@@ -18,6 +18,21 @@
     },
     {
       "path": "../framework/inline"
+    },
+    {
+      "path": "../affine/model"
+    },
+    {
+      "path": "../affine/shared"
+    },
+    {
+      "path": "../affine/components"
+    },
+    {
+      "path": "../affine/block-paragraph"
+    },
+    {
+      "path": "../affine/block-list"
     }
   ]
 }

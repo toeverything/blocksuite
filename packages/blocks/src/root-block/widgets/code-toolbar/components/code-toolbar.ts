@@ -1,3 +1,7 @@
+import type { EditorIconButton } from '@blocksuite/affine-components/toolbar';
+
+import { MoreVerticalIcon } from '@blocksuite/affine-components/icons';
+import { createLitPortal } from '@blocksuite/affine-components/portal';
 import { WithDisposable } from '@blocksuite/block-std';
 import { assertExists, noop } from '@blocksuite/global/utils';
 import { flip, offset } from '@floating-ui/dom';
@@ -5,15 +9,9 @@ import { LitElement, css, html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type { EditorIconButton } from '../../../../_common/components/toolbar/icon-button.js';
 import type { CodeBlockComponent } from '../../../../code-block/code-block.js';
 import type { CodeToolbarItem, CodeToolbarMoreItem } from '../types.js';
 
-import { createLitPortal } from '../../../../_common/components/index.js';
-import '../../../../_common/components/toolbar/icon-button.js';
-import '../../../../_common/components/toolbar/menu-button.js';
-import '../../../../_common/components/toolbar/toolbar.js';
-import { MoreVerticalIcon } from '../../../../_common/icons/edgeless.js';
 import { CodeToolbarItemRenderer, MoreMenuRenderer } from '../utils.js';
 
 @customElement('affine-code-toolbar')

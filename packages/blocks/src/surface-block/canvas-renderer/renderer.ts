@@ -1,18 +1,20 @@
 import type { IBound } from '@blocksuite/global/utils';
 
-import { DisposableGroup, Slot } from '@blocksuite/global/utils';
+import { type Color, ColorScheme } from '@blocksuite/affine-model';
+import { requestConnectedFrame } from '@blocksuite/affine-shared/utils';
+import {
+  DisposableGroup,
+  Slot,
+  getBoundsWithRotation,
+  intersects,
+  last,
+} from '@blocksuite/global/utils';
 
 import type { Viewport } from '../../root-block/edgeless/utils/viewport.js';
-import type { Color } from '../consts.js';
 import type { SurfaceElementModel } from '../element-model/base.js';
 import type { LayerManager } from '../managers/layer-manager.js';
 
-import { ColorScheme } from '../../_common/theme/theme-observer.js';
-import { requestConnectedFrame } from '../../_common/utils/event.js';
-import { last } from '../../_common/utils/iterable.js';
 import { RoughCanvas } from '../rough/canvas.js';
-import { intersects } from '../utils/math-utils.js';
-import { getBoundsWithRotation } from '../utils/math-utils.js';
 import { modelRenderer } from './element-renderer/index.js';
 
 /**
@@ -54,7 +56,7 @@ export class Renderer {
 
   private _overlays = new Set<Overlay>();
 
-  private _shouldUpdate = false;
+  private _refreshRafId: number | null = null;
 
   private _stackingCanvas: HTMLCanvasElement[] = [];
 
@@ -195,7 +197,7 @@ export class Renderer {
 
     this._disposables.add(
       this.viewport.viewportUpdated.on(() => {
-        this._shouldUpdate = true;
+        this.refresh();
       })
     );
 
@@ -206,20 +208,10 @@ export class Renderer {
           sizeUpdatedRafId = null;
           this._resetSize();
           this._render();
-          this._shouldUpdate = false;
+          this.refresh();
         }, this._container);
       })
     );
-  }
-
-  private _loop() {
-    requestConnectedFrame(() => {
-      if (this._shouldUpdate) {
-        this._shouldUpdate = false;
-        this._render();
-      }
-      this._loop();
-    }, this._container);
   }
 
   private _render() {
@@ -323,14 +315,13 @@ export class Renderer {
     sizeUpdater.update(this.canvas);
 
     this._stackingCanvas.forEach(sizeUpdater.update);
-
-    this._shouldUpdate = true;
+    this.refresh();
   }
 
   addOverlay(overlay: Overlay) {
     overlay.setRenderer(this);
     this._overlays.add(overlay);
-    this._shouldUpdate = true;
+    this.refresh();
   }
 
   /**
@@ -342,7 +333,7 @@ export class Renderer {
     container.append(this.canvas);
 
     this._resetSize();
-    this._loop();
+    this.refresh();
   }
 
   dispose(): void {
@@ -401,7 +392,12 @@ export class Renderer {
   }
 
   refresh() {
-    this._shouldUpdate = true;
+    if (this._refreshRafId !== null) return;
+
+    this._refreshRafId = requestConnectedFrame(() => {
+      this._refreshRafId = null;
+      this._render();
+    }, this._container);
   }
 
   removeOverlay(overlay: Overlay) {
@@ -411,7 +407,7 @@ export class Renderer {
 
     overlay.setRenderer(null);
     this._overlays.delete(overlay);
-    this._shouldUpdate = true;
+    this.refresh();
   }
 
   get stackingCanvas() {

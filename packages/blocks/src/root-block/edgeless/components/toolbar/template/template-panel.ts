@@ -1,7 +1,11 @@
 import type { IBound } from '@blocksuite/global/utils';
 
+import {
+  requestConnectedFrame,
+  stopPropagation,
+} from '@blocksuite/affine-shared/utils';
 import { WithDisposable } from '@blocksuite/block-std';
-import { Bound } from '@blocksuite/global/utils';
+import { Bound, getCommonBound } from '@blocksuite/global/utils';
 import { baseTheme } from '@toeverything/theme';
 import { LitElement, css, html, nothing, unsafeCSS } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
@@ -13,11 +17,6 @@ import type { EdgelessRootBlockComponent } from '../../../edgeless-root-block.js
 import type { TemplateJob } from '../../../services/template.js';
 import type { Template } from './template-type.js';
 
-import {
-  requestConnectedFrame,
-  stopPropagation,
-} from '../../../../../_common/utils/event.js';
-import { getCommonBound } from '../../../../../surface-block/utils/bound.js';
 import {
   createInsertPlaceMiddleware,
   createRegenerateIndexMiddleware,
@@ -427,6 +426,9 @@ export class EdgelessTemplatePanel extends WithDisposable(LitElement) {
             type="text"
             placeholder="Search file or anything..."
             @input=${this._updateSearchKeyword}
+            @cut=${stopPropagation}
+            @copy=${stopPropagation}
+            @paste=${stopPropagation}
           />
         </div>
         <div class="template-categories">

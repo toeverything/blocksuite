@@ -1,40 +1,40 @@
+import type { NoteBlockModel, RootBlockModel } from '@blocksuite/affine-model';
 import type { BlockComponent } from '@blocksuite/block-std';
 import type { IVec } from '@blocksuite/global/utils';
 
+import {
+  findNoteBlockModel,
+  getBlockComponentsExcludeSubtrees,
+  getScrollContainer,
+  isInsideEdgelessEditor,
+  isInsidePageEditor,
+  matchFlavours,
+} from '@blocksuite/affine-shared/utils';
+import { getCurrentNativeRange } from '@blocksuite/affine-shared/utils';
 import {
   PathFinder,
   type PointerEventState,
   type UIEventHandler,
   WidgetComponent,
 } from '@blocksuite/block-std';
-import { Point } from '@blocksuite/global/utils';
-import { Bound } from '@blocksuite/global/utils';
-import { DisposableGroup, throttle } from '@blocksuite/global/utils';
+import {
+  Bound,
+  DisposableGroup,
+  Point,
+  Rect,
+  throttle,
+} from '@blocksuite/global/utils';
 import { type BlockModel, BlockViewType, type Query } from '@blocksuite/store';
 import { html } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type {
-  NoteBlockComponent,
-  NoteBlockModel,
-} from '../../../note-block/index.js';
+import type { NoteBlockComponent } from '../../../note-block/index.js';
 import type { EdgelessRootBlockComponent } from '../../../root-block/edgeless/edgeless-root-block.js';
-import type { RootBlockModel } from '../../../root-block/root-model.js';
 import type { GfxBlockModel } from '../../edgeless/block-model.js';
 import type { EdgelessTool } from '../../edgeless/types.js';
 import type { DragHandleOption, DropResult, DropType } from './config.js';
 
-import {
-  Rect,
-  getBlockComponentsExcludeSubtrees,
-  getCurrentNativeRange,
-  getModelByBlockComponent,
-  isInsideEdgelessEditor,
-  isInsidePageEditor,
-  matchFlavours,
-} from '../../../_common/utils/index.js';
-import { getScrollContainer } from '../../../_common/utils/scroll-container.js';
 import {
   getSelectedRect,
   isTopLevelBlock,
@@ -68,7 +68,6 @@ import {
   getDragHandleContainerHeight,
   getDragHandleLeftPadding,
   getDuplicateBlocks,
-  getNoteId,
   includeTextSelection,
   insideDatabaseTable,
   isBlockPathEqual,
@@ -676,7 +675,7 @@ export class AffineDragHandleWidget extends WidgetComponent<
       if (!isTargetEdgelessContainer) return false;
 
       const selectedBlocks = getBlockComponentsExcludeSubtrees(draggingElements)
-        .map(element => getModelByBlockComponent(element))
+        .map(element => element.model)
         .filter((x): x is BlockModel => !!x);
       if (selectedBlocks.length === 0) return false;
 
@@ -738,7 +737,7 @@ export class AffineDragHandleWidget extends WidgetComponent<
     }
 
     const selectedBlocks = getBlockComponentsExcludeSubtrees(draggingElements)
-      .map(element => getModelByBlockComponent(element))
+      .map(element => element.model)
       .filter((x): x is BlockModel => !!x);
     if (!selectedBlocks.length) {
       return false;
@@ -797,8 +796,9 @@ export class AffineDragHandleWidget extends WidgetComponent<
         });
         if (!newSelectedBlocks) return;
 
-        const noteId = getNoteId(parentElement);
-        this._setSelectedBlocks(newSelectedBlocks as BlockComponent[], noteId);
+        const note = findNoteBlockModel(parentElement.model);
+        if (!note) return;
+        this._setSelectedBlocks(newSelectedBlocks as BlockComponent[], note.id);
       }
     }, 0);
 
@@ -1077,7 +1077,10 @@ export class AffineDragHandleWidget extends WidgetComponent<
     // When current page is edgeless page
     // We need to remain surface selection and set editing as true
     if (isInsideEdgelessEditor(this.host)) {
-      const surfaceElementId = noteId ? noteId : getNoteId(blocks[0]);
+      const surfaceElementId = noteId
+        ? noteId
+        : findNoteBlockModel(blocks[0].model)?.id;
+      if (!surfaceElementId) return;
       const surfaceSelection = selection.create(
         'surface',
         blocks[0]!.blockId,

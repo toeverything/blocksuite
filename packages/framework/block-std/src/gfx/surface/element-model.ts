@@ -22,12 +22,12 @@ import type { SurfaceBlockModel } from './surface-model.js';
 
 import {
   convertProps,
+  field,
   getDerivedProps,
-  getYFieldPropsSet,
+  getFieldPropsSet,
   local,
   updateDerivedProps,
   watch,
-  yfield,
 } from './decorators/index.js';
 
 export type BaseElementProps = {
@@ -183,12 +183,12 @@ export abstract class GfxPrimitiveElementModel<
     // @ts-ignore
     delete this[prop];
 
-    if (getYFieldPropsSet(this).has(prop as string)) {
+    if (getFieldPropsSet(this).has(prop as string)) {
       this.surface.doc.transact(() => {
         this.yMap.set(prop as string, value);
       });
     } else {
-      console.warn('pop a prop that is not yfield or local:', prop);
+      console.warn('pop a prop that is not field or local:', prop);
     }
   }
 
@@ -201,7 +201,7 @@ export abstract class GfxPrimitiveElementModel<
       return;
     }
 
-    if (!getYFieldPropsSet(this).has(prop as string)) {
+    if (!getFieldPropsSet(this).has(prop as string)) {
       return;
     }
 
@@ -337,7 +337,7 @@ export abstract class GfxPrimitiveElementModel<
   @local()
   accessor externalXYWH: SerializedXYWH | undefined = undefined;
 
-  @yfield()
+  @field()
   accessor index!: string;
 
   @local()
@@ -345,7 +345,7 @@ export abstract class GfxPrimitiveElementModel<
 
   abstract rotate: number;
 
-  @yfield()
+  @field()
   accessor seed!: number;
 
   abstract get type(): string;
@@ -411,7 +411,7 @@ export abstract class GfxGroupLikeElementModel<
 
   /**
    * The actual field that stores the children of the group.
-   * It should be a ymap decorated with `@yfield`.
+   * It should be a ymap decorated with `@field`.
    */
   hasChild(element: string | GfxModel) {
     return (
@@ -437,7 +437,7 @@ export abstract class GfxGroupLikeElementModel<
    * @param value the new value of the childIds
    * @param fromLocal if true, the change is happened in the local
    */
-  protected setChildIds(value: string[], fromLocal: boolean) {
+  setChildIds(value: string[], fromLocal: boolean) {
     const oldChildIds = this.childIds;
     this._childIds = value;
 

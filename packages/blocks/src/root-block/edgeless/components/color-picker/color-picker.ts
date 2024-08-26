@@ -1,3 +1,4 @@
+import { on, once, stopPropagation } from '@blocksuite/affine-shared/utils';
 import { WithDisposable } from '@blocksuite/block-std';
 import {
   SignalWatcher,
@@ -24,7 +25,6 @@ import type {
   Rgb,
 } from './types.js';
 
-import { on, once, stopPropagation } from '../../../../_common/utils/event.js';
 import { AREA_CIRCLE_R, MATCHERS, SLIDER_CIRCLE_R } from './consts.js';
 import { COLOR_PICKER_STYLE } from './styles.js';
 import {
@@ -557,6 +557,9 @@ export class EdgelessColorPicker extends SignalWatcher(
             maxlength="6"
             .value=${live(this.hex6WithoutHash$.value)}
             @keydown=${this.#editHex}
+            @cut=${stopPropagation}
+            @copy=${stopPropagation}
+            @paste=${stopPropagation}
           />
         </label>
         <label class="field alpha">
@@ -566,6 +569,9 @@ export class EdgelessColorPicker extends SignalWatcher(
             max="100"
             .value=${live(this.alpha100$.value)}
             @input=${this.#editAlpha}
+            @cut=${stopPropagation}
+            @copy=${stopPropagation}
+            @paste=${stopPropagation}
           />
           <span>%</span>
         </label>

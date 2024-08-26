@@ -1,10 +1,10 @@
+import { keys } from '@blocksuite/global/utils';
+
 import type {
   Template,
   TemplateCategory,
   TemplateManager,
 } from './template-type.js';
-
-import { keys } from '../../../../../_common/utils/iterable.js';
 
 export const templates: TemplateCategory[] = [];
 

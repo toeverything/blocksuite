@@ -1,4 +1,26 @@
+import type { ColorScheme, ShapeProps } from '@blocksuite/affine-model';
+
+import {
+  AddTextIcon,
+  ChangeShapeIcon,
+  GeneralStyleIcon,
+  ScribbledStyleIcon,
+  SmallArrowDownIcon,
+} from '@blocksuite/affine-components/icons';
+import { renderToolbarSeparator } from '@blocksuite/affine-components/toolbar';
+import {
+  DEFAULT_SHAPE_FILL_COLOR,
+  DEFAULT_SHAPE_STROKE_COLOR,
+  FontFamily,
+  LineWidth,
+  SHAPE_FILL_COLORS,
+  SHAPE_STROKE_COLORS,
+  ShapeStyle,
+  ShapeType,
+  StrokeStyle,
+} from '@blocksuite/affine-model';
 import { WithDisposable } from '@blocksuite/block-std';
+import { countBy, maxBy } from '@blocksuite/global/utils';
 import { LitElement, type TemplateResult, css, html, nothing } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { cache } from 'lit/directives/cache.js';
@@ -7,39 +29,13 @@ import { join } from 'lit/directives/join.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { when } from 'lit/directives/when.js';
 
-import type { ColorScheme } from '../../../_common/theme/theme-observer.js';
-import type { ShapeProps } from '../../../surface-block/element-model/shape.js';
+import type { ShapeElementModel } from '../../../surface-block/index.js';
 import type { EdgelessColorPickerButton } from '../../edgeless/components/color-picker/button.js';
 import type { PickColorEvent } from '../../edgeless/components/color-picker/types.js';
 import type { EdgelessShapePanel } from '../../edgeless/components/panel/shape-panel.js';
 import type { ShapeTool } from '../../edgeless/controllers/tools/shape-tool.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 
-import '../../../_common/components/toolbar/icon-button.js';
-import '../../../_common/components/toolbar/menu-button.js';
-import { renderToolbarSeparator } from '../../../_common/components/toolbar/separator.js';
-import {
-  AddTextIcon,
-  ChangeShapeIcon,
-  GeneralStyleIcon,
-  ScribbledStyleIcon,
-  SmallArrowDownIcon,
-} from '../../../_common/icons/index.js';
-import { LineWidth } from '../../../_common/types.js';
-import { countBy, maxBy } from '../../../_common/utils/iterable.js';
-import { FontFamily } from '../../../surface-block/consts.js';
-import {
-  DEFAULT_SHAPE_FILL_COLOR,
-  DEFAULT_SHAPE_STROKE_COLOR,
-  FILL_COLORS,
-  STROKE_COLORS,
-  ShapeType,
-} from '../../../surface-block/elements/shape/consts.js';
-import {
-  type ShapeElementModel,
-  ShapeStyle,
-  StrokeStyle,
-} from '../../../surface-block/index.js';
 import '../../edgeless/components/color-picker/index.js';
 import {
   packColor,
@@ -347,7 +343,7 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
                 .color=${selectedFillColor}
                 .colors=${colors}
                 .colorType=${type}
-                .palettes=${FILL_COLORS}
+                .palettes=${SHAPE_FILL_COLORS}
               >
               </edgeless-color-picker-button>
             `;
@@ -370,7 +366,7 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
                 role="listbox"
                 aria-label="Fill colors"
                 .value=${selectedFillColor}
-                .options=${FILL_COLORS}
+                .options=${SHAPE_FILL_COLORS}
                 @select=${(e: ColorEvent) => this._setShapeFillColor(e.detail)}
               >
               </edgeless-color-panel>
@@ -395,7 +391,7 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
                 .color=${selectedStrokeColor}
                 .colors=${colors}
                 .colorType=${type}
-                .palettes=${STROKE_COLORS}
+                .palettes=${SHAPE_STROKE_COLORS}
                 .hollowCircle=${true}
               >
                 <div

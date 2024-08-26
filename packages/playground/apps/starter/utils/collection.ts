@@ -68,6 +68,7 @@ export function createStarterDocCollection() {
       enable_pie_menu: true,
       enable_lasso_tool: true,
       enable_edgeless_text: true,
+      enable_color_picker: true,
       ...flags,
     },
     awarenessSources: [new BroadcastChannelAwarenessSource(id)],

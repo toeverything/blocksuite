@@ -1,7 +1,7 @@
 import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 import { Doc } from '@blocksuite/store';
 import { type BlockModel, BlockViewType } from '@blocksuite/store';
-import { consume, createContext, provide } from '@lit/context';
+import { consume, provide } from '@lit/context';
 import { SignalWatcher, computed } from '@lit-labs/preact-signals';
 import { type PropertyValues, type TemplateResult, nothing, render } from 'lit';
 import { property, state } from 'lit/decorators.js';
@@ -16,11 +16,13 @@ import type { WidgetComponent } from './widget-component.js';
 import { BlockStdScope } from '../../scope/index.js';
 import { PropTypes, requiredProperties } from '../decorators/required.js';
 import { WithDisposable } from '../utils/with-disposable.js';
+import {
+  blockComponentSymbol,
+  modelContext,
+  serviceContext,
+} from './consts.js';
 import { docContext, stdContext } from './lit-host.js';
 import { ShadowlessElement } from './shadowless-element.js';
-
-export const modelContext = createContext<BlockModel>('model');
-export const serviceContext = createContext<BlockService>('service');
 
 @requiredProperties({
   doc: PropTypes.instanceOf(Doc),
@@ -44,20 +46,23 @@ export class BlockComponent<
     return selection;
   });
 
+  [blockComponentSymbol] = true;
+
   handleEvent = (
     name: EventName,
     handler: UIEventHandler,
     options?: { global?: boolean; flavour?: boolean }
   ) => {
-    const config = {
-      flavour: options?.global
-        ? undefined
-        : options?.flavour
-          ? this.model?.flavour
-          : undefined,
-      path: options?.global || options?.flavour ? undefined : this.path,
-    };
-    this._disposables.add(this.host.event.add(name, handler, config));
+    this._disposables.add(
+      this.host.event.add(name, handler, {
+        flavour: options?.global
+          ? undefined
+          : options?.flavour
+            ? this.model?.flavour
+            : undefined,
+        blockId: options?.global || options?.flavour ? undefined : this.blockId,
+      })
+    );
   };
 
   path: string[] = [];
@@ -101,15 +106,14 @@ export class BlockComponent<
     keymap: Record<string, UIEventHandler>,
     options?: { global?: boolean; flavour?: boolean }
   ) {
-    const config = {
+    const dispose = this.host.event.bindHotkey(keymap, {
       flavour: options?.global
         ? undefined
         : options?.flavour
           ? this.model.flavour
           : undefined,
-      path: options?.global || options?.flavour ? undefined : this.path,
-    };
-    const dispose = this.host.event.bindHotkey(keymap, config);
+      blockId: options?.global || options?.flavour ? undefined : this.blockId,
+    });
     this._disposables.add(dispose);
     return dispose;
   }
@@ -273,10 +277,10 @@ export class BlockComponent<
     return model;
   }
 
-  get parentBlock(): BlockComponent {
-    const el = this.parentElement;
-    // TODO(mirone/#6534): find a better way to get block element from a node
-    return el?.closest('[data-block-id]') as BlockComponent;
+  get parentComponent(): BlockComponent | null {
+    const parent = this.model.parent;
+    if (!parent) return null;
+    return this.std.view.getBlock(parent.id);
   }
 
   get rootComponent(): BlockComponent | null {

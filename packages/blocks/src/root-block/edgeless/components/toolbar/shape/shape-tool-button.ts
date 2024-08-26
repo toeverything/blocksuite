@@ -1,3 +1,10 @@
+import {
+  DEFAULT_SHAPE_FILL_COLOR,
+  DEFAULT_SHAPE_STROKE_COLOR,
+  ShapeStyle,
+  ShapeType,
+} from '@blocksuite/affine-model';
+import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import { LitElement, css, html } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -6,13 +13,6 @@ import type { LastProps } from '../../../../../surface-block/managers/edit-sessi
 import type { ShapeName } from './shape-tool-element.js';
 import type { DraggableShape } from './utils.js';
 
-import { ThemeObserver } from '../../../../../_common/theme/theme-observer.js';
-import {
-  DEFAULT_SHAPE_FILL_COLOR,
-  DEFAULT_SHAPE_STROKE_COLOR,
-  ShapeType,
-} from '../../../../../surface-block/elements/shape/consts.js';
-import { ShapeStyle } from '../../../../../surface-block/index.js';
 import { ShapeToolController } from '../../../controllers/tools/shape-tool.js';
 import '../../buttons/toolbar-button.js';
 import { getTooltipWithShortcut } from '../../utils.js';

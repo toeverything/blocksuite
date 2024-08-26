@@ -1,20 +1,20 @@
 import type { BlockComponent } from '@blocksuite/block-std';
-import type { Point } from '@blocksuite/global/utils';
 import type { BlockModel } from '@blocksuite/store';
 
+import {
+  getClosestBlockComponentByElement,
+  matchFlavours,
+} from '@blocksuite/affine-shared/utils';
+import { type Point, Rect } from '@blocksuite/global/utils';
 import { assertExists } from '@blocksuite/global/utils';
 
 import type { EditingState } from '../types.js';
 
-import { matchFlavours } from './model.js';
 import {
   DropFlags,
-  getClosestBlockComponentByElement,
   getDropRectByPoint,
-  getModelByBlockComponent,
   getRectByBlockComponent,
 } from './query.js';
-import { Rect } from './rect.js';
 
 /**
  * A dropping type.
@@ -47,7 +47,7 @@ export function calcDropTarget(
   if (children.length) {
     if (draggingElements.length) {
       shouldAppendToDatabase = draggingElements
-        .map(getModelByBlockComponent)
+        .map(el => el.model)
         .every(m => children.includes(m.flavour));
     } else if (flavour) {
       shouldAppendToDatabase = children.includes(flavour);
@@ -58,7 +58,7 @@ export function calcDropTarget(
     const databaseBlockComponent = element.closest('affine-database');
     if (databaseBlockComponent) {
       element = databaseBlockComponent;
-      model = getModelByBlockComponent(element);
+      model = databaseBlockComponent.model;
     }
   }
 

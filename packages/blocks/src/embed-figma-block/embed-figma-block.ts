@@ -1,14 +1,17 @@
+import type {
+  EmbedFigmaModel,
+  EmbedFigmaStyles,
+} from '@blocksuite/affine-model';
+
+import { OpenIcon } from '@blocksuite/affine-components/icons';
 import { html } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 
-import type { EmbedFigmaStyles } from './embed-figma-model.js';
-import type { EmbedFigmaModel } from './embed-figma-model.js';
 import type { EmbedFigmaBlockService } from './embed-figma-service.js';
 
 import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../_common/consts.js';
 import { EmbedBlockComponent } from '../_common/embed-block-helper/embed-block-element.js';
-import { OpenIcon } from '../_common/icons/text.js';
 import { FigmaIcon, styles } from './styles.js';
 
 @customElement('affine-embed-figma-block')
@@ -18,9 +21,9 @@ export class EmbedFigmaBlockComponent extends EmbedBlockComponent<
 > {
   override _cardStyle: (typeof EmbedFigmaStyles)[number] = 'figma';
 
-  private _isDragging = false;
+  protected _isDragging = false;
 
-  private _isResizing = false;
+  protected _isResizing = false;
 
   static override styles = styles;
 
@@ -34,11 +37,9 @@ export class EmbedFigmaBlockComponent extends EmbedBlockComponent<
 
   refreshData = () => {};
 
-  private _handleClick(event: MouseEvent) {
+  protected _handleClick(event: MouseEvent) {
     event.stopPropagation();
-    if (!this.isInSurface) {
-      this._selectBlock();
-    }
+    this._selectBlock();
   }
 
   private _handleDoubleClick(event: MouseEvent) {
@@ -96,25 +97,6 @@ export class EmbedFigmaBlockComponent extends EmbedBlockComponent<
       this._showOverlay =
         this._isResizing || this._isDragging || !this._isSelected;
     });
-
-    if (this.isInSurface) {
-      this.disposables.add(
-        this.model.propsUpdated.on(() => {
-          this.requestUpdate();
-        })
-      );
-
-      this.rootService?.slots.elementResizeStart.on(() => {
-        this._isResizing = true;
-        this._showOverlay = true;
-      });
-
-      this.rootService?.slots.elementResizeEnd.on(() => {
-        this._isResizing = false;
-        this._showOverlay =
-          this._isResizing || this._isDragging || !this._isSelected;
-      });
-    }
   }
 
   override renderBlock() {
@@ -183,10 +165,10 @@ export class EmbedFigmaBlockComponent extends EmbedBlockComponent<
   }
 
   @state()
-  private accessor _isSelected = false;
+  protected accessor _isSelected = false;
 
   @state()
-  private accessor _showOverlay = true;
+  protected accessor _showOverlay = true;
 }
 
 declare global {

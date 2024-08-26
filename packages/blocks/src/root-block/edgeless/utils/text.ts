@@ -1,20 +1,24 @@
 import type { PointerEventState } from '@blocksuite/block-std';
 import type { IVec } from '@blocksuite/global/utils';
 
+import {
+  type FrameBlockModel,
+  type GroupElementModel,
+  ShapeElementModel,
+} from '@blocksuite/affine-model';
+import { FontFamily, TextElementModel } from '@blocksuite/affine-model';
+import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
-import { Bound } from '@blocksuite/global/utils';
-import { assertExists, assertInstanceOf } from '@blocksuite/global/utils';
+import {
+  Bound,
+  assertExists,
+  assertInstanceOf,
+} from '@blocksuite/global/utils';
 import { DocCollection } from '@blocksuite/store';
 
-import type { FrameBlockModel } from '../../../frame-block/index.js';
-import type { GroupElementModel } from '../../../surface-block/element-model/group.js';
 import type { EdgelessRootBlockComponent } from '../edgeless-root-block.js';
 
-import { ThemeObserver } from '../../../_common/theme/theme-observer.js';
 import { getCursorByCoord } from '../../../surface-block/canvas-renderer/element-renderer/text/utils.js';
-import { FontFamily } from '../../../surface-block/consts.js';
-import { ShapeElementModel } from '../../../surface-block/element-model/shape.js';
-import { TextElementModel } from '../../../surface-block/element-model/text.js';
 import {
   CanvasElementType,
   type ConnectorElementModel,

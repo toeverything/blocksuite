@@ -1,16 +1,19 @@
+import type { RootBlockModel } from '@blocksuite/affine-model';
 import type { PointerEventState } from '@blocksuite/block-std';
 
+import { BLOCK_ID_ATTR } from '@blocksuite/affine-shared/consts';
+import {
+  getScrollContainer,
+  matchFlavours,
+} from '@blocksuite/affine-shared/utils';
 import { BlockComponent, WidgetComponent } from '@blocksuite/block-std';
 import { assertInstanceOf } from '@blocksuite/global/utils';
 import { html, nothing } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type { PageRootBlockComponent, RootBlockModel } from '../../index.js';
+import type { PageRootBlockComponent } from '../../index.js';
 
-import { BLOCK_ID_ATTR } from '../../../_common/consts.js';
-import { matchFlavours } from '../../../_common/utils/model.js';
-import { getScrollContainer } from '../../../_common/utils/scroll-container.js';
 import { autoScroll } from '../../text-selection/utils.js';
 
 type Rect = {

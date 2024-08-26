@@ -1,8 +1,10 @@
-import type { IVec, IVec3 } from '@blocksuite/global/utils';
-import type { Bound } from '@blocksuite/global/utils';
+import type { Bound, IVec, IVec3 } from '@blocksuite/global/utils';
 
-import { almostEqual, linePolygonIntersects } from './math-utils.js';
-import { isOverlap as _isOverlap } from './math-utils.js';
+import {
+  isOverlap as _isOverlap,
+  almostEqual,
+  linePolygonIntersects,
+} from '@blocksuite/global/utils';
 
 function isOverlap(line: IVec[], line2: IVec[]) {
   if (

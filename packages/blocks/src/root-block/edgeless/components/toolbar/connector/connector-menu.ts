@@ -1,19 +1,18 @@
-import { LitElement, css, html } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
-
-import type { Color } from '../../../../../surface-block/consts.js';
-import type { EdgelessTool } from '../../../types.js';
-import type { ColorEvent } from '../../panel/color-panel.js';
-import type { LineWidthEvent } from '../../panel/line-width-panel.js';
-
 import {
   ConnectorCWithArrowIcon,
   ConnectorLWithArrowIcon,
   ConnectorXWithArrowIcon,
-} from '../../../../../_common/icons/index.js';
-import { ThemeObserver } from '../../../../../_common/theme/theme-observer.js';
+} from '@blocksuite/affine-components/icons';
+import { type Color, DEFAULT_CONNECTOR_COLOR } from '@blocksuite/affine-model';
+import { ThemeObserver } from '@blocksuite/affine-shared/theme';
+import { LitElement, css, html } from 'lit';
+import { customElement, property } from 'lit/decorators.js';
+
+import type { EdgelessTool } from '../../../types.js';
+import type { ColorEvent } from '../../panel/color-panel.js';
+import type { LineWidthEvent } from '../../panel/line-width-panel.js';
+
 import { ConnectorMode } from '../../../../../surface-block/index.js';
-import { DEFAULT_CONNECTOR_COLOR } from '../../panel/color-panel.js';
 import '../../panel/one-row-color-panel.js';
 import '../common/slide-menu.js';
 import { EdgelessToolbarToolMixin } from '../mixins/tool.mixin.js';

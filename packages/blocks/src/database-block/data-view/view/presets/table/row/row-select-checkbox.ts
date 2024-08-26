@@ -1,3 +1,7 @@
+import {
+  checkboxChecked,
+  checkboxUnchecked,
+} from '@blocksuite/affine-components/icons';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import {
   type ReadonlySignal,
@@ -8,10 +12,6 @@ import { css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 
-import {
-  checkboxChecked,
-  checkboxUnchecked,
-} from '../../../../../../list-block/utils/icons.js';
 import {
   TableRowSelection,
   type TableViewSelectionWithType,

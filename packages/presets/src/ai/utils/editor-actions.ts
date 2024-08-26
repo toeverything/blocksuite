@@ -5,7 +5,7 @@ import type {
 } from '@blocksuite/block-std';
 import type { AffineAIPanelWidget } from '@blocksuite/blocks';
 
-import { isInsideEdgelessEditor } from '@blocksuite/blocks';
+import { findNoteBlockModel, isInsideEdgelessEditor } from '@blocksuite/blocks';
 import { type BlockModel, Slice } from '@blocksuite/store';
 
 import {
@@ -13,15 +13,6 @@ import {
   markDownToDoc,
   markdownToSnapshot,
 } from './markdown-utils.js';
-
-const getNoteId = (block: BlockComponent) => {
-  let element = block;
-  while (element && element.flavour !== 'affine:note') {
-    element = element.parentBlock;
-  }
-
-  return element.model.id;
-};
 
 const setBlockSelection = (
   host: EditorHost,
@@ -33,7 +24,9 @@ const setBlockSelection = (
     .map(blockId => host.selection.create('block', { blockId }));
 
   if (isInsideEdgelessEditor(host)) {
-    const surfaceElementId = getNoteId(parent);
+    const noteModel = findNoteBlockModel(parent.model);
+    if (!noteModel) return;
+    const surfaceElementId = noteModel.id;
     const surfaceSelection = host.selection.create(
       'surface',
       selections[0].blockId,
@@ -54,8 +47,10 @@ export const insert = async (
   selectBlock: BlockComponent,
   below: boolean = true
 ) => {
-  const blockParent = selectBlock.parentBlock;
-  const index = blockParent.model.children.findIndex(
+  const parentModel = selectBlock.model.parent;
+  const parentComponent = selectBlock.parentComponent;
+  if (!parentModel || !parentComponent) return;
+  const index = parentModel.children.findIndex(
     model => model.id === selectBlock.model.id
   );
   const insertIndex = below ? index + 1 : index;
@@ -63,11 +58,11 @@ export const insert = async (
   const models = await insertFromMarkdown(
     host,
     content,
-    blockParent.model.id,
+    parentModel.id,
     insertIndex
   );
   await host.updateComplete;
-  requestAnimationFrame(() => setBlockSelection(host, blockParent, models));
+  requestAnimationFrame(() => setBlockSelection(host, parentComponent, models));
 };
 
 export const insertBelow = async (
@@ -93,8 +88,10 @@ export const replace = async (
   selectedModels: BlockModel[],
   textSelection?: TextSelection
 ) => {
-  const firstBlockParent = firstBlock.parentBlock;
-  const firstIndex = firstBlockParent.model.children.findIndex(
+  const parentModel = firstBlock.model.parent;
+  const parentComponent = firstBlock.parentComponent;
+  if (!parentModel || !parentComponent) return;
+  const firstIndex = parentModel.children.findIndex(
     model => model.id === firstBlock.model.id
   );
 
@@ -103,7 +100,7 @@ export const replace = async (
     await job.snapshotToSlice(
       snapshot,
       host.doc,
-      firstBlockParent.model.id,
+      parentModel.id,
       firstIndex + 1
     );
   } else {
@@ -114,13 +111,13 @@ export const replace = async (
     const models = await insertFromMarkdown(
       host,
       content,
-      firstBlockParent.model.id,
+      parentModel.id,
       firstIndex
     );
 
     await host.updateComplete;
     requestAnimationFrame(() =>
-      setBlockSelection(host, firstBlockParent, models)
+      setBlockSelection(host, parentComponent, models)
     );
   }
 };

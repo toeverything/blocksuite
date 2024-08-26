@@ -1,3 +1,5 @@
+import { EdgelessTextBlockModel, ShapeType } from '@blocksuite/affine-model';
+import { matchFlavours } from '@blocksuite/affine-shared/utils';
 import { IS_MAC } from '@blocksuite/global/env';
 import { Bound } from '@blocksuite/global/utils';
 
@@ -11,16 +13,13 @@ import {
   isSelectSingleMindMap,
 } from '../../_common/edgeless/mindmap/index.js';
 import { LassoMode } from '../../_common/types.js';
-import { matchFlavours } from '../../_common/utils/model.js';
 import { EdgelessTextBlockComponent } from '../../edgeless-text/edgeless-text-block.js';
-import { EdgelessTextBlockModel } from '../../edgeless-text/edgeless-text-model.js';
 import { MindmapElementModel } from '../../surface-block/element-model/mindmap.js';
 import { LayoutType } from '../../surface-block/element-model/utils/mindmap/layout.js';
 import {
   ConnectorElementModel,
   ConnectorMode,
   GroupElementModel,
-  ShapeType,
 } from '../../surface-block/index.js';
 import { PageKeyboardManager } from '../keyboard/keyboard-manager.js';
 import { GfxBlockModel } from './block-model.js';
@@ -196,7 +195,7 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
                     page: 'whiteboard editor',
                     module: 'toolbar',
                     segment: 'toolbar',
-                    type: type.flavour.split(':')[1],
+                    type: type.flavour?.split(':')[1],
                   }
                 );
                 if (type.isNewDoc) {
@@ -204,7 +203,7 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
                     control: 'shortcut',
                     page: 'whiteboard editor',
                     segment: 'whiteboard',
-                    type: type.flavour.split(':')[1],
+                    type: type.flavour?.split(':')[1],
                   });
                 }
               }
@@ -484,9 +483,30 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
       'keyDown',
       ctx => {
         const event = ctx.get('keyboardState').raw;
+        const service = this.rootComponent.service;
+        const selection = service.selection;
         if (event.code === 'Space' && !event.repeat) {
           this._space(event);
+        } else if (!selection.editing && event.key.length === 1) {
+          const elements = selection.selectedElements;
+          const doc = this.rootComponent.doc;
+
+          if (isSelectSingleMindMap(elements)) {
+            const target = service.getElementById(
+              elements[0].id
+            ) as ShapeElementModel;
+            if (target.text) {
+              doc.transact(() => {
+                target.text!.delete(0, target.text!.length);
+                target.text!.insert(0, event.key);
+              });
+            }
+            mountShapeTextEditor(target, this.rootComponent);
+            return true;
+          }
         }
+
+        return false;
       },
       { global: true }
     );
@@ -510,15 +530,28 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
       return;
     }
 
-    deleteElements(
-      edgeless.surface,
-      edgeless.service.selection.selectedElements
-    );
+    const selectedElements = edgeless.service.selection.selectedElements;
 
-    edgeless.service.selection.clear();
-    edgeless.service.selection.set(
-      edgeless.service.selection.surfaceSelections
-    );
+    if (isSelectSingleMindMap(selectedElements)) {
+      const node = selectedElements[0];
+      const mindmap = node.group as MindmapElementModel;
+      const focusNode =
+        mindmap.getSiblingNode(node.id, 'prev') ??
+        mindmap.getSiblingNode(node.id, 'next') ??
+        mindmap.getParentNode(node.id);
+
+      if (focusNode) {
+        edgeless.service.selection.set({
+          elements: [focusNode.element.id],
+          editing: false,
+        });
+      }
+
+      deleteElements(edgeless.surface, selectedElements);
+    } else {
+      deleteElements(edgeless.surface, selectedElements);
+      edgeless.service.selection.clear();
+    }
   }
 
   private _move(key: string, shift = false) {

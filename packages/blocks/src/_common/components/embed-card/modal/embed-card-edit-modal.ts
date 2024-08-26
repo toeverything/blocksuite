@@ -1,17 +1,18 @@
+import type {
+  BookmarkBlockModel,
+  EmbedFigmaModel,
+  EmbedGithubModel,
+  EmbedLoomModel,
+  EmbedYoutubeModel,
+} from '@blocksuite/affine-model';
 import type { EditorHost } from '@blocksuite/block-std';
 
+import { toast } from '@blocksuite/affine-components/toast';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 
-import type { BookmarkBlockModel } from '../../../../bookmark-block/bookmark-model.js';
-import type { EmbedFigmaModel } from '../../../../embed-figma-block/embed-figma-model.js';
-import type { EmbedGithubModel } from '../../../../embed-github-block/embed-github-model.js';
-import type { EmbedLoomModel } from '../../../../embed-loom-block/embed-loom-model.js';
-import type { EmbedYoutubeModel } from '../../../../embed-youtube-block/embed-youtube-model.js';
-
-import { toast } from '../../toast.js';
 import { embedCardModalStyles } from './styles.js';
 
 type EmbedCardModel =
@@ -95,17 +96,16 @@ export class EmbedCardEditModal extends WithDisposable(ShadowlessElement) {
             ></textarea>
           </div>
           <div class="embed-card-modal-row">
-            <div
+            <button
               class=${classMap({
                 'embed-card-modal-button': true,
                 save: true,
-                disabled: this._titleInputValue.length === 0,
               })}
-              tabindex="0"
+              ?disabled=${this._titleInputValue.length === 0}
               @click=${() => this._onSave()}
             >
               Save
-            </div>
+            </button>
           </div>
         </div>
       </div>

@@ -1,6 +1,5 @@
+import { FONT_XS, PANEL_BASE } from '@blocksuite/affine-shared/styles';
 import { css } from 'lit';
-
-import { FONT_XS, PANEL_BASE } from '../../../styles.js';
 
 export const embedCardModalStyles = css`
   .embed-card-modal-mask {
@@ -89,10 +88,11 @@ export const embedCardModalStyles = css`
     background: var(--affine-primary-color);
     color: var(--affine-pure-white);
   }
-  .embed-card-modal-button.disabled {
+  .embed-card-modal-button[disabled] {
     pointer-events: none;
     cursor: not-allowed;
     color: var(--affine-text-disable-color);
+    background: transparent;
   }
 
   .embed-card-modal-title {

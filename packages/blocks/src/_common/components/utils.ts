@@ -1,14 +1,14 @@
+import type { AffineInlineEditor } from '@blocksuite/affine-components/rich-text';
 import type { EditorHost } from '@blocksuite/block-std';
 import type { InlineEditor, InlineRange } from '@blocksuite/inline';
 
+import { getInlineEditorByModel } from '@blocksuite/affine-components/rich-text';
+import {
+  getCurrentNativeRange,
+  isControlledKeyboardEvent,
+} from '@blocksuite/affine-shared/utils';
 import { BlockModel } from '@blocksuite/store';
 import { css, unsafeCSS } from 'lit';
-
-import type { AffineInlineEditor } from '../inline/presets/affine-inline-specs.js';
-
-import { isControlledKeyboardEvent } from '../../_common/utils/event.js';
-import { getInlineEditorByModel } from '../../_common/utils/query.js';
-import { getCurrentNativeRange } from '../../_common/utils/selection.js';
 
 export function getQuery(
   inlineEditor: InlineEditor,

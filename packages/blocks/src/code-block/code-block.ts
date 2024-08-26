@@ -1,157 +1,136 @@
+import type { CodeBlockModel } from '@blocksuite/affine-model';
 import type { BlockComponent } from '@blocksuite/block-std';
-import type { BundledLanguage, Highlighter } from 'shiki';
+import type { VLine } from '@blocksuite/inline';
+import type { ThemedToken } from 'shiki';
 
+import { CaptionedBlockComponent } from '@blocksuite/affine-components/caption';
+import {
+  type RichText,
+  focusTextModel,
+} from '@blocksuite/affine-components/rich-text';
+import '@blocksuite/affine-components/rich-text';
+import { toast } from '@blocksuite/affine-components/toast';
+import { BRACKET_PAIRS, NOTE_SELECTOR } from '@blocksuite/affine-shared/consts';
+import { getViewportElement } from '@blocksuite/affine-shared/utils';
 import { getInlineRangeProvider } from '@blocksuite/block-std';
+import { IS_MAC } from '@blocksuite/global/env';
+import { noop } from '@blocksuite/global/utils';
 import {
   INLINE_ROOT_ATTR,
   type InlineRangeProvider,
   type InlineRootElement,
 } from '@blocksuite/inline';
 import { Slice } from '@blocksuite/store';
-import { type TemplateResult, html, nothing, render } from 'lit';
+import {
+  type Signal,
+  computed,
+  effect,
+  signal,
+} from '@lit-labs/preact-signals';
+import { type TemplateResult, html, nothing } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
-import { repeat } from 'lit/directives/repeat.js';
-import { styleMap } from 'lit/directives/style-map.js';
-import { z } from 'zod';
 
-import type { RichText } from '../_common/components/rich-text/rich-text.js';
-import type { CodeBlockModel, HighlightOptionsGetter } from './code-model.js';
+import type { CodeBlockService } from './code-block-service.js';
 
-import { CaptionedBlockComponent } from '../_common/components/captioned-block-component.js';
-import { bindContainerHotkey } from '../_common/components/rich-text/keymap/index.js';
-import '../_common/components/rich-text/rich-text.js';
-import { toast } from '../_common/components/toast.js';
-import { NOTE_SELECTOR } from '../_common/edgeless/note/consts.js';
-import { ThemeObserver } from '../_common/theme/theme-observer.js';
-import { getViewportElement } from '../_common/utils/query.js';
 import { EdgelessRootBlockComponent } from '../root-block/edgeless/edgeless-root-block.js';
 import { CodeClipboardController } from './clipboard/index.js';
+import './highlight/affine-code-unit.js';
 import { codeBlockStyles } from './styles.js';
-import { getStandardLanguage, isPlaintext } from './utils/code-languages.js';
-import { getCodeLineRenderer } from './utils/code-line-renderer.js';
-import {
-  DARK_THEME,
-  FALLBACK_LANG,
-  LIGHT_THEME,
-  PLAIN_TEXT_LANG_INFO,
-  type StrictLanguageInfo,
-} from './utils/consts.js';
-import { getHighLighter } from './utils/high-lighter.js';
 
 @customElement('affine-code')
-export class CodeBlockComponent extends CaptionedBlockComponent<CodeBlockModel> {
-  private _highlighter: Highlighter | null = null;
-
+export class CodeBlockComponent extends CaptionedBlockComponent<
+  CodeBlockModel,
+  CodeBlockService
+> {
   private _inlineRangeProvider: InlineRangeProvider | null = null;
-
-  /**
-   * Given the high cost associated with updating the highlight,
-   * it is preferable to do so only when a change in language occurs.
-   *
-   * The variable is used to store the "current" language info,
-   * also known as the "previous" language
-   * when a language change occurs and the highlighter is not updated.
-   *
-   * In most cases, the language will be equal to normalizing the language of the model.
-   *
-   * See {@link updated}
-   */
-  private _previousLanguage: StrictLanguageInfo = PLAIN_TEXT_LANG_INFO;
-
-  private _richTextResizeObserver: ResizeObserver = new ResizeObserver(() => {
-    this._updateLineNumbers();
-  });
 
   static override styles = codeBlockStyles;
 
-  readonly attributesSchema = z.object({});
-
   clipboardController = new CodeClipboardController(this);
 
-  readonly getAttributeRenderer = () =>
-    getCodeLineRenderer(() => ({
-      lang:
-        getStandardLanguage(this.model.language.toLowerCase())?.id ??
-        'plaintext',
-      highlighter: this._highlighter,
-    }));
+  highlightTokens$: Signal<ThemedToken[][]> = signal([]);
 
-  highlightOptionsGetter: HighlightOptionsGetter | null = null;
+  languageName$: Signal<string> = computed(() => {
+    const lang = this.model.language$.value;
+    if (lang === null) {
+      return 'Plain Text';
+    }
 
-  private async _startHighlight(lang: StrictLanguageInfo) {
-    if (this._highlighter) {
-      const loadedLangs = this._highlighter.getLoadedLanguages();
-      if (!isPlaintext(lang.id) && !loadedLangs.includes(lang.id)) {
-        this._highlighter
-          .loadLanguage(lang.id)
-          .then(() => {
-            const richText = this.querySelector('rich-text');
-            const inlineEditor = richText?.inlineEditor;
-            if (inlineEditor) {
-              inlineEditor.requestUpdate();
-            }
-          })
-          .catch(console.error);
-      }
+    const matchedInfo = this.service.langs.find(info => info.id === lang);
+    return matchedInfo ? matchedInfo.name : 'Plain Text';
+  });
+
+  private _updateHighlightTokens() {
+    const modelLang = this.model.language$.value;
+    if (modelLang === null) {
+      this.highlightTokens$.value = [];
       return;
     }
-    this._highlighter = await getHighLighter({
-      themes: [LIGHT_THEME, DARK_THEME],
-      langs: [lang.id],
-    });
 
-    const richText = this.querySelector('rich-text');
-    const inlineEditor = richText?.inlineEditor;
-    if (!inlineEditor) return;
-
-    inlineEditor.requestUpdate();
-    const range = inlineEditor.getInlineRange();
-    if (range) {
-      inlineEditor.setInlineRange(range);
-    }
-  }
-
-  private _updateLineNumbers() {
-    const lineNumbersContainer =
-      this.querySelector<HTMLElement>('#line-numbers');
-    if (!lineNumbersContainer) return;
-
-    const next = this.model.wrap
-      ? generateLineNumberRender()
-      : lineNumberRender;
-
-    render(
-      repeat(Array.from(this.querySelectorAll('v-line')), next),
-      lineNumbersContainer
+    const matchedInfo = this.service.langs.find(
+      info =>
+        info.id === modelLang ||
+        info.name === modelLang ||
+        info.aliases?.includes(modelLang)
     );
+
+    if (matchedInfo) {
+      this.model.language$.value = matchedInfo.id;
+      const langImport = matchedInfo.import;
+      const lang = matchedInfo.id;
+
+      const highlighter = this.service.highlighter$.value;
+      const theme = this.service.themeKey;
+      if (!theme || !highlighter) {
+        this.highlightTokens$.value = [];
+        return;
+      }
+
+      noop(this.model.text.deltas$.value);
+      const code = this.model.text.toString();
+
+      const loadedLanguages = highlighter.getLoadedLanguages();
+      if (!loadedLanguages.includes(lang)) {
+        highlighter
+          .loadLanguage(langImport)
+          .then(() => {
+            this.highlightTokens$.value = highlighter.codeToTokensBase(code, {
+              lang,
+              theme,
+            });
+          })
+          .catch(console.error);
+      } else {
+        this.highlightTokens$.value = highlighter.codeToTokensBase(code, {
+          lang,
+          theme,
+        });
+      }
+    } else {
+      this.highlightTokens$.value = [];
+      // clear language if not found
+      this.model.language$.value = null;
+    }
   }
 
   override connectedCallback() {
     super.connectedCallback();
+
     // set highlight options getter used by "exportToHtml"
     this.clipboardController.hostConnected();
-    this.setHighlightOptionsGetter(() => {
-      return {
-        lang: this._previousLanguage.id as BundledLanguage,
-        highlighter: this._highlighter,
-      };
-    });
 
     this.disposables.add(
-      ThemeObserver.subscribe(() => {
-        if (!this._highlighter) return;
-        const richText = this.querySelector('rich-text');
-        const inlineEditor = richText?.inlineEditor;
-        if (!inlineEditor) return;
-        // update code-line theme
-        setTimeout(() => {
-          inlineEditor.requestUpdate();
-        });
+      effect(() => {
+        this._updateHighlightTokens();
       })
     );
-
-    bindContainerHotkey(this);
+    this.disposables.add(
+      effect(() => {
+        noop(this.highlightTokens$.value);
+        this._richTextElement?.inlineEditor?.requestUpdate();
+      })
+    );
 
     const selectionManager = this.host.selection;
     const INDENT_SYMBOL = '  ';
@@ -176,6 +155,7 @@ export class CodeBlockComponent extends CaptionedBlockComponent<CodeBlockModel> 
       return indexArr;
     };
 
+    // TODO: move to service for better performance
     this.bindHotKey({
       Backspace: ctx => {
         const state = ctx.get('keyboardState');
@@ -192,6 +172,26 @@ export class CodeBlockComponent extends CaptionedBlockComponent<CodeBlockModel> 
           selectionManager.setGroup('note', [
             selectionManager.create('block', { blockId: this.blockId }),
           ]);
+          return true;
+        }
+
+        const inlineEditor = this.inlineEditor;
+        const inlineRange = inlineEditor?.getInlineRange();
+        if (!inlineRange || !inlineEditor) return;
+        const left = inlineEditor.yText.toString()[inlineRange.index - 1];
+        const right = inlineEditor.yText.toString()[inlineRange.index];
+        const leftBrackets = BRACKET_PAIRS.map(pair => pair.left);
+        if (BRACKET_PAIRS[leftBrackets.indexOf(left)]?.right === right) {
+          const index = inlineRange.index - 1;
+          inlineEditor.deleteText({
+            index: index,
+            length: 2,
+          });
+          inlineEditor.setInlineRange({
+            index: index,
+            length: 0,
+          });
+          state.raw.preventDefault();
           return true;
         }
 
@@ -301,6 +301,33 @@ export class CodeBlockComponent extends CaptionedBlockComponent<CodeBlockModel> 
 
         return;
       },
+      'Control-d': () => {
+        if (!IS_MAC) return;
+        return true;
+      },
+      Delete: () => {
+        return true;
+      },
+      Enter: () => {
+        this.doc.captureSync();
+        return true;
+      },
+      'Mod-Enter': () => {
+        const { model, std } = this;
+        if (!model || !std) return;
+        const inlineEditor = this.inlineEditor;
+        const inlineRange = inlineEditor?.getInlineRange();
+        if (!inlineRange || !inlineEditor) return;
+        const isEnd = model.text.length === inlineRange.index;
+        if (!isEnd) return;
+        const parent = this.doc.getParent(model);
+        if (!parent) return;
+        const index = parent.children.indexOf(model);
+        if (index === -1) return;
+        const id = this.doc.addBlock('affine:paragraph', {}, parent, index + 1);
+        focusTextModel(std, id);
+        return true;
+      },
     });
 
     this._inlineRangeProvider = getInlineRangeProvider(this);
@@ -323,7 +350,6 @@ export class CodeBlockComponent extends CaptionedBlockComponent<CodeBlockModel> 
   override disconnectedCallback() {
     super.disconnectedCallback();
     this.clipboardController.hostDisconnected();
-    this._richTextResizeObserver.disconnect();
   }
 
   override async getUpdateComplete() {
@@ -340,66 +366,36 @@ export class CodeBlockComponent extends CaptionedBlockComponent<CodeBlockModel> 
           wrap: this.model.wrap,
         })}
       >
-        <div class="rich-text-container">
-          <div contenteditable="false" id="line-numbers"></div>
-          <rich-text
-            .yText=${this.model.text.yText}
-            .inlineEventSource=${this.topContenteditableElement ?? nothing}
-            .undoManager=${this.doc.history}
-            .attributesSchema=${this.attributesSchema}
-            .attributeRenderer=${this.getAttributeRenderer()}
-            .readonly=${this.doc.readonly}
-            .inlineRangeProvider=${this._inlineRangeProvider}
-            .enableClipboard=${false}
-            .enableUndoRedo=${false}
-            .wrapText=${this.model.wrap}
-            .verticalScrollContainerGetter=${() =>
-              getViewportElement(this.host)}
-          >
-          </rich-text>
-        </div>
+        <rich-text
+          .yText=${this.model.text.yText}
+          .inlineEventSource=${this.topContenteditableElement ?? nothing}
+          .undoManager=${this.doc.history}
+          .attributesSchema=${this.service.inlineManager.getSchema()}
+          .attributeRenderer=${this.service.inlineManager.getRenderer()}
+          .readonly=${this.doc.readonly}
+          .inlineRangeProvider=${this._inlineRangeProvider}
+          .enableClipboard=${false}
+          .enableUndoRedo=${false}
+          .wrapText=${this.model.wrap}
+          .verticalScrollContainerGetter=${() => getViewportElement(this.host)}
+          .vLineRenderer=${(vLine: VLine) => {
+            return html`
+              <span contenteditable="false" class="line-number"
+                >${vLine.index + 1}</span
+              >
+              ${vLine.renderVElements()}
+            `;
+          }}
+        >
+        </rich-text>
 
         ${this.renderChildren(this.model)} ${Object.values(this.widgets)}
       </div>
     `;
   }
 
-  setHighlightOptionsGetter(fn: HighlightOptionsGetter) {
-    this.highlightOptionsGetter = fn;
-  }
-
-  setLang(lang: string | null) {
-    const standardLang = lang ? getStandardLanguage(lang) : null;
-    const langName = standardLang?.id ?? FALLBACK_LANG;
-    this.doc.updateBlock(this.model, {
-      language: langName,
-    });
-  }
-
   setWrap(wrap: boolean) {
     this.doc.updateBlock(this.model, { wrap });
-  }
-
-  override updated() {
-    if (this.model.language !== this._previousLanguage.id) {
-      const lang = getStandardLanguage(this.model.language);
-      this._previousLanguage = lang ?? PLAIN_TEXT_LANG_INFO;
-      if (lang) {
-        this._startHighlight(lang).catch(console.error);
-      } else {
-        this._highlighter = null;
-      }
-
-      const richText = this.querySelector('rich-text');
-      const inlineEditor = richText?.inlineEditor;
-      if (inlineEditor) {
-        inlineEditor.requestUpdate();
-      }
-    }
-
-    if (!this._richTextElement) return;
-    this._richTextResizeObserver.disconnect();
-    this._richTextResizeObserver.observe(this._richTextElement);
   }
 
   get inlineEditor() {
@@ -429,20 +425,6 @@ export class CodeBlockComponent extends CaptionedBlockComponent<CodeBlockModel> 
   };
 
   override accessor useCaptionEditor = true;
-}
-
-function generateLineNumberRender(top = 0) {
-  return function lineNumberRender(e: HTMLElement, index: number) {
-    const style = {
-      '--top': `${top}px`,
-    };
-    top = e.getBoundingClientRect().height;
-    return html`<div style=${styleMap(style)}>${index + 1}</div>`;
-  };
-}
-
-function lineNumberRender(_: HTMLElement, index: number) {
-  return html`<div>${index + 1}</div>`;
 }
 
 declare global {

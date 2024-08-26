@@ -6,6 +6,11 @@
   "scripts": {
     "test": "nx e2e"
   },
+  "dependencies": {
+    "@blocksuite/global": "workspace:*",
+    "@blocksuite/affine-model": "workspace:*",
+    "@blocksuite/playground": "workspace:*"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/toeverything/blocksuite.git"

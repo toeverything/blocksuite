@@ -1,9 +1,5 @@
-import type { IVec } from '@blocksuite/global/utils';
-
-import { assertExists } from '@blocksuite/global/utils';
-import { describe, expect, it } from 'vitest';
-
 import {
+  type IVec,
   almostEqual,
   isPointOnLineSegment,
   lineEllipseIntersects,
@@ -15,7 +11,9 @@ import {
   rotatePoints,
   toDegree,
   toRadian,
-} from '../../surface-block/utils/math-utils.js';
+} from '@blocksuite/global/utils';
+import { assertExists } from '@blocksuite/global/utils';
+import { describe, expect, it } from 'vitest';
 
 describe('Line', () => {
   it('should intersect', () => {

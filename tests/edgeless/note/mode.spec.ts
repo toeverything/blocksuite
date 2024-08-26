@@ -1,4 +1,4 @@
-import { NoteDisplayMode } from '@blocks/_common/types.js';
+import { NoteDisplayMode } from '@blocksuite/affine-model';
 
 import {
   addNote,

@@ -1,18 +1,19 @@
 import type { PlaywrightWorkerOptions } from '@playwright/test';
 
+import { nxE2EPreset } from '@nx/playwright/preset';
 import { defineConfig } from '@playwright/test';
 
+const __filename = new URL(import.meta.url).pathname;
+
 export default defineConfig({
-  testDir: '.',
+  ...nxE2EPreset(__filename, { testDir: '.' }),
   timeout: 40000,
   fullyParallel: true,
   snapshotDir: 'snapshots',
   snapshotPathTemplate: 'snapshots/{testFilePath}/{arg}{ext}',
   webServer: {
-    command: 'pnpm -w dev',
-    port: 5173,
-    // command: process.env.CI ? 'pnpm preview' : 'pnpm dev',
-    // port: process.env.CI ? 4173 : 5173,
+    command: process.env.CI ? 'pnpm -w preview' : 'pnpm -w dev',
+    port: process.env.CI ? 4173 : 5173,
     reuseExistingServer: !process.env.CI,
     env: {
       COVERAGE: process.env.COVERAGE ?? '',

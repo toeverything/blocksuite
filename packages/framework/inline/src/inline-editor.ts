@@ -1,8 +1,9 @@
 import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 import { DisposableGroup, Slot, assertExists } from '@blocksuite/global/utils';
-import { nothing, render } from 'lit';
+import { type TemplateResult, nothing, render } from 'lit';
 import * as Y from 'yjs';
 
+import type { VLine } from './components/v-line.js';
 import type {
   DeltaInsert,
   InlineRange,
@@ -164,8 +165,6 @@ export class InlineEditor<
 
   isLastLine = this.rangeService.isLastLine;
 
-  isNormalizedDeltaSelected = this.deltaService.isNormalizedDeltaSelected;
-
   isValidInlineRange = this.rangeService.isValidInlineRange;
 
   mapDeltasInInlineRange = this.deltaService.mapDeltasInInlineRange;
@@ -211,12 +210,15 @@ export class InlineEditor<
 
   toInlineRange = this.rangeService.toInlineRange;
 
+  readonly vLineRenderer: ((vLine: VLine) => TemplateResult) | null;
+
   constructor(
     yText: InlineEditor['yText'],
     ops: {
       isEmbed?: (delta: DeltaInsert<TextAttributes>) => boolean;
       hooks?: InlineHookService<TextAttributes>['hooks'];
       inlineRangeProvider?: InlineRangeProvider;
+      vLineRenderer?: (vLine: VLine) => TemplateResult;
     } = {}
   ) {
     if (!yText.doc) {
@@ -237,9 +239,11 @@ export class InlineEditor<
       isEmbed = () => false,
       hooks = {},
       inlineRangeProvider = null,
+      vLineRenderer = null,
     } = ops;
     this._yText = yText;
     this.isEmbed = isEmbed;
+    this.vLineRenderer = vLineRenderer;
     this._hooksService = new InlineHookService(this, hooks);
     this.inlineRangeProvider = inlineRangeProvider;
 

@@ -1,43 +1,54 @@
 import type {
+  AttachmentBlockProps,
+  ImageBlockProps,
+  RootBlockModel,
+  ShapeElementModel,
+} from '@blocksuite/affine-model';
+import type {
   GfxBlockComponent,
   SurfaceSelection,
+  UIEventHandler,
 } from '@blocksuite/block-std';
+import type { GfxViewportElement } from '@blocksuite/block-std/gfx';
 import type { IBound, IPoint, IVec } from '@blocksuite/global/utils';
 import type { BlockModel } from '@blocksuite/store';
 
+import { focusTextModel } from '@blocksuite/affine-components/rich-text';
+import { toast } from '@blocksuite/affine-components/toast';
+import { NoteDisplayMode } from '@blocksuite/affine-model';
+import { humanFileSize } from '@blocksuite/affine-shared/utils';
+import {
+  handleNativeRangeAtPoint,
+  isTouchPadPinchEvent,
+  requestConnectedFrame,
+  requestThrottledConnectedFrame,
+} from '@blocksuite/affine-shared/utils';
 import { BlockComponent } from '@blocksuite/block-std';
 import { IS_WINDOWS } from '@blocksuite/global/env';
-import { serializeXYWH } from '@blocksuite/global/utils';
-import { Point } from '@blocksuite/global/utils';
-import { Bound, Vec, assertExists, throttle } from '@blocksuite/global/utils';
+import {
+  Bound,
+  Point,
+  Vec,
+  assertExists,
+  serializeXYWH,
+  throttle,
+} from '@blocksuite/global/utils';
 import { css, html, nothing } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
-import type { AttachmentBlockProps } from '../../attachment-block/attachment-model.js';
-import type { ImageBlockProps } from '../../image-block/image-model.js';
+import type { Viewport } from '../../_common/utils/index.js';
 import type { SurfaceBlockComponent } from '../../surface-block/surface-block.js';
 import type { SurfaceBlockModel } from '../../surface-block/surface-model.js';
 import type { FontLoader } from '../font-loader/font-loader.js';
-import type { RootBlockModel } from '../root-model.js';
 import type { EdgelessRootBlockWidgetName } from '../types.js';
 import type { EdgelessSelectedRect } from './components/rects/edgeless-selected-rect.js';
 import type { EdgelessRootService } from './edgeless-root-service.js';
 import type { EdgelessToolConstructor } from './services/tools-manager.js';
 import type { EdgelessTool } from './types.js';
 
-import { toast } from '../../_common/components/toast.js';
 import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../../_common/consts.js';
-import {
-  NoteDisplayMode,
-  type Viewport,
-  asyncFocusRichText,
-  handleNativeRangeAtPoint,
-  isTouchPadPinchEvent,
-  requestConnectedFrame,
-  requestThrottledConnectedFrame,
-} from '../../_common/utils/index.js';
-import { humanFileSize } from '../../_common/utils/math.js';
+import { isSelectSingleMindMap } from '../../_common/edgeless/mindmap/index.js';
 import {
   setAttachmentUploaded,
   setAttachmentUploading,
@@ -77,6 +88,7 @@ import {
   DEFAULT_NOTE_WIDTH,
 } from './utils/consts.js';
 import { getBackgroundGrid, isCanvasElement } from './utils/query.js';
+import { mountShapeTextEditor } from './utils/text.js';
 
 @customElement('affine-edgeless-root')
 export class EdgelessRootBlockComponent extends BlockComponent<
@@ -97,11 +109,6 @@ export class EdgelessRootBlockComponent extends BlockComponent<
         'background-size',
         `${gap}px ${gap}px`
       );
-    }
-
-    if (this.layerElm) {
-      this.layerElm.style.setProperty('transform', this._getLayerViewport());
-      this.layerElm.dataset.scale = zoom.toString();
     }
   }, this);
 
@@ -136,13 +143,6 @@ export class EdgelessRootBlockComponent extends BlockComponent<
       );
     }
 
-    .edgeless-layer {
-      position: absolute;
-      top: 0;
-      left: 0;
-      contain: size layout style;
-    }
-
     @media print {
       .selected {
         background-color: transparent !important;
@@ -172,16 +172,6 @@ export class EdgelessRootBlockComponent extends BlockComponent<
 
   mouseRoot!: HTMLElement;
 
-  private _getLayerViewport(negative = false) {
-    const { translateX, translateY, zoom } = this.service.viewport;
-
-    if (negative) {
-      return `scale(${1 / zoom}) translate(${-translateX}px, ${-translateY}px)`;
-    }
-
-    return `translate(${translateX}px, ${translateY}px) scale(${zoom})`;
-  }
-
   private _handleToolbarFlag() {
     const createToolbar = () => {
       const toolbar = new EdgelessToolbar(this);
@@ -208,10 +198,9 @@ export class EdgelessRootBlockComponent extends BlockComponent<
 
   private _initLayerUpdateEffect() {
     const updateLayers = requestThrottledConnectedFrame(() => {
-      const blocks =
-        this.renderRoot?.querySelectorAll<GfxBlockComponent>(
-          '.edgeless-layer > [data-block-id]'
-        ) ?? [];
+      const blocks = Array.from(
+        this.gfxViewportElm.children as HTMLCollectionOf<GfxBlockComponent>
+      );
 
       blocks.forEach((block: GfxBlockComponent) => {
         block.updateZIndex?.();
@@ -414,11 +403,7 @@ export class EdgelessRootBlockComponent extends BlockComponent<
       }
     };
 
-    if (this.surface.isUpdatePending) {
-      this.surface.updateComplete.then(run).catch(console.error);
-    } else {
-      run();
-    }
+    run();
 
     this._disposables.add(() => {
       service.editPropsStore.setStorage('viewport', {
@@ -733,6 +718,41 @@ export class EdgelessRootBlockComponent extends BlockComponent<
     return blockId;
   }
 
+  override bindHotKey(
+    keymap: Record<string, UIEventHandler>,
+    options?: { global?: boolean; flavour?: boolean }
+  ): () => void {
+    const { service } = this;
+    const selection = service.selection;
+
+    Object.keys(keymap).forEach(key => {
+      if (key.length === 1 && key >= 'A' && key <= 'z') {
+        const handler = keymap[key];
+
+        keymap[key] = ctx => {
+          const elements = selection.selectedElements;
+
+          if (isSelectSingleMindMap(elements) && !selection.editing) {
+            const target = service.getElementById(
+              elements[0].id
+            ) as ShapeElementModel;
+            if (target.text) {
+              this.doc.transact(() => {
+                target.text!.delete(0, target.text!.length);
+                target.text!.insert(0, key);
+              });
+            }
+            mountShapeTextEditor(target, this);
+          } else {
+            handler(ctx);
+          }
+        };
+      }
+    });
+
+    return super.bindHotKey(keymap, options);
+  }
+
   override connectedCallback() {
     super.connectedCallback();
     this.clipboardController.hostConnected();
@@ -829,11 +849,28 @@ export class EdgelessRootBlockComponent extends BlockComponent<
 
     return html`
       <div class="edgeless-background edgeless-container">
-        <div class="edgeless-layer">
+        <gfx-viewport
+          .maxConcurrentRenders=${6}
+          .viewport=${this.service.viewport}
+          .getModelsInViewport=${() => {
+            const blocks = this.service.layer.blocksGrid.search(
+              this.service.viewport.viewportBounds,
+              undefined,
+              true
+            );
+
+            this.service.layer.framesGrid
+              .search(this.service.viewport.viewportBounds, undefined, true)
+              .forEach(frame => blocks.add(frame));
+
+            return blocks;
+          }}
+          .host=${this.host}
+        >
           ${this.renderChildren(this.model)}${this.renderChildren(
             this.surfaceBlockModel
           )}
-        </div>
+        </gfx-viewport>
       </div>
 
       <!--
@@ -880,7 +917,7 @@ export class EdgelessRootBlockComponent extends BlockComponent<
       this.updateComplete
         .then(() => {
           if (blockId) {
-            asyncFocusRichText(this.host, blockId)?.catch(console.error);
+            focusTextModel(this.std, blockId);
           } else if (point) {
             // Cannot reuse `handleNativeRangeClick` directly here,
             // since `retargetClick` will re-target to pervious editor
@@ -951,8 +988,8 @@ export class EdgelessRootBlockComponent extends BlockComponent<
     type: localStorage.defaultTool ?? 'default',
   };
 
-  @query('.edgeless-layer')
-  accessor layerElm: HTMLDivElement | null = null;
+  @query('gfx-viewport')
+  accessor gfxViewportElm!: GfxViewportElement;
 
   @query('.edgeless-mount-point')
   accessor mountElm: HTMLDivElement | null = null;

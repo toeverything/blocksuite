@@ -1,60 +1,9 @@
-import type {
-  BaseBlockTransformer,
-  InternalPrimitives,
-} from '@blocksuite/store';
-
+import { isAbortError } from '@blocksuite/affine-shared/utils';
 import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
-import { defineBlockSchema } from '@blocksuite/store';
 
-import type { EmbedBlockModel } from './embed-block-model.js';
-import type {
-  EmbedProps,
-  LinkPreviewData,
-  LinkPreviewResponseData,
-} from './types.js';
+import type { LinkPreviewData, LinkPreviewResponseData } from './types.js';
 
 import { DEFAULT_LINK_PREVIEW_ENDPOINT } from '../consts.js';
-import { isAbortError } from '../utils/helper.js';
-
-export function createEmbedBlockSchema<
-  Props extends object,
-  Model extends EmbedBlockModel<Props>,
-  Transformer extends BaseBlockTransformer<
-    EmbedProps<Props>
-  > = BaseBlockTransformer<EmbedProps<Props>>,
->({
-  name,
-  version,
-  toModel,
-  props,
-  transformer,
-}: {
-  name: string;
-  version: number;
-  toModel: () => Model;
-  props?: (internalPrimitives: InternalPrimitives) => Props;
-  transformer?: () => Transformer;
-}) {
-  return defineBlockSchema({
-    flavour: `affine:embed-${name}`,
-    props: internalPrimitives => {
-      const userProps = props?.(internalPrimitives);
-
-      return {
-        index: 'a0',
-        xywh: '[0,0,0,0]',
-        rotate: 0,
-        ...userProps,
-      } as unknown as EmbedProps<Props>;
-    },
-    metadata: {
-      version,
-      role: 'content',
-    },
-    toModel,
-    transformer,
-  });
-}
 
 // ========== Link Preview ==========
 
@@ -81,7 +30,7 @@ export class LinkPreviewer {
           title: tweet.author.name,
           icon: tweet.author.avatar_url,
           description: tweet.text,
-          image: tweet.media?.photos[0].url || tweet.author.banner_url,
+          image: tweet.media?.photos?.[0].url || tweet.author.banner_url,
         };
       } catch (e) {
         console.error(`Failed to fetch tweet: ${url}`);

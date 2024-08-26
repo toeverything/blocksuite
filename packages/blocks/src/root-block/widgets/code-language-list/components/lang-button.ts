@@ -1,27 +1,23 @@
+import { ArrowDownIcon } from '@blocksuite/affine-components/icons';
+import { WithDisposable } from '@blocksuite/block-std';
 import { noop } from '@blocksuite/global/utils';
+import { SignalWatcher } from '@lit-labs/preact-signals';
 import { LitElement, css, nothing } from 'lit';
-import { customElement, property, query, state } from 'lit/decorators.js';
+import { customElement, property, query } from 'lit/decorators.js';
 import { html } from 'lit/static-html.js';
-import { type BundledLanguage, bundledLanguagesInfo } from 'shiki';
 
 import type { CodeBlockComponent } from '../../../../code-block/code-block.js';
 
 import {
+  type FilterableListItem,
   type FilterableListOptions,
   showPopFilterableList,
 } from '../../../../_common/components/filterable-list/index.js';
-import { ArrowDownIcon } from '../../../../_common/icons/text.js';
-import {
-  getLanguagePriority,
-  getStandardLanguage,
-} from '../../../../code-block/utils/code-languages.js';
-import {
-  PLAIN_TEXT_LANG_INFO,
-  type StrictLanguageInfo,
-} from '../../../../code-block/utils/consts.js';
 
 @customElement('language-list-button')
-export class LanguageListButton extends LitElement {
+export class LanguageListButton extends WithDisposable(
+  SignalWatcher(LitElement)
+) {
   private _abortController?: AbortController;
 
   private _clickLangBtn = () => {
@@ -38,29 +34,25 @@ export class LanguageListButton extends LitElement {
     });
     this.onActiveStatusChange(true);
 
-    const languages = (
-      [...bundledLanguagesInfo, PLAIN_TEXT_LANG_INFO] as StrictLanguageInfo[]
-    ).map(lang => ({
-      label: lang.name,
-      name: lang.id,
-      aliases: lang.aliases,
-    }));
-
     const options: FilterableListOptions = {
       placeholder: 'Search for a language',
       onSelect: item => {
-        this.blockComponent.setLang(item.name);
-        this._updateLanguage();
+        const sortedBundledLanguages = this._sortedBundledLanguages;
+        const index = sortedBundledLanguages.indexOf(item);
+        if (index !== -1) {
+          sortedBundledLanguages.splice(index, 1);
+          sortedBundledLanguages.unshift(item);
+        }
+        this.blockComponent.doc.transact(() => {
+          this.blockComponent.model.language$.value = item.name;
+        });
       },
-      active: item => item.name === this._currentLanguage.id,
-      items: languages,
+      active: item => item.name === this.blockComponent.model.language,
+      items: this._sortedBundledLanguages,
     };
 
     showPopFilterableList({
       options,
-      filter: (a, b) =>
-        getLanguagePriority(a.name as BundledLanguage) -
-        getLanguagePriority(b.name as BundledLanguage),
       referenceElement: this._langButton,
       container: this.blockComponent.host,
       abortController: this._abortController,
@@ -70,6 +62,8 @@ export class LanguageListButton extends LitElement {
       },
     });
   };
+
+  private _sortedBundledLanguages: FilterableListItem[] = [];
 
   static override styles = css`
     :host {
@@ -96,15 +90,28 @@ export class LanguageListButton extends LitElement {
     }
   `;
 
-  private _updateLanguage() {
-    this._currentLanguage =
-      getStandardLanguage(this.blockComponent.model.language) ??
-      PLAIN_TEXT_LANG_INFO;
-  }
-
-  override connectedCallback() {
+  override connectedCallback(): void {
     super.connectedCallback();
-    this._updateLanguage();
+
+    const langList = localStorage.getItem('blocksuite:code-block:lang-list');
+    if (langList) {
+      this._sortedBundledLanguages = JSON.parse(langList);
+    } else {
+      this._sortedBundledLanguages = this.blockComponent.service.langs.map(
+        lang => ({
+          label: lang.name,
+          name: lang.id,
+          aliases: lang.aliases,
+        })
+      );
+    }
+
+    this.disposables.add(() => {
+      localStorage.setItem(
+        'blocksuite:code-block:lang-list',
+        JSON.stringify(this._sortedBundledLanguages)
+      );
+    });
   }
 
   override render() {
@@ -112,7 +119,7 @@ export class LanguageListButton extends LitElement {
       class="lang-button"
       data-testid="lang-button"
       width="auto"
-      text=${this._currentLanguage.name ?? this._currentLanguage.id}
+      text=${this.blockComponent.languageName$.value}
       height="24px"
       @click=${this._clickLangBtn}
       ?disabled=${this.blockComponent.doc.readonly}
@@ -122,9 +129,6 @@ export class LanguageListButton extends LitElement {
       </span>
     </icon-button> `;
   }
-
-  @state()
-  private accessor _currentLanguage: StrictLanguageInfo = PLAIN_TEXT_LANG_INFO;
 
   @query('.lang-button')
   private accessor _langButton!: HTMLElement;

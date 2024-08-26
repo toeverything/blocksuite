@@ -23,6 +23,13 @@ export class VElement<
       return nothing;
     }
     const attributeRenderer = inlineEditor.attributeService.attributeRenderer;
+    const renderProps: Parameters<typeof attributeRenderer>[0] = {
+      delta: this.delta,
+      selected: this.selected,
+      startOffset: this.startOffset,
+      endOffset: this.endOffset,
+      lineIndex: this.lineIndex,
+    };
 
     const isEmbed = inlineEditor.isEmbed(this.delta);
     if (isEmbed) {
@@ -41,14 +48,14 @@ export class VElement<
         data-v-element="true"
         contenteditable="false"
         style=${styleMap({ userSelect: 'none' })}
-        >${attributeRenderer(this.delta, this.selected)}</span
+        >${attributeRenderer(renderProps)}</span
       >`;
     }
 
     // we need to avoid \n appearing before and after the span element, which will
     // cause the unexpected space
     return html`<span data-v-element="true"
-      >${attributeRenderer(this.delta, this.selected)}</span
+      >${attributeRenderer(renderProps)}</span
     >`;
   }
 
@@ -58,7 +65,16 @@ export class VElement<
   };
 
   @property({ attribute: false })
+  accessor endOffset!: number;
+
+  @property({ attribute: false })
+  accessor lineIndex!: number;
+
+  @property({ attribute: false })
   accessor selected: boolean = false;
+
+  @property({ attribute: false })
+  accessor startOffset!: number;
 }
 
 declare global {

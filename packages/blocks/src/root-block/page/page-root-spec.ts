@@ -1,10 +1,11 @@
-import type { BlockService, BlockSpec } from '@blocksuite/block-std';
+import type { BlockSpec } from '@blocksuite/block-std';
 
+import { RootBlockSchema } from '@blocksuite/affine-model';
 import { literal, unsafeStatic } from 'lit/static-html.js';
 
-import type { RootBlockConfig } from '../index.js';
+import type { RootBlockConfig } from '../root-config.js';
 
-import { RootBlockSchema } from '../root-model.js';
+import { commands } from '../commands/index.js';
 import { AFFINE_DOC_REMOTE_SELECTION_WIDGET } from '../widgets/doc-remote-selection/doc-remote-selection.js';
 import { AFFINE_DRAG_HANDLE_WIDGET } from '../widgets/drag-handle/drag-handle.js';
 import { AFFINE_EMBED_CARD_TOOLBAR_WIDGET } from '../widgets/embed-card-toolbar/embed-card-toolbar.js';
@@ -18,7 +19,6 @@ import { AFFINE_VIEWPORT_OVERLAY_WIDGET } from '../widgets/viewport-overlay/view
 import { PageRootService } from './page-root-service.js';
 
 export type PageRootBlockWidgetName =
-  // | typeof AFFINE_BLOCK_HUB_WIDGET
   | typeof AFFINE_MODAL_WIDGET
   | typeof AFFINE_INNER_MODAL_WIDGET
   | typeof AFFINE_SLASH_MENU_WIDGET
@@ -32,7 +32,6 @@ export type PageRootBlockWidgetName =
 
 export type PageRootBlockSpecType = BlockSpec<
   PageRootBlockWidgetName,
-  BlockService,
   RootBlockConfig
 >;
 
@@ -42,9 +41,6 @@ export const PageRootBlockSpec: PageRootBlockSpecType = {
   view: {
     component: literal`affine-page-root`,
     widgets: {
-      // [AFFINE_BLOCK_HUB_WIDGET]: literal`${unsafeStatic(
-      //   AFFINE_BLOCK_HUB_WIDGET
-      // )}`,
       [AFFINE_MODAL_WIDGET]: literal`${unsafeStatic(AFFINE_MODAL_WIDGET)}`,
       [AFFINE_INNER_MODAL_WIDGET]: literal`${unsafeStatic(AFFINE_INNER_MODAL_WIDGET)}`,
       [AFFINE_SLASH_MENU_WIDGET]: literal`${unsafeStatic(
@@ -73,4 +69,5 @@ export const PageRootBlockSpec: PageRootBlockSpecType = {
       )}`,
     },
   },
+  commands,
 };

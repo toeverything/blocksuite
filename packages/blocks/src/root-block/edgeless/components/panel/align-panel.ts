@@ -1,13 +1,12 @@
-import { LitElement, css, html } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
-import { repeat } from 'lit/directives/repeat.js';
-
 import {
   TextAlignCenterIcon,
   TextAlignLeftIcon,
   TextAlignRightIcon,
-} from '../../../../_common/icons/index.js';
-import { TextAlign } from '../../../../surface-block/consts.js';
+} from '@blocksuite/affine-components/icons';
+import { TextAlign } from '@blocksuite/affine-model';
+import { LitElement, css, html } from 'lit';
+import { customElement, property } from 'lit/decorators.js';
+import { repeat } from 'lit/directives/repeat.js';
 
 const TEXT_ALIGN_LIST = [
   {

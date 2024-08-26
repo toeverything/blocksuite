@@ -1,3 +1,13 @@
+import {
+  CenterPeekIcon,
+  CopyIcon,
+  DeleteIcon,
+  DuplicateIcon,
+  OpenIcon,
+  RefreshIcon,
+} from '@blocksuite/affine-components/icons';
+import { isPeekable, peek } from '@blocksuite/affine-components/peek';
+import { toast } from '@blocksuite/affine-components/toast';
 import { WithDisposable } from '@blocksuite/block-std';
 import { Slice } from '@blocksuite/store';
 import { LitElement, css, html, nothing } from 'lit';
@@ -9,17 +19,7 @@ import {
   isEmbedLinkedDocBlock,
   isEmbedSyncedDocBlock,
 } from '../../../root-block/edgeless/utils/query.js';
-import {
-  CenterPeekIcon,
-  CopyIcon,
-  DeleteIcon,
-  DuplicateIcon,
-  OpenIcon,
-  RefreshIcon,
-} from '../../icons/text.js';
-import { getBlockProps } from '../../utils/block-props.js';
-import { isPeekable, peek } from '../peekable.js';
-import { toast } from '../toast.js';
+import { getBlockProps } from '../../utils/index.js';
 import './../button.js';
 
 @customElement('embed-card-more-menu')

@@ -1,18 +1,18 @@
-import type { PointLocation } from '@blocksuite/global/utils';
+import {
+  type ConnectorElementModel,
+  ConnectorMode,
+  type LocalConnectorElementModel,
+  type PointStyle,
+} from '@blocksuite/affine-model';
+import {
+  type PointLocation,
+  getBezierParameters,
+} from '@blocksuite/global/utils';
 
-import type {
-  ConnectorElementModel,
-  LocalConnectorElementModel,
-  PointStyle,
-} from '../../../element-model/connector.js';
 import type { RoughCanvas } from '../../../rough/canvas.js';
 import type { Renderer } from '../../renderer.js';
 
-import {
-  ConnectorMode,
-  isConnectorWithLabel,
-} from '../../../element-model/connector.js';
-import { getBezierParameters } from '../../../utils/curve.js';
+import { isConnectorWithLabel } from '../../../element-model/utils/connector.js';
 import {
   type TextDelta,
   deltaInsertsToChunks,

@@ -127,7 +127,9 @@ test.describe('Embed synced doc', () => {
     await page.mouse.up();
 
     // Check the height of the embed synced doc portal, it should be the same as the embed synced doc in note
-    const EmbedSyncedDocBlock = page.locator('affine-embed-synced-doc-block');
+    const EmbedSyncedDocBlock = page.locator(
+      'affine-embed-edgeless-synced-doc-block'
+    );
     const EmbedSyncedDocBlockBox = await EmbedSyncedDocBlock.boundingBox();
     const border = 1;
     assertExists(EmbedSyncedDocBlockBox);
@@ -248,10 +250,13 @@ test.describe('Embed synced doc', () => {
         }
         model.applyColumnUpdate();
       });
-      const backLineButton = page.locator('backlink-button');
-      await backLineButton.click();
-      const backLinkPageButton = page.locator('.backlinks .link');
-      await backLinkPageButton.click();
+
+      // go back to previous doc
+      await page.evaluate(() => {
+        const { collection, editor } = window;
+        editor.doc = collection.getDoc('doc:home')!;
+      });
+
       const databaseFirstCell = page.locator(
         '.affine-database-column-header.database-row'
       );

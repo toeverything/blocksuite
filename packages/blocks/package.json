@@ -1,6 +1,6 @@
 {
   "name": "@blocksuite/blocks",
-  "version": "0.15.0",
+  "version": "0.16.0",
   "description": "Default BlockSuite editable blocks.",
   "type": "module",
   "repository": "toeverything/blocksuite",
@@ -15,29 +15,33 @@
   "author": "toeverything",
   "license": "MPL-2.0",
   "dependencies": {
+    "@blocksuite/affine-block-list": "workspace:*",
+    "@blocksuite/affine-block-paragraph": "workspace:*",
+    "@blocksuite/affine-components": "workspace:*",
+    "@blocksuite/affine-model": "workspace:*",
+    "@blocksuite/affine-shared": "workspace:*",
     "@blocksuite/block-std": "workspace:*",
     "@blocksuite/global": "workspace:*",
+    "@blocksuite/icons": "^2.1.64",
     "@blocksuite/inline": "workspace:*",
     "@blocksuite/store": "workspace:*",
-    "@blocksuite/icons": "^2.1.62",
-    "@dotlottie/player-component": "^2.7.12",
-    "@floating-ui/dom": "^1.6.8",
+    "@floating-ui/dom": "^1.6.10",
     "@lit-labs/preact-signals": "^1.0.2",
     "@lit/context": "^1.1.2",
-    "@toeverything/theme": "^1.0.2",
+    "@toeverything/theme": "^1.0.7",
     "@types/hast": "^3.0.4",
     "@types/mdast": "^4.0.4",
     "@types/sortablejs": "^1.15.8",
     "collapse-white-space": "^2.1.0",
     "date-fns": "^3.6.0",
     "dompurify": "^3.1.6",
+    "fflate": "^0.8.2",
     "figma-squircle": "^0.3.1",
-    "file-type": "^19.3.0",
+    "file-type": "^19.4.1",
     "fractional-indexing": "^3.2.0",
     "html2canvas": "^1.4.1",
-    "jszip": "^3.10.1",
-    "lit": "^3.1.4",
-    "mdast-util-gfm-autolink-literal": "^2.0.0",
+    "lit": "^3.2.0",
+    "mdast-util-gfm-autolink-literal": "^2.0.1",
     "mdast-util-gfm-strikethrough": "^2.0.0",
     "mdast-util-gfm-table": "^2.0.0",
     "mdast-util-gfm-task-list-item": "^2.0.0",
@@ -54,7 +58,7 @@
     "rehype-stringify": "^10.0.0",
     "remark-parse": "^11.0.0",
     "remark-stringify": "^11.0.0",
-    "shiki": "^1.12.0",
+    "shiki": "^1.14.1",
     "sortablejs": "^1.15.2",
     "unified": "^11.0.5",
     "zod": "^3.23.8"
@@ -72,12 +76,12 @@
       "./dist/*": "./dist/*",
       "./src/*": "./dist/*.js",
       ".": {
-        "module": "./dist/index.js",
+        "types": "./dist/index.d.ts",
         "import": "./dist/index.js"
       },
       "./schemas": {
         "types": "./dist/schemas.d.ts",
-        "default": "./dist/schemas.js"
+        "import": "./dist/schemas.js"
       }
     }
   },

@@ -7,6 +7,7 @@ import type {
 } from '@blocksuite/block-std';
 import type { Bound } from '@blocksuite/global/utils';
 
+import { NoteDisplayMode } from '@blocksuite/affine-model';
 import { IS_MAC } from '@blocksuite/global/env';
 import { DisposableGroup } from '@blocksuite/global/utils';
 
@@ -17,7 +18,6 @@ import type { EdgelessTool } from '../types.js';
 import type { EdgelessSelectionState } from './selection-manager.js';
 
 import {
-  NoteDisplayMode,
   isMiddleButtonPressed,
   isRightButtonPressed,
 } from '../../../_common/utils/index.js';
@@ -68,10 +68,14 @@ export class EdgelessToolsManager {
   private _mounted = false;
 
   private _onContainerClick = (e: PointerEventState) => {
+    this._updateLastMousePos(e);
     return this.currentController.onContainerClick(e);
   };
 
   private _onContainerContextMenu = (e: UIEventState) => {
+    // should display context menu when right-clicking on editing block
+    // e.g. `note` `edgeless-text` and `shape-text`
+    if (this.selection.editing) return;
     e.event.preventDefault();
   };
 
@@ -126,9 +130,10 @@ export class EdgelessToolsManager {
     const metaKeyPressed = IS_MAC ? pointEvt.metaKey : pointEvt.ctrlKey;
 
     if (
-      isMiddleButtonPressed(pointEvt) ||
-      isRightButtonPressed(pointEvt) ||
-      metaKeyPressed
+      !this.selection.editing &&
+      (isMiddleButtonPressed(pointEvt) ||
+        isRightButtonPressed(pointEvt) ||
+        metaKeyPressed)
     ) {
       const isRightButton = isRightButtonPressed(pointEvt);
       const targetTool = (

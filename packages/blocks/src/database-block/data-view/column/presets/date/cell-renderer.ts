@@ -1,3 +1,4 @@
+import { createLitPortal } from '@blocksuite/affine-components/portal';
 import { flip, offset } from '@floating-ui/dom';
 import { baseTheme } from '@toeverything/theme';
 import { format } from 'date-fns/format';
@@ -5,7 +6,6 @@ import { css, html, unsafeCSS } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 
 import { DatePicker } from '../../../../../_common/components/date-picker/index.js';
-import { createLitPortal } from '../../../../../_common/components/portal.js';
 import { createIcon } from '../../../utils/uni-icon.js';
 import { BaseCellRenderer } from '../../base-cell.js';
 import { createFromBaseCellRenderer } from '../../renderer.js';

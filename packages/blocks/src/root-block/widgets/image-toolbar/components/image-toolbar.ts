@@ -1,18 +1,16 @@
+import type { EditorIconButton } from '@blocksuite/affine-components/toolbar';
+
+import { MoreVerticalIcon } from '@blocksuite/affine-components/icons';
+import { createLitPortal } from '@blocksuite/affine-components/portal';
 import { assertExists, noop } from '@blocksuite/global/utils';
 import { flip, offset } from '@floating-ui/dom';
 import { LitElement, html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type { EditorIconButton } from '../../../../_common/components/toolbar/icon-button.js';
 import type { ImageBlockComponent } from '../../../../image-block/image-block.js';
 import type { ImageConfigItem, MoreMenuConfigItem } from '../type.js';
 
-import { createLitPortal } from '../../../../_common/components/portal.js';
-import '../../../../_common/components/toolbar/icon-button.js';
-import '../../../../_common/components/toolbar/menu-button.js';
-import '../../../../_common/components/toolbar/toolbar.js';
-import { MoreVerticalIcon } from '../../../../_common/icons/edgeless.js';
 import { styles } from '../styles.js';
 import { ConfigRenderer, MoreMenuRenderer } from '../utils.js';
 

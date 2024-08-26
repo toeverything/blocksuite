@@ -3,7 +3,6 @@ import { ShadowlessElement } from '@blocksuite/block-std';
 import {
   type AttributeRenderer,
   type BaseTextAttributes,
-  type DeltaInsert,
   InlineEditor,
   KEYBOARD_ALLOW_DEFAULT,
   ZERO_WIDTH_NON_JOINER,
@@ -52,10 +51,7 @@ function inlineTextStyles(
   });
 }
 
-const attributeRenderer: AttributeRenderer = (
-  delta: DeltaInsert,
-  selected: boolean
-) => {
+const attributeRenderer: AttributeRenderer = ({ delta, selected }) => {
   // @ts-ignore
   if (delta.attributes?.embed) {
     return html`<span

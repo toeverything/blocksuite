@@ -1,11 +1,8 @@
 packages:
   - 'tests'
-  - 'packages/framework/block-std'
-  - 'packages/framework/global'
-  - 'packages/framework/inline'
-  - 'packages/framework/store'
-  - 'packages/framework/sync'
   - 'packages/blocks'
   - 'packages/docs'
   - 'packages/playground'
   - 'packages/presets'
+  - 'packages/framework/*'
+  - 'packages/affine/*'

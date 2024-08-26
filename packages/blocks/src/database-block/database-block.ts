@@ -1,4 +1,13 @@
-import { RangeManager } from '@blocksuite/block-std';
+import { CaptionedBlockComponent } from '@blocksuite/affine-components/caption';
+import {
+  CopyIcon,
+  DeleteIcon,
+  MoreHorizontalIcon,
+} from '@blocksuite/affine-components/icons';
+import { toast } from '@blocksuite/affine-components/toast';
+import { NOTE_SELECTOR } from '@blocksuite/affine-shared/consts';
+import { RANGE_SYNC_EXCLUDE_ATTR } from '@blocksuite/block-std';
+import { Rect } from '@blocksuite/global/utils';
 import { Slice } from '@blocksuite/store';
 import { computed } from '@lit-labs/preact-signals';
 import { css, html, nothing, unsafeCSS } from 'lit';
@@ -9,19 +18,7 @@ import type { AffineInnerModalWidget } from '../root-block/index.js';
 import type { DatabaseBlockModel } from './database-model.js';
 import type { DatabaseBlockService } from './database-service.js';
 
-import {
-  CaptionedBlockComponent,
-  DragIndicator,
-  popMenu,
-  toast,
-} from '../_common/components/index.js';
-import { NOTE_SELECTOR } from '../_common/edgeless/note/consts.js';
-import {
-  CopyIcon,
-  DeleteIcon,
-  MoreHorizontalIcon,
-} from '../_common/icons/index.js';
-import { Rect } from '../_common/utils/index.js';
+import { DragIndicator, popMenu } from '../_common/components/index.js';
 import {
   AffineDragHandleWidget,
   EdgelessRootBlockComponent,
@@ -56,7 +53,7 @@ export class DatabaseBlockComponent extends CaptionedBlockComponent<
   _bindHotkey: DataViewProps['bindHotkey'] = hotkeys => {
     return {
       dispose: this.host.event.bindHotkey(hotkeys, {
-        path: this.topContenteditableElement?.path ?? this.path,
+        blockId: this.topContenteditableElement?.blockId ?? this.blockId,
       }),
     };
   };
@@ -121,7 +118,7 @@ export class DatabaseBlockComponent extends CaptionedBlockComponent<
   _handleEvent: DataViewProps['handleEvent'] = (name, handler) => {
     return {
       dispose: this.host.event.add(name, handler, {
-        path: this.path,
+        blockId: this.blockId,
       }),
     };
   };
@@ -170,6 +167,16 @@ export class DatabaseBlockComponent extends CaptionedBlockComponent<
     .database-ops:hover {
       background-color: var(--affine-hover-color);
     }
+
+    @media print {
+      .database-ops {
+        display: none;
+      }
+
+      .database-header-bar {
+        display: none !important;
+      }
+    }
   `;
 
   getRootService = () => {
@@ -185,6 +192,7 @@ export class DatabaseBlockComponent extends CaptionedBlockComponent<
           </div>
           <div
             style="display:flex;align-items:center;justify-content: space-between;gap: 12px"
+            class="database-header-bar"
           >
             <div style="flex:1">
               ${renderUniLit(widgetPresets.viewBar, props)}
@@ -211,8 +219,8 @@ export class DatabaseBlockComponent extends CaptionedBlockComponent<
       );
       return () => {
         this.indicator.remove();
-        const model = this.doc.getBlock(id).model;
-        const target = this.doc.getBlock(result.dropBlockId).model;
+        const model = this.doc.getBlock(id)?.model;
+        const target = this.doc.getBlock(result.dropBlockId)?.model ?? null;
         let parent = this.doc.getParent(result.dropBlockId);
         const shouldInsertIn = result.dropType === 'in';
         if (shouldInsertIn) {
@@ -290,7 +298,7 @@ export class DatabaseBlockComponent extends CaptionedBlockComponent<
   override connectedCallback() {
     super.connectedCallback();
 
-    this.setAttribute(RangeManager.rangeSyncExcludeAttr, 'true');
+    this.setAttribute(RANGE_SYNC_EXCLUDE_ATTR, 'true');
     let canDrop = false;
     this.disposables.add(
       AffineDragHandleWidget.registerOption({

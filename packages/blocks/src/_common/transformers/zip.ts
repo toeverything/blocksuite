@@ -6,74 +6,73 @@ import type {
   JobMiddleware,
 } from '@blocksuite/store';
 
-import { assertExists, sha } from '@blocksuite/global/utils';
+import { sha } from '@blocksuite/global/utils';
 import { Job, extMimeMap, getAssetName } from '@blocksuite/store';
-import JSZip from 'jszip';
 
+import { Unzip, Zip } from '../transformers/utils.js';
 import { replaceIdMiddleware, titleMiddleware } from './middlewares.js';
 
 async function exportDocs(collection: DocCollection, docs: Doc[]) {
-  const zip = new JSZip();
-
+  const zip = new Zip();
   const job = new Job({ collection });
   const snapshots = await Promise.all(docs.map(job.docToSnapshot));
 
   const collectionInfo = job.collectionInfoToSnapshot();
-  zip.file('info.json', JSON.stringify(collectionInfo, null, 2));
+  await zip.file('info.json', JSON.stringify(collectionInfo, null, 2));
 
-  snapshots
-    .filter((snapshot): snapshot is DocSnapshot => !!snapshot)
-    .forEach(snapshot => {
-      const snapshotName = `${snapshot.meta.id}.snapshot.json`;
-      zip.file(snapshotName, JSON.stringify(snapshot, null, 2));
-    });
+  await Promise.all(
+    snapshots
+      .filter((snapshot): snapshot is DocSnapshot => !!snapshot)
+      .map(async snapshot => {
+        const snapshotName = `${snapshot.meta.id}.snapshot.json`;
+        await zip.file(snapshotName, JSON.stringify(snapshot, null, 2));
+      })
+  );
 
   const assets = zip.folder('assets');
-  assertExists(assets);
   const assetsMap = job.assets;
 
-  assetsMap.forEach((blob, id) => {
+  for (const [id, blob] of assetsMap) {
     const ext = getAssetName(assetsMap, id).split('.').at(-1);
     const name = `${id}.${ext}`;
-    assets.file(name, blob);
-  });
+    await assets.file(name, blob);
+  }
 
-  return zip.generateAsync({ type: 'blob' });
+  return zip.generate();
 }
 
 async function importDocs(collection: DocCollection, imported: Blob) {
-  const zip = new JSZip();
-  const { files } = await zip.loadAsync(imported);
+  const unzip = new Unzip();
+  await unzip.load(imported);
 
-  const assetObjs: JSZip.JSZipObject[] = [];
-  const snapshotsObjs: JSZip.JSZipObject[] = [];
-  let infoObj: JSZip.JSZipObject | undefined;
+  const assetBlobs: [string, Blob][] = [];
+  const snapshotsBlobs: Blob[] = [];
+  let infoBlob: Blob | undefined;
   let info: CollectionInfoSnapshot | undefined;
 
-  Object.entries(files).map(([name, fileObj]) => {
-    if (name.includes('MACOSX') || name.includes('DS_Store')) {
-      return;
+  for (const { path, content: blob } of unzip) {
+    if (path.includes('MACOSX') || path.includes('DS_Store')) {
+      continue;
     }
 
-    if (name.startsWith('assets/') && !fileObj.dir) {
-      assetObjs.push(fileObj);
-      return;
+    if (path.startsWith('assets/')) {
+      assetBlobs.push([path, blob]);
+      continue;
     }
 
-    if (name === 'info.json') {
-      infoObj = fileObj;
-      return;
+    if (path === 'info.json') {
+      infoBlob = blob;
+      continue;
     }
 
-    if (name.endsWith('.snapshot.json')) {
-      snapshotsObjs.push(fileObj);
-      return;
+    if (path.endsWith('.snapshot.json')) {
+      snapshotsBlobs.push(blob);
+      continue;
     }
-  });
+  }
 
   {
-    const json = await infoObj?.async('text');
-    assertExists(json);
+    const json = (await infoBlob?.text()) ?? '';
     info = JSON.parse(json) as CollectionInfoSnapshot;
   }
 
@@ -95,10 +94,9 @@ async function importDocs(collection: DocCollection, imported: Blob) {
   const assetsMap = job.assets;
 
   await Promise.all(
-    assetObjs.map(async fileObj => {
-      const nameWithExt = fileObj.name.replace('assets/', '');
+    assetBlobs.map(([name, blob]) => {
+      const nameWithExt = name.replace('assets/', '');
       const assetsId = nameWithExt.replace(/\.[^/.]+$/, '');
-      const blob = await fileObj.async('blob');
       const ext = nameWithExt.split('.').at(-1) ?? '';
       const mime = extMimeMap.get(ext) ?? '';
       const file = new File([blob], nameWithExt, {
@@ -109,8 +107,8 @@ async function importDocs(collection: DocCollection, imported: Blob) {
   );
 
   return Promise.all(
-    snapshotsObjs.map(async fileObj => {
-      const json = await fileObj.async('text');
+    snapshotsBlobs.map(async blob => {
+      const json = await blob.text();
       const snapshot = JSON.parse(json) as DocSnapshot;
       const tasks: Promise<void>[] = [];
 

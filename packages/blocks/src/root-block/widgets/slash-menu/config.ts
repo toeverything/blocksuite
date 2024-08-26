@@ -1,18 +1,10 @@
+import type {
+  FrameBlockModel,
+  ParagraphBlockModel,
+} from '@blocksuite/affine-model';
 import type { BlockModel } from '@blocksuite/store';
 import type { TemplateResult } from 'lit';
 
-import { Slice, Text } from '@blocksuite/store';
-
-import type { DataViewBlockComponent } from '../../../data-view-block/index.js';
-import type { FrameBlockModel } from '../../../frame-block/frame-model.js';
-import type { ParagraphBlockModel } from '../../../paragraph-block/index.js';
-import type { RootBlockComponent } from '../../types.js';
-import type { AffineLinkedDocWidget } from '../linked-doc/index.js';
-
-import { toggleEmbedCardCreateModal } from '../../../_common/components/embed-card/modal/embed-card-create-modal.js';
-import { toast } from '../../../_common/components/toast.js';
-import { textConversionConfigs } from '../../../_common/configs/text-conversion.js';
-import { textFormatConfigs } from '../../../_common/configs/text-format/config.js';
 import {
   ArrowDownBigIcon,
   ArrowUpBigIcon,
@@ -32,17 +24,29 @@ import {
   TodayIcon,
   TomorrowIcon,
   YesterdayIcon,
-} from '../../../_common/icons/index.js';
-import { REFERENCE_NODE } from '../../../_common/inline/presets/nodes/consts.js';
+} from '@blocksuite/affine-components/icons';
+import {
+  REFERENCE_NODE,
+  clearMarksOnDiscontinuousInput,
+  getInlineEditorByModel,
+  textFormatConfigs,
+} from '@blocksuite/affine-components/rich-text';
+import { toast } from '@blocksuite/affine-components/toast';
+import { NoteBlockModel } from '@blocksuite/affine-model';
 import {
   createDefaultDoc,
-  getBlockComponentByPath,
   getImageFilesFromLocal,
-  getInlineEditorByModel,
   matchFlavours,
   openFileOrFiles,
-} from '../../../_common/utils/index.js';
-import { clearMarksOnDiscontinuousInput } from '../../../_common/utils/inline-editor.js';
+} from '@blocksuite/affine-shared/utils';
+import { Slice, Text } from '@blocksuite/store';
+
+import type { DataViewBlockComponent } from '../../../data-view-block/index.js';
+import type { RootBlockComponent } from '../../types.js';
+import type { AffineLinkedDocWidget } from '../linked-doc/index.js';
+
+import { toggleEmbedCardCreateModal } from '../../../_common/components/embed-card/modal/embed-card-create-modal.js';
+import { textConversionConfigs } from '../../../_common/configs/text-conversion.js';
 import { addSiblingAttachmentBlocks } from '../../../attachment-block/utils.js';
 import { GroupingIcon } from '../../../database-block/data-view/common/icons/index.js';
 import { viewPresets } from '../../../database-block/data-view/index.js';
@@ -51,7 +55,6 @@ import { GithubIcon } from '../../../embed-github-block/styles.js';
 import { LoomIcon } from '../../../embed-loom-block/styles.js';
 import { YoutubeIcon } from '../../../embed-youtube-block/styles.js';
 import { addSiblingImageBlock } from '../../../image-block/utils.js';
-import { NoteBlockModel } from '../../../note-block/note-model.js';
 import { onModelTextUpdated } from '../../../root-block/utils/index.js';
 import { CanvasElementType } from '../../../surface-block/index.js';
 import { getSurfaceBlock } from '../../../surface-ref-block/utils.js';
@@ -231,12 +234,18 @@ export const defaultSlashMenuConfig: SlashMenuConfig = {
       })),
 
     // ---------------------------------------------------------
-    { groupName: 'Page' },
+    {
+      groupName: 'Page',
+      showWhen: ({ model }) =>
+        model.doc.schema.flavourSchemaMap.has('affine:embed-linked-doc'),
+    },
     {
       name: 'New Doc',
       description: 'Start a new document.',
       icon: NewDocIcon,
       tooltip: slashMenuToolTips['New Doc'],
+      showWhen: ({ model }) =>
+        model.doc.schema.flavourSchemaMap.has('affine:embed-linked-doc'),
       action: ({ rootComponent, model }) => {
         const newDoc = createDefaultDoc(rootComponent.doc.collection);
         insertContent(rootComponent.host, model, REFERENCE_NODE, {
@@ -253,10 +262,16 @@ export const defaultSlashMenuConfig: SlashMenuConfig = {
       icon: LinkedDocIcon,
       tooltip: slashMenuToolTips['Linked Doc'],
       alias: ['dual link'],
-      showWhen: ({ rootComponent }) => {
+      showWhen: ({ rootComponent, model }) => {
         const linkedDocWidgetEle =
           rootComponent.widgetComponents['affine-linked-doc-widget'];
         if (!linkedDocWidgetEle) return false;
+
+        const hasLinkedDocSchema = model.doc.schema.flavourSchemaMap.has(
+          'affine:embed-linked-doc'
+        );
+        if (!hasLinkedDocSchema) return false;
+
         if (!('showLinkedDocPopover' in linkedDocWidgetEle)) {
           console.warn(
             'You may not have correctly implemented the linkedDoc widget! "showLinkedDoc(model)" method not found on widget'
@@ -657,11 +672,10 @@ export const defaultSlashMenuConfig: SlashMenuConfig = {
         const dataViewModel = rootComponent.doc.getBlock(id)!;
         // eslint-disable-next-line @typescript-eslint/no-floating-promises
         Promise.resolve().then(() => {
-          const dataView = getBlockComponentByPath(
-            rootComponent.host,
-            dataViewModel.model.id
-          ) as DataViewBlockComponent;
-          dataView.dataSource.viewDataAdd('table');
+          const dataView = rootComponent.std.view.getBlock(
+            dataViewModel.id
+          ) as DataViewBlockComponent | null;
+          dataView?.dataSource.viewDataAdd('table');
         });
         tryRemoveEmptyLine(model);
       },

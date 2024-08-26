@@ -19,7 +19,7 @@ import {
 } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
-import { html, unsafeStatic } from 'lit/static-html.js';
+import { type StaticValue, html, unsafeStatic } from 'lit/static-html.js';
 
 import type { CommandManager } from '../../command/index.js';
 import type { UIEventDispatcher } from '../../event/index.js';
@@ -58,7 +58,10 @@ export class EditorHost extends SignalWatcher(
       return html`${nothing}`;
     }
 
-    const tag = view.component;
+    const tag =
+      typeof view.component === 'function'
+        ? view.component(model)
+        : view.component;
     const widgets: Record<string, TemplateResult> = view.widgets
       ? Object.entries(view.widgets).reduce((mapping, [key, tag]) => {
           const template = html`<${tag} ${unsafeStatic(this.widgetIdAttr)}=${key}></${tag}>`;
@@ -146,10 +149,17 @@ export class EditorHost extends SignalWatcher(
       const result = await super.getUpdateComplete();
       const rootModel = this.doc.root;
       if (!rootModel) return result;
+
       const view = this.std.spec.getView(rootModel.flavour);
       if (!view) return result;
+
       const widgetTags = Object.values(view.widgets ?? {});
-      const elementsTags = [view.component, ...widgetTags];
+      const elementsTags: StaticValue[] = [
+        typeof view.component === 'function'
+          ? view.component(rootModel)
+          : view.component,
+        ...widgetTags,
+      ];
       await Promise.all(
         elementsTags.map(tag => {
           const element = this.renderRoot.querySelector(tag._$litStatic$);

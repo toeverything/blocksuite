@@ -5,8 +5,8 @@ import type { DeltaInsert } from '@blocksuite/inline';
 import type { AffineEditorContainer } from '@blocksuite/presets';
 
 import { ShadowlessElement } from '@blocksuite/block-std';
-import { EdgelessRootService } from '@blocksuite/blocks';
-import { type DocCollection, Text, Utils } from '@blocksuite/store';
+import { EdgelessRootService, printToPdf } from '@blocksuite/blocks';
+import { type DocCollection, Text } from '@blocksuite/store';
 import '@shoelace-style/shoelace/dist/components/alert/alert.js';
 import '@shoelace-style/shoelace/dist/components/button/button.js';
 import '@shoelace-style/shoelace/dist/components/button-group/button-group.js';
@@ -218,6 +218,10 @@ export class QuickEdgelessMenu extends ShadowlessElement {
     }, duration);
   }
 
+  private _print() {
+    printToPdf().catch(console.error);
+  }
+
   private _setThemeMode(dark: boolean) {
     const html = document.querySelector('html');
 
@@ -235,13 +239,6 @@ export class QuickEdgelessMenu extends ShadowlessElement {
       html.classList.remove('dark');
       html.classList.remove('sl-theme-dark');
     }
-  }
-
-  private _shareUrl() {
-    const base64 = Utils.encodeCollectionAsYjsUpdateV2(this.collection);
-    const url = new URL(window.location.toString());
-    url.searchParams.set('init', base64);
-    window.history.pushState({}, '', url);
   }
 
   private _switchEditorMode() {
@@ -378,6 +375,7 @@ export class QuickEdgelessMenu extends ShadowlessElement {
                   ></sl-icon>
                   <span>Test operations</span>
                   <sl-menu slot="submenu">
+                    <sl-menu-item @click="${this._print}"> Print </sl-menu-item>
                     <sl-menu-item @click=${this._addNote}>
                       Add Note</sl-menu-item
                     >
@@ -399,9 +397,6 @@ export class QuickEdgelessMenu extends ShadowlessElement {
                     <sl-menu-item @click=${this._importSnapshot}>
                       Import Snapshot
                     </sl-menu-item>
-                    <sl-menu-item @click=${this._shareUrl}>
-                      Share URL</sl-menu-item
-                    >
                     ${this.chatPanel
                       ? html`<sl-menu-item @click=${this._toggleChatPanel}>
                           Toggle Chat Panel

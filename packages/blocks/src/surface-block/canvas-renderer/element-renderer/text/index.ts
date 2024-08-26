@@ -1,4 +1,5 @@
-import type { TextElementModel } from '../../../element-model/text.js';
+import type { TextElementModel } from '@blocksuite/affine-model';
+
 import type { Renderer } from '../../renderer.js';
 
 import {

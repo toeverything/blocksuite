@@ -19,6 +19,11 @@ export const IS_IOS =
 
 export const IS_MAC = /Mac/i.test(platform);
 
+export const IS_IPAD =
+  /iPad/i.test(platform) ||
+  /iPad/i.test(agent) ||
+  (/Macintosh/i.test(agent) && globalThis.navigator?.maxTouchPoints > 2);
+
 export const IS_WINDOWS = /Win/.test(platform);
 
 export const REQUEST_IDLE_CALLBACK_ENABLED =

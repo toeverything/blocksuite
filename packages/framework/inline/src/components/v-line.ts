@@ -42,12 +42,19 @@ export class VLine extends LitElement {
   }
 
   override render() {
+    if (!this.isConnected) return;
+
+    if (this.inlineEditor.vLineRenderer) {
+      return this.inlineEditor.vLineRenderer(this);
+    }
+    return this.renderVElements();
+  }
+
+  renderVElements() {
     if (this.elements.length === 0) {
       // don't use v-element because it not correspond to the actual delta
       return html`<div><v-text .str=${ZERO_WIDTH_SPACE}></v-text></div>`;
     }
-
-    if (!this.isConnected) return;
 
     const inlineEditor = this.inlineEditor;
     const renderElements = this.elements.flatMap(([template, delta], index) => {
@@ -124,6 +131,9 @@ export class VLine extends LitElement {
 
   @property({ attribute: false })
   accessor elements: [TemplateResult<1>, DeltaInsert][] = [];
+
+  @property({ attribute: false })
+  accessor index!: number;
 }
 
 declare global {

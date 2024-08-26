@@ -1,6 +1,7 @@
 import type { EditorHost } from '@blocksuite/block-std';
 import type { BlockModel } from '@blocksuite/store';
 
+import { toast } from '@blocksuite/affine-components/toast';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { Vec } from '@blocksuite/global/utils';
 import { Bound } from '@blocksuite/global/utils';
@@ -13,9 +14,7 @@ import type { EdgelessRootBlockComponent } from '../../../../root-block/edgeless
 import type { EmbedCardStyle } from '../../../types.js';
 
 import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../../../consts.js';
-import { getRootByEditorHost } from '../../../utils/query.js';
-import { isValidUrl } from '../../../utils/url.js';
-import { toast } from '../../toast.js';
+import { getRootByEditorHost, isValidUrl } from '../../../utils/index.js';
 import { embedCardModalStyles } from './styles.js';
 
 @customElement('embed-card-create-modal')
@@ -147,17 +146,16 @@ export class EmbedCardCreateModal extends WithDisposable(ShadowlessElement) {
         </div>
 
         <div class="embed-card-modal-row">
-          <div
+          <button
             class=${classMap({
               'embed-card-modal-button': true,
               save: true,
-              disabled: !isValidUrl(this._linkInputValue),
             })}
-            tabindex="0"
+            ?disabled=${!isValidUrl(this._linkInputValue)}
             @click=${this._onConfirm}
           >
             Confirm
-          </div>
+          </button>
         </div>
       </div>
     </div>`;

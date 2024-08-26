@@ -1,3 +1,11 @@
+import {
+  ArrowLeftSmallIcon,
+  ArrowRightSmallIcon,
+  MoreHorizontalIcon,
+} from '@blocksuite/affine-components/icons';
+import { ColorScheme } from '@blocksuite/affine-model';
+import { ThemeObserver } from '@blocksuite/affine-shared/theme';
+import { stopPropagation } from '@blocksuite/affine-shared/utils';
 import { WithDisposable } from '@blocksuite/block-std';
 import { debounce } from '@blocksuite/global/utils';
 import { Slot } from '@blocksuite/store';
@@ -17,16 +25,6 @@ import {
   popMenu,
 } from '../../../../_common/components/index.js';
 import '../../../../_common/components/smooth-corner.js';
-import {
-  ArrowLeftSmallIcon,
-  ArrowRightSmallIcon,
-  MoreHorizontalIcon,
-} from '../../../../_common/icons/index.js';
-import {
-  ColorScheme,
-  ThemeObserver,
-} from '../../../../_common/theme/theme-observer.js';
-import { stopPropagation } from '../../../../_common/utils/event.js';
 import '../buttons/tool-icon-button.js';
 import '../buttons/toolbar-button.js';
 import {

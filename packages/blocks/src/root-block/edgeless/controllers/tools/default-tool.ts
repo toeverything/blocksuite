@@ -1,43 +1,47 @@
+import type {
+  EdgelessTextBlockModel,
+  FrameBlockModel,
+  NoteBlockModel,
+} from '@blocksuite/affine-model';
 import type { PointerEventState } from '@blocksuite/block-std';
+import type { PointTestOptions } from '@blocksuite/block-std/gfx';
 import type { IVec } from '@blocksuite/global/utils';
 
-import { Bound, Vec } from '@blocksuite/global/utils';
-import { DisposableGroup, noop } from '@blocksuite/global/utils';
-
-import type { EdgelessTextBlockModel } from '../../../../edgeless-text/edgeless-text-model.js';
-import type { FrameBlockModel } from '../../../../frame-block/index.js';
-import type { NoteBlockModel } from '../../../../note-block/note-model.js';
-import type { MindmapNode } from '../../../../surface-block/element-model/utils/mindmap/layout.js';
-import type { EdgelessTool } from '../../types.js';
-
-import {
-  asyncFocusRichText,
-  buildPath,
-} from '../../../../_common/utils/index.js';
-import {
-  handleNativeRangeAtPoint,
-  resetNativeSelection,
-} from '../../../../_common/utils/index.js';
-import { clamp } from '../../../../_common/utils/math.js';
-import {
-  type PointTestOptions,
-  SurfaceGroupLikeModel,
-} from '../../../../surface-block/element-model/base.js';
-import { isConnectorWithLabel } from '../../../../surface-block/element-model/connector.js';
+import { focusTextModel } from '@blocksuite/affine-components/rich-text';
 import {
   ConnectorElementModel,
   GroupElementModel,
+} from '@blocksuite/affine-model';
+import {
+  clamp,
+  handleNativeRangeAtPoint,
+  resetNativeSelection,
+} from '@blocksuite/affine-shared/utils';
+import {
+  Bound,
+  DisposableGroup,
+  Vec,
+  intersects,
+  noop,
+} from '@blocksuite/global/utils';
+
+import type { MindmapNode } from '../../../../surface-block/element-model/utils/mindmap/layout.js';
+import type { EdgelessTool } from '../../types.js';
+
+import { buildPath } from '../../../../_common/utils/index.js';
+import { SurfaceGroupLikeModel } from '../../../../surface-block/element-model/base.js';
+import {
   MindmapElementModel,
   ShapeElementModel,
   TextElementModel,
 } from '../../../../surface-block/element-model/index.js';
+import { isConnectorWithLabel } from '../../../../surface-block/element-model/utils/connector.js';
 import {
   hideTargetConnector,
   moveSubtree,
   showMergeIndicator,
 } from '../../../../surface-block/element-model/utils/mindmap/utils.js';
 import { isConnectorAndBindingsAllSelected } from '../../../../surface-block/managers/connector-manager.js';
-import { intersects } from '../../../../surface-block/utils/math-utils.js';
 import { edgelessElementsBound } from '../../utils/bound-utils.js';
 import { prepareCloneData } from '../../utils/clone-utils.js';
 import { calPanDelta } from '../../utils/panning-utils.js';
@@ -256,7 +260,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
       block.id
     );
     if (blockId) {
-      asyncFocusRichText(this._edgeless.host, blockId)?.catch(console.error);
+      focusTextModel(this._edgeless.std, blockId);
     }
   }
 
@@ -769,14 +773,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
 
       if (textFlag) {
         const [x, y] = this._service.viewport.toModelCoord(e.x, e.y);
-        const textService = this._edgeless.host.spec.getService(
-          'affine:edgeless-text'
-        );
-        textService.initEdgelessTextBlock({
-          edgeless: this._edgeless,
-          x,
-          y,
-        });
+        this._edgeless.std.command.exec('insertEdgelessText', { x, y });
       } else {
         addText(this._edgeless, e);
       }

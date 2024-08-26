@@ -1,3 +1,5 @@
+import '@blocksuite/affine-shared/commands';
+
 export * from './blocks/index.js';
 export * from './editors/index.js';
 export * from './fragments/index.js';

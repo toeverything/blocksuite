@@ -1,3 +1,5 @@
+import { IS_IPAD } from '@blocksuite/global/env';
+
 import type { UIEventDispatcher } from '../dispatcher.js';
 
 import { UIEventState, UIEventStateContext } from '../base.js';
@@ -268,9 +270,26 @@ class DragController extends PointerControllerBase {
     this._reset();
   };
 
+  // https://mikepk.com/2020/10/iOS-safari-scribble-bug/
+  private _applyScribblePatch() {
+    if (!IS_IPAD) return;
+
+    const { host, disposables } = this._dispatcher;
+    disposables.addFromEvent(host, 'touchmove', (event: TouchEvent) => {
+      if (
+        this._dragging &&
+        this._startPointerState &&
+        this._startPointerState.raw.pointerType === 'pen'
+      ) {
+        event.preventDefault();
+      }
+    });
+  }
+
   listen() {
     const { host, disposables } = this._dispatcher;
     disposables.addFromEvent(host, 'pointerdown', this._down);
+    this._applyScribblePatch();
   }
 }
 

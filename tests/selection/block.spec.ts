@@ -1585,5 +1585,5 @@ test('scroll should update dragging area and select blocks when dragging', async
   await page.mouse.up();
 
   rects = page.locator('affine-block-selection').locator('visible=true');
-  await expect(rects).toHaveCount(4);
+  await expect(rects).toHaveCount(3);
 });

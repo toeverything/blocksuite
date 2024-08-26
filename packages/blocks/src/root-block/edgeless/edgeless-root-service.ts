@@ -1,33 +1,27 @@
+import type {
+  FrameBlockModel,
+  GroupElementModel,
+} from '@blocksuite/affine-model';
 import type { BlockServiceOptions } from '@blocksuite/block-std';
+import type { PointTestOptions } from '@blocksuite/block-std/gfx';
 import type { IBound } from '@blocksuite/global/utils';
 
+import { clamp } from '@blocksuite/affine-shared/utils';
 import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
-import { Bound } from '@blocksuite/global/utils';
+import { Bound, getCommonBound, last } from '@blocksuite/global/utils';
 import { type BlockModel, Slot } from '@blocksuite/store';
 
-import type { FrameBlockModel } from '../../frame-block/index.js';
 import type {
   CanvasElementType,
   ConnectorElementModel,
 } from '../../surface-block/element-model/index.js';
-import type {
-  GroupElementModel,
-  SurfaceBlockModel,
-} from '../../surface-block/index.js';
+import type { SurfaceBlockModel } from '../../surface-block/index.js';
 import type { ReorderingDirection } from '../../surface-block/managers/layer-manager.js';
 import type { EdgelessToolConstructor } from './services/tools-manager.js';
 import type { EdgelessTool } from './types.js';
 
-import { last } from '../../_common/utils/iterable.js';
-import { clamp } from '../../_common/utils/math.js';
-import {
-  type PointTestOptions,
-  SurfaceGroupLikeModel,
-} from '../../surface-block/element-model/base.js';
-import {
-  MindmapElementModel,
-  getCommonBound,
-} from '../../surface-block/index.js';
+import { SurfaceGroupLikeModel } from '../../surface-block/element-model/base.js';
+import { MindmapElementModel } from '../../surface-block/index.js';
 import { LayerManager } from '../../surface-block/managers/layer-manager.js';
 import { compare } from '../../surface-block/managers/layer-utils.js';
 import { getSurfaceBlock } from '../../surface-ref-block/utils.js';

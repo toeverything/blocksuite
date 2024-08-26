@@ -70,6 +70,11 @@ export const blockStyles = css`
     background-color: var(--affine-white);
     opacity: 0;
   }
+  @media print {
+    .affine-embed-synced-doc-header-wrapper {
+      display: none;
+    }
+  }
   .affine-embed-synced-doc-header-wrapper.selected {
     opacity: 1;
     transition: all 0.23s ease;

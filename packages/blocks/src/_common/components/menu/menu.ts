@@ -6,6 +6,13 @@ import type {
 } from '@floating-ui/dom';
 import type { TemplateResult } from 'lit';
 
+import {
+  ArrowRightSmallIcon,
+  DoneIcon,
+  checkboxChecked,
+  checkboxUnchecked,
+} from '@blocksuite/affine-components/icons';
+import { rangeWrap } from '@blocksuite/affine-shared/utils';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import {
   autoUpdate,
@@ -21,13 +28,6 @@ import { ifDefined } from 'lit/directives/if-defined.js';
 import { createRef, ref } from 'lit/directives/ref.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
-
-import {
-  checkboxChecked,
-  checkboxUnchecked,
-} from '../../../list-block/utils/icons.js';
-import { ArrowRightSmallIcon, DoneIcon } from '../../icons/index.js';
-import { rangeWrap } from '../../utils/math.js';
 
 type MenuCommon = {
   hide?: () => boolean;

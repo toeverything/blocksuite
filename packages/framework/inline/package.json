@@ -1,6 +1,6 @@
 {
   "name": "@blocksuite/inline",
-  "version": "0.15.0",
+  "version": "0.16.0",
   "description": "A micro editor.",
   "type": "module",
   "repository": "toeverything/blocksuite",
@@ -9,9 +9,7 @@
     "test:unit": "nx vite:test --run",
     "test:unit:coverage": "nx vite:test --run --coverage",
     "test:unit:ui": "nx vite:test --ui",
-    "test:e2e": "nx e2e",
-    "test:e2e:ci": "nx e2e-ci",
-    "test": "pnpm test:unit && pnpm test:e2e"
+    "test": "nx e2e"
   },
   "keywords": [],
   "files": [
@@ -23,7 +21,7 @@
   "author": "toeverything",
   "license": "MPL-2.0",
   "devDependencies": {
-    "lit": "^3.1.4",
+    "lit": "^3.2.0",
     "yjs": "^13.6.18"
   },
   "peerDependencies": {

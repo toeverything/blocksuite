@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-restricted-imports */
+import type { EdgelessRootService } from '@blocksuite/blocks';
 import type { SerializedXYWH } from '@blocksuite/global/utils';
 import type { DeltaInsert } from '@blocksuite/inline/types';
 import type { AffineEditorContainer, CommentPanel } from '@blocksuite/presets';
@@ -19,9 +20,11 @@ import {
   ZipTransformer,
   defaultImageProxyMiddleware,
   openFileOrFiles,
+  printToPdf,
+  toast,
 } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
-import { type DocCollection, Job, Text, Utils } from '@blocksuite/store';
+import { type DocCollection, Job, Text } from '@blocksuite/store';
 import '@shoelace-style/shoelace/dist/components/button/button.js';
 import '@shoelace-style/shoelace/dist/components/button-group/button-group.js';
 import '@shoelace-style/shoelace/dist/components/color-picker/color-picker.js';
@@ -35,8 +38,8 @@ import '@shoelace-style/shoelace/dist/components/select/select.js';
 import '@shoelace-style/shoelace/dist/components/tab/tab.js';
 import '@shoelace-style/shoelace/dist/components/tab-group/tab-group.js';
 import '@shoelace-style/shoelace/dist/components/tooltip/tooltip.js';
-import '@shoelace-style/shoelace/dist/themes/light.css';
 import '@shoelace-style/shoelace/dist/themes/dark.css';
+import '@shoelace-style/shoelace/dist/themes/light.css';
 import { setBasePath } from '@shoelace-style/shoelace/dist/utilities/base-path.js';
 import { css, html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
@@ -311,6 +314,30 @@ export class DebugMenu extends ShadowlessElement {
     }, duration);
   }
 
+  private _present() {
+    if (!this.editor.host) return;
+    const rootService = this.editor.host.spec.getService('affine:page');
+    const { docModeService } = rootService;
+    if (docModeService.getMode() !== 'edgeless') {
+      toast(
+        this.editor.host,
+        'The presentation mode is only available on edgeless mode.',
+        3000
+      );
+      return;
+    }
+
+    const edgelessRootService = rootService as EdgelessRootService;
+    edgelessRootService?.tool.setEdgelessTool({
+      type: 'frameNavigator',
+      mode: 'fit',
+    });
+  }
+
+  private _print() {
+    printToPdf().catch(console.error);
+  }
+
   private _setThemeMode(dark: boolean) {
     const html = document.querySelector('html');
 
@@ -339,13 +366,6 @@ export class DebugMenu extends ShadowlessElement {
     const hash = lz.compressToEncodedURIComponent(JSON.stringify(json));
     const url = new URL(window.location.toString());
     url.searchParams.set('sel', hash);
-    window.history.pushState({}, '', url);
-  }
-
-  private _shareUrl() {
-    const base64 = Utils.encodeCollectionAsYjsUpdateV2(this.collection);
-    const url = new URL(window.location.toString());
-    url.searchParams.set('init', base64);
     window.history.pushState({}, '', url);
   }
 
@@ -536,6 +556,7 @@ export class DebugMenu extends ShadowlessElement {
               Test Operations
             </sl-button>
             <sl-menu>
+              <sl-menu-item @click="${this._print}">Print</sl-menu-item>
               <sl-menu-item @click="${this._exportMarkDown}">
                 Export Markdown
               </sl-menu-item>
@@ -556,9 +577,6 @@ export class DebugMenu extends ShadowlessElement {
               </sl-menu-item>
               <sl-menu-item @click="${this._importNotionHTML}">
                 Import Notion HTML
-              </sl-menu-item>
-              <sl-menu-item @click="${this._shareUrl}">
-                Share URL
               </sl-menu-item>
               <sl-menu-item @click="${this._toggleStyleDebugMenu}">
                 Toggle CSS Debug Menu
@@ -612,6 +630,16 @@ export class DebugMenu extends ShadowlessElement {
               <sl-icon
                 name="${this._dark ? 'moon' : 'brightness-high'}"
               ></sl-icon>
+            </sl-button>
+          </sl-tooltip>
+
+          <sl-tooltip
+            content="Enter presentation mode"
+            placement="bottom"
+            hoist
+          >
+            <sl-button size="small" @click="${this._present}">
+              <sl-icon name="easel"></sl-icon>
             </sl-button>
           </sl-tooltip>
 

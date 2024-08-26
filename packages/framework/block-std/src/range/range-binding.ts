@@ -1,9 +1,11 @@
 import { throttle } from '@blocksuite/global/utils';
 
 import type { BaseSelection, TextSelection } from '../selection/index.js';
+import type { BlockComponent } from '../view/element/block-component.js';
+import type { RangeManager } from './range-manager.js';
 
-import { BlockComponent } from '../view/element/block-component.js';
-import { RangeManager } from './range-manager.js';
+import { blockComponentSymbol } from '../view/element/consts.js';
+import { RANGE_SYNC_EXCLUDE_ATTR } from './consts.js';
 
 /**
  * Two-way binding between native range and text selection
@@ -116,7 +118,7 @@ export class RangeBinding {
         const parentModel = this.host.doc.getParent(highestBlock.blockId);
         if (!parentModel) continue;
         const parent = this.host.view.getBlock(parentModel.id);
-        if (!(parent instanceof BlockComponent) || parents.includes(parent))
+        if (!this._isBlockComponent(parent) || parents.includes(parent))
           continue;
 
         // Restore the DOM structure damaged by the composition
@@ -186,10 +188,10 @@ export class RangeBinding {
     // range is in a non-editable element
     // ex. placeholder
     const isRangeOutNotEditable =
-      (range.startContainer instanceof HTMLElement &&
-        range.startContainer.contentEditable === 'false') ||
-      (range.endContainer instanceof HTMLElement &&
-        range.endContainer.contentEditable === 'false');
+      range.startContainer instanceof HTMLElement &&
+      range.startContainer.contentEditable === 'false' &&
+      range.endContainer instanceof HTMLElement &&
+      range.endContainer.contentEditable === 'false';
     if (isRangeOutNotEditable) {
       this._prevTextSelection = null;
       this.selectionManager.clear(['text']);
@@ -205,8 +207,7 @@ export class RangeBinding {
         : range.commonAncestorContainer.parentElement;
     if (!el) return;
     const block = el.closest<BlockComponent>(`[${this.host.blockIdAttr}]`);
-    if (block?.getAttribute(RangeManager.rangeSyncExcludeAttr) === 'true')
-      return;
+    if (block?.getAttribute(RANGE_SYNC_EXCLUDE_ATTR) === 'true') return;
 
     const inlineEditor = this.rangeManager?.getClosestInlineEditor(
       range.commonAncestorContainer
@@ -311,6 +312,10 @@ export class RangeBinding {
         this._onCompositionEnd(event);
       })
     );
+  }
+
+  private _isBlockComponent(el: Element | null): el is BlockComponent {
+    return Boolean(el && blockComponentSymbol in el);
   }
 
   get host() {

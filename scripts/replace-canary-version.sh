@@ -9,6 +9,11 @@ packages=(
   "framework/store"
   "framework/inline"
   "framework/sync"
+  "affine/model"
+  "affine/shared"
+  "affine/components"
+  "affine/block-paragraph"
+  "affine/block-list"
   "blocks"
   # "docs" # NOT PUBLISHING
   "presets"
@@ -18,7 +23,7 @@ packages=(
 replace() {
   mv package-modified.json package.json
 
-  CURRENT_VERSION="0.15.0"
+  CURRENT_VERSION="0.16.0"
   IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT_VERSION"
   MINOR=$((MINOR + 1))
   VERSION="$MAJOR.$MINOR.$PATCH"
@@ -29,12 +34,19 @@ replace() {
 
 for package in "${packages[@]}"
 do
-  unprefixed_package="${package//framework\//}"
+  unprefixed_package="$package"
+
+  if [[ $unprefixed_package == affine/* ]]; then
+    unprefixed_package="${unprefixed_package/#affine\//affine-}"
+  elif [[ $unprefixed_package == framework/* ]]; then
+    unprefixed_package="${unprefixed_package/#framework\//}"
+  fi
+
   cd "packages/$package"
   jq ".name = \"@blocksuite/${unprefixed_package}\"" package.json > package-modified.json
   replace
 
-  if [[ $package == framework/* ]]; then
+  if [[ $package == framework/* || $package == affine/* ]]; then
     cd ../../../
   else
     cd ../../

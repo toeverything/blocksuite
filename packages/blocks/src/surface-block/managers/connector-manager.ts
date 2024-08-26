@@ -1,48 +1,41 @@
-import type { IVec, IVec3 } from '@blocksuite/global/utils';
-import type { IBound } from '@blocksuite/global/utils';
+import type { IBound, IVec, IVec3 } from '@blocksuite/global/utils';
 
-import { Vec } from '@blocksuite/global/utils';
-import { Bound } from '@blocksuite/global/utils';
-import { PointLocation } from '@blocksuite/global/utils';
 import {
+  type Connection,
+  type ConnectorElementModel,
+  ConnectorMode,
+  GroupElementModel,
+  type LocalConnectorElementModel,
+} from '@blocksuite/affine-model';
+import {
+  Bound,
+  PI2,
+  PointLocation,
+  Vec,
+  almostEqual,
   assertEquals,
   assertExists,
   assertType,
-} from '@blocksuite/global/utils';
-
-import type { Connectable } from '../../_common/types.js';
-import type { EdgelessRootService } from '../../root-block/edgeless/edgeless-root-service.js';
-import type {
-  Connection,
-  ConnectorElementModel,
-  LocalConnectorElementModel,
-} from '../element-model/connector.js';
-
-import { last } from '../../_common/utils/iterable.js';
-import { Overlay } from '../canvas-renderer/renderer.js';
-import {
-  ConnectorMode,
-  isConnectorWithLabel,
-} from '../element-model/connector.js';
-import { GroupElementModel } from '../element-model/group.js';
-import { AStarRunner } from '../utils/a-star.js';
-import { getBoundFromPoints } from '../utils/bound.js';
-import {
+  clamp,
   getBezierCurveBoundingBox,
   getBezierParameters,
-} from '../utils/curve.js';
-import {
-  PI2,
-  almostEqual,
-  clamp,
+  getBoundFromPoints,
   getBoundsWithRotation,
   getPointFromBoundsWithRotation,
   isOverlap,
   isVecZero,
+  last,
   lineIntersects,
   sign,
   toRadian,
-} from '../utils/math-utils.js';
+} from '@blocksuite/global/utils';
+
+import type { Connectable } from '../../_common/types.js';
+import type { EdgelessRootService } from '../../root-block/edgeless/edgeless-root-service.js';
+
+import { Overlay } from '../canvas-renderer/renderer.js';
+import { isConnectorWithLabel } from '../element-model/utils/connector.js';
+import { AStarRunner } from '../utils/a-star.js';
 
 export type OrthogonalConnectorInput = {
   startBound: Bound | null;

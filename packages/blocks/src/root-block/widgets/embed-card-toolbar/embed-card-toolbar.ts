@@ -1,39 +1,5 @@
-import { WidgetComponent } from '@blocksuite/block-std';
-import { assertExists } from '@blocksuite/global/utils';
-import { type BlockModel, DocCollection, Slice } from '@blocksuite/store';
-import { autoUpdate, computePosition, flip, offset } from '@floating-ui/dom';
-import { type TemplateResult, html, nothing } from 'lit';
-import { customElement, query, state } from 'lit/decorators.js';
-import { classMap } from 'lit/directives/class-map.js';
-import { join } from 'lit/directives/join.js';
-import { repeat } from 'lit/directives/repeat.js';
+import type { RootBlockModel } from '@blocksuite/affine-model';
 
-import type { EmbedCardStyle } from '../../../_common/types.js';
-import type { EmbedGithubModel } from '../../../embed-github-block/embed-github-model.js';
-import type { EmbedLinkedDocModel } from '../../../embed-linked-doc-block/embed-linked-doc-model.js';
-import type { RootBlockModel } from '../../root-model.js';
-import type { EmbedOptions } from '../../root-service.js';
-import type { RootBlockComponent } from '../../types.js';
-
-import '../../../_common/components/button.js';
-import { toggleEmbedCardCaptionEditModal } from '../../../_common/components/embed-card/modal/embed-card-caption-edit-modal.js';
-import { toggleEmbedCardEditModal } from '../../../_common/components/embed-card/modal/embed-card-edit-modal.js';
-import {
-  type EmbedToolbarBlockComponent,
-  type EmbedToolbarModel,
-  isEmbedCardBlockComponent,
-} from '../../../_common/components/embed-card/type.js';
-import { isPeekable, peek } from '../../../_common/components/index.js';
-import { toast } from '../../../_common/components/toast.js';
-import '../../../_common/components/toolbar/icon-button.js';
-import '../../../_common/components/toolbar/menu-button.js';
-import '../../../_common/components/toolbar/separator.js';
-import { renderToolbarSeparator } from '../../../_common/components/toolbar/separator.js';
-import '../../../_common/components/toolbar/toolbar.js';
-import {
-  type Action,
-  renderActions,
-} from '../../../_common/components/toolbar/utils.js';
 import {
   CaptionIcon,
   CenterPeekIcon,
@@ -47,13 +13,44 @@ import {
   PaletteIcon,
   RefreshIcon,
   SmallArrowDownIcon,
-} from '../../../_common/icons/index.js';
-import { getBlockProps } from '../../../_common/utils/block-props.js';
-import { getEmbedCardIcons, getHostName } from '../../../_common/utils/url.js';
+} from '@blocksuite/affine-components/icons';
+import { isPeekable, peek } from '@blocksuite/affine-components/peek';
+import { toast } from '@blocksuite/affine-components/toast';
+import {
+  type Action,
+  renderActions,
+  renderToolbarSeparator,
+} from '@blocksuite/affine-components/toolbar';
 import {
   type BookmarkBlockModel,
   BookmarkStyles,
-} from '../../../bookmark-block/bookmark-model.js';
+  type EmbedGithubModel,
+  type EmbedLinkedDocModel,
+} from '@blocksuite/affine-model';
+import { getBlockProps, getHostName } from '@blocksuite/affine-shared/utils';
+import { WidgetComponent } from '@blocksuite/block-std';
+import { assertExists } from '@blocksuite/global/utils';
+import { type BlockModel, DocCollection, Slice } from '@blocksuite/store';
+import { autoUpdate, computePosition, flip, offset } from '@floating-ui/dom';
+import { type TemplateResult, html, nothing } from 'lit';
+import { customElement, query, state } from 'lit/decorators.js';
+import { classMap } from 'lit/directives/class-map.js';
+import { join } from 'lit/directives/join.js';
+import { repeat } from 'lit/directives/repeat.js';
+
+import type { EmbedCardStyle } from '../../../_common/types.js';
+import type { EmbedOptions } from '../../root-service.js';
+import type { RootBlockComponent } from '../../types.js';
+
+import '../../../_common/components/button.js';
+import { toggleEmbedCardCaptionEditModal } from '../../../_common/components/embed-card/modal/embed-card-caption-edit-modal.js';
+import { toggleEmbedCardEditModal } from '../../../_common/components/embed-card/modal/embed-card-edit-modal.js';
+import {
+  type EmbedToolbarBlockComponent,
+  type EmbedToolbarModel,
+  isEmbedCardBlockComponent,
+} from '../../../_common/components/embed-card/type.js';
+import { getEmbedCardIcons } from '../../../_common/utils/url.js';
 import {
   isAttachmentBlock,
   isBookmarkBlock,

@@ -1,5 +1,10 @@
+import type { RichText } from '@blocksuite/affine-components/rich-text';
+
+import '@blocksuite/affine-components/rich-text';
+import { ThemeObserver } from '@blocksuite/affine-shared/theme';
+import { almostEqual } from '@blocksuite/affine-shared/utils';
 import {
-  RangeManager,
+  RANGE_SYNC_EXCLUDE_ATTR,
   ShadowlessElement,
   WithDisposable,
 } from '@blocksuite/block-std';
@@ -10,13 +15,9 @@ import { css, html, nothing } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type { RichText } from '../../../../_common/components/rich-text/rich-text.js';
 import type { ConnectorElementModel } from '../../../../surface-block/index.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
 
-import '../../../../_common/components/rich-text/rich-text.js';
-import { ThemeObserver } from '../../../../_common/theme/theme-observer.js';
-import { almostEqual } from '../../../../_common/utils/math.js';
 import { getLineHeight } from '../../../../surface-block/canvas-renderer/element-renderer/text/utils.js';
 
 const HORIZONTAL_PADDING = 2;
@@ -90,7 +91,7 @@ export class EdgelessConnectorLabelEditor extends WithDisposable(
 
   override connectedCallback() {
     super.connectedCallback();
-    this.setAttribute(RangeManager.rangeSyncExcludeAttr, 'true');
+    this.setAttribute(RANGE_SYNC_EXCLUDE_ATTR, 'true');
   }
 
   override disconnectedCallback() {

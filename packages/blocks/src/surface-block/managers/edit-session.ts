@@ -1,143 +1,25 @@
 import type { BlockService } from '@blocksuite/block-std';
 
+import {
+  BrushSchema,
+  ColorSchema,
+  ConnectorSchema,
+  EdgelessTextSchema,
+  NoteSchema,
+  ShapeSchema,
+  TextSchema,
+} from '@blocksuite/affine-shared/utils';
 import { DisposableGroup, Slot } from '@blocksuite/global/utils';
 import { isPlainObject, merge } from 'merge';
 import { z } from 'zod';
 
-import {
-  DEFAULT_NOTE_BACKGROUND_COLOR,
-  DEFAULT_NOTE_SHADOW,
-  NoteBackgroundColorsSchema,
-  NoteShadowsSchema,
-} from '../../_common/edgeless/note/consts.js';
-import { LineWidth, NoteDisplayMode } from '../../_common/types.js';
-import {
-  DEFAULT_CONNECTOR_COLOR,
-  GET_DEFAULT_LINE_COLOR,
-  GET_DEFAULT_TEXT_COLOR,
-  LineColorsSchema,
-} from '../../root-block/edgeless/components/panel/color-panel.js';
-import {
-  FontFamily,
-  FontStyle,
-  FontWeight,
-  ShapeStyle,
-  StrokeStyle,
-  TextAlign,
-  TextVerticalAlign,
-} from '../consts.js';
-import {
-  ConnectorMode,
-  DEFAULT_FRONT_END_POINT_STYLE,
-  DEFAULT_REAR_END_POINT_STYLE,
-} from '../element-model/connector.js';
-import {
-  DEFAULT_SHAPE_FILL_COLOR,
-  DEFAULT_SHAPE_STROKE_COLOR,
-  DEFAULT_SHAPE_TEXT_COLOR,
-  FillColorsSchema,
-  SHAPE_TEXT_FONT_SIZE,
-  ShapeType,
-  StrokeColorsSchema,
-} from '../elements/shape/consts.js';
-
-const ConnectorEndpointSchema = z.enum([
-  'None',
-  'Arrow',
-  'Triangle',
-  'Circle',
-  'Diamond',
-]);
-const StrokeStyleSchema = z.nativeEnum(StrokeStyle);
-const LineWidthSchema = z.nativeEnum(LineWidth);
-const ShapeStyleSchema = z.nativeEnum(ShapeStyle);
-const ShapeTextFontSizeSchema = z.nativeEnum(SHAPE_TEXT_FONT_SIZE);
-const FontFamilySchema = z.nativeEnum(FontFamily);
-const FontWeightSchema = z.nativeEnum(FontWeight);
-const FontStyleSchema = z.nativeEnum(FontStyle);
-const TextAlignSchema = z.nativeEnum(TextAlign);
-const TextVerticalAlignSchema = z.nativeEnum(TextVerticalAlign);
-const ShapeTypeSchema = z.nativeEnum(ShapeType);
-const NoteDisplayModeSchema = z.nativeEnum(NoteDisplayMode);
-
-const ColorSchema = z.union([
-  z.object({
-    normal: z.string(),
-  }),
-  z.object({
-    light: z.string(),
-    dark: z.string(),
-  }),
-]);
-const LineColorSchema = z.union([LineColorsSchema, ColorSchema]);
-const ShapeFillColorSchema = z.union([FillColorsSchema, ColorSchema]);
-const ShapeStrokeColorSchema = z.union([StrokeColorsSchema, ColorSchema]);
-const TextColorSchema = z.union([z.string(), ColorSchema]);
-const NoteBackgroundColorSchema = z.union([
-  NoteBackgroundColorsSchema,
-  ColorSchema,
-]);
-
 const LastPropsSchema = z.object({
-  connector: z.object({
-    frontEndpointStyle: ConnectorEndpointSchema,
-    rearEndpointStyle: ConnectorEndpointSchema,
-    strokeStyle: StrokeStyleSchema,
-    stroke: LineColorSchema,
-    strokeWidth: LineWidthSchema,
-    rough: z.boolean(),
-    mode: z.number().optional(),
-  }),
-  brush: z.object({
-    color: LineColorSchema,
-    lineWidth: LineWidthSchema,
-  }),
-  shape: z.object({
-    shapeType: ShapeTypeSchema,
-    fillColor: ShapeFillColorSchema,
-    strokeColor: ShapeStrokeColorSchema,
-    shapeStyle: ShapeStyleSchema,
-    filled: z.boolean(),
-    radius: z.number(),
-    strokeWidth: z.number().optional(),
-    strokeStyle: StrokeStyleSchema.optional(),
-    color: TextColorSchema.optional(),
-    fontSize: ShapeTextFontSizeSchema.optional(),
-    fontFamily: FontFamilySchema.optional(),
-    fontWeight: FontWeightSchema.optional(),
-    fontStyle: FontStyleSchema.optional(),
-    textAlign: TextAlignSchema.optional(),
-    textHorizontalAlign: TextAlignSchema.optional(),
-    textVerticalAlign: TextVerticalAlignSchema.optional(),
-    roughness: z.number().optional(),
-  }),
-  text: z.object({
-    color: TextColorSchema,
-    fontFamily: FontFamilySchema,
-    textAlign: TextAlignSchema,
-    fontWeight: FontWeightSchema,
-    fontStyle: FontStyleSchema,
-    fontSize: z.number(),
-  }),
-  'affine:edgeless-text': z.object({
-    color: TextColorSchema,
-    fontFamily: FontFamilySchema,
-    textAlign: TextAlignSchema,
-    fontWeight: FontWeightSchema,
-    fontStyle: FontStyleSchema,
-  }),
-  'affine:note': z.object({
-    background: NoteBackgroundColorSchema,
-    displayMode: NoteDisplayModeSchema.optional(),
-    edgeless: z.object({
-      style: z.object({
-        borderRadius: z.number(),
-        borderSize: z.number(),
-        borderStyle: StrokeStyleSchema,
-        shadowType: NoteShadowsSchema,
-      }),
-    }),
-  }),
+  connector: ConnectorSchema,
+  brush: BrushSchema,
+  shape: ShapeSchema,
+  text: TextSchema,
+  'affine:edgeless-text': EdgelessTextSchema,
+  'affine:note': NoteSchema,
 });
 
 export type LastProps = z.infer<typeof LastPropsSchema>;
@@ -192,59 +74,14 @@ export type SerializedViewport = z.infer<
 export class EditPropsStore {
   private _disposables = new DisposableGroup();
 
-  private _lastProps: LastProps = {
-    connector: {
-      frontEndpointStyle: DEFAULT_FRONT_END_POINT_STYLE,
-      rearEndpointStyle: DEFAULT_REAR_END_POINT_STYLE,
-      stroke: DEFAULT_CONNECTOR_COLOR,
-      strokeStyle: StrokeStyle.Solid,
-      strokeWidth: LineWidth.Two,
-      rough: false,
-      mode: ConnectorMode.Curve,
-    },
-    brush: {
-      color: GET_DEFAULT_LINE_COLOR(),
-      lineWidth: LineWidth.Four,
-    },
-    shape: {
-      color: DEFAULT_SHAPE_TEXT_COLOR,
-      shapeType: ShapeType.Rect,
-      fillColor: DEFAULT_SHAPE_FILL_COLOR,
-      strokeColor: DEFAULT_SHAPE_STROKE_COLOR,
-      strokeStyle: StrokeStyle.Solid,
-      strokeWidth: LineWidth.Two,
-      shapeStyle: ShapeStyle.General,
-      filled: true,
-      radius: 0,
-    },
-    text: {
-      color: GET_DEFAULT_TEXT_COLOR(),
-      fontFamily: FontFamily.Inter,
-      textAlign: TextAlign.Left,
-      fontWeight: FontWeight.Regular,
-      fontStyle: FontStyle.Normal,
-      fontSize: 24,
-    },
-    'affine:edgeless-text': {
-      color: GET_DEFAULT_TEXT_COLOR(),
-      fontFamily: FontFamily.Inter,
-      textAlign: TextAlign.Left,
-      fontWeight: FontWeight.Regular,
-      fontStyle: FontStyle.Normal,
-    },
-    'affine:note': {
-      background: DEFAULT_NOTE_BACKGROUND_COLOR,
-      displayMode: NoteDisplayMode.DocAndEdgeless,
-      edgeless: {
-        style: {
-          borderRadius: 0,
-          borderSize: 4,
-          borderStyle: StrokeStyle.None,
-          shadowType: DEFAULT_NOTE_SHADOW,
-        },
-      },
-    },
-  };
+  private _lastProps: LastProps = LastPropsSchema.parse(
+    Object.entries(LastPropsSchema.shape).reduce((value, [key, schema]) => {
+      return {
+        ...value,
+        [key]: schema.parse(undefined),
+      };
+    }, {})
+  );
 
   slots = {
     lastPropsUpdated: new Slot<{
@@ -344,7 +181,7 @@ export class EditPropsStore {
     const props = this._lastProps[type];
     const overrideProps = extractProps(
       recordProps,
-      LastPropsSchema.shape[type]
+      LastPropsSchema.shape[type]._def.innerType
     );
     if (Object.keys(overrideProps).length === 0) return;
 

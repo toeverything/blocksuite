@@ -1,7 +1,7 @@
 {
   "name": "@blocksuite/playground",
   "private": true,
-  "version": "0.15.0",
+  "version": "0.16.0",
   "type": "module",
   "repository": "toeverything/blocksuite",
   "scripts": {
@@ -23,10 +23,9 @@
     "@toeverything/y-indexeddb": "0.10.0-canary.9",
     "@types/katex": "^0.16.7",
     "browser-fs-access": "^0.35.0",
-    "intl-segmenter-polyfill-rs": "^0.1.7",
     "jszip": "^3.10.1",
     "katex": "^0.16.11",
-    "lit": "^3.1.4",
+    "lit": "^3.2.0",
     "lz-string": "^1.5.0",
     "merge": "^2.1.1",
     "tweakpane": "^4.0.4",
@@ -37,12 +36,12 @@
   },
   "license": "MPL-2.0",
   "devDependencies": {
-    "@apollo/client": "^3.11.1",
+    "@apollo/client": "^3.11.4",
     "@tweakpane/core": "^2.0.4",
     "@types/micromatch": "^4.0.9",
     "graphql": "^16.9.0",
     "magic-string": "^0.30.11",
-    "openai": "^4.53.2",
+    "openai": "^4.56.0",
     "vite-plugin-wasm": "^3.3.0"
   }
 }

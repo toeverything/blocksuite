@@ -39,9 +39,6 @@ export class KeyboardControl {
     ) {
       return false;
     }
-    if (['Control', 'Meta', 'Shift'].includes(event.key)) {
-      return false;
-    }
     return true;
   };
 

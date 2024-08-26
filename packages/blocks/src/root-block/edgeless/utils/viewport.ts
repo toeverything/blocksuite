@@ -1,10 +1,8 @@
-import type { IVec } from '@blocksuite/global/utils';
-import type { IPoint } from '@blocksuite/global/utils';
+import type { IPoint, IVec } from '@blocksuite/global/utils';
 
+import { clamp } from '@blocksuite/affine-shared/utils';
 import { Bound, Vec } from '@blocksuite/global/utils';
 import { Slot } from '@blocksuite/store';
-
-import { clamp } from '../../../_common/utils/math.js';
 
 function cutoff(value: number, ref: number, sign: number) {
   if (sign > 0 && value > ref) return ref;

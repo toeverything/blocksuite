@@ -1,7 +1,5 @@
 import type { TemplateResult } from 'lit';
 
-import type { ShapeTool } from '../../../controllers/tools/shape-tool.js';
-
 import {
   DiamondIcon,
   EllipseIcon,
@@ -13,8 +11,10 @@ import {
   ScribbledTriangleIcon,
   SquareIcon,
   TriangleIcon,
-} from '../../../../../_common/icons/index.js';
-import { ShapeType } from '../../../../../surface-block/index.js';
+} from '@blocksuite/affine-components/icons';
+import { ShapeType } from '@blocksuite/affine-model';
+
+import type { ShapeTool } from '../../../controllers/tools/shape-tool.js';
 
 const { Rect, Ellipse, Triangle, Diamond } = ShapeType;
 

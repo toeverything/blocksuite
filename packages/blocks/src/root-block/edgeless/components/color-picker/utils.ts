@@ -1,7 +1,7 @@
 // https://www.w3.org/TR/css-color-4/
 
-import type { ColorScheme } from '../../../../_common/theme/theme-observer.js';
-import type { Color } from '../../../../surface-block/consts.js';
+import type { Color, ColorScheme } from '@blocksuite/affine-model';
+
 import type {
   Hsv,
   Hsva,

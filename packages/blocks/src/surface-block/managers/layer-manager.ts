@@ -1,17 +1,16 @@
+import type { GroupElementModel } from '@blocksuite/affine-model';
 import type { Doc } from '@blocksuite/store';
 import type { BlockModel } from '@blocksuite/store';
 
-import { Bound } from '@blocksuite/global/utils';
+import { FrameBlockModel } from '@blocksuite/affine-model';
+import { matchFlavours } from '@blocksuite/affine-shared/utils';
+import { GfxBlockElementModel } from '@blocksuite/block-std/gfx';
+import { Bound, last, nToLast } from '@blocksuite/global/utils';
 import { DisposableGroup, Slot, assertType } from '@blocksuite/global/utils';
 import { generateKeyBetween } from 'fractional-indexing';
 
-import type { GroupElementModel } from '../element-model/group.js';
 import type { SurfaceBlockModel } from '../surface-model.js';
 
-import { last, nToLast } from '../../_common/utils/iterable.js';
-import { matchFlavours } from '../../_common/utils/model.js';
-import { FrameBlockModel } from '../../frame-block/frame-model.js';
-import { GfxBlockModel } from '../../root-block/edgeless/block-model.js';
 import {
   SurfaceElementModel,
   SurfaceGroupLikeModel,
@@ -43,7 +42,7 @@ type BaseLayer<T> = {
   indexes: [string, string];
 };
 
-export type BlockLayer = BaseLayer<GfxBlockModel> & {
+export type BlockLayer = BaseLayer<GfxBlockElementModel> & {
   type: 'block';
 
   /**
@@ -74,9 +73,9 @@ export class LayerManager {
 
   static INITAL_INDEX = 'a0';
 
-  blocks: GfxBlockModel[] = [];
+  blocks: GfxBlockElementModel[] = [];
 
-  blocksGrid = new GridManager<GfxBlockModel>();
+  blocksGrid = new GridManager<GfxBlockElementModel>();
 
   canvasElements: SurfaceElementModel[] = [];
 
@@ -487,10 +486,10 @@ export class LayerManager {
         .getBlocks()
         .filter(
           model =>
-            model instanceof GfxBlockModel &&
+            model instanceof GfxBlockElementModel &&
             renderableInEdgeless(this._doc, this._surface, model)
         ) as BlockSuite.EdgelessModel[]
-    ).concat(this._surface.elementModels);
+    ).concat(this._surface?.elementModels ?? []);
 
     this.canvasElements = [];
     this.blocks = [];
@@ -556,7 +555,7 @@ export class LayerManager {
     } else {
       updateType = 'block';
       updateArray(this.blocks, element);
-      this.blocksGrid.update(element as GfxBlockModel);
+      this.blocksGrid.update(element as GfxBlockElementModel);
     }
 
     if (updateType && (indexChanged || childIdsChanged)) {
@@ -575,11 +574,11 @@ export class LayerManager {
           const block = doc.getBlockById(payload.id)!;
 
           if (
-            block instanceof GfxBlockModel &&
+            block instanceof GfxBlockElementModel &&
             renderableInEdgeless(doc, surface, block) &&
             this.blocks.indexOf(block) === -1
           ) {
-            this.add(block as GfxBlockModel);
+            this.add(block as GfxBlockElementModel);
           }
         }
         if (payload.type === 'update') {
@@ -588,10 +587,10 @@ export class LayerManager {
           if (
             payload.props.key === 'index' ||
             (payload.props.key === 'xywh' &&
-              block instanceof GfxBlockModel &&
+              block instanceof GfxBlockElementModel &&
               renderableInEdgeless(doc, surface, block))
           ) {
-            this.update(block as GfxBlockModel, {
+            this.update(block as GfxBlockElementModel, {
               [payload.props.key]: true,
             });
           }
@@ -599,8 +598,8 @@ export class LayerManager {
         if (payload.type === 'delete') {
           const block = doc.getBlockById(payload.id);
 
-          if (block instanceof GfxBlockModel) {
-            this.delete(block as GfxBlockModel);
+          if (block instanceof GfxBlockElementModel) {
+            this.delete(block as GfxBlockElementModel);
           }
         }
       })
@@ -651,7 +650,7 @@ export class LayerManager {
     } else {
       insertType = 'block';
       insertToOrderedArray(this.blocks, element);
-      this.blocksGrid.add(element as GfxBlockModel);
+      this.blocksGrid.add(element as GfxBlockElementModel);
     }
 
     if (insertType) {

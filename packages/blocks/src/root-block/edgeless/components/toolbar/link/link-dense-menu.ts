@@ -1,13 +1,13 @@
-import type { DenseMenuBuilder } from '../common/type.js';
+import { LinkIcon } from '@blocksuite/affine-components/icons';
 
-import { LinkIcon } from '../../../../../_common/icons/text.js';
+import type { DenseMenuBuilder } from '../common/type.js';
 
 export const buildLinkDenseMenu: DenseMenuBuilder = edgeless => ({
   type: 'action',
   name: 'Link',
   icon: LinkIcon,
   select: () => {
-    const { insertedLinkType } = edgeless.service.std.command.exec(
+    const { insertedLinkType } = edgeless.std.command.exec(
       'insertLinkByQuickSearch'
     );
 
@@ -18,14 +18,14 @@ export const buildLinkDenseMenu: DenseMenuBuilder = edgeless => ({
             control: 'toolbar:general',
             page: 'whiteboard editor',
             module: 'toolbar',
-            type: type.flavour.split(':')[1],
+            type: type.flavour?.split(':')[1],
           });
           if (type.isNewDoc) {
             edgeless.service.telemetryService?.track('DocCreated', {
               control: 'toolbar:general',
               page: 'whiteboard editor',
               module: 'edgeless toolbar',
-              type: type.flavour.split(':')[1],
+              type: type.flavour?.split(':')[1],
             });
           }
         }

@@ -1,15 +1,14 @@
+import type { Color, ShapeElementModel } from '@blocksuite/affine-model';
 import type { Bound } from '@blocksuite/global/utils';
 
+import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import { BlockComponent } from '@blocksuite/block-std';
 import { html } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 
-import type { Color } from '../consts.js';
-import type { ShapeElementModel } from '../element-model/shape.js';
 import type { SurfaceBlockModel } from '../surface-model.js';
 import type { MindmapService } from './service.js';
 
-import { ThemeObserver } from '../../_common/theme/theme-observer.js';
 import { Viewport } from '../../root-block/edgeless/utils/viewport.js';
 import { fitContent } from '../canvas-renderer/element-renderer/shape/utils.js';
 import { Renderer } from '../canvas-renderer/renderer.js';
@@ -17,31 +16,15 @@ import { LayerManager } from '../managers/layer-manager.js';
 
 @customElement('mini-mindmap-surface-block')
 export class MindmapSurfaceBlock extends BlockComponent<SurfaceBlockModel> {
-  private _layer: LayerManager;
+  private _layer?: LayerManager;
 
-  private _renderer: Renderer;
+  private _renderer?: Renderer;
 
   private _viewport: Viewport;
 
   constructor() {
     super();
-    this._layer = LayerManager.create(this.doc, this.model);
     this._viewport = new Viewport();
-    this._renderer = new Renderer({
-      viewport: this._viewport,
-      layerManager: this._layer,
-      enableStackingCanvas: true,
-      provider: {
-        selectedElements: () => [],
-        getColorScheme: () => ThemeObserver.mode,
-        getColorValue: (color: Color, fallback?: string, real?: boolean) =>
-          ThemeObserver.getColorValue(color, fallback, real),
-        generateColorProperty: (color: Color, fallback: string) =>
-          ThemeObserver.generateColorProperty(color, fallback),
-        getPropertyValue: (property: string) =>
-          ThemeObserver.getPropertyValue(property),
-      },
-    });
   }
 
   private _adjustNodeWidth() {
@@ -88,7 +71,7 @@ export class MindmapSurfaceBlock extends BlockComponent<SurfaceBlockModel> {
   private _setupRenderer() {
     this._disposables.add(
       this.model.elementUpdated.on(() => {
-        this._renderer.refresh();
+        this._renderer?.refresh();
         this.mindmapService.center();
       })
     );
@@ -96,8 +79,30 @@ export class MindmapSurfaceBlock extends BlockComponent<SurfaceBlockModel> {
     this._viewport.ZOOM_MIN = 0.01;
   }
 
+  override connectedCallback(): void {
+    super.connectedCallback();
+
+    this._layer = LayerManager.create(this.doc, this.model);
+    this._viewport = new Viewport();
+    this._renderer = new Renderer({
+      viewport: this._viewport,
+      layerManager: this._layer,
+      enableStackingCanvas: true,
+      provider: {
+        selectedElements: () => [],
+        getColorScheme: () => ThemeObserver.mode,
+        getColorValue: (color: Color, fallback?: string, real?: boolean) =>
+          ThemeObserver.getColorValue(color, fallback, real),
+        generateColorProperty: (color: Color, fallback: string) =>
+          ThemeObserver.generateColorProperty(color, fallback),
+        getPropertyValue: (property: string) =>
+          ThemeObserver.getPropertyValue(property),
+      },
+    });
+  }
+
   override firstUpdated(_changedProperties: Map<PropertyKey, unknown>): void {
-    this._renderer.attach(this.editorContainer);
+    this._renderer?.attach(this.editorContainer);
     this._viewport.setContainer(this.editorContainer);
 
     this._resizeEffect();

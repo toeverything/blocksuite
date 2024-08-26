@@ -1,10 +1,15 @@
+import {
+  type BrushProps,
+  type ColorScheme,
+  LINE_COLORS,
+  LineWidth,
+} from '@blocksuite/affine-model';
 import { WithDisposable } from '@blocksuite/block-std';
+import { countBy, maxBy } from '@blocksuite/global/utils';
 import { LitElement, html, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { when } from 'lit/directives/when.js';
 
-import type { ColorScheme } from '../../../_common/theme/theme-observer.js';
-import type { BrushProps } from '../../../surface-block/element-model/brush.js';
 import type { BrushElementModel } from '../../../surface-block/index.js';
 import type { EdgelessColorPickerButton } from '../../edgeless/components/color-picker/button.js';
 import type { PickColorEvent } from '../../edgeless/components/color-picker/types.js';
@@ -12,20 +17,12 @@ import type { ColorEvent } from '../../edgeless/components/panel/color-panel.js'
 import type { LineWidthEvent } from '../../edgeless/components/panel/line-width-panel.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 
-import '../../../_common/components/toolbar/icon-button.js';
-import '../../../_common/components/toolbar/menu-button.js';
-import '../../../_common/components/toolbar/separator.js';
-import { LineWidth } from '../../../_common/types.js';
-import { countBy, maxBy } from '../../../_common/utils/iterable.js';
 import {
   packColor,
   packColorsWithColorScheme,
 } from '../../edgeless/components/color-picker/utils.js';
 import '../../edgeless/components/panel/color-panel.js';
-import {
-  GET_DEFAULT_LINE_COLOR,
-  LINE_COLORS,
-} from '../../edgeless/components/panel/color-panel.js';
+import { GET_DEFAULT_LINE_COLOR } from '../../edgeless/components/panel/color-panel.js';
 import '../../edgeless/components/panel/line-width-panel.js';
 
 function getMostCommonColor(

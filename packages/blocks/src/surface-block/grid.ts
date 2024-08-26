@@ -1,14 +1,14 @@
 import type { IBound } from '@blocksuite/global/utils';
 
-import { Bound } from '@blocksuite/global/utils';
-
-import { GRID_SIZE } from './consts.js';
-import { compare } from './managers/layer-utils.js';
 import {
+  Bound,
   getBoundsWithRotation,
   intersects,
   isPointIn,
-} from './utils/math-utils.js';
+} from '@blocksuite/global/utils';
+
+import { GRID_SIZE } from './consts.js';
+import { compare } from './managers/layer-utils.js';
 
 function getGridIndex(val: number) {
   return Math.ceil(val / GRID_SIZE) - 1;

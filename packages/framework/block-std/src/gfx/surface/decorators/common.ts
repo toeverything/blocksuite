@@ -48,6 +48,6 @@ export function createDecoratorState() {
   return {
     creating: false,
     deriving: false,
-    skipYfield: false,
+    skipField: false,
   };
 }

@@ -1,22 +1,26 @@
 import type { BlockSpec } from '@blocksuite/block-std';
 
+import { EmbedLinkedDocBlockSchema } from '@blocksuite/affine-model';
 import { literal } from 'lit/static-html.js';
 
-import type { EmbedLinkedDocBlockConfig } from './embed-linked-doc-block.js';
+import type { EmbedLinkedDocBlockConfig } from './embed-linked-doc-config.js';
 
-import { EmbedLinkedDocBlockSchema } from './embed-linked-doc-schema.js';
-import { EmbedLinkedDocBlockService } from './embed-linked-doc-service.js';
+import { commands } from './commands/index.js';
+import './embed-edgeless-linked-doc-block.js';
 
 export type EmbedLinkedDocBlockSpecType = BlockSpec<
   string,
-  EmbedLinkedDocBlockService,
   EmbedLinkedDocBlockConfig
 >;
 
 export const EmbedLinkedDocBlockSpec: EmbedLinkedDocBlockSpecType = {
   schema: EmbedLinkedDocBlockSchema,
   view: {
-    component: literal`affine-embed-linked-doc-block`,
+    component: model => {
+      return model.parent?.flavour === 'affine:surface'
+        ? literal`affine-embed-edgeless-linked-doc-block`
+        : literal`affine-embed-linked-doc-block`;
+    },
   },
-  service: EmbedLinkedDocBlockService,
+  commands,
 };

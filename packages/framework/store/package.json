@@ -1,6 +1,6 @@
 {
   "name": "@blocksuite/store",
-  "version": "0.15.0",
+  "version": "0.16.0",
   "description": "BlockSuite data store built for general purpose state management.",
   "type": "module",
   "repository": "toeverything/blocksuite",
@@ -18,11 +18,11 @@
     "@blocksuite/global": "workspace:*",
     "@blocksuite/inline": "workspace:*",
     "@blocksuite/sync": "workspace:*",
-    "@preact/signals-core": "^1.7.0",
+    "@preact/signals-core": "^1.8.0",
     "@types/flexsearch": "^0.7.6",
     "@types/lodash.ismatch": "^4.4.9",
     "flexsearch": "0.7.43",
-    "lib0": "^0.2.95",
+    "lib0": "^0.2.97",
     "lodash.ismatch": "^4.4.0",
     "merge": "^2.1.1",
     "minimatch": "^10.0.1",
@@ -31,7 +31,7 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
-    "lit": "^3.1.4",
+    "lit": "^3.2.0",
     "yjs": "^13.6.18"
   },
   "peerDependencies": {

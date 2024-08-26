@@ -402,6 +402,7 @@ export class TableSelectionController implements ReactiveController {
             `affine-data-view-table-group[data-group-key="${groupKey}"]`
           )
         : this.tableContainer;
+    assertExists(container);
     return container;
   }
 
@@ -585,6 +586,7 @@ export class TableSelectionController implements ReactiveController {
     let minIndex: number | undefined = undefined;
     let maxIndex: number | undefined = undefined;
     const set = new Set(rows);
+    if (!this.tableContainer) return;
     for (const row of this.tableContainer
       ?.querySelectorAll('data-view-table-row')
       .values() ?? []) {
@@ -796,6 +798,7 @@ export class TableSelectionController implements ReactiveController {
         return undefined;
       },
       onMove: ({ x, y }) => {
+        if (!table) return;
         const tableRect = table.getBoundingClientRect();
         const startX = tableRect.left + startOffsetX;
         const startY = tableRect.top + startOffsetY;
@@ -948,7 +951,7 @@ class SelectionElement extends WithDisposable(ShadowlessElement) {
       height: 1px;
     }
     @media print {
-      affine-database-selection {
+      data-view-table-selection {
         display: none;
       }
     }
@@ -1036,9 +1039,9 @@ class SelectionElement extends WithDisposable(ShadowlessElement) {
   ) {
     const div = this.selectionRef.value;
     if (!div) return;
-    const tableRect = this.controller.tableContainer?.getBoundingClientRect();
-    if (!tableRect) return;
-    // eslint-disable-next-line prefer-const
+    const tableContainer = this.controller.tableContainer;
+    if (!tableContainer) return;
+    const tableRect = tableContainer.getBoundingClientRect();
     const rect = this.controller.getRect(
       groupKey,
       rowSelection?.start ?? 0,
@@ -1084,7 +1087,9 @@ class SelectionElement extends WithDisposable(ShadowlessElement) {
       return;
     }
     const { left, top, width, height, scale } = rect;
-    const tableRect = this.controller.tableContainer?.getBoundingClientRect();
+    const tableContainer = this.controller.tableContainer;
+    if (!tableContainer) return;
+    const tableRect = tableContainer?.getBoundingClientRect();
     if (!tableRect) {
       this.clearFocusStyle();
       return;

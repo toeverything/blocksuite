@@ -1,11 +1,12 @@
 import type { UIEventStateContext } from '@blocksuite/block-std';
 import type { ReactiveController } from 'lit';
 
+import { toast } from '@blocksuite/affine-components/toast';
+
 import type { Cell } from '../../../../view-manager/cell.js';
 import type { Row } from '../../../../view-manager/row.js';
 import type { DataViewTable } from '../table-view.js';
 
-import { toast } from '../../../../../../_common/components/index.js';
 import {
   TableAreaSelection,
   TableRowSelection,

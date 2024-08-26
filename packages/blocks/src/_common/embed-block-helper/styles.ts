@@ -10,4 +10,10 @@ export const styles = css`
   .embed-block-container.selected.dark {
     box-shadow: 0px 0px 0px 1px var(--affine-brand-color);
   }
+  @media print {
+    .embed-block-container.selected.light,
+    .embed-block-container.selected.dark {
+      box-shadow: none;
+    }
+  }
 `;

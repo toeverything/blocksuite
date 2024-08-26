@@ -1,5 +1,10 @@
-import type { EditorHost } from '@blocksuite/block-std';
+import type {
+  EmbedLinkedDocModel,
+  EmbedLinkedDocStyles,
+} from '@blocksuite/affine-model';
 
+import { Peekable, isPeekable } from '@blocksuite/affine-components/peek';
+import { REFERENCE_NODE } from '@blocksuite/affine-components/rich-text';
 import { Bound } from '@blocksuite/global/utils';
 import { assertExists } from '@blocksuite/global/utils';
 import { DocCollection } from '@blocksuite/store';
@@ -11,25 +16,15 @@ import type { DocMode } from '../_common/types.js';
 import type { RootBlockComponent } from '../root-block/index.js';
 import type { SurfaceRefBlockService } from '../surface-ref-block/index.js';
 import type { SurfaceRefRenderer } from '../surface-ref-block/surface-ref-renderer.js';
-import type {
-  EmbedLinkedDocModel,
-  EmbedLinkedDocStyles,
-} from './embed-linked-doc-model.js';
+import type { EmbedLinkedDocBlockConfig } from './embed-linked-doc-config.js';
 import type { EmbedLinkedDocBlockService } from './embed-linked-doc-service.js';
 
-import { Peekable, isPeekable } from '../_common/components/peekable.js';
 import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../_common/consts.js';
 import { EmbedBlockComponent } from '../_common/embed-block-helper/index.js';
-import { REFERENCE_NODE } from '../_common/inline/presets/nodes/consts.js';
 import { renderLinkedDocInCard } from '../_common/utils/render-linked-doc.js';
 import { SyncedDocErrorIcon } from '../embed-synced-doc-block/styles.js';
 import { styles } from './styles.js';
 import { getEmbedLinkedDocIcons } from './utils.js';
-
-export interface EmbedLinkedDocBlockConfig {
-  handleClick?: (e: MouseEvent, host: EditorHost) => void;
-  handleDoubleClick?: (e: MouseEvent, host: EditorHost) => void;
-}
 
 @customElement('affine-embed-linked-doc-block')
 @Peekable({
@@ -110,7 +105,7 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockComponent<
   };
 
   convertToEmbed = () => {
-    const { id, doc, pageId, caption, xywh } = this.model;
+    const { doc, pageId, caption } = this.model;
 
     // synced doc entry controlled by awareness flag
     const isSyncedDocEnabled = doc.awarenessStore.getFlag(
@@ -120,47 +115,13 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockComponent<
       return;
     }
 
-    if (this.isInSurface) {
-      const style = 'syncedDoc';
-      const bound = Bound.deserialize(xywh);
-      bound.w = EMBED_CARD_WIDTH[style];
-      bound.h = EMBED_CARD_HEIGHT[style];
+    const parent = doc.getParent(this.model);
+    assertExists(parent);
+    const index = parent.children.indexOf(this.model);
 
-      const edgelessService = this.rootService;
+    doc.addBlock('affine:embed-synced-doc', { pageId, caption }, parent, index);
 
-      if (!edgelessService) {
-        return;
-      }
-
-      const newId = edgelessService.addBlock(
-        'affine:embed-synced-doc',
-        { pageId, xywh: bound.serialize(), caption },
-        edgelessService.surface
-      );
-
-      this.std.command.exec('reassociateConnectors', {
-        oldId: id,
-        newId,
-      });
-
-      edgelessService.selection.set({
-        editing: false,
-        elements: [newId],
-      });
-    } else {
-      const parent = doc.getParent(this.model);
-      assertExists(parent);
-      const index = parent.children.indexOf(this.model);
-
-      doc.addBlock(
-        'affine:embed-synced-doc',
-        { pageId, caption },
-        parent,
-        index
-      );
-
-      this.std.selection.setGroup('note', []);
-    }
+    this.std.selection.setGroup('note', []);
     doc.deleteBlock(this.model);
   };
 
@@ -208,13 +169,12 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockComponent<
     });
   };
 
-  private _handleClick(event: MouseEvent) {
+  protected _handleClick(event: MouseEvent) {
     if (this.config.handleClick) {
       this.config.handleClick(event, this.host);
       return;
     }
 
-    if (this.isInSurface) return;
     this._selectBlock();
   }
 
@@ -305,14 +265,6 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockComponent<
         });
       }
     });
-
-    if (this.isInSurface) {
-      this.disposables.add(
-        this.model.propsUpdated.on(() => {
-          this.requestUpdate();
-        })
-      );
-    }
   }
 
   override disconnectedCallback() {

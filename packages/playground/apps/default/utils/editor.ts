@@ -43,17 +43,13 @@ export async function mountDefaultDocEditor(collection: DocCollection) {
   const specs = getExampleSpecs();
   editor.pageSpecs = [...specs.pageModeSpecs].map(spec => {
     if (spec.schema.model.flavour === 'affine:page') {
-      spec = patchPageRootSpec(
-        spec as BlockSpec<'affine:page', PageRootService>
-      );
+      spec = patchPageRootSpec(spec);
     }
     return spec;
   });
   editor.edgelessSpecs = [...specs.edgelessModeSpecs].map(spec => {
     if (spec.schema.model.flavour === 'affine:page') {
-      spec = patchPageRootSpec(
-        spec as BlockSpec<'affine:page', PageRootService>
-      );
+      spec = patchPageRootSpec(spec);
     }
     return spec;
   });
@@ -104,7 +100,7 @@ export async function mountDefaultDocEditor(collection: DocCollection) {
 
   return editor;
 
-  function patchPageRootSpec(spec: BlockSpec<'affine:page', PageRootService>) {
+  function patchPageRootSpec(spec: BlockSpec) {
     const setup = spec.setup;
     const newSpec: typeof spec = {
       ...spec,

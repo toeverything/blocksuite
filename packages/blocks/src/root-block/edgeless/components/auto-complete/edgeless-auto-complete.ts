@@ -1,35 +1,37 @@
+import type {
+  Color,
+  Connection,
+  ConnectorElementModel,
+  NoteBlockModel,
+  ShapeType,
+} from '@blocksuite/affine-model';
 import type { Bound, IVec } from '@blocksuite/global/utils';
-
-import { WithDisposable } from '@blocksuite/block-std';
-import { Vec } from '@blocksuite/global/utils';
-import { DisposableGroup, assertExists } from '@blocksuite/global/utils';
-import { LitElement, css, html, nothing } from 'lit';
-import { customElement, property, state } from 'lit/decorators.js';
-import { classMap } from 'lit/directives/class-map.js';
-import { styleMap } from 'lit/directives/style-map.js';
-
-import type { NoteBlockModel } from '../../../../note-block/index.js';
-import type { Color } from '../../../../surface-block/consts.js';
-import type { ConnectorElementModel } from '../../../../surface-block/element-model/connector.js';
-import type { ShapeType } from '../../../../surface-block/element-model/shape.js';
-import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
-import type { SelectedRect } from '../rects/edgeless-selected-rect.js';
 
 import {
   AutoCompleteArrowIcon,
   MindMapChildIcon,
   MindMapSiblingIcon,
   NoteAutoCompleteIcon,
-} from '../../../../_common/icons/index.js';
-import { handleNativeRangeAtPoint } from '../../../../_common/utils/index.js';
+} from '@blocksuite/affine-components/icons';
 import {
-  type Connection,
   ConnectorMode,
-} from '../../../../surface-block/element-model/connector.js';
+  DEFAULT_CONNECTOR_COLOR,
+  DEFAULT_SHAPE_STROKE_COLOR,
+  shapeMethods,
+} from '@blocksuite/affine-model';
+import { handleNativeRangeAtPoint } from '@blocksuite/affine-shared/utils';
+import { WithDisposable } from '@blocksuite/block-std';
+import { DisposableGroup, Vec, assertExists } from '@blocksuite/global/utils';
+import { LitElement, css, html, nothing } from 'lit';
+import { customElement, property, state } from 'lit/decorators.js';
+import { classMap } from 'lit/directives/class-map.js';
+import { styleMap } from 'lit/directives/style-map.js';
+
+import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
+import type { SelectedRect } from '../rects/edgeless-selected-rect.js';
+
 import { MindmapElementModel } from '../../../../surface-block/element-model/mindmap.js';
-import { shapeMethods } from '../../../../surface-block/element-model/shape.js';
 import { LayoutType } from '../../../../surface-block/element-model/utils/mindmap/layout.js';
-import { DEFAULT_SHAPE_STROKE_COLOR } from '../../../../surface-block/elements/shape/consts.js';
 import { ShapeElementModel } from '../../../../surface-block/index.js';
 import {
   CanvasElementType,
@@ -40,7 +42,6 @@ import { ConnectorPathGenerator } from '../../../../surface-block/managers/conne
 import { NOTE_INIT_HEIGHT } from '../../utils/consts.js';
 import { isNoteBlock } from '../../utils/query.js';
 import { mountShapeTextEditor } from '../../utils/text.js';
-import { DEFAULT_CONNECTOR_COLOR } from '../panel/color-panel.js';
 import './auto-complete-panel.js';
 import { EdgelessAutoCompletePanel } from './auto-complete-panel.js';
 import {
@@ -233,6 +234,19 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
         let tag = current.background.split('-').pop();
         if (!tag || tag === 'gray') tag = 'grey';
         stroke = `--affine-palette-line-${tag}`;
+      }
+    }
+
+    // needs to drop `alpha` value
+    if (typeof stroke === 'object') {
+      if (stroke.normal?.endsWith('00')) {
+        stroke.normal = stroke.normal.substring(0, 7);
+      }
+      if (stroke.light?.endsWith('00')) {
+        stroke.light = stroke.light.substring(0, 7);
+      }
+      if (stroke.dark?.endsWith('00')) {
+        stroke.dark = stroke.dark.substring(0, 7);
       }
     }
 

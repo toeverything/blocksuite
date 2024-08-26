@@ -1,11 +1,11 @@
-import { css, html } from 'lit';
-import { customElement, query } from 'lit/decorators.js';
-
 import {
   checkboxChecked,
   checkboxUnchecked,
   playCheckAnimation,
-} from '../../../../../list-block/utils/icons.js';
+} from '@blocksuite/affine-components/icons';
+import { css, html } from 'lit';
+import { customElement, query } from 'lit/decorators.js';
+
 import { createIcon } from '../../../utils/uni-icon.js';
 import { BaseCellRenderer } from '../../base-cell.js';
 import { createFromBaseCellRenderer } from '../../renderer.js';

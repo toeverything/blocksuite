@@ -12,7 +12,7 @@ import { assertExists } from '@blocksuite/global/utils';
 import { moveBlockConfigs } from '../_common/configs/move-block.js';
 import { quickActionConfig } from '../_common/configs/quick-action/config.js';
 import { textConversionConfigs } from '../_common/configs/text-conversion.js';
-import { buildPath, matchFlavours } from '../_common/utils/index.js';
+import { matchFlavours } from '../_common/utils/index.js';
 import { onModelElementUpdated } from '../root-block/utils/callback.js';
 import { ensureBlockInContainer } from './utils.js';
 
@@ -66,20 +66,16 @@ export class KeymapController implements ReactiveController {
               .inline((ctx, next) => {
                 const newModels = ctx.updatedBlocks;
                 const host = ctx.std.host;
-                assertExists(newModels);
-                assertExists(host);
+                if (!host || !newModels) {
+                  return;
+                }
 
                 if (item.flavour !== 'affine:code') {
                   return;
                 }
 
                 const [codeModel] = newModels;
-                onModelElementUpdated(host, codeModel, () => {
-                  const codeElement = this._std.view.viewFromPath(
-                    'block',
-                    buildPath(codeModel)
-                  );
-                  assertExists(codeElement);
+                onModelElementUpdated(host, codeModel, codeElement => {
                   this._std.selection.setGroup('note', [
                     this._std.selection.create('text', {
                       from: {
@@ -434,12 +430,12 @@ export class KeymapController implements ReactiveController {
   };
 
   private _onSelectAll: UIEventHandler = ctx => {
-    ctx.get('defaultState').event.preventDefault();
     const selection = this._std.selection;
     // eslint-disable-next-line unicorn/prefer-array-some
     if (!selection.find('block')) {
       return;
     }
+    ctx.get('defaultState').event.preventDefault();
     const children = this.host.model.children;
     const blocks: BlockSelection[] = children.map(child => {
       return selection.create('block', {
@@ -485,7 +481,7 @@ export class KeymapController implements ReactiveController {
   bind = () => {
     this.host.handleEvent('keyDown', ctx => {
       const state = ctx.get('keyboardState');
-      if (state.raw.key === 'Shift') {
+      if (['Control', 'Meta', 'Shift'].includes(state.raw.key)) {
         return;
       }
       this._reset();

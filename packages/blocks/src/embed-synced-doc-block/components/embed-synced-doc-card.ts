@@ -1,4 +1,8 @@
-import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
+import {
+  ShadowlessElement,
+  WithDisposable,
+  isGfxBlockComponent,
+} from '@blocksuite/block-std';
 import { html, nothing } from 'lit';
 import { customElement, property, queryAsync } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
@@ -25,7 +29,7 @@ export class EmbedSyncedDocCard extends WithDisposable(ShadowlessElement) {
 
   private _handleClick(event: MouseEvent) {
     event.stopPropagation();
-    if (!this.block.isInSurface) {
+    if (!isGfxBlockComponent(this.block)) {
       this._selectBlock();
     }
   }
@@ -118,7 +122,7 @@ export class EmbedSyncedDocCard extends WithDisposable(ShadowlessElement) {
       error,
       deleted: isDeleted,
       cycle: isCycle,
-      surface: this.block.isInSurface,
+      surface: isGfxBlockComponent(this.block),
       empty: isEmpty,
       'banner-empty': this.isBannerEmpty,
       'note-empty': this.isNoteContentEmpty,

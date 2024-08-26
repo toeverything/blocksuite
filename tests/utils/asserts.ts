@@ -16,7 +16,8 @@ import type { Locator } from '@playwright/test';
 import type { BlockModel } from '@store/index.js';
 import type { JSXElement } from '@store/utils/jsx.js';
 
-import { BLOCK_ID_ATTR, NOTE_WIDTH } from '@blocks/_common/consts.js';
+import { BLOCK_ID_ATTR } from '@blocks/_common/consts.js';
+import { NOTE_WIDTH } from '@blocksuite/affine-model';
 import { assertExists } from '@global/utils/index.js';
 import { type Page, expect } from '@playwright/test';
 import { COLLECTION_VERSION, PAGE_VERSION } from '@store/consts.js';
@@ -466,7 +467,10 @@ export async function assertParentBlockId(
 ) {
   const actual = await page.evaluate(
     ({ blockId }) => {
-      const model = window.doc?.getBlock(blockId).model;
+      const model = window.doc?.getBlock(blockId)?.model;
+      if (!model) {
+        throw new Error(`Block with id ${blockId} not found`);
+      }
       return model.doc.getParent(model)?.id;
     },
     { blockId }
@@ -481,7 +485,10 @@ export async function assertParentBlockFlavour(
 ) {
   const actual = await page.evaluate(
     ({ blockId }) => {
-      const model = window.doc?.getBlock(blockId).model;
+      const model = window.doc?.getBlock(blockId)?.model;
+      if (!model) {
+        throw new Error(`Block with id ${blockId} not found`);
+      }
       return model.doc.getParent(model)?.flavour;
     },
     { blockId }
@@ -900,6 +907,27 @@ export async function assertEdgelessSelectedRect(page: Page, xywh: number[]) {
   await page.waitForTimeout(50);
   const box = await selectedRect.boundingBox();
   if (!box) throw new Error('Missing edgeless selected rect');
+
+  expect(box.x).toBeCloseTo(x, 0);
+  expect(box.y).toBeCloseTo(y, 0);
+  expect(box.width).toBeCloseTo(w, 0);
+  expect(box.height).toBeCloseTo(h, 0);
+}
+
+export async function assertEdgelessRemoteSelectedRect(
+  page: Page,
+  xywh: number[],
+  index = 0
+) {
+  const [x, y, w, h] = xywh;
+  const editor = getEditorLocator(page);
+  const remoteSelectedRect = editor
+    .locator('affine-edgeless-remote-selection-widget')
+    .locator('.remote-rect')
+    .nth(index);
+
+  const box = await remoteSelectedRect.boundingBox();
+  if (!box) throw new Error('Missing edgeless remote selected rect');
 
   expect(box.x).toBeCloseTo(x, 0);
   expect(box.y).toBeCloseTo(y, 0);

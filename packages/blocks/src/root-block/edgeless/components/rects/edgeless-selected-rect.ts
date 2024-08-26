@@ -1,34 +1,41 @@
-import type { IVec, PointLocation } from '@blocksuite/global/utils';
+import type {
+  Disposable,
+  IPoint,
+  IVec,
+  PointLocation,
+} from '@blocksuite/global/utils';
 
-import { WithDisposable } from '@blocksuite/block-std';
-import { deserializeXYWH } from '@blocksuite/global/utils';
-import { Bound } from '@blocksuite/global/utils';
 import {
-  type Disposable,
-  type IPoint,
+  type BookmarkBlockModel,
+  type EdgelessTextBlockModel,
+  type EmbedHtmlModel,
+  type EmbedSyncedDocModel,
+  NoteBlockModel,
+  TextElementModel,
+} from '@blocksuite/affine-model';
+import {
+  clamp,
+  requestThrottledConnectedFrame,
+  stopPropagation,
+} from '@blocksuite/affine-shared/utils';
+import { WithDisposable } from '@blocksuite/block-std';
+import {
+  Bound,
   Slot,
   assertType,
+  deserializeXYWH,
+  pickValues,
 } from '@blocksuite/global/utils';
 import { LitElement, css, html, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { ifDefined } from 'lit/directives/if-defined.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type { BookmarkBlockModel } from '../../../../bookmark-block/bookmark-model.js';
 import type { EdgelessTextBlockComponent } from '../../../../edgeless-text/edgeless-text-block.js';
-import type { EdgelessTextBlockModel } from '../../../../edgeless-text/edgeless-text-model.js';
-import type { EmbedHtmlModel } from '../../../../embed-html-block/embed-html-model.js';
-import type { EmbedSyncedDocModel } from '../../../../embed-synced-doc-block/embed-synced-doc-model.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
 
 import { EMBED_CARD_HEIGHT } from '../../../../_common/consts.js';
 import { isMindmapNode } from '../../../../_common/edgeless/mindmap/index.js';
-import {
-  requestThrottledConnectedFrame,
-  stopPropagation,
-} from '../../../../_common/utils/event.js';
-import { pickValues } from '../../../../_common/utils/iterable.js';
-import { clamp } from '../../../../_common/utils/math.js';
 import { EDGELESS_TEXT_BLOCK_MIN_WIDTH } from '../../../../edgeless-text/edgeless-text-block.js';
 import {
   EMBED_HTML_MIN_HEIGHT,
@@ -38,9 +45,7 @@ import {
   SYNCED_MIN_HEIGHT,
   SYNCED_MIN_WIDTH,
 } from '../../../../embed-synced-doc-block/styles.js';
-import { NoteBlockModel } from '../../../../note-block/note-model.js';
 import { normalizeTextBound } from '../../../../surface-block/canvas-renderer/element-renderer/text/utils.js';
-import { TextElementModel } from '../../../../surface-block/element-model/text.js';
 import {
   CanvasElementType,
   GroupElementModel,
@@ -481,7 +486,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       top,
       rotate,
       borderStyle: 'solid',
-      borderWidth: selection.editing ? 2 : 1,
+      borderWidth: 2,
     };
   }, this);
 
@@ -509,7 +514,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       box-sizing: border-box;
       z-index: 1;
       border-color: var(--affine-blue);
-      border-width: var(--affine-border-width);
+      border-width: 2px;
       border-style: solid;
       transform: translate(0, 0) rotate(0);
     }

@@ -5,13 +5,13 @@ import type {
   SliceSnapshot,
 } from '@blocksuite/store';
 
+import { NoteDisplayMode } from '@blocksuite/affine-model';
 import { AssetsManager, MemoryBlobCRUD } from '@blocksuite/store';
 import { describe, expect, test } from 'vitest';
 
 import { MarkdownAdapter } from '../../_common/adapters/markdown.js';
 import { nanoidReplacement } from '../../_common/test-utils/test-utils.js';
 import { embedSyncedDocMiddleware } from '../../_common/transformers/middlewares.js';
-import { NoteDisplayMode } from '../../_common/types.js';
 import { createJob } from '../utils/create-job.js';
 
 describe('snapshot to markdown', () => {

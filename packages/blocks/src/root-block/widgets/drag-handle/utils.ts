@@ -1,31 +1,30 @@
+import type { ParagraphBlockModel } from '@blocksuite/affine-model';
+import type { EmbedCardStyle } from '@blocksuite/affine-model';
 import type { BlockComponent, EditorHost } from '@blocksuite/block-std';
 import type { BlockModel } from '@blocksuite/store';
 
+import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '@blocksuite/affine-shared/consts';
+import {
+  findClosestBlockComponent,
+  getBlockProps,
+  getClosestBlockComponentByElement,
+  getClosestBlockComponentByPoint,
+  isInsidePageEditor,
+  matchFlavours,
+} from '@blocksuite/affine-shared/utils';
 import {
   type BaseSelection,
   PathFinder,
   type PointerEventState,
 } from '@blocksuite/block-std';
-import { Point } from '@blocksuite/global/utils';
-import { Bound } from '@blocksuite/global/utils';
-import { assertExists } from '@blocksuite/global/utils';
+import { Bound, Point, Rect, assertExists } from '@blocksuite/global/utils';
 
-import type { ParagraphBlockModel } from '../../../paragraph-block/index.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 
-import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '../../../_common/consts.js';
-import { getBlockProps } from '../../../_common/utils/block-props.js';
 import {
-  type EmbedCardStyle,
-  Rect,
-  findClosestBlockComponent,
-  getClosestBlockComponentByElement,
-  getClosestBlockComponentByPoint,
   getDropRectByPoint,
   getHoveringNote,
   getRectByBlockComponent,
-  isInsidePageEditor,
-  matchFlavours,
 } from '../../../_common/utils/index.js';
 import { isEmbedSyncedDocBlock } from '../../edgeless/utils/query.js';
 import {
@@ -94,15 +93,6 @@ export const captureEventTarget = (target: EventTarget | null) => {
       ? target
       : target.parentElement
     : null;
-};
-
-export const getNoteId = (block: BlockComponent) => {
-  let element = block;
-  while (element && element.flavour !== 'affine:note') {
-    element = element.parentBlock;
-  }
-
-  return element.model.id;
 };
 
 export const includeTextSelection = (selections: BaseSelection[]) => {

@@ -1,48 +1,46 @@
-import { WithDisposable } from '@blocksuite/block-std';
-import { Bound } from '@blocksuite/global/utils';
-import { LitElement, type TemplateResult, css, html, nothing } from 'lit';
-import { customElement, property, query } from 'lit/decorators.js';
-import { choose } from 'lit/directives/choose.js';
-import { join } from 'lit/directives/join.js';
-import { when } from 'lit/directives/when.js';
+import type { ColorScheme } from '@blocksuite/affine-model';
 
-import type { ColorScheme } from '../../../_common/theme/theme-observer.js';
-import type {
-  EdgelessColorPickerButton,
-  PickColorEvent,
-} from '../../edgeless/components/color-picker/index.js';
-import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
-
-import '../../../_common/components/toolbar/icon-button.js';
-import '../../../_common/components/toolbar/menu-button.js';
-import '../../../_common/components/toolbar/separator.js';
-import { renderToolbarSeparator } from '../../../_common/components/toolbar/separator.js';
 import {
   SmallArrowDownIcon,
   TextAlignCenterIcon,
   TextAlignLeftIcon,
   TextAlignRightIcon,
-} from '../../../_common/icons/index.js';
-import { countBy, maxBy } from '../../../_common/utils/iterable.js';
-import { EdgelessTextBlockModel } from '../../../edgeless-text/edgeless-text-model.js';
-import {
-  isFontStyleSupported,
-  isFontWeightSupported,
-} from '../../../surface-block/canvas-renderer/element-renderer/text/utils.js';
-import { normalizeTextBound } from '../../../surface-block/canvas-renderer/element-renderer/text/utils.js';
+} from '@blocksuite/affine-components/icons';
+import { renderToolbarSeparator } from '@blocksuite/affine-components/toolbar';
 import {
   FontFamily,
   FontStyle,
   FontWeight,
   TextAlign,
   type TextStyleProps,
-} from '../../../surface-block/consts.js';
-import { isConnectorWithLabel } from '../../../surface-block/element-model/connector.js';
-import { TextElementModel } from '../../../surface-block/element-model/text.js';
+} from '@blocksuite/affine-model';
 import {
   ConnectorElementModel,
-  ShapeElementModel,
-} from '../../../surface-block/index.js';
+  EdgelessTextBlockModel,
+  LINE_COLORS,
+  TextElementModel,
+} from '@blocksuite/affine-model';
+import { WithDisposable } from '@blocksuite/block-std';
+import { Bound, countBy, maxBy } from '@blocksuite/global/utils';
+import { LitElement, type TemplateResult, css, html, nothing } from 'lit';
+import { customElement, property, query } from 'lit/decorators.js';
+import { choose } from 'lit/directives/choose.js';
+import { join } from 'lit/directives/join.js';
+import { when } from 'lit/directives/when.js';
+
+import type {
+  EdgelessColorPickerButton,
+  PickColorEvent,
+} from '../../edgeless/components/color-picker/index.js';
+import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
+
+import {
+  isFontStyleSupported,
+  isFontWeightSupported,
+} from '../../../surface-block/canvas-renderer/element-renderer/text/utils.js';
+import { normalizeTextBound } from '../../../surface-block/canvas-renderer/element-renderer/text/utils.js';
+import { isConnectorWithLabel } from '../../../surface-block/element-model/utils/connector.js';
+import { ShapeElementModel } from '../../../surface-block/index.js';
 import { normalizeShapeBound } from '../../../surface-block/index.js';
 import {
   getFontFacesByFontFamily,
@@ -57,7 +55,6 @@ import '../../edgeless/components/panel/align-panel.js';
 import {
   type ColorEvent,
   GET_DEFAULT_LINE_COLOR,
-  LINE_COLORS,
 } from '../../edgeless/components/panel/color-panel.js';
 import '../../edgeless/components/panel/font-family-panel.js';
 import '../../edgeless/components/panel/font-weight-and-style-panel.js';

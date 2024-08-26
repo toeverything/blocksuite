@@ -1,15 +1,29 @@
+import type { GfxCompatibleProps } from '@blocksuite/affine-model';
 import type {
   BlockStdScope,
   SurfaceSelection,
   UIEventStateContext,
 } from '@blocksuite/block-std';
 import type { EditorHost } from '@blocksuite/block-std';
-import type { IVec } from '@blocksuite/global/utils';
-import type { IBound } from '@blocksuite/global/utils';
+import type { SerializedElement } from '@blocksuite/block-std/gfx';
+import type { IBound, IVec } from '@blocksuite/global/utils';
 
-import { Vec, assertExists } from '@blocksuite/global/utils';
-import { Bound } from '@blocksuite/global/utils';
-import { DisposableGroup } from '@blocksuite/global/utils';
+import { BookmarkStyles } from '@blocksuite/affine-model';
+import {
+  isInsidePageEditor,
+  isUrlInClipboard,
+  matchFlavours,
+} from '@blocksuite/affine-shared/utils';
+import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
+import {
+  Bound,
+  DisposableGroup,
+  Vec,
+  assertExists,
+  getCommonBound,
+  groupBy,
+  nToLast,
+} from '@blocksuite/global/utils';
 import {
   type BlockSnapshot,
   BlockSnapshotSchema,
@@ -20,7 +34,6 @@ import {
 } from '@blocksuite/store';
 import DOMPurify from 'dompurify';
 
-import type { GfxCompatibleProps } from '../../../_common/edgeless/mixin/gfx-compatible.js';
 import type { EdgelessRootBlockComponent } from '../edgeless-root-block.js';
 
 import {
@@ -28,19 +41,8 @@ import {
   EMBED_CARD_HEIGHT,
   EMBED_CARD_WIDTH,
 } from '../../../_common/consts.js';
-import { matchFlavours } from '../../../_common/utils/index.js';
-import { groupBy, nToLast } from '../../../_common/utils/iterable.js';
-import {
-  blockComponentGetter,
-  getRootByEditorHost,
-  isInsidePageEditor,
-} from '../../../_common/utils/query.js';
-import { isUrlInClipboard } from '../../../_common/utils/url.js';
-import { BookmarkStyles } from '../../../bookmark-block/bookmark-model.js';
-import {
-  type SerializedElement,
-  SurfaceGroupLikeModel,
-} from '../../../surface-block/element-model/base.js';
+import { getRootByEditorHost } from '../../../_common/utils/query.js';
+import { SurfaceGroupLikeModel } from '../../../surface-block/element-model/base.js';
 import { CanvasElementType } from '../../../surface-block/element-model/index.js';
 import { splitIntoLines } from '../../../surface-block/elements/text/utils.js';
 import {
@@ -52,7 +54,6 @@ import {
   SortOrder,
   compare,
 } from '../../../surface-block/managers/layer-utils.js';
-import { getCommonBound } from '../../../surface-block/utils/bound.js';
 import { ClipboardAdapter } from '../../clipboard/adapter.js';
 import { PageClipboard } from '../../clipboard/index.js';
 import {
@@ -444,14 +445,18 @@ export class EdgelessClipboardController extends PageClipboard {
 
   private _createCanvasElement(
     clipboardData: Record<string, unknown>,
-    idMap: Map<string, string>
+    oldToNewIdsMap: Map<string, string>
   ) {
     if (clipboardData.type === GROUP) {
       const yMap = new DocCollection.Y.Map();
       const children = clipboardData.children ?? {};
+
       for (const [key, value] of Object.entries(children)) {
-        const newKey = idMap.get(key);
-        assertExists(newKey);
+        const newKey = oldToNewIdsMap.get(key);
+        assertExists(
+          newKey,
+          'Copy failed: cannot find the copied child in group'
+        );
         yMap.set(newKey, value);
       }
       clipboardData.children = yMap;
@@ -460,17 +465,27 @@ export class EdgelessClipboardController extends PageClipboard {
     if (clipboardData.type === MINDMAP) {
       const yMap = new DocCollection.Y.Map();
       const children = clipboardData.children ?? {};
-      for (const [key, value] of Object.entries(children)) {
-        const newKey = idMap.get(key);
-        assertExists(newKey);
 
-        if (value.parent) {
-          const newParent = idMap.get(value.parent);
-          assertExists(newParent);
-          value.parent = newParent;
+      for (const [oldKey, oldValue] of Object.entries(children)) {
+        const newKey = oldToNewIdsMap.get(oldKey);
+        const newValue = {
+          ...oldValue,
+        };
+        assertExists(
+          newKey,
+          'Copy failed: cannot find the copied node in mind map'
+        );
+
+        if (oldValue.parent) {
+          const newParent = oldToNewIdsMap.get(oldValue.parent);
+          assertExists(
+            newParent,
+            'Copy failed: cannot find the copied node in mind map'
+          );
+          newValue.parent = newParent;
         }
 
-        yMap.set(newKey, value);
+        yMap.set(newKey, newValue);
       }
       clipboardData.children = yMap;
     }
@@ -936,17 +951,12 @@ export class EdgelessClipboardController extends PageClipboard {
       block: BlockSuite.EdgelessBlockModelType,
       isInFrame = false
     ) => {
-      let blockComponent = blockComponentGetter(
-        block,
-        this.std.view
-      )?.parentElement;
-      const blockPortalSelector = block.flavour.replace(
-        'affine:',
-        '.edgeless-block-portal-'
-      );
-      blockComponent = blockComponent?.closest(blockPortalSelector);
+      const blockComponent = this.std.view.getBlock(block.id);
       if (!blockComponent) {
-        throw new Error('Could not find edgeless block portal.');
+        throw new BlockSuiteError(
+          ErrorCode.EdgelessExportError,
+          'Could not find edgeless block component.'
+        );
       }
 
       const blockBound = Bound.deserialize(block.xywh);

@@ -1,3 +1,9 @@
+import {
+  ellipseSvg,
+  roundedSvg,
+  triangleSvg,
+} from '@blocksuite/affine-components/icons';
+import { ShapeType } from '@blocksuite/affine-model';
 import { assertExists } from '@blocksuite/global/utils';
 import { LitElement, css, html, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
@@ -7,15 +13,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 
 import type { DraggableShape } from './utils.js';
 
-import {
-  ellipseSvg,
-  roundedSvg,
-  triangleSvg,
-} from '../../../../../_common/icons/edgeless.js';
-import {
-  CanvasElementType,
-  ShapeType,
-} from '../../../../../surface-block/index.js';
+import { CanvasElementType } from '../../../../../surface-block/index.js';
 import { ShapeToolController } from '../../../controllers/tools/shape-tool.js';
 import { EdgelessDraggableElementController } from '../common/draggable/draggable-element.controller.js';
 import { EdgelessToolbarToolMixin } from '../mixins/tool.mixin.js';

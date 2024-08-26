@@ -1,11 +1,13 @@
+import type { AffineInlineEditor } from '@blocksuite/affine-components/rich-text';
 import type { EditorHost } from '@blocksuite/block-std';
 
+import { MoreHorizontalIcon } from '@blocksuite/affine-components/icons';
 import { WithDisposable } from '@blocksuite/block-std';
-import { LitElement, html } from 'lit';
-import { customElement, query, state } from 'lit/decorators.js';
+import { LitElement, html, nothing } from 'lit';
+import { customElement, query, queryAll, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type { AffineInlineEditor } from '../../../_common/inline/presets/affine-inline-specs.js';
+import type { IconButton } from '../../../_common/components/button.js';
 import type { LinkedMenuGroup } from './config.js';
 
 import '../../../_common/components/button.js';
@@ -14,7 +16,6 @@ import {
   createKeydownObserver,
   getQuery,
 } from '../../../_common/components/utils.js';
-import { MoreHorizontalIcon } from '../../../_common/icons/edgeless.js';
 import { styles } from './styles.js';
 
 @customElement('affine-linked-doc-popover')
@@ -87,6 +88,10 @@ export class LinkedDocPopover extends WithDisposable(LitElement) {
       });
     }
     return group.items;
+  }
+
+  private _isTextOverflowing(element: HTMLElement) {
+    return element.scrollWidth > element.clientWidth;
   }
 
   private get _query() {
@@ -202,6 +207,11 @@ export class LinkedDocPopover extends WithDisposable(LitElement) {
               ${group.items.map(({ key, name, icon, action }) => {
                 accIdx++;
                 const curIdx = accIdx - 1;
+                const tooltip = this._showTooltip
+                  ? html`<affine-tooltip tip-position=${'right'}
+                      >${name}</affine-tooltip
+                    >`
+                  : nothing;
                 return html`<icon-button
                   width="280px"
                   height="32px"
@@ -214,9 +224,20 @@ export class LinkedDocPopover extends WithDisposable(LitElement) {
                   @mousemove=${() => {
                     // Use `mousemove` instead of `mouseover` to avoid navigate conflict with keyboard
                     this._activatedItemIndex = curIdx;
+                    // show tooltip whether text length overflows
+                    for (const button of this.iconButtons.values()) {
+                      if (button.dataset.id == key && button.textElement) {
+                        const isOverflowing = this._isTextOverflowing(
+                          button.textElement
+                        );
+                        this._showTooltip = isOverflowing;
+                        break;
+                      }
+                    }
                   }}
-                  >${icon}</icon-button
-                >`;
+                >
+                  ${icon} ${tooltip}
+                </icon-button>`;
               })}
             </div>
           `;
@@ -240,6 +261,12 @@ export class LinkedDocPopover extends WithDisposable(LitElement) {
     x: string;
     y: string;
   } | null = null;
+
+  @state()
+  private accessor _showTooltip = false;
+
+  @queryAll('icon-button')
+  accessor iconButtons!: NodeListOf<IconButton>;
 
   @query('.linked-doc-popover')
   accessor linkedDocElement: Element | null = null;

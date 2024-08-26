@@ -14,7 +14,7 @@ export function selectionStyle(
     height: `${rect.height}px`,
     top: `${rect.top}px`,
     left: `${rect.left}px`,
-    backgroundColor: color,
+    backgroundColor: rect.transparent ? 'transparent' : color,
     pointerEvent: 'none',
     opacity: '20%',
     borderRadius: '3px',

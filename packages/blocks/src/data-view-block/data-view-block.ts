@@ -1,4 +1,10 @@
-import { RangeManager } from '@blocksuite/block-std';
+import { CaptionedBlockComponent } from '@blocksuite/affine-components/caption';
+import {
+  CopyIcon,
+  DeleteIcon,
+  MoreHorizontalIcon,
+} from '@blocksuite/affine-components/icons';
+import { RANGE_SYNC_EXCLUDE_ATTR } from '@blocksuite/block-std';
 import { Slice } from '@blocksuite/store';
 import { computed } from '@lit-labs/preact-signals';
 import { css, nothing, unsafeCSS } from 'lit';
@@ -9,15 +15,7 @@ import type { DataSource } from '../database-block/data-view/common/data-source/
 import type { NoteBlockComponent } from '../note-block/index.js';
 import type { DataViewBlockModel } from './data-view-model.js';
 
-import {
-  CaptionedBlockComponent,
-  popMenu,
-} from '../_common/components/index.js';
-import {
-  CopyIcon,
-  DeleteIcon,
-  MoreHorizontalIcon,
-} from '../_common/icons/index.js';
+import { popMenu } from '../_common/components/index.js';
 import { dataViewCommonStyle } from '../database-block/data-view/common/css-variable.js';
 import {
   DataView,
@@ -42,7 +40,7 @@ export class DataViewBlockComponent extends CaptionedBlockComponent<DataViewBloc
   _bindHotkey: DataViewProps['bindHotkey'] = hotkeys => {
     return {
       dispose: this.host.event.bindHotkey(hotkeys, {
-        path: this.topContenteditableElement?.path ?? this.path,
+        blockId: this.topContenteditableElement?.blockId ?? this.blockId,
       }),
     };
   };
@@ -102,7 +100,7 @@ export class DataViewBlockComponent extends CaptionedBlockComponent<DataViewBloc
   _handleEvent: DataViewProps['handleEvent'] = (name, handler) => {
     return {
       dispose: this.host.event.add(name, handler, {
-        path: this.path,
+        blockId: this.blockId,
       }),
     };
   };
@@ -141,6 +139,16 @@ export class DataViewBlockComponent extends CaptionedBlockComponent<DataViewBloc
     .database-ops:hover {
       background-color: var(--affine-hover-color);
     }
+
+    @media print {
+      .database-ops {
+        display: none;
+      }
+
+      .database-header-bar {
+        display: none !important;
+      }
+    }
   `;
 
   getRootService = () => {
@@ -157,6 +165,7 @@ export class DataViewBlockComponent extends CaptionedBlockComponent<DataViewBloc
           </div>
           <div
             style="display:flex;align-items:center;justify-content: space-between;gap: 12px"
+            class="database-header-bar"
           >
             <div style="flex:1">
               ${renderUniLit(widgetPresets.viewBar, props)}
@@ -223,7 +232,7 @@ export class DataViewBlockComponent extends CaptionedBlockComponent<DataViewBloc
   override connectedCallback() {
     super.connectedCallback();
 
-    this.setAttribute(RangeManager.rangeSyncExcludeAttr, 'true');
+    this.setAttribute(RANGE_SYNC_EXCLUDE_ATTR, 'true');
   }
 
   override renderBlock() {

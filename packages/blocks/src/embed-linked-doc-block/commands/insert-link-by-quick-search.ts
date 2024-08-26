@@ -1,28 +1,54 @@
 import type { Command } from '@blocksuite/block-std';
 
-import { assertExists } from '@blocksuite/global/utils';
-
-import type { RootService } from '../../root-block/root-service.js';
-
 export const insertLinkByQuickSearchCommand: Command<
   never,
   'insertedLinkType',
   { userInput?: string; skipSelection?: boolean }
 > = (ctx, next) => {
-  const rootService = ctx.std.spec.getService('affine:page');
-  assertExists(rootService);
-  next({
-    insertedLinkType: rootService.insertLinkByQuickSearch(
-      ctx.userInput,
-      ctx.skipSelection
-    ),
-  });
+  const { userInput, skipSelection, std } = ctx;
+  const rootService = std.spec.getService('affine:page');
+  const quickSearchService = rootService?.quickSearchService;
+  if (!quickSearchService) {
+    next();
+    return;
+  }
+
+  const insertedLinkType = quickSearchService
+    .searchDoc({
+      action: 'insert',
+      userInput,
+      skipSelection,
+    })
+    .then(result => {
+      // add linked doc
+      if (result && 'docId' in result) {
+        std.command.exec('insertEmbedLinkedDoc', { docId: result.docId });
+        return {
+          flavour: 'affine:embed-linked-doc',
+          isNewDoc: !!result.isNewDoc,
+        };
+      }
+
+      // add normal link;
+      if (result && 'userInput' in result) {
+        std.command.exec('insertBookmark', { url: result.userInput });
+        return {
+          flavour: 'affine:bookmark',
+        };
+      }
+      return {};
+    });
+
+  next({ insertedLinkType });
 };
 
 declare global {
   namespace BlockSuite {
     interface CommandContext {
-      insertedLinkType?: ReturnType<RootService['insertLinkByQuickSearch']>;
+      insertedLinkType?: Promise<{
+        flavour?: string;
+        isNewDoc?: boolean;
+      }>;
     }
 
     interface Commands {

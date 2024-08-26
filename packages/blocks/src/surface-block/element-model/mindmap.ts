@@ -5,14 +5,21 @@ import type {
 } from '@blocksuite/block-std/gfx';
 import type { SerializedXYWH, XYWH } from '@blocksuite/global/utils';
 
+import { LocalConnectorElementModel } from '@blocksuite/affine-model';
 import {
   GfxGroupLikeElementModel,
   convert,
+  field,
   observe,
   watch,
-  yfield,
 } from '@blocksuite/block-std/gfx';
-import { assertType, deserializeXYWH } from '@blocksuite/global/utils';
+import {
+  assertType,
+  deserializeXYWH,
+  keys,
+  last,
+  pick,
+} from '@blocksuite/global/utils';
 import { DocCollection, type Y } from '@blocksuite/store';
 import { generateKeyBetween } from 'fractional-indexing';
 import { z } from 'zod';
@@ -27,10 +34,8 @@ import type {
   MindmapStyleGetter,
 } from './utils/mindmap/style.js';
 
-import { keys, last, pick } from '../../_common/utils/iterable.js';
 import { TextResizing } from '../consts.js';
 import { ConnectorPathGenerator } from '../managers/connector-manager.js';
-import { LocalConnectorElementModel } from './connector.js';
 import { LayoutType, layout } from './utils/mindmap/layout.js';
 import {
   MindmapStyle,
@@ -151,6 +156,7 @@ export class MindmapElementModel extends GfxGroupLikeElementModel<MindmapElement
       return;
     }
 
+    let splitDir: LayoutType | undefined = undefined;
     const tree = this._tree;
     const splitPoint = tree.children.findIndex((child, index) => {
       if (
@@ -158,13 +164,17 @@ export class MindmapElementModel extends GfxGroupLikeElementModel<MindmapElement
         (child.detail.preferredDir === LayoutType.RIGHT &&
           child.children[index + 1]?.detail.preferredDir !== LayoutType.RIGHT)
       ) {
+        splitDir = child.detail.preferredDir;
         return true;
       }
 
       return false;
     });
 
-    if (splitPoint === -1) {
+    if (
+      splitPoint === -1 ||
+      (splitDir === LayoutType.LEFT && splitPoint >= tree.children.length / 2)
+    ) {
       const mid = Math.ceil(tree.children.length / 2);
 
       tree.right.push(...tree.children.slice(0, mid));
@@ -1032,7 +1042,7 @@ export class MindmapElementModel extends GfxGroupLikeElementModel<MindmapElement
       instance.connectors.clear();
     }
   )
-  @yfield()
+  @field()
   accessor children: Y.Map<NodeDetail> = new DocCollection.Y.Map();
 
   @watch((_, instance: MindmapElementModel, local) => {
@@ -1055,7 +1065,7 @@ export class MindmapElementModel extends GfxGroupLikeElementModel<MindmapElement
 
     instance.buildTree();
   })
-  @yfield()
+  @field()
   accessor layoutType: LayoutType = LayoutType.RIGHT;
 
   @watch((_, instance: MindmapElementModel, local) => {
@@ -1063,7 +1073,7 @@ export class MindmapElementModel extends GfxGroupLikeElementModel<MindmapElement
       instance.layout();
     }
   })
-  @yfield()
+  @field()
   accessor style: MindmapStyle = MindmapStyle.ONE;
 }
 

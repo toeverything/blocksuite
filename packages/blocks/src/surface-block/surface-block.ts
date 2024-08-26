@@ -1,15 +1,15 @@
-import { BlockComponent, RangeManager } from '@blocksuite/block-std';
-import { Bound } from '@blocksuite/global/utils';
+import type { Color } from '@blocksuite/affine-model';
+
+import { ThemeObserver } from '@blocksuite/affine-shared/theme';
+import { BlockComponent, RANGE_SYNC_EXCLUDE_ATTR } from '@blocksuite/block-std';
+import { Bound, values } from '@blocksuite/global/utils';
 import { css, html } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 
 import type { EdgelessRootBlockComponent } from '../root-block/edgeless/edgeless-root-block.js';
-import type { Color } from './consts.js';
 import type { SurfaceBlockModel } from './surface-model.js';
 import type { SurfaceBlockService } from './surface-service.js';
 
-import { ThemeObserver } from '../_common/theme/theme-observer.js';
-import { values } from '../_common/utils/iterable.js';
 import { isShape } from '../root-block/edgeless/components/auto-complete/utils.js';
 import { FrameOverlay } from '../root-block/edgeless/frame-manager.js';
 import { Renderer } from './canvas-renderer/renderer.js';
@@ -220,7 +220,7 @@ export class SurfaceBlockComponent extends BlockComponent<
   override connectedCallback() {
     super.connectedCallback();
 
-    this.setAttribute(RangeManager.rangeSyncExcludeAttr, 'true');
+    this.setAttribute(RANGE_SYNC_EXCLUDE_ATTR, 'true');
 
     this._initThemeObserver();
     this._initRenderer();
@@ -242,7 +242,7 @@ export class SurfaceBlockComponent extends BlockComponent<
   }
 
   get edgeless() {
-    return this.parentBlock as EdgelessRootBlockComponent;
+    return this.parentComponent as EdgelessRootBlockComponent;
   }
 
   get renderer() {

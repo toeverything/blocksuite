@@ -1,37 +1,34 @@
+import type {
+  AttachmentBlockModel,
+  BookmarkBlockModel,
+  EdgelessTextBlockModel,
+  EmbedFigmaModel,
+  EmbedGithubModel,
+  EmbedHtmlModel,
+  EmbedLinkedDocModel,
+  EmbedLoomModel,
+  EmbedSyncedDocModel,
+  EmbedYoutubeModel,
+  FrameBlockModel,
+  ImageBlockModel,
+  NoteBlockModel,
+  RootBlockModel,
+} from '@blocksuite/affine-model';
+
+import { ConnectorCWithArrowIcon } from '@blocksuite/affine-components/icons';
+import { renderToolbarSeparator } from '@blocksuite/affine-components/toolbar';
+import { ThemeObserver } from '@blocksuite/affine-shared/theme';
+import { requestConnectedFrame } from '@blocksuite/affine-shared/utils';
 import { WidgetComponent } from '@blocksuite/block-std';
+import { atLeastNMatches, groupBy, pickValues } from '@blocksuite/global/utils';
 import { type TemplateResult, css, html, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { join } from 'lit/directives/join.js';
 
-import type { AttachmentBlockModel } from '../../../attachment-block/attachment-model.js';
-import type { BookmarkBlockModel } from '../../../bookmark-block/bookmark-model.js';
-import type { EdgelessTextBlockModel } from '../../../edgeless-text/edgeless-text-model.js';
-import type { EmbedFigmaModel } from '../../../embed-figma-block/embed-figma-model.js';
-import type { EmbedGithubModel } from '../../../embed-github-block/embed-github-model.js';
-import type { EmbedHtmlModel } from '../../../embed-html-block/embed-html-model.js';
-import type { EmbedLinkedDocModel } from '../../../embed-linked-doc-block/embed-linked-doc-model.js';
-import type { EmbedLoomModel } from '../../../embed-loom-block/embed-loom-model.js';
-import type { EmbedSyncedDocModel } from '../../../embed-synced-doc-block/embed-synced-doc-model.js';
-import type { EmbedYoutubeModel } from '../../../embed-youtube-block/embed-youtube-model.js';
-import type { FrameBlockModel } from '../../../frame-block/frame-model.js';
-import type { ImageBlockModel } from '../../../image-block/image-model.js';
-import type { NoteBlockModel } from '../../../note-block/note-model.js';
 import type { MindmapElementModel } from '../../../surface-block/element-model/mindmap.js';
 import type { ConnectorToolController } from '../../edgeless/controllers/tools/connector-tool.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
-import type { RootBlockModel } from '../../root-model.js';
 
-import '../../../_common/components/toolbar/icon-button.js';
-import '../../../_common/components/toolbar/menu-button.js';
-import { renderToolbarSeparator } from '../../../_common/components/toolbar/separator.js';
-import '../../../_common/components/toolbar/toolbar.js';
-import { ConnectorCWithArrowIcon } from '../../../_common/icons/edgeless.js';
-import { ThemeObserver } from '../../../_common/theme/theme-observer.js';
-import {
-  atLeastNMatches,
-  groupBy,
-  pickValues,
-} from '../../../_common/utils/iterable.js';
 import {
   ConnectorMode,
   GroupElementModel,
@@ -178,16 +175,9 @@ export class EdgelessElementToolbarWidget extends WidgetComponent<
 
     const { width, height } = viewport;
     const [x, y] = viewport.toViewCoord(bound.x, bound.y);
-    const [right, bottom] = viewport.toViewCoord(bound.maxX, bound.maxY);
 
-    let left, top;
-    if (x >= width || right <= 0 || y >= height || bottom <= 0) {
-      left = x;
-      top = y;
-
-      this.style.transform = `translate3d(${left}px, ${top}px, 0)`;
-      return;
-    }
+    let left = x;
+    let top = y;
 
     let offset = 37 + 12;
     // frame, group, shape
@@ -219,11 +209,14 @@ export class EdgelessElementToolbarWidget extends WidgetComponent<
       }
     }
 
-    left = clamp(x, 10, width - 10);
-    top = clamp(top, 10, height - 150);
+    requestConnectedFrame(() => {
+      const rect = this.getBoundingClientRect();
 
-    this.style.transform = `translate3d(${left}px, ${top}px, 0)`;
-    this.selectedIds = selection.selectedIds;
+      left = clamp(x, 10, width - rect.width - 10);
+      top = clamp(top, 10, height - rect.height - 150);
+
+      this.style.transform = `translate3d(${left}px, ${top}px, 0)`;
+    }, this);
   }
 
   private _renderQuickConnectButton() {
@@ -260,6 +253,7 @@ export class EdgelessElementToolbarWidget extends WidgetComponent<
           this.toolbarVisible = false;
         } else {
           this.toolbarVisible = true;
+          this.selectedIds = this.selection.selectedIds;
           this._recalculatePosition();
         }
       })

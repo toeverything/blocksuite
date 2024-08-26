@@ -1,3 +1,5 @@
+import { AddCursorIcon } from '@blocksuite/affine-components/icons';
+import { getScrollContainer } from '@blocksuite/affine-shared/utils';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { autoUpdate } from '@floating-ui/dom';
 import { SignalWatcher } from '@lit-labs/preact-signals';

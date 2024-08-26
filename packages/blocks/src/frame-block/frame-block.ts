@@ -1,5 +1,7 @@
 import type { Doc } from '@blocksuite/store';
 
+import { FrameBlockModel } from '@blocksuite/affine-model';
+import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import {
   GfxBlockComponent,
   ShadowlessElement,
@@ -11,9 +13,6 @@ import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import type { EdgelessRootService } from '../root-block/index.js';
-
-import { ThemeObserver } from '../_common/theme/theme-observer.js';
-import { FrameBlockModel } from './frame-model.js';
 
 const NESTED_FRAME_OFFSET = 4;
 
@@ -253,16 +252,6 @@ export class FrameBlockComponent extends GfxBlockComponent<
 
   override connectedCallback() {
     super.connectedCallback();
-
-    let lastZoom = 0;
-    this._disposables.add(
-      this.rootService!.viewport.viewportUpdated.on(({ zoom }) => {
-        if (zoom !== lastZoom) {
-          lastZoom = zoom;
-          this.requestUpdate();
-        }
-      })
-    );
 
     this._disposables.add(
       this.doc.slots.blockUpdated.on(({ type, id }) => {

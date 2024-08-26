@@ -1,3 +1,22 @@
+import type {
+  FrameBlockModel,
+  NoteBlockModel,
+  RootBlockModel,
+  SurfaceRefBlockModel,
+} from '@blocksuite/affine-model';
+
+import {
+  AutoConnectLeftIcon,
+  AutoConnectRightIcon,
+  HiddenIcon,
+  SmallDocIcon,
+} from '@blocksuite/affine-components/icons';
+import { NoteDisplayMode } from '@blocksuite/affine-model';
+import {
+  matchFlavours,
+  requestThrottledConnectedFrame,
+  stopPropagation,
+} from '@blocksuite/affine-shared/utils';
 import { WidgetComponent } from '@blocksuite/block-std';
 import { Bound } from '@blocksuite/global/utils';
 import { type TemplateResult, css, html, nothing } from 'lit';
@@ -5,25 +24,9 @@ import { customElement, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type { FrameBlockModel } from '../../../frame-block/frame-model.js';
-import type { NoteBlockModel } from '../../../note-block/index.js';
-import type { SurfaceRefBlockModel } from '../../../surface-ref-block/surface-ref-model.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 import type { EdgelessRootService } from '../../edgeless/edgeless-root-service.js';
-import type { RootBlockModel } from '../../root-model.js';
 
-import {
-  AutoConnectLeftIcon,
-  AutoConnectRightIcon,
-  HiddenIcon,
-} from '../../../_common/icons/edgeless.js';
-import { SmallDocIcon } from '../../../_common/icons/text.js';
-import { NoteDisplayMode } from '../../../_common/types.js';
-import {
-  requestThrottledConnectedFrame,
-  stopPropagation,
-} from '../../../_common/utils/event.js';
-import { matchFlavours } from '../../../_common/utils/model.js';
 import { isNoteBlock } from '../../edgeless/utils/query.js';
 
 const PAGE_VISIBLE_INDEX_LABEL_WIDTH = 44;

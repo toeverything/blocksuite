@@ -1,5 +1,8 @@
+import type { RichText } from '@blocksuite/affine-components/rich-text';
+import type { GroupElementModel } from '@blocksuite/affine-model';
+
 import {
-  RangeManager,
+  RANGE_SYNC_EXCLUDE_ATTR,
   ShadowlessElement,
   WithDisposable,
 } from '@blocksuite/block-std';
@@ -9,8 +12,6 @@ import { html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type { RichText } from '../../../../_common/components/rich-text/rich-text.js';
-import type { GroupElementModel } from '../../../../surface-block/element-model/group.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
 
 @customElement('edgeless-group-title-editor')
@@ -30,7 +31,7 @@ export class EdgelessGroupTitleEditor extends WithDisposable(
 
   override connectedCallback() {
     super.connectedCallback();
-    this.setAttribute(RangeManager.rangeSyncExcludeAttr, 'true');
+    this.setAttribute(RANGE_SYNC_EXCLUDE_ATTR, 'true');
   }
 
   override firstUpdated(): void {

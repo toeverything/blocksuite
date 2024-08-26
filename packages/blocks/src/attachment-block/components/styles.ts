@@ -1,6 +1,5 @@
+import { FONT_XS, PANEL_BASE } from '@blocksuite/affine-shared/styles';
 import { css } from 'lit';
-
-import { FONT_XS, PANEL_BASE } from '../../_common/styles.js';
 
 export const renameStyles = css`
   .affine-attachment-rename-container {

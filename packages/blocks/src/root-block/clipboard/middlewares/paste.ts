@@ -1,3 +1,4 @@
+import type { ParagraphBlockModel } from '@blocksuite/affine-model';
 import type {
   BlockComponent,
   EditorHost,
@@ -17,7 +18,6 @@ import {
   fromJSON,
 } from '@blocksuite/store';
 
-import type { ParagraphBlockModel } from '../../../paragraph-block/index.js';
 import type { QuickSearchService } from '../../root-service.js';
 
 import { matchFlavours } from '../../../_common/utils/index.js';
@@ -218,6 +218,9 @@ class PasteTr {
 
   canMerge = () => {
     if (this.snapshot.content.length === 0) {
+      return false;
+    }
+    if (!this.firstSnapshot!.props.text) {
       return false;
     }
     const firstTextSnapshot = this._textFromSnapshot(this.firstSnapshot!);

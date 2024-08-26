@@ -2,6 +2,7 @@ import type { EventName, UIEventHandler } from '@blocksuite/block-std';
 import type { Disposable } from '@blocksuite/global/utils';
 import type { PropertyValues } from 'lit';
 
+import { CrossIcon, ExpandWideIcon } from '@blocksuite/affine-components/icons';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { Slot, assertExists } from '@blocksuite/global/utils';
 import { computed } from '@lit-labs/preact-signals';
@@ -13,7 +14,6 @@ import type { DataViewSelection } from '../../data-view/types.js';
 import type { DatabaseBlockComponent } from '../../database-block.js';
 
 import { createModal } from '../../../_common/components/index.js';
-import { CrossIcon, ExpandWideIcon } from '../../../_common/icons/index.js';
 import { DatabaseSelection } from '../../data-view/common/selection.js';
 import { renderTemplate } from '../../data-view/utils/uni-component/render-template.js';
 import { WidgetBase } from '../../data-view/widget/widget-base.js';
@@ -126,9 +126,7 @@ export class DatabaseBlockModalPreview extends WithDisposable(
   bindHotkey: (hotkeys: Record<string, UIEventHandler>) => Disposable =
     hotkeys => {
       return {
-        dispose: this.database.host.event.bindHotkey(hotkeys, {
-          path: [],
-        }),
+        dispose: this.database.host.event.bindHotkey(hotkeys),
       };
     };
 
@@ -139,9 +137,7 @@ export class DatabaseBlockModalPreview extends WithDisposable(
     handler
   ) => {
     return {
-      dispose: this.database.host.event.add(name, handler, {
-        path: [],
-      }),
+      dispose: this.database.host.event.add(name, handler),
     };
   };
 

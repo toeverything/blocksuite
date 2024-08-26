@@ -24,15 +24,16 @@ export const AIChatBlockStyles = css`
       flex: 1 0 0;
       width: 100%;
       box-sizing: border-box;
+      background: linear-gradient(to top, transparent, var(--affine-white));
       -webkit-mask-image: linear-gradient(
-        0deg,
-        rgba(255, 255, 255, 0) -10.62%,
-        #fff 40.63%
+        to bottom,
+        var(--affine-white) 25%,
+        transparent
       );
       mask-image: linear-gradient(
-        0deg,
-        rgba(255, 255, 255, 0) -10.62%,
-        #fff 40.63%
+        to bottom,
+        var(--affine-white) 25%,
+        transparent
       );
       overflow: hidden;
     }

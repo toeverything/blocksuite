@@ -1,3 +1,8 @@
+import {
+  DarkLoadingIcon,
+  LightLoadingIcon,
+} from '@blocksuite/affine-components/icons';
+import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import { WithDisposable } from '@blocksuite/block-std';
 import { baseTheme } from '@toeverything/theme';
 import {
@@ -9,12 +14,6 @@ import {
   unsafeCSS,
 } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-
-import {
-  DarkLoadingIcon,
-  LightLoadingIcon,
-} from '../../../../_common/icons/text.js';
-import { ThemeObserver } from '../../../../_common/theme/theme-observer.js';
 
 @customElement('generating-placeholder')
 class GeneratingPlaceholder extends WithDisposable(LitElement) {

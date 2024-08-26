@@ -36,7 +36,7 @@ To test locally, please make sure browser binaries are already installed via `np
 pnpm test
 
 # or run tests in headed mode for debugging
-pnpm test:headed
+pnpm test -- --debug
 ```
 
 In headed mode, `await page.pause()` can be used in test cases to suspend the test runner. Note that the usage of the [Playwright VSCode extension](https://marketplace.visualstudio.com/items?itemName=ms-playwright.playwright) is also highly recommended.

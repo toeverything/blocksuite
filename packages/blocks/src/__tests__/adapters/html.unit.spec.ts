@@ -1,12 +1,12 @@
 import type { BlockSnapshot } from '@blocksuite/store';
 
+import { NoteDisplayMode } from '@blocksuite/affine-model';
 import { MemoryBlobCRUD } from '@blocksuite/store';
 import { AssetsManager } from '@blocksuite/store';
 import { describe, expect, test } from 'vitest';
 
 import { HtmlAdapter } from '../../_common/adapters/html.js';
 import { nanoidReplacement } from '../../_common/test-utils/test-utils.js';
-import { NoteDisplayMode } from '../../_common/types.js';
 import { createJob } from '../utils/create-job.js';
 
 const template = (html: string) =>
@@ -106,7 +106,7 @@ describe('snapshot to html', () => {
     };
 
     const html = template(
-      `<pre><code class="code-python"><span style="word-wrap: break-word; color: #AF00DB;">import</span><span style="word-wrap: break-word; color: #000000;"> this</span></code></pre>`
+      `<pre class="shiki light-plus" style="background-color:#FFFFFF;color:#000000" tabindex="0"><code><span class="line"><span style="color:#AF00DB">import</span><span style="color:#000000"> this</span></span></code></pre>`
     );
 
     const htmlAdapter = new HtmlAdapter(createJob());
@@ -172,7 +172,7 @@ describe('snapshot to html', () => {
     };
 
     const html = template(
-      `<pre><code class="code-python"><span style="word-wrap: break-word; color: #AF00DB;">import</span><span style="word-wrap: break-word; color: #000000;"> this</span></code></pre>`
+      `<pre class="shiki light-plus" style="background-color:#FFFFFF;color:#000000" tabindex="0"><code><span class="line"><span>import this</span></span></code></pre>`
     );
 
     const htmlAdapter = new HtmlAdapter(createJob());
@@ -238,7 +238,7 @@ describe('snapshot to html', () => {
     };
 
     const html = template(
-      `<pre><code class="code-unknown">import this</code></pre>`
+      `<pre class="shiki light-plus" style="background-color:#FFFFFF;color:#000000" tabindex="0"><code><span class="line"><span>import this</span></span></code></pre>`
     );
 
     const htmlAdapter = new HtmlAdapter(createJob());

@@ -1,5 +1,10 @@
 import type { EditorHost } from '@blocksuite/block-std';
 
+import { focusTextModel } from '@blocksuite/affine-components/rich-text';
+import {
+  createDefaultDoc,
+  matchFlavours,
+} from '@blocksuite/affine-shared/utils';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { css, html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
@@ -7,12 +12,6 @@ import { customElement, property, query } from 'lit/decorators.js';
 import type { DetailSlotProps } from '../data-view/common/data-source/base.js';
 import type { SingleView } from '../data-view/view-manager/single-view.js';
 import type { DatabaseBlockModel } from '../database-model.js';
-
-import {
-  asyncFocusRichText,
-  createDefaultDoc,
-  matchFlavours,
-} from '../../_common/utils/index.js';
 
 @customElement('database-datasource-note-renderer')
 export class NoteRenderer
@@ -50,7 +49,7 @@ export class NoteRenderer
             ])
           );
         if (this.subHost && block) {
-          asyncFocusRichText(this.subHost, block.id)?.catch(console.error);
+          focusTextModel(this.subHost.std, block.id);
         }
       });
     }

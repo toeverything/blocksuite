@@ -1,9 +1,16 @@
 import type {
+  AffineTextAttributes,
+  RichText,
+} from '@blocksuite/affine-components/rich-text';
+import type {
   BaseSelection,
   BlockComponent,
   CursorSelection,
 } from '@blocksuite/block-std';
 
+import { HoverController } from '@blocksuite/affine-components/hover';
+import { isFormatSupported } from '@blocksuite/affine-components/rich-text';
+import { matchFlavours } from '@blocksuite/affine-shared/utils';
 import { WidgetComponent } from '@blocksuite/block-std';
 import { DisposableGroup, assertExists } from '@blocksuite/global/utils';
 import {
@@ -18,17 +25,7 @@ import {
 import { html, nothing } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 
-import type { AffineTextAttributes } from '../../../_common/inline/presets/affine-inline-specs.js';
-
 import '../../../_common/components/button.js';
-import {
-  HoverController,
-  type RichText,
-} from '../../../_common/components/index.js';
-import '../../../_common/components/toolbar/toolbar.js';
-import { matchFlavours } from '../../../_common/utils/model.js';
-import { isFormatSupported } from '../../../note-block/commands/utils.js';
-import { isRootComponent } from '../../../root-block/utils/guard.js';
 import { ConfigRenderer } from './components/config-renderer.js';
 import {
   type FormatBarConfigItem,
@@ -492,7 +489,7 @@ export class AffineFormatBarWidget extends WidgetComponent {
     }
 
     // check if format bar widget support the host
-    if (!isRootComponent(rootComponent)) {
+    if (rootComponent.model.flavour !== 'affine:page') {
       console.error(
         `format bar not support rootComponent: ${rootComponent.constructor.name} but its widgets has format bar`
       );

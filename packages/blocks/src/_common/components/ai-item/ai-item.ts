@@ -1,3 +1,4 @@
+import { ArrowRightIcon, EnterIcon } from '@blocksuite/affine-components/icons';
 import { EditorHost } from '@blocksuite/block-std';
 import { WithDisposable } from '@blocksuite/block-std';
 import { PropTypes, requiredProperties } from '@blocksuite/block-std';
@@ -6,7 +7,6 @@ import { customElement, property, query } from 'lit/decorators.js';
 
 import type { AIItemConfig } from './types.js';
 
-import { ArrowRightIcon, EnterIcon } from '../../icons/ai.js';
 import './ai-sub-item-list.js';
 import { menuItemStyles } from './styles.js';
 

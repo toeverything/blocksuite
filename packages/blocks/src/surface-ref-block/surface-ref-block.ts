@@ -1,6 +1,15 @@
+import type { BlockCaptionEditor } from '@blocksuite/affine-components/caption';
+import type { SurfaceRefBlockModel } from '@blocksuite/affine-model';
 import type { BaseSelection, EditorHost } from '@blocksuite/block-std';
 import type { Doc } from '@blocksuite/store';
 
+import {
+  EdgelessModeIcon,
+  FrameIcon,
+  MoreDeleteIcon,
+} from '@blocksuite/affine-components/icons';
+import { Peekable } from '@blocksuite/affine-components/peek';
+import { requestConnectedFrame } from '@blocksuite/affine-shared/utils';
 import { BlockComponent } from '@blocksuite/block-std';
 import { GfxBlockElementModel } from '@blocksuite/block-std/gfx';
 import {
@@ -13,21 +22,11 @@ import { type TemplateResult, css, html, nothing } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type { BlockCaptionEditor } from '../_common/components/block-caption.js';
 import type { FrameBlockComponent } from '../frame-block/frame-block.js';
 import type { EdgelessRootPreviewBlockComponent } from '../root-block/edgeless/edgeless-root-preview-block.js';
 import type { EdgelessRootService } from '../root-block/index.js';
-import type { SurfaceRefBlockModel } from './surface-ref-model.js';
 import type { SurfaceRefBlockService } from './surface-ref-service.js';
 
-import { Peekable } from '../_common/components/peekable.js';
-import { bindContainerHotkey } from '../_common/components/rich-text/keymap/container.js';
-import {
-  EdgelessModeIcon,
-  FrameIcon,
-  MoreDeleteIcon,
-} from '../_common/icons/index.js';
-import { requestConnectedFrame } from '../_common/utils/event.js';
 import { SpecProvider } from '../specs/index.js';
 import {
   type SurfaceBlockModel,
@@ -74,6 +73,13 @@ export class SurfaceRefBlockComponent extends BlockComponent<
       position: relative;
       user-select: none;
       margin: 10px 0;
+      break-inside: avoid;
+    }
+
+    @media print {
+      .affine-surface-ref {
+        outline: none !important;
+      }
     }
 
     .ref-placeholder {
@@ -170,6 +176,7 @@ export class SurfaceRefBlockComponent extends BlockComponent<
       top: 0;
       width: 100%;
       height: 100%;
+      break-inside: avoid;
     }
 
     .surface-ref-mask:hover {
@@ -293,7 +300,8 @@ export class SurfaceRefBlockComponent extends BlockComponent<
 
       if (this.doc.getBlock(this.model.reference)) {
         return [
-          this.doc.getBlock(this.model.reference).model as GfxBlockElementModel,
+          this.doc.getBlock(this.model.reference)
+            ?.model as GfxBlockElementModel,
           this.doc.id,
         ];
       }
@@ -323,7 +331,7 @@ export class SurfaceRefBlockComponent extends BlockComponent<
 
       if (doc && doc.getBlock(this.model.reference)) {
         return [
-          doc.getBlock(this.model.reference).model as GfxBlockElementModel,
+          doc.getBlock(this.model.reference)?.model as GfxBlockElementModel,
           doc.id,
         ];
       }
@@ -502,14 +510,12 @@ export class SurfaceRefBlockComponent extends BlockComponent<
     return (
       this.isConnected &&
       // prevent surface-ref from render itself in loop
-      !this.parentBlock.closest('affine-surface-ref')
+      !this.parentComponent?.closest('affine-surface-ref')
     );
   }
 
   override connectedCallback() {
     super.connectedCallback();
-
-    bindContainerHotkey(this);
 
     this.contentEditable = 'false';
 
@@ -546,7 +552,7 @@ export class SurfaceRefBlockComponent extends BlockComponent<
         ${content}
       </div>
 
-      <block-caption-editor .block=${this}></block-caption-editor>
+      <block-caption-editor></block-caption-editor>
 
       ${Object.values(this.widgets)}
     `;

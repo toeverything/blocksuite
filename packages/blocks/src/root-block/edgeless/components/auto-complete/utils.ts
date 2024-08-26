@@ -1,15 +1,14 @@
-import type { XYWH } from '@blocksuite/global/utils';
-
-import { Bound } from '@blocksuite/global/utils';
-import { assertExists } from '@blocksuite/global/utils';
-import { DocCollection } from '@blocksuite/store';
-
-import type { NoteBlockModel } from '../../../../note-block/index.js';
-import type { Connection } from '../../../../surface-block/element-model/connector.js';
 import type {
+  Connection,
+  NoteBlockModel,
   ShapeStyle,
   ShapeType,
-} from '../../../../surface-block/element-model/shape.js';
+} from '@blocksuite/affine-model';
+import type { XYWH } from '@blocksuite/global/utils';
+
+import { Bound, assertExists } from '@blocksuite/global/utils';
+import { DocCollection } from '@blocksuite/store';
+
 import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
 
 import {

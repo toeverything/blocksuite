@@ -1,3 +1,4 @@
+import type { ConnectorElementModel } from '@blocksuite/affine-model';
 import type { SurfaceBlockProps } from '@blocksuite/block-std/gfx';
 import type { MigrationRunner, Y } from '@blocksuite/store';
 
@@ -10,19 +11,10 @@ import {
   defineBlockSchema,
 } from '@blocksuite/store';
 
-import type { ConnectorElementModel } from './element-model/connector.js';
-
 import { elementsCtorMap } from './element-model/index.js';
 import { connectorMiddleware } from './middlewares/connector.js';
 import { groupRelationMiddleware } from './middlewares/group.js';
 import { SurfaceBlockTransformer } from './surface-transformer.js';
-
-export interface ElementUpdatedData {
-  id: string;
-  props: Record<string, unknown>;
-  oldValues: Record<string, unknown>;
-  local: boolean;
-}
 
 const migration = {
   toV4: data => {

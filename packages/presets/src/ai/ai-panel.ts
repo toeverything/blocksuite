@@ -8,6 +8,7 @@ import {
   type AffineAIPanelWidgetConfig,
   ImageBlockModel,
   NoteDisplayMode,
+  findNoteBlockModel,
   isInsideEdgelessEditor,
   matchFlavours,
 } from '@blocksuite/blocks';
@@ -28,7 +29,7 @@ import { INSERT_ABOVE_ACTIONS } from './actions/consts.js';
 import { createTextRenderer } from './messages/text.js';
 import { AIProvider } from './provider.js';
 import { reportResponse } from './utils/action-reporter.js';
-import { findNoteBlockModel, getService } from './utils/edgeless.js';
+import { getService } from './utils/edgeless.js';
 import {
   copyTextAnswer,
   insertAbove,
@@ -98,7 +99,7 @@ function createNewNote(host: EditorHost): AIItemConfig {
       const { selectedBlocks } = getSelections(host);
       if (!selectedBlocks || !selectedBlocks.length) return;
       const firstBlock = selectedBlocks[0];
-      const noteModel = findNoteBlockModel(firstBlock);
+      const noteModel = findNoteBlockModel(firstBlock.model);
       if (!noteModel) return;
 
       // create a new note block at the left of the current note block

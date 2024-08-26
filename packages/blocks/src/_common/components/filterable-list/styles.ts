@@ -1,6 +1,6 @@
+import { PANEL_BASE } from '@blocksuite/affine-shared/styles';
 import { css } from 'lit';
 
-import { PANEL_BASE } from '../../styles.js';
 import { scrollbarStyle } from '../utils.js';
 
 export const filterableListStyles = css`

@@ -1,13 +1,12 @@
+import { MoreIcon } from '@blocksuite/affine-components/icons';
+import { createLitPortal } from '@blocksuite/affine-components/portal';
+import { stopPropagation } from '@blocksuite/affine-shared/utils';
 import { WithDisposable } from '@blocksuite/block-std';
 import { offset } from '@floating-ui/dom';
 import { LitElement, css, html, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
-
-import { createLitPortal } from '../../../_common/components/portal.js';
-import { MoreIcon } from '../../../_common/icons/edgeless.js';
-import { stopPropagation } from '../../../_common/utils/event.js';
 
 @customElement('zoom-bar-toggle-button')
 export class ZoomBarToggleButton extends WithDisposable(LitElement) {

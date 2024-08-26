@@ -1,14 +1,26 @@
-export * from './block-crud/index.js';
-export * from './model-crud/index.js';
-export * from './selection/index.js';
-export * from './text-crud/index.js';
+import type { BlockCommands } from '@blocksuite/block-std';
 
-declare global {
-  namespace BlockSuite {
-    // if we use `with` or `inline` to add command data either then use a command we
-    // need to update this interface
-    interface CommandContext {
-      currentSelectionPath?: string;
-    }
-  }
-}
+import {
+  getSelectedPeekableBlocksCommand,
+  peekSelectedBlockCommand,
+} from '@blocksuite/affine-components/peek';
+import { textCommands } from '@blocksuite/affine-components/rich-text';
+import {
+  copySelectedModelsCommand,
+  deleteSelectedModelsCommand,
+  draftSelectedModelsCommand,
+  getSelectedModelsCommand,
+} from '@blocksuite/affine-shared/commands';
+
+export const commands: BlockCommands = {
+  // models
+  copySelectedModels: copySelectedModelsCommand,
+  deleteSelectedModels: deleteSelectedModelsCommand,
+  draftSelectedModels: draftSelectedModelsCommand,
+  getSelectedModels: getSelectedModelsCommand,
+  // text
+  ...textCommands,
+  // peekable
+  peekSelectedBlock: peekSelectedBlockCommand,
+  getSelectedPeekableBlocks: getSelectedPeekableBlocksCommand,
+};

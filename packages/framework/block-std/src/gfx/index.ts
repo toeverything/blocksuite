@@ -3,15 +3,15 @@ export {
   convert,
   convertProps,
   derive,
+  field,
   getDerivedProps,
-  getYFieldPropsSet,
+  getFieldPropsSet,
   initializeObservers,
   initializeWatchers,
   local,
   observe,
   updateDerivedProps,
   watch,
-  yfield,
 } from './surface/decorators/index.js';
 export {
   type BaseElementProps,
@@ -28,3 +28,4 @@ export {
   type SurfaceMiddleware,
 } from './surface/surface-model.js';
 export * from './viewport.js';
+export { GfxViewportElement } from './viewport-element.js';

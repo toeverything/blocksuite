@@ -6,7 +6,6 @@ import { assertExists } from '@blocksuite/global/utils';
 import type { Renderer } from '../../../surface-block/canvas-renderer/renderer.js';
 import type { SurfaceRefBlockComponent } from '../../../surface-ref-block/surface-ref-block.js';
 
-import { blockComponentGetter } from '../../../_common/utils/query.js';
 import { isTopLevelBlock } from '../../../root-block/edgeless/utils/query.js';
 
 export const edgelessToBlob = async (
@@ -17,7 +16,7 @@ export const edgelessToBlob = async (
     edgelessElement: BlockSuite.EdgelessModel;
   }
 ): Promise<Blob> => {
-  const { edgelessElement, surfaceRefBlock } = options;
+  const { edgelessElement } = options;
   const rootService = host.spec.getService('affine:page');
   const exportManager = rootService.exportManager;
   const bound = Bound.deserialize(edgelessElement.xywh);
@@ -27,7 +26,6 @@ export const edgelessToBlob = async (
     .edgelessToCanvas(
       options.surfaceRenderer,
       bound,
-      model => blockComponentGetter(model, surfaceRefBlock.host.view),
       undefined,
       isBlock ? [edgelessElement] : undefined,
       isBlock ? undefined : [edgelessElement],

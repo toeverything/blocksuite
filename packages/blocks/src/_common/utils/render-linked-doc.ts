@@ -1,7 +1,9 @@
+import type { ImageBlockModel, NoteBlockModel } from '@blocksuite/affine-model';
 import type { EditorHost } from '@blocksuite/block-std';
 
-import { PathFinder } from '@blocksuite/block-std';
-import { Bound } from '@blocksuite/global/utils';
+import { NoteDisplayMode } from '@blocksuite/affine-model';
+import { getBlockProps, matchFlavours } from '@blocksuite/affine-shared/utils';
+import { Bound, getCommonBound } from '@blocksuite/global/utils';
 import { assertExists } from '@blocksuite/global/utils';
 import {
   type BlockModel,
@@ -13,8 +15,7 @@ import { type TemplateResult, css, render } from 'lit';
 
 import type { EmbedLinkedDocBlockComponent } from '../../embed-linked-doc-block/embed-linked-doc-block.js';
 import type { EmbedSyncedDocCard } from '../../embed-synced-doc-block/components/embed-synced-doc-card.js';
-import type { ImageBlockModel } from '../../image-block/index.js';
-import type { NoteBlockModel } from '../../note-block/note-model.js';
+import type { DocMode } from '../types.js';
 
 import { GfxBlockModel } from '../../root-block/edgeless/block-model.js';
 import {
@@ -23,12 +24,8 @@ import {
 } from '../../root-block/edgeless/utils/clone-utils.js';
 import { isNoteBlock } from '../../root-block/edgeless/utils/query.js';
 import { SpecProvider } from '../../specs/utils/spec-provider.js';
-import { getCommonBound } from '../../surface-block/utils/bound.js';
 import { getSurfaceBlock } from '../../surface-ref-block/utils.js';
 import { EMBED_CARD_HEIGHT } from '../consts.js';
-import { type DocMode, NoteDisplayMode } from '../types.js';
-import { getBlockProps } from './block-props.js';
-import { matchFlavours } from './model.js';
 
 export const embedNoteContentStyles = css`
   .affine-embed-doc-content-note-blocks affine-divider,
@@ -359,7 +356,7 @@ function renderSurfaceRef(
   );
 
   card.surfaceRefRenderer = card.surfaceRefService.getRenderer(
-    PathFinder.id(card.path),
+    card.model.id,
     linkedDoc
   );
 

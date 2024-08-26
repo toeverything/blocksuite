@@ -1,6 +1,7 @@
 import type { PointerEventState } from '@blocksuite/block-std';
 import type { IBound, IVec } from '@blocksuite/global/utils';
 
+import { ShapeType } from '@blocksuite/affine-model';
 import { Bound, noop } from '@blocksuite/global/utils';
 
 import type { ConnectorMode } from '../../../../surface-block/index.js';
@@ -12,7 +13,6 @@ import {
   type ConnectorElementModel,
   GroupElementModel,
   ShapeElementModel,
-  ShapeType,
 } from '../../../../surface-block/index.js';
 import {
   ConnectorEndpointLocations,

@@ -1,16 +1,16 @@
 import type { EditorHost } from '@blocksuite/block-std';
 
-import { assertExists } from '@blocksuite/global/utils';
-import { type TemplateResult, html } from 'lit';
-
-import { matchFlavours } from '../../../_common/utils/model.js';
-import { createSimplePortal } from '../../components/portal.js';
-import { toast } from '../../components/toast.js';
 import {
   CopyIcon,
   DatabaseTableViewIcon20,
   LinkedDocIcon,
-} from '../../icons/index.js';
+} from '@blocksuite/affine-components/icons';
+import { createSimplePortal } from '@blocksuite/affine-components/portal';
+import { toast } from '@blocksuite/affine-components/toast';
+import { matchFlavours } from '@blocksuite/affine-shared/utils';
+import { assertExists } from '@blocksuite/global/utils';
+import { type TemplateResult, html } from 'lit';
+
 import {
   convertSelectedBlocksToLinkedDoc,
   getTitleFromSelectedModels,
@@ -143,15 +143,7 @@ export const quickActionConfig: QuickActionConfig[] = [
       const autofill = getTitleFromSelectedModels(selectedModels);
       void promptDocTitle(host, autofill).then(title => {
         if (title === null) return;
-        const linkedDoc = convertSelectedBlocksToLinkedDoc(
-          doc,
-          selectedModels,
-          title
-        );
-        const linkedDocService = host.spec.getService(
-          'affine:embed-linked-doc'
-        );
-        linkedDocService.slots.linkedDocCreated.emit({ docId: linkedDoc.id });
+        convertSelectedBlocksToLinkedDoc(doc, selectedModels, title);
         notifyDocCreated(host, doc);
       });
     },

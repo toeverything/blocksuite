@@ -190,6 +190,12 @@ export const styles = css`
         cursor: pointer;
     }
 
+    @media print {
+        .header-add-column-button {
+            display: none;
+        }
+    }
+
     .header-add-column-button svg {
         color: var(--affine-icon-color);
     }

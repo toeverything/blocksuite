@@ -1,4 +1,4 @@
-import { NOTE_WIDTH } from '@blocks/_common/consts.js';
+import { NOTE_WIDTH } from '@blocksuite/affine-model';
 import { assertExists } from '@global/utils/index.js';
 import { expect } from '@playwright/test';
 
@@ -58,7 +58,7 @@ test('switch to edgeless mode', async ({ page }) => {
   await assertRichTextInlineRange(page, 0, 5, 0);
 
   await switchEditorMode(page);
-  const locator = page.locator('affine-edgeless-root .edgeless-layer');
+  const locator = page.locator('affine-edgeless-root gfx-viewport');
   await expect(locator).toHaveCount(1);
   await assertRichTexts(page, ['hello']);
   await waitNextFrame(page);
@@ -272,13 +272,13 @@ test('shift click multi select and de-select', async ({ page }) => {
   await clickView(page, [50, 0]);
   await assertEdgelessSelectedRectModel(page, [0, 0, 100, 100]);
 
-  await shiftClickView(page, [150, 0]);
+  await shiftClickView(page, [150, 50]);
   await assertEdgelessSelectedRectModel(page, [0, 0, 200, 100]);
 
   // we will try to write text on a shape element when we dbclick it
 
   await waitNextFrame(page, 500);
-  await shiftClickView(page, [150, 95]);
+  await shiftClickView(page, [150, 50]);
   await assertEdgelessSelectedRectModel(page, [0, 0, 100, 100]);
 });
 

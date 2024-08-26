@@ -1,14 +1,3 @@
-import { WithDisposable } from '@blocksuite/block-std';
-import { Bound } from '@blocksuite/global/utils';
-import { LitElement, html, nothing } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
-import { repeat } from 'lit/directives/repeat.js';
-
-import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
-
-import '../../../_common/components/toolbar/icon-button.js';
-import '../../../_common/components/toolbar/menu-button.js';
-import '../../../_common/components/toolbar/separator.js';
 import {
   AlignBottomIcon,
   AlignDistributeHorizontallyIcon,
@@ -19,7 +8,15 @@ import {
   AlignTopIcon,
   AlignVerticallyIcon,
   SmallArrowDownIcon,
-} from '../../../_common/icons/index.js';
+} from '@blocksuite/affine-components/icons';
+import { WithDisposable } from '@blocksuite/block-std';
+import { Bound } from '@blocksuite/global/utils';
+import { LitElement, html, nothing } from 'lit';
+import { customElement, property } from 'lit/decorators.js';
+import { repeat } from 'lit/directives/repeat.js';
+
+import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
+
 import {
   ConnectorElementModel,
   GroupElementModel,

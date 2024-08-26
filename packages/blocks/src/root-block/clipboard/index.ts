@@ -129,18 +129,33 @@ export class PageClipboard {
       .try(cmd => [
         cmd.getTextSelection().inline<'currentSelectionPath'>((ctx, next) => {
           const textSelection = ctx.currentTextSelection;
-          assertExists(textSelection);
+          if (!textSelection) {
+            return;
+          }
           const end = textSelection.to ?? textSelection.from;
           next({ currentSelectionPath: end.blockId });
         }),
         cmd.getBlockSelections().inline<'currentSelectionPath'>((ctx, next) => {
           const currentBlockSelections = ctx.currentBlockSelections;
-          assertExists(currentBlockSelections);
+          if (!currentBlockSelections) {
+            return;
+          }
           const blockSelection = currentBlockSelections.at(-1);
           if (!blockSelection) {
             return;
           }
           next({ currentSelectionPath: blockSelection.blockId });
+        }),
+        cmd.getImageSelections().inline<'currentSelectionPath'>((ctx, next) => {
+          const currentImageSelections = ctx.currentImageSelections;
+          if (!currentImageSelections) {
+            return;
+          }
+          const imageSelection = currentImageSelections.at(-1);
+          if (!imageSelection) {
+            return;
+          }
+          next({ currentSelectionPath: imageSelection.blockId });
         }),
       ])
       .getBlockIndex()

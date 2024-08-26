@@ -1,26 +1,27 @@
+import type { FrameBlockModel } from '@blocksuite/affine-model';
+
+import { NoteIcon, RenameIcon } from '@blocksuite/affine-components/icons';
+import { toast } from '@blocksuite/affine-components/toast';
+import { renderToolbarSeparator } from '@blocksuite/affine-components/toolbar';
+import { type ColorScheme, NoteDisplayMode } from '@blocksuite/affine-model';
+import { matchFlavours } from '@blocksuite/affine-shared/utils';
 import { WithDisposable } from '@blocksuite/block-std';
-import { deserializeXYWH, serializeXYWH } from '@blocksuite/global/utils';
+import {
+  countBy,
+  deserializeXYWH,
+  maxBy,
+  serializeXYWH,
+} from '@blocksuite/global/utils';
 import { LitElement, html, nothing } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { join } from 'lit/directives/join.js';
 import { when } from 'lit/directives/when.js';
 
-import type { ColorScheme } from '../../../_common/theme/theme-observer.js';
-import type { FrameBlockModel } from '../../../frame-block/index.js';
 import type { EdgelessColorPickerButton } from '../../edgeless/components/color-picker/button.js';
 import type { PickColorEvent } from '../../edgeless/components/color-picker/types.js';
 import type { ColorEvent } from '../../edgeless/components/panel/color-panel.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 
-import { toast } from '../../../_common/components/toast.js';
-import '../../../_common/components/toolbar/icon-button.js';
-import '../../../_common/components/toolbar/menu-button.js';
-import '../../../_common/components/toolbar/separator.js';
-import { renderToolbarSeparator } from '../../../_common/components/toolbar/separator.js';
-import { NoteIcon, RenameIcon } from '../../../_common/icons/index.js';
-import { NoteDisplayMode } from '../../../_common/types.js';
-import { countBy, maxBy } from '../../../_common/utils/iterable.js';
-import { matchFlavours } from '../../../_common/utils/model.js';
 import {
   packColor,
   packColorsWithColorScheme,

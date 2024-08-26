@@ -2,23 +2,25 @@ import type { PointerEventState } from '@blocksuite/block-std';
 import type { IVec } from '@blocksuite/global/utils';
 import type { IPoint } from '@blocksuite/global/utils';
 
-import { Bound, Vec, noop } from '@blocksuite/global/utils';
+import { ThemeObserver } from '@blocksuite/affine-shared/theme';
+import {
+  Bound,
+  Vec,
+  getBoundFromPoints,
+  getPolygonPathFromPoints,
+  linePolygonIntersects,
+  noop,
+  pointInPolygon,
+  rotatePoints,
+} from '@blocksuite/global/utils';
 
 import type { EdgelessTool } from '../../types.js';
 
-import { ThemeObserver } from '../../../../_common/theme/theme-observer.js';
 import { LassoMode } from '../../../../_common/types.js';
 import {
   Overlay,
-  getBoundFromPoints,
   getSvgPathFromStroke,
 } from '../../../../surface-block/index.js';
-import {
-  getPolygonPathFromPoints,
-  linePolygonIntersects,
-  pointInPolygon,
-  rotatePoints,
-} from '../../../../surface-block/utils/math-utils.js';
 import { EdgelessToolController } from './edgeless-tool.js';
 
 class LassoOverlay extends Overlay {

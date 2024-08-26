@@ -1,26 +1,25 @@
+import type { NoteBlockModel, RootBlockModel } from '@blocksuite/affine-model';
+import type { Viewport } from '@blocksuite/affine-shared/types';
 import type { PointerEventState } from '@blocksuite/block-std';
 import type { BlockModel, Text } from '@blocksuite/store';
 
+import { focusTextModel } from '@blocksuite/affine-components/rich-text';
+import { NoteDisplayMode } from '@blocksuite/affine-model';
+import {
+  focusTitle,
+  getDocTitleInlineEditor,
+  getScrollContainer,
+  matchFlavours,
+} from '@blocksuite/affine-shared/utils';
 import { BlockComponent } from '@blocksuite/block-std';
 import { css, html } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
-import type { NoteBlockModel } from '../../note-block/index.js';
 import type { PageRootBlockWidgetName } from '../index.js';
-import type { RootBlockModel } from '../root-model.js';
 import type { PageRootService } from './page-root-service.js';
 
-import {
-  NoteDisplayMode,
-  type Viewport,
-  asyncFocusRichText,
-  buildPath,
-  focusTitle,
-  getDocTitleInlineEditor,
-  matchFlavours,
-} from '../../_common/utils/index.js';
-import { getScrollContainer } from '../../_common/utils/scroll-container.js';
+import { buildPath } from '../../_common/utils/index.js';
 import { PageClipboard } from '../clipboard/index.js';
 import { PageKeyboardManager } from '../keyboard/keyboard-manager.js';
 
@@ -118,7 +117,7 @@ export class PageRootBlockComponent extends BlockComponent<
       matchFlavours(block, ['affine:paragraph', 'affine:list', 'affine:code'])
     );
     if (firstText) {
-      asyncFocusRichText(this.host, firstText.id)?.catch(console.error);
+      focusTextModel(this.std, firstText.id);
     } else {
       const newFirstParagraphId = this.doc.addBlock(
         'affine:paragraph',
@@ -126,7 +125,7 @@ export class PageRootBlockComponent extends BlockComponent<
         defaultNote,
         0
       );
-      asyncFocusRichText(this.host, newFirstParagraphId)?.catch(console.error);
+      focusTextModel(this.std, newFirstParagraphId);
     }
   };
 
@@ -139,7 +138,7 @@ export class PageRootBlockComponent extends BlockComponent<
       this._getDefaultNoteBlock(),
       0
     );
-    asyncFocusRichText(this.host, newFirstParagraphId)?.catch(console.error);
+    focusTextModel(this.std, newFirstParagraphId);
   };
 
   private _createDefaultNoteBlock() {

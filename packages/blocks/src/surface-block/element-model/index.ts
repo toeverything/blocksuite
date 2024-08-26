@@ -1,10 +1,13 @@
+import {
+  BrushElementModel,
+  ConnectorElementModel,
+  GroupElementModel,
+  ShapeElementModel,
+  TextElementModel,
+} from '@blocksuite/affine-model';
+
 import { SurfaceElementModel } from './base.js';
-import { BrushElementModel } from './brush.js';
-import { ConnectorElementModel } from './connector.js';
-import { GroupElementModel } from './group.js';
 import { MindmapElementModel } from './mindmap.js';
-import { ShapeElementModel } from './shape.js';
-import { TextElementModel } from './text.js';
 
 export const elementsCtorMap = {
   group: GroupElementModel,

@@ -8,6 +8,12 @@ import type { BlockService } from '../../service/index.js';
 
 import { BlockComponent } from './block-component.js';
 
+export function isGfxBlockComponent(
+  element: unknown
+): element is GfxBlockComponent {
+  return (element as GfxBlockComponent)?.[GfxElementSymbol] === true;
+}
+
 export const GfxElementSymbol = Symbol('GfxElement');
 
 export abstract class GfxBlockComponent<
@@ -33,7 +39,7 @@ export abstract class GfxBlockComponent<
     if (!xywh$) {
       throw new BlockSuiteError(
         ErrorCode.GfxBlockElementError,
-        'Gfx block element should have `xywh` property.'
+        `Error on rendering '${this.model.flavour}': Gfx block's model should have 'xywh' property.`
       );
     }
 
@@ -60,6 +66,21 @@ export abstract class GfxBlockComponent<
 
   renderPageContent(): unknown {
     return nothing;
+  }
+
+  override async scheduleUpdate() {
+    const parent = this.parentElement;
+
+    if (this.hasUpdated || !parent || !('scheduleUpdateChildren' in parent)) {
+      // eslint-disable-next-line @typescript-eslint/no-floating-promises
+      super.scheduleUpdate();
+    } else {
+      await (parent.scheduleUpdateChildren as (id: string) => Promise<void>)(
+        this.model.id
+      );
+      // eslint-disable-next-line @typescript-eslint/no-floating-promises
+      super.scheduleUpdate();
+    }
   }
 
   toZIndex(): string {
@@ -112,7 +133,7 @@ export function toGfxBlockComponent<
       if (!xywh$) {
         throw new BlockSuiteError(
           ErrorCode.GfxBlockElementError,
-          'Gfx block element should have `xywh` property.'
+          `Error on rendering '${this.model.flavour}': Gfx block's model should have 'xywh' property.`
         );
       }
 
@@ -122,18 +143,6 @@ export function toGfxBlockComponent<
     }
 
     override renderBlock() {
-      const { xywh, index } = this.model as BlockModel<{
-        xywh: SerializedXYWH;
-        index: string;
-      }>;
-
-      if (!xywh || !index) {
-        throw new BlockSuiteError(
-          ErrorCode.GfxBlockElementError,
-          'Gfx block element should have `xywh` and `index` props.'
-        );
-      }
-
       const { x, y, w, h, zIndex } = this.getRenderingRect();
 
       this.style.left = `${x}px`;
@@ -151,6 +160,21 @@ export function toGfxBlockComponent<
 
     renderPageContent() {
       return super.renderBlock();
+    }
+
+    override async scheduleUpdate() {
+      const parent = this.parentElement;
+
+      if (this.hasUpdated || !parent || !('scheduleUpdateChildren' in parent)) {
+        // eslint-disable-next-line @typescript-eslint/no-floating-promises
+        super.scheduleUpdate();
+      } else {
+        await (parent.scheduleUpdateChildren as (id: string) => Promise<void>)(
+          this.model.id
+        );
+        // eslint-disable-next-line @typescript-eslint/no-floating-promises
+        super.scheduleUpdate();
+      }
     }
 
     toZIndex(): string {

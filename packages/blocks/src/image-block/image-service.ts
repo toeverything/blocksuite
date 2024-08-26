@@ -1,3 +1,12 @@
+import {
+  type ImageBlockModel,
+  ImageBlockSchema,
+} from '@blocksuite/affine-model';
+import { ImageSelection } from '@blocksuite/affine-shared/selection';
+import {
+  isInsideEdgelessEditor,
+  matchFlavours,
+} from '@blocksuite/affine-shared/utils';
 import { BlockService } from '@blocksuite/block-std';
 import { Bound, Point } from '@blocksuite/global/utils';
 import { render } from 'lit';
@@ -12,8 +21,6 @@ import {
   type FileDropOptions,
 } from '../_common/components/file-drop-manager.js';
 import { setImageProxyMiddlewareURL } from '../_common/transformers/middlewares.js';
-import { matchFlavours } from '../_common/utils/model.js';
-import { isInsideEdgelessEditor } from '../_common/utils/query.js';
 import { EdgelessRootBlockComponent } from '../root-block/edgeless/edgeless-root-block.js';
 import {
   AFFINE_DRAG_HANDLE_WIDGET,
@@ -24,8 +31,7 @@ import {
   convertDragPreviewDocToEdgeless,
   convertDragPreviewEdgelessToDoc,
 } from '../root-block/widgets/drag-handle/utils.js';
-import { type ImageBlockModel, ImageBlockSchema } from './image-model.js';
-import { ImageSelection } from './image-selection.js';
+import { ImageEdgelessBlockComponent } from './image-edgeless-block.js';
 import { addSiblingImageBlock } from './utils.js';
 
 export class ImageBlockService extends BlockService<ImageBlockModel> {
@@ -44,13 +50,15 @@ export class ImageBlockService extends BlockService<ImageBlockModel> {
       )
         return false;
 
-      const blockComponent = anchorComponent as ImageBlockComponent;
+      const blockComponent = anchorComponent as
+        | ImageBlockComponent
+        | ImageEdgelessBlockComponent;
 
       const isDraggingByDragHandle = !!element?.closest(
         AFFINE_DRAG_HANDLE_WIDGET
       );
       const isDraggingByComponent = blockComponent.contains(element);
-      const isInSurface = blockComponent.isInSurface;
+      const isInSurface = blockComponent instanceof ImageEdgelessBlockComponent;
 
       if (!isInSurface && (isDraggingByDragHandle || isDraggingByComponent)) {
         editorHost.std.selection.setGroup('note', [
@@ -95,7 +103,7 @@ export class ImageBlockService extends BlockService<ImageBlockModel> {
         return false;
 
       const blockComponent = draggingElements[0] as ImageBlockComponent;
-      const isInSurface = blockComponent.isInSurface;
+      const isInSurface = blockComponent instanceof ImageEdgelessBlockComponent;
       const target = captureEventTarget(state.raw.target);
       const isTargetEdgelessContainer =
         target?.classList.contains('edgeless-container');

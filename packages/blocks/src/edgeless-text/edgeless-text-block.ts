@@ -1,8 +1,11 @@
+import type { EdgelessTextBlockModel } from '@blocksuite/affine-model';
 import type { BlockComponent } from '@blocksuite/block-std';
 
+import { ThemeObserver } from '@blocksuite/affine-shared/theme';
+import { matchFlavours } from '@blocksuite/affine-shared/utils';
 import { GfxBlockComponent } from '@blocksuite/block-std';
 import { Bound } from '@blocksuite/global/utils';
-import { type PropertyValueMap, css, html } from 'lit';
+import { css, html } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { type StyleInfo, styleMap } from 'lit/directives/style-map.js';
 
@@ -10,11 +13,8 @@ import type {
   EdgelessRootBlockComponent,
   EdgelessRootService,
 } from '../root-block/index.js';
-import type { EdgelessTextBlockModel } from './edgeless-text-model.js';
 import type { EdgelessTextBlockService } from './edgeless-text-service.js';
 
-import { ThemeObserver } from '../_common/theme/theme-observer.js';
-import { matchFlavours } from '../_common/utils/model.js';
 import { HandleDirection } from '../root-block/edgeless/components/resize/resize-handles.js';
 import {
   DefaultModeDragType,
@@ -38,16 +38,12 @@ export class EdgelessTextBlockComponent extends GfxBlockComponent<
       return;
     }
 
-    const rect = this._textContainer.getBoundingClientRect();
-    const bound = Bound.deserialize(this.model.xywh);
     if (!this.rootService) {
       console.error('rootService is not ready in edgeless-text-block');
       return;
     }
-    if (
-      (this._editing && !this.model.hasMaxWidth) ||
-      rect.width > bound.w * this.rootService.zoom
-    ) {
+
+    if (this._editing && !this.model.hasMaxWidth) {
       this._updateW();
     }
 
@@ -65,7 +61,7 @@ export class EdgelessTextBlockComponent extends GfxBlockComponent<
 
   private _initDragEffect() {
     const edgelessSelection = this.rootService.selection;
-    const selectedRect = this.parentBlock.selectedRect;
+    const selectedRect = this.parentComponent.selectedRect;
     const disposables = this.disposables;
 
     if (!edgelessSelection || !selectedRect) {
@@ -183,7 +179,7 @@ export class EdgelessTextBlockComponent extends GfxBlockComponent<
     this.style.transformOrigin = '0 0';
   }
 
-  override firstUpdated(props: PropertyValueMap<unknown>) {
+  override firstUpdated(props: Map<string, unknown>) {
     super.firstUpdated(props);
 
     const { disposables, rootService } = this;
@@ -371,8 +367,8 @@ export class EdgelessTextBlockComponent extends GfxBlockComponent<
     );
   }
 
-  override get parentBlock() {
-    return super.parentBlock as EdgelessRootBlockComponent;
+  override get parentComponent() {
+    return super.parentComponent as EdgelessRootBlockComponent;
   }
 
   @state()

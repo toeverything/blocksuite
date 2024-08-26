@@ -1,3 +1,4 @@
+import { createLitPortal } from '@blocksuite/affine-components/portal';
 import { EditorHost } from '@blocksuite/block-std';
 import { WithDisposable } from '@blocksuite/block-std';
 import { PropTypes, requiredProperties } from '@blocksuite/block-std';
@@ -10,7 +11,6 @@ import { repeat } from 'lit/directives/repeat.js';
 import type { AIItem } from './ai-item.js';
 import type { AIItemConfig, AIItemGroupConfig } from './types.js';
 
-import { createLitPortal } from '../portal.js';
 import './ai-item.js';
 import {
   SUBMENU_OFFSET_CROSS_AXIS,

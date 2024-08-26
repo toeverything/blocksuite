@@ -1,0 +1,92 @@
+{
+  "name": "@blocksuite/affine-components",
+  "version": "0.16.0",
+  "description": "Default BlockSuite editable blocks.",
+  "type": "module",
+  "repository": "toeverything/blocksuite",
+  "scripts": {
+    "build": "tsc",
+    "test:unit": "nx vite:test --run --passWithNoTests",
+    "test:unit:coverage": "nx vite:test --run --coverage",
+    "test:e2e": "playwright test"
+  },
+  "keywords": [],
+  "author": "toeverything",
+  "license": "MPL-2.0",
+  "dependencies": {
+    "@blocksuite/affine-model": "workspace:*",
+    "@blocksuite/affine-shared": "workspace:*",
+    "@blocksuite/block-std": "workspace:*",
+    "@blocksuite/global": "workspace:*",
+    "@blocksuite/icons": "^2.1.64",
+    "@blocksuite/inline": "workspace:*",
+    "@blocksuite/store": "workspace:*",
+    "@floating-ui/dom": "^1.6.10",
+    "@lit-labs/preact-signals": "^1.0.2",
+    "@lit/context": "^1.1.2",
+    "@lottiefiles/dotlottie-wc": "^0.2.16",
+    "@toeverything/theme": "^1.0.7",
+    "lit": "^3.2.0",
+    "zod": "^3.23.8"
+  },
+  "exports": {
+    ".": "./src/index.ts",
+    "./icons": "./src/icons/index.ts",
+    "./peek": "./src/peek/index.ts",
+    "./portal": "./src/portal/index.ts",
+    "./hover": "./src/hover/index.ts",
+    "./toolbar": "./src/toolbar/index.ts",
+    "./toast": "./src/toast/index.ts",
+    "./rich-text": "./src/rich-text/index.ts",
+    "./caption": "./src/caption/index.ts"
+  },
+  "publishConfig": {
+    "access": "public",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "exports": {
+      ".": {
+        "types": "./dist/index.d.ts",
+        "import": "./dist/index.js"
+      },
+      "./icons": {
+        "types": "./dist/icons/index.d.ts",
+        "import": "./dist/icons/index.js"
+      },
+      "./peek": {
+        "types": "./dist/peek/index.d.ts",
+        "import": "./dist/peek/index.js"
+      },
+      "./portal": {
+        "types": "./dist/portal/index.d.ts",
+        "import": "./dist/portal/index.js"
+      },
+      "./hover": {
+        "types": "./dist/hover/index.d.ts",
+        "import": "./dist/hover/index.js"
+      },
+      "./toolbar": {
+        "types": "./dist/toolbar/index.d.ts",
+        "import": "./dist/toolbar/index.js"
+      },
+      "./toast": {
+        "types": "./dist/toast/index.d.ts",
+        "import": "./dist/toast/index.js"
+      },
+      "./rich-text": {
+        "types": "./dist/rich-text/index.d.ts",
+        "import": "./dist/rich-text/index.js"
+      },
+      "./caption": {
+        "types": "./dist/caption/index.d.ts",
+        "import": "./dist/caption/index.js"
+      }
+    }
+  },
+  "files": [
+    "src",
+    "dist",
+    "!src/__tests__",
+    "!dist/__tests__"
+  ]
+}

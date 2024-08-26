@@ -1,29 +1,33 @@
 import type { EditorHost } from '@blocksuite/block-std';
 
-import { Bound, assertExists } from '@blocksuite/global/utils';
+import {
+  EmbedEdgelessIcon,
+  EmbedPageIcon,
+} from '@blocksuite/affine-components/icons';
+import { Peekable } from '@blocksuite/affine-components/peek';
+import { REFERENCE_NODE } from '@blocksuite/affine-components/rich-text';
+import {
+  type EmbedSyncedDocModel,
+  NoteDisplayMode,
+} from '@blocksuite/affine-model';
+import { ThemeObserver } from '@blocksuite/affine-shared/theme';
+import { assertExists } from '@blocksuite/global/utils';
 import { BlockViewType, DocCollection, type Query } from '@blocksuite/store';
-import { type PropertyValues, html, nothing } from 'lit';
+import { type PropertyValues, html } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { choose } from 'lit/directives/choose.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { guard } from 'lit/directives/guard.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type {
-  EdgelessRootService,
-  RootBlockComponent,
-} from '../root-block/index.js';
+import type { DocMode } from '../_common/types.js';
+import type { EdgelessRootService } from '../root-block/edgeless/edgeless-root-service.js';
+import type { RootBlockComponent } from '../root-block/types.js';
 import type { EmbedSyncedDocCard } from './components/embed-synced-doc-card.js';
-import type { EmbedSyncedDocModel } from './embed-synced-doc-model.js';
 import type { EmbedSyncedDocBlockService } from './embed-synced-doc-service.js';
 
-import { Peekable } from '../_common/components/peekable.js';
 import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../_common/consts.js';
 import { EmbedBlockComponent } from '../_common/embed-block-helper/embed-block-element.js';
-import { EmbedEdgelessIcon, EmbedPageIcon } from '../_common/icons/text.js';
-import { REFERENCE_NODE } from '../_common/inline/presets/nodes/consts.js';
-import { ThemeObserver } from '../_common/theme/theme-observer.js';
-import { type DocMode, NoteDisplayMode } from '../_common/types.js';
 import { isEmptyDoc } from '../_common/utils/render-linked-doc.js';
 import { SpecProvider } from '../specs/utils/spec-provider.js';
 import './components/embed-synced-doc-card.js';
@@ -37,7 +41,7 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockComponent<
   EmbedSyncedDocModel,
   EmbedSyncedDocBlockService
 > {
-  private _buildPreviewSpec = (name: 'page:preview' | 'edgeless:preview') => {
+  protected _buildPreviewSpec = (name: 'page:preview' | 'edgeless:preview') => {
     const nextDepth = this.depth + 1;
     const previewSpecBuilder = SpecProvider.getInstance().getSpec(name);
     const currentDisposables = this.disposables;
@@ -111,42 +115,25 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockComponent<
     ],
   };
 
-  private _renderSyncedView = () => {
+  protected _renderSyncedView = () => {
     const syncedDoc = this.syncedDoc;
-    const isInSurface = this.isInSurface;
     const editorMode = this._syncedDocMode;
 
     assertExists(syncedDoc);
 
-    if (this.isPageMode && !this.isInSurface) {
+    if (this.isPageMode) {
       this.style.width = 'calc(100% + 48px)';
       this.style.marginLeft = '-24px';
       this.style.marginRight = '-24px';
     }
 
-    let containerStyleMap = styleMap({
+    const containerStyleMap = styleMap({
       position: 'relative',
       width: '100%',
     });
-    if (isInSurface) {
-      const scale = this.model.scale ?? 1;
-      const bound = Bound.deserialize(
-        (this.rootService?.getElementById(this.model.id) ?? this.model).xywh
-      );
-      const width = bound.w / scale;
-      const height = bound.h / scale;
-      containerStyleMap = styleMap({
-        width: `${width}px`,
-        height: `${height}px`,
-        minHeight: `${height}px`,
-        transform: `scale(${scale})`,
-        transformOrigin: '0 0',
-      });
-    }
 
     const theme = ThemeObserver.mode;
     const isSelected = !!this.selected?.is('block');
-    const scale = isInSurface ? (this.model.scale ?? 1) : undefined;
 
     this.dataset.nestedEditor = '';
 
@@ -187,11 +174,11 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockComponent<
             [editorMode]: true,
             [theme]: true,
             selected: isSelected,
-            surface: isInSurface,
+            surface: false,
           })}
           @click=${this._handleClick}
           style=${containerStyleMap}
-          ?data-scale=${scale}
+          ?data-scale=${undefined}
         >
           <div class="affine-embed-synced-doc-editor">
             ${this.isPageMode && this._isEmptySyncedDoc
@@ -204,26 +191,19 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockComponent<
                 `
               : guard([editorMode, syncedDoc], renderEditor)}
           </div>
-          ${isInSurface
-            ? nothing
-            : html`
-                <div
-                  class=${classMap({
-                    'affine-embed-synced-doc-header-wrapper': true,
-                    selected: isSelected,
-                  })}
-                >
-                  <div class="affine-embed-synced-doc-header">
-                    ${icon}
-                    <span class="affine-embed-synced-doc-title">
-                      ${this.docTitle}
-                    </span>
-                  </div>
-                </div>
-              `}
-          ${isInSurface
-            ? html` <div class="affine-embed-synced-doc-editor-overlay"></div> `
-            : nothing}
+          <div
+            class=${classMap({
+              'affine-embed-synced-doc-header-wrapper': true,
+              selected: isSelected,
+            })}
+          >
+            <div class="affine-embed-synced-doc-header">
+              ${icon}
+              <span class="affine-embed-synced-doc-title">
+                ${this.docTitle}
+              </span>
+            </div>
+          </div>
         </div>
       `
     );
@@ -231,49 +211,22 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockComponent<
 
   static override styles = blockStyles;
 
+  protected cardStyleMap = styleMap({
+    position: 'relative',
+    display: 'block',
+    width: '100%',
+  });
+
   convertToCard = () => {
-    const { id, doc, pageId, caption, xywh } = this.model;
+    const { doc, pageId, caption } = this.model;
 
-    if (this.isInSurface) {
-      const style = 'vertical';
-      const bound = Bound.deserialize(xywh);
-      bound.w = EMBED_CARD_WIDTH[style];
-      bound.h = EMBED_CARD_HEIGHT[style];
+    const parent = doc.getParent(this.model);
+    assertExists(parent);
+    const index = parent.children.indexOf(this.model);
 
-      const edgelessService = this.rootService;
-      if (!edgelessService) {
-        return;
-      }
+    doc.addBlock('affine:embed-linked-doc', { pageId, caption }, parent, index);
 
-      const newId = edgelessService.addBlock(
-        'affine:embed-linked-doc',
-        { pageId, xywh: bound.serialize(), style, caption },
-        edgelessService.surface
-      );
-
-      this.std.command.exec('reassociateConnectors', {
-        oldId: id,
-        newId,
-      });
-
-      edgelessService.selection.set({
-        editing: false,
-        elements: [newId],
-      });
-    } else {
-      const parent = doc.getParent(this.model);
-      assertExists(parent);
-      const index = parent.children.indexOf(this.model);
-
-      doc.addBlock(
-        'affine:embed-linked-doc',
-        { pageId, caption },
-        parent,
-        index
-      );
-
-      this.std.selection.setGroup('note', []);
-    }
+    this.std.selection.setGroup('note', []);
     doc.deleteBlock(this.model);
   };
 
@@ -330,8 +283,7 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockComponent<
     }
   }
 
-  private _handleClick(_event: MouseEvent) {
-    if (this.isInSurface) return;
+  protected _handleClick(_event: MouseEvent) {
     this._selectBlock();
   }
 
@@ -407,10 +359,6 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockComponent<
     }
   }
 
-  private get isPageMode() {
-    return this._syncedDocMode === 'page';
-  }
-
   override connectedCallback() {
     super.connectedCallback();
 
@@ -431,14 +379,6 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockComponent<
       }
     });
 
-    if (this.isInSurface) {
-      this.disposables.add(
-        this.model.propsUpdated.on(() => {
-          this.requestUpdate();
-        })
-      );
-    }
-
     this._setDocUpdatedAt();
     this.disposables.add(
       this.doc.collection.meta.docMetaUpdated.on(() => {
@@ -446,16 +386,18 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockComponent<
       })
     );
 
-    this._syncedDocMode = this._rootService.docModeService.getMode(
-      this.model.pageId
-    );
-    this._isEmptySyncedDoc = isEmptyDoc(this.syncedDoc, this._syncedDocMode);
-    this.disposables.add(
-      this._rootService.docModeService.onModeChange(mode => {
-        this._syncedDocMode = mode;
-        this._isEmptySyncedDoc = isEmptyDoc(this.syncedDoc, mode);
-      }, this.model.pageId)
-    );
+    if (this._rootService) {
+      this._syncedDocMode = this._rootService.docModeService.getMode(
+        this.model.pageId
+      );
+      this._isEmptySyncedDoc = isEmptyDoc(this.syncedDoc, this._syncedDocMode);
+      this.disposables.add(
+        this._rootService.docModeService.onModeChange(mode => {
+          this._syncedDocMode = mode;
+          this._isEmptySyncedDoc = isEmptyDoc(this.syncedDoc, mode);
+        }, this.model.pageId)
+      );
+    }
 
     this.syncedDoc &&
       this.disposables.add(
@@ -480,13 +422,12 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockComponent<
     // Forward docLinkClicked event from the synced doc
     const syncedDocRootService =
       this.syncedDocEditorHost?.std.spec.getService('affine:page');
-    if (syncedDocRootService) {
+    syncedDocRootService &&
       this.disposables.add(
         syncedDocRootService.slots.docLinkClicked.on(({ docId }) => {
-          this._rootService.slots.docLinkClicked.emit({ docId });
+          this._rootService?.slots.docLinkClicked.emit({ docId });
         })
       );
-    }
 
     this._initEdgelessFitEffect();
   }
@@ -494,17 +435,14 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockComponent<
   override renderBlock() {
     delete this.dataset.nestedEditor;
 
-    const { style, xywh } = this.model;
+    const { style } = this.model;
 
     this._cardStyle = style;
-
-    const bound = Bound.deserialize(xywh);
-    this._width = this.isInSurface ? bound.w : EMBED_CARD_WIDTH[style];
-    this._height = this.isInSurface ? bound.h : EMBED_CARD_HEIGHT[style];
+    this._width = EMBED_CARD_WIDTH[style];
+    this._height = EMBED_CARD_HEIGHT[style];
 
     const syncedDoc = this.syncedDoc;
     const { isLoading, isError, isDeleted, isCycle } = this.blockState;
-    const isInSurface = this.isInSurface;
     const isCardOnly = this.depth >= 1;
 
     if (
@@ -515,28 +453,10 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockComponent<
       isCycle ||
       !syncedDoc
     ) {
-      let cardStyleMap = styleMap({
-        position: 'relative',
-        display: 'block',
-        width: '100%',
-      });
-      if (isInSurface) {
-        const bound = Bound.deserialize(this.model.xywh);
-        const scaleX = bound.w / EMBED_CARD_WIDTH[style];
-        const scaleY = bound.h / EMBED_CARD_HEIGHT[style];
-        cardStyleMap = styleMap({
-          display: 'block',
-          width: `${EMBED_CARD_WIDTH[style]}px`,
-          height: `${EMBED_CARD_HEIGHT[style]}px`,
-          transform: `scale(${scaleX}, ${scaleY})`,
-          transformOrigin: '0 0',
-        });
-      }
-
       return this.renderEmbed(
         () => html`
           <affine-embed-synced-doc-card
-            style=${cardStyleMap}
+            style=${this.cardStyleMap}
             .block=${this}
           ></affine-embed-synced-doc-card>
         `
@@ -574,6 +494,10 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockComponent<
     return this._syncedDocMode;
   }
 
+  protected get isPageMode() {
+    return this._syncedDocMode === 'page';
+  }
+
   get syncedDoc() {
     return this._syncedDocMode === 'page'
       ? this.std.collection.getDoc(this.model.pageId, {
@@ -598,13 +522,13 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockComponent<
   private accessor _error = false;
 
   @state()
-  private accessor _isEmptySyncedDoc: boolean = true;
+  protected accessor _isEmptySyncedDoc: boolean = true;
 
   @state()
   private accessor _loading = false;
 
   @state()
-  private accessor _syncedDocMode: DocMode = 'page';
+  protected accessor _syncedDocMode: DocMode = 'page';
 
   @state()
   accessor depth = 0;

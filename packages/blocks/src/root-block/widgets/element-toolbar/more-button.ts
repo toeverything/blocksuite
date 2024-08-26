@@ -1,30 +1,6 @@
 import type { SurfaceSelection } from '@blocksuite/block-std';
 import type { BlockModel } from '@blocksuite/store';
 
-import { WithDisposable } from '@blocksuite/block-std';
-import { Bound } from '@blocksuite/global/utils';
-import { LitElement, html, nothing } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
-
-import type {
-  AttachmentBlockComponent,
-  BookmarkBlockComponent,
-  EmbedFigmaBlockComponent,
-  EmbedGithubBlockComponent,
-  EmbedLoomBlockComponent,
-  EmbedYoutubeBlockComponent,
-  ImageBlockComponent,
-} from '../../../index.js';
-import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
-
-import { isPeekable, peek } from '../../../_common/components/peekable.js';
-import '../../../_common/components/toolbar/icon-button.js';
-import '../../../_common/components/toolbar/menu-button.js';
-import {
-  type Action,
-  type FatActions,
-  renderActions,
-} from '../../../_common/components/toolbar/utils.js';
 import {
   BringForwardIcon,
   BringToFrontIcon,
@@ -41,7 +17,29 @@ import {
   RefreshIcon,
   SendBackwardIcon,
   SendToBackIcon,
-} from '../../../_common/icons/index.js';
+} from '@blocksuite/affine-components/icons';
+import { isPeekable, peek } from '@blocksuite/affine-components/peek';
+import {
+  type Action,
+  type FatActions,
+  renderActions,
+} from '@blocksuite/affine-components/toolbar';
+import { WithDisposable } from '@blocksuite/block-std';
+import { Bound } from '@blocksuite/global/utils';
+import { LitElement, html, nothing } from 'lit';
+import { customElement, property } from 'lit/decorators.js';
+
+import type {
+  AttachmentBlockComponent,
+  BookmarkBlockComponent,
+  EmbedFigmaBlockComponent,
+  EmbedGithubBlockComponent,
+  EmbedLoomBlockComponent,
+  EmbedYoutubeBlockComponent,
+  ImageBlockComponent,
+} from '../../../index.js';
+import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
+
 import {
   createLinkedDocFromEdgelessElements,
   createLinkedDocFromNote,

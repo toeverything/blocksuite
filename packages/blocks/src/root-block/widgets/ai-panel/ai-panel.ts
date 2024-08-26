@@ -1,5 +1,9 @@
 import type { BaseSelection } from '@blocksuite/block-std';
 
+import {
+  getPageRootByElement,
+  stopPropagation,
+} from '@blocksuite/affine-shared/utils';
 import { WidgetComponent } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import {
@@ -17,11 +21,10 @@ import { customElement, property, query } from 'lit/decorators.js';
 import { choose } from 'lit/directives/choose.js';
 
 import type { AIError } from '../../../_common/components/index.js';
+import type { EdgelessRootService } from '../../edgeless/edgeless-root-service.js';
 import type { AIPanelGenerating } from './components/index.js';
 import type { AffineAIPanelState, AffineAIPanelWidgetConfig } from './type.js';
 
-import { stopPropagation } from '../../../_common/utils/event.js';
-import { getPageRootByElement } from '../../../_common/utils/query.js';
 import { PageRootService } from '../../page/page-root-service.js';
 import { AFFINE_FORMAT_BAR_WIDGET } from '../format-bar/format-bar.js';
 import {
@@ -327,7 +330,8 @@ export class AffineAIPanelWidget extends WidgetComponent {
       if (rootService instanceof PageRootService) {
         rootBoundary = undefined;
       } else {
-        const viewport = rootService.viewport;
+        // TODO circular dependency: instanceof EdgelessRootService
+        const viewport = (rootService as EdgelessRootService).viewport;
         rootBoundary = {
           x: viewport.left,
           y: viewport.top,

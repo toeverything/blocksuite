@@ -1,3 +1,7 @@
+import type { NoteBlockModel } from '@blocksuite/affine-model';
+
+import { NoteBlockSchema } from '@blocksuite/affine-model';
+import { matchFlavours } from '@blocksuite/affine-shared/utils';
 import { BlockService } from '@blocksuite/block-std';
 import { Point } from '@blocksuite/global/utils';
 import { Bound } from '@blocksuite/global/utils';
@@ -7,7 +11,6 @@ import type { EdgelessRootService } from '../root-block/edgeless/edgeless-root-s
 import type { DragHandleOption } from '../root-block/widgets/drag-handle/config.js';
 import type { EdgelessNoteBlockComponent } from './note-edgeless-block.js';
 
-import { matchFlavours } from '../_common/utils/model.js';
 import {
   AFFINE_DRAG_HANDLE_WIDGET,
   AffineDragHandleWidget,
@@ -16,15 +19,6 @@ import {
   captureEventTarget,
   getDuplicateBlocks,
 } from '../root-block/widgets/drag-handle/utils.js';
-import { focusBlockEnd } from './commands/focus-block-end.js';
-import { focusBlockStart } from './commands/focus-block-start.js';
-import {
-  registerTextStyleCommands,
-  selectBlock,
-  selectBlocksBetween,
-  updateBlockType,
-} from './commands/index.js';
-import { type NoteBlockModel, NoteBlockSchema } from './note-model.js';
 
 export class NoteBlockService extends BlockService<NoteBlockModel> {
   private _dragHandleOption: DragHandleOption = {
@@ -120,17 +114,43 @@ export class NoteBlockService extends BlockService<NoteBlockModel> {
   override mounted() {
     super.mounted();
 
-    this.std.command
-      .add('selectBlocksBetween', selectBlocksBetween)
-      .add('selectBlock', selectBlock)
-      .add('focusBlockStart', focusBlockStart)
-      .add('focusBlockEnd', focusBlockEnd)
-      .add('updateBlockType', updateBlockType);
-
-    registerTextStyleCommands(this.std);
-
     this.disposables.add(
       AffineDragHandleWidget.registerOption(this._dragHandleOption)
     );
+
+    this.bindHotKey({
+      Tab: ctx => {
+        const { success } = this.std.command.exec('indentBlocks');
+
+        if (!success) return;
+
+        ctx.get('keyboardState').raw.preventDefault();
+        return true;
+      },
+      'Shift-Tab': ctx => {
+        const { success } = this.std.command.exec('dedentBlocks');
+
+        if (!success) return;
+
+        ctx.get('keyboardState').raw.preventDefault();
+        return true;
+      },
+      'Mod-Backspace': ctx => {
+        const { success } = this.std.command.exec('dedentBlocksToRoot');
+
+        if (!success) return;
+
+        ctx.get('keyboardState').raw.preventDefault();
+        return true;
+      },
+    });
+  }
+}
+
+declare global {
+  namespace BlockSuite {
+    interface BlockServices {
+      'affine:note': NoteBlockService;
+    }
   }
 }

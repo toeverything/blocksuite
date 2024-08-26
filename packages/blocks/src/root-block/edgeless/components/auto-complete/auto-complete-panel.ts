@@ -1,5 +1,24 @@
+import type {
+  Color,
+  Connection,
+  NoteBlockModel,
+} from '@blocksuite/affine-model';
 import type { XYWH } from '@blocksuite/global/utils';
 
+import { FrameIcon, SmallNoteIcon } from '@blocksuite/affine-components/icons';
+import { FontFamilyIcon } from '@blocksuite/affine-components/icons';
+import {
+  DEFAULT_NOTE_BACKGROUND_COLOR,
+  DEFAULT_SHAPE_FILL_COLOR,
+  DEFAULT_SHAPE_STROKE_COLOR,
+  DEFAULT_TEXT_COLOR,
+  FontFamily,
+  FontStyle,
+  FontWeight,
+  ShapeStyle,
+  ShapeType,
+} from '@blocksuite/affine-model';
+import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import { WithDisposable } from '@blocksuite/block-std';
 import { serializeXYWH } from '@blocksuite/global/utils';
 import { Bound, Vec } from '@blocksuite/global/utils';
@@ -11,34 +30,14 @@ import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type { NoteBlockModel } from '../../../../note-block/note-model.js';
-import type { Color } from '../../../../surface-block/consts.js';
-import type { Connection } from '../../../../surface-block/element-model/connector.js';
-import type { ShapeStyle } from '../../../../surface-block/element-model/shape.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
 
-import { DEFAULT_NOTE_BACKGROUND_COLOR } from '../../../../_common/edgeless/note/consts.js';
-import {
-  FrameIcon,
-  SmallNoteIcon,
-} from '../../../../_common/icons/edgeless.js';
-import { FontFamilyIcon } from '../../../../_common/icons/text.js';
-import { ThemeObserver } from '../../../../_common/theme/theme-observer.js';
-import {
-  FontFamily,
-  FontStyle,
-  FontWeight,
-} from '../../../../surface-block/consts.js';
 import {
   CanvasElementType,
   type ConnectorElementModel,
   type ShapeElementModel,
   TextElementModel,
 } from '../../../../surface-block/element-model/index.js';
-import {
-  DEFAULT_SHAPE_FILL_COLOR,
-  DEFAULT_SHAPE_STROKE_COLOR,
-} from '../../../../surface-block/elements/shape/consts.js';
 import {
   GroupElementModel,
   clamp,
@@ -56,7 +55,6 @@ import {
   mountTextElementEditor,
 } from '../../utils/text.js';
 import '../buttons/tool-icon-button.js';
-import { GET_DEFAULT_TEXT_COLOR } from '../panel/color-panel.js';
 import { ShapeComponentConfig } from '../toolbar/shape/shape-menu-config.js';
 import {
   type AUTO_COMPLETE_TARGET_TYPE,
@@ -261,15 +259,11 @@ export class EdgelessAutoCompletePanel extends WithDisposable(LitElement) {
       'enable_edgeless_text'
     );
     if (textFlag) {
-      const textService = this.edgeless.host.spec.getService(
-        'affine:edgeless-text'
-      );
-      const textId = textService.initEdgelessTextBlock({
-        edgeless: this.edgeless,
+      const { textId } = this.edgeless.std.command.exec('insertEdgelessText', {
         x: bound.x,
         y: bound.y,
       });
-
+      if (!textId) return;
       edgelessService.updateElement(this.connector.id, {
         target: { id: textId, position },
       });
@@ -289,7 +283,7 @@ export class EdgelessAutoCompletePanel extends WithDisposable(LitElement) {
         textAlign: 'left',
         fontSize: 24,
         fontFamily: FontFamily.Inter,
-        color: GET_DEFAULT_TEXT_COLOR(),
+        color: DEFAULT_TEXT_COLOR,
         fontWeight: FontWeight.Regular,
         fontStyle: FontStyle.Normal,
       });
@@ -389,11 +383,12 @@ export class EdgelessAutoCompletePanel extends WithDisposable(LitElement) {
       const { shapeType, shapeStyle, radius } = currentSource;
       return {
         style: shapeStyle,
-        type: shapeType === 'rect' && radius ? 'roundedRect' : shapeType,
+        type:
+          shapeType === ShapeType.Rect && radius ? 'roundedRect' : shapeType,
       };
     }
     return {
-      style: 'General',
+      style: ShapeStyle.General,
       type: 'note',
     };
   }

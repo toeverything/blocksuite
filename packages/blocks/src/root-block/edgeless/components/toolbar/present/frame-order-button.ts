@@ -1,13 +1,14 @@
+import type { FrameBlockModel } from '@blocksuite/affine-model';
+
+import { FrameOrderAdjustmentIcon } from '@blocksuite/affine-components/icons';
+import { createButtonPopper } from '@blocksuite/affine-shared/utils';
 import { WithDisposable } from '@blocksuite/block-std';
 import { LitElement, css, html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 
-import type { FrameBlockModel } from '../../../../../frame-block/index.js';
 import type { EdgelessRootBlockComponent } from '../../../edgeless-root-block.js';
 import type { EdgelessFrameOrderMenu } from './frame-order-menu.js';
 
-import { FrameOrderAdjustmentIcon } from '../../../../../_common/icons/index.js';
-import { createButtonPopper } from '../../../../../_common/utils/button-popper.js';
 import '../../buttons/tool-icon-button.js';
 import './frame-order-menu.js';
 

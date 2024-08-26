@@ -1,3 +1,9 @@
+import {
+  MindmapStyleFour,
+  MindmapStyleOne,
+  MindmapStyleThree,
+  MindmapStyleTwo,
+} from '@blocksuite/affine-components/icons';
 import { type EditorHost, WithDisposable } from '@blocksuite/block-std';
 import { noop } from '@blocksuite/global/utils';
 import { type Doc, Job } from '@blocksuite/store';
@@ -16,12 +22,6 @@ import type { MindmapElementModel } from '../element-model/mindmap.js';
 import type { SurfaceBlockModel } from '../surface-model.js';
 
 import { MarkdownAdapter } from '../../_common/adapters/markdown.js';
-import {
-  MindmapStyleFour,
-  MindmapStyleOne,
-  MindmapStyleThree,
-  MindmapStyleTwo,
-} from '../../_common/icons/edgeless.js';
 import { MindmapStyle } from '../element-model/utils/mindmap/style.js';
 import { MindmapRootBlock } from './mindmap-root-block.js';
 import { MiniMindmapSchema, MiniMindmapSpecs } from './spec.js';

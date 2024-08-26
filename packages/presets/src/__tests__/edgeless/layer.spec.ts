@@ -262,7 +262,7 @@ test('blocks should rerender when their z-index changed', async () => {
   const assertBlocksContent = () => {
     const blocks = Array.from(
       document.querySelectorAll(
-        'affine-edgeless-root .edgeless-layer > [data-block-id]'
+        'affine-edgeless-root gfx-viewport > [data-block-id]'
       )
     );
 
@@ -486,6 +486,15 @@ describe('group related functionality', () => {
     expect(
       edgeless.querySelectorAll<HTMLCanvasElement>('.indexable-canvas').length
     ).toBe(2);
+
+    Array.from(
+      edgeless.querySelectorAll<HTMLCanvasElement>('.indexable-canvas')
+    ).forEach(canvas => {
+      const rect = canvas.getBoundingClientRect();
+
+      expect(rect.width).toBeGreaterThan(0);
+      expect(rect.height).toBeGreaterThan(0);
+    });
 
     createGroup(
       service,
@@ -849,7 +858,7 @@ test('the actual rendering z-index should satisfy the logic order of their index
 
   const edgeless = getDocRootBlock(doc, editor, 'edgeless');
   const blocks = Array.from(
-    edgeless.querySelectorAll('.edgeless-layer > [data-block-id]')
+    edgeless.querySelectorAll('gfx-viewport > [data-block-id]')
   ) as BlockComponent[];
 
   expect(blocks.length).toBe(indexes.length + 1);

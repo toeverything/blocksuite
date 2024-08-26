@@ -1,3 +1,12 @@
+import {
+  LineColor,
+  PointStyle,
+  SHAPE_TEXT_PADDING,
+  ShapeFillColor,
+  ShapeStyle,
+  ShapeType,
+  StrokeStyle,
+} from '@blocksuite/affine-model';
 import { Bound } from '@blocksuite/global/utils';
 import { DocCollection } from '@blocksuite/store';
 
@@ -8,14 +17,10 @@ import type {
 } from '../../surface-block/index.js';
 
 import { getFontString } from '../../surface-block/canvas-renderer/element-renderer/text/utils.js';
-import { SHAPE_TEXT_PADDING } from '../../surface-block/element-model/shape.js';
 import {
   CanvasElementType,
   ConnectorMode,
   type IShape,
-  ShapeStyle,
-  type ShapeType,
-  StrokeStyle,
   getLineWidth,
   normalizeShapeBound,
 } from '../../surface-block/index.js';
@@ -27,9 +32,9 @@ import {
 } from './layout.js';
 
 export const DEFAULT_SHAPE_PROPS: Partial<IShape> = {
-  shapeType: 'rect' as ShapeType,
-  strokeColor: '--affine-palette-line-blue',
-  fillColor: '--affine-palette-shape-blue',
+  shapeType: ShapeType.Rect,
+  strokeColor: LineColor.Blue,
+  fillColor: ShapeFillColor.Blue,
   radius: 0.1,
   strokeWidth: 2,
   strokeStyle: StrokeStyle.Solid,
@@ -37,12 +42,12 @@ export const DEFAULT_SHAPE_PROPS: Partial<IShape> = {
 };
 
 export const DEFAULT_CONNECTOR_PROPS: Partial<ConnectorElementModel> = {
-  stroke: '--affine-palette-line-black',
+  stroke: LineColor.Black,
   mode: ConnectorMode.Orthogonal,
   strokeWidth: 2,
   strokeStyle: StrokeStyle.Solid,
-  frontEndpointStyle: 'None',
-  rearEndpointStyle: 'None',
+  frontEndpointStyle: PointStyle.None,
+  rearEndpointStyle: PointStyle.None,
 };
 export type TreeNode = {
   // element id in edgeless if it already exists

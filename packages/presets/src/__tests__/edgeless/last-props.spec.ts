@@ -54,7 +54,10 @@ describe('apply last props', () => {
   test('brush', () => {
     const id = service.addElement('brush', {});
     const brush = service.getElementById(id) as BrushElementModel;
-    expect(brush.color).toBe('--affine-palette-line-black');
+    expect(brush.color).toEqual({
+      dark: '--affine-palette-line-white',
+      light: '--affine-palette-line-black',
+    });
     expect(brush.lineWidth).toBe(4);
     service.updateElement(id, { lineWidth: 10 });
     const secondBrush = service.getElementById(

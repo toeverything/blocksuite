@@ -18,19 +18,21 @@ export class DocTitle extends WithDisposable(ShadowlessElement) {
 
     if (event.key === 'Enter' && hasContent && !event.isComposing) {
       event.preventDefault();
+      event.stopPropagation();
 
       const inlineEditor = this._inlineEditor;
-      assertExists(inlineEditor);
-      const inlineRange = inlineEditor.getInlineRange();
-      assertExists(inlineRange);
-
-      const rightText = this._rootModel.title.split(inlineRange.index);
-      this._pageRoot.prependParagraphWithText(rightText);
+      const inlineRange = inlineEditor?.getInlineRange();
+      if (inlineRange) {
+        const rightText = this._rootModel.title.split(inlineRange.index);
+        this._pageRoot.prependParagraphWithText(rightText);
+      }
     } else if (event.key === 'ArrowDown' && hasContent) {
       event.preventDefault();
+      event.stopPropagation();
       this._pageRoot.focusFirstParagraph();
     } else if (event.key === 'Tab') {
       event.preventDefault();
+      event.stopPropagation();
     }
   };
 

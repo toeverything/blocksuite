@@ -1,3 +1,13 @@
+import type { AffineInlineEditor } from '@blocksuite/affine-components/rich-text';
+
+import { ArrowDownIcon } from '@blocksuite/affine-components/icons';
+import { createLitPortal } from '@blocksuite/affine-components/portal';
+import { getInlineEditorByModel } from '@blocksuite/affine-components/rich-text';
+import {
+  isControlledKeyboardEvent,
+  isFuzzyMatch,
+  substringMatchScore,
+} from '@blocksuite/affine-shared/utils';
 import { WithDisposable } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import { autoPlacement, offset } from '@floating-ui/dom';
@@ -6,7 +16,6 @@ import { customElement, property, query, state } from 'lit/decorators.js';
 import { ifDefined } from 'lit/directives/if-defined.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type { AffineInlineEditor } from '../../../_common/inline/presets/affine-inline-specs.js';
 import type {
   SlashMenuActionItem,
   SlashMenuContext,
@@ -17,21 +26,11 @@ import type {
   SlashSubMenu,
 } from './config.js';
 
-import { createLitPortal } from '../../../_common/components/portal.js';
 import {
   cleanSpecifiedTail,
   createKeydownObserver,
   getQuery,
 } from '../../../_common/components/utils.js';
-import { ArrowDownIcon } from '../../../_common/icons/index.js';
-import {
-  getInlineEditorByModel,
-  isControlledKeyboardEvent,
-} from '../../../_common/utils/index.js';
-import {
-  isFuzzyMatch,
-  substringMatchScore,
-} from '../../../_common/utils/string.js';
 import { slashItemToolTipStyle, styles } from './styles.js';
 import {
   getFirstNotDividerItem,

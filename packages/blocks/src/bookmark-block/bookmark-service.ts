@@ -1,3 +1,8 @@
+import {
+  type BookmarkBlockModel,
+  BookmarkBlockSchema,
+} from '@blocksuite/affine-model';
+import { matchFlavours } from '@blocksuite/affine-shared/utils';
 import { BlockService } from '@blocksuite/block-std';
 import { Bound, Point } from '@blocksuite/global/utils';
 import { render } from 'lit';
@@ -8,7 +13,6 @@ import type { BookmarkBlockComponent } from './bookmark-block.js';
 
 import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../_common/consts.js';
 import { LinkPreviewer } from '../_common/embed-block-helper/index.js';
-import { matchFlavours } from '../_common/utils/model.js';
 import {
   AFFINE_DRAG_HANDLE_WIDGET,
   AffineDragHandleWidget,
@@ -18,10 +22,7 @@ import {
   convertDragPreviewDocToEdgeless,
   convertDragPreviewEdgelessToDoc,
 } from '../root-block/widgets/drag-handle/utils.js';
-import {
-  type BookmarkBlockModel,
-  BookmarkBlockSchema,
-} from './bookmark-model.js';
+import { BookmarkEdgelessBlockComponent } from './bookmark-edgeless-block.js';
 
 export class BookmarkBlockService extends BlockService<BookmarkBlockModel> {
   private _dragHandleOption: DragHandleOption = {
@@ -38,14 +39,17 @@ export class BookmarkBlockService extends BlockService<BookmarkBlockModel> {
       )
         return false;
 
-      const blockComponent = anchorComponent as BookmarkBlockComponent;
+      const blockComponent = anchorComponent as
+        | BookmarkBlockComponent
+        | BookmarkEdgelessBlockComponent;
       const element = captureEventTarget(state.raw.target);
 
       const isDraggingByDragHandle = !!element?.closest(
         AFFINE_DRAG_HANDLE_WIDGET
       );
       const isDraggingByComponent = blockComponent.contains(element);
-      const isInSurface = blockComponent.isInSurface;
+      const isInSurface =
+        blockComponent instanceof BookmarkEdgelessBlockComponent;
 
       if (!isInSurface && (isDraggingByDragHandle || isDraggingByComponent)) {
         editorHost.selection.setGroup('note', [
@@ -83,8 +87,11 @@ export class BookmarkBlockService extends BlockService<BookmarkBlockModel> {
       )
         return false;
 
-      const blockComponent = draggingElements[0] as BookmarkBlockComponent;
-      const isInSurface = blockComponent.isInSurface;
+      const blockComponent = draggingElements[0] as
+        | BookmarkBlockComponent
+        | BookmarkEdgelessBlockComponent;
+      const isInSurface =
+        blockComponent instanceof BookmarkEdgelessBlockComponent;
       const target = captureEventTarget(state.raw.target);
       const isTargetEdgelessContainer =
         target?.classList.contains('edgeless-container');

@@ -1,18 +1,19 @@
+import type {
+  EmbedYoutubeModel,
+  EmbedYoutubeStyles,
+} from '@blocksuite/affine-model';
+
+import { OpenIcon } from '@blocksuite/affine-components/icons';
 import { html, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 
-import type { EmbedYoutubeStyles } from './embed-youtube-model.js';
 import type { EmbedYoutubeBlockService } from './embed-youtube-service.js';
 
 import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../_common/consts.js';
 import { EmbedBlockComponent } from '../_common/embed-block-helper/embed-block-element.js';
-import { OpenIcon } from '../_common/icons/text.js';
 import { getEmbedCardIcons } from '../_common/utils/url.js';
-import {
-  type EmbedYoutubeModel,
-  youtubeUrlRegex,
-} from './embed-youtube-model.js';
+import { youtubeUrlRegex } from './embed-youtube-model.js';
 import { YoutubeIcon, styles } from './styles.js';
 import { refreshEmbedYoutubeUrlData } from './utils.js';
 
@@ -23,9 +24,9 @@ export class EmbedYoutubeBlockComponent extends EmbedBlockComponent<
 > {
   override _cardStyle: (typeof EmbedYoutubeStyles)[number] = 'video';
 
-  private _isDragging = false;
+  protected _isDragging = false;
 
-  private _isResizing = false;
+  protected _isResizing = false;
 
   static override styles = styles;
 
@@ -43,11 +44,9 @@ export class EmbedYoutubeBlockComponent extends EmbedBlockComponent<
     );
   };
 
-  private _handleClick(event: MouseEvent) {
+  protected _handleClick(event: MouseEvent) {
     event.stopPropagation();
-    if (!this.isInSurface) {
-      this._selectBlock();
-    }
+    this._selectBlock();
   }
 
   private _handleDoubleClick(event: MouseEvent) {
@@ -120,25 +119,6 @@ export class EmbedYoutubeBlockComponent extends EmbedBlockComponent<
     matchMedia('print').addEventListener('change', () => {
       this._showImage = matchMedia('print').matches;
     });
-
-    if (this.isInSurface) {
-      this.disposables.add(
-        this.model.propsUpdated.on(() => {
-          this.requestUpdate();
-        })
-      );
-
-      this.rootService?.slots.elementResizeStart.on(() => {
-        this._isResizing = true;
-        this._showOverlay = true;
-      });
-
-      this.rootService?.slots.elementResizeEnd.on(() => {
-        this._isResizing = false;
-        this._showOverlay =
-          this._isResizing || this._isDragging || !this._isSelected;
-      });
-    }
   }
 
   override renderBlock() {
@@ -258,13 +238,13 @@ export class EmbedYoutubeBlockComponent extends EmbedBlockComponent<
   }
 
   @state()
-  private accessor _isSelected = false;
+  protected accessor _isSelected = false;
 
   @state()
   private accessor _showImage = false;
 
   @state()
-  private accessor _showOverlay = true;
+  protected accessor _showOverlay = true;
 
   @property({ attribute: false })
   accessor loading = false;

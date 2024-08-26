@@ -1,5 +1,3 @@
-import type { CodeToolbarItem, CodeToolbarMoreItem } from './types.js';
-
 import {
   CancelWrapIcon,
   CaptionIcon,
@@ -7,8 +5,11 @@ import {
   DeleteIcon,
   DuplicateIcon,
   WrapIcon,
-} from '../../../_common/icons/text.js';
-import { isInsidePageEditor } from '../../../_common/utils/query.js';
+} from '@blocksuite/affine-components/icons';
+import { isInsidePageEditor } from '@blocksuite/affine-shared/utils';
+
+import type { CodeToolbarItem, CodeToolbarMoreItem } from './types.js';
+
 import { duplicateCodeBlock } from './utils.js';
 
 export const defaultItems: CodeToolbarItem[] = [

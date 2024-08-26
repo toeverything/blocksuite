@@ -1,13 +1,16 @@
+import { SettingsIcon } from '@blocksuite/affine-components/icons';
+import {
+  CopyIcon,
+  DoneIcon,
+  ExpandCloseIcon,
+} from '@blocksuite/affine-components/icons';
 import { flip, offset } from '@floating-ui/dom';
 import { LitElement, css, html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 
-import type { EmbedHtmlBlockComponent } from '../embed-html-block.js';
+import type { EmbedEdgelessHtmlBlockComponent } from '../embed-edgeless-html-block.js';
 
 import { popMenu } from '../../_common/components/index.js';
-import { SettingsIcon } from '../../_common/icons/edgeless.js';
-import { CopyIcon, ExpandCloseIcon } from '../../_common/icons/text.js';
-import { DoneIcon } from './../../_common/icons/index.js';
 
 @customElement('embed-html-fullscreen-toolbar')
 export class EmbedHtmlFullscreenToolbar extends LitElement {
@@ -118,14 +121,14 @@ export class EmbedHtmlFullscreenToolbar extends LitElement {
 
   private get autoHideToolbar() {
     return (
-      this.embedHtml.rootService?.editPropsStore.getStorage(
+      this.embedHtml.rootService.editPropsStore.getStorage(
         'autoHideEmbedHTMLFullScreenToolbar'
       ) ?? false
     );
   }
 
   private set autoHideToolbar(val: boolean) {
-    this.embedHtml.rootService?.editPropsStore.setStorage(
+    this.embedHtml.rootService.editPropsStore.setStorage(
       'autoHideEmbedHTMLFullScreenToolbar',
       val
     );
@@ -165,7 +168,7 @@ export class EmbedHtmlFullscreenToolbar extends LitElement {
   private accessor _popperVisible = false;
 
   @property({ attribute: false })
-  accessor embedHtml!: EmbedHtmlBlockComponent;
+  accessor embedHtml!: EmbedEdgelessHtmlBlockComponent;
 }
 
 declare global {

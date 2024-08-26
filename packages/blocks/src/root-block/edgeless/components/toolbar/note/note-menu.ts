@@ -1,3 +1,4 @@
+import { AttachmentIcon, LinkIcon } from '@blocksuite/affine-components/icons';
 import { LitElement, css, html } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
@@ -5,7 +6,6 @@ import { repeat } from 'lit/directives/repeat.js';
 import type { NoteTool } from '../../../controllers/tools/note-tool.js';
 import type { EdgelessTool } from '../../../types.js';
 
-import { AttachmentIcon, LinkIcon } from '../../../../../_common/icons/text.js';
 import {
   type NoteChildrenFlavour,
   getImageFilesFromLocal,
@@ -76,14 +76,14 @@ export class EdgelessNoteMenu extends EdgelessToolbarToolMixin(LitElement) {
             control: 'toolbar:general',
             page: 'whiteboard editor',
             module: 'toolbar',
-            type: type.flavour.split(':')[1],
+            type: type.flavour?.split(':')[1],
           });
           if (type.isNewDoc) {
             this.edgeless.service.telemetryService?.track('DocCreated', {
               control: 'toolbar:general',
               page: 'whiteboard editor',
               module: 'edgeless toolbar',
-              type: type.flavour.split(':')[1],
+              type: type.flavour?.split(':')[1],
             });
           }
         }

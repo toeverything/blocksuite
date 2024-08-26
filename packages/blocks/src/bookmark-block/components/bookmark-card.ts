@@ -1,13 +1,15 @@
+import { WebIcon16 } from '@blocksuite/affine-components/icons';
+import { ThemeObserver } from '@blocksuite/affine-shared/theme';
+import { getHostName } from '@blocksuite/affine-shared/utils';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
+import { OpenInNewIcon } from '@blocksuite/icons/lit';
 import { html } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 
 import type { BookmarkBlockComponent } from '../bookmark-block.js';
 
-import { OpenIcon, WebIcon16 } from '../../_common/icons/text.js';
-import { ThemeObserver } from '../../_common/theme/theme-observer.js';
-import { getEmbedCardIcons, getHostName } from '../../_common/utils/url.js';
+import { getEmbedCardIcons } from '../../_common/utils/url.js';
 import { styles } from '../styles.js';
 
 @customElement('bookmark-card')
@@ -16,7 +18,9 @@ export class BookmarkCard extends WithDisposable(ShadowlessElement) {
 
   private _handleClick(event: MouseEvent) {
     event.stopPropagation();
-    if (!this.bookmark.isInSurface) {
+    const model = this.bookmark.model;
+
+    if (model.parent?.flavour !== 'affine:surface') {
       this._selectBlock();
     }
   }
@@ -126,7 +130,9 @@ export class BookmarkCard extends WithDisposable(ShadowlessElement) {
           </div>
           <div class="affine-bookmark-content-url" @click=${this.bookmark.open}>
             <span>${getHostName(url)}</span>
-            <div class="affine-bookmark-content-url-icon">${OpenIcon}</div>
+            <div class="affine-bookmark-content-url-icon">
+              ${OpenInNewIcon({ width: '12', height: '12' })}
+            </div>
           </div>
         </div>
         <div class="affine-bookmark-banner">${bannerImage}</div>

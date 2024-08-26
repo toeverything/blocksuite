@@ -1,11 +1,8 @@
-import type { BlockModel } from '@blocksuite/store';
-
 import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
-import { DisposableGroup, Slot } from '@blocksuite/global/utils';
+import { DisposableGroup } from '@blocksuite/global/utils';
 
 import type { BlockComponent } from '../view/index.js';
 
-import { PathFinder } from '../utils/index.js';
 import {
   type UIEventHandler,
   UIEventState,
@@ -63,32 +60,18 @@ const eventNames = [
 export type EventName = (typeof eventNames)[number];
 export type EventOptions = {
   flavour?: string;
-  path?: string[];
+  blockId?: string;
 };
 export type EventHandlerRunner = {
   fn: UIEventHandler;
   flavour?: string;
-  path?: string[];
-};
-
-export type EventScope = {
-  runners: EventHandlerRunner[];
-  flavours: string[];
-  paths: string[][];
+  blockId?: string;
 };
 
 export class UIEventDispatcher {
   private _active = false;
 
-  private _calculatePath = (model: BlockModel): string[] => {
-    const path: string[] = [];
-    let current: BlockModel | null = model;
-    while (current) {
-      path.push(current.id);
-      current = this.std.doc.getParent(current);
-    }
-    return path.reverse();
-  };
+  private static _activeDispatcher: UIEventDispatcher | null = null;
 
   private _clipboardControl: ClipboardControl;
 
@@ -106,16 +89,6 @@ export class UIEventDispatcher {
     this._keyboardControl.bindHotkey(...args);
 
   disposables = new DisposableGroup();
-
-  /**
-   * @deprecated
-   *
-   * This property is deprecated and will be removed in the future.
-   */
-  slots = {
-    parentScaleChanged: new Slot<number>(),
-    editorHostPanned: new Slot(),
-  };
 
   constructor(public std: BlockSuite.Std) {
     this._pointerControl = new PointerControl(this);
@@ -157,33 +130,46 @@ export class UIEventDispatcher {
     let _dragging = false;
     this.disposables.addFromEvent(this.host, 'pointerdown', () => {
       _dragging = true;
-      this._active = true;
+      this._setActive(true);
     });
     this.disposables.addFromEvent(this.host, 'pointerup', () => {
       _dragging = false;
     });
     this.disposables.addFromEvent(this.host, 'click', () => {
-      this._active = true;
+      this._setActive(true);
     });
     this.disposables.addFromEvent(this.host, 'focusin', () => {
-      this._active = true;
+      this._setActive(true);
     });
     this.disposables.addFromEvent(this.host, 'focusout', e => {
       if (e.relatedTarget && !this.host.contains(e.relatedTarget as Node)) {
-        this._active = false;
+        this._setActive(false);
       }
     });
+    this.disposables.addFromEvent(this.host, 'blur', () => {
+      if (_dragging) {
+        return;
+      }
+
+      this._setActive(false);
+    });
     this.disposables.addFromEvent(this.host, 'pointerenter', () => {
-      this._active = true;
+      if (this._isActiveElementOutsideHost()) {
+        return;
+      }
+
+      this._setActive(true);
     });
     this.disposables.addFromEvent(this.host, 'pointerleave', () => {
       if (
-        (!document.activeElement ||
-          !this.host.contains(document.activeElement)) &&
-        !_dragging
+        (document.activeElement &&
+          this.host.contains(document.activeElement)) ||
+        _dragging
       ) {
-        this._active = false;
+        return;
       }
+
+      this._setActive(false);
     });
   }
 
@@ -192,27 +178,9 @@ export class UIEventDispatcher {
     if (!handlers) return;
 
     const selections = this._currentSelections;
-    const seen: Record<string, boolean> = {};
+    const ids = selections.map(selection => selection.blockId);
 
-    const paths = selections
-      .map(selection => selection.blockId)
-      .map(id => this.std.doc.getBlockById(id))
-      .filter((block): block is BlockModel => !!block)
-      .map(block => this._calculatePath(block));
-
-    const flavours = paths
-      .flatMap(path =>
-        path.map(blockId => this.std.doc.getBlockById(blockId)?.flavour)
-      )
-      .filter((flavour): flavour is string => {
-        if (!flavour) return false;
-        if (seen[flavour]) return false;
-        seen[flavour] = true;
-        return true;
-      })
-      .reverse();
-
-    return this.buildEventScope(name, flavours, paths);
+    return this.buildEventScope(name, ids);
   }
 
   private _buildEventScopeByTarget(name: EventName, target: Node) {
@@ -223,32 +191,31 @@ export class UIEventDispatcher {
     const el = target instanceof Element ? target : target.parentElement;
     const block = el?.closest<BlockComponent>('[data-block-id]');
 
-    const path = block?.path;
-    if (!path) {
+    const blockId = block?.blockId;
+    if (!blockId) {
       return this._buildEventScopeBySelection(name);
     }
 
-    const flavours = path
-      .map(blockId => {
-        return this.std.doc.getBlockById(blockId)?.flavour;
-      })
-      .filter((flavour): flavour is string => {
-        return !!flavour;
-      })
-      .reverse();
-
-    return this.buildEventScope(name, flavours, [path]);
+    return this.buildEventScope(name, [blockId]);
   }
 
   private get _currentSelections() {
     return this.std.selection.value;
   }
 
+  private _getDeepActiveElement(): Element | null {
+    let active = document.activeElement;
+    while (active && active.shadowRoot && active.shadowRoot.activeElement) {
+      active = active.shadowRoot.activeElement;
+    }
+    return active;
+  }
+
   private _getEventScope(name: EventName, state: EventSourceState) {
     const handlers = this._handlersMap[name];
     if (!handlers) return;
 
-    let output: EventScope | undefined;
+    let output: EventHandlerRunner[] | undefined;
 
     switch (state.sourceType) {
       case EventScopeSourceType.Selection: {
@@ -273,11 +240,48 @@ export class UIEventDispatcher {
     return output;
   }
 
+  private _isActiveElementOutsideHost(): boolean {
+    const activeElement = this._getDeepActiveElement();
+    return (
+      activeElement !== null &&
+      this._isEditableElementActive(activeElement) &&
+      !this.host.contains(activeElement)
+    );
+  }
+
+  private _isEditableElementActive(element: Element | null): boolean {
+    if (!element) return false;
+    return (
+      element instanceof HTMLInputElement ||
+      element instanceof HTMLTextAreaElement ||
+      (element as HTMLElement).isContentEditable
+    );
+  }
+
+  private _setActive(active: boolean) {
+    if (this.host.doc.readonly) return;
+
+    if (active) {
+      if (UIEventDispatcher._activeDispatcher !== this) {
+        if (UIEventDispatcher._activeDispatcher) {
+          UIEventDispatcher._activeDispatcher._active = false;
+        }
+        UIEventDispatcher._activeDispatcher = this;
+      }
+      this._active = true;
+    } else {
+      if (UIEventDispatcher._activeDispatcher === this) {
+        UIEventDispatcher._activeDispatcher = null;
+      }
+      this._active = false;
+    }
+  }
+
   add(name: EventName, handler: UIEventHandler, options?: EventOptions) {
     const runner: EventHandlerRunner = {
       fn: handler,
       flavour: options?.flavour,
-      path: options?.path,
+      blockId: options?.blockId,
     };
     this._handlersMap[name].unshift(runner);
     return () => {
@@ -291,31 +295,45 @@ export class UIEventDispatcher {
 
   buildEventScope(
     name: EventName,
-    flavours: string[],
-    paths: string[][]
-  ): EventScope | undefined {
+    blocks: string[]
+  ): EventHandlerRunner[] | undefined {
     const handlers = this._handlersMap[name];
     if (!handlers) return;
 
     const globalEvents = handlers.filter(
-      handler => handler.flavour === undefined && handler.path === undefined
+      handler => handler.flavour === undefined && handler.blockId === undefined
     );
 
-    const pathEvents = handlers.filter(handler => {
-      const _path = handler.path;
-      if (_path === undefined) return false;
-      return paths.some(path => PathFinder.includes(path, _path));
-    });
+    let blockIds: string[] = blocks;
+    const events: EventHandlerRunner[] = [];
+    const flavourSeen: Record<string, boolean> = {};
+    while (blockIds.length > 0) {
+      const idHandlers = handlers.filter(
+        handler => handler.blockId && blockIds.includes(handler.blockId)
+      );
 
-    const flavourEvents = handlers.filter(
-      handler => handler.flavour && flavours.includes(handler.flavour)
-    );
+      const flavourHandlers = blockIds
+        .map(blockId => this.std.doc.getBlock(blockId)?.flavour)
+        .filter((flavour): flavour is string => {
+          if (!flavour) return false;
+          if (flavourSeen[flavour]) return false;
+          flavourSeen[flavour] = true;
+          return true;
+        })
+        .flatMap(flavour => {
+          return handlers.filter(handler => handler.flavour === flavour);
+        });
 
-    return {
-      runners: pathEvents.concat(flavourEvents).concat(globalEvents),
-      flavours,
-      paths,
-    };
+      events.push(...idHandlers, ...flavourHandlers);
+      blockIds = blockIds
+        .map(blockId => {
+          const parent = this.std.doc.getParent(blockId);
+          return parent?.id;
+        })
+        .filter((id): id is string => !!id);
+    }
+
+    return events.concat(globalEvents);
   }
 
   mount() {
@@ -325,17 +343,21 @@ export class UIEventDispatcher {
     this._bindEvents();
   }
 
-  run(name: EventName, context: UIEventStateContext, scope?: EventScope) {
+  run(
+    name: EventName,
+    context: UIEventStateContext,
+    runners?: EventHandlerRunner[]
+  ) {
     if (!this.active) return;
 
     const sourceState = context.get('sourceState');
-    if (!scope) {
-      scope = this._getEventScope(name, sourceState);
-      if (!scope) {
+    if (!runners) {
+      runners = this._getEventScope(name, sourceState);
+      if (!runners) {
         return;
       }
     }
-    for (const runner of scope.runners) {
+    for (const runner of runners) {
       const { fn } = runner;
       const result = fn(context);
       if (result) {
