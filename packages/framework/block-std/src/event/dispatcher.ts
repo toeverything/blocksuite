@@ -1,5 +1,5 @@
 import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
-import { DisposableGroup, Slot } from '@blocksuite/global/utils';
+import { DisposableGroup } from '@blocksuite/global/utils';
 
 import type { BlockComponent } from '../view/index.js';
 
@@ -71,6 +71,8 @@ export type EventHandlerRunner = {
 export class UIEventDispatcher {
   private _active = false;
 
+  private static _activeDispatcher: UIEventDispatcher | null = null;
+
   private _clipboardControl: ClipboardControl;
 
   private _handlersMap = Object.fromEntries(
@@ -87,16 +89,6 @@ export class UIEventDispatcher {
     this._keyboardControl.bindHotkey(...args);
 
   disposables = new DisposableGroup();
-
-  /**
-   * @deprecated
-   *
-   * This property is deprecated and will be removed in the future.
-   */
-  slots = {
-    parentScaleChanged: new Slot<number>(),
-    editorHostPanned: new Slot(),
-  };
 
   constructor(public std: BlockSuite.Std) {
     this._pointerControl = new PointerControl(this);
@@ -138,33 +130,46 @@ export class UIEventDispatcher {
     let _dragging = false;
     this.disposables.addFromEvent(this.host, 'pointerdown', () => {
       _dragging = true;
-      this._active = true;
+      this._setActive(true);
     });
     this.disposables.addFromEvent(this.host, 'pointerup', () => {
       _dragging = false;
     });
     this.disposables.addFromEvent(this.host, 'click', () => {
-      this._active = true;
+      this._setActive(true);
     });
     this.disposables.addFromEvent(this.host, 'focusin', () => {
-      this._active = true;
+      this._setActive(true);
     });
     this.disposables.addFromEvent(this.host, 'focusout', e => {
       if (e.relatedTarget && !this.host.contains(e.relatedTarget as Node)) {
-        this._active = false;
+        this._setActive(false);
       }
     });
+    this.disposables.addFromEvent(this.host, 'blur', () => {
+      if (_dragging) {
+        return;
+      }
+
+      this._setActive(false);
+    });
     this.disposables.addFromEvent(this.host, 'pointerenter', () => {
-      this._active = true;
+      if (this._isActiveElementOutsideHost()) {
+        return;
+      }
+
+      this._setActive(true);
     });
     this.disposables.addFromEvent(this.host, 'pointerleave', () => {
       if (
-        (!document.activeElement ||
-          !this.host.contains(document.activeElement)) &&
-        !_dragging
+        (document.activeElement &&
+          this.host.contains(document.activeElement)) ||
+        _dragging
       ) {
-        this._active = false;
+        return;
       }
+
+      this._setActive(false);
     });
   }
 
@@ -198,6 +203,14 @@ export class UIEventDispatcher {
     return this.std.selection.value;
   }
 
+  private _getDeepActiveElement(): Element | null {
+    let active = document.activeElement;
+    while (active && active.shadowRoot && active.shadowRoot.activeElement) {
+      active = active.shadowRoot.activeElement;
+    }
+    return active;
+  }
+
   private _getEventScope(name: EventName, state: EventSourceState) {
     const handlers = this._handlersMap[name];
     if (!handlers) return;
@@ -225,6 +238,43 @@ export class UIEventDispatcher {
     }
 
     return output;
+  }
+
+  private _isActiveElementOutsideHost(): boolean {
+    const activeElement = this._getDeepActiveElement();
+    return (
+      activeElement !== null &&
+      this._isEditableElementActive(activeElement) &&
+      !this.host.contains(activeElement)
+    );
+  }
+
+  private _isEditableElementActive(element: Element | null): boolean {
+    if (!element) return false;
+    return (
+      element instanceof HTMLInputElement ||
+      element instanceof HTMLTextAreaElement ||
+      (element as HTMLElement).isContentEditable
+    );
+  }
+
+  private _setActive(active: boolean) {
+    if (this.host.doc.readonly) return;
+
+    if (active) {
+      if (UIEventDispatcher._activeDispatcher !== this) {
+        if (UIEventDispatcher._activeDispatcher) {
+          UIEventDispatcher._activeDispatcher._active = false;
+        }
+        UIEventDispatcher._activeDispatcher = this;
+      }
+      this._active = true;
+    } else {
+      if (UIEventDispatcher._activeDispatcher === this) {
+        UIEventDispatcher._activeDispatcher = null;
+      }
+      this._active = false;
+    }
   }
 
   add(name: EventName, handler: UIEventHandler, options?: EventOptions) {
