@@ -1,6 +1,5 @@
 import type { ReactiveController } from 'lit';
 
-import { Point, assertExists } from '@blocksuite/global/utils';
 import { Point, Rect, assertExists } from '@blocksuite/global/utils';
 
 import type { InsertToPosition } from '../../../../types.js';

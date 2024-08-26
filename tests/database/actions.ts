@@ -1,5 +1,7 @@
-import type { RichTextCell } from '@blocks/database-block/columns/rich-text/cell-renderer.js';
-import type { RichTextCellEditing } from '@blocks/database-block/columns/rich-text/cell-renderer.js';
+import type {
+  RichTextCell,
+  RichTextCellEditing,
+} from '@blocks/database-block/columns/rich-text/cell-renderer.js';
 import type { ColumnType } from '@blocks/database-block/data-view/view/presets/table/types.js';
 
 import { ZERO_WIDTH_SPACE } from '@inline/consts.js';
@@ -543,3 +545,8 @@ export function getKanbanCard(
   const card = group.locator('affine-data-view-kanban-card').nth(cardIndex);
   return card;
 }
+export const moveToCenterOf = async (page: Page, locator: Locator) => {
+  const box = (await locator.boundingBox())!;
+  expect(box).toBeDefined();
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+};

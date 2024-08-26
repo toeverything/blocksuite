@@ -633,7 +633,9 @@ export async function initDatabaseRowWithData(page: Page, data: string) {
   await waitNextFrame(page, 50);
   await type(page, data);
 }
-
+export const getAddRow = (page: Page): Locator => {
+  return page.locator('.data-view-table-group-add-row');
+};
 export async function initDatabaseDynamicRowWithData(
   page: Page,
   data: string,

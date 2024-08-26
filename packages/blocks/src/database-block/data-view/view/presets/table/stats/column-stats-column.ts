@@ -1,3 +1,4 @@
+import { ArrowDownIcon } from '@blocksuite/affine-components/icons';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { Text } from '@blocksuite/store';
 import { SignalWatcher, computed, signal } from '@lit-labs/preact-signals';
@@ -13,7 +14,6 @@ import {
   type Menu,
   popFilterableSimpleMenu,
 } from '../../../../../../_common/components/index.js';
-import { ArrowDownIcon } from '../../../../../../_common/icons/index.js';
 import { statsFunctions } from '../../../../common/stats/index.js';
 import { typesystem } from '../../../../logical/typesystem.js';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../consts.js';

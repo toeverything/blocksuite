@@ -176,15 +176,8 @@ export class TableGroup extends SignalWatcher(
               ${PlusIcon}<span>New Record</span>
             </div>
           </div>`}
-      ${this.view.featureFlags$.value.enable_database_statistics
-        ? html`
-            <affine-database-column-stats
-              .view="${this.view}"
-              .group=${this.group}
-            >
-            </affine-database-column-stats>
-          `
-        : null}
+      <affine-database-column-stats .view="${this.view}" .group=${this.group}>
+      </affine-database-column-stats>
     `;
   }
 
