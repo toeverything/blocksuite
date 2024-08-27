@@ -327,12 +327,22 @@ importers:
       '@toeverything/theme':
         specifier: ^1.0.7
         version: 1.0.7
+      katex:
+        specifier: ^0.16.11
+        version: 0.16.11
       lit:
         specifier: ^3.2.0
         version: 3.2.0
+      shiki:
+        specifier: ^1.12.0
+        version: 1.14.1
       zod:
         specifier: ^3.23.8
         version: 3.23.8
+    devDependencies:
+      '@types/katex':
+        specifier: ^0.16.7
+        version: 0.16.7
 
   packages/affine/model:
     dependencies:
@@ -752,11 +762,8 @@ importers:
       jszip:
         specifier: ^3.10.1
         version: 3.10.1
-      katex:
-        specifier: ^0.16.11
-        version: 0.16.11
       lit:
-        specifier: ^3.2.0
+        specifier: ^3.1.4
         version: 3.2.0
       lz-string:
         specifier: ^1.5.0
@@ -3830,7 +3837,7 @@ packages:
     engines: {node: '>= 0.8.0'}
 
   concat-map@0.0.1:
-    resolution: {integrity: sha512-/Srv4dswyQNBfohGpz9o6Yb3Gz3SrUDqBH5rTuhGR7ahtlbYKnVxw2bCFMRljaA7EXHaXZ8wsHdodFvbkhKmqg==}
+    resolution: {integrity: sha1-2Klr13/Wjfd5OnMDajug1UBdR3s=}
 
   connect-history-api-fallback@2.0.0:
     resolution: {integrity: sha512-U73+6lQFmfiNPrYbXqr6kZ1i1wiRqXnp2nhMsINseWXO8lDau0LGEffJ8kQi4EjLZympVgRdvqjAgiZ1tgzDDA==}

@@ -29,6 +29,7 @@ export class VElement<
       startOffset: this.startOffset,
       endOffset: this.endOffset,
       lineIndex: this.lineIndex,
+      editor: inlineEditor,
     };
 
     const isEmbed = inlineEditor.isEmbed(this.delta);

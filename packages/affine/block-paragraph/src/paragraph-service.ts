@@ -10,10 +10,8 @@ import {
 } from '@blocksuite/affine-components/rich-text';
 import { BlockService } from '@blocksuite/block-std';
 
-export class ParagraphBlockService<
-  TextAttributes extends AffineTextAttributes = AffineTextAttributes,
-> extends BlockService<ParagraphBlockModel> {
-  readonly inlineManager = new InlineManager<TextAttributes>();
+export class ParagraphBlockService extends BlockService<ParagraphBlockModel> {
+  readonly inlineManager = new InlineManager<AffineTextAttributes>();
 
   placeholderGenerator: (model: ParagraphBlockModel) => string = model => {
     if (model.type === 'text') {

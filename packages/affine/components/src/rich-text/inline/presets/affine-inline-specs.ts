@@ -22,6 +22,7 @@ export interface AffineTextAttributes {
   } | null;
   background?: string | null;
   color?: string | null;
+  latex?: string | null;
 }
 
 export const basicAffineInlineSpecs: InlineSpecs<AffineTextAttributes>[] = [
@@ -94,6 +95,21 @@ export const basicAffineInlineSpecs: InlineSpecs<AffineTextAttributes>[] = [
     renderer: ({ delta }) => {
       return html`<affine-text .delta=${delta}></affine-text>`;
     },
+  },
+  {
+    name: 'latex',
+    schema: z.string().optional().nullable().catch(undefined),
+    match: delta => typeof delta.attributes?.latex === 'string',
+    renderer: ({ delta, selected, editor, startOffset, endOffset }) => {
+      return html`<affine-latex-node
+        .delta=${delta}
+        .selected=${selected}
+        .editor=${editor}
+        .startOffset=${startOffset}
+        .endOffset=${endOffset}
+      ></affine-latex-node>`;
+    },
+    embed: true,
   },
 ];
 

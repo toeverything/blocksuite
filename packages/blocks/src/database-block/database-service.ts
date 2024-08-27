@@ -1,7 +1,6 @@
 import type { BlockModel, Doc } from '@blocksuite/store';
 
 import {
-  type AffineTextAttributes,
   InlineManager,
   ReferenceNodeConfig,
   affineInlineMarkdownMatches,
@@ -17,12 +16,10 @@ import { DatabaseSelection } from './data-view/common/selection.js';
 import { viewPresets } from './data-view/index.js';
 import { databaseViewInitEmpty, databaseViewInitTemplate } from './utils.js';
 
-export class DatabaseBlockService<
-  TextAttributes extends AffineTextAttributes = AffineTextAttributes,
-> extends BlockService<DatabaseBlockModel> {
+export class DatabaseBlockService extends BlockService<DatabaseBlockModel> {
   databaseViewInitEmpty = databaseViewInitEmpty;
 
-  readonly inlineManager = new InlineManager<TextAttributes>();
+  readonly inlineManager = new InlineManager();
 
   readonly referenceNodeConfig = new ReferenceNodeConfig();
 

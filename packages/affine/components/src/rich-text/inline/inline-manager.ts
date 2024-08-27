@@ -16,7 +16,7 @@ import { type ZodObject, type ZodTypeAny, z } from 'zod';
 export type InlineSpecs<
   TextAttributes extends BaseTextAttributes = BaseTextAttributes,
 > = {
-  name: string;
+  name: keyof TextAttributes | string;
   schema: ZodTypeAny;
   match: (delta: DeltaInsert<TextAttributes>) => boolean;
   renderer: AttributeRenderer<TextAttributes>;
