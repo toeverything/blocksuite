@@ -444,12 +444,12 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
       this._clearMindMapHoverState.forEach(fn => fn());
       this._clearMindMapHoverState = [];
 
-      const hoveredMindmap = this._edgeless.service
+      const hoveredMindmap = this._service
         .pickElement(x, y, { all: true, expand: 40 })
         .filter(
           el =>
-            (el.group as BlockSuite.SurfaceElementModel)?.type === 'mindmap' &&
-            el !== current
+            el !== current &&
+            (el.group as BlockSuite.SurfaceElementModel)?.type === 'mindmap'
         )
         .map(el => ({
           element: el as ShapeElementModel,
@@ -500,7 +500,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
       }
     }
 
-    const frame = this._edgeless.service.frame.selectFrame(this._toBeMoved);
+    const frame = this._service.frame.selectFrame(this._toBeMoved);
     frame
       ? this._surface.overlays.frame.highlight(frame as FrameBlockModel)
       : this._surface.overlays.frame.clear();
