@@ -5,6 +5,7 @@ import type { DocCollection } from '@blocksuite/store';
 
 import {
   AffineFormatBarWidget,
+  DocMode,
   EdgelessEditorBlockSpecs,
   PageEditorBlockSpecs,
   createDocModeService,
@@ -30,7 +31,7 @@ function setDocModeFromUrlParams(service: DocModeService) {
   const params = new URLSearchParams(location.search);
   const paramMode = params.get('mode');
   if (paramMode) {
-    const docMode = paramMode === 'page' ? 'page' : 'edgeless';
+    const docMode = paramMode === 'page' ? DocMode.Page : DocMode.Edgeless;
     service.setMode(docMode);
   }
 }
@@ -68,7 +69,7 @@ export async function mountDefaultDocEditor(collection: DocCollection) {
   });
   editor.mode = modeService.getMode();
   editor.doc = doc;
-  editor.slots.docLinkClicked.on(({ docId }) => {
+  editor.slots.docLinkClicked.on(({ pageId: docId }) => {
     const target = collection.getDoc(docId);
     if (!target) {
       throw new Error(`Failed to jump to doc ${docId}`);

@@ -304,6 +304,12 @@ export const FontLinkedDocIcon = icons.LinkedPageIcon({
   style: 'vertical-align: middle; font-size: inherit; margin-bottom: 0.1em;',
 });
 
+export const BlockLinkIcon = icons.BlockLinkIcon({
+  width: '1.25em',
+  height: '1.25em',
+  style: 'vertical-align: middle; font-size: inherit; margin-bottom: 0.1em;',
+});
+
 export const LinkedEdgelessIcon = icons.LinkedEdgelessIcon({
   width: '20',
   height: '20',

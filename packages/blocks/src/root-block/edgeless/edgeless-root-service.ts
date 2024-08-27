@@ -1,6 +1,7 @@
 import type {
   FrameBlockModel,
   GroupElementModel,
+  ReferenceInfo,
 } from '@blocksuite/affine-model';
 import type { BlockServiceOptions } from '@blocksuite/block-std';
 import type { PointTestOptions } from '@blocksuite/block-std/gfx';
@@ -115,10 +116,7 @@ export class EdgelessRootService extends RootService {
     elementResizeEnd: new Slot(),
     toggleNoteSlicer: new Slot(),
 
-    docLinkClicked: new Slot<{
-      docId: string;
-      blockId?: string;
-    }>(),
+    docLinkClicked: new Slot<ReferenceInfo>(),
     tagClicked: new Slot<{ tagId: string }>(),
     toolbarLocked: new Slot<boolean>(),
   };

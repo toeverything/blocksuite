@@ -1,8 +1,7 @@
 import type { Disposable } from '@blocksuite/global/utils';
 
+import { DocMode } from '@blocksuite/affine-model';
 import { Slot } from '@blocksuite/global/utils';
-
-import type { DocMode } from '../types.js';
 
 export interface DocModeService {
   setMode: (mode: DocMode, docId?: string) => void;
@@ -14,7 +13,7 @@ export interface DocModeService {
   ) => Disposable;
 }
 
-const DEFAULT_MODE = 'page';
+const DEFAULT_MODE = DocMode.Page;
 const modeMap = new Map<string, DocMode>();
 const slotMap = new Map<string, Slot<DocMode>>();
 
@@ -28,7 +27,8 @@ export function createDocModeService(curDocId: string) {
       return modeMap.get(id) ?? DEFAULT_MODE;
     },
     toggleMode: (id: string = curDocId) => {
-      const mode = docModeService.getMode(id) === 'page' ? 'edgeless' : 'page';
+      const mode =
+        docModeService.getMode(id) === 'page' ? DocMode.Edgeless : DocMode.Page;
       docModeService.setMode(mode);
       return mode;
     },

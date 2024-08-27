@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-restricted-imports */
-import type { EdgelessRootService } from '@blocksuite/blocks';
+import type { DocMode, EdgelessRootService } from '@blocksuite/blocks';
 import type { SerializedXYWH } from '@blocksuite/global/utils';
 import type { DeltaInsert } from '@blocksuite/inline/types';
 import type { AffineEditorContainer, CommentPanel } from '@blocksuite/presets';
@@ -686,7 +686,7 @@ export class DebugMenu extends ShadowlessElement {
     return this.editor.mode;
   }
 
-  set mode(value: 'page' | 'edgeless') {
+  set mode(value: DocMode) {
     this.editor.mode = value;
   }
 

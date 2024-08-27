@@ -1,5 +1,6 @@
 import type { BlockCollection } from '@blocksuite/store';
 
+import { DocMode } from '@blocksuite/blocks';
 import { AffineSchemas } from '@blocksuite/blocks/schemas';
 import { assertExists } from '@blocksuite/global/utils';
 import { DocCollection, Text } from '@blocksuite/store';
@@ -43,7 +44,7 @@ function initCollection(collection: DocCollection) {
 
 async function createEditor(
   collection: DocCollection,
-  mode: 'edgeless' | 'page' = 'page'
+  mode: DocMode = DocMode.Page
 ) {
   const app = document.createElement('div');
   const blockCollection = collection.docs.values().next().value as
@@ -67,7 +68,7 @@ async function createEditor(
   return app;
 }
 
-export async function setupEditor(mode: 'edgeless' | 'page' = 'page') {
+export async function setupEditor(mode: DocMode = DocMode.Page) {
   const collection = new DocCollection(createCollectionOptions());
   collection.meta.initialize();
 

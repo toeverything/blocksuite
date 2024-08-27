@@ -1,5 +1,7 @@
+import type { ReferenceInfo } from '@blocksuite/affine-model';
 import type { InlineEditor, InlineRootElement } from '@blocksuite/inline';
 
+import { ReferenceInfoSchema } from '@blocksuite/affine-model';
 import { html } from 'lit';
 import { z } from 'zod';
 
@@ -16,10 +18,11 @@ export interface AffineTextAttributes {
   strike?: true | null;
   code?: true | null;
   link?: string | null;
-  reference?: {
-    type: 'Subpage' | 'LinkedPage';
-    pageId: string;
-  } | null;
+  reference?:
+    | ({
+        type: 'Subpage' | 'LinkedPage';
+      } & ReferenceInfo)
+    | null;
   background?: string | null;
   color?: string | null;
   latex?: string | null;
@@ -127,8 +130,8 @@ export function getAffineInlineSpecsWithReference(
             'Subpage',
             'LinkedPage',
           ]),
-          pageId: z.string(),
         })
+        .merge(ReferenceInfoSchema)
         .optional()
         .nullable()
         .catch(undefined),

@@ -3,6 +3,7 @@ import type {
   SurfaceRefBlockComponent,
 } from '@blocksuite/blocks';
 
+import { DocMode } from '@blocksuite/blocks';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import { wait } from '../utils/common.js';
@@ -19,7 +20,7 @@ describe('basic', () => {
   let frame = '';
 
   beforeEach(async () => {
-    const cleanup = await setupEditor('edgeless');
+    const cleanup = await setupEditor(DocMode.Edgeless);
     edgelessRoot = getDocRootBlock(doc, editor, 'edgeless');
     service = edgelessRoot.service;
 
@@ -58,7 +59,7 @@ describe('basic', () => {
       noteA
     );
 
-    editor.mode = 'page';
+    editor.mode = DocMode.Page;
     await wait();
 
     expect(
@@ -96,7 +97,7 @@ describe('basic', () => {
       noteA
     );
 
-    editor.mode = 'page';
+    editor.mode = DocMode.Page;
     await wait();
 
     const surfaceRef = document.querySelector(
@@ -133,7 +134,7 @@ describe('basic', () => {
       noteA
     );
 
-    editor.mode = 'page';
+    editor.mode = DocMode.Page;
     await wait();
 
     const surfaceRef = document.querySelector(
@@ -170,7 +171,7 @@ describe('basic', () => {
       noteA
     );
 
-    editor.mode = 'page';
+    editor.mode = DocMode.Page;
     await wait();
 
     const surfaceRef = document.querySelector(

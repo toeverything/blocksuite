@@ -5,6 +5,7 @@ import type {
 
 import { Peekable, isPeekable } from '@blocksuite/affine-components/peek';
 import { REFERENCE_NODE } from '@blocksuite/affine-components/rich-text';
+import { DocMode } from '@blocksuite/affine-model';
 import { Bound } from '@blocksuite/global/utils';
 import { assertExists } from '@blocksuite/global/utils';
 import { DocCollection } from '@blocksuite/store';
@@ -12,7 +13,6 @@ import { html, nothing } from 'lit';
 import { customElement, property, queryAsync, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 
-import type { DocMode } from '../_common/types.js';
 import type { RootBlockComponent } from '../root-block/index.js';
 import type { SurfaceRefBlockService } from '../surface-ref-block/index.js';
 import type { SurfaceRefRenderer } from '../surface-ref-block/surface-ref-renderer.js';
@@ -151,15 +151,15 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockComponent<
   };
 
   open = () => {
-    const linkedDocId = this.model.pageId;
-    if (linkedDocId === this.doc.id) return;
+    const pageId = this.model.pageId;
+    if (pageId === this.doc.id) return;
 
     const rootComponent = this.std.view.viewFromPath('block', [
       this.doc.root?.id ?? '',
     ]) as RootBlockComponent | null;
     assertExists(rootComponent);
 
-    rootComponent.slots.docLinkClicked.emit({ docId: linkedDocId });
+    rootComponent.slots.docLinkClicked.emit({ pageId });
   };
 
   refreshData = () => {
@@ -457,7 +457,7 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockComponent<
   private accessor _docUpdatedAt: Date = new Date();
 
   @state()
-  private accessor _linkedDocMode: DocMode = 'page';
+  private accessor _linkedDocMode: DocMode = DocMode.Page;
 
   @state()
   private accessor _loading = false;

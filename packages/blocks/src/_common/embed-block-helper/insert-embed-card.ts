@@ -1,4 +1,4 @@
-import type { EmbedCardStyle } from '@blocksuite/affine-model';
+import type { DocMode, EmbedCardStyle } from '@blocksuite/affine-model';
 import type { BlockStdScope } from '@blocksuite/block-std';
 import type { BlockModel, Doc } from '@blocksuite/store';
 
@@ -10,7 +10,6 @@ import { getLastNoteBlock } from '@blocksuite/affine-shared/utils';
 import { Bound, Vec } from '@blocksuite/global/utils';
 
 import type { EdgelessRootBlockComponent } from '../../root-block/edgeless/index.js';
-import type { DocMode } from '../types.js';
 
 import { getRootByEditorHost } from '../utils/query.js';
 

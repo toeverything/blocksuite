@@ -95,7 +95,7 @@ async function initEmptyEditor({
           const editor = document.createElement('affine-editor-container');
           editor.doc = doc;
           editor.autofocus = true;
-          editor.slots.docLinkClicked.on(({ docId }) => {
+          editor.slots.docLinkClicked.on(({ pageId: docId }) => {
             const newDoc = collection.getDoc(docId);
             if (!newDoc) {
               throw new Error(`Failed to jump to page ${docId}`);
