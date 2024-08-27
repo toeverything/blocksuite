@@ -1,4 +1,8 @@
-import { EdgelessTextBlockModel, ShapeType } from '@blocksuite/affine-model';
+import {
+  EdgelessTextBlockModel,
+  NoteDisplayMode,
+  ShapeType,
+} from '@blocksuite/affine-model';
 import { matchFlavours } from '@blocksuite/affine-shared/utils';
 import { IS_MAC } from '@blocksuite/global/env';
 import { Bound } from '@blocksuite/global/utils';
@@ -274,7 +278,14 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
           this.rootComponent.service.selection.set({
             elements: [
               ...service.blocks
-                .filter(block => block.group === null)
+                .filter(
+                  block =>
+                    block.group === null &&
+                    !(
+                      matchFlavours(block, ['affine:note']) &&
+                      block.displayMode === NoteDisplayMode.DocOnly
+                    )
+                )
                 .map(block => block.id),
               ...service.elements
                 .filter(el => el.group === null)
@@ -398,9 +409,10 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
           }
 
           const mindmap = elements[0].group as MindmapElementModel;
+          const currentNode = mindmap.getNode(elements[0].id)!;
           const node = mindmap.getNode(elements[0].id)!;
           const parent = mindmap.getParentNode(node.id) ?? node;
-          const id = mindmap.addNode(parent.id);
+          const id = mindmap.addNode(parent.id, currentNode.id, 'after');
           const target = service.getElementById(id) as ShapeElementModel;
 
           requestAnimationFrame(() => {
