@@ -51,6 +51,7 @@ import {
   isEmbedCardBlockComponent,
 } from '../../../_common/components/embed-card/type.js';
 import { getEmbedCardIcons } from '../../../_common/utils/url.js';
+import { isLinkToNode } from '../../../embed-linked-doc-block/utils.js';
 import {
   isAttachmentBlock,
   isBookmarkBlock,
@@ -73,8 +74,6 @@ export class EmbedCardToolbar extends WidgetComponent<
 
   private _embedOptions: EmbedOptions | null = null;
 
-  private _focusBlock: EmbedToolbarBlockComponent | null = null;
-
   private _resetAbortController = () => {
     this._abortController.abort();
     this._abortController = new AbortController();
@@ -84,7 +83,7 @@ export class EmbedCardToolbar extends WidgetComponent<
 
   private get _canConvertToEmbedView() {
     // synced doc entry controlled by awareness flag
-    if (this._focusModel && isEmbedLinkedDocBlock(this._focusModel)) {
+    if (this.focusModel && isEmbedLinkedDocBlock(this.focusModel)) {
       const isSyncedDocEnabled = this.doc.awarenessStore.getFlag(
         'enable_synced_doc_block'
       );
@@ -93,10 +92,10 @@ export class EmbedCardToolbar extends WidgetComponent<
       }
     }
 
-    if (!this._focusBlock) return false;
+    if (!this.focusBlock) return false;
 
     return (
-      'convertToEmbed' in this._focusBlock ||
+      'convertToEmbed' in this.focusBlock ||
       this._embedOptions?.viewType === 'embed'
     );
   }
@@ -112,11 +111,11 @@ export class EmbedCardToolbar extends WidgetComponent<
   }
 
   private get _canShowUrlOptions() {
-    return this._focusModel && 'url' in this._focusModel && this._isCardView;
+    return this.focusModel && 'url' in this.focusModel && this._isCardView;
   }
 
   private _cardStyleMenuButton() {
-    if (this._focusModel && this._canShowCardStylePanel(this._focusModel)) {
+    if (this.focusModel && this._canShowCardStylePanel(this.focusModel)) {
       const { EmbedCardHorizontalIcon, EmbedCardListIcon } =
         getEmbedCardIcons();
 
@@ -160,7 +159,7 @@ export class EmbedCardToolbar extends WidgetComponent<
                   height="76px"
                   aria-label=${name}
                   class=${classMap({
-                    selected: this._focusModel?.style === type,
+                    selected: this.focusModel?.style === type,
                   })}
                   @click=${() => this._setEmbedCardStyle(type)}
                 >
@@ -181,20 +180,20 @@ export class EmbedCardToolbar extends WidgetComponent<
     if (this._isCardView) {
       return;
     }
-    if (!this._focusBlock) {
+    if (!this.focusBlock) {
       return;
     }
 
-    if ('convertToCard' in this._focusBlock) {
-      this._focusBlock.convertToCard();
+    if ('convertToCard' in this.focusBlock) {
+      this.focusBlock.convertToCard();
       return;
     }
 
-    if (!this._focusModel || !('url' in this._focusModel)) {
+    if (!this.focusModel || !('url' in this.focusModel)) {
       return;
     }
 
-    const { doc, url, style, caption } = this._focusModel;
+    const { doc, url, style, caption } = this.focusModel;
 
     let targetFlavour = 'affine:bookmark',
       targetStyle = style;
@@ -211,9 +210,9 @@ export class EmbedCardToolbar extends WidgetComponent<
           )[0];
     }
 
-    const parent = doc.getParent(this._focusModel);
+    const parent = doc.getParent(this.focusModel);
     assertExists(parent);
-    const index = parent.children.indexOf(this._focusModel);
+    const index = parent.children.indexOf(this.focusModel);
 
     doc.addBlock(
       targetFlavour as never,
@@ -222,7 +221,7 @@ export class EmbedCardToolbar extends WidgetComponent<
       index
     );
     this.std.selection.setGroup('note', []);
-    doc.deleteBlock(this._focusModel);
+    doc.deleteBlock(this.focusModel);
   }
 
   private _convertToEmbedView() {
@@ -230,20 +229,20 @@ export class EmbedCardToolbar extends WidgetComponent<
       return;
     }
 
-    if (!this._focusBlock) {
+    if (!this.focusBlock) {
       return;
     }
 
-    if ('convertToEmbed' in this._focusBlock) {
-      this._focusBlock.convertToEmbed();
+    if ('convertToEmbed' in this.focusBlock) {
+      this.focusBlock.convertToEmbed();
       return;
     }
 
-    if (!this._focusModel || !('url' in this._focusModel)) {
+    if (!this.focusModel || !('url' in this.focusModel)) {
       return;
     }
 
-    const { doc, url, style, caption } = this._focusModel;
+    const { doc, url, style, caption } = this.focusModel;
 
     if (!this._embedOptions || this._embedOptions.viewType !== 'embed') {
       return;
@@ -254,9 +253,9 @@ export class EmbedCardToolbar extends WidgetComponent<
       ? style
       : styles.filter(style => style !== 'vertical' && style !== 'cube')[0];
 
-    const parent = doc.getParent(this._focusModel);
+    const parent = doc.getParent(this.focusModel);
     assertExists(parent);
-    const index = parent.children.indexOf(this._focusModel);
+    const index = parent.children.indexOf(this.focusModel);
 
     doc.addBlock(
       flavour as never,
@@ -266,33 +265,33 @@ export class EmbedCardToolbar extends WidgetComponent<
     );
 
     this.std.selection.setGroup('note', []);
-    doc.deleteBlock(this._focusModel);
+    doc.deleteBlock(this.focusModel);
   }
 
   private async _copyBlock() {
-    if (!this._focusModel) {
+    if (!this.focusModel) {
       return;
     }
-    const slice = Slice.fromModels(this.doc, [this._focusModel]);
+    const slice = Slice.fromModels(this.doc, [this.focusModel]);
     await this.std.clipboard.copySlice(slice);
     toast(this.host, 'Copied link to clipboard');
     this._abortController.abort();
   }
 
   private _copyUrl() {
-    if (!this._focusModel || !('url' in this._focusModel)) {
+    if (!this.focusModel || !('url' in this.focusModel)) {
       return;
     }
 
-    navigator.clipboard.writeText(this._focusModel.url).catch(console.error);
+    navigator.clipboard.writeText(this.focusModel.url).catch(console.error);
     toast(this.host, 'Copied link to clipboard');
   }
 
   private _duplicateBlock() {
-    if (!this._focusBlock || !this._focusModel) {
+    if (!this.focusBlock || !this.focusModel) {
       return;
     }
-    const model = this._focusModel;
+    const model = this.focusModel;
     const blockProps = getBlockProps(model);
     const { width, height, xywh, rotate, zIndex, ...duplicateProps } =
       blockProps;
@@ -314,38 +313,35 @@ export class EmbedCardToolbar extends WidgetComponent<
       return true;
     }
     return (
-      this._focusModel &&
-      this._focusBlock &&
-      isEmbedLinkedDocBlock(this._focusModel) &&
-      (!!this._focusBlock.closest('affine-embed-synced-doc-block') ||
-        this._focusModel.pageId === this.doc.id)
+      this.focusModel &&
+      this.focusBlock &&
+      isEmbedLinkedDocBlock(this.focusModel) &&
+      (isLinkToNode(this.focusModel) ||
+        !!this.focusBlock.closest('affine-embed-synced-doc-block') ||
+        this.focusModel.pageId === this.doc.id)
     );
-  }
-
-  private get _focusModel(): EmbedToolbarModel | undefined {
-    return this._focusBlock?.model;
   }
 
   private _hide() {
     this._resetAbortController();
-    this._focusBlock = null;
+    this.focusBlock = null;
     this.hide = true;
   }
 
   private get _isCardView() {
     return (
-      this._focusModel &&
-      (isBookmarkBlock(this._focusModel) ||
-        isEmbedLinkedDocBlock(this._focusModel) ||
+      this.focusModel &&
+      (isBookmarkBlock(this.focusModel) ||
+        isEmbedLinkedDocBlock(this.focusModel) ||
         this._embedOptions?.viewType === 'card')
     );
   }
 
   private get _isEmbedView() {
     return (
-      this._focusModel &&
-      !isBookmarkBlock(this._focusModel) &&
-      (isEmbedSyncedDocBlock(this._focusModel) ||
+      this.focusModel &&
+      !isBookmarkBlock(this.focusModel) &&
+      (isEmbedSyncedDocBlock(this.focusModel) ||
         this._embedOptions?.viewType === 'embed')
     );
   }
@@ -370,7 +366,7 @@ export class EmbedCardToolbar extends WidgetComponent<
           action: () => this._duplicateBlock(),
         },
 
-        this._focusModel && this._refreshable(this._focusModel)
+        this.focusModel && this._refreshable(this.focusModel)
           ? {
               type: 'reload',
               label: 'Reload',
@@ -387,7 +383,7 @@ export class EmbedCardToolbar extends WidgetComponent<
           icon: DeleteIcon,
           disabled: this.doc.readonly,
           action: () =>
-            this._focusModel && this.doc.deleteBlock(this._focusModel),
+            this.focusModel && this.doc.deleteBlock(this.focusModel),
         },
       ],
     ]);
@@ -395,9 +391,9 @@ export class EmbedCardToolbar extends WidgetComponent<
 
   get _openButtonDisabled() {
     return (
-      this._focusModel &&
-      isEmbedLinkedDocBlock(this._focusModel) &&
-      this._focusModel.pageId === this.doc.id
+      this.focusModel &&
+      isEmbedLinkedDocBlock(this.focusModel) &&
+      this.focusModel.pageId === this.doc.id
     );
   }
 
@@ -405,20 +401,20 @@ export class EmbedCardToolbar extends WidgetComponent<
     const buttons: MenuItem[] = [];
 
     if (
-      this._focusModel &&
-      (isEmbedLinkedDocBlock(this._focusModel) ||
-        isEmbedSyncedDocBlock(this._focusModel))
+      this.focusModel &&
+      (isEmbedLinkedDocBlock(this.focusModel) ||
+        isEmbedSyncedDocBlock(this.focusModel))
     ) {
       buttons.push({
         label: 'Open this doc',
         icon: ExpandFullSmallIcon,
-        action: () => this._focusBlock?.open(),
+        action: () => this.focusBlock?.open(),
       });
     }
 
     // open in new tab
 
-    const element = this._focusBlock;
+    const element = this.focusBlock;
     if (element && isPeekable(element)) {
       buttons.push({
         label: 'Open in center peek',
@@ -466,7 +462,7 @@ export class EmbedCardToolbar extends WidgetComponent<
   }
 
   private _refreshData() {
-    this._focusBlock?.refreshData();
+    this.focusBlock?.refreshData();
     this._abortController.abort();
   }
 
@@ -488,23 +484,23 @@ export class EmbedCardToolbar extends WidgetComponent<
   }
 
   private _setEmbedCardStyle(style: EmbedCardStyle) {
-    this._focusModel?.doc.updateBlock(this._focusModel, { style });
+    this.focusModel?.doc.updateBlock(this.focusModel, { style });
     this.requestUpdate();
     this._abortController.abort();
   }
 
   private _show() {
-    if (!this._focusBlock) {
+    if (!this.focusBlock) {
       return;
     }
     this.hide = false;
     this._abortController.signal.addEventListener(
       'abort',
-      autoUpdate(this._focusBlock, this, () => {
-        if (!this._focusBlock) {
+      autoUpdate(this.focusBlock, this, () => {
+        if (!this.focusBlock) {
           return;
         }
-        computePosition(this._focusBlock, this, {
+        computePosition(this.focusBlock, this, {
           placement: 'top-start',
           middleware: [flip(), offset(8)],
         })
@@ -518,7 +514,7 @@ export class EmbedCardToolbar extends WidgetComponent<
   }
 
   private _showCaption() {
-    const focusBlock = this._focusBlock;
+    const focusBlock = this.focusBlock;
     if (!focusBlock) {
       return;
     }
@@ -531,26 +527,24 @@ export class EmbedCardToolbar extends WidgetComponent<
   }
 
   private _turnIntoInlineView() {
-    if (this._focusBlock && 'covertToInline' in this._focusBlock) {
-      this._focusBlock.covertToInline();
+    if (this.focusBlock && 'covertToInline' in this.focusBlock) {
+      this.focusBlock.covertToInline();
       return;
     }
 
-    if (!this._focusModel || !('url' in this._focusModel)) {
+    if (!this.focusModel || !('url' in this.focusModel)) {
       return;
     }
 
-    const { doc } = this._focusModel;
-    const parent = doc.getParent(this._focusModel);
-    const index = parent?.children.indexOf(this._focusModel);
+    const { doc } = this.focusModel;
+    const parent = doc.getParent(this.focusModel);
+    const index = parent?.children.indexOf(this.focusModel);
 
     const yText = new DocCollection.Y.Text();
     const insert =
-      this._focusModel.title ||
-      this._focusModel.caption ||
-      this._focusModel.url;
+      this.focusModel.title || this.focusModel.caption || this.focusModel.url;
     yText.insert(0, insert);
-    yText.format(0, insert.length, { link: this._focusModel.url });
+    yText.format(0, insert.length, { link: this.focusModel.url });
     const text = new doc.Text(yText);
     doc.addBlock(
       'affine:paragraph',
@@ -561,7 +555,7 @@ export class EmbedCardToolbar extends WidgetComponent<
       index
     );
 
-    doc.deleteBlock(this._focusModel);
+    doc.deleteBlock(this.focusModel);
   }
 
   private _viewMenuButton() {
@@ -586,7 +580,7 @@ export class EmbedCardToolbar extends WidgetComponent<
         type: 'embed',
         label: 'Embed view',
         action: () => this._convertToEmbedView(),
-        disabled: this.doc.readonly && this._embedViewButtonDisabled,
+        disabled: this.doc.readonly || this._embedViewButtonDisabled,
       });
     }
 
@@ -663,7 +657,7 @@ export class EmbedCardToolbar extends WidgetComponent<
           return;
         }
 
-        this._focusBlock = block as EmbedToolbarBlockComponent;
+        this.focusBlock = block as EmbedToolbarBlockComponent;
         this._show();
       })
     );
@@ -672,7 +666,7 @@ export class EmbedCardToolbar extends WidgetComponent<
   override render() {
     if (this.hide) return nothing;
 
-    const model = this._focusModel;
+    const model = this.focusModel;
     this._embedOptions =
       model && 'url' in model
         ? this._rootService.getEmbedBlockOptions(model.url)
@@ -755,11 +749,18 @@ export class EmbedCardToolbar extends WidgetComponent<
     `;
   }
 
+  get focusModel(): EmbedToolbarModel | undefined {
+    return this.focusBlock?.model;
+  }
+
   @query('.embed-card-toolbar-button.card-style')
   accessor cardStyleButton: HTMLElement | null = null;
 
   @query('.embed-card-toolbar')
   accessor embedCardToolbarElement!: HTMLElement;
+
+  @state()
+  accessor focusBlock: EmbedToolbarBlockComponent | null = null;
 
   @state()
   accessor hide: boolean = true;

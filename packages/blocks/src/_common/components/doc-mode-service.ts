@@ -28,8 +28,11 @@ export function createDocModeService(curDocId: string) {
     },
     toggleMode: (id: string = curDocId) => {
       const mode =
-        docModeService.getMode(id) === 'page' ? DocMode.Edgeless : DocMode.Page;
+        docModeService.getMode(id) === DocMode.Page
+          ? DocMode.Edgeless
+          : DocMode.Page;
       docModeService.setMode(mode);
+
       return mode;
     },
     onModeChange: (handler: (mode: DocMode) => void, id: string = curDocId) => {
