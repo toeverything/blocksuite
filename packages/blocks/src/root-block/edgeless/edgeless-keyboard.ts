@@ -1,4 +1,8 @@
-import { EdgelessTextBlockModel, ShapeType } from '@blocksuite/affine-model';
+import {
+  EdgelessTextBlockModel,
+  NoteDisplayMode,
+  ShapeType,
+} from '@blocksuite/affine-model';
 import { matchFlavours } from '@blocksuite/affine-shared/utils';
 import { IS_MAC } from '@blocksuite/global/env';
 import { Bound } from '@blocksuite/global/utils';
@@ -274,7 +278,14 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
           this.rootComponent.service.selection.set({
             elements: [
               ...service.blocks
-                .filter(block => block.group === null)
+                .filter(
+                  block =>
+                    block.group === null &&
+                    !(
+                      matchFlavours(block, ['affine:note']) &&
+                      block.displayMode === NoteDisplayMode.DocOnly
+                    )
+                )
                 .map(block => block.id),
               ...service.elements
                 .filter(el => el.group === null)
