@@ -1,30 +1,34 @@
 import {
   ArrowUpIcon,
-  ConnectorIcon,
+  ConnectorCWithArrowIcon,
+  ConnectorLWithArrowIcon,
+  ConnectorXWithArrowIcon,
 } from '@blocksuite/affine-components/icons';
-import {
-  DEFAULT_CONNECTOR_COLOR,
-  LineWidth,
-  getConnectorModeName,
-} from '@blocksuite/affine-model';
+import { ConnectorMode, getConnectorModeName } from '@blocksuite/affine-model';
+import { SignalWatcher, computed } from '@lit-labs/preact-signals';
 import { LitElement, css, html } from 'lit';
-import { customElement, state } from 'lit/decorators.js';
+import { customElement } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type { LastProps } from '../../../../../surface-block/managers/edit-session.js';
-
-import { ConnectorMode } from '../../../../../surface-block/index.js';
 import '../../buttons/toolbar-button.js';
 import { getTooltipWithShortcut } from '../../utils.js';
-import {
-  applyLastProps,
-  observeLastProps,
-} from '../common/observe-last-props.js';
 import { QuickToolMixin } from '../mixins/quick-tool.mixin.js';
 import './connector-menu.js';
 
+const IcomMap = {
+  [ConnectorMode.Straight]: ConnectorLWithArrowIcon,
+  [ConnectorMode.Orthogonal]: ConnectorXWithArrowIcon,
+  [ConnectorMode.Curve]: ConnectorCWithArrowIcon,
+};
+
 @customElement('edgeless-connector-tool-button')
-export class EdgelessConnectorToolButton extends QuickToolMixin(LitElement) {
+export class EdgelessConnectorToolButton extends QuickToolMixin(
+  SignalWatcher(LitElement)
+) {
+  private _mode$ = computed(() => {
+    return this.edgeless.service.editPropsStore.lastProps$.value.connector.mode;
+  });
+
   static override styles = css`
     :host {
       display: flex;
@@ -45,44 +49,27 @@ export class EdgelessConnectorToolButton extends QuickToolMixin(LitElement) {
 
   private _toggleMenu() {
     if (this.tryDisposePopper()) return;
+
     const menu = this.createPopper('edgeless-connector-menu', this);
     menu.element.edgeless = this.edgeless;
     menu.element.onChange = (props: Record<string, unknown>) => {
       this.edgeless.service.editPropsStore.recordLastProps(this.type, props);
-      this.updateMenu();
       this.setEdgelessTool({
         type: this.type,
-        mode: this.states.mode!,
+        mode: this._mode$.value,
       });
     };
-    this.updateMenu();
-  }
-
-  override connectedCallback() {
-    super.connectedCallback();
-    const { edgeless, states, stateKeys, type } = this;
-
-    applyLastProps(edgeless.service, type, stateKeys, states);
-
-    this.disposables.add(
-      observeLastProps(edgeless.service, type, stateKeys, states, updates => {
-        this.states = { ...this.states, ...updates };
-        this.updateMenu();
-      })
-    );
   }
 
   override render() {
     const { active } = this;
+    const mode = this._mode$.value;
     const arrowColor = active ? 'currentColor' : 'var(--affine-icon-secondary)';
     return html`
       <edgeless-tool-icon-button
         .tooltip=${this.popper
           ? ''
-          : getTooltipWithShortcut(
-              getConnectorModeName(this.states.mode!),
-              'C'
-            )}
+          : getTooltipWithShortcut(getConnectorModeName(mode), 'C')}
         .tooltipOffset=${17}
         .active=${active}
         .iconContainerPadding=${6}
@@ -92,33 +79,17 @@ export class EdgelessConnectorToolButton extends QuickToolMixin(LitElement) {
           this._toggleMenu();
           this.edgeless.tools.setEdgelessTool({
             type: 'connector',
-            mode: this.states.mode!,
+            mode: mode,
           });
         }}
       >
-        ${ConnectorIcon}
+        ${IcomMap[mode]}
         <span class="arrow-up-icon" style=${styleMap({ color: arrowColor })}>
           ${ArrowUpIcon}
         </span>
       </edgeless-tool-icon-button>
     `;
   }
-
-  updateMenu() {
-    if (!this.popper) return;
-    Object.assign(this.popper.element, this.states);
-  }
-
-  get stateKeys() {
-    return Object.keys(this.states) as Array<keyof typeof this.states>;
-  }
-
-  @state()
-  accessor states: Partial<LastProps['connector']> = {
-    mode: ConnectorMode.Curve,
-    stroke: DEFAULT_CONNECTOR_COLOR,
-    strokeWidth: LineWidth.Two,
-  };
 }
 
 declare global {
