@@ -25,7 +25,7 @@ import {
 } from '../../../../../icons/index.js';
 import { isPeekable, peek } from '../../../../../peek/index.js';
 import {
-  type Action,
+  type MenuItem,
   renderActions,
   renderToolbarSeparator,
 } from '../../../../../toolbar/index.js';
@@ -116,10 +116,10 @@ export class ReferencePopup extends WithDisposable(LitElement) {
       [
         {
           type: 'delete',
-          name: 'Delete',
+          label: 'Delete',
           icon: DeleteIcon,
           disabled: this.doc.readonly,
-          handler: () => this._delete(),
+          action: () => this._delete(),
         },
       ],
     ]);
@@ -145,11 +145,12 @@ export class ReferencePopup extends WithDisposable(LitElement) {
   }
 
   private _openMenuButton() {
-    const buttons: Action[] = [
+    const buttons: MenuItem[] = [
       {
-        name: 'Open this doc',
+        type: 'open-this-doc',
+        label: 'Open this doc',
         icon: ExpandFullSmallIcon,
-        handler: () => this._openDoc(),
+        action: () => this._openDoc(),
         disabled: this._openButtonDisabled,
       },
     ];
@@ -158,9 +159,10 @@ export class ReferencePopup extends WithDisposable(LitElement) {
 
     if (isPeekable(this.target)) {
       buttons.push({
-        name: 'Open in center peek',
+        type: 'open-in-center-peek',
+        label: 'Open in center peek',
         icon: CenterPeekIcon,
-        handler: () => peek(this.target),
+        action: () => peek(this.target),
       });
     }
 
@@ -186,12 +188,12 @@ export class ReferencePopup extends WithDisposable(LitElement) {
         <div data-size="large" data-orientation="vertical">
           ${repeat(
             buttons,
-            button => button.name,
-            ({ name, icon, handler, disabled }) => html`
+            button => button.label,
+            ({ label, icon, action, disabled }) => html`
               <editor-menu-action
-                aria-label=${name}
+                aria-label=${label}
                 ?disabled=${disabled}
-                @click=${handler}
+                @click=${action}
               >
                 ${icon}<span class="label">${name}</span>
               </editor-menu-action>

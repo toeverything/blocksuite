@@ -22,7 +22,7 @@ import {
 import { isPeekable, peek } from '@blocksuite/affine-components/peek';
 import { toast } from '@blocksuite/affine-components/toast';
 import {
-  type Action,
+  type MenuItem,
   renderToolbarSeparator,
 } from '@blocksuite/affine-components/toolbar';
 import { BookmarkStyles } from '@blocksuite/affine-model';
@@ -363,23 +363,23 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
   }
 
   private _openMenuButton() {
-    const buttons: Action[] = [];
+    const buttons: MenuItem[] = [];
 
     if (
       isEmbedLinkedDocBlock(this.model) ||
       isEmbedSyncedDocBlock(this.model)
     ) {
       buttons.push({
-        name: 'Open this doc',
+        label: 'Open this doc',
         icon: ExpandFullSmallIcon,
-        handler: this._open,
+        action: this._open,
         disabled: this._openButtonDisabled,
       });
     } else if (this._canShowFullScreenButton) {
       buttons.push({
-        name: 'Open this doc',
+        label: 'Open this doc',
         icon: ExpandFullSmallIcon,
-        handler: this._open,
+        action: this._open,
       });
     }
 
@@ -387,9 +387,9 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
 
     if (this._blockComponent && isPeekable(this._blockComponent)) {
       buttons.push({
-        name: 'Open in center peek',
+        label: 'Open in center peek',
         icon: CenterPeekIcon,
-        handler: () => this._peek(),
+        action: () => this._peek(),
       });
     }
 
@@ -415,14 +415,14 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
         <div data-size="small" data-orientation="vertical">
           ${repeat(
             buttons,
-            button => button.name,
-            ({ name, icon, handler, disabled }) => html`
+            button => button.label,
+            ({ label, icon, action, disabled }) => html`
               <editor-menu-action
-                aria-label=${name}
+                aria-label=${label}
                 ?disabled=${disabled}
-                @click=${handler}
+                @click=${action}
               >
-                ${icon}<span class="label">${name}</span>
+                ${icon}<span class="label">${label}</span>
               </editor-menu-action>
             `
           )}
@@ -472,13 +472,13 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
       const buttons = [
         {
           type: 'card',
-          name: 'Card view',
+          label: 'Card view',
           handler: () => this._convertToCardView(),
           disabled: this.model.doc.readonly,
         },
         {
           type: 'embed',
-          name: 'Embed view',
+          label: 'Embed view',
           handler: () => this._convertToEmbedView(),
           disabled: this.model.doc.readonly && this._embedViewButtonDisabled,
         },
@@ -508,15 +508,15 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
             ${repeat(
               buttons,
               button => button.type,
-              ({ type, name, handler, disabled }) => html`
+              ({ type, label, handler, disabled }) => html`
                 <editor-menu-action
-                  aria-label=${name}
+                  aria-label=${label}
                   data-testid=${`link-to-${type}`}
                   ?data-selected=${this._viewType === type}
                   ?disabled=${disabled}
                   @click=${handler}
                 >
-                  ${name}
+                  ${label}
                 </editor-menu-action>
               `
             )}

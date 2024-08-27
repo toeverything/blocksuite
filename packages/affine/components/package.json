@@ -26,7 +26,9 @@
     "@lit/context": "^1.1.2",
     "@lottiefiles/dotlottie-wc": "^0.2.16",
     "@toeverything/theme": "^1.0.7",
+    "katex": "^0.16.11",
     "lit": "^3.2.0",
+    "shiki": "^1.12.0",
     "zod": "^3.23.8"
   },
   "exports": {
@@ -88,5 +90,8 @@
     "dist",
     "!src/__tests__",
     "!dist/__tests__"
-  ]
+  ],
+  "devDependencies": {
+    "@types/katex": "^0.16.7"
+  }
 }

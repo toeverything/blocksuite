@@ -52,18 +52,18 @@ export function AttachmentOptionsTemplate({
   const viewActions = [
     {
       type: 'card',
-      name: 'Card view',
+      label: 'Card view',
       disabled: readonly || !model.embed,
-      handler: () => {
+      action: () => {
         model.doc.updateBlock(model, { embed: false });
         abortController.abort();
       },
     },
     {
       type: 'embed',
-      name: 'Embed view',
+      label: 'Embed view',
       disabled: readonly || disableEmbed,
-      handler: () => {
+      action: () => {
         convertToEmbed(model, anchor.service.maxFileSize);
         abortController.abort();
       },
@@ -74,17 +74,17 @@ export function AttachmentOptionsTemplate({
     [
       {
         type: 'copy',
-        name: 'Copy',
+        label: 'Copy',
         icon: CopyIcon,
         disabled: readonly,
-        handler: copy,
+        action: copy,
       },
       {
         type: 'duplicate',
-        name: 'Duplicate',
+        label: 'Duplicate',
         icon: DuplicateIcon,
         disabled: readonly,
-        handler: () => {
+        action: () => {
           const prop: { flavour: 'affine:attachment' } = {
             flavour: 'affine:attachment',
             ...cloneAttachmentProperties(model),
@@ -94,26 +94,26 @@ export function AttachmentOptionsTemplate({
       },
       {
         type: 'reload',
-        name: 'Reload',
+        label: 'Reload',
         icon: RefreshIcon,
         disabled: readonly,
-        handler: refresh,
+        action: refresh,
       },
       {
         type: 'download',
-        name: 'Download',
+        label: 'Download',
         icon: DownloadIcon,
         disabled: readonly,
-        handler: download,
+        action: download,
       },
     ],
     [
       {
         type: 'delete',
-        name: 'Delete',
+        label: 'Delete',
         icon: DeleteIcon,
         disabled: readonly,
-        handler: () => {
+        action: () => {
           model.doc.deleteBlock(model);
           abortController.abort();
         },
@@ -181,13 +181,13 @@ export function AttachmentOptionsTemplate({
           ${repeat(
             viewActions,
             button => button.type,
-            ({ type, name, handler }) => html`
+            ({ type, label, action }) => html`
               <editor-menu-action
                 data-testid=${`link-to-${type}`}
                 ?data-selected=${type === viewType}
-                @click=${handler}
+                @click=${action}
               >
-                ${name}
+                ${label}
               </editor-menu-action>
             `
           )}

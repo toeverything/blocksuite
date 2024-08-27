@@ -6,7 +6,11 @@ import {
 import { html } from 'lit';
 import { z } from 'zod';
 
-export const codeBlockInlineSpecs: InlineSpecs<AffineTextAttributes>[] = [
+export type CodeBlockTextAttributes = AffineTextAttributes & {
+  'code-block-unit'?: null;
+};
+
+export const codeBlockInlineSpecs: InlineSpecs<CodeBlockTextAttributes>[] = [
   {
     name: 'code-block-unit',
     schema: z.undefined(),

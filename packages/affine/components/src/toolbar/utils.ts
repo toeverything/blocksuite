@@ -3,44 +3,47 @@ import { classMap } from 'lit/directives/class-map.js';
 import { join } from 'lit/directives/join.js';
 import { repeat } from 'lit/directives/repeat.js';
 
-export type Action = {
+export type MenuItem = {
   icon: TemplateResult<1>;
-  name: string;
+  label: string;
   type?: string;
-  handler?: () => void;
+  action?: () => void;
   disabled?: boolean;
 };
 
+export type MenuItemGroup = {
+  type: string;
+  items: MenuItem[];
+};
+
 // Group Actions
-export type FatActions = (Action | typeof nothing)[][];
+export type FatMenuItems = (MenuItem | typeof nothing)[][];
 
 export function renderActions(
-  fatActions: FatActions,
-  handler?: (action: Action) => Promise<void> | void,
+  fatMenuItems: FatMenuItems,
+  action?: (item: MenuItem) => Promise<void> | void,
   selectedName?: string
 ) {
   return join(
-    fatActions
+    fatMenuItems
       .filter(g => g.length)
-      .map(g => g.filter(a => a !== nothing) as Action[])
+      .map(g => g.filter(a => a !== nothing) as MenuItem[])
       .filter(g => g.length)
-      .map(actions =>
+      .map(items =>
         repeat(
-          actions,
-          action => action.name,
-          action => html`
+          items,
+          item => item.label,
+          item => html`
             <editor-menu-action
-              aria-label=${action.name}
+              aria-label=${item.label}
               class=${classMap({
-                delete: action.type === 'delete',
+                delete: item.type === 'delete',
               })}
-              ?data-selected=${selectedName === action.name}
-              ?disabled=${action.disabled}
-              @click=${action.handler
-                ? action.handler
-                : () => handler?.(action)}
+              ?data-selected=${selectedName === item.label}
+              ?disabled=${item.disabled}
+              @click=${item.action ? item.action : () => action?.(item)}
             >
-              ${action.icon}<span class="label">${action.name}</span>
+              ${item.icon}<span class="label">${item.label}</span>
             </editor-menu-action>
           `
         )

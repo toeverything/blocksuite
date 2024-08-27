@@ -1,5 +1,4 @@
 import {
-  type AffineTextAttributes,
   InlineManager,
   ReferenceNodeConfig,
   affineInlineMarkdownMatches,
@@ -11,10 +10,8 @@ import type { DataViewBlockModel } from './data-view-model.js';
 
 import { DatabaseSelection } from '../database-block/data-view/index.js';
 
-export class DataViewBlockService<
-  TextAttributes extends AffineTextAttributes = AffineTextAttributes,
-> extends BlockService<DataViewBlockModel> {
-  readonly inlineManager = new InlineManager<TextAttributes>();
+export class DataViewBlockService extends BlockService<DataViewBlockModel> {
+  readonly inlineManager = new InlineManager();
 
   readonly referenceNodeConfig = new ReferenceNodeConfig();
 

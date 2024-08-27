@@ -458,4 +458,126 @@ export const affineInlineMarkdownMatches: InlineMarkdownMatch<AffineTextAttribut
         return KEYBOARD_PREVENT_DEFAULT;
       },
     },
+    {
+      name: 'latex',
+      /* eslint-disable no-useless-escape */
+      pattern: /(?:\$\$)(?<content>[^\s\$]+)(?:\$\$)$|^[^\$]*(?<prefix>\$\$)$/g,
+      action: ({
+        inlineEditor,
+        prefixText,
+        inlineRange,
+        pattern,
+        undoManager,
+      }) => {
+        const match = pattern.exec(prefixText);
+        if (!match || !match.groups) {
+          return KEYBOARD_ALLOW_DEFAULT;
+        }
+        const content = match.groups['content'];
+        const prefix = match.groups['prefix'];
+
+        if (prefix === '$$') {
+          inlineEditor.insertText(
+            {
+              index: inlineRange.index,
+              length: 0,
+            },
+            ' '
+          );
+          inlineEditor.setInlineRange({
+            index: inlineRange.index + 1,
+            length: 0,
+          });
+
+          undoManager.stopCapturing();
+
+          inlineEditor.deleteText({
+            index: inlineRange.index - 2,
+            length: 3,
+          });
+          inlineEditor.insertText(
+            {
+              index: inlineRange.index - 2,
+              length: 0,
+            },
+            ' '
+          );
+          inlineEditor.formatText(
+            {
+              index: inlineRange.index - 2,
+              length: 1,
+            },
+            {
+              latex: '',
+            }
+          );
+
+          inlineEditor
+            .waitForUpdate()
+            .then(() => {
+              const textPoint = inlineEditor.getTextPoint(
+                inlineRange.index - 2 + 1
+              );
+              if (!textPoint) return;
+
+              const [text] = textPoint;
+              const latexNode =
+                text.parentElement?.closest('affine-latex-node');
+              if (!latexNode) return;
+
+              latexNode.toggleEditor();
+            })
+            .catch(console.error);
+
+          return KEYBOARD_PREVENT_DEFAULT;
+        }
+
+        if (!content || content.length === 0) {
+          return KEYBOARD_ALLOW_DEFAULT;
+        }
+
+        inlineEditor.insertText(
+          {
+            index: inlineRange.index,
+            length: 0,
+          },
+          ' '
+        );
+        inlineEditor.setInlineRange({
+          index: inlineRange.index + 1,
+          length: 0,
+        });
+
+        undoManager.stopCapturing();
+
+        const startIndex = inlineRange.index - 2 - content.length - 2;
+        inlineEditor.deleteText({
+          index: startIndex,
+          length: 2 + content.length + 2,
+        });
+        inlineEditor.insertText(
+          {
+            index: startIndex,
+            length: 0,
+          },
+          ' '
+        );
+        inlineEditor.formatText(
+          {
+            index: startIndex,
+            length: 1,
+          },
+          {
+            latex: String.raw`${content}`,
+          }
+        );
+
+        inlineEditor.setInlineRange({
+          index: startIndex + 1,
+          length: 0,
+        });
+
+        return KEYBOARD_PREVENT_DEFAULT;
+      },
+    },
   ];
