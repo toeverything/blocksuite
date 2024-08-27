@@ -14,8 +14,9 @@ export { EditorToolbarSeparator } from './separator.js';
 export { EditorToolbar } from './toolbar.js';
 export { Tooltip } from './tooltip.js';
 export {
-  type Action,
-  type FatActions,
+  type FatMenuItems,
+  type MenuItem,
+  type MenuItemGroup,
   renderActions,
   renderToolbarSeparator,
 } from './utils.js';

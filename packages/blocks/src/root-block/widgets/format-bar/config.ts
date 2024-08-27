@@ -322,10 +322,10 @@ export function toolbarMoreButton(toolbar: AffineFormatBarWidget) {
     [
       {
         type: 'copy',
-        name: 'Copy',
+        label: 'Copy',
         icon: CopyIcon,
         disabled: toolbar.doc.readonly,
-        handler: () => {
+        action: () => {
           toolbar.std.command
             .chain()
             .getSelectedModels()
@@ -341,10 +341,10 @@ export function toolbarMoreButton(toolbar: AffineFormatBarWidget) {
       },
       {
         type: 'duplicate',
-        name: 'Duplicate',
+        label: 'Duplicate',
         icon: DuplicateIcon,
         disabled: toolbar.doc.readonly,
-        handler: () => {
+        action: () => {
           toolbar.std.doc.captureSync();
           toolbar.std.command
             .chain()
@@ -398,10 +398,10 @@ export function toolbarMoreButton(toolbar: AffineFormatBarWidget) {
     [
       {
         type: 'delete',
-        name: 'Delete',
+        label: 'Delete',
         icon: DeleteIcon,
         disabled: toolbar.doc.readonly,
-        handler: () => {
+        action: () => {
           // remove text
           const [result] = toolbar.std.command
             .chain()

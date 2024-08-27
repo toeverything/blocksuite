@@ -132,8 +132,8 @@ export {
 } from '@blocksuite/affine-components/rich-text';
 export { toast } from '@blocksuite/affine-components/toast';
 export {
-  type Action,
-  type FatActions,
+  type FatMenuItems,
+  type MenuItem,
   Tooltip,
   renderActions,
   renderToolbarSeparator,

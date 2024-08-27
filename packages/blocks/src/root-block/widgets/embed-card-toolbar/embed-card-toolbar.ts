@@ -17,7 +17,7 @@ import {
 import { isPeekable, peek } from '@blocksuite/affine-components/peek';
 import { toast } from '@blocksuite/affine-components/toast';
 import {
-  type Action,
+  type MenuItem,
   renderActions,
   renderToolbarSeparator,
 } from '@blocksuite/affine-components/toolbar';
@@ -355,38 +355,38 @@ export class EmbedCardToolbar extends WidgetComponent<
       [
         {
           type: 'copy',
-          name: 'Copy',
+          label: 'Copy',
           icon: CopyIcon,
           disabled: this.doc.readonly,
-          handler: () => {
+          action: () => {
             this._copyBlock().catch(console.error);
           },
         },
         {
           type: 'duplicate',
-          name: 'Duplicate',
+          label: 'Duplicate',
           icon: DuplicateIcon,
           disabled: this.doc.readonly,
-          handler: () => this._duplicateBlock(),
+          action: () => this._duplicateBlock(),
         },
 
         this._focusModel && this._refreshable(this._focusModel)
           ? {
               type: 'reload',
-              name: 'Reload',
+              label: 'Reload',
               icon: RefreshIcon,
               disabled: this.doc.readonly,
-              handler: () => this._refreshData(),
+              action: () => this._refreshData(),
             }
           : nothing,
       ],
       [
         {
           type: 'delete',
-          name: 'Delete',
+          label: 'Delete',
           icon: DeleteIcon,
           disabled: this.doc.readonly,
-          handler: () =>
+          action: () =>
             this._focusModel && this.doc.deleteBlock(this._focusModel),
         },
       ],
@@ -402,7 +402,7 @@ export class EmbedCardToolbar extends WidgetComponent<
   }
 
   private _openMenuButton() {
-    const buttons: Action[] = [];
+    const buttons: MenuItem[] = [];
 
     if (
       this._focusModel &&
@@ -410,9 +410,9 @@ export class EmbedCardToolbar extends WidgetComponent<
         isEmbedSyncedDocBlock(this._focusModel))
     ) {
       buttons.push({
-        name: 'Open this doc',
+        label: 'Open this doc',
         icon: ExpandFullSmallIcon,
-        handler: () => this._focusBlock?.open(),
+        action: () => this._focusBlock?.open(),
       });
     }
 
@@ -421,9 +421,9 @@ export class EmbedCardToolbar extends WidgetComponent<
     const element = this._focusBlock;
     if (element && isPeekable(element)) {
       buttons.push({
-        name: 'Open in center peek',
+        label: 'Open in center peek',
         icon: CenterPeekIcon,
-        handler: () => peek(element),
+        action: () => peek(element),
       });
     }
 
@@ -449,14 +449,14 @@ export class EmbedCardToolbar extends WidgetComponent<
         <div data-size="small" data-orientation="vertical">
           ${repeat(
             buttons,
-            button => button.name,
-            ({ name, icon, handler, disabled }) => html`
+            button => button.label,
+            ({ label, icon, action, disabled }) => html`
               <editor-menu-action
-                aria-label=${name}
+                aria-label=${label}
                 ?disabled=${disabled}
-                @click=${handler}
+                @click=${action}
               >
-                ${icon}<span class="label">${name}</span>
+                ${icon}<span class="label">${label}</span>
               </editor-menu-action>
             `
           )}
@@ -569,23 +569,23 @@ export class EmbedCardToolbar extends WidgetComponent<
 
     buttons.push({
       type: 'inline',
-      name: 'Inline view',
-      handler: () => this._turnIntoInlineView(),
+      label: 'Inline view',
+      action: () => this._turnIntoInlineView(),
       disabled: this.doc.readonly,
     });
 
     buttons.push({
       type: 'card',
-      name: 'Card view',
-      handler: () => this._convertToCardView(),
+      label: 'Card view',
+      action: () => this._convertToCardView(),
       disabled: this.doc.readonly,
     });
 
     if (this._canConvertToEmbedView || this._isEmbedView) {
       buttons.push({
         type: 'embed',
-        name: 'Embed view',
-        handler: () => this._convertToEmbedView(),
+        label: 'Embed view',
+        action: () => this._convertToEmbedView(),
         disabled: this.doc.readonly && this._embedViewButtonDisabled,
       });
     }
@@ -612,15 +612,15 @@ export class EmbedCardToolbar extends WidgetComponent<
           ${repeat(
             buttons,
             button => button.type,
-            ({ type, name, handler, disabled }) => html`
+            ({ type, label, action, disabled }) => html`
               <editor-menu-action
-                aria-label=${name}
+                aria-label=${label}
                 data-testid=${`link-to-${type}`}
                 ?data-selected=${this._viewType === type}
                 ?disabled=${disabled}
-                @click=${handler}
+                @click=${action}
               >
-                ${name}
+                ${label}
               </editor-menu-action>
             `
           )}
