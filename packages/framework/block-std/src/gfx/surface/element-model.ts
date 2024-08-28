@@ -79,6 +79,18 @@ export interface GfxElementGeometry {
   intersectsBound(bound: Bound): boolean;
 }
 
+export const gfxContainerSymbol = Symbol('GfxContainerElement');
+
+export const isGfxContainerElm = (elm: unknown): elm is GfxContainerElement => {
+  return (elm as GfxContainerElement)[gfxContainerSymbol] === true;
+};
+
+export interface GfxContainerElement {
+  [gfxContainerSymbol]: true;
+  childIds: string[];
+  childElements: GfxModel[];
+}
+
 export abstract class GfxPrimitiveElementModel<
   Props extends BaseElementProps = BaseElementProps,
 > implements GfxElementGeometry
@@ -361,13 +373,18 @@ export abstract class GfxPrimitiveElementModel<
 }
 
 export abstract class GfxGroupLikeElementModel<
-  Props extends BaseElementProps = BaseElementProps,
-> extends GfxPrimitiveElementModel<Props> {
+    Props extends BaseElementProps = BaseElementProps,
+  >
+  extends GfxPrimitiveElementModel<Props>
+  implements GfxContainerElement
+{
   private _childBoundCacheKey: string = '';
 
   private _childIds: string[] = [];
 
   private _mutex = createMutex();
+
+  [gfxContainerSymbol] = true as const;
 
   private _updateXYWH() {
     let bound: Bound | undefined;
