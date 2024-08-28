@@ -13,13 +13,16 @@ export type GetDataViewSelection<
   ? T
   : never;
 export type DataViewSelectionState = DataViewSelection | undefined;
-export type InsertToPosition =
-  | 'end'
-  | 'start'
-  | {
-      id: string;
-      before: boolean;
-    };
 export type ColumnDataUpdater<
   Data extends Record<string, unknown> = Record<string, unknown>,
 > = (data: Data) => Partial<Data>;
+
+export interface DatabaseFlags {
+  enable_number_formatting: boolean;
+  enable_database_statistics: boolean;
+}
+
+export const defaultDatabaseFlags: Readonly<DatabaseFlags> = {
+  enable_number_formatting: false,
+  enable_database_statistics: false,
+};

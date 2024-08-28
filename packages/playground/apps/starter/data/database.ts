@@ -2,8 +2,8 @@ import {
   type DatabaseBlockModel,
   type ListType,
   type ParagraphType,
+  type ViewBasicDataType,
   columnPresets,
-  databaseViewAddView,
   richTextColumnConfig,
   viewPresets,
 } from '@blocksuite/blocks';
@@ -54,7 +54,8 @@ export const database: InitFn = (collection: DocCollection, id: string) => {
           );
           const database = doc.getBlockById(databaseId) as DatabaseBlockModel;
           database.title = new Text(title);
-          const richTextId = database.addColumn(
+          const richTextId = service.addColumn(
+            database,
             'end',
             richTextColumnConfig.model.create(richTextColumnConfig.model.name)
           );
@@ -66,9 +67,13 @@ export const database: InitFn = (collection: DocCollection, id: string) => {
             columnPresets.checkboxColumnConfig,
             columnPresets.progressColumnConfig,
           ]).forEach(column => {
-            database.addColumn('end', column.model.create(column.model.name));
+            service.addColumn(
+              database,
+              'end',
+              column.model.create(column.model.name)
+            );
           });
-          database.updateView(database.views[0].id, () => {
+          service.updateView(database, database.views[0].id, () => {
             return {
               groupBy: group
                 ? {
@@ -77,7 +82,7 @@ export const database: InitFn = (collection: DocCollection, id: string) => {
                     name: 'select',
                   }
                 : undefined,
-            };
+            } as Partial<ViewBasicDataType>;
           });
           const paragraphTypes: ParagraphType[] = [
             'text',
@@ -95,7 +100,7 @@ export const database: InitFn = (collection: DocCollection, id: string) => {
               { type: type, text: new Text(`Paragraph type ${type}`) },
               databaseId
             );
-            database.updateCell(id, {
+            service.updateCell(database, id, {
               columnId: richTextId,
               value: new Text(`Paragraph type ${type}`),
             });
@@ -113,7 +118,7 @@ export const database: InitFn = (collection: DocCollection, id: string) => {
               { type: type, text: new Text(`List type ${type}`) },
               databaseId
             );
-            database.updateCell(id, {
+            service.updateCell(database, id, {
               columnId: richTextId,
               value: new Text(`List type ${type}`),
             });
@@ -124,7 +129,7 @@ export const database: InitFn = (collection: DocCollection, id: string) => {
           doc.addBlock('affine:paragraph', {}, noteId);
           doc.addBlock('affine:paragraph', {}, noteId);
           doc.addBlock('affine:paragraph', {}, noteId);
-          databaseViewAddView(database, viewPresets.kanbanViewConfig);
+          service.databaseViewAddView(database, viewPresets.kanbanViewConfig);
 
           doc.resetHistory();
         })

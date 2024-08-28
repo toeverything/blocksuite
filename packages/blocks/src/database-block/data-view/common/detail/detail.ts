@@ -1,5 +1,5 @@
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
-import { computed } from '@lit-labs/preact-signals';
+import { SignalWatcher, computed } from '@lit-labs/preact-signals';
 import { css, nothing, unsafeCSS } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
@@ -109,7 +109,9 @@ const styles = css`
 `;
 
 @customElement('affine-data-view-record-detail')
-export class RecordDetail extends WithDisposable(ShadowlessElement) {
+export class RecordDetail extends SignalWatcher(
+  WithDisposable(ShadowlessElement)
+) {
   _clickAddProperty = () => {
     popFilterableSimpleMenu(
       this.addPropertyButton,

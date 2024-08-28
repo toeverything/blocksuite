@@ -1,3 +1,4 @@
+import type { InsertToPosition } from '@blocksuite/affine-shared/utils';
 import type {
   BlockStdScope,
   EventName,
@@ -10,7 +11,7 @@ import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 
 import type { DataSource } from '../common/data-source/base.js';
 import type { DataViewRenderer } from '../data-view.js';
-import type { DataViewSelection, InsertToPosition } from '../types.js';
+import type { DataViewSelection } from '../types.js';
 import type { UniComponent } from '../utils/uni-component/index.js';
 import type { SingleView } from '../view-manager/single-view.js';
 import type { ViewManager } from '../view-manager/view-manager.js';

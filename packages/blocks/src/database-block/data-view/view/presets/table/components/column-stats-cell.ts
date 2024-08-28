@@ -1,6 +1,7 @@
 import { ArrowDownIcon } from '@blocksuite/affine-components/icons';
 import { getRootByElement } from '@blocksuite/affine-shared/utils';
 import { WithDisposable } from '@blocksuite/block-std';
+import { SignalWatcher } from '@lit-labs/preact-signals';
 import { LitElement, css, html } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -54,7 +55,9 @@ const styles = css`
 `;
 
 @customElement('affine-database-column-stats-cell')
-export class DatabaseColumnStatsCell extends WithDisposable(LitElement) {
+export class DatabaseColumnStatsCell extends SignalWatcher(
+  WithDisposable(LitElement)
+) {
   static override styles = styles;
 
   onSelect = (operation: StatCalcOp) => {

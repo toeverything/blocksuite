@@ -18,6 +18,8 @@ import { isPeekable, peek } from '@blocksuite/affine-components/peek';
 import { toast } from '@blocksuite/affine-components/toast';
 import {
   type MenuItem,
+  type MoreMenuItemGroup,
+  groupsToActions,
   renderActions,
   renderToolbarSeparator,
 } from '@blocksuite/affine-components/toolbar';
@@ -52,6 +54,7 @@ import {
 } from '../../../_common/components/embed-card/type.js';
 import { getEmbedCardIcons } from '../../../_common/utils/url.js';
 import { isLinkToNode } from '../../../embed-linked-doc-block/utils.js';
+import { MoreMenuContext } from '../../configs/toolbar.js';
 import {
   isAttachmentBlock,
   isBookmarkBlock,
@@ -62,6 +65,79 @@ import {
   isImageBlock,
 } from '../../edgeless/utils/query.js';
 import { embedCardToolbarStyle } from './styles.js';
+
+const BUILT_IN_GROUPS: MoreMenuItemGroup<EmbedCardToolbarContext>[] = [
+  {
+    type: 'clipboard',
+    items: [
+      {
+        type: 'copy',
+        label: 'Copy',
+        icon: CopyIcon,
+        disabled: ctx => ctx.doc.readonly,
+        action: ctx => ctx.toolbar.copyBlock().catch(console.error),
+      },
+      {
+        type: 'duplicate',
+        label: 'Duplicate',
+        icon: DuplicateIcon,
+        disabled: ctx => ctx.doc.readonly,
+        action: ctx => ctx.toolbar.duplicateBlock(),
+      },
+
+      {
+        type: 'reload',
+        label: 'Reload',
+        icon: RefreshIcon,
+        disabled: ctx => ctx.doc.readonly,
+        action: ctx => ctx.toolbar.refreshData(),
+        when: ctx =>
+          !!ctx.toolbar.focusModel &&
+          ctx.toolbar.refreshable(ctx.toolbar.focusModel),
+      },
+    ],
+  },
+  {
+    type: 'delete',
+    items: [
+      {
+        type: 'delete',
+        label: 'Delete',
+        icon: DeleteIcon,
+        disabled: ctx => ctx.doc.readonly,
+        action: ctx =>
+          ctx.toolbar.focusModel && ctx.doc.deleteBlock(ctx.toolbar.focusModel),
+      },
+    ],
+  },
+];
+
+export class EmbedCardToolbarContext extends MoreMenuContext {
+  constructor(public toolbar: EmbedCardToolbar) {
+    super();
+  }
+
+  isEmpty() {
+    return this.toolbar.focusBlock === null;
+  }
+
+  get doc() {
+    return this.toolbar.doc;
+  }
+
+  get host() {
+    return this.toolbar.host;
+  }
+
+  get selectedBlockModels() {
+    if (this.toolbar.focusModel) return [this.toolbar.focusModel];
+    return [];
+  }
+
+  get std() {
+    return this.host.std;
+  }
+}
 
 export const AFFINE_EMBED_CARD_TOOLBAR_WIDGET = 'affine-embed-card-toolbar';
 
@@ -268,16 +344,6 @@ export class EmbedCardToolbar extends WidgetComponent<
     doc.deleteBlock(this.focusModel);
   }
 
-  private async _copyBlock() {
-    if (!this.focusModel) {
-      return;
-    }
-    const slice = Slice.fromModels(this.doc, [this.focusModel]);
-    await this.std.clipboard.copySlice(slice);
-    toast(this.host, 'Copied link to clipboard');
-    this._abortController.abort();
-  }
-
   private _copyUrl() {
     if (!this.focusModel || !('url' in this.focusModel)) {
       return;
@@ -285,27 +351,6 @@ export class EmbedCardToolbar extends WidgetComponent<
 
     navigator.clipboard.writeText(this.focusModel.url).catch(console.error);
     toast(this.host, 'Copied link to clipboard');
-  }
-
-  private _duplicateBlock() {
-    if (!this.focusBlock || !this.focusModel) {
-      return;
-    }
-    const model = this.focusModel;
-    const blockProps = getBlockProps(model);
-    const { width, height, xywh, rotate, zIndex, ...duplicateProps } =
-      blockProps;
-
-    const { doc } = model;
-    const parent = doc.getParent(model);
-    const index = parent?.children.indexOf(model);
-    doc.addBlock(
-      model.flavour as BlockSuite.Flavour,
-      duplicateProps,
-      parent,
-      index
-    );
-    this._abortController.abort();
   }
 
   private get _embedViewButtonDisabled() {
@@ -347,46 +392,11 @@ export class EmbedCardToolbar extends WidgetComponent<
   }
 
   private _moreActions() {
-    return renderActions([
-      [
-        {
-          type: 'copy',
-          label: 'Copy',
-          icon: CopyIcon,
-          disabled: this.doc.readonly,
-          action: () => {
-            this._copyBlock().catch(console.error);
-          },
-        },
-        {
-          type: 'duplicate',
-          label: 'Duplicate',
-          icon: DuplicateIcon,
-          disabled: this.doc.readonly,
-          action: () => this._duplicateBlock(),
-        },
-
-        this.focusModel && this._refreshable(this.focusModel)
-          ? {
-              type: 'reload',
-              label: 'Reload',
-              icon: RefreshIcon,
-              disabled: this.doc.readonly,
-              action: () => this._refreshData(),
-            }
-          : nothing,
-      ],
-      [
-        {
-          type: 'delete',
-          label: 'Delete',
-          icon: DeleteIcon,
-          disabled: this.doc.readonly,
-          action: () =>
-            this.focusModel && this.doc.deleteBlock(this.focusModel),
-        },
-      ],
-    ]);
+    const context = new EmbedCardToolbarContext(this);
+    const groups = context.config.configure(
+      BUILT_IN_GROUPS.map(group => ({ ...group, items: [...group.items] }))
+    );
+    return renderActions(groupsToActions(groups, context));
   }
 
   get _openButtonDisabled() {
@@ -459,20 +469,6 @@ export class EmbedCardToolbar extends WidgetComponent<
         </div>
       </editor-menu-button>
     `;
-  }
-
-  private _refreshData() {
-    this.focusBlock?.refreshData();
-    this._abortController.abort();
-  }
-
-  private _refreshable(ele: BlockModel) {
-    return (
-      isImageBlock(ele) ||
-      isBookmarkBlock(ele) ||
-      isAttachmentBlock(ele) ||
-      isEmbeddedLinkBlock(ele)
-    );
   }
 
   private get _rootService() {
@@ -660,6 +656,51 @@ export class EmbedCardToolbar extends WidgetComponent<
         this.focusBlock = block as EmbedToolbarBlockComponent;
         this._show();
       })
+    );
+  }
+
+  async copyBlock() {
+    if (!this.focusModel) {
+      return;
+    }
+    const slice = Slice.fromModels(this.doc, [this.focusModel]);
+    await this.std.clipboard.copySlice(slice);
+    toast(this.host, 'Copied link to clipboard');
+    this._abortController.abort();
+  }
+
+  duplicateBlock() {
+    if (!this.focusBlock || !this.focusModel) {
+      return;
+    }
+    const model = this.focusModel;
+    const blockProps = getBlockProps(model);
+    const { width, height, xywh, rotate, zIndex, ...duplicateProps } =
+      blockProps;
+
+    const { doc } = model;
+    const parent = doc.getParent(model);
+    const index = parent?.children.indexOf(model);
+    doc.addBlock(
+      model.flavour as BlockSuite.Flavour,
+      duplicateProps,
+      parent,
+      index
+    );
+    this._abortController.abort();
+  }
+
+  refreshData() {
+    this.focusBlock?.refreshData();
+    this._abortController.abort();
+  }
+
+  refreshable(ele: BlockModel) {
+    return (
+      isImageBlock(ele) ||
+      isBookmarkBlock(ele) ||
+      isAttachmentBlock(ele) ||
+      isEmbeddedLinkBlock(ele)
     );
   }
 

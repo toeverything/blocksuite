@@ -1,16 +1,17 @@
+import type { InsertToPosition } from '@blocksuite/affine-shared/utils';
+
 import {
   type ReadonlySignal,
   computed,
   signal,
 } from '@lit-labs/preact-signals';
 
-import type { DatabaseFlags } from '../../types.js';
 import type { ColumnConfig, ColumnMeta } from '../column/column-config.js';
 import type { FilterGroup, Variable } from '../common/ast.js';
 import type { DetailSlots } from '../common/data-source/base.js';
 import type { DataViewContextKey } from '../common/data-source/context.js';
 import type { TType } from '../logical/typesystem.js';
-import type { InsertToPosition } from '../types.js';
+import type { DatabaseFlags } from '../types.js';
 import type { UniComponent } from '../utils/uni-component/index.js';
 import type { DataViewDataType, ViewMeta } from '../view/data-view.js';
 import type { Column } from './column.js';

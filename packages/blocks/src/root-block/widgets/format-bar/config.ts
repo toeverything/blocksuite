@@ -1,3 +1,4 @@
+import type { MoreMenuItemGroup } from '@blocksuite/affine-components/toolbar';
 import type {
   Chain,
   CommandKeyToData,
@@ -31,7 +32,10 @@ import {
 } from '@blocksuite/affine-components/icons';
 import { createSimplePortal } from '@blocksuite/affine-components/portal';
 import { toast } from '@blocksuite/affine-components/toast';
-import { renderActions } from '@blocksuite/affine-components/toolbar';
+import {
+  groupsToActions,
+  renderActions,
+} from '@blocksuite/affine-components/toolbar';
 import { assertExists } from '@blocksuite/global/utils';
 import { Slice } from '@blocksuite/store';
 import { type TemplateResult, html } from 'lit';
@@ -45,6 +49,7 @@ import {
   notifyDocCreated,
   promptDocTitle,
 } from '../../../_common/utils/render-linked-doc.js';
+import { MoreMenuContext } from '../../configs/toolbar.js';
 
 export type DividerConfigItem = {
   type: 'divider';
@@ -317,21 +322,53 @@ export function toolbarDefaultConfig(toolbar: AffineFormatBarWidget) {
     });
 }
 
-export function toolbarMoreButton(toolbar: AffineFormatBarWidget) {
-  const actions = [
-    [
+export class FormatBarContext extends MoreMenuContext {
+  constructor(public toolbar: AffineFormatBarWidget) {
+    super();
+  }
+
+  override isEmpty() {
+    return this.selectedBlockModels.length === 0;
+  }
+
+  get doc() {
+    return this.toolbar.host.doc;
+  }
+
+  get host() {
+    return this.toolbar.host;
+  }
+
+  get selectedBlockModels() {
+    const { success, selectedModels } =
+      this.std.command.exec('getSelectedModels');
+
+    if (!success) return [];
+
+    return selectedModels ?? [];
+  }
+
+  get std() {
+    return this.toolbar.std;
+  }
+}
+
+const BUILT_IN_GROUPS: MoreMenuItemGroup<FormatBarContext>[] = [
+  {
+    type: 'clipboard',
+    items: [
       {
         type: 'copy',
         label: 'Copy',
         icon: CopyIcon,
-        disabled: toolbar.doc.readonly,
-        action: () => {
-          toolbar.std.command
+        disabled: c => c.doc.readonly,
+        action: c => {
+          c.std.command
             .chain()
             .getSelectedModels()
             .with({
               onCopy: () => {
-                toast(toolbar.host, 'Copied to clipboard');
+                toast(c.host, 'Copied to clipboard');
               },
             })
             .draftSelectedModels()
@@ -343,10 +380,10 @@ export function toolbarMoreButton(toolbar: AffineFormatBarWidget) {
         type: 'duplicate',
         label: 'Duplicate',
         icon: DuplicateIcon,
-        disabled: toolbar.doc.readonly,
-        action: () => {
-          toolbar.std.doc.captureSync();
-          toolbar.std.command
+        disabled: c => c.doc.readonly,
+        action: c => {
+          c.doc.captureSync();
+          c.std.command
             .chain()
             .try(cmd => [
               cmd
@@ -380,7 +417,7 @@ export function toolbarMoreButton(toolbar: AffineFormatBarWidget) {
               ctx.draftedModels
                 .then(models => {
                   const slice = Slice.fromModels(ctx.std.doc, models);
-                  return toolbar.std.clipboard.duplicateSlice(
+                  return ctx.std.clipboard.duplicateSlice(
                     slice,
                     ctx.std.doc,
                     ctx.parentBlock?.model.id,
@@ -395,15 +432,18 @@ export function toolbarMoreButton(toolbar: AffineFormatBarWidget) {
         },
       },
     ],
-    [
+  },
+  {
+    type: 'delete',
+    items: [
       {
         type: 'delete',
         label: 'Delete',
         icon: DeleteIcon,
-        disabled: toolbar.doc.readonly,
-        action: () => {
+        disabled: c => c.doc.readonly,
+        action: c => {
           // remove text
-          const [result] = toolbar.std.command
+          const [result] = c.std.command
             .chain()
             .getTextSelection()
             .deleteText()
@@ -414,7 +454,7 @@ export function toolbarMoreButton(toolbar: AffineFormatBarWidget) {
           }
 
           // remove blocks
-          toolbar.std.command
+          c.std.command
             .chain()
             .tryAll(chain => [
               chain.getBlockSelections(),
@@ -424,11 +464,19 @@ export function toolbarMoreButton(toolbar: AffineFormatBarWidget) {
             .deleteSelectedModels()
             .run();
 
-          toolbar.reset();
+          c.toolbar.reset();
         },
       },
     ],
-  ];
+  },
+];
+
+export function toolbarMoreButton(toolbar: AffineFormatBarWidget) {
+  const context = new FormatBarContext(toolbar);
+  const groups = context.config.configure(
+    BUILT_IN_GROUPS.map(group => ({ ...group, items: [...group.items] }))
+  );
+  const actions = renderActions(groupsToActions(groups, context));
 
   return html`
     <editor-menu-button
@@ -439,9 +487,7 @@ export function toolbarMoreButton(toolbar: AffineFormatBarWidget) {
         </editor-icon-button>
       `}
     >
-      <div data-size="large" data-orientation="vertical">
-        ${renderActions(actions)}
-      </div>
+      <div data-size="large" data-orientation="vertical">${actions}</div>
     </editor-menu-button>
   `;
 }

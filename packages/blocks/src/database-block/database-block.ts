@@ -1,3 +1,5 @@
+import type { DatabaseBlockModel } from '@blocksuite/affine-model';
+
 import { CaptionedBlockComponent } from '@blocksuite/affine-components/caption';
 import {
   CopyIcon,
@@ -5,6 +7,7 @@ import {
   MoreHorizontalIcon,
 } from '@blocksuite/affine-components/icons';
 import { toast } from '@blocksuite/affine-components/toast';
+import { DatabaseBlockSchema } from '@blocksuite/affine-model';
 import { NOTE_SELECTOR } from '@blocksuite/affine-shared/consts';
 import { RANGE_SYNC_EXCLUDE_ATTR } from '@blocksuite/block-std';
 import { Rect } from '@blocksuite/global/utils';
@@ -15,7 +18,6 @@ import { customElement } from 'lit/decorators.js';
 
 import type { NoteBlockComponent } from '../note-block/index.js';
 import type { AffineInnerModalWidget } from '../root-block/index.js';
-import type { DatabaseBlockModel } from './database-model.js';
 import type { DatabaseBlockService } from './database-service.js';
 
 import { DragIndicator, popMenu } from '../_common/components/index.js';
@@ -43,7 +45,6 @@ import {
   renderUniLit,
   widgetPresets,
 } from './data-view/index.js';
-import { DatabaseBlockSchema } from './database-model.js';
 
 @customElement('affine-database')
 export class DatabaseBlockComponent extends CaptionedBlockComponent<

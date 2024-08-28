@@ -1,3 +1,5 @@
+import type { InsertToPosition } from '@blocksuite/affine-shared/utils';
+
 import {
   type ReadonlySignal,
   computed,
@@ -5,7 +7,6 @@ import {
 } from '@lit-labs/preact-signals';
 
 import type { DataSource } from '../common/data-source/base.js';
-import type { InsertToPosition } from '../types.js';
 import type { DataViewDataType, DataViewTypes } from '../view/data-view.js';
 import type { SingleView } from './single-view.js';
 

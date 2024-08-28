@@ -1,23 +1,51 @@
-import { type TemplateResult, html, nothing } from 'lit';
+import { html, nothing } from 'lit';
 import { classMap } from 'lit/directives/class-map.js';
 import { join } from 'lit/directives/join.js';
 import { repeat } from 'lit/directives/repeat.js';
 
-export type MenuItem = {
-  icon: TemplateResult<1>;
-  label: string;
-  type?: string;
-  action?: () => void;
-  disabled?: boolean;
-};
+import type { FatMenuItems, MenuItem, MoreMenuItemGroup } from './types.js';
 
-export type MenuItemGroup = {
-  type: string;
-  items: MenuItem[];
-};
+export function groupsToActions<T>(
+  groups: MoreMenuItemGroup<T>[],
+  context: T
+): MenuItem[][] {
+  return groups
+    .filter(group => group.when?.(context) ?? true)
+    .map(({ items }) =>
+      items
+        .filter(item => item.when?.(context) ?? true)
+        .map(({ icon, label, type, action, disabled, generate }) => {
+          if (action && typeof action === 'function') {
+            return {
+              icon,
+              label,
+              type,
+              action: () => {
+                action(context)?.catch(console.error);
+              },
+              disabled:
+                typeof disabled === 'function' ? disabled(context) : disabled,
+            };
+          }
 
-// Group Actions
-export type FatMenuItems = (MenuItem | typeof nothing)[][];
+          if (generate && typeof generate === 'function') {
+            const result = generate(context);
+
+            if (!result) return;
+
+            return {
+              icon,
+              label,
+              type,
+              ...result,
+            };
+          }
+
+          return;
+        })
+        .filter(item => !!item)
+    );
+}
 
 export function renderActions(
   fatMenuItems: FatMenuItems,

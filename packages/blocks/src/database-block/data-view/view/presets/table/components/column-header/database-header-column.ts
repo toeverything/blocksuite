@@ -1,3 +1,7 @@
+import {
+  type InsertToPosition,
+  insertPositionToIndex,
+} from '@blocksuite/affine-shared/utils';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import { SignalWatcher } from '@lit-labs/preact-signals';
@@ -9,7 +13,6 @@ import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
 
 import type { NumberColumnDataType } from '../../../../../column/presets/number/define.js';
-import type { InsertToPosition } from '../../../../../types.js';
 import type { Column } from '../../../../../view-manager/column.js';
 import type { TableColumn, TableSingleView } from '../../table-view-manager.js';
 
@@ -30,7 +33,6 @@ import {
 } from '../../../../../common/icons/index.js';
 import { startDrag } from '../../../../../utils/drag.js';
 import { autoScrollOnBoundary } from '../../../../../utils/frame-loop.js';
-import { insertPositionToIndex } from '../../../../../utils/insert.js';
 import { renderUniLit } from '../../../../../utils/uni-component/index.js';
 import { getResultInRange } from '../../../../../utils/utils.js';
 import { DEFAULT_COLUMN_TITLE_HEIGHT } from '../../consts.js';

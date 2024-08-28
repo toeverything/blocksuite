@@ -7,6 +7,7 @@ import type { EdgelessRootBlockComponent } from '../../../edgeless/edgeless-root
 import type { EdgelessRootService } from '../../../edgeless/edgeless-root-service.js';
 import type { EdgelessSelectionManager } from '../../../edgeless/services/selection-manager.js';
 
+import { MoreMenuContext } from '../../../configs/toolbar.js';
 import {
   isAttachmentBlock,
   isBookmarkBlock,
@@ -18,7 +19,7 @@ import {
   isNoteBlock,
 } from '../../../edgeless/utils/query.js';
 
-export class MoreMenuContext {
+export class ElementToolbarMoreMenuContext extends MoreMenuContext {
   #empty = true;
 
   #includedFrame = false;
@@ -30,6 +31,7 @@ export class MoreMenuContext {
   edgeless!: EdgelessRootBlockComponent;
 
   constructor(edgeless: EdgelessRootBlockComponent) {
+    super();
     this.edgeless = edgeless;
 
     const selectedElements = this.selection.selectedElements;
@@ -68,13 +70,13 @@ export class MoreMenuContext {
     return this.#includedFrame;
   }
 
-  isElement() {
+  override isElement() {
     return (
       this.#single && this.firstElement instanceof GfxPrimitiveElementModel
     );
   }
 
-  isEmpty() {
+  override isEmpty() {
     return this.#empty;
   }
 
@@ -103,12 +105,23 @@ export class MoreMenuContext {
     return this.getBlockComponent(this.firstElement.id);
   }
 
-  get firstElement() {
+  override get firstElement() {
     return this.selection.firstElement;
   }
 
   get host() {
     return this.edgeless.host;
+  }
+
+  get selectedBlockModels() {
+    const [result, { selectedModels }] = this.std.command
+      .chain()
+      .getSelectedModels()
+      .run();
+
+    if (!result) return [];
+
+    return selectedModels ?? [];
   }
 
   get selectedElements() {
@@ -121,6 +134,10 @@ export class MoreMenuContext {
 
   get service(): EdgelessRootService {
     return this.edgeless.service;
+  }
+
+  get std() {
+    return this.edgeless.host.std;
   }
 
   get surface(): SurfaceBlockComponent {

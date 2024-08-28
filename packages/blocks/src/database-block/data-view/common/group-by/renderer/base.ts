@@ -1,10 +1,11 @@
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
+import { SignalWatcher } from '@lit-labs/preact-signals';
 import { property } from 'lit/decorators.js';
 
 import type { GroupRenderProps } from '../matcher.js';
 
 export class BaseGroup<Data extends NonNullable<unknown>, Value>
-  extends WithDisposable(ShadowlessElement)
+  extends SignalWatcher(WithDisposable(ShadowlessElement))
   implements GroupRenderProps<Data, Value>
 {
   @property({ attribute: false })

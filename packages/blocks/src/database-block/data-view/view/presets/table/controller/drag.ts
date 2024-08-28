@@ -1,8 +1,8 @@
 // related component
 
+import type { InsertToPosition } from '@blocksuite/affine-shared/utils';
 import type { ReactiveController } from 'lit';
 
-import type { InsertToPosition } from '../../../../types.js';
 import type { DataViewTable } from '../table-view.js';
 
 import { startDrag } from '../../../../utils/drag.js';

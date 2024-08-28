@@ -1,9 +1,13 @@
+import type { Column } from '@blocksuite/affine-model';
 import type { EditorHost } from '@blocksuite/block-std';
 import type { Block, Doc } from '@blocksuite/store';
 
+import {
+  type InsertToPosition,
+  insertPositionToIndex,
+} from '@blocksuite/affine-shared/utils';
 import { Slot, assertExists } from '@blocksuite/global/utils';
 
-import type { Column } from '../database-block/index.js';
 import type { BlockMeta } from './block-meta/base.js';
 import type { DataViewBlockModel } from './data-view-model.js';
 
@@ -13,10 +17,8 @@ import {
   type ColumnMeta,
   DataSourceBase,
   type DetailSlots,
-  type InsertToPosition,
   columnPresets,
   createUniComponentFromWebComponent,
-  insertPositionToIndex,
 } from '../database-block/data-view/index.js';
 import { BlockRenderer } from '../database-block/detail-panel/block-renderer.js';
 import { blockMetaMap } from './block-meta/index.js';

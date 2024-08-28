@@ -1,6 +1,8 @@
+import type { DatabaseBlockModel } from '@blocksuite/affine-model';
 import type { EditorHost } from '@blocksuite/block-std';
 
 import {
+  CloseIcon,
   DatabaseKanbanViewIcon,
   DatabaseTableViewIcon,
 } from '@blocksuite/affine-components/icons';
@@ -10,11 +12,12 @@ import { LitElement, type TemplateResult, css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 import type { ViewMeta } from '../../../database-block/data-view/index.js';
-import type { DatabaseBlockModel } from '../../../database-block/index.js';
 
-import { DatabaseSearchClose } from '../../../database-block/data-view/common/icons/index.js';
 import { viewPresets } from '../../../database-block/data-view/index.js';
-import { databaseViewInitConvert } from '../../../database-block/utils.js';
+import {
+  applyColumnUpdate,
+  databaseViewInitConvert,
+} from '../../../database-block/utils.js';
 
 interface DatabaseView {
   meta: ViewMeta;
@@ -83,8 +86,8 @@ export class DatabaseConvertView extends WithDisposable(LitElement) {
     .modal-header-close-icon {
       display: flex;
       align-items: center;
-      color: var(--affine-icon-color);
       cursor: pointer;
+      color: var(--affine-icon-color);
     }
     .modal-header-close-icon svg {
       width: 24px;
@@ -182,7 +185,7 @@ export class DatabaseConvertView extends WithDisposable(LitElement) {
     const databaseModel = this.doc.getBlockById(id) as DatabaseBlockModel;
     assertExists(databaseModel);
     databaseViewInitConvert(databaseModel, viewMeta);
-    databaseModel.applyColumnUpdate();
+    applyColumnUpdate(databaseModel);
     this.doc.moveBlocks(selectedModels, databaseModel);
 
     const selectionManager = this.host.selection;
@@ -202,7 +205,7 @@ export class DatabaseConvertView extends WithDisposable(LitElement) {
       <div class="modal-container">
         <div class="modal-header">
           <div class="modal-header-title">Select Database View</div>
-          <div class="modal-header-close-icon">${DatabaseSearchClose}</div>
+          <div class="modal-header-close-icon">${CloseIcon}</div>
         </div>
         <div class="modal-body">
           <div class="modal-desc">

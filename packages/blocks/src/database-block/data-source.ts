@@ -1,13 +1,17 @@
+import type { DatabaseBlockModel } from '@blocksuite/affine-model';
 import type { EditorHost } from '@blocksuite/block-std';
 
+import {
+  type InsertToPosition,
+  insertPositionToIndex,
+} from '@blocksuite/affine-shared/utils';
 import { assertExists } from '@blocksuite/global/utils';
 import { type BlockModel, Text } from '@blocksuite/store';
 import { type ReadonlySignal, computed } from '@lit-labs/preact-signals';
 
 import type { ColumnConfig } from './data-view/index.js';
+import type { DatabaseFlags } from './data-view/types.js';
 import type { DataViewTypes } from './data-view/view/data-view.js';
-import type { DatabaseBlockModel } from './database-model.js';
-import type { DatabaseFlags } from './types.js';
 
 import { getIcon } from './block-icons.js';
 import {
@@ -20,11 +24,9 @@ import {
   DataSourceBase,
   type DataViewDataType,
   type DetailSlots,
-  type InsertToPosition,
   type ViewMeta,
   columnPresets,
   createUniComponentFromWebComponent,
-  insertPositionToIndex,
 } from './data-view/index.js';
 import { map } from './data-view/utils/uni-component/operation.js';
 import {
@@ -33,7 +35,24 @@ import {
 } from './data-view/view-manager/view-manager.js';
 import { BlockRenderer } from './detail-panel/block-renderer.js';
 import { NoteRenderer } from './detail-panel/note-renderer.js';
-import { databaseViewAddView } from './utils.js';
+import {
+  addColumn,
+  applyCellsUpdate,
+  applyColumnUpdate,
+  copyCellsByColumn,
+  databaseViewAddView,
+  deleteRows,
+  deleteView,
+  duplicateView,
+  findColumnIndex,
+  getCell,
+  getColumn,
+  moveViewTo,
+  updateCell,
+  updateCells,
+  updateColumn,
+  updateView,
+} from './utils.js';
 import { databaseBlockViewMap, databaseBlockViews } from './views/models.js';
 
 export type DatabaseBlockDataSourceConfig = {
@@ -71,7 +90,7 @@ export class DatabaseBlockDataSource extends DataSourceBase {
   });
 
   viewDataList$: ReadonlySignal<DataViewDataType[]> = computed(() => {
-    return this._model.views$.value;
+    return this._model.views$.value as DataViewDataType[];
   });
 
   override viewManager: ViewManager = new ViewManagerBase(this);
@@ -132,11 +151,11 @@ export class DatabaseBlockDataSource extends DataSourceBase {
       return;
     }
     if (this._model.columns$.value.some(v => v.id === propertyId)) {
-      this._model.updateCell(rowId, {
+      updateCell(this._model, rowId, {
         columnId: propertyId,
         value: newValue,
       });
-      this._model.applyCellsUpdate();
+      applyCellsUpdate(this._model);
     }
   }
 
@@ -153,7 +172,7 @@ export class DatabaseBlockDataSource extends DataSourceBase {
       const model = this.getModelById(rowId);
       return model?.text;
     }
-    return this._model.getCell(rowId, propertyId)?.value;
+    return getCell(this._model, rowId, propertyId)?.value;
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -163,27 +182,28 @@ export class DatabaseBlockDataSource extends DataSourceBase {
 
   propertyAdd(insertToPosition: InsertToPosition, type?: string): string {
     this.doc.captureSync();
-    const result = this._model.addColumn(
+    const result = addColumn(
+      this._model,
       insertToPosition,
       databaseBlockAllColumnMap[
         type ?? columnPresets.multiSelectColumnConfig.type
       ].model.create(this.newColumnName())
     );
-    this._model.applyColumnUpdate();
+    applyColumnUpdate(this._model);
     return result;
   }
 
   propertyChangeData(propertyId: string, data: Record<string, unknown>): void {
     this._runCapture();
 
-    this._model.updateColumn(propertyId, () => ({ data }));
-    this._model.applyColumnUpdate();
+    updateColumn(this._model, propertyId, () => ({ data }));
+    applyColumnUpdate(this._model);
   }
 
   propertyChangeName(propertyId: string, name: string): void {
     this.doc.captureSync();
-    this._model.updateColumn(propertyId, () => ({ name }));
-    this._model.applyColumnUpdate();
+    updateColumn(this._model, propertyId, () => ({ name }));
+    applyColumnUpdate(this._model);
   }
 
   propertyChangeType(propertyId: string, toType: string): void {
@@ -202,7 +222,7 @@ export class DatabaseBlockDataSource extends DataSourceBase {
       cells: currentCells.map(() => undefined),
     };
     this.doc.captureSync();
-    this._model.updateColumn(propertyId, () => ({
+    updateColumn(this._model, propertyId, () => ({
       type: toType,
       data: result.column,
     }));
@@ -212,13 +232,13 @@ export class DatabaseBlockDataSource extends DataSourceBase {
         cells[rows[i]] = result.cells[i];
       }
     });
-    this._model.updateCells(propertyId, cells);
-    this._model.applyColumnUpdate();
+    updateCells(this._model, propertyId, cells);
+    applyColumnUpdate(this._model);
   }
 
   propertyDelete(id: string): void {
     this.doc.captureSync();
-    const index = this._model.findColumnIndex(id);
+    const index = findColumnIndex(this._model, id);
     if (index < 0) return;
 
     this.doc.transact(() => {
@@ -228,7 +248,7 @@ export class DatabaseBlockDataSource extends DataSourceBase {
 
   propertyDuplicate(columnId: string): string {
     this.doc.captureSync();
-    const currentSchema = this._model.getColumn(columnId);
+    const currentSchema = getColumn(this._model, columnId);
     assertExists(currentSchema);
     const { id: copyId, ...nonIdProps } = currentSchema;
     const names = new Set(this._model.columns$.value.map(v => v.name));
@@ -237,15 +257,16 @@ export class DatabaseBlockDataSource extends DataSourceBase {
       index++;
     }
     const schema = { ...nonIdProps, name: `${nonIdProps.name}(${index})` };
-    const id = this._model.addColumn(
+    const id = addColumn(
+      this._model,
       {
         before: false,
         id: columnId,
       },
       schema
     );
-    this._model.copyCellsByColumn(copyId, id);
-    this._model.applyColumnUpdate();
+    copyCellsByColumn(this._model, copyId, id);
+    applyColumnUpdate(this._model);
     return id;
   }
 
@@ -299,7 +320,7 @@ export class DatabaseBlockDataSource extends DataSourceBase {
     this.doc.updateBlock(this._model, {
       children: this._model.children.filter(v => !ids.includes(v.id)),
     });
-    this._model.deleteRows(ids);
+    deleteRows(this._model, ids);
   }
 
   rowMove(rowId: string, position: InsertToPosition): void {
@@ -325,11 +346,11 @@ export class DatabaseBlockDataSource extends DataSourceBase {
 
   viewDataDelete(viewId: string): void {
     this._model.doc.captureSync();
-    this._model.deleteView(viewId);
+    deleteView(this._model, viewId);
   }
 
   viewDataDuplicate(id: string): string {
-    return this._model.duplicateView(id);
+    return duplicateView(this._model, id);
   }
 
   viewDataGet(viewId: string): DataViewDataType {
@@ -337,14 +358,14 @@ export class DatabaseBlockDataSource extends DataSourceBase {
   }
 
   viewDataMoveTo(id: string, position: InsertToPosition): void {
-    this._model.moveViewTo(id, position);
+    moveViewTo(this._model, id, position);
   }
 
   viewDataUpdate<ViewData extends DataViewDataType>(
     id: string,
     updater: (data: ViewData) => Partial<ViewData>
   ): void {
-    this._model.updateView(id, updater);
+    updateView(this._model, id, updater);
   }
 
   viewMetaGet(type: string): ViewMeta {
