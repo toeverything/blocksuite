@@ -19,7 +19,7 @@ import { customElement, property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
 
-import type { Renderer } from '../../surface-block/canvas-renderer/renderer.js';
+import type { CanvasRenderer } from '../../surface-block/renderer/canvas-renderer.js';
 
 import {
   EDGELESS_BLOCK_CHILD_BORDER_WIDTH,
@@ -155,7 +155,7 @@ export class SurfaceRefNotePortal extends WithDisposable(ShadowlessElement) {
   accessor model!: NoteBlockModel;
 
   @property({ attribute: false })
-  accessor renderer!: Renderer;
+  accessor renderer!: CanvasRenderer;
 }
 
 declare global {

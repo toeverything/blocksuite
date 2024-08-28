@@ -1,6 +1,6 @@
 import type { TextElementModel } from '@blocksuite/affine-model';
 
-import type { Renderer } from '../../renderer.js';
+import type { CanvasRenderer } from '../../canvas-renderer.js';
 
 import {
   deltaInsertsToChunks,
@@ -15,7 +15,7 @@ export function text(
   model: TextElementModel,
   ctx: CanvasRenderingContext2D,
   matrix: DOMMatrix,
-  renderer: Renderer
+  renderer: CanvasRenderer
 ) {
   const { fontSize, fontWeight, fontStyle, fontFamily, textAlign, rotate } =
     model;

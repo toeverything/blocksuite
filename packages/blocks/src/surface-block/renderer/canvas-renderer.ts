@@ -13,20 +13,20 @@ import {
 import type { Viewport } from '../../root-block/edgeless/utils/viewport.js';
 import type { SurfaceElementModel } from '../element-model/base.js';
 import type { LayerManager } from '../managers/layer-manager.js';
+import type { ElementRenderer } from './elements/index.js';
 
 import { RoughCanvas } from '../rough/canvas.js';
-import { modelRenderer } from './element-renderer/index.js';
 
 /**
  * An overlay is a layer covered on top of elements,
  * can be used for rendering non-CRDT state indicators.
  */
 export abstract class Overlay {
-  protected _renderer: Renderer | null = null;
+  protected _renderer: CanvasRenderer | null = null;
 
   constructor() {}
 
-  setRenderer(renderer: Renderer | null) {
+  setRenderer(renderer: CanvasRenderer | null) {
     this._renderer = renderer;
   }
 
@@ -44,12 +44,13 @@ type EnvProvider = {
 type RendererOptions = {
   viewport: Viewport;
   layerManager: LayerManager;
-  provider: EnvProvider;
+  provider?: Partial<EnvProvider>;
   enableStackingCanvas?: boolean;
   onStackingCanvasCreated?: (canvas: HTMLCanvasElement) => void;
+  elementRenderers: Record<string, ElementRenderer>;
 };
 
-export class Renderer {
+export class CanvasRenderer {
   private _container!: HTMLElement;
 
   private _disposables = new DisposableGroup();
@@ -63,6 +64,8 @@ export class Renderer {
   canvas: HTMLCanvasElement;
 
   ctx: CanvasRenderingContext2D;
+
+  elementRenderers: Record<string, ElementRenderer>;
 
   layerManager: LayerManager;
 
@@ -84,6 +87,7 @@ export class Renderer {
     this.viewport = options.viewport;
     this.layerManager = options.layerManager;
     this.provider = options.provider ?? {};
+    this.elementRenderers = options.elementRenderers;
     this._initViewport();
 
     options.enableStackingCanvas = options.enableStackingCanvas ?? false;
@@ -279,7 +283,9 @@ export class Renderer {
       const display = element.display ?? true;
       if (display && intersects(getBoundsWithRotation(element), bound)) {
         const renderFn =
-          modelRenderer[element.type as keyof typeof modelRenderer];
+          this.elementRenderers[
+            element.type as keyof typeof this.elementRenderers
+          ];
 
         if (!renderFn) {
           console.warn(`Cannot find renderer for ${element.type}`);

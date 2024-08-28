@@ -1,15 +1,15 @@
 import type { ShapeElementModel } from '@blocksuite/affine-model';
 
 import type { RoughCanvas } from '../../../rough/canvas.js';
-import type { Renderer } from '../../renderer.js';
+import type { CanvasRenderer } from '../../canvas-renderer.js';
 
 import { type Colors, drawGeneralShape } from './utils.js';
 
-export function triangle(
+export function diamond(
   model: ShapeElementModel,
   ctx: CanvasRenderingContext2D,
   matrix: DOMMatrix,
-  renderer: Renderer,
+  renderer: CanvasRenderer,
   rc: RoughCanvas,
   colors: Colors
 ) {
@@ -45,8 +45,9 @@ export function triangle(
     rc.polygon(
       [
         [renderWidth / 2, 0],
-        [renderWidth, renderHeight],
-        [0, renderHeight],
+        [renderWidth, renderHeight / 2],
+        [renderWidth / 2, renderHeight],
+        [0, renderHeight / 2],
       ],
       {
         seed,

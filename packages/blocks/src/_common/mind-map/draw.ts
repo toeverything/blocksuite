@@ -16,7 +16,6 @@ import type {
   ShapeElementModel,
 } from '../../surface-block/index.js';
 
-import { getFontString } from '../../surface-block/canvas-renderer/element-renderer/text/utils.js';
 import {
   CanvasElementType,
   ConnectorMode,
@@ -24,6 +23,7 @@ import {
   getLineWidth,
   normalizeShapeBound,
 } from '../../surface-block/index.js';
+import { getFontString } from '../../surface-block/renderer/elements/text/utils.js';
 import {
   type Connector,
   type LayoutNode,

@@ -15,8 +15,8 @@ import { styleMap } from 'lit/directives/style-map.js';
 import { literal, html as staticHtml, unsafeStatic } from 'lit/static-html.js';
 
 import type { GfxBlockModel } from '../root-block/edgeless/block-model.js';
-import type { Renderer } from '../surface-block/canvas-renderer/renderer.js';
 import type { BlockLayer } from '../surface-block/managers/layer-manager.js';
+import type { CanvasRenderer } from '../surface-block/renderer/canvas-renderer.js';
 
 import './portal/generic-block.js';
 import './portal/note.js';
@@ -172,7 +172,7 @@ export class SurfaceRefPortal extends WithDisposable(ShadowlessElement) {
   accessor renderModel!: (model: BlockModel) => TemplateResult;
 
   @property({ attribute: false })
-  accessor renderer!: Renderer;
+  accessor renderer!: CanvasRenderer;
 }
 
 declare global {

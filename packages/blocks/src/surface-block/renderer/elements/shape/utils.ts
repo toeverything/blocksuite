@@ -6,7 +6,7 @@ import type {
 import type { Bound } from '@blocksuite/global/utils';
 import type { SerializedXYWH } from '@blocksuite/global/utils';
 
-import type { Renderer } from '../../renderer.js';
+import type { CanvasRenderer } from '../../canvas-renderer.js';
 
 import {
   type TextDelta,
@@ -29,7 +29,7 @@ export type Colors = {
 export function drawGeneralShape(
   ctx: CanvasRenderingContext2D,
   shapeModel: ShapeElementModel,
-  renderer: Renderer,
+  renderer: CanvasRenderer,
   filled: boolean,
   fillColor: string,
   strokeColor: string

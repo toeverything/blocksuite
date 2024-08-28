@@ -45,7 +45,6 @@ import {
   SYNCED_MIN_HEIGHT,
   SYNCED_MIN_WIDTH,
 } from '../../../../embed-synced-doc-block/styles.js';
-import { normalizeTextBound } from '../../../../surface-block/canvas-renderer/element-renderer/text/utils.js';
 import {
   CanvasElementType,
   GroupElementModel,
@@ -56,6 +55,7 @@ import {
   normalizeDegAngle,
   normalizeShapeBound,
 } from '../../../../surface-block/index.js';
+import { normalizeTextBound } from '../../../../surface-block/renderer/elements/text/utils.js';
 import {
   AI_CHAT_BLOCK_MAX_HEIGHT,
   AI_CHAT_BLOCK_MAX_WIDTH,

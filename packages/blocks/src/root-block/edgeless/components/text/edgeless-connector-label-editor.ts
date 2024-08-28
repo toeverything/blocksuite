@@ -18,7 +18,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 import type { ConnectorElementModel } from '../../../../surface-block/index.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
 
-import { getLineHeight } from '../../../../surface-block/canvas-renderer/element-renderer/text/utils.js';
+import { getLineHeight } from '../../../../surface-block/renderer/elements/text/utils.js';
 
 const HORIZONTAL_PADDING = 2;
 const VERTICAL_PADDING = 2;

@@ -12,7 +12,7 @@ import { last } from '@blocksuite/global/utils';
 
 import type { MindmapNode } from './layout.js';
 
-import { fitContent } from '../../../canvas-renderer/element-renderer/shape/utils.js';
+import { fitContent } from '../../../renderer/elements/shape/utils.js';
 
 export type NodeStyle = {
   radius: number;

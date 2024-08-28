@@ -1,12 +1,12 @@
 import type { BrushElementModel } from '@blocksuite/affine-model';
 
-import type { Renderer } from '../../renderer.js';
+import type { CanvasRenderer } from '../../canvas-renderer.js';
 
 export function brush(
   model: BrushElementModel,
   ctx: CanvasRenderingContext2D,
   matrix: DOMMatrix,
-  renderer: Renderer
+  renderer: CanvasRenderer
 ) {
   const { rotate } = model;
   const [, , w, h] = model.deserializedXYWH;

@@ -2,7 +2,7 @@ import type { IBound } from '@blocksuite/global/utils';
 
 import type { MindmapElementModel } from '../../element-model/mindmap.js';
 import type { RoughCanvas } from '../../rough/canvas.js';
-import type { Renderer } from '../renderer.js';
+import type { CanvasRenderer } from '../canvas-renderer.js';
 
 import { connector as renderConnector } from './connector/index.js';
 
@@ -10,7 +10,7 @@ export function mindmap(
   model: MindmapElementModel,
   ctx: CanvasRenderingContext2D,
   matrix: DOMMatrix,
-  renderer: Renderer,
+  renderer: CanvasRenderer,
   rc: RoughCanvas,
   bound: IBound
 ) {

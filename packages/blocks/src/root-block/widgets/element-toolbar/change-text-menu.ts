@@ -34,14 +34,14 @@ import type {
 } from '../../edgeless/components/color-picker/index.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 
-import {
-  isFontStyleSupported,
-  isFontWeightSupported,
-} from '../../../surface-block/canvas-renderer/element-renderer/text/utils.js';
-import { normalizeTextBound } from '../../../surface-block/canvas-renderer/element-renderer/text/utils.js';
 import { isConnectorWithLabel } from '../../../surface-block/element-model/utils/connector.js';
 import { ShapeElementModel } from '../../../surface-block/index.js';
 import { normalizeShapeBound } from '../../../surface-block/index.js';
+import {
+  isFontStyleSupported,
+  isFontWeightSupported,
+} from '../../../surface-block/renderer/elements/text/utils.js';
+import { normalizeTextBound } from '../../../surface-block/renderer/elements/text/utils.js';
 import {
   getFontFacesByFontFamily,
   wrapFontFamily,
