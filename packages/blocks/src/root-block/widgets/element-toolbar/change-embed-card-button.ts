@@ -372,6 +372,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
       isEmbedSyncedDocBlock(this.model)
     ) {
       buttons.push({
+        type: 'open-this-doc',
         label: 'Open this doc',
         icon: ExpandFullSmallIcon,
         action: this._open,
@@ -379,6 +380,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
       });
     } else if (this._canShowFullScreenButton) {
       buttons.push({
+        type: 'open-this-doc',
         label: 'Open this doc',
         icon: ExpandFullSmallIcon,
         action: this._open,
@@ -389,6 +391,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
 
     if (this._blockComponent && isPeekable(this._blockComponent)) {
       buttons.push({
+        type: 'open-in-center-peek',
         label: 'Open in center peek',
         icon: CenterPeekIcon,
         action: () => this._peek(),
@@ -420,7 +423,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
             button => button.label,
             ({ label, icon, action, disabled }) => html`
               <editor-menu-action
-                aria-label=${label}
+                ?aria-label=${label}
                 ?disabled=${disabled}
                 @click=${action}
               >
@@ -512,8 +515,8 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
               button => button.type,
               ({ type, label, handler, disabled }) => html`
                 <editor-menu-action
-                  aria-label=${label}
                   data-testid=${`link-to-${type}`}
+                  ?aria-label=${label}
                   ?data-selected=${this._viewType === type}
                   ?disabled=${disabled}
                   @click=${handler}

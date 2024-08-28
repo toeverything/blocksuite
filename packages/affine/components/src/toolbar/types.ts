@@ -3,15 +3,17 @@ import type { TemplateResult, nothing } from 'lit';
 export type MenuItemPart = {
   action: () => void;
   disabled?: boolean;
+  render?: (item: MenuItem) => TemplateResult<1>;
 };
 
 export type MenuItem = {
-  icon: TemplateResult<1>;
-  label: string;
-  type?: string;
+  type: string;
+  label?: string;
+  tooltip?: string;
+  icon?: TemplateResult<1>;
 } & MenuItemPart;
 
-export type MoreMenuItem<T> = Omit<MenuItem, 'action' | 'disabled'> & {
+export type AdvancedMenuItem<T> = Omit<MenuItem, 'action' | 'disabled'> & {
   action?: (context: T) => void | Promise<void>;
   disabled?: boolean | ((context: T) => boolean);
   when?: (context: T) => boolean;
@@ -19,9 +21,9 @@ export type MoreMenuItem<T> = Omit<MenuItem, 'action' | 'disabled'> & {
   generate?: (context: T) => MenuItemPart | void;
 };
 
-export type MoreMenuItemGroup<T> = {
+export type MenuItemGroup<T> = {
   type: string;
-  items: MoreMenuItem<T>[];
+  items: AdvancedMenuItem<T>[];
   when?: (context: T) => boolean;
 };
 

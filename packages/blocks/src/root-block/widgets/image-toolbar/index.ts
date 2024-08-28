@@ -1,3 +1,7 @@
+import type {
+  AdvancedMenuItem,
+  MenuItemGroup,
+} from '@blocksuite/affine-components/toolbar';
 import type { ImageBlockModel } from '@blocksuite/affine-model';
 
 import { HoverController } from '@blocksuite/affine-components/hover';
@@ -7,11 +11,11 @@ import { html } from 'lit';
 import { customElement } from 'lit/decorators.js';
 
 import type { ImageBlockComponent } from '../../../image-block/image-block.js';
-import type { ImageConfigItem, MoreMenuConfigItem } from './type.js';
 
 import { PAGE_HEADER_HEIGHT } from '../../../_common/consts.js';
 import './components/image-toolbar.js';
-import { commonConfig, moreMenuConfig } from './config.js';
+import { COMMON_GROUPS, MORE_GROUPS } from './config.js';
+import { ImageToolbarContext } from './type.js';
 
 export const AFFINE_IMAGE_TOOLBAR_WIDGET = 'affine-image-toolbar-widget';
 
@@ -55,10 +59,11 @@ export class AffineImageToolbarWidget extends WidgetComponent<
           return null;
         }
 
+        const context = new ImageToolbarContext(imageBlock, abortController);
+
         return {
           template: html`<affine-image-toolbar
-            .blockComponent=${imageBlock}
-            .abortController=${abortController}
+            .context=${context}
             .config=${this.config}
             .moreMenuConfig=${this.moreMenuConfig}
             .onActiveStatusChange=${(active: boolean) => {
@@ -104,50 +109,48 @@ export class AffineImageToolbarWidget extends WidgetComponent<
     };
   };
 
-  addConfigItems = (item: ImageConfigItem[], index?: number) => {
+  addConfigItems = (
+    items: AdvancedMenuItem<ImageToolbarContext>[],
+    index?: number
+  ) => {
     if (index === undefined) {
-      this.config.push(...item);
+      this.config[0].items.push(...items);
       return this;
     }
 
-    this.config.splice(index, 0, ...item);
+    this.config[0].items.splice(index, 0, ...items);
     return this;
   };
 
-  addMoreMenuItems = (item: MoreMenuConfigItem[], index?: number) => {
+  addMoreMenuItems = (
+    items: AdvancedMenuItem<ImageToolbarContext>[],
+    index?: number,
+    type?: string
+  ) => {
+    let group;
+    if (type) {
+      group = this.moreMenuConfig.find(g => g.type === type);
+    }
+    if (!group) {
+      group = this.moreMenuConfig[0];
+    }
+
     if (index === undefined) {
-      this.moreMenuConfig.push(...item);
+      group.items.push(...items);
       return this;
     }
 
-    this.moreMenuConfig.splice(index, 0, ...item);
+    group.items.splice(index, 0, ...items);
     return this;
   };
 
-  buildDefaultConfig = () => {
-    this.clearConfig()
-      .addConfigItems(commonConfig)
-      .addMoreMenuItems(moreMenuConfig);
-    return this;
-  };
+  config: MenuItemGroup<ImageToolbarContext>[] = COMMON_GROUPS;
 
-  clearConfig = () => {
-    this.config = [];
-    this.moreMenuConfig = [];
-    return this;
-  };
-
-  config: ImageConfigItem[] = [];
-
-  moreMenuConfig: MoreMenuConfigItem[] = [];
+  moreMenuConfig: MenuItemGroup<ImageToolbarContext>[] = MORE_GROUPS;
 
   override firstUpdated() {
     if (this.doc.getParent(this.model.id)?.flavour === 'affine:surface') {
       return;
-    }
-
-    if (!this.config.length || !this.moreMenuConfig.length) {
-      this.buildDefaultConfig();
     }
 
     this._setHoverController();

@@ -16,9 +16,8 @@ import { isPeekable, peek } from '@blocksuite/affine-components/peek';
 import { toast } from '@blocksuite/affine-components/toast';
 import {
   type MenuItem,
-  type MoreMenuItemGroup,
-  groupsToActions,
-  renderActions,
+  type MenuItemGroup,
+  renderGroups,
   renderToolbarSeparator,
 } from '@blocksuite/affine-components/toolbar';
 import { downloadBlob } from '@blocksuite/affine-shared/utils';
@@ -138,7 +137,7 @@ export class SurfaceRefToolbarContext extends MoreMenuContext {
   }
 }
 
-const BUILT_IN_GROUPS: MoreMenuItemGroup<SurfaceRefToolbarContext>[] = [
+const BUILT_IN_GROUPS: MenuItemGroup<SurfaceRefToolbarContext>[] = [
   {
     type: 'clipboard',
     when: ctx => !!(ctx.blockComponent.referenceModel && ctx.doc.root),
@@ -228,6 +227,7 @@ function SurfaceRefToolbarOptions(options: {
   const openMenuActions: MenuItem[] = [];
   if (hasValidReference) {
     openMenuActions.push({
+      type: 'open-in-edgeless',
       label: 'Open in edgeless',
       icon: EdgelessModeIcon,
       action: () => block.viewInEdgeless(),
@@ -236,6 +236,7 @@ function SurfaceRefToolbarOptions(options: {
 
     if (isPeekable(block)) {
       openMenuActions.push({
+        type: 'open-in-center-peek',
         label: 'Open in center peek',
         icon: CenterPeekIcon,
         action: () => peek(block),
@@ -247,7 +248,7 @@ function SurfaceRefToolbarOptions(options: {
   const groups = context.config.configure(
     BUILT_IN_GROUPS.map(group => ({ ...group, items: [...group.items] }))
   );
-  const moreMenuActions = renderActions(groupsToActions(groups, context));
+  const moreMenuActions = renderGroups(groups, context);
 
   const buttons = [
     openMenuActions.length
@@ -270,7 +271,7 @@ function SurfaceRefToolbarOptions(options: {
                 button => button.label,
                 ({ label, icon, action, disabled }) => html`
                   <editor-menu-action
-                    aria-label=${label}
+                    ?aria-label=${label}
                     ?disabled=${disabled}
                     @click=${action}
                   >

@@ -1,94 +1,148 @@
-import { BookmarkIcon } from '@blocksuite/affine-components/icons';
+import type { MenuItemGroup } from '@blocksuite/affine-components/toolbar';
+
 import {
+  BookmarkIcon,
   CaptionIcon,
   CopyIcon,
   DeleteIcon,
   DownloadIcon,
   DuplicateIcon,
 } from '@blocksuite/affine-components/icons';
+import { html } from 'lit';
 
-import type { ImageBlockComponent } from '../../../image-block/image-block.js';
-import type { ImageConfigItem, MoreMenuConfigItem } from './type.js';
+import type { ImageToolbarContext } from './type.js';
 
 import { duplicate } from './utils.js';
 
-export const commonConfig: ImageConfigItem[] = [
+export const COMMON_GROUPS: MenuItemGroup<ImageToolbarContext>[] = [
   {
-    name: 'download',
-    icon: DownloadIcon,
-    tooltip: 'Download',
-    showWhen: () => true,
-    action: (block: ImageBlockComponent, abortController: AbortController) => {
-      abortController.abort();
-      block.download();
-    },
     type: 'common',
-  },
-  {
-    name: 'caption',
-    icon: CaptionIcon,
-    tooltip: 'Caption',
-    showWhen: block => !block.doc.readonly,
-    action: (block: ImageBlockComponent, abortController: AbortController) => {
-      abortController.abort();
-      block.captionEditor?.show();
-    },
-    type: 'common',
+    items: [
+      {
+        type: 'download',
+        label: 'Download',
+        icon: DownloadIcon,
+        generate: ({ blockComponent, abortController }) => {
+          return {
+            action: () => {
+              abortController.abort();
+              blockComponent.download();
+            },
+            render: item => html`
+              <editor-icon-button
+                class="image-toolbar-button download"
+                ?aria-label=${item.label}
+                .tooltip=${item.label}
+                .tooltipOffset=${4}
+                @click=${(e: MouseEvent) => {
+                  e.stopPropagation();
+                  item.action();
+                }}
+              >
+                ${item.icon}
+              </editor-icon-button>
+            `,
+          };
+        },
+      },
+      {
+        type: 'caption',
+        label: 'Caption',
+        icon: CaptionIcon,
+        when: ({ doc }) => !doc.readonly,
+        generate: ({ blockComponent, abortController }) => {
+          return {
+            action: () => {
+              abortController.abort();
+              blockComponent.captionEditor?.show();
+            },
+            render: item => html`
+              <editor-icon-button
+                class="image-toolbar-button caption"
+                ?aria-label=${item.label}
+                .tooltip=${item.label}
+                .tooltipOffset=${4}
+                @click=${(e: MouseEvent) => {
+                  e.stopPropagation();
+                  item.action();
+                }}
+              >
+                ${item.icon}
+              </editor-icon-button>
+            `,
+          };
+        },
+      },
+    ],
   },
 ];
 
-export const moreMenuConfig: MoreMenuConfigItem[] = [
-  {
-    name: 'Turn into card view',
-    icon: BookmarkIcon,
-    tooltip: 'Turn into Card view',
-    showWhen: block => {
-      const doc = block.doc;
-      const supportAttachment =
-        doc.schema.flavourSchemaMap.has('affine:attachment');
-      const readonly = doc.readonly;
-      return supportAttachment && !readonly && !!block.blob;
+// Clipboard Group
+export const clipboardGroup: MenuItemGroup<ImageToolbarContext> = {
+  type: 'clipboard',
+  items: [
+    {
+      type: 'copy',
+      label: 'Copy',
+      icon: CopyIcon,
+      action: ({ blockComponent, abortController }) => {
+        blockComponent.copy();
+        abortController.abort();
+      },
     },
-    action: (block: ImageBlockComponent, abortController: AbortController) => {
-      block.convertToCardView();
-      abortController.abort();
+    {
+      type: 'duplicate',
+      label: 'Duplicate',
+      icon: DuplicateIcon,
+      when: ({ doc }) => !doc.readonly,
+      action: ({ blockComponent, abortController }) => {
+        duplicate(blockComponent, abortController);
+      },
     },
-    type: 'more',
-  },
-  {
-    name: 'Copy',
-    icon: CopyIcon,
-    tooltip: 'Copy',
-    showWhen: () => true,
-    action: (block: ImageBlockComponent, abortController: AbortController) => {
-      block.copy();
-      abortController.abort();
+  ],
+};
+
+// Conversions Group
+export const conversionsGroup: MenuItemGroup<ImageToolbarContext> = {
+  type: 'conversions',
+  items: [
+    {
+      label: 'Turn into card view',
+      type: 'turn-into-card-view',
+      icon: BookmarkIcon,
+      when: ({ doc, blockComponent }) => {
+        const supportAttachment =
+          doc.schema.flavourSchemaMap.has('affine:attachment');
+        const readonly = doc.readonly;
+        return supportAttachment && !readonly && !!blockComponent.blob;
+      },
+      action: ({ blockComponent, abortController }) => {
+        blockComponent.convertToCardView();
+        abortController.abort();
+      },
     },
-    type: 'more',
-  },
-  {
-    name: 'Duplicate',
-    icon: DuplicateIcon,
-    tooltip: 'Duplicate',
-    showWhen: block => !block.doc.readonly,
-    action: (block: ImageBlockComponent, abortController: AbortController) => {
-      duplicate(block, abortController);
+  ],
+};
+
+// Delete Group
+export const deleteGroup: MenuItemGroup<ImageToolbarContext> = {
+  type: 'delete',
+  items: [
+    {
+      type: 'delete',
+      label: 'Delete',
+      icon: DeleteIcon,
+      when: ({ doc }) => !doc.readonly,
+      action: ({ doc, blockComponent, abortController }) => {
+        abortController.abort();
+        doc.deleteBlock(blockComponent.model);
+      },
     },
-    type: 'more',
-  },
-  {
-    type: 'divider',
-    showWhen: block => !block.doc.readonly,
-  },
-  {
-    name: 'Delete',
-    icon: DeleteIcon,
-    tooltip: 'Delete',
-    showWhen: block => !block.doc.readonly,
-    action: (block: ImageBlockComponent, abortController: AbortController) => {
-      abortController.abort();
-      block.doc.deleteBlock(block.model);
-    },
-    type: 'more',
-  },
+  ],
+};
+
+export const MORE_GROUPS: MenuItemGroup<ImageToolbarContext>[] = [
+  clipboardGroup,
+  conversionsGroup,
+  deleteGroup,
 ];

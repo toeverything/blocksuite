@@ -1,40 +1,32 @@
-import type { TemplateResult } from 'lit';
-
 import type { ImageBlockComponent } from '../../../image-block/image-block.js';
 
-export type DefaultItemConfig = {
-  name: string;
-  icon: TemplateResult;
-  tooltip: string;
-  showWhen: (block: ImageBlockComponent) => boolean;
-  action: (
-    block: ImageBlockComponent,
-    abortController: AbortController,
-    onClick?: () => void
-  ) => void;
-};
+import { MoreMenuContext } from '../../configs/toolbar.js';
 
-export type CommonItem = DefaultItemConfig & {
-  type: 'common';
-};
+export class ImageToolbarContext extends MoreMenuContext {
+  constructor(
+    public blockComponent: ImageBlockComponent,
+    public abortController: AbortController
+  ) {
+    super();
+  }
 
-export type MoreItem = DefaultItemConfig & {
-  type: 'more';
-};
+  override isEmpty() {
+    return false;
+  }
 
-export type DividerItem = {
-  type: 'divider';
-  showWhen: (block: ImageBlockComponent) => boolean;
-};
+  get doc() {
+    return this.blockComponent.doc;
+  }
 
-export type CustomItem = {
-  showWhen: (block: ImageBlockComponent) => boolean;
-  render: (
-    block: ImageBlockComponent,
-    onClick?: () => void
-  ) => TemplateResult | null;
-  type: 'custom';
-};
+  get host() {
+    return this.blockComponent.host;
+  }
 
-export type ImageConfigItem = CommonItem | CustomItem;
-export type MoreMenuConfigItem = MoreItem | DividerItem;
+  get selectedBlockModels() {
+    return [this.blockComponent.model];
+  }
+
+  get std() {
+    return this.blockComponent.std;
+  }
+}

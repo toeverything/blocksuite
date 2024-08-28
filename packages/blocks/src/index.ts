@@ -133,10 +133,14 @@ export {
 } from '@blocksuite/affine-components/rich-text';
 export { toast } from '@blocksuite/affine-components/toast';
 export {
+  type AdvancedMenuItem,
   type FatMenuItems,
   type MenuItem,
+  type MenuItemGroup,
   Tooltip,
+  groupsToActions,
   renderActions,
+  renderGroups,
   renderToolbarSeparator,
 } from '@blocksuite/affine-components/toolbar';
 export * from '@blocksuite/affine-model';

@@ -18,9 +18,8 @@ import { isPeekable, peek } from '@blocksuite/affine-components/peek';
 import { toast } from '@blocksuite/affine-components/toast';
 import {
   type MenuItem,
-  type MoreMenuItemGroup,
-  groupsToActions,
-  renderActions,
+  type MenuItemGroup,
+  renderGroups,
   renderToolbarSeparator,
 } from '@blocksuite/affine-components/toolbar';
 import {
@@ -66,7 +65,7 @@ import {
 } from '../../edgeless/utils/query.js';
 import { embedCardToolbarStyle } from './styles.js';
 
-const BUILT_IN_GROUPS: MoreMenuItemGroup<EmbedCardToolbarContext>[] = [
+const BUILT_IN_GROUPS: MenuItemGroup<EmbedCardToolbarContext>[] = [
   {
     type: 'clipboard',
     items: [
@@ -198,17 +197,17 @@ export class EmbedCardToolbar extends WidgetComponent<
       const buttons = [
         {
           type: 'horizontal',
-          name: 'Large horizontal style',
+          label: 'Large horizontal style',
           icon: EmbedCardHorizontalIcon,
         },
         {
           type: 'list',
-          name: 'Small horizontal style',
+          label: 'Small horizontal style',
           icon: EmbedCardListIcon,
         },
       ] as {
         type: EmbedCardStyle;
-        name: string;
+        label: string;
         icon: TemplateResult<1>;
       }[];
 
@@ -229,18 +228,18 @@ export class EmbedCardToolbar extends WidgetComponent<
             ${repeat(
               buttons,
               button => button.type,
-              ({ type, name, icon }) => html`
+              ({ type, label, icon }) => html`
                 <icon-button
                   width="76px"
                   height="76px"
-                  aria-label=${name}
+                  aria-label=${label}
                   class=${classMap({
                     selected: this.focusModel?.style === type,
                   })}
                   @click=${() => this._setEmbedCardStyle(type)}
                 >
                   ${icon}
-                  <affine-tooltip .offset=${4}>${name}</affine-tooltip>
+                  <affine-tooltip .offset=${4}>${label}</affine-tooltip>
                 </icon-button>
               `
             )}
@@ -396,7 +395,7 @@ export class EmbedCardToolbar extends WidgetComponent<
     const groups = context.config.configure(
       BUILT_IN_GROUPS.map(group => ({ ...group, items: [...group.items] }))
     );
-    return renderActions(groupsToActions(groups, context));
+    return renderGroups(groups, context);
   }
 
   get _openButtonDisabled() {
@@ -416,6 +415,7 @@ export class EmbedCardToolbar extends WidgetComponent<
         isEmbedSyncedDocBlock(this.focusModel))
     ) {
       buttons.push({
+        type: 'open-this-doc',
         label: 'Open this doc',
         icon: ExpandFullSmallIcon,
         action: () => this.focusBlock?.open(),
@@ -427,6 +427,7 @@ export class EmbedCardToolbar extends WidgetComponent<
     const element = this.focusBlock;
     if (element && isPeekable(element)) {
       buttons.push({
+        type: 'open-in-center-peek',
         label: 'Open in center peek',
         icon: CenterPeekIcon,
         action: () => peek(element),
@@ -458,7 +459,7 @@ export class EmbedCardToolbar extends WidgetComponent<
             button => button.label,
             ({ label, icon, action, disabled }) => html`
               <editor-menu-action
-                aria-label=${label}
+                ?aria-label=${label}
                 ?disabled=${disabled}
                 @click=${action}
               >
@@ -604,8 +605,8 @@ export class EmbedCardToolbar extends WidgetComponent<
             button => button.type,
             ({ type, label, action, disabled }) => html`
               <editor-menu-action
-                aria-label=${label}
                 data-testid=${`link-to-${type}`}
+                ?aria-label=${label}
                 ?data-selected=${this._viewType === type}
                 ?disabled=${disabled}
                 @click=${action}

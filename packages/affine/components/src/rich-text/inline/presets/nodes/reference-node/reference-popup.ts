@@ -192,7 +192,7 @@ export class ReferencePopup extends WithDisposable(LitElement) {
             button => button.label,
             ({ label, icon, action, disabled }) => html`
               <editor-menu-action
-                aria-label=${label}
+                ?aria-label=${label}
                 ?disabled=${disabled}
                 @click=${action}
               >

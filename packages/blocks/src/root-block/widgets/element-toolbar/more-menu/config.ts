@@ -1,4 +1,4 @@
-import type { MoreMenuItemGroup } from '@blocksuite/affine-components/toolbar';
+import type { MenuItemGroup } from '@blocksuite/affine-components/toolbar';
 
 import { isPeekable, peek } from '@blocksuite/affine-components/peek';
 import { Bound } from '@blocksuite/global/utils';
@@ -52,7 +52,7 @@ type RefreshableBlockComponent =
   | BookmarkBlockComponent;
 
 // Section Group: frame & group
-export const sectionGroup: MoreMenuItemGroup<ElementToolbarMoreMenuContext> = {
+export const sectionGroup: MenuItemGroup<ElementToolbarMoreMenuContext> = {
   type: 'section',
   items: [
     {
@@ -87,7 +87,7 @@ export const sectionGroup: MoreMenuItemGroup<ElementToolbarMoreMenuContext> = {
 };
 
 // Reorder Group
-export const reorderGroup: MoreMenuItemGroup<ElementToolbarMoreMenuContext> = {
+export const reorderGroup: MenuItemGroup<ElementToolbarMoreMenuContext> = {
   type: 'reorder',
   items: [
     {
@@ -135,7 +135,7 @@ export const reorderGroup: MoreMenuItemGroup<ElementToolbarMoreMenuContext> = {
 };
 
 // Open Group
-export const openGroup: MoreMenuItemGroup<ElementToolbarMoreMenuContext> = {
+export const openGroup: MenuItemGroup<ElementToolbarMoreMenuContext> = {
   type: 'open',
   items: [
     {
@@ -189,184 +189,182 @@ export const openGroup: MoreMenuItemGroup<ElementToolbarMoreMenuContext> = {
 };
 
 // Clipboard Group
-export const clipboardGroup: MoreMenuItemGroup<ElementToolbarMoreMenuContext> =
-  {
-    type: 'clipboard',
-    items: [
-      {
-        icon: CopyIcon({ width: '20', height: '20' }),
-        label: 'Copy',
-        type: 'copy',
-        action: ({ edgeless }) => edgeless.clipboardController.copy(),
-      },
-      {
-        icon: DuplicateIcon({ width: '20', height: '20' }),
-        label: 'Duplicate',
-        type: 'duplicate',
-        action: ({ edgeless, selectedElements }) =>
-          duplicate(edgeless, selectedElements),
-      },
-      {
-        icon: ResetIcon({ width: '20', height: '20' }),
-        label: 'Reload',
-        type: 'reload',
-        generate: ctx => {
-          if (ctx.hasFrame()) {
-            return;
-          }
+export const clipboardGroup: MenuItemGroup<ElementToolbarMoreMenuContext> = {
+  type: 'clipboard',
+  items: [
+    {
+      icon: CopyIcon({ width: '20', height: '20' }),
+      label: 'Copy',
+      type: 'copy',
+      action: ({ edgeless }) => edgeless.clipboardController.copy(),
+    },
+    {
+      icon: DuplicateIcon({ width: '20', height: '20' }),
+      label: 'Duplicate',
+      type: 'duplicate',
+      action: ({ edgeless, selectedElements }) =>
+        duplicate(edgeless, selectedElements),
+    },
+    {
+      icon: ResetIcon({ width: '20', height: '20' }),
+      label: 'Reload',
+      type: 'reload',
+      generate: ctx => {
+        if (ctx.hasFrame()) {
+          return;
+        }
 
-          const blocks = ctx.selection.surfaceSelections
-            .map(s => ctx.getBlockComponent(s.blockId))
-            .filter(block => !!block)
-            .filter(block => ctx.refreshable(block.model));
+        const blocks = ctx.selection.surfaceSelections
+          .map(s => ctx.getBlockComponent(s.blockId))
+          .filter(block => !!block)
+          .filter(block => ctx.refreshable(block.model));
 
-          if (
-            !blocks.length ||
-            blocks.length !== ctx.selection.surfaceSelections.length
-          ) {
-            return;
-          }
+        if (
+          !blocks.length ||
+          blocks.length !== ctx.selection.surfaceSelections.length
+        ) {
+          return;
+        }
 
-          return {
-            action: () =>
-              blocks.forEach(block =>
-                (block as RefreshableBlockComponent).refreshData()
-              ),
-          };
-        },
+        return {
+          action: () =>
+            blocks.forEach(block =>
+              (block as RefreshableBlockComponent).refreshData()
+            ),
+        };
       },
-    ],
-  };
+    },
+  ],
+};
 
 // Conversions Group
-export const conversionsGroup: MoreMenuItemGroup<ElementToolbarMoreMenuContext> =
-  {
-    type: 'conversions',
-    items: [
-      {
-        icon: LinkedPageIcon({ width: '20', height: '20' }),
-        label: 'Turn into linked doc',
-        type: 'turn-into-linked-doc',
-        action: async ctx => {
-          const { doc, service, surface, host } = ctx;
-          const element = ctx.getNoteBlock();
-          if (!element) return;
+export const conversionsGroup: MenuItemGroup<ElementToolbarMoreMenuContext> = {
+  type: 'conversions',
+  items: [
+    {
+      icon: LinkedPageIcon({ width: '20', height: '20' }),
+      label: 'Turn into linked doc',
+      type: 'turn-into-linked-doc',
+      action: async ctx => {
+        const { doc, service, surface, host } = ctx;
+        const element = ctx.getNoteBlock();
+        if (!element) return;
 
-          const title = await promptDocTitle(host);
-          if (title === null) return;
+        const title = await promptDocTitle(host);
+        if (title === null) return;
 
-          const linkedDoc = createLinkedDocFromNote(doc, element, title);
-          // insert linked doc card
-          const cardId = service.addBlock(
-            'affine:embed-synced-doc',
-            {
-              xywh: element.xywh,
-              style: 'syncedDoc',
-              pageId: linkedDoc.id,
-              index: element.index,
-            },
-            surface.model.id
-          );
-          service.telemetryService?.track('CanvasElementAdded', {
-            control: 'context-menu',
-            page: 'whiteboard editor',
-            module: 'toolbar',
-            segment: 'toolbar',
-            type: 'embed-synced-doc',
-          });
-          service.telemetryService?.track('DocCreated', {
-            control: 'turn into linked doc',
-            page: 'whiteboard editor',
-            module: 'format toolbar',
-            type: 'embed-linked-doc',
-          });
-          service.telemetryService?.track('LinkedDocCreated', {
-            control: 'turn into linked doc',
-            page: 'whiteboard editor',
-            module: 'format toolbar',
-            type: 'embed-linked-doc',
-            other: 'new doc',
-          });
-          moveConnectors(element.id, cardId, service);
-          // delete selected note
-          doc.transact(() => {
-            doc.deleteBlock(element);
-          });
-          service.selection.set({
-            elements: [cardId],
-            editing: false,
-          });
-        },
-        when: ctx => !!ctx.getNoteBlock(),
+        const linkedDoc = createLinkedDocFromNote(doc, element, title);
+        // insert linked doc card
+        const cardId = service.addBlock(
+          'affine:embed-synced-doc',
+          {
+            xywh: element.xywh,
+            style: 'syncedDoc',
+            pageId: linkedDoc.id,
+            index: element.index,
+          },
+          surface.model.id
+        );
+        service.telemetryService?.track('CanvasElementAdded', {
+          control: 'context-menu',
+          page: 'whiteboard editor',
+          module: 'toolbar',
+          segment: 'toolbar',
+          type: 'embed-synced-doc',
+        });
+        service.telemetryService?.track('DocCreated', {
+          control: 'turn into linked doc',
+          page: 'whiteboard editor',
+          module: 'format toolbar',
+          type: 'embed-linked-doc',
+        });
+        service.telemetryService?.track('LinkedDocCreated', {
+          control: 'turn into linked doc',
+          page: 'whiteboard editor',
+          module: 'format toolbar',
+          type: 'embed-linked-doc',
+          other: 'new doc',
+        });
+        moveConnectors(element.id, cardId, service);
+        // delete selected note
+        doc.transact(() => {
+          doc.deleteBlock(element);
+        });
+        service.selection.set({
+          elements: [cardId],
+          editing: false,
+        });
       },
-      {
-        icon: LinkedPageIcon({ width: '20', height: '20' }),
-        label: 'Create linked doc',
-        type: 'create-linked-doc',
-        action: async ({ doc, selection, service, surface, host }) => {
-          const title = await promptDocTitle(host);
-          if (title === null) return;
+      when: ctx => !!ctx.getNoteBlock(),
+    },
+    {
+      icon: LinkedPageIcon({ width: '20', height: '20' }),
+      label: 'Create linked doc',
+      type: 'create-linked-doc',
+      action: async ({ doc, selection, service, surface, host }) => {
+        const title = await promptDocTitle(host);
+        if (title === null) return;
 
-          const elements = getCloneElements(
-            selection.selectedElements,
-            service.frame
-          );
-          const linkedDoc = createLinkedDocFromEdgelessElements(
-            host,
-            elements,
-            title
-          );
-          // insert linked doc card
-          const width = 364;
-          const height = 390;
-          const bound = edgelessElementsBound(elements);
-          const cardId = service.addBlock(
-            'affine:embed-linked-doc',
-            {
-              xywh: `[${bound.center[0] - width / 2}, ${bound.center[1] - height / 2}, ${width}, ${height}]`,
-              style: 'vertical',
-              pageId: linkedDoc.id,
-            },
-            surface.model.id
-          );
-          service.telemetryService?.track('CanvasElementAdded', {
-            control: 'context-menu',
-            page: 'whiteboard editor',
-            module: 'toolbar',
-            segment: 'toolbar',
-            type: 'embed-linked-doc',
-          });
-          service.telemetryService?.track('DocCreated', {
-            control: 'create linked doc',
-            page: 'whiteboard editor',
-            module: 'format toolbar',
-            type: 'embed-linked-doc',
-          });
-          service.telemetryService?.track('LinkedDocCreated', {
-            control: 'create linked doc',
-            page: 'whiteboard editor',
-            module: 'format toolbar',
-            type: 'embed-linked-doc',
-            other: 'new doc',
-          });
-          // delete selected elements
-          doc.transact(() => {
-            deleteElements(surface, elements);
-          });
-          selection.set({
-            elements: [cardId],
-            editing: false,
-          });
+        const elements = getCloneElements(
+          selection.selectedElements,
+          service.frame
+        );
+        const linkedDoc = createLinkedDocFromEdgelessElements(
+          host,
+          elements,
+          title
+        );
+        // insert linked doc card
+        const width = 364;
+        const height = 390;
+        const bound = edgelessElementsBound(elements);
+        const cardId = service.addBlock(
+          'affine:embed-linked-doc',
+          {
+            xywh: `[${bound.center[0] - width / 2}, ${bound.center[1] - height / 2}, ${width}, ${height}]`,
+            style: 'vertical',
+            pageId: linkedDoc.id,
+          },
+          surface.model.id
+        );
+        service.telemetryService?.track('CanvasElementAdded', {
+          control: 'context-menu',
+          page: 'whiteboard editor',
+          module: 'toolbar',
+          segment: 'toolbar',
+          type: 'embed-linked-doc',
+        });
+        service.telemetryService?.track('DocCreated', {
+          control: 'create linked doc',
+          page: 'whiteboard editor',
+          module: 'format toolbar',
+          type: 'embed-linked-doc',
+        });
+        service.telemetryService?.track('LinkedDocCreated', {
+          control: 'create linked doc',
+          page: 'whiteboard editor',
+          module: 'format toolbar',
+          type: 'embed-linked-doc',
+          other: 'new doc',
+        });
+        // delete selected elements
+        doc.transact(() => {
+          deleteElements(surface, elements);
+        });
+        selection.set({
+          elements: [cardId],
+          editing: false,
+        });
 
-          notifyDocCreated(host, doc);
-        },
-        when: ctx => !(ctx.getLinkedDocBlock() || ctx.getNoteBlock()),
+        notifyDocCreated(host, doc);
       },
-    ],
-  };
+      when: ctx => !(ctx.getLinkedDocBlock() || ctx.getNoteBlock()),
+    },
+  ],
+};
 
 // Delete Group
-export const deleteGroup: MoreMenuItemGroup<ElementToolbarMoreMenuContext> = {
+export const deleteGroup: MenuItemGroup<ElementToolbarMoreMenuContext> = {
   type: 'delete',
   items: [
     {
