@@ -16,6 +16,8 @@ import { isPeekable, peek } from '@blocksuite/affine-components/peek';
 import { toast } from '@blocksuite/affine-components/toast';
 import {
   type MenuItem,
+  type MoreMenuItemGroup,
+  groupsToActions,
   renderActions,
   renderToolbarSeparator,
 } from '@blocksuite/affine-components/toolbar';
@@ -31,6 +33,7 @@ import type { SurfaceRefBlockComponent } from '../../../surface-ref-block/index.
 import type { EdgelessRootPreviewBlockComponent } from '../../edgeless/edgeless-root-preview-block.js';
 
 import { PAGE_HEADER_HEIGHT } from '../../../_common/consts.js';
+import { MoreMenuContext } from '../../configs/toolbar.js';
 import { edgelessToBlob, writeImageBlobToClipboard } from './utils.js';
 
 export const AFFINE_SURFACE_REF_TOOLBAR = 'affine-surface-ref-toolbar';
@@ -105,6 +108,114 @@ declare global {
   }
 }
 
+export class SurfaceRefToolbarContext extends MoreMenuContext {
+  constructor(
+    public blockComponent: SurfaceRefBlockComponent,
+    public abortController: AbortController
+  ) {
+    super();
+  }
+
+  isEmpty() {
+    return !this.blockComponent;
+  }
+
+  get doc() {
+    return this.blockComponent.doc;
+  }
+
+  get host() {
+    return this.blockComponent.host;
+  }
+
+  get selectedBlockModels() {
+    if (this.blockComponent) return [this.blockComponent.model];
+    return [];
+  }
+
+  get std() {
+    return this.host.std;
+  }
+}
+
+const BUILT_IN_GROUPS: MoreMenuItemGroup<SurfaceRefToolbarContext>[] = [
+  {
+    type: 'clipboard',
+    when: ctx => !!(ctx.blockComponent.referenceModel && ctx.doc.root),
+    items: [
+      {
+        type: 'copy',
+        label: 'Copy',
+        icon: CopyIcon,
+        action: ctx => {
+          if (!(ctx.blockComponent.referenceModel && ctx.doc.root?.id)) return;
+
+          const referencedModel = ctx.blockComponent.referenceModel;
+          const editor = ctx.blockComponent.previewEditor;
+          const edgelessRootElement = editor?.view.getBlock(ctx.doc.root.id);
+          const surfaceRenderer = (
+            edgelessRootElement as EdgelessRootPreviewBlockComponent
+          )?.surface?.renderer;
+
+          edgelessToBlob(ctx.host, {
+            surfaceRefBlock: ctx.blockComponent,
+            surfaceRenderer,
+            edgelessElement: referencedModel,
+          })
+            .then(blob => writeImageBlobToClipboard(blob))
+            .then(() => toast(ctx.host, 'Copied image to clipboard'))
+            .catch(console.error);
+        },
+      },
+      {
+        type: 'download',
+        label: 'Download',
+        icon: DownloadIcon,
+        action: ctx => {
+          if (!(ctx.blockComponent.referenceModel && ctx.doc.root?.id)) return;
+
+          const referencedModel = ctx.blockComponent.referenceModel;
+          const editor = ctx.blockComponent.previewEditor;
+          const edgelessRootElement = editor?.view.getBlock(ctx.doc.root.id);
+          const surfaceRenderer = (
+            edgelessRootElement as EdgelessRootPreviewBlockComponent
+          )?.surface?.renderer;
+
+          edgelessToBlob(ctx.host, {
+            surfaceRefBlock: ctx.blockComponent,
+            surfaceRenderer,
+            edgelessElement: referencedModel,
+          })
+            .then(blob => {
+              const fileName =
+                'title' in referencedModel
+                  ? (referencedModel.title?.toString() ?? 'Edgeless Content')
+                  : 'Edgeless Content';
+
+              downloadBlob(blob, fileName);
+            })
+            .catch(console.error);
+        },
+      },
+    ],
+  },
+  {
+    type: 'delete',
+    items: [
+      {
+        type: 'delete',
+        label: 'Delete',
+        icon: DeleteIcon,
+        disabled: ctx => ctx.doc.readonly,
+        action: ctx => {
+          ctx.doc.deleteBlock(ctx.blockComponent.model);
+          ctx.abortController.abort();
+        },
+      },
+    ],
+  },
+];
+
 function SurfaceRefToolbarOptions(options: {
   block: SurfaceRefBlockComponent;
   model: SurfaceRefBlockModel;
@@ -132,91 +243,11 @@ function SurfaceRefToolbarOptions(options: {
     }
   }
 
-  const moreMenuActions: MenuItem[][] = [
-    hasValidReference
-      ? [
-          {
-            type: 'copy',
-            label: 'Copy',
-            icon: CopyIcon,
-            action: () => {
-              if (!block.referenceModel || !block.doc.root) return;
-
-              const editor = block.previewEditor;
-              const edgelessRootElement = editor?.view.getBlock(
-                block.doc.root.id
-              );
-              const surfaceRenderer = (
-                edgelessRootElement as EdgelessRootPreviewBlockComponent
-              )?.surface?.renderer;
-
-              edgelessToBlob(block.host, {
-                surfaceRefBlock: block,
-                surfaceRenderer,
-                edgelessElement:
-                  block.referenceModel as BlockSuite.EdgelessModel,
-              })
-                .then(blob => {
-                  return writeImageBlobToClipboard(blob);
-                })
-                .then(() => {
-                  toast(block.host, 'Copied image to clipboard');
-                })
-                .catch(err => {
-                  console.error(err);
-                });
-            },
-          },
-          {
-            type: 'download',
-            label: 'Download',
-            icon: DownloadIcon,
-            action: () => {
-              if (!block.referenceModel || !block.doc.root) return;
-
-              const referencedModel = block.referenceModel;
-              const editor = block.previewEditor;
-              const edgelessRootElement = editor?.view.getBlock(
-                block.doc.root.id
-              );
-              const surfaceRenderer = (
-                edgelessRootElement as EdgelessRootPreviewBlockComponent
-              )?.surface?.renderer;
-
-              edgelessToBlob(block.host, {
-                surfaceRefBlock: block,
-                surfaceRenderer,
-                edgelessElement: referencedModel,
-              })
-                .then(blob => {
-                  const fileName =
-                    'title' in referencedModel
-                      ? (referencedModel.title?.toString() ??
-                        'Edgeless Content')
-                      : 'Edgeless Content';
-
-                  downloadBlob(blob, fileName);
-                })
-                .catch(err => {
-                  console.error(err);
-                });
-            },
-          },
-        ]
-      : [],
-    [
-      {
-        type: 'delete',
-        label: 'Delete',
-        icon: DeleteIcon,
-        disabled: readonly,
-        action: () => {
-          model.doc.deleteBlock(model);
-          abortController.abort();
-        },
-      },
-    ],
-  ];
+  const context = new SurfaceRefToolbarContext(block, abortController);
+  const groups = context.config.configure(
+    BUILT_IN_GROUPS.map(group => ({ ...group, items: [...group.items] }))
+  );
+  const moreMenuActions = renderActions(groupsToActions(groups, context));
 
   const buttons = [
     openMenuActions.length
@@ -276,7 +307,7 @@ function SurfaceRefToolbarOptions(options: {
         `}
       >
         <div data-size="large" data-orientation="vertical">
-          ${renderActions(moreMenuActions)}
+          ${moreMenuActions}
         </div>
       </editor-menu-button>
     `,

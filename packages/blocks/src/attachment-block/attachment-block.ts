@@ -63,10 +63,6 @@ export class AttachmentBlockComponent extends CaptionedBlockComponent<
         template: AttachmentOptionsTemplate({
           anchor: this,
           model: this.model,
-          showCaption: () => this.captionEditor?.show(),
-          copy: this.copy,
-          download: this.download,
-          refresh: this.refreshData,
           abortController,
         }),
         computePosition: {

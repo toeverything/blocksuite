@@ -331,22 +331,22 @@ export class LinkPopup extends WithDisposable(LitElement) {
     return renderActions([
       [
         {
-          type: 'open',
           label: 'Open',
+          type: 'open',
           icon: OpenIcon,
           action: this._openLink,
         },
 
         {
-          type: 'copy',
           label: 'Copy',
+          type: 'copy',
           icon: CopyIcon,
           action: this._copyUrl,
         },
 
         {
-          type: 'remove-link',
           label: 'Remove link',
+          type: 'remove-link',
           icon: UnlinkIcon,
           action: this._removeLink,
         },

@@ -148,8 +148,8 @@ export class ReferencePopup extends WithDisposable(LitElement) {
   private _openMenuButton() {
     const buttons: MenuItem[] = [
       {
-        type: 'open-this-doc',
         label: 'Open this doc',
+        type: 'open-this-doc',
         icon: ExpandFullSmallIcon,
         action: () => this._openDoc(),
         disabled: this._openButtonDisabled,
@@ -160,8 +160,8 @@ export class ReferencePopup extends WithDisposable(LitElement) {
 
     if (isPeekable(this.target)) {
       buttons.push({
-        type: 'open-in-center-peek',
         label: 'Open in center peek',
+        type: 'open-in-center-peek',
         icon: CenterPeekIcon,
         action: () => peek(this.target),
       });
@@ -196,7 +196,7 @@ export class ReferencePopup extends WithDisposable(LitElement) {
                 ?disabled=${disabled}
                 @click=${action}
               >
-                ${icon}<span class="label">${name}</span>
+                ${icon}<span class="label">${label}</span>
               </editor-menu-action>
             `
           )}
@@ -215,21 +215,21 @@ export class ReferencePopup extends WithDisposable(LitElement) {
 
     buttons.push({
       type: 'inline',
-      name: 'Inline view',
+      label: 'Inline view',
     });
 
     buttons.push({
       type: 'card',
-      name: 'Card view',
-      handler: () => this._convertToCardView(),
+      label: 'Card view',
+      action: () => this._convertToCardView(),
       disabled: this.doc.readonly,
     });
 
     if (isSyncedDocEnabled) {
       buttons.push({
         type: 'embed',
-        name: 'Embed view',
-        handler: () => this._convertToEmbedView(),
+        label: 'Embed view',
+        action: () => this._convertToEmbedView(),
         disabled:
           this.doc.readonly ||
           this.isLinkedNode ||
@@ -256,15 +256,15 @@ export class ReferencePopup extends WithDisposable(LitElement) {
           ${repeat(
             buttons,
             button => button.type,
-            ({ type, name, handler, disabled }) => html`
+            ({ type, label, action, disabled }) => html`
               <editor-menu-action
-                aria-label=${name}
+                aria-label=${label}
                 data-testid=${`link-to-${type}`}
                 ?data-selected=${type === 'inline'}
                 ?disabled=${disabled}
-                @click=${handler}
+                @click=${action}
               >
-                ${name}
+                ${label}
               </editor-menu-action>
             `
           )}
