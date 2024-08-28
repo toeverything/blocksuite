@@ -2,7 +2,7 @@ import type { GroupElementModel } from '@blocksuite/affine-model';
 
 import { Bound } from '@blocksuite/global/utils';
 
-import type { Renderer } from '../../renderer.js';
+import type { CanvasRenderer } from '../../canvas-renderer.js';
 
 import { titleRenderParams } from './utils.js';
 
@@ -10,7 +10,7 @@ export function group(
   model: GroupElementModel,
   ctx: CanvasRenderingContext2D,
   matrix: DOMMatrix,
-  renderer: Renderer
+  renderer: CanvasRenderer
 ) {
   const { xywh } = model;
   const elements = renderer.provider.selectedElements?.() || [];
@@ -33,7 +33,7 @@ export function group(
 function renderTitle(
   model: GroupElementModel,
   ctx: CanvasRenderingContext2D,
-  renderer: Renderer
+  renderer: CanvasRenderer
 ) {
   const zoom = renderer.viewport.zoom;
   const {

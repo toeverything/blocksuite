@@ -9,7 +9,7 @@ import { DisposableGroup, Slot } from '@blocksuite/global/utils';
 import type { SurfaceBlockModel } from '../surface-block/surface-model.js';
 
 import { Viewport } from '../root-block/edgeless/utils/viewport.js';
-import { Renderer } from '../surface-block/index.js';
+import { CanvasRenderer } from '../surface-block/index.js';
 import { getSurfaceBlock } from './utils.js';
 
 export class SurfaceRefRenderer {
@@ -17,7 +17,7 @@ export class SurfaceRefRenderer {
 
   private _surfaceModel: SurfaceBlockModel | null = null;
 
-  private readonly _surfaceRenderer: Renderer;
+  private readonly _surfaceRenderer: CanvasRenderer;
 
   private readonly _viewport: Viewport;
 
@@ -40,7 +40,7 @@ export class SurfaceRefRenderer {
     }
   ) {
     const viewport = new Viewport();
-    const renderer = new Renderer({
+    const renderer = new CanvasRenderer({
       viewport,
       layerManager: this.surfaceService.layer,
       enableStackingCanvas: options.enableStackingCanvas,

@@ -12,9 +12,10 @@ import type { SurfaceBlockService } from './surface-service.js';
 
 import { isShape } from '../root-block/edgeless/components/auto-complete/utils.js';
 import { FrameOverlay } from '../root-block/edgeless/frame-manager.js';
-import { Renderer } from './canvas-renderer/renderer.js';
 import { ConnectorElementModel } from './element-model/index.js';
 import { ConnectionOverlay } from './managers/connector-manager.js';
+import { CanvasRenderer } from './renderer/canvas-renderer.js';
+import { elementRenderers } from './renderer/elements/index.js';
 
 @customElement('affine-surface')
 export class SurfaceBlockComponent extends BlockComponent<
@@ -46,7 +47,7 @@ export class SurfaceBlockComponent extends BlockComponent<
 
   private _lastTime = 0;
 
-  private _renderer!: Renderer;
+  private _renderer!: CanvasRenderer;
 
   static isConnector = (element: unknown): element is ConnectorElementModel => {
     return element instanceof ConnectorElementModel;
@@ -158,7 +159,7 @@ export class SurfaceBlockComponent extends BlockComponent<
   private _initRenderer() {
     const service = this.edgeless.service!;
 
-    this._renderer = new Renderer({
+    this._renderer = new CanvasRenderer({
       viewport: service.viewport,
       layerManager: service.layer,
       enableStackingCanvas: true,
@@ -175,6 +176,7 @@ export class SurfaceBlockComponent extends BlockComponent<
       onStackingCanvasCreated(canvas) {
         canvas.className = 'indexable-canvas';
       },
+      elementRenderers,
     });
 
     this._disposables.add(

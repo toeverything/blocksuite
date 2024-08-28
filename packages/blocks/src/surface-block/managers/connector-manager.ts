@@ -33,8 +33,8 @@ import {
 import type { Connectable } from '../../_common/types.js';
 import type { EdgelessRootService } from '../../root-block/edgeless/edgeless-root-service.js';
 
-import { Overlay } from '../canvas-renderer/renderer.js';
 import { isConnectorWithLabel } from '../element-model/utils/connector.js';
+import { Overlay } from '../renderer/canvas-renderer.js';
 import { AStarRunner } from '../utils/a-star.js';
 
 export type OrthogonalConnectorInput = {

@@ -18,12 +18,12 @@ import { DocCollection } from '@blocksuite/store';
 
 import type { EdgelessRootBlockComponent } from '../edgeless-root-block.js';
 
-import { getCursorByCoord } from '../../../surface-block/canvas-renderer/element-renderer/text/utils.js';
 import {
   CanvasElementType,
   type ConnectorElementModel,
   type IModelCoord,
 } from '../../../surface-block/index.js';
+import { getCursorByCoord } from '../../../surface-block/renderer/elements/text/utils.js';
 import {
   GET_DEFAULT_LINE_COLOR,
   isTransparent,

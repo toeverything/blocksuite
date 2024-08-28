@@ -10,15 +10,16 @@ import type { SurfaceBlockModel } from '../surface-model.js';
 import type { MindmapService } from './service.js';
 
 import { Viewport } from '../../root-block/edgeless/utils/viewport.js';
-import { fitContent } from '../canvas-renderer/element-renderer/shape/utils.js';
-import { Renderer } from '../canvas-renderer/renderer.js';
 import { LayerManager } from '../managers/layer-manager.js';
+import { CanvasRenderer } from '../renderer/canvas-renderer.js';
+import { elementRenderers } from '../renderer/elements/index.js';
+import { fitContent } from '../renderer/elements/shape/utils.js';
 
 @customElement('mini-mindmap-surface-block')
 export class MindmapSurfaceBlock extends BlockComponent<SurfaceBlockModel> {
   private _layer?: LayerManager;
 
-  private _renderer?: Renderer;
+  private _renderer?: CanvasRenderer;
 
   private _viewport: Viewport;
 
@@ -84,7 +85,7 @@ export class MindmapSurfaceBlock extends BlockComponent<SurfaceBlockModel> {
 
     this._layer = LayerManager.create(this.doc, this.model);
     this._viewport = new Viewport();
-    this._renderer = new Renderer({
+    this._renderer = new CanvasRenderer({
       viewport: this._viewport,
       layerManager: this._layer,
       enableStackingCanvas: true,
@@ -98,6 +99,7 @@ export class MindmapSurfaceBlock extends BlockComponent<SurfaceBlockModel> {
         getPropertyValue: (property: string) =>
           ThemeObserver.getPropertyValue(property),
       },
+      elementRenderers,
     });
   }
 
