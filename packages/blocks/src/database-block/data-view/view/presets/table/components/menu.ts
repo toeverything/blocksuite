@@ -10,7 +10,6 @@ import { html } from 'lit';
 import type { DataViewRenderer } from '../../../../data-view.js';
 import type { TableSelectionController } from '../controller/selection.js';
 
-import { popFilterableSimpleMenu } from '../../../../../../_common/components/index.js';
 import { DeleteIcon } from '../../../../common/icons/index.js';
 import { TableRowSelection } from '../types.js';
 

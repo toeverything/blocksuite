@@ -1,3 +1,7 @@
+import {
+  type Menu,
+  popFilterableSimpleMenu,
+} from '@blocksuite/affine-components/context-menu';
 import { ArrowDownIcon } from '@blocksuite/affine-components/icons';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { Text } from '@blocksuite/store';
@@ -10,10 +14,6 @@ import type { GroupData } from '../../../../common/group-by/helper.js';
 import type { StatsFunction } from '../../../../common/stats/type.js';
 import type { TableColumn } from '../table-view-manager.js';
 
-import {
-  type Menu,
-  popFilterableSimpleMenu,
-} from '../../../../../../_common/components/index.js';
 import { statsFunctions } from '../../../../common/stats/index.js';
 import { typesystem } from '../../../../logical/typesystem.js';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../consts.js';
