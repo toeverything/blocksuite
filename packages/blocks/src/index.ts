@@ -6,7 +6,6 @@ import '@blocksuite/affine-components/toolbar';
 import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 import { Point, deserializeXYWH } from '@blocksuite/global/utils';
 
-import { mindMap } from './_common/mind-map/index.js';
 import { matchFlavours } from './_common/utils/index.js';
 import './code-block/highlight/affine-code-unit.js';
 import './database-block/index.js';
@@ -164,7 +163,6 @@ export {
 export const BlocksUtils = {
   splitElements,
   matchFlavours,
-  mindMap,
   deserializeXYWH,
   isCanvasElement,
   Point,
