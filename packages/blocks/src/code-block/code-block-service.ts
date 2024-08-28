@@ -11,6 +11,7 @@ import {
   type MaybeGetter,
   createHighlighterCore,
 } from 'shiki';
+import { bundledLanguagesInfo } from 'shiki';
 import getWasm from 'shiki/wasm';
 
 import {
@@ -42,9 +43,9 @@ export class CodeBlockService extends BlockService<CodeBlockModel> {
     })
       .then(async highlighter => {
         const config = this.std.spec.getConfig('affine:code');
-        const darkTheme = config?.theme.dark ?? CODE_BLOCK_DEFAULT_DARK_THEME;
+        const darkTheme = config?.theme?.dark ?? CODE_BLOCK_DEFAULT_DARK_THEME;
         const lightTheme =
-          config?.theme.light ?? CODE_BLOCK_DEFAULT_LIGHT_THEME;
+          config?.theme?.light ?? CODE_BLOCK_DEFAULT_LIGHT_THEME;
 
         this._darkThemeKey = (await normalizeGetter(darkTheme)).name;
         this._lightThemeKey = (await normalizeGetter(lightTheme)).name;
@@ -61,7 +62,9 @@ export class CodeBlockService extends BlockService<CodeBlockModel> {
   }
 
   get langs() {
-    return this.std.spec.getConfig('affine:code')?.langs ?? [];
+    return (
+      this.std.spec.getConfig('affine:code')?.langs ?? bundledLanguagesInfo
+    );
   }
 
   get themeKey() {

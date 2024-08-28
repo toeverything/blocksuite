@@ -140,6 +140,8 @@ export class ImageBlockComponent extends CaptionedBlockComponent<
   accessor retryCount = 0;
 
   override accessor useCaptionEditor = true;
+
+  override accessor useZeroWidth = true;
 }
 
 declare global {

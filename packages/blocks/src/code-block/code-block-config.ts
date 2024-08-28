@@ -1,11 +1,11 @@
 import type { BundledLanguageInfo, ThemeInput } from 'shiki';
 
 export interface CodeBlockConfig {
-  theme: {
-    dark: ThemeInput;
-    light: ThemeInput;
+  theme?: {
+    dark?: ThemeInput;
+    light?: ThemeInput;
   };
-  langs: BundledLanguageInfo[];
+  langs?: BundledLanguageInfo[];
 }
 
 declare global {

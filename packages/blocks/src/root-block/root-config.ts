@@ -10,8 +10,8 @@ export interface RootBlockConfig {
   editorSetting?: Signal<DeepPartial<EditorSetting>>;
   linkedWidget?: Partial<LinkedWidgetConfig>;
   docRemoteSelectionWidget?: Partial<DocRemoteSelectionConfig>;
-  toolbarMoreMenu: Partial<ToolbarMoreMenuConfig>;
-  databaseOptions: Partial<DatabaseOptionsConfig>;
+  toolbarMoreMenu?: Partial<ToolbarMoreMenuConfig>;
+  databaseOptions?: Partial<DatabaseOptionsConfig>;
 }
 
 declare global {
