@@ -43,10 +43,10 @@ export class ReferencePopup extends WithDisposable(LitElement) {
     assertExists(parent);
 
     const index = parent.children.indexOf(block.model);
-    const docId = this.referenceDocId;
+
     doc.addBlock(
       'affine:embed-linked-doc',
-      { pageId: docId },
+      this.referenceInfo,
       parent,
       index + 1
     );
@@ -131,9 +131,9 @@ export class ReferencePopup extends WithDisposable(LitElement) {
   }
 
   private _openDoc() {
-    const refDocId = this.referenceDocId;
+    const pageId = this.referenceDocId;
     const block = this.block;
-    if (refDocId === block.doc.id) return;
+    if (pageId === block.doc.id) return;
     const rootId = block.doc.root?.id;
     if (!rootId) return;
 
@@ -210,7 +210,6 @@ export class ReferencePopup extends WithDisposable(LitElement) {
     const isSyncedDocEnabled = this.doc.awarenessStore.getFlag(
       'enable_synced_doc_block'
     );
-
     const buttons = [];
 
     buttons.push({

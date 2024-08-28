@@ -47,7 +47,7 @@ export function mockDocModeService(curDocId: string) {
     },
     toggleMode: (docId: string = curDocId) => {
       const mode =
-        docModeService.getMode(docId) === 'page'
+        docModeService.getMode(docId) === DocMode.Page
           ? DocMode.Edgeless
           : DocMode.Page;
       docModeService.setMode(mode, docId);

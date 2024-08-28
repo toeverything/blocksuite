@@ -42,6 +42,7 @@ import {
   EMBED_CARD_WIDTH,
 } from '../../../_common/consts.js';
 import { getRootByEditorHost } from '../../../_common/utils/query.js';
+import { extractSearchParams } from '../../../_common/utils/url.js';
 import { SurfaceGroupLikeModel } from '../../../surface-block/element-model/base.js';
 import { CanvasElementType } from '../../../surface-block/element-model/index.js';
 import { splitIntoLines } from '../../../surface-block/elements/text/utils.js';
@@ -262,38 +263,43 @@ export class EdgelessClipboardController extends PageClipboard {
         skipSelection: true,
       });
       const pageId = doc && 'docId' in doc ? doc.docId : undefined;
+      const options: Record<string, unknown> = {};
 
-      const embedOptions = this._rootService.getEmbedBlockOptions(url);
-      const flavour = pageId
-        ? 'affine:embed-linked-doc'
-        : embedOptions
-          ? (embedOptions.flavour as BlockSuite.EdgelessModelKeys)
-          : 'affine:bookmark';
-      const style = pageId
-        ? 'vertical'
-        : embedOptions
-          ? embedOptions.styles[0]
-          : BookmarkStyles[0];
-      const width = EMBED_CARD_WIDTH[style];
-      const height = EMBED_CARD_HEIGHT[style];
-
-      const options: Record<string, unknown> = {
-        xywh: Bound.fromCenter(
-          Vec.toVec({
-            x,
-            y,
-          }),
-          width,
-          height
-        ).serialize(),
-        style,
-      };
+      let flavour = 'affine:bookmark';
+      let style = BookmarkStyles[0];
 
       if (pageId) {
         options.pageId = pageId;
+        flavour = 'affine:embed-linked-doc';
+        style = 'vertical';
+
+        try {
+          Object.assign(options, extractSearchParams(url));
+        } catch (err) {
+          console.error(err);
+        }
       } else {
         options.url = url;
+
+        const embedOptions = this._rootService.getEmbedBlockOptions(url);
+        if (embedOptions) {
+          flavour = embedOptions.flavour as BlockSuite.EdgelessModelKeys;
+          style = embedOptions.styles[0];
+        }
       }
+
+      const width = EMBED_CARD_WIDTH[style];
+      const height = EMBED_CARD_HEIGHT[style];
+
+      options.xywh = Bound.fromCenter(
+        Vec.toVec({
+          x,
+          y,
+        }),
+        width,
+        height
+      ).serialize();
+      options.style = style;
 
       const id = this.host.service.addBlock(
         flavour,

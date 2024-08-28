@@ -111,6 +111,8 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockComponent<
   };
 
   convertToEmbed = () => {
+    if (this._isLinkToNode) return;
+
     const { doc, pageId, caption } = this.model;
 
     // synced doc entry controlled by awareness flag
@@ -140,7 +142,10 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockComponent<
     const yText = new DocCollection.Y.Text();
     yText.insert(0, REFERENCE_NODE);
     yText.format(0, REFERENCE_NODE.length, {
-      reference: { type: 'LinkedPage', ...this.referenceInfo },
+      reference: {
+        type: 'LinkedPage',
+        ...this.referenceInfo,
+      },
     });
     const text = new doc.Text(yText);
 
@@ -158,6 +163,7 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockComponent<
 
   open = () => {
     const pageId = this.model.pageId;
+    // TODO(@fundon): should scroll into target block/element
     if (pageId === this.doc.id) return;
 
     const rootComponent = this.std.view.viewFromPath('block', [

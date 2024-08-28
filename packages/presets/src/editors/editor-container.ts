@@ -112,7 +112,7 @@ export class AffineEditorContainer
   private _pageSpecs$ = signal(PageEditorBlockSpecs);
 
   private _specs = computed(() =>
-    this._mode.value === 'page'
+    this._mode.value === DocMode.Page
       ? this._pageSpecs.value
       : this._edgelessSpecs.value
   );
@@ -232,16 +232,16 @@ export class AffineEditorContainer
       this.rootModel.id + mode,
       html`
         <div
-          class=${mode === 'page'
+          class=${mode === DocMode.Page
             ? 'affine-page-viewport'
             : 'affine-edgeless-viewport'}
         >
           ${when(
-            mode === 'page',
+            mode === DocMode.Page,
             () => html` <doc-title .doc=${this.doc}></doc-title> `
           )}
           <div
-            class=${mode === 'page'
+            class=${mode === DocMode.Page
               ? 'page-editor playground-page-editor-container'
               : 'edgeless-editor-container'}
           >
