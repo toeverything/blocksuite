@@ -19,8 +19,8 @@ import { customElement, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import type { AIItemGroupConfig } from '../../../_common/components/ai-item/types.js';
-import type { CopilotSelectionController } from '../../edgeless/controllers/tools/copilot-tool.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
+import type { CopilotSelectionController } from '../../edgeless/tools/copilot-tool.js';
 import type { AffineAIPanelWidget } from '../ai-panel/ai-panel.js';
 
 import { AFFINE_AI_PANEL_WIDGET } from '../ai-panel/ai-panel.js';

@@ -55,6 +55,7 @@ import {
 } from '../../attachment-block/utils.js';
 import { normalizeWheelDeltaY } from '../../surface-block/index.js';
 import '../../surface-block/surface-block.js';
+import { EdgelessClipboardController } from './clipboard/clipboard.js';
 import './components/note-slicer/index.js';
 import './components/presentation/edgeless-navigator-black-background.js';
 import './components/rects/edgeless-dragging-area-rect.js';
@@ -62,7 +63,7 @@ import './components/rects/edgeless-selected-rect.js';
 import './components/toolbar/edgeless-toolbar.js';
 import { EdgelessToolbar } from './components/toolbar/edgeless-toolbar.js';
 import { calcBoundByOrigin, readImageSize } from './components/utils.js';
-import { EdgelessClipboardController } from './controllers/clipboard.js';
+import { EdgelessPageKeyboardManager } from './edgeless-keyboard.js';
 import {
   BrushToolController,
   ConnectorToolController,
@@ -78,8 +79,7 @@ import {
   ShapeToolController,
   TemplateToolController,
   TextToolController,
-} from './controllers/tools/index.js';
-import { EdgelessPageKeyboardManager } from './edgeless-keyboard.js';
+} from './tools/index.js';
 import { edgelessElementsBound } from './utils/bound-utils.js';
 import {
   DEFAULT_NOTE_HEIGHT,

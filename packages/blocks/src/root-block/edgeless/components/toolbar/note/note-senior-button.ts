@@ -8,7 +8,7 @@ import { SignalWatcher, computed } from '@lit-labs/preact-signals';
 import { LitElement, css, html } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 
-import type { NoteTool } from '../../../controllers/tools/note-tool.js';
+import type { NoteTool } from '../../../tools/note-tool.js';
 
 import { getTooltipWithShortcut } from '../../utils.js';
 import { EdgelessToolbarToolMixin } from '../mixins/tool.mixin.js';

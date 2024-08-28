@@ -25,33 +25,33 @@ import {
   noop,
 } from '@blocksuite/global/utils';
 
-import type { MindmapNode } from '../../../../surface-block/element-model/utils/mindmap/layout.js';
-import type { EdgelessTool } from '../../types.js';
+import type { MindmapNode } from '../../../surface-block/element-model/utils/mindmap/layout.js';
+import type { EdgelessTool } from '../types.js';
 
-import { isSelectSingleMindMap } from '../../../../_common/edgeless/mindmap/index.js';
-import { buildPath } from '../../../../_common/utils/index.js';
-import { SurfaceGroupLikeModel } from '../../../../surface-block/element-model/base.js';
+import { isSelectSingleMindMap } from '../../../_common/edgeless/mindmap/index.js';
+import { buildPath } from '../../../_common/utils/index.js';
+import { SurfaceGroupLikeModel } from '../../../surface-block/element-model/base.js';
 import {
   MindmapElementModel,
   ShapeElementModel,
   TextElementModel,
-} from '../../../../surface-block/element-model/index.js';
-import { isConnectorWithLabel } from '../../../../surface-block/element-model/utils/connector.js';
+} from '../../../surface-block/element-model/index.js';
+import { isConnectorWithLabel } from '../../../surface-block/element-model/utils/connector.js';
 import {
   hideTargetConnector,
   moveSubtree,
   showMergeIndicator,
-} from '../../../../surface-block/element-model/utils/mindmap/utils.js';
-import { isConnectorAndBindingsAllSelected } from '../../../../surface-block/managers/connector-manager.js';
-import { edgelessElementsBound } from '../../utils/bound-utils.js';
-import { prepareCloneData } from '../../utils/clone-utils.js';
-import { calPanDelta } from '../../utils/panning-utils.js';
+} from '../../../surface-block/element-model/utils/mindmap/utils.js';
+import { isConnectorAndBindingsAllSelected } from '../../../surface-block/managers/connector-manager.js';
+import { edgelessElementsBound } from '../utils/bound-utils.js';
+import { prepareCloneData } from '../utils/clone-utils.js';
+import { calPanDelta } from '../utils/panning-utils.js';
 import {
   isCanvasElement,
   isEdgelessTextBlock,
   isFrameBlock,
   isNoteBlock,
-} from '../../utils/query.js';
+} from '../utils/query.js';
 import {
   addText,
   mountConnectorLabelEditor,
@@ -59,7 +59,7 @@ import {
   mountGroupTitleEditor,
   mountShapeTextEditor,
   mountTextElementEditor,
-} from '../../utils/text.js';
+} from '../utils/text.js';
 import { EdgelessToolController } from './edgeless-tool.js';
 
 export enum DefaultModeDragType {

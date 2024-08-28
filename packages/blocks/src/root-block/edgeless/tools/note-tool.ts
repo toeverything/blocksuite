@@ -2,20 +2,20 @@ import type { PointerEventState } from '@blocksuite/block-std';
 
 import { Point, noop } from '@blocksuite/global/utils';
 
-import type { SelectionArea } from '../../services/tools-manager.js';
-import type { EdgelessTool } from '../../types.js';
+import type { SelectionArea } from '../services/tools-manager.js';
+import type { EdgelessTool } from '../types.js';
 
 import {
   type NoteChildrenFlavour,
   hasClassNameInList,
-} from '../../../../_common/utils/index.js';
+} from '../../../_common/utils/index.js';
 import {
   EXCLUDING_MOUSE_OUT_CLASS_LIST,
   NOTE_INIT_HEIGHT,
   NOTE_MIN_WIDTH,
-} from '../../utils/consts.js';
-import { addNote } from '../../utils/note.js';
-import { DraggingNoteOverlay, NoteOverlay } from '../../utils/tool-overlay.js';
+} from '../utils/consts.js';
+import { addNote } from '../utils/note.js';
+import { DraggingNoteOverlay, NoteOverlay } from '../utils/tool-overlay.js';
 import { EdgelessToolController } from './edgeless-tool.js';
 
 export type NoteTool = {

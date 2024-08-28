@@ -3,15 +3,15 @@ import type { IPoint, IVec } from '@blocksuite/global/utils';
 
 import { Bound, noop } from '@blocksuite/global/utils';
 
-import { buildPath } from '../../../../_common/utils/index.js';
+import { buildPath } from '../../../_common/utils/index.js';
 import {
   Overlay,
   getStroke,
   getSvgPathFromStroke,
   linePolygonIntersects,
-} from '../../../../surface-block/index.js';
-import { deleteElements } from '../../utils/crud.js';
-import { isTopLevelBlock } from '../../utils/query.js';
+} from '../../../surface-block/index.js';
+import { deleteElements } from '../utils/crud.js';
+import { isTopLevelBlock } from '../utils/query.js';
 import { EdgelessToolController } from './edgeless-tool.js';
 
 class EraserOverlay extends Overlay {

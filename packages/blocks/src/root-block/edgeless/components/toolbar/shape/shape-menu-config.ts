@@ -14,7 +14,7 @@ import {
 } from '@blocksuite/affine-components/icons';
 import { ShapeType } from '@blocksuite/affine-model';
 
-import type { ShapeTool } from '../../../controllers/tools/shape-tool.js';
+import type { ShapeTool } from '../../../tools/shape-tool.js';
 
 const { Rect, Ellipse, Triangle, Diamond } = ShapeType;
 

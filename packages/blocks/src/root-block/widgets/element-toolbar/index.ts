@@ -26,8 +26,8 @@ import { customElement, property, state } from 'lit/decorators.js';
 import { join } from 'lit/directives/join.js';
 
 import type { MindmapElementModel } from '../../../surface-block/element-model/mindmap.js';
-import type { ConnectorToolController } from '../../edgeless/controllers/tools/connector-tool.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
+import type { ConnectorToolController } from '../../edgeless/tools/connector-tool.js';
 
 import {
   ConnectorMode,

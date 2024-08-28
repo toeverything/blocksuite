@@ -1,6 +1,6 @@
 import { noop } from '@blocksuite/global/utils';
 
-import type { NavigatorMode } from '../../../../_common/edgeless/frame/consts.js';
+import type { NavigatorMode } from '../../../_common/edgeless/frame/consts.js';
 
 import { EdgelessToolController } from './edgeless-tool.js';
 

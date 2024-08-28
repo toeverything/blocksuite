@@ -2,7 +2,7 @@ import type { PointerEventState } from '@blocksuite/block-std';
 
 import { noop } from '@blocksuite/global/utils';
 
-import { addText } from '../../utils/text.js';
+import { addText } from '../utils/text.js';
 import { EdgelessToolController } from './edgeless-tool.js';
 
 export type TextTool = {

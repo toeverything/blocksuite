@@ -15,7 +15,7 @@ import { customElement, property, query, state } from 'lit/decorators.js';
 import type { EdgelessRootBlockComponent } from '../../../edgeless-root-block.js';
 
 import { CanvasElementType } from '../../../../../surface-block/index.js';
-import { ShapeToolController } from '../../../controllers/tools/shape-tool.js';
+import { ShapeToolController } from '../../../tools/shape-tool.js';
 
 export type ShapeName = ShapeType | 'roundedRect';
 
