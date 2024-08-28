@@ -2,7 +2,7 @@ import type { BlockModel } from '@blocksuite/store';
 
 import { BlockComponent, type BlockService } from '@blocksuite/block-std';
 import { html, nothing } from 'lit';
-import { query } from 'lit/decorators.js';
+import { type Ref, createRef, ref } from 'lit/directives/ref.js';
 import { type StyleInfo, styleMap } from 'lit/directives/style-map.js';
 
 import type { BlockCaptionEditor } from './block-caption.js';
@@ -26,7 +26,9 @@ export class CaptionedBlockComponent<
     return html`<div style=${style} class="affine-block-component">
       ${content}
       ${this.useCaptionEditor
-        ? html`<block-caption-editor></block-caption-editor>`
+        ? html`<block-caption-editor
+            ${ref(this._captionEditorRef)}
+          ></block-caption-editor>`
         : nothing}
       ${this.showBlockSelection
         ? html`<affine-block-selection .block=${this}></affine-block-selection>`
@@ -38,16 +40,17 @@ export class CaptionedBlockComponent<
   }
 
   get captionEditor() {
-    if (!this.useCaptionEditor || !this._captionEditor) {
+    if (!this.useCaptionEditor || !this._captionEditorRef.value) {
       console.error(
         'Oops! Please enable useCaptionEditor before accessing captionEditor'
       );
     }
-    return this._captionEditor;
+    return this._captionEditorRef.value;
   }
 
-  @query('.affine-block-component > block-caption-editor')
-  private accessor _captionEditor!: BlockCaptionEditor | null;
+  // There may be multiple block-caption-editors in a nested structure.
+  private accessor _captionEditorRef: Ref<BlockCaptionEditor> =
+    createRef<BlockCaptionEditor>();
 
   protected accessor blockContainerStyles: StyleInfo | undefined = undefined;
 

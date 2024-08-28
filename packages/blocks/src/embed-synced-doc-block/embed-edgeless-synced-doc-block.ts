@@ -161,4 +161,6 @@ export class EmbedEdgelessSyncedDocBlockComponent extends toEdgelessEmbedBlock(
 
     return this.renderPageContent();
   }
+
+  override accessor useCaptionEditor = true;
 }
