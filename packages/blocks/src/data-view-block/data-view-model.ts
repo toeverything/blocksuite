@@ -1,15 +1,13 @@
-import { BlockModel, defineBlockSchema } from '@blocksuite/store';
-
-import type {
-  DataViewDataType,
-  InsertToPosition,
-} from '../database-block/data-view/index.js';
-import type { Column } from '../database-block/data-view/view/presets/table/types.js';
+import type { Column } from '@blocksuite/affine-model';
 
 import {
+  type InsertToPosition,
   arrayMove,
   insertPositionToIndex,
-} from '../database-block/data-view/utils/insert.js';
+} from '@blocksuite/affine-shared/utils';
+import { BlockModel, defineBlockSchema } from '@blocksuite/store';
+
+import type { DataViewDataType } from '../database-block/data-view/index.js';
 
 type Props = {
   title: string;

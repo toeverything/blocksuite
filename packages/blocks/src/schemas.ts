@@ -8,6 +8,7 @@ import {
   AttachmentBlockSchema,
   BookmarkBlockSchema,
   CodeBlockSchema,
+  DatabaseBlockSchema,
   DividerBlockSchema,
   EdgelessTextBlockSchema,
   EmbedFigmaBlockSchema,
@@ -27,7 +28,6 @@ import {
 } from '@blocksuite/affine-model';
 
 import { DataViewBlockSchema } from './data-view-block/data-view-model.js';
-import { DatabaseBlockSchema } from './database-block/database-model.js';
 import { SurfaceBlockSchema } from './surface-block/surface-model.js';
 
 /** Built-in first party block models built for affine */

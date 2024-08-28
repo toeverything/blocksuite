@@ -1,8 +1,8 @@
+import type { InsertToPosition } from '@blocksuite/affine-shared/utils';
 import type { ReadonlySignal } from '@lit-labs/preact-signals';
 
-import type { DatabaseFlags } from '../../../types.js';
 import type { ColumnConfig, ColumnMeta } from '../../column/column-config.js';
-import type { InsertToPosition } from '../../types.js';
+import type { DatabaseFlags } from '../../types.js';
 import type { UniComponent } from '../../utils/uni-component/index.js';
 import type {
   DataViewDataType,

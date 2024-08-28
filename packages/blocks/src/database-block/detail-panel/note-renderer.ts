@@ -1,3 +1,4 @@
+import type { DatabaseBlockModel } from '@blocksuite/affine-model';
 import type { EditorHost } from '@blocksuite/block-std';
 
 import { focusTextModel } from '@blocksuite/affine-components/rich-text';
@@ -11,7 +12,6 @@ import { customElement, property, query } from 'lit/decorators.js';
 
 import type { DetailSlotProps } from '../data-view/common/data-source/base.js';
 import type { SingleView } from '../data-view/view-manager/single-view.js';
-import type { DatabaseBlockModel } from '../database-model.js';
 
 @customElement('database-datasource-note-renderer')
 export class NoteRenderer

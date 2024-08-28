@@ -1,6 +1,7 @@
-import type { RichTextCell } from '@blocks/database-block/columns/rich-text/cell-renderer.js';
-import type { RichTextCellEditing } from '@blocks/database-block/columns/rich-text/cell-renderer.js';
-import type { ColumnType } from '@blocks/database-block/data-view/view/presets/table/types.js';
+import type {
+  RichTextCell,
+  RichTextCellEditing,
+} from '@blocks/database-block/columns/rich-text/cell-renderer.js';
 
 import { ZERO_WIDTH_SPACE } from '@inline/consts.js';
 import { type Locator, type Page, expect } from '@playwright/test';
@@ -55,7 +56,7 @@ export async function performColumnAction(
 
 export async function switchColumnType(
   page: Page,
-  columnType: ColumnType,
+  columnType: string,
   columnIndex = 1
 ) {
   const { typeIcon } = await getDatabaseHeaderColumn(page, columnIndex);
@@ -64,7 +65,7 @@ export async function switchColumnType(
   await clickColumnType(page, columnType);
 }
 
-export function clickColumnType(page: Page, columnType: ColumnType) {
+export function clickColumnType(page: Page, columnType: string) {
   const typeMenu = page.locator(`.affine-menu-action`, {
     hasText: new RegExp(`${columnType}`),
   });

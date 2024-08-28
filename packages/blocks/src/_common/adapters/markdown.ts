@@ -12,7 +12,11 @@ import type {
 } from '@blocksuite/store';
 import type { Heading, Root, RootContentMap, TableRow } from 'mdast';
 
-import { NoteDisplayMode } from '@blocksuite/affine-model';
+import {
+  type Column,
+  NoteDisplayMode,
+  type SerializedCells,
+} from '@blocksuite/affine-model';
 import { getFilenameFromContentDisposition } from '@blocksuite/affine-shared/utils';
 import { assertExists, sha } from '@blocksuite/global/utils';
 import {
@@ -30,9 +34,6 @@ import { format } from 'date-fns/format';
 import remarkParse from 'remark-parse';
 import remarkStringify from 'remark-stringify';
 import { unified } from 'unified';
-
-import type { SerializedCells } from '../../database-block/database-model.js';
-import type { Column } from '../../database-block/types.js';
 
 import { remarkGfm } from './gfm.js';
 import { createText, fetchImage, fetchable, isNullish } from './utils.js';

@@ -1,4 +1,4 @@
-import type { DatabaseBlockModel } from '@blocks/database-block/index.js';
+import type { DatabaseBlockModel } from '@blocksuite/affine-model';
 
 import { assertExists } from '@global/utils.js';
 import { type Page, expect } from '@playwright/test';
@@ -247,8 +247,8 @@ test.describe('Embed synced doc', () => {
             model,
             databaseService.viewPresets.tableViewConfig
           );
+          databaseService.applyColumnUpdate(model);
         }
-        model.applyColumnUpdate();
       });
 
       // go back to previous doc

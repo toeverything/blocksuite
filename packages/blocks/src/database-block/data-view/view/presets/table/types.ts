@@ -1,15 +1,5 @@
 import { assertExists } from '@blocksuite/global/utils';
 
-export type ColumnType = string;
-
-export interface Column<
-  Data extends Record<string, unknown> = Record<string, unknown>,
-> {
-  id: string;
-  type: ColumnType;
-  name: string;
-  data: Data;
-}
 // Common formula types
 export type StatCalcOpBaseTypes =
   | 'none'

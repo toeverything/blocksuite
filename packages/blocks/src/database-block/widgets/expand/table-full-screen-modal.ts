@@ -1,8 +1,8 @@
+import type { DatabaseBlockModel } from '@blocksuite/affine-model';
+
 import { BlockComponent } from '@blocksuite/block-std';
 import { customElement, property } from 'lit/decorators.js';
 import { html } from 'lit/static-html.js';
-
-import type { DatabaseBlockModel } from '../../database-model.js';
 
 import {
   DatabaseTableViewClose,

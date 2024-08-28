@@ -1,8 +1,8 @@
+import type { InsertToPosition } from '@blocksuite/affine-shared/utils';
 import type { ReactiveController } from 'lit';
 
 import { Point, Rect, assertExists } from '@blocksuite/global/utils';
 
-import type { InsertToPosition } from '../../../../types.js';
 import type { DataViewKanban } from '../kanban-view.js';
 
 import { startDrag } from '../../../../utils/drag.js';
