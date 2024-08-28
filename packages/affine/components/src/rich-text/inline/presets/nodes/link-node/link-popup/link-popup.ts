@@ -11,7 +11,6 @@ import {
   normalizeUrl,
 } from '@blocksuite/affine-shared/utils';
 import { WithDisposable } from '@blocksuite/block-std';
-import { assertExists } from '@blocksuite/global/utils';
 import { computePosition, inline, offset, shift } from '@floating-ui/dom';
 import { LitElement, html, nothing } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
@@ -256,7 +255,7 @@ export class LinkPopup extends WithDisposable(LitElement) {
     };
     const doc = block.doc;
     const parent = doc.getParent(block.model);
-    assertExists(parent);
+    if (!parent) return;
     const index = parent.children.indexOf(block.model);
     doc.addBlock(targetFlavour as never, props, parent, index + 1);
 
@@ -283,7 +282,7 @@ export class LinkPopup extends WithDisposable(LitElement) {
     if (!block) return;
     const doc = block.doc;
     const parent = doc.getParent(block.model);
-    assertExists(parent);
+    if (!parent) return;
     const index = parent.children.indexOf(block.model);
 
     doc.addBlock(flavour as never, { url }, parent, index + 1);
@@ -418,7 +417,9 @@ export class LinkPopup extends WithDisposable(LitElement) {
   }
 
   private _updateConfirmBtn() {
-    assertExists(this.confirmButton);
+    if (!this.confirmButton) {
+      return;
+    }
     const link = this.linkInput?.value.trim();
     this.confirmButton.disabled = !(link && isValidUrl(link));
     this.confirmButton.requestUpdate();
@@ -542,14 +543,18 @@ export class LinkPopup extends WithDisposable(LitElement) {
   }
 
   override updated() {
-    assertExists(this.popupContainer);
     const range = this.inlineEditor.toDomRange(this.targetInlineRange);
-    assertExists(range);
+    if (!range) {
+      return;
+    }
 
     if (this.type !== 'view') {
       const domRects = range.getClientRects();
 
       Object.values(domRects).forEach(domRect => {
+        if (!this.mockSelectionContainer) {
+          return;
+        }
         const mockSelection = document.createElement('div');
         mockSelection.classList.add('mock-selection');
         mockSelection.style.left = `${domRect.left}px`;
@@ -557,7 +562,6 @@ export class LinkPopup extends WithDisposable(LitElement) {
         mockSelection.style.width = `${domRect.width}px`;
         mockSelection.style.height = `${domRect.height}px`;
 
-        assertExists(this.mockSelectionContainer);
         this.mockSelectionContainer.append(mockSelection);
       });
     }

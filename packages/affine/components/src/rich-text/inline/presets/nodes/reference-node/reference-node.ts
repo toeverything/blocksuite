@@ -8,7 +8,7 @@ import {
   getRootByElement,
 } from '@blocksuite/affine-shared/utils';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
-import { assertExists } from '@blocksuite/global/utils';
+import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 import {
   type DeltaInsert,
   INLINE_ROOT_ATTR,
@@ -46,7 +46,10 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
 
   private _updateRefMeta = (doc: Doc) => {
     const refAttribute = this.delta.attributes?.reference;
-    assertExists(refAttribute, 'Failed to get reference attribute!');
+    if (!refAttribute) {
+      return;
+    }
+
     this._refAttribute = refAttribute;
     const refMeta = doc.collection.meta.docMetas.find(
       doc => doc.id === refAttribute.pageId
@@ -61,16 +64,21 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
   private _whenHover: HoverController = new HoverController(
     this,
     ({ abortController }) => {
-      if (this.doc.readonly || this.closest('.prevent-reference-popup')) {
+      if (
+        this.doc?.readonly ||
+        this.closest('.prevent-reference-popup') ||
+        !this.selfInlineRange ||
+        !this.inlineEditor
+      ) {
         return null;
       }
 
-      const selection = this.std.selection;
+      const selection = this.std?.selection;
+      if (!selection) {
+        return null;
+      }
       const textSelection = selection.find('text');
-      if (
-        !!textSelection &&
-        (!!textSelection.to || !!textSelection.from.length)
-      ) {
+      if (!!textSelection && !textSelection.isCollapsed()) {
         return null;
       }
 
@@ -148,7 +156,10 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
   override connectedCallback() {
     super.connectedCallback();
 
-    assertExists(this.config, '`reference-node` need `ReferenceNodeConfig`.');
+    if (!this.config) {
+      console.error('`reference-node` need `ReferenceNodeConfig`.');
+      return;
+    }
 
     if (this.delta.insert !== REFERENCE_NODE) {
       console.error(
@@ -157,12 +168,16 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
     }
 
     const doc = this.doc;
-    this._disposables.add(
-      doc.collection.slots.docUpdated.on(() => this._updateRefMeta(doc))
-    );
+    if (doc) {
+      this._disposables.add(
+        doc.collection.slots.docUpdated.on(() => this._updateRefMeta(doc))
+      );
+    }
 
     this.updateComplete
       .then(() => {
+        if (!this.inlineEditor || !doc) return;
+
         // observe yText update
         this.disposables.add(
           this.inlineEditor.slots.textChange.on(() => this._updateRefMeta(doc))
@@ -187,10 +202,10 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
     const isDeleted = !refMeta;
 
     const attributes = this.delta.attributes;
-    assertExists(attributes, 'Failed to get attributes!');
-
-    const type = attributes.reference?.type;
-    assertExists(type, 'Unable to get reference type!');
+    const type = attributes?.reference?.type;
+    if (!type) {
+      return nothing;
+    }
 
     const title = this.customTitle
       ? this.customTitle(this)
@@ -245,14 +260,15 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
     super.willUpdate(_changedProperties);
 
     const doc = this.doc;
-    this._updateRefMeta(doc);
+    if (doc) {
+      this._updateRefMeta(doc);
+    }
   }
 
   get block() {
-    const block = this.inlineEditor.rootElement.closest<BlockComponent>(
+    const block = this.inlineEditor?.rootElement.closest<BlockComponent>(
       `[${BLOCK_ID_ATTR}]`
     );
-    assertExists(block);
     return block;
   }
 
@@ -270,7 +286,6 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
 
   get doc() {
     const doc = this.config.doc;
-    assertExists(doc, '`reference-node` need `Doc`.');
     return doc;
   }
 
@@ -278,13 +293,13 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
     const inlineRoot = this.closest<InlineRootElement<AffineTextAttributes>>(
       `[${INLINE_ROOT_ATTR}]`
     );
-    assertExists(inlineRoot);
-    return inlineRoot.inlineEditor;
+    return inlineRoot?.inlineEditor;
   }
 
   get referenceInfo(): ReferenceInfo {
     const reference = this.delta.attributes?.reference;
-    if (!reference) return { pageId: this.doc.id };
+    const id = this.doc?.id;
+    if (!reference) return { pageId: id ?? '' };
 
     const { pageId, params } = reference;
     const info: ReferenceInfo = { pageId };
@@ -299,14 +314,18 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
   }
 
   get selfInlineRange() {
-    const selfInlineRange = this.inlineEditor.getInlineRangeFromElement(this);
-    assertExists(selfInlineRange);
+    const selfInlineRange = this.inlineEditor?.getInlineRangeFromElement(this);
     return selfInlineRange;
   }
 
   get std() {
-    const std = this.block.std;
-    assertExists(std);
+    const std = this.block?.std;
+    if (!std) {
+      throw new BlockSuiteError(
+        ErrorCode.ValueNotExists,
+        'std not found in reference node'
+      );
+    }
     return std;
   }
 
