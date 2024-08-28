@@ -4,20 +4,17 @@ import type { RootBlockModel } from '@blocksuite/affine-model';
 import type { EmbedCardStyle } from '@blocksuite/affine-model';
 import type { BlockComponent } from '@blocksuite/block-std';
 
+import { DocModeService } from '@blocksuite/affine-shared/services';
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import { BlockService } from '@blocksuite/block-std';
 
+import type { NotificationService } from '../_common/components/index.js';
 import type { RootBlockComponent } from './types.js';
 
 import {
   FileDropManager,
   type FileDropOptions,
 } from '../_common/components/file-drop-manager.js';
-import {
-  type DocModeService,
-  type NotificationService,
-  createDocModeService,
-} from '../_common/components/index.js';
 import { DEFAULT_IMAGE_PROXY_ENDPOINT } from '../_common/consts.js';
 import { ExportManager } from '../_common/export-manager/export-manager.js';
 import {
@@ -95,8 +92,6 @@ export abstract class RootService extends BlockService<RootBlockModel> {
     flavour: this.flavour,
   };
 
-  docModeService: DocModeService = createDocModeService(this.doc.id);
-
   readonly editPropsStore: EditPropsStore = new EditPropsStore(this);
 
   readonly exportManager = new ExportManager(this, this._exportOptions);
@@ -140,6 +135,8 @@ export abstract class RootService extends BlockService<RootBlockModel> {
   }
 
   override mounted() {
+    DocModeService.add(this.std);
+
     super.mounted();
 
     this.loadFonts();

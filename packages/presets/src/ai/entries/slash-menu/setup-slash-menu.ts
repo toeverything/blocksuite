@@ -1,12 +1,12 @@
-import type {
-  AIItemConfig,
-  AffineAIPanelWidget,
-  AffineSlashMenuActionItem,
-  AffineSlashMenuContext,
-  AffineSlashMenuItem,
-  AffineSlashSubMenu,
+import {
+  type AIItemConfig,
+  type AffineAIPanelWidget,
+  type AffineSlashMenuActionItem,
+  type AffineSlashMenuContext,
+  type AffineSlashMenuItem,
+  type AffineSlashSubMenu,
+  getMode,
 } from '@blocksuite/blocks';
-
 import {
   AFFINE_AI_PANEL_WIDGET,
   AIStarIcon,
@@ -39,9 +39,7 @@ export function setupSlashMenuEntry(slashMenu: AffineSlashMenuWidget) {
       if (affineAIPanelWidget === null) return false;
 
       const chain = rootComponent.host.command.chain();
-      const editorMode = rootComponent.service.docModeService.getMode(
-        rootComponent.doc.id
-      );
+      const editorMode = getMode(rootComponent.std, rootComponent.doc.id);
 
       return item?.showWhen?.(chain, editorMode, rootComponent.host) ?? true;
     };

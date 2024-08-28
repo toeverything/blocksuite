@@ -4,9 +4,9 @@ import type {
   TextSelection,
 } from '@blocksuite/block-std';
 import type { EditorHost } from '@blocksuite/block-std';
-import type { ImageSelection } from '@blocksuite/blocks';
 
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
+import { type ImageSelection, onModeChange } from '@blocksuite/blocks';
 import {
   PaymentRequiredError,
   UnauthorizedError,
@@ -492,8 +492,7 @@ export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
           this.requestUpdate();
         })
       );
-      const { docModeService } = this.host.spec.getService('affine:page');
-      disposables.add(docModeService.onModeChange(() => this.requestUpdate()));
+      disposables.add(onModeChange(this.host.std, () => this.requestUpdate()));
     }
   }
 

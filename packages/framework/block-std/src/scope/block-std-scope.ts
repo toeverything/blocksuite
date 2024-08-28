@@ -1,5 +1,7 @@
 import type { Doc, DocCollection } from '@blocksuite/store';
 
+import { Container } from '@blocksuite/global/di';
+
 import type { EditorHost } from '../view/element/index.js';
 
 import { Clipboard } from '../clipboard/index.js';
@@ -21,6 +23,8 @@ export class BlockStdScope {
   readonly collection: DocCollection;
 
   readonly command: CommandManager;
+
+  readonly container: Container;
 
   readonly doc: Doc;
 
@@ -47,6 +51,8 @@ export class BlockStdScope {
     this.spec = new SpecStore(this);
     this.view = new ViewStore(this);
     this.clipboard = new Clipboard(this);
+    this.container = new Container();
+    this.container.addFactory(BlockStdScope, () => this);
   }
 
   mount() {

@@ -1,12 +1,13 @@
-import type {
-  EdgelessRootBlockComponent,
-  PageRootBlockComponent,
-} from '@blocksuite/blocks';
-import type { AbstractEditor, PageRootService } from '@blocksuite/blocks';
 import type { BlockModel, Doc } from '@blocksuite/store';
 
 import { type BlockSpec, EditorHost } from '@blocksuite/block-std';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
+import { type AbstractEditor, onModeChange } from '@blocksuite/blocks';
+import {
+  DocModeFeature,
+  type EdgelessRootBlockComponent,
+  type PageRootBlockComponent,
+} from '@blocksuite/blocks';
 import {
   DocMode,
   EdgelessEditorBlockSpecs,
@@ -59,9 +60,8 @@ export class AffineEditorContainer
           setup: (slots, disposable) => {
             setup?.(slots, disposable);
             slots.mounted.once(({ service }) => {
-              const { docModeService } = service as PageRootService;
               disposable.add(
-                docModeService.onModeChange(this.switchEditor.bind(this))
+                onModeChange(service.std, this.switchEditor.bind(this))
               );
             });
           },
@@ -97,7 +97,9 @@ export class AffineEditorContainer
           setup: (slots, disposable) => {
             setup?.(slots, disposable);
             slots.mounted.once(({ service }) => {
-              const { docModeService } = service as PageRootService;
+              const docModeService = service.std.container
+                .provider()
+                .get(DocModeFeature);
               disposable.add(
                 docModeService.onModeChange(this.switchEditor.bind(this))
               );

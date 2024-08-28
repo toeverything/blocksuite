@@ -1,14 +1,14 @@
 import type { BlockSpec, EditorHost } from '@blocksuite/block-std';
-import type { DocModeService, PageRootService } from '@blocksuite/blocks';
-import type { BlockCollection } from '@blocksuite/store';
-import type { DocCollection } from '@blocksuite/store';
+import type { BlockCollection, DocCollection } from '@blocksuite/store';
 
 import {
   AffineFormatBarWidget,
   DocMode,
+  DocModeFeature,
   EdgelessEditorBlockSpecs,
+  type IDocModeService,
   PageEditorBlockSpecs,
-  createDocModeService,
+  type PageRootService,
   toolbarDefaultConfig,
 } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
@@ -27,7 +27,7 @@ import {
   mockQuickSearchService,
 } from '../../_common/mock-services.js';
 
-function setDocModeFromUrlParams(service: DocModeService) {
+function setDocModeFromUrlParams(service: IDocModeService) {
   const params = new URLSearchParams(location.search);
   const paramMode = params.get('mode');
   if (paramMode) {
@@ -52,8 +52,6 @@ export async function mountDefaultDocEditor(collection: DocCollection) {
   const app = document.getElementById('app');
   if (!app) return;
 
-  const modeService = createDocModeService(doc.id);
-  setDocModeFromUrlParams(modeService);
   const editor = new AffineEditorContainer();
   editor.pageSpecs = [...PageEditorBlockSpecs].map(spec => {
     if (spec.schema.model.flavour === 'affine:page') {
@@ -67,7 +65,7 @@ export async function mountDefaultDocEditor(collection: DocCollection) {
     }
     return spec;
   });
-  editor.mode = modeService.getMode();
+  editor.mode = DocMode.Page;
   editor.doc = doc;
   editor.slots.docLinkClicked.on(({ pageId: docId }) => {
     const target = collection.getDoc(docId);
@@ -77,12 +75,15 @@ export async function mountDefaultDocEditor(collection: DocCollection) {
     target.load();
     editor.doc = target;
   });
-  editor.slots.docUpdated.on(({ newDocId }) => {
-    editor.mode = modeService.getMode(newDocId);
-  });
 
   app.append(editor);
   await editor.updateComplete;
+  const modeService = editor.host!.std.container.provider().get(DocModeFeature);
+  editor.mode = modeService.getMode();
+  setDocModeFromUrlParams(modeService);
+  editor.slots.docUpdated.on(({ newDocId }) => {
+    editor.mode = modeService.getMode(newDocId);
+  });
 
   const outlinePanel = new CustomOutlinePanel();
   outlinePanel.editor = editor;
