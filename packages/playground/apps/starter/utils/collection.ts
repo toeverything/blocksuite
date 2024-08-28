@@ -69,6 +69,7 @@ export function createStarterDocCollection() {
       enable_edgeless_text: true,
       enable_color_picker: true,
       enable_mind_map_import: true,
+      enable_image_cropping: true,
       ...flags,
     },
     awarenessSources: [new BroadcastChannelAwarenessSource(id)],

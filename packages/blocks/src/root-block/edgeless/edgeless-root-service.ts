@@ -89,6 +89,7 @@ export class EdgelessRootService extends RootService implements SurfaceContext {
       blocks: BlockSuite.EdgelessBlockModelType[];
       shapes: BlockSuite.SurfaceModel[];
     }>(),
+    croppingStatusUpdated: new Slot<boolean>(),
     readonlyUpdated: new Slot<boolean>(),
     draggingAreaUpdated: new Slot(),
     navigatorSettingUpdated: new Slot<{

@@ -74,6 +74,7 @@ export async function createDefaultDocCollection() {
       enable_pie_menu: true,
       enable_lasso_tool: true,
       enable_color_picker: true,
+      enable_image_cropping: true,
       ...flags,
     },
   };

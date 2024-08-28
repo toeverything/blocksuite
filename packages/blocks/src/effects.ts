@@ -83,6 +83,13 @@ import {
 import { ImageBlockFallbackCard } from './image-block/components/image-block-fallback.js';
 import { ImageBlockPageComponent } from './image-block/components/page-image-block.js';
 import {
+  CropperCanvas,
+  CropperHandle,
+  CropperImage,
+  CropperSelection,
+  CropperShade,
+} from './image-block/cropperjs/index.js';
+import {
   ImageBlockComponent,
   ImageEdgelessBlockComponent,
 } from './image-block/index.js';
@@ -684,4 +691,10 @@ export function effects() {
     EdgelessAutoConnectWidget
   );
   customElements.define(AFFINE_FORMAT_BAR_WIDGET, AffineFormatBarWidget);
+  /* cropperjs */
+  customElements.define('cropper-canvas', CropperCanvas);
+  customElements.define('cropper-handle', CropperHandle);
+  customElements.define('cropper-image', CropperImage);
+  customElements.define('cropper-selection', CropperSelection);
+  customElements.define('cropper-shade', CropperShade);
 }

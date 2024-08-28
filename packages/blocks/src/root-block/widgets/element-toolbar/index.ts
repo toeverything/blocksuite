@@ -364,12 +364,14 @@ export class EdgelessElementToolbarWidget extends WidgetComponent<
     );
 
     const quickConnectButton =
-      selectedElements.length === 1 && !connector?.length
+      !this.disableOtherButtons &&
+      selectedElements.length === 1 &&
+      !connector?.length
         ? this._renderQuickConnectButton()
         : undefined;
 
     const generalButtons =
-      selectedElements.length !== connector?.length
+      !this.disableOtherButtons && selectedElements.length !== connector?.length
         ? [
             renderAddFrameButton(edgeless, selectedElements),
             renderAddGroupButton(edgeless, selectedElements),
@@ -411,14 +413,15 @@ export class EdgelessElementToolbarWidget extends WidgetComponent<
       .map(entry => entry.render(this.edgeless))
       .forEach(entry => entry && buttons.unshift(entry));
 
-    buttons.push(html`
-      <edgeless-more-button
-        .elements=${selectedElements}
-        .edgeless=${edgeless}
-        .groups=${this.moreGroups}
-        .vertical=${true}
-      ></edgeless-more-button>
-    `);
+    !this.disableOtherButtons &&
+      buttons.push(html`
+        <edgeless-more-button
+          .elements=${selectedElements}
+          .edgeless=${edgeless}
+          .groups=${this.moreGroups}
+          .vertical=${true}
+        ></edgeless-more-button>
+      `);
 
     return html`
       <editor-toolbar>
@@ -438,6 +441,9 @@ export class EdgelessElementToolbarWidget extends WidgetComponent<
     render: (edgeless: EdgelessRootBlockComponent) => TemplateResult | null;
     when: (model: BlockSuite.EdgelessModel[]) => boolean;
   }[] = [];
+
+  @state()
+  accessor disableOtherButtons = false;
 
   @property({ attribute: false })
   accessor enableNoteSlicer!: boolean;

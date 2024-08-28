@@ -9,6 +9,11 @@ export const SelectIcon = icons.SelectIcon({
   height: '24',
 });
 
+export const CropIcon = icons.CropIcon({
+  width: '24',
+  height: '24',
+});
+
 export const LassoFreeHandIcon = html`
   <svg
     width="24"
@@ -2412,6 +2417,12 @@ export const AddTextIcon = icons.AddTextIcon({
 export const CheckIcon = icons.DoneIcon({
   width: '20',
   height: '20',
+});
+
+export const DoneIcon = icons.DoneIcon({
+  width: '20',
+  height: '20',
+  style: 'color:#1E96EB;',
 });
 
 export const ArrowLeftSmallIcon = icons.ArrowLeftSmallIcon({
