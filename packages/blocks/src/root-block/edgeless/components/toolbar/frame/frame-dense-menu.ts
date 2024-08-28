@@ -1,6 +1,7 @@
+import type { Menu } from '@blocksuite/affine-components/context-menu';
+
 import { FrameIcon } from '@blocksuite/affine-components/icons';
 
-import type { Menu } from '../../../../../_common/components/index.js';
 import type { DenseMenuBuilder } from '../common/type.js';
 
 import { FrameConfig } from './config.js';

@@ -1,6 +1,7 @@
+import type { Menu } from '@blocksuite/affine-components/context-menu';
+
 import { type TemplateResult, html } from 'lit';
 
-import type { Menu } from '../../../../_common/components/index.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
 import type { EdgelessTool } from '../../types.js';
 

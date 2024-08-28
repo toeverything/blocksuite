@@ -1,4 +1,8 @@
 import {
+  type MenuHandler,
+  popMenu,
+} from '@blocksuite/affine-components/context-menu';
+import {
   ArrowLeftSmallIcon,
   ArrowRightSmallIcon,
   MoreHorizontalIcon,
@@ -20,10 +24,6 @@ import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
 import type { EdgelessTool } from '../../types.js';
 import type { MenuPopper } from './common/create-popper.js';
 
-import {
-  type MenuHandler,
-  popMenu,
-} from '../../../../_common/components/index.js';
 import '../../../../_common/components/smooth-corner.js';
 import '../buttons/tool-icon-button.js';
 import '../buttons/toolbar-button.js';
