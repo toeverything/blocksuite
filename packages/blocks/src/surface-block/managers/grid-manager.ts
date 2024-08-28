@@ -1,3 +1,4 @@
+import type { GfxModel } from '@blocksuite/block-std/gfx';
 import type { IBound } from '@blocksuite/global/utils';
 
 import {
@@ -7,8 +8,8 @@ import {
   isPointIn,
 } from '@blocksuite/global/utils';
 
-import { GRID_SIZE } from './consts.js';
-import { compare } from './managers/layer-utils.js';
+import { GRID_SIZE } from '../consts.js';
+import { compare } from './layer-utils.js';
 
 function getGridIndex(val: number) {
   return Math.ceil(val / GRID_SIZE) - 1;
@@ -23,9 +24,7 @@ function rangeFromBound(a: IBound): number[] {
   return [minRow, maxRow, minCol, maxCol];
 }
 
-function rangeFromElement<T extends BlockSuite.EdgelessModel>(
-  ele: T
-): number[] {
+function rangeFromElement<T extends GfxModel>(ele: T): number[] {
   const bound = ele.elementBound;
   const minRow = getGridIndex(bound.x);
   const maxRow = getGridIndex(bound.maxX);
@@ -34,9 +33,7 @@ function rangeFromElement<T extends BlockSuite.EdgelessModel>(
   return [minRow, maxRow, minCol, maxCol];
 }
 
-function rangeFromElementExternal<T extends BlockSuite.EdgelessModel>(
-  ele: T
-): number[] | null {
+function rangeFromElementExternal<T extends GfxModel>(ele: T): number[] | null {
   if (!ele.externalXYWH) return null;
 
   const bound = Bound.deserialize(ele.externalXYWH);
@@ -47,7 +44,7 @@ function rangeFromElementExternal<T extends BlockSuite.EdgelessModel>(
   return [minRow, maxRow, minCol, maxCol];
 }
 
-export class GridManager<T extends BlockSuite.EdgelessModel> {
+export class GridManager<T extends GfxModel> {
   private _elementToGrids = new Map<T, Set<Set<T>>>();
 
   private _externalElementToGrids = new Map<T, Set<Set<T>>>();

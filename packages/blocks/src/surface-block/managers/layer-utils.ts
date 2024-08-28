@@ -1,3 +1,4 @@
+import type { GfxModel } from '@blocksuite/block-std/gfx';
 import type { Doc } from '@blocksuite/store';
 
 import { nToLast } from '@blocksuite/global/utils';
@@ -28,7 +29,7 @@ export function updateLayersZIndex(layers: Layer[], startIdx: number) {
   }
 }
 
-export function getElementIndex(indexable: BlockSuite.EdgelessModel) {
+export function getElementIndex(indexable: GfxModel) {
   const groups = indexable.groups as BlockSuite.SurfaceGroupLikeModel[];
 
   if (groups.length) {
@@ -47,10 +48,7 @@ export function ungroupIndex(index: string) {
   return index.split('-')[0];
 }
 
-export function insertToOrderedArray(
-  array: BlockSuite.EdgelessModel[],
-  element: BlockSuite.EdgelessModel
-) {
+export function insertToOrderedArray(array: GfxModel[], element: GfxModel) {
   let idx = 0;
   while (
     idx < array.length &&
@@ -62,10 +60,7 @@ export function insertToOrderedArray(
   array.splice(idx, 0, element);
 }
 
-export function removeFromOrderedArray(
-  array: BlockSuite.EdgelessModel[],
-  element: BlockSuite.EdgelessModel
-) {
+export function removeFromOrderedArray(array: GfxModel[], element: GfxModel) {
   const idx = array.indexOf(element);
 
   if (idx !== -1) {
@@ -79,10 +74,7 @@ export enum SortOrder {
   SAME = 0,
 }
 
-export function isInRange(
-  edges: [BlockSuite.EdgelessModel, BlockSuite.EdgelessModel],
-  target: BlockSuite.EdgelessModel
-) {
+export function isInRange(edges: [GfxModel, GfxModel], target: GfxModel) {
   return compare(target, edges[0]) >= 0 && compare(target, edges[1]) < 0;
 }
 
@@ -101,10 +93,7 @@ export function renderableInEdgeless(
  * SortOrder.AFTER means a should be rendered after b and so on.
  * @returns
  */
-export function compare(
-  a: BlockSuite.EdgelessModel,
-  b: BlockSuite.EdgelessModel
-) {
+export function compare(a: GfxModel, b: GfxModel) {
   if (a instanceof SurfaceGroupLikeModel && a.hasDescendant(b)) {
     return SortOrder.BEFORE;
   } else if (b instanceof SurfaceGroupLikeModel && b.hasDescendant(a)) {
@@ -114,8 +103,8 @@ export function compare(
     const bGroups = b.groups as BlockSuite.SurfaceGroupLikeModel[];
 
     let i = 1;
-    let aGroup: BlockSuite.EdgelessModel | undefined = nToLast(aGroups, i);
-    let bGroup: BlockSuite.EdgelessModel | undefined = nToLast(bGroups, i);
+    let aGroup: GfxModel | undefined = nToLast(aGroups, i);
+    let bGroup: GfxModel | undefined = nToLast(bGroups, i);
 
     while (aGroup === bGroup && aGroup) {
       ++i;

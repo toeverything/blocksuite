@@ -9,7 +9,7 @@ import {
   getBezierParameters,
 } from '@blocksuite/global/utils';
 
-import type { RoughCanvas } from '../../../rough/canvas.js';
+import type { RoughCanvas } from '../../../utils/rough/canvas.js';
 import type { CanvasRenderer } from '../../canvas-renderer.js';
 
 import { isConnectorWithLabel } from '../../../element-model/utils/connector.js';

@@ -15,7 +15,7 @@ import type { SurfaceElementModel } from '../element-model/base.js';
 import type { LayerManager } from '../managers/layer-manager.js';
 import type { ElementRenderer } from './elements/index.js';
 
-import { RoughCanvas } from '../rough/canvas.js';
+import { RoughCanvas } from '../utils/rough/canvas.js';
 
 /**
  * An overlay is a layer covered on top of elements,

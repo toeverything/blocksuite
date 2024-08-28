@@ -1,6 +1,6 @@
 import type { ShapeElementModel } from '@blocksuite/affine-model';
 
-import type { RoughCanvas } from '../../../rough/canvas.js';
+import type { RoughCanvas } from '../../../utils/rough/canvas.js';
 import type { CanvasRenderer } from '../../canvas-renderer.js';
 
 import { type Colors, drawGeneralShape } from './utils.js';

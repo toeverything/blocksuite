@@ -15,7 +15,7 @@ import {
   getBezierTangent,
 } from '@blocksuite/global/utils';
 
-import type { RoughCanvas } from '../../../rough/canvas.js';
+import type { RoughCanvas } from '../../../utils/rough/canvas.js';
 
 type ConnectorEnd = 'Front' | 'Rear';
 

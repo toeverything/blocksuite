@@ -1,3 +1,5 @@
+import type { GfxModel } from '@blocksuite/block-std/gfx';
+
 import type { ConnectorElementModel } from '../index.js';
 import type { SurfaceBlockModel, SurfaceMiddleware } from '../surface-model.js';
 
@@ -9,8 +11,7 @@ export const connectorMiddleware: SurfaceMiddleware = (
   const hasElementById = (id: string) =>
     surface.hasElementById(id) || surface.doc.hasBlockById(id);
   const getElementById = (id: string) =>
-    surface.getElementById(id) ??
-    (surface.doc.getBlockById(id) as BlockSuite.EdgelessModel);
+    surface.getElementById(id) ?? (surface.doc.getBlockById(id) as GfxModel);
   const pathGenerator = new ConnectorPathGenerator({
     getElementById: getElementById,
   });
