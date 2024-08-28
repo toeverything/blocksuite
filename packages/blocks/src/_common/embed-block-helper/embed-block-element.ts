@@ -204,6 +204,8 @@ export class EmbedBlockComponent<
   override accessor showBlockSelection = false;
 
   override accessor useCaptionEditor = true;
+
+  override accessor useZeroWidth = true;
 }
 
 // @ts-ignore

@@ -31,6 +31,9 @@ export class CaptionedBlockComponent<
       ${this.showBlockSelection
         ? html`<affine-block-selection .block=${this}></affine-block-selection>`
         : nothing}
+      ${this.useZeroWidth
+        ? html`<block-zero-width .block=${this}></block-zero-width>`
+        : nothing}
     </div>`;
   }
 
@@ -51,4 +54,6 @@ export class CaptionedBlockComponent<
   protected accessor showBlockSelection = true;
 
   protected accessor useCaptionEditor = false;
+
+  protected accessor useZeroWidth = false;
 }

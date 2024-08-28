@@ -89,6 +89,8 @@ export class BookmarkBlockComponent extends CaptionedBlockComponent<
   accessor loading = false;
 
   override accessor useCaptionEditor = true;
+
+  override accessor useZeroWidth = true;
 }
 
 declare global {
