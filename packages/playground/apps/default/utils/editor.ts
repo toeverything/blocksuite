@@ -21,7 +21,8 @@ function setDocModeFromUrlParams(service: DocModeService) {
   const params = new URLSearchParams(location.search);
   const paramMode = params.get('mode');
   if (paramMode) {
-    const docMode = paramMode === 'page' ? DocMode.Page : DocMode.Edgeless;
+    const docMode =
+      paramMode === DocMode.Page ? DocMode.Page : DocMode.Edgeless;
     service.setMode(docMode);
   }
 }

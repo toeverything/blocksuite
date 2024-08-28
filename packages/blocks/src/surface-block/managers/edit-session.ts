@@ -9,8 +9,12 @@ import {
   ShapeSchema,
   TextSchema,
 } from '@blocksuite/affine-shared/utils';
-import { DisposableGroup, Slot } from '@blocksuite/global/utils';
-import { type Signal, signal } from '@lit-labs/preact-signals';
+import {
+  type DeepPartial,
+  DisposableGroup,
+  Slot,
+} from '@blocksuite/global/utils';
+import { type Signal, computed, signal } from '@lit-labs/preact-signals';
 import isPlainObject from 'lodash.isplainobject';
 import merge from 'lodash.merge';
 import { z } from 'zod';
@@ -76,6 +80,8 @@ export type SerializedViewport = z.infer<
 export class EditPropsStore {
   private _disposables = new DisposableGroup();
 
+  private innerProps$: Signal<DeepPartial<LastProps>> = signal({});
+
   lastProps$: Signal<LastProps>;
 
   slots = {
@@ -86,7 +92,7 @@ export class EditPropsStore {
   };
 
   constructor(private _service: BlockService) {
-    const lastProps = LastPropsSchema.parse(
+    const initProps: LastProps = LastPropsSchema.parse(
       Object.entries(LastPropsSchema.shape).reduce((value, [key, schema]) => {
         return {
           ...value,
@@ -99,11 +105,19 @@ export class EditPropsStore {
     if (props) {
       const result = LastPropsSchema.safeParse(JSON.parse(props));
       if (result.success) {
-        merge(lastProps, result.data);
+        merge({ ...initProps }, result.data);
       }
     }
 
-    this.lastProps$ = signal(lastProps);
+    this.lastProps$ = computed(() => {
+      const editorSetting$ =
+        this._service.std.spec.getConfig('affine:page')?.editorSetting;
+      return merge(
+        { ...initProps },
+        editorSetting$?.value,
+        this.innerProps$.value
+      );
+    });
   }
 
   private _getStorage<T extends StoragePropsKey>(key: T) {
@@ -185,9 +199,11 @@ export class EditPropsStore {
     );
     if (Object.keys(overrideProps).length === 0) return;
 
-    const lastProps = this.lastProps$.value;
-    merge(lastProps, { [type]: overrideProps });
-    this.lastProps$.value = { ...lastProps };
+    const innerProps = this.innerProps$.value;
+    this.innerProps$.value = merge(
+      { ...innerProps },
+      { [type]: overrideProps }
+    );
   }
 
   setStorage<T extends StoragePropsKey>(key: T, value: StorageProps[T]) {

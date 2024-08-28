@@ -18,6 +18,7 @@ import { customElement } from 'lit/decorators.js';
 
 import type { NoteBlockComponent } from '../note-block/index.js';
 import type { AffineInnerModalWidget } from '../root-block/index.js';
+import type { DatabaseOptionsConfig } from './config.js';
 import type { DatabaseBlockService } from './database-service.js';
 
 import { DragIndicator, popMenu } from '../_common/components/index.js';
@@ -60,58 +61,51 @@ export class DatabaseBlockComponent extends CaptionedBlockComponent<
   };
 
   private _clickDatabaseOps = (e: MouseEvent) => {
-    popMenu(e.currentTarget as HTMLElement, {
-      options: {
-        input: {
-          initValue: this.model.title.toString(),
-          placeholder: 'Untitled',
-          onComplete: text => {
-            this.model.title.replace(0, this.model.title.length, text);
+    const options = this.optionsConfig.configure(this.model, {
+      input: {
+        initValue: this.model.title.toString(),
+        placeholder: 'Untitled',
+        onComplete: text => {
+          this.model.title.replace(0, this.model.title.length, text);
+        },
+      },
+      items: [
+        {
+          type: 'action',
+          icon: CopyIcon,
+          name: 'Copy',
+          select: () => {
+            const slice = Slice.fromModels(this.doc, [this.model]);
+            this.std.clipboard
+              .copySlice(slice)
+              .then(() => {
+                toast(this.host, 'Copied to clipboard');
+              })
+              .catch(console.error);
           },
         },
-        items: [
-          {
-            type: 'action',
-            icon: CopyIcon,
-            name: 'Copy',
-            select: () => {
-              const slice = Slice.fromModels(this.doc, [this.model]);
-              this.std.clipboard
-                .copySlice(slice)
-                .then(() => {
-                  toast(this.host, 'Copied to clipboard');
-                })
-                .catch(console.error);
-            },
-          },
-          // {
-          //   type: 'action',
-          //   icon: DuplicateIcon,
-          //   name: 'Duplicate',
-          //   select: () => {
-          //   },
-          // },
-          {
-            type: 'group',
-            name: '',
-            children: () => [
-              {
-                type: 'action',
-                icon: DeleteIcon,
-                class: 'delete-item',
-                name: 'Delete Database',
-                select: () => {
-                  this.model.children.slice().forEach(block => {
-                    this.doc.deleteBlock(block);
-                  });
-                  this.doc.deleteBlock(this.model);
-                },
+        {
+          type: 'group',
+          name: '',
+          children: () => [
+            {
+              type: 'action',
+              icon: DeleteIcon,
+              class: 'delete-item',
+              name: 'Delete Database',
+              select: () => {
+                this.model.children.slice().forEach(block => {
+                  this.doc.deleteBlock(block);
+                });
+                this.doc.deleteBlock(this.model);
               },
-            ],
-          },
-        ],
-      },
+            },
+          ],
+        },
+      ],
     });
+
+    popMenu(e.currentTarget as HTMLElement, { options });
   };
 
   private _dataSource?: DatabaseBlockDataSource;
@@ -386,6 +380,13 @@ export class DatabaseBlockComponent extends CaptionedBlockComponent<
     return this.rootComponent!.widgetComponents[
       AFFINE_INNER_MODAL_WIDGET
     ] as AffineInnerModalWidget;
+  }
+
+  get optionsConfig(): DatabaseOptionsConfig {
+    return {
+      configure: (_model, options) => options,
+      ...this.std.spec.getConfig('affine:page')?.databaseOptions,
+    };
   }
 
   override get topContenteditableElement() {

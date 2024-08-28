@@ -497,7 +497,7 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockComponent<
   }
 
   get syncedDoc() {
-    return this.syncedDocMode === 'page'
+    return this.syncedDocMode === DocMode.Page
       ? this.std.collection.getDoc(this.model.pageId, {
           readonly: true,
           query: this._pageFilter,

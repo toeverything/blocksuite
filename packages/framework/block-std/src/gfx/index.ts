@@ -15,12 +15,15 @@ export {
 } from './surface/decorators/index.js';
 export {
   type BaseElementProps,
+  type GfxContainerElement,
   type GfxElementGeometry,
   GfxGroupLikeElementModel,
   GfxLocalElementModel,
   GfxPrimitiveElementModel,
   type PointTestOptions,
   type SerializedElement,
+  gfxContainerSymbol,
+  isGfxContainerElm,
 } from './surface/element-model.js';
 export {
   SurfaceBlockModel,

@@ -44,7 +44,15 @@ export type SerializedElement = Record<string, unknown> & {
 };
 
 export interface PointTestOptions {
-  expand?: number;
+  /**
+   * The threshold of the hit test. The unit is pixel.
+   */
+  hitThreshold?: number;
+
+  /**
+   * The padding of the response area for each element when do the hit testing. The unit is pixel.
+   */
+  responsePadding?: [number, number];
 
   /**
    * If true, the transparent area of the element will be ignored during the point inclusion test.
@@ -54,7 +62,6 @@ export interface PointTestOptions {
    */
   ignoreTransparent?: boolean;
 
-  all?: boolean;
   zoom?: number;
 }
 
@@ -70,6 +77,18 @@ export interface GfxElementGeometry {
     host: EditorHost
   ): boolean;
   intersectsBound(bound: Bound): boolean;
+}
+
+export const gfxContainerSymbol = Symbol('GfxContainerElement');
+
+export const isGfxContainerElm = (elm: unknown): elm is GfxContainerElement => {
+  return (elm as GfxContainerElement)[gfxContainerSymbol] === true;
+};
+
+export interface GfxContainerElement {
+  [gfxContainerSymbol]: true;
+  childIds: string[];
+  childElements: GfxModel[];
 }
 
 export abstract class GfxPrimitiveElementModel<
@@ -354,13 +373,18 @@ export abstract class GfxPrimitiveElementModel<
 }
 
 export abstract class GfxGroupLikeElementModel<
-  Props extends BaseElementProps = BaseElementProps,
-> extends GfxPrimitiveElementModel<Props> {
+    Props extends BaseElementProps = BaseElementProps,
+  >
+  extends GfxPrimitiveElementModel<Props>
+  implements GfxContainerElement
+{
   private _childBoundCacheKey: string = '';
 
   private _childIds: string[] = [];
 
   private _mutex = createMutex();
+
+  [gfxContainerSymbol] = true as const;
 
   private _updateXYWH() {
     let bound: Bound | undefined;

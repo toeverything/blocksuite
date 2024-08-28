@@ -276,7 +276,7 @@ export class ConnectorElementModel extends GfxPrimitiveElementModel<ConnectorEle
 
     return (
       Vec.dist(point, currentPoint) <
-      (options?.expand ? strokeWidth / 2 : 0) + 8
+      (options?.hitThreshold ? strokeWidth / 2 : 0) + 8
     );
   }
 

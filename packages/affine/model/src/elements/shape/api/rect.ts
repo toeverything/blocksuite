@@ -42,12 +42,16 @@ export const rect = {
     options: PointTestOptions
   ) {
     const point: IVec = [x, y];
-    const points = getPointsFromBoundsWithRotation(this);
+    const points = getPointsFromBoundsWithRotation(
+      this,
+      undefined,
+      options.responsePadding
+    );
 
     let hit = pointOnPolygonStoke(
       point,
       points,
-      (options?.expand ?? 1) / (options.zoom ?? 1)
+      (options?.hitThreshold ?? 1) / (options.zoom ?? 1)
     );
 
     if (!hit) {

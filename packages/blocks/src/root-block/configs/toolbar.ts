@@ -1,4 +1,4 @@
-import type { MoreMenuItemGroup } from '@blocksuite/affine-components/toolbar';
+import type { MenuItemGroup } from '@blocksuite/affine-components/toolbar';
 import type { BlockStdScope, EditorHost } from '@blocksuite/block-std';
 import type { GfxModel } from '@blocksuite/block-std/gfx';
 import type { BlockModel, Doc } from '@blocksuite/store';
@@ -10,7 +10,7 @@ export abstract class MoreMenuContext {
 
   get config(): ToolbarMoreMenuConfig {
     return {
-      configure: <T extends MoreMenuContext>(groups: MoreMenuItemGroup<T>[]) =>
+      configure: <T extends MoreMenuContext>(groups: MenuItemGroup<T>[]) =>
         groups,
       ...this.std.spec.getConfig('affine:page')?.toolbarMoreMenu,
     };
@@ -33,6 +33,6 @@ export abstract class MoreMenuContext {
 
 export interface ToolbarMoreMenuConfig {
   configure: <T extends MoreMenuContext>(
-    groups: MoreMenuItemGroup<T>[]
-  ) => MoreMenuItemGroup<T>[];
+    groups: MenuItemGroup<T>[]
+  ) => MenuItemGroup<T>[];
 }

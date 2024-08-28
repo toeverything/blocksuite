@@ -1,3 +1,4 @@
+import type { DocMode, ReferenceInfo } from '@blocksuite/affine-model';
 import type { TemplateResult } from 'lit';
 
 import {
@@ -14,6 +15,7 @@ import {
   EmbedCardLightVerticalIcon,
   LightLoadingIcon,
 } from '@blocksuite/affine-components/icons';
+import { DocModes } from '@blocksuite/affine-model';
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 
 type EmbedCardIcons = {
@@ -46,4 +48,37 @@ export function getEmbedCardIcons(): EmbedCardIcons {
       EmbedCardCubeIcon: EmbedCardDarkCubeIcon,
     };
   }
+}
+
+export function extractSearchParams(link: string) {
+  const url = new URL(link);
+  const mode = url.searchParams.get('mode');
+
+  if (mode && DocModes.includes(mode)) {
+    const params: ReferenceInfo['params'] = { mode: mode as DocMode };
+    const blockIds = url.searchParams
+      .get('blockIds')
+      ?.trim()
+      .split(',')
+      .map(id => id.trim())
+      .filter(id => id.length);
+    const elementIds = url.searchParams
+      .get('elementIds')
+      ?.trim()
+      .split(',')
+      .map(id => id.trim())
+      .filter(id => id.length);
+
+    if (blockIds?.length) {
+      params.blockIds = blockIds;
+    }
+
+    if (elementIds?.length) {
+      params.elementIds = elementIds;
+    }
+
+    return { params };
+  }
+
+  return null;
 }

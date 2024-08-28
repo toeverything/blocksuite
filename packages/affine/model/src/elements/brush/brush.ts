@@ -104,7 +104,7 @@ export class BrushElementModel extends GfxPrimitiveElementModel<BrushProps> {
       this.points as [number, number][],
       this.rotate,
       [px, py],
-      (options?.expand ?? 10) / Math.min(options?.zoom ?? 1, 1)
+      (options?.hitThreshold ?? 10) / Math.min(options?.zoom ?? 1, 1)
     );
     return hit;
   }

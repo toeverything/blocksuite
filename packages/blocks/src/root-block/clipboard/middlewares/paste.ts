@@ -21,6 +21,7 @@ import {
 import type { QuickSearchService } from '../../root-service.js';
 
 import { matchFlavours } from '../../../_common/utils/index.js';
+import { extractSearchParams } from '../../../_common/utils/url.js';
 
 function findLastMatchingNode(
   root: BlockSnapshot[],
@@ -458,6 +459,17 @@ class PasteTr {
     }
     const newDelta = delta.map(op => {
       if (needToConvert.has(op)) {
+        const link = op.attributes?.link;
+
+        if (!link) {
+          return { ...op };
+        }
+
+        const pageId = needToConvert.get(op)!;
+        const reference = { pageId, type: 'LinkedPage' };
+
+        Object.assign(reference, extractSearchParams(link));
+
         this.std.spec
           .getService('affine:page')
           .telemetryService?.track('LinkedDocCreated', {
@@ -466,21 +478,17 @@ class PasteTr {
             type: 'doc',
             other: 'existing doc',
           });
+
         transformed = true;
+
         return {
           ...op,
-          attributes: {
-            reference: {
-              pageId: needToConvert.get(op),
-              type: 'LinkedPage',
-            },
-          },
+          attributes: { reference },
           insert: ' ',
         };
       }
-      return {
-        ...op,
-      };
+
+      return { ...op };
     });
     return [newDelta, transformed];
   }

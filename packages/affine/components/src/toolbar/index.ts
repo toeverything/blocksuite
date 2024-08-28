@@ -14,13 +14,14 @@ export { EditorToolbarSeparator } from './separator.js';
 export { EditorToolbar } from './toolbar.js';
 export { Tooltip } from './tooltip.js';
 export type {
+  AdvancedMenuItem,
   FatMenuItems,
   MenuItem,
-  MoreMenuItem,
-  MoreMenuItemGroup,
+  MenuItemGroup,
 } from './types.js';
 export {
   groupsToActions,
   renderActions,
+  renderGroups,
   renderToolbarSeparator,
 } from './utils.js';

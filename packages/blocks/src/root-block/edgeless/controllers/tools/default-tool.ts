@@ -28,6 +28,7 @@ import {
 import type { MindmapNode } from '../../../../surface-block/element-model/utils/mindmap/layout.js';
 import type { EdgelessTool } from '../../types.js';
 
+import { isSelectSingleMindMap } from '../../../../_common/edgeless/mindmap/index.js';
 import { buildPath } from '../../../../_common/utils/index.js';
 import { SurfaceGroupLikeModel } from '../../../../surface-block/element-model/base.js';
 import {
@@ -387,7 +388,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     alignBound.x += dx;
     alignBound.y += dy;
 
-    const alignRst = this._edgeless.service.snap.align(alignBound);
+    const alignRst = this._service.snap.align(alignBound);
     const delta = [dx + alignRst.dx, dy + alignRst.dy];
 
     if (shifted) {
@@ -445,7 +446,10 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
       this._clearMindMapHoverState = [];
 
       const hoveredMindmap = this._service
-        .pickElement(x, y, { all: true, expand: 40 })
+        .pickElement(x, y, {
+          all: true,
+          responsePadding: [25, 60],
+        })
         .filter(
           el =>
             el !== current &&
@@ -571,11 +575,14 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     );
 
     if (
-      this._toBeMoved.every(ele => !(ele.group instanceof MindmapElementModel))
+      this._toBeMoved.every(
+        ele => !(ele.group instanceof MindmapElementModel)
+      ) ||
+      (isSelectSingleMindMap(this._toBeMoved) &&
+        this._toBeMoved[0].id ===
+          (this._toBeMoved[0].group as MindmapElementModel).tree.id)
     ) {
-      this._alignBound = this._edgeless.service.snap.setupAlignables(
-        this._toBeMoved
-      );
+      this._alignBound = this._service.snap.setupAlignables(this._toBeMoved);
     }
 
     this._clearDisposable();
@@ -585,7 +592,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     // If the viewport updates when dragging, should update the dragging area and selection
     if (this.dragType === DefaultModeDragType.Selecting) {
       this._disposables.add(
-        this._edgeless.service.viewport.viewportUpdated.on(() => {
+        this._service.viewport.viewportUpdated.on(() => {
           if (
             this.dragType === DefaultModeDragType.Selecting &&
             this._dragging &&
@@ -600,7 +607,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
 
     if (this.dragType === DefaultModeDragType.ContentMoving) {
       this._disposables.add(
-        this._edgeless.service.viewport.viewportMoved.on(delta => {
+        this._service.viewport.viewportMoved.on(delta => {
           if (
             this.dragType === DefaultModeDragType.ContentMoving &&
             this._dragging &&
@@ -621,7 +628,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
               );
             }
 
-            this._alignBound = this._edgeless.service.snap.setupAlignables(
+            this._alignBound = this._service.snap.setupAlignables(
               this._toBeMoved
             );
 
@@ -752,8 +759,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
       const viewport = this._service.viewport;
       if (viewport.zoom === 1) {
         // Fit to Screen
-        const { centerX, centerY, zoom } =
-          this._edgeless.service.getFitToScreenData();
+        const { centerX, centerY, zoom } = this._service.getFitToScreenData();
         viewport.setViewport(zoom, [centerX, centerY], true);
       } else {
         // Zoom to 100% and Center
@@ -764,7 +770,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     }
 
     const selected = this._pick(e.x, e.y, {
-      expand: 10,
+      hitThreshold: 10,
     });
     if (!selected) {
       const textFlag = this._edgeless.doc.awarenessStore.getFlag(
@@ -777,7 +783,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
       } else {
         addText(this._edgeless, e);
       }
-      this._edgeless.service.telemetryService?.track('CanvasElementAdded', {
+      this._service.telemetryService?.track('CanvasElementAdded', {
         control: 'canvas:dbclick',
         page: 'whiteboard editor',
         module: 'toolbar',
@@ -885,7 +891,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     this._dragStartPos = [0, 0];
     this._dragLastPos = [0, 0];
     this._selectedBounds = [];
-    this._edgeless.service.snap.cleanupAlignables();
+    this._service.snap.cleanupAlignables();
     surface.overlays.frame.clear();
     this._toBeMoved = [];
     this._selectedConnector = null;
@@ -960,7 +966,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     const toBeMoved = new Set(elements);
     elements.forEach(element => {
       if (isFrameBlock(element)) {
-        this._edgeless.service.frame
+        this._service.frame
           .getElementsInFrame(element)
           .forEach(ele => toBeMoved.add(ele));
       } else if (
@@ -1072,7 +1078,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
   }
 
   get edgelessSelectionManager() {
-    return this._edgeless.service.selection;
+    return this._service.selection;
   }
 
   get readonly() {
@@ -1080,7 +1086,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
   }
 
   get zoom() {
-    return this._edgeless.service.viewport.zoom;
+    return this._service.viewport.zoom;
   }
 }
 

@@ -4,6 +4,7 @@ import type { DatabaseBlockService } from './database-service.js';
 
 export { richTextColumnConfig } from './columns/rich-text/cell-renderer.js';
 
+export type { DatabaseOptionsConfig } from './config.js';
 export {
   columnPresets,
   viewPresets,

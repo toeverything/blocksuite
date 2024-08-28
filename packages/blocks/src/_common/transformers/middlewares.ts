@@ -80,6 +80,7 @@ export const replaceIdMiddleware: JobMiddleware = ({ slots, collection }) => {
       }
     }
 
+    // TODO(@fundon): process linked block/element
     if (
       payload.type === 'block' &&
       payload.snapshot.flavour === 'affine:embed-linked-doc'

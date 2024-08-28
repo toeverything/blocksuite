@@ -1,4 +1,4 @@
-import type { MoreMenuItemGroup } from '@blocksuite/affine-components/toolbar';
+import type { MenuItemGroup } from '@blocksuite/affine-components/toolbar';
 import type {
   Chain,
   CommandKeyToData,
@@ -32,10 +32,7 @@ import {
 } from '@blocksuite/affine-components/icons';
 import { createSimplePortal } from '@blocksuite/affine-components/portal';
 import { toast } from '@blocksuite/affine-components/toast';
-import {
-  groupsToActions,
-  renderActions,
-} from '@blocksuite/affine-components/toolbar';
+import { renderGroups } from '@blocksuite/affine-components/toolbar';
 import { assertExists } from '@blocksuite/global/utils';
 import { Slice } from '@blocksuite/store';
 import { type TemplateResult, html } from 'lit';
@@ -353,7 +350,7 @@ export class FormatBarContext extends MoreMenuContext {
   }
 }
 
-const BUILT_IN_GROUPS: MoreMenuItemGroup<FormatBarContext>[] = [
+const BUILT_IN_GROUPS: MenuItemGroup<FormatBarContext>[] = [
   {
     type: 'clipboard',
     items: [
@@ -476,7 +473,7 @@ export function toolbarMoreButton(toolbar: AffineFormatBarWidget) {
   const groups = context.config.configure(
     BUILT_IN_GROUPS.map(group => ({ ...group, items: [...group.items] }))
   );
-  const actions = renderActions(groupsToActions(groups, context));
+  const actions = renderGroups(groups, context);
 
   return html`
     <editor-menu-button

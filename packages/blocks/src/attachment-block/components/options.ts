@@ -13,9 +13,8 @@ import {
 } from '@blocksuite/affine-components/icons';
 import { createLitPortal } from '@blocksuite/affine-components/portal';
 import {
-  type MoreMenuItemGroup,
-  groupsToActions,
-  renderActions,
+  type MenuItemGroup,
+  renderGroups,
   renderToolbarSeparator,
 } from '@blocksuite/affine-components/toolbar';
 import { flip, offset } from '@floating-ui/dom';
@@ -31,7 +30,7 @@ import { cloneAttachmentProperties } from '../utils.js';
 import { RenameModal } from './rename-model.js';
 import { styles } from './styles.js';
 
-const BUILT_IN_GROUPS: MoreMenuItemGroup<AttachmentToolbarMoreMenuContext>[] = [
+const BUILT_IN_GROUPS: MenuItemGroup<AttachmentToolbarMoreMenuContext>[] = [
   {
     type: 'clipboard',
     items: [
@@ -160,7 +159,7 @@ export function AttachmentOptionsTemplate({
   const groups = context.config.configure(
     BUILT_IN_GROUPS.map(group => ({ ...group, items: [...group.items] }))
   );
-  const moreMenuActions = renderActions(groupsToActions(groups, context));
+  const moreMenuActions = renderGroups(groups, context);
 
   const buttons = [
     // preview
