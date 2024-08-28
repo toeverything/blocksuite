@@ -10,19 +10,19 @@ import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import { Bound } from '@blocksuite/global/utils';
 import { noop } from '@blocksuite/global/utils';
 
-import type { ShapeElementModel } from '../../../../surface-block/index.js';
-import type { SelectionArea } from '../../services/tools-manager.js';
-import type { EdgelessTool } from '../../types.js';
+import type { ShapeElementModel } from '../../../surface-block/index.js';
+import type { SelectionArea } from '../services/tools-manager.js';
+import type { EdgelessTool } from '../types.js';
 
-import { hasClassNameInList } from '../../../../_common/utils/index.js';
-import { CanvasElementType } from '../../../../surface-block/index.js';
+import { hasClassNameInList } from '../../../_common/utils/index.js';
+import { CanvasElementType } from '../../../surface-block/index.js';
 import {
   EXCLUDING_MOUSE_OUT_CLASS_LIST,
   SHAPE_OVERLAY_HEIGHT,
   SHAPE_OVERLAY_OPTIONS,
   SHAPE_OVERLAY_WIDTH,
-} from '../../utils/consts.js';
-import { ShapeOverlay } from '../../utils/tool-overlay.js';
+} from '../utils/consts.js';
+import { ShapeOverlay } from '../utils/tool-overlay.js';
 import { EdgelessToolController } from './edgeless-tool.js';
 
 export type ShapeTool = {

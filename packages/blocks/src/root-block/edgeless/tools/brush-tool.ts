@@ -3,9 +3,9 @@ import type { IVec } from '@blocksuite/global/utils';
 
 import { assertExists, noop } from '@blocksuite/global/utils';
 
-import type { BrushElementModel } from '../../../../surface-block/index.js';
+import type { BrushElementModel } from '../../../surface-block/index.js';
 
-import { CanvasElementType } from '../../../../surface-block/index.js';
+import { CanvasElementType } from '../../../surface-block/index.js';
 import { EdgelessToolController } from './edgeless-tool.js';
 
 type BrushTool = {

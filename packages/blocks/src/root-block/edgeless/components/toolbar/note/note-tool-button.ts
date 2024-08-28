@@ -3,7 +3,7 @@ import { LitElement, css, html } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type { NoteTool } from '../../../controllers/tools/note-tool.js';
+import type { NoteTool } from '../../../tools/note-tool.js';
 import type { EdgelessTool } from '../../../types.js';
 import type { EdgelessNoteMenu } from './note-menu.js';
 

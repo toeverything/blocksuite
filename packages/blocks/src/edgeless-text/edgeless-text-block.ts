@@ -19,7 +19,7 @@ import { HandleDirection } from '../root-block/edgeless/components/resize/resize
 import {
   DefaultModeDragType,
   DefaultToolController,
-} from '../root-block/edgeless/controllers/tools/default-tool.js';
+} from '../root-block/edgeless/tools/default-tool.js';
 import { wrapFontFamily } from '../surface-block/utils/font.js';
 
 export const EDGELESS_TEXT_BLOCK_MIN_WIDTH = 50;

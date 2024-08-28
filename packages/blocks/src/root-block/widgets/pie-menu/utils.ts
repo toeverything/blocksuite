@@ -15,8 +15,8 @@ import type {
   PieSubmenuNodeModel,
 } from './base.js';
 
-import { ShapeToolController } from '../../edgeless/controllers/tools/shape-tool.js';
 import { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
+import { ShapeToolController } from '../../edgeless/tools/shape-tool.js';
 
 export function updateShapeOverlay(rootComponent: EdgelessRootBlockComponent) {
   const controller = rootComponent.tools.currentController;

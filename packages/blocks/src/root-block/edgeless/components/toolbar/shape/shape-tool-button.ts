@@ -7,7 +7,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 import type { ShapeName } from './shape-tool-element.js';
 import type { DraggableShape } from './utils.js';
 
-import { ShapeToolController } from '../../../controllers/tools/shape-tool.js';
+import { ShapeToolController } from '../../../tools/shape-tool.js';
 import '../../buttons/toolbar-button.js';
 import { getTooltipWithShortcut } from '../../utils.js';
 import { EdgelessToolbarToolMixin } from '../mixins/tool.mixin.js';

@@ -33,8 +33,8 @@ import type { ShapeElementModel } from '../../../surface-block/index.js';
 import type { EdgelessColorPickerButton } from '../../edgeless/components/color-picker/button.js';
 import type { PickColorEvent } from '../../edgeless/components/color-picker/types.js';
 import type { EdgelessShapePanel } from '../../edgeless/components/panel/shape-panel.js';
-import type { ShapeTool } from '../../edgeless/controllers/tools/shape-tool.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
+import type { ShapeTool } from '../../edgeless/tools/shape-tool.js';
 
 import '../../edgeless/components/color-picker/index.js';
 import {

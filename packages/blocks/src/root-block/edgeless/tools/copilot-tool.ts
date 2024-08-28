@@ -3,12 +3,12 @@ import type { PointerEventState } from '@blocksuite/block-std';
 import { Bound, getElementsBound } from '@blocksuite/global/utils';
 import { Slot } from '@blocksuite/store';
 
-import type { EdgelessTool } from '../../types.js';
+import type { EdgelessTool } from '../types.js';
 
 import {
   AFFINE_AI_PANEL_WIDGET,
   type AffineAIPanelWidget,
-} from '../../../widgets/ai-panel/ai-panel.js';
+} from '../../widgets/ai-panel/ai-panel.js';
 import { EdgelessToolController } from './edgeless-tool.js';
 
 type CopilotSelectionTool = {

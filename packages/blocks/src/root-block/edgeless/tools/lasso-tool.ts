@@ -14,13 +14,10 @@ import {
   rotatePoints,
 } from '@blocksuite/global/utils';
 
-import type { EdgelessTool } from '../../types.js';
+import type { EdgelessTool } from '../types.js';
 
-import { LassoMode } from '../../../../_common/types.js';
-import {
-  Overlay,
-  getSvgPathFromStroke,
-} from '../../../../surface-block/index.js';
+import { LassoMode } from '../../../_common/types.js';
+import { Overlay, getSvgPathFromStroke } from '../../../surface-block/index.js';
 import { EdgelessToolController } from './edgeless-tool.js';
 
 class LassoOverlay extends Overlay {

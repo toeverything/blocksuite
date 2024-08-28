@@ -27,9 +27,9 @@ import {
 } from '../../surface-block/index.js';
 import { PageKeyboardManager } from '../keyboard/keyboard-manager.js';
 import { GfxBlockModel } from './block-model.js';
-import { CopilotSelectionController } from './controllers/tools/copilot-tool.js';
-import { LassoToolController } from './controllers/tools/lasso-tool.js';
-import { ShapeToolController } from './controllers/tools/shape-tool.js';
+import { CopilotSelectionController } from './tools/copilot-tool.js';
+import { LassoToolController } from './tools/lasso-tool.js';
+import { ShapeToolController } from './tools/shape-tool.js';
 import {
   DEFAULT_NOTE_CHILD_FLAVOUR,
   DEFAULT_NOTE_CHILD_TYPE,
