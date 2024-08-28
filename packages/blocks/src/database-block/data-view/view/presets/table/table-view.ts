@@ -1,4 +1,5 @@
 // related component
+import { popMenu } from '@blocksuite/affine-components/context-menu';
 import { AddCursorIcon } from '@blocksuite/affine-components/icons';
 import {
   type InsertToPosition,
@@ -11,7 +12,6 @@ import { html } from 'lit/static-html.js';
 import type { GroupManager } from '../../../common/group-by/helper.js';
 import type { TableSingleView } from './table-view-manager.js';
 
-import { popMenu } from '../../../../../_common/components/index.js';
 import { renderUniLit } from '../../../utils/uni-component/index.js';
 import { DataViewBase } from '../../data-view-base.js';
 import './cell.js';

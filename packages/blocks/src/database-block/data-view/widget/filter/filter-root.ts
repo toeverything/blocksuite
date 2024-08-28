@@ -1,3 +1,4 @@
+import { popFilterableSimpleMenu } from '@blocksuite/affine-components/context-menu';
 import {
   ArrowDownSmallIcon,
   DuplicateIcon,
@@ -11,7 +12,6 @@ import { repeat } from 'lit/directives/repeat.js';
 import type { Filter, FilterGroup, Variable } from '../../common/ast.js';
 import type { FilterGroupView } from './filter-group.js';
 
-import { popFilterableSimpleMenu } from '../../../../_common/components/index.js';
 import {
   ConvertIcon,
   DeleteIcon,

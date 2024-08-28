@@ -1,3 +1,7 @@
+import {
+  createPopup,
+  popMenu,
+} from '@blocksuite/affine-components/context-menu';
 import { rangeWrap } from '@blocksuite/affine-shared/utils';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { nanoid } from '@blocksuite/store';
@@ -8,7 +12,6 @@ import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
 
-import { createPopup, popMenu } from '../../../../_common/components/index.js';
 import {
   DatabaseSearchClose,
   DeleteIcon,

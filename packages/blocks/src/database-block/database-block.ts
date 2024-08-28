@@ -1,6 +1,7 @@
 import type { DatabaseBlockModel } from '@blocksuite/affine-model';
 
 import { CaptionedBlockComponent } from '@blocksuite/affine-components/caption';
+import { popMenu } from '@blocksuite/affine-components/context-menu';
 import {
   CopyIcon,
   DeleteIcon,
@@ -21,7 +22,7 @@ import type { AffineInnerModalWidget } from '../root-block/index.js';
 import type { DatabaseOptionsConfig } from './config.js';
 import type { DatabaseBlockService } from './database-service.js';
 
-import { DragIndicator, popMenu } from '../_common/components/index.js';
+import { DragIndicator } from '../_common/components/index.js';
 import {
   AffineDragHandleWidget,
   EdgelessRootBlockComponent,

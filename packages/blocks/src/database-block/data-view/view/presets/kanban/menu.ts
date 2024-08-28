@@ -1,3 +1,4 @@
+import { popFilterableSimpleMenu } from '@blocksuite/affine-components/context-menu';
 import {
   ArrowRightBigIcon,
   ExpandFullIcon,
@@ -9,7 +10,6 @@ import { html } from 'lit';
 import type { DataViewRenderer } from '../../../data-view.js';
 import type { KanbanSelectionController } from './controller/selection.js';
 
-import { popFilterableSimpleMenu } from '../../../../../_common/components/index.js';
 import { DeleteIcon } from '../../../common/icons/index.js';
 
 export const openDetail = (

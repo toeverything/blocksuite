@@ -1,3 +1,4 @@
+import { createModal } from '@blocksuite/affine-components/context-menu';
 import { ShadowlessElement } from '@blocksuite/block-std';
 import {
   type ReferenceElement,
@@ -10,7 +11,6 @@ import { customElement, property } from 'lit/decorators.js';
 
 import type { SingleView } from '../../view-manager/single-view.js';
 
-import { createModal } from '../../../../_common/components/index.js';
 import { CrossIcon } from '../icons/index.js';
 import { RecordDetail } from './detail.js';
 

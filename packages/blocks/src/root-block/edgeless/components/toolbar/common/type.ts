@@ -1,4 +1,5 @@
-import type { Menu } from '../../../../../_common/components/index.js';
+import type { Menu } from '@blocksuite/affine-components/context-menu';
+
 import type { EdgelessRootBlockComponent } from '../../../edgeless-root-block.js';
 
 /**

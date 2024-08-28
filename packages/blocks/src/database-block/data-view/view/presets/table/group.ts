@@ -1,3 +1,4 @@
+import { popFilterableSimpleMenu } from '@blocksuite/affine-components/context-menu';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { SignalWatcher } from '@lit-labs/preact-signals';
 import { type PropertyValues, css, html } from 'lit';
@@ -9,7 +10,6 @@ import type { DataViewRenderer } from '../../../data-view.js';
 import type { DataViewTable } from './table-view.js';
 import type { TableSingleView } from './table-view-manager.js';
 
-import { popFilterableSimpleMenu } from '../../../../../_common/components/index.js';
 import { GroupTitle } from '../../../common/group-by/group-title.js';
 import { PlusIcon } from '../../../common/icons/index.js';
 import { LEFT_TOOL_BAR_WIDTH } from './consts.js';

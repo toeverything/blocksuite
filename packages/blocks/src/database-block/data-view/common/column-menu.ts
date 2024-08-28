@@ -1,9 +1,10 @@
-import { html } from 'lit/static-html.js';
-
 import type {
   MenuOptions,
   NormalMenu,
-} from '../../../_common/components/menu/index.js';
+} from '@blocksuite/affine-components/context-menu';
+
+import { html } from 'lit/static-html.js';
+
 import type { Column } from '../view-manager/column.js';
 
 import { renderUniLit } from '../utils/uni-component/index.js';

@@ -1,4 +1,8 @@
 import {
+  popFilterableSimpleMenu,
+  popMenu,
+} from '@blocksuite/affine-components/context-menu';
+import {
   AddCursorIcon,
   DuplicateIcon,
   MoreHorizontalIcon,
@@ -9,10 +13,6 @@ import { css, html } from 'lit';
 import { customElement } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 
-import {
-  popFilterableSimpleMenu,
-  popMenu,
-} from '../../../../_common/components/index.js';
 import '../../common/component/overflow/overflow.js';
 import { DeleteIcon } from '../../common/icons/index.js';
 import { renderUniLit } from '../../utils/uni-component/index.js';

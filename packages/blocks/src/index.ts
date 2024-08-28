@@ -4,8 +4,7 @@ import '@blocksuite/affine-block-list';
 import '@blocksuite/affine-components/rich-text';
 import '@blocksuite/affine-components/toolbar';
 import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
-import { deserializeXYWH } from '@blocksuite/global/utils';
-import { Point } from '@blocksuite/global/utils';
+import { Point, deserializeXYWH } from '@blocksuite/global/utils';
 
 import { mindMap } from './_common/mind-map/index.js';
 import { matchFlavours } from './_common/utils/index.js';
@@ -29,7 +28,6 @@ export type {
   NotificationService,
 } from './_common/components/index.js';
 export { scrollbarStyle } from './_common/components/index.js';
-export * from './_common/components/menu/index.js';
 export { type NavigatorMode } from './_common/edgeless/frame/consts.js';
 export { EmbedBlockComponent } from './_common/embed-block-helper/index.js';
 export { type TreeNode, type TreeNodeWithId } from './_common/mind-map/draw.js';

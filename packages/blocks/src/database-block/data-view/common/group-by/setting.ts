@@ -1,5 +1,10 @@
 import type { PropertyValues } from 'lit';
 
+import {
+  type Menu,
+  type MenuOptions,
+  popMenu,
+} from '@blocksuite/affine-components/context-menu';
 import { ArrowRightSmallIcon } from '@blocksuite/affine-components/icons';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { SignalWatcher } from '@lit-labs/preact-signals';
@@ -11,11 +16,6 @@ import Sortable from 'sortablejs';
 import type { SingleView } from '../../view-manager/single-view.js';
 import type { GroupRenderProps } from './matcher.js';
 
-import {
-  type Menu,
-  type MenuOptions,
-  popMenu,
-} from '../../../../_common/components/index.js';
 import { menuTitleItem } from '../../utils/menu-title.js';
 import { renderUniLit } from '../../utils/uni-component/uni-component.js';
 import { KanbanSingleView } from '../../view/presets/kanban/kanban-view-manager.js';

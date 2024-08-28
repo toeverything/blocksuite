@@ -1,3 +1,4 @@
+import { popFilterableSimpleMenu } from '@blocksuite/affine-components/context-menu';
 import { AddCursorIcon } from '@blocksuite/affine-components/icons';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { SignalWatcher } from '@lit-labs/preact-signals';
@@ -10,7 +11,6 @@ import type { GroupData } from '../../../common/group-by/helper.js';
 import type { DataViewRenderer } from '../../../data-view.js';
 import type { KanbanSingleView } from './kanban-view-manager.js';
 
-import { popFilterableSimpleMenu } from '../../../../../_common/components/index.js';
 import { GroupTitle } from '../../../common/group-by/group-title.js';
 import './card.js';
 

@@ -1,16 +1,15 @@
-import { SettingsIcon } from '@blocksuite/affine-components/icons';
+import { popMenu } from '@blocksuite/affine-components/context-menu';
 import {
   CopyIcon,
   DoneIcon,
   ExpandCloseIcon,
+  SettingsIcon,
 } from '@blocksuite/affine-components/icons';
 import { flip, offset } from '@floating-ui/dom';
 import { LitElement, css, html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 
 import type { EmbedEdgelessHtmlBlockComponent } from '../embed-edgeless-html-block.js';
-
-import { popMenu } from '../../_common/components/index.js';
 
 @customElement('embed-html-fullscreen-toolbar')
 export class EmbedHtmlFullscreenToolbar extends LitElement {

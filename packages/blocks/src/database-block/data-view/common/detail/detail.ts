@@ -1,3 +1,4 @@
+import { popFilterableSimpleMenu } from '@blocksuite/affine-components/context-menu';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { SignalWatcher, computed } from '@lit-labs/preact-signals';
 import { css, nothing, unsafeCSS } from 'lit';
@@ -10,7 +11,6 @@ import { html } from 'lit/static-html.js';
 import type { SingleView } from '../../view-manager/single-view.js';
 import type { DetailSlotProps, DetailSlots } from '../data-source/base.js';
 
-import { popFilterableSimpleMenu } from '../../../../_common/components/index.js';
 import { renderUniLit } from '../../utils/uni-component/uni-component.js';
 import { dataViewCommonStyle } from '../css-variable.js';
 import { PlusIcon } from '../icons/index.js';

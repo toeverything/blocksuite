@@ -1,3 +1,4 @@
+import { popFilterableSimpleMenu } from '@blocksuite/affine-components/context-menu';
 import { AddCursorIcon } from '@blocksuite/affine-components/icons';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { css, html } from 'lit';
@@ -5,7 +6,6 @@ import { customElement, property } from 'lit/decorators.js';
 
 import type { Filter, Variable, VariableOrProperty } from '../ast.js';
 
-import { popFilterableSimpleMenu } from '../../../../_common/components/index.js';
 import { renderUniLit } from '../../utils/uni-component/uni-component.js';
 import { firstFilterByRef, firstFilterInGroup } from '../ast.js';
 
