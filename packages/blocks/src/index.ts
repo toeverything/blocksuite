@@ -29,6 +29,7 @@ export type {
   NotificationService,
 } from './_common/components/index.js';
 export { scrollbarStyle } from './_common/components/index.js';
+export * from './_common/components/menu/index.js';
 export { type NavigatorMode } from './_common/edgeless/frame/consts.js';
 export { EmbedBlockComponent } from './_common/embed-block-helper/index.js';
 export { type TreeNode, type TreeNodeWithId } from './_common/mind-map/draw.js';
