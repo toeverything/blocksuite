@@ -25,7 +25,7 @@ export const multiEditor: InitFn = (collection: DocCollection, id: string) => {
   if (app) {
     const editor = new AffineEditorContainer();
     editor.doc = doc;
-    editor.slots.docLinkClicked.on(({ docId }) => {
+    editor.slots.docLinkClicked.on(({ pageId: docId }) => {
       const target = collection.getDoc(docId);
       if (!target) {
         throw new Error(`Failed to jump to doc ${docId}`);
@@ -33,14 +33,10 @@ export const multiEditor: InitFn = (collection: DocCollection, id: string) => {
       target.load();
       editor.doc = target;
     });
+    editor.style.borderRight = '1px solid var(--affine-border-color)';
 
     app.append(editor);
     app.style.display = 'flex';
-    app.childNodes.forEach(node => {
-      if (node instanceof AffineEditorContainer) {
-        node.style.flex = '1';
-      }
-    });
   }
 };
 
@@ -73,7 +69,7 @@ export const multiEditorVertical: InitFn = (
   if (app) {
     const editor = new AffineEditorContainer();
     editor.doc = doc;
-    editor.slots.docLinkClicked.on(({ docId }) => {
+    editor.slots.docLinkClicked.on(({ pageId: docId }) => {
       const target = collection.getDoc(docId);
       if (!target) {
         throw new Error(`Failed to jump to doc ${docId}`);
@@ -81,7 +77,11 @@ export const multiEditorVertical: InitFn = (
       target.load();
       editor.doc = target;
     });
+    editor.style.borderBottom = '1px solid var(--affine-border-color)';
+
     app.append(editor);
+    app.style.display = 'flex';
+    app.style.flexDirection = 'column';
   }
 };
 

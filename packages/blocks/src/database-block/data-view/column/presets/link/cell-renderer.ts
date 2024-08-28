@@ -118,7 +118,7 @@ export class LinkCell extends BaseCellRenderer<string> {
     ]) as RootBlockComponent | null;
     assertExists(rootComponent);
 
-    rootComponent.slots.docLinkClicked.emit({ docId: this.docId });
+    rootComponent.slots.docLinkClicked.emit({ pageId: this.docId });
   };
 
   override render() {

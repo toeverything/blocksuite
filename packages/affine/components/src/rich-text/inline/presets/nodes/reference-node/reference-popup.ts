@@ -1,3 +1,4 @@
+import type { ReferenceInfo } from '@blocksuite/affine-model';
 import type { BlockComponent } from '@blocksuite/block-std';
 import type { InlineRange } from '@blocksuite/inline';
 
@@ -141,7 +142,7 @@ export class ReferencePopup extends WithDisposable(LitElement) {
     };
     if (!rootComponent) return;
 
-    rootComponent.slots.docLinkClicked.emit({ docId: refDocId });
+    rootComponent.slots.docLinkClicked.emit(this.referenceInfo);
   }
 
   private _openMenuButton() {
@@ -221,6 +222,7 @@ export class ReferencePopup extends WithDisposable(LitElement) {
       type: 'card',
       name: 'Card view',
       handler: () => this._convertToCardView(),
+      disabled: this.doc.readonly,
     });
 
     if (isSyncedDocEnabled) {
@@ -228,7 +230,10 @@ export class ReferencePopup extends WithDisposable(LitElement) {
         type: 'embed',
         name: 'Embed view',
         handler: () => this._convertToEmbedView(),
-        disabled: this._embedViewButtonDisabled,
+        disabled:
+          this.doc.readonly ||
+          this.isLinkedNode ||
+          this._embedViewButtonDisabled,
       });
     }
 
@@ -386,8 +391,14 @@ export class ReferencePopup extends WithDisposable(LitElement) {
   @property({ attribute: false })
   accessor inlineEditor!: AffineInlineEditor;
 
+  @property({ attribute: false })
+  accessor isLinkedNode!: boolean;
+
   @query('.affine-reference-popover-container')
   accessor popupContainer!: HTMLDivElement;
+
+  @property({ type: Object })
+  accessor referenceInfo!: ReferenceInfo;
 
   @property({ attribute: false })
   accessor target!: LitElement;
@@ -404,6 +415,8 @@ declare global {
 
 export function toggleReferencePopup(
   target: LitElement,
+  isLinkedNode: boolean,
+  referenceInfo: ReferenceInfo,
   inlineEditor: AffineInlineEditor,
   targetInlineRange: InlineRange,
   docTitle: string,
@@ -411,6 +424,8 @@ export function toggleReferencePopup(
 ): ReferencePopup {
   const popup = new ReferencePopup();
   popup.target = target;
+  popup.isLinkedNode = isLinkedNode;
+  popup.referenceInfo = referenceInfo;
   popup.inlineEditor = inlineEditor;
   popup.targetInlineRange = targetInlineRange;
   popup.docTitle = docTitle;

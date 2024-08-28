@@ -1,10 +1,13 @@
 import type {
   EmbedLinkedDocModel,
   EmbedLinkedDocStyles,
+  ReferenceInfo,
 } from '@blocksuite/affine-model';
 
+import { BlockLinkIcon } from '@blocksuite/affine-components/icons';
 import { Peekable, isPeekable } from '@blocksuite/affine-components/peek';
 import { REFERENCE_NODE } from '@blocksuite/affine-components/rich-text';
+import { DocMode } from '@blocksuite/affine-model';
 import { Bound } from '@blocksuite/global/utils';
 import { assertExists } from '@blocksuite/global/utils';
 import { DocCollection } from '@blocksuite/store';
@@ -12,7 +15,6 @@ import { html, nothing } from 'lit';
 import { customElement, property, queryAsync, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 
-import type { DocMode } from '../_common/types.js';
 import type { RootBlockComponent } from '../root-block/index.js';
 import type { SurfaceRefBlockService } from '../surface-ref-block/index.js';
 import type { SurfaceRefRenderer } from '../surface-ref-block/surface-ref-renderer.js';
@@ -24,7 +26,7 @@ import { EmbedBlockComponent } from '../_common/embed-block-helper/index.js';
 import { renderLinkedDocInCard } from '../_common/utils/render-linked-doc.js';
 import { SyncedDocErrorIcon } from '../embed-synced-doc-block/styles.js';
 import { styles } from './styles.js';
-import { getEmbedLinkedDocIcons } from './utils.js';
+import { getEmbedLinkedDocIcons, isLinkToNode } from './utils.js';
 
 @customElement('affine-embed-linked-doc-block')
 @Peekable({
@@ -69,8 +71,12 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockComponent<
 
     this._loading = false;
 
+    // If it is a link to a block or element, the content will not be rendered.
+    if (this._isLinkToNode) {
+      return;
+    }
+
     if (!this.isError) {
-      // renderLinkedDocInCard(this);
       const cardStyle = this.model.style;
       if (cardStyle === 'horizontal' || cardStyle === 'vertical') {
         renderLinkedDocInCard(this);
@@ -126,7 +132,7 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockComponent<
   };
 
   covertToInline = () => {
-    const { doc, pageId } = this.model;
+    const { doc } = this.model;
     const parent = doc.getParent(this.model);
     assertExists(parent);
     const index = parent.children.indexOf(this.model);
@@ -134,7 +140,7 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockComponent<
     const yText = new DocCollection.Y.Text();
     yText.insert(0, REFERENCE_NODE);
     yText.format(0, REFERENCE_NODE.length, {
-      reference: { type: 'LinkedPage', pageId },
+      reference: { type: 'LinkedPage', ...this.referenceInfo },
     });
     const text = new doc.Text(yText);
 
@@ -151,15 +157,15 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockComponent<
   };
 
   open = () => {
-    const linkedDocId = this.model.pageId;
-    if (linkedDocId === this.doc.id) return;
+    const pageId = this.model.pageId;
+    if (pageId === this.doc.id) return;
 
     const rootComponent = this.std.view.viewFromPath('block', [
       this.doc.root?.id ?? '',
     ]) as RootBlockComponent | null;
     assertExists(rootComponent);
 
-    rootComponent.slots.docLinkClicked.emit({ docId: linkedDocId });
+    rootComponent.slots.docLinkClicked.emit(this.referenceInfo);
   };
 
   refreshData = () => {
@@ -205,6 +211,9 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockComponent<
 
   override connectedCallback() {
     super.connectedCallback();
+
+    this._isLinkToNode = isLinkToNode(this.model);
+
     this._load().catch(e => {
       console.error(e);
       this.isError = true;
@@ -247,14 +256,18 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockComponent<
         })
       );
 
-      this._linkedDocMode = this._rootService.docModeService.getMode(
-        this.model.pageId
-      );
-      this.disposables.add(
-        this._rootService.docModeService.onModeChange(mode => {
-          this._linkedDocMode = mode;
-        }, this.model.pageId)
-      );
+      if (this._isLinkToNode) {
+        this._linkedDocMode = this.model.params?.mode ?? DocMode.Page;
+      } else {
+        this._linkedDocMode = this._rootService.docModeService.getMode(
+          this.model.pageId
+        );
+        this.disposables.add(
+          this._rootService.docModeService.onModeChange(mode => {
+            this._linkedDocMode = mode;
+          }, this.model.pageId)
+        );
+      }
     }
 
     this.model.propsUpdated.on(({ key }) => {
@@ -309,7 +322,9 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockComponent<
         ? LoadingIcon
         : isDeleted
           ? LinkedDocDeletedIcon
-          : LinkedDocIcon;
+          : this._isLinkToNode
+            ? BlockLinkIcon
+            : LinkedDocIcon;
 
     const titleText = isError
       ? linkedDoc?.meta?.title || 'Untitled'
@@ -449,15 +464,31 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockComponent<
   }
 
   get linkedDoc() {
-    const doc = this.std.collection.getDoc(this.model.pageId);
-    return doc;
+    return this.std.collection.getDoc(this.model.pageId);
+  }
+
+  get referenceInfo(): ReferenceInfo {
+    const { pageId, params } = this.model;
+    const info: ReferenceInfo = { pageId };
+    if (!params) return info;
+
+    const { mode, blockIds, elementIds } = params;
+    info.params = {};
+    if (mode) info.params.mode = mode;
+    if (blockIds?.length) info.params.blockIds = [...blockIds];
+    if (elementIds?.length) info.params.elementIds = [...elementIds];
+    return info;
   }
 
   @state()
   private accessor _docUpdatedAt: Date = new Date();
 
+  // linking block/element
   @state()
-  private accessor _linkedDocMode: DocMode = 'page';
+  private accessor _isLinkToNode = false;
+
+  @state()
+  private accessor _linkedDocMode: DocMode = DocMode.Page;
 
   @state()
   private accessor _loading = false;

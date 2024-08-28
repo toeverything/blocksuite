@@ -1,6 +1,7 @@
 import type { RefNodeSlots } from '@blocksuite/affine-components/rich-text';
 import type {
   ConnectorElementModel,
+  DocMode,
   GroupElementModel,
 } from '@blocksuite/affine-model';
 import type { Slot } from '@blocksuite/global/utils';
@@ -12,8 +13,6 @@ import type { BrushElementModel } from '../surface-block/index.js';
 
 // TODO: remove
 export type CommonSlots = RefNodeSlots;
-
-export type DocMode = 'page' | 'edgeless';
 
 type EditorSlots = {
   editorModeSwitched: Slot<DocMode>;

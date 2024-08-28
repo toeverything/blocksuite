@@ -34,7 +34,7 @@ export { EmbedBlockComponent } from './_common/embed-block-helper/index.js';
 export { type TreeNode, type TreeNodeWithId } from './_common/mind-map/draw.js';
 export * from './_common/test-utils/test-utils.js';
 export * from './_common/transformers/index.js';
-export { type AbstractEditor, type DocMode } from './_common/types.js';
+export { type AbstractEditor } from './_common/types.js';
 export * from './attachment-block/index.js';
 export * from './bookmark-block/index.js';
 export * from './code-block/index.js';

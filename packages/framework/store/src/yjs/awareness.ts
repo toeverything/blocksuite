@@ -2,7 +2,7 @@ import type { Awareness as YAwareness } from 'y-protocols/awareness.js';
 
 import { Slot } from '@blocksuite/global/utils';
 import { type Signal, signal } from '@preact/signals-core';
-import { merge } from 'merge';
+import merge from 'lodash.merge';
 
 import type { BlockCollection } from '../store/index.js';
 
@@ -87,9 +87,10 @@ export class AwarenessStore<
 
   private _initFlags(defaultFlags: Flags) {
     const upstreamFlags = this.awareness.getLocalState()?.flags;
-    const flags = upstreamFlags
-      ? merge(true, defaultFlags, upstreamFlags)
-      : { ...defaultFlags };
+    const flags = { ...defaultFlags };
+    if (upstreamFlags) {
+      merge(flags, upstreamFlags);
+    }
     this.awareness.setLocalStateField('flags', flags);
   }
 

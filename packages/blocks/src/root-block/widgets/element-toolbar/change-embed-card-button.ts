@@ -51,6 +51,7 @@ import {
   EMBED_CARD_WIDTH,
 } from '../../../_common/consts.js';
 import { getEmbedCardIcons } from '../../../_common/utils/url.js';
+import { isLinkToNode } from '../../../embed-linked-doc-block/utils.js';
 import '../../edgeless/components/panel/card-style-panel.js';
 import {
   isBookmarkBlock,
@@ -301,7 +302,8 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
     }
     return (
       isEmbedLinkedDocBlock(this.model) &&
-      (!!this._blockComponent?.closest('affine-embed-synced-doc-block') ||
+      (isLinkToNode(this.model) ||
+        !!this._blockComponent?.closest('affine-embed-synced-doc-block') ||
         this.model.pageId === this._doc.id)
     );
   }
@@ -480,7 +482,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
           type: 'embed',
           label: 'Embed view',
           handler: () => this._convertToEmbedView(),
-          disabled: this.model.doc.readonly && this._embedViewButtonDisabled,
+          disabled: this.model.doc.readonly || this._embedViewButtonDisabled,
         },
       ];
 

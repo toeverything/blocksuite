@@ -114,6 +114,12 @@ export async function toggleFramePanel(page: Page) {
   await waitNextFrame(page);
 }
 
+export async function toggleMultipleEditors(page: Page) {
+  await page.click('sl-button:text("Test Operations")');
+  await page.click('sl-menu-item:text("Toggle Multiple Editors")');
+  await waitNextFrame(page);
+}
+
 export async function switchEditorMode(page: Page) {
   await page.click('sl-tooltip[content="Switch Editor"]');
   // FIXME: listen to editor loaded event

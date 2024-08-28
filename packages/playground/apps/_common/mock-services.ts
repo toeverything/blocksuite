@@ -1,7 +1,7 @@
 import type { PageRootService } from '@blocksuite/blocks';
 
 import {
-  type DocMode,
+  DocMode,
   type DocModeService,
   type NotificationService,
   type QuickSearchService,
@@ -27,7 +27,7 @@ export function removeModeFromStorage(docId: string) {
   saveModeToStorage(modeMap);
 }
 
-const DEFAULT_MODE = 'page';
+const DEFAULT_MODE = DocMode.Page;
 const slotMap = new Map<string, Slot<DocMode>>();
 export function mockDocModeService(curDocId: string) {
   const docModeService: DocModeService = {
@@ -47,7 +47,9 @@ export function mockDocModeService(curDocId: string) {
     },
     toggleMode: (docId: string = curDocId) => {
       const mode =
-        docModeService.getMode(docId) === 'page' ? 'edgeless' : 'page';
+        docModeService.getMode(docId) === 'page'
+          ? DocMode.Edgeless
+          : DocMode.Page;
       docModeService.setMode(mode, docId);
       return mode;
     },

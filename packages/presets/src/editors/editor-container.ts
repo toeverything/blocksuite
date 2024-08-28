@@ -2,16 +2,13 @@ import type {
   EdgelessRootBlockComponent,
   PageRootBlockComponent,
 } from '@blocksuite/blocks';
-import type {
-  AbstractEditor,
-  DocMode,
-  PageRootService,
-} from '@blocksuite/blocks';
+import type { AbstractEditor, PageRootService } from '@blocksuite/blocks';
 import type { BlockModel, Doc } from '@blocksuite/store';
 
 import { type BlockSpec, EditorHost } from '@blocksuite/block-std';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import {
+  DocMode,
   EdgelessEditorBlockSpecs,
   PageEditorBlockSpecs,
 } from '@blocksuite/blocks';
@@ -78,7 +75,7 @@ export class AffineEditorContainer
 
   private _forwardRef = (mode: DocMode) => {
     requestAnimationFrame(() => {
-      if (mode === 'page') {
+      if (mode === DocMode.Page) {
         if (this._pageRoot) forwardSlot(this._pageRoot.slots, this.slots);
       } else {
         if (this._edgelessRoot)
@@ -89,7 +86,7 @@ export class AffineEditorContainer
 
   private _hostRef: Ref<EditorHost> = createRef<EditorHost>();
 
-  private _mode = signal<DocMode>('page');
+  private _mode = signal<DocMode>(DocMode.Page);
 
   private _pageSpecs = computed(() => {
     return [...this._pageSpecs$.value].map(spec => {

@@ -1,4 +1,5 @@
 import {
+  DocMode,
   EdgelessTemplatePanel,
   type Template,
   type TemplateManager,
@@ -8,7 +9,7 @@ import { beforeEach, expect, test } from 'vitest';
 import { setupEditor } from '../utils/setup.js';
 
 beforeEach(async () => {
-  const cleanup = await setupEditor('edgeless');
+  const cleanup = await setupEditor(DocMode.Edgeless);
 
   return cleanup;
 });

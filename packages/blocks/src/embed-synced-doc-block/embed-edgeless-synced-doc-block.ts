@@ -1,3 +1,4 @@
+import { DocMode } from '@blocksuite/affine-model';
 import {
   EMBED_CARD_HEIGHT,
   EMBED_CARD_WIDTH,
@@ -20,7 +21,7 @@ export class EmbedEdgelessSyncedDocBlockComponent extends toEdgelessEmbedBlock(
 ) {
   protected override _renderSyncedView = () => {
     const syncedDoc = this.syncedDoc;
-    const editorMode = this._syncedDocMode;
+    const editorMode = this.syncedDocMode;
 
     assertExists(syncedDoc, 'Doc should exist');
 
@@ -51,7 +52,7 @@ export class EmbedEdgelessSyncedDocBlockComponent extends toEdgelessEmbedBlock(
     const renderEditor = () => {
       return choose(editorMode, [
         [
-          'page',
+          DocMode.Page,
           () => html`
             <div class="affine-page-viewport">
               ${this.host.renderSpecPortal(
@@ -62,7 +63,7 @@ export class EmbedEdgelessSyncedDocBlockComponent extends toEdgelessEmbedBlock(
           `,
         ],
         [
-          'edgeless',
+          DocMode.Edgeless,
           () => html`
             <div class="affine-edgeless-viewport">
               ${this.host.renderSpecPortal(

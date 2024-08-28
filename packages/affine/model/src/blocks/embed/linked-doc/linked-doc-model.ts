@@ -1,5 +1,6 @@
 import { BlockModel } from '@blocksuite/store';
 
+import type { ReferenceInfo } from '../../../consts/doc.js';
 import type { EmbedCardStyle } from '../../../utils/index.js';
 
 import { defineEmbedModel } from '../../../utils/index.js';
@@ -13,10 +14,9 @@ export const EmbedLinkedDocStyles: EmbedCardStyle[] = [
 ];
 
 export type EmbedLinkedDocBlockProps = {
-  pageId: string;
   style: EmbedCardStyle;
   caption: string | null;
-};
+} & ReferenceInfo;
 
 export class EmbedLinkedDocModel extends defineEmbedModel<EmbedLinkedDocBlockProps>(
   BlockModel

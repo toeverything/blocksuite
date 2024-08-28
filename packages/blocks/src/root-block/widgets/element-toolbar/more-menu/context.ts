@@ -1,5 +1,7 @@
 import type { BlockModel } from '@blocksuite/store';
 
+import { GfxPrimitiveElementModel } from '@blocksuite/block-std/gfx';
+
 import type { SurfaceBlockComponent } from '../../../../surface-block/surface-block.js';
 import type { EdgelessRootBlockComponent } from '../../../edgeless/edgeless-root-block.js';
 import type { EdgelessRootService } from '../../../edgeless/edgeless-root-service.js';
@@ -64,6 +66,12 @@ export class MoreMenuContext {
 
   hasFrame() {
     return this.#includedFrame;
+  }
+
+  isElement() {
+    return (
+      this.#single && this.firstElement instanceof GfxPrimitiveElementModel
+    );
   }
 
   isEmpty() {

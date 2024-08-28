@@ -2,11 +2,11 @@ import type {
   BookmarkBlockModel,
   EmbedFigmaModel,
   EmbedGithubModel,
+  EmbedLinkedDocModel,
   EmbedLoomModel,
   EmbedSyncedDocModel,
   EmbedYoutubeModel,
 } from '@blocksuite/affine-model';
-import type { EmbedLinkedDocModel } from '@blocksuite/affine-model';
 import type { BlockComponent } from '@blocksuite/block-std';
 
 import { BookmarkBlockComponent } from '../../../bookmark-block/bookmark-block.js';
