@@ -1,6 +1,5 @@
 import type { FilterGroup } from '../../../common/ast.js';
 import type { GroupBy, GroupProperty, Sort } from '../../../common/types.js';
-import type { StatCalcOpType } from './types.js';
 
 import { type BasicViewDataType, viewType } from '../../data-view.js';
 import { TableSingleView } from './table-view-manager.js';
@@ -15,7 +14,7 @@ declare global {
 export type TableViewColumn = {
   id: string;
   width: number;
-  statCalcType?: StatCalcOpType;
+  statCalcType?: string;
   hide?: boolean;
 };
 type DataType = {

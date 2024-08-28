@@ -42,7 +42,7 @@ export class KanbanHeader extends SignalWatcher(
           .map(column => {
             return {
               type: 'action',
-              name: column.name,
+              name: column.name$.value,
               select: () => {
                 this.view.changeGroup(column.id);
               },

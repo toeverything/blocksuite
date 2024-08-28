@@ -544,3 +544,8 @@ export function getKanbanCard(
   const card = group.locator('affine-data-view-kanban-card').nth(cardIndex);
   return card;
 }
+export const moveToCenterOf = async (page: Page, locator: Locator) => {
+  const box = (await locator.boundingBox())!;
+  expect(box).toBeDefined();
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+};

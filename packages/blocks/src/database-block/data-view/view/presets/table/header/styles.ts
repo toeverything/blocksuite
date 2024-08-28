@@ -5,7 +5,7 @@ import {
   DEFAULT_ADD_BUTTON_WIDTH,
   DEFAULT_COLUMN_MIN_WIDTH,
   DEFAULT_COLUMN_TITLE_HEIGHT,
-} from '../../consts.js';
+} from '../consts.js';
 
 export const styles = css`
     affine-database-column-header {

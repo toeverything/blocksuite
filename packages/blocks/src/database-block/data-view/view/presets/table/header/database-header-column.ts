@@ -17,10 +17,15 @@ import { createRef, ref } from 'lit/directives/ref.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
 
-import type { NumberColumnDataType } from '../../../../../column/presets/number/define.js';
-import type { Column } from '../../../../../view-manager/column.js';
-import type { TableColumn, TableSingleView } from '../../table-view-manager.js';
+import type { NumberColumnDataType } from '../../../../column/presets/number/define.js';
+import type { Column } from '../../../../view-manager/column.js';
+import type { TableColumn, TableSingleView } from '../table-view-manager.js';
 
+import {
+  type Menu,
+  type NormalMenu,
+  popMenu,
+} from '../../../../../../_common/components/index.js';
 import { numberFormats } from '../../../../../column/presets/number/utils/formats.js';
 import { inputConfig, typeConfig } from '../../../../../common/column-menu.js';
 import {
@@ -30,13 +35,13 @@ import {
   DatabaseMoveLeft,
   DatabaseMoveRight,
   DeleteIcon,
-} from '../../../../../common/icons/index.js';
-import { startDrag } from '../../../../../utils/drag.js';
-import { autoScrollOnBoundary } from '../../../../../utils/frame-loop.js';
-import { renderUniLit } from '../../../../../utils/uni-component/index.js';
-import { getResultInRange } from '../../../../../utils/utils.js';
-import { DEFAULT_COLUMN_TITLE_HEIGHT } from '../../consts.js';
-import { getTableContainer } from '../../types.js';
+} from '../../../../common/icons/index.js';
+import { startDrag } from '../../../../utils/drag.js';
+import { autoScrollOnBoundary } from '../../../../utils/frame-loop.js';
+import { renderUniLit } from '../../../../utils/uni-component/index.js';
+import { getResultInRange } from '../../../../utils/utils.js';
+import { DEFAULT_COLUMN_TITLE_HEIGHT } from '../consts.js';
+import { getTableContainer } from '../types.js';
 import { DataViewColumnPreview } from './column-renderer.js';
 import './number-format-bar.js';
 import {
@@ -60,7 +65,7 @@ export class DatabaseHeaderColumn extends SignalWatcher(
     if (this.tableViewManager.readonly$.value) {
       return;
     }
-    if (this.column.type === 'title') {
+    if (this.column.type$.value === 'title') {
       return;
     }
     event.stopPropagation();
@@ -74,7 +79,7 @@ export class DatabaseHeaderColumn extends SignalWatcher(
           return {
             type: 'action',
             name: config.name,
-            isSelected: config.type === this.column.type,
+            isSelected: config.type === this.column.type$.value,
             icon: renderUniLit(this.tableViewManager.getIcon(config.type)),
             select: () => {
               this.column.updateType?.(config.type);
@@ -334,7 +339,7 @@ export class DatabaseHeaderColumn extends SignalWatcher(
 
                       hide: () =>
                         !this.column.updateData ||
-                        this.column.type !== 'number',
+                        this.column.type$.value !== 'number',
                       options: {
                         input: {
                           search: true,
@@ -377,7 +382,8 @@ export class DatabaseHeaderColumn extends SignalWatcher(
             type: 'action',
             name: 'Duplicate Column',
             icon: DatabaseDuplicate,
-            hide: () => !this.column.duplicate || this.column.type === 'title',
+            hide: () =>
+              !this.column.duplicate || this.column.type$.value === 'title',
             select: () => {
               this.column.duplicate?.();
             },
@@ -469,7 +475,8 @@ export class DatabaseHeaderColumn extends SignalWatcher(
                 type: 'action',
                 name: 'Delete Column',
                 icon: DeleteIcon,
-                hide: () => !this.column.delete || this.column.type === 'title',
+                hide: () =>
+                  !this.column.delete || this.column.type$.value === 'title',
                 select: () => {
                   this.column.delete?.();
                 },
@@ -548,7 +555,7 @@ export class DatabaseHeaderColumn extends SignalWatcher(
               <div class="control-l"></div>
               <div class="control-r"></div>
             </button>`}
-        <div class="affine-database-column-text ${column.type}">
+        <div class="affine-database-column-text ${column.type$.value}">
           <div
             class="affine-database-column-type-icon dv-hover"
             @click="${this._clickTypeIcon}"
@@ -556,7 +563,9 @@ export class DatabaseHeaderColumn extends SignalWatcher(
             <uni-lit .uni="${column.icon}"></uni-lit>
           </div>
           <div class="affine-database-column-text-content">
-            <div class="affine-database-column-text-input">${column.name}</div>
+            <div class="affine-database-column-text-input">
+              ${column.name$.value}
+            </div>
           </div>
         </div>
       </div>

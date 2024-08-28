@@ -44,7 +44,9 @@ export class CellBase<
   });
 
   meta$ = computed(() => {
-    return this.view.viewManager.dataSource.getPropertyMeta(this.column.type);
+    return this.view.viewManager.dataSource.getPropertyMeta(
+      this.column.type$.value
+    );
   });
 
   stringValue$: ReadonlySignal<string> = computed(() => {

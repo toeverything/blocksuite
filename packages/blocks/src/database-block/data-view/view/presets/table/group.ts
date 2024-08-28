@@ -12,9 +12,9 @@ import type { TableSingleView } from './table-view-manager.js';
 
 import { GroupTitle } from '../../../common/group-by/group-title.js';
 import { PlusIcon } from '../../../common/icons/index.js';
-import './components/column-stats.js';
-import './components/column-stats-cell.js';
 import { LEFT_TOOL_BAR_WIDTH } from './consts.js';
+import './stats/column-stats-bar.js';
+import './stats/column-stats-column.js';
 import { TableAreaSelection } from './types.js';
 
 const styles = css`
@@ -63,7 +63,7 @@ export class TableGroup extends SignalWatcher(
     requestAnimationFrame(() => {
       const selectionController = this.viewEle.selectionController;
       const index = this.view.columnManagerList$.value.findIndex(
-        v => v.type === 'title'
+        v => v.type$.value === 'title'
       );
       selectionController.selection = TableAreaSelection.create({
         groupKey: this.group?.key,
@@ -81,7 +81,7 @@ export class TableGroup extends SignalWatcher(
     requestAnimationFrame(() => {
       const selectionController = this.viewEle.selectionController;
       const index = this.view.columnManagerList$.value.findIndex(
-        v => v.type === 'title'
+        v => v.type$.value === 'title'
       );
       selectionController.selection = TableAreaSelection.create({
         groupKey: this.group?.key,
@@ -107,7 +107,7 @@ export class TableGroup extends SignalWatcher(
         hide: () => group.value == null,
         select: () => {
           group.rows.forEach(id => {
-            group.helper.removeFromGroup(id, group.key);
+            group.manager.removeFromGroup(id, group.key);
           });
         },
       },
@@ -176,15 +176,8 @@ export class TableGroup extends SignalWatcher(
               ${PlusIcon}<span>New Record</span>
             </div>
           </div>`}
-      ${this.view.featureFlags$.value.enable_database_statistics
-        ? html`
-            <affine-database-column-stats
-              .view="${this.view}"
-              .group=${this.group}
-            >
-            </affine-database-column-stats>
-          `
-        : null}
+      <affine-database-column-stats .view="${this.view}" .group=${this.group}>
+      </affine-database-column-stats>
     `;
   }
 

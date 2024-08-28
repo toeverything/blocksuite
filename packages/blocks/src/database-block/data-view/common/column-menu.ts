@@ -17,7 +17,7 @@ export const inputConfig = (column: Column): MenuOptions['input'] => {
       </div>
     `,
     divider: false,
-    initValue: column.name,
+    initValue: column.name$.value,
     onComplete: text => {
       column.updateName(text);
     },
@@ -27,13 +27,14 @@ export const typeConfig = (column: Column): NormalMenu => {
   return {
     type: 'sub-menu',
     name: 'Type',
-    hide: () => !column.updateType || column.type === 'title',
+    hide: () => !column.updateType || column.type$.value === 'title',
     postfix: html`<div
       class="affine-database-column-type-icon"
       style="color: var(--affine-text-secondary-color);gap:4px"
     >
       ${renderUniLit(column.icon)}
-      ${column.view.allColumnConfig.find(v => v.type === column.type)?.name}
+      ${column.view.allColumnConfig.find(v => v.type === column.type$.value)
+        ?.name}
     </div>`,
     options: {
       input: {
@@ -42,11 +43,11 @@ export const typeConfig = (column: Column): NormalMenu => {
       items: column.view.allColumnConfig.map(config => {
         return {
           type: 'action',
-          isSelected: config.type === column.type,
+          isSelected: config.type === column.type$.value,
           name: config.name,
           icon: renderUniLit(column.view.getIcon(config.type)),
           select: () => {
-            if (column.type === config.type) {
+            if (column.type$.value === config.type) {
               return;
             }
             column.updateType?.(config.type);

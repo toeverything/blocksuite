@@ -328,8 +328,8 @@ export class TableHotkeysController implements ReactiveController {
             context.get('keyboardState').raw.preventDefault();
             this.selectionController.selection = TableRowSelection.create({
               rows:
-                this.host.view.groupHelper?.groups.flatMap(group =>
-                  group.rows.map(id => ({ groupKey: group.key, id }))
+                this.host.view.groupManager.groupsDataList$.value?.flatMap(
+                  group => group.rows.map(id => ({ groupKey: group.key, id }))
                 ) ??
                 this.host.view.rows$.value.map(id => ({
                   groupKey: undefined,

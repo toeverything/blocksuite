@@ -72,16 +72,17 @@ export class GroupSetting extends SignalWatcher(
       animation: 150,
       group: `group-sort-${this.view.id}`,
       onEnd: evt => {
-        const groupHelper = this.view.groupHelper;
-        if (!groupHelper) {
+        const groupManager = this.view.groupManager;
+        const oldGroups = groupManager.groupsDataList$.value;
+        if (!oldGroups) {
           return;
         }
-        const groups = [...groupHelper.groups];
+        const groups = [...oldGroups];
         const index = evt.oldIndex ?? -1;
         const from = groups[index];
         groups.splice(index, 1);
         const to = groups[evt.newIndex ?? -1];
-        groupHelper.moveGroupTo(
+        groupManager.moveGroupTo(
           from.key,
           to
             ? {
@@ -98,8 +99,8 @@ export class GroupSetting extends SignalWatcher(
   }
 
   protected override render(): unknown {
-    const helper = this.view.groupHelper;
-    if (!helper) {
+    const groups = this.view.groupManager.groupsDataList$.value;
+    if (!groups) {
       return;
     }
     return html`
@@ -116,15 +117,15 @@ export class GroupSetting extends SignalWatcher(
         class="group-sort-setting"
       >
         ${repeat(
-          helper.groups,
+          groups,
           group => group.key,
           group => {
             const props: GroupRenderProps = {
               value: group.value,
-              data: group.helper.data,
+              data: group.column.data$.value,
               readonly: true,
             };
-            const config = group.helper.groupConfig();
+            const config = group.manager.config$.value;
             return html` <div class="dv-hover dv-round-4 group-item">
               <div class="group-item-drag-bar"></div>
               <div style="padding: 0 4px;position:relative;">
@@ -159,16 +160,16 @@ export const selectGroupByProperty = (
     items: [
       ...view.columnsWithoutFilter$.value
         .filter(id => {
-          if (view.columnGet(id).type === 'title') {
+          if (view.columnGet(id).type$.value === 'title') {
             return false;
           }
-          return !!groupByMatcher.match(view.columnGet(id).dataType);
+          return !!groupByMatcher.match(view.columnGet(id).dataType$.value);
         })
         .map<Menu>(id => {
           const column = view.columnGet(id);
           return {
             type: 'action',
-            name: column.name,
+            name: column.name$.value,
             isSelected: view.viewData$.value?.groupBy?.columnId === id,
             icon: html` <uni-lit .uni="${column.icon}"></uni-lit>`,
             select: () => {

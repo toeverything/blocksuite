@@ -5,11 +5,11 @@ import { classMap } from 'lit/directives/class-map.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type { TableColumn } from '../../table-view-manager.js';
+import type { TableColumn } from '../table-view-manager.js';
 
-import { startDrag } from '../../../../../utils/drag.js';
-import { getResultInRange } from '../../../../../utils/utils.js';
-import { DEFAULT_COLUMN_MIN_WIDTH } from '../../consts.js';
+import { startDrag } from '../../../../utils/drag.js';
+import { getResultInRange } from '../../../../utils/utils.js';
+import { DEFAULT_COLUMN_MIN_WIDTH } from '../consts.js';
 
 type GroupRectList = {
   top: number;

@@ -52,8 +52,8 @@ export const popCardMenu = (
           search: true,
         },
         items:
-          selection.view.groupHelper?.groups
-            .filter(v => {
+          selection.view.groupManager.groupsDataList$.value
+            ?.filter(v => {
               const cardSelection = selection.selection;
               if (cardSelection?.selectionType === 'card') {
                 return v.key !== cardSelection?.cards[0].groupKey;

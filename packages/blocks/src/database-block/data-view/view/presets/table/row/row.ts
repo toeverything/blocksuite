@@ -13,9 +13,9 @@ import {
   CenterPeekIcon,
   MoreHorizontalIcon,
 } from '../../../../common/icons/index.js';
+import { openDetail, popRowMenu } from '../components/menu.js';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../consts.js';
 import { TableRowSelection, type TableViewSelection } from '../types.js';
-import { openDetail, popRowMenu } from './menu.js';
 import './row-select-checkbox.js';
 
 @customElement('data-view-table-row')

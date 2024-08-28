@@ -73,7 +73,7 @@ export class KanbanDragController implements ReactiveController {
           return;
         }
         if (result && currentGroup) {
-          currentGroup.group.helper.moveCardTo(
+          currentGroup.group.manager.moveCardTo(
             ele.cardId,
             currentGroup.group.key,
             result.key,

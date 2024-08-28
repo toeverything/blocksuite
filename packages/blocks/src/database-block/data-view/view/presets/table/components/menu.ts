@@ -1,7 +1,4 @@
-import {
-  type Menu,
-  popFilterableSimpleMenu,
-} from '@blocksuite/affine-components/context-menu';
+import { popFilterableSimpleMenu } from '@blocksuite/affine-components/context-menu';
 import {
   CopyIcon,
   ExpandFullIcon,
@@ -10,19 +7,11 @@ import {
 } from '@blocksuite/affine-components/icons';
 import { html } from 'lit';
 
-import type { RootBlockComponent } from '../../../../../../root-block/index.js';
 import type { DataViewRenderer } from '../../../../data-view.js';
-import type { Column } from '../../../../view-manager/column.js';
 import type { TableSelectionController } from '../controller/selection.js';
 
+import { popFilterableSimpleMenu } from '../../../../../../_common/components/index.js';
 import { DeleteIcon } from '../../../../common/icons/index.js';
-import {
-  type ColumnDataType,
-  type StatCalcOp,
-  checkboxCalcOps,
-  commonCalcOps,
-  numberColCalcOps,
-} from '../stat-ops.js';
 import { TableRowSelection } from '../types.js';
 
 export const openDetail = (
@@ -69,14 +58,6 @@ export const popRowMenu = (
               selectionController.host.clipboardController.copy();
             },
           },
-          // {
-          //   type: 'action',
-          //   name: 'Duplicate',
-          //   icon: DuplicateIcon,
-          //   select: () => {
-          //     selectionController.duplicateRow(rowId);
-          //   },
-          // },
         ],
       },
       {
@@ -183,34 +164,4 @@ export const popRowMenu = (
       ],
     },
   ]);
-};
-
-export const popColStatOperationMenu = (
-  _rootComponent: RootBlockComponent | null,
-  elem: HTMLElement,
-  _column: Column,
-  calcType: ColumnDataType,
-  onSelect: (formula: StatCalcOp) => void
-) => {
-  let operations: StatCalcOp[] = [];
-  switch (calcType) {
-    case 'number':
-      operations = numberColCalcOps;
-      break;
-    case 'checkbox':
-      operations = checkboxCalcOps;
-      break;
-    default:
-      operations = commonCalcOps;
-  }
-
-  const menus: Menu[] = operations.map(op => ({
-    type: 'action',
-    name: op.label,
-    select: () => {
-      onSelect(op);
-    },
-  }));
-
-  return popFilterableSimpleMenu(elem, menus);
 };

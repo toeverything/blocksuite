@@ -1,23 +1,26 @@
-import { WithDisposable } from '@blocksuite/block-std';
+import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { SignalWatcher } from '@lit-labs/preact-signals';
-import { LitElement, css, html } from 'lit';
+import { css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
 import type { GroupData } from '../../../../common/group-by/helper.js';
 import type { TableSingleView } from '../table-view-manager.js';
 
+import { LEFT_TOOL_BAR_WIDTH, STATS_BAR_HEIGHT } from '../consts.js';
+
 const styles = css`
   .affine-database-column-stats {
     width: 100%;
-    margin-left: 8px;
+    margin-left: ${LEFT_TOOL_BAR_WIDTH}px;
+    height: ${STATS_BAR_HEIGHT}px;
     display: flex;
   }
 `;
 
 @customElement('affine-database-column-stats')
 export class DataBaseColumnStats extends SignalWatcher(
-  WithDisposable(LitElement)
+  WithDisposable(ShadowlessElement)
 ) {
   static override styles = styles;
 

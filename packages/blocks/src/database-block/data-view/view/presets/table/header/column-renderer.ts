@@ -6,8 +6,8 @@ import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
 
-import type { Column } from '../../../../../view-manager/column.js';
-import type { TableSingleView } from '../../table-view-manager.js';
+import type { Column } from '../../../../view-manager/column.js';
+import type { TableSingleView } from '../table-view-manager.js';
 
 @customElement('affine-data-view-column-preview')
 export class DataViewColumnPreview extends SignalWatcher(
@@ -58,12 +58,12 @@ export class DataViewColumnPreview extends SignalWatcher(
   }
 
   override render() {
-    const groupHelper = this.tableViewManager.groupHelper;
-    if (!groupHelper) {
+    const groups = this.tableViewManager.groupManager.groupsDataList$.value;
+    if (!groups) {
       const rows = this.tableViewManager.rows$.value;
       return this.renderGroup(rows);
     }
-    return groupHelper.groups.map(group => {
+    return groups.map(group => {
       return html`
         <div style="height: 44px;"></div>
         ${this.renderGroup(group.rows)}

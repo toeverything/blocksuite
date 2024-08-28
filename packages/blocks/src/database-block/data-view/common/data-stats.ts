@@ -23,7 +23,7 @@ export class ColumnDataStats<Col extends Column = Column> {
 
   private _assertColumnType(type: string) {
     assertEquals(
-      this.column.type,
+      this.column.type$.value,
       type,
       `This function should only be called in a column of type ${type}`
     );
@@ -31,7 +31,7 @@ export class ColumnDataStats<Col extends Column = Column> {
 
   // this functions also splits the individual values inside the multiselect
   private _getAllValuesAsString(group?: GroupData) {
-    const colType = this.column.type;
+    const colType = this.column.type$.value;
     const colValues: string[] = [];
 
     for (const rId of group?.rows ?? this.dataViewManager.rows$.value) {
