@@ -2,7 +2,6 @@ import type { BlockComponent } from '@blocksuite/block-std';
 
 import { BLOCK_ID_ATTR } from '@blocksuite/affine-shared/consts';
 import { ShadowlessElement } from '@blocksuite/block-std';
-import { assertExists } from '@blocksuite/global/utils';
 import {
   type DeltaInsert,
   INLINE_ROOT_ATTR,
@@ -25,21 +24,21 @@ export class AffineLink extends ShadowlessElement {
   private _whenHover = new HoverController(
     this,
     ({ abortController }) => {
-      if (this.block.doc.readonly) {
+      if (this.block?.doc.readonly) {
+        return null;
+      }
+      if (!this.inlineEditor || !this.selfInlineRange) {
         return null;
       }
 
-      const selection = this.std.selection;
-      const textSelection = selection.find('text');
-      if (
-        !!textSelection &&
-        (!!textSelection.to || !!textSelection.from.length)
-      ) {
+      const selection = this.std?.selection;
+      const textSelection = selection?.find('text');
+      if (!!textSelection && !textSelection.isCollapsed()) {
         return null;
       }
 
-      const blockSelections = selection.filter('block');
-      if (blockSelections.length) {
+      const blockSelections = selection?.filter('block');
+      if (blockSelections?.length) {
         return null;
       }
 
@@ -71,8 +70,7 @@ export class AffineLink extends ShadowlessElement {
   // see https://github.com/toeverything/AFFiNE/issues/1540
   private _onMouseUp() {
     const anchorElement = this.querySelector('a');
-    assertExists(anchorElement);
-    if (!anchorElement.isContentEditable) return;
+    if (!anchorElement || !anchorElement.isContentEditable) return;
     anchorElement.contentEditable = 'false';
     setTimeout(() => {
       anchorElement.removeAttribute('contenteditable');
@@ -116,10 +114,9 @@ export class AffineLink extends ShadowlessElement {
   }
 
   get block() {
-    const block = this.inlineEditor.rootElement.closest<BlockComponent>(
+    const block = this.inlineEditor?.rootElement.closest<BlockComponent>(
       `[${BLOCK_ID_ATTR}]`
     );
-    assertExists(block);
     return block;
   }
 
@@ -127,8 +124,7 @@ export class AffineLink extends ShadowlessElement {
     const inlineRoot = this.closest<InlineRootElement<AffineTextAttributes>>(
       `[${INLINE_ROOT_ATTR}]`
     );
-    assertExists(inlineRoot);
-    return inlineRoot.inlineEditor;
+    return inlineRoot?.inlineEditor;
   }
 
   get link() {
@@ -140,14 +136,12 @@ export class AffineLink extends ShadowlessElement {
   }
 
   get selfInlineRange() {
-    const selfInlineRange = this.inlineEditor.getInlineRangeFromElement(this);
-    assertExists(selfInlineRange);
+    const selfInlineRange = this.inlineEditor?.getInlineRangeFromElement(this);
     return selfInlineRange;
   }
 
   get std() {
-    const std = this.block.std;
-    assertExists(std);
+    const std = this.block?.std;
     return std;
   }
 

@@ -1,6 +1,5 @@
+import type { Constructor } from '@blocksuite/global/utils';
 import type { LitElement, TemplateResult } from 'lit';
-
-import { type Constructor, assertExists } from '@blocksuite/global/utils';
 
 import type { PeekableClass, PeekableOptions } from './type.js';
 
@@ -33,7 +32,10 @@ export const Peekable =
     }
   ) =>
   (Class: C, context: ClassDecoratorContext) => {
-    assertExists(context.kind === 'class');
+    if (context.kind !== 'class') {
+      console.error('@Peekable() can only be applied to a class');
+      return;
+    }
 
     if (options.action === undefined)
       options.action = ['double-click', 'shift-click'];
