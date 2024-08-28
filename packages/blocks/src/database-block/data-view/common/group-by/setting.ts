@@ -2,6 +2,7 @@ import type { PropertyValues } from 'lit';
 
 import { ArrowRightSmallIcon } from '@blocksuite/affine-components/icons';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
+import { SignalWatcher } from '@lit-labs/preact-signals';
 import { css, html, unsafeCSS } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
@@ -24,7 +25,9 @@ import { DeleteIcon } from '../icons/index.js';
 import { groupByMatcher } from './matcher.js';
 
 @customElement('data-view-group-setting')
-export class GroupSetting extends WithDisposable(ShadowlessElement) {
+export class GroupSetting extends SignalWatcher(
+  WithDisposable(ShadowlessElement)
+) {
   static override styles = css`
     data-view-group-setting {
       display: flex;
