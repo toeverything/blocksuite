@@ -2,6 +2,7 @@ import type { EventName, UIEventHandler } from '@blocksuite/block-std';
 import type { Disposable } from '@blocksuite/global/utils';
 import type { PropertyValues } from 'lit';
 
+import { createModal } from '@blocksuite/affine-components/context-menu';
 import { CrossIcon, ExpandWideIcon } from '@blocksuite/affine-components/icons';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { Slot, assertExists } from '@blocksuite/global/utils';
@@ -13,7 +14,6 @@ import type { DataViewRendererConfig } from '../../data-view/data-view.js';
 import type { DataViewSelection } from '../../data-view/types.js';
 import type { DatabaseBlockComponent } from '../../database-block.js';
 
-import { createModal } from '../../../_common/components/index.js';
 import { DatabaseSelection } from '../../data-view/common/selection.js';
 import { renderTemplate } from '../../data-view/utils/uni-component/render-template.js';
 import { WidgetBase } from '../../data-view/widget/widget-base.js';

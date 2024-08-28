@@ -1,3 +1,4 @@
+import { popFilterableSimpleMenu } from '@blocksuite/affine-components/context-menu';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { css, html, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
@@ -10,7 +11,6 @@ import type {
   VariableOrProperty,
 } from '../../common/ast.js';
 
-import { popFilterableSimpleMenu } from '../../../../_common/components/index.js';
 import {
   firstFilter,
   firstFilterByRef,

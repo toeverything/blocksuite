@@ -1,3 +1,4 @@
+import { popMenu } from '@blocksuite/affine-components/context-menu';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { SignalWatcher, computed } from '@lit-labs/preact-signals';
 import { css } from 'lit';
@@ -13,7 +14,6 @@ import type {
 import type { Column } from '../../view-manager/column.js';
 import type { SingleView } from '../../view-manager/single-view.js';
 
-import { popMenu } from '../../../../_common/components/index.js';
 import { renderUniLit } from '../../utils/uni-component/uni-component.js';
 import { inputConfig, typeConfig } from '../column-menu.js';
 import {

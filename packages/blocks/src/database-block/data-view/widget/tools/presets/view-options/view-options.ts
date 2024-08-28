@@ -1,3 +1,4 @@
+import { popMenu } from '@blocksuite/affine-components/context-menu';
 import {
   ArrowRightSmallIcon,
   DeleteIcon,
@@ -9,7 +10,6 @@ import { customElement } from 'lit/decorators.js';
 
 import type { SingleView } from '../../../../view-manager/single-view.js';
 
-import { popMenu } from '../../../../../../_common/components/index.js';
 import { emptyFilterGroup } from '../../../../common/ast.js';
 import {
   popGroupSetting,

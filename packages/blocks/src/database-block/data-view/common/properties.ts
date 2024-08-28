@@ -1,3 +1,4 @@
+import { createPopup } from '@blocksuite/affine-components/context-menu';
 import { ArrowLeftBigIcon } from '@blocksuite/affine-components/icons';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { SignalWatcher } from '@lit-labs/preact-signals';
@@ -9,8 +10,6 @@ import Sortable from 'sortablejs';
 
 import type { Column } from '../view-manager/column.js';
 import type { SingleView } from '../view-manager/single-view.js';
-
-import { createPopup } from '../../../_common/components/index.js';
 
 const show = html`<svg
   width="24"

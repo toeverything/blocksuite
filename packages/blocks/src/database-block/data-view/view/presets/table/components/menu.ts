@@ -1,4 +1,8 @@
 import {
+  type Menu,
+  popFilterableSimpleMenu,
+} from '@blocksuite/affine-components/context-menu';
+import {
   CopyIcon,
   ExpandFullIcon,
   MoveLeftIcon,
@@ -11,10 +15,6 @@ import type { DataViewRenderer } from '../../../../data-view.js';
 import type { Column } from '../../../../view-manager/column.js';
 import type { TableSelectionController } from '../controller/selection.js';
 
-import {
-  type Menu,
-  popFilterableSimpleMenu,
-} from '../../../../../../_common/components/index.js';
 import { DeleteIcon } from '../../../../common/icons/index.js';
 import {
   type ColumnDataType,

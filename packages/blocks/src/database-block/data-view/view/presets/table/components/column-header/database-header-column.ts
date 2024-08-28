@@ -1,4 +1,9 @@
 import {
+  type Menu,
+  type NormalMenu,
+  popMenu,
+} from '@blocksuite/affine-components/context-menu';
+import {
   type InsertToPosition,
   insertPositionToIndex,
 } from '@blocksuite/affine-shared/utils';
@@ -16,11 +21,6 @@ import type { NumberColumnDataType } from '../../../../../column/presets/number/
 import type { Column } from '../../../../../view-manager/column.js';
 import type { TableColumn, TableSingleView } from '../../table-view-manager.js';
 
-import {
-  type Menu,
-  type NormalMenu,
-  popMenu,
-} from '../../../../../../../_common/components/index.js';
 import { numberFormats } from '../../../../../column/presets/number/utils/formats.js';
 import { inputConfig, typeConfig } from '../../../../../common/column-menu.js';
 import {

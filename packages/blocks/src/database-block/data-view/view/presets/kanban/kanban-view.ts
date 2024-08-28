@@ -1,3 +1,4 @@
+import { popMenu } from '@blocksuite/affine-components/context-menu';
 import { AddCursorIcon } from '@blocksuite/affine-components/icons';
 import { css } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
@@ -9,7 +10,6 @@ import type { GroupHelper } from '../../../common/group-by/helper.js';
 import type { KanbanSingleView } from './kanban-view-manager.js';
 import type { KanbanViewSelectionWithType } from './types.js';
 
-import { popMenu } from '../../../../../_common/components/index.js';
 import '../../../common/group-by/define.js';
 import { renderUniLit } from '../../../utils/uni-component/uni-component.js';
 import { DataViewBase } from '../../data-view-base.js';

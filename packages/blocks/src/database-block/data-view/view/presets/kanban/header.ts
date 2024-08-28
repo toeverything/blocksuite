@@ -1,3 +1,4 @@
+import { popMenu } from '@blocksuite/affine-components/context-menu';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { SignalWatcher } from '@lit-labs/preact-signals';
 import { css } from 'lit';
@@ -6,7 +7,6 @@ import { html } from 'lit/static-html.js';
 
 import type { KanbanSingleView } from './kanban-view-manager.js';
 
-import { popMenu } from '../../../../../_common/components/index.js';
 import './card.js';
 
 const styles = css`

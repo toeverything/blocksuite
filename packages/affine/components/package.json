@@ -40,7 +40,8 @@
     "./toolbar": "./src/toolbar/index.ts",
     "./toast": "./src/toast/index.ts",
     "./rich-text": "./src/rich-text/index.ts",
-    "./caption": "./src/caption/index.ts"
+    "./caption": "./src/caption/index.ts",
+    "./context-menu": "./src/context-menu/index.ts"
   },
   "publishConfig": {
     "access": "public",
