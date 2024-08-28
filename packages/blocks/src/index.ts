@@ -6,7 +6,6 @@ import '@blocksuite/affine-components/toolbar';
 import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 import { Point, deserializeXYWH } from '@blocksuite/global/utils';
 
-import { mindMap } from './_common/mind-map/index.js';
 import { matchFlavours } from './_common/utils/index.js';
 import './code-block/highlight/affine-code-unit.js';
 import './database-block/index.js';
@@ -30,7 +29,6 @@ export type {
 export { scrollbarStyle } from './_common/components/index.js';
 export { type NavigatorMode } from './_common/edgeless/frame/consts.js';
 export { EmbedBlockComponent } from './_common/embed-block-helper/index.js';
-export { type TreeNode, type TreeNodeWithId } from './_common/mind-map/draw.js';
 export * from './_common/test-utils/test-utils.js';
 export * from './_common/transformers/index.js';
 export { type AbstractEditor } from './_common/types.js';
@@ -165,7 +163,6 @@ export {
 export const BlocksUtils = {
   splitElements,
   matchFlavours,
-  mindMap,
   deserializeXYWH,
   isCanvasElement,
   Point,
