@@ -129,6 +129,20 @@ export async function mountDefaultDocEditor(collection: DocCollection) {
   document.body.append(debugMenu);
   document.body.append(chatPanel);
 
+  // for multiple editor
+  const params = new URLSearchParams(location.search);
+  const init = params.get('init');
+  if (init && init.startsWith('multiple-editor')) {
+    app.childNodes.forEach(node => {
+      if (node instanceof AffineEditorContainer) {
+        node.style.flex = '1';
+        if (init === 'multiple-editor-vertical') {
+          node.style.overflow = 'auto';
+        }
+      }
+    });
+  }
+
   // debug info
   window.editor = editor;
   window.doc = doc;

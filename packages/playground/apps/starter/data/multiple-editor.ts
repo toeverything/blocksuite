@@ -33,14 +33,10 @@ export const multiEditor: InitFn = (collection: DocCollection, id: string) => {
       target.load();
       editor.doc = target;
     });
+    editor.style.borderRight = '1px solid var(--affine-border-color)';
 
     app.append(editor);
     app.style.display = 'flex';
-    app.childNodes.forEach(node => {
-      if (node instanceof AffineEditorContainer) {
-        node.style.flex = '1';
-      }
-    });
   }
 };
 
@@ -81,7 +77,11 @@ export const multiEditorVertical: InitFn = (
       target.load();
       editor.doc = target;
     });
+    editor.style.borderBottom = '1px solid var(--affine-border-color)';
+
     app.append(editor);
+    app.style.display = 'flex';
+    app.style.flexDirection = 'column';
   }
 };
 
