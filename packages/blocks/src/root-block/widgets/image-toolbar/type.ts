@@ -1,8 +1,8 @@
 import type { ImageBlockComponent } from '../../../image-block/image-block.js';
 
-import { MoreMenuContext } from '../../configs/toolbar.js';
+import { MenuContext } from '../../configs/toolbar.js';
 
-export class ImageToolbarContext extends MoreMenuContext {
+export class ImageToolbarContext extends MenuContext {
   constructor(
     public blockComponent: ImageBlockComponent,
     public abortController: AbortController
@@ -10,8 +10,16 @@ export class ImageToolbarContext extends MoreMenuContext {
     super();
   }
 
-  override isEmpty() {
+  isEmpty() {
     return false;
+  }
+
+  isMultiple() {
+    return false;
+  }
+
+  isSingle() {
+    return true;
   }
 
   get doc() {

@@ -32,7 +32,7 @@ import type { SurfaceRefBlockComponent } from '../../../surface-ref-block/index.
 import type { EdgelessRootPreviewBlockComponent } from '../../edgeless/edgeless-root-preview-block.js';
 
 import { PAGE_HEADER_HEIGHT } from '../../../_common/consts.js';
-import { MoreMenuContext } from '../../configs/toolbar.js';
+import { MenuContext } from '../../configs/toolbar.js';
 import { edgelessToBlob, writeImageBlobToClipboard } from './utils.js';
 
 export const AFFINE_SURFACE_REF_TOOLBAR = 'affine-surface-ref-toolbar';
@@ -107,7 +107,7 @@ declare global {
   }
 }
 
-export class SurfaceRefToolbarContext extends MoreMenuContext {
+export class SurfaceRefToolbarContext extends MenuContext {
   constructor(
     public blockComponent: SurfaceRefBlockComponent,
     public abortController: AbortController
@@ -117,6 +117,14 @@ export class SurfaceRefToolbarContext extends MoreMenuContext {
 
   isEmpty() {
     return !this.blockComponent;
+  }
+
+  isMultiple() {
+    return false;
+  }
+
+  isSingle() {
+    return true;
   }
 
   get doc() {

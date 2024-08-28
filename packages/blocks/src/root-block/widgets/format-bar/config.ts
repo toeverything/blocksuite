@@ -46,7 +46,7 @@ import {
   notifyDocCreated,
   promptDocTitle,
 } from '../../../_common/utils/render-linked-doc.js';
-import { MoreMenuContext } from '../../configs/toolbar.js';
+import { MenuContext } from '../../configs/toolbar.js';
 
 export type DividerConfigItem = {
   type: 'divider';
@@ -319,13 +319,21 @@ export function toolbarDefaultConfig(toolbar: AffineFormatBarWidget) {
     });
 }
 
-export class FormatBarContext extends MoreMenuContext {
+export class FormatBarContext extends MenuContext {
   constructor(public toolbar: AffineFormatBarWidget) {
     super();
   }
 
-  override isEmpty() {
+  isEmpty() {
     return this.selectedBlockModels.length === 0;
+  }
+
+  isMultiple() {
+    return this.selectedBlockModels.length > 1;
+  }
+
+  isSingle() {
+    return this.selectedBlockModels.length === 1;
   }
 
   get doc() {

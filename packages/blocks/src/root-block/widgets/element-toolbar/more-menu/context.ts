@@ -7,7 +7,7 @@ import type { EdgelessRootBlockComponent } from '../../../edgeless/edgeless-root
 import type { EdgelessRootService } from '../../../edgeless/edgeless-root-service.js';
 import type { EdgelessSelectionManager } from '../../../edgeless/services/selection-manager.js';
 
-import { MoreMenuContext } from '../../../configs/toolbar.js';
+import { MenuContext } from '../../../configs/toolbar.js';
 import {
   isAttachmentBlock,
   isBookmarkBlock,
@@ -19,7 +19,7 @@ import {
   isNoteBlock,
 } from '../../../edgeless/utils/query.js';
 
-export class ElementToolbarMoreMenuContext extends MoreMenuContext {
+export class ElementToolbarMoreMenuContext extends MenuContext {
   #empty = true;
 
   #includedFrame = false;
