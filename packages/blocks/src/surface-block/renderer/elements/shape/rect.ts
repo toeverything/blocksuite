@@ -1,7 +1,7 @@
 import type { ShapeElementModel } from '@blocksuite/affine-model';
 
 import type { RoughCanvas } from '../../../rough/canvas.js';
-import type { Renderer } from '../../renderer.js';
+import type { CanvasRenderer } from '../../canvas-renderer.js';
 
 import { type Colors, drawGeneralShape } from './utils.js';
 
@@ -14,7 +14,7 @@ export function rect(
   model: ShapeElementModel,
   ctx: CanvasRenderingContext2D,
   matrix: DOMMatrix,
-  renderer: Renderer,
+  renderer: CanvasRenderer,
   rc: RoughCanvas,
   colors: Colors
 ) {

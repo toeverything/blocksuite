@@ -1,9 +1,6 @@
 import type { SurfaceBlockModel } from './surface-model.js';
 import type { SurfaceBlockService } from './surface-service.js';
 
-export { normalizeShapeBound } from './canvas-renderer/element-renderer/index.js';
-export { fitContent } from './canvas-renderer/element-renderer/shape/utils.js';
-export { Overlay, Renderer } from './canvas-renderer/renderer.js';
 export { type IModelCoord, ZOOM_MAX, ZOOM_MIN, ZOOM_STEP } from './consts.js';
 export {
   AffineCanvasTextFonts,
@@ -25,6 +22,9 @@ export {
   MindmapSurfaceBlock,
   markdownToMindmap,
 } from './mini-mindmap/index.js';
+export { CanvasRenderer, Overlay } from './renderer/canvas-renderer.js';
+export { normalizeShapeBound } from './renderer/elements/index.js';
+export { fitContent } from './renderer/elements/shape/utils.js';
 export { RoughCanvas } from './rough/canvas.js';
 export type { Options } from './rough/core.js';
 export { SurfaceBlockModel as SurfaceBlockModel } from './surface-model.js';

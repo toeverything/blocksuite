@@ -1,7 +1,7 @@
 import type { IBound } from '@blocksuite/global/utils';
 
 import type { RoughCanvas, SurfaceElementModel } from '../../index.js';
-import type { Renderer } from '../renderer.js';
+import type { CanvasRenderer } from '../canvas-renderer.js';
 
 import { brush } from './brush/index.js';
 import { connector } from './connector/index.js';
@@ -17,12 +17,12 @@ export type ElementRenderer<
   model: T,
   ctx: CanvasRenderingContext2D,
   matrix: DOMMatrix,
-  renderer: Renderer,
+  renderer: CanvasRenderer,
   rc: RoughCanvas,
   viewportBound: IBound
 ) => void;
 
-export const modelRenderer = {
+export const elementRenderers = {
   brush,
   connector,
   group,

@@ -10,7 +10,7 @@ import {
 import { Bound } from '@blocksuite/global/utils';
 
 import type { RoughCanvas } from '../../../rough/canvas.js';
-import type { Renderer } from '../../renderer.js';
+import type { CanvasRenderer } from '../../canvas-renderer.js';
 
 import {
   deltaInsertsToChunks,
@@ -32,7 +32,7 @@ const shapeRenderers: {
     model: ShapeElementModel,
     ctx: CanvasRenderingContext2D,
     matrix: DOMMatrix,
-    renderer: Renderer,
+    renderer: CanvasRenderer,
     rc: RoughCanvas,
     colors: Colors
   ) => void;
@@ -47,7 +47,7 @@ export function shape(
   model: ShapeElementModel,
   ctx: CanvasRenderingContext2D,
   matrix: DOMMatrix,
-  renderer: Renderer,
+  renderer: CanvasRenderer,
   rc: RoughCanvas
 ) {
   const color = renderer.getColorValue(

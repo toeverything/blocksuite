@@ -25,7 +25,7 @@ import { getBlocksInFrame } from '../../root-block/edgeless/frame-manager.js';
 import { xywhArrayToObject } from '../../root-block/edgeless/utils/convert.js';
 import { getBackgroundGrid } from '../../root-block/edgeless/utils/query.js';
 import {
-  type Renderer,
+  type CanvasRenderer,
   SurfaceElementModel,
 } from '../../surface-block/index.js';
 import { fetchImage } from '../adapters/utils.js';
@@ -395,7 +395,7 @@ export class ExportManager {
 
   // TODO: refactor of this part
   async edgelessToCanvas(
-    surfaceRenderer: Renderer,
+    surfaceRenderer: CanvasRenderer,
     bound: IBound,
     edgeless?: EdgelessRootBlockComponent,
     nodes?: GfxBlockModel[],

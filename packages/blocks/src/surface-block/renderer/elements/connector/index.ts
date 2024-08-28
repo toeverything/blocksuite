@@ -10,7 +10,7 @@ import {
 } from '@blocksuite/global/utils';
 
 import type { RoughCanvas } from '../../../rough/canvas.js';
-import type { Renderer } from '../../renderer.js';
+import type { CanvasRenderer } from '../../canvas-renderer.js';
 
 import { isConnectorWithLabel } from '../../../element-model/utils/connector.js';
 import {
@@ -35,7 +35,7 @@ export function connector(
   model: ConnectorElementModel | LocalConnectorElementModel,
   ctx: CanvasRenderingContext2D,
   matrix: DOMMatrix,
-  renderer: Renderer,
+  renderer: CanvasRenderer,
   rc: RoughCanvas
 ) {
   const {
@@ -216,7 +216,7 @@ function renderLabel(
   model: ConnectorElementModel,
   ctx: CanvasRenderingContext2D,
   matrix: DOMMatrix,
-  renderer: Renderer
+  renderer: CanvasRenderer
 ) {
   const {
     text,
