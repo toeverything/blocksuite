@@ -27,15 +27,21 @@ export function getHoveredArea(
  * @returns
  */
 export function showMergeIndicator(
-  mindmap: MindmapElementModel,
+  targetMindmap: MindmapElementModel,
   /**
    * The hovered node
    */
   target: string | MindmapNode,
+
+  /**
+   * The node that will be merged
+   */
   source: MindmapNode,
   position: [number, number]
 ) {
-  target = mindmap.getNode(typeof target === 'string' ? target : target.id)!;
+  target = targetMindmap.getNode(
+    typeof target === 'string' ? target : target.id
+  )!;
 
   if (!target) {
     return;
@@ -44,24 +50,24 @@ export function showMergeIndicator(
   assertType<MindmapNode>(target);
 
   // the target cannot be the child of source
-  const mergeCheck = (sourceTree: MindmapNode): boolean => {
-    if (!target || !sourceTree) return false;
-    if (target === sourceTree) return false;
+  const mergeCheck = (sourceNode: MindmapNode): boolean => {
+    if (!target || !sourceNode) return false;
+    if (target === sourceNode) return false;
 
-    if (sourceTree.children.length) {
-      return sourceTree.children.every(node => mergeCheck(node));
+    if (sourceNode.children.length) {
+      return sourceNode.children.every(node => mergeCheck(node));
     }
 
     return true;
   };
   const getMergeInfo = () => {
-    const layoutType = mindmap.getLayoutDir(target)!;
+    const layoutType = targetMindmap.getLayoutDir(target)!;
     const hoveredArea = getHoveredArea(
       target.element as ShapeElementModel,
       position,
       layoutType
     );
-    const isRoot = target.id === mindmap.tree.id;
+    const isRoot = target.id === targetMindmap.tree.id;
     const isSibling =
       !isRoot &&
       ((layoutType === LayoutType.RIGHT && hoveredArea.includes('left')) ||
@@ -81,7 +87,7 @@ export function showMergeIndicator(
         };
       }
 
-      const parentNode = mindmap.getParentNode(target.id)!;
+      const parentNode = targetMindmap.getParentNode(target.id)!;
 
       return {
         target: parentNode,
@@ -100,10 +106,10 @@ export function showMergeIndicator(
   }
 
   const mergeInfo = getMergeInfo();
-  const path = mindmap.getPath(mergeInfo.target);
+  const path = targetMindmap.getPath(mergeInfo.target);
   path.push(mergeInfo.index);
-  const style = mindmap.styleGetter.getNodeStyle(source, path);
-  const connector = mindmap['addConnector'](
+  const style = targetMindmap.styleGetter.getNodeStyle(source, path);
+  const connector = targetMindmap['addConnector'](
     mergeInfo.target,
     source,
     mergeInfo.layoutType,
@@ -115,7 +121,7 @@ export function showMergeIndicator(
 
   return {
     clear: () => {
-      mindmap.extraConnectors.delete(connector.id);
+      targetMindmap.extraConnectors.delete(connector.id);
       delete source.overriddenDir;
     },
     mergeInfo,

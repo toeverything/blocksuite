@@ -44,7 +44,15 @@ export type SerializedElement = Record<string, unknown> & {
 };
 
 export interface PointTestOptions {
-  expand?: number;
+  /**
+   * The threshold of the hit test. The unit is pixel.
+   */
+  hitThreshold?: number;
+
+  /**
+   * The padding of the response area for each element when do the hit testing. The unit is pixel.
+   */
+  responsePadding?: [number, number];
 
   /**
    * If true, the transparent area of the element will be ignored during the point inclusion test.
@@ -54,7 +62,6 @@ export interface PointTestOptions {
    */
   ignoreTransparent?: boolean;
 
-  all?: boolean;
   zoom?: number;
 }
 

@@ -445,7 +445,10 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
       this._clearMindMapHoverState = [];
 
       const hoveredMindmap = this._service
-        .pickElement(x, y, { all: true, expand: 40 })
+        .pickElement(x, y, {
+          all: true,
+          responsePadding: [25, 60],
+        })
         .filter(
           el =>
             el !== current &&
@@ -764,7 +767,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     }
 
     const selected = this._pick(e.x, e.y, {
-      expand: 10,
+      hitThreshold: 10,
     });
     if (!selected) {
       const textFlag = this._edgeless.doc.awarenessStore.getFlag(

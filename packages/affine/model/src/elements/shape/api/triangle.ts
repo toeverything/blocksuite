@@ -55,7 +55,7 @@ export const triangle = {
     let hit = pointOnPolygonStoke(
       point,
       points,
-      (options?.expand ?? 1) / (options?.zoom ?? 1)
+      (options?.hitThreshold ?? 1) / (options?.zoom ?? 1)
     );
 
     if (!hit) {

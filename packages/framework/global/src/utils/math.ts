@@ -72,10 +72,16 @@ export function getPointsFromBoundsWithRotation(
     [x + w, y + h],
     // left-bottom
     [x, y + h],
-  ]
+  ],
+  resPadding: [number, number] = [0, 0]
 ): IVec[] {
   const { rotate } = bounds;
-  let points = getPoints(bounds);
+  let points = getPoints({
+    x: bounds.x - resPadding[1],
+    y: bounds.y - resPadding[0],
+    w: bounds.w + resPadding[1] * 2,
+    h: bounds.h + resPadding[0] * 2,
+  });
 
   if (rotate) {
     const { x, y, w, h } = bounds;
