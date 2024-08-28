@@ -1,5 +1,6 @@
 import type { BlockComponent, PointerEventState } from '@blocksuite/block-std';
 
+import { DocMode } from '@blocksuite/affine-model';
 import { getMode } from '@blocksuite/affine-shared/services';
 import {
   getClosestBlockComponentByElement,
@@ -76,7 +77,10 @@ export class ImageResizeManager {
     ) as BlockComponent;
 
     const rootComponent = getClosestRootBlockComponent(this._activeComponent);
-    if (rootComponent && getMode(rootComponent.service.std)) {
+    if (
+      rootComponent &&
+      getMode(rootComponent.service.std) === DocMode.Edgeless
+    ) {
       this._zoom = (
         rootComponent as EdgelessRootBlockComponent
       ).service.viewport.zoom;
