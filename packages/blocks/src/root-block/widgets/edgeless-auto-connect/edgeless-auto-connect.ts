@@ -154,7 +154,7 @@ export class EdgelessAutoConnectWidget extends WidgetComponent<
   };
 
   static override styles = css`
-    .edgeless-index-label {
+    .page-visible-index-label {
       box-sizing: border-box;
       padding: 0px 6px;
       border: 1px solid #0000001a;
@@ -240,7 +240,7 @@ export class EdgelessAutoConnectWidget extends WidgetComponent<
           alignItems: 'center',
         });
 
-        return html`<div style=${style}>
+        return html`<div style=${style} class="edgeless-only-index-label">
           ${HiddenIcon}
           <affine-tooltip tip-position="bottom">
             ${getIndexLabelTooltip(SmallDocIcon, 'Hidden on page')}
@@ -338,7 +338,7 @@ export class EdgelessAutoConnectWidget extends WidgetComponent<
                 transition: 'all 0.1s linear',
               })}
               index=${i}
-              class="edgeless-index-label"
+              class="page-visible-index-label"
               @pointerdown=${(e: PointerEvent) => {
                 stopPropagation(e);
                 this._index = this._index === i ? -1 : i;
@@ -524,10 +524,31 @@ export class EdgelessAutoConnectWidget extends WidgetComponent<
         }
       })
     );
+
+    _disposables.add(
+      service.uiEventDispatcher.add('dragStart', () => {
+        this._dragging = true;
+      })
+    );
+    _disposables.add(
+      service.uiEventDispatcher.add('dragEnd', () => {
+        this._dragging = false;
+      })
+    );
+    _disposables.add(
+      service.slots.elementResizeStart.on(() => {
+        this._dragging = true;
+      })
+    );
+    _disposables.add(
+      service.slots.elementResizeEnd.on(() => {
+        this._dragging = false;
+      })
+    );
   }
 
   override render() {
-    if (!this._show) return nothing;
+    if (!this._show || this._dragging) return nothing;
 
     this._updateLabels();
 
@@ -539,6 +560,9 @@ export class EdgelessAutoConnectWidget extends WidgetComponent<
       ? this._NavigatorComponent(elements)
       : nothing} `;
   }
+
+  @state()
+  private accessor _dragging = false;
 
   @state()
   private accessor _edgelessOnlyNotesSet = new Set<NoteBlockModel>();

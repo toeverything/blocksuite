@@ -1248,7 +1248,7 @@ export async function assertNotHasClass(locator: Locator, className: string) {
 }
 
 export async function assertNoteSequence(page: Page, expected: string) {
-  const actual = await page.locator('.edgeless-index-label').innerText();
+  const actual = await page.locator('.page-visible-index-label').innerText();
   expect(expected).toBe(actual);
 }
 
