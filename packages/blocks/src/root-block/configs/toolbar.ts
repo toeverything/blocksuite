@@ -3,15 +3,14 @@ import type { BlockStdScope, EditorHost } from '@blocksuite/block-std';
 import type { GfxModel } from '@blocksuite/block-std/gfx';
 import type { BlockModel, Doc } from '@blocksuite/store';
 
-export abstract class MoreMenuContext {
+export abstract class MenuContext {
   isElement() {
     return false;
   }
 
   get config(): ToolbarMoreMenuConfig {
     return {
-      configure: <T extends MoreMenuContext>(groups: MenuItemGroup<T>[]) =>
-        groups,
+      configure: <T extends MenuContext>(groups: MenuItemGroup<T>[]) => groups,
       ...this.std.spec.getConfig('affine:page')?.toolbarMoreMenu,
     };
   }
@@ -26,13 +25,17 @@ export abstract class MoreMenuContext {
 
   abstract isEmpty(): boolean;
 
+  abstract isMultiple(): boolean;
+
+  abstract isSingle(): boolean;
+
   abstract get selectedBlockModels(): BlockModel[];
 
   abstract get std(): BlockStdScope;
 }
 
 export interface ToolbarMoreMenuConfig {
-  configure: <T extends MoreMenuContext>(
+  configure: <T extends MenuContext>(
     groups: MenuItemGroup<T>[]
   ) => MenuItemGroup<T>[];
 }

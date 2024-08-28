@@ -53,7 +53,7 @@ import {
 } from '../../../_common/components/embed-card/type.js';
 import { getEmbedCardIcons } from '../../../_common/utils/url.js';
 import { isLinkToNode } from '../../../embed-linked-doc-block/utils.js';
-import { MoreMenuContext } from '../../configs/toolbar.js';
+import { MenuContext } from '../../configs/toolbar.js';
 import {
   isAttachmentBlock,
   isBookmarkBlock,
@@ -111,13 +111,21 @@ const BUILT_IN_GROUPS: MenuItemGroup<EmbedCardToolbarContext>[] = [
   },
 ];
 
-export class EmbedCardToolbarContext extends MoreMenuContext {
+export class EmbedCardToolbarContext extends MenuContext {
   constructor(public toolbar: EmbedCardToolbar) {
     super();
   }
 
   isEmpty() {
     return this.toolbar.focusBlock === null;
+  }
+
+  isMultiple() {
+    return false;
+  }
+
+  isSingle() {
+    return true;
   }
 
   get doc() {

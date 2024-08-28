@@ -24,7 +24,7 @@ import { repeat } from 'lit/directives/repeat.js';
 
 import type { AttachmentBlockComponent } from '../attachment-block.js';
 
-import { MoreMenuContext } from '../../root-block/configs/toolbar.js';
+import { MenuContext } from '../../root-block/configs/toolbar.js';
 import { allowEmbed, convertToEmbed } from '../embed.js';
 import { cloneAttachmentProperties } from '../utils.js';
 import { RenameModal } from './rename-model.js';
@@ -87,7 +87,7 @@ const BUILT_IN_GROUPS: MenuItemGroup<AttachmentToolbarMoreMenuContext>[] = [
   },
 ];
 
-export class AttachmentToolbarMoreMenuContext extends MoreMenuContext {
+export class AttachmentToolbarMoreMenuContext extends MenuContext {
   constructor(
     public blockComponent: AttachmentBlockComponent,
     public model: AttachmentBlockModel,
@@ -98,6 +98,14 @@ export class AttachmentToolbarMoreMenuContext extends MoreMenuContext {
 
   isEmpty() {
     return false;
+  }
+
+  isMultiple() {
+    return false;
+  }
+
+  isSingle() {
+    return true;
   }
 
   get doc() {
