@@ -35,13 +35,13 @@ import type { GfxBlockModel } from '../../edgeless/block-model.js';
 import type { EdgelessTool } from '../../edgeless/types.js';
 import type { DragHandleOption, DropResult, DropType } from './config.js';
 
+import { SpecProvider } from '../../../_specs/utils/spec-provider.js';
 import {
   getSelectedRect,
   isTopLevelBlock,
 } from '../../../root-block/edgeless/utils/query.js';
 import { PageRootBlockComponent } from '../../../root-block/page/page-root-block.js';
 import { autoScroll } from '../../../root-block/text-selection/utils.js';
-import { SpecProvider } from '../../../specs/utils/spec-provider.js';
 import { DragPreview } from './components/drag-preview.js';
 import { DropIndicator } from './components/drop-indicator.js';
 import {

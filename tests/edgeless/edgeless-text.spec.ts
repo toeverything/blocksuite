@@ -1,4 +1,4 @@
-import type { EdgelessTextBlockComponent } from '@blocks/edgeless-text/edgeless-text-block.js';
+import type { EdgelessTextBlockComponent } from '@blocks/edgeless-text-block/edgeless-text-block.js';
 
 import { Bound } from '@blocksuite/global/utils';
 import { type Page, expect } from '@playwright/test';
