@@ -61,6 +61,13 @@ export class AffineLink extends ShadowlessElement {
     }
   `;
 
+  // Workaround for links not working in contenteditable div
+  // see also https://stackoverflow.com/questions/12059211/how-to-make-clickable-anchor-in-contenteditable-div
+  //
+  // Note: We cannot use JS to directly open a new page as this may be blocked by the browser.
+  //
+  // Please also note that when readonly mode active,
+  // this workaround is not necessary and links work normally.
   // see https://github.com/toeverything/AFFiNE/issues/1540
   private _onMouseUp() {
     const anchorElement = this.querySelector('a');
@@ -138,13 +145,6 @@ export class AffineLink extends ShadowlessElement {
     return selfInlineRange;
   }
 
-  // Workaround for links not working in contenteditable div
-  // see also https://stackoverflow.com/questions/12059211/how-to-make-clickable-anchor-in-contenteditable-div
-  //
-  // Note: We cannot use JS to directly open a new page as this may be blocked by the browser.
-  //
-  // Please also note that when readonly mode active,
-  // this workaround is not necessary and links work normally.
   get std() {
     const std = this.block.std;
     assertExists(std);

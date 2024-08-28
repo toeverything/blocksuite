@@ -1,3 +1,4 @@
+import type { DatabaseBlockModel } from '@blocksuite/affine-model';
 import type {
   EmbedLinkedDocModel,
   EmbedSyncedDocModel,
@@ -8,8 +9,6 @@ import type {
 import type { DeltaOperation, JobMiddleware } from '@blocksuite/store';
 
 import { assertExists } from '@blocksuite/global/utils';
-
-import type { DatabaseBlockModel } from '../../database-block/index.js';
 
 import { DEFAULT_IMAGE_PROXY_ENDPOINT } from '../consts.js';
 
@@ -81,6 +80,7 @@ export const replaceIdMiddleware: JobMiddleware = ({ slots, collection }) => {
       }
     }
 
+    // TODO(@fundon): process linked block/element
     if (
       payload.type === 'block' &&
       payload.snapshot.flavour === 'affine:embed-linked-doc'

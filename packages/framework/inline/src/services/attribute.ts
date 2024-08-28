@@ -70,7 +70,7 @@ export class AttributeService<TextAttributes extends BaseTextAttributes> {
     }
     return Object.fromEntries(
       // filter out undefined values
-      Object.entries(attributeResult.data).filter(([_, v]) => v || v === null)
+      Object.entries(attributeResult.data).filter(([_, v]) => v !== undefined)
     ) as TextAttributes;
   };
 

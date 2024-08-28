@@ -95,7 +95,7 @@ async function initEmptyEditor({
           const editor = document.createElement('affine-editor-container');
           editor.doc = doc;
           editor.autofocus = true;
-          editor.slots.docLinkClicked.on(({ docId }) => {
+          editor.slots.docLinkClicked.on(({ pageId: docId }) => {
             const newDoc = collection.getDoc(docId);
             if (!newDoc) {
               throw new Error(`Failed to jump to page ${docId}`);
@@ -500,8 +500,8 @@ export async function initEmptyDatabaseState(page: Page, rootId?: string) {
         model,
         databaseService.viewPresets.tableViewConfig
       );
+      databaseService.applyColumnUpdate(model);
     }
-    model.applyColumnUpdate();
 
     doc.captureSync();
     return { rootId, noteId, databaseId };
@@ -536,45 +536,43 @@ export async function initKanbanViewState(
         noteId
       );
       const model = doc.getBlockById(databaseId) as DatabaseBlockModel;
-      const database = doc.getBlockById(databaseId) as DatabaseBlockModel;
-
-      const rowIds = config.rows.map(rowText => {
-        const rowId = doc.addBlock(
-          'affine:paragraph',
-          { type: 'text', text: new doc.Text(rowText) },
-          databaseId
-        );
-        return rowId;
-      });
-      config.columns.forEach(column => {
-        const columnId = database.addColumn('end', {
-          data: {},
-          name: column.type,
-          type: column.type,
-        });
-        rowIds.forEach((rowId, index) => {
-          const value = column.value?.[index];
-          if (value !== undefined) {
-            model.updateCell(rowId, {
-              columnId,
-              value:
-                column.type === 'rich-text'
-                  ? new doc.Text(value as string)
-                  : value,
-            });
-          }
-        });
-      });
       await new Promise(resolve => setTimeout(resolve, 100));
       const databaseBlock = document.querySelector('affine-database');
       const databaseService = databaseBlock?.service;
       if (databaseService) {
+        const rowIds = config.rows.map(rowText => {
+          const rowId = doc.addBlock(
+            'affine:paragraph',
+            { type: 'text', text: new doc.Text(rowText) },
+            databaseId
+          );
+          return rowId;
+        });
+        config.columns.forEach(column => {
+          const columnId = databaseService.addColumn(model, 'end', {
+            data: {},
+            name: column.type,
+            type: column.type,
+          });
+          rowIds.forEach((rowId, index) => {
+            const value = column.value?.[index];
+            if (value !== undefined) {
+              databaseService.updateCell(model, rowId, {
+                columnId,
+                value:
+                  column.type === 'rich-text'
+                    ? new doc.Text(value as string)
+                    : value,
+              });
+            }
+          });
+        });
         databaseService.databaseViewInitEmpty(
           model,
           databaseService.viewPresets.kanbanViewConfig
         );
+        databaseService.applyColumnUpdate(model);
       }
-      model.applyColumnUpdate();
       doc.captureSync();
       return { rootId, noteId, databaseId };
     },
@@ -612,8 +610,8 @@ export async function initEmptyDatabaseWithParagraphState(
         model,
         databaseService.viewPresets.tableViewConfig
       );
+      databaseService.applyColumnUpdate(model);
     }
-    model.applyColumnUpdate();
     doc.addBlock('affine:paragraph', {}, noteId);
 
     doc.captureSync();

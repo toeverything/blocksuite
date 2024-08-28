@@ -9,8 +9,14 @@ import {
   ShapeSchema,
   TextSchema,
 } from '@blocksuite/affine-shared/utils';
-import { DisposableGroup, Slot } from '@blocksuite/global/utils';
-import { isPlainObject, merge } from 'merge';
+import {
+  type DeepPartial,
+  DisposableGroup,
+  Slot,
+} from '@blocksuite/global/utils';
+import { type Signal, computed, signal } from '@lit-labs/preact-signals';
+import isPlainObject from 'lodash.isplainobject';
+import merge from 'lodash.merge';
 import { z } from 'zod';
 
 const LastPropsSchema = z.object({
@@ -74,20 +80,11 @@ export type SerializedViewport = z.infer<
 export class EditPropsStore {
   private _disposables = new DisposableGroup();
 
-  private _lastProps: LastProps = LastPropsSchema.parse(
-    Object.entries(LastPropsSchema.shape).reduce((value, [key, schema]) => {
-      return {
-        ...value,
-        [key]: schema.parse(undefined),
-      };
-    }, {})
-  );
+  private innerProps$: Signal<DeepPartial<LastProps>> = signal({});
+
+  lastProps$: Signal<LastProps>;
 
   slots = {
-    lastPropsUpdated: new Slot<{
-      type: LastPropsKey;
-      props: Record<string, unknown>;
-    }>(),
     storageUpdated: new Slot<{
       key: StoragePropsKey;
       value: StorageProps[StoragePropsKey];
@@ -95,13 +92,32 @@ export class EditPropsStore {
   };
 
   constructor(private _service: BlockService) {
+    const initProps: LastProps = LastPropsSchema.parse(
+      Object.entries(LastPropsSchema.shape).reduce((value, [key, schema]) => {
+        return {
+          ...value,
+          [key]: schema.parse(undefined),
+        };
+      }, {})
+    );
+
     const props = sessionStorage.getItem(SESSION_PROP_KEY);
     if (props) {
       const result = LastPropsSchema.safeParse(JSON.parse(props));
       if (result.success) {
-        this._lastProps = result.data;
+        merge({ ...initProps }, result.data);
       }
     }
+
+    this.lastProps$ = computed(() => {
+      const editorSetting$ =
+        this._service.std.spec.getConfig('affine:page')?.editorSetting;
+      return merge(
+        { ...initProps },
+        editorSetting$?.value,
+        this.innerProps$.value
+      );
+    });
   }
 
   private _getStorage<T extends StoragePropsKey>(key: T) {
@@ -138,17 +154,16 @@ export class EditPropsStore {
   ) {
     if (!isLastPropType(type)) return;
 
-    const lastProps = this._lastProps[type];
+    const lastProps = this.lastProps$.value[type];
     deepAssign(props, lastProps);
   }
 
   dispose() {
     this._disposables.dispose();
-    this.slots.lastPropsUpdated.dispose();
   }
 
   getLastProps<T extends LastPropsKey>(type: T) {
-    return this._lastProps[type] as LastProps[T];
+    return this.lastProps$.value[type] as LastProps[T];
   }
 
   getStorage<T extends StoragePropsKey>(key: T) {
@@ -178,15 +193,17 @@ export class EditPropsStore {
   ) {
     if (!isLastPropType(type)) return;
 
-    const props = this._lastProps[type];
     const overrideProps = extractProps(
       recordProps,
       LastPropsSchema.shape[type]._def.innerType
     );
     if (Object.keys(overrideProps).length === 0) return;
 
-    merge(props, overrideProps);
-    this.slots.lastPropsUpdated.emit({ type, props: overrideProps });
+    const innerProps = this.innerProps$.value;
+    this.innerProps$.value = merge(
+      { ...innerProps },
+      { [type]: overrideProps }
+    );
   }
 
   setStorage<T extends StoragePropsKey>(key: T, value: StorageProps[T]) {

@@ -1,8 +1,8 @@
+import type { InsertToPosition } from '@blocksuite/affine-shared/utils';
+
 import { PlusIcon } from '@blocksuite/affine-components/icons';
 import { css, html } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
-
-import type { InsertToPosition } from '../../../../types.js';
 
 import { startDrag } from '../../../../utils/drag.js';
 import { WidgetBase } from '../../../widget-base.js';

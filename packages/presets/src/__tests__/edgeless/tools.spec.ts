@@ -2,8 +2,8 @@ import type {
   EdgelessRootBlockComponent,
   SurfaceBlockComponent,
 } from '@blocksuite/blocks';
-import type {} from '@blocksuite/blocks';
 
+import { DocMode } from '@blocksuite/blocks';
 import { beforeEach, describe, expect, test } from 'vitest';
 
 import { wait } from '../utils/common.js';
@@ -17,7 +17,7 @@ describe('default tool', () => {
   let service!: EdgelessRootBlockComponent['service'];
 
   beforeEach(async () => {
-    const cleanup = await setupEditor('edgeless');
+    const cleanup = await setupEditor(DocMode.Edgeless);
 
     edgeless = getDocRootBlock(doc, editor, 'edgeless');
     surface = getSurface(window.doc, window.editor);

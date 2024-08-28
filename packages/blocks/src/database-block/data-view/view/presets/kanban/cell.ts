@@ -1,6 +1,7 @@
 // related component
 
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
+import { SignalWatcher } from '@lit-labs/preact-signals';
 import { css } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { createRef } from 'lit/directives/ref.js';
@@ -55,7 +56,9 @@ const styles = css`
 `;
 
 @customElement('affine-data-view-kanban-cell')
-export class KanbanCell extends WithDisposable(ShadowlessElement) {
+export class KanbanCell extends SignalWatcher(
+  WithDisposable(ShadowlessElement)
+) {
   private _cell = createRef<DataViewCellLifeCycle>();
 
   static override styles = styles;

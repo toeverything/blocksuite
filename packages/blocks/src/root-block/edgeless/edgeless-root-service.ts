@@ -1,6 +1,7 @@
 import type {
   FrameBlockModel,
   GroupElementModel,
+  ReferenceInfo,
 } from '@blocksuite/affine-model';
 import type { BlockServiceOptions } from '@blocksuite/block-std';
 import type { PointTestOptions } from '@blocksuite/block-std/gfx';
@@ -115,10 +116,7 @@ export class EdgelessRootService extends RootService {
     elementResizeEnd: new Slot(),
     toggleNoteSlicer: new Slot(),
 
-    docLinkClicked: new Slot<{
-      docId: string;
-      blockId?: string;
-    }>(),
+    docLinkClicked: new Slot<ReferenceInfo>(),
     tagClicked: new Slot<{ tagId: string }>(),
     toolbarLocked: new Slot<boolean>(),
   };
@@ -377,34 +375,40 @@ export class EdgelessRootService extends RootService {
   pickElement(
     x: number,
     y: number,
-    options: { all: true; expand?: number }
+    options: { all: true } & PointTestOptions
   ): BlockSuite.EdgelessModel[];
-
   pickElement(
     x: number,
     y: number,
-    options?: { all: false; expand?: number }
+    options?: { all?: false } & PointTestOptions
   ): BlockSuite.EdgelessModel | null;
-
   pickElement(
     x: number,
     y: number,
-    options: PointTestOptions = { all: false, expand: 10 }
+    options: PointTestOptions & {
+      all?: boolean;
+    } = { all: false, hitThreshold: 10 }
   ): BlockSuite.EdgelessModel[] | BlockSuite.EdgelessModel | null {
-    options.expand ??= 10;
     options.zoom = this._viewport.zoom;
+    options.hitThreshold ??= 10;
 
+    const hitThreshold = options.hitThreshold;
+    const responsePadding = options.responsePadding ?? [
+      hitThreshold / 2,
+      hitThreshold / 2,
+    ];
+    const all = options.all ?? false;
     const hitTestBound = {
-      x: x - options.expand / 2,
-      y: y - options.expand / 2,
-      w: options.expand,
-      h: options.expand,
+      x: x - responsePadding[1],
+      y: y - responsePadding[0],
+      w: responsePadding[1] * 2,
+      h: responsePadding[0] * 2,
     };
     const pickCanvasElement = () => {
       const candidates = this._layer.canvasGrid.search(hitTestBound);
       const picked = candidates.filter(
         element =>
-          element.includesPoint(x, y, options, this.host) ||
+          element.includesPoint(x, y, options as PointTestOptions, this.host) ||
           element.externalBound?.isPointInBound([x, y])
       );
 
@@ -414,7 +418,7 @@ export class EdgelessRootService extends RootService {
       const candidates = this._layer.blocksGrid.search(hitTestBound);
       const picked = candidates.filter(
         element =>
-          element.includesPoint(x, y, options, this.host) ||
+          element.includesPoint(x, y, options as PointTestOptions, this.host) ||
           element.externalBound?.isPointInBound([x, y])
       );
       return picked as BlockSuite.EdgelessModel[];
@@ -422,14 +426,14 @@ export class EdgelessRootService extends RootService {
     const pickFrames = () => {
       return this._layer.frames.filter(
         frame =>
-          frame.includesPoint(x, y, options) ||
+          frame.includesPoint(x, y, options as PointTestOptions) ||
           frame.externalBound?.isPointInBound([x, y])
       ) as BlockSuite.EdgelessModel[];
     };
 
     const frames = pickFrames();
 
-    if (frames.length === 0 || options.all) {
+    if (frames.length === 0 || all) {
       let results = pickCanvasElement().concat(pickBlock());
 
       // FIXME: optimazation on ordered element

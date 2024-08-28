@@ -1,18 +1,18 @@
-export { richTextColumnConfig } from './columns/rich-text/cell-renderer.js';
-import type { DatabaseBlockModel } from './database-model.js';
+import type { DatabaseBlockModel } from '@blocksuite/affine-model';
+
 import type { DatabaseBlockService } from './database-service.js';
 
+export { richTextColumnConfig } from './columns/rich-text/cell-renderer.js';
+
+export type { DatabaseOptionsConfig } from './config.js';
 export {
   columnPresets,
   viewPresets,
   widgetPresets,
 } from './data-view/index.js';
-export type { ColumnDataUpdater, InsertToPosition } from './data-view/types.js';
-export { insertPositionToIndex } from './data-view/utils/insert.js';
+export type { ColumnDataUpdater } from './data-view/types.js';
 export * from './database-block.js';
-export * from './database-model.js';
 export * from './database-service.js';
-export * from './types.js';
 declare global {
   namespace BlockSuite {
     interface BlockServices {
@@ -23,4 +23,3 @@ declare global {
     }
   }
 }
-export * from './utils.js';

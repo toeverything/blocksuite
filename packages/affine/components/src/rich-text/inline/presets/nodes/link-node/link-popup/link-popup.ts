@@ -331,30 +331,33 @@ export class LinkPopup extends WithDisposable(LitElement) {
     return renderActions([
       [
         {
-          name: 'Open',
+          label: 'Open',
+          type: 'open',
           icon: OpenIcon,
-          handler: this._openLink,
+          action: this._openLink,
         },
 
         {
-          name: 'Copy',
+          label: 'Copy',
+          type: 'copy',
           icon: CopyIcon,
-          handler: this._copyUrl,
+          action: this._copyUrl,
         },
 
         {
-          name: 'Remove link',
+          label: 'Remove link',
+          type: 'remove-link',
           icon: UnlinkIcon,
-          handler: this._removeLink,
+          action: this._removeLink,
         },
       ],
 
       [
         {
           type: 'delete',
-          name: 'Delete',
+          label: 'Delete',
           icon: DeleteIcon,
-          handler: this._delete,
+          action: this._delete,
         },
       ],
     ]);
@@ -428,20 +431,20 @@ export class LinkPopup extends WithDisposable(LitElement) {
 
     buttons.push({
       type: 'inline',
-      name: 'Inline view',
+      label: 'Inline view',
     });
 
     buttons.push({
       type: 'card',
-      name: 'Card view',
-      handler: () => this._convertToCardView(),
+      label: 'Card view',
+      action: () => this._convertToCardView(),
     });
 
     if (this._canConvertToEmbedView) {
       buttons.push({
         type: 'embed',
-        name: 'Embed view',
-        handler: () => this._convertToEmbedView(),
+        label: 'Embed view',
+        action: () => this._convertToEmbedView(),
       });
     }
 
@@ -464,13 +467,13 @@ export class LinkPopup extends WithDisposable(LitElement) {
           ${repeat(
             buttons,
             button => button.type,
-            ({ type, name, handler }) => html`
+            ({ type, label, action }) => html`
               <editor-menu-action
                 data-testid=${`link-to-${type}`}
                 ?data-selected=${type === 'inline'}
-                @click=${handler}
+                @click=${action}
               >
-                ${name}
+                ${label}
               </editor-menu-action>
             `
           )}

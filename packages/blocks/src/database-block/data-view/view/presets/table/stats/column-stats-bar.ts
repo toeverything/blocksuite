@@ -1,4 +1,5 @@
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
+import { SignalWatcher } from '@lit-labs/preact-signals';
 import { css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
@@ -18,7 +19,9 @@ const styles = css`
 `;
 
 @customElement('affine-database-column-stats')
-export class DataBaseColumnStats extends WithDisposable(ShadowlessElement) {
+export class DataBaseColumnStats extends SignalWatcher(
+  WithDisposable(ShadowlessElement)
+) {
   static override styles = styles;
 
   protected override render() {

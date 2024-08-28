@@ -41,11 +41,12 @@
     "fractional-indexing": "^3.2.0",
     "html2canvas": "^1.4.1",
     "lit": "^3.2.0",
+    "lodash.isplainobject": "^4.0.6",
+    "lodash.merge": "^4.6.2",
     "mdast-util-gfm-autolink-literal": "^2.0.1",
     "mdast-util-gfm-strikethrough": "^2.0.0",
     "mdast-util-gfm-table": "^2.0.0",
     "mdast-util-gfm-task-list-item": "^2.0.0",
-    "merge": "^2.1.1",
     "micromark-extension-gfm-autolink-literal": "^2.1.0",
     "micromark-extension-gfm-strikethrough": "^2.1.0",
     "micromark-extension-gfm-table": "^2.1.0",
@@ -94,6 +95,8 @@
     "schemas.js"
   ],
   "devDependencies": {
-    "@types/dompurify": "^3.0.5"
+    "@types/dompurify": "^3.0.5",
+    "@types/lodash.isplainobject": "^4.0.9",
+    "@types/lodash.merge": "^4.6.9"
   }
 }

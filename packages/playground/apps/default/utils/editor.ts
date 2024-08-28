@@ -3,6 +3,7 @@ import type { DocModeService, PageRootService } from '@blocksuite/blocks';
 import type { BlockCollection } from '@blocksuite/store';
 import type { DocCollection } from '@blocksuite/store';
 
+import { DocMode } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
 import { AffineEditorContainer } from '@blocksuite/presets';
 
@@ -20,7 +21,8 @@ function setDocModeFromUrlParams(service: DocModeService) {
   const params = new URLSearchParams(location.search);
   const paramMode = params.get('mode');
   if (paramMode) {
-    const docMode = paramMode === 'page' ? 'page' : 'edgeless';
+    const docMode =
+      paramMode === DocMode.Page ? DocMode.Page : DocMode.Edgeless;
     service.setMode(docMode);
   }
 }
@@ -55,7 +57,7 @@ export async function mountDefaultDocEditor(collection: DocCollection) {
   });
   editor.doc = doc;
   editor.mode = modeService.getMode();
-  editor.slots.docLinkClicked.on(({ docId }) => {
+  editor.slots.docLinkClicked.on(({ pageId: docId }) => {
     const target = collection.getDoc(docId);
     if (!target) {
       throw new Error(`Failed to jump to doc ${docId}`);

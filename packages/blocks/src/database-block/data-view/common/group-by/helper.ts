@@ -1,12 +1,14 @@
+import {
+  type InsertToPosition,
+  insertPositionToIndex,
+} from '@blocksuite/affine-shared/utils';
 import { type ReadonlySignal, computed } from '@lit-labs/preact-signals';
 
 import type { TType } from '../../logical/typesystem.js';
-import type { InsertToPosition } from '../../types.js';
 import type { Column } from '../../view-manager/column.js';
 import type { SingleView } from '../../view-manager/single-view.js';
 import type { GroupBy, GroupProperty } from '../types.js';
 
-import { insertPositionToIndex } from '../../utils/insert.js';
 import { groupByMatcher } from './matcher.js';
 
 export type GroupData = {

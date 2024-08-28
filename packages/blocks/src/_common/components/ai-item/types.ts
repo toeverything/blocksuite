@@ -1,7 +1,6 @@
+import type { DocMode } from '@blocksuite/affine-model';
 import type { Chain, EditorHost, InitCommandCtx } from '@blocksuite/block-std';
 import type { TemplateResult } from 'lit';
-
-import type { DocMode } from '../../utils/index.js';
 
 export interface AIItemGroupConfig {
   name?: string;

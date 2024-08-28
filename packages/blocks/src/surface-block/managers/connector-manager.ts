@@ -897,7 +897,7 @@ export class ConnectionOverlay extends Overlay {
   renderConnector(point: IVec, excludedIds: string[] = []) {
     const connectables = this._findConnectablesInViews();
     const service = this._service;
-    let target;
+    const target = [];
 
     this._clearRect();
 
@@ -934,7 +934,7 @@ export class ConnectionOverlay extends Overlay {
         const d = Vec.dist(anchorViewCoord, pointerViewCoord);
         if (d < shortestDistance) {
           shortestDistance = d;
-          target = connectable;
+          target.push(connectable);
           this.highlightPoint = anchor.point;
           result = {
             id: connectable.id,
@@ -955,7 +955,7 @@ export class ConnectionOverlay extends Overlay {
           nearestPoint
         );
         this._renderer?.refresh();
-        target = connectable;
+        target.push(connectable);
         result = {
           id: connectable.id,
           position: bound
@@ -964,7 +964,7 @@ export class ConnectionOverlay extends Overlay {
         };
       }
 
-      if (result) break;
+      if (result) continue;
 
       // if not, check if in inside of the element
       if (
@@ -977,15 +977,15 @@ export class ConnectionOverlay extends Overlay {
           this._service.host
         )
       ) {
-        target = connectable;
+        target.push(connectable);
         result = {
           id: connectable.id,
         };
       }
     }
 
-    if (target instanceof GroupElementModel) {
-      this.targetBounds = Bound.deserialize(target.xywh);
+    if (last(target) instanceof GroupElementModel) {
+      this.targetBounds = Bound.deserialize(last(target)!.xywh);
     } else {
       this.targetBounds = null;
     }

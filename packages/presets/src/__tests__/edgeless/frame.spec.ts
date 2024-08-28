@@ -1,5 +1,6 @@
 import type { EdgelessRootBlockComponent } from '@blocksuite/blocks';
 
+import { DocMode } from '@blocksuite/blocks';
 import { Text } from '@blocksuite/store';
 import { beforeEach, describe, expect, test } from 'vitest';
 
@@ -11,7 +12,7 @@ describe('frame', () => {
   let service!: EdgelessRootBlockComponent['service'];
 
   beforeEach(async () => {
-    const cleanup = await setupEditor('edgeless');
+    const cleanup = await setupEditor(DocMode.Edgeless);
     service = getDocRootBlock(window.doc, window.editor, 'edgeless').service;
 
     return cleanup;

@@ -1,4 +1,5 @@
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
+import { SignalWatcher } from '@lit-labs/preact-signals';
 import { css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { html } from 'lit/static-html.js';
@@ -27,7 +28,9 @@ const styles = css`
 `;
 
 @customElement('affine-data-view-kanban-header')
-export class KanbanHeader extends WithDisposable(ShadowlessElement) {
+export class KanbanHeader extends SignalWatcher(
+  WithDisposable(ShadowlessElement)
+) {
   private clickGroup = (e: MouseEvent) => {
     popMenu(e.target as HTMLElement, {
       options: {

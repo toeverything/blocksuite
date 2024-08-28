@@ -65,7 +65,9 @@ export class ThemeObserver {
     }
 
     if (color.light && color.dark) {
-      return `light-dark(${color.light}, ${color.dark})`;
+      return this.mode === ColorScheme.Dark
+        ? `var(${color.dark})`
+        : `var(${color.light})`;
     }
 
     return color.normal ?? fallback;

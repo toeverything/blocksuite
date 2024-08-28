@@ -1,4 +1,10 @@
-import type { InsertToPosition } from '../types.js';
+export type InsertToPosition =
+  | 'end'
+  | 'start'
+  | {
+      id: string;
+      before: boolean;
+    };
 
 export function insertPositionToIndex<
   T extends {

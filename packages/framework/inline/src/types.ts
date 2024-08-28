@@ -1,5 +1,6 @@
 import type { TemplateResult } from 'lit';
 
+import type { InlineEditor } from './inline-editor.js';
 import type { BaseTextAttributes } from './utils/index.js';
 
 export type DeltaInsert<
@@ -12,6 +13,7 @@ export type DeltaInsert<
 export type AttributeRenderer<
   TextAttributes extends BaseTextAttributes = BaseTextAttributes,
 > = (props: {
+  editor: InlineEditor<TextAttributes>;
   delta: DeltaInsert<TextAttributes>;
   selected: boolean;
   startOffset: number;

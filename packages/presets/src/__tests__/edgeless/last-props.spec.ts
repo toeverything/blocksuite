@@ -6,6 +6,7 @@ import type {
   TextElementModel,
 } from '@blocksuite/blocks';
 
+import { DocMode } from '@blocksuite/blocks';
 import { beforeEach, describe, expect, test } from 'vitest';
 
 import { getDocRootBlock } from '../utils/edgeless.js';
@@ -17,7 +18,7 @@ describe('apply last props', () => {
 
   beforeEach(async () => {
     sessionStorage.removeItem('blocksuite:prop:record');
-    const cleanup = await setupEditor('edgeless');
+    const cleanup = await setupEditor(DocMode.Edgeless);
     edgelessRoot = getDocRootBlock(window.doc, window.editor, 'edgeless');
     service = edgelessRoot.service;
     return cleanup;

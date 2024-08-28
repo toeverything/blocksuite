@@ -1,3 +1,5 @@
+import type { DatabaseBlockModel } from '@blocksuite/affine-model';
+
 import { CaptionedBlockComponent } from '@blocksuite/affine-components/caption';
 import {
   CopyIcon,
@@ -5,6 +7,7 @@ import {
   MoreHorizontalIcon,
 } from '@blocksuite/affine-components/icons';
 import { toast } from '@blocksuite/affine-components/toast';
+import { DatabaseBlockSchema } from '@blocksuite/affine-model';
 import { NOTE_SELECTOR } from '@blocksuite/affine-shared/consts';
 import { RANGE_SYNC_EXCLUDE_ATTR } from '@blocksuite/block-std';
 import { Rect } from '@blocksuite/global/utils';
@@ -15,7 +18,7 @@ import { customElement } from 'lit/decorators.js';
 
 import type { NoteBlockComponent } from '../note-block/index.js';
 import type { AffineInnerModalWidget } from '../root-block/index.js';
-import type { DatabaseBlockModel } from './database-model.js';
+import type { DatabaseOptionsConfig } from './config.js';
 import type { DatabaseBlockService } from './database-service.js';
 
 import { DragIndicator, popMenu } from '../_common/components/index.js';
@@ -43,7 +46,6 @@ import {
   renderUniLit,
   widgetPresets,
 } from './data-view/index.js';
-import { DatabaseBlockSchema } from './database-model.js';
 
 @customElement('affine-database')
 export class DatabaseBlockComponent extends CaptionedBlockComponent<
@@ -59,58 +61,51 @@ export class DatabaseBlockComponent extends CaptionedBlockComponent<
   };
 
   private _clickDatabaseOps = (e: MouseEvent) => {
-    popMenu(e.currentTarget as HTMLElement, {
-      options: {
-        input: {
-          initValue: this.model.title.toString(),
-          placeholder: 'Untitled',
-          onComplete: text => {
-            this.model.title.replace(0, this.model.title.length, text);
+    const options = this.optionsConfig.configure(this.model, {
+      input: {
+        initValue: this.model.title.toString(),
+        placeholder: 'Untitled',
+        onComplete: text => {
+          this.model.title.replace(0, this.model.title.length, text);
+        },
+      },
+      items: [
+        {
+          type: 'action',
+          icon: CopyIcon,
+          name: 'Copy',
+          select: () => {
+            const slice = Slice.fromModels(this.doc, [this.model]);
+            this.std.clipboard
+              .copySlice(slice)
+              .then(() => {
+                toast(this.host, 'Copied to clipboard');
+              })
+              .catch(console.error);
           },
         },
-        items: [
-          {
-            type: 'action',
-            icon: CopyIcon,
-            name: 'Copy',
-            select: () => {
-              const slice = Slice.fromModels(this.doc, [this.model]);
-              this.std.clipboard
-                .copySlice(slice)
-                .then(() => {
-                  toast(this.host, 'Copied to clipboard');
-                })
-                .catch(console.error);
-            },
-          },
-          // {
-          //   type: 'action',
-          //   icon: DuplicateIcon,
-          //   name: 'Duplicate',
-          //   select: () => {
-          //   },
-          // },
-          {
-            type: 'group',
-            name: '',
-            children: () => [
-              {
-                type: 'action',
-                icon: DeleteIcon,
-                class: 'delete-item',
-                name: 'Delete Database',
-                select: () => {
-                  this.model.children.slice().forEach(block => {
-                    this.doc.deleteBlock(block);
-                  });
-                  this.doc.deleteBlock(this.model);
-                },
+        {
+          type: 'group',
+          name: '',
+          children: () => [
+            {
+              type: 'action',
+              icon: DeleteIcon,
+              class: 'delete-item',
+              name: 'Delete Database',
+              select: () => {
+                this.model.children.slice().forEach(block => {
+                  this.doc.deleteBlock(block);
+                });
+                this.doc.deleteBlock(this.model);
               },
-            ],
-          },
-        ],
-      },
+            },
+          ],
+        },
+      ],
     });
+
+    popMenu(e.currentTarget as HTMLElement, { options });
   };
 
   private _dataSource?: DatabaseBlockDataSource;
@@ -385,6 +380,13 @@ export class DatabaseBlockComponent extends CaptionedBlockComponent<
     return this.rootComponent!.widgetComponents[
       AFFINE_INNER_MODAL_WIDGET
     ] as AffineInnerModalWidget;
+  }
+
+  get optionsConfig(): DatabaseOptionsConfig {
+    return {
+      configure: (_model, options) => options,
+      ...this.std.spec.getConfig('affine:page')?.databaseOptions,
+    };
   }
 
   override get topContenteditableElement() {

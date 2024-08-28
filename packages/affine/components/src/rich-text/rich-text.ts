@@ -116,6 +116,7 @@ export class RichText extends WithDisposable(ShadowlessElement) {
       height: 100%;
       width: 100%;
       overflow-x: auto;
+      overflow-y: hidden;
 
       scroll-margin-top: 50px;
       scroll-margin-bottom: 30px;

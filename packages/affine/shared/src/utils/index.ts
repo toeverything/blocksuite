@@ -3,6 +3,7 @@ export * from './button-popper.js';
 export * from './dom/index.js';
 export * from './event.js';
 export * from './file/index.js';
+export * from './insert.js';
 export * from './is-abort-error.js';
 export * from './math.js';
 export * from './model/index.js';

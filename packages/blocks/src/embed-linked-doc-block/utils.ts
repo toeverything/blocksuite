@@ -1,4 +1,7 @@
-import type { EmbedLinkedDocStyles } from '@blocksuite/affine-model';
+import type {
+  EmbedLinkedDocModel,
+  EmbedLinkedDocStyles,
+} from '@blocksuite/affine-model';
 import type { TemplateResult } from 'lit';
 
 import {
@@ -111,4 +114,16 @@ export function getEmbedLinkedDocIcons(
       };
     }
   }
+}
+
+/*
+ * Returns true if it is a link to block or element.
+ */
+export function isLinkToNode({ params }: EmbedLinkedDocModel) {
+  if (!params) return false;
+  const { mode, blockIds, elementIds } = params;
+  if (!mode) return false;
+  if (blockIds && blockIds.length > 0) return true;
+  if (elementIds && elementIds.length > 0) return true;
+  return false;
 }

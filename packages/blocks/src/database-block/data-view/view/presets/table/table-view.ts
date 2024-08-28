@@ -1,15 +1,17 @@
 // related component
 import { AddCursorIcon } from '@blocksuite/affine-components/icons';
+import {
+  type InsertToPosition,
+  insertPositionToIndex,
+} from '@blocksuite/affine-shared/utils';
 import { css } from 'lit';
 import { customElement } from 'lit/decorators.js';
 import { html } from 'lit/static-html.js';
 
 import type { GroupManager } from '../../../common/group-by/helper.js';
-import type { InsertToPosition } from '../../../types.js';
 import type { TableSingleView } from './table-view-manager.js';
 
 import { popMenu } from '../../../../../_common/components/index.js';
-import { insertPositionToIndex } from '../../../utils/insert.js';
 import { renderUniLit } from '../../../utils/uni-component/index.js';
 import { DataViewBase } from '../../data-view-base.js';
 import './cell.js';

@@ -1,8 +1,7 @@
 /* eslint-disable @typescript-eslint/no-restricted-imports */
-import type { EdgelessRootService } from '@blocksuite/blocks';
+import type { DocMode, EdgelessRootService } from '@blocksuite/blocks';
 import type { SerializedXYWH } from '@blocksuite/global/utils';
 import type { DeltaInsert } from '@blocksuite/inline/types';
-import type { AffineEditorContainer, CommentPanel } from '@blocksuite/presets';
 import type { SlDropdown } from '@shoelace-style/shoelace';
 import type { Pane } from 'tweakpane';
 
@@ -24,6 +23,7 @@ import {
   toast,
 } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
+import { AffineEditorContainer, type CommentPanel } from '@blocksuite/presets';
 import { type DocCollection, Job, Text } from '@blocksuite/store';
 import '@shoelace-style/shoelace/dist/components/button/button.js';
 import '@shoelace-style/shoelace/dist/components/button-group/button-group.js';
@@ -399,6 +399,34 @@ export class DebugMenu extends ShadowlessElement {
     this.framePanel.toggleDisplay();
   }
 
+  private _toggleMultipleEditors() {
+    const app = document.querySelector('#app');
+    if (app) {
+      const currentEditorCount = app.querySelectorAll(
+        'affine-editor-container'
+      ).length;
+      if (currentEditorCount === 1) {
+        // Add a second editor
+        const newEditor = document.createElement('affine-editor-container');
+        newEditor.doc = this.doc;
+        app.append(newEditor);
+        app.childNodes.forEach(child => {
+          if (child instanceof AffineEditorContainer) {
+            child.style.flex = '1';
+          }
+        });
+        (app as HTMLElement).style.display = 'flex';
+      } else {
+        // Remove the second editor
+        const secondEditor = app.querySelectorAll('affine-editor-container')[1];
+        if (secondEditor) {
+          secondEditor.remove();
+        }
+        (app as HTMLElement).style.display = 'block';
+      }
+    }
+  }
+
   private _toggleOutlinePanel() {
     this.outlinePanel.toggleDisplay();
   }
@@ -606,6 +634,9 @@ export class DebugMenu extends ShadowlessElement {
                 Toggle Comment Panel
               </sl-menu-item>
               <sl-menu-item @click="${this._addNote}"> Add Note </sl-menu-item>
+              <sl-menu-item @click="${this._toggleMultipleEditors}">
+                Toggle Multiple Editors
+              </sl-menu-item>
             </sl-menu>
           </sl-dropdown>
 
@@ -686,7 +717,7 @@ export class DebugMenu extends ShadowlessElement {
     return this.editor.mode;
   }
 
-  set mode(value: 'page' | 'edgeless') {
+  set mode(value: DocMode) {
     this.editor.mode = value;
   }
 

@@ -4,6 +4,7 @@ import type {
 } from '@blocksuite/blocks';
 
 import {
+  DocMode,
   type EdgelessRootBlockComponent,
   NoteDisplayMode,
 } from '@blocksuite/blocks';
@@ -19,7 +20,7 @@ describe('group', () => {
   let service!: EdgelessRootBlockComponent['service'];
 
   beforeEach(async () => {
-    const cleanup = await setupEditor('edgeless');
+    const cleanup = await setupEditor(DocMode.Edgeless);
     service = getDocRootBlock(window.doc, window.editor, 'edgeless').service;
 
     return cleanup;
@@ -199,7 +200,7 @@ describe('mindmap', () => {
   let service!: EdgelessRootBlockComponent['service'];
 
   beforeEach(async () => {
-    const cleanup = await setupEditor('edgeless');
+    const cleanup = await setupEditor(DocMode.Edgeless);
     service = getDocRootBlock(window.doc, window.editor, 'edgeless').service;
 
     return cleanup;

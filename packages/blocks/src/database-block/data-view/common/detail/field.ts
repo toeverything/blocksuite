@@ -1,5 +1,5 @@
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
-import { computed } from '@lit-labs/preact-signals';
+import { SignalWatcher, computed } from '@lit-labs/preact-signals';
 import { css } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
@@ -24,7 +24,9 @@ import {
 } from '../icons/index.js';
 
 @customElement('affine-data-view-record-field')
-export class RecordField extends WithDisposable(ShadowlessElement) {
+export class RecordField extends SignalWatcher(
+  WithDisposable(ShadowlessElement)
+) {
   private _cell = createRef<DataViewCellLifeCycle>();
 
   _click = (e: MouseEvent) => {

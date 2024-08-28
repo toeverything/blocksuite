@@ -1,19 +1,28 @@
+import { NoteDisplayMode } from '@blocksuite/affine-model';
 import { expect } from '@playwright/test';
 
 import * as actions from '../../utils/actions/edgeless.js';
-import { setEdgelessTool } from '../../utils/actions/edgeless.js';
+import {
+  addNote,
+  changeNoteDisplayModeWithId,
+  setEdgelessTool,
+  zoomResetByKeyboard,
+} from '../../utils/actions/edgeless.js';
 import {
   addBasicBrushElement,
   addBasicRectShapeElement,
   dragBetweenCoords,
   enterPlaygroundRoom,
   initEmptyEdgelessState,
+  selectAllByKeyboard,
   switchEditorMode,
 } from '../../utils/actions/index.js';
 import {
   assertEdgelessDraggingArea,
   assertEdgelessNonSelectedRect,
+  assertEdgelessSelectedElementHandleCount,
   assertEdgelessSelectedRect,
+  assertVisibleBlockCount,
 } from '../../utils/asserts.js';
 import { test } from '../../utils/playwright.js';
 
@@ -230,4 +239,27 @@ test('should be able to update selection dragging area after releasing space', a
       },
     }
   );
+});
+
+test('cmd+a should not select doc only note', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+
+  await switchEditorMode(page);
+  await zoomResetByKeyboard(page);
+  const note2 = await addNote(page, 'note2', 100, 200);
+  await addNote(page, 'note3', 200, 300);
+  await page.mouse.click(200, 500);
+  // assert add note success, there should be 2 notes in edgeless page
+  await assertVisibleBlockCount(page, 'edgeless-note', 3);
+
+  // change note display mode to doc only
+  await changeNoteDisplayModeWithId(page, note2, NoteDisplayMode.DocOnly);
+  // there should still be 2 notes in edgeless page
+  await assertVisibleBlockCount(page, 'edgeless-note', 2);
+
+  // cmd+a should not select doc only note
+  await selectAllByKeyboard(page);
+  // there should be only 2 notes in selection
+  await assertEdgelessSelectedElementHandleCount(page, 2);
 });

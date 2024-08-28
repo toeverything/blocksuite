@@ -1,4 +1,5 @@
 import {
+  DatabaseBlockSchema,
   FrameBlockSchema,
   ListBlockSchema,
   NoteBlockSchema,
@@ -12,7 +13,6 @@ import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { assert, describe, expect, test } from 'vitest';
 
-import { DatabaseBlockSchema } from '../../database-block/database-model.js';
 import { SurfaceBlockSchema } from '../../surface-block/surface-model.js';
 
 async function loadBinary(name: string) {

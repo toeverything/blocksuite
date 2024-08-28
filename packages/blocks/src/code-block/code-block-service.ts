@@ -1,5 +1,4 @@
 import {
-  type AffineTextAttributes,
   InlineManager,
   textKeymap,
 } from '@blocksuite/affine-components/rich-text';
@@ -14,22 +13,23 @@ import {
 } from 'shiki';
 import getWasm from 'shiki/wasm';
 
-import { codeBlockInlineSpecs } from './highlight/code-block-inline-specs.js';
+import {
+  type CodeBlockTextAttributes,
+  codeBlockInlineSpecs,
+} from './highlight/code-block-inline-specs.js';
 import {
   CODE_BLOCK_DEFAULT_DARK_THEME,
   CODE_BLOCK_DEFAULT_LIGHT_THEME,
 } from './highlight/const.js';
 
-export class CodeBlockService<
-  TextAttributes extends AffineTextAttributes = AffineTextAttributes,
-> extends BlockService<CodeBlockModel> {
+export class CodeBlockService extends BlockService<CodeBlockModel> {
   private _darkThemeKey: string | undefined;
 
   private _lightThemeKey: string | undefined;
 
   highlighter$: Signal<HighlighterCore | null> = signal(null);
 
-  readonly inlineManager = new InlineManager<TextAttributes>();
+  readonly inlineManager = new InlineManager<CodeBlockTextAttributes>();
 
   override mounted(): void {
     super.mounted();

@@ -10,7 +10,7 @@ import {
   MemoryBlobSource,
   NoopDocSource,
 } from '@blocksuite/sync';
-import { merge } from 'merge';
+import merge from 'lodash.merge';
 import { Awareness } from 'y-protocols/awareness.js';
 import * as Y from 'yjs';
 
@@ -117,7 +117,7 @@ export class DocCollection extends DocCollectionAddonType {
     this.doc = new BlockSuiteDoc({ guid: id });
     this.awarenessStore = new AwarenessStore(
       new Awareness<RawAwarenessState>(this.doc),
-      merge(true, FLAGS_PRESET, defaultFlags)
+      merge({ ...FLAGS_PRESET }, defaultFlags)
     );
 
     this.awarenessSync = new AwarenessEngine(

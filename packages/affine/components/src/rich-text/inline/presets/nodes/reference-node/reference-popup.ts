@@ -1,3 +1,4 @@
+import type { ReferenceInfo } from '@blocksuite/affine-model';
 import type { BlockComponent } from '@blocksuite/block-std';
 import type { InlineRange } from '@blocksuite/inline';
 
@@ -25,7 +26,7 @@ import {
 } from '../../../../../icons/index.js';
 import { isPeekable, peek } from '../../../../../peek/index.js';
 import {
-  type Action,
+  type MenuItem,
   renderActions,
   renderToolbarSeparator,
 } from '../../../../../toolbar/index.js';
@@ -42,10 +43,10 @@ export class ReferencePopup extends WithDisposable(LitElement) {
     assertExists(parent);
 
     const index = parent.children.indexOf(block.model);
-    const docId = this.referenceDocId;
+
     doc.addBlock(
       'affine:embed-linked-doc',
-      { pageId: docId },
+      this.referenceInfo,
       parent,
       index + 1
     );
@@ -116,10 +117,10 @@ export class ReferencePopup extends WithDisposable(LitElement) {
       [
         {
           type: 'delete',
-          name: 'Delete',
+          label: 'Delete',
           icon: DeleteIcon,
           disabled: this.doc.readonly,
-          handler: () => this._delete(),
+          action: () => this._delete(),
         },
       ],
     ]);
@@ -130,9 +131,9 @@ export class ReferencePopup extends WithDisposable(LitElement) {
   }
 
   private _openDoc() {
-    const refDocId = this.referenceDocId;
+    const pageId = this.referenceDocId;
     const block = this.block;
-    if (refDocId === block.doc.id) return;
+    if (pageId === block.doc.id) return;
     const rootId = block.doc.root?.id;
     if (!rootId) return;
 
@@ -141,15 +142,16 @@ export class ReferencePopup extends WithDisposable(LitElement) {
     };
     if (!rootComponent) return;
 
-    rootComponent.slots.docLinkClicked.emit({ docId: refDocId });
+    rootComponent.slots.docLinkClicked.emit(this.referenceInfo);
   }
 
   private _openMenuButton() {
-    const buttons: Action[] = [
+    const buttons: MenuItem[] = [
       {
-        name: 'Open this doc',
+        label: 'Open this doc',
+        type: 'open-this-doc',
         icon: ExpandFullSmallIcon,
-        handler: () => this._openDoc(),
+        action: () => this._openDoc(),
         disabled: this._openButtonDisabled,
       },
     ];
@@ -158,9 +160,10 @@ export class ReferencePopup extends WithDisposable(LitElement) {
 
     if (isPeekable(this.target)) {
       buttons.push({
-        name: 'Open in center peek',
+        label: 'Open in center peek',
+        type: 'open-in-center-peek',
         icon: CenterPeekIcon,
-        handler: () => peek(this.target),
+        action: () => peek(this.target),
       });
     }
 
@@ -186,14 +189,14 @@ export class ReferencePopup extends WithDisposable(LitElement) {
         <div data-size="large" data-orientation="vertical">
           ${repeat(
             buttons,
-            button => button.name,
-            ({ name, icon, handler, disabled }) => html`
+            button => button.label,
+            ({ label, icon, action, disabled }) => html`
               <editor-menu-action
-                aria-label=${name}
+                ?aria-label=${label}
                 ?disabled=${disabled}
-                @click=${handler}
+                @click=${action}
               >
-                ${icon}<span class="label">${name}</span>
+                ${icon}<span class="label">${label}</span>
               </editor-menu-action>
             `
           )}
@@ -207,26 +210,29 @@ export class ReferencePopup extends WithDisposable(LitElement) {
     const isSyncedDocEnabled = this.doc.awarenessStore.getFlag(
       'enable_synced_doc_block'
     );
-
     const buttons = [];
 
     buttons.push({
       type: 'inline',
-      name: 'Inline view',
+      label: 'Inline view',
     });
 
     buttons.push({
       type: 'card',
-      name: 'Card view',
-      handler: () => this._convertToCardView(),
+      label: 'Card view',
+      action: () => this._convertToCardView(),
+      disabled: this.doc.readonly,
     });
 
     if (isSyncedDocEnabled) {
       buttons.push({
         type: 'embed',
-        name: 'Embed view',
-        handler: () => this._convertToEmbedView(),
-        disabled: this._embedViewButtonDisabled,
+        label: 'Embed view',
+        action: () => this._convertToEmbedView(),
+        disabled:
+          this.doc.readonly ||
+          this.isLinkedNode ||
+          this._embedViewButtonDisabled,
       });
     }
 
@@ -249,15 +255,15 @@ export class ReferencePopup extends WithDisposable(LitElement) {
           ${repeat(
             buttons,
             button => button.type,
-            ({ type, name, handler, disabled }) => html`
+            ({ type, label, action, disabled }) => html`
               <editor-menu-action
-                aria-label=${name}
+                aria-label=${label}
                 data-testid=${`link-to-${type}`}
                 ?data-selected=${type === 'inline'}
                 ?disabled=${disabled}
-                @click=${handler}
+                @click=${action}
               >
-                ${name}
+                ${label}
               </editor-menu-action>
             `
           )}
@@ -384,8 +390,14 @@ export class ReferencePopup extends WithDisposable(LitElement) {
   @property({ attribute: false })
   accessor inlineEditor!: AffineInlineEditor;
 
+  @property({ attribute: false })
+  accessor isLinkedNode!: boolean;
+
   @query('.affine-reference-popover-container')
   accessor popupContainer!: HTMLDivElement;
+
+  @property({ type: Object })
+  accessor referenceInfo!: ReferenceInfo;
 
   @property({ attribute: false })
   accessor target!: LitElement;
@@ -402,6 +414,8 @@ declare global {
 
 export function toggleReferencePopup(
   target: LitElement,
+  isLinkedNode: boolean,
+  referenceInfo: ReferenceInfo,
   inlineEditor: AffineInlineEditor,
   targetInlineRange: InlineRange,
   docTitle: string,
@@ -409,6 +423,8 @@ export function toggleReferencePopup(
 ): ReferencePopup {
   const popup = new ReferencePopup();
   popup.target = target;
+  popup.isLinkedNode = isLinkedNode;
+  popup.referenceInfo = referenceInfo;
   popup.inlineEditor = inlineEditor;
   popup.targetInlineRange = targetInlineRange;
   popup.docTitle = docTitle;

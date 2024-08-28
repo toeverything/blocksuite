@@ -298,6 +298,22 @@ export async function assertRowCount(page: Page, count: number) {
   await expect(page.locator('.affine-database-block-row')).toHaveCount(count);
 }
 
+export async function assertVisibleBlockCount(
+  page: Page,
+  flavour: string,
+  count: number
+) {
+  // not only count, but also check if all the blocks are visible
+  const locator = page.locator(`affine-${flavour}`);
+  let visibleCount = 0;
+  for (let i = 0; i < count; i++) {
+    if (await locator.nth(i).isVisible()) {
+      visibleCount++;
+    }
+  }
+  expect(visibleCount).toEqual(count);
+}
+
 export async function assertRichTextInlineRange(
   page: Page,
   richTextIndex: number,
@@ -914,6 +930,15 @@ export async function assertEdgelessSelectedRect(page: Page, xywh: number[]) {
   expect(box.height).toBeCloseTo(h, 0);
 }
 
+export async function assertEdgelessSelectedElementHandleCount(
+  page: Page,
+  count: number
+) {
+  const editor = getEditorLocator(page);
+  const handles = editor.locator('.element-handle');
+  await expect(handles).toHaveCount(count);
+}
+
 export async function assertEdgelessRemoteSelectedRect(
   page: Page,
   xywh: number[],
@@ -1223,7 +1248,7 @@ export async function assertNotHasClass(locator: Locator, className: string) {
 }
 
 export async function assertNoteSequence(page: Page, expected: string) {
-  const actual = await page.locator('.edgeless-index-label').innerText();
+  const actual = await page.locator('.page-visible-index-label').innerText();
   expect(expected).toBe(actual);
 }
 

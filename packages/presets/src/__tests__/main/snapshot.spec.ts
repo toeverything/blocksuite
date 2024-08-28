@@ -1,5 +1,6 @@
 import type { SurfaceBlockModel } from '@blocksuite/blocks';
 
+import { DocMode } from '@blocksuite/blocks';
 import { beforeEach, expect, test } from 'vitest';
 
 import { wait } from '../utils/common.js';
@@ -13,7 +14,7 @@ const excludes = new Set([
 ]);
 
 beforeEach(async () => {
-  const cleanup = await setupEditor('page');
+  const cleanup = await setupEditor(DocMode.Page);
 
   return cleanup;
 });

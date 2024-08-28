@@ -1,7 +1,7 @@
+import type { DatabaseBlockModel } from '@blocksuite/affine-model';
 import type { BlockModel, Doc } from '@blocksuite/store';
 
 import {
-  type AffineTextAttributes,
   InlineManager,
   ReferenceNodeConfig,
   affineInlineMarkdownMatches,
@@ -11,20 +11,35 @@ import { BlockService } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 
 import type { ViewMeta } from './data-view/view/data-view.js';
-import type { DatabaseBlockModel } from './database-model.js';
 
 import { DatabaseSelection } from './data-view/common/selection.js';
 import { viewPresets } from './data-view/index.js';
-import { databaseViewInitEmpty, databaseViewInitTemplate } from './utils.js';
+import {
+  addColumn,
+  applyColumnUpdate,
+  databaseViewAddView,
+  databaseViewInitEmpty,
+  databaseViewInitTemplate,
+  updateCell,
+  updateView,
+} from './utils.js';
 
-export class DatabaseBlockService<
-  TextAttributes extends AffineTextAttributes = AffineTextAttributes,
-> extends BlockService<DatabaseBlockModel> {
+export class DatabaseBlockService extends BlockService<DatabaseBlockModel> {
+  addColumn = addColumn;
+
+  applyColumnUpdate = applyColumnUpdate;
+
+  databaseViewAddView = databaseViewAddView;
+
   databaseViewInitEmpty = databaseViewInitEmpty;
 
-  readonly inlineManager = new InlineManager<TextAttributes>();
+  readonly inlineManager = new InlineManager();
 
   readonly referenceNodeConfig = new ReferenceNodeConfig();
+
+  updateCell = updateCell;
+
+  updateView = updateView;
 
   viewPresets = viewPresets;
 
@@ -44,7 +59,7 @@ export class DatabaseBlockService<
       assertExists(parent);
       doc.addBlock('affine:paragraph', {}, parent.id);
     }
-    blockModel.applyColumnUpdate();
+    applyColumnUpdate(blockModel);
   }
 
   override mounted(): void {

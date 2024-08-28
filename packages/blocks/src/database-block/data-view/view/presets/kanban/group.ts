@@ -1,5 +1,6 @@
 import { AddCursorIcon } from '@blocksuite/affine-components/icons';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
+import { SignalWatcher } from '@lit-labs/preact-signals';
 import { css, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
@@ -88,7 +89,9 @@ const styles = css`
 `;
 
 @customElement('affine-data-view-kanban-group')
-export class KanbanGroup extends WithDisposable(ShadowlessElement) {
+export class KanbanGroup extends SignalWatcher(
+  WithDisposable(ShadowlessElement)
+) {
   private clickAddCard = () => {
     const id = this.view.addCard('end', this.group.key);
     requestAnimationFrame(() => {

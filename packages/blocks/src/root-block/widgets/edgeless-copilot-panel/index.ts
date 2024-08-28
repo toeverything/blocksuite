@@ -1,5 +1,6 @@
 import type { EditorHost } from '@blocksuite/block-std';
 
+import { DocMode } from '@blocksuite/affine-model';
 import { on, stopPropagation } from '@blocksuite/affine-shared/utils';
 import { WithDisposable } from '@blocksuite/block-std';
 import { LitElement, css, html, nothing } from 'lit';
@@ -55,7 +56,7 @@ export class EdgelessCopilotPanel extends WithDisposable(LitElement) {
     const chain = this._getChain();
     const groups = this.groups.reduce((pre, group) => {
       const filtered = group.items.filter(item =>
-        item.showWhen?.(chain, 'edgeless', this.host)
+        item.showWhen?.(chain, DocMode.Edgeless, this.host)
       );
 
       if (filtered.length > 0) pre.push({ ...group, items: filtered });

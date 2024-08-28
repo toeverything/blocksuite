@@ -1,7 +1,7 @@
 import type { ImageBlockModel, NoteBlockModel } from '@blocksuite/affine-model';
 import type { EditorHost } from '@blocksuite/block-std';
 
-import { NoteDisplayMode } from '@blocksuite/affine-model';
+import { DocMode, NoteDisplayMode } from '@blocksuite/affine-model';
 import { getBlockProps, matchFlavours } from '@blocksuite/affine-shared/utils';
 import { Bound, getCommonBound } from '@blocksuite/global/utils';
 import { assertExists } from '@blocksuite/global/utils';
@@ -15,7 +15,6 @@ import { type TemplateResult, css, render } from 'lit';
 
 import type { EmbedLinkedDocBlockComponent } from '../../embed-linked-doc-block/embed-linked-doc-block.js';
 import type { EmbedSyncedDocCard } from '../../embed-synced-doc-block/components/embed-synced-doc-card.js';
-import type { DocMode } from '../types.js';
 
 import { GfxBlockModel } from '../../root-block/edgeless/block-model.js';
 import {
@@ -587,6 +586,6 @@ export function createLinkedDocFromEdgelessElements(
     });
   });
   const pageService = host.spec.getService('affine:page');
-  pageService.docModeService.setMode('edgeless', linkedDoc.id);
+  pageService.docModeService.setMode(DocMode.Edgeless, linkedDoc.id);
   return linkedDoc;
 }

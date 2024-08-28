@@ -56,7 +56,7 @@ export type Connection = {
 export const getConnectorModeName = (mode: ConnectorMode) => {
   return {
     [ConnectorMode.Straight]: 'Straight',
-    [ConnectorMode.Orthogonal]: 'Orthogonal',
+    [ConnectorMode.Orthogonal]: 'Elbowed',
     [ConnectorMode.Curve]: 'Curve',
   }[mode];
 };
@@ -276,7 +276,7 @@ export class ConnectorElementModel extends GfxPrimitiveElementModel<ConnectorEle
 
     return (
       Vec.dist(point, currentPoint) <
-      (options?.expand ? strokeWidth / 2 : 0) + 8
+      (options?.hitThreshold ? strokeWidth / 2 : 0) + 8
     );
   }
 

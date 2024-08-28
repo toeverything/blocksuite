@@ -42,6 +42,7 @@ const TextAlignSchema = z.nativeEnum(TextAlign);
 const TextVerticalAlignSchema = z.nativeEnum(TextVerticalAlign);
 const ShapeTypeSchema = z.nativeEnum(ShapeType);
 const NoteDisplayModeSchema = z.nativeEnum(NoteDisplayMode);
+const ConnectorModeSchema = z.nativeEnum(ConnectorMode);
 
 export const ColorSchema = z.union([
   z.object({
@@ -69,7 +70,7 @@ export const ConnectorSchema = z
     strokeStyle: StrokeStyleSchema,
     strokeWidth: LineWidthSchema,
     rough: z.boolean(),
-    mode: z.number(),
+    mode: ConnectorModeSchema,
   })
   .default({
     frontEndpointStyle: DEFAULT_FRONT_END_POINT_STYLE,

@@ -6,6 +6,7 @@ import {
   WithDisposable,
 } from '@blocksuite/block-std';
 import {
+  DocMode,
   type EdgelessRootBlockComponent,
   type FrameBlockModel,
   generateKeyBetween,
@@ -220,7 +221,7 @@ export class FramePanelBody extends WithDisposable(ShadowlessElement) {
 
       const rootService = this.editorHost.spec.getService('affine:page');
       rootService.editPropsStore.setStorage('viewport', viewport);
-      rootService.docModeService.setMode('edgeless');
+      rootService.docModeService.setMode(DocMode.Edgeless);
     } else {
       this.edgeless.service.viewport.setViewportByBound(
         bound,

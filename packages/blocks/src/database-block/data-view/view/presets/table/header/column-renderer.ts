@@ -1,4 +1,5 @@
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
+import { SignalWatcher } from '@lit-labs/preact-signals';
 import { css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
@@ -9,7 +10,9 @@ import type { Column } from '../../../../view-manager/column.js';
 import type { TableSingleView } from '../table-view-manager.js';
 
 @customElement('affine-data-view-column-preview')
-export class DataViewColumnPreview extends WithDisposable(ShadowlessElement) {
+export class DataViewColumnPreview extends SignalWatcher(
+  WithDisposable(ShadowlessElement)
+) {
   static override styles = css`
     affine-data-view-column-preview {
       pointer-events: none;

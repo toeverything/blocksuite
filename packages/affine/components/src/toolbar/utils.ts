@@ -1,48 +1,85 @@
-import { type TemplateResult, html, nothing } from 'lit';
+import { html, nothing } from 'lit';
 import { classMap } from 'lit/directives/class-map.js';
 import { join } from 'lit/directives/join.js';
 import { repeat } from 'lit/directives/repeat.js';
 
-export type Action = {
-  icon: TemplateResult<1>;
-  name: string;
-  type?: string;
-  handler?: () => void;
-  disabled?: boolean;
-};
+import type { FatMenuItems, MenuItem, MenuItemGroup } from './types.js';
 
-// Group Actions
-export type FatActions = (Action | typeof nothing)[][];
+export function groupsToActions<T>(
+  groups: MenuItemGroup<T>[],
+  context: T
+): MenuItem[][] {
+  return groups
+    .filter(group => group.when?.(context) ?? true)
+    .map(({ items }) =>
+      items
+        .filter(item => item.when?.(context) ?? true)
+        .map(({ type, label, tooltip, icon, action, disabled, generate }) => {
+          if (action && typeof action === 'function') {
+            return {
+              type,
+              label,
+              tooltip,
+              icon,
+              action: () => {
+                action(context)?.catch(console.error);
+              },
+              disabled:
+                typeof disabled === 'function' ? disabled(context) : disabled,
+            };
+          }
+
+          if (generate && typeof generate === 'function') {
+            const result = generate(context);
+
+            if (!result) return;
+
+            return {
+              type,
+              label,
+              tooltip,
+              icon,
+              ...result,
+            };
+          }
+
+          return;
+        })
+        .filter(item => !!item)
+    );
+}
 
 export function renderActions(
-  fatActions: FatActions,
-  handler?: (action: Action) => Promise<void> | void,
+  fatMenuItems: FatMenuItems,
+  action?: (item: MenuItem) => Promise<void> | void,
   selectedName?: string
 ) {
   return join(
-    fatActions
+    fatMenuItems
       .filter(g => g.length)
-      .map(g => g.filter(a => a !== nothing) as Action[])
+      .map(g => g.filter(a => a !== nothing) as MenuItem[])
       .filter(g => g.length)
-      .map(actions =>
+      .map(items =>
         repeat(
-          actions,
-          action => action.name,
-          action => html`
-            <editor-menu-action
-              aria-label=${action.name}
-              class=${classMap({
-                delete: action.type === 'delete',
-              })}
-              ?data-selected=${selectedName === action.name}
-              ?disabled=${action.disabled}
-              @click=${action.handler
-                ? action.handler
-                : () => handler?.(action)}
-            >
-              ${action.icon}<span class="label">${action.name}</span>
-            </editor-menu-action>
-          `
+          items,
+          item => item.type,
+          item =>
+            item.render?.(item) ??
+            html`
+              <editor-menu-action
+                class=${classMap({
+                  delete: item.type === 'delete',
+                })}
+                ?aria-label=${item.label}
+                ?data-selected=${selectedName === item.label}
+                ?disabled=${item.disabled}
+                @click=${item.action ? item.action : () => action?.(item)}
+              >
+                ${item.icon}${item.label
+                  ? html`<span class="label">${item.label}</span>`
+                  : nothing}
+              </editor-menu-action>
+            `
         )
       ),
     () => html`
@@ -51,6 +88,10 @@ export function renderActions(
       ></editor-toolbar-separator>
     `
   );
+}
+
+export function renderGroups<T>(groups: MenuItemGroup<T>[], context: T) {
+  return renderActions(groupsToActions(groups, context));
 }
 
 export function renderToolbarSeparator() {

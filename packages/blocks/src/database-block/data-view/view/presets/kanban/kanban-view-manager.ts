@@ -1,7 +1,10 @@
+import {
+  type InsertToPosition,
+  insertPositionToIndex,
+} from '@blocksuite/affine-shared/utils';
 import { type ReadonlySignal, computed } from '@lit-labs/preact-signals';
 
 import type { TType } from '../../../logical/typesystem.js';
-import type { InsertToPosition } from '../../../types.js';
 import type { KanbanViewData } from './define.js';
 
 import { type FilterGroup, emptyFilterGroup } from '../../../common/ast.js';
@@ -12,7 +15,6 @@ import {
 } from '../../../common/group-by/helper.js';
 import { groupByMatcher } from '../../../common/group-by/matcher.js';
 import { evalFilter } from '../../../logical/eval-filter.js';
-import { insertPositionToIndex } from '../../../utils/insert.js';
 import { ColumnBase } from '../../../view-manager/column.js';
 import { SingleViewBase } from '../../../view-manager/single-view.js';
 

@@ -327,12 +327,22 @@ importers:
       '@toeverything/theme':
         specifier: ^1.0.7
         version: 1.0.7
+      katex:
+        specifier: ^0.16.11
+        version: 0.16.11
       lit:
         specifier: ^3.2.0
         version: 3.2.0
+      shiki:
+        specifier: ^1.12.0
+        version: 1.14.1
       zod:
         specifier: ^3.23.8
         version: 3.23.8
+    devDependencies:
+      '@types/katex':
+        specifier: ^0.16.7
+        version: 0.16.7
 
   packages/affine/model:
     dependencies:
@@ -471,6 +481,12 @@ importers:
       lit:
         specifier: ^3.2.0
         version: 3.2.0
+      lodash.isplainobject:
+        specifier: ^4.0.6
+        version: 4.0.6
+      lodash.merge:
+        specifier: ^4.6.2
+        version: 4.6.2
       mdast-util-gfm-autolink-literal:
         specifier: ^2.0.1
         version: 2.0.1
@@ -483,9 +499,6 @@ importers:
       mdast-util-gfm-task-list-item:
         specifier: ^2.0.0
         version: 2.0.0
-      merge:
-        specifier: ^2.1.1
-        version: 2.1.1
       micromark-extension-gfm-autolink-literal:
         specifier: ^2.1.0
         version: 2.1.0
@@ -538,6 +551,12 @@ importers:
       '@types/dompurify':
         specifier: ^3.0.5
         version: 3.0.5
+      '@types/lodash.isplainobject':
+        specifier: ^4.0.9
+        version: 4.0.9
+      '@types/lodash.merge':
+        specifier: ^4.6.9
+        version: 4.6.9
 
   packages/docs:
     dependencies:
@@ -673,9 +692,9 @@ importers:
       lodash.ismatch:
         specifier: ^4.4.0
         version: 4.4.0
-      merge:
-        specifier: ^2.1.1
-        version: 2.1.1
+      lodash.merge:
+        specifier: ^4.6.2
+        version: 4.6.2
       minimatch:
         specifier: ^10.0.1
         version: 10.0.1
@@ -689,6 +708,9 @@ importers:
         specifier: ^3.23.8
         version: 3.23.8
     devDependencies:
+      '@types/lodash.merge':
+        specifier: ^4.6.9
+        version: 4.6.9
       lit:
         specifier: ^3.2.0
         version: 3.2.0
@@ -752,18 +774,12 @@ importers:
       jszip:
         specifier: ^3.10.1
         version: 3.10.1
-      katex:
-        specifier: ^0.16.11
-        version: 0.16.11
       lit:
-        specifier: ^3.2.0
+        specifier: ^3.1.4
         version: 3.2.0
       lz-string:
         specifier: ^1.5.0
         version: 1.5.0
-      merge:
-        specifier: ^2.1.1
-        version: 2.1.1
       tweakpane:
         specifier: ^4.0.4
         version: 4.0.4
@@ -2851,6 +2867,12 @@ packages:
   '@types/lodash.ismatch@4.4.9':
     resolution: {integrity: sha512-qWihnStOPKH8urljLGm6ZOEdN/5Bt4vxKR81tL3L4ArUNLvcf9RW3QSnPs21eix5BiqioSWq4aAXD4Iep+d0fw==}
 
+  '@types/lodash.isplainobject@4.0.9':
+    resolution: {integrity: sha512-QC8nKcap5hRrbtIaPRjUMlcXXnLeayqQZPSaWJDx3xeuN17+2PW5wkmEJ4+lZgNnQRlSPzxjTYKCfV1uTnPaEg==}
+
+  '@types/lodash.merge@4.6.9':
+    resolution: {integrity: sha512-23sHDPmzd59kUgWyKGiOMO2Qb9YtqRO/x4IhkgNUiPQ1+5MUVqi6bCZeq9nBJ17msjIMbEIO5u+XW4Kz6aGUhQ==}
+
   '@types/lodash@4.17.7':
     resolution: {integrity: sha512-8wTvZawATi/lsmNu10/j2hk1KEP0IvjubqPE3cu1Xz7xfXXt5oCq3SNUz4fMIP4XGF9Ky+Ue2tBA3hcS7LSBlA==}
 
@@ -3830,7 +3852,7 @@ packages:
     engines: {node: '>= 0.8.0'}
 
   concat-map@0.0.1:
-    resolution: {integrity: sha512-/Srv4dswyQNBfohGpz9o6Yb3Gz3SrUDqBH5rTuhGR7ahtlbYKnVxw2bCFMRljaA7EXHaXZ8wsHdodFvbkhKmqg==}
+    resolution: {integrity: sha1-2Klr13/Wjfd5OnMDajug1UBdR3s=}
 
   connect-history-api-fallback@2.0.0:
     resolution: {integrity: sha512-U73+6lQFmfiNPrYbXqr6kZ1i1wiRqXnp2nhMsINseWXO8lDau0LGEffJ8kQi4EjLZympVgRdvqjAgiZ1tgzDDA==}
@@ -5788,9 +5810,6 @@ packages:
   merge2@1.4.1:
     resolution: {integrity: sha512-8q7VEgMJW4J8tcfVPy8g09NcQwZdbwFEqhe/WZkoIzjn/3TGDwtOCYtXGxA3O8tPzpczCCDgv+P2P5y00ZJOOg==}
     engines: {node: '>= 8'}
-
-  merge@2.1.1:
-    resolution: {integrity: sha512-jz+Cfrg9GWOZbQAnDQ4hlVnQky+341Yk5ru8bZSe6sIDTCIg8n9i/u7hSQGSVOF3C7lH6mGtqjkiT9G4wFLL0w==}
 
   methods@1.1.2:
     resolution: {integrity: sha512-iclAHeNqNm68zFtnZ0e+1L2yUIdvzNoauKU4WBA3VvH/vPFieF7qfRlwUZU+DA9P9bPXIS90ulxoUoCH23sV2w==}
@@ -10833,6 +10852,14 @@ snapshots:
     dependencies:
       '@types/lodash': 4.17.7
 
+  '@types/lodash.isplainobject@4.0.9':
+    dependencies:
+      '@types/lodash': 4.17.7
+
+  '@types/lodash.merge@4.6.9':
+    dependencies:
+      '@types/lodash': 4.17.7
+
   '@types/lodash@4.17.7': {}
 
   '@types/markdown-it@14.1.2':
@@ -14198,8 +14225,6 @@ snapshots:
   merge-stream@2.0.0: {}
 
   merge2@1.4.1: {}
-
-  merge@2.1.1: {}
 
   methods@1.1.2: {}
 

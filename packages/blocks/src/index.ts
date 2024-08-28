@@ -29,12 +29,13 @@ export type {
   NotificationService,
 } from './_common/components/index.js';
 export { scrollbarStyle } from './_common/components/index.js';
+export * from './_common/components/menu/index.js';
 export { type NavigatorMode } from './_common/edgeless/frame/consts.js';
 export { EmbedBlockComponent } from './_common/embed-block-helper/index.js';
 export { type TreeNode, type TreeNodeWithId } from './_common/mind-map/draw.js';
 export * from './_common/test-utils/test-utils.js';
 export * from './_common/transformers/index.js';
-export { type AbstractEditor, type DocMode } from './_common/types.js';
+export { type AbstractEditor } from './_common/types.js';
 export * from './attachment-block/index.js';
 export * from './bookmark-block/index.js';
 export * from './code-block/index.js';
@@ -132,10 +133,14 @@ export {
 } from '@blocksuite/affine-components/rich-text';
 export { toast } from '@blocksuite/affine-components/toast';
 export {
-  type Action,
-  type FatActions,
+  type AdvancedMenuItem,
+  type FatMenuItems,
+  type MenuItem,
+  type MenuItemGroup,
   Tooltip,
+  groupsToActions,
   renderActions,
+  renderGroups,
   renderToolbarSeparator,
 } from '@blocksuite/affine-components/toolbar';
 export * from '@blocksuite/affine-model';

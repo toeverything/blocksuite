@@ -24,13 +24,14 @@
     "flexsearch": "0.7.43",
     "lib0": "^0.2.97",
     "lodash.ismatch": "^4.4.0",
-    "merge": "^2.1.1",
+    "lodash.merge": "^4.6.2",
     "minimatch": "^10.0.1",
     "nanoid": "^5.0.7",
     "y-protocols": "^1.0.6",
     "zod": "^3.23.8"
   },
   "devDependencies": {
+    "@types/lodash.merge": "^4.6.9",
     "lit": "^3.2.0",
     "yjs": "^13.6.18"
   },

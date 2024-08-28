@@ -111,9 +111,7 @@ export const PageEditorActions = [
 
       const rootService = host.spec.getService('affine:page');
       if (!(rootService instanceof PageRootService)) return;
-      rootService.slots.docLinkClicked.emit({
-        docId: newDoc.id,
-      });
+      rootService.slots.docLinkClicked.emit({ pageId: newDoc.id });
       let complete = false;
       (function addContent() {
         if (complete) return;

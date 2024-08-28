@@ -14,7 +14,6 @@ import {
 import { NoteDisplayMode } from '@blocksuite/affine-model';
 import {
   matchFlavours,
-  requestThrottledConnectedFrame,
   stopPropagation,
 } from '@blocksuite/affine-shared/utils';
 import { WidgetComponent } from '@blocksuite/block-std';
@@ -113,8 +112,49 @@ export class EdgelessAutoConnectWidget extends WidgetComponent<
   EdgelessRootBlockComponent,
   EdgelessRootService
 > {
+  private _updateLabels = () => {
+    const service = this.service;
+    const pageVisibleBlocks = new Map<AutoConnectElement, number>();
+    const notes = service.doc.root?.children.filter(child =>
+      matchFlavours(child, ['affine:note'])
+    ) as NoteBlockModel[];
+    const edgelessOnlyNotesSet = new Set<NoteBlockModel>();
+
+    notes.forEach(note => {
+      if (isNoteBlock(note)) {
+        if (note.displayMode$.value === NoteDisplayMode.EdgelessOnly) {
+          edgelessOnlyNotesSet.add(note);
+        } else if (note.displayMode$.value === NoteDisplayMode.DocAndEdgeless) {
+          pageVisibleBlocks.set(note, 1);
+        }
+      }
+
+      note.children.forEach(model => {
+        if (matchFlavours(model, ['affine:surface-ref'])) {
+          const reference = service.getElementById(
+            model.reference
+          ) as AutoConnectElement;
+
+          if (!reference) return;
+
+          if (!pageVisibleBlocks.has(reference)) {
+            pageVisibleBlocks.set(reference, 1);
+          } else {
+            pageVisibleBlocks.set(
+              reference,
+              pageVisibleBlocks.get(reference)! + 1
+            );
+          }
+        }
+      });
+    });
+
+    this._edgelessOnlyNotesSet = edgelessOnlyNotesSet;
+    this._pageVisibleElementsMap = pageVisibleBlocks;
+  };
+
   static override styles = css`
-    .edgeless-index-label {
+    .page-visible-index-label {
       box-sizing: border-box;
       padding: 0px 6px;
       border: 1px solid #0000001a;
@@ -200,7 +240,7 @@ export class EdgelessAutoConnectWidget extends WidgetComponent<
           alignItems: 'center',
         });
 
-        return html`<div style=${style}>
+        return html`<div style=${style} class="edgeless-only-index-label">
           ${HiddenIcon}
           <affine-tooltip tip-position="bottom">
             ${getIndexLabelTooltip(SmallDocIcon, 'Hidden on page')}
@@ -262,7 +302,7 @@ export class EdgelessAutoConnectWidget extends WidgetComponent<
       elements,
       element => element.id,
       (element, i) => {
-        const bound = Bound.deserialize(element.xywh);
+        const bound = Bound.deserialize(element.xywh$.value);
         const [left, right] = viewport.toViewCoord(bound.x, bound.y);
         const [width, height] = [bound.w * zoom, bound.h * zoom];
         const style = styleMap({
@@ -298,7 +338,7 @@ export class EdgelessAutoConnectWidget extends WidgetComponent<
                 transition: 'all 0.1s linear',
               })}
               index=${i}
-              class="edgeless-index-label"
+              class="page-visible-index-label"
               @pointerdown=${(e: PointerEvent) => {
                 stopPropagation(e);
                 this._index = this._index === i ? -1 : i;
@@ -380,45 +420,6 @@ export class EdgelessAutoConnectWidget extends WidgetComponent<
 
       return this._show;
     };
-    const updateLabels = requestThrottledConnectedFrame(() => {
-      const pageVisibleBlocks = new Map<AutoConnectElement, number>();
-      const notes = service.doc.root?.children.filter(child =>
-        matchFlavours(child, ['affine:note'])
-      ) as NoteBlockModel[];
-      const edgelessOnlyNotesSet = new Set<NoteBlockModel>();
-
-      notes.forEach(note => {
-        if (isNoteBlock(note)) {
-          if (note.displayMode === NoteDisplayMode.EdgelessOnly) {
-            edgelessOnlyNotesSet.add(note);
-          } else if (note.displayMode === NoteDisplayMode.DocAndEdgeless) {
-            pageVisibleBlocks.set(note, 1);
-          }
-        }
-
-        note.children.forEach(model => {
-          if (matchFlavours(model, ['affine:surface-ref'])) {
-            const reference = service.getElementById(
-              model.reference
-            ) as AutoConnectElement;
-
-            if (!reference) return;
-
-            if (!pageVisibleBlocks.has(reference)) {
-              pageVisibleBlocks.set(reference, 1);
-            } else {
-              pageVisibleBlocks.set(
-                reference,
-                pageVisibleBlocks.get(reference)! + 1
-              );
-            }
-          }
-        });
-      });
-
-      this._edgelessOnlyNotesSet = edgelessOnlyNotesSet;
-      this._pageVisibleElementsMap = pageVisibleBlocks;
-    }, this.block);
 
     this._disposables.add(
       service.selection.slots.updated.on(() => {
@@ -427,13 +428,7 @@ export class EdgelessAutoConnectWidget extends WidgetComponent<
     );
     this._disposables.add(
       this.doc.slots.blockUpdated.on(payload => {
-        if (payload.flavour === 'affine:note') {
-          if (!('props' in payload) || payload.props.key === 'displayMode') {
-            updateLabels();
-          } else if (payload.props.key === 'xywh') {
-            this.requestUpdate();
-          }
-        } else if (payload.flavour === 'affine:surface-ref') {
+        if (payload.flavour === 'affine:surface-ref') {
           switch (payload.type) {
             case 'add':
               surfaceRefs.push(payload.model as SurfaceRefBlockModel);
@@ -454,7 +449,7 @@ export class EdgelessAutoConnectWidget extends WidgetComponent<
               }
           }
 
-          updateLabels();
+          this.requestUpdate();
         }
       })
     );
@@ -468,8 +463,6 @@ export class EdgelessAutoConnectWidget extends WidgetComponent<
         }
       })
     );
-
-    updateLabels();
   }
 
   private _navigateToNext() {
@@ -531,10 +524,33 @@ export class EdgelessAutoConnectWidget extends WidgetComponent<
         }
       })
     );
+
+    _disposables.add(
+      service.uiEventDispatcher.add('dragStart', () => {
+        this._dragging = true;
+      })
+    );
+    _disposables.add(
+      service.uiEventDispatcher.add('dragEnd', () => {
+        this._dragging = false;
+      })
+    );
+    _disposables.add(
+      service.slots.elementResizeStart.on(() => {
+        this._dragging = true;
+      })
+    );
+    _disposables.add(
+      service.slots.elementResizeEnd.on(() => {
+        this._dragging = false;
+      })
+    );
   }
 
   override render() {
-    if (!this._show) return nothing;
+    if (!this._show || this._dragging) return nothing;
+
+    this._updateLabels();
 
     const { elements, counts } = this._getElementsAndCounts();
 
@@ -544,6 +560,9 @@ export class EdgelessAutoConnectWidget extends WidgetComponent<
       ? this._NavigatorComponent(elements)
       : nothing} `;
   }
+
+  @state()
+  private accessor _dragging = false;
 
   @state()
   private accessor _edgelessOnlyNotesSet = new Set<NoteBlockModel>();

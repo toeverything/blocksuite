@@ -49,7 +49,7 @@ export const ellipse = {
     options: PointTestOptions
   ) {
     const point: IVec = [x, y];
-    const expand = (options?.expand ?? 1) / (options?.zoom ?? 1);
+    const expand = (options?.hitThreshold ?? 1) / (options?.zoom ?? 1);
     const rx = this.w / 2;
     const ry = this.h / 2;
     const center: IVec = [this.x + rx, this.y + ry];

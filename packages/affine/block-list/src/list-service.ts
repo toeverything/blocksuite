@@ -17,10 +17,8 @@ import { correctNumberedListsOrderToPrev } from './commands/utils.js';
 import { listPrefix, toggleStyles } from './styles.js';
 import { getListIcon } from './utils/get-list-icon.js';
 
-export class ListBlockService<
-  TextAttributes extends AffineTextAttributes = AffineTextAttributes,
-> extends BlockService<ListBlockModel> {
-  readonly inlineManager = new InlineManager<TextAttributes>();
+export class ListBlockService extends BlockService<ListBlockModel> {
+  readonly inlineManager = new InlineManager<AffineTextAttributes>();
 
   readonly referenceNodeConfig = new ReferenceNodeConfig();
 

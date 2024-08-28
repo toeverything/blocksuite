@@ -1,5 +1,7 @@
+import type { ReferenceInfo } from '@blocksuite/affine-model';
 import type { InlineEditor, InlineRootElement } from '@blocksuite/inline';
 
+import { ReferenceInfoSchema } from '@blocksuite/affine-model';
 import { html } from 'lit';
 import { z } from 'zod';
 
@@ -16,12 +18,14 @@ export interface AffineTextAttributes {
   strike?: true | null;
   code?: true | null;
   link?: string | null;
-  reference?: {
-    type: 'Subpage' | 'LinkedPage';
-    pageId: string;
-  } | null;
+  reference?:
+    | ({
+        type: 'Subpage' | 'LinkedPage';
+      } & ReferenceInfo)
+    | null;
   background?: string | null;
   color?: string | null;
+  latex?: string | null;
 }
 
 export const basicAffineInlineSpecs: InlineSpecs<AffineTextAttributes>[] = [
@@ -95,6 +99,21 @@ export const basicAffineInlineSpecs: InlineSpecs<AffineTextAttributes>[] = [
       return html`<affine-text .delta=${delta}></affine-text>`;
     },
   },
+  {
+    name: 'latex',
+    schema: z.string().optional().nullable().catch(undefined),
+    match: delta => typeof delta.attributes?.latex === 'string',
+    renderer: ({ delta, selected, editor, startOffset, endOffset }) => {
+      return html`<affine-latex-node
+        .delta=${delta}
+        .selected=${selected}
+        .editor=${editor}
+        .startOffset=${startOffset}
+        .endOffset=${endOffset}
+      ></affine-latex-node>`;
+    },
+    embed: true,
+  },
 ];
 
 export function getAffineInlineSpecsWithReference(
@@ -111,8 +130,8 @@ export function getAffineInlineSpecsWithReference(
             'Subpage',
             'LinkedPage',
           ]),
-          pageId: z.string(),
         })
+        .merge(ReferenceInfoSchema)
         .optional()
         .nullable()
         .catch(undefined),

@@ -3,13 +3,14 @@ import {
   ScribbledStyleIcon,
 } from '@blocksuite/affine-components/icons';
 import {
-  type Color,
   DEFAULT_SHAPE_FILL_COLOR,
   LineColor,
   SHAPE_FILL_COLORS,
   ShapeStyle,
+  ShapeType,
 } from '@blocksuite/affine-model';
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
+import { SignalWatcher, computed } from '@lit-labs/preact-signals';
 import { LitElement, css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
@@ -26,7 +27,23 @@ import {
 } from './shape-menu-config.js';
 
 @customElement('edgeless-shape-menu')
-export class EdgelessShapeMenu extends LitElement {
+export class EdgelessShapeMenu extends SignalWatcher(LitElement) {
+  private _props$ = computed(() => {
+    const { shape } = this.edgeless.service.editPropsStore.lastProps$.value;
+    const { shapeStyle, fillColor, strokeColor, radius } = shape;
+    let shapeType: ShapeName = shape.shapeType;
+    if (shapeType === ShapeType.Rect && radius > 0) {
+      shapeType = 'roundedRect';
+    }
+    return {
+      shapeStyle,
+      shapeType,
+      fillColor,
+      strokeColor,
+      radius,
+    };
+  });
+
   private _setFillColor = (fillColor: string) => {
     const filled = !isTransparent(fillColor);
     let strokeColor = fillColor.replace(SHAPE_COLOR_PREFIX, LINE_COLOR_PREFIX);
@@ -72,11 +89,7 @@ export class EdgelessShapeMenu extends LitElement {
   `;
 
   override render() {
-    const { radius, fillColor, shapeStyle } = this;
-    let { shapeType } = this;
-    if (shapeType === 'rect' && radius > 0) {
-      shapeType = 'roundedRect';
-    }
+    const { fillColor, shapeStyle, shapeType } = this._props$.value;
     const color = ThemeObserver.getColorValue(
       fillColor,
       DEFAULT_SHAPE_FILL_COLOR
@@ -144,22 +157,7 @@ export class EdgelessShapeMenu extends LitElement {
   accessor edgeless!: EdgelessRootBlockComponent;
 
   @property({ attribute: false })
-  accessor fillColor!: Color;
-
-  @property({ attribute: false })
   accessor onChange!: (props: Record<string, unknown>) => void;
-
-  @property({ attribute: false })
-  accessor radius!: number;
-
-  @property({ attribute: false })
-  accessor shapeStyle!: ShapeStyle;
-
-  @property({ attribute: false })
-  accessor shapeType!: ShapeName;
-
-  @property({ attribute: false })
-  accessor strokeColor!: Color;
 }
 
 declare global {

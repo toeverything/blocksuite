@@ -1,3 +1,5 @@
+import type { EdgelessRootService } from '@blocksuite/blocks';
+
 import { toGfxBlockComponent } from '@blocksuite/block-std';
 import { Bound } from '@blocksuite/global/utils';
 import { html } from 'lit';
@@ -10,7 +12,7 @@ import { AIChatBlockComponent } from './ai-chat-block.js';
 export class EdgelessAIChatBlockComponent extends toGfxBlockComponent(
   AIChatBlockComponent
 ) {
-  rootServiceFlavour!: 'affine:page';
+  rootServiceFlavour = 'affine:page';
 
   override renderGfxBlock() {
     const bound = Bound.deserialize(this.model.xywh$.value);
@@ -32,6 +34,14 @@ export class EdgelessAIChatBlockComponent extends toGfxBlockComponent(
         ${this.renderPageContent()}
       </div>
     `;
+  }
+
+  override toZIndex() {
+    return this.rootService?.layer.getZIndex(this.model).toString() ?? '0';
+  }
+
+  override get rootService() {
+    return super.rootService as EdgelessRootService;
   }
 }
 

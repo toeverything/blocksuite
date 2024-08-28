@@ -18,7 +18,6 @@ export class VText extends LitElement {
         'word-break': 'break-word',
         'text-wrap': 'wrap',
         'white-space-collapse': 'break-spaces',
-        cursor: 'text',
       })}
       data-v-text="true"
       >${this.str}</span

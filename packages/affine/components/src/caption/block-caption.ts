@@ -1,6 +1,7 @@
 import type { BlockStdScope } from '@blocksuite/block-std';
 import type { BlockModel, Doc } from '@blocksuite/store';
 
+import { DocMode } from '@blocksuite/affine-model';
 import { stopPropagation } from '@blocksuite/affine-shared/utils';
 import {
   ShadowlessElement,
@@ -52,7 +53,7 @@ export class BlockCaptionEditor<
   private _onCaptionKeydown(event: KeyboardEvent) {
     event.stopPropagation();
 
-    if (this.mode === 'edgeless' || event.isComposing) {
+    if (this.mode === DocMode.Edgeless || event.isComposing) {
       return;
     }
 
@@ -148,8 +149,8 @@ export class BlockCaptionEditor<
 
   get mode() {
     return this.doc.getParent(this.model)?.flavour === 'affine:surface'
-      ? 'edgeless'
-      : 'page';
+      ? DocMode.Edgeless
+      : DocMode.Page;
   }
 
   @state()
