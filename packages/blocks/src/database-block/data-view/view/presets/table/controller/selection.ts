@@ -8,8 +8,8 @@ import { css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { createRef, ref } from 'lit/directives/ref.js';
 
-import type { DatabaseCellContainer } from '../components/cell-container.js';
-import type { TableRow } from '../components/row.js';
+import type { DatabaseCellContainer } from '../cell.js';
+import type { TableRow } from '../row/row.js';
 import type { DataViewTable } from '../table-view.js';
 
 import { startDrag } from '../../../../utils/drag.js';
@@ -181,18 +181,18 @@ export class TableSelectionController implements ReactiveController {
   ) {
     const id = this.view.rowAdd({ before, id: rowId });
     if (groupKey != null) {
-      this.view.groupHelper?.moveCardTo(id, undefined, groupKey, {
+      this.view.groupManager.moveCardTo(id, undefined, groupKey, {
         before,
         id: rowId,
       });
     }
     const rows =
       groupKey != null
-        ? this.view.groupHelper?.groupMap[groupKey].rows
+        ? this.view.groupManager.groupDataMap$.value?.[groupKey].rows
         : this.view.rows$.value;
     requestAnimationFrame(() => {
       const index = this.host.view.columnManagerList$.value.findIndex(
-        v => v.type === 'title'
+        v => v.type$.value === 'title'
       );
       this.selection = TableAreaSelection.create({
         groupKey: groupKey,
@@ -235,7 +235,7 @@ export class TableSelectionController implements ReactiveController {
   }
 
   areaToRows(selection: TableAreaSelection) {
-    const rows = this.rows(selection.groupKey);
+    const rows = this.rows(selection.groupKey) ?? [];
     const ids = Array.from({
       length: selection.rowsSelection.end - selection.rowsSelection.start + 1,
     })
@@ -422,8 +422,8 @@ export class TableSelectionController implements ReactiveController {
         scale: number;
       } {
     const rows = this.rows(groupKey);
-    const topRow = rows.item(top);
-    const bottomRow = rows.item(bottom);
+    const topRow = rows?.item(top);
+    const bottomRow = rows?.item(bottom);
     if (!topRow || !bottomRow) {
       return;
     }
@@ -500,7 +500,7 @@ export class TableSelectionController implements ReactiveController {
         ) as TableRow | null
       )?.rowIndex ?? 0;
     const getRowByIndex = (index: number) => {
-      const tableRow = this.rows(lastRow.groupKey).item(index);
+      const tableRow = this.rows(lastRow.groupKey)?.item(index);
       if (!tableRow) {
         return;
       }
@@ -576,8 +576,7 @@ export class TableSelectionController implements ReactiveController {
             `affine-data-view-table-group[data-group-key="${groupKey}"]`
           )
         : this.tableContainer;
-    assertExists(container);
-    return container.querySelectorAll('data-view-table-row');
+    return container?.querySelectorAll('data-view-table-row');
   }
 
   rowsToArea(
@@ -589,8 +588,8 @@ export class TableSelectionController implements ReactiveController {
     const set = new Set(rows);
     if (!this.tableContainer) return;
     for (const row of this.tableContainer
-      .querySelectorAll('data-view-table-row')
-      .values()) {
+      ?.querySelectorAll('data-view-table-row')
+      .values() ?? []) {
       if (!set.has(row.rowId)) {
         continue;
       }
@@ -622,7 +621,7 @@ export class TableSelectionController implements ReactiveController {
     const newSelection = this.focusToArea(selection);
     if (newSelection.rowsSelection.start === newSelection.focus.rowIndex) {
       newSelection.rowsSelection.end = Math.min(
-        this.rows(newSelection.groupKey).length - 1,
+        (this.rows(newSelection.groupKey)?.length ?? 0) - 1,
         newSelection.rowsSelection.end + 1
       );
       requestAnimationFrame(() => {
@@ -686,9 +685,9 @@ export class TableSelectionController implements ReactiveController {
       newSelection.columnsSelection.start === newSelection.focus.columnIndex
     ) {
       const max =
-        this.rows(newSelection.groupKey)
+        (this.rows(newSelection.groupKey)
           ?.item(0)
-          .querySelectorAll('affine-database-cell-container').length - 1;
+          .querySelectorAll('affine-database-cell-container').length ?? 0) - 1;
       newSelection.columnsSelection.end = Math.min(
         max,
         newSelection.columnsSelection.end + 1
@@ -751,9 +750,10 @@ export class TableSelectionController implements ReactiveController {
   ) {
     const groupKey = cell.closest('affine-data-view-table-group')?.group?.key;
     const table = this.tableContainer;
-    if (!table) return;
-    const scrollContainer = table.parentElement;
-    if (!scrollContainer) return;
+    const scrollContainer = table?.parentElement;
+    if (!table || !scrollContainer) {
+      return;
+    }
     const tableRect = table.getBoundingClientRect();
     const startOffsetX = evt.x - tableRect.left;
     const startOffsetY = evt.y - tableRect.top;
@@ -890,10 +890,7 @@ export class TableSelectionController implements ReactiveController {
   }
 
   get tableContainer() {
-    const tableContainer = this.host.querySelector(
-      '.affine-database-table-container'
-    );
-    return tableContainer;
+    return this.host.querySelector('.affine-database-table-container');
   }
 
   get view() {
@@ -1092,7 +1089,11 @@ class SelectionElement extends WithDisposable(ShadowlessElement) {
     const { left, top, width, height, scale } = rect;
     const tableContainer = this.controller.tableContainer;
     if (!tableContainer) return;
-    const tableRect = tableContainer.getBoundingClientRect();
+    const tableRect = tableContainer?.getBoundingClientRect();
+    if (!tableRect) {
+      this.clearFocusStyle();
+      return;
+    }
 
     const x = left - tableRect.left / scale;
     const y = top - 1 - tableRect.top / scale;

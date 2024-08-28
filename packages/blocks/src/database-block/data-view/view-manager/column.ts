@@ -17,13 +17,15 @@ export interface Column<
 
   get index(): number;
 
-  get type(): string;
+  type$: ReadonlySignal<string>;
 
-  get dataType(): TType;
+  dataType$: ReadonlySignal<TType>;
 
-  get name(): string;
+  name$: ReadonlySignal<string>;
 
-  get hide(): boolean;
+  hide$: ReadonlySignal<boolean>;
+
+  cells$: ReadonlySignal<Cell[]>;
 
   data$: ReadonlySignal<Data>;
 
@@ -40,8 +42,11 @@ export interface Column<
   cellGet(rowId: string): Cell<Value>;
 
   getStringValue(rowId: string): string;
+
   getValue(rowId: string): Value | undefined;
+
   setValue(rowId: string, value: Value | undefined): void;
+
   setValueFromString(rowId: string, value: string): void;
 
   updateData(updater: ColumnDataUpdater<Data>): void;
@@ -64,15 +69,31 @@ export abstract class ColumnBase<
   Data extends Record<string, unknown> = Record<string, unknown>,
 > implements Column<Value, Data>
 {
+  cells$ = computed(() => {
+    return this.view.rows$.value.map(id => this.cellGet(id));
+  });
+
   data$ = computed(() => {
     return this.view.columnGetData(this.id) as Data;
   });
 
+  dataType$ = computed(() => {
+    return this.view.columnGetDataType(this.id)!;
+  });
+
   detailRenderer$ = computed(() => {
     return (
-      this.view.columnGetMeta(this.type)?.renderer.detailCellRenderer ??
+      this.view.columnGetMeta(this.type$.value)?.renderer.detailCellRenderer ??
       this.renderer$.value
     );
+  });
+
+  hide$ = computed(() => {
+    return this.view.columnGetHide(this.id);
+  });
+
+  name$ = computed(() => {
+    return this.view.columnGetName(this.id);
   });
 
   readonly$ = computed(() => {
@@ -80,7 +101,11 @@ export abstract class ColumnBase<
   });
 
   renderer$ = computed(() => {
-    return this.view.columnGetMeta(this.type)?.renderer.cellRenderer;
+    return this.view.columnGetMeta(this.type$.value)?.renderer.cellRenderer;
+  });
+
+  type$ = computed(() => {
+    return this.view.columnGetType(this.id)!;
   });
 
   constructor(
@@ -88,8 +113,8 @@ export abstract class ColumnBase<
     public columnId: string
   ) {}
 
-  cellGet(rowId: string): Cell<Value, Data> {
-    return this.view.cellGet(rowId, this.id) as Cell<Value, Data>;
+  cellGet(rowId: string): Cell<Value> {
+    return this.view.cellGet(rowId, this.id) as Cell<Value>;
   }
 
   getStringValue(rowId: string): string {
@@ -131,10 +156,6 @@ export abstract class ColumnBase<
     this.view.columnUpdateName(this.id, name);
   }
 
-  get dataType(): TType {
-    return this.view.columnGetDataType(this.id)!;
-  }
-
   get delete(): (() => void) | undefined {
     return () => this.view.columnDelete(this.id);
   }
@@ -143,13 +164,9 @@ export abstract class ColumnBase<
     return () => this.view.columnDuplicate(this.id);
   }
 
-  get hide(): boolean {
-    return this.view.columnGetHide(this.id);
-  }
-
   get icon(): UniComponent | undefined {
-    if (!this.type) return undefined;
-    return this.view.getIcon(this.type);
+    if (!this.type$.value) return undefined;
+    return this.view.getIcon(this.type$.value);
   }
 
   get id(): string {
@@ -169,14 +186,6 @@ export abstract class ColumnBase<
       this.view.columnGetIndex(this.id) ===
       this.view.columnManagerList$.value.length - 1
     );
-  }
-
-  get name(): string {
-    return this.view.columnGetName(this.id);
-  }
-
-  get type(): string {
-    return this.view.columnGetType(this.id)!;
   }
 
   get updateType(): undefined | ((type: string) => void) {

@@ -135,7 +135,7 @@ export class KanbanGroup extends SignalWatcher(
         hide: () => this.group.value == null,
         select: () => {
           this.group.rows.forEach(id => {
-            this.group.helper.removeFromGroup(id, this.group.key);
+            this.group.manager.removeFromGroup(id, this.group.key);
           });
         },
       },

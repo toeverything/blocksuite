@@ -10,7 +10,7 @@ import type { KanbanViewData } from './define.js';
 import { type FilterGroup, emptyFilterGroup } from '../../../common/ast.js';
 import { defaultGroupBy } from '../../../common/group-by.js';
 import {
-  GroupHelper,
+  GroupManager,
   sortByManually,
 } from '../../../common/group-by/helper.js';
 import { groupByMatcher } from '../../../common/group-by/matcher.js';
@@ -48,6 +48,71 @@ export class KanbanSingleView extends SingleViewBase<KanbanViewData> {
     return this.viewData$.value?.filter ?? emptyFilterGroup;
   });
 
+  groupBy$ = computed(() => {
+    return this.viewData$.value?.groupBy;
+  });
+
+  groupManager = new GroupManager(this.groupBy$, this, {
+    sortGroup: ids =>
+      sortByManually(
+        ids,
+        v => v,
+        this.view?.groupProperties.map(v => v.key) ?? []
+      ),
+    sortRow: (key, ids) => {
+      const property = this.view?.groupProperties.find(v => v.key === key);
+      return sortByManually(ids, v => v, property?.manuallyCardSort ?? []);
+    },
+    changeGroupSort: keys => {
+      const map = new Map(this.view?.groupProperties.map(v => [v.key, v]));
+      this.viewDataUpdate(() => {
+        return {
+          groupProperties: keys.map(key => {
+            const property = map.get(key);
+            if (property) {
+              return property;
+            }
+            return {
+              key,
+              hide: false,
+              manuallyCardSort: [],
+            };
+          }),
+        };
+      });
+    },
+    changeRowSort: (groupKeys, groupKey, keys) => {
+      const map = new Map(this.view?.groupProperties.map(v => [v.key, v]));
+      this.viewDataUpdate(() => {
+        return {
+          groupProperties: groupKeys.map(key => {
+            if (key === groupKey) {
+              const group = map.get(key);
+              return group
+                ? {
+                    ...group,
+                    manuallyCardSort: keys,
+                  }
+                : {
+                    key,
+                    hide: false,
+                    manuallyCardSort: keys,
+                  };
+            } else {
+              return (
+                map.get(key) ?? {
+                  key,
+                  hide: false,
+                  manuallyCardSort: [],
+                }
+              );
+            }
+          }),
+        };
+      });
+    },
+  });
+
   header$ = computed(() => {
     return (
       this.viewData$.value?.header ?? {
@@ -65,7 +130,7 @@ export class KanbanSingleView extends SingleViewBase<KanbanViewData> {
 
   addCard(position: InsertToPosition, group: string) {
     const id = this.rowAdd(position);
-    this.groupHelper?.addToGroup(id, group);
+    this.groupManager.addToGroup(id, group);
     return id;
   }
 
@@ -74,7 +139,7 @@ export class KanbanSingleView extends SingleViewBase<KanbanViewData> {
     this.viewDataUpdate(_view => {
       return {
         groupBy: defaultGroupBy(
-          this.columnGetMeta(column.type),
+          this.columnGetMeta(column.type$.value),
           column.id,
           column.data$.value
         ),
@@ -229,86 +294,6 @@ export class KanbanSingleView extends SingleViewBase<KanbanViewData> {
 
   get filter(): FilterGroup {
     return this.view?.filter ?? emptyFilterGroup;
-  }
-
-  get groupHelper(): GroupHelper | undefined {
-    const groupBy = this.view?.groupBy;
-    if (!groupBy) {
-      return;
-    }
-    const result = groupByMatcher.find(v => v.data.name === groupBy.name);
-    if (!result) {
-      return;
-    }
-    const groupByConfig = result.data;
-    const type = this.columnGetDataType(groupBy.columnId);
-    if (!type) {
-      return;
-    }
-    if (!this.checkGroup(groupBy.columnId, result.type, type)) {
-      // reset groupBy config
-      return this.groupHelper;
-    }
-    return new GroupHelper(groupBy, groupByConfig, type, this, {
-      sortGroup: ids =>
-        sortByManually(
-          ids,
-          v => v,
-          this.view?.groupProperties.map(v => v.key) ?? []
-        ),
-      sortRow: (key, ids) => {
-        const property = this.view?.groupProperties.find(v => v.key === key);
-        return sortByManually(ids, v => v, property?.manuallyCardSort ?? []);
-      },
-      changeGroupSort: keys => {
-        const map = new Map(this.view?.groupProperties.map(v => [v.key, v]));
-        this.viewDataUpdate(() => {
-          return {
-            groupProperties: keys.map(key => {
-              const property = map.get(key);
-              if (property) {
-                return property;
-              }
-              return {
-                key,
-                hide: false,
-                manuallyCardSort: [],
-              };
-            }),
-          };
-        });
-      },
-      changeRowSort: (groupKeys, groupKey, keys) => {
-        const map = new Map(this.view?.groupProperties.map(v => [v.key, v]));
-        this.viewDataUpdate(() => {
-          return {
-            groupProperties: groupKeys.map(key => {
-              if (key === groupKey) {
-                const group = map.get(key);
-                return group
-                  ? {
-                      ...group,
-                      manuallyCardSort: keys,
-                    }
-                  : {
-                      key,
-                      hide: false,
-                      manuallyCardSort: keys,
-                    };
-              } else {
-                return (
-                  map.get(key) ?? {
-                    key,
-                    hide: false,
-                    manuallyCardSort: [],
-                  }
-                );
-              }
-            }),
-          };
-        });
-      },
-    });
   }
 
   get header() {

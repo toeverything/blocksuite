@@ -1,7 +1,6 @@
 import type { Disposable } from '@blocksuite/global/utils';
 
 import type { TType } from '../logical/typesystem.js';
-import type { StatCalcOpType } from '../view/presets/table/types.js';
 import type {
   GetCellDataFromConfig,
   GetColumnDataFromConfig,
@@ -28,6 +27,7 @@ type ColumnOps<
   type: (data: Data) => TType;
   formatValue?: (value: unknown, colData: Data) => Value;
   isEmpty: (value?: Value) => boolean;
+  values?: (value?: Value) => unknown[];
   cellToString: (data: Value, colData: Data) => string;
   cellFromString: (
     data: string,
@@ -55,13 +55,12 @@ export class ColumnConfig<
   ): {
     type: string;
     name: string;
-    statCalcOp: StatCalcOpType;
+    statCalcOp?: string;
     data: T;
   } => {
     return {
       type: this.type,
       name,
-      statCalcOp: 'none',
       data: data ?? this.ops.defaultData(),
     };
   };

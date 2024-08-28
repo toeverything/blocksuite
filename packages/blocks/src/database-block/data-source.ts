@@ -70,8 +70,6 @@ export class DatabaseBlockDataSource extends DataSourceBase {
       enable_number_formatting:
         this.doc.awarenessStore.getFlag('enable_database_number_formatting') ??
         false,
-      enable_database_statistics:
-        this.doc.awarenessStore.getFlag('enable_database_statistics') ?? false,
     };
   });
 

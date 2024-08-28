@@ -1,39 +1,17 @@
 import { assertExists } from '@blocksuite/global/utils';
 
-// Common formula types
-export type StatCalcOpBaseTypes =
-  | 'none'
-  | 'count-all'
-  | 'count-values'
-  | 'count-uni-values'
-  | 'count-empty'
-  | 'count-not-empty'
-  | 'percent-empty'
-  | 'percent-not-empty';
+export type ColumnType = string;
 
-// Mathematical formula types
-export type StatCalcOpMathTypes =
-  | StatCalcOpBaseTypes
-  | 'sum'
-  | 'avg'
-  | 'median'
-  | 'mode'
-  | 'min'
-  | 'max'
-  | 'range';
+export interface Column<
+  Data extends Record<string, unknown> = Record<string, unknown>,
+> {
+  id: string;
+  type: ColumnType;
+  name: string;
+  data: Data;
+}
 
-export type StatCalcOpCheckboxTypes =
-  | StatCalcOpBaseTypes
-  | 'checked'
-  | 'not-checked'
-  | 'percent-checked'
-  | 'percent-not-checked';
-
-// Union of all formula types
-export type StatCalcOpType =
-  | StatCalcOpBaseTypes
-  | StatCalcOpMathTypes
-  | StatCalcOpCheckboxTypes;
+export type StatCalcOpType = string | undefined;
 
 export const getTableContainer = (ele: HTMLElement) => {
   const element = ele.closest(

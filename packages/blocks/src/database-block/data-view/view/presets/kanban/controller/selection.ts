@@ -116,7 +116,7 @@ export class KanbanSelectionController implements ReactiveController {
   }
 
   focusFirstCell() {
-    const group = this.host.groupHelper?.groups[0];
+    const group = this.host.groupManager?.groupsDataList$.value?.[0];
     const card = group?.rows[0];
     const columnId = card && this.host.view.getHeaderTitle(card)?.id;
     if (group && card && columnId) {
@@ -487,7 +487,7 @@ export class KanbanSelectionController implements ReactiveController {
     if (selection?.selectionType !== 'card') {
       return;
     }
-    this.view.groupHelper?.moveCardTo(
+    this.view.groupManager.moveCardTo(
       rowId,
       selection.cards[0].groupKey,
       key,

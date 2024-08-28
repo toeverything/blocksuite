@@ -1,8 +1,8 @@
-import type { DatabaseBlockModel } from '@blocksuite/affine-model';
 import type {
   Cell,
   Column,
   ColumnUpdater,
+  DatabaseBlockModel,
   ViewBasicDataType,
 } from '@blocksuite/affine-model';
 import type { BlockModel } from '@blocksuite/store';
@@ -376,6 +376,9 @@ export function updateCells(
 ) {
   model.doc.transact(() => {
     Object.entries(cells).forEach(([rowId, value]) => {
+      if (!model.cells[rowId]) {
+        model.cells[rowId] = Object.create(null);
+      }
       model.cells[rowId][columnId] = {
         columnId,
         value,
