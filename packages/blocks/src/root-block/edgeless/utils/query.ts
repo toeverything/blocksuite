@@ -1,3 +1,4 @@
+import type { Viewport } from '@blocksuite/block-std/gfx';
 import type { PointLocation } from '@blocksuite/global/utils';
 import type { BlockModel } from '@blocksuite/store';
 
@@ -22,7 +23,6 @@ import { deserializeXYWH } from '@blocksuite/global/utils';
 import { Bound } from '@blocksuite/global/utils';
 
 import type { Connectable } from '../../../_common/utils/index.js';
-import type { Viewport } from '../../../root-block/edgeless/utils/viewport.js';
 import type { GfxBlockModel } from '../block-model.js';
 import type { EdgelessTool } from '../types.js';
 

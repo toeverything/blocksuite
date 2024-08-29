@@ -1,3 +1,4 @@
+import type { Viewport } from '@blocksuite/block-std/gfx';
 import type { IBound } from '@blocksuite/global/utils';
 
 import { type Color, ColorScheme } from '@blocksuite/affine-model';
@@ -10,7 +11,6 @@ import {
   last,
 } from '@blocksuite/global/utils';
 
-import type { Viewport } from '../../root-block/edgeless/utils/viewport.js';
 import type { SurfaceElementModel } from '../element-model/base.js';
 import type { LayerManager } from '../managers/layer-manager.js';
 import type { ElementRenderer } from './elements/index.js';
