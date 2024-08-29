@@ -137,7 +137,7 @@ export class EdgelessClipboardController extends PageClipboard {
 
     const elements = getCloneElements(
       this.selectionManager.selectedElements,
-      this.surface.edgeless.service.frame
+      this.edgeless.service.frame
     );
 
     // when note active, handle copy like page mode
@@ -178,10 +178,10 @@ export class EdgelessClipboardController extends PageClipboard {
 
     const elements = getCloneElements(
       this.selectionManager.selectedElements,
-      this.surface.edgeless.service.frame
+      this.edgeless.service.frame
     );
     this.doc.transact(() => {
-      deleteElements(this.surface, elements);
+      deleteElements(this.edgeless, elements);
     });
 
     this.selectionManager.set({
@@ -1205,7 +1205,7 @@ export class EdgelessClipboardController extends PageClipboard {
   }
 
   private get edgeless() {
-    return this.surface.edgeless;
+    return this.host;
   }
 
   private get selectionManager() {

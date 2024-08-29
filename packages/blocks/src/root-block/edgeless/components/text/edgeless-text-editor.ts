@@ -188,7 +188,7 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
           element.display = true;
 
           if (element.text.length === 0) {
-            deleteElements(edgeless.surface, [element]);
+            deleteElements(edgeless, [element]);
           }
 
           edgeless.service.selection.set({

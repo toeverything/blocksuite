@@ -162,7 +162,7 @@ export class EdgelessChangeBrushButton extends WithDisposable(LitElement) {
   }
 
   get service() {
-    return this.surface.edgeless.service;
+    return this.edgeless.service;
   }
 
   get surface() {

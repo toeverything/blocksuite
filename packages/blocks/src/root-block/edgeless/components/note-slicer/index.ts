@@ -305,11 +305,11 @@ export class NoteSlicer extends WithDisposable(LitElement) {
       })
     );
 
-    const { surface } = this.edgeless;
+    const { surface } = edgeless;
     requestAnimationFrame(() => {
-      if (surface.isConnected && surface.edgeless.dispatcher) {
+      if (surface.isConnected && edgeless.dispatcher) {
         disposables.add(
-          surface.edgeless.dispatcher.add('click', ctx => {
+          edgeless.dispatcher.add('click', ctx => {
             const event = ctx.get('pointerState');
             const { raw } = event;
             const target = raw.target as HTMLElement;
