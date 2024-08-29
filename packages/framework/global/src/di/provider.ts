@@ -46,7 +46,7 @@ export abstract class ServiceProvider {
     });
   }
 
-  abstract collection: Container;
+  abstract container: Container;
 
   abstract getAllRaw(
     identifier: ServiceIdentifierValue,
@@ -74,7 +74,7 @@ export class ServiceCachePool {
 }
 
 export class ServiceResolver extends ServiceProvider {
-  collection = this.provider.collection;
+  container = this.provider.container;
 
   constructor(
     readonly provider: BasicServiceProvider,
@@ -88,7 +88,7 @@ export class ServiceResolver extends ServiceProvider {
     identifier: ServiceIdentifierValue,
     { sameScope = false }: ResolveOptions = {}
   ): Map<ServiceVariant, any> {
-    const vars = this.provider.collection.getFactoryAll(
+    const vars = this.provider.container.getFactoryAll(
       identifier,
       this.provider.scope
     );
@@ -132,7 +132,7 @@ export class ServiceResolver extends ServiceProvider {
     identifier: ServiceIdentifierValue,
     { sameScope = false, optional = false }: ResolveOptions = {}
   ) {
-    const factory = this.provider.collection.getFactory(
+    const factory = this.provider.container.getFactory(
       identifier,
       this.provider.scope
     );
@@ -191,16 +191,16 @@ export class ServiceResolver extends ServiceProvider {
 export class BasicServiceProvider extends ServiceProvider {
   readonly cache = new ServiceCachePool();
 
-  readonly collection: Container;
+  readonly container: Container;
 
   constructor(
-    collection: Container,
+    container: Container,
     readonly scope: string[],
     readonly parent: ServiceProvider | null
   ) {
     super();
-    this.collection = collection.clone();
-    this.collection.addValue(ServiceProvider, this, {
+    this.container = container.clone();
+    this.container.addValue(ServiceProvider, this, {
       scope: scope,
       override: true,
     });
