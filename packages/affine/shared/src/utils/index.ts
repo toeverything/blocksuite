@@ -9,6 +9,7 @@ export * from './math.js';
 export * from './model/index.js';
 export * from './print-to-pdf.js';
 export * from './reordering.js';
+export * from './signal.js';
 export * from './string.js';
 export * from './title.js';
 export * from './url.js';
