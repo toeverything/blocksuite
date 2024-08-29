@@ -174,9 +174,10 @@ export class SurfaceBlockComponent extends BlockComponent<
   }
 
   private _initRenderer() {
+    const context = this._context;
     this._renderer = new CanvasRenderer({
-      viewport: this._context.viewport,
-      layerManager: this._context.layer,
+      viewport: context.viewport,
+      layerManager: context.layer,
       enableStackingCanvas: true,
       provider: {
         generateColorProperty: (color: Color, fallback: string) =>
@@ -186,7 +187,7 @@ export class SurfaceBlockComponent extends BlockComponent<
         getColorScheme: () => ThemeObserver.mode,
         getPropertyValue: (property: string) =>
           ThemeObserver.getPropertyValue(property),
-        selectedElements: () => this._context.selection.selectedIds,
+        selectedElements: () => context.selection.selectedIds,
       },
       onStackingCanvasCreated(canvas) {
         canvas.className = 'indexable-canvas';
@@ -228,7 +229,7 @@ export class SurfaceBlockComponent extends BlockComponent<
       })
     );
     this._disposables.add(
-      this._context.selection.slots.updated.on(() => {
+      context.selection.slots.updated.on(() => {
         this._renderer.refresh();
       })
     );
