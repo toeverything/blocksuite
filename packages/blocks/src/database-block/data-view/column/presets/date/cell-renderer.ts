@@ -39,7 +39,7 @@ export class DateCell extends BaseCellRenderer<number> {
   `;
 
   override render() {
-    const value = this.value ? format(new Date(this.value), 'yyyy/MM/dd') : '';
+    const value = this.value ? format(this.value, 'yyyy/MM/dd') : '';
     if (!value) {
       return '';
     }

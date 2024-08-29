@@ -430,6 +430,9 @@ export class TableSelectionController implements ReactiveController {
     const topCells = topRow.querySelectorAll('affine-database-cell-container');
     const leftCell = topCells.item(left);
     const rightCell = topCells.item(right);
+    if (!leftCell || !rightCell) {
+      return;
+    }
     const leftRect = leftCell.getBoundingClientRect();
     const scale = leftRect.width / leftCell.column.width$.value;
     return {

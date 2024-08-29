@@ -26,7 +26,7 @@ export const selectColumnModelConfig = selectColumnType.modelConfig<
   addGroup: (text, oldData) => {
     return {
       options: [
-        ...oldData.options,
+        ...(oldData.options ?? []),
         { id: nanoid(), value: text, color: getTagColor() },
       ],
     };
