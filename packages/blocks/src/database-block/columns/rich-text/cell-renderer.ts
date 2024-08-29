@@ -102,8 +102,8 @@ export class RichTextCell extends BaseCellRenderer<Text> {
   `;
 
   private changeUserSelectAccordToReadOnly() {
-    if (this.renderRoot && this.renderRoot instanceof HTMLElement) {
-      this.renderRoot.style.userSelect = this.readonly ? 'text' : 'none';
+    if (this && this instanceof HTMLElement) {
+      this.style.userSelect = this.readonly ? 'text' : 'none';
     }
   }
 
