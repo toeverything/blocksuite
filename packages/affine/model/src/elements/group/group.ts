@@ -31,7 +31,7 @@ export type SerializedGroupElement = SerializedElement & {
 
 export class GroupElementModel extends GfxGroupLikeElementModel<GroupElementProps> {
   static override propsToY(props: Record<string, unknown>) {
-    if (props.title && !(props.title instanceof DocCollection.Y.Text)) {
+    if ('title' in props && !(props.title instanceof DocCollection.Y.Text)) {
       props.title = new DocCollection.Y.Text(props.title as string);
     }
 
