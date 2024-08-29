@@ -1,4 +1,7 @@
-import { renderGroups } from '@blocksuite/affine-components/toolbar';
+import {
+  cloneGroups,
+  renderGroups,
+} from '@blocksuite/affine-components/toolbar';
 import { WithDisposable } from '@blocksuite/block-std';
 import { MoreHorizontalIcon, MoreVerticalIcon } from '@blocksuite/icons/lit';
 import { LitElement, html } from 'lit';
@@ -29,9 +32,7 @@ const BUILT_IN_GROUPS = [
 export class EdgelessMoreButton extends WithDisposable(LitElement) {
   override render() {
     const context = new ElementToolbarMoreMenuContext(this.edgeless);
-    const groups = context.config.configure(
-      BUILT_IN_GROUPS.map(group => ({ ...group, items: [...group.items] }))
-    );
+    const groups = context.config.configure(cloneGroups(BUILT_IN_GROUPS));
     const actions = renderGroups(groups, context);
 
     return html`

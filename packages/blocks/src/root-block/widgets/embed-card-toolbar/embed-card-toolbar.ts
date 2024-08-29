@@ -19,6 +19,7 @@ import { toast } from '@blocksuite/affine-components/toast';
 import {
   type MenuItem,
   type MenuItemGroup,
+  cloneGroups,
   renderGroups,
   renderToolbarSeparator,
 } from '@blocksuite/affine-components/toolbar';
@@ -400,9 +401,7 @@ export class EmbedCardToolbar extends WidgetComponent<
 
   private _moreActions() {
     const context = new EmbedCardToolbarContext(this);
-    const groups = context.config.configure(
-      BUILT_IN_GROUPS.map(group => ({ ...group, items: [...group.items] }))
-    );
+    const groups = context.config.configure(cloneGroups(BUILT_IN_GROUPS));
     return renderGroups(groups, context);
   }
 

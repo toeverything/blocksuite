@@ -90,6 +90,10 @@ export function renderActions(
   );
 }
 
+export function cloneGroups<T>(groups: MenuItemGroup<T>[]) {
+  return groups.map(group => ({ ...group, items: [...group.items] }));
+}
+
 export function renderGroups<T>(groups: MenuItemGroup<T>[], context: T) {
   return renderActions(groupsToActions(groups, context));
 }

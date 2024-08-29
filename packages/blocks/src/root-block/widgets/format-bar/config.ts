@@ -32,7 +32,10 @@ import {
 } from '@blocksuite/affine-components/icons';
 import { createSimplePortal } from '@blocksuite/affine-components/portal';
 import { toast } from '@blocksuite/affine-components/toast';
-import { renderGroups } from '@blocksuite/affine-components/toolbar';
+import {
+  cloneGroups,
+  renderGroups,
+} from '@blocksuite/affine-components/toolbar';
 import { assertExists } from '@blocksuite/global/utils';
 import { Slice } from '@blocksuite/store';
 import { type TemplateResult, html } from 'lit';
@@ -478,9 +481,7 @@ const BUILT_IN_GROUPS: MenuItemGroup<FormatBarContext>[] = [
 
 export function toolbarMoreButton(toolbar: AffineFormatBarWidget) {
   const context = new FormatBarContext(toolbar);
-  const groups = context.config.configure(
-    BUILT_IN_GROUPS.map(group => ({ ...group, items: [...group.items] }))
-  );
+  const groups = context.config.configure(cloneGroups(BUILT_IN_GROUPS));
   const actions = renderGroups(groups, context);
 
   return html`
