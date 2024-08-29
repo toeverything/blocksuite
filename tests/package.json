@@ -1,5 +1,6 @@
 {
   "name": "@blocksuite/e2e",
+  "version": "0.16.0",
   "private": true,
   "type": "module",
   "main": "index.js",

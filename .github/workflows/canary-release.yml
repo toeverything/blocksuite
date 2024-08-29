@@ -23,7 +23,7 @@ jobs:
       - run: pnpm install
 
       - name: Add changeset
-        run: cp config/snapshot-changeset.md .changeset/
+        run: cp .github/snapshot-changeset.md .changeset/
 
       - name: Update package version
         run: pnpm ci:version:canary
