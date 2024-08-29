@@ -32,6 +32,7 @@ export { EmbedBlockComponent } from './_common/embed-block-helper/index.js';
 export * from './_common/test-utils/test-utils.js';
 export * from './_common/transformers/index.js';
 export { type AbstractEditor } from './_common/types.js';
+export * from './_specs/index.js';
 export * from './attachment-block/index.js';
 export * from './bookmark-block/index.js';
 export * from './code-block/index.js';
@@ -42,7 +43,7 @@ export {
 } from './database-block/data-view/utils/tags/multi-tag-select.js';
 export * from './database-block/index.js';
 export * from './divider-block/index.js';
-export * from './edgeless-text/index.js';
+export * from './edgeless-text-block/index.js';
 export * from './embed-figma-block/index.js';
 export * from './embed-github-block/index.js';
 export * from './embed-html-block/index.js';
@@ -62,7 +63,6 @@ export type {
 export { CopilotSelectionController } from './root-block/edgeless/tools/copilot-tool.js';
 export * from './root-block/index.js';
 export * from './schemas.js';
-export * from './specs/index.js';
 export {
   AffineCanvasTextFonts,
   BrushElementModel,

@@ -31,12 +31,12 @@ import { customElement, property, state } from 'lit/decorators.js';
 import { ifDefined } from 'lit/directives/if-defined.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type { EdgelessTextBlockComponent } from '../../../../edgeless-text/edgeless-text-block.js';
+import type { EdgelessTextBlockComponent } from '../../../../edgeless-text-block/edgeless-text-block.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
 
 import { EMBED_CARD_HEIGHT } from '../../../../_common/consts.js';
 import { isMindmapNode } from '../../../../_common/edgeless/mindmap/index.js';
-import { EDGELESS_TEXT_BLOCK_MIN_WIDTH } from '../../../../edgeless-text/edgeless-text-block.js';
+import { EDGELESS_TEXT_BLOCK_MIN_WIDTH } from '../../../../edgeless-text-block/edgeless-text-block.js';
 import {
   EMBED_HTML_MIN_HEIGHT,
   EMBED_HTML_MIN_WIDTH,

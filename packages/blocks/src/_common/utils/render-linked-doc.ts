@@ -16,13 +16,13 @@ import { type TemplateResult, css, render } from 'lit';
 import type { EmbedLinkedDocBlockComponent } from '../../embed-linked-doc-block/embed-linked-doc-block.js';
 import type { EmbedSyncedDocCard } from '../../embed-synced-doc-block/components/embed-synced-doc-card.js';
 
+import { SpecProvider } from '../../_specs/utils/spec-provider.js';
 import { GfxBlockModel } from '../../root-block/edgeless/block-model.js';
 import {
   getElementProps,
   sortEdgelessElements,
 } from '../../root-block/edgeless/utils/clone-utils.js';
 import { isNoteBlock } from '../../root-block/edgeless/utils/query.js';
-import { SpecProvider } from '../../specs/utils/spec-provider.js';
 import { getSurfaceBlock } from '../../surface-ref-block/utils.js';
 import { EMBED_CARD_HEIGHT } from '../consts.js';
 

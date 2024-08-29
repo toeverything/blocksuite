@@ -25,7 +25,7 @@ import {
   EDGELESS_BLOCK_CHILD_BORDER_WIDTH,
   EDGELESS_BLOCK_CHILD_PADDING,
 } from '../../_common/consts.js';
-import { SpecProvider } from '../../specs/utils/spec-provider.js';
+import { SpecProvider } from '../../_specs/utils/spec-provider.js';
 
 @customElement('surface-ref-note-portal')
 export class SurfaceRefNotePortal extends WithDisposable(ShadowlessElement) {

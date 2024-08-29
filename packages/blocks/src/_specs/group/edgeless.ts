@@ -1,4 +1,4 @@
-import { EdgelessTextBlockSpec } from '../../edgeless-text/index.js';
+import { EdgelessTextBlockSpec } from '../../edgeless-text-block/index.js';
 import { FrameBlockSpec } from '../../frame-block/frame-spec.js';
 import { EdgelessRootBlockSpec } from '../../root-block/edgeless/edgeless-root-spec.js';
 import { EdgelessSurfaceBlockSpec } from '../../surface-block/surface-spec.js';

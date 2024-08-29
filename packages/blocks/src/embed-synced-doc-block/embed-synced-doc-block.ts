@@ -29,7 +29,7 @@ import type { EmbedSyncedDocBlockService } from './embed-synced-doc-service.js';
 import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../_common/consts.js';
 import { EmbedBlockComponent } from '../_common/embed-block-helper/embed-block-element.js';
 import { isEmptyDoc } from '../_common/utils/render-linked-doc.js';
-import { SpecProvider } from '../specs/utils/spec-provider.js';
+import { SpecProvider } from '../_specs/utils/spec-provider.js';
 import './components/embed-synced-doc-card.js';
 import { blockStyles } from './styles.js';
 

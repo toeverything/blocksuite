@@ -28,7 +28,7 @@ import type { EdgelessRootPreviewBlockComponent } from '../root-block/edgeless/e
 import type { EdgelessRootService } from '../root-block/index.js';
 import type { SurfaceRefBlockService } from './surface-ref-service.js';
 
-import { SpecProvider } from '../specs/index.js';
+import { SpecProvider } from '../_specs/index.js';
 import {
   type SurfaceBlockModel,
   SurfaceElementModel,
