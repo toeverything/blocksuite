@@ -5,6 +5,7 @@ import type {
 import type { ImageBlockModel } from '@blocksuite/affine-model';
 
 import { HoverController } from '@blocksuite/affine-components/hover';
+import { cloneGroups } from '@blocksuite/affine-components/toolbar';
 import { WidgetComponent } from '@blocksuite/block-std';
 import { limitShift, shift } from '@floating-ui/dom';
 import { html } from 'lit';
@@ -64,8 +65,8 @@ export class AffineImageToolbarWidget extends WidgetComponent<
         return {
           template: html`<affine-image-toolbar
             .context=${context}
-            .config=${this.config}
-            .moreMenuConfig=${this.moreMenuConfig}
+            .config=${cloneGroups(this.config)}
+            .moreMenuConfig=${cloneGroups(this.moreMenuConfig)}
             .onActiveStatusChange=${(active: boolean) => {
               this._isActivated = active;
               if (!active && !this._hoverController?.isHovering) {
@@ -144,9 +145,10 @@ export class AffineImageToolbarWidget extends WidgetComponent<
     return this;
   };
 
-  config: MenuItemGroup<ImageToolbarContext>[] = COMMON_GROUPS;
+  config: MenuItemGroup<ImageToolbarContext>[] = cloneGroups(COMMON_GROUPS);
 
-  moreMenuConfig: MenuItemGroup<ImageToolbarContext>[] = MORE_GROUPS;
+  moreMenuConfig: MenuItemGroup<ImageToolbarContext>[] =
+    cloneGroups(MORE_GROUPS);
 
   override firstUpdated() {
     if (this.doc.getParent(this.model.id)?.flavour === 'affine:surface') {

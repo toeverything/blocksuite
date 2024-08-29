@@ -17,6 +17,7 @@ import { toast } from '@blocksuite/affine-components/toast';
 import {
   type MenuItem,
   type MenuItemGroup,
+  cloneGroups,
   renderGroups,
   renderToolbarSeparator,
 } from '@blocksuite/affine-components/toolbar';
@@ -253,9 +254,7 @@ function SurfaceRefToolbarOptions(options: {
   }
 
   const context = new SurfaceRefToolbarContext(block, abortController);
-  const groups = context.config.configure(
-    BUILT_IN_GROUPS.map(group => ({ ...group, items: [...group.items] }))
-  );
+  const groups = context.config.configure(cloneGroups(BUILT_IN_GROUPS));
   const moreMenuActions = renderGroups(groups, context);
 
   const buttons = [

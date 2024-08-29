@@ -14,6 +14,7 @@ import {
 import { createLitPortal } from '@blocksuite/affine-components/portal';
 import {
   type MenuItemGroup,
+  cloneGroups,
   renderGroups,
   renderToolbarSeparator,
 } from '@blocksuite/affine-components/toolbar';
@@ -164,9 +165,7 @@ export function AttachmentOptionsTemplate({
     model,
     abortController
   );
-  const groups = context.config.configure(
-    BUILT_IN_GROUPS.map(group => ({ ...group, items: [...group.items] }))
-  );
+  const groups = context.config.configure(cloneGroups(BUILT_IN_GROUPS));
   const moreMenuActions = renderGroups(groups, context);
 
   const buttons = [
