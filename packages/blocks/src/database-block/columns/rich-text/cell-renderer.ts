@@ -8,7 +8,7 @@ import { getViewportElement } from '@blocksuite/affine-shared/utils';
 import { IS_MAC } from '@blocksuite/global/env';
 import { assertExists } from '@blocksuite/global/utils';
 import { Text } from '@blocksuite/store';
-import { css, nothing } from 'lit';
+import { type PropertyValues, css, nothing } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 import { keyed } from 'lit/directives/keyed.js';
 import { html } from 'lit/static-html.js';
@@ -101,6 +101,17 @@ export class RichTextCell extends BaseCellRenderer<Text> {
     }
   `;
 
+  private changeUserSelectAccordToReadOnly() {
+    if (this.renderRoot && this.renderRoot instanceof HTMLElement) {
+      this.renderRoot.style.userSelect = this.readonly ? 'text' : 'none';
+    }
+  }
+
+  override connectedCallback() {
+    super.connectedCallback();
+    this.changeUserSelectAccordToReadOnly();
+  }
+
   override render() {
     if (!this.service) return nothing;
     if (!this.value || !(this.value instanceof Text)) {
@@ -118,6 +129,12 @@ export class RichTextCell extends BaseCellRenderer<Text> {
         class="affine-database-rich-text inline-editor"
       ></rich-text>`
     );
+  }
+
+  override updated(changedProperties: PropertyValues) {
+    if (changedProperties.has('readonly')) {
+      this.changeUserSelectAccordToReadOnly();
+    }
   }
 
   get attributeRenderer() {
