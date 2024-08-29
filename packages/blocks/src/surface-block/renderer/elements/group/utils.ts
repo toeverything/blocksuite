@@ -15,7 +15,7 @@ const TITLE_FONT_SIZE = 16;
 const TITLE_PADDING = [10, 4];
 
 export function titleRenderParams(group: GroupElementModel, zoom: number) {
-  let text = group.title.toJSON();
+  let text = group.title.toString();
   const font = getGroupTitleFont(zoom);
   const lineWidth = getLineWidth(text, font);
   const lineHeight = getLineHeight(
