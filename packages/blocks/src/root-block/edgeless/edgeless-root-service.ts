@@ -18,6 +18,7 @@ import type {
 } from '../../surface-block/element-model/index.js';
 import type { SurfaceBlockModel } from '../../surface-block/index.js';
 import type { ReorderingDirection } from '../../surface-block/managers/layer-manager.js';
+import type { SurfaceContext } from '../../surface-block/surface-block.js';
 import type { EdgelessToolConstructor } from './services/tools-manager.js';
 import type { EdgelessTool } from './types.js';
 
@@ -76,7 +77,7 @@ declare module '@blocksuite/blocks' {
   }
 }
 
-export class EdgelessRootService extends RootService {
+export class EdgelessRootService extends RootService implements SurfaceContext {
   private _frame: EdgelessFrameManager;
 
   private _layer: LayerManager;
