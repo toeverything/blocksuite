@@ -83,6 +83,10 @@
       "./caption": {
         "types": "./dist/caption/index.d.ts",
         "import": "./dist/caption/index.js"
+      },
+      "./context-menu": {
+        "types": "./dist/context-menu/index.d.ts",
+        "import": "./dist/context-menu/index.js"
       }
     }
   },
