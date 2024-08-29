@@ -1,4 +1,4 @@
-import type { Viewport } from '../../../root-block/edgeless/utils/viewport.js';
+import type { Viewport } from '@blocksuite/block-std/gfx';
 
 import { MindmapElementModel } from '../../../surface-block/index.js';
 

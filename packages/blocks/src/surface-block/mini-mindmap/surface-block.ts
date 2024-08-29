@@ -3,13 +3,13 @@ import type { Bound } from '@blocksuite/global/utils';
 
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import { BlockComponent } from '@blocksuite/block-std';
+import { Viewport } from '@blocksuite/block-std/gfx';
 import { html } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 
 import type { SurfaceBlockModel } from '../surface-model.js';
 import type { MindmapService } from './service.js';
 
-import { Viewport } from '../../root-block/edgeless/utils/viewport.js';
 import { LayerManager } from '../managers/layer-manager.js';
 import { CanvasRenderer } from '../renderer/canvas-renderer.js';
 import { elementRenderers } from '../renderer/elements/index.js';

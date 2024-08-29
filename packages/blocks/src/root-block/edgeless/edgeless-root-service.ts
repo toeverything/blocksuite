@@ -4,10 +4,10 @@ import type {
   ReferenceInfo,
 } from '@blocksuite/affine-model';
 import type { BlockServiceOptions } from '@blocksuite/block-std';
-import type { PointTestOptions } from '@blocksuite/block-std/gfx';
 import type { IBound } from '@blocksuite/global/utils';
 
 import { clamp } from '@blocksuite/affine-shared/utils';
+import { type PointTestOptions, Viewport } from '@blocksuite/block-std/gfx';
 import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 import { Bound, getCommonBound, last } from '@blocksuite/global/utils';
 import { type BlockModel, Slot } from '@blocksuite/store';
@@ -42,13 +42,12 @@ import { FIT_TO_SCREEN_PADDING } from './utils/consts.js';
 import { getCursorMode } from './utils/query.js';
 import { EdgelessSnapManager } from './utils/snap-manager.js';
 import {
-  Viewport,
   ZOOM_INITIAL,
   ZOOM_MAX,
   ZOOM_MIN,
   ZOOM_STEP,
   type ZoomAction,
-} from './utils/viewport.js';
+} from './utils/zoom.js';
 
 export type ElementCreationSource =
   | 'shortcut'
