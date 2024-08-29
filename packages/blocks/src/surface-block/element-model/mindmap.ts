@@ -1,5 +1,6 @@
 import type {
   BaseElementProps,
+  GfxModel,
   SerializedElement,
   SurfaceBlockModel,
 } from '@blocksuite/block-std/gfx';
@@ -89,7 +90,7 @@ export class MindmapElementModel extends GfxGroupLikeElementModel<MindmapElement
   pathGenerator: ConnectorPathGenerator = new ConnectorPathGenerator({
     getElementById: (id: string) =>
       this.surface.getElementById(id) ??
-      (this.surface.doc.getBlockById(id) as BlockSuite.EdgelessModel),
+      (this.surface.doc.getBlockById(id) as GfxModel),
   });
 
   static createFromTree(

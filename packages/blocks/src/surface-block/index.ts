@@ -25,11 +25,11 @@ export {
 export { CanvasRenderer, Overlay } from './renderer/canvas-renderer.js';
 export { normalizeShapeBound } from './renderer/elements/index.js';
 export { fitContent } from './renderer/elements/shape/utils.js';
-export { RoughCanvas } from './rough/canvas.js';
-export type { Options } from './rough/core.js';
 export { SurfaceBlockModel as SurfaceBlockModel } from './surface-model.js';
 export { AStarRunner } from './utils/a-star.js';
 export * from './utils/index.js';
+export { RoughCanvas } from './utils/rough/canvas.js';
+export type { Options } from './utils/rough/core.js';
 export {
   BrushElementModel,
   type Connection,

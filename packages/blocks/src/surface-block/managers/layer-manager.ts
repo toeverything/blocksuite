@@ -4,7 +4,7 @@ import type { BlockModel } from '@blocksuite/store';
 
 import { FrameBlockModel } from '@blocksuite/affine-model';
 import { matchFlavours } from '@blocksuite/affine-shared/utils';
-import { GfxBlockElementModel } from '@blocksuite/block-std/gfx';
+import { GfxBlockElementModel, type GfxModel } from '@blocksuite/block-std/gfx';
 import { Bound, last, nToLast } from '@blocksuite/global/utils';
 import { DisposableGroup, Slot, assertType } from '@blocksuite/global/utils';
 import { generateKeyBetween } from 'fractional-indexing';
@@ -15,7 +15,7 @@ import {
   SurfaceElementModel,
   SurfaceGroupLikeModel,
 } from '../element-model/base.js';
-import { GridManager } from '../grid.js';
+import { GridManager } from './grid-manager.js';
 import {
   SortOrder,
   compare,
@@ -103,7 +103,7 @@ export class LayerManager {
   slots = {
     layerUpdated: new Slot<{
       type: 'delete' | 'add' | 'update';
-      initiatingElement: BlockSuite.EdgelessModel;
+      initiatingElement: GfxModel;
     }>(),
   };
 
@@ -148,7 +148,7 @@ export class LayerManager {
     this.canvasLayers = canvasLayers;
   }
 
-  private _getModelType(element: BlockSuite.EdgelessModel): 'block' | 'canvas' {
+  private _getModelType(element: GfxModel): 'block' | 'canvas' {
     return 'flavour' in element ? 'block' : 'canvas';
   }
 
@@ -289,10 +289,7 @@ export class LayerManager {
     this.layers = layers;
   }
 
-  private _insertIntoLayer(
-    target: BlockSuite.EdgelessModel,
-    type: 'block' | 'canvas'
-  ) {
+  private _insertIntoLayer(target: GfxModel, type: 'block' | 'canvas') {
     if (this.layers.length === 0) {
       this._initLayers();
       return;
@@ -303,7 +300,7 @@ export class LayerManager {
 
     const addToLayer = (
       layer: Layer,
-      element: BlockSuite.EdgelessModel,
+      element: GfxModel,
       position: number | 'tail'
     ) => {
       assertType<CanvasLayer>(layer);
@@ -330,7 +327,7 @@ export class LayerManager {
     };
     const createLayer = (
       type: 'block' | 'canvas',
-      targets: BlockSuite.EdgelessModel[],
+      targets: GfxModel[],
       curZIndex: number
     ): Layer => {
       const newLayer = {
@@ -422,10 +419,7 @@ export class LayerManager {
     }
   }
 
-  private _removeFromLayer(
-    target: BlockSuite.EdgelessModel,
-    type: 'block' | 'canvas'
-  ) {
+  private _removeFromLayer(target: GfxModel, type: 'block' | 'canvas') {
     const layers = this.layers;
     const index = layers.findIndex(layer => {
       if (layer.type !== type) return false;
@@ -488,7 +482,7 @@ export class LayerManager {
           model =>
             model instanceof GfxBlockElementModel &&
             renderableInEdgeless(this._doc, this._surface, model)
-        ) as BlockSuite.EdgelessModel[]
+        ) as GfxModel[]
     ).concat(this._surface?.elementModels ?? []);
 
     this.canvasElements = [];
@@ -519,10 +513,7 @@ export class LayerManager {
   /**
    * @returns a boolean value to indicate whether the layers have been updated
    */
-  private _updateLayer(
-    element: BlockSuite.EdgelessModel,
-    props?: Record<string, unknown>
-  ) {
+  private _updateLayer(element: GfxModel, props?: Record<string, unknown>) {
     let updateType: 'block' | 'canvas' | undefined = undefined;
     const type = 'flavour' in element ? element.flavour : element.type;
 
@@ -531,10 +522,7 @@ export class LayerManager {
     const shouldUpdateGroupChildren =
       (type === 'group' || element instanceof SurfaceGroupLikeModel) &&
       (indexChanged || childIdsChanged);
-    const updateArray = (
-      array: BlockSuite.EdgelessModel[],
-      element: BlockSuite.EdgelessModel
-    ) => {
+    const updateArray = (array: GfxModel[], element: GfxModel) => {
       if (!indexChanged) return;
       removeFromOrderedArray(array, element);
       insertToOrderedArray(array, element);
@@ -559,8 +547,8 @@ export class LayerManager {
     }
 
     if (updateType && (indexChanged || childIdsChanged)) {
-      this._removeFromLayer(element as BlockSuite.EdgelessModel, updateType);
-      this._insertIntoLayer(element as BlockSuite.EdgelessModel, updateType);
+      this._removeFromLayer(element as GfxModel, updateType);
+      this._insertIntoLayer(element as GfxModel, updateType);
       return true;
     }
 
@@ -627,7 +615,7 @@ export class LayerManager {
     );
   }
 
-  add(element: BlockSuite.EdgelessModel) {
+  add(element: GfxModel) {
     let insertType: 'block' | 'canvas' | undefined = undefined;
     const type = 'flavour' in element ? element.flavour : element.type;
     const isGroup =
@@ -654,7 +642,7 @@ export class LayerManager {
     }
 
     if (insertType) {
-      this._insertIntoLayer(element as BlockSuite.EdgelessModel, insertType);
+      this._insertIntoLayer(element as GfxModel, insertType);
       if (isGroup) {
         (element as GroupElementModel).childElements.forEach(
           child => child && this._updateLayer(child)
@@ -671,7 +659,7 @@ export class LayerManager {
   /**
    * Pass to the `Array.sort` to  sort the elements by their index
    */
-  compare(a: BlockSuite.EdgelessModel, b: BlockSuite.EdgelessModel) {
+  compare(a: GfxModel, b: GfxModel) {
     return compare(a, b);
   }
 
@@ -717,13 +705,13 @@ export class LayerManager {
         },
       };
 
-      manager.add(mockedFakeElement as unknown as BlockSuite.EdgelessModel);
+      manager.add(mockedFakeElement as unknown as GfxModel);
 
       return idx;
     };
   }
 
-  delete(element: BlockSuite.EdgelessModel) {
+  delete(element: GfxModel) {
     let deleteType: 'canvas' | 'block' | undefined = undefined;
     const isGroup = element instanceof SurfaceGroupLikeModel;
 
@@ -731,7 +719,7 @@ export class LayerManager {
       this._reset();
       this.slots.layerUpdated.emit({
         type: 'delete',
-        initiatingElement: element as BlockSuite.EdgelessModel,
+        initiatingElement: element as GfxModel,
       });
       return;
     }
@@ -812,15 +800,12 @@ export class LayerManager {
     return this.canvasLayers;
   }
 
-  getReorderedIndex(
-    element: BlockSuite.EdgelessModel,
-    direction: ReorderingDirection
-  ): string {
+  getReorderedIndex(element: GfxModel, direction: ReorderingDirection): string {
     const group = (element.group as BlockSuite.SurfaceGroupLikeModel) || null;
     const isFrameBlock =
       (element as FrameBlockModel).flavour === 'affine:frame';
 
-    let elements: BlockSuite.EdgelessModel[];
+    let elements: GfxModel[];
 
     if (group !== null) {
       elements = group.childElements.filter(
@@ -834,7 +819,7 @@ export class LayerManager {
       elements = this.frames;
     } else {
       elements = this.layers.reduce(
-        (pre: BlockSuite.EdgelessModel[], current) =>
+        (pre: GfxModel[], current) =>
           pre.concat(current.elements.filter(element => element.group == null)),
         []
       );
@@ -883,7 +868,7 @@ export class LayerManager {
     }
   }
 
-  getZIndex(element: BlockSuite.EdgelessModel): number {
+  getZIndex(element: GfxModel): number {
     if (element instanceof FrameBlockModel) {
       const frameIndex = this.frames.indexOf(element);
 
@@ -899,7 +884,7 @@ export class LayerManager {
     return layer.zIndex + layer.elements.indexOf(element);
   }
 
-  update(element: BlockSuite.EdgelessModel, props?: Record<string, unknown>) {
+  update(element: GfxModel, props?: Record<string, unknown>) {
     if (this._updateLayer(element, props)) {
       this._buildCanvasLayers();
       this.slots.layerUpdated.emit({

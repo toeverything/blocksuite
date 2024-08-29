@@ -1,3 +1,4 @@
+import type { GfxModel } from '@blocksuite/block-std/gfx';
 import type { IBound, IVec, IVec3 } from '@blocksuite/global/utils';
 
 import {
@@ -91,14 +92,14 @@ export function calculateNearestLocation(
     ) as IVec;
 }
 
-function rBound(ele: BlockSuite.EdgelessModel, anti = false): IBound {
+function rBound(ele: GfxModel, anti = false): IBound {
   const bound = Bound.deserialize(ele.xywh);
   return { ...bound, rotate: anti ? -ele.rotate : ele.rotate };
 }
 
 export function isConnectorAndBindingsAllSelected(
   connector: ConnectorElementModel | LocalConnectorElementModel,
-  selected: BlockSuite.EdgelessModel[]
+  selected: GfxModel[]
 ) {
   const connectorSelected = selected.find(s => s.id === connector.id);
   if (!connectorSelected) {
@@ -122,7 +123,7 @@ export function isConnectorAndBindingsAllSelected(
   return false;
 }
 
-export function getAnchors(ele: BlockSuite.EdgelessModel) {
+export function getAnchors(ele: GfxModel) {
   const bound = Bound.deserialize(ele.xywh);
   const offset = 10;
   const anchors: { point: PointLocation; coord: IVec }[] = [];
@@ -149,10 +150,7 @@ export function getAnchors(ele: BlockSuite.EdgelessModel) {
   return anchors;
 }
 
-function getConnectableRelativePosition(
-  connectable: BlockSuite.EdgelessModel,
-  position: IVec
-) {
+function getConnectableRelativePosition(connectable: GfxModel, position: IVec) {
   const location = connectable.getRelativePointLocation(position as IVec);
   if (isVecZero(Vec.sub(position, [0, 0.5])))
     location.tangent = Vec.rot([0, -1], toRadian(connectable.rotate));
@@ -1008,7 +1006,7 @@ export class ConnectorPathGenerator {
 
   constructor(
     private options: {
-      getElementById: (id: string) => BlockSuite.EdgelessModel | null;
+      getElementById: (id: string) => GfxModel | null;
     }
   ) {}
 
