@@ -1,6 +1,6 @@
 import { createPopup } from '@blocksuite/affine-components/context-menu';
-import { ArrowLeftBigIcon } from '@blocksuite/affine-components/icons';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
+import { ArrowLeftBigIcon } from '@blocksuite/icons/lit';
 import { SignalWatcher } from '@lit-labs/preact-signals';
 import { css, html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
@@ -237,7 +237,7 @@ export class DataViewPropertiesSettingView extends SignalWatcher(
             style="display:flex;"
             class="dv-hover dv-round-4 dv-pd-2"
           >
-            ${ArrowLeftBigIcon}
+            ${ArrowLeftBigIcon()}
           </div>
           PROPERTIES
         </div>

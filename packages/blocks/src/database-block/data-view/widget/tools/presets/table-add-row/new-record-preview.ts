@@ -1,5 +1,5 @@
-import { PlusIcon } from '@blocksuite/affine-components/icons';
 import { ShadowlessElement } from '@blocksuite/block-std';
+import { PlusIcon } from '@blocksuite/icons/lit';
 import { html } from 'lit';
 import { customElement } from 'lit/decorators.js';
 
@@ -39,7 +39,7 @@ export class NewRecordPreview extends ShadowlessElement {
           fill: var(--affine-brand-color);
         }
       </style>
-      ${PlusIcon}
+      ${PlusIcon()}
     `;
   }
 }

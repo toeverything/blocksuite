@@ -3,9 +3,9 @@ import type { Disposable } from '@blocksuite/global/utils';
 import type { PropertyValues } from 'lit';
 
 import { createModal } from '@blocksuite/affine-components/context-menu';
-import { CrossIcon, ExpandWideIcon } from '@blocksuite/affine-components/icons';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { Slot, assertExists } from '@blocksuite/global/utils';
+import { CloseIcon, ExpandWideIcon } from '@blocksuite/icons/lit';
 import { computed } from '@lit-labs/preact-signals';
 import { css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
@@ -67,7 +67,7 @@ export function showDatabasePreviewModal(database: DatabaseBlockComponent) {
           .database="${database}"
         ></database-block-modal-preview>
         <div @click="${close}" class="database-block-preview-close">
-          ${CrossIcon}
+          ${CloseIcon()}
         </div>
       </div>
     `;
@@ -101,7 +101,7 @@ export class ExpandDatabaseBlockModal extends WidgetBase {
       class="dv-icon-20 dv-pd-2 dv-hover dv-round-4"
       style="display:flex;"
     >
-      ${ExpandWideIcon}
+      ${ExpandWideIcon()}
     </div>`;
   }
 

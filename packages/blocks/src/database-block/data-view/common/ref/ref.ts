@@ -1,6 +1,6 @@
 import { popFilterableSimpleMenu } from '@blocksuite/affine-components/context-menu';
-import { AddCursorIcon } from '@blocksuite/affine-components/icons';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
+import { AddCursorIcon } from '@blocksuite/icons/lit';
 import { css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
@@ -134,7 +134,7 @@ export const popCreateFilter = (
           {
             type: 'action',
             name: 'Add filter group',
-            icon: AddCursorIcon,
+            icon: AddCursorIcon(),
             select: () => {
               props.onSelect(firstFilterInGroup(props.vars));
             },

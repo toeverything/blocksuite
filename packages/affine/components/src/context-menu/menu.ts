@@ -6,14 +6,14 @@ import type {
 } from '@floating-ui/dom';
 import type { TemplateResult } from 'lit';
 
-import {
-  ArrowRightSmallIcon,
-  DoneIcon,
-  checkboxChecked,
-  checkboxUnchecked,
-} from '@blocksuite/affine-components/icons';
 import { rangeWrap } from '@blocksuite/affine-shared/utils';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
+import {
+  ArrowRightSmallIcon,
+  CheckBoxCkeckSolidIcon,
+  CheckBoxUnIcon,
+  DoneIcon,
+} from '@blocksuite/icons/lit';
 import {
   autoUpdate,
   computePosition,
@@ -183,7 +183,7 @@ export class MenuComponent<_T> extends WithDisposable(ShadowlessElement) {
         ? html` <div class="icon">${menu.icon}</div>`
         : nothing;
       const postfixIcon =
-        menu.postfix ?? (menu.isSelected ? DoneIcon : undefined);
+        menu.postfix ?? (menu.isSelected ? DoneIcon() : undefined);
       const postfix = postfixIcon
         ? html` <div class="icon">${postfixIcon}</div>`
         : nothing;
@@ -216,7 +216,9 @@ export class MenuComponent<_T> extends WithDisposable(ShadowlessElement) {
           type: 'select',
           label: () => html`
             <div class="icon">
-              ${checked ? checkboxChecked() : checkboxUnchecked()}
+              ${checked
+                ? CheckBoxCkeckSolidIcon({ style: `color:#1E96EB` })
+                : CheckBoxUnIcon()}
             </div>
             <div class="affine-menu-action-text">
               ${menu.label?.() ?? menu.name}
@@ -305,7 +307,7 @@ export class MenuComponent<_T> extends WithDisposable(ShadowlessElement) {
         menu.select ? this._complete() : openSubMenu();
       };
       const postfix = html` <div class="icon">
-        ${menu.postfix ?? ArrowRightSmallIcon}
+        ${menu.postfix ?? ArrowRightSmallIcon()}
       </div>`;
       return [
         {

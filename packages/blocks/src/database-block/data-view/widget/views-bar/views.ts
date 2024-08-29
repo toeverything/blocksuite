@@ -4,17 +4,17 @@ import {
 } from '@blocksuite/affine-components/context-menu';
 import {
   AddCursorIcon,
+  DeleteIcon,
   DuplicateIcon,
   MoreHorizontalIcon,
   MoveLeftIcon,
   MoveRightIcon,
-} from '@blocksuite/affine-components/icons';
+} from '@blocksuite/icons/lit';
 import { css, html } from 'lit';
 import { customElement } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 
 import '../../common/component/overflow/overflow.js';
-import { DeleteIcon } from '../../common/icons/index.js';
 import { renderUniLit } from '../../utils/uni-component/index.js';
 import { WidgetBase } from '../widget-base.js';
 
@@ -60,7 +60,7 @@ export class DataViewHeaderViews extends WidgetBase {
             @click="${openViewOption}"
             style="display:flex;align-items:center;"
           >
-            ${MoreHorizontalIcon}
+            ${MoreHorizontalIcon()}
           </div>`,
         };
       }),
@@ -166,7 +166,7 @@ export class DataViewHeaderViews extends WidgetBase {
             type: 'action',
             name: 'Move Left',
             hide: () => index === 0,
-            icon: MoveLeftIcon,
+            icon: MoveLeftIcon(),
             select: () => {
               const targetId = views[index - 1];
               this.viewManager.moveTo(
@@ -178,7 +178,7 @@ export class DataViewHeaderViews extends WidgetBase {
           {
             type: 'action',
             name: 'Move Right',
-            icon: MoveRightIcon,
+            icon: MoveRightIcon(),
             hide: () => index === views.length - 1,
             select: () => {
               const targetId = views[index + 1];
@@ -191,7 +191,7 @@ export class DataViewHeaderViews extends WidgetBase {
           {
             type: 'action',
             name: 'Duplicate',
-            icon: DuplicateIcon,
+            icon: DuplicateIcon(),
             select: () => {
               this.viewManager.viewDuplicate(id);
             },
@@ -203,7 +203,7 @@ export class DataViewHeaderViews extends WidgetBase {
               {
                 type: 'action',
                 name: 'Delete View',
-                icon: DeleteIcon,
+                icon: DeleteIcon(),
                 select: () => {
                   view.delete();
                 },
@@ -227,7 +227,7 @@ export class DataViewHeaderViews extends WidgetBase {
         data-testid="database-add-view-button"
         @click="${this._addViewMenu}"
       >
-        ${AddCursorIcon}
+        ${AddCursorIcon()}
       </div>`;
     }
     return html`

@@ -2,16 +2,16 @@ import type { DatabaseBlockModel } from '@blocksuite/affine-model';
 
 import { CaptionedBlockComponent } from '@blocksuite/affine-components/caption';
 import { popMenu } from '@blocksuite/affine-components/context-menu';
-import {
-  CopyIcon,
-  DeleteIcon,
-  MoreHorizontalIcon,
-} from '@blocksuite/affine-components/icons';
 import { toast } from '@blocksuite/affine-components/toast';
 import { DatabaseBlockSchema } from '@blocksuite/affine-model';
 import { NOTE_SELECTOR } from '@blocksuite/affine-shared/consts';
 import { RANGE_SYNC_EXCLUDE_ATTR } from '@blocksuite/block-std';
 import { Rect } from '@blocksuite/global/utils';
+import {
+  CopyIcon,
+  DeleteIcon,
+  MoreHorizontalIcon,
+} from '@blocksuite/icons/lit';
 import { Slice } from '@blocksuite/store';
 import { computed } from '@lit-labs/preact-signals';
 import { css, html, nothing, unsafeCSS } from 'lit';
@@ -73,7 +73,7 @@ export class DatabaseBlockComponent extends CaptionedBlockComponent<
       items: [
         {
           type: 'action',
-          icon: CopyIcon,
+          icon: CopyIcon(),
           name: 'Copy',
           select: () => {
             const slice = Slice.fromModels(this.doc, [this.model]);
@@ -91,7 +91,7 @@ export class DatabaseBlockComponent extends CaptionedBlockComponent<
           children: () => [
             {
               type: 'action',
-              icon: DeleteIcon,
+              icon: DeleteIcon(),
               class: 'delete-item',
               name: 'Delete Database',
               select: () => {
@@ -287,7 +287,7 @@ export class DatabaseBlockComponent extends CaptionedBlockComponent<
       return nothing;
     }
     return html` <div class="database-ops" @click="${this._clickDatabaseOps}">
-      ${MoreHorizontalIcon}
+      ${MoreHorizontalIcon()}
     </div>`;
   }
 

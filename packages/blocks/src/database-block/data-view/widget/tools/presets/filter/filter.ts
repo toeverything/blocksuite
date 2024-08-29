@@ -1,8 +1,8 @@
+import { FilterIcon } from '@blocksuite/icons/lit';
 import { css, html, nothing } from 'lit';
 import { customElement } from 'lit/decorators.js';
 
 import { type FilterGroup, emptyFilterGroup } from '../../../../common/ast.js';
-import { FilterIcon } from '../../../../common/icons/index.js';
 import { popCreateFilter } from '../../../../common/ref/ref.js';
 import '../../../filter/filter-group.js';
 import { WidgetBase } from '../../../widget-base.js';
@@ -68,7 +68,7 @@ export class DataViewHeaderToolsFilter extends WidgetBase {
       @click="${this.addFilter}"
       class="affine-database-filter-button dv-icon-20"
     >
-      ${FilterIcon} Filter
+      ${FilterIcon()} Filter
     </div>`;
   }
 

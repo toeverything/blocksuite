@@ -1,16 +1,16 @@
 import { popFilterableSimpleMenu } from '@blocksuite/affine-components/context-menu';
 import {
   CopyIcon,
+  DeleteIcon,
   ExpandFullIcon,
   MoveLeftIcon,
   MoveRightIcon,
-} from '@blocksuite/affine-components/icons';
+} from '@blocksuite/icons/lit';
 import { html } from 'lit';
 
 import type { DataViewRenderer } from '../../../../data-view.js';
 import type { TableSelectionController } from '../controller/selection.js';
 
-import { DeleteIcon } from '../../../../common/icons/index.js';
 import { TableRowSelection } from '../types.js';
 
 export const openDetail = (
@@ -51,7 +51,7 @@ export const popRowMenu = (
             icon: html` <div
               style="transform: rotate(90deg);display:flex;align-items:center;"
             >
-              ${CopyIcon}
+              ${CopyIcon()}
             </div>`,
             select: () => {
               selectionController.host.clipboardController.copy();
@@ -67,7 +67,7 @@ export const popRowMenu = (
             type: 'action',
             name: 'Delete Rows',
             class: 'delete-item',
-            icon: DeleteIcon,
+            icon: DeleteIcon(),
             select: () => {
               selectionController.view.rowDelete(rows);
             },
@@ -82,7 +82,7 @@ export const popRowMenu = (
     {
       type: 'action',
       name: 'Expand Row',
-      icon: ExpandFullIcon,
+      icon: ExpandFullIcon(),
       select: () => {
         openDetail(dataViewEle, row.id, selectionController);
       },
@@ -119,7 +119,7 @@ export const popRowMenu = (
           icon: html` <div
             style="transform: rotate(90deg);display:flex;align-items:center;"
           >
-            ${MoveLeftIcon}
+            ${MoveLeftIcon()}
           </div>`,
           select: () => {
             selectionController.insertRowBefore(row.groupKey, row.id);
@@ -131,7 +131,7 @@ export const popRowMenu = (
           icon: html` <div
             style="transform: rotate(90deg);display:flex;align-items:center;"
           >
-            ${MoveRightIcon}
+            ${MoveRightIcon()}
           </div>`,
           select: () => {
             selectionController.insertRowAfter(row.groupKey, row.id);
@@ -155,7 +155,7 @@ export const popRowMenu = (
           type: 'action',
           name: 'Delete Row',
           class: 'delete-item',
-          icon: DeleteIcon,
+          icon: DeleteIcon(),
           select: () => {
             selectionController.deleteRow(row.id);
           },

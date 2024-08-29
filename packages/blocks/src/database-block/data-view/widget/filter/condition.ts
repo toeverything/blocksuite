@@ -1,5 +1,6 @@
 import { popFilterableSimpleMenu } from '@blocksuite/affine-components/context-menu';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
+import { CloseIcon } from '@blocksuite/icons/lit';
 import { css, html, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
@@ -17,7 +18,6 @@ import {
   firstFilterInGroup,
   getRefType,
 } from '../../common/ast.js';
-import { CrossIcon } from '../../common/icons/index.js';
 import '../../common/literal/define.js';
 import { popLiteralEdit, renderLiteral } from '../../common/literal/matcher.js';
 import '../../common/ref/ref.js';
@@ -187,7 +187,7 @@ export class FilterConditionView extends WithDisposable(ShadowlessElement) {
             class="dv-icon-16 dv-round-4 dv-pd-4 dv-hover"
             style="display:flex;align-items:center;"
           >
-            ${CrossIcon}
+            ${CloseIcon()}
           </div>`
         : nothing}
     `;

@@ -2,8 +2,8 @@ import {
   type Menu,
   popFilterableSimpleMenu,
 } from '@blocksuite/affine-components/context-menu';
-import { ArrowDownIcon } from '@blocksuite/affine-components/icons';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
+import { ArrowDownSmallIcon } from '@blocksuite/icons/lit';
 import { Text } from '@blocksuite/store';
 import { SignalWatcher, computed, signal } from '@lit-labs/preact-signals';
 import { css, html } from 'lit';
@@ -195,7 +195,7 @@ export class DatabaseColumnStatsCell extends SignalWatcher(
     >
       <div class="content">
         ${!this.statsResult$.value
-          ? html`Calculate ${ArrowDownIcon}`
+          ? html`Calculate ${ArrowDownSmallIcon()}`
           : html`
               <span class="label">${this.statsResult$.value.name}</span>
               <span class="value">${this.statsResult$.value.value} </span>
