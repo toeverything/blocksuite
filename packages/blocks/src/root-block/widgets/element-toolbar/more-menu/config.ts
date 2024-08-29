@@ -301,7 +301,7 @@ export const conversionsGroup: MenuItemGroup<ElementToolbarMoreMenuContext> = {
       icon: LinkedPageIcon({ width: '20', height: '20' }),
       label: 'Create linked doc',
       type: 'create-linked-doc',
-      action: async ({ doc, selection, service, surface, host }) => {
+      action: async ({ doc, selection, service, surface, edgeless, host }) => {
         const title = await promptDocTitle(host);
         if (title === null) return;
 
@@ -349,7 +349,7 @@ export const conversionsGroup: MenuItemGroup<ElementToolbarMoreMenuContext> = {
         });
         // delete selected elements
         doc.transact(() => {
-          deleteElements(surface, elements);
+          deleteElements(edgeless, elements);
         });
         selection.set({
           elements: [cardId],
@@ -371,9 +371,9 @@ export const deleteGroup: MenuItemGroup<ElementToolbarMoreMenuContext> = {
       icon: DeleteIcon({ width: '20', height: '20' }),
       label: 'Delete',
       type: 'delete',
-      action: ({ doc, selection, selectedElements, surface }) => {
+      action: ({ doc, selection, selectedElements, edgeless }) => {
         doc.captureSync();
-        deleteElements(surface, selectedElements);
+        deleteElements(edgeless, selectedElements);
 
         selection.set({
           elements: [],

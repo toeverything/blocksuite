@@ -10,7 +10,6 @@ import type { EdgelessRootBlockComponent } from '../root-block/edgeless/edgeless
 import type { SurfaceBlockModel } from './surface-model.js';
 import type { SurfaceBlockService } from './surface-service.js';
 
-import { isShape } from '../root-block/edgeless/components/auto-complete/utils.js';
 import { FrameOverlay } from '../root-block/edgeless/frame-manager.js';
 import { ConnectorElementModel } from './element-model/index.js';
 import { ConnectionOverlay } from './managers/connector-manager.js';
@@ -33,7 +32,7 @@ export class SurfaceBlockComponent extends BlockComponent<
     };
 
     this._disposables.add(
-      this.edgeless.service.viewport.viewportUpdated.on(() => {
+      this._edgeless.service.viewport.viewportUpdated.on(() => {
         refresh();
       })
     );
@@ -52,8 +51,6 @@ export class SurfaceBlockComponent extends BlockComponent<
   static isConnector = (element: unknown): element is ConnectorElementModel => {
     return element instanceof ConnectorElementModel;
   };
-
-  static isShape = isShape;
 
   static override styles = css`
     .affine-edgeless-surface-block-container {
@@ -118,7 +115,7 @@ export class SurfaceBlockComponent extends BlockComponent<
   `;
 
   fitToViewport = (bound: Bound) => {
-    const { viewport } = this.edgeless.service;
+    const { viewport } = this._edgeless.service;
     bound = bound.expand(30);
     if (Date.now() - this._lastTime > 200)
       this._cachedViewport = viewport.viewportBounds;
@@ -139,15 +136,20 @@ export class SurfaceBlockComponent extends BlockComponent<
     this._renderer?.refresh();
   };
 
+  /** @deprecated */
+  private get _edgeless() {
+    return this.parentComponent as EdgelessRootBlockComponent;
+  }
+
   private _getReversedTransform() {
-    const { translateX, translateY, zoom } = this.edgeless.service.viewport;
+    const { translateX, translateY, zoom } = this._edgeless.service.viewport;
 
     return `scale(${1 / zoom}) translate(${-translateX}px, ${-translateY}px)`;
   }
 
   private _initOverlay() {
     this.overlays = {
-      connector: new ConnectionOverlay(this.edgeless.service),
+      connector: new ConnectionOverlay(this._edgeless.service),
       frame: new FrameOverlay(),
     };
 
@@ -157,7 +159,7 @@ export class SurfaceBlockComponent extends BlockComponent<
   }
 
   private _initRenderer() {
-    const service = this.edgeless.service!;
+    const service = this._edgeless.service!;
 
     this._renderer = new CanvasRenderer({
       viewport: service.viewport,
@@ -241,10 +243,6 @@ export class SurfaceBlockComponent extends BlockComponent<
         <!-- attach canvas later in renderer -->
       </div>
     `;
-  }
-
-  get edgeless() {
-    return this.parentComponent as EdgelessRootBlockComponent;
   }
 
   get renderer() {

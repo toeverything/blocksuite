@@ -559,9 +559,9 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
         });
       }
 
-      deleteElements(edgeless.surface, selectedElements);
+      deleteElements(edgeless, selectedElements);
     } else {
-      deleteElements(edgeless.surface, selectedElements);
+      deleteElements(edgeless, selectedElements);
       edgeless.service.selection.clear();
     }
   }
