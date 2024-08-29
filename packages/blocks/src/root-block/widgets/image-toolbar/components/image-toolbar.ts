@@ -63,6 +63,8 @@ export class AffineImageToolbar extends LitElement {
 
     assertExists(this._moreButton);
 
+    const groups = this.context.config.configure(this.moreMenuConfig);
+
     createLitPortal({
       template: html`
         <editor-menu-content
@@ -74,7 +76,7 @@ export class AffineImageToolbar extends LitElement {
           })}
         >
           <div data-size="large" data-orientation="vertical">
-            ${renderGroups(this.moreMenuConfig, this.context)}
+            ${renderGroups(groups, this.context)}
           </div>
         </editor-menu-content>
       `,

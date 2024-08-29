@@ -65,8 +65,8 @@ export class AffineImageToolbarWidget extends WidgetComponent<
         return {
           template: html`<affine-image-toolbar
             .context=${context}
-            .config=${this.config}
-            .moreMenuConfig=${this.moreMenuConfig}
+            .config=${cloneGroups(this.config)}
+            .moreMenuConfig=${cloneGroups(this.moreMenuConfig)}
             .onActiveStatusChange=${(active: boolean) => {
               this._isActivated = active;
               if (!active && !this._hoverController?.isHovering) {
