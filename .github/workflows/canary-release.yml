@@ -1,4 +1,3 @@
-# This workflow will release a new version that follows `${version}-${date}-${hash}`
 name: Canary Release
 
 on:
@@ -6,6 +5,8 @@ on:
     # At the end of every day
     - cron: '0 0 * * *'
   workflow_dispatch:
+
+concurrency: ${{ github.workflow }}-${{ github.ref }}
 
 permissions:
   id-token: write
@@ -16,41 +17,22 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - uses: pnpm/action-setup@v4
-        name: Install pnpm
-        id: pnpm-install
-      - name: Use Node.js LTS
-        uses: actions/setup-node@v3
-        with:
-          node-version-file: '.nvmrc'
-          cache: 'pnpm'
-      - name: Get pnpm store directory
-        id: pnpm-cache
-        shell: bash
+
+      - uses: ./.github/actions/setup
+
+      - run: pnpm install
+
+      - name: Add changeset
+        run: cp config/snapshot-changeset.md .changeset/
+
+      - name: Update package version
+        run: pnpm ci:version:canary
+
+      - name: Build packages
+        run: pnpm build:packages
+
+      - name: Publish to NPM
         run: |
-          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
-
-      - uses: actions/cache@v3
-        name: Setup pnpm cache
-        with:
-          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-store-
-
-      - name: Install dependencies
-        run: pnpm install
-
-      - uses: toeverything/set-build-version@latest
-
-      - name: Replace canary version fields
-        run: ./scripts/replace-canary-version.sh
-
-      - name: Try publishing to NPM
-        run: ./scripts/publish.sh
-        env:
-          CANARY: true
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-          NPM_CONFIG_PROVENANCE: true
+          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ".npmrc"
+          pnpm ci:publish:canary
+          rm ".npmrc"

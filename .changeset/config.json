@@ -1,0 +1,11 @@
+{
+  "$schema": "https://unpkg.com/@changesets/config@3.0.2/schema.json",
+  "changelog": "./changelog-config.cjs",
+  "commit": false,
+  "fixed": [],
+  "linked": [["@blocksuite/*"]],
+  "access": "public",
+  "baseBranch": "master",
+  "updateInternalDependencies": "patch",
+  "ignore": ["@blocksuite/e2e", "@blocksuite/playground"]
+}
