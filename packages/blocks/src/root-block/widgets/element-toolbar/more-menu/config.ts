@@ -383,3 +383,12 @@ export const deleteGroup: MenuItemGroup<ElementToolbarMoreMenuContext> = {
     },
   ],
 };
+
+export const BUILT_IN_GROUPS = [
+  sectionGroup,
+  reorderGroup,
+  openGroup,
+  clipboardGroup,
+  conversionsGroup,
+  deleteGroup,
+];

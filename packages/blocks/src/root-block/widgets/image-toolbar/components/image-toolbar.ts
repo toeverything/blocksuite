@@ -12,8 +12,7 @@ import { LitElement, html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type { ImageBlockComponent } from '../../../../image-block/image-block.js';
-import type { ImageToolbarContext } from '../type.js';
+import type { ImageToolbarContext } from '../context.js';
 
 import { styles } from '../styles.js';
 
@@ -63,8 +62,6 @@ export class AffineImageToolbar extends LitElement {
 
     assertExists(this._moreButton);
 
-    const groups = this.context.config.configure(this.moreMenuConfig);
-
     createLitPortal({
       template: html`
         <editor-menu-content
@@ -76,7 +73,7 @@ export class AffineImageToolbar extends LitElement {
           })}
         >
           <div data-size="large" data-orientation="vertical">
-            ${renderGroups(groups, this.context)}
+            ${renderGroups(this.moreGroups, this.context)}
           </div>
         </editor-menu-content>
       `,
@@ -106,7 +103,7 @@ export class AffineImageToolbar extends LitElement {
   override render() {
     return html`
       <editor-toolbar class="affine-image-toolbar-container" data-without-bg>
-        ${renderGroups(this.config, this.context)}
+        ${renderGroups(this.primaryGroups, this.context)}
         <editor-icon-button
           class="image-toolbar-button more"
           aria-label="More"
@@ -128,22 +125,16 @@ export class AffineImageToolbar extends LitElement {
   private accessor _moreMenuOpen = false;
 
   @property({ attribute: false })
-  accessor abortController!: AbortController;
-
-  @property({ attribute: false })
-  accessor blockComponent!: ImageBlockComponent;
-
-  @property({ attribute: false })
-  accessor config!: MenuItemGroup<ImageToolbarContext>[];
-
-  @property({ attribute: false })
   accessor context!: ImageToolbarContext;
 
   @property({ attribute: false })
-  accessor moreMenuConfig!: MenuItemGroup<ImageToolbarContext>[];
+  accessor moreGroups!: MenuItemGroup<ImageToolbarContext>[];
 
   @property({ attribute: false })
   accessor onActiveStatusChange: (active: boolean) => void = noop;
+
+  @property({ attribute: false })
+  accessor primaryGroups!: MenuItemGroup<ImageToolbarContext>[];
 }
 
 declare global {
