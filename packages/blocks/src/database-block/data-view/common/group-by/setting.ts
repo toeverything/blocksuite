@@ -5,8 +5,8 @@ import {
   type MenuOptions,
   popMenu,
 } from '@blocksuite/affine-components/context-menu';
-import { ArrowRightSmallIcon } from '@blocksuite/affine-components/icons';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
+import { ArrowRightSmallIcon, DeleteIcon } from '@blocksuite/icons/lit';
 import { SignalWatcher } from '@lit-labs/preact-signals';
 import { css, html, unsafeCSS } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
@@ -21,7 +21,6 @@ import { renderUniLit } from '../../utils/uni-component/uni-component.js';
 import { KanbanSingleView } from '../../view/presets/kanban/kanban-view-manager.js';
 import { TableSingleView } from '../../view/presets/table/table-view-manager.js';
 import { dataViewCssVariable } from '../css-variable.js';
-import { DeleteIcon } from '../icons/index.js';
 import { groupByMatcher } from './matcher.js';
 
 @customElement('data-view-group-setting')
@@ -191,7 +190,7 @@ export const selectGroupByProperty = (
         children: () => [
           {
             type: 'action',
-            icon: DeleteIcon,
+            icon: DeleteIcon(),
             class: 'delete-item',
             name: 'Remove Grouping',
             select: () => {
@@ -256,7 +255,7 @@ export const popGroupSetting = (
                   ${renderUniLit(icon, {})}
                   ${view.columnGetName(groupBy.columnId)}
                 </div>
-                ${ArrowRightSmallIcon}
+                ${ArrowRightSmallIcon()}
               `,
               options: selectGroupByProperty(view, reopen),
             },

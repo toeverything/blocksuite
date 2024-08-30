@@ -185,7 +185,7 @@ export class NumberCellEditing extends BaseCellRenderer<
 }
 
 export const numberColumnConfig = numberColumnModelConfig.renderConfig({
-  icon: createIcon('DatabaseNumber'),
+  icon: createIcon('NumberIcon'),
   cellRenderer: {
     view: createFromBaseCellRenderer(NumberCell),
     edit: createFromBaseCellRenderer(NumberCellEditing),

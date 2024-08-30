@@ -3,8 +3,11 @@ import {
   ArrowRightSmallIcon,
   DeleteIcon,
   DuplicateIcon,
+  FilterIcon,
+  GroupingIcon,
+  InfoIcon,
   MoreHorizontalIcon,
-} from '@blocksuite/affine-components/icons';
+} from '@blocksuite/icons/lit';
 import { css, html } from 'lit';
 import { customElement } from 'lit/decorators.js';
 
@@ -15,11 +18,6 @@ import {
   popGroupSetting,
   popSelectGroupByProperty,
 } from '../../../../common/group-by/setting.js';
-import {
-  FilterIcon,
-  GroupingIcon,
-  InfoIcon,
-} from '../../../../common/icons/index.js';
 import { popPropertiesSetting } from '../../../../common/properties.js';
 import { popFilterModal } from '../../../filter/filter-modal.js';
 import { WidgetBase } from '../../../widget-base.js';
@@ -72,7 +70,7 @@ export class DataViewHeaderToolsViewOptions extends WidgetBase {
       class="affine-database-toolbar-item more-action dv-icon-20"
       @click="${this.clickMoreAction}"
     >
-      ${MoreHorizontalIcon}
+      ${MoreHorizontalIcon()}
     </div>`;
   }
 
@@ -112,8 +110,8 @@ export const popViewOptions = (
         {
           type: 'action',
           name: 'Properties',
-          icon: InfoIcon,
-          postfix: ArrowRightSmallIcon,
+          icon: InfoIcon(),
+          postfix: ArrowRightSmallIcon(),
           select: () => {
             requestAnimationFrame(() => {
               popPropertiesSetting(target, {
@@ -126,8 +124,8 @@ export const popViewOptions = (
         {
           type: 'action',
           name: 'Filter',
-          icon: FilterIcon,
-          postfix: ArrowRightSmallIcon,
+          icon: FilterIcon(),
+          postfix: ArrowRightSmallIcon(),
           select: () => {
             popFilterModal(target, {
               vars: view.vars$.value,
@@ -147,8 +145,8 @@ export const popViewOptions = (
         {
           type: 'action',
           name: 'Group',
-          icon: GroupingIcon,
-          postfix: ArrowRightSmallIcon,
+          icon: GroupingIcon(),
+          postfix: ArrowRightSmallIcon(),
           select: () => {
             const groupBy = view.viewData$.value?.groupBy;
             if (!groupBy) {
@@ -161,7 +159,7 @@ export const popViewOptions = (
         {
           type: 'action',
           name: 'Duplicate',
-          icon: DuplicateIcon,
+          icon: DuplicateIcon(),
           select: () => {
             view.duplicate();
           },
@@ -173,7 +171,7 @@ export const popViewOptions = (
             {
               type: 'action',
               name: 'Delete View',
-              icon: DeleteIcon,
+              icon: DeleteIcon(),
               select: () => {
                 view.delete();
               },

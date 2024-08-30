@@ -1,9 +1,13 @@
 import { popFilterableSimpleMenu } from '@blocksuite/affine-components/context-menu';
+import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import {
   ArrowDownSmallIcon,
+  ConvertIcon,
+  DeleteIcon,
   DuplicateIcon,
-} from '@blocksuite/affine-components/icons';
-import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
+  MoreHorizontalIcon,
+  PlusIcon,
+} from '@blocksuite/icons/lit';
 import { css, html, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
@@ -12,12 +16,6 @@ import { repeat } from 'lit/directives/repeat.js';
 import type { Filter, FilterGroup, Variable } from '../../common/ast.js';
 import type { FilterGroupView } from './filter-group.js';
 
-import {
-  ConvertIcon,
-  DeleteIcon,
-  MoreHorizontalIcon,
-  PlusIcon,
-} from '../../common/icons/index.js';
 import { menuTitle } from '../../utils/menu-title.js';
 import './condition.js';
 import { popAddNewFilter } from './condition.js';
@@ -178,7 +176,7 @@ export class FilterRootView extends WithDisposable(ShadowlessElement) {
       {
         type: 'action',
         name: filter.type === 'filter' ? 'Turn into group' : 'Wrap in group',
-        icon: ConvertIcon,
+        icon: ConvertIcon(),
         onHover: hover => {
           this.containerClass = hover
             ? { index: i, class: 'hover-style' }
@@ -192,7 +190,7 @@ export class FilterRootView extends WithDisposable(ShadowlessElement) {
       {
         type: 'action',
         name: 'Duplicate',
-        icon: DuplicateIcon,
+        icon: DuplicateIcon(),
         onHover: hover => {
           this.containerClass = hover
             ? { index: i, class: 'hover-style' }
@@ -215,7 +213,7 @@ export class FilterRootView extends WithDisposable(ShadowlessElement) {
           {
             type: 'action',
             name: 'Delete',
-            icon: DeleteIcon,
+            icon: DeleteIcon(),
             class: 'delete-item',
             onHover: hover => {
               this.containerClass = hover
@@ -253,7 +251,7 @@ export class FilterRootView extends WithDisposable(ShadowlessElement) {
           };
           const ops = html`
             <div class="filter-root-item-ops" @click="${clickOps}">
-              ${MoreHorizontalIcon}
+              ${MoreHorizontalIcon()}
             </div>
           `;
           const content =
@@ -311,7 +309,7 @@ export class FilterRootView extends WithDisposable(ShadowlessElement) {
         })}
       </div>
       <div class="filter-root-button add-new" @click="${this._addNew}">
-        ${PlusIcon} Add ${ArrowDownSmallIcon}
+        ${PlusIcon()} Add ${ArrowDownSmallIcon()}
       </div>
     `;
   }

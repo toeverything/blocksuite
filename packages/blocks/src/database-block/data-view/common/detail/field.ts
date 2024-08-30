@@ -1,5 +1,11 @@
 import { popMenu } from '@blocksuite/affine-components/context-menu';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
+import {
+  DeleteIcon,
+  DuplicateIcon,
+  MoveLeftIcon,
+  MoveRightIcon,
+} from '@blocksuite/icons/lit';
 import { SignalWatcher, computed } from '@lit-labs/preact-signals';
 import { css } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
@@ -16,12 +22,6 @@ import type { SingleView } from '../../view-manager/single-view.js';
 
 import { renderUniLit } from '../../utils/uni-component/uni-component.js';
 import { inputConfig, typeConfig } from '../column-menu.js';
-import {
-  DatabaseDuplicate,
-  DatabaseMoveLeft,
-  DatabaseMoveRight,
-  DeleteIcon,
-} from '../icons/index.js';
 
 @customElement('affine-data-view-record-field')
 export class RecordField extends SignalWatcher(
@@ -52,7 +52,7 @@ export class RecordField extends SignalWatcher(
           {
             type: 'action',
             name: 'Duplicate Column',
-            icon: DatabaseDuplicate,
+            icon: DuplicateIcon(),
             hide: () =>
               !this.column.duplicate || this.column.type$.value === 'title',
             select: () => {
@@ -65,7 +65,7 @@ export class RecordField extends SignalWatcher(
             icon: html` <div
               style="transform: rotate(90deg);display:flex;align-items:center;"
             >
-              ${DatabaseMoveLeft}
+              ${MoveLeftIcon()}
             </div>`,
             hide: () => columns.findIndex(v => v === this.column.id) === 0,
             select: () => {
@@ -86,7 +86,7 @@ export class RecordField extends SignalWatcher(
             icon: html` <div
               style="transform: rotate(90deg);display:flex;align-items:center;"
             >
-              ${DatabaseMoveRight}
+              ${MoveRightIcon()}
             </div>`,
             hide: () =>
               columns.findIndex(v => v === this.column.id) ===
@@ -110,7 +110,7 @@ export class RecordField extends SignalWatcher(
               {
                 type: 'action',
                 name: 'Delete Column',
-                icon: DeleteIcon,
+                icon: DeleteIcon(),
                 hide: () =>
                   !this.column.delete || this.column.type$.value === 'title',
                 select: () => {

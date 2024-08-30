@@ -1,3 +1,4 @@
+import { MoreHorizontalIcon, PlusIcon } from '@blocksuite/icons/lit';
 import { nothing } from 'lit';
 import { html } from 'lit/static-html.js';
 
@@ -5,7 +6,6 @@ import type { GroupData } from './helper.js';
 import type { GroupRenderProps } from './matcher.js';
 
 import { renderUniLit } from '../../utils/uni-component/uni-component.js';
-import { MoreHorizontalIcon, PlusIcon } from '../icons/index.js';
 
 function GroupHeaderCount(group: GroupData) {
   const cards = group.rows;
@@ -110,10 +110,10 @@ export function GroupTitle(
       ? nothing
       : html` <div class="group-header-ops">
           <div @click="${ops.clickAdd}" class="group-header-op add-card">
-            ${PlusIcon}
+            ${PlusIcon()}
           </div>
           <div @click="${ops.clickOps}" class="group-header-op">
-            ${MoreHorizontalIcon}
+            ${MoreHorizontalIcon()}
           </div>
         </div>`}
   `;

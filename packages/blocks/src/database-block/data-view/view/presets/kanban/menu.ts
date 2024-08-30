@@ -1,16 +1,15 @@
 import { popFilterableSimpleMenu } from '@blocksuite/affine-components/context-menu';
 import {
   ArrowRightBigIcon,
+  DeleteIcon,
   ExpandFullIcon,
   MoveLeftIcon,
   MoveRightIcon,
-} from '@blocksuite/affine-components/icons';
+} from '@blocksuite/icons/lit';
 import { html } from 'lit';
 
 import type { DataViewRenderer } from '../../../data-view.js';
 import type { KanbanSelectionController } from './controller/selection.js';
-
-import { DeleteIcon } from '../../../common/icons/index.js';
 
 export const openDetail = (
   dataViewEle: DataViewRenderer,
@@ -38,7 +37,7 @@ export const popCardMenu = (
     {
       type: 'action',
       name: 'Expand Card',
-      icon: ExpandFullIcon,
+      icon: ExpandFullIcon(),
       select: () => {
         openDetail(dataViewEle, rowId, selection);
       },
@@ -46,7 +45,7 @@ export const popCardMenu = (
     {
       type: 'sub-menu',
       name: 'Move To',
-      icon: ArrowRightBigIcon,
+      icon: ArrowRightBigIcon(),
       options: {
         input: {
           search: true,
@@ -103,7 +102,7 @@ export const popCardMenu = (
           icon: html` <div
             style="transform: rotate(90deg);display:flex;align-items:center;"
           >
-            ${MoveLeftIcon}
+            ${MoveLeftIcon()}
           </div>`,
           select: () => {
             selection.insertRowBefore();
@@ -115,7 +114,7 @@ export const popCardMenu = (
           icon: html` <div
             style="transform: rotate(90deg);display:flex;align-items:center;"
           >
-            ${MoveRightIcon}
+            ${MoveRightIcon()}
           </div>`,
           select: () => {
             selection.insertRowAfter();
@@ -131,7 +130,7 @@ export const popCardMenu = (
           type: 'action',
           name: 'Delete Card',
           class: 'delete-item',
-          icon: DeleteIcon,
+          icon: DeleteIcon(),
           select: () => {
             selection.deleteCard();
           },

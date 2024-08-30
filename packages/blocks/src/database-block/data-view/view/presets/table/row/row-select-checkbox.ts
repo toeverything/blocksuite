@@ -1,8 +1,5 @@
-import {
-  checkboxChecked,
-  checkboxUnchecked,
-} from '@blocksuite/affine-components/icons';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
+import { CheckBoxCkeckSolidIcon, CheckBoxUnIcon } from '@blocksuite/icons/lit';
 import {
   type ReadonlySignal,
   SignalWatcher,
@@ -74,7 +71,9 @@ export class RowSelectCheckbox extends SignalWatcher(
     });
     return html`
       <div class="${classString}">
-        ${this.isSelected$.value ? checkboxChecked() : checkboxUnchecked()}
+        ${this.isSelected$.value
+          ? CheckBoxCkeckSolidIcon({ style: `color:#1E96EB` })
+          : CheckBoxUnIcon()}
       </div>
     `;
   }

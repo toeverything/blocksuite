@@ -1,10 +1,10 @@
 // related component
 import { popMenu } from '@blocksuite/affine-components/context-menu';
-import { AddCursorIcon } from '@blocksuite/affine-components/icons';
 import {
   type InsertToPosition,
   insertPositionToIndex,
 } from '@blocksuite/affine-shared/utils';
+import { AddCursorIcon } from '@blocksuite/icons/lit';
 import { css } from 'lit';
 import { customElement } from 'lit/decorators.js';
 import { html } from 'lit/static-html.js';
@@ -214,7 +214,7 @@ export class DataViewTable extends DataViewBase<
         style="display:flex;align-items:center;gap: 10px;padding: 6px 12px 6px 8px;color: var(--affine-text-secondary-color);font-size: 12px;line-height: 20px;position: sticky;left: ${LEFT_TOOL_BAR_WIDTH}px;"
         @click="${add}"
       >
-        <div class="dv-icon-16" style="display:flex;">${AddCursorIcon}</div>
+        <div class="dv-icon-16" style="display:flex;">${AddCursorIcon()}</div>
         <div>New Group</div>
       </div>
     </div>`;

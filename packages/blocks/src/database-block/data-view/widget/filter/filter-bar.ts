@@ -1,13 +1,12 @@
 import { createPopup } from '@blocksuite/affine-components/context-menu';
-import { AddCursorIcon } from '@blocksuite/affine-components/icons';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
+import { CloseIcon, FilterIcon, PlusIcon } from '@blocksuite/icons/lit';
 import { type TemplateResult, css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
 import type { Filter, FilterGroup, Variable } from '../../common/ast.js';
 
-import { CrossIcon, FilterIcon } from '../../common/icons/index.js';
 import { popCreateFilter } from '../../common/ref/ref.js';
 import { renderTemplate } from '../../utils/uni-component/render-template.js';
 import { popFilterModal } from './filter-modal.js';
@@ -96,7 +95,7 @@ export class FilterBar extends WithDisposable(ShadowlessElement) {
       class="filter-bar-add-filter dv-icon-16 dv-round-4 dv-hover"
       @click="${this.addFilter}"
     >
-      ${AddCursorIcon} Add filter
+      ${PlusIcon()} Add filter
     </div>`;
   };
 
@@ -199,14 +198,14 @@ export class FilterBar extends WithDisposable(ShadowlessElement) {
         @click="${expandGroup}"
         style="display:flex;gap: 6px;padding: 0 4px;align-items:center;height: 100%;"
       >
-        ${FilterIcon} ${text}
+        ${FilterIcon()} ${text}
       </div>
       <div
         class="dv-icon-16 dv-round-4 dv-pd-4 dv-hover"
         style="display:flex;align-items:center;margin-left: 16px;"
         @click="${deleteFilter}"
       >
-        ${CrossIcon}
+        ${CloseIcon()}
       </div>
     </div>`;
   }

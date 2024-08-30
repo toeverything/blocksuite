@@ -145,7 +145,7 @@ export class DateCellEditing extends BaseCellRenderer<number> {
 }
 
 export const dateColumnConfig = dateColumnModelConfig.renderConfig({
-  icon: createIcon('DateTime'),
+  icon: createIcon('DateTimeIcon'),
   cellRenderer: {
     view: createFromBaseCellRenderer(DateCell),
     edit: createFromBaseCellRenderer(DateCellEditing),

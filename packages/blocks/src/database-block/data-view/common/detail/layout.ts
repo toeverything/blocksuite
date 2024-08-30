@@ -1,5 +1,6 @@
 import { createModal } from '@blocksuite/affine-components/context-menu';
 import { ShadowlessElement } from '@blocksuite/block-std';
+import { CloseIcon } from '@blocksuite/icons/lit';
 import {
   type ReferenceElement,
   autoUpdate,
@@ -11,7 +12,6 @@ import { customElement, property } from 'lit/decorators.js';
 
 import type { SingleView } from '../../view-manager/single-view.js';
 
-import { CrossIcon } from '../icons/index.js';
 import { RecordDetail } from './detail.js';
 
 @customElement('side-layout-modal')
@@ -69,7 +69,7 @@ class SideLayoutModal extends ShadowlessElement {
     return html`
       <div class="side-modal-header">
         <div @click="${this.close}" class="close-modal header-op">
-          ${CrossIcon}
+          ${CloseIcon()}
         </div>
         <div class="header-ops">${this.renderOps()}</div>
       </div>

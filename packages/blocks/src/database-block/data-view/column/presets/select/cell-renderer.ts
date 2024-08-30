@@ -90,7 +90,7 @@ export class SelectCellEditing extends BaseCellRenderer<
 }
 
 export const selectColumnConfig = selectColumnModelConfig.renderConfig({
-  icon: createIcon('DatabaseSelect'),
+  icon: createIcon('SingleSelectIcon'),
   cellRenderer: {
     view: createFromBaseCellRenderer(SelectCell),
     edit: createFromBaseCellRenderer(SelectCellEditing),

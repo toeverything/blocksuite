@@ -1,3 +1,4 @@
+import { CloseIcon, SearchIcon } from '@blocksuite/icons/lit';
 import { baseTheme } from '@toeverything/theme';
 import { css, html, unsafeCSS } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
@@ -7,10 +8,6 @@ import { styleMap } from 'lit/directives/style-map.js';
 import type { KanbanSingleView } from '../../../../view/presets/kanban/kanban-view-manager.js';
 import type { TableSingleView } from '../../../../view/presets/table/table-view-manager.js';
 
-import {
-  DatabaseSearchClose,
-  DatabaseSearchIcon,
-} from '../../../../common/icons/index.js';
 import { stopPropagation } from '../../../../utils/event.js';
 import '../../../filter/filter-group.js';
 import { WidgetBase } from '../../../widget-base.js';
@@ -145,7 +142,7 @@ export class DataViewHeaderToolsSearch extends WidgetBase {
     return html`
       <label class="${searchToolClassMap}" @click="${this._clickSearch}">
         <div class="affine-database-search-input-icon dv-icon-20">
-          ${DatabaseSearchIcon}
+          ${SearchIcon()}
         </div>
         <input
           placeholder="Search..."
@@ -157,7 +154,7 @@ export class DataViewHeaderToolsSearch extends WidgetBase {
           @blur="${this._onSearchBlur}"
         />
         <div class="close-icon" @mousedown="${this._clearSearch}">
-          ${DatabaseSearchClose}
+          ${CloseIcon()}
           <affine-tooltip>
             <span
               style=${styleMap({

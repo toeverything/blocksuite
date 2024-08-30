@@ -1,6 +1,6 @@
 import { popFilterableSimpleMenu } from '@blocksuite/affine-components/context-menu';
-import { AddCursorIcon } from '@blocksuite/affine-components/icons';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
+import { AddCursorIcon } from '@blocksuite/icons/lit';
 import { SignalWatcher } from '@lit-labs/preact-signals';
 import { css, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
@@ -183,7 +183,7 @@ export class KanbanGroup extends SignalWatcher(
               <div
                 style="margin-right: 4px;width: 16px;height: 16px;display:flex;align-items:center;"
               >
-                ${AddCursorIcon}
+                ${AddCursorIcon()}
               </div>
               Add
             </div>`}

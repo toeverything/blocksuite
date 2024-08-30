@@ -1,6 +1,6 @@
-import { AddCursorIcon } from '@blocksuite/affine-components/icons';
 import { getScrollContainer } from '@blocksuite/affine-shared/utils';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
+import { PlusIcon } from '@blocksuite/icons/lit';
 import { autoUpdate } from '@floating-ui/dom';
 import { SignalWatcher } from '@lit-labs/preact-signals';
 import { type TemplateResult, nothing } from 'lit';
@@ -130,7 +130,7 @@ export class DatabaseColumnHeader extends SignalWatcher(
           @click="${this._onAddColumn}"
           class="header-add-column-button dv-hover"
         >
-          ${AddCursorIcon}
+          ${PlusIcon()}
         </div>
         <div class="scale-div" style="width: 1px;height: 1px;"></div>
       </div>

@@ -1,6 +1,6 @@
-import { PenIcon } from '@blocksuite/affine-components/icons';
 import { isValidUrl, normalizeUrl } from '@blocksuite/affine-shared/utils';
 import { assertExists } from '@blocksuite/global/utils';
+import { PenIcon } from '@blocksuite/icons/lit';
 import { baseTheme } from '@toeverything/theme';
 import { css, unsafeCSS } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
@@ -137,7 +137,7 @@ export class LinkCell extends BaseCellRenderer<string> {
               .link="${linkText}"
             ></affine-database-link-node>`}
         <div class="affine-database-link-icon" @click="${this._onEdit}">
-          ${PenIcon}
+          ${PenIcon()}
         </div>
       </div>
     `;

@@ -91,7 +91,7 @@ export class MultiSelectCellEditing extends BaseCellRenderer<
 
 export const multiSelectColumnConfig =
   multiSelectColumnModelConfig.renderConfig({
-    icon: createIcon('DatabaseMultiSelect'),
+    icon: createIcon('MultiSelectIcon'),
     cellRenderer: {
       view: createFromBaseCellRenderer(MultiSelectCell),
       edit: createFromBaseCellRenderer(MultiSelectCellEditing),
