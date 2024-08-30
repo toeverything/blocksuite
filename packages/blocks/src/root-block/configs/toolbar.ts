@@ -4,6 +4,9 @@ import type { GfxModel } from '@blocksuite/block-std/gfx';
 import type { BlockModel, Doc } from '@blocksuite/store';
 
 export abstract class MenuContext {
+  // Sometimes we need to close the menu.
+  close() {}
+
   isElement() {
     return false;
   }

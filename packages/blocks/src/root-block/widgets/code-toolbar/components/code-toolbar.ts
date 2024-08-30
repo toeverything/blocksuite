@@ -1,7 +1,11 @@
-import type { EditorIconButton } from '@blocksuite/affine-components/toolbar';
+import type {
+  EditorIconButton,
+  MenuItemGroup,
+} from '@blocksuite/affine-components/toolbar';
 
 import { MoreVerticalIcon } from '@blocksuite/affine-components/icons';
 import { createLitPortal } from '@blocksuite/affine-components/portal';
+import { renderGroups } from '@blocksuite/affine-components/toolbar';
 import { WithDisposable } from '@blocksuite/block-std';
 import { assertExists, noop } from '@blocksuite/global/utils';
 import { flip, offset } from '@floating-ui/dom';
@@ -9,10 +13,7 @@ import { LitElement, css, html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type { CodeBlockComponent } from '../../../../code-block/code-block.js';
-import type { CodeToolbarItem, CodeToolbarMoreItem } from '../types.js';
-
-import { CodeToolbarItemRenderer, MoreMenuRenderer } from '../utils.js';
+import type { CodeBlockToolbarContext } from '../type.js';
 
 @customElement('affine-code-toolbar')
 export class AffineCodeToolbar extends WithDisposable(LitElement) {
@@ -71,6 +72,9 @@ export class AffineCodeToolbar extends WithDisposable(LitElement) {
     this._currentOpenMenu = this._popMenuAbortController;
 
     assertExists(this._moreButton);
+
+    const groups = this.context.config.configure(this.moreGroups);
+
     createLitPortal({
       template: html`
         <editor-menu-content
@@ -81,12 +85,8 @@ export class AffineCodeToolbar extends WithDisposable(LitElement) {
             '--packed-height': '4px',
           })}
         >
-          <div data-size="small" data-orientation="vertical">
-            ${MoreMenuRenderer(
-              this.blockComponent,
-              this._popMenuAbortController,
-              this.moreItems
-            )}
+          <div data-size="large" data-orientation="vertical">
+            ${renderGroups(groups, this.context)}
           </div>
         </editor-menu-content>
       `,
@@ -94,7 +94,7 @@ export class AffineCodeToolbar extends WithDisposable(LitElement) {
       portalStyles: {
         zIndex: 'var(--affine-z-index-popover)',
       },
-      container: this.blockComponent.host,
+      container: this.context.host,
       computePosition: {
         referenceElement: this._moreButton,
         placement: 'bottom-start',
@@ -113,15 +113,9 @@ export class AffineCodeToolbar extends WithDisposable(LitElement) {
   }
 
   override render() {
-    const items = CodeToolbarItemRenderer(
-      this.items,
-      this.blockComponent,
-      this.closeCurrentMenu
-    );
-
     return html`
       <editor-toolbar class="code-toolbar-container" data-without-bg>
-        ${items}
+        ${renderGroups(this.primaryGroups, this.context)}
         <editor-icon-button
           class="code-toolbar-button more"
           data-testid="more"
@@ -129,7 +123,7 @@ export class AffineCodeToolbar extends WithDisposable(LitElement) {
           .tooltip=${'More'}
           .tooltipOffset=${4}
           .showTooltip=${!this._moreMenuOpen}
-          ?disabled=${this.blockComponent.readonly}
+          ?disabled=${this.context.doc.readonly}
           @click=${() => this._toggleMoreMenu()}
         >
           ${MoreVerticalIcon}
@@ -145,16 +139,16 @@ export class AffineCodeToolbar extends WithDisposable(LitElement) {
   private accessor _moreMenuOpen = false;
 
   @property({ attribute: false })
-  accessor blockComponent!: CodeBlockComponent;
+  accessor context!: CodeBlockToolbarContext;
 
   @property({ attribute: false })
-  accessor items!: CodeToolbarItem[];
-
-  @property({ attribute: false })
-  accessor moreItems!: CodeToolbarMoreItem[];
+  accessor moreGroups!: MenuItemGroup<CodeBlockToolbarContext>[];
 
   @property({ attribute: false })
   accessor onActiveStatusChange: (active: boolean) => void = noop;
+
+  @property({ attribute: false })
+  accessor primaryGroups!: MenuItemGroup<CodeBlockToolbarContext>[];
 }
 
 declare global {

@@ -9,29 +9,29 @@ import {
   DuplicateIcon,
 } from '@blocksuite/affine-components/icons';
 import { html } from 'lit';
+import { ifDefined } from 'lit/directives/if-defined.js';
 
 import type { ImageToolbarContext } from './type.js';
 
 import { duplicate } from './utils.js';
 
-export const COMMON_GROUPS: MenuItemGroup<ImageToolbarContext>[] = [
+export const PRIMARY_GROUPS: MenuItemGroup<ImageToolbarContext>[] = [
   {
-    type: 'common',
+    type: 'primary',
     items: [
       {
         type: 'download',
         label: 'Download',
         icon: DownloadIcon,
-        generate: ({ blockComponent, abortController }) => {
+        generate: ({ blockComponent }) => {
           return {
             action: () => {
-              abortController.abort();
               blockComponent.download();
             },
             render: item => html`
               <editor-icon-button
                 class="image-toolbar-button download"
-                ?aria-label=${item.label}
+                aria-label=${ifDefined(item.label)}
                 .tooltip=${item.label}
                 .tooltipOffset=${4}
                 @click=${(e: MouseEvent) => {
@@ -50,16 +50,15 @@ export const COMMON_GROUPS: MenuItemGroup<ImageToolbarContext>[] = [
         label: 'Caption',
         icon: CaptionIcon,
         when: ({ doc }) => !doc.readonly,
-        generate: ({ blockComponent, abortController }) => {
+        generate: ({ blockComponent }) => {
           return {
             action: () => {
-              abortController.abort();
               blockComponent.captionEditor?.show();
             },
             render: item => html`
               <editor-icon-button
                 class="image-toolbar-button caption"
-                ?aria-label=${item.label}
+                aria-label=${ifDefined(item.label)}
                 .tooltip=${item.label}
                 .tooltipOffset=${4}
                 @click=${(e: MouseEvent) => {
@@ -85,9 +84,9 @@ export const clipboardGroup: MenuItemGroup<ImageToolbarContext> = {
       type: 'copy',
       label: 'Copy',
       icon: CopyIcon,
-      action: ({ blockComponent, abortController }) => {
+      action: ({ blockComponent, close }) => {
         blockComponent.copy();
-        abortController.abort();
+        close();
       },
     },
     {
@@ -116,9 +115,9 @@ export const conversionsGroup: MenuItemGroup<ImageToolbarContext> = {
         const readonly = doc.readonly;
         return supportAttachment && !readonly && !!blockComponent.blob;
       },
-      action: ({ blockComponent, abortController }) => {
+      action: ({ blockComponent, close }) => {
         blockComponent.convertToCardView();
-        abortController.abort();
+        close();
       },
     },
   ],
@@ -133,9 +132,9 @@ export const deleteGroup: MenuItemGroup<ImageToolbarContext> = {
       label: 'Delete',
       icon: DeleteIcon,
       when: ({ doc }) => !doc.readonly,
-      action: ({ doc, blockComponent, abortController }) => {
-        abortController.abort();
+      action: ({ doc, blockComponent, close }) => {
         doc.deleteBlock(blockComponent.model);
+        close();
       },
     },
   ],

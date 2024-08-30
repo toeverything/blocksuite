@@ -37,6 +37,7 @@ import { autoUpdate, computePosition, flip, offset } from '@floating-ui/dom';
 import { type TemplateResult, html, nothing } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
+import { ifDefined } from 'lit/directives/if-defined.js';
 import { join } from 'lit/directives/join.js';
 import { repeat } from 'lit/directives/repeat.js';
 
@@ -466,7 +467,7 @@ export class EmbedCardToolbar extends WidgetComponent<
             button => button.label,
             ({ label, icon, action, disabled }) => html`
               <editor-menu-action
-                ?aria-label=${label}
+                aria-label=${ifDefined(label)}
                 ?disabled=${disabled}
                 @click=${action}
               >
@@ -613,7 +614,7 @@ export class EmbedCardToolbar extends WidgetComponent<
             ({ type, label, action, disabled }) => html`
               <editor-menu-action
                 data-testid=${`link-to-${type}`}
-                ?aria-label=${label}
+                aria-label=${ifDefined(label)}
                 ?data-selected=${this._viewType === type}
                 ?disabled=${disabled}
                 @click=${action}

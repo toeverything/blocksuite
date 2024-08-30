@@ -15,7 +15,7 @@ import type { ImageBlockComponent } from '../../../image-block/image-block.js';
 
 import { PAGE_HEADER_HEIGHT } from '../../../_common/consts.js';
 import './components/image-toolbar.js';
-import { COMMON_GROUPS, MORE_GROUPS } from './config.js';
+import { MORE_GROUPS, PRIMARY_GROUPS } from './config.js';
 import { ImageToolbarContext } from './type.js';
 
 export const AFFINE_IMAGE_TOOLBAR_WIDGET = 'affine-image-toolbar-widget';
@@ -65,8 +65,8 @@ export class AffineImageToolbarWidget extends WidgetComponent<
         return {
           template: html`<affine-image-toolbar
             .context=${context}
-            .config=${cloneGroups(this.config)}
-            .moreMenuConfig=${cloneGroups(this.moreMenuConfig)}
+            .primaryGroups=${cloneGroups(this.primaryGroups)}
+            .moreGroups=${cloneGroups(this.moreGroups)}
             .onActiveStatusChange=${(active: boolean) => {
               this._isActivated = active;
               if (!active && !this._hoverController?.isHovering) {
@@ -110,30 +110,17 @@ export class AffineImageToolbarWidget extends WidgetComponent<
     };
   };
 
-  addConfigItems = (
-    items: AdvancedMenuItem<ImageToolbarContext>[],
-    index?: number
-  ) => {
-    if (index === undefined) {
-      this.config[0].items.push(...items);
-      return this;
-    }
-
-    this.config[0].items.splice(index, 0, ...items);
-    return this;
-  };
-
-  addMoreMenuItems = (
+  addMoreItems = (
     items: AdvancedMenuItem<ImageToolbarContext>[],
     index?: number,
     type?: string
   ) => {
     let group;
     if (type) {
-      group = this.moreMenuConfig.find(g => g.type === type);
+      group = this.moreGroups.find(g => g.type === type);
     }
     if (!group) {
-      group = this.moreMenuConfig[0];
+      group = this.moreGroups[0];
     }
 
     if (index === undefined) {
@@ -145,10 +132,23 @@ export class AffineImageToolbarWidget extends WidgetComponent<
     return this;
   };
 
-  config: MenuItemGroup<ImageToolbarContext>[] = cloneGroups(COMMON_GROUPS);
+  addPrimaryItems = (
+    items: AdvancedMenuItem<ImageToolbarContext>[],
+    index?: number
+  ) => {
+    if (index === undefined) {
+      this.primaryGroups[0].items.push(...items);
+      return this;
+    }
 
-  moreMenuConfig: MenuItemGroup<ImageToolbarContext>[] =
-    cloneGroups(MORE_GROUPS);
+    this.primaryGroups[0].items.splice(index, 0, ...items);
+    return this;
+  };
+
+  moreGroups: MenuItemGroup<ImageToolbarContext>[] = cloneGroups(MORE_GROUPS);
+
+  primaryGroups: MenuItemGroup<ImageToolbarContext>[] =
+    cloneGroups(PRIMARY_GROUPS);
 
   override firstUpdated() {
     if (this.doc.getParent(this.model.id)?.flavour === 'affine:surface') {

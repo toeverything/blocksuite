@@ -26,6 +26,7 @@ import { WidgetComponent } from '@blocksuite/block-std';
 import { offset, shift } from '@floating-ui/dom';
 import { html, nothing } from 'lit';
 import { customElement } from 'lit/decorators.js';
+import { ifDefined } from 'lit/directives/if-defined.js';
 import { join } from 'lit/directives/join.js';
 import { repeat } from 'lit/directives/repeat.js';
 
@@ -278,7 +279,7 @@ function SurfaceRefToolbarOptions(options: {
                 button => button.label,
                 ({ label, icon, action, disabled }) => html`
                   <editor-menu-action
-                    ?aria-label=${label}
+                    aria-label=${ifDefined(label)}
                     ?disabled=${disabled}
                     @click=${action}
                   >

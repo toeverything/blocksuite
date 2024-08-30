@@ -1,5 +1,5 @@
 import { html, nothing } from 'lit';
-import { classMap } from 'lit/directives/class-map.js';
+import { ifDefined } from 'lit/directives/if-defined.js';
 import { join } from 'lit/directives/join.js';
 import { repeat } from 'lit/directives/repeat.js';
 
@@ -67,10 +67,10 @@ export function renderActions(
             item.render?.(item) ??
             html`
               <editor-menu-action
-                class=${classMap({
-                  delete: item.type === 'delete',
-                })}
-                ?aria-label=${item.label}
+                class=${ifDefined(
+                  item.type === 'delete' ? 'delete' : undefined
+                )}
+                aria-label=${ifDefined(item.label)}
                 ?data-selected=${selectedName === item.label}
                 ?disabled=${item.disabled}
                 @click=${item.action ? item.action : () => action?.(item)}

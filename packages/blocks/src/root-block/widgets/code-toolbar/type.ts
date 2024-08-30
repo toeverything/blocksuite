@@ -1,14 +1,14 @@
-import type { ImageBlockComponent } from '../../../image-block/image-block.js';
+import type { CodeBlockComponent } from '../../../code-block/code-block.js';
 
 import { MenuContext } from '../../configs/toolbar.js';
 
-export class ImageToolbarContext extends MenuContext {
+export class CodeBlockToolbarContext extends MenuContext {
   override close = () => {
     this.abortController.abort();
   };
 
   constructor(
-    public blockComponent: ImageBlockComponent,
+    public blockComponent: CodeBlockComponent,
     public abortController: AbortController
   ) {
     super();
@@ -35,7 +35,8 @@ export class ImageToolbarContext extends MenuContext {
   }
 
   get selectedBlockModels() {
-    return [this.blockComponent.model];
+    if (this.blockComponent.model) return [this.blockComponent.model];
+    return [];
   }
 
   get std() {

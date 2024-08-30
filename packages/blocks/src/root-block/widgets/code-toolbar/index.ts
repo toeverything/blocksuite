@@ -1,17 +1,22 @@
+import type {
+  AdvancedMenuItem,
+  MenuItemGroup,
+} from '@blocksuite/affine-components/toolbar';
 import type { CodeBlockModel } from '@blocksuite/affine-model';
 
 import { HoverController } from '@blocksuite/affine-components/hover';
+import { cloneGroups } from '@blocksuite/affine-components/toolbar';
 import { WidgetComponent } from '@blocksuite/block-std';
 import { limitShift, shift } from '@floating-ui/dom';
 import { html } from 'lit';
 import { customElement } from 'lit/decorators.js';
 
 import type { CodeBlockComponent } from '../../../code-block/code-block.js';
-import type { CodeToolbarItem, CodeToolbarMoreItem } from './types.js';
 
 import { PAGE_HEADER_HEIGHT } from '../../../_common/consts.js';
 import './components/code-toolbar.js';
-import { defaultItems, defaultMoreItems } from './config.js';
+import { MORE_GROUPS, PRIMARY_GROUPS } from './config.js';
+import { CodeBlockToolbarContext } from './type.js';
 
 export const AFFINE_CODE_TOOLBAR_WIDGET = 'affine-code-toolbar-widget';
 @customElement(AFFINE_CODE_TOOLBAR_WIDGET)
@@ -48,12 +53,13 @@ export class AffineCodeToolbarWidget extends WidgetComponent<
           return null;
         }
 
+        const context = new CodeBlockToolbarContext(codeBlock, abortController);
+
         return {
           template: html`<affine-code-toolbar
-            .blockComponent=${codeBlock}
-            .abortController=${abortController}
-            .items=${this.items}
-            .moreItems=${this.moreItems}
+            .context=${context}
+            .primaryGroups=${cloneGroups(this.primaryGroups)}
+            .moreGroups=${cloneGroups(this.moreGroups)}
             .onActiveStatusChange=${(active: boolean) => {
               this._isActivated = active;
               if (!active && !this._hoverController?.isHovering) {
@@ -97,44 +103,49 @@ export class AffineCodeToolbarWidget extends WidgetComponent<
     };
   };
 
-  items: CodeToolbarItem[] = [];
-
-  moreItems: CodeToolbarMoreItem[] = [];
-
-  addItems(items: CodeToolbarItem[], index?: number) {
-    if (index === undefined) {
-      this.items.push(...items);
-    } else {
-      this.items.splice(index, 0, ...items);
+  addMoretems = (
+    items: AdvancedMenuItem<CodeBlockToolbarContext>[],
+    index?: number,
+    type?: string
+  ) => {
+    let group;
+    if (type) {
+      group = this.moreGroups.find(g => g.type === type);
     }
-    return this;
-  }
-
-  addMoreItems(menuItemsBuilder: CodeToolbarMoreItem[], index?: number) {
-    if (index === undefined) {
-      this.moreItems.push(...menuItemsBuilder);
-    } else {
-      this.moreItems.splice(index, 0, ...menuItemsBuilder);
+    if (!group) {
+      group = this.moreGroups[0];
     }
-    return this;
-  }
 
-  clearConfig() {
-    this.items = [];
-    this.moreItems = [];
+    if (index === undefined) {
+      group.items.push(...items);
+      return this;
+    }
+
+    group.items.splice(index, 0, ...items);
     return this;
-  }
+  };
+
+  addPrimaryItems = (
+    items: AdvancedMenuItem<CodeBlockToolbarContext>[],
+    index?: number
+  ) => {
+    if (index === undefined) {
+      this.primaryGroups[0].items.push(...items);
+      return this;
+    }
+
+    this.primaryGroups[0].items.splice(index, 0, ...items);
+    return this;
+  };
+
+  moreGroups: MenuItemGroup<CodeBlockToolbarContext>[] =
+    cloneGroups(MORE_GROUPS);
+
+  primaryGroups: MenuItemGroup<CodeBlockToolbarContext>[] =
+    cloneGroups(PRIMARY_GROUPS);
 
   override firstUpdated() {
-    if (!this.items.length || !this.moreItems.length) {
-      this.setupDefaultConfig();
-    }
     this._setHoverController();
-  }
-
-  setupDefaultConfig() {
-    this.clearConfig().addItems(defaultItems).addMoreItems(defaultMoreItems);
-    return this;
   }
 }
 
