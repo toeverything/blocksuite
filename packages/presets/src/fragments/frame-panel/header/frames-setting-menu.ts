@@ -104,7 +104,7 @@ export class FramesSettingMenu extends WithDisposable(LitElement) {
   static override styles = styles;
 
   private get _rootService() {
-    return this.editorHost.spec.getService('affine:page');
+    return this.editorHost.std.getService('affine:page');
   }
 
   private _tryRestoreSettings() {

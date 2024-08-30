@@ -129,9 +129,7 @@ export class MindmapSurfaceBlock extends BlockComponent<SurfaceBlockModel> {
   }
 
   get mindmapService() {
-    return this.host.spec.getService(
-      'affine:page'
-    ) as unknown as MindmapService;
+    return this.std.getService('affine:page') as unknown as MindmapService;
   }
 
   @query('.affine-mini-mindmap-surface')

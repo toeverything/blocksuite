@@ -1,7 +1,22 @@
-import type { BlockService } from '../extension/index.js';
+import { LifeCycleWatcher } from '../extension/index.js';
+import { BlockServiceIdentifier } from '../identifier.js';
 
-export abstract class BlockServiceWatcher {
-  constructor(readonly blockService: BlockService) {}
+export class ServiceManager extends LifeCycleWatcher {
+  static override readonly key = 'serviceManager';
 
-  abstract setup(): void;
+  override mounted() {
+    super.mounted();
+
+    this.std.provider.getAll(BlockServiceIdentifier).forEach(service => {
+      service.mounted();
+    });
+  }
+
+  override unmounted() {
+    super.unmounted();
+
+    this.std.provider.getAll(BlockServiceIdentifier).forEach(service => {
+      service.unmounted();
+    });
+  }
 }

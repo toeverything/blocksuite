@@ -457,7 +457,7 @@ export class EdgelessRootBlockComponent extends BlockComponent<
   async addAttachments(files: File[], point?: IVec): Promise<string[]> {
     if (!files.length) return [];
 
-    const attachmentService = this.host.spec.getService('affine:attachment');
+    const attachmentService = this.std.getService('affine:attachment');
     const maxFileSize = attachmentService.maxFileSize;
     const isSizeExceeded = files.some(file => file.size > maxFileSize);
     if (isSizeExceeded) {
@@ -549,7 +549,7 @@ export class EdgelessRootBlockComponent extends BlockComponent<
     );
     if (!imageFiles.length) return [];
 
-    const imageService = this.host.spec.getService('affine:image');
+    const imageService = this.std.getService('affine:image');
     const maxFileSize = imageService.maxFileSize;
     const isSizeExceeded = imageFiles.some(file => file.size > maxFileSize);
     if (isSizeExceeded) {

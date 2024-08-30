@@ -1,4 +1,4 @@
-import type { BlockSpec } from '@blocksuite/block-std';
+import type { ExtensionType } from '@blocksuite/block-std';
 
 import { ListBlockSpec } from '@blocksuite/affine-block-list';
 import { ParagraphBlockSpec } from '@blocksuite/affine-block-paragraph';
@@ -22,7 +22,7 @@ import {
   NoteBlockSpec,
 } from '../note-block/note-spec.js';
 
-export const CommonFirstPartyBlockSpecs: BlockSpec[] = [
+export const CommonFirstPartyBlockSpecs: ExtensionType[] = [
   ListBlockSpec,
   NoteBlockSpec,
   DatabaseBlockSpec,
@@ -40,9 +40,9 @@ export const CommonFirstPartyBlockSpecs: BlockSpec[] = [
   EmbedHtmlBlockSpec,
   EmbedSyncedDocBlockSpec,
   EmbedLinkedDocBlockSpec,
-];
+].flat();
 
-export const EdgelessFirstPartyBlockSpecs: BlockSpec[] = [
+export const EdgelessFirstPartyBlockSpecs: ExtensionType[] = [
   ListBlockSpec,
   EdgelessNoteBlockSpec,
   DatabaseBlockSpec,
@@ -60,4 +60,4 @@ export const EdgelessFirstPartyBlockSpecs: BlockSpec[] = [
   EmbedHtmlBlockSpec,
   EmbedSyncedDocBlockSpec,
   EmbedLinkedDocBlockSpec,
-];
+].flat();

@@ -76,7 +76,7 @@ export class AIFinishTip extends WithDisposable(LitElement) {
                     this.copied = !!(await this.copy?.onCopy());
                     if (this.copied) {
                       const rootService =
-                        this.host.spec.getService('affine:page');
+                        this.host.std.getService('affine:page');
                       const { notificationService } = rootService;
                       notificationService?.toast('Copied to clipboard');
                     }

@@ -70,7 +70,7 @@ export function createLinkedDocMenuGroup(
           inlineEditor,
           docId: doc.id,
         });
-        editorHost.spec
+        editorHost.std
           .getService('affine:page')
           .telemetryService?.track('LinkedDocCreated', {
             control: 'linked doc',
@@ -115,7 +115,7 @@ export function createNewDocMenuGroup(
             docId: newDoc.id,
           });
           const telemetryService =
-            editorHost.spec.getService('affine:page').telemetryService;
+            editorHost.std.getService('affine:page').telemetryService;
           telemetryService?.track('LinkedDocCreated', {
             control: 'new doc',
             module: 'inline @',

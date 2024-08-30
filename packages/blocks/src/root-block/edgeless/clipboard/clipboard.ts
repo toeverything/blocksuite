@@ -1150,7 +1150,7 @@ export class EdgelessClipboardController extends PageClipboard {
   }
 
   private get _rootService() {
-    return this.std.spec.getService('affine:page');
+    return this.std.getService('affine:page');
   }
 
   private _updatePastedElementsIndex(

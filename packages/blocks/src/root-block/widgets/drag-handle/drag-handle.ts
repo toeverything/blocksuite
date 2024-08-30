@@ -1,5 +1,4 @@
 import type { NoteBlockModel, RootBlockModel } from '@blocksuite/affine-model';
-import type { BlockComponent } from '@blocksuite/block-std';
 import type { IVec } from '@blocksuite/global/utils';
 
 import {
@@ -11,6 +10,7 @@ import {
   matchFlavours,
 } from '@blocksuite/affine-shared/utils';
 import { getCurrentNativeRange } from '@blocksuite/affine-shared/utils';
+import { type BlockComponent, BlockStdScope } from '@blocksuite/block-std';
 import {
   PathFinder,
   type PointerEventState,
@@ -253,10 +253,11 @@ export class AffineDragHandleWidget extends WidgetComponent<
       const doc = this.doc.blockCollection.getDoc({ query });
 
       const previewSpec = SpecProvider.getInstance().getSpec('page:preview');
-      const previewTemplate = this.host.renderSpecPortal(
+      const previewStd = new BlockStdScope({
         doc,
-        previewSpec.value
-      );
+        extensions: previewSpec.value,
+      });
+      const previewTemplate = previewStd.render();
 
       const offset = this._calculatePreviewOffset(blocks, state);
       const posX = state.raw.x - offset.x;

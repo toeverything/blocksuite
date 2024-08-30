@@ -9,7 +9,7 @@ export const insertBookmarkCommand: Command<
   { url: string }
 > = (ctx, next) => {
   const { url, std } = ctx;
-  const rootService = std.spec.getService('affine:page');
+  const rootService = std.getService('affine:page');
   const embedOptions = rootService.getEmbedBlockOptions(url);
 
   let flavour = 'affine:bookmark';

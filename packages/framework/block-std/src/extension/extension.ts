@@ -9,5 +9,3 @@ export abstract class Extension {
 export interface ExtensionType {
   setup(di: Container): void;
 }
-
-export type InlineExtensionType = (di: Container) => void;

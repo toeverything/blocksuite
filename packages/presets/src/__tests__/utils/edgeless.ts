@@ -33,7 +33,7 @@ export function getDocRootBlock(
   editor: AffineEditorContainer,
   _?: 'edgeless' | 'page'
 ) {
-  return editor.host!.view.viewFromPath('block', [doc.root!.id]) as
+  return editor.host!.view.getBlock(doc.root!.id) as
     | EdgelessRootBlockComponent
     | PageRootBlockComponent;
 }

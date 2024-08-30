@@ -21,7 +21,7 @@ export class RemoteColorManager {
   }
 
   private get rootService() {
-    return this.host.spec.getService('affine:page');
+    return this.host.std.getService('affine:page');
   }
 
   get(id: number) {

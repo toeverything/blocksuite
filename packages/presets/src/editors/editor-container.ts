@@ -1,19 +1,21 @@
-import type {
-  EdgelessRootBlockComponent,
-  PageRootBlockComponent,
-} from '@blocksuite/blocks';
 import type { BlockModel, Doc } from '@blocksuite/store';
 
-import { BlockServiceWatcher } from '@blocksuite/block-std';
-import { type BlockSpec, EditorHost } from '@blocksuite/block-std';
-import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
+import {
+  BlockStdScope,
+  EditorHost,
+  type ExtensionType,
+  ShadowlessElement,
+  WithDisposable,
+} from '@blocksuite/block-std';
 import { type AbstractEditor, DocModeProvider } from '@blocksuite/blocks';
 import {
   DocMode,
   EdgelessEditorBlockSpecs,
+  type EdgelessRootBlockComponent,
   PageEditorBlockSpecs,
+  type PageRootBlockComponent,
 } from '@blocksuite/blocks';
-import { Slot, assertExists, noop } from '@blocksuite/global/utils';
+import { Slot, noop } from '@blocksuite/global/utils';
 import {
   SignalWatcher,
   computed,
@@ -23,7 +25,6 @@ import {
 import { css, html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { keyed } from 'lit/directives/keyed.js';
-import { type Ref, createRef, ref } from 'lit/directives/ref.js';
 import { when } from 'lit/directives/when.js';
 
 import '../fragments/doc-title/doc-title.js';
@@ -51,28 +52,13 @@ export class AffineEditorContainer
   extends SignalWatcher(WithDisposable(ShadowlessElement))
   implements AbstractEditor
 {
-  private _edgelessSpecs = computed(() => {
-    return [...this._edgelessSpecs$.value].map(spec => {
-      if (spec.schema.model.flavour === 'affine:page') {
-        const switchEditor = this.switchEditor.bind(this);
-        class SwitchWatcher extends BlockServiceWatcher {
-          static override readonly flavour = 'affine:page';
+  private _doc = signal<Doc>();
 
-          override listen() {
-            const blockService = this.blockService;
-            const docModeService = blockService.std.get(DocModeProvider);
-            blockService.disposables.add(
-              docModeService.onModeChange(switchEditor)
-            );
-          }
-        }
-        spec.extensions = (spec.extensions ?? []).concat([SwitchWatcher]);
-      }
-      return spec;
-    });
+  private _edgelessSpecs = signal<ExtensionType[]>(EdgelessEditorBlockSpecs);
+
+  private _editorTemplate = computed(() => {
+    return this._std.value.render();
   });
-
-  private _edgelessSpecs$ = signal(EdgelessEditorBlockSpecs);
 
   private _forwardRef = (mode: DocMode) => {
     requestAnimationFrame(() => {
@@ -85,38 +71,22 @@ export class AffineEditorContainer
     });
   };
 
-  private _hostRef: Ref<EditorHost> = createRef<EditorHost>();
-
   private _mode = signal<DocMode>(DocMode.Page);
 
-  private _pageSpecs = computed(() => {
-    return [...this._pageSpecs$.value].map(spec => {
-      if (spec.schema.model.flavour === 'affine:page') {
-        const switchEditor = this.switchEditor.bind(this);
-        class SwitchWatcher extends BlockServiceWatcher {
-          static override readonly flavour = 'affine:page';
-
-          override listen() {
-            const blockService = this.blockService;
-            const docModeService = blockService.std.get(DocModeProvider);
-            blockService.disposables.add(
-              docModeService.onModeChange(switchEditor)
-            );
-          }
-        }
-        spec.extensions = (spec.extensions ?? []).concat([SwitchWatcher]);
-      }
-      return spec;
-    });
-  });
-
-  private _pageSpecs$ = signal(PageEditorBlockSpecs);
+  private _pageSpecs = signal<ExtensionType[]>(PageEditorBlockSpecs);
 
   private _specs = computed(() =>
     this._mode.value === DocMode.Page
       ? this._pageSpecs.value
       : this._edgelessSpecs.value
   );
+
+  private _std = computed(() => {
+    return new BlockStdScope({
+      doc: this.doc,
+      extensions: this._specs.value,
+    });
+  });
 
   static override styles = css`
     .affine-page-viewport {
@@ -210,17 +180,16 @@ export class AffineEditorContainer
       setTimeout(() => {
         if (this.autofocus) {
           const richText = this.querySelector('rich-text');
-          assertExists(richText);
-          const inlineEditor = richText.inlineEditor;
-          assertExists(inlineEditor);
-          inlineEditor.focusEnd();
+          const inlineEditor = richText?.inlineEditor;
+          inlineEditor?.focusEnd();
         }
       });
     }
 
     this._disposables.add(
       effect(() => {
-        const mode = this._mode.value;
+        const std = this._std.value;
+        const mode = std.get(DocModeProvider).getMode();
         this._forwardRef(mode);
       })
     );
@@ -246,11 +215,7 @@ export class AffineEditorContainer
               ? 'page-editor playground-page-editor-container'
               : 'edgeless-editor-container'}
           >
-            <editor-host
-              ${ref(this._hostRef)}
-              .doc=${this.doc}
-              .specs=${this._specs.value}
-            ></editor-host>
+            ${this._editorTemplate.value}
           </div>
         </div>
       `
@@ -258,7 +223,7 @@ export class AffineEditorContainer
   }
 
   switchEditor(mode: DocMode) {
-    this.mode = mode;
+    this._mode.value = mode;
   }
 
   /**
@@ -275,12 +240,24 @@ export class AffineEditorContainer
     }
   }
 
-  set edgelessSpecs(specs: BlockSpec[]) {
-    this._edgelessSpecs$.value = specs;
+  get doc() {
+    return this._doc.value as Doc;
+  }
+
+  set doc(doc: Doc) {
+    this._doc.value = doc;
+  }
+
+  set edgelessSpecs(specs: ExtensionType[]) {
+    this._edgelessSpecs.value = specs;
+  }
+
+  get edgelessSpecs() {
+    return this._edgelessSpecs.value;
   }
 
   get host() {
-    return this._hostRef.value;
+    return this.std.host;
   }
 
   get mode() {
@@ -291,12 +268,20 @@ export class AffineEditorContainer
     this._mode.value = mode;
   }
 
-  set pageSpecs(specs: BlockSpec[]) {
-    this._pageSpecs$.value = specs;
+  set pageSpecs(specs: ExtensionType[]) {
+    this._pageSpecs.value = specs;
+  }
+
+  get pageSpecs() {
+    return this._pageSpecs.value;
   }
 
   get rootModel() {
     return this.doc.root as BlockModel;
+  }
+
+  get std() {
+    return this._std.value;
   }
 
   /** @deprecated unreliable since edgelessSpecs can be overridden */
@@ -309,9 +294,6 @@ export class AffineEditorContainer
 
   @property({ attribute: false })
   override accessor autofocus = false;
-
-  @property({ attribute: false })
-  accessor doc!: Doc;
 }
 
 declare global {

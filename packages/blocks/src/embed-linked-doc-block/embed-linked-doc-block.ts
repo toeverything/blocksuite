@@ -452,7 +452,7 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockComponent<
   }
 
   get config(): EmbedLinkedDocBlockConfig {
-    return this.std.spec.getConfig('affine:embed-linked-doc') || {};
+    return this.std.getConfig('affine:embed-linked-doc') || {};
   }
 
   get docTitle() {

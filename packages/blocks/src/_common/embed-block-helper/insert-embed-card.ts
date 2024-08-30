@@ -72,8 +72,8 @@ export function insertEmbedCard(
   std: BlockStdScope,
   properties: EmbedCardProperties
 ) {
-  const { doc, host, spec } = std;
-  const rootService = spec.getService('affine:page');
+  const { doc, host } = std;
+  const rootService = std.getService('affine:page');
   const mode = std.get(DocModeProvider).getMode();
   const selectedBlock = rootService.selectedBlocks[0]?.model;
 

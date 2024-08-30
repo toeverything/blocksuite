@@ -2,10 +2,14 @@ import type { BlockModel } from '@blocksuite/store';
 
 import type { BlockComponent, WidgetComponent } from './element/index.js';
 
-export class ViewStore {
+import { LifeCycleWatcher } from '../extension/index.js';
+
+export class ViewStore extends LifeCycleWatcher {
   private readonly _blockMap = new Map<string, BlockComponent>();
 
   private readonly _widgetMap = new Map<string, WidgetComponent>();
+
+  static override readonly key = 'viewStore';
 
   calculatePath = (model: BlockModel): string[] => {
     const path: string[] = [];
@@ -93,11 +97,7 @@ export class ViewStore {
     });
   };
 
-  constructor(public std: BlockSuite.Std) {}
-
-  mount() {}
-
-  unmount() {
+  override unmounted() {
     this._blockMap.clear();
     this._widgetMap.clear();
   }

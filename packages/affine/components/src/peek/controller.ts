@@ -14,7 +14,7 @@ export class PeekableController<T extends PeekableClass> {
   };
 
   private getRootService = <T extends BlockService>() => {
-    return this.target.std.spec.getService<T>('affine:page');
+    return this.target.std.getService<T>('affine:page');
   };
 
   peek = (template?: TemplateResult) => {

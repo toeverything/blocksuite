@@ -237,7 +237,7 @@ class PasteTr {
 
   convertToLinkedDoc = async () => {
     const quickSearchService =
-      this.std.spec.getService('affine:page').quickSearchService;
+      this.std.getService('affine:page').quickSearchService;
 
     if (!quickSearchService) {
       return;
@@ -470,7 +470,7 @@ class PasteTr {
 
         Object.assign(reference, extractSearchParams(link));
 
-        this.std.spec
+        this.std
           .getService('affine:page')
           .telemetryService?.track('LinkedDocCreated', {
             page: 'doc editor',
