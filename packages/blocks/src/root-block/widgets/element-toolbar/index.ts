@@ -16,7 +16,11 @@ import type {
 } from '@blocksuite/affine-model';
 
 import { ConnectorCWithArrowIcon } from '@blocksuite/affine-components/icons';
-import { renderToolbarSeparator } from '@blocksuite/affine-components/toolbar';
+import {
+  type MenuItemGroup,
+  cloneGroups,
+  renderToolbarSeparator,
+} from '@blocksuite/affine-components/toolbar';
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import { requestConnectedFrame } from '@blocksuite/affine-shared/utils';
 import { WidgetComponent } from '@blocksuite/block-std';
@@ -28,6 +32,7 @@ import { join } from 'lit/directives/join.js';
 import type { MindmapElementModel } from '../../../surface-block/element-model/mindmap.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 import type { ConnectorToolController } from '../../edgeless/tools/connector-tool.js';
+import type { ElementToolbarMoreMenuContext } from './more-menu/context.js';
 
 import {
   ConnectorMode,
@@ -40,6 +45,7 @@ import {
   type TextElementModel,
   clamp,
 } from '../../../surface-block/index.js';
+import { getMoreMenuConfig } from '../../configs/toolbar.js';
 import { edgelessElementsBound } from '../../edgeless/utils/bound-utils.js';
 import {
   isAttachmentBlock,
@@ -66,6 +72,7 @@ import { renderNoteButton } from './change-note-button.js';
 import { renderChangeShapeButton } from './change-shape-button.js';
 import { renderChangeTextButton } from './change-text-button.js';
 import './more-menu/button.js';
+import { BUILT_IN_GROUPS } from './more-menu/config.js';
 import { renderReleaseFromGroupButton } from './release-from-group-button.js';
 
 type CategorizedElements = {
@@ -140,6 +147,13 @@ export class EdgelessElementToolbarWidget extends WidgetComponent<
       user-select: none;
     }
   `;
+
+  /*
+   * Caches the more menu items.
+   * Currently only supports configuring more menu.
+   */
+  moreGroups: MenuItemGroup<ElementToolbarMoreMenuContext>[] =
+    cloneGroups(BUILT_IN_GROUPS);
 
   private _groupSelected(): CategorizedElements {
     const result = groupBy(this.selection.selectedElements, model => {
@@ -236,6 +250,8 @@ export class EdgelessElementToolbarWidget extends WidgetComponent<
 
   protected override firstUpdated() {
     const { _disposables, edgeless } = this;
+
+    this.moreGroups = getMoreMenuConfig(this.std).configure(this.moreGroups);
 
     _disposables.add(
       edgeless.service.viewport.viewportUpdated.on(() => {
@@ -387,6 +403,7 @@ export class EdgelessElementToolbarWidget extends WidgetComponent<
       <edgeless-more-button
         .elements=${selectedElements}
         .edgeless=${edgeless}
+        .groups=${this.moreGroups}
         .vertical=${true}
       ></edgeless-more-button>
     `);

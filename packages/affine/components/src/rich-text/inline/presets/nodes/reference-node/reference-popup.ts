@@ -10,6 +10,7 @@ import { computePosition, inline, offset, shift } from '@floating-ui/dom';
 import { effect } from '@lit-labs/preact-signals';
 import { LitElement, html, nothing } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
+import { ifDefined } from 'lit/directives/if-defined.js';
 import { join } from 'lit/directives/join.js';
 import { repeat } from 'lit/directives/repeat.js';
 
@@ -192,7 +193,7 @@ export class ReferencePopup extends WithDisposable(LitElement) {
             button => button.label,
             ({ label, icon, action, disabled }) => html`
               <editor-menu-action
-                ?aria-label=${label}
+                aria-label=${ifDefined(label)}
                 ?disabled=${disabled}
                 @click=${action}
               >

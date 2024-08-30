@@ -4,15 +4,11 @@ import type { GfxModel } from '@blocksuite/block-std/gfx';
 import type { BlockModel, Doc } from '@blocksuite/store';
 
 export abstract class MenuContext {
+  // Sometimes we need to close the menu.
+  close() {}
+
   isElement() {
     return false;
-  }
-
-  get config(): ToolbarMoreMenuConfig {
-    return {
-      configure: <T extends MenuContext>(groups: MenuItemGroup<T>[]) => groups,
-      ...this.std.spec.getConfig('affine:page')?.toolbarMoreMenu,
-    };
   }
 
   get firstElement(): GfxModel | null {
@@ -38,4 +34,11 @@ export interface ToolbarMoreMenuConfig {
   configure: <T extends MenuContext>(
     groups: MenuItemGroup<T>[]
   ) => MenuItemGroup<T>[];
+}
+
+export function getMoreMenuConfig(std: BlockStdScope): ToolbarMoreMenuConfig {
+  return {
+    configure: <T extends MenuContext>(groups: MenuItemGroup<T>[]) => groups,
+    ...std.spec.getConfig('affine:page')?.toolbarMoreMenu,
+  };
 }

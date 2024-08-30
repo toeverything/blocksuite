@@ -31,6 +31,7 @@ import { WithDisposable } from '@blocksuite/block-std';
 import { Bound } from '@blocksuite/global/utils';
 import { LitElement, type TemplateResult, css, html, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
+import { ifDefined } from 'lit/directives/if-defined.js';
 import { join } from 'lit/directives/join.js';
 import { repeat } from 'lit/directives/repeat.js';
 
@@ -423,7 +424,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
             button => button.label,
             ({ label, icon, action, disabled }) => html`
               <editor-menu-action
-                ?aria-label=${label}
+                aria-label=${ifDefined(label)}
                 ?disabled=${disabled}
                 @click=${action}
               >
@@ -516,7 +517,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
               ({ type, label, handler, disabled }) => html`
                 <editor-menu-action
                   data-testid=${`link-to-${type}`}
-                  ?aria-label=${label}
+                  aria-label=${ifDefined(label)}
                   ?data-selected=${this._viewType === type}
                   ?disabled=${disabled}
                   @click=${handler}

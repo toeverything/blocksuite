@@ -2,18 +2,13 @@ import type { AttachmentBlockModel } from '@blocksuite/affine-model';
 
 import {
   CaptionIcon,
-  CopyIcon,
-  DeleteIcon,
   DownloadIcon,
-  DuplicateIcon,
   EditIcon,
   MoreVerticalIcon,
-  RefreshIcon,
   SmallArrowDownIcon,
 } from '@blocksuite/affine-components/icons';
 import { createLitPortal } from '@blocksuite/affine-components/portal';
 import {
-  type MenuItemGroup,
   cloneGroups,
   renderGroups,
   renderToolbarSeparator,
@@ -25,106 +20,12 @@ import { repeat } from 'lit/directives/repeat.js';
 
 import type { AttachmentBlockComponent } from '../attachment-block.js';
 
-import { MenuContext } from '../../root-block/configs/toolbar.js';
+import { getMoreMenuConfig } from '../../root-block/configs/toolbar.js';
 import { allowEmbed, convertToEmbed } from '../embed.js';
-import { cloneAttachmentProperties } from '../utils.js';
+import { BUILT_IN_GROUPS } from './config.js';
+import { AttachmentToolbarMoreMenuContext } from './context.js';
 import { RenameModal } from './rename-model.js';
 import { styles } from './styles.js';
-
-const BUILT_IN_GROUPS: MenuItemGroup<AttachmentToolbarMoreMenuContext>[] = [
-  {
-    type: 'clipboard',
-    items: [
-      {
-        type: 'copy',
-        label: 'Copy',
-        icon: CopyIcon,
-        disabled: ctx => ctx.doc.readonly,
-        action: ctx => ctx.blockComponent.copy(),
-      },
-      {
-        type: 'duplicate',
-        label: 'Duplicate',
-        icon: DuplicateIcon,
-        disabled: ctx => ctx.doc.readonly,
-        action: ctx => {
-          const prop: { flavour: 'affine:attachment' } = {
-            flavour: 'affine:attachment',
-            ...cloneAttachmentProperties(ctx.model),
-          };
-          ctx.doc.addSiblingBlocks(ctx.model, [prop]);
-        },
-      },
-      {
-        type: 'reload',
-        label: 'Reload',
-        icon: RefreshIcon,
-        disabled: ctx => ctx.doc.readonly,
-        action: ctx => ctx.blockComponent.refreshData(),
-      },
-      {
-        type: 'download',
-        label: 'Download',
-        icon: DownloadIcon,
-        disabled: ctx => ctx.doc.readonly,
-        action: ctx => ctx.blockComponent.download(),
-      },
-    ],
-  },
-  {
-    type: 'delete',
-    items: [
-      {
-        type: 'delete',
-        label: 'Delete',
-        icon: DeleteIcon,
-        disabled: ctx => ctx.doc.readonly,
-        action: ctx => {
-          ctx.doc.deleteBlock(ctx.model);
-          ctx.abortController.abort();
-        },
-      },
-    ],
-  },
-];
-
-export class AttachmentToolbarMoreMenuContext extends MenuContext {
-  constructor(
-    public blockComponent: AttachmentBlockComponent,
-    public model: AttachmentBlockModel,
-    public abortController: AbortController
-  ) {
-    super();
-  }
-
-  isEmpty() {
-    return false;
-  }
-
-  isMultiple() {
-    return false;
-  }
-
-  isSingle() {
-    return true;
-  }
-
-  get doc() {
-    return this.model.doc;
-  }
-
-  get host() {
-    return this.blockComponent.host;
-  }
-
-  get selectedBlockModels() {
-    return [this.model];
-  }
-
-  get std() {
-    return this.blockComponent.std;
-  }
-}
 
 export function AttachmentOptionsTemplate({
   anchor,
@@ -160,12 +61,10 @@ export function AttachmentOptionsTemplate({
     },
   ];
 
-  const context = new AttachmentToolbarMoreMenuContext(
-    anchor,
-    model,
-    abortController
+  const context = new AttachmentToolbarMoreMenuContext(anchor, abortController);
+  const groups = getMoreMenuConfig(anchor.std).configure(
+    cloneGroups(BUILT_IN_GROUPS)
   );
-  const groups = context.config.configure(cloneGroups(BUILT_IN_GROUPS));
   const moreMenuActions = renderGroups(groups, context);
 
   const buttons = [

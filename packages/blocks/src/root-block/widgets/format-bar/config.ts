@@ -32,10 +32,7 @@ import {
 } from '@blocksuite/affine-components/icons';
 import { createSimplePortal } from '@blocksuite/affine-components/portal';
 import { toast } from '@blocksuite/affine-components/toast';
-import {
-  cloneGroups,
-  renderGroups,
-} from '@blocksuite/affine-components/toolbar';
+import { renderGroups } from '@blocksuite/affine-components/toolbar';
 import { assertExists } from '@blocksuite/global/utils';
 import { Slice } from '@blocksuite/store';
 import { type TemplateResult, html } from 'lit';
@@ -49,7 +46,7 @@ import {
   notifyDocCreated,
   promptDocTitle,
 } from '../../../_common/utils/render-linked-doc.js';
-import { MenuContext } from '../../configs/toolbar.js';
+import { FormatBarContext } from './context.js';
 
 export type DividerConfigItem = {
   type: 'divider';
@@ -322,46 +319,7 @@ export function toolbarDefaultConfig(toolbar: AffineFormatBarWidget) {
     });
 }
 
-export class FormatBarContext extends MenuContext {
-  constructor(public toolbar: AffineFormatBarWidget) {
-    super();
-  }
-
-  isEmpty() {
-    return this.selectedBlockModels.length === 0;
-  }
-
-  isMultiple() {
-    return this.selectedBlockModels.length > 1;
-  }
-
-  isSingle() {
-    return this.selectedBlockModels.length === 1;
-  }
-
-  get doc() {
-    return this.toolbar.host.doc;
-  }
-
-  get host() {
-    return this.toolbar.host;
-  }
-
-  get selectedBlockModels() {
-    const { success, selectedModels } =
-      this.std.command.exec('getSelectedModels');
-
-    if (!success) return [];
-
-    return selectedModels ?? [];
-  }
-
-  get std() {
-    return this.toolbar.std;
-  }
-}
-
-const BUILT_IN_GROUPS: MenuItemGroup<FormatBarContext>[] = [
+export const BUILT_IN_GROUPS: MenuItemGroup<FormatBarContext>[] = [
   {
     type: 'clipboard',
     items: [
@@ -481,8 +439,7 @@ const BUILT_IN_GROUPS: MenuItemGroup<FormatBarContext>[] = [
 
 export function toolbarMoreButton(toolbar: AffineFormatBarWidget) {
   const context = new FormatBarContext(toolbar);
-  const groups = context.config.configure(cloneGroups(BUILT_IN_GROUPS));
-  const actions = renderGroups(groups, context);
+  const actions = renderGroups(toolbar.moreGroups, context);
 
   return html`
     <editor-menu-button

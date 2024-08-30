@@ -1,10 +1,14 @@
-import type { ImageBlockComponent } from '../../../image-block/image-block.js';
+import type { EmbedToolbarBlockComponent } from '../../../_common/components/embed-card/type.js';
 
 import { MenuContext } from '../../configs/toolbar.js';
 
-export class ImageToolbarContext extends MenuContext {
+export class EmbedCardToolbarContext extends MenuContext {
+  override close = () => {
+    this.abortController.abort();
+  };
+
   constructor(
-    public blockComponent: ImageBlockComponent,
+    public blockComponent: EmbedToolbarBlockComponent,
     public abortController: AbortController
   ) {
     super();
@@ -31,10 +35,11 @@ export class ImageToolbarContext extends MenuContext {
   }
 
   get selectedBlockModels() {
-    return [this.blockComponent.model];
+    if (this.blockComponent.model) return [this.blockComponent.model];
+    return [];
   }
 
   get std() {
-    return this.blockComponent.std;
+    return this.host.std;
   }
 }

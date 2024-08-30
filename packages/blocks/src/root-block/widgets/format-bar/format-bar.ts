@@ -10,6 +10,10 @@ import type {
 
 import { HoverController } from '@blocksuite/affine-components/hover';
 import { isFormatSupported } from '@blocksuite/affine-components/rich-text';
+import {
+  type MenuItemGroup,
+  cloneGroups,
+} from '@blocksuite/affine-components/toolbar';
 import { matchFlavours } from '@blocksuite/affine-shared/utils';
 import { WidgetComponent } from '@blocksuite/block-std';
 import { DisposableGroup, assertExists } from '@blocksuite/global/utils';
@@ -25,9 +29,13 @@ import {
 import { html, nothing } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 
+import type { FormatBarContext } from './context.js';
+
 import '../../../_common/components/button.js';
+import { getMoreMenuConfig } from '../../configs/toolbar.js';
 import { ConfigRenderer } from './components/config-renderer.js';
 import {
+  BUILT_IN_GROUPS,
   type FormatBarConfigItem,
   type InlineActionConfigItem,
   type ParagraphActionConfigItem,
@@ -49,6 +57,12 @@ export class AffineFormatBarWidget extends WidgetComponent {
   private _placement: Placement = 'top';
 
   static override styles = formatBarStyle;
+
+  /*
+   * Caches the more menu items.
+   * Currently only supports configuring more menu.
+   */
+  moreGroups: MenuItemGroup<FormatBarContext>[] = cloneGroups(BUILT_IN_GROUPS);
 
   private _calculatePlacement() {
     const rootComponent = this.block;
@@ -502,6 +516,8 @@ export class AffineFormatBarWidget extends WidgetComponent {
     if (this.configItems.length === 0) {
       toolbarDefaultConfig(this);
     }
+
+    this.moreGroups = getMoreMenuConfig(this.std).configure(this.moreGroups);
   }
 
   override disconnectedCallback() {
