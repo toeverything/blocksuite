@@ -37,7 +37,7 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
       GfxPrimitiveElementModel,
       ConstructorParameters<typeof GfxPrimitiveElementModel>
     >
-  > = {};
+  > = Object.create(null);
 
   protected _elementModels = new Map<
     string,
