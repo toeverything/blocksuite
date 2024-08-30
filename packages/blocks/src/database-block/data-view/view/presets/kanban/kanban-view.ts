@@ -1,5 +1,5 @@
 import { popMenu } from '@blocksuite/affine-components/context-menu';
-import { AddCursorIcon } from '@blocksuite/affine-components/icons';
+import { AddCursorIcon } from '@blocksuite/icons/lit';
 import { css } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
@@ -144,7 +144,7 @@ export class DataViewKanban extends DataViewBase<
       style="height: 32px;width: 100px;flex-shrink:0;display:flex;align-items:center;"
       @click="${add}"
     >
-      <div class="add-group-icon">${AddCursorIcon}</div>
+      <div class="add-group-icon">${AddCursorIcon()}</div>
     </div>`;
   };
 

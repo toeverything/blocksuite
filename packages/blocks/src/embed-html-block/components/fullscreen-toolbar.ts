@@ -4,7 +4,7 @@ import {
   DoneIcon,
   ExpandCloseIcon,
   SettingsIcon,
-} from '@blocksuite/affine-components/icons';
+} from '@blocksuite/icons/lit';
 import { flip, offset } from '@floating-ui/dom';
 import { LitElement, css, html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
@@ -142,16 +142,16 @@ export class EmbedHtmlFullscreenToolbar extends LitElement {
     >
       <div class="fullscreen-toolbar-container">
         <icon-button @click=${this.embedHtml.close}
-          >${ExpandCloseIcon}</icon-button
+          >${ExpandCloseIcon()}</icon-button
         >
         <icon-button @click=${this._popSettings} hover=${this._popperVisible}
-          >${SettingsIcon}</icon-button
+          >${SettingsIcon()}</icon-button
         >
 
         <div class="short-v-divider"></div>
 
         <icon-button class="copy-button" @click=${this.copyCode}
-          >${this._copied ? DoneIcon : CopyIcon}
+          >${this._copied ? DoneIcon() : CopyIcon()}
         </icon-button>
       </div>
     </div> `;

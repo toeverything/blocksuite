@@ -8,6 +8,7 @@ import { BlockLinkIcon } from '@blocksuite/affine-components/icons';
 import { Peekable, isPeekable } from '@blocksuite/affine-components/peek';
 import { REFERENCE_NODE } from '@blocksuite/affine-components/rich-text';
 import { DocMode } from '@blocksuite/affine-model';
+import { DocModeProvider } from '@blocksuite/affine-shared/services';
 import { Bound } from '@blocksuite/global/utils';
 import { assertExists } from '@blocksuite/global/utils';
 import { DocCollection } from '@blocksuite/store';
@@ -211,10 +212,6 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockComponent<
     return !!linkedDoc && this.isNoteContentEmpty && this.isBannerEmpty;
   }
 
-  private get _rootService() {
-    return this.std.spec.getService('affine:page');
-  }
-
   override connectedCallback() {
     super.connectedCallback();
 
@@ -265,11 +262,10 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockComponent<
       if (this._isLinkToNode) {
         this._linkedDocMode = this.model.params?.mode ?? DocMode.Page;
       } else {
-        this._linkedDocMode = this._rootService.docModeService.getMode(
-          this.model.pageId
-        );
+        const docMode = this.std.get(DocModeProvider);
+        this._linkedDocMode = docMode.getMode(this.model.pageId);
         this.disposables.add(
-          this._rootService.docModeService.onModeChange(mode => {
+          docMode.onModeChange(mode => {
             this._linkedDocMode = mode;
           }, this.model.pageId)
         );

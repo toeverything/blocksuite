@@ -10,13 +10,7 @@ import { Doc } from '@blocksuite/store';
 import { type BlockModel, BlockViewType } from '@blocksuite/store';
 import { createContext, provide } from '@lit/context';
 import { SignalWatcher } from '@lit-labs/preact-signals';
-import {
-  LitElement,
-  type PropertyValues,
-  type TemplateResult,
-  css,
-  nothing,
-} from 'lit';
+import { LitElement, type TemplateResult, css, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { type StaticValue, html, unsafeStatic } from 'lit/static-html.js';
@@ -131,10 +125,10 @@ export class EditorHost extends SignalWatcher(
     this.std = new BlockStdScope({
       host: this,
       doc: this.doc,
+      specs: this.specs,
     });
 
     this.std.mount();
-    this.std.spec.applySpecs(this.specs);
     this.tabIndex = 0;
   }
 
@@ -185,13 +179,6 @@ export class EditorHost extends SignalWatcher(
     if (!root) return nothing;
 
     return this._renderModel(root);
-  }
-
-  override willUpdate(changedProperties: PropertyValues) {
-    if (changedProperties.has('specs')) {
-      this.std.spec.applySpecs(this.specs);
-    }
-    super.willUpdate(changedProperties);
   }
 
   get command(): CommandManager {

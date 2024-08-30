@@ -1,4 +1,4 @@
-import { createZodUnion } from '../utils/zod.js';
+import { z } from 'zod';
 
 export const NOTE_WIDTH = 800;
 
@@ -32,9 +32,7 @@ export const NOTE_BACKGROUND_COLORS = [
 
 export const DEFAULT_NOTE_BACKGROUND_COLOR = NoteBackgroundColor.Blue;
 
-export const NoteBackgroundColorsSchema = createZodUnion(
-  NOTE_BACKGROUND_COLORS
-);
+export const NoteBackgroundColorsSchema = z.nativeEnum(NoteBackgroundColor);
 
 export enum NoteShadow {
   Box = '--affine-note-shadow-box',
@@ -56,7 +54,7 @@ export const NOTE_SHADOWS = [
 
 export const DEFAULT_NOTE_SHADOW = NoteShadow.Sticker;
 
-export const NoteShadowsSchema = createZodUnion(NOTE_SHADOWS);
+export const NoteShadowsSchema = z.nativeEnum(NoteShadow);
 
 export enum NoteDisplayMode {
   DocAndEdgeless = 'both',

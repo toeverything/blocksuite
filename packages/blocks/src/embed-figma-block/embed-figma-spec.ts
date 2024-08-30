@@ -1,6 +1,5 @@
-import type { BlockSpec } from '@blocksuite/block-std';
-
 import { EmbedFigmaBlockSchema } from '@blocksuite/affine-model';
+import { type BlockSpec, FlavourExtension } from '@blocksuite/block-std';
 import { literal } from 'lit/static-html.js';
 
 import './embed-edgeless-figma-block.js';
@@ -15,5 +14,5 @@ export const EmbedFigmaBlockSpec: BlockSpec = {
         : literal`affine-embed-figma-block`;
     },
   },
-  service: EmbedFigmaBlockService,
+  extensions: [FlavourExtension('affine:embed-figma'), EmbedFigmaBlockService],
 };

@@ -1,6 +1,5 @@
-import type { BlockSpec } from '@blocksuite/block-std';
-
 import { EmbedGithubBlockSchema } from '@blocksuite/affine-model';
+import { type BlockSpec, FlavourExtension } from '@blocksuite/block-std';
 import { literal } from 'lit/static-html.js';
 
 import './embed-edgeless-github-block.js';
@@ -15,5 +14,8 @@ export const EmbedGithubBlockSpec: BlockSpec = {
         : literal`affine-embed-github-block`;
     },
   },
-  service: EmbedGithubBlockService,
+  extensions: [
+    FlavourExtension('affine:embed-github'),
+    EmbedGithubBlockService,
+  ],
 };

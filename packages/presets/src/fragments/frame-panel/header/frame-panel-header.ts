@@ -1,8 +1,8 @@
 import type { EditorHost } from '@blocksuite/block-std';
 import type { EdgelessRootBlockComponent } from '@blocksuite/blocks';
-import type { NavigatorMode } from '@blocksuite/blocks';
 
 import { WithDisposable } from '@blocksuite/block-std';
+import { DocModeProvider, type NavigatorMode } from '@blocksuite/blocks';
 import { DocMode, createButtonPopper } from '@blocksuite/blocks';
 import { DisposableGroup } from '@blocksuite/global/utils';
 import { LitElement, type PropertyValues, css, html } from 'lit';
@@ -112,7 +112,7 @@ export class FramePanelHeader extends WithDisposable(LitElement) {
 
   private _enterPresentationMode = () => {
     if (!this.edgeless) {
-      this.rootService.docModeService.setMode(DocMode.Edgeless);
+      this.rootService.std.get(DocModeProvider).setMode(DocMode.Edgeless);
     }
 
     setTimeout(() => {

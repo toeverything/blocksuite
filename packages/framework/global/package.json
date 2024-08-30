@@ -15,7 +15,8 @@
     ".": "./index.d.ts",
     "./utils": "./src/utils.ts",
     "./env": "./src/env/index.ts",
-    "./exceptions": "./src/exceptions/index.ts"
+    "./exceptions": "./src/exceptions/index.ts",
+    "./di": "./src/di/index.ts"
   },
   "typesVersions": {
     "*": {
@@ -27,6 +28,9 @@
       ],
       "exceptions": [
         "dist/exceptions/index.d.ts"
+      ],
+      "di": [
+        "dist/di/index.d.ts"
       ]
     }
   },
@@ -35,10 +39,26 @@
   "publishConfig": {
     "access": "public",
     "exports": {
-      ".": "./index.d.ts",
-      "./utils": "./dist/utils.js",
-      "./env": "./dist/env/index.js",
-      "./exceptions": "./dist/exceptions/index.js"
+      ".": {
+        "types": "./dist/index.d.ts",
+        "import": "./dist/index.js"
+      },
+      "./utils": {
+        "types": "./dist/utils.d.ts",
+        "import": "./dist/utils.js"
+      },
+      "./env": {
+        "types": "./dist/env/index.d.ts",
+        "import": "./dist/env/index.js"
+      },
+      "./exceptions": {
+        "types": "./dist/exceptions/index.d.ts",
+        "import": "./dist/exceptions/index.js"
+      },
+      "./di": {
+        "types": "./dist/di/index.d.ts",
+        "import": "./dist/di/index.js"
+      }
     }
   },
   "files": [

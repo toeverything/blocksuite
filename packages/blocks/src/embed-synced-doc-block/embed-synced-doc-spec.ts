@@ -1,6 +1,5 @@
-import type { BlockSpec } from '@blocksuite/block-std';
-
 import { EmbedSyncedDocBlockSchema } from '@blocksuite/affine-model';
+import { type BlockSpec, FlavourExtension } from '@blocksuite/block-std';
 import { literal } from 'lit/static-html.js';
 
 import './embed-edgeless-synced-doc-block.js';
@@ -15,5 +14,8 @@ export const EmbedSyncedDocBlockSpec: BlockSpec = {
         : literal`affine-embed-synced-doc-block`;
     },
   },
-  service: EmbedSyncedDocBlockService,
+  extensions: [
+    FlavourExtension('affine:embed-synced-doc'),
+    EmbedSyncedDocBlockService,
+  ],
 };

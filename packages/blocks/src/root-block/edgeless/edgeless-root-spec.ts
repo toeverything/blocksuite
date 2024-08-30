@@ -1,11 +1,8 @@
-import type {
-  BlockComponent,
-  BlockService,
-  BlockSpec,
-  BlockSpecSlots,
-} from '@blocksuite/block-std';
+import type { BlockSpec } from '@blocksuite/block-std';
 
 import { RootBlockSchema } from '@blocksuite/affine-model';
+import { DocModeService } from '@blocksuite/affine-shared/services';
+import { BlockServiceWatcher, FlavourExtension } from '@blocksuite/block-std';
 import { literal, unsafeStatic } from 'lit/static-html.js';
 
 import type { RootBlockConfig } from '../root-config.js';
@@ -52,7 +49,6 @@ export type EdgelessRootBlockSpecType = BlockSpec<
 
 export const EdgelessRootBlockSpec: EdgelessRootBlockSpecType = {
   schema: RootBlockSchema,
-  service: EdgelessRootService,
   view: {
     component: literal`affine-edgeless-root`,
     widgets: {
@@ -96,21 +92,37 @@ export const EdgelessRootBlockSpec: EdgelessRootBlockSpecType = {
     },
   },
   commands,
+  extensions: [
+    FlavourExtension('affine:page'),
+    EdgelessRootService,
+    DocModeService,
+  ],
 };
+
+class EdgelessServiceWatcher extends BlockServiceWatcher {
+  static override readonly flavour = 'affine:page';
+
+  override listen() {
+    const service = this.blockService;
+    service.disposables.add(
+      service.specSlots.viewConnected.on(({ service }) => {
+        // Does not allow the user to move and zoom.
+        (service as EdgelessRootService).locked = true;
+      })
+    );
+  }
+}
 
 export const PreviewEdgelessRootBlockSpec: EdgelessRootBlockSpecType = {
   schema: RootBlockSchema,
-  service: EdgelessRootService,
   view: {
     component: literal`affine-edgeless-root-preview`,
   },
-  setup(slots: BlockSpecSlots) {
-    slots.viewConnected.on(
-      ({ service }: { component: BlockComponent; service: BlockService }) => {
-        // Does not allow the user to move and zoom.
-        (service as EdgelessRootService).locked = true;
-      }
-    );
-  },
+  extensions: [
+    FlavourExtension('affine:page'),
+    EdgelessRootService,
+    EdgelessServiceWatcher,
+    DocModeService,
+  ],
   commands,
 };

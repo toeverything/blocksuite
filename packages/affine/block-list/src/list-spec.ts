@@ -1,6 +1,5 @@
-import type { BlockSpec } from '@blocksuite/block-std';
-
 import { ListBlockSchema } from '@blocksuite/affine-model';
+import { type BlockSpec, FlavourExtension } from '@blocksuite/block-std';
 import { literal } from 'lit/static-html.js';
 
 import { commands } from './commands/index.js';
@@ -12,5 +11,5 @@ export const ListBlockSpec: BlockSpec = {
     component: literal`affine-list`,
   },
   commands,
-  service: ListBlockService,
+  extensions: [FlavourExtension('affine:list'), ListBlockService],
 };

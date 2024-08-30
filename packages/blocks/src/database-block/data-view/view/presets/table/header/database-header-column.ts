@@ -9,6 +9,14 @@ import {
 } from '@blocksuite/affine-shared/utils';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
+import {
+  DeleteIcon,
+  DuplicateIcon,
+  InsertLeftIcon,
+  InsertRightIcon,
+  MoveLeftIcon,
+  MoveRightIcon,
+} from '@blocksuite/icons/lit';
 import { SignalWatcher } from '@lit-labs/preact-signals';
 import { css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
@@ -23,14 +31,6 @@ import type { TableColumn, TableSingleView } from '../table-view-manager.js';
 
 import { numberFormats } from '../../../../column/presets/number/utils/formats.js';
 import { inputConfig, typeConfig } from '../../../../common/column-menu.js';
-import {
-  DatabaseDuplicate,
-  DatabaseInsertLeft,
-  DatabaseInsertRight,
-  DatabaseMoveLeft,
-  DatabaseMoveRight,
-  DeleteIcon,
-} from '../../../../common/icons/index.js';
 import { startDrag } from '../../../../utils/drag.js';
 import { autoScrollOnBoundary } from '../../../../utils/frame-loop.js';
 import { renderUniLit } from '../../../../utils/uni-component/index.js';
@@ -376,7 +376,7 @@ export class DatabaseHeaderColumn extends SignalWatcher(
           {
             type: 'action',
             name: 'Duplicate Column',
-            icon: DatabaseDuplicate,
+            icon: DuplicateIcon(),
             hide: () =>
               !this.column.duplicate || this.column.type$.value === 'title',
             select: () => {
@@ -386,7 +386,7 @@ export class DatabaseHeaderColumn extends SignalWatcher(
           {
             type: 'action',
             name: 'Insert Left Column',
-            icon: DatabaseInsertLeft,
+            icon: InsertLeftIcon(),
             select: () => {
               this.tableViewManager.columnAdd({
                 id: this.column.id,
@@ -406,7 +406,7 @@ export class DatabaseHeaderColumn extends SignalWatcher(
           {
             type: 'action',
             name: 'Insert Right Column',
-            icon: DatabaseInsertRight,
+            icon: InsertRightIcon(),
             select: () => {
               this.tableViewManager.columnAdd({
                 id: this.column.id,
@@ -429,7 +429,7 @@ export class DatabaseHeaderColumn extends SignalWatcher(
           {
             type: 'action',
             name: 'Move Left',
-            icon: DatabaseMoveLeft,
+            icon: MoveLeftIcon(),
             hide: () => this.column.isFirst,
             select: () => {
               const preId = this.tableViewManager.columnGetPreColumn(
@@ -447,7 +447,7 @@ export class DatabaseHeaderColumn extends SignalWatcher(
           {
             type: 'action',
             name: 'Move Right',
-            icon: DatabaseMoveRight,
+            icon: MoveRightIcon(),
             hide: () => this.column.isLast,
             select: () => {
               const nextId = this.tableViewManager.columnGetNextColumn(
@@ -469,7 +469,7 @@ export class DatabaseHeaderColumn extends SignalWatcher(
               {
                 type: 'action',
                 name: 'Delete Column',
-                icon: DeleteIcon,
+                icon: DeleteIcon(),
                 hide: () =>
                   !this.column.delete || this.column.type$.value === 'title',
                 select: () => {

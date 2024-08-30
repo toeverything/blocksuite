@@ -6,11 +6,12 @@ import {
 } from '@blocksuite/affine-components/rich-text';
 import { BlockService } from '@blocksuite/block-std';
 
-import type { DataViewBlockModel } from './data-view-model.js';
-
 import { DatabaseSelection } from '../database-block/data-view/index.js';
+import { DataViewBlockSchema } from './data-view-model.js';
 
-export class DataViewBlockService extends BlockService<DataViewBlockModel> {
+export class DataViewBlockService extends BlockService {
+  static override readonly flavour = DataViewBlockSchema.model.flavour;
+
   readonly inlineManager = new InlineManager();
 
   readonly referenceNodeConfig = new ReferenceNodeConfig();

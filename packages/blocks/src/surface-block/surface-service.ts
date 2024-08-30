@@ -1,10 +1,11 @@
 import { BlockService } from '@blocksuite/block-std';
 
-import type { SurfaceBlockModel } from './surface-model.js';
-
 import { LayerManager } from './managers/layer-manager.js';
+import { type SurfaceBlockModel, SurfaceBlockSchema } from './surface-model.js';
 
-export class SurfaceBlockService extends BlockService<SurfaceBlockModel> {
+export class SurfaceBlockService extends BlockService {
+  static override readonly flavour = SurfaceBlockSchema.model.flavour;
+
   layer!: LayerManager;
 
   surface!: SurfaceBlockModel;

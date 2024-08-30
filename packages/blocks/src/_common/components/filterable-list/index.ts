@@ -1,10 +1,9 @@
-import { SearchIcon } from '@blocksuite/affine-components/icons';
-import { DoneIcon } from '@blocksuite/affine-components/icons';
 import {
   type AdvancedPortalOptions,
   createLitPortal,
 } from '@blocksuite/affine-components/portal';
 import { WithDisposable } from '@blocksuite/block-std';
+import { DoneIcon, SearchIcon } from '@blocksuite/icons/lit';
 import { type Placement, autoPlacement, offset, size } from '@floating-ui/dom';
 import { LitElement, html, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
@@ -41,7 +40,7 @@ export class FilterableListComponent<Props = unknown> extends WithDisposable(
         >
           ${item.icon ?? nothing} ${item.label ?? item.name}
           <div slot="suffix">
-            ${this.options.active?.(item) ? DoneIcon : nothing}
+            ${this.options.active?.(item) ? DoneIcon() : nothing}
           </div>
         </icon-button>
       `;
@@ -132,7 +131,7 @@ export class FilterableListComponent<Props = unknown> extends WithDisposable(
         class=${classMap({ 'affine-filterable-list': true, flipped: isFlip })}
       >
         <div class="input-wrapper">
-          ${SearchIcon}
+          ${SearchIcon()}
           <input
             id="filter-input"
             type="text"

@@ -1,5 +1,6 @@
-import type { EmbedHtmlModel } from '@blocksuite/affine-model';
-
+import { EmbedHtmlBlockSchema } from '@blocksuite/affine-model';
 import { BlockService } from '@blocksuite/block-std';
 
-export class EmbedHtmlBlockService extends BlockService<EmbedHtmlModel> {}
+export class EmbedHtmlBlockService extends BlockService {
+  static override readonly flavour = EmbedHtmlBlockSchema.model.flavour;
+}

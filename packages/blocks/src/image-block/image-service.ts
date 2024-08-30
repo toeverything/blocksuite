@@ -1,7 +1,4 @@
-import {
-  type ImageBlockModel,
-  ImageBlockSchema,
-} from '@blocksuite/affine-model';
+import { ImageBlockSchema } from '@blocksuite/affine-model';
 import { ImageSelection } from '@blocksuite/affine-shared/selection';
 import {
   isInsideEdgelessEditor,
@@ -34,7 +31,7 @@ import {
 import { ImageEdgelessBlockComponent } from './image-edgeless-block.js';
 import { addSiblingImageBlock } from './utils.js';
 
-export class ImageBlockService extends BlockService<ImageBlockModel> {
+export class ImageBlockService extends BlockService {
   private _dragHandleOption: DragHandleOption = {
     flavour: ImageBlockSchema.model.flavour,
     edgeless: true,
@@ -156,6 +153,8 @@ export class ImageBlockService extends BlockService<ImageBlockModel> {
       return true;
     },
   };
+
+  static override readonly flavour = ImageBlockSchema.model.flavour;
 
   static setImageProxyURL = setImageProxyMiddlewareURL;
 

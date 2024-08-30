@@ -1,14 +1,17 @@
-import type { BlockSpec, EditorHost } from '@blocksuite/block-std';
-import type { DocModeService, PageRootService } from '@blocksuite/blocks';
-import type { BlockCollection } from '@blocksuite/store';
-import type { DocCollection } from '@blocksuite/store';
+import type { PageRootService } from '@blocksuite/blocks';
+import type { BlockCollection, DocCollection } from '@blocksuite/store';
 
 import {
-  AffineFormatBarWidget,
+  BlockServiceWatcher,
+  type BlockSpec,
+  type EditorHost,
+} from '@blocksuite/block-std';
+import { AffineFormatBarWidget } from '@blocksuite/blocks';
+import {
   DocMode,
+  DocModeProvider,
   EdgelessEditorBlockSpecs,
   PageEditorBlockSpecs,
-  createDocModeService,
   toolbarDefaultConfig,
 } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
@@ -25,9 +28,9 @@ import { SidePanel } from '../../_common/components/side-panel.js';
 import {
   mockNotificationService,
   mockQuickSearchService,
-} from '../../_common/mock-services.js';
+} from '../../_common/mock-services';
 
-function setDocModeFromUrlParams(service: DocModeService) {
+function setDocModeFromUrlParams(service: DocModeProvider) {
   const params = new URLSearchParams(location.search);
   const paramMode = params.get('mode');
   if (paramMode) {
@@ -52,8 +55,6 @@ export async function mountDefaultDocEditor(collection: DocCollection) {
   const app = document.getElementById('app');
   if (!app) return;
 
-  const modeService = createDocModeService(doc.id);
-  setDocModeFromUrlParams(modeService);
   const editor = new AffineEditorContainer();
   editor.pageSpecs = [...PageEditorBlockSpecs].map(spec => {
     if (spec.schema.model.flavour === 'affine:page') {
@@ -67,7 +68,7 @@ export async function mountDefaultDocEditor(collection: DocCollection) {
     }
     return spec;
   });
-  editor.mode = modeService.getMode();
+  editor.mode = DocMode.Page;
   editor.doc = doc;
   editor.slots.docLinkClicked.on(({ pageId: docId }) => {
     const target = collection.getDoc(docId);
@@ -77,12 +78,15 @@ export async function mountDefaultDocEditor(collection: DocCollection) {
     target.load();
     editor.doc = target;
   });
-  editor.slots.docUpdated.on(({ newDocId }) => {
-    editor.mode = modeService.getMode(newDocId);
-  });
 
   app.append(editor);
   await editor.updateComplete;
+  const modeService = editor.host!.std.provider.get(DocModeProvider);
+  editor.mode = modeService.getMode();
+  setDocModeFromUrlParams(modeService);
+  editor.slots.docUpdated.on(({ newDocId }) => {
+    editor.mode = modeService.getMode(newDocId);
+  });
 
   const outlinePanel = new CustomOutlinePanel();
   outlinePanel.editor = editor;
@@ -160,25 +164,27 @@ export async function mountDefaultDocEditor(collection: DocCollection) {
   return editor;
 
   function patchPageRootSpec(spec: BlockSpec) {
-    const setup = spec.setup;
-    const newSpec: typeof spec = {
-      ...spec,
-      setup: (slots, disposable) => {
-        setup?.(slots, disposable);
-        slots.mounted.once(({ service }) => {
-          const pageRootService = service as PageRootService;
-          const onFormatBarConnected = slots.widgetConnected.on(view => {
+    class PatchPageServiceWatcher extends BlockServiceWatcher {
+      static override readonly flavour = 'affine:page';
+
+      override listen() {
+        const pageRootService = this.blockService as PageRootService;
+        const onFormatBarConnected =
+          pageRootService.specSlots.widgetConnected.on(view => {
             if (view.component instanceof AffineFormatBarWidget) {
               configureFormatBar(view.component);
             }
           });
-          disposable.add(onFormatBarConnected);
-          pageRootService.notificationService =
-            mockNotificationService(pageRootService);
-          pageRootService.quickSearchService =
-            mockQuickSearchService(collection);
-        });
-      },
+        pageRootService.disposables.add(onFormatBarConnected);
+        pageRootService.notificationService =
+          mockNotificationService(pageRootService);
+        pageRootService.quickSearchService = mockQuickSearchService(collection);
+      }
+    }
+
+    const newSpec: typeof spec = {
+      ...spec,
+      extensions: [...(spec.extensions ?? []), PatchPageServiceWatcher],
     };
 
     return newSpec;

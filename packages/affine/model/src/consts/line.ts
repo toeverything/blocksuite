@@ -1,4 +1,4 @@
-import { createZodUnion } from '../utils/zod.js';
+import { z } from 'zod';
 
 export enum LineWidth {
   Eight = 8,
@@ -39,7 +39,7 @@ export const LINE_COLORS = [
   LineColor.White,
 ] as const;
 
-export const LineColorsSchema = createZodUnion(LINE_COLORS);
+export const LineColorsSchema = z.nativeEnum(LineColor);
 
 export const DEFAULT_TEXT_COLOR = LineColor.Blue;
 

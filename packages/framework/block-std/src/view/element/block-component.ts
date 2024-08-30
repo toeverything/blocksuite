@@ -10,7 +10,7 @@ import { when } from 'lit/directives/when.js';
 import { html } from 'lit/static-html.js';
 
 import type { EventName, UIEventHandler } from '../../event/index.js';
-import type { BlockService } from '../../service/index.js';
+import type { BlockService } from '../../extension/index.js';
 import type { WidgetComponent } from './widget-component.js';
 
 import { BlockStdScope } from '../../scope/index.js';

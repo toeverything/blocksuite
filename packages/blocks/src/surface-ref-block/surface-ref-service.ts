@@ -1,11 +1,14 @@
 import type { Doc } from '@blocksuite/store';
 
+import { SurfaceRefBlockSchema } from '@blocksuite/affine-model';
 import { BlockService } from '@blocksuite/block-std';
 
 import { SurfaceRefRenderer } from './surface-ref-renderer.js';
 
 export class SurfaceRefBlockService extends BlockService {
   private _rendererMap = new Map<string, SurfaceRefRenderer>();
+
+  static override readonly flavour = SurfaceRefBlockSchema.model.flavour;
 
   getRenderer(id: string, doc: Doc = this.doc, stackingCanvas = false) {
     if (this._rendererMap.has(id)) {

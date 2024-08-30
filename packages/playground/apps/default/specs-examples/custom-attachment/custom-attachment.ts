@@ -1,4 +1,10 @@
 import {
+  BlockFlavourIdentifier,
+  BlockServiceIdentifier,
+  type BlockSpec,
+  BlockStdScope,
+} from '@blocksuite/block-std';
+import {
   AttachmentBlockService,
   EdgelessEditorBlockSpecs,
   PageEditorBlockSpecs,
@@ -14,19 +20,37 @@ class CustomAttachmentBlockService extends AttachmentBlockService {
 export function getCustomAttachmentSpecs() {
   const pageModeSpecs = PageEditorBlockSpecs.map(spec => {
     if (spec.schema.model.flavour === 'affine:attachment') {
-      return {
+      const customized: BlockSpec = {
         ...spec,
-        service: CustomAttachmentBlockService,
+        extensions: [
+          di => {
+            di.override(
+              BlockServiceIdentifier('affine:attachment'),
+              CustomAttachmentBlockService,
+              [BlockStdScope, BlockFlavourIdentifier('affine:attachment')]
+            );
+          },
+        ],
       };
+      return customized;
     }
     return spec;
   });
   const edgelessModeSpecs = EdgelessEditorBlockSpecs.map(spec => {
     if (spec.schema.model.flavour === 'affine:attachment') {
-      return {
+      const customized: BlockSpec = {
         ...spec,
-        service: CustomAttachmentBlockService,
+        extensions: [
+          di => {
+            di.override(
+              BlockServiceIdentifier('affine:attachment'),
+              CustomAttachmentBlockService,
+              [BlockStdScope, BlockFlavourIdentifier('affine:attachment')]
+            );
+          },
+        ],
       };
+      return customized;
     }
     return spec;
   });

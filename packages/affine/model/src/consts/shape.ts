@@ -1,4 +1,5 @@
-import { createZodUnion } from '../utils/zod.js';
+import { z } from 'zod';
+
 import { LINE_COLORS, LineColor } from './line.js';
 
 export const DEFAULT_ROUGHNESS = 1.4;
@@ -55,7 +56,7 @@ export const SHAPE_FILL_COLORS = [
 
 export const DEFAULT_SHAPE_FILL_COLOR = ShapeFillColor.Yellow;
 
-export const FillColorsSchema = createZodUnion(SHAPE_FILL_COLORS);
+export const FillColorsSchema = z.nativeEnum(ShapeFillColor);
 
 export const SHAPE_STROKE_COLORS = LINE_COLORS;
 
@@ -63,4 +64,4 @@ export const DEFAULT_SHAPE_STROKE_COLOR = LineColor.Yellow;
 
 export const DEFAULT_SHAPE_TEXT_COLOR = LineColor.Black;
 
-export const StrokeColorsSchema = createZodUnion(SHAPE_STROKE_COLORS);
+export const StrokeColorsSchema = z.nativeEnum(LineColor);

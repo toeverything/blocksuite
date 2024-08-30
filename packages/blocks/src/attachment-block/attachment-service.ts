@@ -1,7 +1,4 @@
-import {
-  type AttachmentBlockModel,
-  AttachmentBlockSchema,
-} from '@blocksuite/affine-model';
+import { AttachmentBlockSchema } from '@blocksuite/affine-model';
 import {
   isInsideEdgelessEditor,
   matchFlavours,
@@ -34,7 +31,7 @@ import {
 import { AttachmentEdgelessBlockComponent } from './attachment-edgeless-block.js';
 import { addSiblingAttachmentBlocks } from './utils.js';
 
-export class AttachmentBlockService extends BlockService<AttachmentBlockModel> {
+export class AttachmentBlockService extends BlockService {
   private _dragHandleOption: DragHandleOption = {
     flavour: AttachmentBlockSchema.model.flavour,
     edgeless: true,
@@ -175,6 +172,8 @@ export class AttachmentBlockService extends BlockService<AttachmentBlockModel> {
       return true;
     },
   };
+
+  static override readonly flavour = AttachmentBlockSchema.model.flavour;
 
   fileDropManager!: FileDropManager;
 

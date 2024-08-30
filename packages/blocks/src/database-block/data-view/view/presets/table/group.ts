@@ -1,5 +1,6 @@
 import { popFilterableSimpleMenu } from '@blocksuite/affine-components/context-menu';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
+import { PlusIcon } from '@blocksuite/icons/lit';
 import { SignalWatcher } from '@lit-labs/preact-signals';
 import { type PropertyValues, css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
@@ -11,7 +12,6 @@ import type { DataViewTable } from './table-view.js';
 import type { TableSingleView } from './table-view-manager.js';
 
 import { GroupTitle } from '../../../common/group-by/group-title.js';
-import { PlusIcon } from '../../../common/icons/index.js';
 import { LEFT_TOOL_BAR_WIDTH } from './consts.js';
 import './stats/column-stats-bar.js';
 import './stats/column-stats-column.js';
@@ -173,7 +173,7 @@ export class TableGroup extends SignalWatcher(
               data-test-id="affine-database-add-row-button"
               role="button"
             >
-              ${PlusIcon}<span>New Record</span>
+              ${PlusIcon()}<span>New Record</span>
             </div>
           </div>`}
       <affine-database-column-stats .view="${this.view}" .group=${this.group}>

@@ -1,6 +1,5 @@
-import type { BlockSpec } from '@blocksuite/block-std';
-
 import { EmbedYoutubeBlockSchema } from '@blocksuite/affine-model';
+import { type BlockSpec, FlavourExtension } from '@blocksuite/block-std';
 import { literal } from 'lit/static-html.js';
 
 import './embed-edgeless-youtube-block.js';
@@ -15,5 +14,8 @@ export const EmbedYoutubeBlockSpec: BlockSpec = {
         : literal`affine-embed-youtube-block`;
     },
   },
-  service: EmbedYoutubeBlockService,
+  extensions: [
+    FlavourExtension('affine:embed-youtube'),
+    EmbedYoutubeBlockService,
+  ],
 };

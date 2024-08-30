@@ -1,6 +1,5 @@
-import type { BlockSpec } from '@blocksuite/block-std';
-
 import { AttachmentBlockSchema } from '@blocksuite/affine-model';
+import { type BlockSpec, FlavourExtension } from '@blocksuite/block-std';
 import { literal } from 'lit/static-html.js';
 
 import './attachment-edgeless-block.js';
@@ -15,5 +14,5 @@ export const AttachmentBlockSpec: BlockSpec = {
         : literal`affine-attachment`;
     },
   },
-  service: AttachmentBlockService,
+  extensions: [FlavourExtension('affine:attachment'), AttachmentBlockService],
 };

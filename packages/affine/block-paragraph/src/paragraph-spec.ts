@@ -1,6 +1,5 @@
-import type { BlockSpec } from '@blocksuite/block-std';
-
 import { ParagraphBlockSchema } from '@blocksuite/affine-model';
+import { type BlockSpec, FlavourExtension } from '@blocksuite/block-std';
 import { literal } from 'lit/static-html.js';
 
 import { commands } from './commands/index.js';
@@ -12,5 +11,5 @@ export const ParagraphBlockSpec: BlockSpec = {
     component: literal`affine-paragraph`,
   },
   commands,
-  service: ParagraphBlockService,
+  extensions: [FlavourExtension('affine:paragraph'), ParagraphBlockService],
 };

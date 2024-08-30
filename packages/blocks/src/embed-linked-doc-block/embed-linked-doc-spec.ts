@@ -1,12 +1,12 @@
-import type { BlockSpec } from '@blocksuite/block-std';
-
 import { EmbedLinkedDocBlockSchema } from '@blocksuite/affine-model';
+import { type BlockSpec, FlavourExtension } from '@blocksuite/block-std';
 import { literal } from 'lit/static-html.js';
 
 import type { EmbedLinkedDocBlockConfig } from './embed-linked-doc-config.js';
 
 import { commands } from './commands/index.js';
 import './embed-edgeless-linked-doc-block.js';
+import { EmbedLinkedDocBlockService } from './embed-linked-doc-service.js';
 
 export type EmbedLinkedDocBlockSpecType = BlockSpec<
   string,
@@ -23,4 +23,8 @@ export const EmbedLinkedDocBlockSpec: EmbedLinkedDocBlockSpecType = {
     },
   },
   commands,
+  extensions: [
+    FlavourExtension('affine:embed-linked-doc'),
+    EmbedLinkedDocBlockService,
+  ],
 };

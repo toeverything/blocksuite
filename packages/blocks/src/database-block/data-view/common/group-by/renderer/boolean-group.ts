@@ -1,7 +1,4 @@
-import {
-  checkboxChecked,
-  checkboxUnchecked,
-} from '@blocksuite/affine-components/icons';
+import { CheckBoxCkeckSolidIcon, CheckBoxUnIcon } from '@blocksuite/icons/lit';
 import { css, html } from 'lit';
 import { customElement } from 'lit/decorators.js';
 
@@ -22,7 +19,9 @@ export class BooleanGroupView extends BaseGroup<NonNullable<unknown>, boolean> {
 
   protected override render(): unknown {
     return html` <div class="data-view-group-title-boolean-view">
-      ${this.value ? checkboxChecked() : checkboxUnchecked()}
+      ${this.value
+        ? CheckBoxCkeckSolidIcon({ style: `color:#1E96EB` })
+        : CheckBoxUnIcon()}
     </div>`;
   }
 }

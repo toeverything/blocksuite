@@ -39,6 +39,7 @@ import {
   matchFlavours,
   openFileOrFiles,
 } from '@blocksuite/affine-shared/utils';
+import { GroupingIcon } from '@blocksuite/icons/lit';
 import { Slice, Text } from '@blocksuite/store';
 
 import type { DataViewBlockComponent } from '../../../data-view-block/index.js';
@@ -48,7 +49,6 @@ import type { AffineLinkedDocWidget } from '../linked-doc/index.js';
 import { toggleEmbedCardCreateModal } from '../../../_common/components/embed-card/modal/embed-card-create-modal.js';
 import { textConversionConfigs } from '../../../_common/configs/text-conversion.js';
 import { addSiblingAttachmentBlocks } from '../../../attachment-block/utils.js';
-import { GroupingIcon } from '../../../database-block/data-view/common/icons/index.js';
 import { viewPresets } from '../../../database-block/data-view/index.js';
 import { FigmaIcon } from '../../../embed-figma-block/styles.js';
 import { GithubIcon } from '../../../embed-github-block/styles.js';
@@ -527,7 +527,7 @@ export const defaultSlashMenuConfig: SlashMenuConfig = {
 
       const groupItems = groupElements.map(element => ({
         name: 'Group: ' + element.get('title'),
-        icon: GroupingIcon,
+        icon: GroupingIcon(),
         action: () => {
           const { doc } = rootComponent;
           const noteModel = doc.getParent(model) as NoteBlockModel;

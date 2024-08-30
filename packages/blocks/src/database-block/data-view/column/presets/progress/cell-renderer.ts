@@ -216,7 +216,7 @@ export class ProgressCellEditing extends BaseCellRenderer<number> {
 }
 
 export const progressColumnConfig = progressColumnModelConfig.renderConfig({
-  icon: createIcon('DatabaseProgress'),
+  icon: createIcon('ProgressIcon'),
   cellRenderer: {
     view: createFromBaseCellRenderer(ProgressCell),
     edit: createFromBaseCellRenderer(ProgressCellEditing),

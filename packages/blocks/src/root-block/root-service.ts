@@ -1,23 +1,19 @@
 import type { PeekViewService } from '@blocksuite/affine-components/peek';
 import type { RefNodeSlots } from '@blocksuite/affine-components/rich-text';
-import type { RootBlockModel } from '@blocksuite/affine-model';
 import type { EmbedCardStyle } from '@blocksuite/affine-model';
 import type { BlockComponent } from '@blocksuite/block-std';
 
+import { RootBlockSchema } from '@blocksuite/affine-model';
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import { BlockService } from '@blocksuite/block-std';
 
+import type { NotificationService } from '../_common/components/index.js';
 import type { RootBlockComponent } from './types.js';
 
 import {
   FileDropManager,
   type FileDropOptions,
 } from '../_common/components/file-drop-manager.js';
-import {
-  type DocModeService,
-  type NotificationService,
-  createDocModeService,
-} from '../_common/components/index.js';
 import { DEFAULT_IMAGE_PROXY_ENDPOINT } from '../_common/consts.js';
 import { ExportManager } from '../_common/export-manager/export-manager.js';
 import {
@@ -84,7 +80,7 @@ export interface TelemetryService {
   ): void;
 }
 
-export abstract class RootService extends BlockService<RootBlockModel> {
+export abstract class RootService extends BlockService {
   private _embedBlockRegistry = new Set<EmbedOptions>();
 
   private _exportOptions = {
@@ -95,7 +91,7 @@ export abstract class RootService extends BlockService<RootBlockModel> {
     flavour: this.flavour,
   };
 
-  docModeService: DocModeService = createDocModeService(this.doc.id);
+  static override readonly flavour = RootBlockSchema.model.flavour;
 
   readonly editPropsStore: EditPropsStore = new EditPropsStore(this);
 

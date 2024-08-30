@@ -1,4 +1,5 @@
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
+import { CenterPeekIcon, MoreHorizontalIcon } from '@blocksuite/icons/lit';
 import { SignalWatcher } from '@lit-labs/preact-signals';
 import { css } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
@@ -9,10 +10,6 @@ import { html } from 'lit/static-html.js';
 import type { DataViewRenderer } from '../../../data-view.js';
 import type { KanbanColumn, KanbanSingleView } from './kanban-view-manager.js';
 
-import {
-  CenterPeekIcon,
-  MoreHorizontalIcon,
-} from '../../../common/icons/index.js';
 import './cell.js';
 import { openDetail, popCardMenu } from './menu.js';
 
@@ -227,9 +224,11 @@ export class KanbanCard extends SignalWatcher(
     }
     return html`
       <div class="card-ops">
-        <div class="card-op" @click="${this.clickEdit}">${CenterPeekIcon}</div>
+        <div class="card-op" @click="${this.clickEdit}">
+          ${CenterPeekIcon()}
+        </div>
         <div class="card-op" @click="${this.clickMore}">
-          ${MoreHorizontalIcon}
+          ${MoreHorizontalIcon()}
         </div>
       </div>
     `;
