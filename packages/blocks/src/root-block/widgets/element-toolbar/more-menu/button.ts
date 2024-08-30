@@ -1,7 +1,6 @@
-import {
-  cloneGroups,
-  renderGroups,
-} from '@blocksuite/affine-components/toolbar';
+import type { MenuItemGroup } from '@blocksuite/affine-components/toolbar';
+
+import { renderGroups } from '@blocksuite/affine-components/toolbar';
 import { WithDisposable } from '@blocksuite/block-std';
 import { MoreHorizontalIcon, MoreVerticalIcon } from '@blocksuite/icons/lit';
 import { LitElement, html } from 'lit';
@@ -9,31 +8,13 @@ import { customElement, property } from 'lit/decorators.js';
 
 import type { EdgelessRootBlockComponent } from '../../../edgeless/edgeless-root-block.js';
 
-import {
-  clipboardGroup,
-  conversionsGroup,
-  deleteGroup,
-  openGroup,
-  reorderGroup,
-  sectionGroup,
-} from './config.js';
 import { ElementToolbarMoreMenuContext } from './context.js';
-
-const BUILT_IN_GROUPS = [
-  sectionGroup,
-  reorderGroup,
-  openGroup,
-  clipboardGroup,
-  conversionsGroup,
-  deleteGroup,
-];
 
 @customElement('edgeless-more-button')
 export class EdgelessMoreButton extends WithDisposable(LitElement) {
   override render() {
     const context = new ElementToolbarMoreMenuContext(this.edgeless);
-    const groups = context.config.configure(cloneGroups(BUILT_IN_GROUPS));
-    const actions = renderGroups(groups, context);
+    const actions = renderGroups(this.groups, context);
 
     return html`
       <editor-menu-button
@@ -62,6 +43,9 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
 
   @property({ attribute: false })
   accessor elements: BlockSuite.EdgelessModel[] = [];
+
+  @property({ attribute: false })
+  accessor groups!: MenuItemGroup<ElementToolbarMoreMenuContext>[];
 
   @property({ attribute: false })
   accessor vertical = false;

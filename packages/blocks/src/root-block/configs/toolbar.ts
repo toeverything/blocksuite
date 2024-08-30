@@ -11,13 +11,6 @@ export abstract class MenuContext {
     return false;
   }
 
-  get config(): ToolbarMoreMenuConfig {
-    return {
-      configure: <T extends MenuContext>(groups: MenuItemGroup<T>[]) => groups,
-      ...this.std.spec.getConfig('affine:page')?.toolbarMoreMenu,
-    };
-  }
-
   get firstElement(): GfxModel | null {
     return null;
   }
@@ -41,4 +34,11 @@ export interface ToolbarMoreMenuConfig {
   configure: <T extends MenuContext>(
     groups: MenuItemGroup<T>[]
   ) => MenuItemGroup<T>[];
+}
+
+export function getMoreMenuConfig(std: BlockStdScope): ToolbarMoreMenuConfig {
+  return {
+    configure: <T extends MenuContext>(groups: MenuItemGroup<T>[]) => groups,
+    ...std.spec.getConfig('affine:page')?.toolbarMoreMenu,
+  };
 }

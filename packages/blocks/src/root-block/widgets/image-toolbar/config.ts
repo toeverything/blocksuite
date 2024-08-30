@@ -11,7 +11,7 @@ import {
 import { html } from 'lit';
 import { ifDefined } from 'lit/directives/if-defined.js';
 
-import type { ImageToolbarContext } from './type.js';
+import type { ImageToolbarContext } from './context.js';
 
 import { duplicate } from './utils.js';
 

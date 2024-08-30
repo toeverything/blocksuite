@@ -14,9 +14,10 @@ import { customElement } from 'lit/decorators.js';
 import type { ImageBlockComponent } from '../../../image-block/image-block.js';
 
 import { PAGE_HEADER_HEIGHT } from '../../../_common/consts.js';
+import { getMoreMenuConfig } from '../../configs/toolbar.js';
 import './components/image-toolbar.js';
 import { MORE_GROUPS, PRIMARY_GROUPS } from './config.js';
-import { ImageToolbarContext } from './type.js';
+import { ImageToolbarContext } from './context.js';
 
 export const AFFINE_IMAGE_TOOLBAR_WIDGET = 'affine-image-toolbar-widget';
 
@@ -65,8 +66,8 @@ export class AffineImageToolbarWidget extends WidgetComponent<
         return {
           template: html`<affine-image-toolbar
             .context=${context}
-            .primaryGroups=${cloneGroups(this.primaryGroups)}
-            .moreGroups=${cloneGroups(this.moreGroups)}
+            .primaryGroups=${this.primaryGroups}
+            .moreGroups=${this.moreGroups}
             .onActiveStatusChange=${(active: boolean) => {
               this._isActivated = active;
               if (!active && !this._hoverController?.isHovering) {
@@ -145,6 +146,10 @@ export class AffineImageToolbarWidget extends WidgetComponent<
     return this;
   };
 
+  /*
+   * Caches the more menu items.
+   * Currently only supports configuring more menu.
+   */
   moreGroups: MenuItemGroup<ImageToolbarContext>[] = cloneGroups(MORE_GROUPS);
 
   primaryGroups: MenuItemGroup<ImageToolbarContext>[] =
@@ -155,6 +160,7 @@ export class AffineImageToolbarWidget extends WidgetComponent<
       return;
     }
 
+    this.moreGroups = getMoreMenuConfig(this.std).configure(this.moreGroups);
     this._setHoverController();
   }
 }

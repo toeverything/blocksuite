@@ -4,14 +4,11 @@ import {
   CaptionIcon,
   CenterPeekIcon,
   CopyIcon,
-  DeleteIcon,
-  DuplicateIcon,
   EditIcon,
   ExpandFullSmallIcon,
   MoreVerticalIcon,
   OpenIcon,
   PaletteIcon,
-  RefreshIcon,
   SmallArrowDownIcon,
 } from '@blocksuite/affine-components/icons';
 import { isPeekable, peek } from '@blocksuite/affine-components/peek';
@@ -29,10 +26,10 @@ import {
   type EmbedGithubModel,
   type EmbedLinkedDocModel,
 } from '@blocksuite/affine-model';
-import { getBlockProps, getHostName } from '@blocksuite/affine-shared/utils';
+import { getHostName } from '@blocksuite/affine-shared/utils';
 import { WidgetComponent } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
-import { type BlockModel, DocCollection, Slice } from '@blocksuite/store';
+import { type BlockModel, DocCollection } from '@blocksuite/store';
 import { autoUpdate, computePosition, flip, offset } from '@floating-ui/dom';
 import { type TemplateResult, html, nothing } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
@@ -55,98 +52,16 @@ import {
 } from '../../../_common/components/embed-card/type.js';
 import { getEmbedCardIcons } from '../../../_common/utils/url.js';
 import { isLinkToNode } from '../../../embed-linked-doc-block/utils.js';
-import { MenuContext } from '../../configs/toolbar.js';
+import { getMoreMenuConfig } from '../../configs/toolbar.js';
 import {
-  isAttachmentBlock,
   isBookmarkBlock,
   isEmbedGithubBlock,
   isEmbedLinkedDocBlock,
   isEmbedSyncedDocBlock,
-  isEmbeddedLinkBlock,
-  isImageBlock,
 } from '../../edgeless/utils/query.js';
+import { BUILT_IN_GROUPS } from './config.js';
+import { EmbedCardToolbarContext } from './context.js';
 import { embedCardToolbarStyle } from './styles.js';
-
-const BUILT_IN_GROUPS: MenuItemGroup<EmbedCardToolbarContext>[] = [
-  {
-    type: 'clipboard',
-    items: [
-      {
-        type: 'copy',
-        label: 'Copy',
-        icon: CopyIcon,
-        disabled: ctx => ctx.doc.readonly,
-        action: ctx => ctx.toolbar.copyBlock().catch(console.error),
-      },
-      {
-        type: 'duplicate',
-        label: 'Duplicate',
-        icon: DuplicateIcon,
-        disabled: ctx => ctx.doc.readonly,
-        action: ctx => ctx.toolbar.duplicateBlock(),
-      },
-
-      {
-        type: 'reload',
-        label: 'Reload',
-        icon: RefreshIcon,
-        disabled: ctx => ctx.doc.readonly,
-        action: ctx => ctx.toolbar.refreshData(),
-        when: ctx =>
-          !!ctx.toolbar.focusModel &&
-          ctx.toolbar.refreshable(ctx.toolbar.focusModel),
-      },
-    ],
-  },
-  {
-    type: 'delete',
-    items: [
-      {
-        type: 'delete',
-        label: 'Delete',
-        icon: DeleteIcon,
-        disabled: ctx => ctx.doc.readonly,
-        action: ctx =>
-          ctx.toolbar.focusModel && ctx.doc.deleteBlock(ctx.toolbar.focusModel),
-      },
-    ],
-  },
-];
-
-export class EmbedCardToolbarContext extends MenuContext {
-  constructor(public toolbar: EmbedCardToolbar) {
-    super();
-  }
-
-  isEmpty() {
-    return this.toolbar.focusBlock === null;
-  }
-
-  isMultiple() {
-    return false;
-  }
-
-  isSingle() {
-    return true;
-  }
-
-  get doc() {
-    return this.toolbar.doc;
-  }
-
-  get host() {
-    return this.toolbar.host;
-  }
-
-  get selectedBlockModels() {
-    if (this.toolbar.focusModel) return [this.toolbar.focusModel];
-    return [];
-  }
-
-  get std() {
-    return this.host.std;
-  }
-}
 
 export const AFFINE_EMBED_CARD_TOOLBAR_WIDGET = 'affine-embed-card-toolbar';
 
@@ -165,6 +80,13 @@ export class EmbedCardToolbar extends WidgetComponent<
   };
 
   static override styles = embedCardToolbarStyle;
+
+  /*
+   * Caches the more menu items.
+   * Currently only supports configuring more menu.
+   */
+  moreGroups: MenuItemGroup<EmbedCardToolbarContext>[] =
+    cloneGroups(BUILT_IN_GROUPS);
 
   private get _canConvertToEmbedView() {
     // synced doc entry controlled by awareness flag
@@ -401,9 +323,12 @@ export class EmbedCardToolbar extends WidgetComponent<
   }
 
   private _moreActions() {
-    const context = new EmbedCardToolbarContext(this);
-    const groups = context.config.configure(cloneGroups(BUILT_IN_GROUPS));
-    return renderGroups(groups, context);
+    if (!this.focusBlock) return nothing;
+    const context = new EmbedCardToolbarContext(
+      this.focusBlock,
+      this._abortController
+    );
+    return renderGroups(this.moreGroups, context);
   }
 
   get _openButtonDisabled() {
@@ -642,6 +567,9 @@ export class EmbedCardToolbar extends WidgetComponent<
 
   override connectedCallback() {
     super.connectedCallback();
+
+    this.moreGroups = getMoreMenuConfig(this.std).configure(this.moreGroups);
+
     this.disposables.add(
       this._selection.slots.changed.on(() => {
         const hasTextSelection = this._selection.find('text');
@@ -665,51 +593,6 @@ export class EmbedCardToolbar extends WidgetComponent<
         this.focusBlock = block as EmbedToolbarBlockComponent;
         this._show();
       })
-    );
-  }
-
-  async copyBlock() {
-    if (!this.focusModel) {
-      return;
-    }
-    const slice = Slice.fromModels(this.doc, [this.focusModel]);
-    await this.std.clipboard.copySlice(slice);
-    toast(this.host, 'Copied link to clipboard');
-    this._abortController.abort();
-  }
-
-  duplicateBlock() {
-    if (!this.focusBlock || !this.focusModel) {
-      return;
-    }
-    const model = this.focusModel;
-    const blockProps = getBlockProps(model);
-    const { width, height, xywh, rotate, zIndex, ...duplicateProps } =
-      blockProps;
-
-    const { doc } = model;
-    const parent = doc.getParent(model);
-    const index = parent?.children.indexOf(model);
-    doc.addBlock(
-      model.flavour as BlockSuite.Flavour,
-      duplicateProps,
-      parent,
-      index
-    );
-    this._abortController.abort();
-  }
-
-  refreshData() {
-    this.focusBlock?.refreshData();
-    this._abortController.abort();
-  }
-
-  refreshable(ele: BlockModel) {
-    return (
-      isImageBlock(ele) ||
-      isBookmarkBlock(ele) ||
-      isAttachmentBlock(ele) ||
-      isEmbeddedLinkBlock(ele)
     );
   }
 

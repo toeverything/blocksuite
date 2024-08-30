@@ -12,7 +12,7 @@ import { isInsidePageEditor } from '@blocksuite/affine-shared/utils';
 import { html } from 'lit';
 import { ifDefined } from 'lit/directives/if-defined.js';
 
-import type { CodeBlockToolbarContext } from './type.js';
+import type { CodeBlockToolbarContext } from './context.js';
 
 import { duplicateCodeBlock } from './utils.js';
 

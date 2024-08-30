@@ -14,9 +14,10 @@ import { customElement } from 'lit/decorators.js';
 import type { CodeBlockComponent } from '../../../code-block/code-block.js';
 
 import { PAGE_HEADER_HEIGHT } from '../../../_common/consts.js';
+import { getMoreMenuConfig } from '../../configs/toolbar.js';
 import './components/code-toolbar.js';
 import { MORE_GROUPS, PRIMARY_GROUPS } from './config.js';
-import { CodeBlockToolbarContext } from './type.js';
+import { CodeBlockToolbarContext } from './context.js';
 
 export const AFFINE_CODE_TOOLBAR_WIDGET = 'affine-code-toolbar-widget';
 @customElement(AFFINE_CODE_TOOLBAR_WIDGET)
@@ -58,8 +59,8 @@ export class AffineCodeToolbarWidget extends WidgetComponent<
         return {
           template: html`<affine-code-toolbar
             .context=${context}
-            .primaryGroups=${cloneGroups(this.primaryGroups)}
-            .moreGroups=${cloneGroups(this.moreGroups)}
+            .primaryGroups=${this.primaryGroups}
+            .moreGroups=${this.moreGroups}
             .onActiveStatusChange=${(active: boolean) => {
               this._isActivated = active;
               if (!active && !this._hoverController?.isHovering) {
@@ -138,13 +139,18 @@ export class AffineCodeToolbarWidget extends WidgetComponent<
     return this;
   };
 
-  moreGroups: MenuItemGroup<CodeBlockToolbarContext>[] =
+  /*
+   * Caches the more menu items.
+   * Currently only supports configuring more menu.
+   */
+  protected moreGroups: MenuItemGroup<CodeBlockToolbarContext>[] =
     cloneGroups(MORE_GROUPS);
 
-  primaryGroups: MenuItemGroup<CodeBlockToolbarContext>[] =
+  protected primaryGroups: MenuItemGroup<CodeBlockToolbarContext>[] =
     cloneGroups(PRIMARY_GROUPS);
 
   override firstUpdated() {
+    this.moreGroups = getMoreMenuConfig(this.std).configure(this.moreGroups);
     this._setHoverController();
   }
 }

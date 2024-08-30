@@ -12,7 +12,7 @@ import { LitElement, html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type { ImageToolbarContext } from '../type.js';
+import type { ImageToolbarContext } from '../context.js';
 
 import { styles } from '../styles.js';
 
@@ -62,8 +62,6 @@ export class AffineImageToolbar extends LitElement {
 
     assertExists(this._moreButton);
 
-    const groups = this.context.config.configure(this.moreGroups);
-
     createLitPortal({
       template: html`
         <editor-menu-content
@@ -75,7 +73,7 @@ export class AffineImageToolbar extends LitElement {
           })}
         >
           <div data-size="large" data-orientation="vertical">
-            ${renderGroups(groups, this.context)}
+            ${renderGroups(this.moreGroups, this.context)}
           </div>
         </editor-menu-content>
       `,
