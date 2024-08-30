@@ -100,6 +100,7 @@ export async function importNotion(collection: DocCollection, file: File) {
     await unzip.load(path);
     const zipFile = new Map<string, Blob>();
     const pageMap = new Map<string, string>();
+    const pagePaths: string[] = [];
     const promises: Promise<void>[] = [];
     const pendingAssets = new Map<string, Blob>();
     const pendingPathBlobIdMap = new Map<string, string>();
@@ -130,7 +131,12 @@ export async function importNotion(collection: DocCollection, file: File) {
           }
         }
         const id = collection.idGenerator();
-        pageMap.set(path, id);
+        const splitPath = path.split('/');
+        while (splitPath.length > 0) {
+          pageMap.set(splitPath.join('/'), id);
+          splitPath.shift();
+        }
+        pagePaths.push(path);
         if (entryId === undefined && lastSplitIndex === -1) {
           entryId = id;
         }
@@ -161,7 +167,7 @@ export async function importNotion(collection: DocCollection, file: File) {
       }
       pendingAssets.set(key, new File([blob], fileName, { type: mime }));
     }
-    const pagePromises = Array.from(pageMap.keys()).map(async path => {
+    const pagePromises = Array.from(pagePaths).map(async path => {
       const job = new Job({
         collection: collection,
         middlewares: [defaultImageProxyMiddleware],
