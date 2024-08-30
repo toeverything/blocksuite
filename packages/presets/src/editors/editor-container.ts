@@ -1,13 +1,13 @@
-import type { AbstractEditor } from '@blocksuite/blocks';
+import type {
+  EdgelessRootBlockComponent,
+  PageRootBlockComponent,
+} from '@blocksuite/blocks';
 import type { BlockModel, Doc } from '@blocksuite/store';
 
+import { BlockServiceWatcher } from '@blocksuite/block-std';
 import { type BlockSpec, EditorHost } from '@blocksuite/block-std';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
-import {
-  DocModeProvider,
-  type EdgelessRootBlockComponent,
-  type PageRootBlockComponent,
-} from '@blocksuite/blocks';
+import { type AbstractEditor, DocModeProvider } from '@blocksuite/blocks';
 import {
   DocMode,
   EdgelessEditorBlockSpecs,
@@ -54,20 +54,19 @@ export class AffineEditorContainer
   private _edgelessSpecs = computed(() => {
     return [...this._edgelessSpecs$.value].map(spec => {
       if (spec.schema.model.flavour === 'affine:page') {
-        const setup = spec.setup;
-        spec = {
-          ...spec,
-          setup: (slots, disposable, di) => {
-            setup?.(slots, disposable, di);
-            slots.mounted.once(({ service }) => {
-              disposable.add(
-                service.std
-                  .get(DocModeProvider)
-                  .onModeChange(this.switchEditor.bind(this))
-              );
-            });
-          },
-        };
+        const switchEditor = this.switchEditor.bind(this);
+        class SwitchWatcher extends BlockServiceWatcher {
+          static override readonly flavour = 'affine:page';
+
+          override listen() {
+            const blockService = this.blockService;
+            const docModeService = blockService.std.get(DocModeProvider);
+            blockService.disposables.add(
+              docModeService.onModeChange(switchEditor)
+            );
+          }
+        }
+        spec.extensions = (spec.extensions ?? []).concat([SwitchWatcher]);
       }
       return spec;
     });
@@ -93,19 +92,19 @@ export class AffineEditorContainer
   private _pageSpecs = computed(() => {
     return [...this._pageSpecs$.value].map(spec => {
       if (spec.schema.model.flavour === 'affine:page') {
-        const setup = spec.setup;
-        spec = {
-          ...spec,
-          setup: (slots, disposable, di) => {
-            setup?.(slots, disposable, di);
-            slots.mounted.once(({ service }) => {
-              const docModeService = service.std.get(DocModeProvider);
-              disposable.add(
-                docModeService.onModeChange(this.switchEditor.bind(this))
-              );
-            });
-          },
-        };
+        const switchEditor = this.switchEditor.bind(this);
+        class SwitchWatcher extends BlockServiceWatcher {
+          static override readonly flavour = 'affine:page';
+
+          override listen() {
+            const blockService = this.blockService;
+            const docModeService = blockService.std.get(DocModeProvider);
+            blockService.disposables.add(
+              docModeService.onModeChange(switchEditor)
+            );
+          }
+        }
+        spec.extensions = (spec.extensions ?? []).concat([SwitchWatcher]);
       }
       return spec;
     });

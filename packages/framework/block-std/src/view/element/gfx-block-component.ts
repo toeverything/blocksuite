@@ -4,7 +4,7 @@ import type { BlockModel } from '@blocksuite/store';
 import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 import { nothing } from 'lit';
 
-import type { BlockService } from '../../service/index.js';
+import type { BlockService } from '../../extension/index.js';
 
 import { BlockComponent } from './block-component.js';
 

@@ -1,5 +1,3 @@
-import type { ParagraphBlockModel } from '@blocksuite/affine-model';
-
 import {
   type AffineTextAttributes,
   InlineManager,
@@ -8,9 +6,15 @@ import {
   getAffineInlineSpecsWithReference,
   textKeymap,
 } from '@blocksuite/affine-components/rich-text';
+import {
+  type ParagraphBlockModel,
+  ParagraphBlockSchema,
+} from '@blocksuite/affine-model';
 import { BlockService } from '@blocksuite/block-std';
 
-export class ParagraphBlockService extends BlockService<ParagraphBlockModel> {
+export class ParagraphBlockService extends BlockService {
+  static override readonly flavour = ParagraphBlockSchema.model.flavour;
+
   readonly inlineManager = new InlineManager<AffineTextAttributes>();
 
   placeholderGenerator: (model: ParagraphBlockModel) => string = model => {

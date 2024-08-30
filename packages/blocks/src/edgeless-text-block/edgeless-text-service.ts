@@ -1,8 +1,9 @@
-import type { EdgelessTextBlockModel } from '@blocksuite/affine-model';
-
+import { EdgelessTextBlockSchema } from '@blocksuite/affine-model';
 import { BlockService } from '@blocksuite/block-std';
 
-export class EdgelessTextBlockService extends BlockService<EdgelessTextBlockModel> {}
+export class EdgelessTextBlockService extends BlockService {
+  static override readonly flavour = EdgelessTextBlockSchema.model.flavour;
+}
 
 declare global {
   namespace BlockSuite {

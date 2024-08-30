@@ -1,5 +1,4 @@
-import type { BlockSpec } from '@blocksuite/block-std';
-
+import { type BlockSpec, FlavourExtension } from '@blocksuite/block-std';
 import { literal } from 'lit/static-html.js';
 
 import { commands } from './commands/index.js';
@@ -13,7 +12,7 @@ export const PageSurfaceBlockSpec: BlockSpec = {
     component: literal`affine-surface-void`,
   },
   commands,
-  service: SurfaceBlockService,
+  extensions: [FlavourExtension('affine:surface'), SurfaceBlockService],
 };
 
 export const EdgelessSurfaceBlockSpec: BlockSpec = {
@@ -22,5 +21,5 @@ export const EdgelessSurfaceBlockSpec: BlockSpec = {
     component: literal`affine-surface`,
   },
   commands,
-  service: SurfaceBlockService,
+  extensions: [FlavourExtension('affine:surface'), SurfaceBlockService],
 };

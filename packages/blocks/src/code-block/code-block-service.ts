@@ -2,7 +2,7 @@ import {
   InlineManager,
   textKeymap,
 } from '@blocksuite/affine-components/rich-text';
-import { type CodeBlockModel, ColorScheme } from '@blocksuite/affine-model';
+import { CodeBlockSchema, ColorScheme } from '@blocksuite/affine-model';
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import { BlockService } from '@blocksuite/block-std';
 import { type Signal, signal } from '@lit-labs/preact-signals';
@@ -23,10 +23,12 @@ import {
   CODE_BLOCK_DEFAULT_LIGHT_THEME,
 } from './highlight/const.js';
 
-export class CodeBlockService extends BlockService<CodeBlockModel> {
+export class CodeBlockService extends BlockService {
   private _darkThemeKey: string | undefined;
 
   private _lightThemeKey: string | undefined;
+
+  static override readonly flavour = CodeBlockSchema.model.flavour;
 
   highlighter$: Signal<HighlighterCore | null> = signal(null);
 

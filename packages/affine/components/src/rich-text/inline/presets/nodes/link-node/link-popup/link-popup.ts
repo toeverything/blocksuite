@@ -1,4 +1,3 @@
-import type { RootBlockModel } from '@blocksuite/affine-model';
 import type { EmbedOptions } from '@blocksuite/affine-shared/types';
 import type { BlockService } from '@blocksuite/block-std';
 import type { BlockComponent } from '@blocksuite/block-std';
@@ -411,7 +410,7 @@ export class LinkPopup extends WithDisposable(LitElement) {
   private get _rootService() {
     return this.std?.spec.getService('affine:page') as
       | null
-      | (BlockService<RootBlockModel> & {
+      | (BlockService & {
           getEmbedBlockOptions(link: string): EmbedOptions;
         });
   }

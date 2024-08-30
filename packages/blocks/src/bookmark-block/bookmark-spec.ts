@@ -1,6 +1,5 @@
-import type { BlockSpec } from '@blocksuite/block-std';
-
 import { BookmarkBlockSchema } from '@blocksuite/affine-model';
+import { type BlockSpec, FlavourExtension } from '@blocksuite/block-std';
 import { literal } from 'lit/static-html.js';
 
 import './bookmark-edgeless-block.js';
@@ -16,5 +15,5 @@ export const BookmarkBlockSpec: BlockSpec = {
         : literal`affine-bookmark`,
   },
   commands,
-  service: BookmarkBlockService,
+  extensions: [FlavourExtension('affine:bookmark'), BookmarkBlockService],
 };

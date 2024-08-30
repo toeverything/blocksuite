@@ -1,35 +1,26 @@
-import { DisposableGroup, Slot } from '@blocksuite/global/utils';
+import { Slot } from '@blocksuite/global/utils';
 
+import type { BlockService } from '../extension/index.js';
 import type { BlockSpec } from './index.js';
 
-import { BlockService } from '../service/index.js';
-import { getSlots } from './slots.js';
+import {
+  BlockServiceIdentifier,
+  BlockServiceWatcherIdentifier,
+} from '../scope/identifier.js';
 
 export class SpecStore {
-  private _createServices = (newSpecs: Map<string, BlockSpec>) => {
-    newSpecs.forEach((newSpec, flavour) => {
-      if (this._services.has(flavour)) {
-        return;
-      }
-
-      const Service = newSpec.service ?? BlockService;
-
-      const slots = getSlots();
-      const service = new Service({
-        flavour,
-        std: this.std,
-        slots,
-      });
-
+  private _runSetup = (newSpecs: Map<string, BlockSpec>) => {
+    newSpecs.forEach(newSpec => {
       const container = this.std.container;
-      newSpec.setup?.(slots, this._disposables, container);
-      this._services.set(flavour, service);
+      newSpec.extensions?.forEach(ext => {
+        if ('setup' in ext) {
+          ext.setup(container);
+          return;
+        }
+        ext(container);
+      });
     });
   };
-
-  private _disposables = new DisposableGroup();
-
-  private _services = new Map<string, BlockService>();
 
   private _specs = new Map<string, BlockSpec>();
 
@@ -46,7 +37,7 @@ export class SpecStore {
   ) {
     const newSpecs = this._buildSpecMap(specs);
     this._registerCommands(newSpecs);
-    this._createServices(newSpecs);
+    this._runSetup(newSpecs);
     this._specs = newSpecs;
   }
 
@@ -88,7 +79,7 @@ export class SpecStore {
   getService<Service extends BlockService>(flavour: string): Service;
 
   getService(flavour: string): BlockService {
-    return this._services.get(flavour) as never;
+    return this.std.provider.get(BlockServiceIdentifier(flavour));
   }
 
   getView(flavour: string) {
@@ -103,11 +94,11 @@ export class SpecStore {
   mount() {
     this.slots.beforeMount.emit();
 
-    if (this._disposables.disposed) {
-      this._disposables = new DisposableGroup();
-    }
+    this.std.provider.getAll(BlockServiceWatcherIdentifier).forEach(watcher => {
+      watcher.listen();
+    });
 
-    this._services.forEach(service => {
+    this.std.provider.getAll(BlockServiceIdentifier).forEach(service => {
       service.mounted();
     });
 
@@ -117,12 +108,10 @@ export class SpecStore {
   unmount() {
     this.slots.beforeUnmount.emit();
 
-    this._services.forEach(service => {
+    this.std.provider.getAll(BlockServiceIdentifier).forEach(service => {
       service.dispose();
       service.unmounted();
     });
-    this._services.clear();
-    this._disposables.dispose();
 
     this.slots.afterUnmount.emit();
   }

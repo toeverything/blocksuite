@@ -1,13 +1,15 @@
-import type {
-  FrameBlockModel,
-  GroupElementModel,
-  ReferenceInfo,
-} from '@blocksuite/affine-model';
-import type { BlockServiceOptions } from '@blocksuite/block-std';
+import type { BlockStdScope } from '@blocksuite/block-std';
+import type { PointTestOptions } from '@blocksuite/block-std/gfx';
 import type { IBound } from '@blocksuite/global/utils';
 
+import {
+  type FrameBlockModel,
+  type GroupElementModel,
+  type ReferenceInfo,
+  RootBlockSchema,
+} from '@blocksuite/affine-model';
 import { clamp } from '@blocksuite/affine-shared/utils';
-import { type PointTestOptions, Viewport } from '@blocksuite/block-std/gfx';
+import { Viewport } from '@blocksuite/block-std/gfx';
 import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 import { Bound, getCommonBound, last } from '@blocksuite/global/utils';
 import { type BlockModel, Slot } from '@blocksuite/store';
@@ -92,6 +94,8 @@ export class EdgelessRootService extends RootService implements SurfaceContext {
 
   private _viewport: Viewport;
 
+  static override readonly flavour = RootBlockSchema.model.flavour;
+
   TemplateJob = TemplateJob;
 
   slots = {
@@ -121,8 +125,8 @@ export class EdgelessRootService extends RootService implements SurfaceContext {
     toolbarLocked: new Slot<boolean>(),
   };
 
-  constructor(options: BlockServiceOptions) {
-    super(options);
+  constructor(std: BlockStdScope, flavourProvider: { flavour: string }) {
+    super(std, flavourProvider);
     const surface = getSurfaceBlock(this.doc);
     if (!surface) {
       throw new BlockSuiteError(

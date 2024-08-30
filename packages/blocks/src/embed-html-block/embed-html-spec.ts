@@ -1,6 +1,5 @@
-import type { BlockSpec } from '@blocksuite/block-std';
-
 import { EmbedHtmlBlockSchema } from '@blocksuite/affine-model';
+import { type BlockSpec, FlavourExtension } from '@blocksuite/block-std';
 import { literal } from 'lit/static-html.js';
 
 import './embed-edgeless-html-block.js';
@@ -15,5 +14,5 @@ export const EmbedHtmlBlockSpec: BlockSpec = {
         : literal`affine-embed-html-block`;
     },
   },
-  service: EmbedHtmlBlockService,
+  extensions: [FlavourExtension('affine:embed-html'), EmbedHtmlBlockService],
 };

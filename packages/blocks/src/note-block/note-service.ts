@@ -20,7 +20,7 @@ import {
   getDuplicateBlocks,
 } from '../root-block/widgets/drag-handle/utils.js';
 
-export class NoteBlockService extends BlockService<NoteBlockModel> {
+export class NoteBlockService extends BlockService {
   private _dragHandleOption: DragHandleOption = {
     flavour: NoteBlockSchema.model.flavour,
     edgeless: true,
@@ -110,6 +110,8 @@ export class NoteBlockService extends BlockService<NoteBlockModel> {
       return true;
     },
   };
+
+  static override readonly flavour = NoteBlockSchema.model.flavour;
 
   override mounted() {
     super.mounted();

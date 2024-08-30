@@ -1,15 +1,8 @@
+import type { BlockSpec } from '@blocksuite/block-std';
+
 import { RootBlockSchema } from '@blocksuite/affine-model';
-import {
-  DocModeProvider,
-  DocModeService,
-} from '@blocksuite/affine-shared/services';
-import {
-  type BlockComponent,
-  type BlockService,
-  type BlockSpec,
-  type BlockSpecSlots,
-  BlockStdScope,
-} from '@blocksuite/block-std';
+import { DocModeService } from '@blocksuite/affine-shared/services';
+import { BlockServiceWatcher, FlavourExtension } from '@blocksuite/block-std';
 import { literal, unsafeStatic } from 'lit/static-html.js';
 
 import type { RootBlockConfig } from '../root-config.js';
@@ -56,7 +49,6 @@ export type EdgelessRootBlockSpecType = BlockSpec<
 
 export const EdgelessRootBlockSpec: EdgelessRootBlockSpecType = {
   schema: RootBlockSchema,
-  service: EdgelessRootService,
   view: {
     component: literal`affine-edgeless-root`,
     widgets: {
@@ -100,25 +92,37 @@ export const EdgelessRootBlockSpec: EdgelessRootBlockSpecType = {
     },
   },
   commands,
-  setup: (_slots, _disposableGroup, di) => {
-    di.addImpl(DocModeProvider, DocModeService, [BlockStdScope]);
-  },
+  extensions: [
+    FlavourExtension('affine:page'),
+    EdgelessRootService,
+    DocModeService,
+  ],
 };
+
+class EdgelessServiceWatcher extends BlockServiceWatcher {
+  static override readonly flavour = 'affine:page';
+
+  override listen() {
+    const service = this.blockService;
+    service.disposables.add(
+      service.specSlots.viewConnected.on(({ service }) => {
+        // Does not allow the user to move and zoom.
+        (service as EdgelessRootService).locked = true;
+      })
+    );
+  }
+}
 
 export const PreviewEdgelessRootBlockSpec: EdgelessRootBlockSpecType = {
   schema: RootBlockSchema,
-  service: EdgelessRootService,
   view: {
     component: literal`affine-edgeless-root-preview`,
   },
-  setup(slots: BlockSpecSlots, _disposableGroup, di) {
-    di.addImpl(DocModeProvider, DocModeService, [BlockStdScope]);
-    slots.viewConnected.on(
-      ({ service }: { component: BlockComponent; service: BlockService }) => {
-        // Does not allow the user to move and zoom.
-        (service as EdgelessRootService).locked = true;
-      }
-    );
-  },
+  extensions: [
+    FlavourExtension('affine:page'),
+    EdgelessRootService,
+    EdgelessServiceWatcher,
+    DocModeService,
+  ],
   commands,
 };

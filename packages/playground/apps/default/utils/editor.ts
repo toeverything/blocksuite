@@ -1,8 +1,8 @@
 import type { BlockCollection, DocCollection } from '@blocksuite/store';
 
 import {
+  BlockServiceWatcher,
   type BlockSpec,
-  BlockStdScope,
   type EditorHost,
 } from '@blocksuite/block-std';
 import {
@@ -110,12 +110,11 @@ export async function mountDefaultDocEditor(collection: DocCollection) {
   return editor;
 
   function patchPageRootSpec(spec: BlockSpec) {
-    const setup = spec.setup;
-    const newSpec: typeof spec = {
-      ...spec,
-      setup: (slots, disposable, di) => {
-        setup?.(slots, disposable, di);
-        slots.mounted.once(({ service }) => {
+    class PatchPageServiceWatcher extends BlockServiceWatcher {
+      static override readonly flavour = 'affine:page';
+
+      override listen() {
+        this.blockService.specSlots.mounted.once(({ service }) => {
           const pageRootService = service as PageRootService;
           pageRootService.notificationService =
             mockNotificationService(pageRootService);
@@ -128,13 +127,16 @@ export async function mountDefaultDocEditor(collection: DocCollection) {
               return Promise.resolve();
             },
           };
-          pageRootService.std.container.override(
-            DocModeProvider,
-            MockDocModeService,
-            [BlockStdScope]
-          );
         });
-      },
+      }
+    }
+    const newSpec: typeof spec = {
+      ...spec,
+      extensions: [
+        ...(spec.extensions ?? []),
+        PatchPageServiceWatcher,
+        MockDocModeService,
+      ],
     };
 
     return newSpec;

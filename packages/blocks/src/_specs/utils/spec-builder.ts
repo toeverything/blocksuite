@@ -1,5 +1,5 @@
-import type { BlockSpec, BlockSpecSlots } from '@blocksuite/block-std';
-import type { DisposableGroup } from '@blocksuite/global/utils';
+import type { ExtensionType } from '@blocksuite/block-std';
+import type { BlockSpec } from '@blocksuite/block-std';
 
 import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 
@@ -10,12 +10,9 @@ export class SpecBuilder {
     this._value = [...spec];
   }
 
-  setup<Flavour extends BlockSuite.ServiceKeys>(
+  extend<Flavour extends BlockSuite.Flavour>(
     flavour: Flavour,
-    setup: (
-      slots: BlockSpecSlots<BlockSuite.BlockServices[Flavour]>,
-      disposableGroup: DisposableGroup
-    ) => void
+    extensions: ExtensionType[]
   ) {
     const specIndex = this._value.findIndex(
       s => s.schema.model.flavour === flavour
@@ -33,15 +30,9 @@ export class SpecBuilder {
     };
 
     const spec = this._value[specIndex];
-    const oldSetup = spec.setup;
+    const prevExtensions = spec.extensions || [];
 
-    spec.setup = (slots, disposableGroup, di) => {
-      oldSetup?.(slots, disposableGroup, di);
-      setup(
-        slots as unknown as BlockSpecSlots<BlockSuite.BlockServices[Flavour]>,
-        disposableGroup
-      );
-    };
+    spec.extensions = [...prevExtensions, ...extensions];
   }
 
   get value() {

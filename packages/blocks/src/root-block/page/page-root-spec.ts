@@ -1,9 +1,6 @@
 import { RootBlockSchema } from '@blocksuite/affine-model';
-import {
-  DocModeProvider,
-  DocModeService,
-} from '@blocksuite/affine-shared/services';
-import { type BlockSpec, BlockStdScope } from '@blocksuite/block-std';
+import { DocModeService } from '@blocksuite/affine-shared/services';
+import { type BlockSpec, FlavourExtension } from '@blocksuite/block-std';
 import { literal, unsafeStatic } from 'lit/static-html.js';
 
 import type { RootBlockConfig } from '../root-config.js';
@@ -40,7 +37,6 @@ export type PageRootBlockSpecType = BlockSpec<
 
 export const PageRootBlockSpec: PageRootBlockSpecType = {
   schema: RootBlockSchema,
-  service: PageRootService,
   view: {
     component: literal`affine-page-root`,
     widgets: {
@@ -73,7 +69,10 @@ export const PageRootBlockSpec: PageRootBlockSpecType = {
     },
   },
   commands,
-  setup: (_slots, _disposableGroup, di) => {
-    di.addImpl(DocModeProvider, DocModeService, [BlockStdScope]);
-  },
+
+  extensions: [
+    FlavourExtension('affine:page'),
+    PageRootService,
+    DocModeService,
+  ],
 };

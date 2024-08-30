@@ -243,7 +243,7 @@ export class QuickEdgelessMenu extends ShadowlessElement {
 
   private _switchEditorMode() {
     if (!this.rootService) return;
-    this._docMode = this.rootService.std.get(DocModeProvider).getMode();
+    this._docMode = this.rootService.std.get(DocModeProvider).toggleMode();
   }
 
   private _toggleChatPanel() {

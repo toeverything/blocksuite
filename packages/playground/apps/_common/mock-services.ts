@@ -1,6 +1,7 @@
-import type { BlockStdScope } from '@blocksuite/block-std';
-import type { DocModeProvider, PageRootService } from '@blocksuite/blocks';
+import type { Container } from '@blocksuite/global/di';
 
+import { BlockStdScope, Extension } from '@blocksuite/block-std';
+import { DocModeProvider, type PageRootService } from '@blocksuite/blocks';
 import {
   DocMode,
   type NotificationService,
@@ -29,7 +30,7 @@ export function removeModeFromStorage(docId: string) {
 
 const DEFAULT_MODE = DocMode.Page;
 const slotMap = new Map<string, Slot<DocMode>>();
-export class MockDocModeService implements DocModeProvider {
+export class MockDocModeService extends Extension implements DocModeProvider {
   getMode = (docId: string = this.std.doc.id) => {
     try {
       const modeMap = getModeFromStorage();
@@ -63,7 +64,13 @@ export class MockDocModeService implements DocModeProvider {
     return mode;
   };
 
-  constructor(public std: BlockStdScope) {}
+  constructor(public std: BlockStdScope) {
+    super();
+  }
+
+  static override setup(di: Container) {
+    di.override(DocModeProvider, MockDocModeService, [BlockStdScope]);
+  }
 }
 
 export function mockNotificationService(service: PageRootService) {

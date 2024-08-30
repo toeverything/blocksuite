@@ -1,9 +1,9 @@
 import type { PeekViewService } from '@blocksuite/affine-components/peek';
 import type { RefNodeSlots } from '@blocksuite/affine-components/rich-text';
-import type { RootBlockModel } from '@blocksuite/affine-model';
 import type { EmbedCardStyle } from '@blocksuite/affine-model';
 import type { BlockComponent } from '@blocksuite/block-std';
 
+import { RootBlockSchema } from '@blocksuite/affine-model';
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import { BlockService } from '@blocksuite/block-std';
 
@@ -80,7 +80,7 @@ export interface TelemetryService {
   ): void;
 }
 
-export abstract class RootService extends BlockService<RootBlockModel> {
+export abstract class RootService extends BlockService {
   private _embedBlockRegistry = new Set<EmbedOptions>();
 
   private _exportOptions = {
@@ -90,6 +90,8 @@ export abstract class RootService extends BlockService<RootBlockModel> {
   private _fileDropOptions: FileDropOptions = {
     flavour: this.flavour,
   };
+
+  static override readonly flavour = RootBlockSchema.model.flavour;
 
   readonly editPropsStore: EditPropsStore = new EditPropsStore(this);
 

@@ -1,4 +1,3 @@
-import type { ListBlockModel } from '@blocksuite/affine-model';
 import type { BlockComponent } from '@blocksuite/block-std';
 
 import {
@@ -17,7 +16,9 @@ import { correctNumberedListsOrderToPrev } from './commands/utils.js';
 import { listPrefix, toggleStyles } from './styles.js';
 import { getListIcon } from './utils/get-list-icon.js';
 
-export class ListBlockService extends BlockService<ListBlockModel> {
+export class ListBlockService extends BlockService {
+  static override readonly flavour = ListBlockSchema.model.flavour;
+
   readonly inlineManager = new InlineManager<AffineTextAttributes>();
 
   readonly referenceNodeConfig = new ReferenceNodeConfig();

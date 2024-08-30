@@ -1,6 +1,7 @@
-import type { BlockStdScope } from '@blocksuite/block-std';
+import type { Container } from '@blocksuite/global/di';
 
 import { DocMode } from '@blocksuite/affine-model';
+import { BlockStdScope, Extension } from '@blocksuite/block-std';
 import { createIdentifier } from '@blocksuite/global/di';
 import { type Disposable, Slot } from '@blocksuite/global/utils';
 
@@ -23,8 +24,14 @@ export const DocModeProvider = createIdentifier<DocModeProvider>(
 const modeMap = new Map<string, DocMode>();
 const slotMap = new Map<string, Slot<DocMode>>();
 
-export class DocModeService implements DocModeProvider {
-  constructor(public std: BlockStdScope) {}
+export class DocModeService extends Extension implements DocModeProvider {
+  constructor(public std: BlockStdScope) {
+    super();
+  }
+
+  static override setup(di: Container) {
+    di.addImpl(DocModeProvider, DocModeService, [BlockStdScope]);
+  }
 
   getMode(id: string = this.std.doc.id) {
     return modeMap.get(id) ?? DEFAULT_MODE;

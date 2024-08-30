@@ -12,6 +12,7 @@ import { Peekable } from '@blocksuite/affine-components/peek';
 import { DocMode } from '@blocksuite/affine-model';
 import { DocModeProvider } from '@blocksuite/affine-shared/services';
 import { requestConnectedFrame } from '@blocksuite/affine-shared/utils';
+import { BlockServiceWatcher } from '@blocksuite/block-std';
 import { BlockComponent } from '@blocksuite/block-std';
 import { GfxBlockElementModel } from '@blocksuite/block-std/gfx';
 import {
@@ -408,25 +409,39 @@ export class SurfaceRefBlockComponent extends BlockComponent<
   }
 
   private _initSpec() {
-    this._previewSpec.setup('affine:page', ({ viewConnected }) => {
-      viewConnected.once(({ component }) => {
-        const edgelessBlock = component as EdgelessRootPreviewBlockComponent;
+    const refreshViewport = this._refreshViewport;
+    class PageViewWatcher extends BlockServiceWatcher {
+      static override readonly flavour = 'affine:page';
 
-        edgelessBlock.editorViewportSelector = 'ref-viewport';
-        edgelessBlock.service.viewport.sizeUpdated.once(() => {
-          this._refreshViewport();
+      override listen() {
+        this.blockService.disposables.add(
+          this.blockService.specSlots.viewConnected.once(({ component }) => {
+            const edgelessBlock =
+              component as EdgelessRootPreviewBlockComponent;
+
+            edgelessBlock.editorViewportSelector = 'ref-viewport';
+            edgelessBlock.service.viewport.sizeUpdated.once(() => {
+              refreshViewport();
+            });
+          })
+        );
+      }
+    }
+    this._previewSpec.extend('affine:page', [PageViewWatcher]);
+
+    class FrameViewWatcher extends BlockServiceWatcher {
+      static override readonly flavour = 'affine:frame';
+
+      override listen() {
+        this.blockService.specSlots.viewConnected.once(({ component }) => {
+          const frameBlock = component as FrameBlockComponent;
+
+          frameBlock.showBorder = false;
         });
-      });
-    });
+      }
+    }
 
-    // @ts-ignore
-    this._previewSpec.setup('affine:frame', ({ viewConnected }) => {
-      viewConnected.once(({ component }) => {
-        const frameBlock = component as FrameBlockComponent;
-
-        frameBlock.showBorder = false;
-      });
-    });
+    this._previewSpec.extend('affine:frame', [FrameViewWatcher]);
   }
 
   private _refreshViewport() {
