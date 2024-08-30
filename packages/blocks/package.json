@@ -22,7 +22,7 @@
     "@blocksuite/affine-shared": "workspace:*",
     "@blocksuite/block-std": "workspace:*",
     "@blocksuite/global": "workspace:*",
-    "@blocksuite/icons": "^2.1.64",
+    "@blocksuite/icons": "^2.1.65",
     "@blocksuite/inline": "workspace:*",
     "@blocksuite/store": "workspace:*",
     "@floating-ui/dom": "^1.6.10",
@@ -40,6 +40,7 @@
     "file-type": "^19.4.1",
     "fractional-indexing": "^3.2.0",
     "html2canvas": "^1.4.1",
+    "katex": "^0.16.11",
     "lit": "^3.2.0",
     "lodash.isplainobject": "^4.0.6",
     "lodash.merge": "^4.6.2",
@@ -96,6 +97,7 @@
   ],
   "devDependencies": {
     "@types/dompurify": "^3.0.5",
+    "@types/katex": "^0.16.7",
     "@types/lodash.isplainobject": "^4.0.9",
     "@types/lodash.merge": "^4.6.9"
   }

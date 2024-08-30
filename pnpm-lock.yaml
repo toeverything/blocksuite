@@ -307,8 +307,8 @@ importers:
         specifier: workspace:*
         version: link:../../framework/global
       '@blocksuite/icons':
-        specifier: ^2.1.64
-        version: 2.1.64(@types/react@18.3.4)(lit@3.2.0)
+        specifier: ^2.1.65
+        version: 2.1.66(@types/react@18.3.4)(lit@3.2.0)
       '@blocksuite/inline':
         specifier: workspace:*
         version: link:../../framework/inline
@@ -428,8 +428,8 @@ importers:
         specifier: workspace:*
         version: link:../framework/global
       '@blocksuite/icons':
-        specifier: ^2.1.64
-        version: 2.1.64(@types/react@18.3.4)(lit@3.2.0)
+        specifier: ^2.1.65
+        version: 2.1.66(@types/react@18.3.4)(lit@3.2.0)
       '@blocksuite/inline':
         specifier: workspace:*
         version: link:../framework/inline
@@ -481,6 +481,9 @@ importers:
       html2canvas:
         specifier: ^1.4.1
         version: 1.4.1
+      katex:
+        specifier: ^0.16.11
+        version: 0.16.11
       lit:
         specifier: ^3.2.0
         version: 3.2.0
@@ -554,6 +557,9 @@ importers:
       '@types/dompurify':
         specifier: ^3.0.5
         version: 3.0.5
+      '@types/katex':
+        specifier: ^0.16.7
+        version: 0.16.7
       '@types/lodash.isplainobject':
         specifier: ^4.0.9
         version: 4.0.9
@@ -902,9 +908,6 @@ packages:
     peerDependencies:
       '@algolia/client-search': '>= 4.9.1 < 6'
       algoliasearch: '>= 4.9.1 < 6'
-    peerDependenciesMeta:
-      '@algolia/client-search':
-        optional: true
 
   '@algolia/cache-browser-local-storage@4.24.0':
     resolution: {integrity: sha512-t63W9BnoXVrGy9iYHBgObNXqYXM3tYXCjDSHeNwnsc324r4o5UiVKUiAB4THQ5z9U5hTj6qUvwg/Ez43ZD85ww==}
@@ -1627,12 +1630,12 @@ packages:
     resolution: {integrity: sha512-YTnYtra7W9e6/oAZEHj0bJehPRUlLH9/fbpT5LfB0NhQXyALCRkRs3zH9v07IYhkgpqX6Z78FnuccZr/l4Fs4Q==}
     engines: {node: '>=6.9.0'}
 
-  '@blocksuite/icons@2.1.64':
-    resolution: {integrity: sha512-QZlpTGxC8jyfMFl8a6aKJnJIvfvyFu9xUf7PAHURD2NEdPdowkYPJWkZJZt9EL1C+1eBj/0jMG/40x5ANridwA==}
-    engines: {node: '>=18.17.1'}
+  '@blocksuite/icons@2.1.66':
+    resolution: {integrity: sha512-GO9U9ZHc3GJamhZoMJDRj4oXG1zP+/mUQXmgot/vKh66NeZsg4OOe2+uDdoAPp7hLZ03kEbhImGFoRf078Vu1w==}
+    engines: {node: '>=18.19.0 <21.0.0'}
     peerDependencies:
       '@types/react': ^18.0.25
-      lit: ^2.6.1
+      lit: ^3.1.1
       react: ^18.2.0
     peerDependenciesMeta:
       lit:
@@ -8358,9 +8361,8 @@ snapshots:
 
   '@algolia/autocomplete-shared@1.9.3(@algolia/client-search@5.1.1)(algoliasearch@4.24.0)':
     dependencies:
-      algoliasearch: 4.24.0
-    optionalDependencies:
       '@algolia/client-search': 5.1.1
+      algoliasearch: 4.24.0
 
   '@algolia/cache-browser-local-storage@4.24.0':
     dependencies:
@@ -9325,7 +9327,7 @@ snapshots:
       '@babel/helper-validator-identifier': 7.24.7
       to-fast-properties: 2.0.0
 
-  '@blocksuite/icons@2.1.64(@types/react@18.3.4)(lit@3.2.0)':
+  '@blocksuite/icons@2.1.66(@types/react@18.3.4)(lit@3.2.0)':
     dependencies:
       '@types/react': 18.3.4
     optionalDependencies:

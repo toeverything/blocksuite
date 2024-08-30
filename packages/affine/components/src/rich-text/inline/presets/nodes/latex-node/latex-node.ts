@@ -177,13 +177,6 @@ export class AffineLatexNode extends SignalWatcher(
 
     this._editorAbortController?.abort();
     this._editorAbortController = new AbortController();
-    this._editorAbortController.signal.addEventListener(
-      'abort',
-      () => {
-        portal.remove();
-      },
-      { once: true }
-    );
 
     const portal = createLitPortal({
       template: html`<latex-editor-menu
@@ -205,6 +198,14 @@ export class AffineLatexNode extends SignalWatcher(
         zIndex: 'var(--affine-z-index-popover)',
       },
     });
+
+    this._editorAbortController.signal.addEventListener(
+      'abort',
+      () => {
+        portal.remove();
+      },
+      { once: true }
+    );
   }
 
   get deltaLatex() {

@@ -1,5 +1,7 @@
 /* eslint-disable no-useless-escape */
 
+import type { BlockComponent } from '@blocksuite/block-std';
+
 import {
   KEYBOARD_ALLOW_DEFAULT,
   KEYBOARD_PREVENT_DEFAULT,
@@ -461,7 +463,8 @@ export const affineInlineMarkdownMatches: InlineMarkdownMatch<AffineTextAttribut
     {
       name: 'latex',
       /* eslint-disable no-useless-escape */
-      pattern: /(?:\$\$)(?<content>[^\s\$]+)(?:\$\$)$|^[^\$]*(?<prefix>\$\$)$/g,
+      pattern:
+        /(?:\$\$)(?<content>[^\s\$]+)(?:\$\$)$|(?<blockPrefix>\$\$\$\$)|(?<inlinePrefix>\$\$)$/g,
       action: ({
         inlineEditor,
         prefixText,
@@ -474,9 +477,61 @@ export const affineInlineMarkdownMatches: InlineMarkdownMatch<AffineTextAttribut
           return KEYBOARD_ALLOW_DEFAULT;
         }
         const content = match.groups['content'];
-        const prefix = match.groups['prefix'];
+        const inlinePrefix = match.groups['inlinePrefix'];
+        const blockPrefix = match.groups['blockPrefix'];
 
-        if (prefix === '$$') {
+        if (blockPrefix === '$$$$') {
+          inlineEditor.insertText(
+            {
+              index: inlineRange.index,
+              length: 0,
+            },
+            ' '
+          );
+          inlineEditor.setInlineRange({
+            index: inlineRange.index + 1,
+            length: 0,
+          });
+
+          undoManager.stopCapturing();
+
+          const blockComponent =
+            inlineEditor.rootElement.closest<BlockComponent>('[data-block-id]');
+          if (!blockComponent) return KEYBOARD_ALLOW_DEFAULT;
+
+          const doc = blockComponent.doc;
+          const parentComponent = blockComponent.parentComponent;
+          if (!parentComponent) return KEYBOARD_ALLOW_DEFAULT;
+
+          const index = parentComponent.model.children.indexOf(
+            blockComponent.model
+          );
+          if (index === -1) return KEYBOARD_ALLOW_DEFAULT;
+
+          const id = doc.addBlock(
+            'affine:embed-latex',
+            {
+              latex: '',
+            },
+            parentComponent.model,
+            index + 1
+          );
+          blockComponent.host.updateComplete
+            .then(() => {
+              const latexBlock = blockComponent.std.view.getBlock(id);
+              if (!latexBlock || latexBlock.flavour !== 'affine:embed-latex')
+                return;
+
+              //FIXME(@Flrande): wait for refactor
+              // @ts-ignore
+              blockComponent.toggleLatexEditor();
+            })
+            .catch(console.error);
+
+          return KEYBOARD_PREVENT_DEFAULT;
+        }
+
+        if (inlinePrefix === '$$') {
           inlineEditor.insertText(
             {
               index: inlineRange.index,

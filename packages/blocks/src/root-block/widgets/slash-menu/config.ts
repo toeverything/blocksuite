@@ -39,6 +39,7 @@ import {
   matchFlavours,
   openFileOrFiles,
 } from '@blocksuite/affine-shared/utils';
+import { TeXIcon } from '@blocksuite/icons/lit';
 import { Slice, Text } from '@blocksuite/store';
 
 import type { DataViewBlockComponent } from '../../../data-view-block/index.js';
@@ -52,6 +53,7 @@ import { GroupingIcon } from '../../../database-block/data-view/common/icons/ind
 import { viewPresets } from '../../../database-block/data-view/index.js';
 import { FigmaIcon } from '../../../embed-figma-block/styles.js';
 import { GithubIcon } from '../../../embed-github-block/styles.js';
+import { EmbedLatexBlockComponent } from '../../../embed-latex-block/embed-latex-block.js';
 import { LoomIcon } from '../../../embed-loom-block/styles.js';
 import { YoutubeIcon } from '../../../embed-youtube-block/styles.js';
 import { addSiblingImageBlock } from '../../../image-block/utils.js';
@@ -195,6 +197,60 @@ export const defaultSlashMenuConfig: SlashMenuConfig = {
           !insideDatabase(model) &&
           !insideEdgelessText(model),
       })),
+
+    {
+      name: 'Inline equation',
+      description: 'Create a equation block.',
+      icon: TeXIcon({
+        width: '20',
+        height: '20',
+      }),
+      alias: ['inlineMath, inlineEquation', 'inlineLatex'],
+      action: ({ rootComponent }) => {
+        const selectionManager = rootComponent.host.selection;
+        const textSelection = selectionManager.filter('text')[0];
+        if (!textSelection || !textSelection.isCollapsed()) return;
+
+        const blockComponent = rootComponent.std.view.getBlock(
+          textSelection.from.blockId
+        );
+        if (!blockComponent) return;
+
+        const richText = blockComponent.querySelector('rich-text');
+        if (!richText) return;
+        const inlineEditor = richText.inlineEditor;
+        if (!inlineEditor) return;
+
+        inlineEditor.insertText(
+          {
+            index: textSelection.from.index,
+            length: 0,
+          },
+          ' ',
+          {
+            latex: '',
+          }
+        );
+        inlineEditor.setInlineRange({
+          index: textSelection.from.index,
+          length: 1,
+        });
+
+        inlineEditor
+          .waitForUpdate()
+          .then(() => {
+            const textPoint = inlineEditor.getTextPoint(
+              textSelection.from.index + 1
+            );
+            if (!textPoint) return;
+            const [text] = textPoint;
+            const latexNode = text.parentElement?.closest('affine-latex-node');
+            if (!latexNode) return;
+            latexNode.toggleEditor();
+          })
+          .catch(console.error);
+      },
+    },
 
     // ---------------------------------------------------------
     { groupName: 'List' },
@@ -473,6 +529,40 @@ export const defaultSlashMenuConfig: SlashMenuConfig = {
           { mode: 'page', parentModel, index }
         );
         tryRemoveEmptyLine(model);
+      },
+    },
+    {
+      name: 'Equation',
+      description: 'Create a equation block.',
+      icon: TeXIcon({
+        width: '20',
+        height: '20',
+      }),
+      alias: ['mathBlock, equationBlock', 'latexBlock'],
+      action: ({ rootComponent, model }) => {
+        const doc = rootComponent.doc;
+        const parent = doc.getParent(model);
+        if (!parent) return;
+
+        const index = parent.children.indexOf(model);
+        if (index === -1) return;
+
+        const id = doc.addBlock(
+          'affine:embed-latex',
+          {
+            latex: '',
+          },
+          parent,
+          index + 1
+        );
+        rootComponent.host.updateComplete
+          .then(() => {
+            const blockComponent = rootComponent.std.view.getBlock(id);
+            if (!(blockComponent instanceof EmbedLatexBlockComponent)) return;
+
+            blockComponent.toggleLatexEditor();
+          })
+          .catch(console.error);
       },
     },
 

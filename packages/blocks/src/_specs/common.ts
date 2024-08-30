@@ -12,6 +12,7 @@ import { DividerBlockSpec } from '../divider-block/divider-spec.js';
 import { EmbedFigmaBlockSpec } from '../embed-figma-block/embed-figma-spec.js';
 import { EmbedGithubBlockSpec } from '../embed-github-block/embed-github-spec.js';
 import { EmbedHtmlBlockSpec } from '../embed-html-block/embed-html-spec.js';
+import { EmbedLatexBlockSpec } from '../embed-latex-block/embed-latex-spec.js';
 import { EmbedLinkedDocBlockSpec } from '../embed-linked-doc-block/embed-linked-doc-spec.js';
 import { EmbedLoomBlockSpec } from '../embed-loom-block/embed-loom-spec.js';
 import { EmbedSyncedDocBlockSpec } from '../embed-synced-doc-block/embed-synced-doc-spec.js';
@@ -40,6 +41,7 @@ export const CommonFirstPartyBlockSpecs: BlockSpec[] = [
   EmbedHtmlBlockSpec,
   EmbedSyncedDocBlockSpec,
   EmbedLinkedDocBlockSpec,
+  EmbedLatexBlockSpec,
 ];
 
 export const EdgelessFirstPartyBlockSpecs: BlockSpec[] = [
@@ -60,4 +62,5 @@ export const EdgelessFirstPartyBlockSpecs: BlockSpec[] = [
   EmbedHtmlBlockSpec,
   EmbedSyncedDocBlockSpec,
   EmbedLinkedDocBlockSpec,
+  EmbedLatexBlockSpec,
 ];

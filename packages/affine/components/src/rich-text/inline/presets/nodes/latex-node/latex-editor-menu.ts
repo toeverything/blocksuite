@@ -19,8 +19,6 @@ import { customElement, property } from 'lit/decorators.js';
 import { type ThemedToken, codeToTokensBase } from 'shiki';
 import { z } from 'zod';
 
-import type { AffineLatexNode } from './latex-node.js';
-
 import { InlineManager } from '../../../inline-manager.js';
 
 @customElement('latex-editor-menu')
@@ -161,10 +159,14 @@ export class LatexEditorMenu extends SignalWatcher(
       }
     });
 
-    setTimeout(() => {
-      this.richText?.inlineEditorContainer.focus();
-      this.richText?.inlineEditor?.focusEnd();
-    });
+    this.updateComplete
+      .then(async () => {
+        await this.richText?.updateComplete;
+
+        this.richText?.inlineEditorContainer.focus();
+        this.richText?.inlineEditor?.focusEnd();
+      })
+      .catch(console.error);
   }
 
   override render() {
@@ -194,7 +196,7 @@ export class LatexEditorMenu extends SignalWatcher(
   accessor abortController!: AbortController;
 
   @property({ attribute: false })
-  accessor latexSignal!: AffineLatexNode['latex$'];
+  accessor latexSignal!: Signal<string>;
 }
 
 declare global {

@@ -106,7 +106,7 @@ export class EmbedHtmlBlockComponent extends EmbedBlockComponent<
 
     return this.renderEmbed(() => {
       if (!this.model.html) {
-        return html` <div class="affine-html-empty">Empty</div>`;
+        return html`<div class="affine-html-empty">Empty</div>`;
       }
       return html`
         <div

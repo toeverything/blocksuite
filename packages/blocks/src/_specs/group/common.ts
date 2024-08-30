@@ -10,6 +10,7 @@ import { DividerBlockSpec } from '../../divider-block/divider-spec.js';
 import { EmbedFigmaBlockSpec } from '../../embed-figma-block/index.js';
 import { EmbedGithubBlockSpec } from '../../embed-github-block/index.js';
 import { EmbedHtmlBlockSpec } from '../../embed-html-block/index.js';
+import { EmbedLatexBlockSpec } from '../../embed-latex-block/embed-latex-spec.js';
 import { EmbedLinkedDocBlockSpec } from '../../embed-linked-doc-block/index.js';
 import { EmbedLoomBlockSpec } from '../../embed-loom-block/index.js';
 import { EmbedSyncedDocBlockSpec } from '../../embed-synced-doc-block/embed-synced-doc-spec.js';
@@ -31,6 +32,7 @@ export {
   EmbedFigmaBlockSpec,
   EmbedGithubBlockSpec,
   EmbedHtmlBlockSpec,
+  EmbedLatexBlockSpec,
   EmbedLinkedDocBlockSpec,
   EmbedLoomBlockSpec,
   EmbedSyncedDocBlockSpec,

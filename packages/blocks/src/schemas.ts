@@ -14,6 +14,7 @@ import {
   EmbedFigmaBlockSchema,
   EmbedGithubBlockSchema,
   EmbedHtmlBlockSchema,
+  EmbedLatexBlockSchema,
   EmbedLinkedDocBlockSchema,
   EmbedLoomBlockSchema,
   EmbedSyncedDocBlockSchema,
@@ -53,5 +54,6 @@ export const AffineSchemas: z.infer<typeof BlockSchema>[] = [
   EmbedLinkedDocBlockSchema,
   EmbedSyncedDocBlockSchema,
   EmbedLoomBlockSchema,
+  EmbedLatexBlockSchema,
   EdgelessTextBlockSchema,
 ];
