@@ -12,6 +12,7 @@ import {
   insertLinkedNode,
 } from '@blocksuite/affine-components/rich-text';
 import { toast } from '@blocksuite/affine-components/toast';
+import { DocModeProvider } from '@blocksuite/affine-shared/services';
 import {
   createDefaultDoc,
   isFuzzyMatch,
@@ -48,7 +49,6 @@ export function createLinkedDocMenuGroup(
   inlineEditor: AffineInlineEditor
 ) {
   const doc = editorHost.doc;
-  const { docModeService } = editorHost.std.spec.getService('affine:page');
   const { docMetas } = doc.collection.meta;
   const filteredDocList = docMetas
     .filter(({ id }) => id !== doc.id)
@@ -61,7 +61,7 @@ export function createLinkedDocMenuGroup(
       key: doc.id,
       name: doc.title || DEFAULT_DOC_NAME,
       icon:
-        docModeService.getMode(doc.id) === 'edgeless'
+        editorHost.std.get(DocModeProvider).getMode(doc.id) === 'edgeless'
           ? LinkedEdgelessIcon
           : LinkedDocIcon,
       action: () => {

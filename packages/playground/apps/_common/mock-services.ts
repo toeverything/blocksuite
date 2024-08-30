@@ -1,8 +1,8 @@
-import type { PageRootService } from '@blocksuite/blocks';
+import type { BlockStdScope } from '@blocksuite/block-std';
+import type { DocModeProvider, PageRootService } from '@blocksuite/blocks';
 
 import {
   DocMode,
-  type DocModeService,
   type NotificationService,
   type QuickSearchService,
   toast,
@@ -29,41 +29,41 @@ export function removeModeFromStorage(docId: string) {
 
 const DEFAULT_MODE = DocMode.Page;
 const slotMap = new Map<string, Slot<DocMode>>();
-export function mockDocModeService(curDocId: string) {
-  const docModeService: DocModeService = {
-    setMode: (mode: DocMode, docId: string = curDocId) => {
+export class MockDocModeService implements DocModeProvider {
+  getMode = (docId: string = this.std.doc.id) => {
+    try {
       const modeMap = getModeFromStorage();
-      modeMap.set(docId, mode);
-      saveModeToStorage(modeMap);
-      slotMap.get(docId)?.emit(mode);
-    },
-    getMode: (docId: string = curDocId) => {
-      try {
-        const modeMap = getModeFromStorage();
-        return modeMap.get(docId) ?? DEFAULT_MODE;
-      } catch (_e) {
-        return DEFAULT_MODE;
-      }
-    },
-    toggleMode: (docId: string = curDocId) => {
-      const mode =
-        docModeService.getMode(docId) === DocMode.Page
-          ? DocMode.Edgeless
-          : DocMode.Page;
-      docModeService.setMode(mode, docId);
-      return mode;
-    },
-    onModeChange: (
-      handler: (mode: DocMode) => void,
-      docId: string = curDocId
-    ) => {
-      if (!slotMap.get(docId)) {
-        slotMap.set(docId, new Slot());
-      }
-      return slotMap.get(docId)!.on(handler);
-    },
+      return modeMap.get(docId) ?? DEFAULT_MODE;
+    } catch (_e) {
+      return DEFAULT_MODE;
+    }
   };
-  return docModeService;
+
+  onModeChange = (
+    handler: (mode: DocMode) => void,
+    docId: string = this.std.doc.id
+  ) => {
+    if (!slotMap.get(docId)) {
+      slotMap.set(docId, new Slot());
+    }
+    return slotMap.get(docId)!.on(handler);
+  };
+
+  setMode = (mode: DocMode, docId: string = this.std.doc.id) => {
+    const modeMap = getModeFromStorage();
+    modeMap.set(docId, mode);
+    saveModeToStorage(modeMap);
+    slotMap.get(docId)?.emit(mode);
+  };
+
+  toggleMode = (docId: string = this.std.doc.id) => {
+    const mode =
+      this.getMode(docId) === DocMode.Page ? DocMode.Edgeless : DocMode.Page;
+    this.setMode(mode, docId);
+    return mode;
+  };
+
+  constructor(public std: BlockStdScope) {}
 }
 
 export function mockNotificationService(service: PageRootService) {

@@ -1,6 +1,9 @@
-import type { BlockSpec } from '@blocksuite/block-std';
-
 import { RootBlockSchema } from '@blocksuite/affine-model';
+import {
+  DocModeProvider,
+  DocModeService,
+} from '@blocksuite/affine-shared/services';
+import { type BlockSpec, BlockStdScope } from '@blocksuite/block-std';
 import { literal, unsafeStatic } from 'lit/static-html.js';
 
 import type { RootBlockConfig } from '../root-config.js';
@@ -70,4 +73,7 @@ export const PageRootBlockSpec: PageRootBlockSpecType = {
     },
   },
   commands,
+  setup: (_slots, _disposableGroup, di) => {
+    di.addImpl(DocModeProvider, DocModeService, [BlockStdScope]);
+  },
 };

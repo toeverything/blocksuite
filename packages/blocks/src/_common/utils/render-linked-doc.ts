@@ -2,6 +2,7 @@ import type { ImageBlockModel, NoteBlockModel } from '@blocksuite/affine-model';
 import type { EditorHost } from '@blocksuite/block-std';
 
 import { DocMode, NoteDisplayMode } from '@blocksuite/affine-model';
+import { DocModeProvider } from '@blocksuite/affine-shared/services';
 import { getBlockProps, matchFlavours } from '@blocksuite/affine-shared/utils';
 import { Bound, getCommonBound } from '@blocksuite/global/utils';
 import { assertExists } from '@blocksuite/global/utils';
@@ -586,6 +587,6 @@ export function createLinkedDocFromEdgelessElements(
     });
   });
   const pageService = host.spec.getService('affine:page');
-  pageService.docModeService.setMode(DocMode.Edgeless, linkedDoc.id);
+  pageService.std.get(DocModeProvider).setMode(DocMode.Edgeless, linkedDoc.id);
   return linkedDoc;
 }

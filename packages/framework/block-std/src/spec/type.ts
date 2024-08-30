@@ -1,3 +1,4 @@
+import type { Container } from '@blocksuite/global/di';
 import type { DisposableGroup } from '@blocksuite/global/utils';
 import type { BlockModel, BlockSchemaType } from '@blocksuite/store';
 import type { StaticValue } from 'lit/static-html.js';
@@ -23,5 +24,9 @@ export interface BlockSpec<
   config?: BlockConfig;
   commands?: BlockCommands;
   service?: BlockServiceConstructor<Service>;
-  setup?: (slots: BlockSpecSlots, disposableGroup: DisposableGroup) => void;
+  setup?: (
+    slots: BlockSpecSlots,
+    disposableGroup: DisposableGroup,
+    di: Container
+  ) => void;
 }

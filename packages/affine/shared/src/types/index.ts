@@ -1,6 +1,5 @@
 import type { EmbedCardStyle } from '@blocksuite/affine-model';
 import type { BlockComponent } from '@blocksuite/block-std';
-import type { Point } from '@blocksuite/global/utils';
 import type { BlockModel } from '@blocksuite/store';
 
 export interface EditingState {
@@ -8,8 +7,6 @@ export interface EditingState {
   model: BlockModel;
   rect: DOMRect;
 }
-
-export type SelectionPosition = 'start' | 'end' | Point;
 
 export enum LassoMode {
   FreeHand,

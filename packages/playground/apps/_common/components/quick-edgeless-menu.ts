@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-restricted-imports */
-import type { AffineTextAttributes } from '@blocksuite/blocks';
 import type { SerializedXYWH } from '@blocksuite/global/utils';
 import type { DeltaInsert } from '@blocksuite/inline';
 import type { AffineEditorContainer } from '@blocksuite/presets';
 
 import { ShadowlessElement } from '@blocksuite/block-std';
+import { type AffineTextAttributes, DocModeProvider } from '@blocksuite/blocks';
 import { DocMode, EdgelessRootService, printToPdf } from '@blocksuite/blocks';
 import { type DocCollection, Text } from '@blocksuite/store';
 import '@shoelace-style/shoelace/dist/components/alert/alert.js';
@@ -22,8 +22,8 @@ import '@shoelace-style/shoelace/dist/components/select/select.js';
 import '@shoelace-style/shoelace/dist/components/tab/tab.js';
 import '@shoelace-style/shoelace/dist/components/tab-group/tab-group.js';
 import '@shoelace-style/shoelace/dist/components/tooltip/tooltip.js';
-import '@shoelace-style/shoelace/dist/themes/light.css';
 import '@shoelace-style/shoelace/dist/themes/dark.css';
+import '@shoelace-style/shoelace/dist/themes/light.css';
 import { setBasePath } from '@shoelace-style/shoelace/dist/utilities/base-path.js';
 import { css, html, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
@@ -243,7 +243,7 @@ export class QuickEdgelessMenu extends ShadowlessElement {
 
   private _switchEditorMode() {
     if (!this.rootService) return;
-    this._docMode = this.rootService.docModeService.toggleMode();
+    this._docMode = this.rootService.std.get(DocModeProvider).getMode();
   }
 
   private _toggleChatPanel() {
@@ -261,10 +261,12 @@ export class QuickEdgelessMenu extends ShadowlessElement {
   override connectedCallback() {
     super.connectedCallback();
 
+    if (this.rootService) {
+      this.rootService.std.get(DocModeProvider).onModeChange(mode => {
+        this._docMode = mode;
+      });
+    }
     this._docMode = this.editor.mode;
-    this.rootService?.docModeService.onModeChange(mode => {
-      this._docMode = mode;
-    });
     this.editor.slots.docUpdated.on(() => {
       this._docMode = this.editor.mode;
     });

@@ -35,8 +35,8 @@ export class SpecBuilder {
     const spec = this._value[specIndex];
     const oldSetup = spec.setup;
 
-    spec.setup = (slots, disposableGroup) => {
-      oldSetup?.(slots, disposableGroup);
+    spec.setup = (slots, disposableGroup, di) => {
+      oldSetup?.(slots, disposableGroup, di);
       setup(
         slots as unknown as BlockSpecSlots<BlockSuite.BlockServices[Flavour]>,
         disposableGroup

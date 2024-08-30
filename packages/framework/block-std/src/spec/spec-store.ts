@@ -6,50 +6,7 @@ import { BlockService } from '../service/index.js';
 import { getSlots } from './slots.js';
 
 export class SpecStore {
-  private _disposables = new DisposableGroup();
-
-  private _services = new Map<string, BlockService>();
-
-  private _specs = new Map<string, BlockSpec>();
-
-  readonly slots = {
-    beforeApply: new Slot(),
-    beforeMount: new Slot(),
-    beforeUnmount: new Slot(),
-    afterApply: new Slot(),
-    afterMount: new Slot(),
-    afterUnmount: new Slot(),
-  };
-
-  constructor(public std: BlockSuite.Std) {}
-
-  private _buildSpecMap(specs: Array<BlockSpec>) {
-    const specMap = new Map<string, BlockSpec>();
-    specs.forEach(spec => {
-      specMap.set(spec.schema.model.flavour, spec);
-    });
-    return specMap;
-  }
-
-  private _diffServices(
-    oldSpecs: Map<string, BlockSpec>,
-    newSpecs: Map<string, BlockSpec>
-  ) {
-    oldSpecs.forEach((oldSpec, flavour) => {
-      if (
-        newSpecs.has(flavour) &&
-        newSpecs.get(flavour)?.service === oldSpec.service
-      ) {
-        return;
-      }
-
-      const service = this._services.get(flavour);
-      if (service) {
-        service.dispose();
-        service.unmounted();
-      }
-      this._services.delete(flavour);
-    });
+  private _createServices = (newSpecs: Map<string, BlockSpec>) => {
     newSpecs.forEach((newSpec, flavour) => {
       if (this._services.has(flavour)) {
         return;
@@ -64,10 +21,41 @@ export class SpecStore {
         slots,
       });
 
-      newSpec.setup?.(slots, this._disposables);
+      const container = this.std.container;
+      newSpec.setup?.(slots, this._disposables, container);
       this._services.set(flavour, service);
-      service.mounted();
     });
+  };
+
+  private _disposables = new DisposableGroup();
+
+  private _services = new Map<string, BlockService>();
+
+  private _specs = new Map<string, BlockSpec>();
+
+  readonly slots = {
+    beforeMount: new Slot(),
+    beforeUnmount: new Slot(),
+    afterMount: new Slot(),
+    afterUnmount: new Slot(),
+  };
+
+  constructor(
+    public std: BlockSuite.Std,
+    specs: BlockSpec[]
+  ) {
+    const newSpecs = this._buildSpecMap(specs);
+    this._registerCommands(newSpecs);
+    this._createServices(newSpecs);
+    this._specs = newSpecs;
+  }
+
+  private _buildSpecMap(specs: Array<BlockSpec>) {
+    const specMap = new Map<string, BlockSpec>();
+    specs.forEach(spec => {
+      specMap.set(spec.schema.model.flavour, spec);
+    });
+    return specMap;
   }
 
   private _registerCommands(specs: Map<string, BlockSpec>) {
@@ -78,18 +66,6 @@ export class SpecStore {
         this.std.command.add(key as keyof BlockSuite.Commands, command);
       });
     });
-  }
-
-  applySpecs(specs: BlockSpec[]) {
-    this.slots.beforeApply.emit();
-
-    const oldSpecs = this._specs;
-    const newSpecs = this._buildSpecMap(specs);
-    this._diffServices(oldSpecs, newSpecs);
-    this._registerCommands(newSpecs);
-    this._specs = newSpecs;
-
-    this.slots.afterApply.emit();
   }
 
   getConfig<Key extends BlockSuite.ConfigKeys>(
@@ -130,6 +106,10 @@ export class SpecStore {
     if (this._disposables.disposed) {
       this._disposables = new DisposableGroup();
     }
+
+    this._services.forEach(service => {
+      service.mounted();
+    });
 
     this.slots.afterMount.emit();
   }

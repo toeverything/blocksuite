@@ -1,11 +1,15 @@
-import type {
-  BlockComponent,
-  BlockService,
-  BlockSpec,
-  BlockSpecSlots,
-} from '@blocksuite/block-std';
-
 import { RootBlockSchema } from '@blocksuite/affine-model';
+import {
+  DocModeProvider,
+  DocModeService,
+} from '@blocksuite/affine-shared/services';
+import {
+  type BlockComponent,
+  type BlockService,
+  type BlockSpec,
+  type BlockSpecSlots,
+  BlockStdScope,
+} from '@blocksuite/block-std';
 import { literal, unsafeStatic } from 'lit/static-html.js';
 
 import type { RootBlockConfig } from '../root-config.js';
@@ -96,6 +100,9 @@ export const EdgelessRootBlockSpec: EdgelessRootBlockSpecType = {
     },
   },
   commands,
+  setup: (_slots, _disposableGroup, di) => {
+    di.addImpl(DocModeProvider, DocModeService, [BlockStdScope]);
+  },
 };
 
 export const PreviewEdgelessRootBlockSpec: EdgelessRootBlockSpecType = {
@@ -104,7 +111,8 @@ export const PreviewEdgelessRootBlockSpec: EdgelessRootBlockSpecType = {
   view: {
     component: literal`affine-edgeless-root-preview`,
   },
-  setup(slots: BlockSpecSlots) {
+  setup(slots: BlockSpecSlots, _disposableGroup, di) {
+    di.addImpl(DocModeProvider, DocModeService, [BlockStdScope]);
     slots.viewConnected.on(
       ({ service }: { component: BlockComponent; service: BlockService }) => {
         // Does not allow the user to move and zoom.

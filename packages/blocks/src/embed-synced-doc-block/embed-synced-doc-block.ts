@@ -11,6 +11,7 @@ import {
   type EmbedSyncedDocModel,
   NoteDisplayMode,
 } from '@blocksuite/affine-model';
+import { DocModeProvider } from '@blocksuite/affine-shared/services';
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import { assertExists } from '@blocksuite/global/utils';
 import { BlockViewType, DocCollection, type Query } from '@blocksuite/store';
@@ -385,12 +386,11 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockComponent<
     );
 
     if (this._rootService) {
-      this.syncedDocMode = this._rootService.docModeService.getMode(
-        this.model.pageId
-      );
+      const docMode = this._rootService.std.get(DocModeProvider);
+      this.syncedDocMode = docMode.getMode(this.model.pageId);
       this._isEmptySyncedDoc = isEmptyDoc(this.syncedDoc, this.syncedDocMode);
       this.disposables.add(
-        this._rootService.docModeService.onModeChange(mode => {
+        docMode.onModeChange(mode => {
           this.syncedDocMode = mode;
           this._isEmptySyncedDoc = isEmptyDoc(this.syncedDoc, mode);
         }, this.model.pageId)
