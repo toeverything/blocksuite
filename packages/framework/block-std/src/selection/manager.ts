@@ -1,7 +1,6 @@
-import type { StackItem } from '@blocksuite/store';
-
 import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 import { DisposableGroup, Slot } from '@blocksuite/global/utils';
+import { type StackItem, nanoid } from '@blocksuite/store';
 import { computed, signal } from '@lit-labs/preact-signals';
 
 import type { BaseSelection } from './base.js';
@@ -21,6 +20,8 @@ interface SelectionConstructor {
 }
 
 export class SelectionManager {
+  private _id: string;
+
   private _itemAdded = (event: { stackItem: StackItem }) => {
     event.stackItem.meta.set('selection-state', this.value);
   };
@@ -57,6 +58,7 @@ export class SelectionManager {
   };
 
   constructor(public std: BlockSuite.Std) {
+    this._id = `${this.std.doc.blockCollection.id}:${nanoid()}`;
     this._setupDefaultSelections();
     this._store.awareness.on(
       'change',
@@ -66,21 +68,25 @@ export class SelectionManager {
         const exceptLocal = all.filter(id => id !== localClientID);
         const hasLocal = all.includes(localClientID);
         if (hasLocal) {
-          const localSelection = this._store
-            .getLocalSelection(this.std.doc.blockCollection)
-            .map(json => {
-              return this._jsonToSelection(json);
-            });
+          const localSelectionJson = this._store.getLocalSelection(this.id);
+          const localSelection = localSelectionJson.map(json => {
+            return this._jsonToSelection(json);
+          });
           this._selections.value = localSelection;
         }
 
+        // Only consider remote selections from other clients
         if (exceptLocal.length > 0) {
           const map = new Map<number, BaseSelection[]>();
           this._store.getStates().forEach((state, id) => {
             if (id === this._store.awareness.clientID) return;
+            // selection id starts with the same block collection id from others clients would be considered as remote selections
             const selection = Object.entries(state.selectionV2)
-              .filter(([key]) => key === this.std.doc.id)
+              .filter(([key]) =>
+                key.startsWith(this.std.doc.blockCollection.id)
+              )
               .flatMap(([_, selection]) => selection);
+
             const selections = selection
               .map(json => {
                 try {
@@ -96,6 +102,7 @@ export class SelectionManager {
                 }
               })
               .filter((sel): sel is BaseSelection => !!sel);
+
             map.set(id, selections);
           });
           this._remoteSelections.value = map;
@@ -190,7 +197,9 @@ export class SelectionManager {
     this.std.doc.history.on('stack-item-popped', this._itemPopped);
     this.disposables.add(
       this._store.slots.update.on(({ id }) => {
-        if (id === this._store.awareness.clientID) return;
+        if (id === this._store.awareness.clientID) {
+          return;
+        }
         this.slots.remoteChanged.emit(this.remoteSelections);
       })
     );
@@ -205,7 +214,7 @@ export class SelectionManager {
 
   set(selections: BaseSelection[]) {
     this._store.setLocalSelection(
-      this.std.doc.blockCollection,
+      this.id,
       selections.map(s => s.toJSON())
     );
     this.slots.changed.emit(selections);
@@ -227,6 +236,10 @@ export class SelectionManager {
   update(fn: (currentSelections: BaseSelection[]) => BaseSelection[]) {
     const selections = fn(this.value);
     this.set(selections);
+  }
+
+  get id() {
+    return this._id;
   }
 
   get remoteSelections() {

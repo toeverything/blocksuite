@@ -182,6 +182,8 @@ export class AffineFormatBarWidget extends WidgetComponent {
       })
     );
     this.disposables.addFromEvent(document, 'selectionchange', () => {
+      if (!this.host.event.active) return;
+
       const databaseSelection = this.host.selection.find('database');
       if (!databaseSelection) {
         return;
