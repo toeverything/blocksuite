@@ -163,9 +163,30 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockComponent<
   };
 
   open = () => {
-    const pageId = this.model.pageId;
-    // TODO(@fundon): should scroll into target block/element
-    if (pageId === this.doc.id) return;
+    const { pageId, params } = this.model;
+    if (
+      pageId === this.doc.id &&
+      params?.mode === 'page' &&
+      params.blockIds?.length
+    ) {
+      const id = params.blockIds[0];
+      const blockComponent = this.std.view.getBlock(id);
+      if (!blockComponent) return;
+
+      blockComponent.scrollIntoView({
+        behavior: 'instant',
+        block: 'center',
+      });
+
+      this.host.selection.setGroup('note', [
+        this.host.selection.create('block', {
+          blockId: id,
+        }),
+      ]);
+
+      // TODO(@fundon): toolbar should be hidden
+      return;
+    }
 
     this.std
       .getOptional(RefNodeSlotsProvider)

@@ -373,6 +373,7 @@ export class EmbedCardToolbar extends WidgetComponent<
         label: 'Open this doc',
         icon: ExpandFullSmallIcon,
         action: () => this.focusBlock?.open(),
+        disabled: this._openButtonDisabled,
       });
     }
 

@@ -6,6 +6,7 @@ import {
 import { Bound } from '@blocksuite/global/utils';
 
 import type { EdgelessRootService } from '../root-block/index.js';
+import type { RootBlockComponent } from '../root-block/types.js';
 
 import { toEdgelessEmbedBlock } from '../_common/embed-block-helper/embed-block-element.js';
 import { EmbedLinkedDocBlockComponent } from './embed-linked-doc-block.js';
@@ -52,6 +53,42 @@ export class EmbedEdgelessLinkedDocBlockComponent extends toEdgelessEmbedBlock(
     });
 
     doc.deleteBlock(this.model);
+  };
+
+  override open = () => {
+    const { pageId, params } = this.model;
+    if (
+      pageId === this.doc.id &&
+      params?.mode === 'edgeless' &&
+      params.elementIds?.length
+    ) {
+      const id = params.elementIds[0];
+      const anchor = this.rootService.surface.getElementById(id);
+      if (!anchor) return;
+
+      const bounds = Bound.deserialize(anchor.xywh);
+      const { zoom, centerX, centerY } = this.rootService.getFitToScreenData(
+        [20, 20, 20, 20],
+        [bounds]
+      );
+
+      this.rootService.viewport.setViewport(zoom, [centerX, centerY]);
+
+      this.rootService.selection.set({
+        elements: [id],
+        editing: false,
+      });
+
+      // TODO(@fundon): toolbar should be hidden
+      return;
+    }
+
+    const rootComponent = this.std.view.getBlock(
+      this.doc.root?.id ?? ''
+    ) as RootBlockComponent | null;
+    if (!rootComponent) return;
+
+    rootComponent.slots.docLinkClicked.emit(this.referenceInfo);
   };
 
   get rootService() {
