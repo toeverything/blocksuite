@@ -171,17 +171,14 @@ export class RangeBinding {
       return;
     }
     const range = selection.rangeCount > 0 ? selection.getRangeAt(0) : null;
-    const isRangeReversed =
-      !!selection.anchorNode &&
-      !!selection.focusNode &&
-      (selection.anchorNode === selection.focusNode
-        ? selection.anchorOffset > selection.focusOffset
-        : selection.anchorNode.compareDocumentPosition(selection.focusNode) ===
-          Node.DOCUMENT_POSITION_PRECEDING);
 
     if (!range) {
       this._prevTextSelection = null;
       this.selectionManager.clear(['text']);
+      return;
+    }
+
+    if (!this.host.contains(range.commonAncestorContainer)) {
       return;
     }
 
@@ -214,6 +211,13 @@ export class RangeBinding {
     );
     if (inlineEditor?.isComposing) return;
 
+    const isRangeReversed =
+      !!selection.anchorNode &&
+      !!selection.focusNode &&
+      (selection.anchorNode === selection.focusNode
+        ? selection.anchorOffset > selection.focusOffset
+        : selection.anchorNode.compareDocumentPosition(selection.focusNode) ===
+          Node.DOCUMENT_POSITION_PRECEDING);
     const textSelection = this.rangeManager?.rangeToTextSelection(
       range,
       isRangeReversed
@@ -245,20 +249,21 @@ export class RangeBinding {
     if (text === this._prevTextSelection) {
       return;
     }
-
     // wait for lit updated
     this.host.updateComplete
       .then(() => {
         const model = text && this.host.doc.getBlockById(text.blockId);
         const path = model && this.host.view.calculatePath(model);
 
-        const eq =
-          text && this._prevTextSelection && path
-            ? text.equals(this._prevTextSelection.selection) &&
-              path.join('') === this._prevTextSelection.path.join('')
-            : false;
+        if (this.host.event.active) {
+          const eq =
+            text && this._prevTextSelection && path
+              ? text.equals(this._prevTextSelection.selection) &&
+                path.join('') === this._prevTextSelection.path.join('')
+              : false;
 
-        if (eq) return;
+          if (eq) return;
+        }
 
         this._prevTextSelection =
           text && path

@@ -7,16 +7,16 @@ export class RemoteColorManager {
     const sessionColor =
       this.rootService.editPropsStore.getStorage('remoteColor');
     if (sessionColor) {
-      this.awareness.awareness.setLocalStateField('color', sessionColor);
+      this.awarenessStore.awareness.setLocalStateField('color', sessionColor);
       return;
     }
 
     const pickColor = multiPlayersColor.pick();
-    this.awareness.awareness.setLocalStateField('color', pickColor);
+    this.awarenessStore.awareness.setLocalStateField('color', pickColor);
     this.rootService.editPropsStore.setStorage('remoteColor', pickColor);
   }
 
-  private get awareness() {
+  private get awarenessStore() {
     return this.host.doc.collection.awarenessStore;
   }
 
@@ -25,22 +25,22 @@ export class RemoteColorManager {
   }
 
   get(id: number) {
-    const awarenessColor = this.awareness.getStates().get(id)?.color;
+    const awarenessColor = this.awarenessStore.getStates().get(id)?.color;
     if (awarenessColor) {
       return awarenessColor;
     }
 
-    if (id !== this.awareness.awareness.clientID) return null;
+    if (id !== this.awarenessStore.awareness.clientID) return null;
 
     const sessionColor =
       this.rootService.editPropsStore.getStorage('remoteColor');
     if (sessionColor) {
-      this.awareness.awareness.setLocalStateField('color', sessionColor);
+      this.awarenessStore.awareness.setLocalStateField('color', sessionColor);
       return sessionColor;
     }
 
     const pickColor = multiPlayersColor.pick();
-    this.awareness.awareness.setLocalStateField('color', pickColor);
+    this.awarenessStore.awareness.setLocalStateField('color', pickColor);
     this.rootService.editPropsStore.setStorage('remoteColor', pickColor);
     return pickColor;
   }
