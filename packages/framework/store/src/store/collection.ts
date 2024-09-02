@@ -94,6 +94,7 @@ export class DocCollection extends DocCollectionAddonType {
     docAdded: new Slot<string>(),
     docUpdated: new Slot(),
     docRemoved: new Slot<string>(),
+    docCreated: new Slot<string>(),
   };
 
   constructor({
@@ -198,6 +199,7 @@ export class DocCollection extends DocCollectionAddonType {
       createDate: Date.now(),
       tags: [],
     });
+    this.slots.docCreated.emit(docId);
     return this.getDoc(docId, { query }) as Doc;
   }
 
