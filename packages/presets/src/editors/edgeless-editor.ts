@@ -83,7 +83,11 @@ export class EdgelessEditor extends WithDisposable(ShadowlessElement) {
   }
 
   get host() {
-    return this.std.host;
+    try {
+      return this.std.host;
+    } catch {
+      return null;
+    }
   }
 
   @property({ attribute: false })

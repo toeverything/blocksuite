@@ -14,6 +14,13 @@ import { LifeCycleWatcher } from './lifecycle-watcher.js';
 
 const idMap = new Map<string, number>();
 
+/**
+ * @deprecated
+ * BlockServiceWatcher is deprecated. You should reconsider where to put your feature.
+ *
+ * BlockServiceWatcher is a legacy extension that is used to watch the slots registered on block service.
+ * However, we recommend using the new extension system.
+ */
 export abstract class BlockServiceWatcher extends LifeCycleWatcher {
   static flavour: string;
 

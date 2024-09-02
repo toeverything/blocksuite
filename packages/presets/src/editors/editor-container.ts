@@ -257,7 +257,11 @@ export class AffineEditorContainer
   }
 
   get host() {
-    return this.std.host;
+    try {
+      return this.std.host;
+    } catch {
+      return null;
+    }
   }
 
   get mode() {
