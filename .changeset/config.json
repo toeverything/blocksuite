@@ -1,6 +1,9 @@
 {
   "$schema": "https://unpkg.com/@changesets/config@3.0.2/schema.json",
-  "changelog": "./changelog-config.cjs",
+  "changelog": [
+    "@changesets/changelog-github",
+    { "repo": "toeverything/blocksuite" }
+  ],
   "commit": false,
   "fixed": [],
   "linked": [["@blocksuite/*"]],
