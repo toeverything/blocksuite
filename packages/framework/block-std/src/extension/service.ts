@@ -4,15 +4,24 @@ import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 import { DisposableGroup } from '@blocksuite/global/utils';
 
 import type { EventName, UIEventHandler } from '../event/index.js';
+import type { BlockStdScope } from '../scope/index.js';
 
 import {
   BlockFlavourIdentifier,
   BlockServiceIdentifier,
-  BlockStdScope,
-} from '../scope/index.js';
+  StdIdentifier,
+} from '../identifier.js';
 import { getSlots } from '../spec/index.js';
 import { Extension } from './extension.js';
 
+/**
+ * @deprecated
+ * BlockService is deprecated. You should reconsider where to put your feature.
+ *
+ * BlockService is a legacy extension that is used to provide services to the block.
+ * In the previous version of BlockSuite, block service provides a way to extend the block.
+ * However, in the new version, we recommend using the new extension system.
+ */
 export abstract class BlockService extends Extension {
   static flavour: string;
 
@@ -37,10 +46,18 @@ export abstract class BlockService extends Extension {
         'Flavour is not defined in the BlockService'
       );
     }
-    di.addImpl(BlockServiceIdentifier(this.flavour), this, [
-      BlockStdScope,
-      BlockFlavourIdentifier(this.flavour),
-    ]);
+    di.add(
+      this as unknown as {
+        new (
+          std: BlockStdScope,
+          flavourProvider: { flavour: string }
+        ): BlockService;
+      },
+      [StdIdentifier, BlockFlavourIdentifier(this.flavour)]
+    );
+    di.addImpl(BlockServiceIdentifier(this.flavour), provider =>
+      provider.get(this)
+    );
   }
 
   bindHotKey(
@@ -77,6 +94,7 @@ export abstract class BlockService extends Extension {
   }
 
   unmounted() {
+    this.dispose();
     this.specSlots.unmounted.emit({ service: this });
   }
 

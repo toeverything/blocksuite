@@ -3,8 +3,10 @@ import { DisposableGroup, Slot } from '@blocksuite/global/utils';
 import { type StackItem, nanoid } from '@blocksuite/store';
 import { computed, signal } from '@lit-labs/preact-signals';
 
+import type { BlockStdScope } from '../scope/index.js';
 import type { BaseSelection } from './base.js';
 
+import { LifeCycleWatcher } from '../extension/index.js';
 import {
   BlockSelection,
   CursorSelection,
@@ -19,7 +21,7 @@ interface SelectionConstructor {
   fromJSON(json: Record<string, unknown>): BaseSelection;
 }
 
-export class SelectionManager {
+export class SelectionManager extends LifeCycleWatcher {
   private _id: string;
 
   private _itemAdded = (event: { stackItem: StackItem }) => {
@@ -50,6 +52,8 @@ export class SelectionManager {
 
   private _selections = signal<BaseSelection[]>([]);
 
+  static override readonly key = 'selectionManager';
+
   disposables = new DisposableGroup();
 
   slots = {
@@ -57,7 +61,8 @@ export class SelectionManager {
     remoteChanged: new Slot<Map<number, BaseSelection[]>>(),
   };
 
-  constructor(public std: BlockSuite.Std) {
+  constructor(std: BlockStdScope) {
+    super(std);
     this._id = `${this.std.doc.blockCollection.id}:${nanoid()}`;
     this._setupDefaultSelections();
     this._store.awareness.on(
@@ -189,7 +194,7 @@ export class SelectionManager {
     return this.value.filter(s => s.group === group);
   }
 
-  mount() {
+  override mounted() {
     if (this.disposables.disposed) {
       this.disposables = new DisposableGroup();
     }
@@ -225,7 +230,7 @@ export class SelectionManager {
     this.set([...current, ...selections]);
   }
 
-  unmount() {
+  override unmounted() {
     this.std.doc.history.off('stack-item-added', this._itemAdded);
     this.std.doc.history.off('stack-item-popped', this._itemPopped);
     this.slots.changed.dispose();

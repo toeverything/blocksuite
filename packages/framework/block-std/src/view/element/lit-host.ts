@@ -11,19 +11,19 @@ import { type BlockModel, BlockViewType } from '@blocksuite/store';
 import { createContext, provide } from '@lit/context';
 import { SignalWatcher } from '@lit-labs/preact-signals';
 import { LitElement, type TemplateResult, css, nothing } from 'lit';
-import { customElement, property, state } from 'lit/decorators.js';
+import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { type StaticValue, html, unsafeStatic } from 'lit/static-html.js';
 
 import type { CommandManager } from '../../command/index.js';
 import type { UIEventDispatcher } from '../../event/index.js';
 import type { RangeManager } from '../../range/index.js';
+import type { BlockStdScope } from '../../scope/block-std-scope.js';
 import type { SelectionManager } from '../../selection/index.js';
-import type { BlockSpec, SpecStore } from '../../spec/index.js';
 import type { ViewStore } from '../view-store.js';
 
-import { BlockStdScope } from '../../scope/block-std-scope.js';
-import { PropTypes, requiredProperties } from '../decorators/required.js';
+import { WidgetViewMapIdentifier } from '../../identifier.js';
+import { PropTypes, requiredProperties } from '../decorators/index.js';
 import { WithDisposable } from '../utils/with-disposable.js';
 import { ShadowlessElement } from './shadowless-element.js';
 
@@ -32,8 +32,7 @@ export const stdContext = createContext<BlockStdScope>('std');
 
 @requiredProperties({
   doc: PropTypes.instanceOf(Doc),
-  std: PropTypes.instanceOf(BlockStdScope),
-  specs: PropTypes.arrayOf(PropTypes.object),
+  std: PropTypes.object,
 })
 @customElement('editor-host')
 export class EditorHost extends SignalWatcher(
@@ -46,18 +45,18 @@ export class EditorHost extends SignalWatcher(
       return html`${nothing}`;
     }
     const schema = this.doc.schema.flavourSchemaMap.get(flavour);
-    const view = this.std.spec.getView(flavour);
+    const view = this.std.getView(flavour);
     if (!schema || !view) {
       console.warn(`Cannot find render flavour ${flavour}.`);
       return html`${nothing}`;
     }
+    const widgetViewMap = this.std.getOptional(
+      WidgetViewMapIdentifier(flavour)
+    );
 
-    const tag =
-      typeof view.component === 'function'
-        ? view.component(model)
-        : view.component;
-    const widgets: Record<string, TemplateResult> = view.widgets
-      ? Object.entries(view.widgets).reduce((mapping, [key, tag]) => {
+    const tag = typeof view === 'function' ? view(model) : view;
+    const widgets: Record<string, TemplateResult> = widgetViewMap
+      ? Object.entries(widgetViewMap).reduce((mapping, [key, tag]) => {
           const template = html`<${tag} ${unsafeStatic(this.widgetIdAttr)}=${key}></${tag}>`;
 
           return {
@@ -98,16 +97,6 @@ export class EditorHost extends SignalWatcher(
     return this._renderModel(model);
   };
 
-  renderSpecPortal = (doc: Doc, specs: BlockSpec[]) => {
-    return html`
-      <editor-host
-        .doc=${doc}
-        .specs=${specs}
-        contenteditable="false"
-      ></editor-host>
-    `;
-  };
-
   readonly slots = {
     unmounted: new Slot(),
   };
@@ -121,12 +110,6 @@ export class EditorHost extends SignalWatcher(
         'This doc is missing root block. Please initialize the default block structure before connecting the editor to DOM.'
       );
     }
-
-    this.std = new BlockStdScope({
-      host: this,
-      doc: this.doc,
-      specs: this.specs,
-    });
 
     this.std.mount();
     this.tabIndex = 0;
@@ -144,14 +127,15 @@ export class EditorHost extends SignalWatcher(
       const rootModel = this.doc.root;
       if (!rootModel) return result;
 
-      const view = this.std.spec.getView(rootModel.flavour);
+      const view = this.std.getView(rootModel.flavour);
       if (!view) return result;
 
-      const widgetTags = Object.values(view.widgets ?? {});
+      const widgetViewMap = this.std.getOptional(
+        WidgetViewMapIdentifier(rootModel.flavour)
+      );
+      const widgetTags = Object.values(widgetViewMap ?? {});
       const elementsTags: StaticValue[] = [
-        typeof view.component === 'function'
-          ? view.component(rootModel)
-          : view.component,
+        typeof view === 'function' ? view(rootModel) : view,
         ...widgetTags,
       ];
       await Promise.all(
@@ -197,10 +181,6 @@ export class EditorHost extends SignalWatcher(
     return this.std.selection;
   }
 
-  get spec(): SpecStore {
-    return this.std.spec;
-  }
-
   get view(): ViewStore {
     return this.std.view;
   }
@@ -212,11 +192,8 @@ export class EditorHost extends SignalWatcher(
   @property({ attribute: false })
   accessor doc!: Doc;
 
-  @property({ attribute: false })
-  accessor specs!: BlockSpec[];
-
   @provide({ context: stdContext })
-  @state()
+  @property({ attribute: false })
   accessor std!: BlockSuite.Std;
 
   @property({ attribute: false })

@@ -1,19 +1,10 @@
-import type { BlockSpec } from '@blocksuite/block-std';
-
+import { BlockViewExtension, type ExtensionType } from '@blocksuite/block-std';
 import { literal } from 'lit/static-html.js';
 
-import { AIChatBlockSchema } from './ai-chat-model.js';
+export const AIChatBlockSpec: ExtensionType[] = [
+  BlockViewExtension('affine:embed-ai-chat', literal`affine-ai-chat`),
+];
 
-export const AIChatBlockSpec: BlockSpec = {
-  schema: AIChatBlockSchema,
-  view: {
-    component: literal`affine-ai-chat`,
-  },
-};
-
-export const EdgelessAIChatBlockSpec: BlockSpec = {
-  schema: AIChatBlockSchema,
-  view: {
-    component: literal`affine-edgeless-ai-chat`,
-  },
-};
+export const EdgelessAIChatBlockSpec: ExtensionType[] = [
+  BlockViewExtension('affine:embed-ai-chat', literal`affine-edgeless-ai-chat`),
+];

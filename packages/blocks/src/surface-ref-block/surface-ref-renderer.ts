@@ -126,7 +126,7 @@ export class SurfaceRefRenderer {
   }
 
   get surfaceService() {
-    return this.std.spec.getService('affine:surface');
+    return this.std.getService('affine:surface');
   }
 
   get viewport() {

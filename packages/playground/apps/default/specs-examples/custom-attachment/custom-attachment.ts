@@ -1,8 +1,8 @@
 import {
   BlockFlavourIdentifier,
   BlockServiceIdentifier,
-  type BlockSpec,
-  BlockStdScope,
+  type ExtensionType,
+  StdIdentifier,
 } from '@blocksuite/block-std';
 import {
   AttachmentBlockService,
@@ -18,42 +18,30 @@ class CustomAttachmentBlockService extends AttachmentBlockService {
 }
 
 export function getCustomAttachmentSpecs() {
-  const pageModeSpecs = PageEditorBlockSpecs.map(spec => {
-    if (spec.schema.model.flavour === 'affine:attachment') {
-      const customized: BlockSpec = {
-        ...spec,
-        extensions: [
-          di => {
-            di.override(
-              BlockServiceIdentifier('affine:attachment'),
-              CustomAttachmentBlockService,
-              [BlockStdScope, BlockFlavourIdentifier('affine:attachment')]
-            );
-          },
-        ],
-      };
-      return customized;
-    }
-    return spec;
-  });
-  const edgelessModeSpecs = EdgelessEditorBlockSpecs.map(spec => {
-    if (spec.schema.model.flavour === 'affine:attachment') {
-      const customized: BlockSpec = {
-        ...spec,
-        extensions: [
-          di => {
-            di.override(
-              BlockServiceIdentifier('affine:attachment'),
-              CustomAttachmentBlockService,
-              [BlockStdScope, BlockFlavourIdentifier('affine:attachment')]
-            );
-          },
-        ],
-      };
-      return customized;
-    }
-    return spec;
-  });
+  const pageModeSpecs: ExtensionType[] = [
+    ...PageEditorBlockSpecs,
+    {
+      setup: di => {
+        di.override(
+          BlockServiceIdentifier('affine:attachment'),
+          CustomAttachmentBlockService,
+          [StdIdentifier, BlockFlavourIdentifier('affine:attachment')]
+        );
+      },
+    },
+  ];
+  const edgelessModeSpecs: ExtensionType[] = [
+    ...EdgelessEditorBlockSpecs,
+    {
+      setup: di => {
+        di.override(
+          BlockServiceIdentifier('affine:attachment'),
+          CustomAttachmentBlockService,
+          [StdIdentifier, BlockFlavourIdentifier('affine:attachment')]
+        );
+      },
+    },
+  ];
 
   return {
     pageModeSpecs,

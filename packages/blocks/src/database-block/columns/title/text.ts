@@ -113,7 +113,7 @@ abstract class BaseTextCell extends BaseCellRenderer<Text> {
   get service() {
     return this.view
       .getContext(HostContextKey)
-      ?.std.spec.getService('affine:database');
+      ?.std.getService('affine:database');
   }
 
   get titleColumn() {
@@ -207,8 +207,8 @@ export class HeaderAreaTextCellEditing extends BaseTextCell {
     e.stopPropagation();
     if (isValidUrl(text)) {
       const std = this.std;
-      const result = await std?.spec
-        .getService('affine:page')
+      const result = await std
+        ?.getService('affine:page')
         .quickSearchService?.searchDoc({
           userInput: text,
           skipSelection: true,

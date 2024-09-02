@@ -1,3 +1,4 @@
+import type { EditorHost } from '@blocksuite/block-std';
 import type { TemplateResult } from 'lit';
 
 import { ShadowlessElement } from '@blocksuite/block-std';
@@ -54,7 +55,7 @@ export class DragPreview extends ShadowlessElement {
   accessor onRemove: (() => void) | null = null;
 
   @property({ attribute: false })
-  accessor template: TemplateResult | null = null;
+  accessor template: TemplateResult | EditorHost | null = null;
 }
 
 declare global {

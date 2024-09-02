@@ -1,35 +1,41 @@
 import type { Doc } from '@blocksuite/store';
-import type { Ref } from 'lit/directives/ref.js';
 
 import { SignalWatcher } from '@lit-labs/preact-signals';
 import { html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { createRef, ref } from 'lit/directives/ref.js';
 
-import type { BlockSpec } from '../spec/type.js';
-import type { EditorHost } from '../view/index.js';
+import type { ExtensionType } from '../extension/index.js';
 
+import { BlockStdScope } from '../scope/index.js';
 import { ShadowlessElement, WithDisposable } from '../view/index.js';
 
 @customElement('test-editor-container')
 export class TestEditorContainer extends SignalWatcher(
   WithDisposable(ShadowlessElement)
 ) {
-  editorRef: Ref<EditorHost> = createRef();
+  private _std!: BlockStdScope;
+
+  override connectedCallback() {
+    super.connectedCallback();
+    this._std = new BlockStdScope({
+      doc: this.doc,
+      extensions: this.specs,
+    });
+  }
 
   protected override render() {
     return html` <div class="test-editor-container">
-      <editor-host
-        ${ref(this.editorRef)}
-        .doc=${this.doc}
-        .specs=${this.specs}
-      ></editor-host>
+      ${this._std.render()}
     </div>`;
+  }
+
+  get std() {
+    return this._std;
   }
 
   @property({ attribute: false })
   accessor doc!: Doc;
 
   @property({ attribute: false })
-  accessor specs: BlockSpec[] = [];
+  accessor specs: ExtensionType[] = [];
 }

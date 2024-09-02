@@ -1427,7 +1427,7 @@ export async function mockQuickSearch(
 ) {
   // mock quick search service
   await page.evaluate(mapping => {
-    window.host.std.spec.getService('affine:page').quickSearchService = {
+    window.host.std.getService('affine:page').quickSearchService = {
       searchDoc(options) {
         return new Promise(resolve => {
           if (!options.userInput) {

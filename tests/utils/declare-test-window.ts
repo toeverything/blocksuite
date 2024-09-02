@@ -16,6 +16,10 @@ declare global {
         utils: typeof import('../../packages/framework/global/src/utils.js');
       };
       editor: typeof import('../../packages/presets/src/index.js');
+      identifiers: typeof import('../../packages/framework/block-std/src/identifier.js');
+      extensions: {
+        WidgetViewMapExtension: typeof import('../../packages/framework/block-std/src/extension/widget-view-map.js').WidgetViewMapExtension;
+      };
     };
     collection: DocCollection;
     blockSchema: Record<string, typeof BlockModel>;

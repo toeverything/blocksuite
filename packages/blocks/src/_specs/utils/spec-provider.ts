@@ -1,11 +1,11 @@
-import type { BlockSpec } from '@blocksuite/block-std';
+import type { ExtensionType } from '@blocksuite/block-std';
 
 import { assertExists } from '@blocksuite/global/utils';
 
 import { SpecBuilder } from './spec-builder.js';
 
 export class SpecProvider {
-  private specMap = new Map<string, BlockSpec[]>();
+  private specMap = new Map<string, ExtensionType[]>();
 
   static instance: SpecProvider;
 
@@ -18,7 +18,7 @@ export class SpecProvider {
     return SpecProvider.instance;
   }
 
-  addSpec(id: string, spec: BlockSpec[]) {
+  addSpec(id: string, spec: ExtensionType[]) {
     if (!this.specMap.has(id)) {
       this.specMap.set(id, spec);
     }
@@ -28,7 +28,7 @@ export class SpecProvider {
     this.specMap.delete(id);
   }
 
-  extendSpec(id: string, newSpec: BlockSpec[]) {
+  extendSpec(id: string, newSpec: ExtensionType[]) {
     const existingSpec = this.specMap.get(id);
     if (!existingSpec) {
       console.error(`Spec not found for ${id}`);

@@ -176,7 +176,7 @@ export class DatabaseBlockComponent extends CaptionedBlockComponent<
   `;
 
   getRootService = () => {
-    return this.std.spec.getService('affine:page');
+    return this.std.getService('affine:page');
   };
 
   headerWidget: DataViewWidget = defineUniComponent(
@@ -386,7 +386,7 @@ export class DatabaseBlockComponent extends CaptionedBlockComponent<
   get optionsConfig(): DatabaseOptionsConfig {
     return {
       configure: (_model, options) => options,
-      ...this.std.spec.getConfig('affine:page')?.databaseOptions,
+      ...this.std.getConfig('affine:page')?.databaseOptions,
     };
   }
 

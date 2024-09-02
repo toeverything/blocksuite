@@ -217,7 +217,7 @@ export function toolbarDefaultConfig(toolbar: AffineFormatBarWidget) {
           if (title === null) return;
           convertSelectedBlocksToLinkedDoc(doc, selectedModels, title);
           notifyDocCreated(host, doc);
-          host.spec
+          host.std
             .getService('affine:page')
             .telemetryService?.track('DocCreated', {
               control: 'create linked doc',
@@ -225,7 +225,7 @@ export function toolbarDefaultConfig(toolbar: AffineFormatBarWidget) {
               module: 'format toolbar',
               type: 'embed-linked-doc',
             });
-          host.spec
+          host.std
             .getService('affine:page')
             .telemetryService?.track('LinkedDocCreated', {
               control: 'create linked doc',

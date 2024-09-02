@@ -1,24 +1,27 @@
-import { SurfaceRefBlockSchema } from '@blocksuite/affine-model';
-import { type BlockSpec, FlavourExtension } from '@blocksuite/block-std';
+import {
+  BlockViewExtension,
+  type ExtensionType,
+  FlavourExtension,
+  WidgetViewMapExtension,
+} from '@blocksuite/block-std';
 import { literal } from 'lit/static-html.js';
 
 import { SurfaceRefBlockService } from './surface-ref-service.js';
 
-export const PageSurfaceRefBlockSpec: BlockSpec = {
-  schema: SurfaceRefBlockSchema,
-  view: {
-    component: literal`affine-surface-ref`,
-    widgets: {
-      surfaceToolbar: literal`affine-surface-ref-toolbar`,
-    },
-  },
-  extensions: [FlavourExtension('affine:surface-ref'), SurfaceRefBlockService],
-};
+export const PageSurfaceRefBlockSpec: ExtensionType[] = [
+  FlavourExtension('affine:surface-ref'),
+  SurfaceRefBlockService,
+  BlockViewExtension('affine:surface-ref', literal`affine-surface-ref`),
+  WidgetViewMapExtension('affine:surface-ref', {
+    surfaceToolbar: literal`affine-surface-ref-toolbar`,
+  }),
+];
 
-export const EdgelessSurfaceRefBlockSpec: BlockSpec = {
-  schema: SurfaceRefBlockSchema,
-  view: {
-    component: literal`affine-edgeless-surface-ref`,
-  },
-  extensions: [FlavourExtension('affine:surface-ref'), SurfaceRefBlockService],
-};
+export const EdgelessSurfaceRefBlockSpec: ExtensionType[] = [
+  FlavourExtension('affine:surface-ref'),
+  SurfaceRefBlockService,
+  BlockViewExtension(
+    'affine:surface-ref',
+    literal`affine-edgeless-surface-ref`
+  ),
+];

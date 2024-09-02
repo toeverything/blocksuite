@@ -560,7 +560,11 @@ export class QuickEdgelessMenu extends ShadowlessElement {
   }
 
   get rootService() {
-    return this.editor.host?.spec.getService('affine:page');
+    try {
+      return this.editor.std.getService('affine:page');
+    } catch {
+      return null;
+    }
   }
 
   @state()

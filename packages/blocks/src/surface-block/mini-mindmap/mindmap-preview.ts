@@ -4,7 +4,11 @@ import {
   MindmapStyleThree,
   MindmapStyleTwo,
 } from '@blocksuite/affine-components/icons';
-import { type EditorHost, WithDisposable } from '@blocksuite/block-std';
+import {
+  BlockStdScope,
+  type EditorHost,
+  WithDisposable,
+} from '@blocksuite/block-std';
 import { noop } from '@blocksuite/global/utils';
 import { type Doc, Job } from '@blocksuite/store';
 import {
@@ -189,7 +193,10 @@ export class MiniMindmapPreview extends WithDisposable(LitElement) {
           borderRadius: '4px',
         })}
       >
-        ${this.host.renderSpecPortal(this.doc, MiniMindmapSpecs)}
+        ${new BlockStdScope({
+          doc: this.doc,
+          extensions: MiniMindmapSpecs,
+        }).render()}
       </div>
 
       ${this.templateShow

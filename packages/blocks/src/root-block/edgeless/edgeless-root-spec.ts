@@ -1,11 +1,12 @@
-import type { BlockSpec } from '@blocksuite/block-std';
-
-import { RootBlockSchema } from '@blocksuite/affine-model';
 import { DocModeService } from '@blocksuite/affine-shared/services';
+import {
+  BlockViewExtension,
+  CommandExtension,
+  type ExtensionType,
+  WidgetViewMapExtension,
+} from '@blocksuite/block-std';
 import { BlockServiceWatcher, FlavourExtension } from '@blocksuite/block-std';
 import { literal, unsafeStatic } from 'lit/static-html.js';
-
-import type { RootBlockConfig } from '../root-config.js';
 
 import { commands } from '../commands/index.js';
 import { AFFINE_DOC_REMOTE_SELECTION_WIDGET } from '../widgets/doc-remote-selection/doc-remote-selection.js';
@@ -42,67 +43,54 @@ export type EdgelessRootBlockWidgetName =
   | typeof AFFINE_VIEWPORT_OVERLAY_WIDGET
   | typeof AFFINE_EDGELESS_AUTO_CONNECT_WIDGET;
 
-export type EdgelessRootBlockSpecType = BlockSpec<
-  EdgelessRootBlockWidgetName,
-  RootBlockConfig
->;
-
-export const EdgelessRootBlockSpec: EdgelessRootBlockSpecType = {
-  schema: RootBlockSchema,
-  view: {
-    component: literal`affine-edgeless-root`,
-    widgets: {
-      // [AFFINE_BLOCK_HUB_WIDGET]: literal`${unsafeStatic(
-      //   AFFINE_BLOCK_HUB_WIDGET
-      // )}`,
-      [AFFINE_MODAL_WIDGET]: literal`${unsafeStatic(AFFINE_MODAL_WIDGET)}`,
-      [AFFINE_INNER_MODAL_WIDGET]: literal`${unsafeStatic(AFFINE_INNER_MODAL_WIDGET)}`,
-      [AFFINE_PIE_MENU_WIDGET]: literal`${unsafeStatic(AFFINE_PIE_MENU_WIDGET)}`,
-      [AFFINE_SLASH_MENU_WIDGET]: literal`${unsafeStatic(
-        AFFINE_SLASH_MENU_WIDGET
-      )}`,
-      [AFFINE_LINKED_DOC_WIDGET]: literal`${unsafeStatic(
-        AFFINE_LINKED_DOC_WIDGET
-      )}`,
-      [AFFINE_DRAG_HANDLE_WIDGET]: literal`${unsafeStatic(
-        AFFINE_DRAG_HANDLE_WIDGET
-      )}`,
-      [AFFINE_EMBED_CARD_TOOLBAR_WIDGET]: literal`${unsafeStatic(
-        AFFINE_EMBED_CARD_TOOLBAR_WIDGET
-      )}`,
-      [AFFINE_FORMAT_BAR_WIDGET]: literal`${unsafeStatic(
-        AFFINE_FORMAT_BAR_WIDGET
-      )}`,
-      [AFFINE_DOC_REMOTE_SELECTION_WIDGET]: literal`${unsafeStatic(
-        AFFINE_DOC_REMOTE_SELECTION_WIDGET
-      )}`,
-      [AFFINE_EDGELESS_REMOTE_SELECTION_WIDGET]: literal`${unsafeStatic(
-        AFFINE_EDGELESS_REMOTE_SELECTION_WIDGET
-      )}`,
-      [AFFINE_EDGELESS_ZOOM_TOOLBAR_WIDGET]: literal`${unsafeStatic(
-        AFFINE_EDGELESS_ZOOM_TOOLBAR_WIDGET
-      )}`,
-      [EDGELESS_ELEMENT_TOOLBAR_WIDGET]: literal`${unsafeStatic(EDGELESS_ELEMENT_TOOLBAR_WIDGET)}`,
-      [AFFINE_VIEWPORT_OVERLAY_WIDGET]: literal`${unsafeStatic(
-        AFFINE_VIEWPORT_OVERLAY_WIDGET
-      )}`,
-      [AFFINE_EDGELESS_AUTO_CONNECT_WIDGET]: literal`${unsafeStatic(
-        AFFINE_EDGELESS_AUTO_CONNECT_WIDGET
-      )}`,
-    },
-  },
-  commands,
-  extensions: [
-    FlavourExtension('affine:page'),
-    EdgelessRootService,
-    DocModeService,
-  ],
-};
+export const EdgelessRootBlockSpec: ExtensionType[] = [
+  FlavourExtension('affine:page'),
+  EdgelessRootService,
+  DocModeService,
+  CommandExtension(commands),
+  BlockViewExtension('affine:page', literal`affine-edgeless-root`),
+  WidgetViewMapExtension('affine:page', {
+    [AFFINE_MODAL_WIDGET]: literal`${unsafeStatic(AFFINE_MODAL_WIDGET)}`,
+    [AFFINE_INNER_MODAL_WIDGET]: literal`${unsafeStatic(AFFINE_INNER_MODAL_WIDGET)}`,
+    [AFFINE_PIE_MENU_WIDGET]: literal`${unsafeStatic(AFFINE_PIE_MENU_WIDGET)}`,
+    [AFFINE_SLASH_MENU_WIDGET]: literal`${unsafeStatic(
+      AFFINE_SLASH_MENU_WIDGET
+    )}`,
+    [AFFINE_LINKED_DOC_WIDGET]: literal`${unsafeStatic(
+      AFFINE_LINKED_DOC_WIDGET
+    )}`,
+    [AFFINE_DRAG_HANDLE_WIDGET]: literal`${unsafeStatic(
+      AFFINE_DRAG_HANDLE_WIDGET
+    )}`,
+    [AFFINE_EMBED_CARD_TOOLBAR_WIDGET]: literal`${unsafeStatic(
+      AFFINE_EMBED_CARD_TOOLBAR_WIDGET
+    )}`,
+    [AFFINE_FORMAT_BAR_WIDGET]: literal`${unsafeStatic(
+      AFFINE_FORMAT_BAR_WIDGET
+    )}`,
+    [AFFINE_DOC_REMOTE_SELECTION_WIDGET]: literal`${unsafeStatic(
+      AFFINE_DOC_REMOTE_SELECTION_WIDGET
+    )}`,
+    [AFFINE_EDGELESS_REMOTE_SELECTION_WIDGET]: literal`${unsafeStatic(
+      AFFINE_EDGELESS_REMOTE_SELECTION_WIDGET
+    )}`,
+    [AFFINE_EDGELESS_ZOOM_TOOLBAR_WIDGET]: literal`${unsafeStatic(
+      AFFINE_EDGELESS_ZOOM_TOOLBAR_WIDGET
+    )}`,
+    [EDGELESS_ELEMENT_TOOLBAR_WIDGET]: literal`${unsafeStatic(EDGELESS_ELEMENT_TOOLBAR_WIDGET)}`,
+    [AFFINE_VIEWPORT_OVERLAY_WIDGET]: literal`${unsafeStatic(
+      AFFINE_VIEWPORT_OVERLAY_WIDGET
+    )}`,
+    [AFFINE_EDGELESS_AUTO_CONNECT_WIDGET]: literal`${unsafeStatic(
+      AFFINE_EDGELESS_AUTO_CONNECT_WIDGET
+    )}`,
+  }),
+];
 
 class EdgelessServiceWatcher extends BlockServiceWatcher {
   static override readonly flavour = 'affine:page';
 
-  override listen() {
+  override mounted() {
     const service = this.blockService;
     service.disposables.add(
       service.specSlots.viewConnected.on(({ service }) => {
@@ -113,16 +101,11 @@ class EdgelessServiceWatcher extends BlockServiceWatcher {
   }
 }
 
-export const PreviewEdgelessRootBlockSpec: EdgelessRootBlockSpecType = {
-  schema: RootBlockSchema,
-  view: {
-    component: literal`affine-edgeless-root-preview`,
-  },
-  extensions: [
-    FlavourExtension('affine:page'),
-    EdgelessRootService,
-    EdgelessServiceWatcher,
-    DocModeService,
-  ],
-  commands,
-};
+export const PreviewEdgelessRootBlockSpec: ExtensionType[] = [
+  FlavourExtension('affine:page'),
+  EdgelessRootService,
+  EdgelessServiceWatcher,
+  DocModeService,
+  CommandExtension(commands),
+  BlockViewExtension('affine:page', literal`affine-edgeless-root-preview`),
+];

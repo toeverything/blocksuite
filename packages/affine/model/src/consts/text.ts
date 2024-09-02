@@ -1,3 +1,5 @@
+import { createEnumMap } from '../utils/enum.js';
+
 export enum ColorScheme {
   Dark = 'dark',
   Light = 'light',
@@ -10,6 +12,8 @@ export enum TextAlign {
   Left = 'left',
   Right = 'right',
 }
+
+export const TextAlignMap = createEnumMap(TextAlign);
 
 export enum TextVerticalAlign {
   Bottom = 'bottom',
@@ -34,6 +38,8 @@ export enum FontWeight {
   SemiBold = '600',
 }
 
+export const FontWeightMap = createEnumMap(FontWeight);
+
 export enum FontStyle {
   Italic = 'italic',
   Normal = 'normal',
@@ -49,15 +55,7 @@ export enum FontFamily {
   Satoshi = 'blocksuite:surface:Satoshi',
 }
 
-export const FontFamilyMap = {
-  [FontFamily.Inter]: 'Inter',
-  [FontFamily.Kalam]: 'Kalam',
-  [FontFamily.Satoshi]: 'Satoshi',
-  [FontFamily.Poppins]: 'Poppins',
-  [FontFamily.Lora]: 'Lora',
-  [FontFamily.BebasNeue]: 'Bebas Neue',
-  [FontFamily.OrelegaOne]: 'Orelega One',
-} as const satisfies Record<FontFamily, string>;
+export const FontFamilyMap = createEnumMap(FontFamily);
 
 export const FontFamilyList = Object.entries(FontFamilyMap) as {
   [K in FontFamily]: [K, (typeof FontFamilyMap)[K]];

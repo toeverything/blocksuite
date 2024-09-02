@@ -2,8 +2,8 @@ import type { BlockCollection, DocCollection } from '@blocksuite/store';
 
 import {
   BlockServiceWatcher,
-  type BlockSpec,
   type EditorHost,
+  type ExtensionType,
 } from '@blocksuite/block-std';
 import {
   DocMode,
@@ -47,18 +47,8 @@ export async function mountDefaultDocEditor(collection: DocCollection) {
 
   const editor = new AffineEditorContainer();
   const specs = getExampleSpecs();
-  editor.pageSpecs = [...specs.pageModeSpecs].map(spec => {
-    if (spec.schema.model.flavour === 'affine:page') {
-      spec = patchPageRootSpec(spec);
-    }
-    return spec;
-  });
-  editor.edgelessSpecs = [...specs.edgelessModeSpecs].map(spec => {
-    if (spec.schema.model.flavour === 'affine:page') {
-      spec = patchPageRootSpec(spec);
-    }
-    return spec;
-  });
+  editor.pageSpecs = patchPageRootSpec([...specs.pageModeSpecs]);
+  editor.edgelessSpecs = patchPageRootSpec([...specs.edgelessModeSpecs]);
   editor.doc = doc;
   editor.mode = DocMode.Page;
   editor.slots.docLinkClicked.on(({ pageId: docId }) => {
@@ -72,7 +62,7 @@ export async function mountDefaultDocEditor(collection: DocCollection) {
 
   app.append(editor);
   await editor.updateComplete;
-  const modeService = editor.host!.std.provider.get(DocModeProvider);
+  const modeService = editor.host!.std.get(DocModeProvider);
   editor.mode = modeService.getMode();
   setDocModeFromUrlParams(modeService);
   editor.slots.docUpdated.on(({ newDocId }) => {
@@ -109,35 +99,33 @@ export async function mountDefaultDocEditor(collection: DocCollection) {
 
   return editor;
 
-  function patchPageRootSpec(spec: BlockSpec) {
+  function patchPageRootSpec(spec: ExtensionType[]) {
     class PatchPageServiceWatcher extends BlockServiceWatcher {
       static override readonly flavour = 'affine:page';
 
-      override listen() {
-        this.blockService.specSlots.mounted.once(({ service }) => {
-          const pageRootService = service as PageRootService;
-          pageRootService.notificationService =
-            mockNotificationService(pageRootService);
-          pageRootService.quickSearchService =
-            mockQuickSearchService(collection);
-          pageRootService.peekViewService = {
-            peek(target: unknown) {
-              alert('Peek view not implemented in playground');
-              console.log('peek', target);
-              return Promise.resolve();
-            },
-          };
-        });
+      override mounted() {
+        const pageRootService = this.blockService as PageRootService;
+        pageRootService.notificationService =
+          mockNotificationService(pageRootService);
+        pageRootService.quickSearchService = mockQuickSearchService(collection);
+        pageRootService.peekViewService = {
+          peek(target: unknown) {
+            alert('Peek view not implemented in playground');
+            console.log('peek', target);
+            return Promise.resolve();
+          },
+        };
+        const switchEditor = editor.switchEditor.bind(editor);
+        pageRootService.disposables.add(
+          pageRootService.std.get(DocModeProvider).onModeChange(switchEditor)
+        );
       }
     }
-    const newSpec: typeof spec = {
+    const newSpec: typeof spec = [
       ...spec,
-      extensions: [
-        ...(spec.extensions ?? []),
-        PatchPageServiceWatcher,
-        MockDocModeService,
-      ],
-    };
+      PatchPageServiceWatcher,
+      MockDocModeService,
+    ];
 
     return newSpec;
   }

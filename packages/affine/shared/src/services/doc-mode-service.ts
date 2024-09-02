@@ -1,7 +1,8 @@
+import type { BlockStdScope } from '@blocksuite/block-std';
 import type { Container } from '@blocksuite/global/di';
 
 import { DocMode } from '@blocksuite/affine-model';
-import { BlockStdScope, Extension } from '@blocksuite/block-std';
+import { Extension, StdIdentifier } from '@blocksuite/block-std';
 import { createIdentifier } from '@blocksuite/global/di';
 import { type Disposable, Slot } from '@blocksuite/global/utils';
 
@@ -30,7 +31,7 @@ export class DocModeService extends Extension implements DocModeProvider {
   }
 
   static override setup(di: Container) {
-    di.addImpl(DocModeProvider, DocModeService, [BlockStdScope]);
+    di.addImpl(DocModeProvider, DocModeService, [StdIdentifier]);
   }
 
   getMode(id: string = this.std.doc.id) {

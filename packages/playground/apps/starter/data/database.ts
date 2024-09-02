@@ -43,7 +43,7 @@ export const database: InitFn = (collection: DocCollection, id: string) => {
 
       new Promise(resolve => requestAnimationFrame(resolve))
         .then(() => {
-          const service = window.host.std.spec.getService('affine:database');
+          const service = window.host.std.getService('affine:database');
           service.initDatabaseBlock(
             doc,
             model,

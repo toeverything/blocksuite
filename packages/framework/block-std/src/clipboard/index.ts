@@ -13,6 +13,8 @@ import * as lz from 'lz-string';
 import rehypeParse from 'rehype-parse';
 import { unified } from 'unified';
 
+import { LifeCycleWatcher } from '../extension/index.js';
+
 type AdapterConstructor<T extends BaseAdapter> = new (job: Job) => T;
 
 type AdapterMap = Map<
@@ -55,7 +57,7 @@ export function onlyContainImgElement(
   return 'maybe';
 }
 
-export class Clipboard {
+export class Clipboard extends LifeCycleWatcher {
   private _adapterMap: AdapterMap = new Map();
 
   // Need to be cloned to a map for later use
@@ -152,6 +154,8 @@ export class Clipboard {
   };
 
   private _jobMiddlewares: JobMiddleware[] = [];
+
+  static override readonly key = 'clipboard';
 
   copy = async (slice: Slice) => {
     return this.copySlice(slice);
@@ -260,8 +264,6 @@ export class Clipboard {
   use = (middleware: JobMiddleware) => {
     this._jobMiddlewares.push(middleware);
   };
-
-  constructor(public std: BlockSuite.Std) {}
 
   private async _getClipboardItem(slice: Slice, type: string) {
     const job = this._getJob();

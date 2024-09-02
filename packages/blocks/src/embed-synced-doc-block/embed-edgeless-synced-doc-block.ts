@@ -4,6 +4,7 @@ import {
   EMBED_CARD_WIDTH,
 } from '@blocksuite/affine-shared/consts';
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
+import { BlockStdScope } from '@blocksuite/block-std';
 import { Bound, assertExists } from '@blocksuite/global/utils';
 import { html } from 'lit';
 import { customElement } from 'lit/decorators.js';
@@ -55,10 +56,10 @@ export class EmbedEdgelessSyncedDocBlockComponent extends toEdgelessEmbedBlock(
           DocMode.Page,
           () => html`
             <div class="affine-page-viewport">
-              ${this.host.renderSpecPortal(
-                syncedDoc,
-                this._buildPreviewSpec('page:preview')
-              )}
+              ${new BlockStdScope({
+                doc: syncedDoc,
+                extensions: this._buildPreviewSpec('page:preview'),
+              }).render()}
             </div>
           `,
         ],
@@ -66,10 +67,10 @@ export class EmbedEdgelessSyncedDocBlockComponent extends toEdgelessEmbedBlock(
           DocMode.Edgeless,
           () => html`
             <div class="affine-edgeless-viewport">
-              ${this.host.renderSpecPortal(
-                syncedDoc,
-                this._buildPreviewSpec('edgeless:preview')
-              )}
+              ${new BlockStdScope({
+                doc: syncedDoc,
+                extensions: this._buildPreviewSpec('edgeless:preview'),
+              }).render()}
             </div>
           `,
         ],

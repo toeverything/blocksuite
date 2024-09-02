@@ -324,7 +324,7 @@ export class RangeBinding {
   }
 
   get host() {
-    return this.manager.host;
+    return this.manager.std.host;
   }
 
   get rangeManager() {

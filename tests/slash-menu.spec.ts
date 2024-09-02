@@ -828,12 +828,22 @@ test.describe('slash menu with customize menu', () => {
       customElements.define('affine-custom-slash-menu', CustomSlashMenu);
 
       const pageSpecs = window.$blocksuite.blocks.PageEditorBlockSpecs;
-      const rootBlockSpec = pageSpecs.shift();
-      if (!rootBlockSpec) throw new Error("Can't find rootBlockSpec");
-      // @ts-ignore
-      rootBlockSpec.view.widgets['affine-slash-menu-widget'] =
-        fakeLiteral`affine-custom-slash-menu`;
-      editor.pageSpecs = [rootBlockSpec, ...pageSpecs];
+      editor.pageSpecs = [
+        ...pageSpecs,
+        {
+          setup: di => {
+            di.override(
+              window.$blocksuite.identifiers.WidgetViewMapIdentifier(
+                'affine:page'
+              ),
+              // @ts-ignore
+              () => ({
+                'affine-slash-menu-widget': fakeLiteral`affine-custom-slash-menu`,
+              })
+            );
+          },
+        },
+      ];
       await editor.updateComplete;
     });
 
@@ -892,12 +902,21 @@ test.describe('slash menu with customize menu', () => {
       customElements.define('affine-custom-slash-menu', CustomSlashMenu);
 
       const pageSpecs = window.$blocksuite.blocks.PageEditorBlockSpecs;
-      const rootBlockSpec = pageSpecs.shift();
-      if (!rootBlockSpec) throw new Error("Can't find rootBlockSpec");
-      // @ts-ignore
-      rootBlockSpec.view.widgets['affine-slash-menu-widget'] =
-        fakeLiteral`affine-custom-slash-menu`;
-      editor.pageSpecs = [rootBlockSpec, ...pageSpecs];
+      editor.pageSpecs = [
+        ...pageSpecs,
+        {
+          setup: di =>
+            di.override(
+              window.$blocksuite.identifiers.WidgetViewMapIdentifier(
+                'affine:page'
+              ),
+              // @ts-ignore
+              () => ({
+                'affine-slash-menu-widget': fakeLiteral`affine-custom-slash-menu`,
+              })
+            ),
+        },
+      ];
       await editor.updateComplete;
     });
 

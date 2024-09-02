@@ -1,15 +1,17 @@
-import { ListBlockSchema } from '@blocksuite/affine-model';
-import { type BlockSpec, FlavourExtension } from '@blocksuite/block-std';
+import {
+  BlockViewExtension,
+  CommandExtension,
+  type ExtensionType,
+  FlavourExtension,
+} from '@blocksuite/block-std';
 import { literal } from 'lit/static-html.js';
 
 import { commands } from './commands/index.js';
 import { ListBlockService } from './list-service.js';
 
-export const ListBlockSpec: BlockSpec = {
-  schema: ListBlockSchema,
-  view: {
-    component: literal`affine-list`,
-  },
-  commands,
-  extensions: [FlavourExtension('affine:list'), ListBlockService],
-};
+export const ListBlockSpec: ExtensionType[] = [
+  FlavourExtension('affine:list'),
+  ListBlockService,
+  CommandExtension(commands),
+  BlockViewExtension('affine:list', literal`affine-list`),
+];

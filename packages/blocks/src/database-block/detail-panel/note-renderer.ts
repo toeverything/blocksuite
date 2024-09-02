@@ -1,11 +1,11 @@
 import type { DatabaseBlockModel } from '@blocksuite/affine-model';
-import type { EditorHost } from '@blocksuite/block-std';
 
 import { focusTextModel } from '@blocksuite/affine-components/rich-text';
 import {
   createDefaultDoc,
   matchFlavours,
 } from '@blocksuite/affine-shared/utils';
+import { BlockStdScope, type EditorHost } from '@blocksuite/block-std';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { css, html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
@@ -99,7 +99,11 @@ export class NoteRenderer
     if (!page) {
       return;
     }
-    return html`${host.renderSpecPortal(page, host.specs)} `;
+    const previewStd = new BlockStdScope({
+      doc: page,
+      extensions: std.extensions,
+    });
+    return html`${previewStd.render()} `;
   }
 
   get databaseBlock(): DatabaseBlockModel {

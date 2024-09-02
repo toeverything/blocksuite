@@ -6,7 +6,7 @@ export const insertLinkByQuickSearchCommand: Command<
   { userInput?: string; skipSelection?: boolean }
 > = (ctx, next) => {
   const { userInput, skipSelection, std } = ctx;
-  const rootService = std.spec.getService('affine:page');
+  const rootService = std.getService('affine:page');
   const quickSearchService = rootService?.quickSearchService;
   if (!quickSearchService) {
     next();

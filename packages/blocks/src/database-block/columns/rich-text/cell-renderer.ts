@@ -159,7 +159,7 @@ export class RichTextCell extends BaseCellRenderer<Text> {
   get service() {
     return this.view
       .getContext(HostContextKey)
-      ?.std.spec.getService('affine:database');
+      ?.std.getService('affine:database');
   }
 
   get topContenteditableElement() {
@@ -361,7 +361,7 @@ export class RichTextCellEditing extends BaseCellRenderer<Text> {
   get service() {
     return this.view
       .getContext(HostContextKey)
-      ?.std.spec.getService('affine:database');
+      ?.std.getService('affine:database');
   }
 
   get topContenteditableElement() {
