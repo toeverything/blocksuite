@@ -1,5 +1,7 @@
 import { z } from 'zod';
 
+import { createEnumMap } from '../utils/enum.js';
+
 export const NOTE_WIDTH = 800;
 
 export enum NoteBackgroundColor {
@@ -15,6 +17,8 @@ export enum NoteBackgroundColor {
   White = '--affine-note-background-white',
   Yellow = '--affine-note-background-yellow',
 }
+
+export const NoteBackgroundColorMap = createEnumMap(NoteBackgroundColor);
 
 export const NOTE_BACKGROUND_COLORS = [
   NoteBackgroundColor.Yellow,
@@ -43,6 +47,8 @@ export enum NoteShadow {
   Sticker = '--affine-note-shadow-sticker',
 }
 
+export const NoteShadowMap = createEnumMap(NoteShadow);
+
 export const NOTE_SHADOWS = [
   NoteShadow.None,
   NoteShadow.Box,
@@ -67,3 +73,5 @@ export enum StrokeStyle {
   None = 'none',
   Solid = 'solid',
 }
+
+export const StrokeStyleMap = createEnumMap(StrokeStyle);

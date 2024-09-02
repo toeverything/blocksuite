@@ -1,5 +1,7 @@
 import { z } from 'zod';
 
+import { createEnumMap } from '../utils/enum.js';
+
 export enum LineWidth {
   Eight = 8,
   // Thin
@@ -24,6 +26,8 @@ export enum LineColor {
   White = '--affine-palette-line-white',
   Yellow = '--affine-palette-line-yellow',
 }
+
+export const LineColorMap = createEnumMap(LineColor);
 
 export const LINE_COLORS = [
   LineColor.Yellow,

@@ -1,3 +1,5 @@
+import { createEnumMap } from '../utils/enum.js';
+
 export enum ConnectorEndpoint {
   Front = 'Front',
   Rear = 'Rear',
@@ -10,6 +12,8 @@ export enum PointStyle {
   None = 'None',
   Triangle = 'Triangle',
 }
+
+export const PointStyleMap = createEnumMap(PointStyle);
 
 export const DEFAULT_FRONT_END_POINT_STYLE = PointStyle.None;
 export const DEFAULT_REAR_END_POINT_STYLE = PointStyle.Arrow;

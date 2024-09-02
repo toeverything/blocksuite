@@ -56,7 +56,7 @@ export const ColorSchema = z.union([
 const LineColorSchema = z.union([LineColorsSchema, ColorSchema]);
 const ShapeFillColorSchema = z.union([FillColorsSchema, ColorSchema]);
 const ShapeStrokeColorSchema = z.union([StrokeColorsSchema, ColorSchema]);
-const TextColorSchema = z.union([z.string(), ColorSchema]);
+const TextColorSchema = z.union([LineColorsSchema, ColorSchema]);
 const NoteBackgroundColorSchema = z.union([
   NoteBackgroundColorsSchema,
   ColorSchema,
