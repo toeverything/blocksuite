@@ -3,7 +3,6 @@ import '@blocksuite/affine-block-paragraph';
 import '@blocksuite/affine-block-list';
 import '@blocksuite/affine-components/rich-text';
 import '@blocksuite/affine-components/toolbar';
-import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 import { Point, deserializeXYWH } from '@blocksuite/global/utils';
 
 import { matchFlavours } from './_common/utils/index.js';
@@ -182,13 +181,6 @@ if (env[importIdentifier] === true) {
   // https://github.com/yjs/yjs/issues/438
   console.error(
     '@blocksuite/blocks was already imported. This breaks constructor checks and will lead to issues!'
-  );
-}
-
-if (typeof window === 'undefined') {
-  throw new BlockSuiteError(
-    ErrorCode.NoneSupportedSSRError,
-    'Seems like you are importing @blocksuite/blocks in SSR mode. Which is not supported for now.'
   );
 }
 
