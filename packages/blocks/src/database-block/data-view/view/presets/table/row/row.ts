@@ -110,7 +110,7 @@ export class TableRow extends SignalWatcher(WithDisposable(ShadowlessElement)) {
       height: 16px;
     }
     .data-view-table-view-drag-handler {
-      width: 8px;
+      width: 4px;
       height: 38px;
       display: flex;
       align-items: center;

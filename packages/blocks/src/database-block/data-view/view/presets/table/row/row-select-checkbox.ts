@@ -28,17 +28,14 @@ export class RowSelectCheckbox extends SignalWatcher(
       background-color: var(--affine-background-primary-color);
       opacity: 0;
       cursor: pointer;
+      font-size: 20px;
+      color: var(--affine-icon-color);
     }
     .row-select-checkbox:hover {
       opacity: 1;
     }
     .row-select-checkbox.selected {
       opacity: 1;
-    }
-    .row-select-checkbox svg {
-      width: 18px;
-      height: 18px;
-      color: var(--affine-icon-color);
     }
   `;
 
