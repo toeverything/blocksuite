@@ -320,7 +320,7 @@ export const defaultSlashMenuConfig: SlashMenuConfig = {
         const imageFiles = await getImageFilesFromLocal();
         if (!imageFiles.length) return;
 
-        const imageService = rootComponent.host.spec.getService('affine:image');
+        const imageService = rootComponent.std.getService('affine:image');
         const maxFileSize = imageService.maxFileSize;
 
         addSiblingImageBlock(
@@ -369,7 +369,7 @@ export const defaultSlashMenuConfig: SlashMenuConfig = {
         if (!file) return;
 
         const attachmentService =
-          rootComponent.host.spec.getService('affine:attachment');
+          rootComponent.std.getService('affine:attachment');
         if (!attachmentService) return;
         const maxFileSize = attachmentService.maxFileSize;
 
@@ -637,7 +637,7 @@ export const defaultSlashMenuConfig: SlashMenuConfig = {
         if (!id) {
           return;
         }
-        const service = rootComponent.std.spec.getService('affine:database');
+        const service = rootComponent.std.getService('affine:database');
         service.initDatabaseBlock(
           rootComponent.doc,
           model,
@@ -695,7 +695,7 @@ export const defaultSlashMenuConfig: SlashMenuConfig = {
         if (!id) {
           return;
         }
-        const service = rootComponent.std.spec.getService('affine:database');
+        const service = rootComponent.std.getService('affine:database');
         service.initDatabaseBlock(
           rootComponent.doc,
           model,

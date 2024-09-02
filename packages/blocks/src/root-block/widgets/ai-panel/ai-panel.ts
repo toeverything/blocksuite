@@ -259,7 +259,7 @@ export class AffineAIPanelWidget extends WidgetComponent {
 
   showDiscardModal = () => {
     const notification =
-      this.host.std.spec.getService('affine:page').notificationService;
+      this.host.std.getService('affine:page').notificationService;
     if (!notification) {
       return Promise.resolve(true);
     }
@@ -326,7 +326,7 @@ export class AffineAIPanelWidget extends WidgetComponent {
   ): Partial<ComputePositionConfig> {
     let rootBoundary: Rect | undefined;
     {
-      const rootService = this.host.std.spec.getService('affine:page');
+      const rootService = this.host.std.getService('affine:page');
       if (rootService instanceof PageRootService) {
         rootBoundary = undefined;
       } else {

@@ -9,9 +9,11 @@ import type {
   InitCommandCtx,
 } from './types.js';
 
+import { LifeCycleWatcher } from '../extension/index.js';
+import { CommandIdentifier } from '../identifier.js';
 import { cmdSymbol } from './consts.js';
 
-export class CommandManager {
+export class CommandManager extends LifeCycleWatcher {
   private _commands = new Map<string, Command>();
 
   private _createChain = (
@@ -129,6 +131,8 @@ export class CommandManager {
     };
   };
 
+  static override readonly key = 'commandManager';
+
   chain = (): Chain<InitCommandCtx> => {
     const methods = {} as Record<
       string,
@@ -151,7 +155,6 @@ export class CommandManager {
     return createChain(methods, []) as never;
   };
 
-  constructor(public std: BlockSuite.Std) {}
   add<N extends BlockSuite.CommandName>(
     name: N,
     command: BlockSuite.Commands[N]
@@ -160,6 +163,13 @@ export class CommandManager {
   add(name: string, command: Command) {
     this._commands.set(name, command);
     return this;
+  }
+
+  override created() {
+    const add = this.add.bind(this);
+    this.std.provider.getAll(CommandIdentifier).forEach((command, key) => {
+      add(key as keyof BlockSuite.Commands, command);
+    });
   }
 
   exec<K extends keyof BlockSuite.Commands>(

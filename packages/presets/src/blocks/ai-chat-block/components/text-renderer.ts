@@ -1,6 +1,10 @@
 import type { AffineAIPanelState } from '@blocksuite/blocks';
 
-import { type EditorHost, WithDisposable } from '@blocksuite/block-std';
+import {
+  BlockStdScope,
+  type EditorHost,
+  WithDisposable,
+} from '@blocksuite/block-std';
 import {
   CodeBlockComponent,
   DividerBlockComponent,
@@ -239,7 +243,10 @@ export class TextRenderer extends WithDisposable(LitElement) {
         ${keyed(
           this._doc,
           html`<div class="ai-answer-text-editor affine-page-viewport">
-            ${this.host.renderSpecPortal(this._doc, previewSpec.value)}
+            ${new BlockStdScope({
+              doc: this._doc,
+              extensions: previewSpec.value,
+            }).render()}
           </div>`
         )}
       </div>

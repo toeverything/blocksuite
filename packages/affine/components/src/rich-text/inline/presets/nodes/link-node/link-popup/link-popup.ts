@@ -408,7 +408,7 @@ export class LinkPopup extends WithDisposable(LitElement) {
   }
 
   private get _rootService() {
-    return this.std?.spec.getService('affine:page') as
+    return this.std?.getService('affine:page') as
       | null
       | (BlockService & {
           getEmbedBlockOptions(link: string): EmbedOptions;

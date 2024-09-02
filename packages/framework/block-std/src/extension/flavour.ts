@@ -1,6 +1,6 @@
 import type { ExtensionType } from './extension.js';
 
-import { BlockFlavourIdentifier } from '../scope/index.js';
+import { BlockFlavourIdentifier } from '../identifier.js';
 
 export function FlavourExtension(flavour: string): ExtensionType {
   return {

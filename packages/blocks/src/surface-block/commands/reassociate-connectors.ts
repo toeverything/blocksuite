@@ -12,7 +12,7 @@ export const reassociateConnectorsCommand: Command<
   { oldId: string; newId: string }
 > = (ctx, next) => {
   const { oldId, newId } = ctx;
-  const service = ctx.std.spec.getService('affine:surface');
+  const service = ctx.std.getService('affine:surface');
   if (!oldId || !newId || !service) {
     next();
     return;

@@ -21,7 +21,7 @@ export const insertEdgelessTextCommand: Command<
   const { std, x, y } = ctx;
   const host = std.host;
   const doc = host.doc;
-  const edgelessService = std.spec.getService('affine:page');
+  const edgelessService = std.getService('affine:page');
   const surface = getSurfaceBlock(doc);
   if (!(edgelessService instanceof EdgelessRootService) || !surface) {
     next();

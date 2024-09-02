@@ -31,7 +31,7 @@ export class EmbedCardCreateModal extends WithDisposable(ShadowlessElement) {
       return;
     }
 
-    const rootService = this.host.spec.getService('affine:page');
+    const rootService = this.host.std.getService('affine:page');
 
     const embedOptions = rootService.getEmbedBlockOptions(url);
 

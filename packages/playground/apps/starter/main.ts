@@ -1,4 +1,8 @@
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
+import {
+  WidgetViewMapExtension,
+  WidgetViewMapIdentifier,
+} from '@blocksuite/block-std';
 import * as blocks from '@blocksuite/blocks';
 import * as globalUtils from '@blocksuite/global/utils';
 import * as editor from '@blocksuite/presets';
@@ -30,6 +34,12 @@ async function main() {
         blocks,
         global: { utils: globalUtils },
         editor,
+        identifiers: {
+          WidgetViewMapIdentifier,
+        },
+        extensions: {
+          WidgetViewMapExtension,
+        },
       }),
     });
 

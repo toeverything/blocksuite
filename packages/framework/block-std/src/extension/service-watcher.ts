@@ -2,21 +2,26 @@ import type { Container } from '@blocksuite/global/di';
 
 import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 
+import type { BlockStdScope } from '../scope/index.js';
 import type { BlockService } from './service.js';
 
 import {
   BlockServiceIdentifier,
-  BlockServiceWatcherIdentifier,
-} from '../scope/index.js';
-import { Extension } from './extension.js';
+  LifeCycleWatcherIdentifier,
+  StdIdentifier,
+} from '../identifier.js';
+import { LifeCycleWatcher } from './lifecycle-watcher.js';
 
 const idMap = new Map<string, number>();
 
-export abstract class BlockServiceWatcher extends Extension {
+export abstract class BlockServiceWatcher extends LifeCycleWatcher {
   static flavour: string;
 
-  constructor(readonly blockService: BlockService) {
-    super();
+  constructor(
+    std: BlockStdScope,
+    readonly blockService: BlockService
+  ) {
+    super(std);
   }
 
   static override setup(di: Container) {
@@ -29,11 +34,9 @@ export abstract class BlockServiceWatcher extends Extension {
     const id = idMap.get(this.flavour) ?? 0;
     idMap.set(this.flavour, id + 1);
     di.addImpl(
-      BlockServiceWatcherIdentifier(`${this.flavour}-watcher-${id}`),
+      LifeCycleWatcherIdentifier(`${this.flavour}-watcher-${id}`),
       this,
-      [BlockServiceIdentifier(this.flavour)]
+      [StdIdentifier, BlockServiceIdentifier(this.flavour)]
     );
   }
-
-  listen() {}
 }

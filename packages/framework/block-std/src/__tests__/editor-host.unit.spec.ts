@@ -40,13 +40,13 @@ describe('editor host', () => {
     document.body.append(editorContainer);
 
     await wait(50);
-    let headingElm = editorContainer.editorRef.value?.view.getBlock(headingId);
+    let headingElm = editorContainer.std.view.getBlock(headingId);
 
     expect(headingElm!.tagName).toBe('TEST-H1-BLOCK');
 
     (headingBlock.model as HeadingBlockModel).type = 'h2';
     await wait(50);
-    headingElm = editorContainer.editorRef.value?.view.getBlock(headingId);
+    headingElm = editorContainer.std.view.getBlock(headingId);
 
     expect(headingElm!.tagName).toBe('TEST-H2-BLOCK');
   });

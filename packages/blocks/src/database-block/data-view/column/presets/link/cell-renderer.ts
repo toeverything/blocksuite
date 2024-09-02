@@ -151,8 +151,8 @@ export class LinkCell extends BaseCellRenderer<string> {
         this.docId = undefined;
         return;
       }
-      const result = std?.spec
-        .getService('affine:page')
+      const result = std
+        ?.getService('affine:page')
         .quickSearchService?.searchDoc({
           userInput: this.value,
           skipSelection: true,

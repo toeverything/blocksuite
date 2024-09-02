@@ -39,6 +39,6 @@ export interface ToolbarMoreMenuConfig {
 export function getMoreMenuConfig(std: BlockStdScope): ToolbarMoreMenuConfig {
   return {
     configure: <T extends MenuContext>(groups: MenuItemGroup<T>[]) => groups,
-    ...std.spec.getConfig('affine:page')?.toolbarMoreMenu,
+    ...std.getConfig('affine:page')?.toolbarMoreMenu,
   };
 }

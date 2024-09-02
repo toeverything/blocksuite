@@ -1,15 +1,14 @@
 import { literal } from 'lit/static-html.js';
 
-import type { BlockSpec } from '../spec/type.js';
+import type { HeadingBlockModel } from './test-schema.js';
 
-import { BlockService, FlavourExtension } from '../extension/index.js';
-import './test-block.js';
 import {
-  type HeadingBlockModel,
-  HeadingBlockSchema,
-  NoteBlockSchema,
-  RootBlockSchema,
-} from './test-schema.js';
+  BlockService,
+  BlockViewExtension,
+  type ExtensionType,
+  FlavourExtension,
+} from '../extension/index.js';
+import './test-block.js';
 
 class TestPageService extends BlockService {
   static override flavour = 'test:page';
@@ -23,36 +22,24 @@ class TestHeadingService extends BlockService {
   static override flavour = 'test:heading';
 }
 
-export const testSpecs: BlockSpec[] = [
-  {
-    schema: RootBlockSchema,
-    view: {
-      component: literal`test-root-block`,
-    },
-    extensions: [FlavourExtension('test:page'), TestPageService],
-  },
+export const testSpecs: ExtensionType[] = [
+  FlavourExtension('test:page'),
+  TestPageService,
+  BlockViewExtension('test:page', literal`test-root-block`),
 
-  {
-    schema: NoteBlockSchema,
-    view: {
-      component: literal`test-note-block`,
-    },
-    extensions: [FlavourExtension('test:note'), TestNoteService],
-  },
+  FlavourExtension('test:note'),
+  TestNoteService,
+  BlockViewExtension('test:note', literal`test-note-block`),
 
-  {
-    schema: HeadingBlockSchema,
-    view: {
-      component: model => {
-        const h = (model as HeadingBlockModel).type$.value;
+  FlavourExtension('test:heading'),
+  TestHeadingService,
+  BlockViewExtension('test:heading', model => {
+    const h = (model as HeadingBlockModel).type$.value;
 
-        if (h === 'h1') {
-          return literal`test-h1-block`;
-        }
+    if (h === 'h1') {
+      return literal`test-h1-block`;
+    }
 
-        return literal`test-h2-block`;
-      },
-    },
-    extensions: [FlavourExtension('test:heading'), TestHeadingService],
-  },
+    return literal`test-h2-block`;
+  }),
 ];

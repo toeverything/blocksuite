@@ -145,7 +145,7 @@ export class BlockRenderer
   }
 
   get service() {
-    return this.host.std.spec.getService('affine:database');
+    return this.host.std.getService('affine:database');
   }
 
   @property({ attribute: false })

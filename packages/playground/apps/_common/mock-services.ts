@@ -1,6 +1,7 @@
+import type { BlockStdScope } from '@blocksuite/block-std';
 import type { Container } from '@blocksuite/global/di';
 
-import { BlockStdScope, Extension } from '@blocksuite/block-std';
+import { Extension, StdIdentifier } from '@blocksuite/block-std';
 import { DocModeProvider, type PageRootService } from '@blocksuite/blocks';
 import {
   DocMode,
@@ -69,7 +70,7 @@ export class MockDocModeService extends Extension implements DocModeProvider {
   }
 
   static override setup(di: Container) {
-    di.override(DocModeProvider, MockDocModeService, [BlockStdScope]);
+    di.override(DocModeProvider, MockDocModeService, [StdIdentifier]);
   }
 }
 

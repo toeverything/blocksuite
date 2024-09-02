@@ -17,7 +17,7 @@ export const edgelessToBlob = async (
   }
 ): Promise<Blob> => {
   const { edgelessElement } = options;
-  const rootService = host.spec.getService('affine:page');
+  const rootService = host.std.getService('affine:page');
   const exportManager = rootService.exportManager;
   const bound = Bound.deserialize(edgelessElement.xywh);
   const isBlock = isTopLevelBlock(edgelessElement);

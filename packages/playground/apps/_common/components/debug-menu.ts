@@ -319,9 +319,9 @@ export class DebugMenu extends ShadowlessElement {
   }
 
   private _present() {
-    if (!this.editor.host) return;
-    const rootService = this.editor.host.spec.getService('affine:page');
-    const mode = this.editor.host.std.get(DocModeProvider).getMode();
+    if (!this.editor.std || !this.editor.host) return;
+    const rootService = this.editor.std.getService('affine:page');
+    const mode = this.editor.std.get(DocModeProvider).getMode();
     if (mode !== 'edgeless') {
       toast(
         this.editor.host,
@@ -725,7 +725,7 @@ export class DebugMenu extends ShadowlessElement {
   }
 
   get rootService() {
-    return this.editor.host?.spec.getService('affine:page');
+    return this.editor.std?.getService('affine:page');
   }
 
   @state()

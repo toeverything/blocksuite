@@ -148,7 +148,7 @@ export class FramePanelHeader extends WithDisposable(LitElement) {
   static override styles = styles;
 
   private _tryLoadNavigatorStateLocalRecord() {
-    this._navigatorMode = this.editorHost.spec
+    this._navigatorMode = this.editorHost.std
       .getService('affine:page')
       .editPropsStore.getStorage('presentFillScreen')
       ? 'fill'
@@ -226,7 +226,7 @@ export class FramePanelHeader extends WithDisposable(LitElement) {
   }
 
   get rootService() {
-    return this.editorHost.spec.getService('affine:page');
+    return this.editorHost.std.getService('affine:page');
   }
 
   @query('.all-frames-setting-button')

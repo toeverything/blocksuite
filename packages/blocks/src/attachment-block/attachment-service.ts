@@ -67,7 +67,7 @@ export class AttachmentBlockService extends BlockService {
         startDragging([blockComponent], state);
         return true;
       } else if (isInSurface && isDraggingByDragHandle) {
-        const edgelessService = editorHost.std.spec.getService(
+        const edgelessService = editorHost.std.getService(
           'affine:page'
         ) as EdgelessRootService;
         const zoom = edgelessService?.viewport.zoom ?? 1;

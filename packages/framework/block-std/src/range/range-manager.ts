@@ -4,18 +4,18 @@ import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 import { INLINE_ROOT_ATTR, type InlineRootElement } from '@blocksuite/inline';
 
 import type { BlockComponent } from '../view/element/block-component.js';
-import type { EditorHost } from '../view/element/lit-host.js';
 
+import { LifeCycleWatcher } from '../extension/index.js';
 import { RANGE_QUERY_EXCLUDE_ATTR, RANGE_SYNC_EXCLUDE_ATTR } from './consts.js';
 import { RangeBinding } from './range-binding.js';
 
 /**
  * CRUD for Range and TextSelection
  */
-export class RangeManager {
-  binding: RangeBinding | null = null;
+export class RangeManager extends LifeCycleWatcher {
+  static override readonly key = 'rangeManager';
 
-  constructor(public host: EditorHost) {}
+  binding: RangeBinding | null = null;
 
   private _isRangeSyncExcluded(el: Element) {
     return !!el.closest(`[${RANGE_SYNC_EXCLUDE_ATTR}="true"]`);
@@ -26,7 +26,7 @@ export class RangeManager {
     if (!selection) return;
     selection.removeAllRanges();
 
-    const topContenteditableElement = this.host.querySelector(
+    const topContenteditableElement = this.std.host.querySelector(
       '[contenteditable="true"]'
     );
     if (topContenteditableElement instanceof HTMLElement) {
@@ -40,7 +40,7 @@ export class RangeManager {
   getClosestBlock(node: Node) {
     const el = node instanceof Element ? node : node.parentElement;
     if (!el) return null;
-    const block = el.closest<BlockComponent>(`[${this.host.blockIdAttr}]`);
+    const block = el.closest<BlockComponent>(`[${this.std.host.blockIdAttr}]`);
     if (!block) return null;
     if (this._isRangeSyncExcluded(block)) return null;
     return block;
@@ -81,8 +81,8 @@ export class RangeManager {
     const { mode = 'all', match = () => true } = options;
 
     let result = Array.from<BlockComponent>(
-      this.host.querySelectorAll(
-        `[${this.host.blockIdAttr}]:not([${RANGE_QUERY_EXCLUDE_ATTR}="true"])`
+      this.std.host.querySelectorAll(
+        `[${this.std.host.blockIdAttr}]:not([${RANGE_QUERY_EXCLUDE_ATTR}="true"])`
       )
     ).filter(el => range.intersectsNode(el) && match(el));
 
@@ -123,12 +123,12 @@ export class RangeManager {
     return result;
   }
 
-  mount() {
+  override mounted() {
     this.binding = new RangeBinding(this);
   }
 
   queryInlineEditorByPath(path: string) {
-    const block = this.host.view.getBlock(path);
+    const block = this.std.host.view.getBlock(path);
     if (!block) return null;
 
     const inlineRoot = block.querySelector<InlineRootElement>(
@@ -162,7 +162,7 @@ export class RangeManager {
       return null;
     }
 
-    return this.host.selection.create('text', {
+    return this.std.host.selection.create('text', {
       from: {
         blockId: startBlock.blockId,
         index: startInlineRange.index,
@@ -188,7 +188,7 @@ export class RangeManager {
   }
 
   syncRangeToTextSelection(range: Range, isRangeReversed: boolean) {
-    const selectionManager = this.host.selection;
+    const selectionManager = this.std.host.selection;
 
     if (!range) {
       selectionManager.clear(['text']);

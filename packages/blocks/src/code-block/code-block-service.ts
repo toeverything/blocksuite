@@ -44,7 +44,7 @@ export class CodeBlockService extends BlockService {
       loadWasm: getWasm,
     })
       .then(async highlighter => {
-        const config = this.std.spec.getConfig('affine:code');
+        const config = this.std.getConfig('affine:code');
         const darkTheme = config?.theme?.dark ?? CODE_BLOCK_DEFAULT_DARK_THEME;
         const lightTheme =
           config?.theme?.light ?? CODE_BLOCK_DEFAULT_LIGHT_THEME;
@@ -64,9 +64,7 @@ export class CodeBlockService extends BlockService {
   }
 
   get langs() {
-    return (
-      this.std.spec.getConfig('affine:code')?.langs ?? bundledLanguagesInfo
-    );
+    return this.std.getConfig('affine:code')?.langs ?? bundledLanguagesInfo;
   }
 
   get themeKey() {
