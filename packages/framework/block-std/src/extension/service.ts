@@ -14,6 +14,14 @@ import {
 import { getSlots } from '../spec/index.js';
 import { Extension } from './extension.js';
 
+/**
+ * @deprecated
+ * BlockService is deprecated. You should reconsider where to put your feature.
+ *
+ * BlockService is a legacy extension that is used to provide services to the block.
+ * In the previous version of BlockSuite, block service provides a way to extend the block.
+ * However, in the new version, we recommend using the new extension system.
+ */
 export abstract class BlockService extends Extension {
   static flavour: string;
 
