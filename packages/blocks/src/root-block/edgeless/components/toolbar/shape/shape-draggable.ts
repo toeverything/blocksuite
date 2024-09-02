@@ -203,39 +203,37 @@ export class EdgelessToolbarShapeDraggable extends EdgelessToolbarToolMixin(
       },
     });
 
-    this._disposables.add(
-      this.edgeless.bindHotKey(
-        {
-          s: ctx => {
-            // `page.keyboard.press('Shift+s')` in playwright will also trigger this 's' key event
-            if (ctx.get('keyboardState').raw.shiftKey) return;
+    this.edgeless.bindHotKey(
+      {
+        s: ctx => {
+          // `page.keyboard.press('Shift+s')` in playwright will also trigger this 's' key event
+          if (ctx.get('keyboardState').raw.shiftKey) return;
 
-            const service = this.edgeless.service;
-            if (service.locked || service.selection.editing) return;
+          const service = this.edgeless.service;
+          if (service.locked || service.selection.editing) return;
 
-            if (this.readyToDrop) {
-              const activeIndex = shapes.findIndex(
-                s => s.name === this.draggingShape
-              );
-              const nextIndex = (activeIndex + 1) % shapes.length;
-              const next = shapes[nextIndex];
-              this.draggingShape = next.name;
+          if (this.readyToDrop) {
+            const activeIndex = shapes.findIndex(
+              s => s.name === this.draggingShape
+            );
+            const nextIndex = (activeIndex + 1) % shapes.length;
+            const next = shapes[nextIndex];
+            this.draggingShape = next.name;
 
-              this.draggableController.cancelWithoutAnimation();
-            }
+            this.draggableController.cancelWithoutAnimation();
+          }
 
-            const el = this.shapeContainer.querySelector(
-              `.shape.${this.draggingShape}`
-            ) as HTMLElement;
-            assertExists(el, 'Edgeless toolbar Shape element not found');
-            const { x, y } = service.tool.lastMousePos;
-            const { left, top } = this.edgeless.viewport;
-            const clientPos = { x: x + left, y: y + top };
-            this.draggableController.clickToDrag(el, clientPos);
-          },
+          const el = this.shapeContainer.querySelector(
+            `.shape.${this.draggingShape}`
+          ) as HTMLElement;
+          assertExists(el, 'Edgeless toolbar Shape element not found');
+          const { x, y } = service.tool.lastMousePos;
+          const { left, top } = this.edgeless.viewport;
+          const clientPos = { x: x + left, y: y + top };
+          this.draggableController.clickToDrag(el, clientPos);
         },
-        { global: true }
-      )
+      },
+      { global: true }
     );
   }
 

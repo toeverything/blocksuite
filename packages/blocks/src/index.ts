@@ -1,6 +1,7 @@
 /// <reference types="@blocksuite/global" />
 import '@blocksuite/affine-block-paragraph';
 import '@blocksuite/affine-block-list';
+import '@blocksuite/affine-components/context-menu';
 import '@blocksuite/affine-components/rich-text';
 import '@blocksuite/affine-components/toolbar';
 import { Point, deserializeXYWH } from '@blocksuite/global/utils';
@@ -86,6 +87,7 @@ export * from './surface-block/surface-service.js';
 export * from './surface-ref-block/index.js';
 export * from '@blocksuite/affine-block-list';
 export * from '@blocksuite/affine-block-paragraph';
+export { type MenuOptions } from '@blocksuite/affine-components/context-menu';
 export {
   HoverController,
   whenHover,
