@@ -39,9 +39,7 @@
   "publishConfig": {
     "access": "public",
     "exports": {
-      ".": {
-        "types": "./index.d.ts"
-      },
+      ".": "./index.d.ts",
       "./utils": {
         "types": "./dist/utils.d.ts",
         "import": "./dist/utils.js"

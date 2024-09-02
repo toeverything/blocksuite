@@ -26,23 +26,6 @@ import { AFFINE_VIEWPORT_OVERLAY_WIDGET } from '../widgets/viewport-overlay/view
 import './edgeless-root-preview-block.js';
 import { EdgelessRootService } from './edgeless-root-service.js';
 
-export type EdgelessRootBlockWidgetName =
-  // | typeof AFFINE_BLOCK_HUB_WIDGET
-  | typeof AFFINE_MODAL_WIDGET
-  | typeof AFFINE_INNER_MODAL_WIDGET
-  | typeof AFFINE_PIE_MENU_WIDGET
-  | typeof AFFINE_SLASH_MENU_WIDGET
-  | typeof AFFINE_LINKED_DOC_WIDGET
-  | typeof AFFINE_DRAG_HANDLE_WIDGET
-  | typeof AFFINE_EMBED_CARD_TOOLBAR_WIDGET
-  | typeof AFFINE_FORMAT_BAR_WIDGET
-  | typeof AFFINE_DOC_REMOTE_SELECTION_WIDGET
-  | typeof AFFINE_EDGELESS_REMOTE_SELECTION_WIDGET
-  | typeof AFFINE_EDGELESS_ZOOM_TOOLBAR_WIDGET
-  | typeof EDGELESS_ELEMENT_TOOLBAR_WIDGET
-  | typeof AFFINE_VIEWPORT_OVERLAY_WIDGET
-  | typeof AFFINE_EDGELESS_AUTO_CONNECT_WIDGET;
-
 export const edgelessRootWigetViewMap = {
   [AFFINE_MODAL_WIDGET]: literal`${unsafeStatic(AFFINE_MODAL_WIDGET)}`,
   [AFFINE_INNER_MODAL_WIDGET]: literal`${unsafeStatic(AFFINE_INNER_MODAL_WIDGET)}`,
