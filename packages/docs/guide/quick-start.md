@@ -18,42 +18,42 @@ BlockSuite works with all common frameworks, you can start from these examples t
   </tr>
   <tr>
     <td><Icon name="TypeScript" />Vanilla</td>
-    <td><a href="https://stackblitz.com/github/toeverything/blocksuite/tree/master/examples/vanilla-indexeddb" target="_blank">vanilla-indexeddb</a></td>
+    <td><a href="https://stackblitz.com/github/toeverything/blocksuite-examples/tree/master/vanilla-indexeddb" target="_blank">vanilla-indexeddb</a></td>
     <td>✅</td>
   </tr>
   <tr>
     <td><Icon name="Next" />Next</td>
-    <td><a href="https://github.com/toeverything/blocksuite/tree/master/examples/react-basic-next" target="_blank">react-basic-next</a></td>
+    <td><a href="https://github.com/toeverything/blocksuite-examples/tree/master/react-basic-next" target="_blank">react-basic-next</a></td>
     <td>✅</td>
   </tr>
   <tr>
     <td><Icon name="React" />React</td>
-    <td><a href="https://stackblitz.com/github/toeverything/blocksuite/tree/master/examples/react-basic" target="_blank">react-basic</a></td>
+    <td><a href="https://stackblitz.com/github/toeverything/blocksuite-examples/tree/master/react-basic" target="_blank">react-basic</a></td>
     <td>✅</td>
   </tr>
   <tr>
     <td><Icon name="Vue" />Vue</td>
-    <td><a href="https://stackblitz.com/github/toeverything/blocksuite/tree/master/examples/vue-basic" target="_blank">vue-basic</a></td>
+    <td><a href="https://stackblitz.com/github/toeverything/blocksuite-examples/tree/master/vue-basic" target="_blank">vue-basic</a></td>
     <td>✅</td>
   </tr>
   <tr>
     <td><Icon name="Angular" />Angular</td>
-    <td><a href="https://github.com/toeverything/blocksuite/tree/master/examples/angular-basic" target="_blank">angular-basic</a></td>
+    <td><a href="https://github.com/toeverything/blocksuite-examples/tree/master/angular-basic" target="_blank">angular-basic</a></td>
     <td>✅</td>
   </tr>
   <tr>
     <td><Icon name="Preact" icon="https://raw.githubusercontent.com/preactjs/preact-www/master/src/assets/branding/symbol.svg" />Preact</td>
-    <td><a href="https://stackblitz.com/github/toeverything/blocksuite/tree/master/examples/preact-basic" target="_blank">preact-basic</a></td>
+    <td><a href="https://stackblitz.com/github/toeverything/blocksuite-examples/tree/master/preact-basic" target="_blank">preact-basic</a></td>
     <td>✅</td>
   </tr>
   <tr>
     <td><Icon name="Svelte" />Svelte</td>
-    <td><a href="https://stackblitz.com/github/toeverything/blocksuite/tree/master/examples/svelte-basic" target="_blank">svelte-basic</a></td>
+    <td><a href="https://stackblitz.com/github/toeverything/blocksuite-examples/tree/master/svelte-basic" target="_blank">svelte-basic</a></td>
     <td>✅</td>
   </tr>
   <tr>
     <td><Icon name="Solid" icon="https://www.solidjs.com/img/favicons/favicon-32x32.png" />Solid</td>
-    <td><a href="https://stackblitz.com/github/toeverything/blocksuite/tree/master/examples/solid-basic" target="_blank">solid-basic</a></td>
+    <td><a href="https://stackblitz.com/github/toeverything/blocksuite-examples/tree/master/solid-basic" target="_blank">solid-basic</a></td>
     <td>✅</td>
   </tr>
 </table>
