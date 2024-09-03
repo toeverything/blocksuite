@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-restricted-imports */
 // checkout https://vitest.dev/guide/debugging.html for debugging tests
 
 import type { Slot } from '@blocksuite/global/utils';
@@ -374,7 +373,6 @@ describe('addBlock', () => {
 
     assert.equal(root.flavour, 'affine:page');
 
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     doc.addBlock('affine:paragraph', {}, noteId!);
     assert.equal(root.children[0].flavour, 'affine:note');
     assert.equal(root.children[0].children[0].flavour, 'affine:paragraph');

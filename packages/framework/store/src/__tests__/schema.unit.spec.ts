@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-restricted-imports */
-
 import { literal } from 'lit/static-html.js';
 import { describe, expect, it, vi } from 'vitest';
 

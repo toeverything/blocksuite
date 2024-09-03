@@ -187,7 +187,6 @@ describe('DatabaseManager', () => {
 
     expect(model).not.toBeNull();
 
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const result = getCell(db, model!.id, column.id);
     expect(result).toEqual(cell);
   });

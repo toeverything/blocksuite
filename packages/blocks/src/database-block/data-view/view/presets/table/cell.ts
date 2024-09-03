@@ -110,7 +110,6 @@ export class DatabaseCellContainer extends SignalWatcher(
     return selection.focus.rowIndex === this.rowIndex;
   }
 
-  /* eslint-disable lit/binding-positions, lit/no-invalid-html */
   override render() {
     const renderer = this.column.renderer$.value;
     if (!renderer) {

@@ -1,11 +1,13 @@
-/* eslint-disable @typescript-eslint/no-restricted-imports */
-import type { DocMode } from '@blocksuite/blocks';
 import type { SerializedXYWH } from '@blocksuite/global/utils';
 import type { DeltaInsert } from '@blocksuite/inline';
 import type { AffineEditorContainer } from '@blocksuite/presets';
 
 import { ShadowlessElement } from '@blocksuite/block-std';
-import { type AffineTextAttributes, DocModeProvider } from '@blocksuite/blocks';
+import {
+  type AffineTextAttributes,
+  type DocMode,
+  DocModeProvider,
+} from '@blocksuite/blocks';
 import { EdgelessRootService, printToPdf } from '@blocksuite/blocks';
 import { type DocCollection, Text } from '@blocksuite/store';
 import '@shoelace-style/shoelace/dist/components/alert/alert.js';

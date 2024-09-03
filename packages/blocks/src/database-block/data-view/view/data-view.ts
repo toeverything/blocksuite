@@ -56,7 +56,6 @@ export interface DataViewExpose {
 }
 
 declare global {
-  // eslint-disable-next-line @typescript-eslint/no-empty-interface
   export interface DataViewDataTypeMap {}
 }
 export type BasicViewDataType<
@@ -119,7 +118,6 @@ export const viewType = <Type extends string>(type: Type) => ({
 });
 
 export class ViewRendererManager {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private map = new Map<string, DataViewRendererConfig>();
 
   getView(type: string): DataViewRendererConfig {

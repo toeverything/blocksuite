@@ -953,6 +953,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     }
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-misused-promises
   async onContainerDragStart(e: PointerEventState) {
     if (this.edgelessSelectionManager.editing) return;
     // Determine the drag type based on the current state and event

@@ -21,7 +21,6 @@ export type CommandKeyToData<K extends BlockSuite.CommandDataName> = Pick<
 export type Command<
   In extends BlockSuite.CommandDataName = never,
   Out extends BlockSuite.CommandDataName = never,
-  // eslint-disable-next-line @typescript-eslint/ban-types
   InData extends object = {},
 > = (
   ctx: CommandKeyToData<In> & InitCommandCtx & InData,
@@ -37,7 +36,6 @@ type OutDataOfCommand<C> =
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   C extends Command<any, infer K, any> ? CommandKeyToData<K> : never;
 
-// eslint-disable-next-line @typescript-eslint/ban-types
 type CommonMethods<In extends object = {}> = {
   inline: <InlineOut extends BlockSuite.CommandDataName = never>(
     command: Command<Extract<keyof In, BlockSuite.CommandDataName>, InlineOut>
@@ -59,7 +57,6 @@ type Cmds = {
   [cmdSymbol]: Command[];
 };
 
-// eslint-disable-next-line @typescript-eslint/ban-types
 export type Chain<In extends object = {}> = CommonMethods<In> & {
   [K in keyof BlockSuite.Commands]: (
     data: MakeOptionalIfEmpty<
@@ -80,7 +77,6 @@ declare global {
     type CommandName = keyof Commands;
     type CommandDataName = keyof CommandContext;
 
-    // eslint-disable-next-line @typescript-eslint/ban-types
     type CommandChain<In extends object = {}> = Chain<In & InitCommandCtx>;
   }
 }

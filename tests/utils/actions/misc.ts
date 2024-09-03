@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-restricted-imports */
 import type { EditorHost } from '@block-std/view/element/lit-host.js';
 import type { DatabaseBlockModel, ListType, RichText } from '@blocks/index.js';
 import type { InlineRange, InlineRootElement } from '@inline/index.js';
@@ -1092,7 +1091,6 @@ export async function setSelection(
       focusOffset,
       currentEditorIndex,
     }) => {
-      /* eslint-disable @typescript-eslint/no-non-null-assertion */
       const editorHost =
         document.querySelectorAll('editor-host')[currentEditorIndex];
       const anchorRichText = editorHost.querySelector<RichText>(

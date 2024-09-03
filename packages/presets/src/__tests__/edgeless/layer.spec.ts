@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-// eslint-disable-next-line @typescript-eslint/no-restricted-imports
+
 import type { BlockComponent } from '@blocksuite/block-std';
 
 import {

@@ -1,5 +1,3 @@
-/* eslint-disable lit/binding-positions, lit/no-invalid-html */
-
 import type {
   FrameBlockModel,
   GroupElementModel,

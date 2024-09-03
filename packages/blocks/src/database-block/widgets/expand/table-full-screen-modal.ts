@@ -10,7 +10,6 @@ import { fullScreenStyles } from './styles.js';
 @customElement('affine-database-table-view-full-screen')
 export class DatabaseTableViewFullScreen extends BlockComponent<DatabaseBlockModel> {
   _renderView = () => {
-    /* eslint-disable lit/binding-positions, lit/no-invalid-html */
     return html`
       <affine-database
         class="affine-block-element"

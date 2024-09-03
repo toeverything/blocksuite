@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-restricted-imports */
 import type { WidgetViewMapIdentifier } from '@block-std/index.js';
 import type { EditorHost } from '@block-std/view/element/index.js';
 import type { TestUtils } from '@blocks/index.js';

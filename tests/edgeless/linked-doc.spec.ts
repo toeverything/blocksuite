@@ -1,7 +1,6 @@
 import { assertNotExists } from '@global/utils.js';
 import { expect } from '@playwright/test';
 
-// eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import {
   Shape,
   activeNoteInEdgeless,
