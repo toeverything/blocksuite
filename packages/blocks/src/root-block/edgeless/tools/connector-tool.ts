@@ -5,7 +5,6 @@ import { ShapeType } from '@blocksuite/affine-model';
 import { Bound, noop } from '@blocksuite/global/utils';
 
 import type { ConnectorMode } from '../../../surface-block/index.js';
-import type { ConnectionOverlay } from '../../../surface-block/managers/connector-manager.js';
 import type { EdgelessTool } from '../types.js';
 
 import {
@@ -248,7 +247,7 @@ export class ConnectorToolController extends EdgelessToolController<ConnectorToo
   }
 
   get connector() {
-    return this._edgeless.service.overlays.connector as ConnectionOverlay;
+    return this._edgeless.service.connectorOverlay;
   }
 }
 

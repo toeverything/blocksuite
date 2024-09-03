@@ -505,8 +505,8 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
 
     const frame = this._service.frame.selectFrame(this._toBeMoved);
     frame
-      ? this._surface.overlays.frame.highlight(frame as FrameBlockModel)
-      : this._surface.overlays.frame.clear();
+      ? this._service.frameOverlay.highlight(frame as FrameBlockModel)
+      : this._service.frameOverlay.clear();
   }
 
   private _moveLabel(delta: IVec) {
@@ -880,15 +880,13 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
       this._lock = false;
     }
 
-    if (this.edgelessSelectionManager.editing) {
-      return;
-    }
-    const { surface } = this._edgeless;
+    if (this.edgelessSelectionManager.editing) return;
+
     this._dragStartPos = [0, 0];
     this._dragLastPos = [0, 0];
     this._selectedBounds = [];
     this._service.snap.cleanupAlignables();
-    surface.overlays.frame.clear();
+    this._service.frameOverlay.clear();
     this._toBeMoved = [];
     this._selectedConnector = null;
     this._selectedConnectorLabelBounds = null;

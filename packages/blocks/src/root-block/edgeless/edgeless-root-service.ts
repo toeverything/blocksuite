@@ -393,6 +393,7 @@ export class EdgelessRootService extends RootService implements SurfaceContext {
     y: number,
     options: { all: true } & PointTestOptions
   ): BlockSuite.EdgelessModel[];
+
   pickElement(
     x: number,
     y: number,
@@ -706,6 +707,10 @@ export class EdgelessRootService extends RootService implements SurfaceContext {
     return (this.frames as GfxBlockModel[]).concat(this._layer.blocks);
   }
 
+  get connectorOverlay() {
+    return this.overlays.connector as ConnectionOverlay;
+  }
+
   /**
    * sorted edgeless elements
    */
@@ -726,6 +731,10 @@ export class EdgelessRootService extends RootService implements SurfaceContext {
 
   get frame() {
     return this._frame;
+  }
+
+  get frameOverlay() {
+    return this.overlays.frame as FrameOverlay;
   }
 
   get frames() {
