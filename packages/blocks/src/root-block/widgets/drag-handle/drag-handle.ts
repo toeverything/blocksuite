@@ -12,7 +12,6 @@ import {
 import { getCurrentNativeRange } from '@blocksuite/affine-shared/utils';
 import { type BlockComponent, BlockStdScope } from '@blocksuite/block-std';
 import {
-  PathFinder,
   type PointerEventState,
   type UIEventHandler,
   WidgetComponent,
@@ -138,7 +137,7 @@ export class AffineDragHandleWidget extends WidgetComponent<
     if (isInsidePageEditor(this.host)) return true;
     const edgelessRoot = this.rootComponent as EdgelessRootBlockComponent;
 
-    const noteBlockId = noteBlock.path[noteBlock.path.length - 1];
+    const noteBlockId = noteBlock.model.id;
     return (
       edgelessRoot.service.selection.editing &&
       edgelessRoot.service.selection.selectedIds[0] === noteBlockId
@@ -452,7 +451,6 @@ export class AffineDragHandleWidget extends WidgetComponent<
     if (!closestBlock) return null;
 
     const blockId = closestBlock.model.id;
-    const blockPath = closestBlock.path;
     const model = closestBlock.model;
 
     const isDatabase = matchFlavours(model, ['affine:database']);
@@ -480,7 +478,7 @@ export class AffineDragHandleWidget extends WidgetComponent<
         this.draggingElements.map(block => block.model.id),
         blockId
       ) ||
-      containChildBlock(this.draggingElements, blockPath)
+      containChildBlock(this.draggingElements, model)
     ) {
       return null;
     }
@@ -539,7 +537,7 @@ export class AffineDragHandleWidget extends WidgetComponent<
 
     if (
       containBlock(
-        blocks.map(block => PathFinder.id(block.path)),
+        blocks.map(block => block.id),
         this._anchorBlockPath
       )
     ) {

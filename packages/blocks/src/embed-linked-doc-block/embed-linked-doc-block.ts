@@ -167,10 +167,10 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockComponent<
     // TODO(@fundon): should scroll into target block/element
     if (pageId === this.doc.id) return;
 
-    const rootComponent = this.std.view.viewFromPath('block', [
-      this.doc.root?.id ?? '',
-    ]) as RootBlockComponent | null;
-    assertExists(rootComponent);
+    const rootComponent = this.std.view.getBlock(
+      this.doc.root?.id ?? ''
+    ) as RootBlockComponent | null;
+    if (!rootComponent) return;
 
     rootComponent.slots.docLinkClicked.emit(this.referenceInfo);
   };

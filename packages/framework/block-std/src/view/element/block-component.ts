@@ -65,8 +65,6 @@ export class BlockComponent<
     );
   };
 
-  path: string[] = [];
-
   renderChildren = (model: BlockModel): TemplateResult => {
     return this.host.renderChildren(model);
   };
@@ -130,8 +128,6 @@ export class BlockComponent<
       }
     });
     this._disposables.add(disposable);
-
-    this.path = this.host.view.calculatePath(this.model);
 
     this._disposables.add(
       this.model.propsUpdated.on(() => {

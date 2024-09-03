@@ -30,8 +30,6 @@ export class WidgetComponent<
     );
   };
 
-  path!: string[];
-
   bindHotKey(
     keymap: Record<string, UIEventHandler>,
     options?: { global: boolean }
@@ -45,10 +43,8 @@ export class WidgetComponent<
 
   override connectedCallback() {
     super.connectedCallback();
-    const id = this.widgetId;
     this.std.view.setWidget(this);
 
-    this.path = this.host.view.calculatePath(this.model).concat(id);
     this.service.specSlots.widgetConnected.emit({
       service: this.service,
       component: this,
