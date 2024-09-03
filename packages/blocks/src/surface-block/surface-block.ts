@@ -10,19 +10,20 @@ import { css, html } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 
 import type { LayerManager } from './managers/layer-manager.js';
+import type { Overlay } from './renderer/canvas-renderer.js';
+import type { ElementRenderer } from './renderer/elements/index.js';
 import type { SurfaceBlockModel } from './surface-model.js';
 import type { SurfaceBlockService } from './surface-service.js';
 
-import { FrameOverlay } from '../root-block/edgeless/frame-manager.js';
 import { ConnectorElementModel } from './element-model/index.js';
-import { ConnectionOverlay } from './managers/connector-manager.js';
 import { CanvasRenderer } from './renderer/canvas-renderer.js';
-import { elementRenderers } from './renderer/elements/index.js';
 
 export interface SurfaceContext {
   viewport: Viewport;
   layer: LayerManager;
   host: EditorHost;
+  overlays: Record<string, Overlay>;
+  elementRenderers: Record<string, ElementRenderer>;
   selection: {
     selectedIds: string[];
     slots: {
@@ -143,11 +144,6 @@ export class SurfaceBlockComponent extends BlockComponent<
     viewport.setViewportByBound(this._cachedViewport, [0, 0, 0, 0], true);
   };
 
-  overlays!: {
-    connector: ConnectionOverlay;
-    frame: FrameOverlay;
-  };
-
   refresh = () => {
     this._renderer?.refresh();
   };
@@ -162,13 +158,8 @@ export class SurfaceBlockComponent extends BlockComponent<
     return `scale(${1 / zoom}) translate(${-translateX}px, ${-translateY}px)`;
   }
 
-  private _initOverlay() {
-    this.overlays = {
-      connector: new ConnectionOverlay(this._context),
-      frame: new FrameOverlay(),
-    };
-
-    values(this.overlays).forEach(overlay => {
+  private _initOverlays() {
+    values(this._context.overlays).forEach(overlay => {
       this._renderer.addOverlay(overlay);
     });
   }
@@ -192,7 +183,7 @@ export class SurfaceBlockComponent extends BlockComponent<
       onStackingCanvasCreated(canvas) {
         canvas.className = 'indexable-canvas';
       },
-      elementRenderers,
+      elementRenderers: this._context.elementRenderers,
     });
 
     this._disposables.add(
@@ -240,9 +231,10 @@ export class SurfaceBlockComponent extends BlockComponent<
 
     this.setAttribute(RANGE_SYNC_EXCLUDE_ATTR, 'true');
 
+    console.log(this.service);
     this._initThemeObserver();
     this._initRenderer();
-    this._initOverlay();
+    this._initOverlays();
   }
 
   override firstUpdated() {

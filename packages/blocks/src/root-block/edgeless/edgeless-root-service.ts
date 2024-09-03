@@ -18,7 +18,7 @@ import type {
   CanvasElementType,
   ConnectorElementModel,
 } from '../../surface-block/element-model/index.js';
-import type { SurfaceBlockModel } from '../../surface-block/index.js';
+import type { Overlay, SurfaceBlockModel } from '../../surface-block/index.js';
 import type { ReorderingDirection } from '../../surface-block/managers/layer-manager.js';
 import type { SurfaceContext } from '../../surface-block/surface-block.js';
 import type { EdgelessToolConstructor } from './services/tools-manager.js';
@@ -26,12 +26,17 @@ import type { EdgelessTool } from './types.js';
 
 import { SurfaceGroupLikeModel } from '../../surface-block/element-model/base.js';
 import { MindmapElementModel } from '../../surface-block/index.js';
+import { ConnectionOverlay } from '../../surface-block/managers/connector-manager.js';
 import { LayerManager } from '../../surface-block/managers/layer-manager.js';
 import { compare } from '../../surface-block/managers/layer-utils.js';
+import {
+  type ElementRenderer,
+  elementRenderers,
+} from '../../surface-block/renderer/elements/index.js';
 import { getSurfaceBlock } from '../../surface-ref-block/utils.js';
 import { RootService, type TelemetryEvent } from '../root-service.js';
 import { GfxBlockModel } from './block-model.js';
-import { EdgelessFrameManager } from './frame-manager.js';
+import { EdgelessFrameManager, FrameOverlay } from './frame-manager.js';
 import { EdgelessSelectionManager } from './services/selection-manager.js';
 import { TemplateJob } from './services/template.js';
 import {
@@ -97,6 +102,13 @@ export class EdgelessRootService extends RootService implements SurfaceContext {
   static override readonly flavour = RootBlockSchema.model.flavour;
 
   TemplateJob = TemplateJob;
+
+  elementRenderers: Record<string, ElementRenderer> = elementRenderers;
+
+  overlays: Record<string, Overlay> = {
+    connector: new ConnectionOverlay(this),
+    frame: new FrameOverlay(),
+  };
 
   slots = {
     edgelessToolUpdated: new Slot<EdgelessTool>(),

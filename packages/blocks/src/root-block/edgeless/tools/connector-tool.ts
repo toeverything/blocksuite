@@ -5,6 +5,7 @@ import { ShapeType } from '@blocksuite/affine-model';
 import { Bound, noop } from '@blocksuite/global/utils';
 
 import type { ConnectorMode } from '../../../surface-block/index.js';
+import type { ConnectionOverlay } from '../../../surface-block/managers/connector-manager.js';
 import type { EdgelessTool } from '../types.js';
 
 import {
@@ -98,7 +99,7 @@ export class ConnectorToolController extends EdgelessToolController<ConnectorToo
       this._edgeless.service.removeElement(id);
     }
 
-    this._surface.overlays.connector.clear();
+    this._edgeless.service.overlays.connector.clear();
     this._mode = ConnectorToolMode.Dragging;
     this._connector = null;
     this._source = null;
@@ -112,7 +113,6 @@ export class ConnectorToolController extends EdgelessToolController<ConnectorToo
     const {
       _connector,
       _edgeless,
-      _surface: { overlays },
       _service: { viewport },
     } = this;
 
@@ -123,7 +123,7 @@ export class ConnectorToolController extends EdgelessToolController<ConnectorToo
       excludedIds.push(_connector.source.id);
     }
 
-    const target = overlays.connector.renderConnector(point, excludedIds);
+    const target = this.connector.renderConnector(point, excludedIds);
     _edgeless.service.updateElement(_connector.id, { target });
   }
 
@@ -182,9 +182,7 @@ export class ConnectorToolController extends EdgelessToolController<ConnectorToo
     if (!sourceId) return;
 
     const point = this._service.viewport.toModelCoord(e.x, e.y);
-    const target = this._surface.overlays.connector.renderConnector(point, [
-      sourceId,
-    ]);
+    const target = this.connector.renderConnector(point, [sourceId]);
 
     this._allowCancel = !target.id;
     this._connector.source.position = calculateNearestLocation(
@@ -204,9 +202,7 @@ export class ConnectorToolController extends EdgelessToolController<ConnectorToo
 
   onContainerPointerDown(e: PointerEventState) {
     this._startPoint = this._service.viewport.toModelCoord(e.x, e.y);
-    this._source = this._surface.overlays.connector.renderConnector(
-      this._startPoint
-    );
+    this._source = this.connector.renderConnector(this._startPoint);
   }
 
   onContainerTripleClick() {
@@ -245,10 +241,14 @@ export class ConnectorToolController extends EdgelessToolController<ConnectorToo
     this._createConnector();
 
     if (element instanceof GroupElementModel) {
-      this._surface.overlays.connector.sourceBounds = this._sourceBounds;
+      this.connector.sourceBounds = this._sourceBounds;
     }
 
     this.findTargetByPoint(point);
+  }
+
+  get connector() {
+    return this._edgeless.service.overlays.connector as ConnectionOverlay;
   }
 }
 
