@@ -34,6 +34,9 @@ patchedDependencies:
   '@lit-labs/preact-signals@1.0.2':
     hash: zsk746dt4hzz7ujosijwqb6oaq
     path: patches/@lit-labs__preact-signals@1.0.2.patch
+  figma-squircle@1.0.0:
+    hash: sy37n6jzb3eyxrysogxfnkzuoa
+    path: patches/figma-squircle@1.0.0.patch
 
 importers:
 
@@ -482,8 +485,8 @@ importers:
         specifier: ^0.8.2
         version: 0.8.2
       figma-squircle:
-        specifier: ^0.3.1
-        version: 0.3.1
+        specifier: ^1.0.0
+        version: 1.0.0(patch_hash=sy37n6jzb3eyxrysogxfnkzuoa)
       file-type:
         specifier: ^19.4.1
         version: 19.4.1
@@ -4616,8 +4619,8 @@ packages:
   fflate@0.8.2:
     resolution: {integrity: sha512-cPJU47OaAoCbg0pBvzsgpTPhmhqI5eJjh/JIu8tPj5q+T7iLvW/JAYUqmE7KOB4R1ZyEhzBaIQpQpardBF5z8A==}
 
-  figma-squircle@0.3.1:
-    resolution: {integrity: sha512-cyb7fbNaJgM3XrMXRq/B4NPUILfbrSRHjqt+0/3OGBOejJKNLnFKTXSMSAjdqbw2bSo2Y2eCnYXvaRgshBnWQw==}
+  figma-squircle@1.0.0:
+    resolution: {integrity: sha512-YjBrkLHR9cbe71yyUfbou0K/rss8L/5i4P4ibE8E7MRpn3oLweYexQX5dLCFcR4o5+dN+i2RlIFTrMqFUhO1Dw==}
 
   figures@3.2.0:
     resolution: {integrity: sha512-yaduQFRKLXYOGgEn6AZau90j3ggSOyiqXU0F9JZfeXYhNa+Jk4X+s45A2zg5jns87GAFa34BBm2kXw4XpNcbdg==}
@@ -12897,7 +12900,7 @@ snapshots:
 
   fflate@0.8.2: {}
 
-  figma-squircle@0.3.1: {}
+  figma-squircle@1.0.0(patch_hash=sy37n6jzb3eyxrysogxfnkzuoa): {}
 
   figures@3.2.0:
     dependencies:
