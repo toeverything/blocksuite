@@ -3,7 +3,6 @@
 import type { BlockComponent } from '@blocksuite/block-std';
 
 import {
-  DocMode,
   type EdgelessRootBlockComponent,
   type NoteBlockModel,
   generateKeyBetween,
@@ -18,7 +17,7 @@ import { setupEditor } from '../utils/setup.js';
 let service!: EdgelessRootBlockComponent['service'];
 
 beforeEach(async () => {
-  const cleanup = await setupEditor(DocMode.Edgeless);
+  const cleanup = await setupEditor('edgeless');
   service = getDocRootBlock(window.doc, window.editor, 'edgeless').service;
 
   return async () => {
@@ -802,9 +801,9 @@ test('indexed canvas should be inserted into edgeless portal when switch to edge
     shapeType: 'rect',
   });
 
-  editor.mode = DocMode.Page;
+  editor.mode = 'page';
   await wait();
-  editor.mode = DocMode.Edgeless;
+  editor.mode = 'edgeless';
   await wait();
 
   surface = getSurface(doc, editor);
@@ -822,7 +821,7 @@ test('indexed canvas should be inserted into edgeless portal when switch to edge
 });
 
 test('the actual rendering z-index should satisfy the logic order of their indexes', async () => {
-  editor.mode = DocMode.Page;
+  editor.mode = 'page';
 
   await wait();
 
@@ -854,7 +853,7 @@ test('the actual rendering z-index should satisfy the logic order of their index
 
   await wait();
 
-  editor.mode = DocMode.Edgeless;
+  editor.mode = 'edgeless';
   await wait(500);
 
   const edgeless = getDocRootBlock(doc, editor, 'edgeless');

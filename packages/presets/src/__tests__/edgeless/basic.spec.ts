@@ -1,11 +1,10 @@
-import { DocMode } from '@blocksuite/blocks';
 import { beforeEach, expect, test } from 'vitest';
 
 import { getSurface } from '../utils/edgeless.js';
 import { setupEditor } from '../utils/setup.js';
 
 beforeEach(async () => {
-  const cleanup = await setupEditor(DocMode.Edgeless);
+  const cleanup = await setupEditor('edgeless');
 
   return cleanup;
 });

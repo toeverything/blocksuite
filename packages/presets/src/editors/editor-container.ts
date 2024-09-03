@@ -1,3 +1,4 @@
+import type { DocMode } from '@blocksuite/blocks';
 import type { BlockModel, Doc } from '@blocksuite/store';
 
 import {
@@ -9,7 +10,6 @@ import {
 } from '@blocksuite/block-std';
 import { type AbstractEditor, DocModeProvider } from '@blocksuite/blocks';
 import {
-  DocMode,
   EdgelessEditorBlockSpecs,
   type EdgelessRootBlockComponent,
   PageEditorBlockSpecs,
@@ -62,7 +62,7 @@ export class AffineEditorContainer
 
   private _forwardRef = (mode: DocMode) => {
     requestAnimationFrame(() => {
-      if (mode === DocMode.Page) {
+      if (mode === 'page') {
         if (this._pageRoot) forwardSlot(this._pageRoot.slots, this.slots);
       } else {
         if (this._edgelessRoot)
@@ -71,12 +71,12 @@ export class AffineEditorContainer
     });
   };
 
-  private _mode = signal<DocMode>(DocMode.Page);
+  private _mode = signal<DocMode>('page');
 
   private _pageSpecs = signal<ExtensionType[]>(PageEditorBlockSpecs);
 
   private _specs = computed(() =>
-    this._mode.value === DocMode.Page
+    this._mode.value === 'page'
       ? this._pageSpecs.value
       : this._edgelessSpecs.value
   );
@@ -202,16 +202,16 @@ export class AffineEditorContainer
       this.rootModel.id + mode,
       html`
         <div
-          class=${mode === DocMode.Page
+          class=${mode === 'page'
             ? 'affine-page-viewport'
             : 'affine-edgeless-viewport'}
         >
           ${when(
-            mode === DocMode.Page,
+            mode === 'page',
             () => html` <doc-title .doc=${this.doc}></doc-title> `
           )}
           <div
-            class=${mode === DocMode.Page
+            class=${mode === 'page'
               ? 'page-editor playground-page-editor-container'
               : 'edgeless-editor-container'}
           >

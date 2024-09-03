@@ -53,7 +53,7 @@ export function getEmbedCardIcons(): EmbedCardIcons {
 export function extractSearchParams(link: string) {
   try {
     const url = new URL(link);
-    const mode = url.searchParams.get('mode');
+    const mode = url.searchParams.get('mode') as DocMode | undefined;
 
     if (mode && DocModes.includes(mode)) {
       const params: ReferenceInfo['params'] = { mode: mode as DocMode };

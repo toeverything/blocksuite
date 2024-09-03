@@ -7,11 +7,7 @@ import {
   SpecProvider,
 } from '@blocksuite/blocks';
 import { AffineFormatBarWidget } from '@blocksuite/blocks';
-import {
-  DocMode,
-  DocModeProvider,
-  toolbarDefaultConfig,
-} from '@blocksuite/blocks';
+import { DocModeProvider, toolbarDefaultConfig } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
 import { AffineEditorContainer, CommentPanel } from '@blocksuite/presets';
 
@@ -32,7 +28,7 @@ function setDocModeFromUrlParams(service: DocModeProvider) {
   const params = new URLSearchParams(location.search);
   const paramMode = params.get('mode');
   if (paramMode) {
-    const docMode = paramMode === 'page' ? DocMode.Page : DocMode.Edgeless;
+    const docMode = paramMode === 'page' ? 'page' : 'edgeless';
     service.setMode(docMode);
   }
 }
@@ -103,7 +99,7 @@ export async function mountDefaultDocEditor(collection: DocCollection) {
   ]);
   editor.edgelessSpecs = edgelessSpecs.value;
 
-  editor.mode = DocMode.Page;
+  editor.mode = 'page';
   editor.doc = doc;
   editor.slots.docLinkClicked.on(({ pageId: docId }) => {
     const target = collection.getDoc(docId);

@@ -8,7 +8,6 @@ import {
   MoreDeleteIcon,
 } from '@blocksuite/affine-components/icons';
 import { Peekable } from '@blocksuite/affine-components/peek';
-import { DocMode } from '@blocksuite/affine-model';
 import { DocModeProvider } from '@blocksuite/affine-shared/services';
 import { requestConnectedFrame } from '@blocksuite/affine-shared/utils';
 import {
@@ -592,7 +591,7 @@ export class SurfaceRefBlockComponent extends BlockComponent<
     const pageService = this.std.getService('affine:page');
 
     pageService.editPropsStore.setStorage('viewport', viewport);
-    this.std.get(DocModeProvider).setMode(DocMode.Edgeless);
+    this.std.get(DocModeProvider).setMode('edgeless');
   }
 
   override willUpdate(_changedProperties: Map<PropertyKey, unknown>): void {

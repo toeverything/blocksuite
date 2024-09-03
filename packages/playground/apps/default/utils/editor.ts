@@ -6,7 +6,6 @@ import {
   type ExtensionType,
 } from '@blocksuite/block-std';
 import {
-  DocMode,
   DocModeProvider,
   type PageRootService,
   QuickSearchProvider,
@@ -28,8 +27,7 @@ function setDocModeFromUrlParams(service: DocModeProvider) {
   const params = new URLSearchParams(location.search);
   const paramMode = params.get('mode');
   if (paramMode) {
-    const docMode =
-      paramMode === DocMode.Page ? DocMode.Page : DocMode.Edgeless;
+    const docMode = paramMode === 'page' ? 'page' : 'edgeless';
     service.setMode(docMode);
   }
 }
@@ -51,7 +49,7 @@ export async function mountDefaultDocEditor(collection: DocCollection) {
   editor.pageSpecs = patchPageRootSpec([...specs.pageModeSpecs]);
   editor.edgelessSpecs = patchPageRootSpec([...specs.edgelessModeSpecs]);
   editor.doc = doc;
-  editor.mode = DocMode.Page;
+  editor.mode = 'page';
   editor.slots.docLinkClicked.on(({ pageId: docId }) => {
     const target = collection.getDoc(docId);
     if (!target) {

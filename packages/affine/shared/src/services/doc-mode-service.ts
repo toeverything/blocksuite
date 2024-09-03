@@ -1,12 +1,12 @@
+import type { DocMode } from '@blocksuite/affine-model';
 import type { BlockStdScope } from '@blocksuite/block-std';
 import type { Container } from '@blocksuite/global/di';
 
-import { DocMode } from '@blocksuite/affine-model';
 import { Extension, StdIdentifier } from '@blocksuite/block-std';
 import { createIdentifier } from '@blocksuite/global/di';
 import { type Disposable, Slot } from '@blocksuite/global/utils';
 
-const DEFAULT_MODE = DocMode.Page;
+const DEFAULT_MODE: DocMode = 'page';
 
 export interface DocModeProvider {
   setMode: (mode: DocMode, docId?: string) => void;
@@ -51,8 +51,7 @@ export class DocModeService extends Extension implements DocModeProvider {
   }
 
   toggleMode(id: string = this.std.doc.id) {
-    const mode =
-      this.getMode(id) === DocMode.Page ? DocMode.Edgeless : DocMode.Page;
+    const mode = this.getMode(id) === 'page' ? 'edgeless' : 'page';
     this.setMode(mode, id);
 
     return mode;

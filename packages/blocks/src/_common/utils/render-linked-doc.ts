@@ -1,6 +1,10 @@
-import type { ImageBlockModel, NoteBlockModel } from '@blocksuite/affine-model';
+import type {
+  DocMode,
+  ImageBlockModel,
+  NoteBlockModel,
+} from '@blocksuite/affine-model';
 
-import { DocMode, NoteDisplayMode } from '@blocksuite/affine-model';
+import { NoteDisplayMode } from '@blocksuite/affine-model';
 import { DocModeProvider } from '@blocksuite/affine-shared/services';
 import { getBlockProps, matchFlavours } from '@blocksuite/affine-shared/utils';
 import { BlockStdScope, type EditorHost } from '@blocksuite/block-std';
@@ -585,6 +589,6 @@ export function createLinkedDocFromEdgelessElements(
       ids.set(model.id, newId);
     });
   });
-  host.std.get(DocModeProvider).setMode(DocMode.Edgeless, linkedDoc.id);
+  host.std.get(DocModeProvider).setMode('edgeless', linkedDoc.id);
   return linkedDoc;
 }
