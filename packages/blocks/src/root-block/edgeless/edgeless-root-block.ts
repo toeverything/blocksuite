@@ -773,7 +773,6 @@ export class EdgelessRootBlockComponent extends BlockComponent<
       return;
     });
 
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     this.mouseRoot = this.parentElement!;
     this._initTools();
 

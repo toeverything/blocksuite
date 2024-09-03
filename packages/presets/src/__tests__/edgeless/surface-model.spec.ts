@@ -5,7 +5,6 @@ import type {
   SurfaceBlockModel,
 } from '@blocksuite/blocks';
 
-import { DocMode } from '@blocksuite/blocks';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import { wait } from '../utils/common.js';
@@ -14,7 +13,7 @@ import { setupEditor } from '../utils/setup.js';
 let model: SurfaceBlockModel;
 
 beforeEach(async () => {
-  const cleanup = await setupEditor(DocMode.Edgeless);
+  const cleanup = await setupEditor('edgeless');
   const models = doc.getBlockByFlavour('affine:surface') as SurfaceBlockModel[];
 
   model = models[0];

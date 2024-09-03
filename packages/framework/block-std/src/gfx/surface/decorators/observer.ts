@@ -37,10 +37,7 @@ export function observe<
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   E extends Y.YEvent<any>,
   T extends GfxPrimitiveElementModel,
->(
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  fn: ObserveFn<E, T>
-) {
+>(fn: ObserveFn<E, T>) {
   return function observeDecorator(
     _: unknown,
     context: ClassAccessorDecoratorContext

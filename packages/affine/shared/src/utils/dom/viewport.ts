@@ -21,7 +21,7 @@ export function getViewportElement(editorHost: EditorHost): HTMLElement | null {
     console.error('Failed to get root doc');
     return null;
   }
-  const rootComponent = editorHost.view.viewFromPath('block', [doc.root.id]);
+  const rootComponent = editorHost.view.getBlock(doc.root.id);
 
   if (
     !rootComponent ||

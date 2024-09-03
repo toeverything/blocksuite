@@ -1,10 +1,10 @@
 import type { BlockStdScope } from '@blocksuite/block-std';
+import type { DocMode } from '@blocksuite/blocks';
 import type { Container } from '@blocksuite/global/di';
 
 import { Extension, StdIdentifier } from '@blocksuite/block-std';
 import { DocModeProvider, type PageRootService } from '@blocksuite/blocks';
 import {
-  DocMode,
   type NotificationService,
   type QuickSearchService,
   toast,
@@ -29,7 +29,7 @@ export function removeModeFromStorage(docId: string) {
   saveModeToStorage(modeMap);
 }
 
-const DEFAULT_MODE = DocMode.Page;
+const DEFAULT_MODE: DocMode = 'page';
 const slotMap = new Map<string, Slot<DocMode>>();
 export class MockDocModeService extends Extension implements DocModeProvider {
   getMode = (docId: string = this.std.doc.id) => {
@@ -59,8 +59,7 @@ export class MockDocModeService extends Extension implements DocModeProvider {
   };
 
   toggleMode = (docId: string = this.std.doc.id) => {
-    const mode =
-      this.getMode(docId) === DocMode.Page ? DocMode.Edgeless : DocMode.Page;
+    const mode = this.getMode(docId) === 'page' ? 'edgeless' : 'page';
     this.setMode(mode, docId);
     return mode;
   };

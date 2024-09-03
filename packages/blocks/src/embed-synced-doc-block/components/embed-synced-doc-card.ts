@@ -254,10 +254,6 @@ export class EmbedSyncedDocCard extends WithDisposable(ShadowlessElement) {
     return this.block.model;
   }
 
-  get path() {
-    return this.block.path;
-  }
-
   get std() {
     return this.block.std;
   }

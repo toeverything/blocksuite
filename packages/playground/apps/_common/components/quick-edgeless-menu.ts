@@ -1,11 +1,14 @@
-/* eslint-disable @typescript-eslint/no-restricted-imports */
 import type { SerializedXYWH } from '@blocksuite/global/utils';
 import type { DeltaInsert } from '@blocksuite/inline';
 import type { AffineEditorContainer } from '@blocksuite/presets';
 
 import { ShadowlessElement } from '@blocksuite/block-std';
-import { type AffineTextAttributes, DocModeProvider } from '@blocksuite/blocks';
-import { DocMode, EdgelessRootService, printToPdf } from '@blocksuite/blocks';
+import {
+  type AffineTextAttributes,
+  type DocMode,
+  DocModeProvider,
+} from '@blocksuite/blocks';
+import { EdgelessRootService, printToPdf } from '@blocksuite/blocks';
 import { type DocCollection, Text } from '@blocksuite/store';
 import '@shoelace-style/shoelace/dist/components/alert/alert.js';
 import '@shoelace-style/shoelace/dist/components/button/button.js';
@@ -577,7 +580,7 @@ export class QuickEdgelessMenu extends ShadowlessElement {
   private accessor _dark = localStorage.getItem('blocksuite:dark') === 'true';
 
   @state()
-  private accessor _docMode: DocMode = DocMode.Page;
+  private accessor _docMode: DocMode = 'page';
 
   @property({ attribute: false })
   accessor chatPanel!: CustomChatPanel;

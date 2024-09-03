@@ -29,7 +29,6 @@ import type { MindmapNode } from '../../../surface-block/element-model/utils/min
 import type { EdgelessTool } from '../types.js';
 
 import { isSelectSingleMindMap } from '../../../_common/edgeless/mindmap/index.js';
-import { buildPath } from '../../../_common/utils/index.js';
 import { SurfaceGroupLikeModel } from '../../../surface-block/element-model/base.js';
 import {
   MindmapElementModel,
@@ -701,10 +700,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
             if (selected.children.length === 0) {
               this._addEmptyParagraphBlock(selected);
             } else {
-              const block = this._edgeless.host.view.viewFromPath(
-                'block',
-                buildPath(selected)
-              );
+              const block = this._edgeless.host.view.getBlock(selected.id);
               if (block) {
                 const rect = block
                   .querySelector('.affine-block-children-container')!
@@ -957,6 +953,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     }
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-misused-promises
   async onContainerDragStart(e: PointerEventState) {
     if (this.edgelessSelectionManager.editing) return;
     // Determine the drag type based on the current state and event

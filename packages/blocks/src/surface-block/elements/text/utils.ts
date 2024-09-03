@@ -228,7 +228,6 @@ export function wrapText(text: string, font: string, maxWidth: number): string {
 
         while (words[index].length > 0) {
           const currentChar = String.fromCodePoint(
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             words[index].codePointAt(0)!
           );
           const width = charWidth.calculate(currentChar, font);

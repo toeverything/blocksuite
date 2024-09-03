@@ -37,7 +37,6 @@ export type GroupMenu = MenuCommon & {
   name: string;
   children: () => Menu[];
 };
-// eslint-disable-next-line @typescript-eslint/ban-types
 type MenuClass = (string & {}) | 'delete-item';
 export type NormalMenu = MenuCommon &
   (

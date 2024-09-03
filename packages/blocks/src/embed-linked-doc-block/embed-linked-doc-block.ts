@@ -3,11 +3,11 @@ import type {
   EmbedLinkedDocStyles,
   ReferenceInfo,
 } from '@blocksuite/affine-model';
+import type { DocMode } from '@blocksuite/affine-model';
 
 import { BlockLinkIcon } from '@blocksuite/affine-components/icons';
 import { Peekable, isPeekable } from '@blocksuite/affine-components/peek';
 import { REFERENCE_NODE } from '@blocksuite/affine-components/rich-text';
-import { DocMode } from '@blocksuite/affine-model';
 import { DocModeProvider } from '@blocksuite/affine-shared/services';
 import { Bound } from '@blocksuite/global/utils';
 import { assertExists } from '@blocksuite/global/utils';
@@ -167,10 +167,10 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockComponent<
     // TODO(@fundon): should scroll into target block/element
     if (pageId === this.doc.id) return;
 
-    const rootComponent = this.std.view.viewFromPath('block', [
-      this.doc.root?.id ?? '',
-    ]) as RootBlockComponent | null;
-    assertExists(rootComponent);
+    const rootComponent = this.std.view.getBlock(
+      this.doc.root?.id ?? ''
+    ) as RootBlockComponent | null;
+    if (!rootComponent) return;
 
     rootComponent.slots.docLinkClicked.emit(this.referenceInfo);
   };
@@ -260,7 +260,7 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockComponent<
       );
 
       if (this._isLinkToNode) {
-        this._linkedDocMode = this.model.params?.mode ?? DocMode.Page;
+        this._linkedDocMode = this.model.params?.mode ?? 'page';
       } else {
         const docMode = this.std.get(DocModeProvider);
         this._linkedDocMode = docMode.getMode(this.model.pageId);
@@ -490,7 +490,7 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockComponent<
   private accessor _isLinkToNode = false;
 
   @state()
-  private accessor _linkedDocMode: DocMode = DocMode.Page;
+  private accessor _linkedDocMode: DocMode = 'page';
 
   @state()
   private accessor _loading = false;

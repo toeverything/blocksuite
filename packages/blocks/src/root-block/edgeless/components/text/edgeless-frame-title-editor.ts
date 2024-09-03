@@ -132,11 +132,9 @@ export class EdgelessFrameTitleEditor extends WithDisposable(
   }
 
   get frameBlock() {
-    assertExists(this.frameModel.page.root);
-    const block = this.editorHost.view.viewFromPath('block', [
-      this.frameModel.page.root.id,
-      this.frameModel.id,
-    ]) as FrameBlockComponent | null;
+    const block = this.editorHost.view.getBlock(
+      this.frameModel.id
+    ) as FrameBlockComponent | null;
     assertExists(block);
     return block;
   }

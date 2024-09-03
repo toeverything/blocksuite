@@ -1,3 +1,5 @@
+import type { DocMode } from '@blocksuite/affine-model';
+
 import {
   EmbedEdgelessIcon,
   EmbedPageIcon,
@@ -5,7 +7,6 @@ import {
 import { Peekable } from '@blocksuite/affine-components/peek';
 import { REFERENCE_NODE } from '@blocksuite/affine-components/rich-text';
 import {
-  DocMode,
   type EmbedSyncedDocModel,
   NoteDisplayMode,
 } from '@blocksuite/affine-model';
@@ -147,7 +148,7 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockComponent<
     const renderEditor = () => {
       return choose(editorMode, [
         [
-          DocMode.Page,
+          'page',
           () => html`
             <div class="affine-page-viewport">
               ${new BlockStdScope({
@@ -158,7 +159,7 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockComponent<
           `,
         ],
         [
-          DocMode.Edgeless,
+          'edgeless',
           () => html`
             <div class="affine-edgeless-viewport">
               ${new BlockStdScope({
@@ -266,10 +267,10 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockComponent<
     const pageId = this.model.pageId;
     if (pageId === this.doc.id) return;
 
-    const rootComponent = this.std.view.viewFromPath('block', [
-      this.doc.root?.id ?? '',
-    ]) as RootBlockComponent | null;
-    assertExists(rootComponent);
+    const rootComponent = this.std.view.getBlock(
+      this.doc.root?.id ?? ''
+    ) as RootBlockComponent | null;
+    if (!rootComponent) return;
 
     rootComponent.slots.docLinkClicked.emit({ pageId });
   };
@@ -501,11 +502,11 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockComponent<
   }
 
   protected get isPageMode() {
-    return this.syncedDocMode === DocMode.Page;
+    return this.syncedDocMode === 'page';
   }
 
   get syncedDoc() {
-    return this.syncedDocMode === DocMode.Page
+    return this.syncedDocMode === 'page'
       ? this.std.collection.getDoc(this.model.pageId, {
           readonly: true,
           query: this._pageFilter,
@@ -547,7 +548,7 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockComponent<
   accessor syncedDocEditorHost: EditorHost | null = null;
 
   @state()
-  accessor syncedDocMode: DocMode = DocMode.Page;
+  accessor syncedDocMode: DocMode = 'page';
 
   override accessor useCaptionEditor = false;
 }

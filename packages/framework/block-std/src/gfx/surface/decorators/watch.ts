@@ -14,10 +14,7 @@ const watchSymbol = Symbol('watch');
  * The watch decorator is used to watch the property change of the element.
  * You can thinks of it as a decorator version of `elementUpdated` slot of the surface model.
  */
-export function watch<V, T extends GfxPrimitiveElementModel>(
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  fn: WatchFn<T>
-) {
+export function watch<V, T extends GfxPrimitiveElementModel>(fn: WatchFn<T>) {
   return function watchDecorator(
     _: unknown,
     context: ClassAccessorDecoratorContext

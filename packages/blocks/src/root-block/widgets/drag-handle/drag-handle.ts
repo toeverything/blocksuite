@@ -12,7 +12,6 @@ import {
 import { getCurrentNativeRange } from '@blocksuite/affine-shared/utils';
 import { type BlockComponent, BlockStdScope } from '@blocksuite/block-std';
 import {
-  PathFinder,
   type PointerEventState,
   type UIEventHandler,
   WidgetComponent,
@@ -70,7 +69,7 @@ import {
   getDuplicateBlocks,
   includeTextSelection,
   insideDatabaseTable,
-  isBlockPathEqual,
+  isBlockIdEqual,
   isOutOfNoteBlock,
   updateDragHandleClassName,
 } from './utils.js';
@@ -82,9 +81,7 @@ export class AffineDragHandleWidget extends WidgetComponent<
   RootBlockModel,
   EdgelessRootBlockComponent | PageRootBlockComponent
 > {
-  private _anchorBlockId = '';
-
-  private _anchorBlockPath: string | null = null;
+  private _anchorBlockId: string | null = null;
 
   private _anchorModelDisposables: DisposableGroup | null = null;
 
@@ -138,7 +135,7 @@ export class AffineDragHandleWidget extends WidgetComponent<
     if (isInsidePageEditor(this.host)) return true;
     const edgelessRoot = this.rootComponent as EdgelessRootBlockComponent;
 
-    const noteBlockId = noteBlock.path[noteBlock.path.length - 1];
+    const noteBlockId = noteBlock.model.id;
     return (
       edgelessRoot.service.selection.editing &&
       edgelessRoot.service.selection.selectedIds[0] === noteBlockId
@@ -180,10 +177,7 @@ export class AffineDragHandleWidget extends WidgetComponent<
       return;
     }
 
-    const selections = edgelessRoot.service.selection.surfaceSelections;
-
     this._anchorBlockId = selectedElement.id;
-    this._anchorBlockPath = selections[0].blockId;
 
     this._showDragHandleOnTopLevelBlocks().catch(console.error);
   };
@@ -202,7 +196,7 @@ export class AffineDragHandleWidget extends WidgetComponent<
     const insideDragHandle = !!element?.closest(AFFINE_DRAG_HANDLE_WIDGET);
     if (!insideDragHandle) return;
 
-    if (!this._anchorBlockId || !this._anchorBlockPath) return;
+    if (!this._anchorBlockId) return;
 
     const { selection } = this.host;
     const selectedBlocks = this.selectedBlocks;
@@ -215,7 +209,7 @@ export class AffineDragHandleWidget extends WidgetComponent<
     ) {
       selection.clear(['block']);
       this._dragHoverRect = null;
-      this._showDragHandleOnHoverBlock(this._anchorBlockPath);
+      this._showDragHandleOnHoverBlock(this._anchorBlockId);
       return;
     }
 
@@ -224,7 +218,7 @@ export class AffineDragHandleWidget extends WidgetComponent<
     if (!blocks) return;
 
     if (selectedBlocks.length > 1) {
-      this._showDragHandleOnHoverBlock(this._anchorBlockPath);
+      this._showDragHandleOnHoverBlock(this._anchorBlockId);
     }
 
     this._setSelectedBlocks([blocks]);
@@ -381,8 +375,7 @@ export class AffineDragHandleWidget extends WidgetComponent<
         option.onDragStart?.({
           state,
           startDragging: this._startDragging,
-          anchorBlockId: this._anchorBlockId,
-          anchorBlockPath: this._anchorBlockPath,
+          anchorBlockId: this._anchorBlockId ?? '',
           editorHost: this.host,
         })
       ) {
@@ -392,8 +385,8 @@ export class AffineDragHandleWidget extends WidgetComponent<
     return this._onDragStart(state);
   };
 
-  private _getBlockComponentFromViewStore = (path: string) => {
-    return this.host.view.getBlock(path);
+  private _getBlockComponentFromViewStore = (blockId: string) => {
+    return this.host.view.getBlock(blockId);
   };
 
   private _getDraggingAreaRect = (block: BlockComponent): Rect => {
@@ -452,7 +445,6 @@ export class AffineDragHandleWidget extends WidgetComponent<
     if (!closestBlock) return null;
 
     const blockId = closestBlock.model.id;
-    const blockPath = closestBlock.path;
     const model = closestBlock.model;
 
     const isDatabase = matchFlavours(model, ['affine:database']);
@@ -480,7 +472,7 @@ export class AffineDragHandleWidget extends WidgetComponent<
         this.draggingElements.map(block => block.model.id),
         blockId
       ) ||
-      containChildBlock(this.draggingElements, blockPath)
+      containChildBlock(this.draggingElements, model)
     ) {
       return null;
     }
@@ -514,7 +506,7 @@ export class AffineDragHandleWidget extends WidgetComponent<
   };
 
   private _getHoveredBlocks = (): BlockComponent[] => {
-    if (!this._isHoverDragHandleVisible || !this._anchorBlockPath) return [];
+    if (!this._isHoverDragHandleVisible || !this._anchorBlockId) return [];
 
     const hoverBlock = this.anchorBlockComponent;
     if (!hoverBlock) return [];
@@ -539,8 +531,8 @@ export class AffineDragHandleWidget extends WidgetComponent<
 
     if (
       containBlock(
-        blocks.map(block => PathFinder.id(block.path)),
-        this._anchorBlockPath
+        blocks.map(block => block.blockId),
+        this._anchorBlockId
       )
     ) {
       return blocks;
@@ -616,8 +608,7 @@ export class AffineDragHandleWidget extends WidgetComponent<
     this._isTopLevelDragHandleVisible = false;
     this._isDragHandleHovered = false;
 
-    this._anchorBlockId = '';
-    this._anchorBlockPath = null;
+    this._anchorBlockId = null;
 
     if (this._dragHandleContainer) {
       this._dragHandleContainer.style.display = 'none';
@@ -656,9 +647,9 @@ export class AffineDragHandleWidget extends WidgetComponent<
     this.dragPreview.style.opacity = altKey ? '1' : '0.5';
   };
 
-  private _lastHoveredBlockPath: string | null = null;
+  private _lastHoveredBlockId: string | null = null;
 
-  private _lastShowedBlock: { path: string; el: BlockComponent } | null = null;
+  private _lastShowedBlock: { id: string; el: BlockComponent } | null = null;
 
   private _onDragEnd = (state: PointerEventState) => {
     const targetBlockId = this.dropBlockId;
@@ -807,7 +798,7 @@ export class AffineDragHandleWidget extends WidgetComponent<
   };
 
   private _onDragHandlePointerDown = () => {
-    if (!this._isHoverDragHandleVisible || !this._anchorBlockPath) return;
+    if (!this._isHoverDragHandleVisible || !this._anchorBlockId) return;
 
     const block = this.anchorBlockComponent;
     if (!block) return;
@@ -820,7 +811,7 @@ export class AffineDragHandleWidget extends WidgetComponent<
     const grabber = this._dragHandleGrabber;
     if (!container || !grabber) return;
 
-    if (this._isHoverDragHandleVisible && this._anchorBlockPath) {
+    if (this._isHoverDragHandleVisible && this._anchorBlockId) {
       const block = this.anchorBlockComponent;
       if (!block) return;
 
@@ -855,8 +846,8 @@ export class AffineDragHandleWidget extends WidgetComponent<
 
     if (this.dragging) return;
 
-    if (!this._anchorBlockPath) return;
-    this._showDragHandleOnHoverBlock(this._anchorBlockPath);
+    if (!this._anchorBlockId) return;
+    this._showDragHandleOnHoverBlock(this._anchorBlockId);
   };
 
   private _onDragHandlePointerUp = () => {
@@ -886,12 +877,7 @@ export class AffineDragHandleWidget extends WidgetComponent<
       return false;
     }
 
-    if (
-      !this._isHoverDragHandleVisible ||
-      !this._anchorBlockId ||
-      !this._anchorBlockPath
-    )
-      return;
+    if (!this._isHoverDragHandleVisible || !this._anchorBlockId) return;
     // Get current hover block element by path
     const hoverBlock = this.anchorBlockComponent;
     if (!hoverBlock) return false;
@@ -969,8 +955,7 @@ export class AffineDragHandleWidget extends WidgetComponent<
       point
     );
     if (!closestBlock) {
-      this._anchorBlockId = '';
-      this._anchorBlockPath = null;
+      this._anchorBlockId = null;
       return;
     }
 
@@ -978,7 +963,6 @@ export class AffineDragHandleWidget extends WidgetComponent<
     if (!blockId) return;
 
     this._anchorBlockId = blockId;
-    this._anchorBlockPath = closestBlock.blockId;
 
     if (insideDatabaseTable(closestBlock) || this.doc.readonly) {
       this._hide();
@@ -987,13 +971,13 @@ export class AffineDragHandleWidget extends WidgetComponent<
 
     // If current block is not the last hovered block, show drag handle beside the hovered block
     if (
-      (!this._lastHoveredBlockPath ||
-        !isBlockPathEqual(this._anchorBlockPath, this._lastHoveredBlockPath) ||
+      (!this._lastHoveredBlockId ||
+        !isBlockIdEqual(this._anchorBlockId, this._lastHoveredBlockId) ||
         !this._isHoverDragHandleVisible) &&
       !this._isDragHandleHovered
     ) {
-      this._showDragHandleOnHoverBlock(this._anchorBlockPath);
-      this._lastHoveredBlockPath = this._anchorBlockPath;
+      this._showDragHandleOnHoverBlock(this._anchorBlockId);
+      this._lastHoveredBlockId = this._anchorBlockId;
     }
   };
 
@@ -1044,10 +1028,9 @@ export class AffineDragHandleWidget extends WidgetComponent<
     this.dragging = false;
 
     this._dragHoverRect = null;
-    this._lastHoveredBlockPath = null;
+    this._lastHoveredBlockId = null;
     this._lastShowedBlock = null;
-    this._anchorBlockId = '';
-    this._anchorBlockPath = null;
+    this._anchorBlockId = null;
     this._isHoverDragHandleVisible = false;
     this._isDragHandleHovered = false;
     this._isTopLevelDragHandleVisible = false;
@@ -1096,8 +1079,8 @@ export class AffineDragHandleWidget extends WidgetComponent<
   };
 
   // Multiple blocks: drag handle should show on the vertical middle of all blocks
-  private _showDragHandleOnHoverBlock = (blockPath: string) => {
-    const block = this._getBlockComponentFromViewStore(blockPath);
+  private _showDragHandleOnHoverBlock = (blockId: string) => {
+    const block = this._getBlockComponentFromViewStore(blockId);
     if (!block) return;
 
     const container = this._dragHandleContainer;
@@ -1143,7 +1126,7 @@ export class AffineDragHandleWidget extends WidgetComponent<
       container.style.height = `${draggingAreaRect.height}px`;
     };
 
-    if (isBlockPathEqual(block.blockId, this._lastShowedBlock?.path)) {
+    if (isBlockIdEqual(block.blockId, this._lastShowedBlock?.id)) {
       applyStyle(true);
     } else if (this.selectedBlocks.length) {
       if (this._isBlockSelected(block))
@@ -1164,9 +1147,9 @@ export class AffineDragHandleWidget extends WidgetComponent<
     }px`;
 
     this._handleAnchorModelDisposables(block.model);
-    if (!isBlockPathEqual(block.blockId, this._lastShowedBlock?.path)) {
+    if (!isBlockIdEqual(block.blockId, this._lastShowedBlock?.id)) {
       this._lastShowedBlock = {
-        path: block.blockId,
+        id: block.blockId,
         el: block,
       };
     }
@@ -1177,7 +1160,7 @@ export class AffineDragHandleWidget extends WidgetComponent<
     const edgelessRoot = this.rootComponent as EdgelessRootBlockComponent;
     await edgelessRoot.surface.updateComplete;
 
-    if (!this._anchorBlockPath) return;
+    if (!this._anchorBlockId) return;
     const block = this.anchorBlockComponent;
     if (!block) return;
 
@@ -1644,8 +1627,8 @@ export class AffineDragHandleWidget extends WidgetComponent<
   }
 
   get anchorBlockComponent(): BlockComponent | null {
-    if (!this._anchorBlockPath) return null;
-    return this._getBlockComponentFromViewStore(this._anchorBlockPath);
+    if (!this._anchorBlockId) return null;
+    return this._getBlockComponentFromViewStore(this._anchorBlockId);
   }
 
   get anchorEdgelessElement(): GfxBlockModel | null {

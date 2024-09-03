@@ -1,3 +1,5 @@
+import type { BlockModel } from '@blocksuite/store';
+
 import { throttle } from '@blocksuite/global/utils';
 
 import type { BaseSelection, TextSelection } from '../selection/index.js';
@@ -14,6 +16,20 @@ export class RangeBinding {
   private _compositionStartCallback:
     | ((event: CompositionEvent) => Promise<void>)
     | null = null;
+
+  private _computePath = (modelId: string) => {
+    const block = this.host.std.doc.getBlock(modelId)?.model;
+    if (!block) return [];
+
+    const path: string[] = [];
+    let parent: BlockModel | null = block;
+    while (parent) {
+      path.unshift(parent.id);
+      parent = this.host.doc.getParent(parent);
+    }
+
+    return path;
+  };
 
   private _onBeforeInput = (event: InputEvent) => {
     const selection = this.selectionManager.find('text');
@@ -232,10 +248,9 @@ export class RangeBinding {
     // If the model is not found, the selection maybe in another editor
     if (!model) return;
 
-    const path = this.host.view.calculatePath(model);
     this._prevTextSelection = {
       selection: textSelection,
-      path,
+      path: this._computePath(model.id),
     };
     this.rangeManager?.syncRangeToTextSelection(range, isRangeReversed);
   };
@@ -252,8 +267,8 @@ export class RangeBinding {
     // wait for lit updated
     this.host.updateComplete
       .then(() => {
-        const model = text && this.host.doc.getBlockById(text.blockId);
-        const path = model && this.host.view.calculatePath(model);
+        const id = text?.blockId;
+        const path = id && this._computePath(id);
 
         if (this.host.event.active) {
           const eq =
@@ -269,7 +284,7 @@ export class RangeBinding {
           text && path
             ? {
                 selection: text,
-                path: path,
+                path,
               }
             : null;
         if (text) {

@@ -235,8 +235,7 @@ export class RoughGenerator {
     const hasStroke = o.stroke !== NOS;
     const simplified = !!(o.simplification && o.simplification < 1);
     const distance = simplified
-      ? // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        4 - 4 * o.simplification!
+      ? 4 - 4 * o.simplification!
       : (1 + o.roughness) / 2;
     const sets = pointsOnPath(d, 1, distance);
 

@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-restricted-imports */
-
 import '../packages/framework/store/src/index';
 import '../packages/affine/model/src/index';
 

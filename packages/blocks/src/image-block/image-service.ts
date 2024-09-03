@@ -35,12 +35,12 @@ export class ImageBlockService extends BlockService {
   private _dragHandleOption: DragHandleOption = {
     flavour: ImageBlockSchema.model.flavour,
     edgeless: true,
-    onDragStart: ({ state, startDragging, anchorBlockPath, editorHost }) => {
+    onDragStart: ({ state, startDragging, anchorBlockId, editorHost }) => {
       const element = captureEventTarget(state.raw.target);
       if (element?.classList.contains('resize')) return false;
 
-      if (!anchorBlockPath) return false;
-      const anchorComponent = editorHost.std.view.getBlock(anchorBlockPath);
+      if (!anchorBlockId) return false;
+      const anchorComponent = editorHost.std.view.getBlock(anchorBlockId);
       if (
         !anchorComponent ||
         !matchFlavours(anchorComponent.model, [ImageBlockSchema.model.flavour])
@@ -177,9 +177,9 @@ export class ImageBlockService extends BlockService {
   get rootComponent(): RootBlockComponent | null {
     const rootModel = this.doc.root;
     if (!rootModel) return null;
-    const rootComponent = this.std.view.viewFromPath('block', [
-      rootModel.id,
-    ]) as RootBlockComponent | null;
+    const rootComponent = this.std.view.getBlock(
+      rootModel.id
+    ) as RootBlockComponent | null;
     return rootComponent;
   }
 }

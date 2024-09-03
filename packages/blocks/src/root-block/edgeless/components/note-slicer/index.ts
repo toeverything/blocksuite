@@ -14,10 +14,7 @@ import type {
   NoteBlockModel,
 } from '../../../../index.js';
 
-import {
-  buildPath,
-  getRectByBlockComponent,
-} from '../../../../_common/utils/index.js';
+import { getRectByBlockComponent } from '../../../../_common/utils/index.js';
 import { DEFAULT_NOTE_HEIGHT } from '../../utils/consts.js';
 import { isNoteBlock } from '../../utils/query.js';
 
@@ -112,9 +109,8 @@ export class NoteSlicer extends WithDisposable(LitElement) {
 
   get _noteBlock() {
     if (!this._editorHost) return null;
-    const noteBlock = this._editorHost.view.viewFromPath(
-      'block',
-      buildPath(this._anchorNote)
+    const noteBlock = this._editorHost.view.getBlock(
+      this._anchorNote?.id ?? ''
     );
     return noteBlock ? (noteBlock as NoteBlockComponent) : null;
   }
@@ -209,7 +205,7 @@ export class NoteSlicer extends WithDisposable(LitElement) {
     for (let i = 0; i < this._anchorNote.children.length - 1; i++) {
       const child = this._anchorNote.children[i];
       const rect = this.edgeless.host.view
-        .viewFromPath('block', buildPath(child))
+        .getBlock(child.id)
         ?.getBoundingClientRect();
 
       if (rect && rect.bottom > noteTop && rect.bottom < noteBottom) {

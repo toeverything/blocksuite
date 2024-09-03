@@ -172,9 +172,11 @@ export abstract class RootService extends BlockService {
   }
 
   get viewportElement() {
-    const rootComponent = this.std.view.viewFromPath('block', [
-      this.std.doc.root?.id ?? '',
-    ]) as RootBlockComponent | null;
+    const rootId = this.std.doc.root?.id;
+    if (!rootId) return null;
+    const rootComponent = this.std.view.getBlock(
+      rootId
+    ) as RootBlockComponent | null;
     if (!rootComponent) return null;
     const viewportElement = rootComponent.viewportElement;
     return viewportElement;

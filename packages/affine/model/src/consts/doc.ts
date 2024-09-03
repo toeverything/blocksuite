@@ -1,17 +1,14 @@
 import { z } from 'zod';
 
-export enum DocMode {
-  Edgeless = 'edgeless',
-  Page = 'page',
-}
+export type DocMode = 'edgeless' | 'page';
 
-export const DocModes: readonly string[] = Object.values(DocMode);
+export const DocModes = ['edgeless', 'page'] as const;
 
 export const ReferenceInfoSchema = z.object({
   pageId: z.string(),
   params: z
     .object({
-      mode: z.nativeEnum(DocMode),
+      mode: z.enum(DocModes),
       blockIds: z.string().array(),
       elementIds: z.string().array(),
     })

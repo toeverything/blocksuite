@@ -19,12 +19,12 @@ jobs:
     name: Size Report
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
         name: Install pnpm
         id: pnpm-install
       - name: Use Node.js LTS
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version-file: '.nvmrc'
           cache: 'pnpm'
@@ -34,7 +34,7 @@ jobs:
         run: |
           echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
 
-      - uses: actions/cache@v3
+      - uses: actions/cache@v4
         name: Setup pnpm cache
         with:
           path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
@@ -46,7 +46,7 @@ jobs:
         run: pnpm install
 
       - name: Download Previous Size Data
-        uses: dawidd6/action-download-artifact@v2
+        uses: dawidd6/action-download-artifact@v6
         with:
           workflow: size-report.yml
           name: size-data
@@ -56,7 +56,7 @@ jobs:
       - run: pnpm run size:generate
 
       - name: Upload Size Data
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: size-data
           path: temp/size

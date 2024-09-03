@@ -1,4 +1,3 @@
-import { DocMode } from '@blocksuite/affine-model';
 import {
   EMBED_CARD_HEIGHT,
   EMBED_CARD_WIDTH,
@@ -53,7 +52,7 @@ export class EmbedEdgelessSyncedDocBlockComponent extends toEdgelessEmbedBlock(
     const renderEditor = () => {
       return choose(editorMode, [
         [
-          DocMode.Page,
+          'page',
           () => html`
             <div class="affine-page-viewport">
               ${new BlockStdScope({
@@ -64,7 +63,7 @@ export class EmbedEdgelessSyncedDocBlockComponent extends toEdgelessEmbedBlock(
           `,
         ],
         [
-          DocMode.Edgeless,
+          'edgeless',
           () => html`
             <div class="affine-edgeless-viewport">
               ${new BlockStdScope({

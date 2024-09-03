@@ -6,16 +6,14 @@ import type {
 } from '@blocksuite/blocks';
 import type { Doc } from '@blocksuite/store';
 
-// eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import type { AffineEditorContainer } from '../../index.js';
 
 export function getSurface(doc: Doc, editor: AffineEditorContainer) {
   const surfaceModel = doc.getBlockByFlavour('affine:surface');
 
-  return editor.host!.view.viewFromPath('block', [
-    doc.root!.id,
-    surfaceModel[0]!.id,
-  ]) as SurfaceBlockComponent;
+  return editor.host!.view.getBlock(
+    surfaceModel[0]!.id
+  ) as SurfaceBlockComponent;
 }
 
 export function getDocRootBlock(

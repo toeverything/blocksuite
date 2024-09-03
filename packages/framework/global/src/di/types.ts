@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { ServiceProvider } from './provider.js';
 
-// eslint-disable-next-line @typescript-eslint/ban-types
 export type Type<T = any> = abstract new (...args: any) => T;
 
 export type ServiceFactory<T = any> = (provider: ServiceProvider) => T;

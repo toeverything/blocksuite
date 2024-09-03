@@ -1,4 +1,3 @@
-// eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import '@blocksuite/presets/themes/affine.css';
 
 import { setupEdgelessTemplate } from '../_common/setup.js';

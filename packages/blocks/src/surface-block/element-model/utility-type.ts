@@ -7,7 +7,7 @@ export type OmitFunctionsAndKeysAndReadOnly<T, K extends keyof any> = {
 };
 
 type FunctionPropertyNames<T> = {
-  // eslint-disable-next-line @typescript-eslint/ban-types
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
   [K in keyof T]: T[K] extends Function ? K : never;
 }[keyof T];
 

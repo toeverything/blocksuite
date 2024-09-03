@@ -1,6 +1,5 @@
 import { QuickSearchProvider } from '@blocksuite/affine-shared/services';
 import { isValidUrl, normalizeUrl } from '@blocksuite/affine-shared/utils';
-import { assertExists } from '@blocksuite/global/utils';
 import { PenIcon } from '@blocksuite/icons/lit';
 import { baseTheme } from '@toeverything/theme';
 import { css, unsafeCSS } from 'lit';
@@ -114,10 +113,12 @@ export class LinkCell extends BaseCellRenderer<string> {
     if (!rootId) {
       return;
     }
-    const rootComponent = std?.view.viewFromPath('block', [
-      rootId,
-    ]) as RootBlockComponent | null;
-    assertExists(rootComponent);
+    const rootComponent = std?.view.getBlock(
+      rootId
+    ) as RootBlockComponent | null;
+    if (!rootComponent) {
+      return;
+    }
 
     rootComponent.slots.docLinkClicked.emit({ pageId: this.docId });
   };

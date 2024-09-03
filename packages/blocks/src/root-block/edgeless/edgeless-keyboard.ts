@@ -180,7 +180,6 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
             std.selection.getGroup('note').length > 0 ||
             // eslint-disable-next-line unicorn/prefer-array-some
             std.selection.find('text') ||
-            // eslint-disable-next-line unicorn/prefer-array-some
             Boolean(std.selection.find('surface')?.editing)
           ) {
             return;
