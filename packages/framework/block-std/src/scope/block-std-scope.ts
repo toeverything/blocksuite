@@ -1,72 +1,182 @@
-import type { Doc, DocCollection } from '@blocksuite/store';
+import type { ServiceProvider } from '@blocksuite/global/di';
+import type { Doc } from '@blocksuite/store';
 
-import type { EditorHost } from '../view/element/index.js';
+import { Container } from '@blocksuite/global/di';
+import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
+
+import type { BlockService } from '../extension/index.js';
+import type { ExtensionType } from '../extension/index.js';
 
 import { Clipboard } from '../clipboard/index.js';
 import { CommandManager } from '../command/index.js';
 import { UIEventDispatcher } from '../event/index.js';
+import {
+  BlockServiceIdentifier,
+  BlockViewIdentifier,
+  ConfigIdentifier,
+  LifeCycleWatcherIdentifier,
+  StdIdentifier,
+} from '../identifier.js';
 import { RangeManager } from '../range/index.js';
 import { SelectionManager } from '../selection/index.js';
-import { SpecStore } from '../spec/index.js';
+import { ServiceManager } from '../service/index.js';
+import { EditorHost } from '../view/element/index.js';
 import { ViewStore } from '../view/view-store.js';
 
 export interface BlockStdOptions {
-  host: EditorHost;
   doc: Doc;
+  extensions: ExtensionType[];
 }
 
+const internalExtensions = [
+  ServiceManager,
+  CommandManager,
+  UIEventDispatcher,
+  SelectionManager,
+  RangeManager,
+  ViewStore,
+  Clipboard,
+];
+
 export class BlockStdScope {
-  readonly clipboard: Clipboard;
+  private _getHost: () => EditorHost;
 
-  readonly collection: DocCollection;
-
-  readonly command: CommandManager;
+  readonly container: Container;
 
   readonly doc: Doc;
 
-  readonly event: UIEventDispatcher;
+  readonly extensions: ExtensionType[];
 
-  readonly host: EditorHost;
-
-  readonly range: RangeManager;
-
-  readonly selection: SelectionManager;
-
-  readonly spec: SpecStore;
-
-  readonly view: ViewStore;
+  readonly provider: ServiceProvider;
 
   constructor(options: BlockStdOptions) {
-    this.host = options.host;
-    this.collection = options.doc.collection;
+    this._getHost = () => {
+      throw new BlockSuiteError(
+        ErrorCode.ValueNotExists,
+        'Host is not ready to use, the `render` method should be called first'
+      );
+    };
     this.doc = options.doc;
-    this.event = new UIEventDispatcher(this);
-    this.selection = new SelectionManager(this);
-    this.range = new RangeManager(this.host);
-    this.command = new CommandManager(this);
-    this.spec = new SpecStore(this);
-    this.view = new ViewStore(this);
-    this.clipboard = new Clipboard(this);
+    this.extensions = [...internalExtensions, ...options.extensions];
+    this.container = new Container();
+    this.container.addImpl(StdIdentifier, () => this);
+
+    this.extensions.forEach(ext => {
+      const container = this.container;
+      ext.setup(container);
+    });
+
+    this.provider = this.container.provider();
+
+    this._lifeCycleWatchers.forEach(watcher => {
+      watcher.created.call(watcher);
+    });
+  }
+
+  private get _lifeCycleWatchers() {
+    return this.provider.getAll(LifeCycleWatcherIdentifier);
+  }
+
+  getConfig<Key extends BlockSuite.ConfigKeys>(
+    flavour: Key
+  ): BlockSuite.BlockConfigs[Key] | null;
+
+  getConfig(flavour: string) {
+    const config = this.provider.getOptional(ConfigIdentifier(flavour));
+    if (!config) {
+      return null;
+    }
+
+    return config;
+  }
+
+  getService<Key extends BlockSuite.ServiceKeys>(
+    flavour: Key
+  ): BlockSuite.BlockServices[Key];
+
+  getService<Service extends BlockService>(flavour: string): Service;
+
+  getService(flavour: string): BlockService {
+    return this.get(BlockServiceIdentifier(flavour));
+  }
+
+  getView(flavour: string) {
+    return this.getOptional(BlockViewIdentifier(flavour));
   }
 
   mount() {
-    this.selection.mount();
-    this.range.mount();
-    this.event.mount();
-    this.view.mount();
-    this.spec.mount();
+    this._lifeCycleWatchers.forEach(watcher => {
+      watcher.mounted.call(watcher);
+    });
+  }
+
+  render() {
+    const element = new EditorHost();
+    element.std = this;
+    element.doc = this.doc;
+    this._getHost = () => element;
+    this._lifeCycleWatchers.forEach(watcher => {
+      watcher.rendered.call(watcher);
+    });
+
+    return element;
   }
 
   unmount() {
-    this.event.unmount();
-    this.selection.unmount();
-    this.view.unmount();
-    this.spec.unmount();
+    this._lifeCycleWatchers.forEach(watcher => {
+      watcher.unmounted.call(watcher);
+    });
+  }
+
+  get clipboard() {
+    return this.get(Clipboard);
+  }
+
+  get collection() {
+    return this.doc.collection;
+  }
+
+  get command() {
+    return this.get(CommandManager);
+  }
+
+  get event() {
+    return this.get(UIEventDispatcher);
+  }
+
+  get get() {
+    return this.provider.get.bind(this.provider);
+  }
+
+  get getOptional() {
+    return this.provider.getOptional.bind(this.provider);
+  }
+
+  get host() {
+    return this._getHost();
+  }
+
+  get range() {
+    return this.get(RangeManager);
+  }
+
+  get selection() {
+    return this.get(SelectionManager);
+  }
+
+  get view() {
+    return this.get(ViewStore);
   }
 }
 
 declare global {
   namespace BlockSuite {
+    interface BlockServices {}
+    interface BlockConfigs {}
+
+    type ServiceKeys = string & keyof BlockServices;
+    type ConfigKeys = string & keyof BlockConfigs;
+
     type Std = BlockStdScope;
   }
 }

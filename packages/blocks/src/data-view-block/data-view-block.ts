@@ -152,7 +152,7 @@ export class DataViewBlockComponent extends CaptionedBlockComponent<DataViewBloc
   `;
 
   getRootService = () => {
-    return this.std.spec.getService('affine:page');
+    return this.std.getService('affine:page');
   };
 
   headerWidget: DataViewWidget = defineUniComponent(

@@ -1,3 +1,5 @@
+import type { BlockModel } from '@blocksuite/store';
+
 import { throttle } from '@blocksuite/global/utils';
 
 import type { BaseSelection, TextSelection } from '../selection/index.js';
@@ -14,6 +16,20 @@ export class RangeBinding {
   private _compositionStartCallback:
     | ((event: CompositionEvent) => Promise<void>)
     | null = null;
+
+  private _computePath = (modelId: string) => {
+    const block = this.host.std.doc.getBlock(modelId)?.model;
+    if (!block) return [];
+
+    const path: string[] = [];
+    let parent: BlockModel | null = block;
+    while (parent) {
+      path.unshift(parent.id);
+      parent = this.host.doc.getParent(parent);
+    }
+
+    return path;
+  };
 
   private _onBeforeInput = (event: InputEvent) => {
     const selection = this.selectionManager.find('text');
@@ -171,17 +187,14 @@ export class RangeBinding {
       return;
     }
     const range = selection.rangeCount > 0 ? selection.getRangeAt(0) : null;
-    const isRangeReversed =
-      !!selection.anchorNode &&
-      !!selection.focusNode &&
-      (selection.anchorNode === selection.focusNode
-        ? selection.anchorOffset > selection.focusOffset
-        : selection.anchorNode.compareDocumentPosition(selection.focusNode) ===
-          Node.DOCUMENT_POSITION_PRECEDING);
 
     if (!range) {
       this._prevTextSelection = null;
       this.selectionManager.clear(['text']);
+      return;
+    }
+
+    if (!this.host.contains(range.commonAncestorContainer)) {
       return;
     }
 
@@ -214,6 +227,13 @@ export class RangeBinding {
     );
     if (inlineEditor?.isComposing) return;
 
+    const isRangeReversed =
+      !!selection.anchorNode &&
+      !!selection.focusNode &&
+      (selection.anchorNode === selection.focusNode
+        ? selection.anchorOffset > selection.focusOffset
+        : selection.anchorNode.compareDocumentPosition(selection.focusNode) ===
+          Node.DOCUMENT_POSITION_PRECEDING);
     const textSelection = this.rangeManager?.rangeToTextSelection(
       range,
       isRangeReversed
@@ -228,10 +248,9 @@ export class RangeBinding {
     // If the model is not found, the selection maybe in another editor
     if (!model) return;
 
-    const path = this.host.view.calculatePath(model);
     this._prevTextSelection = {
       selection: textSelection,
-      path,
+      path: this._computePath(model.id),
     };
     this.rangeManager?.syncRangeToTextSelection(range, isRangeReversed);
   };
@@ -245,26 +264,27 @@ export class RangeBinding {
     if (text === this._prevTextSelection) {
       return;
     }
-
     // wait for lit updated
     this.host.updateComplete
       .then(() => {
-        const model = text && this.host.doc.getBlockById(text.blockId);
-        const path = model && this.host.view.calculatePath(model);
+        const id = text?.blockId;
+        const path = id && this._computePath(id);
 
-        const eq =
-          text && this._prevTextSelection && path
-            ? text.equals(this._prevTextSelection.selection) &&
-              path.join('') === this._prevTextSelection.path.join('')
-            : false;
+        if (this.host.event.active) {
+          const eq =
+            text && this._prevTextSelection && path
+              ? text.equals(this._prevTextSelection.selection) &&
+                path.join('') === this._prevTextSelection.path.join('')
+              : false;
 
-        if (eq) return;
+          if (eq) return;
+        }
 
         this._prevTextSelection =
           text && path
             ? {
                 selection: text,
-                path: path,
+                path,
               }
             : null;
         if (text) {
@@ -319,7 +339,7 @@ export class RangeBinding {
   }
 
   get host() {
-    return this.manager.host;
+    return this.manager.std.host;
   }
 
   get rangeManager() {

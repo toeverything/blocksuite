@@ -3,7 +3,6 @@ import type { IPoint, IVec } from '@blocksuite/global/utils';
 
 import { Bound, noop } from '@blocksuite/global/utils';
 
-import { buildPath } from '../../../_common/utils/index.js';
 import {
   Overlay,
   getStroke,
@@ -103,10 +102,7 @@ export class EraserToolController extends EdgelessToolController<EraserTool> {
   override beforeModeSwitch() {
     this._eraseTargets.forEach(erasable => {
       if (isTopLevelBlock(erasable)) {
-        const ele = this._edgeless.host.view.viewFromPath(
-          'block',
-          buildPath(erasable)
-        );
+        const ele = this._edgeless.host.view.getBlock(erasable.id);
         ele && ((ele as HTMLElement).style.opacity = '1');
       } else {
         erasable.opacity = 1;
@@ -128,7 +124,7 @@ export class EraserToolController extends EdgelessToolController<EraserTool> {
   }
 
   override onContainerDragEnd(): void {
-    deleteElements(this._surface, Array.from(this._eraseTargets));
+    deleteElements(this._edgeless, Array.from(this._eraseTargets));
     this._reset();
     this._doc.captureSync();
   }
@@ -143,10 +139,7 @@ export class EraserToolController extends EdgelessToolController<EraserTool> {
           linePolygonIntersects(this._prevPoint, currentPoint, bound.points)
         ) {
           this._eraseTargets.add(erasable);
-          const ele = this._edgeless.host.view.viewFromPath(
-            'block',
-            buildPath(erasable)
-          );
+          const ele = this._edgeless.host.view.getBlock(erasable.id);
           ele && ((ele as HTMLElement).style.opacity = '0.3');
         }
       } else {

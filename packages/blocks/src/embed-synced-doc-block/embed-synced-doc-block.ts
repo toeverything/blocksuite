@@ -1,5 +1,3 @@
-import type { EditorHost } from '@blocksuite/block-std';
-
 import {
   EmbedEdgelessIcon,
   EmbedPageIcon,
@@ -11,7 +9,13 @@ import {
   type EmbedSyncedDocModel,
   NoteDisplayMode,
 } from '@blocksuite/affine-model';
+import { DocModeProvider } from '@blocksuite/affine-shared/services';
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
+import {
+  BlockServiceWatcher,
+  BlockStdScope,
+  type EditorHost,
+} from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import { BlockViewType, DocCollection, type Query } from '@blocksuite/store';
 import { type PropertyValues, html } from 'lit';
@@ -46,9 +50,12 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockComponent<
     const previewSpecBuilder = SpecProvider.getInstance().getSpec(name);
     const currentDisposables = this.disposables;
 
-    previewSpecBuilder.setup(
-      'affine:embed-synced-doc',
-      (slots, disposableGroup) => {
+    class EmbedSyncedDocWatcher extends BlockServiceWatcher {
+      static override readonly flavour = 'affine:embed-synced-doc';
+
+      override mounted() {
+        const disposableGroup = this.blockService.disposables;
+        const slots = this.blockService.specSlots;
         disposableGroup.add(
           slots.viewConnected.on(({ component }) => {
             const nextComponent = component as EmbedSyncedDocBlockComponent;
@@ -65,7 +72,9 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockComponent<
           })
         );
       }
-    );
+    }
+
+    previewSpecBuilder.extend([EmbedSyncedDocWatcher]);
 
     return previewSpecBuilder.value;
   };
@@ -74,7 +83,7 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockComponent<
     const fitToContent = () => {
       if (this.syncedDocMode !== 'edgeless') return;
 
-      const service = this.syncedDocEditorHost?.std.spec.getService(
+      const service = this.syncedDocEditorHost?.std.getService(
         'affine:page'
       ) as EdgelessRootService;
 
@@ -141,10 +150,10 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockComponent<
           DocMode.Page,
           () => html`
             <div class="affine-page-viewport">
-              ${this.host.renderSpecPortal(
-                syncedDoc,
-                this._buildPreviewSpec('page:preview')
-              )}
+              ${new BlockStdScope({
+                doc: syncedDoc,
+                extensions: this._buildPreviewSpec('page:preview'),
+              }).render()}
             </div>
           `,
         ],
@@ -152,10 +161,10 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockComponent<
           DocMode.Edgeless,
           () => html`
             <div class="affine-edgeless-viewport">
-              ${this.host.renderSpecPortal(
-                syncedDoc,
-                this._buildPreviewSpec('edgeless:preview')
-              )}
+              ${new BlockStdScope({
+                doc: syncedDoc,
+                extensions: this._buildPreviewSpec('edgeless:preview'),
+              }).render()}
             </div>
           `,
         ],
@@ -257,10 +266,10 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockComponent<
     const pageId = this.model.pageId;
     if (pageId === this.doc.id) return;
 
-    const rootComponent = this.std.view.viewFromPath('block', [
-      this.doc.root?.id ?? '',
-    ]) as RootBlockComponent | null;
-    assertExists(rootComponent);
+    const rootComponent = this.std.view.getBlock(
+      this.doc.root?.id ?? ''
+    ) as RootBlockComponent | null;
+    if (!rootComponent) return;
 
     rootComponent.slots.docLinkClicked.emit({ pageId });
   };
@@ -338,7 +347,7 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockComponent<
   }
 
   private get _rootService() {
-    return this.std.spec.getService('affine:page');
+    return this.std.getService('affine:page');
   }
 
   private _selectBlock() {
@@ -385,12 +394,11 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockComponent<
     );
 
     if (this._rootService) {
-      this.syncedDocMode = this._rootService.docModeService.getMode(
-        this.model.pageId
-      );
+      const docMode = this._rootService.std.get(DocModeProvider);
+      this.syncedDocMode = docMode.getMode(this.model.pageId);
       this._isEmptySyncedDoc = isEmptyDoc(this.syncedDoc, this.syncedDocMode);
       this.disposables.add(
-        this._rootService.docModeService.onModeChange(mode => {
+        docMode.onModeChange(mode => {
           this.syncedDocMode = mode;
           this._isEmptySyncedDoc = isEmptyDoc(this.syncedDoc, mode);
         }, this.model.pageId)
@@ -419,7 +427,7 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockComponent<
 
     // Forward docLinkClicked event from the synced doc
     const syncedDocRootService =
-      this.syncedDocEditorHost?.std.spec.getService('affine:page');
+      this.syncedDocEditorHost?.std.getService('affine:page');
     syncedDocRootService &&
       this.disposables.add(
         syncedDocRootService.slots.docLinkClicked.on(({ pageId }) => {

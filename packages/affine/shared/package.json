@@ -36,7 +36,8 @@
     "./commands": "./src/commands/index.ts",
     "./mixins": "./src/mixins/index.ts",
     "./theme": "./src/theme/index.ts",
-    "./styles": "./src/styles/index.ts"
+    "./styles": "./src/styles/index.ts",
+    "./services": "./src/services/index.ts"
   },
   "publishConfig": {
     "access": "public",
@@ -78,6 +79,10 @@
       "./styles": {
         "types": "./dist/styles/index.d.ts",
         "import": "./dist/styles/index.js"
+      },
+      "./services": {
+        "types": "./dist/services/index.d.ts",
+        "import": "./dist/services/index.js"
       }
     }
   },

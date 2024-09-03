@@ -1,7 +1,4 @@
-import {
-  type ImageBlockModel,
-  ImageBlockSchema,
-} from '@blocksuite/affine-model';
+import { ImageBlockSchema } from '@blocksuite/affine-model';
 import { ImageSelection } from '@blocksuite/affine-shared/selection';
 import {
   isInsideEdgelessEditor,
@@ -34,7 +31,7 @@ import {
 import { ImageEdgelessBlockComponent } from './image-edgeless-block.js';
 import { addSiblingImageBlock } from './utils.js';
 
-export class ImageBlockService extends BlockService<ImageBlockModel> {
+export class ImageBlockService extends BlockService {
   private _dragHandleOption: DragHandleOption = {
     flavour: ImageBlockSchema.model.flavour,
     edgeless: true,
@@ -69,7 +66,7 @@ export class ImageBlockService extends BlockService<ImageBlockModel> {
         startDragging([blockComponent], state);
         return true;
       } else if (isInSurface && isDraggingByDragHandle) {
-        const edgelessService = editorHost.std.spec.getService(
+        const edgelessService = editorHost.std.getService(
           'affine:page'
         ) as EdgelessRootService;
         const scale = edgelessService.viewport.zoom || 1;
@@ -157,6 +154,8 @@ export class ImageBlockService extends BlockService<ImageBlockModel> {
     },
   };
 
+  static override readonly flavour = ImageBlockSchema.model.flavour;
+
   static setImageProxyURL = setImageProxyMiddlewareURL;
 
   fileDropManager!: FileDropManager;
@@ -178,9 +177,9 @@ export class ImageBlockService extends BlockService<ImageBlockModel> {
   get rootComponent(): RootBlockComponent | null {
     const rootModel = this.doc.root;
     if (!rootModel) return null;
-    const rootComponent = this.std.view.viewFromPath('block', [
-      rootModel.id,
-    ]) as RootBlockComponent | null;
+    const rootComponent = this.std.view.getBlock(
+      rootModel.id
+    ) as RootBlockComponent | null;
     return rootComponent;
   }
 }

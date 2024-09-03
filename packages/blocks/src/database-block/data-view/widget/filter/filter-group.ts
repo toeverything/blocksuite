@@ -1,11 +1,15 @@
 import type { TemplateResult } from 'lit';
 
 import { popFilterableSimpleMenu } from '@blocksuite/affine-components/context-menu';
+import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import {
   ArrowDownSmallIcon,
+  ConvertIcon,
+  DeleteIcon,
   DuplicateIcon,
-} from '@blocksuite/affine-components/icons';
-import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
+  MoreHorizontalIcon,
+  PlusIcon,
+} from '@blocksuite/icons/lit';
 import { css, html, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
@@ -14,12 +18,6 @@ import { repeat } from 'lit/directives/repeat.js';
 import type { Filter, FilterGroup, Variable } from '../../common/ast.js';
 
 import { firstFilter } from '../../common/ast.js';
-import {
-  ConvertIcon,
-  DeleteIcon,
-  MoreHorizontalIcon,
-  PlusIcon,
-} from '../../common/icons/index.js';
 import './condition.js';
 import { popAddNewFilter } from './condition.js';
 
@@ -210,7 +208,7 @@ export class FilterGroupView extends WithDisposable(ShadowlessElement) {
       {
         type: 'action',
         name: filter.type === 'filter' ? 'Turn into group' : 'Wrap in group',
-        icon: ConvertIcon,
+        icon: ConvertIcon(),
         onHover: hover => {
           this.containerClass = hover
             ? { index: i, class: 'hover-style' }
@@ -224,7 +222,7 @@ export class FilterGroupView extends WithDisposable(ShadowlessElement) {
       {
         type: 'action',
         name: 'Duplicate',
-        icon: DuplicateIcon,
+        icon: DuplicateIcon(),
         onHover: hover => {
           this.containerClass = hover
             ? { index: i, class: 'hover-style' }
@@ -247,7 +245,7 @@ export class FilterGroupView extends WithDisposable(ShadowlessElement) {
           {
             type: 'action',
             name: 'Delete',
-            icon: DeleteIcon,
+            icon: DeleteIcon(),
             class: 'delete-item',
             onHover: hover => {
               this.containerClass = hover
@@ -329,14 +327,14 @@ export class FilterGroupView extends WithDisposable(ShadowlessElement) {
                     ></filter-group-view>
                   `}
               <div class="filter-group-item-ops" @click="${clickOps}">
-                ${MoreHorizontalIcon}
+                ${MoreHorizontalIcon()}
               </div>
             </div>
           </div>`;
         })}
       </div>
       <div class="filter-group-button" @click="${this._addNew}">
-        ${PlusIcon} Add ${this.isMaxDepth ? nothing : ArrowDownSmallIcon}
+        ${PlusIcon()} Add ${this.isMaxDepth ? nothing : ArrowDownSmallIcon()}
       </div>
     `;
   }

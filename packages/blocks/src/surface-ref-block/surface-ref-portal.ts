@@ -150,7 +150,7 @@ export class SurfaceRefPortal extends WithDisposable(ShadowlessElement) {
   }
 
   get surfaceService() {
-    return this.host.std.spec.getService('affine:surface');
+    return this.host.std.getService('affine:surface');
   }
 
   @query('.stacking-canvas')

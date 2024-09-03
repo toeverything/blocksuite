@@ -1,5 +1,9 @@
-import type { ShapeStyle, ShapeType } from '@blocksuite/affine-model';
-
+import {
+  type ShapeName,
+  type ShapeStyle,
+  getShapeRadius,
+  getShapeType,
+} from '@blocksuite/affine-model';
 import { WithDisposable } from '@blocksuite/block-std';
 import { Bound } from '@blocksuite/global/utils';
 import { sleep } from '@blocksuite/global/utils';
@@ -16,8 +20,6 @@ import type { EdgelessRootBlockComponent } from '../../../edgeless-root-block.js
 
 import { CanvasElementType } from '../../../../../surface-block/index.js';
 import { ShapeToolController } from '../../../tools/shape-tool.js';
-
-export type ShapeName = ShapeType | 'roundedRect';
 
 export interface Shape {
   name: ShapeName;
@@ -53,9 +55,9 @@ export class EdgelessShapeToolElement extends WithDisposable(LitElement) {
     );
     const xywh = new Bound(modelX, modelY, width, height).serialize();
     this.edgeless.service.addElement(CanvasElementType.SHAPE, {
-      shapeType: this.shape.name === 'roundedRect' ? 'rect' : this.shape.name,
+      shapeType: getShapeType(this.shape.name),
       xywh: xywh,
-      radius: this.radius,
+      radius: getShapeRadius(this.shape.name),
     });
   };
 
@@ -301,9 +303,6 @@ export class EdgelessShapeToolElement extends WithDisposable(LitElement) {
 
   @property({ attribute: false })
   accessor order!: number;
-
-  @property({ attribute: false })
-  accessor radius!: number;
 
   @property({ attribute: false })
   accessor shape!: Shape;

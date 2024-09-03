@@ -20,6 +20,7 @@ export type {
   MenuItemGroup,
 } from './types.js';
 export {
+  cloneGroups,
   groupsToActions,
   renderActions,
   renderGroups,

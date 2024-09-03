@@ -1,21 +1,23 @@
-import type { BlockModel } from '@blocksuite/store';
-
 import type { BlockComponent, WidgetComponent } from './element/index.js';
 
-export class ViewStore {
+import { LifeCycleWatcher } from '../extension/index.js';
+
+export class ViewStore extends LifeCycleWatcher {
   private readonly _blockMap = new Map<string, BlockComponent>();
+
+  private _fromId = (
+    blockId: string | undefined | null
+  ): BlockComponent | null => {
+    const id = blockId ?? this.std.doc.root?.id;
+    if (!id) {
+      return null;
+    }
+    return this._blockMap.get(id) ?? null;
+  };
 
   private readonly _widgetMap = new Map<string, WidgetComponent>();
 
-  calculatePath = (model: BlockModel): string[] => {
-    const path: string[] = [];
-    let current: BlockModel | null = model;
-    while (current) {
-      path.push(current.id);
-      current = this.std.doc.getParent(current);
-    }
-    return path.reverse();
-  };
+  static override readonly key = 'viewStore';
 
   deleteBlock = (node: BlockComponent) => {
     this._blockMap.delete(node.id);
@@ -25,14 +27,6 @@ export class ViewStore {
     const id = node.dataset.widgetId as string;
     const widgetIndex = `${node.model.id}|${id}`;
     this._widgetMap.delete(widgetIndex);
-  };
-
-  fromPath = (path: string | undefined | null): BlockComponent | null => {
-    const id = path ?? this.std.doc.root?.id;
-    if (!id) {
-      return null;
-    }
-    return this._blockMap.get(id) ?? null;
   };
 
   getBlock = (id: string): BlockComponent | null => {
@@ -63,10 +57,10 @@ export class ViewStore {
       index: number,
       parent: BlockComponent
     ) => undefined | null | true,
-    path?: string | undefined | null
+    blockId?: string | undefined | null
   ) => {
-    const tree = this.fromPath(path);
-    if (!tree) {
+    const top = this._fromId(blockId);
+    if (!top) {
       return;
     }
 
@@ -85,38 +79,16 @@ export class ViewStore {
         });
       };
 
-    tree.model.children.forEach(child => {
+    top.model.children.forEach(child => {
       const childNode = this._blockMap.get(child.id);
       if (childNode) {
-        iterate(childNode)(childNode, tree.model.children.indexOf(child));
+        iterate(childNode)(childNode, top.model.children.indexOf(child));
       }
     });
   };
 
-  constructor(public std: BlockSuite.Std) {}
-
-  mount() {}
-
-  unmount() {
+  override unmounted() {
     this._blockMap.clear();
     this._widgetMap.clear();
-  }
-
-  /**
-   * @deprecated
-   * Use `getBlock` or `getWidget` instead
-   */
-  viewFromPath(type: 'block', path: string[]): null | BlockComponent;
-  viewFromPath(type: 'widget', path: string[]): null | WidgetComponent;
-  viewFromPath(
-    type: 'block' | 'widget',
-    path: string[]
-  ): null | BlockComponent | WidgetComponent {
-    if (type === 'block') {
-      return this.fromPath(path[path.length - 1]);
-    }
-    const temp = path.slice(-2) as [string, string];
-    const widgetId = temp.join('|');
-    return this._widgetMap.get(widgetId) ?? null;
   }
 }

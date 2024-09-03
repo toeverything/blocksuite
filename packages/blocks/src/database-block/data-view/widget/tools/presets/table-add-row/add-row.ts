@@ -1,6 +1,6 @@
 import type { InsertToPosition } from '@blocksuite/affine-shared/utils';
 
-import { PlusIcon } from '@blocksuite/affine-components/icons';
+import { PlusIcon } from '@blocksuite/icons/lit';
 import { css, html } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 
@@ -162,7 +162,7 @@ export class DataViewHeaderToolsAddRow extends WidgetBase {
       draggable="true"
       @click="${this._onAddNewRecord}"
     >
-      ${PlusIcon}<span>New Record</span>
+      ${PlusIcon()}<span>New Record</span>
     </div>`;
   }
 

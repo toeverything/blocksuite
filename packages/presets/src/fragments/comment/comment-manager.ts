@@ -1,7 +1,6 @@
 import type { TextSelection } from '@blocksuite/block-std';
 import type { EditorHost } from '@blocksuite/block-std';
 
-import { assertExists } from '@blocksuite/global/utils';
 import { DocCollection, type Y } from '@blocksuite/store';
 
 export interface CommentMeta {
@@ -10,11 +9,11 @@ export interface CommentMeta {
 }
 export interface CommentRange {
   start: {
-    path: string[];
+    id: string;
     index: Y.RelativePosition;
   };
   end: {
-    path: string[];
+    id: string;
     index: Y.RelativePosition;
   };
 }
@@ -70,13 +69,13 @@ export class CommentManager {
           start.index,
           this.host.doc.spaceDoc
         );
-      const startBlock = this.host.view.viewFromPath('block', start.path);
+      const startBlock = this.host.view.getBlock(start.id);
       const endIndex =
         DocCollection.Y.createAbsolutePositionFromRelativePosition(
           end.index,
           this.host.doc.spaceDoc
         );
-      const endBlock = this.host.view.viewFromPath('block', end.path);
+      const endBlock = this.host.view.getBlock(end.id);
 
       if (!startIndex || !startBlock || !endIndex || !endBlock) {
         // remove outdated comment
@@ -115,14 +114,11 @@ export class CommentManager {
     const { from, to } = selection;
     const fromBlock = blocks[0];
     const fromBlockText = fromBlock.model.text;
-    const fromBlockPath = fromBlock.path;
-    assertExists(fromBlockText);
-    assertExists(fromBlockPath);
+    const fromBlockId = fromBlock.model.id;
     const toBlock = blocks[blocks.length - 1];
     const toBlockText = toBlock.model.text;
-    const toBlockPath = toBlock.path;
-    assertExists(toBlockText);
-    assertExists(toBlockPath);
+    const toBlockId = toBlock.model.id;
+    if (!fromBlockText || !toBlockText) return null;
 
     const startIndex = DocCollection.Y.createRelativePositionFromTypeIndex(
       fromBlockText.yText,
@@ -153,11 +149,11 @@ export class CommentManager {
       quote,
       range: {
         start: {
-          path: fromBlockPath,
+          id: fromBlockId,
           index: startIndex,
         },
         end: {
-          path: toBlockPath,
+          id: toBlockId,
           index: endIndex,
         },
       },

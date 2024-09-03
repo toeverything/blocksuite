@@ -1,23 +1,19 @@
 import type { PeekViewService } from '@blocksuite/affine-components/peek';
 import type { RefNodeSlots } from '@blocksuite/affine-components/rich-text';
-import type { RootBlockModel } from '@blocksuite/affine-model';
 import type { EmbedCardStyle } from '@blocksuite/affine-model';
 import type { BlockComponent } from '@blocksuite/block-std';
 
+import { RootBlockSchema } from '@blocksuite/affine-model';
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import { BlockService } from '@blocksuite/block-std';
 
+import type { NotificationService } from '../_common/components/index.js';
 import type { RootBlockComponent } from './types.js';
 
 import {
   FileDropManager,
   type FileDropOptions,
 } from '../_common/components/file-drop-manager.js';
-import {
-  type DocModeService,
-  type NotificationService,
-  createDocModeService,
-} from '../_common/components/index.js';
 import { DEFAULT_IMAGE_PROXY_ENDPOINT } from '../_common/consts.js';
 import { ExportManager } from '../_common/export-manager/export-manager.js';
 import {
@@ -35,20 +31,6 @@ export type EmbedOptions = {
   styles: EmbedCardStyle[];
   viewType: 'card' | 'embed';
 };
-
-export type QuickSearchResult =
-  | { docId: string; isNewDoc?: boolean }
-  | { userInput: string }
-  | null;
-
-export interface QuickSearchService {
-  searchDoc: (options: {
-    action?: 'insert';
-    userInput?: string;
-    skipSelection?: boolean;
-    trigger?: 'edgeless-toolbar' | 'slash-command' | 'shortcut';
-  }) => Promise<QuickSearchResult>;
-}
 
 export interface TelemetryEvent {
   page?: string;
@@ -84,7 +66,7 @@ export interface TelemetryService {
   ): void;
 }
 
-export abstract class RootService extends BlockService<RootBlockModel> {
+export abstract class RootService extends BlockService {
   private _embedBlockRegistry = new Set<EmbedOptions>();
 
   private _exportOptions = {
@@ -95,7 +77,7 @@ export abstract class RootService extends BlockService<RootBlockModel> {
     flavour: this.flavour,
   };
 
-  docModeService: DocModeService = createDocModeService(this.doc.id);
+  static override readonly flavour = RootBlockSchema.model.flavour;
 
   readonly editPropsStore: EditPropsStore = new EditPropsStore(this);
 
@@ -118,8 +100,6 @@ export abstract class RootService extends BlockService<RootBlockModel> {
   notificationService: NotificationService | null = null;
 
   peekViewService: PeekViewService | null = null;
-
-  quickSearchService: QuickSearchService | null = null;
 
   registerEmbedBlockOptions = (options: EmbedOptions): void => {
     this._embedBlockRegistry.add(options);
@@ -192,9 +172,11 @@ export abstract class RootService extends BlockService<RootBlockModel> {
   }
 
   get viewportElement() {
-    const rootComponent = this.std.view.viewFromPath('block', [
-      this.std.doc.root?.id ?? '',
-    ]) as RootBlockComponent | null;
+    const rootId = this.std.doc.root?.id;
+    if (!rootId) return null;
+    const rootComponent = this.std.view.getBlock(
+      rootId
+    ) as RootBlockComponent | null;
     if (!rootComponent) return null;
     const viewportElement = rootComponent.viewportElement;
     return viewportElement;

@@ -53,7 +53,7 @@ export class EdgelessConnectorToolButton extends QuickToolMixin(
     const menu = this.createPopper('edgeless-connector-menu', this);
     menu.element.edgeless = this.edgeless;
     menu.element.onChange = (props: Record<string, unknown>) => {
-      this.edgeless.service.editPropsStore.recordLastProps(this.type, props);
+      this.edgeless.service.editPropsStore.recordLastProps('connector', props);
       this.setEdgelessTool({
         type: this.type,
         mode: this._mode$.value,

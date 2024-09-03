@@ -19,13 +19,11 @@
     "@blocksuite/global": "workspace:*",
     "@blocksuite/inline": "workspace:*",
     "@blocksuite/store": "workspace:*",
-    "@fal-ai/serverless-client": "^0.14.2",
     "@floating-ui/dom": "^1.6.10",
     "@lit-labs/preact-signals": "^1.0.2",
     "@lottiefiles/dotlottie-wc": "^0.2.16",
     "@toeverything/theme": "^1.0.7",
     "lit": "^3.2.0",
-    "openai": "^4.56.0",
     "zod": "^3.23.8"
   },
   "exports": {
@@ -41,7 +39,6 @@
         "module": "./dist/index.js",
         "import": "./dist/index.js"
       },
-      "./ai": "./dist/ai/index.js",
       "./themes/*": "./themes/*"
     }
   },

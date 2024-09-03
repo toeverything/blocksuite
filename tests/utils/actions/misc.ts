@@ -95,6 +95,27 @@ async function initEmptyEditor({
           const editor = document.createElement('affine-editor-container');
           editor.doc = doc;
           editor.autofocus = true;
+          editor.pageSpecs = [
+            ...editor.pageSpecs,
+            {
+              setup: di => {
+                di.addImpl(window.$blocksuite.identifiers.QuickSearchProvider, {
+                  searchDoc: () => Promise.resolve(null),
+                });
+              },
+            },
+          ];
+          editor.edgelessSpecs = [
+            ...editor.edgelessSpecs,
+            {
+              setup: di => {
+                di.addImpl(window.$blocksuite.identifiers.QuickSearchProvider, {
+                  searchDoc: () => Promise.resolve(null),
+                });
+              },
+            },
+          ];
+
           editor.slots.docLinkClicked.on(({ pageId: docId }) => {
             const newDoc = collection.getDoc(docId);
             if (!newDoc) {
@@ -1427,25 +1448,26 @@ export async function mockQuickSearch(
 ) {
   // mock quick search service
   await page.evaluate(mapping => {
-    window.host.std.spec.getService('affine:page').quickSearchService = {
-      searchDoc(options) {
-        return new Promise(resolve => {
-          if (!options.userInput) {
-            return resolve(null);
-          }
+    const quickSearchService = window.host.std.get(
+      window.$blocksuite.identifiers.QuickSearchProvider
+    );
+    quickSearchService.searchDoc = options => {
+      return new Promise(resolve => {
+        if (!options.userInput) {
+          return resolve(null);
+        }
 
-          const docId = mapping[options.userInput];
-          if (!docId) {
-            return resolve({
-              userInput: options.userInput,
-            });
-          } else {
-            return resolve({
-              docId,
-            });
-          }
-        });
-      },
+        const docId = mapping[options.userInput];
+        if (!docId) {
+          return resolve({
+            userInput: options.userInput,
+          });
+        } else {
+          return resolve({
+            docId,
+          });
+        }
+      });
     };
   }, mapping);
 }

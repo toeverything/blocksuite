@@ -10,11 +10,11 @@ import { when } from 'lit/directives/when.js';
 import { html } from 'lit/static-html.js';
 
 import type { EventName, UIEventHandler } from '../../event/index.js';
-import type { BlockService } from '../../service/index.js';
+import type { BlockService } from '../../extension/index.js';
+import type { BlockStdScope } from '../../scope/index.js';
 import type { WidgetComponent } from './widget-component.js';
 
-import { BlockStdScope } from '../../scope/index.js';
-import { PropTypes, requiredProperties } from '../decorators/required.js';
+import { PropTypes, requiredProperties } from '../decorators/index.js';
 import { WithDisposable } from '../utils/with-disposable.js';
 import {
   blockComponentSymbol,
@@ -26,7 +26,7 @@ import { ShadowlessElement } from './shadowless-element.js';
 
 @requiredProperties({
   doc: PropTypes.instanceOf(Doc),
-  std: PropTypes.instanceOf(BlockStdScope),
+  std: PropTypes.object,
   widgets: PropTypes.recordOf(PropTypes.object),
 })
 export class BlockComponent<
@@ -64,8 +64,6 @@ export class BlockComponent<
       })
     );
   };
-
-  path: string[] = [];
 
   renderChildren = (model: BlockModel): TemplateResult => {
     return this.host.renderChildren(model);
@@ -130,8 +128,6 @@ export class BlockComponent<
       }
     });
     this._disposables.add(disposable);
-
-    this.path = this.host.view.calculatePath(this.model);
 
     this._disposables.add(
       this.model.propsUpdated.on(() => {
@@ -304,7 +300,7 @@ export class BlockComponent<
     if (this._service) {
       return this._service;
     }
-    const service = this.std.spec.getService(this.model.flavour) as Service;
+    const service = this.std.getService(this.model.flavour) as Service;
     if (!service) {
       throw new BlockSuiteError(
         ErrorCode.MissingViewModelError,

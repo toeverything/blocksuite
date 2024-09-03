@@ -1,11 +1,14 @@
-import type { BlockSpec } from '@blocksuite/block-std';
-
-import { DividerBlockSchema } from '@blocksuite/affine-model';
+import {
+  BlockViewExtension,
+  type ExtensionType,
+  FlavourExtension,
+} from '@blocksuite/block-std';
 import { literal } from 'lit/static-html.js';
 
-export const DividerBlockSpec: BlockSpec = {
-  schema: DividerBlockSchema,
-  view: {
-    component: literal`affine-divider`,
-  },
-};
+import { DividerBlockService } from './divider-service.js';
+
+export const DividerBlockSpec: ExtensionType[] = [
+  FlavourExtension('affine:divider'),
+  DividerBlockService,
+  BlockViewExtension('affine:divider', literal`affine-divider`),
+];

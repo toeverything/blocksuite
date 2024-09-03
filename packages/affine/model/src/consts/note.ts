@@ -1,4 +1,6 @@
-import { createZodUnion } from '../utils/zod.js';
+import { z } from 'zod';
+
+import { createEnumMap } from '../utils/enum.js';
 
 export const NOTE_WIDTH = 800;
 
@@ -16,6 +18,8 @@ export enum NoteBackgroundColor {
   Yellow = '--affine-note-background-yellow',
 }
 
+export const NoteBackgroundColorMap = createEnumMap(NoteBackgroundColor);
+
 export const NOTE_BACKGROUND_COLORS = [
   NoteBackgroundColor.Yellow,
   NoteBackgroundColor.Orange,
@@ -32,9 +36,7 @@ export const NOTE_BACKGROUND_COLORS = [
 
 export const DEFAULT_NOTE_BACKGROUND_COLOR = NoteBackgroundColor.Blue;
 
-export const NoteBackgroundColorsSchema = createZodUnion(
-  NOTE_BACKGROUND_COLORS
-);
+export const NoteBackgroundColorsSchema = z.nativeEnum(NoteBackgroundColor);
 
 export enum NoteShadow {
   Box = '--affine-note-shadow-box',
@@ -44,6 +46,8 @@ export enum NoteShadow {
   Paper = '--affine-note-shadow-paper',
   Sticker = '--affine-note-shadow-sticker',
 }
+
+export const NoteShadowMap = createEnumMap(NoteShadow);
 
 export const NOTE_SHADOWS = [
   NoteShadow.None,
@@ -56,7 +60,7 @@ export const NOTE_SHADOWS = [
 
 export const DEFAULT_NOTE_SHADOW = NoteShadow.Sticker;
 
-export const NoteShadowsSchema = createZodUnion(NOTE_SHADOWS);
+export const NoteShadowsSchema = z.nativeEnum(NoteShadow);
 
 export enum NoteDisplayMode {
   DocAndEdgeless = 'both',
@@ -69,3 +73,5 @@ export enum StrokeStyle {
   None = 'none',
   Solid = 'solid',
 }
+
+export const StrokeStyleMap = createEnumMap(StrokeStyle);

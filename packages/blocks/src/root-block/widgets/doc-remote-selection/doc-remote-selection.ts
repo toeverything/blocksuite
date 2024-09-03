@@ -61,7 +61,7 @@ export class AffineDocRemoteSelectionWidget extends WidgetComponent {
 
   private get _config(): DocRemoteSelectionConfig {
     const config =
-      this.std.spec.getConfig('affine:page')?.docRemoteSelectionWidget ?? {};
+      this.std.getConfig('affine:page')?.docRemoteSelectionWidget ?? {};
 
     return {
       blockSelectionBackgroundTransparent: block => {
@@ -70,6 +70,9 @@ export class AffineDocRemoteSelectionWidget extends WidgetComponent {
             'affine:code',
             'affine:database',
             'affine:image',
+            'affine:attachment',
+            'affine:bookmark',
+            'affine:surface-ref',
           ]) || /affine:embed-*/.test(block.flavour)
         );
       },

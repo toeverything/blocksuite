@@ -1,6 +1,7 @@
 import type { ParagraphBlockModel } from '@blocksuite/affine-model';
 import type { EmbedCardStyle } from '@blocksuite/affine-model';
 import type { BlockComponent, EditorHost } from '@blocksuite/block-std';
+import type { BaseSelection } from '@blocksuite/block-std';
 import type { BlockModel } from '@blocksuite/store';
 
 import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '@blocksuite/affine-shared/consts';
@@ -12,11 +13,6 @@ import {
   isInsidePageEditor,
   matchFlavours,
 } from '@blocksuite/affine-shared/utils';
-import {
-  type BaseSelection,
-  PathFinder,
-  type PointerEventState,
-} from '@blocksuite/block-std';
 import { Bound, Point, Rect, assertExists } from '@blocksuite/global/utils';
 
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
@@ -69,11 +65,17 @@ export const getDragHandleContainerHeight = (model: BlockModel) => {
 // To check if the block is a child block of the selected blocks
 export const containChildBlock = (
   blocks: BlockComponent[],
-  childPath: string[]
+  childModel: BlockModel
 ) => {
   return blocks.some(block => {
-    const path = block.path;
-    return PathFinder.includes(childPath, path);
+    let currentBlock: BlockModel | null = childModel;
+    while (currentBlock) {
+      if (currentBlock.id === block.model.id) {
+        return true;
+      }
+      currentBlock = block.doc.getParent(currentBlock.id);
+    }
+    return false;
   });
 };
 
@@ -110,12 +112,6 @@ export const isBlockPathEqual = (
     return false;
   }
   return path1 === path2;
-};
-
-export const getContainerOffsetPoint = (state: PointerEventState) => {
-  const x = state.point.x + state.containerOffset.x;
-  const y = state.point.y + state.containerOffset.y;
-  return new Point(x, y);
 };
 
 export const isOutOfNoteBlock = (
@@ -178,8 +174,7 @@ export const getClosestBlockByPoint = (
     '.affine-note-block-container > .affine-block-children-container > [data-block-id]';
 
   const closestBlock = (
-    block &&
-    PathFinder.includes(block.path, (closestNoteBlock as BlockComponent).path)
+    block && containChildBlock([closestNoteBlock], block.model)
       ? block
       : findClosestBlockComponent(
           closestNoteBlock as BlockComponent,

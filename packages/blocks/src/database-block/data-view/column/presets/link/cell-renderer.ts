@@ -1,6 +1,6 @@
-import { PenIcon } from '@blocksuite/affine-components/icons';
+import { QuickSearchProvider } from '@blocksuite/affine-shared/services';
 import { isValidUrl, normalizeUrl } from '@blocksuite/affine-shared/utils';
-import { assertExists } from '@blocksuite/global/utils';
+import { PenIcon } from '@blocksuite/icons/lit';
 import { baseTheme } from '@toeverything/theme';
 import { css, unsafeCSS } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
@@ -113,10 +113,12 @@ export class LinkCell extends BaseCellRenderer<string> {
     if (!rootId) {
       return;
     }
-    const rootComponent = std?.view.viewFromPath('block', [
-      rootId,
-    ]) as RootBlockComponent | null;
-    assertExists(rootComponent);
+    const rootComponent = std?.view.getBlock(
+      rootId
+    ) as RootBlockComponent | null;
+    if (!rootComponent) {
+      return;
+    }
 
     rootComponent.slots.docLinkClicked.emit({ pageId: this.docId });
   };
@@ -137,7 +139,7 @@ export class LinkCell extends BaseCellRenderer<string> {
               .link="${linkText}"
             ></affine-database-link-node>`}
         <div class="affine-database-link-icon" @click="${this._onEdit}">
-          ${PenIcon}
+          ${PenIcon()}
         </div>
       </div>
     `;
@@ -151,12 +153,10 @@ export class LinkCell extends BaseCellRenderer<string> {
         this.docId = undefined;
         return;
       }
-      const result = std?.spec
-        .getService('affine:page')
-        .quickSearchService?.searchDoc({
-          userInput: this.value,
-          skipSelection: true,
-        });
+      const result = std?.getOptional(QuickSearchProvider)?.searchDoc({
+        userInput: this.value,
+        skipSelection: true,
+      });
       result
         ?.then(res => {
           if (res && 'docId' in res) {

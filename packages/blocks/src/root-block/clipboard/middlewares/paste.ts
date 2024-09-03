@@ -7,6 +7,10 @@ import type {
 } from '@blocksuite/block-std';
 import type { Text } from '@blocksuite/store';
 
+import {
+  QuickSearchProvider,
+  type QuickSearchService,
+} from '@blocksuite/affine-shared/services';
 import { assertExists } from '@blocksuite/global/utils';
 import {
   type BlockModel,
@@ -17,8 +21,6 @@ import {
   type SliceSnapshot,
   fromJSON,
 } from '@blocksuite/store';
-
-import type { QuickSearchService } from '../../root-service.js';
 
 import { matchFlavours } from '../../../_common/utils/index.js';
 import { extractSearchParams } from '../../../_common/utils/url.js';
@@ -236,8 +238,7 @@ class PasteTr {
   };
 
   convertToLinkedDoc = async () => {
-    const quickSearchService =
-      this.std.spec.getService('affine:page').quickSearchService;
+    const quickSearchService = this.std.getOptional(QuickSearchProvider);
 
     if (!quickSearchService) {
       return;
@@ -468,14 +469,21 @@ class PasteTr {
         const pageId = needToConvert.get(op)!;
         const reference = { pageId, type: 'LinkedPage' };
 
-        Object.assign(reference, extractSearchParams(link));
+        const extracted = extractSearchParams(link);
+        const isLinkToNode = Boolean(
+          extracted?.params?.mode &&
+            (extracted.params.blockIds?.length ||
+              extracted.params.elementIds?.length)
+        );
 
-        this.std.spec
+        Object.assign(reference, extracted);
+
+        this.std
           .getService('affine:page')
           .telemetryService?.track('LinkedDocCreated', {
             page: 'doc editor',
             category: 'pasted link',
-            type: 'doc',
+            type: isLinkToNode ? 'block' : 'doc',
             other: 'existing doc',
           });
 

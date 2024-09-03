@@ -1,4 +1,3 @@
-import type { DatabaseBlockModel } from '@blocksuite/affine-model';
 import type { BlockModel, Doc } from '@blocksuite/store';
 
 import {
@@ -7,6 +6,10 @@ import {
   affineInlineMarkdownMatches,
   getAffineInlineSpecsWithReference,
 } from '@blocksuite/affine-components/rich-text';
+import {
+  type DatabaseBlockModel,
+  DatabaseBlockSchema,
+} from '@blocksuite/affine-model';
 import { BlockService } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 
@@ -24,7 +27,9 @@ import {
   updateView,
 } from './utils.js';
 
-export class DatabaseBlockService extends BlockService<DatabaseBlockModel> {
+export class DatabaseBlockService extends BlockService {
+  static override readonly flavour = DatabaseBlockSchema.model.flavour;
+
   addColumn = addColumn;
 
   applyColumnUpdate = applyColumnUpdate;

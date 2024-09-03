@@ -1,7 +1,4 @@
-import {
-  type AttachmentBlockModel,
-  AttachmentBlockSchema,
-} from '@blocksuite/affine-model';
+import { AttachmentBlockSchema } from '@blocksuite/affine-model';
 import {
   isInsideEdgelessEditor,
   matchFlavours,
@@ -34,7 +31,7 @@ import {
 import { AttachmentEdgelessBlockComponent } from './attachment-edgeless-block.js';
 import { addSiblingAttachmentBlocks } from './utils.js';
 
-export class AttachmentBlockService extends BlockService<AttachmentBlockModel> {
+export class AttachmentBlockService extends BlockService {
   private _dragHandleOption: DragHandleOption = {
     flavour: AttachmentBlockSchema.model.flavour,
     edgeless: true,
@@ -70,7 +67,7 @@ export class AttachmentBlockService extends BlockService<AttachmentBlockModel> {
         startDragging([blockComponent], state);
         return true;
       } else if (isInSurface && isDraggingByDragHandle) {
-        const edgelessService = editorHost.std.spec.getService(
+        const edgelessService = editorHost.std.getService(
           'affine:page'
         ) as EdgelessRootService;
         const zoom = edgelessService?.viewport.zoom ?? 1;
@@ -176,6 +173,8 @@ export class AttachmentBlockService extends BlockService<AttachmentBlockModel> {
     },
   };
 
+  static override readonly flavour = AttachmentBlockSchema.model.flavour;
+
   fileDropManager!: FileDropManager;
 
   maxFileSize = 10 * 1000 * 1000; // 10MB (default)
@@ -197,9 +196,9 @@ export class AttachmentBlockService extends BlockService<AttachmentBlockModel> {
   get rootComponent(): RootBlockComponent | null {
     const rootModel = this.doc.root;
     if (!rootModel) return null;
-    const rootComponent = this.std.view.viewFromPath('block', [
-      rootModel.id,
-    ]) as RootBlockComponent | null;
+    const rootComponent = this.std.view.getBlock(
+      rootModel.id
+    ) as RootBlockComponent | null;
     return rootComponent;
   }
 }

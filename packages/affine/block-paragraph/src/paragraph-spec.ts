@@ -1,16 +1,17 @@
-import type { BlockSpec } from '@blocksuite/block-std';
-
-import { ParagraphBlockSchema } from '@blocksuite/affine-model';
+import {
+  BlockViewExtension,
+  CommandExtension,
+  type ExtensionType,
+  FlavourExtension,
+} from '@blocksuite/block-std';
 import { literal } from 'lit/static-html.js';
 
 import { commands } from './commands/index.js';
 import { ParagraphBlockService } from './paragraph-service.js';
 
-export const ParagraphBlockSpec: BlockSpec = {
-  schema: ParagraphBlockSchema,
-  view: {
-    component: literal`affine-paragraph`,
-  },
-  commands,
-  service: ParagraphBlockService,
-};
+export const ParagraphBlockSpec: ExtensionType[] = [
+  FlavourExtension('affine:paragraph'),
+  ParagraphBlockService,
+  CommandExtension(commands),
+  BlockViewExtension('affine:paragraph', literal`affine-paragraph`),
+];

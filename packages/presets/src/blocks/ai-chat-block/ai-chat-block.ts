@@ -38,7 +38,7 @@ export class AIChatBlockComponent extends BlockComponent<AIChatBlockModel> {
   }
 
   get _rootService() {
-    return this.host.std.spec.getService('affine:page');
+    return this.host.std.getService('affine:page');
   }
 
   override renderBlock() {

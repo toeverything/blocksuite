@@ -1,47 +1,14 @@
-import type { BlockSpec, BlockSpecSlots } from '@blocksuite/block-std';
-import type { DisposableGroup } from '@blocksuite/global/utils';
-
-import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
+import type { ExtensionType } from '@blocksuite/block-std';
 
 export class SpecBuilder {
-  private readonly _value: BlockSpec[];
+  private _value: ExtensionType[];
 
-  constructor(spec: BlockSpec[]) {
+  constructor(spec: ExtensionType[]) {
     this._value = [...spec];
   }
 
-  setup<Flavour extends BlockSuite.ServiceKeys>(
-    flavour: Flavour,
-    setup: (
-      slots: BlockSpecSlots<BlockSuite.BlockServices[Flavour]>,
-      disposableGroup: DisposableGroup
-    ) => void
-  ) {
-    const specIndex = this._value.findIndex(
-      s => s.schema.model.flavour === flavour
-    );
-
-    if (specIndex === -1) {
-      throw new BlockSuiteError(
-        ErrorCode.ValueNotExists,
-        `BlockSpec not found for ${flavour}`
-      );
-    }
-
-    this._value[specIndex] = {
-      ...this._value[specIndex],
-    };
-
-    const spec = this._value[specIndex];
-    const oldSetup = spec.setup;
-
-    spec.setup = (slots, disposableGroup) => {
-      oldSetup?.(slots, disposableGroup);
-      setup(
-        slots as unknown as BlockSpecSlots<BlockSuite.BlockServices[Flavour]>,
-        disposableGroup
-      );
-    };
+  extend(extensions: ExtensionType[]) {
+    this._value = [...this._value, ...extensions];
   }
 
   get value() {

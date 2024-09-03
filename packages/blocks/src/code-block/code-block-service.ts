@@ -2,7 +2,7 @@ import {
   InlineManager,
   textKeymap,
 } from '@blocksuite/affine-components/rich-text';
-import { type CodeBlockModel, ColorScheme } from '@blocksuite/affine-model';
+import { CodeBlockSchema, ColorScheme } from '@blocksuite/affine-model';
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import { BlockService } from '@blocksuite/block-std';
 import { type Signal, signal } from '@lit-labs/preact-signals';
@@ -23,10 +23,12 @@ import {
   CODE_BLOCK_DEFAULT_LIGHT_THEME,
 } from './highlight/const.js';
 
-export class CodeBlockService extends BlockService<CodeBlockModel> {
+export class CodeBlockService extends BlockService {
   private _darkThemeKey: string | undefined;
 
   private _lightThemeKey: string | undefined;
+
+  static override readonly flavour = CodeBlockSchema.model.flavour;
 
   highlighter$: Signal<HighlighterCore | null> = signal(null);
 
@@ -42,7 +44,7 @@ export class CodeBlockService extends BlockService<CodeBlockModel> {
       loadWasm: getWasm,
     })
       .then(async highlighter => {
-        const config = this.std.spec.getConfig('affine:code');
+        const config = this.std.getConfig('affine:code');
         const darkTheme = config?.theme?.dark ?? CODE_BLOCK_DEFAULT_DARK_THEME;
         const lightTheme =
           config?.theme?.light ?? CODE_BLOCK_DEFAULT_LIGHT_THEME;
@@ -62,9 +64,7 @@ export class CodeBlockService extends BlockService<CodeBlockModel> {
   }
 
   get langs() {
-    return (
-      this.std.spec.getConfig('affine:code')?.langs ?? bundledLanguagesInfo
-    );
+    return this.std.getConfig('affine:code')?.langs ?? bundledLanguagesInfo;
   }
 
   get themeKey() {

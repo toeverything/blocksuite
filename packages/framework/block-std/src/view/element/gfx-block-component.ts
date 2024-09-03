@@ -4,7 +4,7 @@ import type { BlockModel } from '@blocksuite/store';
 import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 import { nothing } from 'lit';
 
-import type { BlockService } from '../../service/index.js';
+import type { BlockService } from '../../extension/index.js';
 
 import { BlockComponent } from './block-component.js';
 
@@ -92,7 +92,7 @@ export abstract class GfxBlockComponent<
   }
 
   get rootService() {
-    return this.host.spec.getService(this.rootServiceFlavour) as GfxRootService;
+    return this.std.getService(this.rootServiceFlavour) as GfxRootService;
   }
 
   abstract rootServiceFlavour: string;
@@ -186,9 +186,7 @@ export function toGfxBlockComponent<
     }
 
     get rootService() {
-      return this.host.spec.getService(
-        this.rootServiceFlavour
-      ) as GfxRootService;
+      return this.std.getService(this.rootServiceFlavour) as GfxRootService;
     }
   } as B & {
     new (

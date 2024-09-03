@@ -1,11 +1,15 @@
 /* eslint-disable @typescript-eslint/no-restricted-imports */
-import type { DocMode, EdgelessRootService } from '@blocksuite/blocks';
 import type { SerializedXYWH } from '@blocksuite/global/utils';
 import type { DeltaInsert } from '@blocksuite/inline/types';
 import type { SlDropdown } from '@shoelace-style/shoelace';
 import type { Pane } from 'tweakpane';
 
 import { type EditorHost, ShadowlessElement } from '@blocksuite/block-std';
+import {
+  type DocMode,
+  DocModeProvider,
+  type EdgelessRootService,
+} from '@blocksuite/blocks';
 import {
   type AffineTextAttributes,
   ColorVariables,
@@ -315,10 +319,10 @@ export class DebugMenu extends ShadowlessElement {
   }
 
   private _present() {
-    if (!this.editor.host) return;
-    const rootService = this.editor.host.spec.getService('affine:page');
-    const { docModeService } = rootService;
-    if (docModeService.getMode() !== 'edgeless') {
+    if (!this.editor.std || !this.editor.host) return;
+    const rootService = this.editor.std.getService('affine:page');
+    const mode = this.editor.std.get(DocModeProvider).getMode();
+    if (mode !== 'edgeless') {
       toast(
         this.editor.host,
         'The presentation mode is only available on edgeless mode.',
@@ -371,8 +375,7 @@ export class DebugMenu extends ShadowlessElement {
 
   private _switchEditorMode() {
     if (!this.editor.host) return;
-    const { docModeService } = this.editor.host.spec.getService('affine:page');
-    this.mode = docModeService.toggleMode();
+    this.mode = this.editor.host.std.get(DocModeProvider).toggleMode();
   }
 
   private _switchOffsetMode() {
@@ -722,7 +725,7 @@ export class DebugMenu extends ShadowlessElement {
   }
 
   get rootService() {
-    return this.editor.host?.spec.getService('affine:page');
+    return this.editor.std?.getService('affine:page');
   }
 
   @state()

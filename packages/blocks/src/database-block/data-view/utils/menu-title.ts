@@ -1,9 +1,8 @@
 import type { Menu } from '@blocksuite/affine-components/context-menu';
 import type { TemplateResult } from 'lit';
 
+import { ArrowLeftBigIcon } from '@blocksuite/icons/lit';
 import { html } from 'lit';
-
-import { ArrowLeftBigIcon } from '../common/icons/index.js';
 
 export const menuTitleItem = (
   name: string,
@@ -31,7 +30,7 @@ export const menuTitle = (name: string, onBack: () => void) => {
         class="dv-icon-20 dv-hover dv-pd-2 dv-round-4"
         style="display:flex;"
       >
-        ${ArrowLeftBigIcon}
+        ${ArrowLeftBigIcon()}
       </div>
       <div
         style="font-size: 12px;line-height: 20px;color: var(--affine-text-secondary-color)"

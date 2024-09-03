@@ -1,5 +1,4 @@
 import type { NoteBlockModel, RootBlockModel } from '@blocksuite/affine-model';
-import type { BlockComponent } from '@blocksuite/block-std';
 import type { IVec } from '@blocksuite/global/utils';
 
 import {
@@ -11,8 +10,8 @@ import {
   matchFlavours,
 } from '@blocksuite/affine-shared/utils';
 import { getCurrentNativeRange } from '@blocksuite/affine-shared/utils';
+import { type BlockComponent, BlockStdScope } from '@blocksuite/block-std';
 import {
-  PathFinder,
   type PointerEventState,
   type UIEventHandler,
   WidgetComponent,
@@ -138,7 +137,7 @@ export class AffineDragHandleWidget extends WidgetComponent<
     if (isInsidePageEditor(this.host)) return true;
     const edgelessRoot = this.rootComponent as EdgelessRootBlockComponent;
 
-    const noteBlockId = noteBlock.path[noteBlock.path.length - 1];
+    const noteBlockId = noteBlock.model.id;
     return (
       edgelessRoot.service.selection.editing &&
       edgelessRoot.service.selection.selectedIds[0] === noteBlockId
@@ -253,10 +252,11 @@ export class AffineDragHandleWidget extends WidgetComponent<
       const doc = this.doc.blockCollection.getDoc({ query });
 
       const previewSpec = SpecProvider.getInstance().getSpec('page:preview');
-      const previewTemplate = this.host.renderSpecPortal(
+      const previewStd = new BlockStdScope({
         doc,
-        previewSpec.value
-      );
+        extensions: previewSpec.value,
+      });
+      const previewTemplate = previewStd.render();
 
       const offset = this._calculatePreviewOffset(blocks, state);
       const posX = state.raw.x - offset.x;
@@ -451,7 +451,6 @@ export class AffineDragHandleWidget extends WidgetComponent<
     if (!closestBlock) return null;
 
     const blockId = closestBlock.model.id;
-    const blockPath = closestBlock.path;
     const model = closestBlock.model;
 
     const isDatabase = matchFlavours(model, ['affine:database']);
@@ -479,7 +478,7 @@ export class AffineDragHandleWidget extends WidgetComponent<
         this.draggingElements.map(block => block.model.id),
         blockId
       ) ||
-      containChildBlock(this.draggingElements, blockPath)
+      containChildBlock(this.draggingElements, model)
     ) {
       return null;
     }
@@ -538,7 +537,7 @@ export class AffineDragHandleWidget extends WidgetComponent<
 
     if (
       containBlock(
-        blocks.map(block => PathFinder.id(block.path)),
+        blocks.map(block => block.id),
         this._anchorBlockPath
       )
     ) {

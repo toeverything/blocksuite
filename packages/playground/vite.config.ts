@@ -111,10 +111,6 @@ const chunkGroups = {
     path.dirname(require.resolve('micromark-extension-gfm-task-list-item')),
     path.dirname(require.resolve('micromark-util-combine-extensions')),
   ],
-  ai: [
-    path.dirname(require.resolve('@fal-ai/serverless-client')),
-    path.dirname(require.resolve('openai')),
-  ],
   blocks: [
     require.resolve('@blocksuite/blocks'),
     require.resolve('@blocksuite/blocks/schemas'),

@@ -25,11 +25,5 @@ if (env[importIdentifier] === true) {
   );
 }
 
-if (typeof window === 'undefined') {
-  throw new Error(
-    'Seems like you are importing @blocksuite/presets in SSR mode. Which is not supported for now.'
-  );
-}
-
 // @ts-ignore
 env[importIdentifier] = true;

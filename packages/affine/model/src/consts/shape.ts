@@ -1,4 +1,5 @@
-import { createZodUnion } from '../utils/zod.js';
+import { z } from 'zod';
+
 import { LINE_COLORS, LineColor } from './line.js';
 
 export const DEFAULT_ROUGHNESS = 1.4;
@@ -18,6 +19,29 @@ export enum ShapeType {
   Ellipse = 'ellipse',
   Rect = 'rect',
   Triangle = 'triangle',
+}
+
+export type ShapeName = ShapeType | 'roundedRect';
+
+export function getShapeName(type: ShapeType, radius: number): ShapeName {
+  if (type === ShapeType.Rect && radius > 0) {
+    return 'roundedRect';
+  }
+  return type;
+}
+
+export function getShapeType(name: ShapeName): ShapeType {
+  if (name === 'roundedRect') {
+    return ShapeType.Rect;
+  }
+  return name;
+}
+
+export function getShapeRadius(name: ShapeName): number {
+  if (name === 'roundedRect') {
+    return 0.1;
+  }
+  return 0;
 }
 
 export enum ShapeStyle {
@@ -55,7 +79,7 @@ export const SHAPE_FILL_COLORS = [
 
 export const DEFAULT_SHAPE_FILL_COLOR = ShapeFillColor.Yellow;
 
-export const FillColorsSchema = createZodUnion(SHAPE_FILL_COLORS);
+export const FillColorsSchema = z.nativeEnum(ShapeFillColor);
 
 export const SHAPE_STROKE_COLORS = LINE_COLORS;
 
@@ -63,4 +87,4 @@ export const DEFAULT_SHAPE_STROKE_COLOR = LineColor.Yellow;
 
 export const DEFAULT_SHAPE_TEXT_COLOR = LineColor.Black;
 
-export const StrokeColorsSchema = createZodUnion(SHAPE_STROKE_COLORS);
+export const StrokeColorsSchema = z.nativeEnum(LineColor);

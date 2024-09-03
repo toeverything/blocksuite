@@ -7,6 +7,7 @@ import {
   EMBED_CARD_HEIGHT,
   EMBED_CARD_WIDTH,
 } from '@blocksuite/affine-shared/consts';
+import { DocModeProvider } from '@blocksuite/affine-shared/services';
 import { getLastNoteBlock } from '@blocksuite/affine-shared/utils';
 import { Bound, Vec } from '@blocksuite/global/utils';
 
@@ -71,9 +72,9 @@ export function insertEmbedCard(
   std: BlockStdScope,
   properties: EmbedCardProperties
 ) {
-  const { doc, host, spec } = std;
-  const rootService = spec.getService('affine:page');
-  const mode = rootService.docModeService.getMode();
+  const { doc, host } = std;
+  const rootService = std.getService('affine:page');
+  const mode = std.get(DocModeProvider).getMode();
   const selectedBlock = rootService.selectedBlocks[0]?.model;
 
   const { model, index } = getParentModelBySelection(doc, mode, selectedBlock);

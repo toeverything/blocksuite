@@ -1,9 +1,9 @@
 /// <reference types="@blocksuite/global" />
 import '@blocksuite/affine-block-paragraph';
 import '@blocksuite/affine-block-list';
+import '@blocksuite/affine-components/context-menu';
 import '@blocksuite/affine-components/rich-text';
 import '@blocksuite/affine-components/toolbar';
-import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 import { Point, deserializeXYWH } from '@blocksuite/global/utils';
 
 import { matchFlavours } from './_common/utils/index.js';
@@ -21,11 +21,7 @@ import './surface-ref-block/index.js';
 
 export * from './_common/adapters/index.js';
 export * from './_common/components/ai-item/index.js';
-export * from './_common/components/doc-mode-service.js';
-export type {
-  DocModeService,
-  NotificationService,
-} from './_common/components/index.js';
+export type { NotificationService } from './_common/components/index.js';
 export { scrollbarStyle } from './_common/components/index.js';
 export { type NavigatorMode } from './_common/edgeless/frame/consts.js';
 export { EmbedBlockComponent } from './_common/embed-block-helper/index.js';
@@ -91,6 +87,7 @@ export * from './surface-block/surface-service.js';
 export * from './surface-ref-block/index.js';
 export * from '@blocksuite/affine-block-list';
 export * from '@blocksuite/affine-block-paragraph';
+export { type MenuOptions } from '@blocksuite/affine-components/context-menu';
 export {
   HoverController,
   whenHover,
@@ -140,6 +137,7 @@ export {
   renderToolbarSeparator,
 } from '@blocksuite/affine-components/toolbar';
 export * from '@blocksuite/affine-model';
+export * from '@blocksuite/affine-shared/services';
 export {
   ColorVariables,
   FontFamilyVariables,
@@ -147,6 +145,7 @@ export {
   StyleVariables,
   ThemeObserver,
 } from '@blocksuite/affine-shared/theme';
+
 export {
   createButtonPopper,
   createDefaultDoc,
@@ -184,13 +183,6 @@ if (env[importIdentifier] === true) {
   // https://github.com/yjs/yjs/issues/438
   console.error(
     '@blocksuite/blocks was already imported. This breaks constructor checks and will lead to issues!'
-  );
-}
-
-if (typeof window === 'undefined') {
-  throw new BlockSuiteError(
-    ErrorCode.NoneSupportedSSRError,
-    'Seems like you are importing @blocksuite/blocks in SSR mode. Which is not supported for now.'
   );
 }
 

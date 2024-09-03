@@ -1,8 +1,9 @@
 import type { ImageBlockModel, NoteBlockModel } from '@blocksuite/affine-model';
-import type { EditorHost } from '@blocksuite/block-std';
 
 import { DocMode, NoteDisplayMode } from '@blocksuite/affine-model';
+import { DocModeProvider } from '@blocksuite/affine-shared/services';
 import { getBlockProps, matchFlavours } from '@blocksuite/affine-shared/utils';
+import { BlockStdScope, type EditorHost } from '@blocksuite/block-std';
 import { Bound, getCommonBound } from '@blocksuite/global/utils';
 import { assertExists } from '@blocksuite/global/utils';
 import {
@@ -106,8 +107,7 @@ export const embedNoteContentStyles = css`
 `;
 
 export function promptDocTitle(host: EditorHost, autofill?: string) {
-  const notification =
-    host.std.spec.getService('affine:page').notificationService;
+  const notification = host.std.getService('affine:page').notificationService;
   if (!notification) return Promise.resolve(undefined);
 
   return notification.prompt({
@@ -132,8 +132,7 @@ export function getTitleFromSelectedModels(selectedModels: BlockModel[]) {
 }
 
 export function notifyDocCreated(host: EditorHost, doc: Doc) {
-  const notification =
-    host.std.spec.getService('affine:page').notificationService;
+  const notification = host.std.getService('affine:page').notificationService;
   if (!notification) return;
 
   const abortController = new AbortController();
@@ -305,10 +304,11 @@ async function renderNoteContent(
   };
   const previewDoc = doc.blockCollection.getDoc({ query });
   const previewSpec = SpecProvider.getInstance().getSpec('page:preview');
-  const previewTemplate = card.host.renderSpecPortal(
-    previewDoc,
-    previewSpec.value
-  );
+  const previewStd = new BlockStdScope({
+    doc: previewDoc,
+    extensions: previewSpec.value,
+  });
+  const previewTemplate = previewStd.render();
   const fragment = document.createDocumentFragment();
   render(previewTemplate, fragment);
   noteBlocksContainer.append(fragment);
@@ -342,7 +342,7 @@ function renderSurfaceRef(
 ) {
   card.isBannerEmpty = true;
 
-  const surfaceRefService = card.std.spec.getService('affine:surface-ref');
+  const surfaceRefService = card.std.getService('affine:surface-ref');
   assertExists(surfaceRefService, `Surface ref service not found.`);
   card.surfaceRefService = surfaceRefService;
 
@@ -585,7 +585,6 @@ export function createLinkedDocFromEdgelessElements(
       ids.set(model.id, newId);
     });
   });
-  const pageService = host.spec.getService('affine:page');
-  pageService.docModeService.setMode(DocMode.Edgeless, linkedDoc.id);
+  host.std.get(DocModeProvider).setMode(DocMode.Edgeless, linkedDoc.id);
   return linkedDoc;
 }

@@ -20,7 +20,7 @@ import {
   getDuplicateBlocks,
 } from '../root-block/widgets/drag-handle/utils.js';
 
-export class NoteBlockService extends BlockService<NoteBlockModel> {
+export class NoteBlockService extends BlockService {
   private _dragHandleOption: DragHandleOption = {
     flavour: NoteBlockSchema.model.flavour,
     edgeless: true,
@@ -42,7 +42,7 @@ export class NoteBlockService extends BlockService<NoteBlockModel> {
       ) {
         return false;
       }
-      const edgelessService = editorHost.std.spec.getService(
+      const edgelessService = editorHost.std.getService(
         'affine:page'
       ) as EdgelessRootService;
       const zoom = edgelessService?.viewport.zoom ?? 1;
@@ -110,6 +110,8 @@ export class NoteBlockService extends BlockService<NoteBlockModel> {
       return true;
     },
   };
+
+  static override readonly flavour = NoteBlockSchema.model.flavour;
 
   override mounted() {
     super.mounted();

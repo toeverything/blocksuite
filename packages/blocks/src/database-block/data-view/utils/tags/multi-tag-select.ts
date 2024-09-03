@@ -4,6 +4,12 @@ import {
 } from '@blocksuite/affine-components/context-menu';
 import { rangeWrap } from '@blocksuite/affine-shared/utils';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
+import {
+  CloseIcon,
+  DeleteIcon,
+  MoreHorizontalIcon,
+  PlusIcon,
+} from '@blocksuite/icons/lit';
 import { nanoid } from '@blocksuite/store';
 import { autoPlacement, flip, offset } from '@floating-ui/dom';
 import { customElement, property, query, state } from 'lit/decorators.js';
@@ -12,12 +18,6 @@ import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
 
-import {
-  DatabaseSearchClose,
-  DeleteIcon,
-  MoreHorizontalIcon,
-  PlusIcon,
-} from '../../common/icons/index.js';
 import { stopPropagation } from '../event.js';
 import { getTagColor, selectOptionColors } from './colors.js';
 import { styles } from './styles.js';
@@ -61,7 +61,7 @@ export class MultiTagSelect extends WithDisposable(ShadowlessElement) {
           {
             type: 'action',
             name: 'Delete',
-            icon: DeleteIcon,
+            icon: DeleteIcon(),
             class: 'delete-item',
             select: () => {
               this.deleteTag(id);
@@ -339,7 +339,7 @@ export class MultiTagSelect extends WithDisposable(ShadowlessElement) {
               <span
                 class="close-icon"
                 @click="${() => this._onDeleteSelected(selectedTag, id)}"
-                >${DatabaseSearchClose}</span
+                >${CloseIcon()}</span
               >
             </div>`;
           })}
@@ -381,7 +381,7 @@ export class MultiTagSelect extends WithDisposable(ShadowlessElement) {
                   >
                     ${select.isCreate
                       ? html` <div class="select-option-new-icon">
-                          Create ${PlusIcon}
+                          Create ${PlusIcon()}
                         </div>`
                       : ''}
                     <div style="display:flex;flex-direction: column">
@@ -413,7 +413,7 @@ export class MultiTagSelect extends WithDisposable(ShadowlessElement) {
                         class="select-option-icon"
                         @click="${clickOption}"
                       >
-                        ${MoreHorizontalIcon}
+                        ${MoreHorizontalIcon()}
                       </div>`
                     : null}
                 </div>

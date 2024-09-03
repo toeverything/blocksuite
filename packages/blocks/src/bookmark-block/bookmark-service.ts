@@ -1,7 +1,4 @@
-import {
-  type BookmarkBlockModel,
-  BookmarkBlockSchema,
-} from '@blocksuite/affine-model';
+import { BookmarkBlockSchema } from '@blocksuite/affine-model';
 import { matchFlavours } from '@blocksuite/affine-shared/utils';
 import { BlockService } from '@blocksuite/block-std';
 import { Bound, Point } from '@blocksuite/global/utils';
@@ -24,7 +21,7 @@ import {
 } from '../root-block/widgets/drag-handle/utils.js';
 import { BookmarkEdgelessBlockComponent } from './bookmark-edgeless-block.js';
 
-export class BookmarkBlockService extends BlockService<BookmarkBlockModel> {
+export class BookmarkBlockService extends BlockService {
   private _dragHandleOption: DragHandleOption = {
     flavour: BookmarkBlockSchema.model.flavour,
     edgeless: true,
@@ -60,7 +57,7 @@ export class BookmarkBlockService extends BlockService<BookmarkBlockModel> {
         startDragging([blockComponent], state);
         return true;
       } else if (isInSurface && isDraggingByDragHandle) {
-        const edgelessService = editorHost.std.spec.getService(
+        const edgelessService = editorHost.std.getService(
           'affine:page'
         ) as EdgelessRootService;
         const zoom = edgelessService?.viewport.zoom ?? 1;
@@ -122,6 +119,8 @@ export class BookmarkBlockService extends BlockService<BookmarkBlockModel> {
   };
 
   private static readonly linkPreviewer = new LinkPreviewer();
+
+  static override readonly flavour = BookmarkBlockSchema.model.flavour;
 
   static setLinkPreviewEndpoint =
     BookmarkBlockService.linkPreviewer.setEndpoint;

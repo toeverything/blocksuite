@@ -32,7 +32,7 @@ import {
 } from '@blocksuite/global/utils';
 
 import type { Connectable } from '../../_common/types.js';
-import type { EdgelessRootService } from '../../root-block/edgeless/edgeless-root-service.js';
+import type { SurfaceContext } from '../surface-block.js';
 
 import { isConnectorWithLabel } from '../element-model/utils/connector.js';
 import { Overlay } from '../renderer/canvas-renderer.js';
@@ -820,7 +820,7 @@ export class ConnectionOverlay extends Overlay {
 
   targetBounds: IBound | null = null;
 
-  constructor(private _service: EdgelessRootService) {
+  constructor(private _context: SurfaceContext) {
     super();
   }
 
@@ -831,9 +831,9 @@ export class ConnectionOverlay extends Overlay {
   }
 
   private _findConnectablesInViews() {
-    const service = this._service;
-    const bound = this._service.viewport.viewportBounds;
-    return service.pickElementsByBound(bound).filter(ele => ele.connectable);
+    const context = this._context;
+    const bound = context.viewport.viewportBounds;
+    return context.pickElementsByBound(bound).filter(ele => ele.connectable);
   }
 
   clear() {
@@ -843,9 +843,9 @@ export class ConnectionOverlay extends Overlay {
   }
 
   override render(ctx: CanvasRenderingContext2D): void {
-    const zoom = this._service.viewport.zoom;
+    const zoom = this._context.viewport.zoom;
     const radius = 5 / zoom;
-    const color = getComputedStyle(this._service.host).getPropertyValue(
+    const color = getComputedStyle(this._context.host).getPropertyValue(
       '--affine-text-emphasis-color'
     );
 
@@ -894,7 +894,7 @@ export class ConnectionOverlay extends Overlay {
    */
   renderConnector(point: IVec, excludedIds: string[] = []) {
     const connectables = this._findConnectablesInViews();
-    const service = this._service;
+    const context = this._context;
     const target = [];
 
     this._clearRect();
@@ -916,7 +916,7 @@ export class ConnectionOverlay extends Overlay {
       // then check if closes to anchors
       const anchors = getAnchors(connectable);
       const len = anchors.length;
-      const pointerViewCoord = service.viewport.toViewCoord(point[0], point[1]);
+      const pointerViewCoord = context.viewport.toViewCoord(point[0], point[1]);
 
       let shortestDistance = Number.POSITIVE_INFINITY;
       let j = 0;
@@ -925,7 +925,7 @@ export class ConnectionOverlay extends Overlay {
 
       for (; j < len; j++) {
         const anchor = anchors[j];
-        const anchorViewCoord = service.viewport.toViewCoord(
+        const anchorViewCoord = context.viewport.toViewCoord(
           anchor.point[0],
           anchor.point[1]
         );
@@ -972,7 +972,7 @@ export class ConnectionOverlay extends Overlay {
           {
             ignoreTransparent: false,
           },
-          this._service.host
+          this._context.host
         )
       ) {
         target.push(connectable);

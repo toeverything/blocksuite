@@ -1,11 +1,14 @@
-import type { BlockSpec } from '@blocksuite/block-std';
-
-import { FrameBlockSchema } from '@blocksuite/affine-model';
+import {
+  BlockViewExtension,
+  type ExtensionType,
+  FlavourExtension,
+} from '@blocksuite/block-std';
 import { literal } from 'lit/static-html.js';
 
-export const FrameBlockSpec: BlockSpec = {
-  schema: FrameBlockSchema,
-  view: {
-    component: literal`affine-frame`,
-  },
-};
+import { FrameBlockService } from './frame-service.js';
+
+export const FrameBlockSpec: ExtensionType[] = [
+  FlavourExtension('affine:frame'),
+  FrameBlockService,
+  BlockViewExtension('affine:frame', literal`affine-frame`),
+];

@@ -1,4 +1,4 @@
-import type { BlockSpec } from '@blocksuite/block-std';
+import type { ExtensionType } from '@blocksuite/block-std';
 
 import { EdgelessTextBlockSpec } from '../../edgeless-text-block/edgeless-text-spec.js';
 import { FrameBlockSpec } from '../../frame-block/frame-spec.js';
@@ -10,20 +10,20 @@ import { EdgelessSurfaceBlockSpec } from '../../surface-block/surface-spec.js';
 import { EdgelessSurfaceRefBlockSpec } from '../../surface-ref-block/surface-ref-spec.js';
 import { EdgelessFirstPartyBlockSpecs } from '../common.js';
 
-export const EdgelessEditorBlockSpecs: BlockSpec[] = [
+export const EdgelessEditorBlockSpecs: ExtensionType[] = [
   EdgelessRootBlockSpec,
   ...EdgelessFirstPartyBlockSpecs,
   EdgelessSurfaceBlockSpec,
   EdgelessSurfaceRefBlockSpec,
   FrameBlockSpec,
   EdgelessTextBlockSpec,
-];
+].flat();
 
-export const PreviewEdgelessEditorBlockSpecs: BlockSpec[] = [
+export const PreviewEdgelessEditorBlockSpecs: ExtensionType[] = [
   PreviewEdgelessRootBlockSpec,
   ...EdgelessFirstPartyBlockSpecs,
   EdgelessSurfaceBlockSpec,
   EdgelessSurfaceRefBlockSpec,
   FrameBlockSpec,
   EdgelessTextBlockSpec,
-];
+].flat();

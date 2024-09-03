@@ -1,13 +1,15 @@
-import type {
-  FrameBlockModel,
-  GroupElementModel,
-  ReferenceInfo,
-} from '@blocksuite/affine-model';
-import type { BlockServiceOptions } from '@blocksuite/block-std';
+import type { BlockStdScope } from '@blocksuite/block-std';
 import type { PointTestOptions } from '@blocksuite/block-std/gfx';
 import type { IBound } from '@blocksuite/global/utils';
 
+import {
+  type FrameBlockModel,
+  type GroupElementModel,
+  type ReferenceInfo,
+  RootBlockSchema,
+} from '@blocksuite/affine-model';
 import { clamp } from '@blocksuite/affine-shared/utils';
+import { Viewport } from '@blocksuite/block-std/gfx';
 import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 import { Bound, getCommonBound, last } from '@blocksuite/global/utils';
 import { type BlockModel, Slot } from '@blocksuite/store';
@@ -18,6 +20,7 @@ import type {
 } from '../../surface-block/element-model/index.js';
 import type { SurfaceBlockModel } from '../../surface-block/index.js';
 import type { ReorderingDirection } from '../../surface-block/managers/layer-manager.js';
+import type { SurfaceContext } from '../../surface-block/surface-block.js';
 import type { EdgelessToolConstructor } from './services/tools-manager.js';
 import type { EdgelessTool } from './types.js';
 
@@ -42,13 +45,12 @@ import { FIT_TO_SCREEN_PADDING } from './utils/consts.js';
 import { getCursorMode } from './utils/query.js';
 import { EdgelessSnapManager } from './utils/snap-manager.js';
 import {
-  Viewport,
   ZOOM_INITIAL,
   ZOOM_MAX,
   ZOOM_MIN,
   ZOOM_STEP,
   type ZoomAction,
-} from './utils/viewport.js';
+} from './utils/zoom.js';
 
 export type ElementCreationSource =
   | 'shortcut'
@@ -77,7 +79,7 @@ declare module '@blocksuite/blocks' {
   }
 }
 
-export class EdgelessRootService extends RootService {
+export class EdgelessRootService extends RootService implements SurfaceContext {
   private _frame: EdgelessFrameManager;
 
   private _layer: LayerManager;
@@ -91,6 +93,8 @@ export class EdgelessRootService extends RootService {
   private _tool: EdgelessToolsManager;
 
   private _viewport: Viewport;
+
+  static override readonly flavour = RootBlockSchema.model.flavour;
 
   TemplateJob = TemplateJob;
 
@@ -121,8 +125,8 @@ export class EdgelessRootService extends RootService {
     toolbarLocked: new Slot<boolean>(),
   };
 
-  constructor(options: BlockServiceOptions) {
-    super(options);
+  constructor(std: BlockStdScope, flavourProvider: { flavour: string }) {
+    super(std, flavourProvider);
     const surface = getSurfaceBlock(this.doc);
     if (!surface) {
       throw new BlockSuiteError(

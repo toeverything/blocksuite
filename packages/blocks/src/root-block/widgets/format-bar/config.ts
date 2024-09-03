@@ -46,7 +46,7 @@ import {
   notifyDocCreated,
   promptDocTitle,
 } from '../../../_common/utils/render-linked-doc.js';
-import { MenuContext } from '../../configs/toolbar.js';
+import { FormatBarContext } from './context.js';
 
 export type DividerConfigItem = {
   type: 'divider';
@@ -217,7 +217,7 @@ export function toolbarDefaultConfig(toolbar: AffineFormatBarWidget) {
           if (title === null) return;
           convertSelectedBlocksToLinkedDoc(doc, selectedModels, title);
           notifyDocCreated(host, doc);
-          host.spec
+          host.std
             .getService('affine:page')
             .telemetryService?.track('DocCreated', {
               control: 'create linked doc',
@@ -225,7 +225,7 @@ export function toolbarDefaultConfig(toolbar: AffineFormatBarWidget) {
               module: 'format toolbar',
               type: 'embed-linked-doc',
             });
-          host.spec
+          host.std
             .getService('affine:page')
             .telemetryService?.track('LinkedDocCreated', {
               control: 'create linked doc',
@@ -319,46 +319,7 @@ export function toolbarDefaultConfig(toolbar: AffineFormatBarWidget) {
     });
 }
 
-export class FormatBarContext extends MenuContext {
-  constructor(public toolbar: AffineFormatBarWidget) {
-    super();
-  }
-
-  isEmpty() {
-    return this.selectedBlockModels.length === 0;
-  }
-
-  isMultiple() {
-    return this.selectedBlockModels.length > 1;
-  }
-
-  isSingle() {
-    return this.selectedBlockModels.length === 1;
-  }
-
-  get doc() {
-    return this.toolbar.host.doc;
-  }
-
-  get host() {
-    return this.toolbar.host;
-  }
-
-  get selectedBlockModels() {
-    const { success, selectedModels } =
-      this.std.command.exec('getSelectedModels');
-
-    if (!success) return [];
-
-    return selectedModels ?? [];
-  }
-
-  get std() {
-    return this.toolbar.std;
-  }
-}
-
-const BUILT_IN_GROUPS: MenuItemGroup<FormatBarContext>[] = [
+export const BUILT_IN_GROUPS: MenuItemGroup<FormatBarContext>[] = [
   {
     type: 'clipboard',
     items: [
@@ -478,10 +439,7 @@ const BUILT_IN_GROUPS: MenuItemGroup<FormatBarContext>[] = [
 
 export function toolbarMoreButton(toolbar: AffineFormatBarWidget) {
   const context = new FormatBarContext(toolbar);
-  const groups = context.config.configure(
-    BUILT_IN_GROUPS.map(group => ({ ...group, items: [...group.items] }))
-  );
-  const actions = renderGroups(groups, context);
+  const actions = renderGroups(toolbar.moreGroups, context);
 
   return html`
     <editor-menu-button

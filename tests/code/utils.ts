@@ -21,23 +21,19 @@ export function getCodeBlock(page: Page) {
 
   const codeToolbar = page.locator('affine-code-toolbar');
 
-  const copyButton = codeToolbar.getByTestId('copy-code');
-  const moreButton = codeToolbar.getByTestId('more');
-  const captionButton = codeToolbar.getByTestId('caption');
+  const copyButton = codeToolbar.getByRole('button', { name: 'Copy code' });
+  const captionButton = codeToolbar.getByRole('button', { name: 'Caption' });
+  const moreButton = codeToolbar.getByRole('button', { name: 'More' });
 
-  const moreMenu = page.locator('.more-popup-menu');
+  const menu = page.locator('.more-popup-menu');
 
   const openMore = async () => {
     await moreButton.click();
-    const menu = page.locator('.more-popup-menu');
 
-    const wrapButton = page.locator('.menu-item.wrap');
-
-    const cancelWrapButton = page.locator('.menu-item.cancel-wrap');
-
-    const duplicateButton = page.locator('.menu-item.duplicate');
-
-    const deleteButton = page.locator('.menu-item.delete');
+    const wrapButton = menu.getByRole('button', { name: 'Wrap' });
+    const cancelWrapButton = menu.getByRole('button', { name: 'Cancel wrap' });
+    const duplicateButton = menu.getByRole('button', { name: 'Duplicate' });
+    const deleteButton = menu.getByRole('button', { name: 'Delete' });
 
     return {
       menu,
@@ -57,7 +53,7 @@ export function getCodeBlock(page: Page) {
     copyButton,
     moreButton,
     langFilterInput,
-    moreMenu,
+    moreMenu: menu,
 
     openMore,
     clickLanguageButton,

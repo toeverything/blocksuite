@@ -1,8 +1,8 @@
 import type { EditorHost } from '@blocksuite/block-std';
 import type { EdgelessRootBlockComponent } from '@blocksuite/blocks';
-import type { NavigatorMode } from '@blocksuite/blocks';
 
 import { WithDisposable } from '@blocksuite/block-std';
+import { DocModeProvider, type NavigatorMode } from '@blocksuite/blocks';
 import { DocMode, createButtonPopper } from '@blocksuite/blocks';
 import { DisposableGroup } from '@blocksuite/global/utils';
 import { LitElement, type PropertyValues, css, html } from 'lit';
@@ -112,7 +112,7 @@ export class FramePanelHeader extends WithDisposable(LitElement) {
 
   private _enterPresentationMode = () => {
     if (!this.edgeless) {
-      this.rootService.docModeService.setMode(DocMode.Edgeless);
+      this.rootService.std.get(DocModeProvider).setMode(DocMode.Edgeless);
     }
 
     setTimeout(() => {
@@ -148,7 +148,7 @@ export class FramePanelHeader extends WithDisposable(LitElement) {
   static override styles = styles;
 
   private _tryLoadNavigatorStateLocalRecord() {
-    this._navigatorMode = this.editorHost.spec
+    this._navigatorMode = this.editorHost.std
       .getService('affine:page')
       .editPropsStore.getStorage('presentFillScreen')
       ? 'fill'
@@ -226,7 +226,7 @@ export class FramePanelHeader extends WithDisposable(LitElement) {
   }
 
   get rootService() {
-    return this.editorHost.spec.getService('affine:page');
+    return this.editorHost.std.getService('affine:page');
   }
 
   @query('.all-frames-setting-button')

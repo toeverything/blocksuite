@@ -1,4 +1,5 @@
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
+import { CenterPeekIcon, MoreHorizontalIcon } from '@blocksuite/icons/lit';
 import { SignalWatcher } from '@lit-labs/preact-signals';
 import { css, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
@@ -9,10 +10,6 @@ import { html } from 'lit/static-html.js';
 import type { DataViewRenderer } from '../../../../data-view.js';
 import type { TableSingleView } from '../table-view-manager.js';
 
-import {
-  CenterPeekIcon,
-  MoreHorizontalIcon,
-} from '../../../../common/icons/index.js';
 import { openDetail, popRowMenu } from '../components/menu.js';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../consts.js';
 import { TableRowSelection, type TableViewSelection } from '../types.js';
@@ -113,7 +110,7 @@ export class TableRow extends SignalWatcher(WithDisposable(ShadowlessElement)) {
       height: 16px;
     }
     .data-view-table-view-drag-handler {
-      width: 8px;
+      width: 4px;
       height: 38px;
       display: flex;
       align-items: center;
@@ -239,11 +236,11 @@ export class TableRow extends SignalWatcher(WithDisposable(ShadowlessElement)) {
             column.view.header$.value.titleColumn === column.id
               ? html`<div class="row-ops show-on-hover-row">
                   <div class="row-op" @click="${clickDetail}">
-                    ${CenterPeekIcon}
+                    ${CenterPeekIcon()}
                   </div>
                   ${!view.readonly$.value
                     ? html`<div class="row-op" @click="${openMenu}">
-                        ${MoreHorizontalIcon}
+                        ${MoreHorizontalIcon()}
                       </div>`
                     : nothing}
                 </div>`

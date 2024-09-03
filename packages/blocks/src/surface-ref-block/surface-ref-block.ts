@@ -1,6 +1,5 @@
 import type { BlockCaptionEditor } from '@blocksuite/affine-components/caption';
 import type { SurfaceRefBlockModel } from '@blocksuite/affine-model';
-import type { BaseSelection, EditorHost } from '@blocksuite/block-std';
 import type { Doc } from '@blocksuite/store';
 
 import {
@@ -10,7 +9,14 @@ import {
 } from '@blocksuite/affine-components/icons';
 import { Peekable } from '@blocksuite/affine-components/peek';
 import { DocMode } from '@blocksuite/affine-model';
+import { DocModeProvider } from '@blocksuite/affine-shared/services';
 import { requestConnectedFrame } from '@blocksuite/affine-shared/utils';
+import {
+  type BaseSelection,
+  BlockStdScope,
+  type EditorHost,
+} from '@blocksuite/block-std';
+import { BlockServiceWatcher } from '@blocksuite/block-std';
 import { BlockComponent } from '@blocksuite/block-std';
 import { GfxBlockElementModel } from '@blocksuite/block-std/gfx';
 import {
@@ -407,25 +413,39 @@ export class SurfaceRefBlockComponent extends BlockComponent<
   }
 
   private _initSpec() {
-    this._previewSpec.setup('affine:page', ({ viewConnected }) => {
-      viewConnected.once(({ component }) => {
-        const edgelessBlock = component as EdgelessRootPreviewBlockComponent;
+    const refreshViewport = this._refreshViewport.bind(this);
+    class PageViewWatcher extends BlockServiceWatcher {
+      static override readonly flavour = 'affine:page';
 
-        edgelessBlock.editorViewportSelector = 'ref-viewport';
-        edgelessBlock.service.viewport.sizeUpdated.once(() => {
-          this._refreshViewport();
+      override mounted() {
+        this.blockService.disposables.add(
+          this.blockService.specSlots.viewConnected.once(({ component }) => {
+            const edgelessBlock =
+              component as EdgelessRootPreviewBlockComponent;
+
+            edgelessBlock.editorViewportSelector = 'ref-viewport';
+            edgelessBlock.service.viewport.sizeUpdated.once(() => {
+              refreshViewport();
+            });
+          })
+        );
+      }
+    }
+    this._previewSpec.extend([PageViewWatcher]);
+
+    class FrameViewWatcher extends BlockServiceWatcher {
+      static override readonly flavour = 'affine:frame';
+
+      override mounted() {
+        this.blockService.specSlots.viewConnected.once(({ component }) => {
+          const frameBlock = component as FrameBlockComponent;
+
+          frameBlock.showBorder = false;
         });
-      });
-    });
+      }
+    }
 
-    // @ts-ignore
-    this._previewSpec.setup('affine:frame', ({ viewConnected }) => {
-      viewConnected.once(({ component }) => {
-        const frameBlock = component as FrameBlockComponent;
-
-        frameBlock.showBorder = false;
-      });
-    });
+    this._previewSpec.extend([FrameViewWatcher]);
   }
 
   private _refreshViewport() {
@@ -435,7 +455,7 @@ export class SurfaceRefBlockComponent extends BlockComponent<
 
     if (!previewEditorHost) return;
 
-    const edgelessService = previewEditorHost.spec.getService(
+    const edgelessService = previewEditorHost.std.getService(
       'affine:page'
     ) as EdgelessRootService;
 
@@ -480,7 +500,10 @@ export class SurfaceRefBlockComponent extends BlockComponent<
           aspectRatio: `${w} / ${h}`,
         })}
       >
-        ${this.host.renderSpecPortal(this._previewDoc!, _previewSpec)}
+        ${new BlockStdScope({
+          doc: this._previewDoc!,
+          extensions: _previewSpec,
+        }).render()}
       </div>
       ${this._renderMask(referencedModel, flavourOrType)}
     </div>`;
@@ -566,10 +589,10 @@ export class SurfaceRefBlockComponent extends BlockComponent<
       xywh: this._referenceXYWH,
       padding: [60, 20, 20, 20] as [number, number, number, number],
     };
-    const pageService = this.std.spec.getService('affine:page');
+    const pageService = this.std.getService('affine:page');
 
     pageService.editPropsStore.setStorage('viewport', viewport);
-    pageService.docModeService.setMode(DocMode.Edgeless);
+    this.std.get(DocModeProvider).setMode(DocMode.Edgeless);
   }
 
   override willUpdate(_changedProperties: Map<PropertyKey, unknown>): void {

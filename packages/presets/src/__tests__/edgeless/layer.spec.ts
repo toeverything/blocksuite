@@ -811,7 +811,7 @@ test('indexed canvas should be inserted into edgeless portal when switch to edge
   const edgeless = getDocRootBlock(doc, editor, 'edgeless');
   expect(edgeless.querySelectorAll('.indexable-canvas').length).toBe(1);
 
-  const indexedCanvas = getSurface(doc, editor).edgeless.querySelectorAll(
+  const indexedCanvas = edgeless.querySelectorAll(
     '.indexable-canvas'
   )[0] as HTMLCanvasElement;
 

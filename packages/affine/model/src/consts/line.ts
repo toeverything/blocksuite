@@ -1,4 +1,6 @@
-import { createZodUnion } from '../utils/zod.js';
+import { z } from 'zod';
+
+import { createEnumMap } from '../utils/enum.js';
 
 export enum LineWidth {
   Eight = 8,
@@ -25,6 +27,8 @@ export enum LineColor {
   Yellow = '--affine-palette-line-yellow',
 }
 
+export const LineColorMap = createEnumMap(LineColor);
+
 export const LINE_COLORS = [
   LineColor.Yellow,
   LineColor.Orange,
@@ -39,7 +43,7 @@ export const LINE_COLORS = [
   LineColor.White,
 ] as const;
 
-export const LineColorsSchema = createZodUnion(LINE_COLORS);
+export const LineColorsSchema = z.nativeEnum(LineColor);
 
 export const DEFAULT_TEXT_COLOR = LineColor.Blue;
 

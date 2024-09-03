@@ -1,13 +1,14 @@
 import type { Command } from '@blocksuite/block-std';
 
+import { QuickSearchProvider } from '@blocksuite/affine-shared/services';
+
 export const insertLinkByQuickSearchCommand: Command<
   never,
   'insertedLinkType',
   { userInput?: string; skipSelection?: boolean }
 > = (ctx, next) => {
   const { userInput, skipSelection, std } = ctx;
-  const rootService = std.spec.getService('affine:page');
-  const quickSearchService = rootService?.quickSearchService;
+  const quickSearchService = std.getOptional(QuickSearchProvider);
   if (!quickSearchService) {
     next();
     return;

@@ -1,8 +1,5 @@
-import {
-  checkboxChecked,
-  checkboxUnchecked,
-} from '@blocksuite/affine-components/icons';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
+import { CheckBoxCkeckSolidIcon, CheckBoxUnIcon } from '@blocksuite/icons/lit';
 import {
   type ReadonlySignal,
   SignalWatcher,
@@ -31,17 +28,14 @@ export class RowSelectCheckbox extends SignalWatcher(
       background-color: var(--affine-background-primary-color);
       opacity: 0;
       cursor: pointer;
+      font-size: 20px;
+      color: var(--affine-icon-color);
     }
     .row-select-checkbox:hover {
       opacity: 1;
     }
     .row-select-checkbox.selected {
       opacity: 1;
-    }
-    .row-select-checkbox svg {
-      width: 18px;
-      height: 18px;
-      color: var(--affine-icon-color);
     }
   `;
 
@@ -74,7 +68,9 @@ export class RowSelectCheckbox extends SignalWatcher(
     });
     return html`
       <div class="${classString}">
-        ${this.isSelected$.value ? checkboxChecked() : checkboxUnchecked()}
+        ${this.isSelected$.value
+          ? CheckBoxCkeckSolidIcon({ style: `color:#1E96EB` })
+          : CheckBoxUnIcon()}
       </div>
     `;
   }

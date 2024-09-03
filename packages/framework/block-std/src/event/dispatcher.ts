@@ -3,6 +3,7 @@ import { DisposableGroup } from '@blocksuite/global/utils';
 
 import type { BlockComponent } from '../view/index.js';
 
+import { LifeCycleWatcher } from '../extension/index.js';
 import {
   type UIEventHandler,
   UIEventState,
@@ -68,7 +69,7 @@ export type EventHandlerRunner = {
   blockId?: string;
 };
 
-export class UIEventDispatcher {
+export class UIEventDispatcher extends LifeCycleWatcher {
   private _active = false;
 
   private static _activeDispatcher: UIEventDispatcher | null = null;
@@ -85,12 +86,15 @@ export class UIEventDispatcher {
 
   private _rangeControl: RangeControl;
 
+  static override readonly key = 'UIEventDispatcher';
+
   bindHotkey = (...args: Parameters<KeyboardControl['bindHotkey']>) =>
     this._keyboardControl.bindHotkey(...args);
 
   disposables = new DisposableGroup();
 
-  constructor(public std: BlockSuite.Std) {
+  constructor(std: BlockSuite.Std) {
+    super(std);
     this._pointerControl = new PointerControl(this);
     this._keyboardControl = new KeyboardControl(this);
     this._rangeControl = new RangeControl(this);
@@ -336,7 +340,7 @@ export class UIEventDispatcher {
     return events.concat(globalEvents);
   }
 
-  mount() {
+  override mounted() {
     if (this.disposables.disposed) {
       this.disposables = new DisposableGroup();
     }
@@ -367,7 +371,7 @@ export class UIEventDispatcher {
     }
   }
 
-  unmount() {
+  override unmounted() {
     this.disposables.dispose();
   }
 

@@ -4,11 +4,11 @@ import type { BlockStdScope } from '@blocksuite/block-std';
 import type { Doc } from '@blocksuite/store';
 
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
+import { Viewport } from '@blocksuite/block-std/gfx';
 import { DisposableGroup, Slot } from '@blocksuite/global/utils';
 
 import type { SurfaceBlockModel } from '../surface-block/surface-model.js';
 
-import { Viewport } from '../root-block/edgeless/utils/viewport.js';
 import { CanvasRenderer } from '../surface-block/index.js';
 import { elementRenderers } from '../surface-block/renderer/elements/index.js';
 import { getSurfaceBlock } from './utils.js';
@@ -126,7 +126,7 @@ export class SurfaceRefRenderer {
   }
 
   get surfaceService() {
-    return this.std.spec.getService('affine:surface');
+    return this.std.getService('affine:surface');
   }
 
   get viewport() {

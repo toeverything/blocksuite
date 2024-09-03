@@ -106,10 +106,10 @@ export class AwarenessStore<
   }
 
   getLocalSelection(
-    blockCollection: BlockCollection
+    selectionManagerId: string
   ): ReadonlyArray<Record<string, unknown>> {
     return (
-      (this.awareness.getLocalState()?.selectionV2 ?? {})[blockCollection.id] ??
+      (this.awareness.getLocalState()?.selectionV2 ?? {})[selectionManagerId] ??
       []
     );
   }
@@ -132,14 +132,11 @@ export class AwarenessStore<
     this.awareness.setLocalStateField('flags', { ...oldFlags, [field]: value });
   }
 
-  setLocalSelection(
-    blockCollection: BlockCollection,
-    selection: UserSelection
-  ) {
+  setLocalSelection(selectionManagerId: string, selection: UserSelection) {
     const oldSelection = this.awareness.getLocalState()?.selectionV2 ?? {};
     this.awareness.setLocalStateField('selectionV2', {
       ...oldSelection,
-      [blockCollection.id]: selection,
+      [selectionManagerId]: selection,
     });
   }
 

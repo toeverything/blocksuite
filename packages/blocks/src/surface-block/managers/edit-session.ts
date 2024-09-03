@@ -111,7 +111,7 @@ export class EditPropsStore {
 
     this.lastProps$ = computed(() => {
       const editorSetting$ =
-        this._service.std.spec.getConfig('affine:page')?.editorSetting;
+        this._service.std.getConfig('affine:page')?.editorSetting;
       return merge(
         { ...initProps },
         editorSetting$?.value,

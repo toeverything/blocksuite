@@ -8,6 +8,7 @@ import {
 } from '@blocksuite/affine-model';
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import {
+  BlockStdScope,
   type EditorHost,
   RANGE_QUERY_EXCLUDE_ATTR,
 } from '@blocksuite/block-std';
@@ -124,7 +125,10 @@ export class SurfaceRefNotePortal extends WithDisposable(ShadowlessElement) {
       readonly: true,
     });
     const previewSpec = SpecProvider.getInstance().getSpec('page:preview');
-    return this.host.renderSpecPortal(doc, previewSpec.value.slice());
+    return new BlockStdScope({
+      doc,
+      extensions: previewSpec.value.slice(),
+    }).render();
   }
 
   override updated() {

@@ -12,7 +12,7 @@ import { customElement, property } from 'lit/decorators.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 import type { EdgelessTool } from '../../edgeless/types.js';
 
-import { ZOOM_STEP } from '../../edgeless/utils/viewport.js';
+import { ZOOM_STEP } from '../../edgeless/utils/zoom.js';
 
 @customElement('edgeless-zoom-toolbar')
 export class EdgelessZoomToolbar extends WithDisposable(LitElement) {
