@@ -34,12 +34,10 @@
   },
   "license": "MPL-2.0",
   "devDependencies": {
-    "@apollo/client": "^3.11.4",
     "@tweakpane/core": "^2.0.4",
     "@types/micromatch": "^4.0.9",
     "graphql": "^16.9.0",
     "magic-string": "^0.30.11",
-    "openai": "^4.56.0",
     "vite-plugin-wasm": "^3.3.0"
   }
 }
