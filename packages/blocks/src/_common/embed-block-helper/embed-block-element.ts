@@ -46,9 +46,9 @@ export class EmbedBlockComponent<
   private _dragHandleOption: DragHandleOption = {
     flavour: /affine:embed-*/,
     edgeless: true,
-    onDragStart: ({ state, startDragging, anchorBlockPath, editorHost }) => {
-      if (!anchorBlockPath) return false;
-      const anchorComponent = editorHost.std.view.getBlock(anchorBlockPath);
+    onDragStart: ({ state, startDragging, anchorBlockId, editorHost }) => {
+      if (!anchorBlockId) return false;
+      const anchorComponent = editorHost.std.view.getBlock(anchorBlockId);
       if (
         !anchorComponent ||
         !matchFlavours(anchorComponent.model, [

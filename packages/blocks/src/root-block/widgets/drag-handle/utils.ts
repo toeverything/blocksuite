@@ -104,14 +104,14 @@ export const includeTextSelection = (selections: BaseSelection[]) => {
 /**
  * Check if the path of two blocks are equal
  */
-export const isBlockPathEqual = (
-  path1: string | null | undefined,
-  path2: string | null | undefined
+export const isBlockIdEqual = (
+  id1: string | null | undefined,
+  id2: string | null | undefined
 ) => {
-  if (!path1 || !path2) {
+  if (!id1 || !id2) {
     return false;
   }
-  return path1 === path2;
+  return id1 === id2;
 };
 
 export const isOutOfNoteBlock = (

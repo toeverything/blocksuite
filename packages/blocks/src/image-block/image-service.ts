@@ -35,12 +35,12 @@ export class ImageBlockService extends BlockService {
   private _dragHandleOption: DragHandleOption = {
     flavour: ImageBlockSchema.model.flavour,
     edgeless: true,
-    onDragStart: ({ state, startDragging, anchorBlockPath, editorHost }) => {
+    onDragStart: ({ state, startDragging, anchorBlockId, editorHost }) => {
       const element = captureEventTarget(state.raw.target);
       if (element?.classList.contains('resize')) return false;
 
-      if (!anchorBlockPath) return false;
-      const anchorComponent = editorHost.std.view.getBlock(anchorBlockPath);
+      if (!anchorBlockId) return false;
+      const anchorComponent = editorHost.std.view.getBlock(anchorBlockId);
       if (
         !anchorComponent ||
         !matchFlavours(anchorComponent.model, [ImageBlockSchema.model.flavour])

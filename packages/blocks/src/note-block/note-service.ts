@@ -24,8 +24,8 @@ export class NoteBlockService extends BlockService {
   private _dragHandleOption: DragHandleOption = {
     flavour: NoteBlockSchema.model.flavour,
     edgeless: true,
-    onDragStart: ({ state, startDragging, anchorBlockPath, editorHost }) => {
-      if (!anchorBlockPath) {
+    onDragStart: ({ state, startDragging, anchorBlockId, editorHost }) => {
+      if (!anchorBlockId) {
         return false;
       }
 
@@ -35,7 +35,7 @@ export class NoteBlockService extends BlockService {
         return false;
       }
 
-      const anchorComponent = editorHost.std.view.getBlock(anchorBlockPath);
+      const anchorComponent = editorHost.std.view.getBlock(anchorBlockId);
       if (
         !anchorComponent ||
         !matchFlavours(anchorComponent.model, [NoteBlockSchema.model.flavour])
