@@ -68,6 +68,6 @@ jobs:
           path: ./size-report.md
 
       - name: Create commit comment
-        uses: peter-evans/commit-comment@v2
+        uses: peter-evans/commit-comment@v3
         with:
           body: ${{ steps.size-report.outputs.content }}
