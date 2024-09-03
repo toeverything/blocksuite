@@ -231,7 +231,6 @@ export class SurfaceBlockComponent extends BlockComponent<
 
     this.setAttribute(RANGE_SYNC_EXCLUDE_ATTR, 'true');
 
-    console.log(this.service);
     this._initThemeObserver();
     this._initRenderer();
     this._initOverlays();
