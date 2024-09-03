@@ -12,7 +12,11 @@ import {
   SquareIcon,
   TriangleIcon,
 } from '@blocksuite/affine-components/icons';
-import { ShapeType } from '@blocksuite/affine-model';
+import {
+  ShapeType,
+  getShapeRadius,
+  getShapeType,
+} from '@blocksuite/affine-model';
 
 import type { ShapeTool } from '../../../tools/shape-tool.js';
 
@@ -76,8 +80,8 @@ export const ShapeComponentConfig: Config[] = [
     tooltip: 'Rounded rectangle',
     disabled: false,
     value: {
-      shapeType: Rect,
-      radius: 0.1,
+      shapeType: getShapeType('roundedRect'),
+      radius: getShapeRadius('roundedRect'),
     },
   },
 ];

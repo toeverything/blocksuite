@@ -1,11 +1,13 @@
-import type {
-  Connection,
-  NoteBlockModel,
-  ShapeStyle,
-  ShapeType,
-} from '@blocksuite/affine-model';
 import type { XYWH } from '@blocksuite/global/utils';
 
+import {
+  type Connection,
+  type NoteBlockModel,
+  type ShapeName,
+  type ShapeStyle,
+  getShapeRadius,
+  getShapeType,
+} from '@blocksuite/affine-model';
 import { Bound, assertExists } from '@blocksuite/global/utils';
 import { DocCollection } from '@blocksuite/store';
 
@@ -39,7 +41,7 @@ export const DEFAULT_NOTE_OVERLAY_HEIGHT = 110;
 export const DEFAULT_TEXT_WIDTH = 116;
 export const DEFAULT_TEXT_HEIGHT = 24;
 
-export type TARGET_SHAPE_TYPE = ShapeType | 'roundedRect';
+export type TARGET_SHAPE_TYPE = ShapeName;
 export type AUTO_COMPLETE_TARGET_TYPE =
   | TARGET_SHAPE_TYPE
   | 'text'
@@ -322,8 +324,8 @@ export function createShapeElement(
 
   const id = service.addElement('shape', {
     ...props,
-    shapeType: targetType === 'roundedRect' ? 'rect' : targetType,
-    radius: targetType === 'roundedRect' ? 0.1 : 0,
+    shapeType: getShapeType(targetType),
+    radius: getShapeRadius(targetType),
     text: new DocCollection.Y.Text(),
   });
   const group = current.group;

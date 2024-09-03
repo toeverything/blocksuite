@@ -7,7 +7,7 @@ import {
   LineColor,
   SHAPE_FILL_COLORS,
   ShapeStyle,
-  ShapeType,
+  getShapeName,
 } from '@blocksuite/affine-model';
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import { SignalWatcher, computed } from '@lit-labs/preact-signals';
@@ -15,7 +15,6 @@ import { LitElement, css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 import type { EdgelessRootBlockComponent } from '../../../edgeless-root-block.js';
-import type { ShapeName } from './shape-tool-element.js';
 
 import '../../buttons/tool-icon-button.js';
 import { type ColorEvent, isTransparent } from '../../panel/color-panel.js';
@@ -30,14 +29,11 @@ import {
 export class EdgelessShapeMenu extends SignalWatcher(LitElement) {
   private _props$ = computed(() => {
     const { shape } = this.edgeless.service.editPropsStore.lastProps$.value;
-    const { shapeStyle, fillColor, strokeColor, radius } = shape;
-    let shapeType: ShapeName = shape.shapeType;
-    if (shapeType === ShapeType.Rect && radius > 0) {
-      shapeType = 'roundedRect';
-    }
+    const { shapeStyle, fillColor, strokeColor, radius, shapeType } = shape;
+    const shapeName = getShapeName(shapeType, radius);
     return {
       shapeStyle,
-      shapeType,
+      shapeName,
       fillColor,
       strokeColor,
       radius,
@@ -89,7 +85,7 @@ export class EdgelessShapeMenu extends SignalWatcher(LitElement) {
   `;
 
   override render() {
-    const { fillColor, shapeStyle, shapeType } = this._props$.value;
+    const { fillColor, shapeStyle, shapeName } = this._props$.value;
     const color = ThemeObserver.getColorValue(
       fillColor,
       DEFAULT_SHAPE_FILL_COLOR
@@ -127,7 +123,7 @@ export class EdgelessShapeMenu extends SignalWatcher(LitElement) {
                 return html`
                   <edgeless-tool-icon-button
                     .tooltip=${tooltip}
-                    .active=${shapeType === name}
+                    .active=${shapeName === name}
                     .activeMode=${'background'}
                     @click=${() => this.onChange(value)}
                   >

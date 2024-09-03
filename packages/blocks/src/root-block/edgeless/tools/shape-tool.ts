@@ -1,10 +1,11 @@
-import type { ShapeType } from '@blocksuite/affine-model';
+import type { ShapeName } from '@blocksuite/affine-model';
 import type { PointerEventState } from '@blocksuite/block-std';
 import type { IVec } from '@blocksuite/global/utils';
 
 import {
   DEFAULT_SHAPE_FILL_COLOR,
   DEFAULT_SHAPE_STROKE_COLOR,
+  getShapeName,
 } from '@blocksuite/affine-model';
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import { Bound } from '@blocksuite/global/utils';
@@ -27,7 +28,7 @@ import { EdgelessToolController } from './edgeless-tool.js';
 
 export type ShapeTool = {
   type: 'shape';
-  shapeType: ShapeType | 'roundedRect';
+  shapeType: ShapeName;
 };
 
 export class ShapeToolController extends EdgelessToolController<ShapeTool> {
@@ -204,11 +205,8 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
       default:
         options.strokeLineDash = [];
     }
-    let shapeType: string = attributes.shapeType;
-    if (attributes.radius > 0 && shapeType === 'rect') {
-      shapeType = 'roundedRect';
-    }
-    this._shapeOverlay = new ShapeOverlay(this._edgeless, shapeType, options, {
+    const shapeName = getShapeName(attributes.shapeType, attributes.radius);
+    this._shapeOverlay = new ShapeOverlay(this._edgeless, shapeName, options, {
       shapeStyle: attributes.shapeStyle,
       fillColor: attributes.fillColor,
       strokeColor: attributes.strokeColor,

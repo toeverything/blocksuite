@@ -8,7 +8,6 @@ export * from './page/page-root-spec.js';
 export * from './preview/preview-root-block.js';
 export * from './root-config.js';
 export {
-  type QuickSearchService,
   RootService,
   type TelemetryEvent,
   type TelemetryEventMap,

@@ -1,7 +1,7 @@
 import {
   EdgelessTextBlockModel,
   NoteDisplayMode,
-  ShapeType,
+  getShapeName,
 } from '@blocksuite/affine-model';
 import { matchFlavours } from '@blocksuite/affine-shared/utils';
 import { IS_MAC } from '@blocksuite/global/env';
@@ -229,18 +229,14 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
           const attr =
             rootComponent.service.editPropsStore.getLastProps('shape');
 
-          const nextShapeType = getNextShapeType(
-            attr.radius > 0 && attr.shapeType === ShapeType.Rect
-              ? 'roundedRect'
-              : attr.shapeType
-          );
+          const shapeName = getShapeName(attr.shapeType, attr.radius);
+          const nextShapeName = getNextShapeType(shapeName);
           this._setEdgelessTool(rootComponent, {
             type: 'shape',
-            shapeType:
-              nextShapeType === 'roundedRect' ? ShapeType.Rect : nextShapeType,
+            shapeType: nextShapeName,
           });
 
-          updateShapeProps(nextShapeType, rootComponent);
+          updateShapeProps(nextShapeName, rootComponent);
 
           const controller = rootComponent.tools
             .currentController as ShapeToolController;

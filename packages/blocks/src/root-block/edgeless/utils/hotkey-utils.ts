@@ -1,4 +1,8 @@
-import { ShapeType } from '@blocksuite/affine-model';
+import {
+  ShapeType,
+  getShapeRadius,
+  getShapeType,
+} from '@blocksuite/affine-model';
 
 import type { EdgelessRootBlockComponent } from '../edgeless-root-block.js';
 import type { ShapeTool } from '../tools/shape-tool.js';
@@ -17,19 +21,11 @@ export function getNextShapeType(cur: ShapeTool['shapeType']) {
 }
 
 export function updateShapeProps(
-  shapeType: ShapeTool['shapeType'],
+  shapeName: ShapeTool['shapeType'],
   edgeless: EdgelessRootBlockComponent
 ) {
-  const props =
-    shapeType === 'roundedRect'
-      ? {
-          shapeType: ShapeType.Rect,
-          radius: 0.1,
-        }
-      : {
-          shapeType,
-          radius: 0,
-        };
-
-  edgeless.service.editPropsStore.recordLastProps('shape', props);
+  edgeless.service.editPropsStore.recordLastProps('shape', {
+    shapeType: getShapeType(shapeName),
+    radius: getShapeRadius(shapeName),
+  });
 }

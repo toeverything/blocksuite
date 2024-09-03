@@ -3,7 +3,11 @@ import {
   roundedSvg,
   triangleSvg,
 } from '@blocksuite/affine-components/icons';
-import { ShapeType } from '@blocksuite/affine-model';
+import {
+  ShapeType,
+  getShapeRadius,
+  getShapeType,
+} from '@blocksuite/affine-model';
 import { assertExists } from '@blocksuite/global/utils';
 import { LitElement, css, html, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
@@ -163,9 +167,9 @@ export class EdgelessToolbarShapeDraggable extends EdgelessToolbarToolMixin(
         const xywh = bound.serialize();
         const shape = el.data;
         const id = this.edgeless.service.addElement(CanvasElementType.SHAPE, {
-          shapeType: shape.name === 'roundedRect' ? ShapeType.Rect : shape.name,
+          shapeType: getShapeType(shape.name),
           xywh,
-          radius: shape.name === 'roundedRect' ? 0.1 : 0,
+          radius: getShapeRadius(shape.name),
         });
 
         this.edgeless.service.telemetryService?.track('CanvasElementAdded', {
@@ -175,8 +179,7 @@ export class EdgelessToolbarShapeDraggable extends EdgelessToolbarToolMixin(
           segment: 'toolbar',
           type: 'shape',
           other: {
-            shapeType:
-              shape.name === 'roundedRect' ? ShapeType.Rect : shape.name,
+            shapeType: getShapeType(shape.name),
           },
         });
 

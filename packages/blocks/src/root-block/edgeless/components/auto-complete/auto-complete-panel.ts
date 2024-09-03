@@ -16,7 +16,7 @@ import {
   FontStyle,
   FontWeight,
   ShapeStyle,
-  ShapeType,
+  getShapeName,
 } from '@blocksuite/affine-model';
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import { WithDisposable } from '@blocksuite/block-std';
@@ -383,8 +383,7 @@ export class EdgelessAutoCompletePanel extends WithDisposable(LitElement) {
       const { shapeType, shapeStyle, radius } = currentSource;
       return {
         style: shapeStyle,
-        type:
-          shapeType === ShapeType.Rect && radius ? 'roundedRect' : shapeType,
+        type: getShapeName(shapeType, radius),
       };
     }
     return {

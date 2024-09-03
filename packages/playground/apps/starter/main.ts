@@ -4,6 +4,7 @@ import {
   WidgetViewMapIdentifier,
 } from '@blocksuite/block-std';
 import * as blocks from '@blocksuite/blocks';
+import { QuickSearchProvider } from '@blocksuite/blocks';
 import * as globalUtils from '@blocksuite/global/utils';
 import * as editor from '@blocksuite/presets';
 import '@blocksuite/presets/themes/affine.css';
@@ -36,6 +37,7 @@ async function main() {
         editor,
         identifiers: {
           WidgetViewMapIdentifier,
+          QuickSearchProvider,
         },
         extensions: {
           WidgetViewMapExtension,

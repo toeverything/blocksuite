@@ -9,6 +9,7 @@ import type { SerializedElement } from '@blocksuite/block-std/gfx';
 import type { IBound, IVec } from '@blocksuite/global/utils';
 
 import { BookmarkStyles } from '@blocksuite/affine-model';
+import { QuickSearchProvider } from '@blocksuite/affine-shared/services';
 import {
   isInsidePageEditor,
   isUrlInClipboard,
@@ -256,8 +257,9 @@ export class EdgelessClipboardController extends PageClipboard {
         lastMousePos.y
       );
 
-      // try interpret url as affine doc url
-      const doc = await this._rootService.quickSearchService?.searchDoc({
+      // try to interpret url as affine doc url
+      const quickSearchService = this.std.getOptional(QuickSearchProvider);
+      const doc = await quickSearchService?.searchDoc({
         action: 'insert',
         userInput: url,
         skipSelection: true,
@@ -267,17 +269,22 @@ export class EdgelessClipboardController extends PageClipboard {
 
       let flavour = 'affine:bookmark';
       let style = BookmarkStyles[0];
+      let isLinkToNode = false;
 
       if (pageId) {
         options.pageId = pageId;
         flavour = 'affine:embed-linked-doc';
         style = 'vertical';
 
-        try {
-          Object.assign(options, extractSearchParams(url));
-        } catch (err) {
-          console.error(err);
-        }
+        const extracted = extractSearchParams(url);
+
+        isLinkToNode = Boolean(
+          extracted?.params?.mode &&
+            (extracted.params.blockIds?.length ||
+              extracted.params.elementIds?.length)
+        );
+
+        Object.assign(options, extracted);
       } else {
         options.url = url;
 
@@ -320,6 +327,7 @@ export class EdgelessClipboardController extends PageClipboard {
         segment: 'whiteboard',
         category: 'pasted link',
         other: 'existing doc',
+        type: isLinkToNode ? 'block' : 'doc',
       });
 
       this.selectionManager.set({
