@@ -3,15 +3,15 @@
   "extends": ["config:recommended", ":disablePeerDependencies"],
   "packageRules": [
     {
-      "matchPackagePatterns": ["^eslint", "^@typescript-eslint"],
       "rangeStrategy": "replace",
-      "groupName": "linter"
+      "groupName": "linter",
+      "matchPackageNames": ["/^eslint/", "/^@typescript-eslint/"]
     },
     {
       "groupName": "all non-major dependencies",
       "groupSlug": "all-minor-patch",
-      "matchPackagePatterns": ["*"],
-      "matchUpdateTypes": ["minor", "patch"]
+      "matchUpdateTypes": ["minor", "patch"],
+      "matchPackageNames": ["*"]
     }
   ],
   "commitMessagePrefix": "chore: ",
@@ -19,8 +19,5 @@
   "commitMessageTopic": "{{depName}} version",
   "ignoreDeps": [],
   "postUpdateOptions": ["pnpmDedupe"],
-  "lockFileMaintenance": {
-    "enabled": true,
-    "extends": ["schedule:weekly"]
-  }
+  "lockFileMaintenance": { "enabled": true, "extends": ["schedule:weekly"] }
 }
