@@ -1,6 +1,7 @@
 import type { RichText } from '@blocksuite/affine-components/rich-text';
 import type { Text } from '@blocksuite/store';
 
+import { QuickSearchProvider } from '@blocksuite/affine-shared/services';
 import {
   getViewportElement,
   isValidUrl,
@@ -207,12 +208,10 @@ export class HeaderAreaTextCellEditing extends BaseTextCell {
     e.stopPropagation();
     if (isValidUrl(text)) {
       const std = this.std;
-      const result = await std
-        ?.getService('affine:page')
-        .quickSearchService?.searchDoc({
-          userInput: text,
-          skipSelection: true,
-        });
+      const result = await std?.getOptional(QuickSearchProvider)?.searchDoc({
+        userInput: text,
+        skipSelection: true,
+      });
       if (result && 'docId' in result) {
         const text = ' ';
         inlineEditor.insertText(inlineRange, text, {

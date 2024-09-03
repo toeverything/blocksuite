@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-restricted-imports */
+import type { WidgetViewMapIdentifier } from '@block-std/index.js';
 import type { EditorHost } from '@block-std/view/element/index.js';
 import type { TestUtils } from '@blocks/index.js';
 import type { DebugMenu } from '@playground/apps/_common/components/debug-menu.js';
@@ -16,7 +17,10 @@ declare global {
         utils: typeof import('../../packages/framework/global/src/utils.js');
       };
       editor: typeof import('../../packages/presets/src/index.js');
-      identifiers: typeof import('../../packages/framework/block-std/src/identifier.js');
+      identifiers: {
+        WidgetViewMapIdentifier: typeof WidgetViewMapIdentifier;
+        QuickSearchProvider: typeof import('../../packages/affine/shared/src/services/quick-search-service.js').QuickSearchProvider;
+      };
       extensions: {
         WidgetViewMapExtension: typeof import('../../packages/framework/block-std/src/extension/widget-view-map.js').WidgetViewMapExtension;
       };

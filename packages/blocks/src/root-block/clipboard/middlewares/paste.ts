@@ -7,6 +7,10 @@ import type {
 } from '@blocksuite/block-std';
 import type { Text } from '@blocksuite/store';
 
+import {
+  QuickSearchProvider,
+  type QuickSearchService,
+} from '@blocksuite/affine-shared/services';
 import { assertExists } from '@blocksuite/global/utils';
 import {
   type BlockModel,
@@ -17,8 +21,6 @@ import {
   type SliceSnapshot,
   fromJSON,
 } from '@blocksuite/store';
-
-import type { QuickSearchService } from '../../root-service.js';
 
 import { matchFlavours } from '../../../_common/utils/index.js';
 import { extractSearchParams } from '../../../_common/utils/url.js';
@@ -236,8 +238,7 @@ class PasteTr {
   };
 
   convertToLinkedDoc = async () => {
-    const quickSearchService =
-      this.std.getService('affine:page').quickSearchService;
+    const quickSearchService = this.std.getOptional(QuickSearchProvider);
 
     if (!quickSearchService) {
       return;

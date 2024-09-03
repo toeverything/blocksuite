@@ -1,7 +1,11 @@
 import type { BlockCollection, DocCollection } from '@blocksuite/store';
 
 import { BlockServiceWatcher, type EditorHost } from '@blocksuite/block-std';
-import { type PageRootService, SpecProvider } from '@blocksuite/blocks';
+import {
+  type PageRootService,
+  QuickSearchProvider,
+  SpecProvider,
+} from '@blocksuite/blocks';
 import { AffineFormatBarWidget } from '@blocksuite/blocks';
 import {
   DocMode,
@@ -66,7 +70,6 @@ export async function mountDefaultDocEditor(collection: DocCollection) {
       pageRootService.disposables.add(onFormatBarConnected);
       pageRootService.notificationService =
         mockNotificationService(pageRootService);
-      pageRootService.quickSearchService = mockQuickSearchService(collection);
       const switchEditor = editor.switchEditor.bind(editor);
       pageRootService.disposables.add(
         pageRootService.std.get(DocModeProvider).onModeChange(switchEditor)
@@ -75,11 +78,29 @@ export async function mountDefaultDocEditor(collection: DocCollection) {
   }
 
   const pageSpecs = SpecProvider.getInstance().getSpec('page');
-  pageSpecs.extend([PatchPageServiceWatcher]);
+  pageSpecs.extend([
+    PatchPageServiceWatcher,
+    {
+      setup: di => {
+        di.addImpl(QuickSearchProvider, () =>
+          mockQuickSearchService(collection)
+        );
+      },
+    },
+  ]);
   editor.pageSpecs = pageSpecs.value;
 
   const edgelessSpecs = SpecProvider.getInstance().getSpec('edgeless');
-  edgelessSpecs.extend([PatchPageServiceWatcher]);
+  edgelessSpecs.extend([
+    PatchPageServiceWatcher,
+    {
+      setup: di => {
+        di.addImpl(QuickSearchProvider, () =>
+          mockQuickSearchService(collection)
+        );
+      },
+    },
+  ]);
   editor.edgelessSpecs = edgelessSpecs.value;
 
   editor.mode = DocMode.Page;

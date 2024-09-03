@@ -9,6 +9,7 @@ import {
   DocMode,
   DocModeProvider,
   type PageRootService,
+  QuickSearchProvider,
 } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
 import { AffineEditorContainer } from '@blocksuite/presets';
@@ -107,7 +108,6 @@ export async function mountDefaultDocEditor(collection: DocCollection) {
         const pageRootService = this.blockService as PageRootService;
         pageRootService.notificationService =
           mockNotificationService(pageRootService);
-        pageRootService.quickSearchService = mockQuickSearchService(collection);
         pageRootService.peekViewService = {
           peek(target: unknown) {
             alert('Peek view not implemented in playground');
@@ -123,6 +123,13 @@ export async function mountDefaultDocEditor(collection: DocCollection) {
     }
     const newSpec: typeof spec = [
       ...spec,
+      {
+        setup: di => {
+          di.addImpl(QuickSearchProvider, () =>
+            mockQuickSearchService(collection)
+          );
+        },
+      },
       PatchPageServiceWatcher,
       MockDocModeService,
     ];

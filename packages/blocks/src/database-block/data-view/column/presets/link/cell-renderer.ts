@@ -1,3 +1,4 @@
+import { QuickSearchProvider } from '@blocksuite/affine-shared/services';
 import { isValidUrl, normalizeUrl } from '@blocksuite/affine-shared/utils';
 import { assertExists } from '@blocksuite/global/utils';
 import { PenIcon } from '@blocksuite/icons/lit';
@@ -151,12 +152,10 @@ export class LinkCell extends BaseCellRenderer<string> {
         this.docId = undefined;
         return;
       }
-      const result = std
-        ?.getService('affine:page')
-        .quickSearchService?.searchDoc({
-          userInput: this.value,
-          skipSelection: true,
-        });
+      const result = std?.getOptional(QuickSearchProvider)?.searchDoc({
+        userInput: this.value,
+        skipSelection: true,
+      });
       result
         ?.then(res => {
           if (res && 'docId' in res) {

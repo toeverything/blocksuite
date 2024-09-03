@@ -9,6 +9,7 @@ import type { SerializedElement } from '@blocksuite/block-std/gfx';
 import type { IBound, IVec } from '@blocksuite/global/utils';
 
 import { BookmarkStyles } from '@blocksuite/affine-model';
+import { QuickSearchProvider } from '@blocksuite/affine-shared/services';
 import {
   isInsidePageEditor,
   isUrlInClipboard,
@@ -256,8 +257,9 @@ export class EdgelessClipboardController extends PageClipboard {
         lastMousePos.y
       );
 
-      // try interpret url as affine doc url
-      const doc = await this._rootService.quickSearchService?.searchDoc({
+      // try to interpret url as affine doc url
+      const quickSearchService = this.std.getOptional(QuickSearchProvider);
+      const doc = await quickSearchService?.searchDoc({
         action: 'insert',
         userInput: url,
         skipSelection: true,

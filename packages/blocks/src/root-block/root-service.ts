@@ -32,20 +32,6 @@ export type EmbedOptions = {
   viewType: 'card' | 'embed';
 };
 
-export type QuickSearchResult =
-  | { docId: string; isNewDoc?: boolean }
-  | { userInput: string }
-  | null;
-
-export interface QuickSearchService {
-  searchDoc: (options: {
-    action?: 'insert';
-    userInput?: string;
-    skipSelection?: boolean;
-    trigger?: 'edgeless-toolbar' | 'slash-command' | 'shortcut';
-  }) => Promise<QuickSearchResult>;
-}
-
 export interface TelemetryEvent {
   page?: string;
   segment?: string;
@@ -114,8 +100,6 @@ export abstract class RootService extends BlockService {
   notificationService: NotificationService | null = null;
 
   peekViewService: PeekViewService | null = null;
-
-  quickSearchService: QuickSearchService | null = null;
 
   registerEmbedBlockOptions = (options: EmbedOptions): void => {
     this._embedBlockRegistry.add(options);
