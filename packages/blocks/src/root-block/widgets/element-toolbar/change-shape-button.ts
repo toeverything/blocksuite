@@ -16,8 +16,10 @@ import {
   SHAPE_FILL_COLORS,
   SHAPE_STROKE_COLORS,
   ShapeStyle,
-  ShapeType,
   StrokeStyle,
+  getShapeName,
+  getShapeRadius,
+  getShapeType,
 } from '@blocksuite/affine-model';
 import { WithDisposable } from '@blocksuite/block-std';
 import { countBy, maxBy } from '@blocksuite/global/utils';
@@ -121,9 +123,7 @@ function getMostCommonShape(
   elements: ShapeElementModel[]
 ): ShapeTool['shapeType'] | null {
   const shapeTypes = countBy(elements, (ele: ShapeElementModel) => {
-    return ele.shapeType === 'rect' && ele.radius
-      ? 'roundedRect'
-      : ele.shapeType;
+    return getShapeName(ele.shapeType, ele.radius);
   });
   const max = maxBy(Object.entries(shapeTypes), ([_k, count]) => count);
   return max ? (max[0] as ShapeTool['shapeType']) : null;
@@ -255,15 +255,13 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
     const _disposables = this._disposables;
 
     _disposables.add(
-      this._shapePanel.slots.select.on(shapeType => {
-        const updatedProps =
-          shapeType === 'roundedRect'
-            ? ({ shapeType: ShapeType.Rect, radius: 0.1 } as const)
-            : { shapeType, radius: 0 };
-
+      this._shapePanel.slots.select.on(shapeName => {
         this.edgeless.doc.captureSync();
         this.elements.forEach(element => {
-          this.service.updateElement(element.id, updatedProps);
+          this.service.updateElement(element.id, {
+            shapeType: getShapeType(shapeName),
+            radius: getShapeRadius(shapeName),
+          });
         });
       })
     );

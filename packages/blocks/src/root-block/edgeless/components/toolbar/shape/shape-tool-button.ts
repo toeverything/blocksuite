@@ -1,10 +1,11 @@
+import type { ShapeName } from '@blocksuite/affine-model';
+
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import { SignalWatcher, computed } from '@lit-labs/preact-signals';
 import { LitElement, css, html } from 'lit';
 import { customElement } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type { ShapeName } from './shape-tool-element.js';
 import type { DraggableShape } from './utils.js';
 
 import { ShapeToolController } from '../../../tools/shape-tool.js';
