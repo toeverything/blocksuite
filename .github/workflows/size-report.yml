@@ -46,7 +46,7 @@ jobs:
         run: pnpm install
 
       - name: Download Previous Size Data
-        uses: dawidd6/action-download-artifact@v2
+        uses: dawidd6/action-download-artifact@v6
         with:
           workflow: size-report.yml
           name: size-data
