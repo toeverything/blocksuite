@@ -468,14 +468,21 @@ class PasteTr {
         const pageId = needToConvert.get(op)!;
         const reference = { pageId, type: 'LinkedPage' };
 
-        Object.assign(reference, extractSearchParams(link));
+        const extracted = extractSearchParams(link);
+        const isLinkToNode = Boolean(
+          extracted?.params?.mode &&
+            (extracted.params.blockIds?.length ||
+              extracted.params.elementIds?.length)
+        );
+
+        Object.assign(reference, extracted);
 
         this.std
           .getService('affine:page')
           .telemetryService?.track('LinkedDocCreated', {
             page: 'doc editor',
             category: 'pasted link',
-            type: 'doc',
+            type: isLinkToNode ? 'block' : 'doc',
             other: 'existing doc',
           });
 

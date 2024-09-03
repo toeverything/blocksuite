@@ -267,17 +267,22 @@ export class EdgelessClipboardController extends PageClipboard {
 
       let flavour = 'affine:bookmark';
       let style = BookmarkStyles[0];
+      let isLinkToNode = false;
 
       if (pageId) {
         options.pageId = pageId;
         flavour = 'affine:embed-linked-doc';
         style = 'vertical';
 
-        try {
-          Object.assign(options, extractSearchParams(url));
-        } catch (err) {
-          console.error(err);
-        }
+        const extracted = extractSearchParams(url);
+
+        isLinkToNode = Boolean(
+          extracted?.params?.mode &&
+            (extracted.params.blockIds?.length ||
+              extracted.params.elementIds?.length)
+        );
+
+        Object.assign(options, extracted);
       } else {
         options.url = url;
 
@@ -320,6 +325,7 @@ export class EdgelessClipboardController extends PageClipboard {
         segment: 'whiteboard',
         category: 'pasted link',
         other: 'existing doc',
+        type: isLinkToNode ? 'block' : 'doc',
       });
 
       this.selectionManager.set({

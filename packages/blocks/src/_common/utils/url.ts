@@ -51,33 +51,37 @@ export function getEmbedCardIcons(): EmbedCardIcons {
 }
 
 export function extractSearchParams(link: string) {
-  const url = new URL(link);
-  const mode = url.searchParams.get('mode');
+  try {
+    const url = new URL(link);
+    const mode = url.searchParams.get('mode');
 
-  if (mode && DocModes.includes(mode)) {
-    const params: ReferenceInfo['params'] = { mode: mode as DocMode };
-    const blockIds = url.searchParams
-      .get('blockIds')
-      ?.trim()
-      .split(',')
-      .map(id => id.trim())
-      .filter(id => id.length);
-    const elementIds = url.searchParams
-      .get('elementIds')
-      ?.trim()
-      .split(',')
-      .map(id => id.trim())
-      .filter(id => id.length);
+    if (mode && DocModes.includes(mode)) {
+      const params: ReferenceInfo['params'] = { mode: mode as DocMode };
+      const blockIds = url.searchParams
+        .get('blockIds')
+        ?.trim()
+        .split(',')
+        .map(id => id.trim())
+        .filter(id => id.length);
+      const elementIds = url.searchParams
+        .get('elementIds')
+        ?.trim()
+        .split(',')
+        .map(id => id.trim())
+        .filter(id => id.length);
 
-    if (blockIds?.length) {
-      params.blockIds = blockIds;
+      if (blockIds?.length) {
+        params.blockIds = blockIds;
+      }
+
+      if (elementIds?.length) {
+        params.elementIds = elementIds;
+      }
+
+      return { params };
     }
-
-    if (elementIds?.length) {
-      params.elementIds = elementIds;
-    }
-
-    return { params };
+  } catch (err) {
+    console.error(err);
   }
 
   return null;
