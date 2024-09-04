@@ -19,8 +19,6 @@ export const ZOOM_MIN = 0.1;
 export class Viewport {
   protected _center: IPoint = { x: 0, y: 0 };
 
-  protected _cumulativeParentScale = 1;
-
   protected _el!: HTMLElement;
 
   protected _height = 0;
@@ -30,8 +28,6 @@ export class Viewport {
   protected _locked = false;
 
   protected _rafId: number | null = null;
-
-  private _syncFlag = false;
 
   protected _top = 0;
 
@@ -93,14 +89,6 @@ export class Viewport {
     });
   }
 
-  setContainer(container: HTMLElement) {
-    const rect = container.getBoundingClientRect();
-
-    this._el = container;
-
-    this.setRect(rect.left, rect.top, rect.width, rect.height);
-  }
-
   setRect(left: number, top: number, width: number, height: number) {
     this._left = left;
     this._top = top;
@@ -156,6 +144,14 @@ export class Viewport {
     ] as IVec;
 
     this.setViewport(zoom, center, smooth);
+  }
+
+  setViewportElement(elm: HTMLElement) {
+    const rect = elm.getBoundingClientRect();
+
+    this._el = elm;
+
+    this.setRect(rect.left, rect.top, rect.width, rect.height);
   }
 
   setZoom(zoom: number, focusPoint?: IPoint) {
@@ -217,45 +213,6 @@ export class Viewport {
     innerSmoothZoom();
   }
 
-  sync(viewport: Viewport) {
-    const syncViewport = (from: Viewport, to: Viewport) => {
-      to._syncFlag = true;
-      to.setZoom(from.zoom);
-      to.setCenter(from.centerX, from.centerY);
-      to._syncFlag = false;
-    };
-    const syncSize = (from: Viewport, to: Viewport) => {
-      to._syncFlag = true;
-      to.setRect(from.left, from.top, from.width, from.height);
-      to._syncFlag = false;
-    };
-
-    const disposables = [
-      viewport.viewportUpdated.on(() => {
-        if (viewport._syncFlag) return;
-        syncViewport(viewport, this);
-      }),
-      this.viewportUpdated.on(() => {
-        if (this._syncFlag) return;
-        syncViewport(this, viewport);
-      }),
-      viewport.sizeUpdated.on(() => {
-        if (viewport._syncFlag) return;
-        syncSize(viewport, this);
-      }),
-      this.sizeUpdated.on(() => {
-        if (this._syncFlag) return;
-        syncSize(this, viewport);
-      }),
-    ];
-
-    syncViewport(viewport, this);
-
-    return () => {
-      disposables.forEach(disposable => disposable.dispose());
-    };
-  }
-
   toModelBound(bound: Bound) {
     const { w, h } = bound;
     const [x, y] = this.toModelCoord(bound.x, bound.y);
@@ -309,13 +266,6 @@ export class Viewport {
     return this._center.y;
   }
 
-  /**
-   * @deprecated
-   */
-  get cumulativeParentScale() {
-    return this._cumulativeParentScale;
-  }
-
   get height() {
     return this._height;
   }
@@ -359,8 +309,8 @@ export class Viewport {
 
     return Bound.from({
       ...viewportMinXY,
-      w: (viewportMaxXY.x - viewportMinXY.x) / this._cumulativeParentScale,
-      h: (viewportMaxXY.y - viewportMinXY.y) / this._cumulativeParentScale,
+      w: viewportMaxXY.x - viewportMinXY.x,
+      h: viewportMaxXY.y - viewportMinXY.y,
     });
   }
 

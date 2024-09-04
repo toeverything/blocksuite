@@ -163,7 +163,7 @@ export class EdgelessRootPreviewBlockComponent extends BlockComponent<
   }
 
   private _initViewport() {
-    this.service.viewport.setContainer(this);
+    this.service.viewport.setViewportElement(this);
   }
 
   override connectedCallback() {

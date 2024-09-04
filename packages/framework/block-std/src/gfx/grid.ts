@@ -1,4 +1,5 @@
 import type { IBound } from '@blocksuite/global/utils';
+import type { Doc } from '@blocksuite/store';
 
 import {
   Bound,
@@ -7,9 +8,10 @@ import {
   isPointIn,
 } from '@blocksuite/global/utils';
 
-import type { GfxModel } from './gfx-block-model.js';
+import type { SurfaceBlockModel } from './surface/surface-model.js';
 
 import { compare } from '../utils/layer.js';
+import { GfxBlockElementModel, type GfxModel } from './gfx-block-model.js';
 
 function getGridIndex(val: number) {
   return Math.ceil(val / DEFAULT_GRID_SIZE) - 1;
@@ -24,7 +26,7 @@ function rangeFromBound(a: IBound): number[] {
   return [minRow, maxRow, minCol, maxCol];
 }
 
-function rangeFromElement<T extends GfxModel>(ele: T): number[] {
+function rangeFromElement(ele: GfxModel): number[] {
   const bound = ele.elementBound;
   const minRow = getGridIndex(bound.x);
   const maxRow = getGridIndex(bound.maxX);
@@ -33,7 +35,7 @@ function rangeFromElement<T extends GfxModel>(ele: T): number[] {
   return [minRow, maxRow, minCol, maxCol];
 }
 
-function rangeFromElementExternal<T extends GfxModel>(ele: T): number[] | null {
+function rangeFromElementExternal(ele: GfxModel): number[] | null {
   if (!ele.externalXYWH) return null;
 
   const bound = Bound.deserialize(ele.externalXYWH);
@@ -46,16 +48,16 @@ function rangeFromElementExternal<T extends GfxModel>(ele: T): number[] | null {
 
 export const DEFAULT_GRID_SIZE = 3000;
 
-export class GridManager<T extends GfxModel> {
-  private _elementToGrids = new Map<T, Set<Set<T>>>();
+export class GridManager {
+  private _elementToGrids = new Map<GfxModel, Set<Set<GfxModel>>>();
 
-  private _externalElementToGrids = new Map<T, Set<Set<T>>>();
+  private _externalElementToGrids = new Map<GfxModel, Set<Set<GfxModel>>>();
 
-  private _externalGrids = new Map<string, Set<T>>();
+  private _externalGrids = new Map<string, Set<GfxModel>>();
 
-  private _grids = new Map<string, Set<T>>();
+  private _grids = new Map<string, Set<GfxModel>>();
 
-  private _addToExternalGrids(element: T) {
+  private _addToExternalGrids(element: GfxModel) {
     const range = rangeFromElementExternal(element);
 
     if (!range) {
@@ -64,7 +66,7 @@ export class GridManager<T extends GfxModel> {
     }
 
     const [minRow, maxRow, minCol, maxCol] = range;
-    const grids = new Set<Set<T>>();
+    const grids = new Set<Set<GfxModel>>();
     this._externalElementToGrids.set(element, grids);
 
     for (let i = minRow; i <= maxRow; i++) {
@@ -81,14 +83,14 @@ export class GridManager<T extends GfxModel> {
 
   private _createExternalGrid(row: number, col: number) {
     const id = row + '|' + col;
-    const elements = new Set<T>();
+    const elements = new Set<GfxModel>();
     this._externalGrids.set(id, elements);
     return elements;
   }
 
   private _createGrid(row: number, col: number) {
     const id = row + '|' + col;
-    const elements = new Set<T>();
+    const elements = new Set<GfxModel>();
     this._grids.set(id, elements);
     return elements;
   }
@@ -103,7 +105,7 @@ export class GridManager<T extends GfxModel> {
     return this._grids.get(id);
   }
 
-  private _removeFromExternalGrids(element: T) {
+  private _removeFromExternalGrids(element: GfxModel) {
     const grids = this._externalElementToGrids.get(element);
     if (grids) {
       for (const grid of grids) {
@@ -112,9 +114,9 @@ export class GridManager<T extends GfxModel> {
     }
   }
 
-  private _searchExternal(bound: IBound, strict = false): Set<T> {
+  private _searchExternal(bound: IBound, strict = false): Set<GfxModel> {
     const [minRow, maxRow, minCol, maxCol] = rangeFromBound(bound);
-    const results = new Set<T>();
+    const results = new Set<GfxModel>();
     const b = Bound.from(bound);
 
     for (let i = minRow; i <= maxRow; i++) {
@@ -139,11 +141,11 @@ export class GridManager<T extends GfxModel> {
     return results;
   }
 
-  add(element: T) {
+  add(element: GfxModel) {
     this._addToExternalGrids(element);
 
     const [minRow, maxRow, minCol, maxCol] = rangeFromElement(element);
-    const grids = new Set<Set<T>>();
+    const grids = new Set<Set<GfxModel>>();
     this._elementToGrids.set(element, grids);
 
     for (let i = minRow; i <= maxRow; i++) {
@@ -180,7 +182,7 @@ export class GridManager<T extends GfxModel> {
     bound: IBound,
     strict: boolean = false,
     reverseChecking: boolean = false,
-    exclude?: Set<T>
+    exclude?: Set<GfxModel>
   ) {
     const [minRow, maxRow, minCol, maxCol] = rangeFromBound(bound);
     const b = Bound.from(bound);
@@ -207,13 +209,13 @@ export class GridManager<T extends GfxModel> {
     return false;
   }
 
-  pick(x: number, y: number): T[] {
+  pick(x: number, y: number): GfxModel[] {
     const row = getGridIndex(x);
     const col = getGridIndex(y);
     const gridElements = this._getGrid(row, col);
     if (!gridElements) return [];
 
-    const results: T[] = [];
+    const results: GfxModel[] = [];
     for (const element of gridElements) {
       if (
         isPointIn(getBoundsWithRotation(Bound.deserialize(element.xywh)), x, y)
@@ -225,7 +227,7 @@ export class GridManager<T extends GfxModel> {
     return results;
   }
 
-  remove(element: T) {
+  remove(element: GfxModel) {
     const grids = this._elementToGrids.get(element);
     if (grids) {
       for (const grid of grids) {
@@ -235,11 +237,19 @@ export class GridManager<T extends GfxModel> {
 
     this._removeFromExternalGrids(element);
   }
+  search(bound: IBound, strict?: boolean, returnSet?: false): GfxModel[];
+  search(
+    bound: IBound,
+    strict: boolean | undefined,
+    returnSet: true
+  ): Set<GfxModel>;
 
-  search(bound: IBound, strict?: boolean, getSet?: false): T[];
-  search(bound: IBound, strict: boolean | undefined, getSet: true): Set<T>;
-  search(bound: IBound, strict = false, getSet: boolean = false): T[] | Set<T> {
-    const results: Set<T> = this._searchExternal(bound, strict);
+  search(
+    bound: IBound,
+    strict = false,
+    returnSet: boolean = false
+  ): GfxModel[] | Set<GfxModel> {
+    const results: Set<GfxModel> = this._searchExternal(bound, strict);
     const [minRow, maxRow, minCol, maxCol] = rangeFromBound(bound);
     const b = Bound.from(bound);
 
@@ -251,7 +261,7 @@ export class GridManager<T extends GfxModel> {
           if (
             strict
               ? b.contains(element.elementBound)
-              : intersects(element.elementBound, bound)
+              : element.intersectsBound(bound as Bound)
           ) {
             results.add(element);
           }
@@ -259,7 +269,7 @@ export class GridManager<T extends GfxModel> {
       }
     }
 
-    if (getSet) return results;
+    if (returnSet) return results;
 
     // sort elements in set based on index
     const sorted = Array.from(results).sort(compare);
@@ -267,9 +277,64 @@ export class GridManager<T extends GfxModel> {
     return sorted;
   }
 
-  update(element: T) {
+  update(element: GfxModel) {
     this.remove(element);
     this.add(element);
+  }
+
+  watch(blocks: { doc?: Doc; surface?: SurfaceBlockModel | null }) {
+    const disposables: { dispose: () => void }[] = [];
+    const { doc, surface } = blocks;
+
+    if (doc) {
+      disposables.push(
+        doc.slots.blockUpdated.on(payload => {
+          if (payload.type === 'add') {
+            if (payload.model instanceof GfxBlockElementModel) {
+              this.add(payload.model);
+            }
+          }
+
+          if (payload.type === 'update') {
+            if (payload.props.key === 'xywh') {
+              this.update(
+                doc.getBlock(payload.id)?.model as GfxBlockElementModel
+              );
+            }
+          }
+
+          if (payload.type === 'delete') {
+            if (payload.model instanceof GfxBlockElementModel) {
+              this.remove(payload.model);
+            }
+          }
+        })
+      );
+    }
+
+    if (surface) {
+      disposables.push(
+        surface.elementAdded.on(payload => {
+          this.add(surface.getElementById(payload.id)!);
+        })
+      );
+
+      disposables.push(
+        surface.elementRemoved.on(payload => {
+          this.remove(payload.model);
+        })
+      );
+
+      disposables.push(
+        surface.elementUpdated.on(payload => {
+          this.update(surface.getElementById(payload.id)!);
+        })
+      );
+    }
+
+    return () => {
+      disposables.forEach(d => d.dispose());
+    };
   }
 
   get isEmpty() {

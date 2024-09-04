@@ -221,13 +221,11 @@ export class CanvasRenderer {
   }
 
   private _render() {
-    const { viewportBounds, zoom, cumulativeParentScale } = this.viewport;
+    const { viewportBounds, zoom } = this.viewport;
     const { ctx } = this;
     const dpr = window.devicePixelRatio;
     const scale = zoom * dpr;
-    const matrix = new DOMMatrix()
-      .scaleSelf(scale)
-      .scaleSelf(cumulativeParentScale);
+    const matrix = new DOMMatrix().scaleSelf(scale);
     /**
      * if a layer does not have a corresponding canvas
      * its element will be add to this array and drawing on the

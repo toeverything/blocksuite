@@ -106,7 +106,7 @@ export class MindmapSurfaceBlock extends BlockComponent<SurfaceBlockModel> {
 
   override firstUpdated(_changedProperties: Map<PropertyKey, unknown>): void {
     this._renderer?.attach(this.editorContainer);
-    this._viewport.setContainer(this.editorContainer);
+    this._viewport.setViewportElement(this.editorContainer);
 
     this._resizeEffect();
     this._setupCenterEffect();

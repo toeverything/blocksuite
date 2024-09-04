@@ -1,12 +1,16 @@
 import type { Doc } from '@blocksuite/store';
 
 import { GfxBlockElementModel } from '@blocksuite/block-std/gfx';
-import { Bound, last, nToLast } from '@blocksuite/global/utils';
-import { DisposableGroup, Slot, assertType } from '@blocksuite/global/utils';
+import {
+  Bound,
+  DisposableGroup,
+  last,
+  nToLast,
+} from '@blocksuite/global/utils';
+import { Slot, assertType } from '@blocksuite/global/utils';
 import { generateKeyBetween } from 'fractional-indexing';
 
 import type { GfxModel } from './gfx-block-model.js';
-import type { SurfaceBlockModel } from './surface/surface-model.js';
 
 import {
   SortOrder,
@@ -16,16 +20,15 @@ import {
   insertToOrderedArray,
   isInRange,
   removeFromOrderedArray,
-  renderableInEdgeless,
   ungroupIndex,
   updateLayersZIndex,
 } from '../utils/layer.js';
-import { GridManager } from './grid.js';
 import {
   type GfxContainerElement,
   GfxPrimitiveElementModel,
   isGfxContainerElm,
 } from './surface/element-model.js';
+import { SurfaceBlockModel } from './surface/surface-model.js';
 
 export type ReorderingDirection = 'front' | 'forward' | 'backward' | 'back';
 
@@ -67,17 +70,13 @@ export type CanvasLayer = BaseLayer<GfxPrimitiveElementModel> & {
 export type Layer = BlockLayer | CanvasLayer;
 
 export class LayerManager {
-  private _disposables = new DisposableGroup();
+  private _disposable = new DisposableGroup();
 
   static INITIAL_INDEX = 'a0';
 
   blocks: GfxBlockElementModel[] = [];
 
-  blocksGrid = new GridManager<GfxBlockElementModel>();
-
   canvasElements: GfxPrimitiveElementModel[] = [];
-
-  canvasGrid = new GridManager<GfxPrimitiveElementModel>();
 
   canvasLayers: {
     set: Set<GfxPrimitiveElementModel>;
@@ -103,17 +102,13 @@ export class LayerManager {
 
   constructor(
     private _doc: Doc,
-    private _surface: SurfaceBlockModel
+    private _surface: SurfaceBlockModel | null
   ) {
     this._reset();
-  }
-
-  static create(doc: Doc, surface: SurfaceBlockModel) {
-    const layerManager = new LayerManager(doc, surface);
-
-    layerManager.listen(doc, surface);
-
-    return layerManager;
+    this.watch({
+      doc: _doc,
+      surface: _surface,
+    });
   }
 
   private _buildCanvasLayers() {
@@ -475,7 +470,8 @@ export class LayerManager {
         .filter(
           model =>
             model instanceof GfxBlockElementModel &&
-            renderableInEdgeless(this._doc, this._surface, model)
+            (model.parent instanceof SurfaceBlockModel ||
+              model.parent?.role === 'root')
         ) as GfxModel[]
     ).concat(this._surface?.elementModels ?? []);
 
@@ -485,9 +481,7 @@ export class LayerManager {
     elements.forEach(element => {
       if (element instanceof GfxPrimitiveElementModel) {
         this.canvasElements.push(element);
-        this.canvasGrid.add(element);
       } else {
-        this.blocksGrid.add(element);
         this.blocks.push(element);
       }
     });
@@ -522,10 +516,8 @@ export class LayerManager {
 
     if (modelType === 'canvas') {
       updateArray(this.canvasElements, element);
-      this.canvasGrid.update(element as GfxPrimitiveElementModel);
     } else {
       updateArray(this.blocks, element);
-      this.blocksGrid.update(element as GfxBlockElementModel);
     }
 
     if (indexChanged || childIdsChanged) {
@@ -535,66 +527,6 @@ export class LayerManager {
     }
 
     return false;
-  }
-
-  private listen(doc: Doc, surface: SurfaceBlockModel) {
-    this._disposables.add(
-      doc.slots.blockUpdated.on(payload => {
-        if (payload.type === 'add') {
-          const block = doc.getBlockById(payload.id)!;
-
-          if (
-            block instanceof GfxBlockElementModel &&
-            renderableInEdgeless(doc, surface, block) &&
-            this.blocks.indexOf(block) === -1
-          ) {
-            this.add(block as GfxBlockElementModel);
-          }
-        }
-        if (payload.type === 'update') {
-          const block = doc.getBlockById(payload.id)!;
-
-          if (
-            payload.props.key === 'index' ||
-            (payload.props.key === 'xywh' &&
-              block instanceof GfxBlockElementModel &&
-              renderableInEdgeless(doc, surface, block))
-          ) {
-            this.update(block as GfxBlockElementModel, {
-              [payload.props.key]: true,
-            });
-          }
-        }
-        if (payload.type === 'delete') {
-          const block = doc.getBlockById(payload.id);
-
-          if (block instanceof GfxBlockElementModel) {
-            this.delete(block as GfxBlockElementModel);
-          }
-        }
-      })
-    );
-
-    this._disposables.add(
-      surface.elementAdded.on(payload =>
-        this.add(surface.getElementById(payload.id)!)
-      )
-    );
-    this._disposables.add(
-      surface.elementUpdated.on(payload => {
-        if (
-          payload.props['index'] ||
-          payload.props['xywh'] ||
-          payload.props['externalXYWH'] ||
-          payload.props['childIds']
-        ) {
-          this.update(surface.getElementById(payload.id)!, payload.props);
-        }
-      })
-    );
-    this._disposables.add(
-      surface.elementRemoved.on(payload => this.delete(payload.model!))
-    );
   }
 
   add(element: GfxModel) {
@@ -610,10 +542,8 @@ export class LayerManager {
         });
       }
       insertToOrderedArray(this.canvasElements, element);
-      this.canvasGrid.add(element as GfxPrimitiveElementModel);
     } else {
       insertToOrderedArray(this.blocks, element);
-      this.blocksGrid.add(element as GfxBlockElementModel);
     }
 
     this._insertIntoLayer(element as GfxModel, modelType);
@@ -652,7 +582,7 @@ export class LayerManager {
     const manager = new LayerManager(this._doc, this._surface);
 
     return (elementType: string) => {
-      const typeField = this._surface.registeredElementTypes.includes(
+      const typeField = this._surface?.registeredElementTypes.includes(
         elementType
       )
         ? 'type'
@@ -705,11 +635,9 @@ export class LayerManager {
     if (element instanceof GfxPrimitiveElementModel) {
       deleteType = 'canvas';
       removeFromOrderedArray(this.canvasElements, element);
-      this.canvasGrid.remove(element);
     } else {
       deleteType = 'block';
       removeFromOrderedArray(this.blocks, element);
-      this.blocksGrid.remove(element);
     }
 
     if (deleteType) {
@@ -724,11 +652,10 @@ export class LayerManager {
 
   dispose() {
     this.slots.layerUpdated.dispose();
-    this._disposables.dispose();
   }
 
   generateIndex(elementType: string): string {
-    const type = this._surface.registeredElementTypes.includes(elementType)
+    const type = this._surface?.registeredElementTypes.includes(elementType)
       ? 'canvas'
       : 'block';
 
@@ -845,6 +772,69 @@ export class LayerManager {
         type: 'update',
         initiatingElement: element,
       });
+    }
+  }
+
+  watch(blocks: { doc?: Doc; surface: SurfaceBlockModel | null }) {
+    const { doc, surface } = blocks;
+
+    if (doc) {
+      this._disposable.add(
+        doc.slots.blockUpdated.on(payload => {
+          if (payload.type === 'add') {
+            const block = doc.getBlockById(payload.id)!;
+
+            if (
+              block instanceof GfxBlockElementModel &&
+              (block.parent instanceof SurfaceBlockModel ||
+                block.parent?.role === 'root') &&
+              this.blocks.indexOf(block) === -1
+            ) {
+              this.add(block as GfxBlockElementModel);
+            }
+          }
+          if (payload.type === 'update') {
+            const block = doc.getBlockById(payload.id)!;
+
+            if (
+              (payload.props.key === 'index' ||
+                payload.props.key === 'childIds') &&
+              block instanceof GfxBlockElementModel &&
+              (block.parent instanceof SurfaceBlockModel ||
+                block.parent?.role === 'root')
+            ) {
+              this.update(block as GfxBlockElementModel, {
+                [payload.props.key]: true,
+              });
+            }
+          }
+          if (payload.type === 'delete') {
+            const block = doc.getBlockById(payload.id);
+
+            if (block instanceof GfxBlockElementModel) {
+              this.delete(block as GfxBlockElementModel);
+            }
+          }
+        })
+      );
+    }
+
+    if (surface) {
+      this._disposable.add(
+        surface.elementAdded.on(payload =>
+          this.add(surface.getElementById(payload.id)!)
+        )
+      );
+      this._disposable.add(
+        surface.elementUpdated.on(payload => {
+          if (payload.props['index'] || payload.props['childIds']) {
+            this.update(surface.getElementById(payload.id)!, payload.props);
+          }
+        })
+      );
+      this._disposable.add(
+        surface.elementRemoved.on(payload => this.delete(payload.model!))
+      );
     }
   }
 }

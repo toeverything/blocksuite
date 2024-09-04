@@ -392,7 +392,7 @@ export class EdgelessRootBlockComponent extends BlockComponent<
   private _initViewport() {
     const { service } = this;
 
-    service.viewport.setContainer(this);
+    service.viewport.setViewportElement(this);
 
     const run = () => {
       const viewport =
