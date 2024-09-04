@@ -9,7 +9,7 @@
     "dev:hmr": "WC_HMR=1 vite",
     "build": "tsc && nx vite:build",
     "build:size": "nx vite:build -c vite.config.size.ts",
-    "preview": "nx vite:preview"
+    "preview": "vite preview"
   },
   "dependencies": {
     "@blocksuite/block-std": "workspace:*",

@@ -6,7 +6,9 @@ import type {
 
 import { type Page, expect } from '@playwright/test';
 
-const defaultPlaygroundURL = new URL(`http://localhost:5173/`);
+const defaultPlaygroundURL = new URL(
+  `http://localhost:${process.env.CI ? 4173 : 5173}/`
+);
 
 export async function type(page: Page, content: string) {
   await page.keyboard.type(content, { delay: 50 });
