@@ -244,8 +244,15 @@ export class QuickEdgelessMenu extends ShadowlessElement {
   }
 
   private _switchEditorMode() {
-    if (!this.rootService) return;
-    this._docMode = this.rootService.std.get(DocModeProvider).toggleMode();
+    console.log('switch editor mode: ', this.editor.host);
+    if (!this.editor.host) return;
+    const newMode = this._docMode === 'page' ? 'edgeless' : 'page';
+    const docModeService = this.editor.host.std.get(DocModeProvider);
+    if (docModeService) {
+      docModeService.setPrimaryMode(newMode, this.editor.doc.id);
+    }
+    this._docMode = newMode;
+    this.editor.mode = newMode;
   }
 
   private _toggleDarkMode() {
@@ -259,14 +266,12 @@ export class QuickEdgelessMenu extends ShadowlessElement {
   override connectedCallback() {
     super.connectedCallback();
 
-    if (this.rootService) {
-      this.rootService.std.get(DocModeProvider).onModeChange(mode => {
-        this._docMode = mode;
-      });
-    }
     this._docMode = this.editor.mode;
-    this.editor.slots.docUpdated.on(() => {
-      this._docMode = this.editor.mode;
+    this.editor.slots.docUpdated.on(({ newDocId }) => {
+      const newDocMode = this.editor.std
+        .get(DocModeProvider)
+        .getPrimaryMode(newDocId);
+      this._docMode = newDocMode;
     });
 
     document.body.addEventListener('keydown', this._keydown);
@@ -550,6 +555,14 @@ export class QuickEdgelessMenu extends ShadowlessElement {
 
   get doc() {
     return this.editor.doc;
+  }
+
+  get editorMode() {
+    return this.editor.mode;
+  }
+
+  set editorMode(value: DocMode) {
+    this.editor.mode = value;
   }
 
   get rootService() {

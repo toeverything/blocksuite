@@ -591,7 +591,8 @@ export class SurfaceRefBlockComponent extends BlockComponent<
     const pageService = this.std.getService('affine:page');
 
     pageService.editPropsStore.setStorage('viewport', viewport);
-    this.std.get(DocModeProvider).setMode('edgeless');
+
+    this.std.get(DocModeProvider).setEditorMode('edgeless');
   }
 
   override willUpdate(_changedProperties: Map<PropertyKey, unknown>): void {

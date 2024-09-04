@@ -189,7 +189,7 @@ export class AffineEditorContainer
     this._disposables.add(
       effect(() => {
         const std = this._std.value;
-        const mode = std.get(DocModeProvider).getMode();
+        const mode = std.get(DocModeProvider).getPrimaryMode(this.doc.id);
         this._forwardRef(mode);
       })
     );

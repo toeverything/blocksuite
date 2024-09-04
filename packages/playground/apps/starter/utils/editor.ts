@@ -19,16 +19,18 @@ import { DocsPanel } from '../../_common/components/docs-panel.js';
 import { LeftSidePanel } from '../../_common/components/left-side-panel.js';
 import { SidePanel } from '../../_common/components/side-panel.js';
 import {
+  mockDocModeService,
   mockNotificationService,
   mockQuickSearchService,
 } from '../../_common/mock-services';
 
-function setDocModeFromUrlParams(service: DocModeProvider) {
+function setDocModeFromUrlParams(service: DocModeProvider, docId: string) {
   const params = new URLSearchParams(location.search);
   const paramMode = params.get('mode');
   if (paramMode) {
     const docMode = paramMode === 'page' ? 'page' : 'edgeless';
-    service.setMode(docMode);
+    service.setPrimaryMode(docMode, docId);
+    service.setEditorMode(docMode);
   }
 }
 
@@ -65,20 +67,25 @@ export async function mountDefaultDocEditor(collection: DocCollection) {
       pageRootService.disposables.add(onFormatBarConnected);
       pageRootService.notificationService =
         mockNotificationService(pageRootService);
-      const switchEditor = editor.switchEditor.bind(editor);
-      pageRootService.disposables.add(
-        pageRootService.std.get(DocModeProvider).onModeChange(switchEditor)
-      );
     }
   }
 
   const pageSpecs = SpecProvider.getInstance().getSpec('page');
+  const setEditorModeCallBack = editor.switchEditor.bind(editor);
+  const getEditorModeCallback = () => editor.mode;
   pageSpecs.extend([
     PatchPageServiceWatcher,
     {
       setup: di => {
         di.addImpl(QuickSearchProvider, () =>
           mockQuickSearchService(collection)
+        );
+      },
+    },
+    {
+      setup: di => {
+        di.override(DocModeProvider, () =>
+          mockDocModeService(getEditorModeCallback, setEditorModeCallBack)
         );
       },
     },
@@ -92,6 +99,13 @@ export async function mountDefaultDocEditor(collection: DocCollection) {
       setup: di => {
         di.addImpl(QuickSearchProvider, () =>
           mockQuickSearchService(collection)
+        );
+      },
+    },
+    {
+      setup: di => {
+        di.override(DocModeProvider, () =>
+          mockDocModeService(getEditorModeCallback, setEditorModeCallBack)
         );
       },
     },
@@ -112,10 +126,10 @@ export async function mountDefaultDocEditor(collection: DocCollection) {
   app.append(editor);
   await editor.updateComplete;
   const modeService = editor.std.provider.get(DocModeProvider);
-  editor.mode = modeService.getMode();
-  setDocModeFromUrlParams(modeService);
+  editor.mode = modeService.getPrimaryMode(doc.id);
+  setDocModeFromUrlParams(modeService, doc.id);
   editor.slots.docUpdated.on(({ newDocId }) => {
-    editor.mode = modeService.getMode(newDocId);
+    editor.mode = modeService.getPrimaryMode(newDocId);
   });
 
   const outlinePanel = new CustomOutlinePanel();

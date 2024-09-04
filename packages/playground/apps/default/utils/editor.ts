@@ -17,18 +17,19 @@ import { DocsPanel } from '../../_common/components/docs-panel.js';
 import { LeftSidePanel } from '../../_common/components/left-side-panel.js';
 import { QuickEdgelessMenu } from '../../_common/components/quick-edgeless-menu.js';
 import {
-  MockDocModeService,
+  mockDocModeService,
   mockNotificationService,
   mockQuickSearchService,
 } from '../../_common/mock-services.js';
 import { getExampleSpecs } from '../specs-examples/index.js';
 
-function setDocModeFromUrlParams(service: DocModeProvider) {
+function setDocModeFromUrlParams(service: DocModeProvider, docId: string) {
   const params = new URLSearchParams(location.search);
   const paramMode = params.get('mode');
   if (paramMode) {
     const docMode = paramMode === 'page' ? 'page' : 'edgeless';
-    service.setMode(docMode);
+    service.setPrimaryMode(docMode, docId);
+    service.setEditorMode(docMode);
   }
 }
 
@@ -62,10 +63,10 @@ export async function mountDefaultDocEditor(collection: DocCollection) {
   app.append(editor);
   await editor.updateComplete;
   const modeService = editor.host!.std.get(DocModeProvider);
-  editor.mode = modeService.getMode();
-  setDocModeFromUrlParams(modeService);
+  editor.mode = modeService.getPrimaryMode(doc.id);
+  setDocModeFromUrlParams(modeService, doc.id);
   editor.slots.docUpdated.on(({ newDocId }) => {
-    editor.mode = modeService.getMode(newDocId);
+    editor.mode = modeService.getPrimaryMode(newDocId);
   });
 
   const leftSidePanel = new LeftSidePanel();
@@ -113,12 +114,10 @@ export async function mountDefaultDocEditor(collection: DocCollection) {
             return Promise.resolve();
           },
         };
-        const switchEditor = editor.switchEditor.bind(editor);
-        pageRootService.disposables.add(
-          pageRootService.std.get(DocModeProvider).onModeChange(switchEditor)
-        );
       }
     }
+    const setEditorModeCallBack = editor.switchEditor.bind(editor);
+    const getEditorModeCallback = () => editor.mode;
     const newSpec: typeof spec = [
       ...spec,
       {
@@ -128,8 +127,14 @@ export async function mountDefaultDocEditor(collection: DocCollection) {
           );
         },
       },
+      {
+        setup: di => {
+          di.override(DocModeProvider, () =>
+            mockDocModeService(getEditorModeCallback, setEditorModeCallBack)
+          );
+        },
+      },
       PatchPageServiceWatcher,
-      MockDocModeService,
     ];
 
     return newSpec;

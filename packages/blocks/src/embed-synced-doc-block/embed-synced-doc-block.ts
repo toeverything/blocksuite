@@ -396,10 +396,10 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockComponent<
 
     if (this._rootService) {
       const docMode = this._rootService.std.get(DocModeProvider);
-      this.syncedDocMode = docMode.getMode(this.model.pageId);
+      this.syncedDocMode = docMode.getPrimaryMode(this.model.pageId);
       this._isEmptySyncedDoc = isEmptyDoc(this.syncedDoc, this.syncedDocMode);
       this.disposables.add(
-        docMode.onModeChange(mode => {
+        docMode.onPrimaryModeChange(mode => {
           this.syncedDocMode = mode;
           this._isEmptySyncedDoc = isEmptyDoc(this.syncedDoc, mode);
         }, this.model.pageId)

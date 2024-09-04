@@ -7,7 +7,7 @@ import { type EditorHost, ShadowlessElement } from '@blocksuite/block-std';
 import {
   type DocMode,
   DocModeProvider,
-  type EdgelessRootService,
+  EdgelessRootService,
 } from '@blocksuite/blocks';
 import {
   type AffineTextAttributes,
@@ -319,8 +319,7 @@ export class DebugMenu extends ShadowlessElement {
   private _present() {
     if (!this.editor.std || !this.editor.host) return;
     const rootService = this.editor.std.getService('affine:page');
-    const mode = this.editor.std.get(DocModeProvider).getMode();
-    if (mode !== 'edgeless') {
+    if (!(rootService instanceof EdgelessRootService)) {
       toast(
         this.editor.host,
         'The presentation mode is only available on edgeless mode.',
@@ -373,7 +372,12 @@ export class DebugMenu extends ShadowlessElement {
 
   private _switchEditorMode() {
     if (!this.editor.host) return;
-    this.mode = this.editor.host.std.get(DocModeProvider).toggleMode();
+    const newMode = this.mode === 'page' ? 'edgeless' : 'page';
+    const docModeService = this.editor.host.std.get(DocModeProvider);
+    if (docModeService) {
+      docModeService.setPrimaryMode(newMode, this.editor.doc.id);
+    }
+    this.mode = newMode;
   }
 
   private _switchOffsetMode() {

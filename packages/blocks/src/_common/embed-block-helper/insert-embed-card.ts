@@ -74,7 +74,7 @@ export function insertEmbedCard(
 ) {
   const { doc, host } = std;
   const rootService = std.getService('affine:page');
-  const mode = std.get(DocModeProvider).getMode();
+  const mode = rootService.std.get(DocModeProvider).getEditorMode() ?? 'page';
   const selectedBlock = rootService.selectedBlocks[0]?.model;
 
   const { model, index } = getParentModelBySelection(doc, mode, selectedBlock);

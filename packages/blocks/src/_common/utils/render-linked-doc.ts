@@ -598,6 +598,7 @@ export function createLinkedDocFromEdgelessElements(
       ids.set(model.id, newId);
     });
   });
-  host.std.get(DocModeProvider).setMode('edgeless', linkedDoc.id);
+
+  host.std.get(DocModeProvider).setPrimaryMode('edgeless', linkedDoc.id);
   return linkedDoc;
 }
