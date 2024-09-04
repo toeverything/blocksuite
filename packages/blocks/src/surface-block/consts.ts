@@ -1,6 +1,11 @@
 import { FontFamily, FontStyle, FontWeight } from '@blocksuite/affine-model';
 
-import type { FontConfig } from '../root-block/font-loader/font-loader.js';
+export interface FontConfig {
+  font: string;
+  weight: string;
+  url: string;
+  style: string;
+}
 
 export const ZOOM_MAX = 6.0;
 export const ZOOM_MIN = 0.1;

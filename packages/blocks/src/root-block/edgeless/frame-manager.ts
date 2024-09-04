@@ -28,7 +28,7 @@ export function removeContainedFrames(frames: FrameBlockModel[]) {
 export class FrameOverlay extends Overlay {
   bound: Bound | null = null;
 
-  clear() {
+  override clear() {
     this.bound = null;
     this._renderer?.refresh();
   }

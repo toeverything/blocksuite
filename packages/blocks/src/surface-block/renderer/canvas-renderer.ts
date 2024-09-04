@@ -26,6 +26,8 @@ export abstract class Overlay {
 
   constructor() {}
 
+  clear() {}
+
   setRenderer(renderer: CanvasRenderer | null) {
     this._renderer = renderer;
   }
