@@ -11,7 +11,6 @@ import { DocModeProvider, toolbarDefaultConfig } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
 import { AffineEditorContainer, CommentPanel } from '@blocksuite/presets';
 
-import { CustomChatPanel } from '../../_common/components/custom-chat-panel.js';
 import { CustomFramePanel } from '../../_common/components/custom-frame-panel.js';
 import { CustomOutlinePanel } from '../../_common/components/custom-outline-panel.js';
 import { CustomOutlineViewer } from '../../_common/components/custom-outline-viewer.js';
@@ -141,9 +140,6 @@ export async function mountDefaultDocEditor(collection: DocCollection) {
   const commentPanel = new CommentPanel();
   commentPanel.editor = editor;
 
-  const chatPanel = new CustomChatPanel();
-  chatPanel.editor = editor;
-
   const debugMenu = new DebugMenu();
   debugMenu.collection = collection;
   debugMenu.editor = editor;
@@ -154,7 +150,6 @@ export async function mountDefaultDocEditor(collection: DocCollection) {
   debugMenu.leftSidePanel = leftSidePanel;
   debugMenu.docsPanel = docsPanel;
   debugMenu.commentPanel = commentPanel;
-  debugMenu.chatPanel = chatPanel;
 
   document.body.append(outlinePanel);
   document.body.append(outlineViewer);
@@ -162,7 +157,6 @@ export async function mountDefaultDocEditor(collection: DocCollection) {
   document.body.append(sidePanel);
   document.body.append(leftSidePanel);
   document.body.append(debugMenu);
-  document.body.append(chatPanel);
 
   // for multiple editor
   const params = new URLSearchParams(location.search);
