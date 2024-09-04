@@ -1,3 +1,9 @@
+import type {
+  MindmapElementModel,
+  SurfaceBlockModel,
+} from '@blocksuite/affine-block-surface';
+
+import { MindmapStyle } from '@blocksuite/affine-block-surface';
 import {
   MindmapStyleFour,
   MindmapStyleOne,
@@ -22,11 +28,7 @@ import { customElement, property, query } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type { MindmapElementModel } from '../element-model/mindmap.js';
-import type { SurfaceBlockModel } from '../surface-model.js';
-
 import { MarkdownAdapter } from '../../_common/adapters/markdown.js';
-import { MindmapStyle } from '../element-model/utils/mindmap/style.js';
 import { MindmapRootBlock } from './mindmap-root-block.js';
 import { MiniMindmapSchema, MiniMindmapSpecs } from './spec.js';
 import { MindmapSurfaceBlock } from './surface-block.js';
