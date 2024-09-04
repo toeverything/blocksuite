@@ -10,8 +10,7 @@ import type { DenseMenuBuilder } from '../common/type.js';
 
 export const buildConnectorDenseMenu: DenseMenuBuilder = edgeless => {
   const prevMode =
-    edgeless.service.editPropsStore.getLastProps('connector').mode ??
-    ConnectorMode.Curve;
+    edgeless.service.editPropsStore.lastProps$.value.connector.mode;
 
   const isSelected = edgeless.tools.edgelessTool.type === 'connector';
 

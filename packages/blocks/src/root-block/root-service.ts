@@ -32,40 +32,6 @@ export type EmbedOptions = {
   viewType: 'card' | 'embed';
 };
 
-export interface TelemetryEvent {
-  page?: string;
-  segment?: string;
-  module?: string;
-  control?: string;
-  type?: string;
-  category?: string;
-  other?: unknown;
-}
-
-interface DocCreatedEvent extends TelemetryEvent {
-  page?: 'doc editor' | 'whiteboard editor';
-  segment?: 'whiteboard' | 'note' | 'doc';
-  module?:
-    | 'slash commands'
-    | 'format toolbar'
-    | 'edgeless toolbar'
-    | 'inline @';
-  category?: 'page' | 'whiteboard';
-}
-
-export interface TelemetryEventMap {
-  DocCreated: DocCreatedEvent;
-  LinkedDocCreated: TelemetryEvent;
-  SplitNote: TelemetryEvent;
-}
-
-export interface TelemetryService {
-  track<T extends keyof TelemetryEventMap>(
-    eventName: T,
-    props: TelemetryEventMap[T]
-  ): void;
-}
-
 export abstract class RootService extends BlockService {
   private _embedBlockRegistry = new Set<EmbedOptions>();
 
@@ -104,8 +70,6 @@ export abstract class RootService extends BlockService {
   registerEmbedBlockOptions = (options: EmbedOptions): void => {
     this._embedBlockRegistry.add(options);
   };
-
-  telemetryService: TelemetryService | null = null;
 
   readonly themeObserver = ThemeObserver.instance;
 

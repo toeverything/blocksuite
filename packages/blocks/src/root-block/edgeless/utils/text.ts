@@ -2,12 +2,17 @@ import type { PointerEventState } from '@blocksuite/block-std';
 import type { IVec } from '@blocksuite/global/utils';
 
 import {
+  CanvasElementType,
+  TextUtils,
+  type ConnectorElementModel,
+  type IModelCoord,
+} from '@blocksuite/affine-block-surface';
+import {
   type FrameBlockModel,
   type GroupElementModel,
   ShapeElementModel,
 } from '@blocksuite/affine-model';
-import { FontFamily, TextElementModel } from '@blocksuite/affine-model';
-import { ThemeObserver } from '@blocksuite/affine-shared/theme';
+import { TextElementModel } from '@blocksuite/affine-model';
 import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 import {
   Bound,
@@ -18,26 +23,12 @@ import { DocCollection } from '@blocksuite/store';
 
 import type { EdgelessRootBlockComponent } from '../edgeless-root-block.js';
 
-import {
-  CanvasElementType,
-  type ConnectorElementModel,
-  type IModelCoord,
-} from '../../../surface-block/index.js';
-import { getCursorByCoord } from '../../../surface-block/renderer/elements/text/utils.js';
-import {
-  GET_DEFAULT_LINE_COLOR,
-  isTransparent,
-} from '../components/panel/color-panel.js';
+import { GET_DEFAULT_LINE_COLOR } from '../components/panel/color-panel.js';
 import { EdgelessConnectorLabelEditor } from '../components/text/edgeless-connector-label-editor.js';
 import { EdgelessFrameTitleEditor } from '../components/text/edgeless-frame-title-editor.js';
 import { EdgelessGroupTitleEditor } from '../components/text/edgeless-group-title-editor.js';
 import { EdgelessShapeTextEditor } from '../components/text/edgeless-shape-text-editor.js';
 import { EdgelessTextEditor } from '../components/text/edgeless-text-editor.js';
-import {
-  SHAPE_FILL_COLOR_BLACK,
-  SHAPE_TEXT_COLOR_PURE_BLACK,
-  SHAPE_TEXT_COLOR_PURE_WHITE,
-} from './consts.js';
 
 export function mountTextElementEditor(
   textElement: TextElementModel,
@@ -54,7 +45,7 @@ export function mountTextElementEditor(
   let cursorIndex = textElement.text.length;
   if (focusCoord) {
     cursorIndex = Math.min(
-      getCursorByCoord(textElement, focusCoord),
+      TextUtils.getCursorByCoord(textElement, focusCoord),
       cursorIndex
     );
   }
@@ -89,23 +80,7 @@ export function mountShapeTextEditor(
 
   if (!shapeElement.text) {
     const text = new DocCollection.Y.Text();
-    let color = ThemeObserver.getColorValue(
-      shapeElement.fillColor,
-      GET_DEFAULT_LINE_COLOR()
-    );
-    color = isTransparent(color)
-      ? GET_DEFAULT_LINE_COLOR()
-      : color === SHAPE_FILL_COLOR_BLACK
-        ? SHAPE_TEXT_COLOR_PURE_WHITE
-        : SHAPE_TEXT_COLOR_PURE_BLACK;
-    edgeless.service.updateElement(shapeElement.id, {
-      text,
-      color,
-      fontFamily:
-        shapeElement.shapeStyle === 'General'
-          ? FontFamily.Inter
-          : FontFamily.Kalam,
-    });
+    edgeless.service.updateElement(shapeElement.id, { text });
   }
 
   const updatedElement = edgeless.service.getElementById(shapeElement.id);

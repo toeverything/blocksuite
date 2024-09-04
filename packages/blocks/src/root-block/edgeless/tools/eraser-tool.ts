@@ -1,17 +1,14 @@
 import type { PointerEventState } from '@blocksuite/block-std';
 import type { IPoint, IVec } from '@blocksuite/global/utils';
 
-import {
-  Overlay,
-  getStroke,
-  getSvgPathFromStroke,
-  linePolygonIntersects,
-} from '@blocksuite/affine-block-surface';
+import { Overlay, CommonUtils } from '@blocksuite/affine-block-surface';
 import { Bound, noop } from '@blocksuite/global/utils';
 
 import { deleteElements } from '../utils/crud.js';
 import { isTopLevelBlock } from '../utils/query.js';
 import { EdgelessToolController } from './edgeless-tool.js';
+
+const { getSvgPathFromStroke, getStroke, linePolygonIntersects } = CommonUtils;
 
 class EraserOverlay extends Overlay {
   d = '';

@@ -1,4 +1,5 @@
 import { SmallScissorsIcon } from '@blocksuite/affine-components/icons';
+import { TelemetryProvider } from '@blocksuite/affine-shared/services';
 import { WithDisposable } from '@blocksuite/block-std';
 import { deserializeXYWH, serializeXYWH } from '@blocksuite/global/utils';
 import { Point } from '@blocksuite/global/utils';
@@ -166,7 +167,7 @@ export class NoteSlicer extends WithDisposable(LitElement) {
       editing: false,
     });
 
-    this.edgeless.service.telemetryService?.track('SplitNote', {
+    this.edgeless.std.getOptional(TelemetryProvider)?.track('SplitNote', {
       control: 'NoteSlicer',
     });
   }

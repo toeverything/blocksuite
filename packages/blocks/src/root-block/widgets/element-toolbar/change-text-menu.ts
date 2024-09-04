@@ -1,6 +1,12 @@
 import type { ColorScheme } from '@blocksuite/affine-model';
 
 import {
+  normalizeShapeBound,
+  TextUtils,
+} from '@blocksuite/affine-block-surface';
+import { ConnectorUtils } from '@blocksuite/affine-block-surface';
+import { ShapeElementModel } from '@blocksuite/affine-block-surface';
+import {
   SmallArrowDownIcon,
   TextAlignCenterIcon,
   TextAlignLeftIcon,
@@ -34,18 +40,6 @@ import type {
 } from '../../edgeless/components/color-picker/index.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 
-import { isConnectorWithLabel } from '../../../surface-block/element-model/utils/connector.js';
-import { ShapeElementModel } from '../../../surface-block/index.js';
-import { normalizeShapeBound } from '../../../surface-block/index.js';
-import {
-  isFontStyleSupported,
-  isFontWeightSupported,
-} from '../../../surface-block/renderer/elements/text/utils.js';
-import { normalizeTextBound } from '../../../surface-block/renderer/elements/text/utils.js';
-import {
-  getFontFacesByFontFamily,
-  wrapFontFamily,
-} from '../../../surface-block/utils/font.js';
 import '../../edgeless/components/color-picker/index.js';
 import {
   packColor,
@@ -179,11 +173,17 @@ function buildProps(
 export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
   private _setFontFamily = (fontFamily: FontFamily) => {
     const currentFontWeight = getMostCommonFontWeight(this.elements);
-    const fontWeight = isFontWeightSupported(fontFamily, currentFontWeight)
+    const fontWeight = TextUtils.isFontWeightSupported(
+      fontFamily,
+      currentFontWeight
+    )
       ? currentFontWeight
       : FontWeight.Regular;
     const currentFontStyle = getMostCommonFontStyle(this.elements);
-    const fontStyle = isFontStyleSupported(fontFamily, currentFontStyle)
+    const fontStyle = TextUtils.isFontStyleSupported(
+      fontFamily,
+      currentFontStyle
+    )
       ? currentFontStyle
       : FontStyle.Normal;
 
@@ -239,7 +239,7 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
         fontWeight,
         hasMaxWidth,
       } = element;
-      const newBound = normalizeTextBound(
+      const newBound = TextUtils.normalizeTextBound(
         {
           yText,
           fontFamily,
@@ -253,7 +253,10 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
       this.service.updateElement(element.id, {
         xywh: newBound.serialize(),
       });
-    } else if (elementType === 'connector' && isConnectorWithLabel(element)) {
+    } else if (
+      elementType === 'connector' &&
+      ConnectorUtils.isConnectorWithLabel(element)
+    ) {
       const {
         text,
         labelXYWH,
@@ -262,7 +265,7 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
       } = element as ConnectorElementModel;
       const prevBounds = Bound.fromXYWH(labelXYWH || [0, 0, 16, 16]);
       const center = prevBounds.center;
-      const bounds = normalizeTextBound(
+      const bounds = TextUtils.normalizeTextBound(
         {
           yText: text!,
           fontFamily,
@@ -342,7 +345,8 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
     const selectedFontSize = Math.trunc(getMostCommonFontSize(elements));
     const selectedFontStyle = getMostCommonFontStyle(elements);
     const selectedFontWeight = getMostCommonFontWeight(elements);
-    const matchFontFaces = getFontFacesByFontFamily(selectedFontFamily);
+    const matchFontFaces =
+      TextUtils.getFontFacesByFontFamily(selectedFontFamily);
     const fontStyleBtnDisabled =
       matchFontFaces.length === 1 &&
       matchFontFaces[0].style === selectedFontStyle &&
@@ -363,7 +367,7 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
               >
                 <span
                   class="label padding0"
-                  style=${`font-family: ${wrapFontFamily(selectedFontFamily)}`}
+                  style=${`font-family: ${TextUtils.wrapFontFamily(selectedFontFamily)}`}
                   >Aa</span
                 >${SmallArrowDownIcon}
               </editor-icon-button>

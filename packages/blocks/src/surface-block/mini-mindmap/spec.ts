@@ -1,6 +1,7 @@
 import type { BlockSchema } from '@blocksuite/store';
 import type { z } from 'zod';
 
+import { SurfaceBlockSchema } from '@blocksuite/affine-block-surface';
 import { RootBlockSchema } from '@blocksuite/affine-model';
 import {
   BlockViewExtension,
@@ -9,7 +10,6 @@ import {
 } from '@blocksuite/block-std';
 import { literal } from 'lit/static-html.js';
 
-import { SurfaceBlockSchema } from '../surface-model.js';
 import { MindmapService } from './service.js';
 
 export const MiniMindmapSpecs: ExtensionType[] = [

@@ -368,14 +368,7 @@ export async function assertEdgelessShapeType(page: Page, type: ShapeName) {
     if (container.edgelessTool.type !== 'shape')
       throw new Error('Expected shape tool');
 
-    const shapeType = container.edgelessTool.shapeType;
-    if (
-      shapeType === 'rect' &&
-      container.service.editPropsStore.getLastProps('shape').radius > 0
-    )
-      return 'roundedRect';
-
-    return container.edgelessTool.shapeType;
+    return container.edgelessTool.shapeName;
   });
 
   expect(type).toEqual(curType);

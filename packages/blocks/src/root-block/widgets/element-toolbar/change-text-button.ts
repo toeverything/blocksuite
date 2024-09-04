@@ -1,6 +1,7 @@
+import type { TextElementModel } from '@blocksuite/affine-block-surface';
+
 import { html, nothing } from 'lit';
 
-import type { TextElementModel } from '../../../surface-block/index.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 
 import './change-text-menu.js';

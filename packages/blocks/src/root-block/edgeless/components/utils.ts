@@ -1,6 +1,6 @@
 import type { IVec } from '@blocksuite/global/utils';
 
-import { normalizeDegAngle } from '@blocksuite/affine-block-surface';
+import { CommonUtils } from '@blocksuite/affine-block-surface';
 import { Bound, Vec } from '@blocksuite/global/utils';
 import { assertExists } from '@blocksuite/global/utils';
 import { css, html } from 'lit';
@@ -110,7 +110,7 @@ export function calcAngle(target: HTMLElement, point: IVec, offset = 0) {
   assertExists(rect);
   const { left, top, right, bottom } = rect;
   const center = Vec.med([left, top], [right, bottom]);
-  return normalizeDegAngle(
+  return CommonUtils.normalizeDegAngle(
     ((Vec.angle(center, point) + offset) * 180) / Math.PI
   );
 }
@@ -172,7 +172,9 @@ export function calcAngleWithRotation(
 
   const c = new DOMPoint(...center).matrixTransform(m);
 
-  return normalizeDegAngle((Vec.angle([c.x, c.y], point) * 180) / Math.PI);
+  return CommonUtils.normalizeDegAngle(
+    (Vec.angle([c.x, c.y], point) * 180) / Math.PI
+  );
 }
 
 export function calcAngleEdgeWithRotation(target: HTMLElement, rotate: number) {

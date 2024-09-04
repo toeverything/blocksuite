@@ -1,6 +1,7 @@
 import type { EdgelessTextBlockModel } from '@blocksuite/affine-model';
 import type { BlockComponent } from '@blocksuite/block-std';
 
+import { TextUtils } from '@blocksuite/affine-block-surface';
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import { matchFlavours } from '@blocksuite/affine-shared/utils';
 import { GfxBlockComponent } from '@blocksuite/block-std';
@@ -20,7 +21,6 @@ import {
   DefaultModeDragType,
   DefaultToolController,
 } from '../root-block/edgeless/tools/default-tool.js';
-import { wrapFontFamily } from '../surface-block/utils/font.js';
 
 export const EDGELESS_TEXT_BLOCK_MIN_WIDTH = 50;
 export const EDGELESS_TEXT_BLOCK_MIN_HEIGHT = 50;
@@ -321,7 +321,7 @@ export class EdgelessTextBlockComponent extends GfxBlockComponent<
 
     const style = styleMap({
       color,
-      fontFamily: wrapFontFamily(fontFamily),
+      fontFamily: TextUtils.wrapFontFamily(fontFamily),
       fontStyle,
       fontWeight,
       textAlign,

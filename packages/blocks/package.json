@@ -23,7 +23,7 @@
     "@blocksuite/affine-shared": "workspace:*",
     "@blocksuite/block-std": "workspace:*",
     "@blocksuite/global": "workspace:*",
-    "@blocksuite/icons": "^2.1.66",
+    "@blocksuite/icons": "^2.1.67",
     "@blocksuite/inline": "workspace:*",
     "@blocksuite/store": "workspace:*",
     "@floating-ui/dom": "^1.6.10",
@@ -42,6 +42,7 @@
     "fractional-indexing": "^3.2.0",
     "html2canvas": "^1.4.1",
     "lit": "^3.2.0",
+    "lodash.clonedeep": "^4.5.0",
     "lodash.isplainobject": "^4.0.6",
     "lodash.merge": "^4.6.2",
     "mdast-util-gfm-autolink-literal": "^2.0.1",
@@ -97,6 +98,7 @@
   ],
   "devDependencies": {
     "@types/dompurify": "^3.0.5",
+    "@types/lodash.clonedeep": "^4.5.9",
     "@types/lodash.isplainobject": "^4.0.9",
     "@types/lodash.merge": "^4.6.9"
   }

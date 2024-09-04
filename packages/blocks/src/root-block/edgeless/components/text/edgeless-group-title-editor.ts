@@ -2,13 +2,18 @@ import type { RichText } from '@blocksuite/affine-components/rich-text';
 import type { GroupElementModel } from '@blocksuite/affine-model';
 
 import {
+  GROUP_TITLE_FONT_SIZE,
+  GROUP_TITLE_OFFSET,
+  GROUP_TITLE_PADDING,
+} from '@blocksuite/affine-block-surface';
+import {
   RANGE_SYNC_EXCLUDE_ATTR,
   ShadowlessElement,
   WithDisposable,
 } from '@blocksuite/block-std';
 import { Bound } from '@blocksuite/global/utils';
 import { assertExists } from '@blocksuite/global/utils';
-import { html } from 'lit';
+import { html, nothing } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
@@ -87,20 +92,25 @@ export class EdgelessGroupTitleEditor extends WithDisposable(
   }
 
   override render() {
+    if (!this.group.externalXYWH) {
+      console.error('group.externalXYWH is not set');
+      return nothing;
+    }
     const viewport = this.edgeless.service.viewport;
-    const bound = Bound.deserialize(this.group.xywh);
+    const bound = Bound.deserialize(this.group.externalXYWH);
     const [x, y] = viewport.toViewCoord(bound.x, bound.y);
+
     const inlineEditorStyle = styleMap({
       transformOrigin: 'top left',
-      borderRadius: '35px',
+      borderRadius: '2px',
       width: 'fit-content',
       maxHeight: '30px',
-      lineHeight: '20px',
-      padding: '4px 10px',
-      fontSize: '14px',
+      height: 'fit-content',
+      padding: `${GROUP_TITLE_PADDING[1]}px ${GROUP_TITLE_PADDING[0]}px`,
+      fontSize: GROUP_TITLE_FONT_SIZE + 'px',
       position: 'absolute',
       left: x + 'px',
-      top: y - 36 + 'px',
+      top: `${y - GROUP_TITLE_OFFSET + 2}px`,
       minWidth: '8px',
       fontFamily: 'var(--affine-font-family)',
       color: 'var(--affine-text-primary-color)',

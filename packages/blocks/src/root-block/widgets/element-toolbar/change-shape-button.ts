@@ -1,3 +1,4 @@
+import type { ShapeElementModel } from '@blocksuite/affine-block-surface';
 import type { ColorScheme, ShapeProps } from '@blocksuite/affine-model';
 
 import {
@@ -31,7 +32,6 @@ import { join } from 'lit/directives/join.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { when } from 'lit/directives/when.js';
 
-import type { ShapeElementModel } from '../../../surface-block/index.js';
 import type { EdgelessColorPickerButton } from '../../edgeless/components/color-picker/button.js';
 import type { PickColorEvent } from '../../edgeless/components/color-picker/types.js';
 import type { EdgelessShapePanel } from '../../edgeless/components/panel/shape-panel.js';
@@ -121,12 +121,12 @@ function getMostCommonStrokeColor(
 
 function getMostCommonShape(
   elements: ShapeElementModel[]
-): ShapeTool['shapeType'] | null {
+): ShapeTool['shapeName'] | null {
   const shapeTypes = countBy(elements, (ele: ShapeElementModel) => {
     return getShapeName(ele.shapeType, ele.radius);
   });
   const max = maxBy(Object.entries(shapeTypes), ([_k, count]) => count);
-  return max ? (max[0] as ShapeTool['shapeType']) : null;
+  return max ? (max[0] as ShapeTool['shapeName']) : null;
 }
 
 function getMostCommonLineSize(elements: ShapeElementModel[]): LineWidth {

@@ -7,15 +7,12 @@ import type {
 
 import {
   CanvasElementType,
-  GroupElementModel,
   ShapeElementModel,
-} from '@blocksuite/affine-block-surface';
-import {
+  CommonUtils,
   ConnectorElementModel,
-  normalizeDegAngle,
   normalizeShapeBound,
+  TextUtils,
 } from '@blocksuite/affine-block-surface';
-import { normalizeTextBound } from '@blocksuite/affine-block-surface';
 import {
   type BookmarkBlockModel,
   type EdgelessTextBlockModel,
@@ -261,7 +258,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       } else {
         this.edgeless.service.updateElement(id, {
           xywh: bounds.serialize(),
-          rotate: normalizeDegAngle(rotate + delta),
+          rotate: CommonUtils.normalizeDegAngle(rotate + delta),
         });
       }
     });
@@ -1117,7 +1114,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       } = element;
       // If the width of the text element has been changed by dragging,
       // We need to set hasMaxWidth to true for wrapping the text
-      bound = normalizeTextBound(
+      bound = TextUtils.normalizeTextBound(
         {
           yText,
           fontFamily,
@@ -1336,16 +1333,11 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       handlers.push(resizeHandles, connectorHandle, elementHandle);
     }
 
-    const isSingleGroup =
-      elements.length === 1 && elements[0] instanceof GroupElementModel;
-
     if (elements.length === 1 && elements[0] instanceof ConnectorElementModel) {
       _selectedRect.width = 0;
       _selectedRect.height = 0;
       _selectedRect.borderWidth = 0;
     }
-
-    _selectedRect.borderStyle = isSingleGroup ? 'dashed' : 'solid';
 
     return html`
       <style>

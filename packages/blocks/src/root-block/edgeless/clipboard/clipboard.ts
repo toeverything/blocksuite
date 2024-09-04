@@ -12,12 +12,15 @@ import {
   compareLayer,
   SurfaceGroupLikeModel,
   CanvasElementType,
-  splitIntoLines,
-  getBoundsWithRotation,
+  CommonUtils,
+  TextUtils,
   SortOrder,
 } from '@blocksuite/affine-block-surface';
 import { BookmarkStyles } from '@blocksuite/affine-model';
-import { QuickSearchProvider } from '@blocksuite/affine-shared/services';
+import {
+  QuickSearchProvider,
+  TelemetryProvider,
+} from '@blocksuite/affine-shared/services';
 import {
   isInsidePageEditor,
   isUrlInClipboard,
@@ -235,7 +238,7 @@ export class EdgelessClipboardController extends PageClipboard {
         await this.host.addAttachments([...files], point);
       }
 
-      this._rootService.telemetryService?.track('CanvasElementAdded', {
+      this.std.getOptional(TelemetryProvider)?.track('CanvasElementAdded', {
         control: 'canvas:paste',
         page: 'whiteboard editor',
         module: 'toolbar',
@@ -311,7 +314,7 @@ export class EdgelessClipboardController extends PageClipboard {
         this.surface.model.id
       );
 
-      this._rootService.telemetryService?.track('CanvasElementAdded', {
+      this.std.getOptional(TelemetryProvider)?.track('CanvasElementAdded', {
         control: 'canvas:paste',
         page: 'whiteboard editor',
         module: 'toolbar',
@@ -319,7 +322,7 @@ export class EdgelessClipboardController extends PageClipboard {
         type: flavour.split(':')[1],
       });
 
-      this._rootService.telemetryService?.track('LinkedDocCreated', {
+      this.std.getOptional(TelemetryProvider)?.track('LinkedDocCreated', {
         page: 'whiteboard editor',
         segment: 'whiteboard',
         category: 'pasted link',
@@ -525,7 +528,7 @@ export class EdgelessClipboardController extends PageClipboard {
       clipboardData.type as CanvasElementType,
       clipboardData
     );
-    this.host.service.telemetryService?.track('CanvasElementAdded', {
+    this.std.getOptional(TelemetryProvider)?.track('CanvasElementAdded', {
       control: 'canvas:paste',
       page: 'whiteboard editor',
       module: 'toolbar',
@@ -1027,7 +1030,7 @@ export class EdgelessClipboardController extends PageClipboard {
       this.doc.root!.id
     );
 
-    edgeless.service.telemetryService?.track('CanvasElementAdded', {
+    this.std.getOptional(TelemetryProvider)?.track('CanvasElementAdded', {
       control: 'canvas:paste',
       page: 'whiteboard editor',
       module: 'toolbar',
@@ -1036,7 +1039,7 @@ export class EdgelessClipboardController extends PageClipboard {
     });
 
     if (typeof content === 'string') {
-      splitIntoLines(content).forEach((line, idx) => {
+      TextUtils.splitIntoLines(content).forEach((line, idx) => {
         edgeless.service.addBlock(
           'affine:paragraph',
           { text: new DocCollection.Y.Text(line) },
@@ -1325,7 +1328,7 @@ export class EdgelessClipboardController extends PageClipboard {
       bounds.push(Bound.deserialize(block.xywh));
     });
     shapes.forEach(shape => {
-      bounds.push(getBoundsWithRotation(shape.elementBound));
+      bounds.push(CommonUtils.getBoundsWithRotation(shape.elementBound));
     });
     const bound = getCommonBound(bounds);
     assertExists(bound, 'bound not exist');

@@ -9,7 +9,10 @@ import {
   getShapeRadius,
   getShapeType,
 } from '@blocksuite/affine-model';
+import { TelemetryProvider } from '@blocksuite/affine-shared/services';
+import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import { assertExists } from '@blocksuite/global/utils';
+import { SignalWatcher } from '@lit-labs/preact-signals';
 import { LitElement, css, html, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
@@ -63,7 +66,7 @@ shapes.forEach(s => {
 
 @customElement('edgeless-toolbar-shape-draggable')
 export class EdgelessToolbarShapeDraggable extends EdgelessToolbarToolMixin(
-  LitElement
+  SignalWatcher(LitElement)
 ) {
   static override styles = css`
     :host {
@@ -151,9 +154,24 @@ export class EdgelessToolbarShapeDraggable extends EdgelessToolbarToolMixin(
       standardWidth: 100,
       clickToDrag: true,
       onOverlayCreated: (overlay, element) => {
+        const shapeName =
+          this.draggableController.states.draggingElement?.data.name;
+        if (!shapeName) return;
+
+        this.setEdgelessTool({
+          type: 'shape',
+          shapeName,
+        });
+
+        const shape$ =
+          this.edgeless.service.editPropsStore.lastProps$.value[
+            `shape:${shapeName}`
+          ];
+        const color = ThemeObserver.generateColorProperty(shape$.fillColor);
+        const stroke = ThemeObserver.generateColorProperty(shape$.strokeColor);
         Object.assign(overlay.element.style, {
-          color: this.color,
-          stroke: this.stroke,
+          color,
+          stroke,
         });
         const controller = this.edgeless.tools.currentController;
         if (controller instanceof ShapeToolController) {
@@ -172,16 +190,18 @@ export class EdgelessToolbarShapeDraggable extends EdgelessToolbarToolMixin(
           radius: getShapeRadius(shape.name),
         });
 
-        this.edgeless.service.telemetryService?.track('CanvasElementAdded', {
-          control: 'toolbar:dnd',
-          page: 'whiteboard editor',
-          module: 'toolbar',
-          segment: 'toolbar',
-          type: 'shape',
-          other: {
-            shapeType: getShapeType(shape.name),
-          },
-        });
+        this.edgeless.std
+          .getOptional(TelemetryProvider)
+          ?.track('CanvasElementAdded', {
+            control: 'toolbar:dnd',
+            page: 'whiteboard editor',
+            module: 'toolbar',
+            segment: 'toolbar',
+            type: 'shape',
+            other: {
+              shapeType: getShapeType(shape.name),
+            },
+          });
 
         this._setShapeOverlayLock(false);
         this.readyToDrop = false;
@@ -250,9 +270,19 @@ export class EdgelessToolbarShapeDraggable extends EdgelessToolbarToolMixin(
         s => s.name,
         shape => {
           const isBeingDragged = draggingShape?.name === shape.name;
+          const shape$ =
+            this.edgeless.service.editPropsStore.lastProps$.value[
+              `shape:${shape.name}`
+            ];
+          const color = ThemeObserver.generateColorProperty(shape$.fillColor);
+          const stroke = ThemeObserver.generateColorProperty(
+            shape$.strokeColor
+          );
           const baseStyle = {
             ...buildVariablesObject(shape.style),
             filter: `drop-shadow(${this.shapeShadow})`,
+            color,
+            stroke,
           };
           const currStyle = styleMap({
             ...baseStyle,
@@ -314,9 +344,6 @@ export class EdgelessToolbarShapeDraggable extends EdgelessToolbarToolMixin(
   }
 
   @property({ attribute: false })
-  accessor color!: string;
-
-  @property({ attribute: false })
   accessor onShapeClick: (shape: DraggableShape) => void = () => {};
 
   @state()
@@ -324,9 +351,6 @@ export class EdgelessToolbarShapeDraggable extends EdgelessToolbarToolMixin(
 
   @query('.edgeless-shape-draggable')
   accessor shapeContainer!: HTMLDivElement;
-
-  @property({ attribute: false })
-  accessor stroke!: string;
 }
 
 declare global {

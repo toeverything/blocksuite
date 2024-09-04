@@ -3,6 +3,15 @@ import type { PointLocation } from '@blocksuite/global/utils';
 import type { BlockModel } from '@blocksuite/store';
 
 import {
+  type CanvasElementWithText,
+  GRID_GAP_MAX,
+  GRID_GAP_MIN,
+  MindmapElementModel,
+  ShapeElementModel,
+  TextElementModel,
+  CommonUtils,
+} from '@blocksuite/affine-block-surface';
+import {
   type AttachmentBlockModel,
   type BookmarkBlockModel,
   ConnectorElementModel,
@@ -26,17 +35,9 @@ import type { Connectable } from '../../../_common/utils/index.js';
 import type { GfxBlockModel } from '../block-model.js';
 import type { EdgelessTool } from '../types.js';
 
-import {
-  type CanvasElementWithText,
-  GRID_GAP_MAX,
-  GRID_GAP_MIN,
-  MindmapElementModel,
-  ShapeElementModel,
-  TextElementModel,
-  clamp,
-  getQuadBoundsWithRotation,
-} from '../../../surface-block/index.js';
 import { getElementsWithoutGroup } from './group.js';
+
+const { clamp, getQuadBoundsWithRotation } = CommonUtils;
 
 export function isMindmapNode(
   element: GfxBlockModel | BlockSuite.EdgelessModel | null

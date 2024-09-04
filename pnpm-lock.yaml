@@ -380,8 +380,8 @@ importers:
         specifier: workspace:*
         version: link:../../framework/global
       '@blocksuite/icons':
-        specifier: ^2.1.66
-        version: 2.1.66(@types/react@18.3.4)(lit@3.2.0)
+        specifier: ^2.1.67
+        version: 2.1.67(@types/react@18.3.4)(lit@3.2.0)
       '@blocksuite/inline':
         specifier: workspace:*
         version: link:../../framework/inline
@@ -504,8 +504,8 @@ importers:
         specifier: workspace:*
         version: link:../framework/global
       '@blocksuite/icons':
-        specifier: ^2.1.66
-        version: 2.1.66(@types/react@18.3.4)(lit@3.2.0)
+        specifier: ^2.1.67
+        version: 2.1.67(@types/react@18.3.4)(lit@3.2.0)
       '@blocksuite/inline':
         specifier: workspace:*
         version: link:../framework/inline
@@ -560,6 +560,9 @@ importers:
       lit:
         specifier: ^3.2.0
         version: 3.2.0
+      lodash.clonedeep:
+        specifier: ^4.5.0
+        version: 4.5.0
       lodash.isplainobject:
         specifier: ^4.0.6
         version: 4.0.6
@@ -630,6 +633,9 @@ importers:
       '@types/dompurify':
         specifier: ^3.0.5
         version: 3.0.5
+      '@types/lodash.clonedeep':
+        specifier: ^4.5.9
+        version: 4.5.9
       '@types/lodash.isplainobject':
         specifier: ^4.0.9
         version: 4.0.9
@@ -768,6 +774,9 @@ importers:
       lib0:
         specifier: ^0.2.97
         version: 0.2.97
+      lodash.clonedeep:
+        specifier: ^4.5.0
+        version: 4.5.0
       lodash.ismatch:
         specifier: ^4.4.0
         version: 4.4.0
@@ -787,6 +796,9 @@ importers:
         specifier: ^3.23.8
         version: 3.23.8
     devDependencies:
+      '@types/lodash.clonedeep':
+        specifier: ^4.5.9
+        version: 4.5.9
       '@types/lodash.merge':
         specifier: ^4.6.9
         version: 4.6.9
@@ -893,6 +905,9 @@ importers:
 
   packages/presets:
     dependencies:
+      '@blocksuite/affine-block-surface':
+        specifier: workspace:*
+        version: link:../affine/block-surface
       '@blocksuite/affine-shared':
         specifier: workspace:*
         version: link:../affine/shared
@@ -966,9 +981,6 @@ packages:
     peerDependencies:
       '@algolia/client-search': '>= 4.9.1 < 6'
       algoliasearch: '>= 4.9.1 < 6'
-    peerDependenciesMeta:
-      '@algolia/client-search':
-        optional: true
 
   '@algolia/cache-browser-local-storage@4.24.0':
     resolution: {integrity: sha512-t63W9BnoXVrGy9iYHBgObNXqYXM3tYXCjDSHeNwnsc324r4o5UiVKUiAB4THQ5z9U5hTj6qUvwg/Ez43ZD85ww==}
@@ -1673,8 +1685,8 @@ packages:
     resolution: {integrity: sha512-YTnYtra7W9e6/oAZEHj0bJehPRUlLH9/fbpT5LfB0NhQXyALCRkRs3zH9v07IYhkgpqX6Z78FnuccZr/l4Fs4Q==}
     engines: {node: '>=6.9.0'}
 
-  '@blocksuite/icons@2.1.66':
-    resolution: {integrity: sha512-GO9U9ZHc3GJamhZoMJDRj4oXG1zP+/mUQXmgot/vKh66NeZsg4OOe2+uDdoAPp7hLZ03kEbhImGFoRf078Vu1w==}
+  '@blocksuite/icons@2.1.67':
+    resolution: {integrity: sha512-kfkTMVTw5lq48Y7QK28bMtYe5Hq1U0xwywSXuq61qzoqjbIffg2BLrAYutONdxhpbLLiwQZHxa21mA3gWk9N9w==}
     engines: {node: '>=18.19.0 <21.0.0'}
     peerDependencies:
       '@types/react': ^18.0.25
@@ -2972,6 +2984,9 @@ packages:
 
   '@types/linkify-it@5.0.0':
     resolution: {integrity: sha512-sVDA58zAw4eWAffKOaQH5/5j3XeayukzDk+ewSsnv3p4yJEZHCCzMDiZM8e0OUrRvmpGZ85jf4yDHkHsgBNr9Q==}
+
+  '@types/lodash.clonedeep@4.5.9':
+    resolution: {integrity: sha512-19429mWC+FyaAhOLzsS8kZUsI+/GmBAQ0HFiCPsKGU+7pBXOQWhyrY6xNNDwUSX8SMZMJvuFVMF9O5dQOlQK9Q==}
 
   '@types/lodash.ismatch@4.4.9':
     resolution: {integrity: sha512-qWihnStOPKH8urljLGm6ZOEdN/5Bt4vxKR81tL3L4ArUNLvcf9RW3QSnPs21eix5BiqioSWq4aAXD4Iep+d0fw==}
@@ -5688,6 +5703,9 @@ packages:
   lodash.camelcase@4.3.0:
     resolution: {integrity: sha512-TwuEnCnxbc3rAvhf/LbG7tJUDzhqXyFnv3dtzLOPgCG/hODL7WFnsbwktkD7yUV0RrreP/l1PALq/YSg6VvjlA==}
 
+  lodash.clonedeep@4.5.0:
+    resolution: {integrity: sha512-H5ZhCF25riFd9uB5UCkVKo61m3S/xZk1x4wA6yp/L3RFP6Z/eHH1ymQcGLo7J3GMPfm0V/7m1tryHuGVxpqEBQ==}
+
   lodash.clonedeepwith@4.5.0:
     resolution: {integrity: sha512-QRBRSxhbtsX1nc0baxSkkK5WlVTTm/s48DSukcGcWZwIyI8Zz+lB+kFiELJXtzfH4Aj6kMWQ1VWW4U5uUDgZMA==}
 
@@ -8263,9 +8281,8 @@ snapshots:
 
   '@algolia/autocomplete-shared@1.9.3(@algolia/client-search@5.1.1)(algoliasearch@4.24.0)':
     dependencies:
-      algoliasearch: 4.24.0
-    optionalDependencies:
       '@algolia/client-search': 5.1.1
+      algoliasearch: 4.24.0
 
   '@algolia/cache-browser-local-storage@4.24.0':
     dependencies:
@@ -9210,7 +9227,7 @@ snapshots:
       '@babel/helper-validator-identifier': 7.24.7
       to-fast-properties: 2.0.0
 
-  '@blocksuite/icons@2.1.66(@types/react@18.3.4)(lit@3.2.0)':
+  '@blocksuite/icons@2.1.67(@types/react@18.3.4)(lit@3.2.0)':
     dependencies:
       '@types/react': 18.3.4
     optionalDependencies:
@@ -11071,6 +11088,10 @@ snapshots:
       '@types/node': 22.5.2
 
   '@types/linkify-it@5.0.0': {}
+
+  '@types/lodash.clonedeep@4.5.9':
+    dependencies:
+      '@types/lodash': 4.17.7
 
   '@types/lodash.ismatch@4.4.9':
     dependencies:
@@ -14146,6 +14167,8 @@ snapshots:
       p-locate: 6.0.0
 
   lodash.camelcase@4.3.0: {}
+
+  lodash.clonedeep@4.5.0: {}
 
   lodash.clonedeepwith@4.5.0: {}
 

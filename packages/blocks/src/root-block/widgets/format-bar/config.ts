@@ -33,6 +33,7 @@ import {
 import { createSimplePortal } from '@blocksuite/affine-components/portal';
 import { toast } from '@blocksuite/affine-components/toast';
 import { renderGroups } from '@blocksuite/affine-components/toolbar';
+import { TelemetryProvider } from '@blocksuite/affine-shared/services';
 import { assertExists } from '@blocksuite/global/utils';
 import { Slice } from '@blocksuite/store';
 import { type TemplateResult, html } from 'lit';
@@ -217,22 +218,18 @@ export function toolbarDefaultConfig(toolbar: AffineFormatBarWidget) {
           if (title === null) return;
           convertSelectedBlocksToLinkedDoc(doc, selectedModels, title);
           notifyDocCreated(host, doc);
-          host.std
-            .getService('affine:page')
-            .telemetryService?.track('DocCreated', {
-              control: 'create linked doc',
-              page: 'doc editor',
-              module: 'format toolbar',
-              type: 'embed-linked-doc',
-            });
-          host.std
-            .getService('affine:page')
-            .telemetryService?.track('LinkedDocCreated', {
-              control: 'create linked doc',
-              page: 'doc editor',
-              module: 'format toolbar',
-              type: 'embed-linked-doc',
-            });
+          host.std.getOptional(TelemetryProvider)?.track('DocCreated', {
+            control: 'create linked doc',
+            page: 'doc editor',
+            module: 'format toolbar',
+            type: 'embed-linked-doc',
+          });
+          host.std.getOptional(TelemetryProvider)?.track('LinkedDocCreated', {
+            control: 'create linked doc',
+            page: 'doc editor',
+            module: 'format toolbar',
+            type: 'embed-linked-doc',
+          });
         });
       },
       showWhen: chain => {

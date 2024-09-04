@@ -1,7 +1,7 @@
 import type { ConnectorElementModel } from '@blocksuite/affine-block-surface';
 import type { BlockSnapshot, SnapshotReturn } from '@blocksuite/store';
 
-import { generateElementId } from '@blocksuite/affine-block-surface';
+import { CommonUtils } from '@blocksuite/affine-block-surface';
 import { sortIndex } from '@blocksuite/affine-block-surface';
 import { Bound } from '@blocksuite/global/utils';
 import { assertExists, assertType } from '@blocksuite/global/utils';
@@ -53,7 +53,7 @@ export const replaceIdMiddleware = (job: TemplateJob) => {
       Object.entries(
         blockJson.props.elements as Record<string, Record<string, unknown>>
       ).forEach(([id, val]) => {
-        const newId = generateElementId();
+        const newId = CommonUtils.generateElementId();
 
         regeneratedIdMap.set(id, newId);
         val.id = newId;

@@ -533,6 +533,40 @@ export default [
     },
   },
   {
+    files: ['packages/affine/block-surface/src/**/*.ts'],
+
+    rules: {
+      '@typescript-eslint/no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: ['**/dist', '**/dist/**'],
+              message: 'Do not import from dist',
+              allowTypeImports: false,
+            },
+            {
+              group: ['**/src', '**/src/**'],
+              message: 'Do not import from src',
+              allowTypeImports: false,
+            },
+            {
+              group: ['**/*.css', '**/*.css?*'],
+              message:
+                'Do not import CSS directly, see https://github.com/toeverything/blocksuite/issues/525',
+              allowTypeImports: false,
+            },
+            {
+              group: ['@blocksuite/affine/block-surface'],
+              message: 'Do not import package itself',
+              allowTypeImports: false,
+            },
+          ],
+        },
+      ],
+    },
+  },
+  {
     files: ['packages/blocks/src/**/*.ts'],
 
     rules: {

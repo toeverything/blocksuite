@@ -8,11 +8,19 @@ import type { PointerEventState } from '@blocksuite/block-std';
 import type { PointTestOptions } from '@blocksuite/block-std/gfx';
 import type { IVec } from '@blocksuite/global/utils';
 
+import { MindmapUtils } from '@blocksuite/affine-block-surface';
+import {
+  MindmapElementModel,
+  ShapeElementModel,
+  TextElementModel,
+} from '@blocksuite/affine-block-surface';
+import { ConnectorUtils } from '@blocksuite/affine-block-surface';
 import { focusTextModel } from '@blocksuite/affine-components/rich-text';
 import {
   ConnectorElementModel,
   GroupElementModel,
 } from '@blocksuite/affine-model';
+import { TelemetryProvider } from '@blocksuite/affine-shared/services';
 import {
   clamp,
   handleNativeRangeAtPoint,
@@ -29,18 +37,6 @@ import {
 import type { EdgelessTool } from '../types.js';
 
 import { isSelectSingleMindMap } from '../../../_common/edgeless/mindmap/index.js';
-import {
-  MindmapElementModel,
-  ShapeElementModel,
-  TextElementModel,
-} from '../../../surface-block/element-model/index.js';
-import { isConnectorWithLabel } from '../../../surface-block/element-model/utils/connector.js';
-import {
-  hideTargetConnector,
-  moveMindMapSubtree,
-  showMergeIndicator,
-} from '../../../surface-block/element-model/utils/mindmap/utils.js';
-import { isConnectorAndBindingsAllSelected } from '../../../surface-block/managers/connector-manager.js';
 import { edgelessElementsBound } from '../utils/bound-utils.js';
 import { prepareCloneData } from '../utils/clone-utils.js';
 import { calPanDelta } from '../utils/panning-utils.js';
@@ -145,7 +141,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     mindmap: MindmapElementModel;
     node: MindmapNode;
     mergeInfo?: Exclude<
-      ReturnType<typeof showMergeIndicator>,
+      ReturnType<typeof MindmapUtils.showMergeIndicator>,
       undefined
     >['mergeInfo'];
   } = null;
@@ -310,7 +306,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
 
         if (
           isCanvasElement(selected) &&
-          isConnectorWithLabel(selected) &&
+          ConnectorUtils.isConnectorWithLabel(selected) &&
           (selected as ConnectorElementModel).labelIncludesPoint(
             this._service.viewport.toModelCoord(x, y)
           )
@@ -336,7 +332,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
 
         if (
           isCanvasElement(selected) &&
-          isConnectorWithLabel(selected) &&
+          ConnectorUtils.isConnectorWithLabel(selected) &&
           (selected as ConnectorElementModel).labelIncludesPoint(
             this._service.viewport.toModelCoord(x, y)
           )
@@ -376,7 +372,10 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
   private _isDraggable(element: BlockSuite.EdgelessModel) {
     return !(
       element instanceof ConnectorElementModel &&
-      !isConnectorAndBindingsAllSelected(element, this._toBeMoved)
+      !ConnectorUtils.isConnectorAndBindingsAllSelected(
+        element,
+        this._toBeMoved
+      )
     );
   }
 
@@ -467,9 +466,12 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
         element.opacity = 0.8;
 
         const { clear, mergeInfo } =
-          showMergeIndicator(mindmap, node, subtree, [x, y]) ?? {};
+          MindmapUtils.showMergeIndicator(mindmap, node, subtree, [x, y]) ?? {};
         clear && this._clearMindMapHoverState.push(clear);
-        const clearHide = hideTargetConnector(currentMindmap, subtree);
+        const clearHide = MindmapUtils.hideTargetConnector(
+          currentMindmap,
+          subtree
+        );
         clearHide && this._clearMindMapHoverState.push(clearHide);
 
         const layoutType = mergeInfo?.layoutType;
@@ -493,7 +495,10 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
           ) &&
           currentMindmap.tree.id !== currentNode.id
         ) {
-          const clearHide = hideTargetConnector(currentMindmap, subtree);
+          const clearHide = MindmapUtils.hideTargetConnector(
+            currentMindmap,
+            subtree
+          );
           clearHide && this._clearMindMapHoverState.push(clearHide);
           this._draggingSingleMindmap.detach = true;
         } else {
@@ -788,13 +793,15 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
       } else {
         addText(this._edgeless, e);
       }
-      this._service.telemetryService?.track('CanvasElementAdded', {
-        control: 'canvas:dbclick',
-        page: 'whiteboard editor',
-        module: 'toolbar',
-        segment: 'toolbar',
-        type: 'text',
-      });
+      this._edgeless.std
+        .getOptional(TelemetryProvider)
+        ?.track('CanvasElementAdded', {
+          control: 'canvas:dbclick',
+          page: 'whiteboard editor',
+          module: 'toolbar',
+          segment: 'toolbar',
+          type: 'text',
+        });
       return;
     } else {
       const [x, y] = this._service.viewport.toModelCoord(e.x, e.y);
@@ -842,7 +849,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
         const { node: currentNode, mindmap: currentMindmap } =
           this._draggingSingleMindmap;
 
-        moveMindMapSubtree(
+        MindmapUtils.moveMindMapSubtree(
           currentMindmap,
           currentNode!,
           mindmap,

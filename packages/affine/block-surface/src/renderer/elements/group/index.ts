@@ -13,59 +13,47 @@ export function group(
   renderer: CanvasRenderer
 ) {
   const { xywh } = model;
+  const bound = Bound.deserialize(xywh);
   const elements = renderer.provider.selectedElements?.() || [];
+
+  const renderParams = titleRenderParams(model, renderer.viewport.zoom);
+  model.externalXYWH = renderParams.titleBound.serialize();
 
   ctx.setTransform(matrix);
 
   if (elements.includes(model.id)) {
-    renderTitle(model, ctx, renderer);
+    if (model.showTitle) {
+      renderTitle(model, ctx, renderer, renderParams);
+    } else {
+      ctx.lineWidth = 2 / renderer.viewport.zoom;
+      ctx.strokeStyle = renderer.getPropertyValue('--affine-blue');
+      ctx.strokeRect(0, 0, bound.w, bound.h);
+    }
   } else if (model.childElements.some(child => elements.includes(child.id))) {
-    const bound = Bound.deserialize(xywh);
-    ctx.setLineDash([2, 2]);
-    ctx.strokeStyle = renderer.getPropertyValue('--affine-blue');
-    ctx.lineWidth = 1;
+    ctx.lineWidth = 2 / renderer.viewport.zoom;
+    ctx.strokeStyle = '#8FD1FF';
     ctx.strokeRect(0, 0, bound.w, bound.h);
 
-    renderTitle(model, ctx, renderer);
+    if (model.showTitle) renderTitle(model, ctx, renderer, renderParams);
   }
 }
 
 function renderTitle(
   model: GroupElementModel,
   ctx: CanvasRenderingContext2D,
-  renderer: CanvasRenderer
+  renderer: CanvasRenderer,
+  renderParams: ReturnType<typeof titleRenderParams>
 ) {
-  const zoom = renderer.viewport.zoom;
-  const {
-    titleWidth,
-    text,
-    lineHeight,
-    font,
-    padding,
-    offset,
-    radius,
-    titleBound,
-  } = titleRenderParams(model, zoom);
-
-  if (!model.showTitle) return;
+  const { text, lineHeight, font, padding, offset, titleBound } = renderParams;
 
   model.externalXYWH = titleBound.serialize();
 
   ctx.translate(0, -offset);
 
   ctx.beginPath();
-  ctx.roundRect(
-    0,
-    -lineHeight - padding[1] * 2,
-    titleWidth,
-    lineHeight + padding[1] * 2,
-    radius
-  );
-  ctx.fillStyle = '#E3E2E4';
-  ctx.fill();
 
   ctx.font = font;
-  ctx.fillStyle = '#424149';
+  ctx.fillStyle = renderer.getPropertyValue('--affine-blue');
   ctx.textAlign = 'left';
   ctx.textBaseline = 'middle';
   ctx.fillText(text, padding[0], -lineHeight / 2 - padding[1]);

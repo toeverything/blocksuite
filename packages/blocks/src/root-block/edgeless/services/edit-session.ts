@@ -1,34 +1,21 @@
 import type { BlockService } from '@blocksuite/block-std';
 
-import {
-  BrushSchema,
-  ColorSchema,
-  ConnectorSchema,
-  EdgelessTextSchema,
-  NoteSchema,
-  ShapeSchema,
-  TextSchema,
-} from '@blocksuite/affine-shared/utils';
+import { type ShapeProps, getShapeName } from '@blocksuite/affine-model';
+import { NodePropsSchema } from '@blocksuite/affine-shared/utils';
+import { ColorSchema } from '@blocksuite/affine-shared/utils';
 import {
   type DeepPartial,
   DisposableGroup,
   Slot,
 } from '@blocksuite/global/utils';
 import { type Signal, computed, signal } from '@lit-labs/preact-signals';
+import clonedeep from 'lodash.clonedeep';
 import isPlainObject from 'lodash.isplainobject';
 import merge from 'lodash.merge';
 import { z } from 'zod';
 
-const LastPropsSchema = z.object({
-  connector: ConnectorSchema,
-  brush: BrushSchema,
-  shape: ShapeSchema,
-  text: TextSchema,
-  'affine:edgeless-text': EdgelessTextSchema,
-  'affine:note': NoteSchema,
-});
-
-export type LastProps = z.infer<typeof LastPropsSchema>;
+const LastPropsSchema = NodePropsSchema;
+export type LastProps = z.infer<typeof NodePropsSchema>;
 export type LastPropsKey = keyof LastProps;
 
 const SESSION_PROP_KEY = 'blocksuite:prop:record';
@@ -105,7 +92,7 @@ export class EditPropsStore {
     if (props) {
       const result = LastPropsSchema.safeParse(JSON.parse(props));
       if (result.success) {
-        merge({ ...initProps }, result.data);
+        merge(clonedeep(initProps), result.data);
       }
     }
 
@@ -113,7 +100,7 @@ export class EditPropsStore {
       const editorSetting$ =
         this._service.std.getConfig('affine:page')?.editorSetting;
       return merge(
-        { ...initProps },
+        clonedeep(initProps),
         editorSetting$?.value,
         this.innerProps$.value
       );
@@ -148,22 +135,13 @@ export class EditPropsStore {
     }
   }
 
-  applyLastProps(
-    type: BlockSuite.EdgelessModelKeys,
-    props: Record<string, unknown>
-  ) {
-    if (!isLastPropType(type)) return;
-
-    const lastProps = this.lastProps$.value[type];
-    deepAssign(props, lastProps);
+  applyLastProps(key: LastPropsKey, props: Record<string, unknown>) {
+    const lastProps = this.lastProps$.value[key];
+    return merge(clonedeep(lastProps), props);
   }
 
   dispose() {
     this._disposables.dispose();
-  }
-
-  getLastProps<T extends LastPropsKey>(type: T) {
-    return this.lastProps$.value[type] as LastProps[T];
   }
 
   getStorage<T extends StoragePropsKey>(key: T) {
@@ -187,23 +165,17 @@ export class EditPropsStore {
     }
   }
 
-  recordLastProps(
-    type: BlockSuite.EdgelessModelKeys,
-    recordProps: Partial<LastProps[LastPropsKey]>
-  ) {
-    if (!isLastPropType(type)) return;
-
+  recordLastProps(key: LastPropsKey, props: Partial<LastProps[LastPropsKey]>) {
     const overrideProps = extractProps(
-      recordProps,
-      LastPropsSchema.shape[type]._def.innerType
+      props,
+      LastPropsSchema.shape[key]._def.innerType
     );
     if (Object.keys(overrideProps).length === 0) return;
 
     const innerProps = this.innerProps$.value;
-    this.innerProps$.value = merge(
-      { ...innerProps },
-      { [type]: overrideProps }
-    );
+    this.innerProps$.value = merge(clonedeep(innerProps), {
+      [key]: overrideProps,
+    });
   }
 
   setStorage<T extends StoragePropsKey>(key: T, value: StorageProps[T]) {
@@ -215,6 +187,23 @@ export class EditPropsStore {
     if (oldValue === value) return;
     this.slots.storageUpdated.emit({ key, value });
   }
+}
+
+export function getLastPropsKey(
+  modelType: BlockSuite.EdgelessModelKeys,
+  modelProps: Partial<LastProps[LastPropsKey]>
+): LastPropsKey | null {
+  if (modelType === 'shape') {
+    const { shapeType, radius } = modelProps as ShapeProps;
+    const shapeName = getShapeName(shapeType, radius);
+    return `${modelType}:${shapeName}`;
+  }
+
+  if (isLastPropsKey(modelType)) {
+    return modelType;
+  }
+
+  return null;
 }
 
 function extractProps(
@@ -245,33 +234,8 @@ function extractProps(
   return result;
 }
 
-function isLastPropType(
-  type: BlockSuite.EdgelessModelKeys
-): type is keyof LastProps {
-  return Object.keys(LastPropsSchema.shape).includes(type);
-}
-
-function deepAssign(
-  target: Record<string, unknown>,
-  source: Record<string, unknown>
-) {
-  Object.keys(source).forEach(key => {
-    if (source[key] === undefined) return;
-    if (!(key in target)) target[key] = undefined;
-    if (target[key] !== undefined) return;
-
-    if (isPlainObject(source[key])) {
-      target[key] = target[key] ?? {};
-      deepAssign(
-        target[key] as Record<string, unknown>,
-        source[key] as Record<string, unknown>
-      );
-    } else {
-      target[key] = source[key];
-    }
-  });
-
-  return target;
+function isLastPropsKey(key: string): key is LastPropsKey {
+  return Object.keys(LastPropsSchema.shape).includes(key);
 }
 
 function isColorType(key: string, value: unknown) {

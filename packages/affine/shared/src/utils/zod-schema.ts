@@ -21,8 +21,6 @@ import {
   NoteShadowsSchema,
   PointStyle,
   ShapeStyle,
-  ShapeTextFontSize,
-  ShapeType,
   StrokeColorsSchema,
   StrokeStyle,
   TextAlign,
@@ -34,13 +32,11 @@ const ConnectorEndpointSchema = z.nativeEnum(PointStyle);
 const StrokeStyleSchema = z.nativeEnum(StrokeStyle);
 const LineWidthSchema = z.nativeEnum(LineWidth);
 const ShapeStyleSchema = z.nativeEnum(ShapeStyle);
-const ShapeTextFontSizeSchema = z.nativeEnum(ShapeTextFontSize);
 const FontFamilySchema = z.nativeEnum(FontFamily);
 const FontWeightSchema = z.nativeEnum(FontWeight);
 const FontStyleSchema = z.nativeEnum(FontStyle);
 const TextAlignSchema = z.nativeEnum(TextAlign);
 const TextVerticalAlignSchema = z.nativeEnum(TextVerticalAlign);
-const ShapeTypeSchema = z.nativeEnum(ShapeType);
 const NoteDisplayModeSchema = z.nativeEnum(NoteDisplayMode);
 const ConnectorModeSchema = z.nativeEnum(ConnectorMode);
 
@@ -95,37 +91,46 @@ export const BrushSchema = z
     lineWidth: LineWidth.Four,
   });
 
-export const ShapeSchema = z
-  .object({
-    color: TextColorSchema,
-    shapeType: ShapeTypeSchema,
-    fillColor: ShapeFillColorSchema,
-    strokeColor: ShapeStrokeColorSchema,
-    strokeStyle: StrokeStyleSchema,
-    strokeWidth: z.number(),
-    shapeStyle: ShapeStyleSchema,
-    filled: z.boolean(),
-    radius: z.number(),
-    fontSize: ShapeTextFontSizeSchema.optional(),
-    fontFamily: FontFamilySchema.optional(),
-    fontWeight: FontWeightSchema.optional(),
-    fontStyle: FontStyleSchema.optional(),
-    textAlign: TextAlignSchema.optional(),
-    textHorizontalAlign: TextAlignSchema.optional(),
-    textVerticalAlign: TextVerticalAlignSchema.optional(),
-    roughness: z.number().optional(),
-  })
-  .default({
-    color: DEFAULT_SHAPE_TEXT_COLOR,
-    shapeType: ShapeType.Rect,
-    fillColor: DEFAULT_SHAPE_FILL_COLOR,
-    strokeColor: DEFAULT_SHAPE_STROKE_COLOR,
-    strokeStyle: StrokeStyle.Solid,
-    strokeWidth: LineWidth.Two,
-    shapeStyle: ShapeStyle.General,
-    filled: true,
-    radius: 0,
-  });
+const DEFAULT_SHAPE = {
+  color: DEFAULT_SHAPE_TEXT_COLOR,
+  fillColor: DEFAULT_SHAPE_FILL_COLOR,
+  strokeColor: DEFAULT_SHAPE_STROKE_COLOR,
+  strokeStyle: StrokeStyle.Solid,
+  strokeWidth: LineWidth.Two,
+  shapeStyle: ShapeStyle.General,
+  filled: true,
+  radius: 0,
+  fontSize: 20,
+  fontFamily: FontFamily.Inter,
+  fontWeight: FontWeight.Regular,
+  fontStyle: FontStyle.Normal,
+  textAlign: TextAlign.Center,
+};
+
+const ShapeObject = {
+  color: TextColorSchema,
+  fillColor: ShapeFillColorSchema,
+  strokeColor: ShapeStrokeColorSchema,
+  strokeStyle: StrokeStyleSchema,
+  strokeWidth: z.number(),
+  shapeStyle: ShapeStyleSchema,
+  filled: z.boolean(),
+  radius: z.number(),
+  fontSize: z.number(),
+  fontFamily: FontFamilySchema,
+  fontWeight: FontWeightSchema,
+  fontStyle: FontStyleSchema,
+  textAlign: TextAlignSchema,
+  textHorizontalAlign: TextAlignSchema.optional(),
+  textVerticalAlign: TextVerticalAlignSchema.optional(),
+  roughness: z.number().optional(),
+};
+
+export const ShapeSchema = z.object(ShapeObject).default(DEFAULT_SHAPE);
+
+export const RoundedShapeSchema = z
+  .object(ShapeObject)
+  .default({ ...DEFAULT_SHAPE, radius: 0.1 });
 
 export const TextSchema = z
   .object({
@@ -176,7 +181,7 @@ export const NoteSchema = z
   })
   .default({
     background: DEFAULT_NOTE_BACKGROUND_COLOR,
-    displayMode: NoteDisplayMode.DocAndEdgeless,
+    displayMode: NoteDisplayMode.EdgelessOnly,
     edgeless: {
       style: {
         borderRadius: 0,
@@ -186,3 +191,19 @@ export const NoteSchema = z
       },
     },
   });
+
+export const NodePropsSchema = z.object({
+  connector: ConnectorSchema,
+  brush: BrushSchema,
+  text: TextSchema,
+  'affine:edgeless-text': EdgelessTextSchema,
+  'affine:note': NoteSchema,
+  // shapes
+  'shape:diamond': ShapeSchema,
+  'shape:ellipse': ShapeSchema,
+  'shape:rect': ShapeSchema,
+  'shape:triangle': ShapeSchema,
+  'shape:roundedRect': RoundedShapeSchema,
+});
+
+export type NodeProps = z.infer<typeof NodePropsSchema>;

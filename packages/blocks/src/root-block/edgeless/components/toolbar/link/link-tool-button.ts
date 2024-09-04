@@ -1,4 +1,5 @@
 import { LinkIcon } from '@blocksuite/affine-components/icons';
+import { TelemetryProvider } from '@blocksuite/affine-shared/services';
 import { LitElement, css, html } from 'lit';
 import { customElement } from 'lit/decorators.js';
 
@@ -24,39 +25,47 @@ export class EdgelessLinkToolButton extends QuickToolMixin(LitElement) {
     insertedLinkType
       ?.then(type => {
         if (type) {
-          this.edgeless.service.telemetryService?.track('CanvasElementAdded', {
-            control: 'toolbar:general',
-            page: 'whiteboard editor',
-            module: 'toolbar',
-            segment: 'toolbar',
-            type: type.flavour?.split(':')[1],
-          });
-
-          if (type.isNewDoc) {
-            this.edgeless.service.telemetryService?.track('DocCreated', {
+          this.edgeless.std
+            .getOptional(TelemetryProvider)
+            ?.track('CanvasElementAdded', {
               control: 'toolbar:general',
               page: 'whiteboard editor',
-              module: 'edgeless toolbar',
-              segment: 'whiteboard',
+              module: 'toolbar',
+              segment: 'toolbar',
               type: type.flavour?.split(':')[1],
             });
-            this.edgeless.service.telemetryService?.track('LinkedDocCreated', {
-              control: 'links',
-              page: 'whiteboard editor',
-              module: 'edgeless toolbar',
-              segment: 'whiteboard',
-              type: type.flavour?.split(':')[1],
-              other: 'new doc',
-            });
+
+          if (type.isNewDoc) {
+            this.edgeless.std
+              .getOptional(TelemetryProvider)
+              ?.track('DocCreated', {
+                control: 'toolbar:general',
+                page: 'whiteboard editor',
+                module: 'edgeless toolbar',
+                segment: 'whiteboard',
+                type: type.flavour?.split(':')[1],
+              });
+            this.edgeless.std
+              .getOptional(TelemetryProvider)
+              ?.track('LinkedDocCreated', {
+                control: 'links',
+                page: 'whiteboard editor',
+                module: 'edgeless toolbar',
+                segment: 'whiteboard',
+                type: type.flavour?.split(':')[1],
+                other: 'new doc',
+              });
           } else {
-            this.edgeless.service.telemetryService?.track('LinkedDocCreated', {
-              control: 'links',
-              page: 'whiteboard editor',
-              module: 'edgeless toolbar',
-              segment: 'whiteboard',
-              type: type.flavour?.split(':')[1],
-              other: 'existing doc',
-            });
+            this.edgeless.std
+              .getOptional(TelemetryProvider)
+              ?.track('LinkedDocCreated', {
+                control: 'links',
+                page: 'whiteboard editor',
+                module: 'edgeless toolbar',
+                segment: 'whiteboard',
+                type: type.flavour?.split(':')[1],
+                other: 'existing doc',
+              });
           }
         }
       })

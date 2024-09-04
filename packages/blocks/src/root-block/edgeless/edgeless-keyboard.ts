@@ -10,8 +10,8 @@ import {
 import {
   EdgelessTextBlockModel,
   NoteDisplayMode,
-  getShapeName,
 } from '@blocksuite/affine-model';
+import { TelemetryProvider } from '@blocksuite/affine-shared/services';
 import { matchFlavours } from '@blocksuite/affine-shared/utils';
 import { IS_MAC } from '@blocksuite/global/env';
 import { Bound } from '@blocksuite/global/utils';
@@ -37,7 +37,7 @@ import {
   DEFAULT_NOTE_TIP,
 } from './utils/consts.js';
 import { deleteElements } from './utils/crud.js';
-import { getNextShapeType, updateShapeProps } from './utils/hotkey-utils.js';
+import { getNextShapeType } from './utils/hotkey-utils.js';
 import { isCanvasElement, isNoteBlock } from './utils/query.js';
 import {
   mountConnectorLabelEditor,
@@ -148,16 +148,15 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
           ) {
             const frame = rootComponent.service.frame.createFrameOnSelected();
             if (!frame) return;
-            rootComponent.service.telemetryService?.track(
-              'CanvasElementAdded',
-              {
+            this.rootComponent.std
+              .getOptional(TelemetryProvider)
+              ?.track('CanvasElementAdded', {
                 control: 'shortcut',
                 page: 'whiteboard editor',
                 module: 'toolbar',
                 segment: 'toolbar',
                 type: 'frame',
-              }
-            );
+              });
             rootComponent.surface.fitToViewport(Bound.deserialize(frame.xywh));
           } else if (!this.rootComponent.service.selection.editing) {
             this._setEdgelessTool(rootComponent, { type: 'frame' });
@@ -192,23 +191,24 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
           insertedLinkType
             ?.then(type => {
               if (type) {
-                rootComponent.service.telemetryService?.track(
-                  'CanvasElementAdded',
-                  {
+                rootComponent.std
+                  .getOptional(TelemetryProvider)
+                  ?.track('CanvasElementAdded', {
                     control: 'shortcut',
                     page: 'whiteboard editor',
                     module: 'toolbar',
                     segment: 'toolbar',
                     type: type.flavour?.split(':')[1],
-                  }
-                );
-                if (type.isNewDoc) {
-                  rootComponent.service.telemetryService?.track('DocCreated', {
-                    control: 'shortcut',
-                    page: 'whiteboard editor',
-                    segment: 'whiteboard',
-                    type: type.flavour?.split(':')[1],
                   });
+                if (type.isNewDoc) {
+                  rootComponent.std
+                    .getOptional(TelemetryProvider)
+                    ?.track('DocCreated', {
+                      control: 'shortcut',
+                      page: 'whiteboard editor',
+                      segment: 'whiteboard',
+                      type: type.flavour?.split(':')[1],
+                    });
                 }
               }
             })
@@ -216,30 +216,20 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
         },
         'Shift-s': () => {
           if (this.rootComponent.service.locked) return;
+          const controller = rootComponent.tools.currentController;
           if (
             this.rootComponent.service.selection.editing ||
-            !(
-              rootComponent.tools.currentController instanceof
-              ShapeToolController
-            )
+            !(controller instanceof ShapeToolController)
           ) {
             return;
           }
-
-          const attr =
-            rootComponent.service.editPropsStore.getLastProps('shape');
-
-          const shapeName = getShapeName(attr.shapeType, attr.radius);
+          const { shapeName } = controller.tool;
           const nextShapeName = getNextShapeType(shapeName);
           this._setEdgelessTool(rootComponent, {
             type: 'shape',
-            shapeType: nextShapeName,
+            shapeName: nextShapeName,
           });
 
-          updateShapeProps(nextShapeName, rootComponent);
-
-          const controller = rootComponent.tools
-            .currentController as ShapeToolController;
           controller.createOverlay();
         },
         'Mod-g': ctx => {

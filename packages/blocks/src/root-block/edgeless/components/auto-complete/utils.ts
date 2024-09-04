@@ -4,7 +4,7 @@ import {
   type Options,
   Overlay,
   type RoughCanvas,
-  normalizeDegAngle,
+  CommonUtils,
 } from '@blocksuite/affine-block-surface';
 import {
   GroupElementModel,
@@ -194,7 +194,7 @@ export function nextBound(
       angle = 270;
       break;
   }
-  angle = normalizeDegAngle(angle + curShape.rotate);
+  angle = CommonUtils.normalizeDegAngle(angle + curShape.rotate);
 
   if (angle >= 45 && angle <= 135) {
     nextBound = new Bound(x, y + h + MAIN_GAP, w, h);
@@ -320,7 +320,7 @@ export function createShapeElement(
 
   const props = isShape(current)
     ? current.serialize()
-    : edgeless.service.editPropsStore.getLastProps('shape');
+    : edgeless.service.editPropsStore.lastProps$.value[`shape:${targetType}`];
 
   const id = service.addElement('shape', {
     ...props,
