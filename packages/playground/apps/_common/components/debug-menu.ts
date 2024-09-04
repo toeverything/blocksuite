@@ -48,7 +48,6 @@ import { css, html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import * as lz from 'lz-string';
 
-import type { CustomChatPanel } from './custom-chat-panel.js';
 import type { CustomFramePanel } from './custom-frame-panel.js';
 import type { CustomOutlinePanel } from './custom-outline-panel.js';
 import type { CustomOutlineViewer } from './custom-outline-viewer.js';
@@ -381,10 +380,6 @@ export class DebugMenu extends ShadowlessElement {
     this._hasOffset = !this._hasOffset;
   }
 
-  private _toggleChatPanel() {
-    this.chatPanel.toggleDisplay();
-  }
-
   private _toggleCommentPanel() {
     document.body.append(this.commentPanel);
   }
@@ -629,9 +624,6 @@ export class DebugMenu extends ShadowlessElement {
               <sl-menu-item @click="${this._toggleFramePanel}">
                 Toggle Frame Panel
               </sl-menu-item>
-              <sl-menu-item @click="${this._toggleChatPanel}">
-                Toggle Chat Panel
-              </sl-menu-item>
               <sl-menu-item @click="${this._toggleCommentPanel}">
                 Toggle Comment Panel
               </sl-menu-item>
@@ -741,9 +733,6 @@ export class DebugMenu extends ShadowlessElement {
 
   @query('#block-type-dropdown')
   accessor blockTypeDropdown!: SlDropdown;
-
-  @property({ attribute: false })
-  accessor chatPanel!: CustomChatPanel;
 
   @property({ attribute: false })
   accessor collection!: DocCollection;
