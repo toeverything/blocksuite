@@ -18,6 +18,7 @@ import {
 } from '@blocksuite/affine-block-surface';
 import { BookmarkStyles } from '@blocksuite/affine-model';
 import {
+  EmbedOptionProvider,
   QuickSearchProvider,
   TelemetryProvider,
 } from '@blocksuite/affine-shared/services';
@@ -288,7 +289,9 @@ export class EdgelessClipboardController extends PageClipboard {
       } else {
         options.url = url;
 
-        const embedOptions = this._rootService.getEmbedBlockOptions(url);
+        const embedOptions = this.std
+          .get(EmbedOptionProvider)
+          .getEmbedBlockOptions(url);
         if (embedOptions) {
           flavour = embedOptions.flavour as BlockSuite.EdgelessModelKeys;
           style = embedOptions.styles[0];

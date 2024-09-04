@@ -1,5 +1,8 @@
 import { PageSurfaceBlockSpec } from '@blocksuite/affine-block-surface';
-import { DocModeService } from '@blocksuite/affine-shared/services';
+import {
+  DocModeService,
+  EmbedOptionService,
+} from '@blocksuite/affine-shared/services';
 import {
   BlockViewExtension,
   type ExtensionType,
@@ -15,6 +18,7 @@ const PreviewPageSpec: ExtensionType[] = [
   FlavourExtension('affine:page'),
   PageRootService,
   DocModeService,
+  EmbedOptionService,
   BlockViewExtension('affine:page', literal`affine-preview-root`),
 ];
 

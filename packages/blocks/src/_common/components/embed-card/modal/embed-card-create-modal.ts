@@ -2,6 +2,7 @@ import type { EditorHost } from '@blocksuite/block-std';
 import type { BlockModel } from '@blocksuite/store';
 
 import { toast } from '@blocksuite/affine-components/toast';
+import { EmbedOptionProvider } from '@blocksuite/affine-shared/services';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { Vec } from '@blocksuite/global/utils';
 import { Bound } from '@blocksuite/global/utils';
@@ -31,9 +32,9 @@ export class EmbedCardCreateModal extends WithDisposable(ShadowlessElement) {
       return;
     }
 
-    const rootService = this.host.std.getService('affine:page');
-
-    const embedOptions = rootService.getEmbedBlockOptions(url);
+    const embedOptions = this.host.std
+      .get(EmbedOptionProvider)
+      .getEmbedBlockOptions(url);
 
     const { mode } = this.createOptions;
     if (mode === 'page') {

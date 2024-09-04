@@ -26,6 +26,7 @@ import {
   type EmbedGithubModel,
   type EmbedLinkedDocModel,
 } from '@blocksuite/affine-model';
+import { EmbedOptionProvider } from '@blocksuite/affine-shared/services';
 import { getHostName } from '@blocksuite/affine-shared/utils';
 import { WidgetComponent } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
@@ -405,10 +406,6 @@ export class EmbedCardToolbar extends WidgetComponent<
     `;
   }
 
-  private get _rootService() {
-    return this.std.getService('affine:page');
-  }
-
   private get _selection() {
     return this.host.selection;
   }
@@ -602,7 +599,7 @@ export class EmbedCardToolbar extends WidgetComponent<
     const model = this.focusModel;
     this._embedOptions =
       model && 'url' in model
-        ? this._rootService.getEmbedBlockOptions(model.url)
+        ? this.std.get(EmbedOptionProvider).getEmbedBlockOptions(model.url)
         : null;
 
     const buttons = [
