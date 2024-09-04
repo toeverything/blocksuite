@@ -232,6 +232,7 @@ export class PlainTextAdapter extends BaseAdapter<PlainText> {
       return null;
     }
     payload.file = payload.file.replaceAll('\r', '');
+    payload.file = payload.file.replace(/\n$/, '');
     const contentSlice = {
       type: 'block',
       id: nanoid(),
