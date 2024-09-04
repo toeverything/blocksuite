@@ -836,7 +836,7 @@ export class ConnectionOverlay extends Overlay {
     return context.pickElementsByBound(bound).filter(ele => ele.connectable);
   }
 
-  clear() {
+  override clear() {
     this.sourceBounds = null;
     this.targetBounds = null;
     this._clearRect();

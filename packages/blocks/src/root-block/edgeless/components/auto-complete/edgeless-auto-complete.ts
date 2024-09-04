@@ -116,10 +116,11 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
         assertExists(connector);
         const otherSideId = connector.source.id;
 
-        connector.target = this._surface.overlays.connector.renderConnector(
-          point,
-          otherSideId ? [otherSideId] : []
-        );
+        connector.target =
+          this.edgeless.service.connectorOverlay.renderConnector(
+            point,
+            otherSideId ? [otherSideId] : []
+          );
       }
     });
 
@@ -132,7 +133,7 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
       }
 
       this._isMoving = false;
-      this._surface.overlays.connector.clear();
+      this.edgeless.service.connectorOverlay.clear();
       this._disposables.dispose();
       this._disposables = new DisposableGroup();
     });
@@ -641,10 +642,6 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
       shapeMethods[targetType].draw(ctx, { ...bound, rotate: current.rotate });
     };
     surface.refresh();
-  }
-
-  private get _surface() {
-    return this.edgeless.surface;
   }
 
   override connectedCallback(): void {

@@ -52,20 +52,20 @@ export class EdgelessConnectorHandle extends WithDisposable(LitElement) {
       this._capPointerDown(e, 'target');
     });
     this._disposables.add(() => {
-      edgeless.surface.overlays.connector.clear();
+      edgeless.service.connectorOverlay.clear();
     });
   }
 
   private _capPointerDown(e: PointerEvent, connection: 'target' | 'source') {
     const { edgeless, connector, _disposables } = this;
-    const { service, surface } = edgeless;
+    const { service } = edgeless;
     e.stopPropagation();
     _disposables.addFromEvent(document, 'pointermove', e => {
       const point = service.viewport.toModelCoordFromClientCoord([e.x, e.y]);
       const isStartPointer = connection === 'source';
       const otherSideId = connector[isStartPointer ? 'target' : 'source'].id;
 
-      connector[connection] = surface.overlays.connector.renderConnector(
+      connector[connection] = edgeless.service.connectorOverlay.renderConnector(
         point,
         otherSideId ? [otherSideId] : []
       );
@@ -73,7 +73,7 @@ export class EdgelessConnectorHandle extends WithDisposable(LitElement) {
     });
 
     _disposables.addFromEvent(document, 'pointerup', () => {
-      surface.overlays.connector.clear();
+      edgeless.service.overlays.connector.clear();
       edgeless.doc.captureSync();
       _disposables.dispose();
       this._disposables = new DisposableGroup();
