@@ -1,3 +1,4 @@
+import { CanvasElementType } from '@blocksuite/affine-block-surface';
 import {
   ellipseSvg,
   roundedSvg,
@@ -17,7 +18,6 @@ import { styleMap } from 'lit/directives/style-map.js';
 
 import type { DraggableShape } from './utils.js';
 
-import { CanvasElementType } from '../../../../../surface-block/index.js';
 import { ShapeToolController } from '../../../tools/shape-tool.js';
 import { EdgelessDraggableElementController } from '../common/draggable/draggable-element.controller.js';
 import { EdgelessToolbarToolMixin } from '../mixins/tool.mixin.js';

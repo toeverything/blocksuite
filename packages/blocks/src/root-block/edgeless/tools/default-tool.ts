@@ -1,3 +1,4 @@
+import type { MindmapNode } from '@blocksuite/affine-block-surface';
 import type {
   EdgelessTextBlockModel,
   FrameBlockModel,
@@ -25,7 +26,6 @@ import {
   noop,
 } from '@blocksuite/global/utils';
 
-import type { MindmapNode } from '../../../surface-block/element-model/utils/mindmap/layout.js';
 import type { EdgelessTool } from '../types.js';
 
 import { isSelectSingleMindMap } from '../../../_common/edgeless/mindmap/index.js';

@@ -8,6 +8,15 @@ import type {
 import type { Bound, IVec } from '@blocksuite/global/utils';
 
 import {
+  CanvasElementType,
+  Overlay,
+  type RoughCanvas,
+} from '@blocksuite/affine-block-surface';
+import { MindmapElementModel } from '@blocksuite/affine-block-surface';
+import { LayoutType } from '@blocksuite/affine-block-surface';
+import { ShapeElementModel } from '@blocksuite/affine-block-surface';
+import { ConnectorPathGenerator } from '@blocksuite/affine-block-surface';
+import {
   AutoCompleteArrowIcon,
   MindMapChildIcon,
   MindMapSiblingIcon,
@@ -30,15 +39,6 @@ import { styleMap } from 'lit/directives/style-map.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
 import type { SelectedRect } from '../rects/edgeless-selected-rect.js';
 
-import { MindmapElementModel } from '../../../../surface-block/element-model/mindmap.js';
-import { LayoutType } from '../../../../surface-block/element-model/utils/mindmap/layout.js';
-import { ShapeElementModel } from '../../../../surface-block/index.js';
-import {
-  CanvasElementType,
-  Overlay,
-  type RoughCanvas,
-} from '../../../../surface-block/index.js';
-import { ConnectorPathGenerator } from '../../../../surface-block/managers/connector-manager.js';
 import { NOTE_INIT_HEIGHT } from '../../utils/consts.js';
 import { isNoteBlock } from '../../utils/query.js';
 import { mountShapeTextEditor } from '../../utils/text.js';

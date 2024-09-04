@@ -3,6 +3,10 @@ import type { SurfaceRefBlockModel } from '@blocksuite/affine-model';
 import type { Doc } from '@blocksuite/store';
 
 import {
+  type SurfaceBlockModel,
+  SurfaceElementModel,
+} from '@blocksuite/affine-block-surface';
+import {
   EdgelessModeIcon,
   FrameIcon,
   MoreDeleteIcon,
@@ -34,10 +38,6 @@ import type { EdgelessRootService } from '../root-block/index.js';
 import type { SurfaceRefBlockService } from './surface-ref-service.js';
 
 import { SpecProvider } from '../_specs/index.js';
-import {
-  type SurfaceBlockModel,
-  SurfaceElementModel,
-} from '../surface-block/index.js';
 import './surface-ref-portal.js';
 import { SurfaceRefPortal } from './surface-ref-portal.js';
 import { noContentPlaceholder } from './utils.js';

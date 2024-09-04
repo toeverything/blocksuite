@@ -8,6 +8,14 @@ import type {
 import type { SerializedElement } from '@blocksuite/block-std/gfx';
 import type { IBound, IVec, SerializedXYWH } from '@blocksuite/global/utils';
 
+import {
+  compareLayer,
+  SurfaceGroupLikeModel,
+  CanvasElementType,
+  splitIntoLines,
+  getBoundsWithRotation,
+  SortOrder,
+} from '@blocksuite/affine-block-surface';
 import { BookmarkStyles } from '@blocksuite/affine-model';
 import { QuickSearchProvider } from '@blocksuite/affine-shared/services';
 import {
@@ -44,14 +52,6 @@ import {
 } from '../../../_common/consts.js';
 import { getRootByEditorHost } from '../../../_common/utils/query.js';
 import { extractSearchParams } from '../../../_common/utils/url.js';
-import { SurfaceGroupLikeModel } from '../../../surface-block/element-model/base.js';
-import { CanvasElementType } from '../../../surface-block/element-model/index.js';
-import { splitIntoLines } from '../../../surface-block/elements/text/utils.js';
-import { getBoundsWithRotation } from '../../../surface-block/index.js';
-import {
-  SortOrder,
-  compare,
-} from '../../../surface-block/managers/layer-utils.js';
 import { ClipboardAdapter } from '../../clipboard/adapter.js';
 import { PageClipboard } from '../../clipboard/index.js';
 import {
@@ -1317,8 +1317,8 @@ export class EdgelessClipboardController extends PageClipboard {
     shapes: BlockSuite.SurfaceModel[],
     options?: CanvasExportOptions
   ) {
-    blocks.sort(compare);
-    shapes.sort(compare);
+    blocks.sort(compareLayer);
+    shapes.sort(compareLayer);
 
     const bounds: IBound[] = [];
     blocks.forEach(block => {

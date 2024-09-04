@@ -1,13 +1,12 @@
+import type { ConnectorElementModel } from '@blocksuite/affine-block-surface';
 import type { BlockSnapshot, SnapshotReturn } from '@blocksuite/store';
 
+import { generateElementId } from '@blocksuite/affine-block-surface';
+import { sortIndex } from '@blocksuite/affine-block-surface';
 import { Bound } from '@blocksuite/global/utils';
 import { assertExists, assertType } from '@blocksuite/global/utils';
 
-import type { ConnectorElementModel } from '../../../surface-block/index.js';
 import type { SlotBlockPayload, TemplateJob } from './template.js';
-
-import { generateElementId } from '../../../surface-block/utils/index.js';
-import { sortIndex } from '../../../surface-block/utils/sort.js';
 
 export const replaceIdMiddleware = (job: TemplateJob) => {
   const regeneratedIdMap = new Map<string, string>();

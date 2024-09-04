@@ -307,6 +307,64 @@ importers:
         specifier: ^3.23.8
         version: 3.23.8
 
+  packages/affine/block-surface:
+    dependencies:
+      '@blocksuite/affine-components':
+        specifier: workspace:*
+        version: link:../components
+      '@blocksuite/affine-model':
+        specifier: workspace:*
+        version: link:../model
+      '@blocksuite/affine-shared':
+        specifier: workspace:*
+        version: link:../shared
+      '@blocksuite/block-std':
+        specifier: workspace:*
+        version: link:../../framework/block-std
+      '@blocksuite/global':
+        specifier: workspace:*
+        version: link:../../framework/global
+      '@blocksuite/store':
+        specifier: workspace:*
+        version: link:../../framework/store
+      '@lit-labs/preact-signals':
+        specifier: ^1.0.2
+        version: 1.0.2(patch_hash=zsk746dt4hzz7ujosijwqb6oaq)
+      '@lit/context':
+        specifier: ^1.1.2
+        version: 1.1.2
+      '@toeverything/theme':
+        specifier: ^1.0.7
+        version: 1.0.7
+      fractional-indexing:
+        specifier: ^3.2.0
+        version: 3.2.0
+      lit:
+        specifier: ^3.2.0
+        version: 3.2.0
+      lodash.isplainobject:
+        specifier: ^4.0.6
+        version: 4.0.6
+      lodash.merge:
+        specifier: ^4.6.2
+        version: 4.6.2
+      nanoid:
+        specifier: ^5.0.7
+        version: 5.0.7
+      zod:
+        specifier: ^3.23.8
+        version: 3.23.8
+    devDependencies:
+      '@types/dompurify':
+        specifier: ^3.0.5
+        version: 3.0.5
+      '@types/lodash.isplainobject':
+        specifier: ^4.0.9
+        version: 4.0.9
+      '@types/lodash.merge':
+        specifier: ^4.6.9
+        version: 4.6.9
+
   packages/affine/components:
     dependencies:
       '@blocksuite/affine-model':
@@ -427,6 +485,9 @@ importers:
       '@blocksuite/affine-block-paragraph':
         specifier: workspace:*
         version: link:../affine/block-paragraph
+      '@blocksuite/affine-block-surface':
+        specifier: workspace:*
+        version: link:../affine/block-surface
       '@blocksuite/affine-components':
         specifier: workspace:*
         version: link:../affine/components
@@ -905,6 +966,9 @@ packages:
     peerDependencies:
       '@algolia/client-search': '>= 4.9.1 < 6'
       algoliasearch: '>= 4.9.1 < 6'
+    peerDependenciesMeta:
+      '@algolia/client-search':
+        optional: true
 
   '@algolia/cache-browser-local-storage@4.24.0':
     resolution: {integrity: sha512-t63W9BnoXVrGy9iYHBgObNXqYXM3tYXCjDSHeNwnsc324r4o5UiVKUiAB4THQ5z9U5hTj6qUvwg/Ez43ZD85ww==}
@@ -8199,8 +8263,9 @@ snapshots:
 
   '@algolia/autocomplete-shared@1.9.3(@algolia/client-search@5.1.1)(algoliasearch@4.24.0)':
     dependencies:
-      '@algolia/client-search': 5.1.1
       algoliasearch: 4.24.0
+    optionalDependencies:
+      '@algolia/client-search': 5.1.1
 
   '@algolia/cache-browser-local-storage@4.24.0':
     dependencies:

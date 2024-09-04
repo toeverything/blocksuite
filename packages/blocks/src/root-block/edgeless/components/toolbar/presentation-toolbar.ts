@@ -1,5 +1,6 @@
 import type { FrameBlockModel } from '@blocksuite/affine-model';
 
+import { clamp } from '@blocksuite/affine-block-surface';
 import {
   FrameNavigatorNextIcon,
   FrameNavigatorPrevIcon,
@@ -17,7 +18,6 @@ import type { NavigatorMode } from '../../../../_common/edgeless/frame/consts.js
 import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
 import type { EdgelessTool } from '../../types.js';
 
-import { clamp } from '../../../../surface-block/index.js';
 import { isFrameBlock } from '../../utils/query.js';
 import { launchIntoFullscreen } from '../utils.js';
 import { EdgelessToolbarToolMixin } from './mixins/tool.mixin.js';

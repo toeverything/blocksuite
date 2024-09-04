@@ -1077,11 +1077,3 @@ export class MindmapElementModel extends GfxGroupLikeElementModel<MindmapElement
   @field()
   accessor style: MindmapStyle = MindmapStyle.ONE;
 }
-
-declare global {
-  namespace BlockSuite {
-    interface SurfaceGroupLikeModelMap {
-      mindmap: MindmapElementModel;
-    }
-  }
-}

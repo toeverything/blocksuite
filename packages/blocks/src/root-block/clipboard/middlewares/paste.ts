@@ -398,7 +398,11 @@ class PasteTr {
     this.lastSnapshot = findLast(snapshot) ?? this.firstSnapshot;
     if (
       this.firstSnapshot !== this.lastSnapshot &&
-      this.lastSnapshot.props.text
+      this.lastSnapshot.props.text &&
+      !(
+        matchFlavours(this.fromPointState.model, ['affine:code']) &&
+        matchFlavours(this.endPointState.model, ['affine:code'])
+      )
     ) {
       const text = fromJSON(this.lastSnapshot.props.text) as Text;
       const doc = new DocCollection.Y.Doc();

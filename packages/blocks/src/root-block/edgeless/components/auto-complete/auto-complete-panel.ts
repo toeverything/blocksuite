@@ -5,6 +5,18 @@ import type {
 } from '@blocksuite/affine-model';
 import type { XYWH } from '@blocksuite/global/utils';
 
+import {
+  CanvasElementType,
+  type ConnectorElementModel,
+  type ShapeElementModel,
+  TextElementModel,
+} from '@blocksuite/affine-block-surface';
+import {
+  GroupElementModel,
+  clamp,
+  normalizeDegAngle,
+  toDegree,
+} from '@blocksuite/affine-block-surface';
 import { FrameIcon, SmallNoteIcon } from '@blocksuite/affine-components/icons';
 import { FontFamilyIcon } from '@blocksuite/affine-components/icons';
 import {
@@ -32,18 +44,6 @@ import { styleMap } from 'lit/directives/style-map.js';
 
 import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
 
-import {
-  CanvasElementType,
-  type ConnectorElementModel,
-  type ShapeElementModel,
-  TextElementModel,
-} from '../../../../surface-block/element-model/index.js';
-import {
-  GroupElementModel,
-  clamp,
-  normalizeDegAngle,
-  toDegree,
-} from '../../../../surface-block/index.js';
 import { captureEventTarget } from '../../../widgets/drag-handle/utils.js';
 import {
   DEFAULT_NOTE_WIDTH,

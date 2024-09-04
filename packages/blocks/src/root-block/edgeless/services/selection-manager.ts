@@ -2,6 +2,11 @@ import type { CursorSelection } from '@blocksuite/block-std';
 import type { SurfaceSelection } from '@blocksuite/block-std';
 
 import {
+  GroupElementModel,
+  type SurfaceBlockModel,
+} from '@blocksuite/affine-block-surface';
+import { MindmapElementModel } from '@blocksuite/affine-block-surface';
+import {
   DisposableGroup,
   Slot,
   assertType,
@@ -10,11 +15,6 @@ import {
 
 import type { EdgelessRootService } from '../edgeless-root-service.js';
 
-import { MindmapElementModel } from '../../../surface-block/element-model/mindmap.js';
-import {
-  GroupElementModel,
-  type SurfaceBlockModel,
-} from '../../../surface-block/index.js';
 import { edgelessElementsBound } from '../utils/bound-utils.js';
 
 export interface EdgelessSelectionState {
