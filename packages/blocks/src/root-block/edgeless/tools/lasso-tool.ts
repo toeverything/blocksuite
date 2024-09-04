@@ -2,6 +2,10 @@ import type { PointerEventState } from '@blocksuite/block-std';
 import type { IVec } from '@blocksuite/global/utils';
 import type { IPoint } from '@blocksuite/global/utils';
 
+import {
+  Overlay,
+  getSvgPathFromStroke,
+} from '@blocksuite/affine-block-surface';
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import {
   Bound,
@@ -17,7 +21,6 @@ import {
 import type { EdgelessTool } from '../types.js';
 
 import { LassoMode } from '../../../_common/types.js';
-import { Overlay, getSvgPathFromStroke } from '../../../surface-block/index.js';
 import { EdgelessToolController } from './edgeless-tool.js';
 
 class LassoOverlay extends Overlay {

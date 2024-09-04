@@ -15,8 +15,6 @@ SpecProvider.getInstance().addSpec(
 );
 
 export * from './group/common.js';
-export * from './group/edgeless.js';
-export * from './group/page.js';
 
 export * from './preset/edgeless-specs.js';
 export * from './preset/page-specs.js';

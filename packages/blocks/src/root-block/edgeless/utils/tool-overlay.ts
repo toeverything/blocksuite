@@ -1,6 +1,11 @@
 import type { XYWH } from '@blocksuite/global/utils';
 
 import {
+  type Options,
+  Overlay,
+  type RoughCanvas,
+} from '@blocksuite/affine-block-surface';
+import {
   type Color,
   DEFAULT_NOTE_BACKGROUND_COLOR,
   DEFAULT_SHAPE_FILL_COLOR,
@@ -14,11 +19,6 @@ import { DisposableGroup, Slot, noop } from '@blocksuite/global/utils';
 
 import type { EdgelessRootBlockComponent } from '../edgeless-root-block.js';
 
-import {
-  type Options,
-  Overlay,
-  type RoughCanvas,
-} from '../../../surface-block/index.js';
 import {
   NOTE_OVERLAY_CORNER_RADIUS,
   NOTE_OVERLAY_HEIGHT,

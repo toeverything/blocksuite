@@ -1,4 +1,8 @@
 import type {
+  SurfaceBlockComponent,
+  SurfaceBlockModel,
+} from '@blocksuite/affine-block-surface';
+import type {
   AttachmentBlockProps,
   ImageBlockProps,
   RootBlockModel,
@@ -13,6 +17,7 @@ import type { GfxViewportElement } from '@blocksuite/block-std/gfx';
 import type { IBound, IPoint, IVec } from '@blocksuite/global/utils';
 import type { BlockModel } from '@blocksuite/store';
 
+import { normalizeWheelDeltaY } from '@blocksuite/affine-block-surface';
 import { focusTextModel } from '@blocksuite/affine-components/rich-text';
 import { toast } from '@blocksuite/affine-components/toast';
 import { NoteDisplayMode } from '@blocksuite/affine-model';
@@ -38,8 +43,6 @@ import { customElement, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
 import type { Viewport } from '../../_common/utils/index.js';
-import type { SurfaceBlockComponent } from '../../surface-block/surface-block.js';
-import type { SurfaceBlockModel } from '../../surface-block/surface-model.js';
 import type { FontLoader } from '../font-loader/font-loader.js';
 import type { EdgelessRootBlockWidgetName } from '../types.js';
 import type { EdgelessSelectedRect } from './components/rects/edgeless-selected-rect.js';
@@ -53,8 +56,6 @@ import {
   setAttachmentUploaded,
   setAttachmentUploading,
 } from '../../attachment-block/utils.js';
-import { normalizeWheelDeltaY } from '../../surface-block/index.js';
-import '../../surface-block/surface-block.js';
 import { EdgelessClipboardController } from './clipboard/clipboard.js';
 import './components/note-slicer/index.js';
 import './components/presentation/edgeless-navigator-black-background.js';

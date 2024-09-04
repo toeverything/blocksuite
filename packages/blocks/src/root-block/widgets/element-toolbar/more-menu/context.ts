@@ -1,8 +1,8 @@
+import type { SurfaceBlockComponent } from '@blocksuite/affine-block-surface';
 import type { BlockModel } from '@blocksuite/store';
 
 import { GfxPrimitiveElementModel } from '@blocksuite/block-std/gfx';
 
-import type { SurfaceBlockComponent } from '../../../../surface-block/surface-block.js';
 import type { EdgelessRootBlockComponent } from '../../../edgeless/edgeless-root-block.js';
 import type { EdgelessRootService } from '../../../edgeless/edgeless-root-service.js';
 import type { EdgelessSelectionManager } from '../../../edgeless/services/selection-manager.js';

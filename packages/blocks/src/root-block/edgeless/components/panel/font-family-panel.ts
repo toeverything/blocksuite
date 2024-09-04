@@ -1,10 +1,9 @@
+import { wrapFontFamily } from '@blocksuite/affine-block-surface';
 import { CheckIcon } from '@blocksuite/affine-components/icons';
 import { FontFamily, FontFamilyList } from '@blocksuite/affine-model';
 import { LitElement, css, html, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
-
-import { wrapFontFamily } from '../../../../surface-block/utils/font.js';
 
 @customElement('edgeless-font-family-panel')
 export class EdgelessFontFamilyPanel extends LitElement {

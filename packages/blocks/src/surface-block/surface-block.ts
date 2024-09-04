@@ -7,7 +7,7 @@ import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import { BlockComponent, RANGE_SYNC_EXCLUDE_ATTR } from '@blocksuite/block-std';
 import { Bound, values } from '@blocksuite/global/utils';
 import { css, html } from 'lit';
-import { customElement, query } from 'lit/decorators.js';
+import { query } from 'lit/decorators.js';
 
 import type { LayerManager } from './managers/layer-manager.js';
 import type { Overlay } from './renderer/canvas-renderer.js';
@@ -33,7 +33,6 @@ export interface SurfaceContext {
   pickElementsByBound: (bound: Bound) => GfxModel[];
 }
 
-@customElement('affine-surface')
 export class SurfaceBlockComponent extends BlockComponent<
   SurfaceBlockModel,
   SurfaceBlockService
@@ -256,10 +255,4 @@ export class SurfaceBlockComponent extends BlockComponent<
 
   @query('.affine-edgeless-surface-block-container')
   private accessor _surfaceContainer!: HTMLElement;
-}
-
-declare global {
-  interface HTMLElementTagNameMap {
-    'affine-surface': SurfaceBlockComponent;
-  }
 }

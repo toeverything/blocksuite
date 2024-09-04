@@ -1,21 +1,21 @@
+import type { SurfaceBlockModel } from '@blocksuite/affine-block-surface';
 import type { FrameBlockModel } from '@blocksuite/affine-model';
 import type { NoteBlockModel } from '@blocksuite/affine-model';
 import type { Doc } from '@blocksuite/store';
 
+import {
+  GroupElementModel,
+  Overlay,
+  type RoughCanvas,
+} from '@blocksuite/affine-block-surface';
+import { renderableInEdgeless } from '@blocksuite/affine-block-surface';
 import { isGfxContainerElm } from '@blocksuite/block-std/gfx';
 import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 import { Bound, DisposableGroup, type IVec } from '@blocksuite/global/utils';
 import { DocCollection } from '@blocksuite/store';
 
 import type { EdgelessRootService } from '../../index.js';
-import type { SurfaceBlockModel } from '../../surface-block/surface-model.js';
 
-import {
-  GroupElementModel,
-  Overlay,
-  type RoughCanvas,
-} from '../../surface-block/index.js';
-import { renderableInEdgeless } from '../../surface-block/managers/layer-utils.js';
 import { GfxBlockModel } from './block-model.js';
 import { edgelessElementsBound } from './utils/bound-utils.js';
 import { isFrameBlock } from './utils/query.js';

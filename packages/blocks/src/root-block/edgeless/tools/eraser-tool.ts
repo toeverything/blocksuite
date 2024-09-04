@@ -1,14 +1,14 @@
 import type { PointerEventState } from '@blocksuite/block-std';
 import type { IPoint, IVec } from '@blocksuite/global/utils';
 
-import { Bound, noop } from '@blocksuite/global/utils';
-
 import {
   Overlay,
   getStroke,
   getSvgPathFromStroke,
   linePolygonIntersects,
-} from '../../../surface-block/index.js';
+} from '@blocksuite/affine-block-surface';
+import { Bound, noop } from '@blocksuite/global/utils';
+
 import { deleteElements } from '../utils/crud.js';
 import { isTopLevelBlock } from '../utils/query.js';
 import { EdgelessToolController } from './edgeless-tool.js';

@@ -1,3 +1,8 @@
+import {
+  getFontFaces,
+  getFontFacesByFontFamily,
+  isSameFontFamily,
+} from '@blocksuite/affine-block-surface';
 import { CheckIcon } from '@blocksuite/affine-components/icons';
 import {
   FontFamily,
@@ -10,12 +15,6 @@ import { customElement, property } from 'lit/decorators.js';
 import { choose } from 'lit/directives/choose.js';
 import { join } from 'lit/directives/join.js';
 import { repeat } from 'lit/directives/repeat.js';
-
-import {
-  getFontFaces,
-  getFontFacesByFontFamily,
-  isSameFontFamily,
-} from '../../../../surface-block/utils/font.js';
 
 const FONT_WEIGHT_CHOOSE: [FontWeight, () => string][] = [
   [FontWeight.Light, () => 'Light'],

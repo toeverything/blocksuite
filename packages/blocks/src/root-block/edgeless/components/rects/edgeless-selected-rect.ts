@@ -6,6 +6,17 @@ import type {
 } from '@blocksuite/global/utils';
 
 import {
+  CanvasElementType,
+  GroupElementModel,
+  ShapeElementModel,
+} from '@blocksuite/affine-block-surface';
+import {
+  ConnectorElementModel,
+  normalizeDegAngle,
+  normalizeShapeBound,
+} from '@blocksuite/affine-block-surface';
+import { normalizeTextBound } from '@blocksuite/affine-block-surface';
+import {
   type BookmarkBlockModel,
   type EdgelessTextBlockModel,
   type EmbedHtmlModel,
@@ -46,17 +57,6 @@ import {
   SYNCED_MIN_HEIGHT,
   SYNCED_MIN_WIDTH,
 } from '../../../../embed-synced-doc-block/styles.js';
-import {
-  CanvasElementType,
-  GroupElementModel,
-  ShapeElementModel,
-} from '../../../../surface-block/index.js';
-import {
-  ConnectorElementModel,
-  normalizeDegAngle,
-  normalizeShapeBound,
-} from '../../../../surface-block/index.js';
-import { normalizeTextBound } from '../../../../surface-block/renderer/elements/text/utils.js';
 import {
   AI_CHAT_BLOCK_MAX_HEIGHT,
   AI_CHAT_BLOCK_MAX_WIDTH,
