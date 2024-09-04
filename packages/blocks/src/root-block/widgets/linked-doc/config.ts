@@ -12,7 +12,10 @@ import {
   insertLinkedNode,
 } from '@blocksuite/affine-components/rich-text';
 import { toast } from '@blocksuite/affine-components/toast';
-import { DocModeProvider } from '@blocksuite/affine-shared/services';
+import {
+  DocModeProvider,
+  TelemetryProvider,
+} from '@blocksuite/affine-shared/services';
 import {
   createDefaultDoc,
   isFuzzyMatch,
@@ -71,8 +74,8 @@ export function createLinkedDocMenuGroup(
           docId: doc.id,
         });
         editorHost.std
-          .getService('affine:page')
-          .telemetryService?.track('LinkedDocCreated', {
+          .getOptional(TelemetryProvider)
+          ?.track('LinkedDocCreated', {
             control: 'linked doc',
             module: 'inline @',
             type: 'doc',
@@ -115,7 +118,7 @@ export function createNewDocMenuGroup(
             docId: newDoc.id,
           });
           const telemetryService =
-            editorHost.std.getService('affine:page').telemetryService;
+            editorHost.std.getOptional(TelemetryProvider);
           telemetryService?.track('LinkedDocCreated', {
             control: 'new doc',
             module: 'inline @',

@@ -1,4 +1,5 @@
 import { FrameIcon } from '@blocksuite/affine-components/icons';
+import { TelemetryProvider } from '@blocksuite/affine-shared/services';
 import { WithDisposable } from '@blocksuite/block-std';
 import { Bound } from '@blocksuite/global/utils';
 import { LitElement, css, html, nothing } from 'lit';
@@ -13,13 +14,15 @@ export class EdgelessAddFrameButton extends WithDisposable(LitElement) {
   private _createFrame = () => {
     const frame = this.edgeless.service.frame.createFrameOnSelected();
     if (!frame) return;
-    this.edgeless.service.telemetryService?.track('CanvasElementAdded', {
-      control: 'context-menu',
-      page: 'whiteboard editor',
-      module: 'toolbar',
-      segment: 'toolbar',
-      type: 'frame',
-    });
+    this.edgeless.std
+      .getOptional(TelemetryProvider)
+      ?.track('CanvasElementAdded', {
+        control: 'context-menu',
+        page: 'whiteboard editor',
+        module: 'toolbar',
+        segment: 'toolbar',
+        type: 'frame',
+      });
     this.edgeless.surface.fitToViewport(Bound.deserialize(frame.xywh));
   };
 

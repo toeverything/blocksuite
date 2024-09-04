@@ -13,6 +13,7 @@ import {
   ConnectorElementModel,
   GroupElementModel,
 } from '@blocksuite/affine-model';
+import { TelemetryProvider } from '@blocksuite/affine-shared/services';
 import {
   clamp,
   handleNativeRangeAtPoint,
@@ -788,13 +789,15 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
       } else {
         addText(this._edgeless, e);
       }
-      this._service.telemetryService?.track('CanvasElementAdded', {
-        control: 'canvas:dbclick',
-        page: 'whiteboard editor',
-        module: 'toolbar',
-        segment: 'toolbar',
-        type: 'text',
-      });
+      this._edgeless.std
+        .getOptional(TelemetryProvider)
+        ?.track('CanvasElementAdded', {
+          control: 'canvas:dbclick',
+          page: 'whiteboard editor',
+          module: 'toolbar',
+          segment: 'toolbar',
+          type: 'text',
+        });
       return;
     } else {
       const [x, y] = this._service.viewport.toModelCoord(e.x, e.y);

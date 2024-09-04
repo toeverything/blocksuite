@@ -12,6 +12,7 @@ import {
   NoteDisplayMode,
   getShapeName,
 } from '@blocksuite/affine-model';
+import { TelemetryProvider } from '@blocksuite/affine-shared/services';
 import { matchFlavours } from '@blocksuite/affine-shared/utils';
 import { IS_MAC } from '@blocksuite/global/env';
 import { Bound } from '@blocksuite/global/utils';
@@ -148,16 +149,15 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
           ) {
             const frame = rootComponent.service.frame.createFrameOnSelected();
             if (!frame) return;
-            rootComponent.service.telemetryService?.track(
-              'CanvasElementAdded',
-              {
+            this.rootComponent.std
+              .getOptional(TelemetryProvider)
+              ?.track('CanvasElementAdded', {
                 control: 'shortcut',
                 page: 'whiteboard editor',
                 module: 'toolbar',
                 segment: 'toolbar',
                 type: 'frame',
-              }
-            );
+              });
             rootComponent.surface.fitToViewport(Bound.deserialize(frame.xywh));
           } else if (!this.rootComponent.service.selection.editing) {
             this._setEdgelessTool(rootComponent, { type: 'frame' });
@@ -192,23 +192,24 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
           insertedLinkType
             ?.then(type => {
               if (type) {
-                rootComponent.service.telemetryService?.track(
-                  'CanvasElementAdded',
-                  {
+                rootComponent.std
+                  .getOptional(TelemetryProvider)
+                  ?.track('CanvasElementAdded', {
                     control: 'shortcut',
                     page: 'whiteboard editor',
                     module: 'toolbar',
                     segment: 'toolbar',
                     type: type.flavour?.split(':')[1],
-                  }
-                );
-                if (type.isNewDoc) {
-                  rootComponent.service.telemetryService?.track('DocCreated', {
-                    control: 'shortcut',
-                    page: 'whiteboard editor',
-                    segment: 'whiteboard',
-                    type: type.flavour?.split(':')[1],
                   });
+                if (type.isNewDoc) {
+                  rootComponent.std
+                    .getOptional(TelemetryProvider)
+                    ?.track('DocCreated', {
+                      control: 'shortcut',
+                      page: 'whiteboard editor',
+                      segment: 'whiteboard',
+                      type: type.flavour?.split(':')[1],
+                    });
                 }
               }
             })

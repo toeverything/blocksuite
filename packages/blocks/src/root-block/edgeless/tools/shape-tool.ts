@@ -7,6 +7,7 @@ import {
   DEFAULT_SHAPE_STROKE_COLOR,
   getShapeName,
 } from '@blocksuite/affine-model';
+import { TelemetryProvider } from '@blocksuite/affine-shared/services';
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import { Bound } from '@blocksuite/global/utils';
 import { noop } from '@blocksuite/global/utils';
@@ -75,16 +76,18 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
       radius: attributes.radius,
     });
 
-    this._service.telemetryService?.track('CanvasElementAdded', {
-      control: 'canvas:draw',
-      page: 'whiteboard editor',
-      module: 'toolbar',
-      segment: 'toolbar',
-      type: CanvasElementType.SHAPE,
-      other: {
-        shapeType,
-      },
-    });
+    this._service.std
+      .getOptional(TelemetryProvider)
+      ?.track('CanvasElementAdded', {
+        control: 'canvas:draw',
+        page: 'whiteboard editor',
+        module: 'toolbar',
+        segment: 'toolbar',
+        type: CanvasElementType.SHAPE,
+        other: {
+          shapeType,
+        },
+      });
 
     return id;
   }
