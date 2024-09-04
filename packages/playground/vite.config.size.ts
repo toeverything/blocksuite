@@ -5,7 +5,7 @@ import { resolve } from 'node:path';
 import { defineConfig, mergeConfig } from 'vite';
 
 import { brotliAsync, gzipAsync } from '../../scripts/utils.js';
-import base from './vite.config';
+import base from './vite.config.js';
 
 const sizeDir = resolve(__dirname, '../../temp/size');
 
@@ -22,8 +22,10 @@ const config = mergeConfig(
         },
         load(id) {
           if (id === 'empty-file') return 'export {}';
+
+          return;
         },
-        async writeBundle(o, bundle) {
+        async writeBundle(_, bundle) {
           const chunk = bundle['main.js'];
           if (chunk.type !== 'chunk') return;
 
