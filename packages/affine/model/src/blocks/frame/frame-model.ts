@@ -1,4 +1,4 @@
-import type { GfxBlockElementModel } from '@blocksuite/block-std/gfx';
+import type { GfxBlockElementModel, GfxModel } from '@blocksuite/block-std/gfx';
 
 import {
   type GfxContainerElement,
@@ -54,6 +54,11 @@ export class FrameBlockModel
       if (!this.childElementIds) this.childElementIds = {};
       this.childElementIds[id] = true;
     });
+  }
+
+  hasDescendant(element: string | GfxModel): boolean {
+    const id = typeof element === 'string' ? element : element.id;
+    return !!this.childElementIds?.[id];
   }
 
   override containsBound(bound: Bound): boolean {

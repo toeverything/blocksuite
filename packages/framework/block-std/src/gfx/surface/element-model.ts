@@ -35,6 +35,11 @@ export type BaseElementProps = {
   seed: number;
 };
 
+export type GfxCompatibleProps = {
+  xywh: SerializedXYWH;
+  index: string;
+};
+
 export type SerializedElement = Record<string, unknown> & {
   type: string;
   xywh: SerializedXYWH;
@@ -85,10 +90,11 @@ export const isGfxContainerElm = (elm: unknown): elm is GfxContainerElement => {
   return (elm as GfxContainerElement)[gfxContainerSymbol] === true;
 };
 
-export interface GfxContainerElement {
+export interface GfxContainerElement extends GfxCompatibleProps {
   [gfxContainerSymbol]: true;
   childIds: string[];
   childElements: GfxModel[];
+  hasDescendant(element: string | GfxModel): boolean;
 }
 
 export abstract class GfxPrimitiveElementModel<

@@ -6,7 +6,6 @@ import type {
 import type { ReorderingDirection } from '@blocksuite/affine-block-surface';
 import type { SurfaceContext } from '@blocksuite/affine-block-surface';
 import type { BlockStdScope } from '@blocksuite/block-std';
-import type { PointTestOptions } from '@blocksuite/block-std/gfx';
 import type { IBound } from '@blocksuite/global/utils';
 
 import { SurfaceGroupLikeModel } from '@blocksuite/affine-block-surface';
@@ -25,7 +24,11 @@ import {
   RootBlockSchema,
 } from '@blocksuite/affine-model';
 import { clamp } from '@blocksuite/affine-shared/utils';
-import { Viewport } from '@blocksuite/block-std/gfx';
+import {
+  type GfxModel,
+  type PointTestOptions,
+  Viewport,
+} from '@blocksuite/block-std/gfx';
 import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 import { Bound, getCommonBound, last } from '@blocksuite/global/utils';
 import { type BlockModel, Slot } from '@blocksuite/store';
@@ -681,7 +684,7 @@ export class EdgelessRootService extends RootService implements SurfaceContext {
     this.viewport.setViewport(zoom, [centerX, centerY], true);
   }
 
-  get blocks() {
+  get blocks(): GfxBlockModel[] {
     return (this.frames as GfxBlockModel[]).concat(this._layer.blocks);
   }
 
@@ -692,7 +695,7 @@ export class EdgelessRootService extends RootService implements SurfaceContext {
   /**
    * sorted edgeless elements
    */
-  get edgelessElements() {
+  get edgelessElements(): GfxModel[] {
     return [
       ...this._layer.canvasElements,
       ...this._layer.blocks,

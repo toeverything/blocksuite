@@ -694,6 +694,9 @@ importers:
       '@types/hast':
         specifier: ^3.0.4
         version: 3.0.4
+      fractional-indexing:
+        specifier: ^3.2.0
+        version: 3.2.0
       lib0:
         specifier: ^0.2.97
         version: 0.2.97

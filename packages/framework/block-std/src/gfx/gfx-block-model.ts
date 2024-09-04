@@ -19,6 +19,7 @@ import { BlockModel } from '@blocksuite/store';
 
 import type { EditorHost } from '../view/index.js';
 import type {
+  GfxCompatibleProps,
   GfxElementGeometry,
   GfxGroupLikeElementModel,
   GfxPrimitiveElementModel,
@@ -139,11 +140,6 @@ export class GfxBlockElementModel<
     return (surface as SurfaceBlockModel).getGroups(this.id);
   }
 }
-
-type GfxCompatibleProps = {
-  xywh: SerializedXYWH;
-  index: string;
-};
 
 export function GfxCompatible<
   Props extends GfxCompatibleProps,

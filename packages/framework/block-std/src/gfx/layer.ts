@@ -1,21 +1,13 @@
-import type { GroupElementModel } from '@blocksuite/affine-model';
 import type { Doc } from '@blocksuite/store';
-import type { BlockModel } from '@blocksuite/store';
 
-import { FrameBlockModel } from '@blocksuite/affine-model';
-import { matchFlavours } from '@blocksuite/affine-shared/utils';
-import { GfxBlockElementModel, type GfxModel } from '@blocksuite/block-std/gfx';
+import { GfxBlockElementModel } from '@blocksuite/block-std/gfx';
 import { Bound, last, nToLast } from '@blocksuite/global/utils';
 import { DisposableGroup, Slot, assertType } from '@blocksuite/global/utils';
 import { generateKeyBetween } from 'fractional-indexing';
 
-import type { SurfaceBlockModel } from '../surface-model.js';
+import type { GfxModel } from './gfx-block-model.js';
+import type { SurfaceBlockModel } from './surface/surface-model.js';
 
-import {
-  SurfaceElementModel,
-  SurfaceGroupLikeModel,
-} from '../element-model/base.js';
-import { GridManager } from './grid-manager.js';
 import {
   SortOrder,
   compare,
@@ -27,7 +19,13 @@ import {
   renderableInEdgeless,
   ungroupIndex,
   updateLayersZIndex,
-} from './layer-utils.js';
+} from '../utils/layer.js';
+import { GridManager } from './grid.js';
+import {
+  type GfxContainerElement,
+  GfxPrimitiveElementModel,
+  isGfxContainerElm,
+} from './surface/element-model.js';
 
 export type ReorderingDirection = 'front' | 'forward' | 'backward' | 'back';
 
@@ -54,7 +52,7 @@ export type BlockLayer = BaseLayer<GfxBlockElementModel> & {
   zIndex: number;
 };
 
-export type CanvasLayer = BaseLayer<SurfaceElementModel> & {
+export type CanvasLayer = BaseLayer<GfxPrimitiveElementModel> & {
   type: 'canvas';
 
   /**
@@ -71,19 +69,18 @@ export type Layer = BlockLayer | CanvasLayer;
 export class LayerManager {
   private _disposables = new DisposableGroup();
 
-  static INITAL_INDEX = 'a0';
+  static INITIAL_INDEX = 'a0';
 
   blocks: GfxBlockElementModel[] = [];
 
-  blocksGrid: GridManager<GfxBlockElementModel> =
-    new GridManager<GfxBlockElementModel>();
+  blocksGrid = new GridManager<GfxBlockElementModel>();
 
-  canvasElements: SurfaceElementModel[] = [];
+  canvasElements: GfxPrimitiveElementModel[] = [];
 
-  canvasGrid = new GridManager<SurfaceElementModel>();
+  canvasGrid = new GridManager<GfxPrimitiveElementModel>();
 
   canvasLayers: {
-    set: Set<SurfaceElementModel>;
+    set: Set<GfxPrimitiveElementModel>;
     /**
      * fractional index
      */
@@ -92,12 +89,8 @@ export class LayerManager {
      * z-index, used for actual rendering
      */
     zIndex: number;
-    elements: Array<SurfaceElementModel>;
+    elements: Array<GfxPrimitiveElementModel>;
   }[] = [];
-
-  frames: FrameBlockModel[] = [];
-
-  framesGrid = new GridManager<FrameBlockModel>();
 
   layers: Layer[] = [];
 
@@ -142,7 +135,7 @@ export class LayerManager {
         set: new Set(),
         elements: [],
         zIndex: 0,
-        indexes: [LayerManager.INITAL_INDEX, LayerManager.INITAL_INDEX],
+        indexes: [LayerManager.INITIAL_INDEX, LayerManager.INITIAL_INDEX],
       });
     }
 
@@ -179,7 +172,7 @@ export class LayerManager {
         type === 'canvas'
           ? ({
               type,
-              indexes: [LayerManager.INITAL_INDEX, LayerManager.INITAL_INDEX],
+              indexes: [LayerManager.INITIAL_INDEX, LayerManager.INITIAL_INDEX],
               zIndex: 0,
               set: new Set(),
               elements: [],
@@ -187,7 +180,7 @@ export class LayerManager {
             } as CanvasLayer)
           : ({
               type,
-              indexes: [LayerManager.INITAL_INDEX, LayerManager.INITAL_INDEX],
+              indexes: [LayerManager.INITIAL_INDEX, LayerManager.INITIAL_INDEX],
               zIndex: 0,
               set: new Set(),
               elements: [],
@@ -305,7 +298,7 @@ export class LayerManager {
       position: number | 'tail'
     ) => {
       assertType<CanvasLayer>(layer);
-      assertType<SurfaceElementModel>(element);
+      assertType<GfxPrimitiveElementModel>(element);
 
       if (position === 'tail') {
         layer.elements.push(element);
@@ -383,7 +376,7 @@ export class LayerManager {
             updateLayersZIndex(layers, cur);
           } else {
             const splicedElements = layer.elements.splice(insertIdx);
-            layer.set = new Set(layer.elements as SurfaceElementModel[]);
+            layer.set = new Set(layer.elements as GfxPrimitiveElementModel[]);
 
             layers.splice(
               cur + 1,
@@ -426,7 +419,7 @@ export class LayerManager {
       if (layer.type !== type) return false;
 
       assertType<CanvasLayer>(layer);
-      assertType<SurfaceElementModel>(target);
+      assertType<GfxPrimitiveElementModel>(target);
 
       if (layer.set.has(target)) {
         layer.set.delete(target);
@@ -488,15 +481,11 @@ export class LayerManager {
 
     this.canvasElements = [];
     this.blocks = [];
-    this.frames = [];
 
     elements.forEach(element => {
-      if (element instanceof SurfaceElementModel) {
+      if (element instanceof GfxPrimitiveElementModel) {
         this.canvasElements.push(element);
         this.canvasGrid.add(element);
-      } else if (matchFlavours(element, ['affine:frame'])) {
-        this.framesGrid.add(element);
-        this.frames.push(element);
       } else {
         this.blocksGrid.add(element);
         this.blocks.push(element);
@@ -504,7 +493,6 @@ export class LayerManager {
     });
 
     this.canvasElements.sort(compare);
-    this.frames.sort(compare);
     this.blocks.sort(compare);
 
     this._initLayers();
@@ -515,14 +503,12 @@ export class LayerManager {
    * @returns a boolean value to indicate whether the layers have been updated
    */
   private _updateLayer(element: GfxModel, props?: Record<string, unknown>) {
-    let updateType: 'block' | 'canvas' | undefined = undefined;
-    const type = 'flavour' in element ? element.flavour : element.type;
+    const modelType = this._getModelType(element);
 
     const indexChanged = !props || 'index' in props;
     const childIdsChanged = props && 'childIds' in props;
     const shouldUpdateGroupChildren =
-      (type === 'group' || element instanceof SurfaceGroupLikeModel) &&
-      (indexChanged || childIdsChanged);
+      isGfxContainerElm(element) && (indexChanged || childIdsChanged);
     const updateArray = (array: GfxModel[], element: GfxModel) => {
       if (!indexChanged) return;
       removeFromOrderedArray(array, element);
@@ -534,22 +520,17 @@ export class LayerManager {
       return true;
     }
 
-    if (!type.startsWith('affine:')) {
-      updateType = 'canvas';
+    if (modelType === 'canvas') {
       updateArray(this.canvasElements, element);
-      this.canvasGrid.update(element as SurfaceElementModel);
-    } else if (matchFlavours(element as BlockModel, ['affine:frame'])) {
-      updateArray(this.frames, element);
-      this.framesGrid.update(element as FrameBlockModel);
+      this.canvasGrid.update(element as GfxPrimitiveElementModel);
     } else {
-      updateType = 'block';
       updateArray(this.blocks, element);
       this.blocksGrid.update(element as GfxBlockElementModel);
     }
 
-    if (updateType && (indexChanged || childIdsChanged)) {
-      this._removeFromLayer(element as GfxModel, updateType);
-      this._insertIntoLayer(element as GfxModel, updateType);
+    if (indexChanged || childIdsChanged) {
+      this._removeFromLayer(element as GfxModel, modelType);
+      this._insertIntoLayer(element as GfxModel, modelType);
       return true;
     }
 
@@ -617,44 +598,35 @@ export class LayerManager {
   }
 
   add(element: GfxModel) {
-    let insertType: 'block' | 'canvas' | undefined = undefined;
-    const type = 'flavour' in element ? element.flavour : element.type;
-    const isGroup =
-      type === 'group' || element instanceof SurfaceGroupLikeModel;
+    const modelType = this._getModelType(element);
+    const isGroup = isGfxContainerElm(element);
 
-    if (!type.startsWith('affine:')) {
-      insertType = 'canvas';
+    if (modelType === 'canvas') {
       if (isGroup) {
-        (element as GroupElementModel).childElements.forEach(child => {
+        (element as GfxContainerElement).childElements.forEach(child => {
           if (child && this._getModelType(child) === 'canvas') {
             removeFromOrderedArray(this.canvasElements, child);
           }
         });
       }
       insertToOrderedArray(this.canvasElements, element);
-      this.canvasGrid.add(element as SurfaceElementModel);
-    } else if (matchFlavours(element as BlockModel, ['affine:frame'])) {
-      insertToOrderedArray(this.frames, element);
-      this.framesGrid.add(element as FrameBlockModel);
+      this.canvasGrid.add(element as GfxPrimitiveElementModel);
     } else {
-      insertType = 'block';
       insertToOrderedArray(this.blocks, element);
       this.blocksGrid.add(element as GfxBlockElementModel);
     }
 
-    if (insertType) {
-      this._insertIntoLayer(element as GfxModel, insertType);
-      if (isGroup) {
-        (element as GroupElementModel).childElements.forEach(
-          child => child && this._updateLayer(child)
-        );
-      }
-      this._buildCanvasLayers();
-      this.slots.layerUpdated.emit({
-        type: 'add',
-        initiatingElement: element,
-      });
+    this._insertIntoLayer(element as GfxModel, modelType);
+    if (isGroup) {
+      (element as GfxContainerElement).childElements.forEach(
+        child => child && this._updateLayer(child)
+      );
     }
+    this._buildCanvasLayers();
+    this.slots.layerUpdated.emit({
+      type: 'add',
+      initiatingElement: element,
+    });
   }
 
   /**
@@ -680,18 +652,23 @@ export class LayerManager {
     const manager = new LayerManager(this._doc, this._surface);
 
     return (elementType: string) => {
-      if (ignoreRule && elementType !== 'affine:frame') {
-        elementType = 'shape';
-      }
-
+      const typeField = this._surface.registeredElementTypes.includes(
+        elementType
+      )
+        ? 'type'
+        : 'flavour';
       const idx = manager.generateIndex(elementType);
       const bound = new Bound(0, 0, 10, 10);
+
+      if (ignoreRule) {
+        elementType = 'shape';
+      }
 
       if (elementType === 'group') elementType = 'shape';
 
       const mockedFakeElement = {
         index: idx,
-        flavour: elementType,
+        [typeField]: elementType,
         x: 0,
         y: 0,
         w: 10,
@@ -714,7 +691,7 @@ export class LayerManager {
 
   delete(element: GfxModel) {
     let deleteType: 'canvas' | 'block' | undefined = undefined;
-    const isGroup = element instanceof SurfaceGroupLikeModel;
+    const isGroup = isGfxContainerElm(element);
 
     if (isGroup) {
       this._reset();
@@ -725,13 +702,10 @@ export class LayerManager {
       return;
     }
 
-    if (element instanceof SurfaceElementModel) {
+    if (element instanceof GfxPrimitiveElementModel) {
       deleteType = 'canvas';
       removeFromOrderedArray(this.canvasElements, element);
       this.canvasGrid.remove(element);
-    } else if (matchFlavours(element, ['affine:frame'])) {
-      removeFromOrderedArray(this.frames, element);
-      this.framesGrid.remove(element as FrameBlockModel);
     } else {
       deleteType = 'block';
       removeFromOrderedArray(this.blocks, element);
@@ -754,47 +728,40 @@ export class LayerManager {
   }
 
   generateIndex(elementType: string): string {
-    const batch = elementType === 'affine:frame' ? 'frame' : 'common';
-    const type = elementType.startsWith('affine:') ? 'block' : 'canvas';
+    const type = this._surface.registeredElementTypes.includes(elementType)
+      ? 'canvas'
+      : 'block';
 
-    if (batch === 'frame') {
-      const lastFrame = last(this.frames);
+    if (type === 'canvas') {
+      const lastIndex = last(this.layers)?.indexes[1];
 
-      return lastFrame
-        ? generateKeyBetween(ungroupIndex(getElementIndex(lastFrame)), null)
-        : LayerManager.INITAL_INDEX;
-    } else {
-      if (type === 'canvas') {
-        const lastIndex = last(this.layers)?.indexes[1];
-
-        return lastIndex
-          ? generateKeyBetween(ungroupIndex(lastIndex), null)
-          : LayerManager.INITAL_INDEX;
-      }
-
-      const lastLayer = last(this.layers);
-
-      if (!lastLayer) return LayerManager.INITAL_INDEX;
-
-      assertType<string>(lastLayer);
-
-      if (lastLayer.type === 'canvas') {
-        const secondLastLayer = nToLast(this.layers, 2);
-        const secondLastLayerIndex = secondLastLayer
-          ? ungroupIndex(secondLastLayer.indexes[1])
-          : null;
-        const lastLayerIndex = ungroupIndex(lastLayer.indexes[0]);
-
-        return generateKeyBetween(
-          secondLastLayerIndex,
-          secondLastLayerIndex && secondLastLayerIndex >= lastLayerIndex
-            ? null
-            : lastLayerIndex
-        );
-      }
-
-      return generateKeyBetween(lastLayer.indexes[1], null);
+      return lastIndex
+        ? generateKeyBetween(ungroupIndex(lastIndex), null)
+        : LayerManager.INITIAL_INDEX;
     }
+
+    const lastLayer = last(this.layers);
+
+    if (!lastLayer) return LayerManager.INITIAL_INDEX;
+
+    assertType<string>(lastLayer);
+
+    if (lastLayer.type === 'canvas') {
+      const secondLastLayer = nToLast(this.layers, 2);
+      const secondLastLayerIndex = secondLastLayer
+        ? ungroupIndex(secondLastLayer.indexes[1])
+        : null;
+      const lastLayerIndex = ungroupIndex(lastLayer.indexes[0]);
+
+      return generateKeyBetween(
+        secondLastLayerIndex,
+        secondLastLayerIndex && secondLastLayerIndex >= lastLayerIndex
+          ? null
+          : lastLayerIndex
+      );
+    }
+
+    return generateKeyBetween(lastLayer.indexes[1], null);
   }
 
   getCanvasLayers() {
@@ -802,22 +769,14 @@ export class LayerManager {
   }
 
   getReorderedIndex(element: GfxModel, direction: ReorderingDirection): string {
-    const group = (element.group as BlockSuite.SurfaceGroupLikeModel) || null;
-    const isFrameBlock =
-      (element as FrameBlockModel).flavour === 'affine:frame';
+    const group = (element.group as GfxContainerElement) || null;
 
     let elements: GfxModel[];
 
     if (group !== null) {
-      elements = group.childElements.filter(
-        element =>
-          ((element as FrameBlockModel)?.flavour === 'affine:frame') ===
-          isFrameBlock
-      );
+      elements = group.childElements;
 
       elements.sort(compare);
-    } else if (isFrameBlock) {
-      elements = this.frames;
     } else {
       elements = this.layers.reduce(
         (pre: GfxModel[], current) =>
@@ -870,12 +829,6 @@ export class LayerManager {
   }
 
   getZIndex(element: GfxModel): number {
-    if (element instanceof FrameBlockModel) {
-      const frameIndex = this.frames.indexOf(element);
-
-      return frameIndex - this.frames.length;
-    }
-
     // @ts-ignore
     const layer = this.layers.find(layer => layer.set.has(element));
 

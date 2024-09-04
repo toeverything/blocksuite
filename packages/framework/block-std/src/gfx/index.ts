@@ -17,9 +17,9 @@ export {
   type BaseElementProps,
   type GfxContainerElement,
   type GfxElementGeometry,
-  GfxGroupLikeElementModel,
+  GfxGroupLikeElementModel as GfxGroupLikeElementModel,
   GfxLocalElementModel,
-  GfxPrimitiveElementModel,
+  GfxPrimitiveElementModel as GfxPrimitiveElementModel,
   type PointTestOptions,
   type SerializedElement,
   gfxContainerSymbol,
@@ -32,3 +32,5 @@ export {
 } from './surface/surface-model.js';
 export * from './viewport.js';
 export { GfxViewportElement } from './viewport-element.js';
+
+export { generateKeyBetween, generateNKeysBetween } from 'fractional-indexing';
