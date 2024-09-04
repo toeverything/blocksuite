@@ -21,7 +21,7 @@ import {
   getBlockComponentByModel,
   getRootByEditorHost,
 } from '../../_common/utils/index.js';
-import { getBlocksInFrame } from '../../root-block/edgeless/frame-manager.js';
+import { getBlocksInFrameBound } from '../../root-block/edgeless/frame-manager.js';
 import { xywhArrayToObject } from '../../root-block/edgeless/utils/convert.js';
 import { getBackgroundGrid } from '../../root-block/edgeless/utils/query.js';
 import {
@@ -483,7 +483,8 @@ export class ExportManager {
       }
 
       if (matchFlavours(block, ['affine:frame'])) {
-        const blocksInsideFrame = getBlocksInFrame(this.doc, block, false);
+        // TODO(@L-Sun): use children of frame instead of bound
+        const blocksInsideFrame = getBlocksInFrameBound(this.doc, block, false);
         const frameBound = Bound.deserialize(block.xywh);
 
         for (let i = 0; i < blocksInsideFrame.length; i++) {

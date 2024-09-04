@@ -1,5 +1,6 @@
 import type {
   DocMode,
+  FrameBlockModel,
   ImageBlockModel,
   NoteBlockModel,
 } from '@blocksuite/affine-model';
@@ -25,9 +26,13 @@ import { SpecProvider } from '../../_specs/utils/spec-provider.js';
 import { GfxBlockModel } from '../../root-block/edgeless/block-model.js';
 import {
   getElementProps,
+  mapFrameIds,
   sortEdgelessElements,
 } from '../../root-block/edgeless/utils/clone-utils.js';
-import { isNoteBlock } from '../../root-block/edgeless/utils/query.js';
+import {
+  isFrameBlock,
+  isNoteBlock,
+} from '../../root-block/edgeless/utils/query.js';
 import { getSurfaceBlock } from '../../surface-ref-block/utils.js';
 import { EMBED_CARD_HEIGHT } from '../consts.js';
 
@@ -576,6 +581,10 @@ export function createLinkedDocFromEdgelessElements(
             addBlocksToDoc(linkedDoc, model, newId);
           });
         } else {
+          if (isFrameBlock(model)) {
+            mapFrameIds(blockProps as unknown as FrameBlockModel, ids);
+          }
+
           newId = linkedDoc.addBlock(
             model.flavour as BlockSuite.Flavour,
             blockProps,

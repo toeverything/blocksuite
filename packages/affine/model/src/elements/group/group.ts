@@ -82,6 +82,7 @@ export class GroupElementModel extends GfxGroupLikeElementModel<GroupElementProp
 
   override serialize() {
     const result = super.serialize();
+    result.xywh = this.xywh;
     return result as SerializedGroupElement;
   }
 

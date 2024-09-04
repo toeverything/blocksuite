@@ -1,41 +1,41 @@
 import type {
+  FrameBlockProps,
   SerializedConnectorElement,
   SerializedGroupElement,
 } from '@blocksuite/affine-model';
 import type { BlockStdScope } from '@blocksuite/block-std';
-import type { SerializedElement } from '@blocksuite/block-std/gfx';
 
 import {
   ConnectorElementModel,
   GroupElementModel,
 } from '@blocksuite/affine-model';
-import { groupBy } from '@blocksuite/global/utils';
+import {
+  type SerializedElement,
+  isGfxContainerElm,
+} from '@blocksuite/block-std/gfx';
 import { type BlockSnapshot, Job } from '@blocksuite/store';
 
 import type { SerializedMindmapElement } from '../../../surface-block/element-model/mindmap.js';
 import type { NodeDetail } from '../../../surface-block/element-model/utils/mindmap/layout.js';
-import type { EdgelessFrameManager } from '../frame-manager.js';
 
-import { SurfaceGroupLikeModel } from '../../../surface-block/element-model/base.js';
 import { MindmapElementModel } from '../../../surface-block/index.js';
 import { GfxBlockModel } from '../block-model.js';
-import { isFrameBlock } from '../utils/query.js';
+import { getAllDescendantElements, getTopElements } from './tree.js';
 
-export function getCloneElements(
-  elements: BlockSuite.EdgelessModel[],
-  frame: EdgelessFrameManager
-) {
+/**
+ * return all elements in the tree of the elements
+ */
+export function getSortedCloneElements(elements: BlockSuite.EdgelessModel[]) {
   const set = new Set<BlockSuite.EdgelessModel>();
   elements.forEach(element => {
-    set.add(element);
-    if (isFrameBlock(element)) {
-      frame.getElementsInFrame(element).forEach(ele => set.add(ele));
-    } else if (element instanceof SurfaceGroupLikeModel) {
-      const children = element.childElements;
-      getCloneElements(children, frame).forEach(ele => set.add(ele));
-    }
+    // this element subtree has been added
+    if (set.has(element)) return;
+
+    getAllDescendantElements(element, true).map(descendant =>
+      set.add(descendant)
+    );
   });
-  return Array.from(set);
+  return sortEdgelessElements([...set]);
 }
 
 export async function prepareCloneData(
@@ -99,24 +99,38 @@ export function serializeConnector(
  * @returns sorted edgeless model list
  */
 export function sortEdgelessElements(elements: BlockSuite.EdgelessModel[]) {
-  const result = groupBy(elements, element => {
-    if (element instanceof ConnectorElementModel) {
-      return 'connector';
+  // Since each element has a parent-child relationship, and from-to connector relationship
+  // the child element must be added before the parent element
+  // and the connected elements must be added before the connector element
+  // To achieve this, we do a post-order traversal of the tree
+
+  const result: BlockSuite.EdgelessModel[] = [];
+
+  const topElements = getTopElements(elements);
+
+  // the connector element must be added after the connected elements
+  const moveConnectorToEnd = (elements: BlockSuite.EdgelessModel[]) => {
+    const connectors = elements.filter(
+      element => element instanceof ConnectorElementModel
+    );
+    const rest = elements.filter(
+      element => !(element instanceof ConnectorElementModel)
+    );
+    return [...rest, ...connectors];
+  };
+
+  const traverse = (element: BlockSuite.EdgelessModel) => {
+    if (isGfxContainerElm(element)) {
+      moveConnectorToEnd(element.childElements).forEach(child =>
+        traverse(child)
+      );
     }
-    if (element instanceof GroupElementModel) {
-      return 'group';
-    }
-    if (element instanceof MindmapElementModel) {
-      return 'mindmap';
-    }
-    return 'default';
-  });
-  return [
-    ...(result.default ?? []),
-    ...(result.connector ?? []),
-    ...(result.group ?? []),
-    ...(result.mindmap ?? []),
-  ];
+    result.push(element);
+  };
+
+  moveConnectorToEnd(topElements).forEach(element => traverse(element));
+
+  return result;
 }
 
 /**
@@ -158,6 +172,26 @@ export function mapGroupIds(
     }
     props.children = newMap;
   }
+  return props;
+}
+
+/**
+ * map frame children ids
+ * @param props frame block props
+ * @param ids old element id to new element id map
+ * @returns updated frame block props
+ */
+export function mapFrameIds(props: FrameBlockProps, ids: Map<string, string>) {
+  const oldChildIds = [
+    ...(props.childElementIds ? Object.keys(props.childElementIds) : []),
+  ];
+  const newChildIds: Record<string, boolean> = {};
+  oldChildIds.forEach(oldId => {
+    const newIds = ids.get(oldId);
+    if (newIds) newChildIds[newIds] = true;
+  });
+  props.childElementIds = newChildIds;
+
   return props;
 }
 

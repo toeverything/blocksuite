@@ -74,9 +74,15 @@ export const replaceIdMiddleware: JobMiddleware = ({ slots, collection }) => {
       const model = payload.model as SurfaceRefBlockModel;
       const original = model.reference;
       // If there exists a replacement, replace the reference with the new id.
-      // Otherwise, keep the original reference as the original block might exist.
+      // Otherwise,
+      // 1. If the reference is an affine:frame, generate a new id.
+      // 2. If the reference is graph, keep the original id.
       if (idMap.has(original)) {
         model.reference = idMap.get(original)!;
+      } else if (model.refFlavour === 'affine:frame') {
+        const newId = collection.idGenerator();
+        idMap.set(original, newId);
+        model.reference = newId;
       }
     }
 

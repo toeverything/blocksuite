@@ -29,7 +29,6 @@ import type { MindmapNode } from '../../../surface-block/element-model/utils/min
 import type { EdgelessTool } from '../types.js';
 
 import { isSelectSingleMindMap } from '../../../_common/edgeless/mindmap/index.js';
-import { SurfaceGroupLikeModel } from '../../../surface-block/element-model/base.js';
 import {
   MindmapElementModel,
   ShapeElementModel,
@@ -38,7 +37,7 @@ import {
 import { isConnectorWithLabel } from '../../../surface-block/element-model/utils/connector.js';
 import {
   hideTargetConnector,
-  moveSubtree,
+  moveMindMapSubtree,
   showMergeIndicator,
 } from '../../../surface-block/element-model/utils/mindmap/utils.js';
 import { isConnectorAndBindingsAllSelected } from '../../../surface-block/managers/connector-manager.js';
@@ -59,6 +58,7 @@ import {
   mountShapeTextEditor,
   mountTextElementEditor,
 } from '../utils/text.js';
+import { getAllDescendantElements, getTopElements } from '../utils/tree.js';
 import { EdgelessToolController } from './edgeless-tool.js';
 
 export enum DefaultModeDragType {
@@ -138,6 +138,8 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     clear?: () => void;
     detach?: boolean;
   } = null;
+
+  private _hoveredFrame: FrameBlockModel | null = null;
 
   private _hoveredMindMap: null | {
     mindmap: MindmapElementModel;
@@ -503,9 +505,16 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
       }
     }
 
-    const frame = this._service.frame.selectFrame(this._toBeMoved);
-    frame
-      ? this._service.frameOverlay.highlight(frame as FrameBlockModel)
+    this._hoveredFrame = this._edgeless.service.frame.getFrameFromPoint(
+      this._service.viewport.toModelCoord(
+        this._dragLastPos[0],
+        this._dragLastPos[1]
+      ),
+      this._toBeMoved.filter(ele => isFrameBlock(ele))
+    );
+
+    this._hoveredFrame
+      ? this._service.frameOverlay.highlight(this._hoveredFrame)
       : this._service.frameOverlay.clear();
   }
 
@@ -833,7 +842,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
         const { node: currentNode, mindmap: currentMindmap } =
           this._draggingSingleMindmap;
 
-        moveSubtree(
+        moveMindMapSubtree(
           currentMindmap,
           currentNode!,
           mindmap,
@@ -873,6 +882,22 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
           el.requestLayout();
         }
       });
+    }
+
+    {
+      const frameManager = this._service.frame;
+      const toBeMovedTopElements = getTopElements(this._toBeMoved);
+      if (this._hoveredFrame) {
+        frameManager.addElementsToFrame(
+          this._hoveredFrame,
+          toBeMovedTopElements
+        );
+      } else {
+        // only apply to root nodes of trees
+        toBeMovedTopElements.map(element =>
+          frameManager.removeParentFrame(element)
+        );
+      }
     }
 
     if (this._lock) {
@@ -960,17 +985,19 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     const elements = this.edgelessSelectionManager.selectedElements;
     const toBeMoved = new Set(elements);
     elements.forEach(element => {
-      if (isFrameBlock(element)) {
-        this._service.frame
-          .getElementsInFrame(element)
-          .forEach(ele => toBeMoved.add(ele));
-      } else if (
-        element.group instanceof MindmapElementModel &&
-        elements.length > 1
-      ) {
-        element.group.descendants().forEach(ele => toBeMoved.add(ele));
-      } else if (element instanceof SurfaceGroupLikeModel) {
-        element.descendants().forEach(ele => toBeMoved.add(ele));
+      if (element.group instanceof MindmapElementModel && elements.length > 1) {
+        getAllDescendantElements(element.group).forEach(ele =>
+          toBeMoved.add(ele)
+        );
+      } else {
+        getAllDescendantElements(element).forEach(ele => {
+          if (ele.group instanceof MindmapElementModel) {
+            getAllDescendantElements(ele.group).forEach(_el =>
+              toBeMoved.add(_el)
+            );
+          }
+          toBeMoved.add(ele);
+        });
       }
     });
     this._toBeMoved = Array.from(toBeMoved);

@@ -2,9 +2,10 @@ import type { FrameBlockModel } from '@blocksuite/affine-model';
 import type { PointerEventState } from '@blocksuite/block-std';
 import type { IPoint, IVec } from '@blocksuite/global/utils';
 
-import { Bound, Vec, assertExists, noop } from '@blocksuite/global/utils';
+import { Bound, Vec, noop } from '@blocksuite/global/utils';
 import { DocCollection } from '@blocksuite/store';
 
+import { getTopElements } from '../utils/tree.js';
 import { EdgelessToolController } from './edgeless-tool.js';
 
 type FrameTool = {
@@ -55,6 +56,12 @@ export class FrameToolController extends EdgelessToolController<FrameTool> {
         elements: [this._frame.id],
         editing: false,
       });
+
+      const frameManager = this._edgeless.service.frame;
+      const elements = frameManager.getElementsInFrameBound(frame);
+
+      frameManager.addElementsToFrame(frame, getTopElements(elements));
+
       this._doc.captureSync();
     }
     this._frame = null;
@@ -62,8 +69,9 @@ export class FrameToolController extends EdgelessToolController<FrameTool> {
   }
 
   override onContainerDragMove(e: PointerEventState): void {
+    if (!this._startPoint) return;
+
     const currentPoint = this._toModelCoord(e.point);
-    assertExists(this._startPoint);
     if (Vec.dist(this._startPoint, currentPoint) < 8 && !this._frame) return;
     if (!this._frame) {
       const frames = this._service.frames;
@@ -87,7 +95,6 @@ export class FrameToolController extends EdgelessToolController<FrameTool> {
       this._frame.stash('xywh');
       return;
     }
-    assertExists(this._frame);
 
     this._service.updateElement(this._frame.id, {
       xywh: Bound.fromPoints([this._startPoint, currentPoint]).serialize(),
