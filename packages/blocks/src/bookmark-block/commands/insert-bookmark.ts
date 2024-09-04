@@ -1,6 +1,8 @@
 import type { EmbedCardStyle } from '@blocksuite/affine-model';
 import type { Command } from '@blocksuite/block-std';
 
+import { EmbedOptionProvider } from '@blocksuite/affine-shared/services';
+
 import { insertEmbedCard } from '../../_common/embed-block-helper/insert-embed-card.js';
 
 export const insertBookmarkCommand: Command<
@@ -9,8 +11,7 @@ export const insertBookmarkCommand: Command<
   { url: string }
 > = (ctx, next) => {
   const { url, std } = ctx;
-  const rootService = std.getService('affine:page');
-  const embedOptions = rootService.getEmbedBlockOptions(url);
+  const embedOptions = std.get(EmbedOptionProvider).getEmbedBlockOptions(url);
 
   let flavour = 'affine:bookmark';
   let targetStyle: EmbedCardStyle = 'vertical';

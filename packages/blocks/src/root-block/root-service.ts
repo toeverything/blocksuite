@@ -67,10 +67,6 @@ export abstract class RootService extends BlockService {
 
   peekViewService: PeekViewService | null = null;
 
-  registerEmbedBlockOptions = (options: EmbedOptions): void => {
-    this._embedBlockRegistry.add(options);
-  };
-
   readonly themeObserver = ThemeObserver.instance;
 
   transformers = {

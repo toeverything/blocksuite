@@ -1,4 +1,7 @@
-import { DocModeService } from '@blocksuite/affine-shared/services';
+import {
+  DocModeService,
+  EmbedOptionService,
+} from '@blocksuite/affine-shared/services';
 import {
   BlockViewExtension,
   CommandExtension,
@@ -54,6 +57,7 @@ export const PageRootBlockSpec: ExtensionType[] = [
   FlavourExtension('affine:page'),
   PageRootService,
   DocModeService,
+  EmbedOptionService,
   CommandExtension(commands),
   BlockViewExtension('affine:page', literal`affine-page-root`),
   WidgetViewMapExtension('affine:page', pageRootWidgetViewMap),

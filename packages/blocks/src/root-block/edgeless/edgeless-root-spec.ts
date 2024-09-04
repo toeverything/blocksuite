@@ -1,4 +1,7 @@
-import { DocModeService } from '@blocksuite/affine-shared/services';
+import {
+  DocModeService,
+  EmbedOptionService,
+} from '@blocksuite/affine-shared/services';
 import {
   BlockViewExtension,
   CommandExtension,
@@ -67,6 +70,7 @@ export const EdgelessRootBlockSpec: ExtensionType[] = [
   FlavourExtension('affine:page'),
   EdgelessRootService,
   DocModeService,
+  EmbedOptionService,
   CommandExtension(commands),
   BlockViewExtension('affine:page', literal`affine-edgeless-root`),
   WidgetViewMapExtension('affine:page', edgelessRootWigetViewMap),
@@ -91,6 +95,7 @@ export const PreviewEdgelessRootBlockSpec: ExtensionType[] = [
   EdgelessRootService,
   EdgelessServiceWatcher,
   DocModeService,
+  EmbedOptionService,
   CommandExtension(commands),
   BlockViewExtension('affine:page', literal`affine-edgeless-root-preview`),
 ];

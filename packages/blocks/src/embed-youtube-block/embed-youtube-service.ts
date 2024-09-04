@@ -3,6 +3,7 @@ import {
   type EmbedYoutubeModel,
   EmbedYoutubeStyles,
 } from '@blocksuite/affine-model';
+import { EmbedOptionProvider } from '@blocksuite/affine-shared/services';
 import { BlockService } from '@blocksuite/block-std';
 
 import { LinkPreviewer } from '../_common/embed-block-helper/index.js';
@@ -31,8 +32,7 @@ export class EmbedYoutubeBlockService extends BlockService {
   override mounted() {
     super.mounted();
 
-    const rootService = this.std.getService('affine:page');
-    rootService.registerEmbedBlockOptions({
+    this.std.get(EmbedOptionProvider).registerEmbedBlockOptions({
       flavour: this.flavour,
       urlRegex: youtubeUrlRegex,
       styles: EmbedYoutubeStyles,
