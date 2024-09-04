@@ -61,32 +61,13 @@ export { CopilotSelectionController } from './root-block/edgeless/tools/copilot-
 export * from './root-block/index.js';
 export * from './schemas.js';
 export {
-  AffineCanvasTextFonts,
-  BrushElementModel,
-  CanvasElementType,
-  CommunityCanvasTextFonts,
-  ConnectorElementModel,
-  ConnectorMode,
-  GroupElementModel,
-  LayoutType,
-  MindmapElementModel,
-  MindmapRootBlock,
-  MindmapService,
-  MindmapStyle,
-  MindmapSurfaceBlock,
-  ShapeElementModel,
-  SurfaceBlockModel,
-  TextElementModel,
-  fitContent,
-  generateKeyBetween,
   markdownToMindmap,
-} from './surface-block/index.js';
-export { MiniMindmapPreview } from './surface-block/mini-mindmap/mindmap-preview.js';
-export { SurfaceBlockComponent } from './surface-block/surface-block.js';
-export { SurfaceBlockSchema } from './surface-block/surface-model.js';
+  MiniMindmapPreview,
+} from './surface-block/mini-mindmap/mindmap-preview.js';
 export * from './surface-ref-block/index.js';
 export * from '@blocksuite/affine-block-list';
 export * from '@blocksuite/affine-block-paragraph';
+export { SurfaceBlockComponent } from '@blocksuite/affine-block-surface';
 export { type MenuOptions } from '@blocksuite/affine-components/context-menu';
 export {
   HoverController,
