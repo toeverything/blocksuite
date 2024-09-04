@@ -270,7 +270,7 @@ export class EdgelessTextBlockComponent extends GfxBlockComponent<
       x: bound.x,
       y: bound.y,
       w,
-      h: bound.h,
+      h: bound.h / scale,
       rotate,
       zIndex: this.toZIndex(),
     };
