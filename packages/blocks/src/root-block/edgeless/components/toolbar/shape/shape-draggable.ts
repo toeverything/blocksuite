@@ -9,6 +9,7 @@ import {
   getShapeRadius,
   getShapeType,
 } from '@blocksuite/affine-model';
+import { TelemetryProvider } from '@blocksuite/affine-shared/services';
 import { assertExists } from '@blocksuite/global/utils';
 import { LitElement, css, html, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
@@ -172,16 +173,18 @@ export class EdgelessToolbarShapeDraggable extends EdgelessToolbarToolMixin(
           radius: getShapeRadius(shape.name),
         });
 
-        this.edgeless.service.telemetryService?.track('CanvasElementAdded', {
-          control: 'toolbar:dnd',
-          page: 'whiteboard editor',
-          module: 'toolbar',
-          segment: 'toolbar',
-          type: 'shape',
-          other: {
-            shapeType: getShapeType(shape.name),
-          },
-        });
+        this.edgeless.std
+          .getOptional(TelemetryProvider)
+          ?.track('CanvasElementAdded', {
+            control: 'toolbar:dnd',
+            page: 'whiteboard editor',
+            module: 'toolbar',
+            segment: 'toolbar',
+            type: 'shape',
+            other: {
+              shapeType: getShapeType(shape.name),
+            },
+          });
 
         this._setShapeOverlayLock(false);
         this.readyToDrop = false;

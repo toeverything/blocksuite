@@ -2,6 +2,7 @@ import type { FrameBlockModel } from '@blocksuite/affine-model';
 import type { PointerEventState } from '@blocksuite/block-std';
 import type { IPoint, IVec } from '@blocksuite/global/utils';
 
+import { TelemetryProvider } from '@blocksuite/affine-shared/services';
 import { Bound, Vec, noop } from '@blocksuite/global/utils';
 import { DocCollection } from '@blocksuite/store';
 
@@ -84,13 +85,15 @@ export class FrameToolController extends EdgelessToolController<FrameTool> {
         },
         this._service.surface
       );
-      this._service.telemetryService?.track('CanvasElementAdded', {
-        control: 'canvas:draw',
-        page: 'whiteboard editor',
-        module: 'toolbar',
-        segment: 'toolbar',
-        type: 'frame',
-      });
+      this._service.std
+        .getOptional(TelemetryProvider)
+        ?.track('CanvasElementAdded', {
+          control: 'canvas:draw',
+          page: 'whiteboard editor',
+          module: 'toolbar',
+          segment: 'toolbar',
+          type: 'frame',
+        });
       this._frame = this._service.getElementById(id) as FrameBlockModel;
       this._frame.stash('xywh');
       return;

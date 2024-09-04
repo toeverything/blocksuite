@@ -1,5 +1,6 @@
 import { ImageBlockSchema } from '@blocksuite/affine-model';
 import { ImageSelection } from '@blocksuite/affine-shared/selection';
+import { TelemetryProvider } from '@blocksuite/affine-shared/services';
 import {
   isInsideEdgelessEditor,
   matchFlavours,
@@ -141,7 +142,7 @@ export class ImageBlockService extends BlockService {
         point = edgelessRoot.service.viewport.toViewCoordFromClientCoord(point);
         await edgelessRoot.addImages(imageFiles, point);
 
-        edgelessRoot.service.telemetryService?.track('CanvasElementAdded', {
+        this.std.getOptional(TelemetryProvider)?.track('CanvasElementAdded', {
           control: 'canvas:drop',
           page: 'whiteboard editor',
           module: 'toolbar',

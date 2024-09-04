@@ -1,4 +1,5 @@
 import { AttachmentBlockSchema } from '@blocksuite/affine-model';
+import { TelemetryProvider } from '@blocksuite/affine-shared/services';
 import {
   isInsideEdgelessEditor,
   matchFlavours,
@@ -159,7 +160,7 @@ export class AttachmentBlockService extends BlockService {
         point = edgelessRoot.service.viewport.toViewCoordFromClientCoord(point);
         await edgelessRoot.addAttachments(attachmentFiles, point);
 
-        edgelessRoot.service.telemetryService?.track('CanvasElementAdded', {
+        this.std.getOptional(TelemetryProvider)?.track('CanvasElementAdded', {
           control: 'canvas:drop',
           page: 'whiteboard editor',
           module: 'toolbar',

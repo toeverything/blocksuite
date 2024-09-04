@@ -37,7 +37,7 @@ import type { EdgelessToolConstructor } from './services/tools-manager.js';
 import type { EdgelessTool } from './types.js';
 
 import { getSurfaceBlock } from '../../surface-ref-block/utils.js';
-import { RootService, type TelemetryEvent } from '../root-service.js';
+import { RootService } from '../root-service.js';
 import { GfxBlockModel } from './block-model.js';
 import { EdgelessFrameManager, FrameOverlay } from './frame-manager.js';
 import { EdgelessSelectionManager } from './services/selection-manager.js';
@@ -59,33 +59,6 @@ import {
   ZOOM_STEP,
   type ZoomAction,
 } from './utils/zoom.js';
-
-export type ElementCreationSource =
-  | 'shortcut'
-  | 'toolbar:general'
-  | 'toolbar:dnd'
-  | 'canvas:drop'
-  | 'canvas:draw'
-  | 'canvas:dbclick'
-  | 'canvas:paste'
-  | 'context-menu'
-  | 'ai'
-  | 'internal'
-  | 'conversation'
-  | 'manually save';
-
-declare module '@blocksuite/blocks' {
-  interface ElementCreationEvent extends TelemetryEvent {
-    segment?: 'toolbar' | 'whiteboard' | 'right sidebar';
-    page: 'whiteboard editor';
-    module?: 'toolbar' | 'canvas' | 'ai chat panel';
-    control?: ElementCreationSource;
-  }
-
-  export interface TelemetryEventMap {
-    CanvasElementAdded: ElementCreationEvent;
-  }
-}
 
 export class EdgelessRootService extends RootService implements SurfaceContext {
   private _frame: EdgelessFrameManager;

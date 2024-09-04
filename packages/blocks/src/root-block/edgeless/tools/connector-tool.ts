@@ -15,6 +15,7 @@ import {
   calculateNearestLocation,
 } from '@blocksuite/affine-block-surface';
 import { ShapeType } from '@blocksuite/affine-model';
+import { TelemetryProvider } from '@blocksuite/affine-shared/services';
 import { Bound, noop } from '@blocksuite/global/utils';
 
 import type { EdgelessTool } from '../types.js';
@@ -68,13 +69,15 @@ export class ConnectorToolController extends EdgelessToolController<ConnectorToo
       target: { position: this._startPoint },
     });
 
-    this._edgeless.service.telemetryService?.track('CanvasElementAdded', {
-      control: 'canvas:draw',
-      page: 'whiteboard editor',
-      module: 'toolbar',
-      segment: 'toolbar',
-      type: CanvasElementType.CONNECTOR,
-    });
+    this._edgeless.std
+      .getOptional(TelemetryProvider)
+      ?.track('CanvasElementAdded', {
+        control: 'canvas:draw',
+        page: 'whiteboard editor',
+        module: 'toolbar',
+        segment: 'toolbar',
+        type: CanvasElementType.CONNECTOR,
+      });
 
     const connector = this._edgeless.service.getElementById(id);
     if (!connector) {

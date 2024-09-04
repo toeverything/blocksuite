@@ -1,4 +1,5 @@
 import { AttachmentIcon, LinkIcon } from '@blocksuite/affine-components/icons';
+import { TelemetryProvider } from '@blocksuite/affine-shared/services';
 import { LitElement, css, html } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
@@ -72,19 +73,23 @@ export class EdgelessNoteMenu extends EdgelessToolbarToolMixin(LitElement) {
     insertedLinkType
       ?.then(type => {
         if (type) {
-          this.edgeless.service.telemetryService?.track('CanvasElementAdded', {
-            control: 'toolbar:general',
-            page: 'whiteboard editor',
-            module: 'toolbar',
-            type: type.flavour?.split(':')[1],
-          });
-          if (type.isNewDoc) {
-            this.edgeless.service.telemetryService?.track('DocCreated', {
+          this.edgeless.std
+            .getOptional(TelemetryProvider)
+            ?.track('CanvasElementAdded', {
               control: 'toolbar:general',
               page: 'whiteboard editor',
-              module: 'edgeless toolbar',
+              module: 'toolbar',
               type: type.flavour?.split(':')[1],
             });
+          if (type.isNewDoc) {
+            this.edgeless.std
+              .getOptional(TelemetryProvider)
+              ?.track('DocCreated', {
+                control: 'toolbar:general',
+                page: 'whiteboard editor',
+                module: 'edgeless toolbar',
+                type: type.flavour?.split(':')[1],
+              });
           }
         }
       })
@@ -141,16 +146,15 @@ export class EdgelessNoteMenu extends EdgelessToolbarToolMixin(LitElement) {
                 if (!file) return;
                 await this.edgeless.addAttachments([file]);
                 this.edgeless.service.tool.setEdgelessTool({ type: 'default' });
-                this.edgeless.service.telemetryService?.track(
-                  'CanvasElementAdded',
-                  {
+                this.edgeless.std
+                  .getOptional(TelemetryProvider)
+                  ?.track('CanvasElementAdded', {
                     control: 'toolbar:general',
                     page: 'whiteboard editor',
                     module: 'toolbar',
                     segment: 'toolbar',
                     type: 'attachment',
-                  }
-                );
+                  });
               }}
             >
               ${AttachmentIcon}

@@ -21,6 +21,7 @@ import { normalizeWheelDeltaY } from '@blocksuite/affine-block-surface';
 import { focusTextModel } from '@blocksuite/affine-components/rich-text';
 import { toast } from '@blocksuite/affine-components/toast';
 import { NoteDisplayMode } from '@blocksuite/affine-model';
+import { TelemetryProvider } from '@blocksuite/affine-shared/services';
 import { humanFileSize } from '@blocksuite/affine-shared/utils';
 import {
   handleNativeRangeAtPoint,
@@ -708,7 +709,7 @@ export class EdgelessRootBlockComponent extends BlockComponent<
       noteIndex
     );
 
-    this.service.telemetryService?.track('CanvasElementAdded', {
+    this.std.getOptional(TelemetryProvider)?.track('CanvasElementAdded', {
       control: 'canvas:draw',
       page: 'whiteboard editor',
       module: 'toolbar',
