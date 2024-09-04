@@ -119,7 +119,7 @@ jobs:
 
         # The coverage seems not working now, re-enable it when it's fixed
       - name: Upload unit test coverage results
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v4
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: ./.coverage/unit/lcov.info
@@ -210,7 +210,7 @@ jobs:
       #        run: pnpm exec nyc report -t .nyc_output --reporter=lcov
 
       - name: Upload E2E test coverage results
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v4
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: ./.coverage/lcov.info
