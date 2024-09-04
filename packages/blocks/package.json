@@ -29,7 +29,7 @@
     "@floating-ui/dom": "^1.6.10",
     "@lit-labs/preact-signals": "^1.0.2",
     "@lit/context": "^1.1.2",
-    "@toeverything/theme": "^1.0.7",
+    "@toeverything/theme": "^1.0.8",
     "@types/hast": "^3.0.4",
     "@types/mdast": "^4.0.4",
     "@types/sortablejs": "^1.15.8",
