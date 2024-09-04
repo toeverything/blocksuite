@@ -1,3 +1,4 @@
+import type { SurfaceContext } from '@blocksuite/affine-block-surface';
 import type { GfxModel } from '@blocksuite/block-std/gfx';
 import type { IBound, IVec, IVec3 } from '@blocksuite/global/utils';
 
@@ -32,7 +33,6 @@ import {
 } from '@blocksuite/global/utils';
 
 import type { Connectable } from '../../_common/types.js';
-import type { SurfaceContext } from '../surface-block.js';
 
 import { isConnectorWithLabel } from '../element-model/utils/connector.js';
 import { Overlay } from '../renderer/canvas-renderer.js';

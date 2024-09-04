@@ -1,7 +1,9 @@
+import type { ShapeElementModel } from '@blocksuite/affine-block-surface';
 import type { ShapeName } from '@blocksuite/affine-model';
 import type { PointerEventState } from '@blocksuite/block-std';
 import type { IVec } from '@blocksuite/global/utils';
 
+import { CanvasElementType } from '@blocksuite/affine-block-surface';
 import {
   DEFAULT_SHAPE_FILL_COLOR,
   DEFAULT_SHAPE_STROKE_COLOR,
@@ -11,12 +13,10 @@ import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import { Bound } from '@blocksuite/global/utils';
 import { noop } from '@blocksuite/global/utils';
 
-import type { ShapeElementModel } from '../../../surface-block/index.js';
 import type { SelectionArea } from '../services/tools-manager.js';
 import type { EdgelessTool } from '../types.js';
 
 import { hasClassNameInList } from '../../../_common/utils/index.js';
-import { CanvasElementType } from '../../../surface-block/index.js';
 import {
   EXCLUDING_MOUSE_OUT_CLASS_LIST,
   SHAPE_OVERLAY_HEIGHT,

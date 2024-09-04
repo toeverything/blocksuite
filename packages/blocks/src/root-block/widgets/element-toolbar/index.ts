@@ -1,3 +1,4 @@
+import type { MindmapElementModel } from '@blocksuite/affine-block-surface';
 import type {
   AttachmentBlockModel,
   BookmarkBlockModel,
@@ -15,6 +16,17 @@ import type {
   RootBlockModel,
 } from '@blocksuite/affine-model';
 
+import {
+  ConnectorMode,
+  GroupElementModel,
+} from '@blocksuite/affine-block-surface';
+import {
+  type BrushElementModel,
+  type ConnectorElementModel,
+  ShapeElementModel,
+  type TextElementModel,
+  CommonUtils,
+} from '@blocksuite/affine-block-surface';
 import { ConnectorCWithArrowIcon } from '@blocksuite/affine-components/icons';
 import {
   type MenuItemGroup,
@@ -29,22 +41,10 @@ import { type TemplateResult, css, html, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { join } from 'lit/directives/join.js';
 
-import type { MindmapElementModel } from '../../../surface-block/element-model/mindmap.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 import type { ConnectorToolController } from '../../edgeless/tools/connector-tool.js';
 import type { ElementToolbarMoreMenuContext } from './more-menu/context.js';
 
-import {
-  ConnectorMode,
-  GroupElementModel,
-} from '../../../surface-block/index.js';
-import {
-  type BrushElementModel,
-  type ConnectorElementModel,
-  ShapeElementModel,
-  type TextElementModel,
-  clamp,
-} from '../../../surface-block/index.js';
 import { getMoreMenuConfig } from '../../configs/toolbar.js';
 import { edgelessElementsBound } from '../../edgeless/utils/bound-utils.js';
 import {
@@ -226,8 +226,8 @@ export class EdgelessElementToolbarWidget extends WidgetComponent<
     requestConnectedFrame(() => {
       const rect = this.getBoundingClientRect();
 
-      left = clamp(x, 10, width - rect.width - 10);
-      top = clamp(top, 10, height - rect.height - 150);
+      left = CommonUtils.clamp(x, 10, width - rect.width - 10);
+      top = CommonUtils.clamp(top, 10, height - rect.height - 150);
 
       this.style.transform = `translate3d(${left}px, ${top}px, 0)`;
     }, this);

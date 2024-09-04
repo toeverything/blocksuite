@@ -40,6 +40,7 @@ export {
   ShapeElementModel,
   TextElementModel,
 } from '@blocksuite/affine-model';
+
 export {
   almostEqual,
   clamp,

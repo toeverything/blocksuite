@@ -1,3 +1,5 @@
+import type { BlockLayer } from '@blocksuite/affine-block-surface';
+import type { CanvasRenderer } from '@blocksuite/affine-block-surface';
 import type {
   FrameBlockModel,
   GroupElementModel,
@@ -13,8 +15,6 @@ import { styleMap } from 'lit/directives/style-map.js';
 import { literal, html as staticHtml, unsafeStatic } from 'lit/static-html.js';
 
 import type { GfxBlockModel } from '../root-block/edgeless/block-model.js';
-import type { BlockLayer } from '../surface-block/managers/layer-manager.js';
-import type { CanvasRenderer } from '../surface-block/renderer/canvas-renderer.js';
 
 import './portal/generic-block.js';
 import './portal/note.js';

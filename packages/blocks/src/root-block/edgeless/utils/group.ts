@@ -1,4 +1,4 @@
-import { GroupElementModel } from '../../../surface-block/index.js';
+import { GroupElementModel } from '@blocksuite/affine-block-surface';
 export function getElementsWithoutGroup(elements: BlockSuite.EdgelessModel[]) {
   const set = new Set<BlockSuite.EdgelessModel>();
 

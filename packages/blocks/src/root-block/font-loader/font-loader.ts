@@ -1,6 +1,6 @@
-import { IS_FIREFOX } from '@blocksuite/global/env';
+import type { FontConfig } from '@blocksuite/affine-block-surface';
 
-import type { FontConfig } from '../../surface-block/consts.js';
+import { IS_FIREFOX } from '@blocksuite/global/env';
 
 const initFontFace = IS_FIREFOX
   ? ({ font, weight, url, style }: FontConfig) =>

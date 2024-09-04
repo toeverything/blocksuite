@@ -1,3 +1,5 @@
+import type { GroupElementModel } from '@blocksuite/affine-block-surface';
+
 import {
   NoteIcon,
   RenameIcon,
@@ -13,7 +15,6 @@ import { LitElement, html, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { join } from 'lit/directives/join.js';
 
-import type { GroupElementModel } from '../../../surface-block/index.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 
 import { DEFAULT_NOTE_HEIGHT } from '../../edgeless/utils/consts.js';

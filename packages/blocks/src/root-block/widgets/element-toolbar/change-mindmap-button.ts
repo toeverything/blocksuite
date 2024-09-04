@@ -1,5 +1,8 @@
+import type { MindmapElementModel } from '@blocksuite/affine-block-surface';
 import type { ShapeElementModel } from '@blocksuite/affine-model';
 
+import { LayoutType } from '@blocksuite/affine-block-surface';
+import { MindmapStyle } from '@blocksuite/affine-block-surface';
 import {
   MindmapBalanceLayoutIcon,
   MindmapLeftLayoutIcon,
@@ -19,11 +22,7 @@ import { customElement, property, state } from 'lit/decorators.js';
 import { join } from 'lit/directives/join.js';
 import { repeat } from 'lit/directives/repeat.js';
 
-import type { MindmapElementModel } from '../../../surface-block/element-model/mindmap.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
-
-import { LayoutType } from '../../../surface-block/element-model/utils/mindmap/layout.js';
-import { MindmapStyle } from '../../../surface-block/element-model/utils/mindmap/style.js';
 
 const MINDMAP_STYLE_LIST = [
   {

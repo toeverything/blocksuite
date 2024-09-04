@@ -12,8 +12,8 @@ import {
   compareLayer,
   SurfaceGroupLikeModel,
   CanvasElementType,
-  splitIntoLines,
-  getBoundsWithRotation,
+  CommonUtils,
+  TextUtils,
   SortOrder,
 } from '@blocksuite/affine-block-surface';
 import { BookmarkStyles } from '@blocksuite/affine-model';
@@ -1036,7 +1036,7 @@ export class EdgelessClipboardController extends PageClipboard {
     });
 
     if (typeof content === 'string') {
-      splitIntoLines(content).forEach((line, idx) => {
+      TextUtils.splitIntoLines(content).forEach((line, idx) => {
         edgeless.service.addBlock(
           'affine:paragraph',
           { text: new DocCollection.Y.Text(line) },
@@ -1325,7 +1325,7 @@ export class EdgelessClipboardController extends PageClipboard {
       bounds.push(Bound.deserialize(block.xywh));
     });
     shapes.forEach(shape => {
-      bounds.push(getBoundsWithRotation(shape.elementBound));
+      bounds.push(CommonUtils.getBoundsWithRotation(shape.elementBound));
     });
     const bound = getCommonBound(bounds);
     assertExists(bound, 'bound not exist');
