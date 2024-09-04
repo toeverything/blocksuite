@@ -1,5 +1,7 @@
+import type { ConnectorElementModel } from '@blocksuite/affine-block-surface';
 import type { RichText } from '@blocksuite/affine-components/rich-text';
 
+import { getLineHeight } from '@blocksuite/affine-block-surface';
 import '@blocksuite/affine-components/rich-text';
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import { almostEqual } from '@blocksuite/affine-shared/utils';
@@ -15,10 +17,7 @@ import { css, html, nothing } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type { ConnectorElementModel } from '../../../../surface-block/index.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
-
-import { getLineHeight } from '../../../../surface-block/renderer/elements/text/utils.js';
 
 const HORIZONTAL_PADDING = 2;
 const VERTICAL_PADDING = 2;

@@ -1,6 +1,3 @@
-import type { SurfaceBlockModel } from './surface-model.js';
-import type { SurfaceBlockService } from './surface-service.js';
-
 export { type IModelCoord, ZOOM_MAX, ZOOM_MIN, ZOOM_STEP } from './consts.js';
 export {
   AffineCanvasTextFonts,
@@ -67,14 +64,3 @@ export {
   toDegree,
   toRadian,
 } from '@blocksuite/global/utils';
-
-declare global {
-  namespace BlockSuite {
-    interface BlockServices {
-      'affine:surface': SurfaceBlockService;
-    }
-    interface BlockModels {
-      'affine:surface': SurfaceBlockModel;
-    }
-  }
-}

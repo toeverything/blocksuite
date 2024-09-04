@@ -27,7 +27,7 @@ import { test } from '../utils/playwright.js';
 test.describe('note to linked doc', () => {
   test('select a note and turn it into a linked doc', async ({ page }) => {
     await edgelessCommonSetup(page);
-    const noteId = await createNote(page, [100, 0]);
+    const noteId = await createNote(page, [100, 0], '');
     await activeNoteInEdgeless(page, noteId);
     await waitNextFrame(page, 200);
     await type(page, 'Hello');
@@ -200,10 +200,10 @@ test.describe('single edgeless element to linked doc', () => {
       }));
     });
     expect(groups.length).toBe(1);
-    expect(groups[0]).toEqual({
-      type: 'group',
-      children: ['affine:note', 'shape', 'connector', 'brush'],
-    });
+    expect(groups[0].children).toContain('affine:note');
+    expect(groups[0].children).toContain('shape');
+    expect(groups[0].children).toContain('connector');
+    expect(groups[0].children).toContain('brush');
   });
 
   test('select a frame, turn into a linked doc', async ({ page }) => {
@@ -234,10 +234,16 @@ test.describe('single edgeless element to linked doc', () => {
       const blocks = container!.service.blocks.map(b => b.flavour);
       return { blocks, elements };
     });
-    expect(nodes).toEqual({
-      blocks: ['affine:frame', 'affine:note'],
-      elements: ['group', 'shape', 'connector', 'brush'],
-    });
+
+    expect(nodes.blocks).toHaveLength(2);
+    expect(nodes.blocks).toContain('affine:frame');
+    expect(nodes.blocks).toContain('affine:note');
+
+    expect(nodes.elements).toHaveLength(4);
+    expect(nodes.elements).toContain('group');
+    expect(nodes.elements).toContain('shape');
+    expect(nodes.elements).toContain('connector');
+    expect(nodes.elements).toContain('brush');
   });
 });
 
@@ -249,11 +255,15 @@ test.describe('multiple edgeless elements to linked doc', () => {
     await createNote(page, [100, 0], 'Hello World');
     await page.mouse.click(10, 50);
 
-    await createShapeElement(page, [100, 100], [100, 100], Shape.Square);
+    await createShapeElement(page, [100, 100], [200, 200], Shape.Square);
+    await selectAllByKeyboard(page);
+    await triggerComponentToolbarAction(page, 'addGroup');
+
+    await createShapeElement(page, [200, 200], [300, 300], Shape.Square);
+    await createConnectorElement(page, [250, 300], [100, 70]);
     await selectAllByKeyboard(page);
     await triggerComponentToolbarAction(page, 'addFrame');
 
-    await createConnectorElement(page, [100, 150], [100, 10]);
     const start = { x: 400, y: 400 };
     const end = { x: 500, y: 500 };
     await addBasicBrushElement(page, start, end);
@@ -272,10 +282,15 @@ test.describe('multiple edgeless elements to linked doc', () => {
       const blocks = container!.service.blocks.map(b => b.flavour);
       return { blocks, elements };
     });
-    expect(nodes).toEqual({
-      blocks: ['affine:frame', 'affine:note'],
-      elements: ['shape', 'connector', 'brush'],
-    });
+    expect(nodes.blocks).toHaveLength(2);
+    expect(nodes.blocks).toContain('affine:frame');
+    expect(nodes.blocks).toContain('affine:note');
+
+    expect(nodes.elements).toHaveLength(5);
+    expect(nodes.elements).toContain('group');
+    expect(nodes.elements).toContain('connector');
+    expect(nodes.elements).toContain('brush');
+    expect(nodes.elements.filter(el => el === 'shape')).toHaveLength(2);
   });
 
   test('multi-select with embed doc card inside, turn it into a linked doc', async ({
@@ -304,10 +319,13 @@ test.describe('multiple edgeless elements to linked doc', () => {
       const blocks = container!.service.blocks.map(b => b.flavour);
       return { blocks, elements };
     });
-    expect(nodes).toEqual({
-      blocks: ['affine:embed-synced-doc'],
-      elements: ['shape', 'connector'],
-    });
+
+    expect(nodes.blocks).toHaveLength(1);
+    expect(nodes.blocks).toContain('affine:embed-synced-doc');
+
+    expect(nodes.elements).toHaveLength(2);
+    expect(nodes.elements).toContain('shape');
+    expect(nodes.elements).toContain('connector');
   });
 
   test('multi-select with mindmap, turn it into a linked doc', async ({
@@ -330,9 +348,11 @@ test.describe('multiple edgeless elements to linked doc', () => {
       const blocks = container!.service.blocks.map(b => b.flavour);
       return { blocks, elements };
     });
-    expect(nodes).toEqual({
-      blocks: [],
-      elements: ['mindmap', 'shape', 'shape', 'shape', 'shape'],
-    });
+
+    expect(nodes.blocks).toHaveLength(0);
+
+    expect(nodes.elements).toHaveLength(5);
+    expect(nodes.elements).toContain('mindmap');
+    expect(nodes.elements.filter(el => el === 'shape')).toHaveLength(4);
   });
 });

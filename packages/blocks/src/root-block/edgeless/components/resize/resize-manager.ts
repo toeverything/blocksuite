@@ -1,15 +1,15 @@
 import type { PointLocation } from '@blocksuite/global/utils';
 import type { IVec } from '@blocksuite/global/utils';
 
+import {
+  getQuadBoundsWithRotation,
+  rotatePoints,
+} from '@blocksuite/affine-block-surface';
 import { Bound } from '@blocksuite/global/utils';
 import { type IPoint, assertExists } from '@blocksuite/global/utils';
 
 import type { SelectableProps } from '../../utils/query.js';
 
-import {
-  getQuadBoundsWithRotation,
-  rotatePoints,
-} from '../../../../surface-block/index.js';
 import { NOTE_MIN_WIDTH } from '../../utils/consts.js';
 import { HandleDirection, type ResizeMode } from './resize-handles.js';
 

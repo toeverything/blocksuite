@@ -1,6 +1,9 @@
 import type { RichText } from '@blocksuite/affine-components/rich-text';
 import type { TextElementModel } from '@blocksuite/affine-model';
 
+import { toRadian } from '@blocksuite/affine-block-surface';
+import { getLineHeight } from '@blocksuite/affine-block-surface';
+import { wrapFontFamily } from '@blocksuite/affine-block-surface';
 import '@blocksuite/affine-components/rich-text';
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import {
@@ -15,9 +18,6 @@ import { styleMap } from 'lit/directives/style-map.js';
 
 import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
 
-import { toRadian } from '../../../../surface-block/index.js';
-import { getLineHeight } from '../../../../surface-block/renderer/elements/text/utils.js';
-import { wrapFontFamily } from '../../../../surface-block/utils/font.js';
 import { deleteElements } from '../../utils/crud.js';
 import { getSelectedRect } from '../../utils/query.js';
 

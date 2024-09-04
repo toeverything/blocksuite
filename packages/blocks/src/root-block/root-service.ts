@@ -3,6 +3,7 @@ import type { RefNodeSlots } from '@blocksuite/affine-components/rich-text';
 import type { EmbedCardStyle } from '@blocksuite/affine-model';
 import type { BlockComponent } from '@blocksuite/block-std';
 
+import { CommunityCanvasTextFonts } from '@blocksuite/affine-block-surface';
 import { RootBlockSchema } from '@blocksuite/affine-model';
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import { BlockService } from '@blocksuite/block-std';
@@ -21,8 +22,7 @@ import {
   MarkdownTransformer,
   ZipTransformer,
 } from '../_common/transformers/index.js';
-import { CommunityCanvasTextFonts } from '../surface-block/consts.js';
-import { EditPropsStore } from '../surface-block/managers/edit-session.js';
+import { EditPropsStore } from './edgeless/services/edit-session.js';
 import { FontLoader } from './font-loader/font-loader.js';
 
 export type EmbedOptions = {

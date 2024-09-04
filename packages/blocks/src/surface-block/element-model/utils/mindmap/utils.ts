@@ -164,7 +164,7 @@ export function hideTargetConnector(
  * @param from
  * @param to
  */
-export function moveSubtree(
+export function moveMindMapSubtree(
   from: MindmapElementModel,
   subtree: MindmapNode,
   to: MindmapElementModel,

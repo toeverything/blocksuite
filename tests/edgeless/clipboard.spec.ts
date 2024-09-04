@@ -113,6 +113,7 @@ test.describe('frame clipboard', () => {
     const originIds = await getAllSortedIds(page);
     expect(originIds.length).toBe(5);
 
+    await selectAllByKeyboard(page);
     await copyByKeyboard(page);
     const move = await toViewCoord(page, [250, 250]);
     await page.mouse.move(move[0], move[1]);

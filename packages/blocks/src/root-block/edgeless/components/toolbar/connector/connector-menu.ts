@@ -1,3 +1,4 @@
+import { ConnectorMode } from '@blocksuite/affine-block-surface';
 import {
   ConnectorCWithArrowIcon,
   ConnectorLWithArrowIcon,
@@ -13,7 +14,6 @@ import type { EdgelessTool } from '../../../types.js';
 import type { ColorEvent } from '../../panel/color-panel.js';
 import type { LineWidthEvent } from '../../panel/line-width-panel.js';
 
-import { ConnectorMode } from '../../../../../surface-block/index.js';
 import '../../panel/one-row-color-panel.js';
 import '../common/slide-menu.js';
 import { EdgelessToolbarToolMixin } from '../mixins/tool.mixin.js';

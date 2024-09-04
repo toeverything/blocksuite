@@ -1,3 +1,8 @@
+import type {
+  ConnectorElementModel,
+  SurfaceBlockModel,
+  SurfaceBlockTransformer,
+} from '@blocksuite/affine-block-surface';
 import type { BlockModel, Y } from '@blocksuite/store';
 
 import {
@@ -14,10 +19,6 @@ import {
   Job,
   type SnapshotReturn,
 } from '@blocksuite/store';
-
-import type { ConnectorElementModel } from '../../../surface-block/index.js';
-import type { SurfaceBlockModel } from '../../../surface-block/surface-model.js';
-import type { SurfaceBlockTransformer } from '../../../surface-block/surface-transformer.js';
 
 /**
  * Those block contains other block's id

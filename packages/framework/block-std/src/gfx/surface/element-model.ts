@@ -416,6 +416,7 @@ export abstract class GfxGroupLikeElementModel<
   }
 
   /**
+   * @deprecated Use `getAllDescendantElements` instead.
    * Get all descendants of this group
    * @param withoutGroup if true, will not include group element
    */

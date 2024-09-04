@@ -1,3 +1,4 @@
+import { SurfaceBlockSchema } from '@blocksuite/affine-block-surface';
 import {
   DatabaseBlockSchema,
   FrameBlockSchema,
@@ -12,8 +13,6 @@ import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { assert, describe, expect, test } from 'vitest';
-
-import { SurfaceBlockSchema } from '../../surface-block/surface-model.js';
 
 async function loadBinary(name: string) {
   const originPath = fileURLToPath(import.meta.url);

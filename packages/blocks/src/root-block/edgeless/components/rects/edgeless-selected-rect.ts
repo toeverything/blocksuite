@@ -6,10 +6,22 @@ import type {
 } from '@blocksuite/global/utils';
 
 import {
+  CanvasElementType,
+  GroupElementModel,
+  ShapeElementModel,
+} from '@blocksuite/affine-block-surface';
+import {
+  ConnectorElementModel,
+  normalizeDegAngle,
+  normalizeShapeBound,
+} from '@blocksuite/affine-block-surface';
+import { normalizeTextBound } from '@blocksuite/affine-block-surface';
+import {
   type BookmarkBlockModel,
   type EdgelessTextBlockModel,
   type EmbedHtmlModel,
   type EmbedSyncedDocModel,
+  FrameBlockModel,
   NoteBlockModel,
   TextElementModel,
 } from '@blocksuite/affine-model';
@@ -46,17 +58,6 @@ import {
   SYNCED_MIN_WIDTH,
 } from '../../../../embed-synced-doc-block/styles.js';
 import {
-  CanvasElementType,
-  GroupElementModel,
-  ShapeElementModel,
-} from '../../../../surface-block/index.js';
-import {
-  ConnectorElementModel,
-  normalizeDegAngle,
-  normalizeShapeBound,
-} from '../../../../surface-block/index.js';
-import { normalizeTextBound } from '../../../../surface-block/renderer/elements/text/utils.js';
-import {
   AI_CHAT_BLOCK_MAX_HEIGHT,
   AI_CHAT_BLOCK_MAX_WIDTH,
   AI_CHAT_BLOCK_MIN_HEIGHT,
@@ -85,6 +86,7 @@ import {
   isImageBlock,
   isNoteBlock,
 } from '../../utils/query.js';
+import { getTopElements } from '../../utils/tree.js';
 import '../auto-complete/edgeless-auto-complete.js';
 import '../connector/connector-handle.js';
 import { HandleDirection } from '../resize/resize-handles.js';
@@ -211,6 +213,11 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
 
       if (element instanceof ConnectorElementModel && matrix && path) {
         this.#adjustConnector(element, bound, matrix, path);
+        return;
+      }
+
+      if (element instanceof FrameBlockModel) {
+        this.#adjustFrame(element, bound);
         return;
       }
 
@@ -978,6 +985,27 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       scale,
       xywh: bound.serialize(),
     });
+  }
+
+  #adjustFrame(frame: FrameBlockModel, bound: Bound) {
+    const frameManager = this.edgeless.service.frame;
+
+    const oldChildren = frameManager.getChildElementsInFrame(frame);
+
+    this.edgeless.service.updateElement(frame.id, {
+      xywh: bound.serialize(),
+    });
+
+    const newChildren = getTopElements(
+      frameManager.getElementsInFrameBound(frame)
+    ).concat(
+      oldChildren.filter(oldChild => {
+        return frame.intersectsBound(oldChild.elementBound);
+      })
+    );
+
+    frameManager.removeAllChildrenFromFrame(frame);
+    frameManager.addElementsToFrame(frame, newChildren);
   }
 
   #adjustNote(

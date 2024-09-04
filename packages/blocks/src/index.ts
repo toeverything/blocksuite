@@ -1,6 +1,7 @@
 /// <reference types="@blocksuite/global" />
 import '@blocksuite/affine-block-paragraph';
 import '@blocksuite/affine-block-list';
+import '@blocksuite/affine-block-surface';
 import '@blocksuite/affine-components/context-menu';
 import '@blocksuite/affine-components/rich-text';
 import '@blocksuite/affine-components/toolbar';
@@ -83,7 +84,6 @@ export {
 export { MiniMindmapPreview } from './surface-block/mini-mindmap/mindmap-preview.js';
 export { SurfaceBlockComponent } from './surface-block/surface-block.js';
 export { SurfaceBlockSchema } from './surface-block/surface-model.js';
-export * from './surface-block/surface-service.js';
 export * from './surface-ref-block/index.js';
 export * from '@blocksuite/affine-block-list';
 export * from '@blocksuite/affine-block-paragraph';

@@ -6,7 +6,6 @@ import type { EdgelessTool } from '../../../types.js';
 
 import { EdgelessToolbarToolMixin } from '../mixins/tool.mixin.js';
 import { FrameConfig } from './config.js';
-import { createFrame } from './service.js';
 
 @customElement('edgeless-frame-menu')
 export class EdgelessFrameMenu extends EdgelessToolbarToolMixin(LitElement) {
@@ -82,7 +81,10 @@ export class EdgelessFrameMenu extends EdgelessToolbarToolMixin(LitElement) {
             item => item.name,
             (item, index) => html`
               <div
-                @click=${() => createFrame(edgeless, item.wh)}
+                @click=${() => {
+                  edgeless.tools.setEdgelessTool({ type: 'default' });
+                  edgeless.service.frame.createFrameOnViewportCenter(item.wh);
+                }}
                 class="frame-add-button ${index}"
                 data-name="${item.name}"
                 data-w="${item.wh[0]}"

@@ -1,3 +1,12 @@
+import type { ShapeElementModel } from '@blocksuite/affine-block-surface';
+
+import { MindmapElementModel } from '@blocksuite/affine-block-surface';
+import { LayoutType } from '@blocksuite/affine-block-surface';
+import {
+  ConnectorElementModel,
+  ConnectorMode,
+  GroupElementModel,
+} from '@blocksuite/affine-block-surface';
 import {
   EdgelessTextBlockModel,
   NoteDisplayMode,
@@ -7,7 +16,6 @@ import { matchFlavours } from '@blocksuite/affine-shared/utils';
 import { IS_MAC } from '@blocksuite/global/env';
 import { Bound } from '@blocksuite/global/utils';
 
-import type { ShapeElementModel } from '../../surface-block/index.js';
 import type { EdgelessRootBlockComponent } from './edgeless-root-block.js';
 import type { EdgelessTool } from './types.js';
 
@@ -18,13 +26,6 @@ import {
 } from '../../_common/edgeless/mindmap/index.js';
 import { LassoMode } from '../../_common/types.js';
 import { EdgelessTextBlockComponent } from '../../edgeless-text-block/edgeless-text-block.js';
-import { MindmapElementModel } from '../../surface-block/element-model/mindmap.js';
-import { LayoutType } from '../../surface-block/element-model/utils/mindmap/layout.js';
-import {
-  ConnectorElementModel,
-  ConnectorMode,
-  GroupElementModel,
-} from '../../surface-block/index.js';
 import { PageKeyboardManager } from '../keyboard/keyboard-manager.js';
 import { GfxBlockModel } from './block-model.js';
 import { CopilotSelectionController } from './tools/copilot-tool.js';

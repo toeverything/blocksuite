@@ -1,20 +1,20 @@
+import type { MindmapStyle } from '@blocksuite/affine-block-surface';
 import type { TemplateResult } from 'lit';
 
-import { Bound } from '@blocksuite/global/utils';
-import { assertInstanceOf } from '@blocksuite/global/utils';
-import { DocCollection } from '@blocksuite/store';
-
-import type { MindmapStyle } from '../../../../../surface-block/index.js';
-import type { EdgelessRootBlockComponent } from '../../../edgeless-root-block.js';
-import type { EdgelessRootService } from '../../../edgeless-root-service.js';
-
-import { LayoutType } from '../../../../../surface-block/element-model/utils/mindmap/layout.js';
+import { LayoutType } from '@blocksuite/affine-block-surface';
 import {
   CanvasElementType,
   type MindmapElementModel,
   type ShapeElementModel,
   TextElementModel,
-} from '../../../../../surface-block/index.js';
+} from '@blocksuite/affine-block-surface';
+import { Bound } from '@blocksuite/global/utils';
+import { assertInstanceOf } from '@blocksuite/global/utils';
+import { DocCollection } from '@blocksuite/store';
+
+import type { EdgelessRootBlockComponent } from '../../../edgeless-root-block.js';
+import type { EdgelessRootService } from '../../../edgeless-root-service.js';
+
 import { mountTextElementEditor } from '../../../utils/text.js';
 
 export type ConfigProperty = 'x' | 'y' | 'r' | 's' | 'z' | 'o';

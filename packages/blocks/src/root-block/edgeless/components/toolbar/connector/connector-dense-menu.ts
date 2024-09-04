@@ -1,3 +1,4 @@
+import { ConnectorMode } from '@blocksuite/affine-block-surface';
 import {
   ConnectorCWithArrowIcon,
   ConnectorIcon,
@@ -6,8 +7,6 @@ import {
 } from '@blocksuite/affine-components/icons';
 
 import type { DenseMenuBuilder } from '../common/type.js';
-
-import { ConnectorMode } from '../../../../../surface-block/index.js';
 
 export const buildConnectorDenseMenu: DenseMenuBuilder = edgeless => {
   const prevMode =

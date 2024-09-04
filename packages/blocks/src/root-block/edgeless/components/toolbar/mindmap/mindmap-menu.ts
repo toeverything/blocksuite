@@ -1,8 +1,8 @@
+import type { MindmapStyle } from '@blocksuite/affine-block-surface';
+
 import { LitElement, type TemplateResult, css, html, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
-
-import type { MindmapStyle } from '../../../../../surface-block/index.js';
 
 import { getTooltipWithShortcut } from '../../utils.js';
 import { EdgelessDraggableElementController } from '../common/draggable/draggable-element.controller.js';

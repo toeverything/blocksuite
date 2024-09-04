@@ -30,7 +30,10 @@ const getPortalTag = (model: BlockModel) => {
 
 @customElement('surface-ref-portal')
 export class SurfaceRefPortal extends WithDisposable(ShadowlessElement) {
-  private _getBlocksInFrame = (model: FrameBlockModel): GfxBlockModel[] => {
+  // TODO(@L-Sun): use getBlockInFrame instead of getBlocksInFrameBound
+  private _getBlocksInFrameBound = (
+    model: FrameBlockModel
+  ): GfxBlockModel[] => {
     const bound = model.elementBound;
     const candidates =
       this.surfaceService?.layer.blocksGrid.search(bound) ?? [];
@@ -42,7 +45,7 @@ export class SurfaceRefPortal extends WithDisposable(ShadowlessElement) {
     const refModel = this.refModel;
     const blocks =
       'flavour' in refModel
-        ? this._getBlocksInFrame(refModel)
+        ? this._getBlocksInFrameBound(refModel)
         : this._getBlocksInGroup(refModel);
     const blockLayers = (this.surfaceService?.layer.layers.filter(
       layer => layer.type === 'block'

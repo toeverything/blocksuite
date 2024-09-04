@@ -35,7 +35,7 @@ import { isControlledKeyboardEvent } from '@blocksuite/affine-shared/utils';
 import { html } from 'lit';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type { LastProps } from '../../../surface-block/managers/edit-session.js';
+import type { LastProps } from '../../edgeless/services/edit-session.js';
 import type { PieMenuContext } from './base.js';
 
 import {

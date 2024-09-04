@@ -35,7 +35,7 @@ import {
 } from '../../../../_common/utils/render-linked-doc.js';
 import { edgelessElementsBound } from '../../../edgeless/utils/bound-utils.js';
 import { duplicate } from '../../../edgeless/utils/clipboard-utils.js';
-import { getCloneElements } from '../../../edgeless/utils/clone-utils.js';
+import { getSortedCloneElements } from '../../../edgeless/utils/clone-utils.js';
 import { moveConnectors } from '../../../edgeless/utils/connector.js';
 import { deleteElements } from '../../../edgeless/utils/crud.js';
 
@@ -305,10 +305,7 @@ export const conversionsGroup: MenuItemGroup<ElementToolbarMoreMenuContext> = {
         const title = await promptDocTitle(host);
         if (title === null) return;
 
-        const elements = getCloneElements(
-          selection.selectedElements,
-          service.frame
-        );
+        const elements = getSortedCloneElements(selection.selectedElements);
         const linkedDoc = createLinkedDocFromEdgelessElements(
           host,
           elements,

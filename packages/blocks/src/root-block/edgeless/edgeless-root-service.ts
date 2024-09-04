@@ -1,7 +1,26 @@
+import type {
+  CanvasElementType,
+  ConnectorElementModel,
+} from '@blocksuite/affine-block-surface';
+import type {
+  Overlay,
+  SurfaceBlockModel,
+} from '@blocksuite/affine-block-surface';
+import type { ReorderingDirection } from '@blocksuite/affine-block-surface';
+import type { SurfaceContext } from '@blocksuite/affine-block-surface';
 import type { BlockStdScope } from '@blocksuite/block-std';
 import type { PointTestOptions } from '@blocksuite/block-std/gfx';
 import type { IBound } from '@blocksuite/global/utils';
 
+import { SurfaceGroupLikeModel } from '@blocksuite/affine-block-surface';
+import { MindmapElementModel } from '@blocksuite/affine-block-surface';
+import { ConnectionOverlay } from '@blocksuite/affine-block-surface';
+import { LayerManager } from '@blocksuite/affine-block-surface';
+import { compareLayer } from '@blocksuite/affine-block-surface';
+import {
+  type ElementRenderer,
+  elementRenderers,
+} from '@blocksuite/affine-block-surface';
 import {
   type FrameBlockModel,
   type GroupElementModel,
@@ -14,25 +33,9 @@ import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 import { Bound, getCommonBound, last } from '@blocksuite/global/utils';
 import { type BlockModel, Slot } from '@blocksuite/store';
 
-import type {
-  CanvasElementType,
-  ConnectorElementModel,
-} from '../../surface-block/element-model/index.js';
-import type { Overlay, SurfaceBlockModel } from '../../surface-block/index.js';
-import type { ReorderingDirection } from '../../surface-block/managers/layer-manager.js';
-import type { SurfaceContext } from '../../surface-block/surface-block.js';
 import type { EdgelessToolConstructor } from './services/tools-manager.js';
 import type { EdgelessTool } from './types.js';
 
-import { SurfaceGroupLikeModel } from '../../surface-block/element-model/base.js';
-import { MindmapElementModel } from '../../surface-block/index.js';
-import { ConnectionOverlay } from '../../surface-block/managers/connector-manager.js';
-import { LayerManager } from '../../surface-block/managers/layer-manager.js';
-import { compare } from '../../surface-block/managers/layer-utils.js';
-import {
-  type ElementRenderer,
-  elementRenderers,
-} from '../../surface-block/renderer/elements/index.js';
 import { getSurfaceBlock } from '../../surface-ref-block/utils.js';
 import { RootService, type TelemetryEvent } from '../root-service.js';
 import { GfxBlockModel } from './block-model.js';
@@ -440,28 +443,32 @@ export class EdgelessRootService extends RootService implements SurfaceContext {
       );
       return picked as BlockSuite.EdgelessModel[];
     };
-    const pickFrames = () => {
-      return this._layer.frames.filter(
-        frame =>
-          frame.includesPoint(x, y, options as PointTestOptions) ||
-          frame.externalBound?.isPointInBound([x, y])
+    const pickFrames = (byTitle: boolean) => {
+      return this._layer.frames.filter(frame =>
+        byTitle
+          ? frame.externalBound?.isPointInBound([x, y])
+          : frame.includesPoint(x, y, options)
       ) as BlockSuite.EdgelessModel[];
     };
 
-    const frames = pickFrames();
+    const framesByTitle = pickFrames(true);
 
-    if (frames.length === 0 || all) {
+    if (framesByTitle.length === 0 || all) {
       let results = pickCanvasElement().concat(pickBlock());
 
-      // FIXME: optimazation on ordered element
+      // FIXME(@doouding): optimization on ordered element
       results.sort(this._layer.compare);
 
-      results = results.concat(frames);
+      // The order is following: high to low
+      // 1. frames by pick title (fx -> f0)
+      // 2. block and canvas elements (bx -> ex -> ... -> b0 -> e0)
+      // 3. frames by pick bound (f'x -> f'0)
+      results = [...pickFrames(false), ...results, ...framesByTitle];
 
       // prettier-ignore
       return options.all ? results : (last(results) ?? null);
     } else {
-      return last(frames) ?? null;
+      return last(framesByTitle) ?? null;
     }
   }
 
@@ -479,7 +486,7 @@ export class EdgelessRootService extends RootService implements SurfaceContext {
     const results = this.pickElement(x, y, {
       ...options,
       all: true,
-    }) as BlockSuite.EdgelessModel[];
+    });
 
     let picked = last(results) ?? null;
     const { activeGroup } = selectionManager;
@@ -719,7 +726,7 @@ export class EdgelessRootService extends RootService implements SurfaceContext {
       ...this._layer.canvasElements,
       ...this._layer.blocks,
       ...this._layer.frames,
-    ].sort(compare);
+    ].sort(compareLayer);
   }
 
   /**

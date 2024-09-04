@@ -1,0 +1,58 @@
+{
+  "name": "@blocksuite/affine-block-surface",
+  "version": "0.1.0",
+  "description": "Surface block for BlockSuite.",
+  "type": "module",
+  "repository": "toeverything/blocksuite",
+  "scripts": {
+    "build": "tsc",
+    "test:unit": "nx vite:test --run --passWithNoTests",
+    "test:unit:coverage": "nx vite:test --run --coverage",
+    "test:e2e": "playwright test"
+  },
+  "keywords": [],
+  "author": "toeverything",
+  "license": "MPL-2.0",
+  "dependencies": {
+    "@blocksuite/affine-components": "workspace:*",
+    "@blocksuite/affine-model": "workspace:*",
+    "@blocksuite/affine-shared": "workspace:*",
+    "@blocksuite/block-std": "workspace:*",
+    "@blocksuite/global": "workspace:*",
+    "@blocksuite/store": "workspace:*",
+    "@lit-labs/preact-signals": "^1.0.2",
+    "@lit/context": "^1.1.2",
+    "@toeverything/theme": "^1.0.7",
+    "fractional-indexing": "^3.2.0",
+    "lit": "^3.2.0",
+    "lodash.isplainobject": "^4.0.6",
+    "lodash.merge": "^4.6.2",
+    "nanoid": "^5.0.7",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/dompurify": "^3.0.5",
+    "@types/lodash.isplainobject": "^4.0.9",
+    "@types/lodash.merge": "^4.6.9"
+  },
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "publishConfig": {
+    "access": "public",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "exports": {
+      ".": {
+        "import": "./dist/index.js",
+        "types": "./dist/index.d.ts"
+      }
+    }
+  },
+  "files": [
+    "src",
+    "dist",
+    "!src/__tests__",
+    "!dist/__tests__"
+  ]
+}

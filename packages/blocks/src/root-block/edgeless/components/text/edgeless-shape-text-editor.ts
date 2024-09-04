@@ -1,5 +1,12 @@
 import type { RichText } from '@blocksuite/affine-components/rich-text';
 
+import { TextResizing } from '@blocksuite/affine-block-surface';
+import {
+  MindmapElementModel,
+  type ShapeElementModel,
+} from '@blocksuite/affine-block-surface';
+import { toRadian } from '@blocksuite/affine-block-surface';
+import { wrapFontFamily } from '@blocksuite/affine-block-surface';
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import {
   RANGE_SYNC_EXCLUDE_ATTR,
@@ -15,13 +22,6 @@ import { styleMap } from 'lit/directives/style-map.js';
 
 import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
 
-import { TextResizing } from '../../../../surface-block/consts.js';
-import {
-  MindmapElementModel,
-  type ShapeElementModel,
-} from '../../../../surface-block/element-model/index.js';
-import { toRadian } from '../../../../surface-block/index.js';
-import { wrapFontFamily } from '../../../../surface-block/utils/font.js';
 import { getSelectedRect } from '../../utils/query.js';
 
 @customElement('edgeless-shape-text-editor')

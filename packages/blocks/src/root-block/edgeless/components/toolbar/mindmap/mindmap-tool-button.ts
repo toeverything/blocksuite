@@ -1,3 +1,4 @@
+import { MindmapStyle } from '@blocksuite/affine-block-surface';
 import { assertExists } from '@blocksuite/global/utils';
 import { LitElement, css, html, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
@@ -7,7 +8,6 @@ import { styleMap } from 'lit/directives/style-map.js';
 
 import type { EdgelessTool } from '../../../types.js';
 
-import { MindmapStyle } from '../../../../../surface-block/index.js';
 import { EdgelessDraggableElementController } from '../common/draggable/draggable-element.controller.js';
 import { EdgelessToolbarToolMixin } from '../mixins/tool.mixin.js';
 import { getMindMaps } from './assets.js';

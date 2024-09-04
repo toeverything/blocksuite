@@ -154,7 +154,10 @@ export class EdgelessFrameTitle extends WithDisposable(ShadowlessElement) {
     ];
 
     return html`
-      ${this._frameTitle && !_isNavigator && !_editing
+      ${this._frameTitle &&
+      this._frameTitle.length !== 0 &&
+      !_isNavigator &&
+      !_editing
         ? html`
             <div
               style=${styleMap({

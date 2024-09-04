@@ -1,11 +1,6 @@
+import type { ConnectorMode } from '@blocksuite/affine-block-surface';
 import type { PointerEventState } from '@blocksuite/block-std';
 import type { IBound, IVec } from '@blocksuite/global/utils';
-
-import { ShapeType } from '@blocksuite/affine-model';
-import { Bound, noop } from '@blocksuite/global/utils';
-
-import type { ConnectorMode } from '../../../surface-block/index.js';
-import type { EdgelessTool } from '../types.js';
 
 import {
   CanvasElementType,
@@ -13,12 +8,17 @@ import {
   type ConnectorElementModel,
   GroupElementModel,
   ShapeElementModel,
-} from '../../../surface-block/index.js';
+} from '@blocksuite/affine-block-surface';
 import {
   ConnectorEndpointLocations,
   ConnectorEndpointLocationsOnTriangle,
   calculateNearestLocation,
-} from '../../../surface-block/managers/connector-manager.js';
+} from '@blocksuite/affine-block-surface';
+import { ShapeType } from '@blocksuite/affine-model';
+import { Bound, noop } from '@blocksuite/global/utils';
+
+import type { EdgelessTool } from '../types.js';
+
 import { EdgelessToolController } from './edgeless-tool.js';
 
 enum ConnectorToolMode {

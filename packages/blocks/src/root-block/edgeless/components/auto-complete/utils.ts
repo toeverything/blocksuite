@@ -1,6 +1,16 @@
 import type { XYWH } from '@blocksuite/global/utils';
 
 import {
+  type Options,
+  Overlay,
+  type RoughCanvas,
+  normalizeDegAngle,
+} from '@blocksuite/affine-block-surface';
+import {
+  GroupElementModel,
+  ShapeElementModel,
+} from '@blocksuite/affine-block-surface';
+import {
   type Connection,
   type NoteBlockModel,
   type ShapeName,
@@ -13,16 +23,6 @@ import { DocCollection } from '@blocksuite/store';
 
 import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
 
-import {
-  GroupElementModel,
-  ShapeElementModel,
-} from '../../../../surface-block/element-model/index.js';
-import {
-  type Options,
-  Overlay,
-  type RoughCanvas,
-  normalizeDegAngle,
-} from '../../../../surface-block/index.js';
 import { type Shape, ShapeFactory } from '../../utils/tool-overlay.js';
 
 export enum Direction {

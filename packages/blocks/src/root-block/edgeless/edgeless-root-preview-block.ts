@@ -1,20 +1,20 @@
+import type { SurfaceBlockComponent } from '@blocksuite/affine-block-surface';
+import type { SurfaceBlockModel } from '@blocksuite/affine-block-surface';
 import type { RootBlockModel } from '@blocksuite/affine-model';
 import type { SurfaceSelection } from '@blocksuite/block-std';
 import type { IBound } from '@blocksuite/global/utils';
 
+import '@blocksuite/affine-block-surface';
 import { BlockComponent } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import { css, html } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 
-import type { SurfaceBlockComponent } from '../../surface-block/surface-block.js';
-import type { SurfaceBlockModel } from '../../surface-block/surface-model.js';
 import type { FontLoader } from '../font-loader/font-loader.js';
 import type { EdgelessRootBlockWidgetName } from '../types.js';
 import type { EdgelessRootService } from './edgeless-root-service.js';
 
 import { requestThrottledConnectedFrame } from '../../_common/utils/index.js';
-import '../../surface-block/surface-block.js';
 import './components/note-slicer/index.js';
 import './components/presentation/edgeless-navigator-black-background.js';
 import './components/rects/edgeless-dragging-area-rect.js';

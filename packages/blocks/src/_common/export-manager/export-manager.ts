@@ -3,6 +3,10 @@ import type { IBound } from '@blocksuite/global/utils';
 import type { Doc } from '@blocksuite/store';
 
 import {
+  type CanvasRenderer,
+  SurfaceElementModel,
+} from '@blocksuite/affine-block-surface';
+import {
   GroupElementModel,
   type RootBlockModel,
 } from '@blocksuite/affine-model';
@@ -21,13 +25,9 @@ import {
   getBlockComponentByModel,
   getRootByEditorHost,
 } from '../../_common/utils/index.js';
-import { getBlocksInFrame } from '../../root-block/edgeless/frame-manager.js';
+import { getBlocksInFrameBound } from '../../root-block/edgeless/frame-manager.js';
 import { xywhArrayToObject } from '../../root-block/edgeless/utils/convert.js';
 import { getBackgroundGrid } from '../../root-block/edgeless/utils/query.js';
-import {
-  type CanvasRenderer,
-  SurfaceElementModel,
-} from '../../surface-block/index.js';
 import { fetchImage } from '../adapters/utils.js';
 import { CANVAS_EXPORT_IGNORE_TAGS } from '../consts.js';
 import { FileExporter } from './file-exporter.js';
@@ -483,7 +483,8 @@ export class ExportManager {
       }
 
       if (matchFlavours(block, ['affine:frame'])) {
-        const blocksInsideFrame = getBlocksInFrame(this.doc, block, false);
+        // TODO(@L-Sun): use children of frame instead of bound
+        const blocksInsideFrame = getBlocksInFrameBound(this.doc, block, false);
         const frameBound = Bound.deserialize(block.xywh);
 
         for (let i = 0; i < blocksInsideFrame.length; i++) {

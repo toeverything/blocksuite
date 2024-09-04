@@ -1,3 +1,4 @@
+import { PageSurfaceBlockSpec } from '@blocksuite/affine-block-surface';
 import { DocModeService } from '@blocksuite/affine-shared/services';
 import {
   BlockViewExtension,
@@ -7,7 +8,6 @@ import {
 import { literal } from 'lit/static-html.js';
 
 import { PageRootService } from '../../root-block/page/page-root-service.js';
-import { PageSurfaceBlockSpec } from '../../surface-block/surface-spec.js';
 import { PageSurfaceRefBlockSpec } from '../../surface-ref-block/surface-ref-spec.js';
 import { CommonFirstPartyBlockSpecs } from '../common.js';
 
