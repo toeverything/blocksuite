@@ -17,7 +17,7 @@ import type { GfxViewportElement } from '@blocksuite/block-std/gfx';
 import type { IBound, IPoint, IVec } from '@blocksuite/global/utils';
 import type { BlockModel } from '@blocksuite/store';
 
-import { normalizeWheelDeltaY } from '@blocksuite/affine-block-surface';
+import { CommonUtils } from '@blocksuite/affine-block-surface';
 import { focusTextModel } from '@blocksuite/affine-components/rich-text';
 import { toast } from '@blocksuite/affine-components/toast';
 import { NoteDisplayMode } from '@blocksuite/affine-model';
@@ -91,6 +91,8 @@ import {
 } from './utils/consts.js';
 import { getBackgroundGrid, isCanvasElement } from './utils/query.js';
 import { mountShapeTextEditor } from './utils/text.js';
+
+const { normalizeWheelDeltaY } = CommonUtils;
 
 @customElement('affine-edgeless-root')
 export class EdgelessRootBlockComponent extends BlockComponent<

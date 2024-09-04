@@ -1,4 +1,9 @@
 import {
+  ConnectorElementModel,
+  GroupElementModel,
+  MindmapElementModel,
+} from '@blocksuite/affine-block-surface';
+import {
   AlignBottomIcon,
   AlignDistributeHorizontallyIcon,
   AlignDistributeVerticallyIcon,
@@ -16,12 +21,6 @@ import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
-
-import {
-  ConnectorElementModel,
-  GroupElementModel,
-  MindmapElementModel,
-} from '../../../surface-block/index.js';
 
 const enum Alignment {
   Bottom = 'Align bottom',

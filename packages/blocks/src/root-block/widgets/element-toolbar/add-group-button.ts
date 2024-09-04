@@ -1,14 +1,13 @@
+import {
+  GroupElementModel,
+  MindmapElementModel,
+} from '@blocksuite/affine-block-surface';
 import { GroupIcon } from '@blocksuite/affine-components/icons';
 import { WithDisposable } from '@blocksuite/block-std';
 import { LitElement, css, html, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
-
-import {
-  GroupElementModel,
-  MindmapElementModel,
-} from '../../../surface-block/index.js';
 
 @customElement('edgeless-add-group-button')
 export class EdgelessAddGroupButton extends WithDisposable(LitElement) {

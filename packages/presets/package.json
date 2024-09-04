@@ -13,6 +13,7 @@
   "author": "toeverything",
   "license": "MPL-2.0",
   "dependencies": {
+    "@blocksuite/affine-block-surface": "workspace:*",
     "@blocksuite/affine-shared": "workspace:*",
     "@blocksuite/block-std": "workspace:*",
     "@blocksuite/blocks": "workspace:*",

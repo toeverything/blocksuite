@@ -1,4 +1,4 @@
-import { wrapFontFamily } from '@blocksuite/affine-block-surface';
+import { TextUtils } from '@blocksuite/affine-block-surface';
 import { CheckIcon } from '@blocksuite/affine-components/icons';
 import { FontFamily, FontFamilyList } from '@blocksuite/affine-model';
 import { LitElement, css, html, nothing } from 'lit';
@@ -36,7 +36,7 @@ export class EdgelessFontFamilyPanel extends LitElement {
         return html`
           <edgeless-tool-icon-button
             data-font="${name}"
-            style="font-family: ${wrapFontFamily(font)}"
+            style="font-family: ${TextUtils.wrapFontFamily(font)}"
             .iconContainerPadding=${[4, 8]}
             .justify=${'space-between'}
             .active=${active}

@@ -11,11 +11,11 @@ import {
   ShapeElementModel,
 } from '@blocksuite/affine-block-surface';
 import {
+  CommonUtils,
   ConnectorElementModel,
-  normalizeDegAngle,
   normalizeShapeBound,
 } from '@blocksuite/affine-block-surface';
-import { normalizeTextBound } from '@blocksuite/affine-block-surface';
+import { TextUtils } from '@blocksuite/affine-block-surface';
 import {
   type BookmarkBlockModel,
   type EdgelessTextBlockModel,
@@ -261,7 +261,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       } else {
         this.edgeless.service.updateElement(id, {
           xywh: bounds.serialize(),
-          rotate: normalizeDegAngle(rotate + delta),
+          rotate: CommonUtils.normalizeDegAngle(rotate + delta),
         });
       }
     });
@@ -1117,7 +1117,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       } = element;
       // If the width of the text element has been changed by dragging,
       // We need to set hasMaxWidth to true for wrapping the text
-      bound = normalizeTextBound(
+      bound = TextUtils.normalizeTextBound(
         {
           yText,
           fontFamily,

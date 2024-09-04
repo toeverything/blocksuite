@@ -13,9 +13,7 @@ import {
 } from '@blocksuite/affine-block-surface';
 import {
   GroupElementModel,
-  clamp,
-  normalizeDegAngle,
-  toDegree,
+  CommonUtils,
 } from '@blocksuite/affine-block-surface';
 import { FrameIcon, SmallNoteIcon } from '@blocksuite/affine-components/icons';
 import { FontFamilyIcon } from '@blocksuite/affine-components/icons';
@@ -345,8 +343,10 @@ export class EdgelessAutoCompletePanel extends WithDisposable(LitElement) {
     assertExists(point);
 
     const len = connector.path.length;
-    const angle = normalizeDegAngle(
-      toDegree(Vec.angle(connector.path[len - 2], connector.path[len - 1]))
+    const angle = CommonUtils.normalizeDegAngle(
+      CommonUtils.toDegree(
+        Vec.angle(connector.path[len - 2], connector.path[len - 1])
+      )
     );
     let nextBound: Bound;
     let position: Connection['position'];
@@ -400,8 +400,8 @@ export class EdgelessAutoCompletePanel extends WithDisposable(LitElement) {
     const coord = viewport.toViewCoord(pos[0], pos[1]);
     const { width, height } = viewportRect;
 
-    coord[0] = clamp(coord[0], 20, width - 20 - PANEL_WIDTH);
-    coord[1] = clamp(coord[1], 20, height - 20 - PANEL_HEIGHT);
+    coord[0] = CommonUtils.clamp(coord[0], 20, width - 20 - PANEL_WIDTH);
+    coord[1] = CommonUtils.clamp(coord[1], 20, height - 20 - PANEL_HEIGHT);
 
     return coord;
   }

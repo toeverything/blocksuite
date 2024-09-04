@@ -1,10 +1,15 @@
 import type {
+  NodeDetail,
+  SerializedMindmapElement,
+} from '@blocksuite/affine-block-surface';
+import type {
   FrameBlockProps,
   SerializedConnectorElement,
   SerializedGroupElement,
 } from '@blocksuite/affine-model';
 import type { BlockStdScope } from '@blocksuite/block-std';
 
+import { MindmapElementModel } from '@blocksuite/affine-block-surface';
 import {
   ConnectorElementModel,
   GroupElementModel,
@@ -15,10 +20,6 @@ import {
 } from '@blocksuite/block-std/gfx';
 import { type BlockSnapshot, Job } from '@blocksuite/store';
 
-import type { SerializedMindmapElement } from '../../../surface-block/element-model/mindmap.js';
-import type { NodeDetail } from '../../../surface-block/element-model/utils/mindmap/layout.js';
-
-import { MindmapElementModel } from '../../../surface-block/index.js';
 import { GfxBlockModel } from '../block-model.js';
 import { getAllDescendantElements, getTopElements } from './tree.js';
 

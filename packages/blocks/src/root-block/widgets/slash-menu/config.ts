@@ -5,6 +5,7 @@ import type {
 import type { BlockModel } from '@blocksuite/store';
 import type { TemplateResult } from 'lit';
 
+import { CanvasElementType } from '@blocksuite/affine-block-surface';
 import {
   ArrowDownBigIcon,
   ArrowUpBigIcon,
@@ -56,7 +57,6 @@ import { LoomIcon } from '../../../embed-loom-block/styles.js';
 import { YoutubeIcon } from '../../../embed-youtube-block/styles.js';
 import { addSiblingImageBlock } from '../../../image-block/utils.js';
 import { onModelTextUpdated } from '../../../root-block/utils/index.js';
-import { CanvasElementType } from '../../../surface-block/index.js';
 import { getSurfaceBlock } from '../../../surface-ref-block/utils.js';
 import { type SlashMenuTooltip, slashMenuToolTips } from './tooltips/index.js';
 import {

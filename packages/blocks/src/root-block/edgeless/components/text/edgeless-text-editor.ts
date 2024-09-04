@@ -1,9 +1,7 @@
 import type { RichText } from '@blocksuite/affine-components/rich-text';
 import type { TextElementModel } from '@blocksuite/affine-model';
 
-import { toRadian } from '@blocksuite/affine-block-surface';
-import { getLineHeight } from '@blocksuite/affine-block-surface';
-import { wrapFontFamily } from '@blocksuite/affine-block-surface';
+import { CommonUtils, TextUtils } from '@blocksuite/affine-block-surface';
 import '@blocksuite/affine-components/rich-text';
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import {
@@ -20,6 +18,8 @@ import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
 
 import { deleteElements } from '../../utils/crud.js';
 import { getSelectedRect } from '../../utils/query.js';
+
+const { toRadian } = CommonUtils;
 
 @customElement('edgeless-text-editor')
 export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
@@ -329,7 +329,11 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
       hasMaxWidth,
       w,
     } = this.element;
-    const lineHeight = getLineHeight(fontFamily, fontSize, fontWeight);
+    const lineHeight = TextUtils.getLineHeight(
+      fontFamily,
+      fontSize,
+      fontWeight
+    );
     const rect = getSelectedRect([this.element]);
 
     const { translateX, translateY, zoom } = this.edgeless.service.viewport;
@@ -354,7 +358,7 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
         transform: transformOperation.join(' '),
         minWidth: hasMaxWidth ? `${rect.width}px` : 'none',
         maxWidth: hasMaxWidth ? `${w}px` : 'none',
-        fontFamily: wrapFontFamily(fontFamily),
+        fontFamily: TextUtils.wrapFontFamily(fontFamily),
         fontSize: `${fontSize}px`,
         fontWeight,
         fontStyle,

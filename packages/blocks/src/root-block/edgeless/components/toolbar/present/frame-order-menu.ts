@@ -1,6 +1,6 @@
 import type { FrameBlockModel } from '@blocksuite/affine-model';
 
-import { generateKeyBetween } from '@blocksuite/affine-block-surface';
+import { CommonUtils } from '@blocksuite/affine-block-surface';
 import { WithDisposable } from '@blocksuite/block-std';
 import { DisposableGroup } from '@blocksuite/global/utils';
 import { LitElement, css, html, nothing } from 'lit';
@@ -173,7 +173,7 @@ export class EdgelessFrameOrderMenu extends WithDisposable(LitElement) {
           const frame = this.frames[index];
 
           this.edgeless.service.updateElement(frame.id, {
-            index: generateKeyBetween(before, after),
+            index: CommonUtils.generateKeyBetween(before, after),
           });
           this.edgeless.doc.captureSync();
 

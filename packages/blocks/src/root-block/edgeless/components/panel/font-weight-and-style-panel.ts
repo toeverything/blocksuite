@@ -1,8 +1,4 @@
-import {
-  getFontFaces,
-  getFontFacesByFontFamily,
-  isSameFontFamily,
-} from '@blocksuite/affine-block-surface';
+import { TextUtils } from '@blocksuite/affine-block-surface';
 import { CheckIcon } from '@blocksuite/affine-components/icons';
 import {
   FontFamily,
@@ -51,8 +47,8 @@ export class EdgelessFontWeightAndStylePanel extends LitElement {
     // Compatible with old data
     if (!(this.fontFamily in FontFamilyMap)) return false;
 
-    const fontFace = getFontFaces()
-      .filter(isSameFontFamily(this.fontFamily))
+    const fontFace = TextUtils.getFontFaces()
+      .filter(TextUtils.isSameFontFamily(this.fontFamily))
       .find(
         fontFace =>
           fontFace.weight === fontWeight && fontFace.style === fontStyle
@@ -73,10 +69,10 @@ export class EdgelessFontWeightAndStylePanel extends LitElement {
   }
 
   override render() {
-    let fontFaces = getFontFacesByFontFamily(this.fontFamily);
+    let fontFaces = TextUtils.getFontFacesByFontFamily(this.fontFamily);
     // Compatible with old data
     if (fontFaces.length === 0) {
-      fontFaces = getFontFacesByFontFamily(FontFamily.Inter);
+      fontFaces = TextUtils.getFontFacesByFontFamily(FontFamily.Inter);
     }
     const fontFacesWithNormal = fontFaces.filter(
       fontFace => fontFace.style === FontStyle.Normal

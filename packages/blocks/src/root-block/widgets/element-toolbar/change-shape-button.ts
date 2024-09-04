@@ -1,3 +1,4 @@
+import type { ShapeElementModel } from '@blocksuite/affine-block-surface';
 import type { ColorScheme, ShapeProps } from '@blocksuite/affine-model';
 
 import {
@@ -31,7 +32,6 @@ import { join } from 'lit/directives/join.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { when } from 'lit/directives/when.js';
 
-import type { ShapeElementModel } from '../../../surface-block/index.js';
 import type { EdgelessColorPickerButton } from '../../edgeless/components/color-picker/button.js';
 import type { PickColorEvent } from '../../edgeless/components/color-picker/types.js';
 import type { EdgelessShapePanel } from '../../edgeless/components/panel/shape-panel.js';
