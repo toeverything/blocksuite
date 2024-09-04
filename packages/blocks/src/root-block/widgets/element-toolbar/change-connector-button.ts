@@ -1,4 +1,11 @@
 import {
+  type ConnectorElementModel,
+  ConnectorEndpoint,
+  ConnectorMode,
+  DEFAULT_FRONT_END_POINT_STYLE,
+  DEFAULT_REAR_END_POINT_STYLE,
+} from '@blocksuite/affine-block-surface';
+import {
   AddTextIcon,
   ConnectorCWithArrowIcon,
   ConnectorEndpointNoneIcon,
@@ -39,13 +46,6 @@ import type { EdgelessColorPickerButton } from '../../edgeless/components/color-
 import type { PickColorEvent } from '../../edgeless/components/color-picker/types.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 
-import {
-  type ConnectorElementModel,
-  ConnectorEndpoint,
-  ConnectorMode,
-  DEFAULT_FRONT_END_POINT_STYLE,
-  DEFAULT_REAR_END_POINT_STYLE,
-} from '../../../surface-block/index.js';
 import {
   packColor,
   packColorsWithColorScheme,

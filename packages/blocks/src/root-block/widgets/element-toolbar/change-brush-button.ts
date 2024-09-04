@@ -1,3 +1,5 @@
+import type { BrushElementModel } from '@blocksuite/affine-block-surface';
+
 import {
   type BrushProps,
   type ColorScheme,
@@ -10,7 +12,6 @@ import { LitElement, html, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { when } from 'lit/directives/when.js';
 
-import type { BrushElementModel } from '../../../surface-block/index.js';
 import type { EdgelessColorPickerButton } from '../../edgeless/components/color-picker/button.js';
 import type { PickColorEvent } from '../../edgeless/components/color-picker/types.js';
 import type { ColorEvent } from '../../edgeless/components/panel/color-panel.js';

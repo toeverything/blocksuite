@@ -1,18 +1,16 @@
+import type {
+  ConnectorElementModel,
+  SurfaceBlockModel,
+} from '@blocksuite/affine-block-surface';
+import type { SurfaceBlockComponent } from '@blocksuite/affine-block-surface';
+
+import { Overlay, CommonUtils } from '@blocksuite/affine-block-surface';
 import { deserializeXYWH } from '@blocksuite/global/utils';
 import { Point } from '@blocksuite/global/utils';
 import { Bound } from '@blocksuite/global/utils';
 
-import type { SurfaceBlockComponent } from '../../../index.js';
-import type {
-  ConnectorElementModel,
-  SurfaceBlockModel,
-} from '../../../surface-block/index.js';
 import type { EdgelessRootService } from '../edgeless-root-service.js';
 
-import {
-  Overlay,
-  getBoundsWithRotation,
-} from '../../../surface-block/index.js';
 import { isConnectable, isTopLevelBlock } from '../utils/query.js';
 
 interface Distance {
@@ -277,7 +275,9 @@ export class EdgelessSnapManager extends Overlay {
   ) {
     const rotate = isTopLevelBlock(alignable) ? 0 : alignable.rotate;
     const [x, y, w, h] = deserializeXYWH(alignable.xywh);
-    return Bound.from(getBoundsWithRotation({ x, y, w, h, rotate }));
+    return Bound.from(
+      CommonUtils.getBoundsWithRotation({ x, y, w, h, rotate })
+    );
   }
 
   private get _surface() {

@@ -4,6 +4,7 @@
 import type { BlockSchema } from '@blocksuite/store';
 import type { z } from 'zod';
 
+import { SurfaceBlockSchema } from '@blocksuite/affine-block-surface';
 import {
   AttachmentBlockSchema,
   BookmarkBlockSchema,
@@ -28,7 +29,6 @@ import {
 } from '@blocksuite/affine-model';
 
 import { DataViewBlockSchema } from './data-view-block/data-view-model.js';
-import { SurfaceBlockSchema } from './surface-block/surface-model.js';
 
 /** Built-in first party block models built for affine */
 export const AffineSchemas: z.infer<typeof BlockSchema>[] = [

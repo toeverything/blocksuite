@@ -1,6 +1,7 @@
 import type { MenuItemGroup } from '@blocksuite/affine-components/toolbar';
 
 import { isPeekable, peek } from '@blocksuite/affine-components/peek';
+import { TelemetryProvider } from '@blocksuite/affine-shared/services';
 import { Bound } from '@blocksuite/global/utils';
 import {
   ArrowDownBigBottomIcon,
@@ -59,11 +60,11 @@ export const sectionGroup: MenuItemGroup<ElementToolbarMoreMenuContext> = {
       icon: FrameIcon({ width: '20', height: '20' }),
       label: 'Frame section',
       type: 'create-frame',
-      action: ({ service, edgeless }) => {
+      action: ({ service, edgeless, std }) => {
         const frame = service.frame.createFrameOnSelected();
         if (!frame) return;
 
-        service.telemetryService?.track('CanvasElementAdded', {
+        std.getOptional(TelemetryProvider)?.track('CanvasElementAdded', {
           control: 'context-menu',
           page: 'whiteboard editor',
           module: 'toolbar',
@@ -246,7 +247,7 @@ export const conversionsGroup: MenuItemGroup<ElementToolbarMoreMenuContext> = {
       label: 'Turn into linked doc',
       type: 'turn-into-linked-doc',
       action: async ctx => {
-        const { doc, service, surface, host } = ctx;
+        const { doc, service, surface, host, std } = ctx;
         const element = ctx.getNoteBlock();
         if (!element) return;
 
@@ -265,20 +266,20 @@ export const conversionsGroup: MenuItemGroup<ElementToolbarMoreMenuContext> = {
           },
           surface.model.id
         );
-        service.telemetryService?.track('CanvasElementAdded', {
+        std.getOptional(TelemetryProvider)?.track('CanvasElementAdded', {
           control: 'context-menu',
           page: 'whiteboard editor',
           module: 'toolbar',
           segment: 'toolbar',
           type: 'embed-synced-doc',
         });
-        service.telemetryService?.track('DocCreated', {
+        std.getOptional(TelemetryProvider)?.track('DocCreated', {
           control: 'turn into linked doc',
           page: 'whiteboard editor',
           module: 'format toolbar',
           type: 'embed-linked-doc',
         });
-        service.telemetryService?.track('LinkedDocCreated', {
+        std.getOptional(TelemetryProvider)?.track('LinkedDocCreated', {
           control: 'turn into linked doc',
           page: 'whiteboard editor',
           module: 'format toolbar',
@@ -301,7 +302,15 @@ export const conversionsGroup: MenuItemGroup<ElementToolbarMoreMenuContext> = {
       icon: LinkedPageIcon({ width: '20', height: '20' }),
       label: 'Create linked doc',
       type: 'create-linked-doc',
-      action: async ({ doc, selection, service, surface, edgeless, host }) => {
+      action: async ({
+        doc,
+        selection,
+        service,
+        surface,
+        edgeless,
+        host,
+        std,
+      }) => {
         const title = await promptDocTitle(host);
         if (title === null) return;
 
@@ -324,20 +333,20 @@ export const conversionsGroup: MenuItemGroup<ElementToolbarMoreMenuContext> = {
           },
           surface.model.id
         );
-        service.telemetryService?.track('CanvasElementAdded', {
+        std.getOptional(TelemetryProvider)?.track('CanvasElementAdded', {
           control: 'context-menu',
           page: 'whiteboard editor',
           module: 'toolbar',
           segment: 'toolbar',
           type: 'embed-linked-doc',
         });
-        service.telemetryService?.track('DocCreated', {
+        std.getOptional(TelemetryProvider)?.track('DocCreated', {
           control: 'create linked doc',
           page: 'whiteboard editor',
           module: 'format toolbar',
           type: 'embed-linked-doc',
         });
-        service.telemetryService?.track('LinkedDocCreated', {
+        std.getOptional(TelemetryProvider)?.track('LinkedDocCreated', {
           control: 'create linked doc',
           page: 'whiteboard editor',
           module: 'format toolbar',

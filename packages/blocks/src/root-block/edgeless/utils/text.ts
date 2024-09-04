@@ -2,6 +2,12 @@ import type { PointerEventState } from '@blocksuite/block-std';
 import type { IVec } from '@blocksuite/global/utils';
 
 import {
+  CanvasElementType,
+  TextUtils,
+  type ConnectorElementModel,
+  type IModelCoord,
+} from '@blocksuite/affine-block-surface';
+import {
   type FrameBlockModel,
   type GroupElementModel,
   ShapeElementModel,
@@ -18,12 +24,6 @@ import { DocCollection } from '@blocksuite/store';
 
 import type { EdgelessRootBlockComponent } from '../edgeless-root-block.js';
 
-import {
-  CanvasElementType,
-  type ConnectorElementModel,
-  type IModelCoord,
-} from '../../../surface-block/index.js';
-import { getCursorByCoord } from '../../../surface-block/renderer/elements/text/utils.js';
 import {
   GET_DEFAULT_LINE_COLOR,
   isTransparent,
@@ -54,7 +54,7 @@ export function mountTextElementEditor(
   let cursorIndex = textElement.text.length;
   if (focusCoord) {
     cursorIndex = Math.min(
-      getCursorByCoord(textElement, focusCoord),
+      TextUtils.getCursorByCoord(textElement, focusCoord),
       cursorIndex
     );
   }

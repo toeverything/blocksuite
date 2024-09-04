@@ -1,6 +1,6 @@
 import type { FrameBlockModel } from '@blocksuite/affine-model';
 
-import { clamp } from '@blocksuite/affine-block-surface';
+import { CommonUtils } from '@blocksuite/affine-block-surface';
 import {
   FrameNavigatorNextIcon,
   FrameNavigatorPrevIcon,
@@ -22,6 +22,8 @@ import { isFrameBlock } from '../../utils/query.js';
 import { launchIntoFullscreen } from '../utils.js';
 import { EdgelessToolbarToolMixin } from './mixins/tool.mixin.js';
 import './present/navigator-setting-button.js';
+
+const { clamp } = CommonUtils;
 
 @customElement('presentation-toolbar')
 export class PresentationToolbar extends EdgelessToolbarToolMixin(LitElement) {

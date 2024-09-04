@@ -2,10 +2,7 @@ import type { PointerEventState } from '@blocksuite/block-std';
 import type { IVec } from '@blocksuite/global/utils';
 import type { IPoint } from '@blocksuite/global/utils';
 
-import {
-  Overlay,
-  getSvgPathFromStroke,
-} from '@blocksuite/affine-block-surface';
+import { Overlay, CommonUtils } from '@blocksuite/affine-block-surface';
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import {
   Bound,
@@ -75,7 +72,7 @@ export class LassoToolController extends EdgelessToolController<LassoTool> {
   private _loop = () => {
     const path =
       this.tool.mode === LassoMode.FreeHand
-        ? getSvgPathFromStroke(this._lassoPoints)
+        ? CommonUtils.getSvgPathFromStroke(this._lassoPoints)
         : getPolygonPathFromPoints(this._lassoPoints);
 
     this._overlay.d = path;

@@ -1,5 +1,6 @@
 import type { Doc } from '@blocksuite/store';
 
+import { CommonUtils } from '@blocksuite/affine-block-surface';
 import {
   type EditorHost,
   ShadowlessElement,
@@ -9,7 +10,6 @@ import {
   DocModeProvider,
   type EdgelessRootBlockComponent,
   type FrameBlockModel,
-  generateKeyBetween,
 } from '@blocksuite/blocks';
 import { Bound, DisposableGroup } from '@blocksuite/global/utils';
 import { type PropertyValues, css, html, nothing } from 'lit';
@@ -299,7 +299,7 @@ export class FramePanelBody extends WithDisposable(ShadowlessElement) {
       let before = frames[insertIndex - 1]?.index || null;
       const after = frames[insertIndex]?.index || null;
       selectedFrames.forEach(frame => {
-        const newIndex = generateKeyBetween(before, after);
+        const newIndex = CommonUtils.generateKeyBetween(before, after);
         frame.doc.updateBlock(frame, {
           index: newIndex,
         });

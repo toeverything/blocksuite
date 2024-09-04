@@ -10,6 +10,7 @@ import type { Text } from '@blocksuite/store';
 import {
   QuickSearchProvider,
   type QuickSearchService,
+  TelemetryProvider,
 } from '@blocksuite/affine-shared/services';
 import { assertExists } from '@blocksuite/global/utils';
 import {
@@ -482,14 +483,12 @@ class PasteTr {
 
         Object.assign(reference, extracted);
 
-        this.std
-          .getService('affine:page')
-          .telemetryService?.track('LinkedDocCreated', {
-            page: 'doc editor',
-            category: 'pasted link',
-            type: isLinkToNode ? 'block' : 'doc',
-            other: 'existing doc',
-          });
+        this.std.getOptional(TelemetryProvider)?.track('LinkedDocCreated', {
+          page: 'doc editor',
+          category: 'pasted link',
+          type: isLinkToNode ? 'block' : 'doc',
+          other: 'existing doc',
+        });
 
         transformed = true;
 

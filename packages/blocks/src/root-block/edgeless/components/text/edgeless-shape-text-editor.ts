@@ -5,8 +5,8 @@ import {
   MindmapElementModel,
   type ShapeElementModel,
 } from '@blocksuite/affine-block-surface';
-import { toRadian } from '@blocksuite/affine-block-surface';
-import { wrapFontFamily } from '@blocksuite/affine-block-surface';
+import { CommonUtils } from '@blocksuite/affine-block-surface';
+import { TextUtils } from '@blocksuite/affine-block-surface';
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import {
   RANGE_SYNC_EXCLUDE_ATTR,
@@ -23,6 +23,8 @@ import { styleMap } from 'lit/directives/style-map.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
 
 import { getSelectedRect } from '../../utils/query.js';
+
+const { toRadian } = CommonUtils;
 
 @customElement('edgeless-shape-text-editor')
 export class EdgelessShapeTextEditor extends WithDisposable(ShadowlessElement) {
@@ -263,7 +265,7 @@ export class EdgelessShapeTextEditor extends WithDisposable(ShadowlessElement) {
           : undefined,
       boxSizing: 'border-box',
       fontSize: this.element.fontSize + 'px',
-      fontFamily: wrapFontFamily(this.element.fontFamily),
+      fontFamily: TextUtils.wrapFontFamily(this.element.fontFamily),
       fontWeight: this.element.fontWeight,
       lineHeight: 'normal',
       outline: 'none',

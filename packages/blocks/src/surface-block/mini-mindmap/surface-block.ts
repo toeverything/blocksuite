@@ -1,19 +1,20 @@
+import type { SurfaceBlockModel } from '@blocksuite/affine-block-surface';
 import type { Color, ShapeElementModel } from '@blocksuite/affine-model';
 import type { Bound } from '@blocksuite/global/utils';
 
+import {
+  CanvasRenderer,
+  elementRenderers,
+  fitContent,
+  LayerManager,
+} from '@blocksuite/affine-block-surface';
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import { BlockComponent } from '@blocksuite/block-std';
 import { Viewport } from '@blocksuite/block-std/gfx';
 import { html } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 
-import type { SurfaceBlockModel } from '../surface-model.js';
 import type { MindmapService } from './service.js';
-
-import { LayerManager } from '../managers/layer-manager.js';
-import { CanvasRenderer } from '../renderer/canvas-renderer.js';
-import { elementRenderers } from '../renderer/elements/index.js';
-import { fitContent } from '../renderer/elements/shape/utils.js';
 
 @customElement('mini-mindmap-surface-block')
 export class MindmapSurfaceBlock extends BlockComponent<SurfaceBlockModel> {

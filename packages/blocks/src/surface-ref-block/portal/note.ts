@@ -1,3 +1,4 @@
+import type { CanvasRenderer } from '@blocksuite/affine-block-surface';
 import type { NoteBlockModel } from '@blocksuite/affine-model';
 import type { Query } from '@blocksuite/store';
 
@@ -19,8 +20,6 @@ import { css, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
-
-import type { CanvasRenderer } from '../../surface-block/renderer/canvas-renderer.js';
 
 import {
   EDGELESS_BLOCK_CHILD_BORDER_WIDTH,

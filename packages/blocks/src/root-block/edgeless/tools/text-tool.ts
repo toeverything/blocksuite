@@ -1,5 +1,6 @@
 import type { PointerEventState } from '@blocksuite/block-std';
 
+import { TelemetryProvider } from '@blocksuite/affine-shared/services';
 import { noop } from '@blocksuite/global/utils';
 
 import { addText } from '../utils/text.js';
@@ -36,13 +37,15 @@ export class TextToolController extends EdgelessToolController<TextTool> {
     } else {
       addText(this._edgeless, e);
     }
-    this._service.telemetryService?.track('CanvasElementAdded', {
-      control: 'canvas:draw',
-      page: 'whiteboard editor',
-      module: 'toolbar',
-      segment: 'toolbar',
-      type: 'text',
-    });
+    this._edgeless.std
+      .getOptional(TelemetryProvider)
+      ?.track('CanvasElementAdded', {
+        control: 'canvas:draw',
+        page: 'whiteboard editor',
+        module: 'toolbar',
+        segment: 'toolbar',
+        type: 'text',
+      });
   }
 
   onContainerContextMenu(): void {
