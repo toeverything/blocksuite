@@ -7,15 +7,12 @@ import type {
 
 import {
   CanvasElementType,
-  GroupElementModel,
   ShapeElementModel,
-} from '@blocksuite/affine-block-surface';
-import {
   CommonUtils,
   ConnectorElementModel,
   normalizeShapeBound,
+  TextUtils,
 } from '@blocksuite/affine-block-surface';
-import { TextUtils } from '@blocksuite/affine-block-surface';
 import {
   type BookmarkBlockModel,
   type EdgelessTextBlockModel,
@@ -1336,16 +1333,11 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       handlers.push(resizeHandles, connectorHandle, elementHandle);
     }
 
-    const isSingleGroup =
-      elements.length === 1 && elements[0] instanceof GroupElementModel;
-
     if (elements.length === 1 && elements[0] instanceof ConnectorElementModel) {
       _selectedRect.width = 0;
       _selectedRect.height = 0;
       _selectedRect.borderWidth = 0;
     }
-
-    _selectedRect.borderStyle = isSingleGroup ? 'dashed' : 'solid';
 
     return html`
       <style>

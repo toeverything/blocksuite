@@ -96,8 +96,7 @@ test.describe('group clipboard', () => {
     expect(sortedIds.length).toBe(6);
   });
 
-  // FIX ME: can not group a group inside
-  test.skip('copy and paste group with group inside', async ({ page }) => {
+  test('copy and paste group with group inside', async ({ page }) => {
     await commonSetup(page);
     await createShapeElement(page, [0, 0], [100, 100], Shape.Square);
     await createShapeElement(page, [200, 0], [300, 100], Shape.Square);
@@ -122,8 +121,7 @@ test.describe('group clipboard', () => {
     expect(sortedIds.length).toBe(10);
   });
 
-  // FIX ME: paste position unexpected & redundant empty note
-  test.skip('copy and paste group with frame inside', async ({ page }) => {
+  test('copy and paste group with frame inside', async ({ page }) => {
     await commonSetup(page);
     await createShapeElement(page, [0, 0], [100, 100], Shape.Square);
     await createNote(page, [100, -100]);
@@ -146,6 +144,6 @@ test.describe('group clipboard', () => {
     await pasteByKeyboard(page, true);
     await waitNextFrame(page, 500);
     const sortedIds = await getAllSortedIds(page);
-    expect(sortedIds.length).toBe(10);
+    expect(sortedIds.length).toBe(12);
   });
 });

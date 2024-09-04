@@ -87,15 +87,17 @@ export class EdgelessFrameManager {
       this._rootService.surface.elementAdded.on(({ id, local }) => {
         const element = this._rootService.surface.getElementById(id);
         if (element && local) {
+          const frame = this.getFrameFromPoint(element.elementBound.center);
+
+          // TODO(@L-Sun): refactor this in a tree manager
           if (element instanceof GroupElementModel) {
+            if (frame && element.hasChild(frame)) return;
             element.childElements.forEach(child => {
-              // TODO(@L-Sun): refactor this in a tree manager
               // The children of new group may already have a parent frame
               this.removeParentFrame(child);
             });
           }
 
-          const frame = this.getFrameFromPoint(element.elementBound.center);
           frame && this.addElementsToFrame(frame, [element]);
         }
       })

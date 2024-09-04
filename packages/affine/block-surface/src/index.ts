@@ -1,6 +1,8 @@
 import type { SurfaceBlockModel } from './surface-model.js';
 import type { SurfaceBlockService } from './surface-service.js';
 
+import './commands/reassociate-connectors.js';
+
 export { type IModelCoord, ZOOM_MAX, ZOOM_MIN, ZOOM_STEP } from './consts.js';
 export {
   AffineCanvasTextFonts,
@@ -10,11 +12,11 @@ export {
   TextResizing,
 } from './consts.js';
 export type { FontConfig } from './consts.js';
-
 export {
   SurfaceElementModel,
   SurfaceGroupLikeModel,
 } from './element-model/base.js';
+
 export { CanvasElementType } from './element-model/index.js';
 export {
   LayoutType,
@@ -22,9 +24,9 @@ export {
   MindmapStyle,
 } from './element-model/mindmap.js';
 export type { SerializedMindmapElement } from './element-model/mindmap.js';
+export { MindmapUtils } from './element-model/utils/mindmap/index.js';
 import { isConnectorWithLabel } from './element-model/utils/connector.js';
 import { isConnectorAndBindingsAllSelected } from './managers/connector-manager.js';
-export { MindmapUtils } from './element-model/utils/mindmap/index.js';
 export type {
   MindmapNode,
   NodeDetail,
@@ -46,6 +48,7 @@ export {
   renderableInEdgeless,
 } from './managers/layer-utils.js';
 export { CanvasRenderer, Overlay } from './renderer/canvas-renderer.js';
+export * from './renderer/elements/group/consts.js';
 export type { ElementRenderer } from './renderer/elements/index.js';
 export {
   normalizeShapeBound,

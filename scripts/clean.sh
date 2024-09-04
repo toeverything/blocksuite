@@ -14,6 +14,7 @@ packages=(
   "affine/components"
   "affine/block-paragraph"
   "affine/block-list"
+  "affine/block-surface"
   "blocks"
   "docs"
   "presets"

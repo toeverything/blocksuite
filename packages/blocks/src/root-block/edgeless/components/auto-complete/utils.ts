@@ -320,7 +320,7 @@ export function createShapeElement(
 
   const props = isShape(current)
     ? current.serialize()
-    : edgeless.service.editPropsStore.getLastProps('shape');
+    : edgeless.service.editPropsStore.lastProps$.value[`shape:${targetType}`];
 
   const id = service.addElement('shape', {
     ...props,
