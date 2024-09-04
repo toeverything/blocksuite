@@ -67,7 +67,10 @@ export {
 export * from './surface-ref-block/index.js';
 export * from '@blocksuite/affine-block-list';
 export * from '@blocksuite/affine-block-paragraph';
-export { SurfaceBlockComponent } from '@blocksuite/affine-block-surface';
+export {
+  SurfaceBlockComponent,
+  SurfaceBlockModel,
+} from '@blocksuite/affine-block-surface';
 export { type MenuOptions } from '@blocksuite/affine-components/context-menu';
 export {
   HoverController,
