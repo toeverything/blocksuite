@@ -14,7 +14,7 @@ type TransformState = {
 };
 
 export type DraggableShape = {
-  name: ShapeTool['shapeType'];
+  name: ShapeTool['shapeName'];
   svg: TemplateResult;
   style: {
     default?: TransformState;

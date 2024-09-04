@@ -23,6 +23,7 @@
     "@types/lodash.ismatch": "^4.4.9",
     "flexsearch": "0.7.43",
     "lib0": "^0.2.97",
+    "lodash.clonedeep": "^4.5.0",
     "lodash.ismatch": "^4.4.0",
     "lodash.merge": "^4.6.2",
     "minimatch": "^10.0.1",
@@ -31,6 +32,7 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
+    "@types/lodash.clonedeep": "^4.5.9",
     "@types/lodash.merge": "^4.6.9",
     "lit": "^3.2.0",
     "yjs": "^13.6.18"

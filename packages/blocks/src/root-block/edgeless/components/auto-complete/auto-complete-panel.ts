@@ -514,7 +514,9 @@ export class EdgelessAutoCompletePanel extends WithDisposable(LitElement) {
     const { shapeStyle, strokeColor, fillColor, strokeWidth, roughness } =
       isShape(this.currentSource)
         ? this.currentSource
-        : this.edgeless.service.editPropsStore.getLastProps('shape');
+        : this.edgeless.service.editPropsStore.lastProps$.value[
+            `shape:${targetType}`
+          ];
 
     const stroke = ThemeObserver.getColorValue(
       strokeColor,

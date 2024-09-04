@@ -1,6 +1,8 @@
 import type { SurfaceBlockModel } from './surface-model.js';
 import type { SurfaceBlockService } from './surface-service.js';
 
+import './commands/reassociate-connectors.js';
+
 export { type IModelCoord, ZOOM_MAX, ZOOM_MIN, ZOOM_STEP } from './consts.js';
 export {
   AffineCanvasTextFonts,

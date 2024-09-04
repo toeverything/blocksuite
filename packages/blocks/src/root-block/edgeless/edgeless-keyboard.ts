@@ -10,7 +10,6 @@ import {
 import {
   EdgelessTextBlockModel,
   NoteDisplayMode,
-  getShapeName,
 } from '@blocksuite/affine-model';
 import { TelemetryProvider } from '@blocksuite/affine-shared/services';
 import { matchFlavours } from '@blocksuite/affine-shared/utils';
@@ -38,7 +37,7 @@ import {
   DEFAULT_NOTE_TIP,
 } from './utils/consts.js';
 import { deleteElements } from './utils/crud.js';
-import { getNextShapeType, updateShapeProps } from './utils/hotkey-utils.js';
+import { getNextShapeType } from './utils/hotkey-utils.js';
 import { isCanvasElement, isNoteBlock } from './utils/query.js';
 import {
   mountConnectorLabelEditor,
@@ -217,30 +216,20 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
         },
         'Shift-s': () => {
           if (this.rootComponent.service.locked) return;
+          const controller = rootComponent.tools.currentController;
           if (
             this.rootComponent.service.selection.editing ||
-            !(
-              rootComponent.tools.currentController instanceof
-              ShapeToolController
-            )
+            !(controller instanceof ShapeToolController)
           ) {
             return;
           }
-
-          const attr =
-            rootComponent.service.editPropsStore.getLastProps('shape');
-
-          const shapeName = getShapeName(attr.shapeType, attr.radius);
+          const { shapeName } = controller.tool;
           const nextShapeName = getNextShapeType(shapeName);
           this._setEdgelessTool(rootComponent, {
             type: 'shape',
-            shapeType: nextShapeName,
+            shapeName: nextShapeName,
           });
 
-          updateShapeProps(nextShapeName, rootComponent);
-
-          const controller = rootComponent.tools
-            .currentController as ShapeToolController;
           controller.createOverlay();
         },
         'Mod-g': ctx => {

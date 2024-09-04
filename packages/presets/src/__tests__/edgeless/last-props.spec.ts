@@ -1,11 +1,11 @@
-import type {
-  BrushElementModel,
-  ConnectorElementModel,
-  EdgelessRootBlockComponent,
-  ShapeElementModel,
-  TextElementModel,
+import {
+  ShapeType,
+  type BrushElementModel,
+  type ConnectorElementModel,
+  type EdgelessRootBlockComponent,
+  type ShapeElementModel,
+  type TextElementModel,
 } from '@blocksuite/blocks';
-
 import { beforeEach, describe, expect, test } from 'vitest';
 
 import { getDocRootBlock } from '../utils/edgeless.js';
@@ -23,17 +23,70 @@ describe('apply last props', () => {
     return cleanup;
   });
 
-  test('shape', () => {
-    const id = service.addElement('shape', { shapeType: 'rect' });
-    const shape = service.getElementById(id) as ShapeElementModel;
-    expect(shape.fillColor).toBe('--affine-palette-shape-yellow');
-    expect(shape.strokeColor).toBe('--affine-palette-line-yellow');
-    expect(shape.shapeStyle).toBe('General');
-    service.updateElement(id, { fillColor: '--affine-palette-shape-orange' });
-    const secondShape = service.getElementById(
-      service.addElement('shape', { shapeType: 'rect' })
+  test('shapes', () => {
+    // rect shape
+    const rectId = service.addElement('shape', { shapeType: ShapeType.Rect });
+    const rectShape = service.getElementById(rectId) as ShapeElementModel;
+    expect(rectShape.fillColor).toBe('--affine-palette-shape-yellow');
+    service.updateElement(rectId, {
+      fillColor: '--affine-palette-shape-orange',
+    });
+    expect(
+      service.editPropsStore.lastProps$.value[`shape:${ShapeType.Rect}`]
+        .fillColor
+    ).toBe('--affine-palette-shape-orange');
+
+    // diamond shape
+    const diamondId = service.addElement('shape', {
+      shapeType: ShapeType.Diamond,
+    });
+    const diamondShape = service.getElementById(diamondId) as ShapeElementModel;
+    expect(diamondShape.fillColor).toBe('--affine-palette-shape-yellow');
+    service.updateElement(diamondId, {
+      fillColor: '--affine-palette-shape-blue',
+    });
+    expect(
+      service.editPropsStore.lastProps$.value[`shape:${ShapeType.Diamond}`]
+        .fillColor
+    ).toBe('--affine-palette-shape-blue');
+
+    // rounded rect shape
+    const roundedRectId = service.addElement('shape', {
+      shapeType: ShapeType.Rect,
+      radius: 0.1,
+    });
+    const roundedRectShape = service.getElementById(
+      roundedRectId
     ) as ShapeElementModel;
-    expect(secondShape.fillColor).toBe('--affine-palette-shape-orange');
+    expect(roundedRectShape.fillColor).toBe('--affine-palette-shape-yellow');
+    service.updateElement(roundedRectId, {
+      fillColor: '--affine-palette-shape-green',
+    });
+    expect(
+      service.editPropsStore.lastProps$.value['shape:roundedRect'].fillColor
+    ).toBe('--affine-palette-shape-green');
+
+    // apply last props
+    const rectId2 = service.addElement('shape', { shapeType: ShapeType.Rect });
+    const rectShape2 = service.getElementById(rectId2) as ShapeElementModel;
+    expect(rectShape2.fillColor).toBe('--affine-palette-shape-orange');
+
+    const diamondId2 = service.addElement('shape', {
+      shapeType: ShapeType.Diamond,
+    });
+    const diamondShape2 = service.getElementById(
+      diamondId2
+    ) as ShapeElementModel;
+    expect(diamondShape2.fillColor).toBe('--affine-palette-shape-blue');
+
+    const roundedRectId2 = service.addElement('shape', {
+      shapeType: ShapeType.Rect,
+      radius: 0.1,
+    });
+    const droundedRectShape2 = service.getElementById(
+      roundedRectId2
+    ) as ShapeElementModel;
+    expect(droundedRectShape2.fillColor).toBe('--affine-palette-shape-green');
   });
 
   test('connector', () => {

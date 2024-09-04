@@ -303,24 +303,24 @@ export class ShapeOverlay extends ToolOverlay {
     this.disposables.add(
       this.edgeless.slots.edgelessToolUpdated.on(edgelessTool => {
         if (edgelessTool.type !== 'shape') return;
-        const shapeType = edgelessTool.shapeType;
+        const { shapeName } = edgelessTool;
         const newOptions = {
           ...options,
         };
 
         let { x, y } = this;
-        if (shapeType === 'roundedRect' || shapeType === 'rect') {
+        if (shapeName === 'roundedRect' || shapeName === 'rect') {
           x += SHAPE_OVERLAY_OFFSET_X;
           y += SHAPE_OVERLAY_OFFSET_Y;
         }
         const w =
-          shapeType === 'roundedRect'
+          shapeName === 'roundedRect'
             ? SHAPE_OVERLAY_WIDTH + 40
             : SHAPE_OVERLAY_WIDTH;
         const xywh = [x, y, w, SHAPE_OVERLAY_HEIGHT] as XYWH;
         this.shape = ShapeFactory.createShape(
           xywh,
-          shapeType,
+          shapeName,
           newOptions,
           shapeStyle
         );

@@ -1,3 +1,6 @@
+import type { ShapeFillColor } from '@blocksuite/affine-model';
+import type { Signal } from '@lit-labs/preact-signals';
+
 import {
   GeneralStyleIcon,
   ScribbledStyleIcon,
@@ -6,11 +9,12 @@ import {
   DEFAULT_SHAPE_FILL_COLOR,
   LineColor,
   SHAPE_FILL_COLORS,
+  type ShapeName,
   ShapeStyle,
-  getShapeName,
+  ShapeType,
 } from '@blocksuite/affine-model';
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
-import { SignalWatcher, computed } from '@lit-labs/preact-signals';
+import { SignalWatcher, computed, signal } from '@lit-labs/preact-signals';
 import { LitElement, css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
@@ -28,9 +32,11 @@ import {
 @customElement('edgeless-shape-menu')
 export class EdgelessShapeMenu extends SignalWatcher(LitElement) {
   private _props$ = computed(() => {
-    const { shape } = this.edgeless.service.editPropsStore.lastProps$.value;
-    const { shapeStyle, fillColor, strokeColor, radius, shapeType } = shape;
-    const shapeName = getShapeName(shapeType, radius);
+    const shapeName: ShapeName = this._shapeName$.value;
+    const { shapeStyle, fillColor, strokeColor, radius } =
+      this.edgeless.service.editPropsStore.lastProps$.value[
+        `shape:${shapeName}`
+      ];
     return {
       shapeStyle,
       shapeName,
@@ -40,22 +46,33 @@ export class EdgelessShapeMenu extends SignalWatcher(LitElement) {
     };
   });
 
-  private _setFillColor = (fillColor: string) => {
+  private _setFillColor = (fillColor: ShapeFillColor) => {
     const filled = !isTransparent(fillColor);
-    let strokeColor = fillColor.replace(SHAPE_COLOR_PREFIX, LINE_COLOR_PREFIX);
+    let strokeColor = fillColor.replace(
+      SHAPE_COLOR_PREFIX,
+      LINE_COLOR_PREFIX
+    ) as LineColor;
 
     if (strokeColor.endsWith('transparent')) {
       strokeColor = LineColor.Grey;
     }
 
-    this.onChange({ filled, fillColor, strokeColor });
+    const { shapeName } = this._props$.value;
+    this.edgeless.service.editPropsStore.recordLastProps(`shape:${shapeName}`, {
+      filled,
+      fillColor,
+      strokeColor,
+    });
   };
 
   private _setShapeStyle = (shapeStyle: ShapeStyle) => {
-    this.onChange({
+    const { shapeName } = this._props$.value;
+    this.edgeless.service.editPropsStore.recordLastProps(`shape:${shapeName}`, {
       shapeStyle,
     });
   };
+
+  private _shapeName$: Signal<ShapeName> = signal(ShapeType.Rect);
 
   static override styles = css`
     :host {
@@ -83,6 +100,15 @@ export class EdgelessShapeMenu extends SignalWatcher(LitElement) {
       margin: 0 9px;
     }
   `;
+
+  override connectedCallback(): void {
+    super.connectedCallback();
+    this.edgeless.service.slots.edgelessToolUpdated.on(tool => {
+      if (tool.type === 'shape') {
+        this._shapeName$.value = tool.shapeName;
+      }
+    });
+  }
 
   override render() {
     const { fillColor, shapeStyle, shapeName } = this._props$.value;
@@ -119,13 +145,13 @@ export class EdgelessShapeMenu extends SignalWatcher(LitElement) {
           <menu-divider .vertical=${true}></menu-divider>
           <div class="shape-type-container">
             ${ShapeComponentConfig.map(
-              ({ name, generalIcon, scribbledIcon, tooltip, value }) => {
+              ({ name, generalIcon, scribbledIcon, tooltip }) => {
                 return html`
                   <edgeless-tool-icon-button
                     .tooltip=${tooltip}
                     .active=${shapeName === name}
                     .activeMode=${'background'}
-                    @click=${() => this.onChange(value)}
+                    @click=${() => this.onChange(name)}
                   >
                     ${shapeStyle === ShapeStyle.General
                       ? generalIcon
@@ -142,7 +168,8 @@ export class EdgelessShapeMenu extends SignalWatcher(LitElement) {
             .hasTransparent=${!this.edgeless.doc.awarenessStore.getFlag(
               'enable_color_picker'
             )}
-            @select=${(e: ColorEvent) => this._setFillColor(e.detail)}
+            @select=${(e: ColorEvent) =>
+              this._setFillColor(e.detail as ShapeFillColor)}
           ></edgeless-one-row-color-panel>
         </div>
       </edgeless-slide-menu>
@@ -153,7 +180,7 @@ export class EdgelessShapeMenu extends SignalWatcher(LitElement) {
   accessor edgeless!: EdgelessRootBlockComponent;
 
   @property({ attribute: false })
-  accessor onChange!: (props: Record<string, unknown>) => void;
+  accessor onChange!: (name: ShapeName) => void;
 }
 
 declare global {

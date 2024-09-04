@@ -21,10 +21,10 @@ export class EdgelessShapePanel extends LitElement {
   `;
 
   slots = {
-    select: new Slot<ShapeTool['shapeType']>(),
+    select: new Slot<ShapeTool['shapeName']>(),
   };
 
-  private _onSelect(value: ShapeTool['shapeType']) {
+  private _onSelect(value: ShapeTool['shapeName']) {
     this.selectedShape = value;
     this.slots.select.emit(value);
   }
@@ -57,7 +57,7 @@ export class EdgelessShapePanel extends LitElement {
   }
 
   @property({ attribute: false })
-  accessor selectedShape: ShapeTool['shapeType'] | null | undefined = undefined;
+  accessor selectedShape: ShapeTool['shapeName'] | null | undefined = undefined;
 
   @property({ attribute: false })
   accessor shapeStyle: ShapeStyle = ShapeStyle.Scribbled;

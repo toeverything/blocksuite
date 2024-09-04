@@ -28,7 +28,10 @@ export function updateShapeOverlay(rootComponent: EdgelessRootBlockComponent) {
 export function getActiveShapeColor(type: 'fill' | 'stroke') {
   return ({ rootComponent }: PieMenuContext) => {
     if (rootComponent instanceof EdgelessRootBlockComponent) {
-      const props = rootComponent.service.editPropsStore.getLastProps('shape');
+      const props =
+        rootComponent.service.editPropsStore.lastProps$.value[
+          'shape:roundedRect'
+        ];
       const color = type == 'fill' ? props.fillColor : props.strokeColor;
       return ThemeObserver.getColorValue(color);
     }
@@ -41,7 +44,7 @@ export function getActiveConnectorStrokeColor({
 }: PieMenuContext) {
   if (rootComponent instanceof EdgelessRootBlockComponent) {
     const props =
-      rootComponent.service.editPropsStore.getLastProps('connector');
+      rootComponent.service.editPropsStore.lastProps$.value.connector;
     const color = props.stroke;
     return ThemeObserver.getColorValue(color);
   }

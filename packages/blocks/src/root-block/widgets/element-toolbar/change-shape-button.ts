@@ -121,12 +121,12 @@ function getMostCommonStrokeColor(
 
 function getMostCommonShape(
   elements: ShapeElementModel[]
-): ShapeTool['shapeType'] | null {
+): ShapeTool['shapeName'] | null {
   const shapeTypes = countBy(elements, (ele: ShapeElementModel) => {
     return getShapeName(ele.shapeType, ele.radius);
   });
   const max = maxBy(Object.entries(shapeTypes), ([_k, count]) => count);
-  return max ? (max[0] as ShapeTool['shapeType']) : null;
+  return max ? (max[0] as ShapeTool['shapeName']) : null;
 }
 
 function getMostCommonLineSize(elements: ShapeElementModel[]): LineWidth {

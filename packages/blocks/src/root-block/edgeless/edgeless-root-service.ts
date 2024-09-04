@@ -1,7 +1,4 @@
-import type {
-  CanvasElementType,
-  ConnectorElementModel,
-} from '@blocksuite/affine-block-surface';
+import type { ConnectorElementModel } from '@blocksuite/affine-block-surface';
 import type {
   Overlay,
   SurfaceBlockModel,
@@ -40,6 +37,7 @@ import { getSurfaceBlock } from '../../surface-ref-block/utils.js';
 import { RootService } from '../root-service.js';
 import { GfxBlockModel } from './block-model.js';
 import { EdgelessFrameManager, FrameOverlay } from './frame-manager.js';
+import { getLastPropsKey } from './services/edit-session.js';
 import { EdgelessSelectionManager } from './services/selection-manager.js';
 import { TemplateJob } from './services/template.js';
 import {
@@ -167,32 +165,30 @@ export class EdgelessRootService extends RootService implements SurfaceContext {
     parent?: string | BlockModel,
     parentIndex?: number
   ) {
-    props['index'] = this.generateIndex(flavour);
-
-    this.editPropsStore.applyLastProps(
-      flavour as BlockSuite.EdgelessModelKeys,
-      props
-    );
-
-    return this.doc.addBlock(flavour as never, props, parent, parentIndex);
-  }
-
-  addElement<T = Record<string, unknown>>(type: string, props: T) {
-    // @ts-ignore
-    if (props['index'] === undefined) {
-      // @ts-ignore
-      props['index'] = this.generateIndex(type);
+    const key = getLastPropsKey(flavour as BlockSuite.EdgelessModelKeys, props);
+    if (key) {
+      props = this.editPropsStore.applyLastProps(key, props);
     }
 
-    // @ts-ignore
-    props['type'] = type;
+    const nProps = {
+      ...props,
+      index: this.generateIndex(flavour),
+    };
+    return this.doc.addBlock(flavour as never, nProps, parent, parentIndex);
+  }
 
-    this.editPropsStore.applyLastProps(
-      type as CanvasElementType,
-      props as Record<string, unknown>
-    );
+  addElement<T extends Record<string, unknown>>(type: string, props: T) {
+    const key = getLastPropsKey(type as BlockSuite.EdgelessModelKeys, props);
+    if (key) {
+      props = this.editPropsStore.applyLastProps(key, props) as T;
+    }
 
-    return this._surface.addElement(props as T & { type: string });
+    const nProps = {
+      ...props,
+      type,
+      index: props.index ?? this.generateIndex(type),
+    };
+    return this._surface.addElement(nProps);
   }
 
   createGroup(elements: BlockSuite.EdgelessModel[] | string[]) {
@@ -660,20 +656,22 @@ export class EdgelessRootService extends RootService implements SurfaceContext {
   updateElement(id: string, props: Record<string, unknown>) {
     const element = this._surface.getElementById(id);
     if (element) {
-      this.editPropsStore.recordLastProps(
+      const key = getLastPropsKey(
         element.type as BlockSuite.EdgelessModelKeys,
-        props
+        { ...element.yMap.toJSON(), ...props }
       );
+      key && this.editPropsStore.recordLastProps(key, props);
       this._surface.updateElement(id, props);
       return;
     }
 
     const block = this.doc.getBlockById(id);
     if (block) {
-      this.editPropsStore.recordLastProps(
+      const key = getLastPropsKey(
         block.flavour as BlockSuite.EdgelessModelKeys,
-        props
+        { ...block.yBlock.toJSON(), ...props }
       );
+      key && this.editPropsStore.recordLastProps(key, props);
       this.doc.updateBlock(block, props);
     }
   }

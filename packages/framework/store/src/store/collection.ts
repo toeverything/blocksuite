@@ -10,6 +10,7 @@ import {
   MemoryBlobSource,
   NoopDocSource,
 } from '@blocksuite/sync';
+import clonedeep from 'lodash.clonedeep';
 import merge from 'lodash.merge';
 import { Awareness } from 'y-protocols/awareness.js';
 import * as Y from 'yjs';
@@ -118,7 +119,7 @@ export class DocCollection extends DocCollectionAddonType {
     this.doc = new BlockSuiteDoc({ guid: id });
     this.awarenessStore = new AwarenessStore(
       new Awareness<RawAwarenessState>(this.doc),
-      merge({ ...FLAGS_PRESET }, defaultFlags)
+      merge(clonedeep(FLAGS_PRESET), defaultFlags)
     );
 
     this.awarenessSync = new AwarenessEngine(
