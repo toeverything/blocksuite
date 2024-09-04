@@ -31,7 +31,6 @@ import { setBasePath } from '@shoelace-style/shoelace/dist/utilities/base-path.j
 import { css, html, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
-import type { CustomChatPanel } from './custom-chat-panel.js';
 import type { DocsPanel } from './docs-panel.js';
 import type { LeftSidePanel } from './left-side-panel.js';
 
@@ -249,10 +248,6 @@ export class QuickEdgelessMenu extends ShadowlessElement {
     this._docMode = this.rootService.std.get(DocModeProvider).toggleMode();
   }
 
-  private _toggleChatPanel() {
-    this.chatPanel.toggleDisplay();
-  }
-
   private _toggleDarkMode() {
     this._setThemeMode(!this._dark);
   }
@@ -402,11 +397,6 @@ export class QuickEdgelessMenu extends ShadowlessElement {
                     <sl-menu-item @click=${this._importSnapshot}>
                       Import Snapshot
                     </sl-menu-item>
-                    ${this.chatPanel
-                      ? html`<sl-menu-item @click=${this._toggleChatPanel}>
-                          Toggle Chat Panel
-                        </sl-menu-item>`
-                      : nothing}
                   </sl-menu>
                 </sl-menu-item>
                 <sl-menu-item @click=${this._clearSiteData}>
@@ -581,9 +571,6 @@ export class QuickEdgelessMenu extends ShadowlessElement {
 
   @state()
   private accessor _docMode: DocMode = 'page';
-
-  @property({ attribute: false })
-  accessor chatPanel!: CustomChatPanel;
 
   @property({ attribute: false })
   accessor collection!: DocCollection;
