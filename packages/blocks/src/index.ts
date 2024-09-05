@@ -21,6 +21,7 @@ import './root-block/index.js';
 import './surface-ref-block/index.js';
 
 export * from './_common/adapters/index.js';
+
 export * from './_common/components/ai-item/index.js';
 export type { NotificationService } from './_common/components/index.js';
 export { scrollbarStyle } from './_common/components/index.js';
@@ -68,6 +69,12 @@ export * from './surface-ref-block/index.js';
 export * from '@blocksuite/affine-block-list';
 export * from '@blocksuite/affine-block-paragraph';
 export {
+  AffineCanvasTextFonts,
+  CanvasElementType,
+  EdgelessSurfaceBlockSpec,
+  fitContent,
+  MindmapElementModel,
+  PageSurfaceBlockSpec,
   SurfaceBlockComponent,
   SurfaceBlockModel,
 } from '@blocksuite/affine-block-surface';
