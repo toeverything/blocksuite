@@ -11,7 +11,6 @@ on:
       - 'scripts/**'
       - 'packages/docs/**'
   pull_request:
-    types: [opened, synchronize, reopened, ready_for_review]
     paths-ignore:
       - '.husky'
       - '.vscode'
@@ -47,20 +46,6 @@ jobs:
           node-version-file: '.nvmrc'
           cache: 'pnpm'
 
-      - name: Get pnpm store directory
-        id: pnpm-cache
-        shell: bash
-        run: |
-          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
-
-      - uses: actions/cache@v4
-        name: Setup pnpm cache
-        with:
-          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-store-
-
       - name: Install dependencies
         run: pnpm install
 
@@ -89,20 +74,6 @@ jobs:
         with:
           node-version-file: '.nvmrc'
           cache: 'pnpm'
-
-      - name: Get pnpm store directory
-        id: pnpm-cache
-        shell: bash
-        run: |
-          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
-
-      - uses: actions/cache@v4
-        name: Setup pnpm cache
-        with:
-          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-store-
 
       - uses: nrwl/nx-set-shas@v4
         with:
@@ -180,25 +151,11 @@ jobs:
           node-version-file: '.nvmrc'
           cache: 'pnpm'
 
-      - name: Get pnpm store directory
-        id: pnpm-cache
-        shell: bash
-        run: |
-          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
-
-      - uses: actions/cache@v4
-        name: Setup pnpm cache
-        with:
-          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-store-
-
       - name: Install dependencies
         run: pnpm install
 
       - name: Build
-        run: pnpm --filter=@blocksuite/playground build
+        run: pnpm nx vite:build @blocksuite/playground
 
       - name: Install playwright browsers
         run: npx playwright install chromium
@@ -226,12 +183,85 @@ jobs:
           path: ./tests/test-results
           if-no-files-found: ignore
 
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    needs: install-deps
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: pnpm/action-setup@v4
+        name: Install pnpm
+        id: pnpm-install
+
+      - name: Use Node.js LTS
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'pnpm'
+
+      - uses: nrwl/nx-set-shas@v4
+        with:
+          main-branch-name: master
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Run eslint
+        run: pnpm lint
+
+      - name: Run lit lint
+        run: pnpm lint:lit
+
+      - name: Node Environment Test
+        run: pnpm test:node
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    needs: install-deps
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: pnpm/action-setup@v4
+        name: Install pnpm
+        id: pnpm-install
+
+      - name: Use Node.js LTS
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'pnpm'
+
+      - uses: nrwl/nx-set-shas@v4
+        with:
+          main-branch-name: master
+
+      - name: Install dependencies
+        run: pnpm install
+
+      #      - name: Check dedupe
+      #        run: pnpm dedupe --check
+
+      - name: Run type check
+        run: pnpm test:type
+
+      - name: Run build
+        run: pnpm build:packages
+
+      - name: Run circular imports detect
+        run: pnpm lint:circular
+
   build-and-test:
     if: ${{ always() }}
     name: Build & Test
-    needs: [e2e, unit]
+    needs: [e2e, unit, lint, build]
     runs-on: ubuntu-latest
     steps:
       - name: on error
-        if: ${{ needs.e2e.result != 'success' || needs.unit.result != 'success' }}
+        if: ${{ needs.e2e.result != 'success' || needs.unit.result != 'success' || needs.lint.result != 'success' || needs.build.result != 'success' }}
         run: exit 1
