@@ -7,6 +7,9 @@ import {
   getBoundingBox,
   initDatabaseDynamicRowWithData,
   initEmptyDatabaseState,
+  pressArrowUp,
+  pressArrowUpWithShiftKey,
+  pressBackspace,
   pressEnter,
   pressEscape,
   redoByClick,
@@ -499,5 +502,92 @@ test.describe('select column tag action', () => {
     await performSelectColumnTagAction(page, 'Red');
     await pressEscape(page);
     await assertSelectedStyle(page, 'backgroundColor', 'var(--affine-tag-red)');
+  });
+});
+
+test.describe('drag-to-fill', () => {
+  test('should show when cell in focus and hide on blur', async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyDatabaseState(page);
+
+    await initDatabaseColumn(page);
+    await initDatabaseDynamicRowWithData(page, '', true);
+
+    await pressEscape(page);
+
+    const dragToFillHandle = page.locator('.drag-to-fill');
+
+    await expect(dragToFillHandle).toBeVisible();
+
+    await pressEscape(page);
+
+    await expect(dragToFillHandle).toBeHidden();
+  });
+
+  test('should not show in multi (row or column) selection', async ({
+    page,
+  }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyDatabaseState(page);
+
+    await initDatabaseColumn(page);
+
+    await initDatabaseDynamicRowWithData(page, '', true);
+    await pressEscape(page);
+
+    await initDatabaseDynamicRowWithData(page, '', true);
+    await pressEscape(page);
+
+    const dragToFillHandle = page.locator('.drag-to-fill');
+
+    await expect(dragToFillHandle).toBeVisible();
+
+    await pressArrowUpWithShiftKey(page);
+
+    await expect(dragToFillHandle).toBeHidden();
+    await pressArrowUp(page);
+
+    await expect(dragToFillHandle).toBeVisible();
+  });
+
+  test('should fill columns with data', async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyDatabaseState(page);
+
+    await initDatabaseColumn(page);
+
+    await initDatabaseDynamicRowWithData(page, 'thing', true);
+    await pressEscape(page);
+
+    await initDatabaseDynamicRowWithData(page, '', true);
+    await pressBackspace(page);
+    await type(page, 'aaa');
+    await pressEnter(page);
+    await pressEnter(page);
+
+    await pressEscape(page);
+    await pressArrowUp(page);
+
+    const cells = page.locator('affine-database-multi-select-cell');
+
+    expect(await cells.nth(0).innerText()).toBe('thing');
+    expect(await cells.nth(1).innerText()).toBe('aaa');
+
+    const dragToFillHandle = page.locator('.drag-to-fill');
+
+    await expect(dragToFillHandle).toBeVisible();
+
+    const bbox = await getBoundingBox(dragToFillHandle);
+
+    if (!bbox) throw new Error('Expected a bounding box');
+
+    await dragBetweenCoords(
+      page,
+      { x: bbox.x + bbox.width / 2, y: bbox.y + bbox.height / 2 },
+      { x: bbox.x, y: bbox.y + 200 }
+    );
+
+    expect(await cells.nth(0).innerText()).toBe('thing');
+    expect(await cells.nth(1).innerText()).toBe('thing');
   });
 });
