@@ -677,6 +677,12 @@ importers:
       '@blocksuite/global':
         specifier: workspace:*
         version: link:../global
+      '@blocksuite/inline':
+        specifier: workspace:*
+        version: link:../inline
+      '@blocksuite/store':
+        specifier: workspace:*
+        version: link:../store
       '@lit-labs/preact-signals':
         specifier: ^1.0.2
         version: 1.0.2
@@ -710,13 +716,6 @@ importers:
       zod:
         specifier: ^3.23.8
         version: 3.23.8
-    devDependencies:
-      '@blocksuite/inline':
-        specifier: workspace:*
-        version: link:../inline
-      '@blocksuite/store':
-        specifier: workspace:*
-        version: link:../store
 
   packages/framework/global:
     dependencies:

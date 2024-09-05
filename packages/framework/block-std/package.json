@@ -14,12 +14,10 @@
   "keywords": [],
   "author": "toeverything",
   "license": "MPL-2.0",
-  "peerDependencies": {
-    "@blocksuite/inline": "workspace:*",
-    "@blocksuite/store": "workspace:*"
-  },
   "dependencies": {
     "@blocksuite/global": "workspace:*",
+    "@blocksuite/inline": "workspace:*",
+    "@blocksuite/store": "workspace:*",
     "@lit-labs/preact-signals": "^1.0.2",
     "@lit/context": "^1.1.2",
     "@types/hast": "^3.0.4",
@@ -31,10 +29,6 @@
     "unified": "^11.0.5",
     "w3c-keyname": "^2.2.8",
     "zod": "^3.23.8"
-  },
-  "devDependencies": {
-    "@blocksuite/inline": "workspace:*",
-    "@blocksuite/store": "workspace:*"
   },
   "exports": {
     ".": "./src/index.ts",
