@@ -244,8 +244,8 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      #      - name: Check dedupe
-      #        run: pnpm dedupe --check
+      - name: Check dedupe
+        run: pnpm dedupe --check
 
       - name: Run type check
         run: pnpm test:type
