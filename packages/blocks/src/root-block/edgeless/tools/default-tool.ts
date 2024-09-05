@@ -223,7 +223,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     const h = Math.abs(startY - curY);
     const bound = new Bound(x, y, w, h);
 
-    const elements = service.pickElementsByBound(bound);
+    const elements = service.gfx.getElementsByBound(bound);
 
     const set = new Set(
       tools.shiftKey ? [...elements, ...selection.selectedElements] : elements
@@ -445,8 +445,8 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
       this._clearMindMapHoverState.forEach(fn => fn());
       this._clearMindMapHoverState = [];
 
-      const hoveredMindmap = this._service
-        .pickElement(x, y, {
+      const hoveredMindmap = this._service.gfx
+        .getElementByPoint(x, y, {
           all: true,
           responsePadding: [25, 60],
         })
@@ -547,7 +547,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     const group = service.pickElementInGroup(modelPos[0], modelPos[1], options);
 
     if (group instanceof MindmapElementModel) {
-      const picked = service.pickElement(modelPos[0], modelPos[1], {
+      const picked = service.gfx.getElementByPoint(modelPos[0], modelPos[1], {
         ...((options ?? {}) as PointTestOptions),
         all: true,
       });

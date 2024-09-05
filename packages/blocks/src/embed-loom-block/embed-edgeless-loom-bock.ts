@@ -6,9 +6,7 @@ import { EmbedLoomBlockComponent } from './embed-loom-block.js';
 @customElement('affine-embed-edgeless-loom-block')
 export class EmbedEdgelessLoomBlockComponent extends toEdgelessEmbedBlock(
   EmbedLoomBlockComponent
-) {
-  override rootServiceFlavour: string = 'affine:page';
-}
+) {}
 
 declare global {
   interface HTMLElementTagNameMap {

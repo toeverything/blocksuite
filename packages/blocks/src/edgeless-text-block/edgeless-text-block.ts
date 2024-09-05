@@ -27,7 +27,6 @@ export const EDGELESS_TEXT_BLOCK_MIN_HEIGHT = 50;
 
 @customElement('affine-edgeless-text')
 export class EdgelessTextBlockComponent extends GfxBlockComponent<
-  EdgelessRootService,
   EdgelessTextBlockModel,
   EdgelessTextBlockService
 > {
@@ -35,11 +34,6 @@ export class EdgelessTextBlockComponent extends GfxBlockComponent<
 
   private _resizeObserver = new ResizeObserver(() => {
     if (this.doc.readonly) {
-      return;
-    }
-
-    if (!this.rootService) {
-      console.error('rootService is not ready in edgeless-text-block');
       return;
     }
 
@@ -56,8 +50,6 @@ export class EdgelessTextBlockComponent extends GfxBlockComponent<
       overflow-wrap: normal !important;
     }
   `;
-
-  override rootServiceFlavour = 'affine:page';
 
   private _initDragEffect() {
     const edgelessSelection = this.rootService.selection;
@@ -98,8 +90,8 @@ export class EdgelessTextBlockComponent extends GfxBlockComponent<
     const bound = Bound.deserialize(this.model.xywh);
     const rect = this._textContainer.getBoundingClientRect();
     bound.h = Math.max(
-      rect.height / this.rootService.zoom,
-      EDGELESS_TEXT_BLOCK_MIN_HEIGHT * this.rootService.zoom
+      rect.height / this.gfx.viewport.zoom,
+      EDGELESS_TEXT_BLOCK_MIN_HEIGHT * this.gfx.viewport.zoom
     );
 
     this.doc.updateBlock(this.model, {
@@ -111,8 +103,8 @@ export class EdgelessTextBlockComponent extends GfxBlockComponent<
     const bound = Bound.deserialize(this.model.xywh);
     const rect = this._textContainer.getBoundingClientRect();
     bound.w = Math.max(
-      rect.width / this.rootService.zoom,
-      EDGELESS_TEXT_BLOCK_MIN_WIDTH * this.rootService.zoom
+      rect.width / this.gfx.viewport.zoom,
+      EDGELESS_TEXT_BLOCK_MIN_WIDTH * this.gfx.viewport.zoom
     );
 
     this.doc.updateBlock(this.model, {
@@ -336,10 +328,6 @@ export class EdgelessTextBlockComponent extends GfxBlockComponent<
     `;
   }
 
-  override toZIndex() {
-    return `${this.rootService.layer.getZIndex(this.model)}`;
-  }
-
   tryFocusEnd() {
     const paragraphOrLists = Array.from(
       this.querySelectorAll<BlockComponent>('affine-paragraph, affine-list')
@@ -369,6 +357,10 @@ export class EdgelessTextBlockComponent extends GfxBlockComponent<
 
   override get parentComponent() {
     return super.parentComponent as EdgelessRootBlockComponent;
+  }
+
+  get rootService() {
+    return this.std.getService('affine:page') as EdgelessRootService;
   }
 
   @state()

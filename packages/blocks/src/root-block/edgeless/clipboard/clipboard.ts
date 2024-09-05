@@ -917,10 +917,9 @@ export class EdgelessClipboardController extends PageClipboard {
 
     const nodeElements =
       nodes ??
-      (edgeless.service.pickElementsByBound(
-        bound,
-        'blocks'
-      ) as BlockSuite.EdgelessBlockModelType[]);
+      (edgeless.service.gfx.getElementsByBound(bound, {
+        type: 'block',
+      }) as BlockSuite.EdgelessBlockModelType[]);
     for (const nodeElement of nodeElements) {
       await _drawTopLevelBlock(nodeElement);
 

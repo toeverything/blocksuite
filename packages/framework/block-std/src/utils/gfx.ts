@@ -2,7 +2,7 @@ import type { Doc } from '@blocksuite/store';
 
 import { effect } from '@lit-labs/preact-signals';
 
-import { SurfaceBlockModel } from '../gfx/index.js';
+import { SurfaceBlockModel } from '../gfx/surface/surface-model.js';
 
 export function onSurfaceAdded(
   doc: Doc,
@@ -22,8 +22,8 @@ export function onSurfaceAdded(
         callback(block.model);
         found = true;
         foundId = block.id;
+        return;
       }
-      return;
     }
 
     callback(null);

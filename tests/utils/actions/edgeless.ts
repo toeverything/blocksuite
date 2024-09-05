@@ -1688,8 +1688,10 @@ export async function getSortedIdsInViewport(page: Page) {
     const container = document.querySelector('affine-edgeless-root');
     if (!container) throw new Error('container not found');
     const { service } = container;
-    return service.layer.canvasGrid
-      .search(service.viewport.viewportBounds)
+    return service.gfx.grid
+      .search(service.viewport.viewportBounds, undefined, {
+        filter: model => !('flavour' in model),
+      })
       .map(e => e.id);
   });
 }

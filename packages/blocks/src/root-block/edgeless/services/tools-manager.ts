@@ -378,7 +378,7 @@ export class EdgelessToolsManager {
     }
     const { x, y } = this._lastMousePos;
     const [modelX, modelY] = this.service.viewport.toModelCoord(x, y);
-    const hovered = this.service.pickElement(modelX, modelY);
+    const hovered = this.service.gfx.getElementByPoint(modelX, modelY);
 
     if (!hovered || this.selection?.editing) {
       return null;

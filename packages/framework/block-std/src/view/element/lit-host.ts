@@ -77,6 +77,8 @@ export class EditorHost extends SignalWatcher(
     editor-host {
       outline: none;
       isolation: isolate;
+      display: block;
+      height: 100%;
     }
   `;
 

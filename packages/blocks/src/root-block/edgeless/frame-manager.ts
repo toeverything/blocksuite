@@ -276,11 +276,9 @@ export class EdgelessFrameManager {
   getElementsInFrameBound(frame: FrameBlockModel, fullyContained = true) {
     const bound = Bound.deserialize(frame.xywh);
     const elements: BlockSuite.EdgelessModel[] =
-      this._rootService.layer.canvasGrid.search(bound, true);
+      this._rootService.gfx.grid.search(bound, fullyContained);
 
-    return elements.concat(
-      getBlocksInFrameBound(this._rootService.doc, frame, fullyContained)
-    );
+    return elements;
   }
 
   /**

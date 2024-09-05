@@ -1,4 +1,7 @@
+export { GfxController, GfxControllerIdentifier } from './controller.js';
 export * from './gfx-block-model.js';
+export { GridManager } from './grid.js';
+export { LayerManager } from './layer.js';
 export {
   convert,
   convertProps,

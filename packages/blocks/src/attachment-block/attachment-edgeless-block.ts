@@ -19,8 +19,6 @@ export class AttachmentEdgelessBlockComponent extends toGfxBlockComponent(
 ) {
   protected override _whenHover: HoverController | null = null;
 
-  override rootServiceFlavour: string = 'affine:page';
-
   override connectedCallback(): void {
     super.connectedCallback();
 
@@ -65,16 +63,12 @@ export class AttachmentEdgelessBlockComponent extends toGfxBlockComponent(
     return this.renderPageContent();
   }
 
-  override toZIndex(): string {
-    return `${this.rootService.layer.getZIndex(this.model)}`;
-  }
-
   protected override get embedView() {
     return undefined;
   }
 
-  override get rootService() {
-    return super.rootService as EdgelessRootService;
+  get rootService() {
+    return this.std.getService('affine:page') as EdgelessRootService;
   }
 }
 

@@ -27,7 +27,7 @@ import {
   type SerializedXYWH,
   deserializeXYWH,
 } from '@blocksuite/global/utils';
-import { assertExists, noop } from '@blocksuite/global/utils';
+import { assertExists } from '@blocksuite/global/utils';
 import { type TemplateResult, css, html, nothing } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -38,11 +38,7 @@ import type { EdgelessRootService } from '../root-block/index.js';
 import type { SurfaceRefBlockService } from './surface-ref-service.js';
 
 import { SpecProvider } from '../_specs/index.js';
-import './surface-ref-portal.js';
-import { SurfaceRefPortal } from './surface-ref-portal.js';
 import { noContentPlaceholder } from './utils.js';
-
-noop(SurfaceRefPortal);
 
 const REF_LABEL_ICON = {
   'affine:frame': FrameIcon,

@@ -146,8 +146,6 @@ export class EdgelessNoteBlockComponent extends toGfxBlockComponent(
     }
   `;
 
-  override rootServiceFlavour = 'affine:page';
-
   private _collapsedContent() {
     if (!this._isShowCollapsedContent) {
       return nothing;
@@ -166,7 +164,7 @@ export class EdgelessNoteBlockComponent extends toGfxBlockComponent(
     const rect = this._notePageContent?.getBoundingClientRect();
     if (!rect) return nothing;
 
-    const zoom = this.rootService.viewport.zoom;
+    const zoom = this.gfx.viewport.zoom;
     this._noteFullHeight =
       rect.height / scale / zoom + 2 * EDGELESS_BLOCK_CHILD_PADDING;
 
@@ -308,7 +306,7 @@ export class EdgelessNoteBlockComponent extends toGfxBlockComponent(
   }
 
   get _zoom() {
-    return this.rootService.viewport.zoom;
+    return this.gfx.viewport.zoom;
   }
 
   override connectedCallback(): void {
@@ -349,7 +347,7 @@ export class EdgelessNoteBlockComponent extends toGfxBlockComponent(
     const observer = new MutationObserver(() => {
       const rect = this._notePageContent?.getBoundingClientRect();
       if (!rect) return;
-      const zoom = this.rootService.viewport.zoom;
+      const zoom = this.gfx.viewport.zoom;
       const scale = this.model.edgeless.scale ?? 1;
       this._noteFullHeight =
         rect.height / scale / zoom + 2 * EDGELESS_BLOCK_CHILD_PADDING;
@@ -490,20 +488,15 @@ export class EdgelessNoteBlockComponent extends toGfxBlockComponent(
           .model=${this.model}
           .display=${!this._editing}
           .host=${this.host}
-          .zoom=${this.rootService?.viewport.zoom ?? 1}
+          .zoom=${this.gfx.viewport.zoom ?? 1}
           .editing=${this._editing}
         ></edgeless-note-mask>
       </div>
     `;
   }
 
-  override toZIndex() {
-    // FIXME: weird empty rootService
-    return this.rootService?.layer.getZIndex(this.model).toString() ?? '0';
-  }
-
-  override get rootService() {
-    return super.rootService as EdgelessRootService;
+  get rootService() {
+    return this.std.getService('affine:page') as EdgelessRootService;
   }
 
   @state()

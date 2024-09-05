@@ -1,5 +1,5 @@
 import type { IBound } from '@blocksuite/global/utils';
-import type { Doc } from '@blocksuite/store';
+import type { BlockModel, Doc } from '@blocksuite/store';
 
 import {
   Bound,
@@ -8,10 +8,9 @@ import {
   isPointIn,
 } from '@blocksuite/global/utils';
 
-import type { SurfaceBlockModel } from './surface/surface-model.js';
-
 import { compare } from '../utils/layer.js';
 import { GfxBlockElementModel, type GfxModel } from './gfx-block-model.js';
+import { SurfaceBlockModel } from './surface/surface-model.js';
 
 function getGridIndex(val: number) {
   return Math.ceil(val / DEFAULT_GRID_SIZE) - 1;
@@ -182,7 +181,7 @@ export class GridManager {
     bound: IBound,
     strict: boolean = false,
     reverseChecking: boolean = false,
-    exclude?: Set<GfxModel>
+    filter?: (model: GfxModel) => boolean
   ) {
     const [minRow, maxRow, minCol, maxCol] = rangeFromBound(bound);
     const b = Bound.from(bound);
@@ -199,7 +198,7 @@ export class GridManager {
         const gridElements = this._getGrid(i, j);
         if (!gridElements) continue;
         for (const element of gridElements) {
-          if (!exclude?.has(element) && check(element.elementBound)) {
+          if ((!filter || filter(element)) && check(element.elementBound)) {
             return true;
           }
         }
@@ -237,21 +236,41 @@ export class GridManager {
 
     this._removeFromExternalGrids(element);
   }
-  search(bound: IBound, strict?: boolean, returnSet?: false): GfxModel[];
-  search(
-    bound: IBound,
-    strict: boolean | undefined,
-    returnSet: true
-  ): Set<GfxModel>;
 
   search(
     bound: IBound,
+    strict?: boolean,
+    options?: {
+      useSet?: false;
+      filter?: (model: GfxModel) => boolean;
+    }
+  ): GfxModel[];
+  search(
+    bound: IBound,
+    strict: boolean | undefined,
+    options: {
+      useSet: true;
+      filter?: (model: GfxModel) => boolean;
+    }
+  ): Set<GfxModel>;
+  search(
+    bound: IBound,
     strict = false,
-    returnSet: boolean = false
+    options: {
+      /**
+       * If true, return a set of elements instead of an array
+       */
+      useSet?: boolean;
+      filter?: (model: GfxModel) => boolean;
+    } = {
+      useSet: false,
+    }
   ): GfxModel[] | Set<GfxModel> {
     const results: Set<GfxModel> = this._searchExternal(bound, strict);
     const [minRow, maxRow, minCol, maxCol] = rangeFromBound(bound);
     const b = Bound.from(bound);
+    const returnSet = options.useSet ?? false;
+    const filter = options.filter;
 
     for (let i = minRow; i <= maxRow; i++) {
       for (let j = minCol; j <= maxCol; j++) {
@@ -259,9 +278,9 @@ export class GridManager {
         if (!gridElements) continue;
         for (const element of gridElements) {
           if (
-            strict
+            (!filter || filter(element)) && strict
               ? b.contains(element.elementBound)
-              : element.intersectsBound(bound as Bound)
+              : intersects(element.elementBound, b)
           ) {
             results.add(element);
           }
@@ -285,12 +304,21 @@ export class GridManager {
   watch(blocks: { doc?: Doc; surface?: SurfaceBlockModel | null }) {
     const disposables: { dispose: () => void }[] = [];
     const { doc, surface } = blocks;
+    const isRenderableBlock = (
+      block: BlockModel
+    ): block is GfxBlockElementModel => {
+      return (
+        block instanceof GfxBlockElementModel &&
+        (block.parent?.role === 'root' ||
+          block.parent instanceof SurfaceBlockModel)
+      );
+    };
 
     if (doc) {
       disposables.push(
         doc.slots.blockUpdated.on(payload => {
           if (payload.type === 'add') {
-            if (payload.model instanceof GfxBlockElementModel) {
+            if (isRenderableBlock(payload.model)) {
               this.add(payload.model);
             }
           }
@@ -310,6 +338,12 @@ export class GridManager {
           }
         })
       );
+
+      Object.values(doc.blocks.peek()).forEach(block => {
+        if (isRenderableBlock(block.model)) {
+          this.add(block.model);
+        }
+      });
     }
 
     if (surface) {
@@ -327,9 +361,15 @@ export class GridManager {
 
       disposables.push(
         surface.elementUpdated.on(payload => {
-          this.update(surface.getElementById(payload.id)!);
+          if (payload.props['xywh'] || payload.props['externalXYWH']) {
+            this.update(surface.getElementById(payload.id)!);
+          }
         })
       );
+
+      surface.elementModels.forEach(model => {
+        this.add(model);
+      });
     }
 
     return () => {

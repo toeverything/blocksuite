@@ -12,6 +12,8 @@ import { classMap } from 'lit/directives/class-map.js';
 import { guard } from 'lit/directives/guard.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
+import type { EdgelessRootService } from '../root-block/index.js';
+
 import { toEdgelessEmbedBlock } from '../_common/embed-block-helper/embed-block-element.js';
 import { EmbedSyncedDocBlockComponent } from './embed-synced-doc-block.js';
 
@@ -30,9 +32,7 @@ export class EmbedEdgelessSyncedDocBlockComponent extends toEdgelessEmbedBlock(
       width: '100%',
     });
     const modelScale = this.model.scale ?? 1;
-    const bound = Bound.deserialize(
-      (this.rootService?.getElementById(this.model.id) ?? this.model).xywh
-    );
+    const bound = Bound.deserialize(this.model.xywh);
     const width = bound.w / modelScale;
     const height = bound.h / modelScale;
     containerStyleMap = styleMap({
@@ -138,8 +138,6 @@ export class EmbedEdgelessSyncedDocBlockComponent extends toEdgelessEmbedBlock(
     doc.deleteBlock(this.model);
   };
 
-  override rootServiceFlavour: string = 'affine:page';
-
   override renderGfxBlock() {
     const { style, xywh } = this.model;
 
@@ -160,6 +158,10 @@ export class EmbedEdgelessSyncedDocBlockComponent extends toEdgelessEmbedBlock(
     };
 
     return this.renderPageContent();
+  }
+
+  get rootService() {
+    return this.std.getService('affine:page') as EdgelessRootService;
   }
 
   override accessor useCaptionEditor = true;

@@ -6,7 +6,10 @@ import type { GfxBlockElementModel, GfxModel } from '../gfx/gfx-block-model.js';
 import type { Layer } from '../gfx/layer.js';
 import type { SurfaceBlockModel } from '../gfx/surface/surface-model.js';
 
-import { type GfxContainerElement, isGfxContainerElm } from '../gfx/index.js';
+import {
+  type GfxContainerElement,
+  isGfxContainerElm,
+} from '../gfx/surface/element-model.js';
 
 export function getLayerEndZIndex(layers: Layer[], layerIndex: number) {
   const layer = layers[layerIndex];

@@ -1,6 +1,6 @@
 import type { RichText } from '@blocksuite/affine-components/rich-text';
-import type { FrameBlockModel } from '@blocksuite/affine-model';
 
+import { FrameBlockModel } from '@blocksuite/affine-model';
 import {
   RANGE_SYNC_EXCLUDE_ATTR,
   ShadowlessElement,
@@ -87,11 +87,11 @@ export class EdgelessFrameTitleEditor extends WithDisposable(
     const viewport = this.edgeless.service.viewport;
     const bound = Bound.deserialize(this.frameModel.xywh);
     const [x, y] = viewport.toViewCoord(bound.x, bound.y);
-    const isInner = this.edgeless.service.layer.framesGrid.has(
+    const isInner = this.edgeless.service.gfx.grid.has(
       this.frameModel.elementBound,
       true,
       true,
-      new Set([this.frameModel])
+      model => model !== this.frameModel && model instanceof FrameBlockModel
     );
 
     const inlineEditorStyle = styleMap({

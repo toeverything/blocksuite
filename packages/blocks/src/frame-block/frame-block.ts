@@ -1,3 +1,4 @@
+import type { BlockStdScope } from '@blocksuite/block-std';
 import type { Doc } from '@blocksuite/store';
 
 import { FrameBlockModel } from '@blocksuite/affine-model';
@@ -6,10 +7,15 @@ import {
   GfxBlockComponent,
   ShadowlessElement,
   WithDisposable,
+  docContext,
+  modelContext,
+  stdContext,
 } from '@blocksuite/block-std';
+import { GfxControllerIdentifier } from '@blocksuite/block-std/gfx';
 import { Bound, type SerializedXYWH } from '@blocksuite/global/utils';
+import { consume } from '@lit/context';
 import { css, html, nothing } from 'lit';
-import { customElement, property, query, state } from 'lit/decorators.js';
+import { customElement, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import type { EdgelessRootService } from '../root-block/index.js';
@@ -46,11 +52,11 @@ export class EdgelessFrameTitle extends WithDisposable(ShadowlessElement) {
   `;
 
   private _isInsideFrame() {
-    return this.service.layer.framesGrid.has(
+    return this.gfx.grid.has(
       this.model.elementBound,
       true,
       true,
-      new Set([this.model])
+      model => model !== this.model && model instanceof FrameBlockModel
     );
   }
 
@@ -69,13 +75,15 @@ export class EdgelessFrameTitle extends WithDisposable(ShadowlessElement) {
           ? NESTED_FRAME_OFFSET / zoom
           : -(height + NESTED_FRAME_OFFSET / zoom))
       },${width},${height}]`;
+
+      this.gfx.grid.update(this.model);
     }
   }
 
   override connectedCallback() {
     super.connectedCallback();
 
-    const { _disposables, doc, service } = this;
+    const { _disposables, doc, gfx, rootService } = this;
 
     this._nestedFrame = this._isInsideFrame();
 
@@ -100,26 +108,26 @@ export class EdgelessFrameTitle extends WithDisposable(ShadowlessElement) {
     );
 
     _disposables.add(
-      service.selection.slots.updated.on(() => {
+      rootService.selection.slots.updated.on(() => {
         this._editing =
-          service.selection.selectedIds[0] === this.model.id &&
-          service.selection.editing;
+          rootService.selection.selectedIds[0] === this.model.id &&
+          rootService.selection.editing;
       })
     );
 
     _disposables.add(
-      service.slots.edgelessToolUpdated.on(tool => {
+      rootService.slots.edgelessToolUpdated.on(tool => {
         this._isNavigator = tool.type === 'frameNavigator';
       })
     );
 
     _disposables.add(
-      service.viewport.viewportUpdated.on(({ zoom }) => {
+      gfx.viewport.viewportUpdated.on(({ zoom }) => {
         this._zoom = zoom;
       })
     );
 
-    this._zoom = service.viewport.zoom;
+    this._zoom = gfx.viewport.zoom;
 
     const updateTitle = () => {
       this._frameTitle = this.model.title.toString();
@@ -186,10 +194,8 @@ export class EdgelessFrameTitle extends WithDisposable(ShadowlessElement) {
 
   override updated(_changedProperties: Map<string, unknown>) {
     if (
-      (!this.service.viewport.viewportBounds.contains(
-        this.model.elementBound
-      ) &&
-        !this.service.viewport.viewportBounds.isIntersectWithBound(
+      (!this.gfx.viewport.viewportBounds.contains(this.model.elementBound) &&
+        !this.gfx.viewport.viewportBounds.isIntersectWithBound(
           this.model.elementBound
         )) ||
       !this._frameTitleEl
@@ -210,9 +216,17 @@ export class EdgelessFrameTitle extends WithDisposable(ShadowlessElement) {
       sizeChanged = true;
     }
 
-    if (sizeChanged || _changedProperties.has('zoom')) {
+    if (sizeChanged || _changedProperties.has('_zoom')) {
       this._updateFrameTitleSize();
     }
+  }
+
+  get gfx() {
+    return this.std.get(GfxControllerIdentifier);
+  }
+
+  get rootService() {
+    return this.std.getService('affine:page') as EdgelessRootService;
   }
 
   @state()
@@ -236,23 +250,20 @@ export class EdgelessFrameTitle extends WithDisposable(ShadowlessElement) {
   @state()
   private accessor _zoom!: number;
 
-  @property({ attribute: false })
+  @consume({ context: docContext })
   accessor doc!: Doc;
 
-  @property({ attribute: false })
+  @consume({ context: modelContext })
   accessor model!: FrameBlockModel;
 
-  @property({ attribute: false })
-  accessor service!: EdgelessRootService;
+  @consume({
+    context: stdContext,
+  })
+  accessor std!: BlockStdScope;
 }
 
 @customElement('affine-frame')
-export class FrameBlockComponent extends GfxBlockComponent<
-  EdgelessRootService,
-  FrameBlockModel
-> {
-  override rootServiceFlavour = 'affine:page';
-
+export class FrameBlockComponent extends GfxBlockComponent<FrameBlockModel> {
   override connectedCallback() {
     super.connectedCallback();
 
@@ -272,7 +283,7 @@ export class FrameBlockComponent extends GfxBlockComponent<
   }
 
   override renderGfxBlock() {
-    const { model, _isNavigator, showBorder, doc, rootService } = this;
+    const { model, _isNavigator, showBorder, rootService } = this;
     const backgroundColor = ThemeObserver.generateColorProperty(
       model.background,
       '--affine-platte-transparent'
@@ -281,9 +292,6 @@ export class FrameBlockComponent extends GfxBlockComponent<
 
     return html`
       <edgeless-frame-title
-        .service=${rootService}
-        .doc=${doc}
-        .model=${model}
         style=${styleMap({
           zIndex: 2147483647 - -frameIndex,
         })}
@@ -307,6 +315,10 @@ export class FrameBlockComponent extends GfxBlockComponent<
 
   override toZIndex(): string {
     return 'auto';
+  }
+
+  get rootService() {
+    return this.std.getService('affine:page') as EdgelessRootService;
   }
 
   @state()

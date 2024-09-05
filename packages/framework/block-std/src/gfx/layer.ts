@@ -102,13 +102,19 @@ export class LayerManager {
 
   constructor(
     private _doc: Doc,
-    private _surface: SurfaceBlockModel | null
+    private _surface: SurfaceBlockModel | null,
+    options: {
+      watch: boolean;
+    } = { watch: true }
   ) {
     this._reset();
-    this.watch({
-      doc: _doc,
-      surface: _surface,
-    });
+
+    if (options?.watch) {
+      this.watch({
+        doc: _doc,
+        surface: _surface,
+      });
+    }
   }
 
   private _buildCanvasLayers() {
@@ -579,9 +585,17 @@ export class LayerManager {
    * @returns
    */
   createIndexGenerator(ignoreRule: boolean = false) {
-    const manager = new LayerManager(this._doc, this._surface);
+    const manager = new LayerManager(this._doc, this._surface, {
+      watch: false,
+    });
 
     return (elementType: string) => {
+      if (ignoreRule) {
+        elementType = 'shape';
+      }
+
+      if (elementType === 'group') elementType = 'shape';
+
       const typeField = this._surface?.registeredElementTypes.includes(
         elementType
       )
@@ -589,12 +603,6 @@ export class LayerManager {
         : 'flavour';
       const idx = manager.generateIndex(elementType);
       const bound = new Bound(0, 0, 10, 10);
-
-      if (ignoreRule) {
-        elementType = 'shape';
-      }
-
-      if (elementType === 'group') elementType = 'shape';
 
       const mockedFakeElement = {
         index: idx,
@@ -820,6 +828,10 @@ export class LayerManager {
     }
 
     if (surface) {
+      if (this._surface !== surface) {
+        this._surface = surface;
+      }
+
       this._disposable.add(
         surface.elementAdded.on(payload =>
           this.add(surface.getElementById(payload.id)!)
@@ -835,6 +847,8 @@ export class LayerManager {
       this._disposable.add(
         surface.elementRemoved.on(payload => this.delete(payload.model!))
       );
+
+      surface.elementModels.forEach(el => this.add(el));
     }
   }
 }

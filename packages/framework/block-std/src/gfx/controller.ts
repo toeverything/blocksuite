@@ -1,3 +1,4 @@
+import type { ServiceIdentifier } from '@blocksuite/global/di';
 import type { BlockModel } from '@blocksuite/store';
 
 import {
@@ -10,6 +11,8 @@ import {
 import type { BlockStdScope } from '../scope/block-std-scope.js';
 import type { SurfaceBlockModel } from './surface/surface-model.js';
 
+import { LifeCycleWatcher } from '../extension/lifecycle-watcher.js';
+import { LifeCycleWatcherIdentifier } from '../identifier.js';
 import { onSurfaceAdded } from '../utils/gfx.js';
 import { GfxBlockElementModel, type GfxModel } from './gfx-block-model.js';
 import { GridManager } from './grid.js';
@@ -20,21 +23,24 @@ import {
 } from './surface/element-model.js';
 import { Viewport } from './viewport.js';
 
-export class GfxController {
+export class GfxController extends LifeCycleWatcher {
   private _disposables: DisposableGroup = new DisposableGroup();
 
   private _surface: SurfaceBlockModel | null = null;
+
+  static override key = 'gfxController';
 
   readonly grid: GridManager;
 
   readonly layer: LayerManager;
 
-  std: BlockStdScope;
-
   readonly viewport: Viewport = new Viewport();
 
   constructor(std: BlockStdScope) {
-    this.std = std;
+    super(std);
+
+    this.grid = new GridManager();
+    this.layer = new LayerManager(this.doc, null);
 
     this._disposables.add(
       onSurfaceAdded(this.doc, surface => {
@@ -46,10 +52,6 @@ export class GfxController {
         }
       })
     );
-
-    this.grid = new GridManager();
-    this.layer = new LayerManager(this.doc, this.surface);
-
     this._disposables.add(this.grid.watch({ doc: this.doc }));
     this._disposables.add(this.layer);
     this._disposables.add(this.viewport);
@@ -131,15 +133,19 @@ export class GfxController {
    * @param options
    */
   getElementsByBound(
-    bound: IBound,
+    bound: IBound | Bound,
+    options?: { type: 'all' }
+  ): GfxModel[];
+  getElementsByBound(
+    bound: IBound | Bound,
     options: { type: 'canvas' }
   ): GfxPrimitiveElementModel[];
   getElementsByBound(
-    bound: IBound,
+    bound: IBound | Bound,
     options: { type: 'block' }
   ): GfxBlockElementModel[];
   getElementsByBound(
-    bound: IBound,
+    bound: IBound | Bound,
     options: { type: 'block' | 'canvas' | 'all' } = {
       type: 'all',
     }
@@ -169,7 +175,11 @@ export class GfxController {
     );
   }
 
-  umount() {
+  override mounted() {
+    this.viewport.setViewportElm(this.std.host);
+  }
+
+  override unmounted() {
     this._disposables.dispose();
   }
 
@@ -181,3 +191,7 @@ export class GfxController {
     return this._surface;
   }
 }
+
+export const GfxControllerIdentifier = LifeCycleWatcherIdentifier(
+  GfxController.key
+) as ServiceIdentifier<GfxController>;

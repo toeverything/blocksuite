@@ -157,7 +157,7 @@ export function addText(
   event: PointerEventState
 ) {
   const [x, y] = edgeless.service.viewport.toModelCoord(event.x, event.y);
-  const selected = edgeless.service.pickElement(x, y);
+  const selected = edgeless.service.gfx.getElementByPoint(x, y);
 
   if (!selected) {
     const [modelX, modelY] = edgeless.service.viewport.toModelCoord(

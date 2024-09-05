@@ -146,7 +146,7 @@ export class Viewport {
     this.setViewport(zoom, center, smooth);
   }
 
-  setViewportElement(elm: HTMLElement) {
+  setViewportElm(elm: HTMLElement) {
     const rect = elm.getBoundingClientRect();
 
     this._el = elm;

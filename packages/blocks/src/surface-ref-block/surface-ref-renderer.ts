@@ -8,7 +8,7 @@ import type { Doc } from '@blocksuite/store';
 import { CanvasRenderer } from '@blocksuite/affine-block-surface';
 import { elementRenderers } from '@blocksuite/affine-block-surface';
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
-import { Viewport } from '@blocksuite/block-std/gfx';
+import { GfxControllerIdentifier, Viewport } from '@blocksuite/block-std/gfx';
 import { DisposableGroup, Slot } from '@blocksuite/global/utils';
 
 import { getSurfaceBlock } from './utils.js';
@@ -43,7 +43,8 @@ export class SurfaceRefRenderer {
     const viewport = new Viewport();
     const renderer = new CanvasRenderer({
       viewport,
-      layerManager: this.surfaceService.layer,
+      layerManager: std.get(GfxControllerIdentifier).layer,
+      gridManager: std.get(GfxControllerIdentifier).grid,
       enableStackingCanvas: options.enableStackingCanvas,
       provider: {
         generateColorProperty: (color: Color, fallback: string) =>

@@ -6,16 +6,12 @@ import { toGfxBlockComponent } from '@blocksuite/block-std';
 import { customElement } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type { EdgelessRootService } from '../root-block/index.js';
-
 import { BookmarkBlockComponent } from './bookmark-block.js';
 
 @customElement('affine-edgeless-bookmark')
 export class BookmarkEdgelessBlockComponent extends toGfxBlockComponent(
   BookmarkBlockComponent
 ) {
-  override rootServiceFlavour: string = 'affine:page';
-
   override getRenderingRect() {
     const elementBound = this.model.elementBound;
     const style = this.model.style$.value;
@@ -45,14 +41,6 @@ export class BookmarkEdgelessBlockComponent extends toGfxBlockComponent(
     });
 
     return this.renderPageContent();
-  }
-
-  override toZIndex() {
-    return `${this.rootService.layer.getZIndex(this.model)}`;
-  }
-
-  override get rootService() {
-    return super.rootService as EdgelessRootService;
   }
 
   protected override accessor blockContainerStyles = {};

@@ -236,8 +236,6 @@ export function toEdgelessEmbedBlock<
       transformOrigin: '0 0',
     };
 
-    override rootServiceFlavour: string = 'affine:page';
-
     _handleClick(_: MouseEvent): void {
       return;
     }
@@ -274,16 +272,12 @@ export function toEdgelessEmbedBlock<
       return this.renderPageContent();
     }
 
-    override toZIndex() {
-      return `${this.rootService.layer.getZIndex(this.model)}`;
-    }
-
     get bound(): Bound {
       return Bound.deserialize(this.model.xywh);
     }
 
-    override get rootService() {
-      return super.rootService as EdgelessRootService;
+    get rootService() {
+      return this.std.getService('affine:page') as EdgelessRootService;
     }
 
     protected override accessor blockContainerStyles: StyleInfo | undefined =
@@ -292,6 +286,6 @@ export function toEdgelessEmbedBlock<
     new (
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       ...args: any[]
-    ): GfxBlockComponent<EdgelessRootService>;
+    ): GfxBlockComponent;
   };
 }
