@@ -1,5 +1,8 @@
-import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
-import { SignalWatcher } from '@lit-labs/preact-signals';
+import {
+  ShadowlessElement,
+  WithDisposable,
+  SignalWatcher,
+} from '@blocksuite/block-std';
 import { property } from 'lit/decorators.js';
 
 import type { DataViewExpose } from '../view/data-view.js';

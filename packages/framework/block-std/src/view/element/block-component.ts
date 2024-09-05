@@ -2,7 +2,7 @@ import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 import { Doc } from '@blocksuite/store';
 import { type BlockModel, BlockViewType } from '@blocksuite/store';
 import { consume, provide } from '@lit/context';
-import { SignalWatcher, computed } from '@lit-labs/preact-signals';
+import { computed } from '@lit-labs/preact-signals';
 import { type PropertyValues, type TemplateResult, nothing, render } from 'lit';
 import { property, state } from 'lit/decorators.js';
 import { choose } from 'lit/directives/choose.js';
@@ -15,6 +15,7 @@ import type { BlockStdScope } from '../../scope/index.js';
 import type { WidgetComponent } from './widget-component.js';
 
 import { PropTypes, requiredProperties } from '../decorators/index.js';
+import { SignalWatcher } from '../signal-watcher.js';
 import { WithDisposable } from '../utils/with-disposable.js';
 import {
   blockComponentSymbol,

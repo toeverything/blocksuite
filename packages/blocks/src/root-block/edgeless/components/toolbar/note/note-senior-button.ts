@@ -4,7 +4,8 @@ import {
   TextIcon,
 } from '@blocksuite/affine-components/icons';
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
-import { SignalWatcher, computed } from '@lit-labs/preact-signals';
+import { SignalWatcher } from '@blocksuite/block-std';
+import { computed } from '@lit-labs/preact-signals';
 import { LitElement, css, html } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 

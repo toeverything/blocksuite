@@ -5,9 +5,13 @@ import type {
   UIEventHandler,
 } from '@blocksuite/block-std';
 import type { Disposable } from '@blocksuite/global/utils';
+import type { ReadonlySignal } from '@lit-labs/preact-signals';
 
-import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
-import { type ReadonlySignal, SignalWatcher } from '@lit-labs/preact-signals';
+import {
+  ShadowlessElement,
+  WithDisposable,
+  SignalWatcher,
+} from '@blocksuite/block-std';
 import { property } from 'lit/decorators.js';
 
 import type { DataSource } from '../common/data-source/base.js';

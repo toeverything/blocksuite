@@ -7,6 +7,7 @@ import {
   type ExtensionType,
   ShadowlessElement,
   WithDisposable,
+  SignalWatcher,
 } from '@blocksuite/block-std';
 import { type AbstractEditor, DocModeProvider } from '@blocksuite/blocks';
 import {
@@ -16,12 +17,7 @@ import {
   type PageRootBlockComponent,
 } from '@blocksuite/blocks';
 import { Slot, noop } from '@blocksuite/global/utils';
-import {
-  SignalWatcher,
-  computed,
-  effect,
-  signal,
-} from '@lit-labs/preact-signals';
+import { computed, effect, signal } from '@lit-labs/preact-signals';
 import { css, html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { keyed } from 'lit/directives/keyed.js';

@@ -3,16 +3,15 @@ import type { Y } from '@blocksuite/store';
 
 import { ColorScheme } from '@blocksuite/affine-model';
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
-import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
+import {
+  ShadowlessElement,
+  WithDisposable,
+  SignalWatcher,
+} from '@blocksuite/block-std';
 import { noop } from '@blocksuite/global/utils';
 import { DoneIcon } from '@blocksuite/icons/lit';
 import { DocCollection } from '@blocksuite/store';
-import {
-  type Signal,
-  SignalWatcher,
-  effect,
-  signal,
-} from '@lit-labs/preact-signals';
+import { type Signal, effect, signal } from '@lit-labs/preact-signals';
 import { cssVar } from '@toeverything/theme';
 import { css, html, unsafeCSS } from 'lit';
 import { customElement, property } from 'lit/decorators.js';

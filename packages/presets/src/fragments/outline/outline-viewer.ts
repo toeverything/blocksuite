@@ -2,9 +2,10 @@ import {
   PropTypes,
   WithDisposable,
   requiredProperties,
+  SignalWatcher,
 } from '@blocksuite/block-std';
 import { NoteDisplayMode, scrollbarStyle } from '@blocksuite/blocks';
-import { SignalWatcher, signal } from '@lit-labs/preact-signals';
+import { signal } from '@lit-labs/preact-signals';
 import { LitElement, css, html, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';

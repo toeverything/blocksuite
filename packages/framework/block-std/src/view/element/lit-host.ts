@@ -9,7 +9,6 @@ import { Slot } from '@blocksuite/global/utils';
 import { Doc } from '@blocksuite/store';
 import { type BlockModel, BlockViewType } from '@blocksuite/store';
 import { createContext, provide } from '@lit/context';
-import { SignalWatcher } from '@lit-labs/preact-signals';
 import { LitElement, type TemplateResult, css, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
@@ -24,6 +23,7 @@ import type { ViewStore } from '../view-store.js';
 
 import { WidgetViewMapIdentifier } from '../../identifier.js';
 import { PropTypes, requiredProperties } from '../decorators/index.js';
+import { SignalWatcher } from '../signal-watcher.js';
 import { WithDisposable } from '../utils/with-disposable.js';
 import { ShadowlessElement } from './shadowless-element.js';
 

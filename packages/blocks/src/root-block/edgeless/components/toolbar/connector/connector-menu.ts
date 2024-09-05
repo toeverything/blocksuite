@@ -6,7 +6,8 @@ import {
 } from '@blocksuite/affine-components/icons';
 import { DEFAULT_CONNECTOR_COLOR } from '@blocksuite/affine-model';
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
-import { SignalWatcher, computed } from '@lit-labs/preact-signals';
+import { SignalWatcher } from '@blocksuite/block-std';
+import { computed } from '@lit-labs/preact-signals';
 import { LitElement, css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 

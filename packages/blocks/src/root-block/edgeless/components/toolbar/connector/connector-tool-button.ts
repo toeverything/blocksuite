@@ -5,7 +5,8 @@ import {
   ConnectorXWithArrowIcon,
 } from '@blocksuite/affine-components/icons';
 import { ConnectorMode, getConnectorModeName } from '@blocksuite/affine-model';
-import { SignalWatcher, computed } from '@lit-labs/preact-signals';
+import { SignalWatcher } from '@blocksuite/block-std';
+import { computed } from '@lit-labs/preact-signals';
 import { LitElement, css, html } from 'lit';
 import { customElement } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';

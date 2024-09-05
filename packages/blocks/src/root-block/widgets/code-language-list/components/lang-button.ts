@@ -1,7 +1,6 @@
 import { ArrowDownIcon } from '@blocksuite/affine-components/icons';
-import { WithDisposable } from '@blocksuite/block-std';
+import { WithDisposable, SignalWatcher } from '@blocksuite/block-std';
 import { noop } from '@blocksuite/global/utils';
-import { SignalWatcher } from '@lit-labs/preact-signals';
 import { LitElement, css, nothing } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { html } from 'lit/static-html.js';

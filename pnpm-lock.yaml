@@ -31,9 +31,6 @@ overrides:
   set-function-length: npm:@nolyfill/set-function-length@latest
 
 patchedDependencies:
-  '@lit-labs/preact-signals@1.0.2':
-    hash: zsk746dt4hzz7ujosijwqb6oaq
-    path: patches/@lit-labs__preact-signals@1.0.2.patch
   figma-squircle@1.0.0:
     hash: sy37n6jzb3eyxrysogxfnkzuoa
     path: patches/figma-squircle@1.0.0.patch
@@ -245,7 +242,7 @@ importers:
         version: 1.6.10
       '@lit-labs/preact-signals':
         specifier: ^1.0.2
-        version: 1.0.2(patch_hash=zsk746dt4hzz7ujosijwqb6oaq)
+        version: 1.0.2
       '@lit/context':
         specifier: ^1.1.2
         version: 1.1.2
@@ -290,7 +287,7 @@ importers:
         version: 1.6.10
       '@lit-labs/preact-signals':
         specifier: ^1.0.2
-        version: 1.0.2(patch_hash=zsk746dt4hzz7ujosijwqb6oaq)
+        version: 1.0.2
       '@lit/context':
         specifier: ^1.1.2
         version: 1.1.2
@@ -329,7 +326,7 @@ importers:
         version: link:../../framework/store
       '@lit-labs/preact-signals':
         specifier: ^1.0.2
-        version: 1.0.2(patch_hash=zsk746dt4hzz7ujosijwqb6oaq)
+        version: 1.0.2
       '@lit/context':
         specifier: ^1.1.2
         version: 1.1.2
@@ -393,7 +390,7 @@ importers:
         version: 1.6.10
       '@lit-labs/preact-signals':
         specifier: ^1.0.2
-        version: 1.0.2(patch_hash=zsk746dt4hzz7ujosijwqb6oaq)
+        version: 1.0.2
       '@lit/context':
         specifier: ^1.1.2
         version: 1.1.2
@@ -460,7 +457,7 @@ importers:
         version: 1.6.10
       '@lit-labs/preact-signals':
         specifier: ^1.0.2
-        version: 1.0.2(patch_hash=zsk746dt4hzz7ujosijwqb6oaq)
+        version: 1.0.2
       '@lit/context':
         specifier: ^1.1.2
         version: 1.1.2
@@ -517,7 +514,7 @@ importers:
         version: 1.6.10
       '@lit-labs/preact-signals':
         specifier: ^1.0.2
-        version: 1.0.2(patch_hash=zsk746dt4hzz7ujosijwqb6oaq)
+        version: 1.0.2
       '@lit/context':
         specifier: ^1.1.2
         version: 1.1.2
@@ -693,7 +690,7 @@ importers:
         version: link:../global
       '@lit-labs/preact-signals':
         specifier: ^1.0.2
-        version: 1.0.2(patch_hash=zsk746dt4hzz7ujosijwqb6oaq)
+        version: 1.0.2
       '@lit/context':
         specifier: ^1.1.2
         version: 1.1.2
@@ -940,7 +937,7 @@ importers:
         version: 1.6.10
       '@lit-labs/preact-signals':
         specifier: ^1.0.2
-        version: 1.0.2(patch_hash=zsk746dt4hzz7ujosijwqb6oaq)
+        version: 1.0.2
       '@lottiefiles/dotlottie-wc':
         specifier: ^0.2.16
         version: 0.2.19
@@ -9913,7 +9910,7 @@ snapshots:
     dependencies:
       '@lezer/common': 1.2.1
 
-  '@lit-labs/preact-signals@1.0.2(patch_hash=zsk746dt4hzz7ujosijwqb6oaq)':
+  '@lit-labs/preact-signals@1.0.2':
     dependencies:
       '@preact/signals-core': 1.8.0
       lit: 3.2.0

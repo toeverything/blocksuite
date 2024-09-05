@@ -139,7 +139,6 @@
       "set-function-length": "npm:@nolyfill/set-function-length@latest"
     },
     "patchedDependencies": {
-      "@lit-labs/preact-signals@1.0.2": "patches/@lit-labs__preact-signals@1.0.2.patch",
       "figma-squircle@1.0.0": "patches/figma-squircle@1.0.0.patch"
     }
   },

@@ -21,7 +21,9 @@ export const ListBlockSchema = defineBlockSchema({
       text: internal.Text(),
       checked: false,
       collapsed: false,
-      order: null, // number type only for numbered list
+
+      // number type only for numbered list
+      order: null,
     }) as ListProps,
   metadata: {
     version: 1,

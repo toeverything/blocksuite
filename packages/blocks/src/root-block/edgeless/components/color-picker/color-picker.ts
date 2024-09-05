@@ -1,11 +1,6 @@
 import { on, once, stopPropagation } from '@blocksuite/affine-shared/utils';
-import { WithDisposable } from '@blocksuite/block-std';
-import {
-  SignalWatcher,
-  batch,
-  computed,
-  signal,
-} from '@lit-labs/preact-signals';
+import { WithDisposable, SignalWatcher } from '@blocksuite/block-std';
+import { batch, computed, signal } from '@lit-labs/preact-signals';
 import { LitElement, html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
