@@ -5,7 +5,6 @@ import {
   TextUtils,
 } from '@blocksuite/affine-block-surface';
 import { ConnectorUtils } from '@blocksuite/affine-block-surface';
-import { ShapeElementModel } from '@blocksuite/affine-block-surface';
 import {
   SmallArrowDownIcon,
   TextAlignCenterIcon,
@@ -13,6 +12,7 @@ import {
   TextAlignRightIcon,
 } from '@blocksuite/affine-components/icons';
 import { renderToolbarSeparator } from '@blocksuite/affine-components/toolbar';
+import { ShapeElementModel } from '@blocksuite/affine-model';
 import {
   FontFamily,
   FontStyle,

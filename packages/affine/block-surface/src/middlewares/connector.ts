@@ -1,6 +1,6 @@
+import type { ConnectorElementModel } from '@blocksuite/affine-model';
 import type { GfxModel } from '@blocksuite/block-std/gfx';
 
-import type { ConnectorElementModel } from '../index.js';
 import type { SurfaceBlockModel, SurfaceMiddleware } from '../surface-model.js';
 
 import { ConnectorPathGenerator } from '../managers/connector-manager.js';

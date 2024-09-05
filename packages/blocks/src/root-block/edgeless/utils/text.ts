@@ -1,18 +1,17 @@
+import type {
+  FrameBlockModel,
+  GroupElementModel,
+  ConnectorElementModel,
+} from '@blocksuite/affine-model';
 import type { PointerEventState } from '@blocksuite/block-std';
 import type { IVec } from '@blocksuite/global/utils';
 
 import {
   CanvasElementType,
   TextUtils,
-  type ConnectorElementModel,
   type IModelCoord,
 } from '@blocksuite/affine-block-surface';
-import {
-  type FrameBlockModel,
-  type GroupElementModel,
-  ShapeElementModel,
-} from '@blocksuite/affine-model';
-import { TextElementModel } from '@blocksuite/affine-model';
+import { TextElementModel, ShapeElementModel } from '@blocksuite/affine-model';
 import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 import {
   Bound,

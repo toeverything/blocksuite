@@ -1,11 +1,10 @@
-import type { BrushElementModel } from '@blocksuite/affine-block-surface';
-
-import {
-  type BrushProps,
-  type ColorScheme,
-  LINE_COLORS,
-  LineWidth,
+import type {
+  BrushElementModel,
+  BrushProps,
+  ColorScheme,
 } from '@blocksuite/affine-model';
+
+import { LINE_COLORS, LineWidth } from '@blocksuite/affine-model';
 import { WithDisposable } from '@blocksuite/block-std';
 import { countBy, maxBy } from '@blocksuite/global/utils';
 import { LitElement, html, nothing } from 'lit';

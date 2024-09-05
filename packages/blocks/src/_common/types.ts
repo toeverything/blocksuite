@@ -1,5 +1,5 @@
-import type { BrushElementModel } from '@blocksuite/affine-block-surface';
 import type { RefNodeSlots } from '@blocksuite/affine-components/rich-text';
+import type { BrushElementModel } from '@blocksuite/affine-model';
 import type {
   ConnectorElementModel,
   DocMode,

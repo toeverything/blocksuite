@@ -14,7 +14,6 @@ import {
 } from '@blocksuite/affine-block-surface';
 import { MindmapElementModel } from '@blocksuite/affine-block-surface';
 import { LayoutType } from '@blocksuite/affine-block-surface';
-import { ShapeElementModel } from '@blocksuite/affine-block-surface';
 import { ConnectorPathGenerator } from '@blocksuite/affine-block-surface';
 import {
   AutoCompleteArrowIcon,
@@ -27,6 +26,7 @@ import {
   DEFAULT_CONNECTOR_COLOR,
   DEFAULT_SHAPE_STROKE_COLOR,
   shapeMethods,
+  ShapeElementModel,
 } from '@blocksuite/affine-model';
 import { handleNativeRangeAtPoint } from '@blocksuite/affine-shared/utils';
 import { WithDisposable } from '@blocksuite/block-std';

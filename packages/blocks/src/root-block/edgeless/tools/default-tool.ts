@@ -8,17 +8,14 @@ import type { PointerEventState } from '@blocksuite/block-std';
 import type { PointTestOptions } from '@blocksuite/block-std/gfx';
 import type { IVec } from '@blocksuite/global/utils';
 
-import { MindmapUtils } from '@blocksuite/affine-block-surface';
-import {
-  MindmapElementModel,
-  ShapeElementModel,
-  TextElementModel,
-} from '@blocksuite/affine-block-surface';
-import { ConnectorUtils } from '@blocksuite/affine-block-surface';
+import { MindmapElementModel } from '@blocksuite/affine-block-surface';
+import { ConnectorUtils, MindmapUtils } from '@blocksuite/affine-block-surface';
 import { focusTextModel } from '@blocksuite/affine-components/rich-text';
 import {
   ConnectorElementModel,
   GroupElementModel,
+  ShapeElementModel,
+  TextElementModel,
 } from '@blocksuite/affine-model';
 import { TelemetryProvider } from '@blocksuite/affine-shared/services';
 import {

@@ -1,12 +1,12 @@
 import type { RichText } from '@blocksuite/affine-components/rich-text';
+import type { ShapeElementModel } from '@blocksuite/affine-model';
 
-import { TextResizing } from '@blocksuite/affine-block-surface';
-import {
-  MindmapElementModel,
-  type ShapeElementModel,
-} from '@blocksuite/affine-block-surface';
 import { CommonUtils } from '@blocksuite/affine-block-surface';
-import { TextUtils } from '@blocksuite/affine-block-surface';
+import {
+  TextUtils,
+  MindmapElementModel,
+} from '@blocksuite/affine-block-surface';
+import { TextResizing } from '@blocksuite/affine-model';
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import {
   RANGE_SYNC_EXCLUDE_ATTR,

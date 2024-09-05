@@ -1,8 +1,6 @@
-import type {
-  ConnectorElementModel,
-  SurfaceBlockModel,
-} from '@blocksuite/affine-block-surface';
+import type { SurfaceBlockModel } from '@blocksuite/affine-block-surface';
 import type { SurfaceBlockComponent } from '@blocksuite/affine-block-surface';
+import type { ConnectorElementModel } from '@blocksuite/affine-model';
 
 import { Overlay, CommonUtils } from '@blocksuite/affine-block-surface';
 import { deserializeXYWH } from '@blocksuite/global/utils';

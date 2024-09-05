@@ -1,15 +1,13 @@
-import type { ShapeElementModel } from '@blocksuite/affine-block-surface';
+import type { ShapeElementModel } from '@blocksuite/affine-model';
 
 import { MindmapElementModel } from '@blocksuite/affine-block-surface';
 import { LayoutType } from '@blocksuite/affine-block-surface';
 import {
+  EdgelessTextBlockModel,
+  NoteDisplayMode,
   ConnectorElementModel,
   ConnectorMode,
   GroupElementModel,
-} from '@blocksuite/affine-block-surface';
-import {
-  EdgelessTextBlockModel,
-  NoteDisplayMode,
 } from '@blocksuite/affine-model';
 import { TelemetryProvider } from '@blocksuite/affine-shared/services';
 import { matchFlavours } from '@blocksuite/affine-shared/utils';

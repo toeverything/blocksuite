@@ -1,4 +1,4 @@
-import type { ConnectorElementModel } from '@blocksuite/affine-block-surface';
+import type { ConnectorElementModel } from '@blocksuite/affine-model';
 import type { BlockSnapshot, SnapshotReturn } from '@blocksuite/store';
 
 import { CommonUtils } from '@blocksuite/affine-block-surface';

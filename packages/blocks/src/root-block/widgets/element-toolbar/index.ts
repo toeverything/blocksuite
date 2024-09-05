@@ -14,25 +14,23 @@ import type {
   ImageBlockModel,
   NoteBlockModel,
   RootBlockModel,
+  BrushElementModel,
+  ConnectorElementModel,
+  TextElementModel,
 } from '@blocksuite/affine-model';
 
-import {
-  ConnectorMode,
-  GroupElementModel,
-} from '@blocksuite/affine-block-surface';
-import {
-  type BrushElementModel,
-  type ConnectorElementModel,
-  ShapeElementModel,
-  type TextElementModel,
-  CommonUtils,
-} from '@blocksuite/affine-block-surface';
+import { CommonUtils } from '@blocksuite/affine-block-surface';
 import { ConnectorCWithArrowIcon } from '@blocksuite/affine-components/icons';
 import {
   type MenuItemGroup,
   cloneGroups,
   renderToolbarSeparator,
 } from '@blocksuite/affine-components/toolbar';
+import {
+  ConnectorMode,
+  GroupElementModel,
+  ShapeElementModel,
+} from '@blocksuite/affine-model';
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import { requestConnectedFrame } from '@blocksuite/affine-shared/utils';
 import { WidgetComponent } from '@blocksuite/block-std';

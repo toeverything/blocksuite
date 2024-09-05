@@ -7,14 +7,14 @@ import {
   GRID_GAP_MAX,
   GRID_GAP_MIN,
   MindmapElementModel,
-  ShapeElementModel,
-  TextElementModel,
   CommonUtils,
 } from '@blocksuite/affine-block-surface';
 import {
   type AttachmentBlockModel,
   type BookmarkBlockModel,
   ConnectorElementModel,
+  ShapeElementModel,
+  TextElementModel,
   type EdgelessTextBlockModel,
   type EmbedBlockModel,
   type EmbedFigmaModel,
