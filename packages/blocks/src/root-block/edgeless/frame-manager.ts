@@ -77,7 +77,6 @@ export class FrameOverlay extends Overlay {
 
       this._innerElements = [...innerElements];
     }
-
     this._renderer?.refresh();
   }
 
@@ -330,8 +329,9 @@ export class EdgelessFrameManager {
    */
   getElementsInFrameBound(frame: FrameBlockModel, fullyContained = true) {
     const bound = Bound.deserialize(frame.xywh);
-    const elements: BlockSuite.EdgelessModel[] =
-      this._rootService.gfx.grid.search(bound, fullyContained);
+    const elements: BlockSuite.EdgelessModel[] = this._rootService.gfx.grid
+      .search(bound, fullyContained)
+      .filter(element => element !== frame);
 
     return elements;
   }
