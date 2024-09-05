@@ -52,7 +52,7 @@ export class NoteBlockService extends BlockService {
       const offset = new Point(bound.x * zoom, bound.y * zoom);
 
       render(
-        noteComponent.host.renderModel(noteComponent.model),
+        noteComponent.host.dangerouslyRenderModel(noteComponent.model),
         dragPreviewEl
       );
 

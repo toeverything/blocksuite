@@ -384,7 +384,7 @@ export class PageRootBlockComponent extends BlockComponent<
         return !(isNote && displayOnEdgeless);
       }),
       child => child.id,
-      child => this.host.renderModel(child)
+      child => this.host.dangerouslyRenderModel(child)
     )}`;
 
     const widgets = html`${repeat(
