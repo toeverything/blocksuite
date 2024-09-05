@@ -89,6 +89,7 @@ export default [
       'perfectionist/sort-switch-case': 'off',
       'perfectionist/sort-classes': 'off',
       'perfectionist/sort-named-exports': 'off',
+      'perfectionist/sort-sets': 'off',
       // 'perfectionist/sort-classes': [
       //   'error',
       //   {
