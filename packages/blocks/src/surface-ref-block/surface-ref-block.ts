@@ -428,15 +428,28 @@ export class SurfaceRefBlockComponent extends BlockComponent<
     }
     this._previewSpec.extend([PageViewWatcher]);
 
+    const reference = this.model.reference;
+
     class FrameViewWatcher extends BlockServiceWatcher {
       static override readonly flavour = 'affine:frame';
 
       override mounted() {
-        this.blockService.specSlots.viewConnected.once(({ component }) => {
-          const frameBlock = component as FrameBlockComponent;
+        const disposable = this.blockService.specSlots.viewConnected.on(
+          ({ component }) => {
+            const frameBlock = component as FrameBlockComponent;
+            if (frameBlock.model.id !== reference) return;
 
-          frameBlock.showBorder = false;
-        });
+            frameBlock.showBorder = false;
+            disposable.dispose();
+
+            this.blockService.disposables.add(
+              frameBlock.model.xywh$.subscribe(() => {
+                refreshViewport();
+              })
+            );
+          }
+        );
+        this.blockService.disposables.add(disposable);
       }
     }
 

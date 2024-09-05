@@ -1,5 +1,6 @@
 import { WithDisposable } from '@blocksuite/block-std';
-import { LitElement, css, html, nothing } from 'lit';
+import { cssVarV2 } from '@toeverything/theme/v2';
+import { LitElement, css, html, nothing, unsafeCSS } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
@@ -10,7 +11,16 @@ export class EdgelessDraggingAreaRect extends WithDisposable(LitElement) {
   static override styles = css`
     .affine-edgeless-dragging-area {
       position: absolute;
-      background: var(--affine-hover-color);
+      background: ${unsafeCSS(
+        cssVarV2('edgeless/selection/selectionMarqueeBackground', '#1E96EB14')
+      )};
+      box-sizing: border-box;
+      border-width: 1px;
+      border-style: solid;
+      border-color: ${unsafeCSS(
+        cssVarV2('edgeless/selection/selectionMarqueeBorder', '#1E96EB')
+      )};
+
       z-index: 1;
       pointer-events: none;
     }

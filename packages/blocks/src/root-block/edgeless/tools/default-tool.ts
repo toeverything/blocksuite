@@ -1047,8 +1047,20 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     }
   }
 
-  onContainerMouseMove() {
-    noop();
+  onContainerMouseMove(e: PointerEventState) {
+    const hovered = this._pick(e.x, e.y, {
+      hitThreshold: 10,
+    });
+    if (
+      isFrameBlock(hovered) &&
+      hovered.externalBound?.isPointInBound(
+        this._service.viewport.toModelCoord(e.x, e.y)
+      )
+    ) {
+      this._service.frameOverlay.highlight(hovered);
+    } else {
+      this._service.frameOverlay.clear();
+    }
   }
 
   onContainerMouseOut(_: PointerEventState) {

@@ -147,6 +147,8 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     this._updateMode();
 
     this.edgeless.slots.elementResizeEnd.emit();
+
+    this.edgeless.service.frameOverlay.clear();
   };
 
   private _onDragMove = (
@@ -1003,6 +1005,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
 
     frameManager.removeAllChildrenFromFrame(frame);
     frameManager.addElementsToFrame(frame, newChildren);
+    this.edgeless.service.frameOverlay.highlight(frame, true);
   }
 
   #adjustNote(

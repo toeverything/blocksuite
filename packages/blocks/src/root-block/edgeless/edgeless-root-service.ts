@@ -82,7 +82,7 @@ export class EdgelessRootService extends RootService implements SurfaceContext {
 
   overlays: Record<string, Overlay> = {
     connector: new ConnectionOverlay(this.gfx),
-    frame: new FrameOverlay(),
+    frame: new FrameOverlay(this),
   };
 
   slots = {

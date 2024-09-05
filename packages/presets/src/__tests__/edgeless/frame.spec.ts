@@ -102,11 +102,14 @@ describe('frame', () => {
       bodyRect.y + bodyRect.height / 2
     ) as HTMLElement;
 
-    expect(pointDom1.className, 'Frame title should be on top').toBe(
-      'affine-frame-title'
-    );
-    expect(pointDom2.className, 'Frame body should be on bottom').toBe(
-      'affine-note-mask'
-    );
+    expect(
+      frameTitle.contains(pointDom1),
+      'Frame title should be on top'
+    ).toBeTruthy();
+
+    expect(
+      frameBody.contains(pointDom2),
+      'Frame body should be on bottom'
+    ).toBeFalsy();
   });
 });

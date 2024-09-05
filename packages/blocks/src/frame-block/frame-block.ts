@@ -1,7 +1,7 @@
 import type { BlockStdScope } from '@blocksuite/block-std';
 import type { Doc } from '@blocksuite/store';
 
-import { FrameBlockModel } from '@blocksuite/affine-model';
+import { ColorScheme, FrameBlockModel } from '@blocksuite/affine-model';
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import {
   GfxBlockComponent,
@@ -14,16 +14,27 @@ import {
 import { GfxControllerIdentifier } from '@blocksuite/block-std/gfx';
 import { Bound, type SerializedXYWH } from '@blocksuite/global/utils';
 import { consume } from '@lit/context';
-import { css, html, nothing } from 'lit';
+import { SignalWatcher } from '@lit-labs/preact-signals';
+import { cssVarV2 } from '@toeverything/theme/v2';
+import { css, html, nothing, unsafeCSS } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import type { EdgelessRootService } from '../root-block/index.js';
 
-const NESTED_FRAME_OFFSET = 4;
+import { parseStringToRgba } from '../root-block/edgeless/components/color-picker/utils.js';
+import { isTransparent } from '../root-block/edgeless/components/panel/color-panel.js';
+
+export const frameTitleStyleVars = {
+  nestedFrameOffset: 4,
+  height: 22,
+  fontSize: 14,
+};
 
 @customElement('edgeless-frame-title')
-export class EdgelessFrameTitle extends WithDisposable(ShadowlessElement) {
+export class EdgelessFrameTitle extends SignalWatcher(
+  WithDisposable(ShadowlessElement)
+) {
   private _cachedHeight = 0;
 
   private _cachedWidth = 0;
@@ -35,19 +46,31 @@ export class EdgelessFrameTitle extends WithDisposable(ShadowlessElement) {
 
     .affine-frame-title {
       position: absolute;
+      display: flex;
+      align-items: center;
       z-index: 1;
       left: 0px;
       top: 0px;
+      border: 1px solid ${unsafeCSS(cssVarV2('edgeless/frame/border/default'))};
       border-radius: 4px;
       width: fit-content;
-      padding: 8px 10px;
-      font-size: 14px;
-      cursor: default;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+      height: ${frameTitleStyleVars.height}px;
+      padding: 0px 4px;
       transform-origin: left bottom;
-      line-height: normal;
+      background-color: var(--bg-color);
+
+      span {
+        font-family: var(--affine-font-family);
+        font-size: ${frameTitleStyleVars.fontSize}px;
+        cursor: default;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+    }
+
+    .affine-frame-title:hover {
+      background-color: color-mix(in srgb, var(--bg-color), #000000 7%);
     }
   `;
 
@@ -66,14 +89,16 @@ export class EdgelessFrameTitle extends WithDisposable(ShadowlessElement) {
     const width = this._cachedWidth / zoom;
     const height = this._cachedHeight / zoom;
 
+    const { nestedFrameOffset } = frameTitleStyleVars;
+
     if (width && height) {
       this.model.externalXYWH = `[${
-        elementBound.x + (_nestedFrame ? NESTED_FRAME_OFFSET / zoom : 0)
+        elementBound.x + (_nestedFrame ? nestedFrameOffset / zoom : 0)
       },${
         elementBound.y +
         (_nestedFrame
-          ? NESTED_FRAME_OFFSET / zoom
-          : -(height + NESTED_FRAME_OFFSET / zoom))
+          ? nestedFrameOffset / zoom
+          : -(height + nestedFrameOffset / zoom))
       },${width},${height}]`;
 
       this.gfx.grid.update(this.model);
@@ -94,6 +119,14 @@ export class EdgelessFrameTitle extends WithDisposable(ShadowlessElement) {
             payload.props.key === 'xywh' &&
             doc.getBlock(payload.id)?.model instanceof FrameBlockModel) ||
           (payload.type === 'add' && payload.flavour === 'affine:frame')
+        ) {
+          this._nestedFrame = this._isInsideFrame();
+        }
+
+        if (
+          payload.type === 'delete' &&
+          payload.model instanceof FrameBlockModel &&
+          payload.model !== this.model
         ) {
           this._nestedFrame = this._isInsideFrame();
         }
@@ -130,14 +163,14 @@ export class EdgelessFrameTitle extends WithDisposable(ShadowlessElement) {
     this._zoom = gfx.viewport.zoom;
 
     const updateTitle = () => {
-      this._frameTitle = this.model.title.toString();
+      this._frameTitle = this.model.title.toString().trim();
     };
     _disposables.add(() => {
       this.model.title.yText.unobserve(updateTitle);
     });
     this.model.title.yText.observe(updateTitle);
 
-    this._frameTitle = this.model.title.toString();
+    this._frameTitle = this.model.title.toString().trim();
     this._xywh = this.model.xywh;
   }
 
@@ -147,17 +180,18 @@ export class EdgelessFrameTitle extends WithDisposable(ShadowlessElement) {
 
     const { _isNavigator, _editing, _zoom: zoom } = this;
 
+    const { nestedFrameOffset, height } = frameTitleStyleVars;
+
     const nestedFrame = this._nestedFrame;
     const maxWidth = nestedFrame
-      ? bound.w * zoom - NESTED_FRAME_OFFSET / zoom
+      ? bound.w * zoom - nestedFrameOffset / zoom
       : bound.w * zoom;
-    // 32 is the estimated height of title element
-    const hidden = 32 / zoom >= bound.h && nestedFrame;
+    const hidden = height / zoom >= bound.h;
     const transformOperation = [
       `translate(0%, ${nestedFrame ? 0 : -100}%)`,
       `scale(${1 / zoom})`,
-      `translate(${nestedFrame ? NESTED_FRAME_OFFSET : 0}px, ${
-        nestedFrame ? NESTED_FRAME_OFFSET : -NESTED_FRAME_OFFSET
+      `translate(${nestedFrame ? nestedFrameOffset : 0}px, ${
+        nestedFrame ? nestedFrameOffset : -nestedFrameOffset
       }px)`,
     ];
 
@@ -169,23 +203,16 @@ export class EdgelessFrameTitle extends WithDisposable(ShadowlessElement) {
         ? html`
             <div
               style=${styleMap({
-                display: hidden ? 'none' : 'initial',
+                '--bg-color': this.colors.background,
+                display: hidden ? 'none' : 'flex',
                 transform: transformOperation.join(' '),
                 maxWidth: maxWidth + 'px',
                 transformOrigin: nestedFrame ? 'top left' : 'bottom left',
-                background: nestedFrame
-                  ? 'var(--affine-white)'
-                  : 'var(--affine-text-primary-color)',
-                color: nestedFrame
-                  ? 'var(--affine-text-secondary-color)'
-                  : 'var(--affine-white)',
-                border: nestedFrame
-                  ? '1px solid var(--affine-border-color)'
-                  : 'none',
+                color: this.colors.text,
               })}
               class="affine-frame-title"
             >
-              ${this._frameTitle}
+              <span>${this._frameTitle}</span>
             </div>
           `
         : nothing}
@@ -227,6 +254,47 @@ export class EdgelessFrameTitle extends WithDisposable(ShadowlessElement) {
 
   get rootService() {
     return this.std.getService('affine:page') as EdgelessRootService;
+  }
+
+  get colors() {
+    let backgroundColor = ThemeObserver.getColorValue(
+      this.model.background,
+      undefined,
+      true
+    );
+    if (isTransparent(backgroundColor)) {
+      backgroundColor = ThemeObserver.getPropertyValue(
+        cssVarV2('edgeless/frame/background/white').replace(
+          /var\((--.*)\)/,
+          '$1'
+        )
+      );
+    }
+
+    const { r, g, b, a } = parseStringToRgba(backgroundColor);
+
+    let textColor: string;
+    {
+      let rPrime, gPrime, bPrime;
+      if (ThemeObserver.instance.mode$.value === ColorScheme.Light) {
+        rPrime = 1 - a + a * r;
+        gPrime = 1 - a + a * g;
+        bPrime = 1 - a + a * b;
+      } else {
+        rPrime = a * r;
+        gPrime = a * g;
+        bPrime = a * b;
+      }
+
+      // light
+      const L = 0.299 * rPrime + 0.587 * gPrime + 0.114 * bPrime;
+      textColor = L > 0.5 ? 'black' : 'white';
+    }
+
+    return {
+      background: backgroundColor,
+      text: textColor,
+    };
   }
 
   @state()
@@ -303,11 +371,11 @@ export class FrameBlockComponent extends GfxBlockComponent<FrameBlockModel> {
           backgroundColor,
           height: '100%',
           width: '100%',
-          borderRadius: '8px',
+          borderRadius: '2px',
           border:
             _isNavigator || !showBorder
               ? 'none'
-              : `2px solid var(--affine-black-30)`,
+              : `1px solid ${cssVarV2('edgeless/frame/border/default')}`,
         })}
       ></div>
     `;
@@ -326,6 +394,9 @@ export class FrameBlockComponent extends GfxBlockComponent<FrameBlockModel> {
 
   @state()
   accessor showBorder = true;
+
+  @query('edgeless-frame-title')
+  accessor titleElement: EdgelessFrameTitle | null = null;
 }
 
 declare global {

@@ -54,19 +54,22 @@ export class FrameToolController extends EdgelessToolController<FrameTool> {
       });
       this._edgeless.tools.setEdgelessTool({ type: 'default' });
       this._edgeless.service.selection.set({
-        elements: [this._frame.id],
+        elements: [frame.id],
         editing: false,
       });
 
       const frameManager = this._edgeless.service.frame;
-      const elements = frameManager.getElementsInFrameBound(frame);
-
-      frameManager.addElementsToFrame(frame, getTopElements(elements));
+      frameManager.addElementsToFrame(
+        frame,
+        getTopElements(frameManager.getElementsInFrameBound(frame))
+      );
 
       this._doc.captureSync();
     }
+
     this._frame = null;
     this._startPoint = null;
+    this._service.frameOverlay.clear();
   }
 
   override onContainerDragMove(e: PointerEventState): void {
@@ -102,6 +105,8 @@ export class FrameToolController extends EdgelessToolController<FrameTool> {
     this._service.updateElement(this._frame.id, {
       xywh: Bound.fromPoints([this._startPoint, currentPoint]).serialize(),
     });
+
+    this._service.frameOverlay.highlight(this._frame, true);
   }
 
   override onContainerDragStart(e: PointerEventState): void {
