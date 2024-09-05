@@ -136,6 +136,12 @@ export async function enterPresentationMode(page: Page) {
   await waitNextFrame(page);
 }
 
+export async function toggleEditorReadonly(page: Page) {
+  await page.click('sl-button:text("Test Operations")');
+  await page.click('sl-menu-item:text("Toggle Readonly")');
+  await waitNextFrame(page);
+}
+
 type EdgelessTool =
   | 'default'
   | 'pan'

@@ -263,8 +263,6 @@ export class UIEventDispatcher extends LifeCycleWatcher {
   }
 
   private _setActive(active: boolean) {
-    if (this.host.doc.readonly) return;
-
     if (active) {
       if (UIEventDispatcher._activeDispatcher !== this) {
         if (UIEventDispatcher._activeDispatcher) {
