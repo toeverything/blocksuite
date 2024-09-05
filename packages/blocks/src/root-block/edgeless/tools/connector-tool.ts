@@ -1,20 +1,22 @@
-import type { ConnectorMode } from '@blocksuite/affine-block-surface';
+import type {
+  ConnectorElementModel,
+  ConnectorMode,
+} from '@blocksuite/affine-model';
 import type { PointerEventState } from '@blocksuite/block-std';
 import type { IBound, IVec } from '@blocksuite/global/utils';
 
-import {
-  CanvasElementType,
-  type Connection,
-  type ConnectorElementModel,
-  GroupElementModel,
-  ShapeElementModel,
-} from '@blocksuite/affine-block-surface';
+import { CanvasElementType } from '@blocksuite/affine-block-surface';
 import {
   ConnectorEndpointLocations,
   ConnectorEndpointLocationsOnTriangle,
   calculateNearestLocation,
 } from '@blocksuite/affine-block-surface';
-import { ShapeType } from '@blocksuite/affine-model';
+import {
+  GroupElementModel,
+  ShapeElementModel,
+  ShapeType,
+  type Connection,
+} from '@blocksuite/affine-model';
 import { TelemetryProvider } from '@blocksuite/affine-shared/services';
 import { Bound, noop } from '@blocksuite/global/utils';
 

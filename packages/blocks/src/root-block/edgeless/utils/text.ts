@@ -1,10 +1,10 @@
+import type { ConnectorElementModel } from '@blocksuite/affine-model';
 import type { PointerEventState } from '@blocksuite/block-std';
 import type { IVec } from '@blocksuite/global/utils';
 
 import {
   CanvasElementType,
   TextUtils,
-  type ConnectorElementModel,
   type IModelCoord,
 } from '@blocksuite/affine-block-surface';
 import {

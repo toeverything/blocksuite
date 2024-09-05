@@ -1,4 +1,4 @@
-import type { TextElementModel } from '@blocksuite/affine-block-surface';
+import type { TextElementModel } from '@blocksuite/affine-model';
 
 import { html, nothing } from 'lit';
 

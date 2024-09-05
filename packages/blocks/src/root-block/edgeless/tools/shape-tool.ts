@@ -1,5 +1,4 @@
-import type { ShapeElementModel } from '@blocksuite/affine-block-surface';
-import type { ShapeName } from '@blocksuite/affine-model';
+import type { ShapeElementModel, ShapeName } from '@blocksuite/affine-model';
 import type { PointerEventState } from '@blocksuite/block-std';
 import type { IVec } from '@blocksuite/global/utils';
 

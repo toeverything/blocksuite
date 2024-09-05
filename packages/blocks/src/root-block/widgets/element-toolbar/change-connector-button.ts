@@ -1,11 +1,4 @@
 import {
-  type ConnectorElementModel,
-  ConnectorEndpoint,
-  ConnectorMode,
-  DEFAULT_FRONT_END_POINT_STYLE,
-  DEFAULT_REAR_END_POINT_STYLE,
-} from '@blocksuite/affine-block-surface';
-import {
   AddTextIcon,
   ConnectorCWithArrowIcon,
   ConnectorEndpointNoneIcon,
@@ -32,6 +25,13 @@ import {
   PointStyle,
 } from '@blocksuite/affine-model';
 import { LINE_COLORS, LineWidth, StrokeStyle } from '@blocksuite/affine-model';
+import {
+  type ConnectorElementModel,
+  ConnectorEndpoint,
+  ConnectorMode,
+  DEFAULT_FRONT_END_POINT_STYLE,
+  DEFAULT_REAR_END_POINT_STYLE,
+} from '@blocksuite/affine-model';
 import { WithDisposable } from '@blocksuite/block-std';
 import { countBy, maxBy } from '@blocksuite/global/utils';
 import { LitElement, type TemplateResult, html, nothing } from 'lit';

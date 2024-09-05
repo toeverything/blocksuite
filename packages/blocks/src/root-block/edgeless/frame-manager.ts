@@ -1,10 +1,13 @@
 import type { SurfaceBlockModel } from '@blocksuite/affine-block-surface';
-import type { FrameBlockModel } from '@blocksuite/affine-model';
 import type { NoteBlockModel } from '@blocksuite/affine-model';
 import type { Doc } from '@blocksuite/store';
 
-import { GroupElementModel, Overlay } from '@blocksuite/affine-block-surface';
+import { Overlay } from '@blocksuite/affine-block-surface';
 import { renderableInEdgeless } from '@blocksuite/affine-block-surface';
+import {
+  GroupElementModel,
+  type FrameBlockModel,
+} from '@blocksuite/affine-model';
 import { isGfxContainerElm } from '@blocksuite/block-std/gfx';
 import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 import {

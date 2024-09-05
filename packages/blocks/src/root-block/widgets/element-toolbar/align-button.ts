@@ -1,8 +1,4 @@
-import {
-  ConnectorElementModel,
-  GroupElementModel,
-  MindmapElementModel,
-} from '@blocksuite/affine-block-surface';
+import { MindmapElementModel } from '@blocksuite/affine-block-surface';
 import {
   AlignBottomIcon,
   AlignDistributeHorizontallyIcon,
@@ -14,6 +10,10 @@ import {
   AlignVerticallyIcon,
   SmallArrowDownIcon,
 } from '@blocksuite/affine-components/icons';
+import {
+  ConnectorElementModel,
+  GroupElementModel,
+} from '@blocksuite/affine-model';
 import { WithDisposable } from '@blocksuite/block-std';
 import { Bound } from '@blocksuite/global/utils';
 import { LitElement, html, nothing } from 'lit';

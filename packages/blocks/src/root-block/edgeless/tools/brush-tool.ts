@@ -1,4 +1,4 @@
-import type { BrushElementModel } from '@blocksuite/affine-block-surface';
+import type { BrushElementModel } from '@blocksuite/affine-model';
 import type { PointerEventState } from '@blocksuite/block-std';
 import type { IVec } from '@blocksuite/global/utils';
 

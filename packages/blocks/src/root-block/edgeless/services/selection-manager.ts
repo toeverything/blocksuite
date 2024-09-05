@@ -1,11 +1,9 @@
+import type { SurfaceBlockModel } from '@blocksuite/affine-block-surface';
 import type { CursorSelection } from '@blocksuite/block-std';
 import type { SurfaceSelection } from '@blocksuite/block-std';
 
-import {
-  GroupElementModel,
-  type SurfaceBlockModel,
-} from '@blocksuite/affine-block-surface';
 import { MindmapElementModel } from '@blocksuite/affine-block-surface';
+import { GroupElementModel } from '@blocksuite/affine-model';
 import {
   DisposableGroup,
   Slot,

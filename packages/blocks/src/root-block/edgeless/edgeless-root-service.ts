@@ -1,12 +1,10 @@
-import type {
-  ConnectorElementModel,
-  SurfaceContext,
-} from '@blocksuite/affine-block-surface';
+import type { SurfaceContext } from '@blocksuite/affine-block-surface';
 import type {
   Overlay,
   SurfaceBlockModel,
 } from '@blocksuite/affine-block-surface';
 import type { ReorderingDirection } from '@blocksuite/affine-block-surface';
+import type { ConnectorElementModel } from '@blocksuite/affine-model';
 import type { BlockStdScope } from '@blocksuite/block-std';
 import type {
   GfxController,

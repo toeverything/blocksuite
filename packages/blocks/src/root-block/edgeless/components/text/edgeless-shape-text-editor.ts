@@ -1,10 +1,8 @@
 import type { RichText } from '@blocksuite/affine-components/rich-text';
+import type { ShapeElementModel } from '@blocksuite/affine-model';
 
 import { TextResizing } from '@blocksuite/affine-block-surface';
-import {
-  MindmapElementModel,
-  type ShapeElementModel,
-} from '@blocksuite/affine-block-surface';
+import { MindmapElementModel } from '@blocksuite/affine-block-surface';
 import { CommonUtils } from '@blocksuite/affine-block-surface';
 import { TextUtils } from '@blocksuite/affine-block-surface';
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';

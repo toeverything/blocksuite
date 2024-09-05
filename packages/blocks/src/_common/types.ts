@@ -1,6 +1,6 @@
-import type { BrushElementModel } from '@blocksuite/affine-block-surface';
 import type { RefNodeSlots } from '@blocksuite/affine-components/rich-text';
 import type {
+  BrushElementModel,
   ConnectorElementModel,
   DocMode,
   GroupElementModel,

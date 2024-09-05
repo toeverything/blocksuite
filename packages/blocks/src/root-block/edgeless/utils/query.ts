@@ -7,8 +7,6 @@ import {
   GRID_GAP_MAX,
   GRID_GAP_MIN,
   MindmapElementModel,
-  ShapeElementModel,
-  TextElementModel,
   CommonUtils,
 } from '@blocksuite/affine-block-surface';
 import {
@@ -27,6 +25,8 @@ import {
   type FrameBlockModel,
   type ImageBlockModel,
   type NoteBlockModel,
+  ShapeElementModel,
+  TextElementModel,
 } from '@blocksuite/affine-model';
 import { deserializeXYWH } from '@blocksuite/global/utils';
 import { Bound } from '@blocksuite/global/utils';

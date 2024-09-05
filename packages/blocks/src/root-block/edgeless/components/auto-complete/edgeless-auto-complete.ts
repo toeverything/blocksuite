@@ -14,7 +14,6 @@ import {
 } from '@blocksuite/affine-block-surface';
 import { MindmapElementModel } from '@blocksuite/affine-block-surface';
 import { LayoutType } from '@blocksuite/affine-block-surface';
-import { ShapeElementModel } from '@blocksuite/affine-block-surface';
 import { ConnectorPathGenerator } from '@blocksuite/affine-block-surface';
 import {
   AutoCompleteArrowIcon,
@@ -22,6 +21,7 @@ import {
   MindMapSiblingIcon,
   NoteAutoCompleteIcon,
 } from '@blocksuite/affine-components/icons';
+import { ShapeElementModel } from '@blocksuite/affine-model';
 import {
   ConnectorMode,
   DEFAULT_CONNECTOR_COLOR,

@@ -1,4 +1,4 @@
-import type { GroupElementModel } from '@blocksuite/affine-block-surface';
+import type { GroupElementModel } from '@blocksuite/affine-model';
 
 import {
   NoteIcon,

@@ -5,9 +5,11 @@ import { LayoutType } from '@blocksuite/affine-block-surface';
 import {
   CanvasElementType,
   type MindmapElementModel,
-  type ShapeElementModel,
-  TextElementModel,
 } from '@blocksuite/affine-block-surface';
+import {
+  TextElementModel,
+  type ShapeElementModel,
+} from '@blocksuite/affine-model';
 import { TelemetryProvider } from '@blocksuite/affine-shared/services';
 import { Bound } from '@blocksuite/global/utils';
 import { assertInstanceOf } from '@blocksuite/global/utils';

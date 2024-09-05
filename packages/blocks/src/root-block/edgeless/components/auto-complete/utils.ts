@@ -6,10 +6,7 @@ import {
   type RoughCanvas,
   CommonUtils,
 } from '@blocksuite/affine-block-surface';
-import {
-  GroupElementModel,
-  ShapeElementModel,
-} from '@blocksuite/affine-block-surface';
+import { GroupElementModel, ShapeElementModel } from '@blocksuite/affine-model';
 import {
   type Connection,
   type NoteBlockModel,

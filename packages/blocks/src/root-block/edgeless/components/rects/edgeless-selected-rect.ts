@@ -7,19 +7,19 @@ import type {
 
 import {
   CanvasElementType,
-  ShapeElementModel,
   CommonUtils,
-  ConnectorElementModel,
   normalizeShapeBound,
   TextUtils,
 } from '@blocksuite/affine-block-surface';
 import {
   type BookmarkBlockModel,
+  ConnectorElementModel,
   type EdgelessTextBlockModel,
   type EmbedHtmlModel,
   type EmbedSyncedDocModel,
   FrameBlockModel,
   NoteBlockModel,
+  ShapeElementModel,
   TextElementModel,
 } from '@blocksuite/affine-model';
 import {

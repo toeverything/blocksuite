@@ -1,4 +1,4 @@
-import type { BrushElementModel } from '@blocksuite/affine-block-surface';
+import type { BrushElementModel } from '@blocksuite/affine-model';
 
 import {
   type BrushProps,
