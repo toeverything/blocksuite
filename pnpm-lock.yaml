@@ -557,6 +557,9 @@ importers:
       html2canvas:
         specifier: ^1.4.1
         version: 1.4.1
+      katex:
+        specifier: ^0.16.11
+        version: 0.16.11
       lit:
         specifier: ^3.2.0
         version: 3.2.0
@@ -633,6 +636,9 @@ importers:
       '@types/dompurify':
         specifier: ^3.0.5
         version: 3.0.5
+      '@types/katex':
+        specifier: ^0.16.7
+        version: 0.16.7
       '@types/lodash.clonedeep':
         specifier: ^4.5.9
         version: 4.5.9

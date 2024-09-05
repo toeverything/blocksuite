@@ -10,6 +10,7 @@ import {
 } from '@blocksuite/block-std';
 import { literal } from 'lit/static-html.js';
 
+import { LatexBlockSpec } from '../../latex-block/latex-spec.js';
 import { PageRootService } from '../../root-block/page/page-root-service.js';
 import { PageSurfaceRefBlockSpec } from '../../surface-ref-block/surface-ref-spec.js';
 import { CommonFirstPartyBlockSpecs } from '../common.js';
@@ -27,4 +28,5 @@ export const PreviewEditorBlockSpecs: ExtensionType[] = [
   ...CommonFirstPartyBlockSpecs,
   PageSurfaceBlockSpec,
   PageSurfaceRefBlockSpec,
+  LatexBlockSpec,
 ].flat();

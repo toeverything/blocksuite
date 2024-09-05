@@ -40,7 +40,7 @@ import {
   matchFlavours,
   openFileOrFiles,
 } from '@blocksuite/affine-shared/utils';
-import { GroupingIcon } from '@blocksuite/icons/lit';
+import { GroupingIcon, TeXIcon } from '@blocksuite/icons/lit';
 import { Slice, Text } from '@blocksuite/store';
 
 import type { DataViewBlockComponent } from '../../../data-view-block/index.js';
@@ -56,6 +56,7 @@ import { GithubIcon } from '../../../embed-github-block/styles.js';
 import { LoomIcon } from '../../../embed-loom-block/styles.js';
 import { YoutubeIcon } from '../../../embed-youtube-block/styles.js';
 import { addSiblingImageBlock } from '../../../image-block/utils.js';
+import { LatexBlockComponent } from '../../../latex-block/latex-block.js';
 import { onModelTextUpdated } from '../../../root-block/utils/index.js';
 import { getSurfaceBlock } from '../../../surface-ref-block/utils.js';
 import { type SlashMenuTooltip, slashMenuToolTips } from './tooltips/index.js';
@@ -195,6 +196,68 @@ export const defaultSlashMenuConfig: SlashMenuConfig = {
           !insideDatabase(model) &&
           !insideEdgelessText(model),
       })),
+
+    {
+      name: 'Inline equation',
+      description: 'Create a equation block.',
+      icon: TeXIcon({
+        width: '20',
+        height: '20',
+      }),
+      alias: ['inlineMath, inlineEquation', 'inlineLatex'],
+      action: ({ rootComponent }) => {
+        const selectionManager = rootComponent.host.selection;
+        const textSelection = selectionManager.filter('text')[0];
+        if (!textSelection || !textSelection.isCollapsed()) return;
+
+        const blockComponent = rootComponent.std.view.getBlock(
+          textSelection.from.blockId
+        );
+        if (!blockComponent) return;
+
+        const richText = blockComponent.querySelector('rich-text');
+        if (!richText) return;
+        const inlineEditor = richText.inlineEditor;
+        if (!inlineEditor) return;
+
+        inlineEditor.insertText(
+          {
+            index: textSelection.from.index,
+            length: 0,
+          },
+          ' '
+        );
+        inlineEditor.formatText(
+          {
+            index: textSelection.from.index,
+            length: 1,
+          },
+          {
+            latex: '',
+          }
+        );
+        inlineEditor.setInlineRange({
+          index: textSelection.from.index,
+          length: 1,
+        });
+
+        inlineEditor
+          .waitForUpdate()
+          .then(async () => {
+            await inlineEditor.waitForUpdate();
+
+            const textPoint = inlineEditor.getTextPoint(
+              textSelection.from.index + 1
+            );
+            if (!textPoint) return;
+            const [text] = textPoint;
+            const latexNode = text.parentElement?.closest('affine-latex-node');
+            if (!latexNode) return;
+            latexNode.toggleEditor();
+          })
+          .catch(console.error);
+      },
+    },
 
     // ---------------------------------------------------------
     { groupName: 'List' },
@@ -473,6 +536,43 @@ export const defaultSlashMenuConfig: SlashMenuConfig = {
           { mode: 'page', parentModel, index }
         );
         tryRemoveEmptyLine(model);
+      },
+    },
+
+    {
+      name: 'Equation',
+      description: 'Create a equation block.',
+      icon: TeXIcon({
+        width: '20',
+        height: '20',
+      }),
+      alias: ['mathBlock, equationBlock', 'latexBlock'],
+      action: ({ rootComponent, model }) => {
+        const doc = rootComponent.doc;
+        const parent = doc.getParent(model);
+        if (!parent) return;
+
+        const index = parent.children.indexOf(model);
+        if (index === -1) return;
+
+        const id = doc.addBlock(
+          'affine:latex',
+          {
+            latex: '',
+          },
+          parent,
+          index + 1
+        );
+        rootComponent.host.updateComplete
+          .then(async () => {
+            const blockComponent = rootComponent.std.view.getBlock(id);
+            if (!(blockComponent instanceof LatexBlockComponent)) return;
+
+            await blockComponent.updateComplete;
+
+            blockComponent.toggleEditor();
+          })
+          .catch(console.error);
       },
     },
 

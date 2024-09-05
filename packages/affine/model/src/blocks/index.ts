@@ -7,6 +7,7 @@ export * from './edgeless-text/index.js';
 export * from './embed/index.js';
 export * from './frame/index.js';
 export * from './image/index.js';
+export * from './latex/index.js';
 export * from './list/index.js';
 export * from './note/index.js';
 export * from './paragraph/index.js';

@@ -4,6 +4,7 @@ import { EdgelessSurfaceBlockSpec } from '@blocksuite/affine-block-surface';
 
 import { EdgelessTextBlockSpec } from '../../edgeless-text-block/edgeless-text-spec.js';
 import { FrameBlockSpec } from '../../frame-block/frame-spec.js';
+import { LatexBlockSpec } from '../../latex-block/latex-spec.js';
 import {
   EdgelessRootBlockSpec,
   PreviewEdgelessRootBlockSpec,
@@ -18,6 +19,7 @@ export const EdgelessEditorBlockSpecs: ExtensionType[] = [
   EdgelessSurfaceRefBlockSpec,
   FrameBlockSpec,
   EdgelessTextBlockSpec,
+  LatexBlockSpec,
 ].flat();
 
 export const PreviewEdgelessEditorBlockSpecs: ExtensionType[] = [
@@ -27,4 +29,5 @@ export const PreviewEdgelessEditorBlockSpecs: ExtensionType[] = [
   EdgelessSurfaceRefBlockSpec,
   FrameBlockSpec,
   EdgelessTextBlockSpec,
+  LatexBlockSpec,
 ].flat();
