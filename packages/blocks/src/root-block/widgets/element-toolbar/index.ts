@@ -268,9 +268,9 @@ export class EdgelessElementToolbarWidget extends WidgetComponent<
         ) {
           this.toolbarVisible = false;
         } else {
-          this.toolbarVisible = true;
           this.selectedIds = this.selection.selectedIds;
           this._recalculatePosition();
+          this.toolbarVisible = true;
         }
       })
     );
