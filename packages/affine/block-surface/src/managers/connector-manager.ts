@@ -1330,11 +1330,15 @@ export class ConnectorPathGenerator {
     return true;
   }
 
-  updatePath(
+  static updatePath(
     connector: ConnectorElementModel | LocalConnectorElementModel,
-    path?: PointLocation[]
+    path: PointLocation[] | null | null,
+    elementGetter?: (id: string) => GfxModel | null
   ) {
-    const points = path ?? this._generateConnectorPath(connector) ?? [];
+    const instance = new ConnectorPathGenerator({
+      getElementById: elementGetter ?? (() => null),
+    });
+    const points = path ?? instance._generateConnectorPath(connector) ?? [];
     const bound =
       connector.mode === ConnectorMode.Curve
         ? getBezierCurveBoundingBox(getBezierParameters(points))
