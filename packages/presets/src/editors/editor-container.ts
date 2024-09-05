@@ -1,5 +1,4 @@
 import type { DocMode } from '@blocksuite/blocks';
-import type { BlockModel, Doc } from '@blocksuite/store';
 
 import {
   BlockStdScope,
@@ -16,6 +15,7 @@ import {
   type PageRootBlockComponent,
 } from '@blocksuite/blocks';
 import { Slot, noop } from '@blocksuite/global/utils';
+import { type BlockModel, BlockViewType, type Doc } from '@blocksuite/store';
 import {
   SignalWatcher,
   computed,
@@ -172,6 +172,33 @@ export class AffineEditorContainer
 
     this._disposables.add(
       this.doc.slots.rootAdded.on(() => this.requestUpdate())
+    );
+
+    this._disposables.add(
+      effect(() => {
+        const mode = this._mode.value;
+        const doc = this._doc.value;
+        const blockCollection = doc?.blockCollection;
+        if (!blockCollection) return;
+        if (mode === 'page') {
+          this._doc.value = blockCollection.getDoc({
+            query: {
+              mode: 'exclude',
+              match: [
+                {
+                  flavour: 'affine:note',
+                  viewType: BlockViewType.Hidden,
+                  props: {
+                    displayMode: 'edgeless',
+                  },
+                },
+              ],
+            },
+          });
+        } else {
+          this._doc.value = blockCollection.getDoc();
+        }
+      })
     );
   }
 

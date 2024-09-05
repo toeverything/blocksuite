@@ -14,10 +14,15 @@ export type QueryMatch = {
 
 /**
  * - `strict` means that only blocks that match the query will be included.
+ *    If a block is displayed but its ancestor is hidden, the ancestor will be by-pass.
  * - `loose` means that all blocks will be included first, and then the blocks will be run through the query.
+ *    If a block is displayed but its ancestor is hidden, the ancestor will be by-pass.
  * - `include` means that only blocks and their ancestors that match the query will be included.
+ *    If a block is displayed but its ancestor is hidden, the ancestor will be displayed.
+ * - `exclude` means that all blocks will be included first, and then the blocks will be run through the query.
+ *    If a block is displayed but its ancestor is hidden, the ancestor will not be changed, an the block will not be displayed.
  */
-type QueryMode = 'strict' | 'loose' | 'include';
+type QueryMode = 'strict' | 'loose' | 'include' | 'exclude';
 
 export type Query = {
   match: QueryMatch[];
@@ -30,7 +35,9 @@ export function runQuery(query: Query, block: Block) {
 
   if (blockViewType !== BlockViewType.Hidden) {
     const queryMode = query.mode;
-    setAncestorsToDisplayIfHidden(queryMode, block);
+    if (query.mode !== 'exclude') {
+      setAncestorsToDisplayIfHidden(queryMode, block);
+    }
   }
 }
 
@@ -48,7 +55,9 @@ function getBlockViewType(query: Query, block: Block): BlockViewType {
     {} as Record<string, unknown>
   );
   let blockViewType =
-    queryMode === 'loose' ? BlockViewType.Display : BlockViewType.Hidden;
+    queryMode === 'loose' || queryMode === 'exclude'
+      ? BlockViewType.Display
+      : BlockViewType.Hidden;
 
   query.match.some(queryObject => {
     const {

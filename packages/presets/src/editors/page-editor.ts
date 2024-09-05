@@ -1,5 +1,3 @@
-import type { Doc } from '@blocksuite/store';
-
 import { BlockStdScope } from '@blocksuite/block-std';
 import {
   EditorHost,
@@ -8,6 +6,7 @@ import {
 } from '@blocksuite/block-std';
 import { PageEditorBlockSpecs } from '@blocksuite/blocks';
 import { noop } from '@blocksuite/global/utils';
+import { BlockViewType, type Doc } from '@blocksuite/store';
 import { css, html, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { guard } from 'lit/directives/guard.js';
@@ -52,6 +51,22 @@ export class PageEditor extends WithDisposable(ShadowlessElement) {
     this._disposables.add(
       this.doc.slots.rootAdded.on(() => this.requestUpdate())
     );
+    const blockCollection = this.doc.blockCollection;
+    if (!blockCollection) return;
+    this.doc = blockCollection.getDoc({
+      query: {
+        mode: 'loose',
+        match: [
+          {
+            flavour: 'affine:note',
+            viewType: BlockViewType.Hidden,
+            props: {
+              displayMode: 'edgeless',
+            },
+          },
+        ],
+      },
+    });
     this.std = new BlockStdScope({
       doc: this.doc,
       extensions: this.specs,

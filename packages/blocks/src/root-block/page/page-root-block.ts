@@ -14,7 +14,6 @@ import {
 import { BlockComponent } from '@blocksuite/block-std';
 import { css, html } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
-import { repeat } from 'lit/directives/repeat.js';
 
 import type { PageRootBlockWidgetName } from '../index.js';
 import type { PageRootService } from './page-root-service.js';
@@ -373,28 +372,10 @@ export class PageRootBlockComponent extends BlockComponent<
   }
 
   override renderBlock() {
-    const content = html`${repeat(
-      this.model.children.filter(child => {
-        const isNote = matchFlavours(child, ['affine:note']);
-        const note = child as NoteBlockModel;
-        const displayOnEdgeless =
-          !!note.displayMode &&
-          note.displayMode === NoteDisplayMode.EdgelessOnly;
-        // Should remove deprecated `hidden` property in the future
-        return !(isNote && displayOnEdgeless);
-      }),
-      child => child.id,
-      child => this.host.dangerouslyRenderModel(child)
-    )}`;
-
-    const widgets = html`${repeat(
-      Object.entries(this.widgets),
-      ([id]) => id,
-      ([_, widget]) => widget
-    )}`;
-
     return html`
-      <div class="affine-page-root-block-container">${content} ${widgets}</div>
+      <div class="affine-page-root-block-container">
+        ${this.renderChildren(this.model)}
+      </div>
     `;
   }
 
