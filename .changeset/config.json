@@ -10,5 +10,8 @@
   "access": "public",
   "baseBranch": "master",
   "updateInternalDependencies": "patch",
-  "ignore": ["@blocksuite/e2e", "@blocksuite/playground"]
+  "ignore": ["@blocksuite/e2e", "@blocksuite/playground"],
+  "___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH": {
+    "onlyUpdatePeerDependentsWhenOutOfRange": true
+  }
 }
