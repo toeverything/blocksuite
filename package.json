@@ -137,9 +137,6 @@
       "hasown": "npm:@nolyfill/hasown@latest",
       "isarray": "npm:@nolyfill/isarray@latest",
       "set-function-length": "npm:@nolyfill/set-function-length@latest"
-    },
-    "patchedDependencies": {
-      "figma-squircle@1.0.0": "patches/figma-squircle@1.0.0.patch"
     }
   },
   "stackblitz": {
