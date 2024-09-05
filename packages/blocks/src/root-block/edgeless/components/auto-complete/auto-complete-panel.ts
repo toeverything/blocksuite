@@ -2,19 +2,13 @@ import type {
   Color,
   Connection,
   NoteBlockModel,
+  ConnectorElementModel,
+  ShapeElementModel,
 } from '@blocksuite/affine-model';
 import type { XYWH } from '@blocksuite/global/utils';
 
-import {
-  CanvasElementType,
-  type ConnectorElementModel,
-  type ShapeElementModel,
-  TextElementModel,
-} from '@blocksuite/affine-block-surface';
-import {
-  GroupElementModel,
-  CommonUtils,
-} from '@blocksuite/affine-block-surface';
+import { CanvasElementType } from '@blocksuite/affine-block-surface';
+import { CommonUtils } from '@blocksuite/affine-block-surface';
 import { FrameIcon, SmallNoteIcon } from '@blocksuite/affine-components/icons';
 import { FontFamilyIcon } from '@blocksuite/affine-components/icons';
 import {
@@ -27,6 +21,8 @@ import {
   FontWeight,
   ShapeStyle,
   getShapeName,
+  TextElementModel,
+  GroupElementModel,
 } from '@blocksuite/affine-model';
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import { WithDisposable } from '@blocksuite/block-std';

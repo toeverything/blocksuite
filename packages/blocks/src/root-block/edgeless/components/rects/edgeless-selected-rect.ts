@@ -7,9 +7,7 @@ import type {
 
 import {
   CanvasElementType,
-  ShapeElementModel,
   CommonUtils,
-  ConnectorElementModel,
   normalizeShapeBound,
   TextUtils,
 } from '@blocksuite/affine-block-surface';
@@ -21,6 +19,8 @@ import {
   FrameBlockModel,
   NoteBlockModel,
   TextElementModel,
+  ShapeElementModel,
+  ConnectorElementModel,
 } from '@blocksuite/affine-model';
 import {
   clamp,

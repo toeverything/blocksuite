@@ -9,7 +9,6 @@ export {
   CommunityCanvasTextFonts,
   GRID_GAP_MAX,
   GRID_GAP_MIN,
-  TextResizing,
 } from './consts.js';
 export type { FontConfig } from './consts.js';
 export {
@@ -83,19 +82,6 @@ export { RoughCanvas } from './utils/rough/canvas.js';
 export type { Options } from './utils/rough/core.js';
 export { sortIndex } from './utils/sort.js';
 
-export {
-  BrushElementModel,
-  type Connection,
-  ConnectorElementModel,
-  ConnectorEndpoint,
-  ConnectorMode,
-  DEFAULT_FRONT_END_POINT_STYLE,
-  DEFAULT_REAR_END_POINT_STYLE,
-  GroupElementModel,
-  type PointStyle,
-  ShapeElementModel,
-  TextElementModel,
-} from '@blocksuite/affine-model';
 import {
   almostEqual,
   clamp,

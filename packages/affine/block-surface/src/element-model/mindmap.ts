@@ -5,7 +5,10 @@ import type {
 } from '@blocksuite/block-std/gfx';
 import type { SerializedXYWH, XYWH } from '@blocksuite/global/utils';
 
-import { LocalConnectorElementModel } from '@blocksuite/affine-model';
+import {
+  LocalConnectorElementModel,
+  TextResizing,
+} from '@blocksuite/affine-model';
 import {
   GfxGroupLikeElementModel,
   convert,
@@ -34,7 +37,6 @@ import type {
   MindmapStyleGetter,
 } from './utils/mindmap/style.js';
 
-import { TextResizing } from '../consts.js';
 import { LayoutType, layout } from './utils/mindmap/layout.js';
 import {
   MindmapStyle,

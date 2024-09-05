@@ -1,8 +1,8 @@
 import type {
-  ConnectorElementModel,
   SurfaceBlockModel,
   SurfaceBlockTransformer,
 } from '@blocksuite/affine-block-surface';
+import type { ConnectorElementModel } from '@blocksuite/affine-model';
 import type { BlockModel, Y } from '@blocksuite/store';
 
 import {

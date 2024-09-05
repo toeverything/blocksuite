@@ -1,5 +1,8 @@
-import type { ShapeElementModel } from '@blocksuite/affine-block-surface';
-import type { ColorScheme, ShapeProps } from '@blocksuite/affine-model';
+import type {
+  ColorScheme,
+  ShapeProps,
+  ShapeElementModel,
+} from '@blocksuite/affine-model';
 
 import {
   AddTextIcon,

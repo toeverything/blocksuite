@@ -68,16 +68,7 @@ export {
 export * from './surface-ref-block/index.js';
 export * from '@blocksuite/affine-block-list';
 export * from '@blocksuite/affine-block-paragraph';
-export {
-  AffineCanvasTextFonts,
-  CanvasElementType,
-  EdgelessSurfaceBlockSpec,
-  fitContent,
-  MindmapElementModel,
-  PageSurfaceBlockSpec,
-  SurfaceBlockComponent,
-  SurfaceBlockModel,
-} from '@blocksuite/affine-block-surface';
+export * from '@blocksuite/affine-block-surface';
 export { type MenuOptions } from '@blocksuite/affine-components/context-menu';
 export {
   HoverController,

@@ -7,16 +7,14 @@ import {
   CommonUtils,
 } from '@blocksuite/affine-block-surface';
 import {
-  GroupElementModel,
-  ShapeElementModel,
-} from '@blocksuite/affine-block-surface';
-import {
   type Connection,
   type NoteBlockModel,
   type ShapeName,
   type ShapeStyle,
   getShapeRadius,
   getShapeType,
+  GroupElementModel,
+  ShapeElementModel,
 } from '@blocksuite/affine-model';
 import { Bound, assertExists } from '@blocksuite/global/utils';
 import { DocCollection } from '@blocksuite/store';

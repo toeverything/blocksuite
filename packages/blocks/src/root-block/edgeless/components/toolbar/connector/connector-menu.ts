@@ -1,10 +1,12 @@
-import { ConnectorMode } from '@blocksuite/affine-block-surface';
 import {
   ConnectorCWithArrowIcon,
   ConnectorLWithArrowIcon,
   ConnectorXWithArrowIcon,
 } from '@blocksuite/affine-components/icons';
-import { DEFAULT_CONNECTOR_COLOR } from '@blocksuite/affine-model';
+import {
+  DEFAULT_CONNECTOR_COLOR,
+  ConnectorMode,
+} from '@blocksuite/affine-model';
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import { SignalWatcher } from '@blocksuite/block-std';
 import { computed } from '@lit-labs/preact-signals';
