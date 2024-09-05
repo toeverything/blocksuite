@@ -65,7 +65,7 @@ export class BookmarkBlockService extends BlockService {
         const bound = Bound.deserialize(blockComponent.model.xywh);
         const offset = new Point(bound.x * zoom, bound.y * zoom);
         render(
-          blockComponent.host.renderModel(blockComponent.model),
+          blockComponent.host.dangerouslyRenderModel(blockComponent.model),
           dragPreviewEl
         );
 

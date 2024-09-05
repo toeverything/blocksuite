@@ -89,11 +89,12 @@ export class EditorHost extends SignalWatcher(
   };
 
   /**
-   * @deprecated
-   *
-   * This method is deprecated. Use `renderSpecPortal` instead.
+   * Render a block model manually instead of let blocksuite render it.
+   * If you render the same block model multiple times,
+   * the event flow and data binding will be broken.
+   * Only use this method as a last resort.
    */
-  renderModel = (model: BlockModel): TemplateResult => {
+  dangerouslyRenderModel = (model: BlockModel): TemplateResult => {
     return this._renderModel(model);
   };
 
