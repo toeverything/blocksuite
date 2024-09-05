@@ -33,7 +33,6 @@ import {
   textFormatConfigs,
 } from '@blocksuite/affine-components/rich-text';
 import { toast } from '@blocksuite/affine-components/toast';
-import { NoteBlockModel } from '@blocksuite/affine-model';
 import {
   createDefaultDoc,
   getImageFilesFromLocal,
@@ -585,21 +584,20 @@ export const defaultSlashMenuConfig: SlashMenuConfig = {
       const { doc } = rootComponent;
 
       const surfaceModel = getSurfaceBlock(doc);
-      const noteModel = doc.getParent(model);
-      if (!(noteModel instanceof NoteBlockModel)) return [];
-
       if (!surfaceModel) return [];
+
+      const parent = doc.getParent(model);
+      if (!parent) return [];
 
       const frameModels = doc
         .getBlocksByFlavour('affine:frame')
         .map(block => block.model) as FrameBlockModel[];
-
       const frameItems = frameModels.map<SlashMenuActionItem>(frameModel => ({
         name: 'Frame: ' + frameModel.title,
         icon: FrameIcon,
         showWhen: () => !insideDatabase(model),
         action: () => {
-          const insertIdx = noteModel.children.indexOf(model);
+          const insertIdx = parent.children.indexOf(model);
           const surfaceRefProps = {
             flavour: 'affine:surface-ref',
             reference: frameModel.id,
@@ -613,7 +611,7 @@ export const defaultSlashMenuConfig: SlashMenuConfig = {
           );
 
           if (
-            matchFlavours(model, ['affine:paragraph']) &&
+            matchFlavours(model, ['affine:paragraph', 'affine:list']) &&
             model.text.length === 0
           ) {
             doc.deleteBlock(model);
@@ -630,8 +628,7 @@ export const defaultSlashMenuConfig: SlashMenuConfig = {
         icon: GroupingIcon(),
         action: () => {
           const { doc } = rootComponent;
-          const noteModel = doc.getParent(model) as NoteBlockModel;
-          const insertIdx = noteModel.children.indexOf(model);
+          const insertIdx = parent.children.indexOf(model);
           const surfaceRefProps = {
             flavour: 'affine:surface-ref',
             reference: element.get('id'),
@@ -645,7 +642,7 @@ export const defaultSlashMenuConfig: SlashMenuConfig = {
           );
 
           if (
-            matchFlavours(model, ['affine:paragraph']) &&
+            matchFlavours(model, ['affine:paragraph', 'affine:list']) &&
             model.text.length === 0
           ) {
             doc.deleteBlock(model);
