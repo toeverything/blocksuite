@@ -10,11 +10,8 @@ export const connectorMiddleware: SurfaceMiddleware = (
 ) => {
   const hasElementById = (id: string) =>
     surface.hasElementById(id) || surface.doc.hasBlockById(id);
-  const getElementById = (id: string) =>
+  const elementGetter = (id: string) =>
     surface.getElementById(id) ?? (surface.doc.getBlockById(id) as GfxModel);
-  const pathGenerator = new ConnectorPathGenerator({
-    getElementById: getElementById,
-  });
   const updateConnectorPath = (connector: ConnectorElementModel) => {
     if (
       ((connector.source?.id && hasElementById(connector.source.id)) ||
@@ -22,7 +19,7 @@ export const connectorMiddleware: SurfaceMiddleware = (
       ((connector.target?.id && hasElementById(connector.target.id)) ||
         (!connector.target?.id && connector.target?.position))
     ) {
-      pathGenerator.updatePath(connector);
+      ConnectorPathGenerator.updatePath(connector, null, elementGetter);
     }
   };
   const pendingList = new Set<ConnectorElementModel>();
@@ -42,7 +39,7 @@ export const connectorMiddleware: SurfaceMiddleware = (
 
   const disposables = [
     surface.elementAdded.on(({ id }) => {
-      const element = getElementById(id);
+      const element = elementGetter(id);
 
       if (!element) return;
 
@@ -53,7 +50,7 @@ export const connectorMiddleware: SurfaceMiddleware = (
       }
     }),
     surface.elementUpdated.on(({ id, props }) => {
-      const element = getElementById(id);
+      const element = elementGetter(id);
 
       if (props['xywh'] || props['rotate']) {
         surface.getConnectors(id).forEach(addToUpdateList);

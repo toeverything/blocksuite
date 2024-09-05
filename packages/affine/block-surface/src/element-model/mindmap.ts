@@ -1,6 +1,5 @@
 import type {
   BaseElementProps,
-  GfxModel,
   SerializedElement,
   SurfaceBlockModel,
 } from '@blocksuite/block-std/gfx';
@@ -36,7 +35,6 @@ import type {
 } from './utils/mindmap/style.js';
 
 import { TextResizing } from '../consts.js';
-import { ConnectorPathGenerator } from '../managers/connector-manager.js';
 import { LayoutType, layout } from './utils/mindmap/layout.js';
 import {
   MindmapStyle,
@@ -86,12 +84,6 @@ export class MindmapElementModel extends GfxGroupLikeElementModel<MindmapElement
   connectors = new Map<string, LocalConnectorElementModel>();
 
   extraConnectors = new Map<string, LocalConnectorElementModel>();
-
-  pathGenerator: ConnectorPathGenerator = new ConnectorPathGenerator({
-    getElementById: (id: string) =>
-      this.surface.getElementById(id) ??
-      (this.surface.doc.getBlockById(id) as GfxModel),
-  });
 
   static createFromTree(
     tree: MindmapNode,
@@ -264,8 +256,6 @@ export class MindmapElementModel extends GfxGroupLikeElementModel<MindmapElement
       // @ts-ignore
       connector[key as unknown] = value;
     });
-
-    this.pathGenerator.updatePath(connector);
 
     return connector;
   }
