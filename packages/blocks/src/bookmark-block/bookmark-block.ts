@@ -1,6 +1,7 @@
 import type { BookmarkBlockModel } from '@blocksuite/affine-model';
 
 import { CaptionedBlockComponent } from '@blocksuite/affine-components/caption';
+import { DocModeProvider } from '@blocksuite/affine-shared/services';
 import { html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { type StyleInfo, styleMap } from 'lit/directives/style-map.js';
@@ -18,11 +19,7 @@ export class BookmarkBlockComponent extends CaptionedBlockComponent<
 > {
   private _fetchAbortController?: AbortController;
 
-  protected containerStyleMap = styleMap({
-    position: 'relative',
-    width: '100%',
-    minWidth: `${BOOKMARK_MIN_WIDTH}px`,
-  });
+  protected containerStyleMap!: ReturnType<typeof styleMap>;
 
   open = () => {
     let link = this.model.url;
@@ -40,6 +37,15 @@ export class BookmarkBlockComponent extends CaptionedBlockComponent<
 
   override connectedCallback() {
     super.connectedCallback();
+
+    const mode = this.std.get(DocModeProvider).getEditorMode();
+    const miniWidth = `${BOOKMARK_MIN_WIDTH}px`;
+
+    this.containerStyleMap = styleMap({
+      position: 'relative',
+      width: '100%',
+      ...(mode === 'edgeless' ? { miniWidth } : {}),
+    });
 
     this._fetchAbortController = new AbortController();
 

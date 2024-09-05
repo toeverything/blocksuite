@@ -5,6 +5,7 @@ import type { BlockModel } from '@blocksuite/store';
 import type { TemplateResult } from 'lit';
 
 import { CaptionedBlockComponent } from '@blocksuite/affine-components/caption';
+import { DocModeProvider } from '@blocksuite/affine-shared/services';
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import {
   type BlockService,
@@ -156,7 +157,11 @@ export class EmbedBlockComponent<
       this._cardStyle === 'list'
     ) {
       this.style.display = 'block';
-      this.style.minWidth = `${BOOKMARK_MIN_WIDTH}px`;
+
+      const mode = this.std.get(DocModeProvider).getEditorMode();
+      if (mode === 'edgeless') {
+        this.style.minWidth = `${BOOKMARK_MIN_WIDTH}px`;
+      }
     }
 
     return html`

@@ -8,7 +8,9 @@ import type { BlockModel, Doc, DocCollection } from '@store/index.js';
 
 declare global {
   interface Window {
-    /** Available on playground window */
+    /** Available on playground window
+     * the following instance are initialized in `packages/playground/apps/starter/main.ts`
+     */
     $blocksuite: {
       store: typeof import('../../packages/framework/store/src/index.js');
       blocks: typeof import('../../packages/blocks/src/index.js');
@@ -19,9 +21,13 @@ declare global {
       identifiers: {
         WidgetViewMapIdentifier: typeof WidgetViewMapIdentifier;
         QuickSearchProvider: typeof import('../../packages/affine/shared/src/services/quick-search-service.js').QuickSearchProvider;
+        DocModeProvider: typeof import('../../packages/affine/shared/src/services/doc-mode-service.js').DocModeProvider;
       };
       extensions: {
         WidgetViewMapExtension: typeof import('../../packages/framework/block-std/src/extension/widget-view-map.js').WidgetViewMapExtension;
+      };
+      mockServices: {
+        mockDocModeService: typeof import('../../packages/playground/apps/_common/mock-services.js').mockDocModeService;
       };
     };
     collection: DocCollection;
