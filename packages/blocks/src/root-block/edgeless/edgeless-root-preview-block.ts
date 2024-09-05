@@ -162,10 +162,6 @@ export class EdgelessRootPreviewBlockComponent extends BlockComponent<
     disposables.add(this.service.selection);
   }
 
-  private _initViewport() {
-    this.service.viewport.setContainer(this);
-  }
-
   override connectedCallback() {
     super.connectedCallback();
 
@@ -198,7 +194,6 @@ export class EdgelessRootPreviewBlockComponent extends BlockComponent<
     this._initResizeEffect();
     this._initPixelRatioChangeEffect();
     this._initFontLoader();
-    this._initViewport();
 
     this._disposables.add(
       this.service.viewport.viewportUpdated.on(() => {

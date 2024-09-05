@@ -103,6 +103,17 @@ async function initEmptyEditor({
                 });
               },
             },
+            {
+              setup: di => {
+                di.override(
+                  window.$blocksuite.identifiers.DocModeProvider,
+                  window.$blocksuite.mockServices.mockDocModeService(
+                    () => editor.mode,
+                    mode => editor.switchEditor(mode)
+                  )
+                );
+              },
+            },
           ];
           editor.edgelessSpecs = [
             ...editor.edgelessSpecs,
@@ -111,6 +122,17 @@ async function initEmptyEditor({
                 di.addImpl(window.$blocksuite.identifiers.QuickSearchProvider, {
                   searchDoc: () => Promise.resolve(null),
                 });
+              },
+            },
+            {
+              setup: di => {
+                di.override(
+                  window.$blocksuite.identifiers.DocModeProvider,
+                  window.$blocksuite.mockServices.mockDocModeService(
+                    () => editor.mode,
+                    mode => editor.switchEditor(mode)
+                  )
+                );
               },
             },
           ];

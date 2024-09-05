@@ -1,4 +1,4 @@
-import type { ConnectorElementModel } from '@blocksuite/affine-block-surface';
+import type { ConnectorElementModel } from '@blocksuite/affine-model';
 
 import { WithDisposable } from '@blocksuite/block-std';
 import { Vec } from '@blocksuite/global/utils';

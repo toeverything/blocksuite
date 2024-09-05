@@ -579,4 +579,8 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
     this._elementModels.forEach(model => models.push(model.model));
     return models;
   }
+
+  get registeredElementTypes() {
+    return Object.keys(this._elementCtorMap);
+  }
 }

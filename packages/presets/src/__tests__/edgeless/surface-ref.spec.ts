@@ -1,9 +1,9 @@
-import {
-  DocModeProvider,
-  type EdgelessRootBlockComponent,
-  type SurfaceRefBlockComponent,
+import type {
+  EdgelessRootBlockComponent,
+  SurfaceRefBlockComponent,
 } from '@blocksuite/blocks';
-import { beforeEach, describe, expect, test, vi } from 'vitest';
+
+import { beforeEach, describe, expect, test } from 'vitest';
 
 import { wait } from '../utils/common.js';
 import { addNote, getDocRootBlock } from '../utils/edgeless.js';
@@ -177,13 +177,8 @@ describe('basic', () => {
       `affine-surface-ref[data-block-id="${surfaceRefId}"]`
     ) as HTMLElement;
 
-    const switchEditor = vi.fn(() => {});
-    const pageService = editor.host!.std.getService('affine:page');
-    pageService.std.get(DocModeProvider).onModeChange(switchEditor);
-
     expect(surfaceRef).instanceOf(Element);
     (surfaceRef as SurfaceRefBlockComponent).viewInEdgeless();
-    expect(switchEditor).toBeCalledWith('edgeless');
     await wait();
   });
 });

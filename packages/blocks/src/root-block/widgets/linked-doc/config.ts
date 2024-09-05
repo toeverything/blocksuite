@@ -64,7 +64,8 @@ export function createLinkedDocMenuGroup(
       key: doc.id,
       name: doc.title || DEFAULT_DOC_NAME,
       icon:
-        editorHost.std.get(DocModeProvider).getMode(doc.id) === 'edgeless'
+        editorHost.std.get(DocModeProvider).getPrimaryMode(doc.id) ===
+        'edgeless'
           ? LinkedEdgelessIcon
           : LinkedDocIcon,
       action: () => {

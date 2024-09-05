@@ -2,10 +2,14 @@ import {
   type Menu,
   popFilterableSimpleMenu,
 } from '@blocksuite/affine-components/context-menu';
-import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
+import {
+  ShadowlessElement,
+  WithDisposable,
+  SignalWatcher,
+} from '@blocksuite/block-std';
 import { ArrowDownSmallIcon } from '@blocksuite/icons/lit';
 import { Text } from '@blocksuite/store';
-import { SignalWatcher, computed, signal } from '@lit-labs/preact-signals';
+import { computed, signal } from '@lit-labs/preact-signals';
 import { css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';

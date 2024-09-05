@@ -8,17 +8,14 @@ import type { PointerEventState } from '@blocksuite/block-std';
 import type { PointTestOptions } from '@blocksuite/block-std/gfx';
 import type { IVec } from '@blocksuite/global/utils';
 
-import { MindmapUtils } from '@blocksuite/affine-block-surface';
-import {
-  MindmapElementModel,
-  ShapeElementModel,
-  TextElementModel,
-} from '@blocksuite/affine-block-surface';
-import { ConnectorUtils } from '@blocksuite/affine-block-surface';
+import { MindmapElementModel } from '@blocksuite/affine-block-surface';
+import { ConnectorUtils, MindmapUtils } from '@blocksuite/affine-block-surface';
 import { focusTextModel } from '@blocksuite/affine-components/rich-text';
 import {
   ConnectorElementModel,
   GroupElementModel,
+  ShapeElementModel,
+  TextElementModel,
 } from '@blocksuite/affine-model';
 import { TelemetryProvider } from '@blocksuite/affine-shared/services';
 import {
@@ -223,7 +220,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     const h = Math.abs(startY - curY);
     const bound = new Bound(x, y, w, h);
 
-    const elements = service.pickElementsByBound(bound);
+    const elements = service.gfx.getElementsByBound(bound);
 
     const set = new Set(
       tools.shiftKey ? [...elements, ...selection.selectedElements] : elements
@@ -445,8 +442,8 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
       this._clearMindMapHoverState.forEach(fn => fn());
       this._clearMindMapHoverState = [];
 
-      const hoveredMindmap = this._service
-        .pickElement(x, y, {
+      const hoveredMindmap = this._service.gfx
+        .getElementByPoint(x, y, {
           all: true,
           responsePadding: [25, 60],
         })
@@ -547,7 +544,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     const group = service.pickElementInGroup(modelPos[0], modelPos[1], options);
 
     if (group instanceof MindmapElementModel) {
-      const picked = service.pickElement(modelPos[0], modelPos[1], {
+      const picked = service.gfx.getElementByPoint(modelPos[0], modelPos[1], {
         ...((options ?? {}) as PointTestOptions),
         all: true,
       });
@@ -1047,8 +1044,20 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     }
   }
 
-  onContainerMouseMove() {
-    noop();
+  onContainerMouseMove(e: PointerEventState) {
+    const hovered = this._pick(e.x, e.y, {
+      hitThreshold: 10,
+    });
+    if (
+      isFrameBlock(hovered) &&
+      hovered.externalBound?.isPointInBound(
+        this._service.viewport.toModelCoord(e.x, e.y)
+      )
+    ) {
+      this._service.frameOverlay.highlight(hovered);
+    } else {
+      this._service.frameOverlay.clear();
+    }
   }
 
   onContainerMouseOut(_: PointerEventState) {

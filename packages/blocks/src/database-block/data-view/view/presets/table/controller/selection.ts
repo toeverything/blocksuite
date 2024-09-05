@@ -2,7 +2,6 @@ import type { ReactiveController } from 'lit';
 import type { Ref } from 'lit/directives/ref.js';
 
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
-import { assertExists } from '@blocksuite/global/utils';
 import { effect } from '@lit-labs/preact-signals';
 import { css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
@@ -212,8 +211,7 @@ export class TableSelectionController implements ReactiveController {
     const fillValues = !!target.dataset.dragToFill;
     if (fillValues) {
       const focusCellContainer = this.getFocusCellContainer();
-      assertExists(focusCellContainer);
-      cell = focusCellContainer;
+      cell = focusCellContainer ?? null;
     } else {
       cell = target.closest('affine-database-cell-container');
     }
@@ -402,8 +400,7 @@ export class TableSelectionController implements ReactiveController {
             `affine-data-view-table-group[data-group-key="${groupKey}"]`
           )
         : this.tableContainer;
-    assertExists(container);
-    return container;
+    return container ?? null;
   }
 
   getRect(
@@ -1015,10 +1012,21 @@ class SelectionElement extends WithDisposable(ShadowlessElement) {
         selection.rowsSelection,
         selection.columnsSelection
       );
+
+      const columnSelection = selection.columnsSelection;
+      const rowSelection = selection.rowsSelection;
+
+      const isSingleRowSelection = rowSelection.end - rowSelection.start === 0;
+      const isSingleColumnSelection =
+        columnSelection.end - columnSelection.start === 0;
+
       const isDragElemDragging = this.controller.__dragToFillElement.dragging;
       const isEditing = selection.isEditing;
 
-      const showDragToFillHandle = !isEditing && isDragElemDragging;
+      const showDragToFillHandle =
+        !isEditing &&
+        (isDragElemDragging || isSingleRowSelection) &&
+        isSingleColumnSelection;
 
       this.updateFocusSelectionStyle(
         selection.groupKey,

@@ -1,4 +1,5 @@
 import type { Viewport } from '@blocksuite/block-std/gfx';
+import type { GridManager, LayerManager } from '@blocksuite/block-std/gfx';
 import type { IBound } from '@blocksuite/global/utils';
 
 import { type Color, ColorScheme } from '@blocksuite/affine-model';
@@ -11,10 +12,9 @@ import {
   last,
 } from '@blocksuite/global/utils';
 
-import type { SurfaceElementModel } from '../element-model/base.js';
-import type { LayerManager } from '../managers/layer-manager.js';
 import type { ElementRenderer } from './elements/index.js';
 
+import { SurfaceElementModel } from '../element-model/base.js';
 import { RoughCanvas } from '../utils/rough/canvas.js';
 
 /**
@@ -50,6 +50,7 @@ type RendererOptions = {
   enableStackingCanvas?: boolean;
   onStackingCanvasCreated?: (canvas: HTMLCanvasElement) => void;
   elementRenderers: Record<string, ElementRenderer>;
+  gridManager: GridManager;
 };
 
 export class CanvasRenderer {
@@ -68,6 +69,8 @@ export class CanvasRenderer {
   ctx: CanvasRenderingContext2D;
 
   elementRenderers: Record<string, ElementRenderer>;
+
+  grid: GridManager;
 
   layerManager: LayerManager;
 
@@ -88,6 +91,7 @@ export class CanvasRenderer {
     this.ctx = this.canvas.getContext('2d') as CanvasRenderingContext2D;
     this.viewport = options.viewport;
     this.layerManager = options.layerManager;
+    this.grid = options.gridManager;
     this.provider = options.provider ?? {};
     this.elementRenderers = options.elementRenderers;
     this._initViewport();
@@ -221,13 +225,11 @@ export class CanvasRenderer {
   }
 
   private _render() {
-    const { viewportBounds, zoom, cumulativeParentScale } = this.viewport;
+    const { viewportBounds, zoom } = this.viewport;
     const { ctx } = this;
     const dpr = window.devicePixelRatio;
     const scale = zoom * dpr;
-    const matrix = new DOMMatrix()
-      .scaleSelf(scale)
-      .scaleSelf(cumulativeParentScale);
+    const matrix = new DOMMatrix().scaleSelf(scale);
     /**
      * if a layer does not have a corresponding canvas
      * its element will be add to this array and drawing on the
@@ -278,7 +280,10 @@ export class CanvasRenderer {
     if (!ctx) return;
 
     const elements =
-      surfaceElements ?? this.layerManager.canvasGrid.search(bound);
+      surfaceElements ??
+      (this.grid.search(bound, undefined, {
+        filter: el => el instanceof SurfaceElementModel,
+      }) as SurfaceElementModel[]);
     for (const element of elements) {
       ctx.save();
 

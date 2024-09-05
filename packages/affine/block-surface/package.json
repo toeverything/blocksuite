@@ -22,7 +22,7 @@
     "@blocksuite/store": "workspace:*",
     "@lit-labs/preact-signals": "^1.0.2",
     "@lit/context": "^1.1.2",
-    "@toeverything/theme": "^1.0.7",
+    "@toeverything/theme": "^1.0.8",
     "fractional-indexing": "^3.2.0",
     "lit": "^3.2.0",
     "lodash.isplainobject": "^4.0.6",

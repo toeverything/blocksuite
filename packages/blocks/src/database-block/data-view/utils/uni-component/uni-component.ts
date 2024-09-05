@@ -1,8 +1,7 @@
 import type { LitElement, PropertyValues, TemplateResult } from 'lit';
 import type { Ref } from 'lit/directives/ref.js';
 
-import { ShadowlessElement } from '@blocksuite/block-std';
-import { SignalWatcher } from '@lit-labs/preact-signals';
+import { ShadowlessElement, SignalWatcher } from '@blocksuite/block-std';
 import { css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { type StyleInfo, styleMap } from 'lit/directives/style-map.js';

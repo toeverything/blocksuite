@@ -11,8 +11,8 @@ import {
 } from '@blocksuite/affine-model';
 import { TelemetryProvider } from '@blocksuite/affine-shared/services';
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
+import { SignalWatcher } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
-import { SignalWatcher } from '@lit-labs/preact-signals';
 import { LitElement, css, html, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';

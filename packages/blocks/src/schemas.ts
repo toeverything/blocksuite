@@ -21,6 +21,7 @@ import {
   EmbedYoutubeBlockSchema,
   FrameBlockSchema,
   ImageBlockSchema,
+  LatexBlockSchema,
   ListBlockSchema,
   NoteBlockSchema,
   ParagraphBlockSchema,
@@ -54,4 +55,5 @@ export const AffineSchemas: z.infer<typeof BlockSchema>[] = [
   EmbedSyncedDocBlockSchema,
   EmbedLoomBlockSchema,
   EdgelessTextBlockSchema,
+  LatexBlockSchema,
 ];

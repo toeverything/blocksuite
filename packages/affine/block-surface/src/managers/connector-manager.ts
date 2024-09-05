@@ -1,5 +1,5 @@
 import type { BrushElementModel } from '@blocksuite/affine-model';
-import type { GfxModel } from '@blocksuite/block-std/gfx';
+import type { GfxController, GfxModel } from '@blocksuite/block-std/gfx';
 import type { IBound, IVec, IVec3 } from '@blocksuite/global/utils';
 
 import {
@@ -31,8 +31,6 @@ import {
   sign,
   toRadian,
 } from '@blocksuite/global/utils';
-
-import type { SurfaceContext } from '../surface-block.js';
 
 import { isConnectorWithLabel } from '../element-model/utils/connector.js';
 import { Overlay } from '../renderer/canvas-renderer.js';
@@ -825,7 +823,7 @@ export class ConnectionOverlay extends Overlay {
 
   targetBounds: IBound | null = null;
 
-  constructor(private _context: SurfaceContext) {
+  constructor(private _gfx: GfxController) {
     super();
   }
 
@@ -836,9 +834,9 @@ export class ConnectionOverlay extends Overlay {
   }
 
   private _findConnectablesInViews() {
-    const context = this._context;
-    const bound = context.viewport.viewportBounds;
-    return context.pickElementsByBound(bound).filter(ele => ele.connectable);
+    const gfx = this._gfx;
+    const bound = gfx.viewport.viewportBounds;
+    return gfx.getElementsByBound(bound).filter(ele => ele.connectable);
   }
 
   override clear() {
@@ -848,9 +846,9 @@ export class ConnectionOverlay extends Overlay {
   }
 
   override render(ctx: CanvasRenderingContext2D): void {
-    const zoom = this._context.viewport.zoom;
+    const zoom = this._gfx.viewport.zoom;
     const radius = 5 / zoom;
-    const color = getComputedStyle(this._context.host).getPropertyValue(
+    const color = getComputedStyle(this._gfx.std.host).getPropertyValue(
       '--affine-text-emphasis-color'
     );
 
@@ -899,7 +897,7 @@ export class ConnectionOverlay extends Overlay {
    */
   renderConnector(point: IVec, excludedIds: string[] = []) {
     const connectables = this._findConnectablesInViews();
-    const context = this._context;
+    const context = this._gfx;
     const target = [];
 
     this._clearRect();
@@ -977,7 +975,7 @@ export class ConnectionOverlay extends Overlay {
           {
             ignoreTransparent: false,
           },
-          this._context.host
+          this._gfx.std.host
         )
       ) {
         target.push(connectable);
@@ -1332,11 +1330,15 @@ export class ConnectorPathGenerator {
     return true;
   }
 
-  updatePath(
+  static updatePath(
     connector: ConnectorElementModel | LocalConnectorElementModel,
-    path?: PointLocation[]
+    path: PointLocation[] | null | null,
+    elementGetter?: (id: string) => GfxModel | null
   ) {
-    const points = path ?? this._generateConnectorPath(connector) ?? [];
+    const instance = new ConnectorPathGenerator({
+      getElementById: elementGetter ?? (() => null),
+    });
+    const points = path ?? instance._generateConnectorPath(connector) ?? [];
     const bound =
       connector.mode === ConnectorMode.Curve
         ? getBezierCurveBoundingBox(getBezierParameters(points))

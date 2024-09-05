@@ -112,7 +112,7 @@ export class FramePanelHeader extends WithDisposable(LitElement) {
 
   private _enterPresentationMode = () => {
     if (!this.edgeless) {
-      this.rootService.std.get(DocModeProvider).setMode('edgeless');
+      this.rootService.std.get(DocModeProvider).setEditorMode('edgeless');
     }
 
     setTimeout(() => {

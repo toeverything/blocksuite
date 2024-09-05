@@ -13,7 +13,6 @@ import type {
   SurfaceSelection,
   UIEventHandler,
 } from '@blocksuite/block-std';
-import type { GfxViewportElement } from '@blocksuite/block-std/gfx';
 import type { IBound, IPoint, IVec } from '@blocksuite/global/utils';
 import type { BlockModel } from '@blocksuite/store';
 
@@ -30,6 +29,10 @@ import {
   requestThrottledConnectedFrame,
 } from '@blocksuite/affine-shared/utils';
 import { BlockComponent } from '@blocksuite/block-std';
+import {
+  GfxBlockElementModel,
+  type GfxViewportElement,
+} from '@blocksuite/block-std/gfx';
 import { IS_WINDOWS } from '@blocksuite/global/env';
 import {
   Bound,
@@ -391,8 +394,6 @@ export class EdgelessRootBlockComponent extends BlockComponent<
 
   private _initViewport() {
     const { service } = this;
-
-    service.viewport.setContainer(this);
 
     const run = () => {
       const viewport =
@@ -856,15 +857,14 @@ export class EdgelessRootBlockComponent extends BlockComponent<
           .maxConcurrentRenders=${6}
           .viewport=${this.service.viewport}
           .getModelsInViewport=${() => {
-            const blocks = this.service.layer.blocksGrid.search(
+            const blocks = this.service.gfx.grid.search(
               this.service.viewport.viewportBounds,
               undefined,
-              true
+              {
+                useSet: true,
+                filter: model => model instanceof GfxBlockElementModel,
+              }
             );
-
-            this.service.layer.framesGrid
-              .search(this.service.viewport.viewportBounds, undefined, true)
-              .forEach(frame => blocks.add(frame));
 
             return blocks;
           }}

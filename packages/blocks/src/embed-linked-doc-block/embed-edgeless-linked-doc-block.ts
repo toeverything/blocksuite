@@ -5,6 +5,8 @@ import {
 import { Bound } from '@blocksuite/global/utils';
 import { customElement } from 'lit/decorators.js';
 
+import type { EdgelessRootService } from '../root-block/index.js';
+
 import { toEdgelessEmbedBlock } from '../_common/embed-block-helper/embed-block-element.js';
 import { EmbedLinkedDocBlockComponent } from './embed-linked-doc-block.js';
 
@@ -53,12 +55,14 @@ export class EmbedEdgelessLinkedDocBlockComponent extends toEdgelessEmbedBlock(
     doc.deleteBlock(this.model);
   };
 
-  override rootServiceFlavour: string = 'affine:page';
-
   protected override _handleClick(evt: MouseEvent): void {
     if (this.config.handleClick) {
       this.config.handleClick(evt, this.host);
       return;
     }
+  }
+
+  get rootService() {
+    return this.std.getService('affine:page') as EdgelessRootService;
   }
 }

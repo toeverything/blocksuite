@@ -27,7 +27,7 @@ import {
   type SerializedXYWH,
   deserializeXYWH,
 } from '@blocksuite/global/utils';
-import { assertExists, noop } from '@blocksuite/global/utils';
+import { assertExists } from '@blocksuite/global/utils';
 import { type TemplateResult, css, html, nothing } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -38,11 +38,7 @@ import type { EdgelessRootService } from '../root-block/index.js';
 import type { SurfaceRefBlockService } from './surface-ref-service.js';
 
 import { SpecProvider } from '../_specs/index.js';
-import './surface-ref-portal.js';
-import { SurfaceRefPortal } from './surface-ref-portal.js';
 import { noContentPlaceholder } from './utils.js';
-
-noop(SurfaceRefPortal);
 
 const REF_LABEL_ICON = {
   'affine:frame': FrameIcon,
@@ -432,15 +428,28 @@ export class SurfaceRefBlockComponent extends BlockComponent<
     }
     this._previewSpec.extend([PageViewWatcher]);
 
+    const reference = this.model.reference;
+
     class FrameViewWatcher extends BlockServiceWatcher {
       static override readonly flavour = 'affine:frame';
 
       override mounted() {
-        this.blockService.specSlots.viewConnected.once(({ component }) => {
-          const frameBlock = component as FrameBlockComponent;
+        const disposable = this.blockService.specSlots.viewConnected.on(
+          ({ component }) => {
+            const frameBlock = component as FrameBlockComponent;
+            if (frameBlock.model.id !== reference) return;
 
-          frameBlock.showBorder = false;
-        });
+            frameBlock.showBorder = false;
+            disposable.dispose();
+
+            this.blockService.disposables.add(
+              frameBlock.model.xywh$.subscribe(() => {
+                refreshViewport();
+              })
+            );
+          }
+        );
+        this.blockService.disposables.add(disposable);
       }
     }
 
@@ -591,7 +600,8 @@ export class SurfaceRefBlockComponent extends BlockComponent<
     const pageService = this.std.getService('affine:page');
 
     pageService.editPropsStore.setStorage('viewport', viewport);
-    this.std.get(DocModeProvider).setMode('edgeless');
+
+    this.std.get(DocModeProvider).setEditorMode('edgeless');
   }
 
   override willUpdate(_changedProperties: Map<PropertyKey, unknown>): void {

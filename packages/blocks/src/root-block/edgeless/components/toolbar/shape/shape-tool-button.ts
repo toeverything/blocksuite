@@ -1,5 +1,5 @@
 import { ShapeType, type ShapeName } from '@blocksuite/affine-model';
-import { SignalWatcher } from '@lit-labs/preact-signals';
+import { SignalWatcher } from '@blocksuite/block-std';
 import { LitElement, css, html } from 'lit';
 import { customElement } from 'lit/decorators.js';
 

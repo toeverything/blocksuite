@@ -96,8 +96,8 @@ export class LassoToolController extends EdgelessToolController<LassoTool> {
 
   private _getElementsInsideLasso() {
     const lassoBounds = getBoundFromPoints(this._lassoPoints);
-    return this._service
-      .pickElementsByBound(lassoBounds)
+    return this._service.gfx
+      .getElementsByBound(lassoBounds)
       .filter(e =>
         this.isInsideLassoSelection(Bound.deserialize(e.xywh), e.rotate)
       );

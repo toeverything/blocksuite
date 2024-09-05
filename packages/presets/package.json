@@ -23,7 +23,7 @@
     "@floating-ui/dom": "^1.6.10",
     "@lit-labs/preact-signals": "^1.0.2",
     "@lottiefiles/dotlottie-wc": "^0.2.16",
-    "@toeverything/theme": "^1.0.7",
+    "@toeverything/theme": "^1.0.8",
     "lit": "^3.2.0",
     "zod": "^3.23.8"
   },

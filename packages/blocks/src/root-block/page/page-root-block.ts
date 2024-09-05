@@ -373,28 +373,23 @@ export class PageRootBlockComponent extends BlockComponent<
   }
 
   override renderBlock() {
-    const content = html`${repeat(
-      this.model.children.filter(child => {
-        const isNote = matchFlavours(child, ['affine:note']);
-        const note = child as NoteBlockModel;
-        const displayOnEdgeless =
-          !!note.displayMode &&
-          note.displayMode === NoteDisplayMode.EdgelessOnly;
-        // Should remove deprecated `hidden` property in the future
-        return !(isNote && displayOnEdgeless);
-      }),
-      child => child.id,
-      child => this.host.renderModel(child)
-    )}`;
-
     const widgets = html`${repeat(
       Object.entries(this.widgets),
       ([id]) => id,
       ([_, widget]) => widget
     )}`;
 
+    const children = this.renderChildren(this.model, child => {
+      const isNote = matchFlavours(child, ['affine:note']);
+      const note = child as NoteBlockModel;
+      const displayOnEdgeless =
+        !!note.displayMode && note.displayMode === NoteDisplayMode.EdgelessOnly;
+      // Should remove deprecated `hidden` property in the future
+      return !(isNote && displayOnEdgeless);
+    });
+
     return html`
-      <div class="affine-page-root-block-container">${content} ${widgets}</div>
+      <div class="affine-page-root-block-container">${children} ${widgets}</div>
     `;
   }
 

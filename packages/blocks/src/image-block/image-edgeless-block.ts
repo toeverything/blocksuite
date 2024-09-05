@@ -9,7 +9,6 @@ import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { when } from 'lit/directives/when.js';
 
-import type { EdgelessRootService } from '../root-block/index.js';
 import type { ImageBlockFallbackCard } from './components/image-block-fallback.js';
 import type { ImageBlockService } from './image-service.js';
 
@@ -25,7 +24,6 @@ import {
 @customElement('affine-edgeless-image')
 @Peekable()
 export class ImageEdgelessBlockComponent extends GfxBlockComponent<
-  EdgelessRootService,
   ImageBlockModel,
   ImageBlockService
 > {
@@ -62,8 +60,6 @@ export class ImageEdgelessBlockComponent extends GfxBlockComponent<
       })
       .catch(console.error);
   };
-
-  override rootServiceFlavour: string = 'affine:page';
 
   private _handleError(error: Error) {
     this.dispatchEvent(new CustomEvent('error', { detail: error }));
@@ -120,10 +116,6 @@ export class ImageEdgelessBlockComponent extends GfxBlockComponent<
 
       ${Object.values(this.widgets)}
     `;
-  }
-
-  override toZIndex() {
-    return `${this.rootService.layer.getZIndex(this.model)}`;
   }
 
   override updated() {

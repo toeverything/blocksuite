@@ -7,7 +7,11 @@ import {
   type InsertToPosition,
   insertPositionToIndex,
 } from '@blocksuite/affine-shared/utils';
-import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
+import {
+  ShadowlessElement,
+  WithDisposable,
+  SignalWatcher,
+} from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import {
   DeleteIcon,
@@ -17,7 +21,6 @@ import {
   MoveLeftIcon,
   MoveRightIcon,
 } from '@blocksuite/icons/lit';
-import { SignalWatcher } from '@lit-labs/preact-signals';
 import { css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';

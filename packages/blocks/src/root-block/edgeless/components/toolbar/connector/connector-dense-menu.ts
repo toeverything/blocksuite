@@ -1,10 +1,10 @@
-import { ConnectorMode } from '@blocksuite/affine-block-surface';
 import {
   ConnectorCWithArrowIcon,
   ConnectorIcon,
   ConnectorLWithArrowIcon,
   ConnectorXWithArrowIcon,
 } from '@blocksuite/affine-components/icons';
+import { ConnectorMode } from '@blocksuite/affine-model';
 
 import type { DenseMenuBuilder } from '../common/type.js';
 

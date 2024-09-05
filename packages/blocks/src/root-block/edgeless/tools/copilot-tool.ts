@@ -68,7 +68,7 @@ export class CopilotSelectionController extends EdgelessToolController<CopilotSe
     const bound = new Bound(area.x, area.y, area.width, area.height);
 
     if (area.width & area.height) {
-      const elements = this._service.pickElementsByBound(bound);
+      const elements = this._service.gfx.getElementsByBound(bound);
 
       const set = new Set(elements);
 

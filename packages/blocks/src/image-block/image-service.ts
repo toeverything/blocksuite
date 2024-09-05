@@ -81,7 +81,7 @@ export class ImageBlockService extends BlockService {
         dragPreviewEl.style.overflow = 'hidden';
         dragPreviewEl.style.width = `${width / scale}px`;
         render(
-          blockComponent.host.renderModel(blockComponent.model),
+          blockComponent.host.dangerouslyRenderModel(blockComponent.model),
           dragPreviewEl
         );
 

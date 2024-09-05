@@ -1,15 +1,17 @@
 import type { Color } from '@blocksuite/affine-model';
 import type { EditorHost, SurfaceSelection } from '@blocksuite/block-std';
-import type { GfxModel, Viewport } from '@blocksuite/block-std/gfx';
 import type { Slot } from '@blocksuite/global/utils';
 
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import { BlockComponent, RANGE_SYNC_EXCLUDE_ATTR } from '@blocksuite/block-std';
+import {
+  GfxControllerIdentifier,
+  type Viewport,
+} from '@blocksuite/block-std/gfx';
 import { Bound, values } from '@blocksuite/global/utils';
 import { css, html } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 
-import type { LayerManager } from './managers/layer-manager.js';
 import type { Overlay } from './renderer/canvas-renderer.js';
 import type { ElementRenderer } from './renderer/elements/index.js';
 import type { SurfaceBlockModel } from './surface-model.js';
@@ -20,7 +22,6 @@ import { CanvasRenderer } from './renderer/canvas-renderer.js';
 
 export interface SurfaceContext {
   viewport: Viewport;
-  layer: LayerManager;
   host: EditorHost;
   overlays: Record<string, Overlay>;
   elementRenderers: Record<string, ElementRenderer>;
@@ -30,7 +31,6 @@ export interface SurfaceContext {
       updated: Slot<SurfaceSelection[]>;
     };
   };
-  pickElementsByBound: (bound: Bound) => GfxModel[];
 }
 
 @customElement('affine-surface')
@@ -49,7 +49,7 @@ export class SurfaceBlockComponent extends BlockComponent<
     };
 
     this._disposables.add(
-      this._context.viewport.viewportUpdated.on(() => {
+      this._gfx.viewport.viewportUpdated.on(() => {
         refresh();
       })
     );
@@ -132,7 +132,7 @@ export class SurfaceBlockComponent extends BlockComponent<
   `;
 
   fitToViewport = (bound: Bound) => {
-    const { viewport } = this._context;
+    const { viewport } = this._gfx;
     bound = bound.expand(30);
     if (Date.now() - this._lastTime > 200)
       this._cachedViewport = viewport.viewportBounds;
@@ -148,27 +148,33 @@ export class SurfaceBlockComponent extends BlockComponent<
     this._renderer?.refresh();
   };
 
-  private get _context(): SurfaceContext {
-    return this.parentComponent?.service as unknown as SurfaceContext;
+  private get _edgelessService() {
+    return this.std.getService('affine:page') as unknown as SurfaceContext;
   }
 
   private _getReversedTransform() {
-    const { translateX, translateY, zoom } = this._context.viewport;
+    const { translateX, translateY, zoom } = this._gfx.viewport;
 
     return `scale(${1 / zoom}) translate(${-translateX}px, ${-translateY}px)`;
   }
 
+  private get _gfx() {
+    return this.std.get(GfxControllerIdentifier);
+  }
+
   private _initOverlays() {
-    values(this._context.overlays).forEach(overlay => {
+    values(this._edgelessService.overlays).forEach(overlay => {
       this._renderer.addOverlay(overlay);
     });
   }
 
   private _initRenderer() {
-    const context = this._context;
+    const gfx = this._gfx;
+
     this._renderer = new CanvasRenderer({
-      viewport: context.viewport,
-      layerManager: context.layer,
+      viewport: gfx.viewport,
+      layerManager: gfx.layer,
+      gridManager: gfx.grid,
       enableStackingCanvas: true,
       provider: {
         generateColorProperty: (color: Color, fallback: string) =>
@@ -178,12 +184,12 @@ export class SurfaceBlockComponent extends BlockComponent<
         getColorScheme: () => ThemeObserver.mode,
         getPropertyValue: (property: string) =>
           ThemeObserver.getPropertyValue(property),
-        selectedElements: () => context.selection.selectedIds,
+        selectedElements: () => this._edgelessService.selection.selectedIds,
       },
       onStackingCanvasCreated(canvas) {
         canvas.className = 'indexable-canvas';
       },
-      elementRenderers: this._context.elementRenderers,
+      elementRenderers: this._edgelessService.elementRenderers,
     });
 
     this._disposables.add(
@@ -220,7 +226,7 @@ export class SurfaceBlockComponent extends BlockComponent<
       })
     );
     this._disposables.add(
-      context.selection.slots.updated.on(() => {
+      this._edgelessService.selection.slots.updated.on(() => {
         this._renderer.refresh();
       })
     );

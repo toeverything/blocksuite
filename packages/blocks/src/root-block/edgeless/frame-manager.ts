@@ -1,17 +1,18 @@
 import type { SurfaceBlockModel } from '@blocksuite/affine-block-surface';
-import type { FrameBlockModel } from '@blocksuite/affine-model';
-import type { NoteBlockModel } from '@blocksuite/affine-model';
+import type { FrameBlockModel, NoteBlockModel } from '@blocksuite/affine-model';
 import type { Doc } from '@blocksuite/store';
 
-import {
-  GroupElementModel,
-  Overlay,
-  type RoughCanvas,
-} from '@blocksuite/affine-block-surface';
+import { Overlay } from '@blocksuite/affine-block-surface';
 import { renderableInEdgeless } from '@blocksuite/affine-block-surface';
+import { GroupElementModel } from '@blocksuite/affine-model';
 import { isGfxContainerElm } from '@blocksuite/block-std/gfx';
 import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
-import { Bound, DisposableGroup, type IVec } from '@blocksuite/global/utils';
+import {
+  Bound,
+  DisposableGroup,
+  type IVec,
+  deserializeXYWH,
+} from '@blocksuite/global/utils';
 import { DocCollection } from '@blocksuite/store';
 
 import type { EdgelessRootService } from '../../index.js';
@@ -26,27 +27,80 @@ const MIN_FRAME_HEIGHT = 640;
 const FRAME_PADDING = 40;
 
 export class FrameOverlay extends Overlay {
-  bound: Bound | null = null;
+  private _disposable = new DisposableGroup();
+
+  private _frame: FrameBlockModel | null = null;
+
+  private _innerElements: BlockSuite.EdgelessModel[] = [];
+
+  constructor(private _edgelessService: EdgelessRootService) {
+    super();
+  }
+
+  private get _frameManager() {
+    return this._edgelessService.frame;
+  }
+
+  private _reset() {
+    this._disposable.dispose();
+    this._disposable = new DisposableGroup();
+
+    this._frame = null;
+    this._innerElements = [];
+  }
 
   override clear() {
-    this.bound = null;
+    this._reset();
     this._renderer?.refresh();
   }
 
-  highlight(frame: FrameBlockModel) {
-    const bound = Bound.deserialize(frame.xywh);
-    this.bound = bound;
+  highlight(frame: FrameBlockModel, highlightInnerElements: boolean = false) {
+    this._reset();
+    this._disposable.add(
+      frame.deleted.once(() => {
+        this.clear();
+      })
+    );
+
+    this._frame = frame;
+
+    if (highlightInnerElements) {
+      const innerElements = new Set(
+        getTopElements(
+          this._frameManager.getElementsInFrameBound(frame)
+        ).concat(
+          this._frameManager.getChildElementsInFrame(frame).filter(child => {
+            return frame.intersectsBound(child.elementBound);
+          })
+        )
+      );
+
+      this._innerElements = [...innerElements];
+    }
     this._renderer?.refresh();
   }
 
-  override render(ctx: CanvasRenderingContext2D, _rc: RoughCanvas): void {
-    if (!this.bound) return;
-    const { x, y, w, h } = this.bound;
+  override render(ctx: CanvasRenderingContext2D): void {
+    if (!this._frame) return;
     ctx.beginPath();
     ctx.strokeStyle = '#1E96EB';
-    ctx.lineWidth = 2;
-    ctx.roundRect(x, y, w, h, 8);
-    ctx.stroke();
+    ctx.lineWidth = 2 / this._edgelessService.viewport.zoom;
+    const radius = 2 / this._edgelessService.viewport.zoom;
+
+    {
+      const { x, y, w, h } = this._frame.elementBound;
+      ctx.roundRect(x, y, w, h, radius);
+      ctx.stroke();
+    }
+
+    this._innerElements.forEach(element => {
+      const [x, y, w, h] = deserializeXYWH(element.xywh);
+      ctx.translate(x + w / 2, y + h / 2);
+      ctx.rotate(element.rotate);
+      ctx.roundRect(-w / 2, -h / 2, w, h, radius);
+      ctx.translate(-x - w / 2, -y - h / 2);
+      ctx.stroke();
+    });
   }
 }
 
@@ -275,12 +329,11 @@ export class EdgelessFrameManager {
    */
   getElementsInFrameBound(frame: FrameBlockModel, fullyContained = true) {
     const bound = Bound.deserialize(frame.xywh);
-    const elements: BlockSuite.EdgelessModel[] =
-      this._rootService.layer.canvasGrid.search(bound, true);
+    const elements: BlockSuite.EdgelessModel[] = this._rootService.gfx.grid
+      .search(bound, fullyContained)
+      .filter(element => element !== frame);
 
-    return elements.concat(
-      getBlocksInFrameBound(this._rootService.doc, frame, fullyContained)
-    );
+    return elements;
   }
 
   /**

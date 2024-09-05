@@ -75,7 +75,8 @@ export class LayerManager {
 
   blocks: GfxBlockElementModel[] = [];
 
-  blocksGrid = new GridManager<GfxBlockElementModel>();
+  blocksGrid: GridManager<GfxBlockElementModel> =
+    new GridManager<GfxBlockElementModel>();
 
   canvasElements: SurfaceElementModel[] = [];
 

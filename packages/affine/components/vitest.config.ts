@@ -5,13 +5,13 @@ export default defineConfig({
     target: 'es2018',
   },
   test: {
-    globalSetup: '../../scripts/vitest-global.ts',
+    globalSetup: '../../../scripts/vitest-global.ts',
     include: ['src/__tests__/**/*.unit.spec.ts'],
     testTimeout: 1000,
     coverage: {
       provider: 'istanbul', // or 'c8'
       reporter: ['lcov'],
-      reportsDirectory: '../../.coverage/blocks',
+      reportsDirectory: '../../../.coverage/affine-components',
     },
     /**
      * Custom handler for console.log in tests.

@@ -1,7 +1,6 @@
 import type { TemplateResult } from 'lit';
 
-import { ShadowlessElement } from '@blocksuite/block-std';
-import { SignalWatcher } from '@lit-labs/preact-signals';
+import { ShadowlessElement, SignalWatcher } from '@blocksuite/block-std';
 import { customElement, property } from 'lit/decorators.js';
 
 @customElement('any-render')

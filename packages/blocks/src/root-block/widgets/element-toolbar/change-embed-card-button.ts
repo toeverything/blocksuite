@@ -26,6 +26,7 @@ import {
   renderToolbarSeparator,
 } from '@blocksuite/affine-components/toolbar';
 import { BookmarkStyles } from '@blocksuite/affine-model';
+import { EmbedOptionProvider } from '@blocksuite/affine-shared/services';
 import { getHostName } from '@blocksuite/affine-shared/utils';
 import { WithDisposable } from '@blocksuite/block-std';
 import { Bound } from '@blocksuite/global/utils';
@@ -437,10 +438,6 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
     `;
   }
 
-  private get _rootService() {
-    return this.std.getService('affine:page');
-  }
-
   private _setCardStyle(style: EmbedCardStyle) {
     const bounds = Bound.deserialize(this.model.xywh);
     bounds.w = EMBED_CARD_WIDTH[style];
@@ -559,9 +556,9 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
   override render() {
     const model = this.model;
     if ('url' in this.model) {
-      this._embedOptions = this._rootService.getEmbedBlockOptions(
-        this.model.url
-      );
+      this._embedOptions = this.std
+        .get(EmbedOptionProvider)
+        .getEmbedBlockOptions(this.model.url);
     }
 
     const buttons = [

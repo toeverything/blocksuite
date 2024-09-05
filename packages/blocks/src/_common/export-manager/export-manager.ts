@@ -443,7 +443,9 @@ export class ExportManager {
     }
 
     const blocks =
-      nodes ?? edgeless?.service.pickElementsByBound(bound, 'blocks') ?? [];
+      nodes ??
+      edgeless?.service.gfx.getElementsByBound(bound, { type: 'block' }) ??
+      [];
     for (const block of blocks) {
       if (matchFlavours(block, ['affine:image'])) {
         if (!block.sourceId) return;

@@ -1,7 +1,13 @@
+import { expect, type Locator, type Page } from '@playwright/test';
+
 import {
   activeNoteInEdgeless,
+  addNote,
   assertEdgelessTool,
   locatorEdgelessToolButton,
+  multiTouchDown,
+  multiTouchMove,
+  multiTouchUp,
   setEdgelessTool,
   switchEditorMode,
 } from '../utils/actions/edgeless.js';
@@ -10,6 +16,7 @@ import {
   dragBetweenCoords,
   enterPlaygroundRoom,
   initEmptyEdgelessState,
+  toggleEditorReadonly,
   type,
   waitForInlineEditorStateUpdated,
   waitNextFrame,
@@ -151,4 +158,74 @@ test('pan tool shortcut when user is editing', async ({ page }) => {
   const defaultButton = await locatorEdgelessToolButton(page, 'pan', false);
   await assertNotHasClass(defaultButton, 'pan');
   await waitNextFrame(page);
+});
+
+test.describe('pan tool in readonly mode', () => {
+  async function setupReadonlyEdgeless(page: Page) {
+    await enterPlaygroundRoom(page);
+    await initEmptyEdgelessState(page);
+    await switchEditorMode(page);
+
+    const noteId = await addNote(page, 'hello world', 100, 200);
+    await page.mouse.click(50, 100);
+
+    const edgelessNote = page.locator(
+      `affine-edgeless-note[data-block-id="${noteId}"]`
+    );
+    const originalBoundingBox = await edgelessNote.boundingBox();
+    expect(originalBoundingBox).not.toBeNull();
+    const { x: originalX, y: originalY } = originalBoundingBox!;
+
+    // Toggle readonly mode
+    await toggleEditorReadonly(page);
+    await page.waitForTimeout(100);
+
+    return { edgelessNote, originalX, originalY };
+  }
+
+  async function assertPanned(
+    edgelessNote: Locator,
+    originalX: number,
+    originalY: number
+  ) {
+    const newBoundingBox = await edgelessNote.boundingBox();
+    expect(newBoundingBox).not.toBeNull();
+    const { x: newX, y: newY } = newBoundingBox!;
+
+    expect(newX).toBeGreaterThan(originalX);
+    expect(newY).toBeGreaterThan(originalY);
+  }
+
+  test('can be used by keyboard', async ({ page }) => {
+    const { edgelessNote, originalX, originalY } =
+      await setupReadonlyEdgeless(page);
+
+    await page.keyboard.down('Space');
+    await assertEdgelessTool(page, 'pan');
+
+    // Pan the viewport
+    await dragBetweenCoords(page, { x: 300, y: 300 }, { x: 400, y: 400 });
+
+    await assertPanned(edgelessNote, originalX, originalY);
+  });
+
+  test('can be used by multi-touch', async ({ page }) => {
+    const { edgelessNote, originalX, originalY } =
+      await setupReadonlyEdgeless(page);
+
+    // Pan the viewport using multi-touch
+    const from = [
+      { x: 300, y: 300 },
+      { x: 400, y: 300 },
+    ];
+    const to = [
+      { x: 350, y: 350 },
+      { x: 450, y: 350 },
+    ];
+    await multiTouchDown(page, from);
+    await multiTouchMove(page, from, to);
+    await multiTouchUp(page, to);
+
+    await assertPanned(edgelessNote, originalX, originalY);
+  });
 });

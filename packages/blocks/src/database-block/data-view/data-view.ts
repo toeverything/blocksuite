@@ -1,12 +1,12 @@
 import type { BlockStdScope } from '@blocksuite/block-std';
 import type { ReferenceElement } from '@floating-ui/dom';
 
-import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import {
-  type ReadonlySignal,
+  ShadowlessElement,
+  WithDisposable,
   SignalWatcher,
-  computed,
-} from '@lit-labs/preact-signals';
+} from '@blocksuite/block-std';
+import { type ReadonlySignal, computed } from '@lit-labs/preact-signals';
 import { type TemplateResult, css, unsafeCSS } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';

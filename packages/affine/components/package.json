@@ -25,7 +25,7 @@
     "@lit-labs/preact-signals": "^1.0.2",
     "@lit/context": "^1.1.2",
     "@lottiefiles/dotlottie-wc": "^0.2.16",
-    "@toeverything/theme": "^1.0.7",
+    "@toeverything/theme": "^1.0.8",
     "katex": "^0.16.11",
     "lit": "^3.2.0",
     "shiki": "^1.12.0",

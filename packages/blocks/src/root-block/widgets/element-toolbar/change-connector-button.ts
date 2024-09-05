@@ -1,11 +1,4 @@
 import {
-  type ConnectorElementModel,
-  ConnectorEndpoint,
-  ConnectorMode,
-  DEFAULT_FRONT_END_POINT_STYLE,
-  DEFAULT_REAR_END_POINT_STYLE,
-} from '@blocksuite/affine-block-surface';
-import {
   AddTextIcon,
   ConnectorCWithArrowIcon,
   ConnectorEndpointNoneIcon,
@@ -26,6 +19,11 @@ import {
 } from '@blocksuite/affine-components/icons';
 import { renderToolbarSeparator } from '@blocksuite/affine-components/toolbar';
 import {
+  type ConnectorElementModel,
+  ConnectorEndpoint,
+  ConnectorMode,
+  DEFAULT_FRONT_END_POINT_STYLE,
+  DEFAULT_REAR_END_POINT_STYLE,
   type ColorScheme,
   type ConnectorElementProps,
   type ConnectorLabelProps,

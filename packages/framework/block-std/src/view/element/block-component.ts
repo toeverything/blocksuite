@@ -2,7 +2,7 @@ import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 import { Doc } from '@blocksuite/store';
 import { type BlockModel, BlockViewType } from '@blocksuite/store';
 import { consume, provide } from '@lit/context';
-import { SignalWatcher, computed } from '@lit-labs/preact-signals';
+import { computed } from '@lit-labs/preact-signals';
 import { type PropertyValues, type TemplateResult, nothing, render } from 'lit';
 import { property, state } from 'lit/decorators.js';
 import { choose } from 'lit/directives/choose.js';
@@ -15,6 +15,7 @@ import type { BlockStdScope } from '../../scope/index.js';
 import type { WidgetComponent } from './widget-component.js';
 
 import { PropTypes, requiredProperties } from '../decorators/index.js';
+import { SignalWatcher } from '../signal-watcher.js';
 import { WithDisposable } from '../utils/with-disposable.js';
 import {
   blockComponentSymbol,
@@ -65,23 +66,17 @@ export class BlockComponent<
     );
   };
 
-  renderChildren = (model: BlockModel): TemplateResult => {
-    return this.host.renderChildren(model);
-  };
+  get renderChildren() {
+    return this.host.renderChildren.bind(this);
+  }
 
   private _renderMismatchBlock(content: unknown) {
     return when(
       this.isVersionMismatch,
       () => {
-        const schema = this.doc.schema.flavourSchemaMap.get(this.model.flavour);
-        if (!schema) {
-          throw new BlockSuiteError(
-            ErrorCode.ValueNotExists,
-            `Cannot find schema for flavour ${this.model.flavour}`
-          );
-        }
-        const expectedVersion = schema.version;
         const actualVersion = this.model.version;
+        const schema = this.doc.schema.flavourSchemaMap.get(this.model.flavour);
+        const expectedVersion = schema?.version ?? -1;
         return this.renderVersionMismatch(expectedVersion, actualVersion);
       },
       () => content
@@ -167,6 +162,12 @@ export class BlockComponent<
     return nothing;
   }
 
+  /**
+   * Render a warning message when the block version is mismatched.
+   * @param expectedVersion If the schema is not found, the expected version is -1.
+   *        Which means the block is not supported in the current editor.
+   * @param actualVersion The version of the block's crdt data.
+   */
   renderVersionMismatch(
     expectedVersion: number,
     actualVersion: number
@@ -241,10 +242,10 @@ export class BlockComponent<
   get isVersionMismatch() {
     const schema = this.doc.schema.flavourSchemaMap.get(this.model.flavour);
     if (!schema) {
-      throw new BlockSuiteError(
-        ErrorCode.ValueNotExists,
-        `Cannot find schema for flavour ${this.model.flavour}`
+      console.warn(
+        `Schema not found for block ${this.model.id}, flavour ${this.model.flavour}`
       );
+      return true;
     }
     const expectedVersion = schema.version;
     const actualVersion = this.model.version;

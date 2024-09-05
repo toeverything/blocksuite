@@ -29,7 +29,7 @@
     "@floating-ui/dom": "^1.6.10",
     "@lit-labs/preact-signals": "^1.0.2",
     "@lit/context": "^1.1.2",
-    "@toeverything/theme": "^1.0.7",
+    "@toeverything/theme": "^1.0.8",
     "@types/hast": "^3.0.4",
     "@types/mdast": "^4.0.4",
     "@types/sortablejs": "^1.15.8",
@@ -37,10 +37,10 @@
     "date-fns": "^3.6.0",
     "dompurify": "^3.1.6",
     "fflate": "^0.8.2",
-    "figma-squircle": "^1.0.0",
     "file-type": "^19.4.1",
     "fractional-indexing": "^3.2.0",
     "html2canvas": "^1.4.1",
+    "katex": "^0.16.11",
     "lit": "^3.2.0",
     "lodash.clonedeep": "^4.5.0",
     "lodash.isplainobject": "^4.0.6",
@@ -98,6 +98,7 @@
   ],
   "devDependencies": {
     "@types/dompurify": "^3.0.5",
+    "@types/katex": "^0.16.7",
     "@types/lodash.clonedeep": "^4.5.9",
     "@types/lodash.isplainobject": "^4.0.9",
     "@types/lodash.merge": "^4.6.9"

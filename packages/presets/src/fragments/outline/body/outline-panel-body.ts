@@ -4,10 +4,10 @@ import type {
 } from '@blocksuite/blocks';
 import type { Doc } from '@blocksuite/store';
 
-import { WithDisposable } from '@blocksuite/block-std';
+import { WithDisposable, SignalWatcher } from '@blocksuite/block-std';
 import { BlocksUtils, NoteDisplayMode } from '@blocksuite/blocks';
 import { Bound, DisposableGroup } from '@blocksuite/global/utils';
-import { SignalWatcher, effect, signal } from '@lit-labs/preact-signals';
+import { effect, signal } from '@lit-labs/preact-signals';
 import { LitElement, type PropertyValues, css, html, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';

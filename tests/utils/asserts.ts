@@ -84,6 +84,7 @@ export const defaultStore = {
       'affine:embed-linked-doc': 1,
       'affine:embed-synced-doc': 1,
       'affine:image': 1,
+      'affine:latex': 1,
       'affine:frame': 1,
       'affine:code': 1,
       'affine:surface': 5,

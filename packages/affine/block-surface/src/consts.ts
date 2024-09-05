@@ -24,11 +24,6 @@ export interface IModelCoord {
   y: number;
 }
 
-export enum TextResizing {
-  AUTO_WIDTH,
-  AUTO_HEIGHT,
-}
-
 export const AffineCanvasTextFonts: FontConfig[] = [
   // Inter, https://fonts.cdnfonts.com/css/inter?styles=29139,29134,29135,29136,29140,29141
   {

@@ -9,7 +9,6 @@ import { Slot } from '@blocksuite/global/utils';
 import { Doc } from '@blocksuite/store';
 import { type BlockModel, BlockViewType } from '@blocksuite/store';
 import { createContext, provide } from '@lit/context';
-import { SignalWatcher } from '@lit-labs/preact-signals';
 import { LitElement, type TemplateResult, css, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
@@ -24,6 +23,7 @@ import type { ViewStore } from '../view-store.js';
 
 import { WidgetViewMapIdentifier } from '../../identifier.js';
 import { PropTypes, requiredProperties } from '../decorators/index.js';
+import { SignalWatcher } from '../signal-watcher.js';
 import { WithDisposable } from '../utils/with-disposable.js';
 import { ShadowlessElement } from './shadowless-element.js';
 
@@ -77,23 +77,29 @@ export class EditorHost extends SignalWatcher(
     editor-host {
       outline: none;
       isolation: isolate;
+      display: block;
+      height: 100%;
     }
   `;
 
-  renderChildren = (model: BlockModel): TemplateResult => {
+  renderChildren = (
+    model: BlockModel,
+    filter?: (model: BlockModel) => boolean
+  ): TemplateResult => {
     return html`${repeat(
-      model.children,
+      model.children.filter(filter ?? (() => true)),
       child => child.id,
       child => this._renderModel(child)
     )}`;
   };
 
   /**
-   * @deprecated
-   *
-   * This method is deprecated. Use `renderSpecPortal` instead.
+   * Render a block model manually instead of let blocksuite render it.
+   * If you render the same block model multiple times,
+   * the event flow and data binding will be broken.
+   * Only use this method as a last resort.
    */
-  renderModel = (model: BlockModel): TemplateResult => {
+  dangerouslyRenderModel = (model: BlockModel): TemplateResult => {
     return this._renderModel(model);
   };
 

@@ -1,12 +1,10 @@
 import { BlockService } from '@blocksuite/block-std';
+import { GfxControllerIdentifier } from '@blocksuite/block-std/gfx';
 
-import { LayerManager } from './managers/layer-manager.js';
 import { type SurfaceBlockModel, SurfaceBlockSchema } from './surface-model.js';
 
 export class SurfaceBlockService extends BlockService {
   static override readonly flavour = SurfaceBlockSchema.model.flavour;
-
-  layer!: LayerManager;
 
   surface!: SurfaceBlockModel;
 
@@ -26,15 +24,12 @@ export class SurfaceBlockService extends BlockService {
           ) as SurfaceBlockModel | null;
           if (!surface) return;
           this.surface = surface;
-          this.layer = LayerManager.create(this.doc, surface);
         }
       });
-    } else {
-      this.layer = LayerManager.create(this.doc, this.surface);
     }
   }
 
-  override unmounted(): void {
-    this.layer?.dispose();
+  get layer() {
+    return this.std.get(GfxControllerIdentifier).layer;
   }
 }

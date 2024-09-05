@@ -10,7 +10,7 @@ export default defineConfig({
     coverage: {
       provider: 'istanbul', // or 'c8'
       reporter: ['lcov'],
-      reportsDirectory: '../../.coverage/store',
+      reportsDirectory: '../../../.coverage/store',
     },
     /**
      * Custom handler for console.log in tests.

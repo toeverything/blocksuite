@@ -18,7 +18,6 @@ import type { EdgelessRootPreviewBlockComponent } from '../../edgeless-root-prev
 import type { EdgelessRootService } from '../../edgeless-root-service.js';
 
 import { SpecProvider } from '../../../../_specs/index.js';
-import '../../../../surface-ref-block/surface-ref-portal.js';
 
 const DEFAULT_PREVIEW_CONTAINER_WIDTH = 280;
 const DEFAULT_PREVIEW_CONTAINER_HEIGHT = 166;

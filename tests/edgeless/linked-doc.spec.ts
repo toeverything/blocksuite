@@ -232,18 +232,17 @@ test.describe('single edgeless element to linked doc', () => {
       const container = document.querySelector('affine-edgeless-root');
       const elements = container!.service.elements.map(s => s.type);
       const blocks = container!.service.blocks.map(b => b.flavour);
+
+      blocks.sort();
+      elements.sort();
+
       return { blocks, elements };
     });
 
-    expect(nodes.blocks).toHaveLength(2);
-    expect(nodes.blocks).toContain('affine:frame');
-    expect(nodes.blocks).toContain('affine:note');
-
-    expect(nodes.elements).toHaveLength(4);
-    expect(nodes.elements).toContain('group');
-    expect(nodes.elements).toContain('shape');
-    expect(nodes.elements).toContain('connector');
-    expect(nodes.elements).toContain('brush');
+    expect(nodes).toEqual({
+      blocks: ['affine:note', 'affine:frame'].sort(),
+      elements: ['group', 'shape', 'connector', 'brush'].sort(),
+    });
   });
 });
 
@@ -280,17 +279,16 @@ test.describe('multiple edgeless elements to linked doc', () => {
       const container = document.querySelector('affine-edgeless-root');
       const elements = container!.service.elements.map(s => s.type);
       const blocks = container!.service.blocks.map(b => b.flavour);
+
+      blocks.sort();
+      elements.sort();
+
       return { blocks, elements };
     });
-    expect(nodes.blocks).toHaveLength(2);
-    expect(nodes.blocks).toContain('affine:frame');
-    expect(nodes.blocks).toContain('affine:note');
-
-    expect(nodes.elements).toHaveLength(5);
-    expect(nodes.elements).toContain('group');
-    expect(nodes.elements).toContain('connector');
-    expect(nodes.elements).toContain('brush');
-    expect(nodes.elements.filter(el => el === 'shape')).toHaveLength(2);
+    expect(nodes).toEqual({
+      blocks: ['affine:frame', 'affine:note'].sort(),
+      elements: ['shape', 'shape', 'group', 'connector', 'brush'].sort(),
+    });
   });
 
   test('multi-select with embed doc card inside, turn it into a linked doc', async ({

@@ -6,9 +6,7 @@ import { EmbedFigmaBlockComponent } from './embed-figma-block.js';
 @customElement('affine-embed-edgeless-figma-block')
 export class EmbedEdgelessBlockComponent extends toEdgelessEmbedBlock(
   EmbedFigmaBlockComponent
-) {
-  override rootServiceFlavour: string = 'affine:page';
-}
+) {}
 
 declare global {
   interface HTMLElementTagNameMap {

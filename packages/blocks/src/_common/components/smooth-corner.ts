@@ -1,4 +1,4 @@
-import * as figmaSquircle from 'figma-squircle';
+import { getSvgPath } from '@blocksuite/global/utils';
 import { LitElement, type TemplateResult, css, html, svg } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
@@ -92,8 +92,7 @@ export class SmoothCorner extends LitElement {
   }
 
   get _path() {
-    // return curvePath(this._points);
-    return figmaSquircle.getSvgPath({
+    return getSvgPath({
       width: this.width,
       height: this.height,
       cornerRadius: this.borderRadius, // defaults to 0

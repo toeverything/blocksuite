@@ -1,9 +1,11 @@
 import type { ShapeElementModel } from '@blocksuite/affine-model';
+import type { GfxModel } from '@blocksuite/block-std/gfx';
 
 import { assertType } from '@blocksuite/global/utils';
 
 import type { MindmapElementModel } from '../../mindmap.js';
 
+import { ConnectorPathGenerator } from '../../../managers/connector-manager.js';
 import { LayoutType, type MindmapNode } from './layout.js';
 
 export function getHoveredArea(
@@ -116,6 +118,10 @@ export function showMergeIndicator(
     style.connector,
     true
   );
+  const elementGetter = (id: string) =>
+    targetMindmap.surface.getElementById(id) ??
+    (targetMindmap.surface.doc.getBlockById(id) as GfxModel);
+  ConnectorPathGenerator.updatePath(connector, null, elementGetter);
 
   source.overriddenDir = mergeInfo.layoutType;
 

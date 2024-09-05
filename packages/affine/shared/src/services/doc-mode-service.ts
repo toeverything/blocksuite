@@ -4,18 +4,56 @@ import type { Container } from '@blocksuite/global/di';
 
 import { Extension, StdIdentifier } from '@blocksuite/block-std';
 import { createIdentifier } from '@blocksuite/global/di';
-import { type Disposable, Slot } from '@blocksuite/global/utils';
+import { type Disposable, noop, Slot } from '@blocksuite/global/utils';
 
 const DEFAULT_MODE: DocMode = 'page';
 
 export interface DocModeProvider {
-  setMode: (mode: DocMode, docId?: string) => void;
-  getMode: (docId?: string) => DocMode;
-  toggleMode: (docId?: string) => DocMode;
-  onModeChange: (
+  /**
+   * Set the primary mode of the doc.
+   * This would not affect the current editor mode.
+   * If you want to switch the editor mode, use `setEditorMode` instead.
+   * @param mode - The mode to set.
+   * @param docId - The id of the doc.
+   */
+  setPrimaryMode: (mode: DocMode, docId: string) => void;
+  /**
+   * Get the primary mode of the doc.
+   * Normally, it would be used to query the mode of other doc.
+   * @param docId - The id of the doc.
+   * @returns The primary mode of the document.
+   */
+  getPrimaryMode: (docId: string) => DocMode;
+  /**
+   * Toggle the primary mode of the doc.
+   * @param docId - The id of the doc.
+   * @returns The new primary mode of the doc.
+   */
+  togglePrimaryMode: (docId: string) => DocMode;
+  /**
+   * Subscribe to changes in the primary mode of the doc.
+   * For example:
+   * Embed-linked-doc-block will subscribe to the primary mode of the linked doc,
+   * and will display different UI according to the primary mode of the linked doc.
+   * @param handler - The handler to call when the primary mode of certain doc changes.
+   * @param docId - The id of the doc.
+   * @returns A disposable to stop the subscription.
+   */
+  onPrimaryModeChange: (
     handler: (mode: DocMode) => void,
-    docId?: string
+    docId: string
   ) => Disposable;
+  /**
+   * Set the editor mode. Normally, it would be used to set the mode of the current editor.
+   * When patch or override the doc mode service, can pass a callback to set the editor mode.
+   * @param mode - The mode to set.
+   */
+  setEditorMode: (mode: DocMode) => void;
+  /**
+   * Get current editor mode.
+   * @returns The editor mode.
+   */
+  getEditorMode: () => DocMode | null;
 }
 
 export const DocModeProvider = createIdentifier<DocModeProvider>(
@@ -34,25 +72,33 @@ export class DocModeService extends Extension implements DocModeProvider {
     di.addImpl(DocModeProvider, DocModeService, [StdIdentifier]);
   }
 
-  getMode(id: string = this.std.doc.id) {
+  getPrimaryMode(id: string) {
     return modeMap.get(id) ?? DEFAULT_MODE;
   }
 
-  onModeChange(handler: (mode: DocMode) => void, id: string = this.std.doc.id) {
+  onPrimaryModeChange(handler: (mode: DocMode) => void, id: string) {
     if (!slotMap.get(id)) {
       slotMap.set(id, new Slot());
     }
     return slotMap.get(id)!.on(handler);
   }
 
-  setMode(mode: DocMode, id: string = this.std.doc.id) {
+  getEditorMode() {
+    return null;
+  }
+
+  setEditorMode(mode: DocMode) {
+    noop(mode);
+  }
+
+  setPrimaryMode(mode: DocMode, id: string) {
     modeMap.set(id, mode);
     slotMap.get(id)?.emit(mode);
   }
 
-  toggleMode(id: string = this.std.doc.id) {
-    const mode = this.getMode(id) === 'page' ? 'edgeless' : 'page';
-    this.setMode(mode, id);
+  togglePrimaryMode(id: string) {
+    const mode = this.getPrimaryMode(id) === 'page' ? 'edgeless' : 'page';
+    this.setPrimaryMode(mode, id);
 
     return mode;
   }

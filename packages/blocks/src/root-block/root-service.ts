@@ -33,8 +33,6 @@ export type EmbedOptions = {
 };
 
 export abstract class RootService extends BlockService {
-  private _embedBlockRegistry = new Set<EmbedOptions>();
-
   private _exportOptions = {
     imageProxyEndpoint: DEFAULT_IMAGE_PROXY_ENDPOINT,
   };
@@ -53,23 +51,10 @@ export abstract class RootService extends BlockService {
 
   readonly fontLoader = new FontLoader();
 
-  getEmbedBlockOptions = (url: string): EmbedOptions | null => {
-    const entries = this._embedBlockRegistry.entries();
-    for (const [options] of entries) {
-      const regex = options.urlRegex;
-      if (regex.test(url)) return options;
-    }
-    return null;
-  };
-
   // implements provided by affine
   notificationService: NotificationService | null = null;
 
   peekViewService: PeekViewService | null = null;
-
-  registerEmbedBlockOptions = (options: EmbedOptions): void => {
-    this._embedBlockRegistry.add(options);
-  };
 
   readonly themeObserver = ThemeObserver.instance;
 

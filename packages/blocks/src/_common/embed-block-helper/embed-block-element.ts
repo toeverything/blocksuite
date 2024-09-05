@@ -5,6 +5,7 @@ import type { BlockModel } from '@blocksuite/store';
 import type { TemplateResult } from 'lit';
 
 import { CaptionedBlockComponent } from '@blocksuite/affine-components/caption';
+import { DocModeProvider } from '@blocksuite/affine-shared/services';
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import {
   type BlockService,
@@ -83,7 +84,7 @@ export class EmbedBlockComponent<
         const bound = Bound.deserialize(blockComponent.model.xywh);
         const offset = new Point(bound.x * zoom, bound.y * zoom);
         render(
-          blockComponent.host.renderModel(blockComponent.model),
+          blockComponent.host.dangerouslyRenderModel(blockComponent.model),
           dragPreviewEl
         );
 
@@ -156,7 +157,11 @@ export class EmbedBlockComponent<
       this._cardStyle === 'list'
     ) {
       this.style.display = 'block';
-      this.style.minWidth = `${BOOKMARK_MIN_WIDTH}px`;
+
+      const mode = this.std.get(DocModeProvider).getEditorMode();
+      if (mode === 'edgeless') {
+        this.style.minWidth = `${BOOKMARK_MIN_WIDTH}px`;
+      }
     }
 
     return html`
@@ -236,8 +241,6 @@ export function toEdgelessEmbedBlock<
       transformOrigin: '0 0',
     };
 
-    override rootServiceFlavour: string = 'affine:page';
-
     _handleClick(_: MouseEvent): void {
       return;
     }
@@ -274,16 +277,12 @@ export function toEdgelessEmbedBlock<
       return this.renderPageContent();
     }
 
-    override toZIndex() {
-      return `${this.rootService.layer.getZIndex(this.model)}`;
-    }
-
     get bound(): Bound {
       return Bound.deserialize(this.model.xywh);
     }
 
-    override get rootService() {
-      return super.rootService as EdgelessRootService;
+    get rootService() {
+      return this.std.getService('affine:page') as EdgelessRootService;
     }
 
     protected override accessor blockContainerStyles: StyleInfo | undefined =
@@ -292,6 +291,6 @@ export function toEdgelessEmbedBlock<
     new (
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       ...args: any[]
-    ): GfxBlockComponent<EdgelessRootService>;
+    ): GfxBlockComponent;
   };
 }

@@ -1,6 +1,6 @@
 import type { BlockModel, Doc } from '@blocksuite/store';
 
-import { WithDisposable } from '@blocksuite/block-std';
+import { WithDisposable, SignalWatcher } from '@blocksuite/block-std';
 import {
   type NoteBlockModel,
   NoteDisplayMode,
@@ -9,7 +9,6 @@ import {
   on,
   once,
 } from '@blocksuite/blocks';
-import { SignalWatcher } from '@lit-labs/preact-signals';
 import { baseTheme } from '@toeverything/theme';
 import { LitElement, css, html, nothing, unsafeCSS } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';

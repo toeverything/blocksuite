@@ -1,9 +1,9 @@
 import type { EmbedOptions } from '@blocksuite/affine-shared/types';
-import type { BlockService } from '@blocksuite/block-std';
 import type { BlockComponent } from '@blocksuite/block-std';
 import type { InlineRange } from '@blocksuite/inline/types';
 
 import { BLOCK_ID_ATTR } from '@blocksuite/affine-shared/consts';
+import { EmbedOptionProvider } from '@blocksuite/affine-shared/services';
 import {
   getHostName,
   isValidUrl,
@@ -146,15 +146,12 @@ export class LinkPopup extends WithDisposable(LitElement) {
   };
 
   private _viewTemplate = () => {
-    if (!this._rootService) {
-      return nothing;
-    }
-
     if (!this.currentLink) return;
 
-    this._embedOptions = this._rootService.getEmbedBlockOptions(
-      this.currentLink
-    );
+    this._embedOptions =
+      this.std
+        ?.get(EmbedOptionProvider)
+        .getEmbedBlockOptions(this.currentLink) ?? null;
 
     const buttons = [
       html`
@@ -405,14 +402,6 @@ export class LinkPopup extends WithDisposable(LitElement) {
       e.preventDefault();
       this._onConfirm();
     }
-  }
-
-  private get _rootService() {
-    return this.std?.getService('affine:page') as
-      | null
-      | (BlockService & {
-          getEmbedBlockOptions(link: string): EmbedOptions;
-        });
   }
 
   private _updateConfirmBtn() {

@@ -5,9 +5,12 @@ import {
   type MenuOptions,
   popMenu,
 } from '@blocksuite/affine-components/context-menu';
-import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
+import {
+  ShadowlessElement,
+  WithDisposable,
+  SignalWatcher,
+} from '@blocksuite/block-std';
 import { ArrowRightSmallIcon, DeleteIcon } from '@blocksuite/icons/lit';
-import { SignalWatcher } from '@lit-labs/preact-signals';
 import { css, html, unsafeCSS } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';

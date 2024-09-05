@@ -263,9 +263,9 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockComponent<
         this._linkedDocMode = this.model.params?.mode ?? 'page';
       } else {
         const docMode = this.std.get(DocModeProvider);
-        this._linkedDocMode = docMode.getMode(this.model.pageId);
+        this._linkedDocMode = docMode.getPrimaryMode(this.model.pageId);
         this.disposables.add(
-          docMode.onModeChange(mode => {
+          docMode.onPrimaryModeChange(mode => {
             this._linkedDocMode = mode;
           }, this.model.pageId)
         );

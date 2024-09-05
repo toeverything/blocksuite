@@ -42,6 +42,7 @@ test.describe('presentation', () => {
     await prevButton.click();
     await expect(edgelessNote).toBeHidden();
 
+    await waitNextFrame(page, 300);
     await nextButton.click();
     await expect(edgelessNote).toBeVisible();
   });

@@ -28,12 +28,36 @@ export class FormatBarContext extends MenuContext {
   }
 
   get selectedBlockModels() {
-    const { success, selectedModels } =
-      this.std.command.exec('getSelectedModels');
+    const [success, result] = this.std.command
+      .chain()
+      .tryAll(chain => [
+        chain.getTextSelection(),
+        chain.getBlockSelections(),
+        chain.getImageSelections(),
+      ])
+      .getSelectedModels({
+        mode: 'highest',
+      })
+      .run();
 
-    if (!success) return [];
+    if (!success) {
+      return [];
+    }
 
-    return selectedModels ?? [];
+    // should return an empty array if `to` of the range is null
+    if (
+      result.currentTextSelection &&
+      !result.currentTextSelection.to &&
+      result.currentTextSelection.from.length === 0
+    ) {
+      return [];
+    }
+
+    if (result.selectedModels?.length) {
+      return result.selectedModels;
+    }
+
+    return [];
   }
 
   get std() {

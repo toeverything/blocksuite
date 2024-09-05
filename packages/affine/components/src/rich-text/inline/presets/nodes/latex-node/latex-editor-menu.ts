@@ -3,23 +3,20 @@ import type { Y } from '@blocksuite/store';
 
 import { ColorScheme } from '@blocksuite/affine-model';
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
-import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
+import {
+  ShadowlessElement,
+  WithDisposable,
+  SignalWatcher,
+} from '@blocksuite/block-std';
 import { noop } from '@blocksuite/global/utils';
 import { DoneIcon } from '@blocksuite/icons/lit';
 import { DocCollection } from '@blocksuite/store';
-import {
-  type Signal,
-  SignalWatcher,
-  effect,
-  signal,
-} from '@lit-labs/preact-signals';
+import { type Signal, effect, signal } from '@lit-labs/preact-signals';
 import { cssVar } from '@toeverything/theme';
 import { css, html, unsafeCSS } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { type ThemedToken, codeToTokensBase } from 'shiki';
 import { z } from 'zod';
-
-import type { AffineLatexNode } from './latex-node.js';
 
 import { InlineManager } from '../../../inline-manager.js';
 
@@ -161,10 +158,14 @@ export class LatexEditorMenu extends SignalWatcher(
       }
     });
 
-    setTimeout(() => {
-      this.richText?.inlineEditorContainer.focus();
-      this.richText?.inlineEditor?.focusEnd();
-    });
+    this.updateComplete
+      .then(async () => {
+        await this.richText?.updateComplete;
+
+        this.richText?.inlineEditorContainer.focus();
+        this.richText?.inlineEditor?.focusEnd();
+      })
+      .catch(console.error);
   }
 
   override render() {
@@ -194,7 +195,7 @@ export class LatexEditorMenu extends SignalWatcher(
   accessor abortController!: AbortController;
 
   @property({ attribute: false })
-  accessor latexSignal!: AffineLatexNode['latex$'];
+  accessor latexSignal!: Signal<string>;
 }
 
 declare global {

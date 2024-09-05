@@ -32,21 +32,6 @@ test('layer manager inital state', () => {
   expect(service.layer.canvasLayers.length).toBe(1);
 });
 
-test('new added frame should not affect layer', async () => {
-  service.addBlock(
-    'affine:frame',
-    {
-      xywh: '[0, 0, 100, 100]',
-    },
-    service.surface
-  );
-
-  await wait();
-
-  expect(service.layer.layers.length).toBe(0);
-  expect(service.layer.canvasLayers.length).toBe(1);
-});
-
 test('add new edgeless blocks or canvas elements should update layer automatically', async () => {
   addNote(doc);
 

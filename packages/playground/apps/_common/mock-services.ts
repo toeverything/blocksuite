@@ -1,9 +1,6 @@
-import type { BlockStdScope } from '@blocksuite/block-std';
-import type { DocMode } from '@blocksuite/blocks';
-import type { Container } from '@blocksuite/global/di';
+import type { DocMode, DocModeProvider } from '@blocksuite/blocks';
+import type { PageRootService } from '@blocksuite/blocks';
 
-import { Extension, StdIdentifier } from '@blocksuite/block-std';
-import { DocModeProvider, type PageRootService } from '@blocksuite/blocks';
 import {
   type NotificationService,
   type QuickSearchService,
@@ -31,46 +28,46 @@ export function removeModeFromStorage(docId: string) {
 
 const DEFAULT_MODE: DocMode = 'page';
 const slotMap = new Map<string, Slot<DocMode>>();
-export class MockDocModeService extends Extension implements DocModeProvider {
-  getMode = (docId: string = this.std.doc.id) => {
-    try {
+
+export function mockDocModeService(
+  getEditorModeCallback: () => DocMode,
+  setEditorModeCallback: (mode: DocMode) => void
+) {
+  const docModeService: DocModeProvider = {
+    getPrimaryMode: (docId: string) => {
+      try {
+        const modeMap = getModeFromStorage();
+        return modeMap.get(docId) ?? DEFAULT_MODE;
+      } catch (_e) {
+        return DEFAULT_MODE;
+      }
+    },
+    onPrimaryModeChange: (handler: (mode: DocMode) => void, docId: string) => {
+      if (!slotMap.get(docId)) {
+        slotMap.set(docId, new Slot());
+      }
+      return slotMap.get(docId)!.on(handler);
+    },
+    getEditorMode: () => {
+      return getEditorModeCallback();
+    },
+    setEditorMode: (mode: DocMode) => {
+      setEditorModeCallback(mode);
+    },
+    setPrimaryMode: (mode: DocMode, docId: string) => {
       const modeMap = getModeFromStorage();
-      return modeMap.get(docId) ?? DEFAULT_MODE;
-    } catch (_e) {
-      return DEFAULT_MODE;
-    }
+      modeMap.set(docId, mode);
+      saveModeToStorage(modeMap);
+      slotMap.get(docId)?.emit(mode);
+    },
+    togglePrimaryMode: (docId: string) => {
+      const mode =
+        docModeService.getPrimaryMode(docId) === 'page' ? 'edgeless' : 'page';
+      docModeService.setPrimaryMode(mode, docId);
+      return mode;
+    },
   };
-
-  onModeChange = (
-    handler: (mode: DocMode) => void,
-    docId: string = this.std.doc.id
-  ) => {
-    if (!slotMap.get(docId)) {
-      slotMap.set(docId, new Slot());
-    }
-    return slotMap.get(docId)!.on(handler);
-  };
-
-  setMode = (mode: DocMode, docId: string = this.std.doc.id) => {
-    const modeMap = getModeFromStorage();
-    modeMap.set(docId, mode);
-    saveModeToStorage(modeMap);
-    slotMap.get(docId)?.emit(mode);
-  };
-
-  toggleMode = (docId: string = this.std.doc.id) => {
-    const mode = this.getMode(docId) === 'page' ? 'edgeless' : 'page';
-    this.setMode(mode, docId);
-    return mode;
-  };
-
-  constructor(public std: BlockStdScope) {
-    super();
-  }
-
-  static override setup(di: Container) {
-    di.override(DocModeProvider, MockDocModeService, [StdIdentifier]);
-  }
+  return docModeService;
 }
 
 export function mockNotificationService(service: PageRootService) {

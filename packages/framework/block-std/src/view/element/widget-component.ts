@@ -1,7 +1,6 @@
 import type { BlockModel, Doc } from '@blocksuite/store';
 
 import { consume } from '@lit/context';
-import { SignalWatcher } from '@lit-labs/preact-signals';
 import { LitElement } from 'lit';
 
 import type { EventName, UIEventHandler } from '../../event/index.js';
@@ -9,6 +8,7 @@ import type { BlockService } from '../../extension/index.js';
 import type { BlockStdScope } from '../../scope/index.js';
 import type { BlockComponent } from './block-component.js';
 
+import { SignalWatcher } from '../signal-watcher.js';
 import { WithDisposable } from '../utils/with-disposable.js';
 import { modelContext, serviceContext } from './consts.js';
 import { docContext, stdContext } from './lit-host.js';

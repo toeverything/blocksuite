@@ -4,13 +4,14 @@ import {
   type BlockComponent,
   ShadowlessElement,
   WithDisposable,
+  SignalWatcher,
 } from '@blocksuite/block-std';
 import {
   type DeltaInsert,
   ZERO_WIDTH_NON_JOINER,
   ZERO_WIDTH_SPACE,
 } from '@blocksuite/inline';
-import { SignalWatcher, effect, signal } from '@lit-labs/preact-signals';
+import { effect, signal } from '@lit-labs/preact-signals';
 import { cssVar } from '@toeverything/theme';
 import { cssVarV2 } from '@toeverything/theme/v2';
 import katex from 'katex';
@@ -177,13 +178,6 @@ export class AffineLatexNode extends SignalWatcher(
 
     this._editorAbortController?.abort();
     this._editorAbortController = new AbortController();
-    this._editorAbortController.signal.addEventListener(
-      'abort',
-      () => {
-        portal.remove();
-      },
-      { once: true }
-    );
 
     const portal = createLitPortal({
       template: html`<latex-editor-menu
@@ -205,6 +199,14 @@ export class AffineLatexNode extends SignalWatcher(
         zIndex: 'var(--affine-z-index-popover)',
       },
     });
+
+    this._editorAbortController.signal.addEventListener(
+      'abort',
+      () => {
+        portal.remove();
+      },
+      { once: true }
+    );
   }
 
   get deltaLatex() {

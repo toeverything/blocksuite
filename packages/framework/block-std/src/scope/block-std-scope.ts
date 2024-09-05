@@ -10,6 +10,7 @@ import type { ExtensionType } from '../extension/index.js';
 import { Clipboard } from '../clipboard/index.js';
 import { CommandManager } from '../command/index.js';
 import { UIEventDispatcher } from '../event/index.js';
+import { GfxController } from '../gfx/controller.js';
 import {
   BlockServiceIdentifier,
   BlockViewIdentifier,
@@ -36,6 +37,7 @@ const internalExtensions = [
   RangeManager,
   ViewStore,
   Clipboard,
+  GfxController,
 ];
 
 export class BlockStdScope {

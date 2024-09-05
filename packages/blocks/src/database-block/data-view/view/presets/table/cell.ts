@@ -1,6 +1,10 @@
-import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
+import {
+  ShadowlessElement,
+  WithDisposable,
+  SignalWatcher,
+} from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
-import { SignalWatcher, computed } from '@lit-labs/preact-signals';
+import { computed } from '@lit-labs/preact-signals';
 import { css } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { createRef } from 'lit/directives/ref.js';

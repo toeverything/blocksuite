@@ -21,6 +21,7 @@ import './root-block/index.js';
 import './surface-ref-block/index.js';
 
 export * from './_common/adapters/index.js';
+
 export * from './_common/components/ai-item/index.js';
 export type { NotificationService } from './_common/components/index.js';
 export { scrollbarStyle } from './_common/components/index.js';
@@ -67,10 +68,7 @@ export {
 export * from './surface-ref-block/index.js';
 export * from '@blocksuite/affine-block-list';
 export * from '@blocksuite/affine-block-paragraph';
-export {
-  SurfaceBlockComponent,
-  SurfaceBlockModel,
-} from '@blocksuite/affine-block-surface';
+export * from '@blocksuite/affine-block-surface';
 export { type MenuOptions } from '@blocksuite/affine-components/context-menu';
 export {
   HoverController,
