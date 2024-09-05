@@ -82,9 +82,12 @@ export class EditorHost extends SignalWatcher(
     }
   `;
 
-  renderChildren = (model: BlockModel): TemplateResult => {
+  renderChildren = (
+    model: BlockModel,
+    filter?: (model: BlockModel) => boolean
+  ): TemplateResult => {
     return html`${repeat(
-      model.children,
+      model.children.filter(filter ?? (() => true)),
       child => child.id,
       child => this._renderModel(child)
     )}`;

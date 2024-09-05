@@ -65,9 +65,9 @@ export class BlockComponent<
     );
   };
 
-  renderChildren = (model: BlockModel): TemplateResult => {
-    return this.host.renderChildren(model);
-  };
+  get renderChildren() {
+    return this.host.renderChildren.bind(this);
+  }
 
   private _renderMismatchBlock(content: unknown) {
     return when(
