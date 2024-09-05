@@ -16,6 +16,7 @@
     "lint:fix": "pnpm lint --fix",
     "lint:lit": "pnpm lit-analyzer --strict=false --rules.no-incompatible-property-type=error --rules.no-incompatible-type-binding=off --rules.no-invalid-css=off --rules.no-invalid-tag-name=off \"packages/**/*.ts\"",
     "lint:circular": "madge --circular ./packages/**/*/dist/index.js",
+    "lint:format": "prettier . --check",
     "test": "pnpm --filter=@blocksuite/e2e exec playwright test",
     "test:type": "tsc -p tests/tsconfig.json",
     "coverage:report": "nyc report -t .nyc_output --report-dir .coverage --reporter=html",
@@ -24,7 +25,7 @@
     "test:inline": "pnpm --filter @blocksuite/inline test",
     "test:it": "nx test @blocksuite/presets",
     "test:node": "tsx ./scripts/node-import-test.ts",
-    "format": "prettier --write --cache packages tests",
+    "format": "prettier . --write",
     "build": "pnpm build:packages && pnpm build:playground",
     "build:packages": "pnpm --filter=@blocksuite/presets build",
     "build:playground": "pnpm --filter @blocksuite/playground build",
@@ -39,8 +40,10 @@
     "postinstall": "husky"
   },
   "lint-staged": {
-    "*": "pnpm exec prettier --write --cache --ignore-unknown",
-    "!(examples/**/*).{ts,tsx,js,jsx}": "pnpm exec eslint --cache --fix"
+    "*": [
+      "pnpm exec eslint --no-warn-ignored --cache --fix",
+      "pnpm exec prettier --write -u --cache"
+    ]
   },
   "keywords": [],
   "author": "toeverything",
@@ -71,9 +74,9 @@
     "esbuild": "^0.23.1",
     "eslint": "^9.0.0",
     "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-import-x": "^4.2.1",
     "eslint-plugin-lit": "^1.14.0",
     "eslint-plugin-perfectionist": "^3.0.0",
-    "eslint-plugin-prettier": "^5.2.1",
     "eslint-plugin-unicorn": "^55.0.0",
     "eslint-plugin-unused-imports": "^4.0.1",
     "eslint-plugin-wc": "^2.1.0",
