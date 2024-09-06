@@ -60,8 +60,10 @@ jobs:
           commit: master
           tag: '${{ env.BLOCKSUITE_RELEASE_TAG }}'
           token: ${{ secrets.GITHUB_TOKEN }}
+        continue-on-error: true
 
       - name: Send release notification
+        if: steps.release.outcome == 'success'
         id: slack
         uses: slackapi/slack-github-action@v1.27.0
         with:
@@ -69,7 +71,3 @@ jobs:
             { "message": "[BlockSuite Release]: New BlockSuite version ${{ env.BLOCKSUITE_RELEASE_TAG }} has been released to NPM." }
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-
-      - name: Report
-        if: always()
-        run: echo "Release ${{ env.BLOCKSUITE_RELEASE_TAG }} has been published."
