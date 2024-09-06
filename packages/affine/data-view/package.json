@@ -52,6 +52,10 @@
         "import": "./dist/column-presets/index.js",
         "types": "./dist/column-presets/index.d.ts"
       },
+      "./column-pure-presets": {
+        "import": "./dist/column-presets/pure-index.js",
+        "types": "./dist/column-presets/pure-index.d.ts"
+      },
       "./view-presets": {
         "import": "./dist/view-presets/index.js",
         "types": "./dist/view-presets/index.d.ts"
