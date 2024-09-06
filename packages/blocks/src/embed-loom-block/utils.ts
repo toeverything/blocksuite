@@ -1,5 +1,7 @@
-import type { EmbedLoomModel } from '@blocksuite/affine-model';
-import type { EmbedLoomBlockUrlData } from '@blocksuite/affine-model';
+import type {
+  EmbedLoomBlockUrlData,
+  EmbedLoomModel,
+} from '@blocksuite/affine-model';
 
 import { isAbortError } from '@blocksuite/affine-shared/utils';
 

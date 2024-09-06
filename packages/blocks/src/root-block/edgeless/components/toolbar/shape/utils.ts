@@ -1,4 +1,4 @@
-import { type TemplateResult, render } from 'lit';
+import { render, type TemplateResult } from 'lit';
 
 import type { ShapeTool } from '../../../tools/shape-tool.js';
 

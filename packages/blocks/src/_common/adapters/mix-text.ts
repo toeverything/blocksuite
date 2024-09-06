@@ -1,9 +1,8 @@
 import type { DeltaInsert } from '@blocksuite/inline';
-import type { Job } from '@blocksuite/store';
-import type { AssetsManager } from '@blocksuite/store';
 
 import { NoteDisplayMode } from '@blocksuite/affine-model';
 import {
+  type AssetsManager,
   ASTWalker,
   BaseAdapter,
   type BlockSnapshot,
@@ -15,10 +14,11 @@ import {
   type FromDocSnapshotResult,
   type FromSliceSnapshotPayload,
   type FromSliceSnapshotResult,
+  type Job,
+  nanoid,
   type SliceSnapshot,
   type ToBlockSnapshotPayload,
   type ToDocSnapshotPayload,
-  nanoid,
 } from '@blocksuite/store';
 
 import { MarkdownAdapter } from './markdown.js';

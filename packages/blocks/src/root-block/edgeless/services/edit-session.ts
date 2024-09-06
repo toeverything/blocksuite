@@ -1,14 +1,13 @@
 import type { BlockService } from '@blocksuite/block-std';
 
-import { type ShapeProps, getShapeName } from '@blocksuite/affine-model';
-import { NodePropsSchema } from '@blocksuite/affine-shared/utils';
-import { ColorSchema } from '@blocksuite/affine-shared/utils';
+import { getShapeName, type ShapeProps } from '@blocksuite/affine-model';
+import { ColorSchema, NodePropsSchema } from '@blocksuite/affine-shared/utils';
 import {
   type DeepPartial,
   DisposableGroup,
   Slot,
 } from '@blocksuite/global/utils';
-import { type Signal, computed, signal } from '@lit-labs/preact-signals';
+import { computed, type Signal, signal } from '@lit-labs/preact-signals';
 import clonedeep from 'lodash.clonedeep';
 import isPlainObject from 'lodash.isplainobject';
 import merge from 'lodash.merge';

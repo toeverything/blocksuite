@@ -1,20 +1,5 @@
 import type { AffineTextAttributes } from '@blocksuite/affine-components/rich-text';
 import type { DeltaInsert } from '@blocksuite/inline';
-import type {
-  FromBlockSnapshotPayload,
-  FromBlockSnapshotResult,
-  FromDocSnapshotPayload,
-  FromDocSnapshotResult,
-  FromSliceSnapshotPayload,
-  FromSliceSnapshotResult,
-  ToBlockSnapshotPayload,
-  ToDocSnapshotPayload,
-} from '@blocksuite/store';
-import type {
-  BlockSnapshot,
-  DocSnapshot,
-  SliceSnapshot,
-} from '@blocksuite/store';
 import type { Root } from 'hast';
 
 import { ColorScheme, NoteDisplayMode } from '@blocksuite/affine-model';
@@ -23,9 +8,20 @@ import { getFilenameFromContentDisposition } from '@blocksuite/affine-shared/uti
 import { sha } from '@blocksuite/global/utils';
 import {
   type AssetsManager,
+  type BlockSnapshot,
   BlockSnapshotSchema,
+  type DocSnapshot,
+  type FromBlockSnapshotPayload,
+  type FromBlockSnapshotResult,
+  type FromDocSnapshotPayload,
+  type FromDocSnapshotResult,
+  type FromSliceSnapshotPayload,
+  type FromSliceSnapshotResult,
   getAssetName,
   nanoid,
+  type SliceSnapshot,
+  type ToBlockSnapshotPayload,
+  type ToDocSnapshotPayload,
 } from '@blocksuite/store';
 import { ASTWalker, BaseAdapter } from '@blocksuite/store';
 import { collapseWhiteSpace } from 'collapse-white-space';
@@ -35,15 +31,15 @@ import { bundledLanguagesInfo, codeToHast } from 'shiki';
 import { unified } from 'unified';
 
 import {
-  type HtmlAST,
   hastFlatNodes,
   hastGetElementChildren,
   hastGetTextChildren,
   hastGetTextChildrenOnlyAst,
   hastGetTextContent,
   hastQuerySelector,
+  type HtmlAST,
 } from './hast.js';
-import { fetchImage, fetchable, mergeDeltas } from './utils.js';
+import { fetchable, fetchImage, mergeDeltas } from './utils.js';
 
 export type Html = string;
 

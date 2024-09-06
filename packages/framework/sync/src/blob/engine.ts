@@ -16,6 +16,10 @@ export interface BlobStatus {
 export class BlobEngine {
   private _abort: AbortController | null = null;
 
+  get sources() {
+    return [this.main, ...this.shadows];
+  }
+
   constructor(
     readonly main: BlobSource,
     readonly shadows: BlobSource[],
@@ -190,9 +194,5 @@ export class BlobEngine {
     }
 
     this.logger.debug('finish syncing blob');
-  }
-
-  get sources() {
-    return [this.main, ...this.shadows];
   }
 }

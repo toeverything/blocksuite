@@ -22,6 +22,13 @@ import {
 import { BookmarkEdgelessBlockComponent } from './bookmark-edgeless-block.js';
 
 export class BookmarkBlockService extends BlockService {
+  static override readonly flavour = BookmarkBlockSchema.model.flavour;
+
+  private static readonly linkPreviewer = new LinkPreviewer();
+
+  static setLinkPreviewEndpoint =
+    BookmarkBlockService.linkPreviewer.setEndpoint;
+
   private _dragHandleOption: DragHandleOption = {
     flavour: BookmarkBlockSchema.model.flavour,
     edgeless: true,
@@ -117,13 +124,6 @@ export class BookmarkBlockService extends BlockService {
       return false;
     },
   };
-
-  private static readonly linkPreviewer = new LinkPreviewer();
-
-  static override readonly flavour = BookmarkBlockSchema.model.flavour;
-
-  static setLinkPreviewEndpoint =
-    BookmarkBlockService.linkPreviewer.setEndpoint;
 
   queryUrlData = (url: string, signal?: AbortSignal) => {
     return BookmarkBlockService.linkPreviewer.query(url, signal);

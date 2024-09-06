@@ -1,16 +1,16 @@
 import type { BlockModel, Doc } from '@blocksuite/store';
 
-import { WithDisposable, SignalWatcher } from '@blocksuite/block-std';
+import { SignalWatcher, WithDisposable } from '@blocksuite/block-std';
 import {
+  createButtonPopper,
   type NoteBlockModel,
   NoteDisplayMode,
-  ThemeObserver,
-  createButtonPopper,
   on,
   once,
+  ThemeObserver,
 } from '@blocksuite/blocks';
 import { baseTheme } from '@toeverything/theme';
-import { LitElement, css, html, nothing, unsafeCSS } from 'lit';
+import { css, html, LitElement, nothing, unsafeCSS } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 
@@ -187,10 +187,10 @@ export const AFFINE_OUTLINE_NOTE_CARD = 'affine-outline-note-card';
 
 @customElement(AFFINE_OUTLINE_NOTE_CARD)
 export class OutlineNoteCard extends SignalWatcher(WithDisposable(LitElement)) {
+  static override styles = styles;
+
   private _displayModePopper: ReturnType<typeof createButtonPopper> | null =
     null;
-
-  static override styles = styles;
 
   private _dispatchClickBlockEvent(block: BlockModel) {
     const event = new CustomEvent('clickblock', {

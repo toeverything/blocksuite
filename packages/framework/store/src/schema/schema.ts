@@ -144,6 +144,14 @@ export class Schema {
     validateChildren();
   };
 
+  get versions() {
+    return Object.fromEntries(
+      Array.from(this.flavourSchemaMap.values()).map(
+        (schema): [string, number] => [schema.model.flavour, schema.version]
+      )
+    );
+  }
+
   private _matchFlavour(childFlavour: string, parentFlavour: string) {
     return (
       minimatch(childFlavour, parentFlavour) ||
@@ -259,13 +267,5 @@ export class Schema {
         `Block cannot have parent: ${parent.model.flavour}.`
       );
     }
-  }
-
-  get versions() {
-    return Object.fromEntries(
-      Array.from(this.flavourSchemaMap.values()).map(
-        (schema): [string, number] => [schema.model.flavour, schema.version]
-      )
-    );
   }
 }

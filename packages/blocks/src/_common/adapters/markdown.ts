@@ -1,15 +1,5 @@
 import type { AffineTextAttributes } from '@blocksuite/affine-components/rich-text';
 import type { DeltaInsert } from '@blocksuite/inline/types';
-import type {
-  FromBlockSnapshotPayload,
-  FromBlockSnapshotResult,
-  FromDocSnapshotPayload,
-  FromDocSnapshotResult,
-  FromSliceSnapshotPayload,
-  FromSliceSnapshotResult,
-  ToBlockSnapshotPayload,
-  ToDocSnapshotPayload,
-} from '@blocksuite/store';
 import type { Heading, Root, RootContentMap, TableRow } from 'mdast';
 
 import {
@@ -20,15 +10,23 @@ import {
 import { getFilenameFromContentDisposition } from '@blocksuite/affine-shared/utils';
 import { assertExists, sha } from '@blocksuite/global/utils';
 import {
-  ASTWalker,
   type AssetsManager,
+  ASTWalker,
   BaseAdapter,
   type BlockSnapshot,
   BlockSnapshotSchema,
   type DocSnapshot,
-  type SliceSnapshot,
+  type FromBlockSnapshotPayload,
+  type FromBlockSnapshotResult,
+  type FromDocSnapshotPayload,
+  type FromDocSnapshotResult,
+  type FromSliceSnapshotPayload,
+  type FromSliceSnapshotResult,
   getAssetName,
   nanoid,
+  type SliceSnapshot,
+  type ToBlockSnapshotPayload,
+  type ToDocSnapshotPayload,
 } from '@blocksuite/store';
 import { format } from 'date-fns/format';
 import remarkParse from 'remark-parse';
@@ -36,7 +34,7 @@ import remarkStringify from 'remark-stringify';
 import { unified } from 'unified';
 
 import { remarkGfm } from './gfm.js';
-import { createText, fetchImage, fetchable, isNullish } from './utils.js';
+import { createText, fetchable, fetchImage, isNullish } from './utils.js';
 
 export type Markdown = string;
 

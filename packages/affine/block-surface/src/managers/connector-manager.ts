@@ -1,8 +1,8 @@
-import type { BrushElementModel } from '@blocksuite/affine-model';
 import type { GfxController, GfxModel } from '@blocksuite/block-std/gfx';
 import type { IBound, IVec, IVec3 } from '@blocksuite/global/utils';
 
 import {
+  type BrushElementModel,
   type Connection,
   type ConnectorElementModel,
   ConnectorMode,
@@ -10,14 +10,11 @@ import {
   type LocalConnectorElementModel,
 } from '@blocksuite/affine-model';
 import {
-  Bound,
-  PI2,
-  PointLocation,
-  Vec,
   almostEqual,
   assertEquals,
   assertExists,
   assertType,
+  Bound,
   clamp,
   getBezierCurveBoundingBox,
   getBezierParameters,
@@ -28,8 +25,11 @@ import {
   isVecZero,
   last,
   lineIntersects,
+  PI2,
+  PointLocation,
   sign,
   toRadian,
+  Vec,
 } from '@blocksuite/global/utils';
 
 import { isConnectorWithLabel } from '../element-model/utils/connector.js';
@@ -827,16 +827,16 @@ export class ConnectionOverlay extends Overlay {
     super();
   }
 
-  _clearRect() {
-    this.points = [];
-    this.highlightPoint = null;
-    this._renderer?.refresh();
-  }
-
   private _findConnectablesInViews() {
     const gfx = this._gfx;
     const bound = gfx.viewport.viewportBounds;
     return gfx.getElementsByBound(bound).filter(ele => ele.connectable);
+  }
+
+  _clearRect() {
+    this.points = [];
+    this.highlightPoint = null;
+    this._renderer?.refresh();
   }
 
   override clear() {
@@ -1012,6 +1012,41 @@ export class ConnectorPathGenerator {
       getElementById: (id: string) => GfxModel | null;
     }
   ) {}
+
+  static updatePath(
+    connector: ConnectorElementModel | LocalConnectorElementModel,
+    path: PointLocation[] | null | null,
+    elementGetter?: (id: string) => GfxModel | null
+  ) {
+    const instance = new ConnectorPathGenerator({
+      getElementById: elementGetter ?? (() => null),
+    });
+    const points = path ?? instance._generateConnectorPath(connector) ?? [];
+    const bound =
+      connector.mode === ConnectorMode.Curve
+        ? getBezierCurveBoundingBox(getBezierParameters(points))
+        : getBoundFromPoints(points);
+    const relativePoints = points.map((p: PointLocation) => {
+      return p.setVec(Vec.sub(p, [bound.x, bound.y]));
+    });
+
+    connector.updatingPath = true;
+    // the property assignment order matters
+    connector.xywh = bound.serialize();
+    connector.path = relativePoints;
+
+    // Updates Connector's Label position.
+    if (isConnectorWithLabel(connector)) {
+      const model = connector as ConnectorElementModel;
+      const [cx, cy] = model.getPointByOffsetDistance(
+        model.labelOffset.distance
+      );
+      const [, , w, h] = model.labelXYWH!;
+      model.labelXYWH = [cx - w / 2, cy - h / 2, w, h];
+    }
+
+    connector.updatingPath = false;
+  }
 
   private _computeStartEndPoint(
     connector: ConnectorElementModel | LocalConnectorElementModel
@@ -1328,40 +1363,5 @@ export class ConnectorPathGenerator {
     }
 
     return true;
-  }
-
-  static updatePath(
-    connector: ConnectorElementModel | LocalConnectorElementModel,
-    path: PointLocation[] | null | null,
-    elementGetter?: (id: string) => GfxModel | null
-  ) {
-    const instance = new ConnectorPathGenerator({
-      getElementById: elementGetter ?? (() => null),
-    });
-    const points = path ?? instance._generateConnectorPath(connector) ?? [];
-    const bound =
-      connector.mode === ConnectorMode.Curve
-        ? getBezierCurveBoundingBox(getBezierParameters(points))
-        : getBoundFromPoints(points);
-    const relativePoints = points.map((p: PointLocation) => {
-      return p.setVec(Vec.sub(p, [bound.x, bound.y]));
-    });
-
-    connector.updatingPath = true;
-    // the property assignment order matters
-    connector.xywh = bound.serialize();
-    connector.path = relativePoints;
-
-    // Updates Connector's Label position.
-    if (isConnectorWithLabel(connector)) {
-      const model = connector as ConnectorElementModel;
-      const [cx, cy] = model.getPointByOffsetDistance(
-        model.labelOffset.distance
-      );
-      const [, , w, h] = model.labelXYWH!;
-      model.labelXYWH = [cx - w / 2, cy - h / 2, w, h];
-    }
-
-    connector.updatingPath = false;
   }
 }

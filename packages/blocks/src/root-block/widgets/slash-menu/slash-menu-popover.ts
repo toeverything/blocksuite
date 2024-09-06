@@ -11,7 +11,7 @@ import {
 import { WithDisposable } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import { autoPlacement, offset } from '@floating-ui/dom';
-import { LitElement, type PropertyValues, html, nothing } from 'lit';
+import { html, LitElement, nothing, type PropertyValues } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { ifDefined } from 'lit/directives/if-defined.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -48,6 +48,8 @@ type InnerSlashMenuContext = SlashMenuContext & {
 
 @customElement('affine-slash-menu')
 export class SlashMenu extends WithDisposable(LitElement) {
+  static override styles = styles;
+
   private _handleClickItem = (item: SlashMenuActionItem) => {
     // Need to remove the search string
     // We must to do clean the slash string before we do the action
@@ -136,21 +138,23 @@ export class SlashMenu extends WithDisposable(LitElement) {
     this._queryState = this._filteredItems.length === 0 ? 'no_result' : 'on';
   };
 
-  static override styles = styles;
-
   updatePosition = (position: { x: string; y: string; height: number }) => {
     this._position = position;
   };
+
+  private get _query() {
+    return getQuery(this.inlineEditor, this._startRange);
+  }
+
+  get host() {
+    return this.context.rootComponent.host;
+  }
 
   constructor(
     private inlineEditor: AffineInlineEditor,
     private abortController = new AbortController()
   ) {
     super();
-  }
-
-  private get _query() {
-    return getQuery(this.inlineEditor, this._startRange);
   }
 
   override connectedCallback() {
@@ -261,10 +265,6 @@ export class SlashMenu extends WithDisposable(LitElement) {
       </inner-slash-menu>`;
   }
 
-  get host() {
-    return this.context.rootComponent.host;
-  }
-
   @state()
   private accessor _filteredItems: (SlashMenuActionItem | SlashSubMenu)[] = [];
 
@@ -290,6 +290,8 @@ export class SlashMenu extends WithDisposable(LitElement) {
 
 @customElement('inner-slash-menu')
 export class InnerSlashMenu extends WithDisposable(LitElement) {
+  static override styles = styles;
+
   private _closeSubMenu = () => {
     this._subMenuAbortController?.abort();
     this._subMenuAbortController = null;
@@ -423,8 +425,6 @@ export class InnerSlashMenu extends WithDisposable(LitElement) {
   };
 
   private _subMenuAbortController: AbortController | null = null;
-
-  static override styles = styles;
 
   private _scrollToItem(item: SlashMenuStaticItem) {
     const shadowRoot = this.shadowRoot;

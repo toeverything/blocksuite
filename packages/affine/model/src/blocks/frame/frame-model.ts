@@ -1,14 +1,14 @@
-import type { GfxBlockElementModel, GfxModel } from '@blocksuite/block-std/gfx';
-
 import {
+  type GfxBlockElementModel,
   type GfxContainerElement,
+  gfxContainerSymbol,
   type GfxElementGeometry,
+  type GfxModel,
   type PointTestOptions,
   SurfaceBlockModel,
-  gfxContainerSymbol,
 } from '@blocksuite/block-std/gfx';
 import { Bound, type SerializedXYWH } from '@blocksuite/global/utils';
-import { BlockModel, type Text, defineBlockSchema } from '@blocksuite/store';
+import { BlockModel, defineBlockSchema, type Text } from '@blocksuite/store';
 
 import type { Color } from '../../consts/index.js';
 
@@ -48,42 +48,6 @@ export class FrameBlockModel
 {
   [gfxContainerSymbol] = true as const;
 
-  addChild(element: BlockSuite.EdgelessModel | string): void {
-    const id = typeof element === 'string' ? element : element.id;
-    this.doc.transact(() => {
-      if (!this.childElementIds) this.childElementIds = {};
-      this.childElementIds[id] = true;
-    });
-  }
-
-  hasDescendant(element: string | GfxModel): boolean {
-    const id = typeof element === 'string' ? element : element.id;
-    return !!this.childElementIds?.[id];
-  }
-
-  override containsBound(bound: Bound): boolean {
-    return this.elementBound.contains(bound);
-  }
-
-  override includesPoint(x: number, y: number, _: PointTestOptions): boolean {
-    const bound = Bound.deserialize(this.xywh);
-    return bound.isPointInBound([x, y]);
-  }
-
-  override intersectsBound(selectedBound: Bound): boolean {
-    const bound = Bound.deserialize(this.xywh);
-    return (
-      bound.isIntersectWithBound(selectedBound) || selectedBound.contains(bound)
-    );
-  }
-
-  removeChild(element: BlockSuite.EdgelessModel | string): void {
-    const id = typeof element === 'string' ? element : element.id;
-    this.doc.transact(() => {
-      this.childElementIds && delete this.childElementIds[id];
-    });
-  }
-
   get childElements() {
     const surface = this.doc
       .getBlocks()
@@ -105,6 +69,42 @@ export class FrameBlockModel
 
   get childIds() {
     return [...(this.childElementIds ? Object.keys(this.childElementIds) : [])];
+  }
+
+  addChild(element: BlockSuite.EdgelessModel | string): void {
+    const id = typeof element === 'string' ? element : element.id;
+    this.doc.transact(() => {
+      if (!this.childElementIds) this.childElementIds = {};
+      this.childElementIds[id] = true;
+    });
+  }
+
+  override containsBound(bound: Bound): boolean {
+    return this.elementBound.contains(bound);
+  }
+
+  hasDescendant(element: string | GfxModel): boolean {
+    const id = typeof element === 'string' ? element : element.id;
+    return !!this.childElementIds?.[id];
+  }
+
+  override includesPoint(x: number, y: number, _: PointTestOptions): boolean {
+    const bound = Bound.deserialize(this.xywh);
+    return bound.isPointInBound([x, y]);
+  }
+
+  override intersectsBound(selectedBound: Bound): boolean {
+    const bound = Bound.deserialize(this.xywh);
+    return (
+      bound.isIntersectWithBound(selectedBound) || selectedBound.contains(bound)
+    );
+  }
+
+  removeChild(element: BlockSuite.EdgelessModel | string): void {
+    const id = typeof element === 'string' ? element : element.id;
+    this.doc.transact(() => {
+      this.childElementIds && delete this.childElementIds[id];
+    });
   }
 }
 

@@ -1,5 +1,7 @@
-import type { SurfaceBlockComponent } from '@blocksuite/affine-block-surface';
-import type { SurfaceBlockModel } from '@blocksuite/affine-block-surface';
+import type {
+  SurfaceBlockComponent,
+  SurfaceBlockModel,
+} from '@blocksuite/affine-block-surface';
 import type { RootBlockModel } from '@blocksuite/affine-model';
 import type { SurfaceSelection } from '@blocksuite/block-std';
 import type { IBound } from '@blocksuite/global/utils';
@@ -29,24 +31,6 @@ export class EdgelessRootPreviewBlockComponent extends BlockComponent<
   EdgelessRootService,
   EdgelessRootBlockWidgetName
 > {
-  private _refreshLayerViewport = requestThrottledConnectedFrame(() => {
-    const { zoom, translateX, translateY } = this.service.viewport;
-    const { gap } = getBackgroundGrid(zoom, true);
-
-    this.background.style.setProperty(
-      'background-position',
-      `${translateX}px ${translateY}px`
-    );
-    this.background.style.setProperty('background-size', `${gap}px ${gap}px`);
-
-    this.layer.style.setProperty('transform', this._getLayerViewport());
-    this.layer.dataset.scale = zoom.toString();
-  }, this);
-
-  private _resizeObserver: ResizeObserver | null = null;
-
-  private _viewportElement: HTMLElement | null = null;
-
   static override styles = css`
     affine-edgeless-root {
       -webkit-user-select: none;
@@ -87,9 +71,46 @@ export class EdgelessRootPreviewBlockComponent extends BlockComponent<
     }
   `;
 
+  private _refreshLayerViewport = requestThrottledConnectedFrame(() => {
+    const { zoom, translateX, translateY } = this.service.viewport;
+    const { gap } = getBackgroundGrid(zoom, true);
+
+    this.background.style.setProperty(
+      'background-position',
+      `${translateX}px ${translateY}px`
+    );
+    this.background.style.setProperty('background-size', `${gap}px ${gap}px`);
+
+    this.layer.style.setProperty('transform', this._getLayerViewport());
+    this.layer.dataset.scale = zoom.toString();
+  }, this);
+
+  private _resizeObserver: ResizeObserver | null = null;
+
+  private _viewportElement: HTMLElement | null = null;
+
   fontLoader!: FontLoader;
 
   mouseRoot!: HTMLElement;
+
+  get dispatcher() {
+    return this.service?.uiEventDispatcher;
+  }
+
+  get surfaceBlockModel() {
+    return this.model.children.find(
+      child => child.flavour === 'affine:surface'
+    ) as SurfaceBlockModel;
+  }
+
+  get viewportElement(): HTMLElement {
+    if (this._viewportElement) return this._viewportElement;
+    this._viewportElement = this.host.closest(
+      this.editorViewportSelector
+    ) as HTMLElement | null;
+    assertExists(this._viewportElement);
+    return this._viewportElement;
+  }
 
   private _getLayerViewport(negative = false) {
     const { translateX, translateY, zoom } = this.service.viewport;
@@ -225,25 +246,6 @@ export class EdgelessRootPreviewBlockComponent extends BlockComponent<
     if (_changedProperties.has('editorViewportSelector')) {
       this._initResizeEffect();
     }
-  }
-
-  get dispatcher() {
-    return this.service?.uiEventDispatcher;
-  }
-
-  get surfaceBlockModel() {
-    return this.model.children.find(
-      child => child.flavour === 'affine:surface'
-    ) as SurfaceBlockModel;
-  }
-
-  get viewportElement(): HTMLElement {
-    if (this._viewportElement) return this._viewportElement;
-    this._viewportElement = this.host.closest(
-      this.editorViewportSelector
-    ) as HTMLElement | null;
-    assertExists(this._viewportElement);
-    return this._viewportElement;
   }
 
   @query('.edgeless-background')

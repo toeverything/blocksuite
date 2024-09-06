@@ -7,14 +7,14 @@ import { DatabaseBlockSchema } from '@blocksuite/affine-model';
 import { NOTE_SELECTOR } from '@blocksuite/affine-shared/consts';
 import { RANGE_SYNC_EXCLUDE_ATTR } from '@blocksuite/block-std';
 import {
+  DatabaseSelection,
   DataView,
+  dataViewCommonStyle,
   type DataViewExpose,
   type DataViewProps,
   type DataViewSelection,
   type DataViewWidget,
   type DataViewWidgetProps,
-  DatabaseSelection,
-  dataViewCommonStyle,
   defineUniComponent,
   renderUniLit,
 } from '@blocksuite/data-view';
@@ -53,13 +53,49 @@ export class DatabaseBlockComponent extends CaptionedBlockComponent<
   DatabaseBlockModel,
   DatabaseBlockService
 > {
-  _bindHotkey: DataViewProps['bindHotkey'] = hotkeys => {
-    return {
-      dispose: this.host.event.bindHotkey(hotkeys, {
-        blockId: this.topContenteditableElement?.blockId ?? this.blockId,
-      }),
-    };
-  };
+  static override styles = css`
+    ${unsafeCSS(dataViewCommonStyle('affine-database'))}
+    affine-database {
+      display: block;
+      border-radius: 8px;
+      background-color: var(--affine-background-primary-color);
+      padding: 8px;
+      margin: 8px -8px -8px;
+    }
+
+    .database-block-selected {
+      background-color: var(--affine-hover-color);
+      border-radius: 4px;
+    }
+
+    .database-ops {
+      margin-top: 4px;
+      padding: 2px;
+      border-radius: 4px;
+      display: flex;
+      cursor: pointer;
+    }
+
+    .database-ops svg {
+      width: 16px;
+      height: 16px;
+      color: var(--affine-icon-color);
+    }
+
+    .database-ops:hover {
+      background-color: var(--affine-hover-color);
+    }
+
+    @media print {
+      .database-ops {
+        display: none;
+      }
+
+      .database-header-bar {
+        display: none !important;
+      }
+    }
+  `;
 
   private _clickDatabaseOps = (e: MouseEvent) => {
     const options = this.optionsConfig.configure(this.model, {
@@ -111,14 +147,6 @@ export class DatabaseBlockComponent extends CaptionedBlockComponent<
 
   private _dataSource?: DatabaseBlockDataSource;
 
-  _handleEvent: DataViewProps['handleEvent'] = (name, handler) => {
-    return {
-      dispose: this.host.event.add(name, handler, {
-        blockId: this.blockId,
-      }),
-    };
-  };
-
   private dataView = new DataView();
 
   private renderTitle = (dataViewMethod: DataViewExpose) => {
@@ -131,49 +159,21 @@ export class DatabaseBlockComponent extends CaptionedBlockComponent<
     ></affine-database-title>`;
   };
 
-  static override styles = css`
-    ${unsafeCSS(dataViewCommonStyle('affine-database'))}
-    affine-database {
-      display: block;
-      border-radius: 8px;
-      background-color: var(--affine-background-primary-color);
-      padding: 8px;
-      margin: 8px -8px -8px;
-    }
+  _bindHotkey: DataViewProps['bindHotkey'] = hotkeys => {
+    return {
+      dispose: this.host.event.bindHotkey(hotkeys, {
+        blockId: this.topContenteditableElement?.blockId ?? this.blockId,
+      }),
+    };
+  };
 
-    .database-block-selected {
-      background-color: var(--affine-hover-color);
-      border-radius: 4px;
-    }
-
-    .database-ops {
-      margin-top: 4px;
-      padding: 2px;
-      border-radius: 4px;
-      display: flex;
-      cursor: pointer;
-    }
-
-    .database-ops svg {
-      width: 16px;
-      height: 16px;
-      color: var(--affine-icon-color);
-    }
-
-    .database-ops:hover {
-      background-color: var(--affine-hover-color);
-    }
-
-    @media print {
-      .database-ops {
-        display: none;
-      }
-
-      .database-header-bar {
-        display: none !important;
-      }
-    }
-  `;
+  _handleEvent: DataViewProps['handleEvent'] = (name, handler) => {
+    return {
+      dispose: this.host.event.add(name, handler, {
+        blockId: this.blockId,
+      }),
+    };
+  };
 
   getRootService = () => {
     return this.std.getService('affine:page');
@@ -280,6 +280,41 @@ export class DatabaseBlockComponent extends CaptionedBlockComponent<
     return databaseSelection?.viewSelection;
   });
 
+  get dataSource(): DatabaseBlockDataSource {
+    if (!this._dataSource) {
+      this._dataSource = new DatabaseBlockDataSource(this.host, {
+        pageId: this.host.doc.id,
+        blockId: this.model.id,
+      });
+    }
+    return this._dataSource;
+  }
+
+  get innerModalWidget() {
+    return this.rootComponent!.widgetComponents[
+      AFFINE_INNER_MODAL_WIDGET
+    ] as AffineInnerModalWidget;
+  }
+
+  get optionsConfig(): DatabaseOptionsConfig {
+    return {
+      configure: (_model, options) => options,
+      ...this.std.getConfig('affine:page')?.databaseOptions,
+    };
+  }
+
+  override get topContenteditableElement() {
+    if (this.rootComponent instanceof EdgelessRootBlockComponent) {
+      const note = this.closest<NoteBlockComponent>(NOTE_SELECTOR);
+      return note;
+    }
+    return this.rootComponent;
+  }
+
+  get view() {
+    return this.dataView.expose;
+  }
+
   private renderDatabaseOps() {
     if (this.doc.readonly) {
       return nothing;
@@ -363,41 +398,6 @@ export class DatabaseBlockComponent extends CaptionedBlockComponent<
         })}
       </div>
     `;
-  }
-
-  get dataSource(): DatabaseBlockDataSource {
-    if (!this._dataSource) {
-      this._dataSource = new DatabaseBlockDataSource(this.host, {
-        pageId: this.host.doc.id,
-        blockId: this.model.id,
-      });
-    }
-    return this._dataSource;
-  }
-
-  get innerModalWidget() {
-    return this.rootComponent!.widgetComponents[
-      AFFINE_INNER_MODAL_WIDGET
-    ] as AffineInnerModalWidget;
-  }
-
-  get optionsConfig(): DatabaseOptionsConfig {
-    return {
-      configure: (_model, options) => options,
-      ...this.std.getConfig('affine:page')?.databaseOptions,
-    };
-  }
-
-  override get topContenteditableElement() {
-    if (this.rootComponent instanceof EdgelessRootBlockComponent) {
-      const note = this.closest<NoteBlockComponent>(NOTE_SELECTOR);
-      return note;
-    }
-    return this.rootComponent;
-  }
-
-  get view() {
-    return this.dataView.expose;
   }
 
   override accessor useZeroWidth = true;

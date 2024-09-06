@@ -2,7 +2,7 @@ import type { EditorHost } from '@blocksuite/block-std';
 
 import { WithDisposable } from '@blocksuite/block-std';
 import { baseTheme } from '@toeverything/theme';
-import { LitElement, css, html, nothing, unsafeCSS } from 'lit';
+import { css, html, LitElement, nothing, unsafeCSS } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { choose } from 'lit/directives/choose.js';
 
@@ -17,18 +17,6 @@ import '../finish-tip.js';
 
 @customElement('ai-panel-error')
 export class AIPanelError extends WithDisposable(LitElement) {
-  private _getResponseGroup = () => {
-    let responseGroup: AIItemGroupConfig[] = [];
-    const errorType = this.config.error?.type;
-    if (errorType && errorType !== AIErrorType.GeneralNetworkError) {
-      return responseGroup;
-    }
-
-    responseGroup = filterAIItemGroup(this.host, this.config.responses);
-
-    return responseGroup;
-  };
-
   static override styles = css`
     :host {
       width: 100%;
@@ -142,6 +130,18 @@ export class AIPanelError extends WithDisposable(LitElement) {
       --item-icon-hover-color: var(--affine-icon-color);
     }
   `;
+
+  private _getResponseGroup = () => {
+    let responseGroup: AIItemGroupConfig[] = [];
+    const errorType = this.config.error?.type;
+    if (errorType && errorType !== AIErrorType.GeneralNetworkError) {
+      return responseGroup;
+    }
+
+    responseGroup = filterAIItemGroup(this.host, this.config.responses);
+
+    return responseGroup;
+  };
 
   override render() {
     const responseGroup = this._getResponseGroup();

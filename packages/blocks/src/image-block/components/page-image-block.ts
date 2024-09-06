@@ -1,7 +1,7 @@
 import type { BaseSelection, UIEventStateContext } from '@blocksuite/block-std';
 
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
-import { type PropertyValues, css, html } from 'lit';
+import { css, html, type PropertyValues } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
@@ -13,8 +13,6 @@ import { ImageSelectedRect } from './image-selected-rect.js';
 
 @customElement('affine-page-image')
 export class ImageBlockPageComponent extends WithDisposable(ShadowlessElement) {
-  private _isDragging = false;
-
   static override styles = css`
     affine-page-image {
       display: flex;
@@ -36,6 +34,20 @@ export class ImageBlockPageComponent extends WithDisposable(ShadowlessElement) {
       height: 100%;
     }
   `;
+
+  private _isDragging = false;
+
+  private get _doc() {
+    return this.block.doc;
+  }
+
+  private get _host() {
+    return this.block.host;
+  }
+
+  private get _model() {
+    return this.block.model;
+  }
 
   private _bindKeyMap() {
     const selection = this._host.selection;
@@ -158,10 +170,6 @@ export class ImageBlockPageComponent extends WithDisposable(ShadowlessElement) {
     });
   }
 
-  private get _doc() {
-    return this.block.doc;
-  }
-
   private _handleError() {
     this.block.error = true;
   }
@@ -214,14 +222,6 @@ export class ImageBlockPageComponent extends WithDisposable(ShadowlessElement) {
         global: true,
       }
     );
-  }
-
-  private get _host() {
-    return this.block.host;
-  }
-
-  private get _model() {
-    return this.block.model;
   }
 
   private _normalizeImageSize() {

@@ -2,9 +2,9 @@ import { createModal } from '@blocksuite/affine-components/context-menu';
 import { ShadowlessElement } from '@blocksuite/block-std';
 import { CloseIcon } from '@blocksuite/icons/lit';
 import {
-  type ReferenceElement,
   autoUpdate,
   computePosition,
+  type ReferenceElement,
   size,
 } from '@floating-ui/dom';
 import { css, html } from 'lit';

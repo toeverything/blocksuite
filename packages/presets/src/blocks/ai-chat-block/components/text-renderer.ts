@@ -13,7 +13,7 @@ import {
   SpecProvider,
 } from '@blocksuite/blocks';
 import { BlockViewType, type Doc, type Query } from '@blocksuite/store';
-import { LitElement, type PropertyValues, css, html, nothing } from 'lit';
+import { css, html, LitElement, nothing, type PropertyValues } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { keyed } from 'lit/directives/keyed.js';
@@ -75,59 +75,6 @@ export type TextRendererOptions = {
 
 @customElement('text-renderer')
 export class TextRenderer extends WithDisposable(LitElement) {
-  private _answers: string[] = [];
-
-  private _clearTimer = () => {
-    if (this._timer) {
-      clearInterval(this._timer);
-      this._timer = null;
-    }
-  };
-
-  private _doc: Doc | null = null;
-
-  private readonly _query: Query = {
-    mode: 'strict',
-    match: [
-      'affine:page',
-      'affine:note',
-      'affine:surface',
-      'affine:paragraph',
-      'affine:code',
-      'affine:list',
-      'affine:divider',
-    ].map(flavour => ({ flavour, viewType: BlockViewType.Display })),
-  };
-
-  private _timer?: ReturnType<typeof setInterval> | null = null;
-
-  private _updateDoc = () => {
-    if (this._answers.length > 0) {
-      const latestAnswer = this._answers.pop();
-      this._answers = [];
-      if (latestAnswer) {
-        markDownToDoc(this.host, latestAnswer)
-          .then(doc => {
-            this._doc = doc.blockCollection.getDoc({
-              query: this._query,
-            });
-            this.disposables.add(() => {
-              doc.blockCollection.clearQuery(this._query);
-            });
-            this._doc.awarenessStore.setReadonly(
-              this._doc.blockCollection,
-              true
-            );
-            this.requestUpdate();
-            if (this.state !== 'generating') {
-              this._clearTimer();
-            }
-          })
-          .catch(console.error);
-      }
-    }
-  };
-
   static override styles = css`
     .ai-answer-text-editor.affine-page-viewport {
       background: transparent;
@@ -198,6 +145,59 @@ export class TextRenderer extends WithDisposable(LitElement) {
     ${textBlockStyles}
     ${customHeadingStyles}
   `;
+
+  private _answers: string[] = [];
+
+  private _clearTimer = () => {
+    if (this._timer) {
+      clearInterval(this._timer);
+      this._timer = null;
+    }
+  };
+
+  private _doc: Doc | null = null;
+
+  private readonly _query: Query = {
+    mode: 'strict',
+    match: [
+      'affine:page',
+      'affine:note',
+      'affine:surface',
+      'affine:paragraph',
+      'affine:code',
+      'affine:list',
+      'affine:divider',
+    ].map(flavour => ({ flavour, viewType: BlockViewType.Display })),
+  };
+
+  private _timer?: ReturnType<typeof setInterval> | null = null;
+
+  private _updateDoc = () => {
+    if (this._answers.length > 0) {
+      const latestAnswer = this._answers.pop();
+      this._answers = [];
+      if (latestAnswer) {
+        markDownToDoc(this.host, latestAnswer)
+          .then(doc => {
+            this._doc = doc.blockCollection.getDoc({
+              query: this._query,
+            });
+            this.disposables.add(() => {
+              doc.blockCollection.clearQuery(this._query);
+            });
+            this._doc.awarenessStore.setReadonly(
+              this._doc.blockCollection,
+              true
+            );
+            this.requestUpdate();
+            if (this.state !== 'generating') {
+              this._clearTimer();
+            }
+          })
+          .catch(console.error);
+      }
+    }
+  };
 
   private _onWheel(e: MouseEvent) {
     e.stopPropagation();

@@ -4,17 +4,15 @@ import type { BlockModel } from '@blocksuite/store';
 
 import {
   type CanvasElementWithText,
+  CommonUtils,
   GRID_GAP_MAX,
   GRID_GAP_MIN,
   MindmapElementModel,
-  CommonUtils,
 } from '@blocksuite/affine-block-surface';
 import {
   type AttachmentBlockModel,
   type BookmarkBlockModel,
   ConnectorElementModel,
-  ShapeElementModel,
-  TextElementModel,
   type EdgelessTextBlockModel,
   type EmbedBlockModel,
   type EmbedFigmaModel,
@@ -27,9 +25,10 @@ import {
   type FrameBlockModel,
   type ImageBlockModel,
   type NoteBlockModel,
+  ShapeElementModel,
+  TextElementModel,
 } from '@blocksuite/affine-model';
-import { deserializeXYWH } from '@blocksuite/global/utils';
-import { Bound } from '@blocksuite/global/utils';
+import { Bound, deserializeXYWH } from '@blocksuite/global/utils';
 
 import type { Connectable } from '../../../_common/utils/index.js';
 import type { GfxBlockModel } from '../block-model.js';

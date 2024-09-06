@@ -2,7 +2,6 @@ import { expect } from '@playwright/test';
 
 import { initDatabaseColumn } from '../database/actions.js';
 import {
-  SHORT_KEY,
   activeNoteInEdgeless,
   changeEdgelessNoteBackground,
   copyByKeyboard,
@@ -37,6 +36,7 @@ import {
   selectAllByKeyboard,
   selectNoteInEdgeless,
   setInlineRangeInSelectedRichText,
+  SHORT_KEY,
   switchEditorMode,
   toViewCoord,
   triggerComponentToolbarAction,

@@ -15,8 +15,8 @@ import {
   GroupElementModel,
 } from '@blocksuite/affine-model';
 import {
-  type SerializedElement,
   isGfxContainerElm,
+  type SerializedElement,
 } from '@blocksuite/block-std/gfx';
 import { type BlockSnapshot, Job } from '@blocksuite/store';
 

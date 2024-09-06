@@ -11,10 +11,10 @@ import type { EdgelessRootBlockComponent } from '../../../edgeless-root-block.js
 import type { EdgelessTool } from '../../../types.js';
 import type { EdgelessToolbar } from '../edgeless-toolbar.js';
 
-import { type MenuPopper, createPopper } from '../common/create-popper.js';
+import { createPopper, type MenuPopper } from '../common/create-popper.js';
 import {
-  type EdgelessToolbarSlots,
   edgelessToolbarContext,
+  type EdgelessToolbarSlots,
   edgelessToolbarSlotsContext,
   edgelessToolbarThemeContext,
 } from '../context.js';
@@ -45,9 +45,9 @@ export declare abstract class EdgelessToolbarToolClass extends DisposableClass {
    */
   tryDisposePopper: () => boolean;
 
-  accessor toolbar: EdgelessToolbar;
-
   abstract type: EdgelessTool['type'] | EdgelessTool['type'][];
+
+  accessor toolbar: EdgelessToolbar;
 }
 
 export const EdgelessToolbarToolMixin = <T extends Constructor<LitElement>>(
@@ -55,6 +55,20 @@ export const EdgelessToolbarToolMixin = <T extends Constructor<LitElement>>(
 ) => {
   abstract class DerivedClass extends WithDisposable(SuperClass) {
     enableActiveBackground = false;
+
+    abstract type: EdgelessTool['type'] | EdgelessTool['type'][];
+
+    get active() {
+      const { type } = this;
+      const activeType = this.edgelessTool.type;
+      return Array.isArray(type)
+        ? type.includes(activeType)
+        : activeType === type;
+    }
+
+    get setEdgelessTool() {
+      return this.edgeless.tools.setEdgelessTool;
+    }
 
     private _applyActiveStyle() {
       if (!this.enableActiveBackground) return;
@@ -112,18 +126,6 @@ export const EdgelessToolbarToolMixin = <T extends Constructor<LitElement>>(
       return false;
     }
 
-    get active() {
-      const { type } = this;
-      const activeType = this.edgelessTool.type;
-      return Array.isArray(type)
-        ? type.includes(activeType)
-        : activeType === type;
-    }
-
-    get setEdgelessTool() {
-      return this.edgeless.tools.setEdgelessTool;
-    }
-
     @property({ attribute: false })
     accessor edgeless!: EdgelessRootBlockComponent;
 
@@ -144,8 +146,6 @@ export const EdgelessToolbarToolMixin = <T extends Constructor<LitElement>>(
 
     @consume({ context: edgelessToolbarSlotsContext })
     accessor toolbarSlots!: EdgelessToolbarSlots;
-
-    abstract type: EdgelessTool['type'] | EdgelessTool['type'][];
   }
 
   return DerivedClass as unknown as T & Constructor<EdgelessToolbarToolClass>;

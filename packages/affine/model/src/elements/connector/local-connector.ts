@@ -1,15 +1,14 @@
-import type { PointLocation } from '@blocksuite/global/utils';
-import type { SerializedXYWH } from '@blocksuite/global/utils';
+import type { PointLocation, SerializedXYWH } from '@blocksuite/global/utils';
 
 import { GfxLocalElementModel } from '@blocksuite/block-std/gfx';
 
-import type { PointStyle } from '../../consts/index.js';
 import type { Connection } from './connector.js';
 
 import {
   type Color,
   ConnectorMode,
   DEFAULT_ROUGHNESS,
+  type PointStyle,
   StrokeStyle,
 } from '../../consts/index.js';
 

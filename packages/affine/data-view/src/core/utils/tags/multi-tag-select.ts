@@ -40,6 +40,8 @@ type RenderOption = {
 
 @customElement('affine-multi-tag-select')
 export class MultiTagSelect extends WithDisposable(ShadowlessElement) {
+  static override styles = styles;
+
   private _clickItemOption = (e: MouseEvent, id: string) => {
     e.stopPropagation();
     const option = this.options.find(v => v.id === id);
@@ -182,8 +184,6 @@ export class MultiTagSelect extends WithDisposable(ShadowlessElement) {
 
   private filteredOptions: Array<RenderOption> = [];
 
-  static override styles = styles;
-
   changeTag = (tag: SelectTag) => {
     this.onOptionsChange(this.options.map(v => (v.id === tag.id ? tag : v)));
   };
@@ -202,6 +202,21 @@ export class MultiTagSelect extends WithDisposable(ShadowlessElement) {
   newTags = (tags: SelectTag[]) => {
     this.onOptionsChange([...tags, ...this.options]);
   };
+
+  private get color() {
+    if (!this._currentColor) {
+      this._currentColor = getTagColor();
+    }
+    return this._currentColor;
+  }
+
+  get isSingleMode() {
+    return this.mode === 'single';
+  }
+
+  private get selectedTag() {
+    return this.filteredOptions[this.selectedIndex];
+  }
 
   private _filterOptions() {
     const map = this.optionsIdMap();
@@ -247,13 +262,6 @@ export class MultiTagSelect extends WithDisposable(ShadowlessElement) {
     this._currentColor = undefined;
   }
 
-  private get color() {
-    if (!this._currentColor) {
-      this._currentColor = getTagColor();
-    }
-    return this._currentColor;
-  }
-
   private getGroupInfoByFullName(name: string) {
     const strings = name.split('/');
     const names = strings.slice(0, -1);
@@ -292,10 +300,6 @@ export class MultiTagSelect extends WithDisposable(ShadowlessElement) {
 
   private optionsIdMap() {
     return Object.fromEntries(this.options.map(v => [v.id, v]));
-  }
-
-  private get selectedTag() {
-    return this.filteredOptions[this.selectedIndex];
   }
 
   private setSelectedOption(index: number) {
@@ -423,10 +427,6 @@ export class MultiTagSelect extends WithDisposable(ShadowlessElement) {
         </div>
       </div>
     `;
-  }
-
-  get isSingleMode() {
-    return this.mode === 'single';
   }
 
   @query('.select-input')

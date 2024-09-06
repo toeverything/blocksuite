@@ -31,6 +31,13 @@ export const AFFINE_DOC_REMOTE_SELECTION_WIDGET =
 
 @customElement(AFFINE_DOC_REMOTE_SELECTION_WIDGET)
 export class AffineDocRemoteSelectionWidget extends WidgetComponent {
+  // avoid being unable to select text by mouse click or drag
+  static override styles = css`
+    :host {
+      pointer-events: none;
+    }
+  `;
+
   private _abortController = new AbortController();
 
   private _remoteColorManager: RemoteColorManager | null = null;
@@ -51,13 +58,6 @@ export class AffineDocRemoteSelectionWidget extends WidgetComponent {
   private _resizeObserver: ResizeObserver = new ResizeObserver(() => {
     this.requestUpdate();
   });
-
-  // avoid being unable to select text by mouse click or drag
-  static override styles = css`
-    :host {
-      pointer-events: none;
-    }
-  `;
 
   private get _config(): DocRemoteSelectionConfig {
     const config =
@@ -86,6 +86,10 @@ export class AffineDocRemoteSelectionWidget extends WidgetComponent {
 
   private get _containerRect() {
     return this.offsetParent?.getBoundingClientRect();
+  }
+
+  private get _selectionManager() {
+    return this.host.selection;
   }
 
   private _getCursorRect(selections: BaseSelection[]): SelectionRect | null {
@@ -233,10 +237,6 @@ export class AffineDocRemoteSelectionWidget extends WidgetComponent {
     }
 
     return [];
-  }
-
-  private get _selectionManager() {
-    return this.host.selection;
   }
 
   override connectedCallback() {

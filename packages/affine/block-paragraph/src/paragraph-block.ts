@@ -4,17 +4,19 @@ import type { InlineRangeProvider } from '@blocksuite/inline';
 
 import { CaptionedBlockComponent } from '@blocksuite/affine-components/caption';
 import {
-  type RichText,
   markdownInput,
+  type RichText,
 } from '@blocksuite/affine-components/rich-text';
 import '@blocksuite/affine-components/rich-text';
-import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '@blocksuite/affine-shared/consts';
-import { NOTE_SELECTOR } from '@blocksuite/affine-shared/consts';
+import {
+  BLOCK_CHILDREN_CONTAINER_PADDING_LEFT,
+  NOTE_SELECTOR,
+} from '@blocksuite/affine-shared/consts';
 import { getViewportElement } from '@blocksuite/affine-shared/utils';
 import { getInlineRangeProvider } from '@blocksuite/block-std';
 import { IS_MAC } from '@blocksuite/global/env';
 import { effect, signal } from '@lit-labs/preact-signals';
-import { type TemplateResult, html, nothing } from 'lit';
+import { html, nothing, type TemplateResult } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 
 import type { ParagraphBlockService } from './paragraph-service.js';
@@ -28,6 +30,8 @@ export class ParagraphBlockComponent extends CaptionedBlockComponent<
   ParagraphBlockModel,
   ParagraphBlockService
 > {
+  static override styles = paragraphBlockStyles;
+
   private _composing = signal(false);
 
   private _displayPlaceholder = signal(false);
@@ -45,7 +49,43 @@ export class ParagraphBlockComponent extends CaptionedBlockComponent<
     return false;
   };
 
-  static override styles = paragraphBlockStyles;
+  get attributeRenderer() {
+    return this.inlineManager.getRenderer();
+  }
+
+  get attributesSchema() {
+    return this.inlineManager.getSchema();
+  }
+
+  get embedChecker() {
+    return this.inlineManager.embedChecker;
+  }
+
+  get inEdgelessText() {
+    return (
+      this.topContenteditableElement?.tagName.toLowerCase() ===
+      'affine-edgeless-text'
+    );
+  }
+
+  get inlineEditor() {
+    return this._richTextElement?.inlineEditor;
+  }
+
+  get inlineManager() {
+    return this.service?.inlineManager;
+  }
+
+  get markdownShortcutHandler() {
+    return this.inlineManager.markdownShortcutHandler;
+  }
+
+  override get topContenteditableElement() {
+    if (this.rootComponent?.tagName.toLowerCase() === 'affine-edgeless-root') {
+      return this.closest<BlockComponent>(NOTE_SELECTOR);
+    }
+    return this.rootComponent;
+  }
 
   override connectedCallback() {
     super.connectedCallback();
@@ -294,44 +334,6 @@ export class ParagraphBlockComponent extends CaptionedBlockComponent<
         ${children}
       </div>
     `;
-  }
-
-  get attributeRenderer() {
-    return this.inlineManager.getRenderer();
-  }
-
-  get attributesSchema() {
-    return this.inlineManager.getSchema();
-  }
-
-  get embedChecker() {
-    return this.inlineManager.embedChecker;
-  }
-
-  get inEdgelessText() {
-    return (
-      this.topContenteditableElement?.tagName.toLowerCase() ===
-      'affine-edgeless-text'
-    );
-  }
-
-  get inlineEditor() {
-    return this._richTextElement?.inlineEditor;
-  }
-
-  get inlineManager() {
-    return this.service?.inlineManager;
-  }
-
-  get markdownShortcutHandler() {
-    return this.inlineManager.markdownShortcutHandler;
-  }
-
-  override get topContenteditableElement() {
-    if (this.rootComponent?.tagName.toLowerCase() === 'affine-edgeless-root') {
-      return this.closest<BlockComponent>(NOTE_SELECTOR);
-    }
-    return this.rootComponent;
   }
 
   @query('rich-text')

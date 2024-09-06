@@ -11,17 +11,17 @@ import {
 import { EDGELESS_BLOCK_CHILD_PADDING } from '@blocksuite/affine-shared/consts';
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import {
+  getClosestBlockComponentByPoint,
   handleNativeRangeAtPoint,
   matchFlavours,
   stopPropagation,
 } from '@blocksuite/affine-shared/utils';
-import { getClosestBlockComponentByPoint } from '@blocksuite/affine-shared/utils';
 import {
   ShadowlessElement,
-  WithDisposable,
   toGfxBlockComponent,
+  WithDisposable,
 } from '@blocksuite/block-std';
-import { Bound, Point, almostEqual, clamp } from '@blocksuite/global/utils';
+import { almostEqual, Bound, clamp, Point } from '@blocksuite/global/utils';
 import { css, html, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
@@ -146,6 +146,18 @@ export class EdgelessNoteBlockComponent extends toGfxBlockComponent(
     }
   `;
 
+  private get _isShowCollapsedContent() {
+    return this.model.edgeless.collapse && (this._isResizing || this._isHover);
+  }
+
+  get _zoom() {
+    return this.gfx.viewport.zoom;
+  }
+
+  get rootService() {
+    return this.std.getService('affine:page') as EdgelessRootService;
+  }
+
   private _collapsedContent() {
     if (!this._isShowCollapsedContent) {
       return nothing;
@@ -216,10 +228,6 @@ export class EdgelessNoteBlockComponent extends toGfxBlockComponent(
     ) {
       this._isHover = true;
     }
-  }
-
-  private get _isShowCollapsedContent() {
-    return this.model.edgeless.collapse && (this._isResizing || this._isHover);
   }
 
   private _leaved() {
@@ -303,10 +311,6 @@ export class EdgelessNoteBlockComponent extends toGfxBlockComponent(
         })
         .catch(console.error);
     }
-  }
-
-  get _zoom() {
-    return this.gfx.viewport.zoom;
   }
 
   override connectedCallback(): void {
@@ -493,10 +497,6 @@ export class EdgelessNoteBlockComponent extends toGfxBlockComponent(
         ></edgeless-note-mask>
       </div>
     `;
-  }
-
-  get rootService() {
-    return this.std.getService('affine:page') as EdgelessRootService;
   }
 
   @state()

@@ -1,6 +1,6 @@
 import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
-import { DisposableGroup, Slot, assertExists } from '@blocksuite/global/utils';
-import { type TemplateResult, nothing, render } from 'lit';
+import { assertExists, DisposableGroup, Slot } from '@blocksuite/global/utils';
+import { nothing, render, type TemplateResult } from 'lit';
 import * as Y from 'yjs';
 
 import type { VLine } from './components/v-line.js';
@@ -41,6 +41,12 @@ export interface InlineRangeProvider {
 export class InlineEditor<
   TextAttributes extends BaseTextAttributes = BaseTextAttributes,
 > {
+  static getTextNodesFromElement = getTextNodesFromElement;
+
+  static nativePointToTextPoint = nativePointToTextPoint;
+
+  static textPointToDomPoint = textPointToDomPoint;
+
   private _attributeService: AttributeService<TextAttributes> =
     new AttributeService<TextAttributes>(this);
 
@@ -118,12 +124,6 @@ export class InlineEditor<
     new InlineTextService<TextAttributes>(this);
 
   private readonly _yText: Y.Text;
-
-  static getTextNodesFromElement = getTextNodesFromElement;
-
-  static nativePointToTextPoint = nativePointToTextPoint;
-
-  static textPointToDomPoint = textPointToDomPoint;
 
   // Expose text service API
   deleteText = this._textService.deleteText;
@@ -211,6 +211,74 @@ export class InlineEditor<
   toInlineRange = this.rangeService.toInlineRange;
 
   readonly vLineRenderer: ((vLine: VLine) => TemplateResult) | null;
+
+  get attributeService() {
+    return this._attributeService;
+  }
+
+  get deltaService() {
+    return this._deltaService;
+  }
+
+  get disposables() {
+    return this._disposables;
+  }
+
+  get eventService() {
+    return this._eventService;
+  }
+
+  get eventSource() {
+    return this._eventSource;
+  }
+
+  // Expose hook service API
+  get hooks() {
+    return this._hooksService.hooks;
+  }
+
+  // Expose event service API
+  get isComposing() {
+    return this._eventService.isComposing;
+  }
+
+  get isReadonly() {
+    return this._isReadonly;
+  }
+
+  // Expose attribute service API
+  get marks() {
+    return this._attributeService.marks;
+  }
+
+  get mounted() {
+    return this._mounted;
+  }
+
+  get rangeService() {
+    return this._rangeService;
+  }
+
+  get rootElement() {
+    assertExists(this._rootElement);
+    return this._rootElement;
+  }
+
+  get yText() {
+    return this._yText;
+  }
+
+  get yTextDeltas() {
+    return this.yText.toDelta();
+  }
+
+  get yTextLength() {
+    return this.yText.length;
+  }
+
+  get yTextString() {
+    return this.yText.toString();
+  }
 
   constructor(
     yText: InlineEditor['yText'],
@@ -337,73 +405,5 @@ export class InlineEditor<
   async waitForUpdate() {
     const vLines = Array.from(this.rootElement.querySelectorAll('v-line'));
     await Promise.all(vLines.map(line => line.updateComplete));
-  }
-
-  get attributeService() {
-    return this._attributeService;
-  }
-
-  get deltaService() {
-    return this._deltaService;
-  }
-
-  get disposables() {
-    return this._disposables;
-  }
-
-  get eventService() {
-    return this._eventService;
-  }
-
-  get eventSource() {
-    return this._eventSource;
-  }
-
-  // Expose hook service API
-  get hooks() {
-    return this._hooksService.hooks;
-  }
-
-  // Expose event service API
-  get isComposing() {
-    return this._eventService.isComposing;
-  }
-
-  get isReadonly() {
-    return this._isReadonly;
-  }
-
-  // Expose attribute service API
-  get marks() {
-    return this._attributeService.marks;
-  }
-
-  get mounted() {
-    return this._mounted;
-  }
-
-  get rangeService() {
-    return this._rangeService;
-  }
-
-  get rootElement() {
-    assertExists(this._rootElement);
-    return this._rootElement;
-  }
-
-  get yText() {
-    return this._yText;
-  }
-
-  get yTextDeltas() {
-    return this.yText.toDelta();
-  }
-
-  get yTextLength() {
-    return this.yText.length;
-  }
-
-  get yTextString() {
-    return this.yText.toString();
   }
 }

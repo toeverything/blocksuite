@@ -2,9 +2,9 @@ import type { Column } from '@blocksuite/affine-model';
 import type { DataViewDataType } from '@blocksuite/data-view';
 
 import {
-  type InsertToPosition,
   arrayMove,
   insertPositionToIndex,
+  type InsertToPosition,
 } from '@blocksuite/affine-shared/utils';
 import { BlockModel, defineBlockSchema } from '@blocksuite/store';
 

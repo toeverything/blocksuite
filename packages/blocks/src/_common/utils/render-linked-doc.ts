@@ -9,15 +9,14 @@ import { NoteDisplayMode } from '@blocksuite/affine-model';
 import { DocModeProvider } from '@blocksuite/affine-shared/services';
 import { getBlockProps, matchFlavours } from '@blocksuite/affine-shared/utils';
 import { BlockStdScope, type EditorHost } from '@blocksuite/block-std';
-import { Bound, getCommonBound } from '@blocksuite/global/utils';
-import { assertExists } from '@blocksuite/global/utils';
+import { assertExists, Bound, getCommonBound } from '@blocksuite/global/utils';
 import {
   type BlockModel,
   BlockViewType,
   type Doc,
   type Query,
 } from '@blocksuite/store';
-import { type TemplateResult, css, render } from 'lit';
+import { css, render, type TemplateResult } from 'lit';
 
 import type { EmbedLinkedDocBlockComponent } from '../../embed-linked-doc-block/embed-linked-doc-block.js';
 import type { EmbedSyncedDocCard } from '../../embed-synced-doc-block/components/embed-synced-doc-card.js';

@@ -5,8 +5,7 @@ import type {
 
 import { beforeEach, describe, expect, test } from 'vitest';
 
-import { wait } from '../utils/common.js';
-import { click, drag } from '../utils/common.js';
+import { click, drag, wait } from '../utils/common.js';
 import { addNote, getDocRootBlock, getSurface } from '../utils/edgeless.js';
 import { setupEditor } from '../utils/setup.js';
 

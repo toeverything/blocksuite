@@ -4,13 +4,13 @@ import { describe, expect, test } from 'vitest';
 import {
   CircularDependencyError,
   Container,
+  createIdentifier,
+  createScope,
   DuplicateServiceDefinitionError,
   MissingDependencyError,
   RecursionLimitError,
   ServiceNotFoundError,
   ServiceProvider,
-  createIdentifier,
-  createScope,
 } from '../di/index.js';
 
 describe('di', () => {

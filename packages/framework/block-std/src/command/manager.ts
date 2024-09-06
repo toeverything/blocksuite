@@ -14,6 +14,8 @@ import { CommandIdentifier } from '../identifier.js';
 import { cmdSymbol } from './consts.js';
 
 export class CommandManager extends LifeCycleWatcher {
+  static override readonly key = 'commandManager';
+
   private _commands = new Map<string, Command>();
 
   private _createChain = (
@@ -130,8 +132,6 @@ export class CommandManager extends LifeCycleWatcher {
       std: this.std,
     };
   };
-
-  static override readonly key = 'commandManager';
 
   chain = (): Chain<InitCommandCtx> => {
     const methods = {} as Record<

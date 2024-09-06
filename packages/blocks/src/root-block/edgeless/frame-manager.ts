@@ -2,16 +2,18 @@ import type { SurfaceBlockModel } from '@blocksuite/affine-block-surface';
 import type { FrameBlockModel, NoteBlockModel } from '@blocksuite/affine-model';
 import type { Doc } from '@blocksuite/store';
 
-import { Overlay } from '@blocksuite/affine-block-surface';
-import { renderableInEdgeless } from '@blocksuite/affine-block-surface';
+import {
+  Overlay,
+  renderableInEdgeless,
+} from '@blocksuite/affine-block-surface';
 import { GroupElementModel } from '@blocksuite/affine-model';
 import { isGfxContainerElm } from '@blocksuite/block-std/gfx';
 import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 import {
   Bound,
+  deserializeXYWH,
   DisposableGroup,
   type IVec,
-  deserializeXYWH,
 } from '@blocksuite/global/utils';
 import { DocCollection } from '@blocksuite/store';
 
@@ -33,12 +35,12 @@ export class FrameOverlay extends Overlay {
 
   private _innerElements: BlockSuite.EdgelessModel[] = [];
 
-  constructor(private _edgelessService: EdgelessRootService) {
-    super();
-  }
-
   private get _frameManager() {
     return this._edgelessService.frame;
+  }
+
+  constructor(private _edgelessService: EdgelessRootService) {
+    super();
   }
 
   private _reset() {
@@ -106,6 +108,13 @@ export class FrameOverlay extends Overlay {
 
 export class EdgelessFrameManager {
   private _disposable = new DisposableGroup();
+
+  /**
+   * Get all sorted frames
+   */
+  get frames() {
+    return this._rootService.frames;
+  }
 
   constructor(private _rootService: EdgelessRootService) {
     this._watchElementAddedOrDeleted();
@@ -367,13 +376,6 @@ export class EdgelessFrameManager {
       // eslint-disable-next-line unicorn/prefer-dom-node-remove
       parentFrame.removeChild(element);
     }
-  }
-
-  /**
-   * Get all sorted frames
-   */
-  get frames() {
-    return this._rootService.frames;
   }
 }
 

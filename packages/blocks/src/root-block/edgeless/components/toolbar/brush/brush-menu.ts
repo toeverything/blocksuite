@@ -1,7 +1,7 @@
 import type { Color } from '@blocksuite/affine-model';
 
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
-import { LitElement, css, html } from 'lit';
+import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 import type { EdgelessTool } from '../../../types.js';

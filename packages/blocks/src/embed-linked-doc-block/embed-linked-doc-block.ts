@@ -1,16 +1,15 @@
 import type {
+  DocMode,
   EmbedLinkedDocModel,
   EmbedLinkedDocStyles,
   ReferenceInfo,
 } from '@blocksuite/affine-model';
-import type { DocMode } from '@blocksuite/affine-model';
 
 import { BlockLinkIcon } from '@blocksuite/affine-components/icons';
-import { Peekable, isPeekable } from '@blocksuite/affine-components/peek';
+import { isPeekable, Peekable } from '@blocksuite/affine-components/peek';
 import { REFERENCE_NODE } from '@blocksuite/affine-components/rich-text';
 import { DocModeProvider } from '@blocksuite/affine-shared/services';
-import { Bound } from '@blocksuite/global/utils';
-import { assertExists } from '@blocksuite/global/utils';
+import { assertExists, Bound } from '@blocksuite/global/utils';
 import { DocCollection } from '@blocksuite/store';
 import { html, nothing } from 'lit';
 import { customElement, property, queryAsync, state } from 'lit/decorators.js';
@@ -37,9 +36,7 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockComponent<
   EmbedLinkedDocModel,
   EmbedLinkedDocBlockService
 > {
-  override _cardStyle: (typeof EmbedLinkedDocStyles)[number] = 'horizontal';
-
-  override _height = EMBED_CARD_HEIGHT.horizontal;
+  static override styles = styles;
 
   private _load = async () => {
     this._loading = true;
@@ -101,9 +98,11 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockComponent<
     }
   };
 
-  override _width = EMBED_CARD_WIDTH.horizontal;
+  override _cardStyle: (typeof EmbedLinkedDocStyles)[number] = 'horizontal';
 
-  static override styles = styles;
+  override _height = EMBED_CARD_HEIGHT.horizontal;
+
+  override _width = EMBED_CARD_WIDTH.horizontal;
 
   cleanUpSurfaceRefRenderer = () => {
     if (this.surfaceRefRenderer) {
@@ -182,13 +181,35 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockComponent<
     });
   };
 
-  protected _handleClick(event: MouseEvent) {
-    if (this.config.handleClick) {
-      this.config.handleClick(event, this.host);
-      return;
-    }
+  get config(): EmbedLinkedDocBlockConfig {
+    return this.std.getConfig('affine:embed-linked-doc') || {};
+  }
 
-    this._selectBlock();
+  get docTitle() {
+    return this.linkedDoc?.meta?.title.length
+      ? this.linkedDoc.meta.title
+      : 'Untitled';
+  }
+
+  get editorMode() {
+    return this._linkedDocMode;
+  }
+
+  get linkedDoc() {
+    return this.std.collection.getDoc(this.model.pageId);
+  }
+
+  get referenceInfo(): ReferenceInfo {
+    const { pageId, params } = this.model;
+    const info: ReferenceInfo = { pageId };
+    if (!params) return info;
+
+    const { mode, blockIds, elementIds } = params;
+    info.params = {};
+    if (mode) info.params.mode = mode;
+    if (blockIds?.length) info.params.blockIds = [...blockIds];
+    if (elementIds?.length) info.params.elementIds = [...elementIds];
+    return info;
   }
 
   private _handleDoubleClick(event: MouseEvent) {
@@ -210,6 +231,15 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockComponent<
       return false;
     }
     return !!linkedDoc && this.isNoteContentEmpty && this.isBannerEmpty;
+  }
+
+  protected _handleClick(event: MouseEvent) {
+    if (this.config.handleClick) {
+      this.config.handleClick(event, this.host);
+      return;
+    }
+
+    this._selectBlock();
   }
 
   override connectedCallback() {
@@ -449,37 +479,6 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockComponent<
         });
       });
     }
-  }
-
-  get config(): EmbedLinkedDocBlockConfig {
-    return this.std.getConfig('affine:embed-linked-doc') || {};
-  }
-
-  get docTitle() {
-    return this.linkedDoc?.meta?.title.length
-      ? this.linkedDoc.meta.title
-      : 'Untitled';
-  }
-
-  get editorMode() {
-    return this._linkedDocMode;
-  }
-
-  get linkedDoc() {
-    return this.std.collection.getDoc(this.model.pageId);
-  }
-
-  get referenceInfo(): ReferenceInfo {
-    const { pageId, params } = this.model;
-    const info: ReferenceInfo = { pageId };
-    if (!params) return info;
-
-    const { mode, blockIds, elementIds } = params;
-    info.params = {};
-    if (mode) info.params.mode = mode;
-    if (blockIds?.length) info.params.blockIds = [...blockIds];
-    if (elementIds?.length) info.params.elementIds = [...elementIds];
-    return info;
   }
 
   @state()

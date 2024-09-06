@@ -1,13 +1,12 @@
-import type { InlineEditor } from '@blocksuite/inline';
-
 import {
   type BlockComponent,
   ShadowlessElement,
-  WithDisposable,
   SignalWatcher,
+  WithDisposable,
 } from '@blocksuite/block-std';
 import {
   type DeltaInsert,
+  type InlineEditor,
   ZERO_WIDTH_NON_JOINER,
   ZERO_WIDTH_SPACE,
 } from '@blocksuite/inline';
@@ -28,8 +27,6 @@ import './latex-editor-unit.js';
 export class AffineLatexNode extends SignalWatcher(
   WithDisposable(ShadowlessElement)
 ) {
-  private _editorAbortController: AbortController | null = null;
-
   static override styles = css`
     affine-latex-node {
       display: inline-block;
@@ -92,7 +89,17 @@ export class AffineLatexNode extends SignalWatcher(
     }
   `;
 
+  private _editorAbortController: AbortController | null = null;
+
   readonly latex$ = signal('');
+
+  get deltaLatex() {
+    return this.delta.attributes?.latex as string;
+  }
+
+  get latexContainer() {
+    return this.querySelector<HTMLElement>('.latex-container');
+  }
 
   override connectedCallback() {
     const result = super.connectedCallback();
@@ -207,14 +214,6 @@ export class AffineLatexNode extends SignalWatcher(
       },
       { once: true }
     );
-  }
-
-  get deltaLatex() {
-    return this.delta.attributes?.latex as string;
-  }
-
-  get latexContainer() {
-    return this.querySelector<HTMLElement>('.latex-container');
   }
 
   @property({ attribute: false })

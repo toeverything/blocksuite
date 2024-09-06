@@ -79,6 +79,60 @@ export class DocCollectionMeta {
 
   readonly id: string = 'meta';
 
+  get avatar() {
+    return this._proxy.avatar;
+  }
+
+  get blockVersions() {
+    return this._proxy.blockVersions;
+  }
+
+  get docMetas() {
+    if (!this._proxy.pages) {
+      return [] as DocMeta[];
+    }
+    return this._proxy.pages as DocMeta[];
+  }
+
+  get docs() {
+    return this._proxy.pages;
+  }
+
+  get hasVersion() {
+    if (!this.blockVersions || !this.pageVersion || !this.workspaceVersion) {
+      return false;
+    }
+    return Object.keys(this.blockVersions).length > 0;
+  }
+
+  get name() {
+    return this._proxy.name;
+  }
+
+  get pageVersion() {
+    return this._proxy.pageVersion;
+  }
+
+  get properties(): DocsPropertiesMeta {
+    const meta = this._proxy.properties;
+    if (!meta) {
+      return {
+        tags: {
+          options: [],
+        },
+      };
+    }
+    return meta;
+  }
+
+  get workspaceVersion() {
+    return this._proxy.workspaceVersion;
+  }
+
+  get yDocs() {
+    return this._yMap.get('pages') as unknown as Y.Array<unknown>;
+  }
+
   constructor(doc: BlockSuiteDoc) {
     this.doc = doc;
     this._yMap = doc.getMap(this.id);
@@ -300,59 +354,5 @@ export class DocCollectionMeta {
     } else {
       console.error('Block versions is already set');
     }
-  }
-
-  get avatar() {
-    return this._proxy.avatar;
-  }
-
-  get blockVersions() {
-    return this._proxy.blockVersions;
-  }
-
-  get docMetas() {
-    if (!this._proxy.pages) {
-      return [] as DocMeta[];
-    }
-    return this._proxy.pages as DocMeta[];
-  }
-
-  get docs() {
-    return this._proxy.pages;
-  }
-
-  get hasVersion() {
-    if (!this.blockVersions || !this.pageVersion || !this.workspaceVersion) {
-      return false;
-    }
-    return Object.keys(this.blockVersions).length > 0;
-  }
-
-  get name() {
-    return this._proxy.name;
-  }
-
-  get pageVersion() {
-    return this._proxy.pageVersion;
-  }
-
-  get properties(): DocsPropertiesMeta {
-    const meta = this._proxy.properties;
-    if (!meta) {
-      return {
-        tags: {
-          options: [],
-        },
-      };
-    }
-    return meta;
-  }
-
-  get workspaceVersion() {
-    return this._proxy.workspaceVersion;
-  }
-
-  get yDocs() {
-    return this._yMap.get('pages') as unknown as Y.Array<unknown>;
   }
 }

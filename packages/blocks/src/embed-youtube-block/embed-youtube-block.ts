@@ -14,7 +14,7 @@ import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../_common/consts.js';
 import { EmbedBlockComponent } from '../_common/embed-block-helper/embed-block-element.js';
 import { getEmbedCardIcons } from '../_common/utils/url.js';
 import { youtubeUrlRegex } from './embed-youtube-model.js';
-import { YoutubeIcon, styles } from './styles.js';
+import { styles, YoutubeIcon } from './styles.js';
 import { refreshEmbedYoutubeUrlData } from './utils.js';
 
 @customElement('affine-embed-youtube-block')
@@ -22,13 +22,13 @@ export class EmbedYoutubeBlockComponent extends EmbedBlockComponent<
   EmbedYoutubeModel,
   EmbedYoutubeBlockService
 > {
+  static override styles = styles;
+
   override _cardStyle: (typeof EmbedYoutubeStyles)[number] = 'video';
 
   protected _isDragging = false;
 
   protected _isResizing = false;
-
-  static override styles = styles;
 
   open = () => {
     let link = this.model.url;
@@ -44,11 +44,6 @@ export class EmbedYoutubeBlockComponent extends EmbedBlockComponent<
     );
   };
 
-  protected _handleClick(event: MouseEvent) {
-    event.stopPropagation();
-    this._selectBlock();
-  }
-
   private _handleDoubleClick(event: MouseEvent) {
     event.stopPropagation();
     this.open();
@@ -60,6 +55,11 @@ export class EmbedYoutubeBlockComponent extends EmbedBlockComponent<
       blockId: this.blockId,
     });
     selectionManager.setGroup('note', [blockSelection]);
+  }
+
+  protected _handleClick(event: MouseEvent) {
+    event.stopPropagation();
+    this._selectBlock();
   }
 
   override connectedCallback() {

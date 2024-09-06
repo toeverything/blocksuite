@@ -1,5 +1,4 @@
-import type { DocCollection } from '../collection.js';
-import type { DocCollectionOptions } from '../collection.js';
+import type { DocCollection, DocCollectionOptions } from '../collection.js';
 
 type DocCollectionConstructor<Keys extends string> = {
   new (storeOptions: DocCollectionOptions): Omit<DocCollection, Keys>;

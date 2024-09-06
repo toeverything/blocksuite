@@ -4,7 +4,7 @@ import {
 } from '@blocksuite/affine-components/icons';
 import { WithDisposable } from '@blocksuite/block-std';
 import { baseTheme } from '@toeverything/theme';
-import { LitElement, css, html, nothing, unsafeCSS } from 'lit';
+import { css, html, LitElement, nothing, unsafeCSS } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 import type { AIPanelGeneratingConfig } from '../../type.js';

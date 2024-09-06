@@ -1,8 +1,7 @@
 import type { RootBlockModel } from '@blocksuite/affine-model';
 import type { ExtendedModel } from '@blocksuite/affine-shared/types';
 import type { EditorHost } from '@blocksuite/block-std';
-import type { BlockModel } from '@blocksuite/store';
-import type { Text } from '@blocksuite/store';
+import type { BlockModel, Text } from '@blocksuite/store';
 
 import {
   asyncSetInlineRange,

@@ -134,9 +134,9 @@ export class InlineTextService<TextAttributes extends BaseTextAttributes> {
 
   readonly transact = this.editor.transact;
 
-  constructor(readonly editor: InlineEditor<TextAttributes>) {}
-
   get yText() {
     return this.editor.yText;
   }
+
+  constructor(readonly editor: InlineEditor<TextAttributes>) {}
 }

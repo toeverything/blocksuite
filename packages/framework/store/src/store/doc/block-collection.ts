@@ -126,6 +126,81 @@ export class BlockCollection {
     >(),
   };
 
+  // So, we apply a listener at the top level for the flat structure of the current
+  get awarenessSync() {
+    return this.collection.awarenessSync;
+  }
+
+  get blobSync() {
+    return this.collection.blobSync;
+  }
+
+  get canRedo() {
+    if (this.readonly) {
+      return false;
+    }
+    return this._history.canRedo();
+  }
+
+  get canUndo() {
+    if (this.readonly) {
+      return false;
+    }
+    return this._history.canUndo();
+  }
+
+  get collection() {
+    return this._collection;
+  }
+
+  get crud() {
+    return this._docCRUD;
+  }
+
+  get docSync() {
+    return this.collection.docSync;
+  }
+
+  get history() {
+    return this._history;
+  }
+
+  get isEmpty() {
+    return this._yBlocks.size === 0;
+  }
+
+  get loaded() {
+    return this._loaded;
+  }
+
+  get meta() {
+    return this.collection.meta.getDocMeta(this.id);
+  }
+
+  get readonly() {
+    return this.awarenessStore.isReadonly(this);
+  }
+
+  get ready() {
+    return this._ready;
+  }
+
+  get schema() {
+    return this.collection.schema;
+  }
+
+  get spaceDoc() {
+    return this._ySpaceDoc;
+  }
+
+  get Text() {
+    return Text;
+  }
+
+  get yBlocks() {
+    return this._yBlocks;
+  }
+
   constructor({
     id,
     collection,
@@ -333,81 +408,6 @@ export class BlockCollection {
     this._shouldTransact = false;
     callback();
     this._shouldTransact = true;
-  }
-
-  get Text() {
-    return Text;
-  }
-
-  // So, we apply a listener at the top level for the flat structure of the current
-  get awarenessSync() {
-    return this.collection.awarenessSync;
-  }
-
-  get blobSync() {
-    return this.collection.blobSync;
-  }
-
-  get canRedo() {
-    if (this.readonly) {
-      return false;
-    }
-    return this._history.canRedo();
-  }
-
-  get canUndo() {
-    if (this.readonly) {
-      return false;
-    }
-    return this._history.canUndo();
-  }
-
-  get collection() {
-    return this._collection;
-  }
-
-  get crud() {
-    return this._docCRUD;
-  }
-
-  get docSync() {
-    return this.collection.docSync;
-  }
-
-  get history() {
-    return this._history;
-  }
-
-  get isEmpty() {
-    return this._yBlocks.size === 0;
-  }
-
-  get loaded() {
-    return this._loaded;
-  }
-
-  get meta() {
-    return this.collection.meta.getDocMeta(this.id);
-  }
-
-  get readonly() {
-    return this.awarenessStore.isReadonly(this);
-  }
-
-  get ready() {
-    return this._ready;
-  }
-
-  get schema() {
-    return this.collection.schema;
-  }
-
-  get spaceDoc() {
-    return this._ySpaceDoc;
-  }
-
-  get yBlocks() {
-    return this._yBlocks;
   }
 }
 

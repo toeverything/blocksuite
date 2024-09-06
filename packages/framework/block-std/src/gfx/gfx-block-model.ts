@@ -7,10 +7,10 @@ import type {
 import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 import {
   Bound,
-  PointLocation,
   getBoundsWithRotation,
   getPointsFromBoundsWithRotation,
   linePolygonIntersects,
+  PointLocation,
   polygonGetPointTangent,
   polygonNearestPoint,
   rotatePoints,
@@ -39,6 +39,43 @@ export class GfxBlockElementModel<
   connectable = true;
 
   rotate = 0;
+
+  get elementBound() {
+    const bound = Bound.deserialize(this.xywh);
+    return Bound.from(getBoundsWithRotation({ ...bound, rotate: this.rotate }));
+  }
+
+  get externalBound(): Bound | null {
+    return this._externalXYWH ? Bound.deserialize(this._externalXYWH) : null;
+  }
+
+  get externalXYWH(): SerializedXYWH | undefined {
+    return this._externalXYWH;
+  }
+
+  set externalXYWH(xywh: SerializedXYWH | undefined) {
+    this._externalXYWH = xywh;
+  }
+
+  get group(): GfxGroupLikeElementModel | null {
+    const surface = this.doc
+      .getBlocks()
+      .find(block => block instanceof SurfaceBlockModel);
+
+    if (!surface) return null;
+
+    return (surface as SurfaceBlockModel).getGroup(this.id) ?? null;
+  }
+
+  get groups(): GfxGroupLikeElementModel[] {
+    const surface = this.doc
+      .getBlocks()
+      .find(block => block instanceof SurfaceBlockModel);
+
+    if (!surface) return [];
+
+    return (surface as SurfaceBlockModel).getGroups(this.id);
+  }
 
   containsBound(bounds: Bound): boolean {
     const bound = Bound.deserialize(this.xywh);
@@ -101,43 +138,6 @@ export class GfxBlockElementModel<
         this.getLineIntersections(point, points[(i + 1) % points.length])
       )
     );
-  }
-
-  get elementBound() {
-    const bound = Bound.deserialize(this.xywh);
-    return Bound.from(getBoundsWithRotation({ ...bound, rotate: this.rotate }));
-  }
-
-  get externalBound(): Bound | null {
-    return this._externalXYWH ? Bound.deserialize(this._externalXYWH) : null;
-  }
-
-  get externalXYWH(): SerializedXYWH | undefined {
-    return this._externalXYWH;
-  }
-
-  set externalXYWH(xywh: SerializedXYWH | undefined) {
-    this._externalXYWH = xywh;
-  }
-
-  get group(): GfxGroupLikeElementModel | null {
-    const surface = this.doc
-      .getBlocks()
-      .find(block => block instanceof SurfaceBlockModel);
-
-    if (!surface) return null;
-
-    return (surface as SurfaceBlockModel).getGroup(this.id) ?? null;
-  }
-
-  get groups(): GfxGroupLikeElementModel[] {
-    const surface = this.doc
-      .getBlocks()
-      .find(block => block instanceof SurfaceBlockModel);
-
-    if (!surface) return [];
-
-    return (surface as SurfaceBlockModel).getGroups(this.id);
   }
 }
 

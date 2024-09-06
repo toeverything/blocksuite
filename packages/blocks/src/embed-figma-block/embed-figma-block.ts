@@ -19,13 +19,13 @@ export class EmbedFigmaBlockComponent extends EmbedBlockComponent<
   EmbedFigmaModel,
   EmbedFigmaBlockService
 > {
+  static override styles = styles;
+
   override _cardStyle: (typeof EmbedFigmaStyles)[number] = 'figma';
 
   protected _isDragging = false;
 
   protected _isResizing = false;
-
-  static override styles = styles;
 
   open = () => {
     let link = this.model.url;
@@ -36,11 +36,6 @@ export class EmbedFigmaBlockComponent extends EmbedBlockComponent<
   };
 
   refreshData = () => {};
-
-  protected _handleClick(event: MouseEvent) {
-    event.stopPropagation();
-    this._selectBlock();
-  }
 
   private _handleDoubleClick(event: MouseEvent) {
     event.stopPropagation();
@@ -53,6 +48,11 @@ export class EmbedFigmaBlockComponent extends EmbedBlockComponent<
       blockId: this.blockId,
     });
     selectionManager.setGroup('note', [blockSelection]);
+  }
+
+  protected _handleClick(event: MouseEvent) {
+    event.stopPropagation();
+    this._selectBlock();
   }
 
   override connectedCallback() {

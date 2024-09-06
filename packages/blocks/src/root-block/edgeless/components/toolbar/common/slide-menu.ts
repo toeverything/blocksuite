@@ -1,7 +1,7 @@
 import { ArrowRightSmallIcon } from '@blocksuite/affine-components/icons';
 import { WithDisposable } from '@blocksuite/block-std';
 import { consume } from '@lit/context';
-import { LitElement, css, html } from 'lit';
+import { css, html, LitElement } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 

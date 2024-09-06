@@ -1,12 +1,4 @@
 import type { DeltaInsert } from '@blocksuite/inline';
-import type {
-  FromBlockSnapshotPayload,
-  FromBlockSnapshotResult,
-  FromDocSnapshotPayload,
-  FromDocSnapshotResult,
-  FromSliceSnapshotPayload,
-  FromSliceSnapshotResult,
-} from '@blocksuite/store';
 
 import { NoteDisplayMode } from '@blocksuite/affine-model';
 import { getFilenameFromContentDisposition } from '@blocksuite/affine-shared/utils';
@@ -14,27 +6,33 @@ import { getTagColor } from '@blocksuite/data-view';
 import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 import { isEqual, sha } from '@blocksuite/global/utils';
 import {
-  ASTWalker,
   type AssetsManager,
+  ASTWalker,
   BaseAdapter,
   type BlockSnapshot,
   type DocSnapshot,
-  type SliceSnapshot,
+  type FromBlockSnapshotPayload,
+  type FromBlockSnapshotResult,
+  type FromDocSnapshotPayload,
+  type FromDocSnapshotResult,
+  type FromSliceSnapshotPayload,
+  type FromSliceSnapshotResult,
   getAssetName,
   nanoid,
+  type SliceSnapshot,
 } from '@blocksuite/store';
 import { collapseWhiteSpace } from 'collapse-white-space';
 import rehypeParse from 'rehype-parse';
 import { unified } from 'unified';
 
 import {
-  type HtmlAST,
   hastGetElementChildren,
   hastGetTextChildrenOnlyAst,
   hastGetTextContent,
   hastQuerySelector,
+  type HtmlAST,
 } from './hast.js';
-import { createText, fetchImage, fetchable, isText } from './utils.js';
+import { createText, fetchable, fetchImage, isText } from './utils.js';
 
 export type NotionHtml = string;
 

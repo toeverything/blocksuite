@@ -21,8 +21,8 @@ import {
   Heading5Icon,
   Heading6Icon,
   ItalicIcon,
-  LinkIcon,
   LinkedDocIcon,
+  LinkIcon,
   MoreVerticalIcon,
   NumberedListIcon,
   QuoteIcon,
@@ -36,7 +36,7 @@ import { renderGroups } from '@blocksuite/affine-components/toolbar';
 import { TelemetryProvider } from '@blocksuite/affine-shared/services';
 import { assertExists } from '@blocksuite/global/utils';
 import { Slice } from '@blocksuite/store';
-import { type TemplateResult, html } from 'lit';
+import { html, type TemplateResult } from 'lit';
 
 import type { AffineFormatBarWidget } from './format-bar.js';
 

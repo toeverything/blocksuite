@@ -1,7 +1,7 @@
 import {
   BlockViewExtension,
-  FlavourExtension,
   type ExtensionType,
+  FlavourExtension,
 } from '@blocksuite/block-std';
 import { literal } from 'lit/static-html.js';
 

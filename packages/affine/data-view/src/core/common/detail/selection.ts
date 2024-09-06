@@ -24,6 +24,32 @@ export class DetailSelection {
     }
   };
 
+  get selection(): DetailViewSelection | undefined {
+    return this._selection;
+  }
+
+  set selection(selection: DetailViewSelection | undefined) {
+    if (!selection) {
+      this.onSelect();
+      return;
+    }
+    if (selection.isEditing) {
+      const container = this.getFocusCellContainer(selection);
+      const cell = container?.cell;
+      const isEditing = cell
+        ? cell.beforeEnterEditMode()
+          ? selection.isEditing
+          : false
+        : false;
+      this.onSelect({
+        propertyId: selection.propertyId,
+        isEditing,
+      });
+    } else {
+      this.onSelect(selection);
+    }
+  }
+
   constructor(private viewEle: RecordDetail) {}
 
   blur(selection: DetailViewSelection) {
@@ -125,31 +151,5 @@ export class DetailSelection {
       ?.querySelector(
         `affine-data-view-kanban-card[data-card-id="${cardId}"]`
       ) as KanbanCard | undefined;
-  }
-
-  get selection(): DetailViewSelection | undefined {
-    return this._selection;
-  }
-
-  set selection(selection: DetailViewSelection | undefined) {
-    if (!selection) {
-      this.onSelect();
-      return;
-    }
-    if (selection.isEditing) {
-      const container = this.getFocusCellContainer(selection);
-      const cell = container?.cell;
-      const isEditing = cell
-        ? cell.beforeEnterEditMode()
-          ? selection.isEditing
-          : false
-        : false;
-      this.onSelect({
-        propertyId: selection.propertyId,
-        isEditing,
-      });
-    } else {
-      this.onSelect(selection);
-    }
   }
 }

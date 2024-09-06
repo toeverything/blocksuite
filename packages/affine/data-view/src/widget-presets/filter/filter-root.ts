@@ -17,29 +17,11 @@ import type { Filter, FilterGroup, Variable } from '../../core/common/ast.js';
 import type { FilterGroupView } from './filter-group.js';
 
 import { menuTitle } from '../../core/utils/menu-title.js';
-import './condition.js';
 import { popAddNewFilter } from './condition.js';
 import { getDepth } from './filter-group.js';
 
 @customElement('filter-root-view')
 export class FilterRootView extends WithDisposable(ShadowlessElement) {
-  private _addNew = (e: MouseEvent) => {
-    popAddNewFilter(e.target as HTMLElement, {
-      value: this.data,
-      onChange: this.setData,
-      vars: this.vars,
-    });
-  };
-
-  private _setFilter = (index: number, filter: Filter) => {
-    this.setData({
-      ...this.data,
-      conditions: this.data.conditions.map((v, i) =>
-        index === i ? filter : v
-      ),
-    });
-  };
-
   static override styles = css`
     filter-root-view {
       border-radius: 4px;
@@ -169,6 +151,23 @@ export class FilterRootView extends WithDisposable(ShadowlessElement) {
       margin: 8px 0;
     }
   `;
+
+  private _addNew = (e: MouseEvent) => {
+    popAddNewFilter(e.target as HTMLElement, {
+      value: this.data,
+      onChange: this.setData,
+      vars: this.vars,
+    });
+  };
+
+  private _setFilter = (index: number, filter: Filter) => {
+    this.setData({
+      ...this.data,
+      conditions: this.data.conditions.map((v, i) =>
+        index === i ? filter : v
+      ),
+    });
+  };
 
   private _clickConditionOps(target: HTMLElement, i: number) {
     const filter = this.data.conditions[i];

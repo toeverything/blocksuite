@@ -49,6 +49,17 @@ export class DateCell extends BaseCellRenderer<number> {
 
 @customElement('affine-database-date-cell-editing')
 export class DateCellEditing extends BaseCellRenderer<number> {
+  static override styles = css`
+    affine-database-date-cell-editing {
+      width: 100%;
+      cursor: text;
+    }
+
+    .affine-database-date:focus {
+      outline: none;
+    }
+  `;
+
   private _prevPortalAbortController: AbortController | null = null;
 
   private openDatePicker = () => {
@@ -106,16 +117,10 @@ export class DateCellEditing extends BaseCellRenderer<number> {
     this.tempValue = undefined;
   };
 
-  static override styles = css`
-    affine-database-date-cell-editing {
-      width: 100%;
-      cursor: text;
-    }
-
-    .affine-database-date:focus {
-      outline: none;
-    }
-  `;
+  get dateString() {
+    const value = this.tempValue ?? this.value;
+    return value ? format(value, 'yyyy/MM/dd') : '';
+  }
 
   override firstUpdated() {
     this.openDatePicker();
@@ -133,11 +138,6 @@ export class DateCellEditing extends BaseCellRenderer<number> {
     >
       ${this.dateString}
     </div>`;
-  }
-
-  get dateString() {
-    const value = this.tempValue ?? this.value;
-    return value ? format(value, 'yyyy/MM/dd') : '';
   }
 
   @state()

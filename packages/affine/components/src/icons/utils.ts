@@ -1,4 +1,4 @@
-import { type TemplateResult, html } from 'lit';
+import { html, type TemplateResult } from 'lit';
 
 export function icon(svg: TemplateResult<2>, size = 24) {
   return html`<svg

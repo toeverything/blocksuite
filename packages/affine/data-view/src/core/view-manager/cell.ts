@@ -1,4 +1,4 @@
-import { type ReadonlySignal, computed } from '@lit-labs/preact-signals';
+import { computed, type ReadonlySignal } from '@lit-labs/preact-signals';
 
 import type { Column } from './column.js';
 import type { Row } from './row.js';
@@ -60,6 +60,14 @@ export class CellBase<
     ) as Value;
   });
 
+  get column(): Column<Value, Data> {
+    return this.column$.value;
+  }
+
+  get row(): Row {
+    return this.view.rowGet(this.rowId);
+  }
+
   constructor(
     public view: SingleView,
     public columnId: string,
@@ -76,13 +84,5 @@ export class CellBase<
       this.columnId,
       value
     );
-  }
-
-  get column(): Column<Value, Data> {
-    return this.column$.value;
-  }
-
-  get row(): Row {
-    return this.view.rowGet(this.rowId);
   }
 }

@@ -7,7 +7,7 @@ import {
 import { WithDisposable } from '@blocksuite/block-std';
 import { Bound, getCommonBound } from '@blocksuite/global/utils';
 import { baseTheme } from '@toeverything/theme';
-import { LitElement, css, html, nothing, unsafeCSS } from 'lit';
+import { css, html, LitElement, nothing, unsafeCSS } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -32,8 +32,6 @@ import { cloneDeep } from './utils.js';
 
 @customElement('edgeless-templates-panel')
 export class EdgelessTemplatePanel extends WithDisposable(LitElement) {
-  private _fetchJob: null | { cancel: () => void } = null;
-
   static override styles = css`
     :host {
       position: absolute;
@@ -199,6 +197,8 @@ export class EdgelessTemplatePanel extends WithDisposable(LitElement) {
   `;
 
   static templates = builtInTemplates;
+
+  private _fetchJob: null | { cancel: () => void } = null;
 
   draggableController!: EdgelessDraggableElementController<Template>;
 

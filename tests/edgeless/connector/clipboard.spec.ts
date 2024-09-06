@@ -1,7 +1,6 @@
 import { expect } from '@playwright/test';
 
 import {
-  Shape,
   edgelessCommonSetup as commonSetup,
   copyByKeyboard,
   createConnectorElement,
@@ -11,6 +10,7 @@ import {
   getTypeById,
   pasteByKeyboard,
   selectAllByKeyboard,
+  Shape,
   toViewCoord,
   triggerComponentToolbarAction,
   waitNextFrame,

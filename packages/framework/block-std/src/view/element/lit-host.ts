@@ -9,10 +9,10 @@ import { Slot } from '@blocksuite/global/utils';
 import { Doc } from '@blocksuite/store';
 import { type BlockModel, BlockViewType } from '@blocksuite/store';
 import { createContext, provide } from '@lit/context';
-import { LitElement, type TemplateResult, css, nothing } from 'lit';
+import { css, LitElement, nothing, type TemplateResult } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
-import { type StaticValue, html, unsafeStatic } from 'lit/static-html.js';
+import { html, type StaticValue, unsafeStatic } from 'lit/static-html.js';
 
 import type { CommandManager } from '../../command/index.js';
 import type { UIEventDispatcher } from '../../event/index.js';
@@ -38,6 +38,15 @@ export const stdContext = createContext<BlockStdScope>('std');
 export class EditorHost extends SignalWatcher(
   WithDisposable(ShadowlessElement)
 ) {
+  static override styles = css`
+    editor-host {
+      outline: none;
+      isolation: isolate;
+      display: block;
+      height: 100%;
+    }
+  `;
+
   private _renderModel = (model: BlockModel): TemplateResult => {
     const { flavour } = model;
     const block = this.doc.getBlock(model.id);
@@ -73,14 +82,15 @@ export class EditorHost extends SignalWatcher(
     ></${tag}>`;
   };
 
-  static override styles = css`
-    editor-host {
-      outline: none;
-      isolation: isolate;
-      display: block;
-      height: 100%;
-    }
-  `;
+  /**
+   * Render a block model manually instead of let blocksuite render it.
+   * If you render the same block model multiple times,
+   * the event flow and data binding will be broken.
+   * Only use this method as a last resort.
+   */
+  dangerouslyRenderModel = (model: BlockModel): TemplateResult => {
+    return this._renderModel(model);
+  };
 
   renderChildren = (
     model: BlockModel,
@@ -93,19 +103,29 @@ export class EditorHost extends SignalWatcher(
     )}`;
   };
 
-  /**
-   * Render a block model manually instead of let blocksuite render it.
-   * If you render the same block model multiple times,
-   * the event flow and data binding will be broken.
-   * Only use this method as a last resort.
-   */
-  dangerouslyRenderModel = (model: BlockModel): TemplateResult => {
-    return this._renderModel(model);
-  };
-
   readonly slots = {
     unmounted: new Slot(),
   };
+
+  get command(): CommandManager {
+    return this.std.command;
+  }
+
+  get event(): UIEventDispatcher {
+    return this.std.event;
+  }
+
+  get range(): RangeManager {
+    return this.std.range;
+  }
+
+  get selection(): SelectionManager {
+    return this.std.selection;
+  }
+
+  get view(): ViewStore {
+    return this.std.view;
+  }
 
   override connectedCallback() {
     super.connectedCallback();
@@ -169,26 +189,6 @@ export class EditorHost extends SignalWatcher(
     if (!root) return nothing;
 
     return this._renderModel(root);
-  }
-
-  get command(): CommandManager {
-    return this.std.command;
-  }
-
-  get event(): UIEventDispatcher {
-    return this.std.event;
-  }
-
-  get range(): RangeManager {
-    return this.std.range;
-  }
-
-  get selection(): SelectionManager {
-    return this.std.selection;
-  }
-
-  get view(): ViewStore {
-    return this.std.view;
   }
 
   @property({ attribute: false })

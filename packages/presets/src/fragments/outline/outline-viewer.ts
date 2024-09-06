@@ -1,12 +1,12 @@
 import {
   PropTypes,
-  WithDisposable,
   requiredProperties,
   SignalWatcher,
+  WithDisposable,
 } from '@blocksuite/block-std';
 import { NoteDisplayMode, scrollbarStyle } from '@blocksuite/blocks';
 import { signal } from '@lit-labs/preact-signals';
-import { LitElement, css, html, nothing } from 'lit';
+import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { repeat } from 'lit/directives/repeat.js';
@@ -27,19 +27,6 @@ export const AFFINE_OUTLINE_VIEWER = 'affine-outline-viewer';
 })
 @customElement(AFFINE_OUTLINE_VIEWER)
 export class OutlineViewer extends SignalWatcher(WithDisposable(LitElement)) {
-  private _activeHeadingId$ = signal<string | null>(null);
-
-  private _highlightMaskDisposable = () => {};
-
-  private _lockActiveHeadingId = false;
-
-  private _scrollPanel = () => {
-    this._activeItem?.scrollIntoView({
-      behavior: 'instant',
-      block: 'center',
-    });
-  };
-
   static override styles = css`
     :host {
       display: flex;
@@ -158,6 +145,19 @@ export class OutlineViewer extends SignalWatcher(WithDisposable(LitElement)) {
       }
     }
   `;
+
+  private _activeHeadingId$ = signal<string | null>(null);
+
+  private _highlightMaskDisposable = () => {};
+
+  private _lockActiveHeadingId = false;
+
+  private _scrollPanel = () => {
+    this._activeItem?.scrollIntoView({
+      behavior: 'instant',
+      block: 'center',
+    });
+  };
 
   private async _scrollToBlock(blockId: string) {
     this._lockActiveHeadingId = true;

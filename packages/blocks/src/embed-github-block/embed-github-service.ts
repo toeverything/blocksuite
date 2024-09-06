@@ -11,9 +11,9 @@ import { githubUrlRegex } from './embed-github-model.js';
 import { queryEmbedGithubApiData, queryEmbedGithubData } from './utils.js';
 
 export class EmbedGithubBlockService extends BlockService {
-  private static readonly linkPreviewer = new LinkPreviewer();
-
   static override readonly flavour = EmbedGithubBlockSchema.model.flavour;
+
+  private static readonly linkPreviewer = new LinkPreviewer();
 
   static setLinkPreviewEndpoint =
     EmbedGithubBlockService.linkPreviewer.setEndpoint;

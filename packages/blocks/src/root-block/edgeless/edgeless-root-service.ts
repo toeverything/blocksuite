@@ -1,10 +1,3 @@
-import type { SurfaceContext } from '@blocksuite/affine-block-surface';
-import type {
-  Overlay,
-  SurfaceBlockModel,
-} from '@blocksuite/affine-block-surface';
-import type { ReorderingDirection } from '@blocksuite/affine-block-surface';
-import type { ConnectorElementModel } from '@blocksuite/affine-model';
 import type { BlockStdScope } from '@blocksuite/block-std';
 import type {
   GfxController,
@@ -14,14 +7,21 @@ import type {
 } from '@blocksuite/block-std/gfx';
 import type { IBound } from '@blocksuite/global/utils';
 
-import { SurfaceGroupLikeModel } from '@blocksuite/affine-block-surface';
-import { MindmapElementModel } from '@blocksuite/affine-block-surface';
-import { ConnectionOverlay } from '@blocksuite/affine-block-surface';
 import {
   type ElementRenderer,
   elementRenderers,
+  type Overlay,
+  type ReorderingDirection,
+  type SurfaceBlockModel,
+  type SurfaceContext,
 } from '@blocksuite/affine-block-surface';
 import {
+  ConnectionOverlay,
+  MindmapElementModel,
+  SurfaceGroupLikeModel,
+} from '@blocksuite/affine-block-surface';
+import {
+  type ConnectorElementModel,
   type FrameBlockModel,
   type GroupElementModel,
   type ReferenceInfo,
@@ -62,6 +62,8 @@ import {
 } from './utils/zoom.js';
 
 export class EdgelessRootService extends RootService implements SurfaceContext {
+  static override readonly flavour = RootBlockSchema.model.flavour;
+
   private _frame: EdgelessFrameManager;
 
   private _selection: EdgelessSelectionManager;
@@ -71,10 +73,6 @@ export class EdgelessRootService extends RootService implements SurfaceContext {
   private _surface: SurfaceBlockModel;
 
   private _tool: EdgelessToolsManager;
-
-  static override readonly flavour = RootBlockSchema.model.flavour;
-
-  TemplateJob = TemplateJob;
 
   elementRenderers: Record<string, ElementRenderer> = elementRenderers;
 
@@ -109,6 +107,90 @@ export class EdgelessRootService extends RootService implements SurfaceContext {
     tagClicked: new Slot<{ tagId: string }>(),
     toolbarLocked: new Slot<boolean>(),
   };
+
+  TemplateJob = TemplateJob;
+
+  get blocks(): GfxBlockModel[] {
+    return this.layer.blocks;
+  }
+
+  get connectorOverlay() {
+    return this.overlays.connector as ConnectionOverlay;
+  }
+
+  /**
+   * sorted edgeless elements
+   */
+  get edgelessElements(): GfxModel[] {
+    return [...this.layer.canvasElements, ...this.layer.blocks].sort(
+      this.layer.compare
+    );
+  }
+
+  /**
+   * sorted canvas elements
+   */
+  get elements() {
+    return this.layer.canvasElements;
+  }
+
+  get frame() {
+    return this._frame;
+  }
+
+  get frameOverlay() {
+    return this.overlays.frame as FrameOverlay;
+  }
+
+  get frames() {
+    return this.layer.blocks.filter(
+      block => block.flavour === 'affine:frame'
+    ) as FrameBlockModel[];
+  }
+
+  get gfx(): GfxController {
+    return this.std.get(GfxControllerIdentifier);
+  }
+
+  override get host() {
+    return this.std.host;
+  }
+
+  get layer(): LayerManager {
+    return this.gfx.layer;
+  }
+
+  get locked() {
+    return this.viewport.locked;
+  }
+
+  set locked(locked: boolean) {
+    this.viewport.locked = locked;
+  }
+
+  get selection() {
+    return this._selection;
+  }
+
+  get snap() {
+    return this._snap;
+  }
+
+  get surface() {
+    return this._surface;
+  }
+
+  get tool() {
+    return this._tool;
+  }
+
+  get viewport() {
+    return this.std.get(GfxControllerIdentifier).viewport;
+  }
+
+  get zoom() {
+    return this.viewport.zoom;
+  }
 
   constructor(std: BlockStdScope, flavourProvider: { flavour: string }) {
     super(std, flavourProvider);
@@ -531,87 +613,5 @@ export class EdgelessRootService extends RootService implements SurfaceContext {
   zoomToFit() {
     const { centerX, centerY, zoom } = this.getFitToScreenData();
     this.viewport.setViewport(zoom, [centerX, centerY], true);
-  }
-
-  get blocks(): GfxBlockModel[] {
-    return this.layer.blocks;
-  }
-
-  get connectorOverlay() {
-    return this.overlays.connector as ConnectionOverlay;
-  }
-
-  /**
-   * sorted edgeless elements
-   */
-  get edgelessElements(): GfxModel[] {
-    return [...this.layer.canvasElements, ...this.layer.blocks].sort(
-      this.layer.compare
-    );
-  }
-
-  /**
-   * sorted canvas elements
-   */
-  get elements() {
-    return this.layer.canvasElements;
-  }
-
-  get frame() {
-    return this._frame;
-  }
-
-  get frameOverlay() {
-    return this.overlays.frame as FrameOverlay;
-  }
-
-  get frames() {
-    return this.layer.blocks.filter(
-      block => block.flavour === 'affine:frame'
-    ) as FrameBlockModel[];
-  }
-
-  get gfx(): GfxController {
-    return this.std.get(GfxControllerIdentifier);
-  }
-
-  override get host() {
-    return this.std.host;
-  }
-
-  get layer(): LayerManager {
-    return this.gfx.layer;
-  }
-
-  get locked() {
-    return this.viewport.locked;
-  }
-
-  set locked(locked: boolean) {
-    this.viewport.locked = locked;
-  }
-
-  get selection() {
-    return this._selection;
-  }
-
-  get snap() {
-    return this._snap;
-  }
-
-  get surface() {
-    return this._surface;
-  }
-
-  get tool() {
-    return this._tool;
-  }
-
-  get viewport() {
-    return this.std.get(GfxControllerIdentifier).viewport;
-  }
-
-  get zoom() {
-    return this.viewport.zoom;
   }
 }

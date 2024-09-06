@@ -7,6 +7,23 @@ export class AttachmentToolbarMoreMenuContext extends MenuContext {
     this.abortController.abort();
   };
 
+  get doc() {
+    return this.blockComponent.doc;
+  }
+
+  get host() {
+    return this.blockComponent.host;
+  }
+
+  get selectedBlockModels() {
+    if (this.blockComponent.model) return [this.blockComponent.model];
+    return [];
+  }
+
+  get std() {
+    return this.blockComponent.std;
+  }
+
   constructor(
     public blockComponent: AttachmentBlockComponent,
     public abortController: AbortController
@@ -24,22 +41,5 @@ export class AttachmentToolbarMoreMenuContext extends MenuContext {
 
   isSingle() {
     return true;
-  }
-
-  get doc() {
-    return this.blockComponent.doc;
-  }
-
-  get host() {
-    return this.blockComponent.host;
-  }
-
-  get selectedBlockModels() {
-    if (this.blockComponent.model) return [this.blockComponent.model];
-    return [];
-  }
-
-  get std() {
-    return this.blockComponent.std;
   }
 }

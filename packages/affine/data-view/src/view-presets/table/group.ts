@@ -1,11 +1,11 @@
 import { popFilterableSimpleMenu } from '@blocksuite/affine-components/context-menu';
 import {
   ShadowlessElement,
-  WithDisposable,
   SignalWatcher,
+  WithDisposable,
 } from '@blocksuite/block-std';
 import { PlusIcon } from '@blocksuite/icons/lit';
-import { type PropertyValues, css, html } from 'lit';
+import { css, html, type PropertyValues } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
@@ -61,6 +61,8 @@ const styles = css`
 export class TableGroup extends SignalWatcher(
   WithDisposable(ShadowlessElement)
 ) {
+  static override styles = styles;
+
   private clickAddRow = () => {
     this.view.rowAdd('end', this.group?.key);
     requestAnimationFrame(() => {
@@ -141,7 +143,9 @@ export class TableGroup extends SignalWatcher(
     `;
   };
 
-  static override styles = styles;
+  get rows() {
+    return this.group?.rows ?? this.view.rows$.value;
+  }
 
   private renderRows(ids: string[]) {
     return html`
@@ -193,10 +197,6 @@ export class TableGroup extends SignalWatcher(
     this.querySelectorAll('data-view-table-row').forEach(ele => {
       ele.requestUpdate();
     });
-  }
-
-  get rows() {
-    return this.group?.rows ?? this.view.rows$.value;
   }
 
   @property({ attribute: false })

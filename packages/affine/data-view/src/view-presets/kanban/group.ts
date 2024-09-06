@@ -1,8 +1,8 @@
 import { popFilterableSimpleMenu } from '@blocksuite/affine-components/context-menu';
 import {
   ShadowlessElement,
-  WithDisposable,
   SignalWatcher,
+  WithDisposable,
 } from '@blocksuite/block-std';
 import { AddCursorIcon } from '@blocksuite/icons/lit';
 import { css, nothing } from 'lit';
@@ -95,6 +95,8 @@ const styles = css`
 export class KanbanGroup extends SignalWatcher(
   WithDisposable(ShadowlessElement)
 ) {
+  static override styles = styles;
+
   private clickAddCard = () => {
     const id = this.view.addCard('end', this.group.key);
     requestAnimationFrame(() => {
@@ -151,8 +153,6 @@ export class KanbanGroup extends SignalWatcher(
       },
     ]);
   };
-
-  static override styles = styles;
 
   override render() {
     const cards = this.group.rows;

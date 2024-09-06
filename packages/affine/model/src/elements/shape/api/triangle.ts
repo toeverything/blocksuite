@@ -3,11 +3,11 @@ import type { IBound, IVec } from '@blocksuite/global/utils';
 
 import {
   Bound,
-  PointLocation,
   getCenterAreaBounds,
   getPointsFromBoundsWithRotation,
   linePolygonIntersects,
   pointInPolygon,
+  PointLocation,
   pointOnPolygonStoke,
   polygonGetPointTangent,
   polygonNearestPoint,

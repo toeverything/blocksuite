@@ -1,15 +1,15 @@
 import {
-  type InsertToPosition,
   insertPositionToIndex,
+  type InsertToPosition,
 } from '@blocksuite/affine-shared/utils';
-import { type ReadonlySignal, computed } from '@lit-labs/preact-signals';
+import { computed, type ReadonlySignal } from '@lit-labs/preact-signals';
 
 import type { TType } from '../../core/logical/typesystem.js';
 import type { ViewManager } from '../../core/view-manager/view-manager.js';
 import type { TableViewData } from './define.js';
 import type { StatCalcOpType } from './types.js';
 
-import { type FilterGroup, emptyFilterGroup } from '../../core/common/ast.js';
+import { emptyFilterGroup, type FilterGroup } from '../../core/common/ast.js';
 import { defaultGroupBy } from '../../core/common/group-by.js';
 import {
   GroupManager,
@@ -144,6 +144,18 @@ export class TableSingleView extends SingleViewBase<TableViewData> {
   readonly$ = computed(() => {
     return this.viewManager.readonly$.value;
   });
+
+  get groupProperties() {
+    return this.viewData$.value?.groupProperties ?? [];
+  }
+
+  get name(): string {
+    return this.viewData$.value?.name ?? '';
+  }
+
+  override get type(): string {
+    return this.viewData$.value?.mode ?? 'table';
+  }
 
   constructor(viewManager: ViewManager, viewId: string) {
     super(viewManager, viewId);
@@ -325,18 +337,6 @@ export class TableSingleView extends SingleViewBase<TableViewData> {
         filter,
       };
     });
-  }
-
-  get groupProperties() {
-    return this.viewData$.value?.groupProperties ?? [];
-  }
-
-  get name(): string {
-    return this.viewData$.value?.name ?? '';
-  }
-
-  override get type(): string {
-    return this.viewData$.value?.mode ?? 'table';
   }
 }
 

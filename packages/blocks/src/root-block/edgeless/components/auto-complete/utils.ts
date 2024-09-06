@@ -1,22 +1,22 @@
 import type { XYWH } from '@blocksuite/global/utils';
 
 import {
+  CommonUtils,
   type Options,
   Overlay,
   type RoughCanvas,
-  CommonUtils,
 } from '@blocksuite/affine-block-surface';
 import {
   type Connection,
-  type NoteBlockModel,
-  type ShapeName,
-  type ShapeStyle,
   getShapeRadius,
   getShapeType,
   GroupElementModel,
+  type NoteBlockModel,
   ShapeElementModel,
+  type ShapeName,
+  type ShapeStyle,
 } from '@blocksuite/affine-model';
-import { Bound, assertExists } from '@blocksuite/global/utils';
+import { assertExists, Bound } from '@blocksuite/global/utils';
 import { DocCollection } from '@blocksuite/store';
 
 import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';

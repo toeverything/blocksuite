@@ -1,7 +1,7 @@
 import {
+  isGfxBlockComponent,
   ShadowlessElement,
   WithDisposable,
-  isGfxBlockComponent,
 } from '@blocksuite/block-std';
 import { html, nothing } from 'lit';
 import { customElement, property, queryAsync } from 'lit/decorators.js';
@@ -17,15 +17,39 @@ import { getSyncedDocIcons } from '../utils.js';
 
 @customElement('affine-embed-synced-doc-card')
 export class EmbedSyncedDocCard extends WithDisposable(ShadowlessElement) {
-  private _dragging = false;
-
   static override styles = cardStyles;
+
+  private _dragging = false;
 
   cleanUpSurfaceRefRenderer = () => {
     if (this.surfaceRefRenderer) {
       this.surfaceRefService.removeRenderer(this.surfaceRefRenderer.id);
     }
   };
+
+  get blockState() {
+    return this.block.blockState;
+  }
+
+  get editorMode() {
+    return this.block.editorMode;
+  }
+
+  get host() {
+    return this.block.host;
+  }
+
+  get linkedDoc() {
+    return this.block.syncedDoc;
+  }
+
+  get model() {
+    return this.block.model;
+  }
+
+  get std() {
+    return this.block.std;
+  }
 
   private _handleClick(event: MouseEvent) {
     event.stopPropagation();
@@ -232,30 +256,6 @@ export class EmbedSyncedDocCard extends WithDisposable(ShadowlessElement) {
           : nothing}
       </div>
     `;
-  }
-
-  get blockState() {
-    return this.block.blockState;
-  }
-
-  get editorMode() {
-    return this.block.editorMode;
-  }
-
-  get host() {
-    return this.block.host;
-  }
-
-  get linkedDoc() {
-    return this.block.syncedDoc;
-  }
-
-  get model() {
-    return this.block.model;
-  }
-
-  get std() {
-    return this.block.std;
   }
 
   @queryAsync('.affine-embed-synced-doc-card-banner.render')

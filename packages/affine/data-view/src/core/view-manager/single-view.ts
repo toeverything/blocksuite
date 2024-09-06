@@ -1,8 +1,8 @@
 import type { InsertToPosition } from '@blocksuite/affine-shared/utils';
 
 import {
-  type ReadonlySignal,
   computed,
+  type ReadonlySignal,
   signal,
 } from '@lit-labs/preact-signals';
 
@@ -159,13 +159,25 @@ export abstract class SingleViewBase<
     );
   });
 
+  abstract columns$: ReadonlySignal<string[]>;
+
+  abstract columnsWithoutFilter$: ReadonlySignal<string[]>;
+
+  abstract detailColumns$: ReadonlySignal<string[]>;
+
+  abstract filter$: ReadonlySignal<FilterGroup>;
+
   filterVisible$ = computed(() => {
     return (this.filter$.value?.conditions.length ?? 0) > 0;
   });
 
+  abstract header$: ReadonlySignal<HeaderType>;
+
   name$: ReadonlySignal<string> = computed(() => {
     return this.viewData$.value?.name ?? '';
   });
+
+  abstract readonly$: ReadonlySignal<boolean>;
 
   rows$ = computed(() => {
     return this.filteredRows(this.searchString.value);
@@ -187,6 +199,28 @@ export abstract class SingleViewBase<
   viewData$ = computed(() => {
     return this.dataSource.viewDataGet(this.id) as ViewData | undefined;
   });
+
+  get allColumnMetas(): ColumnMeta[] {
+    return this.dataSource.addPropertyConfigList;
+  }
+
+  protected get dataSource() {
+    return this.viewManager.dataSource;
+  }
+
+  get detailSlots(): DetailSlots {
+    return this.dataSource.detailSlots;
+  }
+
+  get featureFlags$() {
+    return this.dataSource.featureFlags$;
+  }
+
+  abstract get type(): string;
+
+  get viewMeta() {
+    return this.dataSource.viewMetaGet(this.type);
+  }
 
   constructor(
     public viewManager: ViewManager,
@@ -280,6 +314,8 @@ export abstract class SingleViewBase<
     });
   }
 
+  abstract columnGet(columnId: string): Column;
+
   columnGetData(columnId: string): Record<string, unknown> {
     return this.dataSource.propertyGetData(columnId);
   }
@@ -293,6 +329,8 @@ export abstract class SingleViewBase<
       .getPropertyMeta(type)
       .config.type(this.columnGetData(columnId));
   }
+
+  abstract columnGetHide(columnId: string): boolean;
 
   columnGetIdByIndex(index: number): string {
     return this.columns$.value[index];
@@ -330,6 +368,8 @@ export abstract class SingleViewBase<
     return this.dataSource.propertyGetType(columnId);
   }
 
+  abstract columnMove(columnId: string, position: InsertToPosition): void;
+
   columnParseValueFromString(columnId: string, cellData: string) {
     const type = this.columnGetType(columnId);
     if (!type) {
@@ -345,6 +385,8 @@ export abstract class SingleViewBase<
   columnUpdateData(columnId: string, data: Record<string, unknown>): void {
     this.dataSource.propertyChangeData(columnId, data);
   }
+
+  abstract columnUpdateHide(columnId: string, hide: boolean): void;
 
   columnUpdateName(columnId: string, name: string): void {
     this.dataSource.propertyChangeName(columnId, name);
@@ -370,6 +412,8 @@ export abstract class SingleViewBase<
     return this.dataSource.getPropertyMeta(type).renderer.icon;
   }
 
+  abstract isShow(rowId: string): boolean;
+
   rowAdd(insertPosition: InsertToPosition | number): string {
     return this.dataSource.rowAdd(insertPosition);
   }
@@ -382,6 +426,10 @@ export abstract class SingleViewBase<
     return new RowBase(this, rowId);
   }
 
+  abstract rowGetNext(rowId: string): string;
+
+  abstract rowGetPrev(rowId: string): string;
+
   rowMove(rowId: string, position: InsertToPosition): void {
     this.dataSource.rowMove(rowId, position);
   }
@@ -389,6 +437,8 @@ export abstract class SingleViewBase<
   setSearch(str: string): void {
     this.searchString.value = str;
   }
+
+  abstract updateFilter(filter: FilterGroup): void;
 
   updateName(name: string): void {
     this.viewDataUpdate(() => {
@@ -401,54 +451,4 @@ export abstract class SingleViewBase<
   viewDataUpdate(updater: (viewData: ViewData) => Partial<ViewData>): void {
     this.dataSource.viewDataUpdate(this.id, updater);
   }
-
-  get allColumnMetas(): ColumnMeta[] {
-    return this.dataSource.addPropertyConfigList;
-  }
-
-  protected get dataSource() {
-    return this.viewManager.dataSource;
-  }
-
-  get detailSlots(): DetailSlots {
-    return this.dataSource.detailSlots;
-  }
-
-  get featureFlags$() {
-    return this.dataSource.featureFlags$;
-  }
-
-  get viewMeta() {
-    return this.dataSource.viewMetaGet(this.type);
-  }
-
-  abstract columnGet(columnId: string): Column;
-
-  abstract columnGetHide(columnId: string): boolean;
-
-  abstract columnMove(columnId: string, position: InsertToPosition): void;
-
-  abstract columnUpdateHide(columnId: string, hide: boolean): void;
-
-  abstract columns$: ReadonlySignal<string[]>;
-
-  abstract columnsWithoutFilter$: ReadonlySignal<string[]>;
-
-  abstract detailColumns$: ReadonlySignal<string[]>;
-
-  abstract filter$: ReadonlySignal<FilterGroup>;
-
-  abstract header$: ReadonlySignal<HeaderType>;
-
-  abstract isShow(rowId: string): boolean;
-
-  abstract readonly$: ReadonlySignal<boolean>;
-
-  abstract rowGetNext(rowId: string): string;
-
-  abstract rowGetPrev(rowId: string): string;
-
-  abstract get type(): string;
-
-  abstract updateFilter(filter: FilterGroup): void;
 }

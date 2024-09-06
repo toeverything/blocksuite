@@ -1,9 +1,9 @@
 import {
   ShadowlessElement,
-  WithDisposable,
   SignalWatcher,
+  WithDisposable,
 } from '@blocksuite/block-std';
-import { type PropertyValues, type TemplateResult, css, html } from 'lit';
+import { css, html, type PropertyValues, type TemplateResult } from 'lit';
 import {
   customElement,
   property,

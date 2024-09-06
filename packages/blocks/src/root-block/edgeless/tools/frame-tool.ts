@@ -3,7 +3,7 @@ import type { PointerEventState } from '@blocksuite/block-std';
 import type { IPoint, IVec } from '@blocksuite/global/utils';
 
 import { TelemetryProvider } from '@blocksuite/affine-shared/services';
-import { Bound, Vec, noop } from '@blocksuite/global/utils';
+import { Bound, noop, Vec } from '@blocksuite/global/utils';
 import { DocCollection } from '@blocksuite/store';
 
 import { getTopElements } from '../utils/tree.js';

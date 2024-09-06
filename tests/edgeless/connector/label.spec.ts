@@ -1,9 +1,7 @@
 import { assertExists } from '@global/utils/index.js';
-import { type Page, expect } from '@playwright/test';
+import { expect, type Page } from '@playwright/test';
 
 import {
-  SHORT_KEY,
-  Shape,
   addBasicConnectorElement,
   edgelessCommonSetup as commonSetup,
   createConnectorElement,
@@ -11,6 +9,8 @@ import {
   dragBetweenViewCoords,
   locatorComponentToolbar,
   setEdgelessTool,
+  Shape,
+  SHORT_KEY,
   toViewCoord,
   triggerComponentToolbarAction,
   type,

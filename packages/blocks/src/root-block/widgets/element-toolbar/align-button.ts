@@ -16,7 +16,7 @@ import {
 } from '@blocksuite/affine-model';
 import { WithDisposable } from '@blocksuite/block-std';
 import { Bound } from '@blocksuite/global/utils';
-import { LitElement, html, nothing } from 'lit';
+import { html, LitElement, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
@@ -74,6 +74,10 @@ const ALIGNMENT_LIST = [
 
 @customElement('edgeless-align-button')
 export class EdgelessAlignButton extends WithDisposable(LitElement) {
+  private get elements() {
+    return this.edgeless.service.selection.selectedElements;
+  }
+
   private _align(type: Alignment) {
     switch (type) {
       case Alignment.Left:
@@ -246,10 +250,6 @@ export class EdgelessAlignButton extends WithDisposable(LitElement) {
         xywh: bound.serialize(),
       });
     }
-  }
-
-  private get elements() {
-    return this.edgeless.service.selection.selectedElements;
   }
 
   override firstUpdated() {

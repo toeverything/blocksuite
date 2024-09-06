@@ -11,9 +11,9 @@ import { MenuContext } from '../../../configs/toolbar.js';
 import {
   isAttachmentBlock,
   isBookmarkBlock,
+  isEmbeddedLinkBlock,
   isEmbedLinkedDocBlock,
   isEmbedSyncedDocBlock,
-  isEmbeddedLinkBlock,
   isFrameBlock,
   isImageBlock,
   isNoteBlock,
@@ -29,6 +29,57 @@ export class ElementToolbarMoreMenuContext extends MenuContext {
   #single = false;
 
   edgeless!: EdgelessRootBlockComponent;
+
+  get doc() {
+    return this.edgeless.doc;
+  }
+
+  get firstBlockComponent() {
+    return this.getBlockComponent(this.firstElement.id);
+  }
+
+  override get firstElement() {
+    return this.selection.firstElement;
+  }
+
+  get host() {
+    return this.edgeless.host;
+  }
+
+  get selectedBlockModels() {
+    const [result, { selectedModels }] = this.std.command
+      .chain()
+      .getSelectedModels()
+      .run();
+
+    if (!result) return [];
+
+    return selectedModels ?? [];
+  }
+
+  get selectedElements() {
+    return this.selection.selectedElements;
+  }
+
+  get selection(): EdgelessSelectionManager {
+    return this.service.selection;
+  }
+
+  get service(): EdgelessRootService {
+    return this.edgeless.service;
+  }
+
+  get std() {
+    return this.edgeless.host.std;
+  }
+
+  get surface(): SurfaceBlockComponent {
+    return this.edgeless.surface;
+  }
+
+  get view() {
+    return this.host.view;
+  }
 
   constructor(edgeless: EdgelessRootBlockComponent) {
     super();
@@ -95,56 +146,5 @@ export class ElementToolbarMoreMenuContext extends MenuContext {
       isAttachmentBlock(model) ||
       isEmbeddedLinkBlock(model)
     );
-  }
-
-  get doc() {
-    return this.edgeless.doc;
-  }
-
-  get firstBlockComponent() {
-    return this.getBlockComponent(this.firstElement.id);
-  }
-
-  override get firstElement() {
-    return this.selection.firstElement;
-  }
-
-  get host() {
-    return this.edgeless.host;
-  }
-
-  get selectedBlockModels() {
-    const [result, { selectedModels }] = this.std.command
-      .chain()
-      .getSelectedModels()
-      .run();
-
-    if (!result) return [];
-
-    return selectedModels ?? [];
-  }
-
-  get selectedElements() {
-    return this.selection.selectedElements;
-  }
-
-  get selection(): EdgelessSelectionManager {
-    return this.service.selection;
-  }
-
-  get service(): EdgelessRootService {
-    return this.edgeless.service;
-  }
-
-  get std() {
-    return this.edgeless.host.std;
-  }
-
-  get surface(): SurfaceBlockComponent {
-    return this.edgeless.surface;
-  }
-
-  get view() {
-    return this.host.view;
   }
 }

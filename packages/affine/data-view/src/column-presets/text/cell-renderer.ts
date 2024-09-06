@@ -41,20 +41,6 @@ export class TextCell extends BaseCellRenderer<string> {
 }
 @customElement('affine-database-text-cell-editing')
 export class TextCellEditing extends BaseCellRenderer<string> {
-  private _keydown = (e: KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.isComposing) {
-      this._setValue();
-      setTimeout(() => {
-        this.selectCurrentCell(false);
-      });
-    }
-  };
-
-  private _setValue = (str: string = this._inputEle.value) => {
-    this._inputEle.value = `${this.value ?? ''}`;
-    this.onChange(str);
-  };
-
   static override styles = css`
     affine-database-text-cell-editing {
       display: block;
@@ -85,6 +71,20 @@ export class TextCellEditing extends BaseCellRenderer<string> {
       outline: none;
     }
   `;
+
+  private _keydown = (e: KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.isComposing) {
+      this._setValue();
+      setTimeout(() => {
+        this.selectCurrentCell(false);
+      });
+    }
+  };
+
+  private _setValue = (str: string = this._inputEle.value) => {
+    this._inputEle.value = `${this.value ?? ''}`;
+    this.onChange(str);
+  };
 
   focusEnd = () => {
     const end = this._inputEle.value.length;

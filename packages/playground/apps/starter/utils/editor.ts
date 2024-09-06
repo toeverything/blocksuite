@@ -6,8 +6,11 @@ import {
   QuickSearchProvider,
   SpecProvider,
 } from '@blocksuite/blocks';
-import { AffineFormatBarWidget } from '@blocksuite/blocks';
-import { DocModeProvider, toolbarDefaultConfig } from '@blocksuite/blocks';
+import {
+  AffineFormatBarWidget,
+  DocModeProvider,
+  toolbarDefaultConfig,
+} from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
 import { AffineEditorContainer, CommentPanel } from '@blocksuite/presets';
 

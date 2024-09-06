@@ -1,8 +1,8 @@
-import type { DocMode, DocModeProvider } from '@blocksuite/blocks';
-import type { PageRootService } from '@blocksuite/blocks';
-
 import {
+  type DocMode,
+  type DocModeProvider,
   type NotificationService,
+  type PageRootService,
   type QuickSearchService,
   toast,
 } from '@blocksuite/blocks';

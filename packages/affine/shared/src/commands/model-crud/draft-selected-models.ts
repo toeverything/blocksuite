@@ -1,7 +1,10 @@
 import type { Command } from '@blocksuite/block-std';
-import type { BlockModel } from '@blocksuite/store';
 
-import { type DraftModel, toDraftModel } from '@blocksuite/store';
+import {
+  type BlockModel,
+  type DraftModel,
+  toDraftModel,
+} from '@blocksuite/store';
 
 export const draftSelectedModelsCommand: Command<
   'selectedModels',

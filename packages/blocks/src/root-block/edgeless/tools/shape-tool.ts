@@ -1,5 +1,4 @@
-import type { ShapeElementModel } from '@blocksuite/affine-model';
-import type { ShapeName } from '@blocksuite/affine-model';
+import type { ShapeElementModel, ShapeName } from '@blocksuite/affine-model';
 import type { PointerEventState } from '@blocksuite/block-std';
 import type { IVec } from '@blocksuite/global/utils';
 
@@ -12,8 +11,7 @@ import {
 } from '@blocksuite/affine-model';
 import { TelemetryProvider } from '@blocksuite/affine-shared/services';
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
-import { Bound } from '@blocksuite/global/utils';
-import { noop } from '@blocksuite/global/utils';
+import { Bound, noop } from '@blocksuite/global/utils';
 
 import type { SelectionArea } from '../services/tools-manager.js';
 import type { EdgelessTool } from '../types.js';
@@ -36,8 +34,6 @@ export type ShapeTool = {
 export class ShapeToolController extends EdgelessToolController<ShapeTool> {
   private _disableOverlay = false;
 
-  protected override _draggingArea: SelectionArea | null = null;
-
   private _draggingElement: ShapeElementModel | null = null;
 
   private _draggingElementId: string | null = null;
@@ -49,6 +45,8 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
 
   // shape overlay
   private _shapeOverlay: ShapeOverlay | null = null;
+
+  protected override _draggingArea: SelectionArea | null = null;
 
   readonly tool: ShapeTool = {
     type: 'shape',

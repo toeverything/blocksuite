@@ -1,5 +1,4 @@
-import { Bound } from '@blocksuite/global/utils';
-import { assertExists } from '@blocksuite/global/utils';
+import { assertExists, Bound } from '@blocksuite/global/utils';
 import {
   type ReactiveController,
   type ReactiveControllerHost,
@@ -12,16 +11,16 @@ import {
   touchResolver,
 } from './event-resolver.js';
 import {
-  type DraggingInfo,
   createShapeDraggingOverlay,
   defaultInfo,
+  type DraggingInfo,
 } from './overlay-factory.js';
 import {
+  defaultIsValidMove,
   type EdgelessDraggableElementHost,
   type EdgelessDraggableElementOptions,
   type ElementInfo,
   type OverlayLayer,
-  defaultIsValidMove,
 } from './types.js';
 
 interface ReactiveState<T> {

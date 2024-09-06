@@ -3,10 +3,10 @@ import { describe, expect, test, vi } from 'vitest';
 import * as Y from 'yjs';
 
 import {
-  Schema,
-  type SchemaToModel,
   defineBlockSchema,
   internalPrimitives,
+  Schema,
+  type SchemaToModel,
 } from '../schema/index.js';
 import { Block, type YBlock } from '../store/doc/block/index.js';
 import { DocCollection, IdGeneratorType } from '../store/index.js';

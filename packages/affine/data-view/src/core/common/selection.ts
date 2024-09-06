@@ -72,6 +72,10 @@ export class DatabaseSelection extends BaseSelection {
 
   readonly viewSelection: DataViewSelection;
 
+  get viewId() {
+    return this.viewSelection.viewId;
+  }
+
   constructor({
     blockId,
     viewSelection,
@@ -115,10 +119,6 @@ export class DatabaseSelection extends BaseSelection {
       blockId: this.blockId,
       viewSelection: this.viewSelection,
     };
-  }
-
-  get viewId() {
-    return this.viewSelection.viewId;
   }
 }
 

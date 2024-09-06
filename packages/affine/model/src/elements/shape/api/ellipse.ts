@@ -1,19 +1,17 @@
 import type { PointTestOptions } from '@blocksuite/block-std/gfx';
-import type { IBound } from '@blocksuite/global/utils';
 
 import {
-  type IVec,
   clamp,
   getPointsFromBoundsWithRotation,
+  type IBound,
+  type IVec,
   lineEllipseIntersects,
   pointInEllipse,
   pointInPolygon,
   rotatePoints,
   toRadian,
 } from '@blocksuite/global/utils';
-import { Vec } from '@blocksuite/global/utils';
-import { Bound } from '@blocksuite/global/utils';
-import { PointLocation } from '@blocksuite/global/utils';
+import { Bound, PointLocation, Vec } from '@blocksuite/global/utils';
 
 import type { ShapeElementModel } from '../shape.js';
 

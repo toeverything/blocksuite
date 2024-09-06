@@ -1,12 +1,12 @@
 import { getScrollContainer } from '@blocksuite/affine-shared/utils';
 import {
   ShadowlessElement,
-  WithDisposable,
   SignalWatcher,
+  WithDisposable,
 } from '@blocksuite/block-std';
 import { PlusIcon } from '@blocksuite/icons/lit';
 import { autoUpdate } from '@floating-ui/dom';
-import { type TemplateResult, nothing } from 'lit';
+import { nothing, type TemplateResult } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -22,6 +22,8 @@ import { styles } from './styles.js';
 export class DatabaseColumnHeader extends SignalWatcher(
   WithDisposable(ShadowlessElement)
 ) {
+  static override styles = styles;
+
   private _onAddColumn = (e: MouseEvent) => {
     if (this.readonly) return;
     this.tableViewManager.columnAdd('end');
@@ -34,8 +36,6 @@ export class DatabaseColumnHeader extends SignalWatcher(
 
   private preAutoSet = 0;
 
-  static override styles = styles;
-
   editLastColumnTitle = () => {
     const columns = this.querySelectorAll('affine-database-header-column');
     const column = columns.item(columns.length - 1);
@@ -44,6 +44,10 @@ export class DatabaseColumnHeader extends SignalWatcher(
   };
 
   preMove = 0;
+
+  private get readonly() {
+    return this.tableViewManager.readonly$.value;
+  }
 
   private autoSetHeaderPosition(
     group: TableGroup,
@@ -71,10 +75,6 @@ export class DatabaseColumnHeader extends SignalWatcher(
       this.preAutoSet = 0;
       this.autoSetHeaderPosition(group, scrollContainer);
     });
-  }
-
-  private get readonly() {
-    return this.tableViewManager.readonly$.value;
   }
 
   override connectedCallback() {

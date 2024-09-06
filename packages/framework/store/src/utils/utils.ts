@@ -1,7 +1,6 @@
 import type { z } from 'zod';
 
-import type { BlockModel } from '../schema/base.js';
-import type { BlockSchema } from '../schema/base.js';
+import type { BlockModel, BlockSchema } from '../schema/base.js';
 import type { YBlock } from '../store/doc/block/index.js';
 import type { BlockProps } from '../store/doc/block-collection.js';
 

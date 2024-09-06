@@ -1,10 +1,10 @@
 import { undoByClick } from '../utils/actions/click.js';
 import {
-  Shape,
+  createShapeElement,
   dragBetweenViewCoords,
   edgelessCommonSetup,
+  Shape,
 } from '../utils/actions/edgeless.js';
-import { createShapeElement } from '../utils/actions/edgeless.js';
 import { waitNextFrame } from '../utils/actions/misc.js';
 import { assertSelectedBound } from '../utils/asserts.js';
 import { test } from '../utils/playwright.js';

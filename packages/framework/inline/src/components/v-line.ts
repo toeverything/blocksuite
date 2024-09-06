@@ -1,6 +1,6 @@
 import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 import { assertExists } from '@blocksuite/global/utils';
-import { LitElement, type TemplateResult, html } from 'lit';
+import { html, LitElement, type TemplateResult } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
@@ -12,6 +12,37 @@ import { EmbedGap } from './embed-gap.js';
 
 @customElement('v-line')
 export class VLine extends LitElement {
+  get inlineEditor() {
+    const rootElement = this.closest(
+      `[${INLINE_ROOT_ATTR}]`
+    ) as InlineRootElement;
+    assertExists(rootElement, 'v-line must be inside a v-root');
+    const inlineEditor = rootElement.inlineEditor;
+    assertExists(
+      inlineEditor,
+      'v-line must be inside a v-root with inline-editor'
+    );
+
+    return inlineEditor;
+  }
+
+  get vElements() {
+    return Array.from(this.querySelectorAll('v-element'));
+  }
+
+  get vTextContent() {
+    return this.vElements.reduce((acc, el) => acc + el.delta.insert, '');
+  }
+
+  get vTextLength() {
+    return this.vElements.reduce((acc, el) => acc + el.delta.insert.length, 0);
+  }
+
+  // you should use vElements.length or vTextLength because v-element corresponds to the actual delta
+  get vTexts() {
+    return Array.from(this.querySelectorAll('v-text'));
+  }
+
   override createRenderRoot() {
     return this;
   }
@@ -96,37 +127,6 @@ export class VLine extends LitElement {
       padding: '0 0.5px',
       display: 'inline-block',
     })}>${renderElements}</div>`;
-  }
-
-  get inlineEditor() {
-    const rootElement = this.closest(
-      `[${INLINE_ROOT_ATTR}]`
-    ) as InlineRootElement;
-    assertExists(rootElement, 'v-line must be inside a v-root');
-    const inlineEditor = rootElement.inlineEditor;
-    assertExists(
-      inlineEditor,
-      'v-line must be inside a v-root with inline-editor'
-    );
-
-    return inlineEditor;
-  }
-
-  get vElements() {
-    return Array.from(this.querySelectorAll('v-element'));
-  }
-
-  get vTextContent() {
-    return this.vElements.reduce((acc, el) => acc + el.delta.insert, '');
-  }
-
-  get vTextLength() {
-    return this.vElements.reduce((acc, el) => acc + el.delta.insert.length, 0);
-  }
-
-  // you should use vElements.length or vTextLength because v-element corresponds to the actual delta
-  get vTexts() {
-    return Array.from(this.querySelectorAll('v-text'));
   }
 
   @property({ attribute: false })

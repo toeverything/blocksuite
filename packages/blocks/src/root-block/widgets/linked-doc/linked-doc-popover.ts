@@ -3,7 +3,7 @@ import type { EditorHost } from '@blocksuite/block-std';
 
 import { MoreHorizontalIcon } from '@blocksuite/affine-components/icons';
 import { WithDisposable } from '@blocksuite/block-std';
-import { LitElement, html, nothing } from 'lit';
+import { html, LitElement, nothing } from 'lit';
 import { customElement, query, queryAll, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
@@ -20,6 +20,8 @@ import { styles } from './styles.js';
 
 @customElement('affine-linked-doc-popover')
 export class LinkedDocPopover extends WithDisposable(LitElement) {
+  static override styles = styles;
+
   private _abort = () => {
     // remove popover dom
     this.abortController.abort();
@@ -34,23 +36,6 @@ export class LinkedDocPopover extends WithDisposable(LitElement) {
   private _expanded = new Map<string, boolean>();
 
   private _startRange = this.inlineEditor.getInlineRange();
-
-  static override styles = styles;
-
-  constructor(
-    private triggerKey: string,
-    private getMenus: (
-      query: string,
-      abort: () => void,
-      editorHost: EditorHost,
-      inlineEditor: AffineInlineEditor
-    ) => Promise<LinkedMenuGroup[]>,
-    private editorHost: EditorHost,
-    private inlineEditor: AffineInlineEditor,
-    private abortController: AbortController
-  ) {
-    super();
-  }
 
   private get _actionGroup() {
     return this._linkedDocGroup.map(group => {
@@ -67,6 +52,25 @@ export class LinkedDocPopover extends WithDisposable(LitElement) {
         group.items.map(item => ({ ...item, groupName: group.name }))
       )
       .flat();
+  }
+
+  private get _query() {
+    return getQuery(this.inlineEditor, this._startRange);
+  }
+
+  constructor(
+    private triggerKey: string,
+    private getMenus: (
+      query: string,
+      abort: () => void,
+      editorHost: EditorHost,
+      inlineEditor: AffineInlineEditor
+    ) => Promise<LinkedMenuGroup[]>,
+    private editorHost: EditorHost,
+    private inlineEditor: AffineInlineEditor,
+    private abortController: AbortController
+  ) {
+    super();
   }
 
   private _getActionItems(group: LinkedMenuGroup) {
@@ -92,10 +96,6 @@ export class LinkedDocPopover extends WithDisposable(LitElement) {
 
   private _isTextOverflowing(element: HTMLElement) {
     return element.scrollWidth > element.clientWidth;
-  }
-
-  private get _query() {
-    return getQuery(this.inlineEditor, this._startRange);
   }
 
   private async _updateLinkedDocGroup() {

@@ -1,10 +1,10 @@
 import type {
+  BlockComponent,
   Chain,
   Command,
   CommandKeyToData,
   InitCommandCtx,
 } from '@blocksuite/block-std';
-import type { BlockComponent } from '@blocksuite/block-std';
 
 import { BLOCK_ID_ATTR } from '@blocksuite/affine-shared/consts';
 import { assertExists } from '@blocksuite/global/utils';

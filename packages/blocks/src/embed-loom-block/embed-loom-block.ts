@@ -19,13 +19,13 @@ export class EmbedLoomBlockComponent extends EmbedBlockComponent<
   EmbedLoomModel,
   EmbedLoomBlockService
 > {
+  static override styles = styles;
+
   override _cardStyle: (typeof EmbedLoomStyles)[number] = 'video';
 
   protected _isDragging = false;
 
   protected _isResizing = false;
-
-  static override styles = styles;
 
   open = () => {
     let link = this.model.url;
@@ -41,11 +41,6 @@ export class EmbedLoomBlockComponent extends EmbedBlockComponent<
     );
   };
 
-  protected _handleClick(event: MouseEvent) {
-    event.stopPropagation();
-    this._selectBlock();
-  }
-
   private _handleDoubleClick(event: MouseEvent) {
     event.stopPropagation();
     this.open();
@@ -57,6 +52,11 @@ export class EmbedLoomBlockComponent extends EmbedBlockComponent<
       blockId: this.blockId,
     });
     selectionManager.setGroup('note', [blockSelection]);
+  }
+
+  protected _handleClick(event: MouseEvent) {
+    event.stopPropagation();
+    this._selectBlock();
   }
 
   override connectedCallback() {

@@ -9,7 +9,7 @@ import { renderGroups } from '@blocksuite/affine-components/toolbar';
 import { WithDisposable } from '@blocksuite/block-std';
 import { assertExists, noop } from '@blocksuite/global/utils';
 import { flip, offset } from '@floating-ui/dom';
-import { LitElement, css, html } from 'lit';
+import { css, html, LitElement } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
@@ -17,10 +17,6 @@ import type { CodeBlockToolbarContext } from '../context.js';
 
 @customElement('affine-code-toolbar')
 export class AffineCodeToolbar extends WithDisposable(LitElement) {
-  private _currentOpenMenu: AbortController | null = null;
-
-  private _popMenuAbortController: AbortController | null = null;
-
   static override styles = css`
     :host {
       position: absolute;
@@ -42,6 +38,10 @@ export class AffineCodeToolbar extends WithDisposable(LitElement) {
       border-radius: 4px;
     }
   `;
+
+  private _currentOpenMenu: AbortController | null = null;
+
+  private _popMenuAbortController: AbortController | null = null;
 
   closeCurrentMenu = () => {
     if (this._currentOpenMenu && !this._currentOpenMenu.signal.aborted) {

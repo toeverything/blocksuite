@@ -1,7 +1,9 @@
 import type { EditorHost } from '@blocksuite/block-std';
 import type { DetailSlotProps } from '@blocksuite/data-view';
-import type { KanbanSingleView } from '@blocksuite/data-view/view-presets';
-import type { TableSingleView } from '@blocksuite/data-view/view-presets';
+import type {
+  KanbanSingleView,
+  TableSingleView,
+} from '@blocksuite/data-view/view-presets';
 
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { css, html } from 'lit';
@@ -57,6 +59,26 @@ export class BlockRenderer
       height: 16px;
     }
   `;
+
+  get attributeRenderer() {
+    return this.inlineManager.getRenderer();
+  }
+
+  get attributesSchema() {
+    return this.inlineManager.getSchema();
+  }
+
+  get inlineManager() {
+    return this.service.inlineManager;
+  }
+
+  get model() {
+    return this.host?.doc.getBlock(this.rowId)?.model;
+  }
+
+  get service() {
+    return this.host.std.getService('affine:database');
+  }
 
   override connectedCallback() {
     super.connectedCallback();
@@ -125,26 +147,6 @@ export class BlockRenderer
     return html` <div class="database-block-detail-header-icon">
       ${this.view.cellGetValue(this.rowId, iconColumn)}
     </div>`;
-  }
-
-  get attributeRenderer() {
-    return this.inlineManager.getRenderer();
-  }
-
-  get attributesSchema() {
-    return this.inlineManager.getSchema();
-  }
-
-  get inlineManager() {
-    return this.service.inlineManager;
-  }
-
-  get model() {
-    return this.host?.doc.getBlock(this.rowId)?.model;
-  }
-
-  get service() {
-    return this.host.std.getService('affine:database');
   }
 
   @property({ attribute: false })

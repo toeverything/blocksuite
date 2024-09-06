@@ -1,4 +1,4 @@
-import { type ReadonlySignal, computed } from '@lit-labs/preact-signals';
+import { computed, type ReadonlySignal } from '@lit-labs/preact-signals';
 
 import type { CellRenderer } from '../column/index.js';
 import type { TType } from '../logical/typesystem.js';
@@ -108,6 +108,42 @@ export abstract class ColumnBase<
     return this.view.columnGetType(this.id)!;
   });
 
+  get delete(): (() => void) | undefined {
+    return () => this.view.columnDelete(this.id);
+  }
+
+  get duplicate(): (() => void) | undefined {
+    return () => this.view.columnDuplicate(this.id);
+  }
+
+  get icon(): UniComponent | undefined {
+    if (!this.type$.value) return undefined;
+    return this.view.getIcon(this.type$.value);
+  }
+
+  get id(): string {
+    return this.columnId;
+  }
+
+  get index(): number {
+    return this.view.columnGetIndex(this.id);
+  }
+
+  get isFirst(): boolean {
+    return this.view.columnGetIndex(this.id) === 0;
+  }
+
+  get isLast(): boolean {
+    return (
+      this.view.columnGetIndex(this.id) ===
+      this.view.columnManagerList$.value.length - 1
+    );
+  }
+
+  get updateType(): undefined | ((type: string) => void) {
+    return type => this.view.columnUpdateType(this.id, type);
+  }
+
   constructor(
     public view: SingleView,
     public columnId: string
@@ -154,41 +190,5 @@ export abstract class ColumnBase<
 
   updateName(name: string): void {
     this.view.columnUpdateName(this.id, name);
-  }
-
-  get delete(): (() => void) | undefined {
-    return () => this.view.columnDelete(this.id);
-  }
-
-  get duplicate(): (() => void) | undefined {
-    return () => this.view.columnDuplicate(this.id);
-  }
-
-  get icon(): UniComponent | undefined {
-    if (!this.type$.value) return undefined;
-    return this.view.getIcon(this.type$.value);
-  }
-
-  get id(): string {
-    return this.columnId;
-  }
-
-  get index(): number {
-    return this.view.columnGetIndex(this.id);
-  }
-
-  get isFirst(): boolean {
-    return this.view.columnGetIndex(this.id) === 0;
-  }
-
-  get isLast(): boolean {
-    return (
-      this.view.columnGetIndex(this.id) ===
-      this.view.columnManagerList$.value.length - 1
-    );
-  }
-
-  get updateType(): undefined | ((type: string) => void) {
-    return type => this.view.columnUpdateType(this.id, type);
   }
 }

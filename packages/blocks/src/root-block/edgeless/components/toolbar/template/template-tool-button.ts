@@ -7,7 +7,7 @@ import {
   offset,
   shift,
 } from '@floating-ui/dom';
-import { LitElement, css, html } from 'lit';
+import { css, html, LitElement } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { repeat } from 'lit/directives/repeat.js';
@@ -23,10 +23,6 @@ import './template-panel.js';
 export class EdgelessTemplateButton extends EdgelessToolbarToolMixin(
   LitElement
 ) {
-  private _cleanup: (() => void) | null = null;
-
-  private _prevTool: EdgelessTool | null = null;
-
   static override styles = css`
     :host {
       position: relative;
@@ -120,9 +116,18 @@ export class EdgelessTemplateButton extends EdgelessToolbarToolMixin(
     }
   `;
 
+  private _cleanup: (() => void) | null = null;
+
+  private _prevTool: EdgelessTool | null = null;
+
   override enableActiveBackground = true;
 
   override type: EdgelessTool['type'] = 'template';
+
+  get cards() {
+    const { theme } = this;
+    return [TemplateCard1[theme], TemplateCard2[theme], TemplateCard3[theme]];
+  }
 
   private _closePanel() {
     if (this._openedPanel) {
@@ -210,11 +215,6 @@ export class EdgelessTemplateButton extends EdgelessToolbarToolMixin(
         )}
       </div>
     </edgeless-toolbar-button>`;
-  }
-
-  get cards() {
-    const { theme } = this;
-    return [TemplateCard1[theme], TemplateCard2[theme], TemplateCard3[theme]];
   }
 
   @state()

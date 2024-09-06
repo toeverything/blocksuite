@@ -135,6 +135,22 @@ export class SyncPeer {
     subdocsLoadQueue: new PriorityAsyncQueue([], this.priorityTarget),
   };
 
+  get name() {
+    return this.source.name;
+  }
+
+  private set status(s: DocPeerStatus) {
+    if (!isEqual(s, this._status)) {
+      this.logger.debug(`doc-peer:${this.name} status change`, s);
+      this._status = s;
+      this.onStatusChange.emit(s);
+    }
+  }
+
+  get status() {
+    return this._status;
+  }
+
   constructor(
     readonly rootDoc: Doc,
     readonly source: DocSource,
@@ -147,14 +163,6 @@ export class SyncPeer {
       // should not reach here
       console.error(err);
     });
-  }
-
-  private set status(s: DocPeerStatus) {
-    if (!isEqual(s, this._status)) {
-      this.logger.debug(`doc-peer:${this.name} status change`, s);
-      this._status = s;
-      this.onStatusChange.emit(s);
-    }
   }
 
   async connectDoc(doc: Doc, abort: AbortSignal) {
@@ -440,13 +448,5 @@ export class SyncPeer {
         }),
       ]);
     }
-  }
-
-  get name() {
-    return this.source.name;
-  }
-
-  get status() {
-    return this._status;
   }
 }

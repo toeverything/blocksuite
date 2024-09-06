@@ -1,7 +1,7 @@
 import type { Connection, GfxCompatibleProps } from '@blocksuite/affine-model';
-import type { EditorHost } from '@blocksuite/block-std';
 import type {
   BlockStdScope,
+  EditorHost,
   SurfaceSelection,
   UIEventStateContext,
 } from '@blocksuite/block-std';
@@ -9,12 +9,12 @@ import type { SerializedElement } from '@blocksuite/block-std/gfx';
 import type { IBound, IVec, SerializedXYWH } from '@blocksuite/global/utils';
 
 import {
-  compareLayer,
-  SurfaceGroupLikeModel,
   CanvasElementType,
   CommonUtils,
-  TextUtils,
+  compareLayer,
   SortOrder,
+  SurfaceGroupLikeModel,
+  TextUtils,
 } from '@blocksuite/affine-block-surface';
 import { BookmarkStyles } from '@blocksuite/affine-model';
 import {
@@ -29,21 +29,21 @@ import {
 } from '@blocksuite/affine-shared/utils';
 import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 import {
-  Bound,
-  DisposableGroup,
-  Vec,
   assertExists,
   assertType,
+  Bound,
+  DisposableGroup,
   getCommonBound,
   nToLast,
+  Vec,
 } from '@blocksuite/global/utils';
 import {
   type BlockSnapshot,
   BlockSnapshotSchema,
   DocCollection,
+  fromJSON,
   Job,
   type SliceSnapshot,
-  fromJSON,
 } from '@blocksuite/store';
 import DOMPurify from 'dompurify';
 
@@ -373,6 +373,38 @@ export class EdgelessClipboardController extends PageClipboard {
       await this._pasteTextContentAsNote(data.getData('text/plain'));
     }
   };
+
+  private get _exportManager() {
+    return this._rootService.exportManager;
+  }
+
+  private get _rootService() {
+    return this.std.getService('affine:page');
+  }
+
+  private get doc() {
+    return this.host.doc;
+  }
+
+  private get edgeless() {
+    return this.host;
+  }
+
+  private get selectionManager() {
+    return this.host.service.selection;
+  }
+
+  private get std() {
+    return this.host.std;
+  }
+
+  private get surface() {
+    return this.host.surface;
+  }
+
+  private get toolManager() {
+    return this.host.tools;
+  }
 
   constructor(public override host: EdgelessRootBlockComponent) {
     super(host);
@@ -994,10 +1026,6 @@ export class EdgelessClipboardController extends PageClipboard {
     });
   }
 
-  private get _exportManager() {
-    return this._rootService.exportManager;
-  }
-
   private async _pasteShapesAndBlocks(
     elementsRawData: (SerializedElement | BlockSnapshot)[]
   ) {
@@ -1080,10 +1108,6 @@ export class EdgelessClipboardController extends PageClipboard {
     });
   }
 
-  private get _rootService() {
-    return this.std.getService('affine:page');
-  }
-
   private _updatePastedElementsIndex(
     elements: BlockSuite.EdgelessModel[],
     originalIndexes: Map<string, string>
@@ -1129,30 +1153,6 @@ export class EdgelessClipboardController extends PageClipboard {
         index: newIndex,
       });
     });
-  }
-
-  private get doc() {
-    return this.host.doc;
-  }
-
-  private get edgeless() {
-    return this.host;
-  }
-
-  private get selectionManager() {
-    return this.host.service.selection;
-  }
-
-  private get std() {
-    return this.host.std;
-  }
-
-  private get surface() {
-    return this.host.surface;
-  }
-
-  private get toolManager() {
-    return this.host.tools;
   }
 
   copy() {

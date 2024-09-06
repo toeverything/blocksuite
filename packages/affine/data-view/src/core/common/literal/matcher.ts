@@ -2,8 +2,8 @@ import type { TType } from '../../logical/typesystem.js';
 
 import { Matcher } from '../../logical/matcher.js';
 import {
-  type UniComponent,
   renderUniLit,
+  type UniComponent,
 } from '../../utils/uni-component/uni-component.js';
 
 export const renderLiteral = (

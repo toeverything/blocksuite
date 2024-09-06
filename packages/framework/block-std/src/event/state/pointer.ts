@@ -33,6 +33,14 @@ export class PointerEventState extends UIEventState {
 
   override type = 'pointerState';
 
+  get x() {
+    return this.point.x;
+  }
+
+  get y() {
+    return this.point.y;
+  }
+
   constructor({ event, rect, startX, startY, last }: PointerEventStateOptions) {
     super(event);
 
@@ -53,14 +61,6 @@ export class PointerEventState extends UIEventState {
     };
     this.button = last?.button || event.button;
     this.pressure = event.pressure;
-  }
-
-  get x() {
-    return this.point.x;
-  }
-
-  get y() {
-    return this.point.y;
   }
 }
 

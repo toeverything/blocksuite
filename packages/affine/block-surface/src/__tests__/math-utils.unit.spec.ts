@@ -1,7 +1,7 @@
 import {
-  type IVec,
   almostEqual,
   isPointOnLineSegment,
+  type IVec,
   lineEllipseIntersects,
   lineIntersects,
   linePolygonIntersects,

@@ -1,9 +1,8 @@
-import { type Page, expect } from '@playwright/test';
+import { expect, type Page } from '@playwright/test';
 
 import { clickView, moveView } from '../utils/actions/click.js';
 import { dragBetweenCoords } from '../utils/actions/drag.js';
 import {
-  Shape,
   addNote,
   changeEdgelessNoteBackground,
   changeShapeFillColor,
@@ -13,6 +12,7 @@ import {
   dragBetweenViewCoords,
   edgelessCommonSetup,
   getEdgelessSelectedRectModel,
+  Shape,
   switchEditorMode,
   toViewCoord,
   triggerComponentToolbarAction,

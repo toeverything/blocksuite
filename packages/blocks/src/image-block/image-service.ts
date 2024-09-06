@@ -33,6 +33,10 @@ import { ImageEdgelessBlockComponent } from './image-edgeless-block.js';
 import { addSiblingImageBlock } from './utils.js';
 
 export class ImageBlockService extends BlockService {
+  static override readonly flavour = ImageBlockSchema.model.flavour;
+
+  static setImageProxyURL = setImageProxyMiddlewareURL;
+
   private _dragHandleOption: DragHandleOption = {
     flavour: ImageBlockSchema.model.flavour,
     edgeless: true,
@@ -155,13 +159,18 @@ export class ImageBlockService extends BlockService {
     },
   };
 
-  static override readonly flavour = ImageBlockSchema.model.flavour;
-
-  static setImageProxyURL = setImageProxyMiddlewareURL;
-
   fileDropManager!: FileDropManager;
 
   maxFileSize = 10 * 1000 * 1000; // 10MB (default)
+
+  get rootComponent(): RootBlockComponent | null {
+    const rootModel = this.doc.root;
+    if (!rootModel) return null;
+    const rootComponent = this.std.view.getBlock(
+      rootModel.id
+    ) as RootBlockComponent | null;
+    return rootComponent;
+  }
 
   override mounted(): void {
     super.mounted();
@@ -173,14 +182,5 @@ export class ImageBlockService extends BlockService {
     this.disposables.add(
       AffineDragHandleWidget.registerOption(this._dragHandleOption)
     );
-  }
-
-  get rootComponent(): RootBlockComponent | null {
-    const rootModel = this.doc.root;
-    if (!rootModel) return null;
-    const rootComponent = this.std.view.getBlock(
-      rootModel.id
-    ) as RootBlockComponent | null;
-    return rootComponent;
   }
 }

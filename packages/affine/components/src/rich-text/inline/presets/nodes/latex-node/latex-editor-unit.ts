@@ -8,6 +8,14 @@ import { styleMap } from 'lit/directives/style-map.js';
 
 @customElement('latex-editor-unit')
 export class LatexEditorUnit extends ShadowlessElement {
+  get latexMenu() {
+    return this.closest('latex-editor-menu');
+  }
+
+  get vElement() {
+    return this.closest('v-element');
+  }
+
   override render() {
     const plainContent = html`<span
       ><v-text .str=${this.delta.insert}></v-text
@@ -35,14 +43,6 @@ export class LatexEditorUnit extends ShadowlessElement {
         ></v-text>`;
       })}</span
     >`;
-  }
-
-  get latexMenu() {
-    return this.closest('latex-editor-menu');
-  }
-
-  get vElement() {
-    return this.closest('v-element');
   }
 
   @property({ attribute: false })

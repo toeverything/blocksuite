@@ -1,7 +1,7 @@
 import {
   type AffineTextAttributes,
-  type InlineSpecs,
   basicAffineInlineSpecs,
+  type InlineSpecs,
 } from '@blocksuite/affine-components/rich-text';
 import { html } from 'lit';
 import { z } from 'zod';

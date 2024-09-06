@@ -11,11 +11,11 @@ import '../declare-test-window.js';
 import { clickView } from './click.js';
 import { dragBetweenCoords } from './drag.js';
 import {
-  SHIFT_KEY,
-  SHORT_KEY,
   pressBackspace,
   pressEnter,
   selectAllByKeyboard,
+  SHIFT_KEY,
+  SHORT_KEY,
   type,
 } from './keyboard.js';
 import {

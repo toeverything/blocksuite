@@ -7,8 +7,8 @@ import {
 } from '@blocksuite/affine-components/context-menu';
 import {
   ShadowlessElement,
-  WithDisposable,
   SignalWatcher,
+  WithDisposable,
 } from '@blocksuite/block-std';
 import { ArrowRightSmallIcon, DeleteIcon } from '@blocksuite/icons/lit';
 import { css, html, unsafeCSS } from 'lit';

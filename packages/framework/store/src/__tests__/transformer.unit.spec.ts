@@ -5,9 +5,9 @@ import { MemoryBlobCRUD } from '../adapter/index.js';
 import { Text } from '../reactive/index.js';
 import {
   type BlockModel,
+  defineBlockSchema,
   Schema,
   type SchemaToModel,
-  defineBlockSchema,
 } from '../schema/index.js';
 import { DocCollection, IdGeneratorType } from '../store/index.js';
 import { AssetsManager, BaseBlockTransformer } from '../transformer/index.js';

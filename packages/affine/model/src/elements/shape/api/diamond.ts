@@ -1,14 +1,13 @@
 import type { PointTestOptions } from '@blocksuite/block-std/gfx';
-import type { IBound } from '@blocksuite/global/utils';
-import type { IVec } from '@blocksuite/global/utils';
+import type { IBound, IVec } from '@blocksuite/global/utils';
 
-import { Bound } from '@blocksuite/global/utils';
 import {
-  PointLocation,
+  Bound,
   getCenterAreaBounds,
   getPointsFromBoundsWithRotation,
   linePolygonIntersects,
   pointInPolygon,
+  PointLocation,
   pointOnPolygonStoke,
   polygonGetPointTangent,
   polygonNearestPoint,

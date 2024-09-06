@@ -1,6 +1,6 @@
 import { ShadowlessElement } from '@blocksuite/block-std';
 import * as icons from '@blocksuite/icons/lit';
-import { type TemplateResult, css, html } from 'lit';
+import { css, html, type TemplateResult } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 import { uniMap } from './uni-component/operation.js';

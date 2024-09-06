@@ -2,13 +2,13 @@ import { expect } from '@playwright/test';
 
 import * as actions from '../../utils/actions/edgeless.js';
 import {
-  Shape,
   addBasicConnectorElement,
   createConnectorElement,
   createShapeElement,
   dragBetweenCoords,
   enterPlaygroundRoom,
   initEmptyEdgelessState,
+  Shape,
   switchEditorMode,
   toModelCoord,
   waitNextFrame,

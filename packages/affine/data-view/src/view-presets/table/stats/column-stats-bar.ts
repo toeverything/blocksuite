@@ -1,7 +1,7 @@
 import {
   ShadowlessElement,
-  WithDisposable,
   SignalWatcher,
+  WithDisposable,
 } from '@blocksuite/block-std';
 import { css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';

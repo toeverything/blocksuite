@@ -10,6 +10,10 @@ import { EmbedHtmlBlockComponent } from './embed-html-block.js';
 export class EmbedEdgelessHtmlBlockComponent extends toEdgelessEmbedBlock(
   EmbedHtmlBlockComponent
 ) {
+  get rootService() {
+    return this.std.getService('affine:page') as EdgelessRootService;
+  }
+
   override renderGfxBlock() {
     const bound = Bound.deserialize(this.model.xywh);
     this._width = bound.w;
@@ -27,9 +31,5 @@ export class EmbedEdgelessHtmlBlockComponent extends toEdgelessEmbedBlock(
     };
 
     return this.renderPageContent();
-  }
-
-  get rootService() {
-    return this.std.getService('affine:page') as EdgelessRootService;
   }
 }

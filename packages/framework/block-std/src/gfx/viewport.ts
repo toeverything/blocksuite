@@ -1,10 +1,10 @@
 import {
   Bound,
+  clamp,
   type IPoint,
   type IVec,
   Slot,
   Vec,
-  clamp,
 } from '@blocksuite/global/utils';
 
 function cutoff(value: number, ref: number, sign: number) {
@@ -35,10 +35,6 @@ export class Viewport {
 
   protected _zoom: number = 1.0;
 
-  ZOOM_MAX = ZOOM_MAX;
-
-  ZOOM_MIN = ZOOM_MIN;
-
   sizeUpdated = new Slot<{
     width: number;
     height: number;
@@ -49,6 +45,108 @@ export class Viewport {
   viewportMoved = new Slot<IVec>();
 
   viewportUpdated = new Slot<{ zoom: number; center: IVec }>();
+
+  ZOOM_MAX = ZOOM_MAX;
+
+  ZOOM_MIN = ZOOM_MIN;
+
+  get boundingClientRect() {
+    return this._el.getBoundingClientRect();
+  }
+
+  get center() {
+    return this._center;
+  }
+
+  get centerX() {
+    return this._center.x;
+  }
+
+  get centerY() {
+    return this._center.y;
+  }
+
+  get height() {
+    return this._height;
+  }
+
+  get left() {
+    return this._left;
+  }
+
+  // Does not allow the user to move and zoom the canvas in copilot tool
+  get locked() {
+    return this._locked;
+  }
+
+  set locked(locked: boolean) {
+    this._locked = locked;
+  }
+
+  /**
+   * Note this is different from the zoom property.
+   * The editor itself may be scaled by outer container which is common in nested editor scenarios.
+   * This property is used to calculate the scale of the editor.
+   */
+  get scale() {
+    return this.boundingClientRect.width / this._el.offsetWidth;
+  }
+
+  get top() {
+    return this._top;
+  }
+
+  get translateX() {
+    return -this.viewportX * this.zoom;
+  }
+
+  get translateY() {
+    return -this.viewportY * this.zoom;
+  }
+
+  get viewportBounds() {
+    const { viewportMinXY, viewportMaxXY } = this;
+
+    return Bound.from({
+      ...viewportMinXY,
+      w: viewportMaxXY.x - viewportMinXY.x,
+      h: viewportMaxXY.y - viewportMinXY.y,
+    });
+  }
+
+  get viewportMaxXY() {
+    const { centerX, centerY, width, height, zoom } = this;
+    return {
+      x: centerX + width / 2 / zoom,
+      y: centerY + height / 2 / zoom,
+    };
+  }
+
+  get viewportMinXY() {
+    const { centerX, centerY, width, height, zoom } = this;
+    return {
+      x: centerX - width / 2 / zoom,
+      y: centerY - height / 2 / zoom,
+    };
+  }
+
+  get viewportX() {
+    const { centerX, width, zoom } = this;
+    return centerX - width / 2 / zoom;
+  }
+
+  get viewportY() {
+    const { centerY, height, zoom } = this;
+    return centerY - height / 2 / zoom;
+  }
+
+  get width() {
+    return this._width;
+  }
+
+  get zoom() {
+    return this._zoom;
+  }
 
   applyDeltaCenter(deltaX: number, deltaY: number) {
     this.setCenter(this.centerX + deltaX, this.centerY + deltaY);
@@ -248,103 +346,5 @@ export class Viewport {
   toViewCoordFromClientCoord([x, y]: IVec): IVec {
     const { left, top } = this;
     return [x - left, y - top];
-  }
-
-  get boundingClientRect() {
-    return this._el.getBoundingClientRect();
-  }
-
-  get center() {
-    return this._center;
-  }
-
-  get centerX() {
-    return this._center.x;
-  }
-
-  get centerY() {
-    return this._center.y;
-  }
-
-  get height() {
-    return this._height;
-  }
-
-  get left() {
-    return this._left;
-  }
-
-  // Does not allow the user to move and zoom the canvas in copilot tool
-  get locked() {
-    return this._locked;
-  }
-
-  set locked(locked: boolean) {
-    this._locked = locked;
-  }
-
-  /**
-   * Note this is different from the zoom property.
-   * The editor itself may be scaled by outer container which is common in nested editor scenarios.
-   * This property is used to calculate the scale of the editor.
-   */
-  get scale() {
-    return this.boundingClientRect.width / this._el.offsetWidth;
-  }
-
-  get top() {
-    return this._top;
-  }
-
-  get translateX() {
-    return -this.viewportX * this.zoom;
-  }
-
-  get translateY() {
-    return -this.viewportY * this.zoom;
-  }
-
-  get viewportBounds() {
-    const { viewportMinXY, viewportMaxXY } = this;
-
-    return Bound.from({
-      ...viewportMinXY,
-      w: viewportMaxXY.x - viewportMinXY.x,
-      h: viewportMaxXY.y - viewportMinXY.y,
-    });
-  }
-
-  get viewportMaxXY() {
-    const { centerX, centerY, width, height, zoom } = this;
-    return {
-      x: centerX + width / 2 / zoom,
-      y: centerY + height / 2 / zoom,
-    };
-  }
-
-  get viewportMinXY() {
-    const { centerX, centerY, width, height, zoom } = this;
-    return {
-      x: centerX - width / 2 / zoom,
-      y: centerY - height / 2 / zoom,
-    };
-  }
-
-  get viewportX() {
-    const { centerX, width, zoom } = this;
-    return centerX - width / 2 / zoom;
-  }
-
-  get viewportY() {
-    const { centerY, height, zoom } = this;
-    return centerY - height / 2 / zoom;
-  }
-
-  get width() {
-    return this._width;
-  }
-
-  get zoom() {
-    return this._zoom;
   }
 }

@@ -1,5 +1,7 @@
-import { EmbedFigmaBlockSchema } from '@blocksuite/affine-model';
-import { EmbedFigmaStyles } from '@blocksuite/affine-model';
+import {
+  EmbedFigmaBlockSchema,
+  EmbedFigmaStyles,
+} from '@blocksuite/affine-model';
 import { EmbedOptionProvider } from '@blocksuite/affine-shared/services';
 import { BlockService } from '@blocksuite/block-std';
 

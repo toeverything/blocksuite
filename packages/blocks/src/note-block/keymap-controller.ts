@@ -1,10 +1,10 @@
 import type {
   BaseSelection,
+  BlockComponent,
   BlockSelection,
   UIEventHandler,
   UIEventStateContext,
 } from '@blocksuite/block-std';
-import type { BlockComponent } from '@blocksuite/block-std';
 import type { ReactiveController, ReactiveControllerHost } from 'lit';
 
 import { assertExists } from '@blocksuite/global/utils';
@@ -504,12 +504,12 @@ export class KeymapController implements ReactiveController {
 
   host: ReactiveControllerHost & BlockComponent;
 
-  constructor(host: ReactiveControllerHost & BlockComponent) {
-    (this.host = host).addController(this);
-  }
-
   private get _std() {
     return this.host.std;
+  }
+
+  constructor(host: ReactiveControllerHost & BlockComponent) {
+    (this.host = host).addController(this);
   }
 
   hostConnected() {

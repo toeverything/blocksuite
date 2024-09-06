@@ -3,7 +3,7 @@ import {
   HandIcon,
   SelectIcon,
 } from '@blocksuite/affine-components/icons';
-import { LitElement, css, html } from 'lit';
+import { css, html, LitElement } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 
 import type { EdgelessTool } from '../../../types.js';

@@ -1,18 +1,17 @@
-import type { MindmapStyle } from '@blocksuite/affine-block-surface';
 import type { TemplateResult } from 'lit';
 
-import { LayoutType } from '@blocksuite/affine-block-surface';
 import {
   CanvasElementType,
   type MindmapElementModel,
+  type MindmapStyle,
 } from '@blocksuite/affine-block-surface';
+import { LayoutType } from '@blocksuite/affine-block-surface';
 import {
   type ShapeElementModel,
   TextElementModel,
 } from '@blocksuite/affine-model';
 import { TelemetryProvider } from '@blocksuite/affine-shared/services';
-import { Bound } from '@blocksuite/global/utils';
-import { assertInstanceOf } from '@blocksuite/global/utils';
+import { assertInstanceOf, Bound } from '@blocksuite/global/utils';
 import { DocCollection } from '@blocksuite/store';
 
 import type { EdgelessRootBlockComponent } from '../../../edgeless-root-block.js';

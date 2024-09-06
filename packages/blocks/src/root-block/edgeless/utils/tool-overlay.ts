@@ -10,12 +10,11 @@ import {
   DEFAULT_NOTE_BACKGROUND_COLOR,
   DEFAULT_SHAPE_FILL_COLOR,
   DEFAULT_SHAPE_STROKE_COLOR,
-  type ShapeStyle,
   shapeMethods,
+  type ShapeStyle,
 } from '@blocksuite/affine-model';
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
-import { Bound } from '@blocksuite/global/utils';
-import { DisposableGroup, Slot, noop } from '@blocksuite/global/utils';
+import { Bound, DisposableGroup, noop, Slot } from '@blocksuite/global/utils';
 
 import type { EdgelessRootBlockComponent } from '../edgeless-root-block.js';
 

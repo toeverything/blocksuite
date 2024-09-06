@@ -1,5 +1,5 @@
 import { WithDisposable } from '@blocksuite/block-std';
-import { LitElement, css, html } from 'lit';
+import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 import type { Column } from '../../../core/view-manager/column.js';
@@ -38,20 +38,6 @@ const DecreaseDecimalPlacesIcon = html`
 
 @customElement('affine-database-number-format-bar')
 export class DatabaseNumberFormatBar extends WithDisposable(LitElement) {
-  private _decrementDecimalPlaces = () => {
-    this.column.updateData(data => ({
-      decimal: Math.max(((data.decimal as number) ?? 0) - 1, 0),
-    }));
-    this.requestUpdate();
-  };
-
-  private _incrementDecimalPlaces = () => {
-    this.column.updateData(data => ({
-      decimal: Math.min(((data.decimal as number) ?? 0) + 1, 8),
-    }));
-    this.requestUpdate();
-  };
-
   static override styles = css`
     .number-format-toolbar-container {
       padding: 4px 12px;
@@ -102,6 +88,20 @@ export class DatabaseNumberFormatBar extends WithDisposable(LitElement) {
       background-color: var(--affine-border-color);
     }
   `;
+
+  private _decrementDecimalPlaces = () => {
+    this.column.updateData(data => ({
+      decimal: Math.max(((data.decimal as number) ?? 0) - 1, 0),
+    }));
+    this.requestUpdate();
+  };
+
+  private _incrementDecimalPlaces = () => {
+    this.column.updateData(data => ({
+      decimal: Math.min(((data.decimal as number) ?? 0) + 1, 8),
+    }));
+    this.requestUpdate();
+  };
 
   override render() {
     return html`

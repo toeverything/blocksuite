@@ -32,6 +32,8 @@ export class AttachmentBlockComponent extends CaptionedBlockComponent<
   AttachmentBlockModel,
   AttachmentBlockService
 > {
+  static override styles = styles;
+
   protected _isDragging = false;
 
   protected _isResizing = false;
@@ -75,8 +77,6 @@ export class AttachmentBlockComponent extends CaptionedBlockComponent<
     }
   );
 
-  static override styles = styles;
-
   protected containerStyleMap = styleMap({
     position: 'relative',
     width: '100%',
@@ -103,6 +103,11 @@ export class AttachmentBlockComponent extends CaptionedBlockComponent<
   refreshData = () => {
     checkAttachmentBlob(this).catch(console.error);
   };
+
+  protected get embedView() {
+    if (!this.model.embed || !this.blobUrl) return;
+    return renderEmbedView(this.model, this.blobUrl, this.service.maxFileSize);
+  }
 
   private _selectBlock() {
     const selectionManager = this.host.selection;
@@ -253,11 +258,6 @@ export class AttachmentBlockComponent extends CaptionedBlockComponent<
             </div>`}
       </div>
     `;
-  }
-
-  protected get embedView() {
-    if (!this.model.embed || !this.blobUrl) return;
-    return renderEmbedView(this.model, this.blobUrl, this.service.maxFileSize);
   }
 
   @state()

@@ -1,15 +1,18 @@
-import type { Viewport } from '@blocksuite/block-std/gfx';
-import type { GridManager, LayerManager } from '@blocksuite/block-std/gfx';
+import type {
+  GridManager,
+  LayerManager,
+  Viewport,
+} from '@blocksuite/block-std/gfx';
 import type { IBound } from '@blocksuite/global/utils';
 
 import { type Color, ColorScheme } from '@blocksuite/affine-model';
 import { requestConnectedFrame } from '@blocksuite/affine-shared/utils';
 import {
   DisposableGroup,
-  Slot,
   getBoundsWithRotation,
   intersects,
   last,
+  Slot,
 } from '@blocksuite/global/utils';
 
 import type { ElementRenderer } from './elements/index.js';
@@ -28,11 +31,11 @@ export abstract class Overlay {
 
   clear() {}
 
+  abstract render(ctx: CanvasRenderingContext2D, rc: RoughCanvas): void;
+
   setRenderer(renderer: CanvasRenderer | null) {
     this._renderer = renderer;
   }
-
-  abstract render(ctx: CanvasRenderingContext2D, rc: RoughCanvas): void;
 }
 
 type EnvProvider = {
@@ -83,6 +86,10 @@ export class CanvasRenderer {
   }>();
 
   viewport: Viewport;
+
+  get stackingCanvas() {
+    return this._stackingCanvas;
+  }
 
   constructor(options: RendererOptions) {
     const canvas = document.createElement('canvas');
@@ -421,9 +428,5 @@ export class CanvasRenderer {
     overlay.setRenderer(null);
     this._overlays.delete(overlay);
     this.refresh();
-  }
-
-  get stackingCanvas() {
-    return this._stackingCanvas;
   }
 }

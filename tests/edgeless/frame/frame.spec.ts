@@ -1,26 +1,26 @@
-import { type Page, expect } from '@playwright/test';
+import { expect, type Page } from '@playwright/test';
 
 import { clickView } from '../../utils/actions/click.js';
 import {
-  Shape,
+  createFrame as _createFrame,
   addNote,
   autoFit,
-  createFrame as _createFrame,
   createShapeElement,
   dragBetweenViewCoords,
   edgelessCommonSetup,
   getSelectedBound,
   setEdgelessTool,
+  Shape,
   shiftClickView,
   toViewCoord,
   triggerComponentToolbarAction,
   zoomResetByKeyboard,
 } from '../../utils/actions/edgeless.js';
 import {
-  SHORT_KEY,
   pressBackspace,
   pressEscape,
   selectAllByKeyboard,
+  SHORT_KEY,
 } from '../../utils/actions/keyboard.js';
 import { assertSelectedBound } from '../../utils/asserts.js';
 import { test } from '../../utils/playwright.js';

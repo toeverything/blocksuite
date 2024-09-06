@@ -18,7 +18,7 @@ import {
 } from '@blocksuite/affine-shared/utils';
 import { WidgetComponent } from '@blocksuite/block-std';
 import { Bound } from '@blocksuite/global/utils';
-import { type TemplateResult, css, html, nothing } from 'lit';
+import { css, html, nothing, type TemplateResult } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -112,47 +112,6 @@ export class EdgelessAutoConnectWidget extends WidgetComponent<
   EdgelessRootBlockComponent,
   EdgelessRootService
 > {
-  private _updateLabels = () => {
-    const service = this.service;
-    const pageVisibleBlocks = new Map<AutoConnectElement, number>();
-    const notes = service.doc.root?.children.filter(child =>
-      matchFlavours(child, ['affine:note'])
-    ) as NoteBlockModel[];
-    const edgelessOnlyNotesSet = new Set<NoteBlockModel>();
-
-    notes.forEach(note => {
-      if (isNoteBlock(note)) {
-        if (note.displayMode$.value === NoteDisplayMode.EdgelessOnly) {
-          edgelessOnlyNotesSet.add(note);
-        } else if (note.displayMode$.value === NoteDisplayMode.DocAndEdgeless) {
-          pageVisibleBlocks.set(note, 1);
-        }
-      }
-
-      note.children.forEach(model => {
-        if (matchFlavours(model, ['affine:surface-ref'])) {
-          const reference = service.getElementById(
-            model.reference
-          ) as AutoConnectElement;
-
-          if (!reference) return;
-
-          if (!pageVisibleBlocks.has(reference)) {
-            pageVisibleBlocks.set(reference, 1);
-          } else {
-            pageVisibleBlocks.set(
-              reference,
-              pageVisibleBlocks.get(reference)! + 1
-            );
-          }
-        }
-      });
-    });
-
-    this._edgelessOnlyNotesSet = edgelessOnlyNotesSet;
-    this._pageVisibleElementsMap = pageVisibleBlocks;
-  };
-
   static override styles = css`
     .page-visible-index-label {
       box-sizing: border-box;
@@ -209,6 +168,47 @@ export class EdgelessAutoConnectWidget extends WidgetComponent<
     }
   `;
 
+  private _updateLabels = () => {
+    const service = this.service;
+    const pageVisibleBlocks = new Map<AutoConnectElement, number>();
+    const notes = service.doc.root?.children.filter(child =>
+      matchFlavours(child, ['affine:note'])
+    ) as NoteBlockModel[];
+    const edgelessOnlyNotesSet = new Set<NoteBlockModel>();
+
+    notes.forEach(note => {
+      if (isNoteBlock(note)) {
+        if (note.displayMode$.value === NoteDisplayMode.EdgelessOnly) {
+          edgelessOnlyNotesSet.add(note);
+        } else if (note.displayMode$.value === NoteDisplayMode.DocAndEdgeless) {
+          pageVisibleBlocks.set(note, 1);
+        }
+      }
+
+      note.children.forEach(model => {
+        if (matchFlavours(model, ['affine:surface-ref'])) {
+          const reference = service.getElementById(
+            model.reference
+          ) as AutoConnectElement;
+
+          if (!reference) return;
+
+          if (!pageVisibleBlocks.has(reference)) {
+            pageVisibleBlocks.set(reference, 1);
+          } else {
+            pageVisibleBlocks.set(
+              reference,
+              pageVisibleBlocks.get(reference)! + 1
+            );
+          }
+        }
+      });
+    });
+
+    this._edgelessOnlyNotesSet = edgelessOnlyNotesSet;
+    this._pageVisibleElementsMap = pageVisibleBlocks;
+  };
+
   private _EdgelessOnlyLabels() {
     const { _edgelessOnlyNotesSet } = this;
 
@@ -248,6 +248,111 @@ export class EdgelessAutoConnectWidget extends WidgetComponent<
         </div>`;
       }
     )}`;
+  }
+
+  private _getElementsAndCounts() {
+    const elements: AutoConnectElement[] = [];
+    const counts: number[] = [];
+
+    for (const [key, value] of this._pageVisibleElementsMap.entries()) {
+      elements.push(key);
+      counts.push(value);
+    }
+
+    return { elements, counts };
+  }
+
+  private _initLabels() {
+    const { service } = this.block;
+    const surfaceRefs = service.doc
+      .getBlocksByFlavour('affine:surface-ref')
+      .map(block => block.model) as SurfaceRefBlockModel[];
+
+    const getVisibility = () => {
+      const { selectedElements } = service.selection;
+
+      if (
+        selectedElements.length === 1 &&
+        !service.selection.editing &&
+        (isNoteBlock(selectedElements[0]) ||
+          surfaceRefs.some(ref => ref.reference === selectedElements[0].id))
+      ) {
+        this._show = true;
+      } else {
+        this._show = false;
+      }
+
+      return this._show;
+    };
+
+    this._disposables.add(
+      service.selection.slots.updated.on(() => {
+        getVisibility();
+      })
+    );
+    this._disposables.add(
+      this.doc.slots.blockUpdated.on(payload => {
+        if (payload.flavour === 'affine:surface-ref') {
+          switch (payload.type) {
+            case 'add':
+              surfaceRefs.push(payload.model as SurfaceRefBlockModel);
+              break;
+            case 'delete':
+              {
+                const idx = surfaceRefs.indexOf(
+                  payload.model as SurfaceRefBlockModel
+                );
+                if (idx >= 0) {
+                  surfaceRefs.splice(idx, 1);
+                }
+              }
+              break;
+            case 'update':
+              if (payload.props.key !== 'reference') {
+                return;
+              }
+          }
+
+          this.requestUpdate();
+        }
+      })
+    );
+    this._disposables.add(
+      service.surface.elementUpdated.on(payload => {
+        if (
+          payload.props['xywh'] &&
+          surfaceRefs.some(ref => ref.reference === payload.id)
+        ) {
+          this.requestUpdate();
+        }
+      })
+    );
+  }
+
+  private _navigateToNext() {
+    const { elements } = this._getElementsAndCounts();
+    if (this._index >= elements.length - 1) return;
+    this._index = this._index + 1;
+    const element = elements[this._index];
+    const bound = Bound.deserialize(element.xywh);
+    this.service.selection.set({
+      elements: [element.id],
+      editing: false,
+    });
+    this.service.viewport.setViewportByBound(bound, [80, 80, 80, 80], true);
+  }
+
+  private _navigateToPrev() {
+    const { elements } = this._getElementsAndCounts();
+    if (this._index <= 0) return;
+    this._index = this._index - 1;
+    const element = elements[this._index];
+    const bound = Bound.deserialize(element.xywh);
+    this.service.selection.set({
+      elements: [element.id],
+      editing: false,
+    });
+    this.service.viewport.setViewportByBound(bound, [80, 80, 80, 80], true);
   }
 
   private _NavigatorComponent(elements: AutoConnectElement[]) {
@@ -384,111 +489,6 @@ export class EdgelessAutoConnectWidget extends WidgetComponent<
         </div>`;
       }
     )}`;
-  }
-
-  private _getElementsAndCounts() {
-    const elements: AutoConnectElement[] = [];
-    const counts: number[] = [];
-
-    for (const [key, value] of this._pageVisibleElementsMap.entries()) {
-      elements.push(key);
-      counts.push(value);
-    }
-
-    return { elements, counts };
-  }
-
-  private _initLabels() {
-    const { service } = this.block;
-    const surfaceRefs = service.doc
-      .getBlocksByFlavour('affine:surface-ref')
-      .map(block => block.model) as SurfaceRefBlockModel[];
-
-    const getVisibility = () => {
-      const { selectedElements } = service.selection;
-
-      if (
-        selectedElements.length === 1 &&
-        !service.selection.editing &&
-        (isNoteBlock(selectedElements[0]) ||
-          surfaceRefs.some(ref => ref.reference === selectedElements[0].id))
-      ) {
-        this._show = true;
-      } else {
-        this._show = false;
-      }
-
-      return this._show;
-    };
-
-    this._disposables.add(
-      service.selection.slots.updated.on(() => {
-        getVisibility();
-      })
-    );
-    this._disposables.add(
-      this.doc.slots.blockUpdated.on(payload => {
-        if (payload.flavour === 'affine:surface-ref') {
-          switch (payload.type) {
-            case 'add':
-              surfaceRefs.push(payload.model as SurfaceRefBlockModel);
-              break;
-            case 'delete':
-              {
-                const idx = surfaceRefs.indexOf(
-                  payload.model as SurfaceRefBlockModel
-                );
-                if (idx >= 0) {
-                  surfaceRefs.splice(idx, 1);
-                }
-              }
-              break;
-            case 'update':
-              if (payload.props.key !== 'reference') {
-                return;
-              }
-          }
-
-          this.requestUpdate();
-        }
-      })
-    );
-    this._disposables.add(
-      service.surface.elementUpdated.on(payload => {
-        if (
-          payload.props['xywh'] &&
-          surfaceRefs.some(ref => ref.reference === payload.id)
-        ) {
-          this.requestUpdate();
-        }
-      })
-    );
-  }
-
-  private _navigateToNext() {
-    const { elements } = this._getElementsAndCounts();
-    if (this._index >= elements.length - 1) return;
-    this._index = this._index + 1;
-    const element = elements[this._index];
-    const bound = Bound.deserialize(element.xywh);
-    this.service.selection.set({
-      elements: [element.id],
-      editing: false,
-    });
-    this.service.viewport.setViewportByBound(bound, [80, 80, 80, 80], true);
-  }
-
-  private _navigateToPrev() {
-    const { elements } = this._getElementsAndCounts();
-    if (this._index <= 0) return;
-    this._index = this._index - 1;
-    const element = elements[this._index];
-    const bound = Bound.deserialize(element.xywh);
-    this.service.selection.set({
-      elements: [element.id],
-      editing: false,
-    });
-    this.service.viewport.setViewportByBound(bound, [80, 80, 80, 80], true);
   }
 
   private _setHostStyle() {

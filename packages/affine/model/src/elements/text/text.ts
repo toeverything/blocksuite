@@ -9,7 +9,7 @@ import {
   TextAlign,
   type TextStyleProps,
 } from '@blocksuite/affine-model';
-import { GfxPrimitiveElementModel, field } from '@blocksuite/block-std/gfx';
+import { field, GfxPrimitiveElementModel } from '@blocksuite/block-std/gfx';
 import {
   Bound,
   getPointsFromBoundsWithRotation,
@@ -26,6 +26,10 @@ export type TextElementProps = BaseElementProps & {
   Partial<Pick<TextStyleProps, 'fontWeight' | 'fontStyle'>>;
 
 export class TextElementModel extends GfxPrimitiveElementModel<TextElementProps> {
+  get type() {
+    return 'text';
+  }
+
   static override propsToY(props: Record<string, unknown>) {
     if (props.text && !(props.text instanceof DocCollection.Y.Text)) {
       props.text = new DocCollection.Y.Text(props.text as string);
@@ -54,10 +58,6 @@ export class TextElementModel extends GfxPrimitiveElementModel<TextElementProps>
   override includesPoint(x: number, y: number): boolean {
     const points = getPointsFromBoundsWithRotation(this);
     return pointInPolygon([x, y], points);
-  }
-
-  get type() {
-    return 'text';
   }
 
   @field()

@@ -31,6 +31,26 @@ export abstract class BlockService extends Extension {
 
   readonly specSlots = getSlots();
 
+  get collection() {
+    return this.std.collection;
+  }
+
+  get doc() {
+    return this.std.doc;
+  }
+
+  get host() {
+    return this.std.host;
+  }
+
+  get selectionManager() {
+    return this.std.selection;
+  }
+
+  get uiEventDispatcher() {
+    return this.std.event;
+  }
+
   constructor(
     readonly std: BlockStdScope,
     readonly flavourProvider: { flavour: string }
@@ -88,6 +108,7 @@ export abstract class BlockService extends Extension {
       })
     );
   }
+  // life cycle end
 
   mounted() {
     this.specSlots.mounted.emit({ service: this });
@@ -96,27 +117,6 @@ export abstract class BlockService extends Extension {
   unmounted() {
     this.dispose();
     this.specSlots.unmounted.emit({ service: this });
-  }
-
-  get collection() {
-    return this.std.collection;
-  }
-
-  get doc() {
-    return this.std.doc;
-  }
-
-  get host() {
-    return this.std.host;
-  }
-  // life cycle end
-
-  get selectionManager() {
-    return this.std.selection;
-  }
-
-  get uiEventDispatcher() {
-    return this.std.event;
   }
   // event handlers end
 }

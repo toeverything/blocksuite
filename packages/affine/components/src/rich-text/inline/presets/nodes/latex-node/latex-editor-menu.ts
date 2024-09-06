@@ -5,17 +5,17 @@ import { ColorScheme } from '@blocksuite/affine-model';
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import {
   ShadowlessElement,
-  WithDisposable,
   SignalWatcher,
+  WithDisposable,
 } from '@blocksuite/block-std';
 import { noop } from '@blocksuite/global/utils';
 import { DoneIcon } from '@blocksuite/icons/lit';
 import { DocCollection } from '@blocksuite/store';
-import { type Signal, effect, signal } from '@lit-labs/preact-signals';
+import { effect, type Signal, signal } from '@lit-labs/preact-signals';
 import { cssVar } from '@toeverything/theme';
 import { css, html, unsafeCSS } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { type ThemedToken, codeToTokensBase } from 'shiki';
+import { codeToTokensBase, type ThemedToken } from 'shiki';
 import { z } from 'zod';
 
 import { InlineManager } from '../../../inline-manager.js';
@@ -91,6 +91,10 @@ export class LatexEditorMenu extends SignalWatcher(
   >();
 
   yText!: Y.Text;
+
+  get richText() {
+    return this.querySelector('rich-text');
+  }
 
   private _updateHighlightTokens(text: string) {
     const theme =
@@ -185,10 +189,6 @@ export class LatexEditorMenu extends SignalWatcher(
       </div>
       <div class="latex-editor-hint">Shift Enter to line break</div>
     </div>`;
-  }
-
-  get richText() {
-    return this.querySelector('rich-text');
   }
 
   @property({ attribute: false })

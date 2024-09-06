@@ -66,6 +66,11 @@ export class ColumnDataStats<Col extends Column = Column> {
     return val as (boolean | undefined)[];
   }
 
+  // gets the count of non-empty values in the column with separated out multiselect items
+  private _getColumnValueCounts(group?: GroupData) {
+    return this._getAllValuesAsString(group).length;
+  }
+
   private _getColValuesAsNumber(group?: GroupData) {
     this._assertColumnType('number');
     const values: number[] = [];
@@ -82,11 +87,6 @@ export class ColumnDataStats<Col extends Column = Column> {
       return this.column.getStringValue(rId);
     });
     return noEmpty ? val.filter(v => v.trim() !== '') : val;
-  }
-
-  // gets the count of non-empty values in the column with separated out multiselect items
-  private _getColumnValueCounts(group?: GroupData) {
-    return this._getAllValuesAsString(group).length;
   }
 
   private _getEmptyCellCount(group?: GroupData) {

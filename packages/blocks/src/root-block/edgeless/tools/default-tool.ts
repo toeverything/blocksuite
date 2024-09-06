@@ -8,8 +8,11 @@ import type { PointerEventState } from '@blocksuite/block-std';
 import type { PointTestOptions } from '@blocksuite/block-std/gfx';
 import type { IVec } from '@blocksuite/global/utils';
 
-import { MindmapElementModel } from '@blocksuite/affine-block-surface';
-import { ConnectorUtils, MindmapUtils } from '@blocksuite/affine-block-surface';
+import {
+  ConnectorUtils,
+  MindmapElementModel,
+  MindmapUtils,
+} from '@blocksuite/affine-block-surface';
 import { focusTextModel } from '@blocksuite/affine-components/rich-text';
 import {
   ConnectorElementModel,
@@ -26,9 +29,9 @@ import {
 import {
   Bound,
   DisposableGroup,
-  Vec,
   intersects,
   noop,
+  Vec,
 } from '@blocksuite/global/utils';
 
 import type { EdgelessTool } from '../types.js';
@@ -114,14 +117,6 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
 
   private _disposables: DisposableGroup | null = null;
 
-  private _dragLastModelCoord: IVec = [0, 0];
-
-  private _dragLastPos: IVec = [0, 0];
-
-  private _dragStartModelCoord: IVec = [0, 0];
-
-  private _dragStartPos: IVec = [0, 0];
-
   private _dragging = false;
 
   private _draggingSingleMindmap: null | {
@@ -131,6 +126,14 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     clear?: () => void;
     detach?: boolean;
   } = null;
+
+  private _dragLastModelCoord: IVec = [0, 0];
+
+  private _dragLastPos: IVec = [0, 0];
+
+  private _dragStartModelCoord: IVec = [0, 0];
+
+  private _dragStartPos: IVec = [0, 0];
 
   private _hoveredFrame: FrameBlockModel | null = null;
 
@@ -245,6 +248,36 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
   readonly tool = {
     type: 'default',
   } as DefaultTool;
+
+  override get draggingArea() {
+    if (this.dragType === DefaultModeDragType.Selecting) {
+      const [startX, startY] = this._service.viewport.toViewCoord(
+        this._dragStartModelCoord[0],
+        this._dragStartModelCoord[1]
+      );
+      const [endX, endY] = this._service.viewport.toViewCoord(
+        this._dragLastModelCoord[0],
+        this._dragLastModelCoord[1]
+      );
+      return {
+        start: new DOMPoint(startX, startY),
+        end: new DOMPoint(endX, endY),
+      };
+    }
+    return null;
+  }
+
+  get edgelessSelectionManager() {
+    return this._service.selection;
+  }
+
+  get readonly() {
+    return this._edgeless.doc.readonly;
+  }
+
+  get zoom() {
+    return this._service.viewport.zoom;
+  }
 
   private _addEmptyParagraphBlock(
     block: NoteBlockModel | EdgelessTextBlockModel
@@ -1095,36 +1128,6 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
         this._moveSelectionDragStartTemp = [...this._dragStartPos];
       }
     }
-  }
-
-  override get draggingArea() {
-    if (this.dragType === DefaultModeDragType.Selecting) {
-      const [startX, startY] = this._service.viewport.toViewCoord(
-        this._dragStartModelCoord[0],
-        this._dragStartModelCoord[1]
-      );
-      const [endX, endY] = this._service.viewport.toViewCoord(
-        this._dragLastModelCoord[0],
-        this._dragLastModelCoord[1]
-      );
-      return {
-        start: new DOMPoint(startX, startY),
-        end: new DOMPoint(endX, endY),
-      };
-    }
-    return null;
-  }
-
-  get edgelessSelectionManager() {
-    return this._service.selection;
-  }
-
-  get readonly() {
-    return this._edgeless.doc.readonly;
-  }
-
-  get zoom() {
-    return this._service.viewport.zoom;
   }
 }
 

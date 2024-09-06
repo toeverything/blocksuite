@@ -1,5 +1,4 @@
-import { DocCollection } from '@blocksuite/store';
-import { Text } from '@blocksuite/store';
+import { DocCollection, Text } from '@blocksuite/store';
 
 import type { InitFn } from './utils.js';
 

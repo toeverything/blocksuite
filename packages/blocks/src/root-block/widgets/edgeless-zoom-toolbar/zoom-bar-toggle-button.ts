@@ -3,15 +3,13 @@ import { createLitPortal } from '@blocksuite/affine-components/portal';
 import { stopPropagation } from '@blocksuite/affine-shared/utils';
 import { WithDisposable } from '@blocksuite/block-std';
 import { offset } from '@floating-ui/dom';
-import { LitElement, css, html, nothing } from 'lit';
+import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 
 @customElement('zoom-bar-toggle-button')
 export class ZoomBarToggleButton extends WithDisposable(LitElement) {
-  private _abortController: AbortController | null = null;
-
   static override styles = css`
     :host {
       display: flex;
@@ -25,6 +23,8 @@ export class ZoomBarToggleButton extends WithDisposable(LitElement) {
       bottom: initial;
     }
   `;
+
+  private _abortController: AbortController | null = null;
 
   private _closeZoomMenu() {
     if (this._abortController && !this._abortController.signal.aborted) {

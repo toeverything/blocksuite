@@ -1,13 +1,13 @@
 import type { MindmapStyle } from '@blocksuite/affine-block-surface';
 
-import { LitElement, type TemplateResult, css, html, nothing } from 'lit';
+import { css, html, LitElement, nothing, type TemplateResult } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
 import { getTooltipWithShortcut } from '../../utils.js';
 import { EdgelessDraggableElementController } from '../common/draggable/draggable-element.controller.js';
 import { EdgelessToolbarToolMixin } from '../mixins/tool.mixin.js';
-import { type ToolbarMindmapItem, getMindMaps } from './assets.js';
+import { getMindMaps, type ToolbarMindmapItem } from './assets.js';
 import { textRender } from './basket-elements.js';
 import { textIcon } from './icons.js';
 
@@ -78,6 +78,10 @@ export class EdgelessMindmapMenu extends EdgelessToolbarToolMixin(LitElement) {
   >;
 
   override type = 'mindmap' as const;
+
+  get mindMaps() {
+    return getMindMaps(this.theme);
+  }
 
   initDragController() {
     if (this.draggableController || !this.edgeless) return;
@@ -196,10 +200,6 @@ export class EdgelessMindmapMenu extends EdgelessToolbarToolMixin(LitElement) {
   override updated(changedProperties: Map<PropertyKey, unknown>) {
     if (!changedProperties.has('edgeless')) return;
     this.initDragController();
-  }
-
-  get mindMaps() {
-    return getMindMaps(this.theme);
   }
 
   @property({ attribute: false })

@@ -1,5 +1,4 @@
-import type { Command } from '@blocksuite/block-std';
-import type { BlockComponent } from '@blocksuite/block-std';
+import type { BlockComponent, Command } from '@blocksuite/block-std';
 
 import { BLOCK_ID_ATTR } from '@blocksuite/affine-shared/consts';
 import { INLINE_ROOT_ATTR, type InlineRootElement } from '@blocksuite/inline';

@@ -29,6 +29,108 @@ export class Bound implements IBound {
 
   y: number;
 
+  get bl() {
+    return [this.x, this.y + this.h];
+  }
+
+  get br() {
+    return [this.x + this.w, this.y + this.h];
+  }
+
+  get center(): IVec {
+    return [this.x + this.w / 2, this.y + this.h / 2];
+  }
+
+  set center([cx, cy]: IVec) {
+    const [px, py] = this.center;
+    this.x += cx - px;
+    this.y += cy - py;
+  }
+
+  get horizontalLine(): IVec[] {
+    return [
+      [this.x, this.y + this.h / 2],
+      [this.x + this.w, this.y + this.h / 2],
+    ];
+  }
+
+  get leftLine(): IVec[] {
+    return [
+      [this.x, this.y],
+      [this.x, this.y + this.h],
+    ];
+  }
+
+  get lowerLine(): IVec[] {
+    return [
+      [this.x, this.y + this.h],
+      [this.x + this.w, this.y + this.h],
+    ];
+  }
+
+  get maxX() {
+    return this.x + this.w;
+  }
+
+  get maxY() {
+    return this.y + this.h;
+  }
+
+  get midPoints(): IVec[] {
+    return [
+      [this.x + this.w / 2, this.y],
+      [this.x + this.w, this.y + this.h / 2],
+      [this.x + this.w / 2, this.y + this.h],
+      [this.x, this.y + this.h / 2],
+    ];
+  }
+
+  get minX() {
+    return this.x;
+  }
+
+  get minY() {
+    return this.y;
+  }
+
+  get points(): IVec[] {
+    return [
+      [this.x, this.y],
+      [this.x + this.w, this.y],
+      [this.x + this.w, this.y + this.h],
+      [this.x, this.y + this.h],
+    ];
+  }
+
+  get rightLine(): IVec[] {
+    return [
+      [this.x + this.w, this.y],
+      [this.x + this.w, this.y + this.h],
+    ];
+  }
+
+  get tl(): IVec {
+    return [this.x, this.y];
+  }
+
+  get tr() {
+    return [this.x + this.w, this.y];
+  }
+
+  get upperLine(): IVec[] {
+    return [
+      [this.x, this.y],
+      [this.x + this.w, this.y],
+    ];
+  }
+
+  get verticalLine(): IVec[] {
+    return [
+      [this.x + this.w / 2, this.y],
+      [this.x + this.w / 2, this.y + this.h],
+    ];
+  }
+
   constructor(x = 0, y = 0, w = 0, h = 0) {
     this.x = x;
     this.y = y;
@@ -204,107 +306,5 @@ export class Bound implements IBound {
       Math.abs(this.minY - bound.maxY),
       Math.abs(this.maxY - bound.minY)
     );
-  }
-
-  get bl() {
-    return [this.x, this.y + this.h];
-  }
-
-  get br() {
-    return [this.x + this.w, this.y + this.h];
-  }
-
-  get center(): IVec {
-    return [this.x + this.w / 2, this.y + this.h / 2];
-  }
-
-  set center([cx, cy]: IVec) {
-    const [px, py] = this.center;
-    this.x += cx - px;
-    this.y += cy - py;
-  }
-
-  get horizontalLine(): IVec[] {
-    return [
-      [this.x, this.y + this.h / 2],
-      [this.x + this.w, this.y + this.h / 2],
-    ];
-  }
-
-  get leftLine(): IVec[] {
-    return [
-      [this.x, this.y],
-      [this.x, this.y + this.h],
-    ];
-  }
-
-  get lowerLine(): IVec[] {
-    return [
-      [this.x, this.y + this.h],
-      [this.x + this.w, this.y + this.h],
-    ];
-  }
-
-  get maxX() {
-    return this.x + this.w;
-  }
-
-  get maxY() {
-    return this.y + this.h;
-  }
-
-  get midPoints(): IVec[] {
-    return [
-      [this.x + this.w / 2, this.y],
-      [this.x + this.w, this.y + this.h / 2],
-      [this.x + this.w / 2, this.y + this.h],
-      [this.x, this.y + this.h / 2],
-    ];
-  }
-
-  get minX() {
-    return this.x;
-  }
-
-  get minY() {
-    return this.y;
-  }
-
-  get points(): IVec[] {
-    return [
-      [this.x, this.y],
-      [this.x + this.w, this.y],
-      [this.x + this.w, this.y + this.h],
-      [this.x, this.y + this.h],
-    ];
-  }
-
-  get rightLine(): IVec[] {
-    return [
-      [this.x + this.w, this.y],
-      [this.x + this.w, this.y + this.h],
-    ];
-  }
-
-  get tl(): IVec {
-    return [this.x, this.y];
-  }
-
-  get tr() {
-    return [this.x + this.w, this.y];
-  }
-
-  get upperLine(): IVec[] {
-    return [
-      [this.x, this.y],
-      [this.x + this.w, this.y],
-    ];
-  }
-
-  get verticalLine(): IVec[] {
-    return [
-      [this.x + this.w / 2, this.y],
-      [this.x + this.w / 2, this.y + this.h],
-    ];
   }
 }

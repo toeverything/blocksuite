@@ -4,6 +4,18 @@ import type { GfxModel } from '@blocksuite/block-std/gfx';
 import type { BlockModel, Doc } from '@blocksuite/store';
 
 export abstract class MenuContext {
+  abstract get doc(): Doc;
+
+  get firstElement(): GfxModel | null {
+    return null;
+  }
+
+  abstract get host(): EditorHost;
+
+  abstract get selectedBlockModels(): BlockModel[];
+
+  abstract get std(): BlockStdScope;
+
   // Sometimes we need to close the menu.
   close() {}
 
@@ -11,23 +23,11 @@ export abstract class MenuContext {
     return false;
   }
 
-  get firstElement(): GfxModel | null {
-    return null;
-  }
-
-  abstract get doc(): Doc;
-
-  abstract get host(): EditorHost;
-
   abstract isEmpty(): boolean;
 
   abstract isMultiple(): boolean;
 
   abstract isSingle(): boolean;
-
-  abstract get selectedBlockModels(): BlockModel[];
-
-  abstract get std(): BlockStdScope;
 }
 
 export interface ToolbarMoreMenuConfig {

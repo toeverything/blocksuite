@@ -7,8 +7,8 @@ import { BaseCellRenderer } from '../../core/column/index.js';
 import { createFromBaseCellRenderer } from '../../core/column/renderer.js';
 import '../../core/utils/tags/multi-tag-select.js';
 import {
-  type SelectTag,
   popTagSelect,
+  type SelectTag,
 } from '../../core/utils/tags/multi-tag-select.js';
 import { createIcon } from '../../core/utils/uni-icon.js';
 import { selectColumnModelConfig } from './define.js';
@@ -31,23 +31,6 @@ export class SelectCellEditing extends BaseCellRenderer<
   string,
   SelectColumnData
 > {
-  _editComplete = () => {
-    this.selectCurrentCell(false);
-  };
-
-  _onChange = ([id]: string[]) => {
-    this.onChange(id);
-  };
-
-  _onOptionsChange = (options: SelectTag[]) => {
-    this.column.updateData(data => {
-      return {
-        ...data,
-        options,
-      };
-    });
-  };
-
   private popTagSelect = () => {
     this._disposables.add({
       dispose: popTagSelect(
@@ -62,6 +45,23 @@ export class SelectCellEditing extends BaseCellRenderer<
           minWidth: 400,
         }
       ),
+    });
+  };
+
+  _editComplete = () => {
+    this.selectCurrentCell(false);
+  };
+
+  _onChange = ([id]: string[]) => {
+    this.onChange(id);
+  };
+
+  _onOptionsChange = (options: SelectTag[]) => {
+    this.column.updateData(data => {
+      return {
+        ...data,
+        options,
+      };
     });
   };
 

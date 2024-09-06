@@ -2,7 +2,7 @@ import type { EditorHost } from '@blocksuite/block-std';
 import type { EdgelessRootBlockComponent } from '@blocksuite/blocks';
 
 import { WithDisposable } from '@blocksuite/block-std';
-import { LitElement, type PropertyValues, css, html } from 'lit';
+import { css, html, LitElement, type PropertyValues } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
 const styles = css`
@@ -72,6 +72,8 @@ export const AFFINE_FRAMES_SETTING_MENU = 'affine-frames-setting-menu';
 
 @customElement(AFFINE_FRAMES_SETTING_MENU)
 export class FramesSettingMenu extends WithDisposable(LitElement) {
+  static override styles = styles;
+
   private _onBlackBackgroundChange = (checked: boolean) => {
     this.blackBackground = checked;
     this.edgeless?.slots.navigatorSettingUpdated.emit({
@@ -100,8 +102,6 @@ export class FramesSettingMenu extends WithDisposable(LitElement) {
       this.hideToolbar
     );
   };
-
-  static override styles = styles;
 
   private get _rootService() {
     return this.editorHost.std.getService('affine:page');

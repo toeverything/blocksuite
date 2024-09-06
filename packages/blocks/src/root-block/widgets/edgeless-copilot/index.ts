@@ -33,14 +33,6 @@ export class EdgelessCopilotWidget extends WidgetComponent<
   RootBlockModel,
   EdgelessRootBlockComponent
 > {
-  private _clickOutsideOff: (() => void) | null = null;
-
-  private _copilotPanel!: EdgelessCopilotPanel | null;
-
-  private _listenClickOutsideId: number | null = null;
-
-  private _selectionModelRect!: DOMRect;
-
   static override styles = css`
     .copilot-selection-rect {
       position: absolute;
@@ -50,7 +42,39 @@ export class EdgelessCopilotWidget extends WidgetComponent<
     }
   `;
 
+  private _clickOutsideOff: (() => void) | null = null;
+
+  private _copilotPanel!: EdgelessCopilotPanel | null;
+
+  private _listenClickOutsideId: number | null = null;
+
+  private _selectionModelRect!: DOMRect;
+
   groups: AIItemGroupConfig[] = [];
+
+  get edgeless() {
+    return this.block;
+  }
+
+  get selectionModelRect() {
+    return this._selectionModelRect;
+  }
+
+  get selectionRect() {
+    return this._selectionRect;
+  }
+
+  get visible() {
+    return !!(
+      this._visible &&
+      this._selectionRect.width &&
+      this._selectionRect.height
+    );
+  }
+
+  set visible(visible: boolean) {
+    this._visible = visible;
+  }
 
   private _showCopilotPanel() {
     requestConnectedFrame(() => {
@@ -247,30 +271,6 @@ export class EdgelessCopilotWidget extends WidgetComponent<
         })}
       ></div>
     </div>`;
-  }
-
-  get edgeless() {
-    return this.block;
-  }
-
-  get selectionModelRect() {
-    return this._selectionModelRect;
-  }
-
-  get selectionRect() {
-    return this._selectionRect;
-  }
-
-  get visible() {
-    return !!(
-      this._visible &&
-      this._selectionRect.width &&
-      this._selectionRect.height
-    );
-  }
-
-  set visible(visible: boolean) {
-    this._visible = visible;
   }
 
   @state()

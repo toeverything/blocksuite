@@ -240,6 +240,22 @@ export class BlockModel<
 
   yBlock!: YBlock;
 
+  get children() {
+    return this._childModels.value;
+  }
+
+  get doc() {
+    return this.page;
+  }
+
+  set doc(doc: Doc) {
+    this.page = doc;
+  }
+
+  get parent() {
+    return this.doc.getParent(this);
+  }
+
   constructor() {
     super();
     this._onCreated = this.created.once(() => {
@@ -256,11 +272,6 @@ export class BlockModel<
     this._onDeleted = this.deleted.once(() => {
       this._onCreated.dispose();
     });
-  }
-
-  [Symbol.dispose]() {
-    this._onCreated.dispose();
-    this._onDeleted.dispose();
   }
 
   dispose() {
@@ -280,19 +291,8 @@ export class BlockModel<
     return this.children[this.children.length - 1].lastChild();
   }
 
-  get children() {
-    return this._childModels.value;
-  }
-
-  get doc() {
-    return this.page;
-  }
-
-  set doc(doc: Doc) {
-    this.page = doc;
-  }
-
-  get parent() {
-    return this.doc.getParent(this);
+  [Symbol.dispose]() {
+    this._onCreated.dispose();
+    this._onDeleted.dispose();
   }
 }

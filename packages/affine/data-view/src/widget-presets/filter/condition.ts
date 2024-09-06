@@ -7,13 +7,13 @@ import { repeat } from 'lit/directives/repeat.js';
 
 import {
   type FilterGroup,
-  type SingleFilter,
-  type Variable,
-  type VariableOrProperty,
   firstFilter,
   firstFilterByRef,
   firstFilterInGroup,
   getRefType,
+  type SingleFilter,
+  type Variable,
+  type VariableOrProperty,
 } from '../../core/common/ast.js';
 import '../../core/common/literal/define.js';
 import {
@@ -27,10 +27,6 @@ import { filterMatcher } from './matcher/matcher.js';
 
 @customElement('filter-condition-view')
 export class FilterConditionView extends WithDisposable(ShadowlessElement) {
-  private _setRef = (ref: VariableOrProperty) => {
-    this.setData(firstFilterByRef(this.vars, ref));
-  };
-
   static override styles = css`
     filter-condition-view {
       display: flex;
@@ -89,6 +85,10 @@ export class FilterConditionView extends WithDisposable(ShadowlessElement) {
       align-items: center;
     }
   `;
+
+  private _setRef = (ref: VariableOrProperty) => {
+    this.setData(firstFilterByRef(this.vars, ref));
+  };
 
   private _args() {
     const fn = filterMatcher.find(v => v.data.name === this.data.function);

@@ -55,14 +55,14 @@ export class EmbedEdgelessLinkedDocBlockComponent extends toEdgelessEmbedBlock(
     doc.deleteBlock(this.model);
   };
 
+  get rootService() {
+    return this.std.getService('affine:page') as EdgelessRootService;
+  }
+
   protected override _handleClick(evt: MouseEvent): void {
     if (this.config.handleClick) {
       this.config.handleClick(evt, this.host);
       return;
     }
-  }
-
-  get rootService() {
-    return this.std.getService('affine:page') as EdgelessRootService;
   }
 }

@@ -16,14 +16,15 @@ import {
   WithDisposable,
 } from '@blocksuite/block-std';
 import { noop } from '@blocksuite/global/utils';
-import { type Doc, Job } from '@blocksuite/store';
 import {
+  type Doc,
   DocCollection,
   type DocCollectionOptions,
   IdGeneratorType,
+  Job,
   Schema,
 } from '@blocksuite/store';
-import { LitElement, css, html, nothing } from 'lit';
+import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -101,6 +102,14 @@ export class MiniMindmapPreview extends WithDisposable(LitElement) {
 
   surface?: SurfaceBlockModel;
 
+  get _mindmap(): MindmapElementModel | null {
+    return (
+      (this.surface?.getElementById(
+        this.mindmapId || ''
+      ) as MindmapElementModel) ?? null
+    );
+  }
+
   private _createTemporaryDoc() {
     const schema = new Schema();
     schema.register(MiniMindmapSchema);
@@ -125,14 +134,6 @@ export class MiniMindmapPreview extends WithDisposable(LitElement) {
       doc,
       surface,
     };
-  }
-
-  get _mindmap(): MindmapElementModel | null {
-    return (
-      (this.surface?.getElementById(
-        this.mindmapId || ''
-      ) as MindmapElementModel) ?? null
-    );
   }
 
   private _switchStyle(style: MindmapStyle) {

@@ -17,6 +17,10 @@ const initFontFace = IS_FIREFOX
 export class FontLoader {
   readonly fontFaces: FontFace[] = [];
 
+  get ready() {
+    return Promise.all(this.fontFaces.map(fontFace => fontFace.loaded));
+  }
+
   clear() {
     this.fontFaces.forEach(fontFace => document.fonts.delete(fontFace));
     this.fontFaces.splice(0, this.fontFaces.length);
@@ -31,9 +35,5 @@ export class FontLoader {
         return fontFace;
       })
     );
-  }
-
-  get ready() {
-    return Promise.all(this.fontFaces.map(fontFace => fontFace.loaded));
   }
 }

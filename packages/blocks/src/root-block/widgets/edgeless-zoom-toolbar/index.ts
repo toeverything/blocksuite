@@ -42,6 +42,10 @@ export class AffineEdgelessZoomToolbarWidget extends WidgetComponent<
     }
   `;
 
+  get edgeless() {
+    return this.block;
+  }
+
   override firstUpdated() {
     const {
       disposables,
@@ -75,10 +79,6 @@ export class AffineEdgelessZoomToolbarWidget extends WidgetComponent<
         .edgeless=${this.edgeless}
       ></zoom-bar-toggle-button>
     `;
-  }
-
-  get edgeless() {
-    return this.block;
   }
 
   @state()

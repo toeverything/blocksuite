@@ -4,11 +4,11 @@ import type {
 } from '@blocksuite/blocks';
 import type { Doc } from '@blocksuite/store';
 
-import { WithDisposable, SignalWatcher } from '@blocksuite/block-std';
+import { SignalWatcher, WithDisposable } from '@blocksuite/block-std';
 import { BlocksUtils, NoteDisplayMode } from '@blocksuite/blocks';
 import { Bound, DisposableGroup } from '@blocksuite/global/utils';
 import { effect, signal } from '@lit-labs/preact-signals';
-import { LitElement, type PropertyValues, css, html, nothing } from 'lit';
+import { css, html, LitElement, nothing, type PropertyValues } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { repeat } from 'lit/directives/repeat.js';
@@ -115,6 +115,8 @@ export const AFFINE_OUTLINE_PANEL_BODY = 'affine-outline-panel-body';
 export class OutlinePanelBody extends SignalWatcher(
   WithDisposable(LitElement)
 ) {
+  static override styles = styles;
+
   private _activeHeadingId$ = signal<string | null>(null);
 
   private _changedFlag = false;
@@ -135,80 +137,12 @@ export class OutlinePanelBody extends SignalWatcher(
     };
   };
 
-  static override styles = styles;
-
-  private _EmptyPanel() {
-    return html`<div class="no-note-container">
-      <div class="note-placeholder">
-        Use headings to create a table of contents.
-      </div>
-    </div>`;
-  }
-
-  private _PanelList(withEdgelessOnlyNotes: boolean) {
-    const selectedNotesSet = new Set(this._selected);
-
-    return html`<div class="panel-list">
-      ${this.insertIndex !== undefined
-        ? html`<div
-            class="insert-indicator"
-            style=${`transform: translateY(${this._indicatorTranslateY}px)`}
-          ></div>`
-        : nothing}
-      ${this._renderDocTitle()}
-      ${this._pageVisibleNotes.length
-        ? repeat(
-            this._pageVisibleNotes,
-            note => note.note.id,
-            (note, idx) => html`
-              <affine-outline-note-card
-                data-note-id=${note.note.id}
-                .note=${note.note}
-                .number=${idx + 1}
-                .index=${note.index}
-                .doc=${this.doc}
-                .editorMode=${this.editor.mode}
-                .activeHeadingId=${this._activeHeadingId$.value}
-                .status=${selectedNotesSet.has(note.note.id)
-                  ? this._dragging
-                    ? 'placeholder'
-                    : 'selected'
-                  : undefined}
-                .showPreviewIcon=${this.showPreviewIcon}
-                .enableNotesSorting=${this.enableNotesSorting}
-                @select=${this._selectNote}
-                @drag=${this._drag}
-                @fitview=${this._fitToElement}
-                @clickblock=${(e: ClickBlockEvent) => {
-                  this._scrollToBlock(e.detail.blockId).catch(console.error);
-                }}
-                @displaymodechange=${this._handleDisplayModeChange}
-              ></affine-outline-note-card>
-            `
-          )
-        : html`${nothing}`}
-      ${withEdgelessOnlyNotes
-        ? html`<div class="hidden-title">Hidden Contents</div>
-            ${repeat(
-              this._edgelessOnlyNotes,
-              note => note.note.id,
-              (note, idx) =>
-                html`<affine-outline-note-card
-                  data-note-id=${note.note.id}
-                  .note=${note.note}
-                  .number=${idx + 1}
-                  .index=${note.index}
-                  .doc=${this.doc}
-                  .activeHeadingId=${this._activeHeadingId$.value}
-                  .invisible=${true}
-                  .showPreviewIcon=${this.showPreviewIcon}
-                  .enableNotesSorting=${this.enableNotesSorting}
-                  @fitview=${this._fitToElement}
-                  @displaymodechange=${this._handleDisplayModeChange}
-                ></affine-outline-note-card>`
-            )} `
-        : nothing}
-    </div>`;
+  get viewportPadding(): [number, number, number, number] {
+    return this.fitPadding
+      ? ([0, 0, 0, 0].map((val, idx) =>
+          Number.isFinite(this.fitPadding[idx]) ? this.fitPadding[idx] : val
+        ) as [number, number, number, number])
+      : [0, 0, 0, 0];
   }
 
   private _clearDocDisposables() {
@@ -307,6 +241,14 @@ export class OutlinePanelBody extends SignalWatcher(
     });
   }
 
+  private _EmptyPanel() {
+    return html`<div class="no-note-container">
+      <div class="note-placeholder">
+        Use headings to create a table of contents.
+      </div>
+    </div>`;
+  }
+
   private _fitToElement(e: FitViewEvent) {
     const edgeless = this.edgeless;
 
@@ -393,6 +335,72 @@ export class OutlinePanelBody extends SignalWatcher(
     this.doc.updateBlock(this.doc.root, {
       children: newChildren,
     });
+  }
+
+  private _PanelList(withEdgelessOnlyNotes: boolean) {
+    const selectedNotesSet = new Set(this._selected);
+
+    return html`<div class="panel-list">
+      ${this.insertIndex !== undefined
+        ? html`<div
+            class="insert-indicator"
+            style=${`transform: translateY(${this._indicatorTranslateY}px)`}
+          ></div>`
+        : nothing}
+      ${this._renderDocTitle()}
+      ${this._pageVisibleNotes.length
+        ? repeat(
+            this._pageVisibleNotes,
+            note => note.note.id,
+            (note, idx) => html`
+              <affine-outline-note-card
+                data-note-id=${note.note.id}
+                .note=${note.note}
+                .number=${idx + 1}
+                .index=${note.index}
+                .doc=${this.doc}
+                .editorMode=${this.editor.mode}
+                .activeHeadingId=${this._activeHeadingId$.value}
+                .status=${selectedNotesSet.has(note.note.id)
+                  ? this._dragging
+                    ? 'placeholder'
+                    : 'selected'
+                  : undefined}
+                .showPreviewIcon=${this.showPreviewIcon}
+                .enableNotesSorting=${this.enableNotesSorting}
+                @select=${this._selectNote}
+                @drag=${this._drag}
+                @fitview=${this._fitToElement}
+                @clickblock=${(e: ClickBlockEvent) => {
+                  this._scrollToBlock(e.detail.blockId).catch(console.error);
+                }}
+                @displaymodechange=${this._handleDisplayModeChange}
+              ></affine-outline-note-card>
+            `
+          )
+        : html`${nothing}`}
+      ${withEdgelessOnlyNotes
+        ? html`<div class="hidden-title">Hidden Contents</div>
+            ${repeat(
+              this._edgelessOnlyNotes,
+              note => note.note.id,
+              (note, idx) =>
+                html`<affine-outline-note-card
+                  data-note-id=${note.note.id}
+                  .note=${note.note}
+                  .number=${idx + 1}
+                  .index=${note.index}
+                  .doc=${this.doc}
+                  .activeHeadingId=${this._activeHeadingId$.value}
+                  .invisible=${true}
+                  .showPreviewIcon=${this.showPreviewIcon}
+                  .enableNotesSorting=${this.enableNotesSorting}
+                  @fitview=${this._fitToElement}
+                  @displaymodechange=${this._handleDisplayModeChange}
+                ></affine-outline-note-card>`
+            )} `
+        : nothing}
+    </div>`;
   }
 
   private _renderDocTitle() {
@@ -658,14 +666,6 @@ export class OutlinePanelBody extends SignalWatcher(
     }
   }
 
-  get viewportPadding(): [number, number, number, number] {
-    return this.fitPadding
-      ? ([0, 0, 0, 0].map((val, idx) =>
-          Number.isFinite(this.fitPadding[idx]) ? this.fitPadding[idx] : val
-        ) as [number, number, number, number])
-      : [0, 0, 0, 0];
-  }
-
   @state()
   private accessor _dragging = false;
 
@@ -680,9 +680,6 @@ export class OutlinePanelBody extends SignalWatcher(
    */
   @state()
   private accessor _selected: string[] = [];
-
-  @query('.outline-panel-body-container')
-  accessor OutlinePanelContainer!: HTMLElement;
 
   @property({ attribute: false })
   accessor doc!: Doc;
@@ -707,6 +704,9 @@ export class OutlinePanelBody extends SignalWatcher(
 
   @property({ attribute: false })
   accessor noticeVisible!: boolean;
+
+  @query('.outline-panel-body-container')
+  accessor OutlinePanelContainer!: HTMLElement;
 
   @query('.panel-list')
   accessor panelListElement!: HTMLElement;

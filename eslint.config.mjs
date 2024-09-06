@@ -126,14 +126,6 @@ export default [
     },
 
     rules: {
-      '@typescript-eslint/consistent-type-imports': [
-        'error',
-        {
-          prefer: 'type-imports',
-          disallowTypeAnnotations: false,
-        },
-      ],
-
       'arrow-body-style': 'off',
       'prefer-arrow-callback': 'off',
       'perfectionist/sort-intersection-types': 'off',
@@ -142,35 +134,34 @@ export default [
       'perfectionist/sort-objects': 'off',
       'perfectionist/sort-object-types': 'off',
       'perfectionist/sort-variable-declarations': 'off',
-
-      // TODO: enable these
-      'import-x/no-duplicates': 'off',
-      'perfectionist/sort-named-imports': 'off',
       'perfectionist/sort-switch-case': 'off',
-      'perfectionist/sort-classes': 'off',
-      'perfectionist/sort-named-exports': 'off',
       'perfectionist/sort-sets': 'off',
-      // 'perfectionist/sort-classes': [
-      //   'error',
-      //   {
-      //     type: 'natural',
-      //     order: 'asc',
-      //
-      //     groups: [
-      //       'private-property',
-      //       'static-property',
-      //       'index-signature',
-      //       'property',
-      //       ['get-method', 'set-method'],
-      //       'constructor',
-      //       'static-private-method',
-      //       'static-method',
-      //       'private-method',
-      //       'method',
-      //       'unknown',
-      //     ],
-      //   },
-      // ],
+
+      'import-x/no-duplicates': 'error',
+      'perfectionist/sort-named-imports': 'error',
+      'perfectionist/sort-named-exports': 'error',
+      'perfectionist/sort-classes': [
+        'error',
+        {
+          type: 'natural',
+          order: 'asc',
+
+          groups: [
+            'static-property',
+            'static-block',
+            'private-property',
+            'index-signature',
+            'property',
+            ['get-method', 'set-method'],
+            'constructor',
+            'static-private-method',
+            'static-method',
+            'private-method',
+            'method',
+            'unknown',
+          ],
+        },
+      ],
     },
   },
   {
@@ -225,6 +216,14 @@ export default [
       '@typescript-eslint/consistent-generic-constructors': 'error',
       '@typescript-eslint/consistent-indexed-object-style': 'error',
       '@typescript-eslint/consistent-type-assertions': 'error',
+      '@typescript-eslint/consistent-type-imports': [
+        'error',
+        {
+          prefer: 'type-imports',
+          disallowTypeAnnotations: false,
+          fixStyle: 'inline-type-imports',
+        },
+      ],
       '@typescript-eslint/no-import-type-side-effects': 'error',
 
       '@typescript-eslint/no-namespace': [

@@ -21,6 +21,17 @@ export class LatexBlockComponent extends CaptionedBlockComponent<
 
   private _editorAbortController: AbortController | null = null;
 
+  get editorPlacement(): Placement {
+    return 'bottom';
+  }
+
+  get isBlockSelected() {
+    const blockSelection = this.selection.filter('block');
+    return blockSelection.some(
+      selection => selection.blockId === this.model.id
+    );
+  }
+
   override firstUpdated(props: Map<string, unknown>) {
     super.firstUpdated(props);
 
@@ -78,6 +89,24 @@ export class LatexBlockComponent extends CaptionedBlockComponent<
     });
   }
 
+  removeEditor(portal: HTMLDivElement) {
+    portal.remove();
+  }
+
+  override renderBlock() {
+    return html`
+      <div contenteditable="false" class="latex-block-container">
+        <div class="katex"></div>
+      </div>
+    `;
+  }
+
+  selectBlock() {
+    this.host.command.exec('selectBlock', {
+      focusBlock: this,
+    });
+  }
+
   toggleEditor() {
     const katexContainer = this._katexContainer;
     if (!katexContainer) return;
@@ -121,37 +150,8 @@ export class LatexBlockComponent extends CaptionedBlockComponent<
     );
   }
 
-  selectBlock() {
-    this.host.command.exec('selectBlock', {
-      focusBlock: this,
-    });
-  }
-
-  removeEditor(portal: HTMLDivElement) {
-    portal.remove();
-  }
-
-  get isBlockSelected() {
-    const blockSelection = this.selection.filter('block');
-    return blockSelection.some(
-      selection => selection.blockId === this.model.id
-    );
-  }
-
-  override renderBlock() {
-    return html`
-      <div contenteditable="false" class="latex-block-container">
-        <div class="katex"></div>
-      </div>
-    `;
-  }
-
   @query('.latex-block-container')
   private accessor _katexContainer!: HTMLDivElement;
-
-  get editorPlacement(): Placement {
-    return 'bottom';
-  }
 }
 
 declare global {

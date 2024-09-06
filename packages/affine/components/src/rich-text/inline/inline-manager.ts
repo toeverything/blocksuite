@@ -1,17 +1,18 @@
-import type { InlineEditor, KeyboardBindingContext } from '@blocksuite/inline';
 import type { Y } from '@blocksuite/store';
 
 import {
   type AttributeRenderer,
   type BaseTextAttributes,
+  baseTextAttributes,
   type DeltaInsert,
+  getDefaultAttributeRenderer,
+  type InlineEditor,
   type InlineRange,
   KEYBOARD_ALLOW_DEFAULT,
+  type KeyboardBindingContext,
   type KeyboardBindingHandler,
-  baseTextAttributes,
-  getDefaultAttributeRenderer,
 } from '@blocksuite/inline';
-import { type ZodObject, type ZodTypeAny, z } from 'zod';
+import { z, type ZodObject, type ZodTypeAny } from 'zod';
 
 export type InlineSpecs<
   TextAttributes extends BaseTextAttributes = BaseTextAttributes,
@@ -111,6 +112,14 @@ export class InlineManager<
     return KEYBOARD_ALLOW_DEFAULT;
   };
 
+  get markdownMatches() {
+    return this._markdownMatches;
+  }
+
+  get specs() {
+    return this._specs;
+  }
+
   registerMarkdownMatches(
     markdownMatches: InlineMarkdownMatch<TextAttributes>[]
   ): void {
@@ -122,13 +131,5 @@ export class InlineManager<
       return;
     }
     this._specs = specs;
-  }
-
-  get markdownMatches() {
-    return this._markdownMatches;
-  }
-
-  get specs() {
-    return this._specs;
   }
 }

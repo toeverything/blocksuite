@@ -56,6 +56,10 @@ export class GridManager {
 
   private _grids = new Map<string, Set<GfxModel>>();
 
+  get isEmpty() {
+    return this._grids.size === 0;
+  }
+
   private _addToExternalGrids(element: GfxModel) {
     const range = rangeFromElementExternal(element);
 
@@ -236,7 +240,6 @@ export class GridManager {
 
     this._removeFromExternalGrids(element);
   }
-
   search(
     bound: IBound,
     strict?: boolean,
@@ -253,6 +256,7 @@ export class GridManager {
       filter?: (model: GfxModel) => boolean;
     }
   ): Set<GfxModel>;
+
   search(
     bound: IBound,
     strict = false,
@@ -375,9 +379,5 @@ export class GridManager {
     return () => {
       disposables.forEach(d => d.dispose());
     };
-  }
-
-  get isEmpty() {
-    return this._grids.size === 0;
   }
 }

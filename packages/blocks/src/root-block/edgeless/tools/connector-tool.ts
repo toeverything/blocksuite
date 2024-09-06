@@ -1,21 +1,21 @@
 import type {
-  ConnectorMode,
   Connection,
   ConnectorElementModel,
+  ConnectorMode,
 } from '@blocksuite/affine-model';
 import type { PointerEventState } from '@blocksuite/block-std';
 import type { IBound, IVec } from '@blocksuite/global/utils';
 
-import { CanvasElementType } from '@blocksuite/affine-block-surface';
 import {
+  calculateNearestLocation,
+  CanvasElementType,
   ConnectorEndpointLocations,
   ConnectorEndpointLocationsOnTriangle,
-  calculateNearestLocation,
 } from '@blocksuite/affine-block-surface';
 import {
-  ShapeType,
   GroupElementModel,
   ShapeElementModel,
+  ShapeType,
 } from '@blocksuite/affine-model';
 import { TelemetryProvider } from '@blocksuite/affine-shared/services';
 import { Bound, noop } from '@blocksuite/global/utils';
@@ -55,6 +55,10 @@ export class ConnectorToolController extends EdgelessToolController<ConnectorToo
   readonly tool = {
     type: 'connector',
   } as ConnectorTool;
+
+  get connector() {
+    return this._edgeless.service.connectorOverlay;
+  }
 
   private _createConnector() {
     if (!(this._source && this._startPoint)) {
@@ -249,10 +253,6 @@ export class ConnectorToolController extends EdgelessToolController<ConnectorToo
     }
 
     this.findTargetByPoint(point);
-  }
-
-  get connector() {
-    return this._edgeless.service.connectorOverlay;
   }
 }
 

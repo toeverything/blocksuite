@@ -10,9 +10,9 @@ import {
   type LocalConnectorElementModel,
 } from '@blocksuite/affine-model';
 import {
-  Vec,
   getBezierParameters,
   getBezierTangent,
+  Vec,
 } from '@blocksuite/global/utils';
 
 import type { RoughCanvas } from '../../../utils/rough/canvas.js';

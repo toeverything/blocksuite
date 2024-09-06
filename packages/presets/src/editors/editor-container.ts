@@ -1,4 +1,3 @@
-import type { DocMode } from '@blocksuite/blocks';
 import type { BlockModel, Doc } from '@blocksuite/store';
 
 import {
@@ -6,17 +5,19 @@ import {
   EditorHost,
   type ExtensionType,
   ShadowlessElement,
-  WithDisposable,
   SignalWatcher,
+  WithDisposable,
 } from '@blocksuite/block-std';
-import { type AbstractEditor, DocModeProvider } from '@blocksuite/blocks';
 import {
+  type AbstractEditor,
+  type DocMode,
+  DocModeProvider,
   EdgelessEditorBlockSpecs,
   type EdgelessRootBlockComponent,
   PageEditorBlockSpecs,
   type PageRootBlockComponent,
 } from '@blocksuite/blocks';
-import { Slot, noop } from '@blocksuite/global/utils';
+import { noop, Slot } from '@blocksuite/global/utils';
 import { computed, effect, signal } from '@lit-labs/preact-signals';
 import { css, html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
@@ -48,42 +49,6 @@ export class AffineEditorContainer
   extends SignalWatcher(WithDisposable(ShadowlessElement))
   implements AbstractEditor
 {
-  private _doc = signal<Doc>();
-
-  private _edgelessSpecs = signal<ExtensionType[]>(EdgelessEditorBlockSpecs);
-
-  private _editorTemplate = computed(() => {
-    return this._std.value.render();
-  });
-
-  private _forwardRef = (mode: DocMode) => {
-    requestAnimationFrame(() => {
-      if (mode === 'page') {
-        if (this._pageRoot) forwardSlot(this._pageRoot.slots, this.slots);
-      } else {
-        if (this._edgelessRoot)
-          forwardSlot(this._edgelessRoot.slots, this.slots);
-      }
-    });
-  };
-
-  private _mode = signal<DocMode>('page');
-
-  private _pageSpecs = signal<ExtensionType[]>(PageEditorBlockSpecs);
-
-  private _specs = computed(() =>
-    this._mode.value === 'page'
-      ? this._pageSpecs.value
-      : this._edgelessSpecs.value
-  );
-
-  private _std = computed(() => {
-    return new BlockStdScope({
-      doc: this.doc,
-      extensions: this._specs.value,
-    });
-  });
-
   static override styles = css`
     .affine-page-viewport {
       position: relative;
@@ -150,6 +115,42 @@ export class AffineEditorContainer
     }
   `;
 
+  private _doc = signal<Doc>();
+
+  private _edgelessSpecs = signal<ExtensionType[]>(EdgelessEditorBlockSpecs);
+
+  private _editorTemplate = computed(() => {
+    return this._std.value.render();
+  });
+
+  private _forwardRef = (mode: DocMode) => {
+    requestAnimationFrame(() => {
+      if (mode === 'page') {
+        if (this._pageRoot) forwardSlot(this._pageRoot.slots, this.slots);
+      } else {
+        if (this._edgelessRoot)
+          forwardSlot(this._edgelessRoot.slots, this.slots);
+      }
+    });
+  };
+
+  private _mode = signal<DocMode>('page');
+
+  private _pageSpecs = signal<ExtensionType[]>(PageEditorBlockSpecs);
+
+  private _specs = computed(() =>
+    this._mode.value === 'page'
+      ? this._pageSpecs.value
+      : this._edgelessSpecs.value
+  );
+
+  private _std = computed(() => {
+    return new BlockStdScope({
+      doc: this.doc,
+      extensions: this._specs.value,
+    });
+  });
+
   /**
    * @deprecated need to refactor
    */
@@ -159,6 +160,54 @@ export class AffineEditorContainer
     docUpdated: new Slot(),
     tagClicked: new Slot<{ tagId: string }>(),
   };
+
+  get doc() {
+    return this._doc.value as Doc;
+  }
+
+  set doc(doc: Doc) {
+    this._doc.value = doc;
+  }
+
+  set edgelessSpecs(specs: ExtensionType[]) {
+    this._edgelessSpecs.value = specs;
+  }
+
+  get edgelessSpecs() {
+    return this._edgelessSpecs.value;
+  }
+
+  get host() {
+    try {
+      return this.std.host;
+    } catch {
+      return null;
+    }
+  }
+
+  get mode() {
+    return this._mode.value;
+  }
+
+  set mode(mode: DocMode) {
+    this._mode.value = mode;
+  }
+
+  set pageSpecs(specs: ExtensionType[]) {
+    this._pageSpecs.value = specs;
+  }
+
+  get pageSpecs() {
+    return this._pageSpecs.value;
+  }
+
+  get rootModel() {
+    return this.doc.root as BlockModel;
+  }
+
+  get std() {
+    return this._std.value;
+  }
 
   /**
    * @deprecated need to refactor
@@ -234,54 +283,6 @@ export class AffineEditorContainer
     if (!changedProperties.has('doc') && !changedProperties.has('mode')) {
       return;
     }
-  }
-
-  get doc() {
-    return this._doc.value as Doc;
-  }
-
-  set doc(doc: Doc) {
-    this._doc.value = doc;
-  }
-
-  set edgelessSpecs(specs: ExtensionType[]) {
-    this._edgelessSpecs.value = specs;
-  }
-
-  get edgelessSpecs() {
-    return this._edgelessSpecs.value;
-  }
-
-  get host() {
-    try {
-      return this.std.host;
-    } catch {
-      return null;
-    }
-  }
-
-  get mode() {
-    return this._mode.value;
-  }
-
-  set mode(mode: DocMode) {
-    this._mode.value = mode;
-  }
-
-  set pageSpecs(specs: ExtensionType[]) {
-    this._pageSpecs.value = specs;
-  }
-
-  get pageSpecs() {
-    return this._pageSpecs.value;
-  }
-
-  get rootModel() {
-    return this.doc.root as BlockModel;
-  }
-
-  get std() {
-    return this._std.value;
   }
 
   /** @deprecated unreliable since edgelessSpecs can be overridden */

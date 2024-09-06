@@ -24,17 +24,25 @@ import {
 import { Viewport } from './viewport.js';
 
 export class GfxController extends LifeCycleWatcher {
+  static override key = 'gfxController';
+
   private _disposables: DisposableGroup = new DisposableGroup();
 
   private _surface: SurfaceBlockModel | null = null;
-
-  static override key = 'gfxController';
 
   readonly grid: GridManager;
 
   readonly layer: LayerManager;
 
   readonly viewport: Viewport = new Viewport();
+
+  get doc() {
+    return this.std.doc;
+  }
+
+  get surface() {
+    return this._surface;
+  }
 
   constructor(std: BlockStdScope) {
     super(std);
@@ -71,7 +79,6 @@ export class GfxController extends LifeCycleWatcher {
       this.surface?.getElementById(id) ?? this.doc.getBlock(id)?.model ?? null
     );
   }
-
   /**
    * Get elements on a specific point.
    * @param x
@@ -83,6 +90,7 @@ export class GfxController extends LifeCycleWatcher {
     y: number,
     options: { all: true } & PointTestOptions
   ): GfxModel[];
+
   getElementByPoint(
     x: number,
     y: number,
@@ -126,7 +134,6 @@ export class GfxController extends LifeCycleWatcher {
 
     return last(picked) ?? null;
   }
-
   /**
    * Query all elements in an area.
    * @param bound
@@ -140,10 +147,12 @@ export class GfxController extends LifeCycleWatcher {
     bound: IBound | Bound,
     options: { type: 'canvas' }
   ): GfxPrimitiveElementModel[];
+
   getElementsByBound(
     bound: IBound | Bound,
     options: { type: 'block' }
   ): GfxBlockElementModel[];
+
   getElementsByBound(
     bound: IBound | Bound,
     options: { type: 'block' | 'canvas' | 'all' } = {
@@ -181,14 +190,6 @@ export class GfxController extends LifeCycleWatcher {
 
   override unmounted() {
     this._disposables.dispose();
-  }
-
-  get doc() {
-    return this.std.doc;
-  }
-
-  get surface() {
-    return this._surface;
   }
 }
 

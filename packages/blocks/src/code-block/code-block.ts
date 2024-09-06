@@ -1,12 +1,11 @@
 import type { CodeBlockModel } from '@blocksuite/affine-model';
 import type { BlockComponent } from '@blocksuite/block-std';
-import type { VLine } from '@blocksuite/inline';
 import type { ThemedToken } from 'shiki';
 
 import { CaptionedBlockComponent } from '@blocksuite/affine-components/caption';
 import {
-  type RichText,
   focusTextModel,
+  type RichText,
 } from '@blocksuite/affine-components/rich-text';
 import '@blocksuite/affine-components/rich-text';
 import { toast } from '@blocksuite/affine-components/toast';
@@ -19,15 +18,16 @@ import {
   INLINE_ROOT_ATTR,
   type InlineRangeProvider,
   type InlineRootElement,
+  type VLine,
 } from '@blocksuite/inline';
 import { Slice } from '@blocksuite/store';
 import {
-  type Signal,
   computed,
   effect,
+  type Signal,
   signal,
 } from '@lit-labs/preact-signals';
-import { type TemplateResult, html, nothing } from 'lit';
+import { html, nothing, type TemplateResult } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 
@@ -43,9 +43,9 @@ export class CodeBlockComponent extends CaptionedBlockComponent<
   CodeBlockModel,
   CodeBlockService
 > {
-  private _inlineRangeProvider: InlineRangeProvider | null = null;
-
   static override styles = codeBlockStyles;
+
+  private _inlineRangeProvider: InlineRangeProvider | null = null;
 
   clipboardController = new CodeClipboardController(this);
 
@@ -60,6 +60,25 @@ export class CodeBlockComponent extends CaptionedBlockComponent<
     const matchedInfo = this.service.langs.find(info => info.id === lang);
     return matchedInfo ? matchedInfo.name : 'Plain Text';
   });
+
+  get inlineEditor() {
+    const inlineRoot = this.querySelector<InlineRootElement>(
+      `[${INLINE_ROOT_ATTR}]`
+    );
+    return inlineRoot?.inlineEditor;
+  }
+
+  get readonly() {
+    return this.doc.readonly;
+  }
+
+  override get topContenteditableElement() {
+    if (this.rootComponent instanceof EdgelessRootBlockComponent) {
+      const el = this.closest<BlockComponent>(NOTE_SELECTOR);
+      return el;
+    }
+    return this.rootComponent;
+  }
 
   private _updateHighlightTokens() {
     const modelLang = this.model.language$.value;
@@ -396,25 +415,6 @@ export class CodeBlockComponent extends CaptionedBlockComponent<
 
   setWrap(wrap: boolean) {
     this.doc.updateBlock(this.model, { wrap });
-  }
-
-  get inlineEditor() {
-    const inlineRoot = this.querySelector<InlineRootElement>(
-      `[${INLINE_ROOT_ATTR}]`
-    );
-    return inlineRoot?.inlineEditor;
-  }
-
-  get readonly() {
-    return this.doc.readonly;
-  }
-
-  override get topContenteditableElement() {
-    if (this.rootComponent instanceof EdgelessRootBlockComponent) {
-      const el = this.closest<BlockComponent>(NOTE_SELECTOR);
-      return el;
-    }
-    return this.rootComponent;
   }
 
   @query('rich-text')

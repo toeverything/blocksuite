@@ -3,7 +3,7 @@ import type { FrameBlockModel } from '@blocksuite/affine-model';
 import { CommonUtils } from '@blocksuite/affine-block-surface';
 import { WithDisposable } from '@blocksuite/block-std';
 import { DisposableGroup } from '@blocksuite/global/utils';
-import { LitElement, css, html, nothing } from 'lit';
+import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 

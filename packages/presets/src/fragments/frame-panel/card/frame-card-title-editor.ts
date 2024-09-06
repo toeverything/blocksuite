@@ -15,9 +15,13 @@ export const AFFINE_FRAME_TITLE_EDITOR = 'affine-frame-card-title-editor';
 
 @customElement(AFFINE_FRAME_TITLE_EDITOR)
 export class FrameCardTitleEditor extends WithDisposable(ShadowlessElement) {
+  static override styles = styles;
+
   private _isComposing = false;
 
-  static override styles = styles;
+  get inlineEditor() {
+    return this.richText.inlineEditor;
+  }
 
   private _unmount() {
     // dispose in advance to avoid execute `this.remove()` twice
@@ -96,10 +100,6 @@ export class FrameCardTitleEditor extends WithDisposable(ShadowlessElement) {
       .wrapText=${false}
       style=${inlineEditorStyle}
     ></rich-text>`;
-  }
-
-  get inlineEditor() {
-    return this.richText.inlineEditor;
   }
 
   @property({ attribute: false })

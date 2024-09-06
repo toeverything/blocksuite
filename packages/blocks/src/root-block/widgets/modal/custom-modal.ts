@@ -1,4 +1,4 @@
-import { LitElement, css, html, nothing } from 'lit';
+import { css, html, LitElement, nothing } from 'lit';
 import { customElement } from 'lit/decorators.js';
 import { ref } from 'lit/directives/ref.js';
 import { repeat } from 'lit/directives/repeat.js';

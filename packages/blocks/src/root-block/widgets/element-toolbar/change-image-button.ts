@@ -2,7 +2,7 @@ import type { ImageBlockModel } from '@blocksuite/affine-model';
 
 import { CaptionIcon, DownloadIcon } from '@blocksuite/affine-components/icons';
 import { WithDisposable } from '@blocksuite/block-std';
-import { LitElement, html, nothing } from 'lit';
+import { html, LitElement, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 import type { ImageBlockComponent } from '../../../image-block/image-block.js';

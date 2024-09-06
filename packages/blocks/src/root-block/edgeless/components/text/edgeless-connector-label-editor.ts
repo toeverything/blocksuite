@@ -10,8 +10,7 @@ import {
   ShadowlessElement,
   WithDisposable,
 } from '@blocksuite/block-std';
-import { Bound, Vec } from '@blocksuite/global/utils';
-import { assertExists } from '@blocksuite/global/utils';
+import { assertExists, Bound, Vec } from '@blocksuite/global/utils';
 import { DocCollection } from '@blocksuite/store';
 import { css, html, nothing } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
@@ -27,34 +26,6 @@ const BORDER_WIDTH = 1;
 export class EdgelessConnectorLabelEditor extends WithDisposable(
   ShadowlessElement
 ) {
-  private _isComposition = false;
-
-  private _keeping = false;
-
-  private _resizeObserver: ResizeObserver | null = null;
-
-  private _updateLabelRect = () => {
-    const { connector, edgeless } = this;
-    if (!connector || !edgeless) return;
-
-    const newWidth = this.inlineEditorContainer.scrollWidth;
-    const newHeight = this.inlineEditorContainer.scrollHeight;
-    const center = connector.getPointByOffsetDistance(
-      connector.labelOffset.distance
-    );
-    const bounds = Bound.fromCenter(center, newWidth, newHeight);
-    const labelXYWH = bounds.toXYWH();
-
-    if (
-      !connector.labelXYWH ||
-      labelXYWH.some((p, i) => !almostEqual(p, connector.labelXYWH![i]))
-    ) {
-      edgeless.service.updateElement(connector.id, {
-        labelXYWH,
-      });
-    }
-  };
-
   static override styles = css`
     .edgeless-connector-label-editor {
       position: absolute;
@@ -87,6 +58,43 @@ export class EdgelessConnectorLabelEditor extends WithDisposable(
       }
     }
   `;
+
+  private _isComposition = false;
+
+  private _keeping = false;
+
+  private _resizeObserver: ResizeObserver | null = null;
+
+  private _updateLabelRect = () => {
+    const { connector, edgeless } = this;
+    if (!connector || !edgeless) return;
+
+    const newWidth = this.inlineEditorContainer.scrollWidth;
+    const newHeight = this.inlineEditorContainer.scrollHeight;
+    const center = connector.getPointByOffsetDistance(
+      connector.labelOffset.distance
+    );
+    const bounds = Bound.fromCenter(center, newWidth, newHeight);
+    const labelXYWH = bounds.toXYWH();
+
+    if (
+      !connector.labelXYWH ||
+      labelXYWH.some((p, i) => !almostEqual(p, connector.labelXYWH![i]))
+    ) {
+      edgeless.service.updateElement(connector.id, {
+        labelXYWH,
+      });
+    }
+  };
+
+  get inlineEditor() {
+    assertExists(this.richText.inlineEditor);
+    return this.richText.inlineEditor;
+  }
+
+  get inlineEditorContainer() {
+    return this.inlineEditor.rootElement;
+  }
 
   override connectedCallback() {
     super.connectedCallback();
@@ -294,15 +302,6 @@ export class EdgelessConnectorLabelEditor extends WithDisposable(
 
   setKeeping(keeping: boolean) {
     this._keeping = keeping;
-  }
-
-  get inlineEditor() {
-    assertExists(this.richText.inlineEditor);
-    return this.richText.inlineEditor;
-  }
-
-  get inlineEditorContainer() {
-    return this.inlineEditor.rootElement;
   }
 
   @property({ attribute: false })

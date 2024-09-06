@@ -1,4 +1,4 @@
-import { LitElement, css, html } from 'lit';
+import { css, html, LitElement } from 'lit';
 import { customElement } from 'lit/decorators.js';
 
 @customElement('affine-template-loading')

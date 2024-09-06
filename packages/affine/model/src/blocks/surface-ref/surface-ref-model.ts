@@ -1,4 +1,4 @@
-import { type SchemaToModel, defineBlockSchema } from '@blocksuite/store';
+import { defineBlockSchema, type SchemaToModel } from '@blocksuite/store';
 
 type SurfaceRefProps = {
   reference: string;

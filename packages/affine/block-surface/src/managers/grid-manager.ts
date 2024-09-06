@@ -53,6 +53,10 @@ export class GridManager<T extends GfxModel> {
 
   private _grids = new Map<string, Set<T>>();
 
+  get isEmpty() {
+    return this._grids.size === 0;
+  }
+
   private _addToExternalGrids(element: T) {
     const range = rangeFromElementExternal(element);
 
@@ -233,9 +237,9 @@ export class GridManager<T extends GfxModel> {
 
     this._removeFromExternalGrids(element);
   }
-
   search(bound: IBound, strict?: boolean, getSet?: false): T[];
   search(bound: IBound, strict: boolean | undefined, getSet: true): Set<T>;
+
   search(bound: IBound, strict = false, getSet: boolean = false): T[] | Set<T> {
     const results: Set<T> = this._searchExternal(bound, strict);
     const [minRow, maxRow, minCol, maxCol] = rangeFromBound(bound);
@@ -268,9 +272,5 @@ export class GridManager<T extends GfxModel> {
   update(element: T) {
     this.remove(element);
     this.add(element);
-  }
-
-  get isEmpty() {
-    return this._grids.size === 0;
   }
 }

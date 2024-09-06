@@ -6,11 +6,11 @@ import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import { WithDisposable } from '@blocksuite/block-std';
 import { baseTheme } from '@toeverything/theme';
 import {
-  LitElement,
-  type PropertyValues,
   css,
   html,
+  LitElement,
   nothing,
+  type PropertyValues,
   unsafeCSS,
 } from 'lit';
 import { customElement, property } from 'lit/decorators.js';

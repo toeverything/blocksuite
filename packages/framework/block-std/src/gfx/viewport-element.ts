@@ -1,4 +1,4 @@
-import { LitElement, css, html } from 'lit';
+import { css, html, LitElement } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 
 import type { EditorHost } from '../view/index.js';
@@ -31,6 +31,16 @@ export function requestThrottledConnectedFrame<
 
 @customElement('gfx-viewport')
 export class GfxViewportElement extends LitElement {
+  static override styles = css`
+    .gfx-viewport {
+      position: absolute;
+      left: 0;
+      top: 0;
+      contain: size layout style;
+      display: block;
+    }
+  `;
+
   private _hideOutsideBlock = requestThrottledConnectedFrame(() => {
     if (this.getModelsInViewport && this.host) {
       const host = this.host;
@@ -80,16 +90,6 @@ export class GfxViewportElement extends LitElement {
   }, this);
 
   private _updatingChildrenFlag = false;
-
-  static override styles = css`
-    .gfx-viewport {
-      position: absolute;
-      left: 0;
-      top: 0;
-      contain: size layout style;
-      display: block;
-    }
-  `;
 
   renderingBlocks = new Set<string>();
 

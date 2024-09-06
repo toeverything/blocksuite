@@ -76,29 +76,27 @@ export interface DataSource {
 }
 
 export abstract class DataSourceBase implements DataSource {
+  abstract addPropertyConfigList: ColumnMeta[];
+
   context = new Map<DataViewContextKey<unknown>, unknown>();
 
-  getContext<T>(key: DataViewContextKey<T>): T | undefined {
-    return this.context.get(key) as T;
-  }
+  abstract featureFlags$: ReadonlySignal<DatabaseFlags>;
 
-  propertyGetDefaultWidth(_propertyId: string): number {
-    return DEFAULT_COLUMN_WIDTH;
-  }
+  abstract properties$: ReadonlySignal<string[]>;
 
-  propertyGetReadonly(_propertyId: string): boolean {
-    return false;
-  }
+  abstract readonly$: ReadonlySignal<boolean>;
 
-  protected setContext<T>(key: DataViewContextKey<T>, value: T): void {
-    this.context.set(key, value);
-  }
+  abstract rows$: ReadonlySignal<string[]>;
+
+  abstract viewDataList$: ReadonlySignal<DataViewDataType[]>;
+
+  abstract viewManager: ViewManager;
+
+  abstract viewMetas: ViewMeta[];
 
   get detailSlots(): DetailSlots {
     return {};
   }
-
-  abstract addPropertyConfigList: ColumnMeta[];
 
   abstract cellChangeValue(
     rowId: string,
@@ -114,11 +112,11 @@ export abstract class DataSourceBase implements DataSource {
 
   abstract cellGetValue(rowId: string, propertyId: string): unknown;
 
-  abstract featureFlags$: ReadonlySignal<DatabaseFlags>;
+  getContext<T>(key: DataViewContextKey<T>): T | undefined {
+    return this.context.get(key) as T;
+  }
 
   abstract getPropertyMeta(type: string): ColumnMeta;
-
-  abstract properties$: ReadonlySignal<string[]>;
 
   abstract propertyAdd(
     insertToPosition: InsertToPosition,
@@ -140,18 +138,26 @@ export abstract class DataSourceBase implements DataSource {
 
   abstract propertyGetData(propertyId: string): Record<string, unknown>;
 
+  propertyGetDefaultWidth(_propertyId: string): number {
+    return DEFAULT_COLUMN_WIDTH;
+  }
+
   abstract propertyGetName(propertyId: string): string;
 
+  propertyGetReadonly(_propertyId: string): boolean {
+    return false;
+  }
+
   abstract propertyGetType(propertyId: string): string;
-
-  abstract readonly$: ReadonlySignal<boolean>;
-
   abstract rowAdd(InsertToPosition: InsertToPosition | number): string;
 
   abstract rowDelete(ids: string[]): void;
 
   abstract rowMove(rowId: string, position: InsertToPosition): void;
-  abstract rows$: ReadonlySignal<string[]>;
+
+  protected setContext<T>(key: DataViewContextKey<T>, value: T): void {
+    this.context.set(key, value);
+  }
 
   abstract viewDataAdd(viewType: DataViewTypes): string;
 
@@ -161,18 +167,12 @@ export abstract class DataSourceBase implements DataSource {
 
   abstract viewDataGet(viewId: string): DataViewDataType;
 
-  abstract viewDataList$: ReadonlySignal<DataViewDataType[]>;
-
   abstract viewDataMoveTo(id: string, position: InsertToPosition): void;
-
   abstract viewDataUpdate<ViewData extends DataViewDataType>(
     id: string,
     updater: (data: ViewData) => Partial<ViewData>
   ): void;
-
-  abstract viewManager: ViewManager;
   abstract viewMetaGet(type: string): ViewMeta;
-  abstract viewMetaGetById(viewId: string): ViewMeta;
 
-  abstract viewMetas: ViewMeta[];
+  abstract viewMetaGetById(viewId: string): ViewMeta;
 }

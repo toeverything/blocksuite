@@ -22,8 +22,8 @@ import {
   TextVerticalAlign,
 } from '@blocksuite/affine-model';
 import {
-  GfxPrimitiveElementModel,
   field,
+  GfxPrimitiveElementModel,
   local,
 } from '@blocksuite/block-std/gfx';
 import { DocCollection, type Y } from '@blocksuite/store';
@@ -63,6 +63,10 @@ export const SHAPE_TEXT_VERTICAL_PADDING = 10;
 export class ShapeElementModel extends GfxPrimitiveElementModel<ShapeProps> {
   textBound: IBound | null = null;
 
+  get type() {
+    return 'shape';
+  }
+
   static override propsToY(props: ShapeProps) {
     if (props.text && !(props.text instanceof DocCollection.Y.Text)) {
       props.text = new DocCollection.Y.Text(props.text);
@@ -92,10 +96,6 @@ export class ShapeElementModel extends GfxPrimitiveElementModel<ShapeProps> {
       ...options,
       ignoreTransparent: options.ignoreTransparent ?? true,
     });
-  }
-
-  get type() {
-    return 'shape';
   }
 
   @field('#000000' as Color)

@@ -12,7 +12,7 @@ import {
   type FrameBlockModel,
 } from '@blocksuite/blocks';
 import { Bound, DisposableGroup } from '@blocksuite/global/utils';
-import { type PropertyValues, css, html, nothing } from 'lit';
+import { css, html, nothing, type PropertyValues } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
@@ -85,6 +85,8 @@ export const AFFINE_FRAME_PANEL_BODY = 'affine-frame-panel-body';
 
 @customElement(AFFINE_FRAME_PANEL_BODY)
 export class FramePanelBody extends WithDisposable(ShadowlessElement) {
+  static override styles = styles;
+
   private _clearDocDisposables = () => {
     this._docDisposables?.dispose();
     this._docDisposables = null;
@@ -146,7 +148,20 @@ export class FramePanelBody extends WithDisposable(ShadowlessElement) {
     }));
   };
 
-  static override styles = styles;
+  get frames() {
+    const frames = this.doc.getBlockByFlavour(
+      'affine:frame'
+    ) as FrameBlockModel[];
+    return frames.sort(this.compare);
+  }
+
+  get viewportPadding(): [number, number, number, number] {
+    return this.fitPadding
+      ? ([0, 0, 0, 0].map((val, idx) =>
+          Number.isFinite(this.fitPadding[idx]) ? this.fitPadding[idx] : val
+        ) as [number, number, number, number])
+      : [0, 0, 0, 0];
+  }
 
   private _drag(e: DragEvent) {
     if (!this._selected.length) return;
@@ -404,21 +419,6 @@ export class FramePanelBody extends WithDisposable(ShadowlessElement) {
       }
       this._lastEdgelessRootId = this.edgeless.model.id;
     }
-  }
-
-  get frames() {
-    const frames = this.doc.getBlockByFlavour(
-      'affine:frame'
-    ) as FrameBlockModel[];
-    return frames.sort(this.compare);
-  }
-
-  get viewportPadding(): [number, number, number, number] {
-    return this.fitPadding
-      ? ([0, 0, 0, 0].map((val, idx) =>
-          Number.isFinite(this.fitPadding[idx]) ? this.fitPadding[idx] : val
-        ) as [number, number, number, number])
-      : [0, 0, 0, 0];
   }
 
   @state()

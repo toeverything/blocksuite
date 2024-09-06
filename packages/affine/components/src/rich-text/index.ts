@@ -1,6 +1,4 @@
-import './inline/presets/nodes/index.js';
-import './rich-text.js';
-import './format/index.js';
+import './global.js';
 
 export {
   asyncGetRichText,
@@ -11,31 +9,31 @@ export {
   selectTextModel,
 } from './dom.js';
 export {
+  clearMarksOnDiscontinuousInput,
   FORMAT_BLOCK_SUPPORT_FLAVOURS,
   FORMAT_NATIVE_SUPPORT_FLAVOURS,
   FORMAT_TEXT_SUPPORT_FLAVOURS,
-  clearMarksOnDiscontinuousInput,
   isFormatSupported,
   textCommands,
   textFormatConfigs,
 } from './format/index.js';
 export {
   type AffineInlineEditor,
+  affineInlineMarkdownMatches,
   type AffineInlineRootElement,
   AffineLink,
   AffineReference,
   type AffineTextAttributes,
+  basicAffineInlineSpecs,
   DEFAULT_DOC_NAME,
+  getAffineInlineSpecsWithReference,
   InlineManager,
   type InlineMarkdownMatch,
   type InlineMarkdownMatchAction,
   type InlineSpecs,
   REFERENCE_NODE,
-  type RefNodeSlots,
   ReferenceNodeConfig,
-  affineInlineMarkdownMatches,
-  basicAffineInlineSpecs,
-  getAffineInlineSpecsWithReference,
+  type RefNodeSlots,
   toggleLinkPopup,
 } from './inline/index.js';
 export { textKeymap } from './keymap/index.js';

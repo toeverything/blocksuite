@@ -48,6 +48,10 @@ export class UniLit<
 
   uniReturn?: UniComponentReturn<Props, Expose>;
 
+  get expose(): Expose | undefined {
+    return this.uniReturn?.expose;
+  }
+
   private mount() {
     this.uniReturn = this.uni?.(this, this.props);
     if (this.ref) {
@@ -82,10 +86,6 @@ export class UniLit<
     } else if (_changedProperties.has('props')) {
       this.uniReturn?.update(this.props);
     }
-  }
-
-  get expose(): Expose | undefined {
-    return this.uniReturn?.expose;
   }
 
   @property({ attribute: false })

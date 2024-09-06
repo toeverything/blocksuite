@@ -2,6 +2,8 @@ import type { MindmapElementModel } from '@blocksuite/affine-block-surface';
 import type {
   AttachmentBlockModel,
   BookmarkBlockModel,
+  BrushElementModel,
+  ConnectorElementModel,
   EdgelessTextBlockModel,
   EmbedFigmaModel,
   EmbedGithubModel,
@@ -14,16 +16,14 @@ import type {
   ImageBlockModel,
   NoteBlockModel,
   RootBlockModel,
-  BrushElementModel,
-  ConnectorElementModel,
   TextElementModel,
 } from '@blocksuite/affine-model';
 
 import { CommonUtils } from '@blocksuite/affine-block-surface';
 import { ConnectorCWithArrowIcon } from '@blocksuite/affine-components/icons';
 import {
-  type MenuItemGroup,
   cloneGroups,
+  type MenuItemGroup,
   renderToolbarSeparator,
 } from '@blocksuite/affine-components/toolbar';
 import {
@@ -35,7 +35,7 @@ import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import { requestConnectedFrame } from '@blocksuite/affine-shared/utils';
 import { WidgetComponent } from '@blocksuite/block-std';
 import { atLeastNMatches, groupBy, pickValues } from '@blocksuite/global/utils';
-import { type TemplateResult, css, html, nothing } from 'lit';
+import { css, html, nothing, type TemplateResult } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { join } from 'lit/directives/join.js';
 
@@ -108,6 +108,17 @@ export class EdgelessElementToolbarWidget extends WidgetComponent<
   RootBlockModel,
   EdgelessRootBlockComponent
 > {
+  static override styles = css`
+    :host {
+      position: absolute;
+      z-index: 3;
+      transform: translateZ(0);
+      will-change: transform;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+  `;
+
   private _quickConnect = ({ x, y }: MouseEvent) => {
     const element = this.selection.selectedElements[0];
     const point = this.edgeless.service.viewport.toViewCoordFromClientCoord([
@@ -135,23 +146,28 @@ export class EdgelessElementToolbarWidget extends WidgetComponent<
     }
   };
 
-  static override styles = css`
-    :host {
-      position: absolute;
-      z-index: 3;
-      transform: translateZ(0);
-      will-change: transform;
-      -webkit-user-select: none;
-      user-select: none;
-    }
-  `;
-
   /*
    * Caches the more menu items.
    * Currently only supports configuring more menu.
    */
   moreGroups: MenuItemGroup<ElementToolbarMoreMenuContext>[] =
     cloneGroups(BUILT_IN_GROUPS);
+
+  get edgeless() {
+    return this.block as EdgelessRootBlockComponent;
+  }
+
+  get selection() {
+    return this.edgeless.service.selection;
+  }
+
+  get slots() {
+    return this.edgeless.slots;
+  }
+
+  get surface() {
+    return this.edgeless.surface;
+  }
 
   private _groupSelected(): CategorizedElements {
     const result = groupBy(this.selection.selectedElements, model => {
@@ -414,22 +430,6 @@ export class EdgelessElementToolbarWidget extends WidgetComponent<
         )}
       </editor-toolbar>
     `;
-  }
-
-  get edgeless() {
-    return this.block as EdgelessRootBlockComponent;
-  }
-
-  get selection() {
-    return this.edgeless.service.selection;
-  }
-
-  get slots() {
-    return this.edgeless.slots;
-  }
-
-  get surface() {
-    return this.edgeless.surface;
   }
 
   @state()

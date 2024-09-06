@@ -1,7 +1,7 @@
-import type { SurfaceSelection } from '@blocksuite/block-std';
 import type {
   EventName,
   PointerEventState,
+  SurfaceSelection,
   UIEventHandler,
   UIEventState,
 } from '@blocksuite/block-std';
@@ -55,8 +55,6 @@ export class EdgelessToolsManager {
     EdgelessTool['type'] | string,
     EdgelessToolController
   > = {};
-
-  protected readonly _disposables = new DisposableGroup();
 
   private _dragging = false;
 
@@ -200,6 +198,8 @@ export class EdgelessToolsManager {
 
   private _spaceBar = false;
 
+  protected readonly _disposables = new DisposableGroup();
+
   setEdgelessTool = (
     edgelessTool: EdgelessTool,
     state: EdgelessSelectionState | SurfaceSelection[] = {
@@ -277,6 +277,81 @@ export class EdgelessToolsManager {
     this._controllers[lastType].afterModeSwitch(edgelessTool);
     this._controllers[edgelessTool.type].afterModeSwitch(edgelessTool);
   };
+
+  get container() {
+    return this._container;
+  }
+
+  get controllers() {
+    return this._controllers;
+  }
+
+  get currentController() {
+    return this._controllers[this.edgelessTool.type];
+  }
+
+  get dispatcher() {
+    return this.container.dispatcher;
+  }
+
+  get doc() {
+    return this.service.doc;
+  }
+
+  get dragging() {
+    return this._dragging;
+  }
+
+  get draggingArea() {
+    if (!this.currentController.draggingArea) return null;
+
+    const { start, end } = this.currentController.draggingArea;
+    const minX = Math.min(start.x, end.x);
+    const minY = Math.min(start.y, end.y);
+    const maxX = Math.max(start.x, end.x);
+    const maxY = Math.max(start.y, end.y);
+    return new DOMRect(minX, minY, maxX - minX, maxY - minY);
+  }
+
+  get edgelessTool() {
+    return this._edgelessTool;
+  }
+
+  set edgelessTool(mode: EdgelessTool) {
+    this._edgelessTool = mode;
+    // sync mouse mode
+    this._controllers[this._edgelessTool.type].tool = this._edgelessTool;
+  }
+
+  get lastMousePos() {
+    return this._lastMousePos;
+  }
+
+  get selection() {
+    return this.service.selection;
+  }
+
+  get service() {
+    return this._service;
+  }
+
+  set shiftKey(pressed: boolean) {
+    this._shiftKey = pressed;
+    this.currentController.onPressShiftKey(pressed);
+  }
+
+  get shiftKey() {
+    return this._shiftKey;
+  }
+
+  set spaceBar(pressed: boolean) {
+    this._spaceBar = pressed;
+    this.currentController.onPressSpaceBar(pressed);
+  }
+
+  get spaceBar() {
+    return this._spaceBar;
+  }
 
   constructor(service: EdgelessRootService) {
     this._service = service;
@@ -413,80 +488,5 @@ export class EdgelessToolsManager {
 
   switchToDefaultMode(state: EdgelessSelectionState) {
     this.setEdgelessTool({ type: 'default' }, state);
-  }
-
-  get container() {
-    return this._container;
-  }
-
-  get controllers() {
-    return this._controllers;
-  }
-
-  get currentController() {
-    return this._controllers[this.edgelessTool.type];
-  }
-
-  get dispatcher() {
-    return this.container.dispatcher;
-  }
-
-  get doc() {
-    return this.service.doc;
-  }
-
-  get dragging() {
-    return this._dragging;
-  }
-
-  get draggingArea() {
-    if (!this.currentController.draggingArea) return null;
-
-    const { start, end } = this.currentController.draggingArea;
-    const minX = Math.min(start.x, end.x);
-    const minY = Math.min(start.y, end.y);
-    const maxX = Math.max(start.x, end.x);
-    const maxY = Math.max(start.y, end.y);
-    return new DOMRect(minX, minY, maxX - minX, maxY - minY);
-  }
-
-  get edgelessTool() {
-    return this._edgelessTool;
-  }
-
-  set edgelessTool(mode: EdgelessTool) {
-    this._edgelessTool = mode;
-    // sync mouse mode
-    this._controllers[this._edgelessTool.type].tool = this._edgelessTool;
-  }
-
-  get lastMousePos() {
-    return this._lastMousePos;
-  }
-
-  get selection() {
-    return this.service.selection;
-  }
-
-  get service() {
-    return this._service;
-  }
-
-  set shiftKey(pressed: boolean) {
-    this._shiftKey = pressed;
-    this.currentController.onPressShiftKey(pressed);
-  }
-
-  get shiftKey() {
-    return this._shiftKey;
-  }
-
-  set spaceBar(pressed: boolean) {
-    this._spaceBar = pressed;
-    this.currentController.onPressSpaceBar(pressed);
-  }
-
-  get spaceBar() {
-    return this._spaceBar;
   }
 }

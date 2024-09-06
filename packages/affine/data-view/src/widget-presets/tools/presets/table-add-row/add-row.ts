@@ -33,6 +33,34 @@ const styles = css`
 
 @customElement('data-view-header-tools-add-row')
 export class DataViewHeaderToolsAddRow extends WidgetBase {
+  static override styles = styles;
+
+  private _onAddNewRecord = () => {
+    if (this.readonly) return;
+    const selection = this.viewMethods.getSelection?.();
+    if (!selection) {
+      this.addRow('start');
+    } else if (
+      selection.type === 'table' &&
+      selection.selectionType === 'area'
+    ) {
+      const { rowsSelection, columnsSelection, focus } = selection;
+      let index = 0;
+      if (rowsSelection && !columnsSelection) {
+        // rows
+        index = rowsSelection.end;
+      } else if (rowsSelection && columnsSelection) {
+        // multiple cells
+        index = rowsSelection.end;
+      } else if (!rowsSelection && !columnsSelection && focus) {
+        // single cell
+        index = focus.rowIndex;
+      }
+
+      this.addRow(index + 1);
+    }
+  };
+
   _dragStart = (e: MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -107,34 +135,6 @@ export class DataViewHeaderToolsAddRow extends WidgetBase {
       },
     });
   };
-
-  private _onAddNewRecord = () => {
-    if (this.readonly) return;
-    const selection = this.viewMethods.getSelection?.();
-    if (!selection) {
-      this.addRow('start');
-    } else if (
-      selection.type === 'table' &&
-      selection.selectionType === 'area'
-    ) {
-      const { rowsSelection, columnsSelection, focus } = selection;
-      let index = 0;
-      if (rowsSelection && !columnsSelection) {
-        // rows
-        index = rowsSelection.end;
-      } else if (rowsSelection && columnsSelection) {
-        // multiple cells
-        index = rowsSelection.end;
-      } else if (!rowsSelection && !columnsSelection && focus) {
-        // single cell
-        index = focus.rowIndex;
-      }
-
-      this.addRow(index + 1);
-    }
-  };
-
-  static override styles = styles;
 
   addRow = (position: InsertToPosition | number) => {
     this.viewMethods.addRow?.(position);

@@ -1,7 +1,7 @@
 import type { EditorHost } from '@blocksuite/block-std';
 import type { AffineAIPanelState } from '@blocksuite/blocks';
 
-import { LitElement, css, html } from 'lit';
+import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { repeat } from 'lit/directives/repeat.js';

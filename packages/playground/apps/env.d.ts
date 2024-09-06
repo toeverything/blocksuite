@@ -1,8 +1,7 @@
 import type { EditorHost } from '@blocksuite/block-std';
 import type { TestUtils } from '@blocksuite/blocks';
 import type { AffineEditorContainer } from '@blocksuite/presets';
-import type { BlockSchema, Doc, DocCollection } from '@blocksuite/store';
-import type { Job } from '@blocksuite/store';
+import type { BlockSchema, Doc, DocCollection, Job } from '@blocksuite/store';
 import type { z } from 'zod';
 
 declare global {

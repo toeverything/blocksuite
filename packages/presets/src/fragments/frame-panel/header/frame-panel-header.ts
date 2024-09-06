@@ -1,11 +1,14 @@
 import type { EditorHost } from '@blocksuite/block-std';
-import type { EdgelessRootBlockComponent } from '@blocksuite/blocks';
 
 import { WithDisposable } from '@blocksuite/block-std';
-import { DocModeProvider, type NavigatorMode } from '@blocksuite/blocks';
+import {
+  DocModeProvider,
+  type EdgelessRootBlockComponent,
+  type NavigatorMode,
+} from '@blocksuite/blocks';
 import { createButtonPopper } from '@blocksuite/blocks';
 import { DisposableGroup } from '@blocksuite/global/utils';
-import { LitElement, type PropertyValues, css, html } from 'lit';
+import { css, html, LitElement, type PropertyValues } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 
 import { SettingsIcon, SmallFrameNavigatorIcon } from '../../_common/icons.js';
@@ -103,6 +106,8 @@ export const AFFINE_FRAME_PANEL_HEADER = 'affine-frame-panel-header';
 
 @customElement(AFFINE_FRAME_PANEL_HEADER)
 export class FramePanelHeader extends WithDisposable(LitElement) {
+  static override styles = styles;
+
   private _clearEdgelessDisposables = () => {
     this._edgelessDisposables?.dispose();
     this._edgelessDisposables = null;
@@ -145,7 +150,9 @@ export class FramePanelHeader extends WithDisposable(LitElement) {
     );
   };
 
-  static override styles = styles;
+  get rootService() {
+    return this.editorHost.std.getService('affine:page');
+  }
 
   private _tryLoadNavigatorStateLocalRecord() {
     this._navigatorMode = this.editorHost.std
@@ -223,10 +230,6 @@ export class FramePanelHeader extends WithDisposable(LitElement) {
         this._clearEdgelessDisposables();
       }
     }
-  }
-
-  get rootService() {
-    return this.editorHost.std.getService('affine:page');
   }
 
   @query('.all-frames-setting-button')

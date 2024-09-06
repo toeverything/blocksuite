@@ -1,5 +1,4 @@
-import type { IVec3 } from '@blocksuite/global/utils';
-import type { Bound } from '@blocksuite/global/utils';
+import type { Bound, IVec3 } from '@blocksuite/global/utils';
 
 import { almostEqual, assertExists } from '@blocksuite/global/utils';
 
@@ -53,6 +52,24 @@ export class AStarRunner {
   private _graph: Graph<IVec3>;
 
   private _pointPriority = new Map<IVec3, number[]>();
+
+  get path() {
+    const result: IVec3[] = [];
+    let current: null | IVec3 = this._complete
+      ? this._originalEp
+      : this._current;
+    const nextIndexs = [0];
+    while (current) {
+      result.unshift(current);
+      const froms = this._cameFrom.get(current);
+      if (!froms) return result;
+      const index = nextIndexs.shift();
+      assertExists(index);
+      nextIndexs.push(froms.indexs[index]);
+      current = froms.from[index];
+    }
+    return result;
+  }
 
   constructor(
     points: IVec3[],
@@ -229,24 +246,6 @@ export class AStarRunner {
         return;
       }
     }
-  }
-
-  get path() {
-    const result: IVec3[] = [];
-    let current: null | IVec3 = this._complete
-      ? this._originalEp
-      : this._current;
-    const nextIndexs = [0];
-    while (current) {
-      result.unshift(current);
-      const froms = this._cameFrom.get(current);
-      if (!froms) return result;
-      const index = nextIndexs.shift();
-      assertExists(index);
-      nextIndexs.push(froms.indexs[index]);
-      current = froms.from[index];
-    }
-    return result;
   }
 }
 

@@ -1,4 +1,4 @@
-import { type Page, test as baseTest, expect } from '@playwright/test';
+import { test as baseTest, expect, type Page } from '@playwright/test';
 import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';

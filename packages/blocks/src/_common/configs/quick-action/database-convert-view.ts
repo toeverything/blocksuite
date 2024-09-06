@@ -160,6 +160,10 @@ export class DatabaseConvertView extends WithDisposable(LitElement) {
     }
   `;
 
+  get doc() {
+    return this.host.doc;
+  }
+
   private _convertToDatabase(viewMeta: ViewMeta) {
     const [_, ctx] = this.host.std.command
       .chain()
@@ -239,10 +243,6 @@ export class DatabaseConvertView extends WithDisposable(LitElement) {
         <div class="modal-footer">More views are on the way.</div>
       </div>
     </div>`;
-  }
-
-  get doc() {
-    return this.host.doc;
   }
 
   @property({ attribute: false })

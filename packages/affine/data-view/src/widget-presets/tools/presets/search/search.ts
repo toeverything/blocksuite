@@ -92,6 +92,8 @@ const styles = css`
 
 @customElement('data-view-header-tools-search')
 export class DataViewHeaderToolsSearch extends WidgetBase {
+  static override styles = styles;
+
   private _clearSearch = () => {
     this._searchInput.value = '';
     this.view.setSearch('');
@@ -130,9 +132,19 @@ export class DataViewHeaderToolsSearch extends WidgetBase {
     }
   };
 
-  static override styles = styles;
-
   preventBlur = false;
+
+  get showSearch(): boolean {
+    return this._showSearch;
+  }
+
+  set showSearch(value: boolean) {
+    this._showSearch = value;
+    const tools = this.closest('data-view-header-tools');
+    if (tools) {
+      tools.showToolBar = value;
+    }
+  }
 
   override render() {
     const searchToolClassMap = classMap({
@@ -172,18 +184,6 @@ export class DataViewHeaderToolsSearch extends WidgetBase {
         </div>
       </label>
     `;
-  }
-
-  get showSearch(): boolean {
-    return this._showSearch;
-  }
-
-  set showSearch(value: boolean) {
-    this._showSearch = value;
-    const tools = this.closest('data-view-header-tools');
-    if (tools) {
-      tools.showToolBar = value;
-    }
   }
 
   @query('.affine-database-search-input')

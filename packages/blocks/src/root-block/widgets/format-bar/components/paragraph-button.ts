@@ -6,7 +6,7 @@ import { ArrowDownIcon } from '@blocksuite/affine-components/icons';
 import { assertExists } from '@blocksuite/global/utils';
 import { computePosition, flip, offset, shift } from '@floating-ui/dom';
 import { html } from 'lit';
-import { type RefOrCallback, ref } from 'lit/directives/ref.js';
+import { ref, type RefOrCallback } from 'lit/directives/ref.js';
 import { repeat } from 'lit/directives/repeat.js';
 
 import type { ParagraphActionConfigItem } from '../config.js';

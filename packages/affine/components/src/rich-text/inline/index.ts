@@ -17,7 +17,7 @@ export {
   AffineReference,
   DEFAULT_DOC_NAME,
   REFERENCE_NODE,
-  type RefNodeSlots,
   ReferenceNodeConfig,
+  type RefNodeSlots,
   toggleLinkPopup,
 } from './presets/nodes/index.js';

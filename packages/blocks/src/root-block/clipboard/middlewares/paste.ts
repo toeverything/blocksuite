@@ -5,7 +5,6 @@ import type {
   TextRangePoint,
   TextSelection,
 } from '@blocksuite/block-std';
-import type { Text } from '@blocksuite/store';
 
 import {
   QuickSearchProvider,
@@ -18,9 +17,10 @@ import {
   type BlockSnapshot,
   type DeltaOperation,
   DocCollection,
+  fromJSON,
   type JobMiddleware,
   type SliceSnapshot,
-  fromJSON,
+  type Text,
 } from '@blocksuite/store';
 
 import { matchFlavours } from '../../../_common/utils/index.js';

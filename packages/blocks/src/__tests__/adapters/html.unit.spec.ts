@@ -1,8 +1,7 @@
 import type { BlockSnapshot } from '@blocksuite/store';
 
 import { NoteDisplayMode } from '@blocksuite/affine-model';
-import { MemoryBlobCRUD } from '@blocksuite/store';
-import { AssetsManager } from '@blocksuite/store';
+import { AssetsManager, MemoryBlobCRUD } from '@blocksuite/store';
 import { describe, expect, test } from 'vitest';
 
 import { HtmlAdapter } from '../../_common/adapters/html.js';

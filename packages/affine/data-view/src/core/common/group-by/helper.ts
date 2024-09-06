@@ -1,8 +1,8 @@
 import {
-  type InsertToPosition,
   insertPositionToIndex,
+  type InsertToPosition,
 } from '@blocksuite/affine-shared/utils';
-import { type ReadonlySignal, computed } from '@lit-labs/preact-signals';
+import { computed, type ReadonlySignal } from '@lit-labs/preact-signals';
 
 import type { TType } from '../../logical/typesystem.js';
 import type { Column } from '../../view-manager/column.js';
@@ -123,6 +123,18 @@ export class GroupManager {
     }
     this.viewManager.columnUpdateData(columnId, data);
   };
+
+  get addGroup() {
+    const type = this.column$.value?.type$.value;
+    if (!type) {
+      return;
+    }
+    return this.viewManager.columnGetMeta(type)?.config.addGroup;
+  }
+
+  get columnId() {
+    return this.groupBy$.value?.columnId;
+  }
 
   constructor(
     private groupBy$: ReadonlySignal<GroupBy | undefined>,
@@ -251,18 +263,6 @@ export class GroupManager {
     rows.forEach(id => {
       this.viewManager.cellUpdateValue(id, columnId, value);
     });
-  }
-
-  get addGroup() {
-    const type = this.column$.value?.type$.value;
-    if (!type) {
-      return;
-    }
-    return this.viewManager.columnGetMeta(type)?.config.addGroup;
-  }
-
-  get columnId() {
-    return this.groupBy$.value?.columnId;
   }
 }
 

@@ -3,8 +3,7 @@ import type { NoteBlockModel } from '@blocksuite/affine-model';
 import { NoteBlockSchema } from '@blocksuite/affine-model';
 import { matchFlavours } from '@blocksuite/affine-shared/utils';
 import { BlockService } from '@blocksuite/block-std';
-import { Point } from '@blocksuite/global/utils';
-import { Bound } from '@blocksuite/global/utils';
+import { Bound, Point } from '@blocksuite/global/utils';
 import { render } from 'lit';
 
 import type { EdgelessRootService } from '../root-block/edgeless/edgeless-root-service.js';
@@ -21,6 +20,8 @@ import {
 } from '../root-block/widgets/drag-handle/utils.js';
 
 export class NoteBlockService extends BlockService {
+  static override readonly flavour = NoteBlockSchema.model.flavour;
+
   private _dragHandleOption: DragHandleOption = {
     flavour: NoteBlockSchema.model.flavour,
     edgeless: true,
@@ -110,8 +111,6 @@ export class NoteBlockService extends BlockService {
       return true;
     },
   };
-
-  static override readonly flavour = NoteBlockSchema.model.flavour;
 
   override mounted() {
     super.mounted();

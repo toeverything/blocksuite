@@ -1,5 +1,7 @@
-import type { EmbedGithubModel } from '@blocksuite/affine-model';
-import type { EmbedGithubBlockUrlData } from '@blocksuite/affine-model';
+import type {
+  EmbedGithubBlockUrlData,
+  EmbedGithubModel,
+} from '@blocksuite/affine-model';
 
 import { isAbortError } from '@blocksuite/affine-shared/utils';
 import { assertExists } from '@blocksuite/global/utils';

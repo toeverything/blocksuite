@@ -1,4 +1,4 @@
-import type { TemplateResult, nothing } from 'lit';
+import type { nothing, TemplateResult } from 'lit';
 
 export type MenuItemPart = {
   action: () => void;

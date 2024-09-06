@@ -1,6 +1,6 @@
 import { WithDisposable } from '@blocksuite/block-std';
 import { createButtonPopper } from '@blocksuite/blocks';
-import { LitElement, css, html } from 'lit';
+import { css, html, LitElement } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 
 import { SettingsIcon, SortingIcon } from '../../_common/icons.js';
@@ -79,11 +79,11 @@ export const AFFINE_OUTLINE_PANEL_HEADER = 'affine-outline-panel-header';
 
 @customElement(AFFINE_OUTLINE_PANEL_HEADER)
 export class OutlinePanelHeader extends WithDisposable(LitElement) {
+  static override styles = styles;
+
   private _notePreviewSettingMenuPopper: ReturnType<
     typeof createButtonPopper
   > | null = null;
-
-  static override styles = styles;
 
   override firstUpdated() {
     const _disposables = this._disposables;

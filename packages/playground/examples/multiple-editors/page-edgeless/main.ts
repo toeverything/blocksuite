@@ -1,7 +1,7 @@
 import {
+  createEmptyDoc,
   EdgelessEditor,
   PageEditor,
-  createEmptyDoc,
 } from '@blocksuite/presets';
 import '@blocksuite/presets/themes/affine.css';
 

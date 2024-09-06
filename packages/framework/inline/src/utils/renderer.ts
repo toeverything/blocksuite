@@ -1,4 +1,4 @@
-import { type TemplateResult, html } from 'lit';
+import { html, type TemplateResult } from 'lit';
 
 import type { DeltaInsert } from '../types.js';
 import type { BaseTextAttributes } from './base-attributes.js';

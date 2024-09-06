@@ -1,6 +1,8 @@
-import type { Text } from '@blocksuite/store';
-
-import { type SchemaToModel, defineBlockSchema } from '@blocksuite/store';
+import {
+  defineBlockSchema,
+  type SchemaToModel,
+  type Text,
+} from '@blocksuite/store';
 
 interface CodeBlockProps {
   text: Text;

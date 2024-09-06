@@ -5,17 +5,17 @@ import type {
 import type { Y } from '@blocksuite/store';
 
 import {
-  GfxGroupLikeElementModel,
   field,
+  GfxGroupLikeElementModel,
   local,
   observe,
 } from '@blocksuite/block-std/gfx';
 import {
   Bound,
   type IVec,
-  type PointLocation,
   keys,
   linePolygonIntersects,
+  type PointLocation,
 } from '@blocksuite/global/utils';
 import { DocCollection } from '@blocksuite/store';
 
@@ -30,6 +30,16 @@ export type SerializedGroupElement = SerializedElement & {
 };
 
 export class GroupElementModel extends GfxGroupLikeElementModel<GroupElementProps> {
+  get rotate() {
+    return 0;
+  }
+
+  set rotate(_: number) {}
+
+  get type() {
+    return 'group';
+  }
+
   static override propsToY(props: Record<string, unknown>) {
     if ('title' in props && !(props.title instanceof DocCollection.Y.Text)) {
       props.title = new DocCollection.Y.Text(props.title as string);
@@ -84,16 +94,6 @@ export class GroupElementModel extends GfxGroupLikeElementModel<GroupElementProp
     const result = super.serialize();
     result.xywh = this.xywh;
     return result as SerializedGroupElement;
-  }
-
-  get rotate() {
-    return 0;
-  }
-
-  set rotate(_: number) {}
-
-  get type() {
-    return 'group';
   }
 
   @observe(

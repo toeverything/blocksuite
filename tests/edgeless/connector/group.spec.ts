@@ -1,13 +1,13 @@
 import type { Page } from '@playwright/test';
 
 import {
-  Shape,
   clickView,
   edgelessCommonSetup as commonSetup,
   createShapeElement,
   dragBetweenViewCoords,
   moveView,
   selectAllByKeyboard,
+  Shape,
   triggerComponentToolbarAction,
   waitNextFrame,
 } from '../../utils/actions/index.js';

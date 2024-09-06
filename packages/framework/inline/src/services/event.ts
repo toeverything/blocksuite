@@ -384,8 +384,6 @@ export class EventService<TextAttributes extends BaseTextAttributes> {
     this.editor.disposables.addFromEvent(rootElement, 'click', this._onClick);
   };
 
-  constructor(readonly editor: InlineEditor<TextAttributes>) {}
-
   get inlineRangeProvider() {
     return this.editor.inlineRangeProvider;
   }
@@ -393,4 +391,6 @@ export class EventService<TextAttributes extends BaseTextAttributes> {
   get isComposing() {
     return this._isComposing;
   }
+
+  constructor(readonly editor: InlineEditor<TextAttributes>) {}
 }

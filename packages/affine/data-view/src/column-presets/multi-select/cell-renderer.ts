@@ -7,8 +7,8 @@ import { BaseCellRenderer } from '../../core/column/index.js';
 import { createFromBaseCellRenderer } from '../../core/column/renderer.js';
 import '../../core/utils/tags/multi-tag-select.js';
 import {
-  type SelectTag,
   popTagSelect,
+  type SelectTag,
 } from '../../core/utils/tags/multi-tag-select.js';
 import { createIcon } from '../../core/utils/uni-icon.js';
 import { multiSelectColumnModelConfig } from './define.js';
@@ -33,6 +33,22 @@ export class MultiSelectCellEditing extends BaseCellRenderer<
   string[],
   SelectColumnData
 > {
+  private popTagSelect = () => {
+    this._disposables.add({
+      dispose: popTagSelect(
+        this.querySelector('affine-multi-tag-view') ?? this,
+        {
+          options: this._options,
+          onOptionsChange: this._onOptionsChange,
+          value: this._value,
+          onChange: this._onChange,
+          onComplete: this._editComplete,
+          minWidth: 400,
+        }
+      ),
+    });
+  };
+
   _editComplete = () => {
     this.selectCurrentCell(false);
   };
@@ -47,22 +63,6 @@ export class MultiSelectCellEditing extends BaseCellRenderer<
         ...data,
         options,
       };
-    });
-  };
-
-  private popTagSelect = () => {
-    this._disposables.add({
-      dispose: popTagSelect(
-        this.querySelector('affine-multi-tag-view') ?? this,
-        {
-          options: this._options,
-          onOptionsChange: this._onOptionsChange,
-          value: this._value,
-          onChange: this._onChange,
-          onComplete: this._editComplete,
-          minWidth: 400,
-        }
-      ),
     });
   };
 

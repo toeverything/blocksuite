@@ -62,9 +62,9 @@ const styles = css`
 export class KanbanCell extends SignalWatcher(
   WithDisposable(ShadowlessElement)
 ) {
-  private _cell = createRef<DataViewCellLifeCycle>();
-
   static override styles = styles;
+
+  private _cell = createRef<DataViewCellLifeCycle>();
 
   selectCurrentCell = (editing: boolean) => {
     const selectionView = this.closest(
@@ -92,6 +92,14 @@ export class KanbanCell extends SignalWatcher(
       }
     }
   };
+
+  get cell(): DataViewCellLifeCycle | undefined {
+    return this._cell.value;
+  }
+
+  get selection() {
+    return this.closest('affine-data-view-kanban')?.selectionController;
+  }
 
   override connectedCallback() {
     super.connectedCallback();
@@ -152,14 +160,6 @@ export class KanbanCell extends SignalWatcher(
       return;
     }
     return html` <uni-lit class="icon" .uni="${this.column.icon}"></uni-lit>`;
-  }
-
-  get cell(): DataViewCellLifeCycle | undefined {
-    return this._cell.value;
-  }
-
-  get selection() {
-    return this.closest('affine-data-view-kanban')?.selectionController;
   }
 
   @property({ attribute: false })

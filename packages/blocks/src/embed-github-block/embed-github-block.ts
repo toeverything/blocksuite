@@ -28,9 +28,9 @@ export class EmbedGithubBlockComponent extends EmbedBlockComponent<
   EmbedGithubModel,
   EmbedGithubBlockService
 > {
-  override _cardStyle: (typeof EmbedGithubStyles)[number] = 'horizontal';
-
   static override styles = styles;
+
+  override _cardStyle: (typeof EmbedGithubStyles)[number] = 'horizontal';
 
   open = () => {
     let link = this.model.url;
@@ -57,11 +57,6 @@ export class EmbedGithubBlockComponent extends EmbedBlockComponent<
     window.open(link, '_blank');
   }
 
-  protected _handleClick(event: MouseEvent) {
-    event.stopPropagation();
-    this._selectBlock();
-  }
-
   private _handleDoubleClick(event: MouseEvent) {
     event.stopPropagation();
     this.open();
@@ -73,6 +68,11 @@ export class EmbedGithubBlockComponent extends EmbedBlockComponent<
       blockId: this.blockId,
     });
     selectionManager.setGroup('note', [blockSelection]);
+  }
+
+  protected _handleClick(event: MouseEvent) {
+    event.stopPropagation();
+    this._selectBlock();
   }
 
   override connectedCallback() {

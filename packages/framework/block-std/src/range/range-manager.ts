@@ -17,6 +17,15 @@ export class RangeManager extends LifeCycleWatcher {
 
   binding: RangeBinding | null = null;
 
+  get value() {
+    const selection = document.getSelection();
+    if (!selection) {
+      return;
+    }
+    if (selection.rangeCount === 0) return null;
+    return selection.getRangeAt(0);
+  }
+
   private _isRangeSyncExcluded(el: Element) {
     return !!el.closest(`[${RANGE_SYNC_EXCLUDE_ATTR}="true"]`);
   }
@@ -249,14 +258,5 @@ export class RangeManager extends LifeCycleWatcher {
     range.setEnd(endContainer, endOffset);
 
     return range;
-  }
-
-  get value() {
-    const selection = document.getSelection();
-    if (!selection) {
-      return;
-    }
-    if (selection.rangeCount === 0) return null;
-    return selection.getRangeAt(0);
   }
 }

@@ -1,7 +1,7 @@
 import type { IVec } from '@blocksuite/global/utils';
 
 import { WithDisposable } from '@blocksuite/block-std';
-import { LitElement, html } from 'lit';
+import { html, LitElement } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
 import type { PieNodeModel } from './base.js';
@@ -19,6 +19,8 @@ import {
 
 @customElement('affine-pie-node')
 export class PieNode extends WithDisposable(LitElement) {
+  static override styles = pieNodeStyles;
+
   private _handleChildNodeClick = () => {
     this.select();
     if (isCommandNode(this.model)) this.menu.close();
@@ -54,7 +56,20 @@ export class PieNode extends WithDisposable(LitElement) {
 
   private _rotatorAngle: number | null = null;
 
-  static override styles = pieNodeStyles;
+  get icon() {
+    const icon = this.model.icon;
+    if (typeof icon === 'function') {
+      const { menu } = this;
+      const { rootComponent, widgetComponent } = menu;
+      return icon({
+        rootComponent,
+        menu,
+        widgetComponent,
+        node: this,
+      });
+    }
+    return icon;
+  }
 
   private _renderCenterNode() {
     const isActiveNode = this.isActive();
@@ -133,21 +148,6 @@ export class PieNode extends WithDisposable(LitElement) {
     }
 
     this.requestUpdate();
-  }
-
-  get icon() {
-    const icon = this.model.icon;
-    if (typeof icon === 'function') {
-      const { menu } = this;
-      const { rootComponent, widgetComponent } = menu;
-      return icon({
-        rootComponent,
-        menu,
-        widgetComponent,
-        node: this,
-      });
-    }
-    return icon;
   }
 
   @state()

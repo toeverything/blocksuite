@@ -1,14 +1,14 @@
 import {
-  ConnectorMode,
-  Shape,
   assertEdgelessConnectorToolMode,
   edgelessCommonSetup as commonSetup,
+  ConnectorMode,
   createConnectorElement,
   createShapeElement,
   deleteAllConnectors,
   dragBetweenViewCoords,
   redoByClick,
   setEdgelessTool,
+  Shape,
   undoByClick,
 } from '../../utils/actions/index.js';
 import { assertConnectorPath } from '../../utils/asserts.js';

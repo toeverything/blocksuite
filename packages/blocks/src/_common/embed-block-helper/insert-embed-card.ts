@@ -1,5 +1,4 @@
-import type { EmbedCardStyle } from '@blocksuite/affine-model';
-import type { DocMode } from '@blocksuite/affine-model';
+import type { DocMode, EmbedCardStyle } from '@blocksuite/affine-model';
 import type { BlockStdScope } from '@blocksuite/block-std';
 import type { BlockModel, Doc } from '@blocksuite/store';
 

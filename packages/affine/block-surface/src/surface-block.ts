@@ -38,33 +38,6 @@ export class SurfaceBlockComponent extends BlockComponent<
   SurfaceBlockModel,
   SurfaceBlockService
 > {
-  private _cachedViewport = new Bound();
-
-  private _initCanvasTransform = () => {
-    const refresh = () => {
-      this._surfaceContainer.style.setProperty(
-        '--canvas-transform',
-        this._getReversedTransform()
-      );
-    };
-
-    this._disposables.add(
-      this._gfx.viewport.viewportUpdated.on(() => {
-        refresh();
-      })
-    );
-
-    refresh();
-  };
-
-  private _initThemeObserver = () => {
-    this.disposables.add(ThemeObserver.subscribe(() => this.requestUpdate()));
-  };
-
-  private _lastTime = 0;
-
-  private _renderer!: CanvasRenderer;
-
   static isConnector = (element: unknown): element is ConnectorElementModel => {
     return element instanceof ConnectorElementModel;
   };
@@ -131,6 +104,33 @@ export class SurfaceBlockComponent extends BlockComponent<
     }
   `;
 
+  private _cachedViewport = new Bound();
+
+  private _initCanvasTransform = () => {
+    const refresh = () => {
+      this._surfaceContainer.style.setProperty(
+        '--canvas-transform',
+        this._getReversedTransform()
+      );
+    };
+
+    this._disposables.add(
+      this._gfx.viewport.viewportUpdated.on(() => {
+        refresh();
+      })
+    );
+
+    refresh();
+  };
+
+  private _initThemeObserver = () => {
+    this.disposables.add(ThemeObserver.subscribe(() => this.requestUpdate()));
+  };
+
+  private _lastTime = 0;
+
+  private _renderer!: CanvasRenderer;
+
   fitToViewport = (bound: Bound) => {
     const { viewport } = this._gfx;
     bound = bound.expand(30);
@@ -152,14 +152,18 @@ export class SurfaceBlockComponent extends BlockComponent<
     return this.std.getService('affine:page') as unknown as SurfaceContext;
   }
 
+  private get _gfx() {
+    return this.std.get(GfxControllerIdentifier);
+  }
+
+  get renderer() {
+    return this._renderer;
+  }
+
   private _getReversedTransform() {
     const { translateX, translateY, zoom } = this._gfx.viewport;
 
     return `scale(${1 / zoom}) translate(${-translateX}px, ${-translateY}px)`;
-  }
-
-  private get _gfx() {
-    return this.std.get(GfxControllerIdentifier);
   }
 
   private _initOverlays() {
@@ -254,10 +258,6 @@ export class SurfaceBlockComponent extends BlockComponent<
         <!-- attach canvas later in renderer -->
       </div>
     `;
-  }
-
-  get renderer() {
-    return this._renderer;
   }
 
   @query('.affine-edgeless-surface-block-container')

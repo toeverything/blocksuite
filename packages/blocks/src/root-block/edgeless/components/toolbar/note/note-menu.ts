@@ -1,6 +1,6 @@
 import { AttachmentIcon, LinkIcon } from '@blocksuite/affine-components/icons';
 import { TelemetryProvider } from '@blocksuite/affine-shared/services';
-import { LitElement, css, html } from 'lit';
+import { css, html, LitElement } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
@@ -8,8 +8,8 @@ import type { NoteTool } from '../../../tools/note-tool.js';
 import type { EdgelessTool } from '../../../types.js';
 
 import {
-  type NoteChildrenFlavour,
   getImageFilesFromLocal,
+  type NoteChildrenFlavour,
   openFileOrFiles,
 } from '../../../../../_common/utils/index.js';
 import { ImageIcon } from '../../../../../image-block/styles.js';

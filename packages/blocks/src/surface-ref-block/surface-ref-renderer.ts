@@ -1,12 +1,15 @@
-import type { SurfaceBlockModel } from '@blocksuite/affine-block-surface';
-import type { SurfaceBlockService } from '@blocksuite/affine-block-surface';
-import type { Color } from '@blocksuite/affine-model';
-import type { NoteBlockModel } from '@blocksuite/affine-model';
+import type {
+  SurfaceBlockModel,
+  SurfaceBlockService,
+} from '@blocksuite/affine-block-surface';
+import type { Color, NoteBlockModel } from '@blocksuite/affine-model';
 import type { BlockStdScope } from '@blocksuite/block-std';
 import type { Doc } from '@blocksuite/store';
 
-import { CanvasRenderer } from '@blocksuite/affine-block-surface';
-import { elementRenderers } from '@blocksuite/affine-block-surface';
+import {
+  CanvasRenderer,
+  elementRenderers,
+} from '@blocksuite/affine-block-surface';
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import { GfxControllerIdentifier, Viewport } from '@blocksuite/block-std/gfx';
 import { DisposableGroup, Slot } from '@blocksuite/global/utils';
@@ -14,13 +17,13 @@ import { DisposableGroup, Slot } from '@blocksuite/global/utils';
 import { getSurfaceBlock } from './utils.js';
 
 export class SurfaceRefRenderer {
-  protected _disposables = new DisposableGroup();
-
   private _surfaceModel: SurfaceBlockModel | null = null;
 
   private readonly _surfaceRenderer: CanvasRenderer;
 
   private readonly _viewport: Viewport;
+
+  protected _disposables = new DisposableGroup();
 
   slots = {
     surfaceRendererInit: new Slot(),
@@ -29,6 +32,22 @@ export class SurfaceRefRenderer {
     mounted: new Slot(),
     unmounted: new Slot(),
   };
+
+  get surfaceModel() {
+    return this._surfaceModel;
+  }
+
+  get surfaceRenderer() {
+    return this._surfaceRenderer;
+  }
+
+  get surfaceService() {
+    return this.std.getService('affine:surface') as SurfaceBlockService;
+  }
+
+  get viewport() {
+    return this._viewport;
+  }
 
   constructor(
     readonly id: string,
@@ -116,21 +135,5 @@ export class SurfaceRefRenderer {
   unmount() {
     this._disposables.dispose();
     this.slots.unmounted.emit();
-  }
-
-  get surfaceModel() {
-    return this._surfaceModel;
-  }
-
-  get surfaceRenderer() {
-    return this._surfaceRenderer;
-  }
-
-  get surfaceService() {
-    return this.std.getService('affine:surface') as SurfaceBlockService;
-  }
-
-  get viewport() {
-    return this._viewport;
   }
 }

@@ -6,52 +6,13 @@ import {
   SettingsIcon,
 } from '@blocksuite/icons/lit';
 import { flip, offset } from '@floating-ui/dom';
-import { LitElement, css, html } from 'lit';
+import { css, html, LitElement } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 
 import type { EmbedEdgelessHtmlBlockComponent } from '../embed-edgeless-html-block.js';
 
 @customElement('embed-html-fullscreen-toolbar')
 export class EmbedHtmlFullscreenToolbar extends LitElement {
-  private _popSettings = () => {
-    this._popperVisible = true;
-    popMenu(this._fullScreenToolbarContainer, {
-      options: {
-        items: [
-          {
-            type: 'custom',
-            render: () =>
-              html`<div class="settings-header">
-                <span>Settings</span>
-              </div>`,
-          },
-
-          {
-            type: 'group',
-            name: 'thing',
-            children: () => [
-              {
-                type: 'toggle-switch',
-                name: 'Hide toolbar',
-                on: this.autoHideToolbar,
-                onChange: on => {
-                  this.autoHideToolbar = on;
-                },
-              },
-            ],
-          },
-        ],
-        onClose: () => {
-          this._popperVisible = false;
-        },
-      },
-
-      placement: 'top-end',
-      middleware: [flip(), offset({ mainAxis: 4, crossAxis: -40 })],
-      container: this.embedHtml.iframeWrapper,
-    });
-  };
-
   static override styles = css`
     :host {
       box-sizing: border-box;
@@ -102,6 +63,45 @@ export class EmbedHtmlFullscreenToolbar extends LitElement {
       height: 36px;
     }
   `;
+
+  private _popSettings = () => {
+    this._popperVisible = true;
+    popMenu(this._fullScreenToolbarContainer, {
+      options: {
+        items: [
+          {
+            type: 'custom',
+            render: () =>
+              html`<div class="settings-header">
+                <span>Settings</span>
+              </div>`,
+          },
+
+          {
+            type: 'group',
+            name: 'thing',
+            children: () => [
+              {
+                type: 'toggle-switch',
+                name: 'Hide toolbar',
+                on: this.autoHideToolbar,
+                onChange: on => {
+                  this.autoHideToolbar = on;
+                },
+              },
+            ],
+          },
+        ],
+        onClose: () => {
+          this._popperVisible = false;
+        },
+      },
+
+      placement: 'top-end',
+      middleware: [flip(), offset({ mainAxis: 4, crossAxis: -40 })],
+      container: this.embedHtml.iframeWrapper,
+    });
+  };
 
   copyCode = () => {
     if (this._copied) return;

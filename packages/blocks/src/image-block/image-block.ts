@@ -43,6 +43,10 @@ export class ImageBlockComponent extends CaptionedBlockComponent<
     fetchImageBlob(this).catch(console.error);
   };
 
+  get resizableImg() {
+    return this.pageImage?.resizeImg;
+  }
+
   private _handleClick(event: MouseEvent) {
     // the peek view need handle shift + click
     if (event.shiftKey) return;
@@ -104,10 +108,6 @@ export class ImageBlockComponent extends CaptionedBlockComponent<
 
   override updated() {
     this.fallbackCard?.requestUpdate();
-  }
-
-  get resizableImg() {
-    return this.pageImage?.resizeImg;
   }
 
   @property({ attribute: false })

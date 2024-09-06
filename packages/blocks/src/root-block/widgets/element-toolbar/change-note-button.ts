@@ -21,11 +21,11 @@ import {
 } from '@blocksuite/affine-model';
 import { matchFlavours } from '@blocksuite/affine-shared/utils';
 import { WithDisposable } from '@blocksuite/block-std';
-import { Bound, assertExists, countBy, maxBy } from '@blocksuite/global/utils';
-import { LitElement, type TemplateResult, html, nothing } from 'lit';
+import { assertExists, Bound, countBy, maxBy } from '@blocksuite/global/utils';
+import { html, LitElement, nothing, type TemplateResult } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { join } from 'lit/directives/join.js';
-import { type Ref, createRef, ref } from 'lit/directives/ref.js';
+import { createRef, type Ref, ref } from 'lit/directives/ref.js';
 import { when } from 'lit/directives/when.js';
 
 import type {
@@ -119,6 +119,10 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
       ele[event.type === 'start' ? 'stash' : 'pop']('background')
     );
   };
+
+  private get doc() {
+    return this.edgeless.doc;
+  }
 
   private _getScaleLabel(scale: number) {
     return Math.round(scale * 100) + '%';
@@ -224,10 +228,6 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
     if (type === 'lineStyle') {
       this._setStrokeStyle(value);
     }
-  }
-
-  private get doc() {
-    return this.edgeless.doc;
   }
 
   override render() {

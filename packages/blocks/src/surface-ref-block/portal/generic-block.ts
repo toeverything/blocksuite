@@ -1,4 +1,3 @@
-import type { ImageBlockModel } from '@blocksuite/affine-model';
 import type {
   AttachmentBlockModel,
   BookmarkBlockModel,
@@ -9,12 +8,13 @@ import type {
   EmbedLoomModel,
   EmbedSyncedDocModel,
   EmbedYoutubeModel,
+  ImageBlockModel,
 } from '@blocksuite/affine-model';
 import type { BlockModel } from '@blocksuite/store';
 
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { Bound } from '@blocksuite/global/utils';
-import { type TemplateResult, css } from 'lit';
+import { css, type TemplateResult } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';

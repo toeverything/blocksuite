@@ -1,13 +1,13 @@
-import { type Page, expect } from '@playwright/test';
+import { expect, type Page } from '@playwright/test';
 
 import {
-  Shape,
   createShapeElement,
   dblclickView,
   edgelessCommonSetup,
   getSelectedBound,
   pressEnter,
   selectAllByKeyboard,
+  Shape,
   triggerComponentToolbarAction,
   type,
 } from '../../utils/actions/index.js';

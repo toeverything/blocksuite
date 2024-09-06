@@ -1,8 +1,8 @@
 import { popFilterableSimpleMenu } from '@blocksuite/affine-components/context-menu';
 import {
   ShadowlessElement,
-  WithDisposable,
   SignalWatcher,
+  WithDisposable,
 } from '@blocksuite/block-std';
 import {
   ArrowDownBigIcon,
@@ -94,6 +94,8 @@ const styles = css`
 export class RecordDetail extends SignalWatcher(
   WithDisposable(ShadowlessElement)
 ) {
+  static override styles = styles;
+
   _clickAddProperty = () => {
     popFilterableSimpleMenu(
       this.addPropertyButton,
@@ -109,8 +111,6 @@ export class RecordDetail extends SignalWatcher(
       })
     );
   };
-
-  static override styles = styles;
 
   columns$ = computed(() => {
     return this.view.detailColumns$.value.map(id => this.view.columnGet(id));

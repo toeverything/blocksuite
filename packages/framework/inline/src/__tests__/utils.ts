@@ -4,7 +4,7 @@ import type {
   InlineRange,
 } from '@blocksuite/inline';
 
-import { type Page, expect } from '@playwright/test';
+import { expect, type Page } from '@playwright/test';
 
 const defaultPlaygroundURL = new URL(
   `http://localhost:${process.env.CI ? 4173 : 5173}/`

@@ -1,7 +1,7 @@
 import { on, once, stopPropagation } from '@blocksuite/affine-shared/utils';
-import { WithDisposable, SignalWatcher } from '@blocksuite/block-std';
+import { SignalWatcher, WithDisposable } from '@blocksuite/block-std';
 import { batch, computed, signal } from '@lit-labs/preact-signals';
-import { LitElement, html } from 'lit';
+import { html, LitElement } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { live } from 'lit/directives/live.js';
@@ -32,10 +32,10 @@ import {
   linearGradientAt,
   parseHexToHsva,
   renderCanvas,
-  rgbToHex,
-  rgbToHsv,
   rgbaToHex8,
   rgbaToHsva,
+  rgbToHex,
+  rgbToHsv,
 } from './utils.js';
 
 const TABS: NavTab<NavType>[] = [
@@ -47,6 +47,8 @@ const TABS: NavTab<NavType>[] = [
 export class EdgelessColorPicker extends SignalWatcher(
   WithDisposable(LitElement)
 ) {
+  static override styles = COLOR_PICKER_STYLE;
+
   #alphaRect = new DOMRect();
 
   #editAlpha = (e: InputEvent) => {
@@ -107,8 +109,6 @@ export class EdgelessColorPicker extends SignalWatcher(
   #hueRect = new DOMRect();
 
   #paletteRect = new DOMRect();
-
-  static override styles = COLOR_PICKER_STYLE;
 
   #pick() {
     const hsva = this.hsva$.peek();
@@ -640,13 +640,13 @@ export class EdgelessColorPicker extends SignalWatcher(
     return this.modes$.value.find(mode => mode.type === modeType)!;
   });
 
-  accessor modeType$ = signal<ModeType>('normal');
-
   accessor modes$ = signal<ModeTab<ModeType>[]>([
     { type: 'normal', name: 'Normal', hsva: defaultHsva() },
     { type: 'light', name: 'Light', hsva: defaultHsva() },
     { type: 'dark', name: 'Dark', hsva: defaultHsva() },
   ]);
+
+  accessor modeType$ = signal<ModeType>('normal');
 
   accessor navType$ = signal<NavType>('colors');
 

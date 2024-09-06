@@ -1,6 +1,6 @@
 import { NoteDisplayMode } from '@blocksuite/affine-model';
 import { assertExists } from '@blocksuite/global/utils';
-import { type Page, expect } from '@playwright/test';
+import { expect, type Page } from '@playwright/test';
 
 import {
   addNote,

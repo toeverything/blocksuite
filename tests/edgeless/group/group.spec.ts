@@ -1,20 +1,20 @@
-import { type Page, expect } from '@playwright/test';
+import { expect, type Page } from '@playwright/test';
 
 import { clickView } from '../../utils/actions/click.js';
 import {
-  Shape,
   createShapeElement,
   dragBetweenViewCoords,
   edgelessCommonSetup,
   getFirstGroupId,
+  Shape,
   shiftClickView,
   triggerComponentToolbarAction,
 } from '../../utils/actions/edgeless.js';
 import {
-  SHORT_KEY,
   pressBackspace,
   redoByKeyboard,
   selectAllByKeyboard,
+  SHORT_KEY,
   undoByKeyboard,
 } from '../../utils/actions/keyboard.js';
 import { captureHistory } from '../../utils/actions/misc.js';

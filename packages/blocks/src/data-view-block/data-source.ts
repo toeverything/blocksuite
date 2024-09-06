@@ -45,6 +45,36 @@ export class BlockQueryDataSource extends DataSourceBase {
     update: new Slot(),
   };
 
+  get addPropertyConfigList(): ColumnMeta[] {
+    return queryBlockColumns as ColumnMeta[];
+  }
+
+  private get blocks() {
+    return [...this.blockMap.values()];
+  }
+
+  override get detailSlots(): DetailSlots {
+    return {
+      ...super.detailSlots,
+      header: createUniComponentFromWebComponent(BlockRenderer),
+    };
+  }
+
+  get properties(): string[] {
+    return [
+      ...this.meta.properties.map(v => v.key),
+      ...this.block.columns.map(v => v.id),
+    ];
+  }
+
+  get rows(): string[] {
+    return this.blocks.map(v => v.id);
+  }
+
+  get workspace() {
+    return this.host.doc.collection;
+  }
+
   constructor(
     private host: EditorHost,
     private block: DataViewBlockModel,
@@ -74,10 +104,6 @@ export class BlockQueryDataSource extends DataSourceBase {
     this.workspace.slots.docRemoved.on(id => {
       this.docDisposeMap.get(id)?.();
     });
-  }
-
-  private get blocks() {
-    return [...this.blockMap.values()];
   }
 
   private getProperty(propertyId: string) {
@@ -299,30 +325,4 @@ export class BlockQueryDataSource extends DataSourceBase {
   }
 
   rowMove(_rowId: string, _position: InsertToPosition): void {}
-
-  get addPropertyConfigList(): ColumnMeta[] {
-    return queryBlockColumns as ColumnMeta[];
-  }
-
-  override get detailSlots(): DetailSlots {
-    return {
-      ...super.detailSlots,
-      header: createUniComponentFromWebComponent(BlockRenderer),
-    };
-  }
-
-  get properties(): string[] {
-    return [
-      ...this.meta.properties.map(v => v.key),
-      ...this.block.columns.map(v => v.id),
-    ];
-  }
-
-  get rows(): string[] {
-    return this.blocks.map(v => v.id);
-  }
-
-  get workspace() {
-    return this.host.doc.collection;
-  }
 }

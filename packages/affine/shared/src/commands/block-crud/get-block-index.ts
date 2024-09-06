@@ -1,5 +1,4 @@
-import type { Command } from '@blocksuite/block-std';
-import type { BlockComponent } from '@blocksuite/block-std';
+import type { BlockComponent, Command } from '@blocksuite/block-std';
 
 import { assertExists } from '@blocksuite/global/utils';
 

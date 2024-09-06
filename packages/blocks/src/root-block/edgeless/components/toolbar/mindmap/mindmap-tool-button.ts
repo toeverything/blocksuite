@@ -1,6 +1,6 @@
 import { MindmapStyle } from '@blocksuite/affine-block-surface';
 import { assertExists } from '@blocksuite/global/utils';
-import { LitElement, css, html, nothing } from 'lit';
+import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { repeat } from 'lit/directives/repeat.js';
@@ -122,6 +122,30 @@ export class EdgelessMindmapToolButton extends EdgelessToolbarToolMixin(
   override enableActiveBackground = true;
 
   override type: EdgelessTool['type'][] = ['mindmap', 'text'];
+
+  get draggableTools(): DraggableTool[] {
+    const mindmap = this.mindmaps.find(m => m.style === this.activeStyle)!;
+    return [
+      {
+        name: 'text',
+        icon: textIcon,
+        config: textConfig,
+        standardWidth: 100,
+        render: textRender,
+      },
+      {
+        name: 'mindmap',
+        icon: mindmap.icon,
+        config: mindmapConfig,
+        standardWidth: 350,
+        render: getMindmapRender(this.activeStyle),
+      },
+    ];
+  }
+
+  get mindmaps() {
+    return getMindMaps(this.theme);
+  }
 
   private _toggleMenu() {
     if (this.tryDisposePopper()) return;
@@ -347,30 +371,6 @@ export class EdgelessMindmapToolButton extends EdgelessToolbarToolMixin(
     ) {
       this.initDragController();
     }
-  }
-
-  get draggableTools(): DraggableTool[] {
-    const mindmap = this.mindmaps.find(m => m.style === this.activeStyle)!;
-    return [
-      {
-        name: 'text',
-        icon: textIcon,
-        config: textConfig,
-        standardWidth: 100,
-        render: textRender,
-      },
-      {
-        name: 'mindmap',
-        icon: mindmap.icon,
-        config: mindmapConfig,
-        standardWidth: 350,
-        render: getMindmapRender(this.activeStyle),
-      },
-    ];
-  }
-
-  get mindmaps() {
-    return getMindMaps(this.theme);
   }
 
   @state()

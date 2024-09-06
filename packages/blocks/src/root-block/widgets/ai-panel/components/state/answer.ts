@@ -2,7 +2,7 @@ import type { EditorHost } from '@blocksuite/block-std';
 
 import { WithDisposable } from '@blocksuite/block-std';
 import { baseTheme } from '@toeverything/theme';
-import { LitElement, css, html, nothing, unsafeCSS } from 'lit';
+import { css, html, LitElement, nothing, unsafeCSS } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 import type { AIPanelAnswerConfig, CopyConfig } from '../../type.js';

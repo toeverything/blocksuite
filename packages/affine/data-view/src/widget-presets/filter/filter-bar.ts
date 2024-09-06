@@ -1,7 +1,7 @@
 import { createPopup } from '@blocksuite/affine-components/context-menu';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { CloseIcon, FilterIcon, PlusIcon } from '@blocksuite/icons/lit';
-import { type TemplateResult, css, html } from 'lit';
+import { css, html, type TemplateResult } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
@@ -13,6 +13,37 @@ import { popFilterModal } from './filter-modal.js';
 
 @customElement('filter-bar')
 export class FilterBar extends WithDisposable(ShadowlessElement) {
+  static override styles = css`
+    filter-bar {
+      margin-top: 8px;
+      display: flex;
+      gap: 8px;
+    }
+
+    .filter-group-tag {
+      font-size: 12px;
+      font-style: normal;
+      font-weight: 600;
+      line-height: 20px;
+      display: flex;
+      align-items: center;
+      padding: 4px;
+      background-color: var(--affine-white);
+    }
+
+    .filter-bar-add-filter {
+      color: var(--affine-text-secondary-color);
+      padding: 4px 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 14px;
+      font-style: normal;
+      font-weight: 400;
+      line-height: 22px;
+    }
+  `;
+
   private _setFilter = (index: number, filter: Filter) => {
     this.setData({
       ...this.data,
@@ -57,37 +88,6 @@ export class FilterBar extends WithDisposable(ShadowlessElement) {
       },
     });
   };
-
-  static override styles = css`
-    filter-bar {
-      margin-top: 8px;
-      display: flex;
-      gap: 8px;
-    }
-
-    .filter-group-tag {
-      font-size: 12px;
-      font-style: normal;
-      font-weight: 600;
-      line-height: 20px;
-      display: flex;
-      align-items: center;
-      padding: 4px;
-      background-color: var(--affine-white);
-    }
-
-    .filter-bar-add-filter {
-      color: var(--affine-text-secondary-color);
-      padding: 4px 8px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 14px;
-      font-style: normal;
-      font-weight: 400;
-      line-height: 22px;
-    }
-  `;
 
   renderAddFilter = () => {
     return html` <div

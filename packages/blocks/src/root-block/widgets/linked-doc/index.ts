@@ -13,7 +13,7 @@ import { InlineEditor } from '@blocksuite/inline';
 import { customElement } from 'lit/decorators.js';
 
 import { getPopperPosition } from '../../../root-block/utils/position.js';
-import { type LinkedMenuGroup, getMenus } from './config.js';
+import { getMenus, type LinkedMenuGroup } from './config.js';
 import { LinkedDocPopover } from './linked-doc-popover.js';
 
 export const AFFINE_LINKED_DOC_WIDGET = 'affine-linked-doc-widget';
@@ -164,6 +164,16 @@ export class AffineLinkedDocWidget extends WidgetComponent {
     return linkedDoc;
   };
 
+  get config(): LinkedWidgetConfig {
+    return {
+      triggerKeys: ['@', '[[', '【【'],
+      ignoreBlockTypes: ['affine:code'],
+      convertTriggerKey: true,
+      getMenus,
+      ...this.std.getConfig('affine:page')?.linkedWidget,
+    };
+  }
+
   private _handleInput(inlineEditor: InlineEditor, isCompositionEnd: boolean) {
     const primaryTriggerKey = this.config.triggerKeys[0];
 
@@ -221,16 +231,6 @@ export class AffineLinkedDocWidget extends WidgetComponent {
     super.connectedCallback();
     this.handleEvent('keyDown', this._onKeyDown);
     this.handleEvent('compositionEnd', this._onCompositionEnd);
-  }
-
-  get config(): LinkedWidgetConfig {
-    return {
-      triggerKeys: ['@', '[[', '【【'],
-      ignoreBlockTypes: ['affine:code'],
-      convertTriggerKey: true,
-      getMenus,
-      ...this.std.getConfig('affine:page')?.linkedWidget,
-    };
   }
 }
 

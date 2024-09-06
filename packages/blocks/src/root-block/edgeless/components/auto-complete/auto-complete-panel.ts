@@ -1,16 +1,21 @@
 import type {
   Color,
   Connection,
-  NoteBlockModel,
   ConnectorElementModel,
+  NoteBlockModel,
   ShapeElementModel,
 } from '@blocksuite/affine-model';
 import type { XYWH } from '@blocksuite/global/utils';
 
-import { CanvasElementType } from '@blocksuite/affine-block-surface';
-import { CommonUtils } from '@blocksuite/affine-block-surface';
-import { FrameIcon, SmallNoteIcon } from '@blocksuite/affine-components/icons';
-import { FontFamilyIcon } from '@blocksuite/affine-components/icons';
+import {
+  CanvasElementType,
+  CommonUtils,
+} from '@blocksuite/affine-block-surface';
+import {
+  FontFamilyIcon,
+  FrameIcon,
+  SmallNoteIcon,
+} from '@blocksuite/affine-components/icons';
 import {
   DEFAULT_NOTE_BACKGROUND_COLOR,
   DEFAULT_SHAPE_FILL_COLOR,
@@ -19,19 +24,23 @@ import {
   FontFamily,
   FontStyle,
   FontWeight,
-  ShapeStyle,
   getShapeName,
-  TextElementModel,
   GroupElementModel,
+  ShapeStyle,
+  TextElementModel,
 } from '@blocksuite/affine-model';
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import { WithDisposable } from '@blocksuite/block-std';
-import { serializeXYWH } from '@blocksuite/global/utils';
-import { Bound, Vec } from '@blocksuite/global/utils';
-import { assertExists, assertInstanceOf } from '@blocksuite/global/utils';
+import {
+  assertExists,
+  assertInstanceOf,
+  Bound,
+  serializeXYWH,
+  Vec,
+} from '@blocksuite/global/utils';
 import { DocCollection } from '@blocksuite/store';
 import { baseTheme } from '@toeverything/theme';
-import { LitElement, css, html, nothing, unsafeCSS } from 'lit';
+import { css, html, LitElement, nothing, unsafeCSS } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -56,27 +65,20 @@ import {
   AutoCompleteNoteOverlay,
   AutoCompleteShapeOverlay,
   AutoCompleteTextOverlay,
+  capitalizeFirstLetter,
+  createShapeElement,
   DEFAULT_NOTE_OVERLAY_HEIGHT,
   DEFAULT_TEXT_HEIGHT,
   DEFAULT_TEXT_WIDTH,
   Direction,
+  isShape,
   PANEL_HEIGHT,
   PANEL_WIDTH,
   type TARGET_SHAPE_TYPE,
-  capitalizeFirstLetter,
-  createShapeElement,
-  isShape,
 } from './utils.js';
 
 @customElement('edgeless-auto-complete-panel')
 export class EdgelessAutoCompletePanel extends WithDisposable(LitElement) {
-  private _overlay:
-    | AutoCompleteShapeOverlay
-    | AutoCompleteNoteOverlay
-    | AutoCompleteFrameOverlay
-    | AutoCompleteTextOverlay
-    | null = null;
-
   static override styles = css`
     .auto-complete-panel-container {
       position: absolute;
@@ -110,6 +112,13 @@ export class EdgelessAutoCompletePanel extends WithDisposable(LitElement) {
       box-sizing: border-box;
     }
   `;
+
+  private _overlay:
+    | AutoCompleteShapeOverlay
+    | AutoCompleteNoteOverlay
+    | AutoCompleteFrameOverlay
+    | AutoCompleteTextOverlay
+    | null = null;
 
   constructor(
     position: [number, number],

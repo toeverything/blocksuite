@@ -1,9 +1,9 @@
-import type { DatabaseBlockModel } from '@blocksuite/affine-model';
 import type { BlockModel, Doc } from '@blocksuite/store';
 
 import {
   type Cell,
   type Column,
+  type DatabaseBlockModel,
   DatabaseBlockSchema,
   NoteBlockSchema,
   ParagraphBlockSchema,

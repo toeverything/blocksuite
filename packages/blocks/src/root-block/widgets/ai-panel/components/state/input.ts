@@ -1,42 +1,14 @@
-import { ArrowUpBigIcon } from '@blocksuite/affine-components/icons';
-import { AIStarIcon } from '@blocksuite/affine-components/icons';
+import {
+  AIStarIcon,
+  ArrowUpBigIcon,
+} from '@blocksuite/affine-components/icons';
 import { stopPropagation } from '@blocksuite/affine-shared/utils';
 import { WithDisposable } from '@blocksuite/block-std';
-import { LitElement, css, html, nothing } from 'lit';
+import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 
 @customElement('ai-panel-input')
 export class AIPanelInput extends WithDisposable(LitElement) {
-  private _onInput = () => {
-    this._textarea.style.height = 'auto';
-    this._textarea.style.height = this._textarea.scrollHeight + 'px';
-
-    this.onInput?.(this._textarea.value);
-    const value = this._textarea.value.trim();
-    if (value.length > 0) {
-      this._arrow.dataset.active = '';
-      this._hasContent = true;
-    } else {
-      delete this._arrow.dataset.active;
-      this._hasContent = false;
-    }
-  };
-
-  private _onKeyDown = (e: KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) {
-      e.preventDefault();
-      this._sendToAI();
-    }
-  };
-
-  private _sendToAI = () => {
-    const value = this._textarea.value.trim();
-    if (value.length === 0) return;
-
-    this.onFinish?.(value);
-    this.remove();
-  };
-
   static override styles = css`
     :host {
       width: 100%;
@@ -114,6 +86,36 @@ export class AIPanelInput extends WithDisposable(LitElement) {
       cursor: pointer;
     }
   `;
+
+  private _onInput = () => {
+    this._textarea.style.height = 'auto';
+    this._textarea.style.height = this._textarea.scrollHeight + 'px';
+
+    this.onInput?.(this._textarea.value);
+    const value = this._textarea.value.trim();
+    if (value.length > 0) {
+      this._arrow.dataset.active = '';
+      this._hasContent = true;
+    } else {
+      delete this._arrow.dataset.active;
+      this._hasContent = false;
+    }
+  };
+
+  private _onKeyDown = (e: KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) {
+      e.preventDefault();
+      this._sendToAI();
+    }
+  };
+
+  private _sendToAI = () => {
+    const value = this._textarea.value.trim();
+    if (value.length === 0) return;
+
+    this.onFinish?.(value);
+    this.remove();
+  };
 
   override render() {
     this.updateComplete

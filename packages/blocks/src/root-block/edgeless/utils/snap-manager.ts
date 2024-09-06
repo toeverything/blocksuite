@@ -1,11 +1,11 @@
-import type { SurfaceBlockModel } from '@blocksuite/affine-block-surface';
-import type { SurfaceBlockComponent } from '@blocksuite/affine-block-surface';
+import type {
+  SurfaceBlockComponent,
+  SurfaceBlockModel,
+} from '@blocksuite/affine-block-surface';
 import type { ConnectorElementModel } from '@blocksuite/affine-model';
 
-import { Overlay, CommonUtils } from '@blocksuite/affine-block-surface';
-import { deserializeXYWH } from '@blocksuite/global/utils';
-import { Point } from '@blocksuite/global/utils';
-import { Bound } from '@blocksuite/global/utils';
+import { CommonUtils, Overlay } from '@blocksuite/affine-block-surface';
+import { Bound, deserializeXYWH, Point } from '@blocksuite/global/utils';
 
 import type { EdgelessRootService } from '../edgeless-root-service.js';
 
@@ -50,6 +50,16 @@ export class EdgelessSnapManager extends Overlay {
     // FIXME: not sure why renderer can be undefined sometimes
     this._surface.renderer?.removeOverlay(this);
   };
+
+  private get _surface() {
+    const surfaceModel = this._rootService.doc.getBlockByFlavour(
+      'affine:surface'
+    )[0] as SurfaceBlockModel;
+
+    return this._rootService.std.view.getBlock(
+      surfaceModel.id
+    ) as SurfaceBlockComponent;
+  }
 
   constructor(private _rootService: EdgelessRootService) {
     super();
@@ -276,16 +286,6 @@ export class EdgelessSnapManager extends Overlay {
     return Bound.from(
       CommonUtils.getBoundsWithRotation({ x, y, w, h, rotate })
     );
-  }
-
-  private get _surface() {
-    const surfaceModel = this._rootService.doc.getBlockByFlavour(
-      'affine:surface'
-    )[0] as SurfaceBlockModel;
-
-    return this._rootService.std.view.getBlock(
-      surfaceModel.id
-    ) as SurfaceBlockComponent;
   }
 
   // Update X align point

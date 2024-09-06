@@ -1,11 +1,11 @@
 import type { BlockComponent } from '@blocksuite/block-std';
 
 import {
+  affineInlineMarkdownMatches,
   type AffineTextAttributes,
+  getAffineInlineSpecsWithReference,
   InlineManager,
   ReferenceNodeConfig,
-  affineInlineMarkdownMatches,
-  getAffineInlineSpecsWithReference,
   textKeymap,
 } from '@blocksuite/affine-components/rich-text';
 import { ListBlockSchema } from '@blocksuite/affine-model';

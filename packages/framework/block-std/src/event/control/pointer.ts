@@ -3,8 +3,7 @@ import { IS_IPAD } from '@blocksuite/global/env';
 import type { UIEventDispatcher } from '../dispatcher.js';
 
 import { UIEventState, UIEventStateContext } from '../base.js';
-import { MultiPointerEventState } from '../state/index.js';
-import { PointerEventState } from '../state/index.js';
+import { MultiPointerEventState, PointerEventState } from '../state/index.js';
 import { EventScopeSourceType, EventSourceState } from '../state/source.js';
 import { center, isFarEnough } from '../utils.js';
 
@@ -25,11 +24,11 @@ function createContext(
 }
 
 abstract class PointerControllerBase {
-  constructor(protected _dispatcher: UIEventDispatcher) {}
-
   protected get _rect() {
     return this._dispatcher.host.getBoundingClientRect();
   }
+
+  constructor(protected _dispatcher: UIEventDispatcher) {}
 
   abstract listen(): void;
 }
@@ -422,6 +421,11 @@ abstract class DualDragControllerBase extends PointerControllerBase {
     }
   };
 
+  abstract _handleMove(
+    event: PointerEvent,
+    state: MultiPointerEventState
+  ): void;
+
   override listen(): void {
     const { host, disposables } = this._dispatcher;
     disposables.addFromEvent(host, 'pointerdown', this._down);
@@ -429,11 +433,6 @@ abstract class DualDragControllerBase extends PointerControllerBase {
     disposables.addFromEvent(host, 'pointerup', this._upOrOut);
     disposables.addFromEvent(host, 'pointerout', this._upOrOut);
   }
-
-  abstract _handleMove(
-    event: PointerEvent,
-    state: MultiPointerEventState
-  ): void;
 }
 
 class PinchController extends DualDragControllerBase {

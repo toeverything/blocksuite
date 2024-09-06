@@ -1,5 +1,4 @@
-import type { Bound } from './model/bound.js';
-import type { IBound } from './model/bound.js';
+import type { Bound, IBound } from './model/bound.js';
 
 import { PointLocation } from './model/point-location.js';
 import { type IVec, Vec } from './model/vec.js';

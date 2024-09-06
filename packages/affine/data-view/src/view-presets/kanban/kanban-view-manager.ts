@@ -1,13 +1,13 @@
 import {
-  type InsertToPosition,
   insertPositionToIndex,
+  type InsertToPosition,
 } from '@blocksuite/affine-shared/utils';
-import { type ReadonlySignal, computed } from '@lit-labs/preact-signals';
+import { computed, type ReadonlySignal } from '@lit-labs/preact-signals';
 
 import type { TType } from '../../core/logical/typesystem.js';
 import type { KanbanViewData } from './define.js';
 
-import { type FilterGroup, emptyFilterGroup } from '../../core/common/ast.js';
+import { emptyFilterGroup, type FilterGroup } from '../../core/common/ast.js';
 import { defaultGroupBy } from '../../core/common/group-by.js';
 import {
   GroupManager,
@@ -127,6 +127,41 @@ export class KanbanSingleView extends SingleViewBase<KanbanViewData> {
   readonly$ = computed(() => {
     return this.viewManager.readonly$.value;
   });
+
+  get columns(): string[] {
+    return this.columnsWithoutFilter$.value.filter(
+      id => !this.columnGetHide(id)
+    );
+  }
+
+  get columnsWithoutFilter(): string[] {
+    const needShow = new Set(this.dataSource.properties$.value);
+    const result: string[] = [];
+    this.view?.columns.forEach(v => {
+      if (needShow.has(v.id)) {
+        result.push(v.id);
+        needShow.delete(v.id);
+      }
+    });
+    result.push(...needShow);
+    return result;
+  }
+
+  get filter(): FilterGroup {
+    return this.view?.filter ?? emptyFilterGroup;
+  }
+
+  get header() {
+    return this.view?.header;
+  }
+
+  get type(): string {
+    return this.view?.mode ?? 'kanban';
+  }
+
+  get view() {
+    return this.viewData$.value;
+  }
 
   addCard(position: InsertToPosition, group: string) {
     const id = this.rowAdd(position);
@@ -271,41 +306,6 @@ export class KanbanSingleView extends SingleViewBase<KanbanViewData> {
         filter,
       };
     });
-  }
-
-  get columns(): string[] {
-    return this.columnsWithoutFilter$.value.filter(
-      id => !this.columnGetHide(id)
-    );
-  }
-
-  get columnsWithoutFilter(): string[] {
-    const needShow = new Set(this.dataSource.properties$.value);
-    const result: string[] = [];
-    this.view?.columns.forEach(v => {
-      if (needShow.has(v.id)) {
-        result.push(v.id);
-        needShow.delete(v.id);
-      }
-    });
-    result.push(...needShow);
-    return result;
-  }
-
-  get filter(): FilterGroup {
-    return this.view?.filter ?? emptyFilterGroup;
-  }
-
-  get header() {
-    return this.view?.header;
-  }
-
-  get type(): string {
-    return this.view?.mode ?? 'kanban';
-  }
-
-  get view() {
-    return this.viewData$.value;
   }
 }
 

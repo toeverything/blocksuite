@@ -19,6 +19,14 @@ export class AttachmentEdgelessBlockComponent extends toGfxBlockComponent(
 ) {
   protected override _whenHover: HoverController | null = null;
 
+  protected override get embedView() {
+    return undefined;
+  }
+
+  get rootService() {
+    return this.std.getService('affine:page') as EdgelessRootService;
+  }
+
   override connectedCallback(): void {
     super.connectedCallback();
 
@@ -61,14 +69,6 @@ export class AttachmentEdgelessBlockComponent extends toGfxBlockComponent(
     });
 
     return this.renderPageContent();
-  }
-
-  protected override get embedView() {
-    return undefined;
-  }
-
-  get rootService() {
-    return this.std.getService('affine:page') as EdgelessRootService;
   }
 }
 

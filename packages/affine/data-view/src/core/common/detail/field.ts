@@ -1,8 +1,8 @@
 import { popMenu } from '@blocksuite/affine-components/context-menu';
 import {
   ShadowlessElement,
-  WithDisposable,
   SignalWatcher,
+  WithDisposable,
 } from '@blocksuite/block-std';
 import {
   DeleteIcon,
@@ -31,6 +31,84 @@ import { inputConfig, typeConfig } from '../column-menu.js';
 export class RecordField extends SignalWatcher(
   WithDisposable(ShadowlessElement)
 ) {
+  static override styles = css`
+    affine-data-view-record-field {
+      display: flex;
+      gap: 12px;
+    }
+
+    .field-left {
+      padding: 6px;
+      display: flex;
+      height: max-content;
+      align-items: center;
+      gap: 6px;
+      font-size: var(--data-view-cell-text-size);
+      line-height: var(--data-view-cell-text-line-height);
+      color: var(--affine-text-secondary-color);
+      width: 160px;
+      border-radius: 4px;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .field-left:hover {
+      background-color: var(--affine-hover-color);
+    }
+
+    affine-data-view-record-field .icon {
+      display: flex;
+      align-items: center;
+      width: 16px;
+      height: 16px;
+    }
+
+    affine-data-view-record-field .icon svg {
+      width: 16px;
+      height: 16px;
+      fill: var(--affine-icon-color);
+    }
+
+    .filed-name {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .field-content {
+      padding: 6px 8px;
+      border-radius: 4px;
+      flex: 1;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      border: 1px solid transparent;
+    }
+
+    .field-content .affine-database-number {
+      text-align: left;
+      justify-content: start;
+    }
+
+    .field-content:hover {
+      background-color: var(--affine-hover-color);
+    }
+
+    .field-content.is-editing {
+      box-shadow: 0px 0px 0px 2px rgba(30, 150, 235, 0.3);
+    }
+
+    .field-content.is-focus {
+      border: 1px solid var(--affine-primary-color);
+    }
+    .field-content.empty::before {
+      content: 'Empty';
+      color: var(--affine-text-disable-color);
+      font-size: 14px;
+      line-height: 22px;
+    }
+  `;
+
   private _cell = createRef<DataViewCellLifeCycle>();
 
   _click = (e: MouseEvent) => {
@@ -129,84 +207,6 @@ export class RecordField extends SignalWatcher(
     });
   };
 
-  static override styles = css`
-    affine-data-view-record-field {
-      display: flex;
-      gap: 12px;
-    }
-
-    .field-left {
-      padding: 6px;
-      display: flex;
-      height: max-content;
-      align-items: center;
-      gap: 6px;
-      font-size: var(--data-view-cell-text-size);
-      line-height: var(--data-view-cell-text-line-height);
-      color: var(--affine-text-secondary-color);
-      width: 160px;
-      border-radius: 4px;
-      cursor: pointer;
-      user-select: none;
-    }
-
-    .field-left:hover {
-      background-color: var(--affine-hover-color);
-    }
-
-    affine-data-view-record-field .icon {
-      display: flex;
-      align-items: center;
-      width: 16px;
-      height: 16px;
-    }
-
-    affine-data-view-record-field .icon svg {
-      width: 16px;
-      height: 16px;
-      fill: var(--affine-icon-color);
-    }
-
-    .filed-name {
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-    .field-content {
-      padding: 6px 8px;
-      border-radius: 4px;
-      flex: 1;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      border: 1px solid transparent;
-    }
-
-    .field-content .affine-database-number {
-      text-align: left;
-      justify-content: start;
-    }
-
-    .field-content:hover {
-      background-color: var(--affine-hover-color);
-    }
-
-    .field-content.is-editing {
-      box-shadow: 0px 0px 0px 2px rgba(30, 150, 235, 0.3);
-    }
-
-    .field-content.is-focus {
-      border: 1px solid var(--affine-primary-color);
-    }
-    .field-content.empty::before {
-      content: 'Empty';
-      color: var(--affine-text-disable-color);
-      font-size: 14px;
-      line-height: 22px;
-    }
-  `;
-
   cell$ = computed(() => {
     return this.column.cellGet(this.rowId);
   });
@@ -220,6 +220,10 @@ export class RecordField extends SignalWatcher(
       };
     }
   };
+
+  get cell(): DataViewCellLifeCycle | undefined {
+    return this._cell.value;
+  }
 
   private get readonly() {
     return this.view.readonly$.value;
@@ -260,10 +264,6 @@ export class RecordField extends SignalWatcher(
         })}
       </div>
     `;
-  }
-
-  get cell(): DataViewCellLifeCycle | undefined {
-    return this._cell.value;
   }
 
   @property({ attribute: false })

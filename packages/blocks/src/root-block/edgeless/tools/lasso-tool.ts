@@ -1,18 +1,17 @@
 import type { PointerEventState } from '@blocksuite/block-std';
-import type { IVec } from '@blocksuite/global/utils';
-import type { IPoint } from '@blocksuite/global/utils';
+import type { IPoint, IVec } from '@blocksuite/global/utils';
 
-import { Overlay, CommonUtils } from '@blocksuite/affine-block-surface';
+import { CommonUtils, Overlay } from '@blocksuite/affine-block-surface';
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import {
   Bound,
-  Vec,
   getBoundFromPoints,
   getPolygonPathFromPoints,
   linePolygonIntersects,
   noop,
   pointInPolygon,
   rotatePoints,
+  Vec,
 } from '@blocksuite/global/utils';
 
 import type { EdgelessTool } from '../types.js';
@@ -87,6 +86,14 @@ export class LassoToolController extends EdgelessToolController<LassoTool> {
   readonly tool = {
     type: 'lasso',
   } as LassoTool; // to finalize the selection
+
+  get isSelecting() {
+    return this._isSelecting;
+  }
+
+  get selection() {
+    return this._edgeless.service.selection;
+  }
 
   private _clearLastSelection() {
     if (this.selection.empty) {
@@ -329,14 +336,6 @@ export class LassoToolController extends EdgelessToolController<LassoTool> {
 
   override onPressSpaceBar(): void {
     noop();
-  }
-
-  get isSelecting() {
-    return this._isSelecting;
-  }
-
-  get selection() {
-    return this._edgeless.service.selection;
   }
 }
 

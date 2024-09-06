@@ -1,7 +1,7 @@
 import type { AffineEditorContainer } from '@blocksuite/presets';
 
 import { WithDisposable } from '@blocksuite/block-std';
-import { LitElement, css, html, nothing } from 'lit';
+import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
 @customElement('custom-outline-viewer')

@@ -1,7 +1,6 @@
 import { expect } from '@playwright/test';
 
 import {
-  SHORT_KEY,
   captureHistory,
   copyByKeyboard,
   dragBetweenCoords,
@@ -24,6 +23,7 @@ import {
   resetHistory,
   setInlineRangeInSelectedRichText,
   setSelection,
+  SHORT_KEY,
   type,
   undoByClick,
   waitNextFrame,

@@ -1,4 +1,4 @@
-import { type ReadonlySignal, computed } from '@lit-labs/preact-signals';
+import { computed, type ReadonlySignal } from '@lit-labs/preact-signals';
 
 import type { SingleView } from './single-view.js';
 

@@ -1,10 +1,12 @@
 import type { EditorHost } from '@blocksuite/block-std';
 
-import { CopyIcon } from '@blocksuite/affine-components/icons';
-import { AIDoneIcon } from '@blocksuite/affine-components/icons';
-import { WarningIcon } from '@blocksuite/affine-components/icons';
+import {
+  AIDoneIcon,
+  CopyIcon,
+  WarningIcon,
+} from '@blocksuite/affine-components/icons';
 import { WithDisposable } from '@blocksuite/block-std';
-import { LitElement, css, html, nothing } from 'lit';
+import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
 import type { CopyConfig } from '../type.js';
