@@ -77,19 +77,30 @@ const chunkGroups = {
     require.resolve('@blocksuite/global/utils'),
     require.resolve('@blocksuite/global/env'),
     require.resolve('@blocksuite/global/exceptions'),
+    require.resolve('@blocksuite/global/di'),
     require.resolve('@blocksuite/inline'),
     require.resolve('@blocksuite/store'),
     require.resolve('@blocksuite/sync'),
   ],
-  affine: [
-    require.resolve('@blocksuite/affine-model'),
-    require.resolve('@blocksuite/affine-components/hover'),
+  components: [
     require.resolve('@blocksuite/affine-components/icons'),
     require.resolve('@blocksuite/affine-components/peek'),
     require.resolve('@blocksuite/affine-components/portal'),
-    require.resolve('@blocksuite/affine-components/rich-text'),
-    require.resolve('@blocksuite/affine-components/toast'),
+    require.resolve('@blocksuite/affine-components/hover'),
     require.resolve('@blocksuite/affine-components/toolbar'),
+    require.resolve('@blocksuite/affine-components/toast'),
+    require.resolve('@blocksuite/affine-components/rich-text'),
+    require.resolve('@blocksuite/affine-components/caption'),
+    require.resolve('@blocksuite/affine-components/context-menu'),
+    require.resolve('@blocksuite/affine-components/date-picker'),
+  ],
+  affine: [
+    require.resolve('@blocksuite/affine-shared'),
+    require.resolve('@blocksuite/affine-model'),
+    require.resolve('@blocksuite/affine-block-list'),
+    require.resolve('@blocksuite/affine-block-paragraph'),
+    require.resolve('@blocksuite/affine-block-surface'),
+    require.resolve('@blocksuite/data-view'),
   ],
   datefns: [path.dirname(require.resolve('date-fns'))],
   dompurify: [path.dirname(require.resolve('dompurify'))],
@@ -116,6 +127,19 @@ const chunkGroups = {
     require.resolve('@blocksuite/blocks/schemas'),
   ],
   presets: [require.resolve('@blocksuite/presets')],
+  common: [
+    require.resolve('@blocksuite/icons/lit'),
+    require.resolve('@toeverything/theme'),
+    require.resolve('@toeverything/y-indexeddb'),
+    require.resolve('@preact/signals-core'),
+    require.resolve('@lit-labs/preact-signals'),
+    require.resolve('@lit/context'),
+    require.resolve('lit'),
+    require.resolve('zod'),
+    require.resolve('minimatch'),
+    require.resolve('nanoid'),
+    require.resolve('yjs'),
+  ],
 };
 
 const clearSiteDataPlugin = () =>
@@ -165,6 +189,9 @@ export default ({ mode }) => {
     ],
     esbuild: {
       target: 'es2018',
+    },
+    resolve: {
+      extensions: ['.ts', '.js'],
     },
     build: {
       target: 'es2022',
