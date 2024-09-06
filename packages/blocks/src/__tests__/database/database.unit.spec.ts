@@ -9,14 +9,11 @@ import {
   ParagraphBlockSchema,
   RootBlockSchema,
 } from '@blocksuite/affine-model';
+import { columnModelPresets } from '@blocksuite/data-view/column-pure-presets';
 import { DocCollection, IdGeneratorType, Schema } from '@blocksuite/store';
 import { beforeEach, describe, expect, test } from 'vitest';
 
-import { selectColumnModelConfig } from '../../database-block/data-view/column/presets/select/define.js';
-import {
-  columnPresets,
-  richTextColumnConfig,
-} from '../../database-block/index.js';
+import { databaseBlockColumns } from '../../database-block/index.js';
 import {
   addColumn,
   copyCellsByColumn,
@@ -93,14 +90,20 @@ describe('DatabaseManager', () => {
     col1 = addColumn(
       db,
       'end',
-      columnPresets.numberColumnConfig.model.create('Number')
+      databaseBlockColumns.numberColumnConfig.create('Number')
     );
     col2 = addColumn(
       db,
       'end',
-      selectColumnModelConfig.create('Single Select', { options: selection })
+      columnModelPresets.selectColumnModelConfig.create('Single Select', {
+        options: selection,
+      })
     );
-    col3 = addColumn(db, 'end', richTextColumnConfig.model.create('Rich Text'));
+    col3 = addColumn(
+      db,
+      'end',
+      databaseBlockColumns.richTextColumnConfig.create('Rich Text')
+    );
 
     doc.updateBlock(databaseModel, {
       columns: [col1, col2, col3],
@@ -133,7 +136,7 @@ describe('DatabaseManager', () => {
 
   test('getColumn', () => {
     const column = {
-      ...columnPresets.numberColumnConfig.model.create('testColumnId'),
+      ...databaseBlockColumns.numberColumnConfig.create('testColumnId'),
       id: 'testColumnId',
     };
     addColumn(db, 'end', column);
@@ -143,7 +146,8 @@ describe('DatabaseManager', () => {
   });
 
   test('addColumn', () => {
-    const column = columnPresets.numberColumnConfig.model.create('Test Column');
+    const column =
+      databaseBlockColumns.numberColumnConfig.create('Test Column');
     const id = addColumn(db, 'end', column);
     const result = getColumn(db, id);
 
@@ -153,7 +157,7 @@ describe('DatabaseManager', () => {
 
   test('deleteColumn', () => {
     const column = {
-      ...columnPresets.numberColumnConfig.model.create('Test Column'),
+      ...databaseBlockColumns.numberColumnConfig.create('Test Column'),
       id: 'testColumnId',
     };
     addColumn(db, 'end', column);
@@ -172,7 +176,7 @@ describe('DatabaseManager', () => {
       noteBlockId
     );
     const column = {
-      ...columnPresets.numberColumnConfig.model.create('Test Column'),
+      ...databaseBlockColumns.numberColumnConfig.create('Test Column'),
       id: 'testColumnId',
     };
     const cell: Cell = {
@@ -216,7 +220,9 @@ describe('DatabaseManager', () => {
     const newColId = addColumn(
       db,
       'end',
-      selectColumnModelConfig.create('Copied Select', { options: selection })
+      columnModelPresets.selectColumnModelConfig.create('Copied Select', {
+        options: selection,
+      })
     );
 
     copyCellsByColumn(db, col2, newColId);

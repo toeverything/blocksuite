@@ -3,23 +3,25 @@ import type { EditorHost } from '@blocksuite/block-std';
 import type { Block, Doc } from '@blocksuite/store';
 
 import {
-  type InsertToPosition,
   insertPositionToIndex,
+  type InsertToPosition,
 } from '@blocksuite/affine-shared/utils';
-import { Slot, assertExists } from '@blocksuite/global/utils';
+import {
+  type ColumnMeta,
+  createUniComponentFromWebComponent,
+  DataSourceBase,
+  type DetailSlots,
+} from '@blocksuite/data-view';
+import { columnPresets } from '@blocksuite/data-view/column-presets';
+import { assertExists, Slot } from '@blocksuite/global/utils';
 
 import type { BlockMeta } from './block-meta/base.js';
 import type { DataViewBlockModel } from './data-view-model.js';
 
-import { databaseBlockAllColumnMap } from '../database-block/columns/index.js';
 import {
-  type ColumnConfig,
-  type ColumnMeta,
-  DataSourceBase,
-  type DetailSlots,
-  columnPresets,
-  createUniComponentFromWebComponent,
-} from '../database-block/data-view/index.js';
+  databaseBlockAllColumnMap,
+  databaseColumnConverts,
+} from '../database-block/columns/index.js';
 import { BlockRenderer } from '../database-block/detail-panel/block-renderer.js';
 import { blockMetaMap } from './block-meta/index.js';
 import { queryBlockAllColumnMap, queryBlockColumns } from './columns/index.js';
@@ -121,8 +123,7 @@ export class BlockQueryDataSource extends DataSourceBase {
     return;
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  getPropertyMeta(type: string): ColumnMeta<any, any, any> {
+  getPropertyMeta(type: string): ColumnMeta {
     const meta = this.columnMetaMap.get(type);
     if (meta) {
       return meta;
@@ -159,7 +160,7 @@ export class BlockQueryDataSource extends DataSourceBase {
     doc.captureSync();
     const column = databaseBlockAllColumnMap[
       type ?? columnPresets.multiSelectColumnConfig.type
-    ].model.create(this.newColumnName());
+    ].create(this.newColumnName());
 
     const id = doc.generateBlockId();
     if (this.block.columns.some(v => v.id === id)) {
@@ -202,12 +203,16 @@ export class BlockQueryDataSource extends DataSourceBase {
       const currentCells = rows.map(rowId =>
         this.cellGetValue(rowId, propertyId)
       );
-      const result = databaseBlockAllColumnMap[currentType].model?.convertCell(
-        toType,
-        currentData,
-        currentCells
+      const convertFunction = databaseColumnConverts.find(
+        v => v.from === currentType && v.to === toType
+      )?.convert;
+      const result = convertFunction?.(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        currentData as any,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        currentCells as any
       ) ?? {
-        column: databaseBlockAllColumnMap[toType].model.defaultData(),
+        column: databaseBlockAllColumnMap[toType].config.defaultData(),
         cells: currentCells.map(() => undefined),
       };
       this.block.doc.captureSync();
@@ -243,7 +248,7 @@ export class BlockQueryDataSource extends DataSourceBase {
     const property = this.getProperty(propertyId);
     return (
       property.getColumnData?.(this.blocks[0].model) ??
-      property.columnMeta.model.defaultData()
+      property.columnMeta.config.defaultData()
     );
   }
 
@@ -295,9 +300,8 @@ export class BlockQueryDataSource extends DataSourceBase {
 
   rowMove(_rowId: string, _position: InsertToPosition): void {}
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  get addPropertyConfigList(): ColumnConfig<any, any, any>[] {
-    return queryBlockColumns.map(v => v.model);
+  get addPropertyConfigList(): ColumnMeta[] {
+    return queryBlockColumns as ColumnMeta[];
   }
 
   override get detailSlots(): DetailSlots {

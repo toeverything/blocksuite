@@ -12,26 +12,22 @@ import {
   arrayMove,
   insertPositionToIndex,
 } from '@blocksuite/affine-shared/utils';
+import {
+  type ColumnMeta,
+  type DataViewDataType,
+  type DataViewTypes,
+  type ViewMeta,
+  defaultGroupBy,
+  getTagColor,
+  groupByMatcher,
+} from '@blocksuite/data-view';
+import { columnPresets } from '@blocksuite/data-view/column-presets';
+import { columnModelPresets } from '@blocksuite/data-view/column-pure-presets';
 import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 import { nanoid } from '@blocksuite/store';
 
-import type {
-  ColumnMeta,
-  DataViewDataType,
-  ViewMeta,
-} from './data-view/index.js';
-import type { DataViewTypes } from './data-view/view/data-view.js';
-
 import { databaseBlockAllColumnMap } from './columns/index.js';
 import { titlePureColumnConfig } from './columns/title/define.js';
-import { multiSelectColumnModelConfig } from './data-view/column/presets/multi-select/define.js';
-import { numberColumnModelConfig } from './data-view/column/presets/number/define.js';
-import { selectColumnModelConfig } from './data-view/column/presets/select/define.js';
-import { textColumnModelConfig } from './data-view/column/presets/text/define.js';
-import { defaultGroupBy } from './data-view/common/group-by.js';
-import { groupByMatcher } from './data-view/common/group-by/matcher.js';
-import { columnPresets } from './data-view/index.js';
-import { getTagColor } from './data-view/utils/tags/colors.js';
 
 const initMap: Record<
   DataViewTypes,
@@ -61,22 +57,22 @@ const initMap: Record<
   },
   kanban(columnMetaMap, model, id, name) {
     const allowList = model.columns.filter(column => {
-      const type = columnMetaMap[column.type].model.dataType(column.data);
+      const type = columnMetaMap[column.type].config.type(column.data);
       return !!groupByMatcher.match(type) && column.type !== 'title';
     });
     const getWeight = (column: Column) => {
       if (
         [
-          multiSelectColumnModelConfig.type,
-          selectColumnModelConfig.type as string,
+          columnModelPresets.multiSelectColumnModelConfig.type,
+          columnModelPresets.selectColumnModelConfig.type as string,
         ].includes(column.type)
       ) {
         return 3;
       }
       if (
         [
-          numberColumnModelConfig.type as string,
-          textColumnModelConfig.type,
+          columnModelPresets.numberColumnModelConfig.type as string,
+          columnModelPresets.textColumnModelConfig.type,
         ].includes(column.type)
       ) {
         return 2;
@@ -123,7 +119,7 @@ export const databaseViewInitEmpty = (
   addColumn(
     model,
     'start',
-    titlePureColumnConfig.create(titlePureColumnConfig.model.name)
+    titlePureColumnConfig.create(titlePureColumnConfig.config.name)
   );
   databaseViewAddView(model, viewMeta);
 };
@@ -135,7 +131,7 @@ export const databaseViewInitConvert = (
   addColumn(
     model,
     'end',
-    columnPresets.multiSelectColumnConfig.model.create('Tag', { options: [] })
+    columnPresets.multiSelectColumnConfig.create('Tag', { options: [] })
   );
   databaseViewInitEmpty(model, viewMeta);
 };
@@ -148,7 +144,7 @@ export const databaseViewInitTemplate = (
   const statusId = addColumn(
     model,
     'end',
-    columnPresets.selectColumnConfig.model.create('Status', {
+    columnPresets.selectColumnConfig.create('Status', {
       options: [
         {
           id: ids[0],

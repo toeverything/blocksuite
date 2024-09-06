@@ -1,25 +1,39 @@
-import type { ColumnMeta } from '../data-view/index.js';
+import type { ColumnMeta } from '@blocksuite/data-view';
 
-import { columnPresets } from '../data-view/index.js';
+import { columnPresets } from '@blocksuite/data-view/column-presets';
+
+import { linkColumnConfig } from './link/cell-renderer.js';
 import { richTextColumnConfig } from './rich-text/cell-renderer.js';
 import { titleColumnConfig } from './title/cell-renderer.js';
 
-export const databaseBlockColumns = [
-  columnPresets.dateColumnConfig,
-  columnPresets.numberColumnConfig,
-  columnPresets.progressColumnConfig,
-  columnPresets.selectColumnConfig,
-  columnPresets.multiSelectColumnConfig,
-  columnPresets.linkColumnConfig,
-  columnPresets.checkboxColumnConfig,
+export * from './converts.js';
+const {
+  checkboxColumnConfig,
+  dateColumnConfig,
+  imageColumnConfig,
+  multiSelectColumnConfig,
+  numberColumnConfig,
+  progressColumnConfig,
+  selectColumnConfig,
+} = columnPresets;
+export const databaseBlockColumns = {
+  checkboxColumnConfig,
+  dateColumnConfig,
+  imageColumnConfig,
+  multiSelectColumnConfig,
+  numberColumnConfig,
+  progressColumnConfig,
+  selectColumnConfig,
+  linkColumnConfig,
   richTextColumnConfig,
-];
+};
+export const databaseBlockColumnList = Object.values(databaseBlockColumns);
 export const databaseBlockHiddenColumns = [
   columnPresets.imageColumnConfig,
   titleColumnConfig,
 ];
 const databaseBlockAllColumns = [
-  ...databaseBlockColumns,
+  ...databaseBlockColumnList,
   ...databaseBlockHiddenColumns,
 ];
 export const databaseBlockAllColumnMap = Object.fromEntries(

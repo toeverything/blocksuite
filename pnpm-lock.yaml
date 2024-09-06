@@ -392,6 +392,9 @@ importers:
       '@toeverything/theme':
         specifier: ^1.0.8
         version: 1.0.8
+      date-fns:
+        specifier: ^3.6.0
+        version: 3.6.0
       katex:
         specifier: ^0.16.11
         version: 0.16.11
@@ -408,6 +411,55 @@ importers:
       '@types/katex':
         specifier: ^0.16.7
         version: 0.16.7
+
+  packages/affine/data-view:
+    dependencies:
+      '@blocksuite/affine-components':
+        specifier: workspace:*
+        version: link:../components
+      '@blocksuite/affine-shared':
+        specifier: workspace:*
+        version: link:../shared
+      '@blocksuite/block-std':
+        specifier: workspace:*
+        version: link:../../framework/block-std
+      '@blocksuite/global':
+        specifier: workspace:*
+        version: link:../../framework/global
+      '@blocksuite/icons':
+        specifier: ^2.1.66
+        version: 2.1.67(@types/react@18.3.5)(lit@3.2.0)
+      '@blocksuite/store':
+        specifier: workspace:*
+        version: link:../../framework/store
+      '@floating-ui/dom':
+        specifier: ^1.6.10
+        version: 1.6.10
+      '@lit-labs/preact-signals':
+        specifier: ^1.0.2
+        version: 1.0.2
+      '@lit/context':
+        specifier: ^1.1.2
+        version: 1.1.2
+      '@toeverything/theme':
+        specifier: ^1.0.7
+        version: 1.0.8
+      date-fns:
+        specifier: ^3.6.0
+        version: 3.6.0
+      lit:
+        specifier: ^3.2.0
+        version: 3.2.0
+      sortablejs:
+        specifier: ^1.15.2
+        version: 1.15.3
+      zod:
+        specifier: ^3.23.8
+        version: 3.23.8
+    devDependencies:
+      '@types/sortablejs':
+        specifier: ^1.15.8
+        version: 1.15.8
 
   packages/affine/model:
     dependencies:
@@ -489,6 +541,9 @@ importers:
       '@blocksuite/block-std':
         specifier: workspace:*
         version: link:../framework/block-std
+      '@blocksuite/data-view':
+        specifier: workspace:*
+        version: link:../affine/data-view
       '@blocksuite/global':
         specifier: workspace:*
         version: link:../framework/global
@@ -823,12 +878,21 @@ importers:
 
   packages/playground:
     dependencies:
+      '@blocksuite/affine-components':
+        specifier: workspace:*
+        version: link:../affine/components
+      '@blocksuite/affine-model':
+        specifier: workspace:*
+        version: link:../affine/model
       '@blocksuite/block-std':
         specifier: workspace:*
         version: link:../framework/block-std
       '@blocksuite/blocks':
         specifier: workspace:*
         version: link:../blocks
+      '@blocksuite/data-view':
+        specifier: workspace:*
+        version: link:../affine/data-view
       '@blocksuite/global':
         specifier: workspace:*
         version: link:../framework/global

@@ -35,6 +35,9 @@
       "path": "../affine/block-list"
     },
     {
+      "path": "../affine/data-view"
+    },
+    {
       "path": "../affine/block-surface"
     }
   ]

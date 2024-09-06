@@ -5,8 +5,8 @@ import {
   getAffineInlineSpecsWithReference,
 } from '@blocksuite/affine-components/rich-text';
 import { BlockService } from '@blocksuite/block-std';
+import { DatabaseSelection } from '@blocksuite/data-view';
 
-import { DatabaseSelection } from '../database-block/data-view/index.js';
 import { DataViewBlockSchema } from './data-view-model.js';
 
 export class DataViewBlockService extends BlockService {

@@ -1,5 +1,5 @@
 import { press } from '@inline/__tests__/utils.js';
-import { type Page, expect } from '@playwright/test';
+import { expect, type Page } from '@playwright/test';
 
 import { type } from '../utils/actions/index.js';
 import {
@@ -9,7 +9,7 @@ import {
   waitNextFrame,
 } from '../utils/actions/misc.js';
 import { test } from '../utils/playwright.js';
-import { moveToCenterOf } from './actions.js';
+import { changeColumnType, moveToCenterOf, pressKey } from './actions.js';
 
 const addRow = async (page: Page, count: number = 1) => {
   await waitNextFrame(page);
@@ -20,28 +20,12 @@ const addRow = async (page: Page, count: number = 1) => {
   await press(page, 'Escape');
   await waitNextFrame(page);
 };
-const pressKey = async (page: Page, key: string, count: number = 1) => {
-  for (let i = 0; i < count; i++) {
-    await waitNextFrame(page);
-    await press(page, key);
-  }
-  await waitNextFrame(page);
-};
 const insertRightColumn = async (page: Page, index = 0) => {
   await waitNextFrame(page);
   await page.locator('affine-database-header-column').nth(index).click();
   await pressKey(page, 'ArrowDown', 3);
   await pressKey(page, 'Enter');
   await pressKey(page, 'Escape');
-};
-const changeColumnType = async (page: Page, column: number, name: string) => {
-  await waitNextFrame(page);
-  await page.locator('affine-database-header-column').nth(column).click();
-  await pressKey(page, 'ArrowDown', 2);
-  await pressKey(page, 'Enter');
-  await type(page, name);
-  await pressKey(page, 'ArrowDown');
-  await pressKey(page, 'Enter');
 };
 const menuSelect = async (
   page: Page,

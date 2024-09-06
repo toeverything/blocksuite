@@ -1,7 +1,6 @@
-import {
-  type ViewMeta,
-  viewPresets,
-} from '../../database-block/data-view/index.js';
+import type { ViewMeta } from '@blocksuite/data-view';
+
+import { viewPresets } from '@blocksuite/data-view/view-presets';
 
 export const blockQueryViews: ViewMeta[] = [
   viewPresets.tableViewConfig,

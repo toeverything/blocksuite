@@ -23,6 +23,7 @@ import {
   assertDatabaseCellNumber,
   assertDatabaseCellRichTexts,
   assertSelectedStyle,
+  changeColumnType,
   clickDatabaseOutside,
   clickSelectOption,
   getDatabaseHeaderColumn,
@@ -190,7 +191,7 @@ test.describe('switch column type', () => {
     await initDatabaseColumn(page);
     await initDatabaseDynamicRowWithData(page, '123abc', true);
     await pressEscape(page);
-    await switchColumnType(page, 'Number');
+    await changeColumnType(page, 1, 'Number');
 
     const cell = getFirstColumnCell(page, 'number');
     await assertDatabaseCellNumber(page, {
@@ -317,7 +318,7 @@ test.describe('switch column type', () => {
     await initDatabaseColumn(page);
     await initDatabaseDynamicRowWithData(page, '', true);
     await pressEscape(page);
-    await switchColumnType(page, 'Checkbox');
+    await changeColumnType(page, 1, 'Checkbox');
 
     const checkbox = getFirstColumnCell(page, 'checkbox');
     await expect(checkbox).not.toHaveClass('checked');
@@ -337,32 +338,32 @@ test.describe('switch column type', () => {
     await initDatabaseColumn(page);
     await initDatabaseDynamicRowWithData(page, '', true);
     await pressEscape(page);
-    await switchColumnType(page, 'Checkbox');
+    await changeColumnType(page, 1, 'Checkbox');
 
     let checkbox = getFirstColumnCell(page, 'checkbox');
     await expect(checkbox).not.toHaveClass('checked');
 
     // checked
     await checkbox.click();
-    await switchColumnType(page, 'Text');
+    await changeColumnType(page, 1, 'Text');
     await clickDatabaseOutside(page);
     await waitNextFrame(page, 100);
     await assertDatabaseCellRichTexts(page, { text: 'Yes' });
     await clickDatabaseOutside(page);
     await waitNextFrame(page, 100);
-    await switchColumnType(page, 'Checkbox');
+    await changeColumnType(page, 1, 'Checkbox');
     checkbox = getFirstColumnCell(page, 'checkbox');
     await expect(checkbox).toHaveClass(/checked/);
 
     // not checked
     await checkbox.click();
-    await switchColumnType(page, 'Text');
+    await changeColumnType(page, 1, 'Text');
     await clickDatabaseOutside(page);
     await waitNextFrame(page, 100);
     await assertDatabaseCellRichTexts(page, { text: 'No' });
     await clickDatabaseOutside(page);
     await waitNextFrame(page, 100);
-    await switchColumnType(page, 'Checkbox');
+    await changeColumnType(page, 1, 'Checkbox');
     checkbox = getFirstColumnCell(page, 'checkbox');
     await expect(checkbox).not.toHaveClass('checked');
   });

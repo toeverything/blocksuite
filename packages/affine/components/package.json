@@ -29,7 +29,8 @@
     "katex": "^0.16.11",
     "lit": "^3.2.0",
     "shiki": "^1.12.0",
-    "zod": "^3.23.8"
+    "zod": "^3.23.8",
+    "date-fns": "^3.6.0"
   },
   "exports": {
     ".": "./src/index.ts",
@@ -41,7 +42,8 @@
     "./toast": "./src/toast/index.ts",
     "./rich-text": "./src/rich-text/index.ts",
     "./caption": "./src/caption/index.ts",
-    "./context-menu": "./src/context-menu/index.ts"
+    "./context-menu": "./src/context-menu/index.ts",
+    "./date-picker": "./src/date-picker/index.ts"
   },
   "publishConfig": {
     "access": "public",
@@ -87,6 +89,10 @@
       "./context-menu": {
         "types": "./dist/context-menu/index.d.ts",
         "import": "./dist/context-menu/index.js"
+      },
+      "./date-picker": {
+        "types": "./dist/date-picker/index.d.ts",
+        "import": "./dist/date-picker/index.js"
       }
     }
   },

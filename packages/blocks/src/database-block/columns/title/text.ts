@@ -6,6 +6,7 @@ import {
   getViewportElement,
   isValidUrl,
 } from '@blocksuite/affine-shared/utils';
+import { BaseCellRenderer } from '@blocksuite/data-view';
 import { IS_MAC } from '@blocksuite/global/env';
 import { assertExists } from '@blocksuite/global/utils';
 import { css } from 'lit';
@@ -15,7 +16,6 @@ import { html } from 'lit/static-html.js';
 import type { DatabaseBlockComponent } from '../../database-block.js';
 
 import { HostContextKey } from '../../context/host-context.js';
-import { BaseCellRenderer } from '../../data-view/column/index.js';
 
 const styles = css`
   data-view-header-area-text {
@@ -115,12 +115,6 @@ abstract class BaseTextCell extends BaseCellRenderer<Text> {
     return this.view
       .getContext(HostContextKey)
       ?.std.getService('affine:database');
-  }
-
-  get titleColumn() {
-    const columnId = this.view.header$.value.titleColumn;
-    assertExists(columnId);
-    return this.view.columnGet(columnId);
   }
 
   get topContenteditableElement() {

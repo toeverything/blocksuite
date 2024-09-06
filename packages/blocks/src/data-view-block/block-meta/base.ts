@@ -1,8 +1,6 @@
+import type { ColumnMeta } from '@blocksuite/data-view';
 import type { Disposable } from '@blocksuite/global/utils';
-import type { Block } from '@blocksuite/store';
-import type { BlockModel } from '@blocksuite/store';
-
-import type { ColumnMeta } from '../../database-block/data-view/index.js';
+import type { Block, BlockModel } from '@blocksuite/store';
 
 type PropertyMeta<
   T extends BlockModel = BlockModel,
@@ -11,7 +9,7 @@ type PropertyMeta<
 > = {
   name: string;
   key: string;
-  columnMeta: ColumnMeta<string, Value, ColumnData>;
+  columnMeta: ColumnMeta<string, ColumnData, Value>;
   getColumnData?: (block: T) => ColumnData;
   setColumnData?: (block: T, data: ColumnData) => void;
   get: (block: T) => Value;

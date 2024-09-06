@@ -1,12 +1,11 @@
 import type { EditorHost } from '@blocksuite/block-std';
+import type { DetailSlotProps } from '@blocksuite/data-view';
+import type { KanbanSingleView } from '@blocksuite/data-view/view-presets';
+import type { TableSingleView } from '@blocksuite/data-view/view-presets';
 
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-
-import type { DetailSlotProps } from '../data-view/common/data-source/base.js';
-import type { KanbanSingleView } from '../data-view/view/presets/kanban/kanban-view-manager.js';
-import type { TableSingleView } from '../data-view/view/presets/table/table-view-manager.js';
 
 @customElement('database-datasource-block-renderer')
 export class BlockRenderer

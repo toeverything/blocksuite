@@ -1,7 +1,8 @@
-import type { ColumnMeta } from '../../database-block/data-view/index.js';
+import type { ColumnMeta } from '@blocksuite/data-view';
 
-import { columnPresets } from '../../database-block/index.js';
-import { richTextColumnConfig } from './rich-text/cell-renderer.js';
+import { columnPresets } from '@blocksuite/data-view/column-presets';
+
+import { richTextColumnConfig } from '../../database-block/columns/rich-text/cell-renderer.js';
 
 export const queryBlockColumns = [
   columnPresets.dateColumnConfig,
@@ -9,7 +10,6 @@ export const queryBlockColumns = [
   columnPresets.progressColumnConfig,
   columnPresets.selectColumnConfig,
   columnPresets.multiSelectColumnConfig,
-  columnPresets.linkColumnConfig,
   columnPresets.checkboxColumnConfig,
 ];
 export const queryBlockHiddenColumns = [richTextColumnConfig];

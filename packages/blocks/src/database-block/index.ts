@@ -2,15 +2,9 @@ import type { DatabaseBlockModel } from '@blocksuite/affine-model';
 
 import type { DatabaseBlockService } from './database-service.js';
 
-export { richTextColumnConfig } from './columns/rich-text/cell-renderer.js';
+export { databaseBlockColumns } from './columns/index.js';
 
 export type { DatabaseOptionsConfig } from './config.js';
-export {
-  columnPresets,
-  viewPresets,
-  widgetPresets,
-} from './data-view/index.js';
-export type { ColumnDataUpdater } from './data-view/types.js';
 export * from './database-block.js';
 export * from './database-service.js';
 declare global {

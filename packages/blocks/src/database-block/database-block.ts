@@ -6,6 +6,19 @@ import { toast } from '@blocksuite/affine-components/toast';
 import { DatabaseBlockSchema } from '@blocksuite/affine-model';
 import { NOTE_SELECTOR } from '@blocksuite/affine-shared/consts';
 import { RANGE_SYNC_EXCLUDE_ATTR } from '@blocksuite/block-std';
+import {
+  DataView,
+  type DataViewExpose,
+  type DataViewProps,
+  type DataViewSelection,
+  type DataViewWidget,
+  type DataViewWidgetProps,
+  DatabaseSelection,
+  dataViewCommonStyle,
+  defineUniComponent,
+  renderUniLit,
+} from '@blocksuite/data-view';
+import { widgetPresets } from '@blocksuite/data-view/widget-presets';
 import { Rect } from '@blocksuite/global/utils';
 import {
   CopyIcon,
@@ -34,19 +47,6 @@ import {
 import { AFFINE_INNER_MODAL_WIDGET } from '../root-block/widgets/inner-modal/inner-modal.js';
 import './components/title/index.js';
 import { DatabaseBlockDataSource } from './data-source.js';
-import { dataViewCommonStyle } from './data-view/common/css-variable.js';
-import {
-  DataView,
-  type DataViewExpose,
-  type DataViewProps,
-  type DataViewSelection,
-  type DataViewWidget,
-  type DataViewWidgetProps,
-  DatabaseSelection,
-  defineUniComponent,
-  renderUniLit,
-  widgetPresets,
-} from './data-view/index.js';
 
 @customElement('affine-database')
 export class DatabaseBlockComponent extends CaptionedBlockComponent<
@@ -257,14 +257,12 @@ export class DatabaseBlockComponent extends CaptionedBlockComponent<
   toolsWidget: DataViewWidget = widgetPresets.createTools({
     table: [
       widgetPresets.tools.filter,
-      widgetPresets.tools.expand,
       widgetPresets.tools.search,
       widgetPresets.tools.viewOptions,
       widgetPresets.tools.tableAddRow,
     ],
     kanban: [
       widgetPresets.tools.filter,
-      widgetPresets.tools.expand,
       widgetPresets.tools.search,
       widgetPresets.tools.viewOptions,
     ],

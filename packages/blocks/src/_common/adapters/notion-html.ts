@@ -10,6 +10,7 @@ import type {
 
 import { NoteDisplayMode } from '@blocksuite/affine-model';
 import { getFilenameFromContentDisposition } from '@blocksuite/affine-shared/utils';
+import { getTagColor } from '@blocksuite/data-view';
 import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 import { isEqual, sha } from '@blocksuite/global/utils';
 import {
@@ -26,7 +27,6 @@ import { collapseWhiteSpace } from 'collapse-white-space';
 import rehypeParse from 'rehype-parse';
 import { unified } from 'unified';
 
-import { getTagColor } from '../../database-block/data-view/utils/tags/colors.js';
 import {
   type HtmlAST,
   hastGetElementChildren,
