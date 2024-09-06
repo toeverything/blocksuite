@@ -5,7 +5,6 @@ on:
     branches:
       - master
 
-# Pending until other workflows done
 concurrency: ${{ github.workflow }}-${{ github.ref }}
 
 permissions:
@@ -14,50 +13,47 @@ permissions:
   pull-requests: write
 
 jobs:
-  release:
-    name: Release blocksuite latest version
+  prepare:
+    name: Prepare
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - uses: pnpm/action-setup@v4
-        name: Install pnpm
-        id: pnpm-install
-      - name: Use Node.js LTS
-        uses: actions/setup-node@v4
-        with:
-          node-version-file: '.nvmrc'
-          cache: 'pnpm'
 
-      - name: Install dependencies
-        run: pnpm install
+      - uses: ./.github/actions/setup
 
-      - name: Build packages
-        run: pnpm build:packages
-
-      - name: Add token
-        run: echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ".npmrc"
-
-      - name: Create Release Pull Request or Publish to npm
+      - name: Create Release Pull Request
         id: changesets
         uses: changesets/action@v1
         with:
-          publish: pnpm changeset publish --no-git-tag
-          commit: 'ci: release blocksuite'
+          version: pnpm ci:version
+          commit: 'chore: version packages'
+          title: 'chore: version packages'
           createGithubReleases: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - name: Get the version
-        if: steps.changesets.outputs.published == 'true'
+  publish:
+    name: Publish
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ./.github/actions/setup
+
+      - name: Build packages
+        run: pnpm build:package
+
+      - name: Publish to NPM
+        run: pnpm ci:publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Get package version
         run: |
           BLOCKSUITE_VERSION=$(jq -r ".version" packages/blocks/package.json)
           echo "BLOCKSUITE_RELEASE_TAG=v${BLOCKSUITE_VERSION}" >> "$GITHUB_ENV"
 
       - name: Create GitHub release
-        if: steps.changesets.outputs.published == 'true'
         uses: ncipollo/release-action@v1
         with:
           commit: master
@@ -66,12 +62,11 @@ jobs:
         continue-on-error: true
 
       - name: Send release notification
-        if: steps.changesets.outputs.published == 'true'
         id: slack
         uses: slackapi/slack-github-action@v1.27.0
         with:
           payload: |
-            { "message": "[BlockSuite Release]: New BlockSuite version has been released to NPM." }
+            { "message": "[BlockSuite Release]: New BlockSuite version ${{ env.BLOCKSUITE_RELEASE_TAG }} has been released to NPM." }
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
 
