@@ -1,6 +1,10 @@
-import type { DocMode } from '@blocksuite/blocks';
 import type { BlockCollection } from '@blocksuite/store';
 
+import {
+  CommunityCanvasTextFonts,
+  type DocMode,
+  FontConfigExtension,
+} from '@blocksuite/blocks';
 import { AffineSchemas } from '@blocksuite/blocks/schemas';
 import { assertExists } from '@blocksuite/global/utils';
 import {
@@ -56,6 +60,12 @@ async function createEditor(collection: DocCollection, mode: DocMode = 'page') {
   const editor = new AffineEditorContainer();
   editor.doc = doc;
   editor.mode = mode;
+  editor.pageSpecs = editor.pageSpecs.concat([
+    FontConfigExtension(CommunityCanvasTextFonts),
+  ]);
+  editor.edgelessSpecs = editor.edgelessSpecs.concat([
+    FontConfigExtension(CommunityCanvasTextFonts),
+  ]);
   app.append(editor);
 
   window.editor = editor;

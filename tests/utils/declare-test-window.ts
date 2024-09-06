@@ -1,6 +1,7 @@
 import type { TestUtils } from '@blocks/index.js';
 import type {
   EditorHost,
+  ExtensionType,
   WidgetViewMapIdentifier,
 } from '@blocksuite/block-std';
 import type { AffineEditorContainer } from '@blocksuite/presets';
@@ -26,6 +27,7 @@ declare global {
       };
       extensions: {
         WidgetViewMapExtension: typeof import('../../packages/framework/block-std/src/extension/widget-view-map.js').WidgetViewMapExtension;
+        FontConfigExtension: ExtensionType;
       };
       mockServices: {
         mockDocModeService: typeof import('../../packages/playground/apps/_common/mock-services.js').mockDocModeService;

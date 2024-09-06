@@ -1,9 +1,7 @@
 import type { PeekViewService } from '@blocksuite/affine-components/peek';
 import type { RefNodeSlots } from '@blocksuite/affine-components/rich-text';
-import type { EmbedCardStyle } from '@blocksuite/affine-model';
 import type { BlockComponent } from '@blocksuite/block-std';
 
-import { CommunityCanvasTextFonts } from '@blocksuite/affine-block-surface';
 import { RootBlockSchema } from '@blocksuite/affine-model';
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import { BlockService } from '@blocksuite/block-std';
@@ -23,14 +21,6 @@ import {
   ZipTransformer,
 } from '../_common/transformers/index.js';
 import { EditPropsStore } from './edgeless/services/edit-session.js';
-import { FontLoader } from './font-loader/font-loader.js';
-
-export type EmbedOptions = {
-  flavour: string;
-  urlRegex: RegExp;
-  styles: EmbedCardStyle[];
-  viewType: 'card' | 'embed';
-};
 
 export abstract class RootService extends BlockService {
   static override readonly flavour = RootBlockSchema.model.flavour;
@@ -48,8 +38,6 @@ export abstract class RootService extends BlockService {
   readonly exportManager = new ExportManager(this, this._exportOptions);
 
   readonly fileDropManager = new FileDropManager(this, this._fileDropOptions);
-
-  readonly fontLoader = new FontLoader();
 
   // implements provided by affine
   notificationService: NotificationService | null = null;
@@ -99,14 +87,8 @@ export abstract class RootService extends BlockService {
     return viewportElement;
   }
 
-  loadFonts() {
-    this.fontLoader.load(CommunityCanvasTextFonts);
-  }
-
   override mounted() {
     super.mounted();
-
-    this.loadFonts();
 
     this.disposables.addFromEvent(
       this.host,
@@ -130,7 +112,6 @@ export abstract class RootService extends BlockService {
 
   override unmounted() {
     this.editPropsStore.dispose();
-    this.fontLoader.clear();
   }
 }
 

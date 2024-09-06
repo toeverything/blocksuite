@@ -96,6 +96,7 @@ async function initEmptyEditor({
           editor.autofocus = true;
           editor.pageSpecs = [
             ...editor.pageSpecs,
+            window.$blocksuite.extensions.FontConfigExtension,
             {
               setup: di => {
                 di.addImpl(window.$blocksuite.identifiers.QuickSearchProvider, {
@@ -117,6 +118,7 @@ async function initEmptyEditor({
           ];
           editor.edgelessSpecs = [
             ...editor.edgelessSpecs,
+            window.$blocksuite.extensions.FontConfigExtension,
             {
               setup: di => {
                 di.addImpl(window.$blocksuite.identifiers.QuickSearchProvider, {

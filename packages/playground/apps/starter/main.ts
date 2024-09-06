@@ -3,7 +3,12 @@ import {
   WidgetViewMapIdentifier,
 } from '@blocksuite/block-std';
 import * as blocks from '@blocksuite/blocks';
-import { DocModeProvider, QuickSearchProvider } from '@blocksuite/blocks';
+import {
+  CommunityCanvasTextFonts,
+  DocModeProvider,
+  FontConfigExtension,
+  QuickSearchProvider,
+} from '@blocksuite/blocks';
 import * as globalUtils from '@blocksuite/global/utils';
 import * as editor from '@blocksuite/presets';
 import '@blocksuite/presets/themes/affine.css';
@@ -41,6 +46,7 @@ async function main() {
           DocModeProvider,
         },
         extensions: {
+          FontConfigExtension: FontConfigExtension(CommunityCanvasTextFonts),
           WidgetViewMapExtension,
         },
         mockServices: {

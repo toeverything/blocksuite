@@ -2,6 +2,8 @@ import type { BlockCollection, DocCollection } from '@blocksuite/store';
 
 import { BlockServiceWatcher, type EditorHost } from '@blocksuite/block-std';
 import {
+  CommunityCanvasTextFonts,
+  FontConfigExtension,
   type PageRootService,
   QuickSearchProvider,
   SpecProvider,
@@ -78,6 +80,7 @@ export async function mountDefaultDocEditor(collection: DocCollection) {
   const getEditorModeCallback = () => editor.mode;
   pageSpecs.extend([
     PatchPageServiceWatcher,
+    FontConfigExtension(CommunityCanvasTextFonts),
     {
       setup: di => {
         di.addImpl(QuickSearchProvider, () =>
@@ -98,6 +101,7 @@ export async function mountDefaultDocEditor(collection: DocCollection) {
   const edgelessSpecs = SpecProvider.getInstance().getSpec('edgeless');
   edgelessSpecs.extend([
     PatchPageServiceWatcher,
+    FontConfigExtension(CommunityCanvasTextFonts),
     {
       setup: di => {
         di.addImpl(QuickSearchProvider, () =>

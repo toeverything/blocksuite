@@ -6,7 +6,9 @@ import {
   type ExtensionType,
 } from '@blocksuite/block-std';
 import {
+  CommunityCanvasTextFonts,
   DocModeProvider,
+  FontConfigExtension,
   type PageRootService,
   QuickSearchProvider,
 } from '@blocksuite/blocks';
@@ -135,6 +137,7 @@ export async function mountDefaultDocEditor(collection: DocCollection) {
         },
       },
       PatchPageServiceWatcher,
+      FontConfigExtension(CommunityCanvasTextFonts),
     ];
 
     return newSpec;

@@ -264,7 +264,6 @@ export class QuickEdgelessMenu extends ShadowlessElement {
   }
 
   private _switchEditorMode() {
-    console.log('switch editor mode: ', this.editor.host);
     if (!this.editor.host) return;
     const newMode = this._docMode === 'page' ? 'edgeless' : 'page';
     const docModeService = this.editor.host.std.get(DocModeProvider);

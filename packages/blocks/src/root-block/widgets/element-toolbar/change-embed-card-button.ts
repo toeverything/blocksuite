@@ -26,7 +26,10 @@ import {
   renderToolbarSeparator,
 } from '@blocksuite/affine-components/toolbar';
 import { BookmarkStyles } from '@blocksuite/affine-model';
-import { EmbedOptionProvider } from '@blocksuite/affine-shared/services';
+import {
+  EmbedOptionProvider,
+  type EmbedOptions,
+} from '@blocksuite/affine-shared/services';
 import { getHostName } from '@blocksuite/affine-shared/utils';
 import { WithDisposable } from '@blocksuite/block-std';
 import { Bound } from '@blocksuite/global/utils';
@@ -45,7 +48,6 @@ import type { EmbedLoomBlockComponent } from '../../../embed-loom-block/index.js
 import type { EmbedSyncedDocBlockComponent } from '../../../embed-synced-doc-block/index.js';
 import type { EmbedYoutubeBlockComponent } from '../../../embed-youtube-block/index.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
-import type { EmbedOptions } from '../../root-service.js';
 
 import { toggleEmbedCardEditModal } from '../../../_common/components/embed-card/modal/embed-card-edit-modal.js';
 import {

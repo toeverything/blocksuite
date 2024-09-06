@@ -4,13 +4,7 @@ import type { SurfaceBlockService } from './surface-service.js';
 import './commands/reassociate-connectors.js';
 
 export { type IModelCoord, ZOOM_MAX, ZOOM_MIN, ZOOM_STEP } from './consts.js';
-export {
-  AffineCanvasTextFonts,
-  CommunityCanvasTextFonts,
-  GRID_GAP_MAX,
-  GRID_GAP_MIN,
-} from './consts.js';
-export type { FontConfig } from './consts.js';
+export { GRID_GAP_MAX, GRID_GAP_MIN } from './consts.js';
 export {
   SurfaceElementModel,
   SurfaceGroupLikeModel,
