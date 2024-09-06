@@ -23,17 +23,17 @@
     "@blocksuite/store": "workspace:*",
     "@blocksuite/sync": "workspace:*",
     "@shoelace-style/shoelace": "2.16.0",
-    "@toeverything/y-indexeddb": "0.10.0-canary.9",
+    "@toeverything/y-indexeddb": "catalog:",
     "@types/katex": "^0.16.7",
     "browser-fs-access": "^0.35.0",
     "jszip": "^3.10.1",
-    "lit": "^3.1.4",
+    "lit": "catalog:",
     "lz-string": "^1.5.0",
     "tweakpane": "^4.0.4",
-    "y-indexeddb": "^9.0.12",
-    "y-protocols": "^1.0.6",
-    "yjs": "^13.6.18",
-    "zod": "^3.23.8"
+    "y-indexeddb": "catalog:",
+    "y-protocols": "catalog:",
+    "yjs": "catalog:",
+    "zod": "catalog:"
   },
   "license": "MPL-2.0",
   "devDependencies": {

@@ -19,15 +19,15 @@
     "@blocksuite/global": "workspace:*",
     "@blocksuite/store": "workspace:*",
     "@blocksuite/affine-components": "workspace:*",
-    "@blocksuite/icons": "^2.1.66",
-    "@floating-ui/dom": "^1.6.10",
-    "@lit-labs/preact-signals": "^1.0.2",
-    "@lit/context": "^1.1.2",
-    "@toeverything/theme": "^1.0.7",
-    "lit": "^3.2.0",
-    "date-fns": "^3.6.0",
+    "@blocksuite/icons": "catalog:",
+    "@floating-ui/dom": "catalog:",
+    "@lit-labs/preact-signals": "catalog:",
+    "@lit/context": "catalog:",
+    "@toeverything/theme": "catalog:",
+    "lit": "catalog:",
+    "date-fns": "catalog:",
     "sortablejs": "^1.15.2",
-    "zod": "^3.23.8"
+    "zod": "catalog:"
   },
   "devDependencies": {
     "@types/sortablejs": "^1.15.8"

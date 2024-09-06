@@ -18,7 +18,7 @@
     "@blocksuite/global": "workspace:*",
     "@blocksuite/inline": "workspace:*",
     "@blocksuite/sync": "workspace:*",
-    "@preact/signals-core": "^1.8.0",
+    "@preact/signals-core": "catalog:",
     "@types/flexsearch": "^0.7.6",
     "@types/lodash.ismatch": "^4.4.9",
     "flexsearch": "0.7.43",
@@ -26,9 +26,9 @@
     "lodash.clonedeep": "^4.5.0",
     "lodash.ismatch": "^4.4.0",
     "lodash.merge": "^4.6.2",
-    "minimatch": "^10.0.1",
-    "nanoid": "^5.0.7",
-    "y-protocols": "^1.0.6",
+    "minimatch": "catalog:",
+    "nanoid": "catalog:",
+    "y-protocols": "catalog:",
     "zod": "^3.23.8"
   },
   "devDependencies": {

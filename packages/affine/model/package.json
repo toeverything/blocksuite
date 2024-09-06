@@ -18,7 +18,7 @@
     "@blocksuite/global": "workspace:*",
     "@blocksuite/inline": "workspace:*",
     "@blocksuite/store": "workspace:*",
-    "zod": "^3.23.8"
+    "zod": "catalog:"
   },
   "exports": {
     ".": "./src/index.ts"

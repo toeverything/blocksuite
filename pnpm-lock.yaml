@@ -4,6 +4,60 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+catalogs:
+  default:
+    '@blocksuite/icons':
+      specifier: ^2.1.67
+      version: 2.1.67
+    '@floating-ui/dom':
+      specifier: ^1.6.10
+      version: 1.6.10
+    '@lit-labs/preact-signals':
+      specifier: ^1.0.2
+      version: 1.0.2
+    '@lit/context':
+      specifier: ^1.1.2
+      version: 1.1.2
+    '@lottiefiles/dotlottie-wc':
+      specifier: ^0.2.16
+      version: 0.2.20
+    '@preact/signals-core':
+      specifier: ^1.8.0
+      version: 1.8.0
+    '@toeverything/theme':
+      specifier: ^1.0.8
+      version: 1.0.8
+    '@toeverything/y-indexeddb':
+      specifier: 0.10.0-canary.9
+      version: 0.10.0-canary.9
+    date-fns:
+      specifier: ^3.6.0
+      version: 3.6.0
+    lib0:
+      specifier: ^0.2.97
+      version: 0.2.97
+    lit:
+      specifier: ^3.2.0
+      version: 3.2.0
+    minimatch:
+      specifier: ^10.0.1
+      version: 10.0.1
+    nanoid:
+      specifier: ^5.0.7
+      version: 5.0.7
+    y-indexeddb:
+      specifier: ^9.0.12
+      version: 9.0.12
+    y-protocols:
+      specifier: ^1.0.6
+      version: 1.0.6
+    yjs:
+      specifier: ^13.6.18
+      version: 13.6.18
+    zod:
+      specifier: ^3.23.8
+      version: 3.23.8
+
 overrides:
   esbuild: npm:esbuild@latest
   array-includes: npm:@nolyfill/array-includes@latest
@@ -230,25 +284,25 @@ importers:
         specifier: workspace:*
         version: link:../../framework/store
       '@floating-ui/dom':
-        specifier: ^1.6.10
+        specifier: 'catalog:'
         version: 1.6.10
       '@lit-labs/preact-signals':
-        specifier: ^1.0.2
+        specifier: 'catalog:'
         version: 1.0.2
       '@lit/context':
-        specifier: ^1.1.2
+        specifier: 'catalog:'
         version: 1.1.2
       '@toeverything/theme':
-        specifier: ^1.0.8
+        specifier: 'catalog:'
         version: 1.0.8
       lit:
-        specifier: ^3.2.0
+        specifier: 'catalog:'
         version: 3.2.0
       minimatch:
-        specifier: ^10.0.1
+        specifier: 'catalog:'
         version: 10.0.1
       zod:
-        specifier: ^3.23.8
+        specifier: 'catalog:'
         version: 3.23.8
 
   packages/affine/block-paragraph:
@@ -284,16 +338,16 @@ importers:
         specifier: ^1.1.2
         version: 1.1.2
       '@toeverything/theme':
-        specifier: ^1.0.8
+        specifier: 'catalog:'
         version: 1.0.8
       lit:
-        specifier: ^3.2.0
+        specifier: 'catalog:'
         version: 3.2.0
       minimatch:
-        specifier: ^10.0.1
+        specifier: 'catalog:'
         version: 10.0.1
       zod:
-        specifier: ^3.23.8
+        specifier: 'catalog:'
         version: 3.23.8
 
   packages/affine/block-surface:
@@ -317,19 +371,19 @@ importers:
         specifier: workspace:*
         version: link:../../framework/store
       '@lit-labs/preact-signals':
-        specifier: ^1.0.2
+        specifier: 'catalog:'
         version: 1.0.2
       '@lit/context':
-        specifier: ^1.1.2
+        specifier: 'catalog:'
         version: 1.1.2
       '@toeverything/theme':
-        specifier: ^1.0.8
+        specifier: 'catalog:'
         version: 1.0.8
       fractional-indexing:
         specifier: ^3.2.0
         version: 3.2.0
       lit:
-        specifier: ^3.2.0
+        specifier: 'catalog:'
         version: 3.2.0
       lodash.isplainobject:
         specifier: ^4.0.6
@@ -341,7 +395,7 @@ importers:
         specifier: ^5.0.7
         version: 5.0.7
       zod:
-        specifier: ^3.23.8
+        specifier: 'catalog:'
         version: 3.23.8
     devDependencies:
       '@types/dompurify':
@@ -369,7 +423,7 @@ importers:
         specifier: workspace:*
         version: link:../../framework/global
       '@blocksuite/icons':
-        specifier: ^2.1.67
+        specifier: 'catalog:'
         version: 2.1.67(@types/react@18.3.5)(lit@3.2.0)
       '@blocksuite/inline':
         specifier: workspace:*
@@ -378,34 +432,34 @@ importers:
         specifier: workspace:*
         version: link:../../framework/store
       '@floating-ui/dom':
-        specifier: ^1.6.10
+        specifier: 'catalog:'
         version: 1.6.10
       '@lit-labs/preact-signals':
-        specifier: ^1.0.2
+        specifier: 'catalog:'
         version: 1.0.2
       '@lit/context':
-        specifier: ^1.1.2
+        specifier: 'catalog:'
         version: 1.1.2
       '@lottiefiles/dotlottie-wc':
-        specifier: ^0.2.16
+        specifier: 'catalog:'
         version: 0.2.20
       '@toeverything/theme':
-        specifier: ^1.0.8
+        specifier: 'catalog:'
         version: 1.0.8
       date-fns:
-        specifier: ^3.6.0
+        specifier: 'catalog:'
         version: 3.6.0
       katex:
         specifier: ^0.16.11
         version: 0.16.11
       lit:
-        specifier: ^3.2.0
+        specifier: 'catalog:'
         version: 3.2.0
       shiki:
         specifier: ^1.12.0
         version: 1.16.2
       zod:
-        specifier: ^3.23.8
+        specifier: 'catalog:'
         version: 3.23.8
     devDependencies:
       '@types/katex':
@@ -427,34 +481,34 @@ importers:
         specifier: workspace:*
         version: link:../../framework/global
       '@blocksuite/icons':
-        specifier: ^2.1.66
+        specifier: 'catalog:'
         version: 2.1.67(@types/react@18.3.5)(lit@3.2.0)
       '@blocksuite/store':
         specifier: workspace:*
         version: link:../../framework/store
       '@floating-ui/dom':
-        specifier: ^1.6.10
+        specifier: 'catalog:'
         version: 1.6.10
       '@lit-labs/preact-signals':
-        specifier: ^1.0.2
+        specifier: 'catalog:'
         version: 1.0.2
       '@lit/context':
-        specifier: ^1.1.2
+        specifier: 'catalog:'
         version: 1.1.2
       '@toeverything/theme':
-        specifier: ^1.0.7
+        specifier: 'catalog:'
         version: 1.0.8
       date-fns:
-        specifier: ^3.6.0
+        specifier: 'catalog:'
         version: 3.6.0
       lit:
-        specifier: ^3.2.0
+        specifier: 'catalog:'
         version: 3.2.0
       sortablejs:
         specifier: ^1.15.2
         version: 1.15.3
       zod:
-        specifier: ^3.23.8
+        specifier: 'catalog:'
         version: 3.23.8
     devDependencies:
       '@types/sortablejs':
@@ -476,7 +530,7 @@ importers:
         specifier: workspace:*
         version: link:../../framework/store
       zod:
-        specifier: ^3.23.8
+        specifier: 'catalog:'
         version: 3.23.8
 
   packages/affine/shared:
@@ -497,25 +551,25 @@ importers:
         specifier: workspace:*
         version: link:../../framework/store
       '@floating-ui/dom':
-        specifier: ^1.6.10
+        specifier: 'catalog:'
         version: 1.6.10
       '@lit-labs/preact-signals':
-        specifier: ^1.0.2
+        specifier: 'catalog:'
         version: 1.0.2
       '@lit/context':
-        specifier: ^1.1.2
+        specifier: 'catalog:'
         version: 1.1.2
       '@toeverything/theme':
-        specifier: ^1.0.8
+        specifier: 'catalog:'
         version: 1.0.8
       lit:
-        specifier: ^3.2.0
+        specifier: 'catalog:'
         version: 3.2.0
       minimatch:
-        specifier: ^10.0.1
+        specifier: 'catalog:'
         version: 10.0.1
       zod:
-        specifier: ^3.23.8
+        specifier: 'catalog:'
         version: 3.23.8
 
   packages/blocks:
@@ -548,7 +602,7 @@ importers:
         specifier: workspace:*
         version: link:../framework/global
       '@blocksuite/icons':
-        specifier: ^2.1.67
+        specifier: 'catalog:'
         version: 2.1.67(@types/react@18.3.5)(lit@3.2.0)
       '@blocksuite/inline':
         specifier: workspace:*
@@ -557,16 +611,16 @@ importers:
         specifier: workspace:*
         version: link:../framework/store
       '@floating-ui/dom':
-        specifier: ^1.6.10
+        specifier: 'catalog:'
         version: 1.6.10
       '@lit-labs/preact-signals':
-        specifier: ^1.0.2
+        specifier: 'catalog:'
         version: 1.0.2
       '@lit/context':
-        specifier: ^1.1.2
+        specifier: 'catalog:'
         version: 1.1.2
       '@toeverything/theme':
-        specifier: ^1.0.8
+        specifier: 'catalog:'
         version: 1.0.8
       '@types/hast':
         specifier: ^3.0.4
@@ -581,7 +635,7 @@ importers:
         specifier: ^2.1.0
         version: 2.1.0
       date-fns:
-        specifier: ^3.6.0
+        specifier: 'catalog:'
         version: 3.6.0
       dompurify:
         specifier: ^3.1.6
@@ -602,7 +656,7 @@ importers:
         specifier: ^0.16.11
         version: 0.16.11
       lit:
-        specifier: ^3.2.0
+        specifier: 'catalog:'
         version: 3.2.0
       lodash.clonedeep:
         specifier: ^4.5.0
@@ -641,10 +695,10 @@ importers:
         specifier: ^2.0.0
         version: 2.0.0
       minimatch:
-        specifier: ^10.0.1
+        specifier: 'catalog:'
         version: 10.0.1
       nanoid:
-        specifier: ^5.0.7
+        specifier: 'catalog:'
         version: 5.0.7
       pdf-lib:
         specifier: ^1.17.1
@@ -671,7 +725,7 @@ importers:
         specifier: ^11.0.5
         version: 11.0.5
       zod:
-        specifier: ^3.23.8
+        specifier: 'catalog:'
         version: 3.23.8
     devDependencies:
       '@types/dompurify':
@@ -702,7 +756,7 @@ importers:
         specifier: workspace:*
         version: link:../framework/store
       date-fns:
-        specifier: ^3.6.0
+        specifier: 'catalog:'
         version: 3.6.0
       markdown-it-container:
         specifier: ^4.0.0
@@ -739,10 +793,10 @@ importers:
         specifier: workspace:*
         version: link:../store
       '@lit-labs/preact-signals':
-        specifier: ^1.0.2
+        specifier: 'catalog:'
         version: 1.0.2
       '@lit/context':
-        specifier: ^1.1.2
+        specifier: 'catalog:'
         version: 1.1.2
       '@types/hast':
         specifier: ^3.0.4
@@ -751,10 +805,10 @@ importers:
         specifier: ^3.2.0
         version: 3.2.0
       lib0:
-        specifier: ^0.2.97
+        specifier: 'catalog:'
         version: 0.2.97
       lit:
-        specifier: ^3.2.0
+        specifier: 'catalog:'
         version: 3.2.0
       lz-string:
         specifier: ^1.5.0
@@ -769,7 +823,7 @@ importers:
         specifier: ^2.2.8
         version: 2.2.8
       zod:
-        specifier: ^3.23.8
+        specifier: 'catalog:'
         version: 3.23.8
 
   packages/framework/global:
@@ -809,7 +863,7 @@ importers:
         specifier: workspace:*
         version: link:../sync
       '@preact/signals-core':
-        specifier: ^1.8.0
+        specifier: 'catalog:'
         version: 1.8.0
       '@types/flexsearch':
         specifier: ^0.7.6
@@ -833,13 +887,13 @@ importers:
         specifier: ^4.6.2
         version: 4.6.2
       minimatch:
-        specifier: ^10.0.1
+        specifier: 'catalog:'
         version: 10.0.1
       nanoid:
-        specifier: ^5.0.7
+        specifier: 'catalog:'
         version: 5.0.7
       y-protocols:
-        specifier: ^1.0.6
+        specifier: 'catalog:'
         version: 1.0.6(yjs@13.6.18)
       zod:
         specifier: ^3.23.8
@@ -912,7 +966,7 @@ importers:
         specifier: 2.16.0
         version: 2.16.0(@types/react@18.3.5)
       '@toeverything/y-indexeddb':
-        specifier: 0.10.0-canary.9
+        specifier: 'catalog:'
         version: 0.10.0-canary.9(yjs@13.6.18)
       '@types/katex':
         specifier: ^0.16.7
@@ -924,7 +978,7 @@ importers:
         specifier: ^3.10.1
         version: 3.10.1
       lit:
-        specifier: ^3.1.4
+        specifier: 'catalog:'
         version: 3.2.0
       lz-string:
         specifier: ^1.5.0
@@ -933,16 +987,16 @@ importers:
         specifier: ^4.0.4
         version: 4.0.4
       y-indexeddb:
-        specifier: ^9.0.12
+        specifier: 'catalog:'
         version: 9.0.12(yjs@13.6.18)
       y-protocols:
-        specifier: ^1.0.6
+        specifier: 'catalog:'
         version: 1.0.6(yjs@13.6.18)
       yjs:
-        specifier: ^13.6.18
+        specifier: 'catalog:'
         version: 13.6.18
       zod:
-        specifier: ^3.23.8
+        specifier: 'catalog:'
         version: 3.23.8
     devDependencies:
       '@tweakpane/core':
@@ -985,22 +1039,22 @@ importers:
         specifier: workspace:*
         version: link:../framework/store
       '@floating-ui/dom':
-        specifier: ^1.6.10
+        specifier: 'catalog:'
         version: 1.6.10
       '@lit-labs/preact-signals':
-        specifier: ^1.0.2
+        specifier: 'catalog:'
         version: 1.0.2
       '@lottiefiles/dotlottie-wc':
-        specifier: ^0.2.16
+        specifier: 'catalog:'
         version: 0.2.20
       '@toeverything/theme':
-        specifier: ^1.0.8
+        specifier: 'catalog:'
         version: 1.0.8
       lit:
-        specifier: ^3.2.0
+        specifier: 'catalog:'
         version: 3.2.0
       zod:
-        specifier: ^3.23.8
+        specifier: 'catalog:'
         version: 3.23.8
 
   tests:
