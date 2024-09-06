@@ -12,7 +12,6 @@ import { classMap } from 'lit/directives/class-map.js';
 import type { EmbedCardStyle } from '../../types.js';
 
 import { getEmbedCardIcons } from '../../utils/url.js';
-import '../tooltip/tooltip.js';
 import './../button.js';
 
 @customElement('embed-card-style-menu')
