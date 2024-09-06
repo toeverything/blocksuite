@@ -212,6 +212,9 @@ jobs:
       - name: Run eslint
         run: pnpm lint
 
+      - name: Run format check
+        run: pnpm lint:format
+
       - name: Run lit lint
         run: pnpm lint:lit
 

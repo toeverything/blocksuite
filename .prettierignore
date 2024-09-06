@@ -3,6 +3,9 @@ dist
 pnpm-lock.yaml
 tests/snapshots/
 __snapshots__/
+tsconfig.tsbuildinfo
+**/docs/api/
+.coverage/
+.nx/
+**/test-results/
 
-/.nx/cache
-/.nx/workspace-data

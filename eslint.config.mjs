@@ -4,12 +4,14 @@ import stylisticTs from '@stylistic/eslint-plugin-ts';
 import typescriptEslint from '@typescript-eslint/eslint-plugin';
 import tsParser from '@typescript-eslint/parser';
 import perfectionist from 'eslint-plugin-perfectionist';
-import prettier from 'eslint-plugin-prettier';
 import unicorn from 'eslint-plugin-unicorn';
 import unusedImports from 'eslint-plugin-unused-imports';
 import globals from 'globals';
 import path from 'node:path';
+import fs from 'node:fs';
 import { fileURLToPath } from 'node:url';
+import eslintPluginImportX from 'eslint-plugin-import-x';
+import eslintConfigPrettier from 'eslint-config-prettier';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -18,6 +20,64 @@ const compat = new FlatCompat({
   recommendedConfig: js.configs.recommended,
   allConfig: js.configs.all,
 });
+
+const createNoRestrictedImports = packagePath => {
+  return {
+    files: [`packages/${packagePath}/src/**/*.ts`],
+    rules: {
+      '@typescript-eslint/no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: ['**/dist', '**/dist/**'],
+              message: 'Do not import from dist',
+              allowTypeImports: false,
+            },
+            {
+              group: ['**/src', '**/src/**'],
+              message: 'Do not import from src',
+              allowTypeImports: false,
+            },
+            {
+              group: ['**/*.css', '**/*.css?*'],
+              message:
+                'Do not import CSS directly, see https://github.com/toeverything/blocksuite/issues/525',
+              allowTypeImports: false,
+            },
+            {
+              group: [`@blocksuite/${packagePath}`],
+              message: 'Do not import package itself',
+              allowTypeImports: false,
+            },
+          ],
+        },
+      ],
+    },
+  };
+};
+
+const entry = path.resolve(__dirname, 'packages');
+
+function getFoldersWithPackageJson(dir) {
+  let folders = [];
+
+  const items = fs.readdirSync(dir);
+  for (const item of items) {
+    if (item.includes('node_modules') || item.includes('src')) {
+      break;
+    }
+    const fullPath = path.join(dir, item);
+    if (fs.statSync(fullPath).isDirectory()) {
+      if (fs.existsSync(path.join(fullPath, 'package.json'))) {
+        folders.push(fullPath);
+      }
+      folders = folders.concat(getFoldersWithPackageJson(fullPath));
+    }
+  }
+
+  return folders;
+}
 
 export default [
   {
@@ -41,14 +101,13 @@ export default [
     'eslint:recommended',
     'plugin:@typescript-eslint/recommended',
     'plugin:wc/recommended',
-    'plugin:lit/recommended',
-    'plugin:prettier/recommended'
+    'plugin:lit/recommended'
   ),
   perfectionist.configs['recommended-natural'],
   {
     plugins: {
       unicorn,
-      prettier,
+      'import-x': eslintPluginImportX,
     },
 
     languageOptions: {
@@ -85,6 +144,7 @@ export default [
       'perfectionist/sort-variable-declarations': 'off',
 
       // TODO: enable these
+      'import-x/no-duplicates': 'off',
       'perfectionist/sort-named-imports': 'off',
       'perfectionist/sort-switch-case': 'off',
       'perfectionist/sort-classes': 'off',
@@ -101,12 +161,12 @@ export default [
       //       'static-property',
       //       'index-signature',
       //       'property',
+      //       ['get-method', 'set-method'],
       //       'constructor',
       //       'static-private-method',
       //       'static-method',
       //       'private-method',
       //       'method',
-      //       ['get-method', 'set-method'],
       //       'unknown',
       //     ],
       //   },
@@ -193,519 +253,8 @@ export default [
       '@stylistic/ts/space-before-blocks': 'error',
     },
   },
-  {
-    files: ['packages/framework/block-std/src/**/*.ts'],
-
-    rules: {
-      '@typescript-eslint/no-restricted-imports': [
-        'error',
-        {
-          patterns: [
-            {
-              group: ['**/dist', '**/dist/**'],
-              message: 'Do not import from dist',
-              allowTypeImports: false,
-            },
-            {
-              group: ['**/src', '**/src/**'],
-              message: 'Do not import from src',
-              allowTypeImports: false,
-            },
-            {
-              group: ['**/*.css', '**/*.css?*'],
-              message:
-                'Do not import CSS directly, see https://github.com/toeverything/blocksuite/issues/525',
-              allowTypeImports: false,
-            },
-            {
-              group: ['@blocksuite/framework/block-std'],
-              message: 'Do not import package itself',
-              allowTypeImports: false,
-            },
-          ],
-        },
-      ],
-    },
-  },
-  {
-    files: ['packages/framework/global/src/**/*.ts'],
-
-    rules: {
-      '@typescript-eslint/no-restricted-imports': [
-        'error',
-        {
-          patterns: [
-            {
-              group: ['**/dist', '**/dist/**'],
-              message: 'Do not import from dist',
-              allowTypeImports: false,
-            },
-            {
-              group: ['**/src', '**/src/**'],
-              message: 'Do not import from src',
-              allowTypeImports: false,
-            },
-            {
-              group: ['**/*.css', '**/*.css?*'],
-              message:
-                'Do not import CSS directly, see https://github.com/toeverything/blocksuite/issues/525',
-              allowTypeImports: false,
-            },
-            {
-              group: ['@blocksuite/framework/global'],
-              message: 'Do not import package itself',
-              allowTypeImports: false,
-            },
-          ],
-        },
-      ],
-    },
-  },
-  {
-    files: ['packages/framework/inline/src/**/*.ts'],
-
-    rules: {
-      '@typescript-eslint/no-restricted-imports': [
-        'error',
-        {
-          patterns: [
-            {
-              group: ['**/dist', '**/dist/**'],
-              message: 'Do not import from dist',
-              allowTypeImports: false,
-            },
-            {
-              group: ['**/src', '**/src/**'],
-              message: 'Do not import from src',
-              allowTypeImports: false,
-            },
-            {
-              group: ['**/*.css', '**/*.css?*'],
-              message:
-                'Do not import CSS directly, see https://github.com/toeverything/blocksuite/issues/525',
-              allowTypeImports: false,
-            },
-            {
-              group: ['@blocksuite/framework/inline'],
-              message: 'Do not import package itself',
-              allowTypeImports: false,
-            },
-          ],
-        },
-      ],
-    },
-  },
-  {
-    files: ['packages/framework/store/src/**/*.ts'],
-
-    rules: {
-      '@typescript-eslint/no-restricted-imports': [
-        'error',
-        {
-          patterns: [
-            {
-              group: ['**/dist', '**/dist/**'],
-              message: 'Do not import from dist',
-              allowTypeImports: false,
-            },
-            {
-              group: ['**/src', '**/src/**'],
-              message: 'Do not import from src',
-              allowTypeImports: false,
-            },
-            {
-              group: ['**/*.css', '**/*.css?*'],
-              message:
-                'Do not import CSS directly, see https://github.com/toeverything/blocksuite/issues/525',
-              allowTypeImports: false,
-            },
-            {
-              group: ['@blocksuite/framework/store'],
-              message: 'Do not import package itself',
-              allowTypeImports: false,
-            },
-          ],
-        },
-      ],
-    },
-  },
-  {
-    files: ['packages/framework/sync/src/**/*.ts'],
-
-    rules: {
-      '@typescript-eslint/no-restricted-imports': [
-        'error',
-        {
-          patterns: [
-            {
-              group: ['**/dist', '**/dist/**'],
-              message: 'Do not import from dist',
-              allowTypeImports: false,
-            },
-            {
-              group: ['**/src', '**/src/**'],
-              message: 'Do not import from src',
-              allowTypeImports: false,
-            },
-            {
-              group: ['**/*.css', '**/*.css?*'],
-              message:
-                'Do not import CSS directly, see https://github.com/toeverything/blocksuite/issues/525',
-              allowTypeImports: false,
-            },
-            {
-              group: ['@blocksuite/framework/sync'],
-              message: 'Do not import package itself',
-              allowTypeImports: false,
-            },
-          ],
-        },
-      ],
-    },
-  },
-  {
-    files: ['packages/affine/model/src/**/*.ts'],
-
-    rules: {
-      '@typescript-eslint/no-restricted-imports': [
-        'error',
-        {
-          patterns: [
-            {
-              group: ['**/dist', '**/dist/**'],
-              message: 'Do not import from dist',
-              allowTypeImports: false,
-            },
-            {
-              group: ['**/src', '**/src/**'],
-              message: 'Do not import from src',
-              allowTypeImports: false,
-            },
-            {
-              group: ['**/*.css', '**/*.css?*'],
-              message:
-                'Do not import CSS directly, see https://github.com/toeverything/blocksuite/issues/525',
-              allowTypeImports: false,
-            },
-            {
-              group: ['@blocksuite/affine/model'],
-              message: 'Do not import package itself',
-              allowTypeImports: false,
-            },
-          ],
-        },
-      ],
-    },
-  },
-  {
-    files: ['packages/affine/shared/src/**/*.ts'],
-
-    rules: {
-      '@typescript-eslint/no-restricted-imports': [
-        'error',
-        {
-          patterns: [
-            {
-              group: ['**/dist', '**/dist/**'],
-              message: 'Do not import from dist',
-              allowTypeImports: false,
-            },
-            {
-              group: ['**/src', '**/src/**'],
-              message: 'Do not import from src',
-              allowTypeImports: false,
-            },
-            {
-              group: ['**/*.css', '**/*.css?*'],
-              message:
-                'Do not import CSS directly, see https://github.com/toeverything/blocksuite/issues/525',
-              allowTypeImports: false,
-            },
-            {
-              group: ['@blocksuite/affine/shared'],
-              message: 'Do not import package itself',
-              allowTypeImports: false,
-            },
-          ],
-        },
-      ],
-    },
-  },
-  {
-    files: ['packages/affine/components/src/**/*.ts'],
-
-    rules: {
-      '@typescript-eslint/no-restricted-imports': [
-        'error',
-        {
-          patterns: [
-            {
-              group: ['**/dist', '**/dist/**'],
-              message: 'Do not import from dist',
-              allowTypeImports: false,
-            },
-            {
-              group: ['**/src', '**/src/**'],
-              message: 'Do not import from src',
-              allowTypeImports: false,
-            },
-            {
-              group: ['**/*.css', '**/*.css?*'],
-              message:
-                'Do not import CSS directly, see https://github.com/toeverything/blocksuite/issues/525',
-              allowTypeImports: false,
-            },
-            {
-              group: ['@blocksuite/affine/components'],
-              message: 'Do not import package itself',
-              allowTypeImports: false,
-            },
-          ],
-        },
-      ],
-    },
-  },
-  {
-    files: ['packages/affine/block-paragraph/src/**/*.ts'],
-
-    rules: {
-      '@typescript-eslint/no-restricted-imports': [
-        'error',
-        {
-          patterns: [
-            {
-              group: ['**/dist', '**/dist/**'],
-              message: 'Do not import from dist',
-              allowTypeImports: false,
-            },
-            {
-              group: ['**/src', '**/src/**'],
-              message: 'Do not import from src',
-              allowTypeImports: false,
-            },
-            {
-              group: ['**/*.css', '**/*.css?*'],
-              message:
-                'Do not import CSS directly, see https://github.com/toeverything/blocksuite/issues/525',
-              allowTypeImports: false,
-            },
-            {
-              group: ['@blocksuite/affine/block-paragraph'],
-              message: 'Do not import package itself',
-              allowTypeImports: false,
-            },
-          ],
-        },
-      ],
-    },
-  },
-  {
-    files: ['packages/affine/block-list/src/**/*.ts'],
-
-    rules: {
-      '@typescript-eslint/no-restricted-imports': [
-        'error',
-        {
-          patterns: [
-            {
-              group: ['**/dist', '**/dist/**'],
-              message: 'Do not import from dist',
-              allowTypeImports: false,
-            },
-            {
-              group: ['**/src', '**/src/**'],
-              message: 'Do not import from src',
-              allowTypeImports: false,
-            },
-            {
-              group: ['**/*.css', '**/*.css?*'],
-              message:
-                'Do not import CSS directly, see https://github.com/toeverything/blocksuite/issues/525',
-              allowTypeImports: false,
-            },
-            {
-              group: ['@blocksuite/affine/block-list'],
-              message: 'Do not import package itself',
-              allowTypeImports: false,
-            },
-          ],
-        },
-      ],
-    },
-  },
-  {
-    files: ['packages/affine/block-surface/src/**/*.ts'],
-
-    rules: {
-      '@typescript-eslint/no-restricted-imports': [
-        'error',
-        {
-          patterns: [
-            {
-              group: ['**/dist', '**/dist/**'],
-              message: 'Do not import from dist',
-              allowTypeImports: false,
-            },
-            {
-              group: ['**/src', '**/src/**'],
-              message: 'Do not import from src',
-              allowTypeImports: false,
-            },
-            {
-              group: ['**/*.css', '**/*.css?*'],
-              message:
-                'Do not import CSS directly, see https://github.com/toeverything/blocksuite/issues/525',
-              allowTypeImports: false,
-            },
-            {
-              group: ['@blocksuite/affine/block-surface'],
-              message: 'Do not import package itself',
-              allowTypeImports: false,
-            },
-          ],
-        },
-      ],
-    },
-  },
-  {
-    files: ['packages/blocks/src/**/*.ts'],
-
-    rules: {
-      '@typescript-eslint/no-restricted-imports': [
-        'error',
-        {
-          patterns: [
-            {
-              group: ['**/dist', '**/dist/**'],
-              message: 'Do not import from dist',
-              allowTypeImports: false,
-            },
-            {
-              group: ['**/src', '**/src/**'],
-              message: 'Do not import from src',
-              allowTypeImports: false,
-            },
-            {
-              group: ['**/*.css', '**/*.css?*'],
-              message:
-                'Do not import CSS directly, see https://github.com/toeverything/blocksuite/issues/525',
-              allowTypeImports: false,
-            },
-            {
-              group: ['@blocksuite/blocks'],
-              message: 'Do not import package itself',
-              allowTypeImports: false,
-            },
-            {
-              group: ['**/std.js'],
-              message: 'Do not import from std',
-              allowTypeImports: false,
-            },
-          ],
-        },
-      ],
-    },
-  },
-  {
-    files: ['packages/docs/src/**/*.ts'],
-
-    rules: {
-      '@typescript-eslint/no-restricted-imports': [
-        'error',
-        {
-          patterns: [
-            {
-              group: ['**/dist', '**/dist/**'],
-              message: 'Do not import from dist',
-              allowTypeImports: false,
-            },
-            {
-              group: ['**/src', '**/src/**'],
-              message: 'Do not import from src',
-              allowTypeImports: false,
-            },
-            {
-              group: ['**/*.css', '**/*.css?*'],
-              message:
-                'Do not import CSS directly, see https://github.com/toeverything/blocksuite/issues/525',
-              allowTypeImports: false,
-            },
-            {
-              group: ['@blocksuite/docs'],
-              message: 'Do not import package itself',
-              allowTypeImports: false,
-            },
-          ],
-        },
-      ],
-    },
-  },
-  {
-    files: ['packages/playground/src/**/*.ts'],
-
-    rules: {
-      '@typescript-eslint/no-restricted-imports': [
-        'error',
-        {
-          patterns: [
-            {
-              group: ['**/dist', '**/dist/**'],
-              message: 'Do not import from dist',
-              allowTypeImports: false,
-            },
-            {
-              group: ['**/src', '**/src/**'],
-              message: 'Do not import from src',
-              allowTypeImports: false,
-            },
-            {
-              group: ['**/*.css', '**/*.css?*'],
-              message:
-                'Do not import CSS directly, see https://github.com/toeverything/blocksuite/issues/525',
-              allowTypeImports: false,
-            },
-            {
-              group: ['@blocksuite/playground'],
-              message: 'Do not import package itself',
-              allowTypeImports: false,
-            },
-          ],
-        },
-      ],
-    },
-  },
-  {
-    files: ['packages/presets/src/**/*.ts'],
-
-    rules: {
-      '@typescript-eslint/no-restricted-imports': [
-        'error',
-        {
-          patterns: [
-            {
-              group: ['**/dist', '**/dist/**'],
-              message: 'Do not import from dist',
-              allowTypeImports: false,
-            },
-            {
-              group: ['**/src', '**/src/**'],
-              message: 'Do not import from src',
-              allowTypeImports: false,
-            },
-            {
-              group: ['**/*.css', '**/*.css?*'],
-              message:
-                'Do not import CSS directly, see https://github.com/toeverything/blocksuite/issues/525',
-              allowTypeImports: false,
-            },
-            {
-              group: ['@blocksuite/presets'],
-              message: 'Do not import package itself',
-              allowTypeImports: false,
-            },
-          ],
-        },
-      ],
-    },
-  },
+  ...getFoldersWithPackageJson(entry)
+    .map(p => p.replace(__dirname + '/', ''))
+    .map(createNoRestrictedImports),
+  eslintConfigPrettier,
 ];
