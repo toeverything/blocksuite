@@ -14,23 +14,23 @@ export const buildLinkDenseMenu: DenseMenuBuilder = edgeless => ({
 
     insertedLinkType
       ?.then(type => {
-        if (type) {
-          edgeless.std
-            .getOptional(TelemetryProvider)
-            ?.track('CanvasElementAdded', {
-              control: 'toolbar:general',
-              page: 'whiteboard editor',
-              module: 'toolbar',
-              type: type.flavour?.split(':')[1],
-            });
-          if (type.isNewDoc) {
-            edgeless.std.getOptional(TelemetryProvider)?.track('DocCreated', {
-              control: 'toolbar:general',
-              page: 'whiteboard editor',
-              module: 'edgeless toolbar',
-              type: type.flavour?.split(':')[1],
-            });
-          }
+        if (!type) return;
+
+        edgeless.std
+          .getOptional(TelemetryProvider)
+          ?.track('CanvasElementAdded', {
+            control: 'toolbar:general',
+            page: 'whiteboard editor',
+            module: 'toolbar',
+            type: type.flavour?.split(':')[1],
+          });
+        if (type.isNewDoc) {
+          edgeless.std.getOptional(TelemetryProvider)?.track('DocCreated', {
+            control: 'toolbar:general',
+            page: 'whiteboard editor',
+            module: 'edgeless toolbar',
+            type: type.flavour?.split(':')[1],
+          });
         }
       })
       .catch(console.error);
