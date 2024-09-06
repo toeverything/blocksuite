@@ -43,12 +43,27 @@ jobs:
         id: changesets
         uses: changesets/action@v1
         with:
-          publish: pnpm changeset publish
+          publish: pnpm changeset publish --no-git-tag
           commit: 'ci: release blocksuite'
           createGithubReleases: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Get the version
+        if: steps.changesets.outputs.published == 'true'
+        run: |
+          BLOCKSUITE_VERSION=$(jq -r ".version" packages/blocks/package.json)
+          echo "BLOCKSUITE_RELEASE_TAG=v${BLOCKSUITE_VERSION}" >> "$GITHUB_ENV"
+
+      - name: Create GitHub release
+        if: steps.changesets.outputs.published == 'true'
+        uses: ncipollo/release-action@v1
+        with:
+          commit: master
+          tag: '${{ env.BLOCKSUITE_RELEASE_TAG }}'
+          token: ${{ secrets.GITHUB_TOKEN }}
+        continue-on-error: true
 
       - name: Send release notification
         if: steps.changesets.outputs.published == 'true'
