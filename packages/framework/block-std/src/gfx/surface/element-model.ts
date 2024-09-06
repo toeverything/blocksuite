@@ -294,7 +294,9 @@ export abstract class GfxPrimitiveElementModel<
   }
 
   serialize() {
-    return this.yMap.toJSON() as SerializedElement;
+    const result = this.yMap.toJSON();
+    result.xywh = this.xywh;
+    return result as SerializedElement;
   }
 
   stash(prop: keyof Props | string) {
