@@ -1,4 +1,4 @@
-import { assertExists } from '@global/utils/index.js';
+import { assertExists } from '@blocksuite/global/utils';
 import { expect, type Page } from '@playwright/test';
 
 import {

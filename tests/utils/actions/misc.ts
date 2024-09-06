@@ -1,5 +1,6 @@
-import type { EditorHost } from '@block-std/view/element/lit-host.js';
 import type { DatabaseBlockModel, ListType, RichText } from '@blocks/index.js';
+import type { EditorHost } from '@blocksuite/block-std';
+import type { AffineEditorContainer } from '@blocksuite/presets';
 import type { InlineRange, InlineRootElement } from '@inline/index.js';
 import type { CustomFramePanel } from '@playground/apps/_common/components/custom-frame-panel.js';
 import type { CustomOutlinePanel } from '@playground/apps/_common/components/custom-outline-panel.js';
@@ -7,10 +8,9 @@ import type { CustomOutlineViewer } from '@playground/apps/_common/components/cu
 import type { DebugMenu } from '@playground/apps/_common/components/debug-menu.js';
 import type { DocsPanel } from '@playground/apps/_common/components/docs-panel.js';
 import type { ConsoleMessage, Locator, Page } from '@playwright/test';
-import type { AffineEditorContainer } from '@presets/editors/index.js';
 import type { BlockModel } from '@store/schema/index.js';
 
-import { assertExists } from '@global/utils.js';
+import { assertExists } from '@blocksuite/global/utils';
 import { expect } from '@playwright/test';
 import { uuidv4 } from '@store/utils/id-generator.js';
 import lz from 'lz-string';

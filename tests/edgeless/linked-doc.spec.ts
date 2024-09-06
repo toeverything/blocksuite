@@ -1,4 +1,4 @@
-import { assertNotExists } from '@global/utils.js';
+import { assertNotExists } from '@blocksuite/global/utils';
 import { expect } from '@playwright/test';
 
 import {

@@ -6,12 +6,8 @@
     "composite": false,
     "paths": {
       "@blocks/*": ["../packages/blocks/src/*"],
-      "@block-std/*": ["../packages/framework/block-std/src/*"],
-      "@global/*": ["../packages/framework/global/src/*"],
       "@inline/*": ["../packages/framework/inline/src/*"],
-      "@store/provider/*": ["../packages/framework/store/provider/*"],
       "@store/*": ["../packages/framework/store/src/*"],
-      "@presets/*": ["../packages/presets/src/*"],
       "@playground/*": ["../packages/playground/*"]
     }
   },

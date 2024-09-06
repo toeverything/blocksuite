@@ -1,8 +1,10 @@
-import type { WidgetViewMapIdentifier } from '@block-std/index.js';
-import type { EditorHost } from '@block-std/view/element/index.js';
 import type { TestUtils } from '@blocks/index.js';
+import type {
+  EditorHost,
+  WidgetViewMapIdentifier,
+} from '@blocksuite/block-std';
+import type { AffineEditorContainer } from '@blocksuite/presets';
 import type { DebugMenu } from '@playground/apps/_common/components/debug-menu.js';
-import type { AffineEditorContainer } from '@presets/editors/index.js';
 import type { BlockModel, Doc, DocCollection, Job } from '@store/index.js';
 
 declare global {

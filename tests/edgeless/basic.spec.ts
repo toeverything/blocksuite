@@ -1,5 +1,5 @@
 import { NOTE_WIDTH } from '@blocksuite/affine-model';
-import { assertExists } from '@global/utils/index.js';
+import { assertExists } from '@blocksuite/global/utils';
 import { expect } from '@playwright/test';
 
 import {
