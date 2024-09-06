@@ -2,37 +2,34 @@ import type { DatabaseBlockModel } from '@blocksuite/affine-model';
 import type { EditorHost } from '@blocksuite/block-std';
 
 import {
-  type InsertToPosition,
   insertPositionToIndex,
+  type InsertToPosition,
 } from '@blocksuite/affine-shared/utils';
+import {
+  type ColumnMeta,
+  createUniComponentFromWebComponent,
+  type DatabaseFlags,
+  DataSourceBase,
+  type DataViewDataType,
+  type DataViewTypes,
+  type DetailSlots,
+  uniMap,
+  type ViewManager,
+  ViewManagerBase,
+  type ViewMeta,
+} from '@blocksuite/data-view';
+import { columnPresets } from '@blocksuite/data-view/column-presets';
 import { assertExists } from '@blocksuite/global/utils';
 import { type BlockModel, Text } from '@blocksuite/store';
-import { type ReadonlySignal, computed } from '@lit-labs/preact-signals';
-
-import type { ColumnConfig } from './data-view/index.js';
-import type { DatabaseFlags } from './data-view/types.js';
-import type { DataViewTypes } from './data-view/view/data-view.js';
+import { computed, type ReadonlySignal } from '@lit-labs/preact-signals';
 
 import { getIcon } from './block-icons.js';
 import {
   databaseBlockAllColumnMap,
-  databaseBlockColumns,
+  databaseBlockColumnList,
+  databaseColumnConverts,
 } from './columns/index.js';
 import { HostContextKey } from './context/host-context.js';
-import {
-  type ColumnMeta,
-  DataSourceBase,
-  type DataViewDataType,
-  type DetailSlots,
-  type ViewMeta,
-  columnPresets,
-  createUniComponentFromWebComponent,
-} from './data-view/index.js';
-import { map } from './data-view/utils/uni-component/operation.js';
-import {
-  type ViewManager,
-  ViewManagerBase,
-} from './data-view/view-manager/view-manager.js';
 import { BlockRenderer } from './detail-panel/block-renderer.js';
 import { NoteRenderer } from './detail-panel/note-renderer.js';
 import {
@@ -135,7 +132,7 @@ export class DatabaseBlockDataSource extends DataSourceBase {
     this._runCapture();
 
     const type = this.propertyGetType(propertyId);
-    const update = this.getPropertyMeta(type).model.ops.valueUpdate;
+    const update = this.getPropertyMeta(type).config.valueUpdate;
     let newValue = value;
     if (update) {
       const old = this.cellGetValue(rowId, propertyId);
@@ -173,8 +170,7 @@ export class DatabaseBlockDataSource extends DataSourceBase {
     return getCell(this._model, rowId, propertyId)?.value;
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  getPropertyMeta(type: string): ColumnMeta<any, any, any> {
+  getPropertyMeta(type: string): ColumnMeta {
     return databaseBlockAllColumnMap[type];
   }
 
@@ -185,7 +181,7 @@ export class DatabaseBlockDataSource extends DataSourceBase {
       insertToPosition,
       databaseBlockAllColumnMap[
         type ?? columnPresets.multiSelectColumnConfig.type
-      ].model.create(this.newColumnName())
+      ].create(this.newColumnName())
     );
     applyColumnUpdate(this._model);
     return result;
@@ -211,12 +207,16 @@ export class DatabaseBlockDataSource extends DataSourceBase {
     const currentCells = rows.map(rowId =>
       this.cellGetValue(rowId, propertyId)
     );
-    const result = databaseBlockAllColumnMap[currentType].model?.convertCell(
-      toType,
-      currentData,
-      currentCells
+    const convertFunction = databaseColumnConverts.find(
+      v => v.from === currentType && v.to === toType
+    )?.convert;
+    const result = convertFunction?.(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      currentData as any,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      currentCells as any
     ) ?? {
-      column: databaseBlockAllColumnMap[toType].model.defaultData(),
+      column: databaseBlockAllColumnMap[toType].config.defaultData(),
       cells: currentCells.map(() => undefined),
     };
     this.doc.captureSync();
@@ -376,18 +376,21 @@ export class DatabaseBlockDataSource extends DataSourceBase {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  get addPropertyConfigList(): ColumnConfig<any, any, any>[] {
-    return databaseBlockColumns.map(v => v.model);
+  get addPropertyConfigList(): ColumnMeta<any, any, any>[] {
+    return databaseBlockColumnList;
   }
 
   override get detailSlots(): DetailSlots {
     return {
       ...super.detailSlots,
-      header: map(createUniComponentFromWebComponent(BlockRenderer), props => ({
-        ...props,
-        host: this.host,
-      })),
-      note: map(createUniComponentFromWebComponent(NoteRenderer), props => ({
+      header: uniMap(
+        createUniComponentFromWebComponent(BlockRenderer),
+        props => ({
+          ...props,
+          host: this.host,
+        })
+      ),
+      note: uniMap(createUniComponentFromWebComponent(NoteRenderer), props => ({
         ...props,
         model: this._model,
         host: this.host,

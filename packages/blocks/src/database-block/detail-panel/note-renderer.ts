@@ -1,17 +1,19 @@
 import type { DatabaseBlockModel } from '@blocksuite/affine-model';
+import type { DetailSlotProps, SingleView } from '@blocksuite/data-view';
 
 import { focusTextModel } from '@blocksuite/affine-components/rich-text';
 import {
   createDefaultDoc,
   matchFlavours,
 } from '@blocksuite/affine-shared/utils';
-import { BlockStdScope, type EditorHost } from '@blocksuite/block-std';
-import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
+import {
+  BlockStdScope,
+  type EditorHost,
+  ShadowlessElement,
+  WithDisposable,
+} from '@blocksuite/block-std';
 import { css, html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
-
-import type { DetailSlotProps } from '../data-view/common/data-source/base.js';
-import type { SingleView } from '../data-view/view-manager/single-view.js';
 
 @customElement('database-datasource-note-renderer')
 export class NoteRenderer

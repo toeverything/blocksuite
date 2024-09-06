@@ -12,6 +12,9 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@blocksuite/affine-model": "workspace:*",
+    "@blocksuite/affine-components": "workspace:*",
+    "@blocksuite/data-view": "workspace:*",
     "@blocksuite/block-std": "workspace:*",
     "@blocksuite/blocks": "workspace:*",
     "@blocksuite/global": "workspace:*",

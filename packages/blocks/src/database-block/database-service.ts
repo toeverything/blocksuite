@@ -1,22 +1,20 @@
 import type { BlockModel, Doc } from '@blocksuite/store';
 
 import {
-  InlineManager,
-  ReferenceNodeConfig,
   affineInlineMarkdownMatches,
   getAffineInlineSpecsWithReference,
+  InlineManager,
+  ReferenceNodeConfig,
 } from '@blocksuite/affine-components/rich-text';
 import {
   type DatabaseBlockModel,
   DatabaseBlockSchema,
 } from '@blocksuite/affine-model';
 import { BlockService } from '@blocksuite/block-std';
+import { DatabaseSelection, type ViewMeta } from '@blocksuite/data-view';
+import { viewPresets } from '@blocksuite/data-view/view-presets';
 import { assertExists } from '@blocksuite/global/utils';
 
-import type { ViewMeta } from './data-view/view/data-view.js';
-
-import { DatabaseSelection } from './data-view/common/selection.js';
-import { viewPresets } from './data-view/index.js';
 import {
   addColumn,
   applyColumnUpdate,

@@ -1,5 +1,3 @@
-import { describe, expect, test } from 'vitest';
-
 import {
   tArray,
   tFunction,
@@ -8,7 +6,8 @@ import {
   tUnion,
   tUnknown,
   typesystem,
-} from '../../database-block/data-view/logical/typesystem.js';
+} from '@blocksuite/data-view';
+import { describe, expect, test } from 'vitest';
 
 export const tString = typesystem.defineData<{ value: string }>({
   name: 'String',

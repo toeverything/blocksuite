@@ -1,5 +1,6 @@
 import type { DatabaseBlockModel } from '@blocksuite/affine-model';
 import type { EditorHost } from '@blocksuite/block-std';
+import type { ViewMeta } from '@blocksuite/data-view';
 
 import {
   CloseIcon,
@@ -7,13 +8,11 @@ import {
   DatabaseTableViewIcon,
 } from '@blocksuite/affine-components/icons';
 import { WithDisposable } from '@blocksuite/block-std';
+import { viewPresets } from '@blocksuite/data-view/view-presets';
 import { assertExists } from '@blocksuite/global/utils';
-import { LitElement, type TemplateResult, css, html } from 'lit';
+import { css, html, LitElement, type TemplateResult } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
-import type { ViewMeta } from '../../../database-block/data-view/index.js';
-
-import { viewPresets } from '../../../database-block/data-view/index.js';
 import {
   applyColumnUpdate,
   databaseViewInitConvert,

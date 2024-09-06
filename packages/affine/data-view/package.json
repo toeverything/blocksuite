@@ -1,0 +1,71 @@
+{
+  "name": "@blocksuite/data-view",
+  "version": "0.0.1",
+  "description": "views of database",
+  "type": "module",
+  "repository": "toeverything/blocksuite",
+  "scripts": {
+    "build": "tsc",
+    "test:unit": "nx vite:test --run --passWithNoTests",
+    "test:unit:coverage": "nx vite:test --run --coverage",
+    "test:e2e": "playwright test"
+  },
+  "keywords": [],
+  "author": "toeverything",
+  "license": "MPL-2.0",
+  "dependencies": {
+    "@blocksuite/affine-shared": "workspace:*",
+    "@blocksuite/block-std": "workspace:*",
+    "@blocksuite/global": "workspace:*",
+    "@blocksuite/store": "workspace:*",
+    "@blocksuite/affine-components": "workspace:*",
+    "@blocksuite/icons": "^2.1.66",
+    "@floating-ui/dom": "^1.6.10",
+    "@lit-labs/preact-signals": "^1.0.2",
+    "@lit/context": "^1.1.2",
+    "@toeverything/theme": "^1.0.7",
+    "lit": "^3.2.0",
+    "date-fns": "^3.6.0",
+    "sortablejs": "^1.15.2",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/sortablejs": "^1.15.8"
+  },
+  "exports": {
+    ".": "./src/index.ts",
+    "./column-presets": "./src/column-presets/index.ts",
+    "./column-pure-presets": "./src/column-presets/pure-index.ts",
+    "./view-presets": "./src/view-presets/index.ts",
+    "./widget-presets": "./src/widget-presets/index.ts"
+  },
+  "publishConfig": {
+    "access": "public",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "exports": {
+      ".": {
+        "import": "./dist/index.js",
+        "types": "./dist/index.d.ts"
+      },
+      "./column-presets": {
+        "import": "./dist/column-presets/index.js",
+        "types": "./dist/column-presets/index.d.ts"
+      },
+      "./view-presets": {
+        "import": "./dist/view-presets/index.js",
+        "types": "./dist/view-presets/index.d.ts"
+      },
+      "./widget-presets": {
+        "import": "./dist/widget-presets/index.js",
+        "types": "./dist/widget-presets/index.d.ts"
+      }
+    }
+  },
+  "files": [
+    "src",
+    "dist",
+    "!src/__tests__",
+    "!dist/__tests__"
+  ]
+}

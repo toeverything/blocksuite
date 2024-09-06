@@ -3,8 +3,9 @@ import type {
   RichTextCellEditing,
 } from '@blocks/database-block/columns/rich-text/cell-renderer.js';
 
+import { press } from '@inline/__tests__/utils.js';
 import { ZERO_WIDTH_SPACE } from '@inline/consts.js';
-import { type Locator, type Page, expect } from '@playwright/test';
+import { expect, type Locator, type Page } from '@playwright/test';
 
 import {
   pressEnter,
@@ -548,4 +549,24 @@ export const moveToCenterOf = async (page: Page, locator: Locator) => {
   const box = (await locator.boundingBox())!;
   expect(box).toBeDefined();
   await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+};
+export const changeColumnType = async (
+  page: Page,
+  column: number,
+  name: string
+) => {
+  await waitNextFrame(page);
+  await page.locator('affine-database-header-column').nth(column).click();
+  await pressKey(page, 'ArrowDown', 2);
+  await pressKey(page, 'Enter');
+  await type(page, name);
+  await pressKey(page, 'ArrowDown');
+  await pressKey(page, 'Enter');
+};
+export const pressKey = async (page: Page, key: string, count: number = 1) => {
+  for (let i = 0; i < count; i++) {
+    await waitNextFrame(page);
+    await press(page, key);
+  }
+  await waitNextFrame(page);
 };

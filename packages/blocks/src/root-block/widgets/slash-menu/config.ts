@@ -17,8 +17,8 @@ import {
   FrameIcon,
   HeadingIcon,
   ImageIcon20,
-  LinkIcon,
   LinkedDocIcon,
+  LinkIcon,
   NewDocIcon,
   NowIcon,
   PasteIcon,
@@ -27,9 +27,9 @@ import {
   YesterdayIcon,
 } from '@blocksuite/affine-components/icons';
 import {
-  REFERENCE_NODE,
   clearMarksOnDiscontinuousInput,
   getInlineEditorByModel,
+  REFERENCE_NODE,
   textFormatConfigs,
 } from '@blocksuite/affine-components/rich-text';
 import { toast } from '@blocksuite/affine-components/toast';
@@ -39,6 +39,7 @@ import {
   matchFlavours,
   openFileOrFiles,
 } from '@blocksuite/affine-shared/utils';
+import { viewPresets } from '@blocksuite/data-view/view-presets';
 import { GroupingIcon, TeXIcon } from '@blocksuite/icons/lit';
 import { Slice, Text } from '@blocksuite/store';
 
@@ -49,7 +50,6 @@ import type { AffineLinkedDocWidget } from '../linked-doc/index.js';
 import { toggleEmbedCardCreateModal } from '../../../_common/components/embed-card/modal/embed-card-create-modal.js';
 import { textConversionConfigs } from '../../../_common/configs/text-conversion.js';
 import { addSiblingAttachmentBlocks } from '../../../attachment-block/utils.js';
-import { viewPresets } from '../../../database-block/data-view/index.js';
 import { FigmaIcon } from '../../../embed-figma-block/styles.js';
 import { GithubIcon } from '../../../embed-github-block/styles.js';
 import { LoomIcon } from '../../../embed-loom-block/styles.js';

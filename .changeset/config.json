@@ -1,14 +1,14 @@
 {
   "$schema": "https://unpkg.com/@changesets/config@3.0.2/schema.json",
-  "changelog": [
-    "@changesets/changelog-github",
-    { "repo": "toeverything/blocksuite" }
-  ],
+  "changelog": "@changesets/cli/changelog",
   "commit": false,
-  "fixed": [],
-  "linked": [["@blocksuite/*"]],
+  "fixed": [["@blocksuite/*"]],
+  "linked": [],
   "access": "public",
   "baseBranch": "master",
   "updateInternalDependencies": "patch",
-  "ignore": ["@blocksuite/e2e", "@blocksuite/playground"]
+  "ignore": ["@blocksuite/e2e", "@blocksuite/playground"],
+  "___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH": {
+    "onlyUpdatePeerDependentsWhenOutOfRange": true
+  }
 }

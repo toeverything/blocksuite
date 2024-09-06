@@ -1,12 +1,12 @@
 import {
+  databaseBlockColumns,
   type DatabaseBlockModel,
   type ListType,
   type ParagraphType,
   type ViewBasicDataType,
-  columnPresets,
-  richTextColumnConfig,
-  viewPresets,
 } from '@blocksuite/blocks';
+import { columnPresets } from '@blocksuite/data-view/column-presets';
+import { viewPresets } from '@blocksuite/data-view/view-presets';
 import { assertExists } from '@blocksuite/global/utils';
 import { type DocCollection, Text } from '@blocksuite/store';
 
@@ -14,7 +14,6 @@ import type { InitFn } from './utils.js';
 
 export const database: InitFn = (collection: DocCollection, id: string) => {
   const doc = collection.createDoc({ id });
-  doc.awarenessStore.setFlag('enable_expand_database_block', true);
   doc.awarenessStore.setFlag('enable_database_number_formatting', true);
   doc.awarenessStore.setFlag('enable_database_attachment_note', true);
   doc.awarenessStore.setFlag('enable_block_query', true);
@@ -56,20 +55,22 @@ export const database: InitFn = (collection: DocCollection, id: string) => {
           const richTextId = service.addColumn(
             database,
             'end',
-            richTextColumnConfig.model.create(richTextColumnConfig.model.name)
+            databaseBlockColumns.richTextColumnConfig.create(
+              databaseBlockColumns.richTextColumnConfig.config.name
+            )
           );
           Object.values([
             columnPresets.multiSelectColumnConfig,
             columnPresets.dateColumnConfig,
             columnPresets.numberColumnConfig,
-            columnPresets.linkColumnConfig,
+            databaseBlockColumns.linkColumnConfig,
             columnPresets.checkboxColumnConfig,
             columnPresets.progressColumnConfig,
           ]).forEach(column => {
             service.addColumn(
               database,
               'end',
-              column.model.create(column.model.name)
+              column.create(column.config.name)
             );
           });
           service.updateView(database, database.views[0].id, () => {

@@ -34,9 +34,6 @@ importers:
 
   .:
     devDependencies:
-      '@changesets/changelog-github':
-        specifier: ^0.5.0
-        version: 0.5.0
       '@changesets/cli':
         specifier: ^2.27.7
         version: 2.27.8
@@ -395,6 +392,9 @@ importers:
       '@toeverything/theme':
         specifier: ^1.0.8
         version: 1.0.8
+      date-fns:
+        specifier: ^3.6.0
+        version: 3.6.0
       katex:
         specifier: ^0.16.11
         version: 0.16.11
@@ -411,6 +411,55 @@ importers:
       '@types/katex':
         specifier: ^0.16.7
         version: 0.16.7
+
+  packages/affine/data-view:
+    dependencies:
+      '@blocksuite/affine-components':
+        specifier: workspace:*
+        version: link:../components
+      '@blocksuite/affine-shared':
+        specifier: workspace:*
+        version: link:../shared
+      '@blocksuite/block-std':
+        specifier: workspace:*
+        version: link:../../framework/block-std
+      '@blocksuite/global':
+        specifier: workspace:*
+        version: link:../../framework/global
+      '@blocksuite/icons':
+        specifier: ^2.1.66
+        version: 2.1.67(@types/react@18.3.5)(lit@3.2.0)
+      '@blocksuite/store':
+        specifier: workspace:*
+        version: link:../../framework/store
+      '@floating-ui/dom':
+        specifier: ^1.6.10
+        version: 1.6.10
+      '@lit-labs/preact-signals':
+        specifier: ^1.0.2
+        version: 1.0.2
+      '@lit/context':
+        specifier: ^1.1.2
+        version: 1.1.2
+      '@toeverything/theme':
+        specifier: ^1.0.7
+        version: 1.0.8
+      date-fns:
+        specifier: ^3.6.0
+        version: 3.6.0
+      lit:
+        specifier: ^3.2.0
+        version: 3.2.0
+      sortablejs:
+        specifier: ^1.15.2
+        version: 1.15.3
+      zod:
+        specifier: ^3.23.8
+        version: 3.23.8
+    devDependencies:
+      '@types/sortablejs':
+        specifier: ^1.15.8
+        version: 1.15.8
 
   packages/affine/model:
     dependencies:
@@ -492,6 +541,9 @@ importers:
       '@blocksuite/block-std':
         specifier: workspace:*
         version: link:../framework/block-std
+      '@blocksuite/data-view':
+        specifier: workspace:*
+        version: link:../affine/data-view
       '@blocksuite/global':
         specifier: workspace:*
         version: link:../framework/global
@@ -680,6 +732,12 @@ importers:
       '@blocksuite/global':
         specifier: workspace:*
         version: link:../global
+      '@blocksuite/inline':
+        specifier: workspace:*
+        version: link:../inline
+      '@blocksuite/store':
+        specifier: workspace:*
+        version: link:../store
       '@lit-labs/preact-signals':
         specifier: ^1.0.2
         version: 1.0.2
@@ -713,13 +771,6 @@ importers:
       zod:
         specifier: ^3.23.8
         version: 3.23.8
-    devDependencies:
-      '@blocksuite/inline':
-        specifier: workspace:*
-        version: link:../inline
-      '@blocksuite/store':
-        specifier: workspace:*
-        version: link:../store
 
   packages/framework/global:
     dependencies:
@@ -827,12 +878,21 @@ importers:
 
   packages/playground:
     dependencies:
+      '@blocksuite/affine-components':
+        specifier: workspace:*
+        version: link:../affine/components
+      '@blocksuite/affine-model':
+        specifier: workspace:*
+        version: link:../affine/model
       '@blocksuite/block-std':
         specifier: workspace:*
         version: link:../framework/block-std
       '@blocksuite/blocks':
         specifier: workspace:*
         version: link:../blocks
+      '@blocksuite/data-view':
+        specifier: workspace:*
+        version: link:../affine/data-view
       '@blocksuite/global':
         specifier: workspace:*
         version: link:../framework/global
@@ -1698,9 +1758,6 @@ packages:
   '@changesets/changelog-git@0.2.0':
     resolution: {integrity: sha512-bHOx97iFI4OClIT35Lok3sJAwM31VbUM++gnMBV16fdbtBhgYu4dxsphBF/0AZZsyAHMrnM0yFcj5gZM1py6uQ==}
 
-  '@changesets/changelog-github@0.5.0':
-    resolution: {integrity: sha512-zoeq2LJJVcPJcIotHRJEEA2qCqX0AQIeFE+L21L8sRLPVqDhSXY8ZWAt2sohtBpFZkBwu+LUwMSKRr2lMy3LJA==}
-
   '@changesets/cli@2.27.8':
     resolution: {integrity: sha512-gZNyh+LdSsI82wBSHLQ3QN5J30P4uHKJ4fXgoGwQxfXwYFTJzDdvIJasZn8rYQtmKhyQuiBj4SSnLuKlxKWq4w==}
     hasBin: true
@@ -1713,9 +1770,6 @@ packages:
 
   '@changesets/get-dependents-graph@2.1.2':
     resolution: {integrity: sha512-sgcHRkiBY9i4zWYBwlVyAjEM9sAzs4wYVwJUdnbDLnVG3QwAaia1Mk5P8M7kraTOZN+vBET7n8KyB0YXCbFRLQ==}
-
-  '@changesets/get-github-info@0.6.0':
-    resolution: {integrity: sha512-v/TSnFVXI8vzX9/w3DU2Ol+UlTZcu3m0kXTjTT4KlAdwSvwutcByYwyYn9hwerPWfPkT2JfpoX0KgvCEi8Q/SA==}
 
   '@changesets/get-release-plan@4.0.4':
     resolution: {integrity: sha512-SicG/S67JmPTrdcc9Vpu0wSQt7IiuN0dc8iR5VScnnTVPfIaLvKmEGRvIaF0kcn8u5ZqLbormZNTO77bCEvyWw==}
@@ -4132,9 +4186,6 @@ packages:
     resolution: {integrity: sha512-wAV9QHOsNbwnWdNW2FYvE1P56wtgSbM+3SZcdGiWQILwVjACCXDCI3Ai8QlCjMDB8YK5zySiXZYBiwGmNY3lnw==}
     engines: {node: '>=12'}
 
-  dataloader@1.4.0:
-    resolution: {integrity: sha512-68s5jYdlvasItOJnCuI2Q9s4q98g0pCyL3HrcKJu8KNugUl8ahgmZYg38ysLTgQjjXX3H8CJLkAvWrclWfcalw==}
-
   date-fns@3.6.0:
     resolution: {integrity: sha512-fRHTG8g/Gif+kSh50gaGEdToemgfj74aRX3swtiouboip5JDLAyDE9F11nHMIcvOaXeOC6D7SpNhi7uFyB7Uww==}
 
@@ -4356,10 +4407,6 @@ packages:
   dotenv@16.4.5:
     resolution: {integrity: sha512-ZmdL2rui+eB2YwhsWzjInR8LldtZHGDoQ1ugH85ppHKwpUHL7j7rN0Ti9NCnGiQbhaZ11FpR+7ao1dNsmduNUg==}
     engines: {node: '>=12'}
-
-  dotenv@8.6.0:
-    resolution: {integrity: sha512-IrPdXQsk2BbzvCBGBOTmmSH5SodmqZNt4ERAZDmW4CT+tL8VtvinqywuANaFu4bOMWki16nqf0e4oC0QIaDr/g==}
-    engines: {node: '>=10'}
 
   duplexer@0.1.2:
     resolution: {integrity: sha512-jtD6YG370ZCIi/9GTaJKQxWTZD045+4R4hTk/x1UyoqadyJ9x9CgSi1RlVDQF8U2sxLLSnFkCaMihqljHIWgMg==}
@@ -6105,15 +6152,6 @@ packages:
   node-abort-controller@3.1.1:
     resolution: {integrity: sha512-AGK2yQKIjRuqnc6VkX2Xj5d+QW8xZ87pa1UK6yA6ouUyuxfHuMP6umE5QK7UmTeOAymo+Zx1Fxiuw9rVx8taHQ==}
 
-  node-fetch@2.7.0:
-    resolution: {integrity: sha512-c4FRfUm/dbcWZ7U+1Wq0AwCyFL+3nt2bEw05wfxSz+DWpWsitgmSgYmy2dQdWyKC1694ELPqMs/YzUSNozLt8A==}
-    engines: {node: 4.x || >=6.0.0}
-    peerDependencies:
-      encoding: ^0.1.0
-    peerDependenciesMeta:
-      encoding:
-        optional: true
-
   node-forge@1.3.1:
     resolution: {integrity: sha512-dPEtOeMvF9VMcYV/1Wb8CPoVAXtp6MKMlcbAt4ddqmGqUJ6fQZFXkNZNkNlfevtNkGtaSoXf/vNNNSvgrdXwtA==}
     engines: {node: '>= 6.13.0'}
@@ -7515,9 +7553,6 @@ packages:
     resolution: {integrity: sha512-Loo5UUvLD9ScZ6jh8beX1T6sO1w2/MpCRpEP7V280GKMVUQ0Jzar2U3UJPsrdbziLEMMhu3Ujnq//rhiFuIeag==}
     engines: {node: '>=6'}
 
-  tr46@0.0.3:
-    resolution: {integrity: sha512-N3WMsuqV66lT30CrXNbEjx4GEwlow3v6rr4mCcv6prnfwhS01rkgyFdjPNBYd9br7LpXV1+Emh01fHnq2Gdgrw==}
-
   tree-dump@1.0.2:
     resolution: {integrity: sha512-dpev9ABuLWdEubk+cIaI9cHwRNNDjkBBLXTwI4UCUFdQ5xXKqNXoK4FEciw/vxf+NQ7Cb7sGUyeUtORvHIdRXQ==}
     engines: {node: '>=10.0'}
@@ -7939,9 +7974,6 @@ packages:
   web-namespaces@2.0.1:
     resolution: {integrity: sha512-bKr1DkiNa2krS7qxNtdrtHAmzuYGFQLiQ13TsorsdT6ULTkPLKuu5+GsFpDlg6JFjUTwX2DyhMPG2be8uPrqsQ==}
 
-  webidl-conversions@3.0.1:
-    resolution: {integrity: sha512-2JAn3z8AR6rjK8Sm8orRC0h/bcl/DqL7tRPdGZ4I1CjdF+EaMLmYxBHyXuKL849eucPFhvBoxMsflfOb8kxaeQ==}
-
   webidl-conversions@7.0.0:
     resolution: {integrity: sha512-VwddBukDzu71offAQR975unBIGqfKZpM+8ZX6ySk8nYhVoo5CYaZyzt3YBvYtRtO+aoGlqxPg/B87NGVZ/fu6g==}
     engines: {node: '>=12'}
@@ -8011,9 +8043,6 @@ packages:
   whatwg-mimetype@3.0.0:
     resolution: {integrity: sha512-nt+N2dzIutVRxARx1nghPKGv1xHikU7HKdfafKkLNLindmPU/ch3U31NOCGGA/dmPcmb1VlofO0vnKAcsm0o/Q==}
     engines: {node: '>=12'}
-
-  whatwg-url@5.0.0:
-    resolution: {integrity: sha512-saE57nupxk6v3HY35+jzBwYa0rKSy0XR8JSxZPwgLr7ys0IBzhGviA1/TUGJLmSVqs8pb9AnvICXEuOHLprYTw==}
 
   which-module@2.0.1:
     resolution: {integrity: sha512-iBdZ57RDvnOR9AGBhML2vFZf7h8vmBjhoaZqODJBFWHVtKkDmKuHai3cx5PgVMrX5YDNp27AofYbAwctSS+vhQ==}
@@ -9190,14 +9219,6 @@ snapshots:
     dependencies:
       '@changesets/types': 6.0.0
 
-  '@changesets/changelog-github@0.5.0':
-    dependencies:
-      '@changesets/get-github-info': 0.6.0
-      '@changesets/types': 6.0.0
-      dotenv: 8.6.0
-    transitivePeerDependencies:
-      - encoding
-
   '@changesets/cli@2.27.8':
     dependencies:
       '@changesets/apply-release-plan': 7.0.5
@@ -9251,13 +9272,6 @@ snapshots:
       '@manypkg/get-packages': 1.1.3
       picocolors: 1.1.0
       semver: 7.6.3
-
-  '@changesets/get-github-info@0.6.0':
-    dependencies:
-      dataloader: 1.4.0
-      node-fetch: 2.7.0
-    transitivePeerDependencies:
-      - encoding
 
   '@changesets/get-release-plan@4.0.4':
     dependencies:
@@ -12310,8 +12324,6 @@ snapshots:
 
   dargs@8.1.0: {}
 
-  dataloader@1.4.0: {}
-
   date-fns@3.6.0: {}
 
   date-format@4.0.14: {}
@@ -12505,8 +12517,6 @@ snapshots:
       dotenv: 16.4.5
 
   dotenv@16.4.5: {}
-
-  dotenv@8.6.0: {}
 
   duplexer@0.1.2: {}
 
@@ -14566,10 +14576,6 @@ snapshots:
 
   node-abort-controller@3.1.1: {}
 
-  node-fetch@2.7.0:
-    dependencies:
-      whatwg-url: 5.0.0
-
   node-forge@1.3.1: {}
 
   node-machine-id@1.1.12: {}
@@ -16078,8 +16084,6 @@ snapshots:
       universalify: 0.2.0
       url-parse: 1.5.10
 
-  tr46@0.0.3: {}
-
   tree-dump@1.0.2(tslib@2.7.0):
     dependencies:
       tslib: 2.7.0
@@ -16560,8 +16564,6 @@ snapshots:
 
   web-namespaces@2.0.1: {}
 
-  webidl-conversions@3.0.1: {}
-
   webidl-conversions@7.0.0: {}
 
   webpack-dev-middleware@7.4.2(webpack@5.94.0(@swc/core@1.7.23(@swc/helpers@0.5.13))(esbuild@0.23.1)):
@@ -16665,11 +16667,6 @@ snapshots:
       iconv-lite: 0.6.3
 
   whatwg-mimetype@3.0.0: {}
-
-  whatwg-url@5.0.0:
-    dependencies:
-      tr46: 0.0.3
-      webidl-conversions: 3.0.1
 
   which-module@2.0.1: {}
 

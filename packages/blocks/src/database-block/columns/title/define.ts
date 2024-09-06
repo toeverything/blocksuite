@@ -1,15 +1,8 @@
 import type { Text } from '@blocksuite/store';
 
-import { columnType } from '../../data-view/column/column-config.js';
-import { tRichText } from '../../data-view/logical/data-type.js';
+import { columnType, tRichText } from '@blocksuite/data-view';
 
 export const titleColumnType = columnType('title');
-
-declare global {
-  interface ColumnConfigMap {
-    [titleColumnType.type]: typeof titlePureColumnConfig.model;
-  }
-}
 
 export const titlePureColumnConfig = titleColumnType.modelConfig<Text>({
   name: 'Title',

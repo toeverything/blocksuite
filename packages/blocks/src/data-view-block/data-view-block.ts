@@ -6,28 +6,28 @@ import {
   MoreHorizontalIcon,
 } from '@blocksuite/affine-components/icons';
 import { RANGE_SYNC_EXCLUDE_ATTR } from '@blocksuite/block-std';
-import { Slice } from '@blocksuite/store';
-import { computed } from '@lit-labs/preact-signals';
-import { css, nothing, unsafeCSS } from 'lit';
-import { customElement } from 'lit/decorators.js';
-import { html } from 'lit/static-html.js';
-
-import type { DataSource } from '../database-block/data-view/common/data-source/base.js';
-import type { NoteBlockComponent } from '../note-block/index.js';
-import type { DataViewBlockModel } from './data-view-model.js';
-
-import { dataViewCommonStyle } from '../database-block/data-view/common/css-variable.js';
 import {
+  type DataSource,
   DataView,
   type DataViewProps,
   type DataViewSelection,
   type DataViewWidget,
   type DataViewWidgetProps,
   DatabaseSelection,
+  dataViewCommonStyle,
   defineUniComponent,
   renderUniLit,
-  widgetPresets,
-} from '../database-block/data-view/index.js';
+} from '@blocksuite/data-view';
+import { widgetPresets } from '@blocksuite/data-view/widget-presets';
+import { Slice } from '@blocksuite/store';
+import { computed } from '@lit-labs/preact-signals';
+import { css, nothing, unsafeCSS } from 'lit';
+import { customElement } from 'lit/decorators.js';
+import { html } from 'lit/static-html.js';
+
+import type { NoteBlockComponent } from '../note-block/index.js';
+import type { DataViewBlockModel } from './data-view-model.js';
+
 import {
   type AffineInnerModalWidget,
   EdgelessRootBlockComponent,
@@ -207,14 +207,12 @@ export class DataViewBlockComponent extends CaptionedBlockComponent<DataViewBloc
   toolsWidget: DataViewWidget = widgetPresets.createTools({
     table: [
       widgetPresets.tools.filter,
-      widgetPresets.tools.expand,
       widgetPresets.tools.search,
       widgetPresets.tools.viewOptions,
       widgetPresets.tools.tableAddRow,
     ],
     kanban: [
       widgetPresets.tools.filter,
-      widgetPresets.tools.expand,
       widgetPresets.tools.search,
       widgetPresets.tools.viewOptions,
     ],

@@ -10,10 +10,12 @@ concurrency: ${{ github.workflow }}-${{ github.ref }}
 
 permissions:
   id-token: write
+  contents: write
+  pull-requests: write
 
 jobs:
   release:
-    name: Try publishing npm@latest release
+    name: Release blocksuite latest version
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -43,6 +45,27 @@ jobs:
         with:
           publish: pnpm changeset publish
           commit: 'ci: release blocksuite'
+          createGithubReleases: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Send release notification
+        if: steps.changesets.outputs.published == 'true'
+        id: slack
+        uses: slackapi/slack-github-action@v1.27.0
+        with:
+          payload: |
+            { "message": "[BlockSuite Release]: New BlockSuite version has been released to NPM." }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+      - name: Send failure notification
+        if: failure()
+        id: slack_failure
+        uses: slackapi/slack-github-action@v1.27.0
+        with:
+          payload: |
+            { "message": "[BlockSuite Release]: There was an issue publishing a new version. You can find the logs here: https://github.com/toeverything/blocksuite/actions/runs/${{ github.run_id }}" }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}

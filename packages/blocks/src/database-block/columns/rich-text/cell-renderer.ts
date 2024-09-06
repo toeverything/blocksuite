@@ -5,6 +5,11 @@ import type {
 } from '@blocksuite/affine-components/rich-text';
 
 import { getViewportElement } from '@blocksuite/affine-shared/utils';
+import {
+  BaseCellRenderer,
+  createFromBaseCellRenderer,
+  createIcon,
+} from '@blocksuite/data-view';
 import { IS_MAC } from '@blocksuite/global/env';
 import { assertExists } from '@blocksuite/global/utils';
 import { Text } from '@blocksuite/store';
@@ -16,9 +21,6 @@ import { html } from 'lit/static-html.js';
 import type { DatabaseBlockComponent } from '../../database-block.js';
 
 import { HostContextKey } from '../../context/host-context.js';
-import { BaseCellRenderer } from '../../data-view/column/base-cell.js';
-import { createFromBaseCellRenderer } from '../../data-view/column/renderer.js';
-import { createIcon } from '../../data-view/utils/uni-icon.js';
 import { richTextColumnModelConfig } from './define.js';
 
 function toggleStyle(
@@ -380,7 +382,7 @@ declare global {
   }
 }
 
-export const richTextColumnConfig = richTextColumnModelConfig.renderConfig({
+export const richTextColumnConfig = richTextColumnModelConfig.createColumnMeta({
   icon: createIcon('TextIcon'),
 
   cellRenderer: {

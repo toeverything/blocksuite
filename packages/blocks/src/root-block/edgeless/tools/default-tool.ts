@@ -220,7 +220,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     const h = Math.abs(startY - curY);
     const bound = new Bound(x, y, w, h);
 
-    const elements = service.gfx.getElementsByBound(bound);
+    const elements = getTopElements(service.gfx.getElementsByBound(bound));
 
     const set = new Set(
       tools.shiftKey ? [...elements, ...selection.selectedElements] : elements
