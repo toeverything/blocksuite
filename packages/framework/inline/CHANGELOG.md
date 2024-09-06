@@ -1,5 +1,20 @@
 # @blocksuite/inline
 
+## 0.17.1
+
+### Patch Changes
+
+- 21b5d47: BlockSuite 0.17.1
+
+  Add @blocksuite/data-view package.
+  Make font loader an extension.
+  Frame improvement.
+  Fix missing xywh when copy/paste mind map.
+  Fix connector label text.
+
+- Updated dependencies [21b5d47]
+  - @blocksuite/global@0.17.1
+
 ## 0.17.0
 
 ### Minor Changes
