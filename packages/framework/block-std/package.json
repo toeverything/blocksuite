@@ -1,6 +1,6 @@
 {
   "name": "@blocksuite/block-std",
-  "version": "0.17.1",
+  "version": "0.17.2",
   "description": "Std for blocksuite blocks",
   "type": "module",
   "repository": "toeverything/blocksuite",
