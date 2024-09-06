@@ -1,5 +1,11 @@
 # @blocksuite/global
 
+## 0.17.2
+
+### Patch Changes
+
+- 5543e32: Fix missing export in dataview
+
 ## 0.17.1
 
 ### Patch Changes
