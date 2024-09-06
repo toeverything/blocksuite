@@ -1,5 +1,23 @@
 # @blocksuite/blocks
 
+## 0.17.3
+
+### Patch Changes
+
+- be60caf: Generate git tag
+- Updated dependencies [be60caf]
+  - @blocksuite/affine-block-list@0.17.3
+  - @blocksuite/affine-block-paragraph@0.17.3
+  - @blocksuite/affine-block-surface@0.17.3
+  - @blocksuite/affine-components@0.17.3
+  - @blocksuite/data-view@0.17.3
+  - @blocksuite/affine-model@0.17.3
+  - @blocksuite/affine-shared@0.17.3
+  - @blocksuite/block-std@0.17.3
+  - @blocksuite/global@0.17.3
+  - @blocksuite/inline@0.17.3
+  - @blocksuite/store@0.17.3
+
 ## 0.17.2
 
 ### Patch Changes

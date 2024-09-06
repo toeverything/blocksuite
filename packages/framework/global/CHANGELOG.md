@@ -1,5 +1,11 @@
 # @blocksuite/global
 
+## 0.17.3
+
+### Patch Changes
+
+- be60caf: Generate git tag
+
 ## 0.17.2
 
 ### Patch Changes
