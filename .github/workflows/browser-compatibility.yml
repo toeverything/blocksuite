@@ -18,6 +18,7 @@ on:
         default: 'master'
 jobs:
   main-test:
+    if: github.repository == 'toeverything/blocksuite'
     name: Playground E2E test
     runs-on: ${{ matrix.os }}
     strategy:
@@ -35,24 +36,6 @@ jobs:
         id: pnpm-install
       - name: Use Node.js LTS
         uses: actions/setup-node@v4
-        with:
-          node-version-file: '.nvmrc'
-          cache: 'pnpm'
-      - name: Get pnpm store directory
-        id: pnpm-cache
-        shell: bash
-        run: |
-          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
-
-      - uses: actions/cache@v4
-        name: Setup pnpm cache
-        with:
-          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-store-
-
-      - uses: actions/setup-node@v4
         with:
           node-version-file: '.nvmrc'
           cache: 'pnpm'
