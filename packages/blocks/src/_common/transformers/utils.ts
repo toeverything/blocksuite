@@ -61,6 +61,10 @@ export class Zip {
 export class Unzip {
   private unzipped?: ReturnType<typeof fflate.unzipSync>;
 
+  async load(blob: Blob) {
+    this.unzipped = fflate.unzipSync(new Uint8Array(await blob.arrayBuffer()));
+  }
+
   *[Symbol.iterator]() {
     const keys = Object.keys(this.unzipped ?? {});
     let index = 0;
@@ -80,10 +84,6 @@ export class Unzip {
       yield { path, content, index };
       index++;
     }
-  }
-
-  async load(blob: Blob) {
-    this.unzipped = fflate.unzipSync(new Uint8Array(await blob.arrayBuffer()));
   }
 }
 

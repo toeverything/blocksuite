@@ -3,9 +3,7 @@ import * as Y from 'yjs';
 
 import type { Text } from '../reactive/index.js';
 
-import { popProp } from '../reactive/index.js';
-import { stashProp } from '../reactive/index.js';
-import { Boxed, createYProxy } from '../reactive/index.js';
+import { Boxed, createYProxy, popProp, stashProp } from '../reactive/index.js';
 
 describe('blocksuite yjs', () => {
   describe('array', () => {

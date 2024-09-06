@@ -16,6 +16,8 @@ import { ChatMessagesSchema } from './types.js';
   enableOn: ({ doc }: AIChatBlockComponent) => !doc.readonly,
 })
 export class AIChatBlockComponent extends BlockComponent<AIChatBlockModel> {
+  static override styles = AIChatBlockStyles;
+
   // Deserialize messages from JSON string and verify the type using zod
   private _deserializeChatMessages = computed(() => {
     const messages = this.model.messages$.value;
@@ -30,8 +32,6 @@ export class AIChatBlockComponent extends BlockComponent<AIChatBlockModel> {
       return [];
     }
   });
-
-  static override styles = AIChatBlockStyles;
 
   get _peekViewService() {
     return this._rootService.peekViewService;

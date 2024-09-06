@@ -8,7 +8,7 @@ import { createLitPortal } from '@blocksuite/affine-components/portal';
 import { renderGroups } from '@blocksuite/affine-components/toolbar';
 import { assertExists, noop } from '@blocksuite/global/utils';
 import { flip, offset } from '@floating-ui/dom';
-import { LitElement, html } from 'lit';
+import { html, LitElement } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
@@ -18,11 +18,11 @@ import { styles } from '../styles.js';
 
 @customElement('affine-image-toolbar')
 export class AffineImageToolbar extends LitElement {
+  static override styles = styles;
+
   private _currentOpenMenu: AbortController | null = null;
 
   private _popMenuAbortController: AbortController | null = null;
-
-  static override styles = styles;
 
   closeCurrentMenu = () => {
     if (this._currentOpenMenu && !this._currentOpenMenu.signal.aborted) {

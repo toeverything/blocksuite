@@ -9,7 +9,7 @@ import {
   once,
 } from '@blocksuite/blocks';
 import { DisposableGroup } from '@blocksuite/global/utils';
-import { type PropertyValues, css, html, nothing } from 'lit';
+import { css, html, nothing, type PropertyValues } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
@@ -115,6 +115,8 @@ export const AFFINE_FRAME_CARD = 'affine-frame-card';
 
 @customElement(AFFINE_FRAME_CARD)
 export class FrameCard extends WithDisposable(ShadowlessElement) {
+  static override styles = styles;
+
   private _clearFrameDisposables = () => {
     this._frameDisposables?.dispose();
     this._frameDisposables = null;
@@ -125,16 +127,6 @@ export class FrameCard extends WithDisposable(ShadowlessElement) {
   private _updateElement = () => {
     this.requestUpdate();
   };
-
-  static override styles = styles;
-
-  private _DraggingCardNumber() {
-    if (this.draggingCardNumber === undefined) return nothing;
-
-    return html`<div class="dragging-card-number">
-      ${this.draggingCardNumber}
-    </div>`;
-  }
 
   private _dispatchDragEvent(e: MouseEvent) {
     e.preventDefault();
@@ -194,6 +186,14 @@ export class FrameCard extends WithDisposable(ShadowlessElement) {
     }) as SelectEvent;
 
     this.dispatchEvent(event);
+  }
+
+  private _DraggingCardNumber() {
+    if (this.draggingCardNumber === undefined) return nothing;
+
+    return html`<div class="dragging-card-number">
+      ${this.draggingCardNumber}
+    </div>`;
   }
 
   private _setFrameDisposables(frame: FrameBlockModel) {

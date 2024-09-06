@@ -25,6 +25,18 @@ export class Text {
 
   private readonly _yText: Y.Text;
 
+  get deltas$() {
+    return this._deltas$;
+  }
+
+  get length() {
+    return this._length$.value;
+  }
+
+  get yText() {
+    return this._yText;
+  }
+
   constructor(
     input?: Y.Text | string | DeltaInsert[],
     onChange?: OnTextChange
@@ -329,17 +341,5 @@ export class Text {
 
   toString() {
     return this._yText?.toString() || '';
-  }
-
-  get deltas$() {
-    return this._deltas$;
-  }
-
-  get length() {
-    return this._length$.value;
-  }
-
-  get yText() {
-    return this._yText;
   }
 }

@@ -3,19 +3,18 @@ import type {
   TextAlign,
   TextVerticalAlign,
 } from '@blocksuite/affine-model';
-import type { Bound } from '@blocksuite/global/utils';
-import type { SerializedXYWH } from '@blocksuite/global/utils';
+import type { Bound, SerializedXYWH } from '@blocksuite/global/utils';
 
 import type { CanvasRenderer } from '../../canvas-renderer.js';
 
 import {
-  type TextDelta,
   deltaInsertsToChunks,
   getFontString,
   getLineHeight,
   getLineWidth,
   getTextWidth,
   measureTextInDOM,
+  type TextDelta,
   wrapText,
   wrapTextDeltas,
 } from '../text/utils.js';

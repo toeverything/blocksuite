@@ -25,6 +25,10 @@ export abstract class GfxBlockComponent<
 > extends BlockComponent<Model, Service, WidgetName> {
   [GfxElementSymbol] = true;
 
+  get gfx() {
+    return this.std.get(GfxControllerIdentifier);
+  }
+
   override connectedCallback(): void {
     super.connectedCallback();
 
@@ -88,10 +92,6 @@ export abstract class GfxBlockComponent<
   updateZIndex(): void {
     this.style.zIndex = this.toZIndex();
   }
-
-  get gfx() {
-    return this.std.get(GfxControllerIdentifier);
-  }
 }
 
 // @ts-ignore
@@ -104,6 +104,10 @@ export function toGfxBlockComponent<
   // @ts-ignore
   return class extends CustomBlock {
     [GfxElementSymbol] = true;
+
+    get gfx() {
+      return this.std.get(GfxControllerIdentifier);
+    }
 
     override connectedCallback(): void {
       super.connectedCallback();
@@ -176,10 +180,6 @@ export function toGfxBlockComponent<
 
     updateZIndex(): void {
       this.style.zIndex = this.toZIndex();
-    }
-
-    get gfx() {
-      return this.std.get(GfxControllerIdentifier);
     }
   } as B & {
     new (

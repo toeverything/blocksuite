@@ -1,6 +1,6 @@
-import type { ImageBlockModel } from '@blocksuite/affine-model';
 import type {
   AttachmentBlockProps,
+  ImageBlockModel,
   ImageBlockProps,
 } from '@blocksuite/affine-model';
 import type { EditorHost } from '@blocksuite/block-std';

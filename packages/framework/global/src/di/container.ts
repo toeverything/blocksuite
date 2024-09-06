@@ -107,12 +107,53 @@ export class Container {
   >();
 
   /**
+   * @see {@link ContainerEditor.add}
+   */
+  get add() {
+    return new ContainerEditor(this).add;
+  }
+
+  /**
+   * @see {@link ContainerEditor.addImpl}
+   */
+  get addImpl() {
+    return new ContainerEditor(this).addImpl;
+  }
+
+  /**
    * Create an empty service container.
    *
    * same as `new Container()`
    */
   static get EMPTY() {
     return new Container();
+  }
+
+  /**
+   * @see {@link ContainerEditor.scope}
+   */
+  get override() {
+    return new ContainerEditor(this).override;
+  }
+
+  /**
+   * @see {@link ContainerEditor.scope}
+   */
+  get scope() {
+    return new ContainerEditor(this).scope;
+  }
+
+  /**
+   * The number of services in the container.
+   */
+  get size() {
+    let size = 0;
+    for (const [, identifiers] of this.services) {
+      for (const [, variants] of identifiers) {
+        size += variants.size;
+      }
+    }
+    return size;
   }
 
   /**
@@ -225,47 +266,6 @@ export class Container {
     parent: ServiceProvider | null = null
   ): ServiceProvider {
     return new BasicServiceProvider(this, scope, parent);
-  }
-
-  /**
-   * @see {@link ContainerEditor.add}
-   */
-  get add() {
-    return new ContainerEditor(this).add;
-  }
-
-  /**
-   * @see {@link ContainerEditor.addImpl}
-   */
-  get addImpl() {
-    return new ContainerEditor(this).addImpl;
-  }
-
-  /**
-   * @see {@link ContainerEditor.scope}
-   */
-  get override() {
-    return new ContainerEditor(this).override;
-  }
-
-  /**
-   * @see {@link ContainerEditor.scope}
-   */
-  get scope() {
-    return new ContainerEditor(this).scope;
-  }
-
-  /**
-   * The number of services in the container.
-   */
-  get size() {
-    let size = 0;
-    for (const [, identifiers] of this.services) {
-      for (const [, variants] of identifiers) {
-        size += variants.size;
-      }
-    }
-    return size;
   }
 }
 

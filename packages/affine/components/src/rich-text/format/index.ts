@@ -10,12 +10,8 @@ export {
   FORMAT_NATIVE_SUPPORT_FLAVOURS,
   FORMAT_TEXT_SUPPORT_FLAVOURS,
 } from './consts.js';
-import './delete-text.js';
-import './format-block.js';
 import { formatNativeCommand } from './format-native.js';
-import './format-native.js';
 import { formatTextCommand } from './format-text.js';
-import './format-text.js';
 import {
   getTextStyle,
   isTextStyleActive,
@@ -26,7 +22,6 @@ import {
   toggleStrike,
   toggleUnderline,
 } from './text-style.js';
-import './text-style.js';
 export { clearMarksOnDiscontinuousInput, isFormatSupported } from './utils.js';
 
 export const textCommands: BlockCommands = {

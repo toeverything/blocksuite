@@ -137,6 +137,8 @@ export class DataViewTable extends DataViewBase<
   TableSingleView,
   TableViewSelectionWithType
 > {
+  static override styles = styles;
+
   private _addRow = (
     tableViewManager: TableSingleView,
     position: InsertToPosition | number
@@ -161,8 +163,6 @@ export class DataViewTable extends DataViewBase<
       });
     });
   };
-
-  static override styles = styles;
 
   clipboardController = new TableClipboardController(this);
 

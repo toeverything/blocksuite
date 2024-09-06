@@ -5,9 +5,9 @@ import { assertExists } from '@blocksuite/global/utils';
 import { SpecBuilder } from './spec-builder.js';
 
 export class SpecProvider {
-  private specMap = new Map<string, ExtensionType[]>();
-
   static instance: SpecProvider;
+
+  private specMap = new Map<string, ExtensionType[]>();
 
   private constructor() {}
 

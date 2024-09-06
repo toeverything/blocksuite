@@ -6,8 +6,11 @@ import {
   ShadowlessElement,
   WithDisposable,
 } from '@blocksuite/block-std';
-import { DisposableGroup, deserializeXYWH } from '@blocksuite/global/utils';
-import { Bound } from '@blocksuite/global/utils';
+import {
+  Bound,
+  deserializeXYWH,
+  DisposableGroup,
+} from '@blocksuite/global/utils';
 import { BlockViewType, type Doc, type Query } from '@blocksuite/store';
 import { css, html, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
@@ -58,6 +61,8 @@ const styles = css`
 
 @customElement('frame-preview')
 export class FramePreview extends WithDisposable(ShadowlessElement) {
+  static override styles = styles;
+
   private _clearFrameDisposables = () => {
     this._frameDisposables?.dispose();
     this._frameDisposables = null;
@@ -94,8 +99,6 @@ export class FramePreview extends WithDisposable(ShadowlessElement) {
   private _previewDoc: Doc | null = null;
 
   private _previewSpec = SpecProvider.getInstance().getSpec('edgeless:preview');
-
-  static override styles = styles;
 
   private _initPreviewDoc() {
     this._previewDoc = this.doc.collection.getDoc(this.doc.id, {

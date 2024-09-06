@@ -33,6 +33,8 @@ import { AttachmentEdgelessBlockComponent } from './attachment-edgeless-block.js
 import { addSiblingAttachmentBlocks } from './utils.js';
 
 export class AttachmentBlockService extends BlockService {
+  static override readonly flavour = AttachmentBlockSchema.model.flavour;
+
   private _dragHandleOption: DragHandleOption = {
     flavour: AttachmentBlockSchema.model.flavour,
     edgeless: true,
@@ -174,8 +176,6 @@ export class AttachmentBlockService extends BlockService {
     },
   };
 
-  static override readonly flavour = AttachmentBlockSchema.model.flavour;
-
   fileDropManager!: FileDropManager;
 
   maxFileSize = 10 * 1000 * 1000; // 10MB (default)
@@ -183,6 +183,15 @@ export class AttachmentBlockService extends BlockService {
   slots = {
     onFilesDropped: new Slot<File[]>(),
   };
+
+  get rootComponent(): RootBlockComponent | null {
+    const rootModel = this.doc.root;
+    if (!rootModel) return null;
+    const rootComponent = this.std.view.getBlock(
+      rootModel.id
+    ) as RootBlockComponent | null;
+    return rootComponent;
+  }
 
   override mounted(): void {
     super.mounted();
@@ -192,14 +201,5 @@ export class AttachmentBlockService extends BlockService {
     this.disposables.add(
       AffineDragHandleWidget.registerOption(this._dragHandleOption)
     );
-  }
-
-  get rootComponent(): RootBlockComponent | null {
-    const rootModel = this.doc.root;
-    if (!rootModel) return null;
-    const rootComponent = this.std.view.getBlock(
-      rootModel.id
-    ) as RootBlockComponent | null;
-    return rootComponent;
   }
 }

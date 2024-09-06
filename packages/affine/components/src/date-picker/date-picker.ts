@@ -1,11 +1,11 @@
 import { WithDisposable } from '@blocksuite/block-std';
 import { isSameDay, isSameMonth, isToday } from 'date-fns';
 import {
+  html,
   LitElement,
+  nothing,
   type PropertyValues,
   type TemplateResult,
-  html,
-  nothing,
 } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
@@ -50,14 +50,14 @@ type NavActionArg = {
  */
 @customElement('date-picker')
 export class DatePicker extends WithDisposable(LitElement) {
+  static override styles = datePickerStyle;
+
   /** current active month */
   private _cursor = new Date();
 
   private _maxYear = 2099;
 
   private _minYear = 1970;
-
-  static override styles = datePickerStyle;
 
   get _cardStyle() {
     return {
@@ -68,6 +68,49 @@ export class DatePicker extends WithDisposable(LitElement) {
       'min-height': `${this.cardHeight}px`,
       padding: `${this.padding}px`,
     };
+  }
+
+  get cardHeight() {
+    const rowNum = 7;
+    return this.size * rowNum + this.padding * 2 + this.gapV * (rowNum - 1) - 2;
+  }
+
+  get cardWidth() {
+    const colNum = 7;
+    return this.size * colNum + this.padding * 2 + this.gapH * (colNum - 1);
+  }
+
+  get date() {
+    return this._cursor.getDate();
+  }
+
+  get day() {
+    return this._cursor.getDay();
+  }
+
+  get dayLabel() {
+    return days[this.day];
+  }
+
+  get minHeight() {
+    const rowNum = 8;
+    return this.size * rowNum + this.padding * 2 + this.gapV * (rowNum - 1) - 2;
+  }
+
+  get month() {
+    return this._cursor.getMonth();
+  }
+
+  get monthLabel() {
+    return months[this.month];
+  }
+
+  get year() {
+    return this._cursor.getFullYear();
+  }
+
+  get yearLabel() {
+    return this.year;
   }
 
   /** Cell */
@@ -503,49 +546,6 @@ export class DatePicker extends WithDisposable(LitElement) {
       if (this.value) this._onChange(toDate(this.value), false);
       else this._getMatrix();
     }
-  }
-
-  get cardHeight() {
-    const rowNum = 7;
-    return this.size * rowNum + this.padding * 2 + this.gapV * (rowNum - 1) - 2;
-  }
-
-  get cardWidth() {
-    const colNum = 7;
-    return this.size * colNum + this.padding * 2 + this.gapH * (colNum - 1);
-  }
-
-  get date() {
-    return this._cursor.getDate();
-  }
-
-  get day() {
-    return this._cursor.getDay();
-  }
-
-  get dayLabel() {
-    return days[this.day];
-  }
-
-  get minHeight() {
-    const rowNum = 8;
-    return this.size * rowNum + this.padding * 2 + this.gapV * (rowNum - 1) - 2;
-  }
-
-  get month() {
-    return this._cursor.getMonth();
-  }
-
-  get monthLabel() {
-    return months[this.month];
-  }
-
-  get year() {
-    return this._cursor.getFullYear();
-  }
-
-  get yearLabel() {
-    return this.year;
   }
 
   /** date matrix */

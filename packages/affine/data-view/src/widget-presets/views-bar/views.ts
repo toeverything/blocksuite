@@ -20,6 +20,53 @@ import { WidgetBase } from '../../core/widget/widget-base.js';
 
 @customElement('data-view-header-views')
 export class DataViewHeaderViews extends WidgetBase {
+  static override styles = css`
+    data-view-header-views {
+      height: 32px;
+      display: flex;
+      user-select: none;
+      gap: 4px;
+    }
+    data-view-header-views::-webkit-scrollbar-thumb {
+      width: 1px;
+    }
+
+    .database-view-button {
+      height: 100%;
+      cursor: pointer;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      color: var(--affine-text-secondary-color);
+      white-space: nowrap;
+    }
+
+    .database-view-button .name {
+      align-items: center;
+      height: 22px;
+      max-width: 100px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .database-view-button .icon {
+      margin-right: 6px;
+      display: block;
+    }
+
+    .database-view-button .icon svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    .database-view-button.active {
+      color: var(--affine-text-primary-color);
+      background-color: var(--affine-hover-color-filled);
+    }
+  `;
+
   _addViewMenu = (event: MouseEvent) => {
     popFilterableSimpleMenu(
       event.target as HTMLElement,
@@ -83,53 +130,6 @@ export class DataViewHeaderViews extends WidgetBase {
       },
     ]);
   };
-
-  static override styles = css`
-    data-view-header-views {
-      height: 32px;
-      display: flex;
-      user-select: none;
-      gap: 4px;
-    }
-    data-view-header-views::-webkit-scrollbar-thumb {
-      width: 1px;
-    }
-
-    .database-view-button {
-      height: 100%;
-      cursor: pointer;
-      padding: 4px 8px;
-      border-radius: 4px;
-      font-size: 14px;
-      display: flex;
-      align-items: center;
-      color: var(--affine-text-secondary-color);
-      white-space: nowrap;
-    }
-
-    .database-view-button .name {
-      align-items: center;
-      height: 22px;
-      max-width: 100px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .database-view-button .icon {
-      margin-right: 6px;
-      display: block;
-    }
-
-    .database-view-button .icon svg {
-      width: 16px;
-      height: 16px;
-    }
-
-    .database-view-button.active {
-      color: var(--affine-text-primary-color);
-      background-color: var(--affine-hover-color-filled);
-    }
-  `;
 
   openViewOption = (target: HTMLElement, id: string) => {
     if (this.readonly) {
@@ -259,16 +259,20 @@ export class DataViewHeaderViews extends WidgetBase {
     });
   };
 
+  get readonly() {
+    return this.viewManager.readonly$.value;
+  }
+
+  private getRenderer(viewId: string) {
+    return this.dataSource.viewMetaGetById(viewId).renderer;
+  }
+
   _clickView(event: MouseEvent, id: string) {
     if (this.viewManager.currentViewId$.value !== id) {
       this.viewManager.setCurrentView(id);
       return;
     }
     this.openViewOption(event.target as HTMLElement, id);
-  }
-
-  private getRenderer(viewId: string) {
-    return this.dataSource.viewMetaGetById(viewId).renderer;
   }
 
   override render() {
@@ -278,10 +282,6 @@ export class DataViewHeaderViews extends WidgetBase {
         .renderMore="${this.renderMore}"
       ></component-overflow>
     `;
-  }
-
-  get readonly() {
-    return this.viewManager.readonly$.value;
   }
 }
 

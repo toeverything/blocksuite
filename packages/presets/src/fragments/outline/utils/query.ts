@@ -1,11 +1,12 @@
-import type {
-  NoteDisplayMode,
-  ParagraphBlockModel,
-  RootBlockModel,
-} from '@blocksuite/blocks';
 import type { BlockModel, Doc } from '@blocksuite/store';
 
-import { BlocksUtils, type NoteBlockModel } from '@blocksuite/blocks';
+import {
+  BlocksUtils,
+  type NoteBlockModel,
+  type NoteDisplayMode,
+  type ParagraphBlockModel,
+  type RootBlockModel,
+} from '@blocksuite/blocks';
 
 import { headingKeys } from '../config.js';
 

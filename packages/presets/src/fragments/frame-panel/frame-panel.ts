@@ -2,7 +2,7 @@ import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { FramePreview } from '@blocksuite/blocks';
 import { DisposableGroup } from '@blocksuite/global/utils';
 import { baseTheme } from '@toeverything/theme';
-import { type PropertyValues, css, html, unsafeCSS } from 'lit';
+import { css, html, type PropertyValues, unsafeCSS } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 import type { AffineEditorContainer } from '../../index.js';
@@ -66,9 +66,21 @@ export const AFFINE_FRAME_PANEL = 'affine-frame-panel';
 
 @customElement(AFFINE_FRAME_PANEL)
 export class FramePanel extends WithDisposable(ShadowlessElement) {
+  static override styles = styles;
+
   private _editorDisposables: DisposableGroup | null = null;
 
-  static override styles = styles;
+  get doc() {
+    return this.editor.doc;
+  }
+
+  get edgeless() {
+    return this.editor.querySelector('affine-edgeless-root');
+  }
+
+  get host() {
+    return this.editor.host;
+  }
 
   private _clearEditorDisposables() {
     this._editorDisposables?.dispose();
@@ -128,18 +140,6 @@ export class FramePanel extends WithDisposable(ShadowlessElement) {
     if (_changedProperties.has('editor')) {
       this._setEditorDisposables();
     }
-  }
-
-  get doc() {
-    return this.editor.doc;
-  }
-
-  get edgeless() {
-    return this.editor.querySelector('affine-edgeless-root');
-  }
-
-  get host() {
-    return this.editor.host;
   }
 
   @property({ attribute: false })

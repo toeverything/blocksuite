@@ -32,6 +32,10 @@ export function WithDisposable<T extends Constructor<LitElement>>(
   class DerivedClass extends SuperClass {
     protected _disposables = new DisposableGroup();
 
+    get disposables() {
+      return this._disposables;
+    }
+
     override connectedCallback() {
       super.connectedCallback();
       if (this._disposables.disposed) {
@@ -42,10 +46,6 @@ export function WithDisposable<T extends Constructor<LitElement>>(
     override disconnectedCallback() {
       super.disconnectedCallback();
       this._disposables.dispose();
-    }
-
-    get disposables() {
-      return this._disposables;
     }
   }
   return DerivedClass as unknown as T & Constructor<DisposableClass>;

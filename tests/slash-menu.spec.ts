@@ -2,7 +2,6 @@ import { expect } from '@playwright/test';
 
 import { addNote, switchEditorMode } from './utils/actions/edgeless.js';
 import {
-  SHORT_KEY,
   pressArrowDown,
   pressArrowLeft,
   pressArrowRight,
@@ -14,6 +13,7 @@ import {
   pressShiftTab,
   pressTab,
   redoByKeyboard,
+  SHORT_KEY,
   type,
   undoByKeyboard,
 } from './utils/actions/keyboard.js';

@@ -1,5 +1,4 @@
 import type { GfxCompatibleProps } from '@blocksuite/affine-model';
-import type { GfxBlockComponent } from '@blocksuite/block-std';
 import type { GfxBlockElementModel } from '@blocksuite/block-std/gfx';
 import type { BlockModel } from '@blocksuite/store';
 import type { TemplateResult } from 'lit';
@@ -8,9 +7,10 @@ import { CaptionedBlockComponent } from '@blocksuite/affine-components/caption';
 import { DocModeProvider } from '@blocksuite/affine-shared/services';
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import {
-  type BlockService,
-  GfxElementSymbol,
   blockComponentSymbol,
+  type BlockService,
+  type GfxBlockComponent,
+  GfxElementSymbol,
   isGfxBlockComponent,
   toGfxBlockComponent,
 } from '@blocksuite/block-std';
@@ -42,7 +42,7 @@ export class EmbedBlockComponent<
   Service extends BlockService = BlockService,
   WidgetName extends string = string,
 > extends CaptionedBlockComponent<Model, Service, WidgetName> {
-  protected _cardStyle: EmbedCardStyle = 'horizontal';
+  static override styles = styles;
 
   private _dragHandleOption: DragHandleOption = {
     flavour: /affine:embed-*/,
@@ -136,11 +136,11 @@ export class EmbedBlockComponent<
 
   private _fetchAbortController = new AbortController();
 
+  protected _cardStyle: EmbedCardStyle = 'horizontal';
+
   protected _height = EMBED_CARD_HEIGHT.horizontal;
 
   protected _width = EMBED_CARD_WIDTH.horizontal;
-
-  static override styles = styles;
 
   protected embedContainerStyle: StyleInfo = {
     position: 'relative',
@@ -178,6 +178,10 @@ export class EmbedBlockComponent<
     `;
   };
 
+  get fetchAbortController() {
+    return this._fetchAbortController;
+  }
+
   override connectedCallback() {
     super.connectedCallback();
 
@@ -193,10 +197,6 @@ export class EmbedBlockComponent<
   override disconnectedCallback(): void {
     super.disconnectedCallback();
     this._fetchAbortController.abort();
-  }
-
-  get fetchAbortController() {
-    return this._fetchAbortController;
   }
 
   protected override accessor blockContainerStyles: StyleInfo | undefined = {
@@ -230,8 +230,6 @@ export function toEdgelessEmbedBlock<
 
     _showOverlay = false;
 
-    [GfxElementSymbol] = true;
-
     [blockComponentSymbol] = true;
 
     protected override embedContainerStyle: StyleInfo = {
@@ -240,6 +238,16 @@ export function toEdgelessEmbedBlock<
       height: '100%',
       transformOrigin: '0 0',
     };
+
+    [GfxElementSymbol] = true;
+
+    get bound(): Bound {
+      return Bound.deserialize(this.model.xywh);
+    }
+
+    get rootService() {
+      return this.std.getService('affine:page') as EdgelessRootService;
+    }
 
     _handleClick(_: MouseEvent): void {
       return;
@@ -275,14 +283,6 @@ export function toEdgelessEmbedBlock<
       this.embedContainerStyle.transform = `scale(${scaleX}, ${scaleY})`;
 
       return this.renderPageContent();
-    }
-
-    get bound(): Bound {
-      return Bound.deserialize(this.model.xywh);
-    }
-
-    get rootService() {
-      return this.std.getService('affine:page') as EdgelessRootService;
     }
 
     protected override accessor blockContainerStyles: StyleInfo | undefined =

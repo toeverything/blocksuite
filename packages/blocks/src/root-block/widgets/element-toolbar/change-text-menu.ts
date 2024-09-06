@@ -1,10 +1,8 @@
-import type { ColorScheme } from '@blocksuite/affine-model';
-
 import {
+  ConnectorUtils,
   normalizeShapeBound,
   TextUtils,
 } from '@blocksuite/affine-block-surface';
-import { ConnectorUtils } from '@blocksuite/affine-block-surface';
 import {
   SmallArrowDownIcon,
   TextAlignCenterIcon,
@@ -12,8 +10,8 @@ import {
   TextAlignRightIcon,
 } from '@blocksuite/affine-components/icons';
 import { renderToolbarSeparator } from '@blocksuite/affine-components/toolbar';
-import { ShapeElementModel } from '@blocksuite/affine-model';
 import {
+  type ColorScheme,
   FontFamily,
   FontStyle,
   FontWeight,
@@ -24,11 +22,12 @@ import {
   ConnectorElementModel,
   EdgelessTextBlockModel,
   LINE_COLORS,
+  ShapeElementModel,
   TextElementModel,
 } from '@blocksuite/affine-model';
 import { WithDisposable } from '@blocksuite/block-std';
 import { Bound, countBy, maxBy } from '@blocksuite/global/utils';
-import { LitElement, type TemplateResult, css, html, nothing } from 'lit';
+import { css, html, LitElement, nothing, type TemplateResult } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { choose } from 'lit/directives/choose.js';
 import { join } from 'lit/directives/join.js';
@@ -171,6 +170,16 @@ function buildProps(
 
 @customElement('edgeless-change-text-menu')
 export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
+  static override styles = css`
+    :host {
+      display: inherit;
+      align-items: inherit;
+      justify-content: inherit;
+      gap: inherit;
+      height: 100%;
+    }
+  `;
+
   private _setFontFamily = (fontFamily: FontFamily) => {
     const currentFontWeight = getMostCommonFontWeight(this.elements);
     const fontWeight = TextUtils.isFontWeightSupported(
@@ -296,16 +305,6 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
     // no need to update the bound of edgeless text block, which updates itself using ResizeObserver
   };
 
-  static override styles = css`
-    :host {
-      display: inherit;
-      align-items: inherit;
-      justify-content: inherit;
-      gap: inherit;
-      height: 100%;
-    }
-  `;
-
   pickColor = (event: PickColorEvent) => {
     if (event.type === 'pick') {
       this.elements.forEach(ele => {
@@ -335,6 +334,10 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
       ele[event.type === 'start' ? 'stash' : 'pop'](key);
     });
   };
+
+  get service() {
+    return this.edgeless.service;
+  }
 
   override render() {
     const colorScheme = this.edgeless.surface.renderer.getColorScheme();
@@ -505,18 +508,14 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
     );
   }
 
-  get service() {
-    return this.edgeless.service;
-  }
-
   @property({ attribute: false })
   accessor edgeless!: EdgelessRootBlockComponent;
 
   @property({ attribute: false })
-  accessor elementType!: BlockSuite.EdgelessTextModelKeyType;
+  accessor elements!: BlockSuite.EdgelessTextModelType[];
 
   @property({ attribute: false })
-  accessor elements!: BlockSuite.EdgelessTextModelType[];
+  accessor elementType!: BlockSuite.EdgelessTextModelKeyType;
 
   @query('edgeless-color-picker-button.text-color')
   accessor textColorButton!: EdgelessColorPickerButton;

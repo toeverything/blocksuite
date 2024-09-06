@@ -24,6 +24,18 @@ export function SignalWatcher<T extends ReactiveElementConstructor>(
   abstract class SignalWatcher extends Base {
     private __dispose?: () => void;
 
+    override connectedCallback(): void {
+      super.connectedCallback();
+      // In order to listen for signals again after re-connection, we must
+      // re-render to capture all the current signal accesses.
+      this.requestUpdate();
+    }
+
+    override disconnectedCallback(): void {
+      super.disconnectedCallback();
+      this.__dispose?.();
+    }
+
     override performUpdate() {
       // ReactiveElement.performUpdate() also does this check, so we want to
       // also bail early so we don't erroneously appear to not depend on any
@@ -57,18 +69,6 @@ export function SignalWatcher<T extends ReactiveElementConstructor>(
           this.requestUpdate();
         }
       });
-    }
-
-    override connectedCallback(): void {
-      super.connectedCallback();
-      // In order to listen for signals again after re-connection, we must
-      // re-render to capture all the current signal accesses.
-      this.requestUpdate();
-    }
-
-    override disconnectedCallback(): void {
-      super.disconnectedCallback();
-      this.__dispose?.();
     }
   }
   return SignalWatcher;

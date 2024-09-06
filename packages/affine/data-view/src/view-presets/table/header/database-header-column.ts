@@ -4,13 +4,13 @@ import {
   popMenu,
 } from '@blocksuite/affine-components/context-menu';
 import {
-  type InsertToPosition,
   insertPositionToIndex,
+  type InsertToPosition,
 } from '@blocksuite/affine-shared/utils';
 import {
   ShadowlessElement,
-  WithDisposable,
   SignalWatcher,
+  WithDisposable,
 } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import {
@@ -52,6 +52,16 @@ import {
 export class DatabaseHeaderColumn extends SignalWatcher(
   WithDisposable(ShadowlessElement)
 ) {
+  static override styles = css`
+    affine-database-header-column {
+      display: flex;
+    }
+
+    .affine-database-header-column-grabbing * {
+      cursor: grabbing;
+    }
+  `;
+
   private _clickColumn = () => {
     if (this.tableViewManager.readonly$.value) {
       return;
@@ -301,19 +311,13 @@ export class DatabaseHeaderColumn extends SignalWatcher(
 
   private widthDragBar = createRef();
 
-  static override styles = css`
-    affine-database-header-column {
-      display: flex;
-    }
-
-    .affine-database-header-column-grabbing * {
-      cursor: grabbing;
-    }
-  `;
-
   editTitle = () => {
     this._clickColumn();
   };
+
+  private get readonly() {
+    return this.tableViewManager.readonly$.value;
+  }
 
   private popMenu(ele?: HTMLElement) {
     const enableNumberFormatting =
@@ -485,10 +489,6 @@ export class DatabaseHeaderColumn extends SignalWatcher(
         ],
       },
     });
-  }
-
-  private get readonly() {
-    return this.tableViewManager.readonly$.value;
   }
 
   private widthDragStart(event: PointerEvent) {

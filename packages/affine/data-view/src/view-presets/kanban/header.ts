@@ -1,8 +1,8 @@
 import { popMenu } from '@blocksuite/affine-components/context-menu';
 import {
   ShadowlessElement,
-  WithDisposable,
   SignalWatcher,
+  WithDisposable,
 } from '@blocksuite/block-std';
 import { css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
@@ -34,6 +34,8 @@ const styles = css`
 export class KanbanHeader extends SignalWatcher(
   WithDisposable(ShadowlessElement)
 ) {
+  static override styles = styles;
+
   private clickGroup = (e: MouseEvent) => {
     popMenu(e.target as HTMLElement, {
       options: {
@@ -54,8 +56,6 @@ export class KanbanHeader extends SignalWatcher(
       },
     });
   };
-
-  static override styles = styles;
 
   override render() {
     return html`

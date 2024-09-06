@@ -1,6 +1,6 @@
-import { ShapeType, type ShapeName } from '@blocksuite/affine-model';
+import { type ShapeName, ShapeType } from '@blocksuite/affine-model';
 import { SignalWatcher } from '@blocksuite/block-std';
-import { LitElement, css, html } from 'lit';
+import { css, html, LitElement } from 'lit';
 import { customElement } from 'lit/decorators.js';
 
 import type { DraggableShape } from './utils.js';
@@ -29,8 +29,6 @@ export class EdgelessShapeToolButton extends EdgelessToolbarToolMixin(
     }
   `;
 
-  override type = 'shape' as const;
-
   private _handleShapeClick = (shape: DraggableShape) => {
     this.setEdgelessTool({
       type: this.type,
@@ -48,6 +46,8 @@ export class EdgelessShapeToolButton extends EdgelessToolbarToolMixin(
     });
     if (!this.popper) this._toggleMenu();
   };
+
+  override type = 'shape' as const;
 
   private _toggleMenu() {
     this.createPopper('edgeless-shape-menu', this, {

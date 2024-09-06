@@ -1,4 +1,4 @@
-import { LitElement, css } from 'lit';
+import { css, LitElement } from 'lit';
 import { customElement } from 'lit/decorators.js';
 
 @customElement('editor-toolbar-separator')

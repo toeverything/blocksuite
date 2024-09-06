@@ -1,4 +1,3 @@
-import type { ShapeFillColor } from '@blocksuite/affine-model';
 import type { Signal } from '@lit-labs/preact-signals';
 
 import {
@@ -9,6 +8,7 @@ import {
   DEFAULT_SHAPE_FILL_COLOR,
   LineColor,
   SHAPE_FILL_COLORS,
+  type ShapeFillColor,
   type ShapeName,
   ShapeStyle,
   ShapeType,
@@ -16,7 +16,7 @@ import {
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import { SignalWatcher } from '@blocksuite/block-std';
 import { computed, signal } from '@lit-labs/preact-signals';
-import { LitElement, css, html } from 'lit';
+import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 import type { EdgelessRootBlockComponent } from '../../../edgeless-root-block.js';
@@ -32,6 +32,33 @@ import {
 
 @customElement('edgeless-shape-menu')
 export class EdgelessShapeMenu extends SignalWatcher(LitElement) {
+  static override styles = css`
+    :host {
+      display: flex;
+      z-index: -1;
+    }
+    .menu-content {
+      display: flex;
+      align-items: center;
+    }
+    .shape-type-container,
+    .shape-style-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+    }
+    .shape-type-container svg,
+    .shape-style-container svg {
+      fill: var(--affine-icon-color);
+      stroke: none;
+    }
+    menu-divider {
+      height: 24px;
+      margin: 0 9px;
+    }
+  `;
+
   private _props$ = computed(() => {
     const shapeName: ShapeName = this._shapeName$.value;
     const { shapeStyle, fillColor, strokeColor, radius } =
@@ -74,33 +101,6 @@ export class EdgelessShapeMenu extends SignalWatcher(LitElement) {
   };
 
   private _shapeName$: Signal<ShapeName> = signal(ShapeType.Rect);
-
-  static override styles = css`
-    :host {
-      display: flex;
-      z-index: -1;
-    }
-    .menu-content {
-      display: flex;
-      align-items: center;
-    }
-    .shape-type-container,
-    .shape-style-container {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 14px;
-    }
-    .shape-type-container svg,
-    .shape-style-container svg {
-      fill: var(--affine-icon-color);
-      stroke: none;
-    }
-    menu-divider {
-      height: 24px;
-      margin: 0 9px;
-    }
-  `;
 
   override connectedCallback(): void {
     super.connectedCallback();

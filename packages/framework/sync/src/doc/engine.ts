@@ -54,6 +54,14 @@ export class DocEngine {
 
   readonly priorityTarget = new SharedPriorityTarget();
 
+  get rootDocId() {
+    return this.rootDoc.guid;
+  }
+
+  get status() {
+    return this._status;
+  }
+
   constructor(
     readonly rootDoc: Doc,
     readonly main: DocSource,
@@ -276,13 +284,5 @@ export class DocEngine {
         }),
       ]);
     }
-  }
-
-  get rootDocId() {
-    return this.rootDoc.guid;
-  }
-
-  get status() {
-    return this._status;
   }
 }

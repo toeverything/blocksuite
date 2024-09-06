@@ -12,26 +12,6 @@ type SliceData = {
 };
 
 export class Slice {
-  constructor(readonly data: SliceData) {}
-
-  static fromModels(doc: Doc, models: DraftModel[]) {
-    const meta = doc.collection.meta;
-    const { pageVersion, workspaceVersion } = meta;
-    if (!pageVersion || !workspaceVersion) {
-      throw new BlockSuiteError(
-        ErrorCode.ModelCRUDError,
-        'pageVersion or workspaceVersion not found when creating slice'
-      );
-    }
-    return new Slice({
-      content: models,
-      workspaceId: doc.collection.id,
-      pageId: doc.id,
-      pageVersion,
-      workspaceVersion,
-    });
-  }
-
   get content() {
     return this.data.content;
   }
@@ -50,5 +30,25 @@ export class Slice {
 
   get workspaceVersion() {
     return this.data.workspaceVersion;
+  }
+
+  constructor(readonly data: SliceData) {}
+
+  static fromModels(doc: Doc, models: DraftModel[]) {
+    const meta = doc.collection.meta;
+    const { pageVersion, workspaceVersion } = meta;
+    if (!pageVersion || !workspaceVersion) {
+      throw new BlockSuiteError(
+        ErrorCode.ModelCRUDError,
+        'pageVersion or workspaceVersion not found when creating slice'
+      );
+    }
+    return new Slice({
+      content: models,
+      workspaceId: doc.collection.id,
+      pageId: doc.id,
+      pageVersion,
+      workspaceVersion,
+    });
   }
 }

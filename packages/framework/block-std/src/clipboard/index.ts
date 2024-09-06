@@ -58,6 +58,8 @@ export function onlyContainImgElement(
 }
 
 export class Clipboard extends LifeCycleWatcher {
+  static override readonly key = 'clipboard';
+
   private _adapterMap: AdapterMap = new Map();
 
   // Need to be cloned to a map for later use
@@ -154,8 +156,6 @@ export class Clipboard extends LifeCycleWatcher {
   };
 
   private _jobMiddlewares: JobMiddleware[] = [];
-
-  static override readonly key = 'clipboard';
 
   copy = async (slice: Slice) => {
     return this.copySlice(slice);
@@ -265,6 +265,10 @@ export class Clipboard extends LifeCycleWatcher {
     this._jobMiddlewares.push(middleware);
   };
 
+  get configs() {
+    return this._getJob().adapterConfigs;
+  }
+
   private async _getClipboardItem(slice: Slice, type: string) {
     const job = this._getJob();
     const adapterItem = this._adapterMap.get(type);
@@ -351,9 +355,5 @@ export class Clipboard extends LifeCycleWatcher {
       clipboardItems['image/png'] = pngBlob;
     }
     await navigator.clipboard.write([new ClipboardItem(clipboardItems)]);
-  }
-
-  get configs() {
-    return this._getJob().adapterConfigs;
   }
 }

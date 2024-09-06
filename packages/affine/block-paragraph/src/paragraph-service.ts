@@ -1,9 +1,9 @@
 import {
+  affineInlineMarkdownMatches,
   type AffineTextAttributes,
+  getAffineInlineSpecsWithReference,
   InlineManager,
   ReferenceNodeConfig,
-  affineInlineMarkdownMatches,
-  getAffineInlineSpecsWithReference,
   textKeymap,
 } from '@blocksuite/affine-components/rich-text';
 import {

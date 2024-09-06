@@ -2,8 +2,8 @@ import type { BaseCellRenderer } from './base-cell.js';
 import type { CellRenderer, DataViewCellComponent } from './manager.js';
 
 import {
-  type UniComponent,
   createUniComponentFromWebComponent,
+  type UniComponent,
 } from '../utils/uni-component/index.js';
 
 export interface Renderer<

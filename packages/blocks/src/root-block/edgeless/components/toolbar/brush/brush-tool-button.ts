@@ -5,7 +5,7 @@ import {
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import { SignalWatcher } from '@blocksuite/block-std';
 import { computed } from '@lit-labs/preact-signals';
-import { LitElement, css, html } from 'lit';
+import { css, html, LitElement } from 'lit';
 import { customElement } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
@@ -18,12 +18,6 @@ import './brush-menu.js';
 export class EdgelessBrushToolButton extends EdgelessToolbarToolMixin(
   SignalWatcher(LitElement)
 ) {
-  private _color$ = computed(() => {
-    return ThemeObserver.generateColorProperty(
-      this.edgeless.service.editPropsStore.lastProps$.value.brush.color
-    );
-  });
-
   static override styles = css`
     :host {
       display: flex;
@@ -49,6 +43,12 @@ export class EdgelessBrushToolButton extends EdgelessToolbarToolMixin(
       transform: translateY(0);
     }
   `;
+
+  private _color$ = computed(() => {
+    return ThemeObserver.generateColorProperty(
+      this.edgeless.service.editPropsStore.lastProps$.value.brush.color
+    );
+  });
 
   override enableActiveBackground = true;
 

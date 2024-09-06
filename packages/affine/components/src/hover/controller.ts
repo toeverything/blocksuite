@@ -70,9 +70,9 @@ const abortHoverPortal = ({
 };
 
 export class HoverController implements ReactiveController {
-  private _abortController?: AbortController;
+  static globalAbortController?: AbortController;
 
-  protected _disposables = new DisposableGroup();
+  private _abortController?: AbortController;
 
   private readonly _hoverOptions: HoverOptions;
 
@@ -88,7 +88,7 @@ export class HoverController implements ReactiveController {
     console.error('setReference is not ready');
   };
 
-  static globalAbortController?: AbortController;
+  protected _disposables = new DisposableGroup();
 
   host: ReactiveElement;
 
@@ -98,6 +98,23 @@ export class HoverController implements ReactiveController {
   onAbort = () => {
     this.abort();
   };
+
+  /**
+   * Whether the host is currently hovering.
+   *
+   * This property is unreliable when the floating element disconnect from the DOM suddenly.
+   */
+  get isHovering() {
+    return this._isHovering;
+  }
+
+  get portal() {
+    return this._portal;
+  }
+
+  get setReference() {
+    return this._setReference;
+  }
 
   constructor(
     host: ReactiveElement,
@@ -182,22 +199,5 @@ export class HoverController implements ReactiveController {
   hostDisconnected() {
     this._abortController?.abort();
     this._disposables.dispose();
-  }
-
-  /**
-   * Whether the host is currently hovering.
-   *
-   * This property is unreliable when the floating element disconnect from the DOM suddenly.
-   */
-  get isHovering() {
-    return this._isHovering;
-  }
-
-  get portal() {
-    return this._portal;
-  }
-
-  get setReference() {
-    return this._setReference;
   }
 }

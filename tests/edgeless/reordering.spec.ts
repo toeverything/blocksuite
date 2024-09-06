@@ -1,7 +1,6 @@
-import { type Page, expect } from '@playwright/test';
+import { expect, type Page } from '@playwright/test';
 
 import {
-  Shape,
   createShapeElement,
   edgelessCommonSetup,
   getFirstGroupId,
@@ -9,6 +8,7 @@ import {
   getSortedIds,
   initThreeOverlapFilledShapes,
   initThreeOverlapNotes,
+  Shape,
   shiftClickView,
   switchEditorMode,
   triggerComponentToolbarAction,

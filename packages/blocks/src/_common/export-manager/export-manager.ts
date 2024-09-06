@@ -15,8 +15,7 @@ import {
   matchFlavours,
 } from '@blocksuite/affine-shared/utils';
 import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
-import { assertExists } from '@blocksuite/global/utils';
-import { Bound } from '@blocksuite/global/utils';
+import { assertExists, Bound } from '@blocksuite/global/utils';
 
 import type { GfxBlockModel } from '../../root-block/edgeless/block-model.js';
 import type { EdgelessRootBlockComponent } from '../../root-block/edgeless/edgeless-root-block.js';
@@ -103,6 +102,14 @@ export class ExportManager {
     // Wait for all promises to resolve
     await Promise.all(promises);
   };
+
+  get doc(): Doc {
+    return this._blockService.std.doc;
+  }
+
+  get editorHost(): EditorHost {
+    return this._blockService.std.host;
+  }
 
   constructor(blockService: BlockService, options: ExportOptions) {
     this._exportOptions = options;
@@ -569,13 +576,5 @@ export class ExportManager {
       (this.doc.root as RootBlockModel).title.toString(),
       canvasImage.toDataURL('image/png')
     );
-  }
-
-  get doc(): Doc {
-    return this._blockService.std.doc;
-  }
-
-  get editorHost(): EditorHost {
-    return this._blockService.std.host;
   }
 }

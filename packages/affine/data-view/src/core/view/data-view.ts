@@ -120,6 +120,10 @@ export const viewType = <Type extends string>(type: Type) => ({
 export class ViewRendererManager {
   private map = new Map<string, DataViewRendererConfig>();
 
+  get all() {
+    return Array.from(this.map.values());
+  }
+
   getView(type: string): DataViewRendererConfig {
     const view = this.map.get(type);
     if (!view) {
@@ -129,10 +133,6 @@ export class ViewRendererManager {
       );
     }
     return view;
-  }
-
-  get all() {
-    return Array.from(this.map.values());
   }
 }
 

@@ -18,68 +18,13 @@ import { repeat } from 'lit/directives/repeat.js';
 import {
   type Filter,
   type FilterGroup,
-  type Variable,
   firstFilter,
+  type Variable,
 } from '../../core/common/ast.js';
-import './condition.js';
 import { popAddNewFilter } from './condition.js';
 
 @customElement('filter-group-view')
 export class FilterGroupView extends WithDisposable(ShadowlessElement) {
-  private _addNew = (e: MouseEvent) => {
-    if (this.isMaxDepth) {
-      this.setData({
-        ...this.data,
-        conditions: [...this.data.conditions, firstFilter(this.vars)],
-      });
-      return;
-    }
-    popAddNewFilter(e.target as HTMLElement, {
-      value: this.data,
-      onChange: this.setData,
-      vars: this.vars,
-    });
-  };
-
-  private _selectOp = (event: MouseEvent) => {
-    popFilterableSimpleMenu(event.target as HTMLElement, [
-      {
-        type: 'action',
-        name: 'And',
-        select: () => {
-          this.setData({
-            ...this.data,
-            op: 'and',
-          });
-        },
-      },
-      {
-        type: 'action',
-        name: 'Or',
-        select: () => {
-          this.setData({
-            ...this.data,
-            op: 'or',
-          });
-        },
-      },
-    ]);
-  };
-
-  private _setFilter = (index: number, filter: Filter) => {
-    this.setData({
-      ...this.data,
-      conditions: this.data.conditions.map((v, i) =>
-        index === i ? filter : v
-      ),
-    });
-  };
-
-  private opMap = {
-    and: 'And',
-    or: 'Or',
-  };
-
   static override styles = css`
     filter-group-view {
       border-radius: 4px;
@@ -205,6 +150,64 @@ export class FilterGroupView extends WithDisposable(ShadowlessElement) {
     }
   `;
 
+  private _addNew = (e: MouseEvent) => {
+    if (this.isMaxDepth) {
+      this.setData({
+        ...this.data,
+        conditions: [...this.data.conditions, firstFilter(this.vars)],
+      });
+      return;
+    }
+    popAddNewFilter(e.target as HTMLElement, {
+      value: this.data,
+      onChange: this.setData,
+      vars: this.vars,
+    });
+  };
+
+  private _selectOp = (event: MouseEvent) => {
+    popFilterableSimpleMenu(event.target as HTMLElement, [
+      {
+        type: 'action',
+        name: 'And',
+        select: () => {
+          this.setData({
+            ...this.data,
+            op: 'and',
+          });
+        },
+      },
+      {
+        type: 'action',
+        name: 'Or',
+        select: () => {
+          this.setData({
+            ...this.data,
+            op: 'or',
+          });
+        },
+      },
+    ]);
+  };
+
+  private _setFilter = (index: number, filter: Filter) => {
+    this.setData({
+      ...this.data,
+      conditions: this.data.conditions.map((v, i) =>
+        index === i ? filter : v
+      ),
+    });
+  };
+
+  private opMap = {
+    and: 'And',
+    or: 'Or',
+  };
+
+  private get isMaxDepth() {
+    return this.depth === 3;
+  }
+
   private _clickConditionOps(target: HTMLElement, i: number) {
     const filter = this.data.conditions[i];
     popFilterableSimpleMenu(target, [
@@ -267,10 +270,6 @@ export class FilterGroupView extends WithDisposable(ShadowlessElement) {
         ],
       },
     ]);
-  }
-
-  private get isMaxDepth() {
-    return this.depth === 3;
   }
 
   override render() {

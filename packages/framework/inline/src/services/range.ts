@@ -334,6 +334,26 @@ export class RangeService<TextAttributes extends BaseTextAttributes> {
     return domRangeToInlineRange(range, rootElement, yText);
   };
 
+  get inlineRangeProvider() {
+    return this.editor.inlineRangeProvider;
+  }
+
+  get lastEndRelativePosition() {
+    return this._lastEndRelativePosition;
+  }
+
+  get lastStartRelativePosition() {
+    return this._lastStartRelativePosition;
+  }
+
+  get rootElement() {
+    return this.editor.rootElement;
+  }
+
+  get yText() {
+    return this.editor.yText;
+  }
+
   constructor(readonly editor: InlineEditor<TextAttributes>) {}
 
   // the number is related to the VLine's textLength
@@ -403,25 +423,5 @@ export class RangeService<TextAttributes extends BaseTextAttributes> {
     }
 
     return null;
-  }
-
-  get inlineRangeProvider() {
-    return this.editor.inlineRangeProvider;
-  }
-
-  get lastEndRelativePosition() {
-    return this._lastEndRelativePosition;
-  }
-
-  get lastStartRelativePosition() {
-    return this._lastStartRelativePosition;
-  }
-
-  get rootElement() {
-    return this.editor.rootElement;
-  }
-
-  get yText() {
-    return this.editor.yText;
   }
 }

@@ -17,6 +17,15 @@ export abstract class BaseSelection {
 
   readonly blockId: string;
 
+  get group(): string {
+    return (this.constructor as SelectionConstructor).group;
+  }
+
+  get type(): BlockSuite.SelectionType {
+    return (this.constructor as SelectionConstructor)
+      .type as BlockSuite.SelectionType;
+  }
+
   constructor({ blockId }: BaseSelectionOptions) {
     this.blockId = blockId;
   }
@@ -28,22 +37,13 @@ export abstract class BaseSelection {
     );
   }
 
+  abstract equals(other: BaseSelection): boolean;
+
   is<T extends BlockSuite.SelectionType>(
     type: T
   ): this is BlockSuite.SelectionInstance[T] {
     return this.type === type;
   }
-
-  get group(): string {
-    return (this.constructor as SelectionConstructor).group;
-  }
-
-  get type(): BlockSuite.SelectionType {
-    return (this.constructor as SelectionConstructor)
-      .type as BlockSuite.SelectionType;
-  }
-
-  abstract equals(other: BaseSelection): boolean;
 
   abstract toJSON(): Record<string, unknown>;
 }

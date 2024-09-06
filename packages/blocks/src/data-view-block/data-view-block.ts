@@ -7,14 +7,14 @@ import {
 } from '@blocksuite/affine-components/icons';
 import { RANGE_SYNC_EXCLUDE_ATTR } from '@blocksuite/block-std';
 import {
+  DatabaseSelection,
   type DataSource,
   DataView,
+  dataViewCommonStyle,
   type DataViewProps,
   type DataViewSelection,
   type DataViewWidget,
   type DataViewWidgetProps,
-  DatabaseSelection,
-  dataViewCommonStyle,
   defineUniComponent,
   renderUniLit,
 } from '@blocksuite/data-view';
@@ -37,13 +37,49 @@ import { BlockQueryDataSource } from './data-source.js';
 
 @customElement('affine-data-view')
 export class DataViewBlockComponent extends CaptionedBlockComponent<DataViewBlockModel> {
-  _bindHotkey: DataViewProps['bindHotkey'] = hotkeys => {
-    return {
-      dispose: this.host.event.bindHotkey(hotkeys, {
-        blockId: this.topContenteditableElement?.blockId ?? this.blockId,
-      }),
-    };
-  };
+  static override styles = css`
+    ${unsafeCSS(dataViewCommonStyle('affine-database'))}
+    affine-database {
+      display: block;
+      border-radius: 8px;
+      background-color: var(--affine-background-primary-color);
+      padding: 8px;
+      margin: 8px -8px -8px;
+    }
+
+    .database-block-selected {
+      background-color: var(--affine-hover-color);
+      border-radius: 4px;
+    }
+
+    .database-ops {
+      margin-top: 4px;
+      padding: 2px;
+      border-radius: 4px;
+      display: flex;
+      cursor: pointer;
+    }
+
+    .database-ops svg {
+      width: 16px;
+      height: 16px;
+      color: var(--affine-icon-color);
+    }
+
+    .database-ops:hover {
+      background-color: var(--affine-hover-color);
+    }
+
+    @media print {
+      .database-ops {
+        display: none;
+      }
+
+      .database-header-bar {
+        display: none !important;
+      }
+    }
+  `;
 
   private _clickDatabaseOps = (e: MouseEvent) => {
     popMenu(e.currentTarget as HTMLElement, {
@@ -97,6 +133,16 @@ export class DataViewBlockComponent extends CaptionedBlockComponent<DataViewBloc
 
   private _dataSource?: DataSource;
 
+  private dataView = new DataView();
+
+  _bindHotkey: DataViewProps['bindHotkey'] = hotkeys => {
+    return {
+      dispose: this.host.event.bindHotkey(hotkeys, {
+        blockId: this.topContenteditableElement?.blockId ?? this.blockId,
+      }),
+    };
+  };
+
   _handleEvent: DataViewProps['handleEvent'] = (name, handler) => {
     return {
       dispose: this.host.event.add(name, handler, {
@@ -104,52 +150,6 @@ export class DataViewBlockComponent extends CaptionedBlockComponent<DataViewBloc
       }),
     };
   };
-
-  private dataView = new DataView();
-
-  static override styles = css`
-    ${unsafeCSS(dataViewCommonStyle('affine-database'))}
-    affine-database {
-      display: block;
-      border-radius: 8px;
-      background-color: var(--affine-background-primary-color);
-      padding: 8px;
-      margin: 8px -8px -8px;
-    }
-
-    .database-block-selected {
-      background-color: var(--affine-hover-color);
-      border-radius: 4px;
-    }
-
-    .database-ops {
-      margin-top: 4px;
-      padding: 2px;
-      border-radius: 4px;
-      display: flex;
-      cursor: pointer;
-    }
-
-    .database-ops svg {
-      width: 16px;
-      height: 16px;
-      color: var(--affine-icon-color);
-    }
-
-    .database-ops:hover {
-      background-color: var(--affine-hover-color);
-    }
-
-    @media print {
-      .database-ops {
-        display: none;
-      }
-
-      .database-header-bar {
-        display: none !important;
-      }
-    }
-  `;
 
   getRootService = () => {
     return this.std.getService('affine:page');
@@ -218,6 +218,33 @@ export class DataViewBlockComponent extends CaptionedBlockComponent<DataViewBloc
     ],
   });
 
+  get dataSource(): DataSource {
+    if (!this._dataSource) {
+      this._dataSource = new BlockQueryDataSource(this.host, this.model, {
+        type: 'todo',
+      });
+    }
+    return this._dataSource;
+  }
+
+  get innerModalWidget() {
+    return this.rootComponent?.widgetComponents[
+      AFFINE_INNER_MODAL_WIDGET
+    ] as AffineInnerModalWidget;
+  }
+
+  override get topContenteditableElement() {
+    if (this.rootComponent instanceof EdgelessRootBlockComponent) {
+      const note = this.closest<NoteBlockComponent>('affine-note');
+      return note;
+    }
+    return this.rootComponent;
+  }
+
+  get view() {
+    return this.dataView.expose;
+  }
+
   private renderDatabaseOps() {
     if (this.doc.readonly) {
       return nothing;
@@ -254,33 +281,6 @@ export class DataViewBlockComponent extends CaptionedBlockComponent<DataViewBloc
         })}
       </div>
     `;
-  }
-
-  get dataSource(): DataSource {
-    if (!this._dataSource) {
-      this._dataSource = new BlockQueryDataSource(this.host, this.model, {
-        type: 'todo',
-      });
-    }
-    return this._dataSource;
-  }
-
-  get innerModalWidget() {
-    return this.rootComponent?.widgetComponents[
-      AFFINE_INNER_MODAL_WIDGET
-    ] as AffineInnerModalWidget;
-  }
-
-  override get topContenteditableElement() {
-    if (this.rootComponent instanceof EdgelessRootBlockComponent) {
-      const note = this.closest<NoteBlockComponent>('affine-note');
-      return note;
-    }
-    return this.rootComponent;
-  }
-
-  get view() {
-    return this.dataView.expose;
   }
 }
 

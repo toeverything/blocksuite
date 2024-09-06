@@ -11,9 +11,9 @@ import type {
 } from '@blocksuite/blocks';
 import type { DeltaInsert } from '@blocksuite/inline';
 
-import { WithDisposable, SignalWatcher } from '@blocksuite/block-std';
+import { SignalWatcher, WithDisposable } from '@blocksuite/block-std';
 import { noop } from '@blocksuite/global/utils';
-import { LitElement, css, html, nothing } from 'lit';
+import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 import { SmallLinkedDocIcon } from '../../_common/icons.js';

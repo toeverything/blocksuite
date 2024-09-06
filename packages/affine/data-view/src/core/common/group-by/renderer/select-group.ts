@@ -16,6 +16,30 @@ export class SelectGroupView extends BaseGroup<
   },
   string
 > {
+  static override styles = css`
+    data-view-group-title-select-view {
+      overflow: hidden;
+    }
+    .data-view-group-title-select-view {
+      width: 100%;
+      cursor: pointer;
+    }
+
+    .data-view-group-title-select-view.readonly {
+      cursor: inherit;
+    }
+
+    .tag {
+      padding: 0 8px;
+      border-radius: 4px;
+      font-size: var(--data-view-cell-text-size);
+      line-height: var(--data-view-cell-text-line-height);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  `;
+
   private _click = () => {
     if (this.readonly) {
       return;
@@ -49,29 +73,9 @@ export class SelectGroupView extends BaseGroup<
     });
   };
 
-  static override styles = css`
-    data-view-group-title-select-view {
-      overflow: hidden;
-    }
-    .data-view-group-title-select-view {
-      width: 100%;
-      cursor: pointer;
-    }
-
-    .data-view-group-title-select-view.readonly {
-      cursor: inherit;
-    }
-
-    .tag {
-      padding: 0 8px;
-      border-radius: 4px;
-      font-size: var(--data-view-cell-text-size);
-      line-height: var(--data-view-cell-text-line-height);
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-  `;
+  get tag() {
+    return this.data.options.find(v => v.id === this.value);
+  }
 
   protected override render(): unknown {
     const tag = this.tag;
@@ -107,9 +111,5 @@ export class SelectGroupView extends BaseGroup<
         return v;
       }),
     });
-  }
-
-  get tag() {
-    return this.data.options.find(v => v.id === this.value);
   }
 }

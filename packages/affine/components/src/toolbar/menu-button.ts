@@ -2,11 +2,11 @@ import { PANEL_BASE } from '@blocksuite/affine-shared/styles';
 import { createButtonPopper } from '@blocksuite/affine-shared/utils';
 import { WithDisposable } from '@blocksuite/block-std';
 import {
+  css,
+  html,
   LitElement,
   type PropertyValues,
   type TemplateResult,
-  css,
-  html,
 } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 
@@ -16,8 +16,6 @@ import './icon-button.js';
 
 @customElement('editor-menu-button')
 export class EditorMenuButton extends WithDisposable(LitElement) {
-  private _popper!: ReturnType<typeof createButtonPopper>;
-
   static override styles = css`
     :host {
       display: flex;
@@ -26,6 +24,8 @@ export class EditorMenuButton extends WithDisposable(LitElement) {
       gap: 8px;
     }
   `;
+
+  private _popper!: ReturnType<typeof createButtonPopper>;
 
   override firstUpdated() {
     this._popper = createButtonPopper(

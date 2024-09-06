@@ -11,7 +11,7 @@ import {
 } from '@blocksuite/affine-shared/utils';
 import { WithDisposable } from '@blocksuite/block-std';
 import { computePosition, inline, offset, shift } from '@floating-ui/dom';
-import { LitElement, html, nothing } from 'lit';
+import { html, LitElement, nothing } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { choose } from 'lit/directives/choose.js';
 import { join } from 'lit/directives/join.js';
@@ -39,6 +39,8 @@ import { linkPopupStyle } from './styles.js';
 
 @customElement('link-popup')
 export class LinkPopup extends WithDisposable(LitElement) {
+  static override styles = linkPopupStyle;
+
   private _bodyOverflowStyle = '';
 
   private _createTemplate = () => {
@@ -211,10 +213,55 @@ export class LinkPopup extends WithDisposable(LitElement) {
     `;
   };
 
-  static override styles = linkPopupStyle;
-
   private get _canConvertToEmbedView() {
     return this._embedOptions?.viewType === 'embed';
+  }
+
+  private get _isBookmarkAllowed() {
+    const block = this.block;
+    if (!block) return false;
+    const schema = block.doc.schema;
+    const parent = block.doc.getParent(block.model);
+    if (!parent) return false;
+    const bookmarkSchema = schema.flavourSchemaMap.get('affine:bookmark');
+    if (!bookmarkSchema) return false;
+    const parentSchema = schema.flavourSchemaMap.get(parent.flavour);
+    if (!parentSchema) return false;
+
+    try {
+      schema.validateSchema(bookmarkSchema, parentSchema);
+    } catch {
+      return false;
+    }
+
+    return true;
+  }
+
+  get block() {
+    const block = this.inlineEditor.rootElement.closest<BlockComponent>(
+      `[${BLOCK_ID_ATTR}]`
+    );
+    if (!block) return null;
+    return block;
+  }
+
+  get currentLink() {
+    return this.inlineEditor.getFormat(this.targetInlineRange).link;
+  }
+
+  get currentText() {
+    return this.inlineEditor.yTextString.slice(
+      this.targetInlineRange.index,
+      this.targetInlineRange.index + this.targetInlineRange.length
+    );
+  }
+
+  get host() {
+    return this.block?.host;
+  }
+
+  get std() {
+    return this.block?.std;
   }
 
   private _confirmBtnTemplate() {
@@ -300,26 +347,6 @@ export class LinkPopup extends WithDisposable(LitElement) {
     if (!this.host) return;
     toast(this.host, 'Copied link to clipboard');
     this.abortController.abort();
-  }
-
-  private get _isBookmarkAllowed() {
-    const block = this.block;
-    if (!block) return false;
-    const schema = block.doc.schema;
-    const parent = block.doc.getParent(block.model);
-    if (!parent) return false;
-    const bookmarkSchema = schema.flavourSchemaMap.get('affine:bookmark');
-    if (!bookmarkSchema) return false;
-    const parentSchema = schema.flavourSchemaMap.get(parent.flavour);
-    if (!parentSchema) return false;
-
-    try {
-      schema.validateSchema(bookmarkSchema, parentSchema);
-    } catch {
-      return false;
-    }
-
-    return true;
   }
 
   private _moreActions() {
@@ -574,33 +601,6 @@ export class LinkPopup extends WithDisposable(LitElement) {
         popupContainer.style.top = `${y}px`;
       })
       .catch(console.error);
-  }
-
-  get block() {
-    const block = this.inlineEditor.rootElement.closest<BlockComponent>(
-      `[${BLOCK_ID_ATTR}]`
-    );
-    if (!block) return null;
-    return block;
-  }
-
-  get currentLink() {
-    return this.inlineEditor.getFormat(this.targetInlineRange).link;
-  }
-
-  get currentText() {
-    return this.inlineEditor.yTextString.slice(
-      this.targetInlineRange.index,
-      this.targetInlineRange.index + this.targetInlineRange.length
-    );
-  }
-
-  get host() {
-    return this.block?.host;
-  }
-
-  get std() {
-    return this.block?.std;
   }
 
   @property({ attribute: false })

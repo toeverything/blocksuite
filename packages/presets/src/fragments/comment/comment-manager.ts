@@ -1,5 +1,4 @@
-import type { TextSelection } from '@blocksuite/block-std';
-import type { EditorHost } from '@blocksuite/block-std';
+import type { EditorHost, TextSelection } from '@blocksuite/block-std';
 
 import { DocCollection, type Y } from '@blocksuite/store';
 
@@ -26,11 +25,15 @@ export interface CommentContent {
 export type Comment = CommentMeta & CommentRange & CommentContent;
 
 export class CommentManager {
-  constructor(readonly host: EditorHost) {}
-
   private get _command() {
     return this.host.command;
   }
+
+  get commentsMap() {
+    return this.host.doc.spaceDoc.getMap<Y.Map<unknown>>('comments');
+  }
+
+  constructor(readonly host: EditorHost) {}
 
   addComment(
     selection: TextSelection,
@@ -158,9 +161,5 @@ export class CommentManager {
         },
       },
     };
-  }
-
-  get commentsMap() {
-    return this.host.doc.spaceDoc.getMap<Y.Map<unknown>>('comments');
   }
 }

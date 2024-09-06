@@ -3,12 +3,12 @@ import type { IVec, SerializedXYWH, XYWH } from '@blocksuite/global/utils';
 
 import {
   Bound,
-  DisposableGroup,
-  PointLocation,
   deserializeXYWH,
+  DisposableGroup,
   getBoundsWithRotation,
   getPointsFromBoundsWithRotation,
   linePolygonIntersects,
+  PointLocation,
   polygonGetPointTangent,
   polygonNearestPoint,
   randomSeed,
@@ -101,11 +101,11 @@ export abstract class GfxPrimitiveElementModel<
   Props extends BaseElementProps = BaseElementProps,
 > implements GfxElementGeometry
 {
+  private _lastXYWH!: SerializedXYWH;
+
   protected _disposable = new DisposableGroup();
 
   protected _id: string;
-
-  private _lastXYWH!: SerializedXYWH;
 
   protected _local = new Map<string | symbol, unknown>();
 
@@ -122,9 +122,85 @@ export abstract class GfxPrimitiveElementModel<
 
   protected _stashed: Map<keyof Props | string, unknown>;
 
+  abstract rotate: number;
+
   surface!: SurfaceBlockModel;
 
+  abstract xywh: SerializedXYWH;
+
   yMap: Y.Map<unknown>;
+
+  get connectable() {
+    return true;
+  }
+
+  get deserializedXYWH() {
+    if (!this._lastXYWH || this.xywh !== this._lastXYWH) {
+      const xywh = this.xywh;
+      this._local.set('deserializedXYWH', deserializeXYWH(xywh));
+      this._lastXYWH = xywh;
+    }
+
+    return (this._local.get('deserializedXYWH') as XYWH) ?? [0, 0, 0, 0];
+  }
+
+  /**
+   * The bound of the element after rotation.
+   * The bound without rotation should be created by `Bound.deserialize(this.xywh)`.
+   */
+  get elementBound() {
+    if (this.rotate) {
+      return Bound.from(getBoundsWithRotation(this));
+    }
+
+    return Bound.deserialize(this.xywh);
+  }
+
+  get externalBound(): Bound | null {
+    if (!this._local.has('externalBound')) {
+      const bound = this.externalXYWH
+        ? Bound.deserialize(this.externalXYWH)
+        : null;
+
+      this._local.set('externalBound', bound);
+    }
+
+    return this._local.get('externalBound') as Bound | null;
+  }
+
+  get group(): GfxGroupLikeElementModel | null {
+    return this.surface.getGroup(this.id);
+  }
+
+  get groups() {
+    return this.surface.getGroups(this.id);
+  }
+
+  get h() {
+    return this.deserializedXYWH[3];
+  }
+
+  get id() {
+    return this._id;
+  }
+
+  get isConnected() {
+    return this.surface.hasElementById(this.id);
+  }
+
+  abstract get type(): string;
+
+  get w() {
+    return this.deserializedXYWH[2];
+  }
+
+  get x() {
+    return this.deserializedXYWH[0];
+  }
+
+  get y() {
+    return this.deserializedXYWH[1];
+  }
 
   constructor(options: {
     id: string;
@@ -276,76 +352,6 @@ export abstract class GfxPrimitiveElementModel<
     });
   }
 
-  get connectable() {
-    return true;
-  }
-
-  get deserializedXYWH() {
-    if (!this._lastXYWH || this.xywh !== this._lastXYWH) {
-      const xywh = this.xywh;
-      this._local.set('deserializedXYWH', deserializeXYWH(xywh));
-      this._lastXYWH = xywh;
-    }
-
-    return (this._local.get('deserializedXYWH') as XYWH) ?? [0, 0, 0, 0];
-  }
-
-  /**
-   * The bound of the element after rotation.
-   * The bound without rotation should be created by `Bound.deserialize(this.xywh)`.
-   */
-  get elementBound() {
-    if (this.rotate) {
-      return Bound.from(getBoundsWithRotation(this));
-    }
-
-    return Bound.deserialize(this.xywh);
-  }
-
-  get externalBound(): Bound | null {
-    if (!this._local.has('externalBound')) {
-      const bound = this.externalXYWH
-        ? Bound.deserialize(this.externalXYWH)
-        : null;
-
-      this._local.set('externalBound', bound);
-    }
-
-    return this._local.get('externalBound') as Bound | null;
-  }
-
-  get group(): GfxGroupLikeElementModel | null {
-    return this.surface.getGroup(this.id);
-  }
-
-  get groups() {
-    return this.surface.getGroups(this.id);
-  }
-
-  get h() {
-    return this.deserializedXYWH[3];
-  }
-
-  get id() {
-    return this._id;
-  }
-
-  get isConnected() {
-    return this.surface.hasElementById(this.id);
-  }
-
-  get w() {
-    return this.deserializedXYWH[2];
-  }
-
-  get x() {
-    return this.deserializedXYWH[0];
-  }
-
-  get y() {
-    return this.deserializedXYWH[1];
-  }
-
   @local()
   accessor display: boolean = true;
 
@@ -368,14 +374,8 @@ export abstract class GfxPrimitiveElementModel<
   @local()
   accessor opacity: number = 1;
 
-  abstract rotate: number;
-
   @field()
   accessor seed!: number;
-
-  abstract get type(): string;
-
-  abstract xywh: SerializedXYWH;
 }
 
 export abstract class GfxGroupLikeElementModel<
@@ -390,7 +390,50 @@ export abstract class GfxGroupLikeElementModel<
 
   private _mutex = createMutex();
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  abstract children: Y.Map<any>;
+
   [gfxContainerSymbol] = true as const;
+
+  get childElements() {
+    const elements: GfxModel[] = [];
+
+    for (const key of this.childIds) {
+      const element =
+        this.surface.getElementById(key) ||
+        (this.surface.doc.getBlockById(key) as GfxBlockElementModel);
+
+      element && elements.push(element);
+    }
+
+    return elements;
+  }
+
+  /**
+   * The ids of the children. Its role is to provide a unique way to access the children.
+   * You should update this field through `setChildIds` when the children are added or removed.
+   */
+  get childIds() {
+    return this._childIds;
+  }
+
+  get xywh() {
+    if (
+      !this._local.has('xywh') ||
+      this.childElements.reduce(
+        (pre, model) => pre + (model.xywh ?? ''),
+        ''
+      ) !== this._childBoundCacheKey
+    ) {
+      this._mutex(() => {
+        this._updateXYWH();
+      });
+    }
+
+    return (this._local.get('xywh') as SerializedXYWH) ?? '[0,0,0,0]';
+  }
+
+  set xywh(_) {}
 
   private _updateXYWH() {
     let bound: Bound | undefined;
@@ -464,6 +507,11 @@ export abstract class GfxGroupLikeElementModel<
   }
 
   /**
+   * Remove the child from the group
+   */
+  abstract removeChild(id: string): void;
+
+  /**
    * Set the new value of the childIds
    * @param value the new value of the childIds
    * @param fromLocal if true, the change is happened in the local
@@ -492,54 +540,6 @@ export abstract class GfxGroupLikeElementModel<
       },
     });
   }
-
-  get childElements() {
-    const elements: GfxModel[] = [];
-
-    for (const key of this.childIds) {
-      const element =
-        this.surface.getElementById(key) ||
-        (this.surface.doc.getBlockById(key) as GfxBlockElementModel);
-
-      element && elements.push(element);
-    }
-
-    return elements;
-  }
-
-  /**
-   * The ids of the children. Its role is to provide a unique way to access the children.
-   * You should update this field through `setChildIds` when the children are added or removed.
-   */
-  get childIds() {
-    return this._childIds;
-  }
-
-  get xywh() {
-    if (
-      !this._local.has('xywh') ||
-      this.childElements.reduce(
-        (pre, model) => pre + (model.xywh ?? ''),
-        ''
-      ) !== this._childBoundCacheKey
-    ) {
-      this._mutex(() => {
-        this._updateXYWH();
-      });
-    }
-
-    return (this._local.get('xywh') as SerializedXYWH) ?? '[0,0,0,0]';
-  }
-
-  set xywh(_) {}
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  abstract children: Y.Map<any>;
-
-  /**
-   * Remove the child from the group
-   */
-  abstract removeChild(id: string): void;
 }
 
 export abstract class GfxLocalElementModel {
@@ -548,6 +548,10 @@ export abstract class GfxLocalElementModel {
   protected _local = new Map<string | symbol, unknown>();
 
   opacity: number = 1;
+
+  abstract rotate: number;
+
+  abstract xywh: SerializedXYWH;
 
   get deserializedXYWH() {
     if (this.xywh !== this._lastXYWH) {
@@ -574,10 +578,6 @@ export abstract class GfxLocalElementModel {
   get y() {
     return this.deserializedXYWH[1];
   }
-
-  abstract rotate: number;
-
-  abstract xywh: SerializedXYWH;
 }
 
 export function syncElementFromY(

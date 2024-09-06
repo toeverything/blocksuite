@@ -1,8 +1,8 @@
-import { Slot, assertExists } from '@blocksuite/global/utils';
+import { assertExists, Slot } from '@blocksuite/global/utils';
 import {
-  type ComputePositionReturn,
   autoUpdate,
   computePosition,
+  type ComputePositionReturn,
 } from '@floating-ui/dom';
 import { render } from 'lit';
 

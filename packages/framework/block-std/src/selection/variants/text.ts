@@ -43,6 +43,14 @@ export class TextSelection extends BaseSelection {
 
   to: TextRangePoint | null;
 
+  get end(): TextRangePoint {
+    return this.reverse ? this.from : (this.to ?? this.from);
+  }
+
+  get start(): TextRangePoint {
+    return this.reverse ? (this.to ?? this.from) : this.from;
+  }
+
   constructor({ from, to, reverse }: TextSelectionProps) {
     super({
       blockId: from.blockId,
@@ -106,14 +114,6 @@ export class TextSelection extends BaseSelection {
       to: this.to,
       reverse: this.reverse,
     };
-  }
-
-  get end(): TextRangePoint {
-    return this.reverse ? this.from : (this.to ?? this.from);
-  }
-
-  get start(): TextRangePoint {
-    return this.reverse ? (this.to ?? this.from) : this.from;
   }
 }
 

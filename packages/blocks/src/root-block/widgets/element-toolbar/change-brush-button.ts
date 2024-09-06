@@ -7,7 +7,7 @@ import type {
 import { LINE_COLORS, LineWidth } from '@blocksuite/affine-model';
 import { WithDisposable } from '@blocksuite/block-std';
 import { countBy, maxBy } from '@blocksuite/global/utils';
-import { LitElement, html, nothing } from 'lit';
+import { html, LitElement, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { when } from 'lit/directives/when.js';
 
@@ -21,7 +21,6 @@ import {
   packColor,
   packColorsWithColorScheme,
 } from '../../edgeless/components/color-picker/utils.js';
-import '../../edgeless/components/panel/color-panel.js';
 import { GET_DEFAULT_LINE_COLOR } from '../../edgeless/components/panel/color-panel.js';
 import '../../edgeless/components/panel/line-width-panel.js';
 
@@ -75,6 +74,29 @@ export class EdgelessChangeBrushButton extends WithDisposable(LitElement) {
       ele[event.type === 'start' ? 'stash' : 'pop']('color')
     );
   };
+
+  get doc() {
+    return this.edgeless.doc;
+  }
+
+  get selectedColor() {
+    const colorScheme = this.edgeless.surface.renderer.getColorScheme();
+    return (
+      this._selectedColor ?? getMostCommonColor(this.elements, colorScheme)
+    );
+  }
+
+  get selectedSize() {
+    return this._selectedSize ?? getMostCommonSize(this.elements);
+  }
+
+  get service() {
+    return this.edgeless.service;
+  }
+
+  get surface() {
+    return this.edgeless.surface;
+  }
 
   private _setBrushProp<K extends keyof BrushProps>(
     key: K,
@@ -144,29 +166,6 @@ export class EdgelessChangeBrushButton extends WithDisposable(LitElement) {
         `
       )}
     `;
-  }
-
-  get doc() {
-    return this.edgeless.doc;
-  }
-
-  get selectedColor() {
-    const colorScheme = this.edgeless.surface.renderer.getColorScheme();
-    return (
-      this._selectedColor ?? getMostCommonColor(this.elements, colorScheme)
-    );
-  }
-
-  get selectedSize() {
-    return this._selectedSize ?? getMostCommonSize(this.elements);
-  }
-
-  get service() {
-    return this.edgeless.service;
-  }
-
-  get surface() {
-    return this.edgeless.surface;
   }
 
   @state()

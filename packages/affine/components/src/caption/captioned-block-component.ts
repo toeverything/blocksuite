@@ -2,7 +2,7 @@ import type { BlockModel } from '@blocksuite/store';
 
 import { BlockComponent, type BlockService } from '@blocksuite/block-std';
 import { html, nothing } from 'lit';
-import { type Ref, createRef, ref } from 'lit/directives/ref.js';
+import { createRef, type Ref, ref } from 'lit/directives/ref.js';
 import { type StyleInfo, styleMap } from 'lit/directives/style-map.js';
 
 import type { BlockCaptionEditor } from './block-caption.js';
@@ -12,6 +12,15 @@ export class CaptionedBlockComponent<
   Service extends BlockService = BlockService,
   WidgetName extends string = string,
 > extends BlockComponent<Model, Service, WidgetName> {
+  get captionEditor() {
+    if (!this.useCaptionEditor || !this._captionEditorRef.value) {
+      console.error(
+        'Oops! Please enable useCaptionEditor before accessing captionEditor'
+      );
+    }
+    return this._captionEditorRef.value;
+  }
+
   constructor() {
     super();
     this.addRenderer(this._renderWithWidget);
@@ -37,15 +46,6 @@ export class CaptionedBlockComponent<
         ? html`<block-zero-width .block=${this}></block-zero-width>`
         : nothing}
     </div>`;
-  }
-
-  get captionEditor() {
-    if (!this.useCaptionEditor || !this._captionEditorRef.value) {
-      console.error(
-        'Oops! Please enable useCaptionEditor before accessing captionEditor'
-      );
-    }
-    return this._captionEditorRef.value;
   }
 
   // There may be multiple block-caption-editors in a nested structure.

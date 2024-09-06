@@ -1,8 +1,8 @@
 import {
-  InlineManager,
-  ReferenceNodeConfig,
   affineInlineMarkdownMatches,
   getAffineInlineSpecsWithReference,
+  InlineManager,
+  ReferenceNodeConfig,
 } from '@blocksuite/affine-components/rich-text';
 import { BlockService } from '@blocksuite/block-std';
 import { DatabaseSelection } from '@blocksuite/data-view';

@@ -5,15 +5,15 @@ import {
   triangleSvg,
 } from '@blocksuite/affine-components/icons';
 import {
-  ShapeType,
   getShapeRadius,
   getShapeType,
+  ShapeType,
 } from '@blocksuite/affine-model';
 import { TelemetryProvider } from '@blocksuite/affine-shared/services';
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import { SignalWatcher } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
-import { LitElement, css, html, nothing } from 'lit';
+import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { repeat } from 'lit/directives/repeat.js';
@@ -136,6 +136,12 @@ export class EdgelessToolbarShapeDraggable extends EdgelessToolbarToolMixin(
   draggingShape: DraggableShape['name'] = 'roundedRect';
 
   override type = 'shape' as const;
+
+  get shapeShadow() {
+    return this.theme === 'dark'
+      ? '0 0 7px rgba(0, 0, 0, .22)'
+      : '0 0 5px rgba(0, 0, 0, .2)';
+  }
 
   private _setShapeOverlayLock(lock: boolean) {
     const controller = this.edgeless.tools.currentController;
@@ -335,12 +341,6 @@ export class EdgelessToolbarShapeDraggable extends EdgelessToolbarToolMixin(
     ) {
       this.initDragController();
     }
-  }
-
-  get shapeShadow() {
-    return this.theme === 'dark'
-      ? '0 0 7px rgba(0, 0, 0, .22)'
-      : '0 0 5px rgba(0, 0, 0, .2)';
   }
 
   @property({ attribute: false })

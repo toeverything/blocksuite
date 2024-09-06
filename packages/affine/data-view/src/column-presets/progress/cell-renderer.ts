@@ -136,12 +136,12 @@ export class ProgressCellEditing extends BaseCellRenderer<number> {
     });
   };
 
-  _onChange(value?: number) {
-    this.tempValue = value;
-  }
-
   get _value() {
     return this.tempValue ?? this.value ?? 0;
+  }
+
+  _onChange(value?: number) {
+    this.tempValue = value;
   }
 
   override firstUpdated() {

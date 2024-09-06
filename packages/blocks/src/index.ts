@@ -5,7 +5,7 @@ import '@blocksuite/affine-block-surface';
 import '@blocksuite/affine-components/context-menu';
 import '@blocksuite/affine-components/rich-text';
 import '@blocksuite/affine-components/toolbar';
-import { Point, deserializeXYWH } from '@blocksuite/global/utils';
+import { deserializeXYWH, Point } from '@blocksuite/global/utils';
 
 import { matchFlavours } from './_common/utils/index.js';
 import './code-block/highlight/affine-code-unit.js';
@@ -81,11 +81,11 @@ export {
 } from '@blocksuite/affine-components/icons';
 export * from '@blocksuite/affine-components/icons';
 export {
-  type PeekViewService,
-  Peekable,
-  PeekableController,
   isPeekable,
   peek,
+  Peekable,
+  PeekableController,
+  type PeekViewService,
 } from '@blocksuite/affine-components/peek';
 export {
   createLitPortal,
@@ -95,24 +95,24 @@ export {
   type AffineInlineEditor,
   AffineReference,
   type AffineTextAttributes,
+  getAffineInlineSpecsWithReference,
   InlineManager,
   type InlineMarkdownMatch,
   type InlineSpecs,
   ReferenceNodeConfig,
   RichText,
-  getAffineInlineSpecsWithReference,
 } from '@blocksuite/affine-components/rich-text';
 export { toast } from '@blocksuite/affine-components/toast';
 export {
   type AdvancedMenuItem,
   type FatMenuItems,
+  groupsToActions,
   type MenuItem,
   type MenuItemGroup,
-  Tooltip,
-  groupsToActions,
   renderActions,
   renderGroups,
   renderToolbarSeparator,
+  Tooltip,
 } from '@blocksuite/affine-components/toolbar';
 export * from '@blocksuite/affine-model';
 export * from '@blocksuite/affine-shared/services';

@@ -1,5 +1,7 @@
-import type { EmbedYoutubeModel } from '@blocksuite/affine-model';
-import type { EmbedYoutubeBlockUrlData } from '@blocksuite/affine-model';
+import type {
+  EmbedYoutubeBlockUrlData,
+  EmbedYoutubeModel,
+} from '@blocksuite/affine-model';
 
 import { isAbortError } from '@blocksuite/affine-shared/utils';
 import { assertExists } from '@blocksuite/global/utils';

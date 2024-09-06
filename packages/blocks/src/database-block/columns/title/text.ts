@@ -79,19 +79,6 @@ const styles = css`
 abstract class BaseTextCell extends BaseCellRenderer<Text> {
   static override styles = styles;
 
-  renderIcon() {
-    if (!this.showIcon) {
-      return;
-    }
-    const iconColumn = this.view.header$.value.iconColumn;
-    if (!iconColumn) return;
-
-    const icon = this.view.cellGetValue(this.cell.rowId, iconColumn) as string;
-    if (!icon) return;
-
-    return html`<div class="data-view-header-area-icon">${icon}</div>`;
-  }
-
   get attributeRenderer() {
     return this.inlineManager?.getRenderer();
   }
@@ -121,6 +108,19 @@ abstract class BaseTextCell extends BaseCellRenderer<Text> {
     const databaseBlock =
       this.closest<DatabaseBlockComponent>('affine-database');
     return databaseBlock?.topContenteditableElement;
+  }
+
+  renderIcon() {
+    if (!this.showIcon) {
+      return;
+    }
+    const iconColumn = this.view.header$.value.iconColumn;
+    if (!iconColumn) return;
+
+    const icon = this.view.cellGetValue(this.cell.rowId, iconColumn) as string;
+    if (!icon) return;
+
+    return html`<div class="data-view-header-area-icon">${icon}</div>`;
   }
 
   @query('rich-text')

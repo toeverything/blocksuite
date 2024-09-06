@@ -11,9 +11,9 @@ import {
 } from '@blocksuite/affine-components/icons';
 import { isPeekable, peek } from '@blocksuite/affine-components/peek';
 import {
+  cloneGroups,
   type MenuItem,
   type MenuItemGroup,
-  cloneGroups,
   renderGroups,
   renderToolbarSeparator,
 } from '@blocksuite/affine-components/toolbar';

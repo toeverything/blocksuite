@@ -4,11 +4,11 @@ import type { BlockModel, Doc } from '@blocksuite/store';
 
 import { stopPropagation } from '@blocksuite/affine-shared/utils';
 import {
-  ShadowlessElement,
-  WithDisposable,
   docContext,
   modelContext,
+  ShadowlessElement,
   stdContext,
+  WithDisposable,
 } from '@blocksuite/block-std';
 import { Text } from '@blocksuite/store';
 import { consume } from '@lit/context';
@@ -25,8 +25,6 @@ export interface BlockCaptionProps {
 export class BlockCaptionEditor<
   Model extends BlockModel<BlockCaptionProps> = BlockModel<BlockCaptionProps>,
 > extends WithDisposable(ShadowlessElement) {
-  private _focus = false;
-
   static override styles = css`
     .block-caption-editor {
       display: inline-table;
@@ -45,10 +43,18 @@ export class BlockCaptionEditor<
     }
   `;
 
+  private _focus = false;
+
   show = () => {
     this.display = true;
     this.updateComplete.then(() => this.input.focus()).catch(console.error);
   };
+
+  get mode(): DocMode {
+    return this.doc.getParent(this.model)?.flavour === 'affine:surface'
+      ? 'edgeless'
+      : 'page';
+  }
 
   private _onCaptionKeydown(event: KeyboardEvent) {
     event.stopPropagation();
@@ -145,12 +151,6 @@ export class BlockCaptionEditor<
       @keydown=${this._onCaptionKeydown}
       @keyup=${stopPropagation}
     ></textarea>`;
-  }
-
-  get mode(): DocMode {
-    return this.doc.getParent(this.model)?.flavour === 'affine:surface'
-      ? 'edgeless'
-      : 'page';
   }
 
   @state()

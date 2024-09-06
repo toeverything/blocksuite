@@ -44,6 +44,24 @@ setBasePath(basePath);
 
 @customElement('quick-edgeless-menu')
 export class QuickEdgelessMenu extends ShadowlessElement {
+  static override styles = css`
+    :root {
+      --sl-font-size-medium: var(--affine-font-xs);
+      --sl-input-font-size-small: var(--affine-font-xs);
+    }
+
+    .dg.ac {
+      z-index: 1001 !important;
+    }
+
+    .top-container {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 16px;
+    }
+  `;
+
   private _darkModeChange = (e: MediaQueryListEvent) => {
     this._setThemeMode(!!e.matches);
   };
@@ -71,23 +89,25 @@ export class QuickEdgelessMenu extends ShadowlessElement {
     location.href = url.href;
   };
 
-  static override styles = css`
-    :root {
-      --sl-font-size-medium: var(--affine-font-xs);
-      --sl-input-font-size-small: var(--affine-font-xs);
-    }
+  get doc() {
+    return this.editor.doc;
+  }
 
-    .dg.ac {
-      z-index: 1001 !important;
-    }
+  get editorMode() {
+    return this.editor.mode;
+  }
 
-    .top-container {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      font-size: 16px;
+  set editorMode(value: DocMode) {
+    this.editor.mode = value;
+  }
+
+  get rootService() {
+    try {
+      return this.editor.std.getService('affine:page');
+    } catch {
+      return null;
     }
-  `;
+  }
 
   private _addNote() {
     const rootModel = this.doc.root;
@@ -551,26 +571,6 @@ export class QuickEdgelessMenu extends ShadowlessElement {
         </div>
       </div>
     `;
-  }
-
-  get doc() {
-    return this.editor.doc;
-  }
-
-  get editorMode() {
-    return this.editor.mode;
-  }
-
-  set editorMode(value: DocMode) {
-    this.editor.mode = value;
-  }
-
-  get rootService() {
-    try {
-      return this.editor.std.getService('affine:page');
-    } catch {
-      return null;
-    }
   }
 
   @state()

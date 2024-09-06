@@ -4,19 +4,14 @@ import type {
 } from '@blocksuite/block-std/gfx';
 
 import {
-  GfxPrimitiveElementModel,
   convert,
   derive,
   field,
+  GfxPrimitiveElementModel,
   watch,
 } from '@blocksuite/block-std/gfx';
 import {
   Bound,
-  type IVec,
-  type IVec3,
-  PointLocation,
-  type SerializedXYWH,
-  Vec,
   getBoundFromPoints,
   getPointsFromBoundsWithRotation,
   getQuadBoundsWithRotation,
@@ -24,9 +19,14 @@ import {
   getSvgPathFromStroke,
   inflateBound,
   isPointOnlines,
+  type IVec,
+  type IVec3,
   lineIntersects,
+  PointLocation,
   polyLineNearestPoint,
+  type SerializedXYWH,
   transformPointsToNewBound,
+  Vec,
 } from '@blocksuite/global/utils';
 
 import type { Color } from '../../consts/index.js';
@@ -42,6 +42,28 @@ export type BrushProps = BaseElementProps & {
 };
 
 export class BrushElementModel extends GfxPrimitiveElementModel<BrushProps> {
+  /**
+   * The SVG path commands for the brush.
+   */
+  get commands() {
+    if (!this._local.has('commands')) {
+      const stroke = getSolidStrokePoints(this.points, this.lineWidth);
+      const commands = getSvgPathFromStroke(stroke);
+
+      this._local.set('commands', commands);
+    }
+
+    return this._local.get('commands') as string;
+  }
+
+  override get connectable() {
+    return false;
+  }
+
+  override get type() {
+    return 'brush';
+  }
+
   static override propsToY(props: BrushProps) {
     return props;
   }
@@ -107,28 +129,6 @@ export class BrushElementModel extends GfxPrimitiveElementModel<BrushProps> {
       (options?.hitThreshold ?? 10) / Math.min(options?.zoom ?? 1, 1)
     );
     return hit;
-  }
-
-  /**
-   * The SVG path commands for the brush.
-   */
-  get commands() {
-    if (!this._local.has('commands')) {
-      const stroke = getSolidStrokePoints(this.points, this.lineWidth);
-      const commands = getSvgPathFromStroke(stroke);
-
-      this._local.set('commands', commands);
-    }
-
-    return this._local.get('commands') as string;
-  }
-
-  override get connectable() {
-    return false;
-  }
-
-  override get type() {
-    return 'brush';
   }
 
   @field()

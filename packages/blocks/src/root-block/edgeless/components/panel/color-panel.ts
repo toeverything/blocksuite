@@ -6,7 +6,7 @@ import {
   ShapeFillColor,
 } from '@blocksuite/affine-model';
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
-import { LitElement, css, html, nothing } from 'lit';
+import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -172,6 +172,11 @@ export class EdgelessColorButton extends LitElement {
     }
   `;
 
+  get preprocessColor() {
+    const color = this.color;
+    return color.startsWith('--') ? `var(${color})` : color;
+  }
+
   override render() {
     const { color, hollowCircle, letter } = this;
     const additionIcon = AdditionIcon(color, !!hollowCircle);
@@ -190,11 +195,6 @@ export class EdgelessColorButton extends LitElement {
     >
       ${additionIcon}
     </div>`;
-  }
-
-  get preprocessColor() {
-    const color = this.color;
-    return color.startsWith('--') ? `var(${color})` : color;
   }
 
   @property({ attribute: false })
@@ -253,6 +253,12 @@ export class EdgelessColorPanel extends LitElement {
     ${colorContainerStyles}
   `;
 
+  get palettes() {
+    return this.hasTransparent
+      ? ['--affine-palette-transparent', ...this.options]
+      : this.options;
+  }
+
   onSelect(value: string) {
     this.dispatchEvent(
       new ColorEvent('select', {
@@ -291,12 +297,6 @@ export class EdgelessColorPanel extends LitElement {
     `;
   }
 
-  get palettes() {
-    return this.hasTransparent
-      ? ['--affine-palette-transparent', ...this.options]
-      : this.options;
-  }
-
   @property({ attribute: false })
   accessor hasTransparent: boolean = true;
 
@@ -328,6 +328,11 @@ export class EdgelessTextColorIcon extends LitElement {
     }
   `;
 
+  get preprocessColor() {
+    const color = this.color;
+    return color.startsWith('--') ? `var(${color})` : color;
+  }
+
   override render() {
     return html`
       <svg
@@ -353,11 +358,6 @@ export class EdgelessTextColorIcon extends LitElement {
         />
       </svg>
     `;
-  }
-
-  get preprocessColor() {
-    const color = this.color;
-    return color.startsWith('--') ? `var(${color})` : color;
   }
 
   @property({ attribute: false })

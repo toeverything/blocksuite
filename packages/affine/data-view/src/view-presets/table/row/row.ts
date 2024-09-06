@@ -1,7 +1,7 @@
 import {
   ShadowlessElement,
-  WithDisposable,
   SignalWatcher,
+  WithDisposable,
 } from '@blocksuite/block-std';
 import { CenterPeekIcon, MoreHorizontalIcon } from '@blocksuite/icons/lit';
 import { css, nothing } from 'lit';
@@ -20,13 +20,6 @@ import './row-select-checkbox.js';
 
 @customElement('data-view-table-row')
 export class TableRow extends SignalWatcher(WithDisposable(ShadowlessElement)) {
-  private _clickDragHandler = () => {
-    if (this.view.readonly$.value) {
-      return;
-    }
-    this.selectionController?.toggleRow(this.rowId, this.groupKey);
-  };
-
   static override styles = css`
     .affine-database-block-row:has(.row-select-checkbox.selected) {
       background: var(--affine-primary-color-04);
@@ -123,6 +116,13 @@ export class TableRow extends SignalWatcher(WithDisposable(ShadowlessElement)) {
     }
   `;
 
+  private _clickDragHandler = () => {
+    if (this.view.readonly$.value) {
+      return;
+    }
+    this.selectionController?.toggleRow(this.rowId, this.groupKey);
+  };
+
   contextMenu = (e: MouseEvent) => {
     if (this.view.readonly$.value) {
       return;
@@ -153,6 +153,14 @@ export class TableRow extends SignalWatcher(WithDisposable(ShadowlessElement)) {
       this.selectionController.selection = selection;
     }
   };
+
+  get groupKey() {
+    return this.closest('affine-data-view-table-group')?.group?.key;
+  }
+
+  get selectionController() {
+    return this.closest('affine-database-table')?.selectionController;
+  }
 
   override connectedCallback() {
     super.connectedCallback();
@@ -253,14 +261,6 @@ export class TableRow extends SignalWatcher(WithDisposable(ShadowlessElement)) {
       )}
       <div class="database-cell add-column-button"></div>
     `;
-  }
-
-  get groupKey() {
-    return this.closest('affine-data-view-table-group')?.group?.key;
-  }
-
-  get selectionController() {
-    return this.closest('affine-database-table')?.selectionController;
   }
 
   @property({ attribute: false })

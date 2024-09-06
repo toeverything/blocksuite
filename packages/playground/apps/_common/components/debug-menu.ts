@@ -5,25 +5,23 @@ import type { Pane } from 'tweakpane';
 
 import { type EditorHost, ShadowlessElement } from '@blocksuite/block-std';
 import {
+  type AffineTextAttributes,
+  ColorVariables,
+  defaultImageProxyMiddleware,
   type DocMode,
   DocModeProvider,
   EdgelessRootService,
-} from '@blocksuite/blocks';
-import {
-  type AffineTextAttributes,
-  ColorVariables,
   FontFamilyVariables,
   HtmlTransformer,
   MarkdownTransformer,
   NotionHtmlAdapter,
+  openFileOrFiles,
+  printToPdf,
   SizeVariables,
   StyleVariables,
   type SurfaceBlockComponent,
-  ZipTransformer,
-  defaultImageProxyMiddleware,
-  openFileOrFiles,
-  printToPdf,
   toast,
+  ZipTransformer,
 } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
 import { AffineEditorContainer, type CommentPanel } from '@blocksuite/presets';
@@ -166,14 +164,6 @@ function getDarkModeConfig(): boolean {
 
 @customElement('debug-menu')
 export class DebugMenu extends ShadowlessElement {
-  private _darkModeChange = (e: MediaQueryListEvent) => {
-    this._setThemeMode(!!e.matches);
-  };
-
-  private _showStyleDebugMenu = false;
-
-  private _styleMenu!: Pane;
-
   static override styles = css`
     :root {
       --sl-font-size-medium: var(--affine-font-xs);
@@ -184,6 +174,30 @@ export class DebugMenu extends ShadowlessElement {
       z-index: 1001 !important;
     }
   `;
+
+  private _darkModeChange = (e: MediaQueryListEvent) => {
+    this._setThemeMode(!!e.matches);
+  };
+
+  private _showStyleDebugMenu = false;
+
+  private _styleMenu!: Pane;
+
+  get doc() {
+    return this.editor.doc;
+  }
+
+  get mode() {
+    return this.editor.mode;
+  }
+
+  set mode(value: DocMode) {
+    this.editor.mode = value;
+  }
+
+  get rootService() {
+    return this.editor.std?.getService('affine:page');
+  }
 
   private _addNote() {
     const rootModel = this.doc.root;
@@ -705,22 +719,6 @@ export class DebugMenu extends ShadowlessElement {
       Object.assign(appRoot.style, style);
     }
     super.update(changedProperties);
-  }
-
-  get doc() {
-    return this.editor.doc;
-  }
-
-  get mode() {
-    return this.editor.mode;
-  }
-
-  set mode(value: DocMode) {
-    this.editor.mode = value;
-  }
-
-  get rootService() {
-    return this.editor.std?.getService('affine:page');
   }
 
   @state()

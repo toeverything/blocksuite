@@ -11,7 +11,7 @@ import {
 import { toast } from '@blocksuite/affine-components/toast';
 import { Bound } from '@blocksuite/global/utils';
 import { cssVar } from '@toeverything/theme';
-import { LitElement, type PropertyValues, css, html, nothing } from 'lit';
+import { css, html, LitElement, nothing, type PropertyValues } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
 import type { NavigatorMode } from '../../../../_common/edgeless/frame/consts.js';
@@ -27,10 +27,6 @@ const { clamp } = CommonUtils;
 
 @customElement('presentation-toolbar')
 export class PresentationToolbar extends EdgelessToolbarToolMixin(LitElement) {
-  private _cachedIndex = -1;
-
-  private _timer?: ReturnType<typeof setTimeout>;
-
   static override styles = css`
     :host {
       align-items: inherit;
@@ -107,12 +103,11 @@ export class PresentationToolbar extends EdgelessToolbarToolMixin(LitElement) {
     }
   `;
 
-  override type: EdgelessTool['type'] = 'frameNavigator';
+  private _cachedIndex = -1;
 
-  constructor(edgeless: EdgelessRootBlockComponent) {
-    super();
-    this.edgeless = edgeless;
-  }
+  private _timer?: ReturnType<typeof setTimeout>;
+
+  override type: EdgelessTool['type'] = 'frameNavigator';
 
   private get _cachedPresentHideToolbar() {
     return !!this.edgeless.service.editPropsStore.getStorage(
@@ -129,6 +124,19 @@ export class PresentationToolbar extends EdgelessToolbarToolMixin(LitElement) {
 
   private get _frames(): FrameBlockModel[] {
     return this.edgeless.service.frames;
+  }
+
+  get dense() {
+    return this.containerWidth < 554;
+  }
+
+  get host() {
+    return this.edgeless.host;
+  }
+
+  constructor(edgeless: EdgelessRootBlockComponent) {
+    super();
+    this.edgeless = edgeless;
   }
 
   private _moveToCurrentFrame() {
@@ -369,14 +377,6 @@ export class PresentationToolbar extends EdgelessToolbarToolMixin(LitElement) {
     ) {
       this._moveToCurrentFrame();
     }
-  }
-
-  get dense() {
-    return this.containerWidth < 554;
-  }
-
-  get host() {
-    return this.edgeless.host;
   }
 
   @state({

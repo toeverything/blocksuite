@@ -4,5 +4,5 @@ export {
 } from './commands.js';
 export { PeekableController } from './controller.js';
 
-export { Peekable, isPeekable, peek } from './peekable.js';
-export type { PeekViewService, PeekableOptions } from './type.js';
+export { isPeekable, peek, Peekable } from './peekable.js';
+export type { PeekableOptions, PeekViewService } from './type.js';

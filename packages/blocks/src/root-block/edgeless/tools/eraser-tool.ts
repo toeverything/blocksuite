@@ -1,7 +1,7 @@
 import type { PointerEventState } from '@blocksuite/block-std';
 import type { IPoint, IVec } from '@blocksuite/global/utils';
 
-import { Overlay, CommonUtils } from '@blocksuite/affine-block-surface';
+import { CommonUtils, Overlay } from '@blocksuite/affine-block-surface';
 import { Bound, noop } from '@blocksuite/global/utils';
 
 import { deleteElements } from '../utils/crud.js';
@@ -28,9 +28,9 @@ type EraserTool = {
 export class EraserToolController extends EdgelessToolController<EraserTool> {
   private _erasables = new Set<BlockSuite.EdgelessModel>();
 
-  private _eraseTargets = new Set<BlockSuite.EdgelessModel>();
-
   private _eraserPoints: IVec[] = [];
+
+  private _eraseTargets = new Set<BlockSuite.EdgelessModel>();
 
   private _loop = () => {
     const now = Date.now();

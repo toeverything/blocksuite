@@ -2,10 +2,10 @@ import type { Disposable } from '@blocksuite/global/utils';
 
 import { autoUpdate } from '@floating-ui/dom';
 import {
-  type Rect,
   autoPlacement,
   computePosition,
   offset,
+  type Rect,
   shift,
   size,
 } from '@floating-ui/dom';

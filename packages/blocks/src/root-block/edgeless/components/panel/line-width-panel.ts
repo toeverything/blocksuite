@@ -1,7 +1,7 @@
 import { LineWidth } from '@blocksuite/affine-model';
 import { requestConnectedFrame } from '@blocksuite/affine-shared/utils';
 import { WithDisposable } from '@blocksuite/block-std';
-import { LitElement, type PropertyValues, css, html, nothing } from 'lit';
+import { css, html, LitElement, nothing, type PropertyValues } from 'lit';
 import { customElement, property, query, queryAll } from 'lit/decorators.js';
 
 type DragConfig = {
@@ -29,6 +29,83 @@ export class LineWidthEvent extends Event {
 
 @customElement('edgeless-line-width-panel')
 export class EdgelessLineWidthPanel extends WithDisposable(LitElement) {
+  static override styles = css`
+    :host {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      align-self: stretch;
+    }
+
+    .line-width-panel {
+      width: 108px;
+      height: 24px;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+      position: relative;
+      cursor: default;
+    }
+
+    .line-width-button {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 16px;
+      height: 16px;
+      z-index: 2;
+    }
+
+    .line-width-icon {
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background-color: var(--affine-border-color);
+    }
+
+    .line-width-button:nth-child(1) {
+      margin-right: 0;
+    }
+
+    .line-width-button:nth-child(6) {
+      margin-left: 0;
+    }
+
+    .drag-handle {
+      position: absolute;
+      left: 0;
+      top: 50%;
+      width: 8px;
+      height: 8px;
+      transform: translateY(-50%) translateX(4px);
+      border-radius: 50%;
+      background-color: var(--affine-icon-color);
+      z-index: 3;
+    }
+
+    .bottom-line,
+    .line-width-overlay {
+      left: 8px;
+      top: 50%;
+      transform: translateY(-50%);
+      height: 1px;
+      background-color: var(--affine-border-color);
+      position: absolute;
+    }
+
+    .bottom-line {
+      width: calc(100% - 16px);
+      background-color: var(--affine-border-color);
+    }
+
+    .line-width-overlay {
+      width: 0;
+      background-color: var(--affine-icon-color);
+      z-index: 1;
+    }
+  `;
+
   private _dragConfig: DragConfig | null = null;
 
   private _getDragHandlePosition = (e: PointerEvent, config: DragConfig) => {
@@ -132,83 +209,6 @@ export class EdgelessLineWidthPanel extends WithDisposable(LitElement) {
       icon => (icon.style.backgroundColor = 'var(--affine-border-color)')
     );
   };
-
-  static override styles = css`
-    :host {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      align-self: stretch;
-    }
-
-    .line-width-panel {
-      width: 108px;
-      height: 24px;
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-      justify-content: space-between;
-      position: relative;
-      cursor: default;
-    }
-
-    .line-width-button {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 16px;
-      height: 16px;
-      z-index: 2;
-    }
-
-    .line-width-icon {
-      width: 4px;
-      height: 4px;
-      border-radius: 50%;
-      background-color: var(--affine-border-color);
-    }
-
-    .line-width-button:nth-child(1) {
-      margin-right: 0;
-    }
-
-    .line-width-button:nth-child(6) {
-      margin-left: 0;
-    }
-
-    .drag-handle {
-      position: absolute;
-      left: 0;
-      top: 50%;
-      width: 8px;
-      height: 8px;
-      transform: translateY(-50%) translateX(4px);
-      border-radius: 50%;
-      background-color: var(--affine-icon-color);
-      z-index: 3;
-    }
-
-    .bottom-line,
-    .line-width-overlay {
-      left: 8px;
-      top: 50%;
-      transform: translateY(-50%);
-      height: 1px;
-      background-color: var(--affine-border-color);
-      position: absolute;
-    }
-
-    .bottom-line {
-      width: calc(100% - 16px);
-      background-color: var(--affine-border-color);
-    }
-
-    .line-width-overlay {
-      width: 0;
-      background-color: var(--affine-icon-color);
-      z-index: 1;
-    }
-  `;
 
   private _onSelect(lineWidth: LineWidth) {
     // If the selected size is the same as the previous one, do nothing.

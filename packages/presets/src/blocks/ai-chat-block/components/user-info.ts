@@ -1,5 +1,5 @@
 import { baseTheme } from '@toeverything/theme';
-import { LitElement, type TemplateResult, css, html, unsafeCSS } from 'lit';
+import { css, html, LitElement, type TemplateResult, unsafeCSS } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 import type { MessageRole, MessageUserInfo } from '../types.js';

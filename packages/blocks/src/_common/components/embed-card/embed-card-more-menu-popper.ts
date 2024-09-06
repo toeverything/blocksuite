@@ -10,7 +10,7 @@ import { isPeekable, peek } from '@blocksuite/affine-components/peek';
 import { toast } from '@blocksuite/affine-components/toast';
 import { WithDisposable } from '@blocksuite/block-std';
 import { Slice } from '@blocksuite/store';
-import { LitElement, css, html, nothing } from 'lit';
+import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 import type { EmbedToolbarBlockComponent } from './type.js';
@@ -68,15 +68,29 @@ export class EmbedCardMoreMenu extends WithDisposable(LitElement) {
     }
   `;
 
+  private get _doc() {
+    return this.block.doc;
+  }
+
+  private get _model() {
+    return this.block.model;
+  }
+
+  get _openButtonDisabled() {
+    return (
+      isEmbedLinkedDocBlock(this._model) && this._model.pageId === this._doc.id
+    );
+  }
+
+  private get _std() {
+    return this.block.std;
+  }
+
   private async _copyBlock() {
     const slice = Slice.fromModels(this._doc, [this._model]);
     await this._std.clipboard.copySlice(slice);
     toast(this.block.host, 'Copied link to clipboard');
     this.abortController.abort();
-  }
-
-  private get _doc() {
-    return this.block.doc;
   }
 
   private _duplicateBlock() {
@@ -97,19 +111,9 @@ export class EmbedCardMoreMenu extends WithDisposable(LitElement) {
     this.abortController.abort();
   }
 
-  private get _model() {
-    return this.block.model;
-  }
-
   private _open() {
     this.block.open();
     this.abortController.abort();
-  }
-
-  get _openButtonDisabled() {
-    return (
-      isEmbedLinkedDocBlock(this._model) && this._model.pageId === this._doc.id
-    );
   }
 
   private _peek() {
@@ -123,10 +127,6 @@ export class EmbedCardMoreMenu extends WithDisposable(LitElement) {
   private _refreshData() {
     this.block.refreshData();
     this.abortController.abort();
-  }
-
-  private get _std() {
-    return this.block.std;
   }
 
   override render() {

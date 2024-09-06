@@ -15,6 +15,10 @@ export class RoughSVG {
 
   private svg: SVGSVGElement;
 
+  get generator(): RoughGenerator {
+    return this.gen;
+  }
+
   constructor(svg: SVGSVGElement, config?: Config) {
     this.svg = svg;
     this.gen = new RoughGenerator(config);
@@ -175,9 +179,5 @@ export class RoughSVG {
   ): SVGGElement {
     const d = this.gen.rectangle(x, y, width, height, options);
     return this.draw(d);
-  }
-
-  get generator(): RoughGenerator {
-    return this.gen;
   }
 }

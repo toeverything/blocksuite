@@ -1,11 +1,11 @@
 import type { ShapeElementModel, ShapeType } from '@blocksuite/affine-model';
 import type { IBound } from '@blocksuite/global/utils';
 
-import { TextAlign } from '@blocksuite/affine-model';
 import {
   DEFAULT_SHAPE_FILL_COLOR,
   DEFAULT_SHAPE_STROKE_COLOR,
   DEFAULT_SHAPE_TEXT_COLOR,
+  TextAlign,
 } from '@blocksuite/affine-model';
 import { Bound } from '@blocksuite/global/utils';
 

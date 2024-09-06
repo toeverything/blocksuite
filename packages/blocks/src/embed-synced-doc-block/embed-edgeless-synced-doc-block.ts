@@ -4,7 +4,7 @@ import {
 } from '@blocksuite/affine-shared/consts';
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import { BlockStdScope } from '@blocksuite/block-std';
-import { Bound, assertExists } from '@blocksuite/global/utils';
+import { assertExists, Bound } from '@blocksuite/global/utils';
 import { html } from 'lit';
 import { customElement } from 'lit/decorators.js';
 import { choose } from 'lit/directives/choose.js';
@@ -138,6 +138,10 @@ export class EmbedEdgelessSyncedDocBlockComponent extends toEdgelessEmbedBlock(
     doc.deleteBlock(this.model);
   };
 
+  get rootService() {
+    return this.std.getService('affine:page') as EdgelessRootService;
+  }
+
   override renderGfxBlock() {
     const { style, xywh } = this.model;
 
@@ -158,10 +162,6 @@ export class EmbedEdgelessSyncedDocBlockComponent extends toEdgelessEmbedBlock(
     };
 
     return this.renderPageContent();
-  }
-
-  get rootService() {
-    return this.std.getService('affine:page') as EdgelessRootService;
   }
 
   override accessor useCaptionEditor = true;

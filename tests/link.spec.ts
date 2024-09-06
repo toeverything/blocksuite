@@ -3,7 +3,6 @@ import type { Page } from '@playwright/test';
 import { expect } from '@playwright/test';
 
 import {
-  SHORT_KEY,
   cutByKeyboard,
   dragBetweenIndices,
   enterPlaygroundRoom,
@@ -16,6 +15,7 @@ import {
   pressTab,
   selectAllByKeyboard,
   setSelection,
+  SHORT_KEY,
   switchReadonly,
   type,
   waitNextFrame,

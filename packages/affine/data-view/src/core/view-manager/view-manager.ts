@@ -1,8 +1,8 @@
 import type { InsertToPosition } from '@blocksuite/affine-shared/utils';
 
 import {
-  type ReadonlySignal,
   computed,
+  type ReadonlySignal,
   signal,
 } from '@lit-labs/preact-signals';
 

@@ -2,11 +2,11 @@ import { ShadowlessElement } from '@blocksuite/block-std';
 import {
   type AttributeRenderer,
   type BaseTextAttributes,
+  baseTextAttributes,
+  createInlineKeyDownHandler,
   InlineEditor,
   KEYBOARD_ALLOW_DEFAULT,
   ZERO_WIDTH_NON_JOINER,
-  baseTextAttributes,
-  createInlineKeyDownHandler,
 } from '@blocksuite/inline';
 import '@shoelace-style/shoelace';
 import { css, html, nothing } from 'lit';
@@ -359,14 +359,6 @@ export class CustomToolbar extends ShadowlessElement {
 
 @customElement('test-page')
 export class TestPage extends ShadowlessElement {
-  private _editorA: InlineEditor | null = null;
-
-  private _editorB: InlineEditor | null = null;
-
-  private _undoManagerA: Y.UndoManager | null = null;
-
-  private _undoManagerB: Y.UndoManager | null = null;
-
   static override styles = css`
     .container {
       display: grid;
@@ -395,6 +387,14 @@ export class TestPage extends ShadowlessElement {
       overflow-y: scroll;
     }
   `;
+
+  private _editorA: InlineEditor | null = null;
+
+  private _editorB: InlineEditor | null = null;
+
+  private _undoManagerA: Y.UndoManager | null = null;
+
+  private _undoManagerB: Y.UndoManager | null = null;
 
   override firstUpdated() {
     const textA = yDocA.getText(TEXT_ID);

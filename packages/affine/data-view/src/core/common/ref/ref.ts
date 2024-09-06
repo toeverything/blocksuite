@@ -35,31 +35,6 @@ export class VariableRefView extends WithDisposable(ShadowlessElement) {
     }
   `;
 
-  override connectedCallback() {
-    super.connectedCallback();
-    this.disposables.addFromEvent(this, 'click', e => {
-      popFilterableSimpleMenu(
-        e.target as HTMLElement,
-        this.vars.map(v => ({
-          type: 'action',
-          name: v.name,
-          icon: renderUniLit(v.icon, {}),
-          select: () => {
-            this.setData({
-              type: 'ref',
-              name: v.id,
-            });
-          },
-        }))
-      );
-    });
-  }
-
-  override render() {
-    const data = this.fieldData;
-    return html` ${renderUniLit(data?.icon, {})} ${data?.name} `;
-  }
-
   get field() {
     if (!this.data) {
       return;
@@ -86,6 +61,31 @@ export class VariableRefView extends WithDisposable(ShadowlessElement) {
       return;
     }
     return this.data.propertyFuncName;
+  }
+
+  override connectedCallback() {
+    super.connectedCallback();
+    this.disposables.addFromEvent(this, 'click', e => {
+      popFilterableSimpleMenu(
+        e.target as HTMLElement,
+        this.vars.map(v => ({
+          type: 'action',
+          name: v.name,
+          icon: renderUniLit(v.icon, {}),
+          select: () => {
+            this.setData({
+              type: 'ref',
+              name: v.id,
+            });
+          },
+        }))
+      );
+    });
+  }
+
+  override render() {
+    const data = this.fieldData;
+    return html` ${renderUniLit(data?.icon, {})} ${data?.name} `;
   }
 
   @property({ attribute: false })

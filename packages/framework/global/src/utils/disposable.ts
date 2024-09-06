@@ -9,6 +9,10 @@ export class DisposableGroup implements Disposable {
 
   private _disposed = false;
 
+  get disposed() {
+    return this._disposed;
+  }
+
   /**
    * Add to group to be disposed with others.
    * This will be immediately disposed if this group has already been disposed.
@@ -29,7 +33,6 @@ export class DisposableGroup implements Disposable {
     handler: (e: WindowEventMap[N]) => void,
     options?: boolean | AddEventListenerOptions
   ): void;
-
   addFromEvent<N extends keyof DocumentEventMap>(
     element: Document,
     eventName: N,
@@ -42,6 +45,7 @@ export class DisposableGroup implements Disposable {
     handler: (e: HTMLElementEventMap[N]) => void,
     eventOptions?: boolean | AddEventListenerOptions
   ): void;
+
   addFromEvent(
     target: HTMLElement | Window | Document,
     type: string,
@@ -60,10 +64,6 @@ export class DisposableGroup implements Disposable {
     disposeAll(this._disposables);
     this._disposables = [];
     this._disposed = true;
-  }
-
-  get disposed() {
-    return this._disposed;
   }
 }
 

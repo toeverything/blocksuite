@@ -1,4 +1,4 @@
-import { type Locator, type Page, expect } from '@playwright/test';
+import { expect, type Locator, type Page } from '@playwright/test';
 import { addNote, switchEditorMode } from 'utils/actions/edgeless.js';
 import { pressBackspace, pressEnter, type } from 'utils/actions/keyboard.js';
 import {

@@ -92,6 +92,33 @@ export class DatabaseBlockDataSource extends DataSourceBase {
 
   viewMetas = databaseBlockViews;
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  get addPropertyConfigList(): ColumnMeta<any, any, any>[] {
+    return databaseBlockColumnList;
+  }
+
+  override get detailSlots(): DetailSlots {
+    return {
+      ...super.detailSlots,
+      header: uniMap(
+        createUniComponentFromWebComponent(BlockRenderer),
+        props => ({
+          ...props,
+          host: this.host,
+        })
+      ),
+      note: uniMap(createUniComponentFromWebComponent(NoteRenderer), props => ({
+        ...props,
+        model: this._model,
+        host: this.host,
+      })),
+    };
+  }
+
+  get doc() {
+    return this._model.doc;
+  }
+
   constructor(
     private host: EditorHost,
     config: DatabaseBlockDataSourceConfig
@@ -373,32 +400,5 @@ export class DatabaseBlockDataSource extends DataSourceBase {
   viewMetaGetById(viewId: string): ViewMeta {
     const view = this.viewDataGet(viewId);
     return this.viewMetaGet(view.mode);
-  }
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  get addPropertyConfigList(): ColumnMeta<any, any, any>[] {
-    return databaseBlockColumnList;
-  }
-
-  override get detailSlots(): DetailSlots {
-    return {
-      ...super.detailSlots,
-      header: uniMap(
-        createUniComponentFromWebComponent(BlockRenderer),
-        props => ({
-          ...props,
-          host: this.host,
-        })
-      ),
-      note: uniMap(createUniComponentFromWebComponent(NoteRenderer), props => ({
-        ...props,
-        model: this._model,
-        host: this.host,
-      })),
-    };
-  }
-
-  get doc() {
-    return this._model.doc;
   }
 }

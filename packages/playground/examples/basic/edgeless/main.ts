@@ -1,4 +1,4 @@
-import { EdgelessEditor, createEmptyDoc } from '@blocksuite/presets';
+import { createEmptyDoc, EdgelessEditor } from '@blocksuite/presets';
 import '@blocksuite/presets/themes/affine.css';
 
 const doc = createEmptyDoc().init();

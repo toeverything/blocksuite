@@ -70,9 +70,11 @@ export type EventHandlerRunner = {
 };
 
 export class UIEventDispatcher extends LifeCycleWatcher {
-  private _active = false;
-
   private static _activeDispatcher: UIEventDispatcher | null = null;
+
+  static override readonly key = 'UIEventDispatcher';
+
+  private _active = false;
 
   private _clipboardControl: ClipboardControl;
 
@@ -86,12 +88,22 @@ export class UIEventDispatcher extends LifeCycleWatcher {
 
   private _rangeControl: RangeControl;
 
-  static override readonly key = 'UIEventDispatcher';
-
   bindHotkey = (...args: Parameters<KeyboardControl['bindHotkey']>) =>
     this._keyboardControl.bindHotkey(...args);
 
   disposables = new DisposableGroup();
+
+  private get _currentSelections() {
+    return this.std.selection.value;
+  }
+
+  get active() {
+    return this._active;
+  }
+
+  get host() {
+    return this.std.host;
+  }
 
   constructor(std: BlockSuite.Std) {
     super(std);
@@ -201,10 +213,6 @@ export class UIEventDispatcher extends LifeCycleWatcher {
     }
 
     return this.buildEventScope(name, [blockId]);
-  }
-
-  private get _currentSelections() {
-    return this.std.selection.value;
   }
 
   private _getDeepActiveElement(): Element | null {
@@ -371,13 +379,5 @@ export class UIEventDispatcher extends LifeCycleWatcher {
 
   override unmounted() {
     this.disposables.dispose();
-  }
-
-  get active() {
-    return this._active;
-  }
-
-  get host() {
-    return this.std.host;
   }
 }

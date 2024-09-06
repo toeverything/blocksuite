@@ -1,5 +1,5 @@
 import { WithDisposable } from '@blocksuite/block-std';
-import { LitElement, type TemplateResult, css, html, nothing } from 'lit';
+import { css, html, LitElement, nothing, type TemplateResult } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { repeat } from 'lit/directives/repeat.js';

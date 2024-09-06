@@ -8,18 +8,18 @@ import type {
 import type { BlockModel } from '@blocksuite/store';
 
 import {
-  type InsertToPosition,
   arrayMove,
   insertPositionToIndex,
+  type InsertToPosition,
 } from '@blocksuite/affine-shared/utils';
 import {
   type ColumnMeta,
   type DataViewDataType,
   type DataViewTypes,
-  type ViewMeta,
   defaultGroupBy,
   getTagColor,
   groupByMatcher,
+  type ViewMeta,
 } from '@blocksuite/data-view';
 import { columnPresets } from '@blocksuite/data-view/column-presets';
 import { columnModelPresets } from '@blocksuite/data-view/column-pure-presets';

@@ -32,49 +32,49 @@ export type {
 } from './element-model/utils/mindmap/layout.js';
 export * from './elements/index.js';
 export {
+  calculateNearestLocation,
   ConnectionOverlay,
-  ConnectorPathGenerator,
   ConnectorEndpointLocations,
   ConnectorEndpointLocationsOnTriangle,
-  calculateNearestLocation,
+  ConnectorPathGenerator,
 } from './managers/connector-manager.js';
 export { LayerManager } from './managers/layer-manager.js';
 export type { BlockLayer } from './managers/layer-manager.js';
 export type { ReorderingDirection } from './managers/layer-manager.js';
 export {
   compare as compareLayer,
-  SortOrder,
   renderableInEdgeless,
+  SortOrder,
 } from './managers/layer-utils.js';
 export { CanvasRenderer, Overlay } from './renderer/canvas-renderer.js';
 export * from './renderer/elements/group/consts.js';
 export type { ElementRenderer } from './renderer/elements/index.js';
 export {
-  normalizeShapeBound,
   elementRenderers,
+  normalizeShapeBound,
 } from './renderer/elements/index.js';
 export { fitContent } from './renderer/elements/shape/utils.js';
 import {
-  splitIntoLines,
-  normalizeTextBound,
-  getLineHeight,
-  isFontWeightSupported,
-  isFontStyleSupported,
   getCursorByCoord,
+  getLineHeight,
+  isFontStyleSupported,
+  isFontWeightSupported,
+  normalizeTextBound,
+  splitIntoLines,
 } from './renderer/elements/text/utils.js';
 import {
-  wrapFontFamily,
   getFontFaces,
   getFontFacesByFontFamily,
   isSameFontFamily,
+  wrapFontFamily,
 } from './utils/font.js';
 export { SurfaceBlockComponent } from './surface-block.js';
 export type { SurfaceContext } from './surface-block.js';
 export { SurfaceBlockModel, SurfaceBlockSchema } from './surface-model.js';
 export type { SurfaceBlockService } from './surface-service.js';
 export {
-  PageSurfaceBlockSpec,
   EdgelessSurfaceBlockSpec,
+  PageSurfaceBlockSpec,
 } from './surface-spec.js';
 export { SurfaceBlockTransformer } from './surface-transformer.js';
 export { AStarRunner } from './utils/a-star.js';
@@ -97,10 +97,10 @@ import {
   lineIntersects,
   linePolygonIntersects,
   normalizeDegAngle,
-  polyLineNearestPoint,
   polygonGetPointTangent,
   polygonNearestPoint,
   polygonPointDistance,
+  polyLineNearestPoint,
   rotatePoints,
   sign,
   toDegree,

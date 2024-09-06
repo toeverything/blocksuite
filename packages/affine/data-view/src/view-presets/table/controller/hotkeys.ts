@@ -6,6 +6,10 @@ import { popRowMenu } from '../components/menu.js';
 import { TableAreaSelection, TableRowSelection } from '../types.js';
 
 export class TableHotkeysController implements ReactiveController {
+  get selectionController() {
+    return this.host.selectionController;
+  }
+
   constructor(private host: DataViewTable) {
     this.host.addController(this);
   }
@@ -371,9 +375,5 @@ export class TableHotkeysController implements ReactiveController {
         },
       })
     );
-  }
-
-  get selectionController() {
-    return this.host.selectionController;
   }
 }

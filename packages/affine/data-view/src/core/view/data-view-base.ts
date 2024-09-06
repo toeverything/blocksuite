@@ -9,8 +9,8 @@ import type { ReadonlySignal } from '@lit-labs/preact-signals';
 
 import {
   ShadowlessElement,
-  WithDisposable,
   SignalWatcher,
+  WithDisposable,
 } from '@blocksuite/block-std';
 import { property } from 'lit/decorators.js';
 
@@ -31,6 +31,10 @@ export abstract class DataViewBase<
 {
   addRow?(position: InsertToPosition): void;
 
+  abstract focusFirstCell(): void;
+
+  abstract getSelection(): Selection | undefined;
+
   @property({ attribute: false })
   accessor bindHotkey!: (hotkeys: Record<string, UIEventHandler>) => Disposable;
 
@@ -39,10 +43,6 @@ export abstract class DataViewBase<
 
   @property({ attribute: false })
   accessor dataViewEle!: DataViewRenderer;
-
-  abstract focusFirstCell(): void;
-
-  abstract getSelection(): Selection | undefined;
 
   @property({ attribute: false })
   accessor handleEvent!: (

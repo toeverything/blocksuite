@@ -5,6 +5,10 @@ export class AsyncQueue<T> {
 
   private _waitForUpdate: Promise<void> | null = null;
 
+  get length() {
+    return this._queue.length;
+  }
+
   constructor(init: T[] = []) {
     this._queue = init;
   }
@@ -62,10 +66,6 @@ export class AsyncQueue<T> {
     if (index !== -1) {
       this._queue.splice(index, 1);
     }
-  }
-
-  get length() {
-    return this._queue.length;
   }
 }
 

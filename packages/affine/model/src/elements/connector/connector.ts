@@ -6,29 +6,29 @@ import type {
 import type { IVec, SerializedXYWH, XYWH } from '@blocksuite/global/utils';
 
 import {
-  GfxPrimitiveElementModel,
   derive,
   field,
+  GfxPrimitiveElementModel,
   local,
 } from '@blocksuite/block-std/gfx';
 import {
   Bound,
-  PointLocation,
-  Polyline,
-  Vec,
   curveIntersects,
   getBezierNearestPoint,
   getBezierNearestTime,
   getBezierParameters,
   getBezierPoint,
   linePolylineIntersects,
+  PointLocation,
+  Polyline,
   polyLineNearestPoint,
+  Vec,
 } from '@blocksuite/global/utils';
 import { DocCollection, type Y } from '@blocksuite/store';
 
 import {
-  CONNECTOR_LABEL_MAX_WIDTH,
   type Color,
+  CONNECTOR_LABEL_MAX_WIDTH,
   ConnectorLabelOffsetAnchor,
   ConnectorMode,
   DEFAULT_ROUGHNESS,
@@ -105,6 +105,27 @@ export type ConnectorElementProps = BaseElementProps & {
 
 export class ConnectorElementModel extends GfxPrimitiveElementModel<ConnectorElementProps> {
   updatingPath = false;
+
+  // @ts-ignore
+  override get connectable() {
+    return false as const;
+  }
+
+  get connected() {
+    return !!(this.source.id || this.target.id);
+  }
+
+  override get elementBound() {
+    let bounds = super.elementBound;
+    if (this.hasLabel()) {
+      bounds = bounds.unite(Bound.fromXYWH(this.labelXYWH!));
+    }
+    return bounds;
+  }
+
+  get type() {
+    return 'connector';
+  }
 
   static override propsToY(props: ConnectorElementProps) {
     if (props.text && !(props.text instanceof DocCollection.Y.Text)) {
@@ -376,27 +397,6 @@ export class ConnectorElementModel extends GfxPrimitiveElementModel<ConnectorEle
     const result = super.serialize();
     result.xywh = this.xywh;
     return result as SerializedConnectorElement;
-  }
-
-  // @ts-ignore
-  override get connectable() {
-    return false as const;
-  }
-
-  get connected() {
-    return !!(this.source.id || this.target.id);
-  }
-
-  override get elementBound() {
-    let bounds = super.elementBound;
-    if (this.hasLabel()) {
-      bounds = bounds.unite(Bound.fromXYWH(this.labelXYWH!));
-    }
-    return bounds;
-  }
-
-  get type() {
-    return 'connector';
   }
 
   @local()

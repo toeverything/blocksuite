@@ -2,8 +2,8 @@ import type { EditorHost } from '@blocksuite/block-std';
 import type { Doc } from '@blocksuite/store';
 
 import {
-  MarkdownAdapter,
   defaultImageProxyMiddleware,
+  MarkdownAdapter,
 } from '@blocksuite/blocks';
 import { DocCollection, Job } from '@blocksuite/store';
 

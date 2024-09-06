@@ -4,7 +4,7 @@ import type {
 } from '@blocksuite/affine-model';
 
 import { withTempBlobData } from '@blocksuite/affine-shared/utils';
-import { type TemplateResult, html } from 'lit';
+import { html, type TemplateResult } from 'lit';
 
 import { transformModel } from '../root-block/utils/operations/model.js';
 

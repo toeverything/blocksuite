@@ -33,6 +33,8 @@ export type EmbedOptions = {
 };
 
 export abstract class RootService extends BlockService {
+  static override readonly flavour = RootBlockSchema.model.flavour;
+
   private _exportOptions = {
     imageProxyEndpoint: DEFAULT_IMAGE_PROXY_ENDPOINT,
   };
@@ -40,8 +42,6 @@ export abstract class RootService extends BlockService {
   private _fileDropOptions: FileDropOptions = {
     flavour: this.flavour,
   };
-
-  static override readonly flavour = RootBlockSchema.model.flavour;
 
   readonly editPropsStore: EditPropsStore = new EditPropsStore(this);
 
@@ -56,6 +56,8 @@ export abstract class RootService extends BlockService {
 
   peekViewService: PeekViewService | null = null;
 
+  abstract slots: RefNodeSlots;
+
   readonly themeObserver = ThemeObserver.instance;
 
   transformers = {
@@ -63,40 +65,6 @@ export abstract class RootService extends BlockService {
     html: HtmlTransformer,
     zip: ZipTransformer,
   };
-
-  loadFonts() {
-    this.fontLoader.load(CommunityCanvasTextFonts);
-  }
-
-  override mounted() {
-    super.mounted();
-
-    this.loadFonts();
-
-    this.disposables.addFromEvent(
-      this.host,
-      'dragover',
-      this.fileDropManager.onDragOver
-    );
-
-    this.disposables.addFromEvent(
-      this.host,
-      'dragleave',
-      this.fileDropManager.onDragLeave
-    );
-
-    this.disposables.add(
-      this.std.event.add('pointerDown', ctx => {
-        const state = ctx.get('pointerState');
-        state.raw.stopPropagation();
-      })
-    );
-  }
-
-  override unmounted() {
-    this.editPropsStore.dispose();
-    this.fontLoader.clear();
-  }
 
   get selectedBlocks() {
     let result: BlockComponent[] = [];
@@ -131,7 +99,39 @@ export abstract class RootService extends BlockService {
     return viewportElement;
   }
 
-  abstract slots: RefNodeSlots;
+  loadFonts() {
+    this.fontLoader.load(CommunityCanvasTextFonts);
+  }
+
+  override mounted() {
+    super.mounted();
+
+    this.loadFonts();
+
+    this.disposables.addFromEvent(
+      this.host,
+      'dragover',
+      this.fileDropManager.onDragOver
+    );
+
+    this.disposables.addFromEvent(
+      this.host,
+      'dragleave',
+      this.fileDropManager.onDragLeave
+    );
+
+    this.disposables.add(
+      this.std.event.add('pointerDown', ctx => {
+        const state = ctx.get('pointerState');
+        state.raw.stopPropagation();
+      })
+    );
+  }
+
+  override unmounted() {
+    this.editPropsStore.dispose();
+    this.fontLoader.clear();
+  }
 }
 
 declare global {

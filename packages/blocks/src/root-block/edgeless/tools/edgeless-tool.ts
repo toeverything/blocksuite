@@ -17,9 +17,7 @@ export abstract class EdgelessToolController<
 
   enableHover = false;
 
-  constructor(service: EdgelessRootService) {
-    this._service = service;
-  }
+  abstract tool: Tool;
 
   protected get _blocks(): GfxBlockModel[] {
     return this._edgeless.service.blocks;
@@ -33,16 +31,19 @@ export abstract class EdgelessToolController<
     return this._edgeless.surface;
   }
 
-  mount(edgeless: EdgelessRootBlockComponent) {
-    this._edgeless = edgeless;
-  }
-
   get draggingArea() {
     return this._draggingArea;
   }
 
+  constructor(service: EdgelessRootService) {
+    this._service = service;
+  }
+
   abstract afterModeSwitch(newMode: Tool): void;
   abstract beforeModeSwitch(prevMode: Tool): void;
+  mount(edgeless: EdgelessRootBlockComponent) {
+    this._edgeless = edgeless;
+  }
   abstract onContainerClick(e: PointerEventState): void;
   abstract onContainerContextMenu(e: PointerEventState): void;
   abstract onContainerDblClick(e: PointerEventState): void;
@@ -53,6 +54,7 @@ export abstract class EdgelessToolController<
   abstract onContainerMouseOut(e: PointerEventState): void;
   abstract onContainerPointerDown(e: PointerEventState): void;
   abstract onContainerTripleClick(e: PointerEventState): void;
+
   /**
    * @warning Check `!ev.repeat` before calling this function in KeyboardEvents where needed
    */
@@ -62,6 +64,4 @@ export abstract class EdgelessToolController<
    * @warning Check `!ev.repeat` before calling this function in KeyboardEvents where needed
    */
   abstract onPressSpaceBar(pressed: boolean): void;
-
-  abstract tool: Tool;
 }

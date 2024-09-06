@@ -4,9 +4,7 @@ import type { BlockModel } from '@blocksuite/store';
 import { toast } from '@blocksuite/affine-components/toast';
 import { EmbedOptionProvider } from '@blocksuite/affine-shared/services';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
-import { Vec } from '@blocksuite/global/utils';
-import { Bound } from '@blocksuite/global/utils';
-import { assertExists } from '@blocksuite/global/utils';
+import { assertExists, Bound, Vec } from '@blocksuite/global/utils';
 import { html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
@@ -20,6 +18,8 @@ import { embedCardModalStyles } from './styles.js';
 
 @customElement('embed-card-create-modal')
 export class EmbedCardCreateModal extends WithDisposable(ShadowlessElement) {
+  static override styles = embedCardModalStyles;
+
   private _onCancel = () => {
     this.remove();
   };
@@ -100,8 +100,6 @@ export class EmbedCardCreateModal extends WithDisposable(ShadowlessElement) {
       this.remove();
     }
   };
-
-  static override styles = embedCardModalStyles;
 
   private _handleInput(e: InputEvent) {
     const target = e.target as HTMLInputElement;

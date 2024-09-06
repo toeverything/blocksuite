@@ -30,6 +30,38 @@ export class WidgetComponent<
     );
   };
 
+  get block() {
+    return this.std.view.getBlock(this.model.id) as B;
+  }
+
+  get doc() {
+    return this._doc;
+  }
+
+  get flavour(): string {
+    return this.model.flavour;
+  }
+
+  get host() {
+    return this.std.host;
+  }
+
+  get model() {
+    return this._model;
+  }
+
+  get service() {
+    return this._service;
+  }
+
+  get std() {
+    return this._std;
+  }
+
+  get widgetId() {
+    return this.dataset.widgetId as string;
+  }
+
   bindHotKey(
     keymap: Record<string, UIEventHandler>,
     options?: { global: boolean }
@@ -62,38 +94,6 @@ export class WidgetComponent<
 
   override render(): unknown {
     return null;
-  }
-
-  get block() {
-    return this.std.view.getBlock(this.model.id) as B;
-  }
-
-  get doc() {
-    return this._doc;
-  }
-
-  get flavour(): string {
-    return this.model.flavour;
-  }
-
-  get host() {
-    return this.std.host;
-  }
-
-  get model() {
-    return this._model;
-  }
-
-  get service() {
-    return this._service;
-  }
-
-  get std() {
-    return this._std;
-  }
-
-  get widgetId() {
-    return this.dataset.widgetId as string;
   }
 
   @consume({ context: docContext })

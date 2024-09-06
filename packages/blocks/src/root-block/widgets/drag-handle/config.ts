@@ -3,8 +3,7 @@ import type {
   EditorHost,
   PointerEventState,
 } from '@blocksuite/block-std';
-import type { Disposable, Rect } from '@blocksuite/global/utils';
-import type { Point } from '@blocksuite/global/utils';
+import type { Disposable, Point, Rect } from '@blocksuite/global/utils';
 
 import type { DragPreview } from './components/drag-preview.js';
 
@@ -71,6 +70,10 @@ export type DragHandleOption = {
 export class DragHandleOptionsRunner {
   private optionMap = new Map<DragHandleOption, number>();
 
+  get options(): DragHandleOption[] {
+    return Array.from(this.optionMap.keys());
+  }
+
   private _decreaseOptionCount(option: DragHandleOption) {
     const count = this.optionMap.get(option) || 0;
     if (count > 1) {
@@ -109,9 +112,5 @@ export class DragHandleOptionsRunner {
         this._decreaseOptionCount(currentOption);
       },
     };
-  }
-
-  get options(): DragHandleOption[] {
-    return Array.from(this.optionMap.keys());
   }
 }

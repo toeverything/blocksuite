@@ -3,11 +3,11 @@ import type { ReferenceElement } from '@floating-ui/dom';
 
 import {
   ShadowlessElement,
-  WithDisposable,
   SignalWatcher,
+  WithDisposable,
 } from '@blocksuite/block-std';
-import { type ReadonlySignal, computed } from '@lit-labs/preact-signals';
-import { type TemplateResult, css, unsafeCSS } from 'lit';
+import { computed, type ReadonlySignal } from '@lit-labs/preact-signals';
+import { css, type TemplateResult, unsafeCSS } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { keyed } from 'lit/directives/keyed.js';
@@ -55,12 +55,6 @@ export type DataViewRendererConfig = {
 export class DataViewRenderer extends SignalWatcher(
   WithDisposable(ShadowlessElement)
 ) {
-  private _view = createRef<DataViewExpose>();
-
-  private currentViewId$ = computed(() => {
-    return this.config.dataSource.viewManager.currentViewId$.value;
-  });
-
   static override styles = css`
     ${unsafeCSS(dataViewCommonStyle('affine-data-view-renderer'))}
     affine-data-view-renderer {
@@ -68,6 +62,12 @@ export class DataViewRenderer extends SignalWatcher(
       display: contents;
     }
   `;
+
+  private _view = createRef<DataViewExpose>();
+
+  private currentViewId$ = computed(() => {
+    return this.config.dataSource.viewManager.currentViewId$.value;
+  });
 
   currentViewConfig$ = computed<ViewProps | undefined>(() => {
     const currentViewId = this.currentViewId$.value;
@@ -142,6 +142,10 @@ export class DataViewRenderer extends SignalWatcher(
     );
   });
 
+  get expose() {
+    return this._view.value;
+  }
+
   private renderView(viewData?: ViewProps) {
     if (!viewData) {
       return;
@@ -192,10 +196,6 @@ export class DataViewRenderer extends SignalWatcher(
     `;
   }
 
-  get expose() {
-    return this._view.value;
-  }
-
   @property({ attribute: false })
   accessor config!: DataViewRendererConfig;
 
@@ -212,14 +212,14 @@ declare global {
 export class DataView {
   private _ref = createRef<DataViewRenderer>();
 
+  get expose() {
+    return this._ref.value?.expose;
+  }
+
   render(props: DataViewRendererConfig) {
     return html` <affine-data-view-renderer
       ${ref(this._ref)}
       .config="${props}"
     ></affine-data-view-renderer>`;
-  }
-
-  get expose() {
-    return this._ref.value?.expose;
   }
 }

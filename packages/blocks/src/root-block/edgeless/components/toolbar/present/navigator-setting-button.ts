@@ -3,7 +3,7 @@ import type { FrameBlockModel } from '@blocksuite/affine-model';
 import { NavigatorSettingsIcon } from '@blocksuite/affine-components/icons';
 import { createButtonPopper } from '@blocksuite/affine-shared/utils';
 import { WithDisposable } from '@blocksuite/block-std';
-import { LitElement, css, html, nothing } from 'lit';
+import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 
 import type { EdgelessRootBlockComponent } from '../../../edgeless-root-block.js';
@@ -14,17 +14,6 @@ import './frame-order-menu.js';
 
 @customElement('edgeless-navigator-setting-button')
 export class EdgelessNavigatorSettingButton extends WithDisposable(LitElement) {
-  private _navigatorSettingPopper?: ReturnType<
-    typeof createButtonPopper
-  > | null = null;
-
-  private _onBlackBackgroundChange = (checked: boolean) => {
-    this.blackBackground = checked;
-    this.edgeless.slots.navigatorSettingUpdated.emit({
-      blackBackground: this.blackBackground,
-    });
-  };
-
   static override styles = css`
     .navigator-setting-menu {
       display: none;
@@ -83,6 +72,17 @@ export class EdgelessNavigatorSettingButton extends WithDisposable(LitElement) {
       background: var(--affine-border-color);
     }
   `;
+
+  private _navigatorSettingPopper?: ReturnType<
+    typeof createButtonPopper
+  > | null = null;
+
+  private _onBlackBackgroundChange = (checked: boolean) => {
+    this.blackBackground = checked;
+    this.edgeless.slots.navigatorSettingUpdated.emit({
+      blackBackground: this.blackBackground,
+    });
+  };
 
   private _tryRestoreSettings() {
     const blackBackground = this.edgeless.service.editPropsStore.getStorage(

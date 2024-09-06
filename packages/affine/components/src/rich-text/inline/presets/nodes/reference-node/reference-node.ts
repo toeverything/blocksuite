@@ -39,6 +39,36 @@ import { toggleReferencePopup } from './reference-popup.js';
 @customElement('affine-reference')
 @Peekable({ action: false })
 export class AffineReference extends WithDisposable(ShadowlessElement) {
+  static override styles = css`
+    .affine-reference {
+      white-space: normal;
+      word-break: break-word;
+      color: var(--affine-text-primary-color);
+      fill: var(--affine-icon-color);
+      border-radius: 4px;
+      text-decoration: none;
+      cursor: pointer;
+      user-select: none;
+      padding: 1px 2px 1px 0;
+    }
+    .affine-reference:hover {
+      background: var(--affine-hover-color);
+    }
+
+    .affine-reference[data-selected='true'] {
+      background: var(--affine-hover-color);
+    }
+
+    .affine-reference-title {
+      margin-left: 4px;
+      border-bottom: 0.5px solid var(--affine-divider-color);
+      transition: border 0.2s ease-out;
+    }
+    .affine-reference-title:hover {
+      border-bottom: 0.5px solid var(--affine-icon-color);
+    }
+  `;
+
   private _refAttribute: NonNullable<AffineTextAttributes['reference']> = {
     type: 'LinkedPage',
     pageId: '0',
@@ -102,35 +132,69 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
     { enterDelay: 500 }
   );
 
-  static override styles = css`
-    .affine-reference {
-      white-space: normal;
-      word-break: break-word;
-      color: var(--affine-text-primary-color);
-      fill: var(--affine-icon-color);
-      border-radius: 4px;
-      text-decoration: none;
-      cursor: pointer;
-      user-select: none;
-      padding: 1px 2px 1px 0;
-    }
-    .affine-reference:hover {
-      background: var(--affine-hover-color);
-    }
+  get block() {
+    const block = this.inlineEditor?.rootElement.closest<BlockComponent>(
+      `[${BLOCK_ID_ATTR}]`
+    );
+    return block;
+  }
 
-    .affine-reference[data-selected='true'] {
-      background: var(--affine-hover-color);
-    }
+  get customContent() {
+    return this.config.customContent;
+  }
 
-    .affine-reference-title {
-      margin-left: 4px;
-      border-bottom: 0.5px solid var(--affine-divider-color);
-      transition: border 0.2s ease-out;
+  get customIcon() {
+    return this.config.customIcon;
+  }
+
+  get customTitle() {
+    return this.config.customTitle;
+  }
+
+  get doc() {
+    const doc = this.config.doc;
+    return doc;
+  }
+
+  get inlineEditor() {
+    const inlineRoot = this.closest<InlineRootElement<AffineTextAttributes>>(
+      `[${INLINE_ROOT_ATTR}]`
+    );
+    return inlineRoot?.inlineEditor;
+  }
+
+  get referenceInfo(): ReferenceInfo {
+    const reference = this.delta.attributes?.reference;
+    const id = this.doc?.id;
+    if (!reference) return { pageId: id ?? '' };
+
+    const { pageId, params } = reference;
+    const info: ReferenceInfo = { pageId };
+    if (!params) return info;
+
+    const { mode, blockIds, elementIds } = params;
+    info.params = {};
+    if (mode) info.params.mode = mode;
+    if (blockIds?.length) info.params.blockIds = [...blockIds];
+    if (elementIds?.length) info.params.elementIds = [...elementIds];
+    return info;
+  }
+
+  get selfInlineRange() {
+    const selfInlineRange = this.inlineEditor?.getInlineRangeFromElement(this);
+    return selfInlineRange;
+  }
+
+  get std() {
+    const std = this.block?.std;
+    if (!std) {
+      throw new BlockSuiteError(
+        ErrorCode.ValueNotExists,
+        'std not found in reference node'
+      );
     }
-    .affine-reference-title:hover {
-      border-bottom: 0.5px solid var(--affine-icon-color);
-    }
-  `;
+    return std;
+  }
 
   private _onClick() {
     if (!this.config.interactable) return;
@@ -263,70 +327,6 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
     if (doc) {
       this._updateRefMeta(doc);
     }
-  }
-
-  get block() {
-    const block = this.inlineEditor?.rootElement.closest<BlockComponent>(
-      `[${BLOCK_ID_ATTR}]`
-    );
-    return block;
-  }
-
-  get customContent() {
-    return this.config.customContent;
-  }
-
-  get customIcon() {
-    return this.config.customIcon;
-  }
-
-  get customTitle() {
-    return this.config.customTitle;
-  }
-
-  get doc() {
-    const doc = this.config.doc;
-    return doc;
-  }
-
-  get inlineEditor() {
-    const inlineRoot = this.closest<InlineRootElement<AffineTextAttributes>>(
-      `[${INLINE_ROOT_ATTR}]`
-    );
-    return inlineRoot?.inlineEditor;
-  }
-
-  get referenceInfo(): ReferenceInfo {
-    const reference = this.delta.attributes?.reference;
-    const id = this.doc?.id;
-    if (!reference) return { pageId: id ?? '' };
-
-    const { pageId, params } = reference;
-    const info: ReferenceInfo = { pageId };
-    if (!params) return info;
-
-    const { mode, blockIds, elementIds } = params;
-    info.params = {};
-    if (mode) info.params.mode = mode;
-    if (blockIds?.length) info.params.blockIds = [...blockIds];
-    if (elementIds?.length) info.params.elementIds = [...elementIds];
-    return info;
-  }
-
-  get selfInlineRange() {
-    const selfInlineRange = this.inlineEditor?.getInlineRangeFromElement(this);
-    return selfInlineRange;
-  }
-
-  get std() {
-    const std = this.block?.std;
-    if (!std) {
-      throw new BlockSuiteError(
-        ErrorCode.ValueNotExists,
-        'std not found in reference node'
-      );
-    }
-    return std;
   }
 
   @property({ attribute: false })

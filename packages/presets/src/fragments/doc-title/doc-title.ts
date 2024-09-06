@@ -1,6 +1,5 @@
 import type { EditorHost } from '@blocksuite/block-std';
-import type { RichText } from '@blocksuite/blocks';
-import type { RootBlockModel } from '@blocksuite/blocks';
+import type { RichText, RootBlockModel } from '@blocksuite/blocks';
 import type { Doc } from '@blocksuite/store';
 
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
@@ -12,36 +11,6 @@ const DOC_BLOCK_CHILD_PADDING = 24;
 
 @customElement('doc-title')
 export class DocTitle extends WithDisposable(ShadowlessElement) {
-  private _onTitleKeyDown = (event: KeyboardEvent) => {
-    if (event.isComposing || this.doc.readonly) return;
-    const hasContent = !this.doc.isEmpty;
-
-    if (event.key === 'Enter' && hasContent && !event.isComposing) {
-      event.preventDefault();
-      event.stopPropagation();
-
-      const inlineEditor = this._inlineEditor;
-      const inlineRange = inlineEditor?.getInlineRange();
-      if (inlineRange) {
-        const rightText = this._rootModel.title.split(inlineRange.index);
-        this._pageRoot.prependParagraphWithText(rightText);
-      }
-    } else if (event.key === 'ArrowDown' && hasContent) {
-      event.preventDefault();
-      event.stopPropagation();
-      this._pageRoot.focusFirstParagraph();
-    } else if (event.key === 'Tab') {
-      event.preventDefault();
-      event.stopPropagation();
-    }
-  };
-
-  private _updateTitleInMeta = () => {
-    this.doc.collection.setDocMeta(this.doc.id, {
-      title: this._rootModel.title.toString(),
-    });
-  };
-
   static override styles = css`
     .doc-title-container {
       box-sizing: border-box;
@@ -91,6 +60,36 @@ export class DocTitle extends WithDisposable(ShadowlessElement) {
       background-color: transparent;
     }
   `;
+
+  private _onTitleKeyDown = (event: KeyboardEvent) => {
+    if (event.isComposing || this.doc.readonly) return;
+    const hasContent = !this.doc.isEmpty;
+
+    if (event.key === 'Enter' && hasContent && !event.isComposing) {
+      event.preventDefault();
+      event.stopPropagation();
+
+      const inlineEditor = this._inlineEditor;
+      const inlineRange = inlineEditor?.getInlineRange();
+      if (inlineRange) {
+        const rightText = this._rootModel.title.split(inlineRange.index);
+        this._pageRoot.prependParagraphWithText(rightText);
+      }
+    } else if (event.key === 'ArrowDown' && hasContent) {
+      event.preventDefault();
+      event.stopPropagation();
+      this._pageRoot.focusFirstParagraph();
+    } else if (event.key === 'Tab') {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+  };
+
+  private _updateTitleInMeta = () => {
+    this.doc.collection.setDocMeta(this.doc.id, {
+      title: this._rootModel.title.toString(),
+    });
+  };
 
   private get _inlineEditor() {
     return this._richTextElement.inlineEditor;

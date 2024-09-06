@@ -72,6 +72,10 @@ export class DocModeService extends Extension implements DocModeProvider {
     di.addImpl(DocModeProvider, DocModeService, [StdIdentifier]);
   }
 
+  getEditorMode() {
+    return null;
+  }
+
   getPrimaryMode(id: string) {
     return modeMap.get(id) ?? DEFAULT_MODE;
   }
@@ -81,10 +85,6 @@ export class DocModeService extends Extension implements DocModeProvider {
       slotMap.set(id, new Slot());
     }
     return slotMap.get(id)!.on(handler);
-  }
-
-  getEditorMode() {
-    return null;
   }
 
   setEditorMode(mode: DocMode) {

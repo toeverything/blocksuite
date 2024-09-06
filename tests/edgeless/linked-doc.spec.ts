@@ -2,7 +2,6 @@ import { assertNotExists } from '@global/utils.js';
 import { expect } from '@playwright/test';
 
 import {
-  Shape,
   activeNoteInEdgeless,
   createConnectorElement,
   createNote,
@@ -11,6 +10,7 @@ import {
   getConnectorPath,
   locatorComponentToolbarMoreButton,
   selectNoteInEdgeless,
+  Shape,
   triggerComponentToolbarAction,
 } from '../utils/actions/edgeless.js';
 import {
@@ -20,8 +20,7 @@ import {
   type,
   waitNextFrame,
 } from '../utils/actions/index.js';
-import { assertConnectorPath } from '../utils/asserts.js';
-import { assertExists } from '../utils/asserts.js';
+import { assertConnectorPath, assertExists } from '../utils/asserts.js';
 import { test } from '../utils/playwright.js';
 
 test.describe('note to linked doc', () => {

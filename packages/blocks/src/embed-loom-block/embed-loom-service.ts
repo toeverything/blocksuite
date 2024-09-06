@@ -11,9 +11,9 @@ import { loomUrlRegex } from './embed-loom-model.js';
 import { queryEmbedLoomData } from './utils.js';
 
 export class EmbedLoomBlockService extends BlockService {
-  private static readonly linkPreviewer = new LinkPreviewer();
-
   static override readonly flavour = EmbedLoomBlockSchema.model.flavour;
+
+  private static readonly linkPreviewer = new LinkPreviewer();
 
   static setLinkPreviewEndpoint =
     EmbedLoomBlockService.linkPreviewer.setEndpoint;

@@ -19,16 +19,15 @@ import {
   BlockStdScope,
   type EditorHost,
 } from '@blocksuite/block-std';
-import { BlockServiceWatcher } from '@blocksuite/block-std';
-import { BlockComponent } from '@blocksuite/block-std';
+import { BlockComponent, BlockServiceWatcher } from '@blocksuite/block-std';
 import { GfxBlockElementModel } from '@blocksuite/block-std/gfx';
 import {
   Bound,
-  type SerializedXYWH,
   deserializeXYWH,
+  type SerializedXYWH,
 } from '@blocksuite/global/utils';
 import { assertExists } from '@blocksuite/global/utils';
-import { type TemplateResult, css, html, nothing } from 'lit';
+import { css, html, nothing, type TemplateResult } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
@@ -62,14 +61,6 @@ export class SurfaceRefBlockComponent extends BlockComponent<
   SurfaceRefBlockModel,
   SurfaceRefBlockService
 > {
-  private _previewDoc: Doc | null = null;
-
-  private _previewSpec = SpecProvider.getInstance().getSpec('edgeless:preview');
-
-  private _referenceXYWH: SerializedXYWH | null = null;
-
-  private _referencedModel: BlockSuite.EdgelessModel | null = null;
-
   static override styles = css`
     .affine-surface-ref {
       position: relative;
@@ -236,6 +227,26 @@ export class SurfaceRefBlockComponent extends BlockComponent<
       line-height: 20px;
     }
   `;
+
+  private _previewDoc: Doc | null = null;
+
+  private _previewSpec = SpecProvider.getInstance().getSpec('edgeless:preview');
+
+  private _referencedModel: BlockSuite.EdgelessModel | null = null;
+
+  private _referenceXYWH: SerializedXYWH | null = null;
+
+  private get _shouldRender() {
+    return (
+      this.isConnected &&
+      // prevent surface-ref from render itself in loop
+      !this.parentComponent?.closest('affine-surface-ref')
+    );
+  }
+
+  get referenceModel() {
+    return this._referencedModel;
+  }
 
   private _deleteThis() {
     this.doc.deleteBlock(this.model);
@@ -538,14 +549,6 @@ export class SurfaceRefBlockComponent extends BlockComponent<
     </div>`;
   }
 
-  private get _shouldRender() {
-    return (
-      this.isConnected &&
-      // prevent surface-ref from render itself in loop
-      !this.parentComponent?.closest('affine-surface-ref')
-    );
-  }
-
   override connectedCallback() {
     super.connectedCallback();
 
@@ -608,10 +611,6 @@ export class SurfaceRefBlockComponent extends BlockComponent<
     if (_changedProperties.has('_referencedModel')) {
       this._refreshViewport();
     }
-  }
-
-  get referenceModel() {
-    return this._referencedModel;
   }
 
   @state()

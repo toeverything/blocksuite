@@ -1,8 +1,7 @@
-import { type Page, expect } from '@playwright/test';
+import { expect, type Page } from '@playwright/test';
 import { getLinkedDocPopover } from 'utils/actions/linked-doc.js';
 
 import {
-  SHORT_KEY,
   assertEdgelessTool,
   enterPlaygroundRoom,
   getEdgelessSelectedRect,
@@ -10,6 +9,7 @@ import {
   pressArrowLeft,
   pressEnter,
   setEdgelessTool,
+  SHORT_KEY,
   switchEditorMode,
   type,
   waitForInlineEditorStateUpdated,

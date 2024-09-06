@@ -8,6 +8,10 @@ export class SurfaceBlockService extends BlockService {
 
   surface!: SurfaceBlockModel;
 
+  get layer() {
+    return this.std.get(GfxControllerIdentifier).layer;
+  }
+
   override mounted(): void {
     super.mounted();
 
@@ -27,9 +31,5 @@ export class SurfaceBlockService extends BlockService {
         }
       });
     }
-  }
-
-  get layer() {
-    return this.std.get(GfxControllerIdentifier).layer;
   }
 }

@@ -1,7 +1,6 @@
 import { expect } from '@playwright/test';
 
 import {
-  Shape,
   addBasicConnectorElement,
   changeConnectorStrokeColor,
   changeConnectorStrokeStyle,
@@ -12,6 +11,7 @@ import {
   dragBetweenViewCoords,
   pickColorAtPoints,
   rotateElementByHandle,
+  Shape,
   toModelCoord,
   toViewCoord,
   triggerComponentToolbarAction,

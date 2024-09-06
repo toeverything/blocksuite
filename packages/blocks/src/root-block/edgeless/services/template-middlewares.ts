@@ -1,10 +1,8 @@
 import type { ConnectorElementModel } from '@blocksuite/affine-model';
 import type { BlockSnapshot, SnapshotReturn } from '@blocksuite/store';
 
-import { CommonUtils } from '@blocksuite/affine-block-surface';
-import { sortIndex } from '@blocksuite/affine-block-surface';
-import { Bound } from '@blocksuite/global/utils';
-import { assertExists, assertType } from '@blocksuite/global/utils';
+import { CommonUtils, sortIndex } from '@blocksuite/affine-block-surface';
+import { assertExists, assertType, Bound } from '@blocksuite/global/utils';
 
 import type { SlotBlockPayload, TemplateJob } from './template.js';
 

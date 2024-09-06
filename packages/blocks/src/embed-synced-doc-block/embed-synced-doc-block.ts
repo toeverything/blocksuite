@@ -1,5 +1,3 @@
-import type { DocMode } from '@blocksuite/affine-model';
-
 import {
   EmbedEdgelessIcon,
   EmbedPageIcon,
@@ -7,6 +5,7 @@ import {
 import { Peekable } from '@blocksuite/affine-components/peek';
 import { REFERENCE_NODE } from '@blocksuite/affine-components/rich-text';
 import {
+  type DocMode,
   type EmbedSyncedDocModel,
   NoteDisplayMode,
 } from '@blocksuite/affine-model';
@@ -19,7 +18,7 @@ import {
 } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import { BlockViewType, DocCollection, type Query } from '@blocksuite/store';
-import { type PropertyValues, html } from 'lit';
+import { html, type PropertyValues } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { choose } from 'lit/directives/choose.js';
 import { classMap } from 'lit/directives/class-map.js';
@@ -46,39 +45,7 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockComponent<
   EmbedSyncedDocModel,
   EmbedSyncedDocBlockService
 > {
-  protected _buildPreviewSpec = (name: 'page:preview' | 'edgeless:preview') => {
-    const nextDepth = this.depth + 1;
-    const previewSpecBuilder = SpecProvider.getInstance().getSpec(name);
-    const currentDisposables = this.disposables;
-
-    class EmbedSyncedDocWatcher extends BlockServiceWatcher {
-      static override readonly flavour = 'affine:embed-synced-doc';
-
-      override mounted() {
-        const disposableGroup = this.blockService.disposables;
-        const slots = this.blockService.specSlots;
-        disposableGroup.add(
-          slots.viewConnected.on(({ component }) => {
-            const nextComponent = component as EmbedSyncedDocBlockComponent;
-            nextComponent.depth = nextDepth;
-            currentDisposables.add(() => {
-              nextComponent.depth = 0;
-            });
-          })
-        );
-        disposableGroup.add(
-          slots.viewDisconnected.on(({ component }) => {
-            const nextComponent = component as EmbedSyncedDocBlockComponent;
-            nextComponent.depth = 0;
-          })
-        );
-      }
-    }
-
-    previewSpecBuilder.extend([EmbedSyncedDocWatcher]);
-
-    return previewSpecBuilder.value;
-  };
+  static override styles = blockStyles;
 
   private _initEdgelessFitEffect = () => {
     const fitToContent = () => {
@@ -121,6 +88,40 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockComponent<
         viewType: BlockViewType.Hidden,
       },
     ],
+  };
+
+  protected _buildPreviewSpec = (name: 'page:preview' | 'edgeless:preview') => {
+    const nextDepth = this.depth + 1;
+    const previewSpecBuilder = SpecProvider.getInstance().getSpec(name);
+    const currentDisposables = this.disposables;
+
+    class EmbedSyncedDocWatcher extends BlockServiceWatcher {
+      static override readonly flavour = 'affine:embed-synced-doc';
+
+      override mounted() {
+        const disposableGroup = this.blockService.disposables;
+        const slots = this.blockService.specSlots;
+        disposableGroup.add(
+          slots.viewConnected.on(({ component }) => {
+            const nextComponent = component as EmbedSyncedDocBlockComponent;
+            nextComponent.depth = nextDepth;
+            currentDisposables.add(() => {
+              nextComponent.depth = 0;
+            });
+          })
+        );
+        disposableGroup.add(
+          slots.viewDisconnected.on(({ component }) => {
+            const nextComponent = component as EmbedSyncedDocBlockComponent;
+            nextComponent.depth = 0;
+          })
+        );
+      }
+    }
+
+    previewSpecBuilder.extend([EmbedSyncedDocWatcher]);
+
+    return previewSpecBuilder.value;
   };
 
   protected _renderSyncedView = () => {
@@ -217,8 +218,6 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockComponent<
     );
   };
 
-  static override styles = blockStyles;
-
   protected cardStyleMap = styleMap({
     position: 'relative',
     display: 'block',
@@ -282,6 +281,48 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockComponent<
     });
   };
 
+  private get _rootService() {
+    return this.std.getService('affine:page');
+  }
+
+  get blockState() {
+    return {
+      isLoading: this._loading,
+      isError: this._error,
+      isDeleted: this._deleted,
+      isCycle: this._cycle,
+    };
+  }
+
+  get docTitle() {
+    return this.syncedDoc?.meta?.title.length
+      ? this.syncedDoc.meta.title
+      : 'Untitled';
+  }
+
+  get docUpdatedAt() {
+    return this._docUpdatedAt;
+  }
+
+  get editorMode() {
+    return this.syncedDocMode;
+  }
+
+  protected get isPageMode() {
+    return this.syncedDocMode === 'page';
+  }
+
+  get syncedDoc() {
+    return this.syncedDocMode === 'page'
+      ? this.std.collection.getDoc(this.model.pageId, {
+          readonly: true,
+          query: this._pageFilter,
+        })
+      : this.std.collection.getDoc(this.model.pageId, {
+          readonly: true,
+        });
+  }
+
   private _checkCycle() {
     let editorHost: EditorHost | null = this.host;
     while (editorHost && !this._cycle) {
@@ -289,10 +330,6 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockComponent<
       editorHost =
         editorHost.parentElement?.closest<EditorHost>('editor-host') ?? null;
     }
-  }
-
-  protected _handleClick(_event: MouseEvent) {
-    this._selectBlock();
   }
 
   private _isClickAtBorder(
@@ -347,10 +384,6 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockComponent<
     this._loading = false;
   }
 
-  private get _rootService() {
-    return this.std.getService('affine:page');
-  }
-
   private _selectBlock() {
     const selectionManager = this.host.selection;
     const blockSelection = selectionManager.create('block', {
@@ -365,6 +398,10 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockComponent<
       const date = meta.updatedDate || meta.createDate;
       this._docUpdatedAt = new Date(date);
     }
+  }
+
+  protected _handleClick(_event: MouseEvent) {
+    this._selectBlock();
   }
 
   override connectedCallback() {
@@ -476,44 +513,6 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockComponent<
   override updated(changedProperties: PropertyValues) {
     super.updated(changedProperties);
     this.syncedDocCard?.requestUpdate();
-  }
-
-  get blockState() {
-    return {
-      isLoading: this._loading,
-      isError: this._error,
-      isDeleted: this._deleted,
-      isCycle: this._cycle,
-    };
-  }
-
-  get docTitle() {
-    return this.syncedDoc?.meta?.title.length
-      ? this.syncedDoc.meta.title
-      : 'Untitled';
-  }
-
-  get docUpdatedAt() {
-    return this._docUpdatedAt;
-  }
-
-  get editorMode() {
-    return this.syncedDocMode;
-  }
-
-  protected get isPageMode() {
-    return this.syncedDocMode === 'page';
-  }
-
-  get syncedDoc() {
-    return this.syncedDocMode === 'page'
-      ? this.std.collection.getDoc(this.model.pageId, {
-          readonly: true,
-          query: this._pageFilter,
-        })
-      : this.std.collection.getDoc(this.model.pageId, {
-          readonly: true,
-        });
   }
 
   @state()

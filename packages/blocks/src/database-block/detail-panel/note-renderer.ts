@@ -28,6 +28,10 @@ export class NoteRenderer
     }
   `;
 
+  get databaseBlock(): DatabaseBlockModel {
+    return this.model;
+  }
+
   addNote() {
     const collection = this.host?.std.collection;
     if (!collection) {
@@ -106,10 +110,6 @@ export class NoteRenderer
       extensions: std.extensions,
     });
     return html`${previewStd.render()} `;
-  }
-
-  get databaseBlock(): DatabaseBlockModel {
-    return this.model;
   }
 
   @property({ attribute: false })

@@ -303,6 +303,22 @@ export class Job {
     walk(snapshot.blocks);
   };
 
+  get adapterConfigs() {
+    return this._adapterConfigs;
+  }
+
+  get assets() {
+    return this._assetsManager.getAssets();
+  }
+
+  get assetsManager() {
+    return this._assetsManager;
+  }
+
+  get collection() {
+    return this._collection;
+  }
+
   constructor({ collection, middlewares = [] }: JobConfig) {
     this._collection = collection;
     this._assetsManager = new AssetsManager({ blob: collection.blobSync });
@@ -506,21 +522,5 @@ export class Job {
 
   reset() {
     this._assetsManager.cleanup();
-  }
-
-  get adapterConfigs() {
-    return this._adapterConfigs;
-  }
-
-  get assets() {
-    return this._assetsManager.getAssets();
-  }
-
-  get assetsManager() {
-    return this._assetsManager;
-  }
-
-  get collection() {
-    return this._collection;
   }
 }

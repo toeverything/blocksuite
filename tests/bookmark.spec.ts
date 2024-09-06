@@ -4,7 +4,6 @@ import { expect } from '@playwright/test';
 import { getEmbedCardToolbar } from 'utils/query.js';
 
 import {
-  SHORT_KEY,
   activeNoteInEdgeless,
   copyByKeyboard,
   dragBlockToPoint,
@@ -22,6 +21,7 @@ import {
   pressTab,
   selectAllByKeyboard,
   setInlineRangeInSelectedRichText,
+  SHORT_KEY,
   switchEditorMode,
   type,
   waitForInlineEditorStateUpdated,

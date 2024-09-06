@@ -140,6 +140,134 @@ const isSelectableItem = (item: Item): item is SelectItem => {
 
 @customElement('affine-menu')
 export class MenuComponent<_T> extends WithDisposable(ShadowlessElement) {
+  static override styles = css`
+    affine-menu {
+      font-family: var(--affine-font-family);
+      display: flex;
+      flex-direction: column;
+      user-select: none;
+      min-width: 276px;
+      box-shadow: var(--affine-shadow-2);
+      border-radius: 8px;
+      background-color: var(--affine-background-overlay-panel-color);
+      padding: 8px;
+      position: absolute;
+      z-index: 999;
+    }
+
+    affine-menu * {
+      box-sizing: border-box;
+    }
+
+    .affine-menu-body {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .affine-menu-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+    }
+
+    /* .affine-menu-header .icon {
+    } */
+    .affine-menu-header input {
+      flex: 1;
+      border-radius: 4px;
+      outline: none;
+      font-size: 14px;
+      line-height: 22px;
+      padding: 5px 12px;
+      border: 1px solid var(--affine-border-color);
+    }
+
+    .affine-menu-header input::placeholder {
+      color: var(--affine-placeholder-color);
+    }
+
+    .affine-menu-header input:focus {
+      border: 1px solid var(--affine-primary-color);
+    }
+
+    .affine-menu-action {
+      padding: 4px 12px;
+      cursor: pointer;
+      display: flex;
+      gap: 4px;
+      border-radius: 4px;
+    }
+
+    .affine-menu-action svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    .affine-menu-action .icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--affine-icon-color);
+      fill: var(--affine-icon-color);
+    }
+
+    .affine-menu-action .content {
+      border-radius: 4px;
+      cursor: pointer;
+      white-space: nowrap;
+      justify-content: space-between;
+      display: flex;
+      align-items: center;
+      font-size: 14px;
+      line-height: 22px;
+      flex: 1;
+      gap: 8px;
+    }
+
+    .affine-menu-action.selected {
+      background-color: var(--affine-hover-color);
+    }
+
+    .affine-menu-action.selected.delete-item {
+      background-color: var(--affine-background-error-color);
+      color: var(--affine-error-color);
+    }
+
+    .affine-menu-action.selected.delete-item .icon > svg {
+      color: var(--affine-error-color);
+    }
+
+    .affine-menu-action.selected-item {
+      color: var(--affine-text-emphasis-color);
+    }
+
+    .affine-menu-action.selected-item .icon {
+      color: var(--affine-text-emphasis-color);
+      fill: currentColor;
+    }
+
+    .database-menu-component-action-button:hover {
+      background-color: rgba(0, 0, 0, 0.1);
+    }
+
+    .no-results {
+      font-size: 12px;
+      line-height: 20px;
+      color: var(--affine-text-secondary-color);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 8px;
+    }
+
+    .affine-menu-action-text {
+      flex: 1;
+      padding: 0 4px;
+    }
+  `;
+
   private _checked: Record<string, boolean> = {};
 
   private _clickContainer = (e: MouseEvent) => {
@@ -339,134 +467,6 @@ export class MenuComponent<_T> extends WithDisposable(ShadowlessElement) {
 
   private subMenu?: HTMLElement;
 
-  static override styles = css`
-    affine-menu {
-      font-family: var(--affine-font-family);
-      display: flex;
-      flex-direction: column;
-      user-select: none;
-      min-width: 276px;
-      box-shadow: var(--affine-shadow-2);
-      border-radius: 8px;
-      background-color: var(--affine-background-overlay-panel-color);
-      padding: 8px;
-      position: absolute;
-      z-index: 999;
-    }
-
-    affine-menu * {
-      box-sizing: border-box;
-    }
-
-    .affine-menu-body {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-
-    .affine-menu-header {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 8px 12px;
-    }
-
-    /* .affine-menu-header .icon {
-    } */
-    .affine-menu-header input {
-      flex: 1;
-      border-radius: 4px;
-      outline: none;
-      font-size: 14px;
-      line-height: 22px;
-      padding: 5px 12px;
-      border: 1px solid var(--affine-border-color);
-    }
-
-    .affine-menu-header input::placeholder {
-      color: var(--affine-placeholder-color);
-    }
-
-    .affine-menu-header input:focus {
-      border: 1px solid var(--affine-primary-color);
-    }
-
-    .affine-menu-action {
-      padding: 4px 12px;
-      cursor: pointer;
-      display: flex;
-      gap: 4px;
-      border-radius: 4px;
-    }
-
-    .affine-menu-action svg {
-      width: 20px;
-      height: 20px;
-    }
-
-    .affine-menu-action .icon {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--affine-icon-color);
-      fill: var(--affine-icon-color);
-    }
-
-    .affine-menu-action .content {
-      border-radius: 4px;
-      cursor: pointer;
-      white-space: nowrap;
-      justify-content: space-between;
-      display: flex;
-      align-items: center;
-      font-size: 14px;
-      line-height: 22px;
-      flex: 1;
-      gap: 8px;
-    }
-
-    .affine-menu-action.selected {
-      background-color: var(--affine-hover-color);
-    }
-
-    .affine-menu-action.selected.delete-item {
-      background-color: var(--affine-background-error-color);
-      color: var(--affine-error-color);
-    }
-
-    .affine-menu-action.selected.delete-item .icon > svg {
-      color: var(--affine-error-color);
-    }
-
-    .affine-menu-action.selected-item {
-      color: var(--affine-text-emphasis-color);
-    }
-
-    .affine-menu-action.selected-item .icon {
-      color: var(--affine-text-emphasis-color);
-      fill: currentColor;
-    }
-
-    .database-menu-component-action-button:hover {
-      background-color: rgba(0, 0, 0, 0.1);
-    }
-
-    .no-results {
-      font-size: 12px;
-      line-height: 20px;
-      color: var(--affine-text-secondary-color);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-top: 8px;
-    }
-
-    .affine-menu-action-text {
-      flex: 1;
-      padding: 0 4px;
-    }
-  `;
-
   mouseEnterHeader = () => {
     if (this.isSearchMode) {
       return;
@@ -474,42 +474,12 @@ export class MenuComponent<_T> extends WithDisposable(ShadowlessElement) {
     this._mouseEnter(-1);
   };
 
-  private _isConsciousChoice() {
-    return Date.now() < this.initTime + 100;
-  }
-
-  private clearSubMenu() {
-    this.subMenu?.remove();
-    this.subMenu = undefined;
-    this.focusInput();
-  }
-
-  private close() {
-    this.options.onClose?.();
-  }
-
-  private focusInput() {
-    this.inputRef.value?.focus();
-  }
-
-  private getChecked(name: string): boolean {
-    return this._checked[name];
-  }
-
   private get isSearchMode() {
     return this.options.input?.search;
   }
 
   private get minIndex() {
     return this.isSearchMode ? 0 : -1;
-  }
-
-  private process(menu: Menu): Item[] {
-    if (this.show(menu)) {
-      return this.processMap[menu.type](menu as never);
-    } else {
-      return [];
-    }
   }
 
   private get selectedIndex(): number | undefined {
@@ -541,6 +511,44 @@ export class MenuComponent<_T> extends WithDisposable(ShadowlessElement) {
       : undefined;
   }
 
+  private get text() {
+    return this._text ?? this.options.input?.initValue ?? '';
+  }
+
+  private set text(value: string) {
+    this._text = value;
+  }
+
+  private _isConsciousChoice() {
+    return Date.now() < this.initTime + 100;
+  }
+
+  private clearSubMenu() {
+    this.subMenu?.remove();
+    this.subMenu = undefined;
+    this.focusInput();
+  }
+
+  private close() {
+    this.options.onClose?.();
+  }
+
+  private focusInput() {
+    this.inputRef.value?.focus();
+  }
+
+  private getChecked(name: string): boolean {
+    return this._checked[name];
+  }
+
+  private process(menu: Menu): Item[] {
+    if (this.show(menu)) {
+      return this.processMap[menu.type](menu as never);
+    } else {
+      return [];
+    }
+  }
+
   private setChecked(name: string, checked: boolean) {
     this._checked[name] = checked;
     this.requestUpdate();
@@ -563,14 +571,6 @@ export class MenuComponent<_T> extends WithDisposable(ShadowlessElement) {
 
   private showHeader() {
     return !this.isSearchMode || !!this.text;
-  }
-
-  private get text() {
-    return this._text ?? this.options.input?.initValue ?? '';
-  }
-
-  private set text(value: string) {
-    this._text = value;
   }
 
   override disconnectedCallback() {

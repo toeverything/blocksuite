@@ -1,7 +1,7 @@
 import {
   ShadowlessElement,
-  WithDisposable,
   SignalWatcher,
+  WithDisposable,
 } from '@blocksuite/block-std';
 import { CenterPeekIcon, MoreHorizontalIcon } from '@blocksuite/icons/lit';
 import { css } from 'lit';
@@ -121,6 +121,8 @@ const styles = css`
 export class KanbanCard extends SignalWatcher(
   WithDisposable(ShadowlessElement)
 ) {
+  static override styles = styles;
+
   private clickEdit = (e: MouseEvent) => {
     e.stopPropagation();
     const selection = this.getSelection();
@@ -166,8 +168,6 @@ export class KanbanCard extends SignalWatcher(
       popCardMenu(this.dataViewEle, ref, this.cardId, selection);
     }
   };
-
-  static override styles = styles;
 
   private getSelection() {
     return this.closest('affine-data-view-kanban')?.selectionController;

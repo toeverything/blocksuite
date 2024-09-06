@@ -4,13 +4,13 @@ import {
   ConnectorXWithArrowIcon,
 } from '@blocksuite/affine-components/icons';
 import {
-  DEFAULT_CONNECTOR_COLOR,
   ConnectorMode,
+  DEFAULT_CONNECTOR_COLOR,
 } from '@blocksuite/affine-model';
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import { SignalWatcher } from '@blocksuite/block-std';
 import { computed } from '@lit-labs/preact-signals';
-import { LitElement, css, html } from 'lit';
+import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 import type { EdgelessTool } from '../../../types.js';
@@ -64,12 +64,6 @@ function ConnectorModeButtonGroup(
 export class EdgelessConnectorMenu extends EdgelessToolbarToolMixin(
   SignalWatcher(LitElement)
 ) {
-  private _props$ = computed(() => {
-    const { mode, stroke, strokeWidth } =
-      this.edgeless.service.editPropsStore.lastProps$.value.connector;
-    return { mode, stroke, strokeWidth };
-  });
-
   static override styles = css`
     :host {
       position: absolute;
@@ -103,6 +97,12 @@ export class EdgelessConnectorMenu extends EdgelessToolbarToolMixin(
       display: inline-block;
     }
   `;
+
+  private _props$ = computed(() => {
+    const { mode, stroke, strokeWidth } =
+      this.edgeless.service.editPropsStore.lastProps$.value.connector;
+    return { mode, stroke, strokeWidth };
+  });
 
   override type: EdgelessTool['type'] = 'connector';
 

@@ -1,14 +1,14 @@
 import type { Doc } from '@blocksuite/store';
 
-import { BlockStdScope } from '@blocksuite/block-std';
 import {
+  BlockStdScope,
   EditorHost,
   ShadowlessElement,
   WithDisposable,
 } from '@blocksuite/block-std';
 import { EdgelessEditorBlockSpecs } from '@blocksuite/blocks';
 import { noop } from '@blocksuite/global/utils';
-import { type TemplateResult, css, html, nothing } from 'lit';
+import { css, html, nothing, type TemplateResult } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { guard } from 'lit/directives/guard.js';
 
@@ -41,6 +41,14 @@ export class EdgelessEditor extends WithDisposable(ShadowlessElement) {
       container-type: inline-size;
     }
   `;
+
+  get host() {
+    try {
+      return this.std.host;
+    } catch {
+      return null;
+    }
+  }
 
   override connectedCallback() {
     super.connectedCallback();
@@ -79,14 +87,6 @@ export class EdgelessEditor extends WithDisposable(ShadowlessElement) {
         doc: this.doc,
         extensions: this.specs,
       });
-    }
-  }
-
-  get host() {
-    try {
-      return this.std.host;
-    } catch {
-      return null;
     }
   }
 

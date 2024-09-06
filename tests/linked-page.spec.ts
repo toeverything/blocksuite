@@ -1,4 +1,4 @@
-import { type Page, expect } from '@playwright/test';
+import { expect, type Page } from '@playwright/test';
 import { switchEditorMode } from 'utils/actions/edgeless.js';
 import { getLinkedDocPopover } from 'utils/actions/linked-doc.js';
 
@@ -9,7 +9,6 @@ import {
 } from './utils/actions/click.js';
 import { dragBetweenIndices, dragBlockToPoint } from './utils/actions/drag.js';
 import {
-  SHORT_KEY,
   copyByKeyboard,
   cutByKeyboard,
   pasteByKeyboard,
@@ -19,6 +18,7 @@ import {
   pressEnter,
   redoByKeyboard,
   selectAllByKeyboard,
+  SHORT_KEY,
   type,
   undoByKeyboard,
 } from './utils/actions/keyboard.js';

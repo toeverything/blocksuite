@@ -30,7 +30,7 @@ import { EmbedOptionProvider } from '@blocksuite/affine-shared/services';
 import { getHostName } from '@blocksuite/affine-shared/utils';
 import { WithDisposable } from '@blocksuite/block-std';
 import { Bound } from '@blocksuite/global/utils';
-import { LitElement, type TemplateResult, css, html, nothing } from 'lit';
+import { css, html, LitElement, nothing, type TemplateResult } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { ifDefined } from 'lit/directives/if-defined.js';
 import { join } from 'lit/directives/join.js';
@@ -65,6 +65,40 @@ import {
 
 @customElement('edgeless-change-embed-card-button')
 export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
+  static override styles = css`
+    .affine-link-preview {
+      display: flex;
+      justify-content: flex-start;
+      width: 140px;
+      padding: var(--1, 0px);
+      border-radius: var(--1, 0px);
+      opacity: var(--add, 1);
+      user-select: none;
+      cursor: pointer;
+
+      color: var(--affine-link-color);
+      font-feature-settings:
+        'clig' off,
+        'liga' off;
+      font-family: var(--affine-font-family);
+      font-size: var(--affine-font-sm);
+      font-style: normal;
+      font-weight: 400;
+      text-decoration: none;
+      text-wrap: nowrap;
+    }
+
+    .affine-link-preview > span {
+      display: inline-block;
+      -webkit-line-clamp: 1;
+      -webkit-box-orient: vertical;
+
+      text-overflow: ellipsis;
+      overflow: hidden;
+      opacity: var(--add, 1);
+    }
+  `;
+
   private _convertToCardView = () => {
     if (this._isCardView) {
       return;
@@ -195,40 +229,6 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
     if (!this._blockComponent) return;
     peek(this._blockComponent);
   };
-
-  static override styles = css`
-    .affine-link-preview {
-      display: flex;
-      justify-content: flex-start;
-      width: 140px;
-      padding: var(--1, 0px);
-      border-radius: var(--1, 0px);
-      opacity: var(--add, 1);
-      user-select: none;
-      cursor: pointer;
-
-      color: var(--affine-link-color);
-      font-feature-settings:
-        'clig' off,
-        'liga' off;
-      font-family: var(--affine-font-family);
-      font-size: var(--affine-font-sm);
-      font-style: normal;
-      font-weight: 400;
-      text-decoration: none;
-      text-wrap: nowrap;
-    }
-
-    .affine-link-preview > span {
-      display: inline-block;
-      -webkit-line-clamp: 1;
-      -webkit-box-orient: vertical;
-
-      text-overflow: ellipsis;
-      overflow: hidden;
-      opacity: var(--add, 1);
-    }
-  `;
 
   private get _blockComponent() {
     const blockSelection =
@@ -364,6 +364,23 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
     return (
       isEmbedLinkedDocBlock(this.model) && this.model.pageId === this._doc.id
     );
+  }
+
+  private get _viewType(): 'inline' | 'embed' | 'card' {
+    if (this._isCardView) {
+      return 'card';
+    }
+
+    if (this._isEmbedView) {
+      return 'embed';
+    }
+
+    // unreachable
+    return 'inline';
+  }
+
+  private get std() {
+    return this.edgeless.std;
   }
 
   private _openMenuButton() {
@@ -529,23 +546,6 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
     }
 
     return nothing;
-  }
-
-  private get _viewType(): 'inline' | 'embed' | 'card' {
-    if (this._isCardView) {
-      return 'card';
-    }
-
-    if (this._isEmbedView) {
-      return 'embed';
-    }
-
-    // unreachable
-    return 'inline';
-  }
-
-  private get std() {
-    return this.edgeless.std;
   }
 
   override connectedCallback() {

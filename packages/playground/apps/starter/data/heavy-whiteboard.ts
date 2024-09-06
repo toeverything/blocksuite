@@ -3,10 +3,10 @@ import type { SerializedXYWH } from '@blocksuite/global/utils';
 import {
   Boxed,
   type DocCollection,
-  Text,
-  type Y,
   nanoid,
   native2Y,
+  Text,
+  type Y,
 } from '@blocksuite/store';
 
 import type { InitFn } from './utils.js';

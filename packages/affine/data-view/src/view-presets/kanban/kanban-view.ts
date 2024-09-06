@@ -13,11 +13,9 @@ import '../../core/common/group-by/define.js';
 import { renderUniLit } from '../../core/index.js';
 import { DataViewBase } from '../../core/view/data-view-base.js';
 import { KanbanClipboardController } from './controller/clipboard.js';
-import './controller/drag.js';
 import { KanbanDragController } from './controller/drag.js';
 import { KanbanHotkeysController } from './controller/hotkeys.js';
 import { KanbanSelectionController } from './controller/selection.js';
-import './group.js';
 import { KanbanGroup } from './group.js';
 import './header.js';
 
@@ -96,9 +94,9 @@ export class DataViewKanban extends DataViewBase<
   KanbanSingleView,
   KanbanViewSelectionWithType
 > {
-  private dragController = new KanbanDragController(this);
-
   static override styles = styles;
+
+  private dragController = new KanbanDragController(this);
 
   clipboardController = new KanbanClipboardController(this);
 
@@ -149,6 +147,10 @@ export class DataViewKanban extends DataViewBase<
   };
 
   selectionController = new KanbanSelectionController(this);
+
+  get groupManager() {
+    return this.view.groupManager;
+  }
 
   override firstUpdated() {
     const sortable = Sortable.create(this.groups, {
@@ -240,10 +242,6 @@ export class DataViewKanban extends DataViewBase<
 
   showIndicator(evt: MouseEvent): boolean {
     return this.dragController.shooIndicator(evt, undefined) != null;
-  }
-
-  get groupManager() {
-    return this.view.groupManager;
   }
 
   @query('.affine-data-view-kanban-groups')

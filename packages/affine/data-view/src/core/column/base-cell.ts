@@ -1,7 +1,7 @@
 import {
   ShadowlessElement,
-  WithDisposable,
   SignalWatcher,
+  WithDisposable,
 } from '@blocksuite/block-std';
 import { computed } from '@lit-labs/preact-signals';
 import { property } from 'lit/decorators.js';
@@ -23,6 +23,26 @@ export abstract class BaseCellRenderer<
   value$ = computed(() => {
     return this.cell.value$.value;
   });
+
+  get column() {
+    return this.cell.column;
+  }
+
+  get readonly() {
+    return this.readonly$.value;
+  }
+
+  get row() {
+    return this.cell.row;
+  }
+
+  get value() {
+    return this.value$.value;
+  }
+
+  get view() {
+    return this.cell.view;
+  }
 
   beforeEnterEditMode(): boolean {
     return true;
@@ -85,26 +105,6 @@ export abstract class BaseCellRenderer<
   }
 
   onPaste(_e: ClipboardEvent) {}
-
-  get column() {
-    return this.cell.column;
-  }
-
-  get readonly() {
-    return this.readonly$.value;
-  }
-
-  get row() {
-    return this.cell.row;
-  }
-
-  get value() {
-    return this.value$.value;
-  }
-
-  get view() {
-    return this.cell.view;
-  }
 
   @property({ attribute: false })
   accessor cell!: Cell<Value, Data>;

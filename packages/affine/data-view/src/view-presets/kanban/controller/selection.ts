@@ -45,6 +45,42 @@ export class KanbanSelectionController implements ReactiveController {
       : undefined;
   };
 
+  get selection(): KanbanViewSelectionWithType | undefined {
+    return this._selection;
+  }
+
+  set selection(data: KanbanViewSelection | undefined) {
+    if (!data) {
+      this.host.setSelection();
+      return;
+    }
+    const selection: KanbanViewSelectionWithType = {
+      ...data,
+      viewId: this.host.view.id,
+      type: 'kanban',
+    };
+
+    if (selection.selectionType === 'cell' && selection.isEditing) {
+      const container = getFocusCell(this.host, selection);
+      const cell = container?.cell;
+      const isEditing = cell
+        ? cell.beforeEnterEditMode()
+          ? selection.isEditing
+          : false
+        : false;
+      this.host.setSelection({
+        ...selection,
+        isEditing,
+      });
+    } else {
+      this.host.setSelection(selection);
+    }
+  }
+
+  get view() {
+    return this.host.view;
+  }
+
   constructor(private host: DataViewKanban) {
     this.host.addController(this);
   }
@@ -507,42 +543,6 @@ export class KanbanSelectionController implements ReactiveController {
           }
         : undefined;
     });
-  }
-
-  get selection(): KanbanViewSelectionWithType | undefined {
-    return this._selection;
-  }
-
-  set selection(data: KanbanViewSelection | undefined) {
-    if (!data) {
-      this.host.setSelection();
-      return;
-    }
-    const selection: KanbanViewSelectionWithType = {
-      ...data,
-      viewId: this.host.view.id,
-      type: 'kanban',
-    };
-
-    if (selection.selectionType === 'cell' && selection.isEditing) {
-      const container = getFocusCell(this.host, selection);
-      const cell = container?.cell;
-      const isEditing = cell
-        ? cell.beforeEnterEditMode()
-          ? selection.isEditing
-          : false
-        : false;
-      this.host.setSelection({
-        ...selection,
-        isEditing,
-      });
-    } else {
-      this.host.setSelection(selection);
-    }
-  }
-
-  get view() {
-    return this.host.view;
   }
 }
 

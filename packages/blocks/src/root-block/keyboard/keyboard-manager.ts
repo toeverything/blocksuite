@@ -1,5 +1,4 @@
-import type { BlockSelection } from '@blocksuite/block-std';
-import type { BlockComponent } from '@blocksuite/block-std';
+import type { BlockComponent, BlockSelection } from '@blocksuite/block-std';
 
 import { matchFlavours } from '@blocksuite/affine-shared/utils';
 import { IS_MAC, IS_WINDOWS } from '@blocksuite/global/env';
@@ -42,6 +41,18 @@ export class PageKeyboardManager {
       }
     });
   };
+
+  private get _currentSelection() {
+    return this._selection.value;
+  }
+
+  private get _doc() {
+    return this.rootComponent.doc;
+  }
+
+  private get _selection() {
+    return this.rootComponent.host.selection;
+  }
 
   constructor(public rootComponent: BlockComponent) {
     this.rootComponent.bindHotKey(
@@ -112,10 +123,6 @@ export class PageKeyboardManager {
     });
   }
 
-  private get _currentSelection() {
-    return this._selection.value;
-  }
-
   private _deleteBlocksBySelection(selections: BlockSelection[]) {
     selections.forEach(selection => {
       const block = this._doc.getBlockById(selection.blockId);
@@ -123,10 +130,6 @@ export class PageKeyboardManager {
         this._doc.deleteBlock(block);
       }
     });
-  }
-
-  private get _doc() {
-    return this.rootComponent.doc;
   }
 
   private _replaceBlocksBySelection(
@@ -158,9 +161,5 @@ export class PageKeyboardManager {
       blockId,
       path: blockId,
     };
-  }
-
-  private get _selection() {
-    return this.rootComponent.host.selection;
   }
 }

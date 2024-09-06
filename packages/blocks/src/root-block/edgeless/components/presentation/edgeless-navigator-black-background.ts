@@ -2,7 +2,7 @@ import type { FrameBlockModel } from '@blocksuite/affine-model';
 
 import { WithDisposable } from '@blocksuite/block-std';
 import { Bound } from '@blocksuite/global/utils';
-import { LitElement, css, html, nothing } from 'lit';
+import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
 import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
@@ -11,8 +11,6 @@ import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
 export class EdgelessNavigatorBlackBackground extends WithDisposable(
   LitElement
 ) {
-  private _blackBackground = false;
-
   static override styles = css`
     .edgeless-navigator-black-background {
       background-color: black;
@@ -22,6 +20,8 @@ export class EdgelessNavigatorBlackBackground extends WithDisposable(
       box-shadow: 0 0 0 5000px black;
     }
   `;
+
+  private _blackBackground = false;
 
   private _tryLoadBlackBackground() {
     const value = this.edgeless.service.editPropsStore.getStorage(

@@ -1,13 +1,30 @@
 import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 import * as Y from 'yjs';
 
-import type { BlockModel } from '../../schema/index.js';
 import type { YBlock } from './index.js';
 
 import { native2Y } from '../../reactive/index.js';
-import { type Schema, internalPrimitives } from '../../schema/index.js';
+import {
+  type BlockModel,
+  internalPrimitives,
+  type Schema,
+} from '../../schema/index.js';
 
 export class DocCRUD {
+  get root(): string | null {
+    let rootId: string | null = null;
+    this._yBlocks.forEach(yBlock => {
+      const flavour = yBlock.get('sys:flavour');
+      const schema = this._schema.flavourSchemaMap.get(flavour);
+      if (!schema) return;
+
+      if (schema.model.role === 'root') {
+        rootId = yBlock.get('sys:id');
+      }
+    });
+    return rootId;
+  }
+
   constructor(
     private readonly _yBlocks: Y.Map<YBlock>,
     private readonly _schema: Schema
@@ -325,19 +342,5 @@ export class DocCRUD {
     const yChildrenArray = yBlock.get('sys:children') as Y.Array<string>;
     yChildrenArray.delete(0, yChildrenArray.length);
     yChildrenArray.push(children);
-  }
-
-  get root(): string | null {
-    let rootId: string | null = null;
-    this._yBlocks.forEach(yBlock => {
-      const flavour = yBlock.get('sys:flavour');
-      const schema = this._schema.flavourSchemaMap.get(flavour);
-      if (!schema) return;
-
-      if (schema.model.role === 'root') {
-        rootId = yBlock.get('sys:id');
-      }
-    });
-    return rootId;
   }
 }

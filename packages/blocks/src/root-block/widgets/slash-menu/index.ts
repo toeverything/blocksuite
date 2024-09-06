@@ -7,9 +7,9 @@ import {
 } from '@blocksuite/affine-shared/utils';
 import { WidgetComponent } from '@blocksuite/block-std';
 import {
-  DisposableGroup,
   assertExists,
   debounce,
+  DisposableGroup,
   throttle,
 } from '@blocksuite/global/utils';
 import { customElement } from 'lit/decorators.js';
@@ -18,6 +18,7 @@ import type { RootBlockComponent } from '../../types.js';
 
 import { getPopperPosition } from '../../utils/position.js';
 import {
+  defaultSlashMenuConfig,
   type SlashMenuActionItem,
   type SlashMenuContext,
   type SlashMenuGroupDivider,
@@ -25,7 +26,6 @@ import {
   type SlashMenuItemGenerator,
   type SlashMenuStaticConfig,
   type SlashSubMenu,
-  defaultSlashMenuConfig,
 } from './config.js';
 import { SlashMenu } from './slash-menu-popover.js';
 import { filterEnabledSlashMenuItems } from './utils.js';
@@ -106,6 +106,8 @@ export const AFFINE_SLASH_MENU_WIDGET = 'affine-slash-menu-widget';
 
 @customElement(AFFINE_SLASH_MENU_WIDGET)
 export class AffineSlashMenuWidget extends WidgetComponent {
+  static DEFAULT_CONFIG = defaultSlashMenuConfig;
+
   private _onBeforeInput = (ctx: UIEventStateContext) => {
     const eventState = ctx.get('defaultState');
     const event = eventState.event as InputEvent;
@@ -159,8 +161,6 @@ export class AffineSlashMenuWidget extends WidgetComponent {
       });
     });
   };
-
-  static DEFAULT_CONFIG = defaultSlashMenuConfig;
 
   config = AffineSlashMenuWidget.DEFAULT_CONFIG;
 

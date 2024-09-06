@@ -127,7 +127,13 @@ export abstract class BaseReactiveYData<T, Y> {
     this._options.onChange?.(this._proxy);
   };
 
+  protected abstract readonly _options: ProxyOptions<T>;
+
+  protected abstract readonly _proxy: T;
+
   protected _skipNext = false;
+
+  protected abstract readonly _source: T;
 
   protected readonly _stashed = new Set<string | number>();
 
@@ -141,19 +147,13 @@ export abstract class BaseReactiveYData<T, Y> {
     this._skipNext = false;
   };
 
+  protected abstract readonly _ySource: Y;
+
   get proxy() {
     return this._proxy;
   }
 
   protected abstract _getProxy(): T;
-
-  protected abstract readonly _options: ProxyOptions<T>;
-
-  protected abstract readonly _proxy: T;
-
-  protected abstract readonly _source: T;
-
-  protected abstract readonly _ySource: Y;
 
   abstract pop(prop: string | number): void;
   abstract stash(prop: string | number): void;

@@ -3,8 +3,8 @@ import { css, html, nothing } from 'lit';
 import { customElement } from 'lit/decorators.js';
 
 import {
-  type FilterGroup,
   emptyFilterGroup,
+  type FilterGroup,
 } from '../../../../core/common/ast.js';
 import { popCreateFilter } from '../../../../core/common/ref/ref.js';
 import { WidgetBase } from '../../../../core/widget/widget-base.js';
@@ -44,6 +44,10 @@ export class DataViewHeaderToolsFilter extends WidgetBase {
     this.view.updateFilter(filter);
   }
 
+  private get readonly() {
+    return this.view.readonly$.value;
+  }
+
   private addFilter(event: MouseEvent) {
     this.showToolBar(true);
     popCreateFilter(event.target as HTMLElement, {
@@ -59,10 +63,6 @@ export class DataViewHeaderToolsFilter extends WidgetBase {
       },
     });
     return;
-  }
-
-  private get readonly() {
-    return this.view.readonly$.value;
   }
 
   override render() {

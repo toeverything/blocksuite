@@ -7,7 +7,7 @@ import type {
 } from '@blocksuite/store';
 
 import { sha } from '@blocksuite/global/utils';
-import { Job, extMimeMap, getAssetName } from '@blocksuite/store';
+import { extMimeMap, getAssetName, Job } from '@blocksuite/store';
 
 import { Unzip, Zip } from '../transformers/utils.js';
 import { replaceIdMiddleware, titleMiddleware } from './middlewares.js';

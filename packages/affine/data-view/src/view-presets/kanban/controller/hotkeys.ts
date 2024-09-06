@@ -3,12 +3,12 @@ import type { ReactiveController } from 'lit';
 import type { DataViewKanban } from '../kanban-view.js';
 
 export class KanbanHotkeysController implements ReactiveController {
-  constructor(private host: DataViewKanban) {
-    this.host.addController(this);
-  }
-
   private get hasSelection() {
     return !!this.host.selectionController.selection;
+  }
+
+  constructor(private host: DataViewKanban) {
+    this.host.addController(this);
   }
 
   hostConnected() {

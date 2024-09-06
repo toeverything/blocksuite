@@ -1,4 +1,4 @@
-import { PageEditor, createEmptyDoc } from '@blocksuite/presets';
+import { createEmptyDoc, PageEditor } from '@blocksuite/presets';
 import '@blocksuite/presets/themes/affine.css';
 import { Text } from '@blocksuite/store';
 

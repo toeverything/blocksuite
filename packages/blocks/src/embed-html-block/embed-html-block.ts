@@ -17,13 +17,13 @@ export class EmbedHtmlBlockComponent extends EmbedBlockComponent<
   EmbedHtmlModel,
   EmbedHtmlBlockService
 > {
+  static override styles = styles;
+
   override _cardStyle: (typeof EmbedHtmlStyles)[number] = 'html';
 
   protected _isDragging = false;
 
   protected _isResizing = false;
-
-  static override styles = styles;
 
   close = () => {
     document.exitFullscreen().catch(console.error);
@@ -37,11 +37,6 @@ export class EmbedHtmlBlockComponent extends EmbedBlockComponent<
 
   refreshData = () => {};
 
-  protected _handleClick(event: MouseEvent) {
-    event.stopPropagation();
-    this._selectBlock();
-  }
-
   private _handleDoubleClick(event: MouseEvent) {
     event.stopPropagation();
     this.open();
@@ -53,6 +48,11 @@ export class EmbedHtmlBlockComponent extends EmbedBlockComponent<
       blockId: this.blockId,
     });
     selectionManager.setGroup('note', [blockSelection]);
+  }
+
+  protected _handleClick(event: MouseEvent) {
+    event.stopPropagation();
+    this._selectBlock();
   }
 
   override connectedCallback() {

@@ -1,12 +1,17 @@
 import type { GroupElementModel } from '@blocksuite/affine-model';
-import type { Doc } from '@blocksuite/store';
-import type { BlockModel } from '@blocksuite/store';
+import type { BlockModel, Doc } from '@blocksuite/store';
 
 import { FrameBlockModel } from '@blocksuite/affine-model';
 import { matchFlavours } from '@blocksuite/affine-shared/utils';
 import { GfxBlockElementModel, type GfxModel } from '@blocksuite/block-std/gfx';
-import { Bound, last, nToLast } from '@blocksuite/global/utils';
-import { DisposableGroup, Slot, assertType } from '@blocksuite/global/utils';
+import {
+  assertType,
+  Bound,
+  DisposableGroup,
+  last,
+  nToLast,
+  Slot,
+} from '@blocksuite/global/utils';
 import { generateKeyBetween } from 'fractional-indexing';
 
 import type { SurfaceBlockModel } from '../surface-model.js';
@@ -17,7 +22,6 @@ import {
 } from '../element-model/base.js';
 import { GridManager } from './grid-manager.js';
 import {
-  SortOrder,
   compare,
   getElementIndex,
   getLayerEndZIndex,
@@ -25,6 +29,7 @@ import {
   isInRange,
   removeFromOrderedArray,
   renderableInEdgeless,
+  SortOrder,
   ungroupIndex,
   updateLayersZIndex,
 } from './layer-utils.js';
@@ -69,9 +74,9 @@ export type CanvasLayer = BaseLayer<SurfaceElementModel> & {
 export type Layer = BlockLayer | CanvasLayer;
 
 export class LayerManager {
-  private _disposables = new DisposableGroup();
-
   static INITAL_INDEX = 'a0';
+
+  private _disposables = new DisposableGroup();
 
   blocks: GfxBlockElementModel[] = [];
 

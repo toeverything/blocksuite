@@ -1,5 +1,4 @@
-import type { BlockStdScope } from '@blocksuite/block-std';
-import type { EditorHost } from '@blocksuite/block-std';
+import type { BlockStdScope, EditorHost } from '@blocksuite/block-std';
 import type { InlineRange } from '@blocksuite/inline';
 import type { BlockModel } from '@blocksuite/store';
 

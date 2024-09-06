@@ -9,9 +9,9 @@ import type { YBlock } from './types.js';
 
 import {
   Boxed,
-  type UnRecord,
   createYProxy,
   native2Y,
+  type UnRecord,
   y2Native,
 } from '../../../reactive/index.js';
 import { BlockModel, internalPrimitives } from '../../../schema/base.js';

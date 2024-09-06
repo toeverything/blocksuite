@@ -1,19 +1,19 @@
-import type { VLine } from '@blocksuite/inline';
 import type { Y } from '@blocksuite/store';
 
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import {
   type AttributeRenderer,
+  createInlineKeyDownHandler,
   type DeltaInsert,
   InlineEditor,
   type InlineRange,
   type InlineRangeProvider,
   type KeyboardBindingContext,
-  createInlineKeyDownHandler,
+  type VLine,
 } from '@blocksuite/inline';
 import { DocCollection, Text } from '@blocksuite/store';
-import { type TemplateResult, css, html } from 'lit';
+import { css, html, type TemplateResult } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { z } from 'zod';
@@ -31,6 +31,35 @@ interface RichTextStackItem {
 
 @customElement('rich-text')
 export class RichText extends WithDisposable(ShadowlessElement) {
+  static override styles = css`
+    rich-text {
+      display: block;
+      height: 100%;
+      width: 100%;
+      overflow-x: auto;
+      overflow-y: hidden;
+
+      scroll-margin-top: 50px;
+      scroll-margin-bottom: 30px;
+    }
+
+    .inline-editor {
+      height: 100%;
+      width: 100%;
+      outline: none;
+      cursor: text;
+    }
+
+    .inline-editor.readonly {
+      cursor: default;
+    }
+
+    rich-text .nowrap-lines v-text span,
+    rich-text .nowrap-lines v-element span {
+      white-space: pre !important;
+    }
+  `;
+
   #verticalScrollContainer: HTMLElement | null = null;
 
   private _inlineEditor: AffineInlineEditor | null = null;
@@ -110,34 +139,19 @@ export class RichText extends WithDisposable(ShadowlessElement) {
     }
   };
 
-  static override styles = css`
-    rich-text {
-      display: block;
-      height: 100%;
-      width: 100%;
-      overflow-x: auto;
-      overflow-y: hidden;
+  private get _yText() {
+    return this.yText instanceof Text ? this.yText.yText : this.yText;
+  }
 
-      scroll-margin-top: 50px;
-      scroll-margin-bottom: 30px;
-    }
+  // It will listen ctrl+z/ctrl+shift+z and call undoManager.undo/redo, keydown event will not
+  get inlineEditor() {
+    return this._inlineEditor;
+  }
 
-    .inline-editor {
-      height: 100%;
-      width: 100%;
-      outline: none;
-      cursor: text;
-    }
-
-    .inline-editor.readonly {
-      cursor: default;
-    }
-
-    rich-text .nowrap-lines v-text span,
-    rich-text .nowrap-lines v-element span {
-      white-space: pre !important;
-    }
-  `;
+  get inlineEditorContainer() {
+    assertExists(this._inlineEditorContainer);
+    return this._inlineEditorContainer;
+  }
 
   private _init() {
     if (this._inlineEditor) {
@@ -252,10 +266,6 @@ export class RichText extends WithDisposable(ShadowlessElement) {
     this._inlineEditor = null;
   }
 
-  private get _yText() {
-    return this.yText instanceof Text ? this.yText.yText : this.yText;
-  }
-
   override connectedCallback() {
     super.connectedCallback();
 
@@ -324,6 +334,7 @@ export class RichText extends WithDisposable(ShadowlessElement) {
     return result;
   }
 
+  // If it is true rich-text will handle undo/redo by itself. (including v-range restore)
   override render() {
     const classes = classMap({
       'inline-editor': true,
@@ -341,17 +352,6 @@ export class RichText extends WithDisposable(ShadowlessElement) {
     if (this._inlineEditor && changedProperties.has('readonly')) {
       this._inlineEditor.setReadonly(this.readonly);
     }
-  }
-
-  // If it is true rich-text will handle undo/redo by itself. (including v-range restore)
-  // It will listen ctrl+z/ctrl+shift+z and call undoManager.undo/redo, keydown event will not
-  get inlineEditor() {
-    return this._inlineEditor;
-  }
-
-  get inlineEditorContainer() {
-    assertExists(this._inlineEditorContainer);
-    return this._inlineEditorContainer;
   }
 
   @query('.inline-editor')
@@ -407,12 +407,12 @@ export class RichText extends WithDisposable(ShadowlessElement) {
   accessor undoManager!: Y.UndoManager;
 
   @property({ attribute: false })
-  accessor vLineRenderer: ((vLine: VLine) => TemplateResult) | undefined;
-
-  @property({ attribute: false })
   accessor verticalScrollContainerGetter:
     | (() => HTMLElement | null)
     | undefined = undefined;
+
+  @property({ attribute: false })
+  accessor vLineRenderer: ((vLine: VLine) => TemplateResult) | undefined;
 
   @property({ attribute: false })
   accessor wrapText = true;

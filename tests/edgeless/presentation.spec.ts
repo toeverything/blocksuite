@@ -1,6 +1,5 @@
 import { expect } from '@playwright/test';
 import {
-  Shape,
   createNote,
   createShapeElement,
   dragBetweenViewCoords,
@@ -8,6 +7,7 @@ import {
   enterPresentationMode,
   locatorPresentationToolbarButton,
   setEdgelessTool,
+  Shape,
 } from 'utils/actions/edgeless.js';
 import { waitNextFrame } from 'utils/actions/misc.js';
 

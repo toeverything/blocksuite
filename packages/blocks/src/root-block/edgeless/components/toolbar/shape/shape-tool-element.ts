@@ -1,19 +1,18 @@
 import { CanvasElementType } from '@blocksuite/affine-block-surface';
 import {
-  type ShapeName,
-  type ShapeStyle,
   getShapeRadius,
   getShapeType,
+  type ShapeName,
+  type ShapeStyle,
 } from '@blocksuite/affine-model';
 import { WithDisposable } from '@blocksuite/block-std';
-import { Bound } from '@blocksuite/global/utils';
-import { sleep } from '@blocksuite/global/utils';
+import { Bound, sleep } from '@blocksuite/global/utils';
 import {
+  css,
+  html,
   LitElement,
   type PropertyValues,
   type TemplateResult,
-  css,
-  html,
 } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 
@@ -43,6 +42,34 @@ type TransformMap = Record<
 
 @customElement('edgeless-shape-tool-element')
 export class EdgelessShapeToolElement extends WithDisposable(LitElement) {
+  static override styles = css`
+    .shape {
+      --x: 0px;
+      --y: 0px;
+      --offset-x: 0px;
+      --offset-y: 0px;
+      --scale: 1;
+      transform: translateX(calc(var(--offset-x) + var(--x)))
+        translateY(calc(var(--y) + var(--offset-y))) scale(var(--scale));
+      height: 60px;
+      width: 60px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: absolute;
+      top: 12px;
+      left: 16px;
+      transition: all 0.5s cubic-bezier(0, -0.01, 0.01, 1.01);
+    }
+    .shape.dragging {
+      transition: none;
+    }
+    .shape svg {
+      height: 100%;
+      filter: drop-shadow(0px 2px 8px rgba(0, 0, 0, 0.15));
+    }
+  `;
+
   private _addShape = (coord: Coord, padding: Coord) => {
     const width = 100;
     const height = 100;
@@ -177,34 +204,6 @@ export class EdgelessShapeToolElement extends WithDisposable(LitElement) {
     z3: { x: 15, y: 0, scale: 0.75, origin: '80% 20%' },
     hidden: { x: 0, y: 120, scale: 0, origin: '50% 50%' },
   };
-
-  static override styles = css`
-    .shape {
-      --x: 0px;
-      --y: 0px;
-      --offset-x: 0px;
-      --offset-y: 0px;
-      --scale: 1;
-      transform: translateX(calc(var(--offset-x) + var(--x)))
-        translateY(calc(var(--y) + var(--offset-y))) scale(var(--scale));
-      height: 60px;
-      width: 60px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      position: absolute;
-      top: 12px;
-      left: 16px;
-      transition: all 0.5s cubic-bezier(0, -0.01, 0.01, 1.01);
-    }
-    .shape.dragging {
-      transition: none;
-    }
-    .shape svg {
-      height: 100%;
-      filter: drop-shadow(0px 2px 8px rgba(0, 0, 0, 0.15));
-    }
-  `;
 
   override connectedCallback() {
     super.connectedCallback();

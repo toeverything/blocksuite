@@ -2,13 +2,13 @@ import type { CSSResult } from 'lit';
 
 import { assertExists } from '@blocksuite/global/utils';
 import {
-  type ComputePositionReturn,
-  type Placement,
   arrow,
+  type ComputePositionReturn,
   flip,
   offset,
+  type Placement,
 } from '@floating-ui/dom';
-import { LitElement, css, html, unsafeCSS } from 'lit';
+import { css, html, LitElement, unsafeCSS } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { type StyleInfo, styleMap } from 'lit/directives/style-map.js';
 
@@ -117,6 +117,12 @@ const updateArrowStyles = ({
  */
 @customElement('affine-tooltip')
 export class Tooltip extends LitElement {
+  static override styles = css`
+    :host {
+      display: none;
+    }
+  `;
+
   private _hoverController!: HoverController;
 
   private _setUpHoverController = () => {
@@ -188,12 +194,6 @@ export class Tooltip extends LitElement {
       this._hoverController.setReference(parent);
     }, 0);
   };
-
-  static override styles = css`
-    :host {
-      display: none;
-    }
-  `;
 
   private _getStyles() {
     return css`

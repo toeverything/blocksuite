@@ -1,7 +1,7 @@
 import type { EditorHost } from '@blocksuite/block-std';
 
 import { NoteDisplayMode } from '@blocksuite/blocks';
-import { DisposableGroup, clamp } from '@blocksuite/global/utils';
+import { clamp, DisposableGroup } from '@blocksuite/global/utils';
 
 import type { AffineEditorContainer } from '../../../editors/editor-container.js';
 

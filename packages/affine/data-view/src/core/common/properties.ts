@@ -1,8 +1,8 @@
 import { createPopup } from '@blocksuite/affine-components/context-menu';
 import {
   ShadowlessElement,
-  WithDisposable,
   SignalWatcher,
+  WithDisposable,
 } from '@blocksuite/block-std';
 import {
   ArrowLeftBigIcon,

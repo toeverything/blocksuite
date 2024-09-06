@@ -1,13 +1,13 @@
 import type { PointerEventState } from '@blocksuite/block-std';
 
-import { Point, noop } from '@blocksuite/global/utils';
+import { noop, Point } from '@blocksuite/global/utils';
 
 import type { SelectionArea } from '../services/tools-manager.js';
 import type { EdgelessTool } from '../types.js';
 
 import {
-  type NoteChildrenFlavour,
   hasClassNameInList,
+  type NoteChildrenFlavour,
 } from '../../../_common/utils/index.js';
 import {
   EXCLUDING_MOUSE_OUT_CLASS_LIST,
@@ -26,11 +26,11 @@ export type NoteTool = {
 };
 
 export class NoteToolController extends EdgelessToolController<NoteTool> {
-  protected override _draggingArea: SelectionArea | null = null;
-
   private _draggingNoteOverlay: DraggingNoteOverlay | null = null;
 
   private _noteOverlay: NoteOverlay | null = null;
+
+  protected override _draggingArea: SelectionArea | null = null;
 
   readonly tool = {
     type: 'affine:note',

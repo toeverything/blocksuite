@@ -20,6 +20,35 @@ export class ReactiveYArray extends BaseReactiveYData<
   unknown[],
   YArray<unknown>
 > {
+  private _observer = (event: YArrayEvent<unknown>) => {
+    this._onObserve(event, () => {
+      let retain = 0;
+      event.changes.delta.forEach(change => {
+        if (change.retain) {
+          retain += change.retain;
+          return;
+        }
+        if (change.delete) {
+          this._updateWithSkip(() => {
+            this._source.splice(retain, change.delete);
+          });
+          return;
+        }
+        if (change.insert) {
+          const _arr = [change.insert].flat();
+
+          const proxyList = _arr.map(value => createYProxy(value));
+
+          this._updateWithSkip(() => {
+            this._source.splice(retain, 0, ...proxyList);
+          });
+
+          retain += change.insert.length;
+        }
+      });
+    });
+  };
+
   protected _getProxy = () => {
     return new Proxy(this._source, {
       has: (target, p) => {
@@ -108,35 +137,6 @@ export class ReactiveYArray extends BaseReactiveYData<
     });
   };
 
-  private _observer = (event: YArrayEvent<unknown>) => {
-    this._onObserve(event, () => {
-      let retain = 0;
-      event.changes.delta.forEach(change => {
-        if (change.retain) {
-          retain += change.retain;
-          return;
-        }
-        if (change.delete) {
-          this._updateWithSkip(() => {
-            this._source.splice(retain, change.delete);
-          });
-          return;
-        }
-        if (change.insert) {
-          const _arr = [change.insert].flat();
-
-          const proxyList = _arr.map(value => createYProxy(value));
-
-          this._updateWithSkip(() => {
-            this._source.splice(retain, 0, ...proxyList);
-          });
-
-          retain += change.insert.length;
-        }
-      });
-    });
-  };
-
   protected readonly _proxy: unknown[];
 
   constructor(
@@ -162,6 +162,29 @@ export class ReactiveYArray extends BaseReactiveYData<
 }
 
 export class ReactiveYMap extends BaseReactiveYData<UnRecord, YMap<unknown>> {
+  private _observer = (event: YMapEvent<unknown>) => {
+    this._onObserve(event, () => {
+      event.keysChanged.forEach(key => {
+        const type = event.changes.keys.get(key);
+        if (!type) {
+          return;
+        }
+        if (type.action === 'delete') {
+          this._updateWithSkip(() => {
+            delete this._source[key];
+          });
+        } else if (type.action === 'add' || type.action === 'update') {
+          const current = this._ySource.get(key);
+          this._updateWithSkip(() => {
+            this._source[key] = proxies.has(current)
+              ? proxies.get(current)
+              : createYProxy(current, this._options);
+          });
+        }
+      });
+    });
+  };
+
   protected _getProxy = () => {
     return new Proxy(this._source, {
       has: (target, p) => {
@@ -241,29 +264,6 @@ export class ReactiveYMap extends BaseReactiveYData<UnRecord, YMap<unknown>> {
 
         return Reflect.deleteProperty(target, p);
       },
-    });
-  };
-
-  private _observer = (event: YMapEvent<unknown>) => {
-    this._onObserve(event, () => {
-      event.keysChanged.forEach(key => {
-        const type = event.changes.keys.get(key);
-        if (!type) {
-          return;
-        }
-        if (type.action === 'delete') {
-          this._updateWithSkip(() => {
-            delete this._source[key];
-          });
-        } else if (type.action === 'add' || type.action === 'update') {
-          const current = this._ySource.get(key);
-          this._updateWithSkip(() => {
-            this._source[key] = proxies.has(current)
-              ? proxies.get(current)
-              : createYProxy(current, this._options);
-          });
-        }
-      });
     });
   };
 

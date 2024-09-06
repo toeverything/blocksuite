@@ -18,15 +18,44 @@ type CopilotSelectionTool = {
 export class CopilotSelectionController extends EdgelessToolController<CopilotSelectionTool> {
   private _dragging = false;
 
+  draggingAreaUpdated = new Slot<boolean | void>();
+
   dragLastPoint: [number, number] = [0, 0];
 
   dragStartPoint: [number, number] = [0, 0];
 
-  draggingAreaUpdated = new Slot<boolean | void>();
-
   readonly tool = {
     type: 'copilot',
   } as CopilotSelectionTool;
+
+  get area() {
+    const start = new DOMPoint(this.dragStartPoint[0], this.dragStartPoint[1]);
+    const end = new DOMPoint(this.dragLastPoint[0], this.dragLastPoint[1]);
+
+    const minX = Math.min(start.x, end.x);
+    const minY = Math.min(start.y, end.y);
+    const maxX = Math.max(start.x, end.x);
+    const maxY = Math.max(start.y, end.y);
+
+    return new DOMRect(minX, minY, maxX - minX, maxY - minY);
+  }
+
+  // AI processing
+  get processing() {
+    const aiPanel = this._edgeless.host.view.getWidget(
+      AFFINE_AI_PANEL_WIDGET,
+      this._edgeless.doc.root!.id
+    ) as AffineAIPanelWidget;
+    return aiPanel && aiPanel.state !== 'hidden';
+  }
+
+  get selectedElements() {
+    return this.selection.selectedElements;
+  }
+
+  get selection() {
+    return this._edgeless.service.selection;
+  }
 
   private _initDragState(e: PointerEventState) {
     this.dragStartPoint = this._service.viewport.toModelCoord(e.x, e.y);
@@ -138,35 +167,6 @@ export class CopilotSelectionController extends EdgelessToolController<CopilotSe
     });
 
     this.draggingAreaUpdated.emit(true);
-  }
-
-  get area() {
-    const start = new DOMPoint(this.dragStartPoint[0], this.dragStartPoint[1]);
-    const end = new DOMPoint(this.dragLastPoint[0], this.dragLastPoint[1]);
-
-    const minX = Math.min(start.x, end.x);
-    const minY = Math.min(start.y, end.y);
-    const maxX = Math.max(start.x, end.x);
-    const maxY = Math.max(start.y, end.y);
-
-    return new DOMRect(minX, minY, maxX - minX, maxY - minY);
-  }
-
-  // AI processing
-  get processing() {
-    const aiPanel = this._edgeless.host.view.getWidget(
-      AFFINE_AI_PANEL_WIDGET,
-      this._edgeless.doc.root!.id
-    ) as AffineAIPanelWidget;
-    return aiPanel && aiPanel.state !== 'hidden';
-  }
-
-  get selectedElements() {
-    return this.selection.selectedElements;
-  }
-
-  get selection() {
-    return this._edgeless.service.selection;
   }
 }
 

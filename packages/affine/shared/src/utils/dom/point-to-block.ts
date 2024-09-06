@@ -1,6 +1,5 @@
 import type { BlockComponent } from '@blocksuite/block-std';
-import type { Rect } from '@blocksuite/global/utils';
-import type { Point } from '@blocksuite/global/utils';
+import type { Point, Rect } from '@blocksuite/global/utils';
 
 import {
   BLOCK_CHILDREN_CONTAINER_PADDING_LEFT,

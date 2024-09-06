@@ -1,6 +1,6 @@
 import { WithDisposable } from '@blocksuite/block-std';
 import { cssVarV2 } from '@toeverything/theme/v2';
-import { LitElement, css, html, nothing, unsafeCSS } from 'lit';
+import { css, html, LitElement, nothing, unsafeCSS } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 

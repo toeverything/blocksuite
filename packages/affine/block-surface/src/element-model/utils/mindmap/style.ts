@@ -47,6 +47,8 @@ export type ConnectorStyle = {
 };
 
 export abstract class MindmapStyleGetter {
+  abstract readonly root: NodeStyle;
+
   abstract getNodeStyle(
     node: MindmapNode,
     path: number[]
@@ -54,8 +56,6 @@ export abstract class MindmapStyleGetter {
     connector: ConnectorStyle;
     node: NodeStyle;
   };
-
-  abstract readonly root: NodeStyle;
 }
 
 export class StyleOne extends MindmapStyleGetter {

@@ -13,13 +13,11 @@ type BrushTool = {
 };
 
 export class BrushToolController extends EdgelessToolController<BrushTool> {
+  static BRUSH_POP_GAP = 20;
+
   private _draggingElement: BrushElementModel | null = null;
 
   private _draggingElementId: string | null = null;
-
-  protected _draggingPathPoints: number[][] | null = null;
-
-  protected _draggingPathPressures: number[] | null = null;
 
   private _lastPoint: IVec | null = null;
 
@@ -29,7 +27,9 @@ export class BrushToolController extends EdgelessToolController<BrushTool> {
 
   private _straightLineType: 'horizontal' | 'vertical' | null = null;
 
-  static BRUSH_POP_GAP = 20;
+  protected _draggingPathPoints: number[][] | null = null;
+
+  protected _draggingPathPressures: number[] | null = null;
 
   readonly tool = {
     type: 'brush',

@@ -1,7 +1,7 @@
 import type { Doc } from '@blocksuite/store';
 
-import { BlockStdScope } from '@blocksuite/block-std';
 import {
+  BlockStdScope,
   EditorHost,
   ShadowlessElement,
   WithDisposable,
@@ -47,6 +47,14 @@ export class PageEditor extends WithDisposable(ShadowlessElement) {
     }
   `;
 
+  get host() {
+    try {
+      return this.std.host;
+    } catch {
+      return null;
+    }
+  }
+
   override connectedCallback() {
     super.connectedCallback();
     this._disposables.add(
@@ -88,14 +96,6 @@ export class PageEditor extends WithDisposable(ShadowlessElement) {
         doc: this.doc,
         extensions: this.specs,
       });
-    }
-  }
-
-  get host() {
-    try {
-      return this.std.host;
-    } catch {
-      return null;
     }
   }
 

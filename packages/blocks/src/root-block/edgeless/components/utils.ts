@@ -1,8 +1,7 @@
 import type { IVec } from '@blocksuite/global/utils';
 
 import { CommonUtils } from '@blocksuite/affine-block-surface';
-import { Bound, Vec } from '@blocksuite/global/utils';
-import { assertExists } from '@blocksuite/global/utils';
+import { assertExists, Bound, Vec } from '@blocksuite/global/utils';
 import { css, html } from 'lit';
 
 import {

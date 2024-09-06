@@ -7,7 +7,7 @@ import {
 import { ConnectorMode, getConnectorModeName } from '@blocksuite/affine-model';
 import { SignalWatcher } from '@blocksuite/block-std';
 import { computed } from '@lit-labs/preact-signals';
-import { LitElement, css, html } from 'lit';
+import { css, html, LitElement } from 'lit';
 import { customElement } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
@@ -26,10 +26,6 @@ const IcomMap = {
 export class EdgelessConnectorToolButton extends QuickToolMixin(
   SignalWatcher(LitElement)
 ) {
-  private _mode$ = computed(() => {
-    return this.edgeless.service.editPropsStore.lastProps$.value.connector.mode;
-  });
-
   static override styles = css`
     :host {
       display: flex;
@@ -45,6 +41,10 @@ export class EdgelessConnectorToolButton extends QuickToolMixin(
       font-size: 0;
     }
   `;
+
+  private _mode$ = computed(() => {
+    return this.edgeless.service.editPropsStore.lastProps$.value.connector.mode;
+  });
 
   override type = 'connector' as const;
 

@@ -68,9 +68,9 @@ export interface StackItem {
 
 @test
 export class DocCollection extends DocCollectionAddonType {
-  protected readonly _schema: Schema;
-
   static Y = Y;
+
+  protected readonly _schema: Schema;
 
   readonly awarenessStore: AwarenessStore;
 
@@ -96,6 +96,28 @@ export class DocCollection extends DocCollectionAddonType {
     docRemoved: new Slot<string>(),
     docCreated: new Slot<string>(),
   };
+
+  get docs() {
+    return this.blockCollections;
+  }
+
+  get isEmpty() {
+    if (this.doc.store.clients.size === 0) return true;
+
+    let flag = false;
+    if (this.doc.store.clients.size === 1) {
+      const items = Array.from(this.doc.store.clients.values())[0];
+      // workspaceVersion and pageVersion were set when the collection is initialized
+      if (items.length <= 2) {
+        flag = true;
+      }
+    }
+    return flag;
+  }
+
+  get schema() {
+    return this._schema;
+  }
 
   constructor({
     id,
@@ -267,27 +289,5 @@ export class DocCollection extends DocCollectionAddonType {
 
   waitForSynced() {
     return this.docSync.waitForSynced();
-  }
-
-  get docs() {
-    return this.blockCollections;
-  }
-
-  get isEmpty() {
-    if (this.doc.store.clients.size === 0) return true;
-
-    let flag = false;
-    if (this.doc.store.clients.size === 1) {
-      const items = Array.from(this.doc.store.clients.values())[0];
-      // workspaceVersion and pageVersion were set when the collection is initialized
-      if (items.length <= 2) {
-        flag = true;
-      }
-    }
-    return flag;
-  }
-
-  get schema() {
-    return this._schema;
   }
 }

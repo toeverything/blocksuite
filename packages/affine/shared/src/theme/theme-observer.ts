@@ -25,6 +25,20 @@ export class ThemeObserver {
     return computedStyle;
   }
 
+  static get instance(): ThemeObserver {
+    if (!ThemeObserver.#instance) {
+      const instance = new ThemeObserver();
+      instance.observe(document.documentElement);
+      ThemeObserver.#instance = instance;
+    }
+
+    return ThemeObserver.#instance;
+  }
+
+  static get mode() {
+    return ThemeObserver.instance.mode$.peek();
+  }
+
   /**
    * Generates a CSS's color property with `var` or `light-dark` functions.
    *
@@ -122,20 +136,6 @@ export class ThemeObserver {
       );
     }
     return property;
-  }
-
-  static get instance(): ThemeObserver {
-    if (!ThemeObserver.#instance) {
-      const instance = new ThemeObserver();
-      instance.observe(document.documentElement);
-      ThemeObserver.#instance = instance;
-    }
-
-    return ThemeObserver.#instance;
-  }
-
-  static get mode() {
-    return ThemeObserver.instance.mode$.peek();
   }
 
   static subscribe(callback: (T: ColorScheme) => void) {

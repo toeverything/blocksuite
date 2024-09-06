@@ -1,8 +1,11 @@
 import { ArrowRightIcon, EnterIcon } from '@blocksuite/affine-components/icons';
-import { EditorHost } from '@blocksuite/block-std';
-import { WithDisposable } from '@blocksuite/block-std';
-import { PropTypes, requiredProperties } from '@blocksuite/block-std';
-import { LitElement, css, html, nothing } from 'lit';
+import {
+  EditorHost,
+  PropTypes,
+  requiredProperties,
+  WithDisposable,
+} from '@blocksuite/block-std';
+import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 
 import type { AIItemConfig } from './types.js';

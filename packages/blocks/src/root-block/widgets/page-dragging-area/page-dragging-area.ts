@@ -36,6 +36,8 @@ export class AffinePageDraggingAreaWidget extends WidgetComponent<
   RootBlockModel,
   PageRootBlockComponent
 > {
+  static excludeFlavours: string[] = ['affine:note', 'affine:surface'];
+
   private _dragging = false;
 
   private _initialContainerOffset: {
@@ -122,8 +124,6 @@ export class AffinePageDraggingAreaWidget extends WidgetComponent<
     }
   };
 
-  static excludeFlavours: string[] = ['affine:note', 'affine:surface'];
-
   private get _allBlocksWithRect(): BlockInfo[] {
     if (!this._viewport) {
       return [];
@@ -166,6 +166,16 @@ export class AffinePageDraggingAreaWidget extends WidgetComponent<
     });
   }
 
+  private get _viewport() {
+    const rootComponent = this.block;
+    if (!rootComponent) return;
+    return rootComponent.viewport;
+  }
+
+  private get scrollContainer() {
+    return getScrollContainer(this.block);
+  }
+
   private _clearRaf() {
     if (this._rafID) {
       cancelAnimationFrame(this._rafID);
@@ -184,16 +194,6 @@ export class AffinePageDraggingAreaWidget extends WidgetComponent<
     });
 
     this.host.selection.setGroup('note', selections);
-  }
-
-  private get _viewport() {
-    const rootComponent = this.block;
-    if (!rootComponent) return;
-    return rootComponent.viewport;
-  }
-
-  private get scrollContainer() {
-    return getScrollContainer(this.block);
   }
 
   override connectedCallback() {

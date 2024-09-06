@@ -3,7 +3,7 @@ import { Doc } from '@blocksuite/store';
 import { type BlockModel, BlockViewType } from '@blocksuite/store';
 import { consume, provide } from '@lit/context';
 import { computed } from '@lit-labs/preact-signals';
-import { type PropertyValues, type TemplateResult, nothing, render } from 'lit';
+import { nothing, type PropertyValues, render, type TemplateResult } from 'lit';
 import { property, state } from 'lit/decorators.js';
 import { choose } from 'lit/directives/choose.js';
 import { when } from 'lit/directives/when.js';
@@ -66,8 +66,116 @@ export class BlockComponent<
     );
   };
 
+  get blockId() {
+    return this.dataset.blockId as string;
+  }
+
+  get childBlocks() {
+    const childModels = this.model.children;
+    return childModels
+      .map(child => {
+        return this.std.view.getBlock(child.id);
+      })
+      .filter((x): x is BlockComponent => !!x);
+  }
+
+  get flavour(): string {
+    return this.model.flavour;
+  }
+
+  get host() {
+    return this.std.host;
+  }
+
+  get isVersionMismatch() {
+    const schema = this.doc.schema.flavourSchemaMap.get(this.model.flavour);
+    if (!schema) {
+      console.warn(
+        `Schema not found for block ${this.model.id}, flavour ${this.model.flavour}`
+      );
+      return true;
+    }
+    const expectedVersion = schema.version;
+    const actualVersion = this.model.version;
+    if (expectedVersion !== actualVersion) {
+      console.warn(
+        `Version mismatch for block ${this.model.id}, expected ${expectedVersion}, actual ${actualVersion}`
+      );
+      return true;
+    }
+
+    return false;
+  }
+
+  get model() {
+    if (this._model) {
+      return this._model;
+    }
+    const model = this.doc.getBlockById<Model>(this.blockId);
+    if (!model) {
+      throw new BlockSuiteError(
+        ErrorCode.MissingViewModelError,
+        `Cannot find block model for id ${this.blockId}`
+      );
+    }
+    this._model = model;
+    return model;
+  }
+
+  get parentComponent(): BlockComponent | null {
+    const parent = this.model.parent;
+    if (!parent) return null;
+    return this.std.view.getBlock(parent.id);
+  }
+
   get renderChildren() {
     return this.host.renderChildren.bind(this);
+  }
+
+  get rootComponent(): BlockComponent | null {
+    const rootId = this.doc.root?.id;
+    if (!rootId) {
+      return null;
+    }
+    const rootComponent = this.host.view.getBlock(rootId);
+    return rootComponent ?? null;
+  }
+
+  get selected() {
+    return this._selected.value;
+  }
+
+  get selection() {
+    return this.host.selection;
+  }
+
+  get service(): Service {
+    if (this._service) {
+      return this._service;
+    }
+    const service = this.std.getService(this.model.flavour) as Service;
+    if (!service) {
+      throw new BlockSuiteError(
+        ErrorCode.MissingViewModelError,
+        `Cannot find service for flavour ${this.model.flavour}`
+      );
+    }
+    this._service = service;
+    return service;
+  }
+
+  get topContenteditableElement(): BlockComponent | null {
+    return this.rootComponent;
+  }
+
+  get widgetComponents(): Partial<Record<WidgetName, WidgetComponent>> {
+    return Object.keys(this.widgets).reduce(
+      (mapping, key) => ({
+        ...mapping,
+        [key]: this.host.view.getWidget(key, this.blockId),
+      }),
+      {}
+    );
   }
 
   private _renderMismatchBlock(content: unknown) {
@@ -216,114 +324,6 @@ export class BlockComponent<
     } else {
       super.update(changedProperties);
     }
-  }
-
-  get blockId() {
-    return this.dataset.blockId as string;
-  }
-
-  get childBlocks() {
-    const childModels = this.model.children;
-    return childModels
-      .map(child => {
-        return this.std.view.getBlock(child.id);
-      })
-      .filter((x): x is BlockComponent => !!x);
-  }
-
-  get flavour(): string {
-    return this.model.flavour;
-  }
-
-  get host() {
-    return this.std.host;
-  }
-
-  get isVersionMismatch() {
-    const schema = this.doc.schema.flavourSchemaMap.get(this.model.flavour);
-    if (!schema) {
-      console.warn(
-        `Schema not found for block ${this.model.id}, flavour ${this.model.flavour}`
-      );
-      return true;
-    }
-    const expectedVersion = schema.version;
-    const actualVersion = this.model.version;
-    if (expectedVersion !== actualVersion) {
-      console.warn(
-        `Version mismatch for block ${this.model.id}, expected ${expectedVersion}, actual ${actualVersion}`
-      );
-      return true;
-    }
-
-    return false;
-  }
-
-  get model() {
-    if (this._model) {
-      return this._model;
-    }
-    const model = this.doc.getBlockById<Model>(this.blockId);
-    if (!model) {
-      throw new BlockSuiteError(
-        ErrorCode.MissingViewModelError,
-        `Cannot find block model for id ${this.blockId}`
-      );
-    }
-    this._model = model;
-    return model;
-  }
-
-  get parentComponent(): BlockComponent | null {
-    const parent = this.model.parent;
-    if (!parent) return null;
-    return this.std.view.getBlock(parent.id);
-  }
-
-  get rootComponent(): BlockComponent | null {
-    const rootId = this.doc.root?.id;
-    if (!rootId) {
-      return null;
-    }
-    const rootComponent = this.host.view.getBlock(rootId);
-    return rootComponent ?? null;
-  }
-
-  get selected() {
-    return this._selected.value;
-  }
-
-  get selection() {
-    return this.host.selection;
-  }
-
-  get service(): Service {
-    if (this._service) {
-      return this._service;
-    }
-    const service = this.std.getService(this.model.flavour) as Service;
-    if (!service) {
-      throw new BlockSuiteError(
-        ErrorCode.MissingViewModelError,
-        `Cannot find service for flavour ${this.model.flavour}`
-      );
-    }
-    this._service = service;
-    return service;
-  }
-
-  get topContenteditableElement(): BlockComponent | null {
-    return this.rootComponent;
-  }
-
-  get widgetComponents(): Partial<Record<WidgetName, WidgetComponent>> {
-    return Object.keys(this.widgets).reduce(
-      (mapping, key) => ({
-        ...mapping,
-        [key]: this.host.view.getWidget(key, this.blockId),
-      }),
-      {}
-    );
   }
 
   @provide({ context: modelContext as never })

@@ -1,10 +1,9 @@
 import { sleep } from '@global/utils.js';
-import { type Page, expect } from '@playwright/test';
+import { expect, type Page } from '@playwright/test';
 import { switchEditorMode } from 'utils/actions/edgeless.js';
 
 import { dragBlockToPoint, popImageMoreMenu } from './utils/actions/drag.js';
 import {
-  SHORT_KEY,
   pressArrowDown,
   pressArrowUp,
   pressBackspace,
@@ -13,6 +12,7 @@ import {
   pressShiftTab,
   pressTab,
   redoByKeyboard,
+  SHORT_KEY,
   type,
   undoByKeyboard,
 } from './utils/actions/keyboard.js';

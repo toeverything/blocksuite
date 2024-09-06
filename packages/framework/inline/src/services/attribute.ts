@@ -1,8 +1,7 @@
-import type { ZodTypeDef, z } from 'zod';
+import type { z, ZodTypeDef } from 'zod';
 
 import type { InlineEditor } from '../inline-editor.js';
-import type { AttributeRenderer } from '../types.js';
-import type { InlineRange } from '../types.js';
+import type { AttributeRenderer, InlineRange } from '../types.js';
 import type { BaseTextAttributes } from '../utils/index.js';
 
 import {
@@ -92,8 +91,6 @@ export class AttributeService<TextAttributes extends BaseTextAttributes> {
     this._marks = marks;
   };
 
-  constructor(readonly editor: InlineEditor<TextAttributes>) {}
-
   get attributeRenderer() {
     return this._attributeRenderer;
   }
@@ -101,4 +98,6 @@ export class AttributeService<TextAttributes extends BaseTextAttributes> {
   get marks() {
     return this._marks;
   }
+
+  constructor(readonly editor: InlineEditor<TextAttributes>) {}
 }

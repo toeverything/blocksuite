@@ -1,7 +1,7 @@
-import { WithDisposable, SignalWatcher } from '@blocksuite/block-std';
+import { SignalWatcher, WithDisposable } from '@blocksuite/block-std';
 import { DisposableGroup } from '@blocksuite/global/utils';
 import { baseTheme } from '@toeverything/theme';
-import { LitElement, type PropertyValues, css, html, unsafeCSS } from 'lit';
+import { css, html, LitElement, type PropertyValues, unsafeCSS } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
 import type { AffineEditorContainer } from '../../editors/editor-container.js';
@@ -59,6 +59,8 @@ export const AFFINE_OUTLINE_PANEL = 'affine-outline-panel';
 
 @customElement(AFFINE_OUTLINE_PANEL)
 export class OutlinePanel extends SignalWatcher(WithDisposable(LitElement)) {
+  static override styles = styles;
+
   private _editorDisposables: DisposableGroup | null = null;
 
   private _setNoticeVisibility = (visibility: boolean) => {
@@ -80,7 +82,21 @@ export class OutlinePanel extends SignalWatcher(WithDisposable(LitElement)) {
     this._updateAndSaveSettings({ showIcons: on });
   };
 
-  static override styles = styles;
+  get doc() {
+    return this.editor.doc;
+  }
+
+  get edgeless() {
+    return this.editor.querySelector('affine-edgeless-root');
+  }
+
+  get host() {
+    return this.editor.host;
+  }
+
+  get mode() {
+    return this.editor.mode;
+  }
 
   private _clearEditorDisposables() {
     this._editorDisposables?.dispose();
@@ -178,22 +194,6 @@ export class OutlinePanel extends SignalWatcher(WithDisposable(LitElement)) {
     if (_changedProperties.has('editor')) {
       this._setEditorDisposables();
     }
-  }
-
-  get doc() {
-    return this.editor.doc;
-  }
-
-  get edgeless() {
-    return this.editor.querySelector('affine-edgeless-root');
-  }
-
-  get host() {
-    return this.editor.host;
-  }
-
-  get mode() {
-    return this.editor.mode;
   }
 
   @state()

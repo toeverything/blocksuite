@@ -1,5 +1,4 @@
-import type { Command } from '@blocksuite/block-std';
-import type { BlockSelection } from '@blocksuite/block-std';
+import type { BlockSelection, Command } from '@blocksuite/block-std';
 
 export const getBlockSelectionsCommand: Command<
   never,

@@ -10,9 +10,9 @@ export * from './schema/index.js';
 export * from './store/index.js';
 export * from './transformer/index.js';
 export {
-  type IdGenerator,
   createAutoIncrementIdGenerator,
   createAutoIncrementIdGeneratorByClientId,
+  type IdGenerator,
   nanoid,
   uuidv4,
 } from './utils/id-generator.js';

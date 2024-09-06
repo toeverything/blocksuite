@@ -3,8 +3,7 @@ import { repeat } from 'lit/directives/repeat.js';
 
 import type { VLine } from '../index.js';
 import type { InlineEditor } from '../inline-editor.js';
-import type { DeltaInsert } from '../types.js';
-import type { DeltaEntry, InlineRange } from '../types.js';
+import type { DeltaEntry, DeltaInsert, InlineRange } from '../types.js';
 import type { BaseTextAttributes } from '../utils/index.js';
 
 import {
@@ -235,9 +234,9 @@ export class DeltaService<TextAttributes extends BaseTextAttributes> {
     this.editor.slots.renderComplete.emit();
   };
 
-  constructor(readonly editor: InlineEditor<TextAttributes>) {}
-
   get deltas() {
     return transformDeltasToEmbedDeltas(this.editor, this.editor.yTextDeltas);
   }
+
+  constructor(readonly editor: InlineEditor<TextAttributes>) {}
 }

@@ -3,8 +3,8 @@ import type { Constructor } from '@blocksuite/global/utils';
 import {
   type BaseBlockTransformer,
   type BlockModel,
-  type InternalPrimitives,
   defineBlockSchema,
+  type InternalPrimitives,
 } from '@blocksuite/store';
 
 import { GfxCompatible, type GfxCompatibleProps } from './gfx-compatible.js';

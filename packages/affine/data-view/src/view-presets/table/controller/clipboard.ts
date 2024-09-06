@@ -104,16 +104,16 @@ export class TableClipboardController implements ReactiveController {
     return true;
   };
 
-  constructor(public host: DataViewTable) {
-    host.addController(this);
-  }
-
   private get readonly() {
     return this.host.view.readonly$.value;
   }
 
   private get std() {
     return this.host.std;
+  }
+
+  constructor(public host: DataViewTable) {
+    host.addController(this);
   }
 
   copy() {

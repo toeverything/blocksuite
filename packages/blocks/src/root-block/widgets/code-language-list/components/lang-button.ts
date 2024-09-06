@@ -1,7 +1,7 @@
 import { ArrowDownIcon } from '@blocksuite/affine-components/icons';
-import { WithDisposable, SignalWatcher } from '@blocksuite/block-std';
+import { SignalWatcher, WithDisposable } from '@blocksuite/block-std';
 import { noop } from '@blocksuite/global/utils';
-import { LitElement, css, nothing } from 'lit';
+import { css, LitElement, nothing } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { html } from 'lit/static-html.js';
 
@@ -17,6 +17,31 @@ import {
 export class LanguageListButton extends WithDisposable(
   SignalWatcher(LitElement)
 ) {
+  static override styles = css`
+    :host {
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 1;
+    }
+
+    .lang-button {
+      background-color: var(--affine-background-primary-color);
+      box-shadow: var(--affine-shadow-1);
+      display: flex;
+      gap: 4px;
+      padding: 2px 4px;
+    }
+
+    .lang-button:hover {
+      background: var(--affine-hover-color-filled);
+    }
+
+    .lang-button[hover] {
+      background: var(--affine-hover-color-filled);
+    }
+  `;
+
   private _abortController?: AbortController;
 
   private _clickLangBtn = () => {
@@ -63,31 +88,6 @@ export class LanguageListButton extends WithDisposable(
   };
 
   private _sortedBundledLanguages: FilterableListItem[] = [];
-
-  static override styles = css`
-    :host {
-      position: absolute;
-      top: 0;
-      left: 0;
-      z-index: 1;
-    }
-
-    .lang-button {
-      background-color: var(--affine-background-primary-color);
-      box-shadow: var(--affine-shadow-1);
-      display: flex;
-      gap: 4px;
-      padding: 2px 4px;
-    }
-
-    .lang-button:hover {
-      background: var(--affine-hover-color-filled);
-    }
-
-    .lang-button[hover] {
-      background: var(--affine-hover-color-filled);
-    }
-  `;
 
   override connectedCallback(): void {
     super.connectedCallback();

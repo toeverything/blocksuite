@@ -19,14 +19,14 @@ export {
 export {
   type BaseElementProps,
   type GfxContainerElement,
+  gfxContainerSymbol,
   type GfxElementGeometry,
   GfxGroupLikeElementModel as GfxGroupLikeElementModel,
   GfxLocalElementModel,
   GfxPrimitiveElementModel as GfxPrimitiveElementModel,
+  isGfxContainerElm,
   type PointTestOptions,
   type SerializedElement,
-  gfxContainerSymbol,
-  isGfxContainerElm,
 } from './surface/element-model.js';
 export {
   SurfaceBlockModel,

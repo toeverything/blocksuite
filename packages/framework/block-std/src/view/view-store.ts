@@ -3,6 +3,8 @@ import type { BlockComponent, WidgetComponent } from './element/index.js';
 import { LifeCycleWatcher } from '../extension/index.js';
 
 export class ViewStore extends LifeCycleWatcher {
+  static override readonly key = 'viewStore';
+
   private readonly _blockMap = new Map<string, BlockComponent>();
 
   private _fromId = (
@@ -16,8 +18,6 @@ export class ViewStore extends LifeCycleWatcher {
   };
 
   private readonly _widgetMap = new Map<string, WidgetComponent>();
-
-  static override readonly key = 'viewStore';
 
   deleteBlock = (node: BlockComponent) => {
     this._blockMap.delete(node.id);

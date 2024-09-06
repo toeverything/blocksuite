@@ -4,8 +4,7 @@ import type { Doc } from '@blocksuite/store';
 import { Container } from '@blocksuite/global/di';
 import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 
-import type { BlockService } from '../extension/index.js';
-import type { ExtensionType } from '../extension/index.js';
+import type { BlockService, ExtensionType } from '../extension/index.js';
 
 import { Clipboard } from '../clipboard/index.js';
 import { CommandManager } from '../command/index.js';
@@ -51,6 +50,50 @@ export class BlockStdScope {
 
   readonly provider: ServiceProvider;
 
+  private get _lifeCycleWatchers() {
+    return this.provider.getAll(LifeCycleWatcherIdentifier);
+  }
+
+  get clipboard() {
+    return this.get(Clipboard);
+  }
+
+  get collection() {
+    return this.doc.collection;
+  }
+
+  get command() {
+    return this.get(CommandManager);
+  }
+
+  get event() {
+    return this.get(UIEventDispatcher);
+  }
+
+  get get() {
+    return this.provider.get.bind(this.provider);
+  }
+
+  get getOptional() {
+    return this.provider.getOptional.bind(this.provider);
+  }
+
+  get host() {
+    return this._getHost();
+  }
+
+  get range() {
+    return this.get(RangeManager);
+  }
+
+  get selection() {
+    return this.get(SelectionManager);
+  }
+
+  get view() {
+    return this.get(ViewStore);
+  }
+
   constructor(options: BlockStdOptions) {
     this._getHost = () => {
       throw new BlockSuiteError(
@@ -73,10 +116,6 @@ export class BlockStdScope {
     this._lifeCycleWatchers.forEach(watcher => {
       watcher.created.call(watcher);
     });
-  }
-
-  private get _lifeCycleWatchers() {
-    return this.provider.getAll(LifeCycleWatcherIdentifier);
   }
 
   getConfig<Key extends BlockSuite.ConfigKeys>(
@@ -128,46 +167,6 @@ export class BlockStdScope {
     this._lifeCycleWatchers.forEach(watcher => {
       watcher.unmounted.call(watcher);
     });
-  }
-
-  get clipboard() {
-    return this.get(Clipboard);
-  }
-
-  get collection() {
-    return this.doc.collection;
-  }
-
-  get command() {
-    return this.get(CommandManager);
-  }
-
-  get event() {
-    return this.get(UIEventDispatcher);
-  }
-
-  get get() {
-    return this.provider.get.bind(this.provider);
-  }
-
-  get getOptional() {
-    return this.provider.getOptional.bind(this.provider);
-  }
-
-  get host() {
-    return this._getHost();
-  }
-
-  get range() {
-    return this.get(RangeManager);
-  }
-
-  get selection() {
-    return this.get(SelectionManager);
-  }
-
-  get view() {
-    return this.get(ViewStore);
   }
 }
 

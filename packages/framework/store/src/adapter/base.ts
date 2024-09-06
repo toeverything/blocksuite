@@ -2,8 +2,7 @@ import { assertEquals } from '@blocksuite/global/utils';
 
 import type { Doc } from '../store/index.js';
 import type { AssetsManager } from '../transformer/assets.js';
-import type { Slice } from '../transformer/index.js';
-import type { DraftModel, Job } from '../transformer/index.js';
+import type { DraftModel, Job, Slice } from '../transformer/index.js';
 import type {
   BlockSnapshot,
   DocSnapshot,
@@ -52,6 +51,10 @@ export type ToSliceSnapshotPayload<Target> = {
 export abstract class BaseAdapter<AdapterTarget = unknown> {
   job: Job;
 
+  get configs() {
+    return this.job.adapterConfigs;
+  }
+
   constructor(job: Job) {
     this.job = job;
   }
@@ -71,6 +74,12 @@ export abstract class BaseAdapter<AdapterTarget = unknown> {
     }
   }
 
+  abstract fromBlockSnapshot(
+    payload: FromBlockSnapshotPayload
+  ):
+    | Promise<FromBlockSnapshotResult<AdapterTarget>>
+    | FromBlockSnapshotResult<AdapterTarget>;
+
   async fromDoc(doc: Doc) {
     try {
       const docSnapshot = await this.job.docToSnapshot(doc);
@@ -86,6 +95,12 @@ export abstract class BaseAdapter<AdapterTarget = unknown> {
     }
   }
 
+  abstract fromDocSnapshot(
+    payload: FromDocSnapshotPayload
+  ):
+    | Promise<FromDocSnapshotResult<AdapterTarget>>
+    | FromDocSnapshotResult<AdapterTarget>;
+
   async fromSlice(slice: Slice) {
     try {
       const sliceSnapshot = await this.job.sliceToSnapshot(slice);
@@ -100,6 +115,12 @@ export abstract class BaseAdapter<AdapterTarget = unknown> {
       return;
     }
   }
+
+  abstract fromSliceSnapshot(
+    payload: FromSliceSnapshotPayload
+  ):
+    | Promise<FromSliceSnapshotResult<AdapterTarget>>
+    | FromSliceSnapshotResult<AdapterTarget>;
 
   async toBlock(
     payload: ToBlockSnapshotPayload<AdapterTarget>,
@@ -118,6 +139,10 @@ export abstract class BaseAdapter<AdapterTarget = unknown> {
     }
   }
 
+  abstract toBlockSnapshot(
+    payload: ToBlockSnapshotPayload<AdapterTarget>
+  ): Promise<BlockSnapshot> | BlockSnapshot;
+
   async toDoc(payload: ToDocSnapshotPayload<AdapterTarget>) {
     try {
       const snapshot = await this.toDocSnapshot(payload);
@@ -129,6 +154,10 @@ export abstract class BaseAdapter<AdapterTarget = unknown> {
       return;
     }
   }
+
+  abstract toDocSnapshot(
+    payload: ToDocSnapshotPayload<AdapterTarget>
+  ): Promise<DocSnapshot> | DocSnapshot;
 
   async toSlice(
     payload: ToSliceSnapshotPayload<AdapterTarget>,
@@ -146,36 +175,6 @@ export abstract class BaseAdapter<AdapterTarget = unknown> {
       return;
     }
   }
-
-  get configs() {
-    return this.job.adapterConfigs;
-  }
-
-  abstract fromBlockSnapshot(
-    payload: FromBlockSnapshotPayload
-  ):
-    | Promise<FromBlockSnapshotResult<AdapterTarget>>
-    | FromBlockSnapshotResult<AdapterTarget>;
-
-  abstract fromDocSnapshot(
-    payload: FromDocSnapshotPayload
-  ):
-    | Promise<FromDocSnapshotResult<AdapterTarget>>
-    | FromDocSnapshotResult<AdapterTarget>;
-
-  abstract fromSliceSnapshot(
-    payload: FromSliceSnapshotPayload
-  ):
-    | Promise<FromSliceSnapshotResult<AdapterTarget>>
-    | FromSliceSnapshotResult<AdapterTarget>;
-
-  abstract toBlockSnapshot(
-    payload: ToBlockSnapshotPayload<AdapterTarget>
-  ): Promise<BlockSnapshot> | BlockSnapshot;
-
-  abstract toDocSnapshot(
-    payload: ToDocSnapshotPayload<AdapterTarget>
-  ): Promise<DocSnapshot> | DocSnapshot;
 
   abstract toSliceSnapshot(
     payload: ToSliceSnapshotPayload<AdapterTarget>

@@ -2,22 +2,22 @@ import { MindmapElementModel } from '@blocksuite/affine-block-surface';
 import { GroupIcon } from '@blocksuite/affine-components/icons';
 import { GroupElementModel } from '@blocksuite/affine-model';
 import { WithDisposable } from '@blocksuite/block-std';
-import { LitElement, css, html, nothing } from 'lit';
+import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 
 @customElement('edgeless-add-group-button')
 export class EdgelessAddGroupButton extends WithDisposable(LitElement) {
-  private _createGroup = () => {
-    this.edgeless.service.createGroupFromSelected();
-  };
-
   static override styles = css`
     .label {
       padding-left: 4px;
     }
   `;
+
+  private _createGroup = () => {
+    this.edgeless.service.createGroupFromSelected();
+  };
 
   protected override render() {
     return html`

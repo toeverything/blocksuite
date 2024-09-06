@@ -4,13 +4,13 @@ import type { Doc } from '@blocksuite/store';
 import { ColorScheme, FrameBlockModel } from '@blocksuite/affine-model';
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import {
-  GfxBlockComponent,
-  ShadowlessElement,
-  WithDisposable,
   docContext,
+  GfxBlockComponent,
   modelContext,
-  stdContext,
+  ShadowlessElement,
   SignalWatcher,
+  stdContext,
+  WithDisposable,
 } from '@blocksuite/block-std';
 import { GfxControllerIdentifier } from '@blocksuite/block-std/gfx';
 import { Bound, type SerializedXYWH } from '@blocksuite/global/utils';
@@ -35,10 +35,6 @@ export const frameTitleStyleVars = {
 export class EdgelessFrameTitle extends SignalWatcher(
   WithDisposable(ShadowlessElement)
 ) {
-  private _cachedHeight = 0;
-
-  private _cachedWidth = 0;
-
   static override styles = css`
     edgeless-frame-title {
       position: relative;
@@ -73,6 +69,59 @@ export class EdgelessFrameTitle extends SignalWatcher(
       background-color: color-mix(in srgb, var(--bg-color), #000000 7%);
     }
   `;
+
+  private _cachedHeight = 0;
+
+  private _cachedWidth = 0;
+
+  get colors() {
+    let backgroundColor = ThemeObserver.getColorValue(
+      this.model.background,
+      undefined,
+      true
+    );
+    if (isTransparent(backgroundColor)) {
+      backgroundColor = ThemeObserver.getPropertyValue(
+        cssVarV2('edgeless/frame/background/white').replace(
+          /var\((--.*)\)/,
+          '$1'
+        )
+      );
+    }
+
+    const { r, g, b, a } = parseStringToRgba(backgroundColor);
+
+    let textColor: string;
+    {
+      let rPrime, gPrime, bPrime;
+      if (ThemeObserver.instance.mode$.value === ColorScheme.Light) {
+        rPrime = 1 - a + a * r;
+        gPrime = 1 - a + a * g;
+        bPrime = 1 - a + a * b;
+      } else {
+        rPrime = a * r;
+        gPrime = a * g;
+        bPrime = a * b;
+      }
+
+      // light
+      const L = 0.299 * rPrime + 0.587 * gPrime + 0.114 * bPrime;
+      textColor = L > 0.5 ? 'black' : 'white';
+    }
+
+    return {
+      background: backgroundColor,
+      text: textColor,
+    };
+  }
+
+  get gfx() {
+    return this.std.get(GfxControllerIdentifier);
+  }
+
+  get rootService() {
+    return this.std.getService('affine:page') as EdgelessRootService;
+  }
 
   private _isInsideFrame() {
     return this.gfx.grid.has(
@@ -248,55 +297,6 @@ export class EdgelessFrameTitle extends SignalWatcher(
     }
   }
 
-  get gfx() {
-    return this.std.get(GfxControllerIdentifier);
-  }
-
-  get rootService() {
-    return this.std.getService('affine:page') as EdgelessRootService;
-  }
-
-  get colors() {
-    let backgroundColor = ThemeObserver.getColorValue(
-      this.model.background,
-      undefined,
-      true
-    );
-    if (isTransparent(backgroundColor)) {
-      backgroundColor = ThemeObserver.getPropertyValue(
-        cssVarV2('edgeless/frame/background/white').replace(
-          /var\((--.*)\)/,
-          '$1'
-        )
-      );
-    }
-
-    const { r, g, b, a } = parseStringToRgba(backgroundColor);
-
-    let textColor: string;
-    {
-      let rPrime, gPrime, bPrime;
-      if (ThemeObserver.instance.mode$.value === ColorScheme.Light) {
-        rPrime = 1 - a + a * r;
-        gPrime = 1 - a + a * g;
-        bPrime = 1 - a + a * b;
-      } else {
-        rPrime = a * r;
-        gPrime = a * g;
-        bPrime = a * b;
-      }
-
-      // light
-      const L = 0.299 * rPrime + 0.587 * gPrime + 0.114 * bPrime;
-      textColor = L > 0.5 ? 'black' : 'white';
-    }
-
-    return {
-      background: backgroundColor,
-      text: textColor,
-    };
-  }
-
   @state()
   private accessor _editing = false;
 
@@ -332,6 +332,10 @@ export class EdgelessFrameTitle extends SignalWatcher(
 
 @customElement('affine-frame')
 export class FrameBlockComponent extends GfxBlockComponent<FrameBlockModel> {
+  get rootService() {
+    return this.std.getService('affine:page') as EdgelessRootService;
+  }
+
   override connectedCallback() {
     super.connectedCallback();
 
@@ -383,10 +387,6 @@ export class FrameBlockComponent extends GfxBlockComponent<FrameBlockModel> {
 
   override toZIndex(): string {
     return 'auto';
-  }
-
-  get rootService() {
-    return this.std.getService('affine:page') as EdgelessRootService;
   }
 
   @state()

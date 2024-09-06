@@ -2,24 +2,25 @@ import type { Doc } from '@blocksuite/store';
 
 import { GfxBlockElementModel } from '@blocksuite/block-std/gfx';
 import {
+  assertType,
   Bound,
   DisposableGroup,
   last,
   nToLast,
+  Slot,
 } from '@blocksuite/global/utils';
-import { Slot, assertType } from '@blocksuite/global/utils';
 import { generateKeyBetween } from 'fractional-indexing';
 
 import type { GfxModel } from './gfx-block-model.js';
 
 import {
-  SortOrder,
   compare,
   getElementIndex,
   getLayerEndZIndex,
   insertToOrderedArray,
   isInRange,
   removeFromOrderedArray,
+  SortOrder,
   ungroupIndex,
   updateLayersZIndex,
 } from '../utils/layer.js';
@@ -70,9 +71,9 @@ export type CanvasLayer = BaseLayer<GfxPrimitiveElementModel> & {
 export type Layer = BlockLayer | CanvasLayer;
 
 export class LayerManager {
-  private _disposable = new DisposableGroup();
-
   static INITIAL_INDEX = 'a0';
+
+  private _disposable = new DisposableGroup();
 
   blocks: GfxBlockElementModel[] = [];
 

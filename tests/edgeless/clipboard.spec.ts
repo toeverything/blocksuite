@@ -1,12 +1,12 @@
 import { expect } from '@playwright/test';
 
 import {
-  Shape,
   createNote,
   createShapeElement,
   decreaseZoomLevel,
   deleteAll,
   getAllSortedIds,
+  Shape,
   switchEditorMode,
   toViewCoord,
   triggerComponentToolbarAction,

@@ -1,9 +1,8 @@
 import type { ConnectorElementModel } from '@blocksuite/affine-model';
 
 import { WithDisposable } from '@blocksuite/block-std';
-import { Vec } from '@blocksuite/global/utils';
-import { DisposableGroup } from '@blocksuite/global/utils';
-import { LitElement, css, html } from 'lit';
+import { DisposableGroup, Vec } from '@blocksuite/global/utils';
+import { css, html, LitElement } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
@@ -14,8 +13,6 @@ const HALF_SIZE = SIZE / 2;
 
 @customElement('edgeless-connector-handle')
 export class EdgelessConnectorHandle extends WithDisposable(LitElement) {
-  private _lastZoom = 1;
-
   static override styles = css`
     .line-controller {
       position: absolute;
@@ -40,6 +37,8 @@ export class EdgelessConnectorHandle extends WithDisposable(LitElement) {
       display: none;
     }
   `;
+
+  private _lastZoom = 1;
 
   private _bindEvent() {
     const edgeless = this.edgeless;

@@ -28,10 +28,6 @@ import {
 } from './drag-to-fill.js';
 
 export class TableSelectionController implements ReactiveController {
-  __dragToFillElement = new DragToFillElement();
-
-  __selectionElement;
-
   private _tableViewSelection?: TableViewSelectionWithType;
 
   private getFocusCellContainer = () => {
@@ -50,7 +46,67 @@ export class TableSelectionController implements ReactiveController {
     return dragStartCell ?? null;
   };
 
+  __dragToFillElement = new DragToFillElement();
+
+  __selectionElement;
+
   selectionStyleUpdateTask = 0;
+
+  private get areaSelectionElement() {
+    return this.__selectionElement.selectionRef.value;
+  }
+
+  get dragToFillDraggable() {
+    return this.__dragToFillElement.dragToFillRef.value;
+  }
+
+  private get focusSelectionElement() {
+    return this.__selectionElement.focusRef.value;
+  }
+
+  get selection(): TableViewSelectionWithType | undefined {
+    return this._tableViewSelection;
+  }
+
+  set selection(data: TableViewSelection | undefined) {
+    if (!data) {
+      this.clearSelection();
+      return;
+    }
+    const selection: TableViewSelectionWithType = {
+      ...data,
+      viewId: this.view.id,
+      type: 'table',
+    };
+    if (selection.selectionType === 'area' && selection.isEditing) {
+      const focus = selection.focus;
+      const container = this.getCellContainer(
+        selection.groupKey,
+        focus.rowIndex,
+        focus.columnIndex
+      );
+      const cell = container?.cell;
+      const isEditing = cell ? cell.beforeEnterEditMode() : true;
+      this.host.setSelection({
+        ...selection,
+        isEditing,
+      });
+    } else {
+      this.host.setSelection(selection);
+    }
+  }
+
+  get tableContainer() {
+    return this.host.querySelector('.affine-database-table-container');
+  }
+
+  get view() {
+    return this.host.view;
+  }
+
+  get viewData() {
+    return this.view;
+  }
 
   constructor(public host: DataViewTable) {
     host.addController(this);
@@ -58,16 +114,8 @@ export class TableSelectionController implements ReactiveController {
     this.__selectionElement.controller = this;
   }
 
-  private get areaSelectionElement() {
-    return this.__selectionElement.selectionRef.value;
-  }
-
   private clearSelection() {
     this.host.setSelection();
-  }
-
-  private get focusSelectionElement() {
-    return this.__selectionElement.focusRef.value;
   }
 
   private handleDragEvent() {
@@ -545,6 +593,16 @@ export class TableSelectionController implements ReactiveController {
     }
   }
 
+  rows(groupKey: string | undefined) {
+    const container =
+      groupKey != null
+        ? this.tableContainer?.querySelector(
+            `affine-data-view-table-group[data-group-key="${groupKey}"]`
+          )
+        : this.tableContainer;
+    return container?.querySelectorAll('data-view-table-row');
+  }
+
   rowSelectionChange({
     add,
     remove,
@@ -567,16 +625,6 @@ export class TableSelectionController implements ReactiveController {
     this.selection = TableRowSelection.create({
       rows: result,
     });
-  }
-
-  rows(groupKey: string | undefined) {
-    const container =
-      groupKey != null
-        ? this.tableContainer?.querySelector(
-            `affine-data-view-table-group[data-group-key="${groupKey}"]`
-          )
-        : this.tableContainer;
-    return container?.querySelectorAll('data-view-table-row');
   }
 
   rowsToArea(
@@ -852,54 +900,6 @@ export class TableSelectionController implements ReactiveController {
       remove: isSelected ? [row] : [],
     });
   }
-
-  get dragToFillDraggable() {
-    return this.__dragToFillElement.dragToFillRef.value;
-  }
-
-  get selection(): TableViewSelectionWithType | undefined {
-    return this._tableViewSelection;
-  }
-
-  set selection(data: TableViewSelection | undefined) {
-    if (!data) {
-      this.clearSelection();
-      return;
-    }
-    const selection: TableViewSelectionWithType = {
-      ...data,
-      viewId: this.view.id,
-      type: 'table',
-    };
-    if (selection.selectionType === 'area' && selection.isEditing) {
-      const focus = selection.focus;
-      const container = this.getCellContainer(
-        selection.groupKey,
-        focus.rowIndex,
-        focus.columnIndex
-      );
-      const cell = container?.cell;
-      const isEditing = cell ? cell.beforeEnterEditMode() : true;
-      this.host.setSelection({
-        ...selection,
-        isEditing,
-      });
-    } else {
-      this.host.setSelection(selection);
-    }
-  }
-
-  get tableContainer() {
-    return this.host.querySelector('.affine-database-table-container');
-  }
-
-  get view() {
-    return this.host.view;
-  }
-
-  get viewData() {
-    return this.view;
-  }
 }
 
 @customElement('data-view-table-selection')
@@ -962,6 +962,10 @@ class SelectionElement extends WithDisposable(ShadowlessElement) {
   preTask = 0;
 
   selectionRef: Ref<HTMLDivElement> = createRef<HTMLDivElement>();
+
+  get selection$() {
+    return this.controller.host.selection$;
+  }
 
   clearAreaStyle() {
     const div = this.selectionRef.value;
@@ -1126,10 +1130,6 @@ class SelectionElement extends WithDisposable(ShadowlessElement) {
     dragToFill.style.left = `${x + w}px`;
     dragToFill.style.top = `${y + h}px`;
     dragToFill.style.display = showDragToFillHandle ? 'block' : 'none';
-  }
-
-  get selection$() {
-    return this.controller.host.selection$;
   }
 
   @property({ attribute: false })

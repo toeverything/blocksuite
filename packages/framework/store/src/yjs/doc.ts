@@ -13,6 +13,10 @@ export type BlockSuiteDocData = Record<string, BlockSuiteDocAllowedValue>;
 export class BlockSuiteDoc extends Y.Doc {
   private _spaces: Y.Map<Y.Doc> = this.getMap('spaces');
 
+  get spaces() {
+    return this._spaces;
+  }
+
   getArrayProxy<
     Key extends keyof BlockSuiteDocData & string,
     Value extends unknown[] = BlockSuiteDocData[Key] extends unknown[]
@@ -52,9 +56,5 @@ export class BlockSuiteDoc extends Y.Doc {
 
   override transact<T>(f: (arg0: Transaction) => T, origin?: number | string) {
     return super.transact(f, origin);
-  }
-
-  get spaces() {
-    return this._spaces;
   }
 }

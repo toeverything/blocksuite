@@ -19,6 +19,22 @@ import type { MindmapService } from './service.js';
 export class MindmapSurfaceBlock extends BlockComponent<SurfaceBlockModel> {
   private _renderer?: CanvasRenderer;
 
+  private get _grid() {
+    return this.std.get(GfxControllerIdentifier).grid;
+  }
+
+  private get _layer() {
+    return this.std.get(GfxControllerIdentifier).layer;
+  }
+
+  get mindmapService() {
+    return this.std.getService('affine:page') as unknown as MindmapService;
+  }
+
+  get viewport() {
+    return this.std.get(GfxControllerIdentifier).viewport;
+  }
+
   constructor() {
     super();
   }
@@ -31,14 +47,6 @@ export class MindmapSurfaceBlock extends BlockComponent<SurfaceBlockModel> {
         }
       });
     });
-  }
-
-  private get _grid() {
-    return this.std.get(GfxControllerIdentifier).grid;
-  }
-
-  private get _layer() {
-    return this.std.get(GfxControllerIdentifier).layer;
   }
 
   private _resizeEffect() {
@@ -127,14 +135,6 @@ export class MindmapSurfaceBlock extends BlockComponent<SurfaceBlockModel> {
         <!-- attach cavnas later in renderer -->
       </div>
     `;
-  }
-
-  get mindmapService() {
-    return this.std.getService('affine:page') as unknown as MindmapService;
-  }
-
-  get viewport() {
-    return this.std.get(GfxControllerIdentifier).viewport;
   }
 
   @query('.affine-mini-mindmap-surface')

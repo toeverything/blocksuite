@@ -1,8 +1,7 @@
-import type { AssetsManager } from '@blocksuite/store';
-
 import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 import { sha } from '@blocksuite/global/utils';
 import {
+  type AssetsManager,
   BaseAdapter,
   type BlockSnapshot,
   type DocSnapshot,
@@ -12,10 +11,10 @@ import {
   type FromDocSnapshotResult,
   type FromSliceSnapshotPayload,
   type FromSliceSnapshotResult,
+  nanoid,
   type SliceSnapshot,
   type ToBlockSnapshotPayload,
   type ToDocSnapshotPayload,
-  nanoid,
 } from '@blocksuite/store';
 
 export type Attachment = File[];

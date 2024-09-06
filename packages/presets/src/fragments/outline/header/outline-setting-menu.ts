@@ -1,5 +1,5 @@
 import { WithDisposable } from '@blocksuite/block-std';
-import { LitElement, css, html } from 'lit';
+import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 const styles = css`

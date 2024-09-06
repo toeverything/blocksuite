@@ -1,7 +1,7 @@
 import {
   ShadowlessElement,
-  WithDisposable,
   SignalWatcher,
+  WithDisposable,
 } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import { computed } from '@lit-labs/preact-signals';
@@ -26,8 +26,6 @@ import {
 export class DatabaseCellContainer extends SignalWatcher(
   WithDisposable(ShadowlessElement)
 ) {
-  private _cell = createRef<DataViewCellLifeCycle>();
-
   static override styles = css`
     affine-database-cell-container {
       display: flex;
@@ -46,6 +44,8 @@ export class DatabaseCellContainer extends SignalWatcher(
       padding: 8px;
     }
   `;
+
+  private _cell = createRef<DataViewCellLifeCycle>();
 
   cell$ = computed(() => {
     return this.column.cellGet(this.rowId);
@@ -80,6 +80,10 @@ export class DatabaseCellContainer extends SignalWatcher(
     }
   };
 
+  get cell(): DataViewCellLifeCycle | undefined {
+    return this._cell.value;
+  }
+
   private get groupKey() {
     return this.closest('affine-data-view-table-group')?.group?.key;
   }
@@ -90,6 +94,12 @@ export class DatabaseCellContainer extends SignalWatcher(
 
   private get selectionView() {
     return this.closest('affine-database-table')?.selectionController;
+  }
+
+  get table() {
+    const table = this.closest('affine-database-table');
+    assertExists(table);
+    return table;
   }
 
   override connectedCallback() {
@@ -133,16 +143,6 @@ export class DatabaseCellContainer extends SignalWatcher(
         display: 'contents',
       },
     });
-  }
-
-  get cell(): DataViewCellLifeCycle | undefined {
-    return this._cell.value;
-  }
-
-  get table() {
-    const table = this.closest('affine-database-table');
-    assertExists(table);
-    return table;
   }
 
   @property({ attribute: false })

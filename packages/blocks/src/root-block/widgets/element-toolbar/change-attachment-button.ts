@@ -4,9 +4,8 @@ import {
   PaletteIcon,
 } from '@blocksuite/affine-components/icons';
 import { WithDisposable } from '@blocksuite/block-std';
-import { Bound } from '@blocksuite/global/utils';
-import { assertExists } from '@blocksuite/global/utils';
-import { LitElement, type TemplateResult, html, nothing } from 'lit';
+import { assertExists, Bound } from '@blocksuite/global/utils';
+import { html, LitElement, nothing, type TemplateResult } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 import type { EmbedCardStyle } from '../../../_common/types.js';
@@ -84,6 +83,10 @@ export class EdgelessChangeAttachmentButton extends WithDisposable(LitElement) {
     ];
   }
 
+  get std() {
+    return this.edgeless.std;
+  }
+
   override render() {
     return html`
       <editor-menu-button
@@ -125,10 +128,6 @@ export class EdgelessChangeAttachmentButton extends WithDisposable(LitElement) {
         ${CaptionIcon}
       </editor-icon-button>
     `;
-  }
-
-  get std() {
-    return this.edgeless.std;
   }
 
   @property({ attribute: false })

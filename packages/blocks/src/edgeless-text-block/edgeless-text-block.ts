@@ -30,6 +30,13 @@ export class EdgelessTextBlockComponent extends GfxBlockComponent<
   EdgelessTextBlockModel,
   EdgelessTextBlockService
 > {
+  static override styles = css`
+    .edgeless-text-block-container[data-max-width='false'] .inline-editor span {
+      word-break: normal !important;
+      overflow-wrap: normal !important;
+    }
+  `;
+
   private _horizontalResizing = false;
 
   private _resizeObserver = new ResizeObserver(() => {
@@ -44,12 +51,21 @@ export class EdgelessTextBlockComponent extends GfxBlockComponent<
     this._updateH();
   });
 
-  static override styles = css`
-    .edgeless-text-block-container[data-max-width='false'] .inline-editor span {
-      word-break: normal !important;
-      overflow-wrap: normal !important;
-    }
-  `;
+  get dragMoving() {
+    const controller = this.rootService.tool.currentController;
+    return (
+      controller instanceof DefaultToolController &&
+      controller.dragType === DefaultModeDragType.ContentMoving
+    );
+  }
+
+  override get parentComponent() {
+    return super.parentComponent as EdgelessRootBlockComponent;
+  }
+
+  get rootService() {
+    return this.std.getService('affine:page') as EdgelessRootService;
+  }
 
   private _initDragEffect() {
     const edgelessSelection = this.rootService.selection;
@@ -345,22 +361,6 @@ export class EdgelessTextBlockComponent extends GfxBlockComponent<
         }),
       ]);
     }
-  }
-
-  get dragMoving() {
-    const controller = this.rootService.tool.currentController;
-    return (
-      controller instanceof DefaultToolController &&
-      controller.dragType === DefaultModeDragType.ContentMoving
-    );
-  }
-
-  override get parentComponent() {
-    return super.parentComponent as EdgelessRootBlockComponent;
-  }
-
-  get rootService() {
-    return this.std.getService('affine:page') as EdgelessRootService;
   }
 
   @state()

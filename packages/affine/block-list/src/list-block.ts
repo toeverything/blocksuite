@@ -10,18 +10,20 @@ import {
   toggleRight,
 } from '@blocksuite/affine-components/icons';
 import {
-  type RichText,
   markdownInput,
+  type RichText,
 } from '@blocksuite/affine-components/rich-text';
 import '@blocksuite/affine-components/rich-text';
 import '@blocksuite/affine-shared/commands';
-import { NOTE_SELECTOR } from '@blocksuite/affine-shared/consts';
-import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '@blocksuite/affine-shared/consts';
+import {
+  BLOCK_CHILDREN_CONTAINER_PADDING_LEFT,
+  NOTE_SELECTOR,
+} from '@blocksuite/affine-shared/consts';
 import { getViewportElement } from '@blocksuite/affine-shared/utils';
 import { getInlineRangeProvider } from '@blocksuite/block-std';
 import { IS_MAC } from '@blocksuite/global/env';
 import { effect } from '@lit-labs/preact-signals';
-import { type TemplateResult, html, nothing } from 'lit';
+import { html, nothing, type TemplateResult } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 
 import type { ListBlockService } from './list-service.js';
@@ -36,6 +38,8 @@ export class ListBlockComponent extends CaptionedBlockComponent<
   ListBlockModel,
   ListBlockService
 > {
+  static override styles = listBlockStyles;
+
   private _getInlineRange = (): InlineRange | null => {
     const richText = this._richTextElement;
     const inlineEditor = richText?.inlineEditor;
@@ -78,7 +82,32 @@ export class ListBlockComponent extends CaptionedBlockComponent<
     return true;
   };
 
-  static override styles = listBlockStyles;
+  get attributeRenderer() {
+    return this.inlineManager.getRenderer();
+  }
+
+  get attributesSchema() {
+    return this.inlineManager.getSchema();
+  }
+
+  get embedChecker() {
+    return this.inlineManager.embedChecker;
+  }
+
+  get inlineManager() {
+    return this.service?.inlineManager;
+  }
+
+  get markdownShortcutHandler() {
+    return this.inlineManager.markdownShortcutHandler;
+  }
+
+  override get topContenteditableElement() {
+    if (this.rootComponent?.tagName.toLowerCase() === 'affine-edgeless-root') {
+      return this.closest<BlockComponent>(NOTE_SELECTOR);
+    }
+    return this.rootComponent;
+  }
 
   private _select() {
     const selection = this.host.selection;
@@ -287,33 +316,6 @@ export class ListBlockComponent extends CaptionedBlockComponent<
         ${children}
       </div>
     `;
-  }
-
-  get attributeRenderer() {
-    return this.inlineManager.getRenderer();
-  }
-
-  get attributesSchema() {
-    return this.inlineManager.getSchema();
-  }
-
-  get embedChecker() {
-    return this.inlineManager.embedChecker;
-  }
-
-  get inlineManager() {
-    return this.service?.inlineManager;
-  }
-
-  get markdownShortcutHandler() {
-    return this.inlineManager.markdownShortcutHandler;
-  }
-
-  override get topContenteditableElement() {
-    if (this.rootComponent?.tagName.toLowerCase() === 'affine-edgeless-root') {
-      return this.closest<BlockComponent>(NOTE_SELECTOR);
-    }
-    return this.rootComponent;
   }
 
   @state()

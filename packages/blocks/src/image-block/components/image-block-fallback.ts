@@ -2,9 +2,9 @@ import type { ImageBlockModel } from '@blocksuite/affine-model';
 
 import { humanFileSize } from '@blocksuite/affine-shared/utils';
 import {
+  modelContext,
   ShadowlessElement,
   WithDisposable,
-  modelContext,
 } from '@blocksuite/block-std';
 import { consume } from '@lit/context';
 import { css, html } from 'lit';

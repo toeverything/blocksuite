@@ -97,6 +97,54 @@ export class Rect {
   // `[left, top]`
   min: Point;
 
+  get bottom() {
+    return this.max.y;
+  }
+
+  set bottom(y: number) {
+    this.max.y = y;
+  }
+
+  get height() {
+    return this.max.y - this.min.y;
+  }
+
+  set height(h: number) {
+    this.max.y = this.min.y + h;
+  }
+
+  get left() {
+    return this.min.x;
+  }
+
+  set left(x: number) {
+    this.min.x = x;
+  }
+
+  get right() {
+    return this.max.x;
+  }
+
+  set right(x: number) {
+    this.max.x = x;
+  }
+
+  get top() {
+    return this.min.y;
+  }
+
+  set top(y: number) {
+    this.min.y = y;
+  }
+
+  get width() {
+    return this.max.x - this.min.x;
+  }
+
+  set width(w: number) {
+    this.max.x = this.min.x + w;
+  }
+
   constructor(left: number, top: number, right: number, bottom: number) {
     const [minX, maxX] = left <= right ? [left, right] : [right, left];
     const [minY, maxY] = top <= bottom ? [top, bottom] : [bottom, top];
@@ -216,53 +264,5 @@ export class Rect {
   toDOMRect() {
     const { left, top, width, height } = this;
     return new DOMRect(left, top, width, height);
-  }
-
-  get bottom() {
-    return this.max.y;
-  }
-
-  set bottom(y: number) {
-    this.max.y = y;
-  }
-
-  get height() {
-    return this.max.y - this.min.y;
-  }
-
-  set height(h: number) {
-    this.max.y = this.min.y + h;
-  }
-
-  get left() {
-    return this.min.x;
-  }
-
-  set left(x: number) {
-    this.min.x = x;
-  }
-
-  get right() {
-    return this.max.x;
-  }
-
-  set right(x: number) {
-    this.max.x = x;
-  }
-
-  get top() {
-    return this.min.y;
-  }
-
-  set top(y: number) {
-    this.min.y = y;
-  }
-
-  get width() {
-    return this.max.x - this.min.x;
-  }
-
-  set width(w: number) {
-    this.max.x = this.min.x + w;
   }
 }

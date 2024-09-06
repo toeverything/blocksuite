@@ -1,9 +1,9 @@
 import type { MindmapElementModel } from '@blocksuite/affine-block-surface';
-import type { GroupElementModel } from '@blocksuite/blocks';
 
 import { LayoutType } from '@blocksuite/affine-block-surface';
 import {
   type EdgelessRootBlockComponent,
+  type GroupElementModel,
   NoteDisplayMode,
 } from '@blocksuite/blocks';
 import { DocCollection } from '@blocksuite/store';

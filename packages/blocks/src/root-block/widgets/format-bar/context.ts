@@ -3,22 +3,6 @@ import type { AffineFormatBarWidget } from './format-bar.js';
 import { MenuContext } from '../../configs/toolbar.js';
 
 export class FormatBarContext extends MenuContext {
-  constructor(public toolbar: AffineFormatBarWidget) {
-    super();
-  }
-
-  isEmpty() {
-    return this.selectedBlockModels.length === 0;
-  }
-
-  isMultiple() {
-    return this.selectedBlockModels.length > 1;
-  }
-
-  isSingle() {
-    return this.selectedBlockModels.length === 1;
-  }
-
   get doc() {
     return this.toolbar.host.doc;
   }
@@ -62,5 +46,21 @@ export class FormatBarContext extends MenuContext {
 
   get std() {
     return this.toolbar.std;
+  }
+
+  constructor(public toolbar: AffineFormatBarWidget) {
+    super();
+  }
+
+  isEmpty() {
+    return this.selectedBlockModels.length === 0;
+  }
+
+  isMultiple() {
+    return this.selectedBlockModels.length > 1;
+  }
+
+  isSingle() {
+    return this.selectedBlockModels.length === 1;
   }
 }

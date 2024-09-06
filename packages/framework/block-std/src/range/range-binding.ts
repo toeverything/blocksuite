@@ -303,6 +303,18 @@ export class RangeBinding {
 
   isComposing = false;
 
+  get host() {
+    return this.manager.std.host;
+  }
+
+  get rangeManager() {
+    return this.host.range;
+  }
+
+  get selectionManager() {
+    return this.host.selection;
+  }
+
   constructor(public manager: RangeManager) {
     this.host.disposables.add(
       this.selectionManager.slots.changed.on(this._onStdSelectionChanged)
@@ -336,17 +348,5 @@ export class RangeBinding {
 
   private _isBlockComponent(el: Element | null): el is BlockComponent {
     return Boolean(el && blockComponentSymbol in el);
-  }
-
-  get host() {
-    return this.manager.std.host;
-  }
-
-  get rangeManager() {
-    return this.host.range;
-  }
-
-  get selectionManager() {
-    return this.host.selection;
   }
 }

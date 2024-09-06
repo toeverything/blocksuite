@@ -1,22 +1,22 @@
 import type {
+  ConnectorElementModel,
   FrameBlockModel,
   GroupElementModel,
-  ConnectorElementModel,
 } from '@blocksuite/affine-model';
 import type { PointerEventState } from '@blocksuite/block-std';
 import type { IVec } from '@blocksuite/global/utils';
 
 import {
   CanvasElementType,
-  TextUtils,
   type IModelCoord,
+  TextUtils,
 } from '@blocksuite/affine-block-surface';
-import { TextElementModel, ShapeElementModel } from '@blocksuite/affine-model';
+import { ShapeElementModel, TextElementModel } from '@blocksuite/affine-model';
 import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 import {
-  Bound,
   assertExists,
   assertInstanceOf,
+  Bound,
 } from '@blocksuite/global/utils';
 import { DocCollection } from '@blocksuite/store';
 

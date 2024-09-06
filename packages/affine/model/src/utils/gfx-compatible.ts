@@ -1,5 +1,4 @@
-import type { Constructor } from '@blocksuite/global/utils';
-import type { SerializedXYWH } from '@blocksuite/global/utils';
+import type { Constructor, SerializedXYWH } from '@blocksuite/global/utils';
 
 import { GfxBlockElementModel } from '@blocksuite/block-std/gfx';
 import { BlockModel } from '@blocksuite/store';

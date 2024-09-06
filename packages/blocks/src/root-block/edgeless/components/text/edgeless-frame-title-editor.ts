@@ -6,8 +6,7 @@ import {
   ShadowlessElement,
   WithDisposable,
 } from '@blocksuite/block-std';
-import { Bound } from '@blocksuite/global/utils';
-import { assertExists } from '@blocksuite/global/utils';
+import { assertExists, Bound } from '@blocksuite/global/utils';
 import { cssVarV2 } from '@toeverything/theme/v2';
 import { css, html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
@@ -16,8 +15,8 @@ import { styleMap } from 'lit/directives/style-map.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
 
 import {
-  frameTitleStyleVars,
   type FrameBlockComponent,
+  frameTitleStyleVars,
 } from '../../../../frame-block/index.js';
 
 @customElement('edgeless-frame-title-editor')
@@ -40,6 +39,26 @@ export class EdgelessFrameTitleEditor extends WithDisposable(
       font-family: var(--affine-font-family);
     }
   `;
+
+  get editorHost() {
+    return this.edgeless.host;
+  }
+
+  get frameBlock() {
+    const block = this.editorHost.view.getBlock(
+      this.frameModel.id
+    ) as FrameBlockComponent | null;
+    return block;
+  }
+
+  get inlineEditor() {
+    assertExists(this.richText.inlineEditor);
+    return this.richText.inlineEditor;
+  }
+
+  get inlineEditorContainer() {
+    return this.inlineEditor.rootElement;
+  }
 
   private _unmount() {
     // dispose in advance to avoid execute `this.remove()` twice
@@ -144,26 +163,6 @@ export class EdgelessFrameTitleEditor extends WithDisposable(
         style=${richTextStyle}
       ></rich-text>
     </div>`;
-  }
-
-  get editorHost() {
-    return this.edgeless.host;
-  }
-
-  get frameBlock() {
-    const block = this.editorHost.view.getBlock(
-      this.frameModel.id
-    ) as FrameBlockComponent | null;
-    return block;
-  }
-
-  get inlineEditor() {
-    assertExists(this.richText.inlineEditor);
-    return this.richText.inlineEditor;
-  }
-
-  get inlineEditorContainer() {
-    return this.inlineEditor.rootElement;
   }
 
   @property({ attribute: false })

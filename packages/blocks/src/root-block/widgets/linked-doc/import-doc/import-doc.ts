@@ -10,11 +10,11 @@ import { WithDisposable } from '@blocksuite/block-std';
 import { sha } from '@blocksuite/global/utils';
 import {
   type DocCollection,
-  type JobMiddleware,
   extMimeMap,
+  type JobMiddleware,
 } from '@blocksuite/store';
 import { Job } from '@blocksuite/store';
-import { LitElement, type PropertyValues, html } from 'lit';
+import { html, LitElement, type PropertyValues } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 
 import { MarkdownAdapter } from '../../../../_common/adapters/markdown.js';

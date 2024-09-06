@@ -1,6 +1,6 @@
 import { isFormatSupported } from '@blocksuite/affine-components/rich-text';
 import { renderToolbarSeparator } from '@blocksuite/affine-components/toolbar';
-import { type TemplateResult, html } from 'lit';
+import { html, type TemplateResult } from 'lit';
 
 import type { AffineFormatBarWidget } from '../format-bar.js';
 

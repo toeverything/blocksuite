@@ -1,8 +1,7 @@
-import type { UIEventHandler } from '@blocksuite/block-std';
-import type { BlockComponent } from '@blocksuite/block-std';
+import type { BlockComponent, UIEventHandler } from '@blocksuite/block-std';
 import type { BlockSnapshot, Doc } from '@blocksuite/store';
 
-import { DisposableGroup, assertExists } from '@blocksuite/global/utils';
+import { assertExists, DisposableGroup } from '@blocksuite/global/utils';
 
 import {
   AttachmentAdapter,
@@ -175,12 +174,12 @@ export class PageClipboard {
       .run();
   };
 
-  constructor(host: BlockComponent) {
-    this.host = host;
-  }
-
   private get _std() {
     return this.host.std;
+  }
+
+  constructor(host: BlockComponent) {
+    this.host = host;
   }
 
   hostConnected() {

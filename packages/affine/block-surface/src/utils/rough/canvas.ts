@@ -16,6 +16,10 @@ export class RoughCanvas {
 
   private gen: RoughGenerator;
 
+  get generator(): RoughGenerator {
+    return this.gen;
+  }
+
   constructor(canvas: HTMLCanvasElement, config?: Config) {
     this.canvas = canvas;
 
@@ -207,9 +211,5 @@ export class RoughCanvas {
     const d = this.gen.rectangle(x, y, width, height, options);
     this.draw(d);
     return d;
-  }
-
-  get generator(): RoughGenerator {
-    return this.gen;
   }
 }

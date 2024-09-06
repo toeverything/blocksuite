@@ -7,16 +7,16 @@ import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import { BlockService } from '@blocksuite/block-std';
 import { type Signal, signal } from '@lit-labs/preact-signals';
 import {
+  createHighlighterCore,
   type HighlighterCore,
   type MaybeGetter,
-  createHighlighterCore,
 } from 'shiki';
 import { bundledLanguagesInfo } from 'shiki';
 import getWasm from 'shiki/wasm';
 
 import {
-  type CodeBlockTextAttributes,
   codeBlockInlineSpecs,
+  type CodeBlockTextAttributes,
 } from './highlight/code-block-inline-specs.js';
 import {
   CODE_BLOCK_DEFAULT_DARK_THEME,
@@ -24,15 +24,25 @@ import {
 } from './highlight/const.js';
 
 export class CodeBlockService extends BlockService {
+  static override readonly flavour = CodeBlockSchema.model.flavour;
+
   private _darkThemeKey: string | undefined;
 
   private _lightThemeKey: string | undefined;
 
-  static override readonly flavour = CodeBlockSchema.model.flavour;
-
   highlighter$: Signal<HighlighterCore | null> = signal(null);
 
   readonly inlineManager = new InlineManager<CodeBlockTextAttributes>();
+
+  get langs() {
+    return this.std.getConfig('affine:code')?.langs ?? bundledLanguagesInfo;
+  }
+
+  get themeKey() {
+    return ThemeObserver.instance.mode$.value === ColorScheme.Dark
+      ? this._darkThemeKey
+      : this._lightThemeKey;
+  }
 
   override mounted(): void {
     super.mounted();
@@ -61,16 +71,6 @@ export class CodeBlockService extends BlockService {
         });
       })
       .catch(console.error);
-  }
-
-  get langs() {
-    return this.std.getConfig('affine:code')?.langs ?? bundledLanguagesInfo;
-  }
-
-  get themeKey() {
-    return ThemeObserver.instance.mode$.value === ColorScheme.Dark
-      ? this._darkThemeKey
-      : this._lightThemeKey;
   }
 }
 

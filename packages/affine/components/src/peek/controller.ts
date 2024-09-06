@@ -1,7 +1,7 @@
 import type { BlockService } from '@blocksuite/block-std';
 import type { TemplateResult } from 'lit';
 
-import type { PeekViewService, PeekableClass } from './type.js';
+import type { PeekableClass, PeekViewService } from './type.js';
 
 export class PeekableController<T extends PeekableClass> {
   private _getPeekViewService = (): PeekViewService | null => {
@@ -23,15 +23,15 @@ export class PeekableController<T extends PeekableClass> {
     );
   };
 
-  constructor(
-    private target: T,
-    private enable?: (e: T) => boolean
-  ) {}
-
   get peekable() {
     return (
       !!this._getPeekViewService() &&
       (this.enable ? this.enable(this.target) : true)
     );
   }
+
+  constructor(
+    private target: T,
+    private enable?: (e: T) => boolean
+  ) {}
 }

@@ -1,6 +1,5 @@
 import type { CanvasRenderer } from '@blocksuite/affine-block-surface';
 import type { NoteBlockModel } from '@blocksuite/affine-model';
-import type { Query } from '@blocksuite/store';
 
 import {
   DEFAULT_NOTE_BACKGROUND_COLOR,
@@ -15,7 +14,7 @@ import {
 } from '@blocksuite/block-std';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { deserializeXYWH } from '@blocksuite/global/utils';
-import { type BlockModel, BlockViewType } from '@blocksuite/store';
+import { type BlockModel, BlockViewType, type Query } from '@blocksuite/store';
 import { css, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';

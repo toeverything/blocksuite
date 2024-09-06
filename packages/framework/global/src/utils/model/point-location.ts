@@ -16,6 +16,42 @@ export class PointLocation extends Array<number> implements IVec {
 
   [1]: number;
 
+  get absIn() {
+    return Vec.add(this, this._in);
+  }
+
+  get absOut() {
+    return Vec.add(this, this._out);
+  }
+
+  get in() {
+    return this._in;
+  }
+
+  set in(value: IVec) {
+    this._in = value;
+  }
+
+  override get length() {
+    return super.length as 2;
+  }
+
+  get out() {
+    return this._out;
+  }
+
+  set out(value: IVec) {
+    this._out = value;
+  }
+
+  get tangent() {
+    return this._tangent;
+  }
+
+  set tangent(value: IVec) {
+    this._tangent = value;
+  }
+
   constructor(
     point: IVec = [0, 0],
     tangent: IVec = [0, 0],
@@ -54,41 +90,5 @@ export class PointLocation extends Array<number> implements IVec {
 
   toVec(): IVec {
     return [this[0], this[1]];
-  }
-
-  get absIn() {
-    return Vec.add(this, this._in);
-  }
-
-  get absOut() {
-    return Vec.add(this, this._out);
-  }
-
-  get in() {
-    return this._in;
-  }
-
-  set in(value: IVec) {
-    this._in = value;
-  }
-
-  override get length() {
-    return super.length as 2;
-  }
-
-  get out() {
-    return this._out;
-  }
-
-  set out(value: IVec) {
-    this._out = value;
-  }
-
-  get tangent() {
-    return this._tangent;
-  }
-
-  set tangent(value: IVec) {
-    this._tangent = value;
   }
 }

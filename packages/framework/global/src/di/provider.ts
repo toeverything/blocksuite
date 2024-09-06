@@ -20,6 +20,8 @@ export interface ResolveOptions {
 }
 
 export abstract class ServiceProvider {
+  abstract container: Container;
+
   get<T>(identifier: GeneralServiceIdentifier<T>, options?: ResolveOptions): T {
     return this.getRaw(parseIdentifier(identifier), {
       ...options,
@@ -36,6 +38,11 @@ export abstract class ServiceProvider {
     });
   }
 
+  abstract getAllRaw(
+    identifier: ServiceIdentifierValue,
+    options?: ResolveOptions
+  ): Map<ServiceVariant, any>;
+
   getOptional<T>(
     identifier: GeneralServiceIdentifier<T>,
     options?: ResolveOptions
@@ -45,13 +52,6 @@ export abstract class ServiceProvider {
       optional: true,
     });
   }
-
-  abstract container: Container;
-
-  abstract getAllRaw(
-    identifier: ServiceIdentifierValue,
-    options?: ResolveOptions
-  ): Map<ServiceVariant, any>;
 
   abstract getRaw(
     identifier: ServiceIdentifierValue,

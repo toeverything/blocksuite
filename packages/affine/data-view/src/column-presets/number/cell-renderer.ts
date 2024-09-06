@@ -11,8 +11,8 @@ import { stopPropagation } from '../../core/utils/event.js';
 import { createIcon } from '../../core/utils/uni-icon.js';
 import { numberColumnModelConfig } from './define.js';
 import {
-  type NumberFormat,
   formatNumber,
+  type NumberFormat,
   parseNumber,
 } from './utils/formatter.js';
 
@@ -65,6 +65,33 @@ export class NumberCellEditing extends BaseCellRenderer<
   number,
   NumberColumnDataType
 > {
+  static override styles = css`
+    affine-database-number-cell-editing {
+      display: block;
+      width: 100%;
+      cursor: text;
+    }
+
+    .affine-database-number {
+      display: flex;
+      align-items: center;
+      width: 100%;
+      padding: 0;
+      border: none;
+      font-family: ${unsafeCSS(baseTheme.fontSansFamily)};
+      font-size: var(--data-view-cell-text-size);
+      line-height: var(--data-view-cell-text-line-height);
+      color: var(--affine-text-primary-color);
+      font-weight: 400;
+      background-color: transparent;
+      text-align: right;
+    }
+
+    .affine-database-number:focus {
+      outline: none;
+    }
+  `;
+
   private _getFormattedString = (value: number) => {
     const enableNewFormatting =
       this.view.featureFlags$.value.enable_number_formatting;
@@ -110,33 +137,6 @@ export class NumberCellEditing extends BaseCellRenderer<
     this._inputEle.value = this._getFormattedString(value);
     this.onChange(value);
   };
-
-  static override styles = css`
-    affine-database-number-cell-editing {
-      display: block;
-      width: 100%;
-      cursor: text;
-    }
-
-    .affine-database-number {
-      display: flex;
-      align-items: center;
-      width: 100%;
-      padding: 0;
-      border: none;
-      font-family: ${unsafeCSS(baseTheme.fontSansFamily)};
-      font-size: var(--data-view-cell-text-size);
-      line-height: var(--data-view-cell-text-line-height);
-      color: var(--affine-text-primary-color);
-      font-weight: 400;
-      background-color: transparent;
-      text-align: right;
-    }
-
-    .affine-database-number:focus {
-      outline: none;
-    }
-  `;
 
   focusEnd = () => {
     const end = this._inputEle.value.length;

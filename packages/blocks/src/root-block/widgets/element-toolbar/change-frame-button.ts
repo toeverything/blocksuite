@@ -1,9 +1,11 @@
-import type { FrameBlockModel } from '@blocksuite/affine-model';
-
 import { NoteIcon, RenameIcon } from '@blocksuite/affine-components/icons';
 import { toast } from '@blocksuite/affine-components/toast';
 import { renderToolbarSeparator } from '@blocksuite/affine-components/toolbar';
-import { type ColorScheme, NoteDisplayMode } from '@blocksuite/affine-model';
+import {
+  type ColorScheme,
+  type FrameBlockModel,
+  NoteDisplayMode,
+} from '@blocksuite/affine-model';
 import { matchFlavours } from '@blocksuite/affine-shared/utils';
 import { WithDisposable } from '@blocksuite/block-std';
 import {
@@ -12,7 +14,7 @@ import {
   maxBy,
   serializeXYWH,
 } from '@blocksuite/global/utils';
-import { LitElement, html, nothing } from 'lit';
+import { html, LitElement, nothing } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { join } from 'lit/directives/join.js';
 import { when } from 'lit/directives/when.js';
@@ -71,6 +73,10 @@ export class EdgelessChangeFrameButton extends WithDisposable(LitElement) {
       ele[event.type === 'start' ? 'stash' : 'pop']('background')
     );
   };
+
+  get service() {
+    return this.edgeless.service;
+  }
 
   private _insertIntoPage() {
     if (!this.edgeless.doc.root) return;
@@ -208,10 +214,6 @@ export class EdgelessChangeFrameButton extends WithDisposable(LitElement) {
       ].filter(button => button !== nothing),
       renderToolbarSeparator
     );
-  }
-
-  get service() {
-    return this.edgeless.service;
   }
 
   @query('edgeless-color-picker-button.background')

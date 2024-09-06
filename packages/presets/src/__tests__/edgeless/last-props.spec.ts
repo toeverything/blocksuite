@@ -1,9 +1,9 @@
 import {
-  ShapeType,
   type BrushElementModel,
   type ConnectorElementModel,
   type EdgelessRootBlockComponent,
   type ShapeElementModel,
+  ShapeType,
   type TextElementModel,
 } from '@blocksuite/blocks';
 import { beforeEach, describe, expect, test } from 'vitest';

@@ -1,7 +1,7 @@
 import type {
   ColorScheme,
-  ShapeProps,
   ShapeElementModel,
+  ShapeProps,
 } from '@blocksuite/affine-model';
 
 import {
@@ -16,18 +16,18 @@ import {
   DEFAULT_SHAPE_FILL_COLOR,
   DEFAULT_SHAPE_STROKE_COLOR,
   FontFamily,
+  getShapeName,
+  getShapeRadius,
+  getShapeType,
   LineWidth,
   SHAPE_FILL_COLORS,
   SHAPE_STROKE_COLORS,
   ShapeStyle,
   StrokeStyle,
-  getShapeName,
-  getShapeRadius,
-  getShapeType,
 } from '@blocksuite/affine-model';
 import { WithDisposable } from '@blocksuite/block-std';
 import { countBy, maxBy } from '@blocksuite/global/utils';
-import { LitElement, type TemplateResult, css, html, nothing } from 'lit';
+import { css, html, LitElement, nothing, type TemplateResult } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { cache } from 'lit/directives/cache.js';
 import { choose } from 'lit/directives/choose.js';
@@ -159,6 +159,10 @@ function getMostCommonShapeStyle(elements: ShapeElementModel[]): ShapeStyle {
 @customElement('edgeless-change-shape-button')
 export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
   static override styles = [changeShapeButtonStyles];
+
+  get service() {
+    return this.edgeless.service;
+  }
 
   #pickColor<K extends keyof Pick<ShapeProps, 'fillColor' | 'strokeColor'>>(
     key: K
@@ -480,10 +484,6 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
       ].filter(button => button !== nothing),
       renderToolbarSeparator
     );
-  }
-
-  get service() {
-    return this.edgeless.service;
   }
 
   @query('edgeless-shape-panel')

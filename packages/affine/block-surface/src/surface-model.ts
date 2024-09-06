@@ -6,9 +6,9 @@ import { SurfaceBlockModel as BaseSurfaceModel } from '@blocksuite/block-std/gfx
 import { DisposableGroup } from '@blocksuite/global/utils';
 import {
   Boxed,
+  defineBlockSchema,
   DocCollection,
   Text,
-  defineBlockSchema,
 } from '@blocksuite/store';
 
 import { elementsCtorMap } from './element-model/index.js';

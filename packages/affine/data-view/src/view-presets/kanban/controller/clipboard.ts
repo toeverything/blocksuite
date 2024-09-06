@@ -18,12 +18,12 @@ export class KanbanClipboardController implements ReactiveController {
     return true;
   };
 
-  constructor(public host: DataViewKanban) {
-    host.addController(this);
-  }
-
   private get readonly() {
     return this.host.view.readonly$.value;
+  }
+
+  constructor(public host: DataViewKanban) {
+    host.addController(this);
   }
 
   hostConnected() {

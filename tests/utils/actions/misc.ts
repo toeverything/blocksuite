@@ -18,11 +18,11 @@ import lz from 'lz-string';
 import '../declare-test-window.js';
 import { currentEditorIndex, multiEditor } from '../multiple-editor.js';
 import {
-  SHORT_KEY,
   pressEnter,
   pressEscape,
   pressSpace,
   pressTab,
+  SHORT_KEY,
   type,
 } from './keyboard.js';
 

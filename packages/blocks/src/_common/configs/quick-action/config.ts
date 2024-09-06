@@ -9,7 +9,7 @@ import { createSimplePortal } from '@blocksuite/affine-components/portal';
 import { toast } from '@blocksuite/affine-components/toast';
 import { matchFlavours } from '@blocksuite/affine-shared/utils';
 import { assertExists } from '@blocksuite/global/utils';
-import { type TemplateResult, html } from 'lit';
+import { html, type TemplateResult } from 'lit';
 
 import {
   convertSelectedBlocksToLinkedDoc,
@@ -17,7 +17,6 @@ import {
   notifyDocCreated,
   promptDocTitle,
 } from '../../utils/render-linked-doc.js';
-import './database-convert-view.js';
 import { DATABASE_CONVERT_WHITE_LIST } from './database-convert-view.js';
 
 export interface QuickActionConfig {

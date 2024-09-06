@@ -1,5 +1,5 @@
 import { WithDisposable } from '@blocksuite/block-std';
-import { LitElement, css, html, nothing } from 'lit';
+import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 import { SmallCloseIcon, SortingIcon } from '../../_common/icons.js';

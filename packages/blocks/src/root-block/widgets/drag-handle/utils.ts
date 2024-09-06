@@ -1,7 +1,12 @@
-import type { ParagraphBlockModel } from '@blocksuite/affine-model';
-import type { EmbedCardStyle } from '@blocksuite/affine-model';
-import type { BlockComponent, EditorHost } from '@blocksuite/block-std';
-import type { BaseSelection } from '@blocksuite/block-std';
+import type {
+  EmbedCardStyle,
+  ParagraphBlockModel,
+} from '@blocksuite/affine-model';
+import type {
+  BaseSelection,
+  BlockComponent,
+  EditorHost,
+} from '@blocksuite/block-std';
 import type { BlockModel } from '@blocksuite/store';
 
 import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '@blocksuite/affine-shared/consts';
@@ -13,7 +18,7 @@ import {
   isInsidePageEditor,
   matchFlavours,
 } from '@blocksuite/affine-shared/utils';
-import { Bound, Point, Rect, assertExists } from '@blocksuite/global/utils';
+import { assertExists, Bound, Point, Rect } from '@blocksuite/global/utils';
 
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 

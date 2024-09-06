@@ -10,9 +10,9 @@ import {
   TextResizing,
 } from '@blocksuite/affine-model';
 import {
-  GfxGroupLikeElementModel,
   convert,
   field,
+  GfxGroupLikeElementModel,
   observe,
   watch,
 } from '@blocksuite/block-std/gfx';
@@ -37,10 +37,10 @@ import type {
   MindmapStyleGetter,
 } from './utils/mindmap/style.js';
 
-import { LayoutType, layout } from './utils/mindmap/layout.js';
+import { layout, LayoutType } from './utils/mindmap/layout.js';
 import {
-  MindmapStyle,
   applyNodeStyle,
+  MindmapStyle,
   mindmapStyleGetters,
 } from './utils/mindmap/style.js';
 
@@ -86,6 +86,28 @@ export class MindmapElementModel extends GfxGroupLikeElementModel<MindmapElement
   connectors = new Map<string, LocalConnectorElementModel>();
 
   extraConnectors = new Map<string, LocalConnectorElementModel>();
+
+  get nodeMap() {
+    return this._nodeMap;
+  }
+
+  override get rotate() {
+    return 0;
+  }
+
+  override set rotate(_: number) {}
+
+  get styleGetter(): MindmapStyleGetter {
+    return mindmapStyleGetters[this.style];
+  }
+
+  get tree() {
+    return this._tree;
+  }
+
+  get type() {
+    return 'mindmap';
+  }
 
   static createFromTree(
     tree: MindmapNode,
@@ -955,28 +977,6 @@ export class MindmapElementModel extends GfxGroupLikeElementModel<MindmapElement
     if (this._tree) {
       traverse(this._tree, null);
     }
-  }
-
-  get nodeMap() {
-    return this._nodeMap;
-  }
-
-  override get rotate() {
-    return 0;
-  }
-
-  override set rotate(_: number) {}
-
-  get styleGetter(): MindmapStyleGetter {
-    return mindmapStyleGetters[this.style];
-  }
-
-  get tree() {
-    return this._tree;
-  }
-
-  get type() {
-    return 'mindmap';
   }
 
   @convert((initialValue, instance) => {

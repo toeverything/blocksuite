@@ -1,6 +1,6 @@
 import { SHAPE_STROKE_COLORS, StrokeStyle } from '@blocksuite/affine-model';
 import { WithDisposable } from '@blocksuite/block-std';
-import { LitElement, css, html } from 'lit';
+import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 import type { ColorEvent } from './color-panel.js';

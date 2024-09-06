@@ -1,10 +1,10 @@
 import type { RichText } from '@blocksuite/affine-components/rich-text';
 import type { ShapeElementModel } from '@blocksuite/affine-model';
 
-import { CommonUtils } from '@blocksuite/affine-block-surface';
 import {
-  TextUtils,
+  CommonUtils,
   MindmapElementModel,
+  TextUtils,
 } from '@blocksuite/affine-block-surface';
 import { TextResizing } from '@blocksuite/affine-model';
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
@@ -13,8 +13,7 @@ import {
   ShadowlessElement,
   WithDisposable,
 } from '@blocksuite/block-std';
-import { Bound, Vec } from '@blocksuite/global/utils';
-import { assertExists } from '@blocksuite/global/utils';
+import { assertExists, Bound, Vec } from '@blocksuite/global/utils';
 import { DocCollection } from '@blocksuite/store';
 import { html, nothing } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
@@ -33,6 +32,15 @@ export class EdgelessShapeTextEditor extends WithDisposable(ShadowlessElement) {
   private _lastXYWH = '';
 
   private _resizeObserver: ResizeObserver | null = null;
+
+  get inlineEditor() {
+    assertExists(this.richText.inlineEditor);
+    return this.richText.inlineEditor;
+  }
+
+  get inlineEditorContainer() {
+    return this.inlineEditor.rootElement;
+  }
 
   private _initMindmapKeyBindings() {
     if (!this.element.surface.isInMindmap(this.element.id)) {
@@ -310,15 +318,6 @@ export class EdgelessShapeTextEditor extends WithDisposable(ShadowlessElement) {
 
   setKeeping(keeping: boolean) {
     this._keeping = keeping;
-  }
-
-  get inlineEditor() {
-    assertExists(this.richText.inlineEditor);
-    return this.richText.inlineEditor;
-  }
-
-  get inlineEditorContainer() {
-    return this.inlineEditor.rootElement;
   }
 
   @property({ attribute: false })

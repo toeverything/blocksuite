@@ -1,7 +1,6 @@
 import type { Page } from '@playwright/test';
 
 import {
-  Shape,
   captureHistory,
   clickView,
   createShapeElement,
@@ -9,6 +8,7 @@ import {
   getFirstGroupId,
   redoByKeyboard,
   selectAllByKeyboard,
+  Shape,
   shiftClickView,
   triggerComponentToolbarAction,
   undoByKeyboard,

@@ -19,20 +19,20 @@ import {
 } from '@blocksuite/affine-components/icons';
 import { renderToolbarSeparator } from '@blocksuite/affine-components/toolbar';
 import {
+  type ColorScheme,
   type ConnectorElementModel,
+  type ConnectorElementProps,
   ConnectorEndpoint,
+  type ConnectorLabelProps,
   ConnectorMode,
   DEFAULT_FRONT_END_POINT_STYLE,
   DEFAULT_REAR_END_POINT_STYLE,
-  type ColorScheme,
-  type ConnectorElementProps,
-  type ConnectorLabelProps,
   PointStyle,
 } from '@blocksuite/affine-model';
 import { LINE_COLORS, LineWidth, StrokeStyle } from '@blocksuite/affine-model';
 import { WithDisposable } from '@blocksuite/block-std';
 import { countBy, maxBy } from '@blocksuite/global/utils';
-import { LitElement, type TemplateResult, html, nothing } from 'lit';
+import { html, LitElement, nothing, type TemplateResult } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { choose } from 'lit/directives/choose.js';
 import { join } from 'lit/directives/join.js';
@@ -241,6 +241,14 @@ export class EdgelessChangeConnectorButton extends WithDisposable(LitElement) {
       ele[event.type === 'start' ? 'stash' : 'pop']('stroke')
     );
   };
+
+  get doc() {
+    return this.edgeless.doc;
+  }
+
+  get service() {
+    return this.edgeless.service;
+  }
 
   private _addLabel() {
     mountConnectorLabelEditor(this.elements[0], this.edgeless);
@@ -593,14 +601,6 @@ export class EdgelessChangeConnectorButton extends WithDisposable(LitElement) {
       ].filter(button => button !== nothing),
       renderToolbarSeparator
     );
-  }
-
-  get doc() {
-    return this.edgeless.doc;
-  }
-
-  get service() {
-    return this.edgeless.service;
   }
 
   @property({ attribute: false })

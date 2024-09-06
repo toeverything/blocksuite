@@ -4,14 +4,15 @@ import type { IVec } from '@blocksuite/global/utils';
 import {
   findNoteBlockModel,
   getBlockComponentsExcludeSubtrees,
+  getCurrentNativeRange,
   getScrollContainer,
   isInsideEdgelessEditor,
   isInsidePageEditor,
   matchFlavours,
 } from '@blocksuite/affine-shared/utils';
-import { getCurrentNativeRange } from '@blocksuite/affine-shared/utils';
-import { type BlockComponent, BlockStdScope } from '@blocksuite/block-std';
 import {
+  type BlockComponent,
+  BlockStdScope,
   type PointerEventState,
   type UIEventHandler,
   WidgetComponent,
@@ -81,6 +82,10 @@ export class AffineDragHandleWidget extends WidgetComponent<
   RootBlockModel,
   EdgelessRootBlockComponent | PageRootBlockComponent
 > {
+  static staticOptionRunner = new DragHandleOptionsRunner();
+
+  static override styles = styles;
+
   private _anchorBlockId: string | null = null;
 
   private _anchorModelDisposables: DisposableGroup | null = null;
@@ -1399,20 +1404,16 @@ export class AffineDragHandleWidget extends WidgetComponent<
     }
   };
 
-  static staticOptionRunner = new DragHandleOptionsRunner();
-
-  static override styles = styles;
-
   // Single block: drag handle should show on the vertical middle of the first line of element
   center: IVec = [0, 0];
 
   cumulativeParentScale = 1;
 
-  dragPreview: DragPreview | null = null;
-
   dragging = false;
 
   draggingElements: BlockComponent[] = [];
+
+  dragPreview: DragPreview | null = null;
 
   dropBlockId = '';
 
@@ -1427,6 +1428,45 @@ export class AffineDragHandleWidget extends WidgetComponent<
   rafID = 0;
 
   scale = 1;
+
+  private get _rangeManager() {
+    return this.std.range;
+  }
+
+  get anchorBlockComponent(): BlockComponent | null {
+    if (!this._anchorBlockId) return null;
+    return this._getBlockComponentFromViewStore(this._anchorBlockId);
+  }
+
+  get anchorEdgelessElement(): GfxBlockModel | null {
+    if (isInsidePageEditor(this.host) || !this._anchorBlockId) return null;
+    const { service } = this.rootComponent as EdgelessRootBlockComponent;
+    const edgelessElement = service.getElementById(this._anchorBlockId);
+    return isTopLevelBlock(edgelessElement) ? edgelessElement : null;
+  }
+
+  private get dragHandleContainerOffsetParent() {
+    return this._dragHandleContainer.parentElement!;
+  }
+
+  get optionRunner() {
+    return AffineDragHandleWidget.staticOptionRunner;
+  }
+
+  get rootComponent() {
+    return this.block as PageRootBlockComponent | EdgelessRootBlockComponent;
+  }
+
+  private get scrollContainer() {
+    return getScrollContainer(this.rootComponent!);
+  }
+
+  get selectedBlocks() {
+    // eslint-disable-next-line unicorn/prefer-array-some
+    return this.host.selection.find('text')
+      ? this.host.selection.filter('text')
+      : this.host.selection.filter('block');
+  }
 
   static registerOption(option: DragHandleOption) {
     return AffineDragHandleWidget.staticOptionRunner.register(option);
@@ -1464,18 +1504,6 @@ export class AffineDragHandleWidget extends WidgetComponent<
     bottom += padding;
 
     return new Rect(left, top, right, bottom);
-  }
-
-  private get _rangeManager() {
-    return this.std.range;
-  }
-
-  private get dragHandleContainerOffsetParent() {
-    return this._dragHandleContainer.parentElement!;
-  }
-
-  private get scrollContainer() {
-    return getScrollContainer(this.rootComponent!);
   }
 
   override connectedCallback() {
@@ -1624,33 +1652,6 @@ export class AffineDragHandleWidget extends WidgetComponent<
         <div class="affine-drag-hover-rect" style=${hoverRectStyle}></div>
       </div>
     `;
-  }
-
-  get anchorBlockComponent(): BlockComponent | null {
-    if (!this._anchorBlockId) return null;
-    return this._getBlockComponentFromViewStore(this._anchorBlockId);
-  }
-
-  get anchorEdgelessElement(): GfxBlockModel | null {
-    if (isInsidePageEditor(this.host) || !this._anchorBlockId) return null;
-    const { service } = this.rootComponent as EdgelessRootBlockComponent;
-    const edgelessElement = service.getElementById(this._anchorBlockId);
-    return isTopLevelBlock(edgelessElement) ? edgelessElement : null;
-  }
-
-  get optionRunner() {
-    return AffineDragHandleWidget.staticOptionRunner;
-  }
-
-  get rootComponent() {
-    return this.block as PageRootBlockComponent | EdgelessRootBlockComponent;
-  }
-
-  get selectedBlocks() {
-    // eslint-disable-next-line unicorn/prefer-array-some
-    return this.host.selection.find('text')
-      ? this.host.selection.filter('text')
-      : this.host.selection.filter('block');
   }
 
   @query('.affine-drag-handle-container')

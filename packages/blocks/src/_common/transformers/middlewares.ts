@@ -1,5 +1,5 @@
-import type { DatabaseBlockModel } from '@blocksuite/affine-model';
 import type {
+  DatabaseBlockModel,
   EmbedLinkedDocModel,
   EmbedSyncedDocModel,
   ListBlockModel,

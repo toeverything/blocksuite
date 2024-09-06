@@ -1,5 +1,5 @@
 import { assertEquals } from '@blocksuite/global/utils';
-import { LitElement, type PropertyValues, css, html } from 'lit';
+import { css, html, LitElement, type PropertyValues } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 
 import type { PieNode } from '../node.js';
