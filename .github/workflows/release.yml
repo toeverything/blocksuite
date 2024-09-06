@@ -54,12 +54,12 @@ jobs:
           echo "BLOCKSUITE_RELEASE_TAG=v${BLOCKSUITE_VERSION}" >> "$GITHUB_ENV"
 
       - name: Create GitHub release
+        id: release
         uses: ncipollo/release-action@v1
         with:
           commit: master
           tag: '${{ env.BLOCKSUITE_RELEASE_TAG }}'
           token: ${{ secrets.GITHUB_TOKEN }}
-        continue-on-error: true
 
       - name: Send release notification
         id: slack
@@ -70,12 +70,6 @@ jobs:
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
 
-      - name: Send failure notification
-        if: failure()
-        id: slack_failure
-        uses: slackapi/slack-github-action@v1.27.0
-        with:
-          payload: |
-            { "message": "[BlockSuite Release]: There was an issue publishing a new version. You can find the logs here: https://github.com/toeverything/blocksuite/actions/runs/${{ github.run_id }}" }
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+      - name: Report
+        if: always()
+        run: echo "Release ${{ env.BLOCKSUITE_RELEASE_TAG }} has been published."
