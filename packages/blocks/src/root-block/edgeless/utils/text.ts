@@ -188,21 +188,29 @@ export function mountConnectorLabelEditor(
     );
   }
 
-  let text = connector.text;
-  if (!text) {
-    text = new DocCollection.Y.Text();
+  if (!connector.text) {
+    const text = new DocCollection.Y.Text();
+    const labelStyle = connector.labelStyle;
+    const labelOffset = connector.labelOffset;
+    let labelXYWH = connector.labelXYWH ?? [0, 0, 16, 16];
 
-    connector.text = text;
-    connector.labelStyle.color = GET_DEFAULT_LINE_COLOR();
+    labelStyle.color = GET_DEFAULT_LINE_COLOR();
 
     if (point) {
       const center = connector.getNearestPoint(point);
       const distance = connector.getOffsetDistanceByPoint(center as IVec);
-      const bounds = Bound.fromXYWH(connector.labelXYWH || [0, 0, 16, 16]);
+      const bounds = Bound.fromXYWH(labelXYWH);
       bounds.center = center;
-      connector.labelOffset.distance = distance;
-      connector.labelXYWH = bounds.toXYWH();
+      labelOffset.distance = distance;
+      labelXYWH = bounds.toXYWH();
     }
+
+    edgeless.service.updateElement(connector.id, {
+      text,
+      labelXYWH,
+      labelStyle: { ...labelStyle },
+      labelOffset: { ...labelOffset },
+    });
   }
 
   const editor = new EdgelessConnectorLabelEditor();
