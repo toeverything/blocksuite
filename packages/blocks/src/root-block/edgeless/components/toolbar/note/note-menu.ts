@@ -72,25 +72,25 @@ export class EdgelessNoteMenu extends EdgelessToolbarToolMixin(LitElement) {
 
     insertedLinkType
       ?.then(type => {
-        if (type) {
+        if (!type) return;
+
+        this.edgeless.std
+          .getOptional(TelemetryProvider)
+          ?.track('CanvasElementAdded', {
+            control: 'toolbar:general',
+            page: 'whiteboard editor',
+            module: 'toolbar',
+            type: type.flavour?.split(':')[1],
+          });
+        if (type.isNewDoc) {
           this.edgeless.std
             .getOptional(TelemetryProvider)
-            ?.track('CanvasElementAdded', {
+            ?.track('DocCreated', {
               control: 'toolbar:general',
               page: 'whiteboard editor',
-              module: 'toolbar',
+              module: 'edgeless toolbar',
               type: type.flavour?.split(':')[1],
             });
-          if (type.isNewDoc) {
-            this.edgeless.std
-              .getOptional(TelemetryProvider)
-              ?.track('DocCreated', {
-                control: 'toolbar:general',
-                page: 'whiteboard editor',
-                module: 'edgeless toolbar',
-                type: type.flavour?.split(':')[1],
-              });
-          }
         }
       })
       .catch(console.error);

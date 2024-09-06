@@ -37,7 +37,8 @@ export const insertLinkByQuickSearchCommand: Command<
           flavour: 'affine:bookmark',
         };
       }
-      return {};
+
+      return null;
     });
 
   next({ insertedLinkType });
@@ -49,7 +50,7 @@ declare global {
       insertedLinkType?: Promise<{
         flavour?: string;
         isNewDoc?: boolean;
-      }>;
+      } | null>;
     }
 
     interface Commands {

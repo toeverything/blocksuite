@@ -24,49 +24,49 @@ export class EdgelessLinkToolButton extends QuickToolMixin(LitElement) {
     );
     insertedLinkType
       ?.then(type => {
-        if (type) {
+        if (!type) return;
+
+        this.edgeless.std
+          .getOptional(TelemetryProvider)
+          ?.track('CanvasElementAdded', {
+            control: 'toolbar:general',
+            page: 'whiteboard editor',
+            module: 'toolbar',
+            segment: 'toolbar',
+            type: type.flavour?.split(':')[1],
+          });
+
+        if (type.isNewDoc) {
           this.edgeless.std
             .getOptional(TelemetryProvider)
-            ?.track('CanvasElementAdded', {
+            ?.track('DocCreated', {
               control: 'toolbar:general',
               page: 'whiteboard editor',
-              module: 'toolbar',
-              segment: 'toolbar',
+              module: 'edgeless toolbar',
+              segment: 'whiteboard',
               type: type.flavour?.split(':')[1],
             });
-
-          if (type.isNewDoc) {
-            this.edgeless.std
-              .getOptional(TelemetryProvider)
-              ?.track('DocCreated', {
-                control: 'toolbar:general',
-                page: 'whiteboard editor',
-                module: 'edgeless toolbar',
-                segment: 'whiteboard',
-                type: type.flavour?.split(':')[1],
-              });
-            this.edgeless.std
-              .getOptional(TelemetryProvider)
-              ?.track('LinkedDocCreated', {
-                control: 'links',
-                page: 'whiteboard editor',
-                module: 'edgeless toolbar',
-                segment: 'whiteboard',
-                type: type.flavour?.split(':')[1],
-                other: 'new doc',
-              });
-          } else {
-            this.edgeless.std
-              .getOptional(TelemetryProvider)
-              ?.track('LinkedDocCreated', {
-                control: 'links',
-                page: 'whiteboard editor',
-                module: 'edgeless toolbar',
-                segment: 'whiteboard',
-                type: type.flavour?.split(':')[1],
-                other: 'existing doc',
-              });
-          }
+          this.edgeless.std
+            .getOptional(TelemetryProvider)
+            ?.track('LinkedDocCreated', {
+              control: 'links',
+              page: 'whiteboard editor',
+              module: 'edgeless toolbar',
+              segment: 'whiteboard',
+              type: type.flavour?.split(':')[1],
+              other: 'new doc',
+            });
+        } else {
+          this.edgeless.std
+            .getOptional(TelemetryProvider)
+            ?.track('LinkedDocCreated', {
+              control: 'links',
+              page: 'whiteboard editor',
+              module: 'edgeless toolbar',
+              segment: 'whiteboard',
+              type: type.flavour?.split(':')[1],
+              other: 'existing doc',
+            });
         }
       })
       .catch(console.error);
