@@ -132,9 +132,9 @@ test('type character jump out code node', async ({ page }) => {
   );
 });
 
-test('multi line rich-text inline code hotkey', async ({ page }) => {
+test('multi line rich-text inline code hotkey', async ({ page }, testInfo) => {
   await enterPlaygroundRoom(page);
-  const { noteId } = await initEmptyParagraphState(page);
+  await initEmptyParagraphState(page);
   await initThreeParagraphs(page);
   await assertRichTexts(page, ['123', '456', '789']);
 
@@ -143,167 +143,20 @@ test('multi line rich-text inline code hotkey', async ({ page }) => {
   await dragBetweenIndices(page, [0, 1], [2, 2]);
   await inlineCode(page);
 
-  await assertStoreMatchJSX(
-    page,
-    `
-<affine:note
-  prop:background="--affine-note-background-blue"
-  prop:displayMode="both"
-  prop:edgeless={
-    Object {
-      "style": Object {
-        "borderRadius": 0,
-        "borderSize": 4,
-        "borderStyle": "none",
-        "shadowType": "--affine-note-shadow-sticker",
-      },
-    }
-  }
-  prop:hidden={false}
-  prop:index="a0"
->
-  <affine:paragraph
-    prop:text={
-      <>
-        <text
-          insert="1"
-        />
-        <text
-          code={true}
-          insert="23"
-        />
-      </>
-    }
-    prop:type="text"
-  />
-  <affine:paragraph
-    prop:text={
-      <>
-        <text
-          code={true}
-          insert="456"
-        />
-      </>
-    }
-    prop:type="text"
-  />
-  <affine:paragraph
-    prop:text={
-      <>
-        <text
-          code={true}
-          insert="78"
-        />
-        <text
-          insert="9"
-        />
-      </>
-    }
-    prop:type="text"
-  />
-</affine:note>`,
-    noteId
+  expect(await getPageSnapshot(page, true)).toMatchSnapshot(
+    `${testInfo.title}_init.json`
   );
 
   await undoByClick(page);
 
-  await assertStoreMatchJSX(
-    page,
-    `
-<affine:note
-  prop:background="--affine-note-background-blue"
-  prop:displayMode="both"
-  prop:edgeless={
-    Object {
-      "style": Object {
-        "borderRadius": 0,
-        "borderSize": 4,
-        "borderStyle": "none",
-        "shadowType": "--affine-note-shadow-sticker",
-      },
-    }
-  }
-  prop:hidden={false}
-  prop:index="a0"
->
-  <affine:paragraph
-    prop:text="123"
-    prop:type="text"
-  />
-  <affine:paragraph
-    prop:text="456"
-    prop:type="text"
-  />
-  <affine:paragraph
-    prop:text="789"
-    prop:type="text"
-  />
-</affine:note>`,
-    noteId
+  expect(await getPageSnapshot(page, true)).toMatchSnapshot(
+    `${testInfo.title}_undo.json`
   );
 
   await redoByClick(page);
 
-  await assertStoreMatchJSX(
-    page,
-    `
-<affine:note
-  prop:background="--affine-note-background-blue"
-  prop:displayMode="both"
-  prop:edgeless={
-    Object {
-      "style": Object {
-        "borderRadius": 0,
-        "borderSize": 4,
-        "borderStyle": "none",
-        "shadowType": "--affine-note-shadow-sticker",
-      },
-    }
-  }
-  prop:hidden={false}
-  prop:index="a0"
->
-  <affine:paragraph
-    prop:text={
-      <>
-        <text
-          insert="1"
-        />
-        <text
-          code={true}
-          insert="23"
-        />
-      </>
-    }
-    prop:type="text"
-  />
-  <affine:paragraph
-    prop:text={
-      <>
-        <text
-          code={true}
-          insert="456"
-        />
-      </>
-    }
-    prop:type="text"
-  />
-  <affine:paragraph
-    prop:text={
-      <>
-        <text
-          code={true}
-          insert="78"
-        />
-        <text
-          insert="9"
-        />
-      </>
-    }
-    prop:type="text"
-  />
-</affine:note>`,
-    noteId
+  expect(await getPageSnapshot(page, true)).toMatchSnapshot(
+    `${testInfo.title}_redo.json`
   );
 });
 
@@ -328,9 +181,9 @@ test('single line rich-text strikethrough hotkey', async ({ page }) => {
   await assertTextFormat(page, 0, 0, {});
 });
 
-test('use formatted cursor with hotkey', async ({ page }) => {
+test('use formatted cursor with hotkey', async ({ page }, testInfo) => {
   await enterPlaygroundRoom(page);
-  const { noteId } = await initEmptyParagraphState(page);
+  await initEmptyParagraphState(page);
   await focusRichText(page);
   await type(page, 'aaa');
   // format italic
@@ -346,230 +199,38 @@ test('use formatted cursor with hotkey', async ({ page }) => {
   await page.keyboard.press(`${SHORT_KEY}+b`, { delay: 50 });
   await type(page, 'eee');
 
-  await assertStoreMatchJSX(
-    page,
-    `
-<affine:note
-  prop:background="--affine-note-background-blue"
-  prop:displayMode="both"
-  prop:edgeless={
-    Object {
-      "style": Object {
-        "borderRadius": 0,
-        "borderSize": 4,
-        "borderStyle": "none",
-        "shadowType": "--affine-note-shadow-sticker",
-      },
-    }
-  }
-  prop:hidden={false}
-  prop:index="a0"
->
-  <affine:paragraph
-    prop:text={
-      <>
-        <text
-          insert="aaa"
-        />
-        <text
-          insert="bbb"
-          italic={true}
-        />
-        <text
-          bold={true}
-          insert="ccc"
-          italic={true}
-        />
-        <text
-          bold={true}
-          insert="ddd"
-        />
-        <text
-          insert="eee"
-        />
-      </>
-    }
-    prop:type="text"
-  />
-</affine:note>`,
-    noteId
+  expect(await getPageSnapshot(page, true)).toMatchSnapshot(
+    `${testInfo.title}_init.json`
   );
 
   // format bold
   await page.keyboard.press(`${SHORT_KEY}+b`, { delay: 50 });
   await type(page, 'fff');
 
-  await assertStoreMatchJSX(
-    page,
-    `
-<affine:note
-  prop:background="--affine-note-background-blue"
-  prop:displayMode="both"
-  prop:edgeless={
-    Object {
-      "style": Object {
-        "borderRadius": 0,
-        "borderSize": 4,
-        "borderStyle": "none",
-        "shadowType": "--affine-note-shadow-sticker",
-      },
-    }
-  }
-  prop:hidden={false}
-  prop:index="a0"
->
-  <affine:paragraph
-    prop:text={
-      <>
-        <text
-          insert="aaa"
-        />
-        <text
-          insert="bbb"
-          italic={true}
-        />
-        <text
-          bold={true}
-          insert="ccc"
-          italic={true}
-        />
-        <text
-          bold={true}
-          insert="ddd"
-        />
-        <text
-          insert="eee"
-        />
-        <text
-          bold={true}
-          insert="fff"
-        />
-      </>
-    }
-    prop:type="text"
-  />
-</affine:note>`,
-    noteId
+  expect(await getPageSnapshot(page, true)).toMatchSnapshot(
+    `${testInfo.title}_bold.json`
   );
 
   await pressArrowLeft(page);
   await pressArrowRight(page);
   await type(page, 'ggg');
 
-  await assertStoreMatchJSX(
-    page,
-    `
-<affine:note
-  prop:background="--affine-note-background-blue"
-  prop:displayMode="both"
-  prop:edgeless={
-    Object {
-      "style": Object {
-        "borderRadius": 0,
-        "borderSize": 4,
-        "borderStyle": "none",
-        "shadowType": "--affine-note-shadow-sticker",
-      },
-    }
-  }
-  prop:hidden={false}
-  prop:index="a0"
->
-  <affine:paragraph
-    prop:text={
-      <>
-        <text
-          insert="aaa"
-        />
-        <text
-          insert="bbb"
-          italic={true}
-        />
-        <text
-          bold={true}
-          insert="ccc"
-          italic={true}
-        />
-        <text
-          bold={true}
-          insert="ddd"
-        />
-        <text
-          insert="eee"
-        />
-        <text
-          bold={true}
-          insert="fffggg"
-        />
-      </>
-    }
-    prop:type="text"
-  />
-</affine:note>`,
-    noteId
+  expect(await getPageSnapshot(page, true)).toMatchSnapshot(
+    `${testInfo.title}_bold_ggg.json`
   );
 
   await setInlineRangeInSelectedRichText(page, 3, 0);
   await waitNextFrame(page);
   await type(page, 'hhh');
 
-  await assertStoreMatchJSX(
-    page,
-    `
-<affine:note
-  prop:background="--affine-note-background-blue"
-  prop:displayMode="both"
-  prop:edgeless={
-    Object {
-      "style": Object {
-        "borderRadius": 0,
-        "borderSize": 4,
-        "borderStyle": "none",
-        "shadowType": "--affine-note-shadow-sticker",
-      },
-    }
-  }
-  prop:hidden={false}
-  prop:index="a0"
->
-  <affine:paragraph
-    prop:text={
-      <>
-        <text
-          insert="aaahhh"
-        />
-        <text
-          insert="bbb"
-          italic={true}
-        />
-        <text
-          bold={true}
-          insert="ccc"
-          italic={true}
-        />
-        <text
-          bold={true}
-          insert="ddd"
-        />
-        <text
-          insert="eee"
-        />
-        <text
-          bold={true}
-          insert="fffggg"
-        />
-      </>
-    }
-    prop:type="text"
-  />
-</affine:note>`,
-    noteId
+  expect(await getPageSnapshot(page, true)).toMatchSnapshot(
+    `${testInfo.title}_bold_hhh.json`
   );
 });
 
-test('should single line format hotkey work', async ({ page }) => {
+test('should single line format hotkey work', async ({ page }, testInfo) => {
   await enterPlaygroundRoom(page);
-  const { noteId } = await initEmptyParagraphState(page);
+  await initEmptyParagraphState(page);
   await focusRichText(page);
   await type(page, 'hello');
   await dragBetweenIndices(page, [0, 1], [0, 4]);
@@ -585,47 +246,8 @@ test('should single line format hotkey work', async ({ page }) => {
 
   await waitNextFrame(page);
 
-  await assertStoreMatchJSX(
-    page,
-    `
-<affine:note
-  prop:background="--affine-note-background-blue"
-  prop:displayMode="both"
-  prop:edgeless={
-    Object {
-      "style": Object {
-        "borderRadius": 0,
-        "borderSize": 4,
-        "borderStyle": "none",
-        "shadowType": "--affine-note-shadow-sticker",
-      },
-    }
-  }
-  prop:hidden={false}
-  prop:index="a0"
->
-  <affine:paragraph
-    prop:text={
-      <>
-        <text
-          insert="h"
-        />
-        <text
-          bold={true}
-          insert="ell"
-          italic={true}
-          strike={true}
-          underline={true}
-        />
-        <text
-          insert="o"
-        />
-      </>
-    }
-    prop:type="text"
-  />
-</affine:note>`,
-    noteId
+  expect(await getPageSnapshot(page, true)).toMatchSnapshot(
+    `${testInfo.title}_init.json`
   );
 
   // bold
@@ -639,37 +261,14 @@ test('should single line format hotkey work', async ({ page }) => {
 
   await waitNextFrame(page);
 
-  await assertStoreMatchJSX(
-    page,
-    `
-<affine:note
-  prop:background="--affine-note-background-blue"
-  prop:displayMode="both"
-  prop:edgeless={
-    Object {
-      "style": Object {
-        "borderRadius": 0,
-        "borderSize": 4,
-        "borderStyle": "none",
-        "shadowType": "--affine-note-shadow-sticker",
-      },
-    }
-  }
-  prop:hidden={false}
-  prop:index="a0"
->
-  <affine:paragraph
-    prop:text="hello"
-    prop:type="text"
-  />
-</affine:note>`,
-    noteId
+  expect(await getPageSnapshot(page, true)).toMatchSnapshot(
+    `${testInfo.title}_finial.json`
   );
 });
 
-test('should multiple line format hotkey work', async ({ page }) => {
+test('should multiple line format hotkey work', async ({ page }, testInfo) => {
   await enterPlaygroundRoom(page);
-  const { noteId } = await initEmptyParagraphState(page);
+  await initEmptyParagraphState(page);
   await initThreeParagraphs(page);
   // 0    1   2
   // 1|23 456 78|9
@@ -686,75 +285,8 @@ test('should multiple line format hotkey work', async ({ page }) => {
 
   await waitNextFrame(page);
 
-  await assertStoreMatchJSX(
-    page,
-    `
-<affine:note
-  prop:background="--affine-note-background-blue"
-  prop:displayMode="both"
-  prop:edgeless={
-    Object {
-      "style": Object {
-        "borderRadius": 0,
-        "borderSize": 4,
-        "borderStyle": "none",
-        "shadowType": "--affine-note-shadow-sticker",
-      },
-    }
-  }
-  prop:hidden={false}
-  prop:index="a0"
->
-  <affine:paragraph
-    prop:text={
-      <>
-        <text
-          insert="1"
-        />
-        <text
-          bold={true}
-          insert="23"
-          italic={true}
-          strike={true}
-          underline={true}
-        />
-      </>
-    }
-    prop:type="text"
-  />
-  <affine:paragraph
-    prop:text={
-      <>
-        <text
-          bold={true}
-          insert="456"
-          italic={true}
-          strike={true}
-          underline={true}
-        />
-      </>
-    }
-    prop:type="text"
-  />
-  <affine:paragraph
-    prop:text={
-      <>
-        <text
-          bold={true}
-          insert="78"
-          italic={true}
-          strike={true}
-          underline={true}
-        />
-        <text
-          insert="9"
-        />
-      </>
-    }
-    prop:type="text"
-  />
-</affine:note>`,
-    noteId
+  expect(await getPageSnapshot(page, true)).toMatchSnapshot(
+    `${testInfo.title}_init.json`
   );
 
   // bold
@@ -768,39 +300,8 @@ test('should multiple line format hotkey work', async ({ page }) => {
 
   await waitNextFrame(page);
 
-  await assertStoreMatchJSX(
-    page,
-    `
-<affine:note
-  prop:background="--affine-note-background-blue"
-  prop:displayMode="both"
-  prop:edgeless={
-    Object {
-      "style": Object {
-        "borderRadius": 0,
-        "borderSize": 4,
-        "borderStyle": "none",
-        "shadowType": "--affine-note-shadow-sticker",
-      },
-    }
-  }
-  prop:hidden={false}
-  prop:index="a0"
->
-  <affine:paragraph
-    prop:text="123"
-    prop:type="text"
-  />
-  <affine:paragraph
-    prop:text="456"
-    prop:type="text"
-  />
-  <affine:paragraph
-    prop:text="789"
-    prop:type="text"
-  />
-</affine:note>`,
-    noteId
+  expect(await getPageSnapshot(page, true)).toMatchSnapshot(
+    `${testInfo.title}_finial.json`
   );
 });
 
@@ -859,75 +360,29 @@ test('format list to h1', async ({ page }) => {
   await assertRichTextModelType(page, 'h1');
 });
 
-test('should cut work single line', async ({ page }) => {
+test('should cut work single line', async ({ page }, testInfo) => {
   await enterPlaygroundRoom(page);
-  const { noteId } = await initEmptyParagraphState(page);
+  await initEmptyParagraphState(page);
   await focusRichText(page);
   await type(page, 'hello');
   await resetHistory(page);
   await dragBetweenIndices(page, [0, 1], [0, 4]);
   // cut
   await page.keyboard.press(`${SHORT_KEY}+x`);
-  await assertStoreMatchJSX(
-    page,
-    `
-<affine:note
-  prop:background="--affine-note-background-blue"
-  prop:displayMode="both"
-  prop:edgeless={
-    Object {
-      "style": Object {
-        "borderRadius": 0,
-        "borderSize": 4,
-        "borderStyle": "none",
-        "shadowType": "--affine-note-shadow-sticker",
-      },
-    }
-  }
-  prop:hidden={false}
-  prop:index="a0"
->
-  <affine:paragraph
-    prop:text="ho"
-    prop:type="text"
-  />
-</affine:note>`,
-    noteId
+  expect(await getPageSnapshot(page, true)).toMatchSnapshot(
+    `${testInfo.title}_init.json`
   );
   await undoByKeyboard(page);
   const text = await readClipboardText(page);
   expect(text).toBe('ell');
-  await assertStoreMatchJSX(
-    page,
-    `
-<affine:note
-  prop:background="--affine-note-background-blue"
-  prop:displayMode="both"
-  prop:edgeless={
-    Object {
-      "style": Object {
-        "borderRadius": 0,
-        "borderSize": 4,
-        "borderStyle": "none",
-        "shadowType": "--affine-note-shadow-sticker",
-      },
-    }
-  }
-  prop:hidden={false}
-  prop:index="a0"
->
-  <affine:paragraph
-    prop:text="hello"
-    prop:type="text"
-  />
-</affine:note>`,
-    noteId
+  expect(await getPageSnapshot(page, true)).toMatchSnapshot(
+    `${testInfo.title}_undo.json`
   );
 });
 
-test('should cut work multiple line', async ({ page }) => {
+test('should cut work multiple line', async ({ page }, testInfo) => {
   await enterPlaygroundRoom(page);
-  const { noteId } = await initEmptyParagraphState(page);
+  await initEmptyParagraphState(page);
   await initThreeParagraphs(page);
   await resetHistory(page);
   // 0    1   2
@@ -935,68 +390,14 @@ test('should cut work multiple line', async ({ page }) => {
   await dragBetweenIndices(page, [0, 1], [2, 2]);
   // cut
   await page.keyboard.press(`${SHORT_KEY}+x`);
-  await assertStoreMatchJSX(
-    page,
-    `
-<affine:note
-  prop:background="--affine-note-background-blue"
-  prop:displayMode="both"
-  prop:edgeless={
-    Object {
-      "style": Object {
-        "borderRadius": 0,
-        "borderSize": 4,
-        "borderStyle": "none",
-        "shadowType": "--affine-note-shadow-sticker",
-      },
-    }
-  }
-  prop:hidden={false}
-  prop:index="a0"
->
-  <affine:paragraph
-    prop:text="19"
-    prop:type="text"
-  />
-</affine:note>`,
-    noteId
+  expect(await getPageSnapshot(page, true)).toMatchSnapshot(
+    `${testInfo.title}_init.json`
   );
   await undoByKeyboard(page);
   const text = await readClipboardText(page);
   expect(text).toBe(`23 456 78`);
-  await assertStoreMatchJSX(
-    page,
-    `
-<affine:note
-  prop:background="--affine-note-background-blue"
-  prop:displayMode="both"
-  prop:edgeless={
-    Object {
-      "style": Object {
-        "borderRadius": 0,
-        "borderSize": 4,
-        "borderStyle": "none",
-        "shadowType": "--affine-note-shadow-sticker",
-      },
-    }
-  }
-  prop:hidden={false}
-  prop:index="a0"
->
-  <affine:paragraph
-    prop:text="123"
-    prop:type="text"
-  />
-  <affine:paragraph
-    prop:text="456"
-    prop:type="text"
-  />
-  <affine:paragraph
-    prop:text="789"
-    prop:type="text"
-  />
-</affine:note>`,
-    noteId
+  expect(await getPageSnapshot(page, true)).toMatchSnapshot(
+    `${testInfo.title}_undo.json`
   );
 });
 
@@ -1354,46 +755,19 @@ test.describe('keyboard operation to move block up or down', () => {
 
 test('Enter key should as expected after setting heading by shortkey', async ({
   page,
-}) => {
+}, testInfo) => {
   test.info().annotations.push({
     type: 'issue',
     description: 'https://github.com/toeverything/blocksuite/issues/4987',
   });
   await enterPlaygroundRoom(page);
-  const { noteId } = await initEmptyParagraphState(page);
+  await initEmptyParagraphState(page);
   await focusRichText(page);
   await type(page, 'hello');
   await page.keyboard.press(`${SHORT_KEY}+${MODIFIER_KEY}+1`);
   await pressEnter(page);
   await type(page, 'world');
-  await assertStoreMatchJSX(
-    page,
-    `
-<affine:note
-  prop:background="--affine-note-background-blue"
-  prop:displayMode="both"
-  prop:edgeless={
-    Object {
-      "style": Object {
-        "borderRadius": 0,
-        "borderSize": 4,
-        "borderStyle": "none",
-        "shadowType": "--affine-note-shadow-sticker",
-      },
-    }
-  }
-  prop:hidden={false}
-  prop:index="a0"
->
-  <affine:paragraph
-    prop:text="hello"
-    prop:type="h1"
-  />
-  <affine:paragraph
-    prop:text="world"
-    prop:type="text"
-  />
-</affine:note>`,
-    noteId
+  expect(await getPageSnapshot(page, true)).toMatchSnapshot(
+    `${testInfo.title}.json`
   );
 });

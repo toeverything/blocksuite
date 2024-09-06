@@ -12,6 +12,7 @@ import {
   enterPlaygroundRoom,
   focusRichText,
   getIndexCoordinate,
+  getPageSnapshot,
   getRichTextBoundingBox,
   initEmptyParagraphState,
   initImageState,
@@ -41,7 +42,6 @@ import {
   assertAlmostEqual,
   assertBlockCount,
   assertRichTexts,
-  assertStoreMatchJSX,
 } from '../utils/asserts.js';
 import { test } from '../utils/playwright.js';
 
@@ -257,7 +257,7 @@ test('selection on heavy page', async ({ page }) => {
   await expect(rects).toHaveCount(5);
 });
 
-test('should indent multi-selection block', async ({ page }) => {
+test('should indent multi-selection block', async ({ page }, testInfo) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await initThreeParagraphs(page);
@@ -274,45 +274,12 @@ test('should indent multi-selection block', async ({ page }) => {
 
   await page.keyboard.press('Tab');
 
-  await assertStoreMatchJSX(
-    page,
-    `
-<affine:page>
-  <affine:note
-    prop:background="--affine-note-background-blue"
-    prop:displayMode="both"
-    prop:edgeless={
-      Object {
-        "style": Object {
-          "borderRadius": 0,
-          "borderSize": 4,
-          "borderStyle": "none",
-          "shadowType": "--affine-note-shadow-sticker",
-        },
-      }
-    }
-    prop:hidden={false}
-    prop:index="a0"
-  >
-    <affine:paragraph
-      prop:text="123"
-      prop:type="text"
-    >
-      <affine:paragraph
-        prop:text="456"
-        prop:type="text"
-      />
-      <affine:paragraph
-        prop:text="789"
-        prop:type="text"
-      />
-    </affine:paragraph>
-  </affine:note>
-</affine:page>`
+  expect(await getPageSnapshot(page, true)).toMatchSnapshot(
+    `${testInfo.title}.json`
   );
 });
 
-test('should unindent multi-selection block', async ({ page }) => {
+test('should unindent multi-selection block', async ({ page }, testInfo) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await initThreeParagraphs(page);
@@ -329,41 +296,8 @@ test('should unindent multi-selection block', async ({ page }) => {
 
   await page.keyboard.press('Tab');
 
-  await assertStoreMatchJSX(
-    page,
-    `
-<affine:page>
-  <affine:note
-    prop:background="--affine-note-background-blue"
-    prop:displayMode="both"
-    prop:edgeless={
-      Object {
-        "style": Object {
-          "borderRadius": 0,
-          "borderSize": 4,
-          "borderStyle": "none",
-          "shadowType": "--affine-note-shadow-sticker",
-        },
-      }
-    }
-    prop:hidden={false}
-    prop:index="a0"
-  >
-    <affine:paragraph
-      prop:text="123"
-      prop:type="text"
-    >
-      <affine:paragraph
-        prop:text="456"
-        prop:type="text"
-      />
-      <affine:paragraph
-        prop:text="789"
-        prop:type="text"
-      />
-    </affine:paragraph>
-  </affine:note>
-</affine:page>`
+  expect(await getPageSnapshot(page, true)).toMatchSnapshot(
+    `${testInfo.title}_init.json`
   );
 
   coord = await getIndexCoordinate(page, [1, 2]);
@@ -378,40 +312,8 @@ test('should unindent multi-selection block', async ({ page }) => {
 
   await pressShiftTab(page);
 
-  await assertStoreMatchJSX(
-    page,
-    `
-<affine:page>
-  <affine:note
-    prop:background="--affine-note-background-blue"
-    prop:displayMode="both"
-    prop:edgeless={
-      Object {
-        "style": Object {
-          "borderRadius": 0,
-          "borderSize": 4,
-          "borderStyle": "none",
-          "shadowType": "--affine-note-shadow-sticker",
-        },
-      }
-    }
-    prop:hidden={false}
-    prop:index="a0"
-  >
-    <affine:paragraph
-      prop:text="123"
-      prop:type="text"
-    />
-    <affine:paragraph
-      prop:text="456"
-      prop:type="text"
-    />
-    <affine:paragraph
-      prop:text="789"
-      prop:type="text"
-    />
-  </affine:note>
-</affine:page>`
+  expect(await getPageSnapshot(page, true)).toMatchSnapshot(
+    `${testInfo.title}_final.json`
   );
 });
 
@@ -1191,7 +1093,7 @@ test('undo should clear block selection', async ({ page }) => {
 
 test('should not draw rect for sub selected blocks when entering tab key', async ({
   page,
-}) => {
+}, testInfo) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await initThreeParagraphs(page);
@@ -1210,41 +1112,8 @@ test('should not draw rect for sub selected blocks when entering tab key', async
 
   await pressTab(page);
 
-  await assertStoreMatchJSX(
-    page,
-    `
-<affine:page>
-  <affine:note
-    prop:background="--affine-note-background-blue"
-    prop:displayMode="both"
-    prop:edgeless={
-      Object {
-        "style": Object {
-          "borderRadius": 0,
-          "borderSize": 4,
-          "borderStyle": "none",
-          "shadowType": "--affine-note-shadow-sticker",
-        },
-      }
-    }
-    prop:hidden={false}
-    prop:index="a0"
-  >
-    <affine:paragraph
-      prop:text="123"
-      prop:type="text"
-    >
-      <affine:paragraph
-        prop:text="456"
-        prop:type="text"
-      />
-      <affine:paragraph
-        prop:text="789"
-        prop:type="text"
-      />
-    </affine:paragraph>
-  </affine:note>
-</affine:page>`
+  expect(await getPageSnapshot(page, true)).toMatchSnapshot(
+    `${testInfo.title}.json`
   );
 });
 
@@ -1306,7 +1175,7 @@ test('should not show option menu of image on block selection', async ({
 
 test('click bottom of page and if the last is embed block, editor should insert a new editable block', async ({
   page,
-}) => {
+}, testInfo) => {
   await enterPlaygroundRoom(page);
   await initImageState(page);
   await activeEmbed(page);
@@ -1322,40 +1191,8 @@ test('click bottom of page and if the last is embed block, editor should insert 
 
   await page.mouse.click(hostRect.x + hostRect.width / 2, hostRect.bottom - 10);
 
-  await assertStoreMatchJSX(
-    page,
-    `
-<affine:page>
-  <affine:note
-    prop:background="--affine-note-background-blue"
-    prop:displayMode="both"
-    prop:edgeless={
-      Object {
-        "style": Object {
-          "borderRadius": 0,
-          "borderSize": 4,
-          "borderStyle": "none",
-          "shadowType": "--affine-note-shadow-sticker",
-        },
-      }
-    }
-    prop:hidden={false}
-    prop:index="a0"
-  >
-    <affine:image
-      prop:caption=""
-      prop:height={256.5}
-      prop:index="a0"
-      prop:rotate={0}
-      prop:size={-1}
-      prop:sourceId="ejImogf-Tb7AuKY-v94uz1zuOJbClqK-tWBxVr_ksGA="
-      prop:width={342}
-    />
-    <affine:paragraph
-      prop:type="text"
-    />
-  </affine:note>
-</affine:page>`
+  expect(await getPageSnapshot(page, true)).toMatchSnapshot(
+    `${testInfo.title}.json`
   );
 });
 

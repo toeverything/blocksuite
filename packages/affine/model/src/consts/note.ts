@@ -34,7 +34,7 @@ export const NOTE_BACKGROUND_COLORS = [
   NoteBackgroundColor.White,
 ] as const;
 
-export const DEFAULT_NOTE_BACKGROUND_COLOR = NoteBackgroundColor.Blue;
+export const DEFAULT_NOTE_BACKGROUND_COLOR = NoteBackgroundColor.White;
 
 export const NoteBackgroundColorsSchema = z.nativeEnum(NoteBackgroundColor);
 
@@ -58,7 +58,7 @@ export const NOTE_SHADOWS = [
   NoteShadow.Film,
 ] as const;
 
-export const DEFAULT_NOTE_SHADOW = NoteShadow.Sticker;
+export const DEFAULT_NOTE_SHADOW = NoteShadow.Box;
 
 export const NoteShadowsSchema = z.nativeEnum(NoteShadow);
 
@@ -74,4 +74,30 @@ export enum StrokeStyle {
   Solid = 'solid',
 }
 
+export const DEFAULT_NOTE_BORDER_STYLE = StrokeStyle.None;
+
 export const StrokeStyleMap = createEnumMap(StrokeStyle);
+
+export enum NoteCorners {
+  Huge = 32,
+  Large = 24,
+  Medium = 16,
+  None = 0,
+  Small = 8,
+}
+
+export const NoteCornersMap = createEnumMap(NoteCorners);
+
+export const NOTE_CORNERS = [
+  NoteCorners.None,
+  NoteCorners.Small,
+  NoteCorners.Medium,
+  NoteCorners.Large,
+  NoteCorners.Huge,
+] as const;
+
+export const DEFAULT_NOTE_CORNER = NoteCorners.Small;
+
+export const NoteCornersSchema = z.nativeEnum(NoteCorners);
+
+export const DEFAULT_NOTE_BORDER_SIZE = 4;

@@ -17,10 +17,7 @@ import {
   initEmptyCodeBlockState,
   setSelection,
 } from '../utils/actions/misc.js';
-import {
-  assertRichTextInlineRange,
-  assertStoreMatchJSX,
-} from '../utils/asserts.js';
+import { assertRichTextInlineRange } from '../utils/asserts.js';
 import { test } from '../utils/playwright.js';
 import { getCodeBlock } from './utils.js';
 
@@ -109,7 +106,7 @@ test.skip('use keyboard copy inside code block copy', async ({
 
 test('code block has content, click code block copy menu, copy whole code block', async ({
   page,
-}) => {
+}, testInfo) => {
   await enterPlaygroundRoom(page);
   await initEmptyCodeBlockState(page, { language: 'javascript' });
   await focusRichText(page);
@@ -124,46 +121,14 @@ test('code block has content, click code block copy menu, copy whole code block'
 
   await focusRichText(page, 1);
   await pasteByKeyboard(page);
-  await assertStoreMatchJSX(
-    page,
-    /*xml*/ `
-<affine:page>
-  <affine:note
-    prop:background="--affine-note-background-blue"
-    prop:displayMode="both"
-    prop:edgeless={
-      Object {
-        "style": Object {
-          "borderRadius": 0,
-          "borderSize": 4,
-          "borderStyle": "none",
-          "shadowType": "--affine-note-shadow-sticker",
-        },
-      }
-    }
-    prop:hidden={false}
-    prop:index="a0"
-  >
-    <affine:code
-      prop:caption=""
-      prop:language="javascript"
-      prop:text="use"
-      prop:wrap={false}
-    />
-    <affine:code
-      prop:caption=""
-      prop:language="javascript"
-      prop:text="use"
-      prop:wrap={false}
-    />
-  </affine:note>
-</affine:page>`
+  expect(await getPageSnapshot(page, true)).toMatchSnapshot(
+    `${testInfo.title}_pasted.json`
   );
 });
 
 test('code block is empty, click code block copy menu, copy the empty code block', async ({
   page,
-}) => {
+}, testInfo) => {
   await enterPlaygroundRoom(page);
   await initEmptyCodeBlockState(page, { language: 'javascript' });
   await focusRichText(page);
@@ -177,37 +142,7 @@ test('code block is empty, click code block copy menu, copy the empty code block
 
   await focusRichText(page, 1);
   await pasteByKeyboard(page);
-  await assertStoreMatchJSX(
-    page,
-    /*xml*/ `
-<affine:page>
-  <affine:note
-    prop:background="--affine-note-background-blue"
-    prop:displayMode="both"
-    prop:edgeless={
-      Object {
-        "style": Object {
-          "borderRadius": 0,
-          "borderSize": 4,
-          "borderStyle": "none",
-          "shadowType": "--affine-note-shadow-sticker",
-        },
-      }
-    }
-    prop:hidden={false}
-    prop:index="a0"
-  >
-    <affine:code
-      prop:caption=""
-      prop:language="javascript"
-      prop:wrap={false}
-    />
-    <affine:code
-      prop:caption=""
-      prop:language="javascript"
-      prop:wrap={false}
-    />
-  </affine:note>
-</affine:page>`
+  expect(await getPageSnapshot(page, true)).toMatchSnapshot(
+    `${testInfo.title}_pasted.json`
   );
 });

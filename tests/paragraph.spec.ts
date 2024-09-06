@@ -8,6 +8,7 @@ import {
   focusRichText,
   focusTitle,
   getIndexCoordinate,
+  getPageSnapshot,
   initEmptyEdgelessState,
   initEmptyParagraphState,
   initThreeDividers,
@@ -423,9 +424,11 @@ test('update paragraph with children to head type', async ({ page }) => {
   await assertBlockChildrenIds(page, '2', ['3', '4']);
 });
 
-test('should indent and unindent works with children', async ({ page }) => {
+test('should indent and unindent works with children', async ({
+  page,
+}, testInfo) => {
   await enterPlaygroundRoom(page);
-  const { noteId } = await initEmptyParagraphState(page);
+  await initEmptyParagraphState(page);
   await initThreeParagraphs(page);
   await pressEnter(page);
   await type(page, '012');
@@ -437,49 +440,9 @@ test('should indent and unindent works with children', async ({ page }) => {
   // 012
   // 345
 
-  await assertStoreMatchJSX(
-    page,
-    `
-<affine:note
-  prop:background="--affine-note-background-blue"
-  prop:displayMode="both"
-  prop:edgeless={
-    Object {
-      "style": Object {
-        "borderRadius": 0,
-        "borderSize": 4,
-        "borderStyle": "none",
-        "shadowType": "--affine-note-shadow-sticker",
-      },
-    }
-  }
-  prop:hidden={false}
-  prop:index="a0"
->
-  <affine:paragraph
-    prop:text="123"
-    prop:type="text"
-  />
-  <affine:paragraph
-    prop:text="456"
-    prop:type="text"
-  />
-  <affine:paragraph
-    prop:text="789"
-    prop:type="text"
-  />
-  <affine:paragraph
-    prop:text="012"
-    prop:type="text"
-  />
-  <affine:paragraph
-    prop:text="345"
-    prop:type="text"
-  />
-</affine:note>`,
-    noteId
+  expect(await getPageSnapshot(page, true)).toMatchSnapshot(
+    `${testInfo.title}_init.json`
   );
-
   //-- test indent --//
 
   // Focus 789
@@ -491,48 +454,8 @@ test('should indent and unindent works with children', async ({ page }) => {
   // 012
   // 345
 
-  await assertStoreMatchJSX(
-    page,
-    `
-<affine:note
-  prop:background="--affine-note-background-blue"
-  prop:displayMode="both"
-  prop:edgeless={
-    Object {
-      "style": Object {
-        "borderRadius": 0,
-        "borderSize": 4,
-        "borderStyle": "none",
-        "shadowType": "--affine-note-shadow-sticker",
-      },
-    }
-  }
-  prop:hidden={false}
-  prop:index="a0"
->
-  <affine:paragraph
-    prop:text="123"
-    prop:type="text"
-  />
-  <affine:paragraph
-    prop:text="456"
-    prop:type="text"
-  >
-    <affine:paragraph
-      prop:text="789"
-      prop:type="text"
-    />
-  </affine:paragraph>
-  <affine:paragraph
-    prop:text="012"
-    prop:type="text"
-  />
-  <affine:paragraph
-    prop:text="345"
-    prop:type="text"
-  />
-</affine:note>`,
-    noteId
+  expect(await getPageSnapshot(page, true)).toMatchSnapshot(
+    `${testInfo.title}_indent.json`
   );
 
   // Focus 012
@@ -544,48 +467,8 @@ test('should indent and unindent works with children', async ({ page }) => {
   //   012|
   // 345
 
-  await assertStoreMatchJSX(
-    page,
-    `
-<affine:note
-  prop:background="--affine-note-background-blue"
-  prop:displayMode="both"
-  prop:edgeless={
-    Object {
-      "style": Object {
-        "borderRadius": 0,
-        "borderSize": 4,
-        "borderStyle": "none",
-        "shadowType": "--affine-note-shadow-sticker",
-      },
-    }
-  }
-  prop:hidden={false}
-  prop:index="a0"
->
-  <affine:paragraph
-    prop:text="123"
-    prop:type="text"
-  />
-  <affine:paragraph
-    prop:text="456"
-    prop:type="text"
-  >
-    <affine:paragraph
-      prop:text="789"
-      prop:type="text"
-    />
-    <affine:paragraph
-      prop:text="012"
-      prop:type="text"
-    />
-  </affine:paragraph>
-  <affine:paragraph
-    prop:text="345"
-    prop:type="text"
-  />
-</affine:note>`,
-    noteId
+  expect(await getPageSnapshot(page, true)).toMatchSnapshot(
+    `${testInfo.title}_indent_2.json`
   );
 
   // Focus 456
@@ -597,49 +480,8 @@ test('should indent and unindent works with children', async ({ page }) => {
   //     012
   // 345
 
-  await assertStoreMatchJSX(
-    page,
-    `
-<affine:note
-  prop:background="--affine-note-background-blue"
-  prop:displayMode="both"
-  prop:edgeless={
-    Object {
-      "style": Object {
-        "borderRadius": 0,
-        "borderSize": 4,
-        "borderStyle": "none",
-        "shadowType": "--affine-note-shadow-sticker",
-      },
-    }
-  }
-  prop:hidden={false}
-  prop:index="a0"
->
-  <affine:paragraph
-    prop:text="123"
-    prop:type="text"
-  >
-    <affine:paragraph
-      prop:text="456"
-      prop:type="text"
-    >
-      <affine:paragraph
-        prop:text="789"
-        prop:type="text"
-      />
-      <affine:paragraph
-        prop:text="012"
-        prop:type="text"
-      />
-    </affine:paragraph>
-  </affine:paragraph>
-  <affine:paragraph
-    prop:text="345"
-    prop:type="text"
-  />
-</affine:note>`,
-    noteId
+  expect(await getPageSnapshot(page, true)).toMatchSnapshot(
+    `${testInfo.title}_indent_3.json`
   );
 
   // Focus 345
@@ -651,52 +493,9 @@ test('should indent and unindent works with children', async ({ page }) => {
   //     012
   //       345|
 
-  await assertStoreMatchJSX(
-    page,
-    `
-<affine:note
-  prop:background="--affine-note-background-blue"
-  prop:displayMode="both"
-  prop:edgeless={
-    Object {
-      "style": Object {
-        "borderRadius": 0,
-        "borderSize": 4,
-        "borderStyle": "none",
-        "shadowType": "--affine-note-shadow-sticker",
-      },
-    }
-  }
-  prop:hidden={false}
-  prop:index="a0"
->
-  <affine:paragraph
-    prop:text="123"
-    prop:type="text"
-  >
-    <affine:paragraph
-      prop:text="456"
-      prop:type="text"
-    >
-      <affine:paragraph
-        prop:text="789"
-        prop:type="text"
-      />
-      <affine:paragraph
-        prop:text="012"
-        prop:type="text"
-      >
-        <affine:paragraph
-          prop:text="345"
-          prop:type="text"
-        />
-      </affine:paragraph>
-    </affine:paragraph>
-  </affine:paragraph>
-</affine:note>`,
-    noteId
+  expect(await getPageSnapshot(page, true)).toMatchSnapshot(
+    `${testInfo.title}_indent_4.json`
   );
-
   //-- test unindent --//
 
   // Focus 456
@@ -708,49 +507,8 @@ test('should indent and unindent works with children', async ({ page }) => {
   //   012
   //     345
 
-  await assertStoreMatchJSX(
-    page,
-    `
-<affine:note
-  prop:background="--affine-note-background-blue"
-  prop:displayMode="both"
-  prop:edgeless={
-    Object {
-      "style": Object {
-        "borderRadius": 0,
-        "borderSize": 4,
-        "borderStyle": "none",
-        "shadowType": "--affine-note-shadow-sticker",
-      },
-    }
-  }
-  prop:hidden={false}
-  prop:index="a0"
->
-  <affine:paragraph
-    prop:text="123"
-    prop:type="text"
-  />
-  <affine:paragraph
-    prop:text="456"
-    prop:type="text"
-  >
-    <affine:paragraph
-      prop:text="789"
-      prop:type="text"
-    />
-    <affine:paragraph
-      prop:text="012"
-      prop:type="text"
-    >
-      <affine:paragraph
-        prop:text="345"
-        prop:type="text"
-      />
-    </affine:paragraph>
-  </affine:paragraph>
-</affine:note>`,
-    noteId
+  expect(await getPageSnapshot(page, true)).toMatchSnapshot(
+    `${testInfo.title}_unindent_1.json`
   );
 
   // Focus 012
@@ -762,49 +520,8 @@ test('should indent and unindent works with children', async ({ page }) => {
   // 012|
   //   345
 
-  await assertStoreMatchJSX(
-    page,
-    `
-<affine:note
-  prop:background="--affine-note-background-blue"
-  prop:displayMode="both"
-  prop:edgeless={
-    Object {
-      "style": Object {
-        "borderRadius": 0,
-        "borderSize": 4,
-        "borderStyle": "none",
-        "shadowType": "--affine-note-shadow-sticker",
-      },
-    }
-  }
-  prop:hidden={false}
-  prop:index="a0"
->
-  <affine:paragraph
-    prop:text="123"
-    prop:type="text"
-  />
-  <affine:paragraph
-    prop:text="456"
-    prop:type="text"
-  >
-    <affine:paragraph
-      prop:text="789"
-      prop:type="text"
-    />
-  </affine:paragraph>
-  <affine:paragraph
-    prop:text="012"
-    prop:type="text"
-  >
-    <affine:paragraph
-      prop:text="345"
-      prop:type="text"
-    />
-  </affine:paragraph>
-</affine:note>`,
-    noteId
+  expect(await getPageSnapshot(page, true)).toMatchSnapshot(
+    `${testInfo.title}_unindent_2.json`
   );
 
   // Focus 789
@@ -825,53 +542,16 @@ test('should indent and unindent works with children', async ({ page }) => {
   // 012
   // 345|
 
-  await assertStoreMatchJSX(
-    page,
-    `
-<affine:note
-  prop:background="--affine-note-background-blue"
-  prop:displayMode="both"
-  prop:edgeless={
-    Object {
-      "style": Object {
-        "borderRadius": 0,
-        "borderSize": 4,
-        "borderStyle": "none",
-        "shadowType": "--affine-note-shadow-sticker",
-      },
-    }
-  }
-  prop:hidden={false}
-  prop:index="a0"
->
-  <affine:paragraph
-    prop:text="123"
-    prop:type="text"
-  />
-  <affine:paragraph
-    prop:text="456"
-    prop:type="text"
-  />
-  <affine:paragraph
-    prop:text="789"
-    prop:type="text"
-  />
-  <affine:paragraph
-    prop:text="012"
-    prop:type="text"
-  />
-  <affine:paragraph
-    prop:text="345"
-    prop:type="text"
-  />
-</affine:note>`,
-    noteId
+  expect(await getPageSnapshot(page, true)).toMatchSnapshot(
+    `${testInfo.title}_unindent_3.json`
   );
 });
 
-test('paragraph with child block should work at enter', async ({ page }) => {
+test('paragraph with child block should work at enter', async ({
+  page,
+}, testInfo) => {
   await enterPlaygroundRoom(page);
-  const { noteId } = await initEmptyParagraphState(page);
+  await initEmptyParagraphState(page);
   await focusRichText(page);
   await type(page, '123');
   await pressEnter(page);
@@ -879,153 +559,38 @@ test('paragraph with child block should work at enter', async ({ page }) => {
 
   await focusRichText(page, 1);
   await page.keyboard.press('Tab');
-  await assertStoreMatchJSX(
-    page,
-    `
-<affine:note
-  prop:background="--affine-note-background-blue"
-  prop:displayMode="both"
-  prop:edgeless={
-    Object {
-      "style": Object {
-        "borderRadius": 0,
-        "borderSize": 4,
-        "borderStyle": "none",
-        "shadowType": "--affine-note-shadow-sticker",
-      },
-    }
-  }
-  prop:hidden={false}
-  prop:index="a0"
->
-  <affine:paragraph
-    prop:text="123"
-    prop:type="text"
-  >
-    <affine:paragraph
-      prop:text="456"
-      prop:type="text"
-    />
-  </affine:paragraph>
-</affine:note>`,
-    noteId
+  expect(await getPageSnapshot(page, true)).toMatchSnapshot(
+    `${testInfo.title}_init.json`
   );
   await focusRichText(page, 0);
   await pressEnter(page);
   await type(page, '789');
-  await assertStoreMatchJSX(
-    page,
-    `
-<affine:note
-  prop:background="--affine-note-background-blue"
-  prop:displayMode="both"
-  prop:edgeless={
-    Object {
-      "style": Object {
-        "borderRadius": 0,
-        "borderSize": 4,
-        "borderStyle": "none",
-        "shadowType": "--affine-note-shadow-sticker",
-      },
-    }
-  }
-  prop:hidden={false}
-  prop:index="a0"
->
-  <affine:paragraph
-    prop:text="123"
-    prop:type="text"
-  >
-    <affine:paragraph
-      prop:text="789"
-      prop:type="text"
-    />
-    <affine:paragraph
-      prop:text="456"
-      prop:type="text"
-    />
-  </affine:paragraph>
-</affine:note>`,
-    noteId
+  expect(await getPageSnapshot(page, true)).toMatchSnapshot(
+    `${testInfo.title}_final.json`
   );
 });
 
 test('should delete paragraph block child can hold cursor in correct position', async ({
   page,
-}) => {
+}, testInfo) => {
   await enterPlaygroundRoom(page);
-  const { noteId } = await initEmptyParagraphState(page);
+  await initEmptyParagraphState(page);
   await focusRichText(page);
   await type(page, '123');
   await pressEnter(page);
   await pressTab(page);
   await waitNextFrame(page);
   await type(page, '4');
-  await assertStoreMatchJSX(
-    page,
-    `
-<affine:note
-  prop:background="--affine-note-background-blue"
-  prop:displayMode="both"
-  prop:edgeless={
-    Object {
-      "style": Object {
-        "borderRadius": 0,
-        "borderSize": 4,
-        "borderStyle": "none",
-        "shadowType": "--affine-note-shadow-sticker",
-      },
-    }
-  }
-  prop:hidden={false}
-  prop:index="a0"
->
-  <affine:paragraph
-    prop:text="123"
-    prop:type="text"
-  >
-    <affine:paragraph
-      prop:text="4"
-      prop:type="text"
-    />
-  </affine:paragraph>
-</affine:note>`,
-    noteId
+  expect(await getPageSnapshot(page, true)).toMatchSnapshot(
+    `${testInfo.title}_init.json`
   );
 
   await pressBackspace(page, 2);
   await waitNextFrame(page);
   await type(page, 'now');
 
-  await assertStoreMatchJSX(
-    page,
-    `
-<affine:note
-  prop:background="--affine-note-background-blue"
-  prop:displayMode="both"
-  prop:edgeless={
-    Object {
-      "style": Object {
-        "borderRadius": 0,
-        "borderSize": 4,
-        "borderStyle": "none",
-        "shadowType": "--affine-note-shadow-sticker",
-      },
-    }
-  }
-  prop:hidden={false}
-  prop:index="a0"
->
-  <affine:paragraph
-    prop:text="123"
-    prop:type="text"
-  />
-  <affine:paragraph
-    prop:text="now"
-    prop:type="text"
-  />
-</affine:note>`,
-    noteId
+  expect(await getPageSnapshot(page, true)).toMatchSnapshot(
+    `${testInfo.title}_final.json`
   );
 });
 
@@ -1489,9 +1054,9 @@ test.describe('press ArrowDown when cursor is at the last line of a block', () =
 
 test('delete empty text paragraph block should keep children blocks when following custom blocks', async ({
   page,
-}) => {
+}, testInfo) => {
   await enterPlaygroundRoom(page);
-  const { noteId } = await initEmptyParagraphState(page);
+  await initEmptyParagraphState(page);
   await focusRichText(page);
   await type(page, '--- ');
   await assertDivider(page, 1);
@@ -1508,41 +1073,8 @@ test('delete empty text paragraph block should keep children blocks when followi
   await focusRichText(page, 2);
   await pressTab(page);
 
-  await assertStoreMatchJSX(
-    page,
-    `
-<affine:note
-  prop:background="--affine-note-background-blue"
-  prop:displayMode="both"
-  prop:edgeless={
-    Object {
-      "style": Object {
-        "borderRadius": 0,
-        "borderSize": 4,
-        "borderStyle": "none",
-        "shadowType": "--affine-note-shadow-sticker",
-      },
-    }
-  }
-  prop:hidden={false}
-  prop:index="a0"
->
-  <affine:divider />
-  <affine:paragraph
-    prop:text="123"
-    prop:type="text"
-  />
-  <affine:paragraph
-    prop:text="456"
-    prop:type="text"
-  >
-    <affine:paragraph
-      prop:text="789"
-      prop:type="text"
-    />
-  </affine:paragraph>
-</affine:note>`,
-    noteId
+  expect(await getPageSnapshot(page, true)).toMatchSnapshot(
+    `${testInfo.title}_init.json`
   );
 
   // Delete the parent paragraph block
@@ -1551,36 +1083,8 @@ test('delete empty text paragraph block should keep children blocks when followi
 
   await assertRichTexts(page, ['123', '789']);
 
-  await assertStoreMatchJSX(
-    page,
-    `
-<affine:note
-  prop:background="--affine-note-background-blue"
-  prop:displayMode="both"
-  prop:edgeless={
-    Object {
-      "style": Object {
-        "borderRadius": 0,
-        "borderSize": 4,
-        "borderStyle": "none",
-        "shadowType": "--affine-note-shadow-sticker",
-      },
-    }
-  }
-  prop:hidden={false}
-  prop:index="a0"
->
-  <affine:divider />
-  <affine:paragraph
-    prop:text="123"
-    prop:type="text"
-  />
-  <affine:paragraph
-    prop:text="789"
-    prop:type="text"
-  />
-</affine:note>`,
-    noteId
+  expect(await getPageSnapshot(page, true)).toMatchSnapshot(
+    `${testInfo.title}_final.json`
   );
 });
 
@@ -1602,9 +1106,11 @@ test('delete first paragraph with children should keep children blocks', async (
   await assertRichTexts(page, ['456']);
 });
 
-test('paragraph indent and delete in line start', async ({ page }) => {
+test('paragraph indent and delete in line start', async ({
+  page,
+}, testInfo) => {
   await enterPlaygroundRoom(page);
-  const { noteId } = await initEmptyParagraphState(page);
+  await initEmptyParagraphState(page);
   await focusRichText(page);
   await type(page, 'abc');
   await pressEnter(page);
@@ -1624,49 +1130,9 @@ test('paragraph indent and delete in line start', async ({ page }) => {
   //     hij
   //   klm
   //   nop
-  await assertStoreMatchJSX(
-    page,
-    `
-<affine:note
-  prop:background="--affine-note-background-blue"
-  prop:displayMode="both"
-  prop:edgeless={
-    Object {
-      "style": Object {
-        "borderRadius": 0,
-        "borderSize": 4,
-        "borderStyle": "none",
-        "shadowType": "--affine-note-shadow-sticker",
-      },
-    }
-  }
-  prop:hidden={false}
-  prop:index="a0"
->
-  <affine:paragraph
-    prop:text="abc"
-    prop:type="text"
-  >
-    <affine:paragraph
-      prop:text="efg"
-      prop:type="text"
-    >
-      <affine:paragraph
-        prop:text="hij"
-        prop:type="text"
-      />
-    </affine:paragraph>
-    <affine:paragraph
-      prop:text="klm"
-      prop:type="text"
-    />
-    <affine:paragraph
-      prop:text="nop"
-      prop:type="text"
-    />
-  </affine:paragraph>
-</affine:note>`,
-    noteId
+
+  expect(await getPageSnapshot(page, true)).toMatchSnapshot(
+    `${testInfo.title}_init.json`
   );
 
   await pressBackspace(page, 2);
@@ -1675,44 +1141,9 @@ test('paragraph indent and delete in line start', async ({ page }) => {
   //   hij
   //   k|lm
   //   nop
-  await assertStoreMatchJSX(
-    page,
-    `
-<affine:note
-  prop:background="--affine-note-background-blue"
-  prop:displayMode="both"
-  prop:edgeless={
-    Object {
-      "style": Object {
-        "borderRadius": 0,
-        "borderSize": 4,
-        "borderStyle": "none",
-        "shadowType": "--affine-note-shadow-sticker",
-      },
-    }
-  }
-  prop:hidden={false}
-  prop:index="a0"
->
-  <affine:paragraph
-    prop:text="abcfg"
-    prop:type="text"
-  >
-    <affine:paragraph
-      prop:text="hij"
-      prop:type="text"
-    />
-    <affine:paragraph
-      prop:text="klm"
-      prop:type="text"
-    />
-    <affine:paragraph
-      prop:text="nop"
-      prop:type="text"
-    />
-  </affine:paragraph>
-</affine:note>`,
-    noteId
+
+  expect(await getPageSnapshot(page, true)).toMatchSnapshot(
+    `${testInfo.title}_after_press_backspace.json`
   );
 
   await pressBackspace(page, 2);
@@ -1720,80 +1151,18 @@ test('paragraph indent and delete in line start', async ({ page }) => {
   // abcfg
   //   hijlm
   //   n|op
-  await assertStoreMatchJSX(
-    page,
-    `
-<affine:note
-  prop:background="--affine-note-background-blue"
-  prop:displayMode="both"
-  prop:edgeless={
-    Object {
-      "style": Object {
-        "borderRadius": 0,
-        "borderSize": 4,
-        "borderStyle": "none",
-        "shadowType": "--affine-note-shadow-sticker",
-      },
-    }
-  }
-  prop:hidden={false}
-  prop:index="a0"
->
-  <affine:paragraph
-    prop:text="abcfg"
-    prop:type="text"
-  >
-    <affine:paragraph
-      prop:text="hijlm"
-      prop:type="text"
-    />
-    <affine:paragraph
-      prop:text="nop"
-      prop:type="text"
-    />
-  </affine:paragraph>
-</affine:note>`,
-    noteId
+
+  expect(await getPageSnapshot(page, true)).toMatchSnapshot(
+    `${testInfo.title}_after_press_backspace_2.json`
   );
 
   await pressBackspace(page, 2);
   // abcfg
   //   hijlm
   // |op
-  await assertStoreMatchJSX(
-    page,
-    `
-<affine:note
-  prop:background="--affine-note-background-blue"
-  prop:displayMode="both"
-  prop:edgeless={
-    Object {
-      "style": Object {
-        "borderRadius": 0,
-        "borderSize": 4,
-        "borderStyle": "none",
-        "shadowType": "--affine-note-shadow-sticker",
-      },
-    }
-  }
-  prop:hidden={false}
-  prop:index="a0"
->
-  <affine:paragraph
-    prop:text="abcfg"
-    prop:type="text"
-  >
-    <affine:paragraph
-      prop:text="hijlm"
-      prop:type="text"
-    />
-  </affine:paragraph>
-  <affine:paragraph
-    prop:text="op"
-    prop:type="text"
-  />
-</affine:note>`,
-    noteId
+
+  expect(await getPageSnapshot(page, true)).toMatchSnapshot(
+    `${testInfo.title}_after_press_backspace_3.json`
   );
 });
 

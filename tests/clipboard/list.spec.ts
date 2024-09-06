@@ -441,15 +441,15 @@ test(scoped`should copy and paste of database work`, async ({ page }) => {
     /*xml*/ `
 <affine:page>
   <affine:note
-    prop:background="--affine-note-background-blue"
+    prop:background="--affine-note-background-white"
     prop:displayMode="both"
     prop:edgeless={
       Object {
         "style": Object {
-          "borderRadius": 0,
+          "borderRadius": 8,
           "borderSize": 4,
           "borderStyle": "none",
-          "shadowType": "--affine-note-shadow-sticker",
+          "shadowType": "--affine-note-shadow-box",
         },
       }
     }
@@ -487,15 +487,15 @@ test(scoped`should copy and paste of database work`, async ({ page }) => {
     /*xml*/ `
 <affine:page>
   <affine:note
-    prop:background="--affine-note-background-blue"
+    prop:background="--affine-note-background-white"
     prop:displayMode="both"
     prop:edgeless={
       Object {
         "style": Object {
-          "borderRadius": 0,
+          "borderRadius": 8,
           "borderSize": 4,
           "borderStyle": "none",
-          "shadowType": "--affine-note-shadow-sticker",
+          "shadowType": "--affine-note-shadow-box",
         },
       }
     }
@@ -601,7 +601,7 @@ test(scoped`copy and paste to selection block selection`, async ({ page }) => {
 
 test(
   scoped`should keep paragraph block's type when pasting at the start of empty paragraph block except type text`,
-  async ({ page }) => {
+  async ({ page }, testInfo) => {
     test.info().annotations.push({
       type: 'issue',
       description: 'https://github.com/toeverything/blocksuite/issues/2336',
@@ -625,32 +625,9 @@ test(
     await focusRichText(page);
     await pasteByKeyboard(page);
     await waitNextFrame(page);
-    await assertStoreMatchJSX(
-      page,
-      /*xml*/ `
-<affine:page>
-  <affine:note
-    prop:background="--affine-note-background-blue"
-    prop:displayMode="both"
-    prop:edgeless={
-      Object {
-        "style": Object {
-          "borderRadius": 0,
-          "borderSize": 4,
-          "borderStyle": "none",
-          "shadowType": "--affine-note-shadow-sticker",
-        },
-      }
-    }
-    prop:hidden={false}
-    prop:index="a0"
-  >
-    <affine:paragraph
-      prop:text="123"
-      prop:type="quote"
-    />
-  </affine:note>
-</affine:page>`
+
+    expect(await getPageSnapshot(page, true)).toMatchSnapshot(
+      `${testInfo.title}_after-paste-1.json`
     );
 
     await pressEnter(page);
@@ -660,36 +637,8 @@ test(
     await pasteByKeyboard(page, false);
     await waitNextFrame(page);
 
-    await assertStoreMatchJSX(
-      page,
-      /*xml*/ `
-<affine:page>
-  <affine:note
-    prop:background="--affine-note-background-blue"
-    prop:displayMode="both"
-    prop:edgeless={
-      Object {
-        "style": Object {
-          "borderRadius": 0,
-          "borderSize": 4,
-          "borderStyle": "none",
-          "shadowType": "--affine-note-shadow-sticker",
-        },
-      }
-    }
-    prop:hidden={false}
-    prop:index="a0"
-  >
-    <affine:paragraph
-      prop:text="123"
-      prop:type="quote"
-    />
-    <affine:paragraph
-      prop:text="123"
-      prop:type="text"
-    />
-  </affine:note>
-</affine:page>`
+    expect(await getPageSnapshot(page, true)).toMatchSnapshot(
+      `${testInfo.title}_after-paste-2.json`
     );
   }
 );

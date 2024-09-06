@@ -46,10 +46,11 @@ test('use debug menu can create code block', async ({ page }) => {
   await expect(locator).toBeVisible();
 });
 
-test('use markdown syntax can create code block', async ({ page }) => {
+test('use markdown syntax can create code block', async ({
+  page,
+}, testInfo) => {
   await enterPlaygroundRoom(page);
-  const { noteId } = await initEmptyParagraphState(page);
-
+  await initEmptyParagraphState(page);
   await focusRichText(page);
   await type(page, 'aaa');
   await pressEnter(page);
@@ -59,41 +60,8 @@ test('use markdown syntax can create code block', async ({ page }) => {
   await type(page, 'ccc');
   await pressTab(page);
 
-  await assertStoreMatchJSX(
-    page,
-    `
-<affine:note
-  prop:background="--affine-note-background-blue"
-  prop:displayMode="both"
-  prop:edgeless={
-    Object {
-      "style": Object {
-        "borderRadius": 0,
-        "borderSize": 4,
-        "borderStyle": "none",
-        "shadowType": "--affine-note-shadow-sticker",
-      },
-    }
-  }
-  prop:hidden={false}
-  prop:index="a0"
->
-  <affine:paragraph
-    prop:text="aaa"
-    prop:type="text"
-  >
-    <affine:paragraph
-      prop:text="bbb"
-      prop:type="text"
-    >
-      <affine:paragraph
-        prop:text="ccc"
-        prop:type="text"
-      />
-    </affine:paragraph>
-  </affine:paragraph>
-</affine:note>`,
-    noteId
+  expect(await getPageSnapshot(page, true)).toMatchSnapshot(
+    `${testInfo.title}_init.json`
   );
 
   await setSelection(page, 2, 0, 2, 0);
@@ -103,45 +71,8 @@ test('use markdown syntax can create code block', async ({ page }) => {
 
   await type(page, '``` ');
 
-  await assertStoreMatchJSX(
-    page,
-    `
-<affine:note
-  prop:background="--affine-note-background-blue"
-  prop:displayMode="both"
-  prop:edgeless={
-    Object {
-      "style": Object {
-        "borderRadius": 0,
-        "borderSize": 4,
-        "borderStyle": "none",
-        "shadowType": "--affine-note-shadow-sticker",
-      },
-    }
-  }
-  prop:hidden={false}
-  prop:index="a0"
->
-  <affine:code
-    prop:caption=""
-    prop:language={null}
-    prop:wrap={false}
-  />
-  <affine:paragraph
-    prop:text="aaa"
-    prop:type="text"
-  />
-  <affine:paragraph
-    prop:text="bbb"
-    prop:type="text"
-  >
-    <affine:paragraph
-      prop:text="ccc"
-      prop:type="text"
-    />
-  </affine:paragraph>
-</affine:note>`,
-    noteId
+  expect(await getPageSnapshot(page, true)).toMatchSnapshot(
+    `${testInfo.title}_markdown_syntax.json`
   );
 });
 
@@ -269,7 +200,7 @@ test('change code language can work', async ({ page }) => {
   await expect(codeBlockController.languageButton).toHaveText('TypeScript');
 });
 
-test('duplicate code block', async ({ page }) => {
+test('duplicate code block', async ({ page }, testInfo) => {
   await enterPlaygroundRoom(page);
   await initEmptyCodeBlockState(page, { language: 'javascript' });
 
@@ -307,44 +238,12 @@ test('duplicate code block', async ({ page }) => {
   await codeBlockController.codeBlock.hover();
   await (await codeBlockController.openMore()).duplicateButton.click();
 
-  await assertStoreMatchJSX(
-    page,
-    /*xml*/ `
-<affine:page>
-  <affine:note
-    prop:background="--affine-note-background-blue"
-    prop:displayMode="both"
-    prop:edgeless={
-      Object {
-        "style": Object {
-          "borderRadius": 0,
-          "borderSize": 4,
-          "borderStyle": "none",
-          "shadowType": "--affine-note-shadow-sticker",
-        },
-      }
-    }
-    prop:hidden={false}
-    prop:index="a0"
-  >
-    <affine:code
-      prop:caption="BlockSuite"
-      prop:language="rust"
-      prop:text="let a: u8 = 7"
-      prop:wrap={true}
-    />
-    <affine:code
-      prop:caption="BlockSuite"
-      prop:language="rust"
-      prop:text="let a: u8 = 7"
-      prop:wrap={true}
-    />
-  </affine:note>
-</affine:page>`
+  expect(await getPageSnapshot(page, true)).toMatchSnapshot(
+    `${testInfo.title}_final.json`
   );
 });
 
-test('delete code block in more menu', async ({ page }) => {
+test('delete code block in more menu', async ({ page }, testInfo) => {
   await enterPlaygroundRoom(page);
   await initEmptyCodeBlockState(page, { language: 'javascript' });
 
@@ -355,27 +254,8 @@ test('delete code block in more menu', async ({ page }) => {
   await expect(moreMenu.menu).toBeVisible();
   await moreMenu.deleteButton.click();
 
-  await assertStoreMatchJSX(
-    page,
-    /*xml*/ `
-<affine:page>
-  <affine:note
-    prop:background="--affine-note-background-blue"
-    prop:displayMode="both"
-    prop:edgeless={
-      Object {
-        "style": Object {
-          "borderRadius": 0,
-          "borderSize": 4,
-          "borderStyle": "none",
-          "shadowType": "--affine-note-shadow-sticker",
-        },
-      }
-    }
-    prop:hidden={false}
-    prop:index="a0"
-  />
-</affine:page>`
+  expect(await getPageSnapshot(page, true)).toMatchSnapshot(
+    `${testInfo.title}_final.json`
   );
 });
 

@@ -7,10 +7,13 @@ import { BlockModel, defineBlockSchema } from '@blocksuite/store';
 import {
   type Color,
   DEFAULT_NOTE_BACKGROUND_COLOR,
+  DEFAULT_NOTE_BORDER_SIZE,
+  DEFAULT_NOTE_BORDER_STYLE,
+  DEFAULT_NOTE_CORNER,
   DEFAULT_NOTE_SHADOW,
   NOTE_WIDTH,
   NoteDisplayMode,
-  StrokeStyle,
+  type StrokeStyle,
 } from '../../consts/index.js';
 import { GfxCompatible } from '../../utils/index.js';
 
@@ -24,9 +27,9 @@ export const NoteBlockSchema = defineBlockSchema({
     displayMode: NoteDisplayMode.DocAndEdgeless,
     edgeless: {
       style: {
-        borderRadius: 0,
-        borderSize: 4,
-        borderStyle: StrokeStyle.None,
+        borderRadius: DEFAULT_NOTE_CORNER,
+        borderSize: DEFAULT_NOTE_BORDER_SIZE,
+        borderStyle: DEFAULT_NOTE_BORDER_STYLE,
         shadowType: DEFAULT_NOTE_SHADOW,
       },
     },

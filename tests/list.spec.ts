@@ -34,7 +34,6 @@ import {
   assertListPrefix,
   assertRichTextInlineRange,
   assertRichTexts,
-  assertStoreMatchJSX,
   assertTextContent,
 } from './utils/asserts.js';
 import { test } from './utils/playwright.js';
@@ -308,7 +307,7 @@ test('update numbered list block prefix', async ({ page }) => {
   await assertListPrefix(page, ['1', '2', 'a', '3']);
 });
 
-test('basic indent and unindent', async ({ page }) => {
+test('basic indent and unindent', async ({ page }, testInfo) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await focusRichText(page);
@@ -317,104 +316,21 @@ test('basic indent and unindent', async ({ page }) => {
   await pressEnter(page);
   await type(page, 'text2');
 
-  await assertStoreMatchJSX(
-    page,
-    /*xml*/ `
-<affine:page>
-  <affine:note
-    prop:background="--affine-note-background-blue"
-    prop:displayMode="both"
-    prop:edgeless={
-      Object {
-        "style": Object {
-          "borderRadius": 0,
-          "borderSize": 4,
-          "borderStyle": "none",
-          "shadowType": "--affine-note-shadow-sticker",
-        },
-      }
-    }
-    prop:hidden={false}
-    prop:index="a0"
-  >
-    <affine:paragraph
-      prop:text="text1"
-      prop:type="text"
-    />
-    <affine:paragraph
-      prop:text="text2"
-      prop:type="text"
-    />
-  </affine:note>
-</affine:page>`
+  expect(await getPageSnapshot(page, true)).toMatchSnapshot(
+    `${testInfo.title}_init.json`
   );
 
   await page.keyboard.press('Tab');
-  await assertStoreMatchJSX(
-    page,
-    /*xml*/ `
-<affine:page>
-  <affine:note
-    prop:background="--affine-note-background-blue"
-    prop:displayMode="both"
-    prop:edgeless={
-      Object {
-        "style": Object {
-          "borderRadius": 0,
-          "borderSize": 4,
-          "borderStyle": "none",
-          "shadowType": "--affine-note-shadow-sticker",
-        },
-      }
-    }
-    prop:hidden={false}
-    prop:index="a0"
-  >
-    <affine:paragraph
-      prop:text="text1"
-      prop:type="text"
-    >
-      <affine:paragraph
-        prop:text="text2"
-        prop:type="text"
-      />
-    </affine:paragraph>
-  </affine:note>
-</affine:page>`
+
+  expect(await getPageSnapshot(page, true)).toMatchSnapshot(
+    `${testInfo.title}_after_tab.json`
   );
 
   await page.waitForTimeout(100);
   await pressShiftTab(page);
-  await assertStoreMatchJSX(
-    page,
-    /*xml*/ `
-<affine:page>
-  <affine:note
-    prop:background="--affine-note-background-blue"
-    prop:displayMode="both"
-    prop:edgeless={
-      Object {
-        "style": Object {
-          "borderRadius": 0,
-          "borderSize": 4,
-          "borderStyle": "none",
-          "shadowType": "--affine-note-shadow-sticker",
-        },
-      }
-    }
-    prop:hidden={false}
-    prop:index="a0"
-  >
-    <affine:paragraph
-      prop:text="text1"
-      prop:type="text"
-    />
-    <affine:paragraph
-      prop:text="text2"
-      prop:type="text"
-    />
-  </affine:note>
-</affine:page>`
+
+  expect(await getPageSnapshot(page, true)).toMatchSnapshot(
+    `${testInfo.title}_after_shift_tab.json`
   );
 });
 

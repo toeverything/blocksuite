@@ -62,16 +62,16 @@
       "version": 1,
       "props": {
         "xywh": "[0,0,800,92]",
-        "background": "--affine-note-background-blue",
+        "background": "--affine-note-background-white",
         "index": "a0",
         "hidden": false,
         "displayMode": "both",
         "edgeless": {
           "style": {
-            "borderRadius": 0,
+            "borderRadius": 8,
             "borderSize": 4,
             "borderStyle": "none",
-            "shadowType": "--affine-note-shadow-sticker"
+            "shadowType": "--affine-note-shadow-box"
           }
         }
       },

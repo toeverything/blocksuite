@@ -8,6 +8,7 @@ import {
   enterPlaygroundRoom,
   focusRichText,
   focusRichTextEnd,
+  getPageSnapshot,
   initEmptyParagraphState,
   pasteByKeyboard,
   pressEnter,
@@ -30,7 +31,7 @@ const pressCreateLinkShortCut = async (page: Page) => {
   await page.keyboard.press(`${SHORT_KEY}+k`);
 };
 
-test('basic link', async ({ page }) => {
+test('basic link', async ({ page }, testInfo) => {
   const linkText = 'linkText';
   const link = 'http://example.com';
   await enterPlaygroundRoom(page);
@@ -86,39 +87,8 @@ test('basic link', async ({ page }) => {
   const link2Locator = page.locator('affine-link a');
 
   await expect(link2Locator).toHaveAttribute('href', link2);
-  await assertStoreMatchJSX(
-    page,
-    `
-<affine:page>
-  <affine:note
-    prop:background="--affine-note-background-blue"
-    prop:displayMode="both"
-    prop:edgeless={
-      Object {
-        "style": Object {
-          "borderRadius": 0,
-          "borderSize": 4,
-          "borderStyle": "none",
-          "shadowType": "--affine-note-shadow-sticker",
-        },
-      }
-    }
-    prop:hidden={false}
-    prop:index="a0"
-  >
-    <affine:paragraph
-      prop:text={
-        <>
-          <text
-            insert="link2"
-            link="https://github.com"
-          />
-        </>
-      }
-      prop:type="text"
-    />
-  </affine:note>
-</affine:page>`
+  expect(await getPageSnapshot(page, true)).toMatchSnapshot(
+    `${testInfo.title}.json`
   );
 });
 
@@ -421,7 +391,7 @@ test('create link with paste', async ({ page }) => {
   );
 });
 
-test('convert link to card', async ({ page }) => {
+test('convert link to card', async ({ page }, testInfo) => {
   const linkText = 'alinkTexta';
   const link = 'http://example.com';
   await enterPlaygroundRoom(page);
@@ -444,49 +414,8 @@ test('convert link to card', async ({ page }) => {
   await expect(linkPopoverLocator).not.toBeVisible();
   await focusRichText(page, 1);
 
-  await assertStoreMatchJSX(
-    page,
-    `
-<affine:page>
-  <affine:note
-    prop:background="--affine-note-background-blue"
-    prop:displayMode="both"
-    prop:edgeless={
-      Object {
-        "style": Object {
-          "borderRadius": 0,
-          "borderSize": 4,
-          "borderStyle": "none",
-          "shadowType": "--affine-note-shadow-sticker",
-        },
-      }
-    }
-    prop:hidden={false}
-    prop:index="a0"
-  >
-    <affine:paragraph
-      prop:text="aaa"
-      prop:type="text"
-    />
-    <affine:paragraph
-      prop:text={
-        <>
-          <text
-            insert="a"
-          />
-          <text
-            insert="linkText"
-            link="${link}"
-          />
-          <text
-            insert="a"
-          />
-        </>
-      }
-      prop:type="text"
-    />
-  </affine:note>
-</affine:page>`
+  expect(await getPageSnapshot(page, true)).toMatchSnapshot(
+    `${testInfo.title}.json`
   );
 
   const linkLocator = page.locator('affine-link a');
@@ -549,10 +478,10 @@ test.skip('convert link to embed', async ({ page }) => {
     prop:edgeless={
       Object {
         "style": Object {
-          "borderRadius": 0,
+          "borderRadius": 8,
           "borderSize": 4,
           "borderStyle": "none",
-          "shadowType": "--affine-note-shadow-sticker",
+          "shadowType": "--affine-note-shadow-box",
         },
       }
     }

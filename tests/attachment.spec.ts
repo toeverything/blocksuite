@@ -144,15 +144,15 @@ test('can insert attachment from slash menu', async ({ page }) => {
     page,
     `
 <affine:note
-  prop:background="--affine-note-background-blue"
+  prop:background="--affine-note-background-white"
   prop:displayMode="both"
   prop:edgeless={
     Object {
       "style": Object {
-        "borderRadius": 0,
+        "borderRadius": 8,
         "borderSize": 4,
         "borderStyle": "none",
-        "shadowType": "--affine-note-shadow-sticker",
+        "shadowType": "--affine-note-shadow-box",
       },
     }
   }
@@ -189,15 +189,15 @@ test('should undo/redo works for attachment', async ({ page }) => {
   await assertStoreMatchJSX(
     page,
     `  <affine:note
-  prop:background="--affine-note-background-blue"
+  prop:background="--affine-note-background-white"
   prop:displayMode="both"
   prop:edgeless={
     Object {
       "style": Object {
-        "borderRadius": 0,
+        "borderRadius": 8,
         "borderSize": 4,
         "borderStyle": "none",
-        "shadowType": "--affine-note-shadow-sticker",
+        "shadowType": "--affine-note-shadow-box",
       },
     }
   }
@@ -225,15 +225,15 @@ test('should undo/redo works for attachment', async ({ page }) => {
     page,
     `
 <affine:note
-  prop:background="--affine-note-background-blue"
+  prop:background="--affine-note-background-white"
   prop:displayMode="both"
   prop:edgeless={
     Object {
       "style": Object {
-        "borderRadius": 0,
+        "borderRadius": 8,
         "borderSize": 4,
         "borderStyle": "none",
-        "shadowType": "--affine-note-shadow-sticker",
+        "shadowType": "--affine-note-shadow-box",
       },
     }
   }
@@ -254,15 +254,15 @@ test('should undo/redo works for attachment', async ({ page }) => {
     page,
     `
 <affine:note
-  prop:background="--affine-note-background-blue"
+  prop:background="--affine-note-background-white"
   prop:displayMode="both"
   prop:edgeless={
     Object {
       "style": Object {
-        "borderRadius": 0,
+        "borderRadius": 8,
         "borderSize": 4,
         "borderStyle": "none",
-        "shadowType": "--affine-note-shadow-sticker",
+        "shadowType": "--affine-note-shadow-box",
       },
     }
   }
@@ -340,15 +340,15 @@ test('should turn attachment to image works', async ({ page }) => {
     page,
     `
 <affine:note
-  prop:background="--affine-note-background-blue"
+  prop:background="--affine-note-background-white"
   prop:displayMode="both"
   prop:edgeless={
     Object {
       "style": Object {
-        "borderRadius": 0,
+        "borderRadius": 8,
         "borderSize": 4,
         "borderStyle": "none",
-        "shadowType": "--affine-note-shadow-sticker",
+        "shadowType": "--affine-note-shadow-box",
       },
     }
   }
@@ -372,15 +372,15 @@ test('should turn attachment to image works', async ({ page }) => {
     page,
     `
 <affine:note
-  prop:background="--affine-note-background-blue"
+  prop:background="--affine-note-background-white"
   prop:displayMode="both"
   prop:edgeless={
     Object {
       "style": Object {
-        "borderRadius": 0,
+        "borderRadius": 8,
         "borderSize": 4,
         "borderStyle": "none",
-        "shadowType": "--affine-note-shadow-sticker",
+        "shadowType": "--affine-note-shadow-box",
       },
     }
   }
@@ -419,15 +419,15 @@ test('should attachment can be deleted', async ({ page }) => {
     page,
     `
 <affine:note
-  prop:background="--affine-note-background-blue"
+  prop:background="--affine-note-background-white"
   prop:displayMode="both"
   prop:edgeless={
     Object {
       "style": Object {
-        "borderRadius": 0,
+        "borderRadius": 8,
         "borderSize": 4,
         "borderStyle": "none",
-        "shadowType": "--affine-note-shadow-sticker",
+        "shadowType": "--affine-note-shadow-box",
       },
     }
   }
@@ -461,15 +461,15 @@ test(`support dragging attachment block directly`, async ({ page }) => {
   await assertStoreMatchJSX(
     page,
     `  <affine:note
-  prop:background="--affine-note-background-blue"
+  prop:background="--affine-note-background-white"
   prop:displayMode="both"
   prop:edgeless={
     Object {
       "style": Object {
-        "borderRadius": 0,
+        "borderRadius": 8,
         "borderSize": 4,
         "borderStyle": "none",
-        "shadowType": "--affine-note-shadow-sticker",
+        "shadowType": "--affine-note-shadow-box",
       },
     }
   }
@@ -515,15 +515,15 @@ test(`support dragging attachment block directly`, async ({ page }) => {
     page,
     /*xml*/ `<affine:page>
   <affine:note
-    prop:background="--affine-note-background-blue"
+    prop:background="--affine-note-background-white"
     prop:displayMode="both"
     prop:edgeless={
       Object {
         "style": Object {
-          "borderRadius": 0,
+          "borderRadius": 8,
           "borderSize": 4,
           "borderStyle": "none",
-          "shadowType": "--affine-note-shadow-sticker",
+          "shadowType": "--affine-note-shadow-box",
         },
       }
     }
@@ -569,15 +569,15 @@ test(`support dragging attachment block directly`, async ({ page }) => {
     page,
     /*xml*/ `<affine:page>
   <affine:note
-    prop:background="--affine-note-background-blue"
+    prop:background="--affine-note-background-white"
     prop:displayMode="both"
     prop:edgeless={
       Object {
         "style": Object {
-          "borderRadius": 0,
+          "borderRadius": 8,
           "borderSize": 4,
           "borderStyle": "none",
-          "shadowType": "--affine-note-shadow-sticker",
+          "shadowType": "--affine-note-shadow-box",
         },
       }
     }

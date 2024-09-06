@@ -298,7 +298,7 @@ test('change note color', async ({ page }) => {
   await assertEdgelessNoteBackground(
     page,
     noteId,
-    '--affine-note-background-blue'
+    '--affine-note-background-white'
   );
 
   await selectNoteInEdgeless(page, noteId);

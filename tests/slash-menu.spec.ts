@@ -22,6 +22,7 @@ import {
   enterPlaygroundRoom,
   focusRichText,
   getInlineSelectionText,
+  getPageSnapshot,
   getSelectionRect,
   initEmptyEdgelessState,
   initEmptyParagraphState,
@@ -955,9 +956,11 @@ test('move block up and down by slash menu', async ({ page }) => {
   await assertRichTexts(page, ['hello', 'world']);
 });
 
-test('delete block by slash menu should remove children', async ({ page }) => {
+test('delete block by slash menu should remove children', async ({
+  page,
+}, testInfo) => {
   await enterPlaygroundRoom(page);
-  const { noteId } = await initEmptyParagraphState(page);
+  await initEmptyParagraphState(page);
   await insertThreeLevelLists(page);
   const slashMenu = page.locator(`.slash-menu`);
   const slashItems = slashMenu.locator('icon-button');
@@ -971,34 +974,8 @@ test('delete block by slash menu should remove children', async ({ page }) => {
   await type(page, 'remove');
   await expect(slashItems).toHaveCount(1);
   await pressEnter(page);
-  await assertStoreMatchJSX(
-    page,
-    `
-<affine:note
-  prop:background="--affine-note-background-blue"
-  prop:displayMode="both"
-  prop:edgeless={
-    Object {
-      "style": Object {
-        "borderRadius": 0,
-        "borderSize": 4,
-        "borderStyle": "none",
-        "shadowType": "--affine-note-shadow-sticker",
-      },
-    }
-  }
-  prop:hidden={false}
-  prop:index="a0"
->
-  <affine:list
-    prop:checked={false}
-    prop:collapsed={false}
-    prop:order={null}
-    prop:text="123"
-    prop:type="bulleted"
-  />
-</affine:note>`,
-    noteId
+  expect(await getPageSnapshot(page, true)).toMatchSnapshot(
+    `${testInfo.title}.json`
   );
 
   await undoByKeyboard(page);

@@ -66,7 +66,7 @@ async function createAndConvertToEmbedLinkedDoc(page: Page) {
 }
 
 test.describe('multiple page', () => {
-  test('should create and switch page work', async ({ page }) => {
+  test('should create and switch page work', async ({ page }, testInfo) => {
     await enterPlaygroundRoom(page);
     await initEmptyParagraphState(page);
     await focusTitle(page);
@@ -75,33 +75,9 @@ test.describe('multiple page', () => {
     await type(page, 'page0');
     await assertRichTexts(page, ['page0']);
 
-    const page1Snapshot = `
-<affine:page
-  prop:title="title0"
->
-  <affine:note
-    prop:background="--affine-note-background-blue"
-    prop:displayMode="both"
-    prop:edgeless={
-      Object {
-        "style": Object {
-          "borderRadius": 0,
-          "borderSize": 4,
-          "borderStyle": "none",
-          "shadowType": "--affine-note-shadow-sticker",
-        },
-      }
-    }
-    prop:hidden={false}
-    prop:index="a0"
-  >
-    <affine:paragraph
-      prop:text="page0"
-      prop:type="text"
-    />
-  </affine:note>
-</affine:page>`;
-    await assertStoreMatchJSX(page, page1Snapshot);
+    expect(await getPageSnapshot(page, true)).toMatchSnapshot(
+      `${testInfo.title}_init.json`
+    );
 
     const { id } = await addNewPage(page);
     await switchToPage(page, id);
@@ -111,39 +87,10 @@ test.describe('multiple page', () => {
     await type(page, 'page1');
     await assertRichTexts(page, ['page1']);
 
-    await assertStoreMatchJSX(
-      page,
-      `
-<affine:page
-  prop:title="title1"
->
-  <affine:surface />
-  <affine:note
-    prop:background="--affine-note-background-blue"
-    prop:displayMode="both"
-    prop:edgeless={
-      Object {
-        "style": Object {
-          "borderRadius": 0,
-          "borderSize": 4,
-          "borderStyle": "none",
-          "shadowType": "--affine-note-shadow-sticker",
-        },
-      }
-    }
-    prop:hidden={false}
-    prop:index="a0"
-  >
-    <affine:paragraph
-      prop:text="page1"
-      prop:type="text"
-    />
-  </affine:note>
-</affine:page>`
-    );
-
     await switchToPage(page);
-    await assertStoreMatchJSX(page, page1Snapshot);
+    expect(await getPageSnapshot(page, true)).toMatchSnapshot(
+      `${testInfo.title}_final.json`
+    );
   });
 });
 
@@ -485,7 +432,7 @@ test.describe('reference node', () => {
     await assertReferenceText('titl1');
   });
 
-  test('can create linked page and jump', async ({ page }) => {
+  test('can create linked page and jump', async ({ page }, testInfo) => {
     await enterPlaygroundRoom(page);
     await initEmptyParagraphState(page);
     await focusTitle(page);
@@ -497,34 +444,8 @@ test.describe('reference node', () => {
     await linkedNode.click();
 
     await assertTitle(page, 'page1');
-    await assertStoreMatchJSX(
-      page,
-      `
-<affine:page
-  prop:title="page1"
->
-  <affine:surface />
-  <affine:note
-    prop:background="--affine-note-background-blue"
-    prop:displayMode="both"
-    prop:edgeless={
-      Object {
-        "style": Object {
-          "borderRadius": 0,
-          "borderSize": 4,
-          "borderStyle": "none",
-          "shadowType": "--affine-note-shadow-sticker",
-        },
-      }
-    }
-    prop:hidden={false}
-    prop:index="a0"
-  >
-    <affine:paragraph
-      prop:type="text"
-    />
-  </affine:note>
-</affine:page>`
+    expect(await getPageSnapshot(page, true)).toMatchSnapshot(
+      `${testInfo.title}_init.json`
     );
     await focusRichText(page);
     await type(page, '@page0');
@@ -532,46 +453,8 @@ test.describe('reference node', () => {
     const refNode = await findRefNode('page0');
     await refNode.click();
     await assertTitle(page, 'page0');
-    await assertStoreMatchJSX(
-      page,
-      `
-<affine:page
-  prop:title="page0"
->
-  <affine:note
-    prop:background="--affine-note-background-blue"
-    prop:displayMode="both"
-    prop:edgeless={
-      Object {
-        "style": Object {
-          "borderRadius": 0,
-          "borderSize": 4,
-          "borderStyle": "none",
-          "shadowType": "--affine-note-shadow-sticker",
-        },
-      }
-    }
-    prop:hidden={false}
-    prop:index="a0"
-  >
-    <affine:paragraph
-      prop:text={
-        <>
-          <text
-            insert=" "
-            reference={
-              Object {
-                "pageId": "3",
-                "type": "LinkedPage",
-              }
-            }
-          />
-        </>
-      }
-      prop:type="text"
-    />
-  </affine:note>
-</affine:page>`
+    expect(await getPageSnapshot(page, true)).toMatchSnapshot(
+      `${testInfo.title}_final.json`
     );
   });
 

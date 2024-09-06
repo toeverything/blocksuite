@@ -13,6 +13,7 @@ import {
   getClipboardText,
   getCurrentEditorDocId,
   getEditorLocator,
+  getPageSnapshot,
   initEmptyParagraphState,
   mockQuickSearch,
   pasteByKeyboard,
@@ -33,7 +34,6 @@ import {
   assertClipItems,
   assertExists,
   assertRichTexts,
-  assertStoreMatchJSX,
   assertText,
   assertTitle,
 } from '../utils/asserts.js';
@@ -213,7 +213,7 @@ test('should keep first line format when pasted into a new line', async ({
   await assertBlockTypes(page, ['todo']);
 });
 
-test(scoped`auto identify url`, async ({ page }) => {
+test(scoped`auto identify url`, async ({ page }, testInfo) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await focusRichText(page);
@@ -236,42 +236,8 @@ test(scoped`auto identify url`, async ({ page }) => {
     },
     { clipData }
   );
-  await assertStoreMatchJSX(
-    page,
-    /*xml*/ `
-<affine:page>
-  <affine:note
-    prop:background="--affine-note-background-blue"
-    prop:displayMode="both"
-    prop:edgeless={
-      Object {
-        "style": Object {
-          "borderRadius": 0,
-          "borderSize": 4,
-          "borderStyle": "none",
-          "shadowType": "--affine-note-shadow-sticker",
-        },
-      }
-    }
-    prop:hidden={false}
-    prop:index="a0"
-  >
-    <affine:paragraph
-      prop:text={
-        <>
-          <text
-            insert="test "
-          />
-          <text
-            insert="https://www.google.com"
-            link="https://www.google.com"
-          />
-        </>
-      }
-      prop:type="text"
-    />
-  </affine:note>
-</affine:page>`
+  expect(await getPageSnapshot(page, true)).toMatchSnapshot(
+    `${testInfo.title}_final.json`
   );
 });
 
