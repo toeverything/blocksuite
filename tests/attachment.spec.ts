@@ -1,4 +1,4 @@
-import { sleep } from '@global/utils.js';
+import { sleep } from '@blocksuite/global/utils';
 import { expect, type Page } from '@playwright/test';
 import { switchEditorMode } from 'utils/actions/edgeless.js';
 

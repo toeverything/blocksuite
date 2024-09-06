@@ -10,7 +10,8 @@
   "dependencies": {
     "@blocksuite/global": "workspace:*",
     "@blocksuite/affine-model": "workspace:*",
-    "@blocksuite/playground": "workspace:*"
+    "@blocksuite/block-std": "workspace:*",
+    "@blocksuite/presets": "workspace:*"
   },
   "repository": {
     "type": "git",

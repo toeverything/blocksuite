@@ -1,8 +1,8 @@
 import type { NoteBlockModel, NoteDisplayMode } from '@blocks/index.js';
-import type { IPoint, IVec } from '@global/utils/index.js';
+import type { IPoint, IVec } from '@blocksuite/global/utils';
 import type { Locator, Page } from '@playwright/test';
 
-import { assertExists, sleep } from '@global/utils/index.js';
+import { assertExists, sleep } from '@blocksuite/global/utils';
 import { expect } from '@playwright/test';
 
 import type { Bound } from '../asserts.js';

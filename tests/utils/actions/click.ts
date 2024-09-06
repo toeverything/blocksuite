@@ -1,4 +1,4 @@
-import type { IPoint } from '@global/utils/index.js';
+import type { IPoint } from '@blocksuite/global/utils';
 import type { Page } from '@playwright/test';
 
 import { toViewCoord } from './edgeless.js';
