@@ -1,5 +1,11 @@
 # @blocksuite/global
 
+## 0.17.4
+
+### Patch Changes
+
+- 9978a71: Create git tag
+
 ## 0.17.3
 
 ### Patch Changes

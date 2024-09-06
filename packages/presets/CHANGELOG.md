@@ -1,5 +1,19 @@
 # @blocksuite/presets
 
+## 0.17.4
+
+### Patch Changes
+
+- 9978a71: Create git tag
+- Updated dependencies [9978a71]
+  - @blocksuite/affine-block-surface@0.17.4
+  - @blocksuite/affine-shared@0.17.4
+  - @blocksuite/blocks@0.17.4
+  - @blocksuite/block-std@0.17.4
+  - @blocksuite/global@0.17.4
+  - @blocksuite/inline@0.17.4
+  - @blocksuite/store@0.17.4
+
 ## 0.17.3
 
 ### Patch Changes
