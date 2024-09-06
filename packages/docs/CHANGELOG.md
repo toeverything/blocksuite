@@ -1,5 +1,15 @@
 # @blocksuite/docs
 
+## 0.17.3
+
+### Patch Changes
+
+- be60caf: Generate git tag
+- Updated dependencies [be60caf]
+  - @blocksuite/blocks@0.17.3
+  - @blocksuite/store@0.17.3
+  - @blocksuite/presets@0.17.3
+
 ## 0.17.2
 
 ### Patch Changes

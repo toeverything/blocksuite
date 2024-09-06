@@ -1,5 +1,15 @@
 # @blocksuite/store
 
+## 0.17.3
+
+### Patch Changes
+
+- be60caf: Generate git tag
+- Updated dependencies [be60caf]
+  - @blocksuite/global@0.17.3
+  - @blocksuite/inline@0.17.3
+  - @blocksuite/sync@0.17.3
+
 ## 0.17.2
 
 ### Patch Changes
