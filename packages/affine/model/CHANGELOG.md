@@ -1,5 +1,16 @@
 # @blocksuite/affine-model
 
+## 0.17.4
+
+### Patch Changes
+
+- 9978a71: Create git tag
+- Updated dependencies [9978a71]
+  - @blocksuite/block-std@0.17.4
+  - @blocksuite/global@0.17.4
+  - @blocksuite/inline@0.17.4
+  - @blocksuite/store@0.17.4
+
 ## 0.17.3
 
 ### Patch Changes
