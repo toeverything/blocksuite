@@ -1,61 +1,29 @@
 name: Size Report
 
-env:
-  # 7 GiB by default on GitHub, setting to 6 GiB
-  # https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners#supported-runners-and-hardware-resources
-  NODE_OPTIONS: --max-old-space-size=6144
-
 on:
-  schedule:
-    # At the end of every day
-    - cron: '0 0 * * *'
-  workflow_dispatch:
+  pull_request:
+    branches:
+      - master
 
-permissions:
-  contents: write
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  size-report:
+  size:
     if: github.repository == 'toeverything/blocksuite'
-    name: Size Report
     runs-on: ubuntu-latest
+
+    env:
+      CI_JOB_NUMBER: 1
+
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-        name: Install pnpm
-        id: pnpm-install
-      - name: Use Node.js LTS
-        uses: actions/setup-node@v4
+
+      - uses: ./.github/actions/setup
+
+      - uses: andresz1/size-limit-action@v1
         with:
-          node-version-file: '.nvmrc'
-          cache: 'pnpm'
-
-      - name: Install dependencies
-        run: pnpm install
-
-      - name: Download Previous Size Data
-        uses: dawidd6/action-download-artifact@v6
-        with:
-          workflow: size-report.yml
-          name: size-data
-          path: temp/size-prev
-          if_no_artifact_found: warn
-
-      - run: pnpm run size:generate
-
-      - name: Upload Size Data
-        uses: actions/upload-artifact@v4
-        with:
-          name: size-data
-          path: temp/size
-
-      - name: Read Size Report
-        id: size-report
-        uses: juliangruber/read-file-action@v1
-        with:
-          path: ./size-report.md
-
-      - name: Create commit comment
-        uses: peter-evans/commit-comment@v3
-        with:
-          body: ${{ steps.size-report.outputs.content }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          build_script: build:packages
+          skip_step: install
