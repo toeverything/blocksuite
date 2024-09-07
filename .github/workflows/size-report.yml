@@ -9,9 +9,11 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  pull-requests: write
+
 jobs:
   size:
-    if: github.repository == 'toeverything/blocksuite'
     runs-on: ubuntu-latest
 
     env:
