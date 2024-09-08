@@ -223,6 +223,13 @@ export class EdgelessFrameTitle extends SignalWatcher(
     this._xywh = this.model.xywh;
   }
 
+  override firstUpdated() {
+    if (!this._frameTitleEl) return;
+    this._cachedWidth = this._frameTitleEl.clientWidth;
+    this._cachedHeight = this._frameTitleEl.clientHeight;
+    this._updateFrameTitleSize();
+  }
+
   override render() {
     const model = this.model;
     const bound = Bound.deserialize(model.xywh);
@@ -291,7 +298,6 @@ export class EdgelessFrameTitle extends SignalWatcher(
       this._cachedHeight = this._frameTitleEl.clientHeight;
       sizeChanged = true;
     }
-
     if (sizeChanged || _changedProperties.has('_zoom')) {
       this._updateFrameTitleSize();
     }
