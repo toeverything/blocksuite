@@ -518,7 +518,7 @@ export class MindmapElementModel extends GfxGroupLikeElementModel<MindmapElement
     const nodesMap = this.children;
 
     // The element may be removed
-    if (!nodesMap) {
+    if (!nodesMap || nodesMap.size === 0) {
       this._nodeMap = mindmapNodeMap;
       // @ts-ignore
       this._tree = null;

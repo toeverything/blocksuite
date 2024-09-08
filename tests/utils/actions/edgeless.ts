@@ -22,6 +22,7 @@ import {
   enterPlaygroundRoom,
   getEditorLocator,
   initEmptyEdgelessState,
+  resetHistory,
   waitNextFrame,
 } from './misc.js';
 
@@ -1707,6 +1708,7 @@ export async function edgelessCommonSetup(page: Page) {
   await initEmptyEdgelessState(page);
   await switchEditorMode(page);
   await deleteAll(page);
+  await resetHistory(page);
 }
 
 export async function createFrame(
