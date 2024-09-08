@@ -1,5 +1,9 @@
-import type { EdgelessRootBlockComponent } from '@blocksuite/blocks';
+import type {
+  EdgelessRootBlockComponent,
+  FrameBlockComponent,
+} from '@blocksuite/blocks';
 
+import { assertType } from '@blocksuite/global/utils';
 import { Text } from '@blocksuite/store';
 import { beforeEach, describe, expect, test } from 'vitest';
 
@@ -82,7 +86,7 @@ describe('frame', () => {
       service.surface.id
     );
     service.zoomToFit();
-    await wait();
+    await wait(500); // fit has a transition animation
 
     const frameTitle = document.querySelector(
       `[data-block-id="${frameId}"] .affine-frame-title`
@@ -96,11 +100,11 @@ describe('frame', () => {
     const pointDom1 = document.elementFromPoint(
       titleRect.x + titleRect.width / 2,
       titleRect.y + titleRect.height / 2
-    ) as HTMLElement;
+    );
     const pointDom2 = document.elementFromPoint(
       bodyRect.x + bodyRect.width / 2,
       bodyRect.y + bodyRect.height / 2
-    ) as HTMLElement;
+    );
 
     expect(
       frameTitle.contains(pointDom1),
@@ -111,5 +115,25 @@ describe('frame', () => {
       frameBody.contains(pointDom2),
       'Frame body should be on bottom'
     ).toBeFalsy();
+  });
+
+  test('frame should have externalXYWH after moving viewport to contains frame', async () => {
+    const frameId = service.doc.addBlock(
+      'affine:frame',
+      {
+        xywh: '[1800,1800,200,200]',
+        title: new Text('Frame 1'),
+      },
+      service.surface.id
+    );
+    await wait();
+
+    const frame = service.doc.getBlock(frameId);
+    expect(frame).toBeTruthy();
+
+    assertType<FrameBlockComponent>(frame);
+
+    service.viewport.setCenter(900, 900);
+    expect(frame?.model.externalXYWH).toBeDefined();
   });
 });

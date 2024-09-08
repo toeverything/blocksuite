@@ -1156,7 +1156,7 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
         if (line.trimStart().startsWith('-')) {
           return line;
         }
-        const trimmedLine = line.trimStart();
+        let trimmedLine = line.trimStart();
         if (!codeFence && trimmedLine.startsWith('```')) {
           codeFence = trimmedLine.substring(
             0,
@@ -1187,6 +1187,25 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
         if (codeFence) {
           return line;
         }
+
+        trimmedLine = trimmedLine.trimEnd();
+        if (!trimmedLine.startsWith('<') && !trimmedLine.endsWith('>')) {
+          // check if it is a url link and wrap it with the angle brackets
+          // sometimes the url includes emphasis `_` that will break URL parsing
+          //
+          // eg. /MuawcBMT1Mzvoar09-_66?mode=page&blockIds=rL2_GXbtLU2SsJVfCSmh_
+          // https://www.markdownguide.org/basic-syntax/#urls-and-email-addresses
+          try {
+            const valid =
+              URL.canParse?.(trimmedLine) ?? Boolean(new URL(trimmedLine));
+            if (valid) {
+              return `<${trimmedLine}>`;
+            }
+          } catch (err) {
+            console.log(err);
+          }
+        }
+
         return line.replace(/^ /, '&#x20;');
       })
       .join('\n');
