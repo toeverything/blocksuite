@@ -38,6 +38,12 @@ export {
   type SurfaceBlockProps,
   type SurfaceMiddleware,
 } from './surface/surface-model.js';
+export {
+  descendantsImpl,
+  getAncestorContainersImpl,
+  getTopElements,
+  hasDescendantImpl,
+} from './tree.js';
 export * from './viewport.js';
 
 export { GfxViewportElement } from './viewport-element.js';

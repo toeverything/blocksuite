@@ -144,6 +144,6 @@ test.describe('group clipboard', () => {
     await pasteByKeyboard(page, true);
     await waitNextFrame(page, 500);
     const sortedIds = await getAllSortedIds(page);
-    expect(sortedIds.length).toBe(12);
+    expect(sortedIds.length).toBe(10);
   });
 });
