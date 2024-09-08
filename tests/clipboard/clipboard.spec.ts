@@ -258,6 +258,24 @@ test(scoped`pasting internal url`, async ({ page }) => {
   await expect(page.locator('affine-reference')).toContainText('test page');
 });
 
+test(scoped`pasting internal url with params`, async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusTitle(page);
+  await type(page, 'test page');
+
+  await focusRichText(page);
+  const docId = await getCurrentEditorDocId(page);
+  await mockQuickSearch(page, {
+    'http://workspace/doc-id?mode=page&blockIds=rL2_GXbtLU2SsJVfCSmh_': docId,
+  });
+  await pasteContent(page, {
+    'text/plain':
+      'http://workspace/doc-id?mode=page&blockIds=rL2_GXbtLU2SsJVfCSmh_',
+  });
+  await expect(page.locator('affine-reference')).toContainText('test page');
+});
+
 test(scoped`paste parent block`, async ({ page }) => {
   test.info().annotations.push({
     type: 'issue',

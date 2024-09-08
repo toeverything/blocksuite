@@ -335,13 +335,13 @@ importers:
         specifier: workspace:*
         version: link:../../framework/store
       '@floating-ui/dom':
-        specifier: ^1.6.10
+        specifier: 'catalog:'
         version: 1.6.10
       '@lit-labs/preact-signals':
-        specifier: ^1.0.2
+        specifier: 'catalog:'
         version: 1.0.2
       '@lit/context':
-        specifier: ^1.1.2
+        specifier: 'catalog:'
         version: 1.1.2
       '@toeverything/theme':
         specifier: 'catalog:'
@@ -398,7 +398,7 @@ importers:
         specifier: ^4.6.2
         version: 4.6.2
       nanoid:
-        specifier: ^5.0.7
+        specifier: 'catalog:'
         version: 5.0.7
       zod:
         specifier: 'catalog:'
@@ -835,10 +835,10 @@ importers:
   packages/framework/global:
     dependencies:
       lib0:
-        specifier: ^0.2.97
+        specifier: 'catalog:'
         version: 0.2.97
       zod:
-        specifier: ^3.23.8
+        specifier: 'catalog:'
         version: 3.23.8
 
   packages/framework/inline:
@@ -847,14 +847,14 @@ importers:
         specifier: workspace:*
         version: link:../global
       zod:
-        specifier: ^3.23.8
+        specifier: 'catalog:'
         version: 3.23.8
     devDependencies:
       lit:
-        specifier: ^3.2.0
+        specifier: 'catalog:'
         version: 3.2.0
       yjs:
-        specifier: ^13.6.18
+        specifier: 'catalog:'
         version: 13.6.18
 
   packages/framework/store:
@@ -881,7 +881,7 @@ importers:
         specifier: 0.7.43
         version: 0.7.43
       lib0:
-        specifier: ^0.2.97
+        specifier: 'catalog:'
         version: 0.2.97
       lodash.clonedeep:
         specifier: ^4.5.0
@@ -902,7 +902,7 @@ importers:
         specifier: 'catalog:'
         version: 1.0.6(yjs@13.6.18)
       zod:
-        specifier: ^3.23.8
+        specifier: 'catalog:'
         version: 3.23.8
     devDependencies:
       '@types/lodash.clonedeep':
@@ -912,10 +912,10 @@ importers:
         specifier: ^4.6.9
         version: 4.6.9
       lit:
-        specifier: ^3.2.0
+        specifier: 'catalog:'
         version: 3.2.0
       yjs:
-        specifier: ^13.6.18
+        specifier: 'catalog:'
         version: 13.6.18
 
   packages/framework/sync:
