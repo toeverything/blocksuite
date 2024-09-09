@@ -280,12 +280,13 @@ export abstract class SingleViewBase<
     if (!type) {
       return;
     }
-    return this.dataSource
-      .getPropertyMeta(type)
-      .config.formatValue?.(
-        this.dataSource.cellGetValue(rowId, columnId),
-        this.columnGetData(columnId)
-      );
+    const cellValue = this.dataSource.cellGetValue(rowId, columnId);
+    return (
+      this.dataSource
+        .getPropertyMeta(type)
+        .config.formatValue?.(cellValue, this.columnGetData(columnId)) ??
+      cellValue
+    );
   }
 
   cellUpdateRenderValue(rowId: string, columnId: string, value: unknown): void {
