@@ -23,3 +23,4 @@
 - Frame improvement
 - Database checkbox statistics improvement
 - Inline extensions
+- Mindmap remember last settings
