@@ -16,4 +16,10 @@
 '@blocksuite/presets': patch
 ---
 
-latex export
+- Fix latex export
+- Fix add group in database kanban view
+- Fix presentation mode `Esc` key
+- Fix url parse and paste for block reference
+- Frame improvement
+- Database checkbox statistics improvement
+- Inline extensions
