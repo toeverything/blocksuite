@@ -314,14 +314,8 @@ export function createShapeElement(
   current: ShapeElementModel | NoteBlockModel,
   targetType: TARGET_SHAPE_TYPE
 ) {
-  const service = edgeless.service!;
-
-  const props = isShape(current)
-    ? current.serialize()
-    : edgeless.service.editPropsStore.lastProps$.value[`shape:${targetType}`];
-
+  const service = edgeless.service;
   const id = service.addElement('shape', {
-    ...props,
     shapeType: getShapeType(targetType),
     radius: getShapeRadius(targetType),
     text: new DocCollection.Y.Text(),

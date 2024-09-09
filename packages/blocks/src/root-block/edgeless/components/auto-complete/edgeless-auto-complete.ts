@@ -1,5 +1,4 @@
 import type {
-  Color,
   Connection,
   ConnectorElementModel,
   NoteBlockModel,
@@ -23,8 +22,6 @@ import {
   NoteAutoCompleteIcon,
 } from '@blocksuite/affine-components/icons';
 import {
-  ConnectorMode,
-  DEFAULT_CONNECTOR_COLOR,
   DEFAULT_SHAPE_STROKE_COLOR,
   LayoutType,
   ShapeElementModel,
@@ -225,42 +222,8 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
   }
 
   private _addConnector(source: Connection, target: Connection) {
-    const { current, edgeless } = this;
-
-    let stroke: Color = DEFAULT_CONNECTOR_COLOR;
-    if (isShape(current)) {
-      if (typeof current.strokeColor === 'object') {
-        stroke = { ...current.strokeColor };
-      } else {
-        stroke = current.strokeColor;
-      }
-    } else {
-      if (typeof current.background === 'object') {
-        stroke = { ...current.background };
-      } else {
-        let tag = current.background.split('-').pop();
-        if (!tag || tag === 'gray') tag = 'grey';
-        stroke = `--affine-palette-line-${tag}`;
-      }
-    }
-
-    // needs to drop `alpha` value
-    if (typeof stroke === 'object') {
-      if (stroke.normal?.endsWith('00')) {
-        stroke.normal = stroke.normal.substring(0, 7);
-      }
-      if (stroke.light?.endsWith('00')) {
-        stroke.light = stroke.light.substring(0, 7);
-      }
-      if (stroke.dark?.endsWith('00')) {
-        stroke.dark = stroke.dark.substring(0, 7);
-      }
-    }
-
+    const { edgeless } = this;
     const id = edgeless.service.addElement(CanvasElementType.CONNECTOR, {
-      mode: ConnectorMode.Orthogonal,
-      strokeWidth: 2,
-      stroke,
       source,
       target,
     });

@@ -5,6 +5,7 @@ import {
   DEFAULT_NOTE_BACKGROUND_COLOR,
   DEFAULT_NOTE_SHADOW,
   DEFAULT_REAR_END_POINT_STYLE,
+  DEFAULT_ROUGHNESS,
   DEFAULT_SHAPE_FILL_COLOR,
   DEFAULT_SHAPE_STROKE_COLOR,
   DEFAULT_SHAPE_TEXT_COLOR,
@@ -109,6 +110,7 @@ const DEFAULT_SHAPE = {
   fontWeight: FontWeight.Regular,
   fontStyle: FontStyle.Normal,
   textAlign: TextAlign.Center,
+  roughness: DEFAULT_ROUGHNESS,
 };
 
 const ShapeObject = {
@@ -127,7 +129,7 @@ const ShapeObject = {
   textAlign: TextAlignSchema,
   textHorizontalAlign: TextAlignSchema.optional(),
   textVerticalAlign: TextVerticalAlignSchema.optional(),
-  roughness: z.number().optional(),
+  roughness: z.number(),
 };
 
 export const ShapeSchema = z.object(ShapeObject).default(DEFAULT_SHAPE);
