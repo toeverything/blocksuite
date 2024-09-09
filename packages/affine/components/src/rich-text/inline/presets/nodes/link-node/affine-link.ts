@@ -13,7 +13,7 @@ import { customElement, property } from 'lit/decorators.js';
 import { ref } from 'lit/directives/ref.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type { AffineTextAttributes } from '../../affine-inline-specs.js';
+import type { AffineTextAttributes } from '../../../../extension/index.js';
 
 import { HoverController } from '../../../../../hover/index.js';
 import { affineTextStyles } from '../affine-text.js';

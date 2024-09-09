@@ -1,12 +1,6 @@
 import type { BlockModel, Doc } from '@blocksuite/store';
 
 import {
-  affineInlineMarkdownMatches,
-  getAffineInlineSpecsWithReference,
-  InlineManager,
-  ReferenceNodeConfig,
-} from '@blocksuite/affine-components/rich-text';
-import {
   type DatabaseBlockModel,
   DatabaseBlockSchema,
 } from '@blocksuite/affine-model';
@@ -36,10 +30,6 @@ export class DatabaseBlockService extends BlockService {
 
   databaseViewInitEmpty = databaseViewInitEmpty;
 
-  readonly inlineManager = new InlineManager();
-
-  readonly referenceNodeConfig = new ReferenceNodeConfig();
-
   updateCell = updateCell;
 
   updateView = updateView;
@@ -68,13 +58,5 @@ export class DatabaseBlockService extends BlockService {
   override mounted(): void {
     super.mounted();
     this.selectionManager.register(DatabaseSelection);
-
-    this.referenceNodeConfig.setDoc(this.doc);
-
-    const inlineSpecs = getAffineInlineSpecsWithReference(
-      this.referenceNodeConfig
-    );
-    this.inlineManager.registerSpecs(inlineSpecs);
-    this.inlineManager.registerMarkdownMatches(affineInlineMarkdownMatches);
   }
 }

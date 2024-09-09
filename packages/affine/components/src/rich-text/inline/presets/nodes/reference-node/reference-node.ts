@@ -21,7 +21,7 @@ import { customElement, property, state } from 'lit/decorators.js';
 import { choose } from 'lit/directives/choose.js';
 import { ref } from 'lit/directives/ref.js';
 
-import type { AffineTextAttributes } from '../../affine-inline-specs.js';
+import type { AffineTextAttributes } from '../../../../extension/index.js';
 import type { ReferenceNodeConfig } from './reference-config.js';
 import type { RefNodeSlots } from './types.js';
 

@@ -95,7 +95,6 @@ export {
   type AffineInlineEditor,
   AffineReference,
   type AffineTextAttributes,
-  getAffineInlineSpecsWithReference,
   InlineManager,
   type InlineMarkdownMatch,
   type InlineSpecs,

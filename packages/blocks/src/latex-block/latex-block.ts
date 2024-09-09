@@ -122,6 +122,7 @@ export class LatexBlockComponent extends CaptionedBlockComponent<
 
     const portal = createLitPortal({
       template: html`<latex-editor-menu
+        .std=${this.std}
         .latexSignal=${this.model.latex$}
         .abortController=${this._editorAbortController}
       ></latex-editor-menu>`,

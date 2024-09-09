@@ -15,10 +15,8 @@ import {
   type InlineRootElement,
 } from '@blocksuite/inline';
 
-import type {
-  AffineInlineEditor,
-  AffineTextAttributes,
-} from '../inline/index.js';
+import type { AffineTextAttributes } from '../extension/index.js';
+import type { AffineInlineEditor } from '../inline/index.js';
 
 import {
   FORMAT_BLOCK_SUPPORT_FLAVOURS,

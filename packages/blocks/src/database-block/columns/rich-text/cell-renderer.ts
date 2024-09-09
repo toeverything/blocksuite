@@ -1,9 +1,9 @@
-import type {
-  AffineInlineEditor,
-  AffineTextAttributes,
-  RichText,
+import {
+  type AffineInlineEditor,
+  type AffineTextAttributes,
+  DefaultInlineManagerExtension,
+  type RichText,
 } from '@blocksuite/affine-components/rich-text';
-
 import { getViewportElement } from '@blocksuite/affine-shared/utils';
 import {
   BaseCellRenderer,
@@ -119,7 +119,9 @@ export class RichTextCell extends BaseCellRenderer<Text> {
   }
 
   get inlineManager() {
-    return this.service?.inlineManager;
+    return this.view
+      .getContext(HostContextKey)
+      ?.std.get(DefaultInlineManagerExtension.identifier);
   }
 
   get service() {
@@ -310,7 +312,9 @@ export class RichTextCellEditing extends BaseCellRenderer<Text> {
   }
 
   get inlineManager() {
-    return this.service?.inlineManager;
+    return this.view
+      .getContext(HostContextKey)
+      ?.std.get(DefaultInlineManagerExtension.identifier);
   }
 
   get service() {

@@ -6,6 +6,10 @@ import {
 } from '@blocksuite/block-std';
 import { literal } from 'lit/static-html.js';
 
+import {
+  CodeBlockInlineManagerExtension,
+  CodeBlockUnitSpecExtension,
+} from './code-block-inline.js';
 import { CodeBlockService } from './code-block-service.js';
 
 export const CodeBlockSpec: ExtensionType[] = [
@@ -16,4 +20,6 @@ export const CodeBlockSpec: ExtensionType[] = [
     codeToolbar: literal`affine-code-toolbar-widget`,
     codeLangList: literal`affine-code-language-list-widget`,
   }),
+  CodeBlockInlineManagerExtension,
+  CodeBlockUnitSpecExtension,
 ];

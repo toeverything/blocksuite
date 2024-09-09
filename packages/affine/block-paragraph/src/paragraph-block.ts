@@ -4,6 +4,7 @@ import type { InlineRangeProvider } from '@blocksuite/inline';
 
 import { CaptionedBlockComponent } from '@blocksuite/affine-components/caption';
 import {
+  DefaultInlineManagerExtension,
   markdownInput,
   type RichText,
 } from '@blocksuite/affine-components/rich-text';
@@ -74,7 +75,7 @@ export class ParagraphBlockComponent extends CaptionedBlockComponent<
   }
 
   get inlineManager() {
-    return this.service?.inlineManager;
+    return this.std.get(DefaultInlineManagerExtension.identifier);
   }
 
   get markdownShortcutHandler() {

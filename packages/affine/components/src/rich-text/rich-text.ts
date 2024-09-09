@@ -18,10 +18,8 @@ import { customElement, property, query } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { z } from 'zod';
 
-import type {
-  AffineInlineEditor,
-  AffineTextAttributes,
-} from './inline/index.js';
+import type { AffineTextAttributes } from './extension/index.js';
+import type { AffineInlineEditor } from './inline/index.js';
 
 import { onVBeforeinput, onVCompositionEnd } from './hooks.js';
 

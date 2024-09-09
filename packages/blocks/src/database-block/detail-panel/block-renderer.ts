@@ -5,6 +5,7 @@ import type {
   TableSingleView,
 } from '@blocksuite/data-view/view-presets';
 
+import { DefaultInlineManagerExtension } from '@blocksuite/affine-components/rich-text';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
@@ -69,7 +70,7 @@ export class BlockRenderer
   }
 
   get inlineManager() {
-    return this.service.inlineManager;
+    return this.host.std.get(DefaultInlineManagerExtension.identifier);
   }
 
   get model() {

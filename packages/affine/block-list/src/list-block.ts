@@ -10,6 +10,7 @@ import {
   toggleRight,
 } from '@blocksuite/affine-components/icons';
 import {
+  DefaultInlineManagerExtension,
   markdownInput,
   type RichText,
 } from '@blocksuite/affine-components/rich-text';
@@ -96,7 +97,7 @@ export class ListBlockComponent extends CaptionedBlockComponent<
   }
 
   get inlineManager() {
-    return this.service?.inlineManager;
+    return this.std.get(DefaultInlineManagerExtension.identifier);
   }
 
   get markdownShortcutHandler() {

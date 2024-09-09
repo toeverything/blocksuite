@@ -35,6 +35,7 @@ import type { CodeBlockService } from './code-block-service.js';
 
 import { EdgelessRootBlockComponent } from '../root-block/edgeless/edgeless-root-block.js';
 import { CodeClipboardController } from './clipboard/index.js';
+import { CodeBlockInlineManagerExtension } from './code-block-inline.js';
 import './highlight/affine-code-unit.js';
 import { codeBlockStyles } from './styles.js';
 
@@ -66,6 +67,10 @@ export class CodeBlockComponent extends CaptionedBlockComponent<
       `[${INLINE_ROOT_ATTR}]`
     );
     return inlineRoot?.inlineEditor;
+  }
+
+  get inlineManager() {
+    return this.std.get(CodeBlockInlineManagerExtension.identifier);
   }
 
   get readonly() {
@@ -389,8 +394,8 @@ export class CodeBlockComponent extends CaptionedBlockComponent<
           .yText=${this.model.text.yText}
           .inlineEventSource=${this.topContenteditableElement ?? nothing}
           .undoManager=${this.doc.history}
-          .attributesSchema=${this.service.inlineManager.getSchema()}
-          .attributeRenderer=${this.service.inlineManager.getRenderer()}
+          .attributesSchema=${this.inlineManager.getSchema()}
+          .attributeRenderer=${this.inlineManager.getRenderer()}
           .readonly=${this.doc.readonly}
           .inlineRangeProvider=${this._inlineRangeProvider}
           .enableClipboard=${false}

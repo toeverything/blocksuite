@@ -4,7 +4,7 @@ import { html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { type StyleInfo, styleMap } from 'lit/directives/style-map.js';
 
-import type { AffineTextAttributes } from '../affine-inline-specs.js';
+import type { AffineTextAttributes } from '../../../extension/index.js';
 
 export function affineTextStyles(
   props: AffineTextAttributes,
