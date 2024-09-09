@@ -1,3 +1,6 @@
+import type { MindmapElementModel } from '@blocksuite/affine-block-surface';
+import type { Bound } from '@blocksuite/global/utils';
+
 import { MindmapStyle } from '@blocksuite/affine-block-surface';
 import { assertExists } from '@blocksuite/global/utils';
 import { css, html, LitElement, nothing } from 'lit';
@@ -21,6 +24,7 @@ import {
 } from './basket-elements.js';
 import { basketIconDark, basketIconLight, textIcon } from './icons.js';
 import './mindmap-menu.js';
+import { importMindmap } from './utils/import-mindmap.js';
 
 @customElement('edgeless-mindmap-tool-button')
 export class EdgelessMindmapToolButton extends EdgelessToolbarToolMixin(
@@ -157,6 +161,26 @@ export class EdgelessMindmapToolButton extends EdgelessToolbarToolMixin(
       activeStyle: this.activeStyle,
       onActiveStyleChange: (style: MindmapStyle) => {
         this.activeStyle = style;
+      },
+      onImportMindMap: (bound: Bound) => {
+        return importMindmap(bound).then(mindmap => {
+          const id = this.edgeless.service.addElement('mindmap', {
+            children: mindmap,
+            layoutType: mindmap?.layoutType === 'left' ? 1 : 0,
+          });
+          const element = this.edgeless.service.getElementById(
+            id
+          ) as MindmapElementModel;
+
+          this.tryDisposePopper();
+          this.setEdgelessTool(
+            { type: 'default' },
+            {
+              elements: [element.tree.id],
+              editing: false,
+            }
+          );
+        });
       },
     });
   }

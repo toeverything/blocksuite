@@ -730,6 +730,9 @@ importers:
       unified:
         specifier: ^11.0.5
         version: 11.0.5
+      xml-js:
+        specifier: ^1.6.11
+        version: 1.6.11
       zod:
         specifier: 'catalog:'
         version: 3.23.8
@@ -8219,6 +8222,10 @@ packages:
         optional: true
       utf-8-validate:
         optional: true
+
+  xml-js@1.6.11:
+    resolution: {integrity: sha512-7rVi2KMfwfWFl+GpPg6m80IVMWXLRjO+PxTq7V2CDhoGak0wzYzFgUY2m4XJ47OGdXd8eLE8EmwfAmdjw7lC1g==}
+    hasBin: true
 
   y-indexeddb@9.0.12:
     resolution: {integrity: sha512-9oCFRSPPzBK7/w5vOkJBaVCQZKHXB/v6SIT+WYhnJxlEC61juqG0hBrAf+y3gmSMLFLwICNH9nQ53uscuse6Hg==}
@@ -15714,8 +15721,7 @@ snapshots:
 
   sax@1.2.4: {}
 
-  sax@1.4.1:
-    optional: true
+  sax@1.4.1: {}
 
   schema-utils@3.3.0:
     dependencies:
@@ -16878,6 +16884,10 @@ snapshots:
   ws@8.17.1: {}
 
   ws@8.18.0: {}
+
+  xml-js@1.6.11:
+    dependencies:
+      sax: 1.4.1
 
   y-indexeddb@9.0.12(yjs@13.6.18):
     dependencies:

@@ -10,5 +10,6 @@ declare type BlockSuiteFlags = {
   enable_ai_onboarding: boolean;
   enable_ai_chat_block: boolean;
   enable_color_picker: boolean;
+  enable_mind_map_import: boolean;
   readonly: Record<string, boolean>;
 };

@@ -31,7 +31,7 @@ export function getCommonRectStyle(
 
 export function getTooltipWithShortcut(
   tip: string,
-  shortcut: string,
+  shortcut?: string,
   postfix?: string
 ) {
   // style for shortcut tooltip
@@ -69,7 +69,9 @@ export function getTooltipWithShortcut(
     </style>
     <div class="tooltip-with-shortcut">
       <span class="tooltip__label">${tip}</span>
-      <span class="tooltip__shortcut">${shortcut}</span>
+      ${shortcut
+        ? html`<span class="tooltip__shortcut">${shortcut}</span>`
+        : ''}
       ${postfix ? html`<span class="tooltip__postfix">${postfix}</span>` : ''}
     </div>`;
 }

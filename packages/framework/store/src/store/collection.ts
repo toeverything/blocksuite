@@ -59,6 +59,7 @@ const FLAGS_PRESET = {
   enable_ai_onboarding: false,
   enable_ai_chat_block: false,
   enable_color_picker: false,
+  enable_mind_map_import: false,
   readonly: {},
 } satisfies BlockSuiteFlags;
 

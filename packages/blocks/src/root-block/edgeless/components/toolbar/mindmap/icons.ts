@@ -563,3 +563,14 @@ export const mindMapStyle4 = svg`<svg width="64" height="48" viewBox="0 0 64 48"
   d="M44 40C46.4711 36.5196 48.1901 33.8006 48.1901 35.5408C48.1901 37.281 47.438 38.9125 47.6529 39.4562C47.8678 40 49.157 38.3686 50.0165 37.3898C50.876 36.4109 51.7355 35.8671 51.6281 37.3898C51.5207 38.9124 52.0579 39.7825 52.9174 39.0212C53.7769 38.2599 54.6364 37.9336 55.281 38.1511C55.7967 38.3251 56.6419 38.8037 57 39.0212"
   stroke="var(--affine-black)" stroke-width="1.4" stroke-linecap="round" />
 </svg>`;
+
+export const importMindMapIcon = svg`<svg width="64" height="48" viewBox="0 0 64 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M24.7745 24.0001L42.2623 24.0001" stroke="#929292" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="2 3"/>
+<path d="M24.7745 24.0002L26.1332 24.0002C30.212 24.0002 33.5184 20.6938 33.5184 16.615V16.615C33.5184 12.5362 36.8249 9.22974 40.9037 9.22974L41.2583 9.22974" stroke="#929292" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="2 3"/>
+<path d="M24.7745 24.0001L26.1332 24.0001C30.212 24.0001 33.5184 27.3066 33.5184 31.3854V31.3854C33.5184 35.4641 36.8249 38.7706 40.9037 38.7706L41.2583 38.7706" stroke="#929292" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="2 3"/>
+<rect x="43.7295" y="34.4261" width="14.7705" height="8.68854" rx="2.4" fill="black" fill-opacity="0.03" stroke="#929292" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="2 3"/>
+<rect x="43.7295" y="19.6558" width="14.7705" height="8.68854" rx="2.4" fill="black" fill-opacity="0.03" stroke="#929292" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="2 3"/>
+<rect x="43.7295" y="4.88538" width="14.7705" height="8.68854" rx="2.4" fill="black" fill-opacity="0.03" stroke="#929292" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="2 3"/>
+<rect x="5.5" y="17.9183" width="17.3771" height="12.1639" rx="3" fill="black" fill-opacity="0.03" stroke="#929292" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="2 3"/>
+</svg>
+`;

@@ -65,6 +65,7 @@
     "shiki": "^1.14.1",
     "sortablejs": "^1.15.2",
     "unified": "^11.0.5",
+    "xml-js": "^1.6.11",
     "zod": "catalog:"
   },
   "exports": {
