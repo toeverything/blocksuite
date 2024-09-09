@@ -6,6 +6,7 @@ import { matchFlavours } from '@blocksuite/affine-shared/utils';
 import { BlockService } from '@blocksuite/block-std';
 
 import { correctNumberedListsOrderToPrev } from './commands/utils.js';
+import { listKeymap } from './list-keymap.js';
 import { listPrefix, toggleStyles } from './styles.js';
 import { getListIcon } from './utils/get-list-icon.js';
 
@@ -21,6 +22,7 @@ export class ListBlockService extends BlockService {
   override mounted(): void {
     super.mounted();
 
+    this.bindHotKey(listKeymap(this.std));
     this.bindHotKey(textKeymap(this.std));
     const rootId = this.std.doc.root?.id;
     if (!rootId) return;
