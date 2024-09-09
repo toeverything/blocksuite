@@ -1,9 +1,5 @@
-import type { ShapeElementModel } from '@blocksuite/affine-model';
-
-import {
-  LayoutType,
-  MindmapElementModel,
-} from '@blocksuite/affine-block-surface';
+import { MindmapElementModel } from '@blocksuite/affine-block-surface';
+import { LayoutType, type ShapeElementModel } from '@blocksuite/affine-model';
 import {
   ConnectorElementModel,
   ConnectorMode,

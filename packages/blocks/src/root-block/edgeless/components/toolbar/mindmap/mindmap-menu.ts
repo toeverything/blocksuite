@@ -1,4 +1,4 @@
-import type { MindmapStyle } from '@blocksuite/affine-block-surface';
+import type { MindmapStyle } from '@blocksuite/affine-model';
 import type { BlockStdScope } from '@blocksuite/block-std';
 import type { Bound } from '@blocksuite/global/utils';
 import type { BlockModel } from '@blocksuite/store';
@@ -7,6 +7,7 @@ import { toast } from '@blocksuite/affine-components/toast';
 import { modelContext, stdContext } from '@blocksuite/block-std';
 import { ErrorCode } from '@blocksuite/global/exceptions';
 import { consume } from '@lit/context';
+import { computed, SignalWatcher } from '@lit-labs/preact-signals';
 import { css, html, LitElement, nothing, type TemplateResult } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
@@ -35,7 +36,9 @@ type ImportItem = {
 const textItem: TextItem = { type: 'text', icon: textIcon, render: textRender };
 
 @customElement('edgeless-mindmap-menu')
-export class EdgelessMindmapMenu extends EdgelessToolbarToolMixin(LitElement) {
+export class EdgelessMindmapMenu extends EdgelessToolbarToolMixin(
+  SignalWatcher(LitElement)
+) {
   static override styles = css`
     :host {
       display: flex;
@@ -80,6 +83,7 @@ export class EdgelessMindmapMenu extends EdgelessToolbarToolMixin(LitElement) {
       padding: 0;
     }
     .text-item:hover,
+    .mindmap-item[data-is-active='true'],
     .mindmap-item:hover {
       background: var(--affine-hover-color);
     }
@@ -88,6 +92,12 @@ export class EdgelessMindmapMenu extends EdgelessToolbarToolMixin(LitElement) {
       transition: transform 0.3s ease-in-out;
     }
   `;
+
+  private _style$ = computed(() => {
+    const { style } =
+      this.edgeless.service.editPropsStore.lastProps$.value.mindmap;
+    return style;
+  });
 
   draggableController!: EdgelessDraggableElementController<
     ToolbarMindmapItem | TextItem | ImportItem
@@ -171,7 +181,10 @@ export class EdgelessMindmapMenu extends EdgelessToolbarToolMixin(LitElement) {
       edgeless: this.edgeless,
       scopeElement: this,
       clickToDrag: true,
-      onOverlayCreated: () => {
+      onOverlayCreated: (_layer, element) => {
+        if (element.data.type === 'mindmap') {
+          this.onActiveStyleChange?.(element.data.style);
+        }
         // a workaround to active mindmap, so that menu cannot be closed by `Escape`
         this.setEdgelessTool({ type: 'mindmap' });
       },
@@ -244,8 +257,9 @@ export class EdgelessMindmapMenu extends EdgelessToolbarToolMixin(LitElement) {
           const isBeingDragged =
             isDraggingMindMap && draggingEle?.style === mindMap.style;
           const showNext = dragOut && !cancelled;
+          const isActive = this._style$.value === mindMap.style;
           return html`
-            <div class="mindmap-item">
+            <div class="mindmap-item" data-is-active=${isActive}>
               ${isBeingDragged
                 ? html`<button
                     style="transform: translateY(${showNext ? 0 : 64}px)"
@@ -291,9 +305,6 @@ export class EdgelessMindmapMenu extends EdgelessToolbarToolMixin(LitElement) {
     if (!changedProperties.has('edgeless')) return;
     this.initDragController();
   }
-
-  @property({ attribute: false })
-  accessor activeStyle!: MindmapStyle;
 
   @consume({ context: modelContext })
   accessor model!: BlockModel;

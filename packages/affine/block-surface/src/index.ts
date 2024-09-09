@@ -11,11 +11,7 @@ export {
 } from './element-model/base.js';
 
 export { CanvasElementType } from './element-model/index.js';
-export {
-  LayoutType,
-  MindmapElementModel,
-  MindmapStyle,
-} from './element-model/mindmap.js';
+export { MindmapElementModel } from './element-model/mindmap.js';
 export type { SerializedMindmapElement } from './element-model/mindmap.js';
 export { MindmapUtils } from './element-model/utils/mindmap/index.js';
 import { isConnectorWithLabel } from './element-model/utils/connector.js';

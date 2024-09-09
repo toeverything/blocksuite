@@ -13,9 +13,11 @@ import {
   FontFamily,
   FontStyle,
   FontWeight,
+  LayoutType,
   LineColor,
   LineColorsSchema,
   LineWidth,
+  MindmapStyle,
   NoteBackgroundColorsSchema,
   NoteDisplayMode,
   NoteShadowsSchema,
@@ -39,6 +41,8 @@ const TextAlignSchema = z.nativeEnum(TextAlign);
 const TextVerticalAlignSchema = z.nativeEnum(TextVerticalAlign);
 const NoteDisplayModeSchema = z.nativeEnum(NoteDisplayMode);
 const ConnectorModeSchema = z.nativeEnum(ConnectorMode);
+const LayoutTypeSchema = z.nativeEnum(LayoutType);
+const MindmapStyleSchema = z.nativeEnum(MindmapStyle);
 
 export const ColorSchema = z.union([
   z.object({
@@ -192,10 +196,21 @@ export const NoteSchema = z
     },
   });
 
+export const MindmapSchema = z
+  .object({
+    layoutType: LayoutTypeSchema,
+    style: MindmapStyleSchema,
+  })
+  .default({
+    layoutType: LayoutType.RIGHT,
+    style: MindmapStyle.ONE,
+  });
+
 export const NodePropsSchema = z.object({
   connector: ConnectorSchema,
   brush: BrushSchema,
   text: TextSchema,
+  mindmap: MindmapSchema,
   'affine:edgeless-text': EdgelessTextSchema,
   'affine:note': NoteSchema,
   // shapes

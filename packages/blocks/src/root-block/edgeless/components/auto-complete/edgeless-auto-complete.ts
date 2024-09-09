@@ -14,7 +14,6 @@ import {
 } from '@blocksuite/affine-block-surface';
 import {
   ConnectorPathGenerator,
-  LayoutType,
   MindmapElementModel,
 } from '@blocksuite/affine-block-surface';
 import {
@@ -27,6 +26,7 @@ import {
   ConnectorMode,
   DEFAULT_CONNECTOR_COLOR,
   DEFAULT_SHAPE_STROKE_COLOR,
+  LayoutType,
   ShapeElementModel,
   shapeMethods,
 } from '@blocksuite/affine-model';
