@@ -3,6 +3,9 @@ import {
   DEFAULT_CONNECTOR_COLOR,
   DEFAULT_FRONT_END_POINT_STYLE,
   DEFAULT_NOTE_BACKGROUND_COLOR,
+  DEFAULT_NOTE_BORDER_SIZE,
+  DEFAULT_NOTE_BORDER_STYLE,
+  DEFAULT_NOTE_CORNER,
   DEFAULT_NOTE_SHADOW,
   DEFAULT_REAR_END_POINT_STYLE,
   DEFAULT_ROUGHNESS,
@@ -190,9 +193,9 @@ export const NoteSchema = z
     displayMode: NoteDisplayMode.EdgelessOnly,
     edgeless: {
       style: {
-        borderRadius: 0,
-        borderSize: 4,
-        borderStyle: StrokeStyle.None,
+        borderRadius: DEFAULT_NOTE_CORNER,
+        borderSize: DEFAULT_NOTE_BORDER_SIZE,
+        borderStyle: DEFAULT_NOTE_BORDER_STYLE,
         shadowType: DEFAULT_NOTE_SHADOW,
       },
     },

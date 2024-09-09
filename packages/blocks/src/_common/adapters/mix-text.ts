@@ -1,6 +1,9 @@
 import type { DeltaInsert } from '@blocksuite/inline';
 
-import { NoteDisplayMode } from '@blocksuite/affine-model';
+import {
+  DEFAULT_NOTE_BACKGROUND_COLOR,
+  NoteDisplayMode,
+} from '@blocksuite/affine-model';
 import {
   type AssetsManager,
   ASTWalker,
@@ -138,7 +141,7 @@ export class MixTextAdapter extends BaseAdapter<MixText> {
       flavour: 'affine:note',
       props: {
         xywh: '[0,0,800,95]',
-        background: '--affine-background-secondary-color',
+        background: DEFAULT_NOTE_BACKGROUND_COLOR,
         index: 'a0',
         hidden: false,
         displayMode: NoteDisplayMode.DocAndEdgeless,
@@ -205,7 +208,7 @@ export class MixTextAdapter extends BaseAdapter<MixText> {
             flavour: 'affine:note',
             props: {
               xywh: '[0,0,800,95]',
-              background: '--affine-background-secondary-color',
+              background: DEFAULT_NOTE_BACKGROUND_COLOR,
               index: 'a0',
               hidden: false,
               displayMode: NoteDisplayMode.DocAndEdgeless,

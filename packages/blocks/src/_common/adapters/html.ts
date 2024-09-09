@@ -2,7 +2,11 @@ import type { AffineTextAttributes } from '@blocksuite/affine-components/rich-te
 import type { DeltaInsert } from '@blocksuite/inline';
 import type { Root } from 'hast';
 
-import { ColorScheme, NoteDisplayMode } from '@blocksuite/affine-model';
+import {
+  ColorScheme,
+  DEFAULT_NOTE_BACKGROUND_COLOR,
+  NoteDisplayMode,
+} from '@blocksuite/affine-model';
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import { getFilenameFromContentDisposition } from '@blocksuite/affine-shared/utils';
 import { sha } from '@blocksuite/global/utils';
@@ -1186,7 +1190,7 @@ export class HtmlAdapter extends BaseAdapter<Html> {
       flavour: 'affine:note',
       props: {
         xywh: '[0,0,800,95]',
-        background: '--affine-background-secondary-color',
+        background: DEFAULT_NOTE_BACKGROUND_COLOR,
         index: 'a0',
         hidden: false,
         displayMode: NoteDisplayMode.DocAndEdgeless,
@@ -1211,7 +1215,7 @@ export class HtmlAdapter extends BaseAdapter<Html> {
       flavour: 'affine:note',
       props: {
         xywh: '[0,0,800,95]',
-        background: '--affine-background-secondary-color',
+        background: DEFAULT_NOTE_BACKGROUND_COLOR,
         index: 'a0',
         hidden: false,
         displayMode: NoteDisplayMode.DocAndEdgeless,
@@ -1271,7 +1275,7 @@ export class HtmlAdapter extends BaseAdapter<Html> {
       flavour: 'affine:note',
       props: {
         xywh: '[0,0,800,95]',
-        background: '--affine-background-secondary-color',
+        background: DEFAULT_NOTE_BACKGROUND_COLOR,
         index: 'a0',
         hidden: false,
         displayMode: NoteDisplayMode.DocAndEdgeless,
