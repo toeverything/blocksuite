@@ -1,16 +1,17 @@
 import type { ParagraphBlockModel } from '@blocksuite/affine-model';
-import type {
-  BlockComponent,
-  EditorHost,
-  TextRangePoint,
-  TextSelection,
-} from '@blocksuite/block-std';
 
 import {
   QuickSearchProvider,
   type QuickSearchService,
   TelemetryProvider,
 } from '@blocksuite/affine-shared/services';
+import {
+  BLOCK_ID_ATTR,
+  type BlockComponent,
+  type EditorHost,
+  type TextRangePoint,
+  type TextSelection,
+} from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import {
   type BlockModel,
@@ -298,7 +299,7 @@ class PasteTr {
     host.updateComplete
       .then(() => {
         const target = this.std.host.querySelector<BlockComponent>(
-          `[${host.blockIdAttr}="${cursorModel.id}"]`
+          `[${BLOCK_ID_ATTR}="${cursorModel.id}"]`
         );
         if (!target) {
           return;

@@ -11,6 +11,7 @@ import {
   matchFlavours,
 } from '@blocksuite/affine-shared/utils';
 import {
+  BLOCK_ID_ATTR,
   type BlockComponent,
   BlockStdScope,
   type PointerEventState,
@@ -964,7 +965,7 @@ export class AffineDragHandleWidget extends WidgetComponent<
       return;
     }
 
-    const blockId = closestBlock.getAttribute(this.host.blockIdAttr);
+    const blockId = closestBlock.getAttribute(BLOCK_ID_ATTR);
     if (!blockId) return;
 
     this._anchorBlockId = blockId;

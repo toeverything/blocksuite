@@ -1,6 +1,8 @@
-import type { BlockComponent, Command } from '@blocksuite/block-std';
-
-import { BLOCK_ID_ATTR } from '@blocksuite/affine-shared/consts';
+import {
+  BLOCK_ID_ATTR,
+  type BlockComponent,
+  type Command,
+} from '@blocksuite/block-std';
 import { INLINE_ROOT_ATTR, type InlineRootElement } from '@blocksuite/inline';
 
 import type { AffineTextAttributes } from '../extension/index.js';

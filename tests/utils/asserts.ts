@@ -9,8 +9,8 @@ import type { InlineRootElement } from '@inline/inline-editor.js';
 import type { BlockModel } from '@store/index.js';
 import type { JSXElement } from '@store/utils/jsx.js';
 
-import { BLOCK_ID_ATTR } from '@blocks/_common/consts.js';
 import { NOTE_WIDTH } from '@blocksuite/affine-model';
+import { BLOCK_ID_ATTR } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import { expect, type Locator, type Page } from '@playwright/test';
 import { COLLECTION_VERSION, PAGE_VERSION } from '@store/consts.js';

@@ -1,7 +1,6 @@
 import type { BlockComponent } from '@blocksuite/block-std';
 
-import { BLOCK_ID_ATTR } from '@blocksuite/affine-shared/consts';
-import { ShadowlessElement } from '@blocksuite/block-std';
+import { BLOCK_ID_ATTR, ShadowlessElement } from '@blocksuite/block-std';
 import {
   type DeltaInsert,
   INLINE_ROOT_ATTR,

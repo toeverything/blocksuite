@@ -1,10 +1,8 @@
-import type { BlockComponent } from '@blocksuite/block-std';
 import type { Point, Rect } from '@blocksuite/global/utils';
 
-import {
-  BLOCK_CHILDREN_CONTAINER_PADDING_LEFT,
-  BLOCK_ID_ATTR,
-} from '../../consts/index.js';
+import { BLOCK_ID_ATTR, type BlockComponent } from '@blocksuite/block-std';
+
+import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '../../consts/index.js';
 import { clamp } from '../math.js';
 import { matchFlavours } from '../model/checker.js';
 

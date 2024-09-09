@@ -1,13 +1,15 @@
-import type { BlockComponent, EditorHost } from '@blocksuite/block-std';
 import type { Point } from '@blocksuite/global/utils';
 import type { BlockModel } from '@blocksuite/store';
 
 import { matchFlavours } from '@blocksuite/affine-shared/utils';
+import {
+  BLOCK_ID_ATTR,
+  type BlockComponent,
+  type EditorHost,
+} from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 
 import type { RootBlockComponent } from '../../index.js';
-
-import { BLOCK_ID_ATTR } from '../consts.js';
 
 const ATTR_SELECTOR = `[${BLOCK_ID_ATTR}]`;
 
