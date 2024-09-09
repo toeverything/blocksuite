@@ -1,6 +1,6 @@
 {
   "name": "@blocksuite/affine-block-surface",
-  "version": "0.17.4",
+  "version": "0.17.5",
   "description": "Surface block for BlockSuite.",
   "type": "module",
   "repository": "toeverything/blocksuite",
