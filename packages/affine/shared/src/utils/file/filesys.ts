@@ -95,7 +95,7 @@ const FileTypes: NonNullable<OpenFilePickerOptions['types']> = [
   {
     description: 'MindMap',
     accept: {
-      'text/xml': ['.mm', '.opml'],
+      'text/xml': ['.mm', '.opml', '.xml'],
     },
   },
 ];

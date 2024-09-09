@@ -4,6 +4,7 @@ import type { Bound } from '@blocksuite/global/utils';
 import type { BlockModel } from '@blocksuite/store';
 
 import { toast } from '@blocksuite/affine-components/toast';
+import { once } from '@blocksuite/affine-shared/utils';
 import { modelContext, stdContext } from '@blocksuite/block-std';
 import { ErrorCode } from '@blocksuite/global/exceptions';
 import { consume } from '@lit/context';
@@ -118,18 +119,27 @@ export class EdgelessMindmapMenu extends EdgelessToolbarToolMixin(
 
     const isBeingDragged = draggingElement?.data.type === 'import';
 
+    let clicked = false;
+
     return html`<div class="mindmap-item">
       <button
         style="opacity: ${isBeingDragged ? 0 : 1}"
         class="next"
         @mousedown=${(e: MouseEvent) => {
-          this.draggableController.onMouseDown(e, {
-            preview: importMindMapIcon,
-            data: {
-              type: 'import',
-              icon: importMindMapIcon,
-            },
-            standardWidth: 350,
+          let mouseReleased = false;
+          once(document, 'mouseup', () => {
+            mouseReleased = true;
+          });
+          queueMicrotask(() => {
+            if (clicked || mouseReleased) return;
+            this.draggableController.onMouseDown(e, {
+              preview: importMindMapIcon,
+              data: {
+                type: 'import',
+                icon: importMindMapIcon,
+              },
+              standardWidth: 350,
+            });
           });
         }}
         @touchstart=${(e: TouchEvent) => {
@@ -141,6 +151,15 @@ export class EdgelessMindmapMenu extends EdgelessToolbarToolMixin(
             },
             standardWidth: 350,
           });
+        }}
+        @click=${() => {
+          clicked = true;
+          const viewportBound = this._rootBlock.service.viewport.viewportBounds;
+
+          viewportBound.x += viewportBound.w / 2;
+          viewportBound.y += viewportBound.h / 2;
+
+          this._onImportMindMap(viewportBound);
         }}
       >
         ${importMindMapIcon}
