@@ -5,6 +5,8 @@ import {
 } from '@blocksuite/affine-model';
 import { BlockService } from '@blocksuite/block-std';
 
+import { paragraphKeymap } from './paragraph-keymap.js';
+
 export class ParagraphBlockService extends BlockService {
   static override readonly flavour = ParagraphBlockSchema.model.flavour;
 
@@ -29,5 +31,6 @@ export class ParagraphBlockService extends BlockService {
     super.mounted();
 
     this.bindHotKey(textKeymap(this.std));
+    this.bindHotKey(paragraphKeymap(this.std));
   }
 }
