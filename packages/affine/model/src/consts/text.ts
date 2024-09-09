@@ -1,4 +1,5 @@
 import { createEnumMap } from '../utils/enum.js';
+import { LineColor } from './line.js';
 
 export enum ColorScheme {
   Dark = 'dark',
@@ -65,3 +66,5 @@ export enum TextResizing {
   AUTO_WIDTH,
   AUTO_HEIGHT,
 }
+
+export const DEFAULT_TEXT_COLOR = LineColor.Blue;

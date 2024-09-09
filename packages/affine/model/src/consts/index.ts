@@ -1,3 +1,4 @@
+export * from './brush.js';
 export * from './connector.js';
 export * from './doc.js';
 export * from './line.js';

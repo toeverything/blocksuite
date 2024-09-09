@@ -1,4 +1,5 @@
 import { createEnumMap } from '../utils/enum.js';
+import { LineColor } from './line.js';
 
 export enum ConnectorEndpoint {
   Front = 'Front',
@@ -15,8 +16,14 @@ export enum PointStyle {
 
 export const PointStyleMap = createEnumMap(PointStyle);
 
+export const DEFAULT_CONNECTOR_COLOR = LineColor.Grey;
+
+export const DEFAULT_CONNECTOR_TEXT_COLOR = LineColor.Black;
+
 export const DEFAULT_FRONT_END_POINT_STYLE = PointStyle.None;
+
 export const DEFAULT_REAR_END_POINT_STYLE = PointStyle.Arrow;
+
 export const CONNECTOR_LABEL_MAX_WIDTH = 280;
 
 export enum ConnectorLabelOffsetAnchor {

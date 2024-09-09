@@ -172,7 +172,6 @@ export class EdgelessConnectorLabelEditor extends WithDisposable(
               edgeless.service.updateElement(connector.id, {
                 text: undefined,
                 labelXYWH: undefined,
-                labelStyle: undefined,
                 labelOffset: undefined,
               });
             } else if (len < text.length) {
