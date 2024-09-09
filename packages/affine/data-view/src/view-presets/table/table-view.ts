@@ -200,7 +200,9 @@ export class DataViewTable extends DataViewBase<
             onComplete: text => {
               const column = groupHelper.column$.value;
               if (column) {
-                column.updateData(() => addGroup(text, column.data$) as never);
+                column.updateData(
+                  () => addGroup(text, column.data$.value) as never
+                );
               }
             },
           },

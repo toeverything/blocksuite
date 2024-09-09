@@ -51,28 +51,23 @@ export class GroupManager {
     if (!staticGroupMap || !config || !groupBy || !tType || !column) {
       return;
     }
-    const groupMap: Record<string, GroupData> = {};
+    const groupMap: Record<string, GroupData> = Object.fromEntries(
+      Object.entries(staticGroupMap).map(([k, v]) => [k, { ...v, rows: [] }])
+    );
     this.viewManager.rows$.value.forEach(id => {
       const value = this.viewManager.cellGetJsonValue(id, groupBy.columnId);
       const keys = config.valuesGroup(value, tType);
       keys.forEach(({ key, value }) => {
         if (!groupMap[key]) {
-          if (!staticGroupMap[key]) {
-            groupMap[key] = {
-              key,
-              column,
-              name: config.groupName(tType, value),
-              manager: this,
-              value,
-              rows: [],
-              type: tType,
-            };
-          } else {
-            groupMap[key] = {
-              ...staticGroupMap[key],
-              rows: [],
-            };
-          }
+          groupMap[key] = {
+            key,
+            column,
+            name: config.groupName(tType, value),
+            manager: this,
+            value,
+            rows: [],
+            type: tType,
+          };
         }
         groupMap[key].rows.push(id);
       });

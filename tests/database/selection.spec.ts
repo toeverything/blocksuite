@@ -352,21 +352,21 @@ test.describe('kanban view selection', () => {
     await focusKanbanCardHeader(page);
     await assertKanbanCellSelected(page, {
       // group by `number` column, the first(groupIndex: 0) group is `Ungroups`
-      groupIndex: 0,
+      groupIndex: 1,
       cardIndex: 0,
       cellIndex: 0,
     });
 
     await pressArrowDown(page, 3);
     await assertKanbanCellSelected(page, {
-      groupIndex: 0,
+      groupIndex: 1,
       cardIndex: 0,
       cellIndex: 0,
     });
 
     await pressArrowUp(page);
     await assertKanbanCellSelected(page, {
-      groupIndex: 0,
+      groupIndex: 1,
       cardIndex: 0,
       cellIndex: 2,
     });
@@ -393,14 +393,14 @@ test.describe('kanban view selection', () => {
     await focusKanbanCardHeader(page);
     await pressArrowUp(page);
     await assertKanbanCellSelected(page, {
-      groupIndex: 0,
+      groupIndex: 1,
       cardIndex: 1,
       cellIndex: 2,
     });
 
     await pressArrowDown(page);
     await assertKanbanCellSelected(page, {
-      groupIndex: 0,
+      groupIndex: 1,
       cardIndex: 0,
       cellIndex: 0,
     });
