@@ -29,6 +29,6 @@ export const LifeCycleWatcherIdentifier =
 export const StdIdentifier = createIdentifier<BlockStdScope>('Std');
 
 export const KeymapIdentifier = createIdentifier<{
-  keymap: Record<string, UIEventHandler>;
+  getter: (std: BlockStdScope) => Record<string, UIEventHandler>;
   options?: EventOptions;
 }>('Keymap');

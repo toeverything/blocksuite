@@ -7,6 +7,10 @@ import {
 import { literal } from 'lit/static-html.js';
 
 import { commands } from './commands/index.js';
+import {
+  ParagraphKeymapExtension,
+  ParagraphTextKeymapExtension,
+} from './paragraph-keymap.js';
 import { ParagraphBlockService } from './paragraph-service.js';
 
 export const ParagraphBlockSpec: ExtensionType[] = [
@@ -14,4 +18,6 @@ export const ParagraphBlockSpec: ExtensionType[] = [
   ParagraphBlockService,
   CommandExtension(commands),
   BlockViewExtension('affine:paragraph', literal`affine-paragraph`),
+  ParagraphTextKeymapExtension,
+  ParagraphKeymapExtension,
 ];

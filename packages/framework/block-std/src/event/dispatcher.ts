@@ -353,10 +353,11 @@ export class UIEventDispatcher extends LifeCycleWatcher {
     }
     this._bindEvents();
 
+    const std = this.std;
     this.std.provider
       .getAll(KeymapIdentifier)
-      .forEach(({ keymap, options }) => {
-        this.bindHotkey(keymap, options);
+      .forEach(({ getter, options }) => {
+        this.bindHotkey(getter(std), options);
       });
   }
 
