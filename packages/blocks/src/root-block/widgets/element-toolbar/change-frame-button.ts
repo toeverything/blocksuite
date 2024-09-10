@@ -3,6 +3,7 @@ import { toast } from '@blocksuite/affine-components/toast';
 import { renderToolbarSeparator } from '@blocksuite/affine-components/toolbar';
 import {
   type ColorScheme,
+  FRAME_BACKGROUND_COLORS,
   type FrameBlockModel,
   NoteDisplayMode,
 } from '@blocksuite/affine-model';
@@ -30,18 +31,6 @@ import {
 } from '../../edgeless/components/color-picker/utils.js';
 import { DEFAULT_NOTE_HEIGHT } from '../../edgeless/utils/consts.js';
 import { mountFrameTitleEditor } from '../../edgeless/utils/text.js';
-
-const FRAME_BACKGROUND = [
-  '--affine-tag-gray',
-  '--affine-tag-red',
-  '--affine-tag-orange',
-  '--affine-tag-yellow',
-  '--affine-tag-green',
-  '--affine-tag-teal',
-  '--affine-tag-blue',
-  '--affine-tag-purple',
-  '--affine-tag-pink',
-] as const;
 
 function getMostCommonColor(
   elements: FrameBlockModel[],
@@ -183,7 +172,7 @@ export class EdgelessChangeFrameButton extends WithDisposable(LitElement) {
                 .color=${background}
                 .colors=${colors}
                 .colorType=${type}
-                .palettes=${FRAME_BACKGROUND}
+                .palettes=${FRAME_BACKGROUND_COLORS}
               >
               </edgeless-color-picker-button>
             `;
@@ -204,7 +193,7 @@ export class EdgelessChangeFrameButton extends WithDisposable(LitElement) {
             >
               <edgeless-color-panel
                 .value=${background}
-                .options=${FRAME_BACKGROUND}
+                .options=${FRAME_BACKGROUND_COLORS}
                 @select=${(e: ColorEvent) => this._setFrameBackground(e.detail)}
               >
               </edgeless-color-panel>

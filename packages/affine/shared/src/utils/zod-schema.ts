@@ -18,6 +18,7 @@ import {
   FontFamily,
   FontStyle,
   FontWeight,
+  FrameBackgroundColorsSchema,
   LayoutType,
   LineColor,
   LineColorsSchema,
@@ -64,6 +65,10 @@ const ShapeStrokeColorSchema = z.union([StrokeColorsSchema, ColorSchema]);
 const TextColorSchema = z.union([LineColorsSchema, ColorSchema]);
 const NoteBackgroundColorSchema = z.union([
   NoteBackgroundColorsSchema,
+  ColorSchema,
+]);
+const FrameBackgroundColorSchema = z.union([
+  FrameBackgroundColorsSchema,
   ColorSchema,
 ]);
 
@@ -228,6 +233,12 @@ export const MindmapSchema = z
     style: MindmapStyle.ONE,
   });
 
+export const FrameSchema = z
+  .object({
+    background: FrameBackgroundColorSchema.optional(),
+  })
+  .default({});
+
 export const NodePropsSchema = z.object({
   connector: ConnectorSchema,
   brush: BrushSchema,
@@ -235,6 +246,7 @@ export const NodePropsSchema = z.object({
   mindmap: MindmapSchema,
   'affine:edgeless-text': EdgelessTextSchema,
   'affine:note': NoteSchema,
+  'affine:frame': FrameSchema,
   // shapes
   'shape:diamond': ShapeSchema,
   'shape:ellipse': ShapeSchema,

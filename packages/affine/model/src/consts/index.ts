@@ -1,6 +1,7 @@
 export * from './brush.js';
 export * from './connector.js';
 export * from './doc.js';
+export * from './frame.js';
 export * from './line.js';
 export * from './mindmap.js';
 export * from './note.js';
