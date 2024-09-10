@@ -1,3 +1,5 @@
+import type { DocSnapshot } from '@blocksuite/store';
+
 import {
   type EdgelessRootBlockComponent,
   EdgelessRootService,
@@ -8,6 +10,7 @@ import { beforeEach, describe, expect, test } from 'vitest';
 
 import { wait } from '../utils/common.js';
 import { addNote, getDocRootBlock } from '../utils/edgeless.js';
+import { importFromSnapshot } from '../utils/misc.js';
 import { setupEditor } from '../utils/setup.js';
 
 describe('basic', () => {
@@ -269,5 +272,35 @@ describe('basic', () => {
     expect(surfaceRef).instanceOf(Element);
     (surfaceRef as SurfaceRefBlockComponent).viewInEdgeless();
     await wait();
+  });
+});
+
+import snapshot from '../snapshots/edgeless/surface-ref.spec.ts/surface-ref.json';
+
+describe('clipboard', () => {
+  test('import surface-ref snapshot should render content correctly', async () => {
+    await setupEditor('page');
+
+    const pageRoot = getDocRootBlock(doc, editor, 'page');
+    const pageRootService = pageRoot.service;
+
+    const newDoc = await importFromSnapshot(
+      pageRootService.collection,
+      snapshot as DocSnapshot
+    );
+    expect(newDoc).toBeTruthy();
+
+    editor.doc = newDoc!;
+    await wait();
+
+    const surfaceRefs = newDoc!.getBlocksByFlavour('affine:surface-ref');
+    expect(surfaceRefs).toHaveLength(2);
+
+    const surfaceRefBlocks = surfaceRefs.map(({ id }) =>
+      editor.std.view.getBlock(id)
+    ) as SurfaceRefBlockComponent[];
+
+    expect(surfaceRefBlocks[0].querySelector('.ref-placeholder')).toBeFalsy();
+    expect(surfaceRefBlocks[1].querySelector('.ref-placeholder')).toBeFalsy();
   });
 });
