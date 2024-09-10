@@ -22,8 +22,8 @@ export class ListBlockService extends BlockService {
   override mounted(): void {
     super.mounted();
 
-    this.bindHotKey(listKeymap(this.std));
     this.bindHotKey(textKeymap(this.std));
+    this.bindHotKey(listKeymap(this.std));
     const rootId = this.std.doc.root?.id;
     if (!rootId) return;
 
