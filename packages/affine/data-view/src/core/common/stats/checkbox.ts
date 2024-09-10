@@ -42,6 +42,7 @@ export const checkboxTypeStatsFunctions: StatsFunction[] = [
     menuName: 'Percent Unchecked',
     displayName: 'Unchecked',
     impl: (data: unknown[]) => {
+      if (data.length === 0) return '';
       const emptyList = data.filter(value => !value);
       return ((emptyList.length / data.length) * 100).toFixed(2) + '%';
     },
@@ -53,6 +54,7 @@ export const checkboxTypeStatsFunctions: StatsFunction[] = [
     menuName: 'Percent Checked',
     displayName: 'Checked',
     impl: (data: unknown[]) => {
+      if (data.length === 0) return '';
       const notEmptyList = data.filter(value => !!value);
       return ((notEmptyList.length / data.length) * 100).toFixed(2) + '%';
     },

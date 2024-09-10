@@ -78,6 +78,7 @@ export const anyTypeStatsFunctions: StatsFunction[] = [
     type: 'percent-empty',
     dataType: tUnknown.create(),
     impl: (data: unknown[], { meta }) => {
+      if (data.length === 0) return '';
       const emptyList = data.filter(value => meta.config.isEmpty(value));
       return ((emptyList.length / data.length) * 100).toFixed(2) + '%';
     },
@@ -89,6 +90,7 @@ export const anyTypeStatsFunctions: StatsFunction[] = [
     type: 'percent-not-empty',
     dataType: tUnknown.create(),
     impl: (data: unknown[], { meta }) => {
+      if (data.length === 0) return '';
       const notEmptyList = data.filter(value => !meta.config.isEmpty(value));
       return ((notEmptyList.length / data.length) * 100).toFixed(2) + '%';
     },
