@@ -20,16 +20,21 @@ export const createToastContainer = (editorHost: EditorHost) => {
   const template = html`<div class="toast-container" style="${styles}"></div>`;
   const element = htmlToElement<HTMLDivElement>(template);
   const { std, doc } = editorHost;
-  if (!doc.root) {
-    return null;
+
+  let container = document.body;
+  if (doc.root) {
+    const rootComponent = std.view.getBlock(doc.root.id) as BlockComponent & {
+      viewportElement: HTMLElement;
+    };
+    if (rootComponent) {
+      const viewportElement = rootComponent.viewportElement;
+      const editorContainer = viewportElement.parentElement;
+      if (editorContainer) {
+        container = editorContainer;
+      }
+    }
   }
-  const rootComponent = std.view.getBlock(doc.root.id) as BlockComponent & {
-    viewportElement: HTMLElement;
-  };
-  if (!rootComponent) {
-    return null;
-  }
-  const viewportElement = rootComponent.viewportElement;
-  viewportElement?.append(element);
+  container.append(element);
+
   return element;
 };
