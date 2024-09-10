@@ -60,6 +60,7 @@ export class LatexEditorMenu extends SignalWatcher(
       box-shadow: 0px 0px 0px 2px rgba(30, 150, 235, 0.3);
 
       font-family: ${unsafeCSS(cssVar('fontCodeFamily'))};
+      border: 1px solid transparent;
     }
     .latex-editor:focus-within {
       border: 1px solid ${unsafeCSS(cssVar('blue700'))};
