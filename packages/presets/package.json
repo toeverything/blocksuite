@@ -20,12 +20,12 @@
     "@blocksuite/global": "workspace:*",
     "@blocksuite/inline": "workspace:*",
     "@blocksuite/store": "workspace:*",
-    "@floating-ui/dom": "catalog:",
-    "@lit-labs/preact-signals": "catalog:",
-    "@lottiefiles/dotlottie-wc": "catalog:",
-    "@toeverything/theme": "catalog:",
-    "lit": "catalog:",
-    "zod": "catalog:"
+    "@floating-ui/dom": "^1.6.10",
+    "@lit-labs/preact-signals": "^1.0.2",
+    "@lottiefiles/dotlottie-wc": "^0.2.16",
+    "@toeverything/theme": "^1.0.8",
+    "lit": "^3.2.0",
+    "zod": "^3.23.8"
   },
   "exports": {
     ".": "./src/index.ts",

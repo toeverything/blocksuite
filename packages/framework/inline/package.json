@@ -20,12 +20,12 @@
   "author": "toeverything",
   "license": "MPL-2.0",
   "devDependencies": {
-    "lit": "catalog:",
-    "yjs": "catalog:"
+    "lit": "^3.2.0",
+    "yjs": "^13.6.18"
   },
   "peerDependencies": {
-    "lit": "catalog:",
-    "yjs": "catalog:"
+    "lit": "^3.2.0",
+    "yjs": "^13.6.18"
   },
   "exports": {
     "./*": "./src/*.ts",
@@ -42,6 +42,6 @@
   },
   "dependencies": {
     "@blocksuite/global": "workspace:*",
-    "zod": "catalog:"
+    "zod": "^3.23.8"
   }
 }

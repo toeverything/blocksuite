@@ -14,20 +14,20 @@
   "author": "toeverything",
   "license": "MPL-2.0",
   "dependencies": {
+    "@blocksuite/affine-components": "workspace:*",
     "@blocksuite/affine-shared": "workspace:*",
     "@blocksuite/block-std": "workspace:*",
     "@blocksuite/global": "workspace:*",
+    "@blocksuite/icons": "^2.1.67",
     "@blocksuite/store": "workspace:*",
-    "@blocksuite/affine-components": "workspace:*",
-    "@blocksuite/icons": "catalog:",
-    "@floating-ui/dom": "catalog:",
-    "@lit-labs/preact-signals": "catalog:",
-    "@lit/context": "catalog:",
-    "@toeverything/theme": "catalog:",
-    "lit": "catalog:",
-    "date-fns": "catalog:",
+    "@floating-ui/dom": "^1.6.10",
+    "@lit-labs/preact-signals": "^1.0.2",
+    "@lit/context": "^1.1.2",
+    "@toeverything/theme": "^1.0.8",
+    "date-fns": "^3.6.0",
+    "lit": "^3.2.0",
     "sortablejs": "^1.15.2",
-    "zod": "catalog:"
+    "zod": "^3.23.8"
   },
   "devDependencies": {
     "@types/sortablejs": "^1.15.8"

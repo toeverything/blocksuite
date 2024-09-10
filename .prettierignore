@@ -1,6 +1,7 @@
 dist
 .next
 pnpm-lock.yaml
+yarn.lock
 tests/snapshots/
 __snapshots__/
 tsconfig.tsbuildinfo
@@ -8,4 +9,3 @@ tsconfig.tsbuildinfo
 .coverage/
 .nx/
 **/test-results/
-

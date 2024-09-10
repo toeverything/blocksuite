@@ -20,19 +20,17 @@ jobs:
 
       - uses: ./.github/actions/setup
 
-      - run: pnpm install
-
       - name: Add changeset
         run: cp .github/snapshot-changeset.md .changeset/
 
       - name: Update package version
-        run: pnpm ci:version:canary
+        run: yarn ci:version:canary
 
       - name: Build packages
-        run: pnpm build:packages
+        run: yarn build:packages
 
       - name: Publish to NPM
         run: |
           echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ".npmrc"
-          pnpm ci:publish:canary
+          yarn ci:publish:canary
           rm ".npmrc"

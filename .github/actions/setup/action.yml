@@ -1,12 +1,6 @@
 name: Setup
 description: Setup the environment
 
-inputs:
-  node-version:
-    description: The version of node.js
-    required: false
-    default: '20'
-
 runs:
   using: composite
   steps:
@@ -20,23 +14,23 @@ runs:
       run: corepack enable
       shell: bash
 
-    - name: Install pnpm
-      run: pnpm --version
+    - name: Install yarn
+      run: yarn --version
       shell: bash
 
     - name: Setup node
       uses: actions/setup-node@v4
       with:
-        node-version: ${{ inputs.node-version }}
-        cache: pnpm
+        node-version-file: '.nvmrc'
+        cache: yarn
         registry-url: 'https://registry.npmjs.org'
 
     - name: Show versions
       run: |
         node --version
-        pnpm --version
+        yarn --version
       shell: bash
 
     - name: Install
-      run: pnpm install
+      run: yarn install
       shell: bash
