@@ -31,6 +31,8 @@ jobs:
 
       - name: Publish to NPM
         run: |
-          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ".npmrc"
+          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > .npmrc
+          yarn config set npmAuthToken ${{ secrets.NPM_TOKEN }}
           yarn ci:publish:canary
           rm ".npmrc"
+          yarn config unset npmAuthToken
