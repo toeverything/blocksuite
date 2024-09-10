@@ -105,13 +105,10 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
 
   pickColor = (event: PickColorEvent) => {
     if (event.type === 'pick') {
-      this.notes.forEach(ele =>
-        this.doc.updateBlock(ele, packColor('background', { ...event.detail }))
-      );
-      this.edgeless.service.editPropsStore.recordLastProps(
-        'affine:note',
-        packColor('background', event.detail)
-      );
+      this.notes.forEach(element => {
+        const props = packColor('background', { ...event.detail });
+        this.edgeless.service.updateElement(element.id, props);
+      });
       return;
     }
 
@@ -136,12 +133,9 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
   }
 
   private _setBackground(background: string) {
-    this.notes.forEach(note => {
-      this.doc.updateBlock(note, { background });
+    this.notes.forEach(element => {
+      this.edgeless.service.updateElement(element.id, { background });
     });
-    this.edgeless.service.editPropsStore.recordLastProps('affine:note', {
-      background,
-    } as Record<string, unknown>);
   }
 
   private _setCollapse() {

@@ -1,6 +1,7 @@
 import {
   ConnectorMode,
   DEFAULT_CONNECTOR_COLOR,
+  DEFAULT_CONNECTOR_TEXT_COLOR,
   DEFAULT_FRONT_END_POINT_STYLE,
   DEFAULT_NOTE_BACKGROUND_COLOR,
   DEFAULT_NOTE_BORDER_SIZE,
@@ -75,6 +76,14 @@ export const ConnectorSchema = z
     strokeWidth: LineWidthSchema,
     rough: z.boolean(),
     mode: ConnectorModeSchema,
+    labelStyle: z.object({
+      color: LineColorSchema,
+      fontSize: z.number(),
+      fontFamily: FontFamilySchema,
+      fontWeight: FontWeightSchema,
+      fontStyle: FontStyleSchema,
+      textAlign: TextAlignSchema,
+    }),
   })
   .default({
     frontEndpointStyle: DEFAULT_FRONT_END_POINT_STYLE,
@@ -84,6 +93,14 @@ export const ConnectorSchema = z
     strokeWidth: LineWidth.Two,
     rough: false,
     mode: ConnectorMode.Curve,
+    labelStyle: {
+      color: DEFAULT_CONNECTOR_TEXT_COLOR,
+      fontSize: 16,
+      fontFamily: FontFamily.Inter,
+      fontWeight: FontWeight.Regular,
+      fontStyle: FontStyle.Normal,
+      textAlign: TextAlign.Center,
+    },
   });
 
 export const BrushSchema = z
@@ -144,35 +161,35 @@ export const RoundedShapeSchema = z
 export const TextSchema = z
   .object({
     color: TextColorSchema,
+    fontSize: z.number(),
     fontFamily: FontFamilySchema,
-    textAlign: TextAlignSchema,
     fontWeight: FontWeightSchema,
     fontStyle: FontStyleSchema,
-    fontSize: z.number(),
+    textAlign: TextAlignSchema,
   })
   .default({
     color: DEFAULT_TEXT_COLOR,
+    fontSize: 24,
     fontFamily: FontFamily.Inter,
-    textAlign: TextAlign.Left,
     fontWeight: FontWeight.Regular,
     fontStyle: FontStyle.Normal,
-    fontSize: 24,
+    textAlign: TextAlign.Left,
   });
 
 export const EdgelessTextSchema = z
   .object({
     color: TextColorSchema,
     fontFamily: FontFamilySchema,
-    textAlign: TextAlignSchema,
     fontWeight: FontWeightSchema,
     fontStyle: FontStyleSchema,
+    textAlign: TextAlignSchema,
   })
   .default({
     color: DEFAULT_TEXT_COLOR,
     fontFamily: FontFamily.Inter,
-    textAlign: TextAlign.Left,
     fontWeight: FontWeight.Regular,
     fontStyle: FontStyle.Normal,
+    textAlign: TextAlign.Left,
   });
 
 export const NoteSchema = z

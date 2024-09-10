@@ -307,23 +307,10 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
 
   pickColor = (event: PickColorEvent) => {
     if (event.type === 'pick') {
-      this.elements.forEach(ele => {
-        if (ele instanceof ConnectorElementModel) {
-          this.service.updateElement(ele.id, {
-            labelStyle: {
-              ...ele.labelStyle,
-              ...packColor('color', { ...event.detail }),
-            },
-          });
-          this._updateElementBound(ele);
-          return;
-        }
-
-        this.service.updateElement(
-          ele.id,
-          packColor('color', { ...event.detail })
-        );
-        this._updateElementBound(ele);
+      this.elements.forEach(element => {
+        const props = packColor('color', { ...event.detail });
+        this.service.updateElement(element.id, buildProps(element, props));
+        this._updateElementBound(element);
       });
       return;
     }

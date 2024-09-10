@@ -22,7 +22,6 @@ import { DocCollection } from '@blocksuite/store';
 
 import type { EdgelessRootBlockComponent } from '../edgeless-root-block.js';
 
-import { GET_DEFAULT_LINE_COLOR } from '../components/panel/color-panel.js';
 import { EdgelessConnectorLabelEditor } from '../components/text/edgeless-connector-label-editor.js';
 import { EdgelessFrameTitleEditor } from '../components/text/edgeless-frame-title-editor.js';
 import { EdgelessGroupTitleEditor } from '../components/text/edgeless-group-title-editor.js';
@@ -190,11 +189,8 @@ export function mountConnectorLabelEditor(
 
   if (!connector.text) {
     const text = new DocCollection.Y.Text();
-    const labelStyle = connector.labelStyle;
     const labelOffset = connector.labelOffset;
     let labelXYWH = connector.labelXYWH ?? [0, 0, 16, 16];
-
-    labelStyle.color = GET_DEFAULT_LINE_COLOR();
 
     if (point) {
       const center = connector.getNearestPoint(point);
@@ -208,7 +204,6 @@ export function mountConnectorLabelEditor(
     edgeless.service.updateElement(connector.id, {
       text,
       labelXYWH,
-      labelStyle: { ...labelStyle },
       labelOffset: { ...labelOffset },
     });
   }

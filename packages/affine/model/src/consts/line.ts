@@ -44,9 +44,3 @@ export const LINE_COLORS = [
 ] as const;
 
 export const LineColorsSchema = z.nativeEnum(LineColor);
-
-export const DEFAULT_TEXT_COLOR = LineColor.Blue;
-
-export const DEFAULT_BRUSH_COLOR = LineColor.Blue;
-
-export const DEFAULT_CONNECTOR_COLOR = LineColor.Grey;
