@@ -3,10 +3,10 @@ import type { TemplateResult } from 'lit';
 import {
   CanvasElementType,
   type MindmapElementModel,
-  type MindmapStyle,
 } from '@blocksuite/affine-block-surface';
-import { LayoutType } from '@blocksuite/affine-block-surface';
 import {
+  LayoutType,
+  type MindmapStyle,
   type ShapeElementModel,
   TextElementModel,
 } from '@blocksuite/affine-model';

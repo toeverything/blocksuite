@@ -1,6 +1,6 @@
 {
   "name": "@blocksuite/blocks",
-  "version": "0.17.4",
+  "version": "0.17.5",
   "description": "Default BlockSuite editable blocks.",
   "type": "module",
   "repository": "toeverything/blocksuite",
@@ -65,6 +65,7 @@
     "shiki": "^1.14.1",
     "sortablejs": "^1.15.2",
     "unified": "^11.0.5",
+    "xml-js": "^1.6.11",
     "zod": "catalog:"
   },
   "exports": {

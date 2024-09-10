@@ -10,6 +10,8 @@ import {
 import type { TextSelection } from '../selection/index.js';
 import type { BlockComponent } from '../view/element/block-component.js';
 
+import { BLOCK_ID_ATTR } from '../view/index.js';
+
 export const getInlineRangeProvider: (
   element: BlockComponent
 ) => InlineRangeProvider | null = element => {
@@ -33,7 +35,7 @@ export const getInlineRangeProvider: (
       const inlineRoot = startElement?.closest(`[${INLINE_ROOT_ATTR}]`);
       if (!inlineRoot) return false;
 
-      const block = startElement?.closest(`[${editorHost.blockIdAttr}]`);
+      const block = startElement?.closest(`[${BLOCK_ID_ATTR}]`);
       if (!block || block !== element) return false;
     } else {
       if (!range.intersectsNode(element)) return false;

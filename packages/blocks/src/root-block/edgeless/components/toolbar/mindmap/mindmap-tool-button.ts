@@ -1,5 +1,8 @@
-import { MindmapStyle } from '@blocksuite/affine-block-surface';
-import { assertExists } from '@blocksuite/global/utils';
+import type { MindmapElementModel } from '@blocksuite/affine-block-surface';
+import type { MindmapStyle } from '@blocksuite/affine-model';
+import type { Bound } from '@blocksuite/global/utils';
+
+import { computed, SignalWatcher } from '@lit-labs/preact-signals';
 import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
@@ -21,10 +24,11 @@ import {
 } from './basket-elements.js';
 import { basketIconDark, basketIconLight, textIcon } from './icons.js';
 import './mindmap-menu.js';
+import { importMindmap } from './utils/import-mindmap.js';
 
 @customElement('edgeless-mindmap-tool-button')
 export class EdgelessMindmapToolButton extends EdgelessToolbarToolMixin(
-  LitElement
+  SignalWatcher(LitElement)
 ) {
   static override styles = css`
     :host {
@@ -117,6 +121,12 @@ export class EdgelessMindmapToolButton extends EdgelessToolbarToolMixin(
     }
   `;
 
+  private _style$ = computed(() => {
+    const { style } =
+      this.edgeless.service.editPropsStore.lastProps$.value.mindmap;
+    return style;
+  });
+
   draggableController!: EdgelessDraggableElementController<DraggableTool>;
 
   override enableActiveBackground = true;
@@ -124,7 +134,9 @@ export class EdgelessMindmapToolButton extends EdgelessToolbarToolMixin(
   override type: EdgelessTool['type'][] = ['mindmap', 'text'];
 
   get draggableTools(): DraggableTool[] {
-    const mindmap = this.mindmaps.find(m => m.style === this.activeStyle)!;
+    const style = this._style$.value;
+    const mindmap =
+      this.mindmaps.find(m => m.style === style) || this.mindmaps[0];
     return [
       {
         name: 'text',
@@ -138,7 +150,7 @@ export class EdgelessMindmapToolButton extends EdgelessToolbarToolMixin(
         icon: mindmap.icon,
         config: mindmapConfig,
         standardWidth: 350,
-        render: getMindmapRender(this.activeStyle),
+        render: getMindmapRender(style),
       },
     ];
   }
@@ -154,9 +166,30 @@ export class EdgelessMindmapToolButton extends EdgelessToolbarToolMixin(
     const menu = this.createPopper('edgeless-mindmap-menu', this);
     Object.assign(menu.element, {
       edgeless: this.edgeless,
-      activeStyle: this.activeStyle,
       onActiveStyleChange: (style: MindmapStyle) => {
-        this.activeStyle = style;
+        this.edgeless.service.editPropsStore.recordLastProps('mindmap', {
+          style,
+        });
+      },
+      onImportMindMap: (bound: Bound) => {
+        return importMindmap(bound).then(mindmap => {
+          const id = this.edgeless.service.addElement('mindmap', {
+            children: mindmap,
+            layoutType: mindmap?.layoutType === 'left' ? 1 : 0,
+          });
+          const element = this.edgeless.service.getElementById(
+            id
+          ) as MindmapElementModel;
+
+          this.tryDisposePopper();
+          this.setEdgelessTool(
+            { type: 'default' },
+            {
+              elements: [element.tree.id],
+              editing: false,
+            }
+          );
+        });
       },
     });
   }
@@ -229,13 +262,14 @@ export class EdgelessMindmapToolButton extends EdgelessToolbarToolMixin(
           if (this.readyToDrop) {
             // change the style
             const activeIndex = this.mindmaps.findIndex(
-              m => m.style === this.activeStyle
+              m => m.style === this._style$.value
             );
             const nextIndex = (activeIndex + 1) % this.mindmaps.length;
             const next = this.mindmaps[nextIndex];
-            this.activeStyle = next.style;
+            this.edgeless.service.editPropsStore.recordLastProps('mindmap', {
+              style: next.style,
+            });
             const tool = this.draggableTools.find(t => t.name === 'mindmap');
-            assertExists(tool);
             this.draggableController.updateElementInfo({
               data: tool,
               preview: next.icon,
@@ -244,7 +278,6 @@ export class EdgelessMindmapToolButton extends EdgelessToolbarToolMixin(
           }
           this.setEdgelessTool({ type: 'mindmap' });
           const icon = this.mindmapElement;
-          assertExists(icon);
           const { x, y } = service.tool.lastMousePos;
           const { left, top } = this.edgeless.viewport;
           const clientPos = { x: x + left, y: y + top };
@@ -372,9 +405,6 @@ export class EdgelessMindmapToolButton extends EdgelessToolbarToolMixin(
       this.initDragController();
     }
   }
-
-  @state()
-  accessor activeStyle: MindmapStyle = MindmapStyle.ONE;
 
   @property({ type: Boolean })
   accessor enableBlur = true;

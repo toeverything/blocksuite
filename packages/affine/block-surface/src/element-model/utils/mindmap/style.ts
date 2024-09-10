@@ -5,6 +5,7 @@ import {
   FontFamily,
   FontWeight,
   LineColor,
+  MindmapStyle,
   ShapeFillColor,
   StrokeStyle,
 } from '@blocksuite/affine-model';
@@ -345,13 +346,6 @@ export class StyleFour extends MindmapStyleGetter {
   }
 }
 export const styleFour = new StyleFour();
-
-export enum MindmapStyle {
-  FOUR = 4,
-  ONE = 1,
-  THREE = 3,
-  TWO = 2,
-}
 
 export const mindmapStyleGetters: {
   [key in MindmapStyle]: MindmapStyleGetter;

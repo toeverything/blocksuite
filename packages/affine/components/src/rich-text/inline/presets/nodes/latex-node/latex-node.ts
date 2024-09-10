@@ -1,5 +1,6 @@
 import {
   type BlockComponent,
+  type BlockStdScope,
   ShadowlessElement,
   SignalWatcher,
   WithDisposable,
@@ -17,7 +18,7 @@ import katex from 'katex';
 import { css, html, render, unsafeCSS } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
-import type { AffineTextAttributes } from '../../affine-inline-specs.js';
+import type { AffineTextAttributes } from '../../../../extension/index.js';
 
 import { createLitPortal } from '../../../../../portal/helper.js';
 import './latex-editor-menu.js';
@@ -188,6 +189,7 @@ export class AffineLatexNode extends SignalWatcher(
 
     const portal = createLitPortal({
       template: html`<latex-editor-menu
+        .std=${this.std}
         .latexSignal=${this.latex$}
         .abortController=${this._editorAbortController}
       ></latex-editor-menu>`,
@@ -232,6 +234,9 @@ export class AffineLatexNode extends SignalWatcher(
 
   @property({ attribute: false })
   accessor startOffset!: number;
+
+  @property({ attribute: false })
+  accessor std!: BlockStdScope;
 }
 
 declare global {

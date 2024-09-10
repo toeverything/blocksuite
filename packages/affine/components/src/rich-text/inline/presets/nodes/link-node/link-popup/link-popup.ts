@@ -2,14 +2,13 @@ import type { EmbedOptions } from '@blocksuite/affine-shared/types';
 import type { BlockComponent } from '@blocksuite/block-std';
 import type { InlineRange } from '@blocksuite/inline/types';
 
-import { BLOCK_ID_ATTR } from '@blocksuite/affine-shared/consts';
 import { EmbedOptionProvider } from '@blocksuite/affine-shared/services';
 import {
   getHostName,
   isValidUrl,
   normalizeUrl,
 } from '@blocksuite/affine-shared/utils';
-import { WithDisposable } from '@blocksuite/block-std';
+import { BLOCK_ID_ATTR, WithDisposable } from '@blocksuite/block-std';
 import { computePosition, inline, offset, shift } from '@floating-ui/dom';
 import { html, LitElement, nothing } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';

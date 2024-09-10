@@ -92,6 +92,12 @@ const FileTypes: NonNullable<OpenFilePickerOptions['types']> = [
       'application/zip': ['.zip'],
     },
   },
+  {
+    description: 'MindMap',
+    accept: {
+      'text/xml': ['.mm', '.opml', '.xml'],
+    },
+  },
 ];
 
 /**
@@ -104,7 +110,8 @@ type AcceptTypes =
   | 'Audios'
   | 'Markdown'
   | 'Html'
-  | 'Zip';
+  | 'Zip'
+  | 'MindMap';
 export function openFileOrFiles(options?: {
   acceptType?: AcceptTypes;
 }): Promise<File | null>;

@@ -1,5 +1,6 @@
 import './global.js';
 
+export * from './all-extensions.js';
 export {
   asyncGetRichText,
   asyncSetInlineRange,
@@ -8,6 +9,7 @@ export {
   getRichTextByModel,
   selectTextModel,
 } from './dom.js';
+export * from './extension/index.js';
 export {
   clearMarksOnDiscontinuousInput,
   FORMAT_BLOCK_SUPPORT_FLAVOURS,
@@ -17,25 +19,7 @@ export {
   textCommands,
   textFormatConfigs,
 } from './format/index.js';
-export {
-  type AffineInlineEditor,
-  affineInlineMarkdownMatches,
-  type AffineInlineRootElement,
-  AffineLink,
-  AffineReference,
-  type AffineTextAttributes,
-  basicAffineInlineSpecs,
-  DEFAULT_DOC_NAME,
-  getAffineInlineSpecsWithReference,
-  InlineManager,
-  type InlineMarkdownMatch,
-  type InlineMarkdownMatchAction,
-  type InlineSpecs,
-  REFERENCE_NODE,
-  ReferenceNodeConfig,
-  type RefNodeSlots,
-  toggleLinkPopup,
-} from './inline/index.js';
+export * from './inline/index.js';
 export { textKeymap } from './keymap/index.js';
 export { insertLinkedNode } from './linked-node.js';
 export { markdownInput } from './markdown/index.js';

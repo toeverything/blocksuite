@@ -4,6 +4,7 @@ import type { Heading, Root, RootContentMap, TableRow } from 'mdast';
 
 import {
   type Column,
+  DEFAULT_NOTE_BACKGROUND_COLOR,
   NoteDisplayMode,
   type SerializedCells,
 } from '@blocksuite/affine-model';
@@ -1073,7 +1074,7 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
       flavour: 'affine:note',
       props: {
         xywh: '[0,0,800,95]',
-        background: '--affine-background-secondary-color',
+        background: DEFAULT_NOTE_BACKGROUND_COLOR,
         index: 'a0',
         hidden: false,
         displayMode: NoteDisplayMode.DocAndEdgeless,
@@ -1097,7 +1098,7 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
       flavour: 'affine:note',
       props: {
         xywh: '[0,0,800,95]',
-        background: '--affine-background-secondary-color',
+        background: DEFAULT_NOTE_BACKGROUND_COLOR,
         index: 'a0',
         hidden: false,
         displayMode: NoteDisplayMode.DocAndEdgeless,
@@ -1216,7 +1217,7 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
       flavour: 'affine:note',
       props: {
         xywh: '[0,0,800,95]',
-        background: '--affine-background-secondary-color',
+        background: DEFAULT_NOTE_BACKGROUND_COLOR,
         index: 'a0',
         hidden: false,
         displayMode: NoteDisplayMode.DocAndEdgeless,

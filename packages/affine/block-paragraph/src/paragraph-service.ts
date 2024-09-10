@@ -1,12 +1,4 @@
 import {
-  affineInlineMarkdownMatches,
-  type AffineTextAttributes,
-  getAffineInlineSpecsWithReference,
-  InlineManager,
-  ReferenceNodeConfig,
-  textKeymap,
-} from '@blocksuite/affine-components/rich-text';
-import {
   type ParagraphBlockModel,
   ParagraphBlockSchema,
 } from '@blocksuite/affine-model';
@@ -14,8 +6,6 @@ import { BlockService } from '@blocksuite/block-std';
 
 export class ParagraphBlockService extends BlockService {
   static override readonly flavour = ParagraphBlockSchema.model.flavour;
-
-  readonly inlineManager = new InlineManager<AffineTextAttributes>();
 
   placeholderGenerator: (model: ParagraphBlockModel) => string = model => {
     if (model.type === 'text') {
@@ -33,19 +23,4 @@ export class ParagraphBlockService extends BlockService {
     };
     return placeholders[model.type];
   };
-
-  readonly referenceNodeConfig = new ReferenceNodeConfig();
-
-  override mounted(): void {
-    super.mounted();
-
-    this.bindHotKey(textKeymap(this.std));
-    this.referenceNodeConfig.setDoc(this.doc);
-
-    const inlineSpecs = getAffineInlineSpecsWithReference(
-      this.referenceNodeConfig
-    );
-    this.inlineManager.registerSpecs(inlineSpecs);
-    this.inlineManager.registerMarkdownMatches(affineInlineMarkdownMatches);
-  }
 }

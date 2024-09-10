@@ -1,6 +1,9 @@
-import type { RichText } from '@blocksuite/affine-components/rich-text';
 import type { Text } from '@blocksuite/store';
 
+import {
+  DefaultInlineManagerExtension,
+  type RichText,
+} from '@blocksuite/affine-components/rich-text';
 import { QuickSearchProvider } from '@blocksuite/affine-shared/services';
 import {
   getViewportElement,
@@ -95,7 +98,9 @@ abstract class BaseTextCell extends BaseCellRenderer<Text> {
   }
 
   get inlineManager() {
-    return this.service?.inlineManager;
+    return this.view
+      .getContext(HostContextKey)
+      ?.std.get(DefaultInlineManagerExtension.identifier);
   }
 
   get service() {

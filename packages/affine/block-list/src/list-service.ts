@@ -1,13 +1,5 @@
 import type { BlockComponent } from '@blocksuite/block-std';
 
-import {
-  affineInlineMarkdownMatches,
-  type AffineTextAttributes,
-  getAffineInlineSpecsWithReference,
-  InlineManager,
-  ReferenceNodeConfig,
-  textKeymap,
-} from '@blocksuite/affine-components/rich-text';
 import { ListBlockSchema } from '@blocksuite/affine-model';
 import { matchFlavours } from '@blocksuite/affine-shared/utils';
 import { BlockService } from '@blocksuite/block-std';
@@ -19,10 +11,6 @@ import { getListIcon } from './utils/get-list-icon.js';
 export class ListBlockService extends BlockService {
   static override readonly flavour = ListBlockSchema.model.flavour;
 
-  readonly inlineManager = new InlineManager<AffineTextAttributes>();
-
-  readonly referenceNodeConfig = new ReferenceNodeConfig();
-
   readonly styles = {
     icon: getListIcon,
     prefix: listPrefix,
@@ -32,15 +20,6 @@ export class ListBlockService extends BlockService {
   override mounted(): void {
     super.mounted();
 
-    this.referenceNodeConfig.setDoc(this.doc);
-
-    const inlineSpecs = getAffineInlineSpecsWithReference(
-      this.referenceNodeConfig
-    );
-    this.inlineManager.registerSpecs(inlineSpecs);
-    this.inlineManager.registerMarkdownMatches(affineInlineMarkdownMatches);
-
-    this.bindHotKey(textKeymap(this.std));
     const rootId = this.std.doc.root?.id;
     if (!rootId) return;
 

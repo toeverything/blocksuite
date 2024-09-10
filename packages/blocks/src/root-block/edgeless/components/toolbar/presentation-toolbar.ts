@@ -139,6 +139,39 @@ export class PresentationToolbar extends EdgelessToolbarToolMixin(LitElement) {
     this.edgeless = edgeless;
   }
 
+  private _bindHotKey() {
+    const handleKeyIfFrameNavigator = (action: () => void) => () => {
+      if (this.edgelessTool.type === 'frameNavigator') {
+        action();
+      }
+    };
+
+    this.edgeless.bindHotKey(
+      {
+        ArrowLeft: handleKeyIfFrameNavigator(() => this._previousFrame()),
+        ArrowRight: handleKeyIfFrameNavigator(() => this._nextFrame()),
+        Escape: handleKeyIfFrameNavigator(() => this._exitPresentation()),
+      },
+      {
+        global: true,
+      }
+    );
+  }
+
+  private _exitPresentation() {
+    // When exit presentation mode, we need to set the tool to default or pan
+    // And exit fullscreen
+    this.setEdgelessTool(
+      this.edgeless.doc.readonly
+        ? { type: 'pan', panning: false }
+        : { type: 'default' }
+    );
+
+    if (document.fullscreenElement) {
+      document.exitFullscreen().catch(console.error);
+    }
+  }
+
   private _moveToCurrentFrame() {
     const current = this._currentFrameIndex;
     const viewport = this.edgeless.service.viewport;
@@ -190,44 +223,26 @@ export class PresentationToolbar extends EdgelessToolbarToolMixin(LitElement) {
     }
   }
 
+  /**
+   * Toggle fullscreen, but keep edgeless tool to frameNavigator
+   * If already fullscreen, exit fullscreen
+   * If not fullscreen, enter fullscreen
+   */
   private _toggleFullScreen() {
     if (document.fullscreenElement) {
-      clearTimeout(this._timer);
       document.exitFullscreen().catch(console.error);
+      this._fullScreenMode = false;
     } else {
       launchIntoFullscreen(this.edgeless.viewportElement);
-      this._timer = setTimeout(() => {
-        this._currentFrameIndex = this._cachedIndex;
-      }, 400);
+      this._fullScreenMode = true;
     }
-
-    setTimeout(() => this._moveToCurrentFrame(), 400);
-    this.edgeless.slots.fullScreenToggled.emit();
   }
 
   override firstUpdated() {
     const { _disposables, edgeless } = this;
     const { slots } = edgeless;
 
-    _disposables.add(
-      edgeless.bindHotKey(
-        {
-          ArrowLeft: () => {
-            const { type } = this.edgelessTool;
-            if (type !== 'frameNavigator') return;
-            this._previousFrame();
-          },
-          ArrowRight: () => {
-            const { type } = this.edgelessTool;
-            if (type !== 'frameNavigator') return;
-            this._nextFrame();
-          },
-        },
-        {
-          global: true,
-        }
-      )
-    );
+    this._bindHotKey();
 
     _disposables.add(
       slots.edgelessToolUpdated.on(tool => {
@@ -261,6 +276,31 @@ export class PresentationToolbar extends EdgelessToolbarToolMixin(LitElement) {
       })
     );
 
+    _disposables.addFromEvent(document, 'fullscreenchange', () => {
+      if (document.fullscreenElement) {
+        // When enter fullscreen, we need to set current frame to the cached index
+        this._timer = setTimeout(() => {
+          this._currentFrameIndex = this._cachedIndex;
+        }, 400);
+      } else {
+        // When exit fullscreen, we need to clear the timer
+        clearTimeout(this._timer);
+        if (
+          this.edgelessTool.type === 'frameNavigator' &&
+          this._fullScreenMode
+        ) {
+          this.setEdgelessTool(
+            this.edgeless.doc.readonly
+              ? { type: 'pan', panning: false }
+              : { type: 'default' }
+          );
+        }
+      }
+
+      setTimeout(() => this._moveToCurrentFrame(), 400);
+      this.edgeless.slots.fullScreenToggled.emit();
+    });
+
     this._navigatorMode =
       this.edgeless.service.editPropsStore.getStorage('presentFillScreen') ===
       true
@@ -272,7 +312,6 @@ export class PresentationToolbar extends EdgelessToolbarToolMixin(LitElement) {
     const current = this._currentFrameIndex;
     const frames = this._frames;
     const frame = frames[current];
-    const { doc } = this.edgeless;
 
     return html`
       <style>
@@ -356,13 +395,7 @@ export class PresentationToolbar extends EdgelessToolbarToolMixin(LitElement) {
 
       <button
         class="edgeless-frame-navigator-stop"
-        @click=${() => {
-          this.setEdgelessTool(
-            doc.readonly ? { type: 'pan', panning: false } : { type: 'default' }
-          );
-
-          document.fullscreenElement && this._toggleFullScreen();
-        }}
+        @click=${this._exitPresentation}
         style="background: ${cssVar('warningColor')}"
       >
         ${StopAIIcon}
@@ -385,6 +418,8 @@ export class PresentationToolbar extends EdgelessToolbarToolMixin(LitElement) {
     },
   })
   private accessor _currentFrameIndex = 0;
+
+  private accessor _fullScreenMode = true;
 
   @state()
   private accessor _navigatorMode: NavigatorMode = 'fit';

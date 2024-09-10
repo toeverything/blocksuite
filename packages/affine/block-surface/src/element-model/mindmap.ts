@@ -6,7 +6,9 @@ import type {
 import type { SerializedXYWH, XYWH } from '@blocksuite/global/utils';
 
 import {
+  LayoutType,
   LocalConnectorElementModel,
+  MindmapStyle,
   TextResizing,
 } from '@blocksuite/affine-model';
 import {
@@ -37,15 +39,8 @@ import type {
   MindmapStyleGetter,
 } from './utils/mindmap/style.js';
 
-import { layout, LayoutType } from './utils/mindmap/layout.js';
-import {
-  applyNodeStyle,
-  MindmapStyle,
-  mindmapStyleGetters,
-} from './utils/mindmap/style.js';
-
-export { LayoutType } from './utils/mindmap/layout.js';
-export { MindmapStyle } from './utils/mindmap/style.js';
+import { layout } from './utils/mindmap/layout.js';
+import { applyNodeStyle, mindmapStyleGetters } from './utils/mindmap/style.js';
 
 const baseNodeSchema = z.object({
   text: z.string(),

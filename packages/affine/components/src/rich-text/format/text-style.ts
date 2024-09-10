@@ -3,7 +3,7 @@ import type { Command } from '@blocksuite/block-std';
 import { toggleLinkPopup } from '@blocksuite/affine-components/rich-text';
 import { INLINE_ROOT_ATTR, type InlineRootElement } from '@blocksuite/inline';
 
-import type { AffineTextAttributes } from '../inline/index.js';
+import type { AffineTextAttributes } from '../extension/index.js';
 
 import { generateTextStyleCommand, getCombinedTextStyle } from './utils.js';
 

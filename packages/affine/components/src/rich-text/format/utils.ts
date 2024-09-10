@@ -1,12 +1,11 @@
-import type {
-  BlockComponent,
-  Chain,
-  Command,
-  CommandKeyToData,
-  InitCommandCtx,
+import {
+  BLOCK_ID_ATTR,
+  type BlockComponent,
+  type Chain,
+  type Command,
+  type CommandKeyToData,
+  type InitCommandCtx,
 } from '@blocksuite/block-std';
-
-import { BLOCK_ID_ATTR } from '@blocksuite/affine-shared/consts';
 import { assertExists } from '@blocksuite/global/utils';
 import {
   INLINE_ROOT_ATTR,
@@ -15,10 +14,8 @@ import {
   type InlineRootElement,
 } from '@blocksuite/inline';
 
-import type {
-  AffineInlineEditor,
-  AffineTextAttributes,
-} from '../inline/index.js';
+import type { AffineTextAttributes } from '../extension/index.js';
+import type { AffineInlineEditor } from '../inline/index.js';
 
 import {
   FORMAT_BLOCK_SUPPORT_FLAVOURS,

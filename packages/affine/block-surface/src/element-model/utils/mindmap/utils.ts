@@ -1,12 +1,12 @@
-import type { ShapeElementModel } from '@blocksuite/affine-model';
 import type { GfxModel } from '@blocksuite/block-std/gfx';
 
+import { LayoutType, type ShapeElementModel } from '@blocksuite/affine-model';
 import { assertType } from '@blocksuite/global/utils';
 
 import type { MindmapElementModel } from '../../mindmap.js';
+import type { MindmapNode } from './layout.js';
 
 import { ConnectorPathGenerator } from '../../../managers/connector-manager.js';
-import { LayoutType, type MindmapNode } from './layout.js';
 
 export function getHoveredArea(
   target: ShapeElementModel,

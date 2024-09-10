@@ -1,9 +1,8 @@
 import type { ReferenceInfo } from '@blocksuite/affine-model';
-import type { BlockComponent } from '@blocksuite/block-std';
 import type { InlineRange } from '@blocksuite/inline';
 
-import { BLOCK_ID_ATTR } from '@blocksuite/affine-shared/consts';
 import { isInsideBlockByFlavour } from '@blocksuite/affine-shared/utils';
+import { BLOCK_ID_ATTR, type BlockComponent } from '@blocksuite/block-std';
 import { WithDisposable } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import { computePosition, inline, offset, shift } from '@floating-ui/dom';

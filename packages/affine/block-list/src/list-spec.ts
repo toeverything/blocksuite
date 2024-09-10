@@ -7,6 +7,7 @@ import {
 import { literal } from 'lit/static-html.js';
 
 import { commands } from './commands/index.js';
+import { ListKeymapExtension, ListTextKeymapExtension } from './list-keymap.js';
 import { ListBlockService } from './list-service.js';
 
 export const ListBlockSpec: ExtensionType[] = [
@@ -14,4 +15,6 @@ export const ListBlockSpec: ExtensionType[] = [
   ListBlockService,
   CommandExtension(commands),
   BlockViewExtension('affine:list', literal`affine-list`),
+  ListKeymapExtension,
+  ListTextKeymapExtension,
 ];

@@ -1,11 +1,10 @@
 import type { RootBlockModel } from '@blocksuite/affine-model';
-import type { PointerEventState } from '@blocksuite/block-std';
 
-import { BLOCK_ID_ATTR } from '@blocksuite/affine-shared/consts';
 import {
   getScrollContainer,
   matchFlavours,
 } from '@blocksuite/affine-shared/utils';
+import { BLOCK_ID_ATTR, type PointerEventState } from '@blocksuite/block-std';
 import { BlockComponent, WidgetComponent } from '@blocksuite/block-std';
 import { assertInstanceOf } from '@blocksuite/global/utils';
 import { html, nothing } from 'lit';

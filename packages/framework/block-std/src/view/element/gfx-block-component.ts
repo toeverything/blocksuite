@@ -94,7 +94,6 @@ export abstract class GfxBlockComponent<
   }
 }
 
-// @ts-ignore
 export function toGfxBlockComponent<
   Model extends GfxBlockElementModel,
   Service extends BlockService,

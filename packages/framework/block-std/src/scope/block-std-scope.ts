@@ -131,12 +131,14 @@ export class BlockStdScope {
     return config;
   }
 
+  /**
+   * @deprecated
+   * BlockService will be removed in the future.
+   */
   getService<Key extends BlockSuite.ServiceKeys>(
     flavour: Key
   ): BlockSuite.BlockServices[Key];
-
   getService<Service extends BlockService>(flavour: string): Service;
-
   getService(flavour: string): BlockService {
     return this.get(BlockServiceIdentifier(flavour));
   }

@@ -1,5 +1,24 @@
 # @blocksuite/data-view
 
+## 0.17.5
+
+### Patch Changes
+
+- debf65c: - Fix latex export
+  - Fix add group in database kanban view
+  - Fix presentation mode `Esc` key
+  - Fix url parse and paste for block reference
+  - Frame improvement
+  - Database checkbox statistics improvement
+  - Inline extensions
+  - Mindmap remember last settings
+- Updated dependencies [debf65c]
+  - @blocksuite/affine-components@0.17.5
+  - @blocksuite/affine-shared@0.17.5
+  - @blocksuite/block-std@0.17.5
+  - @blocksuite/global@0.17.5
+  - @blocksuite/store@0.17.5
+
 ## 0.17.4
 
 ### Patch Changes

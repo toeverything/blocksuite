@@ -7,6 +7,7 @@ import type { BlockComponent } from '../view/element/block-component.js';
 import type { RangeManager } from './range-manager.js';
 
 import { blockComponentSymbol } from '../view/element/consts.js';
+import { BLOCK_ID_ATTR } from '../view/index.js';
 import { RANGE_SYNC_EXCLUDE_ATTR } from './consts.js';
 
 /**
@@ -219,7 +220,7 @@ export class RangeBinding {
         ? range.commonAncestorContainer
         : range.commonAncestorContainer.parentElement;
     if (!el) return;
-    const block = el.closest<BlockComponent>(`[${this.host.blockIdAttr}]`);
+    const block = el.closest<BlockComponent>(`[${BLOCK_ID_ATTR}]`);
     if (block?.getAttribute(RANGE_SYNC_EXCLUDE_ATTR) === 'true') return;
 
     const inlineEditor = this.rangeManager?.getClosestInlineEditor(

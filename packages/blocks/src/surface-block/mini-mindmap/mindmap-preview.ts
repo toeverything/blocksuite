@@ -3,13 +3,13 @@ import type {
   SurfaceBlockModel,
 } from '@blocksuite/affine-block-surface';
 
-import { MindmapStyle } from '@blocksuite/affine-block-surface';
 import {
   MindmapStyleFour,
   MindmapStyleOne,
   MindmapStyleThree,
   MindmapStyleTwo,
 } from '@blocksuite/affine-components/icons';
+import { MindmapStyle } from '@blocksuite/affine-model';
 import {
   BlockStdScope,
   type EditorHost,

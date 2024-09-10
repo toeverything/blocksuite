@@ -1,16 +1,15 @@
-import type {
-  FrameBlockModel,
-  NoteBlockModel,
-  RootBlockModel,
-  SurfaceRefBlockModel,
-} from '@blocksuite/affine-model';
-
 import {
   AutoConnectLeftIcon,
   AutoConnectRightIcon,
   HiddenIcon,
   SmallDocIcon,
 } from '@blocksuite/affine-components/icons';
+import {
+  FrameBlockModel,
+  NoteBlockModel,
+  type RootBlockModel,
+  type SurfaceRefBlockModel,
+} from '@blocksuite/affine-model';
 import { NoteDisplayMode } from '@blocksuite/affine-model';
 import {
   matchFlavours,
@@ -103,6 +102,12 @@ function getIndexLabelTooltip(icon: TemplateResult, content: string) {
 
 type AutoConnectElement = NoteBlockModel | FrameBlockModel;
 
+function isAutoConnectElement(element: unknown): element is AutoConnectElement {
+  return (
+    element instanceof NoteBlockModel || element instanceof FrameBlockModel
+  );
+}
+
 export const AFFINE_EDGELESS_AUTO_CONNECT_WIDGET =
   'affine-edgeless-auto-connect-widget';
 
@@ -170,10 +175,12 @@ export class EdgelessAutoConnectWidget extends WidgetComponent<
 
   private _updateLabels = () => {
     const service = this.service;
+    if (!service.doc.root) return;
+
     const pageVisibleBlocks = new Map<AutoConnectElement, number>();
     const notes = service.doc.root?.children.filter(child =>
       matchFlavours(child, ['affine:note'])
-    ) as NoteBlockModel[];
+    );
     const edgelessOnlyNotesSet = new Set<NoteBlockModel>();
 
     notes.forEach(note => {
@@ -187,11 +194,9 @@ export class EdgelessAutoConnectWidget extends WidgetComponent<
 
       note.children.forEach(model => {
         if (matchFlavours(model, ['affine:surface-ref'])) {
-          const reference = service.getElementById(
-            model.reference
-          ) as AutoConnectElement;
+          const reference = service.getElementById(model.reference);
 
-          if (!reference) return;
+          if (!isAutoConnectElement(reference)) return;
 
           if (!pageVisibleBlocks.has(reference)) {
             pageVisibleBlocks.set(reference, 1);

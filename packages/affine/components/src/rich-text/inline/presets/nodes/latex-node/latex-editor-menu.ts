@@ -1,9 +1,9 @@
-import type { BaseTextAttributes } from '@blocksuite/inline/index';
 import type { Y } from '@blocksuite/store';
 
 import { ColorScheme } from '@blocksuite/affine-model';
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import {
+  type BlockStdScope,
   ShadowlessElement,
   SignalWatcher,
   WithDisposable,
@@ -16,9 +16,15 @@ import { cssVar } from '@toeverything/theme';
 import { css, html, unsafeCSS } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { codeToTokensBase, type ThemedToken } from 'shiki';
-import { z } from 'zod';
 
-import { InlineManager } from '../../../inline-manager.js';
+import { InlineManagerExtension } from '../../../../extension/index.js';
+import { LatexEditorUnitSpecExtension } from '../../affine-inline-specs.js';
+
+export const LatexEditorInlineManagerExtension = InlineManagerExtension({
+  id: 'latex-inline-editor',
+  enableMarkdown: false,
+  specs: [LatexEditorUnitSpecExtension.identifier],
+});
 
 @customElement('latex-editor-menu')
 export class LatexEditorMenu extends SignalWatcher(
@@ -84,13 +90,11 @@ export class LatexEditorMenu extends SignalWatcher(
 
   highlightTokens$: Signal<ThemedToken[][]> = signal([]);
 
-  readonly inlineManager = new InlineManager<
-    BaseTextAttributes & {
-      'latex-editor-unit'?: null;
-    }
-  >();
-
   yText!: Y.Text;
+
+  get inlineManager() {
+    return this.std.get(LatexEditorInlineManagerExtension.identifier);
+  }
 
   get richText() {
     return this.querySelector('rich-text');
@@ -143,17 +147,6 @@ export class LatexEditorMenu extends SignalWatcher(
       })
     );
 
-    this.inlineManager.registerSpecs([
-      {
-        name: 'latex-editor-unit',
-        schema: z.undefined(),
-        match: () => true,
-        renderer: ({ delta }) => {
-          return html`<latex-editor-unit .delta=${delta}></latex-editor-unit>`;
-        },
-      },
-    ]);
-
     this.disposables.addFromEvent(this, 'keydown', e => {
       if (e.key === 'Enter' && !e.shiftKey) {
         e.preventDefault();
@@ -196,6 +189,9 @@ export class LatexEditorMenu extends SignalWatcher(
 
   @property({ attribute: false })
   accessor latexSignal!: Signal<string>;
+
+  @property({ attribute: false })
+  accessor std!: BlockStdScope;
 }
 
 declare global {

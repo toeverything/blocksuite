@@ -82,37 +82,50 @@ export class DatabaseColumnStatsCell extends SignalWatcher(
     return this.column.cells$.value.map(cell => cell.value$.value);
   });
 
-  openMenu = (ev: MouseEvent) => {
-    const groups: Record<string, StatsFunction[]> = {};
+  groups$ = computed(() => {
+    const groups: Record<string, Record<string, StatsFunction>> = {};
 
     statsFunctions.forEach(func => {
       if (!typesystem.isSubtype(func.dataType, this.column.dataType$.value)) {
         return;
       }
       if (!groups[func.group]) {
-        groups[func.group] = [];
+        groups[func.group] = {};
       }
-      groups[func.group].push(func);
+      const oldFunc = groups[func.group][func.type];
+      if (!oldFunc || typesystem.isSubtype(oldFunc.dataType, func.dataType)) {
+        if (!func.impl) {
+          delete groups[func.group][func.type];
+        } else {
+          groups[func.group][func.type] = func;
+        }
+      }
     });
-    const menus: Menu[] = Object.entries(groups).map(([group, funcs]) => {
-      return {
-        type: 'sub-menu',
-        name: group,
-        options: {
-          input: { search: true },
-          items: funcs.map(func => {
-            return {
-              type: 'action',
-              isSelected: func.type === this.column.statCalcOp$.value,
-              name: func.menuName,
-              select: () => {
-                this.column.updateStatCalcOp(func.type);
-              },
-            };
-          }),
-        },
-      };
-    });
+    return groups;
+  });
+
+  openMenu = (ev: MouseEvent) => {
+    const menus: Menu[] = Object.entries(this.groups$.value).map(
+      ([group, funcs]) => {
+        return {
+          type: 'sub-menu',
+          name: group,
+          options: {
+            input: { search: true },
+            items: Object.values(funcs).map(func => {
+              return {
+                type: 'action',
+                isSelected: func.type === this.column.statCalcOp$.value,
+                name: func.menuName ?? func.type,
+                select: () => {
+                  this.column.updateStatCalcOp(func.type);
+                },
+              };
+            }),
+          },
+        };
+      }
+    );
     popFilterableSimpleMenu(ev.target as HTMLElement, [
       {
         type: 'action',
@@ -127,9 +140,9 @@ export class DatabaseColumnStatsCell extends SignalWatcher(
   };
 
   statsFunc$ = computed(() => {
-    return statsFunctions.find(
-      func => func.type === this.column.statCalcOp$.value
-    );
+    return Object.values(this.groups$.value)
+      .flatMap(group => Object.values(group))
+      .find(func => func.type === this.column.statCalcOp$.value);
   });
 
   statsResult$ = computed(() => {
@@ -143,7 +156,7 @@ export class DatabaseColumnStatsCell extends SignalWatcher(
     }
     return {
       name: func.displayName,
-      value: func.impl(this.values$.value, { meta }),
+      value: func.impl?.(this.values$.value, { meta }) ?? '',
     };
   });
 

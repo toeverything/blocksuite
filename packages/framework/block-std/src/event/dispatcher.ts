@@ -4,6 +4,7 @@ import { DisposableGroup } from '@blocksuite/global/utils';
 import type { BlockComponent } from '../view/index.js';
 
 import { LifeCycleWatcher } from '../extension/index.js';
+import { KeymapIdentifier } from '../identifier.js';
 import {
   type UIEventHandler,
   UIEventState,
@@ -351,6 +352,13 @@ export class UIEventDispatcher extends LifeCycleWatcher {
       this.disposables = new DisposableGroup();
     }
     this._bindEvents();
+
+    const std = this.std;
+    this.std.provider
+      .getAll(KeymapIdentifier)
+      .forEach(({ getter, options }) => {
+        this.bindHotkey(getter(std), options);
+      });
   }
 
   run(

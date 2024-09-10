@@ -1,6 +1,9 @@
 import type { BlockSnapshot } from '@blocksuite/store';
 
-import { NoteDisplayMode } from '@blocksuite/affine-model';
+import {
+  DEFAULT_NOTE_BACKGROUND_COLOR,
+  NoteDisplayMode,
+} from '@blocksuite/affine-model';
 import { AssetsManager, MemoryBlobCRUD } from '@blocksuite/store';
 import { describe, expect, test } from 'vitest';
 
@@ -76,7 +79,7 @@ describe('snapshot to html', () => {
           flavour: 'affine:note',
           props: {
             xywh: '[0,0,800,95]',
-            background: '--affine-background-secondary-color',
+            background: DEFAULT_NOTE_BACKGROUND_COLOR,
             index: 'a0',
             hidden: false,
             displayMode: NoteDisplayMode.DocAndEdgeless,
@@ -142,7 +145,7 @@ describe('snapshot to html', () => {
           flavour: 'affine:note',
           props: {
             xywh: '[0,0,800,95]',
-            background: '--affine-background-secondary-color',
+            background: DEFAULT_NOTE_BACKGROUND_COLOR,
             index: 'a0',
             hidden: false,
             displayMode: NoteDisplayMode.DocAndEdgeless,
@@ -208,7 +211,7 @@ describe('snapshot to html', () => {
           flavour: 'affine:note',
           props: {
             xywh: '[0,0,800,95]',
-            background: '--affine-background-secondary-color',
+            background: DEFAULT_NOTE_BACKGROUND_COLOR,
             index: 'a0',
             hidden: false,
             displayMode: NoteDisplayMode.DocAndEdgeless,
@@ -274,7 +277,7 @@ describe('snapshot to html', () => {
           flavour: 'affine:note',
           props: {
             xywh: '[0,0,800,95]',
-            background: '--affine-background-secondary-color',
+            background: DEFAULT_NOTE_BACKGROUND_COLOR,
             index: 'a0',
             hidden: false,
             displayMode: NoteDisplayMode.DocAndEdgeless,
@@ -460,7 +463,7 @@ describe('snapshot to html', () => {
           flavour: 'affine:note',
           props: {
             xywh: '[0,0,800,95]',
-            background: '--affine-background-secondary-color',
+            background: DEFAULT_NOTE_BACKGROUND_COLOR,
             index: 'a0',
             hidden: false,
             displayMode: NoteDisplayMode.DocAndEdgeless,
@@ -605,7 +608,7 @@ describe('snapshot to html', () => {
           flavour: 'affine:note',
           props: {
             xywh: '[0,0,800,95]',
-            background: '--affine-background-secondary-color',
+            background: DEFAULT_NOTE_BACKGROUND_COLOR,
             index: 'a0',
             hidden: false,
             displayMode: NoteDisplayMode.DocAndEdgeless,
@@ -679,7 +682,7 @@ describe('snapshot to html', () => {
           flavour: 'affine:note',
           props: {
             xywh: '[0,0,800,95]',
-            background: '--affine-background-secondary-color',
+            background: DEFAULT_NOTE_BACKGROUND_COLOR,
             index: 'a0',
             hidden: false,
             displayMode: NoteDisplayMode.DocAndEdgeless,
@@ -753,7 +756,7 @@ describe('snapshot to html', () => {
           flavour: 'affine:note',
           props: {
             xywh: '[0,0,800,95]',
-            background: '--affine-background-secondary-color',
+            background: DEFAULT_NOTE_BACKGROUND_COLOR,
             index: 'a0',
             hidden: false,
             displayMode: NoteDisplayMode.DocAndEdgeless,
@@ -828,7 +831,7 @@ describe('snapshot to html', () => {
           flavour: 'affine:note',
           props: {
             xywh: '[0,0,800,95]',
-            background: '--affine-background-secondary-color',
+            background: DEFAULT_NOTE_BACKGROUND_COLOR,
             index: 'a0',
             hidden: false,
             displayMode: NoteDisplayMode.DocAndEdgeless,
@@ -903,7 +906,7 @@ describe('snapshot to html', () => {
           flavour: 'affine:note',
           props: {
             xywh: '[0,0,800,95]',
-            background: '--affine-background-secondary-color',
+            background: DEFAULT_NOTE_BACKGROUND_COLOR,
             index: 'a0',
             hidden: false,
             displayMode: NoteDisplayMode.DocAndEdgeless,
@@ -974,7 +977,7 @@ describe('html to snapshot', () => {
       flavour: 'affine:note',
       props: {
         xywh: '[0,0,800,95]',
-        background: '--affine-background-secondary-color',
+        background: DEFAULT_NOTE_BACKGROUND_COLOR,
         index: 'a0',
         hidden: false,
         displayMode: NoteDisplayMode.DocAndEdgeless,
@@ -1016,7 +1019,7 @@ describe('html to snapshot', () => {
       flavour: 'affine:note',
       props: {
         xywh: '[0,0,800,95]',
-        background: '--affine-background-secondary-color',
+        background: DEFAULT_NOTE_BACKGROUND_COLOR,
         index: 'a0',
         hidden: false,
         displayMode: NoteDisplayMode.DocAndEdgeless,
@@ -1126,7 +1129,7 @@ describe('html to snapshot', () => {
       flavour: 'affine:note',
       props: {
         xywh: '[0,0,800,95]',
-        background: '--affine-background-secondary-color',
+        background: DEFAULT_NOTE_BACKGROUND_COLOR,
         index: 'a0',
         hidden: false,
         displayMode: NoteDisplayMode.DocAndEdgeless,
@@ -1172,7 +1175,7 @@ describe('html to snapshot', () => {
       flavour: 'affine:note',
       props: {
         xywh: '[0,0,800,95]',
-        background: '--affine-background-secondary-color',
+        background: DEFAULT_NOTE_BACKGROUND_COLOR,
         index: 'a0',
         hidden: false,
         displayMode: NoteDisplayMode.DocAndEdgeless,
@@ -1208,7 +1211,7 @@ describe('html to snapshot', () => {
       flavour: 'affine:note',
       props: {
         xywh: '[0,0,800,95]',
-        background: '--affine-background-secondary-color',
+        background: DEFAULT_NOTE_BACKGROUND_COLOR,
         index: 'a0',
         hidden: false,
         displayMode: NoteDisplayMode.DocAndEdgeless,

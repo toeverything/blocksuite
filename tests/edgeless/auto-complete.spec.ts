@@ -1,3 +1,4 @@
+import { DEFAULT_NOTE_BACKGROUND_COLOR } from '@blocksuite/affine-model';
 import { expect, type Page } from '@playwright/test';
 
 import { clickView, moveView } from '../utils/actions/click.js';
@@ -163,7 +164,7 @@ test.describe('auto-complete', () => {
       await assertEdgelessNoteBackground(
         page,
         noteId,
-        '--affine-note-background-green'
+        DEFAULT_NOTE_BACKGROUND_COLOR
       );
 
       const rect = await edgelessNote.boundingBox();

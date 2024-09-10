@@ -25,6 +25,7 @@ import { WidgetViewMapIdentifier } from '../../identifier.js';
 import { PropTypes, requiredProperties } from '../decorators/index.js';
 import { SignalWatcher } from '../signal-watcher.js';
 import { WithDisposable } from '../utils/with-disposable.js';
+import { BLOCK_ID_ATTR, WIDGET_ID_ATTR } from './consts.js';
 import { ShadowlessElement } from './shadowless-element.js';
 
 export const docContext = createContext<Doc>('doc');
@@ -66,7 +67,7 @@ export class EditorHost extends SignalWatcher(
     const tag = typeof view === 'function' ? view(model) : view;
     const widgets: Record<string, TemplateResult> = widgetViewMap
       ? Object.entries(widgetViewMap).reduce((mapping, [key, tag]) => {
-          const template = html`<${tag} ${unsafeStatic(this.widgetIdAttr)}=${key}></${tag}>`;
+          const template = html`<${tag} ${unsafeStatic(WIDGET_ID_ATTR)}=${key}></${tag}>`;
 
           return {
             ...mapping,
@@ -76,7 +77,7 @@ export class EditorHost extends SignalWatcher(
       : {};
 
     return html`<${tag}
-      ${unsafeStatic(this.blockIdAttr)}=${model.id}
+      ${unsafeStatic(BLOCK_ID_ATTR)}=${model.id}
       .widgets=${widgets}
       .viewType=${block.blockViewType}
     ></${tag}>`;
@@ -191,9 +192,6 @@ export class EditorHost extends SignalWatcher(
     return this._renderModel(root);
   }
 
-  @property({ attribute: false })
-  accessor blockIdAttr = 'data-block-id';
-
   @provide({ context: docContext })
   @property({ attribute: false })
   accessor doc!: Doc;
@@ -201,9 +199,6 @@ export class EditorHost extends SignalWatcher(
   @provide({ context: stdContext })
   @property({ attribute: false })
   accessor std!: BlockSuite.Std;
-
-  @property({ attribute: false })
-  accessor widgetIdAttr = 'data-widget-id';
 }
 
 declare global {

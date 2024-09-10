@@ -168,7 +168,6 @@ export const replaceIdMiddleware: JobMiddleware = ({ slots, collection }) => {
         ).forEach(([_, value]) => {
           switch (value.type) {
             case 'connector': {
-              // @ts-ignore
               let connection = value.source as Record<string, string>;
               if (idMap.has(connection.id)) {
                 const newId = idMap.get(connection.id);

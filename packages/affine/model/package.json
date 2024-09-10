@@ -1,6 +1,6 @@
 {
   "name": "@blocksuite/affine-model",
-  "version": "0.17.4",
+  "version": "0.17.5",
   "description": "Default BlockSuite editable blocks.",
   "type": "module",
   "repository": "toeverything/blocksuite",

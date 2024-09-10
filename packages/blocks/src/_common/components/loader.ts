@@ -1,9 +1,8 @@
 import type { BlockModel } from '@blocksuite/store';
 
+import { BLOCK_ID_ATTR } from '@blocksuite/block-std';
 import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-
-import { BLOCK_ID_ATTR } from '../consts.js';
 
 @customElement('loader-element')
 export class Loader extends LitElement {

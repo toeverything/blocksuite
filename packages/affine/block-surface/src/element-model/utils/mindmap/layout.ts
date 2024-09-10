@@ -1,5 +1,6 @@
 import type { SerializedXYWH } from '@blocksuite/global/utils';
 
+import { LayoutType } from '@blocksuite/affine-model';
 import { Bound } from '@blocksuite/global/utils';
 
 import type { MindmapElementModel } from '../../mindmap.js';
@@ -40,12 +41,6 @@ export type MindmapRoot = MindmapNode & {
   left: MindmapNode[];
   right: MindmapNode[];
 };
-
-export enum LayoutType {
-  BALANCE = 2,
-  LEFT = 1,
-  RIGHT = 0,
-}
 
 type TreeSize = {
   /**

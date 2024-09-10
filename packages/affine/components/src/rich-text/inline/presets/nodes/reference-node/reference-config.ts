@@ -1,4 +1,4 @@
-import type { Doc } from '@blocksuite/store';
+import type { BlockStdScope } from '@blocksuite/block-std';
 import type { TemplateResult } from 'lit';
 
 import type { AffineReference } from './reference-node.js';
@@ -12,8 +12,6 @@ export class ReferenceNodeConfig {
     null;
 
   private _customTitle: ((reference: AffineReference) => string) | null = null;
-
-  private _Doc: Doc | null = null;
 
   private _interactable = true;
 
@@ -30,12 +28,14 @@ export class ReferenceNodeConfig {
   }
 
   get doc() {
-    return this._Doc;
+    return this.std.doc;
   }
 
   get interactable() {
     return this._interactable;
   }
+
+  constructor(readonly std: BlockStdScope) {}
 
   setCustomContent(content: ReferenceNodeConfig['_customContent']) {
     this._customContent = content;
@@ -47,10 +47,6 @@ export class ReferenceNodeConfig {
 
   setCustomTitle(title: ReferenceNodeConfig['_customTitle']) {
     this._customTitle = title;
-  }
-
-  setDoc(doc: Doc | null) {
-    this._Doc = doc;
   }
 
   setInteractable(interactable: boolean) {

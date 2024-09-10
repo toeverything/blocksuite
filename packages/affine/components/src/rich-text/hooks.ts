@@ -6,7 +6,7 @@ import type {
 
 import { isStrictUrl } from '@blocksuite/affine-shared/utils';
 
-import type { AffineTextAttributes } from './inline/index.js';
+import type { AffineTextAttributes } from './extension/index.js';
 
 const EDGE_IGNORED_ATTRIBUTES = ['code', 'link'] as const;
 const GLOBAL_IGNORED_ATTRIBUTES = [] as const;

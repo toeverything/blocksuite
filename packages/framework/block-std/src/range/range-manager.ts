@@ -6,6 +6,7 @@ import { INLINE_ROOT_ATTR, type InlineRootElement } from '@blocksuite/inline';
 import type { BlockComponent } from '../view/element/block-component.js';
 
 import { LifeCycleWatcher } from '../extension/index.js';
+import { BLOCK_ID_ATTR } from '../view/index.js';
 import { RANGE_QUERY_EXCLUDE_ATTR, RANGE_SYNC_EXCLUDE_ATTR } from './consts.js';
 import { RangeBinding } from './range-binding.js';
 
@@ -49,7 +50,7 @@ export class RangeManager extends LifeCycleWatcher {
   getClosestBlock(node: Node) {
     const el = node instanceof Element ? node : node.parentElement;
     if (!el) return null;
-    const block = el.closest<BlockComponent>(`[${this.std.host.blockIdAttr}]`);
+    const block = el.closest<BlockComponent>(`[${BLOCK_ID_ATTR}]`);
     if (!block) return null;
     if (this._isRangeSyncExcluded(block)) return null;
     return block;
@@ -91,7 +92,7 @@ export class RangeManager extends LifeCycleWatcher {
 
     let result = Array.from<BlockComponent>(
       this.std.host.querySelectorAll(
-        `[${this.std.host.blockIdAttr}]:not([${RANGE_QUERY_EXCLUDE_ATTR}="true"])`
+        `[${BLOCK_ID_ATTR}]:not([${RANGE_QUERY_EXCLUDE_ATTR}="true"])`
       )
     ).filter(el => range.intersectsNode(el) && match(el));
 

@@ -47,6 +47,7 @@ export * from './embed-synced-doc-block/index.js';
 export * from './embed-youtube-block/index.js';
 export * from './frame-block/index.js';
 export * from './image-block/index.js';
+export * from './latex-block/index.js';
 export * from './note-block/index.js';
 export { EdgelessTemplatePanel } from './root-block/edgeless/components/toolbar/template/template-panel.js';
 export type {
@@ -95,7 +96,6 @@ export {
   type AffineInlineEditor,
   AffineReference,
   type AffineTextAttributes,
-  getAffineInlineSpecsWithReference,
   InlineManager,
   type InlineMarkdownMatch,
   type InlineSpecs,

@@ -1,25 +1,45 @@
-import type { MindmapStyle } from '@blocksuite/affine-block-surface';
+import type { MindmapStyle } from '@blocksuite/affine-model';
+import type { BlockStdScope } from '@blocksuite/block-std';
+import type { Bound } from '@blocksuite/global/utils';
+import type { BlockModel } from '@blocksuite/store';
 
+import { toast } from '@blocksuite/affine-components/toast';
+import { once } from '@blocksuite/affine-shared/utils';
+import { modelContext, stdContext } from '@blocksuite/block-std';
+import { ErrorCode } from '@blocksuite/global/exceptions';
+import { consume } from '@lit/context';
+import { computed, SignalWatcher } from '@lit-labs/preact-signals';
 import { css, html, LitElement, nothing, type TemplateResult } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
+
+import type { EdgelessRootBlockComponent } from '../../../index.js';
 
 import { getTooltipWithShortcut } from '../../utils.js';
 import { EdgelessDraggableElementController } from '../common/draggable/draggable-element.controller.js';
 import { EdgelessToolbarToolMixin } from '../mixins/tool.mixin.js';
 import { getMindMaps, type ToolbarMindmapItem } from './assets.js';
 import { textRender } from './basket-elements.js';
-import { textIcon } from './icons.js';
+import { importMindMapIcon, textIcon } from './icons.js';
+import { MindMapPlaceholder } from './mindmap-importing-placeholder.js';
 
 type TextItem = {
   type: 'text';
   icon: TemplateResult;
   render: typeof textRender;
 };
+
+type ImportItem = {
+  type: 'import';
+  icon: TemplateResult;
+};
+
 const textItem: TextItem = { type: 'text', icon: textIcon, render: textRender };
 
 @customElement('edgeless-mindmap-menu')
-export class EdgelessMindmapMenu extends EdgelessToolbarToolMixin(LitElement) {
+export class EdgelessMindmapMenu extends EdgelessToolbarToolMixin(
+  SignalWatcher(LitElement)
+) {
   static override styles = css`
     :host {
       display: flex;
@@ -64,6 +84,7 @@ export class EdgelessMindmapMenu extends EdgelessToolbarToolMixin(LitElement) {
       padding: 0;
     }
     .text-item:hover,
+    .mindmap-item[data-is-active='true'],
     .mindmap-item:hover {
       background: var(--affine-hover-color);
     }
@@ -73,14 +94,103 @@ export class EdgelessMindmapMenu extends EdgelessToolbarToolMixin(LitElement) {
     }
   `;
 
+  private _style$ = computed(() => {
+    const { style } =
+      this.edgeless.service.editPropsStore.lastProps$.value.mindmap;
+    return style;
+  });
+
   draggableController!: EdgelessDraggableElementController<
-    ToolbarMindmapItem | TextItem
+    ToolbarMindmapItem | TextItem | ImportItem
   >;
 
   override type = 'mindmap' as const;
 
+  private get _rootBlock(): EdgelessRootBlockComponent {
+    return this.std.view.getBlock(this.model.id) as EdgelessRootBlockComponent;
+  }
+
   get mindMaps() {
     return getMindMaps(this.theme);
+  }
+
+  private _importMindMapEntry() {
+    const { draggingElement } = this.draggableController?.states || {};
+
+    const isBeingDragged = draggingElement?.data.type === 'import';
+
+    let clicked = false;
+
+    return html`<div class="mindmap-item">
+      <button
+        style="opacity: ${isBeingDragged ? 0 : 1}"
+        class="next"
+        @mousedown=${(e: MouseEvent) => {
+          let mouseReleased = false;
+          once(document, 'mouseup', () => {
+            mouseReleased = true;
+          });
+          queueMicrotask(() => {
+            if (clicked || mouseReleased) return;
+            this.draggableController.onMouseDown(e, {
+              preview: importMindMapIcon,
+              data: {
+                type: 'import',
+                icon: importMindMapIcon,
+              },
+              standardWidth: 350,
+            });
+          });
+        }}
+        @touchstart=${(e: TouchEvent) => {
+          this.draggableController.onTouchStart(e, {
+            preview: importMindMapIcon,
+            data: {
+              type: 'import',
+              icon: importMindMapIcon,
+            },
+            standardWidth: 350,
+          });
+        }}
+        @click=${() => {
+          clicked = true;
+          const viewportBound = this._rootBlock.service.viewport.viewportBounds;
+
+          viewportBound.x += viewportBound.w / 2;
+          viewportBound.y += viewportBound.h / 2;
+
+          this._onImportMindMap(viewportBound);
+        }}
+      >
+        ${importMindMapIcon}
+      </button>
+      <affine-tooltip tip-position="top" .offset=${12}>
+        ${getTooltipWithShortcut('Support import of FreeMind,OPML.')}
+      </affine-tooltip>
+    </div>`;
+  }
+
+  private _onImportMindMap(bound: Bound) {
+    const edgelessBlock = this._rootBlock;
+    if (!edgelessBlock) return;
+
+    const placeholder = new MindMapPlaceholder();
+
+    placeholder.style.position = 'absolute';
+    placeholder.style.left = `${bound.x}px`;
+    placeholder.style.top = `${bound.y}px`;
+
+    edgelessBlock.gfxViewportElm.append(placeholder);
+
+    this.onImportMindMap?.(bound)
+      .catch(e => {
+        if (e.code === ErrorCode.UserAbortError) return;
+        toast(this.edgeless.host, 'Import failed, please try again');
+        console.error(e);
+      })
+      .finally(() => {
+        placeholder.remove();
+      });
   }
 
   initDragController() {
@@ -90,24 +200,33 @@ export class EdgelessMindmapMenu extends EdgelessToolbarToolMixin(LitElement) {
       edgeless: this.edgeless,
       scopeElement: this,
       clickToDrag: true,
-      onOverlayCreated: () => {
+      onOverlayCreated: (_layer, element) => {
+        if (element.data.type === 'mindmap') {
+          this.onActiveStyleChange?.(element.data.style);
+        }
         // a workaround to active mindmap, so that menu cannot be closed by `Escape`
         this.setEdgelessTool({ type: 'mindmap' });
       },
       onDrop: (element, bound) => {
-        const id = element.data.render(
-          bound,
-          this.edgeless.service,
-          this.edgeless
-        );
-        if (element.data.type === 'mindmap') {
-          this.onActiveStyleChange?.(element.data.style);
-          this.setEdgelessTool(
-            { type: 'default' },
-            { elements: [id], editing: false }
+        if ('render' in element.data) {
+          const id = element.data.render(
+            bound,
+            this.edgeless.service,
+            this.edgeless
           );
-        } else if (element.data.type === 'text') {
-          this.setEdgelessTool({ type: 'default' });
+          if (element.data.type === 'mindmap') {
+            this.onActiveStyleChange?.(element.data.style);
+            this.setEdgelessTool(
+              { type: 'default' },
+              { elements: [id], editing: false }
+            );
+          } else if (element.data.type === 'text') {
+            this.setEdgelessTool({ type: 'default' });
+          }
+        }
+
+        if (element.data.type === 'import') {
+          this._onImportMindMap?.(bound);
         }
       },
     });
@@ -157,8 +276,9 @@ export class EdgelessMindmapMenu extends EdgelessToolbarToolMixin(LitElement) {
           const isBeingDragged =
             isDraggingMindMap && draggingEle?.style === mindMap.style;
           const showNext = dragOut && !cancelled;
+          const isActive = this._style$.value === mindMap.style;
           return html`
-            <div class="mindmap-item">
+            <div class="mindmap-item" data-is-active=${isActive}>
               ${isBeingDragged
                 ? html`<button
                     style="transform: translateY(${showNext ? 0 : 64}px)"
@@ -193,6 +313,9 @@ export class EdgelessMindmapMenu extends EdgelessToolbarToolMixin(LitElement) {
             </div>
           `;
         })}
+        ${this.std.doc.awarenessStore.getFlag('enable_mind_map_import')
+          ? this._importMindMapEntry()
+          : nothing}
       </div>
     </edgeless-slide-menu>`;
   }
@@ -202,11 +325,17 @@ export class EdgelessMindmapMenu extends EdgelessToolbarToolMixin(LitElement) {
     this.initDragController();
   }
 
-  @property({ attribute: false })
-  accessor activeStyle!: MindmapStyle;
+  @consume({ context: modelContext })
+  accessor model!: BlockModel;
 
   @property({ attribute: false })
   accessor onActiveStyleChange!: (style: MindmapStyle) => void;
+
+  @property({ attribute: false })
+  accessor onImportMindMap!: (bound: Bound) => Promise<void>;
+
+  @consume({ context: stdContext })
+  accessor std!: BlockStdScope;
 }
 
 declare global {
