@@ -1,9 +1,31 @@
-import type { BlockStdScope } from '@blocksuite/block-std';
+import type { BlockStdScope, ExtensionType } from '@blocksuite/block-std';
 import type { TemplateResult } from 'lit';
+
+import { createIdentifier } from '@blocksuite/global/di';
 
 import type { AffineReference } from './reference-node.js';
 
-export class ReferenceNodeConfig {
+export interface ReferenceNodeConfig {
+  customContent?: ((reference: AffineReference) => TemplateResult) | null;
+  customIcon?: ((reference: AffineReference) => TemplateResult) | null;
+  customTitle?: ((reference: AffineReference) => string) | null;
+  interactable?: boolean;
+}
+
+export const ReferenceNodeConfigIdentifier =
+  createIdentifier<ReferenceNodeConfig>('AffineReferenceNodeConfig');
+
+export function ReferenceNodeConfigExtension(
+  config: ReferenceNodeConfig
+): ExtensionType {
+  return {
+    setup: di => {
+      di.addImpl(ReferenceNodeConfigIdentifier, () => ({ ...config }));
+    },
+  };
+}
+
+export class ReferenceNodeConfigProvider {
   private _customContent:
     | ((reference: AffineReference) => TemplateResult)
     | null = null;
@@ -37,15 +59,15 @@ export class ReferenceNodeConfig {
 
   constructor(readonly std: BlockStdScope) {}
 
-  setCustomContent(content: ReferenceNodeConfig['_customContent']) {
+  setCustomContent(content: ReferenceNodeConfigProvider['_customContent']) {
     this._customContent = content;
   }
 
-  setCustomIcon(icon: ReferenceNodeConfig['_customIcon']) {
+  setCustomIcon(icon: ReferenceNodeConfigProvider['_customIcon']) {
     this._customIcon = icon;
   }
 
-  setCustomTitle(title: ReferenceNodeConfig['_customTitle']) {
+  setCustomTitle(title: ReferenceNodeConfigProvider['_customTitle']) {
     this._customTitle = title;
   }
 

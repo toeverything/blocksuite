@@ -9,7 +9,10 @@ import {
   type AffineTextAttributes,
   InlineSpecExtension,
 } from '../../extension/index.js';
-import { ReferenceNodeConfig } from './nodes/reference-node/reference-config.js';
+import {
+  ReferenceNodeConfigIdentifier,
+  ReferenceNodeConfigProvider,
+} from './nodes/reference-node/reference-config.js';
 
 export type AffineInlineEditor = InlineEditor<AffineTextAttributes>;
 export type AffineInlineRootElement = InlineRootElement<AffineTextAttributes>;
@@ -118,7 +121,20 @@ export const ReferenceInlineSpecExtension = InlineSpecExtension(
   'reference',
   provider => {
     const std = provider.get(StdIdentifier);
-    const config = new ReferenceNodeConfig(std);
+    const configProvider = new ReferenceNodeConfigProvider(std);
+    const config = provider.getOptional(ReferenceNodeConfigIdentifier) ?? {};
+    if (config.customContent) {
+      configProvider.setCustomContent(config.customContent);
+    }
+    if (config.customIcon) {
+      configProvider.setCustomIcon(config.customIcon);
+    }
+    if (config.customTitle) {
+      configProvider.setCustomTitle(config.customTitle);
+    }
+    if (config.interactable !== undefined) {
+      configProvider.setInteractable(config.interactable);
+    }
     return {
       name: 'reference',
       schema: z
@@ -140,7 +156,7 @@ export const ReferenceInlineSpecExtension = InlineSpecExtension(
         return html`<affine-reference
           .delta=${delta}
           .selected=${selected}
-          .config=${config}
+          .config=${configProvider}
         ></affine-reference>`;
       },
       embed: true,

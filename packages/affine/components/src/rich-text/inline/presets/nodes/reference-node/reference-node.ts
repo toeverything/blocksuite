@@ -21,7 +21,7 @@ import { choose } from 'lit/directives/choose.js';
 import { ref } from 'lit/directives/ref.js';
 
 import type { AffineTextAttributes } from '../../../../extension/index.js';
-import type { ReferenceNodeConfig } from './reference-config.js';
+import type { ReferenceNodeConfigProvider } from './reference-config.js';
 import type { RefNodeSlots } from './types.js';
 
 import { HoverController } from '../../../../../hover/index.js';
@@ -329,7 +329,7 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
   }
 
   @property({ attribute: false })
-  accessor config!: ReferenceNodeConfig;
+  accessor config!: ReferenceNodeConfigProvider;
 
   @property({ type: Object })
   accessor delta: DeltaInsert<AffineTextAttributes> = {
