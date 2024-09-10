@@ -676,6 +676,9 @@ export class MenuComponent<_T> extends WithDisposable(ShadowlessElement) {
                   autocomplete="off"
                   data-1p-ignore
                   ${ref(this.inputRef)}
+                  style=${styleMap({
+                    pointerEvents: this._text?.length ? 'auto' : 'none',
+                  })}
                   type="text"
                   placeholder="${this.options.input?.placeholder ?? ''}"
                   value="${this.text ?? this.options.input?.initValue ?? ''}"
