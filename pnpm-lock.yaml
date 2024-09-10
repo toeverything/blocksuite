@@ -724,15 +724,15 @@ importers:
       shiki:
         specifier: ^1.14.1
         version: 1.16.2
+      simple-xml-to-json:
+        specifier: ^1.2.2
+        version: 1.2.2
       sortablejs:
         specifier: ^1.15.2
         version: 1.15.3
       unified:
         specifier: ^11.0.5
         version: 11.0.5
-      xml-js:
-        specifier: ^1.6.11
-        version: 1.6.11
       zod:
         specifier: 'catalog:'
         version: 3.23.8
@@ -7268,6 +7268,10 @@ packages:
   simple-git@3.26.0:
     resolution: {integrity: sha512-5tbkCSzuskR6uA7uA23yjasmA0RzugVo8QM2bpsnxkrgP13eisFT7TMS4a+xKEJvbmr4qf+l0WT3eKa9IxxUyw==}
 
+  simple-xml-to-json@1.2.2:
+    resolution: {integrity: sha512-bmJJf5YiYL60eOQk3gaVxbM6vgYuwrFydCEAA2x3jccHUTsAffiPyblS/yQGr8GDUQVxSDm3WwLNL5HmRqDUcg==}
+    engines: {node: '>=14.20.0'}
+
   sirv@2.0.4:
     resolution: {integrity: sha512-94Bdh3cC2PKrbgSOUqTiGPWVZeSiXfKOVZNJniWoqrWrRkB1CJzBU3NEbiTsPcYy1lDsANA/THzS+9WBiy5nfQ==}
     engines: {node: '>= 10'}
@@ -8222,10 +8226,6 @@ packages:
         optional: true
       utf-8-validate:
         optional: true
-
-  xml-js@1.6.11:
-    resolution: {integrity: sha512-7rVi2KMfwfWFl+GpPg6m80IVMWXLRjO+PxTq7V2CDhoGak0wzYzFgUY2m4XJ47OGdXd8eLE8EmwfAmdjw7lC1g==}
-    hasBin: true
 
   y-indexeddb@9.0.12:
     resolution: {integrity: sha512-9oCFRSPPzBK7/w5vOkJBaVCQZKHXB/v6SIT+WYhnJxlEC61juqG0hBrAf+y3gmSMLFLwICNH9nQ53uscuse6Hg==}
@@ -15721,7 +15721,8 @@ snapshots:
 
   sax@1.2.4: {}
 
-  sax@1.4.1: {}
+  sax@1.4.1:
+    optional: true
 
   schema-utils@3.3.0:
     dependencies:
@@ -15848,6 +15849,8 @@ snapshots:
       debug: 4.3.7
     transitivePeerDependencies:
       - supports-color
+
+  simple-xml-to-json@1.2.2: {}
 
   sirv@2.0.4:
     dependencies:
@@ -16884,10 +16887,6 @@ snapshots:
   ws@8.17.1: {}
 
   ws@8.18.0: {}
-
-  xml-js@1.6.11:
-    dependencies:
-      sax: 1.4.1
 
   y-indexeddb@9.0.12(yjs@13.6.18):
     dependencies:

@@ -2,7 +2,7 @@ import type { Bound } from '@blocksuite/global/utils';
 
 import { openFileOrFiles } from '@blocksuite/affine-shared/utils';
 import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
-import converter from 'xml-js';
+import c from 'simple-xml-to-json';
 
 type MindMapNode = {
   children: MindMapNode[];
@@ -43,10 +43,10 @@ function readAsText(file: File) {
 }
 
 type RawMmNode = {
-  node: RawMmNode[];
-  _attributes: {
-    POSITION: 'left' | 'right';
+  node?: {
     TEXT: string;
+    POSITION: 'left' | 'right';
+    children?: RawMmNode[];
   };
 };
 
@@ -54,31 +54,33 @@ async function parseMmFile(file: File): Promise<MindMapNode> {
   const content = await readAsText(file);
 
   try {
-    const { map } = JSON.parse(converter.xml2json(content, { compact: true }));
+    const parsed = c.convertXML(content);
+    const map = parsed.map.children[0];
+
     const traverse = (node: RawMmNode): MindMapNode | null => {
-      if (!node?._attributes?.TEXT && !node.node) {
+      if (!node.node) {
         return null;
       }
 
-      return node._attributes.POSITION
+      return node.node.POSITION
         ? {
-            layoutType: node._attributes.POSITION,
-            text: node._attributes?.TEXT ?? 'MINDMAP',
+            layoutType: node.node.POSITION,
+            text: node.node.TEXT ?? 'MINDMAP',
             children:
-              (node.node
+              (node.node.children
                 ?.map(traverse)
                 .filter(node => node) as MindMapNode[]) ?? [],
           }
         : {
-            text: node._attributes?.TEXT ?? 'MINDMAP',
+            text: node.node.TEXT ?? 'MINDMAP',
             children:
-              (node.node
+              (node.node.children
                 ?.map(traverse)
                 .filter(node => node) as MindMapNode[]) ?? [],
           };
     };
 
-    const result = traverse(map.node);
+    const result = traverse(map);
 
     if (!result) {
       throw new BlockSuiteError(
@@ -97,37 +99,34 @@ async function parseMmFile(file: File): Promise<MindMapNode> {
   }
 }
 
-type RawOPMLNode = {
-  _attributes: {
+type RawOPMLOutline = {
+  outline: {
     text: string;
+    children: RawOPMLOutline[];
   };
-  outline: RawOPMLNode[];
 };
 
 async function parseOPMLFile(file: File): Promise<MindMapNode> {
   const content = await readAsText(file);
 
   try {
-    const parsed = JSON.parse(converter.xml2json(content, { compact: true }));
-    const opml = parsed.opml;
+    const parsed = c.convertXML(content);
+    const outline = parsed.opml?.children[1].body?.children?.[0];
 
-    const traverse = (node: RawOPMLNode): MindMapNode | null => {
-      if (!node?._attributes?.text && !node.outline) {
+    const traverse = (node: RawOPMLOutline): MindMapNode | null => {
+      if (!node.outline?.text && !node.outline?.children) {
         return null;
       }
 
       return {
-        text: node._attributes?.text ?? 'MINDMAP',
-        children: node.outline
-          ? (Array.isArray(node.outline)
-              ? (node.outline.map(traverse) as MindMapNode[])
-              : ([traverse(node.outline)] as MindMapNode[])
-            ).filter(node => node)
+        text: node.outline?.text ?? 'MINDMAP',
+        children: node.outline.children
+          ? (node.outline.children.map(traverse) as MindMapNode[])
           : [],
       };
     };
 
-    const result = traverse(opml.body.outline);
+    const result = traverse(outline);
 
     if (!result) {
       throw new BlockSuiteError(
