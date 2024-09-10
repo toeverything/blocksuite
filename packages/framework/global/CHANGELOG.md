@@ -1,5 +1,17 @@
 # @blocksuite/global
 
+## 0.17.6
+
+### Patch Changes
+
+- d8d5656: - Fix latex block export
+  - Fix rich text reference config export
+  - Fix mindmap export dependency error
+  - Fix toast position
+  - Fix frame remember settings
+  - Database statistic improvements
+  - Add keymap extension
+
 ## 0.17.5
 
 ### Patch Changes
