@@ -213,14 +213,12 @@ export class EmbedBlockComponent<
   override accessor useZeroWidth = true;
 }
 
-// @ts-ignore
 export function toEdgelessEmbedBlock<
   Model extends GfxBlockElementModel<GfxCompatibleProps>,
   Service extends BlockService,
   WidgetName extends string,
   B extends typeof EmbedBlockComponent<Model, Service, WidgetName>,
 >(block: B) {
-  // @ts-ignore
   return class extends toGfxBlockComponent(block) {
     _isDragging = false;
 
