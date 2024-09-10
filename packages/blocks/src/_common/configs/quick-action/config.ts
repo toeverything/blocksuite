@@ -1,23 +1,26 @@
 import type { EditorHost } from '@blocksuite/block-std';
+import type { TemplateResult } from 'lit';
 
 import {
   CopyIcon,
   DatabaseTableViewIcon20,
   LinkedDocIcon,
 } from '@blocksuite/affine-components/icons';
-import { createSimplePortal } from '@blocksuite/affine-components/portal';
 import { toast } from '@blocksuite/affine-components/toast';
 import { matchFlavours } from '@blocksuite/affine-shared/utils';
+import { tableViewConfig } from '@blocksuite/data-view/view-presets';
 import { assertExists } from '@blocksuite/global/utils';
-import { html, type TemplateResult } from 'lit';
 
+import {
+  convertToDatabase,
+  DATABASE_CONVERT_WHITE_LIST,
+} from '../../../database-block/utils.js';
 import {
   convertSelectedBlocksToLinkedDoc,
   getTitleFromSelectedModels,
   notifyDocCreated,
   promptDocTitle,
 } from '../../utils/render-linked-doc.js';
-import { DATABASE_CONVERT_WHITE_LIST } from './database-convert-view.js';
 
 export interface QuickActionConfig {
   id: string;
@@ -55,7 +58,7 @@ export const quickActionConfig: QuickActionConfig[] = [
   },
   {
     id: 'convert-to-database',
-    name: 'Group as Database',
+    name: 'Group as Table',
     disabledToolTip:
       'Contains Block types that cannot be converted to Database',
     icon: DatabaseTableViewIcon20,
@@ -92,11 +95,7 @@ export const quickActionConfig: QuickActionConfig[] = [
       );
     },
     action: host => {
-      createSimplePortal({
-        template: html`<database-convert-view
-          .host=${host}
-        ></database-convert-view>`,
-      });
+      convertToDatabase(host, tableViewConfig);
     },
   },
   {

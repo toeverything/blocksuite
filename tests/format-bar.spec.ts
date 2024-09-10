@@ -808,8 +808,6 @@ test('should convert to database work', async ({ page }) => {
   );
   const databaseAction = page.getByTestId('convert-to-database');
   await databaseAction.click();
-  const tableView = page.locator('.modal-view-item.table');
-  await tableView.click();
   const database = page.locator('affine-database');
   await expect(database).toBeVisible();
   const rows = page.locator('.affine-database-block-row');
