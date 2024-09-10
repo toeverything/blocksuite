@@ -8,9 +8,9 @@
     "test": "playwright test"
   },
   "dependencies": {
-    "@blocksuite/global": "workspace:*",
     "@blocksuite/affine-model": "workspace:*",
     "@blocksuite/block-std": "workspace:*",
+    "@blocksuite/global": "workspace:*",
     "@blocksuite/presets": "workspace:*"
   },
   "repository": {

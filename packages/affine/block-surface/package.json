@@ -20,15 +20,15 @@
     "@blocksuite/block-std": "workspace:*",
     "@blocksuite/global": "workspace:*",
     "@blocksuite/store": "workspace:*",
-    "@lit-labs/preact-signals": "catalog:",
-    "@lit/context": "catalog:",
-    "@toeverything/theme": "catalog:",
+    "@lit-labs/preact-signals": "^1.0.2",
+    "@lit/context": "^1.1.2",
+    "@toeverything/theme": "^1.0.8",
     "fractional-indexing": "^3.2.0",
-    "lit": "catalog:",
+    "lit": "^3.2.0",
     "lodash.isplainobject": "^4.0.6",
     "lodash.merge": "^4.6.2",
-    "nanoid": "catalog:",
-    "zod": "catalog:"
+    "nanoid": "^5.0.7",
+    "zod": "^3.23.8"
   },
   "devDependencies": {
     "@types/dompurify": "^3.0.5",

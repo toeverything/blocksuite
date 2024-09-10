@@ -36,21 +36,10 @@ jobs:
         with:
           fetch-depth: 0
 
-      - uses: pnpm/action-setup@v4
-        name: Install pnpm
-        id: pnpm-install
-
-      - name: Use Node.js LTS
-        uses: actions/setup-node@v4
-        with:
-          node-version-file: '.nvmrc'
-          cache: 'pnpm'
-
-      - name: Install dependencies
-        run: pnpm install
+      - uses: ./.github/actions/setup
 
       - name: Build
-        run: pnpm --filter=@blocksuite/playground build
+        run: yarn exec nx vite:build @blocksuite/playground
 
   unit:
     name: Unit Test
@@ -65,28 +54,17 @@ jobs:
         with:
           fetch-depth: 0
 
-      - uses: pnpm/action-setup@v4
-        name: Install pnpm
-        id: pnpm-install
-
-      - name: Use Node.js LTS
-        uses: actions/setup-node@v4
-        with:
-          node-version-file: '.nvmrc'
-          cache: 'pnpm'
+      - uses: ./.github/actions/setup
 
       - uses: nrwl/nx-set-shas@v4
         with:
           main-branch-name: master
 
-      - name: Install dependencies
-        run: pnpm install
-
       - name: Install playwright browsers
         run: npx playwright install chromium
 
       - name: Run unit tests
-        run: pnpm exec vitest run --coverage --shard=${{ matrix.shard }}/${{ strategy.job-total }}
+        run: yarn exec vitest run --coverage --shard=${{ matrix.shard }}/${{ strategy.job-total }}
 
         # The coverage seems not working now, re-enable it when it's fixed
       - name: Upload unit test coverage results
@@ -141,30 +119,19 @@ jobs:
         with:
           fetch-depth: 0
 
-      - uses: pnpm/action-setup@v4
-        name: Install pnpm
-        id: pnpm-install
-
-      - name: Use Node.js LTS
-        uses: actions/setup-node@v4
-        with:
-          node-version-file: '.nvmrc'
-          cache: 'pnpm'
-
-      - name: Install dependencies
-        run: pnpm install
+      - uses: ./.github/actions/setup
 
       - name: Build
-        run: pnpm nx vite:build @blocksuite/playground
+        run: yarn exec nx vite:build @blocksuite/playground
 
       - name: Install playwright browsers
         run: npx playwright install chromium
 
       - name: Run playwright test
-        run: pnpm test -- --forbid-only --shard=${{ matrix.shard }}/${{ strategy.job-total }}
+        run: yarn test --forbid-only --shard=${{ matrix.shard }}/${{ strategy.job-total }}
 
       #      - name: Collect code coverage report
-      #        run: pnpm exec nyc report -t .nyc_output --reporter=lcov
+      #        run: yarn exec nyc report -t .nyc_output --reporter=lcov
 
       - name: Upload E2E test coverage results
         uses: codecov/codecov-action@v4
@@ -192,34 +159,23 @@ jobs:
         with:
           fetch-depth: 0
 
-      - uses: pnpm/action-setup@v4
-        name: Install pnpm
-        id: pnpm-install
-
-      - name: Use Node.js LTS
-        uses: actions/setup-node@v4
-        with:
-          node-version-file: '.nvmrc'
-          cache: 'pnpm'
+      - uses: ./.github/actions/setup
 
       - uses: nrwl/nx-set-shas@v4
         with:
           main-branch-name: master
 
-      - name: Install dependencies
-        run: pnpm install
-
       - name: Run eslint
-        run: pnpm lint
+        run: yarn lint
 
       - name: Run format check
-        run: pnpm lint:format
+        run: yarn lint:format
 
       - name: Run lit lint
-        run: pnpm lint:lit
+        run: yarn lint:lit
 
       - name: Node Environment Test
-        run: pnpm test:node
+        run: yarn test:node
 
   build:
     name: Build
@@ -230,34 +186,23 @@ jobs:
         with:
           fetch-depth: 0
 
-      - uses: pnpm/action-setup@v4
-        name: Install pnpm
-        id: pnpm-install
-
-      - name: Use Node.js LTS
-        uses: actions/setup-node@v4
-        with:
-          node-version-file: '.nvmrc'
-          cache: 'pnpm'
+      - uses: ./.github/actions/setup
 
       - uses: nrwl/nx-set-shas@v4
         with:
           main-branch-name: master
 
-      - name: Install dependencies
-        run: pnpm install
-
       - name: Check dedupe
-        run: pnpm dedupe --check
+        run: yarn dedupe --check
 
       - name: Run type check
-        run: pnpm test:type
+        run: yarn test:type
 
       - name: Run build
-        run: pnpm build:packages
+        run: yarn build:packages
 
       - name: Run circular imports detect
-        run: pnpm lint:circular
+        run: yarn lint:circular
 
   build-and-test:
     if: ${{ always() }}

@@ -7,7 +7,7 @@
   "scripts": {
     "build": "tsc",
     "test:unit": "nx vite:test --run",
-    "test": "pnpm test:unit"
+    "test": "yarn test:unit"
   },
   "keywords": [],
   "author": "toeverything",

@@ -16,18 +16,18 @@
     "vue": "^3.4.38"
   },
   "scripts": {
-    "typedoc": "pnpm -C ../.. build:packages && typedoc --options ../../typedoc.json",
-    "dev": "pnpm run typedoc && vitepress dev --port 5200",
+    "typedoc": "yarn run -T build:packages && typedoc --options ../../typedoc.json",
+    "dev": "yarn run typedoc && vitepress dev --port 5200",
     "dev:nobuild": "vitepress dev --port 5200",
-    "build": "pnpm run typedoc && vitepress build",
-    "build:vercel": "pnpm run typedoc && vitepress build",
-    "preview": "pnpm run typedoc && vitepress preview"
+    "build": "yarn run typedoc && vitepress build",
+    "build:vercel": "yarn run typedoc && vitepress build",
+    "preview": "yarn run typedoc && vitepress preview"
   },
   "dependencies": {
     "@blocksuite/blocks": "workspace:*",
     "@blocksuite/presets": "workspace:*",
     "@blocksuite/store": "workspace:*",
-    "date-fns": "catalog:",
+    "date-fns": "^3.6.0",
     "markdown-it-container": "^4.0.0",
     "vitepress-plugin-sandpack": "^1.1.4"
   }

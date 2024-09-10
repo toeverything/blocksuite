@@ -31,20 +31,11 @@ jobs:
         with:
           repository: ${{ inputs.repo || github.repository }}
           ref: ${{ inputs.ref || github.ref }}
-      - uses: pnpm/action-setup@v4
-        name: Install pnpm
-        id: pnpm-install
-      - name: Use Node.js LTS
-        uses: actions/setup-node@v4
-        with:
-          node-version-file: '.nvmrc'
-          cache: 'pnpm'
 
-      - name: Install dependencies
-        run: pnpm install
+      - uses: ./.github/actions/setup
 
       - name: Build playground
-        run: pnpm build:playground
+        run: yarn build:playground
 
       - name: Install playwright browsers
         run: npx playwright install --with-deps ${{ matrix.browsers }}
@@ -52,7 +43,7 @@ jobs:
       - name: Run playwright test
         env:
           BROWSER: ${{ matrix.browsers }}
-        run: pnpm test -- --forbid-only
+        run: yarn test -- --forbid-only
 
       - name: Upload test results
         if: ${{ failure() }}

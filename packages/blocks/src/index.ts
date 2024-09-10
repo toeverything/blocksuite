@@ -92,16 +92,7 @@ export {
   createLitPortal,
   createSimplePortal,
 } from '@blocksuite/affine-components/portal';
-export {
-  type AffineInlineEditor,
-  AffineReference,
-  type AffineTextAttributes,
-  InlineManager,
-  type InlineMarkdownMatch,
-  type InlineSpecs,
-  ReferenceNodeConfig,
-  RichText,
-} from '@blocksuite/affine-components/rich-text';
+export * from '@blocksuite/affine-components/rich-text';
 export { toast } from '@blocksuite/affine-components/toast';
 export {
   type AdvancedMenuItem,
