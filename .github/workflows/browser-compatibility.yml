@@ -54,6 +54,6 @@ jobs:
         if: ${{ failure() }}
         uses: actions/upload-artifact@v4
         with:
-          name: test-results-e2e-${{ matrix.os }}-${{ matrix.browsers }}
+          name: test-results-e2e-${{ matrix.os }}-${{ matrix.browsers }}-${{ matrix.shard }}
           path: ./tests/test-results
           if-no-files-found: ignore
