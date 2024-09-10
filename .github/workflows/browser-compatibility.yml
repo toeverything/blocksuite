@@ -55,5 +55,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: test-results-e2e-${{ matrix.os }}-${{ matrix.browsers }}
-          path: ./test-results
+          path: ./tests/test-results
           if-no-files-found: ignore
