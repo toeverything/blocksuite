@@ -1,5 +1,4 @@
 import type { BlockCaptionEditor } from '@blocksuite/affine-components/caption';
-import type { SurfaceRefBlockModel } from '@blocksuite/affine-model';
 import type { Doc } from '@blocksuite/store';
 
 import {
@@ -12,18 +11,26 @@ import {
   MoreDeleteIcon,
 } from '@blocksuite/affine-components/icons';
 import { Peekable } from '@blocksuite/affine-components/peek';
+import {
+  FrameBlockModel,
+  GroupElementModel,
+  type SurfaceRefBlockModel,
+} from '@blocksuite/affine-model';
 import { DocModeProvider } from '@blocksuite/affine-shared/services';
 import { requestConnectedFrame } from '@blocksuite/affine-shared/utils';
 import {
   type BaseSelection,
   BlockStdScope,
   type EditorHost,
+  LifeCycleWatcher,
 } from '@blocksuite/block-std';
 import { BlockComponent, BlockServiceWatcher } from '@blocksuite/block-std';
 import { GfxBlockElementModel } from '@blocksuite/block-std/gfx';
+import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 import {
   Bound,
   deserializeXYWH,
+  DisposableGroup,
   type SerializedXYWH,
 } from '@blocksuite/global/utils';
 import { assertExists } from '@blocksuite/global/utils';
@@ -31,12 +38,11 @@ import { css, html, nothing, type TemplateResult } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type { FrameBlockComponent } from '../frame-block/frame-block.js';
 import type { EdgelessRootPreviewBlockComponent } from '../root-block/edgeless/edgeless-root-preview-block.js';
-import type { EdgelessRootService } from '../root-block/index.js';
 import type { SurfaceRefBlockService } from './surface-ref-service.js';
 
 import { SpecProvider } from '../_specs/index.js';
+import { EdgelessRootService } from '../root-block/index.js';
 import { noContentPlaceholder } from './utils.js';
 
 const REF_LABEL_ICON = {
@@ -236,6 +242,8 @@ export class SurfaceRefBlockComponent extends BlockComponent<
 
   private _referenceXYWH: SerializedXYWH | null = null;
 
+  private _viewportEditor: EditorHost | null = null;
+
   private get _shouldRender() {
     return (
       this.isConnected &&
@@ -430,6 +438,7 @@ export class SurfaceRefBlockComponent extends BlockComponent<
               component as EdgelessRootPreviewBlockComponent;
 
             edgelessBlock.editorViewportSelector = 'ref-viewport';
+            refreshViewport();
             edgelessBlock.service.viewport.sizeUpdated.once(() => {
               refreshViewport();
             });
@@ -439,32 +448,53 @@ export class SurfaceRefBlockComponent extends BlockComponent<
     }
     this._previewSpec.extend([PageViewWatcher]);
 
-    const reference = this.model.reference;
+    const referenceId = this.model.reference;
+    const setReferenceXYWH = (xywh: typeof this._referenceXYWH) => {
+      this._referenceXYWH = xywh;
+    };
 
-    class FrameViewWatcher extends BlockServiceWatcher {
-      static override readonly flavour = 'affine:frame';
+    class FrameGroupViewWatcher extends LifeCycleWatcher {
+      static override readonly key = 'surface-ref-group-view-watcher';
+
+      private _disposable = new DisposableGroup();
 
       override mounted() {
-        const disposable = this.blockService.specSlots.viewConnected.on(
-          ({ component }) => {
-            const frameBlock = component as FrameBlockComponent;
-            if (frameBlock.model.id !== reference) return;
+        const edgelessService = this.std.get(EdgelessRootService);
 
-            frameBlock.showBorder = false;
-            disposable.dispose();
+        const referenceElement = edgelessService.getElementById(referenceId);
+        if (!referenceElement) {
+          throw new BlockSuiteError(
+            ErrorCode.MissingViewModelError,
+            `can not find element(id:${referenceElement})`
+          );
+        }
 
-            this.blockService.disposables.add(
-              frameBlock.model.xywh$.subscribe(() => {
-                refreshViewport();
-              })
-            );
-          }
-        );
-        this.blockService.disposables.add(disposable);
+        if (referenceElement instanceof FrameBlockModel) {
+          referenceElement.xywh$.subscribe(xywh => {
+            setReferenceXYWH(xywh);
+            refreshViewport();
+          });
+        } else if (referenceElement instanceof GroupElementModel) {
+          edgelessService.surface.elementUpdated.on(({ id, oldValues }) => {
+            if (
+              id === referenceId &&
+              oldValues.xywh !== referenceElement.xywh
+            ) {
+              setReferenceXYWH(referenceElement.xywh);
+              refreshViewport();
+            }
+          });
+        } else {
+          console.warn('Unsupported reference element type');
+        }
+      }
+
+      override unmounted() {
+        this._disposable.dispose();
       }
     }
 
-    this._previewSpec.extend([FrameViewWatcher]);
+    this._previewSpec.extend([FrameGroupViewWatcher]);
   }
 
   private _refreshViewport() {
@@ -511,6 +541,13 @@ export class SurfaceRefBlockComponent extends BlockComponent<
         : referencedModel.type;
     const _previewSpec = this._previewSpec.value;
 
+    if (!this._viewportEditor) {
+      this._viewportEditor = new BlockStdScope({
+        doc: this._previewDoc!,
+        extensions: _previewSpec,
+      }).render();
+    }
+
     return html`<div class="ref-content">
       <div
         class="ref-viewport ${flavourOrType === 'affine:frame' ? 'frame' : ''}"
@@ -519,10 +556,7 @@ export class SurfaceRefBlockComponent extends BlockComponent<
           aspectRatio: `${w} / ${h}`,
         })}
       >
-        ${new BlockStdScope({
-          doc: this._previewDoc!,
-          extensions: _previewSpec,
-        }).render()}
+        ${this._viewportEditor}
       </div>
       ${this._renderMask(referencedModel, flavourOrType)}
     </div>`;

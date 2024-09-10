@@ -3,7 +3,10 @@ import { customElement, property, query } from 'lit/decorators.js';
 
 import type { EditorHost } from '../view/index.js';
 import type { GfxBlockElementModel } from './gfx-block-model.js';
-import type { Viewport } from './viewport.js';
+
+import { PropTypes, requiredProperties } from '../view/decorators/required.js';
+import { WithDisposable } from '../view/utils/with-disposable.js';
+import { Viewport } from './viewport.js';
 
 /**
  * A wrapper around `requestConnectedFrame` that only calls at most once in one frame
@@ -29,8 +32,11 @@ export function requestThrottledConnectedFrame<
   }) as T;
 }
 
+@requiredProperties({
+  viewport: PropTypes.instanceOf(Viewport),
+})
 @customElement('gfx-viewport')
-export class GfxViewportElement extends LitElement {
+export class GfxViewportElement extends WithDisposable(LitElement) {
   static override styles = css`
     .gfx-viewport {
       position: absolute;
@@ -93,8 +99,6 @@ export class GfxViewportElement extends LitElement {
 
   renderingBlocks = new Set<string>();
 
-  viewport!: Viewport;
-
   private _toCSSTransform(
     translateX: number,
     translateY: number,
@@ -106,10 +110,18 @@ export class GfxViewportElement extends LitElement {
   override connectedCallback(): void {
     super.connectedCallback();
 
-    this.viewport.viewportUpdated.on(() => {
+    const viewportUpdateCallback = () => {
       this._refreshViewport();
       this._hideOutsideBlock();
-    });
+    };
+
+    viewportUpdateCallback();
+    this.disposables.add(
+      this.viewport.viewportUpdated.on(() => viewportUpdateCallback())
+    );
+    this.disposables.add(
+      this.viewport.sizeUpdated.on(() => viewportUpdateCallback())
+    );
   }
 
   override render() {
@@ -163,4 +175,7 @@ export class GfxViewportElement extends LitElement {
 
   @property({ type: Number })
   accessor maxConcurrentRenders: number = 2;
+
+  @property({ attribute: false })
+  accessor viewport!: Viewport;
 }
