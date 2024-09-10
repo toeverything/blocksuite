@@ -3,6 +3,7 @@ export * from './command.js';
 export * from './config.js';
 export * from './extension.js';
 export * from './flavour.js';
+export * from './keymap.js';
 export * from './lifecycle-watcher.js';
 export * from './service.js';
 export * from './service-watcher.js';
