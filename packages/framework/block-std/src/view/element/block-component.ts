@@ -154,6 +154,12 @@ export class BlockComponent<
       return this._service;
     }
     const service = this.std.getService(this.model.flavour) as Service;
+    if (!service) {
+      throw new BlockSuiteError(
+        ErrorCode.ValueNotExists,
+        `Cannot find service for flavour ${this.model.flavour}`
+      );
+    }
     this._service = service;
     return service;
   }

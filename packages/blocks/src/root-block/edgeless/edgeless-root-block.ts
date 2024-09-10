@@ -509,6 +509,10 @@ export class EdgelessRootBlockComponent extends BlockComponent<
     if (!files.length) return [];
 
     const attachmentService = this.std.getService('affine:attachment');
+    if (!attachmentService) {
+      console.error('Attachment service not found');
+      return [];
+    }
     const maxFileSize = attachmentService.maxFileSize;
     const isSizeExceeded = files.some(file => file.size > maxFileSize);
     if (isSizeExceeded) {
@@ -601,6 +605,10 @@ export class EdgelessRootBlockComponent extends BlockComponent<
     if (!imageFiles.length) return [];
 
     const imageService = this.std.getService('affine:image');
+    if (!imageService) {
+      console.error('Image service not found');
+      return [];
+    }
     const maxFileSize = imageService.maxFileSize;
     const isSizeExceeded = imageFiles.some(file => file.size > maxFileSize);
     if (isSizeExceeded) {

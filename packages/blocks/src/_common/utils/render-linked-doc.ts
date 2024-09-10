@@ -115,7 +115,7 @@ export const embedNoteContentStyles = css`
 `;
 
 export function promptDocTitle(host: EditorHost, autofill?: string) {
-  const notification = host.std.getService('affine:page').notificationService;
+  const notification = host.std.getService('affine:page')?.notificationService;
   if (!notification) return Promise.resolve(undefined);
 
   return notification.prompt({
@@ -140,7 +140,7 @@ export function getTitleFromSelectedModels(selectedModels: BlockModel[]) {
 }
 
 export function notifyDocCreated(host: EditorHost, doc: Doc) {
-  const notification = host.std.getService('affine:page').notificationService;
+  const notification = host.std.getService('affine:page')?.notificationService;
   if (!notification) return;
 
   const abortController = new AbortController();

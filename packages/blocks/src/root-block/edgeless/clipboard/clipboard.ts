@@ -375,7 +375,7 @@ export class EdgelessClipboardController extends PageClipboard {
   };
 
   private get _exportManager() {
-    return this._rootService.exportManager;
+    return this._rootService?.exportManager;
   }
 
   private get _rootService() {
@@ -878,7 +878,7 @@ export class EdgelessClipboardController extends PageClipboard {
     }
     ctx.scale(dpr, dpr);
 
-    const replaceImgSrcWithSvg = this._exportManager.replaceImgSrcWithSvg;
+    const replaceImgSrcWithSvg = this._exportManager?.replaceImgSrcWithSvg;
     const replaceRichTextWithSvgElementFunc =
       this._replaceRichTextWithSvgElement.bind(this);
 
@@ -911,7 +911,7 @@ export class EdgelessClipboardController extends PageClipboard {
             element.style.setProperty('box-shadow', 'none');
           }
         });
-        await replaceImgSrcWithSvg(element);
+        await replaceImgSrcWithSvg?.(element);
         replaceRichTextWithSvgElementFunc(element);
       },
       backgroundColor: 'transparent',

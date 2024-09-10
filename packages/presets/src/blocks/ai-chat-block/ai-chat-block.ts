@@ -33,14 +33,6 @@ export class AIChatBlockComponent extends BlockComponent<AIChatBlockModel> {
     }
   });
 
-  get _peekViewService() {
-    return this._rootService.peekViewService;
-  }
-
-  get _rootService() {
-    return this.host.std.getService('affine:page');
-  }
-
   override renderBlock() {
     const messages = this._deserializeChatMessages.value.slice(-2);
     const textRendererOptions = {

@@ -374,7 +374,7 @@ export class DatabaseBlockComponent extends CaptionedBlockComponent<
   }
 
   override renderBlock() {
-    const peekViewService = this.getRootService().peekViewService;
+    const peekViewService = this.getRootService()?.peekViewService;
     return html`
       <div
         contenteditable="false"

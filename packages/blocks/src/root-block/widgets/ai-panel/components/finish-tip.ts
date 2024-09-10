@@ -79,8 +79,9 @@ export class AIFinishTip extends WithDisposable(LitElement) {
                     if (this.copied) {
                       const rootService =
                         this.host.std.getService('affine:page');
-                      const { notificationService } = rootService;
-                      notificationService?.toast('Copied to clipboard');
+                      rootService?.notificationService?.toast(
+                        'Copied to clipboard'
+                      );
                     }
                   }}
                 >

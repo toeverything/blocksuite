@@ -13,7 +13,7 @@ export class RemoteColorManager {
 
   constructor(readonly host: EditorHost) {
     const sessionColor =
-      this.rootService.editPropsStore.getStorage('remoteColor');
+      this.rootService?.editPropsStore.getStorage('remoteColor');
     if (sessionColor) {
       this.awarenessStore.awareness.setLocalStateField('color', sessionColor);
       return;
@@ -21,7 +21,7 @@ export class RemoteColorManager {
 
     const pickColor = multiPlayersColor.pick();
     this.awarenessStore.awareness.setLocalStateField('color', pickColor);
-    this.rootService.editPropsStore.setStorage('remoteColor', pickColor);
+    this.rootService?.editPropsStore.setStorage('remoteColor', pickColor);
   }
 
   get(id: number) {
@@ -33,7 +33,7 @@ export class RemoteColorManager {
     if (id !== this.awarenessStore.awareness.clientID) return null;
 
     const sessionColor =
-      this.rootService.editPropsStore.getStorage('remoteColor');
+      this.rootService?.editPropsStore.getStorage('remoteColor');
     if (sessionColor) {
       this.awarenessStore.awareness.setLocalStateField('color', sessionColor);
       return sessionColor;
@@ -41,7 +41,7 @@ export class RemoteColorManager {
 
     const pickColor = multiPlayersColor.pick();
     this.awarenessStore.awareness.setLocalStateField('color', pickColor);
-    this.rootService.editPropsStore.setStorage('remoteColor', pickColor);
+    this.rootService?.editPropsStore.setStorage('remoteColor', pickColor);
     return pickColor;
   }
 }

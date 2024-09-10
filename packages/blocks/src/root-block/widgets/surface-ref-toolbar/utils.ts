@@ -1,6 +1,7 @@
 import type { CanvasRenderer } from '@blocksuite/affine-block-surface';
 import type { EditorHost } from '@blocksuite/block-std';
 
+import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 import { assertExists, Bound } from '@blocksuite/global/utils';
 
 import type { SurfaceRefBlockComponent } from '../../../surface-ref-block/surface-ref-block.js';
@@ -17,6 +18,12 @@ export const edgelessToBlob = async (
 ): Promise<Blob> => {
   const { edgelessElement } = options;
   const rootService = host.std.getService('affine:page');
+  if (!rootService) {
+    throw new BlockSuiteError(
+      ErrorCode.ValueNotExists,
+      'Cannot find root service when export edgeless to blob'
+    );
+  }
   const exportManager = rootService.exportManager;
   const bound = Bound.deserialize(edgelessElement.xywh);
   const isBlock = isTopLevelBlock(edgelessElement);

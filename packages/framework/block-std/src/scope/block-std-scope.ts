@@ -137,10 +137,10 @@ export class BlockStdScope {
    */
   getService<Key extends BlockSuite.ServiceKeys>(
     flavour: Key
-  ): BlockSuite.BlockServices[Key];
-  getService<Service extends BlockService>(flavour: string): Service;
-  getService(flavour: string): BlockService {
-    return this.get(BlockServiceIdentifier(flavour));
+  ): BlockSuite.BlockServices[Key] | null;
+  getService<Service extends BlockService>(flavour: string): Service | null;
+  getService(flavour: string): BlockService | null {
+    return this.getOptional(BlockServiceIdentifier(flavour));
   }
 
   getView(flavour: string) {

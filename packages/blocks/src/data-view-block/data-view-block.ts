@@ -261,7 +261,7 @@ export class DataViewBlockComponent extends CaptionedBlockComponent<DataViewBloc
   }
 
   override renderBlock() {
-    const peekViewService = this.getRootService().peekViewService;
+    const peekViewService = this.getRootService()?.peekViewService;
     return html`
       <div contenteditable="false" style="position: relative">
         ${this.dataView.render({

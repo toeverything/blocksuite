@@ -383,6 +383,7 @@ export const defaultSlashMenuConfig: SlashMenuConfig = {
         if (!imageFiles.length) return;
 
         const imageService = rootComponent.std.getService('affine:image');
+        if (!imageService) return;
         const maxFileSize = imageService.maxFileSize;
 
         addSiblingImageBlock(
@@ -735,6 +736,7 @@ export const defaultSlashMenuConfig: SlashMenuConfig = {
           return;
         }
         const service = rootComponent.std.getService('affine:database');
+        if (!service) return;
         service.initDatabaseBlock(
           rootComponent.doc,
           model,
@@ -793,6 +795,7 @@ export const defaultSlashMenuConfig: SlashMenuConfig = {
           return;
         }
         const service = rootComponent.std.getService('affine:database');
+        if (!service) return;
         service.initDatabaseBlock(
           rootComponent.doc,
           model,

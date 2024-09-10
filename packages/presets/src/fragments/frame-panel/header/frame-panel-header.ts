@@ -117,7 +117,7 @@ export class FramePanelHeader extends WithDisposable(LitElement) {
 
   private _enterPresentationMode = () => {
     if (!this.edgeless) {
-      this.rootService.std.get(DocModeProvider).setEditorMode('edgeless');
+      this.rootService?.std.get(DocModeProvider).setEditorMode('edgeless');
     }
 
     setTimeout(() => {
@@ -157,7 +157,7 @@ export class FramePanelHeader extends WithDisposable(LitElement) {
   private _tryLoadNavigatorStateLocalRecord() {
     this._navigatorMode = this.editorHost.std
       .getService('affine:page')
-      .editPropsStore.getStorage('presentFillScreen')
+      ?.editPropsStore.getStorage('presentFillScreen')
       ? 'fill'
       : 'fit';
   }

@@ -5,10 +5,9 @@ import type { PeekableClass, PeekViewService } from './type.js';
 
 export class PeekableController<T extends PeekableClass> {
   private _getPeekViewService = (): PeekViewService | null => {
-    if ('peekViewService' in this.getRootService()) {
-      return this.getRootService<
-        BlockService & { peekViewService: PeekViewService }
-      >().peekViewService;
+    const service = this.getRootService();
+    if (service && 'peekViewService' in service) {
+      return service.peekViewService as PeekViewService;
     }
     return null;
   };

@@ -602,7 +602,7 @@ export class SurfaceRefBlockComponent extends BlockComponent<
     };
     const pageService = this.std.getService('affine:page');
 
-    pageService.editPropsStore.setStorage('viewport', viewport);
+    pageService?.editPropsStore.setStorage('viewport', viewport);
 
     this.std.get(DocModeProvider).setEditorMode('edgeless');
   }

@@ -235,8 +235,8 @@ export class FramePanelBody extends WithDisposable(ShadowlessElement) {
       };
 
       const rootService = this.editorHost.std.getService('affine:page');
-      rootService.editPropsStore.setStorage('viewport', viewport);
-      rootService.std.get(DocModeProvider).setEditorMode('edgeless');
+      rootService?.editPropsStore.setStorage('viewport', viewport);
+      rootService?.std.get(DocModeProvider).setEditorMode('edgeless');
     } else {
       this.edgeless.service.viewport.setViewportByBound(
         bound,

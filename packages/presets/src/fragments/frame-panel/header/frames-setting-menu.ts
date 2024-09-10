@@ -86,7 +86,7 @@ export class FramesSettingMenu extends WithDisposable(LitElement) {
     this.edgeless?.slots.navigatorSettingUpdated.emit({
       fillScreen: this.fillScreen,
     });
-    this._rootService.editPropsStore.setStorage(
+    this._rootService?.editPropsStore.setStorage(
       'presentFillScreen',
       this.fillScreen
     );
@@ -97,7 +97,7 @@ export class FramesSettingMenu extends WithDisposable(LitElement) {
     this.edgeless?.slots.navigatorSettingUpdated.emit({
       hideToolbar: this.hideToolbar,
     });
-    this._rootService.editPropsStore.setStorage(
+    this._rootService?.editPropsStore.setStorage(
       'presentHideToolbar',
       this.hideToolbar
     );
@@ -108,6 +108,9 @@ export class FramesSettingMenu extends WithDisposable(LitElement) {
   }
 
   private _tryRestoreSettings() {
+    if (!this._rootService) {
+      return;
+    }
     const { editPropsStore } = this._rootService;
     const blackBackground = editPropsStore.getStorage('presentBlackBackground');
 

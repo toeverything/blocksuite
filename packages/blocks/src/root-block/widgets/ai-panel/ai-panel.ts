@@ -259,7 +259,7 @@ export class AffineAIPanelWidget extends WidgetComponent {
 
   showDiscardModal = () => {
     const notification =
-      this.host.std.getService('affine:page').notificationService;
+      this.host.std.getService('affine:page')?.notificationService;
     if (!notification) {
       return Promise.resolve(true);
     }
