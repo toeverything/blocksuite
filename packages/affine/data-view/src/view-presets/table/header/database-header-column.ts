@@ -12,7 +12,6 @@ import {
   SignalWatcher,
   WithDisposable,
 } from '@blocksuite/block-std';
-import { assertExists } from '@blocksuite/global/utils';
 import {
   DeleteIcon,
   DuplicateIcon,
@@ -20,6 +19,7 @@ import {
   InsertRightIcon,
   MoveLeftIcon,
   MoveRightIcon,
+  ViewIcon,
 } from '@blocksuite/icons/lit';
 import { css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
@@ -219,9 +219,9 @@ export class DatabaseHeaderColumn extends SignalWatcher(
     const tableContainer = getTableContainer(this);
     const headerContainer = this.closest('affine-database-column-header');
     const scrollContainer = tableContainer?.parentElement;
-    assertExists(headerContainer);
-    assertExists(tableContainer);
-    assertExists(scrollContainer);
+
+    if (!tableContainer || !headerContainer || !scrollContainer) return;
+
     const columnHeaderRect = this.getBoundingClientRect();
     const scale = columnHeaderRect.width / this.column.width$.value;
     const headerContainerRect = tableContainer.getBoundingClientRect();
@@ -329,7 +329,7 @@ export class DatabaseHeaderColumn extends SignalWatcher(
         items: [
           {
             type: 'group',
-            name: 'Column Prop Group ',
+            name: 'Column Prop Group',
             children: () => [
               typeConfig(this.column),
               // Number format begin
@@ -377,6 +377,23 @@ export class DatabaseHeaderColumn extends SignalWatcher(
                   ] as Menu[])
                 : []),
               // Number format end
+            ],
+          },
+          {
+            type: 'group',
+            name: 'col-ops-p1',
+            children: () => [
+              {
+                type: 'action',
+                name: 'Hide In View',
+                icon: ViewIcon(),
+                hide: () =>
+                  this.column.hide$.value ||
+                  this.column.type$.value === 'title',
+                select: () => {
+                  this.column.updateHide(true);
+                },
+              },
             ],
           },
 
@@ -471,7 +488,7 @@ export class DatabaseHeaderColumn extends SignalWatcher(
           },
           {
             type: 'group',
-            name: 'operation',
+            name: 'col-ops-p2',
             children: () => [
               {
                 type: 'action',
