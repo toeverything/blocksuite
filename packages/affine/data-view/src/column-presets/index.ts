@@ -9,6 +9,7 @@ import { textColumnConfig } from './text/cell-renderer.js';
 
 export * from './converts.js';
 export * from './number/types.js';
+export * from './select/define.js';
 export const columnPresets = {
   checkboxColumnConfig,
   dateColumnConfig,

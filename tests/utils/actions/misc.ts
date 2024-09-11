@@ -186,6 +186,7 @@ async function initEmptyEditor({
             window.debugMenu = debugMenu;
             window.editor = editor;
             window.doc = doc;
+            window.host = editor.host!;
             Object.defineProperty(globalThis, 'host', {
               get() {
                 return document.querySelector<EditorHost>('editor-host');
