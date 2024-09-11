@@ -18,8 +18,6 @@ export class ShadowlessElement extends LitElement {
           const style = document.createElement('style');
           style.textContent = s.cssText;
           styleRoot.append(style);
-        } else {
-          console.error('unreachable');
         }
       });
       elementStyles = [];
