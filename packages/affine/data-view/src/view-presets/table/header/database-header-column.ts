@@ -505,7 +505,7 @@ export class DatabaseHeaderColumn extends SignalWatcher(
     const table = this.closest('affine-database-table');
     if (table) {
       this.disposables.add(
-        table.handleEvent('dragStart', context => {
+        table.props.handleEvent('dragStart', context => {
           if (this.tableViewManager.readonly$.value) {
             return;
           }

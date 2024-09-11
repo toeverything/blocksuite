@@ -19,7 +19,7 @@ export class KanbanClipboardController implements ReactiveController {
   };
 
   private get readonly() {
-    return this.host.view.readonly$.value;
+    return this.host.props.view.readonly$.value;
   }
 
   constructor(public host: DataViewKanban) {
@@ -28,7 +28,7 @@ export class KanbanClipboardController implements ReactiveController {
 
   hostConnected() {
     this.host.disposables.add(
-      this.host.handleEvent('copy', ctx => {
+      this.host.props.handleEvent('copy', ctx => {
         const kanbanSelection = this.host.selectionController.selection;
         if (!kanbanSelection) return false;
 
@@ -38,7 +38,7 @@ export class KanbanClipboardController implements ReactiveController {
     );
 
     this.host.disposables.add(
-      this.host.handleEvent('paste', ctx => {
+      this.host.props.handleEvent('paste', ctx => {
         if (this.readonly) return false;
 
         this._onPaste(ctx);

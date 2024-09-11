@@ -1,5 +1,4 @@
 import type { BlockStdScope } from '@blocksuite/block-std';
-import type { ReferenceElement } from '@floating-ui/dom';
 
 import {
   ShadowlessElement,
@@ -16,12 +15,11 @@ import { html } from 'lit/static-html.js';
 
 import type { DataSource } from './common/data-source/base.js';
 import type { DataViewSelection, DataViewSelectionState } from './types.js';
-import type { DataViewExpose, DataViewProps } from './view/data-view.js';
-import type { DataViewBase } from './view/data-view-base.js';
+import type { DataViewExpose, DataViewProps } from './view/types.js';
 import type { SingleView } from './view-manager/single-view.js';
 
 import { dataViewCommonStyle } from './common/css-variable.js';
-import { createRecordDetail, popSideDetail } from './common/detail/layout.js';
+import { createRecordDetail } from './common/detail/detail.js';
 import './common/group-by/define.js';
 import { renderUniLit } from './utils/uni-component/index.js';
 
@@ -29,22 +27,22 @@ type ViewProps = {
   view: SingleView;
   selection$: ReadonlySignal<DataViewSelectionState>;
   setSelection: (selection?: DataViewSelectionState) => void;
-  bindHotkey: DataViewBase['bindHotkey'];
-  handleEvent: DataViewBase['handleEvent'];
+  bindHotkey: DataViewProps['bindHotkey'];
+  handleEvent: DataViewProps['handleEvent'];
 };
 
 export type DataViewRendererConfig = {
   bindHotkey: DataViewProps['bindHotkey'];
   handleEvent: DataViewProps['handleEvent'];
+  virtualPadding$: DataViewProps['virtualPadding$'];
   selection$: ReadonlySignal<DataViewSelection | undefined>;
   setSelection: (selection: DataViewSelection | undefined) => void;
   dataSource: DataSource;
-  detailPanelConfig?: {
-    openDetailPanel?: (
+  detailPanelConfig: {
+    openDetailPanel: (
       target: HTMLElement,
       template: TemplateResult
     ) => Promise<void>;
-    target?: () => ReferenceElement;
   };
   headerWidget: DataViewProps['headerWidget'];
   onDrag?: DataViewProps['onDrag'];
@@ -114,7 +112,7 @@ export class DataViewRenderer extends SignalWatcher(
     rowId: string;
     onClose?: () => void;
   }) => {
-    const openDetailPanel = this.config.detailPanelConfig?.openDetailPanel;
+    const openDetailPanel = this.config.detailPanelConfig.openDetailPanel;
     if (openDetailPanel) {
       openDetailPanel(
         this,
@@ -125,13 +123,6 @@ export class DataViewRenderer extends SignalWatcher(
       )
         .catch(console.error)
         .finally(ops.onClose);
-    } else {
-      popSideDetail({
-        target: this.config.detailPanelConfig?.target?.() ?? document.body,
-        view: ops.view,
-        rowId: ops.rowId,
-        onClose: ops.onClose,
-      });
     }
   };
 
@@ -152,8 +143,8 @@ export class DataViewRenderer extends SignalWatcher(
     }
     const props: DataViewProps = {
       dataViewEle: this,
-      view: viewData.view,
       headerWidget: this.config.headerWidget,
+      view: viewData.view,
       selection$: viewData.selection$,
       setSelection: viewData.setSelection,
       bindHotkey: viewData.bindHotkey,
@@ -161,12 +152,17 @@ export class DataViewRenderer extends SignalWatcher(
       onDrag: this.config.onDrag,
       std: this.config.std,
       dataSource: this.config.dataSource,
+      virtualPadding$: this.config.virtualPadding$,
     };
     return keyed(
       viewData.view.id,
-      renderUniLit(viewData.view.viewMeta.renderer.view, props, {
-        ref: this._view,
-      })
+      renderUniLit(
+        viewData.view.viewMeta.renderer.view,
+        { props },
+        {
+          ref: this._view,
+        }
+      )
     );
   }
 

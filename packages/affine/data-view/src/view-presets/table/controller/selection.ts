@@ -87,12 +87,12 @@ export class TableSelectionController implements ReactiveController {
       );
       const cell = container?.cell;
       const isEditing = cell ? cell.beforeEnterEditMode() : true;
-      this.host.setSelection({
+      this.host.props.setSelection({
         ...selection,
         isEditing,
       });
     } else {
-      this.host.setSelection(selection);
+      this.host.props.setSelection(selection);
     }
   }
 
@@ -101,7 +101,7 @@ export class TableSelectionController implements ReactiveController {
   }
 
   get view() {
-    return this.host.view;
+    return this.host.props.view;
   }
 
   get viewData() {
@@ -115,13 +115,13 @@ export class TableSelectionController implements ReactiveController {
   }
 
   private clearSelection() {
-    this.host.setSelection();
+    this.host.props.setSelection();
   }
 
   private handleDragEvent() {
     this.host.disposables.add(
-      this.host.handleEvent('dragStart', context => {
-        if (this.host.view.readonly$.value) {
+      this.host.props.handleEvent('dragStart', context => {
+        if (this.host.props.view.readonly$.value) {
           return;
         }
         const event = context.get('pointerState').raw;
@@ -153,7 +153,7 @@ export class TableSelectionController implements ReactiveController {
 
   private handleSelectionChange() {
     this.host.disposables.add(
-      this.host.selection$.subscribe(tableSelection => {
+      this.host.props.selection$.subscribe(tableSelection => {
         if (!this.isValidSelection(tableSelection)) {
           this.selection = undefined;
           return;
@@ -238,7 +238,7 @@ export class TableSelectionController implements ReactiveController {
         ? this.view.groupManager.groupDataMap$.value?.[groupKey].rows
         : this.view.rows$.value;
     requestAnimationFrame(() => {
-      const index = this.host.view.columnManagerList$.value.findIndex(
+      const index = this.host.props.view.columnManagerList$.value.findIndex(
         v => v.type$.value === 'title'
       );
       this.selection = TableAreaSelection.create({
@@ -964,7 +964,7 @@ class SelectionElement extends WithDisposable(ShadowlessElement) {
   selectionRef: Ref<HTMLDivElement> = createRef<HTMLDivElement>();
 
   get selection$() {
-    return this.controller.host.selection$;
+    return this.controller.host.props.selection$;
   }
 
   clearAreaStyle() {
@@ -1009,7 +1009,7 @@ class SelectionElement extends WithDisposable(ShadowlessElement) {
     }
     if (
       selection?.selectionType === 'area' &&
-      !this.controller.host.view.readonly$.value
+      !this.controller.host.props.view.readonly$.value
     ) {
       this.updateAreaSelectionStyle(
         selection.groupKey,

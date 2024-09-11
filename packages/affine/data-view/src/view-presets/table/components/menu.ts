@@ -21,7 +21,7 @@ export const openDetail = (
   const old = selection.selection;
   selection.selection = undefined;
   dataViewEle.openDetailPanel({
-    view: selection.host.view,
+    view: selection.host.props.view,
     rowId: rowId,
     onClose: () => {
       selection.selection = old;

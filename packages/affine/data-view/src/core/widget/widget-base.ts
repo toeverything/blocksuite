@@ -5,7 +5,7 @@ import {
 } from '@blocksuite/block-std';
 import { property } from 'lit/decorators.js';
 
-import type { DataViewExpose } from '../view/data-view.js';
+import type { DataViewExpose } from '../view/types.js';
 import type { SingleView } from '../view-manager/single-view.js';
 import type { DataViewWidgetProps } from './types.js';
 

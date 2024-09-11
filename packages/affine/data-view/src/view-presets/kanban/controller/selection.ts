@@ -51,12 +51,12 @@ export class KanbanSelectionController implements ReactiveController {
 
   set selection(data: KanbanViewSelection | undefined) {
     if (!data) {
-      this.host.setSelection();
+      this.host.props.setSelection();
       return;
     }
     const selection: KanbanViewSelectionWithType = {
       ...data,
-      viewId: this.host.view.id,
+      viewId: this.host.props.view.id,
       type: 'kanban',
     };
 
@@ -68,17 +68,17 @@ export class KanbanSelectionController implements ReactiveController {
           ? selection.isEditing
           : false
         : false;
-      this.host.setSelection({
+      this.host.props.setSelection({
         ...selection,
         isEditing,
       });
     } else {
-      this.host.setSelection(selection);
+      this.host.props.setSelection(selection);
     }
   }
 
   get view() {
-    return this.host.view;
+    return this.host.props.view;
   }
 
   constructor(private host: DataViewKanban) {
@@ -117,7 +117,7 @@ export class KanbanSelectionController implements ReactiveController {
       return;
     }
     if (selection.selectionType === 'card') {
-      this.host.view.rowDelete(selection.cards.map(v => v.cardId));
+      this.host.props.view.rowDelete(selection.cards.map(v => v.cardId));
       this.selection = undefined;
     }
   }
@@ -154,7 +154,7 @@ export class KanbanSelectionController implements ReactiveController {
   focusFirstCell() {
     const group = this.host.groupManager?.groupsDataList$.value?.[0];
     const card = group?.rows[0];
-    const columnId = card && this.host.view.getHeaderTitle(card)?.id;
+    const columnId = card && this.host.props.view.getHeaderTitle(card)?.id;
     if (group && card && columnId) {
       this.selection = {
         selectionType: 'cell',
@@ -439,7 +439,7 @@ export class KanbanSelectionController implements ReactiveController {
 
   hostConnected() {
     this.host.disposables.add(
-      this.host.selection$.subscribe(selection => {
+      this.host.props.selection$.subscribe(selection => {
         const old = this._selection;
         if (old) {
           this.blur(old);

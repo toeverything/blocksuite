@@ -34,7 +34,7 @@ export class TableDragController implements ReactiveController {
       onMove: evt => {
         preview.display(evt.x - offsetLeft, evt.y - offsetTop);
         if (!this.host.contains(evt.target as Node)) {
-          const callback = this.host.onDrag;
+          const callback = this.host.props.onDrag;
           if (callback) {
             this.dropPreview.remove();
             return {
@@ -67,7 +67,7 @@ export class TableDragController implements ReactiveController {
           return;
         }
         if (result.type === 'self') {
-          this.host.view.rowMove(
+          this.host.props.view.rowMove(
             row.rowId,
             result.position,
             fromGroup,
@@ -132,11 +132,11 @@ export class TableDragController implements ReactiveController {
   }
 
   hostConnected() {
-    if (this.host.view.readonly$.value) {
+    if (this.host.props.view.readonly$.value) {
       return;
     }
     this.host.disposables.add(
-      this.host.handleEvent('dragStart', context => {
+      this.host.props.handleEvent('dragStart', context => {
         const event = context.get('pointerState').raw;
         const target = event.target;
         if (

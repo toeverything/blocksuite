@@ -16,7 +16,7 @@ export class TableHotkeysController implements ReactiveController {
 
   hostConnected() {
     this.host.disposables.add(
-      this.host.bindHotkey({
+      this.host.props.bindHotkey({
         Backspace: () => {
           const selection = this.selectionController.selection;
           if (!selection) {
@@ -25,7 +25,7 @@ export class TableHotkeysController implements ReactiveController {
           if (TableRowSelection.is(selection)) {
             const rows = TableRowSelection.rowsIds(selection);
             this.selectionController.selection = undefined;
-            this.host.view.rowDelete(rows);
+            this.host.props.view.rowDelete(rows);
             return;
           }
           const {
@@ -332,10 +332,10 @@ export class TableHotkeysController implements ReactiveController {
             context.get('keyboardState').raw.preventDefault();
             this.selectionController.selection = TableRowSelection.create({
               rows:
-                this.host.view.groupManager.groupsDataList$.value?.flatMap(
+                this.host.props.view.groupManager.groupsDataList$.value?.flatMap(
                   group => group.rows.map(id => ({ groupKey: group.key, id }))
                 ) ??
-                this.host.view.rows$.value.map(id => ({
+                this.host.props.view.rows$.value.map(id => ({
                   groupKey: undefined,
                   id,
                 })),
@@ -370,7 +370,11 @@ export class TableHotkeysController implements ReactiveController {
             this.selectionController.selection = TableRowSelection.create({
               rows: [row],
             });
-            popRowMenu(this.host.dataViewEle, cell, this.selectionController);
+            popRowMenu(
+              this.host.props.dataViewEle,
+              cell,
+              this.selectionController
+            );
           }
         },
       })
