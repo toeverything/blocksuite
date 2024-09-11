@@ -164,7 +164,7 @@ export class DataViewKanban extends DataViewBase<
       });
     };
     return html` <div
-      style="height: 32px;width: 100px;flex-shrink:0;display:flex;align-items:center;"
+      style="height: 32px;flex-shrink:0;display:flex;align-items:center;"
       @click="${add}"
     >
       <div class="add-group-icon">${AddCursorIcon()}</div>
@@ -222,6 +222,7 @@ export class DataViewKanban extends DataViewBase<
       marginLeft: `-${vPadding}px`,
       marginRight: `-${vPadding}px`,
       paddingLeft: `${vPadding}px`,
+      paddingRight: `${vPadding}px`,
     });
     return html`
       ${renderUniLit(this.props.headerWidget, {

@@ -289,6 +289,7 @@ export class DataViewTable extends DataViewBase<
     });
     const containerStyle = styleMap({
       paddingLeft: `${vPadding}px`,
+      paddingRight: `${vPadding}px`,
     });
     return html`
       ${renderUniLit(this.props.headerWidget, {

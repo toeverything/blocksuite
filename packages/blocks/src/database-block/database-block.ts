@@ -27,6 +27,7 @@ import {
   MoreHorizontalIcon,
 } from '@blocksuite/icons/lit';
 import { Slice } from '@blocksuite/store';
+import { autoUpdate } from '@floating-ui/dom';
 import { computed, signal } from '@lit-labs/preact-signals';
 import { css, html, nothing, unsafeCSS } from 'lit';
 import { customElement } from 'lit/decorators.js';
@@ -281,6 +282,8 @@ export class DatabaseBlockComponent extends CaptionedBlockComponent<
     return databaseSelection?.viewSelection;
   });
 
+  virtualPadding$ = signal(0);
+
   get dataSource(): DatabaseBlockDataSource {
     if (!this._dataSource) {
       this._dataSource = new DatabaseBlockDataSource(this.host, {
@@ -323,6 +326,7 @@ export class DatabaseBlockComponent extends CaptionedBlockComponent<
     super.connectedCallback();
 
     this.setAttribute(RANGE_SYNC_EXCLUDE_ATTR, 'true');
+    this.listenFullWidthChange();
     let canDrop = false;
     this.disposables.add(
       AffineDragHandleWidget.registerOption({
@@ -368,6 +372,20 @@ export class DatabaseBlockComponent extends CaptionedBlockComponent<
     );
   }
 
+  listenFullWidthChange() {
+    if (!this.doc.awarenessStore.getFlag('enable_database_full_width')) {
+      return;
+    }
+    this.disposables.add(
+      autoUpdate(this.host, this, () => {
+        const padding =
+          this.getBoundingClientRect().left -
+          this.host.getBoundingClientRect().left;
+        this.virtualPadding$.value = padding;
+      })
+    );
+  }
+
   override renderBlock() {
     const peekViewService = this.std.getOptional(PeekViewProvider);
     return html`
@@ -376,7 +394,7 @@ export class DatabaseBlockComponent extends CaptionedBlockComponent<
         style="position: relative;background-color: var(--affine-background-primary-color);border-radius: 4px"
       >
         ${this.dataView.render({
-          virtualPadding$: signal(300),
+          virtualPadding$: this.virtualPadding$,
           bindHotkey: this._bindHotkey,
           handleEvent: this._handleEvent,
           selection$: this.viewSelection$,

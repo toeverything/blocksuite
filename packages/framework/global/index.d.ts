@@ -3,6 +3,7 @@ declare type BlockSuiteFlags = {
   enable_pie_menu: boolean;
   enable_database_number_formatting: boolean;
   enable_database_attachment_note: boolean;
+  enable_database_full_width: boolean;
   enable_block_query: boolean;
   enable_legacy_validation: boolean;
   enable_lasso_tool: boolean;
