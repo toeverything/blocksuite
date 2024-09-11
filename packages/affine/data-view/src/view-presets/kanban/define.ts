@@ -7,6 +7,8 @@ import {
   defaultGroupBy,
   groupByMatcher,
   isTArray,
+  tRichText,
+  tString,
   tTag,
 } from '../../core/index.js';
 import { type BasicViewDataType, viewType } from '../../core/view/data-view.js';
@@ -46,7 +48,7 @@ export const kanbanViewModel = kanbanViewType.createModel<KanbanViewData>({
     });
     const getWeight = (columnId: string) => {
       const dataType = viewManager.dataSource.propertyGetDataType(columnId);
-      if (!dataType) {
+      if (!dataType || tString.is(dataType) || tRichText.is(dataType)) {
         return 0;
       }
       if (tTag.is(dataType)) {
