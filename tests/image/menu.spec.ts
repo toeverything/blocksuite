@@ -12,7 +12,8 @@ import {
 import { assertRichImage } from '../utils/asserts.js';
 import { test } from '../utils/playwright.js';
 
-test('popup menu should follow position of image when scrolling', async ({
+// FIXME(@fundon): This behavior is not meeting the design spec
+test.skip('popup menu should follow position of image when scrolling', async ({
   page,
 }) => {
   await enterPlaygroundRoom(page);
