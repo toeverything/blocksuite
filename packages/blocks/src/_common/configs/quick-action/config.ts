@@ -11,10 +11,8 @@ import { matchFlavours } from '@blocksuite/affine-shared/utils';
 import { tableViewMeta } from '@blocksuite/data-view/view-presets';
 import { assertExists } from '@blocksuite/global/utils';
 
-import {
-  convertToDatabase,
-  DATABASE_CONVERT_WHITE_LIST,
-} from '../../../database-block/utils.js';
+import { convertToDatabase } from '../../../database-block/data-source.js';
+import { DATABASE_CONVERT_WHITE_LIST } from '../../../database-block/utils.js';
 import {
   convertSelectedBlocksToLinkedDoc,
   getTitleFromSelectedModels,

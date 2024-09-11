@@ -5,7 +5,6 @@ import type {
   DatabaseBlockModel,
   ViewBasicDataType,
 } from '@blocksuite/affine-model';
-import type { EditorHost } from '@blocksuite/block-std';
 import type { BlockModel } from '@blocksuite/store';
 
 import {
@@ -13,95 +12,6 @@ import {
   insertPositionToIndex,
   type InsertToPosition,
 } from '@blocksuite/affine-shared/utils';
-import { getTagColor, type ViewMeta } from '@blocksuite/data-view';
-import { columnPresets } from '@blocksuite/data-view/column-presets';
-import { nanoid } from '@blocksuite/store';
-
-import { titlePureColumnConfig } from './columns/title/define.js';
-import { DatabaseBlockDataSource } from './data-source.js';
-
-export const databaseViewInitEmpty = (
-  host: EditorHost,
-  model: DatabaseBlockModel,
-  viewMeta: ViewMeta
-) => {
-  addColumn(
-    model,
-    'start',
-    titlePureColumnConfig.create(titlePureColumnConfig.config.name)
-  );
-  databaseViewAddView(host, model, viewMeta);
-};
-
-export const databaseViewInitConvert = (
-  host: EditorHost,
-  model: DatabaseBlockModel,
-  viewMeta: ViewMeta
-) => {
-  addColumn(
-    model,
-    'end',
-    columnPresets.multiSelectColumnConfig.create('Tag', { options: [] })
-  );
-  databaseViewInitEmpty(host, model, viewMeta);
-};
-
-export const databaseViewInitTemplate = (
-  host: EditorHost,
-  model: DatabaseBlockModel,
-  viewMeta: ViewMeta
-) => {
-  const ids = [nanoid(), nanoid(), nanoid()];
-  const statusId = addColumn(
-    model,
-    'end',
-    columnPresets.selectColumnConfig.create('Status', {
-      options: [
-        {
-          id: ids[0],
-          color: getTagColor(),
-          value: 'TODO',
-        },
-        {
-          id: ids[1],
-          color: getTagColor(),
-          value: 'In Progress',
-        },
-        {
-          id: ids[2],
-          color: getTagColor(),
-          value: 'Done',
-        },
-      ],
-    })
-  );
-  for (let i = 0; i < 4; i++) {
-    const rowId = model.doc.addBlock(
-      'affine:paragraph',
-      {
-        text: new model.doc.Text(`Task ${i + 1}`),
-      },
-      model.id
-    );
-    updateCell(model, rowId, {
-      columnId: statusId,
-      value: ids[i],
-    });
-  }
-  databaseViewInitEmpty(host, model, viewMeta);
-};
-
-export const databaseViewAddView = (
-  host: EditorHost,
-  model: DatabaseBlockModel,
-  viewMeta: ViewMeta
-) => {
-  const dataSource = new DatabaseBlockDataSource(host, {
-    pageId: model.doc.id,
-    blockId: model.id,
-  });
-  dataSource.viewManager.viewAdd(viewMeta.type);
-};
 
 export function addColumn(
   model: DatabaseBlockModel,
@@ -320,41 +230,5 @@ export const updateView = <ViewData extends ViewBasicDataType>(
     });
   });
   applyViewsUpdate(model);
-};
-export const convertToDatabase = (host: EditorHost, viewMeta: ViewMeta) => {
-  const [_, ctx] = host.std.command
-    .chain()
-    .getSelectedModels({
-      types: ['block', 'text'],
-    })
-    .run();
-  const { selectedModels } = ctx;
-  if (!selectedModels || selectedModels.length === 0) return;
-
-  host.doc.captureSync();
-
-  const parentModel = host.doc.getParent(selectedModels[0]);
-  if (!parentModel) {
-    return;
-  }
-
-  const id = host.doc.addBlock(
-    'affine:database',
-    {},
-    parentModel,
-    parentModel.children.indexOf(selectedModels[0])
-  );
-  const databaseModel = host.doc.getBlock(id)?.model as
-    | DatabaseBlockModel
-    | undefined;
-  if (!databaseModel) {
-    return;
-  }
-  databaseViewInitConvert(host, databaseModel, viewMeta);
-  applyColumnUpdate(databaseModel);
-  host.doc.moveBlocks(selectedModels, databaseModel);
-
-  const selectionManager = host.selection;
-  selectionManager.clear();
 };
 export const DATABASE_CONVERT_WHITE_LIST = ['affine:list', 'affine:paragraph'];

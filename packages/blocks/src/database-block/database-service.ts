@@ -9,11 +9,13 @@ import { DatabaseSelection, type ViewMeta } from '@blocksuite/data-view';
 import { viewPresets } from '@blocksuite/data-view/view-presets';
 
 import {
-  addColumn,
-  applyColumnUpdate,
   databaseViewAddView,
   databaseViewInitEmpty,
   databaseViewInitTemplate,
+} from './data-source.js';
+import {
+  addColumn,
+  applyColumnUpdate,
   updateCell,
   updateView,
 } from './utils.js';

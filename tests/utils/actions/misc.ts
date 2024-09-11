@@ -186,7 +186,6 @@ async function initEmptyEditor({
             window.debugMenu = debugMenu;
             window.editor = editor;
             window.doc = doc;
-            window.host = editor.host!;
             Object.defineProperty(globalThis, 'host', {
               get() {
                 return document.querySelector<EditorHost>('editor-host');
@@ -521,7 +520,7 @@ export async function initEmptyEdgelessState(page: Page) {
 
 export async function initEmptyDatabaseState(page: Page, rootId?: string) {
   const ids = await page.evaluate(async rootId => {
-    const { doc, host } = window;
+    const { doc } = window;
     doc.captureSync();
     if (!rootId) {
       rootId = doc.addBlock('affine:page', {
@@ -542,7 +541,7 @@ export async function initEmptyDatabaseState(page: Page, rootId?: string) {
     const databaseService = databaseBlock?.service;
     if (databaseService) {
       databaseService.databaseViewInitEmpty(
-        host,
+        window.host,
         model,
         databaseService.viewPresets.tableViewMeta
       );
@@ -565,7 +564,7 @@ export async function initKanbanViewState(
 ) {
   const ids = await page.evaluate(
     async ({ rootId, config }) => {
-      const { doc, host } = window;
+      const { doc } = window;
 
       doc.captureSync();
       if (!rootId) {
@@ -614,7 +613,7 @@ export async function initKanbanViewState(
           });
         });
         databaseService.databaseViewInitEmpty(
-          host,
+          window.host,
           model,
           databaseService.viewPresets.kanbanViewMeta
         );
@@ -633,7 +632,7 @@ export async function initEmptyDatabaseWithParagraphState(
   rootId?: string
 ) {
   const ids = await page.evaluate(async rootId => {
-    const { doc, host } = window;
+    const { doc } = window;
     doc.captureSync();
     if (!rootId) {
       rootId = doc.addBlock('affine:page', {
@@ -654,7 +653,7 @@ export async function initEmptyDatabaseWithParagraphState(
     const databaseService = databaseBlock?.service;
     if (databaseService) {
       databaseService.databaseViewInitEmpty(
-        host,
+        window.host,
         model,
         databaseService.viewPresets.tableViewMeta
       );

@@ -12,6 +12,7 @@ import {
   DataSourceBase,
   type DataViewDataType,
   type DetailSlots,
+  getTagColor,
   type TType,
   uniMap,
   type ViewManager,
@@ -20,7 +21,7 @@ import {
 } from '@blocksuite/data-view';
 import { columnPresets } from '@blocksuite/data-view/column-presets';
 import { assertExists } from '@blocksuite/global/utils';
-import { type BlockModel, Text } from '@blocksuite/store';
+import { type BlockModel, nanoid, Text } from '@blocksuite/store';
 import { computed, type ReadonlySignal } from '@lit-labs/preact-signals';
 
 import { getIcon } from './block-icons.js';
@@ -29,6 +30,7 @@ import {
   databaseBlockColumnList,
   databaseColumnConverts,
 } from './columns/index.js';
+import { titlePureColumnConfig } from './columns/title/define.js';
 import { HostContextKey } from './context/host-context.js';
 import { BlockRenderer } from './detail-panel/block-renderer.js';
 import { NoteRenderer } from './detail-panel/note-renderer.js';
@@ -415,3 +417,119 @@ export class DatabaseBlockDataSource extends DataSourceBase {
     return this.viewMetaGet(view.mode);
   }
 }
+
+export const databaseViewAddView = (
+  host: EditorHost,
+  model: DatabaseBlockModel,
+  viewMeta: ViewMeta
+) => {
+  const dataSource = new DatabaseBlockDataSource(host, {
+    pageId: model.doc.id,
+    blockId: model.id,
+  });
+  dataSource.viewManager.viewAdd(viewMeta.type);
+};
+export const databaseViewInitEmpty = (
+  host: EditorHost,
+  model: DatabaseBlockModel,
+  viewMeta: ViewMeta
+) => {
+  addColumn(
+    model,
+    'start',
+    titlePureColumnConfig.create(titlePureColumnConfig.config.name)
+  );
+  databaseViewAddView(host, model, viewMeta);
+};
+export const databaseViewInitConvert = (
+  host: EditorHost,
+  model: DatabaseBlockModel,
+  viewMeta: ViewMeta
+) => {
+  addColumn(
+    model,
+    'end',
+    columnPresets.multiSelectColumnConfig.create('Tag', { options: [] })
+  );
+  databaseViewInitEmpty(host, model, viewMeta);
+};
+export const databaseViewInitTemplate = (
+  host: EditorHost,
+  model: DatabaseBlockModel,
+  viewMeta: ViewMeta
+) => {
+  const ids = [nanoid(), nanoid(), nanoid()];
+  const statusId = addColumn(
+    model,
+    'end',
+    columnPresets.selectColumnConfig.create('Status', {
+      options: [
+        {
+          id: ids[0],
+          color: getTagColor(),
+          value: 'TODO',
+        },
+        {
+          id: ids[1],
+          color: getTagColor(),
+          value: 'In Progress',
+        },
+        {
+          id: ids[2],
+          color: getTagColor(),
+          value: 'Done',
+        },
+      ],
+    })
+  );
+  for (let i = 0; i < 4; i++) {
+    const rowId = model.doc.addBlock(
+      'affine:paragraph',
+      {
+        text: new model.doc.Text(`Task ${i + 1}`),
+      },
+      model.id
+    );
+    updateCell(model, rowId, {
+      columnId: statusId,
+      value: ids[i],
+    });
+  }
+  databaseViewInitEmpty(host, model, viewMeta);
+};
+export const convertToDatabase = (host: EditorHost, viewMeta: ViewMeta) => {
+  const [_, ctx] = host.std.command
+    .chain()
+    .getSelectedModels({
+      types: ['block', 'text'],
+    })
+    .run();
+  const { selectedModels } = ctx;
+  if (!selectedModels || selectedModels.length === 0) return;
+
+  host.doc.captureSync();
+
+  const parentModel = host.doc.getParent(selectedModels[0]);
+  if (!parentModel) {
+    return;
+  }
+
+  const id = host.doc.addBlock(
+    'affine:database',
+    {},
+    parentModel,
+    parentModel.children.indexOf(selectedModels[0])
+  );
+  const databaseModel = host.doc.getBlock(id)?.model as
+    | DatabaseBlockModel
+    | undefined;
+  if (!databaseModel) {
+    return;
+  }
+  databaseViewInitConvert(host, databaseModel, viewMeta);
+  applyColumnUpdate(databaseModel);
+  host.doc.moveBlocks(selectedModels, databaseModel);
+
+  const selectionManager = host.selection;
+  selectionManager.clear();
+};
