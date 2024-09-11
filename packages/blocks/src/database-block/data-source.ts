@@ -11,8 +11,9 @@ import {
   type DatabaseFlags,
   DataSourceBase,
   type DataViewDataType,
-  type DataViewTypes,
   type DetailSlots,
+  getTagColor,
+  type TType,
   uniMap,
   type ViewManager,
   ViewManagerBase,
@@ -20,7 +21,7 @@ import {
 } from '@blocksuite/data-view';
 import { columnPresets } from '@blocksuite/data-view/column-presets';
 import { assertExists } from '@blocksuite/global/utils';
-import { type BlockModel, Text } from '@blocksuite/store';
+import { type BlockModel, nanoid, Text } from '@blocksuite/store';
 import { computed, type ReadonlySignal } from '@lit-labs/preact-signals';
 
 import { getIcon } from './block-icons.js';
@@ -29,6 +30,7 @@ import {
   databaseBlockColumnList,
   databaseColumnConverts,
 } from './columns/index.js';
+import { titlePureColumnConfig } from './columns/title/define.js';
 import { HostContextKey } from './context/host-context.js';
 import { BlockRenderer } from './detail-panel/block-renderer.js';
 import { NoteRenderer } from './detail-panel/note-renderer.js';
@@ -37,7 +39,6 @@ import {
   applyCellsUpdate,
   applyColumnUpdate,
   copyCellsByColumn,
-  databaseViewAddView,
   deleteRows,
   deleteView,
   duplicateView,
@@ -50,7 +51,11 @@ import {
   updateColumn,
   updateView,
 } from './utils.js';
-import { databaseBlockViewMap, databaseBlockViews } from './views/models.js';
+import {
+  databaseBlockViewConverts,
+  databaseBlockViewMap,
+  databaseBlockViews,
+} from './views/index.js';
 
 export type DatabaseBlockDataSourceConfig = {
   pageId: string;
@@ -83,6 +88,8 @@ export class DatabaseBlockDataSource extends DataSourceBase {
   rows$: ReadonlySignal<string[]> = computed(() => {
     return this._model.children.map(v => v.id);
   });
+
+  viewConverts = databaseBlockViewConverts;
 
   viewDataList$: ReadonlySignal<DataViewDataType[]> = computed(() => {
     return this._model.views$.value as DataViewDataType[];
@@ -301,6 +308,15 @@ export class DatabaseBlockDataSource extends DataSourceBase {
     );
   }
 
+  propertyGetDataType(propertyId: string): TType | undefined {
+    const data = this._model.columns$.value.find(v => v.id === propertyId);
+    if (!data) {
+      return;
+    }
+    const meta = this.getPropertyMeta(data.type);
+    return meta.config.type(data);
+  }
+
   override propertyGetDefaultWidth(propertyId: string): number {
     if (this.propertyGetType(propertyId) === 'title') {
       return 260;
@@ -360,13 +376,12 @@ export class DatabaseBlockDataSource extends DataSourceBase {
     }
   }
 
-  viewDataAdd(viewType: DataViewTypes): string {
+  viewDataAdd(viewData: DataViewDataType): string {
     this._model.doc.captureSync();
-    const view = databaseViewAddView(
-      this._model,
-      databaseBlockViewMap[viewType]
-    );
-    return view.id;
+    this._model.doc.transact(() => {
+      this._model.views = [...this._model.views, viewData];
+    });
+    return viewData.id;
   }
 
   viewDataDelete(viewId: string): void {
@@ -402,3 +417,119 @@ export class DatabaseBlockDataSource extends DataSourceBase {
     return this.viewMetaGet(view.mode);
   }
 }
+
+export const databaseViewAddView = (
+  host: EditorHost,
+  model: DatabaseBlockModel,
+  viewMeta: ViewMeta
+) => {
+  const dataSource = new DatabaseBlockDataSource(host, {
+    pageId: model.doc.id,
+    blockId: model.id,
+  });
+  dataSource.viewManager.viewAdd(viewMeta.type);
+};
+export const databaseViewInitEmpty = (
+  host: EditorHost,
+  model: DatabaseBlockModel,
+  viewMeta: ViewMeta
+) => {
+  addColumn(
+    model,
+    'start',
+    titlePureColumnConfig.create(titlePureColumnConfig.config.name)
+  );
+  databaseViewAddView(host, model, viewMeta);
+};
+export const databaseViewInitConvert = (
+  host: EditorHost,
+  model: DatabaseBlockModel,
+  viewMeta: ViewMeta
+) => {
+  addColumn(
+    model,
+    'end',
+    columnPresets.multiSelectColumnConfig.create('Tag', { options: [] })
+  );
+  databaseViewInitEmpty(host, model, viewMeta);
+};
+export const databaseViewInitTemplate = (
+  host: EditorHost,
+  model: DatabaseBlockModel,
+  viewMeta: ViewMeta
+) => {
+  const ids = [nanoid(), nanoid(), nanoid()];
+  const statusId = addColumn(
+    model,
+    'end',
+    columnPresets.selectColumnConfig.create('Status', {
+      options: [
+        {
+          id: ids[0],
+          color: getTagColor(),
+          value: 'TODO',
+        },
+        {
+          id: ids[1],
+          color: getTagColor(),
+          value: 'In Progress',
+        },
+        {
+          id: ids[2],
+          color: getTagColor(),
+          value: 'Done',
+        },
+      ],
+    })
+  );
+  for (let i = 0; i < 4; i++) {
+    const rowId = model.doc.addBlock(
+      'affine:paragraph',
+      {
+        text: new model.doc.Text(`Task ${i + 1}`),
+      },
+      model.id
+    );
+    updateCell(model, rowId, {
+      columnId: statusId,
+      value: ids[i],
+    });
+  }
+  databaseViewInitEmpty(host, model, viewMeta);
+};
+export const convertToDatabase = (host: EditorHost, viewMeta: ViewMeta) => {
+  const [_, ctx] = host.std.command
+    .chain()
+    .getSelectedModels({
+      types: ['block', 'text'],
+    })
+    .run();
+  const { selectedModels } = ctx;
+  if (!selectedModels || selectedModels.length === 0) return;
+
+  host.doc.captureSync();
+
+  const parentModel = host.doc.getParent(selectedModels[0]);
+  if (!parentModel) {
+    return;
+  }
+
+  const id = host.doc.addBlock(
+    'affine:database',
+    {},
+    parentModel,
+    parentModel.children.indexOf(selectedModels[0])
+  );
+  const databaseModel = host.doc.getBlock(id)?.model as
+    | DatabaseBlockModel
+    | undefined;
+  if (!databaseModel) {
+    return;
+  }
+  databaseViewInitConvert(host, databaseModel, viewMeta);
+  applyColumnUpdate(databaseModel);
+  host.doc.moveBlocks(selectedModels, databaseModel);
+
+  const selectionManager = host.selection;
+  selectionManager.clear();
+};

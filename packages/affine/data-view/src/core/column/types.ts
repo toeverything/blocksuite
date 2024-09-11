@@ -1,11 +1,6 @@
 import type { Disposable } from '@blocksuite/global/utils';
 
 import type { TType } from '../logical/index.js';
-import type { SelectTag } from '../utils/tags/multi-tag-select.js';
-
-export type SelectColumnData = {
-  options: SelectTag[];
-};
 
 export type GetColumnDataFromConfig<T> =
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

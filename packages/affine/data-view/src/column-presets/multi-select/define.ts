@@ -1,7 +1,7 @@
 import { nanoid } from '@blocksuite/store';
 
-import type { SelectColumnData } from '../../core/column/types.js';
 import type { SelectTag } from '../../core/utils/tags/multi-tag-select.js';
+import type { SelectColumnData } from '../select/define.js';
 
 import { columnType } from '../../core/column/column-config.js';
 import { tTag } from '../../core/logical/data-type.js';

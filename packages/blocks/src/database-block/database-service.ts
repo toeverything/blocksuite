@@ -4,17 +4,18 @@ import {
   type DatabaseBlockModel,
   DatabaseBlockSchema,
 } from '@blocksuite/affine-model';
-import { BlockService } from '@blocksuite/block-std';
+import { BlockService, type EditorHost } from '@blocksuite/block-std';
 import { DatabaseSelection, type ViewMeta } from '@blocksuite/data-view';
 import { viewPresets } from '@blocksuite/data-view/view-presets';
-import { assertExists } from '@blocksuite/global/utils';
 
 import {
-  addColumn,
-  applyColumnUpdate,
   databaseViewAddView,
   databaseViewInitEmpty,
   databaseViewInitTemplate,
+} from './data-source.js';
+import {
+  addColumn,
+  applyColumnUpdate,
   updateCell,
   updateView,
 } from './utils.js';
@@ -37,19 +38,23 @@ export class DatabaseBlockService extends BlockService {
   viewPresets = viewPresets;
 
   initDatabaseBlock(
+    host: EditorHost,
     doc: Doc,
     model: BlockModel,
     databaseId: string,
     viewMeta: ViewMeta,
     isAppendNewRow = true
   ) {
-    const blockModel = doc.getBlockById(databaseId) as DatabaseBlockModel;
-    assertExists(blockModel);
-    databaseViewInitTemplate(blockModel, viewMeta);
+    const blockModel = doc.getBlock(databaseId)?.model as
+      | DatabaseBlockModel
+      | undefined;
+    if (!blockModel) {
+      return;
+    }
+    databaseViewInitTemplate(host, blockModel, viewMeta);
     if (isAppendNewRow) {
-      // Add a paragraph after database
       const parent = doc.getParent(model);
-      assertExists(parent);
+      if (!parent) return;
       doc.addBlock('affine:paragraph', {}, parent.id);
     }
     applyColumnUpdate(blockModel);

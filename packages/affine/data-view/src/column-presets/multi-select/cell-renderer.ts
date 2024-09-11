@@ -1,7 +1,7 @@
 import { customElement } from 'lit/decorators.js';
 import { html } from 'lit/static-html.js';
 
-import type { SelectColumnData } from '../../core/column/types.js';
+import type { SelectColumnData } from '../select/define.js';
 
 import { BaseCellRenderer } from '../../core/column/index.js';
 import { createFromBaseCellRenderer } from '../../core/column/renderer.js';

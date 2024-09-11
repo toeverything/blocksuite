@@ -1,8 +1,6 @@
 import { customElement } from 'lit/decorators.js';
 import { html } from 'lit/static-html.js';
 
-import type { SelectColumnData } from '../../core/column/types.js';
-
 import { BaseCellRenderer } from '../../core/column/index.js';
 import { createFromBaseCellRenderer } from '../../core/column/renderer.js';
 import '../../core/utils/tags/multi-tag-select.js';
@@ -11,7 +9,7 @@ import {
   type SelectTag,
 } from '../../core/utils/tags/multi-tag-select.js';
 import { createIcon } from '../../core/utils/uni-icon.js';
-import { selectColumnModelConfig } from './define.js';
+import { type SelectColumnData, selectColumnModelConfig } from './define.js';
 
 @customElement('affine-database-select-cell')
 export class SelectCell extends BaseCellRenderer<string[], SelectColumnData> {

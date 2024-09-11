@@ -1,2 +1,3 @@
+export * from './convert.js';
 export * from './data-view.js';
-export type { DataViewExpose, DataViewProps } from './types.js';
+export * from './types.js';

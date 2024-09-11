@@ -33,7 +33,7 @@ import {
 import { toast } from '@blocksuite/affine-components/toast';
 import { renderGroups } from '@blocksuite/affine-components/toolbar';
 import { TelemetryProvider } from '@blocksuite/affine-shared/services';
-import { tableViewConfig } from '@blocksuite/data-view/view-presets';
+import { tableViewMeta } from '@blocksuite/data-view/view-presets';
 import { assertExists } from '@blocksuite/global/utils';
 import { Slice } from '@blocksuite/store';
 import { html, type TemplateResult } from 'lit';
@@ -46,10 +46,8 @@ import {
   notifyDocCreated,
   promptDocTitle,
 } from '../../../_common/utils/render-linked-doc.js';
-import {
-  convertToDatabase,
-  DATABASE_CONVERT_WHITE_LIST,
-} from '../../../database-block/utils.js';
+import { convertToDatabase } from '../../../database-block/data-source.js';
+import { DATABASE_CONVERT_WHITE_LIST } from '../../../database-block/utils.js';
 import { FormatBarContext } from './context.js';
 
 export type DividerConfigItem = {
@@ -148,7 +146,7 @@ export function toolbarDefaultConfig(toolbar: AffineFormatBarWidget) {
       icon: DatabaseTableViewIcon20,
       isActive: () => false,
       action: () => {
-        convertToDatabase(toolbar.host, tableViewConfig);
+        convertToDatabase(toolbar.host, tableViewMeta);
       },
       showWhen: chain => {
         const middleware = (count = 0) => {
