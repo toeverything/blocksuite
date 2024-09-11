@@ -9,8 +9,9 @@ import {
   CommunityCanvasTextFonts,
   DocModeProvider,
   FontConfigExtension,
+  NotificationExtension,
   type PageRootService,
-  QuickSearchProvider,
+  QuickSearchExtension,
 } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
 import { AffineEditorContainer } from '@blocksuite/presets';
@@ -107,8 +108,6 @@ export async function mountDefaultDocEditor(collection: DocCollection) {
 
       override mounted() {
         const pageRootService = this.blockService as PageRootService;
-        pageRootService.notificationService =
-          mockNotificationService(pageRootService);
         pageRootService.peekViewService = {
           peek(target: unknown) {
             alert('Peek view not implemented in playground');
@@ -124,18 +123,13 @@ export async function mountDefaultDocEditor(collection: DocCollection) {
       ...spec,
       {
         setup: di => {
-          di.addImpl(QuickSearchProvider, () =>
-            mockQuickSearchService(collection)
-          );
-        },
-      },
-      {
-        setup: di => {
           di.override(DocModeProvider, () =>
             mockDocModeService(getEditorModeCallback, setEditorModeCallBack)
           );
         },
       },
+      QuickSearchExtension(mockQuickSearchService(collection)),
+      NotificationExtension(mockNotificationService(editor)),
       PatchPageServiceWatcher,
       FontConfigExtension(CommunityCanvasTextFonts),
     ];

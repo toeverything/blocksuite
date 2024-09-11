@@ -23,7 +23,6 @@ import './surface-ref-block/index.js';
 export * from './_common/adapters/index.js';
 
 export * from './_common/components/ai-item/index.js';
-export type { NotificationService } from './_common/components/index.js';
 export { scrollbarStyle } from './_common/components/index.js';
 export { type NavigatorMode } from './_common/edgeless/frame/consts.js';
 export { EmbedBlockComponent } from './_common/embed-block-helper/index.js';

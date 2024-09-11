@@ -1,8 +1,9 @@
+import type { AffineEditorContainer } from '@blocksuite/presets';
+
 import {
   type DocMode,
   type DocModeProvider,
   type NotificationService,
-  type PageRootService,
   type QuickSearchService,
   toast,
 } from '@blocksuite/blocks';
@@ -70,10 +71,10 @@ export function mockDocModeService(
   return docModeService;
 }
 
-export function mockNotificationService(service: PageRootService) {
+export function mockNotificationService(editor: AffineEditorContainer) {
   const notificationService: NotificationService = {
     toast: (message, options) => {
-      toast(service.host, message, options?.duration);
+      toast(editor.host!, message, options?.duration);
     },
     confirm: notification => {
       return Promise.resolve(confirm(notification.title.toString()));

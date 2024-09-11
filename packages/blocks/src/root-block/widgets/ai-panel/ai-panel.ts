@@ -1,5 +1,6 @@
 import type { BaseSelection } from '@blocksuite/block-std';
 
+import { NotificationProvider } from '@blocksuite/affine-shared/services';
 import {
   getPageRootByElement,
   stopPropagation,
@@ -258,8 +259,7 @@ export class AffineAIPanelWidget extends WidgetComponent {
   };
 
   showDiscardModal = () => {
-    const notification =
-      this.host.std.getService('affine:page')?.notificationService;
+    const notification = this.host.std.getOptional(NotificationProvider);
     if (!notification) {
       return Promise.resolve(true);
     }

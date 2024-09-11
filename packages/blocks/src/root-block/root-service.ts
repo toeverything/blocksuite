@@ -6,7 +6,6 @@ import { RootBlockSchema } from '@blocksuite/affine-model';
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import { BlockService } from '@blocksuite/block-std';
 
-import type { NotificationService } from '../_common/components/index.js';
 import type { RootBlockComponent } from './types.js';
 
 import {
@@ -38,9 +37,6 @@ export abstract class RootService extends BlockService {
   readonly exportManager = new ExportManager(this, this._exportOptions);
 
   readonly fileDropManager = new FileDropManager(this, this._fileDropOptions);
-
-  // implements provided by affine
-  notificationService: NotificationService | null = null;
 
   peekViewService: PeekViewService | null = null;
 
