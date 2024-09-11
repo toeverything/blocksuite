@@ -1,3 +1,4 @@
+import { EmbedLinkedDocStyles } from '@blocksuite/affine-model';
 import {
   EMBED_CARD_HEIGHT,
   EMBED_CARD_WIDTH,
@@ -64,5 +65,21 @@ export class EmbedEdgelessLinkedDocBlockComponent extends toEdgelessEmbedBlock(
       this.config.handleClick(evt, this.host);
       return;
     }
+  }
+
+  override renderGfxBlock() {
+    const { style$ } = this.model;
+    const cardStyle = style$.value ?? EmbedLinkedDocStyles[1];
+    const width = EMBED_CARD_WIDTH[cardStyle];
+    const height = EMBED_CARD_HEIGHT[cardStyle];
+    const bound = this.model.elementBound;
+    const scaleX = bound.w / width;
+    const scaleY = bound.h / height;
+
+    this.embedContainerStyle.width = `${width}px`;
+    this.embedContainerStyle.height = `${height}px`;
+    this.embedContainerStyle.transform = `scale(${scaleX}, ${scaleY})`;
+
+    return this.renderPageContent();
   }
 }
