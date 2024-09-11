@@ -1,11 +1,16 @@
 import type { BlockCollection, DocCollection } from '@blocksuite/store';
 
-import { BlockServiceWatcher, type EditorHost } from '@blocksuite/block-std';
+import {
+  BlockServiceWatcher,
+  type EditorHost,
+  type ExtensionType,
+} from '@blocksuite/block-std';
 import {
   CommunityCanvasTextFonts,
   FontConfigExtension,
+  NotificationExtension,
   type PageRootService,
-  QuickSearchProvider,
+  QuickSearchExtension,
   SpecProvider,
 } from '@blocksuite/blocks';
 import {
@@ -70,53 +75,31 @@ export async function mountDefaultDocEditor(collection: DocCollection) {
         }
       );
       pageRootService.disposables.add(onFormatBarConnected);
-      pageRootService.notificationService =
-        mockNotificationService(pageRootService);
     }
   }
+
+  const extensions: ExtensionType[] = [
+    PatchPageServiceWatcher,
+    FontConfigExtension(CommunityCanvasTextFonts),
+    QuickSearchExtension(mockQuickSearchService(collection)),
+    NotificationExtension(mockNotificationService(editor)),
+    {
+      setup: di => {
+        di.override(DocModeProvider, () =>
+          mockDocModeService(getEditorModeCallback, setEditorModeCallBack)
+        );
+      },
+    },
+  ];
 
   const pageSpecs = SpecProvider.getInstance().getSpec('page');
   const setEditorModeCallBack = editor.switchEditor.bind(editor);
   const getEditorModeCallback = () => editor.mode;
-  pageSpecs.extend([
-    PatchPageServiceWatcher,
-    FontConfigExtension(CommunityCanvasTextFonts),
-    {
-      setup: di => {
-        di.addImpl(QuickSearchProvider, () =>
-          mockQuickSearchService(collection)
-        );
-      },
-    },
-    {
-      setup: di => {
-        di.override(DocModeProvider, () =>
-          mockDocModeService(getEditorModeCallback, setEditorModeCallBack)
-        );
-      },
-    },
-  ]);
+  pageSpecs.extend([...extensions]);
   editor.pageSpecs = pageSpecs.value;
 
   const edgelessSpecs = SpecProvider.getInstance().getSpec('edgeless');
-  edgelessSpecs.extend([
-    PatchPageServiceWatcher,
-    FontConfigExtension(CommunityCanvasTextFonts),
-    {
-      setup: di => {
-        di.addImpl(QuickSearchProvider, () =>
-          mockQuickSearchService(collection)
-        );
-      },
-    },
-    {
-      setup: di => {
-        di.override(DocModeProvider, () =>
-          mockDocModeService(getEditorModeCallback, setEditorModeCallBack)
-        );
-      },
-    },
-  ]);
+  edgelessSpecs.extend([...extensions]);
   editor.edgelessSpecs = edgelessSpecs.value;
 
   editor.mode = 'page';

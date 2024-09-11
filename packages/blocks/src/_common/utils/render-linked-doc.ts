@@ -6,7 +6,10 @@ import type {
 } from '@blocksuite/affine-model';
 
 import { NoteDisplayMode } from '@blocksuite/affine-model';
-import { DocModeProvider } from '@blocksuite/affine-shared/services';
+import {
+  DocModeProvider,
+  NotificationProvider,
+} from '@blocksuite/affine-shared/services';
 import { getBlockProps, matchFlavours } from '@blocksuite/affine-shared/utils';
 import { BlockStdScope, type EditorHost } from '@blocksuite/block-std';
 import { assertExists, Bound, getCommonBound } from '@blocksuite/global/utils';
@@ -115,7 +118,7 @@ export const embedNoteContentStyles = css`
 `;
 
 export function promptDocTitle(host: EditorHost, autofill?: string) {
-  const notification = host.std.getService('affine:page')?.notificationService;
+  const notification = host.std.getOptional(NotificationProvider);
   if (!notification) return Promise.resolve(undefined);
 
   return notification.prompt({
@@ -140,7 +143,7 @@ export function getTitleFromSelectedModels(selectedModels: BlockModel[]) {
 }
 
 export function notifyDocCreated(host: EditorHost, doc: Doc) {
-  const notification = host.std.getService('affine:page')?.notificationService;
+  const notification = host.std.getOptional(NotificationProvider);
   if (!notification) return;
 
   const abortController = new AbortController();

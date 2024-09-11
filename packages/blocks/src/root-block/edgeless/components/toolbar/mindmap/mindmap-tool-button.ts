@@ -2,6 +2,7 @@ import type { MindmapElementModel } from '@blocksuite/affine-block-surface';
 import type { MindmapStyle } from '@blocksuite/affine-model';
 import type { Bound } from '@blocksuite/global/utils';
 
+import { EditPropsStore } from '@blocksuite/affine-shared/services';
 import { computed, SignalWatcher } from '@lit-labs/preact-signals';
 import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
@@ -123,7 +124,7 @@ export class EdgelessMindmapToolButton extends EdgelessToolbarToolMixin(
 
   private _style$ = computed(() => {
     const { style } =
-      this.edgeless.service.editPropsStore.lastProps$.value.mindmap;
+      this.edgeless.std.get(EditPropsStore).lastProps$.value.mindmap;
     return style;
   });
 
@@ -167,7 +168,7 @@ export class EdgelessMindmapToolButton extends EdgelessToolbarToolMixin(
     Object.assign(menu.element, {
       edgeless: this.edgeless,
       onActiveStyleChange: (style: MindmapStyle) => {
-        this.edgeless.service.editPropsStore.recordLastProps('mindmap', {
+        this.edgeless.std.get(EditPropsStore).recordLastProps('mindmap', {
           style,
         });
       },
@@ -266,7 +267,7 @@ export class EdgelessMindmapToolButton extends EdgelessToolbarToolMixin(
             );
             const nextIndex = (activeIndex + 1) % this.mindmaps.length;
             const next = this.mindmaps[nextIndex];
-            this.edgeless.service.editPropsStore.recordLastProps('mindmap', {
+            this.edgeless.std.get(EditPropsStore).recordLastProps('mindmap', {
               style: next.style,
             });
             const tool = this.draggableTools.find(t => t.name === 'mindmap');

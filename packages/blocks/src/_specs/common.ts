@@ -3,6 +3,7 @@ import type { ExtensionType } from '@blocksuite/block-std';
 import { ListBlockSpec } from '@blocksuite/affine-block-list';
 import { ParagraphBlockSpec } from '@blocksuite/affine-block-paragraph';
 import { RichTextExtensions } from '@blocksuite/affine-components/rich-text';
+import { EditPropsStore } from '@blocksuite/affine-shared/services';
 
 import { AttachmentBlockSpec } from '../attachment-block/attachment-spec.js';
 import { BookmarkBlockSpec } from '../bookmark-block/bookmark-spec.js';
@@ -25,6 +26,7 @@ import {
 
 export const CommonFirstPartyBlockSpecs: ExtensionType[] = [
   RichTextExtensions,
+  EditPropsStore,
   ListBlockSpec,
   NoteBlockSpec,
   DatabaseBlockSpec,
@@ -46,6 +48,7 @@ export const CommonFirstPartyBlockSpecs: ExtensionType[] = [
 
 export const EdgelessFirstPartyBlockSpecs: ExtensionType[] = [
   RichTextExtensions,
+  EditPropsStore,
   ListBlockSpec,
   EdgelessNoteBlockSpec,
   DatabaseBlockSpec,

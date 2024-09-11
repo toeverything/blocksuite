@@ -256,7 +256,7 @@ export class EdgelessConnectorLabelEditor extends WithDisposable(
       `scale(${zoom})`,
     ];
 
-    const isEmpty = !connector.text!.length && !this._isComposition;
+    const isEmpty = !connector.text?.length && !this._isComposition;
     const color = ThemeObserver.generateColorProperty(labelColor, '#000000');
 
     return html`

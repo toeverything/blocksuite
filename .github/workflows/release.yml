@@ -44,9 +44,12 @@ jobs:
         run: yarn build:packages
 
       - name: Publish to NPM
-        run: yarn ci:publish
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > .npmrc
+          yarn config set npmAuthToken ${{ secrets.NPM_TOKEN }}
+          yarn ci:publish
+          rm ".npmrc"
+          yarn config unset npmAuthToken
 
       - name: Get package version
         run: |

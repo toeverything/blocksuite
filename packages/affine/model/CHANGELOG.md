@@ -1,5 +1,22 @@
 # @blocksuite/affine-model
 
+## 0.17.6
+
+### Patch Changes
+
+- d8d5656: - Fix latex block export
+  - Fix rich text reference config export
+  - Fix mindmap export dependency error
+  - Fix toast position
+  - Fix frame remember settings
+  - Database statistic improvements
+  - Add keymap extension
+- Updated dependencies [d8d5656]
+  - @blocksuite/block-std@0.17.6
+  - @blocksuite/global@0.17.6
+  - @blocksuite/inline@0.17.6
+  - @blocksuite/store@0.17.6
+
 ## 0.17.5
 
 ### Patch Changes

@@ -9,6 +9,7 @@ import {
   StopAIIcon,
 } from '@blocksuite/affine-components/icons';
 import { toast } from '@blocksuite/affine-components/toast';
+import { EditPropsStore } from '@blocksuite/affine-shared/services';
 import { Bound } from '@blocksuite/global/utils';
 import { cssVar } from '@toeverything/theme';
 import { css, html, LitElement, nothing, type PropertyValues } from 'lit';
@@ -110,16 +111,15 @@ export class PresentationToolbar extends EdgelessToolbarToolMixin(LitElement) {
   override type: EdgelessTool['type'] = 'frameNavigator';
 
   private get _cachedPresentHideToolbar() {
-    return !!this.edgeless.service.editPropsStore.getStorage(
-      'presentHideToolbar'
-    );
+    return !!this.edgeless.std
+      .get(EditPropsStore)
+      .getStorage('presentHideToolbar');
   }
 
   private set _cachedPresentHideToolbar(value) {
-    this.edgeless.service.editPropsStore.setStorage(
-      'presentHideToolbar',
-      !!value
-    );
+    this.edgeless.std
+      .get(EditPropsStore)
+      .setStorage('presentHideToolbar', !!value);
   }
 
   private get _frames(): FrameBlockModel[] {
@@ -302,7 +302,7 @@ export class PresentationToolbar extends EdgelessToolbarToolMixin(LitElement) {
     });
 
     this._navigatorMode =
-      this.edgeless.service.editPropsStore.getStorage('presentFillScreen') ===
+      this.edgeless.std.get(EditPropsStore).getStorage('presentFillScreen') ===
       true
         ? 'fill'
         : 'fit';

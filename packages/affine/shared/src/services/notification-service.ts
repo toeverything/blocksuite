@@ -1,4 +1,7 @@
+import type { ExtensionType } from '@blocksuite/block-std';
 import type { TemplateResult } from 'lit';
+
+import { createIdentifier } from '@blocksuite/global/di';
 
 export interface NotificationService {
   toast(
@@ -36,4 +39,18 @@ export interface NotificationService {
     };
     onClose: () => void;
   }): void;
+}
+
+export const NotificationProvider = createIdentifier<NotificationService>(
+  'AffineNotificationService'
+);
+
+export function NotificationExtension(
+  notificationService: NotificationService
+): ExtensionType {
+  return {
+    setup: di => {
+      di.addImpl(NotificationProvider, notificationService);
+    },
+  };
 }

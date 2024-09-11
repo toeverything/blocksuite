@@ -27,6 +27,7 @@ import {
   type ReferenceInfo,
   RootBlockSchema,
 } from '@blocksuite/affine-model';
+import { EditPropsStore } from '@blocksuite/affine-shared/services';
 import { clamp } from '@blocksuite/affine-shared/utils';
 import { GfxControllerIdentifier } from '@blocksuite/block-std/gfx';
 import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
@@ -40,7 +41,6 @@ import { getSurfaceBlock } from '../../surface-ref-block/utils.js';
 import { RootService } from '../root-service.js';
 import { GfxBlockModel } from './block-model.js';
 import { EdgelessFrameManager, FrameOverlay } from './frame-manager.js';
-import { getLastPropsKey } from './services/edit-session.js';
 import { EdgelessSelectionManager } from './services/selection-manager.js';
 import { TemplateJob } from './services/template.js';
 import {
@@ -51,6 +51,7 @@ import {
 } from './services/template-middlewares.js';
 import { EdgelessToolsManager } from './services/tools-manager.js';
 import { FIT_TO_SCREEN_PADDING } from './utils/consts.js';
+import { getLastPropsKey } from './utils/get-last-props-key.js';
 import { getCursorMode } from './utils/query.js';
 import { EdgelessSnapManager } from './utils/snap-manager.js';
 import {
@@ -246,7 +247,7 @@ export class EdgelessRootService extends RootService implements SurfaceContext {
   ) {
     const key = getLastPropsKey(flavour as BlockSuite.EdgelessModelKeys, props);
     if (key) {
-      props = this.editPropsStore.applyLastProps(key, props);
+      props = this.std.get(EditPropsStore).applyLastProps(key, props);
     }
 
     const nProps = {
@@ -259,7 +260,7 @@ export class EdgelessRootService extends RootService implements SurfaceContext {
   addElement<T extends Record<string, unknown>>(type: string, props: T) {
     const key = getLastPropsKey(type as BlockSuite.EdgelessModelKeys, props);
     if (key) {
-      props = this.editPropsStore.applyLastProps(key, props) as T;
+      props = this.std.get(EditPropsStore).applyLastProps(key, props) as T;
     }
 
     const nProps = {
@@ -594,7 +595,7 @@ export class EdgelessRootService extends RootService implements SurfaceContext {
         element.type as BlockSuite.EdgelessModelKeys,
         { ...element.yMap.toJSON(), ...props }
       );
-      key && this.editPropsStore.recordLastProps(key, props);
+      key && this.std.get(EditPropsStore).recordLastProps(key, props);
       this._surface.updateElement(id, props);
       return;
     }
@@ -605,7 +606,7 @@ export class EdgelessRootService extends RootService implements SurfaceContext {
         block.flavour as BlockSuite.EdgelessModelKeys,
         { ...block.yBlock.toJSON(), ...props }
       );
-      key && this.editPropsStore.recordLastProps(key, props);
+      key && this.std.get(EditPropsStore).recordLastProps(key, props);
       this.doc.updateBlock(block, props);
     }
   }

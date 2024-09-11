@@ -7,7 +7,10 @@ import {
   GroupElementModel,
   NoteDisplayMode,
 } from '@blocksuite/affine-model';
-import { TelemetryProvider } from '@blocksuite/affine-shared/services';
+import {
+  EditPropsStore,
+  TelemetryProvider,
+} from '@blocksuite/affine-shared/services';
 import { matchFlavours } from '@blocksuite/affine-shared/utils';
 import { IS_MAC } from '@blocksuite/global/env';
 import { Bound } from '@blocksuite/global/utils';
@@ -57,7 +60,7 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
         },
         c: () => {
           const mode = ConnectorMode.Curve;
-          rootComponent.service.editPropsStore.recordLastProps('connector', {
+          rootComponent.std.get(EditPropsStore).recordLastProps('connector', {
             mode,
           });
           this._setEdgelessTool(rootComponent, { type: 'connector', mode });

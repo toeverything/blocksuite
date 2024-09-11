@@ -3,12 +3,20 @@ import type {
   SurfaceBlockModel,
 } from '@blocksuite/affine-block-surface';
 import type { RootBlockModel } from '@blocksuite/affine-model';
-import type { SurfaceSelection } from '@blocksuite/block-std';
+import type {
+  GfxBlockComponent,
+  SurfaceSelection,
+} from '@blocksuite/block-std';
 import type { IBound } from '@blocksuite/global/utils';
 
 import '@blocksuite/affine-block-surface';
 import { FontLoaderService } from '@blocksuite/affine-shared/services';
+import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import { BlockComponent } from '@blocksuite/block-std';
+import {
+  GfxBlockElementModel,
+  type GfxViewportElement,
+} from '@blocksuite/block-std/gfx';
 import { assertExists } from '@blocksuite/global/utils';
 import { css, html } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
@@ -17,11 +25,6 @@ import type { EdgelessRootBlockWidgetName } from '../types.js';
 import type { EdgelessRootService } from './edgeless-root-service.js';
 
 import { requestThrottledConnectedFrame } from '../../_common/utils/index.js';
-import './components/note-slicer/index.js';
-import './components/presentation/edgeless-navigator-black-background.js';
-import './components/rects/edgeless-dragging-area-rect.js';
-import './components/rects/edgeless-selected-rect.js';
-import './components/toolbar/edgeless-toolbar.js';
 import { edgelessElementsBound } from './utils/bound-utils.js';
 import { getBackgroundGrid, isCanvasElement } from './utils/query.js';
 
@@ -32,14 +35,15 @@ export class EdgelessRootPreviewBlockComponent extends BlockComponent<
   EdgelessRootBlockWidgetName
 > {
   static override styles = css`
-    affine-edgeless-root {
+    affine-edgeless-root-preview {
+      pointer-events: none;
       -webkit-user-select: none;
       user-select: none;
       display: block;
       height: 100%;
     }
 
-    .widgets-container {
+    affine-edgeless-root-preview .widgets-container {
       position: absolute;
       left: 0;
       top: 0;
@@ -48,20 +52,13 @@ export class EdgelessRootPreviewBlockComponent extends BlockComponent<
       height: 100%;
     }
 
-    .edgeless-background {
+    affine-edgeless-root-preview .edgeless-background {
       height: 100%;
       background-color: var(--affine-background-primary-color);
       background-image: radial-gradient(
         var(--affine-edgeless-grid-color) 1px,
         var(--affine-background-primary-color) 1px
       );
-    }
-
-    .edgeless-layer {
-      position: absolute;
-      top: 0;
-      left: 0;
-      contain: size layout style;
     }
 
     @media print {
@@ -80,9 +77,6 @@ export class EdgelessRootPreviewBlockComponent extends BlockComponent<
       `${translateX}px ${translateY}px`
     );
     this.background.style.setProperty('background-size', `${gap}px ${gap}px`);
-
-    this.layer.style.setProperty('transform', this._getLayerViewport());
-    this.layer.dataset.scale = zoom.toString();
   }, this);
 
   private _resizeObserver: ResizeObserver | null = null;
@@ -110,16 +104,6 @@ export class EdgelessRootPreviewBlockComponent extends BlockComponent<
     return this._viewportElement;
   }
 
-  private _getLayerViewport(negative = false) {
-    const { translateX, translateY, zoom } = this.service.viewport;
-
-    if (negative) {
-      return `scale(${1 / zoom}) translate(${-translateX}px, ${-translateY}px)`;
-    }
-
-    return `translate(${translateX}px, ${translateY}px) scale(${zoom})`;
-  }
-
   private _initFontLoader() {
     this.std
       .get(FontLoaderService)
@@ -127,6 +111,22 @@ export class EdgelessRootPreviewBlockComponent extends BlockComponent<
         this.surface.refresh();
       })
       .catch(console.error);
+  }
+
+  private _initLayerUpdateEffect() {
+    const updateLayers = requestThrottledConnectedFrame(() => {
+      const blocks = Array.from(
+        this.gfxViewportElm.children as HTMLCollectionOf<GfxBlockComponent>
+      );
+
+      blocks.forEach((block: GfxBlockComponent) => {
+        block.updateZIndex?.();
+      });
+    });
+
+    this._disposables.add(
+      this.service.layer.slots.layerUpdated.on(() => updateLayers())
+    );
   }
 
   private _initPixelRatioChangeEffect() {
@@ -173,7 +173,7 @@ export class EdgelessRootPreviewBlockComponent extends BlockComponent<
     const { disposables } = this;
 
     this.disposables.add(
-      this.service.themeObserver.mode$.subscribe(() => this.surface.refresh())
+      ThemeObserver.instance.mode$.subscribe(() => this.surface.refresh())
     );
 
     disposables.add(this.service.selection);
@@ -211,6 +211,7 @@ export class EdgelessRootPreviewBlockComponent extends BlockComponent<
     this._initResizeEffect();
     this._initPixelRatioChangeEffect();
     this._initFontLoader();
+    this._initLayerUpdateEffect();
 
     this._disposables.add(
       this.service.viewport.viewportUpdated.on(() => {
@@ -229,11 +230,25 @@ export class EdgelessRootPreviewBlockComponent extends BlockComponent<
   override renderBlock() {
     return html`
       <div class="edgeless-background edgeless-container">
-        <div class="edgeless-layer">
+        <gfx-viewport
+          .viewport=${this.service.viewport}
+          .getModelsInViewport=${() => {
+            const blocks = this.service.gfx.grid.search(
+              this.service.viewport.viewportBounds,
+              undefined,
+              {
+                useSet: true,
+                filter: model => model instanceof GfxBlockElementModel,
+              }
+            );
+            return blocks;
+          }}
+          .host=${this.host}
+        >
           ${this.renderChildren(this.model)}${this.renderChildren(
             this.surfaceBlockModel
           )}
-        </div>
+        </gfx-viewport>
       </div>
     `;
   }
@@ -250,8 +265,8 @@ export class EdgelessRootPreviewBlockComponent extends BlockComponent<
   @state()
   accessor editorViewportSelector = '.affine-edgeless-viewport';
 
-  @query('.edgeless-layer')
-  accessor layer!: HTMLDivElement;
+  @query('gfx-viewport')
+  accessor gfxViewportElm!: GfxViewportElement;
 
   @query('affine-surface')
   accessor surface!: SurfaceBlockComponent;

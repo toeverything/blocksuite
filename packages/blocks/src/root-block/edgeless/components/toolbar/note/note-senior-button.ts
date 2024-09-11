@@ -3,6 +3,7 @@ import {
   LinkIcon,
   TextIcon,
 } from '@blocksuite/affine-components/icons';
+import { EditPropsStore } from '@blocksuite/affine-shared/services';
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import { SignalWatcher } from '@blocksuite/block-std';
 import { computed } from '@lit-labs/preact-signals';
@@ -127,7 +128,7 @@ export class EdgelessNoteSeniorButton extends EdgelessToolbarToolMixin(
 
   private _noteBg$ = computed(() => {
     return ThemeObserver.generateColorProperty(
-      this.edgeless.service.editPropsStore.lastProps$.value['affine:note']
+      this.edgeless.std.get(EditPropsStore).lastProps$.value['affine:note']
         .background
     );
   });

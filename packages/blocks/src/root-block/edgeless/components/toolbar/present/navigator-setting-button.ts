@@ -1,6 +1,7 @@
 import type { FrameBlockModel } from '@blocksuite/affine-model';
 
 import { NavigatorSettingsIcon } from '@blocksuite/affine-components/icons';
+import { EditPropsStore } from '@blocksuite/affine-shared/services';
 import { createButtonPopper } from '@blocksuite/affine-shared/utils';
 import { WithDisposable } from '@blocksuite/block-std';
 import { css, html, LitElement, nothing } from 'lit';
@@ -85,9 +86,9 @@ export class EdgelessNavigatorSettingButton extends WithDisposable(LitElement) {
   };
 
   private _tryRestoreSettings() {
-    const blackBackground = this.edgeless.service.editPropsStore.getStorage(
-      'presentBlackBackground'
-    );
+    const blackBackground = this.edgeless.std
+      .get(EditPropsStore)
+      .getStorage('presentBlackBackground');
     this.blackBackground = blackBackground ?? true;
   }
 

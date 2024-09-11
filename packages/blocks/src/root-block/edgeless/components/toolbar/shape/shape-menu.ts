@@ -13,6 +13,7 @@ import {
   ShapeStyle,
   ShapeType,
 } from '@blocksuite/affine-model';
+import { EditPropsStore } from '@blocksuite/affine-shared/services';
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import { SignalWatcher } from '@blocksuite/block-std';
 import { computed, signal } from '@lit-labs/preact-signals';
@@ -62,7 +63,7 @@ export class EdgelessShapeMenu extends SignalWatcher(LitElement) {
   private _props$ = computed(() => {
     const shapeName: ShapeName = this._shapeName$.value;
     const { shapeStyle, fillColor, strokeColor, radius } =
-      this.edgeless.service.editPropsStore.lastProps$.value[
+      this.edgeless.std.get(EditPropsStore).lastProps$.value[
         `shape:${shapeName}`
       ];
     return {
@@ -86,18 +87,22 @@ export class EdgelessShapeMenu extends SignalWatcher(LitElement) {
     }
 
     const { shapeName } = this._props$.value;
-    this.edgeless.service.editPropsStore.recordLastProps(`shape:${shapeName}`, {
-      filled,
-      fillColor,
-      strokeColor,
-    });
+    this.edgeless.std
+      .get(EditPropsStore)
+      .recordLastProps(`shape:${shapeName}`, {
+        filled,
+        fillColor,
+        strokeColor,
+      });
   };
 
   private _setShapeStyle = (shapeStyle: ShapeStyle) => {
     const { shapeName } = this._props$.value;
-    this.edgeless.service.editPropsStore.recordLastProps(`shape:${shapeName}`, {
-      shapeStyle,
-    });
+    this.edgeless.std
+      .get(EditPropsStore)
+      .recordLastProps(`shape:${shapeName}`, {
+        shapeStyle,
+      });
   };
 
   private _shapeName$: Signal<ShapeName> = signal(ShapeType.Rect);

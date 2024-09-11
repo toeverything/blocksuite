@@ -1,12 +1,9 @@
-import type { PeekViewService } from '@blocksuite/affine-components/peek';
 import type { RefNodeSlots } from '@blocksuite/affine-components/rich-text';
 import type { BlockComponent } from '@blocksuite/block-std';
 
 import { RootBlockSchema } from '@blocksuite/affine-model';
-import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import { BlockService } from '@blocksuite/block-std';
 
-import type { NotificationService } from '../_common/components/index.js';
 import type { RootBlockComponent } from './types.js';
 
 import {
@@ -20,7 +17,6 @@ import {
   MarkdownTransformer,
   ZipTransformer,
 } from '../_common/transformers/index.js';
-import { EditPropsStore } from './edgeless/services/edit-session.js';
 
 export abstract class RootService extends BlockService {
   static override readonly flavour = RootBlockSchema.model.flavour;
@@ -33,20 +29,11 @@ export abstract class RootService extends BlockService {
     flavour: this.flavour,
   };
 
-  readonly editPropsStore: EditPropsStore = new EditPropsStore(this);
-
   readonly exportManager = new ExportManager(this, this._exportOptions);
 
   readonly fileDropManager = new FileDropManager(this, this._fileDropOptions);
 
-  // implements provided by affine
-  notificationService: NotificationService | null = null;
-
-  peekViewService: PeekViewService | null = null;
-
   abstract slots: RefNodeSlots;
-
-  readonly themeObserver = ThemeObserver.instance;
 
   transformers = {
     markdown: MarkdownTransformer,
@@ -108,10 +95,6 @@ export abstract class RootService extends BlockService {
         state.raw.stopPropagation();
       })
     );
-  }
-
-  override unmounted() {
-    this.editPropsStore.dispose();
   }
 }
 

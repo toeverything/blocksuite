@@ -1,6 +1,5 @@
 dist
 .next
-pnpm-lock.yaml
 yarn.lock
 tests/snapshots/
 __snapshots__/

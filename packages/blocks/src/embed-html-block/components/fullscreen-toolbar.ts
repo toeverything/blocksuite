@@ -1,4 +1,5 @@
 import { popMenu } from '@blocksuite/affine-components/context-menu';
+import { EditPropsStore } from '@blocksuite/affine-shared/services';
 import {
   CopyIcon,
   DoneIcon,
@@ -120,17 +121,16 @@ export class EmbedHtmlFullscreenToolbar extends LitElement {
 
   private get autoHideToolbar() {
     return (
-      this.embedHtml.rootService.editPropsStore.getStorage(
-        'autoHideEmbedHTMLFullScreenToolbar'
-      ) ?? false
+      this.embedHtml.std
+        .get(EditPropsStore)
+        .getStorage('autoHideEmbedHTMLFullScreenToolbar') ?? false
     );
   }
 
   private set autoHideToolbar(val: boolean) {
-    this.embedHtml.rootService.editPropsStore.setStorage(
-      'autoHideEmbedHTMLFullScreenToolbar',
-      val
-    );
+    this.embedHtml.std
+      .get(EditPropsStore)
+      .setStorage('autoHideEmbedHTMLFullScreenToolbar', val);
   }
 
   override render() {

@@ -205,7 +205,7 @@ export class EdgelessRemoteSelectionWidget extends WidgetComponent<
     this._updateTransform();
     this._updateRemoteRects();
 
-    this._remoteColorManager = new RemoteColorManager(this.host);
+    this._remoteColorManager = new RemoteColorManager(this.std);
   }
 
   override render() {

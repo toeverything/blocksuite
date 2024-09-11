@@ -7,6 +7,7 @@ import {
   ConnectorMode,
   DEFAULT_CONNECTOR_COLOR,
 } from '@blocksuite/affine-model';
+import { EditPropsStore } from '@blocksuite/affine-shared/services';
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import { SignalWatcher } from '@blocksuite/block-std';
 import { computed } from '@lit-labs/preact-signals';
@@ -100,7 +101,7 @@ export class EdgelessConnectorMenu extends EdgelessToolbarToolMixin(
 
   private _props$ = computed(() => {
     const { mode, stroke, strokeWidth } =
-      this.edgeless.service.editPropsStore.lastProps$.value.connector;
+      this.edgeless.std.get(EditPropsStore).lastProps$.value.connector;
     return { mode, stroke, strokeWidth };
   });
 

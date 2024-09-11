@@ -4,6 +4,7 @@ import type { Bound } from '@blocksuite/global/utils';
 import type { BlockModel } from '@blocksuite/store';
 
 import { toast } from '@blocksuite/affine-components/toast';
+import { EditPropsStore } from '@blocksuite/affine-shared/services';
 import { modelContext, stdContext } from '@blocksuite/block-std';
 import { ErrorCode } from '@blocksuite/global/exceptions';
 import { consume } from '@lit/context';
@@ -95,7 +96,7 @@ export class EdgelessMindmapMenu extends EdgelessToolbarToolMixin(
 
   private _style$ = computed(() => {
     const { style } =
-      this.edgeless.service.editPropsStore.lastProps$.value.mindmap;
+      this.edgeless.std.get(EditPropsStore).lastProps$.value.mindmap;
     return style;
   });
 

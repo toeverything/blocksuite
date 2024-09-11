@@ -37,9 +37,9 @@
     "size:report": "tsx ./scripts/size-report.ts",
     "size:generate": "./scripts/size-generate.sh",
     "ci:version": "changeset version && yarn install --no-frozen-lockfile",
-    "ci:publish": "yarn build:packages && yarn publish --access public -r --no-git-checks --tag latest",
+    "ci:publish": "yarn build:packages && yarn workspaces foreach -Ap --no-private npm publish --tolerate-republish --access public --tag latest",
     "ci:version:canary": "changeset version --snapshot canary && yarn install --no-frozen-lockfile",
-    "ci:publish:canary": "yarn build:packages && yarn publish --access public -r --no-git-checks --tag canary",
+    "ci:publish:canary": "yarn build:packages && yarn workspaces foreach -Ap --no-private npm publish --access public --tag canary",
     "release-note:draft": "tsx ./scripts/release-note/convert.ts",
     "release-note:notable": "node ./scripts/release-note/notable-prs.mjs",
     "postinstall": "husky"

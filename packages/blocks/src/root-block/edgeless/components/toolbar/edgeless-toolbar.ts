@@ -8,6 +8,7 @@ import {
   MoreHorizontalIcon,
 } from '@blocksuite/affine-components/icons';
 import { ColorScheme } from '@blocksuite/affine-model';
+import { EditPropsStore } from '@blocksuite/affine-shared/services';
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import { stopPropagation } from '@blocksuite/affine-shared/utils';
 import { WithDisposable } from '@blocksuite/block-std';
@@ -274,9 +275,9 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
   }
 
   private get _cachedPresentHideToolbar() {
-    return !!this.edgeless.service.editPropsStore.getStorage(
-      'presentHideToolbar'
-    );
+    return !!this.edgeless.std
+      .get(EditPropsStore)
+      .getStorage('presentHideToolbar');
   }
 
   private get _denseQuickTools() {
@@ -597,13 +598,13 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
     // This state from `editPropsStore` is not reactive,
     // if the value is updated outside of this component, it will not be reflected.
     _disposables.add(
-      this.edgeless.service.editPropsStore.slots.storageUpdated.on(
-        ({ key }) => {
+      this.edgeless.std
+        .get(EditPropsStore)
+        .slots.storageUpdated.on(({ key }) => {
           if (key === 'presentHideToolbar') {
             this.requestUpdate();
           }
-        }
-      )
+        })
     );
   }
 

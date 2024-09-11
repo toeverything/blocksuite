@@ -5,6 +5,7 @@ import type {
   DatabaseBlockModel,
   ViewBasicDataType,
 } from '@blocksuite/affine-model';
+import type { EditorHost } from '@blocksuite/block-std';
 import type { BlockModel } from '@blocksuite/store';
 
 import {
@@ -415,3 +416,40 @@ export const updateView = <ViewData extends ViewBasicDataType>(
   });
   applyViewsUpdate(model);
 };
+export const convertToDatabase = (host: EditorHost, viewMeta: ViewMeta) => {
+  const [_, ctx] = host.std.command
+    .chain()
+    .getSelectedModels({
+      types: ['block', 'text'],
+    })
+    .run();
+  const { selectedModels } = ctx;
+  if (!selectedModels || selectedModels.length === 0) return;
+
+  host.doc.captureSync();
+
+  const parentModel = host.doc.getParent(selectedModels[0]);
+  if (!parentModel) {
+    return;
+  }
+
+  const id = host.doc.addBlock(
+    'affine:database',
+    {},
+    parentModel,
+    parentModel.children.indexOf(selectedModels[0])
+  );
+  const databaseModel = host.doc.getBlock(id)?.model as
+    | DatabaseBlockModel
+    | undefined;
+  if (!databaseModel) {
+    return;
+  }
+  databaseViewInitConvert(databaseModel, viewMeta);
+  applyColumnUpdate(databaseModel);
+  host.doc.moveBlocks(selectedModels, databaseModel);
+
+  const selectionManager = host.selection;
+  selectionManager.clear();
+};
+export const DATABASE_CONVERT_WHITE_LIST = ['affine:list', 'affine:paragraph'];

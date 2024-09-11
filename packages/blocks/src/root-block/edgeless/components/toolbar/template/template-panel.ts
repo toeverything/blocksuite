@@ -1,5 +1,6 @@
 import type { IBound } from '@blocksuite/global/utils';
 
+import { EditPropsStore } from '@blocksuite/affine-shared/services';
 import {
   requestConnectedFrame,
   stopPropagation,
@@ -275,7 +276,7 @@ export class EdgelessTemplatePanel extends WithDisposable(LitElement) {
   }
 
   private _getLocalSelectedCategory() {
-    return this.edgeless.service.editPropsStore.getStorage('templateCache');
+    return this.edgeless.std.get(EditPropsStore).getStorage('templateCache');
   }
 
   private async _initCategory() {
@@ -384,10 +385,9 @@ export class EdgelessTemplatePanel extends WithDisposable(LitElement) {
     this.addEventListener('keydown', stopPropagation, false);
     this._disposables.add(() => {
       if (this._currentCategory) {
-        this.edgeless.service.editPropsStore.setStorage(
-          'templateCache',
-          this._currentCategory
-        );
+        this.edgeless.std
+          .get(EditPropsStore)
+          .setStorage('templateCache', this._currentCategory);
       }
     });
   }

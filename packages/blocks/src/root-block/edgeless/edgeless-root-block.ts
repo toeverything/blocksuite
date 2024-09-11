@@ -21,9 +21,11 @@ import { focusTextModel } from '@blocksuite/affine-components/rich-text';
 import { toast } from '@blocksuite/affine-components/toast';
 import { NoteDisplayMode } from '@blocksuite/affine-model';
 import {
+  EditPropsStore,
   FontLoaderService,
   TelemetryProvider,
 } from '@blocksuite/affine-shared/services';
+import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import {
   handleNativeRangeAtPoint,
   humanFileSize,
@@ -380,7 +382,7 @@ export class EdgelessRootBlockComponent extends BlockComponent<
     const { disposables, slots } = this;
 
     this.disposables.add(
-      this.service.themeObserver.mode$.subscribe(() => this.surface.refresh())
+      ThemeObserver.instance.mode$.subscribe(() => this.surface.refresh())
     );
 
     disposables.add(this.service.selection);
@@ -439,11 +441,11 @@ export class EdgelessRootBlockComponent extends BlockComponent<
   }
 
   private _initViewport() {
-    const { service } = this;
+    const { service, std } = this;
 
     const run = () => {
       const viewport =
-        service.editPropsStore.getStorage('viewport') ??
+        std.get(EditPropsStore).getStorage('viewport') ??
         service.getFitToScreenData();
       if ('xywh' in viewport) {
         const bound = Bound.deserialize(viewport.xywh);
@@ -457,7 +459,7 @@ export class EdgelessRootBlockComponent extends BlockComponent<
     run();
 
     this._disposables.add(() => {
-      service.editPropsStore.setStorage('viewport', {
+      std.get(EditPropsStore).setStorage('viewport', {
         centerX: service.viewport.centerX,
         centerY: service.viewport.centerY,
         zoom: service.viewport.zoom,

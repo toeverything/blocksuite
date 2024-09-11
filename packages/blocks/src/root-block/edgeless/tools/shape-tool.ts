@@ -9,7 +9,10 @@ import {
   getShapeType,
   ShapeType,
 } from '@blocksuite/affine-model';
-import { TelemetryProvider } from '@blocksuite/affine-shared/services';
+import {
+  EditPropsStore,
+  TelemetryProvider,
+} from '@blocksuite/affine-shared/services';
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import { Bound, noop } from '@blocksuite/global/utils';
 
@@ -61,7 +64,7 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
     const { viewport } = this._service;
     const { shapeName } = this.tool;
     const attributes =
-      this._edgeless.service.editPropsStore.lastProps$.value[
+      this._edgeless.std.get(EditPropsStore).lastProps$.value[
         `shape:${shapeName}`
       ];
 
@@ -188,7 +191,7 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
     const options = SHAPE_OVERLAY_OPTIONS;
     const { shapeName } = this.tool;
     const attributes =
-      this._edgeless.service.editPropsStore.lastProps$.value[
+      this._edgeless.std.get(EditPropsStore).lastProps$.value[
         `shape:${shapeName}`
       ];
     options.stroke = ThemeObserver.getColorValue(

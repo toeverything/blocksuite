@@ -2,12 +2,14 @@
 
 ## Using Playground
 
-To run BlockSuite from source, please ensure you have installed [Node.js](https://nodejs.org/en/download) and [pnpm](https://pnpm.io/).
+To run BlockSuite from source, please ensure you have installed [Node.js](https://nodejs.org/en/download) and [yarn](https://yarnpkg.com/).
 
 ```sh
-pnpm install
-pnpm dev
+yarn install
+yarn dev
 ```
+
+Be sure to use the correct version of yarn specified in package.json.
 
 Then there would be multiple entries to choose from:
 
@@ -20,7 +22,7 @@ All these entries are published to [try-blocksuite.vercel.app](https://try-block
 And this would build the BlockSuite packages:
 
 ```sh
-pnpm build
+yarn build
 ```
 
 ## Testing
@@ -33,10 +35,10 @@ To test locally, please make sure browser binaries are already installed via `np
 
 ```sh
 # run tests in headless mode in another terminal window
-pnpm test
+yarn test
 
 # or run tests in headed mode for debugging
-pnpm test -- --debug
+yarn test -- --debug
 ```
 
 In headed mode, `await page.pause()` can be used in test cases to suspend the test runner. Note that the usage of the [Playwright VSCode extension](https://marketplace.visualstudio.com/items?itemName=ms-playwright.playwright) is also highly recommended.
@@ -45,13 +47,13 @@ To test browser compatibility, the `BROWSER` environment variable can be used:
 
 ```sh
 # supports `firefox|webkit|chromium`
-BROWSER=firefox pnpm test
+BROWSER=firefox yarn test
 
 # passing playwright params with the -- syntax
-BROWSER=webkit pnpm test -- --debug
+BROWSER=webkit yarn test -- --debug
 ```
 
-To investigate flaky tests, we can mark a test case as `test.only`, then perform `npx playwright test --repeat-each=10` to reproduce the problem by repeated execution. It's also very helpful to run `pnpm test -- --debug` with `await page.pause()` added before certain asserters.
+To investigate flaky tests, we can mark a test case as `test.only`, then perform `npx playwright test --repeat-each=10` to reproduce the problem by repeated execution. It's also very helpful to run `yarn test -- --debug` with `await page.pause()` added before certain asserters.
 
 ### Test Collaboration
 

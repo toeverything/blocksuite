@@ -66,17 +66,21 @@ export const edgelessRootWigetViewMap = {
   )}`,
 };
 
-export const EdgelessRootBlockSpec: ExtensionType[] = [
+const EdgelessCommonExtension: ExtensionType[] = [
   FlavourExtension('affine:page'),
   EdgelessRootService,
   DocModeService,
   EmbedOptionService,
   CommandExtension(commands),
+];
+
+export const EdgelessRootBlockSpec: ExtensionType[] = [
+  ...EdgelessCommonExtension,
   BlockViewExtension('affine:page', literal`affine-edgeless-root`),
   WidgetViewMapExtension('affine:page', edgelessRootWigetViewMap),
 ];
 
-class EdgelessServiceWatcher extends BlockServiceWatcher {
+class EdgelessLocker extends BlockServiceWatcher {
   static override readonly flavour = 'affine:page';
 
   override mounted() {
@@ -91,11 +95,7 @@ class EdgelessServiceWatcher extends BlockServiceWatcher {
 }
 
 export const PreviewEdgelessRootBlockSpec: ExtensionType[] = [
-  FlavourExtension('affine:page'),
-  EdgelessRootService,
-  EdgelessServiceWatcher,
-  DocModeService,
-  EmbedOptionService,
-  CommandExtension(commands),
+  ...EdgelessCommonExtension,
   BlockViewExtension('affine:page', literal`affine-edgeless-root-preview`),
+  EdgelessLocker,
 ];

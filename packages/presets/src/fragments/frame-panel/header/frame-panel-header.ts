@@ -4,6 +4,7 @@ import { WithDisposable } from '@blocksuite/block-std';
 import {
   DocModeProvider,
   type EdgelessRootBlockComponent,
+  EditPropsStore,
   type NavigatorMode,
 } from '@blocksuite/blocks';
 import { createButtonPopper } from '@blocksuite/blocks';
@@ -156,8 +157,8 @@ export class FramePanelHeader extends WithDisposable(LitElement) {
 
   private _tryLoadNavigatorStateLocalRecord() {
     this._navigatorMode = this.editorHost.std
-      .getService('affine:page')
-      ?.editPropsStore.getStorage('presentFillScreen')
+      .get(EditPropsStore)
+      .getStorage('presentFillScreen')
       ? 'fill'
       : 'fit';
   }

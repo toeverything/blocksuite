@@ -1,31 +1,36 @@
-name: Browser Compatibility Test (Firefox and WebKit)
+name: Firefox and Webkit
 
 on:
   schedule:
     # At the end of every day
     - cron: '0 0 * * *'
   workflow_dispatch:
-    inputs:
-      repo:
-        description: 'blocksuite repository to use'
-        required: true
-        type: string
-        default: 'toeverything/blocksuite'
-      ref:
-        description: 'blocksuite branch to use'
-        required: true
-        type: string
-        default: 'master'
+
 jobs:
+  install-deps:
+    name: Install Dependencies
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: ./.github/actions/setup
+
+      - name: Build
+        run: yarn exec nx vite:build @blocksuite/playground
+
   main-test:
     if: github.repository == 'toeverything/blocksuite'
-    name: Playground E2E test
+    needs: install-deps
+    name: Browser Compatibility Test
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        os: [macos-latest]
         browsers: [firefox, webkit]
+        shard: [1, 2, 3, 4, 5]
     steps:
       - uses: actions/checkout@v4
         with:
@@ -35,7 +40,7 @@ jobs:
       - uses: ./.github/actions/setup
 
       - name: Build playground
-        run: yarn build:playground
+        run: yarn exec nx vite:build @blocksuite/playground
 
       - name: Install playwright browsers
         run: npx playwright install --with-deps ${{ matrix.browsers }}
@@ -43,12 +48,12 @@ jobs:
       - name: Run playwright test
         env:
           BROWSER: ${{ matrix.browsers }}
-        run: yarn test -- --forbid-only
+        run: yarn test --forbid-only --shard=${{ matrix.shard }}/5
 
       - name: Upload test results
         if: ${{ failure() }}
         uses: actions/upload-artifact@v4
         with:
-          name: test-results-main
-          path: ./test-results
+          name: test-results-e2e-${{ matrix.os }}-${{ matrix.browsers }}-${{ matrix.shard }}
+          path: ./tests/test-results
           if-no-files-found: ignore

@@ -1,7 +1,5 @@
-import type { BlockService } from '@blocksuite/block-std';
-
-import { getShapeName, type ShapeProps } from '@blocksuite/affine-model';
 import { ColorSchema, NodePropsSchema } from '@blocksuite/affine-shared/utils';
+import { type BlockStdScope, LifeCycleWatcher } from '@blocksuite/block-std';
 import {
   type DeepPartial,
   DisposableGroup,
@@ -12,6 +10,8 @@ import clonedeep from 'lodash.clonedeep';
 import isPlainObject from 'lodash.isplainobject';
 import merge from 'lodash.merge';
 import { z } from 'zod';
+
+import { EditorSettingProvider } from './editor-setting-service.js';
 
 const LastPropsSchema = NodePropsSchema;
 export type LastProps = z.infer<typeof NodePropsSchema>;
@@ -59,11 +59,9 @@ function isSessionProp(key: string): key is keyof SessionProps {
   return key in SessionPropsSchema.shape;
 }
 
-export type SerializedViewport = z.infer<
-  typeof SessionPropsSchema.shape.viewport
->;
+export class EditPropsStore extends LifeCycleWatcher {
+  static override key = 'EditPropsStore';
 
-export class EditPropsStore {
   private _disposables = new DisposableGroup();
 
   private innerProps$: Signal<DeepPartial<LastProps>> = signal({});
@@ -77,7 +75,8 @@ export class EditPropsStore {
     }>(),
   };
 
-  constructor(private _service: BlockService) {
+  constructor(std: BlockStdScope) {
+    super(std);
     const initProps: LastProps = LastPropsSchema.parse(
       Object.entries(LastPropsSchema.shape).reduce((value, [key, schema]) => {
         return {
@@ -96,8 +95,7 @@ export class EditPropsStore {
     }
 
     this.lastProps$ = computed(() => {
-      const editorSetting$ =
-        this._service.std.getConfig('affine:page')?.editorSetting;
+      const editorSetting$ = this.std.getOptional(EditorSettingProvider);
       return merge(
         clonedeep(initProps),
         editorSetting$?.value,
@@ -111,7 +109,7 @@ export class EditPropsStore {
   }
 
   private _getStorageKey<T extends StoragePropsKey>(key: T) {
-    const id = this._service.doc.id;
+    const id = this.std.doc.id;
     switch (key) {
       case 'viewport':
         return 'blocksuite:' + id + ':edgelessViewport';
@@ -186,23 +184,11 @@ export class EditPropsStore {
     if (oldValue === value) return;
     this.slots.storageUpdated.emit({ key, value });
   }
-}
 
-export function getLastPropsKey(
-  modelType: BlockSuite.EdgelessModelKeys,
-  modelProps: Partial<LastProps[LastPropsKey]>
-): LastPropsKey | null {
-  if (modelType === 'shape') {
-    const { shapeType, radius } = modelProps as ShapeProps;
-    const shapeName = getShapeName(shapeType, radius);
-    return `${modelType}:${shapeName}`;
+  override unmounted() {
+    super.unmounted();
+    this.dispose();
   }
-
-  if (isLastPropsKey(modelType)) {
-    return modelType;
-  }
-
-  return null;
 }
 
 function extractProps(
@@ -231,10 +217,6 @@ function extractProps(
   });
 
   return result;
-}
-
-function isLastPropsKey(key: string): key is LastPropsKey {
-  return Object.keys(LastPropsSchema.shape).includes(key);
 }
 
 function isColorType(key: string, value: unknown) {

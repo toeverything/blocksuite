@@ -30,23 +30,26 @@ import {
   TextIcon,
   UnderlineIcon,
 } from '@blocksuite/affine-components/icons';
-import { createSimplePortal } from '@blocksuite/affine-components/portal';
 import { toast } from '@blocksuite/affine-components/toast';
 import { renderGroups } from '@blocksuite/affine-components/toolbar';
 import { TelemetryProvider } from '@blocksuite/affine-shared/services';
+import { tableViewConfig } from '@blocksuite/data-view/view-presets';
 import { assertExists } from '@blocksuite/global/utils';
 import { Slice } from '@blocksuite/store';
 import { html, type TemplateResult } from 'lit';
 
 import type { AffineFormatBarWidget } from './format-bar.js';
 
-import { DATABASE_CONVERT_WHITE_LIST } from '../../../_common/configs/quick-action/database-convert-view.js';
 import {
   convertSelectedBlocksToLinkedDoc,
   getTitleFromSelectedModels,
   notifyDocCreated,
   promptDocTitle,
 } from '../../../_common/utils/render-linked-doc.js';
+import {
+  convertToDatabase,
+  DATABASE_CONVERT_WHITE_LIST,
+} from '../../../database-block/utils.js';
 import { FormatBarContext } from './context.js';
 
 export type DividerConfigItem = {
@@ -141,15 +144,11 @@ export function toolbarDefaultConfig(toolbar: AffineFormatBarWidget) {
     .addDivider()
     .addInlineAction({
       id: 'convert-to-database',
-      name: 'Create Database',
+      name: 'Create Table',
       icon: DatabaseTableViewIcon20,
       isActive: () => false,
       action: () => {
-        createSimplePortal({
-          template: html`<database-convert-view
-            .host=${toolbar.host}
-          ></database-convert-view>`,
-        });
+        convertToDatabase(toolbar.host, tableViewConfig);
       },
       showWhen: chain => {
         const middleware = (count = 0) => {

@@ -5,12 +5,13 @@ import {
   ConnectorXWithArrowIcon,
 } from '@blocksuite/affine-components/icons';
 import { ConnectorMode } from '@blocksuite/affine-model';
+import { EditPropsStore } from '@blocksuite/affine-shared/services';
 
 import type { DenseMenuBuilder } from '../common/type.js';
 
 export const buildConnectorDenseMenu: DenseMenuBuilder = edgeless => {
   const prevMode =
-    edgeless.service.editPropsStore.lastProps$.value.connector.mode;
+    edgeless.std.get(EditPropsStore).lastProps$.value.connector.mode;
 
   const isSelected = edgeless.tools.edgelessTool.type === 'connector';
 
@@ -19,7 +20,7 @@ export const buildConnectorDenseMenu: DenseMenuBuilder = edgeless => {
     () => {
       edgeless.tools.setEdgelessTool({ type: 'connector', mode });
       record &&
-        edgeless.service.editPropsStore.recordLastProps('connector', { mode });
+        edgeless.std.get(EditPropsStore).recordLastProps('connector', { mode });
     };
 
   return {

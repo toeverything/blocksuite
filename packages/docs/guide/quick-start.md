@@ -63,7 +63,7 @@ BlockSuite works with all common frameworks, you can start from these examples t
 To use BlockSuite in your existing project, simply install these core packages:
 
 ```sh
-pnpm install \
+yarn install \
   @blocksuite/presets@canary \
   @blocksuite/blocks@canary \
   @blocksuite/store@canary

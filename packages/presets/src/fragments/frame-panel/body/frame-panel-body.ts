@@ -9,6 +9,7 @@ import {
 import {
   DocModeProvider,
   type EdgelessRootBlockComponent,
+  EditPropsStore,
   type FrameBlockModel,
 } from '@blocksuite/blocks';
 import { Bound, DisposableGroup } from '@blocksuite/global/utils';
@@ -234,9 +235,8 @@ export class FramePanelBody extends WithDisposable(ShadowlessElement) {
         padding: this.viewportPadding as [number, number, number, number],
       };
 
-      const rootService = this.editorHost.std.getService('affine:page');
-      rootService?.editPropsStore.setStorage('viewport', viewport);
-      rootService?.std.get(DocModeProvider).setEditorMode('edgeless');
+      this.editorHost.std.get(EditPropsStore).setStorage('viewport', viewport);
+      this.editorHost.std.get(DocModeProvider).setEditorMode('edgeless');
     } else {
       this.edgeless.service.viewport.setViewportByBound(
         bound,

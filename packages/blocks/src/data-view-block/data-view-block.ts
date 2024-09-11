@@ -5,6 +5,7 @@ import {
   DeleteIcon,
   MoreHorizontalIcon,
 } from '@blocksuite/affine-components/icons';
+import { PeekViewProvider } from '@blocksuite/affine-components/peek';
 import { RANGE_SYNC_EXCLUDE_ATTR } from '@blocksuite/block-std';
 import {
   DatabaseSelection,
@@ -254,7 +255,7 @@ export class DataViewBlockComponent extends CaptionedBlockComponent<DataViewBloc
   }
 
   override renderBlock() {
-    const peekViewService = this.getRootService()?.peekViewService;
+    const peekViewService = this.std.getOptional(PeekViewProvider);
     return html`
       <div contenteditable="false" style="position: relative">
         ${this.dataView.render({

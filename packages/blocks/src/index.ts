@@ -23,7 +23,6 @@ import './surface-ref-block/index.js';
 export * from './_common/adapters/index.js';
 
 export * from './_common/components/ai-item/index.js';
-export type { NotificationService } from './_common/components/index.js';
 export { scrollbarStyle } from './_common/components/index.js';
 export { type NavigatorMode } from './_common/edgeless/frame/consts.js';
 export { EmbedBlockComponent } from './_common/embed-block-helper/index.js';
@@ -81,13 +80,7 @@ export {
   TagsIcon,
 } from '@blocksuite/affine-components/icons';
 export * from '@blocksuite/affine-components/icons';
-export {
-  isPeekable,
-  peek,
-  Peekable,
-  PeekableController,
-  type PeekViewService,
-} from '@blocksuite/affine-components/peek';
+export * from '@blocksuite/affine-components/peek';
 export {
   createLitPortal,
   createSimplePortal,
@@ -107,6 +100,7 @@ export {
 } from '@blocksuite/affine-components/toolbar';
 export * from '@blocksuite/affine-model';
 export * from '@blocksuite/affine-shared/services';
+
 export {
   ColorVariables,
   FontFamilyVariables,
@@ -114,7 +108,6 @@ export {
   StyleVariables,
   ThemeObserver,
 } from '@blocksuite/affine-shared/theme';
-
 export {
   createButtonPopper,
   createDefaultDoc,
