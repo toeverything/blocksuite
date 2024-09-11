@@ -23,7 +23,10 @@ export const insertLinkByQuickSearchCommand: Command<
     .then(result => {
       // add linked doc
       if (result && 'docId' in result) {
-        std.command.exec('insertEmbedLinkedDoc', { docId: result.docId });
+        std.command.exec('insertEmbedLinkedDoc', {
+          docId: result.docId,
+          params: result.params,
+        });
         return {
           flavour: 'affine:embed-linked-doc',
           isNewDoc: !!result.isNewDoc,
