@@ -738,6 +738,7 @@ export const defaultSlashMenuConfig: SlashMenuConfig = {
         const service = rootComponent.std.getService('affine:database');
         if (!service) return;
         service.initDatabaseBlock(
+          rootComponent.host,
           rootComponent.doc,
           model,
           id,
@@ -774,7 +775,7 @@ export const defaultSlashMenuConfig: SlashMenuConfig = {
           const dataView = rootComponent.std.view.getBlock(
             dataViewModel.id
           ) as DataViewBlockComponent | null;
-          dataView?.dataSource.viewDataAdd('table');
+          dataView?.dataSource.viewManager.viewAdd('table');
         });
         tryRemoveEmptyLine(model);
       },
@@ -797,6 +798,7 @@ export const defaultSlashMenuConfig: SlashMenuConfig = {
         const service = rootComponent.std.getService('affine:database');
         if (!service) return;
         service.initDatabaseBlock(
+          rootComponent.host,
           rootComponent.doc,
           model,
           id,

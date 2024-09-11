@@ -520,7 +520,7 @@ export async function initEmptyEdgelessState(page: Page) {
 
 export async function initEmptyDatabaseState(page: Page, rootId?: string) {
   const ids = await page.evaluate(async rootId => {
-    const { doc } = window;
+    const { doc, host } = window;
     doc.captureSync();
     if (!rootId) {
       rootId = doc.addBlock('affine:page', {
@@ -541,8 +541,9 @@ export async function initEmptyDatabaseState(page: Page, rootId?: string) {
     const databaseService = databaseBlock?.service;
     if (databaseService) {
       databaseService.databaseViewInitEmpty(
+        host,
         model,
-        databaseService.viewPresets.tableViewConfig
+        databaseService.viewPresets.tableViewMeta
       );
       databaseService.applyColumnUpdate(model);
     }
@@ -563,7 +564,7 @@ export async function initKanbanViewState(
 ) {
   const ids = await page.evaluate(
     async ({ rootId, config }) => {
-      const { doc } = window;
+      const { doc, host } = window;
 
       doc.captureSync();
       if (!rootId) {
@@ -612,8 +613,9 @@ export async function initKanbanViewState(
           });
         });
         databaseService.databaseViewInitEmpty(
+          host,
           model,
-          databaseService.viewPresets.kanbanViewConfig
+          databaseService.viewPresets.kanbanViewMeta
         );
         databaseService.applyColumnUpdate(model);
       }
@@ -630,7 +632,7 @@ export async function initEmptyDatabaseWithParagraphState(
   rootId?: string
 ) {
   const ids = await page.evaluate(async rootId => {
-    const { doc } = window;
+    const { doc, host } = window;
     doc.captureSync();
     if (!rootId) {
       rootId = doc.addBlock('affine:page', {
@@ -651,8 +653,9 @@ export async function initEmptyDatabaseWithParagraphState(
     const databaseService = databaseBlock?.service;
     if (databaseService) {
       databaseService.databaseViewInitEmpty(
+        host,
         model,
-        databaseService.viewPresets.tableViewConfig
+        databaseService.viewPresets.tableViewMeta
       );
       databaseService.applyColumnUpdate(model);
     }

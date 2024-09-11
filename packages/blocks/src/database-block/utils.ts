@@ -13,107 +13,15 @@ import {
   insertPositionToIndex,
   type InsertToPosition,
 } from '@blocksuite/affine-shared/utils';
-import {
-  type ColumnMeta,
-  type DataViewDataType,
-  type DataViewMode,
-  defaultGroupBy,
-  getTagColor,
-  groupByMatcher,
-  type ViewMeta,
-} from '@blocksuite/data-view';
+import { getTagColor, type ViewMeta } from '@blocksuite/data-view';
 import { columnPresets } from '@blocksuite/data-view/column-presets';
-import { columnModelPresets } from '@blocksuite/data-view/column-pure-presets';
-import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 import { nanoid } from '@blocksuite/store';
 
-import { databaseBlockAllColumnMap } from './columns/index.js';
 import { titlePureColumnConfig } from './columns/title/define.js';
+import { DatabaseBlockDataSource } from './data-source.js';
 
-const initMap: Record<
-  DataViewMode,
-  (
-    columnMetaMap: Record<string, ColumnMeta>,
-    model: DatabaseBlockModel,
-    id: string,
-    name: string
-  ) => DataViewDataType
-> = {
-  table(_columnMetaMap, model, id, name) {
-    return {
-      id,
-      name,
-      mode: 'table',
-      columns: [],
-      filter: {
-        type: 'group',
-        op: 'and',
-        conditions: [],
-      },
-      header: {
-        titleColumn: model.columns.find(v => v.type === 'title')?.id,
-        iconColumn: 'type',
-      },
-    };
-  },
-  kanban(columnMetaMap, model, id, name) {
-    const allowList = model.columns.filter(column => {
-      const type = columnMetaMap[column.type].config.type(column.data);
-      return !!groupByMatcher.match(type) && column.type !== 'title';
-    });
-    const getWeight = (column: Column) => {
-      if (
-        [
-          columnModelPresets.multiSelectColumnModelConfig.type,
-          columnModelPresets.selectColumnModelConfig.type as string,
-        ].includes(column.type)
-      ) {
-        return 3;
-      }
-      if (
-        [
-          columnModelPresets.numberColumnModelConfig.type as string,
-          columnModelPresets.textColumnModelConfig.type,
-        ].includes(column.type)
-      ) {
-        return 2;
-      }
-      return 1;
-    };
-    const column = allowList.sort((a, b) => getWeight(b) - getWeight(a))[0];
-    if (!column) {
-      throw new BlockSuiteError(
-        ErrorCode.DatabaseBlockError,
-        'not implement yet'
-      );
-    }
-    return {
-      id,
-      name,
-      mode: 'kanban',
-      columns: model.columns.map(v => ({
-        id: v.id,
-        hide: false,
-      })),
-      filter: {
-        type: 'group',
-        op: 'and',
-        conditions: [],
-      },
-      groupBy: defaultGroupBy(
-        columnMetaMap[column.type],
-        column.id,
-        column.data
-      ),
-      header: {
-        titleColumn: model.columns.find(v => v.type === 'title')?.id,
-        iconColumn: 'type',
-      },
-      groupProperties: [],
-    };
-  },
-};
 export const databaseViewInitEmpty = (
+  host: EditorHost,
   model: DatabaseBlockModel,
   viewMeta: ViewMeta
 ) => {
@@ -122,10 +30,11 @@ export const databaseViewInitEmpty = (
     'start',
     titlePureColumnConfig.create(titlePureColumnConfig.config.name)
   );
-  databaseViewAddView(model, viewMeta);
+  databaseViewAddView(host, model, viewMeta);
 };
 
 export const databaseViewInitConvert = (
+  host: EditorHost,
   model: DatabaseBlockModel,
   viewMeta: ViewMeta
 ) => {
@@ -134,10 +43,11 @@ export const databaseViewInitConvert = (
     'end',
     columnPresets.multiSelectColumnConfig.create('Tag', { options: [] })
   );
-  databaseViewInitEmpty(model, viewMeta);
+  databaseViewInitEmpty(host, model, viewMeta);
 };
 
 export const databaseViewInitTemplate = (
+  host: EditorHost,
   model: DatabaseBlockModel,
   viewMeta: ViewMeta
 ) => {
@@ -178,24 +88,19 @@ export const databaseViewInitTemplate = (
       value: ids[i],
     });
   }
-  databaseViewInitEmpty(model, viewMeta);
+  databaseViewInitEmpty(host, model, viewMeta);
 };
 
 export const databaseViewAddView = (
+  host: EditorHost,
   model: DatabaseBlockModel,
   viewMeta: ViewMeta
 ) => {
-  const id = model.doc.generateBlockId();
-  const view = initMap[viewMeta.type](
-    databaseBlockAllColumnMap,
-    model,
-    id,
-    viewMeta.model.defaultName
-  );
-  model.doc.transact(() => {
-    model.views = [...model.views, view];
+  const dataSource = new DatabaseBlockDataSource(host, {
+    pageId: model.doc.id,
+    blockId: model.id,
   });
-  return view;
+  dataSource.viewManager.viewAdd(viewMeta.type);
 };
 
 export function addColumn(
@@ -445,7 +350,7 @@ export const convertToDatabase = (host: EditorHost, viewMeta: ViewMeta) => {
   if (!databaseModel) {
     return;
   }
-  databaseViewInitConvert(databaseModel, viewMeta);
+  databaseViewInitConvert(host, databaseModel, viewMeta);
   applyColumnUpdate(databaseModel);
   host.doc.moveBlocks(selectedModels, databaseModel);
 

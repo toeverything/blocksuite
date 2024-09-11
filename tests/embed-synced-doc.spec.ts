@@ -215,7 +215,7 @@ test.describe('Embed synced doc', () => {
       await button.click();
 
       await page.evaluate(async () => {
-        const { collection } = window;
+        const { collection, host } = window;
         const getDocCollection = () => {
           for (const [id, doc] of collection.docs.entries()) {
             if (id === 'doc:home') {
@@ -244,8 +244,9 @@ test.describe('Embed synced doc', () => {
         const databaseService = databaseBlock?.service;
         if (databaseService) {
           databaseService.databaseViewInitEmpty(
+            host,
             model,
-            databaseService.viewPresets.tableViewConfig
+            databaseService.viewPresets.tableViewMeta
           );
           databaseService.applyColumnUpdate(model);
         }
