@@ -228,7 +228,7 @@ export function toEdgelessEmbedBlock<
 
     _showOverlay = false;
 
-    [blockComponentSymbol] = true;
+    override [blockComponentSymbol] = true;
 
     protected override embedContainerStyle: StyleInfo = {
       position: 'relative',
@@ -237,7 +237,7 @@ export function toEdgelessEmbedBlock<
       transformOrigin: '0 0',
     };
 
-    [GfxElementSymbol] = true;
+    override [GfxElementSymbol] = true;
 
     get bound(): Bound {
       return Bound.deserialize(this.model.xywh);
