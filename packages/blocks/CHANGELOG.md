@@ -1,5 +1,32 @@
 # @blocksuite/blocks
 
+## 0.17.7
+
+### Patch Changes
+
+- 5ab06c3: - Peek view as extension
+  - Editor settings as extension
+  - Edit props store as extension
+  - Notifications as extension
+  - Fix mini mindmap get service error
+  - Fix generating placeholder style
+  - Fix brush menu settings
+  - Fix brush element line width
+  - Fix edgeless preview pointer events
+  - Fix latex editor focus shake
+- Updated dependencies [5ab06c3]
+  - @blocksuite/affine-block-list@0.17.7
+  - @blocksuite/affine-block-paragraph@0.17.7
+  - @blocksuite/affine-block-surface@0.17.7
+  - @blocksuite/affine-components@0.17.7
+  - @blocksuite/data-view@0.17.7
+  - @blocksuite/affine-model@0.17.7
+  - @blocksuite/affine-shared@0.17.7
+  - @blocksuite/block-std@0.17.7
+  - @blocksuite/global@0.17.7
+  - @blocksuite/inline@0.17.7
+  - @blocksuite/store@0.17.7
+
 ## 0.17.6
 
 ### Patch Changes
