@@ -5,6 +5,7 @@ import {
   ConnectorXWithArrowIcon,
 } from '@blocksuite/affine-components/icons';
 import { ConnectorMode, getConnectorModeName } from '@blocksuite/affine-model';
+import { EditPropsStore } from '@blocksuite/affine-shared/services';
 import { SignalWatcher } from '@blocksuite/block-std';
 import { computed } from '@lit-labs/preact-signals';
 import { css, html, LitElement } from 'lit';
@@ -43,7 +44,8 @@ export class EdgelessConnectorToolButton extends QuickToolMixin(
   `;
 
   private _mode$ = computed(() => {
-    return this.edgeless.service.editPropsStore.lastProps$.value.connector.mode;
+    return this.edgeless.std.get(EditPropsStore).lastProps$.value.connector
+      .mode;
   });
 
   override type = 'connector' as const;
@@ -54,7 +56,7 @@ export class EdgelessConnectorToolButton extends QuickToolMixin(
     const menu = this.createPopper('edgeless-connector-menu', this);
     menu.element.edgeless = this.edgeless;
     menu.element.onChange = (props: Record<string, unknown>) => {
-      this.edgeless.service.editPropsStore.recordLastProps('connector', props);
+      this.edgeless.std.get(EditPropsStore).recordLastProps('connector', props);
       this.setEdgelessTool({
         type: this.type,
         mode: this._mode$.value,

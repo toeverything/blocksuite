@@ -1,5 +1,6 @@
 import type { FrameBlockModel } from '@blocksuite/affine-model';
 
+import { EditPropsStore } from '@blocksuite/affine-shared/services';
 import { WithDisposable } from '@blocksuite/block-std';
 import { Bound } from '@blocksuite/global/utils';
 import { css, html, LitElement, nothing } from 'lit';
@@ -24,9 +25,9 @@ export class EdgelessNavigatorBlackBackground extends WithDisposable(
   private _blackBackground = false;
 
   private _tryLoadBlackBackground() {
-    const value = this.edgeless.service.editPropsStore.getStorage(
-      'presentBlackBackground'
-    );
+    const value = this.edgeless.std
+      .get(EditPropsStore)
+      .getStorage('presentBlackBackground');
     this._blackBackground = value ?? true;
   }
 
@@ -41,10 +42,9 @@ export class EdgelessNavigatorBlackBackground extends WithDisposable(
     _disposables.add(
       edgeless.slots.navigatorSettingUpdated.on(({ blackBackground }) => {
         if (blackBackground !== undefined) {
-          this.edgeless.service.editPropsStore.setStorage(
-            'presentBlackBackground',
-            blackBackground
-          );
+          this.edgeless.std
+            .get(EditPropsStore)
+            .setStorage('presentBlackBackground', blackBackground);
 
           this._blackBackground = blackBackground;
 

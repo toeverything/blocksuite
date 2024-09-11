@@ -19,7 +19,6 @@ import {
   MarkdownTransformer,
   ZipTransformer,
 } from '../_common/transformers/index.js';
-import { EditPropsStore } from './edgeless/services/edit-session.js';
 
 export abstract class RootService extends BlockService {
   static override readonly flavour = RootBlockSchema.model.flavour;
@@ -31,8 +30,6 @@ export abstract class RootService extends BlockService {
   private _fileDropOptions: FileDropOptions = {
     flavour: this.flavour,
   };
-
-  readonly editPropsStore: EditPropsStore = new EditPropsStore(this);
 
   readonly exportManager = new ExportManager(this, this._exportOptions);
 
@@ -104,10 +101,6 @@ export abstract class RootService extends BlockService {
         state.raw.stopPropagation();
       })
     );
-  }
-
-  override unmounted() {
-    this.editPropsStore.dispose();
   }
 }
 

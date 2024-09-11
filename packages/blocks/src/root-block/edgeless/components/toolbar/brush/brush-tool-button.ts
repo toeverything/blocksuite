@@ -2,6 +2,7 @@ import {
   EdgelessPenDarkIcon,
   EdgelessPenLightIcon,
 } from '@blocksuite/affine-components/icons';
+import { EditPropsStore } from '@blocksuite/affine-shared/services';
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import { SignalWatcher } from '@blocksuite/block-std';
 import { computed } from '@lit-labs/preact-signals';
@@ -46,7 +47,7 @@ export class EdgelessBrushToolButton extends EdgelessToolbarToolMixin(
 
   private _color$ = computed(() => {
     return ThemeObserver.generateColorProperty(
-      this.edgeless.service.editPropsStore.lastProps$.value.brush.color
+      this.edgeless.std.get(EditPropsStore).lastProps$.value.brush.color
     );
   });
 
@@ -61,7 +62,7 @@ export class EdgelessBrushToolButton extends EdgelessToolbarToolMixin(
     Object.assign(menu.element, {
       edgeless: this.edgeless,
       onChange: (props: Record<string, unknown>) => {
-        this.edgeless.service.editPropsStore.recordLastProps('brush', props);
+        this.edgeless.std.get(EditPropsStore).recordLastProps('brush', props);
         this.setEdgelessTool({ type: 'brush' });
       },
     });

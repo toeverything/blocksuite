@@ -28,6 +28,7 @@ import {
   ShapeStyle,
   TextElementModel,
 } from '@blocksuite/affine-model';
+import { EditPropsStore } from '@blocksuite/affine-shared/services';
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import { WithDisposable } from '@blocksuite/block-std';
 import {
@@ -450,7 +451,7 @@ export class EdgelessAutoCompletePanel extends WithDisposable(LitElement) {
     if (!xywh) return;
 
     const background = ThemeObserver.getColorValue(
-      this.edgeless.service.editPropsStore.lastProps$.value['affine:note']
+      this.edgeless.std.get(EditPropsStore).lastProps$.value['affine:note']
         .background,
       DEFAULT_NOTE_BACKGROUND_COLOR,
       true
@@ -487,7 +488,7 @@ export class EdgelessAutoCompletePanel extends WithDisposable(LitElement) {
     const { x, y, w, h } = bound;
     const xywh = [x, y, w, h] as XYWH;
     const { shapeStyle, strokeColor, fillColor, strokeWidth, roughness } =
-      this.edgeless.service.editPropsStore.lastProps$.value[
+      this.edgeless.std.get(EditPropsStore).lastProps$.value[
         `shape:${targetType}`
       ];
 

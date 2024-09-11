@@ -1,5 +1,6 @@
 import type { IVec } from '@blocksuite/global/utils';
 
+import { EditPropsStore } from '@blocksuite/affine-shared/services';
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 
 import type { EdgelessTool } from '../../edgeless/types.js';
@@ -29,7 +30,7 @@ export function getActiveShapeColor(type: 'fill' | 'stroke') {
   return ({ rootComponent }: PieMenuContext) => {
     if (rootComponent instanceof EdgelessRootBlockComponent) {
       const props =
-        rootComponent.service.editPropsStore.lastProps$.value[
+        rootComponent.std.get(EditPropsStore).lastProps$.value[
           'shape:roundedRect'
         ];
       const color = type == 'fill' ? props.fillColor : props.strokeColor;
@@ -44,7 +45,7 @@ export function getActiveConnectorStrokeColor({
 }: PieMenuContext) {
   if (rootComponent instanceof EdgelessRootBlockComponent) {
     const props =
-      rootComponent.service.editPropsStore.lastProps$.value.connector;
+      rootComponent.std.get(EditPropsStore).lastProps$.value.connector;
     const color = props.stroke;
     return ThemeObserver.getColorValue(color);
   }

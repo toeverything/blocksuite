@@ -1,3 +1,4 @@
+import { EditPropsStore } from '@blocksuite/affine-shared/services';
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import { computed, SignalWatcher } from '@lit-labs/preact-signals';
 import { css, html, LitElement } from 'lit';
@@ -39,7 +40,7 @@ export class EdgelessBrushMenu extends EdgelessToolbarToolMixin(
 
   private _props$ = computed(() => {
     const { color, lineWidth } =
-      this.edgeless.service.editPropsStore.lastProps$.value.brush;
+      this.edgeless.std.get(EditPropsStore).lastProps$.value.brush;
     return {
       color,
       lineWidth,

@@ -9,7 +9,10 @@ import {
   getShapeType,
   ShapeType,
 } from '@blocksuite/affine-model';
-import { TelemetryProvider } from '@blocksuite/affine-shared/services';
+import {
+  EditPropsStore,
+  TelemetryProvider,
+} from '@blocksuite/affine-shared/services';
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import { SignalWatcher } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
@@ -170,7 +173,7 @@ export class EdgelessToolbarShapeDraggable extends EdgelessToolbarToolMixin(
         });
 
         const shape$ =
-          this.edgeless.service.editPropsStore.lastProps$.value[
+          this.edgeless.std.get(EditPropsStore).lastProps$.value[
             `shape:${shapeName}`
           ];
         const color = ThemeObserver.generateColorProperty(shape$.fillColor);
@@ -277,7 +280,7 @@ export class EdgelessToolbarShapeDraggable extends EdgelessToolbarToolMixin(
         shape => {
           const isBeingDragged = draggingShape?.name === shape.name;
           const shape$ =
-            this.edgeless.service.editPropsStore.lastProps$.value[
+            this.edgeless.std.get(EditPropsStore).lastProps$.value[
               `shape:${shape.name}`
             ];
           const color = ThemeObserver.generateColorProperty(shape$.fillColor);

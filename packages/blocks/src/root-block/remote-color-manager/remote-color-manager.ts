@@ -1,19 +1,16 @@
-import type { EditorHost } from '@blocksuite/block-std';
+import type { BlockStdScope } from '@blocksuite/block-std';
+
+import { EditPropsStore } from '@blocksuite/affine-shared/services';
 
 import { multiPlayersColor } from './color-picker.js';
 
 export class RemoteColorManager {
   private get awarenessStore() {
-    return this.host.doc.collection.awarenessStore;
+    return this.std.doc.collection.awarenessStore;
   }
 
-  private get rootService() {
-    return this.host.std.getService('affine:page');
-  }
-
-  constructor(readonly host: EditorHost) {
-    const sessionColor =
-      this.rootService?.editPropsStore.getStorage('remoteColor');
+  constructor(readonly std: BlockStdScope) {
+    const sessionColor = this.std.get(EditPropsStore).getStorage('remoteColor');
     if (sessionColor) {
       this.awarenessStore.awareness.setLocalStateField('color', sessionColor);
       return;
@@ -21,7 +18,7 @@ export class RemoteColorManager {
 
     const pickColor = multiPlayersColor.pick();
     this.awarenessStore.awareness.setLocalStateField('color', pickColor);
-    this.rootService?.editPropsStore.setStorage('remoteColor', pickColor);
+    this.std.get(EditPropsStore).setStorage('remoteColor', pickColor);
   }
 
   get(id: number) {
@@ -32,8 +29,7 @@ export class RemoteColorManager {
 
     if (id !== this.awarenessStore.awareness.clientID) return null;
 
-    const sessionColor =
-      this.rootService?.editPropsStore.getStorage('remoteColor');
+    const sessionColor = this.std.get(EditPropsStore).getStorage('remoteColor');
     if (sessionColor) {
       this.awarenessStore.awareness.setLocalStateField('color', sessionColor);
       return sessionColor;
@@ -41,7 +37,7 @@ export class RemoteColorManager {
 
     const pickColor = multiPlayersColor.pick();
     this.awarenessStore.awareness.setLocalStateField('color', pickColor);
-    this.rootService?.editPropsStore.setStorage('remoteColor', pickColor);
+    this.std.get(EditPropsStore).setStorage('remoteColor', pickColor);
     return pickColor;
   }
 }

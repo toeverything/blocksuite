@@ -16,7 +16,10 @@ import {
   GroupElementModel,
   type SurfaceRefBlockModel,
 } from '@blocksuite/affine-model';
-import { DocModeProvider } from '@blocksuite/affine-shared/services';
+import {
+  DocModeProvider,
+  EditPropsStore,
+} from '@blocksuite/affine-shared/services';
 import { requestConnectedFrame } from '@blocksuite/affine-shared/utils';
 import {
   type BaseSelection,
@@ -634,10 +637,8 @@ export class SurfaceRefBlockComponent extends BlockComponent<
       xywh: this._referenceXYWH,
       padding: [60, 20, 20, 20] as [number, number, number, number],
     };
-    const pageService = this.std.getService('affine:page');
 
-    pageService?.editPropsStore.setStorage('viewport', viewport);
-
+    this.std.get(EditPropsStore).setStorage('viewport', viewport);
     this.std.get(DocModeProvider).setEditorMode('edgeless');
   }
 

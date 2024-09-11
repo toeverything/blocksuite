@@ -1,7 +1,10 @@
 import type { EditorHost } from '@blocksuite/block-std';
-import type { EdgelessRootBlockComponent } from '@blocksuite/blocks';
 
 import { WithDisposable } from '@blocksuite/block-std';
+import {
+  type EdgelessRootBlockComponent,
+  EditPropsStore,
+} from '@blocksuite/blocks';
 import { css, html, LitElement, type PropertyValues } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
@@ -86,10 +89,7 @@ export class FramesSettingMenu extends WithDisposable(LitElement) {
     this.edgeless?.slots.navigatorSettingUpdated.emit({
       fillScreen: this.fillScreen,
     });
-    this._rootService?.editPropsStore.setStorage(
-      'presentFillScreen',
-      this.fillScreen
-    );
+    this._editPropsStore.setStorage('presentFillScreen', this.fillScreen);
   };
 
   private _onHideToolBarChange = (checked: boolean) => {
@@ -97,35 +97,28 @@ export class FramesSettingMenu extends WithDisposable(LitElement) {
     this.edgeless?.slots.navigatorSettingUpdated.emit({
       hideToolbar: this.hideToolbar,
     });
-    this._rootService?.editPropsStore.setStorage(
-      'presentHideToolbar',
-      this.hideToolbar
-    );
+    this._editPropsStore.setStorage('presentHideToolbar', this.hideToolbar);
   };
 
-  private get _rootService() {
-    return this.editorHost.std.getService('affine:page');
+  private get _editPropsStore() {
+    return this.editorHost.std.get(EditPropsStore);
   }
 
   private _tryRestoreSettings() {
-    if (!this._rootService) {
-      return;
-    }
-    const { editPropsStore } = this._rootService;
-    const blackBackground = editPropsStore.getStorage('presentBlackBackground');
+    const blackBackground = this._editPropsStore.getStorage(
+      'presentBlackBackground'
+    );
 
     this.blackBackground = blackBackground ?? true;
-    this.fillScreen = editPropsStore.getStorage('presentFillScreen') ?? false;
-    this.hideToolbar = editPropsStore.getStorage('presentHideToolbar') ?? false;
+    this.fillScreen =
+      this._editPropsStore.getStorage('presentFillScreen') ?? false;
+    this.hideToolbar =
+      this._editPropsStore.getStorage('presentHideToolbar') ?? false;
   }
 
   override connectedCallback() {
     super.connectedCallback();
     this._tryRestoreSettings();
-  }
-
-  override disconnectedCallback(): void {
-    super.disconnectedCallback();
   }
 
   override render() {

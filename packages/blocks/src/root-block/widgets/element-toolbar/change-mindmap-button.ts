@@ -14,6 +14,7 @@ import {
 } from '@blocksuite/affine-components/icons';
 import { renderToolbarSeparator } from '@blocksuite/affine-components/toolbar';
 import { LayoutType, MindmapStyle } from '@blocksuite/affine-model';
+import { EditPropsStore } from '@blocksuite/affine-shared/services';
 import { WithDisposable } from '@blocksuite/block-std';
 import { countBy, maxBy } from '@blocksuite/global/utils';
 import { css, html, LitElement, nothing, type TemplateResult } from 'lit';
@@ -157,7 +158,7 @@ class EdgelessChangeMindmapLayoutPanel extends LitElement {
 @customElement('edgeless-change-mindmap-button')
 export class EdgelessChangeMindmapButton extends WithDisposable(LitElement) {
   private _updateLayoutType = (layoutType: LayoutType) => {
-    this.edgeless.service.editPropsStore.recordLastProps('mindmap', {
+    this.edgeless.std.get(EditPropsStore).recordLastProps('mindmap', {
       layoutType,
     });
     this.elements.forEach(element => {
@@ -168,7 +169,7 @@ export class EdgelessChangeMindmapButton extends WithDisposable(LitElement) {
   };
 
   private _updateStyle = (style: MindmapStyle) => {
-    this.edgeless.service.editPropsStore.recordLastProps('mindmap', { style });
+    this.edgeless.std.get(EditPropsStore).recordLastProps('mindmap', { style });
     this._mindmaps.forEach(element => (element.style = style));
   };
 

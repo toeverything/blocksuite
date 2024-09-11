@@ -1,7 +1,10 @@
+import type { BlockStdScope } from '@blocksuite/block-std';
+
 import {
   type BrushElementModel,
   type ConnectorElementModel,
   type EdgelessRootBlockComponent,
+  EditPropsStore,
   type ShapeElementModel,
   ShapeType,
   type TextElementModel,
@@ -14,12 +17,14 @@ import { setupEditor } from '../utils/setup.js';
 describe('apply last props', () => {
   let edgelessRoot!: EdgelessRootBlockComponent;
   let service!: EdgelessRootBlockComponent['service'];
+  let std!: BlockStdScope;
 
   beforeEach(async () => {
     sessionStorage.removeItem('blocksuite:prop:record');
     const cleanup = await setupEditor('edgeless');
     edgelessRoot = getDocRootBlock(window.doc, window.editor, 'edgeless');
     service = edgelessRoot.service;
+    std = edgelessRoot.std;
     return cleanup;
   });
 
@@ -32,7 +37,7 @@ describe('apply last props', () => {
       fillColor: '--affine-palette-shape-orange',
     });
     expect(
-      service.editPropsStore.lastProps$.value[`shape:${ShapeType.Rect}`]
+      std.get(EditPropsStore).lastProps$.value[`shape:${ShapeType.Rect}`]
         .fillColor
     ).toBe('--affine-palette-shape-orange');
 
@@ -46,7 +51,7 @@ describe('apply last props', () => {
       fillColor: '--affine-palette-shape-blue',
     });
     expect(
-      service.editPropsStore.lastProps$.value[`shape:${ShapeType.Diamond}`]
+      std.get(EditPropsStore).lastProps$.value[`shape:${ShapeType.Diamond}`]
         .fillColor
     ).toBe('--affine-palette-shape-blue');
 
@@ -63,7 +68,7 @@ describe('apply last props', () => {
       fillColor: '--affine-palette-shape-green',
     });
     expect(
-      service.editPropsStore.lastProps$.value['shape:roundedRect'].fillColor
+      std.get(EditPropsStore).lastProps$.value['shape:roundedRect'].fillColor
     ).toBe('--affine-palette-shape-green');
 
     // apply last props

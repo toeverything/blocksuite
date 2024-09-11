@@ -106,6 +106,7 @@ export {
 } from '@blocksuite/affine-components/toolbar';
 export * from '@blocksuite/affine-model';
 export * from '@blocksuite/affine-shared/services';
+
 export {
   ColorVariables,
   FontFamilyVariables,
@@ -113,7 +114,6 @@ export {
   StyleVariables,
   ThemeObserver,
 } from '@blocksuite/affine-shared/theme';
-
 export {
   createButtonPopper,
   createDefaultDoc,

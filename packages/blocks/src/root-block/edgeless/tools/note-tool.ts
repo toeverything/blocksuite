@@ -1,5 +1,6 @@
 import type { PointerEventState } from '@blocksuite/block-std';
 
+import { EditPropsStore } from '@blocksuite/affine-shared/services';
 import { noop, Point } from '@blocksuite/global/utils';
 
 import type { SelectionArea } from '../services/tools-manager.js';
@@ -105,7 +106,7 @@ export class NoteToolController extends EdgelessToolController<NoteTool> {
     if (newTool.type !== 'affine:note') return;
 
     const attributes =
-      this._edgeless.service.editPropsStore.lastProps$.value['affine:note'];
+      this._edgeless.std.get(EditPropsStore).lastProps$.value['affine:note'];
     const background = attributes.background;
     this._noteOverlay = new NoteOverlay(this._edgeless, background);
     this._noteOverlay.text = newTool.tip;
@@ -179,7 +180,7 @@ export class NoteToolController extends EdgelessToolController<NoteTool> {
     this._clearOverlay();
 
     const attributes =
-      this._edgeless.service.editPropsStore.lastProps$.value['affine:note'];
+      this._edgeless.std.get(EditPropsStore).lastProps$.value['affine:note'];
     const background = attributes.background;
     this._draggingNoteOverlay = new DraggingNoteOverlay(
       this._edgeless,
