@@ -499,3 +499,27 @@ describe('basic property', () => {
     expect(group.h).toBe(0);
   });
 });
+
+describe('brush', () => {
+  test('same lineWidth should have same xywh', () => {
+    const id = model.addElement({
+      type: 'brush',
+      lineWidth: 2,
+      points: [
+        [0, 0],
+        [100, 100],
+        [120, 150],
+      ],
+    });
+    const brush = model.getElementById(id) as BrushElementModel;
+    const oldBrushXYWH = brush.xywh;
+
+    brush.lineWidth = 4;
+
+    expect(brush.xywh).not.toBe(oldBrushXYWH);
+
+    brush.lineWidth = 2;
+
+    expect(brush.xywh).toBe(oldBrushXYWH);
+  });
+});
