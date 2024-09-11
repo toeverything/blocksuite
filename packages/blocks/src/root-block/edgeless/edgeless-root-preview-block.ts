@@ -24,11 +24,6 @@ import type { EdgelessRootBlockWidgetName } from '../types.js';
 import type { EdgelessRootService } from './edgeless-root-service.js';
 
 import { requestThrottledConnectedFrame } from '../../_common/utils/index.js';
-import './components/note-slicer/index.js';
-import './components/presentation/edgeless-navigator-black-background.js';
-import './components/rects/edgeless-dragging-area-rect.js';
-import './components/rects/edgeless-selected-rect.js';
-import './components/toolbar/edgeless-toolbar.js';
 import { edgelessElementsBound } from './utils/bound-utils.js';
 import { getBackgroundGrid, isCanvasElement } from './utils/query.js';
 
@@ -39,14 +34,15 @@ export class EdgelessRootPreviewBlockComponent extends BlockComponent<
   EdgelessRootBlockWidgetName
 > {
   static override styles = css`
-    affine-edgeless-root {
+    affine-edgeless-root-preview {
+      pointer-events: none;
       -webkit-user-select: none;
       user-select: none;
       display: block;
       height: 100%;
     }
 
-    .widgets-container {
+    affine-edgeless-root-preview .widgets-container {
       position: absolute;
       left: 0;
       top: 0;
@@ -55,7 +51,7 @@ export class EdgelessRootPreviewBlockComponent extends BlockComponent<
       height: 100%;
     }
 
-    .edgeless-background {
+    affine-edgeless-root-preview .edgeless-background {
       height: 100%;
       background-color: var(--affine-background-primary-color);
       background-image: radial-gradient(
