@@ -1,26 +1,20 @@
 import { expect } from '@playwright/test';
 
 import {
-  cutByKeyboard,
   dragBetweenIndices,
-  dragOverTitle,
   enterPlaygroundRoom,
   focusRichText,
-  focusTitle,
   getPageSnapshot,
-  initEmptyCodeBlockState,
   initEmptyParagraphState,
   initThreeParagraphs,
   inlineCode,
   MODIFIER_KEY,
-  pasteByKeyboard,
   pressArrowDown,
   pressArrowLeft,
   pressArrowRight,
   pressArrowUp,
   pressEnter,
   pressForwardDelete,
-  pressShiftEnter,
   pressShiftTab,
   pressTab,
   readClipboardText,
@@ -36,18 +30,15 @@ import {
   undoByKeyboard,
   updateBlockType,
   waitNextFrame,
-} from './utils/actions/index.js';
+} from '../utils/actions/index.js';
 import {
   assertBlockChildrenIds,
-  assertBlockSelections,
   assertRichTextInlineRange,
   assertRichTextModelType,
   assertRichTexts,
-  assertStoreMatchJSX,
   assertTextFormat,
-  assertTitle,
-} from './utils/asserts.js';
-import { test } from './utils/playwright.js';
+} from '../utils/asserts.js';
+import { test } from '../utils/playwright.js';
 
 test('rich-text hotkey scope on single press', async ({ page }) => {
   await enterPlaygroundRoom(page);
@@ -85,78 +76,21 @@ test('single line rich-text inline code hotkey', async ({ page }) => {
   await assertTextFormat(page, 0, 0, {});
 });
 
-test('type character jump out code node', async ({ page }) => {
+test('type character jump out code node', async ({ page }, testInfo) => {
   await enterPlaygroundRoom(page);
-  const { paragraphId } = await initEmptyParagraphState(page);
+  await initEmptyParagraphState(page);
   await focusRichText(page);
   await type(page, 'Hello');
   await setInlineRangeInSelectedRichText(page, 0, 5);
   await inlineCode(page);
-  await assertStoreMatchJSX(
-    page,
-    `
-<affine:paragraph
-  prop:text={
-    <>
-      <text
-        code={true}
-        insert="Hello"
-      />
-    </>
-  }
-  prop:type="text"
-/>`,
-    paragraphId
+  expect(await getPageSnapshot(page, true)).toMatchSnapshot(
+    `${testInfo.title}_1.json`
   );
   await focusRichText(page);
   await page.keyboard.press(`${SHORT_KEY}+ArrowRight`);
   await type(page, 'block suite');
-  await assertStoreMatchJSX(
-    page,
-    `
-<affine:paragraph
-  prop:text={
-    <>
-      <text
-        code={true}
-        insert="Hello"
-      />
-      <text
-        insert="block suite"
-      />
-    </>
-  }
-  prop:type="text"
-/>`,
-    paragraphId
-  );
-});
-
-test('multi line rich-text inline code hotkey', async ({ page }, testInfo) => {
-  await enterPlaygroundRoom(page);
-  await initEmptyParagraphState(page);
-  await initThreeParagraphs(page);
-  await assertRichTexts(page, ['123', '456', '789']);
-
-  // 0    1   2
-  // 1|23 456 78|9
-  await dragBetweenIndices(page, [0, 1], [2, 2]);
-  await inlineCode(page);
-
   expect(await getPageSnapshot(page, true)).toMatchSnapshot(
-    `${testInfo.title}_init.json`
-  );
-
-  await undoByClick(page);
-
-  expect(await getPageSnapshot(page, true)).toMatchSnapshot(
-    `${testInfo.title}_undo.json`
-  );
-
-  await redoByClick(page);
-
-  expect(await getPageSnapshot(page, true)).toMatchSnapshot(
-    `${testInfo.title}_redo.json`
+    `${testInfo.title}_2.json`
   );
 });
 
@@ -266,45 +200,6 @@ test('should single line format hotkey work', async ({ page }, testInfo) => {
   );
 });
 
-test('should multiple line format hotkey work', async ({ page }, testInfo) => {
-  await enterPlaygroundRoom(page);
-  await initEmptyParagraphState(page);
-  await initThreeParagraphs(page);
-  // 0    1   2
-  // 1|23 456 78|9
-  await dragBetweenIndices(page, [0, 1], [2, 2]);
-
-  // bold
-  await page.keyboard.press(`${SHORT_KEY}+b`);
-  // italic
-  await page.keyboard.press(`${SHORT_KEY}+i`);
-  // underline
-  await page.keyboard.press(`${SHORT_KEY}+u`);
-  // strikethrough
-  await page.keyboard.press(`${SHORT_KEY}+Shift+S`);
-
-  await waitNextFrame(page);
-
-  expect(await getPageSnapshot(page, true)).toMatchSnapshot(
-    `${testInfo.title}_init.json`
-  );
-
-  // bold
-  await page.keyboard.press(`${SHORT_KEY}+b`, { delay: 50 });
-  // italic
-  await page.keyboard.press(`${SHORT_KEY}+i`, { delay: 50 });
-  // underline
-  await page.keyboard.press(`${SHORT_KEY}+u`, { delay: 50 });
-  // strikethrough
-  await page.keyboard.press(`${SHORT_KEY}+Shift+s`, { delay: 50 });
-
-  await waitNextFrame(page);
-
-  expect(await getPageSnapshot(page, true)).toMatchSnapshot(
-    `${testInfo.title}_finial.json`
-  );
-});
-
 test('should hotkey work in paragraph', async ({ page }, testInfo) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
@@ -380,35 +275,13 @@ test('should cut work single line', async ({ page }, testInfo) => {
   );
 });
 
-test('should cut work multiple line', async ({ page }, testInfo) => {
-  await enterPlaygroundRoom(page);
-  await initEmptyParagraphState(page);
-  await initThreeParagraphs(page);
-  await resetHistory(page);
-  // 0    1   2
-  // 1|23 456 78|9
-  await dragBetweenIndices(page, [0, 1], [2, 2]);
-  // cut
-  await page.keyboard.press(`${SHORT_KEY}+x`);
-  expect(await getPageSnapshot(page, true)).toMatchSnapshot(
-    `${testInfo.title}_init.json`
-  );
-  await undoByKeyboard(page);
-  const text = await readClipboardText(page);
-  expect(text).toBe(`23 456 78`);
-  expect(await getPageSnapshot(page, true)).toMatchSnapshot(
-    `${testInfo.title}_undo.json`
-  );
-});
-
 test('should ctrl+enter create new block', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
 
   await focusRichText(page);
   await type(page, '123');
-  await page.keyboard.press('ArrowLeft');
-  await page.keyboard.press('ArrowLeft');
+  await pressArrowLeft(page, 2);
   await pressEnter(page);
   await waitNextFrame(page);
   await assertRichTexts(page, ['1', '23']);
@@ -416,135 +289,7 @@ test('should ctrl+enter create new block', async ({ page }) => {
   await assertRichTexts(page, ['1', '23', '']);
 });
 
-test('arrow up and down behavior on multiline text blocks when previous is non-text', async ({
-  page,
-}) => {
-  await enterPlaygroundRoom(page);
-  await initEmptyParagraphState(page);
-  await focusRichText(page);
-
-  await pressEnter(page);
-  await pressArrowUp(page);
-  await type(page, '--- ');
-  await pressEnter(page);
-
-  await focusRichText(page);
-  await type(page, '124');
-  await pressShiftEnter(page);
-  await type(page, '1234');
-
-  await pressArrowUp(page);
-  await waitNextFrame(page, 100);
-  await assertRichTextInlineRange(page, 0, 3);
-
-  await pressArrowUp(page);
-  await assertBlockSelections(page, ['4']);
-});
-
-test.describe('bracket auto complete', () => {
-  test('should bracket complete works', async ({ page }) => {
-    await enterPlaygroundRoom(page);
-    await initEmptyParagraphState(page);
-    await focusRichText(page);
-    await type(page, '([{');
-    // type without selection should not trigger bracket complete
-    await assertRichTexts(page, ['([{']);
-
-    await dragBetweenIndices(page, [0, 1], [0, 2]);
-    await type(page, '(');
-    await assertRichTexts(page, ['(([){']);
-
-    await type(page, ')');
-    // Should not trigger bracket complete when type right bracket
-    await assertRichTexts(page, ['(()){']);
-  });
-
-  test('bracket complete should not work when selecting mutiple lines', async ({
-    page,
-  }) => {
-    await enterPlaygroundRoom(page);
-    await initEmptyParagraphState(page);
-    await initThreeParagraphs(page);
-
-    // 1(23 45)6 789
-    await dragBetweenIndices(page, [0, 1], [1, 2]);
-    await type(page, '(');
-    await assertRichTexts(page, ['1(6', '789']);
-  });
-
-  test('should bracket complete with backtick works', async ({ page }) => {
-    await enterPlaygroundRoom(page);
-    const { paragraphId } = await initEmptyParagraphState(page);
-    await focusRichText(page);
-    await type(page, 'hello world');
-
-    await dragBetweenIndices(page, [0, 2], [0, 5]);
-    await resetHistory(page);
-    await type(page, '`');
-    await assertStoreMatchJSX(
-      page,
-      `
-<affine:paragraph
-  prop:text={
-    <>
-      <text
-        insert="he"
-      />
-      <text
-        code={true}
-        insert="llo"
-      />
-      <text
-        insert=" world"
-      />
-    </>
-  }
-  prop:type="text"
-/>`,
-      paragraphId
-    );
-
-    await undoByClick(page);
-    await assertStoreMatchJSX(
-      page,
-      `
-<affine:paragraph
-  prop:text="hello world"
-  prop:type="text"
-/>`,
-      paragraphId
-    );
-  });
-
-  test('auto delete bracket right', async ({ page }) => {
-    await enterPlaygroundRoom(page);
-    await initEmptyCodeBlockState(page);
-    await focusRichText(page);
-    await type(page, '(');
-    await assertRichTexts(page, ['()']);
-    await type(page, '(');
-    await assertRichTexts(page, ['(())']);
-    await page.keyboard.press('Backspace');
-    await assertRichTexts(page, ['()']);
-    await page.keyboard.press('Backspace');
-    await assertRichTexts(page, ['']);
-  });
-
-  test('skip redundant right bracket', async ({ page }) => {
-    await enterPlaygroundRoom(page);
-    await initEmptyCodeBlockState(page);
-    await focusRichText(page);
-    await type(page, '(');
-    await assertRichTexts(page, ['()']);
-    await type(page, ')');
-    await assertRichTexts(page, ['()']);
-    await type(page, ')');
-    await assertRichTexts(page, ['())']);
-  });
-});
-
-// FIXME: getCurrentBlockRange need to handle comment node
-test.skip('should left/right key navigator works', async ({ page }) => {
+test('should left/right key navigator works', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await initThreeParagraphs(page);
@@ -589,36 +334,6 @@ test('should up/down key navigator works', async ({ page }) => {
   await assertRichTextInlineRange(page, 1, 1);
 });
 
-test('should cut in title works', async ({ page }) => {
-  await enterPlaygroundRoom(page);
-  await initEmptyParagraphState(page);
-
-  await focusTitle(page);
-  await type(page, 'hello');
-  await assertTitle(page, 'hello');
-
-  await dragOverTitle(page);
-  await cutByKeyboard(page);
-  await assertTitle(page, '');
-
-  await focusRichText(page);
-  await pasteByKeyboard(page);
-  await assertRichTexts(page, ['hello']);
-});
-
-test('enter in title should move cursor in new paragraph block', async ({
-  page,
-}) => {
-  await enterPlaygroundRoom(page);
-  await initEmptyParagraphState(page);
-  await focusTitle(page);
-  await type(page, 'hello');
-  await assertTitle(page, 'hello');
-  await pressEnter(page);
-  await type(page, 'world');
-  await assertRichTexts(page, ['world', '']);
-});
-
 test('should support ctrl/cmd+shift+l convert to linked doc', async ({
   page,
 }) => {
@@ -657,38 +372,6 @@ test('should forwardDelete works when delete single character', async ({
   await pressArrowLeft(page, 5);
   await pressForwardDelete(page);
   await assertRichTexts(page, ['ello']);
-});
-
-test('should forwardDelete works when delete multi characters', async ({
-  page,
-}) => {
-  test.info().annotations.push({
-    type: 'issue',
-    description: 'https://github.com/toeverything/blocksuite/issues/3122',
-  });
-  await enterPlaygroundRoom(page);
-  await initEmptyParagraphState(page);
-  await focusRichText(page, 0);
-  await type(page, 'hello');
-  await pressArrowLeft(page, 5);
-  await setInlineRangeInSelectedRichText(page, 1, 3);
-  await pressForwardDelete(page);
-  await assertRichTexts(page, ['ho']);
-});
-
-test('should drag multiple block and input text works', async ({ page }) => {
-  test.info().annotations.push({
-    type: 'issue',
-    description: 'https://github.com/toeverything/blocksuite/issues/2982',
-  });
-  await enterPlaygroundRoom(page);
-  await initEmptyParagraphState(page);
-  await initThreeParagraphs(page);
-  await dragBetweenIndices(page, [0, 1], [2, 1]);
-  await type(page, 'ab');
-  await assertRichTexts(page, ['1ab89']);
-  await undoByKeyboard(page);
-  await assertRichTexts(page, ['123', '456', '789']);
 });
 
 test.describe('keyboard operation to move block up or down', () => {
