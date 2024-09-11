@@ -420,7 +420,10 @@ export class EdgelessSnapManager extends Overlay {
     });
   }
 
-  setupAlignables(alignables: BlockSuite.EdgelessModel[]): Bound {
+  setupAlignables(
+    alignables: BlockSuite.EdgelessModel[],
+    exclude: BlockSuite.EdgelessModel[] = []
+  ): Bound {
     if (alignables.length === 0) return new Bound();
 
     const connectors = alignables.filter(isConnectable).reduce((prev, el) => {
@@ -437,7 +440,7 @@ export class EdgelessSnapManager extends Overlay {
     const viewportBounds = Bound.from(viewport.viewportBounds);
     this._surface.renderer.addOverlay(this);
     const canvasElements = this._rootService.elements;
-    const excludes = [...alignables, ...connectors];
+    const excludes = new Set([...alignables, ...exclude, ...connectors]);
     this._alignableBounds = [];
     (
       [
@@ -448,7 +451,7 @@ export class EdgelessSnapManager extends Overlay {
       const bounds = this._getBoundsWithRotationByAlignable(alignable);
       if (
         viewportBounds.isOverlapWithBound(bounds) &&
-        !excludes.includes(alignable)
+        !excludes.has(alignable)
       ) {
         this._alignableBounds.push(bounds);
       }

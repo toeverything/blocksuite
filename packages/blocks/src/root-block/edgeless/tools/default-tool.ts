@@ -618,14 +618,19 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     );
 
     if (
-      this._toBeMoved.every(
-        ele => !(ele.group instanceof MindmapElementModel)
-      ) ||
+      (this._toBeMoved.length &&
+        this._toBeMoved.every(
+          ele => !(ele.group instanceof MindmapElementModel)
+        )) ||
       (isSelectSingleMindMap(this._toBeMoved) &&
         this._toBeMoved[0].id ===
           (this._toBeMoved[0].group as MindmapElementModel).tree.id)
     ) {
-      this._alignBound = this._service.snap.setupAlignables(this._toBeMoved);
+      const mindmap = this._toBeMoved[0].group as MindmapElementModel;
+
+      this._alignBound = this._service.snap.setupAlignables(this._toBeMoved, [
+        ...(mindmap?.childElements || []),
+      ]);
     }
 
     this._clearDisposable();

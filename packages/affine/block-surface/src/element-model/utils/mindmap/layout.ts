@@ -15,12 +15,6 @@ export type NodeDetail = {
    */
   index: string;
   parent?: string;
-
-  /**
-   * The preferred layout direction of the node, it only works when the layout type is BALANCE
-   * and the node is on the first level
-   */
-  preferredDir?: LayoutType;
 };
 
 export type MindmapNode = {

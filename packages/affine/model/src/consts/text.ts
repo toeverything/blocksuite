@@ -63,7 +63,7 @@ export const FontFamilyList = Object.entries(FontFamilyMap) as {
 }[FontFamily][];
 
 export enum TextResizing {
-  AUTO_WIDTH,
+  AUTO_WIDTH_AND_HEIGHT,
   AUTO_HEIGHT,
 }
 

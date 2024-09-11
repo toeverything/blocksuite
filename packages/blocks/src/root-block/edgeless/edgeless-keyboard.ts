@@ -484,7 +484,14 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
         const selection = service.selection;
         if (event.code === 'Space' && !event.repeat) {
           this._space(event);
-        } else if (!selection.editing && event.key.length === 1) {
+        } else if (
+          !selection.editing &&
+          event.key.length === 1 &&
+          !event.shiftKey &&
+          !event.ctrlKey &&
+          !event.altKey &&
+          !event.metaKey
+        ) {
           const elements = selection.selectedElements;
           const doc = this.rootComponent.doc;
 

@@ -244,8 +244,8 @@ export function fitContent(shape: ShapeElementModel) {
       const str = delta.insert;
 
       maxWidth = Math.max(maxWidth, getLineWidth(str, font));
-      height += lineHeight + lineGap;
     }
+    height += lineHeight + lineGap;
   });
 
   height = Math.max(lineHeight + lineGap, height);

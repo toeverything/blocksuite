@@ -186,5 +186,5 @@ export function moveMindMapSubtree(
     return;
   }
 
-  return to.addTree(parent, subtree, index, layout);
+  return to.addTree(parent, subtree, index);
 }

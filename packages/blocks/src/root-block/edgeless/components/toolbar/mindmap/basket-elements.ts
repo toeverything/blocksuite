@@ -5,7 +5,6 @@ import {
   type MindmapElementModel,
 } from '@blocksuite/affine-block-surface';
 import {
-  LayoutType,
   type MindmapStyle,
   type ShapeElementModel,
   TextElementModel,
@@ -97,16 +96,10 @@ export const getMindmapRender =
     for (let i = 0; i < 3; i++) {
       const nodeX = x + rootW + 300;
       const nodeY = centerVertical - nodeH / 2 + (i - 1) * 50;
-      createNode(
-        root.id,
-        undefined,
-        undefined,
-        {
-          text: 'Text',
-          xywh: `[${nodeX},${nodeY},${nodeW},${nodeH}]`,
-        },
-        LayoutType.RIGHT
-      );
+      createNode(root.id, undefined, undefined, {
+        text: 'Text',
+        xywh: `[${nodeX},${nodeY},${nodeW},${nodeH}]`,
+      });
     }
 
     return mindmapId;

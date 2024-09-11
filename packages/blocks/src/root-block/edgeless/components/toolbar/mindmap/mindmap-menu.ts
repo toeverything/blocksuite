@@ -4,7 +4,10 @@ import type { Bound } from '@blocksuite/global/utils';
 import type { BlockModel } from '@blocksuite/store';
 
 import { toast } from '@blocksuite/affine-components/toast';
-import { EditPropsStore } from '@blocksuite/affine-shared/services';
+import {
+  EditPropsStore,
+  TelemetryProvider,
+} from '@blocksuite/affine-shared/services';
 import { modelContext, stdContext } from '@blocksuite/block-std';
 import { ErrorCode } from '@blocksuite/global/exceptions';
 import { consume } from '@lit/context';
@@ -173,8 +176,22 @@ export class EdgelessMindmapMenu extends EdgelessToolbarToolMixin(
     edgelessBlock.gfxViewportElm.append(placeholder);
 
     this.onImportMindMap?.(bound)
+      .then(() => {
+        this.std.get(TelemetryProvider)?.track('CanvasElementAdded', {
+          page: 'whiteboard editor',
+          type: 'imported mind map',
+          other: 'success',
+          module: 'toolbar',
+        });
+      })
       .catch(e => {
         if (e.code === ErrorCode.UserAbortError) return;
+        this.std.get(TelemetryProvider)?.track('CanvasElementAdded', {
+          page: 'whiteboard editor',
+          type: 'imported mind map',
+          other: 'failed',
+          module: 'toolbar',
+        });
         toast(this.edgeless.host, 'Import failed, please try again');
         console.error(e);
       })

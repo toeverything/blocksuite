@@ -152,7 +152,7 @@ export class MindmapElementModel extends GfxGroupLikeElementModel<MindmapElement
       keys(props.children).forEach(key => {
         const detail = pick<Record<string, unknown>, keyof NodeDetail>(
           props.children![key],
-          ['index', 'parent', 'preferredDir']
+          ['index', 'parent']
         );
         children.set(key as string, detail as NodeDetail);
       });
@@ -168,34 +168,11 @@ export class MindmapElementModel extends GfxGroupLikeElementModel<MindmapElement
       return;
     }
 
-    let splitDir: LayoutType | undefined = undefined;
     const tree = this._tree;
-    const splitPoint = tree.children.findIndex((child, index) => {
-      if (
-        child.detail.preferredDir === LayoutType.LEFT ||
-        (child.detail.preferredDir === LayoutType.RIGHT &&
-          child.children[index + 1]?.detail.preferredDir !== LayoutType.RIGHT)
-      ) {
-        splitDir = child.detail.preferredDir;
-        return true;
-      }
+    const splitPoint = Math.ceil(tree.children.length / 2);
 
-      return false;
-    });
-
-    if (
-      splitPoint === -1 ||
-      (splitDir === LayoutType.LEFT && splitPoint >= tree.children.length / 2)
-    ) {
-      const mid = Math.ceil(tree.children.length / 2);
-
-      tree.right.push(...tree.children.slice(0, mid));
-      tree.left.push(...tree.children.slice(mid));
-    } else {
-      tree.right.push(...tree.children.slice(0, splitPoint + 1));
-      tree.left.push(...tree.children.slice(splitPoint + 1));
-    }
-
+    tree.right.push(...tree.children.slice(0, splitPoint));
+    tree.left.push(...tree.children.slice(splitPoint));
     tree.left.reverse();
   }
 
@@ -286,13 +263,7 @@ export class MindmapElementModel extends GfxGroupLikeElementModel<MindmapElement
     parent: string | MindmapNode | null,
     sibling?: string | number,
     position: 'before' | 'after' = 'after',
-    props: Record<string, unknown> = {},
-
-    /**
-     * Force the layout direction of the node.
-     * It only works on the first level node with the layout type of BALANCE
-     */
-    direction?: LayoutType.LEFT | LayoutType.RIGHT
+    props: Record<string, unknown> = {}
   ) {
     if (parent && typeof parent !== 'string') {
       parent = parent.id;
@@ -314,10 +285,6 @@ export class MindmapElementModel extends GfxGroupLikeElementModel<MindmapElement
       const parentNode = parent ? this._nodeMap.get(parent)! : null;
 
       if (parentNode) {
-        const isBalance =
-          this.layoutType === LayoutType.BALANCE &&
-          this._tree.id === parentNode.id;
-
         let index = last(parentNode.children)
           ? generateKeyBetween(last(parentNode.children)!.detail.index, null)
           : 'a0';
@@ -340,7 +307,7 @@ export class MindmapElementModel extends GfxGroupLikeElementModel<MindmapElement
         id = this.surface.addElement({
           type,
           xywh: '[0,0,100,30]',
-          textResizing: TextResizing.AUTO_WIDTH,
+          textResizing: TextResizing.AUTO_WIDTH_AND_HEIGHT,
           maxWidth: false,
           ...props,
           ...style.node,
@@ -361,25 +328,12 @@ export class MindmapElementModel extends GfxGroupLikeElementModel<MindmapElement
                   parentNode.children[siblingIndex - 1]?.detail.index ?? null,
                   siblingNode.detail.index
                 );
-        } else if (isBalance && direction !== undefined) {
-          const lastNode =
-            direction === LayoutType.LEFT
-              ? this._tree.left[0]
-              : last(this._tree.right);
-
-          if (lastNode) {
-            index = generateKeyBetween(lastNode.detail.index, null);
-          }
         }
 
         const nodeDetail: NodeDetail = {
           index,
           parent: parent!,
         };
-
-        if (direction !== undefined && isBalance) {
-          nodeDetail.preferredDir = direction;
-        }
 
         this.children.set(id, nodeDetail);
       } else {
@@ -388,7 +342,7 @@ export class MindmapElementModel extends GfxGroupLikeElementModel<MindmapElement
         id = this.surface.addElement({
           type,
           xywh: '[0,0,113,41]',
-          textResizing: TextResizing.AUTO_WIDTH,
+          textResizing: TextResizing.AUTO_WIDTH_AND_HEIGHT,
           maxWidth: 400,
           ...props,
           ...rootStyle,
@@ -414,12 +368,7 @@ export class MindmapElementModel extends GfxGroupLikeElementModel<MindmapElement
      * if it's a number, it represents its index.
      * The subtree will be inserted before the sibling element.
      */
-    sibling?: string | number,
-
-    /**
-     * Preferred layout direction, only works when parent is root and layout type is BALANCE
-     */
-    layout?: LayoutType
+    sibling?: string | number
   ) {
     parent = typeof parent === 'string' ? parent : parent.id;
 
@@ -429,30 +378,16 @@ export class MindmapElementModel extends GfxGroupLikeElementModel<MindmapElement
 
     assertType<string>(parent);
 
-    if (
-      layout === LayoutType.BALANCE ||
-      this._nodeMap.get(parent) !== this._tree
-    ) {
-      layout = undefined;
-    }
-
     const traverse = (
       node: NodeType | MindmapNode,
       parent: string,
-      sibling?: string | number,
-      layout?: LayoutType.LEFT | LayoutType.RIGHT
+      sibling?: string | number
     ) => {
       let nodeId: string;
       if ('text' in node) {
-        nodeId = this.addNode(
-          parent,
-          sibling,
-          'before',
-          {
-            text: node.text,
-          },
-          layout
-        );
+        nodeId = this.addNode(parent, sibling, 'before', {
+          text: node.text,
+        });
       } else {
         this.children.set(node.id, {
           ...node.detail,
@@ -471,7 +406,7 @@ export class MindmapElementModel extends GfxGroupLikeElementModel<MindmapElement
     if (!('text' in tree)) {
       // Modify the children ymap directly hence need transaction
       this.surface.doc.transact(() => {
-        traverse(tree, parent, sibling, layout);
+        traverse(tree, parent, sibling);
       });
 
       this.applyStyle();
@@ -479,7 +414,7 @@ export class MindmapElementModel extends GfxGroupLikeElementModel<MindmapElement
 
       return this._nodeMap.get(tree.id);
     } else {
-      const nodeId = traverse(tree, parent, sibling, layout);
+      const nodeId = traverse(tree, parent, sibling);
 
       this.layout();
 
@@ -836,7 +771,6 @@ export class MindmapElementModel extends GfxGroupLikeElementModel<MindmapElement
               ...tree.detail,
               index,
               parent: parent.id,
-              preferredDir: layout,
             }
           : {
               ...tree.detail,

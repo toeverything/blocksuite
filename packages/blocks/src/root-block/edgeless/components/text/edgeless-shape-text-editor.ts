@@ -92,8 +92,6 @@ export class EdgelessShapeTextEditor extends WithDisposable(ShadowlessElement) {
     }
 
     this.element.textDisplay = true;
-    this.element.group instanceof MindmapElementModel &&
-      this.element.group.layout();
 
     this.remove();
     this.edgeless.service.selection.set({
@@ -115,8 +113,9 @@ export class EdgelessShapeTextEditor extends WithDisposable(ShadowlessElement) {
     if (
       (containerHeight !== this.element.h &&
         textResizing === TextResizing.AUTO_HEIGHT) ||
-      (textResizing === TextResizing.AUTO_WIDTH &&
-        containerWidth !== this.element.w)
+      (textResizing === TextResizing.AUTO_WIDTH_AND_HEIGHT &&
+        (containerWidth !== this.element.w ||
+          containerHeight !== this.element.h))
     ) {
       const [leftTopX, leftTopY] = Vec.rotWith(
         [this.richText.offsetLeft, this.richText.offsetTop],
@@ -131,7 +130,7 @@ export class EdgelessShapeTextEditor extends WithDisposable(ShadowlessElement) {
         xywh: new Bound(
           modelLeftTopX,
           modelLeftTopY,
-          textResizing === TextResizing.AUTO_WIDTH
+          textResizing === TextResizing.AUTO_WIDTH_AND_HEIGHT
             ? containerWidth
             : this.element.w,
           containerHeight
@@ -247,7 +246,7 @@ export class EdgelessShapeTextEditor extends WithDisposable(ShadowlessElement) {
       leftTopX,
       leftTopY
     );
-    const autoWidth = textResizing === TextResizing.AUTO_WIDTH;
+    const autoWidth = textResizing === TextResizing.AUTO_WIDTH_AND_HEIGHT;
     const color = ThemeObserver.generateColorProperty(
       this.element.color,
       '#000000'
@@ -258,15 +257,17 @@ export class EdgelessShapeTextEditor extends WithDisposable(ShadowlessElement) {
       left: x + 'px',
       top: y + 'px',
       width:
-        textResizing > TextResizing.AUTO_WIDTH
+        textResizing === TextResizing.AUTO_HEIGHT
           ? rect.width + 'px'
           : 'fit-content',
       // override rich-text style (height: 100%)
       height: 'initial',
       minHeight:
-        textResizing === TextResizing.AUTO_WIDTH ? '1em' : `${rect.height}px`,
+        textResizing === TextResizing.AUTO_WIDTH_AND_HEIGHT
+          ? '1em'
+          : `${rect.height}px`,
       maxWidth:
-        textResizing === TextResizing.AUTO_WIDTH
+        textResizing === TextResizing.AUTO_WIDTH_AND_HEIGHT
           ? this.element.maxWidth
             ? `${this.element.maxWidth}px`
             : undefined

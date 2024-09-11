@@ -230,10 +230,7 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
     return edgeless.service.getElementById(id) as ConnectorElementModel;
   }
 
-  private _addMindmapNode(
-    direction: LayoutType.LEFT | LayoutType.RIGHT,
-    target: 'sibling' | 'child'
-  ) {
+  private _addMindmapNode(target: 'sibling' | 'child') {
     const mindmap = this.current.group;
 
     if (!(mindmap instanceof MindmapElementModel)) return;
@@ -247,8 +244,7 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
       parentNode.id,
       target === 'sibling' ? this.current.id : undefined,
       undefined,
-      undefined,
-      direction
+      undefined
     );
 
     requestAnimationFrame(() => {
@@ -583,7 +579,7 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
         <div
           class="edgeless-auto-complete-arrow"
           @pointerdown=${() => {
-            this._addMindmapNode(layout, target);
+            this._addMindmapNode(target);
           }}
         >
           ${icon}
