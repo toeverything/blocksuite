@@ -16,6 +16,10 @@ import { customElement, property, query } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import Sortable from 'sortablejs';
 
+import type {
+  KanbanViewData,
+  TableViewData,
+} from '../../../view-presets/index.js';
 import type { SingleView } from '../../view-manager/single-view.js';
 import type { GroupRenderProps } from './matcher.js';
 
@@ -37,6 +41,7 @@ export class GroupSetting extends SignalWatcher(
       gap: 4px;
       ${unsafeCSS(dataViewCssVariable())};
     }
+
     .group-item {
       display: flex;
       padding: 4px 12px;
@@ -149,8 +154,9 @@ export class GroupSetting extends SignalWatcher(
   @property({ attribute: false })
   accessor view!: TableSingleView | KanbanSingleView;
 }
+
 export const selectGroupByProperty = (
-  view: SingleView,
+  view: SingleView<TableViewData | KanbanViewData>,
   onClose?: () => void
 ): MenuOptions => {
   return {
@@ -209,7 +215,7 @@ export const selectGroupByProperty = (
 };
 export const popSelectGroupByProperty = (
   target: HTMLElement,
-  view: SingleView,
+  view: SingleView<TableViewData | KanbanViewData>,
   onClose?: () => void
 ) => {
   popMenu(target, {
@@ -218,7 +224,7 @@ export const popSelectGroupByProperty = (
 };
 export const popGroupSetting = (
   target: HTMLElement,
-  view: SingleView,
+  view: SingleView<TableViewData | KanbanViewData>,
   onBack: () => void
 ) => {
   const groupBy = view.viewData$.value?.groupBy;

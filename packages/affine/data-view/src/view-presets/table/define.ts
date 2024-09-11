@@ -6,11 +6,6 @@ import { TableSingleView } from './table-view-manager.js';
 
 export const tableViewType = viewType('table');
 
-declare global {
-  interface DataViewDataTypeMap {
-    table: DataType;
-  }
-}
 export type TableViewColumn = {
   id: string;
   width: number;
@@ -33,7 +28,24 @@ export type TableViewData = BasicViewDataType<
   typeof tableViewType.type,
   DataType
 >;
-export const tableViewModel = tableViewType.modelConfig<TableViewData>({
+export const tableViewModel = tableViewType.createModel<TableViewData>({
   defaultName: 'Table View',
   dataViewManager: TableSingleView,
+  defaultData: viewManager => {
+    return {
+      mode: 'table',
+      columns: [],
+      filter: {
+        type: 'group',
+        op: 'and',
+        conditions: [],
+      },
+      header: {
+        titleColumn: viewManager.dataSource.properties$.value.find(
+          id => viewManager.dataSource.propertyGetType(id) === 'title'
+        ),
+        iconColumn: 'type',
+      },
+    };
+  },
 });

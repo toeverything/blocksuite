@@ -11,8 +11,8 @@ import {
   type DatabaseFlags,
   DataSourceBase,
   type DataViewDataType,
-  type DataViewTypes,
   type DetailSlots,
+  type TType,
   uniMap,
   type ViewManager,
   ViewManagerBase,
@@ -37,7 +37,6 @@ import {
   applyCellsUpdate,
   applyColumnUpdate,
   copyCellsByColumn,
-  databaseViewAddView,
   deleteRows,
   deleteView,
   duplicateView,
@@ -50,7 +49,11 @@ import {
   updateColumn,
   updateView,
 } from './utils.js';
-import { databaseBlockViewMap, databaseBlockViews } from './views/models.js';
+import {
+  databaseBlockViewConverts,
+  databaseBlockViewMap,
+  databaseBlockViews,
+} from './views/index.js';
 
 export type DatabaseBlockDataSourceConfig = {
   pageId: string;
@@ -83,6 +86,8 @@ export class DatabaseBlockDataSource extends DataSourceBase {
   rows$: ReadonlySignal<string[]> = computed(() => {
     return this._model.children.map(v => v.id);
   });
+
+  viewConverts = databaseBlockViewConverts;
 
   viewDataList$: ReadonlySignal<DataViewDataType[]> = computed(() => {
     return this._model.views$.value as DataViewDataType[];
@@ -301,6 +306,15 @@ export class DatabaseBlockDataSource extends DataSourceBase {
     );
   }
 
+  propertyGetDataType(propertyId: string): TType | undefined {
+    const data = this._model.columns$.value.find(v => v.id === propertyId);
+    if (!data) {
+      return;
+    }
+    const meta = this.getPropertyMeta(data.type);
+    return meta.config.type(data);
+  }
+
   override propertyGetDefaultWidth(propertyId: string): number {
     if (this.propertyGetType(propertyId) === 'title') {
       return 260;
@@ -360,13 +374,12 @@ export class DatabaseBlockDataSource extends DataSourceBase {
     }
   }
 
-  viewDataAdd(viewType: DataViewTypes): string {
+  viewDataAdd(viewData: DataViewDataType): string {
     this._model.doc.captureSync();
-    const view = databaseViewAddView(
-      this._model,
-      databaseBlockViewMap[viewType]
-    );
-    return view.id;
+    this._model.doc.transact(() => {
+      this._model.views = [...this._model.views, viewData];
+    });
+    return viewData.id;
   }
 
   viewDataDelete(viewId: string): void {

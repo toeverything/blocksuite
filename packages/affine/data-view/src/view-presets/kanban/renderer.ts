@@ -3,7 +3,7 @@ import { createIcon } from '../../core/utils/uni-icon.js';
 import { kanbanViewModel } from './define.js';
 import { DataViewKanban } from './kanban-view.js';
 
-export const kanbanViewConfig = kanbanViewModel.rendererConfig({
+export const kanbanViewMeta = kanbanViewModel.createMeta({
   icon: createIcon('DatabaseKanbanViewIcon'),
   view: createUniComponentFromWebComponent(DataViewKanban),
 });

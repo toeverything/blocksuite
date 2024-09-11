@@ -16,7 +16,7 @@ import {
 import {
   type ColumnMeta,
   type DataViewDataType,
-  type DataViewTypes,
+  type DataViewMode,
   defaultGroupBy,
   getTagColor,
   groupByMatcher,
@@ -31,7 +31,7 @@ import { databaseBlockAllColumnMap } from './columns/index.js';
 import { titlePureColumnConfig } from './columns/title/define.js';
 
 const initMap: Record<
-  DataViewTypes,
+  DataViewMode,
   (
     columnMetaMap: Record<string, ColumnMeta>,
     model: DatabaseBlockModel,

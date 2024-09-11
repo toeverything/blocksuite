@@ -49,7 +49,7 @@ export const database: InitFn = (collection: DocCollection, id: string) => {
             doc,
             model,
             databaseId,
-            viewPresets.tableViewConfig,
+            viewPresets.tableViewMeta,
             true
           );
           const database = doc.getBlockById(databaseId) as DatabaseBlockModel;
@@ -131,7 +131,7 @@ export const database: InitFn = (collection: DocCollection, id: string) => {
           doc.addBlock('affine:paragraph', {}, noteId);
           doc.addBlock('affine:paragraph', {}, noteId);
           doc.addBlock('affine:paragraph', {}, noteId);
-          service.databaseViewAddView(database, viewPresets.kanbanViewConfig);
+          service.databaseViewAddView(database, viewPresets.kanbanViewMeta);
 
           doc.resetHistory();
         })

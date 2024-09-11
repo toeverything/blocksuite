@@ -8,7 +8,7 @@ import {
 } from '@blocksuite/affine-components/icons';
 import { toast } from '@blocksuite/affine-components/toast';
 import { matchFlavours } from '@blocksuite/affine-shared/utils';
-import { tableViewConfig } from '@blocksuite/data-view/view-presets';
+import { tableViewMeta } from '@blocksuite/data-view/view-presets';
 import { assertExists } from '@blocksuite/global/utils';
 
 import {
@@ -95,7 +95,7 @@ export const quickActionConfig: QuickActionConfig[] = [
       );
     },
     action: host => {
-      convertToDatabase(host, tableViewConfig);
+      convertToDatabase(host, tableViewMeta);
     },
   },
   {

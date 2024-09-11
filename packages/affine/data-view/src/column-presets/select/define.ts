@@ -1,6 +1,5 @@
 import { nanoid } from '@blocksuite/store';
 
-import type { SelectColumnData } from '../../core/column/types.js';
 import type { SelectTag } from '../../core/utils/tags/multi-tag-select.js';
 
 import { columnType } from '../../core/column/column-config.js';
@@ -9,6 +8,9 @@ import { getTagColor } from '../../core/utils/tags/colors.js';
 
 export const selectColumnType = columnType('select');
 
+export type SelectColumnData = {
+  options: SelectTag[];
+};
 export const selectColumnModelConfig = selectColumnType.modelConfig<
   string,
   SelectColumnData

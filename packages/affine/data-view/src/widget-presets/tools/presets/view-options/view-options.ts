@@ -12,6 +12,10 @@ import { css, html } from 'lit';
 import { customElement } from 'lit/decorators.js';
 
 import type { SingleView } from '../../../../core/view-manager/single-view.js';
+import type {
+  KanbanViewData,
+  TableViewData,
+} from '../../../../view-presets/index.js';
 
 import { emptyFilterGroup } from '../../../../core/common/ast.js';
 import {
@@ -19,6 +23,7 @@ import {
   popSelectGroupByProperty,
 } from '../../../../core/common/group-by/setting.js';
 import { popPropertiesSetting } from '../../../../core/common/properties.js';
+import { renderUniLit } from '../../../../core/index.js';
 import { WidgetBase } from '../../../../core/widget/widget-base.js';
 import { popFilterModal } from '../../../filter/filter-modal.js';
 
@@ -81,7 +86,7 @@ export class DataViewHeaderToolsViewOptions extends WidgetBase {
     }
   }
 
-  override accessor view!: SingleView;
+  override accessor view!: SingleView<TableViewData | KanbanViewData>;
 }
 
 declare global {
@@ -91,7 +96,7 @@ declare global {
 }
 export const popViewOptions = (
   target: HTMLElement,
-  view: SingleView,
+  view: SingleView<TableViewData | KanbanViewData>,
   onClose?: () => void
 ) => {
   const reopen = () => {
@@ -107,6 +112,38 @@ export const popViewOptions = (
         },
       },
       items: [
+        {
+          type: 'group',
+          name: 'Layout',
+          children: () => [
+            {
+              type: 'sub-menu',
+              name: 'Layout',
+              options: {
+                input: {
+                  search: true,
+                },
+                items: view.viewManager.viewMetas.map(meta => {
+                  return {
+                    type: 'action',
+                    name: meta.model.defaultName,
+                    icon: renderUniLit(meta.renderer.icon),
+                    isSelected:
+                      meta.type === view.viewManager.currentView$.value.type,
+                    select: () => {
+                      console.log(meta.type);
+                      view.viewManager.viewChangeType(
+                        view.viewManager.currentViewId$.value,
+                        meta.type
+                      );
+                    },
+                  };
+                }),
+              },
+              icon: InfoIcon(),
+            },
+          ],
+        },
         {
           type: 'action',
           name: 'Properties',

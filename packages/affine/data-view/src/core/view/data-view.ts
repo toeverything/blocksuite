@@ -3,9 +3,6 @@ import type { SingleView } from '../view-manager/single-view.js';
 import type { ViewManager } from '../view-manager/view-manager.js';
 import type { DataViewExpose, DataViewProps } from './types.js';
 
-declare global {
-  export interface DataViewDataTypeMap {}
-}
 export type BasicViewDataType<
   Type extends string = string,
   T = NonNullable<unknown>,
@@ -14,22 +11,16 @@ export type BasicViewDataType<
   name: string;
   mode: Type;
 } & T;
-export type _DataViewDataTypeMap = {
-  [K in keyof DataViewDataTypeMap]: BasicViewDataType<
-    Extract<K, string>,
-    DataViewDataTypeMap[K]
-  >;
-};
+
 export type DefaultViewDataType = BasicViewDataType & {
   mode: string;
 };
-type FallBack<T> = [T] extends [never] ? DefaultViewDataType : T;
-export type DataViewDataType = FallBack<
-  _DataViewDataTypeMap[keyof _DataViewDataTypeMap]
->;
-export type DataViewTypes = keyof DataViewDataTypeMap;
 
-export interface DataViewConfig<
+export type DataViewDataType = DefaultViewDataType;
+
+export type DataViewMode = string;
+
+export interface DataViewModelConfig<
   Data extends DataViewDataType = DataViewDataType,
 > {
   defaultName: string;
@@ -37,7 +28,19 @@ export interface DataViewConfig<
     viewManager: ViewManager,
     viewId: string
   ) => SingleView<Data>;
+  defaultData: (viewManager: ViewManager) => Omit<Data, 'id' | 'name' | 'mode'>;
 }
+
+export type DataViewModel<
+  Type extends string = DataViewMode,
+  Data extends DataViewDataType = DataViewDataType,
+> = {
+  type: Type;
+  model: DataViewModelConfig<Data>;
+};
+
+export type GetDataFromDataViewModel<Model> =
+  Model extends DataViewModel<infer _, infer R> ? R : never;
 
 export interface DataViewRendererConfig {
   view: UniComponent<
@@ -50,22 +53,22 @@ export interface DataViewRendererConfig {
 }
 
 export type ViewMeta<
-  Type extends string = DataViewTypes,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  Data extends DataViewDataType = any,
-> = {
-  type: Type;
-  model: DataViewConfig<Data>;
+  Type extends string = DataViewMode,
+  Data extends DataViewDataType = DataViewDataType,
+> = DataViewModel<Type, Data> & {
   renderer: DataViewRendererConfig;
 };
+
 export const viewType = <Type extends string>(type: Type) => ({
   type,
-  modelConfig: <Data extends DataViewDataType>(
-    model: DataViewConfig<Data>
-  ) => ({
+  createModel: <Data extends DataViewDataType>(
+    model: DataViewModelConfig<Data>
+  ): DataViewModel<Type, Data> & {
+    createMeta: (renderer: DataViewRendererConfig) => ViewMeta<Type, Data>;
+  } => ({
     type,
     model,
-    rendererConfig: (renderer: DataViewRendererConfig) => ({
+    createMeta: renderer => ({
       type,
       model,
       renderer,

@@ -741,7 +741,7 @@ export const defaultSlashMenuConfig: SlashMenuConfig = {
           rootComponent.doc,
           model,
           id,
-          viewPresets.tableViewConfig,
+          viewPresets.tableViewMeta,
           false
         );
         tryRemoveEmptyLine(model);
@@ -800,7 +800,7 @@ export const defaultSlashMenuConfig: SlashMenuConfig = {
           rootComponent.doc,
           model,
           id,
-          viewPresets.kanbanViewConfig,
+          viewPresets.kanbanViewMeta,
           false
         );
         tryRemoveEmptyLine(model);
