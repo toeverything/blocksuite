@@ -13,7 +13,7 @@ import { GfxControllerIdentifier } from '@blocksuite/block-std/gfx';
 import { html } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 
-import type { MindmapService } from './service.js';
+import type { MindmapService } from './minmap-service.js';
 
 @customElement('mini-mindmap-surface-block')
 export class MindmapSurfaceBlock extends BlockComponent<SurfaceBlockModel> {
