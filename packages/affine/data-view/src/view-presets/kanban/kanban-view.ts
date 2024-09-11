@@ -3,6 +3,7 @@ import { AddCursorIcon } from '@blocksuite/icons/lit';
 import { css } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
+import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
 import Sortable from 'sortablejs';
 
@@ -10,7 +11,7 @@ import type { KanbanSingleView } from './kanban-view-manager.js';
 import type { KanbanViewSelectionWithType } from './types.js';
 
 import '../../core/common/group-by/define.js';
-import { renderUniLit } from '../../core/index.js';
+import { type DataViewExpose, renderUniLit } from '../../core/index.js';
 import { DataViewBase } from '../../core/view/data-view-base.js';
 import { KanbanClipboardController } from './controller/clipboard.js';
 import { KanbanDragController } from './controller/drag.js';
@@ -22,7 +23,6 @@ import './header.js';
 const styles = css`
   affine-data-view-kanban {
     user-select: none;
-    overflow: hidden;
     display: flex;
     flex-direction: column;
   }
@@ -32,7 +32,6 @@ const styles = css`
     z-index: 1;
     display: flex;
     gap: 20px;
-    width: 100%;
     padding-bottom: 4px;
     overflow-x: scroll;
     overflow-y: hidden;
@@ -100,6 +99,32 @@ export class DataViewKanban extends DataViewBase<
 
   clipboardController = new KanbanClipboardController(this);
 
+  expose: DataViewExpose = {
+    focusFirstCell: () => {
+      this.selectionController.focusFirstCell();
+    },
+    getSelection: () => {
+      return this.selectionController.selection;
+    },
+    hideIndicator: () => {
+      this.dragController.dropPreview.remove();
+    },
+    moveTo: (id, evt) => {
+      const position = this.dragController.getInsertPosition(evt);
+      if (position) {
+        position.group.group.manager.moveCardTo(
+          id,
+          '',
+          position.group.group.key,
+          position.position
+        );
+      }
+    },
+    showIndicator: evt => {
+      return this.dragController.shooIndicator(evt, undefined) != null;
+    },
+  };
+
   hotkeysController = new KanbanHotkeysController(this);
 
   onWheel = (event: WheelEvent) => {
@@ -139,7 +164,7 @@ export class DataViewKanban extends DataViewBase<
       });
     };
     return html` <div
-      style="height: 32px;width: 100px;flex-shrink:0;display:flex;align-items:center;"
+      style="height: 32px;flex-shrink:0;display:flex;align-items:center;"
       @click="${add}"
     >
       <div class="add-group-icon">${AddCursorIcon()}</div>
@@ -149,12 +174,12 @@ export class DataViewKanban extends DataViewBase<
   selectionController = new KanbanSelectionController(this);
 
   get groupManager() {
-    return this.view.groupManager;
+    return this.props.view.groupManager;
   }
 
   override firstUpdated() {
     const sortable = Sortable.create(this.groups, {
-      group: `kanban-group-drag-${this.view.id}`,
+      group: `kanban-group-drag-${this.props.view.id}`,
       handle: '.group-header',
       draggable: 'affine-data-view-kanban-group',
       animation: 100,
@@ -187,50 +212,36 @@ export class DataViewKanban extends DataViewBase<
     });
   }
 
-  focusFirstCell(): void {
-    this.selectionController.focusFirstCell();
-  }
-
-  getSelection() {
-    return this.selectionController.selection;
-  }
-
-  hideIndicator(): void {
-    this.dragController.dropPreview.remove();
-  }
-
-  moveTo(id: string, evt: MouseEvent): void {
-    const position = this.dragController.getInsertPosition(evt);
-    if (position) {
-      position.group.group.manager.moveCardTo(
-        id,
-        '',
-        position.group.group.key,
-        position.position
-      );
-    }
-  }
-
   override render() {
     const groups = this.groupManager.groupsDataList$.value;
     if (!groups) {
       return html``;
     }
-
+    const vPadding = this.props.virtualPadding$.value;
+    const wrapperStyle = styleMap({
+      marginLeft: `-${vPadding}px`,
+      marginRight: `-${vPadding}px`,
+      paddingLeft: `${vPadding}px`,
+      paddingRight: `${vPadding}px`,
+    });
     return html`
-      ${renderUniLit(this.headerWidget, {
-        view: this.view,
-        viewMethods: this,
+      ${renderUniLit(this.props.headerWidget, {
+        view: this.props.view,
+        viewMethods: this.expose,
       })}
-      <div class="affine-data-view-kanban-groups" @wheel="${this.onWheel}">
+      <div
+        class="affine-data-view-kanban-groups"
+        style="${wrapperStyle}"
+        @wheel="${this.onWheel}"
+      >
         ${repeat(
           groups,
           group => group.key,
           group => {
             return html` <affine-data-view-kanban-group
               data-key="${group.key}"
-              .dataViewEle="${this.dataViewEle}"
-              .view="${this.view}"
+              .dataViewEle="${this.props.dataViewEle}"
+              .view="${this.props.view}"
               .group="${group}"
             ></affine-data-view-kanban-group>`;
           }
@@ -238,10 +249,6 @@ export class DataViewKanban extends DataViewBase<
         ${this.renderAddGroup()}
       </div>
     `;
-  }
-
-  showIndicator(evt: MouseEvent): boolean {
-    return this.dragController.shooIndicator(evt, undefined) != null;
   }
 
   @query('.affine-data-view-kanban-groups')

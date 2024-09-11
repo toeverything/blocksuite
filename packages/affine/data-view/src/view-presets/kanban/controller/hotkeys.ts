@@ -13,7 +13,7 @@ export class KanbanHotkeysController implements ReactiveController {
 
   hostConnected() {
     this.host.disposables.add(
-      this.host.bindHotkey({
+      this.host.props.bindHotkey({
         Escape: () => {
           this.host.selectionController.focusOut();
           return true;

@@ -21,7 +21,7 @@ import {
 } from '@blocksuite/data-view';
 import { widgetPresets } from '@blocksuite/data-view/widget-presets';
 import { Slice } from '@blocksuite/store';
-import { computed } from '@lit-labs/preact-signals';
+import { computed, signal } from '@lit-labs/preact-signals';
 import { css, nothing, unsafeCSS } from 'lit';
 import { customElement } from 'lit/decorators.js';
 import { html } from 'lit/static-html.js';
@@ -30,10 +30,9 @@ import type { NoteBlockComponent } from '../note-block/index.js';
 import type { DataViewBlockModel } from './data-view-model.js';
 
 import {
-  type AffineInnerModalWidget,
   EdgelessRootBlockComponent,
+  type RootService,
 } from '../root-block/index.js';
-import { AFFINE_INNER_MODAL_WIDGET } from '../root-block/widgets/inner-modal/inner-modal.js';
 import { BlockQueryDataSource } from './data-source.js';
 
 @customElement('affine-data-view')
@@ -153,7 +152,7 @@ export class DataViewBlockComponent extends CaptionedBlockComponent<DataViewBloc
   };
 
   getRootService = () => {
-    return this.std.getService('affine:page');
+    return this.std.getService<RootService>('affine:page');
   };
 
   headerWidget: DataViewWidget = defineUniComponent(
@@ -228,12 +227,6 @@ export class DataViewBlockComponent extends CaptionedBlockComponent<DataViewBloc
     return this._dataSource;
   }
 
-  get innerModalWidget() {
-    return this.rootComponent?.widgetComponents[
-      AFFINE_INNER_MODAL_WIDGET
-    ] as AffineInnerModalWidget;
-  }
-
   override get topContenteditableElement() {
     if (this.rootComponent instanceof EdgelessRootBlockComponent) {
       const note = this.closest<NoteBlockComponent>('affine-note');
@@ -266,6 +259,7 @@ export class DataViewBlockComponent extends CaptionedBlockComponent<DataViewBloc
     return html`
       <div contenteditable="false" style="position: relative">
         ${this.dataView.render({
+          virtualPadding$: signal(0),
           bindHotkey: this._bindHotkey,
           handleEvent: this._handleEvent,
           selection$: this.selection$,
@@ -274,10 +268,13 @@ export class DataViewBlockComponent extends CaptionedBlockComponent<DataViewBloc
           headerWidget: this.headerWidget,
           std: this.std,
           detailPanelConfig: {
-            openDetailPanel: peekViewService
-              ? (target, template) => peekViewService.peek(target, template)
-              : undefined,
-            target: () => this.innerModalWidget.target,
+            openDetailPanel: (target, template) => {
+              if (peekViewService) {
+                return peekViewService.peek(target, template);
+              } else {
+                return Promise.resolve();
+              }
+            },
           },
         })}
       </div>

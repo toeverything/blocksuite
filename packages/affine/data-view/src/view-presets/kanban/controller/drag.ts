@@ -39,7 +39,7 @@ export class KanbanDragController implements ReactiveController {
         }
         preview.display(evt.x - offsetLeft, evt.y - offsetTop);
         if (!Rect.fromDOM(this.host).isPointIn(Point.from(evt))) {
-          const callback = this.host.onDrag;
+          const callback = this.host.props.onDrag;
           if (callback) {
             this.dropPreview.remove();
             return {
@@ -136,11 +136,11 @@ export class KanbanDragController implements ReactiveController {
   }
 
   hostConnected() {
-    if (this.host.view.readonly$.value) {
+    if (this.host.props.view.readonly$.value) {
       return;
     }
     this.host.disposables.add(
-      this.host.handleEvent('dragStart', context => {
+      this.host.props.handleEvent('dragStart', context => {
         const event = context.get('pointerState').raw;
         const target = event.target;
         if (target instanceof Element) {

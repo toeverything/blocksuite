@@ -253,3 +253,13 @@ declare global {
     'affine-data-view-record-detail': RecordDetail;
   }
 }
+export const createRecordDetail = (ops: {
+  view: SingleView;
+  rowId: string;
+}) => {
+  return html`<affine-data-view-record-detail
+    .view=${ops.view}
+    .rowId=${ops.rowId}
+    class="data-view-popup-container"
+  ></affine-data-view-record-detail>`;
+};

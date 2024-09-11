@@ -27,12 +27,12 @@ import {
   MoreHorizontalIcon,
 } from '@blocksuite/icons/lit';
 import { Slice } from '@blocksuite/store';
-import { computed } from '@lit-labs/preact-signals';
+import { autoUpdate } from '@floating-ui/dom';
+import { computed, signal } from '@lit-labs/preact-signals';
 import { css, html, nothing, unsafeCSS } from 'lit';
 import { customElement } from 'lit/decorators.js';
 
 import type { NoteBlockComponent } from '../note-block/index.js';
-import type { AffineInnerModalWidget } from '../root-block/index.js';
 import type { DatabaseOptionsConfig } from './config.js';
 import type { DatabaseBlockService } from './database-service.js';
 
@@ -40,12 +40,13 @@ import { DragIndicator } from '../_common/components/index.js';
 import {
   AffineDragHandleWidget,
   EdgelessRootBlockComponent,
+  type RootService,
 } from '../root-block/index.js';
 import {
   captureEventTarget,
   getDropResult,
 } from '../root-block/widgets/drag-handle/utils.js';
-import { AFFINE_INNER_MODAL_WIDGET } from '../root-block/widgets/inner-modal/inner-modal.js';
+import { popSideDetail } from './components/layout.js';
 import './components/title/index.js';
 import { DatabaseBlockDataSource } from './data-source.js';
 
@@ -177,7 +178,7 @@ export class DatabaseBlockComponent extends CaptionedBlockComponent<
   };
 
   getRootService = () => {
-    return this.std.getService('affine:page');
+    return this.std.getService<RootService>('affine:page');
   };
 
   headerWidget: DataViewWidget = defineUniComponent(
@@ -281,6 +282,8 @@ export class DatabaseBlockComponent extends CaptionedBlockComponent<
     return databaseSelection?.viewSelection;
   });
 
+  virtualPadding$ = signal(0);
+
   get dataSource(): DatabaseBlockDataSource {
     if (!this._dataSource) {
       this._dataSource = new DatabaseBlockDataSource(this.host, {
@@ -289,12 +292,6 @@ export class DatabaseBlockComponent extends CaptionedBlockComponent<
       });
     }
     return this._dataSource;
-  }
-
-  get innerModalWidget() {
-    return this.rootComponent!.widgetComponents[
-      AFFINE_INNER_MODAL_WIDGET
-    ] as AffineInnerModalWidget;
   }
 
   get optionsConfig(): DatabaseOptionsConfig {
@@ -329,6 +326,7 @@ export class DatabaseBlockComponent extends CaptionedBlockComponent<
     super.connectedCallback();
 
     this.setAttribute(RANGE_SYNC_EXCLUDE_ATTR, 'true');
+    this.listenFullWidthChange();
     let canDrop = false;
     this.disposables.add(
       AffineDragHandleWidget.registerOption({
@@ -374,6 +372,20 @@ export class DatabaseBlockComponent extends CaptionedBlockComponent<
     );
   }
 
+  listenFullWidthChange() {
+    if (!this.doc.awarenessStore.getFlag('enable_database_full_width')) {
+      return;
+    }
+    this.disposables.add(
+      autoUpdate(this.host, this, () => {
+        const padding =
+          this.getBoundingClientRect().left -
+          this.host.getBoundingClientRect().left;
+        this.virtualPadding$.value = padding;
+      })
+    );
+  }
+
   override renderBlock() {
     const peekViewService = this.std.getOptional(PeekViewProvider);
     return html`
@@ -382,6 +394,7 @@ export class DatabaseBlockComponent extends CaptionedBlockComponent<
         style="position: relative;background-color: var(--affine-background-primary-color);border-radius: 4px"
       >
         ${this.dataView.render({
+          virtualPadding$: this.virtualPadding$,
           bindHotkey: this._bindHotkey,
           handleEvent: this._handleEvent,
           selection$: this.viewSelection$,
@@ -391,10 +404,13 @@ export class DatabaseBlockComponent extends CaptionedBlockComponent<
           onDrag: this.onDrag,
           std: this.std,
           detailPanelConfig: {
-            openDetailPanel: peekViewService
-              ? (target, template) => peekViewService.peek(target, template)
-              : undefined,
-            target: () => this.innerModalWidget.target,
+            openDetailPanel: (target, template) => {
+              if (peekViewService) {
+                return peekViewService.peek(target, template);
+              } else {
+                return popSideDetail(template);
+              }
+            },
           },
         })}
       </div>

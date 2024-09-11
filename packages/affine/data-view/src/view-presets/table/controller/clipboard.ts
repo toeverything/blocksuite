@@ -47,7 +47,7 @@ export class TableClipboardController implements ReactiveController {
         }
       }
       if (deleteRows.length) {
-        table.view.rowDelete(deleteRows);
+        this.props.view.rowDelete(deleteRows);
       }
     }
     this.std.clipboard
@@ -61,13 +61,13 @@ export class TableClipboardController implements ReactiveController {
       .then(() => {
         if (area[0]?.row) {
           toast(
-            this.host.std.host,
+            this.std.host,
             `${area.length} row${area.length > 1 ? 's' : ''} copied to clipboard`
           );
         } else {
           const count = area.flatMap(row => row.cells).length;
           toast(
-            this.host.std.host,
+            this.std.host,
             `${count} cell${count > 1 ? 's' : ''} copied to clipboard`
           );
         }
@@ -104,12 +104,16 @@ export class TableClipboardController implements ReactiveController {
     return true;
   };
 
+  get props() {
+    return this.host.props;
+  }
+
   private get readonly() {
-    return this.host.view.readonly$.value;
+    return this.props.view.readonly$.value;
   }
 
   private get std() {
-    return this.host.std;
+    return this.props.std;
   }
 
   constructor(public host: DataViewTable) {
@@ -134,7 +138,7 @@ export class TableClipboardController implements ReactiveController {
 
   hostConnected() {
     this.host.disposables.add(
-      this.host.handleEvent('copy', _ctx => {
+      this.props.handleEvent('copy', _ctx => {
         const tableSelection = this.host.selectionController.selection;
         if (!tableSelection) return false;
 
@@ -144,7 +148,7 @@ export class TableClipboardController implements ReactiveController {
     );
 
     this.host.disposables.add(
-      this.host.handleEvent('cut', _ctx => {
+      this.props.handleEvent('cut', _ctx => {
         const tableSelection = this.host.selectionController.selection;
         if (!tableSelection) return false;
 
@@ -154,7 +158,7 @@ export class TableClipboardController implements ReactiveController {
     );
 
     this.host.disposables.add(
-      this.host.handleEvent('paste', ctx => {
+      this.props.handleEvent('paste', ctx => {
         if (this.readonly) return false;
 
         this._onPaste(ctx).catch(console.error);
@@ -168,7 +172,7 @@ function getSelectedArea(
   selection: TableViewSelection,
   table: DataViewTable
 ): SelectedArea | undefined {
-  const view = table.view;
+  const view = table.props.view;
   if (TableRowSelection.is(selection)) {
     const rows = TableRowSelection.rows(selection)
       .map(row => {
