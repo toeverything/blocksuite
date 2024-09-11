@@ -59,8 +59,9 @@ export * from './root-block/index.js';
 export * from './schemas.js';
 export {
   markdownToMindmap,
+  MindmapSurfaceBlock,
   MiniMindmapPreview,
-} from './surface-block/mini-mindmap/mindmap-preview.js';
+} from './surface-block/mini-mindmap/index.js';
 export * from './surface-ref-block/index.js';
 export * from '@blocksuite/affine-block-list';
 export * from '@blocksuite/affine-block-paragraph';

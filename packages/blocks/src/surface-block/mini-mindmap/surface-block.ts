@@ -17,7 +17,7 @@ import type { MindmapService } from './minmap-service.js';
 
 @customElement('mini-mindmap-surface-block')
 export class MindmapSurfaceBlock extends BlockComponent<SurfaceBlockModel> {
-  private _renderer?: CanvasRenderer;
+  renderer?: CanvasRenderer;
 
   private get _grid() {
     return this.std.get(GfxControllerIdentifier).grid;
@@ -83,7 +83,7 @@ export class MindmapSurfaceBlock extends BlockComponent<SurfaceBlockModel> {
   private _setupRenderer() {
     this._disposables.add(
       this.model.elementUpdated.on(() => {
-        this._renderer?.refresh();
+        this.renderer?.refresh();
         this.mindmapService.center();
       })
     );
@@ -94,7 +94,7 @@ export class MindmapSurfaceBlock extends BlockComponent<SurfaceBlockModel> {
   override connectedCallback(): void {
     super.connectedCallback();
 
-    this._renderer = new CanvasRenderer({
+    this.renderer = new CanvasRenderer({
       viewport: this.viewport,
       layerManager: this._layer,
       gridManager: this._grid,
@@ -114,7 +114,7 @@ export class MindmapSurfaceBlock extends BlockComponent<SurfaceBlockModel> {
   }
 
   override firstUpdated(_changedProperties: Map<PropertyKey, unknown>): void {
-    this._renderer?.attach(this.editorContainer);
+    this.renderer?.attach(this.editorContainer);
 
     this._resizeEffect();
     this._setupCenterEffect();
