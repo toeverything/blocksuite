@@ -1,4 +1,4 @@
-import type { ReferenceInfo } from '@blocksuite/affine-model';
+import type { ReferenceParams } from '@blocksuite/affine-model';
 import type { ExtensionType } from '@blocksuite/block-std';
 
 import { createIdentifier } from '@blocksuite/global/di';
@@ -13,10 +13,11 @@ export interface QuickSearchService {
 }
 
 export type QuickSearchResult =
-  | ({
+  | {
       docId: string;
       isNewDoc?: boolean;
-    } & Omit<ReferenceInfo, 'pageId'>)
+      params?: ReferenceParams;
+    }
   | { userInput: string }
   | null;
 
