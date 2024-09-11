@@ -1,16 +1,13 @@
+import type { EditorHost, ExtensionType } from '@blocksuite/block-std';
 import type { BlockCollection, DocCollection } from '@blocksuite/store';
 
-import {
-  BlockServiceWatcher,
-  type EditorHost,
-  type ExtensionType,
-} from '@blocksuite/block-std';
+import { PeekViewExtension } from '@blocksuite/affine-components/peek';
 import {
   CommunityCanvasTextFonts,
+  DocModeExtension,
   DocModeProvider,
   FontConfigExtension,
   NotificationExtension,
-  type PageRootService,
   QuickSearchExtension,
 } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
@@ -103,35 +100,23 @@ export async function mountDefaultDocEditor(collection: DocCollection) {
   return editor;
 
   function patchPageRootSpec(spec: ExtensionType[]) {
-    class PatchPageServiceWatcher extends BlockServiceWatcher {
-      static override readonly flavour = 'affine:page';
-
-      override mounted() {
-        const pageRootService = this.blockService as PageRootService;
-        pageRootService.peekViewService = {
-          peek(target: unknown) {
-            alert('Peek view not implemented in playground');
-            console.log('peek', target);
-            return Promise.resolve();
-          },
-        };
-      }
-    }
     const setEditorModeCallBack = editor.switchEditor.bind(editor);
     const getEditorModeCallback = () => editor.mode;
     const newSpec: typeof spec = [
       ...spec,
-      {
-        setup: di => {
-          di.override(DocModeProvider, () =>
-            mockDocModeService(getEditorModeCallback, setEditorModeCallBack)
-          );
-        },
-      },
+      DocModeExtension(
+        mockDocModeService(getEditorModeCallback, setEditorModeCallBack)
+      ),
       QuickSearchExtension(mockQuickSearchService(collection)),
       NotificationExtension(mockNotificationService(editor)),
-      PatchPageServiceWatcher,
       FontConfigExtension(CommunityCanvasTextFonts),
+      PeekViewExtension({
+        peek(target: unknown) {
+          alert('Peek view not implemented in playground');
+          console.log('peek', target);
+          return Promise.resolve();
+        },
+      }),
     ];
 
     return newSpec;

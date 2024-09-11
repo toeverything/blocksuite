@@ -2,6 +2,7 @@ import type { DatabaseBlockModel } from '@blocksuite/affine-model';
 
 import { CaptionedBlockComponent } from '@blocksuite/affine-components/caption';
 import { popMenu } from '@blocksuite/affine-components/context-menu';
+import { PeekViewProvider } from '@blocksuite/affine-components/peek';
 import { toast } from '@blocksuite/affine-components/toast';
 import { DatabaseBlockSchema } from '@blocksuite/affine-model';
 import { NOTE_SELECTOR } from '@blocksuite/affine-shared/consts';
@@ -374,7 +375,7 @@ export class DatabaseBlockComponent extends CaptionedBlockComponent<
   }
 
   override renderBlock() {
-    const peekViewService = this.getRootService()?.peekViewService;
+    const peekViewService = this.std.getOptional(PeekViewProvider);
     return html`
       <div
         contenteditable="false"

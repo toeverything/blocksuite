@@ -1,9 +1,7 @@
-import type { PeekViewService } from '@blocksuite/affine-components/peek';
 import type { RefNodeSlots } from '@blocksuite/affine-components/rich-text';
 import type { BlockComponent } from '@blocksuite/block-std';
 
 import { RootBlockSchema } from '@blocksuite/affine-model';
-import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import { BlockService } from '@blocksuite/block-std';
 
 import type { RootBlockComponent } from './types.js';
@@ -35,11 +33,7 @@ export abstract class RootService extends BlockService {
 
   readonly fileDropManager = new FileDropManager(this, this._fileDropOptions);
 
-  peekViewService: PeekViewService | null = null;
-
   abstract slots: RefNodeSlots;
-
-  readonly themeObserver = ThemeObserver.instance;
 
   transformers = {
     markdown: MarkdownTransformer,

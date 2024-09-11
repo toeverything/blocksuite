@@ -80,13 +80,7 @@ export {
   TagsIcon,
 } from '@blocksuite/affine-components/icons';
 export * from '@blocksuite/affine-components/icons';
-export {
-  isPeekable,
-  peek,
-  Peekable,
-  PeekableController,
-  type PeekViewService,
-} from '@blocksuite/affine-components/peek';
+export * from '@blocksuite/affine-components/peek';
 export {
   createLitPortal,
   createSimplePortal,

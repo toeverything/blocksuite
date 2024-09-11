@@ -25,6 +25,7 @@ import {
   FontLoaderService,
   TelemetryProvider,
 } from '@blocksuite/affine-shared/services';
+import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import {
   handleNativeRangeAtPoint,
   humanFileSize,
@@ -381,7 +382,7 @@ export class EdgelessRootBlockComponent extends BlockComponent<
     const { disposables, slots } = this;
 
     this.disposables.add(
-      this.service.themeObserver.mode$.subscribe(() => this.surface.refresh())
+      ThemeObserver.instance.mode$.subscribe(() => this.surface.refresh())
     );
 
     disposables.add(this.service.selection);

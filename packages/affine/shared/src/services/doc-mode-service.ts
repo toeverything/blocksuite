@@ -1,5 +1,5 @@
 import type { DocMode } from '@blocksuite/affine-model';
-import type { BlockStdScope } from '@blocksuite/block-std';
+import type { BlockStdScope, ExtensionType } from '@blocksuite/block-std';
 import type { Container } from '@blocksuite/global/di';
 
 import { Extension, StdIdentifier } from '@blocksuite/block-std';
@@ -102,4 +102,12 @@ export class DocModeService extends Extension implements DocModeProvider {
 
     return mode;
   }
+}
+
+export function DocModeExtension(service: DocModeProvider): ExtensionType {
+  return {
+    setup: di => {
+      di.override(DocModeProvider, () => service);
+    },
+  };
 }

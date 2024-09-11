@@ -11,6 +11,7 @@ import type { IBound } from '@blocksuite/global/utils';
 
 import '@blocksuite/affine-block-surface';
 import { FontLoaderService } from '@blocksuite/affine-shared/services';
+import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import { BlockComponent } from '@blocksuite/block-std';
 import {
   GfxBlockElementModel,
@@ -172,7 +173,7 @@ export class EdgelessRootPreviewBlockComponent extends BlockComponent<
     const { disposables } = this;
 
     this.disposables.add(
-      this.service.themeObserver.mode$.subscribe(() => this.surface.refresh())
+      ThemeObserver.instance.mode$.subscribe(() => this.surface.refresh())
     );
 
     disposables.add(this.service.selection);
