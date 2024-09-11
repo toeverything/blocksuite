@@ -1,6 +1,6 @@
 {
   "name": "@blocksuite/data-view",
-  "version": "0.17.6",
+  "version": "0.17.7",
   "description": "views of database",
   "type": "module",
   "repository": "toeverything/blocksuite",
