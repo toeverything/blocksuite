@@ -1,10 +1,9 @@
-import type { GfxModel } from '@blocksuite/block-std/gfx';
-
 import { LayoutType, type ShapeElementModel } from '@blocksuite/affine-model';
+import { generateKeyBetween, type GfxModel } from '@blocksuite/block-std/gfx';
 import { assertType } from '@blocksuite/global/utils';
 
-import type { MindmapElementModel } from '../../mindmap.js';
-import type { MindmapNode } from './layout.js';
+import type { MindmapElementModel, NodeType } from '../../mindmap.js';
+import type { MindmapNode, NodeDetail } from './layout.js';
 
 import { ConnectorPathGenerator } from '../../../managers/connector-manager.js';
 
@@ -164,6 +163,162 @@ export function hideTargetConnector(
   };
 }
 
+function moveTree(
+  mindmap: MindmapElementModel,
+  tree: MindmapNode,
+  parent: string | MindmapNode,
+  siblingIndex: number,
+  layout?: LayoutType
+) {
+  parent = mindmap.nodeMap.get(
+    typeof parent === 'string' ? parent : parent.id
+  )!;
+
+  if (!parent || !mindmap.nodeMap.has(tree.id)) {
+    return;
+  }
+
+  assertType<MindmapNode>(parent);
+
+  if (layout === LayoutType.BALANCE || parent !== mindmap.tree) {
+    layout = undefined;
+  }
+
+  const sibling = parent.children[siblingIndex];
+  const preSibling = parent.children[siblingIndex - 1];
+  const index =
+    sibling || preSibling
+      ? generateKeyBetween(
+          preSibling?.detail.index ?? null,
+          sibling?.detail.index ?? null
+        )
+      : (tree.detail.index ?? undefined);
+
+  mindmap.surface.doc.transact(() => {
+    const val: NodeDetail =
+      layout !== undefined
+        ? {
+            ...tree.detail,
+            index,
+            parent: parent.id,
+          }
+        : {
+            ...tree.detail,
+            index,
+            parent: parent.id,
+          };
+
+    mindmap.children.set(tree.id, val);
+  });
+
+  mindmap.layout();
+
+  return mindmap.nodeMap.get(tree.id);
+}
+
+function addTree(
+  mindmap: MindmapElementModel,
+  parent: string | MindmapNode,
+  tree: NodeType | MindmapNode,
+  /**
+   * `sibling` indicates where to insert a subtree among peer elements.
+   * If it's a string, it represents a peer element's ID;
+   * if it's a number, it represents its index.
+   * The subtree will be inserted before the sibling element.
+   */
+  sibling?: string | number
+) {
+  parent = typeof parent === 'string' ? parent : parent.id;
+
+  if (!mindmap.nodeMap.has(parent) || !parent) {
+    return null;
+  }
+
+  assertType<string>(parent);
+
+  const traverse = (
+    node: NodeType | MindmapNode,
+    parent: string,
+    sibling?: string | number
+  ) => {
+    let nodeId: string;
+    if ('text' in node) {
+      nodeId = mindmap.addNode(parent, sibling, 'before', {
+        text: node.text,
+      });
+    } else {
+      mindmap.children.set(node.id, {
+        ...node.detail,
+        parent,
+      });
+      nodeId = node.id;
+    }
+
+    node.children?.forEach(child => {
+      traverse(child, nodeId);
+    });
+
+    return nodeId;
+  };
+
+  if (!('text' in tree)) {
+    // Modify the children ymap directly hence need transaction
+    mindmap.surface.doc.transact(() => {
+      traverse(tree, parent, sibling);
+    });
+
+    mindmap.applyStyle();
+    mindmap.layout();
+
+    return mindmap.nodeMap.get(tree.id);
+  } else {
+    const nodeId = traverse(tree, parent, sibling);
+
+    mindmap.layout();
+
+    return mindmap.nodeMap.get(nodeId);
+  }
+}
+
+/**
+ * Detach a mindmap. It is similar to `removeChild` but
+ * it does not delete the node.
+ *
+ * So the node can be used to create a new mind map or merge into other mind map
+ */
+export function detachMindmap(
+  mindmap: MindmapElementModel,
+  subtree: string | MindmapNode
+) {
+  subtree =
+    typeof subtree === 'string' ? mindmap.nodeMap.get(subtree)! : subtree;
+
+  assertType<MindmapNode>(subtree);
+
+  if (!subtree) return;
+
+  const traverse = (subtree: MindmapNode) => {
+    mindmap.children.delete(subtree.id);
+
+    // cut the reference inside the ymap
+    subtree.detail = {
+      ...subtree.detail,
+    };
+
+    subtree.children.forEach(child => traverse(child));
+  };
+
+  mindmap.surface.doc.transact(() => {
+    traverse(subtree);
+  });
+
+  mindmap.layout();
+
+  delete subtree.detail.parent;
+
+  return subtree;
+}
+
 /**
  * Move a subtree from one mind map to another
  * @param subtree
@@ -179,12 +334,10 @@ export function moveMindMapSubtree(
   layout?: LayoutType
 ) {
   if (from === to) {
-    return from.moveTree(subtree, parent, index, layout);
+    return moveTree(from, subtree, parent, index, layout);
   }
 
-  if (!from.detach(subtree)) {
-    return;
-  }
+  if (!detachMindmap(from, subtree)) return;
 
-  return to.addTree(parent, subtree, index);
+  return addTree(to, parent, subtree, index);
 }
