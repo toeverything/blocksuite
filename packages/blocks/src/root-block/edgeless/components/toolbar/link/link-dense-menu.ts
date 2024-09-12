@@ -24,14 +24,6 @@ export const buildLinkDenseMenu: DenseMenuBuilder = edgeless => ({
             module: 'toolbar',
             type: type.flavour?.split(':')[1],
           });
-        if (type.isNewDoc) {
-          edgeless.std.getOptional(TelemetryProvider)?.track('DocCreated', {
-            control: 'toolbar:general',
-            page: 'whiteboard editor',
-            module: 'edgeless toolbar',
-            type: type.flavour?.split(':')[1],
-          });
-        }
       })
       .catch(console.error);
   },

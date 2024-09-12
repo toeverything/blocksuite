@@ -4,7 +4,7 @@ import {
   type DocMode,
   type DocModeProvider,
   type NotificationService,
-  type QuickSearchService,
+  type ParseDocUrlService,
   toast,
 } from '@blocksuite/blocks';
 import { type DocCollection, Slot } from '@blocksuite/store';
@@ -92,15 +92,11 @@ export function mockNotificationService(editor: AffineEditorContainer) {
   return notificationService;
 }
 
-export function mockQuickSearchService(collection: DocCollection) {
-  const quickSearchService: QuickSearchService = {
-    async searchDoc({ userInput }) {
-      if (!userInput) {
-        return null;
-      }
-      if (URL.canParse(userInput)) {
-        await new Promise(resolve => setTimeout(resolve, 500));
-        const path = new URL(userInput).pathname;
+export function mockParseDocUrlService(collection: DocCollection) {
+  const parseDocUrlService: ParseDocUrlService = {
+    parseDocUrl: (url: string) => {
+      if (url && URL.canParse(url)) {
+        const path = new URL(url).pathname;
         const item =
           path.length > 1
             ? [...collection.docs.values()].find(doc => {
@@ -112,21 +108,9 @@ export function mockQuickSearchService(collection: DocCollection) {
             docId: item.id,
           };
         }
-        return {
-          userInput: userInput,
-        };
       }
-      const doc = [...collection.docs.values()].find(
-        v => v.meta?.title === userInput
-      );
-      if (doc) {
-        await new Promise(resolve => setTimeout(resolve, 500));
-        return {
-          docId: doc.id,
-        };
-      }
-      return null;
+      return;
     },
   };
-  return quickSearchService;
+  return parseDocUrlService;
 }

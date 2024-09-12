@@ -1,8 +1,8 @@
 import type { ParagraphBlockModel } from '@blocksuite/affine-model';
 
 import {
-  QuickSearchProvider,
-  type QuickSearchService,
+  ParseDocUrlProvider,
+  type ParseDocUrlService,
   TelemetryProvider,
 } from '@blocksuite/affine-shared/services';
 import {
@@ -239,10 +239,10 @@ class PasteTr {
     );
   };
 
-  convertToLinkedDoc = async () => {
-    const quickSearchService = this.std.getOptional(QuickSearchProvider);
+  convertToLinkedDoc = () => {
+    const parseDocUrlService = this.std.getOptional(ParseDocUrlProvider);
 
-    if (!quickSearchService) {
+    if (!parseDocUrlService) {
       return;
     }
 
@@ -250,10 +250,10 @@ class PasteTr {
 
     for (const blockSnapshot of this.snapshot.content) {
       if (blockSnapshot.props.text) {
-        const [delta, transformed] = await this._transformLinkDelta(
+        const [delta, transformed] = this._transformLinkDelta(
           this._textFromSnapshot(blockSnapshot).delta,
           linkToDocId,
-          quickSearchService
+          parseDocUrlService
         );
         const model = this.std.doc.getBlockById(blockSnapshot.id);
         if (transformed && model) {
@@ -271,10 +271,10 @@ class PasteTr {
     if (!fromPointStateText) {
       return;
     }
-    const [delta, transformed] = await this._transformLinkDelta(
+    const [delta, transformed] = this._transformLinkDelta(
       fromPointStateText.toDelta(),
       linkToDocId,
-      quickSearchService
+      parseDocUrlService
     );
     if (!transformed) {
       return;
@@ -435,23 +435,21 @@ class PasteTr {
       this.firstSnapshot.props.type === 'text';
   }
 
-  private async _transformLinkDelta(
+  private _transformLinkDelta(
     delta: DeltaOperation[],
     linkToDocId: Map<string, string | null>,
-    quickSearchService: QuickSearchService
-  ): Promise<[DeltaOperation[], boolean]> {
+    parseDocUrlService: ParseDocUrlService
+  ): [DeltaOperation[], boolean] {
     let transformed = false;
     const needToConvert = new Map<DeltaOperation, string>();
     for (const op of delta) {
       if (op.attributes?.link) {
         let docId = linkToDocId.get(op.attributes.link);
         if (docId === undefined) {
-          const searchResult = await quickSearchService.searchDoc({
-            userInput: op.attributes.link,
-            skipSelection: true,
-            action: 'insert',
-          });
-          if (searchResult && 'docId' in searchResult) {
+          const searchResult = parseDocUrlService.parseDocUrl(
+            op.attributes.link
+          );
+          if (searchResult) {
             const doc = this.std.collection.getDoc(searchResult.docId);
             if (doc) {
               docId = doc.id;
@@ -556,7 +554,7 @@ export const pasteMiddleware = (std: EditorHost['std']): JobMiddleware => {
         }
         tr.pasted();
         tr.focusPasted();
-        tr.convertToLinkedDoc().catch(console.error);
+        tr.convertToLinkedDoc();
       }
     });
   };

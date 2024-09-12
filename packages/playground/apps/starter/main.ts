@@ -8,6 +8,7 @@ import {
   CommunityCanvasTextFonts,
   DocModeProvider,
   FontConfigExtension,
+  ParseDocUrlProvider,
   QuickSearchProvider,
   RefNodeSlotsExtension,
   RefNodeSlotsProvider,
@@ -48,6 +49,7 @@ async function main() {
           QuickSearchProvider,
           DocModeProvider,
           RefNodeSlotsProvider,
+          ParseDocUrlService: ParseDocUrlProvider,
         },
         defaultExtensions: (): ExtensionType[] => [
           FontConfigExtension(CommunityCanvasTextFonts),

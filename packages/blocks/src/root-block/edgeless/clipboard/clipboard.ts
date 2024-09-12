@@ -19,7 +19,7 @@ import {
 import { BookmarkStyles } from '@blocksuite/affine-model';
 import {
   EmbedOptionProvider,
-  QuickSearchProvider,
+  ParseDocUrlProvider,
   TelemetryProvider,
 } from '@blocksuite/affine-shared/services';
 import {
@@ -260,12 +260,8 @@ export class EdgelessClipboardController extends PageClipboard {
       );
 
       // try to interpret url as affine doc url
-      const quickSearchService = this.std.getOptional(QuickSearchProvider);
-      const doc = await quickSearchService?.searchDoc({
-        action: 'insert',
-        userInput: url,
-        skipSelection: true,
-      });
+      const parseDocUrlService = this.std.getOptional(ParseDocUrlProvider);
+      const doc = parseDocUrlService?.parseDocUrl(url);
       const pageId = doc && 'docId' in doc ? doc.docId : undefined;
       const options: Record<string, unknown> = {};
 

@@ -98,8 +98,10 @@ async function initEmptyEditor({
             ...window.$blocksuite.defaultExtensions(),
             {
               setup: di => {
-                di.addImpl(window.$blocksuite.identifiers.QuickSearchProvider, {
-                  searchDoc: () => Promise.resolve(null),
+                di.addImpl(window.$blocksuite.identifiers.ParseDocUrlService, {
+                  parseDocUrl() {
+                    return undefined;
+                  },
                 });
               },
             },
@@ -1451,32 +1453,20 @@ export async function scrollToBottom(page: Page) {
   });
 }
 
-export async function mockQuickSearch(
+export async function mockParseDocUrlService(
   page: Page,
-  mapping: Record<string, string> // query -> docId
+  mapping: Record<string, string>
 ) {
-  // mock quick search service
   await page.evaluate(mapping => {
-    const quickSearchService = window.host.std.get(
-      window.$blocksuite.identifiers.QuickSearchProvider
+    const parseDocUrlService = window.host.std.get(
+      window.$blocksuite.identifiers.ParseDocUrlService
     );
-    quickSearchService.searchDoc = options => {
-      return new Promise(resolve => {
-        if (!options.userInput) {
-          return resolve(null);
-        }
-
-        const docId = mapping[options.userInput];
-        if (!docId) {
-          return resolve({
-            userInput: options.userInput,
-          });
-        } else {
-          return resolve({
-            docId,
-          });
-        }
-      });
+    parseDocUrlService.parseDocUrl = (url: string) => {
+      const docId = mapping[url];
+      if (docId) {
+        return { docId };
+      }
+      return;
     };
   }, mapping);
 }

@@ -4,5 +4,6 @@ export * from './editor-setting-service.js';
 export * from './embed-option-service.js';
 export * from './font-loader/index.js';
 export * from './notification-service.js';
+export * from './parse-url-service.js';
 export * from './quick-search-service.js';
 export * from './telemetry-service.js';

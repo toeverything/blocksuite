@@ -15,7 +15,7 @@ import {
   getEditorLocator,
   getPageSnapshot,
   initEmptyParagraphState,
-  mockQuickSearch,
+  mockParseDocUrlService,
   pasteByKeyboard,
   pasteContent,
   pressEnter,
@@ -249,7 +249,7 @@ test(scoped`pasting internal url`, async ({ page }) => {
 
   await focusRichText(page);
   const docId = await getCurrentEditorDocId(page);
-  await mockQuickSearch(page, {
+  await mockParseDocUrlService(page, {
     'http://workspace/doc-id': docId,
   });
   await pasteContent(page, {
@@ -266,7 +266,7 @@ test(scoped`pasting internal url with params`, async ({ page }) => {
 
   await focusRichText(page);
   const docId = await getCurrentEditorDocId(page);
-  await mockQuickSearch(page, {
+  await mockParseDocUrlService(page, {
     'http://workspace/doc-id?mode=page&blockIds=rL2_GXbtLU2SsJVfCSmh_': docId,
   });
   await pasteContent(page, {

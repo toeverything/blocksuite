@@ -25,6 +25,7 @@ declare global {
         QuickSearchProvider: typeof import('../../packages/affine/shared/src/services/quick-search-service.js').QuickSearchProvider;
         DocModeProvider: typeof import('../../packages/affine/shared/src/services/doc-mode-service.js').DocModeProvider;
         RefNodeSlotsProvider: typeof RefNodeSlotsProvider;
+        ParseDocUrlService: typeof import('../../packages/affine/shared/src/services/parse-url-service.js').ParseDocUrlProvider;
       };
       defaultExtensions: () => ExtensionType[];
       extensions: {

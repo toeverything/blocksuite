@@ -200,16 +200,6 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
                   segment: 'toolbar',
                   type: type.flavour?.split(':')[1],
                 });
-              if (type.isNewDoc) {
-                rootComponent.std
-                  .getOptional(TelemetryProvider)
-                  ?.track('DocCreated', {
-                    control: 'shortcut',
-                    page: 'whiteboard editor',
-                    segment: 'whiteboard',
-                    type: type.flavour?.split(':')[1],
-                  });
-              }
             })
             .catch(console.error);
         },

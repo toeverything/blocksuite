@@ -4,7 +4,7 @@ import {
   DefaultInlineManagerExtension,
   type RichText,
 } from '@blocksuite/affine-components/rich-text';
-import { QuickSearchProvider } from '@blocksuite/affine-shared/services';
+import { ParseDocUrlProvider } from '@blocksuite/affine-shared/services';
 import {
   getViewportElement,
   isValidUrl,
@@ -192,7 +192,7 @@ export class HeaderAreaTextCellEditing extends BaseTextCell {
     e.stopPropagation();
   };
 
-  private _onPaste = async (e: ClipboardEvent) => {
+  private _onPaste = (e: ClipboardEvent) => {
     const inlineEditor = this.inlineEditor;
     assertExists(inlineEditor);
 
@@ -207,10 +207,7 @@ export class HeaderAreaTextCellEditing extends BaseTextCell {
     e.stopPropagation();
     if (isValidUrl(text)) {
       const std = this.std;
-      const result = await std?.getOptional(QuickSearchProvider)?.searchDoc({
-        userInput: text,
-        skipSelection: true,
-      });
+      const result = std?.getOptional(ParseDocUrlProvider)?.parseDocUrl(text);
       if (result && 'docId' in result) {
         const text = ' ';
         inlineEditor.insertText(inlineRange, text, {
@@ -266,7 +263,7 @@ export class HeaderAreaTextCellEditing extends BaseTextCell {
     this.disposables.addFromEvent(this.richText, 'copy', this._onCopy);
     this.disposables.addFromEvent(this.richText, 'cut', this._onCut);
     this.disposables.addFromEvent(this.richText, 'paste', e => {
-      this._onPaste(e).catch(console.error);
+      this._onPaste(e);
     });
     this.richText.updateComplete
       .then(() => {

@@ -10,7 +10,7 @@ import {
   FontConfigExtension,
   NotificationExtension,
   type PageRootService,
-  QuickSearchExtension,
+  ParseDocUrlExtension,
   RefNodeSlotsExtension,
   RefNodeSlotsProvider,
   SpecProvider,
@@ -33,7 +33,7 @@ import { SidePanel } from '../../_common/components/side-panel.js';
 import {
   mockDocModeService,
   mockNotificationService,
-  mockQuickSearchService,
+  mockParseDocUrlService,
 } from '../../_common/mock-services';
 
 function setDocModeFromUrlParams(service: DocModeProvider, docId: string) {
@@ -85,7 +85,7 @@ export async function mountDefaultDocEditor(collection: DocCollection) {
     refNodeSlotsExtension,
     PatchPageServiceWatcher,
     FontConfigExtension(CommunityCanvasTextFonts),
-    QuickSearchExtension(mockQuickSearchService(collection)),
+    ParseDocUrlExtension(mockParseDocUrlService(collection)),
     NotificationExtension(mockNotificationService(editor)),
     {
       setup: di => {

@@ -8,7 +8,7 @@ import {
   DocModeProvider,
   FontConfigExtension,
   NotificationExtension,
-  QuickSearchExtension,
+  ParseDocUrlExtension,
   RefNodeSlotsExtension,
   RefNodeSlotsProvider,
 } from '@blocksuite/blocks';
@@ -21,7 +21,7 @@ import { QuickEdgelessMenu } from '../../_common/components/quick-edgeless-menu.
 import {
   mockDocModeService,
   mockNotificationService,
-  mockQuickSearchService,
+  mockParseDocUrlService,
 } from '../../_common/mock-services.js';
 import { getExampleSpecs } from '../specs-examples/index.js';
 
@@ -118,7 +118,7 @@ export async function mountDefaultDocEditor(collection: DocCollection) {
       DocModeExtension(
         mockDocModeService(getEditorModeCallback, setEditorModeCallBack)
       ),
-      QuickSearchExtension(mockQuickSearchService(collection)),
+      ParseDocUrlExtension(mockParseDocUrlService(collection)),
       NotificationExtension(mockNotificationService(editor)),
       FontConfigExtension(CommunityCanvasTextFonts),
       PeekViewExtension({

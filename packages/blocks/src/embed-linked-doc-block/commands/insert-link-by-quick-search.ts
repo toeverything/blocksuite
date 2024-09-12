@@ -4,45 +4,37 @@ import { QuickSearchProvider } from '@blocksuite/affine-shared/services';
 
 export const insertLinkByQuickSearchCommand: Command<
   never,
-  'insertedLinkType',
-  { userInput?: string; skipSelection?: boolean }
+  'insertedLinkType'
 > = (ctx, next) => {
-  const { userInput, skipSelection, std } = ctx;
+  const { std } = ctx;
   const quickSearchService = std.getOptional(QuickSearchProvider);
   if (!quickSearchService) {
     next();
     return;
   }
 
-  const insertedLinkType = quickSearchService
-    .searchDoc({
-      action: 'insert',
-      userInput,
-      skipSelection,
-    })
-    .then(result => {
-      // add linked doc
-      if (result && 'docId' in result) {
-        std.command.exec('insertEmbedLinkedDoc', {
-          docId: result.docId,
-          params: result.params,
-        });
-        return {
-          flavour: 'affine:embed-linked-doc',
-          isNewDoc: !!result.isNewDoc,
-        };
-      }
+  const insertedLinkType = quickSearchService.openQuickSearch().then(result => {
+    // add linked doc
+    if (result && 'docId' in result) {
+      std.command.exec('insertEmbedLinkedDoc', {
+        docId: result.docId,
+        params: result.params,
+      });
+      return {
+        flavour: 'affine:embed-linked-doc',
+      };
+    }
 
-      // add normal link;
-      if (result && 'userInput' in result) {
-        std.command.exec('insertBookmark', { url: result.userInput });
-        return {
-          flavour: 'affine:bookmark',
-        };
-      }
+    // add normal link;
+    if (result && 'userInput' in result) {
+      std.command.exec('insertBookmark', { url: result.externalUrl });
+      return {
+        flavour: 'affine:bookmark',
+      };
+    }
 
-      return null;
-    });
+    return null;
+  });
 
   next({ insertedLinkType });
 };
@@ -52,7 +44,6 @@ declare global {
     interface CommandContext {
       insertedLinkType?: Promise<{
         flavour?: string;
-        isNewDoc?: boolean;
       } | null>;
     }
 

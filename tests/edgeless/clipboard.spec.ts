@@ -20,7 +20,7 @@ import {
   focusTitle,
   getCurrentEditorDocId,
   initEmptyEdgelessState,
-  mockQuickSearch,
+  mockParseDocUrlService,
   pasteByKeyboard,
   pasteContent,
   selectAllByKeyboard,
@@ -197,7 +197,7 @@ test.describe('pasting URLs', () => {
     await switchEditorMode(page);
     await deleteAll(page);
 
-    await mockQuickSearch(page, {
+    await mockParseDocUrlService(page, {
       'http://workspace/doc-id': docId,
     });
 

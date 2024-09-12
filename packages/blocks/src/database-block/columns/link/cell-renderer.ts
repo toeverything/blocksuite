@@ -1,5 +1,5 @@
 import { RefNodeSlotsProvider } from '@blocksuite/affine-components/rich-text';
-import { QuickSearchProvider } from '@blocksuite/affine-shared/services';
+import { ParseDocUrlProvider } from '@blocksuite/affine-shared/services';
 import {
   isValidUrl,
   normalizeUrl,
@@ -157,21 +157,14 @@ export class LinkCell extends BaseCellRenderer<string> {
         this.docId = undefined;
         return;
       }
-      const result = std?.getOptional(QuickSearchProvider)?.searchDoc({
-        userInput: this.value,
-        skipSelection: true,
-      });
-      result
-        ?.then(res => {
-          if (res && 'docId' in res) {
-            this.docId = res.docId;
-            return;
-          }
-          this.docId = undefined;
-        })
-        .catch(() => {
-          this.docId = undefined;
-        });
+      const result = std
+        ?.getOptional(ParseDocUrlProvider)
+        ?.parseDocUrl(this.value);
+      if (result) {
+        this.docId = result.docId;
+      } else {
+        this.docId = undefined;
+      }
     }
   }
 

@@ -4,21 +4,17 @@ import type { ExtensionType } from '@blocksuite/block-std';
 import { createIdentifier } from '@blocksuite/global/di';
 
 export interface QuickSearchService {
-  searchDoc: (options: {
-    action?: 'insert';
-    userInput?: string;
-    skipSelection?: boolean;
-    trigger?: 'edgeless-toolbar' | 'slash-command' | 'shortcut';
-  }) => Promise<QuickSearchResult>;
+  openQuickSearch: () => Promise<QuickSearchResult>;
 }
 
 export type QuickSearchResult =
   | {
       docId: string;
-      isNewDoc?: boolean;
       params?: ReferenceParams;
     }
-  | { userInput: string }
+  | {
+      externalUrl: string;
+    }
   | null;
 
 export const QuickSearchProvider = createIdentifier<QuickSearchService>(
