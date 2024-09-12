@@ -1,5 +1,16 @@
 # @blocksuite/global
 
+## 0.17.8
+
+### Patch Changes
+
+- 2f7dbe9: - feat(database): easy access to property visibility
+  - fix: mind map issues
+  - feat(database): supports switching view types
+  - fix(blocks): should use cardStyle for rendering
+  - test: add mini-mindmap test
+  - feat(database): full width POC
+
 ## 0.17.7
 
 ### Patch Changes
