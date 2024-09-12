@@ -1183,7 +1183,6 @@ export async function assertCanvasElementsCount(page: Page, expected: number) {
   const number = await getCanvasElementsCount(page);
   expect(number).toEqual(expected);
 }
-
 export function assertBound(received: Bound, expected: Bound) {
   expect(received[0]).toBeCloseTo(expected[0], 0);
   expect(received[1]).toBeCloseTo(expected[1], 0);

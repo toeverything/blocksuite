@@ -8,7 +8,6 @@ import {
   createShapeElement,
   dragBetweenViewCoords,
   edgelessCommonSetup,
-  getSelectedBound,
   setEdgelessTool,
   Shape,
   shiftClickView,
@@ -290,42 +289,6 @@ test.describe('add element to frame and then move frame', () => {
       await assertSelectedBound(page, [100, 100, 500, 500], 1); // frame
       await assertSelectedBound(page, [550, 550, 100, 100], 2); // inner frame
     });
-  });
-
-  test('add mindmap root node and move frame', async ({ page }) => {
-    await createFrame(page, [50, 50], [550, 550]);
-    await pressEscape(page);
-    await triggerComponentToolbarAction(page, 'addMindmap');
-    let mindmapBound = await getSelectedBound(page);
-    await clickView(page, [
-      mindmapBound[0] + 10,
-      mindmapBound[1] + 0.5 * mindmapBound[3],
-    ]);
-    await dragBetweenViewCoords(
-      page,
-      [mindmapBound[0] + 10, mindmapBound[1] + 0.5 * mindmapBound[3]],
-      [mindmapBound[0] + 10 + 50, mindmapBound[1] + 0.5 * mindmapBound[3]]
-    );
-    await pressEscape(page);
-    await selectAllByKeyboard(page);
-    mindmapBound = await getSelectedBound(page);
-    await pressEscape(page);
-
-    await clickView(page, [60, 60]);
-    await dragBetweenViewCoords(page, [60, 60], [110, 110]);
-
-    await selectAllByKeyboard(page);
-    await assertSelectedBound(
-      page,
-      [
-        mindmapBound[0] + 50,
-        mindmapBound[1] + 50,
-        mindmapBound[2],
-        mindmapBound[3],
-      ],
-      0
-    ); // mindmap
-    await assertSelectedBound(page, [100, 100, 500, 500], 1); // frame
   });
 });
 

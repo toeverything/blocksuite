@@ -928,7 +928,11 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
 
     {
       const frameManager = this._service.frame;
-      const toBeMovedTopElements = getTopElements(this._toBeMoved);
+      const toBeMovedTopElements = getTopElements(
+        this._toBeMoved.map(el =>
+          el.group instanceof MindmapElementModel ? el.group : el
+        )
+      );
       if (this._hoveredFrame) {
         frameManager.addElementsToFrame(
           this._hoveredFrame,

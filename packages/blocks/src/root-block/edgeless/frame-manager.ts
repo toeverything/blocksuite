@@ -3,6 +3,7 @@ import type { FrameBlockModel, NoteBlockModel } from '@blocksuite/affine-model';
 import type { Doc } from '@blocksuite/store';
 
 import {
+  MindmapElementModel,
   Overlay,
   renderableInEdgeless,
 } from '@blocksuite/affine-block-surface';
@@ -22,7 +23,7 @@ import type { EdgelessRootService } from '../../index.js';
 import { GfxBlockModel } from './block-model.js';
 import { edgelessElementsBound } from './utils/bound-utils.js';
 import { isFrameBlock } from './utils/query.js';
-import { getTopElements } from './utils/tree.js';
+import { getAllDescendantElements, getTopElements } from './utils/tree.js';
 
 const MIN_FRAME_WIDTH = 800;
 const MIN_FRAME_HEIGHT = 640;
@@ -148,9 +149,14 @@ export class EdgelessFrameManager {
   private _watchElementAddedOrDeleted() {
     this._disposable.add(
       this._rootService.surface.elementAdded.on(({ id, local }) => {
-        const element = this._rootService.surface.getElementById(id);
+        let element = this._rootService.surface.getElementById(id);
         if (element && local) {
           const frame = this.getFrameFromPoint(element.elementBound.center);
+
+          // TODO(@L-Sun): refactor this in a tree manager
+          if (element.group instanceof MindmapElementModel) {
+            element = element.group;
+          }
 
           // TODO(@L-Sun): refactor this in a tree manager
           if (element instanceof GroupElementModel) {
@@ -371,11 +377,25 @@ export class EdgelessFrameManager {
   }
 
   removeParentFrame(element: BlockSuite.EdgelessModel) {
-    const parentFrame = this.getParentFrame(element);
-    if (parentFrame) {
-      // eslint-disable-next-line unicorn/prefer-dom-node-remove
-      parentFrame.removeChild(element);
+    // TODO(@L-Sun): refactor this with tree manager
+    // since current implementation may cause one element has multiple parent containers
+    // this is a workaround to avoid this
+    if (element.group instanceof MindmapElementModel) element = element.group;
+    if (element instanceof MindmapElementModel) {
+      [element, ...getAllDescendantElements(element)].forEach(child => {
+        const parentFrame = this.getParentFrame(child);
+        if (!parentFrame) return;
+        // eslint-disable-next-line unicorn/prefer-dom-node-remove
+        parentFrame.removeChild(child);
+      });
+      return;
     }
+
+    const parentFrame = this.getParentFrame(element);
+    if (!parentFrame) return;
+
+    // eslint-disable-next-line unicorn/prefer-dom-node-remove
+    parentFrame.removeChild(element);
   }
 }
 
