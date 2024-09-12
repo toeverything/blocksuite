@@ -1,4 +1,4 @@
-import type { TestUtils } from '@blocks/index.js';
+import type { RefNodeSlotsProvider, TestUtils } from '@blocks/index.js';
 import type {
   EditorHost,
   ExtensionType,
@@ -24,10 +24,11 @@ declare global {
         WidgetViewMapIdentifier: typeof WidgetViewMapIdentifier;
         QuickSearchProvider: typeof import('../../packages/affine/shared/src/services/quick-search-service.js').QuickSearchProvider;
         DocModeProvider: typeof import('../../packages/affine/shared/src/services/doc-mode-service.js').DocModeProvider;
+        RefNodeSlotsProvider: typeof RefNodeSlotsProvider;
       };
+      defaultExtensions: () => ExtensionType[];
       extensions: {
         WidgetViewMapExtension: typeof import('../../packages/framework/block-std/src/extension/widget-view-map.js').WidgetViewMapExtension;
-        FontConfigExtension: ExtensionType;
       };
       mockServices: {
         mockDocModeService: typeof import('../../packages/playground/apps/_common/mock-services.js').mockDocModeService;

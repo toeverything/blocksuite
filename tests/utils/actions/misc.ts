@@ -1,5 +1,5 @@
 import type { DatabaseBlockModel, ListType, RichText } from '@blocks/index.js';
-import type { EditorHost } from '@blocksuite/block-std';
+import type { EditorHost, ExtensionType } from '@blocksuite/block-std';
 import type { AffineEditorContainer } from '@blocksuite/presets';
 import type { InlineRange, InlineRootElement } from '@inline/index.js';
 import type { CustomFramePanel } from '@playground/apps/_common/components/custom-frame-panel.js';
@@ -94,9 +94,8 @@ async function initEmptyEditor({
           const editor = document.createElement('affine-editor-container');
           editor.doc = doc;
           editor.autofocus = true;
-          editor.pageSpecs = [
-            ...editor.pageSpecs,
-            window.$blocksuite.extensions.FontConfigExtension,
+          const defaultExtensions: ExtensionType[] = [
+            ...window.$blocksuite.defaultExtensions(),
             {
               setup: di => {
                 di.addImpl(window.$blocksuite.identifiers.QuickSearchProvider, {
@@ -116,36 +115,21 @@ async function initEmptyEditor({
               },
             },
           ];
+          editor.pageSpecs = [...editor.pageSpecs, ...defaultExtensions];
           editor.edgelessSpecs = [
             ...editor.edgelessSpecs,
-            window.$blocksuite.extensions.FontConfigExtension,
-            {
-              setup: di => {
-                di.addImpl(window.$blocksuite.identifiers.QuickSearchProvider, {
-                  searchDoc: () => Promise.resolve(null),
-                });
-              },
-            },
-            {
-              setup: di => {
-                di.override(
-                  window.$blocksuite.identifiers.DocModeProvider,
-                  window.$blocksuite.mockServices.mockDocModeService(
-                    () => editor.mode,
-                    mode => editor.switchEditor(mode)
-                  )
-                );
-              },
-            },
+            ...defaultExtensions,
           ];
 
-          editor.slots.docLinkClicked.on(({ pageId: docId }) => {
-            const newDoc = collection.getDoc(docId);
-            if (!newDoc) {
-              throw new Error(`Failed to jump to page ${docId}`);
-            }
-            editor.doc = newDoc;
-          });
+          editor.std
+            .get(window.$blocksuite.identifiers.RefNodeSlotsProvider)
+            .docLinkClicked.on(({ pageId: docId }) => {
+              const newDoc = collection.getDoc(docId);
+              if (!newDoc) {
+                throw new Error(`Failed to jump to page ${docId}`);
+              }
+              editor.doc = newDoc;
+            });
           appRoot.append(editor);
           return editor;
         };

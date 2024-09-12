@@ -2,6 +2,7 @@ import {
   EdgelessSurfaceBlockSpec,
   PageSurfaceBlockSpec,
 } from '@blocksuite/affine-block-surface';
+import { RefNodeSlotsExtension } from '@blocksuite/affine-components/rich-text';
 import {
   DocModeService,
   EmbedOptionService,
@@ -45,6 +46,7 @@ export const PreviewEdgelessEditorBlockSpecs: ExtensionType[] = [
   EdgelessTextBlockSpec,
   LatexBlockSpec,
   FontLoaderService,
+  RefNodeSlotsExtension(),
 ].flat();
 
 export const PreviewEditorBlockSpecs: ExtensionType[] = [
@@ -54,4 +56,5 @@ export const PreviewEditorBlockSpecs: ExtensionType[] = [
   PageSurfaceRefBlockSpec,
   LatexBlockSpec,
   FontLoaderService,
+  RefNodeSlotsExtension(),
 ].flat();

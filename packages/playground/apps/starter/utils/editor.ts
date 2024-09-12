@@ -11,6 +11,8 @@ import {
   NotificationExtension,
   type PageRootService,
   QuickSearchExtension,
+  RefNodeSlotsExtension,
+  RefNodeSlotsProvider,
   SpecProvider,
 } from '@blocksuite/blocks';
 import {
@@ -78,7 +80,9 @@ export async function mountDefaultDocEditor(collection: DocCollection) {
     }
   }
 
+  const refNodeSlotsExtension = RefNodeSlotsExtension();
   const extensions: ExtensionType[] = [
+    refNodeSlotsExtension,
     PatchPageServiceWatcher,
     FontConfigExtension(CommunityCanvasTextFonts),
     QuickSearchExtension(mockQuickSearchService(collection)),
@@ -104,14 +108,16 @@ export async function mountDefaultDocEditor(collection: DocCollection) {
 
   editor.mode = 'page';
   editor.doc = doc;
-  editor.slots.docLinkClicked.on(({ pageId: docId }) => {
-    const target = collection.getDoc(docId);
-    if (!target) {
-      throw new Error(`Failed to jump to doc ${docId}`);
-    }
-    target.load();
-    editor.doc = target;
-  });
+  editor.std
+    .get(RefNodeSlotsProvider)
+    .docLinkClicked.on(({ pageId: docId }) => {
+      const target = collection.getDoc(docId);
+      if (!target) {
+        throw new Error(`Failed to jump to doc ${docId}`);
+      }
+      target.load();
+      editor.doc = target;
+    });
 
   app.append(editor);
   await editor.updateComplete;

@@ -1,3 +1,4 @@
+import { RefNodeSlotsProvider } from '@blocksuite/affine-components/rich-text';
 import { QuickSearchProvider } from '@blocksuite/affine-shared/services';
 import {
   isValidUrl,
@@ -14,8 +15,6 @@ import { baseTheme } from '@toeverything/theme';
 import { css, unsafeCSS } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { html } from 'lit/static-html.js';
-
-import type { RootBlockComponent } from '../../../root-block/index.js';
 
 import { HostContextKey } from '../../context/host-context.js';
 import './components/link-node.js';
@@ -114,18 +113,13 @@ export class LinkCell extends BaseCellRenderer<string> {
       return;
     }
     const std = this.std;
-    const rootId = std?.doc.root?.id;
-    if (!rootId) {
-      return;
-    }
-    const rootComponent = std?.view.getBlock(
-      rootId
-    ) as RootBlockComponent | null;
-    if (!rootComponent) {
+    if (!std) {
       return;
     }
 
-    rootComponent.slots.docLinkClicked.emit({ pageId: this.docId });
+    std
+      .getOptional(RefNodeSlotsProvider)
+      ?.docLinkClicked.emit({ pageId: this.docId });
   };
 
   get std() {

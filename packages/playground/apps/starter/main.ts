@@ -1,4 +1,5 @@
 import {
+  type ExtensionType,
   WidgetViewMapExtension,
   WidgetViewMapIdentifier,
 } from '@blocksuite/block-std';
@@ -8,6 +9,8 @@ import {
   DocModeProvider,
   FontConfigExtension,
   QuickSearchProvider,
+  RefNodeSlotsExtension,
+  RefNodeSlotsProvider,
 } from '@blocksuite/blocks';
 import * as globalUtils from '@blocksuite/global/utils';
 import * as editor from '@blocksuite/presets';
@@ -44,10 +47,16 @@ async function main() {
           WidgetViewMapIdentifier,
           QuickSearchProvider,
           DocModeProvider,
+          RefNodeSlotsProvider,
         },
+        defaultExtensions: (): ExtensionType[] => [
+          FontConfigExtension(CommunityCanvasTextFonts),
+          RefNodeSlotsExtension(),
+        ],
         extensions: {
           FontConfigExtension: FontConfigExtension(CommunityCanvasTextFonts),
           WidgetViewMapExtension,
+          RefNodeSlotsExtension: RefNodeSlotsExtension(),
         },
         mockServices: {
           mockDocModeService,

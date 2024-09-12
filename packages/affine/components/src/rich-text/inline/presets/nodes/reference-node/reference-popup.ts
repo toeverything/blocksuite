@@ -14,7 +14,6 @@ import { join } from 'lit/directives/join.js';
 import { repeat } from 'lit/directives/repeat.js';
 
 import type { AffineInlineEditor } from '../../affine-inline-specs.js';
-import type { RefNodeSlots } from './types.js';
 
 import {
   CenterPeekIcon,
@@ -30,6 +29,7 @@ import {
   renderActions,
   renderToolbarSeparator,
 } from '../../../../../toolbar/index.js';
+import { RefNodeSlotsProvider } from '../../../../extension/index.js';
 import { styles } from './styles.js';
 
 @customElement('reference-popup')
@@ -161,15 +161,10 @@ export class ReferencePopup extends WithDisposable(LitElement) {
     const pageId = this.referenceDocId;
     const block = this.block;
     if (pageId === block.doc.id) return;
-    const rootId = block.doc.root?.id;
-    if (!rootId) return;
 
-    const rootComponent = this.std.view.getBlock(rootId) as BlockComponent & {
-      slots: RefNodeSlots;
-    };
-    if (!rootComponent) return;
-
-    rootComponent.slots.docLinkClicked.emit(this.referenceInfo);
+    this.std
+      .getOptional(RefNodeSlotsProvider)
+      ?.docLinkClicked.emit(this.referenceInfo);
   }
 
   private _openMenuButton() {

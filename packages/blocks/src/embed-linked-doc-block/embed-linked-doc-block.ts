@@ -7,7 +7,10 @@ import type {
 
 import { BlockLinkIcon } from '@blocksuite/affine-components/icons';
 import { isPeekable, Peekable } from '@blocksuite/affine-components/peek';
-import { REFERENCE_NODE } from '@blocksuite/affine-components/rich-text';
+import {
+  REFERENCE_NODE,
+  RefNodeSlotsProvider,
+} from '@blocksuite/affine-components/rich-text';
 import { DocModeProvider } from '@blocksuite/affine-shared/services';
 import { assertExists, Bound } from '@blocksuite/global/utils';
 import { DocCollection } from '@blocksuite/store';
@@ -15,7 +18,6 @@ import { html, nothing } from 'lit';
 import { customElement, property, queryAsync, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 
-import type { RootBlockComponent } from '../root-block/index.js';
 import type { SurfaceRefBlockService } from '../surface-ref-block/index.js';
 import type { SurfaceRefRenderer } from '../surface-ref-block/surface-ref-renderer.js';
 import type { EmbedLinkedDocBlockConfig } from './embed-linked-doc-config.js';
@@ -166,12 +168,9 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockComponent<
     // TODO(@fundon): should scroll into target block/element
     if (pageId === this.doc.id) return;
 
-    const rootComponent = this.std.view.getBlock(
-      this.doc.root?.id ?? ''
-    ) as RootBlockComponent | null;
-    if (!rootComponent) return;
-
-    rootComponent.slots.docLinkClicked.emit(this.referenceInfo);
+    this.std
+      .getOptional(RefNodeSlotsProvider)
+      ?.docLinkClicked.emit(this.referenceInfo);
   };
 
   refreshData = () => {

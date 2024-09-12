@@ -24,7 +24,6 @@ import {
   type ConnectorElementModel,
   type FrameBlockModel,
   type GroupElementModel,
-  type ReferenceInfo,
   RootBlockSchema,
 } from '@blocksuite/affine-model';
 import { EditPropsStore } from '@blocksuite/affine-shared/services';
@@ -104,8 +103,6 @@ export class EdgelessRootService extends RootService implements SurfaceContext {
     elementResizeEnd: new Slot(),
     toggleNoteSlicer: new Slot(),
 
-    docLinkClicked: new Slot<ReferenceInfo>(),
-    tagClicked: new Slot<{ tagId: string }>(),
     toolbarLocked: new Slot<boolean>(),
   };
 

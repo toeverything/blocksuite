@@ -1,3 +1,4 @@
+import { DocModeProvider } from '@blocksuite/affine-shared/services';
 import { SignalWatcher, WithDisposable } from '@blocksuite/block-std';
 import { DisposableGroup } from '@blocksuite/global/utils';
 import { baseTheme } from '@toeverything/theme';
@@ -120,13 +121,13 @@ export class OutlinePanel extends SignalWatcher(WithDisposable(LitElement)) {
     this._clearEditorDisposables();
     this._editorDisposables = new DisposableGroup();
     this._editorDisposables.add(
-      this.editor.slots.editorModeSwitched.on(() => {
+      this.editor.std.get(DocModeProvider).onPrimaryModeChange(() => {
         this.editor.updateComplete
           .then(() => {
             this.requestUpdate();
           })
           .catch(console.error);
-      })
+      }, this.editor.doc.id)
     );
     this._editorDisposables.add(
       this.editor.slots.docUpdated.on(() => {

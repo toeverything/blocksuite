@@ -1,3 +1,4 @@
+import { RefNodeSlotsProvider } from '@blocksuite/affine-components/rich-text';
 import { AffineEditorContainer } from '@blocksuite/presets';
 import { type DocCollection, Text } from '@blocksuite/store';
 
@@ -25,14 +26,16 @@ export const multiEditor: InitFn = (collection: DocCollection, id: string) => {
   if (app) {
     const editor = new AffineEditorContainer();
     editor.doc = doc;
-    editor.slots.docLinkClicked.on(({ pageId: docId }) => {
-      const target = collection.getDoc(docId);
-      if (!target) {
-        throw new Error(`Failed to jump to doc ${docId}`);
-      }
-      target.load();
-      editor.doc = target;
-    });
+    editor.std
+      .get(RefNodeSlotsProvider)
+      .docLinkClicked.on(({ pageId: docId }) => {
+        const target = collection.getDoc(docId);
+        if (!target) {
+          throw new Error(`Failed to jump to doc ${docId}`);
+        }
+        target.load();
+        editor.doc = target;
+      });
     editor.style.borderRight = '1px solid var(--affine-border-color)';
 
     app.append(editor);
@@ -69,14 +72,16 @@ export const multiEditorVertical: InitFn = (
   if (app) {
     const editor = new AffineEditorContainer();
     editor.doc = doc;
-    editor.slots.docLinkClicked.on(({ pageId: docId }) => {
-      const target = collection.getDoc(docId);
-      if (!target) {
-        throw new Error(`Failed to jump to doc ${docId}`);
-      }
-      target.load();
-      editor.doc = target;
-    });
+    editor.std
+      .get(RefNodeSlotsProvider)
+      .docLinkClicked.on(({ pageId: docId }) => {
+        const target = collection.getDoc(docId);
+        if (!target) {
+          throw new Error(`Failed to jump to doc ${docId}`);
+        }
+        target.load();
+        editor.doc = target;
+      });
     editor.style.borderBottom = '1px solid var(--affine-border-color)';
 
     app.append(editor);

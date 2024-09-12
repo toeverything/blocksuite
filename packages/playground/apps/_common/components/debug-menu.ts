@@ -517,9 +517,9 @@ export class DebugMenu extends ShadowlessElement {
       this._canRedo = this.doc.canRedo;
     });
 
-    this.editor.slots.editorModeSwitched.on(() => {
+    this.editor.std.get(DocModeProvider).onPrimaryModeChange(() => {
       this.requestUpdate();
-    });
+    }, this.editor.doc.id);
   }
 
   override render() {

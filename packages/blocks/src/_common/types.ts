@@ -1,4 +1,3 @@
-import type { RefNodeSlots } from '@blocksuite/affine-components/rich-text';
 import type {
   BrushElementModel,
   ConnectorElementModel,
@@ -10,18 +9,14 @@ import type { Doc } from '@blocksuite/store';
 
 /** Common context interface definition for block models. */
 
-// TODO: remove
-export type CommonSlots = RefNodeSlots;
-
 type EditorSlots = {
-  editorModeSwitched: Slot<DocMode>;
   docUpdated: Slot<{ newDocId: string }>;
 };
 
 export type AbstractEditor = {
   doc: Doc;
   mode: DocMode;
-  readonly slots: CommonSlots & EditorSlots;
+  readonly slots: EditorSlots;
 } & HTMLElement;
 
 export type Connectable = Exclude<

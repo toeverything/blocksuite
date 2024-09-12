@@ -1,4 +1,3 @@
-import type { RefNodeSlots } from '@blocksuite/affine-components/rich-text';
 import type { BlockComponent } from '@blocksuite/block-std';
 
 import { RootBlockSchema } from '@blocksuite/affine-model';
@@ -32,8 +31,6 @@ export abstract class RootService extends BlockService {
   readonly exportManager = new ExportManager(this, this._exportOptions);
 
   readonly fileDropManager = new FileDropManager(this, this._fileDropOptions);
-
-  abstract slots: RefNodeSlots;
 
   transformers = {
     markdown: MarkdownTransformer,

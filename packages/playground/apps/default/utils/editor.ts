@@ -9,6 +9,8 @@ import {
   FontConfigExtension,
   NotificationExtension,
   QuickSearchExtension,
+  RefNodeSlotsExtension,
+  RefNodeSlotsProvider,
 } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
 import { AffineEditorContainer } from '@blocksuite/presets';
@@ -47,18 +49,27 @@ export async function mountDefaultDocEditor(collection: DocCollection) {
 
   const editor = new AffineEditorContainer();
   const specs = getExampleSpecs();
-  editor.pageSpecs = patchPageRootSpec([...specs.pageModeSpecs]);
-  editor.edgelessSpecs = patchPageRootSpec([...specs.edgelessModeSpecs]);
+  const refNodeSlotsExtension = RefNodeSlotsExtension();
+  editor.pageSpecs = patchPageRootSpec([
+    refNodeSlotsExtension,
+    ...specs.pageModeSpecs,
+  ]);
+  editor.edgelessSpecs = patchPageRootSpec([
+    refNodeSlotsExtension,
+    ...specs.edgelessModeSpecs,
+  ]);
   editor.doc = doc;
   editor.mode = 'page';
-  editor.slots.docLinkClicked.on(({ pageId: docId }) => {
-    const target = collection.getDoc(docId);
-    if (!target) {
-      throw new Error(`Failed to jump to doc ${docId}`);
-    }
-    target.load();
-    editor.doc = target;
-  });
+  editor.std
+    .get(RefNodeSlotsProvider)
+    .docLinkClicked.on(({ pageId: docId }) => {
+      const target = collection.getDoc(docId);
+      if (!target) {
+        throw new Error(`Failed to jump to doc ${docId}`);
+      }
+      target.load();
+      editor.doc = target;
+    });
 
   app.append(editor);
   await editor.updateComplete;

@@ -1,5 +1,6 @@
 import type { AffineEditorContainer } from '@blocksuite/presets';
 
+import { DocModeProvider } from '@blocksuite/affine-shared/services';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { css, html, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
@@ -31,11 +32,11 @@ export class CustomFramePanel extends WithDisposable(ShadowlessElement) {
     super.connectedCallback();
 
     this.disposables.add(
-      this.editor.slots.editorModeSwitched.on(() => {
+      this.editor.std.get(DocModeProvider).onPrimaryModeChange(() => {
         this.editor.updateComplete
           .then(() => this.requestUpdate())
           .catch(console.error);
-      })
+      }, this.editor.doc.id)
     );
   }
 

@@ -11,38 +11,19 @@ import {
 import {
   type AbstractEditor,
   type DocMode,
-  DocModeProvider,
   EdgelessEditorBlockSpecs,
-  type EdgelessRootBlockComponent,
   PageEditorBlockSpecs,
-  type PageRootBlockComponent,
 } from '@blocksuite/blocks';
 import { noop, Slot } from '@blocksuite/global/utils';
-import { computed, effect, signal } from '@lit-labs/preact-signals';
+import { computed, signal } from '@lit-labs/preact-signals';
 import { css, html } from 'lit';
-import { customElement, property, query } from 'lit/decorators.js';
+import { customElement, property } from 'lit/decorators.js';
 import { keyed } from 'lit/directives/keyed.js';
 import { when } from 'lit/directives/when.js';
 
 import '../fragments/doc-title/doc-title.js';
 
 noop(EditorHost);
-
-/**
- * @deprecated need to refactor
- */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function forwardSlot<T extends Record<string, Slot<any>>>(
-  from: T,
-  to: Partial<T>
-) {
-  Object.entries(from).forEach(([key, slot]) => {
-    const target = to[key];
-    if (target) {
-      slot.pipe(target);
-    }
-  });
-}
 
 @customElement('affine-editor-container')
 export class AffineEditorContainer
@@ -123,17 +104,6 @@ export class AffineEditorContainer
     return this._std.value.render();
   });
 
-  private _forwardRef = (mode: DocMode) => {
-    requestAnimationFrame(() => {
-      if (mode === 'page') {
-        if (this._pageRoot) forwardSlot(this._pageRoot.slots, this.slots);
-      } else {
-        if (this._edgelessRoot)
-          forwardSlot(this._edgelessRoot.slots, this.slots);
-      }
-    });
-  };
-
   private _mode = signal<DocMode>('page');
 
   private _pageSpecs = signal<ExtensionType[]>(PageEditorBlockSpecs);
@@ -155,10 +125,7 @@ export class AffineEditorContainer
    * @deprecated need to refactor
    */
   slots: AbstractEditor['slots'] = {
-    docLinkClicked: new Slot(),
-    editorModeSwitched: new Slot(),
     docUpdated: new Slot(),
-    tagClicked: new Slot<{ tagId: string }>(),
   };
 
   get doc() {
@@ -230,14 +197,6 @@ export class AffineEditorContainer
         }
       });
     }
-
-    this._disposables.add(
-      effect(() => {
-        const std = this._std.value;
-        const mode = std.get(DocModeProvider).getPrimaryMode(this.doc.id);
-        this._forwardRef(mode);
-      })
-    );
   }
 
   override render() {
@@ -277,21 +236,12 @@ export class AffineEditorContainer
   override updated(changedProperties: Map<string, unknown>) {
     if (changedProperties.has('doc')) {
       this.slots.docUpdated.emit({ newDocId: this.doc.id });
-      this._forwardRef(this.mode);
     }
 
     if (!changedProperties.has('doc') && !changedProperties.has('mode')) {
       return;
     }
   }
-
-  /** @deprecated unreliable since edgelessSpecs can be overridden */
-  @query('affine-edgeless-root')
-  private accessor _edgelessRoot: EdgelessRootBlockComponent | null = null;
-
-  /** @deprecated unreliable since pageSpecs can be overridden */
-  @query('affine-page-root')
-  private accessor _pageRoot: PageRootBlockComponent | null = null;
 
   @property({ attribute: false })
   override accessor autofocus = false;

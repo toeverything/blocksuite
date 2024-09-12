@@ -3,7 +3,10 @@ import {
   EmbedPageIcon,
 } from '@blocksuite/affine-components/icons';
 import { Peekable } from '@blocksuite/affine-components/peek';
-import { REFERENCE_NODE } from '@blocksuite/affine-components/rich-text';
+import {
+  REFERENCE_NODE,
+  RefNodeSlotsProvider,
+} from '@blocksuite/affine-components/rich-text';
 import {
   type DocMode,
   type EmbedSyncedDocModel,
@@ -271,7 +274,7 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockComponent<
     ) as RootBlockComponent | null;
     if (!rootComponent) return;
 
-    rootComponent.slots.docLinkClicked.emit({ pageId });
+    this.std.getOptional(RefNodeSlotsProvider)?.docLinkClicked.emit({ pageId });
   };
 
   refreshData = () => {
@@ -464,14 +467,17 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockComponent<
     });
 
     // Forward docLinkClicked event from the synced doc
-    const syncedDocRootService =
-      this.syncedDocEditorHost?.std.getService('affine:page');
-    syncedDocRootService &&
+    const refNodeProvider =
+      this.syncedDocEditorHost?.std.getOptional(RefNodeSlotsProvider);
+    if (refNodeProvider) {
       this.disposables.add(
-        syncedDocRootService.slots.docLinkClicked.on(({ pageId }) => {
-          this._rootService?.slots.docLinkClicked.emit({ pageId });
+        refNodeProvider.docLinkClicked.on(({ pageId }) => {
+          this.std
+            .getOptional(RefNodeSlotsProvider)
+            ?.docLinkClicked.emit({ pageId });
         })
       );
+    }
 
     this._initEdgelessFitEffect();
   }

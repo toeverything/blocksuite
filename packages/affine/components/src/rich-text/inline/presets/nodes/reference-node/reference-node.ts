@@ -1,10 +1,7 @@
-import type { ReferenceInfo, RootBlockModel } from '@blocksuite/affine-model';
+import type { ReferenceInfo } from '@blocksuite/affine-model';
 import type { Doc, DocMeta } from '@blocksuite/store';
 
-import {
-  getModelByElement,
-  getRootByElement,
-} from '@blocksuite/affine-shared/utils';
+import { getModelByElement } from '@blocksuite/affine-shared/utils';
 import { BLOCK_ID_ATTR, type BlockComponent } from '@blocksuite/block-std';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
@@ -20,9 +17,7 @@ import { customElement, property, state } from 'lit/decorators.js';
 import { choose } from 'lit/directives/choose.js';
 import { ref } from 'lit/directives/ref.js';
 
-import type { AffineTextAttributes } from '../../../../extension/index.js';
 import type { ReferenceNodeConfigProvider } from './reference-config.js';
-import type { RefNodeSlots } from './types.js';
 
 import { HoverController } from '../../../../../hover/index.js';
 import {
@@ -31,6 +26,10 @@ import {
   FontLinkedDocIcon,
 } from '../../../../../icons/index.js';
 import { Peekable } from '../../../../../peek/index.js';
+import {
+  type AffineTextAttributes,
+  RefNodeSlotsProvider,
+} from '../../../../extension/index.js';
 import { affineTextStyles } from '../affine-text.js';
 import { DEFAULT_DOC_NAME, REFERENCE_NODE } from '../consts.js';
 import { toggleReferencePopup } from './reference-popup.js';
@@ -210,10 +209,9 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
       return;
     }
     const targetDocId = refMeta.id;
-    const rootComponent = getRootByElement(
-      this
-    ) as BlockComponent<RootBlockModel> & { slots: RefNodeSlots };
-    rootComponent.slots.docLinkClicked.emit({ pageId: targetDocId });
+    this.std
+      .getOptional(RefNodeSlotsProvider)
+      ?.docLinkClicked.emit({ pageId: targetDocId });
   }
 
   override connectedCallback() {
