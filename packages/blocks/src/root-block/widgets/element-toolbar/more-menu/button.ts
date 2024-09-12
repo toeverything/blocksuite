@@ -4,13 +4,12 @@ import { renderGroups } from '@blocksuite/affine-components/toolbar';
 import { WithDisposable } from '@blocksuite/block-std';
 import { MoreHorizontalIcon, MoreVerticalIcon } from '@blocksuite/icons/lit';
 import { html, LitElement } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { property } from 'lit/decorators.js';
 
 import type { EdgelessRootBlockComponent } from '../../../edgeless/edgeless-root-block.js';
 
 import { ElementToolbarMoreMenuContext } from './context.js';
 
-@customElement('edgeless-more-button')
 export class EdgelessMoreButton extends WithDisposable(LitElement) {
   override render() {
     const context = new ElementToolbarMoreMenuContext(this.edgeless);

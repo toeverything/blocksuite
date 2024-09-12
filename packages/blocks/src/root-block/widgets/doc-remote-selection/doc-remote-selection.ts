@@ -10,7 +10,6 @@ import { WidgetComponent } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import { computed } from '@lit-labs/preact-signals';
 import { css, html, nothing } from 'lit';
-import { customElement } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import type { DocRemoteSelectionConfig } from './config.js';
@@ -29,7 +28,6 @@ export interface SelectionRect {
 export const AFFINE_DOC_REMOTE_SELECTION_WIDGET =
   'affine-doc-remote-selection-widget';
 
-@customElement(AFFINE_DOC_REMOTE_SELECTION_WIDGET)
 export class AffineDocRemoteSelectionWidget extends WidgetComponent {
   // avoid being unable to select text by mouse click or drag
   static override styles = css`

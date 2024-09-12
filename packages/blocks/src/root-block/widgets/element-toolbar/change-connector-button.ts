@@ -33,7 +33,7 @@ import { LINE_COLORS, LineWidth, StrokeStyle } from '@blocksuite/affine-model';
 import { WithDisposable } from '@blocksuite/block-std';
 import { countBy, maxBy } from '@blocksuite/global/utils';
 import { html, LitElement, nothing, type TemplateResult } from 'lit';
-import { customElement, property, query } from 'lit/decorators.js';
+import { property, query } from 'lit/decorators.js';
 import { choose } from 'lit/directives/choose.js';
 import { join } from 'lit/directives/join.js';
 import { repeat } from 'lit/directives/repeat.js';
@@ -224,7 +224,6 @@ const MODE_CHOOSE: [ConnectorMode, () => TemplateResult<1>][] = [
   [ConnectorMode.Straight, () => ConnectorLWithArrowIcon],
 ] as const;
 
-@customElement('edgeless-change-connector-button')
 export class EdgelessChangeConnectorButton extends WithDisposable(LitElement) {
   pickColor = (event: PickColorEvent) => {
     if (event.type === 'pick') {

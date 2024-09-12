@@ -6,13 +6,12 @@ import { createLitPortal } from '@blocksuite/affine-components/portal';
 import { effect } from '@lit-labs/preact-signals';
 import katex from 'katex';
 import { html, render } from 'lit';
-import { customElement, query } from 'lit/decorators.js';
+import { query } from 'lit/decorators.js';
 
 import type { LatexBlockService } from './latex-service.js';
 
 import { latexBlockStyles } from './styles.js';
 
-@customElement('affine-latex')
 export class LatexBlockComponent extends CaptionedBlockComponent<
   LatexBlockModel,
   LatexBlockService

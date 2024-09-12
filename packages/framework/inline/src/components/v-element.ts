@@ -1,6 +1,6 @@
 import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 import { html, LitElement, nothing } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import type { DeltaInsert } from '../types.js';
@@ -9,7 +9,6 @@ import type { BaseTextAttributes } from '../utils/base-attributes.js';
 import { ZERO_WIDTH_SPACE } from '../consts.js';
 import { getInlineEditorInsideRoot } from '../utils/query.js';
 
-@customElement('v-element')
 export class VElement<
   T extends BaseTextAttributes = BaseTextAttributes,
 > extends LitElement {

@@ -36,7 +36,7 @@ import {
   Slot,
 } from '@blocksuite/global/utils';
 import { css, html, LitElement, nothing } from 'lit';
-import { customElement, property, state } from 'lit/decorators.js';
+import { property, state } from 'lit/decorators.js';
 import { ifDefined } from 'lit/directives/if-defined.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
@@ -108,7 +108,6 @@ export type SelectedRect = {
   rotate: number;
 };
 
-@customElement('edgeless-selected-rect')
 export class EdgelessSelectedRect extends WithDisposable(LitElement) {
   // disable change-in-update warning
   static override enabledWarnings = [];

@@ -1,6 +1,5 @@
 import { FilterIcon } from '@blocksuite/icons/lit';
 import { css, html, nothing } from 'lit';
-import { customElement } from 'lit/decorators.js';
 
 import {
   emptyFilterGroup,
@@ -32,7 +31,6 @@ const styles = css`
   }
 `;
 
-@customElement('data-view-header-tools-filter')
 export class DataViewHeaderToolsFilter extends WidgetBase {
   static override styles = styles;
 

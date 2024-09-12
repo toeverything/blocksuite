@@ -1,7 +1,7 @@
 import { SignalWatcher, WithDisposable } from '@blocksuite/block-std';
 import { baseTheme } from '@toeverything/theme';
 import { css, html, LitElement, unsafeCSS } from 'lit';
-import { customElement, property, state } from 'lit/decorators.js';
+import { property, state } from 'lit/decorators.js';
 
 import type { AffineEditorContainer } from '../../editors/editor-container.js';
 
@@ -56,7 +56,6 @@ const styles = css`
 
 export const AFFINE_OUTLINE_PANEL = 'affine-outline-panel';
 
-@customElement(AFFINE_OUTLINE_PANEL)
 export class OutlinePanel extends SignalWatcher(WithDisposable(LitElement)) {
   static override styles = styles;
 

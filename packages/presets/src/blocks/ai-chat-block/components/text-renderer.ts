@@ -14,7 +14,7 @@ import {
 } from '@blocksuite/blocks';
 import { BlockViewType, type Doc, type Query } from '@blocksuite/store';
 import { css, html, LitElement, nothing, type PropertyValues } from 'lit';
-import { customElement, property, query } from 'lit/decorators.js';
+import { property, query } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { keyed } from 'lit/directives/keyed.js';
 
@@ -73,7 +73,6 @@ export type TextRendererOptions = {
   customHeading?: boolean;
 };
 
-@customElement('text-renderer')
 export class TextRenderer extends WithDisposable(LitElement) {
   static override styles = css`
     .ai-answer-text-editor.affine-page-viewport {

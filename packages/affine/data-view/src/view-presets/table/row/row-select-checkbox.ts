@@ -6,7 +6,7 @@ import {
 import { CheckBoxCkeckSolidIcon, CheckBoxUnIcon } from '@blocksuite/icons/lit';
 import { computed, type ReadonlySignal } from '@lit-labs/preact-signals';
 import { css, html } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { property } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 
 import {
@@ -14,7 +14,6 @@ import {
   type TableViewSelectionWithType,
 } from '../types.js';
 
-@customElement('row-select-checkbox')
 export class RowSelectCheckbox extends SignalWatcher(
   WithDisposable(ShadowlessElement)
 ) {

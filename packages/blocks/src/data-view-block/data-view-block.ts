@@ -23,7 +23,6 @@ import { widgetPresets } from '@blocksuite/data-view/widget-presets';
 import { Slice } from '@blocksuite/store';
 import { computed, signal } from '@lit-labs/preact-signals';
 import { css, nothing, unsafeCSS } from 'lit';
-import { customElement } from 'lit/decorators.js';
 import { html } from 'lit/static-html.js';
 
 import type { NoteBlockComponent } from '../note-block/index.js';
@@ -35,7 +34,6 @@ import {
 } from '../root-block/index.js';
 import { BlockQueryDataSource } from './data-source.js';
 
-@customElement('affine-data-view')
 export class DataViewBlockComponent extends CaptionedBlockComponent<DataViewBlockModel> {
   static override styles = css`
     ${unsafeCSS(dataViewCommonStyle('affine-database'))}

@@ -1,5 +1,4 @@
 import { css, html, LitElement, nothing } from 'lit';
-import { customElement } from 'lit/decorators.js';
 import { ref } from 'lit/directives/ref.js';
 import { repeat } from 'lit/directives/repeat.js';
 
@@ -13,7 +12,6 @@ type ModalOptions = {
   footer: null | ModalButton[];
 };
 
-@customElement('affine-custom-modal')
 export class AffineCustomModal extends LitElement {
   static override styles = css`
     :host {

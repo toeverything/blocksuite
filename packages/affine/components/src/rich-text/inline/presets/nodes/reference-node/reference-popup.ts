@@ -8,7 +8,7 @@ import { assertExists } from '@blocksuite/global/utils';
 import { computePosition, inline, offset, shift } from '@floating-ui/dom';
 import { effect } from '@lit-labs/preact-signals';
 import { html, LitElement, nothing } from 'lit';
-import { customElement, property, query } from 'lit/decorators.js';
+import { property, query } from 'lit/decorators.js';
 import { ifDefined } from 'lit/directives/if-defined.js';
 import { join } from 'lit/directives/join.js';
 import { repeat } from 'lit/directives/repeat.js';
@@ -32,7 +32,6 @@ import {
 import { RefNodeSlotsProvider } from '../../../../extension/index.js';
 import { styles } from './styles.js';
 
-@customElement('reference-popup')
 export class ReferencePopup extends WithDisposable(LitElement) {
   static override styles = styles;
 

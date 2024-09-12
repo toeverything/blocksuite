@@ -6,7 +6,7 @@ import {
 import { assertExists } from '@blocksuite/global/utils';
 import { computed } from '@lit-labs/preact-signals';
 import { css } from 'lit';
-import { customElement, property, state } from 'lit/decorators.js';
+import { property, state } from 'lit/decorators.js';
 import { createRef } from 'lit/directives/ref.js';
 
 import type {
@@ -22,7 +22,6 @@ import {
   type TableViewSelectionWithType,
 } from './types.js';
 
-@customElement('affine-database-cell-container')
 export class DatabaseCellContainer extends SignalWatcher(
   WithDisposable(ShadowlessElement)
 ) {

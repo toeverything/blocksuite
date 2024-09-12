@@ -8,7 +8,7 @@ import {
   ZERO_WIDTH_SPACE,
 } from '@blocksuite/inline';
 import { css, html } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { property } from 'lit/decorators.js';
 import { ref } from 'lit/directives/ref.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
@@ -18,7 +18,6 @@ import { HoverController } from '../../../../../hover/index.js';
 import { affineTextStyles } from '../affine-text.js';
 import { toggleLinkPopup } from './link-popup/toggle-link-popup.js';
 
-@customElement('affine-link')
 export class AffineLink extends ShadowlessElement {
   static override styles = css`
     affine-link a:hover [data-v-text='true'] {

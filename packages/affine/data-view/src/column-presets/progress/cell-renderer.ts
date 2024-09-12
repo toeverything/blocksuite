@@ -1,5 +1,5 @@
 import { css, html } from 'lit';
-import { customElement, query, state } from 'lit/decorators.js';
+import { query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { BaseCellRenderer } from '../../core/column/index.js';
@@ -75,7 +75,6 @@ const progressColors = {
   success: 'var(--affine-success-color)',
 };
 
-@customElement('affine-database-progress-cell')
 export class ProgressCell extends BaseCellRenderer<number> {
   static override styles = styles;
 
@@ -105,7 +104,6 @@ export class ProgressCell extends BaseCellRenderer<number> {
   }
 }
 
-@customElement('affine-database-progress-cell-editing')
 export class ProgressCellEditing extends BaseCellRenderer<number> {
   static override styles = styles;
 

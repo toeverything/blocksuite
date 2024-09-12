@@ -4,9 +4,8 @@ import { focusTextModel } from '@blocksuite/affine-components/rich-text';
 import { stopPropagation } from '@blocksuite/affine-shared/utils';
 import { ZERO_WIDTH_SPACE } from '@blocksuite/inline/consts';
 import { css, html, LitElement } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { property } from 'lit/decorators.js';
 
-@customElement('block-zero-width')
 export class BlockZeroWidth extends LitElement {
   static override styles = css`
     .block-zero-width {

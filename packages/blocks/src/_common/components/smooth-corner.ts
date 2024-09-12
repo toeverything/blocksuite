@@ -1,6 +1,6 @@
 import { getSvgPath } from '@blocksuite/global/utils';
 import { css, html, LitElement, svg, type TemplateResult } from 'lit';
-import { customElement, property, state } from 'lit/decorators.js';
+import { property, state } from 'lit/decorators.js';
 
 /**
  * ### A component to use figma 'smoothing radius'
@@ -41,7 +41,6 @@ import { customElement, property, state } from 'lit/decorators.js';
  * }
  * ```
  */
-@customElement('smooth-corner')
 export class SmoothCorner extends LitElement {
   static override styles = css`
     :host {

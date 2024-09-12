@@ -1,8 +1,7 @@
 import { baseTheme } from '@toeverything/theme';
 import { css, html, LitElement, type TemplateResult, unsafeCSS } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { property } from 'lit/decorators.js';
 
-@customElement('image-placeholder')
 export class ImagePlaceholder extends LitElement {
   static override styles = css`
     .placeholder-container {

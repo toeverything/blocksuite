@@ -1,5 +1,12 @@
 import type { BlockCollection } from '@blocksuite/store';
 
+import { effects as blocksEffects } from '@blocksuite/blocks/effects';
+
+import { effects } from '../../effects.js';
+
+blocksEffects();
+effects();
+
 import {
   CommunityCanvasTextFonts,
   type DocMode,

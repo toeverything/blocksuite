@@ -1,6 +1,6 @@
 import { CheckBoxCkeckSolidIcon, CheckBoxUnIcon } from '@blocksuite/icons/lit';
 import { css, html } from 'lit';
-import { customElement, query } from 'lit/decorators.js';
+import { query } from 'lit/decorators.js';
 
 import { BaseCellRenderer } from '../../core/column/index.js';
 import { createFromBaseCellRenderer } from '../../core/column/renderer.js';
@@ -47,7 +47,6 @@ const playCheckAnimation = async (
   sparkingEl.remove();
 };
 
-@customElement('affine-database-checkbox-cell')
 export class CheckboxCell extends BaseCellRenderer<boolean> {
   static override styles = css`
     affine-database-checkbox-cell {

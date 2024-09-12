@@ -40,7 +40,7 @@ import {
 import { DocCollection } from '@blocksuite/store';
 import { baseTheme } from '@toeverything/theme';
 import { css, html, LitElement, nothing, unsafeCSS } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
@@ -76,7 +76,6 @@ import {
   type TARGET_SHAPE_TYPE,
 } from './utils.js';
 
-@customElement('edgeless-auto-complete-panel')
 export class EdgelessAutoCompletePanel extends WithDisposable(LitElement) {
   static override styles = css`
     .auto-complete-panel-container {

@@ -13,7 +13,7 @@ import { EditPropsStore } from '@blocksuite/affine-shared/services';
 import { Bound } from '@blocksuite/global/utils';
 import { cssVar } from '@toeverything/theme';
 import { css, html, LitElement, nothing, type PropertyValues } from 'lit';
-import { customElement, property, state } from 'lit/decorators.js';
+import { property, state } from 'lit/decorators.js';
 
 import type { NavigatorMode } from '../../../../_common/edgeless/frame/consts.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
@@ -26,7 +26,6 @@ import './present/navigator-setting-button.js';
 
 const { clamp } = CommonUtils;
 
-@customElement('presentation-toolbar')
 export class PresentationToolbar extends EdgelessToolbarToolMixin(LitElement) {
   static override styles = css`
     :host {

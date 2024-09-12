@@ -11,7 +11,7 @@ import { toast } from '@blocksuite/affine-components/toast';
 import { WithDisposable } from '@blocksuite/block-std';
 import { Slice } from '@blocksuite/store';
 import { css, html, LitElement, nothing } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { property } from 'lit/decorators.js';
 
 import type { EmbedToolbarBlockComponent } from './type.js';
 
@@ -22,7 +22,6 @@ import {
 import { getBlockProps } from '../../utils/index.js';
 import './../button.js';
 
-@customElement('embed-card-more-menu')
 export class EmbedCardMoreMenu extends WithDisposable(LitElement) {
   static override styles = css`
     .embed-card-more-menu {

@@ -5,7 +5,7 @@ import {
 } from '@blocksuite/affine-shared/utils';
 import { DisposableGroup } from '@blocksuite/global/utils';
 import { css, html, LitElement } from 'lit';
-import { customElement, query } from 'lit/decorators.js';
+import { query } from 'lit/decorators.js';
 
 /**
  * A scrollbar that is only visible when the user is interacting with it.
@@ -27,7 +27,6 @@ import { customElement, query } from 'lit/decorators.js';
  * Note:
  * - It only works with vertical scrollbars.
  */
-@customElement('overlay-scrollbar')
 export class OverlayScrollbar extends LitElement {
   static override styles = css`
     :host {

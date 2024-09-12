@@ -1,5 +1,5 @@
 import { css, html, LitElement } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { property } from 'lit/decorators.js';
 
 const styles = css`
   :host {
@@ -52,7 +52,6 @@ const styles = css`
   }
 `;
 
-@customElement('toggle-switch')
 export class ToggleSwitch extends LitElement {
   static override styles = styles;
 

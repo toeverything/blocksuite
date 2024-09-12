@@ -2,7 +2,7 @@ import { ShadowlessElement } from '@blocksuite/block-std';
 import { assertEquals } from '@blocksuite/global/utils';
 import { DocCollection, type Text } from '@blocksuite/store';
 import { css, html } from 'lit';
-import { customElement, state } from 'lit/decorators.js';
+import { state } from 'lit/decorators.js';
 import { createRef, ref } from 'lit/directives/ref.js';
 
 import type { DataViewTable } from '../table-view.js';
@@ -10,7 +10,6 @@ import type { TableAreaSelection } from '../types.js';
 
 import { tRichText } from '../../../core/logical/data-type.js';
 
-@customElement('data-view-drag-to-fill')
 export class DragToFillElement extends ShadowlessElement {
   static override styles = css`
     .drag-to-fill {

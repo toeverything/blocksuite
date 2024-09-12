@@ -2,11 +2,10 @@ import { ReleaseFromGroupButtonIcon } from '@blocksuite/affine-components/icons'
 import { GroupElementModel } from '@blocksuite/affine-model';
 import { WithDisposable } from '@blocksuite/block-std';
 import { html, LitElement } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { property } from 'lit/decorators.js';
 
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 
-@customElement('edgeless-release-from-group-button')
 export class EdgelessReleaseFromGroupButton extends WithDisposable(LitElement) {
   private _releaseFromGroup() {
     const service = this.edgeless.service;

@@ -1,3 +1,5 @@
+import { effects as blocksEffects } from '@blocksuite/blocks/effects';
+import { effects as presetsEffects } from '@blocksuite/presets/effects';
 import '@blocksuite/presets/themes/affine.css';
 
 import { setupEdgelessTemplate } from '../_common/setup.js';
@@ -7,6 +9,9 @@ import {
   initDefaultDocCollection,
 } from './utils/collection.js';
 import { mountDefaultDocEditor } from './utils/editor.js';
+
+blocksEffects();
+presetsEffects();
 
 async function main() {
   if (window.collection) return;

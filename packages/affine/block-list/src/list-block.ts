@@ -1,4 +1,3 @@
-/// <reference types="vite/client" />
 import type { ListBlockModel } from '@blocksuite/affine-model';
 import type { BaseSelection, BlockComponent } from '@blocksuite/block-std';
 import type { InlineRangeProvider } from '@blocksuite/inline';
@@ -24,7 +23,7 @@ import { getViewportElement } from '@blocksuite/affine-shared/utils';
 import { getInlineRangeProvider } from '@blocksuite/block-std';
 import { effect } from '@lit-labs/preact-signals';
 import { html, nothing, type TemplateResult } from 'lit';
-import { customElement, query, state } from 'lit/decorators.js';
+import { query, state } from 'lit/decorators.js';
 
 import type { ListBlockService } from './list-service.js';
 
@@ -32,7 +31,6 @@ import { correctNumberedListsOrderToPrev } from './commands/utils.js';
 import { listBlockStyles } from './styles.js';
 import { getListIcon } from './utils/get-list-icon.js';
 
-@customElement('affine-list')
 export class ListBlockComponent extends CaptionedBlockComponent<
   ListBlockModel,
   ListBlockService

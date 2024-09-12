@@ -2,7 +2,7 @@ import type { EditorHost } from '@blocksuite/block-std';
 import type { AffineAIPanelState } from '@blocksuite/blocks';
 
 import { css, html, LitElement } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { property } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { repeat } from 'lit/directives/repeat.js';
 
@@ -13,7 +13,6 @@ import './chat-images.js';
 import './text-renderer.js';
 import { UserInfoTemplate } from './user-info.js';
 
-@customElement('ai-chat-message')
 export class AIChatMessage extends LitElement {
   static override styles = css`
     .ai-chat-message {
@@ -92,7 +91,6 @@ export class AIChatMessage extends LitElement {
   accessor userInfo: MessageUserInfo = {};
 }
 
-@customElement('ai-chat-messages')
 export class AIChatMessages extends LitElement {
   static override styles = css`
     :host {

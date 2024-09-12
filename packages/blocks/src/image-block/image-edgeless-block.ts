@@ -5,7 +5,7 @@ import '@blocksuite/affine-components/caption';
 import { Peekable } from '@blocksuite/affine-components/peek';
 import { GfxBlockComponent } from '@blocksuite/block-std';
 import { css, html } from 'lit';
-import { customElement, property, query, state } from 'lit/decorators.js';
+import { property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { when } from 'lit/directives/when.js';
 
@@ -21,7 +21,6 @@ import {
   turnImageIntoCardView,
 } from './utils.js';
 
-@customElement('affine-edgeless-image')
 @Peekable()
 export class ImageEdgelessBlockComponent extends GfxBlockComponent<
   ImageBlockModel,

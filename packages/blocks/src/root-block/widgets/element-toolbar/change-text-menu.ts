@@ -28,7 +28,7 @@ import {
 import { WithDisposable } from '@blocksuite/block-std';
 import { Bound, countBy, maxBy } from '@blocksuite/global/utils';
 import { css, html, LitElement, nothing, type TemplateResult } from 'lit';
-import { customElement, property, query } from 'lit/decorators.js';
+import { property, query } from 'lit/decorators.js';
 import { choose } from 'lit/directives/choose.js';
 import { join } from 'lit/directives/join.js';
 import { when } from 'lit/directives/when.js';
@@ -168,7 +168,6 @@ function buildProps(
   return { ...props };
 }
 
-@customElement('edgeless-change-text-menu')
 export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
   static override styles = css`
     :host {

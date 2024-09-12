@@ -1,10 +1,8 @@
 import { popMenu } from '@blocksuite/affine-components/context-menu';
 import { css, html } from 'lit';
-import { customElement } from 'lit/decorators.js';
 
 import { BaseGroup } from './base.js';
 
-@customElement('data-view-group-title-number-view')
 export class NumberGroupView extends BaseGroup<NonNullable<unknown>, number> {
   static override styles = css`
     .data-view-group-title-number-view {

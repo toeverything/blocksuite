@@ -2,7 +2,7 @@ import { popFilterableSimpleMenu } from '@blocksuite/affine-components/context-m
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { CloseIcon } from '@blocksuite/icons/lit';
 import { css, html, nothing } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
 import {
@@ -25,7 +25,6 @@ import { tBoolean } from '../../core/logical/data-type.js';
 import { typesystem } from '../../core/logical/typesystem.js';
 import { filterMatcher } from './matcher/matcher.js';
 
-@customElement('filter-condition-view')
 export class FilterConditionView extends WithDisposable(ShadowlessElement) {
   static override styles = css`
     filter-condition-view {

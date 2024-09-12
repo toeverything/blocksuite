@@ -3,7 +3,7 @@ import type { EditorHost } from '@blocksuite/block-std';
 import { WithDisposable } from '@blocksuite/block-std';
 import { baseTheme } from '@toeverything/theme';
 import { css, html, LitElement, nothing, unsafeCSS } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { property } from 'lit/decorators.js';
 import { choose } from 'lit/directives/choose.js';
 
 import type { AIPanelErrorConfig, CopyConfig } from '../../type.js';
@@ -15,7 +15,6 @@ import {
 import { filterAIItemGroup } from '../../utils.js';
 import '../finish-tip.js';
 
-@customElement('ai-panel-error')
 export class AIPanelError extends WithDisposable(LitElement) {
   static override styles = css`
     :host {

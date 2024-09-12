@@ -3,7 +3,7 @@ import type { ImageBlockModel } from '@blocksuite/affine-model';
 import { CaptionedBlockComponent } from '@blocksuite/affine-components/caption';
 import { Peekable } from '@blocksuite/affine-components/peek';
 import { html } from 'lit';
-import { customElement, property, query, state } from 'lit/decorators.js';
+import { property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { when } from 'lit/directives/when.js';
 
@@ -20,7 +20,6 @@ import {
   turnImageIntoCardView,
 } from './utils.js';
 
-@customElement('affine-image')
 @Peekable()
 export class ImageBlockComponent extends CaptionedBlockComponent<
   ImageBlockModel,

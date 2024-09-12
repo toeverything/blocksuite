@@ -2,11 +2,10 @@ import { WithDisposable } from '@blocksuite/block-std';
 import { DualLinkIcon16, scrollbarStyle } from '@blocksuite/blocks';
 import { baseTheme } from '@toeverything/theme';
 import { css, html, LitElement, unsafeCSS } from 'lit';
-import { customElement, state } from 'lit/decorators.js';
+import { state } from 'lit/decorators.js';
 
 import { type BacklinkData, DEFAULT_DOC_NAME } from './utils.js';
 
-@customElement('backlink-button')
 export class BacklinkButton extends WithDisposable(LitElement) {
   static override styles = css`
     :host {

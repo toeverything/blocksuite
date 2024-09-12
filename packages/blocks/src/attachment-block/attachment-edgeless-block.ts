@@ -6,14 +6,12 @@ import {
   EMBED_CARD_WIDTH,
 } from '@blocksuite/affine-shared/consts';
 import { toGfxBlockComponent } from '@blocksuite/block-std';
-import { customElement } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import type { EdgelessRootService } from '../root-block/index.js';
 
 import { AttachmentBlockComponent } from './attachment-block.js';
 
-@customElement('affine-edgeless-attachment')
 export class AttachmentEdgelessBlockComponent extends toGfxBlockComponent(
   AttachmentBlockComponent
 ) {

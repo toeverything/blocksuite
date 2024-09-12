@@ -4,14 +4,12 @@ import {
   EMBED_CARD_WIDTH,
 } from '@blocksuite/affine-shared/consts';
 import { Bound } from '@blocksuite/global/utils';
-import { customElement } from 'lit/decorators.js';
 
 import type { EdgelessRootService } from '../root-block/index.js';
 
 import { toEdgelessEmbedBlock } from '../_common/embed-block-helper/embed-block-element.js';
 import { EmbedLinkedDocBlockComponent } from './embed-linked-doc-block.js';
 
-@customElement('affine-embed-edgeless-linked-doc-block')
 export class EmbedEdgelessLinkedDocBlockComponent extends toEdgelessEmbedBlock(
   EmbedLinkedDocBlockComponent
 ) {

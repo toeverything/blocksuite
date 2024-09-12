@@ -35,7 +35,7 @@ import { assertExists } from '@blocksuite/global/utils';
 import { type BlockModel, DocCollection } from '@blocksuite/store';
 import { autoUpdate, computePosition, flip, offset } from '@floating-ui/dom';
 import { html, nothing, type TemplateResult } from 'lit';
-import { customElement, query, state } from 'lit/decorators.js';
+import { query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { ifDefined } from 'lit/directives/if-defined.js';
 import { join } from 'lit/directives/join.js';
@@ -67,7 +67,6 @@ import { embedCardToolbarStyle } from './styles.js';
 
 export const AFFINE_EMBED_CARD_TOOLBAR_WIDGET = 'affine-embed-card-toolbar';
 
-@customElement(AFFINE_EMBED_CARD_TOOLBAR_WIDGET)
 export class EmbedCardToolbar extends WidgetComponent<
   RootBlockModel,
   RootBlockComponent

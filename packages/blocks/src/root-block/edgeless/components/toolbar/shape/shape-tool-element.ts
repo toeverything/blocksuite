@@ -14,7 +14,7 @@ import {
   type PropertyValues,
   type TemplateResult,
 } from 'lit';
-import { customElement, property, query, state } from 'lit/decorators.js';
+import { property, query, state } from 'lit/decorators.js';
 
 import type { EdgelessRootBlockComponent } from '../../../edgeless-root-block.js';
 
@@ -40,7 +40,6 @@ type TransformMap = Record<
   }
 >;
 
-@customElement('edgeless-shape-tool-element')
 export class EdgelessShapeToolElement extends WithDisposable(LitElement) {
   static override styles = css`
     .shape {

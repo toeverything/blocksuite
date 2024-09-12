@@ -8,7 +8,7 @@ import { BLOCK_ID_ATTR, type PointerEventState } from '@blocksuite/block-std';
 import { BlockComponent, WidgetComponent } from '@blocksuite/block-std';
 import { assertInstanceOf } from '@blocksuite/global/utils';
 import { html, nothing } from 'lit';
-import { customElement, state } from 'lit/decorators.js';
+import { state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import type { PageRootBlockComponent } from '../../index.js';
@@ -30,7 +30,6 @@ type BlockInfo = {
 export const AFFINE_PAGE_DRAGGING_AREA_WIDGET =
   'affine-page-dragging-area-widget';
 
-@customElement(AFFINE_PAGE_DRAGGING_AREA_WIDGET)
 export class AffinePageDraggingAreaWidget extends WidgetComponent<
   RootBlockModel,
   PageRootBlockComponent

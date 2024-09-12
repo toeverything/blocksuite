@@ -3,7 +3,7 @@ import type { ConnectorElementModel } from '@blocksuite/affine-model';
 import { WithDisposable } from '@blocksuite/block-std';
 import { DisposableGroup, Vec } from '@blocksuite/global/utils';
 import { css, html, LitElement } from 'lit';
-import { customElement, property, query } from 'lit/decorators.js';
+import { property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
@@ -11,7 +11,6 @@ import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
 const SIZE = 12;
 const HALF_SIZE = SIZE / 2;
 
-@customElement('edgeless-connector-handle')
 export class EdgelessConnectorHandle extends WithDisposable(LitElement) {
   static override styles = css`
     .line-controller {

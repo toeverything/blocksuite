@@ -6,7 +6,7 @@ import { EmbedOptionProvider } from '@blocksuite/affine-shared/services';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { assertExists, Bound, Vec } from '@blocksuite/global/utils';
 import { html } from 'lit';
-import { customElement, property, query, state } from 'lit/decorators.js';
+import { property, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 
 import type { EdgelessRootBlockComponent } from '../../../../root-block/edgeless/edgeless-root-block.js';
@@ -16,7 +16,6 @@ import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../../../consts.js';
 import { getRootByEditorHost, isValidUrl } from '../../../utils/index.js';
 import { embedCardModalStyles } from './styles.js';
 
-@customElement('embed-card-create-modal')
 export class EmbedCardCreateModal extends WithDisposable(ShadowlessElement) {
   static override styles = embedCardModalStyles;
 

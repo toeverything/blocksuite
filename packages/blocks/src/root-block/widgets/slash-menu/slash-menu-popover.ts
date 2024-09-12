@@ -12,7 +12,7 @@ import { WithDisposable } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import { autoPlacement, offset } from '@floating-ui/dom';
 import { html, LitElement, nothing, type PropertyValues } from 'lit';
-import { customElement, property, query, state } from 'lit/decorators.js';
+import { property, query, state } from 'lit/decorators.js';
 import { ifDefined } from 'lit/directives/if-defined.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
@@ -46,7 +46,6 @@ type InnerSlashMenuContext = SlashMenuContext & {
   onClickItem: (item: SlashMenuActionItem) => void;
 };
 
-@customElement('affine-slash-menu')
 export class SlashMenu extends WithDisposable(LitElement) {
   static override styles = styles;
 
@@ -288,7 +287,6 @@ export class SlashMenu extends WithDisposable(LitElement) {
   accessor triggerKey!: string;
 }
 
-@customElement('inner-slash-menu')
 export class InnerSlashMenu extends WithDisposable(LitElement) {
   static override styles = styles;
 

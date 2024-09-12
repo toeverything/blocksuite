@@ -1,12 +1,10 @@
 import { css, html } from 'lit';
-import { customElement } from 'lit/decorators.js';
 
 import { BaseCellRenderer } from '../../core/column/index.js';
 import { createFromBaseCellRenderer } from '../../core/column/renderer.js';
 import { createIcon } from '../../core/utils/uni-icon.js';
 import { imageColumnModelConfig } from './define.js';
 
-@customElement('affine-database-image-cell')
 export class TextCell extends BaseCellRenderer<string> {
   static override styles = css`
     affine-database-image-cell {

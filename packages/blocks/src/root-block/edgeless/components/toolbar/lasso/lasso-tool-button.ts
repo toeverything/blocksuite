@@ -5,15 +5,14 @@ import {
 } from '@blocksuite/affine-components/icons';
 import { WithDisposable } from '@blocksuite/block-std';
 import { css, html, LitElement } from 'lit';
-import { customElement, query, state } from 'lit/decorators.js';
+import { query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { LassoMode } from '../../../../../_common/types.js';
 import { getTooltipWithShortcut } from '../../utils.js';
 import { QuickToolMixin } from '../mixins/quick-tool.mixin.js';
 
-@customElement('edgeless-lasso-tool-button')
-export class EdgelessDefaultToolButton extends QuickToolMixin(
+export class EdgelessLassoToolButton extends QuickToolMixin(
   WithDisposable(LitElement)
 ) {
   static override styles = css`
@@ -111,6 +110,6 @@ export class EdgelessDefaultToolButton extends QuickToolMixin(
 
 declare global {
   interface HTMLElementTagNameMap {
-    'edgeless-lasso-tool-button': EdgelessDefaultToolButton;
+    'edgeless-lasso-tool-button': EdgelessLassoToolButton;
   }
 }

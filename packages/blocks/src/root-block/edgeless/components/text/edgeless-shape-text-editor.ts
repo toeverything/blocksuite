@@ -16,7 +16,7 @@ import {
 import { assertExists, Bound, Vec } from '@blocksuite/global/utils';
 import { DocCollection } from '@blocksuite/store';
 import { html, nothing } from 'lit';
-import { customElement, property, query } from 'lit/decorators.js';
+import { property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
@@ -25,7 +25,6 @@ import { getSelectedRect } from '../../utils/query.js';
 
 const { toRadian } = CommonUtils;
 
-@customElement('edgeless-shape-text-editor')
 export class EdgelessShapeTextEditor extends WithDisposable(ShadowlessElement) {
   private _keeping = false;
 

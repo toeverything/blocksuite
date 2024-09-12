@@ -2,19 +2,14 @@ import type { Doc } from '@blocksuite/store';
 
 import {
   BlockStdScope,
-  EditorHost,
   ShadowlessElement,
   WithDisposable,
 } from '@blocksuite/block-std';
 import { EdgelessEditorBlockSpecs } from '@blocksuite/blocks';
-import { noop } from '@blocksuite/global/utils';
 import { css, html, nothing, type TemplateResult } from 'lit';
-import { customElement, property, state } from 'lit/decorators.js';
+import { property, state } from 'lit/decorators.js';
 import { guard } from 'lit/directives/guard.js';
 
-noop(EditorHost);
-
-@customElement('edgeless-editor')
 export class EdgelessEditor extends WithDisposable(ShadowlessElement) {
   static override styles = css`
     edgeless-editor {

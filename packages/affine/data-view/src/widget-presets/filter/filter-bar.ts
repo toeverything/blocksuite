@@ -2,7 +2,7 @@ import { createPopup } from '@blocksuite/affine-components/context-menu';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { CloseIcon, FilterIcon, PlusIcon } from '@blocksuite/icons/lit';
 import { css, html, type TemplateResult } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
 import type { Filter, FilterGroup, Variable } from '../../core/common/ast.js';
@@ -11,7 +11,6 @@ import { popCreateFilter } from '../../core/common/ref/ref.js';
 import { renderTemplate } from '../../core/utils/uni-component/render-template.js';
 import { popFilterModal } from './filter-modal.js';
 
-@customElement('filter-bar')
 export class FilterBar extends WithDisposable(ShadowlessElement) {
   static override styles = css`
     filter-bar {

@@ -1,4 +1,3 @@
-import { customElement } from 'lit/decorators.js';
 import { html } from 'lit/static-html.js';
 
 import type { SelectColumnData } from '../select/define.js';
@@ -13,7 +12,6 @@ import {
 import { createIcon } from '../../core/utils/uni-icon.js';
 import { multiSelectColumnModelConfig } from './define.js';
 
-@customElement('affine-database-multi-select-cell')
 export class MultiSelectCell extends BaseCellRenderer<
   string[],
   SelectColumnData
@@ -28,7 +26,6 @@ export class MultiSelectCell extends BaseCellRenderer<
   }
 }
 
-@customElement('affine-database-multi-select-cell-editing')
 export class MultiSelectCellEditing extends BaseCellRenderer<
   string[],
   SelectColumnData

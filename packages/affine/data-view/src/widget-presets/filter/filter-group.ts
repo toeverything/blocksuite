@@ -11,7 +11,7 @@ import {
   PlusIcon,
 } from '@blocksuite/icons/lit';
 import { css, html, nothing } from 'lit';
-import { customElement, property, state } from 'lit/decorators.js';
+import { property, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { repeat } from 'lit/directives/repeat.js';
 
@@ -23,7 +23,6 @@ import {
 } from '../../core/common/ast.js';
 import { popAddNewFilter } from './condition.js';
 
-@customElement('filter-group-view')
 export class FilterGroupView extends WithDisposable(ShadowlessElement) {
   static override styles = css`
     filter-group-view {

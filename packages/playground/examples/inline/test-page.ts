@@ -8,6 +8,7 @@ import {
   KEYBOARD_ALLOW_DEFAULT,
   ZERO_WIDTH_NON_JOINER,
 } from '@blocksuite/inline';
+import { effects } from '@blocksuite/inline/effects';
 import '@shoelace-style/shoelace';
 import { css, html, nothing } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
@@ -16,6 +17,8 @@ import * as Y from 'yjs';
 import { z } from 'zod';
 
 import { markdownMatches } from './markdown.js';
+
+effects();
 
 function inlineTextStyles(
   props: BaseTextAttributes

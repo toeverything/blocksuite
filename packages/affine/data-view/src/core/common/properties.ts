@@ -10,7 +10,7 @@ import {
   ViewIcon,
 } from '@blocksuite/icons/lit';
 import { css, html } from 'lit';
-import { customElement, property, query } from 'lit/decorators.js';
+import { property, query } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { repeat } from 'lit/directives/repeat.js';
 import Sortable from 'sortablejs';
@@ -18,7 +18,6 @@ import Sortable from 'sortablejs';
 import type { Column } from '../view-manager/column.js';
 import type { SingleView } from '../view-manager/single-view.js';
 
-@customElement('data-view-properties-setting')
 export class DataViewPropertiesSettingView extends SignalWatcher(
   WithDisposable(ShadowlessElement)
 ) {

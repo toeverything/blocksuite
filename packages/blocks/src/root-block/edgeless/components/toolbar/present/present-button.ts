@@ -1,13 +1,11 @@
 import { FrameNavigatorIcon } from '@blocksuite/affine-components/icons';
 import { css, html, LitElement } from 'lit';
-import { customElement } from 'lit/decorators.js';
 
 import type { EdgelessTool } from '../../../types.js';
 
 import { QuickToolMixin } from '../mixins/quick-tool.mixin.js';
 import { EdgelessToolbarToolMixin } from '../mixins/tool.mixin.js';
 
-@customElement('edgeless-present-button')
 export class EdgelessPresentButton extends QuickToolMixin(
   EdgelessToolbarToolMixin(LitElement)
 ) {

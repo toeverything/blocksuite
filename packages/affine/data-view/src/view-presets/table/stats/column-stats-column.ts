@@ -11,7 +11,7 @@ import { ArrowDownSmallIcon } from '@blocksuite/icons/lit';
 import { Text } from '@blocksuite/store';
 import { computed, signal } from '@lit-labs/preact-signals';
 import { css, html } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import type { GroupData } from '../../../core/common/group-by/helper.js';
@@ -67,7 +67,6 @@ const styles = css`
   }
 `;
 
-@customElement('affine-database-column-stats-cell')
 export class DatabaseColumnStatsCell extends SignalWatcher(
   WithDisposable(ShadowlessElement)
 ) {

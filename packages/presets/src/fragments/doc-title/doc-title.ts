@@ -5,11 +5,10 @@ import type { Doc } from '@blocksuite/store';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import { css, html } from 'lit';
-import { customElement, property, query, state } from 'lit/decorators.js';
+import { property, query, state } from 'lit/decorators.js';
 
 const DOC_BLOCK_CHILD_PADDING = 24;
 
-@customElement('doc-title')
 export class DocTitle extends WithDisposable(ShadowlessElement) {
   static override styles = css`
     .doc-title-container {

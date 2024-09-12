@@ -27,7 +27,7 @@ import {
 } from '@blocksuite/global/utils';
 import { type BlockModel, BlockViewType, type Query } from '@blocksuite/store';
 import { html } from 'lit';
-import { customElement, query, state } from 'lit/decorators.js';
+import { query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import type { NoteBlockComponent } from '../../../note-block/index.js';
@@ -78,7 +78,6 @@ import {
 
 export const AFFINE_DRAG_HANDLE_WIDGET = 'affine-drag-handle-widget';
 
-@customElement(AFFINE_DRAG_HANDLE_WIDGET)
 export class AffineDragHandleWidget extends WidgetComponent<
   RootBlockModel,
   EdgelessRootBlockComponent | PageRootBlockComponent

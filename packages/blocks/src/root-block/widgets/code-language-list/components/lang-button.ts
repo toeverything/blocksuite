@@ -2,7 +2,7 @@ import { ArrowDownIcon } from '@blocksuite/affine-components/icons';
 import { SignalWatcher, WithDisposable } from '@blocksuite/block-std';
 import { noop } from '@blocksuite/global/utils';
 import { css, LitElement, nothing } from 'lit';
-import { customElement, property, query } from 'lit/decorators.js';
+import { property, query } from 'lit/decorators.js';
 import { html } from 'lit/static-html.js';
 
 import type { CodeBlockComponent } from '../../../../code-block/code-block.js';
@@ -13,7 +13,6 @@ import {
   showPopFilterableList,
 } from '../../../../_common/components/filterable-list/index.js';
 
-@customElement('language-list-button')
 export class LanguageListButton extends WithDisposable(
   SignalWatcher(LitElement)
 ) {

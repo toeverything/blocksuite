@@ -16,7 +16,7 @@ import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { deserializeXYWH } from '@blocksuite/global/utils';
 import { type BlockModel, BlockViewType, type Query } from '@blocksuite/store';
 import { css, nothing } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
 
@@ -26,7 +26,6 @@ import {
 } from '../../_common/consts.js';
 import { SpecProvider } from '../../_specs/utils/spec-provider.js';
 
-@customElement('surface-ref-note-portal')
 export class SurfaceRefNotePortal extends WithDisposable(ShadowlessElement) {
   static override styles = css`
     surface-ref-note-portal {

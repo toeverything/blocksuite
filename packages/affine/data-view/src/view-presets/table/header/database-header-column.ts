@@ -22,7 +22,7 @@ import {
   ViewIcon,
 } from '@blocksuite/icons/lit';
 import { css } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { property } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { createRef, ref } from 'lit/directives/ref.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -48,7 +48,6 @@ import {
   startDragWidthAdjustmentBar,
 } from './vertical-indicator.js';
 
-@customElement('affine-database-header-column')
 export class DatabaseHeaderColumn extends SignalWatcher(
   WithDisposable(ShadowlessElement)
 ) {

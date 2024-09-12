@@ -36,7 +36,7 @@ import { requestConnectedFrame } from '@blocksuite/affine-shared/utils';
 import { WidgetComponent } from '@blocksuite/block-std';
 import { atLeastNMatches, groupBy, pickValues } from '@blocksuite/global/utils';
 import { css, html, nothing, type TemplateResult } from 'lit';
-import { customElement, property, state } from 'lit/decorators.js';
+import { property, state } from 'lit/decorators.js';
 import { join } from 'lit/directives/join.js';
 
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
@@ -103,7 +103,6 @@ type CustomEntry = {
 export const EDGELESS_ELEMENT_TOOLBAR_WIDGET =
   'edgeless-element-toolbar-widget';
 
-@customElement(EDGELESS_ELEMENT_TOOLBAR_WIDGET)
 export class EdgelessElementToolbarWidget extends WidgetComponent<
   RootBlockModel,
   EdgelessRootBlockComponent

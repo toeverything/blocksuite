@@ -28,7 +28,7 @@ import {
 import { WithDisposable } from '@blocksuite/block-std';
 import { countBy, maxBy } from '@blocksuite/global/utils';
 import { css, html, LitElement, nothing, type TemplateResult } from 'lit';
-import { customElement, property, query } from 'lit/decorators.js';
+import { property, query } from 'lit/decorators.js';
 import { cache } from 'lit/directives/cache.js';
 import { choose } from 'lit/directives/choose.js';
 import { join } from 'lit/directives/join.js';
@@ -156,7 +156,6 @@ function getMostCommonShapeStyle(elements: ShapeElementModel[]): ShapeStyle {
   return max ? (max[0] as ShapeStyle) : ShapeStyle.Scribbled;
 }
 
-@customElement('edgeless-change-shape-button')
 export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
   static override styles = [changeShapeButtonStyles];
 

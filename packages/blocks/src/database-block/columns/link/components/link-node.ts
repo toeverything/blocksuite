@@ -1,9 +1,8 @@
 import { isValidUrl } from '@blocksuite/affine-shared/utils';
 import { ShadowlessElement } from '@blocksuite/block-std';
 import { css, html } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { property } from 'lit/decorators.js';
 
-@customElement('affine-database-link-node')
 export class LinkNode extends ShadowlessElement {
   static override styles = css`
     .link-node {

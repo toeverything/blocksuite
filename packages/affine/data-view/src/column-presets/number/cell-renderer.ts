@@ -1,7 +1,7 @@
 import { IS_MAC } from '@blocksuite/global/env';
 import { baseTheme } from '@toeverything/theme';
 import { css, html, unsafeCSS } from 'lit';
-import { customElement, query } from 'lit/decorators.js';
+import { query } from 'lit/decorators.js';
 
 import type { NumberColumnDataType } from './types.js';
 
@@ -16,7 +16,6 @@ import {
   parseNumber,
 } from './utils/formatter.js';
 
-@customElement('affine-database-number-cell')
 export class NumberCell extends BaseCellRenderer<number, NumberColumnDataType> {
   static override styles = css`
     affine-database-number-cell {
@@ -60,7 +59,6 @@ export class NumberCell extends BaseCellRenderer<number, NumberColumnDataType> {
   }
 }
 
-@customElement('affine-database-number-cell-editing')
 export class NumberCellEditing extends BaseCellRenderer<
   number,
   NumberColumnDataType

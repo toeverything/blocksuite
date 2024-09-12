@@ -13,7 +13,7 @@ import { ErrorCode } from '@blocksuite/global/exceptions';
 import { consume } from '@lit/context';
 import { computed, SignalWatcher } from '@lit-labs/preact-signals';
 import { css, html, LitElement, nothing, type TemplateResult } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
 import type { EdgelessRootBlockComponent } from '../../../index.js';
@@ -39,7 +39,6 @@ type ImportItem = {
 
 const textItem: TextItem = { type: 'text', icon: textIcon, render: textRender };
 
-@customElement('edgeless-mindmap-menu')
 export class EdgelessMindmapMenu extends EdgelessToolbarToolMixin(
   SignalWatcher(LitElement)
 ) {

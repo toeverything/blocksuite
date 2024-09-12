@@ -10,7 +10,7 @@ import {
 import { createButtonPopper } from '@blocksuite/blocks';
 import { DisposableGroup } from '@blocksuite/global/utils';
 import { css, html, LitElement, type PropertyValues } from 'lit';
-import { customElement, property, query, state } from 'lit/decorators.js';
+import { property, query, state } from 'lit/decorators.js';
 
 import { SettingsIcon, SmallFrameNavigatorIcon } from '../../_common/icons.js';
 import './frames-setting-menu.js';
@@ -105,7 +105,6 @@ const styles = css`
 
 export const AFFINE_FRAME_PANEL_HEADER = 'affine-frame-panel-header';
 
-@customElement(AFFINE_FRAME_PANEL_HEADER)
 export class FramePanelHeader extends WithDisposable(LitElement) {
   static override styles = styles;
 

@@ -6,7 +6,7 @@ import {
   EditPropsStore,
 } from '@blocksuite/blocks';
 import { css, html, LitElement, type PropertyValues } from 'lit';
-import { customElement, property, state } from 'lit/decorators.js';
+import { property, state } from 'lit/decorators.js';
 
 const styles = css`
   :host {
@@ -73,7 +73,6 @@ const styles = css`
 
 export const AFFINE_FRAMES_SETTING_MENU = 'affine-frames-setting-menu';
 
-@customElement(AFFINE_FRAMES_SETTING_MENU)
 export class FramesSettingMenu extends WithDisposable(LitElement) {
   static override styles = styles;
 

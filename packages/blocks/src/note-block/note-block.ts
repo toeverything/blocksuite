@@ -2,11 +2,9 @@ import type { NoteBlockModel } from '@blocksuite/affine-model';
 
 import { BlockComponent } from '@blocksuite/block-std';
 import { css, html } from 'lit';
-import { customElement } from 'lit/decorators.js';
 
 import type { NoteBlockService } from './note-service.js';
 
-@customElement('affine-note')
 export class NoteBlockComponent extends BlockComponent<
   NoteBlockModel,
   NoteBlockService

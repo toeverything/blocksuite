@@ -3,10 +3,9 @@ import { NoteDisplayMode } from '@blocksuite/affine-model';
 import { stopPropagation } from '@blocksuite/affine-shared/utils';
 import { WithDisposable } from '@blocksuite/block-std';
 import { css, html, LitElement } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
-@customElement('note-display-mode-panel')
 export class NoteDisplayModePanel extends WithDisposable(LitElement) {
   static override styles = css`
     :host {

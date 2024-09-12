@@ -6,7 +6,7 @@ import {
 } from '@blocksuite/block-std';
 import { AddCursorIcon } from '@blocksuite/icons/lit';
 import { css, nothing } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { html } from 'lit/static-html.js';
 
@@ -91,7 +91,6 @@ const styles = css`
   }
 `;
 
-@customElement('affine-data-view-kanban-group')
 export class KanbanGroup extends SignalWatcher(
   WithDisposable(ShadowlessElement)
 ) {

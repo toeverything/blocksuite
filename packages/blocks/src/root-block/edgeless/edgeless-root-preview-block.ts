@@ -19,7 +19,7 @@ import {
 } from '@blocksuite/block-std/gfx';
 import { assertExists } from '@blocksuite/global/utils';
 import { css, html } from 'lit';
-import { customElement, query, state } from 'lit/decorators.js';
+import { query, state } from 'lit/decorators.js';
 
 import type { EdgelessRootBlockWidgetName } from '../types.js';
 import type { EdgelessRootService } from './edgeless-root-service.js';
@@ -28,7 +28,6 @@ import { requestThrottledConnectedFrame } from '../../_common/utils/index.js';
 import { edgelessElementsBound } from './utils/bound-utils.js';
 import { getBackgroundGrid, isCanvasElement } from './utils/query.js';
 
-@customElement('affine-edgeless-root-preview')
 export class EdgelessRootPreviewBlockComponent extends BlockComponent<
   RootBlockModel,
   EdgelessRootService,

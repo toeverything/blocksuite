@@ -7,7 +7,7 @@ import {
 import { NoteDisplayMode, scrollbarStyle } from '@blocksuite/blocks';
 import { signal } from '@lit-labs/preact-signals';
 import { css, html, LitElement, nothing } from 'lit';
-import { customElement, property, query, state } from 'lit/decorators.js';
+import { property, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { repeat } from 'lit/directives/repeat.js';
 
@@ -25,7 +25,6 @@ export const AFFINE_OUTLINE_VIEWER = 'affine-outline-viewer';
 @requiredProperties({
   editor: PropTypes.object,
 })
-@customElement(AFFINE_OUTLINE_VIEWER)
 export class OutlineViewer extends SignalWatcher(WithDisposable(LitElement)) {
   static override styles = css`
     :host {

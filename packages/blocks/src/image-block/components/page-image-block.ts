@@ -2,7 +2,7 @@ import type { BaseSelection, UIEventStateContext } from '@blocksuite/block-std';
 
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { css, html, type PropertyValues } from 'lit';
-import { customElement, property, query, state } from 'lit/decorators.js';
+import { property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import type { ImageBlockComponent } from '../image-block.js';
@@ -11,7 +11,6 @@ import { ImageResizeManager } from '../image-resize-manager.js';
 import { shouldResizeImage } from '../utils.js';
 import { ImageSelectedRect } from './image-selected-rect.js';
 
-@customElement('affine-page-image')
 export class ImageBlockPageComponent extends WithDisposable(ShadowlessElement) {
   static override styles = css`
     affine-page-image {

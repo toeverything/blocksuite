@@ -12,7 +12,7 @@ import {
 } from '@blocksuite/block-std';
 import { ArrowRightSmallIcon, DeleteIcon } from '@blocksuite/icons/lit';
 import { css, html, unsafeCSS } from 'lit';
-import { customElement, property, query } from 'lit/decorators.js';
+import { property, query } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import Sortable from 'sortablejs';
 
@@ -21,7 +21,7 @@ import type {
   TableViewData,
 } from '../../../view-presets/index.js';
 import type { SingleView } from '../../view-manager/single-view.js';
-import type { GroupRenderProps } from './matcher.js';
+import type { GroupRenderProps } from './types.js';
 
 import { KanbanSingleView } from '../../../view-presets/kanban/kanban-view-manager.js';
 import { TableSingleView } from '../../../view-presets/table/table-view-manager.js';
@@ -30,7 +30,6 @@ import { renderUniLit } from '../../utils/uni-component/uni-component.js';
 import { dataViewCssVariable } from '../css-variable.js';
 import { groupByMatcher } from './matcher.js';
 
-@customElement('data-view-group-setting')
 export class GroupSetting extends SignalWatcher(
   WithDisposable(ShadowlessElement)
 ) {

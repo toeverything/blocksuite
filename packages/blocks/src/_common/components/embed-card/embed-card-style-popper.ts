@@ -6,7 +6,7 @@ import type {
 
 import { WithDisposable } from '@blocksuite/block-std';
 import { css, html, LitElement } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { property } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 
 import type { EmbedCardStyle } from '../../types.js';
@@ -14,7 +14,6 @@ import type { EmbedCardStyle } from '../../types.js';
 import { getEmbedCardIcons } from '../../utils/url.js';
 import './../button.js';
 
-@customElement('embed-card-style-menu')
 export class EmbedCardStyleMenu extends WithDisposable(LitElement) {
   static override styles = css`
     .embed-card-style-menu {

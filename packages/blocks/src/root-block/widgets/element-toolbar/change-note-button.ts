@@ -23,7 +23,7 @@ import { matchFlavours } from '@blocksuite/affine-shared/utils';
 import { WithDisposable } from '@blocksuite/block-std';
 import { assertExists, Bound, countBy, maxBy } from '@blocksuite/global/utils';
 import { html, LitElement, nothing, type TemplateResult } from 'lit';
-import { customElement, property, query } from 'lit/decorators.js';
+import { property, query } from 'lit/decorators.js';
 import { join } from 'lit/directives/join.js';
 import { createRef, type Ref, ref } from 'lit/directives/ref.js';
 import { when } from 'lit/directives/when.js';
@@ -78,7 +78,6 @@ function getMostCommonBackground(
   return max ? (max[0] as string) : null;
 }
 
-@customElement('edgeless-change-note-button')
 export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
   private _setBorderRadius = (borderRadius: number) => {
     this.notes.forEach(note => {

@@ -8,9 +8,8 @@ import type {
 import { DefaultInlineManagerExtension } from '@blocksuite/affine-components/rich-text';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { css, html } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { property } from 'lit/decorators.js';
 
-@customElement('database-datasource-block-renderer')
 export class BlockRenderer
   extends WithDisposable(ShadowlessElement)
   implements DetailSlotProps
@@ -86,10 +85,8 @@ export class BlockRenderer
     if (this.model && this.model.text) {
       const cb = () => {
         if (this.model?.text?.length == 0) {
-          // eslint-disable-next-line wc/no-self-class
           this.classList.add('empty');
         } else {
-          // eslint-disable-next-line wc/no-self-class
           this.classList.remove('empty');
         }
       };

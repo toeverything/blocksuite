@@ -18,7 +18,7 @@ import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import { SignalWatcher } from '@blocksuite/block-std';
 import { computed, signal } from '@lit-labs/preact-signals';
 import { css, html, LitElement } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { property } from 'lit/decorators.js';
 
 import type { EdgelessRootBlockComponent } from '../../../edgeless-root-block.js';
 
@@ -31,7 +31,6 @@ import {
   ShapeComponentConfig,
 } from './shape-menu-config.js';
 
-@customElement('edgeless-shape-menu')
 export class EdgelessShapeMenu extends SignalWatcher(LitElement) {
   static override styles = css`
     :host {

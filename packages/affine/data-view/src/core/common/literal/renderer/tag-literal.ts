@@ -1,12 +1,10 @@
 import { css, html } from 'lit';
-import { customElement } from 'lit/decorators.js';
 
 import type { TArray, TypeOfData } from '../../../logical/typesystem.js';
 
 import { tTag } from '../../../logical/data-type.js';
 import { LiteralElement } from './literal-element.js';
 
-@customElement('data-view-literal-tag-view')
 export class TagLiteral extends LiteralElement<
   string,
   TypeOfData<typeof tTag>
@@ -40,7 +38,6 @@ export class TagLiteral extends LiteralElement<
   }
 }
 
-@customElement('data-view-literal-multi-tag-view')
 export class MultiTagLiteral extends LiteralElement<
   string[],
   TArray<TypeOfData<typeof tTag>>

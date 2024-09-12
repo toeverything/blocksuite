@@ -4,7 +4,7 @@ import type { Y } from '@blocksuite/store';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { DisposableGroup } from '@blocksuite/global/utils';
 import { css, html, type PropertyValues } from 'lit';
-import { customElement, property, query } from 'lit/decorators.js';
+import { property, query } from 'lit/decorators.js';
 
 import { FrameCardTitleEditor } from './frame-card-title-editor.js';
 
@@ -57,7 +57,6 @@ const styles = css`
 
 export const AFFINE_FRAME_CARD_TITLE = 'affine-frame-card-title';
 
-@customElement(AFFINE_FRAME_CARD_TITLE)
 export class FrameCardTitle extends WithDisposable(ShadowlessElement) {
   static override styles = styles;
 

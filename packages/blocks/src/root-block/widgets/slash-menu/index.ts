@@ -12,7 +12,6 @@ import {
   DisposableGroup,
   throttle,
 } from '@blocksuite/global/utils';
-import { customElement } from 'lit/decorators.js';
 
 import type { RootBlockComponent } from '../../types.js';
 
@@ -104,7 +103,6 @@ const showSlashMenu = debounce(
 
 export const AFFINE_SLASH_MENU_WIDGET = 'affine-slash-menu-widget';
 
-@customElement(AFFINE_SLASH_MENU_WIDGET)
 export class AffineSlashMenuWidget extends WidgetComponent {
   static DEFAULT_CONFIG = defaultSlashMenuConfig;
 

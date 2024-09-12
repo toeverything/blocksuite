@@ -10,16 +10,18 @@ import { commands } from './commands/index.js';
 import './surface-block-void.js';
 import { SurfaceBlockService } from './surface-service.js';
 
-export const PageSurfaceBlockSpec: ExtensionType[] = [
+const CommonSurfaceBlockSpec: ExtensionType[] = [
   FlavourExtension('affine:surface'),
   SurfaceBlockService,
   CommandExtension(commands),
+];
+
+export const PageSurfaceBlockSpec: ExtensionType[] = [
+  ...CommonSurfaceBlockSpec,
   BlockViewExtension('affine:surface', literal`affine-surface-void`),
 ];
 
 export const EdgelessSurfaceBlockSpec: ExtensionType[] = [
-  FlavourExtension('affine:surface'),
-  SurfaceBlockService,
-  CommandExtension(commands),
+  ...CommonSurfaceBlockSpec,
   BlockViewExtension('affine:surface', literal`affine-surface`),
 ];

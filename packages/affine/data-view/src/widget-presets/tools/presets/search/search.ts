@@ -1,7 +1,7 @@
 import { CloseIcon, SearchIcon } from '@blocksuite/icons/lit';
 import { baseTheme } from '@toeverything/theme';
 import { css, html, unsafeCSS } from 'lit';
-import { customElement, query, state } from 'lit/decorators.js';
+import { query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
@@ -90,7 +90,6 @@ const styles = css`
   }
 `;
 
-@customElement('data-view-header-tools-search')
 export class DataViewHeaderToolsSearch extends WidgetBase {
   static override styles = styles;
 

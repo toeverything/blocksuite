@@ -9,7 +9,6 @@ import { EditPropsStore } from '@blocksuite/affine-shared/services';
 import { SignalWatcher } from '@blocksuite/block-std';
 import { computed } from '@lit-labs/preact-signals';
 import { css, html, LitElement } from 'lit';
-import { customElement } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import '../../buttons/toolbar-button.js';
@@ -23,7 +22,6 @@ const IcomMap = {
   [ConnectorMode.Curve]: ConnectorCWithArrowIcon,
 };
 
-@customElement('edgeless-connector-tool-button')
 export class EdgelessConnectorToolButton extends QuickToolMixin(
   SignalWatcher(LitElement)
 ) {

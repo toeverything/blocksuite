@@ -12,7 +12,7 @@ import {
 } from '@blocksuite/icons/lit';
 import { computed } from '@lit-labs/preact-signals';
 import { css } from 'lit';
-import { customElement, property, state } from 'lit/decorators.js';
+import { property, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { createRef } from 'lit/directives/ref.js';
 import { html } from 'lit/static-html.js';
@@ -27,7 +27,6 @@ import type { SingleView } from '../../view-manager/single-view.js';
 import { renderUniLit } from '../../utils/uni-component/uni-component.js';
 import { inputConfig, typeConfig } from '../column-menu.js';
 
-@customElement('affine-data-view-record-field')
 export class RecordField extends SignalWatcher(
   WithDisposable(ShadowlessElement)
 ) {

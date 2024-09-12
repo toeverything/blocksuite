@@ -5,7 +5,7 @@ import {
 } from '@blocksuite/affine-components/icons';
 import { TextAlign } from '@blocksuite/affine-model';
 import { css, html, LitElement } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
 const TEXT_ALIGN_LIST = [
@@ -26,7 +26,6 @@ const TEXT_ALIGN_LIST = [
   },
 ];
 
-@customElement('edgeless-align-panel')
 export class EdgelessAlignPanel extends LitElement {
   static override styles = css`
     :host {

@@ -4,7 +4,7 @@ import type { EditorHost } from '@blocksuite/block-std';
 import { MoreHorizontalIcon } from '@blocksuite/affine-components/icons';
 import { WithDisposable } from '@blocksuite/block-std';
 import { html, LitElement, nothing } from 'lit';
-import { customElement, query, queryAll, state } from 'lit/decorators.js';
+import { query, queryAll, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import type { IconButton } from '../../../_common/components/button.js';
@@ -18,7 +18,6 @@ import {
 } from '../../../_common/components/utils.js';
 import { styles } from './styles.js';
 
-@customElement('affine-linked-doc-popover')
 export class LinkedDocPopover extends WithDisposable(LitElement) {
   static override styles = styles;
 

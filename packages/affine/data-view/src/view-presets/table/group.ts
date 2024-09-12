@@ -6,7 +6,7 @@ import {
 } from '@blocksuite/block-std';
 import { PlusIcon } from '@blocksuite/icons/lit';
 import { css, html, type PropertyValues } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
 import type { GroupData } from '../../core/common/group-by/helper.js';
@@ -57,7 +57,6 @@ const styles = css`
   }
 `;
 
-@customElement('affine-data-view-table-group')
 export class TableGroup extends SignalWatcher(
   WithDisposable(ShadowlessElement)
 ) {

@@ -6,7 +6,7 @@ import { requestThrottledConnectedFrame } from '@blocksuite/affine-shared/utils'
 import { WidgetComponent } from '@blocksuite/block-std';
 import { assertExists, pickValues } from '@blocksuite/global/utils';
 import { css, html } from 'lit';
-import { customElement, state } from 'lit/decorators.js';
+import { state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
@@ -21,7 +21,6 @@ import { RemoteColorManager } from '../../../root-block/remote-color-manager/rem
 export const AFFINE_EDGELESS_REMOTE_SELECTION_WIDGET =
   'affine-edgeless-remote-selection-widget';
 
-@customElement(AFFINE_EDGELESS_REMOTE_SELECTION_WIDGET)
 export class EdgelessRemoteSelectionWidget extends WidgetComponent<
   RootBlockModel,
   EdgelessRootBlockComponent

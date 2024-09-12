@@ -2,9 +2,7 @@ import type { RootBlockModel } from '@blocksuite/affine-model';
 
 import { BlockComponent } from '@blocksuite/block-std';
 import { html } from 'lit';
-import { customElement } from 'lit/decorators.js';
 
-@customElement('mini-mindmap-root-block')
 export class MindmapRootBlock extends BlockComponent<RootBlockModel> {
   override render() {
     return html`

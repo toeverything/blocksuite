@@ -1,6 +1,6 @@
 import { baseTheme } from '@toeverything/theme';
 import { css, html, LitElement, nothing, unsafeCSS } from 'lit';
-import { customElement, property, query } from 'lit/decorators.js';
+import { property, query } from 'lit/decorators.js';
 
 /**
  * Default size is 32px, you can override it by setting `size` property.
@@ -21,7 +21,6 @@ import { customElement, property, query } from 'lit/decorators.js';
  * </icon-button>`
  * ```
  */
-@customElement('icon-button')
 export class IconButton extends LitElement {
   static override styles = css`
     :host {

@@ -232,6 +232,7 @@ export default ({ mode }) => {
           ),
           'examples/inline': resolve(__dirname, 'examples/inline/index.html'),
         },
+        treeshake: true,
         output: {
           sourcemapIgnoreList: relativeSourcePath => {
             const normalizedPath = path.normalize(relativeSourcePath);

@@ -10,7 +10,6 @@ import {
 import { WidgetComponent } from '@blocksuite/block-std';
 import { DisposableGroup, throttle } from '@blocksuite/global/utils';
 import { InlineEditor } from '@blocksuite/inline';
-import { customElement } from 'lit/decorators.js';
 
 import { getPopperPosition } from '../../../root-block/utils/position.js';
 import { getMenus, type LinkedMenuGroup } from './config.js';
@@ -38,7 +37,6 @@ export interface LinkedWidgetConfig {
   ) => Promise<LinkedMenuGroup[]>;
 }
 
-@customElement(AFFINE_LINKED_DOC_WIDGET)
 export class AffineLinkedDocWidget extends WidgetComponent {
   private _abortController: AbortController | null = null;
 

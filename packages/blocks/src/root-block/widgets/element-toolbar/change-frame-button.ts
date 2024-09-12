@@ -16,7 +16,7 @@ import {
   serializeXYWH,
 } from '@blocksuite/global/utils';
 import { html, LitElement, nothing } from 'lit';
-import { customElement, property, query } from 'lit/decorators.js';
+import { property, query } from 'lit/decorators.js';
 import { join } from 'lit/directives/join.js';
 import { when } from 'lit/directives/when.js';
 
@@ -45,7 +45,6 @@ function getMostCommonColor(
   return max ? (max[0] as string) : null;
 }
 
-@customElement('edgeless-change-frame-button')
 export class EdgelessChangeFrameButton extends WithDisposable(LitElement) {
   pickColor = (event: PickColorEvent) => {
     if (event.type === 'pick') {

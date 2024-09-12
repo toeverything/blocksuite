@@ -6,7 +6,7 @@ import {
   WithDisposable,
 } from '@blocksuite/block-std';
 import { css, html, LitElement, nothing } from 'lit';
-import { customElement, property, query } from 'lit/decorators.js';
+import { property, query } from 'lit/decorators.js';
 
 import type { AIItemConfig } from './types.js';
 
@@ -17,7 +17,6 @@ import { menuItemStyles } from './styles.js';
   host: PropTypes.instanceOf(EditorHost),
   item: PropTypes.object,
 })
-@customElement('ai-item')
 export class AIItem extends WithDisposable(LitElement) {
   static override styles = css`
     ${menuItemStyles}

@@ -15,7 +15,7 @@ import { DocModeProvider } from '@blocksuite/affine-shared/services';
 import { assertExists, Bound } from '@blocksuite/global/utils';
 import { DocCollection } from '@blocksuite/store';
 import { html, nothing } from 'lit';
-import { customElement, property, queryAsync, state } from 'lit/decorators.js';
+import { property, queryAsync, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 
 import type { SurfaceRefBlockService } from '../surface-ref-block/index.js';
@@ -30,7 +30,6 @@ import { SyncedDocErrorIcon } from '../embed-synced-doc-block/styles.js';
 import { styles } from './styles.js';
 import { getEmbedLinkedDocIcons, isLinkToNode } from './utils.js';
 
-@customElement('affine-embed-linked-doc-block')
 @Peekable({
   enableOn: ({ doc }: EmbedLinkedDocBlockComponent) => !doc.readonly,
 })

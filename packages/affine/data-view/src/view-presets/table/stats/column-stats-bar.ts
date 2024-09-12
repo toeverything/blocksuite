@@ -4,7 +4,7 @@ import {
   WithDisposable,
 } from '@blocksuite/block-std';
 import { css, html } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
 import type { GroupData } from '../../../core/common/group-by/helper.js';
@@ -21,7 +21,6 @@ const styles = css`
   }
 `;
 
-@customElement('affine-database-column-stats')
 export class DataBaseColumnStats extends SignalWatcher(
   WithDisposable(ShadowlessElement)
 ) {

@@ -22,7 +22,7 @@ import {
   shift,
 } from '@floating-ui/dom';
 import { css, html, nothing } from 'lit';
-import { customElement, property, state } from 'lit/decorators.js';
+import { property, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { ifDefined } from 'lit/directives/if-defined.js';
 import { createRef, ref } from 'lit/directives/ref.js';
@@ -138,7 +138,6 @@ const isSelectableItem = (item: Item): item is SelectItem => {
   return item.type === 'select';
 };
 
-@customElement('affine-menu')
 export class MenuComponent<_T> extends WithDisposable(ShadowlessElement) {
   static override styles = css`
     affine-menu {

@@ -13,10 +13,9 @@ import {
   type PropertyValues,
   unsafeCSS,
 } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { property } from 'lit/decorators.js';
 
-@customElement('generating-placeholder')
-class GeneratingPlaceholder extends WithDisposable(LitElement) {
+export class GeneratingPlaceholder extends WithDisposable(LitElement) {
   static override styles = css`
     :host {
       display: flex;

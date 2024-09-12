@@ -9,12 +9,11 @@ import {
 import { PageEditorBlockSpecs } from '@blocksuite/blocks';
 import { noop } from '@blocksuite/global/utils';
 import { css, html, nothing } from 'lit';
-import { customElement, property, state } from 'lit/decorators.js';
+import { property, state } from 'lit/decorators.js';
 import { guard } from 'lit/directives/guard.js';
 
 noop(EditorHost);
 
-@customElement('page-editor')
 export class PageEditor extends WithDisposable(ShadowlessElement) {
   static override styles = css`
     page-editor {

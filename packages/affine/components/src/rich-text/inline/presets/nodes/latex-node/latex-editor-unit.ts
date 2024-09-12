@@ -3,10 +3,9 @@ import type { AffineTextAttributes } from '@blocksuite/affine-components/rich-te
 import { ShadowlessElement } from '@blocksuite/block-std';
 import { type DeltaInsert, ZERO_WIDTH_SPACE } from '@blocksuite/inline';
 import { html } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-@customElement('latex-editor-unit')
 export class LatexEditorUnit extends ShadowlessElement {
   get latexMenu() {
     return this.closest('latex-editor-menu');

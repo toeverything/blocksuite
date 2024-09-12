@@ -2,7 +2,6 @@ import type { BlockModel, Doc } from '@blocksuite/store';
 
 import {
   BlockStdScope,
-  EditorHost,
   type ExtensionType,
   ShadowlessElement,
   SignalWatcher,
@@ -14,18 +13,15 @@ import {
   EdgelessEditorBlockSpecs,
   PageEditorBlockSpecs,
 } from '@blocksuite/blocks';
-import { noop, Slot } from '@blocksuite/global/utils';
+import { Slot } from '@blocksuite/global/utils';
 import { computed, signal } from '@lit-labs/preact-signals';
 import { css, html } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { property } from 'lit/decorators.js';
 import { keyed } from 'lit/directives/keyed.js';
 import { when } from 'lit/directives/when.js';
 
 import '../fragments/doc-title/doc-title.js';
 
-noop(EditorHost);
-
-@customElement('affine-editor-container')
 export class AffineEditorContainer
   extends SignalWatcher(WithDisposable(ShadowlessElement))
   implements AbstractEditor

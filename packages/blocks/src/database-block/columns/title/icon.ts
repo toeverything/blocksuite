@@ -1,8 +1,6 @@
 import { BaseCellRenderer } from '@blocksuite/data-view';
 import { css, html } from 'lit';
-import { customElement } from 'lit/decorators.js';
 
-@customElement('data-view-header-area-icon')
 export class IconCell extends BaseCellRenderer<string> {
   static override styles = css`
     affine-database-image-cell {

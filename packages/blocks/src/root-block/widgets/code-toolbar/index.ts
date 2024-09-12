@@ -9,7 +9,6 @@ import { cloneGroups } from '@blocksuite/affine-components/toolbar';
 import { WidgetComponent } from '@blocksuite/block-std';
 import { limitShift, shift } from '@floating-ui/dom';
 import { html } from 'lit';
-import { customElement } from 'lit/decorators.js';
 
 import type { CodeBlockComponent } from '../../../code-block/code-block.js';
 
@@ -20,7 +19,6 @@ import { MORE_GROUPS, PRIMARY_GROUPS } from './config.js';
 import { CodeBlockToolbarContext } from './context.js';
 
 export const AFFINE_CODE_TOOLBAR_WIDGET = 'affine-code-toolbar-widget';
-@customElement(AFFINE_CODE_TOOLBAR_WIDGET)
 export class AffineCodeToolbarWidget extends WidgetComponent<
   CodeBlockModel,
   CodeBlockComponent

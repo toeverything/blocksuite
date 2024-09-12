@@ -1,6 +1,5 @@
-import './global.js';
-
 export * from './all-extensions.js';
+
 export {
   asyncGetRichText,
   asyncSetInlineRange,
@@ -9,6 +8,7 @@ export {
   getRichTextByModel,
   selectTextModel,
 } from './dom.js';
+export * from './effects.js';
 export * from './extension/index.js';
 export {
   clearMarksOnDiscontinuousInput,

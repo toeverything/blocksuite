@@ -2,7 +2,7 @@ import type { FrameBlockModel, RichText } from '@blocksuite/blocks';
 
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { css, html } from 'lit';
-import { customElement, property, query } from 'lit/decorators.js';
+import { property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 const styles = css`
@@ -13,7 +13,6 @@ const styles = css`
 
 export const AFFINE_FRAME_TITLE_EDITOR = 'affine-frame-card-title-editor';
 
-@customElement(AFFINE_FRAME_TITLE_EDITOR)
 export class FrameCardTitleEditor extends WithDisposable(ShadowlessElement) {
   static override styles = styles;
 

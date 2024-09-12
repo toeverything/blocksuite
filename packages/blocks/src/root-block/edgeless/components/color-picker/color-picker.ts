@@ -2,7 +2,7 @@ import { on, once, stopPropagation } from '@blocksuite/affine-shared/utils';
 import { SignalWatcher, WithDisposable } from '@blocksuite/block-std';
 import { batch, computed, signal } from '@lit-labs/preact-signals';
 import { html, LitElement } from 'lit';
-import { customElement, property, query } from 'lit/decorators.js';
+import { property, query } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { live } from 'lit/directives/live.js';
 import { repeat } from 'lit/directives/repeat.js';
@@ -43,7 +43,6 @@ const TABS: NavTab<NavType>[] = [
   { type: 'custom', name: 'Custom' },
 ];
 
-@customElement('edgeless-color-picker')
 export class EdgelessColorPicker extends SignalWatcher(
   WithDisposable(LitElement)
 ) {

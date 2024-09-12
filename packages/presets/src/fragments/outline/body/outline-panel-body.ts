@@ -9,7 +9,7 @@ import { BlocksUtils, NoteDisplayMode } from '@blocksuite/blocks';
 import { Bound, DisposableGroup } from '@blocksuite/global/utils';
 import { effect, signal } from '@lit-labs/preact-signals';
 import { css, html, LitElement, nothing, type PropertyValues } from 'lit';
-import { customElement, property, query, state } from 'lit/decorators.js';
+import { property, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { repeat } from 'lit/directives/repeat.js';
 
@@ -111,7 +111,6 @@ const styles = css`
 
 export const AFFINE_OUTLINE_PANEL_BODY = 'affine-outline-panel-body';
 
-@customElement(AFFINE_OUTLINE_PANEL_BODY)
 export class OutlinePanelBody extends SignalWatcher(
   WithDisposable(LitElement)
 ) {

@@ -9,7 +9,7 @@ import {
   type Placement,
 } from '@floating-ui/dom';
 import { css, html, LitElement, unsafeCSS } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { property } from 'lit/decorators.js';
 import { type StyleInfo, styleMap } from 'lit/directives/style-map.js';
 
 import { HoverController, type HoverOptions } from '../hover/index.js';
@@ -115,7 +115,6 @@ const updateArrowStyles = ({
  * `
  * ```
  */
-@customElement('affine-tooltip')
 export class Tooltip extends LitElement {
   static override styles = css`
     :host {

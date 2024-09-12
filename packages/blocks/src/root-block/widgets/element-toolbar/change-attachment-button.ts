@@ -6,7 +6,7 @@ import {
 import { WithDisposable } from '@blocksuite/block-std';
 import { assertExists, Bound } from '@blocksuite/global/utils';
 import { html, LitElement, nothing, type TemplateResult } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { property } from 'lit/decorators.js';
 
 import type { EmbedCardStyle } from '../../../_common/types.js';
 import type {
@@ -23,7 +23,6 @@ import { getEmbedCardIcons } from '../../../_common/utils/url.js';
 import { downloadAttachmentBlob } from '../../../attachment-block/utils.js';
 import '../../edgeless/components/panel/card-style-panel.js';
 
-@customElement('edgeless-change-attachment-button')
 export class EdgelessChangeAttachmentButton extends WithDisposable(LitElement) {
   private _download = () => {
     if (!this._block) return;

@@ -10,12 +10,11 @@ import { WithDisposable } from '@blocksuite/block-std';
 import { assertExists, noop } from '@blocksuite/global/utils';
 import { flip, offset } from '@floating-ui/dom';
 import { css, html, LitElement } from 'lit';
-import { customElement, property, query, state } from 'lit/decorators.js';
+import { property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import type { CodeBlockToolbarContext } from '../context.js';
 
-@customElement('affine-code-toolbar')
 export class AffineCodeToolbar extends WithDisposable(LitElement) {
   static override styles = css`
     :host {

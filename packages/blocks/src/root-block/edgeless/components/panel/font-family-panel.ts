@@ -2,10 +2,9 @@ import { TextUtils } from '@blocksuite/affine-block-surface';
 import { CheckIcon } from '@blocksuite/affine-components/icons';
 import { FontFamily, FontFamilyList } from '@blocksuite/affine-model';
 import { css, html, LitElement, nothing } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
-@customElement('edgeless-font-family-panel')
 export class EdgelessFontFamilyPanel extends LitElement {
   static override styles = css`
     :host {

@@ -2,7 +2,7 @@ import { ArrowRightSmallIcon } from '@blocksuite/affine-components/icons';
 import { WithDisposable } from '@blocksuite/block-std';
 import { consume } from '@lit/context';
 import { css, html, LitElement } from 'lit';
-import { customElement, property, query } from 'lit/decorators.js';
+import { property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import {
@@ -10,7 +10,6 @@ import {
   edgelessToolbarSlotsContext,
 } from '../context.js';
 
-@customElement('edgeless-slide-menu')
 export class EdgelessSlideMenu extends WithDisposable(LitElement) {
   static override styles = css`
     :host {

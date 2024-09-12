@@ -2,7 +2,7 @@ import type { EditorMenuButton } from '@blocksuite/affine-components/toolbar';
 
 import { WithDisposable } from '@blocksuite/block-std';
 import { html, LitElement } from 'lit';
-import { customElement, property, query, state } from 'lit/decorators.js';
+import { property, query, state } from 'lit/decorators.js';
 import { choose } from 'lit/directives/choose.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
@@ -21,7 +21,6 @@ import { keepColor, preprocessColor } from './utils.js';
 
 type Type = 'normal' | 'custom';
 
-@customElement('edgeless-color-picker-button')
 export class EdgelessColorPickerButton extends WithDisposable(LitElement) {
   #select = (e: ColorEvent) => {
     this.#pick({ palette: e.detail });

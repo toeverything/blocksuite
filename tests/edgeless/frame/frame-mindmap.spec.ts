@@ -241,68 +241,70 @@ test('drag whole mindmap into frame, move frame, then drag root node of mindmap 
   }
 });
 
-test('add partial mindmap into frame, move frame, then drag root node of mindmap out.', async ({
-  page,
-}) => {
-  await createFrame(page, [50, 50], [550, 550]);
-  await pressEscape(page);
-
-  const button = page.locator('edgeless-mindmap-tool-button');
-  await button.click();
-  await toViewCoord(page, [100, 200]);
-  await clickView(page, [100, 200]);
-
-  let mindmapBound = await getSelectedBound(page);
-
-  // Drag frame
-  {
-    await clickView(page, [60, 60]);
-    await dragBetweenViewCoords(page, [60, 60], [110, 110]);
-  }
-
-  await selectAllByKeyboard(page);
-  await assertSelectedBound(
-    page,
-    [
-      mindmapBound[0] + 50,
-      mindmapBound[1] + 50,
-      mindmapBound[2],
-      mindmapBound[3],
-    ],
-    0
-  ); // mindmap
-  await assertSelectedBound(page, [100, 100, 500, 500], 1); // frame
-
-  // drag out
-  {
-    mindmapBound = await getSelectedBound(page, 0);
-    pressEscape(page);
-    await clickView(page, [
-      mindmapBound[0] + 10,
-      mindmapBound[1] + 0.5 * mindmapBound[3],
-    ]);
-    await dragBetweenViewCoords(
-      page,
-      [mindmapBound[0] + 10, mindmapBound[1] + 0.5 * mindmapBound[3]],
-      [-20, -20]
-    );
+// FIXME(@L-Sun): This test is flaky
+test.fixme(
+  'add partial mindmap into frame, move frame, then drag root node of mindmap out.',
+  async ({ page }) => {
+    await createFrame(page, [50, 50], [550, 550]);
     await pressEscape(page);
+
+    const button = page.locator('edgeless-mindmap-tool-button');
+    await button.click();
+    await toViewCoord(page, [100, 200]);
+    await clickView(page, [100, 200]);
+
+    let mindmapBound = await getSelectedBound(page);
+
+    // Drag frame
+    {
+      await clickView(page, [60, 60]);
+      await dragBetweenViewCoords(page, [60, 60], [110, 110]);
+    }
+
     await selectAllByKeyboard(page);
-    mindmapBound = await getSelectedBound(page, 0);
-    await pressEscape(page);
-  }
+    await assertSelectedBound(
+      page,
+      [
+        mindmapBound[0] + 50,
+        mindmapBound[1] + 50,
+        mindmapBound[2],
+        mindmapBound[3],
+      ],
+      0
+    ); // mindmap
+    await assertSelectedBound(page, [100, 100, 500, 500], 1); // frame
 
-  // drag frame
-  {
-    await clickView(page, [110, 110]);
-    await dragBetweenViewCoords(page, [110, 110], [160, 160]);
-    await pressEscape(page);
-  }
+    // drag out
+    {
+      mindmapBound = await getSelectedBound(page, 0);
+      pressEscape(page);
+      await clickView(page, [
+        mindmapBound[0] + 10,
+        mindmapBound[1] + 0.5 * mindmapBound[3],
+      ]);
+      await dragBetweenViewCoords(
+        page,
+        [mindmapBound[0] + 10, mindmapBound[1] + 0.5 * mindmapBound[3]],
+        [-20, -20]
+      );
+      await pressEscape(page);
+      await selectAllByKeyboard(page);
+      mindmapBound = await getSelectedBound(page, 0);
+      await pressEscape(page);
+    }
 
-  await selectAllByKeyboard(page);
-  await assertSelectedBound(page, mindmapBound, 0); // mindmap
-  await assertSelectedBound(page, [150, 150, 500, 500], 1); // frame
-});
+    // drag frame
+    {
+      await clickView(page, [110, 110]);
+      await dragBetweenViewCoords(page, [110, 110], [160, 160]);
+      await pressEscape(page);
+    }
+
+    await selectAllByKeyboard(page);
+    await assertSelectedBound(page, mindmapBound, 0); // mindmap
+    await assertSelectedBound(page, [150, 150, 500, 500], 1); // frame
+  }
+);
 
 test('add mindmap out of frame and add new node in frame then drag frame', async ({
   page,

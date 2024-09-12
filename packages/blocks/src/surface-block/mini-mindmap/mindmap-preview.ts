@@ -25,7 +25,7 @@ import {
   Schema,
 } from '@blocksuite/store';
 import { css, html, LitElement, nothing } from 'lit';
-import { customElement, property, query } from 'lit/decorators.js';
+import { property, query } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
@@ -46,7 +46,6 @@ const mindmapStyles = [
 
 type Unpacked<T> = T extends (infer U)[] ? U : T;
 
-@customElement('mini-mindmap-preview')
 export class MiniMindmapPreview extends WithDisposable(LitElement) {
   static override styles = css`
     mini-mindmap-root-block,

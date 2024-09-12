@@ -18,7 +18,7 @@ import {
 import { WidgetComponent } from '@blocksuite/block-std';
 import { Bound } from '@blocksuite/global/utils';
 import { css, html, nothing, type TemplateResult } from 'lit';
-import { customElement, state } from 'lit/decorators.js';
+import { state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
@@ -111,7 +111,6 @@ function isAutoConnectElement(element: unknown): element is AutoConnectElement {
 export const AFFINE_EDGELESS_AUTO_CONNECT_WIDGET =
   'affine-edgeless-auto-connect-widget';
 
-@customElement(AFFINE_EDGELESS_AUTO_CONNECT_WIDGET)
 export class EdgelessAutoConnectWidget extends WidgetComponent<
   RootBlockModel,
   EdgelessRootBlockComponent,

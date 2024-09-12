@@ -8,7 +8,7 @@ import {
 import { flip, offset } from '@floating-ui/dom';
 import { baseTheme } from '@toeverything/theme';
 import { css, html, LitElement, nothing, unsafeCSS } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
 import type { AIItem } from './ai-item.js';
@@ -21,7 +21,6 @@ import {
 } from './const.js';
 
 @requiredProperties({ host: PropTypes.instanceOf(EditorHost) })
-@customElement('ai-item-list')
 export class AIItemList extends WithDisposable(LitElement) {
   static override styles = css`
     :host {

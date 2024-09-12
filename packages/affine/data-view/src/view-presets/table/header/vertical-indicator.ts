@@ -1,6 +1,6 @@
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { css, html } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { property } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -16,7 +16,6 @@ type GroupRectList = {
   bottom: number;
 }[];
 
-@customElement('data-view-table-vertical-indicator')
 export class TableVerticalIndicator extends WithDisposable(ShadowlessElement) {
   static override styles = css`
     data-view-table-vertical-indicator {

@@ -10,6 +10,7 @@
     "test:unit:coverage": "nx vite:test --run --coverage",
     "test:unit:ui": "nx vite:test --ui"
   },
+  "sideEffects": false,
   "keywords": [],
   "files": [
     "src",
@@ -28,16 +29,36 @@
     "yjs": "^13.6.18"
   },
   "exports": {
-    "./*": "./src/*.ts",
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./consts": "./src/consts.ts",
+    "./effects": "./src/effects.ts",
+    "./types": "./src/types.ts"
   },
   "publishConfig": {
     "access": "public",
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
     "exports": {
-      "./*": "./dist/*.js",
-      ".": "./dist/index.js"
+      ".": {
+        "types": "./dist/index.d.ts",
+        "module": "./dist/index.js",
+        "import": "./dist/index.js"
+      },
+      "./consts": {
+        "types": "./dist/consts.d.ts",
+        "module": "./dist/consts.js",
+        "import": "./dist/consts.js"
+      },
+      "./effects": {
+        "types": "./dist/effects.d.ts",
+        "module": "./dist/effects.js",
+        "import": "./dist/effects.js"
+      },
+      "./types": {
+        "types": "./dist/types.d.ts",
+        "module": "./dist/types.js",
+        "import": "./dist/types.js"
+      }
     }
   },
   "dependencies": {

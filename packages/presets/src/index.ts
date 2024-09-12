@@ -1,4 +1,4 @@
-import '@blocksuite/affine-shared/commands';
+import '@blocksuite/affine-block-surface/effects';
 
 export * from './blocks/index.js';
 export * from './editors/index.js';

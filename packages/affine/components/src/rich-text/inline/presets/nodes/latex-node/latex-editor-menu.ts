@@ -14,7 +14,7 @@ import { DocCollection } from '@blocksuite/store';
 import { effect, type Signal, signal } from '@lit-labs/preact-signals';
 import { cssVar } from '@toeverything/theme';
 import { css, html, unsafeCSS } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { property } from 'lit/decorators.js';
 import { codeToTokensBase, type ThemedToken } from 'shiki';
 
 import { InlineManagerExtension } from '../../../../extension/index.js';
@@ -26,7 +26,6 @@ export const LatexEditorInlineManagerExtension = InlineManagerExtension({
   specs: [LatexEditorUnitSpecExtension.identifier],
 });
 
-@customElement('latex-editor-menu')
 export class LatexEditorMenu extends SignalWatcher(
   WithDisposable(ShadowlessElement)
 ) {

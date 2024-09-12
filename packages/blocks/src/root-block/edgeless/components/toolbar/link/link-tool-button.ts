@@ -1,12 +1,10 @@
 import { LinkIcon } from '@blocksuite/affine-components/icons';
 import { TelemetryProvider } from '@blocksuite/affine-shared/services';
 import { css, html, LitElement } from 'lit';
-import { customElement } from 'lit/decorators.js';
 
 import { getTooltipWithShortcut } from '../../utils.js';
 import { QuickToolMixin } from '../mixins/quick-tool.mixin.js';
 
-@customElement('edgeless-link-tool-button')
 export class EdgelessLinkToolButton extends QuickToolMixin(LitElement) {
   static override styles = css`
     .link-icon,

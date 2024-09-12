@@ -5,7 +5,7 @@ import {
 } from '@blocksuite/block-std';
 import { property } from 'lit/decorators.js';
 
-import type { GroupRenderProps } from '../matcher.js';
+import type { GroupRenderProps } from '../types.js';
 
 export class BaseGroup<Data extends NonNullable<unknown>, Value>
   extends SignalWatcher(WithDisposable(ShadowlessElement))

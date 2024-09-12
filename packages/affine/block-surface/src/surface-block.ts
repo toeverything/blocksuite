@@ -10,7 +10,7 @@ import {
 } from '@blocksuite/block-std/gfx';
 import { Bound, values } from '@blocksuite/global/utils';
 import { css, html } from 'lit';
-import { customElement, query } from 'lit/decorators.js';
+import { query } from 'lit/decorators.js';
 
 import type { Overlay } from './renderer/canvas-renderer.js';
 import type { ElementRenderer } from './renderer/elements/index.js';
@@ -33,7 +33,6 @@ export interface SurfaceContext {
   };
 }
 
-@customElement('affine-surface')
 export class SurfaceBlockComponent extends BlockComponent<
   SurfaceBlockModel,
   SurfaceBlockService

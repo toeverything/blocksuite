@@ -2,10 +2,9 @@ import { createModal } from '@blocksuite/affine-components/context-menu';
 import { ShadowlessElement } from '@blocksuite/block-std';
 import { CloseIcon } from '@blocksuite/icons/lit';
 import { css, html, type TemplateResult } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { property } from 'lit/decorators.js';
 
-@customElement('center-peek')
-class CenterPeek extends ShadowlessElement {
+export class CenterPeek extends ShadowlessElement {
   static override styles = css`
     center-peek {
       flex-direction: column;

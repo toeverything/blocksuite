@@ -1,6 +1,7 @@
 import { DocCollection, IdGeneratorType, Schema } from '@blocksuite/store';
 import { describe, expect, test } from 'vitest';
 
+import { effects } from '../effects.js';
 import { TestEditorContainer } from './test-editor.js';
 import {
   type HeadingBlockModel,
@@ -9,6 +10,8 @@ import {
   RootBlockSchema,
 } from './test-schema.js';
 import { testSpecs } from './test-spec.js';
+
+effects();
 
 function createTestOptions() {
   const idGenerator = IdGeneratorType.AutoIncrement;

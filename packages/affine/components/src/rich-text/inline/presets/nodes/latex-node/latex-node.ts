@@ -16,7 +16,7 @@ import { cssVar } from '@toeverything/theme';
 import { cssVarV2 } from '@toeverything/theme/v2';
 import katex from 'katex';
 import { css, html, render, unsafeCSS } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { property } from 'lit/decorators.js';
 
 import type { AffineTextAttributes } from '../../../../extension/index.js';
 
@@ -24,7 +24,6 @@ import { createLitPortal } from '../../../../../portal/helper.js';
 import './latex-editor-menu.js';
 import './latex-editor-unit.js';
 
-@customElement('affine-latex-node')
 export class AffineLatexNode extends SignalWatcher(
   WithDisposable(ShadowlessElement)
 ) {

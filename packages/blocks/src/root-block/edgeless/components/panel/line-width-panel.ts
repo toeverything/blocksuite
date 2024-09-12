@@ -2,7 +2,7 @@ import { LineWidth } from '@blocksuite/affine-model';
 import { requestConnectedFrame } from '@blocksuite/affine-shared/utils';
 import { WithDisposable } from '@blocksuite/block-std';
 import { css, html, LitElement, nothing, type PropertyValues } from 'lit';
-import { customElement, property, query, queryAll } from 'lit/decorators.js';
+import { property, query, queryAll } from 'lit/decorators.js';
 
 type DragConfig = {
   stepWidth: number;
@@ -27,7 +27,6 @@ export class LineWidthEvent extends Event {
   }
 }
 
-@customElement('edgeless-line-width-panel')
 export class EdgelessLineWidthPanel extends WithDisposable(LitElement) {
   static override styles = css`
     :host {

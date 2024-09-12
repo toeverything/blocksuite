@@ -8,7 +8,7 @@ import {
   shift,
 } from '@floating-ui/dom';
 import { css, html, LitElement } from 'lit';
-import { customElement, state } from 'lit/decorators.js';
+import { state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { repeat } from 'lit/directives/repeat.js';
 
@@ -19,7 +19,6 @@ import { EdgelessToolbarToolMixin } from '../mixins/tool.mixin.js';
 import { TemplateCard1, TemplateCard2, TemplateCard3 } from './icon.js';
 import './template-panel.js';
 
-@customElement('edgeless-template-button')
 export class EdgelessTemplateButton extends EdgelessToolbarToolMixin(
   LitElement
 ) {

@@ -4,7 +4,7 @@ import type { Ref } from 'lit/directives/ref.js';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { effect } from '@lit-labs/preact-signals';
 import { css, html } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { property } from 'lit/decorators.js';
 import { createRef, ref } from 'lit/directives/ref.js';
 
 import type { DatabaseCellContainer } from '../cell.js';
@@ -902,8 +902,7 @@ export class TableSelectionController implements ReactiveController {
   }
 }
 
-@customElement('data-view-table-selection')
-class SelectionElement extends WithDisposable(ShadowlessElement) {
+export class SelectionElement extends WithDisposable(ShadowlessElement) {
   static override styles = css`
     .database-selection {
       position: absolute;

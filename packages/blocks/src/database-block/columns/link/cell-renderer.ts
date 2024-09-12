@@ -13,14 +13,13 @@ import {
 import { PenIcon } from '@blocksuite/icons/lit';
 import { baseTheme } from '@toeverything/theme';
 import { css, unsafeCSS } from 'lit';
-import { customElement, query, state } from 'lit/decorators.js';
+import { query, state } from 'lit/decorators.js';
 import { html } from 'lit/static-html.js';
 
 import { HostContextKey } from '../../context/host-context.js';
 import './components/link-node.js';
 import { linkColumnModelConfig } from './define.js';
 
-@customElement('affine-database-link-cell')
 export class LinkCell extends BaseCellRenderer<string> {
   static override styles = css`
     affine-database-link-cell {
@@ -172,7 +171,6 @@ export class LinkCell extends BaseCellRenderer<string> {
   accessor docId: string | undefined = undefined;
 }
 
-@customElement('affine-database-link-cell-editing')
 export class LinkCellEditing extends BaseCellRenderer<string> {
   static override styles = css`
     affine-database-link-cell-editing {

@@ -17,7 +17,7 @@ import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import { SignalWatcher } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import { css, html, LitElement, nothing } from 'lit';
-import { customElement, property, query, state } from 'lit/decorators.js';
+import { property, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -67,7 +67,6 @@ shapes.forEach(s => {
   });
 });
 
-@customElement('edgeless-toolbar-shape-draggable')
 export class EdgelessToolbarShapeDraggable extends EdgelessToolbarToolMixin(
   SignalWatcher(LitElement)
 ) {

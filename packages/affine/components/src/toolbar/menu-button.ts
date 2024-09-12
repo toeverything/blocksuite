@@ -8,13 +8,12 @@ import {
   type PropertyValues,
   type TemplateResult,
 } from 'lit';
-import { customElement, property, query } from 'lit/decorators.js';
+import { property, query } from 'lit/decorators.js';
 
 import type { EditorIconButton } from './icon-button.js';
 
 import './icon-button.js';
 
-@customElement('editor-menu-button')
 export class EditorMenuButton extends WithDisposable(LitElement) {
   static override styles = css`
     :host {
@@ -99,7 +98,6 @@ export class EditorMenuButton extends WithDisposable(LitElement) {
   accessor contentPadding: string | undefined = undefined;
 }
 
-@customElement('editor-menu-content')
 export class EditorMenuContent extends LitElement {
   static override styles = css`
     :host {
@@ -165,7 +163,6 @@ export class EditorMenuContent extends LitElement {
   }
 }
 
-@customElement('editor-menu-action')
 export class EditorMenuAction extends LitElement {
   static override styles = css`
     :host {

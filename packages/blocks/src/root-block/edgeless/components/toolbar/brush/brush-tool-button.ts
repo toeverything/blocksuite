@@ -7,7 +7,6 @@ import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import { SignalWatcher } from '@blocksuite/block-std';
 import { computed } from '@lit-labs/preact-signals';
 import { css, html, LitElement } from 'lit';
-import { customElement } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import '../../buttons/toolbar-button.js';
@@ -15,7 +14,6 @@ import { getTooltipWithShortcut } from '../../utils.js';
 import { EdgelessToolbarToolMixin } from '../mixins/tool.mixin.js';
 import './brush-menu.js';
 
-@customElement('edgeless-brush-tool-button')
 export class EdgelessBrushToolButton extends EdgelessToolbarToolMixin(
   SignalWatcher(LitElement)
 ) {

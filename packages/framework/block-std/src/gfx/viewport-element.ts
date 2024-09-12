@@ -1,5 +1,5 @@
 import { css, html, LitElement } from 'lit';
-import { customElement, property, query } from 'lit/decorators.js';
+import { property, query } from 'lit/decorators.js';
 
 import type { EditorHost } from '../view/index.js';
 import type { GfxBlockElementModel } from './gfx-block-model.js';
@@ -35,7 +35,6 @@ export function requestThrottledConnectedFrame<
 @requiredProperties({
   viewport: PropTypes.instanceOf(Viewport),
 })
-@customElement('gfx-viewport')
 export class GfxViewportElement extends WithDisposable(LitElement) {
   static override styles = css`
     .gfx-viewport {

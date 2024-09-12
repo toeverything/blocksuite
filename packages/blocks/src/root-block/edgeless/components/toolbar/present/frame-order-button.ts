@@ -4,7 +4,7 @@ import { FrameOrderAdjustmentIcon } from '@blocksuite/affine-components/icons';
 import { createButtonPopper } from '@blocksuite/affine-shared/utils';
 import { WithDisposable } from '@blocksuite/block-std';
 import { css, html, LitElement } from 'lit';
-import { customElement, property, query } from 'lit/decorators.js';
+import { property, query } from 'lit/decorators.js';
 
 import type { EdgelessRootBlockComponent } from '../../../edgeless-root-block.js';
 import type { EdgelessFrameOrderMenu } from './frame-order-menu.js';
@@ -12,7 +12,6 @@ import type { EdgelessFrameOrderMenu } from './frame-order-menu.js';
 import '../../buttons/tool-icon-button.js';
 import './frame-order-menu.js';
 
-@customElement('edgeless-frame-order-button')
 export class EdgelessFrameOrderButton extends WithDisposable(LitElement) {
   static override styles = css`
     edgeless-frame-order-menu {

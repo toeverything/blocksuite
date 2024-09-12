@@ -3,7 +3,7 @@ import type { EditorHost } from '@blocksuite/block-std';
 import { on, stopPropagation } from '@blocksuite/affine-shared/utils';
 import { WithDisposable } from '@blocksuite/block-std';
 import { css, html, LitElement, nothing } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { property } from 'lit/decorators.js';
 
 import type { AIItemGroupConfig } from '../../../_common/components/ai-item/types.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
@@ -11,7 +11,6 @@ import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-bl
 import '../../../_common/components/ai-item/ai-item-list.js';
 import { scrollbarStyle } from '../../../_common/components/utils.js';
 
-@customElement('edgeless-copilot-panel')
 export class EdgelessCopilotPanel extends WithDisposable(LitElement) {
   static override styles = css`
     :host {

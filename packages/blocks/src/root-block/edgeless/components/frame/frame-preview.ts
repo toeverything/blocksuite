@@ -13,7 +13,7 @@ import {
 } from '@blocksuite/global/utils';
 import { BlockViewType, type Doc, type Query } from '@blocksuite/store';
 import { css, html, nothing } from 'lit';
-import { customElement, property, query, state } from 'lit/decorators.js';
+import { property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
@@ -59,7 +59,6 @@ const styles = css`
   }
 `;
 
-@customElement('frame-preview')
 export class FramePreview extends WithDisposable(ShadowlessElement) {
   static override styles = styles;
 

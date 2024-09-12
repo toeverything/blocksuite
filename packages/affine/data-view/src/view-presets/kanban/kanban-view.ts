@@ -1,7 +1,7 @@
 import { popMenu } from '@blocksuite/affine-components/context-menu';
 import { AddCursorIcon } from '@blocksuite/icons/lit';
 import { css } from 'lit';
-import { customElement, query } from 'lit/decorators.js';
+import { query } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
@@ -88,7 +88,6 @@ const styles = css`
   }
 `;
 
-@customElement('affine-data-view-kanban')
 export class DataViewKanban extends DataViewBase<
   KanbanSingleView,
   KanbanViewSelectionWithType

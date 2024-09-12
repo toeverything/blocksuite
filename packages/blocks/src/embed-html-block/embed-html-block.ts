@@ -1,7 +1,7 @@
 import type { EmbedHtmlModel, EmbedHtmlStyles } from '@blocksuite/affine-model';
 
 import { html } from 'lit';
-import { customElement, query, state } from 'lit/decorators.js';
+import { query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { type StyleInfo, styleMap } from 'lit/directives/style-map.js';
 
@@ -12,7 +12,6 @@ import { EmbedBlockComponent } from '../_common/embed-block-helper/index.js';
 import './components/fullscreen-toolbar.js';
 import { HtmlIcon, styles } from './styles.js';
 
-@customElement('affine-embed-html-block')
 export class EmbedHtmlBlockComponent extends EmbedBlockComponent<
   EmbedHtmlModel,
   EmbedHtmlBlockService

@@ -13,7 +13,7 @@ import {
 import { assertExists, Bound, Vec } from '@blocksuite/global/utils';
 import { DocCollection } from '@blocksuite/store';
 import { css, html, nothing } from 'lit';
-import { customElement, property, query } from 'lit/decorators.js';
+import { property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
@@ -22,7 +22,6 @@ const HORIZONTAL_PADDING = 2;
 const VERTICAL_PADDING = 2;
 const BORDER_WIDTH = 1;
 
-@customElement('edgeless-connector-label-editor')
 export class EdgelessConnectorLabelEditor extends WithDisposable(
   ShadowlessElement
 ) {

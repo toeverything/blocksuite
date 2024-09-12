@@ -1,6 +1,6 @@
 import { clamp, stopPropagation } from '@blocksuite/affine-shared/utils';
 import { css, html, LitElement } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
 import '../buttons/tool-icon-button.js';
@@ -14,7 +14,6 @@ function format(scale: number) {
   return `${scale}%`;
 }
 
-@customElement('edgeless-scale-panel')
 export class EdgelessScalePanel extends LitElement {
   static override styles = css`
     :host {

@@ -5,7 +5,7 @@ import { EditPropsStore } from '@blocksuite/affine-shared/services';
 import { createButtonPopper } from '@blocksuite/affine-shared/utils';
 import { WithDisposable } from '@blocksuite/block-std';
 import { css, html, LitElement, nothing } from 'lit';
-import { customElement, property, query, state } from 'lit/decorators.js';
+import { property, query, state } from 'lit/decorators.js';
 
 import type { EdgelessRootBlockComponent } from '../../../edgeless-root-block.js';
 
@@ -13,7 +13,6 @@ import '../../../../../_common/components/toggle-switch.js';
 import '../../buttons/tool-icon-button.js';
 import './frame-order-menu.js';
 
-@customElement('edgeless-navigator-setting-button')
 export class EdgelessNavigatorSettingButton extends WithDisposable(LitElement) {
   static override styles = css`
     .navigator-setting-menu {

@@ -31,7 +31,7 @@ import { handleNativeRangeAtPoint } from '@blocksuite/affine-shared/utils';
 import { WithDisposable } from '@blocksuite/block-std';
 import { assertExists, DisposableGroup, Vec } from '@blocksuite/global/utils';
 import { css, html, LitElement, nothing } from 'lit';
-import { customElement, property, state } from 'lit/decorators.js';
+import { property, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
@@ -75,7 +75,6 @@ class AutoCompleteOverlay extends Overlay {
   }
 }
 
-@customElement('edgeless-auto-complete')
 export class EdgelessAutoComplete extends WithDisposable(LitElement) {
   static override styles = css`
     .edgeless-auto-complete-container {

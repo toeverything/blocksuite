@@ -18,7 +18,7 @@ import { EditPropsStore } from '@blocksuite/affine-shared/services';
 import { WithDisposable } from '@blocksuite/block-std';
 import { countBy, maxBy } from '@blocksuite/global/utils';
 import { css, html, LitElement, nothing, type TemplateResult } from 'lit';
-import { customElement, property, state } from 'lit/decorators.js';
+import { property, state } from 'lit/decorators.js';
 import { join } from 'lit/directives/join.js';
 import { repeat } from 'lit/directives/repeat.js';
 
@@ -67,8 +67,7 @@ const MINDMAP_LAYOUT_LIST: LayoutItem[] = [
   },
 ] as const;
 
-@customElement('edgeless-change-mindmap-style-panel')
-class EdgelessChangeMindmapStylePanel extends LitElement {
+export class EdgelessChangeMindmapStylePanel extends LitElement {
   static override styles = css`
     :host {
       display: flex;
@@ -117,8 +116,7 @@ class EdgelessChangeMindmapStylePanel extends LitElement {
   accessor onSelect!: (style: MindmapStyle) => void;
 }
 
-@customElement('edgeless-change-mindmap-layout-panel')
-class EdgelessChangeMindmapLayoutPanel extends LitElement {
+export class EdgelessChangeMindmapLayoutPanel extends LitElement {
   static override styles = css`
     :host {
       display: flex;
@@ -155,7 +153,6 @@ class EdgelessChangeMindmapLayoutPanel extends LitElement {
   accessor onSelect!: (style: LayoutType) => void;
 }
 
-@customElement('edgeless-change-mindmap-button')
 export class EdgelessChangeMindmapButton extends WithDisposable(LitElement) {
   private _updateLayoutType = (layoutType: LayoutType) => {
     this.edgeless.std.get(EditPropsStore).recordLastProps('mindmap', {

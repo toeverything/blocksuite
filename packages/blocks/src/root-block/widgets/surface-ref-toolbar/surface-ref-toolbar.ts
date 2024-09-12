@@ -20,7 +20,6 @@ import {
 import { WidgetComponent } from '@blocksuite/block-std';
 import { offset, shift } from '@floating-ui/dom';
 import { html, nothing } from 'lit';
-import { customElement } from 'lit/decorators.js';
 import { ifDefined } from 'lit/directives/if-defined.js';
 import { join } from 'lit/directives/join.js';
 import { repeat } from 'lit/directives/repeat.js';
@@ -34,7 +33,6 @@ import { SurfaceRefToolbarContext } from './context.js';
 
 export const AFFINE_SURFACE_REF_TOOLBAR = 'affine-surface-ref-toolbar';
 
-@customElement(AFFINE_SURFACE_REF_TOOLBAR)
 export class AffineSurfaceRefToolbar extends WidgetComponent<
   SurfaceRefBlockModel,
   SurfaceRefBlockComponent

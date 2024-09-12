@@ -11,6 +11,7 @@
     "test:unit:ui": "nx vite:test --ui",
     "test": "yarn test:unit"
   },
+  "sideEffects": false,
   "keywords": [],
   "author": "toeverything",
   "license": "MPL-2.0",
@@ -32,7 +33,8 @@
   },
   "exports": {
     ".": "./src/index.ts",
-    "./gfx": "./src/gfx/index.ts"
+    "./gfx": "./src/gfx/index.ts",
+    "./effects": "./src/effects.ts"
   },
   "publishConfig": {
     "access": "public",
@@ -48,6 +50,11 @@
         "types": "./dist/gfx/index.d.ts",
         "module": "./dist/gfx/index.js",
         "import": "./dist/gfx/index.js"
+      },
+      "./effects": {
+        "types": "./dist/effects.d.ts",
+        "module": "./dist/effects.js",
+        "import": "./dist/effects.js"
       }
     }
   },

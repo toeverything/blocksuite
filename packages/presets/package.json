@@ -9,6 +9,7 @@
     "test:unit": "nx vite:test --browser.headless --run",
     "test:debug": "nx vite:test"
   },
+  "sideEffects": false,
   "keywords": [],
   "author": "toeverything",
   "license": "MPL-2.0",
@@ -29,6 +30,7 @@
   },
   "exports": {
     ".": "./src/index.ts",
+    "./effects": "./src/effects.ts",
     "./themes/*": "./themes/*"
   },
   "publishConfig": {
@@ -38,7 +40,13 @@
     "exports": {
       ".": {
         "module": "./dist/index.js",
+        "types": "./dist/index.d.ts",
         "import": "./dist/index.js"
+      },
+      "./effects": {
+        "module": "./dist/effects.js",
+        "types": "./dist/effects.d.ts",
+        "import": "./dist/effects.js"
       },
       "./themes/*": "./themes/*"
     }

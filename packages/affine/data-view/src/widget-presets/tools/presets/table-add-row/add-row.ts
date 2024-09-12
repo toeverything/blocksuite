@@ -2,7 +2,7 @@ import type { InsertToPosition } from '@blocksuite/affine-shared/utils';
 
 import { PlusIcon } from '@blocksuite/icons/lit';
 import { css, html } from 'lit';
-import { customElement, state } from 'lit/decorators.js';
+import { state } from 'lit/decorators.js';
 
 import { startDrag } from '../../../../core/utils/drag.js';
 import { WidgetBase } from '../../../../core/widget/widget-base.js';
@@ -31,7 +31,6 @@ const styles = css`
   }
 `;
 
-@customElement('data-view-header-tools-add-row')
 export class DataViewHeaderToolsAddRow extends WidgetBase {
   static override styles = styles;
 

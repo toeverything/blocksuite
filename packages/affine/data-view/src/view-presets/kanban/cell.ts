@@ -6,7 +6,7 @@ import {
   WithDisposable,
 } from '@blocksuite/block-std';
 import { css } from 'lit';
-import { customElement, property, state } from 'lit/decorators.js';
+import { property, state } from 'lit/decorators.js';
 import { createRef } from 'lit/directives/ref.js';
 import { html } from 'lit/static-html.js';
 
@@ -58,7 +58,6 @@ const styles = css`
   }
 `;
 
-@customElement('affine-data-view-kanban-cell')
 export class KanbanCell extends SignalWatcher(
   WithDisposable(ShadowlessElement)
 ) {

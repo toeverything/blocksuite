@@ -17,7 +17,7 @@ import { Bound, type SerializedXYWH } from '@blocksuite/global/utils';
 import { consume } from '@lit/context';
 import { cssVarV2 } from '@toeverything/theme/v2';
 import { css, html, nothing, unsafeCSS } from 'lit';
-import { customElement, query, state } from 'lit/decorators.js';
+import { query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import type { EdgelessRootService } from '../root-block/index.js';
@@ -31,7 +31,6 @@ export const frameTitleStyleVars = {
   fontSize: 14,
 };
 
-@customElement('edgeless-frame-title')
 export class EdgelessFrameTitle extends SignalWatcher(
   WithDisposable(ShadowlessElement)
 ) {
@@ -336,7 +335,6 @@ export class EdgelessFrameTitle extends SignalWatcher(
   accessor std!: BlockStdScope;
 }
 
-@customElement('affine-frame')
 export class FrameBlockComponent extends GfxBlockComponent<FrameBlockModel> {
   get rootService() {
     return this.std.getService('affine:page') as EdgelessRootService;

@@ -1,7 +1,7 @@
 import { AIStarIcon } from '@blocksuite/affine-components/icons';
 import { type EditorHost, WithDisposable } from '@blocksuite/block-std';
 import { css, html, LitElement } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { property } from 'lit/decorators.js';
 
 import type { AIItemGroupConfig } from '../../../_common/components/ai-item/types.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
@@ -9,7 +9,6 @@ import type { CopilotSelectionController } from '../../edgeless/tools/copilot-to
 
 import { getAllDescendantElements } from '../../edgeless/utils/tree.js';
 
-@customElement('edgeless-copilot-toolbar-entry')
 export class EdgelessCopilotToolbarEntry extends WithDisposable(LitElement) {
   static override styles = css`
     .copilot-icon-button {

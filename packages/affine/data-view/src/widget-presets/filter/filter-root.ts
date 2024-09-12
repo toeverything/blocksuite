@@ -9,7 +9,7 @@ import {
   PlusIcon,
 } from '@blocksuite/icons/lit';
 import { css, html, nothing } from 'lit';
-import { customElement, property, state } from 'lit/decorators.js';
+import { property, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { repeat } from 'lit/directives/repeat.js';
 
@@ -20,7 +20,6 @@ import { menuTitle } from '../../core/utils/menu-title.js';
 import { popAddNewFilter } from './condition.js';
 import { getDepth } from './filter-group.js';
 
-@customElement('filter-root-view')
 export class FilterRootView extends WithDisposable(ShadowlessElement) {
   static override styles = css`
     filter-root-view {

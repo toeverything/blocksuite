@@ -1,7 +1,7 @@
 import { ShapeStyle } from '@blocksuite/affine-model';
 import { Slot } from '@blocksuite/global/utils';
 import { css, html, LitElement } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
 import type { ShapeTool } from '../../tools/shape-tool.js';
@@ -9,7 +9,6 @@ import type { ShapeTool } from '../../tools/shape-tool.js';
 import '../buttons/tool-icon-button.js';
 import { ShapeComponentConfig } from '../toolbar/shape/shape-menu-config.js';
 
-@customElement('edgeless-shape-panel')
 export class EdgelessShapePanel extends LitElement {
   static override styles = css`
     :host {

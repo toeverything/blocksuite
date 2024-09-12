@@ -2,14 +2,13 @@ import { popFilterableSimpleMenu } from '@blocksuite/affine-components/context-m
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { AddCursorIcon } from '@blocksuite/icons/lit';
 import { css, html } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { property } from 'lit/decorators.js';
 
 import type { Filter, Variable, VariableOrProperty } from '../ast.js';
 
 import { renderUniLit } from '../../utils/uni-component/uni-component.js';
 import { firstFilterByRef, firstFilterInGroup } from '../ast.js';
 
-@customElement('variable-ref-view')
 export class VariableRefView extends WithDisposable(ShadowlessElement) {
   static override styles = css`
     variable-ref-view {

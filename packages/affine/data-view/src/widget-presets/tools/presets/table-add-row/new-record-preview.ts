@@ -1,9 +1,7 @@
 import { ShadowlessElement } from '@blocksuite/block-std';
 import { PlusIcon } from '@blocksuite/icons/lit';
 import { html } from 'lit';
-import { customElement } from 'lit/decorators.js';
 
-@customElement('affine-database-new-record-preview')
 export class NewRecordPreview extends ShadowlessElement {
   override render() {
     return html`

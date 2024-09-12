@@ -38,7 +38,7 @@ import {
 } from '@blocksuite/global/utils';
 import { assertExists } from '@blocksuite/global/utils';
 import { css, html, nothing, type TemplateResult } from 'lit';
-import { customElement, query, state } from 'lit/decorators.js';
+import { query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import type { EdgelessRootPreviewBlockComponent } from '../root-block/edgeless/edgeless-root-preview-block.js';
@@ -64,7 +64,6 @@ const NO_CONTENT_REASON = {
   DEFAULT: 'This content was deleted on edgeless mode',
 } as Record<string, string>;
 
-@customElement('affine-surface-ref')
 @Peekable()
 export class SurfaceRefBlockComponent extends BlockComponent<
   SurfaceRefBlockModel,

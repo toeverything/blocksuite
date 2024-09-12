@@ -3,7 +3,7 @@ import { nothing } from 'lit';
 import { html } from 'lit/static-html.js';
 
 import type { GroupData } from './helper.js';
-import type { GroupRenderProps } from './matcher.js';
+import type { GroupRenderProps } from './types.js';
 
 import { renderUniLit } from '../../utils/uni-component/uni-component.js';
 

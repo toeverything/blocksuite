@@ -1,6 +1,6 @@
 import { WithDisposable } from '@blocksuite/block-std';
 import { css, html, LitElement } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { property } from 'lit/decorators.js';
 
 const styles = css`
   :host {
@@ -57,7 +57,6 @@ const styles = css`
 export const AFFINE_OUTLINE_NOTE_PREVIEW_SETTING_MENU =
   'affine-outline-note-preview-setting-menu';
 
-@customElement(AFFINE_OUTLINE_NOTE_PREVIEW_SETTING_MENU)
 export class OutlineNotePreviewSettingMenu extends WithDisposable(LitElement) {
   static override styles = styles;
 

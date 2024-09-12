@@ -1,12 +1,11 @@
 import { ShadowlessElement } from '@blocksuite/block-std';
 import * as icons from '@blocksuite/icons/lit';
 import { css, html, type TemplateResult } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { property } from 'lit/decorators.js';
 
 import { uniMap } from './uni-component/operation.js';
 import { createUniComponentFromWebComponent } from './uni-component/uni-component.js';
 
-@customElement('affine-lit-icon')
 export class AffineLitIcon extends ShadowlessElement {
   static override styles = css`
     affine-lit-icon {

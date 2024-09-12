@@ -4,7 +4,7 @@ import {
   WithDisposable,
 } from '@blocksuite/block-std';
 import { css } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
@@ -12,7 +12,6 @@ import { html } from 'lit/static-html.js';
 import type { Column } from '../../../core/view-manager/column.js';
 import type { TableSingleView } from '../table-view-manager.js';
 
-@customElement('affine-data-view-column-preview')
 export class DataViewColumnPreview extends SignalWatcher(
   WithDisposable(ShadowlessElement)
 ) {

@@ -1,7 +1,6 @@
 import { type ShapeName, ShapeType } from '@blocksuite/affine-model';
 import { SignalWatcher } from '@blocksuite/block-std';
 import { css, html, LitElement } from 'lit';
-import { customElement } from 'lit/decorators.js';
 
 import type { DraggableShape } from './utils.js';
 
@@ -12,7 +11,6 @@ import { EdgelessToolbarToolMixin } from '../mixins/tool.mixin.js';
 import './shape-draggable.js';
 import './shape-menu.js';
 
-@customElement('edgeless-shape-tool-button')
 export class EdgelessShapeToolButton extends EdgelessToolbarToolMixin(
   SignalWatcher(LitElement)
 ) {

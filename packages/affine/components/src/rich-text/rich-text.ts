@@ -14,7 +14,7 @@ import {
 } from '@blocksuite/inline';
 import { DocCollection, Text } from '@blocksuite/store';
 import { css, html, type TemplateResult } from 'lit';
-import { customElement, property, query } from 'lit/decorators.js';
+import { property, query } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { z } from 'zod';
 
@@ -27,7 +27,6 @@ interface RichTextStackItem {
   meta: Map<'richtext-v-range', InlineRange | null>;
 }
 
-@customElement('rich-text')
 export class RichText extends WithDisposable(ShadowlessElement) {
   static override styles = css`
     rich-text {

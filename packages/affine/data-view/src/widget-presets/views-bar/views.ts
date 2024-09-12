@@ -11,14 +11,12 @@ import {
   MoveRightIcon,
 } from '@blocksuite/icons/lit';
 import { css, html } from 'lit';
-import { customElement } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 
 import '../../core/common/component/overflow/overflow.js';
 import { renderUniLit } from '../../core/index.js';
 import { WidgetBase } from '../../core/widget/widget-base.js';
 
-@customElement('data-view-header-views')
 export class DataViewHeaderViews extends WidgetBase {
   static override styles = css`
     data-view-header-views {

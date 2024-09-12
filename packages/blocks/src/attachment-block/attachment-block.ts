@@ -14,7 +14,7 @@ import { humanFileSize } from '@blocksuite/affine-shared/utils';
 import { Slice } from '@blocksuite/store';
 import { flip, offset } from '@floating-ui/dom';
 import { html, nothing } from 'lit';
-import { customElement, property, state } from 'lit/decorators.js';
+import { property, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { ref } from 'lit/directives/ref.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -27,7 +27,6 @@ import { renderEmbedView } from './embed.js';
 import { styles } from './styles.js';
 import { checkAttachmentBlob, downloadAttachmentBlob } from './utils.js';
 
-@customElement('affine-attachment')
 export class AttachmentBlockComponent extends CaptionedBlockComponent<
   AttachmentBlockModel,
   AttachmentBlockService

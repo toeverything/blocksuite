@@ -23,7 +23,7 @@ import {
 } from '@blocksuite/block-std';
 import { almostEqual, Bound, clamp, Point } from '@blocksuite/global/utils';
 import { css, html, nothing } from 'lit';
-import { customElement, property, query, state } from 'lit/decorators.js';
+import { property, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
@@ -31,7 +31,6 @@ import type { EdgelessRootService } from '../root-block/index.js';
 
 import { NoteBlockComponent } from './note-block.js';
 
-@customElement('edgeless-note-mask')
 export class EdgelessNoteMask extends WithDisposable(ShadowlessElement) {
   protected override firstUpdated() {
     const maskDOM = this.renderRoot!.querySelector('.affine-note-mask');
@@ -103,7 +102,6 @@ export class EdgelessNoteMask extends WithDisposable(ShadowlessElement) {
 
 const ACTIVE_NOTE_EXTRA_PADDING = 20;
 
-@customElement('affine-edgeless-note')
 export class EdgelessNoteBlockComponent extends toGfxBlockComponent(
   NoteBlockComponent
 ) {

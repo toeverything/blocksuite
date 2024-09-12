@@ -1,13 +1,12 @@
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { css } from 'lit';
-import { customElement, property, query } from 'lit/decorators.js';
+import { property, query } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
 
 import type { SelectTag } from './multi-tag-select.js';
 
-@customElement('affine-multi-tag-view')
 export class MultiTagView extends WithDisposable(ShadowlessElement) {
   static override styles = css`
     affine-multi-tag-view {

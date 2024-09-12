@@ -6,7 +6,6 @@ import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import { BlockStdScope } from '@blocksuite/block-std';
 import { assertExists, Bound } from '@blocksuite/global/utils';
 import { html } from 'lit';
-import { customElement } from 'lit/decorators.js';
 import { choose } from 'lit/directives/choose.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { guard } from 'lit/directives/guard.js';
@@ -17,7 +16,6 @@ import type { EdgelessRootService } from '../root-block/index.js';
 import { toEdgelessEmbedBlock } from '../_common/embed-block-helper/embed-block-element.js';
 import { EmbedSyncedDocBlockComponent } from './embed-synced-doc-block.js';
 
-@customElement('affine-embed-edgeless-synced-doc-block')
 export class EmbedEdgelessSyncedDocBlockComponent extends toEdgelessEmbedBlock(
   EmbedSyncedDocBlockComponent
 ) {

@@ -1,5 +1,4 @@
 import { css, html, LitElement } from 'lit';
-import { customElement } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
 import type { EdgelessTool } from '../../../types.js';
@@ -7,7 +6,6 @@ import type { EdgelessTool } from '../../../types.js';
 import { EdgelessToolbarToolMixin } from '../mixins/tool.mixin.js';
 import { FrameConfig } from './config.js';
 
-@customElement('edgeless-frame-menu')
 export class EdgelessFrameMenu extends EdgelessToolbarToolMixin(LitElement) {
   static override styles = css`
     :host {

@@ -7,7 +7,7 @@ import { matchFlavours } from '@blocksuite/affine-shared/utils';
 import { GfxBlockComponent } from '@blocksuite/block-std';
 import { Bound } from '@blocksuite/global/utils';
 import { css, html } from 'lit';
-import { customElement, query, state } from 'lit/decorators.js';
+import { query, state } from 'lit/decorators.js';
 import { type StyleInfo, styleMap } from 'lit/directives/style-map.js';
 
 import type {
@@ -25,7 +25,6 @@ import {
 export const EDGELESS_TEXT_BLOCK_MIN_WIDTH = 50;
 export const EDGELESS_TEXT_BLOCK_MIN_HEIGHT = 50;
 
-@customElement('affine-edgeless-text')
 export class EdgelessTextBlockComponent extends GfxBlockComponent<
   EdgelessTextBlockModel,
   EdgelessTextBlockService

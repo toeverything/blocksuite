@@ -7,7 +7,7 @@ import {
   FontWeight,
 } from '@blocksuite/affine-model';
 import { css, html, LitElement, nothing } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { property } from 'lit/decorators.js';
 import { choose } from 'lit/directives/choose.js';
 import { join } from 'lit/directives/join.js';
 import { repeat } from 'lit/directives/repeat.js';
@@ -18,7 +18,6 @@ const FONT_WEIGHT_CHOOSE: [FontWeight, () => string][] = [
   [FontWeight.SemiBold, () => 'Semibold'],
 ];
 
-@customElement('edgeless-font-weight-and-style-panel')
 export class EdgelessFontWeightAndStylePanel extends LitElement {
   static override styles = css`
     :host {

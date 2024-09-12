@@ -3,11 +3,10 @@ import { GroupIcon } from '@blocksuite/affine-components/icons';
 import { GroupElementModel } from '@blocksuite/affine-model';
 import { WithDisposable } from '@blocksuite/block-std';
 import { css, html, LitElement, nothing } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { property } from 'lit/decorators.js';
 
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 
-@customElement('edgeless-add-group-button')
 export class EdgelessAddGroupButton extends WithDisposable(LitElement) {
   static override styles = css`
     .label {

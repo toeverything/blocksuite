@@ -4,11 +4,10 @@ import { EditPropsStore } from '@blocksuite/affine-shared/services';
 import { WithDisposable } from '@blocksuite/block-std';
 import { Bound } from '@blocksuite/global/utils';
 import { css, html, LitElement, nothing } from 'lit';
-import { customElement, property, state } from 'lit/decorators.js';
+import { property, state } from 'lit/decorators.js';
 
 import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
 
-@customElement('edgeless-navigator-black-background')
 export class EdgelessNavigatorBlackBackground extends WithDisposable(
   LitElement
 ) {

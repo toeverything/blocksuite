@@ -14,7 +14,7 @@ import {
 } from '@blocksuite/blocks';
 import { Bound, DisposableGroup } from '@blocksuite/global/utils';
 import { css, html, nothing, type PropertyValues } from 'lit';
-import { customElement, property, query, state } from 'lit/decorators.js';
+import { property, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
 import type {
@@ -84,7 +84,6 @@ const styles = css`
 
 export const AFFINE_FRAME_PANEL_BODY = 'affine-frame-panel-body';
 
-@customElement(AFFINE_FRAME_PANEL_BODY)
 export class FramePanelBody extends WithDisposable(ShadowlessElement) {
   static override styles = styles;
 

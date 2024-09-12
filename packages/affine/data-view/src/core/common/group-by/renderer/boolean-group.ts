@@ -1,10 +1,8 @@
 import { CheckBoxCkeckSolidIcon, CheckBoxUnIcon } from '@blocksuite/icons/lit';
 import { css, html } from 'lit';
-import { customElement } from 'lit/decorators.js';
 
 import { BaseGroup } from './base.js';
 
-@customElement('data-view-group-title-boolean-view')
 export class BooleanGroupView extends BaseGroup<NonNullable<unknown>, boolean> {
   static override styles = css`
     .data-view-group-title-boolean-view {

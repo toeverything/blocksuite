@@ -18,7 +18,7 @@ import { offset } from '@floating-ui/dom';
 import { ContextProvider } from '@lit/context';
 import { baseTheme, cssVar } from '@toeverything/theme';
 import { css, html, LitElement, nothing, unsafeCSS } from 'lit';
-import { customElement, query, state } from 'lit/decorators.js';
+import { query, state } from 'lit/decorators.js';
 import { cache } from 'lit/directives/cache.js';
 
 import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
@@ -50,7 +50,6 @@ const DIVIDER_WIDTH = 8;
 const DIVIDER_SPACE = 8;
 const SAFE_AREA_WIDTH = 64;
 
-@customElement('edgeless-toolbar')
 export class EdgelessToolbar extends WithDisposable(LitElement) {
   static override styles = css`
     :host {

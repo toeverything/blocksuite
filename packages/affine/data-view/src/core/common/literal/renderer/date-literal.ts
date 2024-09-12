@@ -1,10 +1,8 @@
 import { format } from 'date-fns/format';
 import { html } from 'lit';
-import { customElement } from 'lit/decorators.js';
 
 import { LiteralElement } from './literal-element.js';
 
-@customElement('data-view-literal-date-view')
 export class DateLiteral extends LiteralElement<number> {
   override render() {
     return this.value

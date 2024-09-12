@@ -7,7 +7,7 @@ import {
 } from '@blocksuite/block-std';
 import { baseTheme } from '@toeverything/theme';
 import { css, html, LitElement, nothing, unsafeCSS } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { property } from 'lit/decorators.js';
 
 import type { AIItemConfig, AISubItemConfig } from './types.js';
 
@@ -17,7 +17,6 @@ import { menuItemStyles } from './styles.js';
   host: PropTypes.instanceOf(EditorHost),
   item: PropTypes.object,
 })
-@customElement('ai-sub-item-list')
 export class AISubItemList extends WithDisposable(LitElement) {
   static override styles = css`
     .ai-sub-menu {

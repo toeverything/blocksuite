@@ -11,6 +11,7 @@
     "test:e2e": "playwright test",
     "test": "yarn test:unit && yarn test:e2e"
   },
+  "sideEffects": false,
   "keywords": [],
   "author": "toeverything",
   "license": "MPL-2.0",
@@ -71,7 +72,8 @@
   "exports": {
     "./dist/*": "./dist/*",
     ".": "./src/index.ts",
-    "./schemas": "./src/schemas.ts"
+    "./schemas": "./src/schemas.ts",
+    "./effects": "./src/effects.ts"
   },
   "publishConfig": {
     "access": "public",
@@ -87,6 +89,10 @@
       "./schemas": {
         "types": "./dist/schemas.d.ts",
         "import": "./dist/schemas.js"
+      },
+      "./effects": {
+        "types": "./dist/effects.d.ts",
+        "import": "./dist/effects.js"
       }
     }
   },

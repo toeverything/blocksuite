@@ -9,7 +9,7 @@ import {
   Vec,
 } from '@blocksuite/global/utils';
 import { html, LitElement, nothing } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
@@ -31,7 +31,6 @@ import {
 
 const { toDegree, toRadian } = CommonUtils;
 
-@customElement('affine-pie-menu')
 export class PieMenu extends WithDisposable(LitElement) {
   static override styles = pieMenuStyles;
 

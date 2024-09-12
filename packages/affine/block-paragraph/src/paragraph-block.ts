@@ -17,13 +17,12 @@ import { getViewportElement } from '@blocksuite/affine-shared/utils';
 import { getInlineRangeProvider } from '@blocksuite/block-std';
 import { effect, signal } from '@lit-labs/preact-signals';
 import { html, nothing, type TemplateResult } from 'lit';
-import { customElement, query } from 'lit/decorators.js';
+import { query } from 'lit/decorators.js';
 
 import type { ParagraphBlockService } from './paragraph-service.js';
 
 import { paragraphBlockStyles } from './styles.js';
 
-@customElement('affine-paragraph')
 export class ParagraphBlockComponent extends CaptionedBlockComponent<
   ParagraphBlockModel,
   ParagraphBlockService

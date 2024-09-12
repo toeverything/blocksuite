@@ -1,7 +1,7 @@
 import { CheckIcon } from '@blocksuite/affine-components/icons';
 import { clamp, stopPropagation } from '@blocksuite/affine-shared/utils';
 import { css, html, LitElement, nothing } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
 import '../buttons/tool-icon-button.js';
@@ -14,7 +14,6 @@ type SizeItem = {
   value: number;
 };
 
-@customElement('edgeless-size-panel')
 export class EdgelessSizePanel extends LitElement {
   static override styles = css`
     :host {

@@ -1,10 +1,9 @@
 import type { Rect } from '@blocksuite/global/utils';
 
 import { css, html, LitElement } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-@customElement('affine-drag-indicator')
 export class DragIndicator extends LitElement {
   static override styles = css`
     .affine-drag-indicator {
@@ -43,4 +42,8 @@ declare global {
   interface HTMLElementTagNameMap {
     'affine-drag-indicator': DragIndicator;
   }
+}
+
+export function effects() {
+  customElements.define('affine-drag-indicator', DragIndicator);
 }

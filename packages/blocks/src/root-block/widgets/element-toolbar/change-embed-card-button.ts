@@ -34,7 +34,7 @@ import { getHostName } from '@blocksuite/affine-shared/utils';
 import { WithDisposable } from '@blocksuite/block-std';
 import { Bound } from '@blocksuite/global/utils';
 import { css, html, LitElement, nothing, type TemplateResult } from 'lit';
-import { customElement, property, state } from 'lit/decorators.js';
+import { property, state } from 'lit/decorators.js';
 import { ifDefined } from 'lit/directives/if-defined.js';
 import { join } from 'lit/directives/join.js';
 import { repeat } from 'lit/directives/repeat.js';
@@ -65,7 +65,6 @@ import {
   isEmbedSyncedDocBlock,
 } from '../../edgeless/utils/query.js';
 
-@customElement('edgeless-change-embed-card-button')
 export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
   static override styles = css`
     .affine-link-preview {

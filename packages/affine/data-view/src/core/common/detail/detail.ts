@@ -11,7 +11,7 @@ import {
 } from '@blocksuite/icons/lit';
 import { computed } from '@lit-labs/preact-signals';
 import { css, nothing, unsafeCSS } from 'lit';
-import { customElement, property, query } from 'lit/decorators.js';
+import { property, query } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { keyed } from 'lit/directives/keyed.js';
 import { repeat } from 'lit/directives/repeat.js';
@@ -90,7 +90,6 @@ const styles = css`
   }
 `;
 
-@customElement('affine-data-view-record-detail')
 export class RecordDetail extends SignalWatcher(
   WithDisposable(ShadowlessElement)
 ) {

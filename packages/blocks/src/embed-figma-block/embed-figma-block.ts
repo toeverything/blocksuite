@@ -5,7 +5,7 @@ import type {
 
 import { OpenIcon } from '@blocksuite/affine-components/icons';
 import { html } from 'lit';
-import { customElement, state } from 'lit/decorators.js';
+import { state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 
 import type { EmbedFigmaBlockService } from './embed-figma-service.js';
@@ -14,7 +14,6 @@ import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../_common/consts.js';
 import { EmbedBlockComponent } from '../_common/embed-block-helper/embed-block-element.js';
 import { FigmaIcon, styles } from './styles.js';
 
-@customElement('affine-embed-figma-block')
 export class EmbedFigmaBlockComponent extends EmbedBlockComponent<
   EmbedFigmaModel,
   EmbedFigmaBlockService

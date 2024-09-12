@@ -8,11 +8,10 @@ import {
 import { NotificationProvider } from '@blocksuite/affine-shared/services';
 import { WithDisposable } from '@blocksuite/block-std';
 import { css, html, LitElement, nothing } from 'lit';
-import { customElement, property, state } from 'lit/decorators.js';
+import { property, state } from 'lit/decorators.js';
 
 import type { CopyConfig } from '../type.js';
 
-@customElement('ai-finish-tip')
 export class AIFinishTip extends WithDisposable(LitElement) {
   static override styles = css`
     .finish-tip {

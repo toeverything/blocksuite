@@ -1,13 +1,12 @@
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { css, html } from 'lit';
-import { customElement, property, query } from 'lit/decorators.js';
+import { property, query } from 'lit/decorators.js';
 
 import type { AffineEditorContainer } from '../../editors/editor-container.js';
 
 import { CommentInput } from './comment-input.js';
 import { CommentManager } from './comment-manager.js';
 
-@customElement('comment-panel')
 export class CommentPanel extends WithDisposable(ShadowlessElement) {
   static override styles = css`
     comment-panel {

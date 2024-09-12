@@ -13,7 +13,7 @@ import {
 } from '@blocksuite/affine-shared/utils';
 import { BlockComponent } from '@blocksuite/block-std';
 import { css, html } from 'lit';
-import { customElement, query } from 'lit/decorators.js';
+import { query } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
 import type { PageRootBlockWidgetName } from '../index.js';
@@ -46,7 +46,6 @@ function testClickOnBlankArea(
   return false;
 }
 
-@customElement('affine-page-root')
 export class PageRootBlockComponent extends BlockComponent<
   RootBlockModel,
   PageRootService,

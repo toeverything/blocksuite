@@ -1,12 +1,11 @@
 import { css, html, LitElement, nothing } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { property } from 'lit/decorators.js';
 import { choose } from 'lit/directives/choose.js';
 import { repeat } from 'lit/directives/repeat.js';
 
 import { ImageLoadingFailedIcon, LoadingIcon } from '../../_common/icon.js';
 import './image-placeholder.js';
 
-@customElement('chat-image')
 export class ChatImage extends LitElement {
   static override styles = css`
     .image-container {
@@ -64,7 +63,6 @@ export class ChatImage extends LitElement {
   accessor status!: 'loading' | 'error' | 'success';
 }
 
-@customElement('chat-images')
 export class ChatImages extends LitElement {
   static override styles = css`
     .images-container {

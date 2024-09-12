@@ -31,7 +31,6 @@ import { Slice } from '@blocksuite/store';
 import { autoUpdate } from '@floating-ui/dom';
 import { computed, signal } from '@lit-labs/preact-signals';
 import { css, html, nothing, unsafeCSS } from 'lit';
-import { customElement } from 'lit/decorators.js';
 
 import type { NoteBlockComponent } from '../note-block/index.js';
 import type { DatabaseOptionsConfig } from './config.js';
@@ -50,7 +49,6 @@ import { popSideDetail } from './components/layout.js';
 import './components/title/index.js';
 import { DatabaseBlockDataSource } from './data-source.js';
 
-@customElement('affine-database')
 export class DatabaseBlockComponent extends CaptionedBlockComponent<
   DatabaseBlockModel,
   DatabaseBlockService

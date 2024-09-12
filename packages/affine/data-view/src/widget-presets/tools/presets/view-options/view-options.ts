@@ -9,7 +9,6 @@ import {
   MoreHorizontalIcon,
 } from '@blocksuite/icons/lit';
 import { css, html } from 'lit';
-import { customElement } from 'lit/decorators.js';
 
 import type { SingleView } from '../../../../core/view-manager/single-view.js';
 import type {
@@ -51,7 +50,6 @@ const styles = css`
   }
 `;
 
-@customElement('data-view-header-tools-view-options')
 export class DataViewHeaderToolsViewOptions extends WidgetBase {
   static override styles = styles;
 

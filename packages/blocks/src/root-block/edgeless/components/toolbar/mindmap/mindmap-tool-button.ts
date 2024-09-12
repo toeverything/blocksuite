@@ -5,7 +5,7 @@ import type { Bound } from '@blocksuite/global/utils';
 import { EditPropsStore } from '@blocksuite/affine-shared/services';
 import { computed, SignalWatcher } from '@lit-labs/preact-signals';
 import { css, html, LitElement, nothing } from 'lit';
-import { customElement, property, query, state } from 'lit/decorators.js';
+import { property, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -27,7 +27,6 @@ import { basketIconDark, basketIconLight, textIcon } from './icons.js';
 import './mindmap-menu.js';
 import { importMindmap } from './utils/import-mindmap.js';
 
-@customElement('edgeless-mindmap-tool-button')
 export class EdgelessMindmapToolButton extends EdgelessToolbarToolMixin(
   SignalWatcher(LitElement)
 ) {

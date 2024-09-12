@@ -4,7 +4,7 @@ import type { IVec } from '@blocksuite/global/utils';
 import { WidgetComponent } from '@blocksuite/block-std';
 import { noop } from '@blocksuite/global/utils';
 import { nothing } from 'lit';
-import { customElement, state } from 'lit/decorators.js';
+import { state } from 'lit/decorators.js';
 
 import type { PieMenuSchema } from './base.js';
 
@@ -24,7 +24,6 @@ noop(PieNodeChild);
 
 export const AFFINE_PIE_MENU_WIDGET = 'affine-pie-menu-widget';
 
-@customElement(AFFINE_PIE_MENU_WIDGET)
 export class AffinePieMenuWidget extends WidgetComponent {
   private _handleCursorPos = (ctx: UIEventStateContext) => {
     const ev = ctx.get('pointerState');

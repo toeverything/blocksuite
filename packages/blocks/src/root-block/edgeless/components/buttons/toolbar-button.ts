@@ -1,9 +1,7 @@
 import { css, html } from 'lit';
-import { customElement } from 'lit/decorators.js';
 
 import { EdgelessToolIconButton } from './tool-icon-button.js';
 
-@customElement('edgeless-toolbar-button')
 export class EdgelessToolbarButton extends EdgelessToolIconButton {
   static override styles = css`
     .icon-container {

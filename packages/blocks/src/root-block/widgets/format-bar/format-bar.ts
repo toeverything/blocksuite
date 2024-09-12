@@ -27,7 +27,7 @@ import {
   shift,
 } from '@floating-ui/dom';
 import { html, nothing } from 'lit';
-import { customElement, query, state } from 'lit/decorators.js';
+import { query, state } from 'lit/decorators.js';
 
 import type { FormatBarContext } from './context.js';
 
@@ -46,7 +46,6 @@ import { formatBarStyle } from './styles.js';
 
 export const AFFINE_FORMAT_BAR_WIDGET = 'affine-format-bar-widget';
 
-@customElement(AFFINE_FORMAT_BAR_WIDGET)
 export class AffineFormatBarWidget extends WidgetComponent {
   static override styles = formatBarStyle;
 

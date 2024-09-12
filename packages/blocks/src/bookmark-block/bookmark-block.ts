@@ -3,7 +3,7 @@ import type { BookmarkBlockModel } from '@blocksuite/affine-model';
 import { CaptionedBlockComponent } from '@blocksuite/affine-components/caption';
 import { DocModeProvider } from '@blocksuite/affine-shared/services';
 import { html } from 'lit';
-import { customElement, property, query } from 'lit/decorators.js';
+import { property, query } from 'lit/decorators.js';
 import { type StyleInfo, styleMap } from 'lit/directives/style-map.js';
 
 import type { BookmarkBlockService } from './bookmark-service.js';
@@ -12,7 +12,6 @@ import { BOOKMARK_MIN_WIDTH } from '../root-block/edgeless/utils/consts.js';
 import './components/bookmark-card.js';
 import { refreshBookmarkUrlData } from './utils.js';
 
-@customElement('affine-bookmark')
 export class BookmarkBlockComponent extends CaptionedBlockComponent<
   BookmarkBlockModel,
   BookmarkBlockService

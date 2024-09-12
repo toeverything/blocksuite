@@ -7,10 +7,15 @@ type MatcherData<Data, Type extends TType = TType> = {
   data: Data;
 };
 
-export class Matcher<Data, Type extends TType = TType> {
-  private list: MatcherData<Data, Type>[] = [];
+export class MatcherCreator<Data, Type extends TType = TType> {
+  createMatcher(type: Type, data: Data) {
+    return { type, data };
+  }
+}
 
+export class Matcher<Data, Type extends TType = TType> {
   constructor(
+    private list: MatcherData<Data, Type>[],
     private _match: (
       type: Type,
       target: TType
@@ -62,9 +67,5 @@ export class Matcher<Data, Type extends TType = TType> {
       }
     }
     return;
-  }
-
-  register(type: Type, data: Data) {
-    this.list.push({ type, data });
   }
 }

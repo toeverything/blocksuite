@@ -1,6 +1,6 @@
 import { CommonUtils } from '@blocksuite/affine-block-surface';
 import { css, html, LitElement, nothing } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { getPosition } from '../utils.js';
@@ -19,7 +19,6 @@ const styles = css`
   }
 `;
 
-@customElement('pie-center-rotator')
 export class PieCenterRotator extends LitElement {
   static override styles = styles;
 

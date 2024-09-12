@@ -5,7 +5,6 @@ import {
 } from '@blocksuite/affine-shared/utils';
 import { AddCursorIcon } from '@blocksuite/icons/lit';
 import { css } from 'lit';
-import { customElement } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
 
@@ -135,7 +134,6 @@ const styles = css`
   }
 `;
 
-@customElement('affine-database-table')
 export class DataViewTable extends DataViewBase<
   TableSingleView,
   TableViewSelectionWithType

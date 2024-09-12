@@ -5,7 +5,7 @@ import type {
 
 import { OpenIcon } from '@blocksuite/affine-components/icons';
 import { html, nothing } from 'lit';
-import { customElement, property, state } from 'lit/decorators.js';
+import { property, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -23,7 +23,6 @@ import {
   refreshEmbedGithubUrlData,
 } from './utils.js';
 
-@customElement('affine-embed-github-block')
 export class EmbedGithubBlockComponent extends EmbedBlockComponent<
   EmbedGithubModel,
   EmbedGithubBlockService

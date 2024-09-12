@@ -13,9 +13,8 @@ import {
   WithDisposable,
 } from '@blocksuite/block-std';
 import { css, html } from 'lit';
-import { customElement, property, query } from 'lit/decorators.js';
+import { property, query } from 'lit/decorators.js';
 
-@customElement('database-datasource-note-renderer')
 export class NoteRenderer
   extends WithDisposable(ShadowlessElement)
   implements DetailSlotProps

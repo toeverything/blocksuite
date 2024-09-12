@@ -13,7 +13,7 @@ import {
   ZERO_WIDTH_SPACE,
 } from '@blocksuite/inline';
 import { css, html, nothing } from 'lit';
-import { customElement, property, state } from 'lit/decorators.js';
+import { property, state } from 'lit/decorators.js';
 import { choose } from 'lit/directives/choose.js';
 import { ref } from 'lit/directives/ref.js';
 
@@ -34,7 +34,6 @@ import { affineTextStyles } from '../affine-text.js';
 import { DEFAULT_DOC_NAME, REFERENCE_NODE } from '../consts.js';
 import { toggleReferencePopup } from './reference-popup.js';
 
-@customElement('affine-reference')
 @Peekable({ action: false })
 export class AffineReference extends WithDisposable(ShadowlessElement) {
   static override styles = css`

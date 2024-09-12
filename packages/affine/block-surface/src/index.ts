@@ -1,8 +1,3 @@
-import type { SurfaceBlockModel } from './surface-model.js';
-import type { SurfaceBlockService } from './surface-service.js';
-
-import './commands/reassociate-connectors.js';
-
 export { type IModelCoord, ZOOM_MAX, ZOOM_MIN, ZOOM_STEP } from './consts.js';
 export { GRID_GAP_MAX, GRID_GAP_MIN } from './consts.js';
 export {
@@ -145,14 +140,3 @@ export const CommonUtils = {
   toDegree,
   toRadian,
 };
-
-declare global {
-  namespace BlockSuite {
-    interface BlockServices {
-      'affine:surface': SurfaceBlockService;
-    }
-    interface BlockModels {
-      'affine:surface': SurfaceBlockModel;
-    }
-  }
-}

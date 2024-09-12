@@ -48,7 +48,7 @@ import {
   Vec,
 } from '@blocksuite/global/utils';
 import { css, html, nothing } from 'lit';
-import { customElement, query, state } from 'lit/decorators.js';
+import { query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
 import type { Viewport } from '../../_common/utils/index.js';
@@ -100,7 +100,6 @@ import { mountShapeTextEditor } from './utils/text.js';
 
 const { normalizeWheelDeltaY } = CommonUtils;
 
-@customElement('affine-edgeless-root')
 export class EdgelessRootBlockComponent extends BlockComponent<
   RootBlockModel,
   EdgelessRootService,

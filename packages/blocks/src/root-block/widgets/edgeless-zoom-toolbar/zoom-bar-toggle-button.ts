@@ -4,11 +4,10 @@ import { stopPropagation } from '@blocksuite/affine-shared/utils';
 import { WithDisposable } from '@blocksuite/block-std';
 import { offset } from '@floating-ui/dom';
 import { css, html, LitElement, nothing } from 'lit';
-import { customElement, property, query, state } from 'lit/decorators.js';
+import { property, query, state } from 'lit/decorators.js';
 
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 
-@customElement('zoom-bar-toggle-button')
 export class ZoomBarToggleButton extends WithDisposable(LitElement) {
   static override styles = css`
     :host {

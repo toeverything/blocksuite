@@ -11,7 +11,7 @@ import {
 import { BLOCK_ID_ATTR, WithDisposable } from '@blocksuite/block-std';
 import { computePosition, inline, offset, shift } from '@floating-ui/dom';
 import { html, LitElement, nothing } from 'lit';
-import { customElement, property, query } from 'lit/decorators.js';
+import { property, query } from 'lit/decorators.js';
 import { choose } from 'lit/directives/choose.js';
 import { join } from 'lit/directives/join.js';
 import { repeat } from 'lit/directives/repeat.js';
@@ -36,7 +36,6 @@ import {
 } from '../../../../../../toolbar/index.js';
 import { linkPopupStyle } from './styles.js';
 
-@customElement('link-popup')
 export class LinkPopup extends WithDisposable(LitElement) {
   static override styles = linkPopupStyle;
 

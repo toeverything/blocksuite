@@ -10,7 +10,7 @@ import {
   serializeXYWH,
 } from '@blocksuite/global/utils';
 import { css, html, LitElement, nothing, type PropertyValues } from 'lit';
-import { customElement, property, state } from 'lit/decorators.js';
+import { property, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
@@ -96,7 +96,6 @@ const styles = css`
     }
   }
 `;
-@customElement('note-slicer')
 export class NoteSlicer extends WithDisposable(LitElement) {
   static override styles = styles;
 

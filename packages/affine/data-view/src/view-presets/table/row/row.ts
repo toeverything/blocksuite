@@ -5,7 +5,7 @@ import {
 } from '@blocksuite/block-std';
 import { CenterPeekIcon, MoreHorizontalIcon } from '@blocksuite/icons/lit';
 import { css, nothing } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
@@ -18,7 +18,6 @@ import { DEFAULT_COLUMN_MIN_WIDTH } from '../consts.js';
 import { TableRowSelection, type TableViewSelection } from '../types.js';
 import './row-select-checkbox.js';
 
-@customElement('data-view-table-row')
 export class TableRow extends SignalWatcher(WithDisposable(ShadowlessElement)) {
   static override styles = css`
     .affine-database-block-row:has(.row-select-checkbox.selected) {
@@ -165,7 +164,7 @@ export class TableRow extends SignalWatcher(WithDisposable(ShadowlessElement)) {
   override connectedCallback() {
     super.connectedCallback();
     this.disposables.addFromEvent(this, 'contextmenu', this.contextMenu);
-    // eslint-disable-next-line wc/no-self-class
+
     this.classList.add('affine-database-block-row', 'database-row');
   }
 

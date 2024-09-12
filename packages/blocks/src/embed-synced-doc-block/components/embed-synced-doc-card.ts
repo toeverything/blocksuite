@@ -4,7 +4,7 @@ import {
   WithDisposable,
 } from '@blocksuite/block-std';
 import { html, nothing } from 'lit';
-import { customElement, property, queryAsync } from 'lit/decorators.js';
+import { property, queryAsync } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 
 import type { SurfaceRefRenderer } from '../../surface-ref-block/surface-ref-renderer.js';
@@ -15,7 +15,6 @@ import { renderLinkedDocInCard } from '../../_common/utils/render-linked-doc.js'
 import { cardStyles } from '../styles.js';
 import { getSyncedDocIcons } from '../utils.js';
 
-@customElement('affine-embed-synced-doc-card')
 export class EmbedSyncedDocCard extends WithDisposable(ShadowlessElement) {
   static override styles = cardStyles;
 

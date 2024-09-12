@@ -3,7 +3,7 @@ import { DocModeProvider, FramePreview } from '@blocksuite/blocks';
 import { DisposableGroup } from '@blocksuite/global/utils';
 import { baseTheme } from '@toeverything/theme';
 import { css, html, type PropertyValues, unsafeCSS } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { property } from 'lit/decorators.js';
 
 import type { AffineEditorContainer } from '../../index.js';
 
@@ -64,7 +64,6 @@ const styles = css`
 
 export const AFFINE_FRAME_PANEL = 'affine-frame-panel';
 
-@customElement(AFFINE_FRAME_PANEL)
 export class FramePanel extends WithDisposable(ShadowlessElement) {
   static override styles = styles;
 

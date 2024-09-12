@@ -7,11 +7,9 @@ import {
   size,
 } from '@floating-ui/dom';
 import { nothing } from 'lit';
-import { customElement } from 'lit/decorators.js';
 
 export const AFFINE_INNER_MODAL_WIDGET = 'affine-inner-modal-widget';
 
-@customElement(AFFINE_INNER_MODAL_WIDGET)
 export class AffineInnerModalWidget extends WidgetComponent {
   private _getTarget?: () => ReferenceElement;
 

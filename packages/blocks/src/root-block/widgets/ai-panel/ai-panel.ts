@@ -18,7 +18,7 @@ import {
   shift,
 } from '@floating-ui/dom';
 import { css, html, nothing, type PropertyValues } from 'lit';
-import { customElement, property, query } from 'lit/decorators.js';
+import { property, query } from 'lit/decorators.js';
 import { choose } from 'lit/directives/choose.js';
 
 import type { AIError } from '../../../_common/components/index.js';
@@ -36,7 +36,6 @@ import './components/index.js';
 
 export const AFFINE_AI_PANEL_WIDGET = 'affine-ai-panel-widget';
 
-@customElement(AFFINE_AI_PANEL_WIDGET)
 export class AffineAIPanelWidget extends WidgetComponent {
   static override styles = css`
     :host {

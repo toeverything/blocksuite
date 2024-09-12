@@ -10,7 +10,7 @@ import type { EditorHost } from '@blocksuite/block-std';
 import { toast } from '@blocksuite/affine-components/toast';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { html } from 'lit';
-import { customElement, property, query, state } from 'lit/decorators.js';
+import { property, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 
 import { embedCardModalStyles } from './styles.js';
@@ -22,7 +22,6 @@ type EmbedCardModel =
   | EmbedFigmaModel
   | EmbedLoomModel;
 
-@customElement('embed-card-edit-modal')
 export class EmbedCardEditModal extends WithDisposable(ShadowlessElement) {
   static override styles = embedCardModalStyles;
 

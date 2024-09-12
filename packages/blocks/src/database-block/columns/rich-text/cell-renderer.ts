@@ -14,7 +14,7 @@ import { IS_MAC } from '@blocksuite/global/env';
 import { assertExists } from '@blocksuite/global/utils';
 import { Text } from '@blocksuite/store';
 import { css, nothing, type PropertyValues } from 'lit';
-import { customElement, query } from 'lit/decorators.js';
+import { query } from 'lit/decorators.js';
 import { keyed } from 'lit/directives/keyed.js';
 import { html } from 'lit/static-html.js';
 
@@ -69,7 +69,6 @@ function toggleStyle(
   inlineEditor.syncInlineRange();
 }
 
-@customElement('affine-database-rich-text-cell')
 export class RichTextCell extends BaseCellRenderer<Text> {
   static override styles = css`
     affine-database-rich-text-cell {
@@ -176,7 +175,6 @@ export class RichTextCell extends BaseCellRenderer<Text> {
   private accessor _richTextElement: RichText | null = null;
 }
 
-@customElement('affine-database-rich-text-cell-editing')
 export class RichTextCellEditing extends BaseCellRenderer<Text> {
   static override styles = css`
     affine-database-rich-text-cell-editing {

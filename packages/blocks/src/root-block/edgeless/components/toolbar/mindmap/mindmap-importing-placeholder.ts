@@ -2,11 +2,9 @@ import { LightLoadingIcon } from '@blocksuite/affine-components/icons';
 import { ShadowlessElement } from '@blocksuite/block-std';
 import { cssVarV2 } from '@toeverything/theme/v2';
 import { css, html, unsafeCSS } from 'lit';
-import { customElement } from 'lit/decorators.js';
 
 import { importMindMapIcon } from './icons.js';
 
-@customElement('mindmap-import-placeholder')
 export class MindMapPlaceholder extends ShadowlessElement {
   static override styles = css`
     mindmap-import-placeholder {

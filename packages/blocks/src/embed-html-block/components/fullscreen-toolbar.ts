@@ -8,11 +8,10 @@ import {
 } from '@blocksuite/icons/lit';
 import { flip, offset } from '@floating-ui/dom';
 import { css, html, LitElement } from 'lit';
-import { customElement, property, query, state } from 'lit/decorators.js';
+import { property, query, state } from 'lit/decorators.js';
 
 import type { EmbedEdgelessHtmlBlockComponent } from '../embed-edgeless-html-block.js';
 
-@customElement('embed-html-fullscreen-toolbar')
 export class EmbedHtmlFullscreenToolbar extends LitElement {
   static override styles = css`
     :host {

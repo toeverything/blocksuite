@@ -1,9 +1,7 @@
 import { css } from 'lit';
-import { customElement } from 'lit/decorators.js';
 
 import { colorContainerStyles, EdgelessColorPanel } from './color-panel.js';
 
-@customElement('edgeless-one-row-color-panel')
 export class EdgelessOneRowColorPanel extends EdgelessColorPanel {
   static override styles = css`
     :host {

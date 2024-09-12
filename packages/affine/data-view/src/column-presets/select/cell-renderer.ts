@@ -1,4 +1,3 @@
-import { customElement } from 'lit/decorators.js';
 import { html } from 'lit/static-html.js';
 
 import { BaseCellRenderer } from '../../core/column/index.js';
@@ -11,7 +10,6 @@ import {
 import { createIcon } from '../../core/utils/uni-icon.js';
 import { type SelectColumnData, selectColumnModelConfig } from './define.js';
 
-@customElement('affine-database-select-cell')
 export class SelectCell extends BaseCellRenderer<string[], SelectColumnData> {
   override render() {
     const value = this.value ? [this.value] : [];
@@ -24,7 +22,6 @@ export class SelectCell extends BaseCellRenderer<string[], SelectColumnData> {
   }
 }
 
-@customElement('affine-database-select-cell-editing')
 export class SelectCellEditing extends BaseCellRenderer<
   string,
   SelectColumnData

@@ -5,7 +5,7 @@ import type {
 
 import { OpenIcon } from '@blocksuite/affine-components/icons';
 import { html, nothing } from 'lit';
-import { customElement, property, state } from 'lit/decorators.js';
+import { property, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 
 import type { EmbedYoutubeBlockService } from './embed-youtube-service.js';
@@ -17,7 +17,6 @@ import { youtubeUrlRegex } from './embed-youtube-model.js';
 import { styles, YoutubeIcon } from './styles.js';
 import { refreshEmbedYoutubeUrlData } from './utils.js';
 
-@customElement('affine-embed-youtube-block')
 export class EmbedYoutubeBlockComponent extends EmbedBlockComponent<
   EmbedYoutubeModel,
   EmbedYoutubeBlockService

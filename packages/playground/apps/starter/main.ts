@@ -13,8 +13,10 @@ import {
   RefNodeSlotsExtension,
   RefNodeSlotsProvider,
 } from '@blocksuite/blocks';
+import { effects as blocksEffects } from '@blocksuite/blocks/effects';
 import * as globalUtils from '@blocksuite/global/utils';
 import * as editor from '@blocksuite/presets';
+import { effects as presetsEffects } from '@blocksuite/presets/effects';
 import '@blocksuite/presets/themes/affine.css';
 import * as store from '@blocksuite/store';
 
@@ -26,6 +28,9 @@ import {
   initStarterDocCollection,
 } from './utils/collection.js';
 import { mountDefaultDocEditor } from './utils/editor.js';
+
+blocksEffects();
+presetsEffects();
 
 async function main() {
   if (window.collection) return;

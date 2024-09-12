@@ -1,5 +1,5 @@
 import { css, html, LitElement } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { PieNode } from '../node.js';
@@ -30,7 +30,6 @@ const styles = css`
   }
 `;
 
-@customElement('pie-node-center')
 export class PieNodeCenter extends LitElement {
   static override styles = [PieNode.styles, styles];
 

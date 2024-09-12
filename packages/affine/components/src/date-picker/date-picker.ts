@@ -7,7 +7,7 @@ import {
   type PropertyValues,
   type TemplateResult,
 } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { property } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
@@ -48,7 +48,6 @@ type NavActionArg = {
 /**
  * Date picker
  */
-@customElement('date-picker')
 export class DatePicker extends WithDisposable(LitElement) {
   static override styles = datePickerStyle;
 

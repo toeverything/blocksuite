@@ -1,13 +1,12 @@
 import { baseTheme } from '@toeverything/theme';
 import { css, html, unsafeCSS } from 'lit';
-import { customElement, query } from 'lit/decorators.js';
+import { query } from 'lit/decorators.js';
 
 import { BaseCellRenderer } from '../../core/column/index.js';
 import { createFromBaseCellRenderer } from '../../core/column/renderer.js';
 import { createIcon } from '../../core/utils/uni-icon.js';
 import { textColumnModelConfig } from './define.js';
 
-@customElement('affine-database-text-cell')
 export class TextCell extends BaseCellRenderer<string> {
   static override styles = css`
     affine-database-text-cell {
@@ -39,7 +38,6 @@ export class TextCell extends BaseCellRenderer<string> {
     return html` <div class="affine-database-text">${this.value ?? ''}</div>`;
   }
 }
-@customElement('affine-database-text-cell-editing')
 export class TextCellEditing extends BaseCellRenderer<string> {
   static override styles = css`
     affine-database-text-cell-editing {

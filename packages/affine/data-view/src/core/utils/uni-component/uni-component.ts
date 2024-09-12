@@ -3,7 +3,7 @@ import type { Ref } from 'lit/directives/ref.js';
 
 import { ShadowlessElement, SignalWatcher } from '@blocksuite/block-std';
 import { css, html } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { property } from 'lit/decorators.js';
 import { type StyleInfo, styleMap } from 'lit/directives/style-map.js';
 
 export type UniComponentReturn<
@@ -35,7 +35,6 @@ export const renderUniLit = <Props, Expose extends NonNullable<unknown>>(
   ></uni-lit>`;
 };
 
-@customElement('uni-lit')
 export class UniLit<
   Props,
   Expose extends NonNullable<unknown> = NonNullable<unknown>,
@@ -121,8 +120,7 @@ export const createUniComponentFromWebComponent = <
   };
 };
 
-@customElement('uni-any-render')
-class UniAnyRender<
+export class UniAnyRender<
   T,
   Expose extends NonNullable<unknown>,
 > extends SignalWatcher(ShadowlessElement) {

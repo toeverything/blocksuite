@@ -10,7 +10,7 @@ import { Doc } from '@blocksuite/store';
 import { type BlockModel, BlockViewType } from '@blocksuite/store';
 import { createContext, provide } from '@lit/context';
 import { css, LitElement, nothing, type TemplateResult } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { html, type StaticValue, unsafeStatic } from 'lit/static-html.js';
 
@@ -35,7 +35,6 @@ export const stdContext = createContext<BlockStdScope>('std');
   doc: PropTypes.instanceOf(Doc),
   std: PropTypes.object,
 })
-@customElement('editor-host')
 export class EditorHost extends SignalWatcher(
   WithDisposable(ShadowlessElement)
 ) {

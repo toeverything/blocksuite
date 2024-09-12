@@ -13,7 +13,7 @@ import { BaseCellRenderer } from '@blocksuite/data-view';
 import { IS_MAC } from '@blocksuite/global/env';
 import { assertExists } from '@blocksuite/global/utils';
 import { css } from 'lit';
-import { customElement, property, query } from 'lit/decorators.js';
+import { property, query } from 'lit/decorators.js';
 import { html } from 'lit/static-html.js';
 
 import type { DatabaseBlockComponent } from '../../database-block.js';
@@ -135,7 +135,6 @@ abstract class BaseTextCell extends BaseCellRenderer<Text> {
   accessor showIcon = false;
 }
 
-@customElement('data-view-header-area-text')
 export class HeaderAreaTextCell extends BaseTextCell {
   override render() {
     return html`${this.renderIcon()}
@@ -151,7 +150,6 @@ export class HeaderAreaTextCell extends BaseTextCell {
   }
 }
 
-@customElement('data-view-header-area-text-editing')
 export class HeaderAreaTextCellEditing extends BaseTextCell {
   private _onCopy = (e: ClipboardEvent) => {
     const inlineEditor = this.inlineEditor;

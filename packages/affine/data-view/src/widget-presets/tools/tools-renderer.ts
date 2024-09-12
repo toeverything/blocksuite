@@ -1,5 +1,5 @@
 import { css, html } from 'lit';
-import { customElement, property, state } from 'lit/decorators.js';
+import { property, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { repeat } from 'lit/directives/repeat.js';
 
@@ -44,7 +44,6 @@ const styles = css`
   }
 `;
 
-@customElement('data-view-header-tools')
 export class DataViewHeaderTools extends WidgetBase {
   static override styles = styles;
 

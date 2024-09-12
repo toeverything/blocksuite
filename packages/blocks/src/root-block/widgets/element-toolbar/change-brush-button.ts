@@ -8,7 +8,7 @@ import { LINE_COLORS, LineWidth } from '@blocksuite/affine-model';
 import { WithDisposable } from '@blocksuite/block-std';
 import { countBy, maxBy } from '@blocksuite/global/utils';
 import { html, LitElement, nothing } from 'lit';
-import { customElement, property, query, state } from 'lit/decorators.js';
+import { property, query, state } from 'lit/decorators.js';
 import { when } from 'lit/directives/when.js';
 
 import type { EdgelessColorPickerButton } from '../../edgeless/components/color-picker/button.js';
@@ -47,7 +47,6 @@ function notEqual<K extends keyof BrushProps>(key: K, value: BrushProps[K]) {
   return (element: BrushElementModel) => element[key] !== value;
 }
 
-@customElement('edgeless-change-brush-button')
 export class EdgelessChangeBrushButton extends WithDisposable(LitElement) {
   private _setBrushColor = ({ detail: color }: ColorEvent) => {
     this._setBrushProp('color', color);

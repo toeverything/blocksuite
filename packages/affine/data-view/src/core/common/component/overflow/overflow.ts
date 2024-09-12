@@ -4,17 +4,10 @@ import {
   WithDisposable,
 } from '@blocksuite/block-std';
 import { css, html, type PropertyValues, type TemplateResult } from 'lit';
-import {
-  customElement,
-  property,
-  query,
-  queryAll,
-  state,
-} from 'lit/decorators.js';
+import { property, query, queryAll, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { repeat } from 'lit/directives/repeat.js';
 
-@customElement('component-overflow')
 export class Overflow extends SignalWatcher(WithDisposable(ShadowlessElement)) {
   static override styles = css`
     component-overflow {

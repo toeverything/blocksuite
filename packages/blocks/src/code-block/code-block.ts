@@ -28,7 +28,7 @@ import {
   signal,
 } from '@lit-labs/preact-signals';
 import { html, nothing, type TemplateResult } from 'lit';
-import { customElement, query } from 'lit/decorators.js';
+import { query } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 
 import type { CodeBlockService } from './code-block-service.js';
@@ -39,7 +39,6 @@ import { CodeBlockInlineManagerExtension } from './code-block-inline.js';
 import './highlight/affine-code-unit.js';
 import { codeBlockStyles } from './styles.js';
 
-@customElement('affine-code')
 export class CodeBlockComponent extends CaptionedBlockComponent<
   CodeBlockModel,
   CodeBlockService

@@ -1,6 +1,6 @@
 import { WithDisposable } from '@blocksuite/block-std';
 import { css, html, LitElement } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { property } from 'lit/decorators.js';
 
 import type { Column } from '../../../core/view-manager/column.js';
 
@@ -36,7 +36,6 @@ const DecreaseDecimalPlacesIcon = html`
   </svg>
 `;
 
-@customElement('affine-database-number-format-bar')
 export class DatabaseNumberFormatBar extends WithDisposable(LitElement) {
   static override styles = css`
     .number-format-toolbar-container {

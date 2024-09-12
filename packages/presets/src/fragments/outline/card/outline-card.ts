@@ -11,7 +11,7 @@ import {
 } from '@blocksuite/blocks';
 import { baseTheme } from '@toeverything/theme';
 import { css, html, LitElement, nothing, unsafeCSS } from 'lit';
-import { customElement, property, query, state } from 'lit/decorators.js';
+import { property, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 
 import type { SelectEvent } from '../utils/custom-events.js';
@@ -185,7 +185,6 @@ const styles = css`
 
 export const AFFINE_OUTLINE_NOTE_CARD = 'affine-outline-note-card';
 
-@customElement(AFFINE_OUTLINE_NOTE_CARD)
 export class OutlineNoteCard extends SignalWatcher(WithDisposable(LitElement)) {
   static override styles = styles;
 

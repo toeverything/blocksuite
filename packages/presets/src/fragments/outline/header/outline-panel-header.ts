@@ -1,7 +1,7 @@
 import { WithDisposable } from '@blocksuite/block-std';
 import { createButtonPopper } from '@blocksuite/blocks';
 import { css, html, LitElement } from 'lit';
-import { customElement, property, query, state } from 'lit/decorators.js';
+import { property, query, state } from 'lit/decorators.js';
 
 import { SettingsIcon, SortingIcon } from '../../_common/icons.js';
 import './outline-setting-menu.js';
@@ -77,7 +77,6 @@ const styles = css`
 
 export const AFFINE_OUTLINE_PANEL_HEADER = 'affine-outline-panel-header';
 
-@customElement(AFFINE_OUTLINE_PANEL_HEADER)
 export class OutlinePanelHeader extends WithDisposable(LitElement) {
   static override styles = styles;
 

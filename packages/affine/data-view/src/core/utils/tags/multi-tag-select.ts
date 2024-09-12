@@ -12,7 +12,7 @@ import {
 } from '@blocksuite/icons/lit';
 import { nanoid } from '@blocksuite/store';
 import { autoPlacement, flip, offset } from '@floating-ui/dom';
-import { customElement, property, query, state } from 'lit/decorators.js';
+import { property, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -38,7 +38,6 @@ type RenderOption = {
   select: () => void;
 };
 
-@customElement('affine-multi-tag-select')
 export class MultiTagSelect extends WithDisposable(ShadowlessElement) {
   static override styles = styles;
 

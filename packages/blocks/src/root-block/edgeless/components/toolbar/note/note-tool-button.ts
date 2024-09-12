@@ -1,6 +1,6 @@
 import { ArrowUpIcon, NoteIcon } from '@blocksuite/affine-components/icons';
 import { css, html, LitElement } from 'lit';
-import { customElement, state } from 'lit/decorators.js';
+import { state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import type { NoteTool } from '../../../tools/note-tool.js';
@@ -13,7 +13,6 @@ import { createPopper, type MenuPopper } from '../common/create-popper.js';
 import { QuickToolMixin } from '../mixins/quick-tool.mixin.js';
 import './note-menu.js';
 
-@customElement('edgeless-note-tool-button')
 export class EdgelessNoteToolButton extends QuickToolMixin(LitElement) {
   static override styles = css`
     :host {

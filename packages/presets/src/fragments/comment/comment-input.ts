@@ -4,11 +4,10 @@ import type { RichText } from '@blocksuite/blocks';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { DocCollection } from '@blocksuite/store';
 import { css, html, nothing } from 'lit';
-import { customElement, property, query } from 'lit/decorators.js';
+import { property, query } from 'lit/decorators.js';
 
 import type { Comment, CommentManager } from './comment-manager.js';
 
-@customElement('comment-input')
 export class CommentInput extends WithDisposable(ShadowlessElement) {
   static override styles = css`
     .comment-input-container {

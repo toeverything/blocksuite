@@ -9,7 +9,7 @@ import { WithDisposable } from '@blocksuite/block-std';
 import { Bound, getCommonBound } from '@blocksuite/global/utils';
 import { baseTheme } from '@toeverything/theme';
 import { css, html, LitElement, nothing, unsafeCSS } from 'lit';
-import { customElement, property, state } from 'lit/decorators.js';
+import { property, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { unsafeSVG } from 'lit/directives/unsafe-svg.js';
@@ -31,7 +31,6 @@ import './overlay-scrollbar.js';
 import './template-loading.js';
 import { cloneDeep } from './utils.js';
 
-@customElement('edgeless-templates-panel')
 export class EdgelessTemplatePanel extends WithDisposable(LitElement) {
   static override styles = css`
     :host {

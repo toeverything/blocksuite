@@ -9,7 +9,7 @@ import {
 import { assertExists, Bound } from '@blocksuite/global/utils';
 import { cssVarV2 } from '@toeverything/theme/v2';
 import { css, html } from 'lit';
-import { customElement, property, query } from 'lit/decorators.js';
+import { property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
@@ -19,7 +19,6 @@ import {
   frameTitleStyleVars,
 } from '../../../../frame-block/index.js';
 
-@customElement('edgeless-frame-title-editor')
 export class EdgelessFrameTitleEditor extends WithDisposable(
   ShadowlessElement
 ) {

@@ -4,14 +4,13 @@ import { flip, offset } from '@floating-ui/dom';
 import { baseTheme } from '@toeverything/theme';
 import { format } from 'date-fns/format';
 import { css, html, unsafeCSS } from 'lit';
-import { customElement, state } from 'lit/decorators.js';
+import { state } from 'lit/decorators.js';
 
 import { BaseCellRenderer } from '../../core/column/index.js';
 import { createFromBaseCellRenderer } from '../../core/column/renderer.js';
 import { createIcon } from '../../core/utils/uni-icon.js';
 import { dateColumnModelConfig } from './define.js';
 
-@customElement('affine-database-date-cell')
 export class DateCell extends BaseCellRenderer<number> {
   static override styles = css`
     affine-database-date-cell {
@@ -47,7 +46,6 @@ export class DateCell extends BaseCellRenderer<number> {
   }
 }
 
-@customElement('affine-database-date-cell-editing')
 export class DateCellEditing extends BaseCellRenderer<number> {
   static override styles = css`
     affine-database-date-cell-editing {

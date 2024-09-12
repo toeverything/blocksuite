@@ -13,12 +13,11 @@ import {
 } from '@blocksuite/block-std';
 import { assertExists, Bound } from '@blocksuite/global/utils';
 import { html, nothing } from 'lit';
-import { customElement, property, query } from 'lit/decorators.js';
+import { property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
 
-@customElement('edgeless-group-title-editor')
 export class EdgelessGroupTitleEditor extends WithDisposable(
   ShadowlessElement
 ) {

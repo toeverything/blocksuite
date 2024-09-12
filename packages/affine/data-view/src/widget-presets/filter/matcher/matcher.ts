@@ -1,4 +1,4 @@
-import { Matcher } from '../../../core/logical/matcher.js';
+import { Matcher, MatcherCreator } from '../../../core/logical/matcher.js';
 import {
   type TFunction,
   typesystem,
@@ -19,7 +19,29 @@ export type FilterMatcherDataType = {
 export type FilterDefineType = {
   type: TFunction;
 } & Omit<FilterMatcherDataType, 'name'>;
+const allFilter = {
+  ...dateFilter,
+  ...multiTagFilter,
+  ...numberFilter,
+  ...stringFilter,
+  ...tagFilter,
+  ...booleanFilter,
+  ...unknownFilter,
+};
+const filterMatcherCreator = new MatcherCreator<
+  FilterMatcherDataType,
+  TFunction
+>();
+const filterMatchers = Object.entries(allFilter).map(
+  ([name, { type, ...data }]) => {
+    return filterMatcherCreator.createMatcher(type, {
+      name: name,
+      ...data,
+    });
+  }
+);
 export const filterMatcher = new Matcher<FilterMatcherDataType, TFunction>(
+  filterMatchers,
   (type, target) => {
     if (type.type !== 'function') {
       return false;
@@ -32,18 +54,3 @@ export const filterMatcher = new Matcher<FilterMatcherDataType, TFunction>(
     return firstArg && typesystem.isSubtype(firstArg, target);
   }
 );
-const allFilter = {
-  ...dateFilter,
-  ...multiTagFilter,
-  ...numberFilter,
-  ...stringFilter,
-  ...tagFilter,
-  ...booleanFilter,
-  ...unknownFilter,
-};
-Object.entries(allFilter).forEach(([name, { type, ...data }]) => {
-  filterMatcher.register(type, {
-    name: name,
-    ...data,
-  });
-});

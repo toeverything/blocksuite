@@ -2,7 +2,7 @@ import type { EmbedLoomModel, EmbedLoomStyles } from '@blocksuite/affine-model';
 
 import { OpenIcon } from '@blocksuite/affine-components/icons';
 import { html } from 'lit';
-import { customElement, property, state } from 'lit/decorators.js';
+import { property, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 
 import type { EmbedLoomBlockService } from './embed-loom-service.js';
@@ -14,7 +14,6 @@ import { loomUrlRegex } from './embed-loom-model.js';
 import { LoomIcon, styles } from './styles.js';
 import { refreshEmbedLoomUrlData } from './utils.js';
 
-@customElement('affine-embed-loom-block')
 export class EmbedLoomBlockComponent extends EmbedBlockComponent<
   EmbedLoomModel,
   EmbedLoomBlockService

@@ -5,9 +5,8 @@ import {
 import { stopPropagation } from '@blocksuite/affine-shared/utils';
 import { WithDisposable } from '@blocksuite/block-std';
 import { css, html, LitElement, nothing } from 'lit';
-import { customElement, property, query, state } from 'lit/decorators.js';
+import { property, query, state } from 'lit/decorators.js';
 
-@customElement('ai-panel-input')
 export class AIPanelInput extends WithDisposable(LitElement) {
   static override styles = css`
     :host {

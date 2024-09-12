@@ -15,7 +15,7 @@ import {
 } from '@blocksuite/store';
 import { Job } from '@blocksuite/store';
 import { html, LitElement, type PropertyValues } from 'lit';
-import { customElement, query, state } from 'lit/decorators.js';
+import { query, state } from 'lit/decorators.js';
 
 import { MarkdownAdapter } from '../../../../_common/adapters/markdown.js';
 import { NotionHtmlAdapter } from '../../../../_common/adapters/notion-html.js';
@@ -204,7 +204,6 @@ export async function importNotion(collection: DocCollection, file: File) {
   return { entryId, pageIds, isWorkspaceFile, hasMarkdown };
 }
 
-@customElement('import-doc')
 export class ImportDoc extends WithDisposable(LitElement) {
   static override styles = styles;
 

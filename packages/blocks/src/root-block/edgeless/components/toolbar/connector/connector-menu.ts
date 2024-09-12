@@ -12,7 +12,7 @@ import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import { SignalWatcher } from '@blocksuite/block-std';
 import { computed } from '@lit-labs/preact-signals';
 import { css, html, LitElement } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { property } from 'lit/decorators.js';
 
 import type { EdgelessTool } from '../../../types.js';
 import type { ColorEvent } from '../../panel/color-panel.js';
@@ -61,7 +61,6 @@ function ConnectorModeButtonGroup(
   `;
 }
 
-@customElement('edgeless-connector-menu')
 export class EdgelessConnectorMenu extends EdgelessToolbarToolMixin(
   SignalWatcher(LitElement)
 ) {

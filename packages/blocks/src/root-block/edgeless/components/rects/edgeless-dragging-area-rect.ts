@@ -1,12 +1,11 @@
 import { WithDisposable } from '@blocksuite/block-std';
 import { cssVarV2 } from '@toeverything/theme/v2';
 import { css, html, LitElement, nothing, unsafeCSS } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
 
-@customElement('edgeless-dragging-area-rect')
 export class EdgelessDraggingAreaRect extends WithDisposable(LitElement) {
   static override styles = css`
     .affine-edgeless-dragging-area {

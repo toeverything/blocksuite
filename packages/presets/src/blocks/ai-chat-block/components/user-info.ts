@@ -1,12 +1,11 @@
 import { baseTheme } from '@toeverything/theme';
 import { css, html, LitElement, type TemplateResult, unsafeCSS } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { property } from 'lit/decorators.js';
 
 import type { MessageRole, MessageUserInfo } from '../types.js';
 
 import { AffineAIIcon } from '../../_common/icon.js';
 
-@customElement('user-info')
 export class UserInfo extends LitElement {
   static override styles = css`
     .user-info-container {

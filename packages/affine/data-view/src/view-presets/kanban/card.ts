@@ -5,7 +5,7 @@ import {
 } from '@blocksuite/block-std';
 import { CenterPeekIcon, MoreHorizontalIcon } from '@blocksuite/icons/lit';
 import { css } from 'lit';
-import { customElement, property, state } from 'lit/decorators.js';
+import { property, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { html } from 'lit/static-html.js';
@@ -117,7 +117,6 @@ const styles = css`
   }
 `;
 
-@customElement('affine-data-view-kanban-card')
 export class KanbanCard extends SignalWatcher(
   WithDisposable(ShadowlessElement)
 ) {

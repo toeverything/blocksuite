@@ -7,7 +7,7 @@ import {
 } from '@blocksuite/affine-model';
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import { css, html, LitElement, nothing } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
@@ -152,7 +152,6 @@ export function ColorUnit(
   `;
 }
 
-@customElement('edgeless-color-button')
 export class EdgelessColorButton extends LitElement {
   static override styles = css`
     :host {
@@ -239,7 +238,6 @@ export const colorContainerStyles = css`
   }
 `;
 
-@customElement('edgeless-color-panel')
 export class EdgelessColorPanel extends LitElement {
   static override styles = css`
     :host {
@@ -316,7 +314,6 @@ export class EdgelessColorPanel extends LitElement {
   accessor value: string | null = null;
 }
 
-@customElement('edgeless-text-color-icon')
 export class EdgelessTextColorIcon extends LitElement {
   static override styles = css`
     :host {

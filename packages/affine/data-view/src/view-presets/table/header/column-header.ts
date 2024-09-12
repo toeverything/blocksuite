@@ -7,7 +7,7 @@ import {
 import { PlusIcon } from '@blocksuite/icons/lit';
 import { autoUpdate } from '@floating-ui/dom';
 import { nothing, type TemplateResult } from 'lit';
-import { customElement, property, query } from 'lit/decorators.js';
+import { property, query } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
@@ -18,7 +18,6 @@ import type { TableSingleView } from '../table-view-manager.js';
 import './database-header-column.js';
 import { styles } from './styles.js';
 
-@customElement('affine-database-column-header')
 export class DatabaseColumnHeader extends SignalWatcher(
   WithDisposable(ShadowlessElement)
 ) {

@@ -7,7 +7,7 @@ import {
 } from '@blocksuite/block-std';
 import { computed, type ReadonlySignal } from '@lit-labs/preact-signals';
 import { css, type TemplateResult, unsafeCSS } from 'lit';
-import { customElement, property, state } from 'lit/decorators.js';
+import { property, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { keyed } from 'lit/directives/keyed.js';
 import { createRef, ref } from 'lit/directives/ref.js';
@@ -49,7 +49,6 @@ export type DataViewRendererConfig = {
   std: BlockStdScope;
 };
 
-@customElement('affine-data-view-renderer')
 export class DataViewRenderer extends SignalWatcher(
   WithDisposable(ShadowlessElement)
 ) {

@@ -1,14 +1,13 @@
 import { createPopup } from '@blocksuite/affine-components/context-menu';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { css, html } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { property } from 'lit/decorators.js';
 
 import type { FilterGroup, Variable } from '../../core/common/ast.js';
 
 import './filter-group.js';
 import './filter-root.js';
 
-@customElement('advanced-filter-modal')
 export class AdvancedFilterModal extends WithDisposable(ShadowlessElement) {
   static override styles = css`
     advanced-filter-modal {

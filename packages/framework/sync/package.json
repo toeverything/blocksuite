@@ -9,6 +9,7 @@
     "test:unit": "nx vite:test --run",
     "test": "yarn test:unit"
   },
+  "sideEffects": false,
   "keywords": [],
   "author": "toeverything",
   "license": "MPL-2.0",

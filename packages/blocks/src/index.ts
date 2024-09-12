@@ -1,4 +1,6 @@
 /// <reference types="@blocksuite/global" />
+// eslint-disable-next-line @typescript-eslint/triple-slash-reference
+/// <reference path="./effects.ts" />
 import '@blocksuite/affine-block-paragraph';
 import '@blocksuite/affine-block-list';
 import '@blocksuite/affine-block-surface';

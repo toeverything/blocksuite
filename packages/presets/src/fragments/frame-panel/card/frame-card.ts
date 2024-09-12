@@ -10,7 +10,7 @@ import {
 } from '@blocksuite/blocks';
 import { DisposableGroup } from '@blocksuite/global/utils';
 import { css, html, nothing, type PropertyValues } from 'lit';
-import { customElement, property, query } from 'lit/decorators.js';
+import { property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import './frame-card-title.js';
@@ -113,7 +113,6 @@ const styles = css`
 
 export const AFFINE_FRAME_CARD = 'affine-frame-card';
 
-@customElement(AFFINE_FRAME_CARD)
 export class FrameCard extends WithDisposable(ShadowlessElement) {
   static override styles = styles;
 

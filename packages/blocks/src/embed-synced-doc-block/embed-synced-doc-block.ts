@@ -22,7 +22,7 @@ import {
 import { assertExists } from '@blocksuite/global/utils';
 import { BlockViewType, DocCollection, type Query } from '@blocksuite/store';
 import { html, type PropertyValues } from 'lit';
-import { customElement, query, state } from 'lit/decorators.js';
+import { query, state } from 'lit/decorators.js';
 import { choose } from 'lit/directives/choose.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { guard } from 'lit/directives/guard.js';
@@ -40,7 +40,6 @@ import { SpecProvider } from '../_specs/utils/spec-provider.js';
 import './components/embed-synced-doc-card.js';
 import { blockStyles } from './styles.js';
 
-@customElement('affine-embed-synced-doc-block')
 @Peekable({
   enableOn: ({ doc }: EmbedSyncedDocBlockComponent) => !doc.readonly,
 })

@@ -1,7 +1,7 @@
 import { AttachmentIcon, LinkIcon } from '@blocksuite/affine-components/icons';
 import { TelemetryProvider } from '@blocksuite/affine-shared/services';
 import { css, html, LitElement } from 'lit';
-import { customElement, property, state } from 'lit/decorators.js';
+import { property, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
 import type { NoteTool } from '../../../tools/note-tool.js';
@@ -19,7 +19,6 @@ import '../common/slide-menu.js';
 import { EdgelessToolbarToolMixin } from '../mixins/tool.mixin.js';
 import { NOTE_MENU_ITEMS } from './note-menu-config.js';
 
-@customElement('edgeless-note-menu')
 export class EdgelessNoteMenu extends EdgelessToolbarToolMixin(LitElement) {
   static override styles = css`
     :host {

@@ -17,7 +17,7 @@ import {
 import { WithDisposable } from '@blocksuite/block-std';
 import { Bound } from '@blocksuite/global/utils';
 import { html, LitElement, nothing } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
@@ -72,7 +72,6 @@ const ALIGNMENT_LIST = [
   },
 ] as const;
 
-@customElement('edgeless-align-button')
 export class EdgelessAlignButton extends WithDisposable(LitElement) {
   private get elements() {
     return this.edgeless.service.selection.selectedElements;

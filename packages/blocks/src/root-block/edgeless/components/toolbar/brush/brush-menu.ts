@@ -2,7 +2,7 @@ import { EditPropsStore } from '@blocksuite/affine-shared/services';
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import { computed, SignalWatcher } from '@lit-labs/preact-signals';
 import { css, html, LitElement } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { property } from 'lit/decorators.js';
 
 import type { EdgelessTool } from '../../../types.js';
 import type { LineWidthEvent } from '../../panel/line-width-panel.js';
@@ -16,7 +16,6 @@ import '../../panel/one-row-color-panel.js';
 import '../common/slide-menu.js';
 import { EdgelessToolbarToolMixin } from '../mixins/tool.mixin.js';
 
-@customElement('edgeless-brush-menu')
 export class EdgelessBrushMenu extends EdgelessToolbarToolMixin(
   SignalWatcher(LitElement)
 ) {

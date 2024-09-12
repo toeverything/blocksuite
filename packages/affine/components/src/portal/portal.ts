@@ -1,5 +1,5 @@
 import { html, LitElement } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { property } from 'lit/decorators.js';
 
 /**
  * Renders a template into a portal. Defaults to `document.body`.
@@ -17,7 +17,6 @@ import { customElement, property } from 'lit/decorators.js';
  * };
  * ```
  */
-@customElement('blocksuite-portal')
 export class Portal extends LitElement {
   private _portalRoot: HTMLElement | null = null;
 
