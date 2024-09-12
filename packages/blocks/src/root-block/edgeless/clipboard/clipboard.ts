@@ -56,7 +56,6 @@ import {
 } from '../../../_common/consts.js';
 import { ExportManager } from '../../../_common/export-manager/export-manager.js';
 import { getRootByEditorHost } from '../../../_common/utils/query.js';
-import { extractSearchParams } from '../../../_common/utils/url.js';
 import { ClipboardAdapter } from '../../clipboard/adapter.js';
 import { PageClipboard } from '../../clipboard/index.js';
 import {
@@ -261,28 +260,27 @@ export class EdgelessClipboardController extends PageClipboard {
 
       // try to interpret url as affine doc url
       const parseDocUrlService = this.std.getOptional(ParseDocUrlProvider);
-      const doc = parseDocUrlService?.parseDocUrl(url);
-      const pageId = doc && 'docId' in doc ? doc.docId : undefined;
+      const docUrlInfo = parseDocUrlService?.parseDocUrl(url);
       const options: Record<string, unknown> = {};
 
       let flavour = 'affine:bookmark';
       let style = BookmarkStyles[0];
       let isLinkToNode = false;
 
-      if (pageId) {
-        options.pageId = pageId;
+      if (docUrlInfo) {
+        options.pageId = docUrlInfo.docId;
         flavour = 'affine:embed-linked-doc';
         style = 'vertical';
 
-        const extracted = extractSearchParams(url);
-
         isLinkToNode = Boolean(
-          extracted?.params?.mode &&
-            (extracted.params.blockIds?.length ||
-              extracted.params.elementIds?.length)
+          docUrlInfo.blockIds?.length || docUrlInfo.elementIds?.length
         );
 
-        Object.assign(options, extracted);
+        Object.assign(options, {
+          mode: docUrlInfo.mode,
+          blockIds: docUrlInfo.blockIds,
+          elementIds: docUrlInfo.elementIds,
+        });
       } else {
         options.url = url;
 
