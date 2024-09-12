@@ -1,5 +1,30 @@
 # @blocksuite/blocks
 
+## 0.17.9
+
+### Patch Changes
+
+- 5f29800: - Fix latex issues
+  - Fix inline embed gap
+  - Fix edgeless text color
+  - Fix outline panel note status
+  - Improve mindmap
+  - Add sideEffects: false to all packages
+  - Add parse url service
+  - Add ref node slots extension
+- Updated dependencies [5f29800]
+  - @blocksuite/affine-block-list@0.17.9
+  - @blocksuite/affine-block-paragraph@0.17.9
+  - @blocksuite/affine-block-surface@0.17.9
+  - @blocksuite/affine-components@0.17.9
+  - @blocksuite/data-view@0.17.9
+  - @blocksuite/affine-model@0.17.9
+  - @blocksuite/affine-shared@0.17.9
+  - @blocksuite/block-std@0.17.9
+  - @blocksuite/global@0.17.9
+  - @blocksuite/inline@0.17.9
+  - @blocksuite/store@0.17.9
+
 ## 0.17.8
 
 ### Patch Changes

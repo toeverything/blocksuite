@@ -1,5 +1,22 @@
 # @blocksuite/docs
 
+## 0.17.9
+
+### Patch Changes
+
+- 5f29800: - Fix latex issues
+  - Fix inline embed gap
+  - Fix edgeless text color
+  - Fix outline panel note status
+  - Improve mindmap
+  - Add sideEffects: false to all packages
+  - Add parse url service
+  - Add ref node slots extension
+- Updated dependencies [5f29800]
+  - @blocksuite/blocks@0.17.9
+  - @blocksuite/store@0.17.9
+  - @blocksuite/presets@0.17.9
+
 ## 0.17.8
 
 ### Patch Changes
