@@ -206,12 +206,17 @@ export class HeaderAreaTextCellEditing extends BaseTextCell {
     if (isValidUrl(text)) {
       const std = this.std;
       const result = std?.getOptional(ParseDocUrlProvider)?.parseDocUrl(text);
-      if (result && 'docId' in result) {
+      if (result) {
         const text = ' ';
         inlineEditor.insertText(inlineRange, text, {
           reference: {
             type: 'LinkedPage',
             pageId: result.docId,
+            params: {
+              blockIds: result.blockIds,
+              elementIds: result.elementIds,
+              mode: result.mode,
+            },
           },
         });
         inlineEditor.setInlineRange({
