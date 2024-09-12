@@ -176,10 +176,12 @@ export class LatexEditorMenu extends SignalWatcher(
         ></rich-text>
       </div>
       <div class="latex-editor-confirm">
-        ${DoneIcon({
-          width: '24',
-          height: '24',
-        })}
+        <span @click=${() => this.abortController.abort()}
+          >${DoneIcon({
+            width: '24',
+            height: '24',
+          })}</span
+        >
       </div>
       <div class="latex-editor-hint">Shift Enter to line break</div>
     </div>`;
