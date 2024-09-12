@@ -51,7 +51,6 @@ export function getEdgelessRootByEditorHost(editorHost: EditorHost) {
  * Get block component by model.
  * Note that this function is used for compatibility only, and may be removed in the future.
  *
- * Use `root.view.viewFromPath` instead.
  * @deprecated
  */
 export function getBlockComponentByModel(

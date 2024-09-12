@@ -11,6 +11,7 @@ import {
   type DocMode,
   DocModeProvider,
   EdgelessRootService,
+  ExportManager,
   FontFamilyVariables,
   HtmlTransformer,
   MarkdownTransformer,
@@ -214,11 +215,11 @@ export class DebugMenu extends ShadowlessElement {
   }
 
   private _exportPdf() {
-    this.rootService?.exportManager.exportPdf().catch(console.error);
+    this.editor.std.get(ExportManager).exportPdf().catch(console.error);
   }
 
   private _exportPng() {
-    this.rootService?.exportManager.exportPng().catch(console.error);
+    this.editor.std.get(ExportManager).exportPng().catch(console.error);
   }
 
   private async _exportSnapshot() {

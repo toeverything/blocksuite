@@ -26,6 +26,10 @@ export * from './_common/components/ai-item/index.js';
 export { scrollbarStyle } from './_common/components/index.js';
 export { type NavigatorMode } from './_common/edgeless/frame/consts.js';
 export { EmbedBlockComponent } from './_common/embed-block-helper/index.js';
+export {
+  ExportManager,
+  ExportManagerExtension,
+} from './_common/export-manager/export-manager.js';
 export * from './_common/test-utils/test-utils.js';
 export * from './_common/transformers/index.js';
 export { type AbstractEditor } from './_common/types.js';

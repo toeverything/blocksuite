@@ -11,6 +11,7 @@ import {
 } from '@blocksuite/block-std';
 import { literal, unsafeStatic } from 'lit/static-html.js';
 
+import { ExportManagerExtension } from '../../_common/export-manager/export-manager.js';
 import { commands } from '../commands/index.js';
 import { AFFINE_DOC_REMOTE_SELECTION_WIDGET } from '../widgets/doc-remote-selection/doc-remote-selection.js';
 import { AFFINE_DRAG_HANDLE_WIDGET } from '../widgets/drag-handle/drag-handle.js';
@@ -61,4 +62,5 @@ export const PageRootBlockSpec: ExtensionType[] = [
   CommandExtension(commands),
   BlockViewExtension('affine:page', literal`affine-page-root`),
   WidgetViewMapExtension('affine:page', pageRootWidgetViewMap),
+  ExportManagerExtension,
 ];

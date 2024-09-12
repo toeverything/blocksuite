@@ -1,4 +1,3 @@
-import type { BlockService, EditorHost } from '@blocksuite/block-std';
 import type { IBound } from '@blocksuite/global/utils';
 import type { Doc } from '@blocksuite/store';
 
@@ -11,11 +10,21 @@ import {
   type RootBlockModel,
 } from '@blocksuite/affine-model';
 import {
+  CANVAS_EXPORT_IGNORE_TAGS,
+  DEFAULT_IMAGE_PROXY_ENDPOINT,
+} from '@blocksuite/affine-shared/consts';
+import {
   isInsidePageEditor,
   matchFlavours,
 } from '@blocksuite/affine-shared/utils';
+import {
+  type BlockStdScope,
+  type EditorHost,
+  type ExtensionType,
+  StdIdentifier,
+} from '@blocksuite/block-std';
 import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
-import { assertExists, Bound } from '@blocksuite/global/utils';
+import { Bound } from '@blocksuite/global/utils';
 
 import type { GfxBlockModel } from '../../root-block/edgeless/block-model.js';
 import type { EdgelessRootBlockComponent } from '../../root-block/edgeless/edgeless-root-block.js';
@@ -28,7 +37,6 @@ import { getBlocksInFrameBound } from '../../root-block/edgeless/frame-manager.j
 import { xywhArrayToObject } from '../../root-block/edgeless/utils/convert.js';
 import { getBackgroundGrid } from '../../root-block/edgeless/utils/query.js';
 import { fetchImage } from '../adapters/utils.js';
-import { CANVAS_EXPORT_IGNORE_TAGS } from '../consts.js';
 import { FileExporter } from './file-exporter.js';
 
 type Html2CanvasFunction = typeof import('html2canvas').default;
@@ -37,9 +45,9 @@ export type ExportOptions = {
   imageProxyEndpoint: string;
 };
 export class ExportManager {
-  private _blockService: BlockService;
-
-  private _exportOptions: ExportOptions;
+  private _exportOptions: ExportOptions = {
+    imageProxyEndpoint: DEFAULT_IMAGE_PROXY_ENDPOINT,
+  };
 
   private _replaceRichTextWithSvgElement = (element: HTMLElement) => {
     const richList = Array.from(element.querySelectorAll('.inline-editor'));
@@ -104,17 +112,14 @@ export class ExportManager {
   };
 
   get doc(): Doc {
-    return this._blockService.std.doc;
+    return this.std.doc;
   }
 
   get editorHost(): EditorHost {
-    return this._blockService.std.host;
+    return this.std.host;
   }
 
-  constructor(blockService: BlockService, options: ExportOptions) {
-    this._exportOptions = options;
-    this._blockService = blockService;
-  }
+  constructor(readonly std: BlockStdScope) {}
 
   private _checkCanContinueToCanvas(pathName: string, editorMode: boolean) {
     if (
@@ -193,15 +198,15 @@ export class ExportManager {
     const editorMode = isInsidePageEditor(this.editorHost);
 
     const rootComponent = getRootByEditorHost(this.editorHost);
-    assertExists(rootComponent);
+    if (!rootComponent) return;
     const viewportElement = rootComponent.viewportElement;
-    assertExists(viewportElement);
+    if (!viewportElement) return;
     const pageContainer = viewportElement.querySelector(
       '.affine-page-root-block-container'
     );
     const rect = pageContainer?.getBoundingClientRect();
     const { viewport } = rootComponent;
-    assertExists(viewport);
+    if (!viewport) return;
     const pageWidth = rect?.width;
     const pageLeft = rect?.left ?? 0;
     const viewportHeight = viewportElement?.scrollHeight;
@@ -395,7 +400,7 @@ export class ExportManager {
         rootModel
       ) as EdgelessRootBlockComponent;
       const bound = edgeless.getElementsBound();
-      assertExists(bound);
+      if (!bound) return;
       return this.edgelessToCanvas(edgeless.surface.renderer, bound, edgeless);
     }
   }
@@ -417,9 +422,9 @@ export class ExportManager {
     const pathname = location.pathname;
     const editorMode = isInsidePageEditor(this.editorHost);
     const rootComponent = getRootByEditorHost(this.editorHost);
-    assertExists(rootComponent);
+    if (!rootComponent) return;
     const viewportElement = rootComponent.viewportElement;
-    assertExists(viewportElement);
+    if (!viewportElement) return;
     const containerComputedStyle = window.getComputedStyle(viewportElement);
 
     const html2canvas = (element: HTMLElement) =>
@@ -578,3 +583,9 @@ export class ExportManager {
     );
   }
 }
+
+export const ExportManagerExtension: ExtensionType = {
+  setup: di => {
+    di.add(ExportManager, [StdIdentifier]);
+  },
+};

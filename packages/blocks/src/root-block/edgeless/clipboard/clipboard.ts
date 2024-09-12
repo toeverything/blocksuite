@@ -54,6 +54,7 @@ import {
   EMBED_CARD_HEIGHT,
   EMBED_CARD_WIDTH,
 } from '../../../_common/consts.js';
+import { ExportManager } from '../../../_common/export-manager/export-manager.js';
 import { getRootByEditorHost } from '../../../_common/utils/query.js';
 import { extractSearchParams } from '../../../_common/utils/url.js';
 import { ClipboardAdapter } from '../../clipboard/adapter.js';
@@ -375,11 +376,7 @@ export class EdgelessClipboardController extends PageClipboard {
   };
 
   private get _exportManager() {
-    return this._rootService?.exportManager;
-  }
-
-  private get _rootService() {
-    return this.std.getService('affine:page');
+    return this.std.getOptional(ExportManager);
   }
 
   private get doc() {

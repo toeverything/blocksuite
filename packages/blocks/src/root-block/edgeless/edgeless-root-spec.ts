@@ -11,6 +11,7 @@ import {
 import { BlockServiceWatcher, FlavourExtension } from '@blocksuite/block-std';
 import { literal, unsafeStatic } from 'lit/static-html.js';
 
+import { ExportManagerExtension } from '../../_common/export-manager/export-manager.js';
 import { commands } from '../commands/index.js';
 import { AFFINE_DOC_REMOTE_SELECTION_WIDGET } from '../widgets/doc-remote-selection/doc-remote-selection.js';
 import { AFFINE_DRAG_HANDLE_WIDGET } from '../widgets/drag-handle/drag-handle.js';
@@ -72,6 +73,7 @@ const EdgelessCommonExtension: ExtensionType[] = [
   DocModeService,
   EmbedOptionService,
   CommandExtension(commands),
+  ExportManagerExtension,
 ];
 
 export const EdgelessRootBlockSpec: ExtensionType[] = [

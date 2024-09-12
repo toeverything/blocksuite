@@ -7,6 +7,7 @@ import {
   type AffineTextAttributes,
   type DocMode,
   DocModeProvider,
+  ExportManager,
 } from '@blocksuite/blocks';
 import { EdgelessRootService, printToPdf } from '@blocksuite/blocks';
 import { type DocCollection, Text } from '@blocksuite/store';
@@ -138,11 +139,11 @@ export class QuickEdgelessMenu extends ShadowlessElement {
   }
 
   private _exportPdf() {
-    this.rootService?.exportManager.exportPdf().catch(console.error);
+    this.editor.std.get(ExportManager).exportPdf().catch(console.error);
   }
 
   private _exportPng() {
-    this.rootService?.exportManager.exportPng().catch(console.error);
+    this.editor.std.get(ExportManager).exportPng().catch(console.error);
   }
 
   private async _exportSnapshot() {

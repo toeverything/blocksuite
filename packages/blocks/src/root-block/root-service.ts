@@ -9,8 +9,6 @@ import {
   FileDropManager,
   type FileDropOptions,
 } from '../_common/components/file-drop-manager.js';
-import { DEFAULT_IMAGE_PROXY_ENDPOINT } from '../_common/consts.js';
-import { ExportManager } from '../_common/export-manager/export-manager.js';
 import {
   HtmlTransformer,
   MarkdownTransformer,
@@ -20,15 +18,9 @@ import {
 export abstract class RootService extends BlockService {
   static override readonly flavour = RootBlockSchema.model.flavour;
 
-  private _exportOptions = {
-    imageProxyEndpoint: DEFAULT_IMAGE_PROXY_ENDPOINT,
-  };
-
   private _fileDropOptions: FileDropOptions = {
     flavour: this.flavour,
   };
-
-  readonly exportManager = new ExportManager(this, this._exportOptions);
 
   readonly fileDropManager = new FileDropManager(this, this._fileDropOptions);
 
