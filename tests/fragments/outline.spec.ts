@@ -1,5 +1,11 @@
+import { NoteDisplayMode } from '@blocksuite/affine-model';
 import { expect, type Locator, type Page } from '@playwright/test';
-import { addNote, switchEditorMode } from 'utils/actions/edgeless.js';
+import {
+  addNote,
+  changeNoteDisplayModeWithId,
+  switchEditorMode,
+  zoomResetByKeyboard,
+} from 'utils/actions/edgeless.js';
 import { pressBackspace, pressEnter, type } from 'utils/actions/keyboard.js';
 import {
   enterPlaygroundRoom,
@@ -11,6 +17,7 @@ import {
   initEmptyParagraphState,
   waitNextFrame,
 } from 'utils/actions/misc.js';
+import { assertRichTexts } from 'utils/asserts.js';
 
 import { test } from '../utils/playwright.js';
 
@@ -55,6 +62,23 @@ test.describe('toc-panel', () => {
 
   function getTitle(panel: Locator) {
     return panel.locator(`affine-outline-panel-body .title`);
+  }
+
+  async function toggleNoteSorting(page: Page) {
+    const enableSortingButton = page.locator(
+      '.outline-panel-header-container .note-sorting-button'
+    );
+    await enableSortingButton.click();
+  }
+
+  async function dragNoteCard(page: Page, fromCard: Locator, toCard: Locator) {
+    const fromRect = await fromCard.boundingBox();
+    const toRect = await toCard.boundingBox();
+
+    await page.mouse.move(fromRect!.x + 10, fromRect!.y + 10);
+    await page.mouse.down();
+    await page.mouse.move(toRect!.x + 5, toRect!.y + 5, { steps: 10 });
+    await page.mouse.up();
   }
 
   test('should display placeholder when no headings', async ({ page }) => {
@@ -250,6 +274,78 @@ test.describe('toc-panel', () => {
     await titleInPanel.click();
     await waitNextFrame(page, 50);
     await expect(title).toBeVisible();
+  });
+
+  test('should update notes when change note display mode from note toolbar', async ({
+    page,
+  }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyEdgelessState(page);
+    await switchEditorMode(page);
+    await zoomResetByKeyboard(page);
+    const noteId = await addNote(page, 'hello', 300, 300);
+    await page.mouse.click(100, 100);
+
+    await toggleTocPanel(page);
+    await toggleNoteSorting(page);
+    const docVisibleCard = page.locator(
+      '.card-container[data-invisible="false"]'
+    );
+    const docInvisibleCard = page.locator(
+      '.card-container[data-invisible="true"]'
+    );
+
+    await expect(docVisibleCard).toHaveCount(1);
+    await expect(docInvisibleCard).toHaveCount(1);
+
+    await changeNoteDisplayModeWithId(
+      page,
+      noteId,
+      NoteDisplayMode.DocAndEdgeless
+    );
+
+    await expect(docVisibleCard).toHaveCount(2);
+    await expect(docInvisibleCard).toHaveCount(0);
+  });
+
+  test('should reorder notes when drag and drop note in outline panel', async ({
+    page,
+  }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyEdgelessState(page);
+    await switchEditorMode(page);
+    await zoomResetByKeyboard(page);
+    const note1 = await addNote(page, 'hello', 300, 300);
+    const note2 = await addNote(page, 'world', 300, 500);
+    await page.mouse.click(100, 100);
+
+    await changeNoteDisplayModeWithId(
+      page,
+      note1,
+      NoteDisplayMode.DocAndEdgeless
+    );
+    await changeNoteDisplayModeWithId(
+      page,
+      note2,
+      NoteDisplayMode.DocAndEdgeless
+    );
+
+    await toggleTocPanel(page);
+    await toggleNoteSorting(page);
+    const docVisibleCard = page.locator(
+      '.card-container[data-invisible="false"]'
+    );
+
+    await expect(docVisibleCard).toHaveCount(3);
+    await assertRichTexts(page, ['', 'hello', 'world']);
+
+    const noteCard3 = docVisibleCard.nth(2);
+    const noteCard1 = docVisibleCard.nth(0);
+
+    await dragNoteCard(page, noteCard3, noteCard1);
+
+    await waitNextFrame(page);
+    await assertRichTexts(page, ['world', '', 'hello']);
   });
 
   // TODO(@L-Sun) test other function like enable sorting, show icons, etc

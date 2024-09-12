@@ -483,6 +483,17 @@ export class OutlinePanelBody extends SignalWatcher(
         this._updateNoticeVisibility();
       })
     );
+    this._docDisposables.add(
+      this.doc.slots.blockUpdated.on(payload => {
+        if (
+          payload.type === 'update' &&
+          payload.flavour === 'affine:note' &&
+          payload.props.key === 'displayMode'
+        ) {
+          this._updateNotes();
+        }
+      })
+    );
   }
 
   /**
@@ -531,7 +542,7 @@ export class OutlinePanelBody extends SignalWatcher(
     const newSelected: string[] = [];
 
     rootModel.children.forEach(block => {
-      if (!['affine:note'].includes(block.flavour)) return;
+      if (!BlocksUtils.matchFlavours(block, ['affine:note'])) return;
 
       const blockModel = block as NoteBlockModel;
 
