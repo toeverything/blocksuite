@@ -1525,11 +1525,17 @@ export async function toViewCoord(page: Page, point: number[]) {
 export async function dragBetweenViewCoords(
   page: Page,
   start: number[],
-  end: number[]
+  end: number[],
+  options?: Parameters<typeof dragBetweenCoords>[3]
 ) {
   const [startX, startY] = await toViewCoord(page, start);
   const [endX, endY] = await toViewCoord(page, end);
-  await dragBetweenCoords(page, { x: startX, y: startY }, { x: endX, y: endY });
+  await dragBetweenCoords(
+    page,
+    { x: startX, y: startY },
+    { x: endX, y: endY },
+    options
+  );
 }
 
 export async function toModelCoord(page: Page, point: number[]) {
