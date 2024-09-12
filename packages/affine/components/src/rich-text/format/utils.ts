@@ -13,6 +13,7 @@ import {
   type InlineRange,
   type InlineRootElement,
 } from '@blocksuite/inline';
+import { effect } from '@lit-labs/preact-signals';
 
 import type { AffineTextAttributes } from '../extension/index.js';
 import type { AffineInlineEditor } from '../inline/index.js';
@@ -255,17 +256,17 @@ export function clearMarksOnDiscontinuousInput(
   inlineEditor: InlineEditor
 ): void {
   let inlineRange = inlineEditor.getInlineRange();
-  const dispose = inlineEditor.slots.inlineRangeUpdate.on(([r, s]) => {
+  const dispose = effect(() => {
+    const r = inlineEditor.inlineRange$.value;
     if (
       inlineRange &&
       r &&
-      ((!s && r.index === inlineRange.index) ||
-        (s && r.index === inlineRange.index + 1))
+      (inlineRange.index === r.index || inlineRange.index === r.index + 1)
     ) {
       inlineRange = r;
     } else {
       inlineEditor.resetMarks();
-      dispose.dispose();
+      dispose();
     }
   });
 }

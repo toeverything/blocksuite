@@ -39,6 +39,12 @@ export class EventService<TextAttributes extends BaseTextAttributes> {
 
   private _onBeforeInput = (event: InputEvent) => {
     const range = this.editor.rangeService.getNativeRange();
+    console.trace(
+      '_onBeforeInput',
+      range,
+      this.editor.rootElement.innerText,
+      this.editor.yTextString
+    );
     if (
       this.editor.isReadonly ||
       this._isComposing ||
@@ -168,13 +174,10 @@ export class EventService<TextAttributes extends BaseTextAttributes> {
     const { inlineRange: newInlineRange, data: newData } = ctx;
     if (newData && newData.length > 0) {
       this.editor.insertText(newInlineRange, newData, ctx.attributes);
-      this.editor.setInlineRange(
-        {
-          index: newInlineRange.index + newData.length,
-          length: 0,
-        },
-        false
-      );
+      this.editor.setInlineRange({
+        index: newInlineRange.index + newData.length,
+        length: 0,
+      });
     }
 
     this.editor.slots.inputting.emit();
@@ -282,7 +285,7 @@ export class EventService<TextAttributes extends BaseTextAttributes> {
     if (!selection) return;
     if (selection.rangeCount === 0) {
       if (previousInlineRange !== null) {
-        this.editor.setInlineRange(null, false);
+        this.editor.setInlineRange(null);
       }
 
       return;
@@ -304,7 +307,7 @@ export class EventService<TextAttributes extends BaseTextAttributes> {
         return;
       } else {
         if (previousInlineRange !== null) {
-          this.editor.setInlineRange(null, false);
+          this.editor.setInlineRange(null);
         }
         return;
       }
@@ -315,7 +318,7 @@ export class EventService<TextAttributes extends BaseTextAttributes> {
 
     const inlineRange = this.editor.toInlineRange(selection.getRangeAt(0));
     if (!isMaybeInlineRangeEqual(previousInlineRange, inlineRange)) {
-      this.editor.setInlineRange(inlineRange, false);
+      this.editor.setInlineRange(inlineRange);
     }
 
     // avoid infinite syncInlineRange
@@ -329,7 +332,7 @@ export class EventService<TextAttributes extends BaseTextAttributes> {
       range.startContainer.nodeType === Node.COMMENT_NODE ||
       range.endContainer.nodeType === Node.COMMENT_NODE
     ) {
-      this.editor.syncInlineRange();
+      this.editor.syncInlineRange(inlineRange);
     }
   };
 
@@ -341,7 +344,7 @@ export class EventService<TextAttributes extends BaseTextAttributes> {
     const eventSource = this.editor.eventSource;
     const rootElement = this.editor.rootElement;
 
-    if (!this.inlineRangeProvider) {
+    if (!this.editor.inlineRangeProviderOverride) {
       this.editor.disposables.addFromEvent(
         document,
         'selectionchange',
@@ -383,10 +386,6 @@ export class EventService<TextAttributes extends BaseTextAttributes> {
     );
     this.editor.disposables.addFromEvent(rootElement, 'click', this._onClick);
   };
-
-  get inlineRangeProvider() {
-    return this.editor.inlineRangeProvider;
-  }
 
   get isComposing() {
     return this._isComposing;

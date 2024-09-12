@@ -137,7 +137,7 @@ export class LatexEditorMenu extends SignalWatcher(
     this.disposables.add(
       effect(() => {
         noop(this.highlightTokens$.value);
-        this.richText?.inlineEditor?.requestUpdate();
+        this.richText?.inlineEditor?.render();
       })
     );
 
@@ -160,7 +160,9 @@ export class LatexEditorMenu extends SignalWatcher(
         await this.richText?.updateComplete;
 
         this.richText?.inlineEditorContainer.focus();
-        this.richText?.inlineEditor?.focusEnd();
+        requestAnimationFrame(() => {
+          this.richText?.inlineEditor?.focusEnd();
+        });
       })
       .catch(console.error);
   }

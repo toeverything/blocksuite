@@ -1,14 +1,10 @@
-import { REQUEST_IDLE_CALLBACK_ENABLED } from '@blocksuite/global/env';
 import { assertExists } from '@blocksuite/global/utils';
+import { effect } from '@lit-labs/preact-signals';
 import * as Y from 'yjs';
 
 import type { VLine } from '../components/v-line.js';
 import type { InlineEditor } from '../inline-editor.js';
-import type {
-  InlineRange,
-  InlineRangeUpdatedProp,
-  TextPoint,
-} from '../types.js';
+import type { InlineRange, TextPoint } from '../types.js';
 import type { BaseTextAttributes } from '../utils/base-attributes.js';
 
 import { isMaybeInlineRangeEqual } from '../utils/inline-range.js';
@@ -19,60 +15,31 @@ import {
 import { calculateTextLength, getTextNodesFromElement } from '../utils/text.js';
 
 export class RangeService<TextAttributes extends BaseTextAttributes> {
-  private _applyInlineRange = (inlineRange: InlineRange): void => {
-    const selection = document.getSelection();
-    if (!selection) {
-      return;
-    }
-    try {
-      const newRange = this.toDomRange(inlineRange);
-
-      if (!newRange) {
-        return;
-      }
-
-      selection.removeAllRanges();
-      selection.addRange(newRange);
-      this.editor.slots.inlineRangeApply.emit(newRange);
-    } catch (error) {
-      console.error('failed to apply inline range');
-      console.error(error);
-    }
-  };
-
-  private _inlineRange: InlineRange | null = null;
-
   private _lastEndRelativePosition: Y.RelativePosition | null = null;
 
   private _lastStartRelativePosition: Y.RelativePosition | null = null;
 
+  private _rangeSyncing = false;
+
   focusEnd = (): void => {
-    this.setInlineRange({
+    this.editor.inlineRange$.value = {
       index: this.editor.yTextLength,
       length: 0,
-    });
+    };
   };
 
   focusIndex = (index: number): void => {
-    this.setInlineRange({
+    this.editor.inlineRange$.value = {
       index,
       length: 0,
-    });
+    };
   };
 
   focusStart = (): void => {
-    this.setInlineRange({
+    this.editor.inlineRange$.value = {
       index: 0,
       length: 0,
-    });
-  };
-
-  getInlineRange = (): InlineRange | null => {
-    if (this.inlineRangeProvider) {
-      return this.inlineRangeProvider.getInlineRange();
-    }
-
-    return this._inlineRange;
+    };
   };
 
   getInlineRangeFromElement = (element: Element): InlineRange | null => {
@@ -87,6 +54,77 @@ export class RangeService<TextAttributes extends BaseTextAttributes> {
     range.setEnd(textNode, textNode.textContent?.length ?? 0);
     const inlineRange = this.toInlineRange(range);
     return inlineRange;
+  };
+
+  // the number is related to the VLine's textLength
+  getLine = (
+    rangeIndex: InlineRange['index']
+  ): {
+    line: VLine;
+    lineIndex: number;
+    rangeIndexRelatedToLine: number;
+  } | null => {
+    const rootElement = this.editor.rootElement;
+    const lineElements = Array.from(rootElement.querySelectorAll('v-line'));
+
+    let beforeIndex = 0;
+    for (const [lineIndex, lineElement] of lineElements.entries()) {
+      if (
+        rangeIndex >= beforeIndex &&
+        rangeIndex < beforeIndex + lineElement.vTextLength + 1
+      ) {
+        return {
+          line: lineElement,
+          lineIndex,
+          rangeIndexRelatedToLine: rangeIndex - beforeIndex,
+        };
+      }
+      beforeIndex += lineElement.vTextLength + 1;
+    }
+
+    console.error('failed to find line');
+    return null;
+  };
+
+  getNativeRange = (): Range | null => {
+    const selection = this.getNativeSelection();
+    if (!selection) return null;
+    return selection.getRangeAt(0);
+  };
+
+  getNativeSelection = (): Selection | null => {
+    const selection = document.getSelection();
+    if (!selection) return null;
+    if (selection.rangeCount === 0) return null;
+
+    return selection;
+  };
+
+  getTextPoint = (rangeIndex: InlineRange['index']): TextPoint | null => {
+    const rootElement = this.editor.rootElement;
+    const vLines = Array.from(rootElement.querySelectorAll('v-line'));
+
+    let index = 0;
+    for (const vLine of vLines) {
+      const texts = getTextNodesFromElement(vLine);
+      if (texts.length === 0) {
+        return null;
+      }
+
+      for (const text of texts) {
+        if (!text.textContent) {
+          return null;
+        }
+        if (index + text.textContent.length >= rangeIndex) {
+          return [text, rangeIndex - index];
+        }
+        index += calculateTextLength(text);
+      }
+
+      index += 1;
+    }
+
+    return null;
   };
 
   /**
@@ -182,109 +220,86 @@ export class RangeService<TextAttributes extends BaseTextAttributes> {
     );
   };
 
-  onInlineRangeUpdated = async ([
-    newInlineRange,
-    sync,
-  ]: InlineRangeUpdatedProp) => {
-    const eq = isMaybeInlineRangeEqual(this._inlineRange, newInlineRange);
-    if (eq) {
-      return;
-    }
+  mount = () => {
+    const editor = this.editor;
+    let lastInlineRange: InlineRange | null = editor.inlineRange$.value;
+    editor.disposables.add(
+      effect(() => {
+        const newInlineRange = editor.inlineRange$.value;
+        if (!editor.mounted) return;
 
-    this._inlineRange = newInlineRange;
+        const eq = isMaybeInlineRangeEqual(lastInlineRange, newInlineRange);
+        if (eq) return;
+        lastInlineRange = newInlineRange;
 
-    if (newInlineRange) {
-      this._lastStartRelativePosition = Y.createRelativePositionFromTypeIndex(
-        this.yText,
-        newInlineRange.index
-      );
-      this._lastEndRelativePosition = Y.createRelativePositionFromTypeIndex(
-        this.yText,
-        newInlineRange.index + newInlineRange.length
-      );
-    } else {
-      this._lastStartRelativePosition = null;
-      this._lastEndRelativePosition = null;
-    }
+        const yText = editor.yText;
+        if (newInlineRange) {
+          this._lastStartRelativePosition =
+            Y.createRelativePositionFromTypeIndex(yText, newInlineRange.index);
+          this._lastEndRelativePosition = Y.createRelativePositionFromTypeIndex(
+            yText,
+            newInlineRange.index + newInlineRange.length
+          );
+        } else {
+          this._lastStartRelativePosition = null;
+          this._lastEndRelativePosition = null;
+        }
 
-    // try to trigger update because the `selected` state of inline editor element may change
-    if (this.editor.mounted) {
-      // range change may happen before the editor is prepared
-      await this.editor.waitForUpdate();
-      // improve performance
-      if (REQUEST_IDLE_CALLBACK_ENABLED) {
-        requestIdleCallback(() => {
-          this.editor.requestUpdate(false);
-        });
-      } else {
-        Promise.resolve()
-          .then(() => {
-            this.editor.requestUpdate(false);
-          })
-          .catch(console.error);
-      }
-    }
+        if (editor.inlineRangeProviderOverride) return;
 
-    if (!sync) {
-      return;
-    }
+        this.syncInlineRange();
+      })
+    );
+  };
 
-    if (this._inlineRange === null) {
-      const selection = document.getSelection();
-      if (selection && selection.rangeCount > 0) {
+  selectAll = (): void => {
+    this.editor.inlineRange$.value = {
+      index: 0,
+      length: this.editor.yTextLength,
+    };
+  };
+
+  /**
+   * sync the dom selection from inline range for **this Editor**
+   */
+  syncInlineRange = (inlineRange?: InlineRange | null) => {
+    inlineRange = inlineRange ?? this.editor.getInlineRange();
+    console.trace(
+      'syncInlineRange',
+      inlineRange,
+      this.editor.rootElement.innerText,
+      this.editor.yTextString
+    );
+    const selection = document.getSelection();
+    if (!selection) return;
+
+    if (inlineRange === null) {
+      if (selection.rangeCount > 0) {
         const range = selection.getRangeAt(0);
         if (range.intersectsNode(this.editor.rootElement)) {
           selection.removeAllRanges();
         }
       }
-      return;
-    }
+    } else {
+      this._rangeSyncing = true;
+      try {
+        const newRange = this.toDomRange(inlineRange);
+        console.log('newRange', newRange);
+        if (newRange) {
+          selection.removeAllRanges();
+          selection.addRange(newRange);
 
-    const fn = () => {
-      // There may be multiple range update events in one frame,
-      // so we need to obtain the latest inline ranage.
-      // see https://github.com/toeverything/blocksuite/issues/2982
-      // when using input method inline ranage will return to the starting point,
-      // so we need to re-sync
-      this.syncInlineRange();
-    };
-
-    // updates in lit are performed asynchronously
-    requestAnimationFrame(fn);
-  };
-
-  selectAll = (): void => {
-    this.setInlineRange({
-      index: 0,
-      length: this.editor.yTextLength,
-    });
-  };
-
-  /**
-   * the inline range is synced to the native selection asynchronously
-   * if sync is true, the native selection will be synced immediately
-   */
-  setInlineRange = (inlineRange: InlineRange | null, sync = true): void => {
-    if (!this.isValidInlineRange(inlineRange)) {
-      console.error('invalid inline range');
-      return;
-    }
-
-    if (this.inlineRangeProvider) {
-      this.inlineRangeProvider.setInlineRange(inlineRange, sync);
-      return;
-    }
-
-    this.editor.slots.inlineRangeUpdate.emit([inlineRange, sync]);
-  };
-
-  /**
-   * sync the dom selection from inline ranage for **this Editor**
-   */
-  syncInlineRange = (): void => {
-    const inlineRange = this.getInlineRange();
-    if (inlineRange && this.editor.mounted) {
-      this._applyInlineRange(inlineRange);
+          this._rangeSyncing = false;
+          this.editor.slots.inlineRangeSync.emit(newRange);
+        } else {
+          this.editor.slots.renderComplete.once(() => {
+            this.syncInlineRange(inlineRange);
+          });
+        }
+      } catch (error) {
+        console.error('failed to apply inline range');
+        console.error(error);
+      }
     }
   };
 
@@ -334,10 +349,6 @@ export class RangeService<TextAttributes extends BaseTextAttributes> {
     return domRangeToInlineRange(range, rootElement, yText);
   };
 
-  get inlineRangeProvider() {
-    return this.editor.inlineRangeProvider;
-  }
-
   get lastEndRelativePosition() {
     return this._lastEndRelativePosition;
   }
@@ -346,84 +357,9 @@ export class RangeService<TextAttributes extends BaseTextAttributes> {
     return this._lastStartRelativePosition;
   }
 
-  get rootElement() {
-    return this.editor.rootElement;
-  }
-
-  get yText() {
-    return this.editor.yText;
+  get rangeSyncing() {
+    return this._rangeSyncing;
   }
 
   constructor(readonly editor: InlineEditor<TextAttributes>) {}
-
-  // the number is related to the VLine's textLength
-  getLine(rangeIndex: InlineRange['index']): {
-    line: VLine;
-    lineIndex: number;
-    rangeIndexRelatedToLine: number;
-  } | null {
-    const lineElements = Array.from(
-      this.rootElement.querySelectorAll('v-line')
-    );
-
-    let beforeIndex = 0;
-    for (const [lineIndex, lineElement] of lineElements.entries()) {
-      if (
-        rangeIndex >= beforeIndex &&
-        rangeIndex < beforeIndex + lineElement.vTextLength + 1
-      ) {
-        return {
-          line: lineElement,
-          lineIndex,
-          rangeIndexRelatedToLine: rangeIndex - beforeIndex,
-        };
-      }
-      beforeIndex += lineElement.vTextLength + 1;
-    }
-
-    console.error('failed to find line');
-    return null;
-  }
-
-  getNativeRange(): Range | null {
-    const selection = this.getNativeSelection();
-    if (!selection) return null;
-    return selection.getRangeAt(0);
-  }
-
-  getNativeSelection(): Selection | null {
-    const selection = document.getSelection();
-    if (!selection) return null;
-    if (selection.rangeCount === 0) return null;
-
-    return selection;
-  }
-
-  getTextPoint(rangeIndex: InlineRange['index']): TextPoint | null {
-    const vLines = Array.from(this.rootElement.querySelectorAll('v-line'));
-
-    let index = 0;
-    for (const vLine of vLines) {
-      const texts = getTextNodesFromElement(vLine).filter(
-        text => !text.parentElement?.closest('[data-v-embed-gap="true"]')
-      );
-      if (texts.length === 0) {
-        return null;
-      }
-
-      for (const text of texts) {
-        if (!text.textContent) {
-          return null;
-        }
-        if (index + text.textContent.length >= rangeIndex) {
-          return [text, rangeIndex - index];
-        }
-        index += calculateTextLength(text);
-      }
-
-      index += 1;
-    }
-
-    return null;
-  }
 }

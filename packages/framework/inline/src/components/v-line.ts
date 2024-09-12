@@ -67,7 +67,6 @@ export class VLine extends LitElement {
   override async getUpdateComplete() {
     const result = await super.getUpdateComplete();
     await Promise.all(this.vElements.map(el => el.updateComplete));
-    await Promise.all(this.vTexts.map(el => el.updateComplete));
     return result;
   }
 

@@ -21,6 +21,7 @@
     "@blocksuite/presets": "workspace:*",
     "@blocksuite/store": "workspace:*",
     "@blocksuite/sync": "workspace:*",
+    "@lit-labs/preact-signals": "^1.0.2",
     "@shoelace-style/shoelace": "2.16.0",
     "@toeverything/y-indexeddb": "0.10.0-canary.9",
     "@types/katex": "^0.16.7",

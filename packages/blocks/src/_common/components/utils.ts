@@ -7,7 +7,9 @@ import {
   getCurrentNativeRange,
   isControlledKeyboardEvent,
 } from '@blocksuite/affine-shared/utils';
+import { noop } from '@blocksuite/global/utils';
 import { BlockModel } from '@blocksuite/store';
+import { effect } from '@lit-labs/preact-signals';
 import { css, unsafeCSS } from 'lit';
 
 export function getQuery(
@@ -72,7 +74,10 @@ export const createKeydownObserver = ({
   // In iOS webkit, using requestAnimationFrame has some timing issues
   // we need wait inline editor updated before handle the next action
   const waitForInlineEditorUpdated = (fn: () => void) => {
-    inlineEditor.slots.inlineRangeUpdate.once(fn);
+    effect(() => {
+      noop(inlineEditor.inlineRange$.value);
+      fn();
+    });
   };
 
   const keyDownListener = (e: KeyboardEvent) => {

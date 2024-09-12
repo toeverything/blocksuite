@@ -9,6 +9,7 @@ import {
   ZERO_WIDTH_NON_JOINER,
 } from '@blocksuite/inline';
 import { effects } from '@blocksuite/inline/effects';
+import { effect } from '@lit-labs/preact-signals';
 import '@shoelace-style/shoelace';
 import { css, html, nothing } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
@@ -163,15 +164,13 @@ export class TestRichText extends ShadowlessElement {
         el.replaceChildren(span);
       }
     });
-    this.inlineEditor.slots.inlineRangeUpdate.on(() => {
+    effect(() => {
+      const inlineRange = this.inlineEditor.inlineRange$.value;
       const el = this.querySelector('.v-range');
-      if (el) {
-        const inlineRange = this.inlineEditor.getInlineRange();
-        if (inlineRange) {
-          const span = document.createElement('span');
-          span.innerHTML = JSON.stringify(inlineRange);
-          el.replaceChildren(span);
-        }
+      if (el && inlineRange) {
+        const span = document.createElement('span');
+        span.innerHTML = JSON.stringify(inlineRange);
+        el.replaceChildren(span);
       }
     });
   }
