@@ -114,11 +114,7 @@ export class LatexBlockComponent extends CaptionedBlockComponent<
     this._editorAbortController?.abort();
     this._editorAbortController = new AbortController();
 
-    this.selection.setGroup('note', [
-      this.selection.create('block', {
-        blockId: this.model.id,
-      }),
-    ]);
+    this.selection.setGroup('note', []);
 
     const portal = createLitPortal({
       template: html`<latex-editor-menu
