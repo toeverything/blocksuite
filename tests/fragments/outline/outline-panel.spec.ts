@@ -4,6 +4,7 @@ import {
   addNote,
   changeNoteDisplayModeWithId,
   switchEditorMode,
+  triggerComponentToolbarAction,
   zoomResetByKeyboard,
 } from 'utils/actions/edgeless.js';
 import { pressBackspace, pressEnter, type } from 'utils/actions/keyboard.js';
@@ -12,38 +13,17 @@ import {
   focusRichTextEnd,
   focusTitle,
   getEditorHostLocator,
-  getEditorLocator,
   initEmptyEdgelessState,
   initEmptyParagraphState,
   waitNextFrame,
 } from 'utils/actions/misc.js';
 import { assertRichTexts } from 'utils/asserts.js';
 
-import { test } from '../utils/playwright.js';
-
-async function getVerticalCenterFromLocator(locator: Locator) {
-  const rect = await locator.boundingBox();
-  return rect!.y + rect!.height / 2;
-}
-
-async function createHeadingsWithGap(page: Page) {
-  // heading 1 to 6
-  const editor = getEditorHostLocator(page);
-
-  const headings: Locator[] = [];
-  await pressEnter(page, 10);
-  for (let i = 1; i <= 6; i++) {
-    await type(page, `${'#'.repeat(i)} `);
-    await type(page, `Heading ${i}`);
-    const heading = editor.locator(`.h${i}`);
-    await expect(heading).toBeVisible();
-    headings.push(heading);
-    await pressEnter(page, 10);
-  }
-  await pressEnter(page, 10);
-
-  return headings;
-}
+import { test } from '../../utils/playwright.js';
+import {
+  createHeadingsWithGap,
+  getVerticalCenterFromLocator,
+} from './utils.js';
 
 test.describe('toc-panel', () => {
   async function toggleTocPanel(page: Page) {
@@ -348,170 +328,34 @@ test.describe('toc-panel', () => {
     await assertRichTexts(page, ['world', '', 'hello']);
   });
 
-  // TODO(@L-Sun) test other function like enable sorting, show icons, etc
-});
-
-test.describe('toc-viewer', () => {
-  async function toggleTocViewer(page: Page) {
-    await page.click('sl-button:text("Test Operations")');
-    await page.click('sl-menu-item:text("Enable Outline Viewer")');
-    await waitNextFrame(page);
-    const viewer = page.locator('affine-outline-viewer');
-    return viewer;
-  }
-
-  function getIndicators(page: Page) {
-    return page.locator('affine-outline-viewer .outline-viewer-indicator');
-  }
-
-  test('should display highlight indicators when non-empty headings exists', async ({
-    page,
-  }) => {
-    await enterPlaygroundRoom(page);
-    await initEmptyParagraphState(page);
-    await toggleTocViewer(page);
-
-    await focusRichTextEnd(page);
-
-    const indicators = getIndicators(page);
-
-    // heading 1 to 6
-    for (let i = 1; i <= 6; i++) {
-      await type(page, `${'#'.repeat(i)} `);
-      await type(page, `Heading ${i}`);
-      await pressEnter(page);
-
-      await expect(indicators.nth(i - 1)).toBeVisible();
-    }
-  });
-
-  test('should be hidden when only empty headings exists', async ({ page }) => {
-    await enterPlaygroundRoom(page);
-    await initEmptyParagraphState(page);
-    await toggleTocViewer(page);
-
-    await focusTitle(page);
-    await type(page, 'Title');
-    await focusRichTextEnd(page);
-
-    const indicators = getIndicators(page);
-
-    // heading 1 to 6
-    for (let i = 1; i <= 6; i++) {
-      await type(page, `${'#'.repeat(i)} `);
-      await pressEnter(page);
-      await expect(indicators).toHaveCount(0);
-    }
-  });
-
-  test('should display outline content when hovering over indicators', async ({
-    page,
-  }) => {
-    await enterPlaygroundRoom(page);
-    await initEmptyParagraphState(page);
-    await toggleTocViewer(page);
-
-    await focusRichTextEnd(page);
-
-    await type(page, '# Heading 1');
-    await pressEnter(page);
-
-    const indicator = getIndicators(page).first();
-    await indicator.hover({ force: true });
-
-    const items = page.locator('.outline-viewer-item');
-    await expect(items).toHaveCount(2);
-    await expect(items.nth(0)).toContainText(['Table of Contents']);
-    await expect(items.nth(1)).toContainText(['Heading 1']);
-  });
-
-  test('should highlight indicator when scrolling', async ({ page }) => {
-    await enterPlaygroundRoom(page);
-    await initEmptyParagraphState(page);
-    await toggleTocViewer(page);
-    await focusRichTextEnd(page);
-
-    const editor = getEditorLocator(page);
-    const indicators = getIndicators(page);
-    const headings = await createHeadingsWithGap(page);
-    await editor.locator('.inline-editor').first().scrollIntoViewIfNeeded();
-
-    const viewportCenter = await getVerticalCenterFromLocator(
-      page.locator('body')
-    );
-    for (let i = 0; i < headings.length; i++) {
-      const lastHeadingCenter = await getVerticalCenterFromLocator(headings[i]);
-      await page.mouse.wheel(0, lastHeadingCenter - viewportCenter + 50);
-      await expect(indicators.nth(i)).toHaveClass(/active/);
-    }
-  });
-
-  test('should highlight indicator when click item in outline panel', async ({
-    page,
-  }) => {
-    await enterPlaygroundRoom(page);
-    await initEmptyParagraphState(page);
-    const viewer = await toggleTocViewer(page);
-
-    await focusRichTextEnd(page);
-    const headings = await createHeadingsWithGap(page);
-
-    const indicators = getIndicators(page);
-    await indicators.first().hover({ force: true });
-
-    const headingsInPanel = Array.from({ length: 6 }, (_, i) =>
-      viewer.locator(`.h${i + 1} > span`)
-    );
-
-    await headingsInPanel[2].click();
-    await expect(headings[2]).toBeVisible();
-    await expect(indicators.nth(2)).toHaveClass(/active/);
-  });
-
-  test('should hide in edgeless mode', async ({ page }) => {
+  test('should update notes after slicing note', async ({ page }) => {
     await enterPlaygroundRoom(page);
     await initEmptyEdgelessState(page);
-    await toggleTocViewer(page);
-
-    const indicators = getIndicators(page);
-
-    await focusRichTextEnd(page);
-    await type(page, '# Heading 1');
-    await pressEnter(page);
-
-    await expect(indicators).toHaveCount(1);
-
     await switchEditorMode(page);
-
-    await expect(indicators).toHaveCount(0);
-  });
-
-  test('should hide edgeless-only note headings', async ({ page }) => {
-    await enterPlaygroundRoom(page);
-    await initEmptyEdgelessState(page);
-    const viewer = await toggleTocViewer(page);
-
-    await focusRichTextEnd(page);
-
-    await type(page, '# Heading 1');
+    await zoomResetByKeyboard(page);
+    const note1 = await addNote(page, 'hello', 100, 300);
     await pressEnter(page);
+    await type(page, 'world');
+    await page.mouse.click(100, 100);
 
-    await type(page, '## Heading 2');
-    await pressEnter(page);
+    await changeNoteDisplayModeWithId(
+      page,
+      note1,
+      NoteDisplayMode.DocAndEdgeless
+    );
 
-    await switchEditorMode(page);
+    await toggleTocPanel(page);
+    await toggleNoteSorting(page);
+    const docVisibleCard = page.locator(
+      '.card-container[data-invisible="false"]'
+    );
 
-    await addNote(page, '# Edgeless', 300, 300);
+    await expect(docVisibleCard).toHaveCount(2);
 
-    await switchEditorMode(page);
+    await triggerComponentToolbarAction(page, 'changeNoteSlicerSetting');
+    await expect(page.locator('.note-slicer-button')).toBeVisible();
+    await page.locator('.note-slicer-button').click();
 
-    const indicators = getIndicators(page);
-    await expect(indicators).toHaveCount(2);
-
-    await indicators.first().hover({ force: true });
-
-    await expect(viewer).toBeVisible();
-    const hiddenTitle = viewer.locator('.hidden-title');
-    await expect(hiddenTitle).toBeHidden();
+    await expect(docVisibleCard).toHaveCount(3);
   });
 });

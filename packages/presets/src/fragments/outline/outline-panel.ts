@@ -1,8 +1,6 @@
-import { DocModeProvider } from '@blocksuite/affine-shared/services';
 import { SignalWatcher, WithDisposable } from '@blocksuite/block-std';
-import { DisposableGroup } from '@blocksuite/global/utils';
 import { baseTheme } from '@toeverything/theme';
-import { css, html, LitElement, type PropertyValues, unsafeCSS } from 'lit';
+import { css, html, LitElement, unsafeCSS } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
 import type { AffineEditorContainer } from '../../editors/editor-container.js';
@@ -62,8 +60,6 @@ export const AFFINE_OUTLINE_PANEL = 'affine-outline-panel';
 export class OutlinePanel extends SignalWatcher(WithDisposable(LitElement)) {
   static override styles = styles;
 
-  private _editorDisposables: DisposableGroup | null = null;
-
   private _setNoticeVisibility = (visibility: boolean) => {
     this._noticeVisible = visibility;
   };
@@ -99,11 +95,6 @@ export class OutlinePanel extends SignalWatcher(WithDisposable(LitElement)) {
     return this.editor.mode;
   }
 
-  private _clearEditorDisposables() {
-    this._editorDisposables?.dispose();
-    this._editorDisposables = null;
-  }
-
   private _loadSettingsFromLocalStorage() {
     const settings = localStorage.getItem(outlineSettingsKey);
     if (settings) {
@@ -117,29 +108,6 @@ export class OutlinePanel extends SignalWatcher(WithDisposable(LitElement)) {
     localStorage.setItem(outlineSettingsKey, JSON.stringify(this._settings));
   }
 
-  private _setEditorDisposables() {
-    this._clearEditorDisposables();
-    this._editorDisposables = new DisposableGroup();
-    this._editorDisposables.add(
-      this.editor.std.get(DocModeProvider).onPrimaryModeChange(() => {
-        this.editor.updateComplete
-          .then(() => {
-            this.requestUpdate();
-          })
-          .catch(console.error);
-      }, this.editor.doc.id)
-    );
-    this._editorDisposables.add(
-      this.editor.slots.docUpdated.on(() => {
-        this.editor.updateComplete
-          .then(() => {
-            this.requestUpdate();
-          })
-          .catch(console.error);
-      })
-    );
-  }
-
   private _updateAndSaveSettings(
     newSettings: Partial<OutlineSettingsDataType>
   ) {
@@ -150,11 +118,6 @@ export class OutlinePanel extends SignalWatcher(WithDisposable(LitElement)) {
   override connectedCallback() {
     super.connectedCallback();
     this._loadSettingsFromLocalStorage();
-  }
-
-  override disconnectedCallback() {
-    super.disconnectedCallback();
-    this._clearEditorDisposables();
   }
 
   override render() {
@@ -189,12 +152,6 @@ export class OutlinePanel extends SignalWatcher(WithDisposable(LitElement)) {
         ></affine-outline-notice>
       </div>
     `;
-  }
-
-  override updated(_changedProperties: PropertyValues) {
-    if (_changedProperties.has('editor')) {
-      this._setEditorDisposables();
-    }
   }
 
   @state()

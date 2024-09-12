@@ -1,4 +1,5 @@
 import { SmallScissorsIcon } from '@blocksuite/affine-components/icons';
+import { EDGELESS_BLOCK_CHILD_PADDING } from '@blocksuite/affine-shared/consts';
 import { TelemetryProvider } from '@blocksuite/affine-shared/services';
 import { getRectByBlockComponent } from '@blocksuite/affine-shared/utils';
 import { WithDisposable } from '@blocksuite/block-std';
@@ -317,12 +318,11 @@ export class NoteSlicer extends WithDisposable(LitElement) {
             const event = ctx.get('pointerState');
             const { raw } = event;
             const target = raw.target as HTMLElement;
-            if (!target) return false;
+            if (!target) return;
+
             if (target.closest('note-slicer')) {
               this._sliceNote();
-              return true;
             }
-            return false;
           })
         );
       }
@@ -362,7 +362,7 @@ export class NoteSlicer extends WithDisposable(LitElement) {
     if (!noteBlock || !this._divingLinePositions.length) return nothing;
 
     const rect = getRectByBlockComponent(noteBlock);
-    const width = rect.width;
+    const width = rect.width - 2 * EDGELESS_BLOCK_CHILD_PADDING;
     const buttonPosition = this._divingLinePositions[this._activeSlicerIndex];
 
     return html`<div class="note-slicer-container">
