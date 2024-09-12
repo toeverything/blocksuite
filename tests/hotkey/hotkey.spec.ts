@@ -410,6 +410,7 @@ test.describe('keyboard operation to move block up or down', () => {
     await assertRichTexts(page, ['hello', 'world', 'foo']);
     await assertBlockChildrenIds(page, '2', ['3']);
     await pressArrowUp(page, 2);
+    await waitNextFrame(page);
     await page.keyboard.press(`${SHORT_KEY}+${MODIFIER_KEY}+ArrowDown`);
     await waitNextFrame(page);
     await assertRichTexts(page, ['foo', 'hello', 'world']);

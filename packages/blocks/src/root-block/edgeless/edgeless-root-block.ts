@@ -133,6 +133,10 @@ export class EdgelessRootBlockComponent extends BlockComponent<
       );
     }
 
+    .edgeless-container {
+      color: var(--affine-text-primary-color);
+    }
+
     @media print {
       .selected {
         background-color: transparent !important;
