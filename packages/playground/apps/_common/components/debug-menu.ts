@@ -3,7 +3,7 @@ import type { DeltaInsert } from '@blocksuite/inline/types';
 import type { SlDropdown } from '@shoelace-style/shoelace';
 import type { Pane } from 'tweakpane';
 
-import { type EditorHost, ShadowlessElement } from '@blocksuite/block-std';
+import { ShadowlessElement } from '@blocksuite/block-std';
 import {
   type AffineTextAttributes,
   ColorVariables,
@@ -19,11 +19,9 @@ import {
   printToPdf,
   SizeVariables,
   StyleVariables,
-  type SurfaceBlockComponent,
   toast,
   ZipTransformer,
 } from '@blocksuite/blocks';
-import { assertExists } from '@blocksuite/global/utils';
 import { AffineEditorContainer, type CommentPanel } from '@blocksuite/presets';
 import { type DocCollection, Job, Text } from '@blocksuite/store';
 import '@shoelace-style/shoelace/dist/components/button/button.js';
@@ -56,24 +54,9 @@ import type { SidePanel } from './side-panel.js';
 import './left-side-panel.js';
 import './side-panel.js';
 
-const basePath = import.meta.env.DEV
-  ? '/node_modules/@shoelace-style/shoelace/dist'
-  : 'https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.11.2/dist';
+const basePath =
+  'https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.11.2/dist';
 setBasePath(basePath);
-
-export function getSurfaceElementFromEditor(editorHost: EditorHost) {
-  const { doc } = editorHost;
-  const surfaceModel = doc.getBlockByFlavour('affine:surface')[0];
-  assertExists(surfaceModel);
-
-  const surfaceId = surfaceModel.id;
-  const surfaceElement = editorHost.querySelector(
-    `affine-surface[data-block-id="${surfaceId}"]`
-  ) as SurfaceBlockComponent;
-  assertExists(surfaceElement);
-
-  return surfaceElement;
-}
 
 const OTHER_CSS_VARIABLES = StyleVariables.filter(
   variable =>

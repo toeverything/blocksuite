@@ -37,9 +37,8 @@ import type { LeftSidePanel } from './left-side-panel.js';
 import { notify } from '../../default/utils/notify.js';
 import { generateRoomId } from '../sync/websocket/utils.js';
 
-const basePath = import.meta.env.DEV
-  ? '/node_modules/@shoelace-style/shoelace/dist'
-  : 'https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.11.2/dist/';
+const basePath =
+  'https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.11.2/dist/';
 setBasePath(basePath);
 
 @customElement('quick-edgeless-menu')
