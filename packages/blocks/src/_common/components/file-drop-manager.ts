@@ -1,3 +1,4 @@
+import type { DragIndicator } from '@blocksuite/affine-components/drag-indicator';
 import type { BlockService, EditorHost } from '@blocksuite/block-std';
 import type { IVec } from '@blocksuite/global/utils';
 import type { BlockModel } from '@blocksuite/store';
@@ -8,8 +9,6 @@ import {
   matchFlavours,
 } from '@blocksuite/affine-shared/utils';
 import { assertExists, Point } from '@blocksuite/global/utils';
-
-import type { DragIndicator } from './drag-indicator.js';
 
 import { calcDropTarget, type DropResult } from '../../_common/utils/index.js';
 

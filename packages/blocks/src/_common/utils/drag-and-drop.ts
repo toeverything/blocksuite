@@ -3,18 +3,14 @@ import type { BlockModel } from '@blocksuite/store';
 
 import {
   getClosestBlockComponentByElement,
+  getRectByBlockComponent,
   matchFlavours,
 } from '@blocksuite/affine-shared/utils';
 import { type Point, Rect } from '@blocksuite/global/utils';
-import { assertExists } from '@blocksuite/global/utils';
 
 import type { EditingState } from '../types.js';
 
-import {
-  DropFlags,
-  getDropRectByPoint,
-  getRectByBlockComponent,
-} from './query.js';
+import { DropFlags, getDropRectByPoint } from './query.js';
 
 /**
  * A dropping type.
@@ -39,8 +35,7 @@ export function calcDropTarget(
   flavour: string | null = null // for block-hub
 ): DropResult | null {
   const schema = model.doc.getSchemaByFlavour('affine:database');
-  assertExists(schema);
-  const children = schema.model.children ?? [];
+  const children = schema?.model.children ?? [];
 
   let shouldAppendToDatabase = true;
 

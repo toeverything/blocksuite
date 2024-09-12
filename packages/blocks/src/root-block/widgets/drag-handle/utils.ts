@@ -15,6 +15,7 @@ import {
   getBlockProps,
   getClosestBlockComponentByElement,
   getClosestBlockComponentByPoint,
+  getRectByBlockComponent,
   isInsidePageEditor,
   matchFlavours,
 } from '@blocksuite/affine-shared/utils';
@@ -25,7 +26,6 @@ import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-bl
 import {
   getDropRectByPoint,
   getHoveringNote,
-  getRectByBlockComponent,
 } from '../../../_common/utils/index.js';
 import { isEmbedSyncedDocBlock } from '../../edgeless/utils/query.js';
 import {

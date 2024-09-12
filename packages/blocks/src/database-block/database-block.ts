@@ -2,6 +2,7 @@ import type { DatabaseBlockModel } from '@blocksuite/affine-model';
 
 import { CaptionedBlockComponent } from '@blocksuite/affine-components/caption';
 import { popMenu } from '@blocksuite/affine-components/context-menu';
+import { DragIndicator } from '@blocksuite/affine-components/drag-indicator';
 import { PeekViewProvider } from '@blocksuite/affine-components/peek';
 import { toast } from '@blocksuite/affine-components/toast';
 import { DatabaseBlockSchema } from '@blocksuite/affine-model';
@@ -36,7 +37,6 @@ import type { NoteBlockComponent } from '../note-block/index.js';
 import type { DatabaseOptionsConfig } from './config.js';
 import type { DatabaseBlockService } from './database-service.js';
 
-import { DragIndicator } from '../_common/components/index.js';
 import {
   AffineDragHandleWidget,
   EdgelessRootBlockComponent,

@@ -1,12 +1,11 @@
 import type { Point } from '@blocksuite/global/utils';
 import type { BlockModel } from '@blocksuite/store';
 
-import { matchFlavours } from '@blocksuite/affine-shared/utils';
 import {
-  BLOCK_ID_ATTR,
-  type BlockComponent,
-  type EditorHost,
-} from '@blocksuite/block-std';
+  getRectByBlockComponent,
+  matchFlavours,
+} from '@blocksuite/affine-shared/utils';
+import { BLOCK_ID_ATTR, type EditorHost } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 
 import type { RootBlockComponent } from '../../index.js';
@@ -61,24 +60,8 @@ export function getBlockComponentByModel(
   return editorHost.view.getBlock(model.id);
 }
 
-function isDatabase({ tagName }: Element) {
-  return tagName === 'AFFINE-DATABASE-TABLE' || tagName === 'AFFINE-DATABASE';
-}
-
 function isEdgelessChildNote({ classList }: Element) {
   return classList.contains('note-background');
-}
-
-/**
- * Returns rect of the block element.
- *
- * Compatible with Safari!
- * https://github.com/toeverything/blocksuite/issues/902
- * https://github.com/toeverything/blocksuite/pull/1121
- */
-export function getRectByBlockComponent(element: Element | BlockComponent) {
-  if (isDatabase(element)) return element.getBoundingClientRect();
-  return (element.firstElementChild ?? element).getBoundingClientRect();
 }
 
 /**
