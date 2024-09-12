@@ -24,7 +24,7 @@ import {
 } from '@blocksuite/affine-model';
 import {
   clamp,
-  requestThrottledConnectedFrame,
+  requestConnectedFrame,
   stopPropagation,
 } from '@blocksuite/affine-shared/utils';
 import { WithDisposable } from '@blocksuite/block-std';
@@ -785,36 +785,6 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     _resizeManager.updateBounds(getSelectableBounds(selectedElements));
   };
 
-  private _updateSelectedRect = requestThrottledConnectedFrame(() => {
-    const { zoom, selection, edgeless } = this;
-
-    const elements = selection.selectedElements;
-    // in surface
-    const rect = getSelectedRect(elements);
-
-    // in viewport
-    const [left, top] = edgeless.service.viewport.toViewCoord(
-      rect.left,
-      rect.top
-    );
-    const [width, height] = [rect.width * zoom, rect.height * zoom];
-
-    let rotate = 0;
-    if (elements.length === 1 && elements[0].rotate) {
-      rotate = elements[0].rotate;
-    }
-
-    this._selectedRect = {
-      width,
-      height,
-      left,
-      top,
-      rotate,
-      borderStyle: 'solid',
-      borderWidth: 2,
-    };
-  }, this);
-
   readonly slots = {
     dragStart: new Slot(),
     dragMove: new Slot(),
@@ -1288,6 +1258,38 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
   private _shouldRenderSelection(elements?: BlockSuite.EdgelessModel[]) {
     elements = elements ?? this.selection.selectedElements;
     return elements.length > 0 && !this.selection.editing;
+  }
+
+  private _updateSelectedRect() {
+    requestConnectedFrame(() => {
+      const { zoom, selection, edgeless } = this;
+
+      const elements = selection.selectedElements;
+      // in surface
+      const rect = getSelectedRect(elements);
+
+      // in viewport
+      const [left, top] = edgeless.service.viewport.toViewCoord(
+        rect.left,
+        rect.top
+      );
+      const [width, height] = [rect.width * zoom, rect.height * zoom];
+
+      let rotate = 0;
+      if (elements.length === 1 && elements[0].rotate) {
+        rotate = elements[0].rotate;
+      }
+
+      this._selectedRect = {
+        width,
+        height,
+        left,
+        top,
+        rotate,
+        borderStyle: 'solid',
+        borderWidth: 2,
+      };
+    }, this);
   }
 
   override firstUpdated() {
