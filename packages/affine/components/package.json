@@ -43,7 +43,8 @@
     "./rich-text": "./src/rich-text/index.ts",
     "./caption": "./src/caption/index.ts",
     "./context-menu": "./src/context-menu/index.ts",
-    "./date-picker": "./src/date-picker/index.ts"
+    "./date-picker": "./src/date-picker/index.ts",
+    "./drag-indicator": "./src/drag-indicator/index.ts"
   },
   "publishConfig": {
     "access": "public",
@@ -93,6 +94,10 @@
       "./date-picker": {
         "types": "./dist/date-picker/index.d.ts",
         "import": "./dist/date-picker/index.js"
+      },
+      "./drag-indicator": {
+        "types": "./dist/drag-indicator/index.d.ts",
+        "import": "./dist/drag-indicator/index.js"
       }
     }
   },

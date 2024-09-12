@@ -1,5 +1,6 @@
 import { SmallScissorsIcon } from '@blocksuite/affine-components/icons';
 import { TelemetryProvider } from '@blocksuite/affine-shared/services';
+import { getRectByBlockComponent } from '@blocksuite/affine-shared/utils';
 import { WithDisposable } from '@blocksuite/block-std';
 import {
   deserializeXYWH,
@@ -18,7 +19,6 @@ import type {
   NoteBlockModel,
 } from '../../../../index.js';
 
-import { getRectByBlockComponent } from '../../../../_common/utils/index.js';
 import { DEFAULT_NOTE_HEIGHT } from '../../utils/consts.js';
 import { isNoteBlock } from '../../utils/query.js';
 
