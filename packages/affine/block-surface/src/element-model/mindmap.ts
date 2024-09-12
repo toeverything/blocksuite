@@ -55,7 +55,7 @@ const nodeSchema: z.ZodType<Node> = baseNodeSchema.extend({
   children: z.lazy(() => nodeSchema.array()).optional(),
 });
 
-type NodeType = z.infer<typeof nodeSchema>;
+export type NodeType = z.infer<typeof nodeSchema>;
 
 function isNodeType(node: Record<string, unknown>): node is NodeType {
   return typeof node.text === 'string' && Array.isArray(node.children);
@@ -520,44 +520,6 @@ export class MindmapElementModel extends GfxGroupLikeElementModel<MindmapElement
   }
 
   /**
-   * Detach a mindmap. It is similar to `removeChild` but
-   * it does not delete the node.
-   *
-   * So the node can be used to create a new mind map or merge into other mind map
-   */
-  detach(subtree: string | MindmapNode) {
-    subtree =
-      typeof subtree === 'string' ? this._nodeMap.get(subtree)! : subtree;
-
-    assertType<MindmapNode>(subtree);
-
-    if (!subtree) {
-      return;
-    }
-
-    const traverse = (subtree: MindmapNode) => {
-      this.children.delete(subtree.id);
-
-      // cut the reference inside the ymap
-      subtree.detail = {
-        ...subtree.detail,
-      };
-
-      subtree.children.forEach(child => traverse(child));
-    };
-
-    this.surface.doc.transact(() => {
-      traverse(subtree);
-    });
-
-    this.layout();
-
-    delete subtree.detail.parent;
-
-    return subtree;
-  }
-
-  /**
    *
    * @param subtree The subtree of root, this only take effects when the layout type is BALANCED.
    * @returns
@@ -732,58 +694,6 @@ export class MindmapElementModel extends GfxGroupLikeElementModel<MindmapElement
           `[${deserializedXYWH[0] + offsetX},${deserializedXYWH[1] + offsetY},${deserializedXYWH[2]},${deserializedXYWH[3]}]` as SerializedXYWH;
       });
     });
-  }
-
-  moveTree(
-    tree: MindmapNode,
-    parent: string | MindmapNode,
-    siblingIndex: number,
-    layout?: LayoutType
-  ) {
-    parent = this._nodeMap.get(
-      typeof parent === 'string' ? parent : parent.id
-    )!;
-
-    if (!parent || !this._nodeMap.has(tree.id)) {
-      return;
-    }
-
-    assertType<MindmapNode>(parent);
-
-    if (layout === LayoutType.BALANCE || parent !== this._tree) {
-      layout = undefined;
-    }
-
-    const sibling = parent.children[siblingIndex];
-    const preSibling = parent.children[siblingIndex - 1];
-    const index =
-      sibling || preSibling
-        ? generateKeyBetween(
-            preSibling?.detail.index ?? null,
-            sibling?.detail.index ?? null
-          )
-        : (tree.detail.index ?? undefined);
-
-    this.surface.doc.transact(() => {
-      const val: NodeDetail =
-        layout !== undefined
-          ? {
-              ...tree.detail,
-              index,
-              parent: parent.id,
-            }
-          : {
-              ...tree.detail,
-              index,
-              parent: parent.id,
-            };
-
-      this.children.set(tree.id, val);
-    });
-
-    this.layout();
-
-    return this._nodeMap.get(tree.id);
   }
 
   override onCreated(): void {

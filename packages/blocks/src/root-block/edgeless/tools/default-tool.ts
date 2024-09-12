@@ -894,7 +894,10 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
         );
       } else if (this._draggingSingleMindmap.detach) {
         const { mindmap } = this._draggingSingleMindmap;
-        const subtree = mindmap.detach(this._draggingSingleMindmap.node);
+        const subtree = MindmapUtils.detachMindmap(
+          mindmap,
+          this._draggingSingleMindmap.node
+        );
 
         if (subtree) {
           MindmapElementModel.createFromTree(
