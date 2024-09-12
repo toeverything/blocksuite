@@ -404,7 +404,9 @@ export class RangeService<TextAttributes extends BaseTextAttributes> {
 
     let index = 0;
     for (const vLine of vLines) {
-      const texts = getTextNodesFromElement(vLine);
+      const texts = getTextNodesFromElement(vLine).filter(
+        text => !text.parentElement?.closest('[data-v-embed-gap="true"]')
+      );
       if (texts.length === 0) {
         return null;
       }
