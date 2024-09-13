@@ -25,6 +25,8 @@
     "@lit/context": "^1.1.2",
     "@toeverything/theme": "^1.0.8",
     "lit": "^3.2.0",
+    "lodash.clonedeep": "^4.5.0",
+    "lodash.mergewith": "^4.6.2",
     "minimatch": "^10.0.1",
     "zod": "^3.23.8"
   },
@@ -92,5 +94,9 @@
     "dist",
     "!src/__tests__",
     "!dist/__tests__"
-  ]
+  ],
+  "devDependencies": {
+    "@types/lodash.clonedeep": "^4.5.9",
+    "@types/lodash.mergewith": "^4"
+  }
 }

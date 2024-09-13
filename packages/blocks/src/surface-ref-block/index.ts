@@ -8,6 +8,8 @@ export {
   PageSurfaceRefBlockSpec,
 } from './surface-ref-spec.js';
 
+export * from './utils.js';
+
 declare global {
   namespace BlockSuite {
     interface BlockServices {

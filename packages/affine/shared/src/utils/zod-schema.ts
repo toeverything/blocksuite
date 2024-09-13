@@ -34,7 +34,7 @@ import {
   TextAlign,
   TextVerticalAlign,
 } from '@blocksuite/affine-model';
-import { z } from 'zod';
+import { z, ZodDefault, ZodObject, type ZodTypeAny, ZodUnion } from 'zod';
 
 const ConnectorEndpointSchema = z.nativeEnum(PointStyle);
 const StrokeStyleSchema = z.nativeEnum(StrokeStyle);
@@ -82,7 +82,7 @@ export const ConnectorSchema = z
     rough: z.boolean(),
     mode: ConnectorModeSchema,
     labelStyle: z.object({
-      color: LineColorSchema,
+      color: TextColorSchema,
       fontSize: z.number(),
       fontFamily: FontFamilySchema,
       fontWeight: FontWeightSchema,
@@ -256,3 +256,22 @@ export const NodePropsSchema = z.object({
 });
 
 export type NodeProps = z.infer<typeof NodePropsSchema>;
+
+export function makeDeepOptional(schema: ZodTypeAny): ZodTypeAny {
+  if (schema instanceof ZodDefault) {
+    return makeDeepOptional(schema._def.innerType);
+  }
+  if (schema instanceof ZodObject) {
+    const shape = schema.shape;
+    const deepOptionalShape = Object.fromEntries(
+      Object.entries(shape).map(([key, value]) => {
+        return [key, makeDeepOptional(value as ZodTypeAny)];
+      })
+    );
+    return z.object(deepOptionalShape).optional();
+  } else if (schema instanceof ZodUnion) {
+    return schema.or(z.undefined());
+  } else {
+    return schema.optional();
+  }
+}

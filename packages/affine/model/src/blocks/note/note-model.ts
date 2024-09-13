@@ -58,7 +58,7 @@ export const NoteBlockSchema = defineBlockSchema({
   },
 });
 
-type NoteProps = {
+export type NoteProps = {
   xywh: SerializedXYWH;
   background: Color;
   index: string;
@@ -75,7 +75,7 @@ type NoteProps = {
   hidden: boolean;
 };
 
-type NoteEdgelessProps = {
+export type NoteEdgelessProps = {
   style: {
     borderRadius: number;
     borderSize: number;

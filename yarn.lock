@@ -1713,12 +1713,8 @@ __metadata:
     "@lit/context": "npm:^1.1.2"
     "@toeverything/theme": "npm:^1.0.8"
     "@types/dompurify": "npm:^3.0.5"
-    "@types/lodash.isplainobject": "npm:^4.0.9"
-    "@types/lodash.merge": "npm:^4.6.9"
     fractional-indexing: "npm:^3.2.0"
     lit: "npm:^3.2.0"
-    lodash.isplainobject: "npm:^4.0.6"
-    lodash.merge: "npm:^4.6.2"
     nanoid: "npm:^5.0.7"
     zod: "npm:^3.23.8"
   languageName: unknown
@@ -1774,7 +1770,11 @@ __metadata:
     "@lit-labs/preact-signals": "npm:^1.0.2"
     "@lit/context": "npm:^1.1.2"
     "@toeverything/theme": "npm:^1.0.8"
+    "@types/lodash.clonedeep": "npm:^4.5.9"
+    "@types/lodash.mergewith": "npm:^4"
     lit: "npm:^3.2.0"
+    lodash.clonedeep: "npm:^4.5.0"
+    lodash.mergewith: "npm:^4.6.2"
     minimatch: "npm:^10.0.1"
     zod: "npm:^3.23.8"
   languageName: unknown
@@ -1824,9 +1824,6 @@ __metadata:
     "@types/dompurify": "npm:^3.0.5"
     "@types/hast": "npm:^3.0.4"
     "@types/katex": "npm:^0.16.7"
-    "@types/lodash.clonedeep": "npm:^4.5.9"
-    "@types/lodash.isplainobject": "npm:^4.0.9"
-    "@types/lodash.merge": "npm:^4.6.9"
     "@types/mdast": "npm:^4.0.4"
     "@types/sortablejs": "npm:^1.15.8"
     collapse-white-space: "npm:^2.1.0"
@@ -1838,9 +1835,6 @@ __metadata:
     html2canvas: "npm:^1.4.1"
     katex: "npm:^0.16.11"
     lit: "npm:^3.2.0"
-    lodash.clonedeep: "npm:^4.5.0"
-    lodash.isplainobject: "npm:^4.0.6"
-    lodash.merge: "npm:^4.6.2"
     mdast-util-gfm-autolink-literal: "npm:^2.0.1"
     mdast-util-gfm-strikethrough: "npm:^2.0.0"
     mdast-util-gfm-table: "npm:^2.0.0"
@@ -4910,21 +4904,21 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/lodash.isplainobject@npm:^4.0.9":
-  version: 4.0.9
-  resolution: "@types/lodash.isplainobject@npm:4.0.9"
-  dependencies:
-    "@types/lodash": "npm:*"
-  checksum: 10/2ccfff10ff81a78caa9ed4d660efecdebaa145e428c0e3b175650d6de27a5fa06627e2fab0636ab25178f57ec58325fc31b46398aef05df0a912e65b211a20b2
-  languageName: node
-  linkType: hard
-
 "@types/lodash.merge@npm:^4.6.9":
   version: 4.6.9
   resolution: "@types/lodash.merge@npm:4.6.9"
   dependencies:
     "@types/lodash": "npm:*"
   checksum: 10/d0dd6654547c9d8d905184d14aa5c2a37a1ed1c3204f5ab20b7d591a05f34859ef09d3b72c065e94ca1989abf9109eb8230f67c4d64a5768b1d65b9ed8baf8e7
+  languageName: node
+  linkType: hard
+
+"@types/lodash.mergewith@npm:^4":
+  version: 4.6.9
+  resolution: "@types/lodash.mergewith@npm:4.6.9"
+  dependencies:
+    "@types/lodash": "npm:*"
+  checksum: 10/c5a67e83040103decfd37090127118f5758773d0ce2a1756d442b371721737c7752f48f62544cc970f44abec8471f260cc4c844e1a4fdef8b76cb96bdec8a595
   languageName: node
   linkType: hard
 
