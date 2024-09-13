@@ -361,7 +361,7 @@ export function detachMindmap(
   return subtree;
 }
 
-function handleLayout(
+export function handleLayout(
   mindmap: MindmapElementModel,
   tree?: MindmapNode | MindmapRoot,
   shouldApplyStyle = true,

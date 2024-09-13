@@ -93,6 +93,7 @@ import { generateElementId, normalizeWheelDeltaY } from './utils/index.js';
 import {
   createFromTree,
   detachMindmap,
+  handleLayout,
   hideTargetConnector,
   moveMindMapSubtree,
   showMergeIndicator,
@@ -147,6 +148,7 @@ export const CommonUtils = {
 export const MindmapUtils = {
   createFromTree,
   detachMindmap,
+  handleLayout,
   hideTargetConnector,
   moveMindMapSubtree,
   showMergeIndicator,
