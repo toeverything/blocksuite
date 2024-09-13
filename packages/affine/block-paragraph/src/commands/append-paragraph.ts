@@ -29,11 +29,3 @@ export const appendParagraphCommand: Command<
   focusTextModel(std, id, text.length);
   next();
 };
-
-declare global {
-  namespace BlockSuite {
-    interface Commands {
-      appendParagraph: typeof appendParagraphCommand;
-    }
-  }
-}

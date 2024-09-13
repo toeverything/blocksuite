@@ -23,11 +23,3 @@ export const insertBookmarkCommand: Command<
   insertEmbedCard(std, { flavour, targetStyle, props });
   next();
 };
-
-declare global {
-  namespace BlockSuite {
-    interface Commands {
-      insertBookmark: typeof insertBookmarkCommand;
-    }
-  }
-}

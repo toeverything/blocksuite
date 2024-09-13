@@ -54,11 +54,3 @@ export const addParagraphCommand: Command<
   focusTextModel(std, id);
   return next({ paragraphConvertedId: id });
 };
-
-declare global {
-  namespace BlockSuite {
-    interface Commands {
-      addParagraph: typeof addParagraphCommand;
-    }
-  }
-}

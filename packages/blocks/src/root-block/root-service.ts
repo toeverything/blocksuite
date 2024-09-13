@@ -86,11 +86,3 @@ export abstract class RootService extends BlockService {
     );
   }
 }
-
-declare global {
-  namespace BlockSuite {
-    interface BlockServices {
-      'affine:page': RootService;
-    }
-  }
-}

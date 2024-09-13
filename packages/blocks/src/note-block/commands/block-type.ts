@@ -217,15 +217,3 @@ export const updateBlockType: Command<
 
   return next({ updatedBlocks: resultCtx.updatedBlocks });
 };
-
-declare global {
-  namespace BlockSuite {
-    interface CommandContext {
-      updatedBlocks?: BlockModel[];
-    }
-
-    interface Commands {
-      updateBlockType: typeof updateBlockType;
-    }
-  }
-}

@@ -42,11 +42,3 @@ export const reassociateConnectorsCommand: Command<
 
   next();
 };
-
-declare global {
-  namespace BlockSuite {
-    interface Commands {
-      reassociateConnectors: typeof reassociateConnectorsCommand;
-    }
-  }
-}

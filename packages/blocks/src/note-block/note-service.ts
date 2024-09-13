@@ -694,11 +694,3 @@ export class NoteBlockService extends BlockService {
     });
   }
 }
-
-declare global {
-  namespace BlockSuite {
-    interface BlockServices {
-      'affine:note': NoteBlockService;
-    }
-  }
-}

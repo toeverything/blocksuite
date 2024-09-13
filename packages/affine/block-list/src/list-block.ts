@@ -218,9 +218,3 @@ export class ListBlockComponent extends CaptionedBlockComponent<
     margin: '10px 0',
   };
 }
-
-declare global {
-  interface HTMLElementTagNameMap {
-    'affine-list': ListBlockComponent;
-  }
-}

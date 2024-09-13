@@ -191,9 +191,3 @@ export class ParagraphBlockComponent extends CaptionedBlockComponent<
 
   override accessor blockContainerStyles = { margin: '10px 0' };
 }
-
-declare global {
-  interface HTMLElementTagNameMap {
-    'affine-paragraph': ParagraphBlockComponent;
-  }
-}
