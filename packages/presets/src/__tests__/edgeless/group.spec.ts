@@ -1,4 +1,4 @@
-import type { MindmapElementModel } from '@blocksuite/affine-block-surface';
+import type { MindmapElementModel } from '@blocksuite/affine-model';
 
 import {
   type EdgelessRootBlockComponent,
