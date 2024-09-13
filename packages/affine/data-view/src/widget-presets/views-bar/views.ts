@@ -43,7 +43,7 @@ export class DataViewHeaderViews extends WidgetBase {
     .database-view-button .name {
       align-items: center;
       height: 22px;
-      max-width: 100px;
+      max-width: 200px;
       overflow: hidden;
       text-overflow: ellipsis;
     }
