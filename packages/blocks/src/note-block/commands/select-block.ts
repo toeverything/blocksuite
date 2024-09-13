@@ -14,11 +14,3 @@ export const selectBlock: Command<'focusBlock'> = (ctx, next) => {
 
   return next();
 };
-
-declare global {
-  namespace BlockSuite {
-    interface Commands {
-      selectBlock: typeof selectBlock;
-    }
-  }
-}

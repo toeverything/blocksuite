@@ -13,11 +13,3 @@ export const commands: BlockCommands = {
   indentList: indentListCommand,
   dedentList: dedentListCommand,
 };
-
-declare global {
-  namespace BlockSuite {
-    interface CommandContext {
-      listConvertedId?: string;
-    }
-  }
-}

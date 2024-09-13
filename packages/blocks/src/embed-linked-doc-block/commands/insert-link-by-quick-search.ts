@@ -40,17 +40,3 @@ export const insertLinkByQuickSearchCommand: Command<
 
   next({ insertedLinkType });
 };
-
-declare global {
-  namespace BlockSuite {
-    interface CommandContext {
-      insertedLinkType?: Promise<{
-        flavour?: string;
-      } | null>;
-    }
-
-    interface Commands {
-      insertLinkByQuickSearch: typeof insertLinkByQuickSearchCommand;
-    }
-  }
-}

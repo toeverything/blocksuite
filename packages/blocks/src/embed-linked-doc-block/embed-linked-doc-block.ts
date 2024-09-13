@@ -12,7 +12,7 @@ import {
   RefNodeSlotsProvider,
 } from '@blocksuite/affine-components/rich-text';
 import { DocModeProvider } from '@blocksuite/affine-shared/services';
-import { assertExists, Bound } from '@blocksuite/global/utils';
+import { Bound } from '@blocksuite/global/utils';
 import { DocCollection } from '@blocksuite/store';
 import { html, nothing } from 'lit';
 import { property, queryAsync, state } from 'lit/decorators.js';
@@ -21,7 +21,6 @@ import { classMap } from 'lit/directives/class-map.js';
 import type { SurfaceRefBlockService } from '../surface-ref-block/index.js';
 import type { SurfaceRefRenderer } from '../surface-ref-block/surface-ref-renderer.js';
 import type { EmbedLinkedDocBlockConfig } from './embed-linked-doc-config.js';
-import type { EmbedLinkedDocBlockService } from './embed-linked-doc-service.js';
 
 import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../_common/consts.js';
 import { EmbedBlockComponent } from '../_common/embed-block-helper/index.js';
@@ -33,10 +32,7 @@ import { getEmbedLinkedDocIcons, isLinkToNode } from './utils.js';
 @Peekable({
   enableOn: ({ doc }: EmbedLinkedDocBlockComponent) => !doc.readonly,
 })
-export class EmbedLinkedDocBlockComponent extends EmbedBlockComponent<
-  EmbedLinkedDocModel,
-  EmbedLinkedDocBlockService
-> {
+export class EmbedLinkedDocBlockComponent extends EmbedBlockComponent<EmbedLinkedDocModel> {
   static override styles = styles;
 
   private _load = async () => {
@@ -125,7 +121,9 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockComponent<
     }
 
     const parent = doc.getParent(this.model);
-    assertExists(parent);
+    if (!parent) {
+      return;
+    }
     const index = parent.children.indexOf(this.model);
 
     doc.addBlock('affine:embed-synced-doc', { pageId, caption }, parent, index);
@@ -137,7 +135,9 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockComponent<
   covertToInline = () => {
     const { doc } = this.model;
     const parent = doc.getParent(this.model);
-    assertExists(parent);
+    if (!parent) {
+      return;
+    }
     const index = parent.children.indexOf(this.model);
 
     const yText = new DocCollection.Y.Text();

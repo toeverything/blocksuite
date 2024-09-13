@@ -86,11 +86,3 @@ export const indentListCommand: Command<
 
   return next();
 };
-
-declare global {
-  namespace BlockSuite {
-    interface Commands {
-      indentList: typeof indentListCommand;
-    }
-  }
-}

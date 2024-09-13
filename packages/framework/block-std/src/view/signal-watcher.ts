@@ -6,7 +6,7 @@
 
 import type { ReactiveElement } from 'lit';
 
-import { effect } from '@lit-labs/preact-signals';
+import { effect } from '@preact/signals-core';
 
 type ReactiveElementConstructor = abstract new (
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

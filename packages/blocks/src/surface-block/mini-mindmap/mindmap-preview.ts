@@ -15,7 +15,6 @@ import {
   type EditorHost,
   WithDisposable,
 } from '@blocksuite/block-std';
-import { noop } from '@blocksuite/global/utils';
 import {
   type Doc,
   DocCollection,
@@ -30,12 +29,7 @@ import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { MarkdownAdapter } from '../../_common/adapters/markdown.js';
-import { MindmapRootBlock } from './mindmap-root-block.js';
 import { MiniMindmapSchema, MiniMindmapSpecs } from './spec.js';
-import { MindmapSurfaceBlock } from './surface-block.js';
-
-noop(MindmapRootBlock);
-noop(MindmapSurfaceBlock);
 
 const mindmapStyles = [
   [MindmapStyle.ONE, MindmapStyleOne],

@@ -1,6 +1,7 @@
 import { EditPropsStore } from '@blocksuite/affine-shared/services';
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
-import { computed, SignalWatcher } from '@lit-labs/preact-signals';
+import { SignalWatcher } from '@blocksuite/block-std';
+import { computed } from '@preact/signals-core';
 import { css, html, LitElement } from 'lit';
 import { property } from 'lit/decorators.js';
 

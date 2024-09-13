@@ -5,16 +5,11 @@ import { query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { type StyleInfo, styleMap } from 'lit/directives/style-map.js';
 
-import type { EmbedHtmlBlockService } from './embed-html-service.js';
-
 import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../_common/consts.js';
 import { EmbedBlockComponent } from '../_common/embed-block-helper/index.js';
 import { HtmlIcon, styles } from './styles.js';
 
-export class EmbedHtmlBlockComponent extends EmbedBlockComponent<
-  EmbedHtmlModel,
-  EmbedHtmlBlockService
-> {
+export class EmbedHtmlBlockComponent extends EmbedBlockComponent<EmbedHtmlModel> {
   static override styles = styles;
 
   override _cardStyle: (typeof EmbedHtmlStyles)[number] = 'html';

@@ -2,7 +2,7 @@ import { textKeymap } from '@blocksuite/affine-components/rich-text';
 import { CodeBlockSchema, ColorScheme } from '@blocksuite/affine-model';
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import { BlockService } from '@blocksuite/block-std';
-import { type Signal, signal } from '@lit-labs/preact-signals';
+import { type Signal, signal } from '@preact/signals-core';
 import {
   createHighlighterCore,
   type HighlighterCore,

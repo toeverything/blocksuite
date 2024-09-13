@@ -41,11 +41,3 @@ export const listToParagraphCommand: Command<
   focusTextModel(std, listConvertedId);
   return next({ listConvertedId });
 };
-
-declare global {
-  namespace BlockSuite {
-    interface Commands {
-      listToParagraph: typeof listToParagraphCommand;
-    }
-  }
-}

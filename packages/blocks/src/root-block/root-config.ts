@@ -9,11 +9,3 @@ export interface RootBlockConfig {
   toolbarMoreMenu?: Partial<ToolbarMoreMenuConfig>;
   databaseOptions?: Partial<DatabaseOptionsConfig>;
 }
-
-declare global {
-  namespace BlockSuite {
-    interface BlockConfigs {
-      'affine:page': RootBlockConfig;
-    }
-  }
-}

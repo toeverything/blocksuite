@@ -1,4 +1,4 @@
-import type { Signal } from '@lit-labs/preact-signals';
+import type { Signal } from '@preact/signals-core';
 
 import {
   GeneralStyleIcon,
@@ -16,7 +16,7 @@ import {
 import { EditPropsStore } from '@blocksuite/affine-shared/services';
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import { SignalWatcher } from '@blocksuite/block-std';
-import { computed, signal } from '@lit-labs/preact-signals';
+import { computed, signal } from '@preact/signals-core';
 import { css, html, LitElement } from 'lit';
 import { property } from 'lit/decorators.js';
 

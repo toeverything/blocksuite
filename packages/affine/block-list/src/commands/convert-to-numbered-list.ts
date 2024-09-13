@@ -26,11 +26,3 @@ export const convertToNumberedListCommand: Command<
 
   return next({ listConvertedId });
 };
-
-declare global {
-  namespace BlockSuite {
-    interface Commands {
-      convertToNumberedList: typeof convertToNumberedListCommand;
-    }
-  }
-}

@@ -5,7 +5,7 @@ import {
   WithDisposable,
 } from '@blocksuite/block-std';
 import { NoteDisplayMode, scrollbarStyle } from '@blocksuite/blocks';
-import { signal } from '@lit-labs/preact-signals';
+import { signal } from '@preact/signals-core';
 import { css, html, LitElement, nothing } from 'lit';
 import { property, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';

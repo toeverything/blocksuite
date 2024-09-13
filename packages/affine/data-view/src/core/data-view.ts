@@ -5,7 +5,7 @@ import {
   SignalWatcher,
   WithDisposable,
 } from '@blocksuite/block-std';
-import { computed, type ReadonlySignal } from '@lit-labs/preact-signals';
+import { computed, type ReadonlySignal } from '@preact/signals-core';
 import { css, type TemplateResult, unsafeCSS } from 'lit';
 import { property, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';

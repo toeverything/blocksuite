@@ -13,11 +13,3 @@ export const commands: BlockCommands = {
   indentParagraph: indentParagraphCommand,
   dedentParagraph: dedentParagraphCommand,
 };
-
-declare global {
-  namespace BlockSuite {
-    interface CommandContext {
-      paragraphConvertedId?: string;
-    }
-  }
-}

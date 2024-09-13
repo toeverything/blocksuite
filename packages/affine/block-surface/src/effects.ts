@@ -1,7 +1,7 @@
+import type { reassociateConnectorsCommand } from './commands/reassociate-connectors.js';
 import type { SurfaceBlockModel } from './surface-model.js';
 import type { SurfaceBlockService } from './surface-service.js';
 
-import './commands/reassociate-connectors.js';
 import { SurfaceBlockComponent } from './surface-block.js';
 import { SurfaceBlockVoidComponent } from './surface-block-void.js';
 
@@ -17,6 +17,9 @@ declare global {
     }
     interface BlockModels {
       'affine:surface': SurfaceBlockModel;
+    }
+    interface Commands {
+      reassociateConnectors: typeof reassociateConnectorsCommand;
     }
   }
 }

@@ -17,14 +17,6 @@ export {
   ConnectorEndpointLocationsOnTriangle,
   ConnectorPathGenerator,
 } from './managers/connector-manager.js';
-export { LayerManager } from './managers/layer-manager.js';
-export type { BlockLayer } from './managers/layer-manager.js';
-export type { ReorderingDirection } from './managers/layer-manager.js';
-export {
-  compare as compareLayer,
-  renderableInEdgeless,
-  SortOrder,
-} from './managers/layer-utils.js';
 export { CanvasRenderer, Overlay } from './renderer/canvas-renderer.js';
 export * from './renderer/elements/group/consts.js';
 export type { ElementRenderer } from './renderer/elements/index.js';

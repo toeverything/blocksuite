@@ -64,11 +64,3 @@ export const indentBlock: Command<
 
   return next();
 };
-
-declare global {
-  namespace BlockSuite {
-    interface Commands {
-      indentBlock: typeof indentBlock;
-    }
-  }
-}

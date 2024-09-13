@@ -1,7 +1,7 @@
 import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 import { DisposableGroup, Slot } from '@blocksuite/global/utils';
 import { nanoid, type StackItem } from '@blocksuite/store';
-import { computed, signal } from '@lit-labs/preact-signals';
+import { computed, signal } from '@preact/signals-core';
 
 import type { BlockStdScope } from '../scope/index.js';
 import type { BaseSelection } from './base.js';

@@ -1,4 +1,4 @@
-import type { BlockCommands, BlockComponent } from '@blocksuite/block-std';
+import type { BlockCommands } from '@blocksuite/block-std';
 
 import {
   getBlockIndexCommand,
@@ -39,12 +39,3 @@ export const commands: BlockCommands = {
   dedentBlockToRoot,
   dedentBlocksToRoot,
 };
-
-declare global {
-  namespace BlockSuite {
-    interface CommandContext {
-      focusBlock?: BlockComponent | null;
-      anchorBlock?: BlockComponent | null;
-    }
-  }
-}

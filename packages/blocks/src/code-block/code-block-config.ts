@@ -7,11 +7,3 @@ export interface CodeBlockConfig {
   };
   langs?: BundledLanguageInfo[];
 }
-
-declare global {
-  namespace BlockSuite {
-    interface BlockConfigs {
-      'affine:code': CodeBlockConfig;
-    }
-  }
-}
