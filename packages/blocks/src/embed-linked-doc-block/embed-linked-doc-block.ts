@@ -37,10 +37,21 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockComponent<EmbedLinke
   static override styles = styles;
 
   private _load = async () => {
-    this._loading = true;
-    this.isError = false;
-    this.isNoteContentEmpty = true;
-    this.isBannerEmpty = true;
+    const {
+      loading = true,
+      isError = false,
+      isBannerEmpty = true,
+      isNoteContentEmpty = true,
+    } = this.resetState();
+
+    this._loading = loading;
+    this.isError = isError;
+    this.isBannerEmpty = isBannerEmpty;
+    this.isNoteContentEmpty = isNoteContentEmpty;
+
+    if (!this._loading) {
+      return;
+    }
 
     const linkedDoc = this.linkedDoc;
     if (!linkedDoc) {
@@ -443,6 +454,15 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockComponent<EmbedLinke
         </div>
       `
     );
+  }
+
+  resetState(): {
+    loading?: boolean;
+    isError?: boolean;
+    isNoteContentEmpty?: boolean;
+    isBannerEmpty?: boolean;
+  } {
+    return {};
   }
 
   override updated() {
