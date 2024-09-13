@@ -4,6 +4,7 @@ import {
   computePosition,
   type ComputePositionReturn,
 } from '@floating-ui/dom';
+import { cssVar } from '@toeverything/theme';
 import { render } from 'lit';
 
 import type { AdvancedPortalOptions, PortalOptions } from './types.js';
@@ -157,6 +158,7 @@ export function createLitPortal({
   portalRoot.style.position = 'fixed';
   portalRoot.style.left = '0';
   portalRoot.style.top = '0';
+  portalRoot.style.zIndex = cssVar('zIndexPopover');
 
   Object.assign(portalRoot.style, portalOptions.portalStyles);
 
