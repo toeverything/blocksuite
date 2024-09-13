@@ -8,13 +8,13 @@ import {
   getBezierParameters,
   type PointLocation,
 } from '@blocksuite/global/utils';
+import { deltaInsertsToChunks } from '@blocksuite/inline';
 
 import type { RoughCanvas } from '../../../utils/rough/canvas.js';
 import type { CanvasRenderer } from '../../canvas-renderer.js';
 
 import { isConnectorWithLabel } from '../../../element-model/utils/connector.js';
 import {
-  deltaInsertsToChunks,
   getFontString,
   getLineHeight,
   getTextWidth,
