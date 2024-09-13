@@ -13,7 +13,7 @@ import { deltaInsertsToChunks } from '@blocksuite/inline';
 import type { RoughCanvas } from '../../../utils/rough/canvas.js';
 import type { CanvasRenderer } from '../../canvas-renderer.js';
 
-import { isConnectorWithLabel } from '../../../element-model/utils/connector.js';
+import { isConnectorWithLabel } from '../../../managers/connector-manager.js';
 import {
   getFontString,
   getLineHeight,

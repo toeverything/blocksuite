@@ -17,13 +17,13 @@ import {
 } from '@blocksuite/affine-block-surface';
 import {
   ConnectionOverlay,
-  MindmapElementModel,
   SurfaceGroupLikeModel,
 } from '@blocksuite/affine-block-surface';
 import {
   type ConnectorElementModel,
   type FrameBlockModel,
   type GroupElementModel,
+  MindmapElementModel,
   RootBlockSchema,
 } from '@blocksuite/affine-model';
 import { EditPropsStore } from '@blocksuite/affine-shared/services';

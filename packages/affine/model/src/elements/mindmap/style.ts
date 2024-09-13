@@ -1,5 +1,3 @@
-import type { ShapeElementModel } from '@blocksuite/affine-model';
-
 import {
   ConnectorMode,
   FontFamily,
@@ -11,9 +9,7 @@ import {
 } from '@blocksuite/affine-model';
 import { last } from '@blocksuite/global/utils';
 
-import type { MindmapNode } from './layout.js';
-
-import { fitContent } from '../../../renderer/elements/shape/utils.js';
+import type { MindmapNode } from './mindmap.js';
 
 export type NodeStyle = {
   radius: number;
@@ -356,11 +352,7 @@ export const mindmapStyleGetters: {
   [MindmapStyle.FOUR]: styleFour,
 };
 
-export const applyNodeStyle = (
-  node: MindmapNode,
-  nodeStyle: NodeStyle,
-  shouldFitContent: boolean = false
-) => {
+export const applyNodeStyle = (node: MindmapNode, nodeStyle: NodeStyle) => {
   Object.entries(nodeStyle).forEach(([key, value]) => {
     // @ts-ignore
     if (node.element[key] !== value) {
@@ -368,6 +360,4 @@ export const applyNodeStyle = (
       node.element[key] = value;
     }
   });
-
-  shouldFitContent && fitContent(node.element as ShapeElementModel);
 };

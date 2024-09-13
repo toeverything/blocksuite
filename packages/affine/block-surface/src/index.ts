@@ -6,15 +6,10 @@ export {
 } from './element-model/base.js';
 
 export { CanvasElementType } from './element-model/index.js';
-export { MindmapElementModel } from './element-model/mindmap.js';
-export type { SerializedMindmapElement } from './element-model/mindmap.js';
-export { MindmapUtils } from './element-model/utils/mindmap/index.js';
-import { isConnectorWithLabel } from './element-model/utils/connector.js';
-import { isConnectorAndBindingsAllSelected } from './managers/connector-manager.js';
-export type {
-  MindmapNode,
-  NodeDetail,
-} from './element-model/utils/mindmap/layout.js';
+import {
+  isConnectorAndBindingsAllSelected,
+  isConnectorWithLabel,
+} from './managers/connector-manager.js';
 export {
   calculateNearestLocation,
   ConnectionOverlay,
@@ -65,6 +60,7 @@ export { SurfaceBlockTransformer } from './surface-transformer.js';
 export { AStarRunner } from './utils/a-star.js';
 export { RoughCanvas } from './utils/rough/canvas.js';
 export type { Options } from './utils/rough/core.js';
+
 export { sortIndex } from './utils/sort.js';
 
 import {
@@ -94,6 +90,13 @@ import {
 import { generateKeyBetween } from 'fractional-indexing';
 
 import { generateElementId, normalizeWheelDeltaY } from './utils/index.js';
+import {
+  createFromTree,
+  detachMindmap,
+  hideTargetConnector,
+  moveMindMapSubtree,
+  showMergeIndicator,
+} from './utils/mindmap/utils.js';
 
 export const ConnectorUtils = {
   isConnectorAndBindingsAllSelected,
@@ -139,4 +142,12 @@ export const CommonUtils = {
   sign,
   toDegree,
   toRadian,
+};
+
+export const MindmapUtils = {
+  createFromTree,
+  detachMindmap,
+  hideTargetConnector,
+  moveMindMapSubtree,
+  showMergeIndicator,
 };

@@ -7,7 +7,6 @@ import {
   CommonUtils,
   GRID_GAP_MAX,
   GRID_GAP_MIN,
-  MindmapElementModel,
 } from '@blocksuite/affine-block-surface';
 import {
   type AttachmentBlockModel,
@@ -24,6 +23,7 @@ import {
   type EmbedYoutubeModel,
   type FrameBlockModel,
   type ImageBlockModel,
+  MindmapElementModel,
   type NoteBlockModel,
   ShapeElementModel,
   TextElementModel,
