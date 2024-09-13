@@ -31,7 +31,6 @@ import { styleMap } from 'lit/directives/style-map.js';
 import type { EdgelessRootService } from '../root-block/edgeless/edgeless-root-service.js';
 import type { RootBlockComponent } from '../root-block/types.js';
 import type { EmbedSyncedDocCard } from './components/embed-synced-doc-card.js';
-import type { EmbedSyncedDocBlockService } from './embed-synced-doc-service.js';
 
 import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../_common/consts.js';
 import { EmbedBlockComponent } from '../_common/embed-block-helper/embed-block-element.js';
@@ -42,10 +41,7 @@ import { blockStyles } from './styles.js';
 @Peekable({
   enableOn: ({ doc }: EmbedSyncedDocBlockComponent) => !doc.readonly,
 })
-export class EmbedSyncedDocBlockComponent extends EmbedBlockComponent<
-  EmbedSyncedDocModel,
-  EmbedSyncedDocBlockService
-> {
+export class EmbedSyncedDocBlockComponent extends EmbedBlockComponent<EmbedSyncedDocModel> {
   static override styles = blockStyles;
 
   private _initEdgelessFitEffect = () => {

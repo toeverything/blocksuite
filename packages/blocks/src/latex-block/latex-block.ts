@@ -8,14 +8,9 @@ import katex from 'katex';
 import { html, render } from 'lit';
 import { query } from 'lit/decorators.js';
 
-import type { LatexBlockService } from './latex-service.js';
-
 import { latexBlockStyles } from './styles.js';
 
-export class LatexBlockComponent extends CaptionedBlockComponent<
-  LatexBlockModel,
-  LatexBlockService
-> {
+export class LatexBlockComponent extends CaptionedBlockComponent<LatexBlockModel> {
   static override styles = latexBlockStyles;
 
   private _editorAbortController: AbortController | null = null;
