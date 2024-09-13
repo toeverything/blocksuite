@@ -2,13 +2,12 @@ import type { SurfaceBlockModel } from '@blocksuite/affine-block-surface';
 import type { FrameBlockModel, NoteBlockModel } from '@blocksuite/affine-model';
 import type { Doc } from '@blocksuite/store';
 
-import {
-  MindmapElementModel,
-  Overlay,
-  renderableInEdgeless,
-} from '@blocksuite/affine-block-surface';
+import { MindmapElementModel, Overlay } from '@blocksuite/affine-block-surface';
 import { GroupElementModel } from '@blocksuite/affine-model';
-import { isGfxContainerElm } from '@blocksuite/block-std/gfx';
+import {
+  isGfxContainerElm,
+  renderableInEdgeless,
+} from '@blocksuite/block-std/gfx';
 import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 import {
   Bound,
