@@ -83,6 +83,50 @@ type MindmapElementProps = BaseElementProps & {
   children: Y.Map<NodeDetail>;
 };
 
+function observeChildren(
+  _: unknown,
+  instance: MindmapElementModel,
+  transaction: Y.Transaction | null
+) {
+  instance.setChildIds(
+    Array.from(instance.children.keys()),
+    transaction?.local ?? true
+  );
+
+  instance.buildTree();
+  instance.connectors.clear();
+}
+
+function watchLayoutType(
+  _: unknown,
+  instance: MindmapElementModel,
+  local: boolean
+) {
+  if (!local) {
+    return;
+  }
+
+  instance.surface.doc.transact(() => {
+    instance['_tree']?.children.forEach(child => {
+      if (!instance.children.has(child.id)) {
+        return;
+      }
+
+      instance.children.set(child.id, {
+        index: child.detail.index,
+        parent: child.detail.parent,
+      });
+    });
+  });
+
+  instance.buildTree();
+}
+
+function watchStyle(_: unknown, instance: MindmapElementModel, local: boolean) {
+  if (!local) return;
+  instance.layout();
+}
+
 export class MindmapElementModel extends GfxGroupLikeElementModel<MindmapElementProps> {
   private _layoutHandler = (
     _mindmap: MindmapElementModel,
@@ -343,7 +387,7 @@ export class MindmapElementModel extends GfxGroupLikeElementModel<MindmapElement
     return id!;
   }
 
-  protected buildTree() {
+  buildTree() {
     const mindmapNodeMap = new Map<string, MindmapNode>();
     const nodesMap = this.children;
 
@@ -758,48 +802,17 @@ export class MindmapElementModel extends GfxGroupLikeElementModel<MindmapElement
       return initialValue;
     }
   })
-  @observe(
-    (_, instance: MindmapElementModel, transaction: Y.Transaction | null) => {
-      instance.setChildIds(
-        Array.from(instance.children.keys()),
-        transaction?.local ?? true
-      );
-
-      instance.buildTree();
-      instance.connectors.clear();
-    }
-  )
+  // Use extracted function to avoid playwright test failure
+  // since this model package is imported by playwright
+  @observe(observeChildren)
   @field()
   accessor children: Y.Map<NodeDetail> = new DocCollection.Y.Map();
 
-  @watch((_, instance: MindmapElementModel, local) => {
-    if (!local) {
-      return;
-    }
-
-    instance.surface.doc.transact(() => {
-      instance['_tree']?.children.forEach(child => {
-        if (!instance.children.has(child.id)) {
-          return;
-        }
-
-        instance.children.set(child.id, {
-          index: child.detail.index,
-          parent: child.detail.parent,
-        });
-      });
-    });
-
-    instance.buildTree();
-  })
+  @watch(watchLayoutType)
   @field()
   accessor layoutType: LayoutType = LayoutType.RIGHT;
 
-  @watch((_, instance: MindmapElementModel, local) => {
-    if (local) {
-      instance.layout();
-    }
-  })
+  @watch(watchStyle)
   @field()
   accessor style: MindmapStyle = MindmapStyle.ONE;
 }
