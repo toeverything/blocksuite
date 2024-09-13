@@ -74,8 +74,24 @@ export class FrameBlockModel
   addChild(element: BlockSuite.EdgelessModel | string): void {
     const id = typeof element === 'string' ? element : element.id;
     this.doc.transact(() => {
-      if (!this.childElementIds) this.childElementIds = {};
-      this.childElementIds[id] = true;
+      this.childElementIds = { ...this.childElementIds, [id]: true };
+    });
+  }
+
+  addChildren(elements: (BlockSuite.EdgelessModel | string)[]): void {
+    elements = [...new Set(elements)];
+
+    const newChildren: Record<string, boolean> = {};
+    for (const element of elements) {
+      const id = typeof element === 'string' ? element : element.id;
+      newChildren[id] = true;
+    }
+
+    this.doc.transact(() => {
+      this.childElementIds = {
+        ...this.childElementIds,
+        ...newChildren,
+      };
     });
   }
 

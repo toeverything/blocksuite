@@ -120,6 +120,16 @@ export class EdgelessFrameManager {
     this._watchElementAddedOrDeleted();
   }
 
+  private _addChildrenToLegacyFrame(frame: FrameBlockModel) {
+    if (frame.childElementIds !== undefined) return;
+    const elements = this.getElementsInFrameBound(frame);
+    const childElements = elements.filter(
+      element => this.getParentFrame(element) === null && element !== frame
+    );
+
+    frame.addChildren(childElements);
+  }
+
   private _addFrameBlock(bound: Bound) {
     const surfaceModel = this._rootService.doc.getBlocksByFlavour(
       'affine:surface'
@@ -218,8 +228,7 @@ export class EdgelessFrameManager {
     elements: BlockSuite.EdgelessModel[]
   ) {
     if (frame.childElementIds === undefined) {
-      elements = [...elements, ...this.getChildElementsInFrame(frame)];
-      frame.childElementIds = {};
+      this._addChildrenToLegacyFrame(frame);
     }
 
     elements = elements.filter(
@@ -228,26 +237,26 @@ export class EdgelessFrameManager {
 
     if (elements.length === 0) return;
 
-    this._rootService.doc.transact(() => {
-      elements.forEach(element => {
-        // TODO(@L-Sun): refactor this. This branch is avoid circle, but it's better to handle in a tree manager
-        if (isGfxContainerElm(element) && element.childIds.includes(frame.id)) {
-          if (isFrameBlock(element)) {
-            this.removeParentFrame(frame);
-          } else if (element instanceof GroupElementModel) {
-            // eslint-disable-next-line unicorn/prefer-dom-node-remove
-            element.removeChild(frame.id);
-          }
-        }
-
-        const parentFrame = this.getParentFrame(element);
-        if (parentFrame) {
+    // Remove other relations
+    elements.forEach(element => {
+      // TODO(@L-Sun): refactor this. This branch is avoid circle, but it's better to handle in a tree manager
+      if (isGfxContainerElm(element) && element.childIds.includes(frame.id)) {
+        if (isFrameBlock(element)) {
+          this.removeParentFrame(frame);
+        } else if (element instanceof GroupElementModel) {
           // eslint-disable-next-line unicorn/prefer-dom-node-remove
-          parentFrame.removeChild(element);
+          element.removeChild(frame.id);
         }
-        frame.addChild(element);
-      });
+      }
+
+      const parentFrame = this.getParentFrame(element);
+      if (parentFrame) {
+        // eslint-disable-next-line unicorn/prefer-dom-node-remove
+        parentFrame.removeChild(element);
+      }
     });
+
+    frame.addChildren(elements);
   }
 
   createFrameOnBound(bound: Bound) {
