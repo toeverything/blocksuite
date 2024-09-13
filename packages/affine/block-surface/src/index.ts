@@ -15,7 +15,6 @@ export type {
   MindmapNode,
   NodeDetail,
 } from './element-model/utils/mindmap/layout.js';
-export * from './elements/index.js';
 export {
   calculateNearestLocation,
   ConnectionOverlay,
@@ -39,6 +38,7 @@ export {
   normalizeShapeBound,
 } from './renderer/elements/index.js';
 export { fitContent } from './renderer/elements/shape/utils.js';
+export * from './renderer/elements/type.js';
 import {
   getCursorByCoord,
   getLineHeight,

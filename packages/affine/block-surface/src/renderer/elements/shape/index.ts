@@ -8,12 +8,12 @@ import {
   TextAlign,
 } from '@blocksuite/affine-model';
 import { Bound } from '@blocksuite/global/utils';
+import { deltaInsertsToChunks } from '@blocksuite/inline';
 
 import type { RoughCanvas } from '../../../utils/rough/canvas.js';
 import type { CanvasRenderer } from '../../canvas-renderer.js';
 
 import {
-  deltaInsertsToChunks,
   getFontMetrics,
   getFontString,
   getLineWidth,
