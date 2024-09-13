@@ -1,10 +1,7 @@
 import type { EditorHost } from '@blocksuite/block-std';
 
 import { WithDisposable } from '@blocksuite/block-std';
-import {
-  type EdgelessRootBlockComponent,
-  EditPropsStore,
-} from '@blocksuite/blocks';
+import { EdgelessRootService, EditPropsStore } from '@blocksuite/blocks';
 import { css, html, LitElement, type PropertyValues } from 'lit';
 import { property, state } from 'lit/decorators.js';
 
@@ -78,14 +75,14 @@ export class FramesSettingMenu extends WithDisposable(LitElement) {
 
   private _onBlackBackgroundChange = (checked: boolean) => {
     this.blackBackground = checked;
-    this.edgeless?.slots.navigatorSettingUpdated.emit({
+    this._edgelessRootService?.slots.navigatorSettingUpdated.emit({
       blackBackground: this.blackBackground,
     });
   };
 
   private _onFillScreenChange = (checked: boolean) => {
     this.fillScreen = checked;
-    this.edgeless?.slots.navigatorSettingUpdated.emit({
+    this._edgelessRootService?.slots.navigatorSettingUpdated.emit({
       fillScreen: this.fillScreen,
     });
     this._editPropsStore.setStorage('presentFillScreen', this.fillScreen);
@@ -93,11 +90,15 @@ export class FramesSettingMenu extends WithDisposable(LitElement) {
 
   private _onHideToolBarChange = (checked: boolean) => {
     this.hideToolbar = checked;
-    this.edgeless?.slots.navigatorSettingUpdated.emit({
+    this._edgelessRootService?.slots.navigatorSettingUpdated.emit({
       hideToolbar: this.hideToolbar,
     });
     this._editPropsStore.setStorage('presentHideToolbar', this.hideToolbar);
   };
+
+  private get _edgelessRootService() {
+    return this.editorHost.std.getOptional(EdgelessRootService);
+  }
 
   private get _editPropsStore() {
     return this.editorHost.std.get(EditPropsStore);
@@ -167,10 +168,10 @@ export class FramesSettingMenu extends WithDisposable(LitElement) {
   }
 
   override updated(_changedProperties: PropertyValues) {
-    if (_changedProperties.has('edgeless')) {
-      if (this.edgeless) {
+    if (_changedProperties.has('editorHost')) {
+      if (this._edgelessRootService) {
         this.disposables.add(
-          this.edgeless.slots.navigatorSettingUpdated.on(
+          this._edgelessRootService.slots.navigatorSettingUpdated.on(
             ({ blackBackground, hideToolbar }) => {
               if (
                 blackBackground !== undefined &&
@@ -196,9 +197,6 @@ export class FramesSettingMenu extends WithDisposable(LitElement) {
 
   @state()
   accessor blackBackground = false;
-
-  @property({ attribute: false })
-  accessor edgeless!: EdgelessRootBlockComponent | null;
 
   @property({ attribute: false })
   accessor editorHost!: EditorHost;
