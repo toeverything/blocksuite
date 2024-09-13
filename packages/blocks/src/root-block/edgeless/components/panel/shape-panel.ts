@@ -6,7 +6,6 @@ import { repeat } from 'lit/directives/repeat.js';
 
 import type { ShapeTool } from '../../tools/shape-tool.js';
 
-import '../buttons/tool-icon-button.js';
 import { ShapeComponentConfig } from '../toolbar/shape/shape-menu-config.js';
 
 export class EdgelessShapePanel extends LitElement {

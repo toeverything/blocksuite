@@ -7,7 +7,6 @@ import {
 } from '../../../../core/common/ast.js';
 import { popCreateFilter } from '../../../../core/common/ref/ref.js';
 import { WidgetBase } from '../../../../core/widget/widget-base.js';
-import '../../../filter/filter-group.js';
 
 const styles = css`
   .affine-database-filter-button {

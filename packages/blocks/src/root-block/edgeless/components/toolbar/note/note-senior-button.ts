@@ -15,7 +15,6 @@ import type { NoteTool } from '../../../tools/note-tool.js';
 import { getTooltipWithShortcut } from '../../utils.js';
 import { EdgelessToolbarToolMixin } from '../mixins/tool.mixin.js';
 import { toShapeNotToAdapt } from './icon.js';
-import './note-menu.js';
 
 export class EdgelessNoteSeniorButton extends EdgelessToolbarToolMixin(
   SignalWatcher(LitElement)

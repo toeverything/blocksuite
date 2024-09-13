@@ -24,7 +24,6 @@ import {
   toolConfig2StyleObj,
 } from './basket-elements.js';
 import { basketIconDark, basketIconLight, textIcon } from './icons.js';
-import './mindmap-menu.js';
 import { importMindmap } from './utils/import-mindmap.js';
 
 export class EdgelessMindmapToolButton extends EdgelessToolbarToolMixin(

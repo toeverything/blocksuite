@@ -14,7 +14,6 @@ import type { CodeBlockComponent } from '../../../code-block/code-block.js';
 
 import { PAGE_HEADER_HEIGHT } from '../../../_common/consts.js';
 import { getMoreMenuConfig } from '../../configs/toolbar.js';
-import './components/code-toolbar.js';
 import { MORE_GROUPS, PRIMARY_GROUPS } from './config.js';
 import { CodeBlockToolbarContext } from './context.js';
 

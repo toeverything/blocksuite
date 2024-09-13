@@ -5,7 +5,6 @@ import { property } from 'lit/decorators.js';
 
 import type { ColorEvent } from './color-panel.js';
 
-import './color-panel.js';
 import { type LineStyleEvent, LineStylesPanel } from './line-styles-panel.js';
 
 export class StrokeStylePanel extends WithDisposable(LitElement) {

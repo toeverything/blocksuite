@@ -9,10 +9,8 @@ import { computed } from '@lit-labs/preact-signals';
 import { css, html, LitElement } from 'lit';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import '../../buttons/toolbar-button.js';
 import { getTooltipWithShortcut } from '../../utils.js';
 import { EdgelessToolbarToolMixin } from '../mixins/tool.mixin.js';
-import './brush-menu.js';
 
 export class EdgelessBrushToolButton extends EdgelessToolbarToolMixin(
   SignalWatcher(LitElement)

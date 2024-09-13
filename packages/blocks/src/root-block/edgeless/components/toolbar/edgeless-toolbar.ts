@@ -25,17 +25,12 @@ import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
 import type { EdgelessTool } from '../../types.js';
 import type { MenuPopper } from './common/create-popper.js';
 
-import '../../../../_common/components/smooth-corner.js';
-import '../buttons/tool-icon-button.js';
-import '../buttons/toolbar-button.js';
 import {
   edgelessToolbarContext,
   type EdgelessToolbarSlots,
   edgelessToolbarSlotsContext,
   edgelessToolbarThemeContext,
 } from './context.js';
-import './present/frame-order-button.js';
-import './presentation-toolbar.js';
 import { getQuickTools, getSeniorTools } from './tools.js';
 
 const TOOLBAR_PADDING_X = 12;

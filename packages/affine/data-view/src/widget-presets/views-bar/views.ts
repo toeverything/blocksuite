@@ -13,7 +13,6 @@ import {
 import { css, html } from 'lit';
 import { classMap } from 'lit/directives/class-map.js';
 
-import '../../core/common/component/overflow/overflow.js';
 import { renderUniLit } from '../../core/index.js';
 import { WidgetBase } from '../../core/widget/widget-base.js';
 

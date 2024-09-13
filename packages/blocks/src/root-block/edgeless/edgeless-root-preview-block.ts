@@ -9,7 +9,6 @@ import type {
 } from '@blocksuite/block-std';
 import type { IBound } from '@blocksuite/global/utils';
 
-import '@blocksuite/affine-block-surface';
 import { FontLoaderService } from '@blocksuite/affine-shared/services';
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import { BlockComponent } from '@blocksuite/block-std';

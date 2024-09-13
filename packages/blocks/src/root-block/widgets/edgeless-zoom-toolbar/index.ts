@@ -6,9 +6,6 @@ import { state } from 'lit/decorators.js';
 
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 
-import './zoom-bar-toggle-button.js';
-import './zoom-toolbar.js';
-
 export const AFFINE_EDGELESS_ZOOM_TOOLBAR_WIDGET =
   'affine-edgeless-zoom-toolbar-widget';
 

@@ -6,8 +6,6 @@ import { repeat } from 'lit/directives/repeat.js';
 
 import type { EmbedCardStyle } from '../../../../_common/types.js';
 
-import '../../../../_common/components/button.js';
-
 export class CardStylePanel extends WithDisposable(LitElement) {
   static override styles = css`
     :host {

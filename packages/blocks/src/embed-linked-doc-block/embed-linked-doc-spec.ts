@@ -7,7 +7,6 @@ import {
 import { literal } from 'lit/static-html.js';
 
 import { commands } from './commands/index.js';
-import './embed-edgeless-linked-doc-block.js';
 import { EmbedLinkedDocBlockService } from './embed-linked-doc-service.js';
 
 export const EmbedLinkedDocBlockSpec: ExtensionType[] = [

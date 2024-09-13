@@ -22,9 +22,7 @@ import { property } from 'lit/decorators.js';
 
 import type { EdgelessRootBlockComponent } from '../../../edgeless-root-block.js';
 
-import '../../buttons/tool-icon-button.js';
 import { type ColorEvent, isTransparent } from '../../panel/color-panel.js';
-import '../../panel/one-row-color-panel.js';
 import {
   LINE_COLOR_PREFIX,
   SHAPE_COLOR_PREFIX,

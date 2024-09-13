@@ -16,7 +16,6 @@ import type { TableSingleView } from '../table-view-manager.js';
 import { openDetail, popRowMenu } from '../components/menu.js';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../consts.js';
 import { TableRowSelection, type TableViewSelection } from '../types.js';
-import './row-select-checkbox.js';
 
 export class TableRow extends SignalWatcher(WithDisposable(ShadowlessElement)) {
   static override styles = css`

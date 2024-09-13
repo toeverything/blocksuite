@@ -5,7 +5,6 @@ import {
 } from '@blocksuite/block-std';
 import { literal } from 'lit/static-html.js';
 
-import './attachment-edgeless-block.js';
 import { AttachmentBlockService } from './attachment-service.js';
 
 export const AttachmentBlockSpec: ExtensionType[] = [

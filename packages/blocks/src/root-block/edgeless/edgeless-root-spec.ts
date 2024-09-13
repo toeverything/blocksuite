@@ -27,7 +27,6 @@ import { AFFINE_MODAL_WIDGET } from '../widgets/modal/modal.js';
 import { AFFINE_PIE_MENU_WIDGET } from '../widgets/pie-menu/index.js';
 import { AFFINE_SLASH_MENU_WIDGET } from '../widgets/slash-menu/index.js';
 import { AFFINE_VIEWPORT_OVERLAY_WIDGET } from '../widgets/viewport-overlay/viewport-overlay.js';
-import './edgeless-root-preview-block.js';
 import { EdgelessRootService } from './edgeless-root-service.js';
 
 export const edgelessRootWigetViewMap = {

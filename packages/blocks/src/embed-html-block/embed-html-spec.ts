@@ -5,7 +5,6 @@ import {
 } from '@blocksuite/block-std';
 import { literal } from 'lit/static-html.js';
 
-import './embed-edgeless-html-block.js';
 import { EmbedHtmlBlockService } from './embed-html-service.js';
 
 export const EmbedHtmlBlockSpec: ExtensionType[] = [

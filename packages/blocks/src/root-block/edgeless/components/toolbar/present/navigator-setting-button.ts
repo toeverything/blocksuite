@@ -9,10 +9,6 @@ import { property, query, state } from 'lit/decorators.js';
 
 import type { EdgelessRootBlockComponent } from '../../../edgeless-root-block.js';
 
-import '../../../../../_common/components/toggle-switch.js';
-import '../../buttons/tool-icon-button.js';
-import './frame-order-menu.js';
-
 export class EdgelessNavigatorSettingButton extends WithDisposable(LitElement) {
   static override styles = css`
     .navigator-setting-menu {

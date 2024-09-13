@@ -9,7 +9,6 @@ import type { EmbedHtmlBlockService } from './embed-html-service.js';
 
 import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../_common/consts.js';
 import { EmbedBlockComponent } from '../_common/embed-block-helper/index.js';
-import './components/fullscreen-toolbar.js';
 import { HtmlIcon, styles } from './styles.js';
 
 export class EmbedHtmlBlockComponent extends EmbedBlockComponent<

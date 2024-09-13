@@ -16,8 +16,6 @@ import type { TableSingleView } from './table-view-manager.js';
 
 import { GroupTitle } from '../../core/common/group-by/group-title.js';
 import { LEFT_TOOL_BAR_WIDTH } from './consts.js';
-import './stats/column-stats-bar.js';
-import './stats/column-stats-column.js';
 import { TableAreaSelection } from './types.js';
 
 const styles = css`

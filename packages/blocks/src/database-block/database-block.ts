@@ -46,7 +46,6 @@ import {
   getDropResult,
 } from '../root-block/widgets/drag-handle/utils.js';
 import { popSideDetail } from './components/layout.js';
-import './components/title/index.js';
 import { DatabaseBlockDataSource } from './data-source.js';
 
 export class DatabaseBlockComponent extends CaptionedBlockComponent<

@@ -9,8 +9,6 @@ import { html } from 'lit';
 
 import type { CodeBlockComponent } from '../../../code-block/index.js';
 
-import './components/lang-button.js';
-
 export const AFFINE_CODE_LANGUAGE_LIST_WIDGET =
   'affine-code-language-list-widget';
 

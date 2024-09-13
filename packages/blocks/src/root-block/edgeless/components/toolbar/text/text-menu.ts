@@ -4,9 +4,6 @@ import { property } from 'lit/decorators.js';
 import type { EdgelessTool } from '../../../types.js';
 import type { ColorEvent } from '../../panel/color-panel.js';
 
-import '../../buttons/tool-icon-button.js';
-import '../../panel/one-row-color-panel.js';
-import '../common/slide-menu.js';
 import { EdgelessToolbarToolMixin } from '../mixins/tool.mixin.js';
 
 export class EdgelessTextMenu extends EdgelessToolbarToolMixin(LitElement) {

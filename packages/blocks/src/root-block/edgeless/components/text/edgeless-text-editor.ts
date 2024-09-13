@@ -2,7 +2,6 @@ import type { RichText } from '@blocksuite/affine-components/rich-text';
 import type { TextElementModel } from '@blocksuite/affine-model';
 
 import { CommonUtils, TextUtils } from '@blocksuite/affine-block-surface';
-import '@blocksuite/affine-components/rich-text';
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import {
   RANGE_SYNC_EXCLUDE_ATTR,

@@ -7,7 +7,6 @@ import {
   focusTextModel,
   type RichText,
 } from '@blocksuite/affine-components/rich-text';
-import '@blocksuite/affine-components/rich-text';
 import { toast } from '@blocksuite/affine-components/toast';
 import { BRACKET_PAIRS, NOTE_SELECTOR } from '@blocksuite/affine-shared/consts';
 import { getViewportElement } from '@blocksuite/affine-shared/utils';
@@ -36,7 +35,6 @@ import type { CodeBlockService } from './code-block-service.js';
 import { EdgelessRootBlockComponent } from '../root-block/edgeless/edgeless-root-block.js';
 import { CodeClipboardController } from './clipboard/index.js';
 import { CodeBlockInlineManagerExtension } from './code-block-inline.js';
-import './highlight/affine-code-unit.js';
 import { codeBlockStyles } from './styles.js';
 
 export class CodeBlockComponent extends CaptionedBlockComponent<

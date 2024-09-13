@@ -14,9 +14,6 @@ import type {
   PickColorType,
 } from './types.js';
 
-import '../panel/color-panel.js';
-import './color-picker.js';
-import './custom-button.js';
 import { keepColor, preprocessColor } from './utils.js';
 
 type Type = 'normal' | 'custom';

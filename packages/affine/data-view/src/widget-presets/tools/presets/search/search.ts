@@ -10,7 +10,6 @@ import type { TableSingleView } from '../../../../view-presets/table/table-view-
 
 import { stopPropagation } from '../../../../core/utils/event.js';
 import { WidgetBase } from '../../../../core/widget/widget-base.js';
-import '../../../filter/filter-group.js';
 
 const styles = css`
   .affine-database-search-container {

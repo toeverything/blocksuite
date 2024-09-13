@@ -12,10 +12,6 @@ import type {
 
 import { type DataViewExpose, renderUniLit } from '../../core/index.js';
 import { WidgetBase } from '../../core/widget/widget-base.js';
-import './presets/filter/filter.js';
-import './presets/search/search.js';
-import './presets/table-add-row/add-row.js';
-import './presets/view-options/view-options.js';
 
 const styles = css`
   .affine-database-toolbar {

@@ -69,7 +69,6 @@ import { renderMindmapButton } from './change-mindmap-button.js';
 import { renderNoteButton } from './change-note-button.js';
 import { renderChangeShapeButton } from './change-shape-button.js';
 import { renderChangeTextButton } from './change-text-button.js';
-import './more-menu/button.js';
 import { BUILT_IN_GROUPS } from './more-menu/config.js';
 import { renderReleaseFromGroupButton } from './release-from-group-button.js';
 

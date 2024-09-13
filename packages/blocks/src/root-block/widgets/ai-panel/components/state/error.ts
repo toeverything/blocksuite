@@ -13,7 +13,6 @@ import {
   type AIItemGroupConfig,
 } from '../../../../../_common/components/index.js';
 import { filterAIItemGroup } from '../../utils.js';
-import '../finish-tip.js';
 
 export class AIPanelError extends WithDisposable(LitElement) {
   static override styles = css`

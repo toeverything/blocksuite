@@ -27,8 +27,6 @@ import {
 import { EdgelessDraggableElementController } from '../common/draggable/draggable-element.controller.js';
 import { builtInTemplates } from './builtin-templates.js';
 import { ArrowIcon, defaultPreview } from './icon.js';
-import './overlay-scrollbar.js';
-import './template-loading.js';
 import { cloneDeep } from './utils.js';
 
 export class EdgelessTemplatePanel extends WithDisposable(LitElement) {

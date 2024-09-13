@@ -5,11 +5,8 @@ import { css, html, LitElement } from 'lit';
 import type { DraggableShape } from './utils.js';
 
 import { ShapeToolController } from '../../../tools/shape-tool.js';
-import '../../buttons/toolbar-button.js';
 import { getTooltipWithShortcut } from '../../utils.js';
 import { EdgelessToolbarToolMixin } from '../mixins/tool.mixin.js';
-import './shape-draggable.js';
-import './shape-menu.js';
 
 export class EdgelessShapeToolButton extends EdgelessToolbarToolMixin(
   SignalWatcher(LitElement)

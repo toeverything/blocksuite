@@ -5,7 +5,6 @@ import {
 } from '@blocksuite/block-std';
 import { literal } from 'lit/static-html.js';
 
-import './embed-edgeless-youtube-block.js';
 import { EmbedYoutubeBlockService } from './embed-youtube-service.js';
 
 export const EmbedYoutubeBlockSpec: ExtensionType[] = [

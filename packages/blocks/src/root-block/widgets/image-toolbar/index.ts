@@ -14,7 +14,6 @@ import type { ImageBlockComponent } from '../../../image-block/image-block.js';
 
 import { PAGE_HEADER_HEIGHT } from '../../../_common/consts.js';
 import { getMoreMenuConfig } from '../../configs/toolbar.js';
-import './components/image-toolbar.js';
 import { MORE_GROUPS, PRIMARY_GROUPS } from './config.js';
 import { ImageToolbarContext } from './context.js';
 

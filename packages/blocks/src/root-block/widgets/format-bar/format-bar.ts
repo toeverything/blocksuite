@@ -31,7 +31,6 @@ import { query, state } from 'lit/decorators.js';
 
 import type { FormatBarContext } from './context.js';
 
-import '../../../_common/components/button.js';
 import { getMoreMenuConfig } from '../../configs/toolbar.js';
 import { ConfigRenderer } from './components/config-renderer.js';
 import {

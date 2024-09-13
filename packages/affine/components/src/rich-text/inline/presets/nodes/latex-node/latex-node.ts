@@ -21,8 +21,6 @@ import { property } from 'lit/decorators.js';
 import type { AffineTextAttributes } from '../../../../extension/index.js';
 
 import { createLitPortal } from '../../../../../portal/helper.js';
-import './latex-editor-menu.js';
-import './latex-editor-unit.js';
 
 export class AffineLatexNode extends SignalWatcher(
   WithDisposable(ShadowlessElement)
@@ -236,10 +234,4 @@ export class AffineLatexNode extends SignalWatcher(
 
   @property({ attribute: false })
   accessor std!: BlockStdScope;
-}
-
-declare global {
-  interface HTMLElementTagNameMap {
-    'affine-latex-node': AffineLatexNode;
-  }
 }

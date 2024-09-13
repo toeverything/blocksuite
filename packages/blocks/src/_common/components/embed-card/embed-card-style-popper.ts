@@ -12,7 +12,6 @@ import { classMap } from 'lit/directives/class-map.js';
 import type { EmbedCardStyle } from '../../types.js';
 
 import { getEmbedCardIcons } from '../../utils/url.js';
-import './../button.js';
 
 export class EmbedCardStyleMenu extends WithDisposable(LitElement) {
   static override styles = css`

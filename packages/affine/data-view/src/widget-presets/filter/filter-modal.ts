@@ -5,9 +5,6 @@ import { property } from 'lit/decorators.js';
 
 import type { FilterGroup, Variable } from '../../core/common/ast.js';
 
-import './filter-group.js';
-import './filter-root.js';
-
 export class AdvancedFilterModal extends WithDisposable(ShadowlessElement) {
   static override styles = css`
     advanced-filter-modal {

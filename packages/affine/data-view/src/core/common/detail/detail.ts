@@ -22,7 +22,6 @@ import type { DetailSlotProps, DetailSlots } from '../data-source/base.js';
 
 import { renderUniLit } from '../../utils/uni-component/uni-component.js';
 import { dataViewCommonStyle } from '../css-variable.js';
-import './field.js';
 import { DetailSelection } from './selection.js';
 
 const styles = css`

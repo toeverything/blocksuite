@@ -15,12 +15,10 @@ import {
   type Variable,
   type VariableOrProperty,
 } from '../../core/common/ast.js';
-import '../../core/common/literal/define.js';
 import {
   popLiteralEdit,
   renderLiteral,
 } from '../../core/common/literal/matcher.js';
-import '../../core/common/ref/ref.js';
 import { tBoolean } from '../../core/logical/data-type.js';
 import { typesystem } from '../../core/logical/typesystem.js';
 import { filterMatcher } from './matcher/matcher.js';

@@ -21,7 +21,6 @@ import {
 } from '../../../_common/consts.js';
 import { getEmbedCardIcons } from '../../../_common/utils/url.js';
 import { downloadAttachmentBlob } from '../../../attachment-block/utils.js';
-import '../../edgeless/components/panel/card-style-panel.js';
 
 export class EdgelessChangeAttachmentButton extends WithDisposable(LitElement) {
   private _download = () => {

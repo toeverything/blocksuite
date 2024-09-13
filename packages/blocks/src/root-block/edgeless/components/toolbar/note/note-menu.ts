@@ -13,9 +13,7 @@ import {
   openFileOrFiles,
 } from '../../../../../_common/utils/index.js';
 import { ImageIcon } from '../../../../../image-block/styles.js';
-import '../../buttons/tool-icon-button.js';
 import { getTooltipWithShortcut } from '../../utils.js';
-import '../common/slide-menu.js';
 import { EdgelessToolbarToolMixin } from '../mixins/tool.mixin.js';
 import { NOTE_MENU_ITEMS } from './note-menu-config.js';
 

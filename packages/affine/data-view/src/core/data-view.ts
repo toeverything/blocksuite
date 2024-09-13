@@ -20,7 +20,6 @@ import type { SingleView } from './view-manager/single-view.js';
 
 import { dataViewCommonStyle } from './common/css-variable.js';
 import { createRecordDetail } from './common/detail/detail.js';
-import './common/group-by/define.js';
 import { renderUniLit } from './utils/uni-component/index.js';
 
 type ViewProps = {

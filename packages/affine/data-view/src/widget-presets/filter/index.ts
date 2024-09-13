@@ -3,7 +3,6 @@ import { html } from 'lit';
 import type { DataViewWidgetProps } from '../../core/widget/types.js';
 
 import { defineUniComponent } from '../../core/index.js';
-import './filter-bar.js';
 
 export const widgetFilterBar = defineUniComponent(
   (props: DataViewWidgetProps) => {

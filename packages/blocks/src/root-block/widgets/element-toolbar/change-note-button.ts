@@ -35,20 +35,14 @@ import type {
 import type { ColorEvent } from '../../edgeless/components/panel/color-panel.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 
-import '../../edgeless/components/color-picker/index.js';
 import {
   packColor,
   packColorsWithColorScheme,
 } from '../../edgeless/components/color-picker/utils.js';
-import '../../edgeless/components/panel/color-panel.js';
 import {
   type LineStyleEvent,
   LineStylesPanel,
 } from '../../edgeless/components/panel/line-styles-panel.js';
-import '../../edgeless/components/panel/note-display-mode-panel.js';
-import '../../edgeless/components/panel/note-shadow-panel.js';
-import '../../edgeless/components/panel/scale-panel.js';
-import '../../edgeless/components/panel/size-panel.js';
 import { getTooltipWithShortcut } from '../../edgeless/components/utils.js';
 
 const SIZE_LIST = [

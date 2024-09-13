@@ -17,7 +17,6 @@ import { query, state } from 'lit/decorators.js';
 import { html } from 'lit/static-html.js';
 
 import { HostContextKey } from '../../context/host-context.js';
-import './components/link-node.js';
 import { linkColumnModelConfig } from './define.js';
 
 export class LinkCell extends BaseCellRenderer<string> {

@@ -14,7 +14,6 @@ import { repeat } from 'lit/directives/repeat.js';
 import type { AIItem } from './ai-item.js';
 import type { AIItemConfig, AIItemGroupConfig } from './types.js';
 
-import './ai-item.js';
 import {
   SUBMENU_OFFSET_CROSS_AXIS,
   SUBMENU_OFFSET_MAIN_AXIS,

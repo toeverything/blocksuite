@@ -11,10 +11,8 @@ import { computed } from '@lit-labs/preact-signals';
 import { css, html, LitElement } from 'lit';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import '../../buttons/toolbar-button.js';
 import { getTooltipWithShortcut } from '../../utils.js';
 import { QuickToolMixin } from '../mixins/quick-tool.mixin.js';
-import './connector-menu.js';
 
 const IcomMap = {
   [ConnectorMode.Straight]: ConnectorLWithArrowIcon,

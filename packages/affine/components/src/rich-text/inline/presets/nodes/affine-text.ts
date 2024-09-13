@@ -68,9 +68,3 @@ export class AffineText extends ShadowlessElement {
     insert: ZERO_WIDTH_SPACE,
   };
 }
-
-declare global {
-  interface HTMLElementTagNameMap {
-    'affine-text': AffineText;
-  }
-}

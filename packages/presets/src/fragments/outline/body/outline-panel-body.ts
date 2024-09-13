@@ -21,7 +21,6 @@ import type {
   SelectEvent,
 } from '../utils/custom-events.js';
 
-import '../card/outline-card.js';
 import { startDragging } from '../utils/drag.js';
 import {
   getHeadingBlocksFromDoc,
@@ -32,7 +31,6 @@ import {
   observeActiveHeadingDuringScroll,
   scrollToBlockWithHighlight,
 } from '../utils/scroll.js';
-import './outline-notice.js';
 
 type OutlineNoteItem = {
   note: NoteBlockModel;

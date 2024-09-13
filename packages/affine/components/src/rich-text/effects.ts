@@ -24,3 +24,12 @@ export function effects() {
   customElements.define('reference-popup', ReferencePopup);
   customElements.define('affine-reference', AffineReference);
 }
+
+declare global {
+  interface HTMLElementTagNameMap {
+    'affine-latex-node': AffineLatexNode;
+    'affine-reference': AffineReference;
+    'affine-link': AffineLink;
+    'affine-text': AffineText;
+  }
+}

@@ -65,10 +65,6 @@ import {
   setAttachmentUploading,
 } from '../../attachment-block/utils.js';
 import { EdgelessClipboardController } from './clipboard/clipboard.js';
-import './components/note-slicer/index.js';
-import './components/presentation/edgeless-navigator-black-background.js';
-import './components/rects/edgeless-dragging-area-rect.js';
-import './components/rects/edgeless-selected-rect.js';
 import { EdgelessToolbar } from './components/toolbar/edgeless-toolbar.js';
 import { calcBoundByOrigin, readImageSize } from './components/utils.js';
 import { EdgelessPageKeyboardManager } from './edgeless-keyboard.js';

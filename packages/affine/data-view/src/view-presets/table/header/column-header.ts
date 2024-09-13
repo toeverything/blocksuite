@@ -15,7 +15,6 @@ import { html } from 'lit/static-html.js';
 import type { TableGroup } from '../group.js';
 import type { TableSingleView } from '../table-view-manager.js';
 
-import './database-header-column.js';
 import { styles } from './styles.js';
 
 export class DatabaseColumnHeader extends SignalWatcher(

@@ -32,7 +32,6 @@ import {
   AFFINE_VIEWPORT_OVERLAY_WIDGET,
   type AffineViewportOverlayWidget,
 } from '../viewport-overlay/viewport-overlay.js';
-import './components/index.js';
 
 export const AFFINE_AI_PANEL_WIDGET = 'affine-ai-panel-widget';
 

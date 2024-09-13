@@ -19,7 +19,6 @@ import { query, state } from 'lit/decorators.js';
 
 import { MarkdownAdapter } from '../../../../_common/adapters/markdown.js';
 import { NotionHtmlAdapter } from '../../../../_common/adapters/notion-html.js';
-import '../../../../_common/components/loader.js';
 import { defaultImageProxyMiddleware } from '../../../../_common/transformers/middlewares.js';
 import { Unzip } from '../../../../_common/transformers/utils.js';
 import { openFileOrFiles } from '../../../../_common/utils/index.js';

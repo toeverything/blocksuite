@@ -56,7 +56,6 @@ import {
 } from '../../../_common/consts.js';
 import { getEmbedCardIcons } from '../../../_common/utils/url.js';
 import { isLinkToNode } from '../../../embed-linked-doc-block/utils.js';
-import '../../edgeless/components/panel/card-style-panel.js';
 import {
   isBookmarkBlock,
   isEmbedGithubBlock,

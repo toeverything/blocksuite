@@ -10,8 +10,6 @@ import { property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import '../buttons/tool-icon-button.js';
-
 const SHADOWS = [
   {
     type: NoteShadow.None,

@@ -1,14 +1,11 @@
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
-import { DocModeProvider, FramePreview } from '@blocksuite/blocks';
+import { FramePreview } from '@blocksuite/blocks';
 import { DisposableGroup } from '@blocksuite/global/utils';
 import { baseTheme } from '@toeverything/theme';
 import { css, html, type PropertyValues, unsafeCSS } from 'lit';
 import { property } from 'lit/decorators.js';
 
 import type { AffineEditorContainer } from '../../index.js';
-
-import './body/frame-panel-body.js';
-import './header/frame-panel-header.js';
 
 const styles = css`
   frame-panel {
@@ -89,13 +86,6 @@ export class FramePanel extends WithDisposable(ShadowlessElement) {
   private _setEditorDisposables() {
     this._clearEditorDisposables();
     this._editorDisposables = new DisposableGroup();
-    this._editorDisposables.add(
-      this.editor.std.get(DocModeProvider).onPrimaryModeChange(() => {
-        this.editor.updateComplete
-          .then(() => this.requestUpdate())
-          .catch(console.error);
-      }, this.editor.doc.id)
-    );
     this._editorDisposables.add(
       this.editor.slots.docUpdated.on(() => {
         this.editor.updateComplete
