@@ -4,10 +4,10 @@ import { OpenIcon } from '@blocksuite/affine-components/icons';
 import { html } from 'lit';
 import { property, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
+import { styleMap } from 'lit/directives/style-map.js';
 
 import type { EmbedLoomBlockService } from './embed-loom-service.js';
 
-import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../_common/consts.js';
 import { EmbedBlockComponent } from '../_common/embed-block-helper/embed-block-element.js';
 import { getEmbedCardIcons } from '../_common/utils/url.js';
 import { loomUrlRegex } from './embed-loom-model.js';
@@ -117,8 +117,6 @@ export class EmbedLoomBlockComponent extends EmbedBlockComponent<
     const { image, title = 'Loom', description, videoId, style } = this.model;
 
     this._cardStyle = style;
-    this._width = EMBED_CARD_WIDTH[this._cardStyle];
-    this._height = EMBED_CARD_HEIGHT[this._cardStyle];
 
     const loading = this.loading;
     const { LoadingIcon, EmbedCardBannerIcon } = getEmbedCardIcons();
@@ -134,58 +132,58 @@ export class EmbedLoomBlockComponent extends EmbedBlockComponent<
 
     return this.renderEmbed(
       () => html`
-        <div>
-          <div
-            class=${classMap({
-              'affine-embed-loom-block': true,
-              loading,
-              selected: this._isSelected,
-            })}
-            @click=${this._handleClick}
-            @dblclick=${this._handleDoubleClick}
-          >
-            <div class="affine-embed-loom-video">
-              ${videoId
-                ? html`
-                    <div class="affine-embed-loom-video-iframe-container">
-                      <iframe
-                        src=${`https://www.loom.com/embed/${videoId}?hide_title=true`}
-                        frameborder="0"
-                        allow="fullscreen; accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                      ></iframe>
+        <div
+          class=${classMap({
+            'affine-embed-loom-block': true,
+            loading,
+            selected: this._isSelected,
+          })}
+          style=${styleMap({
+            transform: `scale(${this._scale})`,
+            transformOrigin: '0 0',
+          })}
+          @click=${this._handleClick}
+          @dblclick=${this._handleDoubleClick}
+        >
+          <div class="affine-embed-loom-video">
+            ${videoId
+              ? html`
+                  <div class="affine-embed-loom-video-iframe-container">
+                    <iframe
+                      src=${`https://www.loom.com/embed/${videoId}?hide_title=true`}
+                      frameborder="0"
+                      allow="fullscreen; accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    ></iframe>
 
-                      <div
-                        class=${classMap({
-                          'affine-embed-loom-video-iframe-overlay': true,
-                          hide: !this._showOverlay,
-                        })}
-                      ></div>
-                    </div>
-                  `
-                : bannerImage}
+                    <div
+                      class=${classMap({
+                        'affine-embed-loom-video-iframe-overlay': true,
+                        hide: !this._showOverlay,
+                      })}
+                    ></div>
+                  </div>
+                `
+              : bannerImage}
+          </div>
+          <div class="affine-embed-loom-content">
+            <div class="affine-embed-loom-content-header">
+              <div class="affine-embed-loom-content-title-icon">
+                ${titleIcon}
+              </div>
+
+              <div class="affine-embed-loom-content-title-text">
+                ${titleText}
+              </div>
             </div>
-            <div class="affine-embed-loom-content">
-              <div class="affine-embed-loom-content-header">
-                <div class="affine-embed-loom-content-title-icon">
-                  ${titleIcon}
-                </div>
 
-                <div class="affine-embed-loom-content-title-text">
-                  ${titleText}
-                </div>
-              </div>
+            <div class="affine-embed-loom-content-description">
+              ${descriptionText}
+            </div>
 
-              <div class="affine-embed-loom-content-description">
-                ${descriptionText}
-              </div>
+            <div class="affine-embed-loom-content-url" @click=${this.open}>
+              <span>loom.com</span>
 
-              <div class="affine-embed-loom-content-url" @click=${this.open}>
-                <span>loom.com</span>
-
-                <div class="affine-embed-loom-content-url-icon">
-                  ${OpenIcon}
-                </div>
-              </div>
+              <div class="affine-embed-loom-content-url-icon">${OpenIcon}</div>
             </div>
           </div>
         </div>
