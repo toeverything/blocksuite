@@ -26,14 +26,12 @@ import { query, state } from 'lit/decorators.js';
 import { choose } from 'lit/directives/choose.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { guard } from 'lit/directives/guard.js';
-import { styleMap } from 'lit/directives/style-map.js';
+import { type StyleInfo, styleMap } from 'lit/directives/style-map.js';
 
 import type { EdgelessRootService } from '../root-block/edgeless/edgeless-root-service.js';
 import type { RootBlockComponent } from '../root-block/types.js';
 import type { EmbedSyncedDocCard } from './components/embed-synced-doc-card.js';
-import type { EmbedSyncedDocBlockService } from './embed-synced-doc-service.js';
 
-import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../_common/consts.js';
 import { EmbedBlockComponent } from '../_common/embed-block-helper/embed-block-element.js';
 import { isEmptyDoc } from '../_common/utils/render-linked-doc.js';
 import { SpecProvider } from '../_specs/utils/spec-provider.js';
@@ -42,10 +40,7 @@ import { blockStyles } from './styles.js';
 @Peekable({
   enableOn: ({ doc }: EmbedSyncedDocBlockComponent) => !doc.readonly,
 })
-export class EmbedSyncedDocBlockComponent extends EmbedBlockComponent<
-  EmbedSyncedDocModel,
-  EmbedSyncedDocBlockService
-> {
+export class EmbedSyncedDocBlockComponent extends EmbedBlockComponent<EmbedSyncedDocModel> {
   static override styles = blockStyles;
 
   private _initEdgelessFitEffect = () => {
@@ -261,6 +256,10 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockComponent<
     );
 
     doc.deleteBlock(this.model);
+  };
+
+  protected override embedContainerStyle: StyleInfo = {
+    height: 'unset',
   };
 
   open = () => {
@@ -486,8 +485,6 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockComponent<
     const { style } = this.model;
 
     this._cardStyle = style;
-    this._width = EMBED_CARD_WIDTH[style];
-    this._height = EMBED_CARD_HEIGHT[style];
 
     const syncedDoc = this.syncedDoc;
     const { isLoading, isError, isDeleted, isCycle } = this.blockState;

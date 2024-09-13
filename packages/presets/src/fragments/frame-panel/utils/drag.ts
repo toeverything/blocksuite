@@ -1,12 +1,4 @@
-import type { EditorHost } from '@blocksuite/block-std';
-import type { Doc } from '@blocksuite/store';
-
-import {
-  type EdgelessRootBlockComponent,
-  type FrameBlockModel,
-  on,
-  once,
-} from '@blocksuite/blocks';
+import { type FrameBlockModel, on, once } from '@blocksuite/blocks';
 
 import type { FramePanelBody } from '../body/frame-panel-body.js';
 
@@ -37,9 +29,6 @@ export function startDragging(
       x: number;
       y: number;
     };
-    edgeless: EdgelessRootBlockComponent | null;
-    doc: Doc;
-    editorHost: EditorHost;
   }
 ) {
   const {
@@ -52,18 +41,12 @@ export function startDragging(
     framePanelBody,
     frameListContainer,
     start,
-    edgeless,
-    doc,
-    editorHost,
   } = options;
   const cardElements = frames
     .slice(frames.length - 2, frames.length)
     .map((frame, idx, arr) => {
       const el = new FrameCard();
 
-      el.edgeless = edgeless;
-      el.doc = doc;
-      el.host = editorHost;
       el.frame = frame.frame;
 
       el.cardIndex = frame.cardIndex;

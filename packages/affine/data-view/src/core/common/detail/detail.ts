@@ -9,7 +9,7 @@ import {
   ArrowUpBigIcon,
   PlusIcon,
 } from '@blocksuite/icons/lit';
-import { computed } from '@lit-labs/preact-signals';
+import { computed } from '@preact/signals-core';
 import { css, nothing, unsafeCSS } from 'lit';
 import { property, query } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';

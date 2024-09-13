@@ -2,7 +2,7 @@ import type { ReactiveController } from 'lit';
 import type { Ref } from 'lit/directives/ref.js';
 
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
-import { effect } from '@lit-labs/preact-signals';
+import { effect } from '@preact/signals-core';
 import { css, html } from 'lit';
 import { property } from 'lit/decorators.js';
 import { createRef, ref } from 'lit/directives/ref.js';

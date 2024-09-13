@@ -1,6 +1,6 @@
 import type { Doc } from '@blocksuite/store';
 
-import { effect } from '@lit-labs/preact-signals';
+import { effect } from '@preact/signals-core';
 
 import { SurfaceBlockModel } from '../gfx/surface/surface-model.js';
 

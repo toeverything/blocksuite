@@ -2,7 +2,7 @@ import {
   insertPositionToIndex,
   type InsertToPosition,
 } from '@blocksuite/affine-shared/utils';
-import { computed, type ReadonlySignal } from '@lit-labs/preact-signals';
+import { computed, type ReadonlySignal } from '@preact/signals-core';
 
 import type { TType } from '../../core/logical/typesystem.js';
 import type { KanbanViewData } from './define.js';

@@ -3,19 +3,14 @@ import type { Placement } from '@floating-ui/dom';
 
 import { CaptionedBlockComponent } from '@blocksuite/affine-components/caption';
 import { createLitPortal } from '@blocksuite/affine-components/portal';
-import { effect } from '@lit-labs/preact-signals';
+import { effect } from '@preact/signals-core';
 import katex from 'katex';
 import { html, render } from 'lit';
 import { query } from 'lit/decorators.js';
 
-import type { LatexBlockService } from './latex-service.js';
-
 import { latexBlockStyles } from './styles.js';
 
-export class LatexBlockComponent extends CaptionedBlockComponent<
-  LatexBlockModel,
-  LatexBlockService
-> {
+export class LatexBlockComponent extends CaptionedBlockComponent<LatexBlockModel> {
   static override styles = latexBlockStyles;
 
   private _editorAbortController: AbortController | null = null;

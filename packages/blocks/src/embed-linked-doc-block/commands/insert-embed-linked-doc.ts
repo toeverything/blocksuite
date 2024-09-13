@@ -19,11 +19,3 @@ export const insertEmbedLinkedDocCommand: Command<
   insertEmbedCard(std, { flavour, targetStyle, props });
   next();
 };
-
-declare global {
-  namespace BlockSuite {
-    interface Commands {
-      insertEmbedLinkedDoc: typeof insertEmbedLinkedDocCommand;
-    }
-  }
-}

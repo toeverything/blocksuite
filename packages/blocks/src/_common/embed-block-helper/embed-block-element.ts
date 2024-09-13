@@ -138,14 +138,18 @@ export class EmbedBlockComponent<
 
   protected _cardStyle: EmbedCardStyle = 'horizontal';
 
-  protected _height = EMBED_CARD_HEIGHT.horizontal;
+  /**
+   * The actual rendered scale of the embed card.
+   * By default, it is set to 1.
+   */
+  protected _scale = 1;
 
-  protected _width = EMBED_CARD_WIDTH.horizontal;
-
-  protected embedContainerStyle: StyleInfo = {
-    position: 'relative',
-    width: '100%',
-  };
+  /**
+   * The style of the embed card.
+   * You can use this to change the height and width of the card.
+   * By default, the height and width are set to `_cardHeight` and `_cardWidth` respectively.
+   */
+  protected embedContainerStyle: StyleInfo = {};
 
   renderEmbed = (content: () => TemplateResult) => {
     const theme = ThemeObserver.mode;
@@ -171,12 +175,30 @@ export class EmbedBlockComponent<
           [theme]: true,
           selected: isSelected,
         })}
-        style=${styleMap(this.embedContainerStyle)}
+        style=${styleMap({
+          height: `${this._cardHeight}px`,
+          width: '100%',
+          ...this.embedContainerStyle,
+        })}
       >
         ${content()}
       </div>
     `;
   };
+
+  /**
+   * The height of the current embed card. Changes based on the card style.
+   */
+  get _cardHeight() {
+    return EMBED_CARD_HEIGHT[this._cardStyle];
+  }
+
+  /**
+   * The width of the current embed card. Changes based on the card style.
+   */
+  get _cardWidth() {
+    return EMBED_CARD_WIDTH[this._cardStyle];
+  }
 
   get fetchAbortController() {
     return this._fetchAbortController;
@@ -230,12 +252,7 @@ export function toEdgelessEmbedBlock<
 
     override [blockComponentSymbol] = true;
 
-    protected override embedContainerStyle: StyleInfo = {
-      position: 'relative',
-      width: '100%',
-      height: '100%',
-      transformOrigin: '0 0',
-    };
+    protected override embedContainerStyle: StyleInfo = {};
 
     override [GfxElementSymbol] = true;
 
@@ -272,13 +289,14 @@ export function toEdgelessEmbedBlock<
     }
 
     override renderGfxBlock() {
-      const width = this._width;
-      const height = this._height;
       const bound = Bound.deserialize(this.model.xywh);
-      const scaleX = bound.w / width;
-      const scaleY = bound.h / height;
 
-      this.embedContainerStyle.transform = `scale(${scaleX}, ${scaleY})`;
+      this.embedContainerStyle.width = `${bound.w}px`;
+      this.embedContainerStyle.height = `${bound.h}px`;
+      this.blockContainerStyles = {
+        width: `${bound.w}px`,
+      };
+      this._scale = bound.w / this._cardWidth;
 
       return this.renderPageContent();
     }

@@ -142,15 +142,11 @@ export class EmbedEdgelessSyncedDocBlockComponent extends toEdgelessEmbedBlock(
 
   override renderGfxBlock() {
     const { style, xywh } = this.model;
-
     const bound = Bound.deserialize(xywh);
-    this._width = bound.w;
-    this._height = bound.h;
 
-    const width = this._width;
-    const height = this._height;
+    this.embedContainerStyle.width = `${bound.w}px`;
+    this.embedContainerStyle.height = `${bound.h}px`;
 
-    this.embedContainerStyle.transform = `scale(${bound.w / width}, ${bound.h / height})`;
     this.cardStyleMap = {
       display: 'block',
       width: `${EMBED_CARD_WIDTH[style]}px`,

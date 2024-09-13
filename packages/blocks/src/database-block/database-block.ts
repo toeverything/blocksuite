@@ -29,7 +29,7 @@ import {
 } from '@blocksuite/icons/lit';
 import { Slice } from '@blocksuite/store';
 import { autoUpdate } from '@floating-ui/dom';
-import { computed, signal } from '@lit-labs/preact-signals';
+import { computed, signal } from '@preact/signals-core';
 import { css, html, nothing, unsafeCSS } from 'lit';
 
 import type { NoteBlockComponent } from '../note-block/index.js';

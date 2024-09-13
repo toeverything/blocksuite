@@ -5,14 +5,11 @@ import type {
   SurfaceSelection,
   UIEventStateContext,
 } from '@blocksuite/block-std';
-import type { SerializedElement } from '@blocksuite/block-std/gfx';
 import type { IBound, IVec, SerializedXYWH } from '@blocksuite/global/utils';
 
 import {
   CanvasElementType,
   CommonUtils,
-  compareLayer,
-  SortOrder,
   SurfaceGroupLikeModel,
   TextUtils,
 } from '@blocksuite/affine-block-surface';
@@ -27,6 +24,11 @@ import {
   isUrlInClipboard,
   matchFlavours,
 } from '@blocksuite/affine-shared/utils';
+import {
+  compareLayer,
+  type SerializedElement,
+  SortOrder,
+} from '@blocksuite/block-std/gfx';
 import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 import {
   assertExists,

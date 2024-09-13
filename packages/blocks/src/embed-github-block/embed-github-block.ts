@@ -12,7 +12,6 @@ import { styleMap } from 'lit/directives/style-map.js';
 
 import type { EmbedGithubBlockService } from './embed-github-service.js';
 
-import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../_common/consts.js';
 import { EmbedBlockComponent } from '../_common/embed-block-helper/embed-block-element.js';
 import { getEmbedCardIcons } from '../_common/utils/url.js';
 import { githubUrlRegex } from './embed-github-model.js';
@@ -133,8 +132,6 @@ export class EmbedGithubBlockComponent extends EmbedBlockComponent<
     } = this.model;
 
     this._cardStyle = style;
-    this._width = EMBED_CARD_WIDTH[this._cardStyle];
-    this._height = EMBED_CARD_HEIGHT[this._cardStyle];
 
     const loading = this.loading;
     const { LoadingIcon, EmbedCardBannerIcon } = getEmbedCardIcons();
@@ -168,106 +165,103 @@ export class EmbedGithubBlockComponent extends EmbedBlockComponent<
     return this.renderEmbed(
       () => html`
         <div
-          style=${styleMap({
-            position: 'relative',
+          class=${classMap({
+            'affine-embed-github-block': true,
+            loading,
+            [style]: true,
+            selected: this._isSelected,
           })}
+          style=${styleMap({
+            transform: `scale(${this._scale})`,
+            transformOrigin: '0 0 ',
+          })}
+          @click=${this._handleClick}
+          @dblclick=${this._handleDoubleClick}
         >
-          <div
-            class=${classMap({
-              'affine-embed-github-block': true,
-              loading,
-              [style]: true,
-              selected: this._isSelected,
-            })}
-            @click=${this._handleClick}
-            @dblclick=${this._handleDoubleClick}
-          >
-            <div class="affine-embed-github-content">
-              <div class="affine-embed-github-content-title">
-                <div class="affine-embed-github-content-title-icons">
-                  <div class="affine-embed-github-content-title-site-icon">
-                    ${titleIcon}
-                  </div>
-
-                  ${status && statusText
-                    ? html`<div
-                        class=${classMap({
-                          'affine-embed-github-content-title-status-icon': true,
-                          [githubType]: true,
-                          [status]: true,
-                          success: statusReason === 'completed',
-                          failure: statusReason === 'not_planned',
-                        })}
-                      >
-                        ${statusIcon}
-
-                        <span>${statusText}</span>
-                      </div>`
-                    : nothing}
+          <div class="affine-embed-github-banner">${bannerImage}</div>
+          <div class="affine-embed-github-content">
+            <div class="affine-embed-github-content-title">
+              <div class="affine-embed-github-content-title-icons">
+                <div class="affine-embed-github-content-title-site-icon">
+                  ${titleIcon}
                 </div>
 
-                <div class="affine-embed-github-content-title-text">
-                  ${titleText}
-                </div>
-              </div>
+                ${status && statusText
+                  ? html`<div
+                      class=${classMap({
+                        'affine-embed-github-content-title-status-icon': true,
+                        [githubType]: true,
+                        [status]: true,
+                        success: statusReason === 'completed',
+                        failure: statusReason === 'not_planned',
+                      })}
+                    >
+                      ${statusIcon}
 
-              <div class="affine-embed-github-content-description">
-                ${descriptionText}
-              </div>
-
-              ${githubType === 'issue' && assignees
-                ? html`
-                    <div class="affine-embed-github-content-assignees">
-                      <div
-                        class="affine-embed-github-content-assignees-text label"
-                      >
-                        Assignees
-                      </div>
-
-                      <div
-                        class="affine-embed-github-content-assignees-text users"
-                      >
-                        ${assignees.length === 0
-                          ? html`<span
-                              class="affine-embed-github-content-assignees-text-users placeholder"
-                              >No one</span
-                            >`
-                          : repeat(
-                              assignees,
-                              assignee => assignee,
-                              (assignee, index) =>
-                                html`<span
-                                    class="affine-embed-github-content-assignees-text-users user"
-                                    @click=${() =>
-                                      this._handleAssigneeClick(assignee)}
-                                    >${`@${assignee}`}</span
-                                  >
-                                  ${index === assignees.length - 1 ? '' : `, `}`
-                            )}
-                      </div>
-                    </div>
-                  `
-                : nothing}
-
-              <div class="affine-embed-github-content-url" @click=${this.open}>
-                <span class="affine-embed-github-content-repo"
-                  >${`${owner}/${repo} |`}</span
-                >
-
-                ${createdAt
-                  ? html`<span class="affine-embed-github-content-date"
-                      >${dateText} |</span
-                    >`
+                      <span>${statusText}</span>
+                    </div>`
                   : nothing}
-                <span>github.com</span>
+              </div>
 
-                <div class="affine-embed-github-content-url-icon">
-                  ${OpenIcon}
-                </div>
+              <div class="affine-embed-github-content-title-text">
+                ${titleText}
               </div>
             </div>
 
-            <div class="affine-embed-github-banner">${bannerImage}</div>
+            <div class="affine-embed-github-content-description">
+              ${descriptionText}
+            </div>
+
+            ${githubType === 'issue' && assignees
+              ? html`
+                  <div class="affine-embed-github-content-assignees">
+                    <div
+                      class="affine-embed-github-content-assignees-text label"
+                    >
+                      Assignees
+                    </div>
+
+                    <div
+                      class="affine-embed-github-content-assignees-text users"
+                    >
+                      ${assignees.length === 0
+                        ? html`<span
+                            class="affine-embed-github-content-assignees-text-users placeholder"
+                            >No one</span
+                          >`
+                        : repeat(
+                            assignees,
+                            assignee => assignee,
+                            (assignee, index) =>
+                              html`<span
+                                  class="affine-embed-github-content-assignees-text-users user"
+                                  @click=${() =>
+                                    this._handleAssigneeClick(assignee)}
+                                  >${`@${assignee}`}</span
+                                >
+                                ${index === assignees.length - 1 ? '' : `, `}`
+                          )}
+                    </div>
+                  </div>
+                `
+              : nothing}
+
+            <div class="affine-embed-github-content-url" @click=${this.open}>
+              <span class="affine-embed-github-content-repo"
+                >${`${owner}/${repo} |`}</span
+              >
+
+              ${createdAt
+                ? html`<span class="affine-embed-github-content-date"
+                    >${dateText} |</span
+                  >`
+                : nothing}
+              <span>github.com</span>
+
+              <div class="affine-embed-github-content-url-icon">
+                ${OpenIcon}
+              </div>
+            </div>
           </div>
         </div>
       `

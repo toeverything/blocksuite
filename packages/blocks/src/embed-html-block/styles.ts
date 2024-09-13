@@ -5,7 +5,6 @@ export const EMBED_HTML_MIN_HEIGHT = 80;
 
 export const styles = css`
   .affine-embed-html-block {
-    margin: 0 auto;
     box-sizing: border-box;
     width: 100%;
     height: 100%;
@@ -24,8 +23,8 @@ export const styles = css`
   }
 
   .affine-embed-html {
+    flex-grow: 1;
     width: 100%;
-    height: calc(100% - 20px - 22px);
     opacity: var(--add, 1);
   }
 
@@ -91,6 +90,7 @@ export const styles = css`
   }
 
   .affine-embed-html-title {
+    height: fit-content;
     display: flex;
     align-items: center;
     gap: 8px;

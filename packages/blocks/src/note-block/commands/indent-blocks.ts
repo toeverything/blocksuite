@@ -61,11 +61,3 @@ export const indentBlocks: Command<
 
   return next();
 };
-
-declare global {
-  namespace BlockSuite {
-    interface Commands {
-      indentBlocks: typeof indentBlocks;
-    }
-  }
-}

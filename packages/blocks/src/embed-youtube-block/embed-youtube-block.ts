@@ -7,10 +7,10 @@ import { OpenIcon } from '@blocksuite/affine-components/icons';
 import { html, nothing } from 'lit';
 import { property, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
+import { styleMap } from 'lit/directives/style-map.js';
 
 import type { EmbedYoutubeBlockService } from './embed-youtube-service.js';
 
-import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../_common/consts.js';
 import { EmbedBlockComponent } from '../_common/embed-block-helper/embed-block-element.js';
 import { getEmbedCardIcons } from '../_common/utils/url.js';
 import { youtubeUrlRegex } from './embed-youtube-model.js';
@@ -132,8 +132,6 @@ export class EmbedYoutubeBlockComponent extends EmbedBlockComponent<
     } = this.model;
 
     this._cardStyle = style;
-    this._width = EMBED_CARD_WIDTH[this._cardStyle];
-    this._height = EMBED_CARD_HEIGHT[this._cardStyle];
 
     const loading = this.loading;
     const { LoadingIcon, EmbedCardBannerIcon } = getEmbedCardIcons();
@@ -158,76 +156,78 @@ export class EmbedYoutubeBlockComponent extends EmbedBlockComponent<
 
     return this.renderEmbed(
       () => html`
-        <div>
-          <div
-            class=${classMap({
-              'affine-embed-youtube-block': true,
-              loading,
-              selected: this._isSelected,
-            })}
-            @click=${this._handleClick}
-            @dblclick=${this._handleDoubleClick}
-          >
-            <div class="affine-embed-youtube-video">
-              ${videoId
-                ? html`
-                    <div class="affine-embed-youtube-video-iframe-container">
-                      <iframe
-                        id="ytplayer"
-                        type="text/html"
-                        src=${`https://www.youtube.com/embed/${videoId}`}
-                        frameborder="0"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                        allowfullscreen
-                      ></iframe>
-                      <div
-                        class=${classMap({
-                          'affine-embed-youtube-video-iframe-overlay': true,
-                          hide: !this._showOverlay,
-                        })}
-                      ></div>
-                      <img
-                        class=${classMap({
-                          'affine-embed-youtube-video-iframe-overlay': true,
-                          'media-print': true,
-                          hide: !this._showImage,
-                        })}
-                        src=${`https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`}
-                        alt="YouTube Video"
-                      />
-                    </div>
-                  `
-                : bannerImage}
+        <div
+          class=${classMap({
+            'affine-embed-youtube-block': true,
+            loading,
+            selected: this._isSelected,
+          })}
+          style=${styleMap({
+            transform: `scale(${this._scale})`,
+            transformOrigin: '0 0',
+          })}
+          @click=${this._handleClick}
+          @dblclick=${this._handleDoubleClick}
+        >
+          <div class="affine-embed-youtube-video">
+            ${videoId
+              ? html`
+                  <div class="affine-embed-youtube-video-iframe-container">
+                    <iframe
+                      id="ytplayer"
+                      type="text/html"
+                      src=${`https://www.youtube.com/embed/${videoId}`}
+                      frameborder="0"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                      allowfullscreen
+                    ></iframe>
+                    <div
+                      class=${classMap({
+                        'affine-embed-youtube-video-iframe-overlay': true,
+                        hide: !this._showOverlay,
+                      })}
+                    ></div>
+                    <img
+                      class=${classMap({
+                        'affine-embed-youtube-video-iframe-overlay': true,
+                        'media-print': true,
+                        hide: !this._showImage,
+                      })}
+                      src=${`https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`}
+                      alt="YouTube Video"
+                    />
+                  </div>
+                `
+              : bannerImage}
+          </div>
+          <div class="affine-embed-youtube-content">
+            <div class="affine-embed-youtube-content-header">
+              <div class="affine-embed-youtube-content-title-icon">
+                ${titleIcon}
+              </div>
+
+              <div class="affine-embed-youtube-content-title-text">
+                ${titleText}
+              </div>
+
+              <div class="affine-embed-youtube-content-creator-image">
+                ${creatorImageEl}
+              </div>
+
+              <div class="affine-embed-youtube-content-creator-text">
+                ${creator}
+              </div>
             </div>
-            <div class="affine-embed-youtube-content">
-              <div class="affine-embed-youtube-content-header">
-                <div class="affine-embed-youtube-content-title-icon">
-                  ${titleIcon}
-                </div>
 
-                <div class="affine-embed-youtube-content-title-text">
-                  ${titleText}
-                </div>
+            <div class="affine-embed-youtube-content-description">
+              ${descriptionText}
+            </div>
 
-                <div class="affine-embed-youtube-content-creator-image">
-                  ${creatorImageEl}
-                </div>
+            <div class="affine-embed-youtube-content-url" @click=${this.open}>
+              <span>www.youtube.com</span>
 
-                <div class="affine-embed-youtube-content-creator-text">
-                  ${creator}
-                </div>
-              </div>
-
-              <div class="affine-embed-youtube-content-description">
-                ${descriptionText}
-              </div>
-
-              <div class="affine-embed-youtube-content-url" @click=${this.open}>
-                <span>www.youtube.com</span>
-
-                <div class="affine-embed-youtube-content-url-icon">
-                  ${OpenIcon}
-                </div>
+              <div class="affine-embed-youtube-content-url-icon">
+                ${OpenIcon}
               </div>
             </div>
           </div>

@@ -20,12 +20,7 @@ import {
   type VLine,
 } from '@blocksuite/inline';
 import { Slice } from '@blocksuite/store';
-import {
-  computed,
-  effect,
-  type Signal,
-  signal,
-} from '@lit-labs/preact-signals';
+import { computed, effect, type Signal, signal } from '@preact/signals-core';
 import { html, nothing, type TemplateResult } from 'lit';
 import { query } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';

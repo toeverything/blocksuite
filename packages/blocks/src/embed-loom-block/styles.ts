@@ -1,13 +1,11 @@
 import { css, html } from 'lit';
 
-import { EMBED_CARD_HEIGHT } from '../_common/consts.js';
+import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../_common/consts.js';
 
 export const styles = css`
   .affine-embed-loom-block {
-    margin: 0 auto;
     box-sizing: border-box;
-    width: 100%;
-    height: ${EMBED_CARD_HEIGHT.video}px;
+    width: ${EMBED_CARD_WIDTH.video}px;
     display: flex;
     flex-direction: column;
     gap: 20px;
@@ -19,11 +17,13 @@ export const styles = css`
     opacity: var(--add, 1);
     background: var(--affine-background-primary-color);
     user-select: none;
+
+    aspect-ratio: ${EMBED_CARD_WIDTH.video} / ${EMBED_CARD_HEIGHT.video};
   }
 
   .affine-embed-loom-video {
+    flex-grow: 1;
     width: 100%;
-    height: 100%;
     opacity: var(--add, 1);
   }
 
@@ -38,11 +38,12 @@ export const styles = css`
 
   .affine-embed-loom-video-iframe-container {
     position: relative;
+    height: 100%;
   }
 
   .affine-embed-loom-video-iframe-container > iframe {
     width: 100%;
-    height: 410px;
+    height: 100%;
     border-radius: 4px 4px var(--1, 0px) var(--1, 0px);
   }
 
@@ -62,7 +63,7 @@ export const styles = css`
     display: flex;
     flex-direction: column;
     width: 100%;
-    height: 100%;
+    height: fit-content;
     border-radius: var(--1, 0px);
     opacity: var(--add, 1);
   }

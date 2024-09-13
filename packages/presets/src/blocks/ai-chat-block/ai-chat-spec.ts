@@ -1,15 +1,7 @@
-import {
-  BlockViewExtension,
-  type ExtensionType,
-  FlavourExtension,
-} from '@blocksuite/block-std';
+import { BlockViewExtension, type ExtensionType } from '@blocksuite/block-std';
 import { literal } from 'lit/static-html.js';
 
-import { AIChatBlockService } from './ai-chat-service.js';
-
 export const AIChatBlockSpec: ExtensionType[] = [
-  FlavourExtension('affine:embed-ai-chat'),
-  AIChatBlockService,
   BlockViewExtension('affine:embed-ai-chat', model => {
     const parent = model.doc.getParent(model.id);
 

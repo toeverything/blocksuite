@@ -1,5 +1,23 @@
 # @blocksuite/block-std
 
+## 0.17.10
+
+### Patch Changes
+
+- e0d0016: - Fix database performance issue
+  - Fix frame panel display issue
+  - Fix editor settings for color with transparency
+  - Fix portal in modals
+  - Fix group selection rendering delay
+  - Remove unused and duplicated code
+  - Improve frame model
+  - Improve ParseDocUrl service
+  - Support custom max zoom
+- Updated dependencies [e0d0016]
+  - @blocksuite/global@0.17.10
+  - @blocksuite/inline@0.17.10
+  - @blocksuite/store@0.17.10
+
 ## 0.17.9
 
 ### Patch Changes

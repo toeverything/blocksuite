@@ -201,11 +201,3 @@ export const splitListCommand: Command<
     return;
   }
 };
-
-declare global {
-  namespace BlockSuite {
-    interface Commands {
-      splitList: typeof splitListCommand;
-    }
-  }
-}

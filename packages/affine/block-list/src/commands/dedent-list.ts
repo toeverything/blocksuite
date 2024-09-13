@@ -124,11 +124,3 @@ export const dedentListCommand: Command<
 
   return next();
 };
-
-declare global {
-  namespace BlockSuite {
-    interface Commands {
-      dedentList: typeof dedentListCommand;
-    }
-  }
-}

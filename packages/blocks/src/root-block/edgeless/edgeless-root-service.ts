@@ -4,6 +4,7 @@ import type {
   GfxModel,
   LayerManager,
   PointTestOptions,
+  ReorderingDirection,
 } from '@blocksuite/block-std/gfx';
 import type { IBound } from '@blocksuite/global/utils';
 
@@ -11,7 +12,6 @@ import {
   type ElementRenderer,
   elementRenderers,
   type Overlay,
-  type ReorderingDirection,
   type SurfaceBlockModel,
   type SurfaceContext,
 } from '@blocksuite/affine-block-surface';
