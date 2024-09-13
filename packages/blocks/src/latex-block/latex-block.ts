@@ -3,7 +3,7 @@ import type { Placement } from '@floating-ui/dom';
 
 import { CaptionedBlockComponent } from '@blocksuite/affine-components/caption';
 import { createLitPortal } from '@blocksuite/affine-components/portal';
-import { effect } from '@lit-labs/preact-signals';
+import { effect } from '@preact/signals-core';
 import katex from 'katex';
 import { html, render } from 'lit';
 import { query } from 'lit/decorators.js';

@@ -3,7 +3,8 @@ import type { MindmapStyle } from '@blocksuite/affine-model';
 import type { Bound } from '@blocksuite/global/utils';
 
 import { EditPropsStore } from '@blocksuite/affine-shared/services';
-import { computed, SignalWatcher } from '@lit-labs/preact-signals';
+import { SignalWatcher } from '@blocksuite/block-std';
+import { computed } from '@preact/signals-core';
 import { css, html, LitElement, nothing } from 'lit';
 import { property, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';

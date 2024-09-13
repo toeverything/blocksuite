@@ -5,7 +5,7 @@ import type {
   UIEventHandler,
 } from '@blocksuite/block-std';
 import type { Disposable } from '@blocksuite/global/utils';
-import type { ReadonlySignal } from '@lit-labs/preact-signals';
+import type { ReadonlySignal } from '@preact/signals-core';
 
 import type { DataSource } from '../common/index.js';
 import type { DataViewRenderer } from '../data-view.js';

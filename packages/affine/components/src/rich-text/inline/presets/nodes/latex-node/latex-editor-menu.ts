@@ -11,7 +11,7 @@ import {
 import { noop } from '@blocksuite/global/utils';
 import { DoneIcon } from '@blocksuite/icons/lit';
 import { DocCollection } from '@blocksuite/store';
-import { effect, type Signal, signal } from '@lit-labs/preact-signals';
+import { effect, type Signal, signal } from '@preact/signals-core';
 import { cssVar } from '@toeverything/theme';
 import { css, html, unsafeCSS } from 'lit';
 import { property } from 'lit/decorators.js';

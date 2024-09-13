@@ -1,5 +1,5 @@
 import { type Color, ColorScheme } from '@blocksuite/affine-model';
-import { signal } from '@lit-labs/preact-signals';
+import { signal } from '@preact/signals-core';
 
 const TRANSPARENT = 'transparent';
 

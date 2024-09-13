@@ -1,10 +1,6 @@
 import type { InsertToPosition } from '@blocksuite/affine-shared/utils';
 
-import {
-  computed,
-  type ReadonlySignal,
-  signal,
-} from '@lit-labs/preact-signals';
+import { computed, type ReadonlySignal, signal } from '@preact/signals-core';
 
 import type { ColumnMeta } from '../column/column-config.js';
 import type { FilterGroup, Variable } from '../common/ast.js';

@@ -14,7 +14,7 @@ import {
   PageEditorBlockSpecs,
 } from '@blocksuite/blocks';
 import { Slot } from '@blocksuite/global/utils';
-import { computed, signal } from '@lit-labs/preact-signals';
+import { computed, signal } from '@preact/signals-core';
 import { css, html } from 'lit';
 import { property } from 'lit/decorators.js';
 import { keyed } from 'lit/directives/keyed.js';

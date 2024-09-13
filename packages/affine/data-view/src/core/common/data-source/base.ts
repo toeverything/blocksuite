@@ -1,5 +1,5 @@
 import type { InsertToPosition } from '@blocksuite/affine-shared/utils';
-import type { ReadonlySignal } from '@lit-labs/preact-signals';
+import type { ReadonlySignal } from '@preact/signals-core';
 
 import type { ColumnMeta } from '../../column/column-config.js';
 import type { TType } from '../../logical/index.js';
