@@ -1,15 +1,13 @@
-import {
-  ConnectorMode,
-  FontFamily,
-  FontWeight,
-  LineColor,
-  MindmapStyle,
-  ShapeFillColor,
-  StrokeStyle,
-} from '@blocksuite/affine-model';
 import { last } from '@blocksuite/global/utils';
 
 import type { MindmapNode } from './mindmap.js';
+
+import { ConnectorMode } from '../../consts/connector.js';
+import { LineColor } from '../../consts/line.js';
+import { MindmapStyle } from '../../consts/mindmap.js';
+import { StrokeStyle } from '../../consts/note.js';
+import { ShapeFillColor } from '../../consts/shape.js';
+import { FontFamily, FontWeight } from '../../consts/text.js';
 
 export type NodeStyle = {
   radius: number;

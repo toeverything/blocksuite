@@ -5,12 +5,6 @@ import type {
 import type { SerializedXYWH, XYWH } from '@blocksuite/global/utils';
 
 import {
-  LayoutType,
-  LocalConnectorElementModel,
-  MindmapStyle,
-  TextResizing,
-} from '@blocksuite/affine-model';
-import {
   convert,
   field,
   GfxGroupLikeElementModel,
@@ -30,6 +24,9 @@ import { z } from 'zod';
 
 import type { ConnectorStyle, MindmapStyleGetter } from './style.js';
 
+import { LayoutType, MindmapStyle } from '../../consts/mindmap.js';
+import { TextResizing } from '../../consts/text.js';
+import { LocalConnectorElementModel } from '../connector/local-connector.js';
 import { mindmapStyleGetters } from './style.js';
 
 export type NodeDetail = {
