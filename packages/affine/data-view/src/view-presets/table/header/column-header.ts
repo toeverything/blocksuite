@@ -32,8 +32,6 @@ export class DatabaseColumnHeader extends SignalWatcher(
     });
   };
 
-  private preAutoSet = 0;
-
   editLastColumnTitle = () => {
     const columns = this.querySelectorAll('affine-database-header-column');
     const column = columns.item(columns.length - 1);
@@ -51,10 +49,6 @@ export class DatabaseColumnHeader extends SignalWatcher(
     group: TableGroup,
     scrollContainer: HTMLElement
   ) {
-    if (this.preAutoSet) {
-      cancelAnimationFrame(this.preAutoSet);
-      this.preAutoSet = 0;
-    }
     const referenceRect = group.getBoundingClientRect();
     const floatingRect = this.getBoundingClientRect();
     const rootRect = scrollContainer.getBoundingClientRect();
@@ -69,10 +63,6 @@ export class DatabaseColumnHeader extends SignalWatcher(
     }
     this.preMove = moveX;
     this.style.transform = `translate3d(0,${moveX / this.getScale()}px,0)`;
-    this.preAutoSet = requestAnimationFrame(() => {
-      this.preAutoSet = 0;
-      this.autoSetHeaderPosition(group, scrollContainer);
-    });
   }
 
   override connectedCallback() {
@@ -89,9 +79,6 @@ export class DatabaseColumnHeader extends SignalWatcher(
         this.autoSetHeaderPosition(group, scrollContainer);
       });
       this.disposables.add(cancel);
-      this.disposables.add(() => {
-        cancelAnimationFrame(this.preAutoSet);
-      });
     }
   }
 
