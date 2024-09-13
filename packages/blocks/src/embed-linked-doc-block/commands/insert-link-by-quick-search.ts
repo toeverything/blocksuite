@@ -14,8 +14,10 @@ export const insertLinkByQuickSearchCommand: Command<
   }
 
   const insertedLinkType = quickSearchService.openQuickSearch().then(result => {
+    if (!result) return null;
+
     // add linked doc
-    if (result && 'docId' in result) {
+    if ('docId' in result) {
       std.command.exec('insertEmbedLinkedDoc', {
         docId: result.docId,
         params: result.params,
@@ -26,7 +28,7 @@ export const insertLinkByQuickSearchCommand: Command<
     }
 
     // add normal link;
-    if (result && 'userInput' in result) {
+    if ('userInput' in result) {
       std.command.exec('insertBookmark', { url: result.externalUrl });
       return {
         flavour: 'affine:bookmark',

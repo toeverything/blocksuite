@@ -14,7 +14,8 @@ export const buildLinkDenseMenu: DenseMenuBuilder = edgeless => ({
 
     insertedLinkType
       ?.then(type => {
-        if (!type) return;
+        const flavour = type?.flavour;
+        if (!flavour) return;
 
         edgeless.std
           .getOptional(TelemetryProvider)
@@ -22,7 +23,7 @@ export const buildLinkDenseMenu: DenseMenuBuilder = edgeless => ({
             control: 'toolbar:general',
             page: 'whiteboard editor',
             module: 'toolbar',
-            type: type.flavour?.split(':')[1],
+            type: flavour.split(':')[1],
           });
       })
       .catch(console.error);

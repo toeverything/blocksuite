@@ -69,7 +69,8 @@ export class EdgelessNoteMenu extends EdgelessToolbarToolMixin(LitElement) {
 
     insertedLinkType
       ?.then(type => {
-        if (!type) return;
+        const flavour = type?.flavour;
+        if (!flavour) return;
 
         this.edgeless.std
           .getOptional(TelemetryProvider)
@@ -77,7 +78,7 @@ export class EdgelessNoteMenu extends EdgelessToolbarToolMixin(LitElement) {
             control: 'toolbar:general',
             page: 'whiteboard editor',
             module: 'toolbar',
-            type: type.flavour?.split(':')[1],
+            type: flavour.split(':')[1],
           });
       })
       .catch(console.error);

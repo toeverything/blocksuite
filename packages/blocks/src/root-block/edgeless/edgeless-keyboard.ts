@@ -189,7 +189,8 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
 
           insertedLinkType
             ?.then(type => {
-              if (!type) return;
+              const flavour = type?.flavour;
+              if (!flavour) return;
 
               rootComponent.std
                 .getOptional(TelemetryProvider)
@@ -198,7 +199,7 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
                   page: 'whiteboard editor',
                   module: 'toolbar',
                   segment: 'toolbar',
-                  type: type.flavour?.split(':')[1],
+                  type: flavour.split(':')[1],
                 });
             })
             .catch(console.error);
