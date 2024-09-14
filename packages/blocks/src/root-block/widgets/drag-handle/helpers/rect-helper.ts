@@ -20,7 +20,7 @@ export class RectHelper {
     if (!this.widget.isHoverDragHandleVisible || !this.widget.anchorBlockId)
       return [];
 
-    const hoverBlock = this.widget.anchorBlockComponent;
+    const hoverBlock = this.widget.anchorBlockComponent.peek();
     if (!hoverBlock) return [];
 
     const selections = this.widget.selectedBlocks;
@@ -45,7 +45,7 @@ export class RectHelper {
     if (
       containBlock(
         blocks.map(block => block.blockId),
-        this.widget.anchorBlockId
+        this.widget.anchorBlockId.peek()!
       )
     ) {
       return blocks;
@@ -54,7 +54,10 @@ export class RectHelper {
     return [hoverBlock];
   };
 
-  getDraggingAreaRect = (block: BlockComponent): Rect => {
+  getDraggingAreaRect = (): Rect | null => {
+    const block = this.widget.anchorBlockComponent.value;
+    if (!block) return null;
+
     // When hover block is in selected blocks, should show hover rect on the selected blocks
     // Top: the top of the first selected block
     // Left: the left of the first selected block
@@ -75,35 +78,21 @@ export class RectHelper {
 
     const offsetParentRect =
       this.widget.dragHandleContainerOffsetParent.getBoundingClientRect();
-    if (!offsetParentRect) return new Rect(0, 0, 0, 0);
+    if (!offsetParentRect) return null;
 
     left -= offsetParentRect.left;
     right -= offsetParentRect.left;
     top -= offsetParentRect.top;
     bottom -= offsetParentRect.top;
 
+    const scaleInNote = this.widget.scaleInNote.value;
     // Add padding to hover rect
-    left -=
-      (DRAG_HANDLE_CONTAINER_WIDTH + offsetLeft) *
-      this.widget.scale *
-      this.widget.noteScale;
-    top -= DRAG_HOVER_RECT_PADDING * this.widget.scale;
-    right += DRAG_HOVER_RECT_PADDING * this.widget.scale;
-    bottom += DRAG_HOVER_RECT_PADDING * this.widget.scale;
+    left -= (DRAG_HANDLE_CONTAINER_WIDTH + offsetLeft) * scaleInNote;
+    top -= DRAG_HOVER_RECT_PADDING * scaleInNote;
+    right += DRAG_HOVER_RECT_PADDING * scaleInNote;
+    bottom += DRAG_HOVER_RECT_PADDING * scaleInNote;
 
     return new Rect(left, top, right, bottom);
-  };
-
-  // Need to consider block padding and scale
-  getTopWithBlockComponent = (block: BlockComponent) => {
-    const computedStyle = getComputedStyle(block);
-    const { top } = block.getBoundingClientRect();
-    const paddingTop = parseInt(computedStyle.paddingTop) * this.widget.scale;
-    return (
-      top +
-      paddingTop -
-      this.widget.dragHandleContainerOffsetParent.getBoundingClientRect().top
-    );
   };
 
   constructor(readonly widget: AffineDragHandleWidget) {}

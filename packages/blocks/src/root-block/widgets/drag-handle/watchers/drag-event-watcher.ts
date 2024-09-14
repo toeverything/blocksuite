@@ -9,7 +9,6 @@ import type { BlockModel } from '@blocksuite/store';
 import {
   findNoteBlockModel,
   getBlockComponentsExcludeSubtrees,
-  isInsideEdgelessEditor,
   matchFlavours,
 } from '@blocksuite/affine-shared/utils';
 import { Bound, Point } from '@blocksuite/global/utils';
@@ -64,12 +63,12 @@ export class DragEventWatcher {
           dropBlockId: this.widget.dropBlockId,
           dropType: this.widget.dropType,
           dragPreview: this.widget.dragPreview,
-          noteScale: this.widget.noteScale,
+          noteScale: this.widget.noteScale.peek(),
           editorHost: this.widget.host,
         })
       ) {
         this.widget.hide(true);
-        if (isInsideEdgelessEditor(this.widget.host)) {
+        if (this.widget.mode === 'edgeless') {
           this.widget.edgelessWatcher.checkTopLevelBlockSelection();
         }
         return true;
@@ -79,7 +78,7 @@ export class DragEventWatcher {
     // call default drag end handler if no option return true
     this._onDragEnd(state);
 
-    if (isInsideEdgelessEditor(this.widget.host)) {
+    if (this.widget.mode === 'edgeless') {
       this.widget.edgelessWatcher.checkTopLevelBlockSelection();
     }
 
@@ -134,7 +133,7 @@ export class DragEventWatcher {
         option.onDragStart?.({
           state,
           startDragging: this._startDragging,
-          anchorBlockId: this.widget.anchorBlockId ?? '',
+          anchorBlockId: this.widget.anchorBlockId.peek() ?? '',
           editorHost: this.widget.host,
         })
       ) {
@@ -178,7 +177,7 @@ export class DragEventWatcher {
       const newNoteId = edgelessRoot.addNoteWithPoint(
         new Point(state.raw.x - viewportLeft, state.raw.y - viewportTop),
         {
-          scale: this.widget.noteScale,
+          scale: this.widget.noteScale.peek(),
         }
       );
       const newNoteBlock = this.widget.doc.getBlockById(
@@ -187,13 +186,13 @@ export class DragEventWatcher {
       if (!newNoteBlock) return;
 
       const bound = Bound.deserialize(newNoteBlock.xywh);
-      bound.h *= this.widget.noteScale;
-      bound.w *= this.widget.noteScale;
+      bound.h *= this.widget.noteScale.peek();
+      bound.w *= this.widget.noteScale.peek();
       this.widget.doc.updateBlock(newNoteBlock, {
         xywh: bound.serialize(),
         edgeless: {
           ...newNoteBlock.edgeless,
-          scale: this.widget.noteScale,
+          scale: this.widget.noteScale.peek(),
         },
       });
 
@@ -349,10 +348,10 @@ export class DragEventWatcher {
       selections.length === 0 ||
       !containBlock(
         selections.map(selection => selection.blockId),
-        this.widget.anchorBlockId
+        this.widget.anchorBlockId.peek()!
       )
     ) {
-      const block = this.widget.anchorBlockComponent;
+      const block = this.widget.anchorBlockComponent.peek();
       if (block) {
         this.widget.setSelectedBlocks([block]);
       }

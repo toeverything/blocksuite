@@ -1,4 +1,3 @@
-import { isInsidePageEditor } from '@blocksuite/affine-shared/utils';
 import {
   BLOCK_ID_ATTR,
   type BlockComponent,
@@ -6,6 +5,7 @@ import {
   type UIEventHandler,
 } from '@blocksuite/block-std';
 import { Point, throttle } from '@blocksuite/global/utils';
+import { computed } from '@preact/signals-core';
 
 import type { NoteBlockComponent } from '../../../../note-block/index.js';
 import type { EdgelessRootBlockComponent } from '../../../edgeless/index.js';
@@ -34,7 +34,8 @@ export class PointerEventWatcher {
   private _canEditing = (noteBlock: BlockComponent) => {
     if (noteBlock.doc.id !== this.widget.doc.id) return false;
 
-    if (isInsidePageEditor(this.widget.host)) return true;
+    if (this.widget.mode === 'page') return true;
+
     const edgelessRoot = this.widget
       .rootComponent as EdgelessRootBlockComponent;
 
@@ -68,24 +69,78 @@ export class PointerEventWatcher {
     if (
       selectedBlocks.length > 0 &&
       !includeTextSelection(selectedBlocks) &&
-      selectedBlocks[0].blockId === this.widget.anchorBlockId
+      selectedBlocks[0].blockId === this.widget.anchorBlockId.peek()
     ) {
       selection.clear(['block']);
       this.widget.dragHoverRect = null;
-      this._showDragHandleOnHoverBlock(this.widget.anchorBlockId);
+      this.showDragHandleOnHoverBlock();
       return;
     }
 
     // Should select the block if current block is not selected
-    const blocks = this.widget.anchorBlockComponent;
+    const blocks = this.widget.anchorBlockComponent.peek();
     if (!blocks) return;
 
     if (selectedBlocks.length > 1) {
-      this._showDragHandleOnHoverBlock(this.widget.anchorBlockId);
+      this.showDragHandleOnHoverBlock();
     }
 
     this.widget.setSelectedBlocks([blocks]);
   };
+
+  private _containerStyle = computed(() => {
+    const draggingAreaRect = this.widget.draggingAreaRect.value;
+    if (!draggingAreaRect) return null;
+
+    const block = this.widget.anchorBlockComponent.value;
+    if (!block) return null;
+
+    const containerHeight = getDragHandleContainerHeight(block.model);
+
+    const posTop = this._getTopWithBlockComponent(block);
+
+    const scaleInNote = this.widget.scaleInNote.value;
+
+    const rowPaddingY =
+      ((containerHeight - DRAG_HANDLE_GRABBER_HEIGHT) / 2) * scaleInNote;
+
+    // use padding to control grabber's height
+    const paddingTop = rowPaddingY + posTop - draggingAreaRect.top;
+    const paddingBottom =
+      draggingAreaRect.height -
+      paddingTop -
+      DRAG_HANDLE_GRABBER_HEIGHT * scaleInNote;
+
+    return {
+      paddingTop: `${paddingTop}px`,
+      paddingBottom: `${paddingBottom}px`,
+      width: `${DRAG_HANDLE_CONTAINER_WIDTH * scaleInNote}px`,
+      left: `${draggingAreaRect.left}px`,
+      top: `${draggingAreaRect.top}px`,
+      height: `${draggingAreaRect.height}px`,
+    };
+  });
+
+  // Need to consider block padding and scale
+  private _getTopWithBlockComponent = (block: BlockComponent) => {
+    const computedStyle = getComputedStyle(block);
+    const { top } = block.getBoundingClientRect();
+    const paddingTop =
+      parseInt(computedStyle.paddingTop) * this.widget.scale.peek();
+    return (
+      top +
+      paddingTop -
+      this.widget.dragHandleContainerOffsetParent.getBoundingClientRect().top
+    );
+  };
+
+  private _grabberStyle = computed(() => {
+    const scaleInNote = this.widget.scaleInNote.value;
+    return {
+      width: `${DRAG_HANDLE_GRABBER_WIDTH * scaleInNote}px`,
+      borderRadius: `${DRAG_HANDLE_GRABBER_BORDER_RADIUS * scaleInNote}px`,
+    };
+  });
 
   private _lastHoveredBlockId: string | null = null;
 
@@ -105,14 +160,14 @@ export class PointerEventWatcher {
       point
     );
     if (!closestBlock) {
-      this.widget.anchorBlockId = null;
+      this.widget.anchorBlockId.value = null;
       return;
     }
 
     const blockId = closestBlock.getAttribute(BLOCK_ID_ATTR);
     if (!blockId) return;
 
-    this.widget.anchorBlockId = blockId;
+    this.widget.anchorBlockId.value = blockId;
 
     if (insideDatabaseTable(closestBlock) || this.widget.doc.readonly) {
       this.widget.hide();
@@ -122,12 +177,15 @@ export class PointerEventWatcher {
     // If current block is not the last hovered block, show drag handle beside the hovered block
     if (
       (!this._lastHoveredBlockId ||
-        !isBlockIdEqual(this.widget.anchorBlockId, this._lastHoveredBlockId) ||
+        !isBlockIdEqual(
+          this.widget.anchorBlockId.peek(),
+          this._lastHoveredBlockId
+        ) ||
         !this.widget.isHoverDragHandleVisible) &&
       !this.widget.isDragHandleHovered
     ) {
-      this._showDragHandleOnHoverBlock(this.widget.anchorBlockId);
-      this._lastHoveredBlockId = this.widget.anchorBlockId;
+      this.showDragHandleOnHoverBlock();
+      this._lastHoveredBlockId = this.widget.anchorBlockId.peek();
     }
   };
 
@@ -175,7 +233,6 @@ export class PointerEventWatcher {
     // When pointer on drag handle, should do nothing
     if (element.closest('.affine-drag-handle-container')) return;
 
-    // TODO: need to optimize
     // When pointer out of note block hover area or inside database, should hide drag handle
     const point = new Point(state.raw.x, state.raw.y);
 
@@ -185,9 +242,10 @@ export class PointerEventWatcher {
       point
     ) as NoteBlockComponent | null;
 
-    this.widget.noteScale = isInsidePageEditor(this.widget.host)
-      ? 1
-      : (closestNoteBlock?.model.edgeless.scale ?? 1);
+    this.widget.noteScale.value =
+      this.widget.mode === 'page'
+        ? 1
+        : (closestNoteBlock?.model.edgeless.scale ?? 1);
 
     if (
       closestNoteBlock &&
@@ -196,7 +254,7 @@ export class PointerEventWatcher {
         this.widget.host,
         closestNoteBlock,
         point,
-        this.widget.scale * this.widget.noteScale
+        this.widget.scaleInNote.peek()
       )
     ) {
       this._pointerMoveOnBlock(state);
@@ -208,8 +266,8 @@ export class PointerEventWatcher {
   }, 1000 / 60);
 
   // Multiple blocks: drag handle should show on the vertical middle of all blocks
-  _showDragHandleOnHoverBlock = (blockId: string) => {
-    const block = this.widget.std.view.getBlock(blockId);
+  showDragHandleOnHoverBlock = () => {
+    const block = this.widget.anchorBlockComponent.peek();
     if (!block) return;
 
     const container = this.widget.dragHandleContainer;
@@ -218,41 +276,21 @@ export class PointerEventWatcher {
 
     this.widget.isHoverDragHandleVisible = true;
 
-    const draggingAreaRect = this.widget.rectHelper.getDraggingAreaRect(block);
-
-    // Some blocks have padding, should consider padding when calculating position
-
-    const containerHeight = getDragHandleContainerHeight(block.model);
+    const draggingAreaRect = this.widget.draggingAreaRect.peek();
+    if (!draggingAreaRect) return;
 
     // Ad-hoc solution for list with toggle icon
     updateDragHandleClassName([block]);
     // End of ad-hoc solution
 
-    const posTop = this.widget.rectHelper.getTopWithBlockComponent(block);
-
-    const rowPaddingY =
-      ((containerHeight - DRAG_HANDLE_GRABBER_HEIGHT) / 2) *
-      this.widget.scale *
-      this.widget.noteScale;
-
-    // use padding to control grabber's height
-    const paddingTop = rowPaddingY + posTop - draggingAreaRect.top;
-    const paddingBottom =
-      draggingAreaRect.height -
-      paddingTop -
-      DRAG_HANDLE_GRABBER_HEIGHT * this.widget.scale * this.widget.noteScale;
-
     const applyStyle = (transition?: boolean) => {
+      const containerStyle = this._containerStyle.value;
+      if (!containerStyle) return;
+
       container.style.transition = transition ? 'padding 0.25s ease' : 'none';
-      container.style.paddingTop = `${paddingTop}px`;
-      container.style.paddingBottom = `${paddingBottom}px`;
-      container.style.width = `${
-        DRAG_HANDLE_CONTAINER_WIDTH * this.widget.scale * this.widget.noteScale
-      }px`;
-      container.style.left = `${draggingAreaRect.left}px`;
-      container.style.top = `${draggingAreaRect.top}px`;
+      Object.assign(container.style, containerStyle);
+
       container.style.display = 'flex';
-      container.style.height = `${draggingAreaRect.height}px`;
     };
 
     if (isBlockIdEqual(block.blockId, this._lastShowedBlock?.id)) {
@@ -268,14 +306,8 @@ export class PointerEventWatcher {
       applyStyle(false);
     }
 
-    grabber.style.width = `${
-      DRAG_HANDLE_GRABBER_WIDTH * this.widget.scale * this.widget.noteScale
-    }px`;
-    grabber.style.borderRadius = `${
-      DRAG_HANDLE_GRABBER_BORDER_RADIUS *
-      this.widget.scale *
-      this.widget.noteScale
-    }px`;
+    const grabberStyle = this._grabberStyle.value;
+    Object.assign(grabber.style, grabberStyle);
 
     this.widget.handleAnchorModelDisposables(block.model);
     if (!isBlockIdEqual(block.blockId, this._lastShowedBlock?.id)) {
