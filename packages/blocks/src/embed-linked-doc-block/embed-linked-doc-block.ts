@@ -42,7 +42,7 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockComponent<EmbedLinke
       isError = false,
       isBannerEmpty = true,
       isNoteContentEmpty = true,
-    } = this.resetState();
+    } = this.getInitialState();
 
     this._loading = loading;
     this.isError = isError;
@@ -323,6 +323,15 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockComponent<EmbedLinke
     super.disconnectedCallback();
   }
 
+  getInitialState(): {
+    loading?: boolean;
+    isError?: boolean;
+    isNoteContentEmpty?: boolean;
+    isBannerEmpty?: boolean;
+  } {
+    return {};
+  }
+
   override renderBlock() {
     this._cardStyle = this.model.style;
 
@@ -454,15 +463,6 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockComponent<EmbedLinke
         </div>
       `
     );
-  }
-
-  resetState(): {
-    loading?: boolean;
-    isError?: boolean;
-    isNoteContentEmpty?: boolean;
-    isBannerEmpty?: boolean;
-  } {
-    return {};
   }
 
   override updated() {
