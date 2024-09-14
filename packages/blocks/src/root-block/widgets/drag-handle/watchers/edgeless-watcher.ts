@@ -201,11 +201,9 @@ export class EdgelessWatcher {
 
     const dragPreviewOffset = this.widget.dragPreview.offset;
 
-    let posX = state.raw.x - dragPreviewOffset.x - offsetParentRect.left;
-    posX /= this.widget.cumulativeParentScale;
+    const posX = state.raw.x - dragPreviewOffset.x - offsetParentRect.left;
 
-    let posY = state.raw.y - dragPreviewOffset.y - offsetParentRect.top;
-    posY /= this.widget.cumulativeParentScale;
+    const posY = state.raw.y - dragPreviewOffset.y - offsetParentRect.top;
 
     this.widget.dragPreview.style.transform = `translate(${posX}px, ${posY}px) scale(${
       this.widget.scale * this.widget.noteScale

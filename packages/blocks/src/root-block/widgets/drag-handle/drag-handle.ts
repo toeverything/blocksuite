@@ -118,7 +118,7 @@ export class AffineDragHandleWidget extends WidgetComponent<
       model,
       closestBlock,
       this.draggingElements,
-      this.scale * this.cumulativeParentScale,
+      this.scale,
       isDraggedElementNote === false
     );
 
@@ -167,7 +167,7 @@ export class AffineDragHandleWidget extends WidgetComponent<
 
     this.pointerEventWatcher.reset();
 
-    this.removeDragPreview();
+    this.previewHelper.removeDragPreview();
     this._removeDropIndicator();
     this._resetCursor();
   };
@@ -193,12 +193,7 @@ export class AffineDragHandleWidget extends WidgetComponent<
       left -= offsetParentRect.left;
       top -= offsetParentRect.top;
 
-      left /= this.cumulativeParentScale;
-      top /= this.cumulativeParentScale;
-
-      let { width, height } = dropResult.rect;
-      width /= this.cumulativeParentScale;
-      height /= this.cumulativeParentScale;
+      const { width, height } = dropResult.rect;
 
       const rect = Rect.fromLWTH(left, width, top, height);
       this.dropIndicator.rect = rect;
@@ -211,8 +206,6 @@ export class AffineDragHandleWidget extends WidgetComponent<
 
   // Single block: drag handle should show on the vertical middle of the first line of element
   center: IVec = [0, 0];
-
-  cumulativeParentScale = 1;
 
   dragging = false;
 
@@ -285,13 +278,6 @@ export class AffineDragHandleWidget extends WidgetComponent<
   rafID = 0;
 
   rectHelper = new RectHelper(this);
-
-  removeDragPreview = () => {
-    if (this.dragPreview) {
-      this.dragPreview.remove();
-      this.dragPreview = null;
-    }
-  };
 
   scale = 1;
 
