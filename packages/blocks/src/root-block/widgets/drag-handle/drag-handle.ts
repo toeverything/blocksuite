@@ -1,7 +1,6 @@
 import type { RootBlockModel } from '@blocksuite/affine-model';
 import type { GfxBlockElementModel } from '@blocksuite/block-std/gfx';
 import type { IVec } from '@blocksuite/global/utils';
-import type { BlockModel } from '@blocksuite/store';
 
 import { DocModeProvider } from '@blocksuite/affine-shared/services';
 import {
@@ -247,7 +246,11 @@ export class AffineDragHandleWidget extends WidgetComponent<
 
   edgelessWatcher = new EdgelessWatcher(this);
 
-  handleAnchorModelDisposables = (blockModel: BlockModel) => {
+  handleAnchorModelDisposables = () => {
+    const block = this.anchorBlockComponent.peek();
+    if (!block) return;
+    const blockModel = block.model;
+
     if (this._anchorModelDisposables) {
       this._anchorModelDisposables.dispose();
       this._anchorModelDisposables = null;

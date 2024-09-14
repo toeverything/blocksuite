@@ -309,7 +309,7 @@ export class PointerEventWatcher {
     const grabberStyle = this._grabberStyle.value;
     Object.assign(grabber.style, grabberStyle);
 
-    this.widget.handleAnchorModelDisposables(block.model);
+    this.widget.handleAnchorModelDisposables();
     if (!isBlockIdEqual(block.blockId, this._lastShowedBlock?.id)) {
       this._lastShowedBlock = {
         id: block.blockId,

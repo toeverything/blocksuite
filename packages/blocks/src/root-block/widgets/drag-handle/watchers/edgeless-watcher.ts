@@ -2,7 +2,7 @@ import type { PointerEventState } from '@blocksuite/block-std';
 
 import { GfxControllerIdentifier } from '@blocksuite/block-std/gfx';
 import { type IVec, Rect } from '@blocksuite/global/utils';
-import { computed } from '@preact/signals-core';
+import { computed, signal } from '@preact/signals-core';
 
 import type {
   EdgelessRootBlockComponent,
@@ -64,50 +64,34 @@ export class EdgelessWatcher {
     if (this.widget.mode === 'page') return;
     const { edgelessRoot } = this;
     await edgelessRoot.surface.updateComplete;
-
-    if (!this.widget.anchorBlockId) return;
-    const block = this.widget.anchorBlockComponent.peek();
-    if (!block) return;
-
-    const edgelessElement = edgelessRoot.service.getElementById(block.model.id);
-    if (!edgelessElement) return;
+    this.areaUpdater.value += 1;
 
     const container = this.widget.dragHandleContainer;
     const grabber = this.widget.dragHandleGrabber;
     if (!container || !grabber) return;
 
-    const rect = getSelectedRect([edgelessElement]);
-    const [left, top] = edgelessRoot.service.viewport.toViewCoord(
-      rect.left,
-      rect.top
-    );
-    const height = rect.height * this.widget.scale.peek();
+    const area = this.hoverAreaTopLevelBlock.peek();
+    if (!area) return;
 
-    const posLeft =
-      left -
-      (DRAG_HANDLE_CONTAINER_WIDTH_TOP_LEVEL +
-        DRAG_HANDLE_CONTAINER_OFFSET_LEFT_TOP_LEVEL) *
-        this.widget.scale.peek();
-
-    const posTop = top;
+    const { left, top, padding, height } = area;
 
     container.style.transition = 'none';
-    container.style.paddingTop = `0px`;
+    container.style.paddingTop = `${padding}px`;
     container.style.paddingBottom = `0px`;
     container.style.width = `${
       DRAG_HANDLE_CONTAINER_WIDTH_TOP_LEVEL * this.widget.scale.peek()
     }px`;
-    container.style.left = `${posLeft}px`;
-    container.style.top = `${posTop}px`;
+    container.style.left = `${left}px`;
+    container.style.top = `${top}px`;
     container.style.display = 'flex';
-    container.style.height = `${height}px`;
+    container.style.height = `${height + padding}px`;
 
     grabber.style.width = `${DRAG_HANDLE_GRABBER_WIDTH_HOVERED * this.widget.scale.peek()}px`;
     grabber.style.borderRadius = `${
       DRAG_HANDLE_GRABBER_BORDER_RADIUS * this.widget.scale.peek()
     }px`;
 
-    this.widget.handleAnchorModelDisposables(block.model);
+    this.widget.handleAnchorModelDisposables();
 
     this.widget.isTopLevelDragHandleVisible = true;
   };
@@ -123,6 +107,8 @@ export class EdgelessWatcher {
       this.updateDragPreviewPosition(this.widget.lastDragPointerState);
     }
   };
+
+  areaUpdater = signal(0);
 
   checkTopLevelBlockSelection = () => {
     if (!this.widget.isConnected) return;
@@ -158,7 +144,20 @@ export class EdgelessWatcher {
     this._showDragHandleOnTopLevelBlocks().catch(console.error);
   };
 
+  containerWidth = computed(() => {
+    const scale = this.widget.scale.value;
+    return DRAG_HANDLE_CONTAINER_WIDTH_TOP_LEVEL * scale;
+  });
+
   hoverAreaRectTopLevelBlock = computed(() => {
+    const area = this.hoverAreaTopLevelBlock.value;
+    if (!area) return null;
+
+    return new Rect(area.left, area.top, area.right, area.bottom);
+  });
+
+  hoverAreaTopLevelBlock = computed(() => {
+    this.areaUpdater.value;
     const edgelessElement = this.widget.anchorEdgelessElement.value;
 
     if (!edgelessElement) return null;
@@ -176,15 +175,27 @@ export class EdgelessWatcher {
 
     let [right, bottom] = [left + width, top + height];
 
-    const offsetLeft = DRAG_HANDLE_CONTAINER_OFFSET_LEFT_TOP_LEVEL * scale;
     const padding = HOVER_AREA_RECT_PADDING_TOP_LEVEL * scale;
 
-    left -= DRAG_HANDLE_CONTAINER_WIDTH_TOP_LEVEL * scale + offsetLeft;
+    left -= this.containerWidth.value + this.offsetLeft.value;
     top -= padding;
     right += padding;
     bottom += padding;
 
-    return new Rect(left, top, right, bottom);
+    return {
+      left,
+      top,
+      right,
+      bottom,
+      width,
+      height,
+      padding,
+    };
+  });
+
+  offsetLeft = computed(() => {
+    const scale = this.widget.scale.value;
+    return DRAG_HANDLE_CONTAINER_OFFSET_LEFT_TOP_LEVEL * scale;
   });
 
   updateDragPreviewPosition = (state: PointerEventState) => {
