@@ -38,7 +38,7 @@ export class HandleEventWatcher {
       this.widget.isDragHandleHovered = true;
     } else if (this.widget.isTopLevelDragHandleVisible) {
       this.widget.dragHoverRect =
-        this.widget.edgelessWatcher.hoverAreaRectTopLevelBlock.value;
+        this.widget.edgelessWatcher.hoverAreaRectTopLevelBlock;
       this.widget.isDragHandleHovered = true;
     }
   };

@@ -215,10 +215,7 @@ export class DragEventWatcher {
 
     // Should make sure drop block id is not in selected blocks
     if (
-      containBlock(
-        this.widget.selectedBlocks.map(selection => selection.blockId),
-        targetBlockId
-      )
+      containBlock(this.widget.selectionHelper.selectedBlockIds, targetBlockId)
     ) {
       return false;
     }
@@ -285,7 +282,7 @@ export class DragEventWatcher {
 
         const note = findNoteBlockModel(parentElement.model);
         if (!note) return;
-        this.widget.setSelectedBlocks(
+        this.widget.selectionHelper.setSelectedBlocks(
           newSelectedBlocks as BlockComponent[],
           note.id
         );
@@ -323,7 +320,7 @@ export class DragEventWatcher {
     const hoverBlock = this.widget.anchorBlockComponent;
     if (!hoverBlock) return false;
 
-    let selections = this.widget.selectedBlocks;
+    let selections = this.widget.selectionHelper.selectedBlocks;
 
     // When current selection is TextSelection
     // Should set BlockSelection for the blocks in native range
@@ -336,8 +333,8 @@ export class DragEventWatcher {
           match: el => el.model.role === 'content',
           mode: 'highest',
         });
-        this.widget.setSelectedBlocks(blocks);
-        selections = this.widget.selectedBlocks;
+        this.widget.selectionHelper.setSelectedBlocks(blocks);
+        selections = this.widget.selectionHelper.selectedBlocks;
       }
     }
 
@@ -353,15 +350,11 @@ export class DragEventWatcher {
     ) {
       const block = this.widget.anchorBlockComponent.peek();
       if (block) {
-        this.widget.setSelectedBlocks([block]);
+        this.widget.selectionHelper.setSelectedBlocks([block]);
       }
     }
 
-    const blocks = this.widget.selectedBlocks
-      .map(selection => {
-        return this.widget.std.view.getBlock(selection.blockId);
-      })
-      .filter((element): element is BlockComponent<BlockModel> => !!element);
+    const blocks = this.widget.selectionHelper.selectedBlockComponents;
 
     // This could be skip if we can ensure that all selected blocks are on the same level
     // Which means not selecting parent block and child block at the same time

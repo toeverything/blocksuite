@@ -60,16 +60,18 @@ export class PointerEventWatcher {
     const insideDragHandle = !!element?.closest(AFFINE_DRAG_HANDLE_WIDGET);
     if (!insideDragHandle) return;
 
-    if (!this.widget.anchorBlockId) return;
+    const anchorBlockId = this.widget.anchorBlockId.peek();
+
+    if (!anchorBlockId) return;
 
     const { selection } = this.widget.std;
-    const selectedBlocks = this.widget.selectedBlocks;
+    const selectedBlocks = this.widget.selectionHelper.selectedBlocks;
 
     // Should clear selection if current block is the first selected block
     if (
       selectedBlocks.length > 0 &&
       !includeTextSelection(selectedBlocks) &&
-      selectedBlocks[0].blockId === this.widget.anchorBlockId.peek()
+      selectedBlocks[0].blockId === anchorBlockId
     ) {
       selection.clear(['block']);
       this.widget.dragHoverRect = null;
@@ -78,14 +80,14 @@ export class PointerEventWatcher {
     }
 
     // Should select the block if current block is not selected
-    const blocks = this.widget.anchorBlockComponent.peek();
-    if (!blocks) return;
+    const block = this.widget.anchorBlockComponent.peek();
+    if (!block) return;
 
     if (selectedBlocks.length > 1) {
       this.showDragHandleOnHoverBlock();
     }
 
-    this.widget.setSelectedBlocks([blocks]);
+    this.widget.selectionHelper.setSelectedBlocks([block]);
   };
 
   private _containerStyle = computed(() => {
@@ -295,11 +297,13 @@ export class PointerEventWatcher {
 
     if (isBlockIdEqual(block.blockId, this._lastShowedBlock?.id)) {
       applyStyle(true);
-    } else if (this.widget.selectedBlocks.length) {
-      if (this.widget.isBlockSelected(block))
+    } else if (this.widget.selectionHelper.selectedBlocks.length) {
+      if (this.widget.selectionHelper.isBlockSelected(block))
         applyStyle(
           this.widget.isDragHandleHovered &&
-            this.widget.isBlockSelected(this._lastShowedBlock?.el)
+            this.widget.selectionHelper.isBlockSelected(
+              this._lastShowedBlock?.el
+            )
         );
       else applyStyle(false);
     } else {
@@ -309,7 +313,7 @@ export class PointerEventWatcher {
     const grabberStyle = this._grabberStyle.value;
     Object.assign(grabber.style, grabberStyle);
 
-    this.widget.handleAnchorModelDisposables(block.model);
+    this.widget.handleAnchorModelDisposables();
     if (!isBlockIdEqual(block.blockId, this._lastShowedBlock?.id)) {
       this._lastShowedBlock = {
         id: block.blockId,

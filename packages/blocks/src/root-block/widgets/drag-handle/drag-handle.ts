@@ -1,11 +1,9 @@
 import type { RootBlockModel } from '@blocksuite/affine-model';
 import type { GfxBlockElementModel } from '@blocksuite/block-std/gfx';
 import type { IVec } from '@blocksuite/global/utils';
-import type { BlockModel } from '@blocksuite/store';
 
 import { DocModeProvider } from '@blocksuite/affine-shared/services';
 import {
-  findNoteBlockModel,
   getScrollContainer,
   isInsideEdgelessEditor,
   isInsidePageEditor,
@@ -22,8 +20,6 @@ import { html } from 'lit';
 import { query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type { EdgelessRootBlockComponent } from '../../../root-block/edgeless/edgeless-root-block.js';
-import type { PageRootBlockComponent } from '../../../root-block/page/page-root-block.js';
 import type { EdgelessRootService } from '../../edgeless/index.js';
 import type { DragPreview } from './components/drag-preview.js';
 import type { DropIndicator } from './components/drop-indicator.js';
@@ -35,6 +31,7 @@ import { autoScroll } from '../../../root-block/text-selection/utils.js';
 import { DragHandleOptionsRunner } from './config.js';
 import { PreviewHelper } from './helpers/preview-helper.js';
 import { RectHelper } from './helpers/rect-helper.js';
+import { SelectionHelper } from './helpers/selection-helper.js';
 import { styles } from './styles.js';
 import {
   calcDropTarget,
@@ -52,10 +49,7 @@ import { KeyboardEventWatcher } from './watchers/keyboard-event-watcher.js';
 import { PageWatcher } from './watchers/page-watcher.js';
 import { PointerEventWatcher } from './watchers/pointer-event-watcher.js';
 
-export class AffineDragHandleWidget extends WidgetComponent<
-  RootBlockModel,
-  EdgelessRootBlockComponent | PageRootBlockComponent
-> {
+export class AffineDragHandleWidget extends WidgetComponent<RootBlockModel> {
   static staticOptionRunner = new DragHandleOptionsRunner();
 
   static override styles = styles;
@@ -247,7 +241,11 @@ export class AffineDragHandleWidget extends WidgetComponent<
 
   edgelessWatcher = new EdgelessWatcher(this);
 
-  handleAnchorModelDisposables = (blockModel: BlockModel) => {
+  handleAnchorModelDisposables = () => {
+    const block = this.anchorBlockComponent.peek();
+    if (!block) return;
+    const blockModel = block.model;
+
     if (this._anchorModelDisposables) {
       this._anchorModelDisposables.dispose();
       this._anchorModelDisposables = null;
@@ -279,14 +277,6 @@ export class AffineDragHandleWidget extends WidgetComponent<
     }
   };
 
-  /** Check if given block component is selected */
-  isBlockSelected = (block?: BlockComponent) => {
-    if (!block) return false;
-    return this.selectedBlocks.some(
-      selection => selection.blockId === block.model.id
-    );
-  };
-
   isDragHandleHovered = false;
 
   isHoverDragHandleVisible = false;
@@ -307,33 +297,7 @@ export class AffineDragHandleWidget extends WidgetComponent<
 
   scaleInNote = computed(() => this.scale.value * this.noteScale.value);
 
-  setSelectedBlocks = (blocks: BlockComponent[], noteId?: string) => {
-    const { selection } = this.host;
-    const selections = blocks.map(block =>
-      selection.create('block', {
-        blockId: block.blockId,
-      })
-    );
-
-    // When current page is edgeless page
-    // We need to remain surface selection and set editing as true
-    if (isInsideEdgelessEditor(this.host)) {
-      const surfaceElementId = noteId
-        ? noteId
-        : findNoteBlockModel(blocks[0].model)?.id;
-      if (!surfaceElementId) return;
-      const surfaceSelection = selection.create(
-        'surface',
-        blocks[0]!.blockId,
-        [surfaceElementId],
-        true
-      );
-
-      selections.push(surfaceSelection);
-    }
-
-    selection.set(selections);
-  };
+  selectionHelper = new SelectionHelper(this);
 
   updateDropIndicator = (
     state: PointerEventState,
@@ -401,13 +365,6 @@ export class AffineDragHandleWidget extends WidgetComponent<
 
   get rootComponent() {
     return this.block;
-  }
-
-  get selectedBlocks() {
-    // eslint-disable-next-line unicorn/prefer-array-some
-    return this.host.selection.find('text')
-      ? this.host.selection.filter('text')
-      : this.host.selection.filter('block');
   }
 
   static registerOption(option: DragHandleOption) {
