@@ -253,7 +253,7 @@ import { AFFINE_CODE_TOOLBAR_WIDGET } from './root-block/widgets/code-toolbar/in
 import { AFFINE_DOC_REMOTE_SELECTION_WIDGET } from './root-block/widgets/doc-remote-selection/index.js';
 import { DragPreview } from './root-block/widgets/drag-handle/components/drag-preview.js';
 import { DropIndicator } from './root-block/widgets/drag-handle/components/drop-indicator.js';
-import { AFFINE_DRAG_HANDLE_WIDGET } from './root-block/widgets/drag-handle/drag-handle.js';
+import { AFFINE_DRAG_HANDLE_WIDGET } from './root-block/widgets/drag-handle/consts.js';
 import {
   AFFINE_EDGELESS_AUTO_CONNECT_WIDGET,
   EdgelessAutoConnectWidget,
