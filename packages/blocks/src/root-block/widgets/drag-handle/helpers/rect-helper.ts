@@ -82,11 +82,6 @@ export class RectHelper {
     top -= offsetParentRect.top;
     bottom -= offsetParentRect.top;
 
-    left /= this.widget.cumulativeParentScale;
-    right /= this.widget.cumulativeParentScale;
-    top /= this.widget.cumulativeParentScale;
-    bottom /= this.widget.cumulativeParentScale;
-
     // Add padding to hover rect
     left -=
       (DRAG_HANDLE_CONTAINER_WIDTH + offsetLeft) *
@@ -105,11 +100,9 @@ export class RectHelper {
     const { top } = block.getBoundingClientRect();
     const paddingTop = parseInt(computedStyle.paddingTop) * this.widget.scale;
     return (
-      (top +
-        paddingTop -
-        this.widget.dragHandleContainerOffsetParent.getBoundingClientRect()
-          .top) /
-      this.widget.cumulativeParentScale
+      top +
+      paddingTop -
+      this.widget.dragHandleContainerOffsetParent.getBoundingClientRect().top
     );
   };
 

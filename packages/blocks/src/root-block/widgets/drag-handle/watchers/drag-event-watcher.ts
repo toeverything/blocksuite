@@ -389,10 +389,6 @@ export class DragEventWatcher {
 
     this.widget.draggingElements = blocks;
 
-    if (this.widget.dragPreview) {
-      this.widget.removeDragPreview();
-    }
-
     this.widget.dragPreview = this.widget.previewHelper.createDragPreview(
       blocks,
       state,
