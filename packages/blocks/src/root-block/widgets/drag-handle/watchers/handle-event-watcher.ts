@@ -11,11 +11,7 @@ export class HandleEventWatcher {
     if (!this.widget.isHoverDragHandleVisible || !this.widget.anchorBlockId)
       return;
 
-    const block = this.widget.anchorBlockComponent;
-    if (!block) return;
-
-    this.widget.dragHoverRect =
-      this.widget.rectHelper.getDraggingAreaRect(block) ?? null;
+    this.widget.dragHoverRect = this.widget.draggingAreaRect.value;
   };
 
   private _onDragHandlePointerEnter = () => {
@@ -27,31 +23,22 @@ export class HandleEventWatcher {
       const block = this.widget.anchorBlockComponent;
       if (!block) return;
 
-      const padding = DRAG_HANDLE_CONTAINER_PADDING * this.widget.scale;
+      const padding = DRAG_HANDLE_CONTAINER_PADDING * this.widget.scale.peek();
       container.style.paddingTop = `${padding}px`;
       container.style.paddingBottom = `${padding}px`;
       container.style.transition = `padding 0.25s ease`;
 
       grabber.style.width = `${
-        DRAG_HANDLE_GRABBER_WIDTH_HOVERED *
-        this.widget.scale *
-        this.widget.noteScale
+        DRAG_HANDLE_GRABBER_WIDTH_HOVERED * this.widget.scaleInNote.peek()
       }px`;
       grabber.style.borderRadius = `${
-        DRAG_HANDLE_GRABBER_BORDER_RADIUS *
-        this.widget.scale *
-        this.widget.noteScale
+        DRAG_HANDLE_GRABBER_BORDER_RADIUS * this.widget.scaleInNote.peek()
       }px`;
 
       this.widget.isDragHandleHovered = true;
     } else if (this.widget.isTopLevelDragHandleVisible) {
-      const edgelessElement = this.widget.anchorEdgelessElement;
-      if (!edgelessElement) return;
-
       this.widget.dragHoverRect =
-        this.widget.edgelessWatcher._getHoverAreaRectTopLevelBlock(
-          edgelessElement
-        );
+        this.widget.edgelessWatcher.hoverAreaRectTopLevelBlock.value;
       this.widget.isDragHandleHovered = true;
     }
   };
@@ -64,10 +51,7 @@ export class HandleEventWatcher {
 
     if (this.widget.dragging) return;
 
-    if (!this.widget.anchorBlockId) return;
-    this.widget.pointerEventWatcher._showDragHandleOnHoverBlock(
-      this.widget.anchorBlockId
-    );
+    this.widget.pointerEventWatcher.showDragHandleOnHoverBlock();
   };
 
   private _onDragHandlePointerUp = () => {

@@ -10,13 +10,13 @@ import type {
 import type { BlockModel } from '@blocksuite/store';
 
 import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '@blocksuite/affine-shared/consts';
+import { DocModeProvider } from '@blocksuite/affine-shared/services';
 import {
   findClosestBlockComponent,
   getBlockProps,
   getClosestBlockComponentByElement,
   getClosestBlockComponentByPoint,
   getRectByBlockComponent,
-  isInsidePageEditor,
   matchFlavours,
 } from '@blocksuite/affine-shared/utils';
 import { assertExists, Bound, Point, Rect } from '@blocksuite/global/utils';
@@ -127,7 +127,8 @@ export const isOutOfNoteBlock = (
 ) => {
   // TODO: need to find a better way to check if the point is out of note block
   const rect = noteBlock.getBoundingClientRect();
-  const insidePageEditor = isInsidePageEditor(editorHost);
+  const insidePageEditor =
+    editorHost.std.get(DocModeProvider).getEditorMode() === 'page';
   const padding =
     (NOTE_CONTAINER_PADDING +
       (insidePageEditor ? 0 : EDGELESS_NOTE_EXTRA_PADDING)) *
@@ -149,7 +150,9 @@ export const getClosestNoteBlock = (
   rootComponent: BlockComponent,
   point: Point
 ) => {
-  return isInsidePageEditor(editorHost)
+  const isInsidePageEditor =
+    editorHost.std.get(DocModeProvider).getEditorMode() === 'page';
+  return isInsidePageEditor
     ? findClosestBlockComponent(rootComponent, point, 'affine-note')
     : getHoveringNote(point)?.closest('affine-edgeless-note');
 };
