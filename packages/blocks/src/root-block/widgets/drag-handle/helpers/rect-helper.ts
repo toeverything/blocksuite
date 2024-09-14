@@ -23,7 +23,7 @@ export class RectHelper {
     const hoverBlock = this.widget.anchorBlockComponent.peek();
     if (!hoverBlock) return [];
 
-    const selections = this.widget.selectedBlocks;
+    const selections = this.widget.selectionHelper.selectedBlocks;
     let blocks: BlockComponent[] = [];
 
     // When current selection is TextSelection, should cover all the blocks in native range
@@ -37,9 +37,7 @@ export class RectHelper {
         mode: 'highest',
       });
     } else {
-      blocks = this.widget.selectedBlocks
-        .map(block => this.widget.std.view.getBlock(block.blockId))
-        .filter((block): block is BlockComponent => !!block);
+      blocks = this.widget.selectionHelper.selectedBlockComponents;
     }
 
     if (
