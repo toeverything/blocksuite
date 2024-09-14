@@ -21,10 +21,8 @@ import { moveBlockConfigs } from '../_common/configs/move-block.js';
 import { quickActionConfig } from '../_common/configs/quick-action/config.js';
 import { textConversionConfigs } from '../_common/configs/text-conversion.js';
 import { onModelElementUpdated } from '../root-block/utils/callback.js';
-import {
-  AFFINE_DRAG_HANDLE_WIDGET,
-  AffineDragHandleWidget,
-} from '../root-block/widgets/drag-handle/drag-handle.js';
+import { AFFINE_DRAG_HANDLE_WIDGET } from '../root-block/widgets/drag-handle/consts.js';
+import { AffineDragHandleWidget } from '../root-block/widgets/drag-handle/drag-handle.js';
 import {
   captureEventTarget,
   getDuplicateBlocks,

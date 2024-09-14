@@ -24,10 +24,8 @@ import type { EdgelessRootService } from '../../root-block/edgeless/edgeless-roo
 import type { DragHandleOption } from '../../root-block/widgets/drag-handle/config.js';
 
 import { BOOKMARK_MIN_WIDTH } from '../../root-block/edgeless/utils/consts.js';
-import {
-  AFFINE_DRAG_HANDLE_WIDGET,
-  AffineDragHandleWidget,
-} from '../../root-block/widgets/drag-handle/drag-handle.js';
+import { AFFINE_DRAG_HANDLE_WIDGET } from '../../root-block/widgets/drag-handle/consts.js';
+import { AffineDragHandleWidget } from '../../root-block/widgets/drag-handle/drag-handle.js';
 import {
   captureEventTarget,
   convertDragPreviewDocToEdgeless,
