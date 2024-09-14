@@ -3,7 +3,7 @@ export * from './bound.js';
 export * from './crypto.js';
 export * from './curve.js';
 export * from './disposable.js';
-export { getSvgPath } from './figma-squircle/index.js';
+export { getSvgPath as getFigmaSquircleSvgPath } from './figma-squircle/index.js';
 export * from './function.js';
 export * from './iterable.js';
 export * from './logger.js';
