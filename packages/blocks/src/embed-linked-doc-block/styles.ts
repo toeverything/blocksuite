@@ -5,11 +5,9 @@ import { embedNoteContentStyles } from './../_common/utils/render-linked-doc.js'
 
 export const styles = css`
   .affine-embed-linked-doc-block {
-    margin: 0 auto;
     box-sizing: border-box;
     display: flex;
-    width: 100%;
-    height: ${EMBED_CARD_HEIGHT.horizontal}px;
+    width: ${EMBED_CARD_WIDTH.horizontal}px;
     border-radius: 8px;
     border: 1px solid var(--affine-background-tertiary-color);
     opacity: var(--add, 1);
@@ -18,18 +16,13 @@ export const styles = css`
     position: relative;
   }
 
-  .affine-embed-linked-doc-block-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 1;
-    border-radius: 8px;
+  .affine-embed-linked-doc-block.horizontal {
+    width: ${EMBED_CARD_WIDTH.horizontal}px;
+    height: ${EMBED_CARD_HEIGHT.horizontal}px;
   }
 
   .affine-embed-linked-doc-content {
-    width: calc(100% - 204px);
+    flex-grow: 1;
     height: 100%;
     display: flex;
     flex-direction: column;
@@ -67,9 +60,9 @@ export const styles = css`
   }
 
   .affine-embed-linked-doc-content-title-text {
-    display: -webkit-box;
-    -webkit-line-clamp: 1;
-    -webkit-box-orient: vertical;
+    flex-grow: 1;
+    position: relative;
+    height: 22px;
     word-break: break-word;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -95,6 +88,7 @@ export const styles = css`
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
+    position: relative;
     white-space: normal;
     word-break: break-word;
     overflow: hidden;
@@ -171,9 +165,6 @@ export const styles = css`
     opacity: var(--add, 1);
     pointer-events: none;
   }
-  .affine-embed-linked-doc-banner.render {
-    display: none;
-  }
   .affine-embed-linked-doc-banner img,
   .affine-embed-linked-doc-banner object,
   .affine-embed-linked-doc-banner svg {
@@ -200,9 +191,6 @@ export const styles = css`
   }
 
   .affine-embed-linked-doc-block:not(.loading):not(.banner-empty) {
-    .affine-embed-linked-doc-banner.render {
-      display: block;
-    }
     .affine-embed-linked-doc-banner.default {
       display: none;
     }
@@ -214,10 +202,6 @@ export const styles = css`
     .affine-embed-linked-doc-content {
       width: 100%;
       height: 100%;
-    }
-
-    .affine-embed-linked-doc-banner.render {
-      display: none;
     }
 
     .affine-embed-linked-doc-banner.default {
@@ -236,10 +220,6 @@ export const styles = css`
     }
 
     .affine-embed-linked-doc-content-date {
-      display: none;
-    }
-
-    .affine-embed-linked-doc-banner.render {
       display: none;
     }
 
@@ -322,10 +302,6 @@ export const styles = css`
     .affine-embed-linked-doc-content {
       width: 100%;
       height: 100%;
-    }
-
-    .affine-embed-linked-doc-banner.render {
-      display: none;
     }
 
     .affine-embed-linked-doc-banner.default {

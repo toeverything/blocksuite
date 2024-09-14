@@ -92,31 +92,22 @@ export const replaceIdMiddleware: JobMiddleware = ({ slots, collection }) => {
     // TODO(@fundon): process linked block/element
     if (
       payload.type === 'block' &&
-      payload.snapshot.flavour === 'affine:embed-linked-doc'
+      ['affine:embed-linked-doc', 'affine:embed-synced-doc'].includes(
+        payload.snapshot.flavour
+      )
     ) {
-      const model = payload.model as EmbedLinkedDocModel;
+      const model = payload.model as EmbedLinkedDocModel | EmbedSyncedDocModel;
       const original = model.pageId;
-      if (idMap.has(original)) {
-        model.pageId = idMap.get(original)!;
-      } else {
-        const newId = collection.idGenerator();
-        idMap.set(original, newId);
-        model.pageId = newId;
-      }
-    }
-
-    if (
-      payload.type === 'block' &&
-      payload.snapshot.flavour === 'affine:embed-synced-doc'
-    ) {
-      const model = payload.model as EmbedSyncedDocModel;
-      const original = model.pageId;
-      if (idMap.has(original)) {
-        model.pageId = idMap.get(original)!;
-      } else {
-        const newId = collection.idGenerator();
-        idMap.set(original, newId);
-        model.pageId = newId;
+      // If the pageId is not in the doc, generate a new id.
+      // If we already have a replacement, use it.
+      if (!collection.getDoc(original)) {
+        if (idMap.has(original)) {
+          model.pageId = idMap.get(original)!;
+        } else {
+          const newId = collection.idGenerator();
+          idMap.set(original, newId);
+          model.pageId = newId;
+        }
       }
     }
   });

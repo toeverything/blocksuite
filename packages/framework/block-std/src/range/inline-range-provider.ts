@@ -123,10 +123,16 @@ export const getInlineRangeProvider: (
   let lastInlineRange: InlineRange | null = null;
   selectionManager.slots.changed.on(() => {
     const textSelection = selectionManager.find('text');
-    if (!textSelection) return;
+    if (!textSelection) {
+      inlineRangeUpdatedSlot.emit([null, false]);
+      return;
+    }
 
     const range = rangeManager.value;
-    if (!range || !isElementSelected(range)) return;
+    if (!range || !isElementSelected(range)) {
+      inlineRangeUpdatedSlot.emit([null, false]);
+      return;
+    }
 
     // wait for lit updated
     requestAnimationFrame(() => {

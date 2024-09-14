@@ -229,7 +229,7 @@ export class RangeService<TextAttributes extends BaseTextAttributes> {
       return;
     }
 
-    if (this._inlineRange === null) {
+    if (this._inlineRange === null && this.editor.mounted) {
       const selection = document.getSelection();
       if (selection && selection.rangeCount > 0) {
         const range = selection.getRangeAt(0);

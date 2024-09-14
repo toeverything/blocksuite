@@ -5,7 +5,6 @@ import { query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { type StyleInfo, styleMap } from 'lit/directives/style-map.js';
 
-import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../_common/consts.js';
 import { EmbedBlockComponent } from '../_common/embed-block-helper/index.js';
 import { HtmlIcon, styles } from './styles.js';
 
@@ -79,12 +78,6 @@ export class EmbedHtmlBlockComponent extends EmbedBlockComponent<EmbedHtmlModel>
     const { style } = this.model;
 
     this._cardStyle = style;
-    this._width = EMBED_CARD_WIDTH[style];
-    this._height = EMBED_CARD_HEIGHT[style];
-    this.embedHtmlStyle = {
-      width: '100%',
-      height: `${this._height}px`,
-    };
 
     const titleText = 'Basic HTML Page Structure';
 

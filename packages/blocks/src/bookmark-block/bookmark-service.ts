@@ -10,10 +10,8 @@ import type { BookmarkBlockComponent } from './bookmark-block.js';
 
 import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../_common/consts.js';
 import { LinkPreviewer } from '../_common/embed-block-helper/index.js';
-import {
-  AFFINE_DRAG_HANDLE_WIDGET,
-  AffineDragHandleWidget,
-} from '../root-block/widgets/drag-handle/drag-handle.js';
+import { AFFINE_DRAG_HANDLE_WIDGET } from '../root-block/widgets/drag-handle/consts.js';
+import { AffineDragHandleWidget } from '../root-block/widgets/drag-handle/drag-handle.js';
 import {
   captureEventTarget,
   convertDragPreviewDocToEdgeless,
