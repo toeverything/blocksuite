@@ -1,4 +1,5 @@
 import { type BlockStdScope, LifeCycleWatcher } from '@blocksuite/block-std';
+import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 import {
   type DeepPartial,
   DisposableGroup,
@@ -136,6 +137,12 @@ export class EditPropsStore extends LifeCycleWatcher {
   }
 
   applyLastProps(key: LastPropsKey, props: Record<string, unknown>) {
+    if (['__proto__', 'constructor', 'prototype'].includes(key)) {
+      throw new BlockSuiteError(
+        ErrorCode.DefaultRuntimeError,
+        `Invalid key: ${key}`
+      );
+    }
     const lastProps = this.lastProps$.value[key];
     return mergeWith(clonedeep(lastProps), props, customizer);
   }
