@@ -7,11 +7,9 @@ import { html, nothing } from 'lit';
 import { property, queryAsync } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 
-import type { SurfaceRefRenderer } from '../../surface-ref-block/surface-ref-renderer.js';
-import type { SurfaceRefBlockService } from '../../surface-ref-block/surface-ref-service.js';
 import type { EmbedSyncedDocBlockComponent } from '../embed-synced-doc-block.js';
 
-import { renderLinkedDocInCard } from '../../_common/utils/render-linked-doc.js';
+import { renderLinkedDocInCard } from '../../common/render-linked-doc.js';
 import { cardStyles } from '../styles.js';
 import { getSyncedDocIcons } from '../utils.js';
 
@@ -276,14 +274,12 @@ export class EmbedSyncedDocCard extends WithDisposable(ShadowlessElement) {
   accessor noteContainer!: Promise<HTMLDivElement>;
 
   @property({ attribute: false })
-  accessor surfaceRefRenderer: SurfaceRefRenderer | null = null;
+  // TODO: remove any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  accessor surfaceRefRenderer: any | null = null;
 
   @property({ attribute: false })
-  accessor surfaceRefService!: SurfaceRefBlockService;
-}
-
-declare global {
-  interface HTMLElementTagNameMap {
-    'affine-embed-synced-doc-card': EmbedSyncedDocCard;
-  }
+  // TODO: remove any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  accessor surfaceRefService!: any;
 }

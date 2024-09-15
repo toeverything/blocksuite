@@ -35,6 +35,7 @@ export const insertLinkByQuickSearchCommand: Command<
 
       // add normal link;
       if ('externalUrl' in result) {
+        // @ts-ignore TODO: fix after bookmark refactor
         std.command.exec('insertBookmark', { url: result.externalUrl });
         return {
           flavour: 'affine:bookmark',

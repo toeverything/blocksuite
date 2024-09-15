@@ -1,12 +1,10 @@
-import { toEdgelessEmbedBlock } from '@blocksuite/affine-block-embed';
 import {
   EMBED_CARD_HEIGHT,
   EMBED_CARD_WIDTH,
 } from '@blocksuite/affine-shared/consts';
 import { Bound } from '@blocksuite/global/utils';
 
-import type { EdgelessRootService } from '../root-block/index.js';
-
+import { toEdgelessEmbedBlock } from '../common/to-edgeless-embed-block.js';
 import { EmbedLinkedDocBlockComponent } from './embed-linked-doc-block.js';
 
 export class EmbedEdgelessLinkedDocBlockComponent extends toEdgelessEmbedBlock(
@@ -34,9 +32,11 @@ export class EmbedEdgelessLinkedDocBlockComponent extends toEdgelessEmbedBlock(
       return;
     }
 
+    // @ts-expect-error TODO: fix after edgeless refactor
     const newId = edgelessService.addBlock(
       'affine:embed-synced-doc',
       { pageId, xywh: bound.serialize(), caption },
+      // @ts-expect-error TODO: fix after edgeless refactor
       edgelessService.surface
     );
 
@@ -45,6 +45,7 @@ export class EmbedEdgelessLinkedDocBlockComponent extends toEdgelessEmbedBlock(
       newId,
     });
 
+    // @ts-expect-error TODO: fix after edgeless refactor
     edgelessService.selection.set({
       editing: false,
       elements: [newId],
@@ -54,7 +55,7 @@ export class EmbedEdgelessLinkedDocBlockComponent extends toEdgelessEmbedBlock(
   };
 
   get rootService() {
-    return this.std.getService('affine:page') as EdgelessRootService;
+    return this.std.getService('affine:page');
   }
 
   protected override _handleClick(evt: MouseEvent): void {

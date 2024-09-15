@@ -1,3 +1,4 @@
+import { isLinkToNode } from '@blocksuite/affine-block-embed';
 import {
   CaptionIcon,
   CenterPeekIcon,
@@ -52,7 +53,6 @@ import {
   isEmbedCardBlockComponent,
 } from '../../../_common/components/embed-card/type.js';
 import { getEmbedCardIcons } from '../../../_common/utils/url.js';
-import { isLinkToNode } from '../../../embed-linked-doc-block/utils.js';
 import { getMoreMenuConfig } from '../../configs/toolbar.js';
 import {
   isBookmarkBlock,

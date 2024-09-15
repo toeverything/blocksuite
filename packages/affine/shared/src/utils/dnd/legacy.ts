@@ -3,9 +3,9 @@ import type {
   EmbedSyncedDocModel,
 } from '@blocksuite/affine-model';
 import type { BlockComponent } from '@blocksuite/block-std';
-import type { EdgelessRootBlockComponent } from '@blocksuite/blocks';
 import type { BlockModel } from '@blocksuite/store';
 
+import { GfxControllerIdentifier } from '@blocksuite/block-std/gfx';
 import { assertExists, Bound } from '@blocksuite/global/utils';
 
 import type { OnDragEndProps } from '../../services/index.js';
@@ -43,9 +43,7 @@ export function convertDragPreviewDocToEdgeless({
   height?: number;
   style?: EmbedCardStyle;
 }): boolean {
-  const edgelessRoot = blockComponent.closest(
-    'affine-edgeless-root'
-  ) as EdgelessRootBlockComponent;
+  const edgelessRoot = blockComponent.closest('affine-edgeless-root');
   if (!edgelessRoot) {
     return false;
   }
@@ -56,15 +54,16 @@ export function convertDragPreviewDocToEdgeless({
   }
   const rect = previewEl.getBoundingClientRect();
   const border = 2;
-  const { left: viewportLeft, top: viewportTop } = edgelessRoot.viewport;
+  const controller = blockComponent.std.get(GfxControllerIdentifier);
+  const { viewport } = controller;
+  const { left: viewportLeft, top: viewportTop } = viewport;
   const currentViewBound = new Bound(
     rect.x - viewportLeft,
     rect.y - viewportTop,
     rect.width + border / noteScale,
     rect.height + border / noteScale
   );
-  const currentModelBound =
-    edgelessRoot.service.viewport.toModelBound(currentViewBound);
+  const currentModelBound = viewport.toModelBound(currentViewBound);
 
   // Except for embed synced doc block
   // The width and height of other card style should be fixed
@@ -85,18 +84,22 @@ export function convertDragPreviewDocToEdgeless({
   const blockModel = blockComponent.model;
   const blockProps = getBlockProps(blockModel);
 
+  // @ts-ignore TODO: fix after edgeless refactor
   const blockId = edgelessRoot.service.addBlock(
     blockComponent.flavour,
     {
       ...blockProps,
       xywh: newBound.serialize(),
     },
+    // @ts-ignore TODO: fix after edgeless refactor
     edgelessRoot.surfaceBlockModel
   );
 
   // Embed synced doc block should extend the note scale
+  // @ts-ignore TODO: fix after edgeless refactor
   const newBlock = edgelessRoot.service.getElementById(blockId);
   if (isEmbedSyncedDocBlock(newBlock)) {
+    // @ts-ignore TODO: fix after edgeless refactor
     edgelessRoot.service.updateElement(newBlock.id, {
       scale: noteScale,
     });
@@ -110,6 +113,7 @@ export function convertDragPreviewDocToEdgeless({
     host.selection.setGroup('note', []);
   }
 
+  // @ts-ignore TODO: fix after edgeless refactor
   edgelessRoot.service.selection.set({
     elements: [blockId],
     editing: false,

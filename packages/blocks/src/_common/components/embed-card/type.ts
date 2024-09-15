@@ -12,13 +12,13 @@ import type { BlockComponent } from '@blocksuite/block-std';
 import {
   EmbedFigmaBlockComponent,
   EmbedGithubBlockComponent,
+  EmbedLinkedDocBlockComponent,
   EmbedLoomBlockComponent,
+  EmbedSyncedDocBlockComponent,
   EmbedYoutubeBlockComponent,
 } from '@blocksuite/affine-block-embed';
 
 import { BookmarkBlockComponent } from '../../../bookmark-block/bookmark-block.js';
-import { EmbedLinkedDocBlockComponent } from '../../../embed-linked-doc-block/embed-linked-doc-block.js';
-import { EmbedSyncedDocBlockComponent } from '../../../embed-synced-doc-block/embed-synced-doc-block.js';
 
 export type EmbedToolbarBlockComponent =
   | BookmarkBlockComponent

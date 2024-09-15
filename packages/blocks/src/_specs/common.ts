@@ -12,8 +12,6 @@ import { CodeBlockSpec } from '../code-block/code-block-spec.js';
 import { DataViewBlockSpec } from '../data-view-block/data-view-spec.js';
 import { DatabaseBlockSpec } from '../database-block/database-spec.js';
 import { DividerBlockSpec } from '../divider-block/divider-spec.js';
-import { EmbedLinkedDocBlockSpec } from '../embed-linked-doc-block/embed-linked-doc-spec.js';
-import { EmbedSyncedDocBlockSpec } from '../embed-synced-doc-block/embed-synced-doc-spec.js';
 import { ImageBlockSpec } from '../image-block/image-spec.js';
 import {
   EdgelessNoteBlockSpec,
@@ -34,8 +32,6 @@ export const CommonFirstPartyBlockSpecs: ExtensionType[] = [
   BookmarkBlockSpec,
   AttachmentBlockSpec,
   EmbedExtensions,
-  EmbedSyncedDocBlockSpec,
-  EmbedLinkedDocBlockSpec,
 ].flat();
 
 export const EdgelessFirstPartyBlockSpecs: ExtensionType[] = [
@@ -52,6 +48,4 @@ export const EdgelessFirstPartyBlockSpecs: ExtensionType[] = [
   BookmarkBlockSpec,
   AttachmentBlockSpec,
   EmbedExtensions,
-  EmbedSyncedDocBlockSpec,
-  EmbedLinkedDocBlockSpec,
 ].flat();

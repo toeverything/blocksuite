@@ -1,7 +1,10 @@
+import {
+  EMBED_CARD_HEIGHT,
+  EMBED_CARD_WIDTH,
+} from '@blocksuite/affine-shared/consts';
 import { css, html } from 'lit';
 
-import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../_common/consts.js';
-import { embedNoteContentStyles } from './../_common/utils/render-linked-doc.js';
+import { embedNoteContentStyles } from '../common/embed-note-content-styles.js';
 
 export const styles = css`
   .affine-embed-linked-doc-block {
