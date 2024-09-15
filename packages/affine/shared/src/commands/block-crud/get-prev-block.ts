@@ -2,32 +2,16 @@ import type { BlockComponent, Command } from '@blocksuite/block-std';
 
 import { assertExists } from '@blocksuite/global/utils';
 
-function getPrevSibling(std: BlockSuite.Std, path: string) {
-  const view = std.view;
-  const block = view.getBlock(path);
-  if (!block) return null;
-  const prev = std.doc.getPrev(block.model);
-  if (!prev) return null;
-  return view.getBlock(prev.id);
-}
+import { getPrevContentBlock } from '../../utils/index.js';
 
 function getPrevBlock(std: BlockSuite.Std, path: string) {
   const view = std.view;
 
-  const prev: BlockComponent | null = getPrevSibling(std, path);
-
-  if (!prev) {
-    return null;
-  }
-
-  const block = view.getBlock(path);
-  if (!block) return null;
-
-  if (prev && prev.blockId !== path) {
-    return prev;
-  }
-
-  return null;
+  const model = std.doc.getBlock(path)?.model;
+  if (!model) return null;
+  const prevModel = getPrevContentBlock(std.host, model);
+  if (!prevModel) return null;
+  return view.getBlock(prevModel.id);
 }
 
 export const getPrevBlockCommand: Command<

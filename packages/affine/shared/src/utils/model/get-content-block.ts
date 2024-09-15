@@ -1,6 +1,7 @@
 import type { EditorHost } from '@blocksuite/block-std';
 import type { BlockModel } from '@blocksuite/store';
 
+import { DocModeProvider } from '../../services/doc-mode-service.js';
 import { matchFlavours } from './checker.js';
 
 /**
@@ -38,9 +39,7 @@ export function getPrevContentBlock(
 
     // in edgeless mode, limit search for the previous block within the same note
     if (
-      // FIXME: this is a workaround to check if the editor is in edgeless mode
-      // We should use service to check if the editor is in edgeless mode
-      isInsideEdgelessEditor(editorHost) &&
+      editorHost.std.get(DocModeProvider).getEditorMode() === 'edgeless' &&
       parent.role === 'hub'
     ) {
       return null;
@@ -65,12 +64,12 @@ export function getPrevContentBlock(
     if (prev) {
       if (prev.role === 'content' && !matchFlavours(prev, ['affine:frame'])) {
         return prev;
-      } else {
-        return iterate(prev);
       }
-    } else {
-      return null;
+
+      return iterate(prev);
     }
+
+    return null;
   };
 
   return iterate(model);
@@ -111,9 +110,11 @@ export function getNextContentBlock(
     const nextSibling = doc.getNext(currentBlock);
     if (nextSibling) {
       // Assert nextSibling is not possible to be `affine:page`
-      if (model.role === 'hub') {
+      if (nextSibling.role === 'hub') {
         // in edgeless mode, limit search for the next block within the same note
-        if (isInsideEdgelessEditor(editorHost)) {
+        if (
+          editorHost.std.get(DocModeProvider).getEditorMode() === 'edgeless'
+        ) {
           return null;
         }
 
@@ -124,10 +125,4 @@ export function getNextContentBlock(
     currentBlock = doc.getParent(currentBlock);
   }
   return null;
-}
-
-function isInsideEdgelessEditor(host: EditorHost) {
-  return Array.from(host.children).some(
-    v => v.tagName.toLowerCase() === 'affine-edgeless-root'
-  );
 }

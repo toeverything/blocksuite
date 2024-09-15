@@ -2,32 +2,15 @@ import type { BlockComponent, Command } from '@blocksuite/block-std';
 
 import { assertExists } from '@blocksuite/global/utils';
 
-function getNext(std: BlockSuite.Std, block: BlockComponent) {
-  const view = std.view;
-  const next = std.doc.getNext(block.model);
-  if (!next) return null;
-  return view.getBlock(next.id);
-}
+import { getNextContentBlock } from '../../utils/index.js';
 
 function getNextBlock(std: BlockSuite.Std, path: string) {
   const view = std.view;
-  const focusBlock = view.getBlock(path);
-  if (!focusBlock) return null;
-
-  let next: BlockComponent | null = null;
-  if (focusBlock.childBlocks[0]) {
-    next = focusBlock.childBlocks[0];
-  }
-
-  if (!next) {
-    next = getNext(std, focusBlock);
-  }
-
-  if (next && !next.contains(focusBlock)) {
-    return next;
-  }
-
-  return null;
+  const model = std.doc.getBlock(path)?.model;
+  if (!model) return null;
+  const nextModel = getNextContentBlock(std.host, model);
+  if (!nextModel) return null;
+  return view.getBlock(nextModel.id);
 }
 
 export const getNextBlockCommand: Command<
