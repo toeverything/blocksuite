@@ -17,8 +17,8 @@ import {
   isGfxBlockComponent,
   toGfxBlockComponent,
 } from '@blocksuite/block-std';
-import { Bound, Point } from '@blocksuite/global/utils';
-import { html, render } from 'lit';
+import { Bound } from '@blocksuite/global/utils';
+import { html } from 'lit';
 import { query } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { type StyleInfo, styleMap } from 'lit/directives/style-map.js';
@@ -27,7 +27,6 @@ import type { EdgelessRootService } from '../../root-block/edgeless/edgeless-roo
 import type { EmbedCardStyle } from '../utils/index.js';
 
 import { BOOKMARK_MIN_WIDTH } from '../../root-block/edgeless/utils/consts.js';
-import { AFFINE_DRAG_HANDLE_WIDGET } from '../../root-block/widgets/drag-handle/consts.js';
 import {
   captureEventTarget,
   convertDragPreviewDocToEdgeless,
@@ -39,50 +38,6 @@ import { styles } from './styles.js';
 export const EmbedDragHandleOption = DragHandleConfigExtension({
   flavour: /affine:embed-*/,
   edgeless: true,
-  onDragStart: ({ state, startDragging, anchorBlockId, editorHost }) => {
-    if (!anchorBlockId) return false;
-    const anchorComponent = editorHost.std.view.getBlock(anchorBlockId);
-    if (
-      !anchorComponent ||
-      anchorComponent.model.flavour.match(/affine:embed-*/) === null
-    )
-      return false;
-
-    const blockComponent = anchorComponent as EmbedBlockComponent;
-    const element = captureEventTarget(state.raw.target);
-
-    const isDraggingByDragHandle = !!element?.closest(
-      AFFINE_DRAG_HANDLE_WIDGET
-    );
-    const isDraggingByComponent = blockComponent.contains(element);
-    const isInSurface = isGfxBlockComponent(blockComponent);
-
-    if (!isInSurface && (isDraggingByDragHandle || isDraggingByComponent)) {
-      editorHost.selection.setGroup('note', [
-        editorHost.selection.create('block', {
-          blockId: blockComponent.blockId,
-        }),
-      ]);
-      startDragging([blockComponent], state);
-      return true;
-    } else if (isInSurface && isDraggingByDragHandle) {
-      const edgelessService = editorHost.std.getService(
-        'affine:page'
-      ) as EdgelessRootService;
-      const zoom = edgelessService?.viewport.zoom ?? 1;
-      const dragPreviewEl = document.createElement('div');
-      const bound = Bound.deserialize(blockComponent.model.xywh);
-      const offset = new Point(bound.x * zoom, bound.y * zoom);
-      render(
-        blockComponent.host.dangerouslyRenderModel(blockComponent.model),
-        dragPreviewEl
-      );
-
-      startDragging([blockComponent], state, dragPreviewEl, offset);
-      return true;
-    }
-    return false;
-  },
   onDragEnd: props => {
     const { state, draggingElements } = props;
     if (
