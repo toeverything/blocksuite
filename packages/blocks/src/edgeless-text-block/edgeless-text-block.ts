@@ -39,6 +39,10 @@ export class EdgelessTextBlockComponent extends GfxBlockComponent<EdgelessTextBl
       return;
     }
 
+    if (!this.checkVisibility()) {
+      return;
+    }
+
     if (this._editing && !this.model.hasMaxWidth) {
       this._updateW();
     }
