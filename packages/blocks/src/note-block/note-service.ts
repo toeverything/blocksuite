@@ -11,21 +11,12 @@ import {
   type UIEventHandler,
   type UIEventStateContext,
 } from '@blocksuite/block-std';
-import { Bound, Point } from '@blocksuite/global/utils';
-import { render } from 'lit';
-
-import type { EdgelessRootService } from '../root-block/edgeless/edgeless-root-service.js';
-import type { EdgelessNoteBlockComponent } from './note-edgeless-block.js';
 
 import { moveBlockConfigs } from '../_common/configs/move-block.js';
 import { quickActionConfig } from '../_common/configs/quick-action/config.js';
 import { textConversionConfigs } from '../_common/configs/text-conversion.js';
 import { onModelElementUpdated } from '../root-block/utils/callback.js';
-import { AFFINE_DRAG_HANDLE_WIDGET } from '../root-block/widgets/drag-handle/consts.js';
-import {
-  captureEventTarget,
-  getDuplicateBlocks,
-} from '../root-block/widgets/drag-handle/utils.js';
+import { getDuplicateBlocks } from '../root-block/widgets/drag-handle/utils.js';
 
 export class NoteBlockService extends BlockService {
   static override readonly flavour = NoteBlockSchema.model.flavour;
@@ -601,41 +592,6 @@ export class NoteBlockService extends BlockService {
 export const NoteDragHandleOption = DragHandleConfigExtension({
   flavour: NoteBlockSchema.model.flavour,
   edgeless: true,
-  onDragStart: ({ state, startDragging, anchorBlockId, editorHost }) => {
-    if (!anchorBlockId) {
-      return false;
-    }
-
-    const element = captureEventTarget(state.raw.target);
-    const insideDragHandle = !!element?.closest(AFFINE_DRAG_HANDLE_WIDGET);
-    if (!insideDragHandle) {
-      return false;
-    }
-
-    const anchorComponent = editorHost.std.view.getBlock(anchorBlockId);
-    if (
-      !anchorComponent ||
-      !matchFlavours(anchorComponent.model, [NoteBlockSchema.model.flavour])
-    ) {
-      return false;
-    }
-    const edgelessService = editorHost.std.getService(
-      'affine:page'
-    ) as EdgelessRootService;
-    const zoom = edgelessService?.viewport.zoom ?? 1;
-    const noteComponent = anchorComponent as EdgelessNoteBlockComponent;
-    const dragPreviewEl = document.createElement('div');
-    const bound = Bound.deserialize(noteComponent.model.xywh);
-    const offset = new Point(bound.x * zoom, bound.y * zoom);
-
-    render(
-      noteComponent.host.dangerouslyRenderModel(noteComponent.model),
-      dragPreviewEl
-    );
-
-    startDragging([noteComponent], state, dragPreviewEl, offset);
-    return true;
-  },
   onDragEnd: ({
     draggingElements,
     dropBlockId,

@@ -5,8 +5,6 @@ import type { LinkPreviewData, LinkPreviewResponseData } from './types.js';
 
 import { DEFAULT_LINK_PREVIEW_ENDPOINT } from '../consts.js';
 
-// ========== Link Preview ==========
-
 export class LinkPreviewer {
   private _endpoint = DEFAULT_LINK_PREVIEW_ENDPOINT;
 

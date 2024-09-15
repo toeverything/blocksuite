@@ -83,6 +83,7 @@ export class EditorHost extends SignalWatcher(
   };
 
   /**
+   * @deprecated
    * Render a block model manually instead of let blocksuite render it.
    * If you render the same block model multiple times,
    * the event flow and data binding will be broken.

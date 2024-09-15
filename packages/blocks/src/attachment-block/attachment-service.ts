@@ -8,11 +8,8 @@ import {
   matchFlavours,
 } from '@blocksuite/affine-shared/utils';
 import { BlockService } from '@blocksuite/block-std';
-import { Bound, Point } from '@blocksuite/global/utils';
 import { Slot } from '@blocksuite/store';
-import { render } from 'lit';
 
-import type { EdgelessRootService } from '../root-block/edgeless/edgeless-root-service.js';
 import type { RootBlockComponent } from '../root-block/types.js';
 import type { AttachmentBlockComponent } from './attachment-block.js';
 
@@ -22,7 +19,6 @@ import {
 } from '../_common/components/file-drop-manager.js';
 import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../_common/consts.js';
 import { EdgelessRootBlockComponent } from '../root-block/edgeless/edgeless-root-block.js';
-import { AFFINE_DRAG_HANDLE_WIDGET } from '../root-block/widgets/drag-handle/consts.js';
 import {
   captureEventTarget,
   convertDragPreviewDocToEdgeless,
@@ -99,55 +95,6 @@ export class AttachmentBlockService extends BlockService {
 export const AttachmentDragHandleOption = DragHandleConfigExtension({
   flavour: AttachmentBlockSchema.model.flavour,
   edgeless: true,
-  onDragStart: ({ state, startDragging, anchorBlockId, editorHost }) => {
-    if (!anchorBlockId) return false;
-    const anchorComponent = editorHost.std.view.getBlock(anchorBlockId);
-    if (
-      !anchorComponent ||
-      !matchFlavours(anchorComponent.model, [
-        AttachmentBlockSchema.model.flavour,
-      ])
-    )
-      return false;
-
-    const blockComponent = anchorComponent as
-      | AttachmentBlockComponent
-      | AttachmentEdgelessBlockComponent;
-    const element = captureEventTarget(state.raw.target);
-
-    const isDraggingByDragHandle = !!element?.closest(
-      AFFINE_DRAG_HANDLE_WIDGET
-    );
-    const isDraggingByComponent = blockComponent.contains(element);
-    const isInSurface =
-      blockComponent instanceof AttachmentEdgelessBlockComponent;
-
-    if (!isInSurface && (isDraggingByDragHandle || isDraggingByComponent)) {
-      editorHost.selection.setGroup('note', [
-        editorHost.selection.create('block', {
-          blockId: blockComponent.blockId,
-        }),
-      ]);
-      startDragging([blockComponent], state);
-      return true;
-    } else if (isInSurface && isDraggingByDragHandle) {
-      const edgelessService = editorHost.std.getService(
-        'affine:page'
-      ) as EdgelessRootService;
-      const zoom = edgelessService?.viewport.zoom ?? 1;
-      const dragPreviewEl = document.createElement('div');
-      const bound = Bound.deserialize(blockComponent.model.xywh);
-      const offset = new Point(bound.x * zoom, bound.y * zoom);
-      render(
-        blockComponent.host.dangerouslyRenderModel(blockComponent.model),
-        dragPreviewEl
-      );
-
-      startDragging([blockComponent], state, dragPreviewEl, offset);
-      return true;
-    }
-    return false;
-  },
   onDragEnd: props => {
     const { state, draggingElements, editorHost } = props;
     if (
