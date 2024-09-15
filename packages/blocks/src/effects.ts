@@ -19,7 +19,10 @@ import type { insertBookmarkCommand } from './bookmark-block/commands/insert-boo
 import type { insertEdgelessTextCommand } from './edgeless-text-block/commands/insert-edgeless-text.js';
 import type { EmbedFigmaBlockService } from './embed-figma-block/embed-figma-service.js';
 import type { insertEmbedLinkedDocCommand } from './embed-linked-doc-block/commands/insert-embed-linked-doc.js';
-import type { insertLinkByQuickSearchCommand } from './embed-linked-doc-block/commands/insert-link-by-quick-search.js';
+import type {
+  InsertedLinkType,
+  insertLinkByQuickSearchCommand,
+} from './embed-linked-doc-block/commands/insert-link-by-quick-search.js';
 import type { EmbedLinkedDocBlockConfig } from './embed-linked-doc-block/embed-linked-doc-config.js';
 import type { updateBlockType } from './note-block/commands/block-type.js';
 import type { dedentBlock } from './note-block/commands/dedent-block.js';
@@ -757,7 +760,7 @@ declare global {
       anchorBlock?: BlockComponent | null;
       updatedBlocks?: BlockModel[];
       textId?: string;
-      insertedLinkType?: Promise<{ flavour?: string } | null>;
+      insertedLinkType?: Promise<InsertedLinkType>;
     }
     interface BlockConfigs {
       'affine:code': CodeBlockConfig;
