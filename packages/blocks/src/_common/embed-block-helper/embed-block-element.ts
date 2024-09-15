@@ -4,7 +4,10 @@ import type { BlockModel } from '@blocksuite/store';
 import type { TemplateResult } from 'lit';
 
 import { CaptionedBlockComponent } from '@blocksuite/affine-components/caption';
-import { DocModeProvider } from '@blocksuite/affine-shared/services';
+import {
+  DocModeProvider,
+  DragHandleConfigExtension,
+} from '@blocksuite/affine-shared/services';
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import {
   blockComponentSymbol,
@@ -21,19 +24,103 @@ import { classMap } from 'lit/directives/class-map.js';
 import { type StyleInfo, styleMap } from 'lit/directives/style-map.js';
 
 import type { EdgelessRootService } from '../../root-block/edgeless/edgeless-root-service.js';
-import type { DragHandleOption } from '../../root-block/widgets/drag-handle/config.js';
+import type { EmbedCardStyle } from '../utils/index.js';
 
 import { BOOKMARK_MIN_WIDTH } from '../../root-block/edgeless/utils/consts.js';
 import { AFFINE_DRAG_HANDLE_WIDGET } from '../../root-block/widgets/drag-handle/consts.js';
-import { AffineDragHandleWidget } from '../../root-block/widgets/drag-handle/drag-handle.js';
 import {
   captureEventTarget,
   convertDragPreviewDocToEdgeless,
   convertDragPreviewEdgelessToDoc,
 } from '../../root-block/widgets/drag-handle/utils.js';
 import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../consts.js';
-import { type EmbedCardStyle, matchFlavours } from '../utils/index.js';
 import { styles } from './styles.js';
+
+export const EmbedDragHandleOption = DragHandleConfigExtension({
+  flavour: /affine:embed-*/,
+  edgeless: true,
+  onDragStart: ({ state, startDragging, anchorBlockId, editorHost }) => {
+    if (!anchorBlockId) return false;
+    const anchorComponent = editorHost.std.view.getBlock(anchorBlockId);
+    if (
+      !anchorComponent ||
+      anchorComponent.model.flavour.match(/affine:embed-*/) === null
+    )
+      return false;
+
+    const blockComponent = anchorComponent as EmbedBlockComponent;
+    const element = captureEventTarget(state.raw.target);
+
+    const isDraggingByDragHandle = !!element?.closest(
+      AFFINE_DRAG_HANDLE_WIDGET
+    );
+    const isDraggingByComponent = blockComponent.contains(element);
+    const isInSurface = isGfxBlockComponent(blockComponent);
+
+    if (!isInSurface && (isDraggingByDragHandle || isDraggingByComponent)) {
+      editorHost.selection.setGroup('note', [
+        editorHost.selection.create('block', {
+          blockId: blockComponent.blockId,
+        }),
+      ]);
+      startDragging([blockComponent], state);
+      return true;
+    } else if (isInSurface && isDraggingByDragHandle) {
+      const edgelessService = editorHost.std.getService(
+        'affine:page'
+      ) as EdgelessRootService;
+      const zoom = edgelessService?.viewport.zoom ?? 1;
+      const dragPreviewEl = document.createElement('div');
+      const bound = Bound.deserialize(blockComponent.model.xywh);
+      const offset = new Point(bound.x * zoom, bound.y * zoom);
+      render(
+        blockComponent.host.dangerouslyRenderModel(blockComponent.model),
+        dragPreviewEl
+      );
+
+      startDragging([blockComponent], state, dragPreviewEl, offset);
+      return true;
+    }
+    return false;
+  },
+  onDragEnd: props => {
+    const { state, draggingElements } = props;
+    if (
+      draggingElements.length !== 1 ||
+      draggingElements[0].model.flavour.match(/affine:embed-*/) === null
+    )
+      return false;
+
+    const blockComponent = draggingElements[0] as EmbedBlockComponent;
+    const isInSurface = isGfxBlockComponent(blockComponent);
+    const target = captureEventTarget(state.raw.target);
+    const isTargetEdgelessContainer =
+      target?.classList.contains('edgeless-container');
+
+    if (isInSurface) {
+      const style = blockComponent._cardStyle;
+      const targetStyle =
+        style === 'vertical' || style === 'cube' ? 'horizontal' : style;
+      return convertDragPreviewEdgelessToDoc({
+        blockComponent,
+        style: targetStyle,
+        ...props,
+      });
+    } else if (isTargetEdgelessContainer) {
+      const style = blockComponent._cardStyle;
+
+      return convertDragPreviewDocToEdgeless({
+        blockComponent,
+        cssSelector: '.embed-block-container',
+        width: EMBED_CARD_WIDTH[style],
+        height: EMBED_CARD_HEIGHT[style],
+        ...props,
+      });
+    }
+
+    return false;
+  },
+});
 
 export class EmbedBlockComponent<
   Model extends BlockModel<GfxCompatibleProps> = BlockModel<GfxCompatibleProps>,
@@ -42,99 +129,9 @@ export class EmbedBlockComponent<
 > extends CaptionedBlockComponent<Model, Service, WidgetName> {
   static override styles = styles;
 
-  private _dragHandleOption: DragHandleOption = {
-    flavour: /affine:embed-*/,
-    edgeless: true,
-    onDragStart: ({ state, startDragging, anchorBlockId, editorHost }) => {
-      if (!anchorBlockId) return false;
-      const anchorComponent = editorHost.std.view.getBlock(anchorBlockId);
-      if (
-        !anchorComponent ||
-        !matchFlavours(anchorComponent.model, [
-          this.flavour as keyof BlockSuite.BlockModels,
-        ])
-      )
-        return false;
-
-      const blockComponent = anchorComponent as EmbedBlockComponent;
-      const element = captureEventTarget(state.raw.target);
-
-      const isDraggingByDragHandle = !!element?.closest(
-        AFFINE_DRAG_HANDLE_WIDGET
-      );
-      const isDraggingByComponent = blockComponent.contains(element);
-      const isInSurface = isGfxBlockComponent(blockComponent);
-
-      if (!isInSurface && (isDraggingByDragHandle || isDraggingByComponent)) {
-        editorHost.selection.setGroup('note', [
-          editorHost.selection.create('block', {
-            blockId: blockComponent.blockId,
-          }),
-        ]);
-        startDragging([blockComponent], state);
-        return true;
-      } else if (isInSurface && isDraggingByDragHandle) {
-        const edgelessService = editorHost.std.getService(
-          'affine:page'
-        ) as EdgelessRootService;
-        const zoom = edgelessService?.viewport.zoom ?? 1;
-        const dragPreviewEl = document.createElement('div');
-        const bound = Bound.deserialize(blockComponent.model.xywh);
-        const offset = new Point(bound.x * zoom, bound.y * zoom);
-        render(
-          blockComponent.host.dangerouslyRenderModel(blockComponent.model),
-          dragPreviewEl
-        );
-
-        startDragging([blockComponent], state, dragPreviewEl, offset);
-        return true;
-      }
-      return false;
-    },
-    onDragEnd: props => {
-      const { state, draggingElements } = props;
-      if (
-        draggingElements.length !== 1 ||
-        !matchFlavours(draggingElements[0].model, [
-          this.flavour as keyof BlockSuite.BlockModels,
-        ])
-      )
-        return false;
-
-      const blockComponent = draggingElements[0] as EmbedBlockComponent;
-      const isInSurface = isGfxBlockComponent(blockComponent);
-      const target = captureEventTarget(state.raw.target);
-      const isTargetEdgelessContainer =
-        target?.classList.contains('edgeless-container');
-
-      if (isInSurface) {
-        const style = blockComponent._cardStyle;
-        const targetStyle =
-          style === 'vertical' || style === 'cube' ? 'horizontal' : style;
-        return convertDragPreviewEdgelessToDoc({
-          blockComponent,
-          style: targetStyle,
-          ...props,
-        });
-      } else if (isTargetEdgelessContainer) {
-        const style = blockComponent._cardStyle;
-
-        return convertDragPreviewDocToEdgeless({
-          blockComponent,
-          cssSelector: '.embed-block-container',
-          width: EMBED_CARD_WIDTH[style],
-          height: EMBED_CARD_HEIGHT[style],
-          ...props,
-        });
-      }
-
-      return false;
-    },
-  };
-
   private _fetchAbortController = new AbortController();
 
-  protected _cardStyle: EmbedCardStyle = 'horizontal';
+  _cardStyle: EmbedCardStyle = 'horizontal';
 
   /**
    * The actual rendered scale of the embed card.
@@ -209,9 +206,6 @@ export class EmbedBlockComponent<
       this._fetchAbortController = new AbortController();
 
     this.contentEditable = 'false';
-    this.disposables.add(
-      AffineDragHandleWidget.registerOption(this._dragHandleOption)
-    );
   }
 
   override disconnectedCallback(): void {

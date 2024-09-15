@@ -107,7 +107,12 @@ export class DragEventWatcher {
     const state = ctx.get('pointerState');
 
     for (const option of this.widget.optionRunner.options) {
-      if (option.onDragMove?.(state, this.widget.draggingElements)) {
+      if (
+        option.onDragMove?.({
+          state,
+          draggingElements: this.widget.draggingElements,
+        })
+      ) {
         return true;
       }
     }

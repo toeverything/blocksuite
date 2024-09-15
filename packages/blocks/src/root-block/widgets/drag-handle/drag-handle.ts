@@ -2,7 +2,11 @@ import type { RootBlockModel } from '@blocksuite/affine-model';
 import type { GfxBlockElementModel } from '@blocksuite/block-std/gfx';
 import type { IVec } from '@blocksuite/global/utils';
 
-import { DocModeProvider } from '@blocksuite/affine-shared/services';
+import {
+  DocModeProvider,
+  DragHandleConfigIdentifier,
+  type DropType,
+} from '@blocksuite/affine-shared/services';
 import {
   getScrollContainer,
   isInsideEdgelessEditor,
@@ -23,7 +27,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 import type { EdgelessRootService } from '../../edgeless/index.js';
 import type { DragPreview } from './components/drag-preview.js';
 import type { DropIndicator } from './components/drop-indicator.js';
-import type { DragHandleOption, DropResult, DropType } from './config.js';
+import type { DropResult } from './config.js';
 import type { AFFINE_DRAG_HANDLE_WIDGET } from './consts.js';
 
 import { isTopLevelBlock } from '../../../root-block/edgeless/utils/query.js';
@@ -50,8 +54,6 @@ import { PageWatcher } from './watchers/page-watcher.js';
 import { PointerEventWatcher } from './watchers/pointer-event-watcher.js';
 
 export class AffineDragHandleWidget extends WidgetComponent<RootBlockModel> {
-  static staticOptionRunner = new DragHandleOptionsRunner();
-
   static override styles = styles;
 
   private _anchorModelDisposables: DisposableGroup | null = null;
@@ -287,6 +289,8 @@ export class AffineDragHandleWidget extends WidgetComponent<RootBlockModel> {
 
   noteScale = signal(1);
 
+  readonly optionRunner = new DragHandleOptionsRunner();
+
   pointerEventWatcher = new PointerEventWatcher(this);
 
   previewHelper = new PreviewHelper(this);
@@ -359,16 +363,8 @@ export class AffineDragHandleWidget extends WidgetComponent<RootBlockModel> {
     return this.std.get(DocModeProvider).getEditorMode();
   }
 
-  get optionRunner() {
-    return AffineDragHandleWidget.staticOptionRunner;
-  }
-
   get rootComponent() {
     return this.block;
-  }
-
-  static registerOption(option: DragHandleOption) {
-    return AffineDragHandleWidget.staticOptionRunner.register(option);
   }
 
   clearRaf() {
@@ -380,6 +376,9 @@ export class AffineDragHandleWidget extends WidgetComponent<RootBlockModel> {
 
   override connectedCallback() {
     super.connectedCallback();
+    this.std.provider.getAll(DragHandleConfigIdentifier).forEach(config => {
+      this.optionRunner.register(config);
+    });
 
     this.pointerEventWatcher.watch();
     this._keyboardEventWatcher.watch();

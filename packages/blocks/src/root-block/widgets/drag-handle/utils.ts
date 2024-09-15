@@ -10,7 +10,11 @@ import type {
 import type { BlockModel } from '@blocksuite/store';
 
 import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '@blocksuite/affine-shared/consts';
-import { DocModeProvider } from '@blocksuite/affine-shared/services';
+import {
+  DocModeProvider,
+  type DropType,
+  type OnDragEndProps,
+} from '@blocksuite/affine-shared/services';
 import {
   findClosestBlockComponent,
   getBlockProps,
@@ -33,10 +37,8 @@ import {
   DRAG_HANDLE_CONTAINER_OFFSET_LEFT,
   DRAG_HANDLE_CONTAINER_OFFSET_LEFT_LIST,
   type DropResult,
-  type DropType,
   EDGELESS_NOTE_EXTRA_PADDING,
   NOTE_CONTAINER_PADDING,
-  type OnDragEndProps,
 } from './config.js';
 
 const heightMap: Record<string, number> = {
