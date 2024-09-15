@@ -2,6 +2,7 @@ import type { NoteBlockModel } from '@blocksuite/affine-model';
 import type { BlockModel } from '@blocksuite/store';
 
 import {
+  captureEventTarget,
   findNoteBlockModel,
   getBlockComponentsExcludeSubtrees,
   matchFlavours,
@@ -22,7 +23,6 @@ import type { AffineDragHandleWidget } from '../drag-handle.js';
 import { DropIndicator } from '../components/drop-indicator.js';
 import { AFFINE_DRAG_HANDLE_WIDGET } from '../consts.js';
 import {
-  captureEventTarget,
   containBlock,
   getDuplicateBlocks,
   includeTextSelection,

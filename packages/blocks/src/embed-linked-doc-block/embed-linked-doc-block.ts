@@ -5,6 +5,7 @@ import type {
   ReferenceInfo,
 } from '@blocksuite/affine-model';
 
+import { EmbedBlockComponent } from '@blocksuite/affine-block-embed';
 import { BlockLinkIcon } from '@blocksuite/affine-components/icons';
 import { isPeekable, Peekable } from '@blocksuite/affine-components/peek';
 import {
@@ -24,7 +25,6 @@ import type { SurfaceRefRenderer } from '../surface-ref-block/surface-ref-render
 import type { EmbedLinkedDocBlockConfig } from './embed-linked-doc-config.js';
 
 import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../_common/consts.js';
-import { EmbedBlockComponent } from '../_common/embed-block-helper/index.js';
 import { renderLinkedDocInCard } from '../_common/utils/render-linked-doc.js';
 import { SyncedDocErrorIcon } from '../embed-synced-doc-block/styles.js';
 import { styles } from './styles.js';

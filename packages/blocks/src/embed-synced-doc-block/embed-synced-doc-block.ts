@@ -1,3 +1,4 @@
+import { EmbedBlockComponent } from '@blocksuite/affine-block-embed';
 import {
   EmbedEdgelessIcon,
   EmbedPageIcon,
@@ -32,7 +33,6 @@ import type { EdgelessRootService } from '../root-block/edgeless/edgeless-root-s
 import type { RootBlockComponent } from '../root-block/types.js';
 import type { EmbedSyncedDocCard } from './components/embed-synced-doc-card.js';
 
-import { EmbedBlockComponent } from '../_common/embed-block-helper/embed-block-element.js';
 import { isEmptyDoc } from '../_common/utils/render-linked-doc.js';
 import { SpecProvider } from '../_specs/utils/spec-provider.js';
 import { blockStyles } from './styles.js';

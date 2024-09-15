@@ -1,3 +1,4 @@
+import { toEdgelessEmbedBlock } from '@blocksuite/affine-block-embed';
 import {
   EMBED_CARD_HEIGHT,
   EMBED_CARD_WIDTH,
@@ -13,7 +14,6 @@ import { styleMap } from 'lit/directives/style-map.js';
 
 import type { EdgelessRootService } from '../root-block/index.js';
 
-import { toEdgelessEmbedBlock } from '../_common/embed-block-helper/embed-block-element.js';
 import { EmbedSyncedDocBlockComponent } from './embed-synced-doc-block.js';
 
 export class EmbedEdgelessSyncedDocBlockComponent extends toEdgelessEmbedBlock(

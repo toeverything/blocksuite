@@ -185,3 +185,12 @@ export function requestThrottledConnectedFrame<
     }, element);
   }) as T;
 }
+
+export const captureEventTarget = (target: EventTarget | null) => {
+  const isElementOrNode = target instanceof Element || target instanceof Node;
+  return isElementOrNode
+    ? target instanceof Element
+      ? target
+      : target.parentElement
+    : null;
+};

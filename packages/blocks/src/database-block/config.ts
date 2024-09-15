@@ -5,8 +5,7 @@ import {
   DatabaseBlockSchema,
 } from '@blocksuite/affine-model';
 import { DragHandleConfigExtension } from '@blocksuite/affine-shared/services';
-
-import { captureEventTarget } from '../root-block/widgets/drag-handle/utils.js';
+import { captureEventTarget } from '@blocksuite/affine-shared/utils';
 
 export interface DatabaseOptionsConfig {
   configure: (model: DatabaseBlockModel, options: MenuOptions) => MenuOptions;
