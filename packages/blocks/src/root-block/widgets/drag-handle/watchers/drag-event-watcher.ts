@@ -319,45 +319,7 @@ export class DragEventWatcher {
     const dragByHandle = !!element?.closest(AFFINE_DRAG_HANDLE_WIDGET);
     const isInSurface = isGfxBlockComponent(hoverBlock);
 
-    if (this.widget.draggingElements.length === 0) {
-      const dragByBlock =
-        hoverBlock.contains(element) && !hoverBlock.model.text;
-
-      const canDragByBlock =
-        matchFlavours(hoverBlock.model, [
-          'affine:attachment',
-          'affine:bookmark',
-        ]) || hoverBlock.model.flavour.startsWith('affine:embed-');
-
-      if (!isInSurface && dragByBlock && canDragByBlock) {
-        this.widget.std.selection.setGroup('note', [
-          this.widget.std.selection.create('block', {
-            blockId: hoverBlock.blockId,
-          }),
-        ]);
-        this._startDragging([hoverBlock], state);
-        return true;
-      }
-    }
-
-    // Should only start dragging when pointer down on drag handle
-    // And current mouse button is left button
-    if (!dragByHandle) {
-      this.widget.hide();
-      return false;
-    }
-
-    if (this.widget.draggingElements.length === 1) {
-      if (!isInSurface) {
-        this.widget.std.selection.setGroup('note', [
-          this.widget.std.selection.create('block', {
-            blockId: hoverBlock.blockId,
-          }),
-        ]);
-        this._startDragging([hoverBlock], state);
-        return true;
-      }
-
+    if (isInSurface && dragByHandle) {
       const viewport = this.widget.std.get(GfxControllerIdentifier).viewport;
       const zoom = viewport.zoom ?? 1;
       const dragPreviewEl = document.createElement('div');
@@ -374,7 +336,46 @@ export class DragEventWatcher {
       return true;
     }
 
-    if (!this.widget.isHoverDragHandleVisible) return;
+    const selectBlockAndStartDragging = () => {
+      this.widget.std.selection.setGroup('note', [
+        this.widget.std.selection.create('block', {
+          blockId: hoverBlock.blockId,
+        }),
+      ]);
+      this._startDragging([hoverBlock], state);
+    };
+
+    if (this.widget.draggingElements.length === 0) {
+      const dragByBlock =
+        hoverBlock.contains(element) && !hoverBlock.model.text;
+
+      const canDragByBlock =
+        matchFlavours(hoverBlock.model, [
+          'affine:attachment',
+          'affine:bookmark',
+        ]) || hoverBlock.model.flavour.startsWith('affine:embed-');
+
+      if (!isInSurface && dragByBlock && canDragByBlock) {
+        selectBlockAndStartDragging();
+        return true;
+      }
+    }
+
+    // Should only start dragging when pointer down on drag handle
+    // And current mouse button is left button
+    if (!dragByHandle) {
+      this.widget.hide();
+      return false;
+    }
+
+    if (this.widget.draggingElements.length === 1) {
+      if (!isInSurface) {
+        selectBlockAndStartDragging();
+        return true;
+      }
+    }
+
+    if (!this.widget.isHoverDragHandleVisible) return false;
 
     let selections = this.widget.selectionHelper.selectedBlocks;
 
