@@ -1,3 +1,4 @@
+import { captureEventTarget } from '@blocksuite/affine-shared/utils';
 import {
   BLOCK_ID_ATTR,
   type BlockComponent,
@@ -19,7 +20,6 @@ import {
 } from '../config.js';
 import { AFFINE_DRAG_HANDLE_WIDGET } from '../consts.js';
 import {
-  captureEventTarget,
   getClosestBlockByPoint,
   getClosestNoteBlock,
   getDragHandleContainerHeight,

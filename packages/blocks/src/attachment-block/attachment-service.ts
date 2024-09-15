@@ -4,6 +4,9 @@ import {
   TelemetryProvider,
 } from '@blocksuite/affine-shared/services';
 import {
+  captureEventTarget,
+  convertDragPreviewDocToEdgeless,
+  convertDragPreviewEdgelessToDoc,
   isInsideEdgelessEditor,
   matchFlavours,
 } from '@blocksuite/affine-shared/utils';
@@ -19,11 +22,6 @@ import {
 } from '../_common/components/file-drop-manager.js';
 import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../_common/consts.js';
 import { EdgelessRootBlockComponent } from '../root-block/edgeless/edgeless-root-block.js';
-import {
-  captureEventTarget,
-  convertDragPreviewDocToEdgeless,
-  convertDragPreviewEdgelessToDoc,
-} from '../root-block/widgets/drag-handle/utils.js';
 import { AttachmentEdgelessBlockComponent } from './attachment-edgeless-block.js';
 import { addSiblingAttachmentBlocks } from './utils.js';
 

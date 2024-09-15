@@ -12,7 +12,6 @@ export * from './_common/adapters/index.js';
 export * from './_common/components/ai-item/index.js';
 export { scrollbarStyle } from './_common/components/index.js';
 export { type NavigatorMode } from './_common/edgeless/frame/consts.js';
-export { EmbedBlockComponent } from './_common/embed-block-helper/index.js';
 export {
   ExportManager,
   ExportManagerExtension,
@@ -28,13 +27,8 @@ export * from './data-view-block/index.js';
 export * from './database-block/index.js';
 export * from './divider-block/index.js';
 export * from './edgeless-text-block/index.js';
-export * from './embed-figma-block/index.js';
-export * from './embed-github-block/index.js';
-export * from './embed-html-block/index.js';
 export * from './embed-linked-doc-block/index.js';
-export * from './embed-loom-block/index.js';
 export * from './embed-synced-doc-block/index.js';
-export * from './embed-youtube-block/index.js';
 export * from './frame-block/index.js';
 export * from './image-block/index.js';
 export * from './latex-block/index.js';
@@ -54,6 +48,7 @@ export {
   MiniMindmapPreview,
 } from './surface-block/mini-mindmap/index.js';
 export * from './surface-ref-block/index.js';
+export * from '@blocksuite/affine-block-embed';
 export * from '@blocksuite/affine-block-list';
 export * from '@blocksuite/affine-block-paragraph';
 export * from '@blocksuite/affine-block-surface';

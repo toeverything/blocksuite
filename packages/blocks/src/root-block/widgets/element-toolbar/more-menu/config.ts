@@ -1,3 +1,9 @@
+import type {
+  EmbedFigmaBlockComponent,
+  EmbedGithubBlockComponent,
+  EmbedLoomBlockComponent,
+  EmbedYoutubeBlockComponent,
+} from '@blocksuite/affine-block-embed';
 import type { MenuItemGroup } from '@blocksuite/affine-components/toolbar';
 
 import { isPeekable, peek } from '@blocksuite/affine-components/peek';
@@ -21,10 +27,6 @@ import {
 
 import type { AttachmentBlockComponent } from '../../../../attachment-block/attachment-block.js';
 import type { BookmarkBlockComponent } from '../../../../bookmark-block/bookmark-block.js';
-import type { EmbedFigmaBlockComponent } from '../../../../embed-figma-block/embed-figma-block.js';
-import type { EmbedGithubBlockComponent } from '../../../../embed-github-block/embed-github-block.js';
-import type { EmbedLoomBlockComponent } from '../../../../embed-loom-block/embed-loom-block.js';
-import type { EmbedYoutubeBlockComponent } from '../../../../embed-youtube-block/embed-youtube-block.js';
 import type { ImageBlockComponent } from '../../../../image-block/image-block.js';
 import type { ElementToolbarMoreMenuContext } from './context.js';
 

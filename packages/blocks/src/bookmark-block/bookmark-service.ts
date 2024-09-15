@@ -1,17 +1,17 @@
+import { LinkPreviewer } from '@blocksuite/affine-block-embed';
 import { BookmarkBlockSchema } from '@blocksuite/affine-model';
 import { DragHandleConfigExtension } from '@blocksuite/affine-shared/services';
-import { matchFlavours } from '@blocksuite/affine-shared/utils';
+import {
+  captureEventTarget,
+  convertDragPreviewDocToEdgeless,
+  convertDragPreviewEdgelessToDoc,
+  matchFlavours,
+} from '@blocksuite/affine-shared/utils';
 import { BlockService } from '@blocksuite/block-std';
 
 import type { BookmarkBlockComponent } from './bookmark-block.js';
 
 import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../_common/consts.js';
-import { LinkPreviewer } from '../_common/embed-block-helper/index.js';
-import {
-  captureEventTarget,
-  convertDragPreviewDocToEdgeless,
-  convertDragPreviewEdgelessToDoc,
-} from '../root-block/widgets/drag-handle/utils.js';
 import { BookmarkEdgelessBlockComponent } from './bookmark-edgeless-block.js';
 
 export class BookmarkBlockService extends BlockService {

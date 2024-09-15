@@ -1,7 +1,4 @@
-import type {
-  EmbedCardStyle,
-  ParagraphBlockModel,
-} from '@blocksuite/affine-model';
+import type { ParagraphBlockModel } from '@blocksuite/affine-model';
 import type {
   BaseSelection,
   BlockComponent,
@@ -13,7 +10,6 @@ import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '@blocksuite/affine-shared
 import {
   DocModeProvider,
   type DropType,
-  type OnDragEndProps,
 } from '@blocksuite/affine-shared/services';
 import {
   findClosestBlockComponent,
@@ -23,15 +19,12 @@ import {
   getRectByBlockComponent,
   matchFlavours,
 } from '@blocksuite/affine-shared/utils';
-import { assertExists, Bound, Point, Rect } from '@blocksuite/global/utils';
-
-import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
+import { Point, Rect } from '@blocksuite/global/utils';
 
 import {
   getDropRectByPoint,
   getHoveringNote,
 } from '../../../_common/utils/index.js';
-import { isEmbedSyncedDocBlock } from '../../edgeless/utils/query.js';
 import {
   DRAG_HANDLE_CONTAINER_HEIGHT,
   DRAG_HANDLE_CONTAINER_OFFSET_LEFT,
@@ -93,15 +86,6 @@ export const containBlock = (blockIDs: string[], targetID: string) => {
 // TODO: this is a hack, need to find a better way
 export const insideDatabaseTable = (element: Element) => {
   return !!element.closest('.affine-database-block-table');
-};
-
-export const captureEventTarget = (target: EventTarget | null) => {
-  const isElementOrNode = target instanceof Element || target instanceof Node;
-  return isElementOrNode
-    ? target instanceof Element
-      ? target
-      : target.parentElement
-    : null;
 };
 
 export const includeTextSelection = (selections: BaseSelection[]) => {
@@ -360,141 +344,4 @@ export function getDuplicateBlocks(blocks: BlockModel[]) {
     blockProps: getBlockProps(block),
   }));
   return duplicateBlocks;
-}
-
-export function convertDragPreviewDocToEdgeless({
-  blockComponent,
-  dragPreview,
-  cssSelector,
-  width,
-  height,
-  noteScale,
-  state,
-}: OnDragEndProps & {
-  blockComponent: BlockComponent;
-  cssSelector: string;
-  width?: number;
-  height?: number;
-  style?: EmbedCardStyle;
-}): boolean {
-  const edgelessRoot = blockComponent.closest(
-    'affine-edgeless-root'
-  ) as EdgelessRootBlockComponent;
-  if (!edgelessRoot) {
-    return false;
-  }
-
-  const previewEl = dragPreview.querySelector(cssSelector);
-  if (!previewEl) {
-    return false;
-  }
-  const rect = previewEl.getBoundingClientRect();
-  const border = 2;
-  const { left: viewportLeft, top: viewportTop } = edgelessRoot.viewport;
-  const currentViewBound = new Bound(
-    rect.x - viewportLeft,
-    rect.y - viewportTop,
-    rect.width + border / noteScale,
-    rect.height + border / noteScale
-  );
-  const currentModelBound =
-    edgelessRoot.service.viewport.toModelBound(currentViewBound);
-
-  // Except for embed synced doc block
-  // The width and height of other card style should be fixed
-  const newBound = isEmbedSyncedDocBlock(blockComponent.model)
-    ? new Bound(
-        currentModelBound.x,
-        currentModelBound.y,
-        (currentModelBound.w ?? width) * noteScale,
-        (currentModelBound.h ?? height) * noteScale
-      )
-    : new Bound(
-        currentModelBound.x,
-        currentModelBound.y,
-        (width ?? currentModelBound.w) * noteScale,
-        (height ?? currentModelBound.h) * noteScale
-      );
-
-  const blockModel = blockComponent.model;
-  const blockProps = getBlockProps(blockModel);
-
-  const blockId = edgelessRoot.service.addBlock(
-    blockComponent.flavour,
-    {
-      ...blockProps,
-      xywh: newBound.serialize(),
-    },
-    edgelessRoot.surfaceBlockModel
-  );
-
-  // Embed synced doc block should extend the note scale
-  const newBlock = edgelessRoot.service.getElementById(blockId);
-  if (isEmbedSyncedDocBlock(newBlock)) {
-    edgelessRoot.service.updateElement(newBlock.id, {
-      scale: noteScale,
-    });
-  }
-
-  const doc = blockComponent.doc;
-  const host = blockComponent.host;
-  const altKey = state.raw.altKey;
-  if (!altKey) {
-    doc.deleteBlock(blockModel);
-    host.selection.setGroup('note', []);
-  }
-
-  edgelessRoot.service.selection.set({
-    elements: [blockId],
-    editing: false,
-  });
-
-  return true;
-}
-
-export function convertDragPreviewEdgelessToDoc({
-  blockComponent,
-  dropBlockId,
-  dropType,
-  state,
-  style,
-}: OnDragEndProps & {
-  blockComponent: BlockComponent;
-  style?: EmbedCardStyle;
-}): boolean {
-  const doc = blockComponent.doc;
-  const host = blockComponent.host;
-  const targetBlock = doc.getBlockById(dropBlockId);
-  if (!targetBlock) return false;
-
-  const shouldInsertIn = dropType === 'in';
-  const parentBlock = shouldInsertIn ? targetBlock : doc.getParent(targetBlock);
-  assertExists(parentBlock);
-  const parentIndex = shouldInsertIn
-    ? 0
-    : parentBlock.children.indexOf(targetBlock) +
-      (dropType === 'after' ? 1 : 0);
-
-  const blockModel = blockComponent.model;
-
-  const { width, height, xywh, rotate, zIndex, ...blockProps } =
-    getBlockProps(blockModel);
-  if (style) {
-    blockProps.style = style;
-  }
-
-  doc.addBlock(
-    blockModel.flavour as never,
-    blockProps,
-    parentBlock,
-    parentIndex
-  );
-
-  const altKey = state.raw.altKey;
-  if (!altKey) {
-    doc.deleteBlock(blockModel);
-    host.selection.setGroup('gfx', []);
-  }
-
-  return true;
 }
