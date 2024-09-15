@@ -8,7 +8,6 @@ import { property } from 'lit/decorators.js';
 import type { AIItemGroupConfig } from '../../../_common/components/ai-item/types.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 
-import '../../../_common/components/ai-item/ai-item-list.js';
 import { scrollbarStyle } from '../../../_common/components/utils.js';
 
 export class EdgelessCopilotPanel extends WithDisposable(LitElement) {

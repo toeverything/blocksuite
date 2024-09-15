@@ -1,15 +1,12 @@
+import type { ReferenceParams } from '@blocksuite/affine-model';
 import type { ExtensionType } from '@blocksuite/block-std';
 
 import { createIdentifier } from '@blocksuite/global/di';
 
 export interface ParseDocUrlService {
-  parseDocUrl: (url: string) =>
-    | {
-        docId: string;
-        blockIds?: string[];
-        elementIds?: string[];
-      }
-    | undefined;
+  parseDocUrl: (
+    url: string
+  ) => ({ docId: string } & ReferenceParams) | undefined;
 }
 
 export const ParseDocUrlProvider =

@@ -7,7 +7,7 @@ import {
 import { literal } from 'lit/static-html.js';
 
 import { commands } from './commands/index.js';
-import { NoteBlockService } from './note-service.js';
+import { NoteBlockService, NoteDragHandleOption } from './note-service.js';
 
 export const NoteBlockSpec: ExtensionType[] = [
   FlavourExtension('affine:note'),
@@ -21,4 +21,5 @@ export const EdgelessNoteBlockSpec: ExtensionType[] = [
   NoteBlockService,
   CommandExtension(commands),
   BlockViewExtension('affine:note', literal`affine-edgeless-note`),
+  NoteDragHandleOption,
 ];

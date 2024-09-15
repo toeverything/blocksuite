@@ -2,7 +2,7 @@ import type { Text } from '@blocksuite/store';
 
 import { BlockModel, defineBlockSchema } from '@blocksuite/store';
 
-type RootBlockProps = {
+export type RootBlockProps = {
   title: Text;
 };
 

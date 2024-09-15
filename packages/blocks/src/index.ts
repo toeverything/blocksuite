@@ -1,26 +1,11 @@
 /// <reference types="@blocksuite/global" />
 // eslint-disable-next-line @typescript-eslint/triple-slash-reference
 /// <reference path="./effects.ts" />
-import '@blocksuite/affine-block-paragraph';
-import '@blocksuite/affine-block-list';
-import '@blocksuite/affine-block-surface';
-import '@blocksuite/affine-components/context-menu';
-import '@blocksuite/affine-components/rich-text';
-import '@blocksuite/affine-components/toolbar';
 import { deserializeXYWH, Point } from '@blocksuite/global/utils';
 
 import { matchFlavours } from './_common/utils/index.js';
-import './code-block/highlight/affine-code-unit.js';
-import './database-block/index.js';
-import './divider-block/index.js';
-import './frame-block/index.js';
-import './image-block/index.js';
-import './note-block/index.js';
 import { splitElements } from './root-block/edgeless/utils/clipboard-utils.js';
 import { isCanvasElement } from './root-block/edgeless/utils/query.js';
-// manual import to avoid being tree-shaken
-import './root-block/index.js';
-import './surface-ref-block/index.js';
 
 export * from './_common/adapters/index.js';
 

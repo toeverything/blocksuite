@@ -10,7 +10,6 @@ import { styleMap } from 'lit/directives/style-map.js';
 import type { IconButton } from '../../../_common/components/button.js';
 import type { LinkedMenuGroup } from './config.js';
 
-import '../../../_common/components/button.js';
 import {
   cleanSpecifiedTail,
   createKeydownObserver,

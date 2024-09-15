@@ -22,7 +22,6 @@ import {
   packColorsWithColorScheme,
 } from '../../edgeless/components/color-picker/utils.js';
 import { GET_DEFAULT_LINE_COLOR } from '../../edgeless/components/panel/color-panel.js';
-import '../../edgeless/components/panel/line-width-panel.js';
 
 function getMostCommonColor(
   elements: BrushElementModel[],

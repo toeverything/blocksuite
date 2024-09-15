@@ -7,7 +7,7 @@ import type { Doc } from '@blocksuite/store';
 import { SignalWatcher, WithDisposable } from '@blocksuite/block-std';
 import { BlocksUtils, NoteDisplayMode } from '@blocksuite/blocks';
 import { Bound, DisposableGroup } from '@blocksuite/global/utils';
-import { effect, signal } from '@lit-labs/preact-signals';
+import { effect, signal } from '@preact/signals-core';
 import { css, html, LitElement, nothing, type PropertyValues } from 'lit';
 import { property, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
@@ -21,7 +21,6 @@ import type {
   SelectEvent,
 } from '../utils/custom-events.js';
 
-import '../card/outline-card.js';
 import { startDragging } from '../utils/drag.js';
 import {
   getHeadingBlocksFromDoc,
@@ -32,7 +31,6 @@ import {
   observeActiveHeadingDuringScroll,
   scrollToBlockWithHighlight,
 } from '../utils/scroll.js';
-import './outline-notice.js';
 
 type OutlineNoteItem = {
   note: NoteBlockModel;

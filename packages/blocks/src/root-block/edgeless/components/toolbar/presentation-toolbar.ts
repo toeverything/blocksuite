@@ -22,7 +22,6 @@ import type { EdgelessTool } from '../../types.js';
 import { isFrameBlock } from '../../utils/query.js';
 import { launchIntoFullscreen } from '../utils.js';
 import { EdgelessToolbarToolMixin } from './mixins/tool.mixin.js';
-import './present/navigator-setting-button.js';
 
 const { clamp } = CommonUtils;
 

@@ -4,7 +4,6 @@ import type { SelectColumnData } from '../select/define.js';
 
 import { BaseCellRenderer } from '../../core/column/index.js';
 import { createFromBaseCellRenderer } from '../../core/column/renderer.js';
-import '../../core/utils/tags/multi-tag-select.js';
 import {
   popTagSelect,
   type SelectTag,

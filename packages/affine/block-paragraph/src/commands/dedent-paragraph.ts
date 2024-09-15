@@ -57,11 +57,3 @@ export const dedentParagraphCommand: Command<
 
   return next();
 };
-
-declare global {
-  namespace BlockSuite {
-    interface Commands {
-      dedentParagraph: typeof dedentParagraphCommand;
-    }
-  }
-}

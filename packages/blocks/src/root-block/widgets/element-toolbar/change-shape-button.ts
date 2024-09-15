@@ -41,12 +41,10 @@ import type { EdgelessShapePanel } from '../../edgeless/components/panel/shape-p
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 import type { ShapeTool } from '../../edgeless/tools/shape-tool.js';
 
-import '../../edgeless/components/color-picker/index.js';
 import {
   packColor,
   packColorsWithColorScheme,
 } from '../../edgeless/components/color-picker/utils.js';
-import '../../edgeless/components/panel/color-panel.js';
 import {
   type ColorEvent,
   GET_DEFAULT_LINE_COLOR,
@@ -56,16 +54,12 @@ import {
   type LineStyleEvent,
   LineStylesPanel,
 } from '../../edgeless/components/panel/line-styles-panel.js';
-import '../../edgeless/components/panel/shape-panel.js';
-import '../../edgeless/components/panel/shape-style-panel.js';
-import '../../edgeless/components/panel/stroke-style-panel.js';
 import {
   SHAPE_FILL_COLOR_BLACK,
   SHAPE_TEXT_COLOR_PURE_BLACK,
   SHAPE_TEXT_COLOR_PURE_WHITE,
 } from '../../edgeless/utils/consts.js';
 import { mountShapeTextEditor } from '../../edgeless/utils/text.js';
-import './change-text-menu.js';
 
 const changeShapeButtonStyles = [
   css`

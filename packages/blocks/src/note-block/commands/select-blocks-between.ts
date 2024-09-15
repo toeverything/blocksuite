@@ -47,11 +47,3 @@ export const selectBlocksBetween: Command<
   selection.setGroup('note', sel);
   return next();
 };
-
-declare global {
-  namespace BlockSuite {
-    interface Commands {
-      selectBlocksBetween: typeof selectBlocksBetween;
-    }
-  }
-}

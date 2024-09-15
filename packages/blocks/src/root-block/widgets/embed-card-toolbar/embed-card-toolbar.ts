@@ -44,7 +44,6 @@ import { repeat } from 'lit/directives/repeat.js';
 import type { EmbedCardStyle } from '../../../_common/types.js';
 import type { RootBlockComponent } from '../../types.js';
 
-import '../../../_common/components/button.js';
 import { toggleEmbedCardCaptionEditModal } from '../../../_common/components/embed-card/modal/embed-card-caption-edit-modal.js';
 import { toggleEmbedCardEditModal } from '../../../_common/components/embed-card/modal/embed-card-edit-modal.js';
 import {

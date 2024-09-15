@@ -84,8 +84,6 @@ import {
   isNoteBlock,
 } from '../../utils/query.js';
 import { getTopElements } from '../../utils/tree.js';
-import '../auto-complete/edgeless-auto-complete.js';
-import '../connector/connector-handle.js';
 import { HandleDirection } from '../resize/resize-handles.js';
 import { ResizeHandles, type ResizeMode } from '../resize/resize-handles.js';
 import { HandleResizeManager } from '../resize/resize-manager.js';

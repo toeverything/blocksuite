@@ -22,7 +22,8 @@ export class EdgelessLinkToolButton extends QuickToolMixin(LitElement) {
     );
     insertedLinkType
       ?.then(type => {
-        if (!type) return;
+        const flavour = type?.flavour;
+        if (!flavour) return;
 
         this.edgeless.std
           .getOptional(TelemetryProvider)
@@ -31,7 +32,7 @@ export class EdgelessLinkToolButton extends QuickToolMixin(LitElement) {
             page: 'whiteboard editor',
             module: 'toolbar',
             segment: 'toolbar',
-            type: type.flavour?.split(':')[1],
+            type: flavour.split(':')[1],
           });
 
         this.edgeless.std
@@ -41,7 +42,7 @@ export class EdgelessLinkToolButton extends QuickToolMixin(LitElement) {
             page: 'whiteboard editor',
             module: 'edgeless toolbar',
             segment: 'whiteboard',
-            type: type.flavour?.split(':')[1],
+            type: flavour.split(':')[1],
             other: 'existing doc',
           });
       })

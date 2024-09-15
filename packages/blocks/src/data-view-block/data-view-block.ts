@@ -21,7 +21,7 @@ import {
 } from '@blocksuite/data-view';
 import { widgetPresets } from '@blocksuite/data-view/widget-presets';
 import { Slice } from '@blocksuite/store';
-import { computed, signal } from '@lit-labs/preact-signals';
+import { computed, signal } from '@preact/signals-core';
 import { css, nothing, unsafeCSS } from 'lit';
 import { html } from 'lit/static-html.js';
 

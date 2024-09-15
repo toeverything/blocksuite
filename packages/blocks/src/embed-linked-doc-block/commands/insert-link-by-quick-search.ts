@@ -2,6 +2,10 @@ import type { Command } from '@blocksuite/block-std';
 
 import { QuickSearchProvider } from '@blocksuite/affine-shared/services';
 
+export type InsertedLinkType = {
+  flavour?: 'affine:bookmark' | 'affine:embed-linked-doc';
+} | null;
+
 export const insertLinkByQuickSearchCommand: Command<
   never,
   'insertedLinkType'
@@ -13,42 +17,32 @@ export const insertLinkByQuickSearchCommand: Command<
     return;
   }
 
-  const insertedLinkType = quickSearchService.openQuickSearch().then(result => {
-    // add linked doc
-    if (result && 'docId' in result) {
-      std.command.exec('insertEmbedLinkedDoc', {
-        docId: result.docId,
-        params: result.params,
-      });
-      return {
-        flavour: 'affine:embed-linked-doc',
-      };
-    }
+  const insertedLinkType: Promise<InsertedLinkType> = quickSearchService
+    .openQuickSearch()
+    .then(result => {
+      if (!result) return null;
 
-    // add normal link;
-    if (result && 'userInput' in result) {
-      std.command.exec('insertBookmark', { url: result.externalUrl });
-      return {
-        flavour: 'affine:bookmark',
-      };
-    }
+      // add linked doc
+      if ('docId' in result) {
+        std.command.exec('insertEmbedLinkedDoc', {
+          docId: result.docId,
+          params: result.params,
+        });
+        return {
+          flavour: 'affine:embed-linked-doc',
+        };
+      }
 
-    return null;
-  });
+      // add normal link;
+      if ('externalUrl' in result) {
+        std.command.exec('insertBookmark', { url: result.externalUrl });
+        return {
+          flavour: 'affine:bookmark',
+        };
+      }
+
+      return null;
+    });
 
   next({ insertedLinkType });
 };
-
-declare global {
-  namespace BlockSuite {
-    interface CommandContext {
-      insertedLinkType?: Promise<{
-        flavour?: string;
-      } | null>;
-    }
-
-    interface Commands {
-      insertLinkByQuickSearch: typeof insertLinkByQuickSearchCommand;
-    }
-  }
-}

@@ -1,4 +1,8 @@
-import { defineBlockSchema, type SchemaToModel } from '@blocksuite/store';
+import {
+  defineBlockSchema,
+  type SchemaToModel,
+  type Text,
+} from '@blocksuite/store';
 
 export type ParagraphType =
   | 'text'
@@ -10,10 +14,15 @@ export type ParagraphType =
   | 'h5'
   | 'h6';
 
+export type ParagraphProps = {
+  type: ParagraphType;
+  text: Text;
+};
+
 export const ParagraphBlockSchema = defineBlockSchema({
   flavour: 'affine:paragraph',
-  props: internal => ({
-    type: 'text' as ParagraphType,
+  props: (internal): ParagraphProps => ({
+    type: 'text',
     text: internal.Text(),
   }),
   metadata: {

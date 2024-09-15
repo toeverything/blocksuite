@@ -263,6 +263,8 @@ export class RangeService<TextAttributes extends BaseTextAttributes> {
    * sync the dom selection from inline range for **this Editor**
    */
   syncInlineRange = (inlineRange?: InlineRange | null) => {
+    if (!this.editor.mounted) return;
+
     inlineRange = inlineRange ?? this.editor.getInlineRange();
     console.trace(
       'syncInlineRange',

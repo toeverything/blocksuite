@@ -1,11 +1,8 @@
 import type {
-  BlockComponent,
-  EditorHost,
-  PointerEventState,
-} from '@blocksuite/block-std';
-import type { Disposable, Point, Rect } from '@blocksuite/global/utils';
-
-import type { DragPreview } from './components/drag-preview.js';
+  DragHandleOption,
+  DropType,
+} from '@blocksuite/affine-shared/services';
+import type { Disposable, Rect } from '@blocksuite/global/utils';
 
 export const DRAG_HANDLE_CONTAINER_HEIGHT = 24;
 export const DRAG_HANDLE_CONTAINER_WIDTH = 16;
@@ -27,44 +24,10 @@ export const NOTE_CONTAINER_PADDING = 24;
 export const EDGELESS_NOTE_EXTRA_PADDING = 20;
 export const DRAG_HOVER_RECT_PADDING = 4;
 
-export type DropType = 'before' | 'after' | 'in';
 export type DropResult = {
   rect: Rect | null;
   dropBlockId: string;
   dropType: DropType;
-};
-
-export type OnDragStartProps = {
-  state: PointerEventState;
-  startDragging: (
-    blocks: BlockComponent[],
-    state: PointerEventState,
-    dragPreview?: HTMLElement,
-    dragPreviewOffset?: Point
-  ) => void;
-  anchorBlockId: string | null;
-  editorHost: EditorHost;
-};
-
-export type OnDragEndProps = {
-  state: PointerEventState;
-  draggingElements: BlockComponent[];
-  dropBlockId: string;
-  dropType: DropType | null;
-  dragPreview: DragPreview;
-  noteScale: number;
-  editorHost: EditorHost;
-};
-
-export type DragHandleOption = {
-  flavour: string | RegExp;
-  edgeless?: boolean;
-  onDragStart?: (props: OnDragStartProps) => boolean;
-  onDragMove?: (
-    state: PointerEventState,
-    draggingElements?: BlockComponent[]
-  ) => boolean;
-  onDragEnd?: (props: OnDragEndProps) => boolean;
 };
 
 export class DragHandleOptionsRunner {

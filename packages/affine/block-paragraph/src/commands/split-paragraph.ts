@@ -78,11 +78,3 @@ export const splitParagraphCommand: Command<
   focusTextModel(std, id);
   return next({ paragraphConvertedId: id });
 };
-
-declare global {
-  namespace BlockSuite {
-    interface Commands {
-      splitParagraph: typeof splitParagraphCommand;
-    }
-  }
-}

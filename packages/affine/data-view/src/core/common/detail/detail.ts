@@ -9,7 +9,7 @@ import {
   ArrowUpBigIcon,
   PlusIcon,
 } from '@blocksuite/icons/lit';
-import { computed } from '@lit-labs/preact-signals';
+import { computed } from '@preact/signals-core';
 import { css, nothing, unsafeCSS } from 'lit';
 import { property, query } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
@@ -22,7 +22,6 @@ import type { DetailSlotProps, DetailSlots } from '../data-source/base.js';
 
 import { renderUniLit } from '../../utils/uni-component/uni-component.js';
 import { dataViewCommonStyle } from '../css-variable.js';
-import './field.js';
 import { DetailSelection } from './selection.js';
 
 const styles = css`

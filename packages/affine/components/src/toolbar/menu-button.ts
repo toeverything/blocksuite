@@ -12,8 +12,6 @@ import { property, query } from 'lit/decorators.js';
 
 import type { EditorIconButton } from './icon-button.js';
 
-import './icon-button.js';
-
 export class EditorMenuButton extends WithDisposable(LitElement) {
   static override styles = css`
     :host {

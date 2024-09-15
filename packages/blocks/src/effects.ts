@@ -1,3 +1,6 @@
+import type { BlockComponent } from '@blocksuite/block-std';
+import type { BlockModel } from '@blocksuite/store';
+
 import { effects as blockListEffects } from '@blocksuite/affine-block-list/effects';
 import { effects as blockParagraphEffects } from '@blocksuite/affine-block-paragraph/effects';
 import { effects as blockSurfaceEffects } from '@blocksuite/affine-block-surface/effects';
@@ -11,6 +14,27 @@ import { effects as componentToolbarEffects } from '@blocksuite/affine-component
 import { effects as stdEffects } from '@blocksuite/block-std/effects';
 import { effects as dataViewEffects } from '@blocksuite/data-view/effects';
 import { effects as inlineEffects } from '@blocksuite/inline/effects';
+
+import type { insertBookmarkCommand } from './bookmark-block/commands/insert-bookmark.js';
+import type { insertEdgelessTextCommand } from './edgeless-text-block/commands/insert-edgeless-text.js';
+import type { EmbedFigmaBlockService } from './embed-figma-block/embed-figma-service.js';
+import type { insertEmbedLinkedDocCommand } from './embed-linked-doc-block/commands/insert-embed-linked-doc.js';
+import type {
+  InsertedLinkType,
+  insertLinkByQuickSearchCommand,
+} from './embed-linked-doc-block/commands/insert-link-by-quick-search.js';
+import type { EmbedLinkedDocBlockConfig } from './embed-linked-doc-block/embed-linked-doc-config.js';
+import type { updateBlockType } from './note-block/commands/block-type.js';
+import type { dedentBlock } from './note-block/commands/dedent-block.js';
+import type { dedentBlockToRoot } from './note-block/commands/dedent-block-to-root.js';
+import type { dedentBlocksToRoot } from './note-block/commands/dedent-blocks-to-root.js';
+import type { dedentBlocks } from './note-block/commands/dendent-blocks.js';
+import type { focusBlockEnd } from './note-block/commands/focus-block-end.js';
+import type { focusBlockStart } from './note-block/commands/focus-block-start.js';
+import type { indentBlock } from './note-block/commands/indent-block.js';
+import type { indentBlocks } from './note-block/commands/indent-blocks.js';
+import type { selectBlock } from './note-block/commands/select-block.js';
+import type { selectBlocksBetween } from './note-block/commands/select-blocks-between.js';
 
 import { AIItem } from './_common/components/ai-item/ai-item.js';
 import { AISubItemList } from './_common/components/ai-item/ai-sub-item-list.js';
@@ -32,12 +56,21 @@ import { SmoothCorner } from './_common/components/smooth-corner.js';
 import { ToggleSwitch } from './_common/components/toggle-switch.js';
 import { registerSpecs } from './_specs/register-specs.js';
 import { AttachmentEdgelessBlockComponent } from './attachment-block/attachment-edgeless-block.js';
-import { AttachmentBlockComponent } from './attachment-block/index.js';
+import {
+  AttachmentBlockComponent,
+  type AttachmentBlockService,
+} from './attachment-block/index.js';
 import { BookmarkEdgelessBlockComponent } from './bookmark-block/bookmark-edgeless-block.js';
 import { BookmarkCard } from './bookmark-block/components/bookmark-card.js';
-import { BookmarkBlockComponent } from './bookmark-block/index.js';
+import {
+  BookmarkBlockComponent,
+  type BookmarkBlockService,
+} from './bookmark-block/index.js';
 import { AffineCodeUnit } from './code-block/highlight/affine-code-unit.js';
-import { CodeBlockComponent } from './code-block/index.js';
+import {
+  CodeBlockComponent,
+  type CodeBlockConfig,
+} from './code-block/index.js';
 import { DataViewBlockComponent } from './data-view-block/index.js';
 import {
   LinkCell,
@@ -57,25 +90,37 @@ import { CenterPeek } from './database-block/components/layout.js';
 import { DatabaseTitle } from './database-block/components/title/index.js';
 import { BlockRenderer } from './database-block/detail-panel/block-renderer.js';
 import { NoteRenderer } from './database-block/detail-panel/note-renderer.js';
-import { DatabaseBlockComponent } from './database-block/index.js';
+import {
+  DatabaseBlockComponent,
+  type DatabaseBlockService,
+} from './database-block/index.js';
 import { DividerBlockComponent } from './divider-block/index.js';
 import { EdgelessTextBlockComponent } from './edgeless-text-block/index.js';
 import { EmbedEdgelessBlockComponent } from './embed-figma-block/embed-edgeless-figma-block.js';
 import { EmbedFigmaBlockComponent } from './embed-figma-block/index.js';
 import { EmbedEdgelessGithubBlockComponent } from './embed-github-block/embed-edgeless-github-block.js';
-import { EmbedGithubBlockComponent } from './embed-github-block/index.js';
+import {
+  EmbedGithubBlockComponent,
+  type EmbedGithubBlockService,
+} from './embed-github-block/index.js';
 import { EmbedHtmlFullscreenToolbar } from './embed-html-block/components/fullscreen-toolbar.js';
 import { EmbedEdgelessHtmlBlockComponent } from './embed-html-block/embed-edgeless-html-block.js';
 import { EmbedHtmlBlockComponent } from './embed-html-block/index.js';
 import { EmbedEdgelessLinkedDocBlockComponent } from './embed-linked-doc-block/embed-edgeless-linked-doc-block.js';
 import { EmbedLinkedDocBlockComponent } from './embed-linked-doc-block/index.js';
 import { EmbedEdgelessLoomBlockComponent } from './embed-loom-block/embed-edgeless-loom-bock.js';
-import { EmbedLoomBlockComponent } from './embed-loom-block/index.js';
+import {
+  EmbedLoomBlockComponent,
+  type EmbedLoomBlockService,
+} from './embed-loom-block/index.js';
 import { EmbedSyncedDocCard } from './embed-synced-doc-block/components/embed-synced-doc-card.js';
 import { EmbedEdgelessSyncedDocBlockComponent } from './embed-synced-doc-block/embed-edgeless-synced-doc-block.js';
 import { EmbedSyncedDocBlockComponent } from './embed-synced-doc-block/index.js';
 import { EmbedEdgelessYoutubeBlockComponent } from './embed-youtube-block/embed-edgeless-youtube-block.js';
-import { EmbedYoutubeBlockComponent } from './embed-youtube-block/index.js';
+import {
+  EmbedYoutubeBlockComponent,
+  type EmbedYoutubeBlockService,
+} from './embed-youtube-block/index.js';
 import {
   EdgelessFrameTitle,
   FrameBlockComponent,
@@ -84,6 +129,7 @@ import { ImageBlockFallbackCard } from './image-block/components/image-block-fal
 import { ImageBlockPageComponent } from './image-block/components/page-image-block.js';
 import {
   ImageBlockComponent,
+  type ImageBlockService,
   ImageEdgelessBlockComponent,
 } from './image-block/index.js';
 import { LatexBlockComponent } from './latex-block/index.js';
@@ -91,6 +137,7 @@ import {
   EdgelessNoteBlockComponent,
   EdgelessNoteMask,
   NoteBlockComponent,
+  type NoteBlockService,
 } from './note-block/index.js';
 import { EdgelessAutoCompletePanel } from './root-block/edgeless/components/auto-complete/auto-complete-panel.js';
 import { EdgelessAutoComplete } from './root-block/edgeless/components/auto-complete/edgeless-auto-complete.js';
@@ -190,6 +237,8 @@ import {
   FramePreview,
   PageRootBlockComponent,
   PreviewRootBlockComponent,
+  type RootBlockConfig,
+  type RootService,
 } from './root-block/index.js';
 import { AIFinishTip } from './root-block/widgets/ai-panel/components/finish-tip.js';
 import { GeneratingPlaceholder } from './root-block/widgets/ai-panel/components/generating-placeholder.js';
@@ -207,7 +256,7 @@ import { AFFINE_CODE_TOOLBAR_WIDGET } from './root-block/widgets/code-toolbar/in
 import { AFFINE_DOC_REMOTE_SELECTION_WIDGET } from './root-block/widgets/doc-remote-selection/index.js';
 import { DragPreview } from './root-block/widgets/drag-handle/components/drag-preview.js';
 import { DropIndicator } from './root-block/widgets/drag-handle/components/drop-indicator.js';
-import { AFFINE_DRAG_HANDLE_WIDGET } from './root-block/widgets/drag-handle/drag-handle.js';
+import { AFFINE_DRAG_HANDLE_WIDGET } from './root-block/widgets/drag-handle/consts.js';
 import {
   AFFINE_EDGELESS_AUTO_CONNECT_WIDGET,
   EdgelessAutoConnectWidget,
@@ -271,6 +320,7 @@ import {
 import {
   EdgelessSurfaceRefBlockComponent,
   SurfaceRefBlockComponent,
+  type SurfaceRefBlockService,
 } from './surface-ref-block/index.js';
 import { SurfaceRefGenericBlockPortal } from './surface-ref-block/portal/generic-block.js';
 import { SurfaceRefNotePortal } from './surface-ref-block/portal/note.js';
@@ -684,4 +734,51 @@ export function effects() {
     EdgelessAutoConnectWidget
   );
   customElements.define(AFFINE_FORMAT_BAR_WIDGET, AffineFormatBarWidget);
+}
+
+declare global {
+  namespace BlockSuite {
+    interface Commands {
+      selectBlock: typeof selectBlock;
+      selectBlocksBetween: typeof selectBlocksBetween;
+      focusBlockStart: typeof focusBlockStart;
+      focusBlockEnd: typeof focusBlockEnd;
+      indentBlocks: typeof indentBlocks;
+      dedentBlock: typeof dedentBlock;
+      dedentBlocksToRoot: typeof dedentBlocksToRoot;
+      dedentBlocks: typeof dedentBlocks;
+      indentBlock: typeof indentBlock;
+      insertBookmark: typeof insertBookmarkCommand;
+      updateBlockType: typeof updateBlockType;
+      insertEdgelessText: typeof insertEdgelessTextCommand;
+      insertEmbedLinkedDoc: typeof insertEmbedLinkedDocCommand;
+      insertLinkByQuickSearch: typeof insertLinkByQuickSearchCommand;
+      dedentBlockToRoot: typeof dedentBlockToRoot;
+    }
+    interface CommandContext {
+      focusBlock?: BlockComponent | null;
+      anchorBlock?: BlockComponent | null;
+      updatedBlocks?: BlockModel[];
+      textId?: string;
+      insertedLinkType?: Promise<InsertedLinkType>;
+    }
+    interface BlockConfigs {
+      'affine:code': CodeBlockConfig;
+      'affine:embed-linked-doc': EmbedLinkedDocBlockConfig;
+      'affine:page': RootBlockConfig;
+    }
+    interface BlockServices {
+      'affine:note': NoteBlockService;
+      'affine:page': RootService;
+      'affine:attachment': AttachmentBlockService;
+      'affine:bookmark': BookmarkBlockService;
+      'affine:database': DatabaseBlockService;
+      'affine:embed-figma': EmbedFigmaBlockService;
+      'affine:embed-github': EmbedGithubBlockService;
+      'affine:embed-loom': EmbedLoomBlockService;
+      'affine:embed-youtube': EmbedYoutubeBlockService;
+      'affine:image': ImageBlockService;
+      'affine:surface-ref': SurfaceRefBlockService;
+    }
+  }
 }

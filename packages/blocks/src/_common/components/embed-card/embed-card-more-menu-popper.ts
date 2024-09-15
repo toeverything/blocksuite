@@ -20,7 +20,6 @@ import {
   isEmbedSyncedDocBlock,
 } from '../../../root-block/edgeless/utils/query.js';
 import { getBlockProps } from '../../utils/index.js';
-import './../button.js';
 
 export class EmbedCardMoreMenu extends WithDisposable(LitElement) {
   static override styles = css`

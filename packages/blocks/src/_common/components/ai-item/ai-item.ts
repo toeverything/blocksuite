@@ -10,7 +10,6 @@ import { property, query } from 'lit/decorators.js';
 
 import type { AIItemConfig } from './types.js';
 
-import './ai-sub-item-list.js';
 import { menuItemStyles } from './styles.js';
 
 @requiredProperties({

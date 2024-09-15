@@ -1,23 +1,25 @@
-import { ColorSchema, NodePropsSchema } from '@blocksuite/affine-shared/utils';
 import { type BlockStdScope, LifeCycleWatcher } from '@blocksuite/block-std';
 import {
   type DeepPartial,
   DisposableGroup,
   Slot,
 } from '@blocksuite/global/utils';
-import { computed, type Signal, signal } from '@lit-labs/preact-signals';
+import { computed, type Signal, signal } from '@preact/signals-core';
 import clonedeep from 'lodash.clonedeep';
-import isPlainObject from 'lodash.isplainobject';
-import merge from 'lodash.merge';
+import mergeWith from 'lodash.mergewith';
 import { z } from 'zod';
 
+import {
+  ColorSchema,
+  makeDeepOptional,
+  NodePropsSchema,
+} from '../utils/index.js';
 import { EditorSettingProvider } from './editor-setting-service.js';
 
 const LastPropsSchema = NodePropsSchema;
+const OptionalPropsSchema = makeDeepOptional(NodePropsSchema);
 export type LastProps = z.infer<typeof NodePropsSchema>;
 export type LastPropsKey = keyof LastProps;
-
-const SESSION_PROP_KEY = 'blocksuite:prop:record';
 
 const SessionPropsSchema = z.object({
   viewport: z.union([
@@ -59,6 +61,13 @@ function isSessionProp(key: string): key is keyof SessionProps {
   return key in SessionPropsSchema.shape;
 }
 
+function customizer(_target: unknown, source: unknown) {
+  if (ColorSchema.safeParse(source).success) {
+    return source;
+  }
+  return;
+}
+
 export class EditPropsStore extends LifeCycleWatcher {
   static override key = 'EditPropsStore';
 
@@ -86,21 +95,15 @@ export class EditPropsStore extends LifeCycleWatcher {
       }, {})
     );
 
-    const props = sessionStorage.getItem(SESSION_PROP_KEY);
-    if (props) {
-      const result = LastPropsSchema.safeParse(JSON.parse(props));
-      if (result.success) {
-        merge(clonedeep(initProps), result.data);
-      }
-    }
-
     this.lastProps$ = computed(() => {
       const editorSetting$ = this.std.getOptional(EditorSettingProvider);
-      return merge(
+      const nextProps = mergeWith(
         clonedeep(initProps),
         editorSetting$?.value,
-        this.innerProps$.value
+        this.innerProps$.value,
+        customizer
       );
+      return LastPropsSchema.parse(nextProps);
     });
   }
 
@@ -134,7 +137,7 @@ export class EditPropsStore extends LifeCycleWatcher {
 
   applyLastProps(key: LastPropsKey, props: Record<string, unknown>) {
     const lastProps = this.lastProps$.value[key];
-    return merge(clonedeep(lastProps), props);
+    return mergeWith(clonedeep(lastProps), props, customizer);
   }
 
   dispose() {
@@ -163,16 +166,17 @@ export class EditPropsStore extends LifeCycleWatcher {
   }
 
   recordLastProps(key: LastPropsKey, props: Partial<LastProps[LastPropsKey]>) {
-    const overrideProps = extractProps(
-      props,
-      LastPropsSchema.shape[key]._def.innerType
-    );
+    const schema = OptionalPropsSchema._def.innerType.shape[key];
+    const overrideProps = schema.parse(props);
     if (Object.keys(overrideProps).length === 0) return;
 
     const innerProps = this.innerProps$.value;
-    this.innerProps$.value = merge(clonedeep(innerProps), {
-      [key]: overrideProps,
-    });
+    const nextProps = mergeWith(
+      clonedeep(innerProps),
+      { [key]: overrideProps },
+      customizer
+    );
+    this.innerProps$.value = OptionalPropsSchema.parse(nextProps);
   }
 
   setStorage<T extends StoragePropsKey>(key: T, value: StorageProps[T]) {
@@ -189,49 +193,4 @@ export class EditPropsStore extends LifeCycleWatcher {
     super.unmounted();
     this.dispose();
   }
-}
-
-function extractProps(
-  props: Record<string, unknown>,
-  ref: z.ZodObject<z.ZodRawShape>
-): Record<string, unknown> {
-  const result: Record<string, unknown> = {};
-
-  Object.entries(props).forEach(([key, value]) => {
-    if (!(key in ref.shape)) return;
-    if (isPlainObject(value)) {
-      if (isColorType(key, value)) {
-        const color = processColorValue(value as z.infer<typeof ColorSchema>);
-        if (Object.keys(color).length === 0) return;
-        result[key] = color;
-        return;
-      }
-
-      result[key] = extractProps(
-        props[key] as Record<string, unknown>,
-        ref.shape[key] as z.ZodObject<z.ZodRawShape>
-      );
-    } else {
-      result[key] = value;
-    }
-  });
-
-  return result;
-}
-
-function isColorType(key: string, value: unknown) {
-  return (
-    ['background', 'color', 'stroke', 'fill', 'Color'].some(
-      stuff => key.startsWith(stuff) || key.endsWith(stuff)
-    ) && ColorSchema.safeParse(value).success
-  );
-}
-
-// Don't want the user to create a transparent element, so the alpha value is removed.
-function processColorValue(value: z.infer<typeof ColorSchema>) {
-  const obj: Record<string, string> = {};
-  for (const [k, v] of Object.entries(value)) {
-    obj[k] = v.startsWith('#') ? v.substring(0, 7) : v;
-  }
-  return obj;
 }

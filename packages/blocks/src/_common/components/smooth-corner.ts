@@ -1,4 +1,4 @@
-import { getSvgPath } from '@blocksuite/global/utils';
+import { getFigmaSquircleSvgPath } from '@blocksuite/global/utils';
 import { css, html, LitElement, svg, type TemplateResult } from 'lit';
 import { property, state } from 'lit/decorators.js';
 
@@ -67,7 +67,7 @@ export class SmoothCorner extends LitElement {
   private _resizeObserver: ResizeObserver | null = null;
 
   get _path() {
-    return getSvgPath({
+    return getFigmaSquircleSvgPath({
       width: this.width,
       height: this.height,
       cornerRadius: this.borderRadius, // defaults to 0

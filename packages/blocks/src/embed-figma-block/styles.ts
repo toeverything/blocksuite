@@ -1,13 +1,10 @@
 import { css, html } from 'lit';
 
-import { EMBED_CARD_HEIGHT } from '../_common/consts.js';
+import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../_common/consts.js';
 
 export const styles = css`
   .affine-embed-figma-block {
-    margin: 0 auto;
-    box-sizing: border-box;
-    width: 100%;
-    height: ${EMBED_CARD_HEIGHT.figma}px;
+    width: ${EMBED_CARD_WIDTH.figma}px;
     display: flex;
     flex-direction: column;
     gap: 20px;
@@ -19,11 +16,13 @@ export const styles = css`
     opacity: var(--add, 1);
     background: var(--affine-background-primary-color);
     user-select: none;
+
+    aspect-ratio: ${EMBED_CARD_WIDTH.figma} / ${EMBED_CARD_HEIGHT.figma};
   }
 
   .affine-embed-figma {
+    flex-grow: 1;
     width: 100%;
-    height: 100%;
     opacity: var(--add, 1);
   }
 
@@ -37,12 +36,13 @@ export const styles = css`
   }
 
   .affine-embed-figma-iframe-container {
+    height: 100%;
     position: relative;
   }
 
   .affine-embed-figma-iframe-container > iframe {
     width: 100%;
-    height: 410px;
+    height: 100%;
     border-radius: 4px 4px var(--1, 0px) var(--1, 0px);
     border: none;
   }
@@ -60,10 +60,10 @@ export const styles = css`
   }
 
   .affine-embed-figma-content {
-    display: flex;
+    display: block;
     flex-direction: column;
     width: 100%;
-    height: 100%;
+    height: fit-content;
     border-radius: var(--1, 0px);
     opacity: var(--add, 1);
   }
@@ -116,12 +116,9 @@ export const styles = css`
   }
 
   .affine-embed-figma-content-description {
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
+    height: 40px;
 
-    flex: 1 0 0;
-    align-self: stretch;
+    position: relative;
 
     word-break: break-word;
     white-space: normal;
@@ -134,6 +131,14 @@ export const styles = css`
     font-style: normal;
     font-weight: 400;
     line-height: 20px;
+  }
+
+  .affine-embed-figma-content-description::after {
+    content: '...';
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    background-color: var(--affine-background-primary-color);
   }
 
   .affine-embed-figma-content-url {

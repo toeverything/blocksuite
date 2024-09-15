@@ -22,7 +22,7 @@ import {
 import { columnPresets } from '@blocksuite/data-view/column-presets';
 import { assertExists } from '@blocksuite/global/utils';
 import { type BlockModel, nanoid, Text } from '@blocksuite/store';
-import { computed, type ReadonlySignal } from '@lit-labs/preact-signals';
+import { computed, type ReadonlySignal } from '@preact/signals-core';
 
 import { getIcon } from './block-icons.js';
 import {

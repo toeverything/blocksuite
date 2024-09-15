@@ -1,14 +1,12 @@
-import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
-import { DocModeProvider, FramePreview } from '@blocksuite/blocks';
-import { DisposableGroup } from '@blocksuite/global/utils';
+import {
+  type EditorHost,
+  ShadowlessElement,
+  WithDisposable,
+} from '@blocksuite/block-std';
+import { FramePreview } from '@blocksuite/blocks';
 import { baseTheme } from '@toeverything/theme';
-import { css, html, type PropertyValues, unsafeCSS } from 'lit';
+import { css, html, unsafeCSS } from 'lit';
 import { property } from 'lit/decorators.js';
-
-import type { AffineEditorContainer } from '../../index.js';
-
-import './body/frame-panel-body.js';
-import './header/frame-panel-header.js';
 
 const styles = css`
   frame-panel {
@@ -67,46 +65,6 @@ export const AFFINE_FRAME_PANEL = 'affine-frame-panel';
 export class FramePanel extends WithDisposable(ShadowlessElement) {
   static override styles = styles;
 
-  private _editorDisposables: DisposableGroup | null = null;
-
-  get doc() {
-    return this.editor.doc;
-  }
-
-  get edgeless() {
-    return this.editor.querySelector('affine-edgeless-root');
-  }
-
-  get host() {
-    return this.editor.host;
-  }
-
-  private _clearEditorDisposables() {
-    this._editorDisposables?.dispose();
-    this._editorDisposables = null;
-  }
-
-  private _setEditorDisposables() {
-    this._clearEditorDisposables();
-    this._editorDisposables = new DisposableGroup();
-    this._editorDisposables.add(
-      this.editor.std.get(DocModeProvider).onPrimaryModeChange(() => {
-        this.editor.updateComplete
-          .then(() => this.requestUpdate())
-          .catch(console.error);
-      }, this.editor.doc.id)
-    );
-    this._editorDisposables.add(
-      this.editor.slots.docUpdated.on(() => {
-        this.editor.updateComplete
-          .then(() => {
-            this.requestUpdate();
-          })
-          .catch(console.error);
-      })
-    );
-  }
-
   override connectedCallback() {
     super.connectedCallback();
     if (!customElements.get('frame-preview')) {
@@ -114,38 +72,24 @@ export class FramePanel extends WithDisposable(ShadowlessElement) {
     }
   }
 
-  override disconnectedCallback() {
-    super.disconnectedCallback();
-    this._clearEditorDisposables();
-  }
-
   override render() {
     return html`<div class="frame-panel-container">
       <affine-frame-panel-header
-        .edgeless=${this.edgeless}
         .editorHost=${this.host}
       ></affine-frame-panel-header>
       <affine-frame-panel-body
         class="frame-panel-body"
-        .edgeless=${this.edgeless}
-        .doc=${this.doc}
         .editorHost=${this.host}
         .fitPadding=${this.fitPadding}
       ></affine-frame-panel-body>
     </div>`;
   }
 
-  override updated(_changedProperties: PropertyValues) {
-    if (_changedProperties.has('editor')) {
-      this._setEditorDisposables();
-    }
-  }
-
-  @property({ attribute: false })
-  accessor editor!: AffineEditorContainer;
-
   @property({ attribute: false })
   accessor fitPadding: number[] = [50, 380, 50, 50];
+
+  @property({ attribute: false })
+  accessor host!: EditorHost;
 }
 
 declare global {

@@ -3,7 +3,7 @@ import {
   SignalWatcher,
   WithDisposable,
 } from '@blocksuite/block-std';
-import { computed } from '@lit-labs/preact-signals';
+import { computed } from '@preact/signals-core';
 import { property } from 'lit/decorators.js';
 
 import type { Cell } from '../view-manager/cell.js';

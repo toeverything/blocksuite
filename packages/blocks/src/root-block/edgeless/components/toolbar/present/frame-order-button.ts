@@ -9,9 +9,6 @@ import { property, query } from 'lit/decorators.js';
 import type { EdgelessRootBlockComponent } from '../../../edgeless-root-block.js';
 import type { EdgelessFrameOrderMenu } from './frame-order-menu.js';
 
-import '../../buttons/tool-icon-button.js';
-import './frame-order-menu.js';
-
 export class EdgelessFrameOrderButton extends WithDisposable(LitElement) {
   static override styles = css`
     edgeless-frame-order-menu {

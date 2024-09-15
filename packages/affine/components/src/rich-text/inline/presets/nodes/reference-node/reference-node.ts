@@ -341,9 +341,3 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
   @property({ type: Boolean })
   accessor selected = false;
 }
-
-declare global {
-  interface HTMLElementTagNameMap {
-    'affine-reference': AffineReference;
-  }
-}

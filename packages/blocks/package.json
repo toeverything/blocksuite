@@ -1,6 +1,6 @@
 {
   "name": "@blocksuite/blocks",
-  "version": "0.17.8",
+  "version": "0.17.10",
   "description": "Default BlockSuite editable blocks.",
   "type": "module",
   "repository": "toeverything/blocksuite",
@@ -29,8 +29,8 @@
     "@blocksuite/inline": "workspace:*",
     "@blocksuite/store": "workspace:*",
     "@floating-ui/dom": "^1.6.10",
-    "@lit-labs/preact-signals": "^1.0.2",
     "@lit/context": "^1.1.2",
+    "@preact/signals-core": "^1.8.0",
     "@toeverything/theme": "^1.0.8",
     "@types/hast": "^3.0.4",
     "@types/mdast": "^4.0.4",
@@ -44,9 +44,6 @@
     "html2canvas": "^1.4.1",
     "katex": "^0.16.11",
     "lit": "^3.2.0",
-    "lodash.clonedeep": "^4.5.0",
-    "lodash.isplainobject": "^4.0.6",
-    "lodash.merge": "^4.6.2",
     "mdast-util-gfm-autolink-literal": "^2.0.1",
     "mdast-util-gfm-strikethrough": "^2.0.0",
     "mdast-util-gfm-table": "^2.0.0",
@@ -106,9 +103,6 @@
   ],
   "devDependencies": {
     "@types/dompurify": "^3.0.5",
-    "@types/katex": "^0.16.7",
-    "@types/lodash.clonedeep": "^4.5.9",
-    "@types/lodash.isplainobject": "^4.0.9",
-    "@types/lodash.merge": "^4.6.9"
+    "@types/katex": "^0.16.7"
   }
 }

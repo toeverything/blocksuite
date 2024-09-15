@@ -6,7 +6,7 @@ import {
 import { EditPropsStore } from '@blocksuite/affine-shared/services';
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import { SignalWatcher } from '@blocksuite/block-std';
-import { computed } from '@lit-labs/preact-signals';
+import { computed } from '@preact/signals-core';
 import { css, html, LitElement } from 'lit';
 import { state } from 'lit/decorators.js';
 
@@ -15,7 +15,6 @@ import type { NoteTool } from '../../../tools/note-tool.js';
 import { getTooltipWithShortcut } from '../../utils.js';
 import { EdgelessToolbarToolMixin } from '../mixins/tool.mixin.js';
 import { toShapeNotToAdapt } from './icon.js';
-import './note-menu.js';
 
 export class EdgelessNoteSeniorButton extends EdgelessToolbarToolMixin(
   SignalWatcher(LitElement)

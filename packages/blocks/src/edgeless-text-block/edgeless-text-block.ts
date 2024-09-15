@@ -14,7 +14,6 @@ import type {
   EdgelessRootBlockComponent,
   EdgelessRootService,
 } from '../root-block/index.js';
-import type { EdgelessTextBlockService } from './edgeless-text-service.js';
 
 import { HandleDirection } from '../root-block/edgeless/components/resize/resize-handles.js';
 import {
@@ -25,10 +24,7 @@ import {
 export const EDGELESS_TEXT_BLOCK_MIN_WIDTH = 50;
 export const EDGELESS_TEXT_BLOCK_MIN_HEIGHT = 50;
 
-export class EdgelessTextBlockComponent extends GfxBlockComponent<
-  EdgelessTextBlockModel,
-  EdgelessTextBlockService
-> {
+export class EdgelessTextBlockComponent extends GfxBlockComponent<EdgelessTextBlockModel> {
   static override styles = css`
     .edgeless-text-block-container[data-max-width='false'] .inline-editor span {
       word-break: normal !important;
@@ -40,6 +36,10 @@ export class EdgelessTextBlockComponent extends GfxBlockComponent<
 
   private _resizeObserver = new ResizeObserver(() => {
     if (this.doc.readonly) {
+      return;
+    }
+
+    if (!this.checkVisibility()) {
       return;
     }
 

@@ -6,8 +6,6 @@ import { property } from 'lit/decorators.js';
 import { cache } from 'lit/directives/cache.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import './tooltip.js';
-
 export class EditorIconButton extends LitElement {
   static override styles = css`
     :host([disabled]),

@@ -13,7 +13,6 @@ import {
 import { css, html } from 'lit';
 import { classMap } from 'lit/directives/class-map.js';
 
-import '../../core/common/component/overflow/overflow.js';
 import { renderUniLit } from '../../core/index.js';
 import { WidgetBase } from '../../core/widget/widget-base.js';
 
@@ -44,7 +43,7 @@ export class DataViewHeaderViews extends WidgetBase {
     .database-view-button .name {
       align-items: center;
       height: 22px;
-      max-width: 100px;
+      max-width: 200px;
       overflow: hidden;
       text-overflow: ellipsis;
     }

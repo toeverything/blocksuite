@@ -1,7 +1,9 @@
+import type { Page } from '@playwright/test';
+
 import { clickView } from 'utils/actions/click.js';
 import {
+  dragBetweenViewCoords as _dragBetweenViewCoords,
   createFrame,
-  dragBetweenViewCoords,
   edgelessCommonSetup,
   getSelectedBound,
   toViewCoord,
@@ -13,6 +15,16 @@ import { waitNextFrame } from 'utils/actions/misc.js';
 import { assertSelectedBound } from 'utils/asserts.js';
 
 import { test } from '../../utils/playwright.js';
+
+const dragBetweenViewCoords = async (
+  page: Page,
+  start: number[],
+  end: number[]
+) => {
+  // dragging slowly may drop frame if mindmap is existed, so for test we drag quickly
+  await _dragBetweenViewCoords(page, start, end, { steps: 2 });
+  await waitNextFrame(page);
+};
 
 test.beforeEach(async ({ page }) => {
   await edgelessCommonSetup(page);
@@ -75,7 +87,7 @@ test('drag root node of mindmap into frame partially, move frame, then drag root
     await dragBetweenViewCoords(
       page,
       [mindmapBound[0] + 10, mindmapBound[1] + 0.5 * mindmapBound[3]],
-      [0, 0]
+      [-100, -100]
     );
     await pressEscape(page);
     await selectAllByKeyboard(page);
@@ -150,7 +162,7 @@ test('drag root node of mindmap into frame fully, move frame, then drag root nod
     await dragBetweenViewCoords(
       page,
       [mindmapBound[0] + 10, mindmapBound[1] + 0.5 * mindmapBound[3]],
-      [0, 0]
+      [-100, -100]
     );
     await pressEscape(page);
     await selectAllByKeyboard(page);
@@ -239,6 +251,10 @@ test('drag whole mindmap into frame, move frame, then drag root node of mindmap 
     await clickView(page, [110, 110]);
     await dragBetweenViewCoords(page, [110, 110], [160, 160]);
   }
+
+  await selectAllByKeyboard(page);
+  await assertSelectedBound(page, mindmapBound, 0); // mindmap
+  await assertSelectedBound(page, [150, 150, 500, 500], 1); // frame
 });
 
 // FIXME(@L-Sun): This test is flaky
@@ -314,20 +330,22 @@ test('add mindmap out of frame and add new node in frame then drag frame', async
 
   const button = page.locator('edgeless-mindmap-tool-button');
   await button.click();
-  await toViewCoord(page, [0, 200]);
-  await clickView(page, [0, 200]);
-
+  await toViewCoord(page, [20, 200]);
+  await clickView(page, [20, 200]);
+  await waitNextFrame(page, 100);
   let mindmapBound = await getSelectedBound(page);
 
   // add new node
   {
+    await pressEscape(page);
+    await waitNextFrame(page, 500);
     await clickView(page, [
-      mindmapBound[2] - 10,
+      mindmapBound[2] - 50,
       mindmapBound[1] + 0.5 * mindmapBound[3],
     ]);
-    await waitNextFrame(page, 100);
+    await waitNextFrame(page, 500);
     await clickView(page, [
-      mindmapBound[2] + 50,
+      mindmapBound[2] + 10,
       mindmapBound[1] + 0.5 * mindmapBound[3],
     ]);
     await pressEscape(page, 2);

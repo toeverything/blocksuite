@@ -5,7 +5,6 @@ import {
 } from '@blocksuite/block-std';
 import { literal } from 'lit/static-html.js';
 
-import './embed-edgeless-figma-block.js';
 import { EmbedFigmaBlockService } from './embed-figma-service.js';
 
 export const EmbedFigmaBlockSpec: ExtensionType[] = [

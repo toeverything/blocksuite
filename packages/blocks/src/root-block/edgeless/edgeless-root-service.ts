@@ -4,6 +4,7 @@ import type {
   GfxModel,
   LayerManager,
   PointTestOptions,
+  ReorderingDirection,
 } from '@blocksuite/block-std/gfx';
 import type { IBound } from '@blocksuite/global/utils';
 
@@ -11,7 +12,6 @@ import {
   type ElementRenderer,
   elementRenderers,
   type Overlay,
-  type ReorderingDirection,
   type SurfaceBlockModel,
   type SurfaceContext,
 } from '@blocksuite/affine-block-surface';
@@ -389,7 +389,8 @@ export class EdgelessRootService extends RootService implements SurfaceContext {
 
   getFitToScreenData(
     padding: [number, number, number, number] = [0, 0, 0, 0],
-    inputBounds?: Bound[]
+    inputBounds?: Bound[],
+    maxZoom = ZOOM_INITIAL
   ) {
     let bounds = [];
     if (inputBounds && inputBounds.length) {
@@ -406,27 +407,24 @@ export class EdgelessRootService extends RootService implements SurfaceContext {
     }
 
     const [pt, pr, pb, pl] = padding;
-    const { viewport } = this;
-    let { centerX, centerY, zoom } = viewport;
+    const bound = getCommonBound(bounds);
+    let { centerX, centerY, zoom } = this.viewport;
 
-    if (bounds.length) {
-      const { width, height } = viewport;
-      const bound = getCommonBound(bounds);
-      if (bound) {
-        zoom = Math.min(
-          (width - FIT_TO_SCREEN_PADDING - (pr + pl)) / bound.w,
-          (height - FIT_TO_SCREEN_PADDING - (pt + pb)) / bound.h
-        );
-        zoom = clamp(zoom, ZOOM_MIN, ZOOM_INITIAL);
-
-        centerX = bound.x + (bound.w + pr / zoom) / 2 - pl / zoom / 2;
-        centerY = bound.y + (bound.h + pb / zoom) / 2 - pt / zoom / 2;
-      } else {
-        zoom = ZOOM_INITIAL;
-      }
-    } else {
-      zoom = ZOOM_INITIAL;
+    if (!bound) {
+      return { zoom, centerX, centerY };
     }
+
+    const { width, height } = this.viewport;
+
+    zoom = Math.min(
+      (width - FIT_TO_SCREEN_PADDING - (pr + pl)) / bound.w,
+      (height - FIT_TO_SCREEN_PADDING - (pt + pb)) / bound.h
+    );
+    zoom = clamp(zoom, ZOOM_MIN, clamp(maxZoom, ZOOM_MIN, ZOOM_MAX));
+
+    centerX = bound.x + (bound.w + pr / zoom) / 2 - pl / zoom / 2;
+    centerY = bound.y + (bound.h + pb / zoom) / 2 - pt / zoom / 2;
+
     return { zoom, centerX, centerY };
   }
 

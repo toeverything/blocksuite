@@ -8,7 +8,7 @@ import {
 } from '@blocksuite/block-std';
 import {
   DocModeProvider,
-  type EdgelessRootBlockComponent,
+  EdgelessRootService,
   EditPropsStore,
   type FrameBlockModel,
 } from '@blocksuite/blocks';
@@ -106,7 +106,7 @@ export class FramePanelBody extends WithDisposable(ShadowlessElement) {
     }
 
     this._selected = [];
-    this.edgeless?.service.selection.set({
+    this._edgelessRootService?.selection.set({
       elements: this._selected,
       editing: false,
     });
@@ -134,7 +134,7 @@ export class FramePanelBody extends WithDisposable(ShadowlessElement) {
       this._selected = [id];
     }
 
-    this.edgeless?.service.selection.set({
+    this._edgelessRootService?.selection.set({
       elements: this._selected,
       editing: false,
     });
@@ -148,8 +148,12 @@ export class FramePanelBody extends WithDisposable(ShadowlessElement) {
     }));
   };
 
+  get _edgelessRootService() {
+    return this.editorHost.std.getOptional(EdgelessRootService);
+  }
+
   get frames() {
-    const frames = this.doc.getBlockByFlavour(
+    const frames = this.editorHost.doc.getBlockByFlavour(
       'affine:frame'
     ) as FrameBlockModel[];
     return frames.sort(this.compare);
@@ -204,14 +208,11 @@ export class FramePanelBody extends WithDisposable(ShadowlessElement) {
       framePanelBody: this,
       frameListContainer: this.frameListContainer,
       frameElementHeight: this._frameElementHeight,
-      edgeless: this.edgeless,
-      doc: this.doc,
-      editorHost: this.editorHost,
       onDragEnd: insertIdx => {
         this._dragging = false;
         this.insertIndex = undefined;
 
-        if (insertIdx === undefined) return;
+        if (insertIdx === undefined || this._frameItems.length <= 1) return;
         this._reorderFrames(selected, framesMap, insertIdx);
       },
       onDragMove: (idx, indicatorTranslateY) => {
@@ -225,7 +226,7 @@ export class FramePanelBody extends WithDisposable(ShadowlessElement) {
     const { block } = e.detail;
     const bound = Bound.deserialize(block.xywh);
 
-    if (!this.edgeless) {
+    if (!this._edgelessRootService) {
       // When click frame card in page mode
       // Should switch to edgeless mode and set viewport to the frame
       const viewport = {
@@ -237,7 +238,7 @@ export class FramePanelBody extends WithDisposable(ShadowlessElement) {
       this.editorHost.std.get(EditPropsStore).setStorage('viewport', viewport);
       this.editorHost.std.get(DocModeProvider).setEditorMode('edgeless');
     } else {
-      this.edgeless.service.viewport.setViewportByBound(
+      this._edgelessRootService.viewport.setViewportByBound(
         bound,
         this.viewportPadding,
         true
@@ -264,9 +265,6 @@ export class FramePanelBody extends WithDisposable(ShadowlessElement) {
         const { frame, frameIndex, cardIndex } = frameItem;
         return html`<affine-frame-card
           data-frame-id=${frame.id}
-          .edgeless=${this.edgeless}
-          .doc=${this.doc}
-          .host=${this.editorHost}
           .frame=${frame}
           .cardIndex=${cardIndex}
           .frameIndex=${frameIndex}
@@ -320,7 +318,7 @@ export class FramePanelBody extends WithDisposable(ShadowlessElement) {
         before = newIndex;
       });
 
-      this.doc.captureSync();
+      this.editorHost.doc.captureSync();
       this._updateFrames();
     }
   }
@@ -329,8 +327,8 @@ export class FramePanelBody extends WithDisposable(ShadowlessElement) {
     this._clearDocDisposables();
     this._docDisposables = new DisposableGroup();
     this._docDisposables.add(
-      doc.slots.blockUpdated.on(({ flavour }) => {
-        if (flavour === 'affine:frame') {
+      doc.slots.blockUpdated.on(({ type, flavour }) => {
+        if (flavour === 'affine:frame' && type !== 'update') {
           requestAnimationFrame(() => {
             this._updateFrames();
           });
@@ -379,9 +377,6 @@ export class FramePanelBody extends WithDisposable(ShadowlessElement) {
   override connectedCallback() {
     super.connectedCallback();
     this._updateFrameItems();
-    if (this.edgeless) {
-      this._lastEdgelessRootId = this.edgeless.model.id;
-    }
   }
 
   override disconnectedCallback() {
@@ -402,21 +397,18 @@ export class FramePanelBody extends WithDisposable(ShadowlessElement) {
   }
 
   override updated(_changedProperties: PropertyValues) {
-    if (_changedProperties.has('doc') || _changedProperties.has('edgeless')) {
-      this._setDocDisposables(this.doc);
-    }
-
-    if (_changedProperties.has('edgeless') && this.edgeless) {
+    if (_changedProperties.has('editorHost') && this.editorHost) {
+      this._setDocDisposables(this.editorHost.doc);
       // after switch to edgeless mode, should update the selection
-      if (this.edgeless.model.id === this._lastEdgelessRootId) {
-        this.edgeless.service.selection.set({
+      if (this.editorHost.doc.id === this._lastEdgelessRootId) {
+        this._edgelessRootService?.selection.set({
           elements: this._selected,
           editing: false,
         });
       } else {
         this._selected = [];
       }
-      this._lastEdgelessRootId = this.edgeless.model.id;
+      this._lastEdgelessRootId = this.editorHost.doc.id;
     }
   }
 
@@ -428,13 +420,7 @@ export class FramePanelBody extends WithDisposable(ShadowlessElement) {
   private accessor _selected: string[] = [];
 
   @property({ attribute: false })
-  accessor doc!: Doc;
-
-  @property({ attribute: false })
   accessor domHost!: Document | HTMLElement;
-
-  @property({ attribute: false })
-  accessor edgeless: EdgelessRootBlockComponent | null = null;
 
   @property({ attribute: false })
   accessor editorHost!: EditorHost;

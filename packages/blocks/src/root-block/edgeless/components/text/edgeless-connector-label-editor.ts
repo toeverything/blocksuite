@@ -2,7 +2,6 @@ import type { RichText } from '@blocksuite/affine-components/rich-text';
 import type { ConnectorElementModel } from '@blocksuite/affine-model';
 
 import { TextUtils } from '@blocksuite/affine-block-surface';
-import '@blocksuite/affine-components/rich-text';
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import { almostEqual } from '@blocksuite/affine-shared/utils';
 import {

@@ -13,7 +13,6 @@ import { html } from 'lit/static-html.js';
 import type { DataViewRenderer } from '../../core/data-view.js';
 import type { KanbanColumn, KanbanSingleView } from './kanban-view-manager.js';
 
-import './cell.js';
 import { openDetail, popCardMenu } from './menu.js';
 
 const styles = css`

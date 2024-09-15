@@ -8,10 +8,8 @@ import type { EdgelessTool } from '../../../types.js';
 import type { EdgelessNoteMenu } from './note-menu.js';
 
 import { getTooltipWithShortcut } from '../../../components/utils.js';
-import '../../buttons/tool-icon-button.js';
 import { createPopper, type MenuPopper } from '../common/create-popper.js';
 import { QuickToolMixin } from '../mixins/quick-tool.mixin.js';
-import './note-menu.js';
 
 export class EdgelessNoteToolButton extends QuickToolMixin(LitElement) {
   static override styles = css`

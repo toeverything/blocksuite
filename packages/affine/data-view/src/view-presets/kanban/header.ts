@@ -10,8 +10,6 @@ import { html } from 'lit/static-html.js';
 
 import type { KanbanSingleView } from './kanban-view-manager.js';
 
-import './card.js';
-
 const styles = css`
   affine-data-view-kanban-header {
     display: flex;

@@ -6,7 +6,7 @@ import { BLOCK_ID_ATTR, type BlockComponent } from '@blocksuite/block-std';
 import { WithDisposable } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import { computePosition, inline, offset, shift } from '@floating-ui/dom';
-import { effect } from '@lit-labs/preact-signals';
+import { effect } from '@preact/signals-core';
 import { html, LitElement, nothing } from 'lit';
 import { property, query } from 'lit/decorators.js';
 import { ifDefined } from 'lit/directives/if-defined.js';

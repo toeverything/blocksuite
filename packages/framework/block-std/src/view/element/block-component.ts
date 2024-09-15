@@ -2,7 +2,7 @@ import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 import { Doc } from '@blocksuite/store';
 import { type BlockModel, BlockViewType } from '@blocksuite/store';
 import { consume, provide } from '@lit/context';
-import { computed } from '@lit-labs/preact-signals';
+import { computed } from '@preact/signals-core';
 import { nothing, type PropertyValues, render, type TemplateResult } from 'lit';
 import { property, state } from 'lit/decorators.js';
 import { choose } from 'lit/directives/choose.js';
@@ -154,12 +154,6 @@ export class BlockComponent<
       return this._service;
     }
     const service = this.std.getService(this.model.flavour) as Service;
-    if (!service) {
-      throw new BlockSuiteError(
-        ErrorCode.ValueNotExists,
-        `Cannot find service for flavour ${this.model.flavour}`
-      );
-    }
     this._service = service;
     return service;
   }
@@ -238,7 +232,7 @@ export class BlockComponent<
       })
     );
 
-    this.service.specSlots.viewConnected.emit({
+    this.service?.specSlots.viewConnected.emit({
       service: this.service,
       component: this,
     });

@@ -16,7 +16,6 @@ import { css, html, nothing } from 'lit';
 import { property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
 import type { EdgelessRootPreviewBlockComponent } from '../../edgeless-root-preview-block.js';
 import type { EdgelessRootService } from '../../edgeless-root-service.js';
 
@@ -99,13 +98,20 @@ export class FramePreview extends WithDisposable(ShadowlessElement) {
 
   private _previewSpec = SpecProvider.getInstance().getSpec('edgeless:preview');
 
+  get _originalDoc() {
+    return this.frame.doc;
+  }
+
   private _initPreviewDoc() {
-    this._previewDoc = this.doc.collection.getDoc(this.doc.id, {
-      query: this._docFilter,
-      readonly: true,
-    });
+    this._previewDoc = this._originalDoc.collection.getDoc(
+      this._originalDoc.id,
+      {
+        query: this._docFilter,
+        readonly: true,
+      }
+    );
     this.disposables.add(() => {
-      this.doc.blockCollection.clearQuery(this._docFilter);
+      this._originalDoc.blockCollection.clearQuery(this._docFilter);
     });
   }
 
@@ -199,8 +205,8 @@ export class FramePreview extends WithDisposable(ShadowlessElement) {
   }
 
   override render() {
-    const { frame, host } = this;
-    const noContent = !frame || !frame.xywh || !host;
+    const { frame } = this;
+    const noContent = !frame || !frame.xywh;
 
     return html`<div class="frame-preview-container">
       ${noContent ? nothing : this._renderSurfaceContent()}
@@ -213,20 +219,11 @@ export class FramePreview extends WithDisposable(ShadowlessElement) {
     }
   }
 
-  @property({ attribute: false })
-  accessor doc!: Doc;
-
-  @property({ attribute: false })
-  accessor edgeless: EdgelessRootBlockComponent | null = null;
-
   @state()
   accessor fillScreen = false;
 
   @property({ attribute: false })
   accessor frame!: FrameBlockModel;
-
-  @property({ attribute: false })
-  accessor host!: EditorHost;
 
   @query('editor-host')
   accessor previewEditor: EditorHost | null = null;

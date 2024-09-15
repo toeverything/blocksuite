@@ -9,8 +9,6 @@ import { property } from 'lit/decorators.js';
 
 import type { AIPanelGeneratingConfig } from '../../type.js';
 
-import '../generating-placeholder.js';
-
 export class AIPanelGenerating extends WithDisposable(LitElement) {
   static override styles = css`
     :host {

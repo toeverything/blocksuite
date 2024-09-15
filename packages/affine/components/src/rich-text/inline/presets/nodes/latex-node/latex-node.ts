@@ -11,7 +11,7 @@ import {
   ZERO_WIDTH_NON_JOINER,
   ZERO_WIDTH_SPACE,
 } from '@blocksuite/inline';
-import { effect, signal } from '@lit-labs/preact-signals';
+import { effect, signal } from '@preact/signals-core';
 import { cssVar } from '@toeverything/theme';
 import { cssVarV2 } from '@toeverything/theme/v2';
 import katex from 'katex';
@@ -21,8 +21,6 @@ import { property } from 'lit/decorators.js';
 import type { AffineTextAttributes } from '../../../../extension/index.js';
 
 import { createLitPortal } from '../../../../../portal/helper.js';
-import './latex-editor-menu.js';
-import './latex-editor-unit.js';
 
 export class AffineLatexNode extends SignalWatcher(
   WithDisposable(ShadowlessElement)
@@ -236,10 +234,4 @@ export class AffineLatexNode extends SignalWatcher(
 
   @property({ attribute: false })
   accessor std!: BlockStdScope;
-}
-
-declare global {
-  interface HTMLElementTagNameMap {
-    'affine-latex-node': AffineLatexNode;
-  }
 }

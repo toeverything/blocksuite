@@ -39,19 +39,14 @@ import type {
 } from '../../edgeless/components/color-picker/index.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 
-import '../../edgeless/components/color-picker/index.js';
 import {
   packColor,
   packColorsWithColorScheme,
 } from '../../edgeless/components/color-picker/utils.js';
-import '../../edgeless/components/panel/align-panel.js';
 import {
   type ColorEvent,
   GET_DEFAULT_LINE_COLOR,
 } from '../../edgeless/components/panel/color-panel.js';
-import '../../edgeless/components/panel/font-family-panel.js';
-import '../../edgeless/components/panel/font-weight-and-style-panel.js';
-import '../../edgeless/components/panel/size-panel.js';
 
 const FONT_SIZE_LIST = [
   { value: 16 },

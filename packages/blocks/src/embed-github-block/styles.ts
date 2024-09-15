@@ -4,7 +4,6 @@ import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../_common/consts.js';
 
 export const styles = css`
   .affine-embed-github-block {
-    margin: 0 auto;
     box-sizing: border-box;
     display: flex;
     width: 100%;
@@ -19,9 +18,8 @@ export const styles = css`
   }
 
   .affine-embed-github-content {
-    width: calc(100% - 204px);
-    height: 100%;
     display: flex;
+    flex-grow: 1;
     flex-direction: column;
     align-self: stretch;
     gap: 4px;
@@ -212,10 +210,9 @@ export const styles = css`
   }
 
   .affine-embed-github-banner {
-    margin: 12px 12px 0px 0px;
+    margin: 12px 0px 0px 12px;
     width: 204px;
     height: 102px;
-    max-width: 100%;
     opacity: var(--add, 1);
   }
 
@@ -223,7 +220,6 @@ export const styles = css`
   .affine-embed-github-banner object,
   .affine-embed-github-banner svg {
     width: 204px;
-    max-width: 100%;
     height: 102px;
     object-fit: cover;
     border-radius: 4px 4px var(--1, 0px) var(--1, 0px);
@@ -246,6 +242,7 @@ export const styles = css`
 
   .affine-embed-github-block.list {
     height: ${EMBED_CARD_HEIGHT.list}px;
+    width: ${EMBED_CARD_WIDTH.list}px;
 
     .affine-embed-github-content {
       width: 100%;
@@ -280,10 +277,15 @@ export const styles = css`
     }
   }
 
+  .affine-embed-github-block.horizontal {
+    width: ${EMBED_CARD_WIDTH.horizontal}px;
+    height: ${EMBED_CARD_HEIGHT.horizontal}px;
+  }
+
   .affine-embed-github-block.vertical {
     width: ${EMBED_CARD_WIDTH.vertical}px;
     height: ${EMBED_CARD_HEIGHT.vertical}px;
-    flex-direction: column-reverse;
+    flex-direction: column;
 
     .affine-embed-github-content {
       width: 100%;

@@ -148,9 +148,3 @@ export class AffineLink extends ShadowlessElement {
     insert: ZERO_WIDTH_SPACE,
   };
 }
-
-declare global {
-  interface HTMLElementTagNameMap {
-    'affine-link': AffineLink;
-  }
-}

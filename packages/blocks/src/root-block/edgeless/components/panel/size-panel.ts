@@ -4,8 +4,6 @@ import { css, html, LitElement, nothing } from 'lit';
 import { property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
-import '../buttons/tool-icon-button.js';
-
 const MIN_SIZE = 1;
 const MAX_SIZE = 200;
 

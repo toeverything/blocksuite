@@ -1,9 +1,6 @@
-import type { SurfaceElementModel } from '../../element-model/base.js';
-import type { CanvasRenderer } from '../canvas-renderer.js';
+import type {
+  ShapeElementModel,
+  TextElementModel,
+} from '@blocksuite/affine-model';
 
-export type ElementRenderer = (
-  model: SurfaceElementModel,
-  ctx: CanvasRenderingContext2D,
-  matrix: DOMMatrix,
-  renderer: CanvasRenderer
-) => void;
+export type CanvasElementWithText = ShapeElementModel | TextElementModel;

@@ -1,4 +1,4 @@
-import { signal } from '@lit-labs/preact-signals';
+import { signal } from '@preact/signals-core';
 
 interface Observable<T> {
   subscribe(observer: (value: T) => void): Unsubscribable;
@@ -22,4 +22,4 @@ export function createSignalFromObservable<T>(
   };
 }
 
-export { type Signal } from '@lit-labs/preact-signals';
+export { type Signal } from '@preact/signals-core';

@@ -5,7 +5,6 @@ import { popMenu } from '@blocksuite/affine-components/context-menu';
 import { DragIndicator } from '@blocksuite/affine-components/drag-indicator';
 import { PeekViewProvider } from '@blocksuite/affine-components/peek';
 import { toast } from '@blocksuite/affine-components/toast';
-import { DatabaseBlockSchema } from '@blocksuite/affine-model';
 import { NOTE_SELECTOR } from '@blocksuite/affine-shared/consts';
 import { RANGE_SYNC_EXCLUDE_ATTR } from '@blocksuite/block-std';
 import {
@@ -29,7 +28,7 @@ import {
 } from '@blocksuite/icons/lit';
 import { Slice } from '@blocksuite/store';
 import { autoUpdate } from '@floating-ui/dom';
-import { computed, signal } from '@lit-labs/preact-signals';
+import { computed, signal } from '@preact/signals-core';
 import { css, html, nothing, unsafeCSS } from 'lit';
 
 import type { NoteBlockComponent } from '../note-block/index.js';
@@ -37,16 +36,11 @@ import type { DatabaseOptionsConfig } from './config.js';
 import type { DatabaseBlockService } from './database-service.js';
 
 import {
-  AffineDragHandleWidget,
   EdgelessRootBlockComponent,
   type RootService,
 } from '../root-block/index.js';
-import {
-  captureEventTarget,
-  getDropResult,
-} from '../root-block/widgets/drag-handle/utils.js';
+import { getDropResult } from '../root-block/widgets/drag-handle/utils.js';
 import { popSideDetail } from './components/layout.js';
-import './components/title/index.js';
 import { DatabaseBlockDataSource } from './data-source.js';
 
 export class DatabaseBlockComponent extends CaptionedBlockComponent<
@@ -325,49 +319,6 @@ export class DatabaseBlockComponent extends CaptionedBlockComponent<
 
     this.setAttribute(RANGE_SYNC_EXCLUDE_ATTR, 'true');
     this.listenFullWidthChange();
-    let canDrop = false;
-    this.disposables.add(
-      AffineDragHandleWidget.registerOption({
-        flavour: DatabaseBlockSchema.model.flavour,
-        onDragMove: state => {
-          const target = captureEventTarget(state.raw.target);
-          const view = this.view;
-          if (view && target instanceof HTMLElement && this.contains(target)) {
-            canDrop = view.showIndicator?.(state.raw) ?? false;
-            return false;
-          }
-          if (canDrop) {
-            view?.hideIndicator?.();
-            canDrop = false;
-          }
-          return false;
-        },
-        onDragEnd: ({ state, draggingElements }) => {
-          const target = state.raw.target;
-          const view = this.view;
-          if (
-            canDrop &&
-            view &&
-            view.moveTo &&
-            target instanceof HTMLElement &&
-            this.parentElement?.contains(target)
-          ) {
-            const blocks = draggingElements.map(v => v.model);
-            this.doc.moveBlocks(blocks, this.model);
-            blocks.forEach(model => {
-              view.moveTo?.(model.id, state.raw);
-            });
-            view.hideIndicator?.();
-            return false;
-          }
-          if (canDrop) {
-            view?.hideIndicator?.();
-            canDrop = false;
-          }
-          return false;
-        },
-      })
-    );
   }
 
   listenFullWidthChange() {

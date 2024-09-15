@@ -8,7 +8,6 @@ import { property } from 'lit/decorators.js';
 import type { AIPanelAnswerConfig, CopyConfig } from '../../type.js';
 
 import { filterAIItemGroup } from '../../utils.js';
-import '../finish-tip.js';
 
 export class AIPanelAnswer extends WithDisposable(LitElement) {
   static override styles = css`

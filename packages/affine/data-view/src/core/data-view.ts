@@ -5,7 +5,7 @@ import {
   SignalWatcher,
   WithDisposable,
 } from '@blocksuite/block-std';
-import { computed, type ReadonlySignal } from '@lit-labs/preact-signals';
+import { computed, type ReadonlySignal } from '@preact/signals-core';
 import { css, type TemplateResult, unsafeCSS } from 'lit';
 import { property, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
@@ -20,7 +20,6 @@ import type { SingleView } from './view-manager/single-view.js';
 
 import { dataViewCommonStyle } from './common/css-variable.js';
 import { createRecordDetail } from './common/detail/detail.js';
-import './common/group-by/define.js';
 import { renderUniLit } from './utils/uni-component/index.js';
 
 type ViewProps = {

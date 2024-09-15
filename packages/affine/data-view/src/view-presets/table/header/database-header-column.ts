@@ -41,7 +41,6 @@ import { getResultInRange } from '../../../core/utils/utils.js';
 import { DEFAULT_COLUMN_TITLE_HEIGHT } from '../consts.js';
 import { getTableContainer } from '../types.js';
 import { DataViewColumnPreview } from './column-renderer.js';
-import './number-format-bar.js';
 import {
   getTableGroupRects,
   getVerticalIndicator,

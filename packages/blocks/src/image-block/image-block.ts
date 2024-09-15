@@ -11,8 +11,6 @@ import type { ImageBlockFallbackCard } from './components/image-block-fallback.j
 import type { ImageBlockPageComponent } from './components/page-image-block.js';
 import type { ImageBlockService } from './image-service.js';
 
-import './components/image-block-fallback.js';
-import './components/page-image-block.js';
 import {
   copyImageBlob,
   downloadImageBlob,

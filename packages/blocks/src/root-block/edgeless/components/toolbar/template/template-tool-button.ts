@@ -17,7 +17,6 @@ import type { EdgelessTemplatePanel } from './template-panel.js';
 
 import { EdgelessToolbarToolMixin } from '../mixins/tool.mixin.js';
 import { TemplateCard1, TemplateCard2, TemplateCard3 } from './icon.js';
-import './template-panel.js';
 
 export class EdgelessTemplateButton extends EdgelessToolbarToolMixin(
   LitElement

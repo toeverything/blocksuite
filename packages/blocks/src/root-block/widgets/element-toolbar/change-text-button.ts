@@ -4,8 +4,6 @@ import { html, nothing } from 'lit';
 
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 
-import './change-text-menu.js';
-
 export function renderChangeTextButton(
   edgeless: EdgelessRootBlockComponent,
   elements?: TextElementModel[]

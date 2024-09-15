@@ -7,10 +7,10 @@ import { OpenIcon } from '@blocksuite/affine-components/icons';
 import { html } from 'lit';
 import { state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
+import { styleMap } from 'lit/directives/style-map.js';
 
 import type { EmbedFigmaBlockService } from './embed-figma-service.js';
 
-import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../_common/consts.js';
 import { EmbedBlockComponent } from '../_common/embed-block-helper/embed-block-element.js';
 import { FigmaIcon, styles } from './styles.js';
 
@@ -102,60 +102,58 @@ export class EmbedFigmaBlockComponent extends EmbedBlockComponent<
     const { title, description, style, url } = this.model;
 
     this._cardStyle = style;
-    this._width = EMBED_CARD_WIDTH[this._cardStyle];
-    this._height = EMBED_CARD_HEIGHT[this._cardStyle];
 
     const titleText = title ?? 'Figma';
     const descriptionText = description ?? url;
 
     return this.renderEmbed(
       () => html`
-        <div>
-          <div
-            class=${classMap({
-              'affine-embed-figma-block': true,
-              selected: this._isSelected,
-            })}
-            @click=${this._handleClick}
-            @dblclick=${this._handleDoubleClick}
-          >
-            <div class="affine-embed-figma">
-              <div class="affine-embed-figma-iframe-container">
-                <iframe
-                  src=${`https://www.figma.com/embed?embed_host=blocksuite&url=${url}`}
-                  allowfullscreen
-                ></iframe>
+        <div
+          class=${classMap({
+            'affine-embed-figma-block': true,
+            selected: this._isSelected,
+          })}
+          style=${styleMap({
+            transform: `scale(${this._scale})`,
+            transformOrigin: '0 0',
+          })}
+          @click=${this._handleClick}
+          @dblclick=${this._handleDoubleClick}
+        >
+          <div class="affine-embed-figma">
+            <div class="affine-embed-figma-iframe-container">
+              <iframe
+                src=${`https://www.figma.com/embed?embed_host=blocksuite&url=${url}`}
+                allowfullscreen
+              ></iframe>
 
-                <div
-                  class=${classMap({
-                    'affine-embed-figma-iframe-overlay': true,
-                    hide: !this._showOverlay,
-                  })}
-                ></div>
+              <div
+                class=${classMap({
+                  'affine-embed-figma-iframe-overlay': true,
+                  hide: !this._showOverlay,
+                })}
+              ></div>
+            </div>
+          </div>
+          <div class="affine-embed-figma-content">
+            <div class="affine-embed-figma-content-header">
+              <div class="affine-embed-figma-content-title-icon">
+                ${FigmaIcon}
+              </div>
+
+              <div class="affine-embed-figma-content-title-text">
+                ${titleText}
               </div>
             </div>
-            <div class="affine-embed-figma-content">
-              <div class="affine-embed-figma-content-header">
-                <div class="affine-embed-figma-content-title-icon">
-                  ${FigmaIcon}
-                </div>
 
-                <div class="affine-embed-figma-content-title-text">
-                  ${titleText}
-                </div>
-              </div>
+            <div class="affine-embed-figma-content-description">
+              ${descriptionText}
+            </div>
 
-              <div class="affine-embed-figma-content-description">
-                ${descriptionText}
-              </div>
+            <div class="affine-embed-figma-content-url" @click=${this.open}>
+              <span>www.figma.com</span>
 
-              <div class="affine-embed-figma-content-url" @click=${this.open}>
-                <span>www.figma.com</span>
-
-                <div class="affine-embed-figma-content-url-icon">
-                  ${OpenIcon}
-                </div>
-              </div>
+              <div class="affine-embed-figma-content-url-icon">${OpenIcon}</div>
             </div>
           </div>
         </div>

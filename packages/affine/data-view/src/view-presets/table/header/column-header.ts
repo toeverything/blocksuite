@@ -15,7 +15,6 @@ import { html } from 'lit/static-html.js';
 import type { TableGroup } from '../group.js';
 import type { TableSingleView } from '../table-view-manager.js';
 
-import './database-header-column.js';
 import { styles } from './styles.js';
 
 export class DatabaseColumnHeader extends SignalWatcher(
@@ -32,8 +31,6 @@ export class DatabaseColumnHeader extends SignalWatcher(
       ele.scrollIntoView({ block: 'nearest', inline: 'nearest' });
     });
   };
-
-  private preAutoSet = 0;
 
   editLastColumnTitle = () => {
     const columns = this.querySelectorAll('affine-database-header-column');
@@ -52,10 +49,6 @@ export class DatabaseColumnHeader extends SignalWatcher(
     group: TableGroup,
     scrollContainer: HTMLElement
   ) {
-    if (this.preAutoSet) {
-      cancelAnimationFrame(this.preAutoSet);
-      this.preAutoSet = 0;
-    }
     const referenceRect = group.getBoundingClientRect();
     const floatingRect = this.getBoundingClientRect();
     const rootRect = scrollContainer.getBoundingClientRect();
@@ -70,10 +63,6 @@ export class DatabaseColumnHeader extends SignalWatcher(
     }
     this.preMove = moveX;
     this.style.transform = `translate3d(0,${moveX / this.getScale()}px,0)`;
-    this.preAutoSet = requestAnimationFrame(() => {
-      this.preAutoSet = 0;
-      this.autoSetHeaderPosition(group, scrollContainer);
-    });
   }
 
   override connectedCallback() {
@@ -90,9 +79,6 @@ export class DatabaseColumnHeader extends SignalWatcher(
         this.autoSetHeaderPosition(group, scrollContainer);
       });
       this.disposables.add(cancel);
-      this.disposables.add(() => {
-        cancelAnimationFrame(this.preAutoSet);
-      });
     }
   }
 

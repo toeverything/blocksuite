@@ -43,11 +43,3 @@ export const dedentBlocksToRoot: Command<
 
   return next();
 };
-
-declare global {
-  namespace BlockSuite {
-    interface Commands {
-      dedentBlocksToRoot: typeof dedentBlocksToRoot;
-    }
-  }
-}

@@ -56,7 +56,6 @@ import {
   mountShapeTextEditor,
   mountTextElementEditor,
 } from '../../utils/text.js';
-import '../buttons/tool-icon-button.js';
 import { ShapeComponentConfig } from '../toolbar/shape/shape-menu-config.js';
 import {
   type AUTO_COMPLETE_TARGET_TYPE,

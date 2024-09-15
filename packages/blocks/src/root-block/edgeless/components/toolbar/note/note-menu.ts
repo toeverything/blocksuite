@@ -13,9 +13,7 @@ import {
   openFileOrFiles,
 } from '../../../../../_common/utils/index.js';
 import { ImageIcon } from '../../../../../image-block/styles.js';
-import '../../buttons/tool-icon-button.js';
 import { getTooltipWithShortcut } from '../../utils.js';
-import '../common/slide-menu.js';
 import { EdgelessToolbarToolMixin } from '../mixins/tool.mixin.js';
 import { NOTE_MENU_ITEMS } from './note-menu-config.js';
 
@@ -71,7 +69,8 @@ export class EdgelessNoteMenu extends EdgelessToolbarToolMixin(LitElement) {
 
     insertedLinkType
       ?.then(type => {
-        if (!type) return;
+        const flavour = type?.flavour;
+        if (!flavour) return;
 
         this.edgeless.std
           .getOptional(TelemetryProvider)
@@ -79,7 +78,7 @@ export class EdgelessNoteMenu extends EdgelessToolbarToolMixin(LitElement) {
             control: 'toolbar:general',
             page: 'whiteboard editor',
             module: 'toolbar',
-            type: type.flavour?.split(':')[1],
+            type: flavour.split(':')[1],
           });
       })
       .catch(console.error);

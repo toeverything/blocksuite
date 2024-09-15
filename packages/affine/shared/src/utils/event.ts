@@ -177,7 +177,7 @@ export function requestThrottledConnectedFrame<
   return ((...args: unknown[]) => {
     latestArgs = args;
 
-    raqId && cancelAnimationFrame(raqId);
+    if (raqId) return;
 
     raqId = requestConnectedFrame(() => {
       raqId = undefined;

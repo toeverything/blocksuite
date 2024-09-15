@@ -15,11 +15,3 @@ export const focusBlockStart: Command<'focusBlock'> = (ctx, next) => {
 
   return next();
 };
-
-declare global {
-  namespace BlockSuite {
-    interface Commands {
-      focusBlockStart: typeof focusBlockStart;
-    }
-  }
-}

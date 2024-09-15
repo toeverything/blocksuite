@@ -10,7 +10,6 @@ import Sortable from 'sortablejs';
 import type { KanbanSingleView } from './kanban-view-manager.js';
 import type { KanbanViewSelectionWithType } from './types.js';
 
-import '../../core/common/group-by/define.js';
 import { type DataViewExpose, renderUniLit } from '../../core/index.js';
 import { DataViewBase } from '../../core/view/data-view-base.js';
 import { KanbanClipboardController } from './controller/clipboard.js';
@@ -18,7 +17,6 @@ import { KanbanDragController } from './controller/drag.js';
 import { KanbanHotkeysController } from './controller/hotkeys.js';
 import { KanbanSelectionController } from './controller/selection.js';
 import { KanbanGroup } from './group.js';
-import './header.js';
 
 const styles = css`
   affine-data-view-kanban {

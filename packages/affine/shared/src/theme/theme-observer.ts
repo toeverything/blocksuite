@@ -1,5 +1,5 @@
 import { type Color, ColorScheme } from '@blocksuite/affine-model';
-import { signal } from '@lit-labs/preact-signals';
+import { signal } from '@preact/signals-core';
 
 const TRANSPARENT = 'transparent';
 
@@ -64,27 +64,24 @@ export class ThemeObserver {
         : `var(${fallback})`
       : fallback;
 
+    let result: string | undefined;
     if (typeof color === 'string') {
-      return (
-        (color.startsWith('--')
-          ? color.endsWith(TRANSPARENT)
-            ? TRANSPARENT
-            : `var(${color})`
-          : color) ?? fallback
-      );
+      result = color;
+    } else if (color.light && color.dark) {
+      result = this.mode === ColorScheme.Dark ? color.dark : color.light;
+    } else if (color.normal) {
+      result = color.normal;
     }
 
-    if (!color) {
+    if (!result) {
       return fallback;
     }
 
-    if (color.light && color.dark) {
-      return this.mode === ColorScheme.Dark
-        ? `var(${color.dark})`
-        : `var(${color.light})`;
+    if (result.startsWith('--')) {
+      return result.endsWith(TRANSPARENT) ? TRANSPARENT : `var(${result})`;
     }
 
-    return color.normal ?? fallback;
+    return result;
   }
 
   /**

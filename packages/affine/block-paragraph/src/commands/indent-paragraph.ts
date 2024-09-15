@@ -67,11 +67,3 @@ export const indentParagraphCommand: Command<
 
   return next();
 };
-
-declare global {
-  namespace BlockSuite {
-    interface Commands {
-      indentParagraph: typeof indentParagraphCommand;
-    }
-  }
-}

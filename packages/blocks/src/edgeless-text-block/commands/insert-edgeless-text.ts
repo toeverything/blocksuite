@@ -82,15 +82,3 @@ export const insertEdgelessTextCommand: Command<
 
   next({ textId });
 };
-
-declare global {
-  namespace BlockSuite {
-    interface CommandContext {
-      textId?: string;
-    }
-
-    interface Commands {
-      insertEdgelessText: typeof insertEdgelessTextCommand;
-    }
-  }
-}
