@@ -5,13 +5,16 @@ import type {
   ReferenceInfo,
 } from '@blocksuite/affine-model';
 
-import { EmbedBlockComponent } from '@blocksuite/affine-block-embed';
 import { BlockLinkIcon } from '@blocksuite/affine-components/icons';
 import { isPeekable, Peekable } from '@blocksuite/affine-components/peek';
 import {
   REFERENCE_NODE,
   RefNodeSlotsProvider,
 } from '@blocksuite/affine-components/rich-text';
+import {
+  EMBED_CARD_HEIGHT,
+  EMBED_CARD_WIDTH,
+} from '@blocksuite/affine-shared/consts';
 import { DocModeProvider } from '@blocksuite/affine-shared/services';
 import { Bound } from '@blocksuite/global/utils';
 import { DocCollection } from '@blocksuite/store';
@@ -20,12 +23,10 @@ import { property, queryAsync, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type { SurfaceRefBlockService } from '../surface-ref-block/index.js';
-import type { SurfaceRefRenderer } from '../surface-ref-block/surface-ref-renderer.js';
 import type { EmbedLinkedDocBlockConfig } from './embed-linked-doc-config.js';
 
-import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../_common/consts.js';
-import { renderLinkedDocInCard } from '../_common/utils/render-linked-doc.js';
+import { EmbedBlockComponent } from '../common/embed-block-element.js';
+import { renderLinkedDocInCard } from '../common/render-linked-doc.js';
 import { SyncedDocErrorIcon } from '../embed-synced-doc-block/styles.js';
 import { styles } from './styles.js';
 import { getEmbedLinkedDocIcons, isLinkToNode } from './utils.js';
@@ -520,8 +521,12 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockComponent<EmbedLinke
   accessor noteContainer!: Promise<HTMLDivElement>;
 
   @property({ attribute: false })
-  accessor surfaceRefRenderer: SurfaceRefRenderer | undefined = undefined;
+  // TODO: remove any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  accessor surfaceRefRenderer: any | undefined = undefined;
 
   @property({ attribute: false })
-  accessor surfaceRefService!: SurfaceRefBlockService;
+  // TODO: remove any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  accessor surfaceRefService!: any;
 }

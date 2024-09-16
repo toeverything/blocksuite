@@ -1,4 +1,3 @@
-import { toEdgelessEmbedBlock } from '@blocksuite/affine-block-embed';
 import {
   EMBED_CARD_HEIGHT,
   EMBED_CARD_WIDTH,
@@ -12,8 +11,7 @@ import { classMap } from 'lit/directives/class-map.js';
 import { guard } from 'lit/directives/guard.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type { EdgelessRootService } from '../root-block/index.js';
-
+import { toEdgelessEmbedBlock } from '../common/to-edgeless-embed-block.js';
 import { EmbedSyncedDocBlockComponent } from './embed-synced-doc-block.js';
 
 export class EmbedEdgelessSyncedDocBlockComponent extends toEdgelessEmbedBlock(
@@ -118,9 +116,11 @@ export class EmbedEdgelessSyncedDocBlockComponent extends toEdgelessEmbedBlock(
       return;
     }
 
+    // @ts-expect-error TODO: fix after edgeless refactor
     const newId = edgelessService.addBlock(
       'affine:embed-linked-doc',
       { pageId, xywh: bound.serialize(), style, caption },
+      // @ts-expect-error TODO: fix after edgeless refactor
       edgelessService.surface
     );
 
@@ -129,6 +129,7 @@ export class EmbedEdgelessSyncedDocBlockComponent extends toEdgelessEmbedBlock(
       newId,
     });
 
+    // @ts-expect-error TODO: fix after edgeless refactor
     edgelessService.selection.set({
       editing: false,
       elements: [newId],
@@ -137,7 +138,7 @@ export class EmbedEdgelessSyncedDocBlockComponent extends toEdgelessEmbedBlock(
   };
 
   get rootService() {
-    return this.std.getService('affine:page') as EdgelessRootService;
+    return this.std.getService('affine:page');
   }
 
   override renderGfxBlock() {

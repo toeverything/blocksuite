@@ -1,5 +1,9 @@
 import { LinkPreviewer } from '@blocksuite/affine-block-embed';
 import { BookmarkBlockSchema } from '@blocksuite/affine-model';
+import {
+  EMBED_CARD_HEIGHT,
+  EMBED_CARD_WIDTH,
+} from '@blocksuite/affine-shared/consts';
 import { DragHandleConfigExtension } from '@blocksuite/affine-shared/services';
 import {
   captureEventTarget,
@@ -11,7 +15,6 @@ import { BlockService } from '@blocksuite/block-std';
 
 import type { BookmarkBlockComponent } from './bookmark-block.js';
 
-import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../_common/consts.js';
 import { BookmarkEdgelessBlockComponent } from './bookmark-edgeless-block.js';
 
 export class BookmarkBlockService extends BlockService {
@@ -25,10 +28,6 @@ export class BookmarkBlockService extends BlockService {
   queryUrlData = (url: string, signal?: AbortSignal) => {
     return BookmarkBlockService.linkPreviewer.query(url, signal);
   };
-
-  override mounted(): void {
-    super.mounted();
-  }
 }
 
 export const BookmarkDragHandleOption = DragHandleConfigExtension({

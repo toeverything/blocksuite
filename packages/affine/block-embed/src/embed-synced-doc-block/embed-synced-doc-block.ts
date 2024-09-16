@@ -1,4 +1,3 @@
-import { EmbedBlockComponent } from '@blocksuite/affine-block-embed';
 import {
   EmbedEdgelessIcon,
   EmbedPageIcon,
@@ -15,6 +14,7 @@ import {
 } from '@blocksuite/affine-model';
 import { DocModeProvider } from '@blocksuite/affine-shared/services';
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
+import { SpecProvider } from '@blocksuite/affine-shared/utils';
 import {
   BlockServiceWatcher,
   BlockStdScope,
@@ -29,12 +29,10 @@ import { classMap } from 'lit/directives/class-map.js';
 import { guard } from 'lit/directives/guard.js';
 import { type StyleInfo, styleMap } from 'lit/directives/style-map.js';
 
-import type { EdgelessRootService } from '../root-block/edgeless/edgeless-root-service.js';
-import type { RootBlockComponent } from '../root-block/types.js';
 import type { EmbedSyncedDocCard } from './components/embed-synced-doc-card.js';
 
-import { isEmptyDoc } from '../_common/utils/render-linked-doc.js';
-import { SpecProvider } from '../_specs/utils/spec-provider.js';
+import { EmbedBlockComponent } from '../common/embed-block-element.js';
+import { isEmptyDoc } from '../common/render-linked-doc.js';
 import { blockStyles } from './styles.js';
 
 @Peekable({
@@ -47,13 +45,13 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockComponent<EmbedSynce
     const fitToContent = () => {
       if (this.syncedDocMode !== 'edgeless') return;
 
-      const service = this.syncedDocEditorHost?.std.getService(
-        'affine:page'
-      ) as EdgelessRootService;
+      const service = this.syncedDocEditorHost?.std.getService('affine:page');
 
       if (!service) return;
 
+      // @ts-expect-error TODO: fix after edgeless refactor
       service.viewport.onResize();
+      // @ts-expect-error TODO: fix after edgeless refactor
       service.zoomToFit();
     };
 
@@ -265,11 +263,6 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockComponent<EmbedSynce
   open = () => {
     const pageId = this.model.pageId;
     if (pageId === this.doc.id) return;
-
-    const rootComponent = this.std.view.getBlock(
-      this.doc.root?.id ?? ''
-    ) as RootBlockComponent | null;
-    if (!rootComponent) return;
 
     this.std.getOptional(RefNodeSlotsProvider)?.docLinkClicked.emit({ pageId });
   };

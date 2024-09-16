@@ -27,8 +27,6 @@ export * from './data-view-block/index.js';
 export * from './database-block/index.js';
 export * from './divider-block/index.js';
 export * from './edgeless-text-block/index.js';
-export * from './embed-linked-doc-block/index.js';
-export * from './embed-synced-doc-block/index.js';
 export * from './frame-block/index.js';
 export * from './image-block/index.js';
 export * from './latex-block/index.js';

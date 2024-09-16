@@ -18,12 +18,6 @@ import { effects as inlineEffects } from '@blocksuite/inline/effects';
 
 import type { insertBookmarkCommand } from './bookmark-block/commands/insert-bookmark.js';
 import type { insertEdgelessTextCommand } from './edgeless-text-block/commands/insert-edgeless-text.js';
-import type { insertEmbedLinkedDocCommand } from './embed-linked-doc-block/commands/insert-embed-linked-doc.js';
-import type {
-  InsertedLinkType,
-  insertLinkByQuickSearchCommand,
-} from './embed-linked-doc-block/commands/insert-link-by-quick-search.js';
-import type { EmbedLinkedDocBlockConfig } from './embed-linked-doc-block/embed-linked-doc-config.js';
 import type { updateBlockType } from './note-block/commands/block-type.js';
 import type { dedentBlock } from './note-block/commands/dedent-block.js';
 import type { dedentBlockToRoot } from './note-block/commands/dedent-block-to-root.js';
@@ -96,11 +90,6 @@ import {
 } from './database-block/index.js';
 import { DividerBlockComponent } from './divider-block/index.js';
 import { EdgelessTextBlockComponent } from './edgeless-text-block/index.js';
-import { EmbedEdgelessLinkedDocBlockComponent } from './embed-linked-doc-block/embed-edgeless-linked-doc-block.js';
-import { EmbedLinkedDocBlockComponent } from './embed-linked-doc-block/index.js';
-import { EmbedSyncedDocCard } from './embed-synced-doc-block/components/embed-synced-doc-card.js';
-import { EmbedEdgelessSyncedDocBlockComponent } from './embed-synced-doc-block/embed-edgeless-synced-doc-block.js';
-import { EmbedSyncedDocBlockComponent } from './embed-synced-doc-block/index.js';
 import {
   EdgelessFrameTitle,
   FrameBlockComponent,
@@ -325,7 +314,6 @@ export function effects() {
   componentToolbarEffects();
   componentDragIndicatorEffects();
 
-  customElements.define('affine-embed-synced-doc-card', EmbedSyncedDocCard);
   customElements.define('affine-database-title', DatabaseTitle);
   customElements.define(
     'affine-edgeless-bookmark',
@@ -359,32 +347,16 @@ export function effects() {
   customElements.define('affine-attachment', AttachmentBlockComponent);
   customElements.define('affine-latex', LatexBlockComponent);
   customElements.define('affine-page-root', PageRootBlockComponent);
-  customElements.define(
-    'affine-embed-edgeless-linked-doc-block',
-    EmbedEdgelessLinkedDocBlockComponent
-  );
   customElements.define('edgeless-note-mask', EdgelessNoteMask);
   customElements.define('affine-edgeless-note', EdgelessNoteBlockComponent);
   customElements.define('affine-preview-root', PreviewRootBlockComponent);
   customElements.define('affine-linked-doc-popover', LinkedDocPopover);
   customElements.define('affine-page-image', ImageBlockPageComponent);
   customElements.define('affine-code', CodeBlockComponent);
-  customElements.define(
-    'affine-embed-linked-doc-block',
-    EmbedLinkedDocBlockComponent
-  );
   customElements.define('affine-image-fallback-card', ImageBlockFallbackCard);
   customElements.define('mini-mindmap-preview', MiniMindmapPreview);
-  customElements.define(
-    'affine-embed-edgeless-synced-doc-block',
-    EmbedEdgelessSyncedDocBlockComponent
-  );
   customElements.define('edgeless-frame-title', EdgelessFrameTitle);
   customElements.define('affine-frame', FrameBlockComponent);
-  customElements.define(
-    'affine-embed-synced-doc-block',
-    EmbedSyncedDocBlockComponent
-  );
   customElements.define('mini-mindmap-surface-block', MindmapSurfaceBlock);
   customElements.define('affine-data-view', DataViewBlockComponent);
   customElements.define('affine-edgeless-root', EdgelessRootBlockComponent);
@@ -700,8 +672,6 @@ declare global {
       insertBookmark: typeof insertBookmarkCommand;
       updateBlockType: typeof updateBlockType;
       insertEdgelessText: typeof insertEdgelessTextCommand;
-      insertEmbedLinkedDoc: typeof insertEmbedLinkedDocCommand;
-      insertLinkByQuickSearch: typeof insertLinkByQuickSearchCommand;
       dedentBlockToRoot: typeof dedentBlockToRoot;
     }
     interface CommandContext {
@@ -709,11 +679,9 @@ declare global {
       anchorBlock?: BlockComponent | null;
       updatedBlocks?: BlockModel[];
       textId?: string;
-      insertedLinkType?: Promise<InsertedLinkType>;
     }
     interface BlockConfigs {
       'affine:code': CodeBlockConfig;
-      'affine:embed-linked-doc': EmbedLinkedDocBlockConfig;
       'affine:page': RootBlockConfig;
     }
     interface BlockServices {

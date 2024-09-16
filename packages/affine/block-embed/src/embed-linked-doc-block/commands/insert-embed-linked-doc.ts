@@ -1,7 +1,7 @@
 import type { EmbedCardStyle, ReferenceParams } from '@blocksuite/affine-model';
 import type { Command } from '@blocksuite/block-std';
 
-import { insertEmbedCard } from '../../_common/embed-block-helper/insert-embed-card.js';
+import { insertEmbedCard } from '../../common/insert-embed-card.js';
 
 export const insertEmbedLinkedDocCommand: Command<
   never,

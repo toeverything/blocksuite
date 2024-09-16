@@ -1,3 +1,5 @@
+// eslint-disable-next-line @typescript-eslint/triple-slash-reference
+/// <reference path="./effects.ts" />
 export { type IModelCoord, ZOOM_MAX, ZOOM_MIN, ZOOM_STEP } from './consts.js';
 export { GRID_GAP_MAX, GRID_GAP_MIN } from './consts.js';
 export {
