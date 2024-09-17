@@ -39,12 +39,6 @@ export class EventService<TextAttributes extends BaseTextAttributes> {
 
   private _onBeforeInput = (event: InputEvent) => {
     const range = this.editor.rangeService.getNativeRange();
-    console.trace(
-      '_onBeforeInput',
-      range,
-      this.editor.rootElement.innerText,
-      this.editor.yTextString
-    );
     if (
       this.editor.isReadonly ||
       this._isComposing ||

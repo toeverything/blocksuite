@@ -154,7 +154,9 @@ export class InlineEditor<
   get inlineRange$() {
     return this.inlineRangeProvider.inlineRange$;
   }
-  setInlineRange = this.inlineRangeProvider.setInlineRange;
+  setInlineRange = (inlineRange: InlineRange | null) => {
+    this.inlineRangeProvider.setInlineRange(inlineRange);
+  };
   getInlineRange = () => {
     return this.inlineRange$.value;
   };

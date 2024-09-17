@@ -19,27 +19,25 @@ export class RangeService<TextAttributes extends BaseTextAttributes> {
 
   private _lastStartRelativePosition: Y.RelativePosition | null = null;
 
-  private _rangeSyncing = false;
-
   focusEnd = (): void => {
-    this.editor.inlineRange$.value = {
+    this.editor.setInlineRange({
       index: this.editor.yTextLength,
       length: 0,
-    };
+    });
   };
 
   focusIndex = (index: number): void => {
-    this.editor.inlineRange$.value = {
+    this.editor.setInlineRange({
       index,
       length: 0,
-    };
+    });
   };
 
   focusStart = (): void => {
-    this.editor.inlineRange$.value = {
+    this.editor.setInlineRange({
       index: 0,
       length: 0,
-    };
+    });
   };
 
   getInlineRangeFromElement = (element: Element): InlineRange | null => {
@@ -253,10 +251,10 @@ export class RangeService<TextAttributes extends BaseTextAttributes> {
   };
 
   selectAll = (): void => {
-    this.editor.inlineRange$.value = {
+    this.editor.setInlineRange({
       index: 0,
       length: this.editor.yTextLength,
-    };
+    });
   };
 
   /**
@@ -266,12 +264,6 @@ export class RangeService<TextAttributes extends BaseTextAttributes> {
     if (!this.editor.mounted) return;
 
     inlineRange = inlineRange ?? this.editor.getInlineRange();
-    console.trace(
-      'syncInlineRange',
-      inlineRange,
-      this.editor.rootElement.innerText,
-      this.editor.yTextString
-    );
     const selection = document.getSelection();
     if (!selection) return;
 
@@ -283,15 +275,12 @@ export class RangeService<TextAttributes extends BaseTextAttributes> {
         }
       }
     } else {
-      this._rangeSyncing = true;
       try {
         const newRange = this.toDomRange(inlineRange);
-        console.log('newRange', newRange);
         if (newRange) {
           selection.removeAllRanges();
           selection.addRange(newRange);
 
-          this._rangeSyncing = false;
           this.editor.slots.inlineRangeSync.emit(newRange);
         } else {
           this.editor.slots.renderComplete.once(() => {
@@ -357,10 +346,6 @@ export class RangeService<TextAttributes extends BaseTextAttributes> {
 
   get lastStartRelativePosition() {
     return this._lastStartRelativePosition;
-  }
-
-  get rangeSyncing() {
-    return this._rangeSyncing;
   }
 
   constructor(readonly editor: InlineEditor<TextAttributes>) {}

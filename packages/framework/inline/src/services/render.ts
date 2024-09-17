@@ -74,11 +74,7 @@ export class RenderService<TextAttributes extends BaseTextAttributes> {
   // render current deltas to VLines
   render = () => {
     if (!this.editor.mounted) return;
-    console.trace(
-      'render start',
-      this.editor.rootElement.innerText,
-      this.editor.yTextString
-    );
+
     const rootElement = this.editor.rootElement;
     const embedDeltas = this.editor.deltaService.embedDeltas;
     const chunks = deltaInsertsToChunks(embedDeltas);
@@ -147,12 +143,8 @@ export class RenderService<TextAttributes extends BaseTextAttributes> {
     this.editor
       .waitForUpdate()
       .then(() => {
-        console.log(
-          'render end',
-          this.editor.rootElement.innerText,
-          this.editor.yTextString
-        );
         this.editor.slots.renderComplete.emit();
+        this.editor.syncInlineRange();
       })
       .catch(console.error);
   };

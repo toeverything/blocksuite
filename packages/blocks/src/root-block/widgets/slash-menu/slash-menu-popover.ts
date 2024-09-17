@@ -58,8 +58,13 @@ export class SlashMenu extends WithDisposable(LitElement) {
       this.context.model,
       this.triggerKey + (this._query || '')
     );
-    item.action(this.context)?.catch(console.error);
-    this.abortController.abort();
+    this.inlineEditor
+      .waitForUpdate()
+      .then(() => {
+        item.action(this.context)?.catch(console.error);
+        this.abortController.abort();
+      })
+      .catch(console.error);
   };
 
   private _initItemPathMap = () => {
@@ -191,7 +196,6 @@ export class SlashMenu extends WithDisposable(LitElement) {
     createKeydownObserver({
       target: inlineEditor.eventSource,
       signal: this.abortController.signal,
-      inlineEditor: this.inlineEditor,
       interceptor: (event, next) => {
         const { key, isComposing, code } = event;
         if (key === this.triggerKey) {

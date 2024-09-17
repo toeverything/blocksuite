@@ -126,23 +126,23 @@ export class AffineSlashMenuWidget extends WidgetComponent {
     const inlineEditor = getInlineEditorByModel(this.host, model);
     if (!inlineEditor) return;
 
-    inlineEditor.slots.inlineRangeSync.once(() => {
-      const rootComponent = this.block;
-      if (rootComponent.model.flavour !== 'affine:page') {
-        console.error('SlashMenuWidget should be used in RootBlock');
-        return;
-      }
+    const rootComponent = this.block;
+    if (rootComponent.model.flavour !== 'affine:page') {
+      console.error('SlashMenuWidget should be used in RootBlock');
+      return;
+    }
 
-      const config: SlashMenuStaticConfig = {
-        ...this.config,
-        items: filterEnabledSlashMenuItems(this.config.items, {
-          model,
-          rootComponent: rootComponent as RootBlockComponent,
-        }),
-      };
+    const config: SlashMenuStaticConfig = {
+      ...this.config,
+      items: filterEnabledSlashMenuItems(this.config.items, {
+        model,
+        rootComponent: rootComponent as RootBlockComponent,
+      }),
+    };
 
-      // Wait for dom update, see this case https://github.com/toeverything/blocksuite/issues/2611
-      requestAnimationFrame(() => {
+    inlineEditor
+      .waitForUpdate()
+      .then(() => {
         const curRange = getCurrentNativeRange();
         if (!curRange) return;
 
@@ -156,8 +156,8 @@ export class AffineSlashMenuWidget extends WidgetComponent {
           triggerKey,
           config,
         });
-      });
-    });
+      })
+      .catch(console.error);
   };
 
   config = AffineSlashMenuWidget.DEFAULT_CONFIG;

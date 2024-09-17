@@ -18,24 +18,12 @@ export class VElement<
 
   override async getUpdateComplete(): Promise<boolean> {
     const result = await super.getUpdateComplete();
+    const span = this.querySelector('[data-v-element="true"]') as HTMLElement;
+    const el = span.firstElementChild as LitElement;
+    await el.updateComplete;
     const vTexts = Array.from(this.querySelectorAll('v-text'));
-    if (vTexts.length > 0) {
-      await Promise.all(vTexts.map(el => el.updateComplete));
-      return result;
-    } else {
-      return new Promise(resolve => {
-        const observer = new MutationObserver(() => {
-          const vTexts = Array.from(this.querySelectorAll('v-text'));
-          if (vTexts.length > 0) {
-            Promise.all(vTexts.map(el => el.updateComplete))
-              .then(() => resolve(result))
-              .catch(console.error);
-            observer.disconnect();
-          }
-        });
-        observer.observe(this, { childList: true });
-      });
-    }
+    await Promise.all(vTexts.map(vText => vText.updateComplete));
+    return result;
   }
 
   override render() {
