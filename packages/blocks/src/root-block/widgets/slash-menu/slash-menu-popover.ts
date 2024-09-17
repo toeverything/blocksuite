@@ -222,9 +222,10 @@ export class SlashMenu extends WithDisposable(LitElement) {
 
         next();
       },
-      onInput: () => this._updateFilteredItems(),
+      onInput: () =>
+        this.inlineEditor.slots.renderComplete.once(this._updateFilteredItems),
       onPaste: () => {
-        setTimeout(() => this._updateFilteredItems(), 20);
+        this.inlineEditor.slots.renderComplete.once(this._updateFilteredItems);
       },
       onDelete: () => {
         const curRange = this.inlineEditor.getInlineRange();
@@ -234,7 +235,7 @@ export class SlashMenu extends WithDisposable(LitElement) {
         if (curRange.index < this._startRange.index) {
           this.abortController.abort();
         }
-        this._updateFilteredItems();
+        this.inlineEditor.slots.renderComplete.once(this._updateFilteredItems);
       },
       onAbort: () => this.abortController.abort(),
     });

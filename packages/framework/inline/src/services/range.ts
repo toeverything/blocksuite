@@ -230,6 +230,8 @@ export class RangeService<TextAttributes extends BaseTextAttributes> {
         if (eq) return;
         lastInlineRange = newInlineRange;
 
+        this.editor.render();
+
         const yText = editor.yText;
         if (newInlineRange) {
           this._lastStartRelativePosition =
