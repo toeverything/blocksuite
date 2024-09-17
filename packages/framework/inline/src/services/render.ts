@@ -1,3 +1,5 @@
+/* eslint-disable perfectionist/sort-classes */
+/* eslint-disable @stylistic/ts/lines-between-class-members */
 import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 import { assertExists } from '@blocksuite/global/utils';
 import { html, render } from 'lit';
@@ -71,9 +73,15 @@ export class RenderService<TextAttributes extends BaseTextAttributes> {
     });
   };
 
+  private _rendering = false;
+  get rendering() {
+    return this._rendering;
+  }
   // render current deltas to VLines
   render = () => {
     if (!this.editor.mounted) return;
+
+    this._rendering = true;
 
     const rootElement = this.editor.rootElement;
     const embedDeltas = this.editor.deltaService.embedDeltas;
@@ -143,6 +151,7 @@ export class RenderService<TextAttributes extends BaseTextAttributes> {
     this.editor
       .waitForUpdate()
       .then(() => {
+        this._rendering = false;
         this.editor.slots.renderComplete.emit();
         this.editor.syncInlineRange();
       })

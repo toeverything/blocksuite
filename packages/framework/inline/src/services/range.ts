@@ -245,7 +245,13 @@ export class RangeService<TextAttributes extends BaseTextAttributes> {
 
         if (editor.inlineRangeProviderOverride) return;
 
-        this.syncInlineRange();
+        if (this.editor.renderService.rendering) {
+          editor.slots.renderComplete.once(() => {
+            this.syncInlineRange(newInlineRange);
+          });
+        } else {
+          this.syncInlineRange();
+        }
       })
     );
   };

@@ -160,9 +160,7 @@ export class LatexEditorMenu extends SignalWatcher(
         await this.richText?.updateComplete;
 
         this.richText?.inlineEditorContainer.focus();
-        requestAnimationFrame(() => {
-          this.richText?.inlineEditor?.focusEnd();
-        });
+        this.richText?.inlineEditor?.focusEnd();
       })
       .catch(console.error);
   }
