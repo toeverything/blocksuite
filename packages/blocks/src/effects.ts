@@ -1,6 +1,7 @@
 import type { BlockComponent } from '@blocksuite/block-std';
 import type { BlockModel } from '@blocksuite/store';
 
+import { effects as blockEmbedEffects } from '@blocksuite/affine-block-embed/effects';
 import { effects as blockListEffects } from '@blocksuite/affine-block-list/effects';
 import { effects as blockParagraphEffects } from '@blocksuite/affine-block-paragraph/effects';
 import { effects as blockSurfaceEffects } from '@blocksuite/affine-block-surface/effects';
@@ -17,13 +18,6 @@ import { effects as inlineEffects } from '@blocksuite/inline/effects';
 
 import type { insertBookmarkCommand } from './bookmark-block/commands/insert-bookmark.js';
 import type { insertEdgelessTextCommand } from './edgeless-text-block/commands/insert-edgeless-text.js';
-import type { EmbedFigmaBlockService } from './embed-figma-block/embed-figma-service.js';
-import type { insertEmbedLinkedDocCommand } from './embed-linked-doc-block/commands/insert-embed-linked-doc.js';
-import type {
-  InsertedLinkType,
-  insertLinkByQuickSearchCommand,
-} from './embed-linked-doc-block/commands/insert-link-by-quick-search.js';
-import type { EmbedLinkedDocBlockConfig } from './embed-linked-doc-block/embed-linked-doc-config.js';
 import type { updateBlockType } from './note-block/commands/block-type.js';
 import type { dedentBlock } from './note-block/commands/dedent-block.js';
 import type { dedentBlockToRoot } from './note-block/commands/dedent-block-to-root.js';
@@ -96,31 +90,6 @@ import {
 } from './database-block/index.js';
 import { DividerBlockComponent } from './divider-block/index.js';
 import { EdgelessTextBlockComponent } from './edgeless-text-block/index.js';
-import { EmbedEdgelessBlockComponent } from './embed-figma-block/embed-edgeless-figma-block.js';
-import { EmbedFigmaBlockComponent } from './embed-figma-block/index.js';
-import { EmbedEdgelessGithubBlockComponent } from './embed-github-block/embed-edgeless-github-block.js';
-import {
-  EmbedGithubBlockComponent,
-  type EmbedGithubBlockService,
-} from './embed-github-block/index.js';
-import { EmbedHtmlFullscreenToolbar } from './embed-html-block/components/fullscreen-toolbar.js';
-import { EmbedEdgelessHtmlBlockComponent } from './embed-html-block/embed-edgeless-html-block.js';
-import { EmbedHtmlBlockComponent } from './embed-html-block/index.js';
-import { EmbedEdgelessLinkedDocBlockComponent } from './embed-linked-doc-block/embed-edgeless-linked-doc-block.js';
-import { EmbedLinkedDocBlockComponent } from './embed-linked-doc-block/index.js';
-import { EmbedEdgelessLoomBlockComponent } from './embed-loom-block/embed-edgeless-loom-bock.js';
-import {
-  EmbedLoomBlockComponent,
-  type EmbedLoomBlockService,
-} from './embed-loom-block/index.js';
-import { EmbedSyncedDocCard } from './embed-synced-doc-block/components/embed-synced-doc-card.js';
-import { EmbedEdgelessSyncedDocBlockComponent } from './embed-synced-doc-block/embed-edgeless-synced-doc-block.js';
-import { EmbedSyncedDocBlockComponent } from './embed-synced-doc-block/index.js';
-import { EmbedEdgelessYoutubeBlockComponent } from './embed-youtube-block/embed-edgeless-youtube-block.js';
-import {
-  EmbedYoutubeBlockComponent,
-  type EmbedYoutubeBlockService,
-} from './embed-youtube-block/index.js';
 import {
   EdgelessFrameTitle,
   FrameBlockComponent,
@@ -333,6 +302,7 @@ export function effects() {
 
   blockListEffects();
   blockParagraphEffects();
+  blockEmbedEffects();
   blockSurfaceEffects();
   dataViewEffects();
 
@@ -344,28 +314,17 @@ export function effects() {
   componentToolbarEffects();
   componentDragIndicatorEffects();
 
-  customElements.define(
-    'affine-embed-edgeless-figma-block',
-    EmbedEdgelessBlockComponent
-  );
-  customElements.define('affine-embed-synced-doc-card', EmbedSyncedDocCard);
-  customElements.define('affine-embed-html-block', EmbedHtmlBlockComponent);
   customElements.define('affine-database-title', DatabaseTitle);
   customElements.define(
     'affine-edgeless-bookmark',
     BookmarkEdgelessBlockComponent
   );
   customElements.define('affine-image', ImageBlockComponent);
-  customElements.define(
-    'affine-embed-edgeless-html-block',
-    EmbedEdgelessHtmlBlockComponent
-  );
   customElements.define('data-view-header-area-icon', IconCell);
   customElements.define('affine-database-link-cell', LinkCell);
   customElements.define('affine-database-link-cell-editing', LinkCellEditing);
   customElements.define('affine-bookmark', BookmarkBlockComponent);
   customElements.define('affine-edgeless-image', ImageEdgelessBlockComponent);
-  customElements.define('affine-embed-figma-block', EmbedFigmaBlockComponent);
   customElements.define('data-view-header-area-text', HeaderAreaTextCell);
   customElements.define(
     'data-view-header-area-text-editing',
@@ -383,67 +342,29 @@ export function effects() {
     'affine-edgeless-attachment',
     AttachmentEdgelessBlockComponent
   );
-  customElements.define(
-    'affine-embed-edgeless-github-block',
-    EmbedEdgelessGithubBlockComponent
-  );
   customElements.define('database-datasource-note-renderer', NoteRenderer);
   customElements.define('database-datasource-block-renderer', BlockRenderer);
   customElements.define('affine-attachment', AttachmentBlockComponent);
   customElements.define('affine-latex', LatexBlockComponent);
-  customElements.define('affine-embed-github-block', EmbedGithubBlockComponent);
   customElements.define('affine-page-root', PageRootBlockComponent);
-  customElements.define(
-    'affine-embed-edgeless-linked-doc-block',
-    EmbedEdgelessLinkedDocBlockComponent
-  );
   customElements.define('edgeless-note-mask', EdgelessNoteMask);
   customElements.define('affine-edgeless-note', EdgelessNoteBlockComponent);
-  customElements.define(
-    'embed-html-fullscreen-toolbar',
-    EmbedHtmlFullscreenToolbar
-  );
   customElements.define('affine-preview-root', PreviewRootBlockComponent);
   customElements.define('affine-linked-doc-popover', LinkedDocPopover);
   customElements.define('affine-page-image', ImageBlockPageComponent);
   customElements.define('affine-code', CodeBlockComponent);
-  customElements.define(
-    'affine-embed-linked-doc-block',
-    EmbedLinkedDocBlockComponent
-  );
   customElements.define('affine-image-fallback-card', ImageBlockFallbackCard);
   customElements.define('mini-mindmap-preview', MiniMindmapPreview);
-  customElements.define(
-    'affine-embed-edgeless-synced-doc-block',
-    EmbedEdgelessSyncedDocBlockComponent
-  );
   customElements.define('edgeless-frame-title', EdgelessFrameTitle);
   customElements.define('affine-frame', FrameBlockComponent);
-  customElements.define(
-    'affine-embed-synced-doc-block',
-    EmbedSyncedDocBlockComponent
-  );
   customElements.define('mini-mindmap-surface-block', MindmapSurfaceBlock);
-  customElements.define(
-    'affine-embed-edgeless-youtube-block',
-    EmbedEdgelessYoutubeBlockComponent
-  );
   customElements.define('affine-data-view', DataViewBlockComponent);
   customElements.define('affine-edgeless-root', EdgelessRootBlockComponent);
-  customElements.define(
-    'affine-embed-edgeless-loom-block',
-    EmbedEdgelessLoomBlockComponent
-  );
   customElements.define('affine-divider', DividerBlockComponent);
-  customElements.define('affine-embed-loom-block', EmbedLoomBlockComponent);
   customElements.define('edgeless-copilot-panel', EdgelessCopilotPanel);
   customElements.define(
     'edgeless-copilot-toolbar-entry',
     EdgelessCopilotToolbarEntry
-  );
-  customElements.define(
-    'affine-embed-youtube-block',
-    EmbedYoutubeBlockComponent
   );
   customElements.define(
     'affine-edgeless-surface-ref',
@@ -751,8 +672,6 @@ declare global {
       insertBookmark: typeof insertBookmarkCommand;
       updateBlockType: typeof updateBlockType;
       insertEdgelessText: typeof insertEdgelessTextCommand;
-      insertEmbedLinkedDoc: typeof insertEmbedLinkedDocCommand;
-      insertLinkByQuickSearch: typeof insertLinkByQuickSearchCommand;
       dedentBlockToRoot: typeof dedentBlockToRoot;
     }
     interface CommandContext {
@@ -760,11 +679,9 @@ declare global {
       anchorBlock?: BlockComponent | null;
       updatedBlocks?: BlockModel[];
       textId?: string;
-      insertedLinkType?: Promise<InsertedLinkType>;
     }
     interface BlockConfigs {
       'affine:code': CodeBlockConfig;
-      'affine:embed-linked-doc': EmbedLinkedDocBlockConfig;
       'affine:page': RootBlockConfig;
     }
     interface BlockServices {
@@ -773,10 +690,6 @@ declare global {
       'affine:attachment': AttachmentBlockService;
       'affine:bookmark': BookmarkBlockService;
       'affine:database': DatabaseBlockService;
-      'affine:embed-figma': EmbedFigmaBlockService;
-      'affine:embed-github': EmbedGithubBlockService;
-      'affine:embed-loom': EmbedLoomBlockService;
-      'affine:embed-youtube': EmbedYoutubeBlockService;
       'affine:image': ImageBlockService;
       'affine:surface-ref': SurfaceRefBlockService;
     }

@@ -6,6 +6,12 @@ import type {
 } from '@blocksuite/global/utils';
 
 import {
+  EMBED_HTML_MIN_HEIGHT,
+  EMBED_HTML_MIN_WIDTH,
+  SYNCED_MIN_HEIGHT,
+  SYNCED_MIN_WIDTH,
+} from '@blocksuite/affine-block-embed';
+import {
   CanvasElementType,
   CommonUtils,
   normalizeShapeBound,
@@ -46,14 +52,6 @@ import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
 import { EMBED_CARD_HEIGHT } from '../../../../_common/consts.js';
 import { isMindmapNode } from '../../../../_common/edgeless/mindmap/index.js';
 import { EDGELESS_TEXT_BLOCK_MIN_WIDTH } from '../../../../edgeless-text-block/edgeless-text-block.js';
-import {
-  EMBED_HTML_MIN_HEIGHT,
-  EMBED_HTML_MIN_WIDTH,
-} from '../../../../embed-html-block/styles.js';
-import {
-  SYNCED_MIN_HEIGHT,
-  SYNCED_MIN_WIDTH,
-} from '../../../../embed-synced-doc-block/styles.js';
 import {
   AI_CHAT_BLOCK_MAX_HEIGHT,
   AI_CHAT_BLOCK_MAX_WIDTH,

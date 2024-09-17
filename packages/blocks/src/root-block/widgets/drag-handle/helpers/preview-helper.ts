@@ -1,3 +1,4 @@
+import { SpecProvider } from '@blocksuite/affine-shared/utils';
 import {
   type BlockComponent,
   BlockStdScope,
@@ -8,7 +9,6 @@ import { BlockViewType, type Query } from '@blocksuite/store';
 
 import type { AffineDragHandleWidget } from '../drag-handle.js';
 
-import { SpecProvider } from '../../../../_specs/utils/spec-provider.js';
 import { DragPreview } from '../components/drag-preview.js';
 
 export class PreviewHelper {

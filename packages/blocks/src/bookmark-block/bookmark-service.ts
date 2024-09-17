@@ -1,21 +1,20 @@
+import { LinkPreviewer } from '@blocksuite/affine-block-embed';
 import { BookmarkBlockSchema } from '@blocksuite/affine-model';
+import {
+  EMBED_CARD_HEIGHT,
+  EMBED_CARD_WIDTH,
+} from '@blocksuite/affine-shared/consts';
 import { DragHandleConfigExtension } from '@blocksuite/affine-shared/services';
-import { matchFlavours } from '@blocksuite/affine-shared/utils';
-import { BlockService } from '@blocksuite/block-std';
-import { Bound, Point } from '@blocksuite/global/utils';
-import { render } from 'lit';
-
-import type { EdgelessRootService } from '../root-block/edgeless/edgeless-root-service.js';
-import type { BookmarkBlockComponent } from './bookmark-block.js';
-
-import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../_common/consts.js';
-import { LinkPreviewer } from '../_common/embed-block-helper/index.js';
-import { AFFINE_DRAG_HANDLE_WIDGET } from '../root-block/widgets/drag-handle/consts.js';
 import {
   captureEventTarget,
   convertDragPreviewDocToEdgeless,
   convertDragPreviewEdgelessToDoc,
-} from '../root-block/widgets/drag-handle/utils.js';
+  matchFlavours,
+} from '@blocksuite/affine-shared/utils';
+import { BlockService } from '@blocksuite/block-std';
+
+import type { BookmarkBlockComponent } from './bookmark-block.js';
+
 import { BookmarkEdgelessBlockComponent } from './bookmark-edgeless-block.js';
 
 export class BookmarkBlockService extends BlockService {
@@ -29,62 +28,11 @@ export class BookmarkBlockService extends BlockService {
   queryUrlData = (url: string, signal?: AbortSignal) => {
     return BookmarkBlockService.linkPreviewer.query(url, signal);
   };
-
-  override mounted(): void {
-    super.mounted();
-  }
 }
 
 export const BookmarkDragHandleOption = DragHandleConfigExtension({
   flavour: BookmarkBlockSchema.model.flavour,
   edgeless: true,
-  onDragStart: ({ state, startDragging, anchorBlockId, editorHost }) => {
-    if (!anchorBlockId) return false;
-    const anchorComponent = editorHost.std.view.getBlock(anchorBlockId);
-    if (
-      !anchorComponent ||
-      !matchFlavours(anchorComponent.model, [BookmarkBlockSchema.model.flavour])
-    )
-      return false;
-
-    const blockComponent = anchorComponent as
-      | BookmarkBlockComponent
-      | BookmarkEdgelessBlockComponent;
-    const element = captureEventTarget(state.raw.target);
-
-    const isDraggingByDragHandle = !!element?.closest(
-      AFFINE_DRAG_HANDLE_WIDGET
-    );
-    const isDraggingByComponent = blockComponent.contains(element);
-    const isInSurface =
-      blockComponent instanceof BookmarkEdgelessBlockComponent;
-
-    if (!isInSurface && (isDraggingByDragHandle || isDraggingByComponent)) {
-      editorHost.selection.setGroup('note', [
-        editorHost.selection.create('block', {
-          blockId: blockComponent.blockId,
-        }),
-      ]);
-      startDragging([blockComponent], state);
-      return true;
-    } else if (isInSurface && isDraggingByDragHandle) {
-      const edgelessService = editorHost.std.getService(
-        'affine:page'
-      ) as EdgelessRootService;
-      const zoom = edgelessService?.viewport.zoom ?? 1;
-      const dragPreviewEl = document.createElement('div');
-      const bound = Bound.deserialize(blockComponent.model.xywh);
-      const offset = new Point(bound.x * zoom, bound.y * zoom);
-      render(
-        blockComponent.host.dangerouslyRenderModel(blockComponent.model),
-        dragPreviewEl
-      );
-
-      startDragging([blockComponent], state, dragPreviewEl, offset);
-      return true;
-    }
-    return false;
-  },
   onDragEnd: props => {
     const { state, draggingElements } = props;
     if (

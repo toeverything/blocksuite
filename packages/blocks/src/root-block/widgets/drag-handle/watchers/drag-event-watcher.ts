@@ -1,17 +1,21 @@
 import type { NoteBlockModel } from '@blocksuite/affine-model';
-import type {
-  BlockComponent,
-  PointerEventState,
-  UIEventHandler,
-} from '@blocksuite/block-std';
 import type { BlockModel } from '@blocksuite/store';
 
 import {
+  captureEventTarget,
   findNoteBlockModel,
   getBlockComponentsExcludeSubtrees,
   matchFlavours,
 } from '@blocksuite/affine-shared/utils';
+import {
+  type BlockComponent,
+  isGfxBlockComponent,
+  type PointerEventState,
+  type UIEventHandler,
+} from '@blocksuite/block-std';
+import { GfxControllerIdentifier } from '@blocksuite/block-std/gfx';
 import { Bound, Point } from '@blocksuite/global/utils';
+import { render } from 'lit';
 
 import type { EdgelessRootBlockComponent } from '../../../edgeless/index.js';
 import type { AffineDragHandleWidget } from '../drag-handle.js';
@@ -19,7 +23,6 @@ import type { AffineDragHandleWidget } from '../drag-handle.js';
 import { DropIndicator } from '../components/drop-indicator.js';
 import { AFFINE_DRAG_HANDLE_WIDGET } from '../consts.js';
 import {
-  captureEventTarget,
   containBlock,
   getDuplicateBlocks,
   includeTextSelection,
@@ -308,22 +311,71 @@ export class DragEventWatcher {
   };
 
   private _onDragStart = (state: PointerEventState) => {
-    const event = state.raw;
-    const { target } = event;
-    const element = captureEventTarget(target);
-    const insideDragHandle = !!element?.closest(AFFINE_DRAG_HANDLE_WIDGET);
+    // Get current hover block element by path
+    const hoverBlock = this.widget.anchorBlockComponent.peek();
+    if (!hoverBlock) return false;
+
+    const element = captureEventTarget(state.raw.target);
+    const dragByHandle = !!element?.closest(AFFINE_DRAG_HANDLE_WIDGET);
+    const isInSurface = isGfxBlockComponent(hoverBlock);
+
+    if (isInSurface && dragByHandle) {
+      const viewport = this.widget.std.get(GfxControllerIdentifier).viewport;
+      const zoom = viewport.zoom ?? 1;
+      const dragPreviewEl = document.createElement('div');
+      const bound = Bound.deserialize(hoverBlock.model.xywh);
+      const offset = new Point(bound.x * zoom, bound.y * zoom);
+
+      // TODO: not use `dangerouslyRenderModel` to render drag preview
+      render(
+        this.widget.std.host.dangerouslyRenderModel(hoverBlock.model),
+        dragPreviewEl
+      );
+
+      this._startDragging([hoverBlock], state, dragPreviewEl, offset);
+      return true;
+    }
+
+    const selectBlockAndStartDragging = () => {
+      this.widget.std.selection.setGroup('note', [
+        this.widget.std.selection.create('block', {
+          blockId: hoverBlock.blockId,
+        }),
+      ]);
+      this._startDragging([hoverBlock], state);
+    };
+
+    if (this.widget.draggingElements.length === 0) {
+      const dragByBlock =
+        hoverBlock.contains(element) && !hoverBlock.model.text;
+
+      const canDragByBlock =
+        matchFlavours(hoverBlock.model, [
+          'affine:attachment',
+          'affine:bookmark',
+        ]) || hoverBlock.model.flavour.startsWith('affine:embed-');
+
+      if (!isInSurface && dragByBlock && canDragByBlock) {
+        selectBlockAndStartDragging();
+        return true;
+      }
+    }
+
     // Should only start dragging when pointer down on drag handle
     // And current mouse button is left button
-    if (!insideDragHandle) {
+    if (!dragByHandle) {
       this.widget.hide();
       return false;
     }
 
-    if (!this.widget.isHoverDragHandleVisible || !this.widget.anchorBlockId)
-      return;
-    // Get current hover block element by path
-    const hoverBlock = this.widget.anchorBlockComponent;
-    if (!hoverBlock) return false;
+    if (this.widget.draggingElements.length === 1) {
+      if (!isInSurface) {
+        selectBlockAndStartDragging();
+        return true;
+      }
+    }
+
+    if (!this.widget.isHoverDragHandleVisible) return false;
 
     let selections = this.widget.selectionHelper.selectedBlocks;
 

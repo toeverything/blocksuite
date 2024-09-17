@@ -30,6 +30,7 @@ import {
 } from '@blocksuite/affine-model';
 import { EditPropsStore } from '@blocksuite/affine-shared/services';
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
+import { captureEventTarget } from '@blocksuite/affine-shared/utils';
 import { WithDisposable } from '@blocksuite/block-std';
 import {
   assertInstanceOf,
@@ -46,7 +47,6 @@ import { styleMap } from 'lit/directives/style-map.js';
 
 import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
 
-import { captureEventTarget } from '../../../widgets/drag-handle/utils.js';
 import {
   DEFAULT_NOTE_WIDTH,
   SHAPE_OVERLAY_HEIGHT,

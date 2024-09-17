@@ -35,6 +35,9 @@
       "path": "../affine/block-list"
     },
     {
+      "path": "../affine/block-embed"
+    },
+    {
       "path": "../affine/data-view"
     },
     {
