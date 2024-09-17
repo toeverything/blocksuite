@@ -269,34 +269,42 @@ export class RangeService<TextAttributes extends BaseTextAttributes> {
   syncInlineRange = (inlineRange?: InlineRange | null) => {
     if (!this.editor.mounted) return;
 
-    inlineRange = inlineRange ?? this.editor.getInlineRange();
-    const selection = document.getSelection();
-    if (!selection) return;
+    const handler = () => {
+      inlineRange = inlineRange ?? this.editor.getInlineRange();
+      const selection = document.getSelection();
+      if (!selection) return;
 
-    if (inlineRange === null) {
-      if (selection.rangeCount > 0) {
-        const range = selection.getRangeAt(0);
-        if (range.intersectsNode(this.editor.rootElement)) {
-          selection.removeAllRanges();
+      if (inlineRange === null) {
+        if (selection.rangeCount > 0) {
+          const range = selection.getRangeAt(0);
+          if (range.intersectsNode(this.editor.rootElement)) {
+            selection.removeAllRanges();
+          }
+        }
+      } else {
+        try {
+          const newRange = this.toDomRange(inlineRange);
+          if (newRange) {
+            selection.removeAllRanges();
+            selection.addRange(newRange);
+
+            this.editor.slots.inlineRangeSync.emit(newRange);
+          } else {
+            this.editor.slots.renderComplete.once(() => {
+              this.syncInlineRange(inlineRange);
+            });
+          }
+        } catch (error) {
+          console.error('failed to apply inline range');
+          console.error(error);
         }
       }
+    };
+
+    if (this.editor.renderService.rendering) {
+      this.editor.slots.renderComplete.once(handler);
     } else {
-      try {
-        const newRange = this.toDomRange(inlineRange);
-        if (newRange) {
-          selection.removeAllRanges();
-          selection.addRange(newRange);
-
-          this.editor.slots.inlineRangeSync.emit(newRange);
-        } else {
-          this.editor.slots.renderComplete.once(() => {
-            this.syncInlineRange(inlineRange);
-          });
-        }
-      } catch (error) {
-        console.error('failed to apply inline range');
-        console.error(error);
-      }
+      handler();
     }
   };
 
