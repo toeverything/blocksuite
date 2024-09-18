@@ -1777,6 +1777,7 @@ __metadata:
     "@blocksuite/global": "workspace:*"
     "@blocksuite/inline": "workspace:*"
     "@blocksuite/store": "workspace:*"
+    fractional-indexing: "npm:^3.2.0"
     zod: "npm:^3.23.8"
   languageName: unknown
   linkType: soft
