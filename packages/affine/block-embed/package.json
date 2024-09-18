@@ -15,11 +15,13 @@
   "author": "toeverything",
   "license": "MPL-2.0",
   "dependencies": {
+    "@blocksuite/affine-block-surface": "workspace:*",
     "@blocksuite/affine-components": "workspace:*",
     "@blocksuite/affine-model": "workspace:*",
     "@blocksuite/affine-shared": "workspace:*",
     "@blocksuite/block-std": "workspace:*",
     "@blocksuite/global": "workspace:*",
+    "@blocksuite/icons": "^2.1.67",
     "@blocksuite/inline": "workspace:*",
     "@blocksuite/store": "workspace:*",
     "@floating-ui/dom": "^1.6.10",

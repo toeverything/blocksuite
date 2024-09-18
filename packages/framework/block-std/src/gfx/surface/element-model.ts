@@ -1,4 +1,3 @@
-import type { EditorHost } from '@blocksuite/block-std';
 import type { IVec, SerializedXYWH, XYWH } from '@blocksuite/global/utils';
 
 import {
@@ -17,6 +16,7 @@ import {
 import { DocCollection, type Y } from '@blocksuite/store';
 import { createMutex } from 'lib0/mutex';
 
+import type { EditorHost } from '../../view/index.js';
 import type { GfxBlockElementModel, GfxModel } from '../gfx-block-model.js';
 import type { SurfaceBlockModel } from './surface-model.js';
 

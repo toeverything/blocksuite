@@ -1,10 +1,6 @@
-import type {
-  DeltaInsert,
-  InlineEditor,
-  InlineRange,
-} from '@blocksuite/inline';
-
 import { expect, type Page } from '@playwright/test';
+
+import type { DeltaInsert, InlineEditor, InlineRange } from '../index.js';
 
 const defaultPlaygroundURL = new URL(
   `http://localhost:${process.env.CI ? 4173 : 5173}/`

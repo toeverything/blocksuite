@@ -1,8 +1,9 @@
-import type { AffineTextAttributes } from '@blocksuite/affine-components/rich-text';
 import type { BlockSelection, Command } from '@blocksuite/block-std';
 
 import { assertExists } from '@blocksuite/global/utils';
 import { INLINE_ROOT_ATTR, type InlineRootElement } from '@blocksuite/inline';
+
+import type { AffineTextAttributes } from '../extension/index.js';
 
 import { FORMAT_BLOCK_SUPPORT_FLAVOURS } from './consts.js';
 

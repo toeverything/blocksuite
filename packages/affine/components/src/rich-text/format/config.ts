@@ -8,7 +8,7 @@ import {
   LinkIcon,
   StrikethroughIcon,
   UnderlineIcon,
-} from '@blocksuite/affine-components/icons';
+} from '../../icons/index.js';
 
 export interface TextFormatConfig {
   id: string;
