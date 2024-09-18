@@ -45,7 +45,7 @@ export function isMindmapNode(
 }
 
 export function isTopLevelBlock(
-  selectable: BlockModel | BlockSuite.EdgelessModel | BlockModel | null
+  selectable: BlockModel | BlockSuite.EdgelessModel | null
 ): selectable is GfxBlockModel {
   return !!selectable && 'flavour' in selectable;
 }

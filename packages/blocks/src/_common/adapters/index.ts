@@ -4,6 +4,7 @@ export * from './image.js';
 export * from './markdown.js';
 export * from './mix-text.js';
 export * from './notion-html.js';
+export * from './notion-text.js';
 export * from './plain-text.js';
 export { fetchable, fetchImage } from './utils.js';
 export { createText } from './utils.js';

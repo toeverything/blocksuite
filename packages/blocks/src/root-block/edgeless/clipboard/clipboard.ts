@@ -1,4 +1,8 @@
-import type { Connection, GfxCompatibleProps } from '@blocksuite/affine-model';
+import type {
+  Connection,
+  GfxCompatibleProps,
+  ReferenceParams,
+} from '@blocksuite/affine-model';
 import type {
   BlockStdScope,
   EditorHost,
@@ -278,11 +282,22 @@ export class EdgelessClipboardController extends PageClipboard {
           docUrlInfo.blockIds?.length || docUrlInfo.elementIds?.length
         );
 
-        Object.assign(options, {
-          mode: docUrlInfo.mode,
-          blockIds: docUrlInfo.blockIds,
-          elementIds: docUrlInfo.elementIds,
-        });
+        const params: ReferenceParams = {};
+        if (docUrlInfo.mode) {
+          params.mode = docUrlInfo.mode;
+        }
+        if (isLinkToNode) {
+          if (docUrlInfo.blockIds?.length) {
+            params.blockIds = docUrlInfo.blockIds;
+          }
+          if (docUrlInfo.elementIds?.length) {
+            params.elementIds = docUrlInfo.elementIds;
+          }
+        }
+
+        if (Object.keys(params).length) {
+          Object.assign(options, { params });
+        }
       } else {
         options.url = url;
 
@@ -723,16 +738,16 @@ export class EdgelessClipboardController extends PageClipboard {
   }
 
   private _createLinkedDocEmbedBlock(linkedDocEmbed: BlockSnapshot) {
-    const { xywh, style, caption, pageId } = linkedDocEmbed.props;
+    const { xywh, style, caption, pageId, params } = linkedDocEmbed.props;
+    const props: Record<string, unknown> = { xywh, style, caption, pageId };
+
+    if (params) {
+      props.params = { ...params };
+    }
 
     return this.host.service.addBlock(
       'affine:embed-linked-doc',
-      {
-        xywh,
-        style,
-        caption,
-        pageId,
-      },
+      props,
       this.surface.model.id
     );
   }

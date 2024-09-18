@@ -1,14 +1,6 @@
 import type { BaseElementProps } from '@blocksuite/block-std/gfx';
 import type { IVec, SerializedXYWH } from '@blocksuite/global/utils';
 
-import {
-  type Color,
-  FontFamily,
-  FontStyle,
-  FontWeight,
-  TextAlign,
-  type TextStyleProps,
-} from '@blocksuite/affine-model';
 import { field, GfxPrimitiveElementModel } from '@blocksuite/block-std/gfx';
 import {
   Bound,
@@ -18,6 +10,15 @@ import {
   polygonNearestPoint,
 } from '@blocksuite/global/utils';
 import { DocCollection, type Y } from '@blocksuite/store';
+
+import {
+  type Color,
+  FontFamily,
+  FontStyle,
+  FontWeight,
+  TextAlign,
+  type TextStyleProps,
+} from '../../consts/index.js';
 
 export type TextElementProps = BaseElementProps & {
   text: Y.Text;

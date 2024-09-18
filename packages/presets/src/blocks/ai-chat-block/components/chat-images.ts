@@ -4,7 +4,6 @@ import { choose } from 'lit/directives/choose.js';
 import { repeat } from 'lit/directives/repeat.js';
 
 import { ImageLoadingFailedIcon, LoadingIcon } from '../../_common/icon.js';
-import './image-placeholder.js';
 
 export class ChatImage extends LitElement {
   static override styles = css`

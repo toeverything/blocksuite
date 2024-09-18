@@ -5,7 +5,10 @@ import {
 } from '@blocksuite/block-std';
 import { literal } from 'lit/static-html.js';
 
-import { AttachmentBlockService } from './attachment-service.js';
+import {
+  AttachmentBlockService,
+  AttachmentDragHandleOption,
+} from './attachment-service.js';
 
 export const AttachmentBlockSpec: ExtensionType[] = [
   FlavourExtension('affine:attachment'),
@@ -15,4 +18,5 @@ export const AttachmentBlockSpec: ExtensionType[] = [
       ? literal`affine-edgeless-attachment`
       : literal`affine-attachment`;
   }),
+  AttachmentDragHandleOption,
 ];

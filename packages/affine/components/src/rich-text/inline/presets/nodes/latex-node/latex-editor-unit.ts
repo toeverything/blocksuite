@@ -1,10 +1,10 @@
-import type { AffineTextAttributes } from '@blocksuite/affine-components/rich-text';
-
 import { ShadowlessElement } from '@blocksuite/block-std';
 import { type DeltaInsert, ZERO_WIDTH_SPACE } from '@blocksuite/inline';
 import { html } from 'lit';
 import { property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
+
+import type { AffineTextAttributes } from '../../../../extension/index.js';
 
 export class LatexEditorUnit extends ShadowlessElement {
   get latexMenu() {
@@ -48,10 +48,4 @@ export class LatexEditorUnit extends ShadowlessElement {
   accessor delta: DeltaInsert<AffineTextAttributes> = {
     insert: ZERO_WIDTH_SPACE,
   };
-}
-
-declare global {
-  interface HTMLElementTagNameMap {
-    'latex-editor-unit': LatexEditorUnit;
-  }
 }

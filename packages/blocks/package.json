@@ -1,6 +1,6 @@
 {
   "name": "@blocksuite/blocks",
-  "version": "0.17.10",
+  "version": "0.17.11",
   "description": "Default BlockSuite editable blocks.",
   "type": "module",
   "repository": "toeverything/blocksuite",
@@ -16,12 +16,14 @@
   "author": "toeverything",
   "license": "MPL-2.0",
   "dependencies": {
+    "@blocksuite/affine-block-embed": "workspace:*",
     "@blocksuite/affine-block-list": "workspace:*",
     "@blocksuite/affine-block-paragraph": "workspace:*",
     "@blocksuite/affine-block-surface": "workspace:*",
     "@blocksuite/affine-components": "workspace:*",
     "@blocksuite/affine-model": "workspace:*",
     "@blocksuite/affine-shared": "workspace:*",
+    "@blocksuite/affine-widget-scroll-anchoring": "workspace:*",
     "@blocksuite/block-std": "workspace:*",
     "@blocksuite/data-view": "workspace:*",
     "@blocksuite/global": "workspace:*",
@@ -67,7 +69,6 @@
     "zod": "^3.23.8"
   },
   "exports": {
-    "./dist/*": "./dist/*",
     ".": "./src/index.ts",
     "./schemas": "./src/schemas.ts",
     "./effects": "./src/effects.ts"
@@ -77,8 +78,6 @@
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
     "exports": {
-      "./dist/*": "./dist/*",
-      "./src/*": "./dist/*.js",
       ".": {
         "types": "./dist/index.d.ts",
         "import": "./dist/index.js"

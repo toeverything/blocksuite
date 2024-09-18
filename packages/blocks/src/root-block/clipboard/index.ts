@@ -8,6 +8,7 @@ import {
   HtmlAdapter,
   ImageAdapter,
   MixTextAdapter,
+  NotionTextAdapter,
 } from '../../_common/adapters/index.js';
 import {
   defaultImageProxyMiddleware,
@@ -34,6 +35,11 @@ export class PageClipboard {
       ClipboardAdapter.MIME,
       ClipboardAdapter,
       100
+    );
+    this._std.clipboard.registerAdapter(
+      'text/_notion-text-production',
+      NotionTextAdapter,
+      95
     );
     this._std.clipboard.registerAdapter('text/html', HtmlAdapter, 90);
     [

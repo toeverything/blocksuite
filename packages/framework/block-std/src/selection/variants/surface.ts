@@ -3,6 +3,7 @@ import z from 'zod';
 import { BaseSelection } from '../base.js';
 
 const SurfaceSelectionSchema = z.object({
+  blockId: z.string(),
   elements: z.array(z.string()),
   editing: z.boolean(),
   inoperable: z.boolean().optional(),
@@ -32,33 +33,20 @@ export class SurfaceSelection extends BaseSelection {
     this.inoperable = inoperable;
   }
 
-  static override fromJSON(
-    json:
-      | Record<string, unknown>
-      | {
-          blockId: string[];
-          elements: string[];
-          editing: boolean;
-          inoperable?: boolean;
-        }
-  ): SurfaceSelection {
-    SurfaceSelectionSchema.parse(json);
-    return new SurfaceSelection(
-      json.blockId as string,
-      json.elements as string[],
-      json.editing as boolean,
-      (json.inoperable as boolean) || false
-    );
+  static override fromJSON(json: Record<string, unknown>): SurfaceSelection {
+    const { blockId, elements, editing, inoperable } =
+      SurfaceSelectionSchema.parse(json);
+    return new SurfaceSelection(blockId, elements, editing, inoperable);
   }
 
   override equals(other: BaseSelection): boolean {
     if (other instanceof SurfaceSelection) {
       return (
         this.blockId === other.blockId &&
-        this.elements.length === other.elements.length &&
-        this.elements.every((id, idx) => id === other.elements[idx]) &&
         this.editing === other.editing &&
-        this.inoperable === other.inoperable
+        this.inoperable === other.inoperable &&
+        this.elements.length === other.elements.length &&
+        this.elements.every((id, idx) => id === other.elements[idx])
       );
     }
 

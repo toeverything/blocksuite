@@ -10,6 +10,15 @@ import type {
 } from '@blocksuite/affine-model';
 
 import {
+  type EmbedFigmaBlockComponent,
+  type EmbedGithubBlockComponent,
+  type EmbedLinkedDocBlockComponent,
+  type EmbedLoomBlockComponent,
+  type EmbedSyncedDocBlockComponent,
+  type EmbedYoutubeBlockComponent,
+  isLinkToNode,
+} from '@blocksuite/affine-block-embed';
+import {
   CaptionIcon,
   CenterPeekIcon,
   CopyIcon,
@@ -41,12 +50,6 @@ import { repeat } from 'lit/directives/repeat.js';
 
 import type { EmbedCardStyle } from '../../../_common/types.js';
 import type { BookmarkBlockComponent } from '../../../bookmark-block/index.js';
-import type { EmbedFigmaBlockComponent } from '../../../embed-figma-block/index.js';
-import type { EmbedGithubBlockComponent } from '../../../embed-github-block/index.js';
-import type { EmbedLinkedDocBlockComponent } from '../../../embed-linked-doc-block/index.js';
-import type { EmbedLoomBlockComponent } from '../../../embed-loom-block/index.js';
-import type { EmbedSyncedDocBlockComponent } from '../../../embed-synced-doc-block/index.js';
-import type { EmbedYoutubeBlockComponent } from '../../../embed-youtube-block/index.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 
 import { toggleEmbedCardEditModal } from '../../../_common/components/embed-card/modal/embed-card-edit-modal.js';
@@ -55,7 +58,6 @@ import {
   EMBED_CARD_WIDTH,
 } from '../../../_common/consts.js';
 import { getEmbedCardIcons } from '../../../_common/utils/url.js';
-import { isLinkToNode } from '../../../embed-linked-doc-block/utils.js';
 import {
   isBookmarkBlock,
   isEmbedGithubBlock,

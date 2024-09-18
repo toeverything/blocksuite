@@ -1,6 +1,6 @@
 {
   "name": "@blocksuite/sync",
-  "version": "0.17.10",
+  "version": "0.17.11",
   "description": "BlockSuite data synchronization engine abstraction and implementation.",
   "type": "module",
   "repository": "toeverything/blocksuite",
@@ -23,8 +23,7 @@
     "yjs": "^13.6.15"
   },
   "exports": {
-    ".": "./src/index.ts",
-    "./impl/*": "./src/impl/*"
+    ".": "./src/index.ts"
   },
   "publishConfig": {
     "access": "public",

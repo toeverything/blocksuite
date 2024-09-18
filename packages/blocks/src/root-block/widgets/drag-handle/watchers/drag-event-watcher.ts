@@ -1,18 +1,21 @@
 import type { NoteBlockModel } from '@blocksuite/affine-model';
-import type {
-  BlockComponent,
-  PointerEventState,
-  UIEventHandler,
-} from '@blocksuite/block-std';
 import type { BlockModel } from '@blocksuite/store';
 
 import {
+  captureEventTarget,
   findNoteBlockModel,
   getBlockComponentsExcludeSubtrees,
-  isInsideEdgelessEditor,
   matchFlavours,
 } from '@blocksuite/affine-shared/utils';
+import {
+  type BlockComponent,
+  isGfxBlockComponent,
+  type PointerEventState,
+  type UIEventHandler,
+} from '@blocksuite/block-std';
+import { GfxControllerIdentifier } from '@blocksuite/block-std/gfx';
 import { Bound, Point } from '@blocksuite/global/utils';
+import { render } from 'lit';
 
 import type { EdgelessRootBlockComponent } from '../../../edgeless/index.js';
 import type { AffineDragHandleWidget } from '../drag-handle.js';
@@ -20,7 +23,6 @@ import type { AffineDragHandleWidget } from '../drag-handle.js';
 import { DropIndicator } from '../components/drop-indicator.js';
 import { AFFINE_DRAG_HANDLE_WIDGET } from '../consts.js';
 import {
-  captureEventTarget,
   containBlock,
   getDuplicateBlocks,
   includeTextSelection,
@@ -64,12 +66,12 @@ export class DragEventWatcher {
           dropBlockId: this.widget.dropBlockId,
           dropType: this.widget.dropType,
           dragPreview: this.widget.dragPreview,
-          noteScale: this.widget.noteScale,
+          noteScale: this.widget.noteScale.peek(),
           editorHost: this.widget.host,
         })
       ) {
         this.widget.hide(true);
-        if (isInsideEdgelessEditor(this.widget.host)) {
+        if (this.widget.mode === 'edgeless') {
           this.widget.edgelessWatcher.checkTopLevelBlockSelection();
         }
         return true;
@@ -79,7 +81,7 @@ export class DragEventWatcher {
     // call default drag end handler if no option return true
     this._onDragEnd(state);
 
-    if (isInsideEdgelessEditor(this.widget.host)) {
+    if (this.widget.mode === 'edgeless') {
       this.widget.edgelessWatcher.checkTopLevelBlockSelection();
     }
 
@@ -108,7 +110,12 @@ export class DragEventWatcher {
     const state = ctx.get('pointerState');
 
     for (const option of this.widget.optionRunner.options) {
-      if (option.onDragMove?.(state, this.widget.draggingElements)) {
+      if (
+        option.onDragMove?.({
+          state,
+          draggingElements: this.widget.draggingElements,
+        })
+      ) {
         return true;
       }
     }
@@ -134,7 +141,7 @@ export class DragEventWatcher {
         option.onDragStart?.({
           state,
           startDragging: this._startDragging,
-          anchorBlockId: this.widget.anchorBlockId ?? '',
+          anchorBlockId: this.widget.anchorBlockId.peek() ?? '',
           editorHost: this.widget.host,
         })
       ) {
@@ -178,7 +185,7 @@ export class DragEventWatcher {
       const newNoteId = edgelessRoot.addNoteWithPoint(
         new Point(state.raw.x - viewportLeft, state.raw.y - viewportTop),
         {
-          scale: this.widget.noteScale,
+          scale: this.widget.noteScale.peek(),
         }
       );
       const newNoteBlock = this.widget.doc.getBlockById(
@@ -187,13 +194,13 @@ export class DragEventWatcher {
       if (!newNoteBlock) return;
 
       const bound = Bound.deserialize(newNoteBlock.xywh);
-      bound.h *= this.widget.noteScale;
-      bound.w *= this.widget.noteScale;
+      bound.h *= this.widget.noteScale.peek();
+      bound.w *= this.widget.noteScale.peek();
       this.widget.doc.updateBlock(newNoteBlock, {
         xywh: bound.serialize(),
         edgeless: {
           ...newNoteBlock.edgeless,
-          scale: this.widget.noteScale,
+          scale: this.widget.noteScale.peek(),
         },
       });
 
@@ -216,10 +223,7 @@ export class DragEventWatcher {
 
     // Should make sure drop block id is not in selected blocks
     if (
-      containBlock(
-        this.widget.selectedBlocks.map(selection => selection.blockId),
-        targetBlockId
-      )
+      containBlock(this.widget.selectionHelper.selectedBlockIds, targetBlockId)
     ) {
       return false;
     }
@@ -286,7 +290,7 @@ export class DragEventWatcher {
 
         const note = findNoteBlockModel(parentElement.model);
         if (!note) return;
-        this.widget.setSelectedBlocks(
+        this.widget.selectionHelper.setSelectedBlocks(
           newSelectedBlocks as BlockComponent[],
           note.id
         );
@@ -307,24 +311,73 @@ export class DragEventWatcher {
   };
 
   private _onDragStart = (state: PointerEventState) => {
-    const event = state.raw;
-    const { target } = event;
-    const element = captureEventTarget(target);
-    const insideDragHandle = !!element?.closest(AFFINE_DRAG_HANDLE_WIDGET);
+    // Get current hover block element by path
+    const hoverBlock = this.widget.anchorBlockComponent.peek();
+    if (!hoverBlock) return false;
+
+    const element = captureEventTarget(state.raw.target);
+    const dragByHandle = !!element?.closest(AFFINE_DRAG_HANDLE_WIDGET);
+    const isInSurface = isGfxBlockComponent(hoverBlock);
+
+    if (isInSurface && dragByHandle) {
+      const viewport = this.widget.std.get(GfxControllerIdentifier).viewport;
+      const zoom = viewport.zoom ?? 1;
+      const dragPreviewEl = document.createElement('div');
+      const bound = Bound.deserialize(hoverBlock.model.xywh);
+      const offset = new Point(bound.x * zoom, bound.y * zoom);
+
+      // TODO: not use `dangerouslyRenderModel` to render drag preview
+      render(
+        this.widget.std.host.dangerouslyRenderModel(hoverBlock.model),
+        dragPreviewEl
+      );
+
+      this._startDragging([hoverBlock], state, dragPreviewEl, offset);
+      return true;
+    }
+
+    const selectBlockAndStartDragging = () => {
+      this.widget.std.selection.setGroup('note', [
+        this.widget.std.selection.create('block', {
+          blockId: hoverBlock.blockId,
+        }),
+      ]);
+      this._startDragging([hoverBlock], state);
+    };
+
+    if (this.widget.draggingElements.length === 0) {
+      const dragByBlock =
+        hoverBlock.contains(element) && !hoverBlock.model.text;
+
+      const canDragByBlock =
+        matchFlavours(hoverBlock.model, [
+          'affine:attachment',
+          'affine:bookmark',
+        ]) || hoverBlock.model.flavour.startsWith('affine:embed-');
+
+      if (!isInSurface && dragByBlock && canDragByBlock) {
+        selectBlockAndStartDragging();
+        return true;
+      }
+    }
+
     // Should only start dragging when pointer down on drag handle
     // And current mouse button is left button
-    if (!insideDragHandle) {
+    if (!dragByHandle) {
       this.widget.hide();
       return false;
     }
 
-    if (!this.widget.isHoverDragHandleVisible || !this.widget.anchorBlockId)
-      return;
-    // Get current hover block element by path
-    const hoverBlock = this.widget.anchorBlockComponent;
-    if (!hoverBlock) return false;
+    if (this.widget.draggingElements.length === 1) {
+      if (!isInSurface) {
+        selectBlockAndStartDragging();
+        return true;
+      }
+    }
 
-    let selections = this.widget.selectedBlocks;
+    if (!this.widget.isHoverDragHandleVisible) return false;
+
+    let selections = this.widget.selectionHelper.selectedBlocks;
 
     // When current selection is TextSelection
     // Should set BlockSelection for the blocks in native range
@@ -337,8 +390,8 @@ export class DragEventWatcher {
           match: el => el.model.role === 'content',
           mode: 'highest',
         });
-        this.widget.setSelectedBlocks(blocks);
-        selections = this.widget.selectedBlocks;
+        this.widget.selectionHelper.setSelectedBlocks(blocks);
+        selections = this.widget.selectionHelper.selectedBlocks;
       }
     }
 
@@ -349,20 +402,16 @@ export class DragEventWatcher {
       selections.length === 0 ||
       !containBlock(
         selections.map(selection => selection.blockId),
-        this.widget.anchorBlockId
+        this.widget.anchorBlockId.peek()!
       )
     ) {
-      const block = this.widget.anchorBlockComponent;
+      const block = this.widget.anchorBlockComponent.peek();
       if (block) {
-        this.widget.setSelectedBlocks([block]);
+        this.widget.selectionHelper.setSelectedBlocks([block]);
       }
     }
 
-    const blocks = this.widget.selectedBlocks
-      .map(selection => {
-        return this.widget.std.view.getBlock(selection.blockId);
-      })
-      .filter((element): element is BlockComponent<BlockModel> => !!element);
+    const blocks = this.widget.selectionHelper.selectedBlockComponents;
 
     // This could be skip if we can ensure that all selected blocks are on the same level
     // Which means not selecting parent block and child block at the same time

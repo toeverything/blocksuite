@@ -13,7 +13,6 @@ import { css, html, LitElement, type PropertyValues } from 'lit';
 import { property, query, state } from 'lit/decorators.js';
 
 import { SettingsIcon, SmallFrameNavigatorIcon } from '../../_common/icons.js';
-import './frames-setting-menu.js';
 
 const styles = css`
   :host {

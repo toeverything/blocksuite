@@ -389,8 +389,7 @@ export class EdgelessRootService extends RootService implements SurfaceContext {
 
   getFitToScreenData(
     padding: [number, number, number, number] = [0, 0, 0, 0],
-    inputBounds?: Bound[],
-    maxZoom = ZOOM_INITIAL
+    inputBounds?: Bound[]
   ) {
     let bounds = [];
     if (inputBounds && inputBounds.length) {
@@ -406,26 +405,14 @@ export class EdgelessRootService extends RootService implements SurfaceContext {
       }
     }
 
-    const [pt, pr, pb, pl] = padding;
     const bound = getCommonBound(bounds);
-    let { centerX, centerY, zoom } = this.viewport;
 
-    if (!bound) {
-      return { zoom, centerX, centerY };
-    }
-
-    const { width, height } = this.viewport;
-
-    zoom = Math.min(
-      (width - FIT_TO_SCREEN_PADDING - (pr + pl)) / bound.w,
-      (height - FIT_TO_SCREEN_PADDING - (pt + pb)) / bound.h
+    return this.viewport.getFitToScreenData(
+      bound,
+      padding,
+      ZOOM_INITIAL,
+      FIT_TO_SCREEN_PADDING
     );
-    zoom = clamp(zoom, ZOOM_MIN, clamp(maxZoom, ZOOM_MIN, ZOOM_MAX));
-
-    centerX = bound.x + (bound.w + pr / zoom) / 2 - pl / zoom / 2;
-    centerY = bound.y + (bound.h + pb / zoom) / 2 - pt / zoom / 2;
-
-    return { zoom, centerX, centerY };
   }
 
   override mounted() {

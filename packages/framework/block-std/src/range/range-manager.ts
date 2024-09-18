@@ -1,8 +1,7 @@
-import type { TextSelection } from '@blocksuite/block-std';
-
 import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 import { INLINE_ROOT_ATTR, type InlineRootElement } from '@blocksuite/inline';
 
+import type { TextSelection } from '../selection/index.js';
 import type { BlockComponent } from '../view/element/block-component.js';
 
 import { LifeCycleWatcher } from '../extension/index.js';

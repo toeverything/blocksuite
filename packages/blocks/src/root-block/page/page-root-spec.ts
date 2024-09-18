@@ -2,6 +2,7 @@ import {
   DocModeService,
   EmbedOptionService,
 } from '@blocksuite/affine-shared/services';
+import { AFFINE_SCROLL_ANCHORING_WIDGET } from '@blocksuite/affine-widget-scroll-anchoring';
 import {
   BlockViewExtension,
   CommandExtension,
@@ -52,6 +53,7 @@ export const pageRootWidgetViewMap = {
   [AFFINE_VIEWPORT_OVERLAY_WIDGET]: literal`${unsafeStatic(
     AFFINE_VIEWPORT_OVERLAY_WIDGET
   )}`,
+  [AFFINE_SCROLL_ANCHORING_WIDGET]: literal`${unsafeStatic(AFFINE_SCROLL_ANCHORING_WIDGET)}`,
 };
 
 export const PageRootBlockSpec: ExtensionType[] = [

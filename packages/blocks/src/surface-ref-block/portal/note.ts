@@ -7,6 +7,7 @@ import {
   NoteShadow,
 } from '@blocksuite/affine-model';
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
+import { SpecProvider } from '@blocksuite/affine-shared/utils';
 import {
   BlockStdScope,
   type EditorHost,
@@ -24,7 +25,6 @@ import {
   EDGELESS_BLOCK_CHILD_BORDER_WIDTH,
   EDGELESS_BLOCK_CHILD_PADDING,
 } from '../../_common/consts.js';
-import { SpecProvider } from '../../_specs/utils/spec-provider.js';
 
 export class SurfaceRefNotePortal extends WithDisposable(ShadowlessElement) {
   static override styles = css`

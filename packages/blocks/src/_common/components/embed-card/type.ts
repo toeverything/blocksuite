@@ -9,13 +9,16 @@ import type {
 } from '@blocksuite/affine-model';
 import type { BlockComponent } from '@blocksuite/block-std';
 
+import {
+  EmbedFigmaBlockComponent,
+  EmbedGithubBlockComponent,
+  EmbedLinkedDocBlockComponent,
+  EmbedLoomBlockComponent,
+  EmbedSyncedDocBlockComponent,
+  EmbedYoutubeBlockComponent,
+} from '@blocksuite/affine-block-embed';
+
 import { BookmarkBlockComponent } from '../../../bookmark-block/bookmark-block.js';
-import { EmbedFigmaBlockComponent } from '../../../embed-figma-block/embed-figma-block.js';
-import { EmbedGithubBlockComponent } from '../../../embed-github-block/embed-github-block.js';
-import { EmbedLinkedDocBlockComponent } from '../../../embed-linked-doc-block/embed-linked-doc-block.js';
-import { EmbedLoomBlockComponent } from '../../../embed-loom-block/embed-loom-block.js';
-import { EmbedSyncedDocBlockComponent } from '../../../embed-synced-doc-block/embed-synced-doc-block.js';
-import { EmbedYoutubeBlockComponent } from '../../../embed-youtube-block/embed-youtube-block.js';
 
 export type EmbedToolbarBlockComponent =
   | BookmarkBlockComponent

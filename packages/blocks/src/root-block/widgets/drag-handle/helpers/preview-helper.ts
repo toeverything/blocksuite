@@ -1,3 +1,4 @@
+import { SpecProvider } from '@blocksuite/affine-shared/utils';
 import {
   type BlockComponent,
   BlockStdScope,
@@ -8,7 +9,6 @@ import { BlockViewType, type Query } from '@blocksuite/store';
 
 import type { AffineDragHandleWidget } from '../drag-handle.js';
 
-import { SpecProvider } from '../../../../_specs/utils/spec-provider.js';
 import { DragPreview } from '../components/drag-preview.js';
 
 export class PreviewHelper {
@@ -99,10 +99,8 @@ export class PreviewHelper {
       dragPreview.onRemove = () => {
         this.widget.doc.blockCollection.clearQuery(query);
       };
-      dragPreview.style.width = `${width / this.widget.scale / this.widget.noteScale}px`;
-      dragPreview.style.transform = `translate(${posX}px, ${posY}px) scale(${
-        this.widget.scale * this.widget.noteScale
-      })`;
+      dragPreview.style.width = `${width / this.widget.scaleInNote.peek()}px`;
+      dragPreview.style.transform = `translate(${posX}px, ${posY}px) scale(${this.widget.scaleInNote.peek()})`;
 
       dragPreview.style.opacity = altKey ? '1' : '0.5';
     }

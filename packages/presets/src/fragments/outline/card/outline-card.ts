@@ -17,7 +17,6 @@ import { classMap } from 'lit/directives/class-map.js';
 import type { SelectEvent } from '../utils/custom-events.js';
 
 import { HiddenIcon, SmallArrowDownIcon } from '../../_common/icons.js';
-import './outline-preview.js';
 
 const styles = css`
   :host {

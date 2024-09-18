@@ -20,8 +20,6 @@ import { property } from 'lit/decorators.js';
 import { keyed } from 'lit/directives/keyed.js';
 import { when } from 'lit/directives/when.js';
 
-import '../fragments/doc-title/doc-title.js';
-
 export class AffineEditorContainer
   extends SignalWatcher(WithDisposable(ShadowlessElement))
   implements AbstractEditor

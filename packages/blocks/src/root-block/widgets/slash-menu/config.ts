@@ -5,6 +5,12 @@ import type {
 import type { BlockModel } from '@blocksuite/store';
 import type { TemplateResult } from 'lit';
 
+import {
+  FigmaIcon,
+  GithubIcon,
+  LoomIcon,
+  YoutubeIcon,
+} from '@blocksuite/affine-block-embed';
 import { CanvasElementType } from '@blocksuite/affine-block-surface';
 import {
   ArrowDownBigIcon,
@@ -50,10 +56,6 @@ import type { AffineLinkedDocWidget } from '../linked-doc/index.js';
 import { toggleEmbedCardCreateModal } from '../../../_common/components/embed-card/modal/embed-card-create-modal.js';
 import { textConversionConfigs } from '../../../_common/configs/text-conversion.js';
 import { addSiblingAttachmentBlocks } from '../../../attachment-block/utils.js';
-import { FigmaIcon } from '../../../embed-figma-block/styles.js';
-import { GithubIcon } from '../../../embed-github-block/styles.js';
-import { LoomIcon } from '../../../embed-loom-block/styles.js';
-import { YoutubeIcon } from '../../../embed-youtube-block/styles.js';
 import { addSiblingImageBlock } from '../../../image-block/utils.js';
 import { LatexBlockComponent } from '../../../latex-block/latex-block.js';
 import { onModelTextUpdated } from '../../../root-block/utils/index.js';

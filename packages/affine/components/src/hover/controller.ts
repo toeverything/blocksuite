@@ -1,13 +1,13 @@
 import type { ReactiveController, ReactiveElement } from 'lit';
 
-import {
-  type AdvancedPortalOptions,
-  createLitPortal,
-} from '@blocksuite/affine-components/portal';
 import { DisposableGroup } from '@blocksuite/global/utils';
 
 import type { HoverOptions } from './types.js';
 
+import {
+  type AdvancedPortalOptions,
+  createLitPortal,
+} from '../portal/index.js';
 import { whenHover } from './when-hover.js';
 
 type OptionsParams = Omit<

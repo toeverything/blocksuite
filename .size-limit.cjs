@@ -23,8 +23,6 @@ function getFoldersWithPackageJson(dir) {
   return folders;
 }
 
-const packagejson = require('./package.json');
-
 const folders = getFoldersWithPackageJson(entry)
   .map(p => {
     const packageJson = path.join(p, 'package.json');
@@ -34,74 +32,33 @@ const folders = getFoldersWithPackageJson(entry)
   .filter(data => {
     return !data.json.private;
   })
-  .map(data => ({
-    name: data.json.name,
-    path: [path.join(data.path, 'src', '!(__tests__)', '**', '*.ts')],
-    ignore: Object.keys({
-      ...packagejson.dependencies,
-      ...packagejson.devDependencies,
+  .filter(data => {
+    // We only want to include packages that need to be installed by the user
+    return [
+      '@blocksuite/blocks',
+      '@blocksuite/presets',
+      '@blocksuite/inline',
+      '@blocksuite/block-std',
+      '@blocksuite/global',
+      '@blocksuite/store',
+    ].includes(data.json.name);
+  })
+  .flatMap(data => {
+    const pathList = Object.entries(data.json.exports).map(([key, p]) => {
+      return {
+        path: path.join(data.path, p),
+        subpath: key,
+      };
+    });
+    const ignore = Object.keys({
       ...data.json.dependencies,
       ...data.json.devDependencies,
-    }),
-  }));
+    });
+    return pathList.map(p => ({
+      name: path.join(data.json.name, p.subpath),
+      path: p.path,
+      ignore,
+    }));
+  });
 
 module.exports = folders;
-
-// module.exports = [
-//   {
-//     name: '@blocksuite/global',
-//     path: 'packages/framework/global/dist',
-//   },
-//   {
-//     name: '@blocksuite/store',
-//     path: 'packages/framework/store/dist',
-//   },
-//   {
-//     name: '@blocksuite/block-std',
-//     path: 'packages/framework/block-std/dist',
-//   },
-//   {
-//     name: '@blocksuite/inline',
-//     path: 'packages/framework/inline/dist',
-//   },
-//   {
-//     name: '@blocksuite/sync',
-//     path: 'packages/framework/sync/dist',
-//   },
-//   {
-//     name: '@blocksuite/affine-shared',
-//     path: 'packages/affine/shared/dist',
-//   },
-//   {
-//     name: '@blocksuite/affine-model',
-//     path: 'packages/affine/model/dist',
-//   },
-//   {
-//     name: '@blocksuite/affine-components',
-//     path: 'packages/affine/components/dist',
-//   },
-//   {
-//     name: '@blocksuite/affine-block-list',
-//     path: 'packages/affine/block-list/dist',
-//   },
-//   {
-//     name: '@blocksuite/affine-block-paragraph',
-//     path: 'packages/affine/block-paragraph/dist',
-//   },
-//   {
-//     name: '@blocksuite/affine-block-surface',
-//     path: 'packages/affine/block-surface/dist',
-//   },
-//   {
-//     name: '@blocksuite/data-view',
-//     path: 'packages/affine/data-view/dist',
-//   },
-//   {
-//     name: '@blocksuite/blocks',
-//     path: 'packages/presets/dist',
-//   },
-//   {
-//     name: '@blocksuite/presets',
-//     path: 'packages/presets/dist',
-//   },
-// ];

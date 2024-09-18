@@ -62,6 +62,7 @@ jobs:
         with:
           commit: master
           tag: '${{ env.BLOCKSUITE_RELEASE_TAG }}'
+          body: 'Please refer to [CHANGELOG.md](https://github.com/toeverything/blocksuite/blob/${{ env.BLOCKSUITE_RELEASE_TAG }}/packages/blocks/CHANGELOG.md) for details.'
           token: ${{ secrets.GITHUB_TOKEN }}
         continue-on-error: true
 

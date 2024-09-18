@@ -8,7 +8,7 @@ import {
 import { literal } from 'lit/static-html.js';
 
 import { commands } from './commands/index.js';
-import { ImageBlockService } from './image-service.js';
+import { ImageBlockService, ImageDragHandleOption } from './image-service.js';
 
 export const ImageBlockSpec: ExtensionType[] = [
   FlavourExtension('affine:image'),
@@ -26,4 +26,5 @@ export const ImageBlockSpec: ExtensionType[] = [
   WidgetViewMapExtension('affine:image', {
     imageToolbar: literal`affine-image-toolbar-widget`,
   }),
+  ImageDragHandleOption,
 ];

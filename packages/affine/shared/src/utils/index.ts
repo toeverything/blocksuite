@@ -1,5 +1,5 @@
-// Compat with SSR
 export * from './button-popper.js';
+export * from './dnd/index.js';
 export * from './dom/index.js';
 export * from './event.js';
 export * from './file/index.js';
@@ -10,6 +10,7 @@ export * from './model/index.js';
 export * from './print-to-pdf.js';
 export * from './reordering.js';
 export * from './signal.js';
+export * from './spec/index.js';
 export * from './string.js';
 export * from './title.js';
 export * from './url.js';

@@ -6,7 +6,6 @@ import { html } from 'lit';
 import type { AIChatBlockModel } from './ai-chat-model.js';
 
 import { ChatWithAIIcon } from '../_common/icon.js';
-import './components/ai-chat-messages.js';
 import { AIChatBlockStyles } from './styles.js';
 import { ChatMessagesSchema } from './types.js';
 
