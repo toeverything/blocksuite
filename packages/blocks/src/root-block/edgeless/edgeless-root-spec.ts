@@ -2,6 +2,7 @@ import {
   DocModeService,
   EmbedOptionService,
 } from '@blocksuite/affine-shared/services';
+import { AFFINE_SCROLL_ANCHORING_WIDGET } from '@blocksuite/affine-widget-scroll-anchoring';
 import {
   BlockViewExtension,
   CommandExtension,
@@ -64,6 +65,7 @@ export const edgelessRootWigetViewMap = {
   [AFFINE_EDGELESS_AUTO_CONNECT_WIDGET]: literal`${unsafeStatic(
     AFFINE_EDGELESS_AUTO_CONNECT_WIDGET
   )}`,
+  [AFFINE_SCROLL_ANCHORING_WIDGET]: literal`${unsafeStatic(AFFINE_SCROLL_ANCHORING_WIDGET)}`,
 };
 
 const EdgelessCommonExtension: ExtensionType[] = [

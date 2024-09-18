@@ -158,6 +158,34 @@ export class Viewport {
     this.viewportUpdated.dispose();
   }
 
+  getFitToScreenData(
+    bounds?: Bound | null,
+    padding: [number, number, number, number] = [0, 0, 0, 0],
+    maxZoom = ZOOM_MAX,
+    fitToScreenPadding = 100
+  ) {
+    let { centerX, centerY, zoom } = this;
+
+    if (!bounds) {
+      return { zoom, centerX, centerY };
+    }
+
+    const { x, y, w, h } = bounds;
+    const [pt, pr, pb, pl] = padding;
+    const { width, height } = this;
+
+    zoom = Math.min(
+      (width - fitToScreenPadding - (pr + pl)) / w,
+      (height - fitToScreenPadding - (pt + pb)) / h
+    );
+    zoom = clamp(zoom, ZOOM_MIN, clamp(maxZoom, ZOOM_MIN, ZOOM_MAX));
+
+    centerX = x + (w + pr / zoom) / 2 - pl / zoom / 2;
+    centerY = y + (h + pb / zoom) / 2 - pt / zoom / 2;
+
+    return { zoom, centerX, centerY };
+  }
+
   isInViewport(bound: Bound) {
     const viewportBounds = Bound.from(this.viewportBounds);
     return (

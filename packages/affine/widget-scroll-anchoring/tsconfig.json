@@ -1,0 +1,23 @@
+{
+  "extends": "../../../tsconfig.json",
+  "compilerOptions": {
+    "rootDir": "./src/",
+    "outDir": "./dist/",
+    "noEmit": false
+  },
+  "include": ["./src"],
+  "references": [
+    {
+      "path": "../../framework/global"
+    },
+    {
+      "path": "../../framework/block-std"
+    },
+    {
+      "path": "../model"
+    },
+    {
+      "path": "../shared"
+    }
+  ]
+}

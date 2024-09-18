@@ -63,12 +63,8 @@ export class TextSelection extends BaseSelection {
   }
 
   static override fromJSON(json: Record<string, unknown>): TextSelection {
-    TextSelectionSchema.parse(json);
-    return new TextSelection({
-      from: json.from as TextRangePoint,
-      to: json.to as TextRangePoint | null,
-      reverse: !!json.reverse,
-    });
+    const result = TextSelectionSchema.parse(json);
+    return new TextSelection(result);
   }
 
   private _equalPoint(

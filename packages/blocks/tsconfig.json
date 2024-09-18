@@ -42,6 +42,9 @@
     },
     {
       "path": "../affine/block-surface"
+    },
+    {
+      "path": "../affine/widget-scroll-anchoring"
     }
   ]
 }

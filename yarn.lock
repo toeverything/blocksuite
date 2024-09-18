@@ -1804,6 +1804,20 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@blocksuite/affine-widget-scroll-anchoring@workspace:*, @blocksuite/affine-widget-scroll-anchoring@workspace:packages/affine/widget-scroll-anchoring":
+  version: 0.0.0-use.local
+  resolution: "@blocksuite/affine-widget-scroll-anchoring@workspace:packages/affine/widget-scroll-anchoring"
+  dependencies:
+    "@blocksuite/affine-model": "workspace:*"
+    "@blocksuite/affine-shared": "workspace:*"
+    "@blocksuite/block-std": "workspace:*"
+    "@blocksuite/global": "workspace:*"
+    "@preact/signals-core": "npm:^1.8.0"
+    "@toeverything/theme": "npm:^1.0.8"
+    lit: "npm:^3.2.0"
+  languageName: unknown
+  linkType: soft
+
 "@blocksuite/block-std@workspace:*, @blocksuite/block-std@workspace:packages/framework/block-std":
   version: 0.0.0-use.local
   resolution: "@blocksuite/block-std@workspace:packages/framework/block-std"
@@ -1836,6 +1850,7 @@ __metadata:
     "@blocksuite/affine-components": "workspace:*"
     "@blocksuite/affine-model": "workspace:*"
     "@blocksuite/affine-shared": "workspace:*"
+    "@blocksuite/affine-widget-scroll-anchoring": "workspace:*"
     "@blocksuite/block-std": "workspace:*"
     "@blocksuite/data-view": "workspace:*"
     "@blocksuite/global": "workspace:*"

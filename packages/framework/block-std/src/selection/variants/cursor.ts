@@ -23,15 +23,14 @@ export class CursorSelection extends BaseSelection {
   }
 
   static override fromJSON(json: Record<string, unknown>): CursorSelection {
-    CursorSelectionSchema.parse(json);
-    return new CursorSelection(json.x as number, json.y as number);
+    const { x, y } = CursorSelectionSchema.parse(json);
+    return new CursorSelection(x, y);
   }
 
   override equals(other: BaseSelection): boolean {
     if (other instanceof CursorSelection) {
       return this.x === other.x && this.y === other.y;
     }
-
     return false;
   }
 
