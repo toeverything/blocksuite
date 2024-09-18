@@ -1,5 +1,6 @@
-import type { ImageSelection } from '@blocksuite/affine-shared/selection';
 import type { Command } from '@blocksuite/block-std';
+
+import type { ImageSelection } from '../../selection/index.js';
 
 export const getImageSelectionsCommand: Command<
   never,

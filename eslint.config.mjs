@@ -12,6 +12,7 @@ import fs from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import eslintPluginImportX from 'eslint-plugin-import-x';
 import eslintConfigPrettier from 'eslint-config-prettier';
+import { createRequire } from 'node:module';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -21,10 +22,22 @@ const compat = new FlatCompat({
   allConfig: js.configs.all,
 });
 
+const require = createRequire(import.meta.url);
+
 const createNoRestrictedImports = packagePath => {
+  const dir = path.resolve(__dirname, packagePath);
+  const packageJson = require(path.join(dir, 'package.json'));
+  const packageName = packageJson.name;
   return {
-    files: [`packages/${packagePath}/src/**/*.ts`],
+    files: [`${packagePath}/src/**/*.ts`],
     rules: {
+      'import-x/no-extraneous-dependencies': [
+        'error',
+        {
+          whitelist: ['vitest', '@playwright/test'],
+          includeTypes: true,
+        },
+      ],
       '@typescript-eslint/no-restricted-imports': [
         'error',
         {
@@ -46,7 +59,7 @@ const createNoRestrictedImports = packagePath => {
               allowTypeImports: false,
             },
             {
-              group: [`@blocksuite/${packagePath}`],
+              group: [packageName],
               message: 'Do not import package itself',
               allowTypeImports: false,
             },
@@ -108,6 +121,13 @@ export default [
     plugins: {
       unicorn,
       'import-x': eslintPluginImportX,
+    },
+
+    settings: {
+      'import-x/resolver': {
+        typescript: true,
+        node: true,
+      },
     },
 
     languageOptions: {
