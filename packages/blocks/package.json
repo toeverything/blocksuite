@@ -69,7 +69,6 @@
     "zod": "^3.23.8"
   },
   "exports": {
-    "./dist/*": "./dist/*",
     ".": "./src/index.ts",
     "./schemas": "./src/schemas.ts",
     "./effects": "./src/effects.ts"
@@ -79,8 +78,6 @@
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
     "exports": {
-      "./dist/*": "./dist/*",
-      "./src/*": "./dist/*.js",
       ".": {
         "types": "./dist/index.d.ts",
         "import": "./dist/index.js"

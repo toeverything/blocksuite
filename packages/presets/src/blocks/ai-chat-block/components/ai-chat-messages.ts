@@ -9,8 +9,6 @@ import { repeat } from 'lit/directives/repeat.js';
 import type { ChatMessage, MessageRole, MessageUserInfo } from '../types.js';
 import type { TextRendererOptions } from './text-renderer.js';
 
-import './chat-images.js';
-import './text-renderer.js';
 import { UserInfoTemplate } from './user-info.js';
 
 export class AIChatMessage extends LitElement {

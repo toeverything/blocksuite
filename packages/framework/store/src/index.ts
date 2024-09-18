@@ -22,8 +22,6 @@ export { Slot } from '@blocksuite/global/utils';
 
 import type * as Y from 'yjs';
 
-import './utils/formatter.js';
-
 const env =
   typeof globalThis !== 'undefined'
     ? globalThis

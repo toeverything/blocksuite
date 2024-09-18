@@ -5,10 +5,7 @@ import { property, state } from 'lit/decorators.js';
 
 import type { AffineEditorContainer } from '../../editors/editor-container.js';
 
-import './body/outline-notice.js';
-import './body/outline-panel-body.js';
 import { type OutlineSettingsDataType, outlineSettingsKey } from './config.js';
-import './header/outline-panel-header.js';
 
 const styles = css`
   :host {
