@@ -114,6 +114,9 @@ export class InlineEditor<
   waitForUpdate = this.renderService.waitForUpdate;
   rerenderWholeEditor = this.renderService.rerenderWholeEditor;
   render = this.renderService.render;
+  get rendering() {
+    return this.renderService.rendering;
+  }
 
   readonly hooksService: InlineHookService<TextAttributes>;
   get hooks() {

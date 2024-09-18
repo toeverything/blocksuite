@@ -770,17 +770,17 @@ test('select from the start of line using shift+arrow', async ({ page }) => {
   await assertSelection(page, 0, 0, 8);
 
   /**
-   * a|bc
+   * |abc
    * def
-   * |ghi
+   * g|hi
    */
   await press(page, 'ArrowRight');
-  await assertSelection(page, 0, 1, 7);
+  await assertSelection(page, 0, 0, 9);
   await press(page, 'Backspace');
   await page.waitForTimeout(100);
 
-  expect(await editorA.innerText()).toBe('aghi');
-  expect(await editorB.innerText()).toBe('aghi');
+  expect(await editorA.innerText()).toBe('hi');
+  expect(await editorB.innerText()).toBe('hi');
 });
 
 test('getLine', async ({ page }) => {

@@ -211,12 +211,21 @@ export class RichText extends WithDisposable(ShadowlessElement) {
         inlineEditor
           .waitForUpdate()
           .then(() => {
-            if (!inlineEditor.mounted) return;
+            if (!inlineEditor.mounted || inlineEditor.rendering) return;
 
             const range = inlineEditor.toDomRange(inlineRange);
             if (!range) return;
 
             if (verticalScrollContainer) {
+              const nativeRange = inlineEditor.getNativeRange();
+              if (
+                !nativeRange ||
+                nativeRange.commonAncestorContainer.parentElement?.contains(
+                  inlineEditor.rootElement
+                )
+              )
+                return;
+
               const containerRect =
                 verticalScrollContainer.getBoundingClientRect();
               const rangeRect = range.getBoundingClientRect();

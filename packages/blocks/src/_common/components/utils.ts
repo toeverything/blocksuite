@@ -19,18 +19,10 @@ export function getQuery(
     return null;
   }
   if (nativeRange.startContainer !== nativeRange.endContainer) {
-    console.warn(
-      'Failed to parse query! Current range is not collapsed.',
-      nativeRange
-    );
     return null;
   }
   const textNode = nativeRange.startContainer;
   if (textNode.nodeType !== Node.TEXT_NODE) {
-    console.warn(
-      'Failed to parse query! Current range is not a text node.',
-      nativeRange
-    );
     return null;
   }
   const curRange = inlineEditor.getInlineRange();

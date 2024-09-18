@@ -132,7 +132,9 @@ export class LinkedDocPopover extends WithDisposable(LitElement) {
       },
       onPaste: () => {
         this._activatedItemIndex = 0;
-        this.inlineEditor.slots.renderComplete.once(this._updateLinkedDocGroup);
+        setTimeout(() => {
+          this._updateLinkedDocGroup().catch(console.error);
+        }, 50);
       },
       onDelete: () => {
         const curRange = this.inlineEditor.getInlineRange();
