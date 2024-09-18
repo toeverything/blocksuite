@@ -127,5 +127,8 @@
     "isarray": "npm:@nolyfill/isarray@^1",
     "set-function-length": "npm:@nolyfill/set-function-length@^1",
     "side-channel": "npm:@nolyfill/side-channel@^1"
+  },
+  "dependencies": {
+    "@size-limit/esbuild-why": "^11.1.5"
   }
 }

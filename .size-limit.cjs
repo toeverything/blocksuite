@@ -23,8 +23,6 @@ function getFoldersWithPackageJson(dir) {
   return folders;
 }
 
-const packagejson = require('./package.json');
-
 const folders = getFoldersWithPackageJson(entry)
   .map(p => {
     const packageJson = path.join(p, 'package.json');
@@ -34,22 +32,33 @@ const folders = getFoldersWithPackageJson(entry)
   .filter(data => {
     return !data.json.private;
   })
-  .map(data => {
-    const packageJson = path.join(data.path, 'package.json');
-    const json = require(packageJson);
-    const pathList = Object.values(json.exports).map(p =>
-      path.join(data.path, p)
-    );
-    return {
-      name: data.json.name,
-      path: pathList,
-      ignore: Object.keys({
-        ...packagejson.dependencies,
-        ...packagejson.devDependencies,
-        ...data.json.dependencies,
-        ...data.json.devDependencies,
-      }),
-    };
+  .filter(data => {
+    // We only want to include packages that need to be installed by the user
+    return [
+      '@blocksuite/blocks',
+      '@blocksuite/presets',
+      '@blocksuite/inline',
+      '@blocksuite/block-std',
+      '@blocksuite/global',
+      '@blocksuite/store',
+    ].includes(data.json.name);
+  })
+  .flatMap(data => {
+    const pathList = Object.entries(data.json.exports).map(([key, p]) => {
+      return {
+        path: path.join(data.path, p),
+        subpath: key,
+      };
+    });
+    const ignore = Object.keys({
+      ...data.json.dependencies,
+      ...data.json.devDependencies,
+    });
+    return pathList.map(p => ({
+      name: path.join(data.json.name, p.subpath),
+      path: p.path,
+      ignore,
+    }));
   });
 
 module.exports = folders;
