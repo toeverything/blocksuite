@@ -161,7 +161,7 @@ export class InlineEditor<
     this.inlineRangeProvider.setInlineRange(inlineRange);
   };
   getInlineRange = () => {
-    return this.inlineRange$.value;
+    return this.inlineRange$.peek();
   };
 
   readonly slots = {

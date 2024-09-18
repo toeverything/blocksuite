@@ -1,5 +1,5 @@
 import type { InlineEditor } from '../inline-editor.js';
-import type { InlineRange, NativePoint } from '../types.js';
+import type { InlineRange } from '../types.js';
 import type { BeforeinputHookCtx, CompositionEndHookCtx } from './hook.js';
 
 import {
@@ -307,32 +307,13 @@ export class EventService<TextAttributes extends BaseTextAttributes> {
       }
     }
 
-    this._previousAnchor = [range.startContainer, range.startOffset];
-    this._previousFocus = [range.endContainer, range.endOffset];
-
     const inlineRange = this.editor.toInlineRange(selection.getRangeAt(0));
     if (!isMaybeInlineRangeEqual(previousInlineRange, inlineRange)) {
+      this.editor.rangeService.lockSyncInlineRange();
       this.editor.setInlineRange(inlineRange);
-    }
-
-    // avoid infinite syncInlineRange
-    if (
-      ((range.startContainer.nodeType !== Node.TEXT_NODE ||
-        range.endContainer.nodeType !== Node.TEXT_NODE) &&
-        range.startContainer !== this._previousAnchor[0] &&
-        range.endContainer !== this._previousFocus[0] &&
-        range.startOffset !== this._previousAnchor[1] &&
-        range.endOffset !== this._previousFocus[1]) ||
-      range.startContainer.nodeType === Node.COMMENT_NODE ||
-      range.endContainer.nodeType === Node.COMMENT_NODE
-    ) {
-      this.editor.syncInlineRange(inlineRange);
+      this.editor.rangeService.unlockSyncInlineRange();
     }
   };
-
-  private _previousAnchor: NativePoint | null = null;
-
-  private _previousFocus: NativePoint | null = null;
 
   mount = () => {
     const eventSource = this.editor.eventSource;

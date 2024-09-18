@@ -1,3 +1,5 @@
+/* eslint-disable perfectionist/sort-classes */
+/* eslint-disable @stylistic/ts/lines-between-class-members */
 import { assertExists } from '@blocksuite/global/utils';
 import { effect } from '@lit-labs/preact-signals';
 import * as Y from 'yjs';
@@ -263,14 +265,21 @@ export class RangeService<TextAttributes extends BaseTextAttributes> {
     });
   };
 
+  private _syncInlineRangeLock = false;
+  lockSyncInlineRange = () => {
+    this._syncInlineRangeLock = true;
+  };
+  unlockSyncInlineRange = () => {
+    this._syncInlineRangeLock = false;
+  };
   /**
    * sync the dom selection from inline range for **this Editor**
    */
   syncInlineRange = (inlineRange?: InlineRange | null) => {
-    if (!this.editor.mounted) return;
+    if (!this.editor.mounted || this._syncInlineRangeLock) return;
+    inlineRange = inlineRange ?? this.editor.getInlineRange();
 
     const handler = () => {
-      inlineRange = inlineRange ?? this.editor.getInlineRange();
       const selection = document.getSelection();
       if (!selection) return;
 
