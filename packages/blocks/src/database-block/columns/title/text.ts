@@ -12,7 +12,7 @@ import {
 import { BaseCellRenderer } from '@blocksuite/data-view';
 import { IS_MAC } from '@blocksuite/global/env';
 import { assertExists } from '@blocksuite/global/utils';
-import { effect } from '@lit-labs/preact-signals';
+import { effect } from '@preact/signals-core';
 import { css } from 'lit';
 import { property, query } from 'lit/decorators.js';
 import { html } from 'lit/static-html.js';

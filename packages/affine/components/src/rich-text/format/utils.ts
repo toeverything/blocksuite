@@ -13,7 +13,7 @@ import {
   type InlineRange,
   type InlineRootElement,
 } from '@blocksuite/inline';
-import { effect } from '@lit-labs/preact-signals';
+import { effect } from '@preact/signals-core';
 
 import type { AffineTextAttributes } from '../extension/index.js';
 import type { AffineInlineEditor } from '../inline/index.js';

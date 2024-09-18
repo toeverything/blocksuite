@@ -13,7 +13,7 @@ import {
   type VLine,
 } from '@blocksuite/inline';
 import { DocCollection, Text } from '@blocksuite/store';
-import { effect } from '@lit-labs/preact-signals';
+import { effect } from '@preact/signals-core';
 import { css, html, type TemplateResult } from 'lit';
 import { property, query } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';

@@ -4,7 +4,7 @@ import {
   type InlineRange,
   type InlineRangeProvider,
 } from '@blocksuite/inline';
-import { signal } from '@lit-labs/preact-signals';
+import { signal } from '@preact/signals-core';
 
 import type { TextSelection } from '../selection/index.js';
 import type { BlockComponent } from '../view/element/block-component.js';

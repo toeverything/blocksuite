@@ -2004,7 +2004,7 @@ __metadata:
     "@blocksuite/presets": "workspace:*"
     "@blocksuite/store": "workspace:*"
     "@blocksuite/sync": "workspace:*"
-    "@lit-labs/preact-signals": "npm:^1.0.2"
+    "@preact/signals-core": "npm:^1.8.0"
     "@shoelace-style/shoelace": "npm:2.16.0"
     "@toeverything/y-indexeddb": "npm:0.10.0-canary.9"
     "@tweakpane/core": "npm:^2.0.4"
