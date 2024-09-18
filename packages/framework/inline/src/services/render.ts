@@ -12,7 +12,6 @@ import type { InlineRange } from '../types.js';
 import type { BaseTextAttributes } from '../utils/base-attributes.js';
 
 import { deltaInsertsToChunks } from '../utils/delta-convert.js';
-import { isInlineRangeIntersect } from '../utils/inline-range.js';
 
 export class RenderService<TextAttributes extends BaseTextAttributes> {
   private _onYTextChange = (_: Y.YTextEvent, transaction: Y.Transaction) => {
@@ -100,17 +99,9 @@ export class RenderService<TextAttributes extends BaseTextAttributes> {
           deltaIndex += delta.insert.length;
           const endOffset = deltaIndex;
 
-          const inlineRange = this.editor.getInlineRange();
-          const selected =
-            !!inlineRange &&
-            isInlineRangeIntersect(inlineRange, {
-              index: startOffset,
-              length: endOffset - startOffset,
-            });
-
           return [
             html`<v-element
-              .selected=${selected}
+              .inlineEditor=${this.editor}
               .delta=${{
                 insert: delta.insert,
                 attributes: this.editor.attributeService.normalizeAttributes(
