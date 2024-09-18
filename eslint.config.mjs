@@ -138,6 +138,10 @@ export default [
       'perfectionist/sort-sets': 'off',
 
       'import-x/no-duplicates': 'error',
+      'import-x/no-relative-packages': 'error',
+      'import-x/no-useless-path-segments': 'error',
+      'import-x/no-self-import': 'error',
+
       'perfectionist/sort-named-imports': 'error',
       'perfectionist/sort-named-exports': 'error',
       'perfectionist/sort-classes': [
@@ -162,6 +166,14 @@ export default [
           ],
         },
       ],
+    },
+  },
+  {
+    files: ['packages/**/src/**/*.ts'],
+    ignores: ['**/__tests__/**/*'],
+    rules: {
+      'import-x/no-extraneous-dependencies': 'error',
+      'import-x/no-nodejs-modules': 'error',
     },
   },
   {

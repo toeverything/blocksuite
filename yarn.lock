@@ -1661,11 +1661,13 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@blocksuite/affine-block-embed@workspace:packages/affine/block-embed"
   dependencies:
+    "@blocksuite/affine-block-surface": "workspace:*"
     "@blocksuite/affine-components": "workspace:*"
     "@blocksuite/affine-model": "workspace:*"
     "@blocksuite/affine-shared": "workspace:*"
     "@blocksuite/block-std": "workspace:*"
     "@blocksuite/global": "workspace:*"
+    "@blocksuite/icons": "npm:^2.1.67"
     "@blocksuite/inline": "workspace:*"
     "@blocksuite/store": "workspace:*"
     "@floating-ui/dom": "npm:^1.6.10"
@@ -1729,6 +1731,7 @@ __metadata:
     "@blocksuite/affine-shared": "workspace:*"
     "@blocksuite/block-std": "workspace:*"
     "@blocksuite/global": "workspace:*"
+    "@blocksuite/inline": "workspace:*"
     "@blocksuite/store": "workspace:*"
     "@lit/context": "npm:^1.1.2"
     "@preact/signals-core": "npm:^1.8.0"
@@ -1761,7 +1764,7 @@ __metadata:
     date-fns: "npm:^3.6.0"
     katex: "npm:^0.16.11"
     lit: "npm:^3.2.0"
-    shiki: "npm:^1.12.0"
+    shiki: "npm:^1.14.1"
     zod: "npm:^3.23.8"
   languageName: unknown
   linkType: soft
@@ -1975,8 +1978,12 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@blocksuite/playground@workspace:packages/playground"
   dependencies:
+    "@blocksuite/affine-block-list": "workspace:*"
+    "@blocksuite/affine-block-paragraph": "workspace:*"
+    "@blocksuite/affine-block-surface": "workspace:*"
     "@blocksuite/affine-components": "workspace:*"
     "@blocksuite/affine-model": "workspace:*"
+    "@blocksuite/affine-shared": "workspace:*"
     "@blocksuite/block-std": "workspace:*"
     "@blocksuite/blocks": "workspace:*"
     "@blocksuite/data-view": "workspace:*"
@@ -2062,8 +2069,7 @@ __metadata:
     idb: "npm:^8.0.0"
     idb-keyval: "npm:^6.2.1"
     y-protocols: "npm:^1.0.6"
-  peerDependencies:
-    yjs: ^13.6.15
+    yjs: "npm:^13.6.18"
   languageName: unknown
   linkType: soft
 
@@ -6282,6 +6288,7 @@ __metadata:
     micromatch: "npm:^4.0.7"
     nx: "npm:19.7.3"
     nyc: "npm:^17.0.0"
+    playwright: "npm:^1.47.1"
     prettier: "npm:^3.3.3"
     pretty-bytes: "npm:^6.1.1"
     pretty-format: "npm:^29.7.0"
@@ -12127,7 +12134,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"playwright@npm:1.47.1":
+"playwright@npm:1.47.1, playwright@npm:^1.47.1":
   version: 1.47.1
   resolution: "playwright@npm:1.47.1"
   dependencies:
@@ -13065,7 +13072,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"shiki@npm:1.17.7, shiki@npm:^1.12.0, shiki@npm:^1.13.0, shiki@npm:^1.14.1, shiki@npm:^1.16.2":
+"shiki@npm:1.17.7, shiki@npm:^1.13.0, shiki@npm:^1.14.1, shiki@npm:^1.16.2":
   version: 1.17.7
   resolution: "shiki@npm:1.17.7"
   dependencies:

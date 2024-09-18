@@ -10,6 +10,7 @@ import {
 } from '@blocksuite/affine-components/icons';
 import {
   DefaultInlineManagerExtension,
+  type InlineManager,
   type RichText,
 } from '@blocksuite/affine-components/rich-text';
 import '@blocksuite/affine-components/rich-text';
@@ -66,7 +67,7 @@ export class ListBlockComponent extends CaptionedBlockComponent<
     return this.inlineManager.getRenderer();
   }
 
-  get attributesSchema() {
+  get attributesSchema(): ReturnType<InlineManager['getSchema']> {
     return this.inlineManager.getSchema();
   }
 
@@ -78,7 +79,7 @@ export class ListBlockComponent extends CaptionedBlockComponent<
     return this.std.get(DefaultInlineManagerExtension.identifier);
   }
 
-  get markdownShortcutHandler() {
+  get markdownShortcutHandler(): InlineManager['markdownShortcutHandler'] {
     return this.inlineManager.markdownShortcutHandler;
   }
 
