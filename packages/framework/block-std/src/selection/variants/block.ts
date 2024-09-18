@@ -12,10 +12,8 @@ export class BlockSelection extends BaseSelection {
   static override type = 'block';
 
   static override fromJSON(json: Record<string, unknown>): BlockSelection {
-    BlockSelectionSchema.parse(json);
-    return new BlockSelection({
-      blockId: json.blockId as string,
-    });
+    const result = BlockSelectionSchema.parse(json);
+    return new BlockSelection(result);
   }
 
   override equals(other: BaseSelection): boolean {

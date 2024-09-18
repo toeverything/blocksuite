@@ -24,7 +24,6 @@ import type {
   SelectEvent,
 } from '../card/frame-card.js';
 
-import '../card/frame-card.js';
 import { startDragging } from '../utils/drag.js';
 
 type FrameListItem = {

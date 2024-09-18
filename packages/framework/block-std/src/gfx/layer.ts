@@ -1,6 +1,5 @@
 import type { Doc } from '@blocksuite/store';
 
-import { GfxBlockElementModel } from '@blocksuite/block-std/gfx';
 import {
   assertType,
   Bound,
@@ -10,8 +9,6 @@ import {
   Slot,
 } from '@blocksuite/global/utils';
 import { generateKeyBetween } from 'fractional-indexing';
-
-import type { GfxModel } from './gfx-block-model.js';
 
 import {
   compare,
@@ -24,6 +21,7 @@ import {
   ungroupIndex,
   updateLayersZIndex,
 } from '../utils/layer.js';
+import { GfxBlockElementModel, type GfxModel } from './gfx-block-model.js';
 import {
   type GfxContainerElement,
   GfxPrimitiveElementModel,

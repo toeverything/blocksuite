@@ -1,4 +1,4 @@
-import type { IVec } from '@blocksuite/global/utils';
+import type { IVec } from '../model/index.js';
 
 /**
  * The options object for `getStroke` or `getStrokePoints`.

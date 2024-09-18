@@ -628,9 +628,3 @@ export class LinkPopup extends WithDisposable(LitElement) {
   @property()
   accessor type: 'create' | 'edit' | 'view' = 'create';
 }
-
-declare global {
-  interface HTMLElementTagNameMap {
-    'link-popup': LinkPopup;
-  }
-}

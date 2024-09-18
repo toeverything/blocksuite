@@ -11,17 +11,6 @@ import type {
 } from '@blocksuite/global/utils';
 
 import {
-  type Color,
-  DEFAULT_ROUGHNESS,
-  FontFamily,
-  FontStyle,
-  FontWeight,
-  StrokeStyle,
-  TextAlign,
-  type TextStyleProps,
-  TextVerticalAlign,
-} from '@blocksuite/affine-model';
-import {
   field,
   GfxPrimitiveElementModel,
   local,
@@ -29,12 +18,21 @@ import {
 import { DocCollection, type Y } from '@blocksuite/store';
 
 import {
+  type Color,
+  DEFAULT_ROUGHNESS,
+  FontFamily,
+  FontStyle,
+  FontWeight,
   LineColor,
   ShapeFillColor,
   ShapeStyle,
   ShapeTextFontSize,
   ShapeType,
+  StrokeStyle,
+  TextAlign,
   TextResizing,
+  type TextStyleProps,
+  TextVerticalAlign,
 } from '../../consts/index.js';
 import { shapeMethods } from './api/index.js';
 

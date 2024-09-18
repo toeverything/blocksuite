@@ -1,5 +1,4 @@
-import type { IVec } from '@blocksuite/global/utils';
-
+import type { IVec } from '../model/index.js';
 import type { StrokeOptions, StrokePoint } from './types.js';
 
 import { getStrokeRadius } from './getStrokeRadius.js';

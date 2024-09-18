@@ -79,11 +79,3 @@ export const deleteTextCommand: Command<
 
   next();
 };
-
-declare global {
-  namespace BlockSuite {
-    interface Commands {
-      deleteText: typeof deleteTextCommand;
-    }
-  }
-}

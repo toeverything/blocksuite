@@ -428,9 +428,3 @@ export class RichText extends WithDisposable(ShadowlessElement) {
   @property({ attribute: false })
   accessor yText!: Y.Text | Text;
 }
-
-declare global {
-  interface HTMLElementTagNameMap {
-    'rich-text': RichText;
-  }
-}

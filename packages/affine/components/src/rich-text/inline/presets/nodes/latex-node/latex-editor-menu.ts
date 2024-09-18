@@ -195,9 +195,3 @@ export class LatexEditorMenu extends SignalWatcher(
   @property({ attribute: false })
   accessor std!: BlockStdScope;
 }
-
-declare global {
-  interface HTMLElementTagNameMap {
-    'latex-editor-menu': LatexEditorMenu;
-  }
-}

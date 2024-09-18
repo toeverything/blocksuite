@@ -11,10 +11,8 @@ export class ImageSelection extends BaseSelection {
   static override type = 'image';
 
   static override fromJSON(json: Record<string, unknown>): ImageSelection {
-    ImageSelectionSchema.parse(json);
-    return new ImageSelection({
-      blockId: json.blockId as string,
-    });
+    const result = ImageSelectionSchema.parse(json);
+    return new ImageSelection(result);
   }
 
   override equals(other: BaseSelection): boolean {
