@@ -400,12 +400,6 @@ export class ReferencePopup extends WithDisposable(LitElement) {
   accessor targetInlineRange!: InlineRange;
 }
 
-declare global {
-  interface HTMLElementTagNameMap {
-    'reference-popup': ReferencePopup;
-  }
-}
-
 export function toggleReferencePopup(
   target: LitElement,
   isLinkedNode: boolean,

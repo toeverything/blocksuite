@@ -34,74 +34,22 @@ const folders = getFoldersWithPackageJson(entry)
   .filter(data => {
     return !data.json.private;
   })
-  .map(data => ({
-    name: data.json.name,
-    path: [path.join(data.path, 'src', '!(__tests__)', '**', '*.ts')],
-    ignore: Object.keys({
-      ...packagejson.dependencies,
-      ...packagejson.devDependencies,
-      ...data.json.dependencies,
-      ...data.json.devDependencies,
-    }),
-  }));
+  .map(data => {
+    const packageJson = path.join(data.path, 'package.json');
+    const json = require(packageJson);
+    const pathList = Object.values(json.exports).map(p =>
+      path.join(data.path, p)
+    );
+    return {
+      name: data.json.name,
+      path: pathList,
+      ignore: Object.keys({
+        ...packagejson.dependencies,
+        ...packagejson.devDependencies,
+        ...data.json.dependencies,
+        ...data.json.devDependencies,
+      }),
+    };
+  });
 
 module.exports = folders;
-
-// module.exports = [
-//   {
-//     name: '@blocksuite/global',
-//     path: 'packages/framework/global/dist',
-//   },
-//   {
-//     name: '@blocksuite/store',
-//     path: 'packages/framework/store/dist',
-//   },
-//   {
-//     name: '@blocksuite/block-std',
-//     path: 'packages/framework/block-std/dist',
-//   },
-//   {
-//     name: '@blocksuite/inline',
-//     path: 'packages/framework/inline/dist',
-//   },
-//   {
-//     name: '@blocksuite/sync',
-//     path: 'packages/framework/sync/dist',
-//   },
-//   {
-//     name: '@blocksuite/affine-shared',
-//     path: 'packages/affine/shared/dist',
-//   },
-//   {
-//     name: '@blocksuite/affine-model',
-//     path: 'packages/affine/model/dist',
-//   },
-//   {
-//     name: '@blocksuite/affine-components',
-//     path: 'packages/affine/components/dist',
-//   },
-//   {
-//     name: '@blocksuite/affine-block-list',
-//     path: 'packages/affine/block-list/dist',
-//   },
-//   {
-//     name: '@blocksuite/affine-block-paragraph',
-//     path: 'packages/affine/block-paragraph/dist',
-//   },
-//   {
-//     name: '@blocksuite/affine-block-surface',
-//     path: 'packages/affine/block-surface/dist',
-//   },
-//   {
-//     name: '@blocksuite/data-view',
-//     path: 'packages/affine/data-view/dist',
-//   },
-//   {
-//     name: '@blocksuite/blocks',
-//     path: 'packages/presets/dist',
-//   },
-//   {
-//     name: '@blocksuite/presets',
-//     path: 'packages/presets/dist',
-//   },
-// ];

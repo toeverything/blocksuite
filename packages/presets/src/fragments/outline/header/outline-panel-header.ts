@@ -4,7 +4,6 @@ import { css, html, LitElement } from 'lit';
 import { property, query, state } from 'lit/decorators.js';
 
 import { SettingsIcon, SortingIcon } from '../../_common/icons.js';
-import './outline-setting-menu.js';
 
 const styles = css`
   :host {

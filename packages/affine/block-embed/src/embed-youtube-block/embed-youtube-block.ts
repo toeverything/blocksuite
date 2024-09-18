@@ -248,7 +248,3 @@ export class EmbedYoutubeBlockComponent extends EmbedBlockComponent<
   @property({ attribute: false })
   accessor loading = false;
 }
-
-declare global {
-  interface HTMLElementTagNameMap {}
-}

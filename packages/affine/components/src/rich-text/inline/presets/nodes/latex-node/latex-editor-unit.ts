@@ -49,9 +49,3 @@ export class LatexEditorUnit extends ShadowlessElement {
     insert: ZERO_WIDTH_SPACE,
   };
 }
-
-declare global {
-  interface HTMLElementTagNameMap {
-    'latex-editor-unit': LatexEditorUnit;
-  }
-}
