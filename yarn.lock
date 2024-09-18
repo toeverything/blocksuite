@@ -2030,6 +2030,7 @@ __metadata:
   resolution: "@blocksuite/presets@workspace:packages/presets"
   dependencies:
     "@blocksuite/affine-block-surface": "workspace:*"
+    "@blocksuite/affine-model": "workspace:*"
     "@blocksuite/affine-shared": "workspace:*"
     "@blocksuite/block-std": "workspace:*"
     "@blocksuite/blocks": "workspace:*"
