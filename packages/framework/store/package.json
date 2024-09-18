@@ -42,8 +42,7 @@
     "yjs": "^13.6.18"
   },
   "exports": {
-    ".": "./src/index.ts",
-    "./providers/*": "./src/providers/*.ts"
+    ".": "./src/index.ts"
   },
   "publishConfig": {
     "access": "public",
@@ -61,7 +60,6 @@
   "files": [
     "src",
     "dist",
-    "providers",
     "!src/__tests__",
     "!dist/__tests__"
   ]
