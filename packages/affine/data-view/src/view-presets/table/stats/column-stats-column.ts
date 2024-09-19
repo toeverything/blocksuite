@@ -2,11 +2,8 @@ import {
   type Menu,
   popFilterableSimpleMenu,
 } from '@blocksuite/affine-components/context-menu';
-import {
-  ShadowlessElement,
-  SignalWatcher,
-  WithDisposable,
-} from '@blocksuite/block-std';
+import { ShadowlessElement } from '@blocksuite/block-std';
+import { SignalWatcher, WithDisposable } from '@blocksuite/global/utils';
 import { ArrowDownSmallIcon } from '@blocksuite/icons/lit';
 import { Text } from '@blocksuite/store';
 import { computed, signal } from '@preact/signals-core';

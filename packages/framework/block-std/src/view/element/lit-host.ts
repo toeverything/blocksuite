@@ -5,7 +5,7 @@ import {
   ErrorCode,
   handleError,
 } from '@blocksuite/global/exceptions';
-import { Slot } from '@blocksuite/global/utils';
+import { SignalWatcher, Slot, WithDisposable } from '@blocksuite/global/utils';
 import { Doc } from '@blocksuite/store';
 import { type BlockModel, BlockViewType } from '@blocksuite/store';
 import { createContext, provide } from '@lit/context';
@@ -23,8 +23,6 @@ import type { ViewStore } from '../view-store.js';
 
 import { WidgetViewMapIdentifier } from '../../identifier.js';
 import { PropTypes, requiredProperties } from '../decorators/index.js';
-import { SignalWatcher } from '../signal-watcher.js';
-import { WithDisposable } from '../utils/with-disposable.js';
 import { BLOCK_ID_ATTR, WIDGET_ID_ATTR } from './consts.js';
 import { ShadowlessElement } from './shadowless-element.js';
 

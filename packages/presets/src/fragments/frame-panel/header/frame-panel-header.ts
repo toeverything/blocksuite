@@ -1,6 +1,5 @@
 import type { EditorHost } from '@blocksuite/block-std';
 
-import { WithDisposable } from '@blocksuite/block-std';
 import {
   DocModeProvider,
   EdgelessRootService,
@@ -8,7 +7,7 @@ import {
   type NavigatorMode,
 } from '@blocksuite/blocks';
 import { createButtonPopper } from '@blocksuite/blocks';
-import { DisposableGroup } from '@blocksuite/global/utils';
+import { DisposableGroup, WithDisposable } from '@blocksuite/global/utils';
 import { css, html, LitElement, type PropertyValues } from 'lit';
 import { property, query, state } from 'lit/decorators.js';
 

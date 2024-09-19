@@ -8,12 +8,12 @@ import {
   NoteDisplayMode,
 } from '@blocksuite/affine-model';
 import { matchFlavours } from '@blocksuite/affine-shared/utils';
-import { WithDisposable } from '@blocksuite/block-std';
 import {
   countBy,
   deserializeXYWH,
   maxBy,
   serializeXYWH,
+  WithDisposable,
 } from '@blocksuite/global/utils';
 import { html, LitElement, nothing } from 'lit';
 import { property, query } from 'lit/decorators.js';

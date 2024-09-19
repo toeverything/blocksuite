@@ -1,4 +1,5 @@
 import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
+import { SignalWatcher, WithDisposable } from '@blocksuite/global/utils';
 import { Doc } from '@blocksuite/store';
 import { type BlockModel, BlockViewType } from '@blocksuite/store';
 import { consume, provide } from '@lit/context';
@@ -15,8 +16,6 @@ import type { BlockStdScope } from '../../scope/index.js';
 import type { WidgetComponent } from './widget-component.js';
 
 import { PropTypes, requiredProperties } from '../decorators/index.js';
-import { SignalWatcher } from '../signal-watcher.js';
-import { WithDisposable } from '../utils/with-disposable.js';
 import {
   blockComponentSymbol,
   modelContext,

@@ -20,8 +20,13 @@ import {
   type StrokeStyle,
 } from '@blocksuite/affine-model';
 import { matchFlavours } from '@blocksuite/affine-shared/utils';
-import { WithDisposable } from '@blocksuite/block-std';
-import { assertExists, Bound, countBy, maxBy } from '@blocksuite/global/utils';
+import {
+  assertExists,
+  Bound,
+  countBy,
+  maxBy,
+  WithDisposable,
+} from '@blocksuite/global/utils';
 import { html, LitElement, nothing, type TemplateResult } from 'lit';
 import { property, query } from 'lit/decorators.js';
 import { join } from 'lit/directives/join.js';

@@ -3,7 +3,7 @@ import {
   GroupElementModel,
   MindmapElementModel,
 } from '@blocksuite/affine-model';
-import { WithDisposable } from '@blocksuite/block-std';
+import { WithDisposable } from '@blocksuite/global/utils';
 import { css, html, LitElement, nothing } from 'lit';
 import { property } from 'lit/decorators.js';
 

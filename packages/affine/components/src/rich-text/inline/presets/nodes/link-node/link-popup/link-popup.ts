@@ -1,5 +1,4 @@
 import type { EmbedOptions } from '@blocksuite/affine-shared/types';
-import type { BlockComponent } from '@blocksuite/block-std';
 import type { InlineRange } from '@blocksuite/inline/types';
 
 import { EmbedOptionProvider } from '@blocksuite/affine-shared/services';
@@ -8,7 +7,8 @@ import {
   isValidUrl,
   normalizeUrl,
 } from '@blocksuite/affine-shared/utils';
-import { BLOCK_ID_ATTR, WithDisposable } from '@blocksuite/block-std';
+import { BLOCK_ID_ATTR, type BlockComponent } from '@blocksuite/block-std';
+import { WithDisposable } from '@blocksuite/global/utils';
 import { computePosition, inline, offset, shift } from '@floating-ui/dom';
 import { html, LitElement, nothing } from 'lit';
 import { property, query } from 'lit/decorators.js';

@@ -8,11 +8,10 @@ import {
   GfxBlockComponent,
   modelContext,
   ShadowlessElement,
-  SignalWatcher,
   stdContext,
-  WithDisposable,
 } from '@blocksuite/block-std';
 import { GfxControllerIdentifier } from '@blocksuite/block-std/gfx';
+import { SignalWatcher, WithDisposable } from '@blocksuite/global/utils';
 import { Bound, type SerializedXYWH } from '@blocksuite/global/utils';
 import { consume } from '@lit/context';
 import { cssVarV2 } from '@toeverything/theme/v2';

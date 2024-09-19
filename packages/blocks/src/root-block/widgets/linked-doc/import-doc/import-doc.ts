@@ -6,8 +6,7 @@ import {
   NewIcon,
   NotionIcon,
 } from '@blocksuite/affine-components/icons';
-import { WithDisposable } from '@blocksuite/block-std';
-import { sha } from '@blocksuite/global/utils';
+import { sha, WithDisposable } from '@blocksuite/global/utils';
 import {
   type DocCollection,
   extMimeMap,

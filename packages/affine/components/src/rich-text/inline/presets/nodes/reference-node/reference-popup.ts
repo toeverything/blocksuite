@@ -3,8 +3,7 @@ import type { InlineRange } from '@blocksuite/inline';
 
 import { isInsideBlockByFlavour } from '@blocksuite/affine-shared/utils';
 import { BLOCK_ID_ATTR, type BlockComponent } from '@blocksuite/block-std';
-import { WithDisposable } from '@blocksuite/block-std';
-import { assertExists } from '@blocksuite/global/utils';
+import { assertExists, WithDisposable } from '@blocksuite/global/utils';
 import { computePosition, inline, offset, shift } from '@floating-ui/dom';
 import { effect } from '@preact/signals-core';
 import { html, LitElement, nothing } from 'lit';

@@ -1,7 +1,7 @@
 import { MoreIcon } from '@blocksuite/affine-components/icons';
 import { createLitPortal } from '@blocksuite/affine-components/portal';
 import { stopPropagation } from '@blocksuite/affine-shared/utils';
-import { WithDisposable } from '@blocksuite/block-std';
+import { WithDisposable } from '@blocksuite/global/utils';
 import { offset } from '@floating-ui/dom';
 import { css, html, LitElement, nothing } from 'lit';
 import { property, query, state } from 'lit/decorators.js';

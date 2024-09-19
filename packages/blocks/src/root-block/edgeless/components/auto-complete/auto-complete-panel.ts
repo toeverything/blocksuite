@@ -31,12 +31,12 @@ import {
 import { EditPropsStore } from '@blocksuite/affine-shared/services';
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import { captureEventTarget } from '@blocksuite/affine-shared/utils';
-import { WithDisposable } from '@blocksuite/block-std';
 import {
   assertInstanceOf,
   Bound,
   serializeXYWH,
   Vec,
+  WithDisposable,
 } from '@blocksuite/global/utils';
 import { DocCollection } from '@blocksuite/store';
 import { baseTheme } from '@toeverything/theme';

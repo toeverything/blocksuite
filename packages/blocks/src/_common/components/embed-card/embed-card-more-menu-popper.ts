@@ -8,7 +8,7 @@ import {
 } from '@blocksuite/affine-components/icons';
 import { isPeekable, peek } from '@blocksuite/affine-components/peek';
 import { toast } from '@blocksuite/affine-components/toast';
-import { WithDisposable } from '@blocksuite/block-std';
+import { WithDisposable } from '@blocksuite/global/utils';
 import { Slice } from '@blocksuite/store';
 import { css, html, LitElement, nothing } from 'lit';
 import { property } from 'lit/decorators.js';

@@ -11,8 +11,7 @@ import type {
 } from '@blocksuite/blocks';
 import type { DeltaInsert } from '@blocksuite/inline';
 
-import { SignalWatcher, WithDisposable } from '@blocksuite/block-std';
-import { noop } from '@blocksuite/global/utils';
+import { noop, SignalWatcher, WithDisposable } from '@blocksuite/global/utils';
 import { css, html, LitElement, nothing } from 'lit';
 import { property } from 'lit/decorators.js';
 

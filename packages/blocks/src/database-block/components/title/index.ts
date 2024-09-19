@@ -3,8 +3,8 @@ import type { InlineRange } from '@blocksuite/inline';
 import type { Text } from '@blocksuite/store';
 
 import { getViewportElement } from '@blocksuite/affine-shared/utils';
-import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
-import { assertExists } from '@blocksuite/global/utils';
+import { ShadowlessElement } from '@blocksuite/block-std';
+import { assertExists, WithDisposable } from '@blocksuite/global/utils';
 import { css, html } from 'lit';
 import { property, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';

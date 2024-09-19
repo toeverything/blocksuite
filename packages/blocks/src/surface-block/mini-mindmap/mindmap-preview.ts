@@ -11,11 +11,8 @@ import {
   type MindmapElementModel,
   MindmapStyle,
 } from '@blocksuite/affine-model';
-import {
-  BlockStdScope,
-  type EditorHost,
-  WithDisposable,
-} from '@blocksuite/block-std';
+import { BlockStdScope, type EditorHost } from '@blocksuite/block-std';
+import { WithDisposable } from '@blocksuite/global/utils';
 import {
   type Doc,
   DocCollection,

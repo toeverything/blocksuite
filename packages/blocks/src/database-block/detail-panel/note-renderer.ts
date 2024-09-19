@@ -10,11 +10,10 @@ import {
   BlockStdScope,
   type EditorHost,
   ShadowlessElement,
-  WithDisposable,
 } from '@blocksuite/block-std';
+import { WithDisposable } from '@blocksuite/global/utils';
 import { css, html } from 'lit';
 import { property, query } from 'lit/decorators.js';
-
 export class NoteRenderer
   extends WithDisposable(ShadowlessElement)
   implements DetailSlotProps

@@ -1,8 +1,7 @@
 import type { FrameBlockModel } from '@blocksuite/affine-model';
 
 import { EditPropsStore } from '@blocksuite/affine-shared/services';
-import { WithDisposable } from '@blocksuite/block-std';
-import { Bound } from '@blocksuite/global/utils';
+import { Bound, WithDisposable } from '@blocksuite/global/utils';
 import { css, html, LitElement, nothing } from 'lit';
 import { property, state } from 'lit/decorators.js';
 

@@ -4,8 +4,6 @@ import {
   BlockStdScope,
   type ExtensionType,
   ShadowlessElement,
-  SignalWatcher,
-  WithDisposable,
 } from '@blocksuite/block-std';
 import {
   type AbstractEditor,
@@ -13,7 +11,7 @@ import {
   EdgelessEditorBlockSpecs,
   PageEditorBlockSpecs,
 } from '@blocksuite/blocks';
-import { Slot } from '@blocksuite/global/utils';
+import { SignalWatcher, Slot, WithDisposable } from '@blocksuite/global/utils';
 import { computed, signal } from '@preact/signals-core';
 import { css, html } from 'lit';
 import { property } from 'lit/decorators.js';

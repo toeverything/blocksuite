@@ -1,7 +1,7 @@
 import type { Y } from '@blocksuite/store';
 
-import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
-import { assertExists } from '@blocksuite/global/utils';
+import { ShadowlessElement } from '@blocksuite/block-std';
+import { assertExists, WithDisposable } from '@blocksuite/global/utils';
 import {
   type AttributeRenderer,
   createInlineKeyDownHandler,

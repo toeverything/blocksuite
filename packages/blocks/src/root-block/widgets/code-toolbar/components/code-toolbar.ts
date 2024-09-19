@@ -6,8 +6,7 @@ import type {
 import { MoreVerticalIcon } from '@blocksuite/affine-components/icons';
 import { createLitPortal } from '@blocksuite/affine-components/portal';
 import { renderGroups } from '@blocksuite/affine-components/toolbar';
-import { WithDisposable } from '@blocksuite/block-std';
-import { assertExists, noop } from '@blocksuite/global/utils';
+import { assertExists, noop, WithDisposable } from '@blocksuite/global/utils';
 import { flip, offset } from '@floating-ui/dom';
 import { css, html, LitElement } from 'lit';
 import { property, query, state } from 'lit/decorators.js';

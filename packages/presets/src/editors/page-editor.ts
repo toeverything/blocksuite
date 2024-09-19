@@ -4,10 +4,9 @@ import {
   BlockStdScope,
   EditorHost,
   ShadowlessElement,
-  WithDisposable,
 } from '@blocksuite/block-std';
 import { PageEditorBlockSpecs } from '@blocksuite/blocks';
-import { noop } from '@blocksuite/global/utils';
+import { noop, WithDisposable } from '@blocksuite/global/utils';
 import { css, html, nothing } from 'lit';
 import { property, state } from 'lit/decorators.js';
 import { guard } from 'lit/directives/guard.js';

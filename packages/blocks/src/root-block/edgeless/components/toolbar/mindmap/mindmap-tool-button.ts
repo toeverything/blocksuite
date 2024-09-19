@@ -5,7 +5,7 @@ import type {
 import type { Bound } from '@blocksuite/global/utils';
 
 import { EditPropsStore } from '@blocksuite/affine-shared/services';
-import { SignalWatcher } from '@blocksuite/block-std';
+import { SignalWatcher } from '@blocksuite/global/utils';
 import { computed } from '@preact/signals-core';
 import { css, html, LitElement, nothing } from 'lit';
 import { property, query, state } from 'lit/decorators.js';

@@ -2,13 +2,8 @@ import type { Y } from '@blocksuite/store';
 
 import { ColorScheme } from '@blocksuite/affine-model';
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
-import {
-  type BlockStdScope,
-  ShadowlessElement,
-  SignalWatcher,
-  WithDisposable,
-} from '@blocksuite/block-std';
-import { noop } from '@blocksuite/global/utils';
+import { type BlockStdScope, ShadowlessElement } from '@blocksuite/block-std';
+import { noop, SignalWatcher, WithDisposable } from '@blocksuite/global/utils';
 import { DoneIcon } from '@blocksuite/icons/lit';
 import { DocCollection } from '@blocksuite/store';
 import { effect, type Signal, signal } from '@preact/signals-core';

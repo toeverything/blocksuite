@@ -15,7 +15,7 @@ import {
 } from '@blocksuite/affine-model';
 import { EditPropsStore } from '@blocksuite/affine-shared/services';
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
-import { SignalWatcher } from '@blocksuite/block-std';
+import { SignalWatcher } from '@blocksuite/global/utils';
 import { computed, signal } from '@preact/signals-core';
 import { css, html, LitElement } from 'lit';
 import { property } from 'lit/decorators.js';

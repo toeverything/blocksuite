@@ -30,8 +30,7 @@ import {
   PointStyle,
 } from '@blocksuite/affine-model';
 import { LINE_COLORS, LineWidth, StrokeStyle } from '@blocksuite/affine-model';
-import { WithDisposable } from '@blocksuite/block-std';
-import { countBy, maxBy } from '@blocksuite/global/utils';
+import { countBy, maxBy, WithDisposable } from '@blocksuite/global/utils';
 import { html, LitElement, nothing, type TemplateResult } from 'lit';
 import { property, query } from 'lit/decorators.js';
 import { choose } from 'lit/directives/choose.js';

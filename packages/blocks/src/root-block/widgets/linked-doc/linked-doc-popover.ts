@@ -2,7 +2,7 @@ import type { AffineInlineEditor } from '@blocksuite/affine-components/rich-text
 import type { EditorHost } from '@blocksuite/block-std';
 
 import { MoreHorizontalIcon } from '@blocksuite/affine-components/icons';
-import { WithDisposable } from '@blocksuite/block-std';
+import { WithDisposable } from '@blocksuite/global/utils';
 import { html, LitElement, nothing } from 'lit';
 import { query, queryAll, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
