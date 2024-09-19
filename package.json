@@ -85,7 +85,6 @@
     "globals": "^15.9.0",
     "happy-dom": "^15.0.0",
     "husky": "^9.1.5",
-    "inquirer": "^10.1.8",
     "jscodeshift": "^17.0.0",
     "lint-staged": "^15.2.9",
     "lit-analyzer": "2.0.3",
