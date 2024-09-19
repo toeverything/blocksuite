@@ -260,7 +260,7 @@ export function applyStyle(
   });
 }
 
-function addTree(
+export function addTree(
   mindmap: MindmapElementModel,
   parent: string | MindmapNode,
   tree: NodeType | MindmapNode,

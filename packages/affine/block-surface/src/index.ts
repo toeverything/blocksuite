@@ -85,6 +85,7 @@ import { generateKeyBetween } from 'fractional-indexing';
 
 import { generateElementId, normalizeWheelDeltaY } from './utils/index.js';
 import {
+  addTree,
   createFromTree,
   detachMindmap,
   handleLayout,
@@ -140,6 +141,7 @@ export const CommonUtils = {
 };
 
 export const MindmapUtils = {
+  addTree,
   createFromTree,
   detachMindmap,
   handleLayout,
