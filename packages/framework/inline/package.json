@@ -3,7 +3,11 @@
   "version": "0.17.12",
   "description": "A micro editor.",
   "type": "module",
-  "repository": "toeverything/blocksuite",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/toeverything/blocksuite.git",
+    "directory": "packages/framework/inline"
+  },
   "scripts": {
     "build": "tsc",
     "test:unit": "nx vite:test --run",

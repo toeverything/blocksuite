@@ -3,7 +3,11 @@
   "version": "0.17.12",
   "types": "./index.d.ts",
   "type": "module",
-  "repository": "toeverything/blocksuite",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/toeverything/blocksuite.git",
+    "directory": "packages/framework/global"
+  },
   "scripts": {
     "test:unit": "nx vite:test --run",
     "test:unit:coverage": "nx vite:test --run --coverage",
