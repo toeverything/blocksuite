@@ -1037,11 +1037,6 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
         );
       } else {
         getAllDescendantElements(element).forEach(ele => {
-          if (ele.group instanceof MindmapElementModel) {
-            getAllDescendantElements(ele.group).forEach(_el =>
-              toBeMoved.add(_el)
-            );
-          }
           toBeMoved.add(ele);
         });
       }

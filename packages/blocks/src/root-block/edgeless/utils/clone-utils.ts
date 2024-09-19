@@ -41,6 +41,7 @@ export async function prepareCloneData(
   elements: BlockSuite.EdgelessModel[],
   std: BlockStdScope
 ) {
+  elements = sortEdgelessElements(elements);
   const job = new Job({
     collection: std.collection,
   });
