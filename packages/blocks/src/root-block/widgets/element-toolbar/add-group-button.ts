@@ -1,6 +1,8 @@
-import { MindmapElementModel } from '@blocksuite/affine-block-surface';
 import { GroupIcon } from '@blocksuite/affine-components/icons';
-import { GroupElementModel } from '@blocksuite/affine-model';
+import {
+  GroupElementModel,
+  MindmapElementModel,
+} from '@blocksuite/affine-model';
 import { WithDisposable } from '@blocksuite/block-std';
 import { css, html, LitElement, nothing } from 'lit';
 import { property } from 'lit/decorators.js';

@@ -1,10 +1,8 @@
 import type { TemplateResult } from 'lit';
 
+import { CanvasElementType } from '@blocksuite/affine-block-surface';
 import {
-  CanvasElementType,
   type MindmapElementModel,
-} from '@blocksuite/affine-block-surface';
-import {
   type MindmapStyle,
   type ShapeElementModel,
   TextElementModel,

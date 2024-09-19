@@ -1,8 +1,10 @@
 import type { SurfaceBlockModel } from '@blocksuite/affine-block-surface';
 import type { CursorSelection, SurfaceSelection } from '@blocksuite/block-std';
 
-import { MindmapElementModel } from '@blocksuite/affine-block-surface';
-import { GroupElementModel } from '@blocksuite/affine-model';
+import {
+  GroupElementModel,
+  MindmapElementModel,
+} from '@blocksuite/affine-model';
 import {
   assertType,
   DisposableGroup,

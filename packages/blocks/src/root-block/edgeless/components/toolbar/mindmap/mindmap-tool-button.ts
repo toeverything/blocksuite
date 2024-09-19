@@ -1,5 +1,7 @@
-import type { MindmapElementModel } from '@blocksuite/affine-block-surface';
-import type { MindmapStyle } from '@blocksuite/affine-model';
+import type {
+  MindmapElementModel,
+  MindmapStyle,
+} from '@blocksuite/affine-model';
 import type { Bound } from '@blocksuite/global/utils';
 
 import { EditPropsStore } from '@blocksuite/affine-shared/services';

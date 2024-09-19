@@ -11,10 +11,7 @@ import {
   Overlay,
   type RoughCanvas,
 } from '@blocksuite/affine-block-surface';
-import {
-  ConnectorPathGenerator,
-  MindmapElementModel,
-} from '@blocksuite/affine-block-surface';
+import { ConnectorPathGenerator } from '@blocksuite/affine-block-surface';
 import {
   AutoCompleteArrowIcon,
   MindMapChildIcon,
@@ -24,6 +21,7 @@ import {
 import {
   DEFAULT_SHAPE_STROKE_COLOR,
   LayoutType,
+  MindmapElementModel,
   ShapeElementModel,
   shapeMethods,
 } from '@blocksuite/affine-model';

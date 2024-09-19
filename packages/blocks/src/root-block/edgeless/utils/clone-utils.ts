@@ -1,18 +1,16 @@
 import type {
-  NodeDetail,
-  SerializedMindmapElement,
-} from '@blocksuite/affine-block-surface';
-import type {
   FrameBlockProps,
+  NodeDetail,
   SerializedConnectorElement,
   SerializedGroupElement,
+  SerializedMindmapElement,
 } from '@blocksuite/affine-model';
 import type { BlockStdScope } from '@blocksuite/block-std';
 
-import { MindmapElementModel } from '@blocksuite/affine-block-surface';
 import {
   ConnectorElementModel,
   GroupElementModel,
+  MindmapElementModel,
 } from '@blocksuite/affine-model';
 import {
   isGfxContainerElm,

@@ -4,7 +4,7 @@ import type { IBound, IVec, IVec3 } from '@blocksuite/global/utils';
 import {
   type BrushElementModel,
   type Connection,
-  type ConnectorElementModel,
+  ConnectorElementModel,
   ConnectorMode,
   GroupElementModel,
   type LocalConnectorElementModel,
@@ -32,7 +32,6 @@ import {
   Vec,
 } from '@blocksuite/global/utils';
 
-import { isConnectorWithLabel } from '../element-model/utils/connector.js';
 import { Overlay } from '../renderer/canvas-renderer.js';
 import { AStarRunner } from '../utils/a-star.js';
 
@@ -69,6 +68,12 @@ export const ConnectorEndpointLocationsOnTriangle: IVec[] = [
   // At left
   [0.25, 0.5],
 ];
+
+export function isConnectorWithLabel(
+  model: GfxModel | BlockSuite.SurfaceLocalModel
+) {
+  return model instanceof ConnectorElementModel && model.hasLabel();
+}
 
 export function calculateNearestLocation(
   point: IVec,
