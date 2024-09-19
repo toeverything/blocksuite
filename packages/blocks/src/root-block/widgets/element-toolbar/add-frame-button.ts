@@ -1,5 +1,5 @@
-import { MindmapElementModel } from '@blocksuite/affine-block-surface';
 import { FrameIcon } from '@blocksuite/affine-components/icons';
+import { MindmapElementModel } from '@blocksuite/affine-model';
 import { TelemetryProvider } from '@blocksuite/affine-shared/services';
 import { Bound, WithDisposable } from '@blocksuite/global/utils';
 import { css, html, LitElement, nothing } from 'lit';

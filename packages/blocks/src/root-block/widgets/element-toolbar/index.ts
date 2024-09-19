@@ -1,4 +1,3 @@
-import type { MindmapElementModel } from '@blocksuite/affine-block-surface';
 import type {
   AttachmentBlockModel,
   BookmarkBlockModel,
@@ -14,6 +13,7 @@ import type {
   EmbedYoutubeModel,
   FrameBlockModel,
   ImageBlockModel,
+  MindmapElementModel,
   NoteBlockModel,
   RootBlockModel,
   TextElementModel,

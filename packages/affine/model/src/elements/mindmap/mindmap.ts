@@ -1,16 +1,9 @@
 import type {
   BaseElementProps,
   SerializedElement,
-  SurfaceBlockModel,
 } from '@blocksuite/block-std/gfx';
 import type { SerializedXYWH, XYWH } from '@blocksuite/global/utils';
 
-import {
-  LayoutType,
-  LocalConnectorElementModel,
-  MindmapStyle,
-  TextResizing,
-} from '@blocksuite/affine-model';
 import {
   convert,
   field,
@@ -29,18 +22,39 @@ import { DocCollection, type Y } from '@blocksuite/store';
 import { generateKeyBetween } from 'fractional-indexing';
 import { z } from 'zod';
 
-import type {
-  MindmapNode,
-  MindmapRoot,
-  NodeDetail,
-} from './utils/mindmap/layout.js';
-import type {
-  ConnectorStyle,
-  MindmapStyleGetter,
-} from './utils/mindmap/style.js';
+import type { ConnectorStyle, MindmapStyleGetter } from './style.js';
 
-import { layout } from './utils/mindmap/layout.js';
-import { applyNodeStyle, mindmapStyleGetters } from './utils/mindmap/style.js';
+import { LayoutType, MindmapStyle } from '../../consts/mindmap.js';
+import { TextResizing } from '../../consts/text.js';
+import { LocalConnectorElementModel } from '../connector/local-connector.js';
+import { mindmapStyleGetters } from './style.js';
+
+export type NodeDetail = {
+  /**
+   * The index of the node, it decides the layout order of the node
+   */
+  index: string;
+  parent?: string;
+};
+
+export type MindmapNode = {
+  id: string;
+  detail: NodeDetail;
+
+  element: BlockSuite.SurfaceElementModel;
+  children: MindmapNode[];
+
+  /**
+   * This property override the preferredDir or default layout direction.
+   * It is used during dragging that would temporary change the layout direction
+   */
+  overriddenDir?: LayoutType;
+};
+
+export type MindmapRoot = MindmapNode & {
+  left: MindmapNode[];
+  right: MindmapNode[];
+};
 
 const baseNodeSchema = z.object({
   text: z.string(),
@@ -69,7 +83,58 @@ type MindmapElementProps = BaseElementProps & {
   children: Y.Map<NodeDetail>;
 };
 
+function observeChildren(
+  _: unknown,
+  instance: MindmapElementModel,
+  transaction: Y.Transaction | null
+) {
+  instance.setChildIds(
+    Array.from(instance.children.keys()),
+    transaction?.local ?? true
+  );
+
+  instance.buildTree();
+  instance.connectors.clear();
+}
+
+function watchLayoutType(
+  _: unknown,
+  instance: MindmapElementModel,
+  local: boolean
+) {
+  if (!local) {
+    return;
+  }
+
+  instance.surface.doc.transact(() => {
+    instance['_tree']?.children.forEach(child => {
+      if (!instance.children.has(child.id)) {
+        return;
+      }
+
+      instance.children.set(child.id, {
+        index: child.detail.index,
+        parent: child.detail.parent,
+      });
+    });
+  });
+
+  instance.buildTree();
+}
+
+function watchStyle(_: unknown, instance: MindmapElementModel, local: boolean) {
+  if (!local) return;
+  instance.layout();
+}
+
 export class MindmapElementModel extends GfxGroupLikeElementModel<MindmapElementProps> {
+  private _layoutHandler = (
+    _mindmap: MindmapElementModel,
+    _tree: MindmapNode | MindmapRoot = this.tree,
+    _applyStyle = true,
+    _layoutType?: LayoutType
+  ) => {};
+
   private _nodeMap = new Map<string, MindmapNode>();
 
   private _queueBuildTree = false;
@@ -102,43 +167,6 @@ export class MindmapElementModel extends GfxGroupLikeElementModel<MindmapElement
 
   get type() {
     return 'mindmap';
-  }
-
-  static createFromTree(
-    tree: MindmapNode,
-    style: MindmapStyle,
-    layoutType: LayoutType,
-    surface: SurfaceBlockModel
-  ) {
-    const children = new DocCollection.Y.Map();
-    const traverse = (subtree: MindmapNode, parent?: string) => {
-      const value: NodeDetail = {
-        ...subtree.detail,
-        parent,
-      };
-
-      if (!parent) {
-        delete value.parent;
-      }
-
-      children.set(subtree.id, value);
-
-      subtree.children.forEach(child => traverse(child, subtree.id));
-    };
-
-    traverse(tree);
-
-    const mindmapId = surface.addElement({
-      type: 'mindmap',
-      children,
-      layoutType,
-      style,
-    });
-    const mindmap = surface.getElementById(mindmapId) as MindmapElementModel;
-
-    mindmap.layout();
-
-    return mindmap;
   }
 
   static override propsToY(props: Record<string, unknown>) {
@@ -359,91 +387,7 @@ export class MindmapElementModel extends GfxGroupLikeElementModel<MindmapElement
     return id!;
   }
 
-  addTree(
-    parent: string | MindmapNode,
-    tree: NodeType | MindmapNode,
-    /**
-     * `sibling` indicates where to insert a subtree among peer elements.
-     * If it's a string, it represents a peer element's ID;
-     * if it's a number, it represents its index.
-     * The subtree will be inserted before the sibling element.
-     */
-    sibling?: string | number
-  ) {
-    parent = typeof parent === 'string' ? parent : parent.id;
-
-    if (!this._nodeMap.has(parent) || !parent) {
-      return null;
-    }
-
-    assertType<string>(parent);
-
-    const traverse = (
-      node: NodeType | MindmapNode,
-      parent: string,
-      sibling?: string | number
-    ) => {
-      let nodeId: string;
-      if ('text' in node) {
-        nodeId = this.addNode(parent, sibling, 'before', {
-          text: node.text,
-        });
-      } else {
-        this.children.set(node.id, {
-          ...node.detail,
-          parent,
-        });
-        nodeId = node.id;
-      }
-
-      node.children?.forEach(child => {
-        traverse(child, nodeId);
-      });
-
-      return nodeId;
-    };
-
-    if (!('text' in tree)) {
-      // Modify the children ymap directly hence need transaction
-      this.surface.doc.transact(() => {
-        traverse(tree, parent, sibling);
-      });
-
-      this.applyStyle();
-      this.layout();
-
-      return this._nodeMap.get(tree.id);
-    } else {
-      const nodeId = traverse(tree, parent, sibling);
-
-      this.layout();
-
-      return this._nodeMap.get(nodeId);
-    }
-  }
-
-  applyStyle(fitContent: boolean = false) {
-    this.surface.doc.transact(() => {
-      const style = this.styleGetter;
-      if (!style) return;
-      applyNodeStyle(this._tree, style.root, fitContent);
-
-      const walk = (node: MindmapNode, path: number[]) => {
-        node.children.forEach((child, idx) => {
-          const currentPath = [...path, idx];
-          const nodeStyle = style.getNodeStyle(child, currentPath);
-
-          applyNodeStyle(child, nodeStyle.node, fitContent);
-
-          walk(child, currentPath);
-        });
-      };
-
-      walk(this._tree, [0]);
-    });
-  }
-
-  protected buildTree() {
+  buildTree() {
     const mindmapNodeMap = new Map<string, MindmapNode>();
     const nodesMap = this.children;
 
@@ -663,20 +607,11 @@ export class MindmapElementModel extends GfxGroupLikeElementModel<MindmapElement
   }
 
   layout(
-    tree: MindmapNode | MindmapRoot = this.tree,
-    applyStyle = true,
-    layoutType?: LayoutType
+    _tree: MindmapNode | MindmapRoot = this.tree,
+    _applyStyle = true,
+    _layoutType?: LayoutType
   ) {
-    if (!tree || !tree.element) return;
-
-    if (applyStyle) {
-      this.applyStyle(true);
-    }
-
-    this.surface.doc.transact(() => {
-      const path = this.getPath(tree.id);
-      layout(tree, this, layoutType ?? this.getLayoutDir(tree.id), path);
-    });
+    return this._layoutHandler(this, _tree, _applyStyle, _layoutType);
   }
 
   moveTo(targetXYWH: SerializedXYWH | XYWH) {
@@ -756,6 +691,10 @@ export class MindmapElementModel extends GfxGroupLikeElementModel<MindmapElement
   override serialize() {
     const result = super.serialize();
     return result as SerializedMindmapElement;
+  }
+
+  setLayoutHandler(handler: typeof this._layoutHandler) {
+    this._layoutHandler = handler;
   }
 
   stashTree(node: MindmapNode | string) {
@@ -863,48 +802,17 @@ export class MindmapElementModel extends GfxGroupLikeElementModel<MindmapElement
       return initialValue;
     }
   })
-  @observe(
-    (_, instance: MindmapElementModel, transaction: Y.Transaction | null) => {
-      instance.setChildIds(
-        Array.from(instance.children.keys()),
-        transaction?.local ?? true
-      );
-
-      instance.buildTree();
-      instance.connectors.clear();
-    }
-  )
+  // Use extracted function to avoid playwright test failure
+  // since this model package is imported by playwright
+  @observe(observeChildren)
   @field()
   accessor children: Y.Map<NodeDetail> = new DocCollection.Y.Map();
 
-  @watch((_, instance: MindmapElementModel, local) => {
-    if (!local) {
-      return;
-    }
-
-    instance.surface.doc.transact(() => {
-      instance['_tree']?.children.forEach(child => {
-        if (!instance.children.has(child.id)) {
-          return;
-        }
-
-        instance.children.set(child.id, {
-          index: child.detail.index,
-          parent: child.detail.parent,
-        });
-      });
-    });
-
-    instance.buildTree();
-  })
+  @watch(watchLayoutType)
   @field()
   accessor layoutType: LayoutType = LayoutType.RIGHT;
 
-  @watch((_, instance: MindmapElementModel, local) => {
-    if (local) {
-      instance.layout();
-    }
-  })
+  @watch(watchStyle)
   @field()
   accessor style: MindmapStyle = MindmapStyle.ONE;
 }

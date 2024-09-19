@@ -1777,6 +1777,7 @@ __metadata:
     "@blocksuite/global": "workspace:*"
     "@blocksuite/inline": "workspace:*"
     "@blocksuite/store": "workspace:*"
+    fractional-indexing: "npm:^3.2.0"
     zod: "npm:^3.23.8"
   languageName: unknown
   linkType: soft
@@ -2031,6 +2032,7 @@ __metadata:
   resolution: "@blocksuite/presets@workspace:packages/presets"
   dependencies:
     "@blocksuite/affine-block-surface": "workspace:*"
+    "@blocksuite/affine-model": "workspace:*"
     "@blocksuite/affine-shared": "workspace:*"
     "@blocksuite/block-std": "workspace:*"
     "@blocksuite/blocks": "workspace:*"

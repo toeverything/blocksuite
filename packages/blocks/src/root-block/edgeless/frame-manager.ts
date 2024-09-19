@@ -1,9 +1,11 @@
 import type { SurfaceBlockModel } from '@blocksuite/affine-block-surface';
-import type { FrameBlockModel, NoteBlockModel } from '@blocksuite/affine-model';
 import type { Doc } from '@blocksuite/store';
 
-import { MindmapElementModel, Overlay } from '@blocksuite/affine-block-surface';
-import { GroupElementModel } from '@blocksuite/affine-model';
+import { Overlay } from '@blocksuite/affine-block-surface';
+import {
+  GroupElementModel,
+  MindmapElementModel,
+} from '@blocksuite/affine-model';
 import {
   isGfxContainerElm,
   renderableInEdgeless,
@@ -17,7 +19,11 @@ import {
 } from '@blocksuite/global/utils';
 import { DocCollection } from '@blocksuite/store';
 
-import type { EdgelessRootService } from '../../index.js';
+import type {
+  EdgelessRootService,
+  FrameBlockModel,
+  NoteBlockModel,
+} from '../../index.js';
 
 import { GfxBlockModel } from './block-model.js';
 import { edgelessElementsBound } from './utils/bound-utils.js';

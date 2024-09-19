@@ -1,5 +1,7 @@
-import type { MindmapElementModel } from '@blocksuite/affine-block-surface';
-import type { ShapeElementModel } from '@blocksuite/affine-model';
+import type {
+  MindmapElementModel,
+  ShapeElementModel,
+} from '@blocksuite/affine-model';
 
 import {
   MindmapBalanceLayoutIcon,

@@ -1,9 +1,10 @@
-import type { MindmapElementModel } from '@blocksuite/affine-block-surface';
+import type { MindmapElementModel } from '@blocksuite/affine-model';
 
 import {
   type EdgelessRootBlockComponent,
   type GroupElementModel,
   LayoutType,
+  MindmapUtils,
   NoteDisplayMode,
 } from '@blocksuite/blocks';
 import { DocCollection } from '@blocksuite/store';
@@ -276,6 +277,8 @@ describe('mindmap', () => {
     });
     const mindmap = () =>
       service.getElementById(mindmapId) as MindmapElementModel;
+    mindmap().setLayoutHandler(MindmapUtils.handleLayout);
+    mindmap().layout();
 
     doc.captureSync();
     await wait();

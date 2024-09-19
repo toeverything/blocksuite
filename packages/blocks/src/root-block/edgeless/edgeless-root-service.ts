@@ -11,19 +11,20 @@ import type { IBound } from '@blocksuite/global/utils';
 import {
   type ElementRenderer,
   elementRenderers,
+  MindmapUtils,
   type Overlay,
   type SurfaceBlockModel,
   type SurfaceContext,
 } from '@blocksuite/affine-block-surface';
 import {
   ConnectionOverlay,
-  MindmapElementModel,
   SurfaceGroupLikeModel,
 } from '@blocksuite/affine-block-surface';
 import {
   type ConnectorElementModel,
   type FrameBlockModel,
   type GroupElementModel,
+  MindmapElementModel,
   RootBlockSchema,
 } from '@blocksuite/affine-model';
 import { EditPropsStore } from '@blocksuite/affine-shared/services';
@@ -265,7 +266,14 @@ export class EdgelessRootService extends RootService implements SurfaceContext {
       type,
       index: props.index ?? this.generateIndex(type),
     };
-    return this._surface.addElement(nProps);
+    const id = this._surface.addElement(nProps);
+
+    if (type === 'mindmap') {
+      const model = this._surface.getElementById(id) as MindmapElementModel;
+      model.setLayoutHandler(MindmapUtils.handleLayout);
+      model.layout();
+    }
+    return id;
   }
 
   createGroup(elements: BlockSuite.EdgelessModel[] | string[]) {
