@@ -1,9 +1,13 @@
 {
   "name": "@blocksuite/data-view",
   "version": "0.17.12",
-  "description": "views of database",
+  "description": "Views of database in affine",
   "type": "module",
-  "repository": "toeverything/blocksuite",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/toeverything/blocksuite.git",
+    "directory": "packages/affine/data-view"
+  },
   "scripts": {
     "build": "tsc",
     "test:unit": "nx vite:test --run --passWithNoTests",

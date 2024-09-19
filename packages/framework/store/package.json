@@ -3,7 +3,11 @@
   "version": "0.17.12",
   "description": "BlockSuite data store built for general purpose state management.",
   "type": "module",
-  "repository": "toeverything/blocksuite",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/toeverything/blocksuite.git",
+    "directory": "packages/framework/store"
+  },
   "scripts": {
     "build": "tsc",
     "test:unit": "nx vite:test --run",
