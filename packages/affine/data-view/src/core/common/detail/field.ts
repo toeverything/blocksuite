@@ -1,9 +1,6 @@
 import { popMenu } from '@blocksuite/affine-components/context-menu';
-import {
-  ShadowlessElement,
-  SignalWatcher,
-  WithDisposable,
-} from '@blocksuite/block-std';
+import { ShadowlessElement } from '@blocksuite/block-std';
+import { SignalWatcher, WithDisposable } from '@blocksuite/global/utils';
 import {
   DeleteIcon,
   DuplicateIcon,

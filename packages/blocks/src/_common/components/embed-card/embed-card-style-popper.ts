@@ -4,7 +4,7 @@ import type {
   EmbedLinkedDocModel,
 } from '@blocksuite/affine-model';
 
-import { WithDisposable } from '@blocksuite/block-std';
+import { WithDisposable } from '@blocksuite/global/utils';
 import { css, html, LitElement } from 'lit';
 import { property } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';

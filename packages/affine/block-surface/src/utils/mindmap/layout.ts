@@ -1,40 +1,16 @@
+import type {
+  MindmapElementModel,
+  MindmapNode,
+  MindmapRoot,
+} from '@blocksuite/affine-model';
 import type { SerializedXYWH } from '@blocksuite/global/utils';
 
 import { LayoutType } from '@blocksuite/affine-model';
 import { Bound } from '@blocksuite/global/utils';
 
-import type { MindmapElementModel } from '../../mindmap.js';
-
 export const NODE_VERTICAL_SPACING = 45;
 export const NODE_HORIZONTAL_SPACING = 110;
 export const NODE_FIRST_LEVEL_HORIZONTAL_SPACING = 200;
-
-export type NodeDetail = {
-  /**
-   * The index of the node, it decides the layout order of the node
-   */
-  index: string;
-  parent?: string;
-};
-
-export type MindmapNode = {
-  id: string;
-  detail: NodeDetail;
-
-  element: BlockSuite.SurfaceElementModel;
-  children: MindmapNode[];
-
-  /**
-   * This property override the preferredDir or default layout direction.
-   * It is used during dragging that would temporary change the layout direction
-   */
-  overriddenDir?: LayoutType;
-};
-
-export type MindmapRoot = MindmapNode & {
-  left: MindmapNode[];
-  right: MindmapNode[];
-};
 
 type TreeSize = {
   /**

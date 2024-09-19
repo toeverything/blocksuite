@@ -1,20 +1,18 @@
-import type {
-  MindmapElementModel,
-  SurfaceBlockModel,
-} from '@blocksuite/affine-block-surface';
+import type { SurfaceBlockModel } from '@blocksuite/affine-block-surface';
 
+import { MindmapUtils } from '@blocksuite/affine-block-surface';
 import {
   MindmapStyleFour,
   MindmapStyleOne,
   MindmapStyleThree,
   MindmapStyleTwo,
 } from '@blocksuite/affine-components/icons';
-import { MindmapStyle } from '@blocksuite/affine-model';
 import {
-  BlockStdScope,
-  type EditorHost,
-  WithDisposable,
-} from '@blocksuite/block-std';
+  type MindmapElementModel,
+  MindmapStyle,
+} from '@blocksuite/affine-model';
+import { BlockStdScope, type EditorHost } from '@blocksuite/block-std';
+import { WithDisposable } from '@blocksuite/global/utils';
 import {
   type Doc,
   DocCollection,
@@ -166,6 +164,11 @@ export class MiniMindmapPreview extends WithDisposable(LitElement) {
       children: mindmapNode,
       style: this.mindmapStyle ?? MindmapStyle.FOUR,
     });
+    const mindmap = this.surface.getElementById(
+      this.mindmapId
+    ) as MindmapElementModel;
+    mindmap.setLayoutHandler(MindmapUtils.handleLayout);
+    mindmap.layout();
 
     const centerPosition = this._mindmap?.tree.element.xywh;
 

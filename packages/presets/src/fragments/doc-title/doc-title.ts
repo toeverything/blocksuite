@@ -2,8 +2,8 @@ import type { EditorHost } from '@blocksuite/block-std';
 import type { RichText, RootBlockModel } from '@blocksuite/blocks';
 import type { Doc } from '@blocksuite/store';
 
-import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
-import { assertExists } from '@blocksuite/global/utils';
+import { ShadowlessElement } from '@blocksuite/block-std';
+import { assertExists, WithDisposable } from '@blocksuite/global/utils';
 import { css, html } from 'lit';
 import { property, query, state } from 'lit/decorators.js';
 

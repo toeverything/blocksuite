@@ -5,8 +5,11 @@ import {
   requestConnectedFrame,
   stopPropagation,
 } from '@blocksuite/affine-shared/utils';
-import { WithDisposable } from '@blocksuite/block-std';
-import { Bound, getCommonBound } from '@blocksuite/global/utils';
+import {
+  Bound,
+  getCommonBound,
+  WithDisposable,
+} from '@blocksuite/global/utils';
 import { baseTheme } from '@toeverything/theme';
 import { css, html, LitElement, nothing, unsafeCSS } from 'lit';
 import { property, state } from 'lit/decorators.js';

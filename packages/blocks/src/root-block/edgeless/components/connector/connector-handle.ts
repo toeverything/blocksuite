@@ -1,7 +1,6 @@
 import type { ConnectorElementModel } from '@blocksuite/affine-model';
 
-import { WithDisposable } from '@blocksuite/block-std';
-import { DisposableGroup, Vec } from '@blocksuite/global/utils';
+import { DisposableGroup, Vec, WithDisposable } from '@blocksuite/global/utils';
 import { css, html, LitElement } from 'lit';
 import { property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';

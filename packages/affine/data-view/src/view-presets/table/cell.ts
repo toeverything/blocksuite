@@ -1,9 +1,9 @@
+import { ShadowlessElement } from '@blocksuite/block-std';
 import {
-  ShadowlessElement,
+  assertExists,
   SignalWatcher,
   WithDisposable,
-} from '@blocksuite/block-std';
-import { assertExists } from '@blocksuite/global/utils';
+} from '@blocksuite/global/utils';
 import { computed } from '@preact/signals-core';
 import { css } from 'lit';
 import { property, state } from 'lit/decorators.js';

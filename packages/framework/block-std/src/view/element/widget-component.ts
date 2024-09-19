@@ -1,5 +1,6 @@
 import type { BlockModel, Doc } from '@blocksuite/store';
 
+import { SignalWatcher, WithDisposable } from '@blocksuite/global/utils';
 import { consume } from '@lit/context';
 import { LitElement } from 'lit';
 
@@ -8,8 +9,6 @@ import type { BlockService } from '../../extension/index.js';
 import type { BlockStdScope } from '../../scope/index.js';
 import type { BlockComponent } from './block-component.js';
 
-import { SignalWatcher } from '../signal-watcher.js';
-import { WithDisposable } from '../utils/with-disposable.js';
 import { modelContext, serviceContext } from './consts.js';
 import { docContext, stdContext } from './lit-host.js';
 

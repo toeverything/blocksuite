@@ -1,18 +1,18 @@
 import type { Doc } from '@blocksuite/store';
 
 import { CommonUtils } from '@blocksuite/affine-block-surface';
-import {
-  type EditorHost,
-  ShadowlessElement,
-  WithDisposable,
-} from '@blocksuite/block-std';
+import { type EditorHost, ShadowlessElement } from '@blocksuite/block-std';
 import {
   DocModeProvider,
   EdgelessRootService,
   EditPropsStore,
   type FrameBlockModel,
 } from '@blocksuite/blocks';
-import { Bound, DisposableGroup } from '@blocksuite/global/utils';
+import {
+  Bound,
+  DisposableGroup,
+  WithDisposable,
+} from '@blocksuite/global/utils';
 import { css, html, nothing, type PropertyValues } from 'lit';
 import { property, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';

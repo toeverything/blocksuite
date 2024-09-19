@@ -2,12 +2,12 @@ import { SmallScissorsIcon } from '@blocksuite/affine-components/icons';
 import { EDGELESS_BLOCK_CHILD_PADDING } from '@blocksuite/affine-shared/consts';
 import { TelemetryProvider } from '@blocksuite/affine-shared/services';
 import { getRectByBlockComponent } from '@blocksuite/affine-shared/utils';
-import { WithDisposable } from '@blocksuite/block-std';
 import {
   deserializeXYWH,
   DisposableGroup,
   Point,
   serializeXYWH,
+  WithDisposable,
 } from '@blocksuite/global/utils';
 import { css, html, LitElement, nothing, type PropertyValues } from 'lit';
 import { property, state } from 'lit/decorators.js';

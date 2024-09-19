@@ -8,7 +8,8 @@ import type {
 import type { EditorHost } from '@blocksuite/block-std';
 
 import { toast } from '@blocksuite/affine-components/toast';
-import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
+import { ShadowlessElement } from '@blocksuite/block-std';
+import { WithDisposable } from '@blocksuite/global/utils';
 import { html } from 'lit';
 import { property, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';

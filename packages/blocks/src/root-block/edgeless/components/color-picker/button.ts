@@ -1,6 +1,6 @@
 import type { EditorMenuButton } from '@blocksuite/affine-components/toolbar';
 
-import { WithDisposable } from '@blocksuite/block-std';
+import { WithDisposable } from '@blocksuite/global/utils';
 import { html, LitElement } from 'lit';
 import { property, query, state } from 'lit/decorators.js';
 import { choose } from 'lit/directives/choose.js';

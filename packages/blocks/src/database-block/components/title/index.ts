@@ -4,7 +4,7 @@ import type { Text } from '@blocksuite/store';
 
 import { getViewportElement } from '@blocksuite/affine-shared/utils';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
-import { assertExists } from '@blocksuite/global/utils';
+import { assertExists, WithDisposable } from '@blocksuite/global/utils';
 import { effect } from '@preact/signals-core';
 import { css, html } from 'lit';
 import { property, query, state } from 'lit/decorators.js';

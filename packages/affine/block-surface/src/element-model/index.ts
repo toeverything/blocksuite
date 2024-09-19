@@ -2,12 +2,12 @@ import {
   BrushElementModel,
   ConnectorElementModel,
   GroupElementModel,
+  MindmapElementModel,
   ShapeElementModel,
   TextElementModel,
 } from '@blocksuite/affine-model';
 
 import { SurfaceElementModel } from './base.js';
-import { MindmapElementModel } from './mindmap.js';
 
 export const elementsCtorMap = {
   group: GroupElementModel,

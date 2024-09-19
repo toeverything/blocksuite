@@ -1,6 +1,5 @@
 import type { BlockModel, Doc } from '@blocksuite/store';
 
-import { SignalWatcher, WithDisposable } from '@blocksuite/block-std';
 import {
   createButtonPopper,
   type NoteBlockModel,
@@ -9,6 +8,7 @@ import {
   once,
   ThemeObserver,
 } from '@blocksuite/blocks';
+import { SignalWatcher, WithDisposable } from '@blocksuite/global/utils';
 import { baseTheme } from '@toeverything/theme';
 import { css, html, LitElement, nothing, unsafeCSS } from 'lit';
 import { property, query, state } from 'lit/decorators.js';

@@ -1,9 +1,6 @@
-import {
-  type EditorHost,
-  ShadowlessElement,
-  WithDisposable,
-} from '@blocksuite/block-std';
+import { type EditorHost, ShadowlessElement } from '@blocksuite/block-std';
 import { FramePreview } from '@blocksuite/blocks';
+import { WithDisposable } from '@blocksuite/global/utils';
 import { baseTheme } from '@toeverything/theme';
 import { css, html, unsafeCSS } from 'lit';
 import { property } from 'lit/decorators.js';

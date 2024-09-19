@@ -9,6 +9,7 @@ import {
   edgelessCommonSetup,
   Shape,
   shiftClickView,
+  triggerComponentToolbarAction,
   zoomResetByKeyboard,
 } from 'utils/actions/edgeless.js';
 import {
@@ -75,6 +76,13 @@ test.describe('frame copy and paste', () => {
   }) => {
     await createFrame(page, [50, 50], [450, 450]);
     await createShapeElement(page, [200, 200], [300, 300], Shape.Square);
+    await createShapeElement(page, [250, 250], [350, 350], Shape.Square);
+    await createShapeElement(page, [300, 300], [400, 400], Shape.Square);
+    await pressEscape(page);
+
+    await shiftClickView(page, [260, 260]);
+    await shiftClickView(page, [310, 310]);
+    await triggerComponentToolbarAction(page, 'addGroup');
     await pressEscape(page);
 
     await clickView(page, [60, 60]);
@@ -86,18 +94,21 @@ test.describe('frame copy and paste', () => {
 
     await shiftClickView(page, [60, 60]);
     await shiftClickView(page, [250, 250]);
+    await shiftClickView(page, [350, 350]);
     await pressBackspace(page);
 
     await selectAllByKeyboard(page);
     await assertSelectedBound(page, [600, 600, 100, 100], 0); // shape
-    await assertSelectedBound(page, [450, 450, 400, 400], 1); // frame
+    await assertSelectedBound(page, [650, 650, 150, 150], 1); // group
+    await assertSelectedBound(page, [450, 450, 400, 400], 2); // frame
 
     await clickView(page, [460, 460]);
     await dragBetweenViewCoords(page, [460, 460], [510, 510]);
 
     await selectAllByKeyboard(page);
     await assertSelectedBound(page, [650, 650, 100, 100], 0); // shape
-    await assertSelectedBound(page, [500, 500, 400, 400], 1); // frame
+    await assertSelectedBound(page, [700, 700, 150, 150], 1); // group
+    await assertSelectedBound(page, [500, 500, 400, 400], 2); // frame
   });
 
   test('duplicate element in frame', async ({ page }) => {

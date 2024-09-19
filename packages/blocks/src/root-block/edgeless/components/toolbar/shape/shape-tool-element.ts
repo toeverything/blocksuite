@@ -5,8 +5,7 @@ import {
   type ShapeName,
   type ShapeStyle,
 } from '@blocksuite/affine-model';
-import { WithDisposable } from '@blocksuite/block-std';
-import { Bound, sleep } from '@blocksuite/global/utils';
+import { Bound, sleep, WithDisposable } from '@blocksuite/global/utils';
 import {
   css,
   html,

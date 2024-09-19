@@ -11,10 +11,7 @@ import {
   Overlay,
   type RoughCanvas,
 } from '@blocksuite/affine-block-surface';
-import {
-  ConnectorPathGenerator,
-  MindmapElementModel,
-} from '@blocksuite/affine-block-surface';
+import { ConnectorPathGenerator } from '@blocksuite/affine-block-surface';
 import {
   AutoCompleteArrowIcon,
   MindMapChildIcon,
@@ -24,12 +21,17 @@ import {
 import {
   DEFAULT_SHAPE_STROKE_COLOR,
   LayoutType,
+  MindmapElementModel,
   ShapeElementModel,
   shapeMethods,
 } from '@blocksuite/affine-model';
 import { handleNativeRangeAtPoint } from '@blocksuite/affine-shared/utils';
-import { WithDisposable } from '@blocksuite/block-std';
-import { assertExists, DisposableGroup, Vec } from '@blocksuite/global/utils';
+import {
+  assertExists,
+  DisposableGroup,
+  Vec,
+  WithDisposable,
+} from '@blocksuite/global/utils';
 import { css, html, LitElement, nothing } from 'lit';
 import { property, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';

@@ -1,7 +1,8 @@
 import type { TemplateResult } from 'lit';
 
 import { popFilterableSimpleMenu } from '@blocksuite/affine-components/context-menu';
-import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
+import { ShadowlessElement } from '@blocksuite/block-std';
+import { WithDisposable } from '@blocksuite/global/utils';
 import {
   ArrowDownSmallIcon,
   ConvertIcon,

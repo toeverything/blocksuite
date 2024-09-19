@@ -1,22 +1,19 @@
-import type { MindmapNode } from '@blocksuite/affine-block-surface';
 import type {
   EdgelessTextBlockModel,
   FrameBlockModel,
+  MindmapNode,
   NoteBlockModel,
 } from '@blocksuite/affine-model';
 import type { PointerEventState } from '@blocksuite/block-std';
 import type { PointTestOptions } from '@blocksuite/block-std/gfx';
 import type { IVec } from '@blocksuite/global/utils';
 
-import {
-  ConnectorUtils,
-  MindmapElementModel,
-  MindmapUtils,
-} from '@blocksuite/affine-block-surface';
+import { ConnectorUtils, MindmapUtils } from '@blocksuite/affine-block-surface';
 import { focusTextModel } from '@blocksuite/affine-components/rich-text';
 import {
   ConnectorElementModel,
   GroupElementModel,
+  MindmapElementModel,
   ShapeElementModel,
   TextElementModel,
 } from '@blocksuite/affine-model';
@@ -900,7 +897,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
         );
 
         if (subtree) {
-          MindmapElementModel.createFromTree(
+          MindmapUtils.createFromTree(
             subtree,
             mindmap.style,
             mindmap.layoutType,
@@ -1040,11 +1037,6 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
         );
       } else {
         getAllDescendantElements(element).forEach(ele => {
-          if (ele.group instanceof MindmapElementModel) {
-            getAllDescendantElements(ele.group).forEach(_el =>
-              toBeMoved.add(_el)
-            );
-          }
           toBeMoved.add(ele);
         });
       }

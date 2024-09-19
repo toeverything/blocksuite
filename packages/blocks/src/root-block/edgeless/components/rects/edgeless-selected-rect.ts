@@ -33,13 +33,13 @@ import {
   requestThrottledConnectedFrame,
   stopPropagation,
 } from '@blocksuite/affine-shared/utils';
-import { WithDisposable } from '@blocksuite/block-std';
 import {
   assertType,
   Bound,
   deserializeXYWH,
   pickValues,
   Slot,
+  WithDisposable,
 } from '@blocksuite/global/utils';
 import { css, html, LitElement, nothing } from 'lit';
 import { property, state } from 'lit/decorators.js';

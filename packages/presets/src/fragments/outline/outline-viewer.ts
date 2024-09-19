@@ -1,10 +1,6 @@
-import {
-  PropTypes,
-  requiredProperties,
-  SignalWatcher,
-  WithDisposable,
-} from '@blocksuite/block-std';
+import { PropTypes, requiredProperties } from '@blocksuite/block-std';
 import { NoteDisplayMode, scrollbarStyle } from '@blocksuite/blocks';
+import { SignalWatcher, WithDisposable } from '@blocksuite/global/utils';
 import { signal } from '@preact/signals-core';
 import { css, html, LitElement, nothing } from 'lit';
 import { property, query, state } from 'lit/decorators.js';

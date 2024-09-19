@@ -66,7 +66,9 @@
     "!dist/__tests__"
   ],
   "dependencies": {
+    "@preact/signals-core": "^1.8.0",
     "lib0": "^0.2.97",
+    "lit": "^3.2.0",
     "zod": "^3.23.8"
   }
 }

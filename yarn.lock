@@ -1777,6 +1777,7 @@ __metadata:
     "@blocksuite/global": "workspace:*"
     "@blocksuite/inline": "workspace:*"
     "@blocksuite/store": "workspace:*"
+    fractional-indexing: "npm:^3.2.0"
     zod: "npm:^3.23.8"
   languageName: unknown
   linkType: soft
@@ -1954,7 +1955,9 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@blocksuite/global@workspace:packages/framework/global"
   dependencies:
+    "@preact/signals-core": "npm:^1.8.0"
     lib0: "npm:^0.2.97"
+    lit: "npm:^3.2.0"
     zod: "npm:^3.23.8"
   languageName: unknown
   linkType: soft
@@ -2030,6 +2033,7 @@ __metadata:
   resolution: "@blocksuite/presets@workspace:packages/presets"
   dependencies:
     "@blocksuite/affine-block-surface": "workspace:*"
+    "@blocksuite/affine-model": "workspace:*"
     "@blocksuite/affine-shared": "workspace:*"
     "@blocksuite/block-std": "workspace:*"
     "@blocksuite/blocks": "workspace:*"

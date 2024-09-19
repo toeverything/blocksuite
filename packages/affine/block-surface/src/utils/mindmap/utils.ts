@@ -1,11 +1,25 @@
-import { LayoutType, type ShapeElementModel } from '@blocksuite/affine-model';
-import { generateKeyBetween, type GfxModel } from '@blocksuite/block-std/gfx';
+import {
+  applyNodeStyle,
+  LayoutType,
+  type MindmapElementModel,
+  type MindmapNode,
+  type MindmapRoot,
+  type MindmapStyle,
+  type NodeDetail,
+  type NodeType,
+  type ShapeElementModel,
+} from '@blocksuite/affine-model';
+import {
+  generateKeyBetween,
+  type GfxModel,
+  type SurfaceBlockModel,
+} from '@blocksuite/block-std/gfx';
 import { assertType } from '@blocksuite/global/utils';
+import { DocCollection } from '@blocksuite/store';
 
-import type { MindmapElementModel, NodeType } from '../../mindmap.js';
-import type { MindmapNode, NodeDetail } from './layout.js';
-
-import { ConnectorPathGenerator } from '../../../managers/connector-manager.js';
+import { ConnectorPathGenerator } from '../../managers/connector-manager.js';
+import { fitContent } from '../../renderer/elements/shape/utils.js';
+import { layout } from './layout.js';
 
 export function getHoveredArea(
   target: ShapeElementModel,
@@ -216,6 +230,36 @@ function moveTree(
   return mindmap.nodeMap.get(tree.id);
 }
 
+export function applyStyle(
+  mindmap: MindmapElementModel,
+  shouldFitContent: boolean = false
+) {
+  mindmap.surface.doc.transact(() => {
+    const style = mindmap.styleGetter;
+    if (!style) return;
+    applyNodeStyle(mindmap.tree, style.root);
+    if (shouldFitContent) {
+      fitContent(mindmap.tree.element as ShapeElementModel);
+    }
+
+    const walk = (node: MindmapNode, path: number[]) => {
+      node.children.forEach((child, idx) => {
+        const currentPath = [...path, idx];
+        const nodeStyle = style.getNodeStyle(child, currentPath);
+
+        applyNodeStyle(child, nodeStyle.node);
+        if (shouldFitContent) {
+          fitContent(child.element as ShapeElementModel);
+        }
+
+        walk(child, currentPath);
+      });
+    };
+
+    walk(mindmap.tree, [0]);
+  });
+}
+
 function addTree(
   mindmap: MindmapElementModel,
   parent: string | MindmapNode,
@@ -254,9 +298,7 @@ function addTree(
       nodeId = node.id;
     }
 
-    node.children?.forEach(child => {
-      traverse(child, nodeId);
-    });
+    node.children?.forEach(child => traverse(child, nodeId));
 
     return nodeId;
   };
@@ -267,7 +309,7 @@ function addTree(
       traverse(tree, parent, sibling);
     });
 
-    mindmap.applyStyle();
+    applyStyle(mindmap);
     mindmap.layout();
 
     return mindmap.nodeMap.get(tree.id);
@@ -317,6 +359,61 @@ export function detachMindmap(
   delete subtree.detail.parent;
 
   return subtree;
+}
+
+export function handleLayout(
+  mindmap: MindmapElementModel,
+  tree?: MindmapNode | MindmapRoot,
+  shouldApplyStyle = true,
+  layoutType?: LayoutType
+) {
+  if (!tree || !tree.element) return;
+
+  if (shouldApplyStyle) {
+    applyStyle(mindmap, true);
+  }
+
+  mindmap.surface.doc.transact(() => {
+    const path = mindmap.getPath(tree.id);
+    layout(tree, mindmap, layoutType ?? mindmap.getLayoutDir(tree.id), path);
+  });
+}
+
+export function createFromTree(
+  tree: MindmapNode,
+  style: MindmapStyle,
+  layoutType: LayoutType,
+  surface: SurfaceBlockModel
+) {
+  const children = new DocCollection.Y.Map();
+  const traverse = (subtree: MindmapNode, parent?: string) => {
+    const value: NodeDetail = {
+      ...subtree.detail,
+      parent,
+    };
+
+    if (!parent) {
+      delete value.parent;
+    }
+
+    children.set(subtree.id, value);
+
+    subtree.children.forEach(child => traverse(child, subtree.id));
+  };
+
+  traverse(tree);
+
+  const mindmapId = surface.addElement({
+    type: 'mindmap',
+    children,
+    layoutType,
+    style,
+  });
+  const mindmap = surface.getElementById(mindmapId) as MindmapElementModel;
+  mindmap.setLayoutHandler(handleLayout);
+  mindmap.layout();
+
+  return mindmap;
 }
 
 /**
