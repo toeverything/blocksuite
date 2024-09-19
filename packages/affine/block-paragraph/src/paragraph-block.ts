@@ -140,6 +140,7 @@ export class ParagraphBlockComponent extends CaptionedBlockComponent<
   }
 
   override renderBlock(): TemplateResult<1> {
+    const arabicRegex = /^[\u0600-\u06FF]$/;
     const { type$ } = this.model;
     const children = html`<div
       class="affine-block-children-container"
@@ -150,7 +151,13 @@ export class ParagraphBlockComponent extends CaptionedBlockComponent<
 
     return html`
       <div class="affine-paragraph-block-container">
-        <div class="affine-paragraph-rich-text-wrapper ${type$.value}">
+        <div
+          class="affine-paragraph-rich-text-wrapper ${arabicRegex.test(
+            this.model.text.yText.toJSON()[0]
+          )
+            ? 'rtl'
+            : ''} ${type$.value}"
+        >
           <rich-text
             .yText=${this.model.text.yText}
             .inlineEventSource=${this.topContenteditableElement ?? nothing}
