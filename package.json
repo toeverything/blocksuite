@@ -30,7 +30,7 @@
     "test:node": "tsx ./scripts/node-import-test.ts",
     "format": "prettier . --write",
     "build": "yarn build:packages && yarn build:playground",
-    "build:packages": "yarn workspace @blocksuite/presets build",
+    "build:packages": "yarn workspace @blocksuite/affine build",
     "build:playground": "yarn workspace @blocksuite/playground build",
     "build:docs": "yarn workspace @blocksuite/docs build",
     "size:generate": "./scripts/size-generate.sh",

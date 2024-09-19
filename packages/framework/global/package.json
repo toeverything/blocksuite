@@ -16,16 +16,17 @@
   },
   "sideEffects": false,
   "exports": {
-    ".": "./index.d.ts",
-    "./utils": "./src/utils.ts",
+    ".": "./src/index.ts",
+    "./utils": "./src/utils/index.ts",
     "./env": "./src/env/index.ts",
     "./exceptions": "./src/exceptions/index.ts",
-    "./di": "./src/di/index.ts"
+    "./di": "./src/di/index.ts",
+    "./types": "./src/types/index.ts"
   },
   "typesVersions": {
     "*": {
       "utils": [
-        "dist/utils.d.ts"
+        "dist/utils/index.d.ts"
       ],
       "env": [
         "dist/env/index.d.ts"
@@ -43,7 +44,10 @@
   "publishConfig": {
     "access": "public",
     "exports": {
-      ".": "./index.d.ts",
+      ".": {
+        "types": "./dist/index.d.ts",
+        "import": "./dist/index.js"
+      },
       "./utils": {
         "types": "./dist/utils.d.ts",
         "import": "./dist/utils.js"
@@ -59,6 +63,10 @@
       "./di": {
         "types": "./dist/di/index.d.ts",
         "import": "./dist/di/index.js"
+      },
+      "./types": {
+        "types": "./dist/types/index.d.ts",
+        "import": "./dist/types/index.js"
       }
     }
   },

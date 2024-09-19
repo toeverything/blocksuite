@@ -1,5 +1,6 @@
 import type { DatabaseBlockModel, ListType, RichText } from '@blocks/index.js';
 import type { EditorHost, ExtensionType } from '@blocksuite/block-std';
+import type { BlockSuiteFlags } from '@blocksuite/global/types';
 import type { AffineEditorContainer } from '@blocksuite/presets';
 import type { InlineRange, InlineRootElement } from '@inline/index.js';
 import type { CustomFramePanel } from '@playground/apps/_common/components/custom-frame-panel.js';

@@ -1,4 +1,4 @@
-declare type BlockSuiteFlags = {
+export interface BlockSuiteFlags {
   enable_synced_doc_block: boolean;
   enable_pie_menu: boolean;
   enable_database_number_formatting: boolean;
@@ -13,4 +13,4 @@ declare type BlockSuiteFlags = {
   enable_color_picker: boolean;
   enable_mind_map_import: boolean;
   readonly: Record<string, boolean>;
-};
+}
