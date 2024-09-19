@@ -330,7 +330,7 @@ export class DatabaseBlockComponent extends CaptionedBlockComponent<
         const padding =
           this.getBoundingClientRect().left -
           this.host.getBoundingClientRect().left;
-        this.virtualPadding$.value = padding;
+        this.virtualPadding$.value = Math.max(0, padding - 72);
       })
     );
   }
