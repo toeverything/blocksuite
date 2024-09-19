@@ -4,12 +4,13 @@ import { BlockServiceWatcher, BlockStdScope } from '@blocksuite/block-std';
 import { type EditorHost, ShadowlessElement } from '@blocksuite/block-std';
 import {
   Bound,
+  debounce,
   deserializeXYWH,
   DisposableGroup,
   WithDisposable,
 } from '@blocksuite/global/utils';
 import { BlockViewType, type Doc, type Query } from '@blocksuite/store';
-import { css, html, nothing } from 'lit';
+import { css, html, nothing, type PropertyValues } from 'lit';
 import { property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
@@ -75,7 +76,11 @@ export class FramePreview extends WithDisposable(ShadowlessElement) {
 
   private _frameDisposables: DisposableGroup | null = null;
 
-  private _getViewportWH = () => {
+  private _previewDoc: Doc | null = null;
+
+  private _previewSpec = SpecProvider.getInstance().getSpec('edgeless:preview');
+
+  private _updateFrameViewportWH = () => {
     const [, , w, h] = deserializeXYWH(this.frame.xywh);
 
     let scale = 1;
@@ -85,15 +90,11 @@ export class FramePreview extends WithDisposable(ShadowlessElement) {
       scale = Math.min(this.surfaceWidth / w, this.surfaceHeight / h);
     }
 
-    return {
+    this.frameViewportWH = {
       width: w * scale,
       height: h * scale,
     };
   };
-
-  private _previewDoc: Doc | null = null;
-
-  private _previewSpec = SpecProvider.getInstance().getSpec('edgeless:preview');
 
   get _originalDoc() {
     return this.frame.doc;
@@ -150,7 +151,7 @@ export class FramePreview extends WithDisposable(ShadowlessElement) {
 
   private _renderSurfaceContent() {
     if (!this._previewDoc || !this.frame) return nothing;
-    const { width, height } = this._getViewportWH();
+    const { width, height } = this.frameViewportWH;
 
     const _previewSpec = this._previewSpec.value;
     return html`<div
@@ -179,9 +180,7 @@ export class FramePreview extends WithDisposable(ShadowlessElement) {
     this._clearFrameDisposables();
     this._frameDisposables = new DisposableGroup();
     this._frameDisposables.add(
-      frame.propsUpdated.on(() => {
-        this._refreshViewport();
-      })
+      frame.propsUpdated.on(debounce(this._updateFrameViewportWH, 10))
     );
   }
 
@@ -189,16 +188,13 @@ export class FramePreview extends WithDisposable(ShadowlessElement) {
     super.connectedCallback();
     this._initSpec();
     this._initPreviewDoc();
+    this._updateFrameViewportWH();
+    this._setFrameDisposables(this.frame);
   }
 
   override disconnectedCallback() {
     super.disconnectedCallback();
     this._clearFrameDisposables();
-  }
-
-  override firstUpdated() {
-    this._refreshViewport();
-    this._setFrameDisposables(this.frame);
   }
 
   override render() {
@@ -210,8 +206,11 @@ export class FramePreview extends WithDisposable(ShadowlessElement) {
     </div>`;
   }
 
-  override willUpdate(_changedProperties: Map<PropertyKey, unknown>): void {
+  override updated(_changedProperties: PropertyValues) {
     if (_changedProperties.has('frame')) {
+      this._setFrameDisposables(this.frame);
+    }
+    if (_changedProperties.has('frameViewportWH')) {
       this._refreshViewport();
     }
   }
@@ -221,6 +220,12 @@ export class FramePreview extends WithDisposable(ShadowlessElement) {
 
   @property({ attribute: false })
   accessor frame!: FrameBlockModel;
+
+  @state()
+  accessor frameViewportWH = {
+    width: 0,
+    height: 0,
+  };
 
   @query('editor-host')
   accessor previewEditor: EditorHost | null = null;
