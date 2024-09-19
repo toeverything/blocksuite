@@ -3,7 +3,7 @@ import type { InlineRange } from '@blocksuite/inline';
 import type { Text } from '@blocksuite/store';
 
 import { getViewportElement } from '@blocksuite/affine-shared/utils';
-import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
+import { ShadowlessElement } from '@blocksuite/block-std';
 import { assertExists, WithDisposable } from '@blocksuite/global/utils';
 import { effect } from '@preact/signals-core';
 import { css, html } from 'lit';

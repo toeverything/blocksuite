@@ -1,10 +1,10 @@
+import { signal, type Signal } from '@preact/signals-core';
 /* eslint-disable @stylistic/ts/lines-between-class-members */
 /* eslint-disable perfectionist/sort-classes */
 import type * as Y from 'yjs';
 
 import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 import { assertExists, DisposableGroup, Slot } from '@blocksuite/global/utils';
-import { type Signal, signal } from '@lit-labs/preact-signals';
 import { nothing, render, type TemplateResult } from 'lit';
 
 import type { VLine } from './components/v-line.js';

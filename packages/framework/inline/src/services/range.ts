@@ -1,7 +1,7 @@
 /* eslint-disable perfectionist/sort-classes */
 /* eslint-disable @stylistic/ts/lines-between-class-members */
 import { assertExists } from '@blocksuite/global/utils';
-import { effect } from '@lit-labs/preact-signals';
+import { effect } from '@preact/signals-core';
 import * as Y from 'yjs';
 
 import type { VLine } from '../components/v-line.js';
