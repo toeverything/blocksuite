@@ -3,8 +3,7 @@ import {
   DownloadIcon,
   PaletteIcon,
 } from '@blocksuite/affine-components/icons';
-import { WithDisposable } from '@blocksuite/block-std';
-import { assertExists, Bound } from '@blocksuite/global/utils';
+import { assertExists, Bound, WithDisposable } from '@blocksuite/global/utils';
 import { html, LitElement, nothing, type TemplateResult } from 'lit';
 import { property } from 'lit/decorators.js';
 

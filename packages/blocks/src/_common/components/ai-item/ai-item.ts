@@ -3,8 +3,8 @@ import {
   EditorHost,
   PropTypes,
   requiredProperties,
-  WithDisposable,
 } from '@blocksuite/block-std';
+import { WithDisposable } from '@blocksuite/global/utils';
 import { css, html, LitElement, nothing } from 'lit';
 import { property, query } from 'lit/decorators.js';
 

@@ -1,10 +1,7 @@
 import type { BlockStdScope } from '@blocksuite/block-std';
 
-import {
-  ShadowlessElement,
-  SignalWatcher,
-  WithDisposable,
-} from '@blocksuite/block-std';
+import { ShadowlessElement } from '@blocksuite/block-std';
+import { SignalWatcher, WithDisposable } from '@blocksuite/global/utils';
 import { computed, type ReadonlySignal } from '@preact/signals-core';
 import { css, type TemplateResult, unsafeCSS } from 'lit';
 import { property, state } from 'lit/decorators.js';

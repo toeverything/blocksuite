@@ -11,9 +11,13 @@ import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import {
   RANGE_SYNC_EXCLUDE_ATTR,
   ShadowlessElement,
-  WithDisposable,
 } from '@blocksuite/block-std';
-import { assertExists, Bound, Vec } from '@blocksuite/global/utils';
+import {
+  assertExists,
+  Bound,
+  Vec,
+  WithDisposable,
+} from '@blocksuite/global/utils';
 import { DocCollection } from '@blocksuite/store';
 import { html, nothing } from 'lit';
 import { property, query } from 'lit/decorators.js';

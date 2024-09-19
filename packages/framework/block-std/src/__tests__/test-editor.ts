@@ -1,16 +1,13 @@
 import type { Doc } from '@blocksuite/store';
 
+import { SignalWatcher, WithDisposable } from '@blocksuite/global/utils';
 import { html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 import type { ExtensionType } from '../extension/index.js';
 
 import { BlockStdScope } from '../scope/index.js';
-import {
-  ShadowlessElement,
-  SignalWatcher,
-  WithDisposable,
-} from '../view/index.js';
+import { ShadowlessElement } from '../view/index.js';
 
 @customElement('test-editor-container')
 export class TestEditorContainer extends SignalWatcher(

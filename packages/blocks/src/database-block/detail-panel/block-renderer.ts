@@ -6,7 +6,8 @@ import type {
 } from '@blocksuite/data-view/view-presets';
 
 import { DefaultInlineManagerExtension } from '@blocksuite/affine-components/rich-text';
-import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
+import { ShadowlessElement } from '@blocksuite/block-std';
+import { WithDisposable } from '@blocksuite/global/utils';
 import { css, html } from 'lit';
 import { property } from 'lit/decorators.js';
 

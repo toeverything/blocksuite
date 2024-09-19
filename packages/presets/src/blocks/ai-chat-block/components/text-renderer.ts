@@ -1,10 +1,6 @@
 import type { AffineAIPanelState } from '@blocksuite/blocks';
 
-import {
-  BlockStdScope,
-  type EditorHost,
-  WithDisposable,
-} from '@blocksuite/block-std';
+import { BlockStdScope, type EditorHost } from '@blocksuite/block-std';
 import {
   CodeBlockComponent,
   DividerBlockComponent,
@@ -12,6 +8,7 @@ import {
   ParagraphBlockComponent,
   SpecProvider,
 } from '@blocksuite/blocks';
+import { WithDisposable } from '@blocksuite/global/utils';
 import { BlockViewType, type Doc, type Query } from '@blocksuite/store';
 import { css, html, LitElement, nothing, type PropertyValues } from 'lit';
 import { property, query } from 'lit/decorators.js';

@@ -1,8 +1,5 @@
-import {
-  ShadowlessElement,
-  SignalWatcher,
-  WithDisposable,
-} from '@blocksuite/block-std';
+import { ShadowlessElement } from '@blocksuite/block-std';
+import { SignalWatcher, WithDisposable } from '@blocksuite/global/utils';
 import { CenterPeekIcon, MoreHorizontalIcon } from '@blocksuite/icons/lit';
 import { css } from 'lit';
 import { property, state } from 'lit/decorators.js';

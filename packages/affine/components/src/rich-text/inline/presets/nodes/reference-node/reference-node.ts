@@ -2,9 +2,13 @@ import type { ReferenceInfo } from '@blocksuite/affine-model';
 import type { Doc, DocMeta } from '@blocksuite/store';
 
 import { getModelByElement } from '@blocksuite/affine-shared/utils';
-import { BLOCK_ID_ATTR, type BlockComponent } from '@blocksuite/block-std';
-import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
+import {
+  BLOCK_ID_ATTR,
+  type BlockComponent,
+  ShadowlessElement,
+} from '@blocksuite/block-std';
 import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
+import { WithDisposable } from '@blocksuite/global/utils';
 import {
   type DeltaInsert,
   INLINE_ROOT_ATTR,

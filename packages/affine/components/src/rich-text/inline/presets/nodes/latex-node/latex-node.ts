@@ -2,9 +2,8 @@ import {
   type BlockComponent,
   type BlockStdScope,
   ShadowlessElement,
-  SignalWatcher,
-  WithDisposable,
 } from '@blocksuite/block-std';
+import { SignalWatcher, WithDisposable } from '@blocksuite/global/utils';
 import {
   type DeltaInsert,
   type InlineEditor,

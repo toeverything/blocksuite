@@ -1,5 +1,5 @@
 import { type ShapeName, ShapeType } from '@blocksuite/affine-model';
-import { SignalWatcher } from '@blocksuite/block-std';
+import { SignalWatcher } from '@blocksuite/global/utils';
 import { css, html, LitElement } from 'lit';
 
 import type { DraggableShape } from './utils.js';

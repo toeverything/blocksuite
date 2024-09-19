@@ -1,4 +1,5 @@
 import type { MindmapStyle } from '@blocksuite/affine-model';
+import type { BlockStdScope } from '@blocksuite/block-std';
 import type { Bound } from '@blocksuite/global/utils';
 import type { BlockModel } from '@blocksuite/store';
 
@@ -7,9 +8,9 @@ import {
   EditPropsStore,
   TelemetryProvider,
 } from '@blocksuite/affine-shared/services';
-import { type BlockStdScope, SignalWatcher } from '@blocksuite/block-std';
 import { modelContext, stdContext } from '@blocksuite/block-std';
 import { ErrorCode } from '@blocksuite/global/exceptions';
+import { SignalWatcher } from '@blocksuite/global/utils';
 import { consume } from '@lit/context';
 import { computed } from '@preact/signals-core';
 import { css, html, LitElement, nothing, type TemplateResult } from 'lit';

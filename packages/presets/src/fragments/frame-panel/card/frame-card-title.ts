@@ -1,8 +1,8 @@
 import type { FrameBlockModel } from '@blocksuite/blocks';
 import type { Y } from '@blocksuite/store';
 
-import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
-import { DisposableGroup } from '@blocksuite/global/utils';
+import { ShadowlessElement } from '@blocksuite/block-std';
+import { DisposableGroup, WithDisposable } from '@blocksuite/global/utils';
 import { css, html, type PropertyValues } from 'lit';
 import { property, query } from 'lit/decorators.js';
 

@@ -8,8 +8,8 @@ import {
   modelContext,
   ShadowlessElement,
   stdContext,
-  WithDisposable,
 } from '@blocksuite/block-std';
+import { WithDisposable } from '@blocksuite/global/utils';
 import { Text } from '@blocksuite/store';
 import { consume } from '@lit/context';
 import { css, html, nothing } from 'lit';

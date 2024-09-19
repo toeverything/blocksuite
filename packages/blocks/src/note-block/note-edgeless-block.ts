@@ -16,12 +16,14 @@ import {
   matchFlavours,
   stopPropagation,
 } from '@blocksuite/affine-shared/utils';
+import { ShadowlessElement, toGfxBlockComponent } from '@blocksuite/block-std';
 import {
-  ShadowlessElement,
-  toGfxBlockComponent,
+  almostEqual,
+  Bound,
+  clamp,
+  Point,
   WithDisposable,
-} from '@blocksuite/block-std';
-import { almostEqual, Bound, clamp, Point } from '@blocksuite/global/utils';
+} from '@blocksuite/global/utils';
 import { css, html, nothing } from 'lit';
 import { property, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';

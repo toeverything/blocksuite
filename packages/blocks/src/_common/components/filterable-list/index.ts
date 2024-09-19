@@ -2,7 +2,7 @@ import {
   type AdvancedPortalOptions,
   createLitPortal,
 } from '@blocksuite/affine-components/portal';
-import { WithDisposable } from '@blocksuite/block-std';
+import { WithDisposable } from '@blocksuite/global/utils';
 import { DoneIcon, SearchIcon } from '@blocksuite/icons/lit';
 import { autoPlacement, offset, type Placement, size } from '@floating-ui/dom';
 import { html, LitElement, nothing } from 'lit';

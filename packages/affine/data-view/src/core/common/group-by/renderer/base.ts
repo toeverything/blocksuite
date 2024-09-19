@@ -1,8 +1,5 @@
-import {
-  ShadowlessElement,
-  SignalWatcher,
-  WithDisposable,
-} from '@blocksuite/block-std';
+import { ShadowlessElement } from '@blocksuite/block-std';
+import { SignalWatcher, WithDisposable } from '@blocksuite/global/utils';
 import { property } from 'lit/decorators.js';
 
 import type { GroupRenderProps } from '../types.js';

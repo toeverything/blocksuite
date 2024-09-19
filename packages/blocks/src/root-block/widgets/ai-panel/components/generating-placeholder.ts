@@ -3,7 +3,7 @@ import {
   LightLoadingIcon,
 } from '@blocksuite/affine-components/icons';
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
-import { WithDisposable } from '@blocksuite/block-std';
+import { WithDisposable } from '@blocksuite/global/utils';
 import { baseTheme, cssVar } from '@toeverything/theme';
 import {
   css,

@@ -1,15 +1,12 @@
 import type { FrameBlockModel } from '@blocksuite/affine-model';
 
 import { BlockServiceWatcher, BlockStdScope } from '@blocksuite/block-std';
-import {
-  type EditorHost,
-  ShadowlessElement,
-  WithDisposable,
-} from '@blocksuite/block-std';
+import { type EditorHost, ShadowlessElement } from '@blocksuite/block-std';
 import {
   Bound,
   deserializeXYWH,
   DisposableGroup,
+  WithDisposable,
 } from '@blocksuite/global/utils';
 import { BlockViewType, type Doc, type Query } from '@blocksuite/store';
 import { css, html, nothing } from 'lit';

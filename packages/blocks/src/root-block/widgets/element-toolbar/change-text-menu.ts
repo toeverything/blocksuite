@@ -25,8 +25,12 @@ import {
   ShapeElementModel,
   TextElementModel,
 } from '@blocksuite/affine-model';
-import { WithDisposable } from '@blocksuite/block-std';
-import { Bound, countBy, maxBy } from '@blocksuite/global/utils';
+import {
+  Bound,
+  countBy,
+  maxBy,
+  WithDisposable,
+} from '@blocksuite/global/utils';
 import { css, html, LitElement, nothing, type TemplateResult } from 'lit';
 import { property, query } from 'lit/decorators.js';
 import { choose } from 'lit/directives/choose.js';

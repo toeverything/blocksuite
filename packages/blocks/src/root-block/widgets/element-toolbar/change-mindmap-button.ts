@@ -15,8 +15,7 @@ import {
 import { renderToolbarSeparator } from '@blocksuite/affine-components/toolbar';
 import { LayoutType, MindmapStyle } from '@blocksuite/affine-model';
 import { EditPropsStore } from '@blocksuite/affine-shared/services';
-import { WithDisposable } from '@blocksuite/block-std';
-import { countBy, maxBy } from '@blocksuite/global/utils';
+import { countBy, maxBy, WithDisposable } from '@blocksuite/global/utils';
 import { css, html, LitElement, nothing, type TemplateResult } from 'lit';
 import { property, state } from 'lit/decorators.js';
 import { join } from 'lit/directives/join.js';

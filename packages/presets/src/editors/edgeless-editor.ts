@@ -1,11 +1,8 @@
 import type { Doc } from '@blocksuite/store';
 
-import {
-  BlockStdScope,
-  ShadowlessElement,
-  WithDisposable,
-} from '@blocksuite/block-std';
+import { BlockStdScope, ShadowlessElement } from '@blocksuite/block-std';
 import { EdgelessEditorBlockSpecs } from '@blocksuite/blocks';
+import { WithDisposable } from '@blocksuite/global/utils';
 import { css, html, nothing, type TemplateResult } from 'lit';
 import { property, state } from 'lit/decorators.js';
 import { guard } from 'lit/directives/guard.js';

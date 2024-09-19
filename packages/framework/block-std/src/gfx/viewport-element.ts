@@ -1,3 +1,4 @@
+import { WithDisposable } from '@blocksuite/global/utils';
 import { css, html, LitElement } from 'lit';
 import { property, query } from 'lit/decorators.js';
 
@@ -5,7 +6,6 @@ import type { EditorHost } from '../view/index.js';
 import type { GfxBlockElementModel } from './gfx-block-model.js';
 
 import { PropTypes, requiredProperties } from '../view/decorators/required.js';
-import { WithDisposable } from '../view/utils/with-disposable.js';
 import { Viewport } from './viewport.js';
 
 /**

@@ -5,8 +5,7 @@ import type {
 } from '@blocksuite/affine-model';
 
 import { LINE_COLORS, LineWidth } from '@blocksuite/affine-model';
-import { WithDisposable } from '@blocksuite/block-std';
-import { countBy, maxBy } from '@blocksuite/global/utils';
+import { countBy, maxBy, WithDisposable } from '@blocksuite/global/utils';
 import { html, LitElement, nothing } from 'lit';
 import { property, query, state } from 'lit/decorators.js';
 import { when } from 'lit/directives/when.js';

@@ -3,8 +3,13 @@ import type { BlockModel } from '@blocksuite/store';
 
 import { toast } from '@blocksuite/affine-components/toast';
 import { EmbedOptionProvider } from '@blocksuite/affine-shared/services';
-import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
-import { assertExists, Bound, Vec } from '@blocksuite/global/utils';
+import { ShadowlessElement } from '@blocksuite/block-std';
+import {
+  assertExists,
+  Bound,
+  Vec,
+  WithDisposable,
+} from '@blocksuite/global/utils';
 import { html } from 'lit';
 import { property, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';

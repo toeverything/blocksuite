@@ -4,9 +4,13 @@ import type {
 } from '@blocksuite/blocks';
 import type { Doc } from '@blocksuite/store';
 
-import { SignalWatcher, WithDisposable } from '@blocksuite/block-std';
 import { BlocksUtils, NoteDisplayMode } from '@blocksuite/blocks';
-import { Bound, DisposableGroup } from '@blocksuite/global/utils';
+import {
+  Bound,
+  DisposableGroup,
+  SignalWatcher,
+  WithDisposable,
+} from '@blocksuite/global/utils';
 import { effect, signal } from '@preact/signals-core';
 import { css, html, LitElement, nothing, type PropertyValues } from 'lit';
 import { property, query, state } from 'lit/decorators.js';

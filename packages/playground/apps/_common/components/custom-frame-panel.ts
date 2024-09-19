@@ -1,6 +1,7 @@
 import type { AffineEditorContainer } from '@blocksuite/presets';
 
-import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
+import { ShadowlessElement } from '@blocksuite/block-std';
+import { WithDisposable } from '@blocksuite/global/utils';
 import { effect } from '@preact/signals-core';
 import { css, html, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';

@@ -1,8 +1,5 @@
-import {
-  ShadowlessElement,
-  SignalWatcher,
-  WithDisposable,
-} from '@blocksuite/block-std';
+import { ShadowlessElement } from '@blocksuite/block-std';
+import { SignalWatcher, WithDisposable } from '@blocksuite/global/utils';
 import { css, html } from 'lit';
 import { property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';

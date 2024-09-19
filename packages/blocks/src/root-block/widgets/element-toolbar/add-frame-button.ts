@@ -1,8 +1,7 @@
 import { MindmapElementModel } from '@blocksuite/affine-block-surface';
 import { FrameIcon } from '@blocksuite/affine-components/icons';
 import { TelemetryProvider } from '@blocksuite/affine-shared/services';
-import { WithDisposable } from '@blocksuite/block-std';
-import { Bound } from '@blocksuite/global/utils';
+import { Bound, WithDisposable } from '@blocksuite/global/utils';
 import { css, html, LitElement, nothing } from 'lit';
 import { property } from 'lit/decorators.js';
 
