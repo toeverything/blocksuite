@@ -11,12 +11,6 @@ on:
       - 'scripts/**'
       - 'packages/docs/**'
   pull_request:
-    paths-ignore:
-      - '.husky'
-      - '.vscode'
-      - '**.md'
-      - 'scripts/**'
-      - 'packages/docs/**'
   workflow_dispatch:
 
 concurrency:
