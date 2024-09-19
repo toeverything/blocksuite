@@ -1,5 +1,13 @@
 # @blocksuite/inline
 
+## 0.17.13
+
+### Patch Changes
+
+- 9de68e3: Update mindmap uitls export
+- Updated dependencies [9de68e3]
+  - @blocksuite/global@0.17.13
+
 ## 0.17.12
 
 ### Patch Changes
