@@ -1,5 +1,21 @@
 # @blocksuite/global
 
+## 0.17.13
+
+### Patch Changes
+
+- 9de68e3: Update mindmap uitls export
+
+## 0.17.12
+
+### Patch Changes
+
+- c334c91: - fix(database): remove image column
+  - fix: frame preview should update correctly after mode switched
+  - refactor: move with-disposable and signal-watcher to global package
+  - fix(edgeless): failed to alt clone move frame when it contains container element
+  - fix: wrong size limit config
+
 ## 0.17.11
 
 ### Patch Changes

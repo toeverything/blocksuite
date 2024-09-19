@@ -133,50 +133,119 @@ test.describe('frame panel', () => {
     expect(await frameCards.count()).toBe(1);
   });
 
-  test('should render edgeless note correctly after mode switch', async ({
-    page,
-  }) => {
-    await edgelessCommonSetup(page);
-    await toggleFramePanel(page);
+  test.describe('frame panel behavior after mode switch', () => {
+    async function setupFrameTest(page: Page) {
+      await edgelessCommonSetup(page);
+      await toggleFramePanel(page);
 
-    await addNote(page, 'hello', 150, 500);
+      await addNote(page, 'hello', 150, 500);
+      await page.mouse.click(0, 0);
+      await waitNextFrame(page, 100);
 
-    await page.mouse.click(0, 0);
+      await setEdgelessTool(page, 'frame');
+      await dragBetweenCoords(
+        page,
+        { x: 100, y: 440 },
+        { x: 600, y: 600 },
+        { steps: 10 }
+      );
+      await waitNextFrame(page, 100);
 
-    await setEdgelessTool(page, 'frame');
-    await dragBetweenCoords(page, { x: 100, y: 440 }, { x: 600, y: 600 });
-    await waitNextFrame(page, 100);
-
-    const edgelessNote = page.locator('affine-frame-card affine-edgeless-note');
-    expect(await edgelessNote.count()).toBe(1);
-
-    const initialNoteRect = await edgelessNote.boundingBox();
-    expect(initialNoteRect).not.toBeNull();
-
-    const {
-      width: noteWidth,
-      height: noteHeight,
-      x: noteX,
-      y: noteY,
-    } = initialNoteRect!;
-
-    const checkNoteRect = async () => {
+      const edgelessNote = page.locator(
+        'affine-frame-card affine-edgeless-note'
+      );
       expect(await edgelessNote.count()).toBe(1);
 
-      const newNoteRect = await edgelessNote.boundingBox();
-      expect(newNoteRect).not.toBeNull();
+      return edgelessNote;
+    }
 
-      expect(newNoteRect!.width).toBe(noteWidth);
-      expect(newNoteRect!.height).toBe(noteHeight);
-      expect(newNoteRect!.x).toBe(noteX);
-      expect(newNoteRect!.y).toBe(noteY);
-    };
+    test('should render edgeless note correctly after mode switch', async ({
+      page,
+    }) => {
+      const edgelessNote = await setupFrameTest(page);
 
-    await switchEditorMode(page);
-    await checkNoteRect();
+      const initialNoteRect = await edgelessNote.boundingBox();
+      expect(initialNoteRect).not.toBeNull();
 
-    await switchEditorMode(page);
-    await checkNoteRect();
+      const {
+        width: noteWidth,
+        height: noteHeight,
+        x: noteX,
+        y: noteY,
+      } = initialNoteRect!;
+
+      const checkNoteRect = async () => {
+        expect(await edgelessNote.count()).toBe(1);
+
+        const newNoteRect = await edgelessNote.boundingBox();
+        expect(newNoteRect).not.toBeNull();
+
+        expect(newNoteRect!.width).toBe(noteWidth);
+        expect(newNoteRect!.height).toBe(noteHeight);
+        expect(newNoteRect!.x).toBe(noteX);
+        expect(newNoteRect!.y).toBe(noteY);
+      };
+
+      await switchEditorMode(page);
+      await checkNoteRect();
+
+      await switchEditorMode(page);
+      await checkNoteRect();
+    });
+
+    test('should update frame preview when note is moved', async ({ page }) => {
+      const edgelessNote = await setupFrameTest(page);
+
+      const initialNoteRect = await edgelessNote.boundingBox();
+      expect(initialNoteRect).not.toBeNull();
+
+      await switchEditorMode(page);
+      await switchEditorMode(page);
+
+      async function moveNoteAndCheck(
+        start: { x: number; y: number },
+        end: { x: number; y: number },
+        comparison: 'greaterThan' | 'lessThan'
+      ) {
+        await page.mouse.move(start.x, start.y);
+        await page.mouse.down();
+        await page.mouse.move(end.x, end.y);
+        await page.mouse.up();
+        await waitNextFrame(page);
+
+        const newNoteRect = await edgelessNote.boundingBox();
+        expect(newNoteRect).not.toBeNull();
+
+        if (comparison === 'greaterThan') {
+          expect(newNoteRect!.x).toBeGreaterThan(initialNoteRect!.x);
+          expect(newNoteRect!.y).toBeGreaterThan(initialNoteRect!.y);
+        } else {
+          expect(newNoteRect!.x).toBeLessThan(initialNoteRect!.x);
+          expect(newNoteRect!.y).toBeLessThan(initialNoteRect!.y);
+        }
+      }
+
+      // Move the note to the right
+      await moveNoteAndCheck(
+        { x: 150, y: 500 },
+        { x: 200, y: 550 },
+        'greaterThan'
+      );
+
+      // Move the note back to the left
+      await moveNoteAndCheck(
+        { x: 200, y: 550 },
+        { x: 100, y: 450 },
+        'lessThan'
+      );
+
+      // Move the note diagonally
+      await moveNoteAndCheck(
+        { x: 100, y: 450 },
+        { x: 250, y: 600 },
+        'greaterThan'
+      );
+    });
   });
 
   test.describe('select and de-select frame', () => {

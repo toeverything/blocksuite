@@ -15,6 +15,7 @@ import {
 } from '@blocksuite/global/utils';
 import { css, html, nothing, type PropertyValues } from 'lit';
 import { property, query, state } from 'lit/decorators.js';
+import { keyed } from 'lit/directives/keyed.js';
 import { repeat } from 'lit/directives/repeat.js';
 
 import type {
@@ -152,9 +153,9 @@ export class FramePanelBody extends WithDisposable(ShadowlessElement) {
   }
 
   get frames() {
-    const frames = this.editorHost.doc.getBlockByFlavour(
-      'affine:frame'
-    ) as FrameBlockModel[];
+    const frames = this.editorHost.doc
+      .getBlocksByFlavour('affine:frame')
+      .map(block => block.model as FrameBlockModel);
     return frames.sort(this.compare);
   }
 
@@ -257,12 +258,11 @@ export class FramePanelBody extends WithDisposable(ShadowlessElement) {
 
   private _renderFrameList() {
     const selectedFrames = new Set(this._selected);
-    const frameCards = html`${repeat(
-      this._frameItems,
-      frameItem => [frameItem.frame.id, frameItem.cardIndex].join('-'),
-      frameItem => {
-        const { frame, frameIndex, cardIndex } = frameItem;
-        return html`<affine-frame-card
+    const frameCards = html`${repeat(this._frameItems, frameItem => {
+      const { frame, frameIndex, cardIndex } = frameItem;
+      return keyed(
+        frame,
+        html`<affine-frame-card
           data-frame-id=${frame.id}
           .frame=${frame}
           .cardIndex=${cardIndex}
@@ -275,9 +275,9 @@ export class FramePanelBody extends WithDisposable(ShadowlessElement) {
           @select=${this._selectFrame}
           @fitview=${this._fitToElement}
           @drag=${this._drag}
-        ></affine-frame-card>`;
-      }
-    )}`;
+        ></affine-frame-card>`
+      );
+    })}`;
 
     const frameList = html` <div class="frame-list-container">
       ${this.insertIndex !== undefined

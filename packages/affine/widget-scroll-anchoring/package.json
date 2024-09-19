@@ -1,9 +1,13 @@
 {
   "name": "@blocksuite/affine-widget-scroll-anchoring",
-  "version": "0.17.11",
-  "description": "Affine scroll anchroing widget.",
+  "version": "0.17.13",
+  "description": "Affine scroll anchoring widget.",
   "type": "module",
-  "repository": "toeverything/blocksuite",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/toeverything/blocksuite.git",
+    "directory": "packages/affine/widget-scroll-anchoring"
+  },
   "scripts": {
     "build": "tsc",
     "test:unit": "nx vite:test --run --passWithNoTests",

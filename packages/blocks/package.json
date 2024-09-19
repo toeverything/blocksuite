@@ -1,9 +1,13 @@
 {
   "name": "@blocksuite/blocks",
-  "version": "0.17.11",
+  "version": "0.17.13",
   "description": "Default BlockSuite editable blocks.",
   "type": "module",
-  "repository": "toeverything/blocksuite",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/toeverything/blocksuite.git",
+    "directory": "packages/blocks"
+  },
   "scripts": {
     "build": "tsc",
     "test:unit": "nx vite:test --run",
@@ -38,7 +42,7 @@
     "@types/mdast": "^4.0.4",
     "@types/sortablejs": "^1.15.8",
     "collapse-white-space": "^2.1.0",
-    "date-fns": "^3.6.0",
+    "date-fns": "^4.0.0",
     "dompurify": "^3.1.6",
     "fflate": "^0.8.2",
     "file-type": "^19.4.1",

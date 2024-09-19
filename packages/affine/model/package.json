@@ -1,9 +1,13 @@
 {
   "name": "@blocksuite/affine-model",
-  "version": "0.17.11",
-  "description": "Default BlockSuite editable blocks.",
+  "version": "0.17.13",
+  "description": "Models for BlockSuite in Affine.",
   "type": "module",
-  "repository": "toeverything/blocksuite",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/toeverything/blocksuite.git",
+    "directory": "packages/affine/model"
+  },
   "scripts": {
     "build": "tsc",
     "test:unit": "nx vite:test --run --passWithNoTests",

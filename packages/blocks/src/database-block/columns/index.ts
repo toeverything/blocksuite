@@ -10,7 +10,6 @@ export * from './converts.js';
 const {
   checkboxColumnConfig,
   dateColumnConfig,
-  imageColumnConfig,
   multiSelectColumnConfig,
   numberColumnConfig,
   progressColumnConfig,
@@ -19,7 +18,6 @@ const {
 export const databaseBlockColumns = {
   checkboxColumnConfig,
   dateColumnConfig,
-  imageColumnConfig,
   multiSelectColumnConfig,
   numberColumnConfig,
   progressColumnConfig,

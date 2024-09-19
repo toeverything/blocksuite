@@ -1,5 +1,4 @@
 import { type EditorHost, ShadowlessElement } from '@blocksuite/block-std';
-import { FramePreview } from '@blocksuite/blocks';
 import { WithDisposable } from '@blocksuite/global/utils';
 import { baseTheme } from '@toeverything/theme';
 import { css, html, unsafeCSS } from 'lit';
@@ -61,13 +60,6 @@ export const AFFINE_FRAME_PANEL = 'affine-frame-panel';
 
 export class FramePanel extends WithDisposable(ShadowlessElement) {
   static override styles = styles;
-
-  override connectedCallback() {
-    super.connectedCallback();
-    if (!customElements.get('frame-preview')) {
-      customElements.define('frame-preview', FramePreview);
-    }
-  }
 
   override render() {
     return html`<div class="frame-panel-container">
