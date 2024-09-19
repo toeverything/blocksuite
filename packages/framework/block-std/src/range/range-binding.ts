@@ -6,7 +6,6 @@ import type { BaseSelection, TextSelection } from '../selection/index.js';
 import type { BlockComponent } from '../view/element/block-component.js';
 import type { RangeManager } from './range-manager.js';
 
-import { blockComponentSymbol } from '../view/element/consts.js';
 import { BLOCK_ID_ATTR } from '../view/index.js';
 import { RANGE_SYNC_EXCLUDE_ATTR } from './consts.js';
 
@@ -91,6 +90,7 @@ export class RangeBinding {
   private _onCompositionEnd = (event: CompositionEvent) => {
     if (this._compositionStartCallback) {
       event.preventDefault();
+      event.stopPropagation();
       this._compositionStartCallback(event).catch(console.error);
       this._compositionStartCallback = null;
     }
@@ -111,13 +111,6 @@ export class RangeBinding {
     const blocks = this.rangeManager.getSelectedBlockComponentsByRange(range, {
       mode: 'flat',
     });
-    const highestBlocks = this.rangeManager.getSelectedBlockComponentsByRange(
-      range,
-      {
-        mode: 'highest',
-        match: block => block.model.role === 'content',
-      }
-    );
 
     const start = blocks.at(0);
     const end = blocks.at(-1);
@@ -130,23 +123,18 @@ export class RangeBinding {
     this._compositionStartCallback = async event => {
       this.isComposing = false;
 
-      const parents: BlockComponent[] = [];
-      for (const highestBlock of highestBlocks) {
-        const parentModel = this.host.doc.getParent(highestBlock.blockId);
-        if (!parentModel) continue;
-        const parent = this.host.view.getBlock(parentModel.id);
-        if (!this._isBlockComponent(parent) || parents.includes(parent))
-          continue;
+      this.host.renderRoot.replaceChildren();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      delete (this.host.renderRoot as any)['_$litPart$'];
+      this.host.requestUpdate();
+      await this.host.updateComplete;
 
-        // Restore the DOM structure damaged by the composition
-        parent.dirty = true;
-        await parent.updateComplete;
-        await parent.updateComplete;
-        parents.push(parent);
-      }
+      this.host.doc.captureSync();
 
       this.host.doc.transact(() => {
         endText.delete(0, to.length);
+        startText.delete(from.index, from.length);
+        startText.insert(event.data, from.index);
         startText.join(endText);
 
         blocks
@@ -336,18 +324,18 @@ export class RangeBinding {
       })
     );
 
-    this.host.disposables.add(
-      this.host.event.add('compositionStart', this._onCompositionStart)
+    this.host.disposables.addFromEvent(
+      this.host,
+      'compositionstart',
+      this._onCompositionStart
     );
-    this.host.disposables.add(
-      this.host.event.add('compositionEnd', ctx => {
-        const event = ctx.get('defaultState').event as CompositionEvent;
-        this._onCompositionEnd(event);
-      })
+    this.host.disposables.addFromEvent(
+      this.host,
+      'compositionend',
+      this._onCompositionEnd,
+      {
+        capture: true,
+      }
     );
-  }
-
-  private _isBlockComponent(el: Element | null): el is BlockComponent {
-    return Boolean(el && blockComponentSymbol in el);
   }
 }
