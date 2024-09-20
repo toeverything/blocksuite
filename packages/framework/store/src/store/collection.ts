@@ -1,3 +1,5 @@
+import type { BlockSuiteFlags } from '@blocksuite/global/types';
+
 import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 import { type Logger, NoopLogger, Slot } from '@blocksuite/global/utils';
 import {

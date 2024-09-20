@@ -1,4 +1,3 @@
-/// <reference types="@blocksuite/global" />
 // eslint-disable-next-line @typescript-eslint/triple-slash-reference
 /// <reference path="./effects.ts" />
 import { deserializeXYWH, Point } from '@blocksuite/global/utils';

@@ -1,6 +1,7 @@
 import { createEmptyDoc, PageEditor } from '@blocksuite/presets';
-import '@blocksuite/presets/themes/affine.css';
 import { Text } from '@blocksuite/store';
+
+import '../../../style.css';
 
 const doc = createEmptyDoc().init();
 const editor = new PageEditor();
