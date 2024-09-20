@@ -1,5 +1,6 @@
 import { createEmptyDoc, EdgelessEditor } from '@blocksuite/presets';
-import '@blocksuite/presets/themes/affine.css';
+
+import '../../../style.css';
 
 const container = document.createElement('div');
 container.style.display = 'flex';

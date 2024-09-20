@@ -13,6 +13,7 @@ import {
   pasteByKeyboard,
   pressArrowLeft,
   pressEnter,
+  redoByClick,
   redoByKeyboard,
   type,
   undoByKeyboard,
@@ -88,7 +89,7 @@ test('can click and delete image', async ({ page }) => {
   await undoByKeyboard(page);
   await assertRichImage(page, 1);
 
-  await redoByKeyboard(page);
+  await redoByClick(page);
   await assertRichImage(page, 0);
 });
 

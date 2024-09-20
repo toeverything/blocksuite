@@ -7,7 +7,6 @@ import {
   DefaultInlineManagerExtension,
   type RichText,
 } from '@blocksuite/affine-components/rich-text';
-import '@blocksuite/affine-components/rich-text';
 import {
   BLOCK_CHILDREN_CONTAINER_PADDING_LEFT,
   NOTE_SELECTOR,

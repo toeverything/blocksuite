@@ -28,7 +28,11 @@ export class LatexEditorUnit extends ShadowlessElement {
 
     const lineIndex = this.vElement.lineIndex;
     const tokens = latexMenu.highlightTokens$.value[lineIndex] ?? [];
-    if (tokens.length === 0) {
+    if (
+      tokens.length === 0 ||
+      tokens.reduce((acc, token) => acc + token.content, '') !==
+        this.delta.insert
+    ) {
       return plainContent;
     }
 

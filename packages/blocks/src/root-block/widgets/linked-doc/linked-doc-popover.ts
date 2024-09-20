@@ -35,6 +35,21 @@ export class LinkedDocPopover extends WithDisposable(LitElement) {
 
   private _startRange = this.inlineEditor.getInlineRange();
 
+  private _updateLinkedDocGroup = async () => {
+    const query = this._query;
+
+    if (query === null) {
+      this.abortController.abort();
+      return;
+    }
+    this._linkedDocGroup = await this.getMenus(
+      query,
+      this._abort,
+      this.editorHost,
+      this.inlineEditor
+    );
+  };
+
   private get _actionGroup() {
     return this._linkedDocGroup.map(group => {
       return {
@@ -96,20 +111,6 @@ export class LinkedDocPopover extends WithDisposable(LitElement) {
     return element.scrollWidth > element.clientWidth;
   }
 
-  private async _updateLinkedDocGroup() {
-    const query = this._query;
-    if (query === null) {
-      this.abortController.abort();
-      return;
-    }
-    this._linkedDocGroup = await this.getMenus(
-      query,
-      this._abort,
-      this.editorHost,
-      this.inlineEditor
-    );
-  }
-
   override connectedCallback() {
     super.connectedCallback();
 
@@ -125,16 +126,15 @@ export class LinkedDocPopover extends WithDisposable(LitElement) {
     createKeydownObserver({
       target: eventSource,
       signal: this.abortController.signal,
-      inlineEditor: this.inlineEditor,
       onInput: () => {
         this._activatedItemIndex = 0;
-        void this._updateLinkedDocGroup();
+        this.inlineEditor.slots.renderComplete.once(this._updateLinkedDocGroup);
       },
       onPaste: () => {
         this._activatedItemIndex = 0;
         setTimeout(() => {
-          void this._updateLinkedDocGroup();
-        }, 20);
+          this._updateLinkedDocGroup().catch(console.error);
+        }, 50);
       },
       onDelete: () => {
         const curRange = this.inlineEditor.getInlineRange();
@@ -145,7 +145,7 @@ export class LinkedDocPopover extends WithDisposable(LitElement) {
           this.abortController.abort();
         }
         this._activatedItemIndex = 0;
-        void this._updateLinkedDocGroup();
+        this.inlineEditor.slots.renderComplete.once(this._updateLinkedDocGroup);
       },
       onMove: step => {
         const itemLen = this._flattenActionList.length;

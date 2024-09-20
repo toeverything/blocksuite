@@ -12,7 +12,6 @@ import {
   DefaultInlineManagerExtension,
   type RichText,
 } from '@blocksuite/affine-components/rich-text';
-import '@blocksuite/affine-components/rich-text';
 import '@blocksuite/affine-shared/commands';
 import {
   BLOCK_CHILDREN_CONTAINER_PADDING_LEFT,

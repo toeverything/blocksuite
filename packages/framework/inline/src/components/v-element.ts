@@ -1,30 +1,60 @@
 import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
-import { html, LitElement, nothing } from 'lit';
+import { DisposableGroup, SignalWatcher } from '@blocksuite/global/utils';
+import { effect, signal } from '@preact/signals-core';
+import { html, LitElement } from 'lit';
 import { property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
+import type { InlineEditor } from '../inline-editor.js';
 import type { DeltaInsert } from '../types.js';
 import type { BaseTextAttributes } from '../utils/base-attributes.js';
 
 import { ZERO_WIDTH_SPACE } from '../consts.js';
-import { getInlineEditorInsideRoot } from '../utils/query.js';
+import { isInlineRangeIntersect } from '../utils/inline-range.js';
 
 export class VElement<
   T extends BaseTextAttributes = BaseTextAttributes,
-> extends LitElement {
+> extends SignalWatcher(LitElement) {
+  readonly disposables = new DisposableGroup();
+
+  readonly selected = signal(false);
+
+  override connectedCallback(): void {
+    super.connectedCallback();
+
+    this.disposables.add(
+      effect(() => {
+        const inlineRange = this.inlineEditor.inlineRange$.value;
+        this.selected.value =
+          !!inlineRange &&
+          isInlineRangeIntersect(inlineRange, {
+            index: this.startOffset,
+            length: this.endOffset - this.startOffset,
+          });
+      })
+    );
+  }
+
   override createRenderRoot() {
     return this;
   }
 
+  override async getUpdateComplete(): Promise<boolean> {
+    const result = await super.getUpdateComplete();
+    const span = this.querySelector('[data-v-element="true"]') as HTMLElement;
+    const el = span.firstElementChild as LitElement;
+    await el.updateComplete;
+    const vTexts = Array.from(this.querySelectorAll('v-text'));
+    await Promise.all(vTexts.map(vText => vText.updateComplete));
+    return result;
+  }
+
   override render() {
-    const inlineEditor = getInlineEditorInsideRoot(this);
-    if (!inlineEditor) {
-      return nothing;
-    }
+    const inlineEditor = this.inlineEditor;
     const attributeRenderer = inlineEditor.attributeService.attributeRenderer;
     const renderProps: Parameters<typeof attributeRenderer>[0] = {
       delta: this.delta,
-      selected: this.selected,
+      selected: this.selected.value,
       startOffset: this.startOffset,
       endOffset: this.endOffset,
       lineIndex: this.lineIndex,
@@ -68,10 +98,10 @@ export class VElement<
   accessor endOffset!: number;
 
   @property({ attribute: false })
-  accessor lineIndex!: number;
+  accessor inlineEditor!: InlineEditor;
 
   @property({ attribute: false })
-  accessor selected: boolean = false;
+  accessor lineIndex!: number;
 
   @property({ attribute: false })
   accessor startOffset!: number;

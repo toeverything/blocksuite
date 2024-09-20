@@ -40,15 +40,17 @@ const internalExtensions = [
 ];
 
 export class BlockStdScope {
+  static internalExtensions = internalExtensions;
+
   private _getHost: () => EditorHost;
 
   readonly container: Container;
 
   readonly doc: Doc;
 
-  readonly extensions: ExtensionType[];
-
   readonly provider: ServiceProvider;
+
+  readonly userExtensions: ExtensionType[];
 
   private get _lifeCycleWatchers() {
     return this.provider.getAll(LifeCycleWatcherIdentifier);
@@ -102,11 +104,16 @@ export class BlockStdScope {
       );
     };
     this.doc = options.doc;
-    this.extensions = [...internalExtensions, ...options.extensions];
+    this.userExtensions = options.extensions;
     this.container = new Container();
     this.container.addImpl(StdIdentifier, () => this);
 
-    this.extensions.forEach(ext => {
+    internalExtensions.forEach(ext => {
+      const container = this.container;
+      ext.setup(container);
+    });
+
+    this.userExtensions.forEach(ext => {
       const container = this.container;
       ext.setup(container);
     });

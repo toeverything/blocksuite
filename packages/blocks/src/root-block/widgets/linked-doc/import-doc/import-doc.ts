@@ -16,6 +16,7 @@ import { Job } from '@blocksuite/store';
 import { html, LitElement, type PropertyValues } from 'lit';
 import { query, state } from 'lit/decorators.js';
 
+import { HtmlAdapter } from '../../../../_common/adapters/html.js';
 import { MarkdownAdapter } from '../../../../_common/adapters/markdown.js';
 import { NotionHtmlAdapter } from '../../../../_common/adapters/notion-html.js';
 import { defaultImageProxyMiddleware } from '../../../../_common/transformers/middlewares.js';
@@ -76,7 +77,7 @@ export async function importHtml(collection: DocCollection, text: string) {
     collection,
     middlewares: [defaultImageProxyMiddleware],
   });
-  const htmlAdapter = new NotionHtmlAdapter(job);
+  const htmlAdapter = new HtmlAdapter(job);
   const snapshot = await htmlAdapter.toDocSnapshot({
     file: text,
     assets: job.assetsManager,

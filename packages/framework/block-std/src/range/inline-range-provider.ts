@@ -1,11 +1,10 @@
 import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
-import { Slot } from '@blocksuite/global/utils';
 import {
   INLINE_ROOT_ATTR,
   type InlineRange,
   type InlineRangeProvider,
-  type InlineRangeUpdatedProp,
 } from '@blocksuite/inline';
+import { signal } from '@preact/signals-core';
 
 import type { TextSelection } from '../selection/index.js';
 import type { BlockComponent } from '../view/element/block-component.js';
@@ -18,7 +17,6 @@ export const getInlineRangeProvider: (
   const editorHost = element.host;
   const selectionManager = editorHost.selection;
   const rangeManager = editorHost.range;
-  const inlineRangeUpdatedSlot = new Slot<InlineRangeUpdatedProp>();
 
   if (!selectionManager || !rangeManager) {
     return null;
@@ -80,7 +78,7 @@ export const getInlineRangeProvider: (
     };
   };
 
-  const setInlineRange = (inlineRange: InlineRange | null, sync = true) => {
+  const setInlineRange = (inlineRange: InlineRange | null) => {
     // skip `setInlineRange` from `inlineEditor` when composing happens across blocks,
     // selection will be updated in `range-binding`
     if (rangeManager.binding?.isComposing) return;
@@ -98,61 +96,23 @@ export const getInlineRangeProvider: (
       });
       selectionManager.setGroup('note', [textSelection]);
     }
-
-    inlineRangeUpdatedSlot.emit([inlineRange, sync]);
   };
-
-  const getInlineRange = (): InlineRange | null => {
-    const sl = document.getSelection();
-    if (!sl || sl.rangeCount === 0) {
-      return null;
-    }
-    const range = sl.getRangeAt(0);
-    if (!range) {
-      return null;
-    }
-
-    const textSelection = selectionManager.find('text');
-    if (!textSelection) {
-      return null;
-    }
-
-    return calculateInlineRange(range, textSelection);
-  };
-
-  let lastInlineRange: InlineRange | null = null;
-  selectionManager.slots.changed.on(() => {
-    const textSelection = selectionManager.find('text');
-    if (!textSelection) {
-      inlineRangeUpdatedSlot.emit([null, false]);
-      return;
-    }
-
+  const inlineRange$: InlineRangeProvider['inlineRange$'] = signal(null);
+  selectionManager.slots.changed.on(selections => {
+    const textSelection = selections.find(s => s.type === 'text') as
+      | TextSelection
+      | undefined;
     const range = rangeManager.value;
-    if (!range || !isElementSelected(range)) {
-      inlineRangeUpdatedSlot.emit([null, false]);
+    if (!range || !textSelection) {
+      inlineRange$.value = null;
       return;
     }
-
-    // wait for lit updated
-    requestAnimationFrame(() => {
-      const inlineRange = calculateInlineRange(range, textSelection);
-      if (
-        lastInlineRange &&
-        inlineRange &&
-        lastInlineRange.index === inlineRange.index &&
-        lastInlineRange.length === inlineRange.length
-      )
-        return;
-
-      lastInlineRange = inlineRange;
-      inlineRangeUpdatedSlot.emit([inlineRange, false]);
-    });
+    const inlineRange = calculateInlineRange(range, textSelection);
+    inlineRange$.value = inlineRange;
   });
 
   return {
     setInlineRange,
-    getInlineRange,
-    inlineRangeUpdated: inlineRangeUpdatedSlot,
+    inlineRange$,
   };
 };

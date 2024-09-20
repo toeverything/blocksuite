@@ -1,3 +1,4 @@
+import type { BlockSuiteFlags } from '@blocksuite/global/types';
 import type { Awareness as YAwareness } from 'y-protocols/awareness.js';
 
 import { Slot } from '@blocksuite/global/utils';
@@ -14,27 +15,24 @@ export interface UserInfo {
 type UserSelection = Array<Record<string, unknown>>;
 
 // Raw JSON state in awareness CRDT
-export type RawAwarenessState<
-  Flags extends Record<string, unknown> = BlockSuiteFlags,
-> = {
-  user?: UserInfo;
-  color?: string;
-  flags: Flags;
-  // use v2 to avoid crush on old clients
-  selectionV2: Record<string, UserSelection>;
-};
+export type RawAwarenessState<Flags extends BlockSuiteFlags = BlockSuiteFlags> =
+  {
+    user?: UserInfo;
+    color?: string;
+    flags: Flags;
+    // use v2 to avoid crush on old clients
+    selectionV2: Record<string, UserSelection>;
+  };
 
 export interface AwarenessEvent<
-  Flags extends Record<string, unknown> = BlockSuiteFlags,
+  Flags extends BlockSuiteFlags = BlockSuiteFlags,
 > {
   id: number;
   type: 'add' | 'update' | 'remove';
   state?: RawAwarenessState<Flags>;
 }
 
-export class AwarenessStore<
-  Flags extends Record<string, unknown> = BlockSuiteFlags,
-> {
+export class AwarenessStore<Flags extends BlockSuiteFlags = BlockSuiteFlags> {
   private _flags: Signal<Flags>;
 
   private _onAwarenessChange = (diff: {

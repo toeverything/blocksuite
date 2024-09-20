@@ -132,7 +132,7 @@ export class LatexEditorMenu extends SignalWatcher(
     this.disposables.add(
       effect(() => {
         noop(this.highlightTokens$.value);
-        this.richText?.inlineEditor?.requestUpdate();
+        this.richText?.inlineEditor?.render();
       })
     );
 

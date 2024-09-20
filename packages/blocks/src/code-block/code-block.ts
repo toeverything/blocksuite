@@ -144,7 +144,7 @@ export class CodeBlockComponent extends CaptionedBlockComponent<
     this.disposables.add(
       effect(() => {
         noop(this.highlightTokens$.value);
-        this._richTextElement?.inlineEditor?.requestUpdate();
+        this._richTextElement?.inlineEditor?.render();
       })
     );
 

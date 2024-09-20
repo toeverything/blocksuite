@@ -1,7 +1,7 @@
 import { effects as blocksEffects } from '@blocksuite/blocks/effects';
 import { effects as presetsEffects } from '@blocksuite/presets/effects';
-import '@blocksuite/presets/themes/affine.css';
 
+import '../../style.css';
 import { setupEdgelessTemplate } from '../_common/setup.js';
 import '../dev-format.js';
 import {

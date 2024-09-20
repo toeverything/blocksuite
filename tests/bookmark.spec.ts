@@ -1,6 +1,8 @@
 import type { Page } from '@playwright/test';
+import type { BlockSnapshot } from '@store/index.js';
 
 import { expect } from '@playwright/test';
+import { ignoreSnapshotId } from 'utils/ignore.js';
 import { getEmbedCardToolbar } from 'utils/query.js';
 
 import {
@@ -8,6 +10,7 @@ import {
   copyByKeyboard,
   dragBlockToPoint,
   enterPlaygroundRoom,
+  expectConsoleMessage,
   focusRichText,
   getPageSnapshot,
   initEmptyEdgelessState,
@@ -41,7 +44,11 @@ import {
 import './utils/declare-test-window.js';
 import { scoped, test } from './utils/playwright.js';
 
-const inputUrl = 'http://localhost';
+const LOCAL_HOST_URL = 'http://localhost';
+
+const YOUTUBE_URL = 'https://www.youtube.com/watch?v=fakeid';
+
+const FIGMA_URL = 'https://www.figma.com/design/JuXs6uOAICwf4I4tps0xKZ123';
 
 test.beforeEach(async ({ page }) => {
   await page.route(
@@ -54,7 +61,10 @@ test.beforeEach(async ({ page }) => {
   );
 });
 
-const createBookmarkBlockBySlashMenu = async (page: Page) => {
+const createBookmarkBlockBySlashMenu = async (
+  page: Page,
+  url = LOCAL_HOST_URL
+) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await focusRichText(page);
@@ -62,7 +72,7 @@ const createBookmarkBlockBySlashMenu = async (page: Page) => {
   await type(page, '/link', 100);
   await pressEnter(page);
   await page.waitForTimeout(100);
-  await type(page, inputUrl);
+  await type(page, url);
   await pressEnter(page);
 };
 
@@ -92,8 +102,8 @@ test(
     await initEmptyParagraphState(page);
     await focusRichText(page);
 
-    await type(page, inputUrl);
-    await setInlineRangeInSelectedRichText(page, 0, inputUrl.length);
+    await type(page, LOCAL_HOST_URL);
+    await setInlineRangeInSelectedRichText(page, 0, LOCAL_HOST_URL.length);
     await copyByKeyboard(page);
     await focusRichText(page);
     await type(page, '/link');
@@ -112,7 +122,7 @@ test(
     await enterPlaygroundRoom(page);
     const ids = await initEmptyEdgelessState(page);
     await focusRichText(page);
-    await type(page, inputUrl);
+    await type(page, LOCAL_HOST_URL);
 
     await switchEditorMode(page);
 
@@ -203,7 +213,7 @@ test('press backspace after bookmark block can select bookmark block', async ({
   await type(page, '/link');
   await pressEnter(page);
   await page.waitForTimeout(100);
-  await type(page, inputUrl);
+  await type(page, LOCAL_HOST_URL);
   await pressEnter(page);
 
   await focusRichText(page);
@@ -273,7 +283,7 @@ test('indent bookmark block to paragraph', async ({ page }) => {
   await pressEnter(page);
   await type(page, '/link', 100);
   await pressEnter(page);
-  await type(page, inputUrl);
+  await type(page, LOCAL_HOST_URL);
   await pressEnter(page);
 
   await assertBlockChildrenIds(page, '1', ['2', '4']);
@@ -301,7 +311,7 @@ test('indent bookmark block to list', async ({ page }) => {
   await pressEnter(page);
   await type(page, '/link', 100);
   await pressEnter(page);
-  await type(page, inputUrl);
+  await type(page, LOCAL_HOST_URL);
   await pressEnter(page);
 
   await assertBlockChildrenIds(page, '1', ['3', '5']);
@@ -330,7 +340,7 @@ test('bookmark can be dragged from note to surface top level block', async ({
   await type(page, '/link', 100);
   await pressEnter(page);
   await page.waitForTimeout(100);
-  await type(page, inputUrl);
+  await type(page, LOCAL_HOST_URL);
   await pressEnter(page);
 
   await switchEditorMode(page);
@@ -340,4 +350,111 @@ test('bookmark can be dragged from note to surface top level block', async ({
 
   await waitNextFrame(page);
   await assertParentBlockFlavour(page, '5', 'affine:surface');
+});
+
+test.describe('embed youtube card', () => {
+  test(scoped`create youtube card by slash menu`, async ({ page }) => {
+    expectConsoleMessage(page, /Unrecognized feature/, 'warning');
+    expectConsoleMessage(page, /Failed to load resource/);
+    await createBookmarkBlockBySlashMenu(page, YOUTUBE_URL);
+    const snapshot = (await getPageSnapshot(page)) as BlockSnapshot;
+    expect(ignoreSnapshotId(snapshot)).toMatchSnapshot('embed-youtube.json');
+  });
+
+  test(scoped`change youtube card style`, async ({ page }) => {
+    expectConsoleMessage(page, /Unrecognized feature/, 'warning');
+    expectConsoleMessage(page, /Failed to load resource/);
+
+    await createBookmarkBlockBySlashMenu(page, YOUTUBE_URL);
+    const youtube = page.locator('affine-embed-youtube-block');
+    await youtube.click();
+    await page.waitForTimeout(100);
+
+    // change to card view
+    const embedToolbar = page.locator('affine-embed-card-toolbar');
+    await expect(embedToolbar).toBeVisible();
+    const embedView = page.locator('editor-menu-button', {
+      hasText: 'embed view',
+    });
+    await expect(embedView).toBeVisible();
+    await embedView.click();
+    const cardView = page.locator('editor-menu-action', {
+      hasText: 'card view',
+    });
+    await expect(cardView).toBeVisible();
+    await cardView.click();
+    const snapshot = (await getPageSnapshot(page)) as BlockSnapshot;
+    expect(ignoreSnapshotId(snapshot)).toMatchSnapshot(
+      'horizontal-youtube.json'
+    );
+
+    // change to embed view
+    const bookmark = page.locator('affine-bookmark');
+    await bookmark.click();
+    await page.waitForTimeout(100);
+    const cardView2 = page.locator('editor-icon-button', {
+      hasText: 'card view',
+    });
+    await expect(cardView2).toBeVisible();
+    await cardView2.click();
+    const embedView2 = page.locator('editor-menu-action', {
+      hasText: 'embed view',
+    });
+    await expect(embedView2).toBeVisible();
+    await embedView2.click();
+    const snapshot2 = (await getPageSnapshot(page)) as BlockSnapshot;
+    expect(ignoreSnapshotId(snapshot2)).toMatchSnapshot('embed-youtube.json');
+  });
+});
+
+test.describe('embed figma card', () => {
+  test(scoped`create figma card by slash menu`, async ({ page }) => {
+    expectConsoleMessage(page, /Failed to load resource/);
+    expectConsoleMessage(page, /Refused to frame/);
+    await createBookmarkBlockBySlashMenu(page, FIGMA_URL);
+    const snapshot = (await getPageSnapshot(page)) as BlockSnapshot;
+    expect(ignoreSnapshotId(snapshot)).toMatchSnapshot('embed-figma.json');
+  });
+
+  test(scoped`change figma card style`, async ({ page }) => {
+    expectConsoleMessage(page, /Failed to load resource/);
+    expectConsoleMessage(page, /Refused to frame/);
+    await createBookmarkBlockBySlashMenu(page, FIGMA_URL);
+    const youtube = page.locator('affine-embed-figma-block');
+    await youtube.click();
+    await page.waitForTimeout(100);
+
+    // change to card view
+    const embedToolbar = page.locator('affine-embed-card-toolbar');
+    await expect(embedToolbar).toBeVisible();
+    const embedView = page.locator('editor-menu-button', {
+      hasText: 'embed view',
+    });
+    await expect(embedView).toBeVisible();
+    await embedView.click();
+    const cardView = page.locator('editor-menu-action', {
+      hasText: 'card view',
+    });
+    await expect(cardView).toBeVisible();
+    await cardView.click();
+    const snapshot = (await getPageSnapshot(page)) as BlockSnapshot;
+    expect(ignoreSnapshotId(snapshot)).toMatchSnapshot('horizontal-figma.json');
+
+    // change to embed view
+    const bookmark = page.locator('affine-bookmark');
+    await bookmark.click();
+    await page.waitForTimeout(100);
+    const cardView2 = page.locator('editor-icon-button', {
+      hasText: 'card view',
+    });
+    await expect(cardView2).toBeVisible();
+    await cardView2.click();
+    const embedView2 = page.locator('editor-menu-action', {
+      hasText: 'embed view',
+    });
+    await expect(embedView2).toBeVisible();
+    await embedView2.click();
+    const snapshot2 = (await getPageSnapshot(page)) as BlockSnapshot;
+    expect(ignoreSnapshotId(snapshot2)).toMatchSnapshot('embed-figma.json');
+  });
 });

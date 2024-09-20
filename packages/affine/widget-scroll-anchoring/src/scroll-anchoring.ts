@@ -13,6 +13,11 @@ import { css, html, nothing, unsafeCSS } from 'lit';
 import { classMap } from 'lit/directives/class-map.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
+type Anchor = {
+  id: string;
+  mode: DocMode;
+};
+
 export const AFFINE_SCROLL_ANCHORING_WIDGET = 'affine-scroll-anchoring-widget';
 
 export class AffineScrollAnchoringWidget extends WidgetComponent {
@@ -47,21 +52,25 @@ export class AffineScrollAnchoringWidget extends WidgetComponent {
     }
   `;
 
+  #listened = false;
+
   #requestUpdateFn = () => this.requestUpdate();
 
   #resizeObserver: ResizeObserver = new ResizeObserver(this.#requestUpdateFn);
 
-  anchor = signal<{ mode: DocMode; id: string } | null>(null);
+  anchor$ = signal<Anchor | null>(null);
 
-  anchorBounds = signal<Bound | null>(null);
+  anchorBounds$ = signal<Bound | null>(null);
 
-  highlighted = computed(() => this.service.selectionManager.find('highlight'));
+  highlighted$ = computed(() =>
+    this.service.selectionManager.find('highlight')
+  );
 
   #getBoundsInEdgeless() {
     const controller = this.std.getOptional(GfxControllerIdentifier);
     if (!controller) return;
 
-    const bounds = this.anchorBounds.peek();
+    const bounds = this.anchorBounds$.peek();
     if (!bounds) return;
 
     const { x, y, w, h } = bounds;
@@ -75,12 +84,12 @@ export class AffineScrollAnchoringWidget extends WidgetComponent {
     const blockComponent = this.std.view.getBlock(id);
     if (!blockComponent) return;
 
+    const container = this.offsetParent!;
+    const containerRect = container.getBoundingClientRect();
     const { left, top, width, height } = blockComponent.getBoundingClientRect();
-    const container = this.offsetParent;
-    const containerRect = container?.getBoundingClientRect();
 
-    const offsetX = (containerRect?.left ?? 0) + (container?.scrollLeft ?? 0);
-    const offsetY = (containerRect?.top ?? 0) + (container?.scrollTop ?? 0);
+    const offsetX = containerRect.left + container.scrollLeft;
+    const offsetY = containerRect.top + container.scrollTop;
 
     return new Bound(left - offsetX, top - offsetY, width, height);
   }
@@ -89,11 +98,27 @@ export class AffineScrollAnchoringWidget extends WidgetComponent {
     const controller = this.std.getOptional(GfxControllerIdentifier);
     if (!controller) return;
 
-    const model = controller.getElementById<GfxModel>(id);
-    if (!model) return;
+    const surface = controller.surface;
+    if (!surface) return;
 
-    const xywh = model.xywh;
-    if (!xywh) return;
+    const xywh = controller.getElementById<GfxModel>(id)?.xywh;
+    if (!xywh) {
+      if (!this.#listened) return;
+
+      // listen for document updates
+      this.disposables.add(
+        this.std.doc.slots.blockUpdated
+          .filter(v => v.type === 'add' && v.id === id)
+          .once(() => this.#moveToAnchorInEdgeless(id))
+      );
+
+      this.disposables.add(
+        surface.elementAdded
+          .filter(v => v.id === id && v.local === false)
+          .once(() => this.#moveToAnchorInEdgeless(id))
+      );
+      return;
+    }
 
     let bounds = Bound.fromXYWH(deserializeXYWH(xywh));
 
@@ -117,22 +142,34 @@ export class AffineScrollAnchoringWidget extends WidgetComponent {
       [20, 20, 100, 20]
     );
 
-    viewport.setCenter(centerX, centerY);
     viewport.setZoom(zoom);
+    viewport.setCenter(centerX, centerY);
 
-    this.anchorBounds.value = bounds;
+    this.#listened = false;
+    this.anchorBounds$.value = bounds;
   }
 
   #moveToAnchorInPage(id: string) {
     const blockComponent = this.std.view.getBlock(id);
-    if (!blockComponent) return;
+    if (!blockComponent) {
+      if (!this.#listened) return;
+
+      // listen for document updates
+      this.disposables.add(
+        this.std.doc.slots.blockUpdated
+          .filter(v => v.type === 'add' && v.id === id)
+          .once(() => this.#moveToAnchorInPage(id))
+      );
+      return;
+    }
 
     blockComponent.scrollIntoView({
       behavior: 'instant',
       block: 'center',
     });
 
-    this.anchorBounds.value = Bound.fromDOMRect(
+    this.#listened = false;
+    this.anchorBounds$.value = Bound.fromDOMRect(
       blockComponent.getBoundingClientRect()
     );
   }
@@ -148,8 +185,9 @@ export class AffineScrollAnchoringWidget extends WidgetComponent {
 
     // Clears highlight
     this.disposables.addFromEvent(this.host, 'pointerdown', () => {
-      this.anchor.value = null;
-      this.anchorBounds.value = null;
+      this.#listened = false;
+      this.anchor$.value = null;
+      this.anchorBounds$.value = null;
     });
 
     // In edgeless
@@ -161,24 +199,22 @@ export class AffineScrollAnchoringWidget extends WidgetComponent {
     }
 
     this.disposables.add(
-      this.anchor.subscribe(anchor => {
+      this.anchor$.subscribe(anchor => {
         if (!anchor) return;
 
-        requestAnimationFrame(() => {
-          const { mode, id } = anchor;
+        const { mode, id } = anchor;
 
-          if (mode === 'edgeless') {
-            this.#moveToAnchorInEdgeless(id);
-            return;
-          }
-
+        if (mode === 'page') {
           this.#moveToAnchorInPage(id);
-        });
+          return;
+        }
+
+        this.#moveToAnchorInEdgeless(id);
       })
     );
 
     this.disposables.add(
-      this.highlighted.subscribe(highlighted => {
+      this.highlighted$.subscribe(highlighted => {
         if (!highlighted) return;
 
         const {
@@ -192,7 +228,8 @@ export class AffineScrollAnchoringWidget extends WidgetComponent {
         // Consumes highlight selection
         this.std.selection.clear(['highlight']);
 
-        this.anchor.value = { mode, id };
+        this.anchor$.value = { mode, id };
+        this.#listened = true;
       })
     );
   }
@@ -203,16 +240,14 @@ export class AffineScrollAnchoringWidget extends WidgetComponent {
   }
 
   override render() {
-    const anchor = this.anchor.value;
+    const anchor = this.anchor$.value;
     if (!anchor) return nothing;
 
     const { mode, id } = anchor;
 
     const bounds =
-      mode === 'edgeless'
-        ? this.#getBoundsInEdgeless()
-        : this.#getBoundsInPage(id);
-    if (!bounds) return;
+      mode === 'page' ? this.#getBoundsInPage(id) : this.#getBoundsInEdgeless();
+    if (!bounds) return nothing;
 
     const classes = { highlight: true, [mode]: true };
     const style = {

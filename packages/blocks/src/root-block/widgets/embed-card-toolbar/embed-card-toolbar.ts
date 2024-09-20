@@ -32,7 +32,6 @@ import {
 } from '@blocksuite/affine-shared/services';
 import { getHostName } from '@blocksuite/affine-shared/utils';
 import { WidgetComponent } from '@blocksuite/block-std';
-import { assertExists } from '@blocksuite/global/utils';
 import { type BlockModel, DocCollection } from '@blocksuite/store';
 import { autoUpdate, computePosition, flip, offset } from '@floating-ui/dom';
 import { html, nothing, type TemplateResult } from 'lit';
@@ -260,7 +259,8 @@ export class EmbedCardToolbar extends WidgetComponent<
       return;
     }
 
-    const { doc, url, style, caption } = this.focusModel;
+    const targetModel = this.focusModel;
+    const { doc, url, style, caption } = targetModel;
 
     let targetFlavour = 'affine:bookmark',
       targetStyle = style;
@@ -277,9 +277,9 @@ export class EmbedCardToolbar extends WidgetComponent<
           )[0];
     }
 
-    const parent = doc.getParent(this.focusModel);
-    assertExists(parent);
-    const index = parent.children.indexOf(this.focusModel);
+    const parent = doc.getParent(targetModel);
+    if (!parent) return;
+    const index = parent.children.indexOf(targetModel);
 
     doc.addBlock(
       targetFlavour as never,
@@ -288,7 +288,7 @@ export class EmbedCardToolbar extends WidgetComponent<
       index
     );
     this.std.selection.setGroup('note', []);
-    doc.deleteBlock(this.focusModel);
+    doc.deleteBlock(targetModel);
   }
 
   private _convertToEmbedView() {
@@ -309,7 +309,8 @@ export class EmbedCardToolbar extends WidgetComponent<
       return;
     }
 
-    const { doc, url, style, caption } = this.focusModel;
+    const targetModel = this.focusModel;
+    const { doc, url, style, caption } = targetModel;
 
     if (!this._embedOptions || this._embedOptions.viewType !== 'embed') {
       return;
@@ -320,9 +321,9 @@ export class EmbedCardToolbar extends WidgetComponent<
       ? style
       : styles.filter(style => style !== 'vertical' && style !== 'cube')[0];
 
-    const parent = doc.getParent(this.focusModel);
-    assertExists(parent);
-    const index = parent.children.indexOf(this.focusModel);
+    const parent = doc.getParent(targetModel);
+    if (!parent) return;
+    const index = parent.children.indexOf(targetModel);
 
     doc.addBlock(
       flavour as never,
@@ -332,7 +333,7 @@ export class EmbedCardToolbar extends WidgetComponent<
     );
 
     this.std.selection.setGroup('note', []);
-    doc.deleteBlock(this.focusModel);
+    doc.deleteBlock(targetModel);
   }
 
   private _copyUrl() {
@@ -478,15 +479,15 @@ export class EmbedCardToolbar extends WidgetComponent<
       return;
     }
 
-    const { doc } = this.focusModel;
-    const parent = doc.getParent(this.focusModel);
-    const index = parent?.children.indexOf(this.focusModel);
+    const targetModel = this.focusModel;
+    const { doc, title, caption, url } = targetModel;
+    const parent = doc.getParent(targetModel);
+    const index = parent?.children.indexOf(targetModel);
 
     const yText = new DocCollection.Y.Text();
-    const insert =
-      this.focusModel.title || this.focusModel.caption || this.focusModel.url;
+    const insert = title || caption || url;
     yText.insert(0, insert);
-    yText.format(0, insert.length, { link: this.focusModel.url });
+    yText.format(0, insert.length, { link: url });
     const text = new doc.Text(yText);
     doc.addBlock(
       'affine:paragraph',
@@ -497,7 +498,7 @@ export class EmbedCardToolbar extends WidgetComponent<
       index
     );
 
-    doc.deleteBlock(this.focusModel);
+    doc.deleteBlock(targetModel);
   }
 
   private _viewMenuButton() {

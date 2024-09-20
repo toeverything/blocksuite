@@ -105,7 +105,7 @@ export class NoteRenderer
     }
     const previewStd = new BlockStdScope({
       doc: page,
-      extensions: std.extensions,
+      extensions: std.userExtensions,
     });
     return html`${previewStd.render()} `;
   }

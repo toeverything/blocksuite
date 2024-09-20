@@ -13,6 +13,7 @@ import {
   type VLine,
 } from '@blocksuite/inline';
 import { DocCollection, Text } from '@blocksuite/store';
+import { effect } from '@preact/signals-core';
 import { css, html, type TemplateResult } from 'lit';
 import { property, query } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
@@ -197,7 +198,8 @@ export class RichText extends WithDisposable(ShadowlessElement) {
 
     // init auto scroll
     inlineEditor.disposables.add(
-      inlineEditor.slots.inlineRangeUpdate.on(([inlineRange]) => {
+      effect(() => {
+        const inlineRange = inlineEditor.inlineRange$.value;
         if (!inlineRange) return;
 
         // lazy
@@ -209,12 +211,21 @@ export class RichText extends WithDisposable(ShadowlessElement) {
         inlineEditor
           .waitForUpdate()
           .then(() => {
-            if (!inlineEditor.mounted) return;
+            if (!inlineEditor.mounted || inlineEditor.rendering) return;
 
             const range = inlineEditor.toDomRange(inlineRange);
             if (!range) return;
 
             if (verticalScrollContainer) {
+              const nativeRange = inlineEditor.getNativeRange();
+              if (
+                !nativeRange ||
+                nativeRange.commonAncestorContainer.parentElement?.contains(
+                  inlineEditor.rootElement
+                )
+              )
+                return;
+
               const containerRect =
                 verticalScrollContainer.getBoundingClientRect();
               const rangeRect = range.getBoundingClientRect();

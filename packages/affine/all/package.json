@@ -1,0 +1,181 @@
+{
+  "name": "@blocksuite/affine",
+  "version": "0.17.13",
+  "description": "BlockSuite for Affine",
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/toeverything/blocksuite.git",
+    "directory": "packages/affine/all"
+  },
+  "scripts": {
+    "build": "tsc --build --verbose",
+    "test:unit": "nx vite:test --run --passWithNoTests",
+    "test:unit:coverage": "nx vite:test --run --coverage",
+    "test:e2e": "playwright test"
+  },
+  "sideEffects": false,
+  "keywords": [],
+  "author": "toeverything",
+  "license": "MPL-2.0",
+  "dependencies": {
+    "@blocksuite/block-std": "workspace:*",
+    "@blocksuite/blocks": "workspace:*",
+    "@blocksuite/global": "workspace:*",
+    "@blocksuite/inline": "workspace:*",
+    "@blocksuite/presets": "workspace:*",
+    "@blocksuite/store": "workspace:*"
+  },
+  "exports": {
+    ".": "./src/index.ts",
+    "./effects": "./src/effects.ts",
+    "./block-std": "./src/block-std/index.ts",
+    "./block-std/gfx": "./src/block-std/gfx.ts",
+    "./global": "./src/global/index.ts",
+    "./global/utils": "./src/global/utils.ts",
+    "./global/env": "./src/global/env.ts",
+    "./global/exceptions": "./src/global/exceptions.ts",
+    "./global/di": "./src/global/di.ts",
+    "./global/types": "./src/global/types.ts",
+    "./store": "./src/store/index.ts",
+    "./inline": "./src/inline/index.ts",
+    "./inline/consts": "./src/inline/consts.ts",
+    "./inline/types": "./src/inline/types.ts",
+    "./presets": "./src/presets/index.ts",
+    "./blocks": "./src/blocks/index.ts",
+    "./blocks/schemas": "./src/blocks/schemas.ts"
+  },
+  "typesVersions": {
+    "*": {
+      "effects": [
+        "dist/effects.d.ts"
+      ],
+      "block-std": [
+        "dist/block-std/index.d.ts"
+      ],
+      "block-std/gfx": [
+        "dist/block-std/gfx.d.ts"
+      ],
+      "global": [
+        "dist/global/index.d.ts"
+      ],
+      "global/utils": [
+        "dist/global/utils.d.ts"
+      ],
+      "global/env": [
+        "dist/global/env.d.ts"
+      ],
+      "global/exceptions": [
+        "dist/global/exceptions.d.ts"
+      ],
+      "global/di": [
+        "dist/global/di.d.ts"
+      ],
+      "global/types": [
+        "dist/global/types.d.ts"
+      ],
+      "store": [
+        "dist/store/index.d.ts"
+      ],
+      "inline": [
+        "dist/inline/index.d.ts"
+      ],
+      "inline/consts": [
+        "dist/inline/consts.d.ts"
+      ],
+      "inline/types": [
+        "dist/inline/types.d.ts"
+      ],
+      "presets": [
+        "dist/presets/index.d.ts"
+      ],
+      "blocks": [
+        "dist/blocks/index.d.ts"
+      ],
+      "blocks/schemas": [
+        "dist/blocks/schemas.d.ts"
+      ]
+    }
+  },
+  "publishConfig": {
+    "access": "public",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "exports": {
+      ".": {
+        "import": "./dist/index.js",
+        "types": "./dist/index.d.ts"
+      },
+      "./effects": {
+        "import": "./dist/effects.js",
+        "types": "./dist/effects.d.ts"
+      },
+      "./block-std": {
+        "import": "./dist/block-std/index.js",
+        "types": "./dist/block-std/index.d.ts"
+      },
+      "./block-std/gfx": {
+        "import": "./dist/block-std/gfx.js",
+        "types": "./dist/block-std/gfx.d.ts"
+      },
+      "./global": {
+        "import": "./dist/global/index.js",
+        "types": "./dist/global/index.d.ts"
+      },
+      "./global/utils": {
+        "import": "./dist/global/utils.js",
+        "types": "./dist/global/utils.d.ts"
+      },
+      "./global/env": {
+        "import": "./dist/global/env.js",
+        "types": "./dist/global/env.d.ts"
+      },
+      "./global/exceptions": {
+        "import": "./dist/global/exceptions.js",
+        "types": "./dist/global/exceptions.d.ts"
+      },
+      "./global/di": {
+        "import": "./dist/global/di.js",
+        "types": "./dist/global/di.d.ts"
+      },
+      "./global/types": {
+        "import": "./dist/global/types.js",
+        "types": "./dist/global/types.d.ts"
+      },
+      "./store": {
+        "import": "./dist/store/index.js",
+        "types": "./dist/store/index.d.ts"
+      },
+      "./inline": {
+        "import": "./dist/inline/index.js",
+        "types": "./dist/inline/index.d.ts"
+      },
+      "./inline/consts": {
+        "import": "./dist/inline/consts.js",
+        "types": "./dist/inline/consts.d.ts"
+      },
+      "./inline/types": {
+        "import": "./dist/inline/types.js",
+        "types": "./dist/inline/types.d.ts"
+      },
+      "./presets": {
+        "import": "./dist/presets/index.js",
+        "types": "./dist/presets/index.d.ts"
+      },
+      "./blocks": {
+        "import": "./dist/blocks/index.js",
+        "types": "./dist/blocks/index.d.ts"
+      },
+      "./blocks/schemas": {
+        "import": "./dist/blocks/schemas.js",
+        "types": "./dist/blocks/schemas.d.ts"
+      }
+    }
+  },
+  "files": [
+    "src",
+    "dist",
+    "!src/__tests__",
+    "!dist/__tests__"
+  ]
+}
