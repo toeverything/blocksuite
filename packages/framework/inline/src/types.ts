@@ -26,8 +26,6 @@ export interface InlineRange {
   length: number;
 }
 
-export type InlineRangeUpdatedProp = [range: InlineRange | null, sync: boolean];
-
 export type DeltaEntry<
   TextAttributes extends BaseTextAttributes = BaseTextAttributes,
 > = [delta: DeltaInsert<TextAttributes>, range: InlineRange];

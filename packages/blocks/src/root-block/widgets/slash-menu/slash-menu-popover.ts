@@ -57,8 +57,13 @@ export class SlashMenu extends WithDisposable(LitElement) {
       this.context.model,
       this.triggerKey + (this._query || '')
     );
-    item.action(this.context)?.catch(console.error);
-    this.abortController.abort();
+    this.inlineEditor
+      .waitForUpdate()
+      .then(() => {
+        item.action(this.context)?.catch(console.error);
+        this.abortController.abort();
+      })
+      .catch(console.error);
   };
 
   private _initItemPathMap = () => {
@@ -190,7 +195,6 @@ export class SlashMenu extends WithDisposable(LitElement) {
     createKeydownObserver({
       target: inlineEditor.eventSource,
       signal: this.abortController.signal,
-      inlineEditor: this.inlineEditor,
       interceptor: (event, next) => {
         const { key, isComposing, code } = event;
         if (key === this.triggerKey) {
@@ -217,9 +221,12 @@ export class SlashMenu extends WithDisposable(LitElement) {
 
         next();
       },
-      onInput: () => this._updateFilteredItems(),
+      onInput: () =>
+        this.inlineEditor.slots.renderComplete.once(this._updateFilteredItems),
       onPaste: () => {
-        setTimeout(() => this._updateFilteredItems(), 20);
+        setTimeout(() => {
+          this._updateFilteredItems();
+        }, 50);
       },
       onDelete: () => {
         const curRange = this.inlineEditor.getInlineRange();
@@ -229,7 +236,7 @@ export class SlashMenu extends WithDisposable(LitElement) {
         if (curRange.index < this._startRange.index) {
           this.abortController.abort();
         }
-        this._updateFilteredItems();
+        this.inlineEditor.slots.renderComplete.once(this._updateFilteredItems);
       },
       onAbort: () => this.abortController.abort(),
     });

@@ -4,7 +4,7 @@ import { Doc } from '@blocksuite/store';
 import { type BlockModel, BlockViewType } from '@blocksuite/store';
 import { consume, provide } from '@lit/context';
 import { computed } from '@preact/signals-core';
-import { nothing, type PropertyValues, render, type TemplateResult } from 'lit';
+import { nothing, type TemplateResult } from 'lit';
 import { property, state } from 'lit/decorators.js';
 import { choose } from 'lit/directives/choose.js';
 import { when } from 'lit/directives/when.js';
@@ -290,35 +290,6 @@ export class BlockComponent<
     `;
   }
 
-  protected override update(changedProperties: PropertyValues): void {
-    // In some cases, the DOM structure is directly modified, causing Lit to lose synchronization with the DOM structure.
-    // We can restore this state through the `dirty` property.
-    if (this.dirty) {
-      // Here we made some hacks by referring to the source code of Lit.
-      // https://github.com/lit/lit/blob/273ad4e23b8ec97f1a5015dbf398104f535f9c34/packages/lit-element/src/lit-element.ts#L162-L163
-      // https://github.com/lit/lit/blob/273ad4e23b8ec97f1a5015dbf398104f535f9c34/packages/reactive-element/src/reactive-element.ts#L1586-L1589
-      // https://github.com/lit/lit/blob/273ad4e23b8ec97f1a5015dbf398104f535f9c34/packages/reactive-element/src/reactive-element.ts#L1509-L1512
-      //@ts-ignore
-      this.__reflectingProperties &&= this.__reflectingProperties.forEach(p =>
-        //@ts-ignore
-        this.__propertyToAttribute(p, this[p as keyof this])
-      ) as undefined;
-      //@ts-ignore
-      this._$changedProperties = new Map();
-      this.isUpdatePending = false;
-      //@ts-ignore
-      this.__childPart = render(nothing, this.renderRoot);
-
-      this.updateComplete
-        .then(() => {
-          this.dirty = false;
-        })
-        .catch(console.error);
-    } else {
-      super.update(changedProperties);
-    }
-  }
-
   @provide({ context: modelContext as never })
   @state()
   private accessor _model: Model | null = null;
@@ -333,9 +304,6 @@ export class BlockComponent<
   @provide({ context: serviceContext as never })
   @state()
   private accessor _service: Service | null = null;
-
-  @property({ attribute: false })
-  accessor dirty = false;
 
   @consume({ context: docContext })
   accessor doc!: Doc;

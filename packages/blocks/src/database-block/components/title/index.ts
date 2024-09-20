@@ -5,6 +5,7 @@ import type { Text } from '@blocksuite/store';
 import { getViewportElement } from '@blocksuite/affine-shared/utils';
 import { ShadowlessElement } from '@blocksuite/block-std';
 import { assertExists, WithDisposable } from '@blocksuite/global/utils';
+import { effect } from '@preact/signals-core';
 import { css, html } from 'lit';
 import { property, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
@@ -95,7 +96,8 @@ export class DatabaseTitle extends WithDisposable(ShadowlessElement) {
 
         let beforeInlineRange: InlineRange | null = null;
         this.disposables.add(
-          this.inlineEditor.slots.inlineRangeUpdate.on(([inlineRange]) => {
+          effect(() => {
+            const inlineRange = this.inlineEditor.inlineRange$.value;
             if (inlineRange) {
               if (!beforeInlineRange) {
                 this.isActive = true;

@@ -94,6 +94,9 @@ export class KeyboardControl {
       'compositionstart',
       () => {
         this.composition = true;
+      },
+      {
+        capture: true,
       }
     );
     this._dispatcher.disposables.addFromEvent(
@@ -101,6 +104,9 @@ export class KeyboardControl {
       'compositionend',
       () => {
         this.composition = false;
+      },
+      {
+        capture: true,
       }
     );
   }

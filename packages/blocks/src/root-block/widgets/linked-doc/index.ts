@@ -178,7 +178,7 @@ export class AffineLinkedDocWidget extends WidgetComponent {
     const inlineRangeApplyCallback = (callback: () => void) => {
       // the inline ranged updated in compositionEnd event before this event callback
       if (isCompositionEnd) callback();
-      else inlineEditor.slots.inlineRangeApply.once(callback);
+      else inlineEditor.slots.inlineRangeSync.once(callback);
     };
 
     inlineRangeApplyCallback(() => {

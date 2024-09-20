@@ -1,14 +1,14 @@
+import { signal, type Signal } from '@preact/signals-core';
+/* eslint-disable @stylistic/ts/lines-between-class-members */
+/* eslint-disable perfectionist/sort-classes */
+import type * as Y from 'yjs';
+
 import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 import { assertExists, DisposableGroup, Slot } from '@blocksuite/global/utils';
 import { nothing, render, type TemplateResult } from 'lit';
-import * as Y from 'yjs';
 
 import type { VLine } from './components/v-line.js';
-import type {
-  DeltaInsert,
-  InlineRange,
-  InlineRangeUpdatedProp,
-} from './types.js';
+import type { DeltaInsert, InlineRange } from './types.js';
 
 import { INLINE_ROOT_ATTR } from './consts.js';
 import { InlineHookService } from './services/hook.js';
@@ -18,6 +18,7 @@ import {
   EventService,
   RangeService,
 } from './services/index.js';
+import { RenderService } from './services/render.js';
 import { InlineTextService } from './services/text.js';
 import {
   type BaseTextAttributes,
@@ -33,9 +34,8 @@ export type InlineRootElement<
 };
 
 export interface InlineRangeProvider {
-  inlineRangeUpdated: Slot<InlineRangeUpdatedProp>;
-  getInlineRange(): InlineRange | null;
-  setInlineRange(inlineRange: InlineRange | null, sync: boolean): void;
+  inlineRange$: Signal<InlineRange | null>;
+  setInlineRange(inlineRange: InlineRange | null): void;
 }
 
 export class InlineEditor<
@@ -47,152 +47,129 @@ export class InlineEditor<
 
   static textPointToDomPoint = textPointToDomPoint;
 
-  private _attributeService: AttributeService<TextAttributes> =
+  readonly disposables = new DisposableGroup();
+
+  readonly attributeService: AttributeService<TextAttributes> =
     new AttributeService<TextAttributes>(this);
+  getFormat = this.attributeService.getFormat;
+  normalizeAttributes = this.attributeService.normalizeAttributes;
+  resetMarks = this.attributeService.resetMarks;
+  setAttributeRenderer = this.attributeService.setAttributeRenderer;
+  setAttributeSchema = this.attributeService.setAttributeSchema;
+  setMarks = this.attributeService.setMarks;
+  get marks() {
+    return this.attributeService.marks;
+  }
 
-  private _deltaService: DeltaService<TextAttributes> =
+  readonly textService: InlineTextService<TextAttributes> =
+    new InlineTextService<TextAttributes>(this);
+  deleteText = this.textService.deleteText;
+  formatText = this.textService.formatText;
+  insertLineBreak = this.textService.insertLineBreak;
+  insertText = this.textService.insertText;
+  resetText = this.textService.resetText;
+  setText = this.textService.setText;
+
+  readonly deltaService: DeltaService<TextAttributes> =
     new DeltaService<TextAttributes>(this);
+  getDeltaByRangeIndex = this.deltaService.getDeltaByRangeIndex;
+  getDeltasByInlineRange = this.deltaService.getDeltasByInlineRange;
+  mapDeltasInInlineRange = this.deltaService.mapDeltasInInlineRange;
+  get embedDeltas() {
+    return this.deltaService.embedDeltas;
+  }
 
-  private _disposables = new DisposableGroup();
+  readonly rangeService: RangeService<TextAttributes> =
+    new RangeService<TextAttributes>(this);
+  focusEnd = this.rangeService.focusEnd;
+  focusIndex = this.rangeService.focusIndex;
+  focusStart = this.rangeService.focusStart;
+  getInlineRangeFromElement = this.rangeService.getInlineRangeFromElement;
+  isFirstLine = this.rangeService.isFirstLine;
+  isLastLine = this.rangeService.isLastLine;
+  isValidInlineRange = this.rangeService.isValidInlineRange;
+  selectAll = this.rangeService.selectAll;
+  syncInlineRange = this.rangeService.syncInlineRange;
+  toDomRange = this.rangeService.toDomRange;
+  toInlineRange = this.rangeService.toInlineRange;
+  getLine = this.rangeService.getLine;
+  getNativeRange = this.rangeService.getNativeRange;
+  getNativeSelection = this.rangeService.getNativeSelection;
+  getTextPoint = this.rangeService.getTextPoint;
+  get lastStartRelativePosition() {
+    return this.rangeService.lastStartRelativePosition;
+  }
+  get lastEndRelativePosition() {
+    return this.rangeService.lastEndRelativePosition;
+  }
 
-  private _eventService: EventService<TextAttributes> =
+  readonly eventService: EventService<TextAttributes> =
     new EventService<TextAttributes>(this);
+  get isComposing() {
+    return this.eventService.isComposing;
+  }
+
+  readonly renderService: RenderService<TextAttributes> =
+    new RenderService<TextAttributes>(this);
+  waitForUpdate = this.renderService.waitForUpdate;
+  rerenderWholeEditor = this.renderService.rerenderWholeEditor;
+  render = this.renderService.render;
+  get rendering() {
+    return this.renderService.rendering;
+  }
+
+  readonly hooksService: InlineHookService<TextAttributes>;
+  get hooks() {
+    return this.hooksService.hooks;
+  }
 
   private _eventSource: HTMLElement | null = null;
-
-  private _hooksService: InlineHookService<TextAttributes>;
+  get eventSource() {
+    return this._eventSource;
+  }
 
   private _isReadonly = false;
+  get isReadonly() {
+    return this._isReadonly;
+  }
 
   private _mounted = false;
-
-  private _onYTextChange = (_: Y.YTextEvent, transaction: Y.Transaction) => {
-    if (this.yText.toString().includes('\r')) {
-      throw new BlockSuiteError(
-        ErrorCode.InlineEditorError,
-        'yText must not contain "\\r" because it will break the range synchronization'
-      );
-    }
-
-    this.slots.textChange.emit();
-
-    Promise.resolve()
-      .then(() => {
-        this.deltaService.render().catch(console.error);
-
-        const inlineRange = this.rangeService.getInlineRange();
-        if (!inlineRange || transaction.local) return;
-
-        const lastStartRelativePosition =
-          this.rangeService.lastStartRelativePosition;
-        const lastEndRelativePosition =
-          this.rangeService.lastEndRelativePosition;
-        if (!lastStartRelativePosition || !lastEndRelativePosition) return;
-
-        const doc = this.yText.doc;
-        assertExists(doc);
-        const absoluteStart = Y.createAbsolutePositionFromRelativePosition(
-          lastStartRelativePosition,
-          doc
-        );
-        const absoluteEnd = Y.createAbsolutePositionFromRelativePosition(
-          lastEndRelativePosition,
-          doc
-        );
-
-        const startIndex = absoluteStart?.index;
-        const endIndex = absoluteEnd?.index;
-        if (!startIndex || !endIndex) return;
-
-        const newInlineRange: InlineRange = {
-          index: startIndex,
-          length: endIndex - startIndex,
-        };
-        if (!this.isValidInlineRange(newInlineRange)) return;
-
-        this.setInlineRange(newInlineRange);
-      })
-      .catch(console.error);
-  };
-
-  private _rangeService: RangeService<TextAttributes> =
-    new RangeService<TextAttributes>(this);
+  get mounted() {
+    return this._mounted;
+  }
 
   private _rootElement: InlineRootElement<TextAttributes> | null = null;
+  get rootElement() {
+    assertExists(this._rootElement);
+    return this._rootElement;
+  }
 
-  private _textService: InlineTextService<TextAttributes> =
-    new InlineTextService<TextAttributes>(this);
-
-  private readonly _yText: Y.Text;
-
-  // Expose text service API
-  deleteText = this._textService.deleteText;
-
-  focusEnd = this.rangeService.focusEnd;
-
-  focusIndex = this.rangeService.focusIndex;
-
-  focusStart = this.rangeService.focusStart;
-
-  formatText = this._textService.formatText;
-
-  getDeltaByRangeIndex = this.deltaService.getDeltaByRangeIndex;
-
-  // Expose delta service API
-  getDeltasByInlineRange = this.deltaService.getDeltasByInlineRange;
-
-  getFormat = this._attributeService.getFormat;
-
-  getInlineRange = this.rangeService.getInlineRange;
-
-  getInlineRangeFromElement = this.rangeService.getInlineRangeFromElement;
-
-  getLine = this.rangeService.getLine;
-
-  getNativeSelection = this.rangeService.getNativeSelection;
-
-  getTextPoint = this.rangeService.getTextPoint;
-
-  readonly inlineRangeProvider: InlineRangeProvider | null;
-
-  insertLineBreak = this._textService.insertLineBreak;
-
-  insertText = this._textService.insertText;
-
-  readonly isEmbed: (delta: DeltaInsert<TextAttributes>) => boolean;
-
-  isFirstLine = this.rangeService.isFirstLine;
-
-  isLastLine = this.rangeService.isLastLine;
-
-  isValidInlineRange = this.rangeService.isValidInlineRange;
-
-  mapDeltasInInlineRange = this.deltaService.mapDeltasInInlineRange;
-
-  resetMarks = this._attributeService.resetMarks;
-
-  resetText = this._textService.resetText;
-
-  selectAll = this.rangeService.selectAll;
-
-  setAttributeRenderer = this._attributeService.setAttributeRenderer;
-
-  setAttributeSchema = this._attributeService.setAttributeSchema;
-
-  setInlineRange = this.rangeService.setInlineRange;
-
-  setMarks = this._attributeService.setMarks;
-
-  setText = this._textService.setText;
+  private _inlineRangeProviderOverride = false;
+  get inlineRangeProviderOverride() {
+    return this._inlineRangeProviderOverride;
+  }
+  readonly inlineRangeProvider: InlineRangeProvider = {
+    inlineRange$: signal(null),
+    setInlineRange: inlineRange => {
+      this.inlineRange$.value = inlineRange;
+    },
+  };
+  get inlineRange$() {
+    return this.inlineRangeProvider.inlineRange$;
+  }
+  setInlineRange = (inlineRange: InlineRange | null) => {
+    this.inlineRangeProvider.setInlineRange(inlineRange);
+  };
+  getInlineRange = () => {
+    return this.inlineRange$.peek();
+  };
 
   readonly slots = {
     mounted: new Slot(),
     unmounted: new Slot(),
-    textChange: new Slot(),
-    render: new Slot(),
     renderComplete: new Slot(),
-    inlineRangeUpdate: new Slot<InlineRangeUpdatedProp>(),
-    inlineRangeApply: new Slot<Range>(),
+    textChange: new Slot(),
+    inlineRangeSync: new Slot<Range | null>(),
     /**
      * Corresponding to the `compositionUpdate` and `beforeInput` events, and triggered only when the `inlineRange` is not null.
      */
@@ -203,82 +180,20 @@ export class InlineEditor<
     keydown: new Slot<KeyboardEvent>(),
   };
 
-  syncInlineRange = this.rangeService.syncInlineRange;
-
-  // Expose range service API
-  toDomRange = this.rangeService.toDomRange;
-
-  toInlineRange = this.rangeService.toInlineRange;
-
   readonly vLineRenderer: ((vLine: VLine) => TemplateResult) | null;
 
-  get attributeService() {
-    return this._attributeService;
-  }
-
-  get deltaService() {
-    return this._deltaService;
-  }
-
-  get disposables() {
-    return this._disposables;
-  }
-
-  get eventService() {
-    return this._eventService;
-  }
-
-  get eventSource() {
-    return this._eventSource;
-  }
-
-  // Expose hook service API
-  get hooks() {
-    return this._hooksService.hooks;
-  }
-
-  // Expose event service API
-  get isComposing() {
-    return this._eventService.isComposing;
-  }
-
-  get isReadonly() {
-    return this._isReadonly;
-  }
-
-  // Expose attribute service API
-  get marks() {
-    return this._attributeService.marks;
-  }
-
-  get mounted() {
-    return this._mounted;
-  }
-
-  get rangeService() {
-    return this._rangeService;
-  }
-
-  get rootElement() {
-    assertExists(this._rootElement);
-    return this._rootElement;
-  }
-
-  get yText() {
-    return this._yText;
-  }
-
+  readonly yText: Y.Text;
   get yTextDeltas() {
     return this.yText.toDelta();
   }
-
   get yTextLength() {
     return this.yText.length;
   }
-
   get yTextString() {
     return this.yText.toString();
   }
+
+  readonly isEmbed: (delta: DeltaInsert<TextAttributes>) => boolean;
 
   constructor(
     yText: InlineEditor['yText'],
@@ -306,30 +221,17 @@ export class InlineEditor<
     const {
       isEmbed = () => false,
       hooks = {},
-      inlineRangeProvider = null,
+      inlineRangeProvider,
       vLineRenderer = null,
     } = ops;
-    this._yText = yText;
+    this.yText = yText;
     this.isEmbed = isEmbed;
     this.vLineRenderer = vLineRenderer;
-    this._hooksService = new InlineHookService(this, hooks);
-    this.inlineRangeProvider = inlineRangeProvider;
-
+    this.hooksService = new InlineHookService(this, hooks);
     if (inlineRangeProvider) {
-      inlineRangeProvider.inlineRangeUpdated.on(prop => {
-        this.slots.inlineRangeUpdate.emit(prop);
-      });
+      this.inlineRangeProvider = inlineRangeProvider;
+      this._inlineRangeProviderOverride = true;
     }
-    this.slots.inlineRangeUpdate.on(this.rangeService.onInlineRangeUpdated);
-  }
-
-  private _bindYTextObserver() {
-    this.yText.observe(this._onYTextChange);
-    this.disposables.add({
-      dispose: () => {
-        this.yText.unobserve(this._onYTextChange);
-      },
-    });
   }
 
   mount(
@@ -344,25 +246,30 @@ export class InlineEditor<
     this._eventSource.style.outline = 'none';
     this._rootElement.dataset.vRoot = 'true';
     this.setReadonly(isReadonly);
-    render(nothing, this._rootElement);
 
-    this._bindYTextObserver();
+    this.rootElement.replaceChildren();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    delete (this.rootElement as any)['_$litPart$'];
 
-    this._eventService.mount();
+    this.eventService.mount();
+    this.rangeService.mount();
+    this.renderService.mount();
 
     this._mounted = true;
     this.slots.mounted.emit();
-    this._deltaService.render().catch(console.error);
+
+    this.render();
   }
 
-  requestUpdate(syncInlineRange = true): void {
-    this._deltaService.render(syncInlineRange).catch(console.error);
-  }
-
-  rerenderWholeEditor() {
-    if (!this.rootElement.isConnected) return;
-    render(nothing, this.rootElement);
-    this._deltaService.render().catch(console.error);
+  unmount() {
+    if (this.rootElement.isConnected) {
+      render(nothing, this.rootElement);
+    }
+    this.rootElement.removeAttribute(INLINE_ROOT_ATTR);
+    this._rootElement = null;
+    this._mounted = false;
+    this.disposables.dispose();
+    this.slots.unmounted.emit();
   }
 
   setReadonly(isReadonly: boolean): void {
@@ -389,21 +296,5 @@ export class InlineEditor<
     }
 
     doc.transact(fn, doc.clientID);
-  }
-
-  unmount() {
-    if (this.rootElement.isConnected) {
-      render(nothing, this.rootElement);
-    }
-    this.rootElement.removeAttribute(INLINE_ROOT_ATTR);
-    this._rootElement = null;
-    this._mounted = false;
-    this.disposables.dispose();
-    this.slots.unmounted.emit();
-  }
-
-  async waitForUpdate() {
-    const vLines = Array.from(this.rootElement.querySelectorAll('v-line'));
-    await Promise.all(vLines.map(line => line.updateComplete));
   }
 }

@@ -1,5 +1,5 @@
 import type { InlineEditor } from '../inline-editor.js';
-import type { InlineRange, NativePoint } from '../types.js';
+import type { InlineRange } from '../types.js';
 import type { BeforeinputHookCtx, CompositionEndHookCtx } from './hook.js';
 
 import {
@@ -168,13 +168,10 @@ export class EventService<TextAttributes extends BaseTextAttributes> {
     const { inlineRange: newInlineRange, data: newData } = ctx;
     if (newData && newData.length > 0) {
       this.editor.insertText(newInlineRange, newData, ctx.attributes);
-      this.editor.setInlineRange(
-        {
-          index: newInlineRange.index + newData.length,
-          length: 0,
-        },
-        false
-      );
+      this.editor.setInlineRange({
+        index: newInlineRange.index + newData.length,
+        length: 0,
+      });
     }
 
     this.editor.slots.inputting.emit();
@@ -282,7 +279,7 @@ export class EventService<TextAttributes extends BaseTextAttributes> {
     if (!selection) return;
     if (selection.rangeCount === 0) {
       if (previousInlineRange !== null) {
-        this.editor.setInlineRange(null, false);
+        this.editor.setInlineRange(null);
       }
 
       return;
@@ -304,44 +301,25 @@ export class EventService<TextAttributes extends BaseTextAttributes> {
         return;
       } else {
         if (previousInlineRange !== null) {
-          this.editor.setInlineRange(null, false);
+          this.editor.setInlineRange(null);
         }
         return;
       }
     }
 
-    this._previousAnchor = [range.startContainer, range.startOffset];
-    this._previousFocus = [range.endContainer, range.endOffset];
-
     const inlineRange = this.editor.toInlineRange(selection.getRangeAt(0));
     if (!isMaybeInlineRangeEqual(previousInlineRange, inlineRange)) {
-      this.editor.setInlineRange(inlineRange, false);
-    }
-
-    // avoid infinite syncInlineRange
-    if (
-      ((range.startContainer.nodeType !== Node.TEXT_NODE ||
-        range.endContainer.nodeType !== Node.TEXT_NODE) &&
-        range.startContainer !== this._previousAnchor[0] &&
-        range.endContainer !== this._previousFocus[0] &&
-        range.startOffset !== this._previousAnchor[1] &&
-        range.endOffset !== this._previousFocus[1]) ||
-      range.startContainer.nodeType === Node.COMMENT_NODE ||
-      range.endContainer.nodeType === Node.COMMENT_NODE
-    ) {
-      this.editor.syncInlineRange();
+      this.editor.rangeService.lockSyncInlineRange();
+      this.editor.setInlineRange(inlineRange);
+      this.editor.rangeService.unlockSyncInlineRange();
     }
   };
-
-  private _previousAnchor: NativePoint | null = null;
-
-  private _previousFocus: NativePoint | null = null;
 
   mount = () => {
     const eventSource = this.editor.eventSource;
     const rootElement = this.editor.rootElement;
 
-    if (!this.inlineRangeProvider) {
+    if (!this.editor.inlineRangeProviderOverride) {
       this.editor.disposables.addFromEvent(
         document,
         'selectionchange',
@@ -383,10 +361,6 @@ export class EventService<TextAttributes extends BaseTextAttributes> {
     );
     this.editor.disposables.addFromEvent(rootElement, 'click', this._onClick);
   };
-
-  get inlineRangeProvider() {
-    return this.editor.inlineRangeProvider;
-  }
 
   get isComposing() {
     return this._isComposing;

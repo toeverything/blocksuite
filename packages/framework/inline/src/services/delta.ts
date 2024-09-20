@@ -1,16 +1,8 @@
-import { html, render } from 'lit';
-import { repeat } from 'lit/directives/repeat.js';
-
-import type { VLine } from '../index.js';
 import type { InlineEditor } from '../inline-editor.js';
 import type { DeltaEntry, DeltaInsert, InlineRange } from '../types.js';
 import type { BaseTextAttributes } from '../utils/index.js';
 
-import {
-  deltaInsertsToChunks,
-  transformDeltasToEmbedDeltas,
-} from '../utils/index.js';
-import { isInlineRangeIntersect } from '../utils/inline-range.js';
+import { transformDeltasToEmbedDeltas } from '../utils/index.js';
 
 export class DeltaService<TextAttributes extends BaseTextAttributes> {
   /**
@@ -39,7 +31,7 @@ export class DeltaService<TextAttributes extends BaseTextAttributes> {
    * `getDeltaByRangeIndex(4)` returns `{ insert: 'bbb', attributes: { italic: true } }`.
    */
   getDeltaByRangeIndex = (rangeIndex: number) => {
-    const deltas = this.deltas;
+    const deltas = this.editor.embedDeltas;
 
     let index = 0;
     for (const delta of deltas) {
@@ -128,7 +120,7 @@ export class DeltaService<TextAttributes extends BaseTextAttributes> {
       deltaIndex: number
     ) => Result
   ) => {
-    const deltas = this.deltas;
+    const deltas = this.editor.embedDeltas;
     const result: Result[] = [];
 
     deltas.reduce((rangeIndex, delta, deltaIndex) => {
@@ -152,89 +144,7 @@ export class DeltaService<TextAttributes extends BaseTextAttributes> {
     return result;
   };
 
-  // render current deltas to VLines
-  render = async (syncInlineRange = true) => {
-    if (!this.editor.mounted) return;
-
-    this.editor.slots.render.emit();
-
-    const rootElement = this.editor.rootElement;
-    const chunks = deltaInsertsToChunks(this.deltas);
-
-    let deltaIndex = 0;
-    // every chunk is a line
-    const lines = chunks.map((chunk, lineIndex) => {
-      if (lineIndex > 0) {
-        deltaIndex += 1; // for '\n'
-      }
-
-      if (chunk.length > 0) {
-        const elements: VLine['elements'] = chunk.map(delta => {
-          const startOffset = deltaIndex;
-          deltaIndex += delta.insert.length;
-          const endOffset = deltaIndex;
-
-          const inlineRange = this.editor.getInlineRange();
-          const selected =
-            !!inlineRange &&
-            isInlineRangeIntersect(inlineRange, {
-              index: startOffset,
-              length: endOffset - startOffset,
-            });
-
-          return [
-            html`<v-element
-              .selected=${selected}
-              .delta=${{
-                insert: delta.insert,
-                attributes: this.editor.attributeService.normalizeAttributes(
-                  delta.attributes
-                ),
-              }}
-              .startOffset=${startOffset}
-              .endOffset=${endOffset}
-              .lineIndex=${lineIndex}
-            ></v-element>`,
-            delta,
-          ];
-        });
-
-        return html`<v-line
-          .elements=${elements}
-          .index=${lineIndex}
-        ></v-line>`;
-      } else {
-        return html`<v-line .elements=${[]} .index=${lineIndex}></v-line>`;
-      }
-    });
-
-    try {
-      render(
-        repeat(
-          lines.map((line, i) => ({ line, index: i })),
-          entry => entry.index,
-          entry => entry.line
-        ),
-        rootElement
-      );
-    } catch (_) {
-      // Lit may be crashed by IME input and we need to rerender whole editor for it
-      this.editor.rerenderWholeEditor();
-      await this.editor.waitForUpdate();
-    }
-
-    await this.editor.waitForUpdate();
-
-    if (syncInlineRange) {
-      // We need to synchronize the selection immediately after rendering is completed,
-      // otherwise there is a possibility of an error in the cursor position
-      this.editor.rangeService.syncInlineRange();
-    }
-
-    this.editor.slots.renderComplete.emit();
-  };
-
-  get deltas() {
+  get embedDeltas() {
     return transformDeltasToEmbedDeltas(this.editor, this.editor.yTextDeltas);
   }
 
