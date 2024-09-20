@@ -24,7 +24,7 @@ export const indentBlocks: Command<
     }
   }
 
-  if (!blockIds || !blockIds.length || doc.readonly) return;
+  if (!blockIds || blockIds.length <= 1 || doc.readonly) return;
 
   // Find the first model that can be indented
   let firstIndentIndex = -1;
