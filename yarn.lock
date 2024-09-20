@@ -9001,8 +9001,8 @@ __metadata:
   linkType: hard
 
 "hast-util-to-html@npm:^9.0.0, hast-util-to-html@npm:^9.0.2":
-  version: 9.0.2
-  resolution: "hast-util-to-html@npm:9.0.2"
+  version: 9.0.3
+  resolution: "hast-util-to-html@npm:9.0.3"
   dependencies:
     "@types/hast": "npm:^3.0.0"
     "@types/unist": "npm:^3.0.0"
@@ -9015,7 +9015,7 @@ __metadata:
     space-separated-tokens: "npm:^2.0.0"
     stringify-entities: "npm:^4.0.0"
     zwitch: "npm:^2.0.4"
-  checksum: 10/b14a94d4f675136ba2df89246553b64af785324a6b4deb9b7b7f308e86021a9a3aa5cf16fea18124b92dfb1005277e0f76bb26548d9eb0617dc19c72c32366f4
+  checksum: 10/cdf860be567137d045490b0f27590bcafc7032f0725a84667e8950d7bf2ce175d0dfc635b7ce05f3a8d1963ac4c74cae4d93513047429aad909222decdb2f7d1
   languageName: node
   linkType: hard
 

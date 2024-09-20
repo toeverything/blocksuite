@@ -439,7 +439,7 @@ export class HtmlAdapter extends BaseAdapter<Html> {
           if (
             // Check if it is a paragraph like div
             o.parent?.node.type === 'element' &&
-            o.parent.node.tagName !== 'li' &&
+            !['li', 'p'].includes(o.parent.node.tagName) &&
             (hastGetElementChildren(o.node).every(child =>
               [
                 'a',
