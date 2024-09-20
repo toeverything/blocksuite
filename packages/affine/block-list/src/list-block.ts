@@ -163,6 +163,8 @@ export class ListBlockComponent extends CaptionedBlockComponent<
 
   override renderBlock(): TemplateResult<1> {
     const { model, _onClickIcon } = this;
+    const arabicRegex = /^[\u0600-\u06FF]$/;
+
     const collapsed = this.doc.readonly
       ? this._isCollapsedWhenReadOnly
       : !!model.collapsed;
@@ -183,8 +185,12 @@ export class ListBlockComponent extends CaptionedBlockComponent<
     </div>`;
 
     return html`
-      <div class=${'affine-list-block-container'}>
-        <div class=${`affine-list-rich-text-wrapper ${checked}`}>
+      <div class=${'affine-list-block-container '}>
+        <div
+          class=${`affine-list-rich-text-wrapper  ${
+            arabicRegex.test(this.model.text.yText.toJSON()[0]) ? `rtl` : ''
+          } ${checked}`}
+        >
           ${this._toggleTemplate(collapsed)} ${listIcon}
           <rich-text
             .yText=${this.model.text.yText}

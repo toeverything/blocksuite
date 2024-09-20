@@ -155,8 +155,8 @@ export class ParagraphBlockComponent extends CaptionedBlockComponent<
           class="affine-paragraph-rich-text-wrapper ${arabicRegex.test(
             this.model.text.yText.toJSON()[0]
           )
-            ? 'rtl'
-            : ''} ${type$.value}"
+            ? `rtl ${type$.value === 'quote' ? `${type$.value}-ar` : type$.value}`
+            : ` ${type$.value}`} "
         >
           <rich-text
             .yText=${this.model.text.yText}

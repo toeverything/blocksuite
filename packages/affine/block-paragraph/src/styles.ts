@@ -106,7 +106,7 @@ export const paragraphBlockStyles = css`
 
   .quote {
     line-height: 26px;
-    padding-left: 17px;
+    padding-left: 17px !important;
     margin-top: var(--affine-paragraph-space);
     padding-top: 10px;
     padding-bottom: 10px;
@@ -120,6 +120,27 @@ export const paragraphBlockStyles = css`
     margin-bottom: 10px;
     position: absolute;
     left: 0;
+    top: 0;
+    background: var(--affine-quote-color);
+    border-radius: 18px;
+  }
+
+  .quote-ar {
+    line-height: 26px;
+    padding-right: 17px !important;
+    margin-top: var(--affine-paragraph-space);
+    padding-top: 10px;
+    padding-bottom: 10px;
+    position: relative;
+  }
+  .quote-ar::after {
+    content: '';
+    width: 2px;
+    height: calc(100% - 20px);
+    margin-top: 10px;
+    margin-bottom: 10px;
+    position: absolute;
+    right: 0;
     top: 0;
     background: var(--affine-quote-color);
     border-radius: 18px;
