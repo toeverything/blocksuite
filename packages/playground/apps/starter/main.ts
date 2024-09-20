@@ -17,9 +17,9 @@ import { effects as blocksEffects } from '@blocksuite/blocks/effects';
 import * as globalUtils from '@blocksuite/global/utils';
 import * as editor from '@blocksuite/presets';
 import { effects as presetsEffects } from '@blocksuite/presets/effects';
-import '@blocksuite/presets/themes/affine.css';
 import * as store from '@blocksuite/store';
 
+import '../../style.css';
 import { mockDocModeService } from '../_common/mock-services.js';
 import { setupEdgelessTemplate } from '../_common/setup.js';
 import '../dev-format.js';

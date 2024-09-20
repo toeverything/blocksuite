@@ -63,6 +63,11 @@ const createNoRestrictedImports = packagePath => {
               message: 'Do not import package itself',
               allowTypeImports: false,
             },
+            {
+              group: ['@blocksuite/affine', '@blocksuite/affine/**'],
+              message: 'Do not import shell package',
+              allowTypeImports: false,
+            },
           ],
         },
       ],

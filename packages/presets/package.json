@@ -9,7 +9,7 @@
     "directory": "packages/presets"
   },
   "scripts": {
-    "build": "tsc --build --verbose",
+    "build": "tsc",
     "test:unit": "nx vite:test --browser.headless --run",
     "test:debug": "nx vite:test"
   },
@@ -35,8 +35,7 @@
   },
   "exports": {
     ".": "./src/index.ts",
-    "./effects": "./src/effects.ts",
-    "./themes/*": "./themes/*"
+    "./effects": "./src/effects.ts"
   },
   "publishConfig": {
     "access": "public",
@@ -52,8 +51,7 @@
         "module": "./dist/effects.js",
         "types": "./dist/effects.d.ts",
         "import": "./dist/effects.js"
-      },
-      "./themes/*": "./themes/*"
+      }
     }
   },
   "files": [

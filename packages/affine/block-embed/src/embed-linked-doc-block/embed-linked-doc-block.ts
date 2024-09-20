@@ -172,10 +172,6 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockComponent<EmbedLinke
   };
 
   open = () => {
-    const pageId = this.model.pageId;
-    // TODO(@fundon): should scroll into target block/element
-    if (pageId === this.doc.id) return;
-
     this.std
       .getOptional(RefNodeSlotsProvider)
       ?.docLinkClicked.emit(this.referenceInfo);

@@ -1,5 +1,6 @@
 import { createEmptyDoc, EdgelessEditor } from '@blocksuite/presets';
-import '@blocksuite/presets/themes/affine.css';
+
+import '../../../style.css';
 
 const doc = createEmptyDoc().init();
 const editor = new EdgelessEditor();

@@ -1819,6 +1819,19 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@blocksuite/affine@workspace:packages/affine/all":
+  version: 0.0.0-use.local
+  resolution: "@blocksuite/affine@workspace:packages/affine/all"
+  dependencies:
+    "@blocksuite/block-std": "workspace:*"
+    "@blocksuite/blocks": "workspace:*"
+    "@blocksuite/global": "workspace:*"
+    "@blocksuite/inline": "workspace:*"
+    "@blocksuite/presets": "workspace:*"
+    "@blocksuite/store": "workspace:*"
+  languageName: unknown
+  linkType: soft
+
 "@blocksuite/block-std@workspace:*, @blocksuite/block-std@workspace:packages/framework/block-std":
   version: 0.0.0-use.local
   resolution: "@blocksuite/block-std@workspace:packages/framework/block-std"
