@@ -38,8 +38,6 @@
     "ci:publish": "yarn build:packages && yarn workspaces foreach -Ap --no-private npm publish --tolerate-republish --access public --tag latest",
     "ci:version:canary": "changeset version --snapshot canary && yarn install --no-frozen-lockfile",
     "ci:publish:canary": "yarn build:packages && yarn workspaces foreach -Ap --no-private npm publish --access public --tag canary",
-    "release-note:draft": "tsx ./scripts/release-note/convert.ts",
-    "release-note:notable": "node ./scripts/release-note/notable-prs.mjs",
     "postinstall": "husky"
   },
   "lint-staged": {
