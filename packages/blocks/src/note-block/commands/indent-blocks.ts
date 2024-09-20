@@ -26,6 +26,11 @@ export const indentBlocks: Command<
 
   if (!blockIds || !blockIds.length || doc.readonly) return;
 
+  if (blockIds.length === 1) {
+    const block = doc.getBlock(blockIds[0]);
+    if (!block || block.model.text) return;
+  }
+
   // Find the first model that can be indented
   let firstIndentIndex = -1;
   let previousSibling: BlockModel | null = null;
