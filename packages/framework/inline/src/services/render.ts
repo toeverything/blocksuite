@@ -155,6 +155,9 @@ export class RenderService<TextAttributes extends BaseTextAttributes> {
     if (!rootElement.isConnected) return;
 
     rootElement.replaceChildren();
+    // Because we bypassed Lit and disrupted the DOM structure, this will cause an inconsistency in the original state of `ChildPart`.
+    // Therefore, we need to remove the original `ChildPart`.
+    // https://github.com/lit/lit/blob/a2cd76cfdea4ed717362bb1db32710d70550469d/packages/lit-html/src/lit-html.ts#L2248
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     delete (rootElement as any)['_$litPart$'];
     this.render();
