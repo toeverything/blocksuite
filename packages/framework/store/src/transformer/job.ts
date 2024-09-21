@@ -487,9 +487,7 @@ export class Job {
     });
 
     const nextTick =
-      typeof window !== 'undefined'
-        ? window.requestAnimationFrame
-        : setImmediate;
+      typeof window !== 'undefined' ? window.requestIdleCallback : setImmediate;
     await new Promise(resolve => nextTick(() => resolve(undefined)));
     doc.addBlock(
       modelData.flavour as BlockSuite.Flavour,
