@@ -693,10 +693,6 @@ export class MindmapElementModel extends GfxGroupLikeElementModel<MindmapElement
     return result as SerializedMindmapElement;
   }
 
-  setLayoutHandler(handler: typeof this._layoutHandler) {
-    this._layoutHandler = handler;
-  }
-
   stashTree(node: MindmapNode | string) {
     const mindNode = typeof node === 'string' ? this.getNode(node) : node;
 
