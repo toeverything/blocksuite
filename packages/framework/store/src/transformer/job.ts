@@ -1,5 +1,6 @@
+import { IS_WEB } from '@blocksuite/global/env';
 import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
-import { Slot } from '@blocksuite/global/utils';
+import { requestIdleCallback, Slot } from '@blocksuite/global/utils';
 
 import type { BlockModel, BlockSchemaType } from '../schema/index.js';
 import type { Doc, DocCollection, DocMeta } from '../store/index.js';
@@ -486,8 +487,7 @@ export class Job {
       children,
     });
 
-    const nextTick =
-      typeof window !== 'undefined' ? window.requestIdleCallback : setImmediate;
+    const nextTick = IS_WEB ? requestIdleCallback : setImmediate;
     await new Promise(resolve => nextTick(() => resolve(undefined)));
     doc.addBlock(
       modelData.flavour as BlockSuite.Flavour,

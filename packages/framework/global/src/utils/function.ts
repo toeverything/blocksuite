@@ -1,3 +1,5 @@
+import { IS_WEB, RIC_ENABLED } from '../env/index.js';
+
 export async function sleep(ms: number, signal?: AbortSignal): Promise<void> {
   return new Promise(resolve => {
     if (signal?.aborted) {
@@ -112,3 +114,37 @@ export const debounce = <T extends (...args: any[]) => void>(
     timer = setTimeout(setTimer, limit);
   } as T;
 };
+
+interface IdleDeadline {
+  timeRemaining: () => number;
+  didTimeout: boolean;
+}
+
+type IdleRequestCallback = (deadline: IdleDeadline) => void;
+
+interface IdleRequestOptions {
+  timeout?: number;
+}
+
+function requestIdleCallbackPolyfill(
+  callback: IdleRequestCallback,
+  options?: IdleRequestOptions
+): number {
+  const start = Date.now();
+  return setTimeout(() => {
+    callback({
+      didTimeout: false,
+      timeRemaining: () => Math.max(0, 50 - (Date.now() - start)),
+    });
+  }, options?.timeout ?? 1) as unknown as number;
+}
+
+export const requestIdleCallback =
+  IS_WEB && RIC_ENABLED
+    ? window.requestIdleCallback
+    : requestIdleCallbackPolyfill;
+
+export const cancelIdleCallback =
+  IS_WEB && RIC_ENABLED
+    ? window.cancelIdleCallback
+    : (id: number) => clearTimeout(id);

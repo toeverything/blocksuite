@@ -2,7 +2,7 @@
 
 import type { Slot } from '@blocksuite/global/utils';
 
-import { assert, beforeEach, describe, expect, it, vi } from 'vitest';
+import { assert, describe, expect, it, vi } from 'vitest';
 import { applyUpdate, encodeStateAsUpdate } from 'yjs';
 
 import type { BlockModel, BlockSchemaType, Doc } from '../index.js';
@@ -69,28 +69,6 @@ function createTestDoc(docId = defaultDocId) {
   doc.load();
   return doc;
 }
-
-function requestIdleCallbackPolyfill(
-  callback: IdleRequestCallback,
-  options?: IdleRequestOptions
-) {
-  const timeout = options?.timeout ?? 1000;
-  const start = Date.now();
-  return setTimeout(function () {
-    callback({
-      didTimeout: false,
-      timeRemaining: function () {
-        return Math.max(0, timeout - (Date.now() - start));
-      },
-    });
-  }, timeout) as unknown as number;
-}
-
-beforeEach(() => {
-  if (globalThis.requestIdleCallback === undefined) {
-    globalThis.requestIdleCallback = requestIdleCallbackPolyfill;
-  }
-});
 
 describe('basic', () => {
   it('can init collection', () => {

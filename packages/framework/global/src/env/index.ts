@@ -26,5 +26,4 @@ export const IS_IPAD =
 
 export const IS_WINDOWS = /Win/.test(platform);
 
-export const REQUEST_IDLE_CALLBACK_ENABLED =
-  'requestIdleCallback' in globalThis;
+export const RIC_ENABLED = 'requestIdleCallback' in globalThis;
