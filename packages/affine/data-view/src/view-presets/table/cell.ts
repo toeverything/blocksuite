@@ -12,7 +12,7 @@ import { createRef } from 'lit/directives/ref.js';
 import type {
   CellRenderProps,
   DataViewCellLifeCycle,
-} from '../../core/column/index.js';
+} from '../../core/property/index.js';
 import type { SingleView } from '../../core/view-manager/single-view.js';
 import type { TableColumn } from './table-view-manager.js';
 

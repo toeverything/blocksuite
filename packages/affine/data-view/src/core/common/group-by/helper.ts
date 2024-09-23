@@ -5,7 +5,7 @@ import {
 import { computed, type ReadonlySignal } from '@preact/signals-core';
 
 import type { TType } from '../../logical/typesystem.js';
-import type { Column } from '../../view-manager/column.js';
+import type { Property } from '../../view-manager/property.js';
 import type { SingleView } from '../../view-manager/single-view.js';
 import type { GroupBy, GroupProperty } from '../types.js';
 
@@ -13,7 +13,7 @@ import { groupByMatcher } from './matcher.js';
 
 export type GroupData = {
   manager: GroupManager;
-  column: Column;
+  property: Property;
   key: string;
   name: string;
   type: TType;
@@ -22,14 +22,6 @@ export type GroupData = {
 };
 
 export class GroupManager {
-  column$ = computed(() => {
-    const groupBy = this.groupBy$.value;
-    if (!groupBy) {
-      return;
-    }
-    return this.viewManager.columnGet(groupBy.columnId);
-  });
-
   config$ = computed(() => {
     const groupBy = this.groupBy$.value;
     if (!groupBy) {
@@ -46,22 +38,22 @@ export class GroupManager {
     const staticGroupMap = this.staticGroupDataMap$.value;
     const config = this.config$.value;
     const groupBy = this.groupBy$.value;
-    const column = this.column$.value;
-    const tType = column?.dataType$.value;
-    if (!staticGroupMap || !config || !groupBy || !tType || !column) {
+    const property = this.property$.value;
+    const tType = property?.dataType$.value;
+    if (!staticGroupMap || !config || !groupBy || !tType || !property) {
       return;
     }
     const groupMap: Record<string, GroupData> = Object.fromEntries(
       Object.entries(staticGroupMap).map(([k, v]) => [k, { ...v, rows: [] }])
     );
     this.viewManager.rows$.value.forEach(id => {
-      const value = this.viewManager.cellGetJsonValue(id, groupBy.columnId);
+      const value = this.viewManager.cellJsonValueGet(id, groupBy.columnId);
       const keys = config.valuesGroup(value, tType);
       keys.forEach(({ key, value }) => {
         if (!groupMap[key]) {
           groupMap[key] = {
             key,
-            column,
+            property: property,
             name: config.groupName(tType, value),
             manager: this,
             value,
@@ -87,13 +79,21 @@ export class GroupManager {
     return sortedGroup.map(key => groupMap[key]);
   });
 
+  property$ = computed(() => {
+    const groupBy = this.groupBy$.value;
+    if (!groupBy) {
+      return;
+    }
+    return this.viewManager.propertyGet(groupBy.columnId);
+  });
+
   staticGroupDataMap$ = computed<
     Record<string, Omit<GroupData, 'rows'>> | undefined
   >(() => {
     const config = this.config$.value;
-    const column = this.column$.value;
-    const tType = column?.dataType$.value;
-    if (!config || !tType || !column) {
+    const property = this.property$.value;
+    const tType = property?.dataType$.value;
+    if (!config || !tType || !property) {
       return;
     }
     return Object.fromEntries(
@@ -101,7 +101,7 @@ export class GroupManager {
         key,
         {
           key,
-          column,
+          property,
           name: config.groupName(tType, value),
           manager: this,
           type: tType,
@@ -112,22 +112,22 @@ export class GroupManager {
   });
 
   updateData = (data: NonNullable<unknown>) => {
-    const columnId = this.columnId;
-    if (!columnId) {
+    const propertyId = this.propertyId;
+    if (!propertyId) {
       return;
     }
-    this.viewManager.columnUpdateData(columnId, data);
+    this.viewManager.propertyDataSet(propertyId, data);
   };
 
   get addGroup() {
-    const type = this.column$.value?.type$.value;
+    const type = this.property$.value?.type$.value;
     if (!type) {
       return;
     }
-    return this.viewManager.columnGetMeta(type)?.config.addGroup;
+    return this.viewManager.propertyMetaGet(type)?.config.addGroup;
   }
 
-  get columnId() {
+  get propertyId() {
     return this.groupBy$.value?.columnId;
   }
 
@@ -148,16 +148,16 @@ export class GroupManager {
 
   addToGroup(rowId: string, key: string) {
     const groupMap = this.groupDataMap$.value;
-    const columnId = this.columnId;
-    if (!groupMap || !columnId) {
+    const propertyId = this.propertyId;
+    if (!groupMap || !propertyId) {
       return;
     }
     const addTo = this.config$.value?.addToGroup ?? (value => value);
     const newValue = addTo(
       groupMap[key].value,
-      this.viewManager.cellGetJsonValue(rowId, columnId)
+      this.viewManager.cellJsonValueGet(rowId, propertyId)
     );
-    this.viewManager.cellUpdateValue(rowId, columnId, newValue);
+    this.viewManager.cellValueSet(rowId, propertyId, newValue);
   }
 
   changeCardSort(groupKey: string, cardIds: string[]) {
@@ -195,8 +195,8 @@ export class GroupManager {
       return;
     }
     if (fromGroupKey !== toGroupKey) {
-      const columnId = this.columnId;
-      if (!columnId) {
+      const propertyId = this.propertyId;
+      if (!propertyId) {
         return;
       }
       const remove = this.config$.value?.removeFromGroup ?? (() => undefined);
@@ -205,12 +205,12 @@ export class GroupManager {
       if (group) {
         newValue = remove(
           group.value,
-          this.viewManager.cellGetJsonValue(rowId, columnId)
+          this.viewManager.cellJsonValueGet(rowId, propertyId)
         );
       }
       const addTo = this.config$.value?.addToGroup ?? (value => value);
       newValue = addTo(groupMap[toGroupKey].value, newValue);
-      this.viewManager.cellUpdateValue(rowId, columnId, newValue);
+      this.viewManager.cellValueSet(rowId, propertyId, newValue);
     }
     const rows = groupMap[toGroupKey].rows.filter(id => id !== rowId);
     const index = insertPositionToIndex(position, rows, id => id);
@@ -238,25 +238,25 @@ export class GroupManager {
     if (!groupMap) {
       return;
     }
-    const columnId = this.columnId;
-    if (!columnId) {
+    const propertyId = this.propertyId;
+    if (!propertyId) {
       return;
     }
     const remove = this.config$.value?.removeFromGroup ?? (() => undefined);
     const newValue = remove(
       groupMap[key].value,
-      this.viewManager.cellGetJsonValue(rowId, columnId)
+      this.viewManager.cellJsonValueGet(rowId, propertyId)
     );
-    this.viewManager.cellUpdateValue(rowId, columnId, newValue);
+    this.viewManager.cellValueSet(rowId, propertyId, newValue);
   }
 
   updateValue(rows: string[], value: unknown) {
-    const columnId = this.columnId;
-    if (!columnId) {
+    const propertyId = this.propertyId;
+    if (!propertyId) {
       return;
     }
     rows.forEach(id => {
-      this.viewManager.cellUpdateValue(id, columnId, value);
+      this.viewManager.cellValueSet(id, propertyId, value);
     });
   }
 }

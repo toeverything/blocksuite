@@ -102,7 +102,8 @@ export class KanbanGroup extends SignalWatcher(
           groupKey: this.group.key,
           cardId: id,
           columnId:
-            this.view.header$.value.titleColumn || this.view.columns$.value[0],
+            this.view.mainProperties$.value.titleColumn ||
+            this.view.propertyIds$.value[0],
           isEditing: true,
         };
       }
@@ -119,7 +120,8 @@ export class KanbanGroup extends SignalWatcher(
           groupKey: this.group.key,
           cardId: id,
           columnId:
-            this.view.header$.value.titleColumn || this.view.columns$.value[0],
+            this.view.mainProperties$.value.titleColumn ||
+            this.view.propertyIds$.value[0],
           isEditing: true,
         };
       }

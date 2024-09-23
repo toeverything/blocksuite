@@ -3,7 +3,7 @@ import type { BlockStdScope } from '@blocksuite/block-std';
 import { ShadowlessElement } from '@blocksuite/block-std';
 import { SignalWatcher, WithDisposable } from '@blocksuite/global/utils';
 import { computed, type ReadonlySignal } from '@preact/signals-core';
-import { css, type TemplateResult, unsafeCSS } from 'lit';
+import { css, unsafeCSS } from 'lit';
 import { property, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { keyed } from 'lit/directives/keyed.js';
@@ -16,7 +16,6 @@ import type { DataViewExpose, DataViewProps } from './view/types.js';
 import type { SingleView } from './view-manager/single-view.js';
 
 import { dataViewCommonStyle } from './common/css-variable.js';
-import { createRecordDetail } from './common/detail/detail.js';
 import { renderUniLit } from './utils/uni-component/index.js';
 
 type ViewProps = {
@@ -37,7 +36,10 @@ export type DataViewRendererConfig = {
   detailPanelConfig: {
     openDetailPanel: (
       target: HTMLElement,
-      template: TemplateResult
+      data: {
+        view: SingleView;
+        rowId: string;
+      }
     ) => Promise<void>;
   };
   headerWidget: DataViewProps['headerWidget'];
@@ -109,13 +111,10 @@ export class DataViewRenderer extends SignalWatcher(
   }) => {
     const openDetailPanel = this.config.detailPanelConfig.openDetailPanel;
     if (openDetailPanel) {
-      openDetailPanel(
-        this,
-        createRecordDetail({
-          view: ops.view,
-          rowId: ops.rowId,
-        })
-      )
+      openDetailPanel(this, {
+        view: ops.view,
+        rowId: ops.rowId,
+      })
         .catch(console.error)
         .finally(ops.onClose);
     }
@@ -152,7 +151,7 @@ export class DataViewRenderer extends SignalWatcher(
     return keyed(
       viewData.view.id,
       renderUniLit(
-        viewData.view.viewMeta.renderer.view,
+        viewData.view.meta.renderer.view,
         { props },
         {
           ref: this._view,

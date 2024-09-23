@@ -244,9 +244,8 @@ test.describe('Embed synced doc', () => {
         const databaseService = databaseBlock?.service;
         if (databaseService) {
           databaseService.databaseViewInitEmpty(
-            window.host,
             model,
-            databaseService.viewPresets.tableViewMeta
+            databaseService.viewPresets.tableViewMeta.type
           );
           databaseService.applyColumnUpdate(model);
         }

@@ -6,7 +6,7 @@ import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
 
-import type { Column } from '../../../core/view-manager/column.js';
+import type { Property } from '../../../core/view-manager/property.js';
 import type { TableSingleView } from '../table-view-manager.js';
 
 export class DataViewColumnPreview extends SignalWatcher(
@@ -20,7 +20,7 @@ export class DataViewColumnPreview extends SignalWatcher(
   `;
 
   private renderGroup(rows: string[]) {
-    const columnIndex = this.tableViewManager.columnGetIndex(this.column.id);
+    const columnIndex = this.tableViewManager.propertyIndexGet(this.column.id);
     return html`
       <div
         style="background-color: var(--affine-background-primary-color);border-top: 1px solid var(--affine-border-color);box-shadow: var(--affine-shadow-2);"
@@ -71,7 +71,7 @@ export class DataViewColumnPreview extends SignalWatcher(
   }
 
   @property({ attribute: false })
-  accessor column!: Column;
+  accessor column!: Property;
 
   @property({ attribute: false })
   accessor table!: HTMLElement;

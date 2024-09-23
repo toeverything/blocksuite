@@ -13,7 +13,7 @@ export type GetDataViewSelection<
   ? T
   : never;
 export type DataViewSelectionState = DataViewSelection | undefined;
-export type ColumnDataUpdater<
+export type PropertyDataUpdater<
   Data extends Record<string, unknown> = Record<string, unknown>,
 > = (data: Data) => Partial<Data>;
 

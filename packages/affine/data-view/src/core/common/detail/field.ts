@@ -17,12 +17,12 @@ import { html } from 'lit/static-html.js';
 import type {
   CellRenderProps,
   DataViewCellLifeCycle,
-} from '../../column/index.js';
-import type { Column } from '../../view-manager/column.js';
+} from '../../property/index.js';
+import type { Property } from '../../view-manager/property.js';
 import type { SingleView } from '../../view-manager/single-view.js';
 
 import { renderUniLit } from '../../utils/uni-component/uni-component.js';
-import { inputConfig, typeConfig } from '../column-menu.js';
+import { inputConfig, typeConfig } from '../property-menu.js';
 
 export class RecordField extends SignalWatcher(
   WithDisposable(ShadowlessElement)
@@ -117,7 +117,7 @@ export class RecordField extends SignalWatcher(
   _clickLeft = (e: MouseEvent) => {
     if (this.readonly) return;
     const ele = e.currentTarget as HTMLElement;
-    const columns = this.view.detailColumns$.value;
+    const properties = this.view.detailProperties$.value;
     popMenu(ele, {
       options: {
         input: inputConfig(this.column),
@@ -145,14 +145,14 @@ export class RecordField extends SignalWatcher(
             >
               ${MoveLeftIcon()}
             </div>`,
-            hide: () => columns.findIndex(v => v === this.column.id) === 0,
+            hide: () => properties.findIndex(v => v === this.column.id) === 0,
             select: () => {
-              const index = columns.findIndex(v => v === this.column.id);
-              const targetId = columns[index - 1];
+              const index = properties.findIndex(v => v === this.column.id);
+              const targetId = properties[index - 1];
               if (!targetId) {
                 return;
               }
-              this.view.columnMove(this.column.id, {
+              this.view.propertyMove(this.column.id, {
                 id: targetId,
                 before: true,
               });
@@ -167,15 +167,15 @@ export class RecordField extends SignalWatcher(
               ${MoveRightIcon()}
             </div>`,
             hide: () =>
-              columns.findIndex(v => v === this.column.id) ===
-              columns.length - 1,
+              properties.findIndex(v => v === this.column.id) ===
+              properties.length - 1,
             select: () => {
-              const index = columns.findIndex(v => v === this.column.id);
-              const targetId = columns[index + 1];
+              const index = properties.findIndex(v => v === this.column.id);
+              const targetId = properties[index + 1];
               if (!targetId) {
                 return;
               }
-              this.view.columnMove(this.column.id, {
+              this.view.propertyMove(this.column.id, {
                 id: targetId,
                 before: false,
               });
@@ -263,7 +263,7 @@ export class RecordField extends SignalWatcher(
   }
 
   @property({ attribute: false })
-  accessor column!: Column;
+  accessor column!: Property;
 
   @state()
   accessor editing = false;

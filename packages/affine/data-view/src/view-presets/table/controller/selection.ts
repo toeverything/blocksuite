@@ -239,7 +239,7 @@ export class TableSelectionController implements ReactiveController {
         ? this.view.groupManager.groupDataMap$.value?.[groupKey].rows
         : this.view.rows$.value;
     requestAnimationFrame(() => {
-      const index = this.host.props.view.columnManagerList$.value.findIndex(
+      const index = this.host.props.view.properties$.value.findIndex(
         v => v.type$.value === 'title'
       );
       this.selection = TableAreaSelection.create({
@@ -531,7 +531,7 @@ export class TableSelectionController implements ReactiveController {
       this.selection = undefined;
       return false;
     }
-    if (selection.focus.columnIndex > this.view.columns$.value.length - 1) {
+    if (selection.focus.columnIndex > this.view.propertyIds$.value.length - 1) {
       this.selection = undefined;
       return false;
     }
@@ -1062,8 +1062,7 @@ export class SelectionElement extends WithDisposable(ShadowlessElement) {
       rowSelection?.start ?? 0,
       rowSelection?.end ?? this.controller.view.rows$.value.length - 1,
       columnSelection?.start ?? 0,
-      columnSelection?.end ??
-        this.controller.view.columnManagerList$.value.length - 1
+      columnSelection?.end ?? this.controller.view.properties$.value.length - 1
     );
     if (!rect) {
       this.clearAreaStyle();

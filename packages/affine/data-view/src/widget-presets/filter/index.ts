@@ -13,7 +13,7 @@ export const widgetFilterBar = defineUniComponent(
     return html`<filter-bar
       .vars=${view.vars$.value}
       .data=${view.filter$.value}
-      .setData=${view.updateFilter.bind(view)}
+      .setData=${view.filterSet.bind(view)}
     ></filter-bar>`;
   }
 );

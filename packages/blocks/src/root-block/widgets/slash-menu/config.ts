@@ -740,11 +740,10 @@ export const defaultSlashMenuConfig: SlashMenuConfig = {
         const service = rootComponent.std.getService('affine:database');
         if (!service) return;
         service.initDatabaseBlock(
-          rootComponent.host,
           rootComponent.doc,
           model,
           id,
-          viewPresets.tableViewMeta,
+          viewPresets.tableViewMeta.type,
           false
         );
         tryRemoveEmptyLine(model);
@@ -800,11 +799,10 @@ export const defaultSlashMenuConfig: SlashMenuConfig = {
         const service = rootComponent.std.getService('affine:database');
         if (!service) return;
         service.initDatabaseBlock(
-          rootComponent.host,
           rootComponent.doc,
           model,
           id,
-          viewPresets.kanbanViewMeta,
+          viewPresets.kanbanViewMeta.type,
           false
         );
         tryRemoveEmptyLine(model);

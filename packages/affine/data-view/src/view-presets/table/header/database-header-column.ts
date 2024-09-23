@@ -25,16 +25,16 @@ import { createRef, ref } from 'lit/directives/ref.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
 
-import type { NumberColumnDataType } from '../../../column-presets/index.js';
-import type { Column } from '../../../core/view-manager/column.js';
+import type { Property } from '../../../core/view-manager/property.js';
+import type { NumberPropertyDataType } from '../../../property-presets/index.js';
 import type { TableColumn, TableSingleView } from '../table-view-manager.js';
 
-import { numberFormats } from '../../../column-presets/number/utils/formats.js';
-import { inputConfig, typeConfig } from '../../../core/common/column-menu.js';
+import { inputConfig, typeConfig } from '../../../core/common/property-menu.js';
 import { renderUniLit } from '../../../core/index.js';
 import { startDrag } from '../../../core/utils/drag.js';
 import { autoScrollOnBoundary } from '../../../core/utils/frame-loop.js';
 import { getResultInRange } from '../../../core/utils/utils.js';
+import { numberFormats } from '../../../property-presets/number/utils/formats.js';
 import { DEFAULT_COLUMN_TITLE_HEIGHT } from '../consts.js';
 import { getTableContainer } from '../types.js';
 import { DataViewColumnPreview } from './column-renderer.js';
@@ -78,14 +78,14 @@ export class DatabaseHeaderColumn extends SignalWatcher(
           search: true,
           placeholder: 'Search',
         },
-        items: this.tableViewManager.allColumnMetas.map(config => {
+        items: this.tableViewManager.propertyMetas.map(config => {
           return {
             type: 'action',
             name: config.config.name,
             isSelected: config.type === this.column.type$.value,
-            icon: renderUniLit(this.tableViewManager.getIcon(config.type)),
+            icon: renderUniLit(this.tableViewManager.IconGet(config.type)),
             select: () => {
-              this.column.updateType?.(config.type);
+              this.column.typeSet?.(config.type);
             },
           };
         }),
@@ -292,7 +292,7 @@ export class DatabaseHeaderColumn extends SignalWatcher(
       onDrop: ({ insertPosition }) => {
         this.grabStatus = 'grabEnd';
         if (insertPosition) {
-          this.tableViewManager.columnMove(this.column.id, insertPosition);
+          this.tableViewManager.propertyMove(this.column.id, insertPosition);
         }
       },
       onClear: () => {
@@ -335,7 +335,7 @@ export class DatabaseHeaderColumn extends SignalWatcher(
                       name: 'Number Format',
 
                       hide: () =>
-                        !this.column.updateData ||
+                        !this.column.dataUpdate ||
                         this.column.type$.value !== 'number',
                       options: {
                         input: {
@@ -345,9 +345,9 @@ export class DatabaseHeaderColumn extends SignalWatcher(
                           numberFormatConfig(this.column),
                           ...(numberFormats.map(format => {
                             const data = (
-                              this.column as Column<
+                              this.column as Property<
                                 number,
-                                NumberColumnDataType
+                                NumberPropertyDataType
                               >
                             ).data$.value;
                             return {
@@ -360,7 +360,7 @@ export class DatabaseHeaderColumn extends SignalWatcher(
                               name: format.label,
                               select: () => {
                                 if (data.format === format.type) return;
-                                this.column.updateData(() => ({
+                                this.column.dataUpdate(() => ({
                                   format: format.type,
                                 }));
                               },
@@ -386,7 +386,7 @@ export class DatabaseHeaderColumn extends SignalWatcher(
                   this.column.hide$.value ||
                   this.column.type$.value === 'title',
                 select: () => {
-                  this.column.updateHide(true);
+                  this.column.hideSet(true);
                 },
               },
             ],
@@ -407,7 +407,7 @@ export class DatabaseHeaderColumn extends SignalWatcher(
             name: 'Insert Left Column',
             icon: InsertLeftIcon(),
             select: () => {
-              this.tableViewManager.columnAdd({
+              this.tableViewManager.propertyAdd({
                 id: this.column.id,
                 before: true,
               });
@@ -427,7 +427,7 @@ export class DatabaseHeaderColumn extends SignalWatcher(
             name: 'Insert Right Column',
             icon: InsertRightIcon(),
             select: () => {
-              this.tableViewManager.columnAdd({
+              this.tableViewManager.propertyAdd({
                 id: this.column.id,
                 before: false,
               });
@@ -451,13 +451,13 @@ export class DatabaseHeaderColumn extends SignalWatcher(
             icon: MoveLeftIcon(),
             hide: () => this.column.isFirst,
             select: () => {
-              const preId = this.tableViewManager.columnGetPreColumn(
+              const preId = this.tableViewManager.propertyPreGet(
                 this.column.id
               )?.id;
               if (!preId) {
                 return;
               }
-              this.tableViewManager.columnMove(this.column.id, {
+              this.tableViewManager.propertyMove(this.column.id, {
                 id: preId,
                 before: true,
               });
@@ -469,13 +469,13 @@ export class DatabaseHeaderColumn extends SignalWatcher(
             icon: MoveRightIcon(),
             hide: () => this.column.isLast,
             select: () => {
-              const nextId = this.tableViewManager.columnGetNextColumn(
+              const nextId = this.tableViewManager.propertyNextGet(
                 this.column.id
               )?.id;
               if (!nextId) {
                 return;
               }
-              this.tableViewManager.columnMove(this.column.id, {
+              this.tableViewManager.propertyMove(this.column.id, {
                 id: nextId,
                 before: false,
               });
@@ -633,7 +633,7 @@ const createDragPreview = (
   };
 };
 
-function numberFormatConfig(column: Column): NormalMenu {
+function numberFormatConfig(column: Property): NormalMenu {
   return {
     type: 'custom',
     render: () =>

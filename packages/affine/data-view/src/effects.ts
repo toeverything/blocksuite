@@ -1,29 +1,3 @@
-import { CheckboxCell } from './column-presets/checkbox/cell-renderer.js';
-import {
-  DateCell,
-  DateCellEditing,
-} from './column-presets/date/cell-renderer.js';
-import { TextCell as ImageTextCell } from './column-presets/image/cell-renderer.js';
-import {
-  MultiSelectCell,
-  MultiSelectCellEditing,
-} from './column-presets/multi-select/cell-renderer.js';
-import {
-  NumberCell,
-  NumberCellEditing,
-} from './column-presets/number/cell-renderer.js';
-import {
-  ProgressCell,
-  ProgressCellEditing,
-} from './column-presets/progress/cell-renderer.js';
-import {
-  SelectCell,
-  SelectCellEditing,
-} from './column-presets/select/cell-renderer.js';
-import {
-  TextCell,
-  TextCellEditing,
-} from './column-presets/text/cell-renderer.js';
 import { Overflow } from './core/common/component/overflow/overflow.js';
 import { RecordDetail } from './core/common/detail/detail.js';
 import { RecordField } from './core/common/detail/field.js';
@@ -54,6 +28,32 @@ import {
   UniLit,
 } from './core/index.js';
 import { AnyRender } from './core/utils/uni-component/render-template.js';
+import { CheckboxCell } from './property-presets/checkbox/cell-renderer.js';
+import {
+  DateCell,
+  DateCellEditing,
+} from './property-presets/date/cell-renderer.js';
+import { TextCell as ImageTextCell } from './property-presets/image/cell-renderer.js';
+import {
+  MultiSelectCell,
+  MultiSelectCellEditing,
+} from './property-presets/multi-select/cell-renderer.js';
+import {
+  NumberCell,
+  NumberCellEditing,
+} from './property-presets/number/cell-renderer.js';
+import {
+  ProgressCell,
+  ProgressCellEditing,
+} from './property-presets/progress/cell-renderer.js';
+import {
+  SelectCell,
+  SelectCellEditing,
+} from './property-presets/select/cell-renderer.js';
+import {
+  TextCell,
+  TextCellEditing,
+} from './property-presets/text/cell-renderer.js';
 import { DataViewKanban, DataViewTable } from './view-presets/index.js';
 import { KanbanCard } from './view-presets/kanban/card.js';
 import { KanbanCell } from './view-presets/kanban/cell.js';

@@ -283,7 +283,7 @@ export class KanbanCard extends SignalWatcher(
   }
 
   override render() {
-    const columns = this.view.columnManagerList$.value.filter(
+    const columns = this.view.properties$.value.filter(
       v => !this.view.isInHeader(v.id)
     );
     this.style.border = this.isFocus

@@ -49,7 +49,7 @@ export class TableHotkeysController implements ReactiveController {
                   const rowId = container?.dataset.rowId;
                   const columnId = container?.dataset.columnId;
                   if (rowId && columnId) {
-                    container?.column.setValueFromString(rowId, '');
+                    container?.column.valueSetFromString(rowId, '');
                   }
                 }
               }
@@ -63,7 +63,7 @@ export class TableHotkeysController implements ReactiveController {
               const rowId = container?.dataset.rowId;
               const columnId = container?.dataset.columnId;
               if (rowId && columnId) {
-                container?.column.setValueFromString(rowId, '');
+                container?.column.valueSetFromString(rowId, '');
               }
             }
           }

@@ -148,9 +148,9 @@ export class DataViewKanban extends DataViewBase<
         options: {
           input: {
             onComplete: text => {
-              const column = this.groupManager.column$.value;
+              const column = this.groupManager.property$.value;
               if (column) {
-                column.updateData(
+                column.dataUpdate(
                   () => addGroup(text, column.data$.value) as never
                 );
               }

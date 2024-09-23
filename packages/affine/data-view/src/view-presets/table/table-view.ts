@@ -220,9 +220,9 @@ export class DataViewTable extends DataViewBase<
         options: {
           input: {
             onComplete: text => {
-              const column = groupHelper.column$.value;
+              const column = groupHelper.property$.value;
               if (column) {
-                column.updateData(
+                column.dataUpdate(
                   () => addGroup(text, column.data$.value) as never
                 );
               }

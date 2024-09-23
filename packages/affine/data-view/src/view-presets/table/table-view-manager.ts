@@ -4,7 +4,6 @@ import {
 } from '@blocksuite/affine-shared/utils';
 import { computed, type ReadonlySignal } from '@preact/signals-core';
 
-import type { TType } from '../../core/logical/typesystem.js';
 import type { ViewManager } from '../../core/view-manager/view-manager.js';
 import type { TableViewData } from './define.js';
 import type { StatCalcOpType } from './types.js';
@@ -15,18 +14,18 @@ import {
   GroupManager,
   sortByManually,
 } from '../../core/common/group-by/helper.js';
-import { groupByMatcher } from '../../core/common/group-by/matcher.js';
 import { evalFilter } from '../../core/logical/eval-filter.js';
-import { ColumnBase } from '../../core/view-manager/column.js';
+import { PropertyBase } from '../../core/view-manager/property.js';
 import {
   type SingleView,
   SingleViewBase,
 } from '../../core/view-manager/single-view.js';
+import { DEFAULT_COLUMN_WIDTH } from './consts.js';
 
 export class TableSingleView extends SingleViewBase<TableViewData> {
   private computedColumns$ = computed(() => {
-    return this.columnsWithoutFilter$.value.map(id => {
-      const column = this.columnGet(id);
+    return this.propertiesWithoutFilter$.value.map(id => {
+      const column = this.propertyGet(id);
       return {
         id: column.id,
         hide: column.hide$.value,
@@ -36,37 +35,18 @@ export class TableSingleView extends SingleViewBase<TableViewData> {
     });
   });
 
-  columns$ = computed(() => {
-    return this.columnsWithoutFilter$.value.filter(
-      id => !this.columnGetHide(id)
-    );
-  });
-
-  columnsWithoutFilter$ = computed(() => {
-    const needShow = new Set(this.dataSource.properties$.value);
-    const result: string[] = [];
-    this.viewData$.value?.columns.forEach(v => {
-      if (needShow.has(v.id)) {
-        result.push(v.id);
-        needShow.delete(v.id);
-      }
-    });
-    result.push(...needShow);
-    return result;
-  });
-
-  detailColumns$ = computed(() => {
-    return this.columnsWithoutFilter$.value.filter(
-      id => this.columnGetType(id) !== 'title'
+  detailProperties$ = computed(() => {
+    return this.propertiesWithoutFilter$.value.filter(
+      id => this.propertyTypeGet(id) !== 'title'
     );
   });
 
   filter$ = computed(() => {
-    return this.viewData$.value?.filter ?? emptyFilterGroup;
+    return this.data$.value?.filter ?? emptyFilterGroup;
   });
 
   groupBy$ = computed(() => {
-    return this.viewData$.value?.groupBy;
+    return this.data$.value?.groupBy;
   });
 
   groupManager = new GroupManager(this.groupBy$, this, {
@@ -82,7 +62,7 @@ export class TableSingleView extends SingleViewBase<TableViewData> {
     },
     changeGroupSort: keys => {
       const map = new Map(this.groupProperties.map(v => [v.key, v]));
-      this.viewDataUpdate(() => {
+      this.dataUpdate(() => {
         return {
           groupProperties: keys.map(key => {
             const property = map.get(key);
@@ -100,7 +80,7 @@ export class TableSingleView extends SingleViewBase<TableViewData> {
     },
     changeRowSort: (groupKeys, groupKey, keys) => {
       const map = new Map(this.groupProperties.map(v => [v.key, v]));
-      this.viewDataUpdate(() => {
+      this.dataUpdate(() => {
         return {
           groupProperties: groupKeys.map(key => {
             if (key === groupKey) {
@@ -130,31 +110,50 @@ export class TableSingleView extends SingleViewBase<TableViewData> {
     },
   });
 
-  header$ = computed(() => {
+  mainProperties$ = computed(() => {
     return (
-      this.viewData$.value?.header ?? {
-        titleColumn: this.columnsWithoutFilter$.value.find(
-          id => this.columnGetType(id) === 'title'
+      this.data$.value?.header ?? {
+        titleColumn: this.propertiesWithoutFilter$.value.find(
+          id => this.propertyTypeGet(id) === 'title'
         ),
         iconColumn: 'type',
       }
     );
   });
 
+  propertiesWithoutFilter$ = computed(() => {
+    const needShow = new Set(this.dataSource.properties$.value);
+    const result: string[] = [];
+    this.data$.value?.columns.forEach(v => {
+      if (needShow.has(v.id)) {
+        result.push(v.id);
+        needShow.delete(v.id);
+      }
+    });
+    result.push(...needShow);
+    return result;
+  });
+
+  propertyIds$ = computed(() => {
+    return this.propertiesWithoutFilter$.value.filter(
+      id => !this.propertyHideGet(id)
+    );
+  });
+
   readonly$ = computed(() => {
-    return this.viewManager.readonly$.value;
+    return this.manager.readonly$.value;
   });
 
   get groupProperties() {
-    return this.viewData$.value?.groupProperties ?? [];
+    return this.data$.value?.groupProperties ?? [];
   }
 
   get name(): string {
-    return this.viewData$.value?.name ?? '';
+    return this.data$.value?.name ?? '';
   }
 
   override get type(): string {
-    return this.viewData$.value?.mode ?? 'table';
+    return this.data$.value?.mode ?? 'table';
   }
 
   constructor(viewManager: ViewManager, viewId: string) {
@@ -163,18 +162,18 @@ export class TableSingleView extends SingleViewBase<TableViewData> {
 
   changeGroup(columnId: string | undefined) {
     if (columnId == null) {
-      this.viewDataUpdate(() => {
+      this.dataUpdate(() => {
         return {
           groupBy: undefined,
         };
       });
       return;
     }
-    const column = this.columnGet(columnId);
-    this.viewDataUpdate(_view => {
+    const column = this.propertyGet(columnId);
+    this.dataUpdate(_view => {
       return {
         groupBy: defaultGroupBy(
-          this.columnGetMeta(column.type$.value),
+          this.propertyMetaGet(column.type$.value),
           column.id,
           column.data$.value
         ),
@@ -182,38 +181,100 @@ export class TableSingleView extends SingleViewBase<TableViewData> {
     });
   }
 
-  checkGroup(columnId: string, type: TType, target: TType): boolean {
-    if (!groupByMatcher.isMatched(type, target)) {
-      this.changeGroup(columnId);
-      return false;
+  columnGetStatCalcOp(columnId: string): StatCalcOpType {
+    return this.data$.value?.columns.find(v => v.id === columnId)?.statCalcType;
+  }
+
+  columnGetWidth(columnId: string): number {
+    const column = this.data$.value?.columns.find(v => v.id === columnId);
+    if (column?.width != null) {
+      return column.width;
+    }
+    const type = this.propertyTypeGet(columnId);
+    if (type === 'title') {
+      return 260;
+    }
+    return DEFAULT_COLUMN_WIDTH;
+  }
+
+  columnUpdateStatCalcOp(columnId: string, op?: string): void {
+    this.dataUpdate(() => {
+      return {
+        columns: this.computedColumns$.value.map(v =>
+          v.id === columnId
+            ? {
+                ...v,
+                statCalcType: op,
+              }
+            : v
+        ),
+      };
+    });
+  }
+
+  columnUpdateWidth(columnId: string, width: number): void {
+    this.dataUpdate(() => {
+      return {
+        columns: this.computedColumns$.value.map(v =>
+          v.id === columnId
+            ? {
+                ...v,
+                width: width,
+              }
+            : v
+        ),
+      };
+    });
+  }
+
+  filterSet(filter: FilterGroup): void {
+    this.dataUpdate(() => {
+      return {
+        filter,
+      };
+    });
+  }
+
+  isShow(rowId: string): boolean {
+    if (this.filter$.value?.conditions.length) {
+      const rowMap = Object.fromEntries(
+        this.properties$.value.map(column => [
+          column.id,
+          column.cellGet(rowId).jsonValue$.value,
+        ])
+      );
+      return evalFilter(this.filter$.value, rowMap);
     }
     return true;
   }
 
-  columnGet(columnId: string): TableColumn {
+  propertyGet(columnId: string): TableColumn {
     return new TableColumn(this, columnId);
   }
 
-  columnGetHide(columnId: string): boolean {
+  propertyHideGet(columnId: string): boolean {
     return (
-      this.viewData$.value?.columns.find(v => v.id === columnId)?.hide ?? false
+      this.data$.value?.columns.find(v => v.id === columnId)?.hide ?? false
     );
   }
 
-  columnGetStatCalcOp(columnId: string): StatCalcOpType {
-    return this.viewData$.value?.columns.find(v => v.id === columnId)
-      ?.statCalcType;
+  propertyHideSet(columnId: string, hide: boolean): void {
+    this.dataUpdate(() => {
+      return {
+        columns: this.computedColumns$.value.map(v =>
+          v.id === columnId
+            ? {
+                ...v,
+                hide,
+              }
+            : v
+        ),
+      };
+    });
   }
 
-  columnGetWidth(columnId: string): number {
-    return (
-      this.viewData$.value?.columns.find(v => v.id === columnId)?.width ??
-      this.dataSource.propertyGetDefaultWidth(columnId)
-    );
-  }
-
-  columnMove(columnId: string, toAfterOfColumn: InsertToPosition): void {
-    this.viewDataUpdate(() => {
+  propertyMove(columnId: string, toAfterOfColumn: InsertToPosition): void {
+    this.dataUpdate(() => {
       const columnIndex = this.computedColumns$.value.findIndex(
         v => v.id === columnId
       );
@@ -230,72 +291,6 @@ export class TableSingleView extends SingleViewBase<TableViewData> {
     });
   }
 
-  columnUpdateHide(columnId: string, hide: boolean): void {
-    this.viewDataUpdate(() => {
-      return {
-        columns: this.computedColumns$.value.map(v =>
-          v.id === columnId
-            ? {
-                ...v,
-                hide,
-              }
-            : v
-        ),
-      };
-    });
-  }
-
-  columnUpdateStatCalcOp(columnId: string, op?: string): void {
-    this.viewDataUpdate(() => {
-      return {
-        columns: this.computedColumns$.value.map(v =>
-          v.id === columnId
-            ? {
-                ...v,
-                statCalcType: op,
-              }
-            : v
-        ),
-      };
-    });
-  }
-
-  columnUpdateWidth(columnId: string, width: number): void {
-    this.viewDataUpdate(() => {
-      return {
-        columns: this.computedColumns$.value.map(v =>
-          v.id === columnId
-            ? {
-                ...v,
-                width: width,
-              }
-            : v
-        ),
-      };
-    });
-  }
-
-  hasHeader(rowId: string): boolean {
-    return Object.values(this.header$).some(id => this.cellGetValue(rowId, id));
-  }
-
-  isInHeader(columnId: string) {
-    return Object.values(this.header$).some(v => v === columnId);
-  }
-
-  isShow(rowId: string): boolean {
-    if (this.filter$.value?.conditions.length) {
-      const rowMap = Object.fromEntries(
-        this.columnManagerList$.value.map(column => [
-          column.id,
-          column.cellGet(rowId).jsonValue$.value,
-        ])
-      );
-      return evalFilter(this.filter$.value, rowMap);
-    }
-    return true;
-  }
-
   override rowAdd(
     insertPosition: InsertToPosition | number,
     groupKey?: string
@@ -306,16 +301,6 @@ export class TableSingleView extends SingleViewBase<TableViewData> {
     }
     this.groupManager.addToGroup(id, groupKey);
     return id;
-  }
-
-  override rowGetNext(rowId: string): string {
-    const index = this.rows$.value.indexOf(rowId);
-    return this.rows$.value[index + 1];
-  }
-
-  override rowGetPrev(rowId: string): string {
-    const index = this.rows$.value.indexOf(rowId);
-    return this.rows$.value[index - 1];
   }
 
   override rowMove(
@@ -331,16 +316,18 @@ export class TableSingleView extends SingleViewBase<TableViewData> {
     this.groupManager.moveCardTo(rowId, fromGroup, toGroup, position);
   }
 
-  updateFilter(filter: FilterGroup): void {
-    this.viewDataUpdate(() => {
-      return {
-        filter,
-      };
-    });
+  override rowNextGet(rowId: string): string {
+    const index = this.rows$.value.indexOf(rowId);
+    return this.rows$.value[index + 1];
+  }
+
+  override rowPrevGet(rowId: string): string {
+    const index = this.rows$.value.indexOf(rowId);
+    return this.rows$.value[index - 1];
   }
 }
 
-export class TableColumn extends ColumnBase {
+export class TableColumn extends PropertyBase {
   statCalcOp$ = computed(() => {
     return this.tableView.columnGetStatCalcOp(this.id);
   });

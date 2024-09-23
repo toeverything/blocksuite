@@ -43,11 +43,11 @@ export const kanbanViewModel = kanbanViewType.createModel<KanbanViewData>({
   defaultData: viewManager => {
     const columns = viewManager.dataSource.properties$.value;
     const allowList = columns.filter(columnId => {
-      const dataType = viewManager.dataSource.propertyGetDataType(columnId);
+      const dataType = viewManager.dataSource.propertyDataTypeGet(columnId);
       return dataType && !!groupByMatcher.match(dataType);
     });
     const getWeight = (columnId: string) => {
-      const dataType = viewManager.dataSource.propertyGetDataType(columnId);
+      const dataType = viewManager.dataSource.propertyDataTypeGet(columnId);
       if (!dataType || tString.is(dataType) || tRichText.is(dataType)) {
         return 0;
       }
@@ -60,9 +60,9 @@ export const kanbanViewModel = kanbanViewType.createModel<KanbanViewData>({
       return 1;
     };
     const columnId = allowList.sort((a, b) => getWeight(b) - getWeight(a))[0];
-    const type = viewManager.dataSource.propertyGetType(columnId);
-    const meta = type && viewManager.dataSource.getPropertyMeta(type);
-    const data = viewManager.dataSource.propertyGetData(columnId);
+    const type = viewManager.dataSource.propertyTypeGet(columnId);
+    const meta = type && viewManager.dataSource.propertyMetaGet(type);
+    const data = viewManager.dataSource.propertyDataGet(columnId);
     if (!columnId || !meta || !data) {
       throw new BlockSuiteError(
         ErrorCode.DatabaseBlockError,
@@ -82,7 +82,7 @@ export const kanbanViewModel = kanbanViewType.createModel<KanbanViewData>({
       groupBy: defaultGroupBy(meta, columnId, data),
       header: {
         titleColumn: viewManager.dataSource.properties$.value.find(
-          id => viewManager.dataSource.propertyGetType(id) === 'title'
+          id => viewManager.dataSource.propertyTypeGet(id) === 'title'
         ),
         iconColumn: 'type',
       },

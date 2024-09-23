@@ -1,111 +1,73 @@
 import type { InsertToPosition } from '@blocksuite/affine-shared/utils';
 import type { ReadonlySignal } from '@preact/signals-core';
 
-import type { ColumnMeta } from '../../column/column-config.js';
 import type { TType } from '../../logical/index.js';
+import type { PropertyMetaConfig } from '../../property/property-config.js';
 import type { DatabaseFlags } from '../../types.js';
-import type { UniComponent } from '../../utils/uni-component/index.js';
 import type { ViewConvertConfig } from '../../view/convert.js';
 import type { DataViewDataType, ViewMeta } from '../../view/data-view.js';
-import type { SingleView } from '../../view-manager/single-view.js';
 import type { ViewManager } from '../../view-manager/view-manager.js';
 import type { DataViewContextKey } from './context.js';
 
-import { DEFAULT_COLUMN_WIDTH } from '../../../view-presets/table/consts.js';
-
-export type DetailSlotProps = {
-  view: SingleView;
-  rowId: string;
-};
-
-export interface DetailSlots {
-  header?: UniComponent<DetailSlotProps>;
-  note?: UniComponent<DetailSlotProps>;
-}
-
 export interface DataSource {
-  viewConverts: ViewConvertConfig[];
   readonly$: ReadonlySignal<boolean>;
-  addPropertyConfigList: ColumnMeta[];
-
   properties$: ReadonlySignal<string[]>;
-  rows$: ReadonlySignal<string[]>;
-
-  cellGetValue(rowId: string, propertyId: string): unknown;
-
-  cellChangeValue(rowId: string, propertyId: string, value: unknown): void;
-
-  rowAdd(InsertToPosition: InsertToPosition | number): string;
-
-  rowDelete(ids: string[]): void;
-
-  propertyGetName(propertyId: string): string;
-
-  propertyGetDefaultWidth(propertyId: string): number;
-
-  propertyGetType(propertyId: string): string | undefined;
-
-  propertyGetData(propertyId: string): Record<string, unknown>;
-
-  propertyGetDataType(propertyId: string): TType | undefined;
-
-  propertyGetReadonly(columnId: string): boolean;
-
-  propertyChangeName(propertyId: string, name: string): void;
-
-  propertyChangeType(propertyId: string, type: string): void;
-
-  propertyChangeData(propertyId: string, data: Record<string, unknown>): void;
-
-  propertyAdd(insertToPosition: InsertToPosition, type?: string): string;
-
-  propertyDelete(id: string): void;
-
-  propertyDuplicate(columnId: string): string;
-
   featureFlags$: ReadonlySignal<DatabaseFlags>;
-  detailSlots: DetailSlots;
 
-  getPropertyMeta(type: string): ColumnMeta;
+  cellValueGet(rowId: string, propertyId: string): unknown;
+  cellValueChange(rowId: string, propertyId: string, value: unknown): void;
 
+  rows$: ReadonlySignal<string[]>;
+  rowAdd(InsertToPosition: InsertToPosition | number): string;
+  rowDelete(ids: string[]): void;
   rowMove(rowId: string, position: InsertToPosition): void;
 
-  getContext<T>(key: DataViewContextKey<T>): T | undefined;
+  propertyMetas: PropertyMetaConfig[];
 
+  propertyNameGet(propertyId: string): string;
+  propertyNameSet(propertyId: string, name: string): void;
+
+  propertyTypeGet(propertyId: string): string | undefined;
+  propertyTypeSet(propertyId: string, type: string): void;
+
+  propertyDataGet(propertyId: string): Record<string, unknown>;
+  propertyDataSet(propertyId: string, data: Record<string, unknown>): void;
+
+  propertyDataTypeGet(propertyId: string): TType | undefined;
+  propertyReadonlyGet(propertyId: string): boolean;
+  propertyMetaGet(type: string): PropertyMetaConfig;
+  propertyAdd(insertToPosition: InsertToPosition, type?: string): string;
+  propertyDuplicate(propertyId: string): string;
+  propertyDelete(id: string): void;
+
+  contextGet<T>(key: DataViewContextKey<T>): T | undefined;
+
+  viewConverts: ViewConvertConfig[];
   viewManager: ViewManager;
-
+  viewMetas: ViewMeta[];
   viewDataList$: ReadonlySignal<DataViewDataType[]>;
 
   viewDataAdd(viewData: DataViewDataType): string;
-
   viewDataDuplicate(id: string): string;
-
   viewDataDelete(viewId: string): void;
-
   viewDataGet(viewId: string): DataViewDataType | undefined;
-
   viewDataMoveTo(id: string, position: InsertToPosition): void;
-
   viewDataUpdate<ViewData extends DataViewDataType>(
     id: string,
     updater: (data: ViewData) => Partial<ViewData>
   ): void;
-
-  viewMetas: ViewMeta[];
-
   viewMetaGet(type: string): ViewMeta;
-
   viewMetaGetById(viewId: string): ViewMeta;
 }
 
 export abstract class DataSourceBase implements DataSource {
-  abstract addPropertyConfigList: ColumnMeta[];
-
   context = new Map<DataViewContextKey<unknown>, unknown>();
 
   abstract featureFlags$: ReadonlySignal<DatabaseFlags>;
 
   abstract properties$: ReadonlySignal<string[]>;
+
+  abstract propertyMetas: PropertyMetaConfig[];
 
   abstract readonly$: ReadonlySignal<boolean>;
 
@@ -119,73 +81,65 @@ export abstract class DataSourceBase implements DataSource {
 
   abstract viewMetas: ViewMeta[];
 
-  get detailSlots(): DetailSlots {
-    return {};
-  }
-
-  abstract cellChangeValue(
+  abstract cellValueChange(
     rowId: string,
     propertyId: string,
     value: unknown
   ): void;
 
-  abstract cellChangeValue(
+  abstract cellValueChange(
     rowId: string,
     propertyId: string,
     value: unknown
   ): void;
 
-  abstract cellGetValue(rowId: string, propertyId: string): unknown;
+  abstract cellValueGet(rowId: string, propertyId: string): unknown;
 
-  getContext<T>(key: DataViewContextKey<T>): T | undefined {
+  contextGet<T>(key: DataViewContextKey<T>): T | undefined {
     return this.context.get(key) as T;
   }
 
-  abstract getPropertyMeta(type: string): ColumnMeta;
+  contextSet<T>(key: DataViewContextKey<T>, value: T): void {
+    this.context.set(key, value);
+  }
 
   abstract propertyAdd(
     insertToPosition: InsertToPosition,
     type?: string
   ): string;
 
-  abstract propertyChangeData(
+  abstract propertyDataGet(propertyId: string): Record<string, unknown>;
+
+  abstract propertyDataSet(
     propertyId: string,
     data: Record<string, unknown>
   ): void;
 
-  abstract propertyChangeName(propertyId: string, name: string): void;
-
-  abstract propertyChangeType(propertyId: string, type: string): void;
+  abstract propertyDataTypeGet(propertyId: string): TType | undefined;
 
   abstract propertyDelete(id: string): void;
 
-  abstract propertyDuplicate(columnId: string): string;
+  abstract propertyDuplicate(propertyId: string): string;
 
-  abstract propertyGetData(propertyId: string): Record<string, unknown>;
+  abstract propertyMetaGet(type: string): PropertyMetaConfig;
 
-  abstract propertyGetDataType(propertyId: string): TType | undefined;
+  abstract propertyNameGet(propertyId: string): string;
 
-  propertyGetDefaultWidth(_propertyId: string): number {
-    return DEFAULT_COLUMN_WIDTH;
-  }
+  abstract propertyNameSet(propertyId: string, name: string): void;
 
-  abstract propertyGetName(propertyId: string): string;
-
-  propertyGetReadonly(_propertyId: string): boolean {
+  propertyReadonlyGet(_propertyId: string): boolean {
     return false;
   }
 
-  abstract propertyGetType(propertyId: string): string;
+  abstract propertyTypeGet(propertyId: string): string;
+
+  abstract propertyTypeSet(propertyId: string, type: string): void;
 
   abstract rowAdd(InsertToPosition: InsertToPosition | number): string;
 
   abstract rowDelete(ids: string[]): void;
 
   abstract rowMove(rowId: string, position: InsertToPosition): void;
-
-  protected setContext<T>(key: DataViewContextKey<T>, value: T): void {
-    this.context.set(key, value);
-  }
 
   abstract viewDataAdd(viewData: DataViewDataType): string;
 

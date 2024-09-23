@@ -125,7 +125,7 @@ export class GroupSetting extends SignalWatcher(
           group => {
             const props: GroupRenderProps = {
               value: group.value,
-              data: group.column.data$.value,
+              data: group.property.data$.value,
               readonly: true,
             };
             const config = group.manager.config$.value;
@@ -162,20 +162,20 @@ export const selectGroupByProperty = (
       placeholder: 'Search',
     },
     items: [
-      ...view.columnsWithoutFilter$.value
+      ...view.propertiesWithoutFilter$.value
         .filter(id => {
-          if (view.columnGet(id).type$.value === 'title') {
+          if (view.propertyGet(id).type$.value === 'title') {
             return false;
           }
-          return !!groupByMatcher.match(view.columnGet(id).dataType$.value);
+          return !!groupByMatcher.match(view.propertyGet(id).dataType$.value);
         })
         .map<Menu>(id => {
-          const column = view.columnGet(id);
+          const property = view.propertyGet(id);
           return {
             type: 'action',
-            name: column.name$.value,
-            isSelected: view.viewData$.value?.groupBy?.columnId === id,
-            icon: html` <uni-lit .uni="${column.icon}"></uni-lit>`,
+            name: property.name$.value,
+            isSelected: view.data$.value?.groupBy?.columnId === id,
+            icon: html` <uni-lit .uni="${property.icon}"></uni-lit>`,
             select: () => {
               if (
                 view instanceof TableSingleView ||
@@ -190,8 +190,7 @@ export const selectGroupByProperty = (
         type: 'group',
         name: '',
         hide: () =>
-          view instanceof KanbanSingleView ||
-          view.viewData$.value?.groupBy == null,
+          view instanceof KanbanSingleView || view.data$.value?.groupBy == null,
         children: () => [
           {
             type: 'action',
@@ -223,18 +222,18 @@ export const popGroupSetting = (
   view: SingleView<TableViewData | KanbanViewData>,
   onBack: () => void
 ) => {
-  const groupBy = view.viewData$.value?.groupBy;
+  const groupBy = view.data$.value?.groupBy;
   if (groupBy == null) {
     return;
   }
-  const type = view.columnGetType(groupBy.columnId);
+  const type = view.propertyTypeGet(groupBy.columnId);
   if (!type) {
     return;
   }
   const reopen = () => {
     popGroupSetting(target, view, onBack);
   };
-  const icon = view.getIcon(type);
+  const icon = view.IconGet(type);
   const menuHandler = popMenu(target, {
     options: {
       input: {
@@ -258,7 +257,7 @@ export const popGroupSetting = (
                   class="dv-icon-16"
                 >
                   ${renderUniLit(icon, {})}
-                  ${view.columnGetName(groupBy.columnId)}
+                  ${view.propertyNameGet(groupBy.columnId)}
                 </div>
                 ${ArrowRightSmallIcon()}
               `,

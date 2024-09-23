@@ -1,4 +1,4 @@
-import type { ColumnMeta } from '@blocksuite/data-view';
+import type { PropertyMetaConfig } from '@blocksuite/data-view';
 import type { Disposable } from '@blocksuite/global/utils';
 import type { Block, BlockModel } from '@blocksuite/store';
 
@@ -9,7 +9,7 @@ type PropertyMeta<
 > = {
   name: string;
   key: string;
-  columnMeta: ColumnMeta<string, ColumnData, Value>;
+  metaConfig: PropertyMetaConfig<string, ColumnData, Value>;
   getColumnData?: (block: T) => ColumnData;
   setColumnData?: (block: T, data: ColumnData) => void;
   get: (block: T) => Value;

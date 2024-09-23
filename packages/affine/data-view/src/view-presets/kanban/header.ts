@@ -36,7 +36,7 @@ export class KanbanHeader extends SignalWatcher(
         input: {
           search: true,
         },
-        items: this.view.columnManagerList$.value
+        items: this.view.properties$.value
           .filter(column => column.id !== this.view.view?.groupBy?.columnId)
           .map(column => {
             return {

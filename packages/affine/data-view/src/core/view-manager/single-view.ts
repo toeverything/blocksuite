@@ -2,21 +2,20 @@ import type { InsertToPosition } from '@blocksuite/affine-shared/utils';
 
 import { computed, type ReadonlySignal, signal } from '@preact/signals-core';
 
-import type { ColumnMeta } from '../column/column-config.js';
 import type { FilterGroup, Variable } from '../common/ast.js';
-import type { DetailSlots } from '../common/data-source/base.js';
 import type { DataViewContextKey } from '../common/data-source/context.js';
 import type { TType } from '../logical/typesystem.js';
+import type { PropertyMetaConfig } from '../property/property-config.js';
 import type { DatabaseFlags } from '../types.js';
 import type { UniComponent } from '../utils/uni-component/index.js';
 import type { DataViewDataType, ViewMeta } from '../view/data-view.js';
-import type { Column } from './column.js';
+import type { Property } from './property.js';
 import type { ViewManager } from './view-manager.js';
 
 import { type Cell, CellBase } from './cell.js';
 import { type Row, RowBase } from './row.js';
 
-export type HeaderType = {
+export type MainProperties = {
   titleColumn?: string;
   iconColumn?: string;
   imageColumn?: string;
@@ -25,47 +24,44 @@ export type HeaderType = {
 export interface SingleView<
   ViewData extends DataViewDataType = DataViewDataType,
 > {
-  viewManager: ViewManager;
-  viewMeta: ViewMeta;
-  readonly$: ReadonlySignal<boolean>;
-
+  readonly id: string;
+  readonly type: string;
+  readonly manager: ViewManager;
+  readonly meta: ViewMeta;
+  readonly readonly$: ReadonlySignal<boolean>;
   delete(): void;
   duplicate(): void;
-  name$: ReadonlySignal<string>;
-  updateName(name: string): void;
 
-  get id(): string;
+  data$: ReadonlySignal<ViewData | undefined>;
+  dataUpdate(updater: (viewData: ViewData) => Partial<ViewData>): void;
 
-  get type(): string;
+  readonly name$: ReadonlySignal<string>;
+  nameSet(name: string): void;
 
-  columns$: ReadonlySignal<string[]>;
-  columnsWithoutFilter$: ReadonlySignal<string[]>;
-  columnManagerList$: ReadonlySignal<Column[]>;
-  detailColumns$: ReadonlySignal<string[]>;
+  readonly propertyIds$: ReadonlySignal<string[]>;
+  readonly propertiesWithoutFilter$: ReadonlySignal<string[]>;
+  readonly properties$: ReadonlySignal<Property[]>;
+  readonly detailProperties$: ReadonlySignal<string[]>;
+  readonly rows$: ReadonlySignal<string[]>;
 
-  rows$: ReadonlySignal<string[]>;
+  readonly filterVisible$: ReadonlySignal<boolean>;
+  readonly filter$: ReadonlySignal<FilterGroup>;
+  filterSet(filter: FilterGroup): void;
 
-  filter$: ReadonlySignal<FilterGroup>;
-  filterVisible$: ReadonlySignal<boolean>;
+  readonly vars$: ReadonlySignal<Variable[]>;
 
-  updateFilter(filter: FilterGroup): void;
+  readonly featureFlags$: ReadonlySignal<DatabaseFlags>;
 
-  vars$: ReadonlySignal<Variable[]>;
+  cellValueGet(rowId: string, propertyId: string): unknown;
+  cellValueSet(rowId: string, propertyId: string, value: unknown): void;
 
-  get allColumnMetas(): ColumnMeta[];
+  cellJsonValueGet(rowId: string, propertyId: string): unknown;
+  cellStringValueGet(rowId: string, propertyId: string): string | undefined;
+  cellRenderValueSet(rowId: string, propertyId: string, value: unknown): void;
+  cellGet(rowId: string, propertyId: string): Cell;
 
-  get detailSlots(): DetailSlots;
-
-  featureFlags$: ReadonlySignal<DatabaseFlags>;
-
-  cellGetValue(rowId: string, columnId: string): unknown;
-
-  cellGetJsonValue(rowId: string, columnId: string): unknown;
-
-  cellGetStringValue(rowId: string, columnId: string): string | undefined;
-
-  columnParseValueFromString(
-    columnId: string,
+  propertyParseValueFromString(
+    propertyId: string,
     value: string
   ):
     | {
@@ -74,73 +70,47 @@ export interface SingleView<
       }
     | undefined;
 
-  cellUpdateRenderValue(rowId: string, columnId: string, value: unknown): void;
-
-  cellUpdateValue(rowId: string, columnId: string, value: unknown): void;
-
-  rowDelete(ids: string[]): void;
-
   rowAdd(insertPosition: InsertToPosition): string;
-
-  rowGetPrev(rowId: string): string;
-
-  rowGetNext(rowId: string): string;
-
-  columnAdd(toAfterOfColumn: InsertToPosition, type?: string): string;
-
-  columnDelete(columnId: string): void;
-
-  columnDuplicate(columnId: string): void;
-
-  columnGet(columnId: string): Column;
-
-  columnGetMeta(type: string): ColumnMeta | undefined;
-
-  columnGetPreColumn(columnId: string): Column | undefined;
-
-  columnGetNextColumn(columnId: string): Column | undefined;
-
-  columnGetName(columnId: string): string;
-
-  columnGetType(columnId: string): string | undefined;
-
-  columnGetHide(columnId: string): boolean;
-
-  columnGetData(columnId: string): Record<string, unknown>;
-
-  columnGetDataType(columnId: string): TType | undefined;
-
-  columnGetIndex(columnId: string): number;
-
-  columnGetIdByIndex(index: number): string;
-
-  columnGetReadonly(columnId: string): boolean;
-
-  columnUpdateName(columnId: string, name: string): void;
-
-  columnUpdateHide(columnId: string, hide: boolean): void;
-
-  columnUpdateType(columnId: string, type: string): void;
-
-  columnUpdateData(columnId: string, data: Record<string, unknown>): void;
-
-  getIcon(type: string): UniComponent | undefined;
-
-  columnMove(columnId: string, position: InsertToPosition): void;
-
+  rowDelete(ids: string[]): void;
   rowMove(rowId: string, position: InsertToPosition): void;
-
-  viewDataUpdate(updater: (viewData: ViewData) => Partial<ViewData>): void;
-
-  viewData$: ReadonlySignal<ViewData | undefined>;
-
-  getContext<T>(key: DataViewContextKey<T>): T | undefined;
-
   rowGet(rowId: string): Row;
 
-  header$: ReadonlySignal<HeaderType>;
+  rowPrevGet(rowId: string): string;
+  rowNextGet(rowId: string): string;
 
-  cellGet(rowId: string, columnId: string): Cell;
+  readonly propertyMetas: PropertyMetaConfig[];
+  propertyAdd(toAfterOfProperty: InsertToPosition, type?: string): string;
+  propertyDelete(propertyId: string): void;
+  propertyDuplicate(propertyId: string): void;
+  propertyGet(propertyId: string): Property;
+  propertyMetaGet(type: string): PropertyMetaConfig | undefined;
+
+  propertyPreGet(propertyId: string): Property | undefined;
+  propertyNextGet(propertyId: string): Property | undefined;
+
+  propertyNameGet(propertyId: string): string;
+  propertyNameSet(propertyId: string, name: string): void;
+
+  propertyTypeGet(propertyId: string): string | undefined;
+  propertyTypeSet(propertyId: string, type: string): void;
+
+  propertyHideGet(propertyId: string): boolean;
+  propertyHideSet(propertyId: string, hide: boolean): void;
+
+  propertyDataGet(propertyId: string): Record<string, unknown>;
+  propertyDataSet(propertyId: string, data: Record<string, unknown>): void;
+
+  propertyDataTypeGet(propertyId: string): TType | undefined;
+  propertyIndexGet(propertyId: string): number;
+  propertyIdGetByIndex(index: number): string;
+  propertyReadonlyGet(propertyId: string): boolean;
+  propertyMove(propertyId: string, position: InsertToPosition): void;
+
+  IconGet(type: string): UniComponent | undefined;
+
+  contextGet<T>(key: DataViewContextKey<T>): T | undefined;
+
+  mainProperties$: ReadonlySignal<MainProperties>;
 }
 
 export abstract class SingleViewBase<
@@ -149,17 +119,11 @@ export abstract class SingleViewBase<
 {
   private searchString = signal('');
 
-  columnManagerList$ = computed(() => {
-    return this.columns$.value.map(
-      id => this.columnGet(id) as ReturnType<this['columnGet']>
-    );
+  data$ = computed(() => {
+    return this.dataSource.viewDataGet(this.id) as ViewData | undefined;
   });
 
-  abstract columns$: ReadonlySignal<string[]>;
-
-  abstract columnsWithoutFilter$: ReadonlySignal<string[]>;
-
-  abstract detailColumns$: ReadonlySignal<string[]>;
+  abstract detailProperties$: ReadonlySignal<string[]>;
 
   abstract filter$: ReadonlySignal<FilterGroup>;
 
@@ -167,11 +131,21 @@ export abstract class SingleViewBase<
     return (this.filter$.value?.conditions.length ?? 0) > 0;
   });
 
-  abstract header$: ReadonlySignal<HeaderType>;
+  abstract mainProperties$: ReadonlySignal<MainProperties>;
 
   name$: ReadonlySignal<string> = computed(() => {
-    return this.viewData$.value?.name ?? '';
+    return this.data$.value?.name ?? '';
   });
+
+  properties$ = computed(() => {
+    return this.propertyIds$.value.map(
+      id => this.propertyGet(id) as ReturnType<this['propertyGet']>
+    );
+  });
+
+  abstract propertiesWithoutFilter$: ReadonlySignal<string[]>;
+
+  abstract propertyIds$: ReadonlySignal<string[]>;
 
   abstract readonly$: ReadonlySignal<boolean>;
 
@@ -180,9 +154,9 @@ export abstract class SingleViewBase<
   });
 
   vars$ = computed(() => {
-    return this.columnsWithoutFilter$.value.map(id => {
-      const v = this.columnGet(id);
-      const propertyMeta = this.dataSource.getPropertyMeta(v.type$.value);
+    return this.propertiesWithoutFilter$.value.map(id => {
+      const v = this.propertyGet(id);
+      const propertyMeta = this.dataSource.propertyMetaGet(v.type$.value);
       return {
         id: v.id,
         name: v.name$.value,
@@ -192,45 +166,39 @@ export abstract class SingleViewBase<
     });
   });
 
-  viewData$ = computed(() => {
-    return this.dataSource.viewDataGet(this.id) as ViewData | undefined;
-  });
-
-  get allColumnMetas(): ColumnMeta[] {
-    return this.dataSource.addPropertyConfigList;
-  }
-
   protected get dataSource() {
-    return this.viewManager.dataSource;
-  }
-
-  get detailSlots(): DetailSlots {
-    return this.dataSource.detailSlots;
+    return this.manager.dataSource;
   }
 
   get featureFlags$() {
     return this.dataSource.featureFlags$;
   }
 
-  abstract get type(): string;
-
-  get viewMeta() {
+  get meta() {
     return this.dataSource.viewMetaGet(this.type);
   }
 
+  get propertyMetas(): PropertyMetaConfig[] {
+    return this.dataSource.propertyMetas;
+  }
+
+  abstract get type(): string;
+
   constructor(
-    public viewManager: ViewManager,
+    public manager: ViewManager,
     public id: string
   ) {}
 
   private filteredRows(searchString: string): string[] {
     return this.dataSource.rows$.value.filter(id => {
       if (searchString) {
-        const containsSearchString = this.columns$.value.some(columnId => {
-          return this.cellGetStringValue(id, columnId)
-            ?.toLowerCase()
-            .includes(searchString?.toLowerCase());
-        });
+        const containsSearchString = this.propertyIds$.value.some(
+          propertyId => {
+            return this.cellStringValueGet(id, propertyId)
+              ?.toLowerCase()
+              .includes(searchString?.toLowerCase());
+          }
+        );
         if (!containsSearchString) {
           return false;
         }
@@ -239,177 +207,191 @@ export abstract class SingleViewBase<
     });
   }
 
-  cellGet(rowId: string, columnId: string): Cell {
-    return new CellBase(this, columnId, rowId);
+  cellGet(rowId: string, propertyId: string): Cell {
+    return new CellBase(this, propertyId, rowId);
   }
 
-  cellGetJsonValue(rowId: string, columnId: string): unknown {
-    const type = this.columnGetType(columnId);
+  cellJsonValueGet(rowId: string, propertyId: string): unknown {
+    const type = this.propertyTypeGet(propertyId);
     if (!type) {
       return;
     }
     return this.dataSource
-      .getPropertyMeta(type)
+      .propertyMetaGet(type)
       .config.cellToJson(
-        this.dataSource.cellGetValue(rowId, columnId),
-        this.columnGetData(columnId)
+        this.dataSource.cellValueGet(rowId, propertyId),
+        this.propertyDataGet(propertyId)
       );
   }
 
-  cellGetStringValue(rowId: string, columnId: string): string | undefined {
-    const type = this.columnGetType(columnId);
+  cellRenderValueSet(rowId: string, propertyId: string, value: unknown): void {
+    this.dataSource.cellValueChange(rowId, propertyId, value);
+  }
+
+  cellStringValueGet(rowId: string, propertyId: string): string | undefined {
+    const type = this.propertyTypeGet(propertyId);
     if (!type) {
       return;
     }
     return (
       this.dataSource
-        .getPropertyMeta(type)
+        .propertyMetaGet(type)
         .config.cellToString(
-          this.dataSource.cellGetValue(rowId, columnId),
-          this.columnGetData(columnId)
+          this.dataSource.cellValueGet(rowId, propertyId),
+          this.propertyDataGet(propertyId)
         ) ?? ''
     );
   }
 
-  cellGetValue(rowId: string, columnId: string): unknown {
-    const type = this.columnGetType(columnId);
+  cellValueGet(rowId: string, propertyId: string): unknown {
+    const type = this.propertyTypeGet(propertyId);
     if (!type) {
       return;
     }
-    const cellValue = this.dataSource.cellGetValue(rowId, columnId);
+    const cellValue = this.dataSource.cellValueGet(rowId, propertyId);
     return (
       this.dataSource
-        .getPropertyMeta(type)
-        .config.formatValue?.(cellValue, this.columnGetData(columnId)) ??
+        .propertyMetaGet(type)
+        .config.formatValue?.(cellValue, this.propertyDataGet(propertyId)) ??
       cellValue
     );
   }
 
-  cellUpdateRenderValue(rowId: string, columnId: string, value: unknown): void {
-    this.dataSource.cellChangeValue(rowId, columnId, value);
+  cellValueSet(rowId: string, propertyId: string, value: unknown): void {
+    this.dataSource.cellValueChange(rowId, propertyId, value);
   }
 
-  cellUpdateValue(rowId: string, columnId: string, value: unknown): void {
-    this.dataSource.cellChangeValue(rowId, columnId, value);
+  contextGet<T>(key: DataViewContextKey<T>): T | undefined {
+    return this.dataSource.contextGet(key);
   }
 
-  columnAdd(position: InsertToPosition, type?: string): string {
-    const id = this.dataSource.propertyAdd(position, type);
-    this.columnMove(id, position);
-    return id;
+  dataUpdate(updater: (viewData: ViewData) => Partial<ViewData>): void {
+    this.dataSource.viewDataUpdate(this.id, updater);
   }
 
-  columnDelete(columnId: string): void {
-    this.dataSource.propertyDelete(columnId);
+  delete(): void {
+    this.manager.viewDelete(this.id);
   }
 
-  columnDuplicate(columnId: string): void {
-    const id = this.dataSource.propertyDuplicate(columnId);
-    this.columnMove(id, {
-      before: false,
-      id: columnId,
+  duplicate(): void {
+    this.manager.viewDuplicate(this.id);
+  }
+
+  abstract filterSet(filter: FilterGroup): void;
+
+  IconGet(type: string): UniComponent | undefined {
+    return this.dataSource.propertyMetaGet(type).renderer.icon;
+  }
+
+  abstract isShow(rowId: string): boolean;
+
+  nameSet(name: string): void {
+    this.dataUpdate(() => {
+      return {
+        name,
+      } as ViewData;
     });
   }
 
-  abstract columnGet(columnId: string): Column;
-
-  columnGetData(columnId: string): Record<string, unknown> {
-    return this.dataSource.propertyGetData(columnId);
+  propertyAdd(position: InsertToPosition, type?: string): string {
+    const id = this.dataSource.propertyAdd(position, type);
+    this.propertyMove(id, position);
+    return id;
   }
 
-  columnGetDataType(columnId: string): TType | undefined {
-    const type = this.columnGetType(columnId);
+  propertyDataGet(propertyId: string): Record<string, unknown> {
+    return this.dataSource.propertyDataGet(propertyId);
+  }
+
+  propertyDataSet(propertyId: string, data: Record<string, unknown>): void {
+    this.dataSource.propertyDataSet(propertyId, data);
+  }
+
+  propertyDataTypeGet(propertyId: string): TType | undefined {
+    const type = this.propertyTypeGet(propertyId);
     if (!type) {
       return;
     }
     return this.dataSource
-      .getPropertyMeta(type)
-      .config.type(this.columnGetData(columnId));
+      .propertyMetaGet(type)
+      .config.type(this.propertyDataGet(propertyId));
   }
 
-  abstract columnGetHide(columnId: string): boolean;
-
-  columnGetIdByIndex(index: number): string {
-    return this.columns$.value[index];
+  propertyDelete(propertyId: string): void {
+    this.dataSource.propertyDelete(propertyId);
   }
 
-  columnGetIndex(columnId: string): number {
-    return this.columns$.value.indexOf(columnId);
+  propertyDuplicate(propertyId: string): void {
+    const id = this.dataSource.propertyDuplicate(propertyId);
+    this.propertyMove(id, {
+      before: false,
+      id: propertyId,
+    });
   }
 
-  columnGetMeta(type: string): ColumnMeta {
-    return this.dataSource.getPropertyMeta(type);
+  abstract propertyGet(propertyId: string): Property;
+
+  abstract propertyHideGet(propertyId: string): boolean;
+
+  abstract propertyHideSet(propertyId: string, hide: boolean): void;
+
+  propertyIdGetByIndex(index: number): string {
+    return this.propertyIds$.value[index];
   }
 
-  columnGetName(columnId: string): string {
-    return this.dataSource.propertyGetName(columnId);
+  propertyIndexGet(propertyId: string): number {
+    return this.propertyIds$.value.indexOf(propertyId);
   }
 
-  columnGetNextColumn(columnId: string): Column | undefined {
-    return this.columnGet(
-      this.columnGetIdByIndex(this.columnGetIndex(columnId) + 1)
+  propertyMetaGet(type: string): PropertyMetaConfig {
+    return this.dataSource.propertyMetaGet(type);
+  }
+
+  abstract propertyMove(propertyId: string, position: InsertToPosition): void;
+
+  propertyNameGet(propertyId: string): string {
+    return this.dataSource.propertyNameGet(propertyId);
+  }
+
+  propertyNameSet(propertyId: string, name: string): void {
+    this.dataSource.propertyNameSet(propertyId, name);
+  }
+
+  propertyNextGet(propertyId: string): Property | undefined {
+    return this.propertyGet(
+      this.propertyIdGetByIndex(this.propertyIndexGet(propertyId) + 1)
     );
   }
 
-  columnGetPreColumn(columnId: string): Column | undefined {
-    return this.columnGet(
-      this.columnGetIdByIndex(this.columnGetIndex(columnId) - 1)
-    );
-  }
-
-  columnGetReadonly(columnId: string): boolean {
-    return this.dataSource.propertyGetReadonly(columnId);
-  }
-
-  columnGetType(columnId: string): string | undefined {
-    return this.dataSource.propertyGetType(columnId);
-  }
-
-  abstract columnMove(columnId: string, position: InsertToPosition): void;
-
-  columnParseValueFromString(columnId: string, cellData: string) {
-    const type = this.columnGetType(columnId);
+  propertyParseValueFromString(propertyId: string, cellData: string) {
+    const type = this.propertyTypeGet(propertyId);
     if (!type) {
       return;
     }
     return (
       this.dataSource
-        .getPropertyMeta(type)
-        .config.cellFromString(cellData, this.columnGetData(columnId)) ?? ''
+        .propertyMetaGet(type)
+        .config.cellFromString(cellData, this.propertyDataGet(propertyId)) ?? ''
     );
   }
 
-  columnUpdateData(columnId: string, data: Record<string, unknown>): void {
-    this.dataSource.propertyChangeData(columnId, data);
+  propertyPreGet(propertyId: string): Property | undefined {
+    return this.propertyGet(
+      this.propertyIdGetByIndex(this.propertyIndexGet(propertyId) - 1)
+    );
   }
 
-  abstract columnUpdateHide(columnId: string, hide: boolean): void;
-
-  columnUpdateName(columnId: string, name: string): void {
-    this.dataSource.propertyChangeName(columnId, name);
+  propertyReadonlyGet(propertyId: string): boolean {
+    return this.dataSource.propertyReadonlyGet(propertyId);
   }
 
-  columnUpdateType(columnId: string, type: string): void {
-    this.dataSource.propertyChangeType(columnId, type);
+  propertyTypeGet(propertyId: string): string | undefined {
+    return this.dataSource.propertyTypeGet(propertyId);
   }
 
-  delete(): void {
-    this.viewManager.viewDelete(this.id);
+  propertyTypeSet(propertyId: string, type: string): void {
+    this.dataSource.propertyTypeSet(propertyId, type);
   }
-
-  duplicate(): void {
-    this.viewManager.viewDuplicate(this.id);
-  }
-
-  getContext<T>(key: DataViewContextKey<T>): T | undefined {
-    return this.dataSource.getContext(key);
-  }
-
-  getIcon(type: string): UniComponent | undefined {
-    return this.dataSource.getPropertyMeta(type).renderer.icon;
-  }
-
-  abstract isShow(rowId: string): boolean;
 
   rowAdd(insertPosition: InsertToPosition | number): string {
     return this.dataSource.rowAdd(insertPosition);
@@ -423,29 +405,15 @@ export abstract class SingleViewBase<
     return new RowBase(this, rowId);
   }
 
-  abstract rowGetNext(rowId: string): string;
-
-  abstract rowGetPrev(rowId: string): string;
-
   rowMove(rowId: string, position: InsertToPosition): void {
     this.dataSource.rowMove(rowId, position);
   }
 
+  abstract rowNextGet(rowId: string): string;
+
+  abstract rowPrevGet(rowId: string): string;
+
   setSearch(str: string): void {
     this.searchString.value = str;
-  }
-
-  abstract updateFilter(filter: FilterGroup): void;
-
-  updateName(name: string): void {
-    this.viewDataUpdate(() => {
-      return {
-        name,
-      } as ViewData;
-    });
-  }
-
-  viewDataUpdate(updater: (viewData: ViewData) => Partial<ViewData>): void {
-    this.dataSource.viewDataUpdate(this.id, updater);
   }
 }

@@ -13,7 +13,7 @@ import {
   type InsertToPosition,
 } from '@blocksuite/affine-shared/utils';
 
-export function addColumn(
+export function addProperty(
   model: DatabaseBlockModel,
   position: InsertToPosition,
   column: Omit<Column, 'id'> & {
@@ -44,7 +44,7 @@ export function applyCellsUpdate(model: DatabaseBlockModel) {
   });
 }
 
-export function applyColumnUpdate(model: DatabaseBlockModel) {
+export function applyPropertyUpdate(model: DatabaseBlockModel) {
   model.doc.updateBlock(model, {
     columns: model.columns,
   });
@@ -56,7 +56,7 @@ export function applyViewsUpdate(model: DatabaseBlockModel) {
   });
 }
 
-export function copyCellsByColumn(
+export function copyCellsByProperty(
   model: DatabaseBlockModel,
   fromId: Column['id'],
   toId: Column['id']
@@ -78,7 +78,7 @@ export function deleteColumn(
   model: DatabaseBlockModel,
   columnId: Column['id']
 ) {
-  const index = findColumnIndex(model, columnId);
+  const index = findPropertyIndex(model, columnId);
   if (index < 0) return;
 
   model.doc.transact(() => {
@@ -117,7 +117,7 @@ export function duplicateView(model: DatabaseBlockModel, id: string): string {
   return newId;
 }
 
-export function findColumnIndex(model: DatabaseBlockModel, id: Column['id']) {
+export function findPropertyIndex(model: DatabaseBlockModel, id: Column['id']) {
   return model.columns.findIndex(v => v.id === id);
 }
 
@@ -142,7 +142,7 @@ export function getCell(
   };
 }
 
-export function getColumn(
+export function getProperty(
   model: DatabaseBlockModel,
   id: Column['id']
 ): Column | undefined {
@@ -199,7 +199,7 @@ export function updateCells(
   });
 }
 
-export function updateColumn(
+export function updateProperty(
   model: DatabaseBlockModel,
   id: string,
   updater: ColumnUpdater

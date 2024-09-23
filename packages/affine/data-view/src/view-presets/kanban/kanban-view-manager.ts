@@ -15,41 +15,22 @@ import {
 } from '../../core/common/group-by/helper.js';
 import { groupByMatcher } from '../../core/common/group-by/matcher.js';
 import { evalFilter } from '../../core/logical/eval-filter.js';
-import { ColumnBase } from '../../core/view-manager/column.js';
+import { PropertyBase } from '../../core/view-manager/property.js';
 import { SingleViewBase } from '../../core/view-manager/single-view.js';
 
 export class KanbanSingleView extends SingleViewBase<KanbanViewData> {
-  columns$: ReadonlySignal<string[]> = computed(() => {
-    return this.columnsWithoutFilter$.value.filter(
-      id => !this.columnGetHide(id)
-    );
-  });
-
-  columnsWithoutFilter$ = computed(() => {
-    const needShow = new Set(this.dataSource.properties$.value);
-    const result: string[] = [];
-    this.viewData$.value?.columns.forEach(v => {
-      if (needShow.has(v.id)) {
-        result.push(v.id);
-        needShow.delete(v.id);
-      }
-    });
-    result.push(...needShow);
-    return result;
-  });
-
-  detailColumns$ = computed(() => {
-    return this.columnsWithoutFilter$.value.filter(
-      id => this.columnGetType(id) !== 'title'
+  detailProperties$ = computed(() => {
+    return this.propertiesWithoutFilter$.value.filter(
+      id => this.propertyTypeGet(id) !== 'title'
     );
   });
 
   filter$ = computed(() => {
-    return this.viewData$.value?.filter ?? emptyFilterGroup;
+    return this.data$.value?.filter ?? emptyFilterGroup;
   });
 
   groupBy$ = computed(() => {
-    return this.viewData$.value?.groupBy;
+    return this.data$.value?.groupBy;
   });
 
   groupManager = new GroupManager(this.groupBy$, this, {
@@ -65,7 +46,7 @@ export class KanbanSingleView extends SingleViewBase<KanbanViewData> {
     },
     changeGroupSort: keys => {
       const map = new Map(this.view?.groupProperties.map(v => [v.key, v]));
-      this.viewDataUpdate(() => {
+      this.dataUpdate(() => {
         return {
           groupProperties: keys.map(key => {
             const property = map.get(key);
@@ -83,7 +64,7 @@ export class KanbanSingleView extends SingleViewBase<KanbanViewData> {
     },
     changeRowSort: (groupKeys, groupKey, keys) => {
       const map = new Map(this.view?.groupProperties.map(v => [v.key, v]));
-      this.viewDataUpdate(() => {
+      this.dataUpdate(() => {
         return {
           groupProperties: groupKeys.map(key => {
             if (key === groupKey) {
@@ -113,24 +94,43 @@ export class KanbanSingleView extends SingleViewBase<KanbanViewData> {
     },
   });
 
-  header$ = computed(() => {
+  mainProperties$ = computed(() => {
     return (
-      this.viewData$.value?.header ?? {
-        titleColumn: this.columnsWithoutFilter$.value.find(
-          id => this.columnGetType(id) === 'title'
+      this.data$.value?.header ?? {
+        titleColumn: this.propertiesWithoutFilter$.value.find(
+          id => this.propertyTypeGet(id) === 'title'
         ),
         iconColumn: 'type',
       }
     );
   });
 
+  propertiesWithoutFilter$ = computed(() => {
+    const needShow = new Set(this.dataSource.properties$.value);
+    const result: string[] = [];
+    this.data$.value?.columns.forEach(v => {
+      if (needShow.has(v.id)) {
+        result.push(v.id);
+        needShow.delete(v.id);
+      }
+    });
+    result.push(...needShow);
+    return result;
+  });
+
+  propertyIds$: ReadonlySignal<string[]> = computed(() => {
+    return this.propertiesWithoutFilter$.value.filter(
+      id => !this.propertyHideGet(id)
+    );
+  });
+
   readonly$ = computed(() => {
-    return this.viewManager.readonly$.value;
+    return this.manager.readonly$.value;
   });
 
   get columns(): string[] {
-    return this.columnsWithoutFilter$.value.filter(
-      id => !this.columnGetHide(id)
+    return this.propertiesWithoutFilter$.value.filter(
+      id => !this.propertyHideGet(id)
     );
   }
 
@@ -160,7 +160,7 @@ export class KanbanSingleView extends SingleViewBase<KanbanViewData> {
   }
 
   get view() {
-    return this.viewData$.value;
+    return this.data$.value;
   }
 
   addCard(position: InsertToPosition, group: string) {
@@ -170,11 +170,11 @@ export class KanbanSingleView extends SingleViewBase<KanbanViewData> {
   }
 
   changeGroup(columnId: string) {
-    const column = this.columnGet(columnId);
-    this.viewDataUpdate(_view => {
+    const column = this.propertyGet(columnId);
+    this.dataUpdate(_view => {
       return {
         groupBy: defaultGroupBy(
-          this.columnGetMeta(column.type$.value),
+          this.propertyMetaGet(column.type$.value),
           column.id,
           column.data$.value
         ),
@@ -190,41 +190,10 @@ export class KanbanSingleView extends SingleViewBase<KanbanViewData> {
     return true;
   }
 
-  columnGet(columnId: string): KanbanColumn {
-    return new KanbanColumn(this, columnId);
-  }
-
-  columnGetHide(columnId: string): boolean {
-    return this.view?.columns.find(v => v.id === columnId)?.hide ?? false;
-  }
-
-  columnMove(columnId: string, toAfterOfColumn: InsertToPosition): void {
-    this.viewDataUpdate(view => {
-      const columnIndex = view.columns.findIndex(v => v.id === columnId);
-      if (columnIndex < 0) {
-        return {};
-      }
-      const columns = [...view.columns];
-      const [column] = columns.splice(columnIndex, 1);
-      const index = insertPositionToIndex(toAfterOfColumn, columns);
-      columns.splice(index, 0, column);
+  filterSet(filter: FilterGroup): void {
+    this.dataUpdate(() => {
       return {
-        columns,
-      };
-    });
-  }
-
-  columnUpdateHide(columnId: string, hide: boolean): void {
-    this.viewDataUpdate(view => {
-      return {
-        columns: view.columns.map(v =>
-          v.id === columnId
-            ? {
-                ...v,
-                hide,
-              }
-            : v
-        ),
+        filter,
       };
     });
   }
@@ -234,7 +203,7 @@ export class KanbanSingleView extends SingleViewBase<KanbanViewData> {
     if (!columnId) {
       return;
     }
-    return this.columnGet(columnId);
+    return this.propertyGet(columnId);
   }
 
   getHeaderIcon(_rowId: string): KanbanColumn | undefined {
@@ -242,7 +211,7 @@ export class KanbanSingleView extends SingleViewBase<KanbanViewData> {
     if (!columnId) {
       return;
     }
-    return this.columnGet(columnId);
+    return this.propertyGet(columnId);
   }
 
   getHeaderTitle(_rowId: string): KanbanColumn | undefined {
@@ -250,7 +219,7 @@ export class KanbanSingleView extends SingleViewBase<KanbanViewData> {
     if (!columnId) {
       return;
     }
-    return this.columnGet(columnId);
+    return this.propertyGet(columnId);
   }
 
   hasHeader(_rowId: string): boolean {
@@ -276,7 +245,7 @@ export class KanbanSingleView extends SingleViewBase<KanbanViewData> {
   isShow(rowId: string): boolean {
     if (this.filter$.value?.conditions.length) {
       const rowMap = Object.fromEntries(
-        this.columnManagerList$.value.map(column => [
+        this.properties$.value.map(column => [
           column.id,
           column.cellGet(rowId).jsonValue$.value,
         ])
@@ -286,30 +255,61 @@ export class KanbanSingleView extends SingleViewBase<KanbanViewData> {
     return true;
   }
 
-  override rowGetNext(rowId: string): string {
-    const index = this.rows$.value.indexOf(rowId);
-    return this.rows$.value[index + 1];
+  propertyGet(columnId: string): KanbanColumn {
+    return new KanbanColumn(this, columnId);
   }
 
-  override rowGetPrev(rowId: string): string {
-    const index = this.rows$.value.indexOf(rowId);
-    return this.rows$.value[index - 1];
+  propertyHideGet(columnId: string): boolean {
+    return this.view?.columns.find(v => v.id === columnId)?.hide ?? false;
+  }
+
+  propertyHideSet(columnId: string, hide: boolean): void {
+    this.dataUpdate(view => {
+      return {
+        columns: view.columns.map(v =>
+          v.id === columnId
+            ? {
+                ...v,
+                hide,
+              }
+            : v
+        ),
+      };
+    });
+  }
+
+  propertyMove(columnId: string, toAfterOfColumn: InsertToPosition): void {
+    this.dataUpdate(view => {
+      const columnIndex = view.columns.findIndex(v => v.id === columnId);
+      if (columnIndex < 0) {
+        return {};
+      }
+      const columns = [...view.columns];
+      const [column] = columns.splice(columnIndex, 1);
+      const index = insertPositionToIndex(toAfterOfColumn, columns);
+      columns.splice(index, 0, column);
+      return {
+        columns,
+      };
+    });
   }
 
   override rowMove(rowId: string, position: InsertToPosition): void {
     this.dataSource.rowMove(rowId, position);
   }
 
-  updateFilter(filter: FilterGroup): void {
-    this.viewDataUpdate(() => {
-      return {
-        filter,
-      };
-    });
+  override rowNextGet(rowId: string): string {
+    const index = this.rows$.value.indexOf(rowId);
+    return this.rows$.value[index + 1];
+  }
+
+  override rowPrevGet(rowId: string): string {
+    const index = this.rows$.value.indexOf(rowId);
+    return this.rows$.value[index - 1];
   }
 }
 
-export class KanbanColumn extends ColumnBase {
+export class KanbanColumn extends PropertyBase {
   constructor(dataViewManager: KanbanSingleView, columnId: string) {
     super(dataViewManager, columnId);
   }

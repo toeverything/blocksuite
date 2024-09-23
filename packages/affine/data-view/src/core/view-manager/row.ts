@@ -5,14 +5,14 @@ import type { SingleView } from './single-view.js';
 import { type Cell, CellBase } from './cell.js';
 
 export interface Row {
-  cells$: ReadonlySignal<Cell[]>;
-  rowId: string;
+  readonly cells$: ReadonlySignal<Cell[]>;
+  readonly rowId: string;
 }
 
 export class RowBase implements Row {
   cells$ = computed(() => {
-    return this.singleView.columns$.value.map(columnId => {
-      return new CellBase(this.singleView, columnId, this.rowId);
+    return this.singleView.propertyIds$.value.map(propertyId => {
+      return new CellBase(this.singleView, propertyId, this.rowId);
     });
   });
 

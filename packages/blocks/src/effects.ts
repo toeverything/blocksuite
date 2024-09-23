@@ -67,20 +67,6 @@ import {
   type CodeBlockConfig,
 } from './code-block/index.js';
 import { DataViewBlockComponent } from './data-view-block/index.js';
-import {
-  LinkCell,
-  LinkCellEditing,
-} from './database-block/columns/link/cell-renderer.js';
-import { LinkNode } from './database-block/columns/link/components/link-node.js';
-import {
-  RichTextCell,
-  RichTextCellEditing,
-} from './database-block/columns/rich-text/cell-renderer.js';
-import { IconCell } from './database-block/columns/title/icon.js';
-import {
-  HeaderAreaTextCell,
-  HeaderAreaTextCellEditing,
-} from './database-block/columns/title/text.js';
 import { CenterPeek } from './database-block/components/layout.js';
 import { DatabaseTitle } from './database-block/components/title/index.js';
 import { BlockRenderer } from './database-block/detail-panel/block-renderer.js';
@@ -89,6 +75,20 @@ import {
   DatabaseBlockComponent,
   type DatabaseBlockService,
 } from './database-block/index.js';
+import {
+  LinkCell,
+  LinkCellEditing,
+} from './database-block/properties/link/cell-renderer.js';
+import { LinkNode } from './database-block/properties/link/components/link-node.js';
+import {
+  RichTextCell,
+  RichTextCellEditing,
+} from './database-block/properties/rich-text/cell-renderer.js';
+import { IconCell } from './database-block/properties/title/icon.js';
+import {
+  HeaderAreaTextCell,
+  HeaderAreaTextCellEditing,
+} from './database-block/properties/title/text.js';
 import { DividerBlockComponent } from './divider-block/index.js';
 import { EdgelessTextBlockComponent } from './edgeless-text-block/index.js';
 import {

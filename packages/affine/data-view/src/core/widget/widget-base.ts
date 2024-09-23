@@ -11,11 +11,11 @@ export class WidgetBase
   implements DataViewWidgetProps
 {
   get dataSource() {
-    return this.view.viewManager.dataSource;
+    return this.view.manager.dataSource;
   }
 
   get viewManager() {
-    return this.view.viewManager;
+    return this.view.manager;
   }
 
   @property({ attribute: false })

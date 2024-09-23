@@ -1,7 +1,7 @@
 import type {
   RichTextCell,
   RichTextCellEditing,
-} from '@blocks/database-block/columns/rich-text/cell-renderer.js';
+} from '@blocks/database-block/properties/rich-text/cell-renderer.js';
 
 import { press } from '@inline/__tests__/utils.js';
 import { ZERO_WIDTH_SPACE } from '@inline/consts.js';

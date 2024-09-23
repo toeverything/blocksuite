@@ -15,11 +15,23 @@ import { repeat } from 'lit/directives/repeat.js';
 import { html } from 'lit/static-html.js';
 
 import type { SingleView } from '../../view-manager/single-view.js';
-import type { DetailSlotProps, DetailSlots } from '../data-source/base.js';
 
-import { renderUniLit } from '../../utils/uni-component/uni-component.js';
+import {
+  renderUniLit,
+  type UniComponent,
+} from '../../utils/uni-component/uni-component.js';
 import { dataViewCommonStyle } from '../css-variable.js';
 import { DetailSelection } from './selection.js';
+
+export type DetailSlotProps = {
+  view: SingleView;
+  rowId: string;
+};
+
+export interface DetailSlots {
+  header?: UniComponent<DetailSlotProps>;
+  note?: UniComponent<DetailSlotProps>;
+}
 
 const styles = css`
   ${unsafeCSS(dataViewCommonStyle('affine-data-view-record-detail'))}
@@ -66,6 +78,7 @@ const styles = css`
     width: 20px;
     height: 20px;
   }
+
   .switch-row {
     display: flex;
     align-items: center;
@@ -76,9 +89,11 @@ const styles = css`
     font-size: 22px;
     color: var(--affine-icon-color);
   }
+
   .switch-row:hover {
     background-color: var(--affine-hover-color);
   }
+
   .switch-row.disable {
     cursor: default;
     background: none;
@@ -94,24 +109,24 @@ export class RecordDetail extends SignalWatcher(
   _clickAddProperty = () => {
     popFilterableSimpleMenu(
       this.addPropertyButton,
-      this.view.allColumnMetas.map(meta => {
+      this.view.propertyMetas.map(meta => {
         return {
           type: 'action',
           name: meta.config.name,
-          icon: renderUniLit(this.view.getIcon(meta.type)),
+          icon: renderUniLit(this.view.IconGet(meta.type)),
           select: () => {
-            this.view.columnAdd('end', meta.type);
+            this.view.propertyAdd('end', meta.type);
           },
         };
       })
     );
   };
 
-  columns$ = computed(() => {
-    return this.view.detailColumns$.value.map(id => this.view.columnGet(id));
+  properties$ = computed(() => {
+    return this.view.detailProperties$.value.map(id =>
+      this.view.propertyGet(id)
+    );
   });
-
-  detailSlots?: DetailSlots;
 
   selection = new DetailSelection(this);
 
@@ -152,19 +167,18 @@ export class RecordDetail extends SignalWatcher(
     });
     //FIXME: simulate as a widget
     this.dataset.widgetId = 'affine-detail-widget';
-    this.detailSlots = this.view.detailSlots;
   }
 
   hasNext() {
-    return this.view.rowGetNext(this.rowId) != null;
+    return this.view.rowNextGet(this.rowId) != null;
   }
 
   hasPrev() {
-    return this.view.rowGetPrev(this.rowId) != null;
+    return this.view.rowPrevGet(this.rowId) != null;
   }
 
   nextRow() {
-    const rowId = this.view.rowGetNext(this.rowId);
+    const rowId = this.view.rowNextGet(this.rowId);
     if (rowId == null) {
       return;
     }
@@ -173,7 +187,7 @@ export class RecordDetail extends SignalWatcher(
   }
 
   prevRow() {
-    const rowId = this.view.rowGetPrev(this.rowId);
+    const rowId = this.view.rowPrevGet(this.rowId);
     if (rowId == null) {
       return;
     }
@@ -182,7 +196,7 @@ export class RecordDetail extends SignalWatcher(
   }
 
   override render() {
-    const columns = this.columns$.value;
+    const properties = this.properties$.value;
     const upClass = classMap({
       'switch-row': true,
       disable: !this.hasPrev(),
@@ -207,22 +221,22 @@ export class RecordDetail extends SignalWatcher(
       >
         ${keyed(this.rowId, this.renderHeader())}
         ${repeat(
-          columns,
+          properties,
           v => v.id,
-          column => {
+          property => {
             return keyed(
               this.rowId,
               html` <affine-data-view-record-field
                 .view="${this.view}"
-                .column="${column}"
+                .column="${property}"
                 .rowId="${this.rowId}"
-                data-column-id="${column.id}"
+                data-column-id="${property.id}"
               ></affine-data-view-record-field>`
             );
           }
         )}
         ${!this.readonly
-          ? html`<div class="add-property" @click="${this._clickAddProperty}">
+          ? html` <div class="add-property" @click="${this._clickAddProperty}">
               <div class="icon">${PlusIcon()}</div>
               Add Property
             </div>`
@@ -235,6 +249,9 @@ export class RecordDetail extends SignalWatcher(
 
   @query('.add-property')
   accessor addPropertyButton!: HTMLElement;
+
+  @property({ attribute: false })
+  accessor detailSlots: DetailSlots | undefined;
 
   @property({ attribute: false })
   accessor rowId!: string;
@@ -251,10 +268,12 @@ declare global {
 export const createRecordDetail = (ops: {
   view: SingleView;
   rowId: string;
+  detail: DetailSlots;
 }) => {
-  return html`<affine-data-view-record-detail
+  return html` <affine-data-view-record-detail
     .view=${ops.view}
     .rowId=${ops.rowId}
+    .detailSlots=${ops.detail}
     class="data-view-popup-container"
   ></affine-data-view-record-detail>`;
 };
