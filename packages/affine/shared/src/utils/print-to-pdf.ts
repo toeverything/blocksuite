@@ -123,7 +123,6 @@ export async function printToPdf(
         }, 1000);
       });
 
-      iframe.contentWindow.print();
       iframe.contentWindow.onafterprint = async () => {
         iframe.remove();
 
@@ -139,6 +138,8 @@ export async function printToPdf(
 
         resolve();
       };
+
+      iframe.contentWindow.print();
     };
   });
 }
