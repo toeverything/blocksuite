@@ -22,7 +22,7 @@ import type { Property } from '../../view-manager/property.js';
 import type { SingleView } from '../../view-manager/single-view.js';
 
 import { renderUniLit } from '../../utils/uni-component/uni-component.js';
-import { inputConfig, typeConfig } from '../column-menu.js';
+import { inputConfig, typeConfig } from '../property-menu.js';
 
 export class RecordField extends SignalWatcher(
   WithDisposable(ShadowlessElement)
@@ -117,7 +117,7 @@ export class RecordField extends SignalWatcher(
   _clickLeft = (e: MouseEvent) => {
     if (this.readonly) return;
     const ele = e.currentTarget as HTMLElement;
-    const columns = this.view.detailProperties$.value;
+    const properties = this.view.detailProperties$.value;
     popMenu(ele, {
       options: {
         input: inputConfig(this.column),
@@ -145,10 +145,10 @@ export class RecordField extends SignalWatcher(
             >
               ${MoveLeftIcon()}
             </div>`,
-            hide: () => columns.findIndex(v => v === this.column.id) === 0,
+            hide: () => properties.findIndex(v => v === this.column.id) === 0,
             select: () => {
-              const index = columns.findIndex(v => v === this.column.id);
-              const targetId = columns[index - 1];
+              const index = properties.findIndex(v => v === this.column.id);
+              const targetId = properties[index - 1];
               if (!targetId) {
                 return;
               }
@@ -167,11 +167,11 @@ export class RecordField extends SignalWatcher(
               ${MoveRightIcon()}
             </div>`,
             hide: () =>
-              columns.findIndex(v => v === this.column.id) ===
-              columns.length - 1,
+              properties.findIndex(v => v === this.column.id) ===
+              properties.length - 1,
             select: () => {
-              const index = columns.findIndex(v => v === this.column.id);
-              const targetId = columns[index + 1];
+              const index = properties.findIndex(v => v === this.column.id);
+              const targetId = properties[index + 1];
               if (!targetId) {
                 return;
               }

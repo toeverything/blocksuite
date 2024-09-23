@@ -122,7 +122,7 @@ export class RecordDetail extends SignalWatcher(
     );
   };
 
-  columns$ = computed(() => {
+  properties$ = computed(() => {
     return this.view.detailProperties$.value.map(id =>
       this.view.propertyGet(id)
     );
@@ -196,7 +196,7 @@ export class RecordDetail extends SignalWatcher(
   }
 
   override render() {
-    const columns = this.columns$.value;
+    const properties = this.properties$.value;
     const upClass = classMap({
       'switch-row': true,
       disable: !this.hasPrev(),
@@ -221,16 +221,16 @@ export class RecordDetail extends SignalWatcher(
       >
         ${keyed(this.rowId, this.renderHeader())}
         ${repeat(
-          columns,
+          properties,
           v => v.id,
-          column => {
+          property => {
             return keyed(
               this.rowId,
               html` <affine-data-view-record-field
                 .view="${this.view}"
-                .column="${column}"
+                .column="${property}"
                 .rowId="${this.rowId}"
-                data-column-id="${column.id}"
+                data-column-id="${property.id}"
               ></affine-data-view-record-field>`
             );
           }

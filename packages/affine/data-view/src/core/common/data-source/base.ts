@@ -34,10 +34,10 @@ export interface DataSource {
   propertyDataSet(propertyId: string, data: Record<string, unknown>): void;
 
   propertyDataTypeGet(propertyId: string): TType | undefined;
-  propertyReadonlyGet(columnId: string): boolean;
+  propertyReadonlyGet(propertyId: string): boolean;
   propertyMetaGet(type: string): PropertyMetaConfig;
   propertyAdd(insertToPosition: InsertToPosition, type?: string): string;
-  propertyDuplicate(columnId: string): string;
+  propertyDuplicate(propertyId: string): string;
   propertyDelete(id: string): void;
 
   contextGet<T>(key: DataViewContextKey<T>): T | undefined;
@@ -119,7 +119,7 @@ export abstract class DataSourceBase implements DataSource {
 
   abstract propertyDelete(id: string): void;
 
-  abstract propertyDuplicate(columnId: string): string;
+  abstract propertyDuplicate(propertyId: string): string;
 
   abstract propertyMetaGet(type: string): PropertyMetaConfig;
 

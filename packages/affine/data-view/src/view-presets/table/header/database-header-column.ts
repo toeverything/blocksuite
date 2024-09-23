@@ -29,7 +29,7 @@ import type { Property } from '../../../core/view-manager/property.js';
 import type { NumberPropertyDataType } from '../../../property-presets/index.js';
 import type { TableColumn, TableSingleView } from '../table-view-manager.js';
 
-import { inputConfig, typeConfig } from '../../../core/common/column-menu.js';
+import { inputConfig, typeConfig } from '../../../core/common/property-menu.js';
 import { renderUniLit } from '../../../core/index.js';
 import { startDrag } from '../../../core/utils/drag.js';
 import { autoScrollOnBoundary } from '../../../core/utils/frame-loop.js';

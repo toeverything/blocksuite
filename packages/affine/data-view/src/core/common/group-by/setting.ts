@@ -125,7 +125,7 @@ export class GroupSetting extends SignalWatcher(
           group => {
             const props: GroupRenderProps = {
               value: group.value,
-              data: group.column.data$.value,
+              data: group.property.data$.value,
               readonly: true,
             };
             const config = group.manager.config$.value;
@@ -170,12 +170,12 @@ export const selectGroupByProperty = (
           return !!groupByMatcher.match(view.propertyGet(id).dataType$.value);
         })
         .map<Menu>(id => {
-          const column = view.propertyGet(id);
+          const property = view.propertyGet(id);
           return {
             type: 'action',
-            name: column.name$.value,
+            name: property.name$.value,
             isSelected: view.data$.value?.groupBy?.columnId === id,
-            icon: html` <uni-lit .uni="${column.icon}"></uni-lit>`,
+            icon: html` <uni-lit .uni="${property.icon}"></uni-lit>`,
             select: () => {
               if (
                 view instanceof TableSingleView ||

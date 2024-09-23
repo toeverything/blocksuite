@@ -141,12 +141,12 @@ export class DataViewPropertiesSettingView extends SignalWatcher(
     });
   };
 
-  renderColumn = (column: Property) => {
-    const isTitle = column.type$.value === 'title';
-    const icon = column.hide$.value ? InvisibleIcon() : ViewIcon();
+  renderProperty = (property: Property) => {
+    const isTitle = property.type$.value === 'title';
+    const icon = property.hide$.value ? InvisibleIcon() : ViewIcon();
     const changeVisible = () => {
-      if (column.type$.value !== 'title') {
-        column.hideSet(!column.hide$.value);
+      if (property.type$.value !== 'title') {
+        property.hideSet(!property.hide$.value);
       }
     };
     const classList = classMap({
@@ -155,8 +155,8 @@ export class DataViewPropertiesSettingView extends SignalWatcher(
     });
     return html` <div class="property-item">
       <div class="property-item-drag-bar"></div>
-      <uni-lit class="property-item-icon" .uni="${column.icon}"></uni-lit>
-      <div class="property-item-name">${column.name$.value}</div>
+      <uni-lit class="property-item-icon" .uni="${property.icon}"></uni-lit>
+      <div class="property-item-name">${property.name$.value}</div>
       <div class="${classList}" @click="${changeVisible}">${icon}</div>
     </div>`;
   };
@@ -221,7 +221,7 @@ export class DataViewPropertiesSettingView extends SignalWatcher(
         </div>
       </div>
       <div class="properties-group">
-        ${repeat(items, v => v.id, this.renderColumn)}
+        ${repeat(items, v => v.id, this.renderProperty)}
       </div>
     `;
   }
