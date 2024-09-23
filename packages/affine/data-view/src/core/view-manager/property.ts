@@ -25,6 +25,8 @@ export interface Property<
   readonly delete?: () => void;
   readonly duplicate?: () => void;
 
+  cellGet(rowId: string): Cell<Value>;
+
   readonly data$: ReadonlySignal<Data>;
   dataUpdate(updater: PropertyDataUpdater<Data>): void;
 
@@ -36,8 +38,6 @@ export interface Property<
 
   readonly hide$: ReadonlySignal<boolean>;
   hideSet(hide: boolean): void;
-
-  cellGet(rowId: string): Cell<Value>;
 
   valueGet(rowId: string): Value | undefined;
   valueSet(rowId: string, value: Value | undefined): void;
