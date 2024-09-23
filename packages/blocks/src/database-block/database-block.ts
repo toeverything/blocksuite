@@ -285,7 +285,7 @@ export class DatabaseBlockComponent extends CaptionedBlockComponent<
   get dataSource(): DatabaseBlockDataSource {
     if (!this._dataSource) {
       this._dataSource = new DatabaseBlockDataSource(this.model);
-      this._dataSource.setContext(HostContextKey, this.host);
+      this._dataSource.contextSet(HostContextKey, this.host);
     }
     return this._dataSource;
   }

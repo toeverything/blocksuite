@@ -15,7 +15,6 @@ import { repeat } from 'lit/directives/repeat.js';
 import { html } from 'lit/static-html.js';
 
 import type { SingleView } from '../../view-manager/single-view.js';
-import type { DetailSlotProps } from '../data-source/base.js';
 
 import {
   renderUniLit,
@@ -23,6 +22,11 @@ import {
 } from '../../utils/uni-component/uni-component.js';
 import { dataViewCommonStyle } from '../css-variable.js';
 import { DetailSelection } from './selection.js';
+
+export type DetailSlotProps = {
+  view: SingleView;
+  rowId: string;
+};
 
 export interface DetailSlots {
   header?: UniComponent<DetailSlotProps>;

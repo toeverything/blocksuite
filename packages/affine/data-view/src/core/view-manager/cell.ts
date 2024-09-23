@@ -44,7 +44,7 @@ export class CellBase<
   });
 
   meta$ = computed(() => {
-    return this.view.viewManager.dataSource.propertyGetMeta(
+    return this.view.viewManager.dataSource.propertyMetaGet(
       this.column.type$.value
     );
   });
@@ -54,7 +54,7 @@ export class CellBase<
   });
 
   value$ = computed(() => {
-    return this.view.viewManager.dataSource.cellGetValue(
+    return this.view.viewManager.dataSource.cellValueGet(
       this.rowId,
       this.columnId
     ) as Value;
@@ -79,7 +79,7 @@ export class CellBase<
   }
 
   setValue(value: unknown | undefined): void {
-    this.view.viewManager.dataSource.cellChangeValue(
+    this.view.viewManager.dataSource.cellValueChange(
       this.rowId,
       this.columnId,
       value

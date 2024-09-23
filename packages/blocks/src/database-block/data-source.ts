@@ -88,13 +88,13 @@ export class DatabaseBlockDataSource extends DataSourceBase {
 
   viewMetas = databaseBlockViews;
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  get addPropertyConfigList(): ColumnMeta<any, any, any>[] {
-    return databaseBlockColumnList;
-  }
-
   get doc() {
     return this._model.doc;
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  get propertyMetas(): ColumnMeta<any, any, any>[] {
+    return databaseBlockColumnList;
   }
 
   constructor(model: DatabaseBlockModel) {
@@ -127,15 +127,15 @@ export class DatabaseBlockDataSource extends DataSourceBase {
     return `Column ${i}`;
   }
 
-  cellChangeValue(rowId: string, propertyId: string, value: unknown): void {
+  cellValueChange(rowId: string, propertyId: string, value: unknown): void {
     this._runCapture();
 
-    const type = this.propertyGetType(propertyId);
-    const update = this.propertyGetMeta(type).config.valueUpdate;
+    const type = this.propertyTypeGet(propertyId);
+    const update = this.propertyMetaGet(type).config.valueUpdate;
     let newValue = value;
     if (update) {
-      const old = this.cellGetValue(rowId, propertyId);
-      newValue = update(old, this.propertyGetData(propertyId), value);
+      const old = this.cellValueGet(rowId, propertyId);
+      newValue = update(old, this.propertyDataGet(propertyId), value);
     }
     if (type === 'title' && newValue instanceof Text) {
       this._model.doc.transact(() => {
@@ -153,7 +153,7 @@ export class DatabaseBlockDataSource extends DataSourceBase {
     }
   }
 
-  cellGetValue(rowId: string, propertyId: string): unknown {
+  cellValueGet(rowId: string, propertyId: string): unknown {
     if (propertyId === 'type') {
       const model = this.getModelById(rowId);
       if (!model) {
@@ -161,7 +161,7 @@ export class DatabaseBlockDataSource extends DataSourceBase {
       }
       return getIcon(model);
     }
-    const type = this.propertyGetType(propertyId);
+    const type = this.propertyTypeGet(propertyId);
     if (type === 'title') {
       const model = this.getModelById(rowId);
       return model?.text;
@@ -182,51 +182,26 @@ export class DatabaseBlockDataSource extends DataSourceBase {
     return result;
   }
 
-  propertyChangeData(propertyId: string, data: Record<string, unknown>): void {
+  propertyDataGet(propertyId: string): Record<string, unknown> {
+    return (
+      this._model.columns$.value.find(v => v.id === propertyId)?.data ?? {}
+    );
+  }
+
+  propertyDataSet(propertyId: string, data: Record<string, unknown>): void {
     this._runCapture();
 
     updateColumn(this._model, propertyId, () => ({ data }));
     applyColumnUpdate(this._model);
   }
 
-  propertyChangeName(propertyId: string, name: string): void {
-    this.doc.captureSync();
-    updateColumn(this._model, propertyId, () => ({ name }));
-    applyColumnUpdate(this._model);
-  }
-
-  propertyChangeType(propertyId: string, toType: string): void {
-    const currentType = this.propertyGetType(propertyId);
-    const currentData = this.propertyGetData(propertyId);
-    const rows = this.rows$.value;
-    const currentCells = rows.map(rowId =>
-      this.cellGetValue(rowId, propertyId)
-    );
-    const convertFunction = databaseColumnConverts.find(
-      v => v.from === currentType && v.to === toType
-    )?.convert;
-    const result = convertFunction?.(
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      currentData as any,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      currentCells as any
-    ) ?? {
-      column: databaseBlockAllColumnMap[toType].config.defaultData(),
-      cells: currentCells.map(() => undefined),
-    };
-    this.doc.captureSync();
-    updateColumn(this._model, propertyId, () => ({
-      type: toType,
-      data: result.column,
-    }));
-    const cells: Record<string, unknown> = {};
-    currentCells.forEach((value, i) => {
-      if (value != null || result.cells[i] != null) {
-        cells[rows[i]] = result.cells[i];
-      }
-    });
-    updateCells(this._model, propertyId, cells);
-    applyColumnUpdate(this._model);
+  propertyDataTypeGet(propertyId: string): TType | undefined {
+    const data = this._model.columns$.value.find(v => v.id === propertyId);
+    if (!data) {
+      return;
+    }
+    const meta = this.propertyMetaGet(data.type);
+    return meta.config.type(data);
   }
 
   propertyDelete(id: string): void {
@@ -263,26 +238,11 @@ export class DatabaseBlockDataSource extends DataSourceBase {
     return id;
   }
 
-  propertyGetData(propertyId: string): Record<string, unknown> {
-    return (
-      this._model.columns$.value.find(v => v.id === propertyId)?.data ?? {}
-    );
-  }
-
-  propertyGetDataType(propertyId: string): TType | undefined {
-    const data = this._model.columns$.value.find(v => v.id === propertyId);
-    if (!data) {
-      return;
-    }
-    const meta = this.propertyGetMeta(data.type);
-    return meta.config.type(data);
-  }
-
-  propertyGetMeta(type: string): ColumnMeta {
+  propertyMetaGet(type: string): ColumnMeta {
     return databaseBlockAllColumnMap[type];
   }
 
-  propertyGetName(propertyId: string): string {
+  propertyNameGet(propertyId: string): string {
     if (propertyId === 'type') {
       return 'Block Type';
     }
@@ -291,18 +251,58 @@ export class DatabaseBlockDataSource extends DataSourceBase {
     );
   }
 
-  override propertyGetReadonly(propertyId: string): boolean {
+  propertyNameSet(propertyId: string, name: string): void {
+    this.doc.captureSync();
+    updateColumn(this._model, propertyId, () => ({ name }));
+    applyColumnUpdate(this._model);
+  }
+
+  override propertyReadonlyGet(propertyId: string): boolean {
     if (propertyId === 'type') return true;
     return false;
   }
 
-  propertyGetType(propertyId: string): string {
+  propertyTypeGet(propertyId: string): string {
     if (propertyId === 'type') {
       return 'image';
     }
     return (
       this._model.columns$.value.find(v => v.id === propertyId)?.type ?? ''
     );
+  }
+
+  propertyTypeSet(propertyId: string, toType: string): void {
+    const currentType = this.propertyTypeGet(propertyId);
+    const currentData = this.propertyDataGet(propertyId);
+    const rows = this.rows$.value;
+    const currentCells = rows.map(rowId =>
+      this.cellValueGet(rowId, propertyId)
+    );
+    const convertFunction = databaseColumnConverts.find(
+      v => v.from === currentType && v.to === toType
+    )?.convert;
+    const result = convertFunction?.(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      currentData as any,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      currentCells as any
+    ) ?? {
+      column: databaseBlockAllColumnMap[toType].config.defaultData(),
+      cells: currentCells.map(() => undefined),
+    };
+    this.doc.captureSync();
+    updateColumn(this._model, propertyId, () => ({
+      type: toType,
+      data: result.column,
+    }));
+    const cells: Record<string, unknown> = {};
+    currentCells.forEach((value, i) => {
+      if (value != null || result.cells[i] != null) {
+        cells[rows[i]] = result.cells[i];
+      }
+    });
+    updateCells(this._model, propertyId, cells);
+    applyColumnUpdate(this._model);
   }
 
   rowAdd(insertPosition: InsertToPosition | number): string {

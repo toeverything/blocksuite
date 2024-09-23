@@ -39,10 +39,6 @@ export class BlockQueryDataSource extends DataSourceBase {
     update: new Slot(),
   };
 
-  get addPropertyConfigList(): ColumnMeta[] {
-    return queryBlockColumns as ColumnMeta[];
-  }
-
   private get blocks() {
     return [...this.blockMap.values()];
   }
@@ -52,6 +48,10 @@ export class BlockQueryDataSource extends DataSourceBase {
       ...this.meta.properties.map(v => v.key),
       ...this.block.columns.map(v => v.id),
     ];
+  }
+
+  get propertyMetas(): ColumnMeta[] {
+    return queryBlockColumns as ColumnMeta[];
   }
 
   get rows(): string[] {
@@ -107,7 +107,7 @@ export class BlockQueryDataSource extends DataSourceBase {
     return `Column ${i}`;
   }
 
-  cellChangeValue(rowId: string, propertyId: string, value: unknown): void {
+  cellValueChange(rowId: string, propertyId: string, value: unknown): void {
     const viewColumn = this.getViewColumn(propertyId);
     if (viewColumn) {
       this.block.cells[rowId] = {
@@ -124,7 +124,7 @@ export class BlockQueryDataSource extends DataSourceBase {
     }
   }
 
-  cellGetValue(rowId: string, propertyId: string): unknown {
+  cellValueGet(rowId: string, propertyId: string): unknown {
     const viewColumn = this.getViewColumn(propertyId);
     if (viewColumn) {
       return this.block.cells[rowId]?.[propertyId];
@@ -185,28 +185,90 @@ export class BlockQueryDataSource extends DataSourceBase {
     return id;
   }
 
-  propertyChangeData(propertyId: string, data: Record<string, unknown>): void {
+  propertyDataGet(propertyId: string): Record<string, unknown> {
+    const viewColumn = this.getViewColumn(propertyId);
+    if (viewColumn) {
+      return viewColumn.data;
+    }
+    const property = this.getProperty(propertyId);
+    return (
+      property.getColumnData?.(this.blocks[0].model) ??
+      property.columnMeta.config.defaultData()
+    );
+  }
+
+  propertyDataSet(propertyId: string, data: Record<string, unknown>): void {
     const viewColumn = this.getViewColumn(propertyId);
     if (viewColumn) {
       viewColumn.data = data;
     }
   }
 
-  propertyChangeName(propertyId: string, name: string): void {
+  propertyDelete(_id: string): void {
+    const index = this.block.columns.findIndex(v => v.id === _id);
+    if (index >= 0) {
+      this.block.columns.splice(index, 1);
+    }
+  }
+
+  propertyDuplicate(_columnId: string): string {
+    throw new Error('Method not implemented.');
+  }
+
+  propertyMetaGet(type: string): ColumnMeta {
+    const meta = this.columnMetaMap.get(type);
+    if (meta) {
+      return meta;
+    }
+    return queryBlockAllColumnMap[type];
+  }
+
+  propertyNameGet(propertyId: string): string {
+    const viewColumn = this.getViewColumn(propertyId);
+    if (viewColumn) {
+      return viewColumn.name;
+    }
+    if (propertyId === 'type') {
+      return 'Block Type';
+    }
+    return this.getProperty(propertyId)?.name ?? '';
+  }
+
+  propertyNameSet(propertyId: string, name: string): void {
     const viewColumn = this.getViewColumn(propertyId);
     if (viewColumn) {
       viewColumn.name = name;
     }
   }
 
-  propertyChangeType(propertyId: string, toType: string): void {
+  override propertyReadonlyGet(propertyId: string): boolean {
+    const viewColumn = this.getViewColumn(propertyId);
+    if (viewColumn) {
+      return false;
+    }
+    if (propertyId === 'type') return true;
+    return this.getProperty(propertyId)?.set == null;
+  }
+
+  propertyTypeGet(propertyId: string): string {
+    const viewColumn = this.getViewColumn(propertyId);
+    if (viewColumn) {
+      return viewColumn.type;
+    }
+    if (propertyId === 'type') {
+      return 'image';
+    }
+    return this.getProperty(propertyId).columnMeta.type;
+  }
+
+  propertyTypeSet(propertyId: string, toType: string): void {
     const viewColumn = this.getViewColumn(propertyId);
     if (viewColumn) {
       const currentType = viewColumn.type;
       const currentData = viewColumn.data;
       const rows = this.rows$.value;
       const currentCells = rows.map(rowId =>
-        this.cellGetValue(rowId, propertyId)
+        this.cellValueGet(rowId, propertyId)
       );
       const convertFunction = databaseColumnConverts.find(
         v => v.from === currentType && v.to === toType
@@ -232,68 +294,6 @@ export class BlockQueryDataSource extends DataSourceBase {
         }
       });
     }
-  }
-
-  propertyDelete(_id: string): void {
-    const index = this.block.columns.findIndex(v => v.id === _id);
-    if (index >= 0) {
-      this.block.columns.splice(index, 1);
-    }
-  }
-
-  propertyDuplicate(_columnId: string): string {
-    throw new Error('Method not implemented.');
-  }
-
-  propertyGetData(propertyId: string): Record<string, unknown> {
-    const viewColumn = this.getViewColumn(propertyId);
-    if (viewColumn) {
-      return viewColumn.data;
-    }
-    const property = this.getProperty(propertyId);
-    return (
-      property.getColumnData?.(this.blocks[0].model) ??
-      property.columnMeta.config.defaultData()
-    );
-  }
-
-  propertyGetMeta(type: string): ColumnMeta {
-    const meta = this.columnMetaMap.get(type);
-    if (meta) {
-      return meta;
-    }
-    return queryBlockAllColumnMap[type];
-  }
-
-  propertyGetName(propertyId: string): string {
-    const viewColumn = this.getViewColumn(propertyId);
-    if (viewColumn) {
-      return viewColumn.name;
-    }
-    if (propertyId === 'type') {
-      return 'Block Type';
-    }
-    return this.getProperty(propertyId)?.name ?? '';
-  }
-
-  override propertyGetReadonly(propertyId: string): boolean {
-    const viewColumn = this.getViewColumn(propertyId);
-    if (viewColumn) {
-      return false;
-    }
-    if (propertyId === 'type') return true;
-    return this.getProperty(propertyId)?.set == null;
-  }
-
-  propertyGetType(propertyId: string): string {
-    const viewColumn = this.getViewColumn(propertyId);
-    if (viewColumn) {
-      return viewColumn.type;
-    }
-    if (propertyId === 'type') {
-      return 'image';
-    }
-    return this.getProperty(propertyId).columnMeta.type;
   }
 
   rowAdd(_insertPosition: InsertToPosition | number): string {

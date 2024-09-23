@@ -179,7 +179,7 @@ export abstract class SingleViewBase<
   vars$ = computed(() => {
     return this.columnsWithoutFilter$.value.map(id => {
       const v = this.columnGet(id);
-      const propertyMeta = this.dataSource.propertyGetMeta(v.type$.value);
+      const propertyMeta = this.dataSource.propertyMetaGet(v.type$.value);
       return {
         id: v.id,
         name: v.name$.value,
@@ -194,7 +194,7 @@ export abstract class SingleViewBase<
   });
 
   get allColumnMetas(): ColumnMeta[] {
-    return this.dataSource.addPropertyConfigList;
+    return this.dataSource.propertyMetas;
   }
 
   protected get dataSource() {
@@ -242,9 +242,9 @@ export abstract class SingleViewBase<
       return;
     }
     return this.dataSource
-      .propertyGetMeta(type)
+      .propertyMetaGet(type)
       .config.cellToJson(
-        this.dataSource.cellGetValue(rowId, columnId),
+        this.dataSource.cellValueGet(rowId, columnId),
         this.columnGetData(columnId)
       );
   }
@@ -256,9 +256,9 @@ export abstract class SingleViewBase<
     }
     return (
       this.dataSource
-        .propertyGetMeta(type)
+        .propertyMetaGet(type)
         .config.cellToString(
-          this.dataSource.cellGetValue(rowId, columnId),
+          this.dataSource.cellValueGet(rowId, columnId),
           this.columnGetData(columnId)
         ) ?? ''
     );
@@ -269,21 +269,21 @@ export abstract class SingleViewBase<
     if (!type) {
       return;
     }
-    const cellValue = this.dataSource.cellGetValue(rowId, columnId);
+    const cellValue = this.dataSource.cellValueGet(rowId, columnId);
     return (
       this.dataSource
-        .propertyGetMeta(type)
+        .propertyMetaGet(type)
         .config.formatValue?.(cellValue, this.columnGetData(columnId)) ??
       cellValue
     );
   }
 
   cellUpdateRenderValue(rowId: string, columnId: string, value: unknown): void {
-    this.dataSource.cellChangeValue(rowId, columnId, value);
+    this.dataSource.cellValueChange(rowId, columnId, value);
   }
 
   cellUpdateValue(rowId: string, columnId: string, value: unknown): void {
-    this.dataSource.cellChangeValue(rowId, columnId, value);
+    this.dataSource.cellValueChange(rowId, columnId, value);
   }
 
   columnAdd(position: InsertToPosition, type?: string): string {
@@ -307,7 +307,7 @@ export abstract class SingleViewBase<
   abstract columnGet(columnId: string): Column;
 
   columnGetData(columnId: string): Record<string, unknown> {
-    return this.dataSource.propertyGetData(columnId);
+    return this.dataSource.propertyDataGet(columnId);
   }
 
   columnGetDataType(columnId: string): TType | undefined {
@@ -316,7 +316,7 @@ export abstract class SingleViewBase<
       return;
     }
     return this.dataSource
-      .propertyGetMeta(type)
+      .propertyMetaGet(type)
       .config.type(this.columnGetData(columnId));
   }
 
@@ -331,11 +331,11 @@ export abstract class SingleViewBase<
   }
 
   columnGetMeta(type: string): ColumnMeta {
-    return this.dataSource.propertyGetMeta(type);
+    return this.dataSource.propertyMetaGet(type);
   }
 
   columnGetName(columnId: string): string {
-    return this.dataSource.propertyGetName(columnId);
+    return this.dataSource.propertyNameGet(columnId);
   }
 
   columnGetNextColumn(columnId: string): Column | undefined {
@@ -351,11 +351,11 @@ export abstract class SingleViewBase<
   }
 
   columnGetReadonly(columnId: string): boolean {
-    return this.dataSource.propertyGetReadonly(columnId);
+    return this.dataSource.propertyReadonlyGet(columnId);
   }
 
   columnGetType(columnId: string): string | undefined {
-    return this.dataSource.propertyGetType(columnId);
+    return this.dataSource.propertyTypeGet(columnId);
   }
 
   abstract columnMove(columnId: string, position: InsertToPosition): void;
@@ -367,23 +367,23 @@ export abstract class SingleViewBase<
     }
     return (
       this.dataSource
-        .propertyGetMeta(type)
+        .propertyMetaGet(type)
         .config.cellFromString(cellData, this.columnGetData(columnId)) ?? ''
     );
   }
 
   columnUpdateData(columnId: string, data: Record<string, unknown>): void {
-    this.dataSource.propertyChangeData(columnId, data);
+    this.dataSource.propertyDataSet(columnId, data);
   }
 
   abstract columnUpdateHide(columnId: string, hide: boolean): void;
 
   columnUpdateName(columnId: string, name: string): void {
-    this.dataSource.propertyChangeName(columnId, name);
+    this.dataSource.propertyNameSet(columnId, name);
   }
 
   columnUpdateType(columnId: string, type: string): void {
-    this.dataSource.propertyChangeType(columnId, type);
+    this.dataSource.propertyTypeSet(columnId, type);
   }
 
   delete(): void {
@@ -399,7 +399,7 @@ export abstract class SingleViewBase<
   }
 
   getIcon(type: string): UniComponent | undefined {
-    return this.dataSource.propertyGetMeta(type).renderer.icon;
+    return this.dataSource.propertyMetaGet(type).renderer.icon;
   }
 
   abstract isShow(rowId: string): boolean;

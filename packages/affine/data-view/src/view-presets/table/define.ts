@@ -42,7 +42,7 @@ export const tableViewModel = tableViewType.createModel<TableViewData>({
       },
       header: {
         titleColumn: viewManager.dataSource.properties$.value.find(
-          id => viewManager.dataSource.propertyGetType(id) === 'title'
+          id => viewManager.dataSource.propertyTypeGet(id) === 'title'
         ),
         iconColumn: 'type',
       },
