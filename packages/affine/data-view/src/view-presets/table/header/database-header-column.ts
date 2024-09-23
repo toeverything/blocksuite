@@ -26,7 +26,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
 
 import type { Property } from '../../../core/view-manager/property.js';
-import type { NumberColumnDataType } from '../../../property-presets/index.js';
+import type { NumberPropertyDataType } from '../../../property-presets/index.js';
 import type { TableColumn, TableSingleView } from '../table-view-manager.js';
 
 import { inputConfig, typeConfig } from '../../../core/common/column-menu.js';
@@ -347,7 +347,7 @@ export class DatabaseHeaderColumn extends SignalWatcher(
                             const data = (
                               this.column as Property<
                                 number,
-                                NumberColumnDataType
+                                NumberPropertyDataType
                               >
                             ).data$.value;
                             return {

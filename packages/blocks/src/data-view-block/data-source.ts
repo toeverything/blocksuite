@@ -7,6 +7,7 @@ import {
   type InsertToPosition,
 } from '@blocksuite/affine-shared/utils';
 import { DataSourceBase, type PropertyMetaConfig } from '@blocksuite/data-view';
+import { propertyPresets } from '@blocksuite/data-view/property-presets';
 import { assertExists, Slot } from '@blocksuite/global/utils';
 
 import type { BlockMeta } from './block-meta/base.js';

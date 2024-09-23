@@ -287,13 +287,13 @@ export class DatabaseBlockDataSource extends DataSourceBase {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       currentCells as any
     ) ?? {
-      column: databaseBlockAllColumnMap[toType].config.defaultData(),
+      property: databaseBlockAllColumnMap[toType].config.defaultData(),
       cells: currentCells.map(() => undefined),
     };
     this.doc.captureSync();
     updateColumn(this._model, propertyId, () => ({
       type: toType,
-      data: result.column,
+      data: result.property,
     }));
     const cells: Record<string, unknown> = {};
     currentCells.forEach((value, i) => {
