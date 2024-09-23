@@ -9,6 +9,7 @@ import type { InlineEditor } from '../inline-editor.js';
 import type { InlineRange, TextPoint } from '../types.js';
 import type { BaseTextAttributes } from '../utils/base-attributes.js';
 
+import { isInEmbedGap } from '../utils/embed.js';
 import { isMaybeInlineRangeEqual } from '../utils/inline-range.js';
 import {
   domRangeToInlineRange,
@@ -111,7 +112,7 @@ export class RangeService<TextAttributes extends BaseTextAttributes> {
         return null;
       }
 
-      for (const text of texts) {
+      for (const text of texts.filter(text => !isInEmbedGap(text))) {
         if (!text.textContent) {
           return null;
         }
