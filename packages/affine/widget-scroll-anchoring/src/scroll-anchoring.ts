@@ -163,9 +163,13 @@ export class AffineScrollAnchoringWidget extends WidgetComponent {
       return;
     }
 
-    blockComponent.scrollIntoView({
-      behavior: 'instant',
-      block: 'center',
+    // use `requestAnimationFrame` to better scroll to the target
+    // because sometimes it is impossible to scroll to the target
+    requestAnimationFrame(() => {
+      blockComponent.scrollIntoView({
+        behavior: 'instant',
+        block: 'center',
+      });
     });
 
     this.#listened = false;

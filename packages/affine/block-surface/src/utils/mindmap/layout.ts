@@ -1,11 +1,11 @@
-import type {
-  MindmapElementModel,
-  MindmapNode,
-  MindmapRoot,
-} from '@blocksuite/affine-model';
 import type { SerializedXYWH } from '@blocksuite/global/utils';
 
-import { LayoutType } from '@blocksuite/affine-model';
+import {
+  LayoutType,
+  type MindmapElementModel,
+  type MindmapNode,
+  type MindmapRoot,
+} from '@blocksuite/affine-model';
 import { Bound } from '@blocksuite/global/utils';
 
 export const NODE_VERTICAL_SPACING = 45;

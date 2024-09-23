@@ -11,7 +11,6 @@ import type { IBound } from '@blocksuite/global/utils';
 import {
   type ElementRenderer,
   elementRenderers,
-  MindmapUtils,
   type Overlay,
   type SurfaceBlockModel,
   type SurfaceContext,
@@ -267,12 +266,6 @@ export class EdgelessRootService extends RootService implements SurfaceContext {
       index: props.index ?? this.generateIndex(type),
     };
     const id = this._surface.addElement(nProps);
-
-    if (type === 'mindmap') {
-      const model = this._surface.getElementById(id) as MindmapElementModel;
-      model.setLayoutHandler(MindmapUtils.handleLayout);
-      model.layout();
-    }
     return id;
   }
 

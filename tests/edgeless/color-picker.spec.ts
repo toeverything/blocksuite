@@ -311,6 +311,18 @@ test.describe('basic functions', () => {
     await alphaInput.fill('-1');
     await expect(alphaInput).toHaveValue('1');
 
+    await alphaInput.pressSequentially('--1');
+    await expect(alphaInput).toHaveValue('1');
+
+    await alphaInput.pressSequentially('++1');
+    await expect(alphaInput).toHaveValue('1');
+
+    await alphaInput.pressSequentially('-+1');
+    await expect(alphaInput).toHaveValue('1');
+
+    await alphaInput.pressSequentially('+-1');
+    await expect(alphaInput).toHaveValue('1');
+
     await alphaInput.fill('23');
     await expect(alphaInput).toHaveValue('23');
   });
