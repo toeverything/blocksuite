@@ -1,3 +1,5 @@
+import type { BlockSuiteFlags } from '@blocksuite/global/types';
+
 import { AffineSchemas, TestUtils } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
 import {

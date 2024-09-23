@@ -1,6 +1,5 @@
 import type { SurfaceBlockModel } from '@blocksuite/affine-block-surface';
 
-import { MindmapUtils } from '@blocksuite/affine-block-surface';
 import {
   MindmapStyleFour,
   MindmapStyleOne,
@@ -164,11 +163,7 @@ export class MiniMindmapPreview extends WithDisposable(LitElement) {
       children: mindmapNode,
       style: this.mindmapStyle ?? MindmapStyle.FOUR,
     });
-    const mindmap = this.surface.getElementById(
-      this.mindmapId
-    ) as MindmapElementModel;
-    mindmap.setLayoutHandler(MindmapUtils.handleLayout);
-    mindmap.layout();
+    this.surface.getElementById(this.mindmapId) as MindmapElementModel;
 
     const centerPosition = this._mindmap?.tree.element.xywh;
 

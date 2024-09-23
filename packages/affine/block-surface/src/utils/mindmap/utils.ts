@@ -1,7 +1,7 @@
 import {
   applyNodeStyle,
   LayoutType,
-  type MindmapElementModel,
+  MindmapElementModel,
   type MindmapNode,
   type MindmapRoot,
   type MindmapStyle,
@@ -20,6 +20,12 @@ import { DocCollection } from '@blocksuite/store';
 import { ConnectorPathGenerator } from '../../managers/connector-manager.js';
 import { fitContent } from '../../renderer/elements/shape/utils.js';
 import { layout } from './layout.js';
+
+export class LayoutableMindmapElementModel extends MindmapElementModel {
+  override layout() {
+    handleLayout(this, this.tree, true, this.layoutType);
+  }
+}
 
 export function getHoveredArea(
   target: ShapeElementModel,
@@ -410,8 +416,7 @@ export function createFromTree(
     style,
   });
   const mindmap = surface.getElementById(mindmapId) as MindmapElementModel;
-  mindmap.setLayoutHandler(handleLayout);
-  mindmap.layout();
+  handleLayout(mindmap, mindmap.tree, true, mindmap.layoutType);
 
   return mindmap;
 }

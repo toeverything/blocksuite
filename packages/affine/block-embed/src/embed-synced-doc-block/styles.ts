@@ -36,9 +36,11 @@ export const blockStyles = css`
     border: 1px solid var(--affine-border-color);
   }
 
-  affine-embed-synced-doc-block[data-nested-editor]
+  affine-embed-synced-doc-block[data-nested-editor],
+  affine-embed-edgeless-synced-doc-block[data-nested-editor] {
     .affine-embed-synced-doc-container.page {
-    padding: 0 24px;
+      padding: 0 24px;
+    }
   }
 
   .affine-embed-synced-doc-editor {

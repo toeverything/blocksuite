@@ -160,7 +160,7 @@ export function createLitPortal({
 
   const visibility = portalRoot.style.visibility;
   portalRoot.style.visibility = 'hidden';
-  portalRoot.style.position = 'fixed';
+  portalRoot.style.position = 'absolute';
   portalRoot.style.left = '0';
   portalRoot.style.top = '0';
   portalRoot.style.zIndex = cssVar('zIndexPopover');

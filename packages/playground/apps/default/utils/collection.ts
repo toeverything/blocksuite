@@ -1,3 +1,5 @@
+import type { BlockSuiteFlags } from '@blocksuite/global/types';
+
 import { AffineSchemas } from '@blocksuite/blocks';
 import {
   DocCollection,
