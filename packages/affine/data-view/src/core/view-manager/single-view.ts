@@ -4,7 +4,6 @@ import { computed, type ReadonlySignal, signal } from '@preact/signals-core';
 
 import type { ColumnMeta } from '../column/column-config.js';
 import type { FilterGroup, Variable } from '../common/ast.js';
-import type { DetailSlots } from '../common/data-source/base.js';
 import type { DataViewContextKey } from '../common/data-source/context.js';
 import type { TType } from '../logical/typesystem.js';
 import type { DatabaseFlags } from '../types.js';
@@ -53,8 +52,6 @@ export interface SingleView<
   vars$: ReadonlySignal<Variable[]>;
 
   get allColumnMetas(): ColumnMeta[];
-
-  get detailSlots(): DetailSlots;
 
   featureFlags$: ReadonlySignal<DatabaseFlags>;
 
@@ -182,7 +179,7 @@ export abstract class SingleViewBase<
   vars$ = computed(() => {
     return this.columnsWithoutFilter$.value.map(id => {
       const v = this.columnGet(id);
-      const propertyMeta = this.dataSource.getPropertyMeta(v.type$.value);
+      const propertyMeta = this.dataSource.propertyGetMeta(v.type$.value);
       return {
         id: v.id,
         name: v.name$.value,
@@ -202,10 +199,6 @@ export abstract class SingleViewBase<
 
   protected get dataSource() {
     return this.viewManager.dataSource;
-  }
-
-  get detailSlots(): DetailSlots {
-    return this.dataSource.detailSlots;
   }
 
   get featureFlags$() {
@@ -249,7 +242,7 @@ export abstract class SingleViewBase<
       return;
     }
     return this.dataSource
-      .getPropertyMeta(type)
+      .propertyGetMeta(type)
       .config.cellToJson(
         this.dataSource.cellGetValue(rowId, columnId),
         this.columnGetData(columnId)
@@ -263,7 +256,7 @@ export abstract class SingleViewBase<
     }
     return (
       this.dataSource
-        .getPropertyMeta(type)
+        .propertyGetMeta(type)
         .config.cellToString(
           this.dataSource.cellGetValue(rowId, columnId),
           this.columnGetData(columnId)
@@ -279,7 +272,7 @@ export abstract class SingleViewBase<
     const cellValue = this.dataSource.cellGetValue(rowId, columnId);
     return (
       this.dataSource
-        .getPropertyMeta(type)
+        .propertyGetMeta(type)
         .config.formatValue?.(cellValue, this.columnGetData(columnId)) ??
       cellValue
     );
@@ -323,7 +316,7 @@ export abstract class SingleViewBase<
       return;
     }
     return this.dataSource
-      .getPropertyMeta(type)
+      .propertyGetMeta(type)
       .config.type(this.columnGetData(columnId));
   }
 
@@ -338,7 +331,7 @@ export abstract class SingleViewBase<
   }
 
   columnGetMeta(type: string): ColumnMeta {
-    return this.dataSource.getPropertyMeta(type);
+    return this.dataSource.propertyGetMeta(type);
   }
 
   columnGetName(columnId: string): string {
@@ -374,7 +367,7 @@ export abstract class SingleViewBase<
     }
     return (
       this.dataSource
-        .getPropertyMeta(type)
+        .propertyGetMeta(type)
         .config.cellFromString(cellData, this.columnGetData(columnId)) ?? ''
     );
   }
@@ -402,11 +395,11 @@ export abstract class SingleViewBase<
   }
 
   getContext<T>(key: DataViewContextKey<T>): T | undefined {
-    return this.dataSource.getContext(key);
+    return this.dataSource.contextGet(key);
   }
 
   getIcon(type: string): UniComponent | undefined {
-    return this.dataSource.getPropertyMeta(type).renderer.icon;
+    return this.dataSource.propertyGetMeta(type).renderer.icon;
   }
 
   abstract isShow(rowId: string): boolean;

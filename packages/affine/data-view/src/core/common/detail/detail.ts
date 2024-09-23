@@ -15,11 +15,19 @@ import { repeat } from 'lit/directives/repeat.js';
 import { html } from 'lit/static-html.js';
 
 import type { SingleView } from '../../view-manager/single-view.js';
-import type { DetailSlotProps, DetailSlots } from '../data-source/base.js';
+import type { DetailSlotProps } from '../data-source/base.js';
 
-import { renderUniLit } from '../../utils/uni-component/uni-component.js';
+import {
+  renderUniLit,
+  type UniComponent,
+} from '../../utils/uni-component/uni-component.js';
 import { dataViewCommonStyle } from '../css-variable.js';
 import { DetailSelection } from './selection.js';
+
+export interface DetailSlots {
+  header?: UniComponent<DetailSlotProps>;
+  note?: UniComponent<DetailSlotProps>;
+}
 
 const styles = css`
   ${unsafeCSS(dataViewCommonStyle('affine-data-view-record-detail'))}
@@ -66,6 +74,7 @@ const styles = css`
     width: 20px;
     height: 20px;
   }
+
   .switch-row {
     display: flex;
     align-items: center;
@@ -76,9 +85,11 @@ const styles = css`
     font-size: 22px;
     color: var(--affine-icon-color);
   }
+
   .switch-row:hover {
     background-color: var(--affine-hover-color);
   }
+
   .switch-row.disable {
     cursor: default;
     background: none;
@@ -110,8 +121,6 @@ export class RecordDetail extends SignalWatcher(
   columns$ = computed(() => {
     return this.view.detailColumns$.value.map(id => this.view.columnGet(id));
   });
-
-  detailSlots?: DetailSlots;
 
   selection = new DetailSelection(this);
 
@@ -152,7 +161,6 @@ export class RecordDetail extends SignalWatcher(
     });
     //FIXME: simulate as a widget
     this.dataset.widgetId = 'affine-detail-widget';
-    this.detailSlots = this.view.detailSlots;
   }
 
   hasNext() {
@@ -222,7 +230,7 @@ export class RecordDetail extends SignalWatcher(
           }
         )}
         ${!this.readonly
-          ? html`<div class="add-property" @click="${this._clickAddProperty}">
+          ? html` <div class="add-property" @click="${this._clickAddProperty}">
               <div class="icon">${PlusIcon()}</div>
               Add Property
             </div>`
@@ -235,6 +243,9 @@ export class RecordDetail extends SignalWatcher(
 
   @query('.add-property')
   accessor addPropertyButton!: HTMLElement;
+
+  @property({ attribute: false })
+  accessor detailSlots: DetailSlots | undefined;
 
   @property({ attribute: false })
   accessor rowId!: string;
@@ -251,10 +262,12 @@ declare global {
 export const createRecordDetail = (ops: {
   view: SingleView;
   rowId: string;
+  detail: DetailSlots;
 }) => {
-  return html`<affine-data-view-record-detail
+  return html` <affine-data-view-record-detail
     .view=${ops.view}
     .rowId=${ops.rowId}
+    .detailSlots=${ops.detail}
     class="data-view-popup-container"
   ></affine-data-view-record-detail>`;
 };

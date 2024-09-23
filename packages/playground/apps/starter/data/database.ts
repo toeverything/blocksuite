@@ -46,11 +46,10 @@ export const database: InitFn = (collection: DocCollection, id: string) => {
           const service = window.host.std.getService('affine:database');
           if (!service) return;
           service.initDatabaseBlock(
-            window.host,
             doc,
             model,
             databaseId,
-            viewPresets.tableViewMeta,
+            viewPresets.tableViewMeta.type,
             true
           );
           const database = doc.getBlockById(databaseId) as DatabaseBlockModel;
@@ -133,9 +132,8 @@ export const database: InitFn = (collection: DocCollection, id: string) => {
           doc.addBlock('affine:paragraph', {}, noteId);
           doc.addBlock('affine:paragraph', {}, noteId);
           service.databaseViewAddView(
-            window.host,
             database,
-            viewPresets.kanbanViewMeta
+            viewPresets.kanbanViewMeta.type
           );
 
           doc.resetHistory();

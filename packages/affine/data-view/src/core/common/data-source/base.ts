@@ -4,24 +4,16 @@ import type { ReadonlySignal } from '@preact/signals-core';
 import type { ColumnMeta } from '../../column/column-config.js';
 import type { TType } from '../../logical/index.js';
 import type { DatabaseFlags } from '../../types.js';
-import type { UniComponent } from '../../utils/uni-component/index.js';
 import type { ViewConvertConfig } from '../../view/convert.js';
 import type { DataViewDataType, ViewMeta } from '../../view/data-view.js';
 import type { SingleView } from '../../view-manager/single-view.js';
 import type { ViewManager } from '../../view-manager/view-manager.js';
 import type { DataViewContextKey } from './context.js';
 
-import { DEFAULT_COLUMN_WIDTH } from '../../../view-presets/table/consts.js';
-
 export type DetailSlotProps = {
   view: SingleView;
   rowId: string;
 };
-
-export interface DetailSlots {
-  header?: UniComponent<DetailSlotProps>;
-  note?: UniComponent<DetailSlotProps>;
-}
 
 export interface DataSource {
   viewConverts: ViewConvertConfig[];
@@ -40,8 +32,6 @@ export interface DataSource {
   rowDelete(ids: string[]): void;
 
   propertyGetName(propertyId: string): string;
-
-  propertyGetDefaultWidth(propertyId: string): number;
 
   propertyGetType(propertyId: string): string | undefined;
 
@@ -64,13 +54,12 @@ export interface DataSource {
   propertyDuplicate(columnId: string): string;
 
   featureFlags$: ReadonlySignal<DatabaseFlags>;
-  detailSlots: DetailSlots;
 
-  getPropertyMeta(type: string): ColumnMeta;
+  propertyGetMeta(type: string): ColumnMeta;
 
   rowMove(rowId: string, position: InsertToPosition): void;
 
-  getContext<T>(key: DataViewContextKey<T>): T | undefined;
+  contextGet<T>(key: DataViewContextKey<T>): T | undefined;
 
   viewManager: ViewManager;
 
@@ -119,10 +108,6 @@ export abstract class DataSourceBase implements DataSource {
 
   abstract viewMetas: ViewMeta[];
 
-  get detailSlots(): DetailSlots {
-    return {};
-  }
-
   abstract cellChangeValue(
     rowId: string,
     propertyId: string,
@@ -137,11 +122,9 @@ export abstract class DataSourceBase implements DataSource {
 
   abstract cellGetValue(rowId: string, propertyId: string): unknown;
 
-  getContext<T>(key: DataViewContextKey<T>): T | undefined {
+  contextGet<T>(key: DataViewContextKey<T>): T | undefined {
     return this.context.get(key) as T;
   }
-
-  abstract getPropertyMeta(type: string): ColumnMeta;
 
   abstract propertyAdd(
     insertToPosition: InsertToPosition,
@@ -165,9 +148,7 @@ export abstract class DataSourceBase implements DataSource {
 
   abstract propertyGetDataType(propertyId: string): TType | undefined;
 
-  propertyGetDefaultWidth(_propertyId: string): number {
-    return DEFAULT_COLUMN_WIDTH;
-  }
+  abstract propertyGetMeta(type: string): ColumnMeta;
 
   abstract propertyGetName(propertyId: string): string;
 
@@ -183,7 +164,7 @@ export abstract class DataSourceBase implements DataSource {
 
   abstract rowMove(rowId: string, position: InsertToPosition): void;
 
-  protected setContext<T>(key: DataViewContextKey<T>, value: T): void {
+  setContext<T>(key: DataViewContextKey<T>, value: T): void {
     this.context.set(key, value);
   }
 

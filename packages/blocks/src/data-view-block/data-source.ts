@@ -6,12 +6,7 @@ import {
   insertPositionToIndex,
   type InsertToPosition,
 } from '@blocksuite/affine-shared/utils';
-import {
-  type ColumnMeta,
-  createUniComponentFromWebComponent,
-  DataSourceBase,
-  type DetailSlots,
-} from '@blocksuite/data-view';
+import { type ColumnMeta, DataSourceBase } from '@blocksuite/data-view';
 import { columnPresets } from '@blocksuite/data-view/column-presets';
 import { assertExists, Slot } from '@blocksuite/global/utils';
 
@@ -22,7 +17,6 @@ import {
   databaseBlockAllColumnMap,
   databaseColumnConverts,
 } from '../database-block/columns/index.js';
-import { BlockRenderer } from '../database-block/detail-panel/block-renderer.js';
 import { blockMetaMap } from './block-meta/index.js';
 import { queryBlockAllColumnMap, queryBlockColumns } from './columns/index.js';
 
@@ -51,13 +45,6 @@ export class BlockQueryDataSource extends DataSourceBase {
 
   private get blocks() {
     return [...this.blockMap.values()];
-  }
-
-  override get detailSlots(): DetailSlots {
-    return {
-      ...super.detailSlots,
-      header: createUniComponentFromWebComponent(BlockRenderer),
-    };
   }
 
   get properties(): string[] {
@@ -147,14 +134,6 @@ export class BlockQueryDataSource extends DataSourceBase {
       return this.getProperty(propertyId)?.get(block.model);
     }
     return;
-  }
-
-  getPropertyMeta(type: string): ColumnMeta {
-    const meta = this.columnMetaMap.get(type);
-    if (meta) {
-      return meta;
-    }
-    return queryBlockAllColumnMap[type];
   }
 
   getViewColumn(id: string) {
@@ -278,11 +257,12 @@ export class BlockQueryDataSource extends DataSourceBase {
     );
   }
 
-  override propertyGetDefaultWidth(propertyId: string): number {
-    if (this.propertyGetType(propertyId) === 'title') {
-      return 260;
+  propertyGetMeta(type: string): ColumnMeta {
+    const meta = this.columnMetaMap.get(type);
+    if (meta) {
+      return meta;
     }
-    return super.propertyGetDefaultWidth(propertyId);
+    return queryBlockAllColumnMap[type];
   }
 
   propertyGetName(propertyId: string): string {

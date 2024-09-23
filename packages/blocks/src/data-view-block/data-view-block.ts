@@ -8,6 +8,8 @@ import {
 import { PeekViewProvider } from '@blocksuite/affine-components/peek';
 import { RANGE_SYNC_EXCLUDE_ATTR } from '@blocksuite/block-std';
 import {
+  createRecordDetail,
+  createUniComponentFromWebComponent,
   DatabaseSelection,
   type DataSource,
   DataView,
@@ -18,6 +20,7 @@ import {
   type DataViewWidgetProps,
   defineUniComponent,
   renderUniLit,
+  uniMap,
 } from '@blocksuite/data-view';
 import { widgetPresets } from '@blocksuite/data-view/widget-presets';
 import { Slice } from '@blocksuite/store';
@@ -28,6 +31,8 @@ import { html } from 'lit/static-html.js';
 import type { NoteBlockComponent } from '../note-block/index.js';
 import type { DataViewBlockModel } from './data-view-model.js';
 
+import { BlockRenderer } from '../database-block/detail-panel/block-renderer.js';
+import { NoteRenderer } from '../database-block/detail-panel/note-renderer.js';
 import {
   EdgelessRootBlockComponent,
   type RootService,
@@ -266,8 +271,28 @@ export class DataViewBlockComponent extends CaptionedBlockComponent<DataViewBloc
           headerWidget: this.headerWidget,
           std: this.std,
           detailPanelConfig: {
-            openDetailPanel: (target, template) => {
+            openDetailPanel: (target, data) => {
               if (peekViewService) {
+                const template = createRecordDetail({
+                  ...data,
+                  detail: {
+                    header: uniMap(
+                      createUniComponentFromWebComponent(BlockRenderer),
+                      props => ({
+                        ...props,
+                        host: this.host,
+                      })
+                    ),
+                    note: uniMap(
+                      createUniComponentFromWebComponent(NoteRenderer),
+                      props => ({
+                        ...props,
+                        model: this.model,
+                        host: this.host,
+                      })
+                    ),
+                  },
+                });
                 return peekViewService.peek(target, template);
               } else {
                 return Promise.resolve();

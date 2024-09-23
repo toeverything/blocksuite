@@ -7,14 +7,11 @@ import {
 } from '@blocksuite/affine-shared/utils';
 import {
   type ColumnMeta,
-  createUniComponentFromWebComponent,
   type DatabaseFlags,
   DataSourceBase,
   type DataViewDataType,
-  type DetailSlots,
   getTagColor,
   type TType,
-  uniMap,
   type ViewManager,
   ViewManagerBase,
   type ViewMeta,
@@ -31,9 +28,6 @@ import {
   databaseColumnConverts,
 } from './columns/index.js';
 import { titlePureColumnConfig } from './columns/title/define.js';
-import { HostContextKey } from './context/host-context.js';
-import { BlockRenderer } from './detail-panel/block-renderer.js';
-import { NoteRenderer } from './detail-panel/note-renderer.js';
 import {
   addColumn,
   applyCellsUpdate,
@@ -56,11 +50,6 @@ import {
   databaseBlockViewMap,
   databaseBlockViews,
 } from './views/index.js';
-
-export type DatabaseBlockDataSourceConfig = {
-  pageId: string;
-  blockId: string;
-};
 
 export class DatabaseBlockDataSource extends DataSourceBase {
   private _batch = 0;
@@ -104,37 +93,13 @@ export class DatabaseBlockDataSource extends DataSourceBase {
     return databaseBlockColumnList;
   }
 
-  override get detailSlots(): DetailSlots {
-    return {
-      ...super.detailSlots,
-      header: uniMap(
-        createUniComponentFromWebComponent(BlockRenderer),
-        props => ({
-          ...props,
-          host: this.host,
-        })
-      ),
-      note: uniMap(createUniComponentFromWebComponent(NoteRenderer), props => ({
-        ...props,
-        model: this._model,
-        host: this.host,
-      })),
-    };
-  }
-
   get doc() {
     return this._model.doc;
   }
 
-  constructor(
-    private host: EditorHost,
-    config: DatabaseBlockDataSourceConfig
-  ) {
+  constructor(model: DatabaseBlockModel) {
     super();
-    this._model = host.doc.collection
-      .getDoc(config.pageId)
-      ?.getBlockById(config.blockId) as DatabaseBlockModel;
-    this.setContext(HostContextKey, host);
+    this._model = model;
   }
 
   private _runCapture() {
@@ -166,7 +131,7 @@ export class DatabaseBlockDataSource extends DataSourceBase {
     this._runCapture();
 
     const type = this.propertyGetType(propertyId);
-    const update = this.getPropertyMeta(type).config.valueUpdate;
+    const update = this.propertyGetMeta(type).config.valueUpdate;
     let newValue = value;
     if (update) {
       const old = this.cellGetValue(rowId, propertyId);
@@ -202,10 +167,6 @@ export class DatabaseBlockDataSource extends DataSourceBase {
       return model?.text;
     }
     return getCell(this._model, rowId, propertyId)?.value;
-  }
-
-  getPropertyMeta(type: string): ColumnMeta {
-    return databaseBlockAllColumnMap[type];
   }
 
   propertyAdd(insertToPosition: InsertToPosition, type?: string): string {
@@ -313,15 +274,12 @@ export class DatabaseBlockDataSource extends DataSourceBase {
     if (!data) {
       return;
     }
-    const meta = this.getPropertyMeta(data.type);
+    const meta = this.propertyGetMeta(data.type);
     return meta.config.type(data);
   }
 
-  override propertyGetDefaultWidth(propertyId: string): number {
-    if (this.propertyGetType(propertyId) === 'title') {
-      return 260;
-    }
-    return super.propertyGetDefaultWidth(propertyId);
+  propertyGetMeta(type: string): ColumnMeta {
+    return databaseBlockAllColumnMap[type];
   }
 
   propertyGetName(propertyId: string): string {
@@ -419,44 +377,37 @@ export class DatabaseBlockDataSource extends DataSourceBase {
 }
 
 export const databaseViewAddView = (
-  host: EditorHost,
   model: DatabaseBlockModel,
-  viewMeta: ViewMeta
+  viewType: string
 ) => {
-  const dataSource = new DatabaseBlockDataSource(host, {
-    pageId: model.doc.id,
-    blockId: model.id,
-  });
-  dataSource.viewManager.viewAdd(viewMeta.type);
+  const dataSource = new DatabaseBlockDataSource(model);
+  dataSource.viewManager.viewAdd(viewType);
 };
 export const databaseViewInitEmpty = (
-  host: EditorHost,
   model: DatabaseBlockModel,
-  viewMeta: ViewMeta
+  viewType: string
 ) => {
   addColumn(
     model,
     'start',
     titlePureColumnConfig.create(titlePureColumnConfig.config.name)
   );
-  databaseViewAddView(host, model, viewMeta);
+  databaseViewAddView(model, viewType);
 };
 export const databaseViewInitConvert = (
-  host: EditorHost,
   model: DatabaseBlockModel,
-  viewMeta: ViewMeta
+  viewType: string
 ) => {
   addColumn(
     model,
     'end',
     columnPresets.multiSelectColumnConfig.create('Tag', { options: [] })
   );
-  databaseViewInitEmpty(host, model, viewMeta);
+  databaseViewInitEmpty(model, viewType);
 };
 export const databaseViewInitTemplate = (
-  host: EditorHost,
   model: DatabaseBlockModel,
-  viewMeta: ViewMeta
+  viewType: string
 ) => {
   const ids = [nanoid(), nanoid(), nanoid()];
   const statusId = addColumn(
@@ -495,9 +446,9 @@ export const databaseViewInitTemplate = (
       value: ids[i],
     });
   }
-  databaseViewInitEmpty(host, model, viewMeta);
+  databaseViewInitEmpty(model, viewType);
 };
-export const convertToDatabase = (host: EditorHost, viewMeta: ViewMeta) => {
+export const convertToDatabase = (host: EditorHost, viewType: string) => {
   const [_, ctx] = host.std.command
     .chain()
     .getSelectedModels({
@@ -526,7 +477,7 @@ export const convertToDatabase = (host: EditorHost, viewMeta: ViewMeta) => {
   if (!databaseModel) {
     return;
   }
-  databaseViewInitConvert(host, databaseModel, viewMeta);
+  databaseViewInitConvert(databaseModel, viewType);
   applyColumnUpdate(databaseModel);
   host.doc.moveBlocks(selectedModels, databaseModel);
 

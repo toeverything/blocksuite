@@ -4,7 +4,6 @@ import {
 } from '@blocksuite/affine-shared/utils';
 import { computed, type ReadonlySignal } from '@preact/signals-core';
 
-import type { TType } from '../../core/logical/typesystem.js';
 import type { ViewManager } from '../../core/view-manager/view-manager.js';
 import type { TableViewData } from './define.js';
 import type { StatCalcOpType } from './types.js';
@@ -15,13 +14,13 @@ import {
   GroupManager,
   sortByManually,
 } from '../../core/common/group-by/helper.js';
-import { groupByMatcher } from '../../core/common/group-by/matcher.js';
 import { evalFilter } from '../../core/logical/eval-filter.js';
 import { ColumnBase } from '../../core/view-manager/column.js';
 import {
   type SingleView,
   SingleViewBase,
 } from '../../core/view-manager/single-view.js';
+import { DEFAULT_COLUMN_WIDTH } from './consts.js';
 
 export class TableSingleView extends SingleViewBase<TableViewData> {
   private computedColumns$ = computed(() => {
@@ -182,14 +181,6 @@ export class TableSingleView extends SingleViewBase<TableViewData> {
     });
   }
 
-  checkGroup(columnId: string, type: TType, target: TType): boolean {
-    if (!groupByMatcher.isMatched(type, target)) {
-      this.changeGroup(columnId);
-      return false;
-    }
-    return true;
-  }
-
   columnGet(columnId: string): TableColumn {
     return new TableColumn(this, columnId);
   }
@@ -206,10 +197,15 @@ export class TableSingleView extends SingleViewBase<TableViewData> {
   }
 
   columnGetWidth(columnId: string): number {
-    return (
-      this.viewData$.value?.columns.find(v => v.id === columnId)?.width ??
-      this.dataSource.propertyGetDefaultWidth(columnId)
-    );
+    const column = this.viewData$.value?.columns.find(v => v.id === columnId);
+    if (column?.width != null) {
+      return column.width;
+    }
+    const type = this.columnGetType(columnId);
+    if (type === 'title') {
+      return 260;
+    }
+    return DEFAULT_COLUMN_WIDTH;
   }
 
   columnMove(columnId: string, toAfterOfColumn: InsertToPosition): void {
@@ -273,14 +269,6 @@ export class TableSingleView extends SingleViewBase<TableViewData> {
         ),
       };
     });
-  }
-
-  hasHeader(rowId: string): boolean {
-    return Object.values(this.header$).some(id => this.cellGetValue(rowId, id));
-  }
-
-  isInHeader(columnId: string) {
-    return Object.values(this.header$).some(v => v === columnId);
   }
 
   isShow(rowId: string): boolean {

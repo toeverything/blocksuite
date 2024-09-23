@@ -61,7 +61,7 @@ export const kanbanViewModel = kanbanViewType.createModel<KanbanViewData>({
     };
     const columnId = allowList.sort((a, b) => getWeight(b) - getWeight(a))[0];
     const type = viewManager.dataSource.propertyGetType(columnId);
-    const meta = type && viewManager.dataSource.getPropertyMeta(type);
+    const meta = type && viewManager.dataSource.propertyGetMeta(type);
     const data = viewManager.dataSource.propertyGetData(columnId);
     if (!columnId || !meta || !data) {
       throw new BlockSuiteError(

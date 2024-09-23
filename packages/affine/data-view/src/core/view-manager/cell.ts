@@ -44,7 +44,7 @@ export class CellBase<
   });
 
   meta$ = computed(() => {
-    return this.view.viewManager.dataSource.getPropertyMeta(
+    return this.view.viewManager.dataSource.propertyGetMeta(
       this.column.type$.value
     );
   });

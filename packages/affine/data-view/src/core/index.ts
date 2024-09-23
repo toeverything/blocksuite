@@ -1,5 +1,4 @@
 export * from './column/index.js';
-export type { DetailSlots } from './common/data-source/base.js';
 export { DataSourceBase } from './common/data-source/base.js';
 export * from './common/index.js';
 export { DataView } from './data-view.js';

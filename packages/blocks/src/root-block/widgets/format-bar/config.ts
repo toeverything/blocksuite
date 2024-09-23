@@ -146,7 +146,7 @@ export function toolbarDefaultConfig(toolbar: AffineFormatBarWidget) {
       icon: DatabaseTableViewIcon20,
       isActive: () => false,
       action: () => {
-        convertToDatabase(toolbar.host, tableViewMeta);
+        convertToDatabase(toolbar.host, tableViewMeta.type);
       },
       showWhen: chain => {
         const middleware = (count = 0) => {

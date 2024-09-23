@@ -528,9 +528,8 @@ export async function initEmptyDatabaseState(page: Page, rootId?: string) {
     const databaseService = databaseBlock?.service;
     if (databaseService) {
       databaseService.databaseViewInitEmpty(
-        window.host,
         model,
-        databaseService.viewPresets.tableViewMeta
+        databaseService.viewPresets.tableViewMeta.type
       );
       databaseService.applyColumnUpdate(model);
     }
@@ -600,9 +599,8 @@ export async function initKanbanViewState(
           });
         });
         databaseService.databaseViewInitEmpty(
-          window.host,
           model,
-          databaseService.viewPresets.kanbanViewMeta
+          databaseService.viewPresets.kanbanViewMeta.type
         );
         databaseService.applyColumnUpdate(model);
       }
@@ -640,9 +638,8 @@ export async function initEmptyDatabaseWithParagraphState(
     const databaseService = databaseBlock?.service;
     if (databaseService) {
       databaseService.databaseViewInitEmpty(
-        window.host,
         model,
-        databaseService.viewPresets.tableViewMeta
+        databaseService.viewPresets.tableViewMeta.type
       );
       databaseService.applyColumnUpdate(model);
     }

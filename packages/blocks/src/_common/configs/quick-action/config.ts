@@ -93,7 +93,7 @@ export const quickActionConfig: QuickActionConfig[] = [
       );
     },
     action: host => {
-      convertToDatabase(host, tableViewMeta);
+      convertToDatabase(host, tableViewMeta.type);
     },
   },
   {

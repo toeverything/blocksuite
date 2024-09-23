@@ -4,8 +4,8 @@ import {
   type DatabaseBlockModel,
   DatabaseBlockSchema,
 } from '@blocksuite/affine-model';
-import { BlockService, type EditorHost } from '@blocksuite/block-std';
-import { DatabaseSelection, type ViewMeta } from '@blocksuite/data-view';
+import { BlockService } from '@blocksuite/block-std';
+import { DatabaseSelection } from '@blocksuite/data-view';
 import { viewPresets } from '@blocksuite/data-view/view-presets';
 
 import {
@@ -38,11 +38,10 @@ export class DatabaseBlockService extends BlockService {
   viewPresets = viewPresets;
 
   initDatabaseBlock(
-    host: EditorHost,
     doc: Doc,
     model: BlockModel,
     databaseId: string,
-    viewMeta: ViewMeta,
+    viewType: string,
     isAppendNewRow = true
   ) {
     const blockModel = doc.getBlock(databaseId)?.model as
@@ -51,7 +50,7 @@ export class DatabaseBlockService extends BlockService {
     if (!blockModel) {
       return;
     }
-    databaseViewInitTemplate(host, blockModel, viewMeta);
+    databaseViewInitTemplate(blockModel, viewType);
     if (isAppendNewRow) {
       const parent = doc.getParent(model);
       if (!parent) return;
