@@ -131,14 +131,15 @@ export const extMimeMap = new Map(
   Array.from(mimeExtMap.entries()).map(([mime, ext]) => [ext, mime])
 );
 
+const getExt = (type: string) => {
+  if (type === '') return 'blob';
+  const ext = mimeExtMap.get(type);
+  if (ext) return ext;
+  const guessExt = type.split('/');
+  return guessExt.at(-1) ?? 'blob';
+};
+
 export function getAssetName(assets: Map<string, Blob>, blobId: string) {
-  const getExt = (type: string) => {
-    if (type === '') return 'blob';
-    const ext = mimeExtMap.get(type);
-    if (ext) return ext;
-    const exts = type.split('/');
-    return exts.at(-1) ?? 'blob';
-  };
   const blob = assets.get(blobId);
   if (!blob) {
     throw new BlockSuiteError(
@@ -146,10 +147,12 @@ export function getAssetName(assets: Map<string, Blob>, blobId: string) {
       `blob not found for blobId: ${blobId}`
     );
   }
-  const name = (blob as File).name ?? undefined;
-  const ext =
-    name !== undefined && name.includes('.')
-      ? name.split('.').at(-1)
-      : getExt(blob.type);
-  return `${name?.split('.').at(0) ?? blobId}.${ext}`;
+
+  const name =
+    'name' in blob && typeof blob.name === 'string' ? blob.name : undefined;
+  if (name) {
+    if (name.includes('.')) return name;
+    return `${name}.${getExt(blob.type)}`;
+  }
+  return `${blobId}.${getExt(blob.type)}`;
 }

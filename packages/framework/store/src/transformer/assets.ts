@@ -53,18 +53,34 @@ export class AssetsManager {
   }
 
   async readFromBlob(blobId: string) {
-    let blob = await this._blob.get(blobId);
+    if (this._assetsMap.has(blobId)) return;
+    const blob = await this._blob.get(blobId);
     if (!blob) {
       console.error(`Blob ${blobId} not found in blob manager`);
       return;
     }
-    const name = (blob as File).name;
-    if (name && this._names.has(name)) {
-      const newName = makeNewNameWhenConflict(this._names, name);
-      this._names.add(newName);
-      blob = new File([blob], newName, {
-        type: blob.type,
-      }) as Blob;
+    if (blob instanceof File) {
+      let file = blob;
+      if (this._names.has(blob.name)) {
+        const newName = makeNewNameWhenConflict(this._names, blob.name);
+        file = new File([blob], newName, { type: blob.type });
+      }
+      this._assetsMap.set(blobId, file);
+      this._names.add(file.name);
+      return;
+    }
+    if (blob.type && blob.type !== 'application/octet-stream') {
+      this._assetsMap.set(blobId, blob);
+      return;
+    }
+    // Guess the file type from the buffer
+    const buffer = await blob.arrayBuffer();
+    const FileType = await import('file-type');
+    const fileType = await FileType.fileTypeFromBuffer(buffer);
+    if (fileType) {
+      const file = new File([blob], '', { type: fileType.mime });
+      this._assetsMap.set(blobId, file);
+      return;
     }
     this._assetsMap.set(blobId, blob);
   }
@@ -74,7 +90,7 @@ export class AssetsManager {
     if (!blob) {
       throw new BlockSuiteError(
         ErrorCode.TransformerError,
-        'Blob ${blobId} not found in assets manager'
+        `Blob ${blobId} not found in assets manager`
       );
     }
 
