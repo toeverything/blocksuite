@@ -11,57 +11,39 @@ export interface Property<
   Value = unknown,
   Data extends Record<string, unknown> = Record<string, unknown>,
 > {
-  readonly view: SingleView;
-
   readonly id: string;
-
   readonly index: number;
-
-  readonly type$: ReadonlySignal<string>;
-
-  readonly dataType$: ReadonlySignal<TType>;
-
-  readonly name$: ReadonlySignal<string>;
-
-  readonly hide$: ReadonlySignal<boolean>;
-
+  readonly view: SingleView;
+  readonly isFirst: boolean;
+  readonly isLast: boolean;
+  readonly readonly$: ReadonlySignal<boolean>;
+  readonly renderer$: ReadonlySignal<CellRenderer | undefined>;
   readonly cells$: ReadonlySignal<Cell[]>;
+  readonly dataType$: ReadonlySignal<TType>;
+  readonly icon?: UniComponent;
+
+  readonly delete?: () => void;
+  readonly duplicate?: () => void;
 
   readonly data$: ReadonlySignal<Data>;
+  dataUpdate(updater: PropertyDataUpdater<Data>): void;
 
-  readonly readonly$: ReadonlySignal<boolean>;
+  readonly type$: ReadonlySignal<string>;
+  readonly typeSet?: (type: string) => void;
 
-  readonly renderer$: ReadonlySignal<CellRenderer | undefined>;
+  readonly name$: ReadonlySignal<string>;
+  nameSet(name: string): void;
 
-  readonly detailRenderer$: ReadonlySignal<CellRenderer | undefined>;
-
-  readonly isFirst: boolean;
-
-  readonly isLast: boolean;
+  readonly hide$: ReadonlySignal<boolean>;
+  hideSet(hide: boolean): void;
 
   cellGet(rowId: string): Cell<Value>;
 
-  stringValueGet(rowId: string): string;
-
   valueGet(rowId: string): Value | undefined;
-
   valueSet(rowId: string, value: Value | undefined): void;
 
+  stringValueGet(rowId: string): string;
   valueSetFromString(rowId: string, value: string): void;
-
-  dataUpdate(updater: PropertyDataUpdater<Data>): void;
-
-  hideSet(hide: boolean): void;
-
-  nameSet(name: string): void;
-
-  readonly typeSet?: (type: string) => void;
-
-  readonly delete?: () => void;
-
-  readonly duplicate?: () => void;
-
-  readonly icon?: UniComponent;
 }
 
 export abstract class PropertyBase<
@@ -79,13 +61,6 @@ export abstract class PropertyBase<
 
   dataType$ = computed(() => {
     return this.view.propertyDataTypeGet(this.id)!;
-  });
-
-  detailRenderer$ = computed(() => {
-    return (
-      this.view.propertyMetaGet(this.type$.value)?.renderer
-        .detailCellRenderer ?? this.renderer$.value
-    );
   });
 
   hide$ = computed(() => {

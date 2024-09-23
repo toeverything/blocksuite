@@ -13,7 +13,6 @@ export interface Renderer<
   type: string;
   icon?: UniComponent;
   cellRenderer: CellRenderer<Data, Value>;
-  detailCellRenderer?: CellRenderer<Data, Value>;
 }
 
 export const createFromBaseCellRenderer = <

@@ -8,19 +8,16 @@ export interface Cell<
   Value = unknown,
   Data extends Record<string, unknown> = Record<string, unknown>,
 > {
+  readonly rowId: string;
   readonly view: SingleView;
-
+  readonly row: Row;
   readonly propertyId: string;
   readonly property: Property<Value, Data>;
-
-  readonly rowId: string;
-  readonly row: Row;
-
   readonly isEmpty$: ReadonlySignal<boolean>;
-  readonly value$: ReadonlySignal<Value | undefined>;
   readonly stringValue$: ReadonlySignal<string>;
   readonly jsonValue$: ReadonlySignal<unknown>;
 
+  readonly value$: ReadonlySignal<Value | undefined>;
   valueSet(value: Value | undefined): void;
 }
 
