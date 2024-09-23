@@ -11,8 +11,8 @@ export interface Row {
 
 export class RowBase implements Row {
   cells$ = computed(() => {
-    return this.singleView.columns$.value.map(columnId => {
-      return new CellBase(this.singleView, columnId, this.rowId);
+    return this.singleView.propertyIds$.value.map(propertyId => {
+      return new CellBase(this.singleView, propertyId, this.rowId);
     });
   });
 

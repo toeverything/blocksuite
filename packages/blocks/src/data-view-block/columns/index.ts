@@ -1,19 +1,19 @@
-import type { ColumnMeta } from '@blocksuite/data-view';
+import type { PropertyMetaConfig } from '@blocksuite/data-view';
 
-import { columnPresets } from '@blocksuite/data-view/column-presets';
+import { propertyPresets } from '@blocksuite/data-view/property-presets';
 
-import { richTextColumnConfig } from '../../database-block/columns/rich-text/cell-renderer.js';
+import { richTextColumnConfig } from '../../database-block/properties/rich-text/cell-renderer.js';
 
 export const queryBlockColumns = [
-  columnPresets.dateColumnConfig,
-  columnPresets.numberColumnConfig,
-  columnPresets.progressColumnConfig,
-  columnPresets.selectColumnConfig,
-  columnPresets.multiSelectColumnConfig,
-  columnPresets.checkboxColumnConfig,
+  propertyPresets.datePropertyConfig,
+  propertyPresets.numberPropertyConfig,
+  propertyPresets.progressPropertyConfig,
+  propertyPresets.selectPropertyConfig,
+  propertyPresets.multiSelectPropertyConfig,
+  propertyPresets.checkboxPropertyConfig,
 ];
 export const queryBlockHiddenColumns = [richTextColumnConfig];
 const queryBlockAllColumns = [...queryBlockColumns, ...queryBlockHiddenColumns];
 export const queryBlockAllColumnMap = Object.fromEntries(
-  queryBlockAllColumns.map(v => [v.type, v as ColumnMeta])
+  queryBlockAllColumns.map(v => [v.type, v as PropertyMetaConfig])
 );

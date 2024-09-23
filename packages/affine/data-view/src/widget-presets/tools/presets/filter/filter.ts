@@ -38,7 +38,7 @@ export class DataViewHeaderToolsFilter extends WidgetBase {
   }
 
   private set _filter(filter: FilterGroup) {
-    this.view.updateFilter(filter);
+    this.view.filterSet(filter);
   }
 
   private get readonly() {

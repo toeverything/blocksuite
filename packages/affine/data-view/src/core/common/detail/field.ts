@@ -17,8 +17,8 @@ import { html } from 'lit/static-html.js';
 import type {
   CellRenderProps,
   DataViewCellLifeCycle,
-} from '../../column/index.js';
-import type { Column } from '../../view-manager/column.js';
+} from '../../property/index.js';
+import type { Property } from '../../view-manager/property.js';
 import type { SingleView } from '../../view-manager/single-view.js';
 
 import { renderUniLit } from '../../utils/uni-component/uni-component.js';
@@ -117,7 +117,7 @@ export class RecordField extends SignalWatcher(
   _clickLeft = (e: MouseEvent) => {
     if (this.readonly) return;
     const ele = e.currentTarget as HTMLElement;
-    const columns = this.view.detailColumns$.value;
+    const columns = this.view.detailProperties$.value;
     popMenu(ele, {
       options: {
         input: inputConfig(this.column),
@@ -152,7 +152,7 @@ export class RecordField extends SignalWatcher(
               if (!targetId) {
                 return;
               }
-              this.view.columnMove(this.column.id, {
+              this.view.propertyMove(this.column.id, {
                 id: targetId,
                 before: true,
               });
@@ -175,7 +175,7 @@ export class RecordField extends SignalWatcher(
               if (!targetId) {
                 return;
               }
-              this.view.columnMove(this.column.id, {
+              this.view.propertyMove(this.column.id, {
                 id: targetId,
                 before: false,
               });
@@ -263,7 +263,7 @@ export class RecordField extends SignalWatcher(
   }
 
   @property({ attribute: false })
-  accessor column!: Column;
+  accessor column!: Property;
 
   @state()
   accessor editing = false;

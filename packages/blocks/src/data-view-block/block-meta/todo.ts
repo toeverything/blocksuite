@@ -1,7 +1,7 @@
 import { type ListBlockModel, ListBlockSchema } from '@blocksuite/affine-model';
-import { columnPresets } from '@blocksuite/data-view/column-presets';
+import { propertyPresets } from '@blocksuite/data-view/property-presets';
 
-import { richTextColumnConfig } from '../../database-block/columns/rich-text/cell-renderer.js';
+import { richTextColumnConfig } from '../../database-block/properties/rich-text/cell-renderer.js';
 import { createBlockMeta } from './base.js';
 
 export const todoMeta = createBlockMeta<ListBlockModel>({
@@ -16,7 +16,7 @@ export const todoMeta = createBlockMeta<ListBlockModel>({
 todoMeta.addProperty({
   name: 'Content',
   key: 'todo-title',
-  columnMeta: richTextColumnConfig,
+  metaConfig: richTextColumnConfig,
   get: block => block.text.yText,
   set: (_block, _value) => {
     //
@@ -33,7 +33,7 @@ todoMeta.addProperty({
 todoMeta.addProperty({
   name: 'Checked',
   key: 'todo-checked',
-  columnMeta: columnPresets.checkboxColumnConfig,
+  metaConfig: propertyPresets.checkboxPropertyConfig,
   get: block => block.checked,
   set: (block, value) => {
     block.checked = value;
@@ -50,7 +50,7 @@ todoMeta.addProperty({
 todoMeta.addProperty({
   name: 'Source',
   key: 'todo-source',
-  columnMeta: columnPresets.textColumnConfig,
+  metaConfig: propertyPresets.textPropertyConfig,
   get: block => block.doc.meta?.title ?? '',
   updated: (block, callback) => {
     return block.doc.collection.meta.docMetaUpdated.on(() => {

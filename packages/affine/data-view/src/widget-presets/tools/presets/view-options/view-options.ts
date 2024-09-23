@@ -106,7 +106,7 @@ export const popViewOptions = (
       input: {
         initValue: view.name$.value,
         onComplete: text => {
-          view.updateName(text);
+          view.nameSet(text);
         },
       },
       items: [
@@ -121,17 +121,17 @@ export const popViewOptions = (
                 input: {
                   search: true,
                 },
-                items: view.viewManager.viewMetas.map(meta => {
+                items: view.manager.viewMetas.map(meta => {
                   return {
                     type: 'action',
                     name: meta.model.defaultName,
                     icon: renderUniLit(meta.renderer.icon),
                     isSelected:
-                      meta.type === view.viewManager.currentView$.value.type,
+                      meta.type === view.manager.currentView$.value.type,
                     select: () => {
                       console.log(meta.type);
-                      view.viewManager.viewChangeType(
-                        view.viewManager.currentViewId$.value,
+                      view.manager.viewChangeType(
+                        view.manager.currentViewId$.value,
                         meta.type
                       );
                     },
@@ -165,11 +165,11 @@ export const popViewOptions = (
             popFilterModal(target, {
               vars: view.vars$.value,
               value: view.filter$.value ?? emptyFilterGroup,
-              onChange: view.updateFilter.bind(view),
+              onChange: view.filterSet.bind(view),
               isRoot: true,
               onBack: reopen,
               onDelete: () => {
-                view.updateFilter({
+                view.filterSet({
                   ...(view.filter$.value ?? emptyFilterGroup),
                   conditions: [],
                 });
@@ -183,7 +183,7 @@ export const popViewOptions = (
           icon: GroupingIcon(),
           postfix: ArrowRightSmallIcon(),
           select: () => {
-            const groupBy = view.viewData$.value?.groupBy;
+            const groupBy = view.data$.value?.groupBy;
             if (!groupBy) {
               popSelectGroupByProperty(target, view);
             } else {

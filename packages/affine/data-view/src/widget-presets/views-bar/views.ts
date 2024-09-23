@@ -93,8 +93,8 @@ export class DataViewHeaderViews extends WidgetBase {
         return {
           type: 'action' as const,
           icon: html`<uni-lit .uni=${this.getRenderer(id).icon}></uni-lit>`,
-          name: view.viewData$.value?.name ?? '',
-          label: () => html`${view.viewData$.value?.name}`,
+          name: view.data$.value?.name ?? '',
+          label: () => html`${view.data$.value?.name}`,
           isSelected: this.viewManager.currentViewId$.value === id,
           select: () => {
             this.viewManager.setCurrentView(id);
@@ -141,9 +141,9 @@ export class DataViewHeaderViews extends WidgetBase {
     popMenu(target, {
       options: {
         input: {
-          initValue: view.viewData$.value?.name,
+          initValue: view.data$.value?.name,
           onComplete: text => {
-            view.viewDataUpdate(_data => ({
+            view.dataUpdate(_data => ({
               name: text,
             }));
           },

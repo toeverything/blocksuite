@@ -24,7 +24,7 @@ export class DataBaseColumnStats extends SignalWatcher(
   static override styles = styles;
 
   protected override render() {
-    const cols = this.view.columnManagerList$.value;
+    const cols = this.view.properties$.value;
 
     return html`
       <div class="affine-database-column-stats">

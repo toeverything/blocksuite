@@ -1,6 +1,6 @@
 import { computed, type ReadonlySignal } from '@preact/signals-core';
 
-import type { Column } from './column.js';
+import type { Property } from './property.js';
 import type { Row } from './row.js';
 import type { SingleView } from './single-view.js';
 
@@ -10,8 +10,8 @@ export interface Cell<
 > {
   view: SingleView;
 
-  columnId: string;
-  column: Column<Value, Data>;
+  propertyId: string;
+  property: Property<Value, Data>;
 
   rowId: string;
   row: Row;
@@ -31,37 +31,37 @@ export class CellBase<
   Data extends Record<string, unknown> = Record<string, unknown>,
 > implements Cell<Value, Data>
 {
-  column$ = computed(() => {
-    return this.view.columnGet(this.columnId) as Column<Value, Data>;
-  });
-
   isEmpty$: ReadonlySignal<boolean> = computed(() => {
     return this.meta$.value.config.isEmpty(this.value$.value);
   });
 
   jsonValue$: ReadonlySignal<unknown> = computed(() => {
-    return this.view.cellGetJsonValue(this.rowId, this.columnId);
+    return this.view.cellJsonValueGet(this.rowId, this.propertyId);
   });
 
   meta$ = computed(() => {
-    return this.view.viewManager.dataSource.propertyMetaGet(
-      this.column.type$.value
+    return this.view.manager.dataSource.propertyMetaGet(
+      this.property.type$.value
     );
   });
 
+  property$ = computed(() => {
+    return this.view.propertyGet(this.propertyId) as Property<Value, Data>;
+  });
+
   stringValue$: ReadonlySignal<string> = computed(() => {
-    return this.view.cellGetStringValue(this.rowId, this.columnId)!;
+    return this.view.cellStringValueGet(this.rowId, this.propertyId)!;
   });
 
   value$ = computed(() => {
-    return this.view.viewManager.dataSource.cellValueGet(
+    return this.view.manager.dataSource.cellValueGet(
       this.rowId,
-      this.columnId
+      this.propertyId
     ) as Value;
   });
 
-  get column(): Column<Value, Data> {
-    return this.column$.value;
+  get property(): Property<Value, Data> {
+    return this.property$.value;
   }
 
   get row(): Row {
@@ -70,7 +70,7 @@ export class CellBase<
 
   constructor(
     public view: SingleView,
-    public columnId: string,
+    public propertyId: string,
     public rowId: string
   ) {}
 
@@ -79,9 +79,9 @@ export class CellBase<
   }
 
   setValue(value: unknown | undefined): void {
-    this.view.viewManager.dataSource.cellValueChange(
+    this.view.manager.dataSource.cellValueChange(
       this.rowId,
-      this.columnId,
+      this.propertyId,
       value
     );
   }

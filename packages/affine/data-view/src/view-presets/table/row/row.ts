@@ -190,7 +190,7 @@ export class TableRow extends SignalWatcher(WithDisposable(ShadowlessElement)) {
             </div>
           </div>`}
       ${repeat(
-        view.columnManagerList$.value,
+        view.properties$.value,
         v => v.id,
         (column, i) => {
           const clickDetail = () => {
@@ -239,7 +239,7 @@ export class TableRow extends SignalWatcher(WithDisposable(ShadowlessElement)) {
               </affine-database-cell-container>
             </div>
             ${!column.readonly$.value &&
-            column.view.header$.value.titleColumn === column.id
+            column.view.mainProperties$.value.titleColumn === column.id
               ? html`<div class="row-ops show-on-hover-row">
                   <div class="row-op" @click="${clickDetail}">
                     ${CenterPeekIcon()}

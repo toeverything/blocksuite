@@ -5,12 +5,13 @@ import {
   type ParagraphType,
   type ViewBasicDataType,
 } from '@blocksuite/blocks';
-import { columnPresets } from '@blocksuite/data-view/column-presets';
 import { viewPresets } from '@blocksuite/data-view/view-presets';
 import { assertExists } from '@blocksuite/global/utils';
 import { type DocCollection, Text } from '@blocksuite/store';
 
 import type { InitFn } from './utils.js';
+
+import { propertyPresets } from '../../../../affine/data-view/src/property-presets';
 
 export const database: InitFn = (collection: DocCollection, id: string) => {
   const doc = collection.createDoc({ id });
@@ -62,12 +63,12 @@ export const database: InitFn = (collection: DocCollection, id: string) => {
             )
           );
           Object.values([
-            columnPresets.multiSelectColumnConfig,
-            columnPresets.dateColumnConfig,
-            columnPresets.numberColumnConfig,
+            propertyPresets.multiSelectPropertyConfig,
+            propertyPresets.datePropertyConfig,
+            propertyPresets.numberPropertyConfig,
             databaseBlockColumns.linkColumnConfig,
-            columnPresets.checkboxColumnConfig,
-            columnPresets.progressColumnConfig,
+            propertyPresets.checkboxPropertyConfig,
+            propertyPresets.progressPropertyConfig,
           ]).forEach(column => {
             service.addColumn(
               database,

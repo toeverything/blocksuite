@@ -21,7 +21,7 @@ export class DatabaseColumnHeader extends SignalWatcher(
 
   private _onAddColumn = (e: MouseEvent) => {
     if (this.readonly) return;
-    this.tableViewManager.columnAdd('end');
+    this.tableViewManager.propertyAdd('end');
     const ele = e.currentTarget as HTMLElement;
     requestAnimationFrame(() => {
       this.editLastColumnTitle();
@@ -91,7 +91,7 @@ export class DatabaseColumnHeader extends SignalWatcher(
           ? nothing
           : html`<div class="data-view-table-left-bar"></div>`}
         ${repeat(
-          this.tableViewManager.columnManagerList$.value,
+          this.tableViewManager.properties$.value,
           column => column.id,
           (column, index) => {
             const style = styleMap({

@@ -6,17 +6,17 @@ import {
   type InsertToPosition,
 } from '@blocksuite/affine-shared/utils';
 import {
-  type ColumnMeta,
   type DatabaseFlags,
   DataSourceBase,
   type DataViewDataType,
   getTagColor,
+  type PropertyMetaConfig,
   type TType,
   type ViewManager,
   ViewManagerBase,
   type ViewMeta,
 } from '@blocksuite/data-view';
-import { columnPresets } from '@blocksuite/data-view/column-presets';
+import { propertyPresets } from '@blocksuite/data-view/property-presets';
 import { assertExists } from '@blocksuite/global/utils';
 import { type BlockModel, nanoid, Text } from '@blocksuite/store';
 import { computed, type ReadonlySignal } from '@preact/signals-core';
@@ -26,8 +26,8 @@ import {
   databaseBlockAllColumnMap,
   databaseBlockColumnList,
   databaseColumnConverts,
-} from './columns/index.js';
-import { titlePureColumnConfig } from './columns/title/define.js';
+} from './properties/index.js';
+import { titlePureColumnConfig } from './properties/title/define.js';
 import {
   addColumn,
   applyCellsUpdate,
@@ -93,7 +93,7 @@ export class DatabaseBlockDataSource extends DataSourceBase {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  get propertyMetas(): ColumnMeta<any, any, any>[] {
+  get propertyMetas(): PropertyMetaConfig<any, any, any>[] {
     return databaseBlockColumnList;
   }
 
@@ -117,7 +117,7 @@ export class DatabaseBlockDataSource extends DataSourceBase {
     return this._model.children[this._model.childMap.value.get(rowId) ?? -1];
   }
 
-  private newColumnName() {
+  private newPropertyName() {
     let i = 1;
     while (
       this._model.columns$.value.some(column => column.name === `Column ${i}`)
@@ -175,8 +175,8 @@ export class DatabaseBlockDataSource extends DataSourceBase {
       this._model,
       insertToPosition,
       databaseBlockAllColumnMap[
-        type ?? columnPresets.multiSelectColumnConfig.type
-      ].create(this.newColumnName())
+        type ?? propertyPresets.multiSelectPropertyConfig.type
+      ].create(this.newPropertyName())
     );
     applyColumnUpdate(this._model);
     return result;
@@ -238,7 +238,7 @@ export class DatabaseBlockDataSource extends DataSourceBase {
     return id;
   }
 
-  propertyMetaGet(type: string): ColumnMeta {
+  propertyMetaGet(type: string): PropertyMetaConfig {
     return databaseBlockAllColumnMap[type];
   }
 
@@ -401,7 +401,7 @@ export const databaseViewInitConvert = (
   addColumn(
     model,
     'end',
-    columnPresets.multiSelectColumnConfig.create('Tag', { options: [] })
+    propertyPresets.multiSelectPropertyConfig.create('Tag', { options: [] })
   );
   databaseViewInitEmpty(model, viewType);
 };
@@ -413,7 +413,7 @@ export const databaseViewInitTemplate = (
   const statusId = addColumn(
     model,
     'end',
-    columnPresets.selectColumnConfig.create('Status', {
+    propertyPresets.selectPropertyConfig.create('Status', {
       options: [
         {
           id: ids[0],

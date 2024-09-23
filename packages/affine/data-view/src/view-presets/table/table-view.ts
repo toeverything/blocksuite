@@ -222,7 +222,7 @@ export class DataViewTable extends DataViewBase<
             onComplete: text => {
               const column = groupHelper.column$.value;
               if (column) {
-                column.updateData(
+                column.dataUpdate(
                   () => addGroup(text, column.data$.value) as never
                 );
               }

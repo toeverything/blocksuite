@@ -1,8 +1,8 @@
 import type { InsertToPosition } from '@blocksuite/affine-shared/utils';
 import type { ReadonlySignal } from '@preact/signals-core';
 
-import type { ColumnMeta } from '../../column/column-config.js';
 import type { TType } from '../../logical/index.js';
+import type { PropertyMetaConfig } from '../../property/property-config.js';
 import type { DatabaseFlags } from '../../types.js';
 import type { ViewConvertConfig } from '../../view/convert.js';
 import type { DataViewDataType, ViewMeta } from '../../view/data-view.js';
@@ -22,7 +22,7 @@ export interface DataSource {
   rowDelete(ids: string[]): void;
   rowMove(rowId: string, position: InsertToPosition): void;
 
-  propertyMetas: ColumnMeta[];
+  propertyMetas: PropertyMetaConfig[];
 
   propertyNameGet(propertyId: string): string;
   propertyNameSet(propertyId: string, name: string): void;
@@ -35,7 +35,7 @@ export interface DataSource {
 
   propertyDataTypeGet(propertyId: string): TType | undefined;
   propertyReadonlyGet(columnId: string): boolean;
-  propertyMetaGet(type: string): ColumnMeta;
+  propertyMetaGet(type: string): PropertyMetaConfig;
   propertyAdd(insertToPosition: InsertToPosition, type?: string): string;
   propertyDuplicate(columnId: string): string;
   propertyDelete(id: string): void;
@@ -67,7 +67,7 @@ export abstract class DataSourceBase implements DataSource {
 
   abstract properties$: ReadonlySignal<string[]>;
 
-  abstract propertyMetas: ColumnMeta[];
+  abstract propertyMetas: PropertyMetaConfig[];
 
   abstract readonly$: ReadonlySignal<boolean>;
 
@@ -121,7 +121,7 @@ export abstract class DataSourceBase implements DataSource {
 
   abstract propertyDuplicate(columnId: string): string;
 
-  abstract propertyMetaGet(type: string): ColumnMeta;
+  abstract propertyMetaGet(type: string): PropertyMetaConfig;
 
   abstract propertyNameGet(propertyId: string): string;
 

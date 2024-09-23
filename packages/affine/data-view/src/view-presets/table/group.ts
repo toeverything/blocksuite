@@ -61,7 +61,7 @@ export class TableGroup extends SignalWatcher(
     this.view.rowAdd('end', this.group?.key);
     requestAnimationFrame(() => {
       const selectionController = this.viewEle.selectionController;
-      const index = this.view.columnManagerList$.value.findIndex(
+      const index = this.view.properties$.value.findIndex(
         v => v.type$.value === 'title'
       );
       selectionController.selection = TableAreaSelection.create({
@@ -79,7 +79,7 @@ export class TableGroup extends SignalWatcher(
     this.view.rowAdd('start', this.group?.key);
     requestAnimationFrame(() => {
       const selectionController = this.viewEle.selectionController;
-      const index = this.view.columnManagerList$.value.findIndex(
+      const index = this.view.properties$.value.findIndex(
         v => v.type$.value === 'title'
       );
       selectionController.selection = TableAreaSelection.create({

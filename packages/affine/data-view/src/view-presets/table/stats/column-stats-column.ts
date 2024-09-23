@@ -72,7 +72,7 @@ export class DatabaseColumnStatsCell extends SignalWatcher(
   cellValues$ = computed(() => {
     if (this.group) {
       return this.group.rows.map(id => {
-        return this.column.getValue(id);
+        return this.column.valueGet(id);
       });
     }
     return this.column.cells$.value.map(cell => cell.value$.value);
@@ -142,7 +142,7 @@ export class DatabaseColumnStatsCell extends SignalWatcher(
   });
 
   statsResult$ = computed(() => {
-    const meta = this.column.view.columnGetMeta(this.column.type$.value);
+    const meta = this.column.view.propertyMetaGet(this.column.type$.value);
     if (!meta) {
       return null;
     }

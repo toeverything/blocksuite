@@ -2,9 +2,9 @@ import { WithDisposable } from '@blocksuite/global/utils';
 import { css, html, LitElement } from 'lit';
 import { property } from 'lit/decorators.js';
 
-import type { Column } from '../../../core/view-manager/column.js';
+import type { Property } from '../../../core/view-manager/property.js';
 
-import { formatNumber } from '../../../column-presets/number/utils/formatter.js';
+import { formatNumber } from '../../../property-presets/number/utils/formatter.js';
 
 const IncreaseDecimalPlacesIcon = html`
   <svg
@@ -89,14 +89,14 @@ export class DatabaseNumberFormatBar extends WithDisposable(LitElement) {
   `;
 
   private _decrementDecimalPlaces = () => {
-    this.column.updateData(data => ({
+    this.column.dataUpdate(data => ({
       decimal: Math.max(((data.decimal as number) ?? 0) - 1, 0),
     }));
     this.requestUpdate();
   };
 
   private _incrementDecimalPlaces = () => {
-    this.column.updateData(data => ({
+    this.column.dataUpdate(data => ({
       decimal: Math.min(((data.decimal as number) ?? 0) + 1, 8),
     }));
     this.requestUpdate();
@@ -135,7 +135,7 @@ export class DatabaseNumberFormatBar extends WithDisposable(LitElement) {
   }
 
   @property({ attribute: false })
-  accessor column!: Column;
+  accessor column!: Property;
 }
 
 declare global {

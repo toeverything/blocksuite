@@ -109,13 +109,13 @@ export class RecordDetail extends SignalWatcher(
   _clickAddProperty = () => {
     popFilterableSimpleMenu(
       this.addPropertyButton,
-      this.view.allColumnMetas.map(meta => {
+      this.view.propertyMetas.map(meta => {
         return {
           type: 'action',
           name: meta.config.name,
-          icon: renderUniLit(this.view.getIcon(meta.type)),
+          icon: renderUniLit(this.view.IconGet(meta.type)),
           select: () => {
-            this.view.columnAdd('end', meta.type);
+            this.view.propertyAdd('end', meta.type);
           },
         };
       })
@@ -123,7 +123,9 @@ export class RecordDetail extends SignalWatcher(
   };
 
   columns$ = computed(() => {
-    return this.view.detailColumns$.value.map(id => this.view.columnGet(id));
+    return this.view.detailProperties$.value.map(id =>
+      this.view.propertyGet(id)
+    );
   });
 
   selection = new DetailSelection(this);
@@ -168,15 +170,15 @@ export class RecordDetail extends SignalWatcher(
   }
 
   hasNext() {
-    return this.view.rowGetNext(this.rowId) != null;
+    return this.view.rowNextGet(this.rowId) != null;
   }
 
   hasPrev() {
-    return this.view.rowGetPrev(this.rowId) != null;
+    return this.view.rowPrevGet(this.rowId) != null;
   }
 
   nextRow() {
-    const rowId = this.view.rowGetNext(this.rowId);
+    const rowId = this.view.rowNextGet(this.rowId);
     if (rowId == null) {
       return;
     }
@@ -185,7 +187,7 @@ export class RecordDetail extends SignalWatcher(
   }
 
   prevRow() {
-    const rowId = this.view.rowGetPrev(this.rowId);
+    const rowId = this.view.rowPrevGet(this.rowId);
     if (rowId == null) {
       return;
     }

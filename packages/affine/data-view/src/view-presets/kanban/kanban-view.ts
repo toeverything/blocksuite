@@ -150,7 +150,7 @@ export class DataViewKanban extends DataViewBase<
             onComplete: text => {
               const column = this.groupManager.column$.value;
               if (column) {
-                column.updateData(
+                column.dataUpdate(
                   () => addGroup(text, column.data$.value) as never
                 );
               }

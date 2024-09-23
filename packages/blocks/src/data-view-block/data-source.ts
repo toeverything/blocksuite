@@ -6,8 +6,7 @@ import {
   insertPositionToIndex,
   type InsertToPosition,
 } from '@blocksuite/affine-shared/utils';
-import { type ColumnMeta, DataSourceBase } from '@blocksuite/data-view';
-import { columnPresets } from '@blocksuite/data-view/column-presets';
+import { DataSourceBase, type PropertyMetaConfig } from '@blocksuite/data-view';
 import { assertExists, Slot } from '@blocksuite/global/utils';
 
 import type { BlockMeta } from './block-meta/base.js';
@@ -16,7 +15,7 @@ import type { DataViewBlockModel } from './data-view-model.js';
 import {
   databaseBlockAllColumnMap,
   databaseColumnConverts,
-} from '../database-block/columns/index.js';
+} from '../database-block/properties/index.js';
 import { blockMetaMap } from './block-meta/index.js';
 import { queryBlockAllColumnMap, queryBlockColumns } from './columns/index.js';
 
@@ -27,7 +26,7 @@ export type BlockQueryDataSourceConfig = {
 // @ts-ignore
 export class BlockQueryDataSource extends DataSourceBase {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private columnMetaMap = new Map<string, ColumnMeta<any, any, any>>();
+  private columnMetaMap = new Map<string, PropertyMetaConfig<any, any, any>>();
 
   private meta: BlockMeta;
 
@@ -50,8 +49,8 @@ export class BlockQueryDataSource extends DataSourceBase {
     ];
   }
 
-  get propertyMetas(): ColumnMeta[] {
-    return queryBlockColumns as ColumnMeta[];
+  get propertyMetas(): PropertyMetaConfig[] {
+    return queryBlockColumns as PropertyMetaConfig[];
   }
 
   get rows(): string[] {
@@ -70,7 +69,7 @@ export class BlockQueryDataSource extends DataSourceBase {
     super();
     this.meta = blockMetaMap[config.type];
     for (const property of this.meta.properties) {
-      this.columnMetaMap.set(property.columnMeta.type, property.columnMeta);
+      this.columnMetaMap.set(property.metaConfig.type, property.metaConfig);
     }
     for (const collection of this.workspace.docs.values()) {
       for (const block of Object.values(collection.getDoc().blocks.peek())) {
@@ -164,7 +163,7 @@ export class BlockQueryDataSource extends DataSourceBase {
     const doc = this.block.doc;
     doc.captureSync();
     const column = databaseBlockAllColumnMap[
-      type ?? columnPresets.multiSelectColumnConfig.type
+      type ?? propertyPresets.multiSelectPropertyConfig.type
     ].create(this.newColumnName());
 
     const id = doc.generateBlockId();
@@ -193,7 +192,7 @@ export class BlockQueryDataSource extends DataSourceBase {
     const property = this.getProperty(propertyId);
     return (
       property.getColumnData?.(this.blocks[0].model) ??
-      property.columnMeta.config.defaultData()
+      property.metaConfig.config.defaultData()
     );
   }
 
@@ -215,7 +214,7 @@ export class BlockQueryDataSource extends DataSourceBase {
     throw new Error('Method not implemented.');
   }
 
-  propertyMetaGet(type: string): ColumnMeta {
+  propertyMetaGet(type: string): PropertyMetaConfig {
     const meta = this.columnMetaMap.get(type);
     if (meta) {
       return meta;
@@ -258,7 +257,7 @@ export class BlockQueryDataSource extends DataSourceBase {
     if (propertyId === 'type') {
       return 'image';
     }
-    return this.getProperty(propertyId).columnMeta.type;
+    return this.getProperty(propertyId).metaConfig.type;
   }
 
   propertyTypeSet(propertyId: string, toType: string): void {
@@ -279,12 +278,12 @@ export class BlockQueryDataSource extends DataSourceBase {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         currentCells as any
       ) ?? {
-        column: databaseBlockAllColumnMap[toType].config.defaultData(),
+        property: databaseBlockAllColumnMap[toType].config.defaultData(),
         cells: currentCells.map(() => undefined),
       };
       this.block.doc.captureSync();
       viewColumn.type = toType;
-      viewColumn.data = result.column;
+      viewColumn.data = result.property;
       currentCells.forEach((value, i) => {
         if (value != null || result.cells[i] != null) {
           this.block.cells[rows[i]] = {

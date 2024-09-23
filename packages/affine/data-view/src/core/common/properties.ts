@@ -12,7 +12,7 @@ import { classMap } from 'lit/directives/class-map.js';
 import { repeat } from 'lit/directives/repeat.js';
 import Sortable from 'sortablejs';
 
-import type { Column } from '../view-manager/column.js';
+import type { Property } from '../view-manager/property.js';
 import type { SingleView } from '../view-manager/single-view.js';
 
 export class DataViewPropertiesSettingView extends SignalWatcher(
@@ -134,19 +134,19 @@ export class DataViewPropertiesSettingView extends SignalWatcher(
   `;
 
   clickChangeAll = (allShow: boolean) => {
-    this.view.columnsWithoutFilter$.value.forEach(id => {
-      if (this.view.columnGetType(id) !== 'title') {
-        this.view.columnUpdateHide(id, allShow);
+    this.view.propertiesWithoutFilter$.value.forEach(id => {
+      if (this.view.propertyTypeGet(id) !== 'title') {
+        this.view.propertyHideSet(id, allShow);
       }
     });
   };
 
-  renderColumn = (column: Column) => {
+  renderColumn = (column: Property) => {
     const isTitle = column.type$.value === 'title';
     const icon = column.hide$.value ? InvisibleIcon() : ViewIcon();
     const changeVisible = () => {
       if (column.type$.value !== 'title') {
-        column.updateHide(!column.hide$.value);
+        column.hideSet(!column.hide$.value);
       }
     };
     const classList = classMap({
@@ -162,8 +162,8 @@ export class DataViewPropertiesSettingView extends SignalWatcher(
   };
 
   private itemsGroup() {
-    return this.view.columnsWithoutFilter$.value.map(id =>
-      this.view.columnGet(id)
+    return this.view.propertiesWithoutFilter$.value.map(id =>
+      this.view.propertyGet(id)
     );
   }
 
@@ -179,12 +179,12 @@ export class DataViewPropertiesSettingView extends SignalWatcher(
       animation: 150,
       group: `properties-sort-${this.view.id}`,
       onEnd: evt => {
-        const properties = [...this.view.columnsWithoutFilter$.value];
+        const properties = [...this.view.propertiesWithoutFilter$.value];
         const index = evt.oldIndex ?? -1;
         const from = properties[index];
         properties.splice(index, 1);
         const to = properties[evt.newIndex ?? -1];
-        this.view.columnMove(
+        this.view.propertyMove(
           from,
           to
             ? {

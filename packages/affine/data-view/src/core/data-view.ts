@@ -151,7 +151,7 @@ export class DataViewRenderer extends SignalWatcher(
     return keyed(
       viewData.view.id,
       renderUniLit(
-        viewData.view.viewMeta.renderer.view,
+        viewData.view.meta.renderer.view,
         { props },
         {
           ref: this._view,

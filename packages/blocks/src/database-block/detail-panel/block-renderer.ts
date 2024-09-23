@@ -139,12 +139,12 @@ export class BlockRenderer
   }
 
   renderIcon() {
-    const iconColumn = this.view.header$.value.iconColumn;
+    const iconColumn = this.view.mainProperties$.value.iconColumn;
     if (!iconColumn) {
       return;
     }
     return html` <div class="database-block-detail-header-icon">
-      ${this.view.cellGetValue(this.rowId, iconColumn)}
+      ${this.view.cellValueGet(this.rowId, iconColumn)}
     </div>`;
   }
 

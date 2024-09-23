@@ -39,8 +39,8 @@
   },
   "exports": {
     ".": "./src/index.ts",
-    "./column-presets": "./src/column-presets/index.ts",
-    "./column-pure-presets": "./src/column-presets/pure-index.ts",
+    "./property-presets": "./src/property-presets/index.ts",
+    "./property-pure-presets": "./src/property-presets/pure-index.ts",
     "./view-presets": "./src/view-presets/index.ts",
     "./widget-presets": "./src/widget-presets/index.ts",
     "./effects": "./src/effects.ts"
@@ -54,13 +54,13 @@
         "import": "./dist/index.js",
         "types": "./dist/index.d.ts"
       },
-      "./column-presets": {
-        "import": "./dist/column-presets/index.js",
-        "types": "./dist/column-presets/index.d.ts"
+      "./property-presets": {
+        "import": "./dist/property-presets/index.js",
+        "types": "./dist/property-presets/index.d.ts"
       },
-      "./column-pure-presets": {
-        "import": "./dist/column-presets/pure-index.js",
-        "types": "./dist/column-presets/pure-index.d.ts"
+      "./property-pure-presets": {
+        "import": "./dist/property-presets/pure-index.js",
+        "types": "./dist/property-presets/pure-index.d.ts"
       },
       "./view-presets": {
         "import": "./dist/view-presets/index.js",

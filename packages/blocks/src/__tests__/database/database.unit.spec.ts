@@ -9,7 +9,7 @@ import {
   ParagraphBlockSchema,
   RootBlockSchema,
 } from '@blocksuite/affine-model';
-import { columnModelPresets } from '@blocksuite/data-view/column-pure-presets';
+import { propertyModelPresets } from '@blocksuite/data-view/property-pure-presets';
 import { DocCollection, IdGeneratorType, Schema } from '@blocksuite/store';
 import { beforeEach, describe, expect, test } from 'vitest';
 
@@ -95,7 +95,7 @@ describe('DatabaseManager', () => {
     col2 = addColumn(
       db,
       'end',
-      columnModelPresets.selectColumnModelConfig.create('Single Select', {
+      propertyModelPresets.selectPropertyModelConfig.create('Single Select', {
         options: selection,
       })
     );
@@ -220,7 +220,7 @@ describe('DatabaseManager', () => {
     const newColId = addColumn(
       db,
       'end',
-      columnModelPresets.selectColumnModelConfig.create('Copied Select', {
+      propertyModelPresets.selectPropertyModelConfig.create('Copied Select', {
         options: selection,
       })
     );

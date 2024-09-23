@@ -1,5 +1,5 @@
-import type { ColumnMeta } from '../../column/column-config.js';
 import type { TType } from '../../logical/typesystem.js';
+import type { PropertyMetaConfig } from '../../property/property-config.js';
 
 export type StatsFunction = {
   group: string;
@@ -11,7 +11,7 @@ export type StatsFunction = {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     data: any[],
     info: {
-      meta: ColumnMeta;
+      meta: PropertyMetaConfig;
     }
   ) => string;
 };

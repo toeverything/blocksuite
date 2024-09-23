@@ -200,7 +200,7 @@ function getSelectedArea(
   const rows = groupKey
     ? view.groupManager.groupDataMap$.value?.[groupKey].rows
     : view.rows$.value;
-  const columns = view.columns$.value;
+  const columns = view.propertyIds$.value;
   if (!rows) {
     return;
   }
@@ -279,7 +279,7 @@ function pasteToCells(
       const columnId = targetContainer?.dataset.columnId;
 
       if (rowId && columnId) {
-        targetContainer?.column.setValueFromString(rowId, dataString);
+        targetContainer?.column.valueSetFromString(rowId, dataString);
       }
     }
   }

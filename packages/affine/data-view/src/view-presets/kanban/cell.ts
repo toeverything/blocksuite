@@ -10,8 +10,8 @@ import { html } from 'lit/static-html.js';
 import type {
   CellRenderProps,
   DataViewCellLifeCycle,
-} from '../../core/column/index.js';
-import type { Column } from '../../core/view-manager/column.js';
+} from '../../core/property/index.js';
+import type { Property } from '../../core/view-manager/property.js';
 import type { KanbanSingleView } from './kanban-view-manager.js';
 import type { KanbanViewSelection } from './types.js';
 
@@ -162,7 +162,7 @@ export class KanbanCell extends SignalWatcher(
   accessor cardId!: string;
 
   @property({ attribute: false })
-  accessor column!: Column;
+  accessor column!: Property;
 
   @property({ attribute: false })
   accessor contentOnly = false;
