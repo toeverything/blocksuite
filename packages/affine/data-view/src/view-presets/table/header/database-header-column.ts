@@ -85,7 +85,7 @@ export class DatabaseHeaderColumn extends SignalWatcher(
             isSelected: config.type === this.column.type$.value,
             icon: renderUniLit(this.tableViewManager.IconGet(config.type)),
             select: () => {
-              this.column.updateType?.(config.type);
+              this.column.typeSet?.(config.type);
             },
           };
         }),

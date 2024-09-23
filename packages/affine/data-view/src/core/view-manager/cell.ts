@@ -8,22 +8,20 @@ export interface Cell<
   Value = unknown,
   Data extends Record<string, unknown> = Record<string, unknown>,
 > {
-  view: SingleView;
+  readonly view: SingleView;
 
-  propertyId: string;
-  property: Property<Value, Data>;
+  readonly propertyId: string;
+  readonly property: Property<Value, Data>;
 
-  rowId: string;
-  row: Row;
+  readonly rowId: string;
+  readonly row: Row;
 
-  isEmpty$: ReadonlySignal<boolean>;
-  value$: ReadonlySignal<Value | undefined>;
-  stringValue$: ReadonlySignal<string>;
-  jsonValue$: ReadonlySignal<unknown>;
+  readonly isEmpty$: ReadonlySignal<boolean>;
+  readonly value$: ReadonlySignal<Value | undefined>;
+  readonly stringValue$: ReadonlySignal<string>;
+  readonly jsonValue$: ReadonlySignal<unknown>;
 
-  setValue(value: Value | undefined): void;
-
-  getExtra(): unknown;
+  valueSet(value: Value | undefined): void;
 }
 
 export class CellBase<
@@ -74,11 +72,7 @@ export class CellBase<
     public rowId: string
   ) {}
 
-  getExtra(): unknown {
-    return undefined;
-  }
-
-  setValue(value: unknown | undefined): void {
+  valueSet(value: unknown | undefined): void {
     this.view.manager.dataSource.cellValueChange(
       this.rowId,
       this.propertyId,

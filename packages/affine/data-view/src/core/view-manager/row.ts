@@ -5,8 +5,8 @@ import type { SingleView } from './single-view.js';
 import { type Cell, CellBase } from './cell.js';
 
 export interface Row {
-  cells$: ReadonlySignal<Cell[]>;
-  rowId: string;
+  readonly cells$: ReadonlySignal<Cell[]>;
+  readonly rowId: string;
 }
 
 export class RowBase implements Row {

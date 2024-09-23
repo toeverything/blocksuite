@@ -101,10 +101,10 @@ export function fillSelectionWithFocusCellData(
         } else {
           const newText = new DocCollection.Y.Text();
           newText.applyDelta(delta);
-          curCell.setValue(newText);
+          curCell.valueSet(newText);
         }
       } else {
-        curCell.setValue(focusData);
+        curCell.valueSet(focusData);
       }
     }
   }

@@ -14,8 +14,8 @@ import type { BlockMeta } from './block-meta/base.js';
 import type { DataViewBlockModel } from './data-view-model.js';
 
 import {
-  databaseBlockAllColumnMap,
-  databaseColumnConverts,
+  databaseBlockAllPropertyMap,
+  databasePropertyConverts,
 } from '../database-block/properties/index.js';
 import { blockMetaMap } from './block-meta/index.js';
 import { queryBlockAllColumnMap, queryBlockColumns } from './columns/index.js';
@@ -163,7 +163,7 @@ export class BlockQueryDataSource extends DataSourceBase {
   ): string {
     const doc = this.block.doc;
     doc.captureSync();
-    const column = databaseBlockAllColumnMap[
+    const column = databaseBlockAllPropertyMap[
       type ?? propertyPresets.multiSelectPropertyConfig.type
     ].create(this.newColumnName());
 
@@ -270,7 +270,7 @@ export class BlockQueryDataSource extends DataSourceBase {
       const currentCells = rows.map(rowId =>
         this.cellValueGet(rowId, propertyId)
       );
-      const convertFunction = databaseColumnConverts.find(
+      const convertFunction = databasePropertyConverts.find(
         v => v.from === currentType && v.to === toType
       )?.convert;
       const result = convertFunction?.(
@@ -279,7 +279,7 @@ export class BlockQueryDataSource extends DataSourceBase {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         currentCells as any
       ) ?? {
-        property: databaseBlockAllColumnMap[toType].config.defaultData(),
+        property: databaseBlockAllPropertyMap[toType].config.defaultData(),
         cells: currentCells.map(() => undefined),
       };
       this.block.doc.captureSync();

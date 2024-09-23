@@ -25,15 +25,15 @@ export const databaseBlockColumns = {
   linkColumnConfig,
   richTextColumnConfig,
 };
-export const databaseBlockColumnList = Object.values(databaseBlockColumns);
+export const databaseBlockPropertyList = Object.values(databaseBlockColumns);
 export const databaseBlockHiddenColumns = [
   propertyPresets.imagePropertyConfig,
   titleColumnConfig,
 ];
 const databaseBlockAllColumns = [
-  ...databaseBlockColumnList,
+  ...databaseBlockPropertyList,
   ...databaseBlockHiddenColumns,
 ];
-export const databaseBlockAllColumnMap = Object.fromEntries(
+export const databaseBlockAllPropertyMap = Object.fromEntries(
   databaseBlockAllColumns.map(v => [v.type, v as PropertyMetaConfig])
 );

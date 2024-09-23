@@ -14,8 +14,8 @@ import {
   databaseViewInitTemplate,
 } from './data-source.js';
 import {
-  addColumn,
-  applyColumnUpdate,
+  addProperty,
+  applyPropertyUpdate,
   updateCell,
   updateView,
 } from './utils.js';
@@ -23,9 +23,9 @@ import {
 export class DatabaseBlockService extends BlockService {
   static override readonly flavour = DatabaseBlockSchema.model.flavour;
 
-  addColumn = addColumn;
+  addColumn = addProperty;
 
-  applyColumnUpdate = applyColumnUpdate;
+  applyColumnUpdate = applyPropertyUpdate;
 
   databaseViewAddView = databaseViewAddView;
 
@@ -56,7 +56,7 @@ export class DatabaseBlockService extends BlockService {
       if (!parent) return;
       doc.addBlock('affine:paragraph', {}, parent.id);
     }
-    applyColumnUpdate(blockModel);
+    applyPropertyUpdate(blockModel);
   }
 
   override mounted(): void {

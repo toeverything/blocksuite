@@ -10,7 +10,7 @@ import { nanoid, Text } from '@blocksuite/store';
 
 import { richTextColumnModelConfig } from './rich-text/define.js';
 
-export const databaseColumnConverts = [
+export const databasePropertyConverts = [
   ...presetPropertyConverts,
   createPropertyConvert(
     richTextColumnModelConfig,

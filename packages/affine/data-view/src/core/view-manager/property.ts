@@ -55,7 +55,7 @@ export interface Property<
 
   nameSet(name: string): void;
 
-  readonly updateType?: (type: string) => void;
+  readonly typeSet?: (type: string) => void;
 
   readonly delete?: () => void;
 
@@ -140,7 +140,7 @@ export abstract class PropertyBase<
     );
   }
 
-  get updateType(): undefined | ((type: string) => void) {
+  get typeSet(): undefined | ((type: string) => void) {
     return type => this.view.propertyTypeSet(this.id, type);
   }
 
@@ -178,7 +178,7 @@ export abstract class PropertyBase<
   }
 
   valueSet(rowId: string, value: Value | undefined): void {
-    return this.cellGet(rowId).setValue(value);
+    return this.cellGet(rowId).valueSet(value);
   }
 
   valueSetFromString(rowId: string, value: string): void {

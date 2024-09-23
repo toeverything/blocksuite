@@ -23,26 +23,26 @@ import { computed, type ReadonlySignal } from '@preact/signals-core';
 
 import { getIcon } from './block-icons.js';
 import {
-  databaseBlockAllColumnMap,
-  databaseBlockColumnList,
-  databaseColumnConverts,
+  databaseBlockAllPropertyMap,
+  databaseBlockPropertyList,
+  databasePropertyConverts,
 } from './properties/index.js';
-import { titlePureColumnConfig } from './properties/title/define.js';
+import { titlePurePropertyConfig } from './properties/title/define.js';
 import {
-  addColumn,
+  addProperty,
   applyCellsUpdate,
-  applyColumnUpdate,
-  copyCellsByColumn,
+  applyPropertyUpdate,
+  copyCellsByProperty,
   deleteRows,
   deleteView,
   duplicateView,
-  findColumnIndex,
+  findPropertyIndex,
   getCell,
-  getColumn,
+  getProperty,
   moveViewTo,
   updateCell,
   updateCells,
-  updateColumn,
+  updateProperty,
   updateView,
 } from './utils.js';
 import {
@@ -94,7 +94,7 @@ export class DatabaseBlockDataSource extends DataSourceBase {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   get propertyMetas(): PropertyMetaConfig<any, any, any>[] {
-    return databaseBlockColumnList;
+    return databaseBlockPropertyList;
   }
 
   constructor(model: DatabaseBlockModel) {
@@ -171,14 +171,14 @@ export class DatabaseBlockDataSource extends DataSourceBase {
 
   propertyAdd(insertToPosition: InsertToPosition, type?: string): string {
     this.doc.captureSync();
-    const result = addColumn(
+    const result = addProperty(
       this._model,
       insertToPosition,
-      databaseBlockAllColumnMap[
+      databaseBlockAllPropertyMap[
         type ?? propertyPresets.multiSelectPropertyConfig.type
       ].create(this.newPropertyName())
     );
-    applyColumnUpdate(this._model);
+    applyPropertyUpdate(this._model);
     return result;
   }
 
@@ -191,8 +191,8 @@ export class DatabaseBlockDataSource extends DataSourceBase {
   propertyDataSet(propertyId: string, data: Record<string, unknown>): void {
     this._runCapture();
 
-    updateColumn(this._model, propertyId, () => ({ data }));
-    applyColumnUpdate(this._model);
+    updateProperty(this._model, propertyId, () => ({ data }));
+    applyPropertyUpdate(this._model);
   }
 
   propertyDataTypeGet(propertyId: string): TType | undefined {
@@ -206,7 +206,7 @@ export class DatabaseBlockDataSource extends DataSourceBase {
 
   propertyDelete(id: string): void {
     this.doc.captureSync();
-    const index = findColumnIndex(this._model, id);
+    const index = findPropertyIndex(this._model, id);
     if (index < 0) return;
 
     this.doc.transact(() => {
@@ -214,9 +214,9 @@ export class DatabaseBlockDataSource extends DataSourceBase {
     });
   }
 
-  propertyDuplicate(columnId: string): string {
+  propertyDuplicate(propertyId: string): string {
     this.doc.captureSync();
-    const currentSchema = getColumn(this._model, columnId);
+    const currentSchema = getProperty(this._model, propertyId);
     assertExists(currentSchema);
     const { id: copyId, ...nonIdProps } = currentSchema;
     const names = new Set(this._model.columns$.value.map(v => v.name));
@@ -225,21 +225,21 @@ export class DatabaseBlockDataSource extends DataSourceBase {
       index++;
     }
     const schema = { ...nonIdProps, name: `${nonIdProps.name}(${index})` };
-    const id = addColumn(
+    const id = addProperty(
       this._model,
       {
         before: false,
-        id: columnId,
+        id: propertyId,
       },
       schema
     );
-    copyCellsByColumn(this._model, copyId, id);
-    applyColumnUpdate(this._model);
+    copyCellsByProperty(this._model, copyId, id);
+    applyPropertyUpdate(this._model);
     return id;
   }
 
   propertyMetaGet(type: string): PropertyMetaConfig {
-    return databaseBlockAllColumnMap[type];
+    return databaseBlockAllPropertyMap[type];
   }
 
   propertyNameGet(propertyId: string): string {
@@ -253,8 +253,8 @@ export class DatabaseBlockDataSource extends DataSourceBase {
 
   propertyNameSet(propertyId: string, name: string): void {
     this.doc.captureSync();
-    updateColumn(this._model, propertyId, () => ({ name }));
-    applyColumnUpdate(this._model);
+    updateProperty(this._model, propertyId, () => ({ name }));
+    applyPropertyUpdate(this._model);
   }
 
   override propertyReadonlyGet(propertyId: string): boolean {
@@ -278,7 +278,7 @@ export class DatabaseBlockDataSource extends DataSourceBase {
     const currentCells = rows.map(rowId =>
       this.cellValueGet(rowId, propertyId)
     );
-    const convertFunction = databaseColumnConverts.find(
+    const convertFunction = databasePropertyConverts.find(
       v => v.from === currentType && v.to === toType
     )?.convert;
     const result = convertFunction?.(
@@ -287,11 +287,11 @@ export class DatabaseBlockDataSource extends DataSourceBase {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       currentCells as any
     ) ?? {
-      property: databaseBlockAllColumnMap[toType].config.defaultData(),
+      property: databaseBlockAllPropertyMap[toType].config.defaultData(),
       cells: currentCells.map(() => undefined),
     };
     this.doc.captureSync();
-    updateColumn(this._model, propertyId, () => ({
+    updateProperty(this._model, propertyId, () => ({
       type: toType,
       data: result.property,
     }));
@@ -302,7 +302,7 @@ export class DatabaseBlockDataSource extends DataSourceBase {
       }
     });
     updateCells(this._model, propertyId, cells);
-    applyColumnUpdate(this._model);
+    applyPropertyUpdate(this._model);
   }
 
   rowAdd(insertPosition: InsertToPosition | number): string {
@@ -387,10 +387,10 @@ export const databaseViewInitEmpty = (
   model: DatabaseBlockModel,
   viewType: string
 ) => {
-  addColumn(
+  addProperty(
     model,
     'start',
-    titlePureColumnConfig.create(titlePureColumnConfig.config.name)
+    titlePurePropertyConfig.create(titlePurePropertyConfig.config.name)
   );
   databaseViewAddView(model, viewType);
 };
@@ -398,7 +398,7 @@ export const databaseViewInitConvert = (
   model: DatabaseBlockModel,
   viewType: string
 ) => {
-  addColumn(
+  addProperty(
     model,
     'end',
     propertyPresets.multiSelectPropertyConfig.create('Tag', { options: [] })
@@ -410,7 +410,7 @@ export const databaseViewInitTemplate = (
   viewType: string
 ) => {
   const ids = [nanoid(), nanoid(), nanoid()];
-  const statusId = addColumn(
+  const statusId = addProperty(
     model,
     'end',
     propertyPresets.selectPropertyConfig.create('Status', {
@@ -478,7 +478,7 @@ export const convertToDatabase = (host: EditorHost, viewType: string) => {
     return;
   }
   databaseViewInitConvert(databaseModel, viewType);
-  applyColumnUpdate(databaseModel);
+  applyPropertyUpdate(databaseModel);
   host.doc.moveBlocks(selectedModels, databaseModel);
 
   const selectionManager = host.selection;

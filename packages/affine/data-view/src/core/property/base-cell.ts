@@ -86,7 +86,7 @@ export abstract class BaseCellRenderer<
   }
 
   onChange(value: Value | undefined): void {
-    this.cell.setValue(value);
+    this.cell.valueSet(value);
   }
 
   onCopy(_e: ClipboardEvent) {}

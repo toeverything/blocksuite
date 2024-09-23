@@ -27,7 +27,7 @@ export const typeConfig = (column: Property): NormalMenu => {
   return {
     type: 'sub-menu',
     name: 'Type',
-    hide: () => !column.updateType || column.type$.value === 'title',
+    hide: () => !column.typeSet || column.type$.value === 'title',
     postfix: html`<div
       class="affine-database-column-type-icon"
       style="color: var(--affine-text-secondary-color);gap:4px"
@@ -50,7 +50,7 @@ export const typeConfig = (column: Property): NormalMenu => {
             if (column.type$.value === config.type) {
               return;
             }
-            column.updateType?.(config.type);
+            column.typeSet?.(config.type);
           },
         };
       }),

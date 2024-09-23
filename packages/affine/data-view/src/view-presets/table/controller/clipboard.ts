@@ -42,7 +42,7 @@ export class TableClipboardController implements ReactiveController {
           deleteRows.push(row.row.rowId);
         } else {
           for (const cell of row.cells) {
-            cell.setValue(undefined);
+            cell.valueSet(undefined);
           }
         }
       }
