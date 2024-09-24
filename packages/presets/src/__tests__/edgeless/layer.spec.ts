@@ -3,18 +3,30 @@
 import type { BlockComponent } from '@blocksuite/block-std';
 import type {
   EdgelessRootBlockComponent,
+  GroupElementModel,
   NoteBlockModel,
 } from '@blocksuite/blocks';
 
 import { CommonUtils } from '@blocksuite/affine-block-surface';
-import { type BlockModel, DocCollection } from '@blocksuite/store';
+import { type BlockModel, type Doc, DocCollection } from '@blocksuite/store';
 import { beforeEach, describe, expect, test } from 'vitest';
 
 import { wait } from '../utils/common.js';
-import { addNote, getDocRootBlock, getSurface } from '../utils/edgeless.js';
+import {
+  addNote as _addNote,
+  getDocRootBlock,
+  getSurface,
+} from '../utils/edgeless.js';
 import { setupEditor } from '../utils/setup.js';
 
 let service!: EdgelessRootBlockComponent['service'];
+
+const addNote = (doc: Doc, props: Record<string, unknown> = {}) => {
+  return _addNote(doc, {
+    index: service.layer.generateIndex(),
+    ...props,
+  });
+};
 
 beforeEach(async () => {
   const cleanup = await setupEditor('edgeless');
@@ -26,22 +38,35 @@ beforeEach(async () => {
   };
 });
 
-test('layer manager inital state', () => {
+test('layer manager initial state', () => {
   expect(service.layer).toBeDefined();
   expect(service.layer.layers.length).toBe(0);
   expect(service.layer.canvasLayers.length).toBe(1);
 });
 
-test('add new edgeless blocks or canvas elements should update layer automatically', async () => {
-  addNote(doc);
+describe('add new edgeless blocks or canvas elements should update layer automatically', () => {
+  test('add note, note, shape sequentially', async () => {
+    addNote(doc);
+    addNote(doc);
+    service.addElement('shape', {
+      shapeType: 'rect',
+    });
 
-  service.addElement('shape', {
-    shapeType: 'rect',
+    await wait();
+
+    expect(service.layer.layers.length).toBe(2);
   });
 
-  await wait();
+  test('add note, shape, note sequentially', async () => {
+    addNote(doc);
+    service.addElement('shape', {
+      shapeType: 'rect',
+    });
+    addNote(doc);
+    await wait();
 
-  expect(service.layer.layers.length).toBe(2);
+    expect(service.layer.layers.length).toBe(3);
+  });
 });
 
 test('delete element should update layer automatically', () => {
@@ -88,29 +113,6 @@ test('change element should update layer automatically', async () => {
   );
 });
 
-test('new added block should be placed under the topmost canvas layer', async () => {
-  service.addElement('shape', {
-    shapeType: 'rect',
-  });
-  service.addElement('shape', {
-    shapeType: 'rect',
-  });
-  addNote(doc, {
-    index: service.layer.generateIndex('affine:note'),
-  });
-  addNote(doc, {
-    index: service.layer.generateIndex('affine:note'),
-  });
-  addNote(doc, {
-    index: service.layer.generateIndex('affine:note'),
-  });
-
-  await wait();
-
-  expect(service.layer.layers.length).toBe(2);
-  expect(service.layer.layers[1].type).toBe('canvas');
-});
-
 test('new added canvas elements should be placed in the topmost canvas layer', async () => {
   addNote(doc);
   service.addElement('shape', {
@@ -134,9 +136,7 @@ test('if the topmost layer is canvas layer, the length of canvasLayers array sho
   service.addElement('shape', {
     shapeType: 'rect',
   });
-  addNote(doc, {
-    index: service.layer.generateIndex('shape'),
-  });
+  addNote(doc);
   service.addElement('shape', {
     shapeType: 'rect',
   });
@@ -151,30 +151,20 @@ test('a new layer should be created in canvasLayers prop when the topmost layer 
   service.addElement('shape', {
     shapeType: 'rect',
   });
-  addNote(doc, {
-    index: service.layer.generateIndex('shape'),
-  });
+  addNote(doc);
   service.addElement('shape', {
     shapeType: 'rect',
   });
-  addNote(doc, {
-    index: service.layer.generateIndex('shape'),
-  });
+  addNote(doc);
 
   expect(service.layer.canvasLayers.length).toBe(3);
 });
 
 test('layer zindex should update correctly when elements changed', async () => {
-  addNote(doc, {
-    index: service.layer.generateIndex('affine:note'),
-  });
-  const noteId = addNote(doc, {
-    index: service.layer.generateIndex('affine:note'),
-  });
+  addNote(doc);
+  const noteId = addNote(doc);
   const note = service.getElementById(noteId);
-  addNote(doc, {
-    index: service.layer.generateIndex('affine:note'),
-  });
+  addNote(doc);
   service.addElement('shape', {
     shapeType: 'rect',
   });
@@ -230,20 +220,7 @@ test('layer zindex should update correctly when elements changed', async () => {
 });
 
 test('blocks should rerender when their z-index changed', async () => {
-  const blocks = [
-    addNote(doc, {
-      index: service.layer.generateIndex('affine:note'),
-    }),
-    addNote(doc, {
-      index: service.layer.generateIndex('affine:note'),
-    }),
-    addNote(doc, {
-      index: service.layer.generateIndex('affine:note'),
-    }),
-    addNote(doc, {
-      index: service.layer.generateIndex('affine:note'),
-    }),
-  ];
+  const blocks = [addNote(doc), addNote(doc), addNote(doc), addNote(doc)];
   const assertBlocksContent = () => {
     const blocks = Array.from(
       document.querySelectorAll(
@@ -281,15 +258,11 @@ describe('layer reorder functionality', () => {
       service.addElement('shape', {
         shapeType: 'rect',
       }),
-      addNote(doc, {
-        index: service.layer.generateIndex('shape'),
-      }),
+      addNote(doc),
       service.addElement('shape', {
         shapeType: 'rect',
       }),
-      addNote(doc, {
-        index: service.layer.generateIndex('shape'),
-      }),
+      addNote(doc),
     ];
   });
 
@@ -453,15 +426,11 @@ describe('group related functionality', () => {
       service.addElement('shape', {
         shapeType: 'rect',
       }),
-      addNote(doc, {
-        index: service.layer.generateIndex('shape'),
-      }),
+      addNote(doc),
       service.addElement('shape', {
         shapeType: 'rect',
       }),
-      addNote(doc, {
-        index: service.layer.generateIndex('shape'),
-      }),
+      addNote(doc),
       service.addElement('shape', {
         shapeType: 'rect',
       }),
@@ -527,15 +496,11 @@ describe('group related functionality', () => {
       service.addElement('shape', {
         shapeType: 'rect',
       }),
-      addNote(doc, {
-        index: service.layer.generateIndex('shape'),
-      }),
+      addNote(doc),
       service.addElement('shape', {
         shapeType: 'rect',
       }),
-      addNote(doc, {
-        index: service.layer.generateIndex('shape'),
-      }),
+      addNote(doc),
       service.addElement('shape', {
         shapeType: 'rect',
       }),
@@ -558,6 +523,46 @@ describe('group related functionality', () => {
     expect(service.layer.layers[1].type).toBe('canvas');
     expect(service.layer.layers[1].set.size).toBe(4);
     expect(service.layer.layers[1].elements[0]).toBe(group);
+  });
+
+  test('should keep relative index order of elements after group, ungroup, undo, redo', () => {
+    const edgeless = getDocRootBlock(doc, editor, 'edgeless');
+    const elementIds = [
+      service.addElement('shape', {
+        shapeType: 'rect',
+      }),
+      addNote(doc),
+      service.addElement('shape', {
+        shapeType: 'rect',
+      }),
+      addNote(doc),
+      service.addElement('shape', {
+        shapeType: 'rect',
+      }),
+    ];
+    service.doc.captureSync();
+    const elements = elementIds.map(id => service.getElementById(id)!);
+
+    const isKeptRelativeOrder = () => {
+      return elements.every((element, idx) => {
+        if (idx === 0) return true;
+        return elements[idx - 1].index < element.index;
+      });
+    };
+
+    expect(isKeptRelativeOrder()).toBeTruthy();
+
+    const groupId = createGroup(edgeless.service, elementIds);
+    expect(isKeptRelativeOrder()).toBeTruthy();
+
+    service.ungroup(service.getElementById(groupId) as GroupElementModel);
+    expect(isKeptRelativeOrder()).toBeTruthy();
+
+    service.doc.undo();
+    expect(isKeptRelativeOrder()).toBeTruthy();
+
+    service.doc.redo();
+    expect(isKeptRelativeOrder()).toBeTruthy();
   });
 });
 
@@ -590,9 +595,7 @@ describe('compare function', () => {
     const groupEl = service.getElementById(groupId)!;
     expect(service.layer.compare(groupEl, groupEl)).toBe(SORT_ORDER.SAME);
 
-    const noteId = addNote(doc, {
-      index: service.layer.generateIndex('affine:note'),
-    });
+    const noteId = addNote(doc);
     const note = service.getElementById(noteId)! as NoteBlockModel;
     expect(service.layer.compare(note, note)).toBe(SORT_ORDER.SAME);
   });
@@ -602,9 +605,7 @@ describe('compare function', () => {
       shapeType: 'rect',
     });
     const shapeEl = service.getElementById(shapeId)!;
-    const noteId = addNote(doc, {
-      index: service.layer.generateIndex('affine:note'),
-    });
+    const noteId = addNote(doc);
     const note = service.getElementById(noteId)! as NoteBlockModel;
     const groupId = createGroup(service, [shapeId, noteId]);
     const groupEl = service.getElementById(groupId)!;
@@ -624,14 +625,10 @@ describe('compare function', () => {
       shapeType: 'rect',
     });
     const shape2 = service.getElementById(shape2Id)!;
-    const note1Id = addNote(doc, {
-      index: service.layer.generateIndex('shape'),
-    });
+    const note1Id = addNote(doc);
 
     const note1 = service.getElementById(note1Id)! as NoteBlockModel;
-    const note2Id = addNote(doc, {
-      index: service.layer.generateIndex('shape'),
-    });
+    const note2Id = addNote(doc);
     const note2 = service.getElementById(note2Id)! as NoteBlockModel;
 
     expect(service.layer.compare(shape1, shape2)).toBe(SORT_ORDER.BEFORE);
@@ -654,12 +651,8 @@ describe('compare function', () => {
     const shape2Id = service.addElement('shape', {
       shapeType: 'rect',
     });
-    const note1Id = addNote(doc, {
-      index: service.layer.generateIndex('shape'),
-    });
-    const note2Id = addNote(doc, {
-      index: service.layer.generateIndex('shape'),
-    });
+    const note1Id = addNote(doc);
+    const note2Id = addNote(doc);
     const group1Id = createGroup(service, [
       shape1Id,
       shape2Id,
@@ -700,9 +693,7 @@ describe('compare function', () => {
     const groupAShapeId = service.addElement('shape', {
       shapeType: 'rect',
     });
-    const groupANoteId = addNote(doc, {
-      index: service.layer.generateIndex('shape'),
-    });
+    const groupANoteId = addNote(doc);
     const groupAId = createGroup(service, [
       createGroup(service, [groupAShapeId, groupANoteId]),
     ]);
@@ -713,9 +704,7 @@ describe('compare function', () => {
     const groupBShapeId = service.addElement('shape', {
       shapeType: 'rect',
     });
-    const groupBNoteId = addNote(doc, {
-      index: service.layer.generateIndex('shape'),
-    });
+    const groupBNoteId = addNote(doc);
     const groupBId = createGroup(service, [
       createGroup(service, [groupBShapeId, groupBNoteId]),
     ]);
@@ -776,9 +765,7 @@ test('indexed canvas should be inserted into edgeless portal when switch to edge
     shapeType: 'rect',
   });
 
-  addNote(doc, {
-    index: service.layer.generateIndex('shape'),
-  });
+  addNote(doc);
 
   await wait();
 
@@ -873,9 +860,7 @@ describe('index generator', () => {
     const shapeId = service.addElement('shape', {
       shapeType: 'rect',
     });
-    const noteId = addNote(doc, {
-      index: service.layer.generateIndex('affine:block'),
-    });
+    const noteId = addNote(doc);
 
     preinsertedShape = service.getElementById(
       shapeId
@@ -886,28 +871,15 @@ describe('index generator', () => {
   test('generator should remember the index it generated', () => {
     const generator = service.layer.createIndexGenerator();
 
-    const indexA = generator('shape');
-    const indexB = generator('shape');
-    const blockIndex = generator('affine:block');
+    const shape1 = generator();
+    const block1 = generator();
+    const shape2 = generator();
+    const block2 = generator();
 
-    expect(indexA > preinsertedShape.index).toBe(true);
-    expect(indexB).not.toBe(indexA);
-    expect(indexB > indexA).toBe(true);
-    expect(blockIndex > preinsertedNote.index).toBe(true);
-    expect(blockIndex < indexA).toBe(true);
-  });
-
-  test('generator can generate incrementing indices regardless the element type', () => {
-    const generator = service.layer.createIndexGenerator(true);
-
-    const indexA = generator('shape');
-    const indexB = generator('shape');
-    const blockIndexA = generator('affine:block');
-    const blockIndexB = generator('affine:block');
-
-    expect(indexA > preinsertedShape.index).toBe(true);
-    expect(indexB > indexA).toBe(true);
-    expect(blockIndexA > indexB).toBe(true);
-    expect(blockIndexB > blockIndexA).toBe(true);
+    expect(block2 > shape2).toBeTruthy();
+    expect(shape2 > block1).toBeTruthy();
+    expect(block1 > shape1).toBeTruthy();
+    expect(shape1 > preinsertedNote.index).toBeTruthy();
+    expect(shape1 > preinsertedShape.index).toBeTruthy();
   });
 });

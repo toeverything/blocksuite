@@ -227,7 +227,7 @@ export const createStickerMiddleware = (
 };
 
 export const createRegenerateIndexMiddleware = (
-  generateIndex: (type: string) => string
+  generateIndex: () => string
 ) => {
   return (job: TemplateJob) => {
     job.slots.beforeInsert.on(blockData => {
@@ -309,11 +309,11 @@ export const createRegenerateIndexMiddleware = (
       frameList.sort((a, b) => sortIndex(a, b, groupIndexMap));
 
       frameList.forEach(index => {
-        indexMap.set(index.id, generateIndex('affine:frame'));
+        indexMap.set(index.id, generateIndex());
       });
 
       indexList.forEach(index => {
-        indexMap.set(index.id, generateIndex(index.flavour));
+        indexMap.set(index.id, generateIndex());
       });
     };
     const resetIndex = (blockJson: BlockSnapshot) => {

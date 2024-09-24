@@ -154,6 +154,7 @@ test.describe('group', () => {
       await assertSelectedBound(page, [100, 0, 100, 100]);
     });
   });
+
   test.describe('delete', () => {
     test.beforeEach(async ({ page }) => {
       await init(page);

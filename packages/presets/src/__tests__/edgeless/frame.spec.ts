@@ -71,11 +71,11 @@ describe('frame', () => {
   test('frame should always be placed under the bottom of other blocks', async () => {
     addNote(doc, {
       xywh: '[0,0,300,300]',
-      index: service.layer.generateIndex('affine:note'),
+      index: service.layer.generateIndex(),
     });
     addNote(doc, {
       xywh: '[100,100,300,300]',
-      index: service.layer.generateIndex('affine:note'),
+      index: service.layer.generateIndex(),
     });
     const frameId = service.doc.addBlock(
       'affine:frame',

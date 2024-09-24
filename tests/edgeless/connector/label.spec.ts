@@ -313,18 +313,21 @@ test.describe('connector label with straight shape', () => {
     await page.mouse.click(105, 200);
 
     await page.keyboard.press('Enter');
+    await waitNextFrame(page);
     await type(page, ' a ');
     await assertEdgelessCanvasText(page, ' a ');
 
     await page.keyboard.press(`${SHORT_KEY}+Enter`);
 
     await page.keyboard.press('Enter');
+    await waitNextFrame(page);
     await type(page, 'b');
     await assertEdgelessCanvasText(page, 'b');
 
     await page.keyboard.press('Escape');
 
     await page.keyboard.press('Enter');
+    await waitNextFrame(page);
     await type(page, 'c');
     await assertEdgelessCanvasText(page, 'c');
   });

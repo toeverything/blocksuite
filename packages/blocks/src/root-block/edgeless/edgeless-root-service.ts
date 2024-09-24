@@ -249,7 +249,7 @@ export class EdgelessRootService extends RootService implements SurfaceContext {
 
     const nProps = {
       ...props,
-      index: this.generateIndex(flavour),
+      index: this.generateIndex(),
     };
     return this.doc.addBlock(flavour as never, nProps, parent, parentIndex);
   }
@@ -263,7 +263,7 @@ export class EdgelessRootService extends RootService implements SurfaceContext {
     const nProps = {
       ...props,
       type,
-      index: props.index ?? this.generateIndex(type),
+      index: props.index ?? this.generateIndex(),
     };
     const id = this._surface.addElement(nProps);
     return id;
@@ -341,17 +341,15 @@ export class EdgelessRootService extends RootService implements SurfaceContext {
         middlewares.push(createInsertPlaceMiddleware(currentContentBound));
       }
 
-      const idxGenerator = this.layer.createIndexGenerator(true);
+      const idxGenerator = this.layer.createIndexGenerator();
 
-      middlewares.push(
-        createRegenerateIndexMiddleware((type: string) => idxGenerator(type))
-      );
+      middlewares.push(createRegenerateIndexMiddleware(() => idxGenerator()));
     }
 
     if (type === 'sticker') {
       middlewares.push(
         createStickerMiddleware(this.viewport.center, () =>
-          this.layer.generateIndex('affine:image')
+          this.layer.generateIndex()
         )
       );
     }
@@ -365,8 +363,8 @@ export class EdgelessRootService extends RootService implements SurfaceContext {
     });
   }
 
-  generateIndex(type: string) {
-    return this.layer.generateIndex(type);
+  generateIndex() {
+    return this.layer.generateIndex();
   }
 
   getConnectors(element: BlockSuite.EdgelessModel | string) {
@@ -541,12 +539,14 @@ export class EdgelessRootService extends RootService implements SurfaceContext {
       group.removeChild(element.id);
     });
 
-    elements.forEach(element => {
-      // @ts-ignore
-      const elementType = element.type || element.flavour;
-
-      element.index = this.generateIndex(elementType);
-    });
+    // keep relative index order of group children after ungroup
+    elements
+      .sort((a, b) => this.layer.compare(a, b))
+      .forEach(element => {
+        this.doc.transact(() => {
+          element.index = this.layer.generateIndex();
+        });
+      });
 
     if (parent !== null) {
       elements.forEach(element => {

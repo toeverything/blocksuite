@@ -28,24 +28,26 @@ describe('basic', () => {
     service = edgelessRoot.service;
 
     noteAId = addNote(doc, {
-      index: service.generateIndex('affine:note'),
+      index: service.generateIndex(),
     });
     shapeAId = service.addElement('shape', {
       type: 'rect',
       xywh: '[0, 0, 100, 100]',
+      index: service.generateIndex(),
     });
     noteBId = addNote(doc, {
-      // force to be the last note
-      index: service.generateIndex('shape'),
+      index: service.generateIndex(),
     });
     shapeBId = service.addElement('shape', {
       type: 'rect',
       xywh: '[100, 0, 100, 100]',
+      index: service.generateIndex(),
     });
     frameId = service.addBlock(
       'affine:frame',
       {
         xywh: '[0, 0, 800, 200]',
+        index: service.generateIndex(),
       },
       service.surface.id
     );
@@ -114,7 +116,7 @@ describe('basic', () => {
     ) as HTMLCanvasElement[];
 
     expect(refBlocks.length).toBe(2);
-    expect(stackingCanvas.length).toBe(1);
+    expect(stackingCanvas.length).toBe(2);
     expect(stackingCanvas[0].style.zIndex > refBlocks[0].style.zIndex).toBe(
       true
     );

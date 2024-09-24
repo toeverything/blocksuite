@@ -5,7 +5,6 @@ import {
   Bound,
   DisposableGroup,
   last,
-  nToLast,
   Slot,
 } from '@blocksuite/global/utils';
 import { generateKeyBetween } from 'fractional-indexing';
@@ -536,26 +535,26 @@ export class LayerManager {
 
   add(element: GfxModel) {
     const modelType = this._getModelType(element);
-    const isGroup = isGfxContainerElm(element);
+    const isContainer = isGfxContainerElm(element);
 
-    if (modelType === 'canvas') {
-      if (isGroup) {
-        (element as GfxContainerElement).childElements.forEach(child => {
-          if (child && this._getModelType(child) === 'canvas') {
-            removeFromOrderedArray(this.canvasElements, child);
-          }
-        });
-      }
-      insertToOrderedArray(this.canvasElements, element);
-    } else {
-      insertToOrderedArray(this.blocks, element);
+    if (isContainer) {
+      element.childElements.forEach(child => {
+        const childModelType = this._getModelType(child);
+        removeFromOrderedArray(
+          childModelType === 'canvas' ? this.canvasElements : this.blocks,
+          child
+        );
+      });
     }
 
+    insertToOrderedArray(
+      modelType === 'canvas' ? this.canvasElements : this.blocks,
+      element
+    );
     this._insertIntoLayer(element as GfxModel, modelType);
-    if (isGroup) {
-      (element as GfxContainerElement).childElements.forEach(
-        child => child && this._updateLayer(child)
-      );
+
+    if (isContainer) {
+      element.childElements.forEach(child => child && this._updateLayer(child));
     }
     this._buildCanvasLayers();
     this.slots.layerUpdated.emit({
@@ -580,32 +579,20 @@ export class LayerManager {
    *
    * @note The generator cannot work with `group` element.
    *
-   * @param ignoreRule If true, the generator will not distinguish between `block` and `canvas` elements.
    * @returns
    */
-  createIndexGenerator(ignoreRule: boolean = false) {
+  createIndexGenerator() {
     const manager = new LayerManager(this._doc, this._surface, {
       watch: false,
     });
 
-    return (elementType: string) => {
-      if (ignoreRule) {
-        elementType = 'shape';
-      }
-
-      if (elementType === 'group') elementType = 'shape';
-
-      const typeField = this._surface?.registeredElementTypes.includes(
-        elementType
-      )
-        ? 'type'
-        : 'flavour';
-      const idx = manager.generateIndex(elementType);
+    return () => {
+      const idx = manager.generateIndex();
       const bound = new Bound(0, 0, 10, 10);
 
       const mockedFakeElement = {
         index: idx,
-        [typeField]: elementType,
+        type: 'shape',
         x: 0,
         y: 0,
         w: 10,
@@ -647,55 +634,24 @@ export class LayerManager {
       removeFromOrderedArray(this.blocks, element);
     }
 
-    if (deleteType) {
-      this._removeFromLayer(element, deleteType);
-      this._buildCanvasLayers();
-      this.slots.layerUpdated.emit({
-        type: 'delete',
-        initiatingElement: element,
-      });
-    }
+    this._removeFromLayer(element, deleteType);
+    this._buildCanvasLayers();
+    this.slots.layerUpdated.emit({
+      type: 'delete',
+      initiatingElement: element,
+    });
   }
 
   dispose() {
     this.slots.layerUpdated.dispose();
   }
 
-  generateIndex(elementType: string): string {
-    const type = this._surface?.registeredElementTypes.includes(elementType)
-      ? 'canvas'
-      : 'block';
+  generateIndex(): string {
+    const lastIndex = last(this.layers)?.indexes[1];
 
-    if (type === 'canvas') {
-      const lastIndex = last(this.layers)?.indexes[1];
-
-      return lastIndex
-        ? generateKeyBetween(ungroupIndex(lastIndex), null)
-        : LayerManager.INITIAL_INDEX;
-    }
-
-    const lastLayer = last(this.layers);
-
-    if (!lastLayer) return LayerManager.INITIAL_INDEX;
-
-    assertType<string>(lastLayer);
-
-    if (lastLayer.type === 'canvas') {
-      const secondLastLayer = nToLast(this.layers, 2);
-      const secondLastLayerIndex = secondLastLayer
-        ? ungroupIndex(secondLastLayer.indexes[1])
-        : null;
-      const lastLayerIndex = ungroupIndex(lastLayer.indexes[0]);
-
-      return generateKeyBetween(
-        secondLastLayerIndex,
-        secondLastLayerIndex && secondLastLayerIndex >= lastLayerIndex
-          ? null
-          : lastLayerIndex
-      );
-    }
-
-    return generateKeyBetween(lastLayer.indexes[1], null);
+    return lastIndex
+      ? generateKeyBetween(ungroupIndex(lastIndex), null)
+      : LayerManager.INITIAL_INDEX;
   }
 
   getCanvasLayers() {

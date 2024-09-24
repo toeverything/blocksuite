@@ -225,18 +225,14 @@ export class EdgelessTemplatePanel extends WithDisposable(LitElement) {
         middlewares.push(createInsertPlaceMiddleware(currentContentBound));
       }
 
-      const idxGenerator = service.layer.createIndexGenerator(true);
+      const idxGenerator = service.layer.createIndexGenerator();
 
-      middlewares.push(
-        createRegenerateIndexMiddleware((type: string) => idxGenerator(type))
-      );
+      middlewares.push(createRegenerateIndexMiddleware(() => idxGenerator()));
     }
 
     if (type === 'sticker') {
       middlewares.push(
-        createStickerMiddleware(center, () =>
-          service.layer.generateIndex('affine:image')
-        )
+        createStickerMiddleware(center, () => service.layer.generateIndex())
       );
     }
 

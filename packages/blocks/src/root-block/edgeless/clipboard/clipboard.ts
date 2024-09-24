@@ -1150,12 +1150,10 @@ export class EdgelessClipboardController extends PageClipboard {
       }
     }
 
-    const idxGenerator = this.edgeless.service.layer.createIndexGenerator(true);
+    const idxGenerator = this.edgeless.service.layer.createIndexGenerator();
     const sortedElements = elements.sort(compare);
     sortedElements.forEach(ele => {
-      const newIndex = idxGenerator(
-        isTopLevelBlock(ele) ? ele.flavour : ele.type
-      );
+      const newIndex = idxGenerator();
 
       this.edgeless.service.updateElement(ele.id, {
         index: newIndex,
@@ -1253,6 +1251,12 @@ export class EdgelessClipboardController extends PageClipboard {
         );
         if (!config) continue;
 
+        if (typeof blockSnapshot.props.index !== 'string') {
+          console.error(`Block(id: ${oldId}) does not have index property`);
+          continue;
+        }
+        const originalIndex = (blockSnapshot.props as GfxCompatibleProps).index;
+
         if (typeof blockSnapshot.props.xywh !== 'string') {
           console.error(`Block(id: ${oldId}) does not have xywh property`);
           continue;
@@ -1275,8 +1279,7 @@ export class EdgelessClipboardController extends PageClipboard {
         allElements.push(block.model);
         oldIdToNewIdMap.set(oldId, newId);
 
-        const props = blockSnapshot.props as GfxCompatibleProps;
-        originalIndexes.set(blockSnapshot.id, props.index);
+        originalIndexes.set(oldId, originalIndex);
       } else {
         assertType<SerializedElement>(data);
         const oldId = data.id;
@@ -1295,10 +1298,14 @@ export class EdgelessClipboardController extends PageClipboard {
       }
     }
 
-    originalIndexes.forEach((index, id) => {
-      const newId = oldIdToNewIdMap.get(id);
-      if (newId) {
-        originalIndexes.set(newId, index);
+    // remap old id to new id for the original index
+    const oldIds = [...originalIndexes.keys()];
+    oldIds.forEach(oldId => {
+      const newId = oldIdToNewIdMap.get(oldId);
+      const originalIndex = originalIndexes.get(oldId);
+      if (newId && originalIndex) {
+        originalIndexes.set(newId, originalIndex);
+        originalIndexes.delete(oldId);
       }
     });
 
