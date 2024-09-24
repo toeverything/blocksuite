@@ -139,8 +139,10 @@ export async function pressShiftTab(page: Page) {
   await page.keyboard.press('Shift+Tab', { delay: 20 });
 }
 
-export async function pressBackspaceWithShortKey(page: Page) {
-  await page.keyboard.press(`${SHORT_KEY}+Backspace`, { delay: 20 });
+export async function pressBackspaceWithShortKey(page: Page, count = 1) {
+  for (let i = 0; i < count; i++) {
+    await page.keyboard.press(`${SHORT_KEY}+Backspace`, { delay: 20 });
+  }
 }
 
 export async function pressShiftEnter(page: Page) {

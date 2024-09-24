@@ -570,7 +570,7 @@ export const LatexExtension = InlineMarkdownExtension({
     const startIndex = inlineRange.index - 2 - content.length - 2;
     inlineEditor.deleteText({
       index: startIndex,
-      length: 2 + content.length + 2,
+      length: 2 + content.length + 2 + 1,
     });
     inlineEditor.insertText(
       {

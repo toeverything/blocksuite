@@ -1,11 +1,24 @@
+import { ZERO_WIDTH_SPACE } from '@inline/consts.js';
 import { expect } from '@playwright/test';
+import {
+  assertRichTextInlineDeltas,
+  assertRichTextInlineRange,
+} from 'utils/asserts.js';
 
 import {
+  cutByKeyboard,
+  pasteByKeyboard,
   pressArrowLeft,
+  pressArrowRight,
+  pressArrowUp,
   pressBackspace,
+  pressBackspaceWithShortKey,
   pressEnter,
   pressShiftEnter,
+  redoByKeyboard,
+  selectAllByKeyboard,
   type,
+  undoByKeyboard,
 } from '../utils/actions/keyboard.js';
 import {
   enterPlaygroundRoom,
@@ -19,27 +32,27 @@ test('add inline latex at the start of line', async ({ page }) => {
   await initEmptyParagraphState(page);
   await focusRichText(page);
 
-  const latexEditor = page.locator('latex-editor-menu v-line div');
+  const latexEditorLine = page.locator('latex-editor-menu v-line div');
   const latexElement = page.locator(
     'affine-paragraph rich-text affine-latex-node'
   );
 
-  expect(await latexEditor.isVisible()).not.toBeTruthy();
+  expect(await latexEditorLine.isVisible()).not.toBeTruthy();
   expect(await latexElement.isVisible()).not.toBeTruthy();
   await type(page, '$$ ');
-  expect(await latexEditor.isVisible()).toBeTruthy();
+  expect(await latexEditorLine.isVisible()).toBeTruthy();
   expect(await latexElement.isVisible()).toBeTruthy();
   expect(await latexElement.locator('.placeholder').innerText()).toBe(
     'Equation'
   );
   await type(page, 'E=mc^2');
-  expect(await latexEditor.innerText()).toBe('E=mc^2');
+  expect(await latexEditorLine.innerText()).toBe('E=mc^2');
   expect(await latexElement.locator('.katex').innerHTML()).toBe(
     '<math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mi>E</mi><mo>=</mo><mi>m</mi><msup><mi>c</mi><mn>2</mn></msup></mrow><annotation encoding="application/x-tex">E=mc^2</annotation></semantics></math>'
   );
 
   await pressEnter(page);
-  expect(await latexEditor.isVisible()).not.toBeTruthy();
+  expect(await latexEditorLine.isVisible()).not.toBeTruthy();
   expect(await latexElement.locator('.katex').innerHTML()).toBe(
     '<math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mi>E</mi><mo>=</mo><mi>m</mi><msup><mi>c</mi><mn>2</mn></msup></mrow><annotation encoding="application/x-tex">E=mc^2</annotation></semantics></math>'
   );
@@ -50,29 +63,29 @@ test('add inline latex in the middle of text', async ({ page }) => {
   await initEmptyParagraphState(page);
   await focusRichText(page);
 
-  const latexEditor = page.locator('latex-editor-menu v-line div');
+  const latexEditorLine = page.locator('latex-editor-menu v-line div');
   const latexElement = page.locator(
     'affine-paragraph rich-text affine-latex-node'
   );
 
-  expect(await latexEditor.isVisible()).not.toBeTruthy();
+  expect(await latexEditorLine.isVisible()).not.toBeTruthy();
   expect(await latexElement.isVisible()).not.toBeTruthy();
   await type(page, 'aaaa');
   await pressArrowLeft(page, 2);
   await type(page, '$$ ');
-  expect(await latexEditor.isVisible()).toBeTruthy();
+  expect(await latexEditorLine.isVisible()).toBeTruthy();
   expect(await latexElement.isVisible()).toBeTruthy();
   expect(await latexElement.locator('.placeholder').innerText()).toBe(
     'Equation'
   );
   await type(page, 'E=mc^2');
-  expect(await latexEditor.innerText()).toBe('E=mc^2');
+  expect(await latexEditorLine.innerText()).toBe('E=mc^2');
   expect(await latexElement.locator('.katex').innerHTML()).toBe(
     '<math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mi>E</mi><mo>=</mo><mi>m</mi><msup><mi>c</mi><mn>2</mn></msup></mrow><annotation encoding="application/x-tex">E=mc^2</annotation></semantics></math>'
   );
 
   await pressEnter(page);
-  expect(await latexEditor.isVisible()).not.toBeTruthy();
+  expect(await latexEditorLine.isVisible()).not.toBeTruthy();
   expect(await latexElement.locator('.katex').innerHTML()).toBe(
     '<math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mi>E</mi><mo>=</mo><mi>m</mi><msup><mi>c</mi><mn>2</mn></msup></mrow><annotation encoding="application/x-tex">E=mc^2</annotation></semantics></math>'
   );
@@ -83,19 +96,19 @@ test('update inline latex by clicking the node', async ({ page }) => {
   await initEmptyParagraphState(page);
   await focusRichText(page);
 
-  const latexEditor = page.locator('latex-editor-menu v-line div');
+  const latexEditorLine = page.locator('latex-editor-menu v-line div');
   const latexElement = page.locator(
     'affine-paragraph rich-text affine-latex-node'
   );
 
-  expect(await latexEditor.isVisible()).not.toBeTruthy();
+  expect(await latexEditorLine.isVisible()).not.toBeTruthy();
   await type(page, '$$ ');
-  expect(await latexEditor.isVisible()).toBeTruthy();
+  expect(await latexEditorLine.isVisible()).toBeTruthy();
   await type(page, 'E=mc^2');
   await pressEnter(page);
-  expect(await latexEditor.isVisible()).not.toBeTruthy();
+  expect(await latexEditorLine.isVisible()).not.toBeTruthy();
   await latexElement.click();
-  expect(await latexEditor.isVisible()).toBeTruthy();
+  expect(await latexEditorLine.isVisible()).toBeTruthy();
   await pressBackspace(page, 6);
   await type(page, String.raw`\def\arraystretch{1.5}`);
   await pressShiftEnter(page);
@@ -116,5 +129,209 @@ test('update inline latex by clicking the node', async ({ page }) => {
 
   // click outside to hide the editor
   await page.click('affine-editor-container');
-  expect(await latexEditor.isVisible()).not.toBeTruthy();
+  expect(await latexEditorLine.isVisible()).not.toBeTruthy();
+});
+
+test('latex editor', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusRichText(page);
+
+  const latexEditorLine = page.locator('latex-editor-menu v-line div');
+  const latexElement = page.locator(
+    'affine-paragraph rich-text affine-latex-node'
+  );
+
+  expect(await latexEditorLine.isVisible()).not.toBeTruthy();
+  await type(page, '$$ ');
+  expect(await latexEditorLine.isVisible()).toBeTruthy();
+  // test cursor movement works as expected
+  // https://github.com/toeverything/blocksuite/pull/8368
+  await type(page, 'ababababababababababababababababababababababababab');
+  expect(await latexEditorLine.innerText()).toBe(
+    'ababababababababababababababababababababababababab'
+  );
+  // click outside to hide the editor
+  expect(await latexEditorLine.isVisible()).toBeTruthy();
+  await page.mouse.click(130, 130);
+  expect(await latexEditorLine.isVisible()).not.toBeTruthy();
+  await latexElement.click();
+  expect(await latexEditorLine.isVisible()).toBeTruthy();
+  expect(await latexEditorLine.innerText()).toBe(
+    'ababababababababababababababababababababababababab'
+  );
+
+  await pressBackspaceWithShortKey(page, 2);
+  expect(await latexEditorLine.innerText()).toBe(ZERO_WIDTH_SPACE);
+  await undoByKeyboard(page);
+  expect(await latexEditorLine.innerText()).toBe(
+    'ababababababababababababababababababababababababab'
+  );
+  await redoByKeyboard(page);
+  expect(await latexEditorLine.innerText()).toBe(ZERO_WIDTH_SPACE);
+  await undoByKeyboard(page);
+  expect(await latexEditorLine.innerText()).toBe(
+    'ababababababababababababababababababababababababab'
+  );
+
+  // undo-redo
+  await pressArrowLeft(page, 5);
+  await page.keyboard.down('Shift');
+  await pressArrowUp(page);
+  await pressArrowRight(page);
+  await page.keyboard.up('Shift');
+  /**
+   * abababababababababab|ababab
+   * abababababababababa|babab
+   */
+  await cutByKeyboard(page);
+  expect(await latexEditorLine.innerText()).toBe('ababababababababababbabab');
+  /**
+   * abababababababababab|babab
+   */
+  await pressArrowRight(page, 2);
+  /**
+   * ababababababababababba|bab
+   */
+  await pasteByKeyboard(page);
+  expect(await latexEditorLine.innerText()).toBe(
+    'ababababababababababbaabababababababababababababab'
+  );
+
+  await selectAllByKeyboard(page);
+  await pressBackspace(page);
+  expect(await latexEditorLine.innerText()).toBe(ZERO_WIDTH_SPACE);
+
+  // highlight
+  await type(
+    page,
+    String.raw`a+\left(\vcenter{\hbox{$\frac{\frac a b}c$}}\right)`
+  );
+  expect(
+    (await latexEditorLine.locator('latex-editor-unit').innerHTML()).replace(
+      /lit\$\d+\$/g,
+      'lit$test$'
+    )
+  ).toBe(
+    '\x3C!----><span>\x3C!--?lit$test$-->\x3C!----><v-text style="color:#000000;">\x3C!----><span data-v-text="true" style="word-break:break-word;text-wrap:wrap;white-space-collapse:break-spaces;">\x3C!--?lit$test$-->a+</span></v-text>\x3C!---->\x3C!----><v-text style="color:#795E26;">\x3C!----><span data-v-text="true" style="word-break:break-word;text-wrap:wrap;white-space-collapse:break-spaces;">\x3C!--?lit$test$-->\\left</span></v-text>\x3C!---->\x3C!----><v-text style="color:#000000;">\x3C!----><span data-v-text="true" style="word-break:break-word;text-wrap:wrap;white-space-collapse:break-spaces;">\x3C!--?lit$test$-->(</span></v-text>\x3C!---->\x3C!----><v-text style="color:#795E26;">\x3C!----><span data-v-text="true" style="word-break:break-word;text-wrap:wrap;white-space-collapse:break-spaces;">\x3C!--?lit$test$-->\\vcenter</span></v-text>\x3C!---->\x3C!----><v-text style="color:#000000;">\x3C!----><span data-v-text="true" style="word-break:break-word;text-wrap:wrap;white-space-collapse:break-spaces;">\x3C!--?lit$test$-->{</span></v-text>\x3C!---->\x3C!----><v-text style="color:#795E26;">\x3C!----><span data-v-text="true" style="word-break:break-word;text-wrap:wrap;white-space-collapse:break-spaces;">\x3C!--?lit$test$-->\\hbox</span></v-text>\x3C!---->\x3C!----><v-text style="color:#000000;">\x3C!----><span data-v-text="true" style="word-break:break-word;text-wrap:wrap;white-space-collapse:break-spaces;">\x3C!--?lit$test$-->{</span></v-text>\x3C!---->\x3C!----><v-text style="color:#267F99;">\x3C!----><span data-v-text="true" style="word-break:break-word;text-wrap:wrap;white-space-collapse:break-spaces;">\x3C!--?lit$test$-->$</span></v-text>\x3C!---->\x3C!----><v-text style="color:#267F99;">\x3C!----><span data-v-text="true" style="word-break:break-word;text-wrap:wrap;white-space-collapse:break-spaces;">\x3C!--?lit$test$-->\\frac{\\frac a b}c</span></v-text>\x3C!---->\x3C!----><v-text style="color:#267F99;">\x3C!----><span data-v-text="true" style="word-break:break-word;text-wrap:wrap;white-space-collapse:break-spaces;">\x3C!--?lit$test$-->$</span></v-text>\x3C!---->\x3C!----><v-text style="color:#000000;">\x3C!----><span data-v-text="true" style="word-break:break-word;text-wrap:wrap;white-space-collapse:break-spaces;">\x3C!--?lit$test$-->}}</span></v-text>\x3C!---->\x3C!----><v-text style="color:#795E26;">\x3C!----><span data-v-text="true" style="word-break:break-word;text-wrap:wrap;white-space-collapse:break-spaces;">\x3C!--?lit$test$-->\\right</span></v-text>\x3C!---->\x3C!----><v-text style="color:#000000;">\x3C!----><span data-v-text="true" style="word-break:break-word;text-wrap:wrap;white-space-collapse:break-spaces;">\x3C!--?lit$test$-->)</span></v-text>\x3C!----></span>'
+  );
+});
+
+test('add inline latex using slash menu', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusRichText(page);
+
+  const latexEditorLine = page.locator('latex-editor-menu v-line div');
+  const latexElement = page.locator(
+    'affine-paragraph rich-text affine-latex-node'
+  );
+
+  expect(await latexEditorLine.isVisible()).not.toBeTruthy();
+  expect(await latexElement.isVisible()).not.toBeTruthy();
+  await type(page, '/ieq\n');
+  expect(await latexEditorLine.isVisible()).toBeTruthy();
+  expect(await latexElement.isVisible()).toBeTruthy();
+  expect(await latexElement.locator('.placeholder').innerText()).toBe(
+    'Equation'
+  );
+  await type(page, 'E=mc^2');
+  expect(await latexEditorLine.innerText()).toBe('E=mc^2');
+  expect(await latexElement.locator('.katex').innerHTML()).toBe(
+    '<math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mi>E</mi><mo>=</mo><mi>m</mi><msup><mi>c</mi><mn>2</mn></msup></mrow><annotation encoding="application/x-tex">E=mc^2</annotation></semantics></math>'
+  );
+
+  await pressEnter(page);
+  expect(await latexEditorLine.isVisible()).not.toBeTruthy();
+  expect(await latexElement.locator('.katex').innerHTML()).toBe(
+    '<math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mi>E</mi><mo>=</mo><mi>m</mi><msup><mi>c</mi><mn>2</mn></msup></mrow><annotation encoding="application/x-tex">E=mc^2</annotation></semantics></math>'
+  );
+});
+
+test('add inline latex using markdown shortcut', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusRichText(page);
+
+  // toggle by space or enter
+  await type(page, 'aa$$bb$$ cc$$dd$$\n');
+  await assertRichTextInlineDeltas(page, [
+    {
+      insert: 'aa',
+    },
+    {
+      insert: ' ',
+      attributes: {
+        latex: 'bb',
+      },
+    },
+    {
+      insert: 'cc',
+    },
+    {
+      insert: ' ',
+      attributes: {
+        latex: 'dd',
+      },
+    },
+  ]);
+
+  await pressArrowUp(page);
+  await pressArrowRight(page, 3);
+  await pressBackspace(page);
+  await assertRichTextInlineDeltas(page, [
+    {
+      insert: 'aacc',
+    },
+    {
+      insert: ' ',
+      attributes: {
+        latex: 'dd',
+      },
+    },
+  ]);
+});
+
+test('undo-redo when add inline latex using markdown shortcut', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusRichText(page);
+
+  await type(page, 'aa$$bb$$ ');
+  await assertRichTextInlineDeltas(page, [
+    {
+      insert: 'aa',
+    },
+    {
+      insert: ' ',
+      attributes: {
+        latex: 'bb',
+      },
+    },
+  ]);
+  await assertRichTextInlineRange(page, 0, 3, 0);
+
+  await undoByKeyboard(page);
+  await assertRichTextInlineDeltas(page, [
+    {
+      insert: 'aa$$bb$$ ',
+    },
+  ]);
+  await assertRichTextInlineRange(page, 0, 9, 0);
+
+  await redoByKeyboard(page);
+  await assertRichTextInlineDeltas(page, [
+    {
+      insert: 'aa',
+    },
+    {
+      insert: ' ',
+      attributes: {
+        latex: 'bb',
+      },
+    },
+  ]);
+  await assertRichTextInlineRange(page, 0, 3, 0);
 });
