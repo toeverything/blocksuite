@@ -7,7 +7,7 @@ import { Signal } from '@preact/signals-core';
 
 import type { UIEventStateContext } from '../../event/index.js';
 import type { BlockStdScope } from '../../scope/block-std-scope.js';
-import type { AbstractTool } from './tool.js';
+import type { BaseTool } from './tool.js';
 
 const supportedEvents = [
   'dragStart',
@@ -39,7 +39,7 @@ export class ToolController {
 
   private readonly _toolName$ = new Signal<string>('');
 
-  private _tools = new Map<string, AbstractTool>();
+  private _tools = new Map<string, BaseTool>();
 
   readonly dragging$ = new Signal<boolean>(false);
 
@@ -146,7 +146,7 @@ export class ToolController {
     });
   }
 
-  register(toolCtors: Constructor<AbstractTool>[]) {
+  register(toolCtors: Constructor<BaseTool>[]) {
     toolCtors.forEach(ctor => {
       const tool = new ctor(this);
 

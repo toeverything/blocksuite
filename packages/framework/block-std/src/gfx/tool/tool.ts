@@ -6,7 +6,7 @@ import {
   type ToolController,
 } from './tool-controller.js';
 
-export abstract class AbstractTool {
+export abstract class BaseTool {
   abstract readonly name: string;
 
   get active() {

@@ -46,7 +46,9 @@ export {
   type SurfaceBlockProps,
   type SurfaceMiddleware,
 } from './surface/surface-model.js';
-export * from './viewport.js';
+export { BaseTool } from './tool/tool.js';
 
+export { ToolController } from './tool/tool-controller.js';
+export * from './viewport.js';
 export { GfxViewportElement } from './viewport-element.js';
 export { generateKeyBetween, generateNKeysBetween } from 'fractional-indexing';
