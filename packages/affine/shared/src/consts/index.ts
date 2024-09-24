@@ -8,6 +8,8 @@ export const EDGELESS_BLOCK_CHILD_BORDER_WIDTH = 2;
 // In AFFiNE, to avoid the option element to be covered by the header, we need to reserve the space for the header
 export const PAGE_HEADER_HEIGHT = 53;
 
+export const EMBED_CARD_MIN_WIDTH = 450;
+
 export const EMBED_CARD_WIDTH: Record<EmbedCardStyle, number> = {
   horizontal: 752,
   horizontalThin: 752,

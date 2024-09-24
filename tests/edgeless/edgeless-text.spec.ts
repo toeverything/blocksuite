@@ -360,37 +360,37 @@ test.describe('edgeless text block', () => {
     await page.mouse.click(0, 0);
     // select text element
     await page.mouse.click(130, 140);
-    const selectedRect = await getEdgelessSelectedRect(page);
+    const selectedRect0 = await getEdgelessSelectedRect(page);
 
     // from right to left
     await page.mouse.move(
-      selectedRect.x + selectedRect.width,
-      selectedRect.y + selectedRect.height / 2
+      selectedRect0.x + selectedRect0.width,
+      selectedRect0.y + selectedRect0.height / 2
     );
     await page.mouse.down();
     await page.mouse.move(
-      selectedRect.x + selectedRect.width - 45,
-      selectedRect.y + selectedRect.height / 2,
+      selectedRect0.x,
+      selectedRect0.y + selectedRect0.height / 2,
       {
         steps: 10,
       }
     );
     await page.mouse.up();
 
-    // not changed
     expect(await getPageSnapshot(page, true)).toMatchSnapshot(
-      `${testInfo.title}_link_to_card.json`
+      `${testInfo.title}_link_to_card_min_width.json`
     );
 
+    const selectedRect1 = await getEdgelessSelectedRect(page);
     // from left to right
     await page.mouse.move(
-      selectedRect.x + selectedRect.width,
-      selectedRect.y + selectedRect.height / 2
+      selectedRect1.x + selectedRect1.width,
+      selectedRect1.y + selectedRect1.height / 2
     );
     await page.mouse.down();
     await page.mouse.move(
-      selectedRect.x + selectedRect.width + 45,
-      selectedRect.y + selectedRect.height / 2,
+      selectedRect0.x + selectedRect0.width + 45,
+      selectedRect1.y + selectedRect1.height / 2,
       {
         steps: 10,
       }

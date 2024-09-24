@@ -8,6 +8,7 @@ import type { TemplateResult } from 'lit';
 import { CaptionedBlockComponent } from '@blocksuite/affine-components/caption';
 import {
   EMBED_CARD_HEIGHT,
+  EMBED_CARD_MIN_WIDTH,
   EMBED_CARD_WIDTH,
 } from '@blocksuite/affine-shared/consts';
 import {
@@ -27,8 +28,6 @@ import { classMap } from 'lit/directives/class-map.js';
 import { type StyleInfo, styleMap } from 'lit/directives/style-map.js';
 
 import { styles } from './styles.js';
-
-export const EMBED_MIN_WIDTH = 450;
 
 export const EmbedDragHandleOption = DragHandleConfigExtension({
   flavour: /affine:embed-*/,
@@ -109,7 +108,7 @@ export class EmbedBlockComponent<
 
       const mode = this.std.get(DocModeProvider).getEditorMode();
       if (mode === 'edgeless') {
-        this.style.minWidth = `${EMBED_MIN_WIDTH}px`;
+        this.style.minWidth = `${EMBED_CARD_MIN_WIDTH}px`;
       }
     }
 

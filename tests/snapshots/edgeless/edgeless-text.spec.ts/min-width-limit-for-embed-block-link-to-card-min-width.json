@@ -25,7 +25,7 @@
           "flavour": "affine:edgeless-text",
           "version": 1,
           "props": {
-            "xywh": "[25,-287.5,819.0031127929688,164]",
+            "xywh": "[25,-287.5,541.7999877929688,164]",
             "index": "a1",
             "color": "--affine-palette-line-blue",
             "fontFamily": "blocksuite:surface:Inter",

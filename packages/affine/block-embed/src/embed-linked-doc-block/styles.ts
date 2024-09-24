@@ -1,5 +1,6 @@
 import {
   EMBED_CARD_HEIGHT,
+  EMBED_CARD_MIN_WIDTH,
   EMBED_CARD_WIDTH,
 } from '@blocksuite/affine-shared/consts';
 import { css, html } from 'lit';
@@ -10,6 +11,8 @@ export const styles = css`
   .affine-embed-linked-doc-block {
     box-sizing: border-box;
     display: flex;
+    max-width: 100%;
+    min-width: ${EMBED_CARD_MIN_WIDTH}px;
     width: ${EMBED_CARD_WIDTH.horizontal}px;
     border-radius: 8px;
     border: 1px solid var(--affine-background-tertiary-color);
