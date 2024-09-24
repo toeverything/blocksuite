@@ -1,5 +1,36 @@
 # @blocksuite/blocks
 
+## 0.17.15
+
+### Patch Changes
+
+- 931315f: - Fix: Improved scroll behavior to target elements
+  - Fix: Enhanced bookmark and synced document block styles
+  - Fix: Resolved issues with PDF printing completion
+  - Fix: Prevented LaTeX editor from triggering at the start of a line
+  - Fix: Adjusted portal position in blocks
+  - Fix: Improved mindmap layout for existing models
+  - Feature: Added file type detection for exports
+  - Feature: Enhanced block visibility UI in Edgeless mode
+  - Refactor: Improved data source API for database
+  - Refactor: Ensured new block elements are always on top in Edgeless mode
+  - Chore: Upgraded non-major dependencies
+  - Chore: Improved ThemeObserver and added tests
+- Updated dependencies [931315f]
+  - @blocksuite/affine-block-embed@0.17.15
+  - @blocksuite/affine-block-list@0.17.15
+  - @blocksuite/affine-block-paragraph@0.17.15
+  - @blocksuite/affine-block-surface@0.17.15
+  - @blocksuite/affine-components@0.17.15
+  - @blocksuite/data-view@0.17.15
+  - @blocksuite/affine-model@0.17.15
+  - @blocksuite/affine-shared@0.17.15
+  - @blocksuite/affine-widget-scroll-anchoring@0.17.15
+  - @blocksuite/block-std@0.17.15
+  - @blocksuite/global@0.17.15
+  - @blocksuite/inline@0.17.15
+  - @blocksuite/store@0.17.15
+
 ## 0.17.14
 
 ### Patch Changes
