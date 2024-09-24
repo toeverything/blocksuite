@@ -46,7 +46,7 @@ export {
   type SurfaceBlockProps,
   type SurfaceMiddleware,
 } from './surface/surface-model.js';
-export { BaseTool } from './tool/tool.js';
+export { BaseTool, GfxToolExtension } from './tool/tool.js';
 
 export { ToolController } from './tool/tool-controller.js';
 export * from './viewport.js';

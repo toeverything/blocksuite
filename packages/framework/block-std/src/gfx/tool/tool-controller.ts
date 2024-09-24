@@ -1,8 +1,4 @@
-import {
-  type Constructor,
-  DisposableGroup,
-  type IBound,
-} from '@blocksuite/global/utils';
+import { DisposableGroup, type IBound } from '@blocksuite/global/utils';
 import { Signal } from '@preact/signals-core';
 
 import type { UIEventStateContext } from '../../event/index.js';
@@ -66,12 +62,9 @@ export class ToolController {
     };
   }
 
-  get host() {
-    return this.std.host;
-  }
-
   constructor(readonly std: BlockStdScope) {
     const { addHook } = this._initializeEvents();
+
     this[eventTarget] = {
       addHook,
     };
@@ -146,17 +139,13 @@ export class ToolController {
     });
   }
 
-  register(toolCtors: Constructor<BaseTool>[]) {
-    toolCtors.forEach(ctor => {
-      const tool = new ctor(this);
+  register(tools: BaseTool) {
+    if (this._tools.has(tools.toolName)) {
+      this._tools.get(tools.toolName)?.onunload();
+    }
 
-      if (this._tools.has(tool.name)) {
-        throw new Error(`Tool "${tool.name}" is already registered`);
-      }
-
-      this._tools.set(tool.name, tool);
-      tool.onload();
-    });
+    this._tools.set(tools.toolName, tools);
+    tools.onload();
   }
 
   use(toolName: string, options: Record<string, unknown> = {}) {

@@ -1,19 +1,24 @@
-import type { UIEventStateContext } from '../../event/base.js';
+import { type Container, createIdentifier } from '@blocksuite/global/di';
+import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 
-import {
-  eventTarget,
-  type SupportedEvents,
-  type ToolController,
-} from './tool-controller.js';
+import type { UIEventStateContext } from '../../event/base.js';
+import type { ExtensionType } from '../../extension/extension.js';
+
+import { type GfxController, GfxControllerIdentifier } from '../controller.js';
+import { eventTarget, type SupportedEvents } from './tool-controller.js';
 
 export abstract class BaseTool {
-  abstract readonly name: string;
+  static toolName: string = '';
 
   get active() {
-    return this.controller.currentTool$.peek() === this;
+    return this.gfx.tool.currentTool$.peek() === this;
   }
 
-  constructor(readonly controller: ToolController) {}
+  get toolName() {
+    return (this.constructor as typeof BaseTool).toolName;
+  }
+
+  constructor(readonly gfx: GfxController) {}
 
   /**
    * Called when the tool is activated.
@@ -25,7 +30,7 @@ export abstract class BaseTool {
     evtName: SupportedEvents,
     handler: (evtState: UIEventStateContext) => undefined | boolean
   ): void {
-    this.controller[eventTarget].addHook(evtName, handler);
+    this.gfx.tool[eventTarget].addHook(evtName, handler);
   }
 
   click(_: UIEventStateContext): void {}
@@ -64,4 +69,27 @@ export abstract class BaseTool {
   pointerUp(_: UIEventStateContext): void {}
 
   tripleClick(_: UIEventStateContext): void {}
+}
+
+export const ToolIdentifier = createIdentifier<BaseTool>('GfxTool');
+
+export function GfxToolExtension(
+  toolCtors: (typeof BaseTool)[]
+): ExtensionType {
+  return {
+    setup: (di: Container) => {
+      toolCtors.forEach(Ctor => {
+        if (!Ctor.toolName) {
+          throw new BlockSuiteError(
+            ErrorCode.ValueNotExists,
+            'The tool must have a static property `toolName`'
+          );
+        }
+
+        di.addImpl(ToolIdentifier(Ctor.toolName), Ctor, [
+          GfxControllerIdentifier,
+        ]);
+      });
+    },
+  };
 }
