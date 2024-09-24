@@ -12,5 +12,6 @@ export interface BlockSuiteFlags {
   enable_ai_chat_block: boolean;
   enable_color_picker: boolean;
   enable_mind_map_import: boolean;
+  enable_advanced_block_visibility: boolean;
   readonly: Record<string, boolean>;
 }

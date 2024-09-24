@@ -552,7 +552,13 @@ export class EdgelessAutoConnectWidget extends WidgetComponent<
   }
 
   override render() {
-    if (!this._show || this._dragging) return nothing;
+    const advancedVisibilityEnabled = this.doc.awarenessStore.getFlag(
+      'enable_advanced_block_visibility'
+    );
+
+    if (!this._show || this._dragging || !advancedVisibilityEnabled) {
+      return nothing;
+    }
 
     this._updateLabels();
 
