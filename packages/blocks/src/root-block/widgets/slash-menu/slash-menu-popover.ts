@@ -221,8 +221,15 @@ export class SlashMenu extends WithDisposable(LitElement) {
 
         next();
       },
-      onInput: () =>
-        this.inlineEditor.slots.renderComplete.once(this._updateFilteredItems),
+      onInput: isComposition => {
+        if (isComposition) {
+          this._updateFilteredItems();
+        } else {
+          this.inlineEditor.slots.renderComplete.once(
+            this._updateFilteredItems
+          );
+        }
+      },
       onPaste: () => {
         setTimeout(() => {
           this._updateFilteredItems();

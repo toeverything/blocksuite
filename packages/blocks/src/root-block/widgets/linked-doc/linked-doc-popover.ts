@@ -126,9 +126,15 @@ export class LinkedDocPopover extends WithDisposable(LitElement) {
     createKeydownObserver({
       target: eventSource,
       signal: this.abortController.signal,
-      onInput: () => {
+      onInput: isComposition => {
         this._activatedItemIndex = 0;
-        this.inlineEditor.slots.renderComplete.once(this._updateLinkedDocGroup);
+        if (isComposition) {
+          this._updateLinkedDocGroup().catch(console.error);
+        } else {
+          this.inlineEditor.slots.renderComplete.once(
+            this._updateLinkedDocGroup
+          );
+        }
       },
       onPaste: () => {
         this._activatedItemIndex = 0;

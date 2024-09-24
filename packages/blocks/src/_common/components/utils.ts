@@ -39,7 +39,7 @@ export function getQuery(
 interface ObserverParams {
   target: HTMLElement;
   signal: AbortSignal;
-  onInput?: () => void;
+  onInput?: (isComposition: boolean) => void;
   onDelete?: () => void;
   onMove?: (step: 1 | -1) => void;
   onConfirm?: () => void;
@@ -60,6 +60,8 @@ export const createKeydownObserver = ({
   interceptor = (_, next) => next(),
 }: ObserverParams) => {
   const keyDownListener = (e: KeyboardEvent) => {
+    if (e.key === 'Process' || e.isComposing) return;
+
     if (e.defaultPrevented) return;
 
     if (isControlledKeyboardEvent(e)) {
@@ -107,10 +109,10 @@ export const createKeydownObserver = ({
 
     if (
       // input abc, 123, etc.
-      (!isControlledKeyboardEvent(e) && e.key.length === 1) ||
-      e.isComposing
+      !isControlledKeyboardEvent(e) &&
+      e.key.length === 1
     ) {
-      onInput?.();
+      onInput?.(false);
       return;
     }
 
@@ -184,7 +186,7 @@ export const createKeydownObserver = ({
   target.addEventListener('paste', () => onDelete?.(), { signal });
 
   // Fix composition input
-  target.addEventListener('input', () => onInput?.(), { signal });
+  target.addEventListener('compositionend', () => onInput?.(true), { signal });
 };
 
 /**

@@ -51,11 +51,14 @@ test.describe('slash menu should show and hide correctly', () => {
     await expect(slashMenu).toBeVisible();
   });
 
-  test("slash menu should show when user input '、'", async ({ page }) => {
+  // Playwright dose not support IME
+  // https://github.com/microsoft/playwright/issues/5777
+  test.skip("slash menu should show when user input '、'", async ({ page }) => {
     await initEmptyParagraphState(page);
     const slashMenu = page.locator(`.slash-menu`);
     await focusRichText(page);
     await type(page, '、');
+
     await expect(slashMenu).toBeVisible();
   });
 
@@ -778,23 +781,6 @@ test('should insert database', async ({ page }) => {
   expect(await tagColumn.innerText()).toBe('Status');
   const defaultRows = page.locator('.affine-database-block-row');
   expect(await defaultRows.count()).toBe(4);
-});
-
-test.skip('should compatible CJK IME', async ({ page }) => {
-  await enterPlaygroundRoom(page);
-  await initEmptyParagraphState(page);
-  await focusRichText(page);
-
-  await type(page, '、');
-  const slashMenu = page.locator(`.slash-menu`);
-
-  // Fix playwright can not trigger keyboard event with target: '、'
-  test.fail();
-  await expect(slashMenu).toBeVisible();
-  await type(page, 'h2');
-  const slashItems = slashMenu.locator('icon-button');
-  await expect(slashItems).toHaveCount(1);
-  await expect(slashItems).toHaveText(['Heading 2']);
 });
 
 test.describe('slash menu with customize menu', () => {
