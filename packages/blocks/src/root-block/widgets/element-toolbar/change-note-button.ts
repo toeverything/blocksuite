@@ -121,6 +121,10 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
     );
   };
 
+  private get _advancedVisibilityEnabled() {
+    return this.doc.awarenessStore.getFlag('enable_advanced_block_visibility');
+  }
+
   private get doc() {
     return this.edgeless.doc;
   }
@@ -264,7 +268,7 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
     const isDocOnly = displayMode === NoteDisplayMode.DocOnly;
 
     const buttons = [
-      onlyOne
+      onlyOne && this._advancedVisibilityEnabled
         ? html`
             <span class="display-mode-button-label">Show in</span>
             <editor-menu-button
@@ -400,7 +404,7 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
             </editor-menu-button>
           `,
 
-      onlyOne
+      onlyOne && this._advancedVisibilityEnabled
         ? html`
             <editor-icon-button
               aria-label="Slicer"

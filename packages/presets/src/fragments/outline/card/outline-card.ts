@@ -311,6 +311,9 @@ export class OutlineNoteCard extends SignalWatcher(WithDisposable(LitElement)) {
       'card-header-container': true,
       'enable-sorting': this.enableNotesSorting,
     });
+    const advancedVisibilityEnabled = this.doc.awarenessStore.getFlag(
+      'enable_advanced_block_visibility'
+    );
 
     return html`
       <div
@@ -325,27 +328,36 @@ export class OutlineNoteCard extends SignalWatcher(WithDisposable(LitElement)) {
           @dblclick=${this._dispatchFitViewEvent}
         >
         ${html`<div class=${cardHeaderClasses}>
-          ${this.invisible
-            ? html`<span class="card-header-icon">${HiddenIcon}</span>`
-            : html`<span class="card-number">${this.number}</span>`}
+          ${
+            this.invisible
+              ? html`<span class="card-header-icon">${HiddenIcon}</span>`
+              : html`<span class="card-number">${this.number}</span>`
+          }
           <span class="card-divider"></span>
-          <div class="display-mode-button-group">
-            <span class="display-mode-button-label">Show in</span>
-            <edgeless-tool-icon-button
-              .tooltip=${this._showPopper ? '' : 'Display Mode'}
-              .tipPosition=${'left-start'}
-              .iconContainerPadding=${0}
-              @click=${(e: MouseEvent) => {
-                e.stopPropagation();
-                this._displayModePopper?.toggle();
-              }}
-              @dblclick=${(e: MouseEvent) => e.stopPropagation()}
-            >
-              <div class="display-mode-button">
-                <span class="current-mode-label">${currentMode}</span>
-                ${SmallArrowDownIcon}
-              </div>
-            </edgeless-tool-icon-button>
+          ${
+            advancedVisibilityEnabled
+              ? html`
+                  <div class="display-mode-button-group">
+                    <span class="display-mode-button-label">Show in</span>
+                    <edgeless-tool-icon-button
+                      .tooltip=${this._showPopper ? '' : 'Display Mode'}
+                      .tipPosition=${'left-start'}
+                      .iconContainerPadding=${0}
+                      @click=${(e: MouseEvent) => {
+                        e.stopPropagation();
+                        this._displayModePopper?.toggle();
+                      }}
+                      @dblclick=${(e: MouseEvent) => e.stopPropagation()}
+                    >
+                      <div class="display-mode-button">
+                        <span class="current-mode-label">${currentMode}</span>
+                        ${SmallArrowDownIcon}
+                      </div>
+                    </edgeless-tool-icon-button>
+                  </div>
+                `
+              : nothing
+          }
           </div>
           <note-display-mode-panel
             .displayMode=${displayMode}
