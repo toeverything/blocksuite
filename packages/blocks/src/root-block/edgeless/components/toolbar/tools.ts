@@ -1,4 +1,4 @@
-import type { Menu } from '@blocksuite/affine-components/context-menu';
+import type { MenuConfig } from '@blocksuite/affine-components/context-menu';
 
 import { html, type TemplateResult } from 'lit';
 
@@ -15,7 +15,7 @@ export interface QuickTool {
   /**
    * if not configured, the tool will not be shown in dense mode
    */
-  menu?: Menu;
+  menu?: MenuConfig;
 }
 export interface SeniorTool {
   /**

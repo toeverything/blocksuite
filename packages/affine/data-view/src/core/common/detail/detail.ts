@@ -113,7 +113,7 @@ export class RecordDetail extends SignalWatcher(
         return {
           type: 'action',
           name: meta.config.name,
-          icon: renderUniLit(this.view.IconGet(meta.type)),
+          prefix: renderUniLit(this.view.IconGet(meta.type)),
           select: () => {
             this.view.propertyAdd('end', meta.type);
           },

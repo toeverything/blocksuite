@@ -1,4 +1,4 @@
-import type { Menu } from '@blocksuite/affine-components/context-menu';
+import type { MenuConfig } from '@blocksuite/affine-components/context-menu';
 
 import { FrameIcon } from '@blocksuite/affine-components/icons';
 
@@ -28,7 +28,7 @@ export const buildFrameDenseMenu: DenseMenuBuilder = edgeless => ({
               edgeless.tools.setEdgelessTool({ type: 'default' });
               edgeless.service.frame.createFrameOnViewportCenter(config.wh);
             },
-          }) satisfies Menu
+          }) satisfies MenuConfig
       ),
     ],
   },

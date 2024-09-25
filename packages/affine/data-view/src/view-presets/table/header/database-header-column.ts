@@ -1,6 +1,5 @@
 import {
-  type Menu,
-  type NormalMenu,
+  type NormalMenuConfig,
   popMenu,
 } from '@blocksuite/affine-components/context-menu';
 import {
@@ -74,16 +73,12 @@ export class DatabaseHeaderColumn extends SignalWatcher(
     event.stopPropagation();
     popMenu(this, {
       options: {
-        input: {
-          search: true,
-          placeholder: 'Search',
-        },
         items: this.tableViewManager.propertyMetas.map(config => {
           return {
             type: 'action',
             name: config.config.name,
             isSelected: config.type === this.column.type$.value,
-            icon: renderUniLit(this.tableViewManager.IconGet(config.type)),
+            prefix: renderUniLit(this.tableViewManager.IconGet(config.type)),
             select: () => {
               this.column.typeSet?.(config.type);
             },
@@ -320,68 +315,59 @@ export class DatabaseHeaderColumn extends SignalWatcher(
 
     popMenu(ele ?? this, {
       options: {
-        input: inputConfig(this.column),
         items: [
-          {
-            type: 'group',
-            name: 'Column Prop Group',
-            children: () => [
-              typeConfig(this.column),
-              // Number format begin
-              ...(enableNumberFormatting
-                ? ([
-                    {
-                      type: 'sub-menu',
-                      name: 'Number Format',
+          inputConfig(this.column),
+          typeConfig(this.column),
+          // Number format begin
+          ...(enableNumberFormatting
+            ? ([
+                {
+                  type: 'sub-menu',
+                  name: 'Number Format',
 
-                      hide: () =>
-                        !this.column.dataUpdate ||
-                        this.column.type$.value !== 'number',
-                      options: {
-                        input: {
-                          search: true,
-                        },
-                        items: [
-                          numberFormatConfig(this.column),
-                          ...(numberFormats.map(format => {
-                            const data = (
-                              this.column as Property<
-                                number,
-                                NumberPropertyDataType
-                              >
-                            ).data$.value;
-                            return {
-                              type: 'action',
-                              isSelected: data.format === format.type,
-                              icon: html`<span
-                                style="font-size: var(--affine-font-base); scale: 1.2;"
-                                >${format.symbol}</span
-                              >`,
-                              name: format.label,
-                              select: () => {
-                                if (data.format === format.type) return;
-                                this.column.dataUpdate(() => ({
-                                  format: format.type,
-                                }));
-                              },
-                            };
-                          }) as Menu[]),
-                        ],
-                      },
-                    },
-                  ] as Menu[])
-                : []),
-              // Number format end
-            ],
-          },
+                  hide: () =>
+                    !this.column.dataUpdate ||
+                    this.column.type$.value !== 'number',
+                  options: {
+                    items: [
+                      numberFormatConfig(this.column),
+                      ...(numberFormats.map(format => {
+                        const data = (
+                          this.column as Property<
+                            number,
+                            NumberPropertyDataType
+                          >
+                        ).data$.value;
+                        return {
+                          type: 'action',
+                          isSelected: data.format === format.type,
+                          prefix: html`<span
+                            style="font-size: var(--affine-font-base); scale: 1.2;"
+                            >${format.symbol}</span
+                          >`,
+                          name: format.label,
+                          select: () => {
+                            if (data.format === format.type) return;
+                            this.column.dataUpdate(() => ({
+                              format: format.type,
+                            }));
+                          },
+                        };
+                      }) as NormalMenuConfig[]),
+                    ],
+                  },
+                },
+              ] as NormalMenuConfig[])
+            : []),
+          // Number format end
           {
             type: 'group',
             name: 'col-ops-p1',
-            children: () => [
+            items: [
               {
                 type: 'action',
                 name: 'Hide In View',
-                icon: ViewIcon(),
+                prefix: ViewIcon(),
                 hide: () =>
                   this.column.hide$.value ||
                   this.column.type$.value === 'title',
@@ -395,7 +381,7 @@ export class DatabaseHeaderColumn extends SignalWatcher(
           {
             type: 'action',
             name: 'Duplicate Column',
-            icon: DuplicateIcon(),
+            prefix: DuplicateIcon(),
             hide: () =>
               !this.column.duplicate || this.column.type$.value === 'title',
             select: () => {
@@ -405,7 +391,7 @@ export class DatabaseHeaderColumn extends SignalWatcher(
           {
             type: 'action',
             name: 'Insert Left Column',
-            icon: InsertLeftIcon(),
+            prefix: InsertLeftIcon(),
             select: () => {
               this.tableViewManager.propertyAdd({
                 id: this.column.id,
@@ -425,7 +411,7 @@ export class DatabaseHeaderColumn extends SignalWatcher(
           {
             type: 'action',
             name: 'Insert Right Column',
-            icon: InsertRightIcon(),
+            prefix: InsertRightIcon(),
             select: () => {
               this.tableViewManager.propertyAdd({
                 id: this.column.id,
@@ -448,7 +434,7 @@ export class DatabaseHeaderColumn extends SignalWatcher(
           {
             type: 'action',
             name: 'Move Left',
-            icon: MoveLeftIcon(),
+            prefix: MoveLeftIcon(),
             hide: () => this.column.isFirst,
             select: () => {
               const preId = this.tableViewManager.propertyPreGet(
@@ -466,7 +452,7 @@ export class DatabaseHeaderColumn extends SignalWatcher(
           {
             type: 'action',
             name: 'Move Right',
-            icon: MoveRightIcon(),
+            prefix: MoveRightIcon(),
             hide: () => this.column.isLast,
             select: () => {
               const nextId = this.tableViewManager.propertyNextGet(
@@ -484,11 +470,11 @@ export class DatabaseHeaderColumn extends SignalWatcher(
           {
             type: 'group',
             name: 'col-ops-p2',
-            children: () => [
+            items: [
               {
                 type: 'action',
                 name: 'Delete Column',
-                icon: DeleteIcon(),
+                prefix: DeleteIcon(),
                 hide: () =>
                   !this.column.delete || this.column.type$.value === 'title',
                 select: () => {
@@ -633,7 +619,7 @@ const createDragPreview = (
   };
 };
 
-function numberFormatConfig(column: Property): NormalMenu {
+function numberFormatConfig(column: Property): NormalMenuConfig {
   return {
     type: 'custom',
     render: () =>

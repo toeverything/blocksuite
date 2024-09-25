@@ -97,6 +97,7 @@ export class RecordField extends SignalWatcher(
     .field-content.is-focus {
       border: 1px solid var(--affine-primary-color);
     }
+
     .field-content.empty::before {
       content: 'Empty';
       color: var(--affine-text-disable-color);
@@ -120,17 +121,16 @@ export class RecordField extends SignalWatcher(
     const properties = this.view.detailProperties$.value;
     popMenu(ele, {
       options: {
-        input: inputConfig(this.column),
         items: [
           {
             type: 'group',
             name: 'Column Prop Group ',
-            children: () => [typeConfig(this.column)],
+            items: [inputConfig(this.column), typeConfig(this.column)],
           },
           {
             type: 'action',
             name: 'Duplicate Column',
-            icon: DuplicateIcon(),
+            prefix: DuplicateIcon(),
             hide: () =>
               !this.column.duplicate || this.column.type$.value === 'title',
             select: () => {
@@ -140,7 +140,7 @@ export class RecordField extends SignalWatcher(
           {
             type: 'action',
             name: 'Move Up',
-            icon: html` <div
+            prefix: html` <div
               style="transform: rotate(90deg);display:flex;align-items:center;"
             >
               ${MoveLeftIcon()}
@@ -161,7 +161,7 @@ export class RecordField extends SignalWatcher(
           {
             type: 'action',
             name: 'Move Down',
-            icon: html` <div
+            prefix: html` <div
               style="transform: rotate(90deg);display:flex;align-items:center;"
             >
               ${MoveRightIcon()}
@@ -184,11 +184,11 @@ export class RecordField extends SignalWatcher(
           {
             type: 'group',
             name: 'operation',
-            children: () => [
+            items: [
               {
                 type: 'action',
                 name: 'Delete Column',
-                icon: DeleteIcon(),
+                prefix: DeleteIcon(),
                 hide: () =>
                   !this.column.delete || this.column.type$.value === 'title',
                 select: () => {

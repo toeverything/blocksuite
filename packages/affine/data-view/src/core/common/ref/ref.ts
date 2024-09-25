@@ -71,7 +71,7 @@ export class VariableRefView extends WithDisposable(ShadowlessElement) {
         this.vars.map(v => ({
           type: 'action',
           name: v.name,
-          icon: renderUniLit(v.icon, {}),
+          prefix: renderUniLit(v.icon, {}),
           select: () => {
             this.setData({
               type: 'ref',
@@ -117,7 +117,7 @@ export const popCreateFilter = (
       ...props.vars.map(v => ({
         type: 'action' as const,
         name: v.name,
-        icon: renderUniLit(v.icon, {}),
+        prefix: renderUniLit(v.icon, {}),
         select: () => {
           props.onSelect(
             firstFilterByRef(props.vars, {
@@ -130,11 +130,11 @@ export const popCreateFilter = (
       {
         type: 'group',
         name: '',
-        children: () => [
+        items: [
           {
             type: 'action',
             name: 'Add filter group',
-            icon: AddCursorIcon(),
+            prefix: AddCursorIcon(),
             select: () => {
               props.onSelect(firstFilterInGroup(props.vars));
             },

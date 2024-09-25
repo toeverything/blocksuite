@@ -146,17 +146,19 @@ export class DataViewKanban extends DataViewBase<
       const ele = e.currentTarget as HTMLElement;
       popMenu(ele, {
         options: {
-          input: {
-            onComplete: text => {
-              const column = this.groupManager.property$.value;
-              if (column) {
-                column.dataUpdate(
-                  () => addGroup(text, column.data$.value) as never
-                );
-              }
+          items: [
+            {
+              type: 'input',
+              onComplete: text => {
+                const column = this.groupManager.property$.value;
+                if (column) {
+                  column.dataUpdate(
+                    () => addGroup(text, column.data$.value) as never
+                  );
+                }
+              },
             },
-          },
-          items: [],
+          ],
         },
       });
     };

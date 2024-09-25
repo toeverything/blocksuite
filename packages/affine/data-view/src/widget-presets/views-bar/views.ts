@@ -71,7 +71,7 @@ export class DataViewHeaderViews extends WidgetBase {
         return {
           type: 'action',
           name: v.model.defaultName,
-          icon: html`<uni-lit .uni=${v.renderer.icon}></uni-lit>`,
+          prefix: html`<uni-lit .uni=${v.renderer.icon}></uni-lit>`,
           select: () => {
             const id = this.viewManager.viewAdd(v.type);
             this.viewManager.setCurrentView(id);
@@ -92,7 +92,7 @@ export class DataViewHeaderViews extends WidgetBase {
         const view = this.viewManager.viewGet(id);
         return {
           type: 'action' as const,
-          icon: html`<uni-lit .uni=${this.getRenderer(id).icon}></uni-lit>`,
+          prefix: html`<uni-lit .uni=${this.getRenderer(id).icon}></uni-lit>`,
           name: view.data$.value?.name ?? '',
           label: () => html`${view.data$.value?.name}`,
           isSelected: this.viewManager.currentViewId$.value === id,
@@ -111,19 +111,18 @@ export class DataViewHeaderViews extends WidgetBase {
       {
         type: 'group',
         name: '',
-        hide: () => this.readonly,
-        children: () =>
-          this.dataSource.viewMetas.map(v => {
-            return {
-              type: 'action',
-              name: `Create ${v.model.defaultName}`,
-              icon: html`<uni-lit .uni=${v.renderer.icon}></uni-lit>`,
-              select: () => {
-                const id = this.viewManager.viewAdd(v.type);
-                this.viewManager.setCurrentView(id);
-              },
-            };
-          }),
+        items: this.dataSource.viewMetas.map(v => {
+          return {
+            type: 'action',
+            name: `Create ${v.model.defaultName}`,
+            hide: () => this.readonly,
+            prefix: html`<uni-lit .uni=${v.renderer.icon}></uni-lit>`,
+            select: () => {
+              const id = this.viewManager.viewAdd(v.type);
+              this.viewManager.setCurrentView(id);
+            },
+          };
+        }),
       },
     ]);
   };
@@ -140,19 +139,20 @@ export class DataViewHeaderViews extends WidgetBase {
     }
     popMenu(target, {
       options: {
-        input: {
-          initValue: view.data$.value?.name,
-          onComplete: text => {
-            view.dataUpdate(_data => ({
-              name: text,
-            }));
-          },
-        },
         items: [
+          {
+            type: 'input',
+            initialValue: view.data$.value?.name,
+            onComplete: text => {
+              view.dataUpdate(_data => ({
+                name: text,
+              }));
+            },
+          },
           {
             type: 'action',
             name: 'Edit View',
-            icon: renderUniLit(this.getRenderer(id).icon, {}),
+            prefix: renderUniLit(this.getRenderer(id).icon, {}),
             select: () => {
               this.closest('affine-data-view-renderer')
                 ?.querySelector('data-view-header-tools-view-options')
@@ -163,7 +163,7 @@ export class DataViewHeaderViews extends WidgetBase {
             type: 'action',
             name: 'Move Left',
             hide: () => index === 0,
-            icon: MoveLeftIcon(),
+            prefix: MoveLeftIcon(),
             select: () => {
               const targetId = views[index - 1];
               this.viewManager.moveTo(
@@ -175,7 +175,7 @@ export class DataViewHeaderViews extends WidgetBase {
           {
             type: 'action',
             name: 'Move Right',
-            icon: MoveRightIcon(),
+            prefix: MoveRightIcon(),
             hide: () => index === views.length - 1,
             select: () => {
               const targetId = views[index + 1];
@@ -188,7 +188,7 @@ export class DataViewHeaderViews extends WidgetBase {
           {
             type: 'action',
             name: 'Duplicate',
-            icon: DuplicateIcon(),
+            prefix: DuplicateIcon(),
             select: () => {
               this.viewManager.viewDuplicate(id);
             },
@@ -196,11 +196,11 @@ export class DataViewHeaderViews extends WidgetBase {
           {
             type: 'group',
             name: '',
-            children: () => [
+            items: [
               {
                 type: 'action',
                 name: 'Delete View',
-                icon: DeleteIcon(),
+                prefix: DeleteIcon(),
                 select: () => {
                   view.delete();
                 },

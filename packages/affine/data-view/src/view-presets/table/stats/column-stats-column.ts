@@ -1,5 +1,5 @@
 import {
-  type Menu,
+  type MenuConfig,
   popFilterableSimpleMenu,
 } from '@blocksuite/affine-components/context-menu';
 import { ShadowlessElement } from '@blocksuite/block-std';
@@ -101,7 +101,7 @@ export class DatabaseColumnStatsCell extends SignalWatcher(
   });
 
   openMenu = (ev: MouseEvent) => {
-    const menus: Menu[] = Object.entries(this.groups$.value).map(
+    const menus: MenuConfig[] = Object.entries(this.groups$.value).map(
       ([group, funcs]) => {
         return {
           type: 'sub-menu',

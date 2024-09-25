@@ -23,17 +23,19 @@ export class NumberGroupView extends BaseGroup<NonNullable<unknown>, number> {
     }
     popMenu(this, {
       options: {
-        input: {
-          initValue: this.value ? `${this.value * 10}` : '',
-          onComplete: text => {
-            const num = Number.parseFloat(text);
-            if (Number.isNaN(num)) {
-              return;
-            }
-            this.updateValue?.(num);
+        items: [
+          {
+            type: 'input',
+            initialValue: this.value ? `${this.value * 10}` : '',
+            onComplete: text => {
+              const num = Number.parseFloat(text);
+              if (Number.isNaN(num)) {
+                return;
+              }
+              this.updateValue?.(num);
+            },
           },
-        },
-        items: [],
+        ],
       },
     });
   };

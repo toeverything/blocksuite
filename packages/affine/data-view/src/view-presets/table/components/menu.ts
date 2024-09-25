@@ -44,11 +44,11 @@ export const popRowMenu = (
       {
         type: 'group',
         name: '',
-        children: () => [
+        items: [
           {
             type: 'action',
             name: 'Copy',
-            icon: html` <div
+            prefix: html` <div
               style="transform: rotate(90deg);display:flex;align-items:center;"
             >
               ${CopyIcon()}
@@ -62,12 +62,12 @@ export const popRowMenu = (
       {
         type: 'group',
         name: '',
-        children: () => [
+        items: [
           {
             type: 'action',
             name: 'Delete Rows',
             class: 'delete-item',
-            icon: DeleteIcon(),
+            prefix: DeleteIcon(),
             select: () => {
               selectionController.view.rowDelete(rows);
             },
@@ -82,7 +82,7 @@ export const popRowMenu = (
     {
       type: 'action',
       name: 'Expand Row',
-      icon: ExpandFullIcon(),
+      prefix: ExpandFullIcon(),
       select: () => {
         openDetail(dataViewEle, row.id, selectionController);
       },
@@ -94,7 +94,7 @@ export const popRowMenu = (
     //     {
     //       type: 'action',
     //       name: 'Copy',
-    //       icon: CopyIcon,
+    //       prefix: CopyIcon,
     //       select: () => {
     //         //TODO
     //       },
@@ -102,7 +102,7 @@ export const popRowMenu = (
     //     {
     //       type: 'action',
     //       name: 'Paste',
-    //       icon: PasteIcon,
+    //       prefix: PasteIcon,
     //       select: () => {
     //         //TODO
     //       },
@@ -112,11 +112,11 @@ export const popRowMenu = (
     {
       type: 'group',
       name: '',
-      children: () => [
+      items: [
         {
           type: 'action',
           name: 'Insert Before',
-          icon: html` <div
+          prefix: html` <div
             style="transform: rotate(90deg);display:flex;align-items:center;"
           >
             ${MoveLeftIcon()}
@@ -128,7 +128,7 @@ export const popRowMenu = (
         {
           type: 'action',
           name: 'Insert After',
-          icon: html` <div
+          prefix: html` <div
             style="transform: rotate(90deg);display:flex;align-items:center;"
           >
             ${MoveRightIcon()}
@@ -140,7 +140,7 @@ export const popRowMenu = (
         // {
         //   type: 'action',
         //   name: 'Duplicate',
-        //   icon: DuplicateIcon,
+        //   prefix: DuplicateIcon,
         //   select: () => {
         //     selectionController.duplicateRow(rowId);
         //   },
@@ -150,12 +150,12 @@ export const popRowMenu = (
     {
       type: 'group',
       name: '',
-      children: () => [
+      items: [
         {
           type: 'action',
           name: 'Delete Row',
           class: 'delete-item',
-          icon: DeleteIcon(),
+          prefix: DeleteIcon(),
           select: () => {
             selectionController.deleteRow(row.id);
           },

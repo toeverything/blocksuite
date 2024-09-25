@@ -1,4 +1,4 @@
-import type { Menu } from '@blocksuite/affine-components/context-menu';
+import type { MenuConfig } from '@blocksuite/affine-components/context-menu';
 import type { TemplateResult } from 'lit';
 
 import { ArrowLeftBigIcon } from '@blocksuite/icons/lit';
@@ -10,7 +10,7 @@ export const menuTitleItem = (
   ops?: {
     right?: TemplateResult;
   }
-): Menu => {
+): MenuConfig => {
   return {
     type: 'custom',
     render: () =>

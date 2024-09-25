@@ -175,7 +175,7 @@ export class FilterRootView extends WithDisposable(ShadowlessElement) {
       {
         type: 'action',
         name: filter.type === 'filter' ? 'Turn into group' : 'Wrap in group',
-        icon: ConvertIcon(),
+        prefix: ConvertIcon(),
         onHover: hover => {
           this.containerClass = hover
             ? { index: i, class: 'hover-style' }
@@ -189,7 +189,7 @@ export class FilterRootView extends WithDisposable(ShadowlessElement) {
       {
         type: 'action',
         name: 'Duplicate',
-        icon: DuplicateIcon(),
+        prefix: DuplicateIcon(),
         onHover: hover => {
           this.containerClass = hover
             ? { index: i, class: 'hover-style' }
@@ -208,11 +208,11 @@ export class FilterRootView extends WithDisposable(ShadowlessElement) {
       {
         type: 'group',
         name: '',
-        children: () => [
+        items: [
           {
             type: 'action',
             name: 'Delete',
-            icon: DeleteIcon(),
+            prefix: DeleteIcon(),
             class: 'delete-item',
             onHover: hover => {
               this.containerClass = hover

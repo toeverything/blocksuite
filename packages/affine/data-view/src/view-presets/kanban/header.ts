@@ -33,9 +33,6 @@ export class KanbanHeader extends SignalWatcher(
   private clickGroup = (e: MouseEvent) => {
     popMenu(e.target as HTMLElement, {
       options: {
-        input: {
-          search: true,
-        },
         items: this.view.properties$.value
           .filter(column => column.id !== this.view.view?.groupBy?.columnId)
           .map(column => {

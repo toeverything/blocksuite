@@ -23,13 +23,15 @@ export class StringGroupView extends BaseGroup<NonNullable<unknown>, string> {
     }
     popMenu(this, {
       options: {
-        input: {
-          initValue: this.value ?? '',
-          onComplete: text => {
-            this.updateValue?.(text);
+        items: [
+          {
+            type: 'input',
+            initialValue: this.value ?? '',
+            onComplete: text => {
+              this.updateValue?.(text);
+            },
           },
-        },
-        items: [],
+        ],
       },
     });
   };

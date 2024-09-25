@@ -1,7 +1,7 @@
 import type { PropertyValues } from 'lit';
 
 import {
-  type Menu,
+  type MenuConfig,
   type MenuOptions,
   popMenu,
 } from '@blocksuite/affine-components/context-menu';
@@ -157,10 +157,6 @@ export const selectGroupByProperty = (
 ): MenuOptions => {
   return {
     onClose,
-    input: {
-      search: true,
-      placeholder: 'Search',
-    },
     items: [
       ...view.propertiesWithoutFilter$.value
         .filter(id => {
@@ -169,13 +165,13 @@ export const selectGroupByProperty = (
           }
           return !!groupByMatcher.match(view.propertyGet(id).dataType$.value);
         })
-        .map<Menu>(id => {
+        .map<MenuConfig>(id => {
           const property = view.propertyGet(id);
           return {
             type: 'action',
             name: property.name$.value,
             isSelected: view.data$.value?.groupBy?.columnId === id,
-            icon: html` <uni-lit .uni="${property.icon}"></uni-lit>`,
+            prefix: html` <uni-lit .uni="${property.icon}"></uni-lit>`,
             select: () => {
               if (
                 view instanceof TableSingleView ||
@@ -189,12 +185,13 @@ export const selectGroupByProperty = (
       {
         type: 'group',
         name: '',
-        hide: () =>
-          view instanceof KanbanSingleView || view.data$.value?.groupBy == null,
-        children: () => [
+        items: [
           {
             type: 'action',
-            icon: DeleteIcon(),
+            prefix: DeleteIcon(),
+            hide: () =>
+              view instanceof KanbanSingleView ||
+              view.data$.value?.groupBy == null,
             class: 'delete-item',
             name: 'Remove Grouping',
             select: () => {
@@ -236,9 +233,6 @@ export const popGroupSetting = (
   const icon = view.IconGet(type);
   const menuHandler = popMenu(target, {
     options: {
-      input: {
-        search: true,
-      },
       items: [
         menuTitleItem('GROUP', () => {
           onBack();
@@ -247,7 +241,7 @@ export const popGroupSetting = (
         {
           type: 'group',
           name: '',
-          children: () => [
+          items: [
             {
               type: 'sub-menu',
               name: 'Group By',
@@ -268,7 +262,7 @@ export const popGroupSetting = (
         {
           type: 'group',
           name: '',
-          children: () => [
+          items: [
             {
               type: 'custom',
               render: () =>
