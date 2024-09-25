@@ -58,6 +58,7 @@ export class LinkPopup extends WithDisposable(LitElement) {
           type="text"
           spellcheck="false"
           placeholder="Paste or type a link"
+          @paste=${this._updateConfirmBtn}
           @input=${this._updateConfirmBtn}
         />
         ${this._confirmBtnTemplate()}
@@ -434,7 +435,9 @@ export class LinkPopup extends WithDisposable(LitElement) {
       return;
     }
     const link = this.linkInput?.value.trim();
-    this.confirmButton.disabled = !(link && isValidUrl(link));
+    const disabled = !(link && isValidUrl(link));
+    this.confirmButton.disabled = disabled;
+    this.confirmButton.active = !disabled;
     this.confirmButton.requestUpdate();
   }
 
