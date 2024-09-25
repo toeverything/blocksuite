@@ -80,8 +80,6 @@ Then you can use the prebuilt `PageEditor` out of the box, with an initialized `
 ::: code-sandbox {coderHeight=420 previewHeight=300}
 
 ```ts /index.ts [active]
-import '@blocksuite/presets/themes/affine.css';
-
 import { createEmptyDoc, PageEditor } from '@blocksuite/presets';
 import { Text } from '@blocksuite/store';
 
