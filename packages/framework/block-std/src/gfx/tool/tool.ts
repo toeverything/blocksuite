@@ -93,3 +93,9 @@ export function GfxToolExtension(
     },
   };
 }
+
+declare global {
+  namespace BlockSuite {
+    interface GfxToolsMap {}
+  }
+}
