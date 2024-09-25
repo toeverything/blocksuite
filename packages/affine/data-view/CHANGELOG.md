@@ -1,5 +1,23 @@
 # @blocksuite/data-view
 
+## 0.17.16
+
+### Patch Changes
+
+- ce9a242: Fix bugs and improve experience:
+
+  - fix slash menu and @ menu issues with IME [#8444](https://github.com/toeverything/blocksuite/pull/8444)
+  - improve trigger way of latex editor [#8445](https://github.com/toeverything/blocksuite/pull/8445)
+  - support in-app link jump [#8499](https://github.com/toeverything/blocksuite/pull/8449)
+  - some ui improvements [#8446](https://github.com/toeverything/blocksuite/pull/8446), [#8450](https://github.com/toeverything/blocksuite/pull/8450)
+
+- Updated dependencies [ce9a242]
+  - @blocksuite/affine-components@0.17.16
+  - @blocksuite/affine-shared@0.17.16
+  - @blocksuite/block-std@0.17.16
+  - @blocksuite/global@0.17.16
+  - @blocksuite/store@0.17.16
+
 ## 0.17.15
 
 ### Patch Changes
