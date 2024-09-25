@@ -60,6 +60,11 @@ export class MenuInput extends MenuFocusable {
     this.disposables.addFromEvent(this, 'click', e => {
       e.stopPropagation();
     });
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        this.inputRef.select();
+      });
+    });
   }
 
   override onPressEnter() {
