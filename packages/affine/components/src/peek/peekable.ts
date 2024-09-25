@@ -1,6 +1,8 @@
 import type { Constructor } from '@blocksuite/global/utils';
 import type { LitElement, TemplateResult } from 'lit';
 
+import { isInsideEdgelessEditor } from '@blocksuite/affine-shared/utils';
+
 import type { PeekableClass, PeekableOptions } from './type.js';
 
 import { PeekableController } from './controller.js';
@@ -64,7 +66,11 @@ export const Peekable =
             }
           });
         }
-        if (actions.includes('shift-click')) {
+        if (
+          actions.includes('shift-click') &&
+          // shift click in edgeless should be selection
+          !isInsideEdgelessEditor(this.std.host)
+        ) {
           this.disposables.addFromEvent(target, 'click', e => {
             if (e.shiftKey && this[symbol].peekable) {
               e.stopPropagation();
