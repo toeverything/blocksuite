@@ -87,13 +87,16 @@ const styles = css`
 
   .display-mode-button-group {
     display: none;
+    position: absolute;
+    right: 8px;
+    top: -6px;
+    padding-top: 8px;
+    padding-bottom: 8px;
     align-items: center;
     gap: 4px;
-    padding: 2px;
     font-size: 12px;
     font-weight: 500;
     line-height: 20px;
-    position: relative;
   }
 
   .card-preview:hover .display-mode-button-group {
@@ -293,7 +296,7 @@ export class OutlineNoteCard extends SignalWatcher(WithDisposable(LitElement)) {
         this._showPopper = display === 'show';
       },
       {
-        mainAxis: 8,
+        mainAxis: 0,
         crossAxis: -60,
       }
     );
