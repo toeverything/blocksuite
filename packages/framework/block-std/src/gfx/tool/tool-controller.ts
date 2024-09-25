@@ -23,7 +23,7 @@ export interface ToolEventTarget {
   addHook(
     evtName: (typeof supportedEvents)[number],
     handler: (evtState: UIEventStateContext) => undefined | boolean
-  ): void;
+  ): () => void;
 }
 
 export type SupportedEvents = (typeof supportedEvents)[number];
@@ -33,9 +33,9 @@ export const eventTarget = Symbol('eventTarget');
 export class ToolController {
   private _disposableGroup = new DisposableGroup();
 
-  private readonly _toolName$ = new Signal<string>('');
-
   private _tools = new Map<string, BaseTool>();
+
+  readonly currentToolName$ = new Signal<string>('');
 
   readonly dragging$ = new Signal<boolean>(false);
 
@@ -54,10 +54,10 @@ export class ToolController {
 
     return {
       get value() {
-        return self._tools.get(self._toolName$.value);
+        return self._tools.get(self.currentToolName$.value);
       },
       peek() {
-        return self._tools.get(self._toolName$.peek());
+        return self._tools.get(self.currentToolName$.peek());
       },
     };
   }
@@ -104,6 +104,13 @@ export class ToolController {
     ) => {
       hooks[evtName] = hooks[evtName] ?? [];
       hooks[evtName].push(handler);
+
+      return () => {
+        const idx = hooks[evtName].indexOf(handler);
+        if (idx !== -1) {
+          hooks[evtName].splice(idx, 1);
+        }
+      };
     };
 
     this._disposableGroup.add(
@@ -150,7 +157,7 @@ export class ToolController {
 
   use(toolName: string, options: Record<string, unknown> = {}) {
     this.currentTool$.peek()?.deactivate();
-    this._toolName$.value = toolName;
+    this.currentToolName$.value = toolName;
     this.currentTool$.peek()?.activate(options);
   }
 }
