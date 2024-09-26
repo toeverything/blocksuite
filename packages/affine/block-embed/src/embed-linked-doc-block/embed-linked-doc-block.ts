@@ -24,11 +24,13 @@ import { property, queryAsync, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type { EmbedLinkedDocBlockConfig } from './embed-linked-doc-config.js';
-
 import { EmbedBlockComponent } from '../common/embed-block-element.js';
 import { renderLinkedDocInCard } from '../common/render-linked-doc.js';
 import { SyncedDocErrorIcon } from '../embed-synced-doc-block/styles.js';
+import {
+  type EmbedLinkedDocBlockConfig,
+  EmbedLinkedDocBlockConfigIdentifier,
+} from './embed-linked-doc-config.js';
 import { styles } from './styles.js';
 import { getEmbedLinkedDocIcons, isLinkToNode } from './utils.js';
 
@@ -186,7 +188,9 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockComponent<EmbedLinke
   };
 
   get config(): EmbedLinkedDocBlockConfig {
-    return this.std.getConfig('affine:embed-linked-doc') || {};
+    return (
+      this.std.provider.getOptional(EmbedLinkedDocBlockConfigIdentifier) || {}
+    );
   }
 
   get docTitle() {
@@ -218,8 +222,10 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockComponent<EmbedLinke
 
   private _handleDoubleClick(event: MouseEvent) {
     if (this.config.handleDoubleClick) {
-      this.config.handleDoubleClick(event, this.host);
-      return;
+      this.config.handleDoubleClick(event, this.host, this.referenceInfo);
+      if (event.defaultPrevented) {
+        return;
+      }
     }
 
     if (isPeekable(this)) {
@@ -239,8 +245,10 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockComponent<EmbedLinke
 
   protected _handleClick(event: MouseEvent) {
     if (this.config.handleClick) {
-      this.config.handleClick(event, this.host);
-      return;
+      this.config.handleClick(event, this.host, this.referenceInfo);
+      if (event.defaultPrevented) {
+        return;
+      }
     }
 
     this._selectBlock();
