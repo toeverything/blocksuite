@@ -3,11 +3,10 @@ import type {
   SurfaceBlockModel,
 } from '@blocksuite/affine-block-surface';
 import type { ConnectorElementModel } from '@blocksuite/affine-model';
+import type { GfxController } from '@blocksuite/block-std/gfx';
 
 import { CommonUtils, Overlay } from '@blocksuite/affine-block-surface';
 import { Bound, deserializeXYWH, Point } from '@blocksuite/global/utils';
-
-import type { EdgelessRootService } from '../edgeless-root-service.js';
 
 import { isConnectable, isTopLevelBlock } from '../utils/query.js';
 
@@ -23,6 +22,8 @@ interface Distance {
 const ALIGN_THRESHOLD = 5;
 
 export class EdgelessSnapManager extends Overlay {
+  static override overlayName: string = 'snap-manager';
+
   private _alignableBounds: Bound[] = [];
 
   /**
@@ -52,17 +53,15 @@ export class EdgelessSnapManager extends Overlay {
   };
 
   private get _surface() {
-    const surfaceModel = this._rootService.doc.getBlockByFlavour(
+    const surfaceModel = this.gfx.doc.getBlockByFlavour(
       'affine:surface'
     )[0] as SurfaceBlockModel;
 
-    return this._rootService.std.view.getBlock(
-      surfaceModel.id
-    ) as SurfaceBlockComponent;
+    return this.gfx.std.view.getBlock(surfaceModel.id) as SurfaceBlockComponent;
   }
 
-  constructor(private _rootService: EdgelessRootService) {
-    super();
+  constructor(gfx: GfxController) {
+    super(gfx);
   }
 
   private _alignDistributeHorizontally(
@@ -340,7 +339,7 @@ export class EdgelessSnapManager extends Overlay {
     const rst = { dx: 0, dy: 0 };
     const threshold = ALIGN_THRESHOLD;
 
-    const { viewport } = this._rootService;
+    const { viewport } = this.gfx;
 
     this._intraGraphicAlignLines = [];
     this._distributedAlignLines = [];
@@ -375,7 +374,7 @@ export class EdgelessSnapManager extends Overlay {
       this._distributedAlignLines.length === 0
     )
       return;
-    const { viewport } = this._rootService;
+    const { viewport } = this.gfx;
     const strokeWidth = 1 / viewport.zoom;
     const offset = 5 / viewport.zoom;
     ctx.strokeStyle = '#1672F3';
@@ -427,7 +426,9 @@ export class EdgelessSnapManager extends Overlay {
     if (alignables.length === 0) return new Bound();
 
     const connectors = alignables.filter(isConnectable).reduce((prev, el) => {
-      const connectors = this._rootService.getConnectors(el);
+      const connectors = (this.gfx.surface as SurfaceBlockModel).getConnectors(
+        el.id
+      );
 
       if (connectors.length > 0) {
         prev = prev.concat(connectors);
@@ -436,15 +437,15 @@ export class EdgelessSnapManager extends Overlay {
       return prev;
     }, [] as ConnectorElementModel[]);
 
-    const { viewport } = this._rootService;
+    const { viewport } = this.gfx;
     const viewportBounds = Bound.from(viewport.viewportBounds);
     this._surface.renderer.addOverlay(this);
-    const canvasElements = this._rootService.elements;
+    const canvasElements = this.gfx.layer.canvasElements;
     const excludes = new Set([...alignables, ...exclude, ...connectors]);
     this._alignableBounds = [];
     (
       [
-        ...this._rootService.blocks,
+        ...this.gfx.layer.blocks,
         ...canvasElements,
       ] as BlockSuite.EdgelessModel[]
     ).forEach(alignable => {

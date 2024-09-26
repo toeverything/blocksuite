@@ -66,6 +66,7 @@ export class CopilotSelectionController extends EdgelessToolController<CopilotSe
     this._dragging = false;
     this.dragStartPoint = [0, 0];
     this.dragLastPoint = [0, 0];
+    // @ts-ignore
     this._edgeless.tools.setEdgelessTool({ type: 'default' });
   }
 
@@ -128,7 +129,7 @@ export class CopilotSelectionController extends EdgelessToolController<CopilotSe
       e.raw.stopPropagation();
       return;
     }
-
+    // @ts-ignore
     this._edgeless.tools.setEdgelessTool({ type: 'default' });
   }
 

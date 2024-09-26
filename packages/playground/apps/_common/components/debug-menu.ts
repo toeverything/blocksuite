@@ -368,8 +368,7 @@ export class DebugMenu extends ShadowlessElement {
     }
 
     const edgelessRootService = rootService as EdgelessRootService;
-    edgelessRootService?.tool.setEdgelessTool({
-      type: 'frameNavigator',
+    edgelessRootService?.gfx.tool.setTool('frameNavigator', {
       mode: 'fit',
     });
   }

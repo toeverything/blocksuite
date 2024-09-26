@@ -36,6 +36,7 @@ import {
 import { BlockComponent } from '@blocksuite/block-std';
 import {
   GfxBlockElementModel,
+  GfxControllerIdentifier,
   type GfxViewportElement,
 } from '@blocksuite/block-std/gfx';
 import { IS_WINDOWS } from '@blocksuite/global/env';
@@ -47,6 +48,7 @@ import {
   throttle,
   Vec,
 } from '@blocksuite/global/utils';
+import { effect } from '@preact/signals-core';
 import { css, html, nothing } from 'lit';
 import { query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
@@ -55,8 +57,6 @@ import type { Viewport } from '../../_common/utils/index.js';
 import type { EdgelessRootBlockWidgetName } from '../types.js';
 import type { EdgelessSelectedRect } from './components/rects/edgeless-selected-rect.js';
 import type { EdgelessRootService } from './edgeless-root-service.js';
-import type { EdgelessToolConstructor } from './services/tools-manager.js';
-import type { EdgelessTool } from './types.js';
 
 import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../../_common/consts.js';
 import { isSelectSingleMindMap } from '../../_common/edgeless/mindmap/index.js';
@@ -68,22 +68,6 @@ import { EdgelessClipboardController } from './clipboard/clipboard.js';
 import { EdgelessToolbar } from './components/toolbar/edgeless-toolbar.js';
 import { calcBoundByOrigin, readImageSize } from './components/utils.js';
 import { EdgelessPageKeyboardManager } from './edgeless-keyboard.js';
-import {
-  BrushToolController,
-  ConnectorToolController,
-  CopilotSelectionController,
-  DefaultToolController,
-  EraserToolController,
-  FrameToolController,
-  LassoToolController,
-  MindmapToolController,
-  NoteToolController,
-  PanToolController,
-  PresentToolController,
-  ShapeToolController,
-  TemplateToolController,
-  TextToolController,
-} from './tools/index.js';
 import { edgelessElementsBound } from './utils/bound-utils.js';
 import {
   DEFAULT_NOTE_HEIGHT,
@@ -183,6 +167,10 @@ export class EdgelessRootBlockComponent extends BlockComponent<
     return this.service?.uiEventDispatcher;
   }
 
+  get gfx() {
+    return this.std.get(GfxControllerIdentifier);
+  }
+
   get slots() {
     return this.service.slots;
   }
@@ -191,10 +179,6 @@ export class EdgelessRootBlockComponent extends BlockComponent<
     return this.model.children.find(
       child => child.flavour === 'affine:surface'
     ) as SurfaceBlockModel;
-  }
-
-  get tools() {
-    return this.service.tool;
   }
 
   get viewport(): Viewport {
@@ -384,12 +368,6 @@ export class EdgelessRootBlockComponent extends BlockComponent<
       ThemeObserver.instance.mode$.subscribe(() => this.surface.refresh())
     );
 
-    disposables.add(this.service.selection);
-    disposables.add(
-      slots.edgelessToolUpdated.on(tool => {
-        this.edgelessTool = tool;
-      })
-    );
     disposables.add(
       slots.cursorUpdated.on(
         throttle((cursor: string) => {
@@ -413,30 +391,6 @@ export class EdgelessRootBlockComponent extends BlockComponent<
           });
       })
     );
-  }
-
-  private _initTools() {
-    const tools = [
-      DefaultToolController,
-      BrushToolController,
-      EraserToolController,
-      TextToolController,
-      ShapeToolController,
-      ConnectorToolController,
-      NoteToolController,
-      FrameToolController,
-      PanToolController,
-      PresentToolController,
-      CopilotSelectionController,
-      LassoToolController,
-      TemplateToolController,
-      MindmapToolController,
-    ] as EdgelessToolConstructor[];
-
-    tools.forEach(tool => {
-      this.service.registerTool(tool);
-    });
-    this.service.tool.mount(this);
   }
 
   private _initViewport() {
@@ -837,7 +791,6 @@ export class EdgelessRootBlockComponent extends BlockComponent<
     });
 
     this.mouseRoot = this.parentElement!;
-    this._initTools();
 
     this._disposables.add(
       this.slots.elementResizeStart.on(() => {
@@ -848,6 +801,13 @@ export class EdgelessRootBlockComponent extends BlockComponent<
     this._disposables.add(
       this.slots.elementResizeEnd.on(() => {
         this._isResizing = false;
+      })
+    );
+
+    this._disposables.add(
+      effect(() => {
+        this.edgelessTool =
+          this.gfx.tool.currentToolOption$.value ?? this.edgelessTool;
       })
     );
   }
@@ -879,7 +839,9 @@ export class EdgelessRootBlockComponent extends BlockComponent<
     this._initPinchEvent();
 
     if (this.doc.readonly) {
-      this.tools.setEdgelessTool({ type: 'pan', panning: true });
+      this.gfx.tool.setTool('pan', { panning: true });
+    } else {
+      this.gfx.tool.setTool('default');
     }
 
     if (this.disableComponents) return;
@@ -996,7 +958,7 @@ export class EdgelessRootBlockComponent extends BlockComponent<
   accessor backgroundElm: HTMLDivElement | null = null;
 
   @state()
-  accessor edgelessTool: EdgelessTool = {
+  accessor edgelessTool: BlockSuite.GfxToolsFullOptionValue = {
     type: localStorage.defaultTool ?? 'default',
   };
 

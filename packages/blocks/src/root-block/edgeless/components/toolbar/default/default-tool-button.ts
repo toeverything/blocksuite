@@ -3,10 +3,9 @@ import {
   HandIcon,
   SelectIcon,
 } from '@blocksuite/affine-components/icons';
+import { effect } from '@preact/signals-core';
 import { css, html, LitElement } from 'lit';
 import { query } from 'lit/decorators.js';
-
-import type { EdgelessTool } from '../../../types.js';
 
 import { getTooltipWithShortcut } from '../../utils.js';
 import { QuickToolMixin } from '../mixins/quick-tool.mixin.js';
@@ -33,7 +32,10 @@ export class EdgelessDefaultToolButton extends QuickToolMixin(LitElement) {
     }
   `;
 
-  override type: EdgelessTool['type'][] = ['default', 'pan'];
+  override type: BlockSuite.GfxToolsFullOptionValue['type'][] = [
+    'default',
+    'pan',
+  ];
 
   private _changeTool() {
     if (this.toolbar.activePopper) {
@@ -43,9 +45,9 @@ export class EdgelessDefaultToolButton extends QuickToolMixin(LitElement) {
     const type = this.edgelessTool?.type;
     if (type !== 'default' && type !== 'pan') {
       if (localStorage.defaultTool === 'default') {
-        this.setEdgelessTool({ type: 'default' });
+        this.setEdgelessTool('default');
       } else if (localStorage.defaultTool === 'pan') {
-        this.setEdgelessTool({ type: 'pan', panning: false });
+        this.setEdgelessTool('pan', { panning: false });
       }
       return;
     }
@@ -53,9 +55,9 @@ export class EdgelessDefaultToolButton extends QuickToolMixin(LitElement) {
     // wait for animation to finish
     setTimeout(() => {
       if (type === 'default') {
-        this.setEdgelessTool({ type: 'pan', panning: false });
+        this.setEdgelessTool('pan', { panning: false });
       } else if (type === 'pan') {
-        this.setEdgelessTool({ type: 'default' });
+        this.setEdgelessTool('default');
       }
       this._fadeIn();
     }, 100);
@@ -77,9 +79,10 @@ export class EdgelessDefaultToolButton extends QuickToolMixin(LitElement) {
       localStorage.defaultTool = 'default';
     }
     this.disposables.add(
-      this.edgeless.slots.edgelessToolUpdated.on(({ type }) => {
-        if (type === 'default' || type === 'pan') {
-          localStorage.defaultTool = type;
+      effect(() => {
+        const tool = this.edgeless.gfx.tool.currentToolName$.value;
+        if (tool === 'default' || tool === 'pan') {
+          localStorage.defaultTool = tool;
         }
       })
     );

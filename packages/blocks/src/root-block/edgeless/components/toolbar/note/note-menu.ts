@@ -1,11 +1,11 @@
 import { AttachmentIcon, LinkIcon } from '@blocksuite/affine-components/icons';
 import { TelemetryProvider } from '@blocksuite/affine-shared/services';
+import { effect } from '@preact/signals-core';
 import { css, html, LitElement } from 'lit';
 import { property, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
 import type { NoteTool } from '../../../tools/note-tool.js';
-import type { EdgelessTool } from '../../../types.js';
 
 import {
   getImageFilesFromLocal,
@@ -49,17 +49,15 @@ export class EdgelessNoteMenu extends EdgelessToolbarToolMixin(LitElement) {
     }
   `;
 
-  override type: EdgelessTool['type'] = 'affine:note';
+  override type: BlockSuite.GfxToolsFullOptionValue['type'] = 'affine:note';
 
   private async _addImages() {
     this._imageLoading = true;
     const imageFiles = await getImageFilesFromLocal();
     const ids = await this.edgeless.addImages(imageFiles);
     this._imageLoading = false;
-    this.edgeless.service.tool.setEdgelessTool(
-      { type: 'default' },
-      { elements: ids, editing: false }
-    );
+    this.edgeless.gfx.tool.setTool('default');
+    this.edgeless.gfx.selection.set({ elements: ids });
   }
 
   private _onHandleLinkButtonClick() {
@@ -90,8 +88,10 @@ export class EdgelessNoteMenu extends EdgelessToolbarToolMixin(LitElement) {
 
   override firstUpdated() {
     this.disposables.add(
-      this.edgeless.slots.edgelessToolUpdated.on(tool => {
-        if (tool.type !== 'affine:note') return;
+      effect(() => {
+        const tool = this.edgeless.gfx.tool.currentToolOption$.value;
+
+        if (tool?.type !== 'affine:note') return;
         this.childFlavour = tool.childFlavour;
         this.childType = tool.childType;
         this.tip = tool.tip;
@@ -133,7 +133,7 @@ export class EdgelessNoteMenu extends EdgelessToolbarToolMixin(LitElement) {
                 const file = await openFileOrFiles();
                 if (!file) return;
                 await this.edgeless.addAttachments([file]);
-                this.edgeless.service.tool.setEdgelessTool({ type: 'default' });
+                this.edgeless.gfx.tool.setTool('default');
                 this.edgeless.std
                   .getOptional(TelemetryProvider)
                   ?.track('CanvasElementAdded', {

@@ -168,13 +168,9 @@ export class EdgelessRootPreviewBlockComponent extends BlockComponent<
   }
 
   private _initSlotEffects() {
-    const { disposables } = this;
-
     this.disposables.add(
       ThemeObserver.instance.mode$.subscribe(() => this.surface.refresh())
     );
-
-    disposables.add(this.service.selection);
   }
 
   override connectedCallback() {

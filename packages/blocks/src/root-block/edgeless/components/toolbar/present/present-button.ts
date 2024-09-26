@@ -1,8 +1,6 @@
 import { FrameNavigatorIcon } from '@blocksuite/affine-components/icons';
 import { css, html, LitElement } from 'lit';
 
-import type { EdgelessTool } from '../../../types.js';
-
 import { QuickToolMixin } from '../mixins/quick-tool.mixin.js';
 import { EdgelessToolbarToolMixin } from '../mixins/tool.mixin.js';
 
@@ -25,7 +23,7 @@ export class EdgelessPresentButton extends QuickToolMixin(
     }
   `;
 
-  override type: EdgelessTool['type'] = 'frameNavigator';
+  override type: BlockSuite.GfxToolsFullOptionValue['type'] = 'frameNavigator';
 
   override render() {
     return html`<edgeless-tool-icon-button

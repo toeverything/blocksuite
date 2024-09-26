@@ -16,13 +16,13 @@ import { debounce, WithDisposable } from '@blocksuite/global/utils';
 import { Slot } from '@blocksuite/store';
 import { autoPlacement, offset } from '@floating-ui/dom';
 import { ContextProvider } from '@lit/context';
+import { effect } from '@preact/signals-core';
 import { baseTheme, cssVar } from '@toeverything/theme';
 import { css, html, LitElement, nothing, unsafeCSS } from 'lit';
 import { query, state } from 'lit/decorators.js';
 import { cache } from 'lit/directives/cache.js';
 
 import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
-import type { EdgelessTool } from '../../types.js';
 import type { MenuPopper } from './common/create-popper.js';
 
 import {
@@ -258,10 +258,6 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
   activePopper: MenuPopper<HTMLElement> | null = null;
 
   edgeless: EdgelessRootBlockComponent;
-
-  setEdgelessTool = (edgelessTool: EdgelessTool) => {
-    this.edgeless.tools.setEdgelessTool(edgelessTool);
-  };
 
   // calculate all the width manually
   private get _availableWidth() {
@@ -546,8 +542,9 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
       ThemeObserver.subscribe(mode => this._themeProvider.setValue(mode))
     );
     this._disposables.add(
-      this.edgeless.slots.edgelessToolUpdated.on(tool => {
-        this.edgelessTool = tool;
+      effect(() => {
+        this.edgelessTool =
+          this.edgeless.gfx.tool.currentToolOption$.value ?? this.edgelessTool;
       })
     );
     this._disposables.add(
@@ -563,7 +560,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
               }
               return;
             }
-            this.setEdgelessTool({ type: 'default' });
+            this.edgeless.gfx.tool.setTool('default');
           },
         },
         { global: true }
@@ -660,7 +657,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
   accessor containerWidth = 1920;
 
   @state()
-  accessor edgelessTool: EdgelessTool = {
+  accessor edgelessTool: BlockSuite.GfxToolsFullOptionValue = {
     type: localStorage.defaultTool ?? 'default',
   };
 

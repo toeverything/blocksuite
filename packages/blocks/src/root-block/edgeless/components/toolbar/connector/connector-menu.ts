@@ -14,7 +14,6 @@ import { computed } from '@preact/signals-core';
 import { css, html, LitElement } from 'lit';
 import { property } from 'lit/decorators.js';
 
-import type { EdgelessTool } from '../../../types.js';
 import type { ColorEvent } from '../../panel/color-panel.js';
 import type { LineWidthEvent } from '../../panel/line-width-panel.js';
 
@@ -102,7 +101,7 @@ export class EdgelessConnectorMenu extends EdgelessToolbarToolMixin(
     return { mode, stroke, strokeWidth };
   });
 
-  override type: EdgelessTool['type'] = 'connector';
+  override type: BlockSuite.GfxToolsFullOptionValue['type'] = 'connector';
 
   override render() {
     const { stroke, strokeWidth, mode } = this._props$.value;

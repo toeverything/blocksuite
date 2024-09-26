@@ -30,10 +30,15 @@ export interface ElementUpdatedData {
   local: boolean;
 }
 
-export type SurfaceMiddleware = (
-  surface: SurfaceBlockModel,
-  hooks: SurfaceBlockModel['hooks']
-) => () => void;
+export type MiddlewareCtx = {
+  type: 'beforeAdd';
+  payload: {
+    type: string;
+    props: Record<string, unknown>;
+  };
+};
+
+export type SurfaceMiddleware = (ctx: MiddlewareCtx) => void;
 
 export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
   private _tree = new TreeManager(this);
@@ -59,6 +64,8 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
 
   protected _elementTypeMap = new Map<string, GfxPrimitiveElementModel[]>();
 
+  protected _middlewares: SurfaceMiddleware[] = [];
+
   protected _surfaceBlockModel = true;
 
   elementAdded = new Slot<{ id: string; local: boolean }>();
@@ -71,19 +78,6 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
   }>();
 
   elementUpdated = new Slot<ElementUpdatedData>();
-
-  /**
-   * Hooks is used to attach extra logic when calling `addElement`、`updateElement`(or assign property directly) and `removeElement`.
-   * It's useful when dealing with relation between different model.
-   */
-  protected hooks = {
-    update: new Slot<Omit<ElementUpdatedData, 'local'>>(),
-    remove: new Slot<{
-      id: string;
-      type: string;
-      model: GfxPrimitiveElementModel;
-    }>(),
-  };
 
   get elementModels() {
     const models: GfxPrimitiveElementModel[] = [];
@@ -350,7 +344,7 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
 
       if (isGroup(element) && oldValues['childIds']) {
         if (element.childIds.length === 0) {
-          this.removeElement(id);
+          this.deleteElement(id);
         }
       }
     });
@@ -375,7 +369,6 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
     this._initElementModels();
     this._initTreeWatcher();
     this._watchGroupRelationChange();
-    this.applyMiddlewares();
   }
 
   addElement<T extends object = Record<string, unknown>>(
@@ -384,6 +377,18 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
     if (this.doc.readonly) {
       throw new Error('Cannot add element in readonly mode');
     }
+
+    const middlewareCtx: MiddlewareCtx = {
+      type: 'beforeAdd',
+      payload: {
+        type: props.type,
+        props,
+      },
+    };
+
+    this._middlewares.forEach(mid => mid(middlewareCtx));
+
+    props = middlewareCtx.payload.props as Partial<T> & { type: string };
 
     const id = nanoid();
 
@@ -403,7 +408,41 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
     return id;
   }
 
-  protected applyMiddlewares() {}
+  applyMiddlewares(middlewares: SurfaceMiddleware[]) {
+    this._middlewares = middlewares;
+  }
+
+  deleteElement(id: string) {
+    if (this.doc.readonly) {
+      throw new Error('Cannot remove element in readonly mode');
+    }
+
+    if (!this.hasElementById(id)) {
+      return;
+    }
+
+    this.doc.transact(() => {
+      const element = this.getElementById(id)!;
+      const group = this.getGroup(id);
+
+      if (element instanceof GfxGroupLikeElementModel) {
+        element.childIds.forEach(childId => {
+          if (this.hasElementById(childId)) {
+            this.deleteElement(childId);
+          } else if (this.doc.hasBlock(childId)) {
+            this.doc.deleteBlock(this.doc.getBlock(childId)!.model);
+          }
+        });
+      }
+
+      if (group) {
+        // eslint-disable-next-line unicorn/prefer-dom-node-remove
+        group.removeChild(id);
+      }
+
+      this.elements.getValue()!.delete(id);
+    });
+  }
 
   override dispose(): void {
     super.dispose();
@@ -414,9 +453,6 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
 
     this._elementModels.forEach(({ unmount }) => unmount());
     this._elementModels.clear();
-
-    this.hooks.update.dispose();
-    this.hooks.remove.dispose();
   }
 
   getContainer(elementId: string) {
@@ -477,38 +513,6 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
     const group = this.getGroup(id);
 
     return group?.type === 'mindmap';
-  }
-
-  removeElement(id: string) {
-    if (this.doc.readonly) {
-      throw new Error('Cannot remove element in readonly mode');
-    }
-
-    if (!this.hasElementById(id)) {
-      return;
-    }
-
-    this.doc.transact(() => {
-      const element = this.getElementById(id)!;
-
-      if (element instanceof GfxGroupLikeElementModel) {
-        element.childIds.forEach(childId => {
-          if (this.hasElementById(childId)) {
-            this.removeElement(childId);
-          } else if (this.doc.hasBlock(childId)) {
-            this.doc.deleteBlock(this.doc.getBlock(childId)!.model);
-          }
-        });
-      }
-
-      this.elements.getValue()!.delete(id);
-
-      this.hooks.remove.emit({
-        id,
-        model: element as GfxPrimitiveElementModel,
-        type: element.type,
-      });
-    });
   }
 
   updateElement<T extends object = Record<string, unknown>>(

@@ -1,12 +1,12 @@
 import type { EditorHost } from '@blocksuite/block-std';
 
 import {
+  createButtonPopper,
   DocModeProvider,
   EdgelessRootService,
   EditPropsStore,
   type NavigatorMode,
 } from '@blocksuite/blocks';
-import { createButtonPopper } from '@blocksuite/blocks';
 import { DisposableGroup, WithDisposable } from '@blocksuite/global/utils';
 import { css, html, LitElement, type PropertyValues } from 'lit';
 import { property, query, state } from 'lit/decorators.js';
@@ -119,7 +119,7 @@ export class FramePanelHeader extends WithDisposable(LitElement) {
     }
 
     setTimeout(() => {
-      this._edgelessRootService?.tool.setEdgelessTool({
+      this._edgelessRootService?.gfx.tool.setTool({
         type: 'frameNavigator',
         mode: this._navigatorMode,
       });

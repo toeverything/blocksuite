@@ -668,7 +668,7 @@ export class MindmapElementModel extends GfxGroupLikeElementModel<MindmapElement
     });
 
     queueMicrotask(() => {
-      removedDescendants.forEach(id => surface.removeElement(id));
+      removedDescendants.forEach(id => surface.deleteElement(id));
     });
 
     // This transaction may not end

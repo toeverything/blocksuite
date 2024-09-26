@@ -7,7 +7,11 @@ import type {
 import type { PointerEventState } from '@blocksuite/block-std';
 import type { IVec } from '@blocksuite/global/utils';
 
-import { ConnectorUtils, MindmapUtils } from '@blocksuite/affine-block-surface';
+import {
+  ConnectorUtils,
+  MindmapUtils,
+  OverlayIdentifier,
+} from '@blocksuite/affine-block-surface';
 import { focusTextModel } from '@blocksuite/affine-components/rich-text';
 import {
   ConnectorElementModel,
@@ -35,7 +39,9 @@ import {
   Vec,
 } from '@blocksuite/global/utils';
 
+import type { FrameOverlay } from '../frame-manager.js';
 import type { EdgelessTool } from '../types.js';
+import type { EdgelessSnapManager } from '../utils/snap-manager.js';
 
 import { isSelectSingleMindMap } from '../../../_common/edgeless/mindmap/index.js';
 import { edgelessElementsBound } from '../utils/bound-utils.js';
@@ -188,10 +194,10 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
   private _toBeMoved: BlockSuite.EdgelessModel[] = [];
 
   private _updateSelectingState = () => {
-    const { tools, service } = this._edgeless;
+    const { gfx, service } = this._edgeless;
     const { selection } = service;
 
-    if (tools.spaceBar) {
+    if (gfx.keyboard.spaceKey$.peek()) {
       /* Move the selection if space is pressed */
       const [moveCurX, moveCurY] = this._dragLastPos;
       const zoom = service.viewport.zoom;
@@ -226,7 +232,9 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     const elements = getTopElements(service.gfx.getElementsByBound(bound));
 
     const set = new Set(
-      tools.shiftKey ? [...elements, ...selection.selectedElements] : elements
+      gfx.keyboard.shiftKey$.peek()
+        ? [...elements, ...selection.selectedElements]
+        : elements
     );
 
     this.edgelessSelectionManager.set({
@@ -249,6 +257,12 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     type: 'default',
   } as DefaultTool;
 
+  get _snapOverlay() {
+    return this._service.std.get(
+      OverlayIdentifier('snap-manager')
+    ) as EdgelessSnapManager;
+  }
+
   override get draggingArea() {
     if (this.dragType === DefaultModeDragType.Selecting) {
       const [startX, startY] = this._service.viewport.toViewCoord(
@@ -269,6 +283,10 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
 
   get edgelessSelectionManager() {
     return this._service.selection;
+  }
+
+  private get frameOverlay() {
+    return this._service.std.get(OverlayIdentifier('frame')) as FrameOverlay;
   }
 
   get readonly() {
@@ -418,7 +436,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     alignBound.x += dx;
     alignBound.y += dy;
 
-    const alignRst = this._service.snap.align(alignBound);
+    const alignRst = this._snapOverlay.align(alignBound);
     const delta = [dx + alignRst.dx, dy + alignRst.dy];
 
     if (shifted) {
@@ -549,8 +567,8 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     );
 
     this._hoveredFrame
-      ? this._service.frameOverlay.highlight(this._hoveredFrame)
-      : this._service.frameOverlay.clear();
+      ? this.frameOverlay.highlight(this._hoveredFrame)
+      : this.frameOverlay.clear();
   }
 
   private _moveLabel(delta: IVec) {
@@ -628,7 +646,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     ) {
       const mindmap = this._toBeMoved[0].group as MindmapElementModel;
 
-      this._alignBound = this._service.snap.setupAlignables(this._toBeMoved, [
+      this._alignBound = this._snapOverlay.setupAlignables(this._toBeMoved, [
         ...(mindmap?.childElements || []),
       ]);
     }
@@ -676,7 +694,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
               );
             }
 
-            this._alignBound = this._service.snap.setupAlignables(
+            this._alignBound = this._snapOverlay.setupAlignables(
               this._toBeMoved
             );
 
@@ -959,8 +977,8 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     this._dragStartPos = [0, 0];
     this._dragLastPos = [0, 0];
     this._selectedBounds = [];
-    this._service.snap.cleanupAlignables();
-    this._service.frameOverlay.clear();
+    this._snapOverlay.cleanupAlignables();
+    this.frameOverlay.clear();
     this._toBeMoved = [];
     this._selectedConnector = null;
     this._selectedConnectorLabelBounds = null;
@@ -1007,7 +1025,8 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
         const dx = (e.x - this._dragStartPos[0]) / zoom;
         const dy = (e.y - this._dragStartPos[1]) / zoom;
         const alignBound = this._alignBound.clone();
-        const shifted = e.keys.shift || this._edgeless.tools.shiftKey;
+        const shifted =
+          e.keys.shift || this._edgeless.gfx.keyboard.shiftKey$.peek();
 
         this._moveContent([dx, dy], alignBound, shifted, true);
         break;
@@ -1095,9 +1114,9 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
         this._service.viewport.toModelCoord(e.x, e.y)
       )
     ) {
-      this._service.frameOverlay.highlight(hovered);
+      this.frameOverlay.highlight(hovered);
     } else {
-      this._service.frameOverlay.clear();
+      this.frameOverlay.clear();
     }
   }
 

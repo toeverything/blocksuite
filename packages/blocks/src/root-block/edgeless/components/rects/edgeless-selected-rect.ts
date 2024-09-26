@@ -15,6 +15,7 @@ import {
   CanvasElementType,
   CommonUtils,
   normalizeShapeBound,
+  OverlayIdentifier,
   TextUtils,
 } from '@blocksuite/affine-block-surface';
 import {
@@ -33,6 +34,7 @@ import {
   requestThrottledConnectedFrame,
   stopPropagation,
 } from '@blocksuite/affine-shared/utils';
+import { type BlockStdScope, stdContext } from '@blocksuite/block-std';
 import { getTopElements } from '@blocksuite/block-std/gfx';
 import {
   assertType,
@@ -42,6 +44,7 @@ import {
   Slot,
   WithDisposable,
 } from '@blocksuite/global/utils';
+import { consume } from '@lit/context';
 import { css, html, LitElement, nothing } from 'lit';
 import { property, state } from 'lit/decorators.js';
 import { ifDefined } from 'lit/directives/if-defined.js';
@@ -49,6 +52,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 
 import type { EdgelessTextBlockComponent } from '../../../../edgeless-text-block/edgeless-text-block.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
+import type { FrameOverlay } from '../../frame-manager.js';
 
 import { EMBED_CARD_HEIGHT } from '../../../../_common/consts.js';
 import { isMindmapNode } from '../../../../_common/edgeless/mindmap/index.js';
@@ -462,7 +466,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
 
     this.edgeless.slots.elementResizeEnd.emit();
 
-    this.edgeless.service.frameOverlay.clear();
+    this.frameOverlay.clear();
   };
 
   private _onDragMove = (
@@ -825,12 +829,12 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     return this._resizeManager.dragDirection;
   }
 
-  get dragging() {
-    return this._resizeManager.dragging || this.edgeless.tools.dragging;
-  }
-
   get edgelessSlots() {
     return this.edgeless.slots;
+  }
+
+  get frameOverlay() {
+    return this.std.get(OverlayIdentifier('frame')) as FrameOverlay;
   }
 
   get resizeMode(): ResizeMode {
@@ -1093,7 +1097,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
 
     frameManager.removeAllChildrenFromFrame(frame);
     frameManager.addElementsToFrame(frame, newChildren);
-    this.edgeless.service.frameOverlay.highlight(frame, true, false);
+    this.frameOverlay.highlight(frame, true, false);
   }
 
   #adjustNote(
@@ -1529,6 +1533,11 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
 
   @property({ attribute: false })
   accessor edgeless!: EdgelessRootBlockComponent;
+
+  @consume({
+    context: stdContext,
+  })
+  accessor std!: BlockStdScope;
 }
 
 declare global {

@@ -31,7 +31,7 @@ export class TextToolController extends EdgelessToolController<TextTool> {
     if (textFlag) {
       const [x, y] = this._service.viewport.toModelCoord(e.x, e.y);
       this._edgeless.std.command.exec('insertEdgelessText', { x, y });
-      this._service.tool.setEdgelessTool({
+      this._edgeless.gfx.tool.setTool({
         type: 'default',
       });
     } else {

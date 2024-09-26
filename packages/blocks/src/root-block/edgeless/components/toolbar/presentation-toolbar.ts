@@ -11,13 +11,13 @@ import {
 import { toast } from '@blocksuite/affine-components/toast';
 import { EditPropsStore } from '@blocksuite/affine-shared/services';
 import { Bound } from '@blocksuite/global/utils';
+import { effect } from '@preact/signals-core';
 import { cssVar } from '@toeverything/theme';
 import { css, html, LitElement, nothing, type PropertyValues } from 'lit';
 import { property, state } from 'lit/decorators.js';
 
 import type { NavigatorMode } from '../../../../_common/edgeless/frame/consts.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
-import type { EdgelessTool } from '../../types.js';
 
 import { isFrameBlock } from '../../utils/query.js';
 import { launchIntoFullscreen } from '../utils.js';
@@ -106,7 +106,7 @@ export class PresentationToolbar extends EdgelessToolbarToolMixin(LitElement) {
 
   private _timer?: ReturnType<typeof setTimeout>;
 
-  override type: EdgelessTool['type'] = 'frameNavigator';
+  override type: BlockSuite.GfxToolsFullOptionValue['type'] = 'frameNavigator';
 
   private get _cachedPresentHideToolbar() {
     return !!this.edgeless.std
@@ -236,17 +236,18 @@ export class PresentationToolbar extends EdgelessToolbarToolMixin(LitElement) {
     }
   }
 
-  override firstUpdated() {
-    const { _disposables, edgeless } = this;
-    const { slots } = edgeless;
+  override connectedCallback(): void {
+    super.connectedCallback();
 
-    this._bindHotKey();
+    const { _disposables, edgeless } = this;
 
     _disposables.add(
-      slots.edgelessToolUpdated.on(tool => {
-        if (tool.type === 'frameNavigator') {
+      effect(() => {
+        const currentTool = this.edgeless.gfx.tool.currentToolOption$.value;
+
+        if (currentTool?.type === 'frameNavigator') {
           this._cachedIndex = this._currentFrameIndex;
-          this._navigatorMode = tool.mode ?? this._navigatorMode;
+          this._navigatorMode = currentTool.mode ?? this._navigatorMode;
           if (isFrameBlock(edgeless.service.selection.selectedElements[0])) {
             this._cachedIndex = this._frames.findIndex(
               frame =>
@@ -265,6 +266,12 @@ export class PresentationToolbar extends EdgelessToolbarToolMixin(LitElement) {
         this.requestUpdate();
       })
     );
+  }
+
+  override firstUpdated() {
+    const { _disposables, edgeless } = this;
+
+    this._bindHotKey();
 
     _disposables.add(
       edgeless.slots.navigatorSettingUpdated.on(({ fillScreen }) => {

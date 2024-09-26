@@ -1,5 +1,4 @@
-import type { Bound, IBound } from './model/bound.js';
-
+import { Bound, type IBound } from './model/bound.js';
 import { PointLocation } from './model/point-location.js';
 import { type IVec, Vec } from './model/vec.js';
 
@@ -117,6 +116,14 @@ export function getQuadBoundsWithRotation(bounds: IBound): DOMRect {
 export function getBoundsWithRotation(bounds: IBound): IBound {
   const { x, y, width: w, height: h } = getQuadBoundsWithRotation(bounds);
   return { x, y, w, h };
+}
+
+export function getUnitedBound(bounds: Bound[]): Bound {
+  if (bounds.length === 0) return new Bound(0, 0, 0, 0);
+
+  return bounds.reduce((pre, bound) => {
+    return pre.unite(bound);
+  }, bounds[0]);
 }
 
 export function lineIntersects(
