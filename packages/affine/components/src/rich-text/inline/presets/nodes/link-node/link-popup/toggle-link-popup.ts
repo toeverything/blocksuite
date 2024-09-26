@@ -8,12 +8,14 @@ export function toggleLinkPopup(
   inlineEditor: AffineInlineEditor,
   type: LinkPopup['type'],
   targetInlineRange: InlineRange,
-  abortController: AbortController
+  abortController: AbortController,
+  openLink: ((e?: MouseEvent) => void) | null = null
 ): LinkPopup {
   const popup = new LinkPopup();
   popup.inlineEditor = inlineEditor;
   popup.type = type;
   popup.targetInlineRange = targetInlineRange;
+  popup.openLink = openLink;
   popup.abortController = abortController;
 
   document.body.append(popup);

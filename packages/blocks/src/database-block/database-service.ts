@@ -5,7 +5,6 @@ import {
   DatabaseBlockSchema,
 } from '@blocksuite/affine-model';
 import { BlockService } from '@blocksuite/block-std';
-import { DatabaseSelection } from '@blocksuite/data-view';
 import { viewPresets } from '@blocksuite/data-view/view-presets';
 
 import {
@@ -57,10 +56,5 @@ export class DatabaseBlockService extends BlockService {
       doc.addBlock('affine:paragraph', {}, parent.id);
     }
     applyPropertyUpdate(blockModel);
-  }
-
-  override mounted(): void {
-    super.mounted();
-    this.selectionManager.register(DatabaseSelection);
   }
 }

@@ -4,7 +4,10 @@ import {
   type AffineInlineEditor,
   getInlineEditorByModel,
 } from '@blocksuite/affine-components/rich-text';
-import { getCurrentNativeRange } from '@blocksuite/affine-shared/utils';
+import {
+  getCurrentNativeRange,
+  matchFlavours,
+} from '@blocksuite/affine-shared/utils';
 import { WidgetComponent } from '@blocksuite/block-std';
 import {
   assertExists,
@@ -153,6 +156,8 @@ export class AffineSlashMenuWidget extends WidgetComponent {
 
       const model = this.host.doc.getBlock(textSelection.blockId)?.model;
       if (!model) return;
+
+      if (matchFlavours(model, this.config.ignoreBlockTypes)) return;
 
       const inlineRange = inlineEditor.getInlineRange();
       if (!inlineRange) return;

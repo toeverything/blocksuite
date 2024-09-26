@@ -60,7 +60,7 @@ export class EmbedEdgelessLinkedDocBlockComponent extends toEdgelessEmbedBlock(
 
   protected override _handleClick(evt: MouseEvent): void {
     if (this.config.handleClick) {
-      this.config.handleClick(evt, this.host);
+      this.config.handleClick(evt, this.host, this.referenceInfo);
       return;
     }
   }

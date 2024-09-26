@@ -4,6 +4,7 @@ import type { Command } from './command/index.js';
 import type { EventOptions, UIEventHandler } from './event/index.js';
 import type { BlockService, LifeCycleWatcher } from './extension/index.js';
 import type { BlockStdScope } from './scope/index.js';
+import type { SelectionConstructor } from './selection/index.js';
 import type { BlockViewType, WidgetViewMapType } from './spec/type.js';
 
 export const BlockServiceIdentifier =
@@ -32,3 +33,6 @@ export const KeymapIdentifier = createIdentifier<{
   getter: (std: BlockStdScope) => Record<string, UIEventHandler>;
   options?: EventOptions;
 }>('Keymap');
+
+export const SelectionIdentifier =
+  createIdentifier<SelectionConstructor>('Selection');

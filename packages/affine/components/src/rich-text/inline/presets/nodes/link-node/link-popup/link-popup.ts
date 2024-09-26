@@ -128,6 +128,11 @@ export class LinkPopup extends WithDisposable(LitElement) {
   private _embedOptions: EmbedOptions | null = null;
 
   private _openLink = () => {
+    if (this.openLink) {
+      this.openLink();
+      return;
+    }
+
     let link = this.currentLink;
     if (!link) return;
     if (!link.match(/^[a-zA-Z]+:\/\//)) {
@@ -161,6 +166,7 @@ export class LinkPopup extends WithDisposable(LitElement) {
           href=${this.currentLink}
           rel="noopener noreferrer"
           target="_blank"
+          @click=${(e: MouseEvent) => this.openLink?.(e)}
         >
           <span>${getHostName(this.currentLink)}</span>
         </a>
@@ -618,6 +624,9 @@ export class LinkPopup extends WithDisposable(LitElement) {
 
   @query('.mock-selection-container')
   accessor mockSelectionContainer!: HTMLDivElement;
+
+  @property({ attribute: false })
+  accessor openLink: ((e?: MouseEvent) => void) | null = null;
 
   @query('.affine-link-popover-container')
   accessor popupContainer!: HTMLDivElement;

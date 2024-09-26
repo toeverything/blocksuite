@@ -106,7 +106,7 @@ export class FrameToolController extends EdgelessToolController<FrameTool> {
       xywh: Bound.fromPoints([this._startPoint, currentPoint]).serialize(),
     });
 
-    this._service.frameOverlay.highlight(this._frame, true);
+    this._service.frameOverlay.highlight(this._frame, true, false);
   }
 
   override onContainerDragStart(e: PointerEventState): void {
