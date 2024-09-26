@@ -67,6 +67,7 @@ export type AdvancedPortalOptions = Omit<
         positionSlot: Slot<ComputePositionReturn>;
         updatePortal: () => void;
       }) => Renderable);
+  positionStrategy?: 'absolute' | 'fixed';
   /**
    * See https://floating-ui.com/docs/computePosition
    */
