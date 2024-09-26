@@ -151,7 +151,6 @@ class ClickController extends PointerControllerBase {
     const context = createContext(event, state);
 
     const run = () => {
-      this._dispatcher.run('pointerUp', context);
       this._dispatcher.run('click', context);
       if (this._pointerDownCount === 2) {
         this._dispatcher.run('doubleClick', context);
