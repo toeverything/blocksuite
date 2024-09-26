@@ -18,7 +18,13 @@ import {
   StdIdentifier,
 } from '../identifier.js';
 import { RangeManager } from '../range/index.js';
-import { SelectionManager } from '../selection/index.js';
+import {
+  BlockSelectionExtension,
+  CursorSelectionExtension,
+  SelectionManager,
+  SurfaceSelectionExtension,
+  TextSelectionExtension,
+} from '../selection/index.js';
 import { ServiceManager } from '../service/index.js';
 import { EditorHost } from '../view/element/index.js';
 import { ViewStore } from '../view/view-store.js';
@@ -37,6 +43,10 @@ const internalExtensions = [
   ViewStore,
   Clipboard,
   GfxController,
+  BlockSelectionExtension,
+  TextSelectionExtension,
+  SurfaceSelectionExtension,
+  CursorSelectionExtension,
 ];
 
 export class BlockStdScope {
