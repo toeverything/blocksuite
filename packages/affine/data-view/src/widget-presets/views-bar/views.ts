@@ -206,7 +206,7 @@ export class DataViewHeaderViews extends WidgetBase {
               },
               {
                 type: 'action',
-                name: 'Delete View',
+                name: 'Delete',
                 prefix: DeleteIcon(),
                 select: () => {
                   view.delete();

@@ -171,7 +171,7 @@ export class DatabaseHeaderColumn extends SignalWatcher(
       return;
     }
     e.preventDefault();
-    this.popMenu(e.target as HTMLElement);
+    this.popMenu(e.currentTarget as HTMLElement);
   };
 
   private _enterWidthDragBar = () => {

@@ -1,5 +1,6 @@
 import { ShadowlessElement } from '@blocksuite/block-std';
 import { SignalWatcher, WithDisposable } from '@blocksuite/global/utils';
+import { ArrowLeftBigIcon, CloseIcon, SearchIcon } from '@blocksuite/icons/lit';
 import {
   autoPlacement,
   autoUpdate,
@@ -11,9 +12,8 @@ import {
   shift,
   type VirtualElement,
 } from '@floating-ui/dom';
-import { css, html } from 'lit';
+import { css, html, nothing } from 'lit';
 import { property } from 'lit/decorators.js';
-import { ifDefined } from 'lit/directives/if-defined.js';
 import { createRef, ref } from 'lit/directives/ref.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
@@ -38,16 +38,28 @@ export class MenuComponent extends SignalWatcher(
       gap: 4px;
     }
 
+    .affine-menu-search-container {
+      position: absolute;
+      left: 0;
+      top: -40px;
+      border-radius: 8px;
+      width: 100%;
+      display: flex;
+      box-shadow: var(--affine-shadow-2);
+      background-color: var(--affine-background-overlay-panel-color);
+      align-items: center;
+      padding-left: 8px;
+    }
+
     .affine-menu-search {
       flex: 1;
-      border-radius: 4px;
+      border-radius: 8px;
       outline: none;
       font-size: 14px;
       line-height: 22px;
       padding: 5px 12px;
-      border: 1px solid var(--affine-border-color);
       width: 100%;
-      margin-bottom: 8px;
+      border: none;
     }
 
     .affine-menu-body {
@@ -83,7 +95,7 @@ export class MenuComponent extends SignalWatcher(
       });
       const length = input.value.length;
       input.setSelectionRange(length, length);
-      this._disposables.addFromEvent(input, 'keydown', e => {
+      this.disposables.addFromEvent(input, 'keydown', e => {
         e.stopPropagation();
         if (e.key === 'Escape') {
           this.menu.close();
@@ -105,12 +117,13 @@ export class MenuComponent extends SignalWatcher(
         }
       });
 
-      this._disposables.addFromEvent(input, 'copy', e => {
+      this.disposables.addFromEvent(input, 'copy', e => {
         e.stopPropagation();
       });
-      this._disposables.addFromEvent(input, 'cut', e => {
+      this.disposables.addFromEvent(input, 'cut', e => {
         e.stopPropagation();
       });
+      this.disposables.addFromEvent(this, 'click', this._clickContainer);
     }
   }
 
@@ -119,6 +132,18 @@ export class MenuComponent extends SignalWatcher(
   }
 
   override render() {
+    return html`
+      ${this.renderSearch()} ${this.renderTitle()}
+      <div class="affine-menu-body">
+        ${this.menu.searchResult$.value.length === 0 && this.menu.isSearchMode
+          ? html` <div class="no-results">No Results</div>`
+          : ''}
+        ${this.menu.searchResult$.value}
+      </div>
+    `;
+  }
+
+  renderSearch() {
     const showSearch =
       this.menu.isSearchMode && this.menu.searchName$.value.length > 0;
     const searchStyle = styleMap({
@@ -128,32 +153,63 @@ export class MenuComponent extends SignalWatcher(
       position: showSearch ? undefined : 'absolute',
       pointerEvents: showSearch ? undefined : 'none',
     });
+
+    return html` <div style=${searchStyle} class="affine-menu-search-container">
+      <div
+        style="display:flex;align-items:center;color: var(--affine-text-secondary-color)"
+      >
+        ${SearchIcon()}
+      </div>
+      <input
+        autocomplete="off"
+        class="affine-menu-search"
+        data-1p-ignore
+        ${ref(this.searchRef)}
+        type="text"
+        value="${this.menu.searchName$.value}"
+        @input="${(e: Event) =>
+          (this.menu.searchName$.value = (e.target as HTMLInputElement).value)}"
+      />
+    </div>`;
+  }
+
+  renderTitle() {
+    const title = this.menu.options.title;
+    if (!title) {
+      return;
+    }
     return html`
       <div
-        class="affine-menu"
-        style=${ifDefined(this.menu.options.style)}
-        @click="${this._clickContainer}"
+        style="display:flex;align-items:center;gap: 4px;min-width: 300px;padding:3px 4px 3px 2px"
+        @mouseenter="${() => this.menu.closeSubMenu()}"
       >
-        <input
-          autocomplete="off"
-          class="affine-menu-search"
-          data-1p-ignore
-          ${ref(this.searchRef)}
-          style=${searchStyle}
-          type="text"
-          value="${this.menu.searchName$.value}"
-          @input="${(e: Event) =>
-            (this.menu.searchName$.value = (
-              e.target as HTMLInputElement
-            ).value)}"
-        />
-        <div class="affine-menu-body">
-          ${this.menu.searchResult$.value.length === 0 && this.menu.isSearchMode
-            ? html` <div class="no-results">No Results</div>`
-            : ''}
-          ${this.menu.searchResult$.value}
+        ${title.onBack
+          ? html` <div
+              @click="${title.onBack}"
+              class="dv-icon-20 dv-hover dv-pd-2 dv-round-4"
+              style="display:flex;"
+            >
+              ${ArrowLeftBigIcon()}
+            </div>`
+          : nothing}
+        <div
+          style="font-weight:500;font-size: 14px;line-height: 22px;color: var(--affine-text-primary-color)"
+        >
+          ${title.text}
         </div>
+        ${title.onClose
+          ? html` <div
+              @click="${title.onClose}"
+              class="dv-icon-20 dv-hover dv-pd-2 dv-round-4"
+              style="display:flex;"
+            >
+              ${CloseIcon()}
+            </div>`
+          : nothing}
       </div>
+      <div
+        style="height: 1px;background-color: var(--affine-divider-color);margin: 4px 0"
+      ></div>
     `;
   }
 

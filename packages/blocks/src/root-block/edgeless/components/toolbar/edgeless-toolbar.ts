@@ -1,6 +1,7 @@
 import {
   type MenuHandler,
   popMenu,
+  popupTargetFromElement,
 } from '@blocksuite/affine-components/context-menu';
 import {
   ArrowLeftSmallIcon,
@@ -13,7 +14,7 @@ import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import { stopPropagation } from '@blocksuite/affine-shared/utils';
 import { debounce, WithDisposable } from '@blocksuite/global/utils';
 import { Slot } from '@blocksuite/store';
-import { offset } from '@floating-ui/dom';
+import { autoPlacement, offset } from '@floating-ui/dom';
 import { ContextProvider } from '@lit/context';
 import { baseTheme, cssVar } from '@toeverything/theme';
 import { css, html, LitElement, nothing, unsafeCSS } from 'lit';
@@ -436,21 +437,26 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
     if (!this._hiddenQuickTools.length) return;
 
     this._moreQuickToolsMenuRef = e.currentTarget;
-    this._moreQuickToolsMenu = popMenu(e.currentTarget as HTMLElement, {
-      placement: 'top',
-      middleware: [
-        offset({
-          mainAxis: (TOOLBAR_HEIGHT - QUICK_TOOL_MORE_SIZE) / 2 + 8,
-        }),
-      ],
-      options: {
-        onClose: () => {
-          this._moreQuickToolsMenu = null;
-          this._moreQuickToolsMenuRef = null;
+    this._moreQuickToolsMenu = popMenu(
+      popupTargetFromElement(e.currentTarget as HTMLElement),
+      {
+        middleware: [
+          autoPlacement({
+            allowedPlacements: ['top'],
+          }),
+          offset({
+            mainAxis: (TOOLBAR_HEIGHT - QUICK_TOOL_MORE_SIZE) / 2 + 8,
+          }),
+        ],
+        options: {
+          onClose: () => {
+            this._moreQuickToolsMenu = null;
+            this._moreQuickToolsMenuRef = null;
+          },
+          items: this._hiddenQuickTools.map(tool => tool.menu!),
         },
-        items: this._hiddenQuickTools.map(tool => tool.menu!),
-      },
-    });
+      }
+    );
   }
 
   private _renderContent() {

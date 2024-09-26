@@ -109,7 +109,6 @@ export const popViewOptions = (
   };
   popMenu(target, {
     options: {
-      style: 'min-width:300px',
       items: [
         {
           type: 'input',
@@ -227,7 +226,7 @@ export const popViewOptions = (
             },
             {
               type: 'action',
-              name: 'Delete View',
+              name: 'Delete',
               prefix: DeleteIcon(),
               select: () => {
                 view.delete();

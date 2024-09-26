@@ -44,7 +44,11 @@ export type MenuConfig = NormalMenuConfig | GroupMenuConfig;
 export type MenuOptions = {
   onComplete?: () => void;
   onClose?: () => void;
-  style?: string;
+  title?: {
+    text: string;
+    onBack?: () => void;
+    onClose?: () => void;
+  };
   disableSearch?: boolean;
   items: MenuConfig[];
 };

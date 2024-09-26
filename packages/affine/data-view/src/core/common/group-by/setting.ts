@@ -23,7 +23,6 @@ import type { GroupRenderProps } from './types.js';
 
 import { KanbanSingleView } from '../../../view-presets/kanban/kanban-view-manager.js';
 import { TableSingleView } from '../../../view-presets/table/table-view-manager.js';
-import { menuTitleItem } from '../../utils/menu-title.js';
 import { renderUniLit } from '../../utils/uni-component/uni-component.js';
 import { dataViewCssVariable } from '../css-variable.js';
 import { groupByMatcher } from './matcher.js';
@@ -235,11 +234,14 @@ export const popGroupSetting = (
   const icon = view.IconGet(type);
   const menuHandler = popMenu(target, {
     options: {
-      items: [
-        menuTitleItem('GROUP', () => {
+      title: {
+        text: 'Group',
+        onBack: () => {
           menuHandler.close();
           onBack();
-        }),
+        },
+      },
+      items: [
         {
           type: 'group',
           name: '',
@@ -274,8 +276,9 @@ export const popGroupSetting = (
           items: [
             {
               type: 'custom',
-              render: () =>
+              render: menu =>
                 html` <data-view-group-setting
+                  @mouseenter="${() => menu.closeSubMenu()}"
                   .view="${view}"
                   .columnId="${groupBy.columnId}"
                 ></data-view-group-setting>`,
