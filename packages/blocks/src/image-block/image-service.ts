@@ -1,5 +1,4 @@
 import { ImageBlockSchema } from '@blocksuite/affine-model';
-import { ImageSelection } from '@blocksuite/affine-shared/selection';
 import {
   DragHandleConfigExtension,
   TelemetryProvider,
@@ -78,8 +77,6 @@ export class ImageBlockService extends BlockService {
 
   override mounted(): void {
     super.mounted();
-
-    this.selectionManager.register(ImageSelection);
 
     this.fileDropManager = new FileDropManager(this, this._fileDropOptions);
   }

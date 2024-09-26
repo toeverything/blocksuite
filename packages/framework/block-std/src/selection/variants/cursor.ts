@@ -1,5 +1,6 @@
 import z from 'zod';
 
+import { SelectionExtension } from '../../extension/selection.js';
 import { BaseSelection } from '../base.js';
 
 const CursorSelectionSchema = z.object({
@@ -43,10 +44,4 @@ export class CursorSelection extends BaseSelection {
   }
 }
 
-declare global {
-  namespace BlockSuite {
-    interface Selection {
-      cursor: typeof CursorSelection;
-    }
-  }
-}
+export const CursorSelectionExtension = SelectionExtension(CursorSelection);

@@ -1,5 +1,6 @@
 import z from 'zod';
 
+import { SelectionExtension } from '../../extension/selection.js';
 import { BaseSelection } from '../base.js';
 
 const BlockSelectionSchema = z.object({
@@ -31,10 +32,4 @@ export class BlockSelection extends BaseSelection {
   }
 }
 
-declare global {
-  namespace BlockSuite {
-    interface Selection {
-      block: typeof BlockSelection;
-    }
-  }
-}
+export const BlockSelectionExtension = SelectionExtension(BlockSelection);
