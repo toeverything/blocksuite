@@ -22,7 +22,7 @@ export type ToSnapshotPayload<Props extends object> = {
   assets: AssetsManager;
 };
 
-export type SnapshotReturn<Props extends object> = {
+export type SnapshotNode<Props extends object> = {
   id: string;
   flavour: string;
   version: number;
@@ -51,9 +51,7 @@ export class BaseBlockTransformer<Props extends object = object> {
 
   fromSnapshot({
     json,
-  }: FromSnapshotPayload):
-    | Promise<SnapshotReturn<Props>>
-    | SnapshotReturn<Props> {
+  }: FromSnapshotPayload): Promise<SnapshotNode<Props>> | SnapshotNode<Props> {
     const { flavour, id, version, props: _props } = json;
 
     const props = this._propsFromSnapshot(_props);

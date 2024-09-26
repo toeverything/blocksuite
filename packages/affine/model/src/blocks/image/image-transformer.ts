@@ -1,6 +1,6 @@
 import type {
   FromSnapshotPayload,
-  SnapshotReturn,
+  SnapshotNode,
   ToSnapshotPayload,
 } from '@blocksuite/store';
 
@@ -11,7 +11,7 @@ import type { ImageBlockProps } from './image-model.js';
 export class ImageBlockTransformer extends BaseBlockTransformer<ImageBlockProps> {
   override async fromSnapshot(
     payload: FromSnapshotPayload
-  ): Promise<SnapshotReturn<ImageBlockProps>> {
+  ): Promise<SnapshotNode<ImageBlockProps>> {
     const snapshotRet = await super.fromSnapshot(payload);
     const sourceId = snapshotRet.props.sourceId;
     if (!payload.assets.isEmpty() && sourceId && !sourceId.startsWith('/'))

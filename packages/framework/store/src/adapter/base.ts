@@ -59,9 +59,9 @@ export abstract class BaseAdapter<AdapterTarget = unknown> {
     this.job = job;
   }
 
-  async fromBlock(mode: DraftModel) {
+  async fromBlock(model: DraftModel) {
     try {
-      const blockSnapshot = await this.job.blockToSnapshot(mode);
+      const blockSnapshot = await this.job.blockToSnapshot(model);
       if (!blockSnapshot) return;
       return await this.fromBlockSnapshot({
         snapshot: blockSnapshot,

@@ -3,6 +3,7 @@ import { Slot } from '@blocksuite/global/utils';
 
 import type { BlockModel, BlockSchemaType } from '../schema/index.js';
 import type { Doc, DocCollection, DocMeta } from '../store/index.js';
+import type { DraftModel } from './draft.js';
 import type {
   BeforeExportPayload,
   BeforeImportPayload,
@@ -19,7 +20,6 @@ import type {
 
 import { AssetsManager } from './assets.js';
 import { BaseBlockTransformer } from './base.js';
-import { type DraftModel, toDraftModel } from './draft.js';
 import { Slice } from './slice.js';
 import {
   BlockSnapshotSchema,
@@ -33,7 +33,19 @@ export type JobConfig = {
   middlewares?: JobMiddleware[];
 };
 
-function nextTick(callback: () => void) {
+interface FlatSnapshot {
+  snapshot: BlockSnapshot;
+  parentId?: string;
+  index?: number;
+}
+
+interface DraftBlockTreeNode {
+  draft: DraftModel;
+  snapshot: BlockSnapshot;
+  children: Array<DraftBlockTreeNode>;
+}
+
+export function nextTick(callback: () => void) {
   if (typeof requestIdleCallback !== 'undefined') {
     return Number(requestIdleCallback(callback));
   } else {
@@ -46,11 +58,7 @@ export class Job {
 
   private readonly _assetsManager: AssetsManager;
 
-  private _batchCounter = 0;
-
   private readonly _collection: DocCollection;
-
-  private readonly _pendingOperations: (() => void)[] = [];
 
   private readonly _slots: JobSlots = {
     beforeImport: new Slot<BeforeImportPayload>(),
@@ -58,8 +66,6 @@ export class Job {
     beforeExport: new Slot<BeforeExportPayload>(),
     afterExport: new Slot<FinalPayload>(),
   };
-
-  private _unblockTimer?: number;
 
   blockToSnapshot = async (
     model: DraftModel
@@ -188,13 +194,13 @@ export class Job {
   ): Promise<BlockModel | undefined> => {
     try {
       BlockSnapshotSchema.parse(snapshot);
-      const model = await this._batchSnapshotToBlock(
+      const model = await this._parallelSnapshotToBlock(
         snapshot,
         doc,
         parent,
         index
       );
-
+      if (!model) return;
       return model;
     } catch (error) {
       console.error(`Error when transforming snapshot to block:`);
@@ -268,15 +274,17 @@ export class Job {
       const { content, pageVersion, workspaceVersion, workspaceId, pageId } =
         snapshot;
 
-      const contentBlocks: BlockModel[] = [];
-      for (const [i, block] of content.entries()) {
-        contentBlocks.push(
-          await this._batchSnapshotToBlock(block, doc, parent, (index ?? 0) + i)
-        );
-      }
+      const contentPromises = Promise.all(
+        content.map((block, i) =>
+          this._parallelSnapshotToBlock(block, doc, parent, (index ?? 0) + i)
+        )
+      );
+      const contentBlocks = (await contentPromises).filter(
+        block => block !== null
+      );
 
       const slice = new Slice({
-        content: contentBlocks.map(block => toDraftModel(block)),
+        content: contentBlocks.map(block => block),
         pageVersion,
         workspaceVersion,
         workspaceId,
@@ -343,63 +351,6 @@ export class Job {
     });
   }
 
-  /**
-   * Task Execution Strategy:
-   * 1. Execute first 100 tasks immediately.
-   * 2. Queue subsequent tasks when batch limit (100) is reached.
-   * 3. Process queued tasks in batches of up to 100 every tick.
-   * 4. Continue processing until queue is empty.
-   *
-   * This approach balances responsiveness and system load,
-   * ensuring all tasks are processed without overwhelming resources.
-   */
-  private async _batchSnapshotToBlock(
-    snapshot: BlockSnapshot,
-    doc: Doc,
-    parent?: string,
-    index?: number
-  ) {
-    return new Promise<BlockModel>(resolve => {
-      const batchLimit = 100;
-      if (this._batchCounter < batchLimit) {
-        // Execute immediately if within batch limit
-        resolve(this._snapshotToBlock(snapshot, doc, parent, index));
-      } else {
-        // Queue the operation if batch limit is reached
-        this._pendingOperations.push(() => {
-          resolve(this._snapshotToBlock(snapshot, doc, parent, index));
-        });
-      }
-      this._batchCounter++;
-
-      if (!this._unblockTimer) {
-        const processQueue = () => {
-          const operationsToProcess = Math.min(
-            this._pendingOperations.length,
-            batchLimit
-          );
-          for (let i = 0; i < operationsToProcess; i++) {
-            this._pendingOperations.shift()?.();
-          }
-          // Decrease the batch counter, but ensure it doesn't go below 0
-          this._batchCounter = Math.max(
-            0,
-            this._batchCounter - operationsToProcess
-          );
-          this._unblockTimer = undefined;
-
-          // If there are still pending operations, set another timer
-          if (this._pendingOperations.length > 0) {
-            this._unblockTimer = nextTick(processQueue);
-          }
-        };
-
-        // Initialize the timer to process the queue
-        this._unblockTimer = nextTick(processQueue);
-      }
-    });
-  }
-
   private async _blockToSnapshot(model: DraftModel): Promise<BlockSnapshot> {
     this._slots.beforeExport.emit({
       type: 'block',
@@ -430,6 +381,43 @@ export class Job {
     return snapshot;
   }
 
+  private async _convertSnapshotToDraftModel(
+    flat: FlatSnapshot
+  ): Promise<DraftModel | undefined> {
+    try {
+      // this._slots.beforeImport.emit({
+      //   type: 'block',
+      //   snapshot: flat.snapshot,
+      //   parent: flat.parentId,
+      //   index: flat.index,
+      // });
+
+      const { children, flavour } = flat.snapshot;
+      const schema = this._getSchema(flavour);
+      const transformer = this._getTransformer(schema);
+      const { props } = await transformer.fromSnapshot({
+        json: {
+          id: flat.snapshot.id,
+          flavour: flat.snapshot.flavour,
+          props: flat.snapshot.props,
+        },
+        assets: this._assetsManager,
+        children,
+      });
+
+      return {
+        id: flat.snapshot.id,
+        flavour: flat.snapshot.flavour,
+        children: [],
+        ...props,
+      } as DraftModel;
+    } catch (error) {
+      console.error(`Error when transforming snapshot to model data:`);
+      console.error(error);
+      return;
+    }
+  }
+
   private _exportDocMeta(doc: Doc): DocSnapshot['meta'] {
     const docMeta = doc.meta;
 
@@ -445,6 +433,20 @@ export class Job {
       createDate: docMeta.createDate,
       tags: [], // for backward compatibility
     };
+  }
+
+  private _flattenSnapshot(
+    snapshot: BlockSnapshot,
+    flatSnapshots: FlatSnapshot[],
+    parentId?: string,
+    index?: number
+  ) {
+    flatSnapshots.push({ snapshot, parentId, index });
+    if (snapshot.children) {
+      snapshot.children.forEach((child, idx) => {
+        this._flattenSnapshot(child, flatSnapshots, snapshot.id, idx);
+      });
+    }
   }
 
   private _getCollectionMeta() {
@@ -488,63 +490,180 @@ export class Job {
     return schema.transformer?.() ?? new BaseBlockTransformer();
   }
 
-  private async _snapshotToBlock(
+  private _initBlockTree(
+    node: DraftBlockTreeNode,
+    doc: Doc,
+    parentId?: string,
+    index?: number
+  ) {
+    const { draft: model } = node;
+    doc.addBlock(
+      model.flavour as BlockSuite.Flavour,
+      { ...model, id: model.id },
+      parentId,
+      index
+    );
+
+    this._slots.afterImport.emit({
+      type: 'block',
+      model,
+      snapshot: node.snapshot,
+    });
+
+    node.children.forEach((childNode, idx) => {
+      if (childNode) {
+        this._initBlockTree(childNode, doc, model.id, idx);
+      }
+    });
+  }
+
+  private _initDraftTree(
+    node: DraftBlockTreeNode,
+    doc: Doc,
+    parentId?: string,
+    index?: number
+  ) {
+    const { draft, children } = node;
+    doc.addBlock(
+      draft.flavour as BlockSuite.Flavour,
+      { ...draft, id: draft.id },
+      parentId,
+      index
+    );
+
+    children.forEach((childNode, idx) => {
+      if (childNode) {
+        this._initDraftTree(childNode, doc, draft.id, idx);
+      }
+    });
+  }
+
+  private _rebuildBlockTree(
+    draftModels: {
+      draft: DraftModel;
+      snapshot: BlockSnapshot;
+      parentId?: string;
+      index?: number;
+    }[]
+  ): DraftBlockTreeNode {
+    const nodeMap = new Map<string, DraftBlockTreeNode>();
+    // First pass: create nodes and add them to the map
+    draftModels.forEach(({ draft, snapshot }) => {
+      nodeMap.set(draft.id, { draft, snapshot, children: [] });
+    });
+    const root = nodeMap.get(draftModels[0].draft.id) as DraftBlockTreeNode;
+
+    // Second pass: build the tree structure
+    draftModels.forEach(({ draft, parentId, index }) => {
+      const node = nodeMap.get(draft.id);
+      if (!node) return;
+
+      if (parentId) {
+        const parentNode = nodeMap.get(parentId);
+        if (parentNode && index !== undefined) {
+          parentNode.children[index] = node;
+        }
+      }
+    });
+
+    if (!root) {
+      throw new Error('No root node found in the tree');
+    }
+
+    return root;
+  }
+
+  /**
+   * New method to convert snapshot tree to block tree in parallel.
+   * @param snapshot The root snapshot node.
+   * @param doc The document to add blocks to.
+   * @param parent Optional parent block ID.
+   * @param index Optional index position.
+   */
+  async _parallelSnapshotToBlock(
     snapshot: BlockSnapshot,
     doc: Doc,
     parent?: string,
     index?: number
-  ) {
-    this._slots.beforeImport.emit({
-      type: 'block',
-      snapshot,
-      parent,
-      index,
-    });
-    const { children, flavour, props, id } = snapshot;
+  ): Promise<BlockModel | null> {
+    // Phase 1: Flatten the snapshot tree
+    const flatSnapshots: FlatSnapshot[] = [];
+    this._flattenSnapshot(snapshot, flatSnapshots, parent, index);
 
-    const schema = this._getSchema(flavour);
-    const snapshotLeaf = {
-      id,
-      flavour,
-      props,
-    };
-    const transformer = this._getTransformer(schema);
-    const modelData = await transformer.fromSnapshot({
-      json: snapshotLeaf,
-      assets: this._assetsManager,
-      children,
-    });
-
-    doc.addBlock(
-      modelData.flavour as BlockSuite.Flavour,
-      { ...modelData.props, id: modelData.id },
-      parent,
-      index
+    // Phase 2: Convert snapshots to draft models in parallel
+    const blockModels = await Promise.all(
+      flatSnapshots.map(async flat => {
+        const draft = await this._convertSnapshotToDraftModel(flat);
+        if (draft) {
+          draft.id = flat.snapshot.id;
+        }
+        return {
+          draft,
+          snapshot: flat.snapshot,
+          parentId: flat.parentId,
+          index: flat.index,
+        };
+      })
     );
 
-    for (const [childIndex, child] of children.entries()) {
-      await this._batchSnapshotToBlock(child, doc, id, childIndex);
-    }
+    // Filter out the models that failed to convert
+    const validBlockModels = blockModels.filter(item => !!item.draft) as {
+      draft: DraftModel;
+      snapshot: BlockSnapshot;
+      parentId?: string;
+      index?: number;
+    }[];
 
-    const model = doc.getBlockById(id);
-    if (!model) {
-      throw new BlockSuiteError(
-        ErrorCode.TransformerError,
-        `Block not found by id ${id}`
-      );
-    }
-    this._slots.afterImport.emit({
-      type: 'block',
-      snapshot,
-      model,
-      parent,
-      index,
-    });
+    // Phase 3: Rebuild the block tree
+    const blockTree = this._rebuildBlockTree(validBlockModels);
 
-    return model;
+    // Phase 4: Instantiate the block tree
+    this._initBlockTree(blockTree, doc, parent, index);
+
+    return doc.getBlockById(snapshot.id) || null;
   }
 
   reset() {
     this._assetsManager.cleanup();
+  }
+}
+
+export class TaskQueue {
+  private _concurrency: number;
+
+  private _current: number;
+
+  private _queue: Array<() => Promise<void>>;
+
+  constructor(concurrency: number = 100) {
+    this._concurrency = concurrency;
+    this._current = 0;
+    this._queue = [];
+  }
+
+  private _dequeue() {
+    if (this._current >= this._concurrency || this._queue.length === 0) {
+      return;
+    }
+
+    const task = this._queue.shift();
+    if (task) {
+      this._current++;
+      void task().finally(() => {
+        this._current--;
+        this._dequeue();
+      });
+    }
+  }
+
+  enqueue(task: () => Promise<void>) {
+    this._queue.push(task);
+    this._dequeue();
+  }
+
+  async onIdle() {
+    while (this._current > 0 || this._queue.length > 0) {
+      await new Promise(resolve => setTimeout(resolve, 50));
+    }
   }
 }
