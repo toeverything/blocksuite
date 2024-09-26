@@ -61,6 +61,7 @@ export class MenuButton extends MenuFocusable {
     super.connectedCallback();
     this.disposables.addFromEvent(this, 'mouseenter', () => {
       this.data.onHover?.(true);
+      this.menu.closeSubMenu();
     });
     this.disposables.addFromEvent(this, 'mouseleave', () => {
       this.data.onHover?.(false);

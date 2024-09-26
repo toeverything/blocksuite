@@ -1,11 +1,14 @@
 import {
   popFilterableSimpleMenu,
   popMenu,
+  type PopupTarget,
+  popupTargetFromElement,
 } from '@blocksuite/affine-components/context-menu';
 import {
   AddCursorIcon,
   DeleteIcon,
   DuplicateIcon,
+  InfoIcon,
   MoreHorizontalIcon,
   MoveLeftIcon,
   MoveRightIcon,
@@ -13,7 +16,6 @@ import {
 import { css, html } from 'lit';
 import { classMap } from 'lit/directives/class-map.js';
 
-import { renderUniLit } from '../../core/index.js';
 import { WidgetBase } from '../../core/widget/widget-base.js';
 
 export class DataViewHeaderViews extends WidgetBase {
@@ -66,7 +68,7 @@ export class DataViewHeaderViews extends WidgetBase {
 
   _addViewMenu = (event: MouseEvent) => {
     popFilterableSimpleMenu(
-      event.target as HTMLElement,
+      popupTargetFromElement(event.currentTarget as HTMLElement),
       this.dataSource.viewMetas.map(v => {
         return {
           type: 'action',
@@ -83,51 +85,56 @@ export class DataViewHeaderViews extends WidgetBase {
 
   _showMore = (event: MouseEvent) => {
     const views = this.viewManager.views$.value;
-    popFilterableSimpleMenu(event.target as HTMLElement, [
-      ...views.map(id => {
-        const openViewOption = (event: MouseEvent) => {
-          event.stopPropagation();
-          this.openViewOption(event.target as HTMLElement, id);
-        };
-        const view = this.viewManager.viewGet(id);
-        return {
-          type: 'action' as const,
-          prefix: html`<uni-lit .uni=${this.getRenderer(id).icon}></uni-lit>`,
-          name: view.data$.value?.name ?? '',
-          label: () => html`${view.data$.value?.name}`,
-          isSelected: this.viewManager.currentViewId$.value === id,
-          select: () => {
-            this.viewManager.setCurrentView(id);
-          },
-          postfix: html`<div
-            class="dv-hover dv-round-4"
-            @click="${openViewOption}"
-            style="display:flex;align-items:center;"
-          >
-            ${MoreHorizontalIcon()}
-          </div>`,
-        };
-      }),
-      {
-        type: 'group',
-        name: '',
-        items: this.dataSource.viewMetas.map(v => {
+    popFilterableSimpleMenu(
+      popupTargetFromElement(event.currentTarget as HTMLElement),
+      [
+        ...views.map(id => {
+          const openViewOption = (event: MouseEvent) => {
+            event.stopPropagation();
+            this.openViewOption(
+              popupTargetFromElement(event.currentTarget as HTMLElement),
+              id
+            );
+          };
+          const view = this.viewManager.viewGet(id);
           return {
-            type: 'action',
-            name: `Create ${v.model.defaultName}`,
-            hide: () => this.readonly,
-            prefix: html`<uni-lit .uni=${v.renderer.icon}></uni-lit>`,
+            type: 'action' as const,
+            prefix: html`<uni-lit .uni=${this.getRenderer(id).icon}></uni-lit>`,
+            name: view.data$.value?.name ?? '',
+            label: () => html`${view.data$.value?.name}`,
+            isSelected: this.viewManager.currentViewId$.value === id,
             select: () => {
-              const id = this.viewManager.viewAdd(v.type);
               this.viewManager.setCurrentView(id);
             },
+            postfix: html`<div
+              class="dv-hover dv-round-4"
+              @click="${openViewOption}"
+              style="display:flex;align-items:center;"
+            >
+              ${MoreHorizontalIcon()}
+            </div>`,
           };
         }),
-      },
-    ]);
+        {
+          type: 'group',
+          items: this.dataSource.viewMetas.map(v => {
+            return {
+              type: 'action',
+              name: `Create ${v.model.defaultName}`,
+              hide: () => this.readonly,
+              prefix: html`<uni-lit .uni=${v.renderer.icon}></uni-lit>`,
+              select: () => {
+                const id = this.viewManager.viewAdd(v.type);
+                this.viewManager.setCurrentView(id);
+              },
+            };
+          }),
+        },
+      ]
+    );
   };
 
-  openViewOption = (target: HTMLElement, id: string) => {
+  openViewOption = (target: PopupTarget, id: string) => {
     if (this.readonly) {
       return;
     }
@@ -152,7 +159,7 @@ export class DataViewHeaderViews extends WidgetBase {
           {
             type: 'action',
             name: 'Edit View',
-            prefix: renderUniLit(this.getRenderer(id).icon, {}),
+            prefix: InfoIcon(),
             select: () => {
               this.closest('affine-data-view-renderer')
                 ?.querySelector('data-view-header-tools-view-options')
@@ -186,17 +193,17 @@ export class DataViewHeaderViews extends WidgetBase {
             },
           },
           {
-            type: 'action',
-            name: 'Duplicate',
-            prefix: DuplicateIcon(),
-            select: () => {
-              this.viewManager.viewDuplicate(id);
-            },
-          },
-          {
             type: 'group',
             name: '',
             items: [
+              {
+                type: 'action',
+                name: 'Duplicate',
+                prefix: DuplicateIcon(),
+                select: () => {
+                  this.viewManager.viewDuplicate(id);
+                },
+              },
               {
                 type: 'action',
                 name: 'Delete View',
@@ -269,7 +276,10 @@ export class DataViewHeaderViews extends WidgetBase {
       this.viewManager.setCurrentView(id);
       return;
     }
-    this.openViewOption(event.target as HTMLElement, id);
+    this.openViewOption(
+      popupTargetFromElement(event.currentTarget as HTMLElement),
+      id
+    );
   }
 
   override render() {

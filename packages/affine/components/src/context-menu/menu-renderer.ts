@@ -1,13 +1,16 @@
-import type {
-  ClientRectObject,
-  Middleware,
-  Placement,
-  VirtualElement,
-} from '@floating-ui/dom';
-
 import { ShadowlessElement } from '@blocksuite/block-std';
 import { SignalWatcher, WithDisposable } from '@blocksuite/global/utils';
-import { autoUpdate, computePosition, shift } from '@floating-ui/dom';
+import {
+  autoPlacement,
+  autoUpdate,
+  type ClientRectObject,
+  computePosition,
+  type Middleware,
+  offset,
+  type ReferenceElement,
+  shift,
+  type VirtualElement,
+} from '@floating-ui/dom';
 import { css, html } from 'lit';
 import { property } from 'lit/decorators.js';
 import { ifDefined } from 'lit/directives/if-defined.js';
@@ -67,6 +70,7 @@ export class MenuComponent extends SignalWatcher(
   private _clickContainer = (e: MouseEvent) => {
     e.stopPropagation();
     this.focusInput();
+    this.menu.closeSubMenu();
   };
 
   private searchRef = createRef<HTMLInputElement>();
@@ -199,20 +203,36 @@ export const positionToVRect = (x: number, y: number): VirtualElement => {
     },
   };
 };
+export type PopupTarget = {
+  targetRect: ReferenceElement;
+  root: HTMLElement;
+};
+export const popupTargetFromElement = (element: HTMLElement): PopupTarget => {
+  let rect = element.getBoundingClientRect();
+  return {
+    targetRect: {
+      getBoundingClientRect: () => {
+        if (element.isConnected) {
+          return (rect = element.getBoundingClientRect());
+        }
+        return rect;
+      },
+    },
+    root: getDefaultModalRoot(element),
+  };
+};
 export const createPopup = (
-  target: HTMLElement,
+  target: PopupTarget,
   content: HTMLElement,
   options?: {
     onClose?: () => void;
     middleware?: Array<Middleware | null | undefined | false>;
-    placement?: Placement;
     container?: HTMLElement;
   }
 ) => {
-  const modal = createModal(options?.container ?? getDefaultModalRoot(target));
-  autoUpdate(target, content, () => {
-    computePosition(target, content, {
-      placement: options?.placement,
+  const modal = createModal(target.root);
+  autoUpdate(target.targetRect, content, () => {
+    computePosition(target.targetRect, content, {
       middleware: options?.middleware ?? [shift({ crossAxis: true })],
     })
       .then(({ x, y }) => {
@@ -248,10 +268,9 @@ export type MenuHandler = {
 };
 
 export const popMenu = (
-  target: HTMLElement,
+  target: PopupTarget,
   props: {
     options: MenuOptions;
-    placement?: Placement;
     middleware?: Array<Middleware | null | undefined | false>;
     container?: HTMLElement;
   }
@@ -265,16 +284,25 @@ export const popMenu = (
   });
   const close = createPopup(target, menu.menuElement, {
     onClose: props.options.onClose,
-    middleware: props.middleware,
+    middleware: props.middleware ?? [
+      autoPlacement({
+        allowedPlacements: [
+          'bottom-start',
+          'bottom-end',
+          'top-start',
+          'top-end',
+        ],
+      }),
+      offset(4),
+    ],
     container: props.container,
-    placement: props.placement,
   });
   return {
     close,
   };
 };
 export const popFilterableSimpleMenu = (
-  target: HTMLElement,
+  target: PopupTarget,
   options: MenuConfig[],
   onClose?: () => void
 ) => {

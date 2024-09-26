@@ -1,3 +1,5 @@
+import type { PopupTarget } from '@blocksuite/affine-components/context-menu';
+
 import type { TType } from '../../logical/typesystem.js';
 import type { LiteralData } from './types.js';
 
@@ -18,7 +20,7 @@ export const renderLiteral = (
 };
 
 export const popLiteralEdit = (
-  target: HTMLElement,
+  target: PopupTarget,
   type: TType,
   value: unknown,
   onChange: (value: unknown) => void

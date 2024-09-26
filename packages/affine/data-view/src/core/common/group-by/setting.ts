@@ -4,10 +4,11 @@ import {
   type MenuConfig,
   type MenuOptions,
   popMenu,
+  type PopupTarget,
 } from '@blocksuite/affine-components/context-menu';
 import { ShadowlessElement } from '@blocksuite/block-std';
 import { SignalWatcher, WithDisposable } from '@blocksuite/global/utils';
-import { ArrowRightSmallIcon, DeleteIcon } from '@blocksuite/icons/lit';
+import { DeleteIcon } from '@blocksuite/icons/lit';
 import { css, html, unsafeCSS } from 'lit';
 import { property, query } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
@@ -107,7 +108,7 @@ export class GroupSetting extends SignalWatcher(
       return;
     }
     return html`
-      <div style="padding: 7px 12px;">
+      <div style="padding: 7px 0;">
         <div
           style="padding: 0 4px; font-size: 12px;color: var(--affine-text-secondary-color);line-height: 20px;"
         >
@@ -153,6 +154,7 @@ export class GroupSetting extends SignalWatcher(
 
 export const selectGroupByProperty = (
   view: SingleView<TableViewData | KanbanViewData>,
+  onSelect?: (id?: string) => void,
   onClose?: () => void
 ): MenuOptions => {
   return {
@@ -178,6 +180,7 @@ export const selectGroupByProperty = (
                 view instanceof KanbanSingleView
               ) {
                 view.changeGroup(id);
+                onSelect?.(id);
               }
             },
           };
@@ -197,6 +200,7 @@ export const selectGroupByProperty = (
             select: () => {
               if (view instanceof TableSingleView) {
                 view.changeGroup(undefined);
+                onSelect?.();
               }
             },
           },
@@ -206,16 +210,17 @@ export const selectGroupByProperty = (
   };
 };
 export const popSelectGroupByProperty = (
-  target: HTMLElement,
+  target: PopupTarget,
   view: SingleView<TableViewData | KanbanViewData>,
+  onSelect?: () => void,
   onClose?: () => void
 ) => {
   popMenu(target, {
-    options: selectGroupByProperty(view, onClose),
+    options: selectGroupByProperty(view, onSelect, onClose),
   });
 };
 export const popGroupSetting = (
-  target: HTMLElement,
+  target: PopupTarget,
   view: SingleView<TableViewData | KanbanViewData>,
   onBack: () => void
 ) => {
@@ -227,16 +232,13 @@ export const popGroupSetting = (
   if (!type) {
     return;
   }
-  const reopen = () => {
-    popGroupSetting(target, view, onBack);
-  };
   const icon = view.IconGet(type);
   const menuHandler = popMenu(target, {
     options: {
       items: [
         menuTitleItem('GROUP', () => {
-          onBack();
           menuHandler.close();
+          onBack();
         }),
         {
           type: 'group',
@@ -253,9 +255,16 @@ export const popGroupSetting = (
                   ${renderUniLit(icon, {})}
                   ${view.propertyNameGet(groupBy.columnId)}
                 </div>
-                ${ArrowRightSmallIcon()}
               `,
-              options: selectGroupByProperty(view, reopen),
+              label: () => html`
+                <div style="color: var(--affine-text-secondary-color);">
+                  Group By
+                </div>
+              `,
+              options: selectGroupByProperty(view, () => {
+                menuHandler.close();
+                popGroupSetting(target, view, onBack);
+              }),
             },
           ],
         },
@@ -270,6 +279,24 @@ export const popGroupSetting = (
                   .view="${view}"
                   .columnId="${groupBy.columnId}"
                 ></data-view-group-setting>`,
+            },
+          ],
+        },
+        {
+          type: 'group',
+          name: '',
+          items: [
+            {
+              type: 'action',
+              name: 'Remove grouping',
+              prefix: DeleteIcon(),
+              class: 'delete-item',
+              hide: () => !(view instanceof TableSingleView),
+              select: () => {
+                if (view instanceof TableSingleView) {
+                  view.changeGroup(undefined);
+                }
+              },
             },
           ],
         },

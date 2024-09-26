@@ -1,4 +1,7 @@
-import { createPopup } from '@blocksuite/affine-components/context-menu';
+import {
+  createPopup,
+  type PopupTarget,
+} from '@blocksuite/affine-components/context-menu';
 import { ShadowlessElement } from '@blocksuite/block-std';
 import { WithDisposable } from '@blocksuite/global/utils';
 import { css, html } from 'lit';
@@ -139,7 +142,7 @@ declare global {
   }
 }
 export const popFilterModal = (
-  target: HTMLElement,
+  target: PopupTarget,
   props: {
     isRoot: boolean;
     vars: Variable[];

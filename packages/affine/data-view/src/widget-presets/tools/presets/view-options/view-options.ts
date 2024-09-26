@@ -1,4 +1,8 @@
-import { popMenu } from '@blocksuite/affine-components/context-menu';
+import {
+  popMenu,
+  type PopupTarget,
+  popupTargetFromElement,
+} from '@blocksuite/affine-components/context-menu';
 import {
   ArrowRightSmallIcon,
   DeleteIcon,
@@ -6,15 +10,12 @@ import {
   FilterIcon,
   GroupingIcon,
   InfoIcon,
+  LayoutIcon,
   MoreHorizontalIcon,
 } from '@blocksuite/icons/lit';
 import { css, html } from 'lit';
 
 import type { SingleView } from '../../../../core/view-manager/single-view.js';
-import type {
-  KanbanViewData,
-  TableViewData,
-} from '../../../../view-presets/index.js';
 
 import { emptyFilterGroup } from '../../../../core/common/ast.js';
 import {
@@ -24,6 +25,12 @@ import {
 import { popPropertiesSetting } from '../../../../core/common/properties.js';
 import { renderUniLit } from '../../../../core/index.js';
 import { WidgetBase } from '../../../../core/widget/widget-base.js';
+import {
+  KanbanSingleView,
+  type KanbanViewData,
+  TableSingleView,
+  type TableViewData,
+} from '../../../../view-presets/index.js';
 import { popFilterModal } from '../../../filter/filter-modal.js';
 
 const styles = css`
@@ -55,10 +62,10 @@ export class DataViewHeaderToolsViewOptions extends WidgetBase {
 
   clickMoreAction = (e: MouseEvent) => {
     e.stopPropagation();
-    this.openMoreAction(e.target as HTMLElement);
+    this.openMoreAction(popupTargetFromElement(e.currentTarget as HTMLElement));
   };
 
-  openMoreAction = (target: HTMLElement) => {
+  openMoreAction = (target: PopupTarget) => {
     this.showToolBar(true);
     popViewOptions(target, this.view, () => {
       this.showToolBar(false);
@@ -93,7 +100,7 @@ declare global {
   }
 }
 export const popViewOptions = (
-  target: HTMLElement,
+  target: PopupTarget,
   view: SingleView<TableViewData | KanbanViewData>,
   onClose?: () => void
 ) => {
@@ -122,7 +129,6 @@ export const popViewOptions = (
                 prefix: renderUniLit(meta.renderer.icon),
                 isSelected: meta.type === view.manager.currentView$.value.type,
                 select: () => {
-                  console.log(meta.type);
                   view.manager.viewChangeType(
                     view.manager.currentViewId$.value,
                     meta.type
@@ -131,7 +137,12 @@ export const popViewOptions = (
               };
             }),
           },
-          prefix: InfoIcon(),
+          prefix: LayoutIcon(),
+          postfix: html` <div
+            style="font-size: 14px;text-transform: capitalize;"
+          >
+            ${view.type}
+          </div>`,
         },
         {
           type: 'group',
@@ -140,7 +151,10 @@ export const popViewOptions = (
               type: 'action',
               name: 'Properties',
               prefix: InfoIcon(),
-              postfix: ArrowRightSmallIcon(),
+              postfix: html` <div style="font-size: 14px;">
+                  ${view.properties$.value.length} shown
+                </div>
+                ${ArrowRightSmallIcon()}`,
               select: () => {
                 requestAnimationFrame(() => {
                   popPropertiesSetting(target, {
@@ -154,7 +168,12 @@ export const popViewOptions = (
               type: 'action',
               name: 'Filter',
               prefix: FilterIcon(),
-              postfix: ArrowRightSmallIcon(),
+              postfix: html` <div style="font-size: 14px;">
+                  ${view.filter$.value.conditions.length
+                    ? `${view.filter$.value.conditions.length} filters`
+                    : ''}
+                </div>
+                ${ArrowRightSmallIcon()}`,
               select: () => {
                 popFilterModal(target, {
                   vars: view.vars$.value,
@@ -175,11 +194,19 @@ export const popViewOptions = (
               type: 'action',
               name: 'Group',
               prefix: GroupingIcon(),
-              postfix: ArrowRightSmallIcon(),
+              postfix: html` <div style="font-size: 14px;">
+                  ${view instanceof TableSingleView ||
+                  view instanceof KanbanSingleView
+                    ? view.groupManager.property$.value?.name$.value
+                    : ''}
+                </div>
+                ${ArrowRightSmallIcon()}`,
               select: () => {
                 const groupBy = view.data$.value?.groupBy;
                 if (!groupBy) {
-                  popSelectGroupByProperty(target, view);
+                  popSelectGroupByProperty(target, view, () =>
+                    popGroupSetting(target, view, reopen)
+                  );
                 } else {
                   popGroupSetting(target, view, reopen);
                 }

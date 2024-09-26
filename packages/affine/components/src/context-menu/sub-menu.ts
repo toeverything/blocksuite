@@ -1,12 +1,18 @@
 import { ArrowRightSmallIcon } from '@blocksuite/icons/lit';
-import { html, type TemplateResult } from 'lit';
+import {
+  autoPlacement,
+  autoUpdate,
+  computePosition,
+  offset,
+} from '@floating-ui/dom';
+import { html, nothing, type TemplateResult } from 'lit';
 import { property } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 
-import type { MenuOptions } from './menu.js';
 import type { MenuItemRender } from './types.js';
 
 import { MenuFocusable } from './focusable.js';
+import { Menu, type MenuOptions } from './menu.js';
 
 export type MenuSubMenuData = {
   content: () => TemplateResult;
@@ -21,7 +27,33 @@ export class MenuSubMenu extends MenuFocusable {
   }
 
   onMouseEnter() {
-    this.menu.openSubMenu();
+    const focus = this.menu.currentFocused$.value;
+    const menu = new Menu({
+      ...this.data.options,
+      onClose: () => {
+        menu.menuElement.remove();
+        this.menu.focusTo(focus);
+        this.data.options.onClose?.();
+        unsub();
+      },
+    });
+    this.menu.menuElement.parentElement?.append(menu.menuElement);
+    const unsub = autoUpdate(this, menu.menuElement, () => {
+      computePosition(this, menu.menuElement, {
+        middleware: [
+          autoPlacement({
+            allowedPlacements: ['right-start', 'left-start'],
+          }),
+          offset(16),
+        ],
+      })
+        .then(({ x, y }) => {
+          menu.menuElement.style.left = `${x}px`;
+          menu.menuElement.style.top = `${y}px`;
+        })
+        .catch(err => console.error(err));
+    });
+    this.menu.openSubMenu(menu);
   }
 
   override onPressEnter() {
@@ -50,6 +82,7 @@ export const subMenuItems = {
       prefix?: TemplateResult;
       class?: string;
       options: MenuOptions;
+      disableArrow?: boolean;
     },
     menu
   ) => {
@@ -62,7 +95,8 @@ export const subMenuItems = {
           <div class="affine-menu-action-text">
             ${config.label?.() ?? config.name}
           </div>
-          ${config.postfix ?? ArrowRightSmallIcon()}`,
+          ${config.postfix}
+          ${config.disableArrow ? nothing : ArrowRightSmallIcon()} `,
       class: config.class,
       options: config.options,
     };

@@ -1,4 +1,7 @@
-import { popMenu } from '@blocksuite/affine-components/context-menu';
+import {
+  popMenu,
+  popupTargetFromElement,
+} from '@blocksuite/affine-components/context-menu';
 import { ShadowlessElement } from '@blocksuite/block-std';
 import { SignalWatcher, WithDisposable } from '@blocksuite/global/utils';
 import { css } from 'lit';
@@ -31,7 +34,7 @@ export class KanbanHeader extends SignalWatcher(
   static override styles = styles;
 
   private clickGroup = (e: MouseEvent) => {
-    popMenu(e.target as HTMLElement, {
+    popMenu(popupTargetFromElement(e.target as HTMLElement), {
       options: {
         items: this.view.properties$.value
           .filter(column => column.id !== this.view.view?.groupBy?.columnId)

@@ -1,6 +1,8 @@
 import {
   createPopup,
   popMenu,
+  type PopupTarget,
+  popupTargetFromElement,
 } from '@blocksuite/affine-components/context-menu';
 import { rangeWrap } from '@blocksuite/affine-shared/utils';
 import { ShadowlessElement } from '@blocksuite/block-std';
@@ -48,7 +50,7 @@ export class MultiTagSelect extends WithDisposable(ShadowlessElement) {
     if (!option) {
       return;
     }
-    popMenu(e.target as HTMLElement, {
+    popMenu(popupTargetFromElement(e.target as HTMLElement), {
       options: {
         items: [
           {
@@ -464,7 +466,7 @@ declare global {
 }
 
 export const popTagSelect = (
-  target: HTMLElement,
+  target: PopupTarget,
   ops: {
     mode?: 'single' | 'multi';
     value: string[];
@@ -480,10 +482,8 @@ export const popTagSelect = (
   if (ops.mode) {
     component.mode = ops.mode;
   }
-  component.style.width = `${Math.max(
-    ops.minWidth ?? target.offsetWidth,
-    target.offsetWidth
-  )}px`;
+  const width = target.targetRect.getBoundingClientRect().width;
+  component.style.width = `${Math.max(ops.minWidth ?? width, width)}px`;
   component.value = ops.value;
   component.onChange = tags => {
     ops.onChange(tags);

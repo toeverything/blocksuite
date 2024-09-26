@@ -1,5 +1,8 @@
 import { CaptionedBlockComponent } from '@blocksuite/affine-components/caption';
-import { popMenu } from '@blocksuite/affine-components/context-menu';
+import {
+  popMenu,
+  popupTargetFromElement,
+} from '@blocksuite/affine-components/context-menu';
 import {
   CopyIcon,
   DeleteIcon,
@@ -85,19 +88,20 @@ export class DataViewBlockComponent extends CaptionedBlockComponent<DataViewBloc
   `;
 
   private _clickDatabaseOps = (e: MouseEvent) => {
-    popMenu(e.currentTarget as HTMLElement, {
+    popMenu(popupTargetFromElement(e.currentTarget as HTMLElement), {
       options: {
-        input: {
-          initValue: this.model.title,
-          placeholder: 'Untitled',
-          onComplete: text => {
-            this.model.title = text;
-          },
-        },
         items: [
           {
+            type: 'input',
+            initialValue: this.model.title,
+            placeholder: 'Untitled',
+            onComplete: text => {
+              this.model.title = text;
+            },
+          },
+          {
             type: 'action',
-            icon: CopyIcon,
+            prefix: CopyIcon,
             name: 'Copy',
             select: () => {
               const slice = Slice.fromModels(this.doc, [this.model]);
@@ -114,10 +118,10 @@ export class DataViewBlockComponent extends CaptionedBlockComponent<DataViewBloc
           {
             type: 'group',
             name: '',
-            children: () => [
+            items: [
               {
                 type: 'action',
-                icon: DeleteIcon,
+                prefix: DeleteIcon,
                 class: 'delete-item',
                 name: 'Delete Database',
                 select: () => {

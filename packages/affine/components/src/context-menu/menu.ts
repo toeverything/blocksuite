@@ -52,6 +52,8 @@ export type MenuOptions = {
 export class Menu {
   private _currentFocused$ = signal<MenuFocusable>();
 
+  private _subMenu$ = signal<Menu>();
+
   readonly currentFocused$ = computed(() => this._currentFocused$.value);
 
   menuElement: MenuComponent;
@@ -59,9 +61,7 @@ export class Menu {
   searchName$ = signal('');
 
   searchResult$ = computed(() => {
-    return this.options.items
-      .map(item => this.renderItem(item))
-      .filter(item => item != null);
+    return this.renderItems(this.options.items);
   });
 
   get isSearchMode() {
@@ -73,12 +73,22 @@ export class Menu {
     this.menuElement.menu = this;
   }
 
+  private renderItem(item: MenuConfig, index: number) {
+    if (item.type !== 'group' && item.hide?.() === true) {
+      return;
+    }
+    return menus[item.type](item as never, this, index);
+  }
+
   close() {
     this.menuElement.remove();
     this.options.onClose?.();
   }
 
-  closeSubMenu() {}
+  closeSubMenu() {
+    this._subMenu$.value?.close();
+    this._subMenu$.value = undefined;
+  }
 
   focusNext() {
     if (!this._currentFocused$.value) {
@@ -110,25 +120,44 @@ export class Menu {
     list[index - 1]?.focus();
   }
 
-  focusTo(ele: MenuFocusable) {
-    this._currentFocused$.value = ele;
+  focusSearch() {
     this.menuElement.focusInput();
   }
 
-  openSubMenu() {}
+  focusTo(ele?: MenuFocusable) {
+    this.setFocusOnly(ele);
+    this.focusSearch();
+  }
+
+  openSubMenu(menu: Menu) {
+    this.closeSubMenu();
+    this._subMenu$.value = menu;
+  }
 
   pressEnter() {
     this._currentFocused$.value?.onPressEnter();
   }
 
-  renderItem(item: MenuConfig) {
-    if (item.type !== 'group' && item.hide?.() === true) {
-      return;
+  renderItems(items: MenuConfig[]) {
+    const result = [];
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+      if (item.type !== 'group' && item.hide?.() === true) {
+        continue;
+      }
+      const template = this.renderItem(item, result.length);
+      if (template != null) {
+        result.push(template);
+      }
     }
-    return menus[item.type](item as never, this);
+    return result;
   }
 
   search(name: string) {
     return name.toLowerCase().includes(this.searchName$.value.toLowerCase());
+  }
+
+  setFocusOnly(ele?: MenuFocusable) {
+    this._currentFocused$.value = ele;
   }
 }

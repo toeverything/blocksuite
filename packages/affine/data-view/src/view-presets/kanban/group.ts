@@ -1,4 +1,7 @@
-import { popFilterableSimpleMenu } from '@blocksuite/affine-components/context-menu';
+import {
+  popFilterableSimpleMenu,
+  popupTargetFromElement,
+} from '@blocksuite/affine-components/context-menu';
 import { ShadowlessElement } from '@blocksuite/block-std';
 import { SignalWatcher, WithDisposable } from '@blocksuite/global/utils';
 import { AddCursorIcon } from '@blocksuite/icons/lit';
@@ -130,7 +133,7 @@ export class KanbanGroup extends SignalWatcher(
 
   private clickGroupOptions = (e: MouseEvent) => {
     const ele = e.currentTarget as HTMLElement;
-    popFilterableSimpleMenu(ele, [
+    popFilterableSimpleMenu(popupTargetFromElement(ele), [
       {
         type: 'action',
         name: 'Ungroup',

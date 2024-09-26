@@ -33,17 +33,18 @@ export const menuGroupItems = {
       name?: string;
       items: NormalMenuConfig[];
     },
-    menu
+    menu,
+    index
   ) => {
-    const items = config.items
-      .map(item => menu.renderItem(item))
-      .filter(item => item != null);
+    const items = menu.renderItems(config.items);
     if (!items.length) {
       return;
     }
-    const result: TemplateResult = html` <div
-        style="height: 1px;background-color: var(--affine-divider-color);margin: 8px 0"
-      ></div>
+    const result: TemplateResult = html` ${index === 0
+        ? ''
+        : html` <div
+            style="height: 1px;background-color: var(--affine-divider-color);margin: 4px 0"
+          ></div>`}
       <div style="display: flex;flex-direction: column;gap:4px">${items}</div>`;
     return result;
   },

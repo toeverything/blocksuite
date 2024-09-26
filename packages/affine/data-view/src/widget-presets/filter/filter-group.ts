@@ -1,6 +1,9 @@
 import type { TemplateResult } from 'lit';
 
-import { popFilterableSimpleMenu } from '@blocksuite/affine-components/context-menu';
+import {
+  popFilterableSimpleMenu,
+  popupTargetFromElement,
+} from '@blocksuite/affine-components/context-menu';
 import { ShadowlessElement } from '@blocksuite/block-std';
 import { WithDisposable } from '@blocksuite/global/utils';
 import {
@@ -158,7 +161,7 @@ export class FilterGroupView extends WithDisposable(ShadowlessElement) {
       });
       return;
     }
-    popAddNewFilter(e.target as HTMLElement, {
+    popAddNewFilter(popupTargetFromElement(e.currentTarget as HTMLElement), {
       value: this.data,
       onChange: this.setData,
       vars: this.vars,
@@ -166,28 +169,31 @@ export class FilterGroupView extends WithDisposable(ShadowlessElement) {
   };
 
   private _selectOp = (event: MouseEvent) => {
-    popFilterableSimpleMenu(event.target as HTMLElement, [
-      {
-        type: 'action',
-        name: 'And',
-        select: () => {
-          this.setData({
-            ...this.data,
-            op: 'and',
-          });
+    popFilterableSimpleMenu(
+      popupTargetFromElement(event.currentTarget as HTMLElement),
+      [
+        {
+          type: 'action',
+          name: 'And',
+          select: () => {
+            this.setData({
+              ...this.data,
+              op: 'and',
+            });
+          },
         },
-      },
-      {
-        type: 'action',
-        name: 'Or',
-        select: () => {
-          this.setData({
-            ...this.data,
-            op: 'or',
-          });
+        {
+          type: 'action',
+          name: 'Or',
+          select: () => {
+            this.setData({
+              ...this.data,
+              op: 'or',
+            });
+          },
         },
-      },
-    ]);
+      ]
+    );
   };
 
   private _setFilter = (index: number, filter: Filter) => {
@@ -210,7 +216,7 @@ export class FilterGroupView extends WithDisposable(ShadowlessElement) {
 
   private _clickConditionOps(target: HTMLElement, i: number) {
     const filter = this.data.conditions[i];
-    popFilterableSimpleMenu(target, [
+    popFilterableSimpleMenu(popupTargetFromElement(target), [
       {
         type: 'action',
         name: filter.type === 'filter' ? 'Turn into group' : 'Wrap in group',

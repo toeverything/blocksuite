@@ -1,4 +1,7 @@
-import { popFilterableSimpleMenu } from '@blocksuite/affine-components/context-menu';
+import {
+  popFilterableSimpleMenu,
+  type PopupTarget,
+} from '@blocksuite/affine-components/context-menu';
 import {
   CopyIcon,
   DeleteIcon,
@@ -31,7 +34,7 @@ export const openDetail = (
 
 export const popRowMenu = (
   dataViewEle: DataViewRenderer,
-  ele: HTMLElement,
+  ele: PopupTarget,
   selectionController: TableSelectionController
 ) => {
   const selection = selectionController.selection;

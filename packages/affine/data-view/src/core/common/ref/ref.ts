@@ -1,4 +1,8 @@
-import { popFilterableSimpleMenu } from '@blocksuite/affine-components/context-menu';
+import {
+  popFilterableSimpleMenu,
+  type PopupTarget,
+  popupTargetFromElement,
+} from '@blocksuite/affine-components/context-menu';
 import { ShadowlessElement } from '@blocksuite/block-std';
 import { WithDisposable } from '@blocksuite/global/utils';
 import { AddCursorIcon } from '@blocksuite/icons/lit';
@@ -67,7 +71,7 @@ export class VariableRefView extends WithDisposable(ShadowlessElement) {
     super.connectedCallback();
     this.disposables.addFromEvent(this, 'click', e => {
       popFilterableSimpleMenu(
-        e.target as HTMLElement,
+        popupTargetFromElement(e.target as HTMLElement),
         this.vars.map(v => ({
           type: 'action',
           name: v.name,
@@ -104,7 +108,7 @@ declare global {
   }
 }
 export const popCreateFilter = (
-  target: HTMLElement,
+  target: PopupTarget,
   props: {
     vars: Variable[];
     onSelect: (filter: Filter) => void;

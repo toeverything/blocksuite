@@ -1,4 +1,7 @@
-import { popFilterableSimpleMenu } from '@blocksuite/affine-components/context-menu';
+import {
+  popFilterableSimpleMenu,
+  popupTargetFromElement,
+} from '@blocksuite/affine-components/context-menu';
 import { ShadowlessElement } from '@blocksuite/block-std';
 import { SignalWatcher, WithDisposable } from '@blocksuite/global/utils';
 import {
@@ -108,7 +111,7 @@ export class RecordDetail extends SignalWatcher(
 
   _clickAddProperty = () => {
     popFilterableSimpleMenu(
-      this.addPropertyButton,
+      popupTargetFromElement(this.addPropertyButton),
       this.view.propertyMetas.map(meta => {
         return {
           type: 'action',

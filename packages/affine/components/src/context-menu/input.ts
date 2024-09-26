@@ -60,6 +60,9 @@ export class MenuInput extends MenuFocusable {
     this.disposables.addFromEvent(this, 'click', e => {
       e.stopPropagation();
     });
+    this.disposables.addFromEvent(this, 'mouseenter', () => {
+      this.menu.closeSubMenu();
+    });
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
         this.inputRef.select();
@@ -79,6 +82,9 @@ export class MenuInput extends MenuFocusable {
     });
 
     return html`<input
+      @focus="${() => {
+        this.menu.setFocusOnly(this);
+      }}"
       class="${classString}"
       value="${this.data.initialValue}"
       type="text"

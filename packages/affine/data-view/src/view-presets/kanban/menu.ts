@@ -1,4 +1,7 @@
-import { popFilterableSimpleMenu } from '@blocksuite/affine-components/context-menu';
+import {
+  popFilterableSimpleMenu,
+  type PopupTarget,
+} from '@blocksuite/affine-components/context-menu';
 import {
   ArrowRightBigIcon,
   DeleteIcon,
@@ -29,7 +32,7 @@ export const openDetail = (
 
 export const popCardMenu = (
   dataViewEle: DataViewRenderer,
-  ele: HTMLElement,
+  ele: PopupTarget,
   rowId: string,
   selection: KanbanSelectionController
 ) => {

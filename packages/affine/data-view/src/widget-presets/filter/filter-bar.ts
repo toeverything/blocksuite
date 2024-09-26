@@ -1,4 +1,8 @@
-import { createPopup } from '@blocksuite/affine-components/context-menu';
+import {
+  createPopup,
+  type PopupTarget,
+  popupTargetFromElement,
+} from '@blocksuite/affine-components/context-menu';
 import { ShadowlessElement } from '@blocksuite/block-std';
 import { WithDisposable } from '@blocksuite/global/utils';
 import { CloseIcon, FilterIcon, PlusIcon } from '@blocksuite/icons/lit';
@@ -54,7 +58,7 @@ export class FilterBar extends WithDisposable(ShadowlessElement) {
   };
 
   private addFilter = (e: MouseEvent) => {
-    const element = e.target as HTMLElement;
+    const element = popupTargetFromElement(e.target as HTMLElement);
     popCreateFilter(element, {
       vars: this.vars,
       onSelect: filter => {
@@ -70,7 +74,7 @@ export class FilterBar extends WithDisposable(ShadowlessElement) {
     });
   };
 
-  private expandGroup = (position: HTMLElement, i: number) => {
+  private expandGroup = (position: PopupTarget, i: number) => {
     const value = this.data.conditions[i];
     if (value.type !== 'group') {
       return;
@@ -145,11 +149,15 @@ export class FilterBar extends WithDisposable(ShadowlessElement) {
       }
       ins.requestUpdate();
     };
-    const close = createPopup(e.target as HTMLElement, ins, {
-      onClose: () => {
-        this.updateMoreFilterPanel = undefined;
-      },
-    });
+    const close = createPopup(
+      popupTargetFromElement(e.target as HTMLElement),
+      ins,
+      {
+        onClose: () => {
+          this.updateMoreFilterPanel = undefined;
+        },
+      }
+    );
   };
 
   updateMoreFilterPanel?: () => void;
@@ -185,7 +193,7 @@ export class FilterBar extends WithDisposable(ShadowlessElement) {
       ></filter-condition-view>`;
     }
     const expandGroup = (e: MouseEvent) => {
-      this.expandGroup(e.target as HTMLElement, i);
+      this.expandGroup(popupTargetFromElement(e.target as HTMLElement), i);
     };
     const length = condition.conditions.length;
     const text = length > 1 ? `${length} rules` : `${length} rule`;

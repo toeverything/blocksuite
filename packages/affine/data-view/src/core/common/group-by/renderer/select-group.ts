@@ -1,6 +1,7 @@
 import {
   type NormalMenuConfig,
   popMenu,
+  popupTargetFromElement,
 } from '@blocksuite/affine-components/context-menu';
 import { css, html } from 'lit';
 import { classMap } from 'lit/directives/class-map.js';
@@ -46,7 +47,7 @@ export class SelectGroupView extends BaseGroup<
     if (this.readonly) {
       return;
     }
-    popMenu(this, {
+    popMenu(popupTargetFromElement(this), {
       options: {
         items: [
           {
