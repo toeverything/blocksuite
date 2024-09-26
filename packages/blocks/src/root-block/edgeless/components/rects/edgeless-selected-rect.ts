@@ -1093,7 +1093,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
 
     frameManager.removeAllChildrenFromFrame(frame);
     frameManager.addElementsToFrame(frame, newChildren);
-    this.edgeless.service.frameOverlay.highlight(frame, true);
+    this.edgeless.service.frameOverlay.highlight(frame, true, false);
   }
 
   #adjustNote(
