@@ -16,6 +16,7 @@ import {
   EMBED_CARD_WIDTH,
 } from '@blocksuite/affine-shared/consts';
 import { DocModeProvider } from '@blocksuite/affine-shared/services';
+import { matchFlavours } from '@blocksuite/affine-shared/utils';
 import { Bound } from '@blocksuite/global/utils';
 import { DocCollection } from '@blocksuite/store';
 import { html, nothing } from 'lit';
@@ -337,6 +338,7 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockComponent<EmbedLinke
     const isLoading = this._loading;
     const isError = this.isError;
     const isEmpty = this._isDocEmpty() && this.isBannerEmpty;
+    const inCanvas = matchFlavours(this.model.parent, ['affine:surface']);
 
     const cardClassMap = classMap({
       loading: isLoading,
@@ -345,6 +347,7 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockComponent<EmbedLinke
       empty: isEmpty,
       'banner-empty': this.isBannerEmpty,
       'note-empty': this.isNoteContentEmpty,
+      'in-canvas': inCanvas,
       [this._cardStyle]: true,
     });
 

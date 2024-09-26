@@ -1,5 +1,6 @@
 import z from 'zod';
 
+import { SelectionExtension } from '../../extension/selection.js';
 import { BaseSelection } from '../base.js';
 
 export type TextRangePoint = {
@@ -113,10 +114,4 @@ export class TextSelection extends BaseSelection {
   }
 }
 
-declare global {
-  namespace BlockSuite {
-    interface Selection {
-      text: typeof TextSelection;
-    }
-  }
-}
+export const TextSelectionExtension = SelectionExtension(TextSelection);

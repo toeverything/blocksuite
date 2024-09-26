@@ -7,14 +7,9 @@ import type { BlockStdScope } from '../scope/index.js';
 import type { BaseSelection } from './base.js';
 
 import { LifeCycleWatcher } from '../extension/index.js';
-import {
-  BlockSelection,
-  CursorSelection,
-  SurfaceSelection,
-  TextSelection,
-} from './variants/index.js';
+import { SelectionIdentifier } from '../identifier.js';
 
-interface SelectionConstructor {
+export interface SelectionConstructor {
   type: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   new (...args: any[]): BaseSelection;
@@ -133,12 +128,9 @@ export class SelectionManager extends LifeCycleWatcher {
   }
 
   private _setupDefaultSelections() {
-    this.register([
-      TextSelection,
-      BlockSelection,
-      SurfaceSelection,
-      CursorSelection,
-    ]);
+    this.std.provider.getAll(SelectionIdentifier).forEach(ctor => {
+      this.register(ctor);
+    });
   }
 
   clear(types?: string[]) {
