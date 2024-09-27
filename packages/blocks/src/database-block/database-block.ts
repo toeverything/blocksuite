@@ -152,7 +152,7 @@ export class DatabaseBlockComponent extends CaptionedBlockComponent<
 
   private renderTitle = (dataViewMethod: DataViewExpose) => {
     const addRow = () => dataViewMethod.addRow?.('start');
-    return html` <affine-database-title
+    return html`<affine-database-title
       style="overflow: hidden"
       .titleText="${this.model.title}"
       .readonly="${this.doc.readonly}"
@@ -303,7 +303,7 @@ export class DatabaseBlockComponent extends CaptionedBlockComponent<
       const note = this.closest<NoteBlockComponent>(NOTE_SELECTOR);
       return note;
     }
-    return this.rootComponent;
+    return super.topContenteditableElement;
   }
 
   get view() {

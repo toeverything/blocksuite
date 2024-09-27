@@ -85,7 +85,7 @@ export class ListBlockComponent extends CaptionedBlockComponent<
     if (this.std.get(DocModeProvider).getEditorMode() === 'edgeless') {
       return this.closest<BlockComponent>(NOTE_SELECTOR);
     }
-    return this.rootComponent;
+    return super.topContenteditableElement;
   }
 
   private _select() {
