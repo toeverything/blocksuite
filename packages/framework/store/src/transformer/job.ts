@@ -385,13 +385,6 @@ export class Job {
     flat: FlatSnapshot
   ): Promise<DraftModel | undefined> {
     try {
-      // this._slots.beforeImport.emit({
-      //   type: 'block',
-      //   snapshot: flat.snapshot,
-      //   parent: flat.parentId,
-      //   index: flat.index,
-      // });
-
       const { children, flavour } = flat.snapshot;
       const schema = this._getSchema(flavour);
       const transformer = this._getTransformer(schema);
@@ -517,27 +510,6 @@ export class Job {
     });
   }
 
-  private _initDraftTree(
-    node: DraftBlockTreeNode,
-    doc: Doc,
-    parentId?: string,
-    index?: number
-  ) {
-    const { draft, children } = node;
-    doc.addBlock(
-      draft.flavour as BlockSuite.Flavour,
-      { ...draft, id: draft.id },
-      parentId,
-      index
-    );
-
-    children.forEach((childNode, idx) => {
-      if (childNode) {
-        this._initDraftTree(childNode, doc, draft.id, idx);
-      }
-    });
-  }
-
   private _rebuildBlockTree(
     draftModels: {
       draft: DraftModel;
@@ -574,6 +546,37 @@ export class Job {
   }
 
   /**
+   * traverse the snapshot tree and trigger beforeImport event for all blocks
+   * @param snapshot
+   * @param parent
+   * @param index
+   */
+  private _triggerBeforeImportEvent(
+    snapshot: BlockSnapshot,
+    parent?: string,
+    index?: number
+  ) {
+    const traverseAndTrigger = (
+      node: BlockSnapshot,
+      parent?: string,
+      index?: number
+    ) => {
+      this._slots.beforeImport.emit({
+        type: 'block',
+        snapshot: node,
+        parent: parent,
+        index: index,
+      });
+      if (node.children) {
+        node.children.forEach((child, idx) => {
+          traverseAndTrigger(child, node.id, idx);
+        });
+      }
+    };
+    traverseAndTrigger(snapshot, parent, index);
+  }
+
+  /**
    * New method to convert snapshot tree to block tree in parallel.
    * @param snapshot The root snapshot node.
    * @param doc The document to add blocks to.
@@ -586,12 +589,14 @@ export class Job {
     parent?: string,
     index?: number
   ): Promise<BlockModel | null> {
+    this._triggerBeforeImportEvent(snapshot, parent, index);
+
     // Phase 1: Flatten the snapshot tree
     const flatSnapshots: FlatSnapshot[] = [];
     this._flattenSnapshot(snapshot, flatSnapshots, parent, index);
 
     // Phase 2: Convert snapshots to draft models in parallel
-    const blockModels = await Promise.all(
+    const draftModels = await Promise.all(
       flatSnapshots.map(async flat => {
         const draft = await this._convertSnapshotToDraftModel(flat);
         if (draft) {
@@ -607,7 +612,7 @@ export class Job {
     );
 
     // Filter out the models that failed to convert
-    const validBlockModels = blockModels.filter(item => !!item.draft) as {
+    const validDraftModels = draftModels.filter(item => !!item.draft) as {
       draft: DraftModel;
       snapshot: BlockSnapshot;
       parentId?: string;
@@ -615,7 +620,7 @@ export class Job {
     }[];
 
     // Phase 3: Rebuild the block tree
-    const blockTree = this._rebuildBlockTree(validBlockModels);
+    const blockTree = this._rebuildBlockTree(validDraftModels);
 
     // Phase 4: Instantiate the block tree
     this._initBlockTree(blockTree, doc, parent, index);
