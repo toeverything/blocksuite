@@ -21,10 +21,6 @@ export function getQuery(
   if (nativeRange.startContainer !== nativeRange.endContainer) {
     return null;
   }
-  const textNode = nativeRange.startContainer;
-  if (textNode.nodeType !== Node.TEXT_NODE) {
-    return null;
-  }
   const curRange = inlineEditor.getInlineRange();
   if (!startRange || !curRange) {
     return null;
