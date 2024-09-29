@@ -489,13 +489,18 @@ export class Job {
     parentId?: string,
     index?: number
   ) {
-    const { draft: model } = node;
-    doc.addBlock(
-      model.flavour as BlockSuite.Flavour,
-      { ...model, id: model.id },
-      parentId,
-      index
-    );
+    const { draft } = node;
+    const { id, flavour } = draft;
+
+    doc.addBlock(flavour as BlockSuite.Flavour, draft, parentId, index);
+
+    const model = doc.getBlockById(id);
+    if (!model) {
+      throw new BlockSuiteError(
+        ErrorCode.TransformerError,
+        `Block not found by id ${id}`
+      );
+    }
 
     this._slots.afterImport.emit({
       type: 'block',
@@ -505,7 +510,7 @@ export class Job {
 
     node.children.forEach((childNode, idx) => {
       if (childNode) {
-        this._initBlockTree(childNode, doc, model.id, idx);
+        this._initBlockTree(childNode, doc, id, idx);
       }
     });
   }
