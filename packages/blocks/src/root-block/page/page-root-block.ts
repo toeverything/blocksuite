@@ -44,7 +44,6 @@ export class PageRootBlockComponent extends BlockComponent<
       grid-template-areas:
         'left content right'
         'bottom bottom bottom';
-      height: 100%;
       font-family: var(--affine-font-family);
       font-size: var(--affine-font-base);
       line-height: var(--affine-line-height);
@@ -52,6 +51,7 @@ export class PageRootBlockComponent extends BlockComponent<
       font-weight: 400;
       max-width: var(--affine-editor-width);
       width: 100%;
+      margin: 0 auto;
       /* cursor: crosshair; */
       cursor: default;
     }
@@ -338,71 +338,74 @@ export class PageRootBlockComponent extends BlockComponent<
           'click',
           getBlockAreaHandler('right')
         );
+        this.disposables.addFromEvent(this.bottomBlankArea, 'click', () => {
+          let newTextSelectionId: string | null = null;
+          const readonly = this.doc.readonly;
+          const lastNote = this.model.children
+            .slice()
+            .reverse()
+            .find(child => {
+              const isNote = matchFlavours(child, ['affine:note']);
+              if (!isNote) return false;
+              const note = child as NoteBlockModel;
+              const displayOnDoc =
+                !!note.displayMode &&
+                note.displayMode !== NoteDisplayMode.EdgelessOnly;
+              return displayOnDoc;
+            });
+          if (!lastNote) {
+            if (readonly) return;
+            const noteId = this.doc.addBlock('affine:note', {}, this.model.id);
+            const paragraphId = this.doc.addBlock(
+              'affine:paragraph',
+              {},
+              noteId
+            );
+            newTextSelectionId = paragraphId;
+          } else {
+            const last = lastNote.children.at(-1);
+            if (
+              !last ||
+              !last.text ||
+              matchFlavours(last, [
+                'affine:code',
+                'affine:divider',
+                'affine:image',
+                'affine:database',
+                'affine:bookmark',
+                'affine:attachment',
+                'affine:surface-ref',
+              ]) ||
+              /affine:embed-*/.test(last.flavour)
+            ) {
+              if (readonly) return;
+              const paragraphId = this.doc.addBlock(
+                'affine:paragraph',
+                {},
+                lastNote.id
+              );
+              newTextSelectionId = paragraphId;
+            }
+          }
+
+          this.updateComplete
+            .then(() => {
+              if (!newTextSelectionId) return;
+              this.host.selection.setGroup('note', [
+                this.host.selection.create('text', {
+                  from: {
+                    blockId: newTextSelectionId,
+                    index: 0,
+                    length: 0,
+                  },
+                  to: null,
+                }),
+              ]);
+            })
+            .catch(console.error);
+        });
       })
       .catch(console.error);
-
-    this.handleEvent('click', () => {
-      let newTextSelectionId: string | null = null;
-      const readonly = this.doc.readonly;
-      const lastNote = this.model.children
-        .slice()
-        .reverse()
-        .find(child => {
-          const isNote = matchFlavours(child, ['affine:note']);
-          if (!isNote) return false;
-          const note = child as NoteBlockModel;
-          const displayOnDoc =
-            !!note.displayMode &&
-            note.displayMode !== NoteDisplayMode.EdgelessOnly;
-          return displayOnDoc;
-        });
-      if (!lastNote) {
-        if (readonly) return;
-        const noteId = this.doc.addBlock('affine:note', {}, this.model.id);
-        const paragraphId = this.doc.addBlock('affine:paragraph', {}, noteId);
-        newTextSelectionId = paragraphId;
-      } else {
-        const last = lastNote.children.at(-1);
-        if (
-          !last ||
-          !last.text ||
-          matchFlavours(last, [
-            'affine:code',
-            'affine:divider',
-            'affine:image',
-            'affine:database',
-            'affine:bookmark',
-            'affine:attachment',
-            'affine:surface-ref',
-          ]) ||
-          /affine:embed-*/.test(last.flavour)
-        ) {
-          if (readonly) return;
-          const paragraphId = this.doc.addBlock(
-            'affine:paragraph',
-            {},
-            lastNote.id
-          );
-          newTextSelectionId = paragraphId;
-        }
-      }
-
-      this.updateComplete
-        .then(() => {
-          if (!newTextSelectionId) return;
-          this.host.selection.setGroup('note', [
-            this.host.selection.create('text', {
-              from: {
-                blockId: newTextSelectionId,
-                index: 0,
-                length: 0,
-              },
-              to: null,
-            }),
-          ]);
-        })
-        .catch(console.error);
-    });
   }
 
   override disconnectedCallback() {
@@ -455,6 +458,9 @@ export class PageRootBlockComponent extends BlockComponent<
       </div>
     `;
   }
+
+  @query('.affine-page-root-bottom-blank')
+  accessor bottomBlankArea!: HTMLDivElement;
 
   @query('.affine-page-root-left-blank')
   accessor leftBlankArea!: HTMLDivElement;
