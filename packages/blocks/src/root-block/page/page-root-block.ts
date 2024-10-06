@@ -36,16 +36,10 @@ export class PageRootBlockComponent extends BlockComponent<
       height: 100%;
     }
 
-    affine-page-root {
-      display: grid;
-      height: 100%;
-      justify-content: center;
-    }
-
     .affine-page-root-block-container {
       display: grid;
       /* prettier-ignore */
-      grid-template-columns: minmax(var(--affine-editor-side-padding, ${DOC_BLOCK_CHILD_PADDING}px), 1fr) auto minmax(var(--affine-editor-side-padding, ${DOC_BLOCK_CHILD_PADDING}px), 1fr);
+      grid-template-columns: var(--affine-editor-side-padding, ${DOC_BLOCK_CHILD_PADDING}px) auto var(--affine-editor-side-padding, ${DOC_BLOCK_CHILD_PADDING}px);
       grid-template-rows: 1fr auto;
       grid-template-areas:
         'left content right'
@@ -57,6 +51,7 @@ export class PageRootBlockComponent extends BlockComponent<
       color: var(--affine-text-primary-color);
       font-weight: 400;
       max-width: var(--affine-editor-width);
+      width: 100%;
       /* cursor: crosshair; */
       cursor: default;
     }
