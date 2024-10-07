@@ -10,6 +10,7 @@ import {
 } from '@blocksuite/global/utils';
 
 import type { BlockStdScope } from '../scope/block-std-scope.js';
+import type { BlockComponent } from '../view/index.js';
 import type { SurfaceBlockModel } from './surface/surface-model.js';
 
 import { LifeCycleWatcher } from '../extension/lifecycle-watcher.js';
@@ -19,6 +20,7 @@ import { GfxBlockElementModel, type GfxModel } from './gfx-block-model.js';
 import { GridManager } from './grid.js';
 import { KeyboardController } from './keyboard.js';
 import { LayerManager } from './layer.js';
+import { GfxSelectionManager } from './selection.js';
 import {
   GfxPrimitiveElementModel,
   type PointTestOptions,
@@ -40,6 +42,8 @@ export class GfxController extends LifeCycleWatcher {
 
   readonly layer: LayerManager;
 
+  readonly selection: GfxSelectionManager;
+
   readonly tool: ToolController;
 
   readonly viewport: Viewport = new Viewport();
@@ -52,6 +56,12 @@ export class GfxController extends LifeCycleWatcher {
     return this._surface;
   }
 
+  get surfaceComponent(): BlockComponent | null {
+    return this.surface
+      ? (this.std.view.getBlock(this.surface.id) ?? null)
+      : null;
+  }
+
   constructor(std: BlockStdScope) {
     super(std);
 
@@ -59,6 +69,7 @@ export class GfxController extends LifeCycleWatcher {
     this.layer = new LayerManager(this.doc, null);
     this.keyboard = new KeyboardController(std);
     this.tool = new ToolController(std);
+    this.selection = new GfxSelectionManager(std);
 
     this._disposables.add(
       onSurfaceAdded(this.doc, surface => {
@@ -75,6 +86,7 @@ export class GfxController extends LifeCycleWatcher {
     this._disposables.add(this.viewport);
     this._disposables.add(this.keyboard);
     this._disposables.add(this.tool);
+    this._disposables.add(this.selection);
   }
 
   deleteElement(element: GfxModel | BlockModel<object> | string): void {

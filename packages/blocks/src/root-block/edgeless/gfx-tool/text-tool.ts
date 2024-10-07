@@ -47,7 +47,7 @@ export class TextTool extends BaseTool {
     if (textFlag) {
       const [x, y] = this.gfx.viewport.toModelCoord(e.x, e.y);
       this.gfx.std.command.exec('insertEdgelessText', { x, y });
-      this.gfx.tool.use('default');
+      this.gfx.tool.setTool('default');
     } else {
       addText(this.gfx, e);
     }
@@ -59,5 +59,13 @@ export class TextTool extends BaseTool {
       segment: 'toolbar',
       type: 'text',
     });
+  }
+}
+
+declare global {
+  namespace BlockSuite {
+    interface GfxToolsMap {
+      text: TextTool;
+    }
   }
 }

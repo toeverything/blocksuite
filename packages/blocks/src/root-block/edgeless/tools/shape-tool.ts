@@ -216,11 +216,16 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
       default:
         options.strokeLineDash = [];
     }
-    this._shapeOverlay = new ShapeOverlay(this._edgeless, shapeName, options, {
-      shapeStyle: attributes.shapeStyle,
-      fillColor: attributes.fillColor,
-      strokeColor: attributes.strokeColor,
-    });
+    this._shapeOverlay = new ShapeOverlay(
+      this._service.gfx,
+      shapeName,
+      options,
+      {
+        shapeStyle: attributes.shapeStyle,
+        fillColor: attributes.fillColor,
+        strokeColor: attributes.strokeColor,
+      }
+    );
     this._edgeless.surface.renderer.addOverlay(this._shapeOverlay);
   }
 

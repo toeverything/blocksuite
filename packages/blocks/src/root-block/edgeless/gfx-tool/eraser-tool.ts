@@ -63,7 +63,7 @@ export class EraserTool extends BaseTool {
         })
       );
       this._overlay.d = d;
-      this._surfaceBlock?.refresh();
+      (this.gfx.surfaceComponent as SurfaceBlockComponent)?.refresh();
     }
     this._timer = requestAnimationFrame(this._loop);
   };
@@ -78,16 +78,6 @@ export class EraserTool extends BaseTool {
 
   private _timestamp = 0;
 
-  private get _surfaceBlock() {
-    if (!this.gfx.surface) {
-      return null;
-    }
-
-    return this.std.view.getBlock(
-      this.gfx.surface?.id
-    ) as SurfaceBlockComponent;
-  }
-
   private _reset() {
     cancelAnimationFrame(this._timer);
 
@@ -95,7 +85,9 @@ export class EraserTool extends BaseTool {
       return;
     }
 
-    this._surfaceBlock?.renderer.removeOverlay(this._overlay);
+    (
+      this.gfx.surfaceComponent as SurfaceBlockComponent
+    )?.renderer.removeOverlay(this._overlay);
     this._erasable.clear();
     this._eraseTargets.clear();
   }
@@ -159,6 +151,16 @@ export class EraserTool extends BaseTool {
       ...this.gfx.layer.blocks,
     ]);
     this._loop();
-    this._surfaceBlock?.renderer.addOverlay(this._overlay);
+    (this.gfx.surfaceComponent as SurfaceBlockComponent)?.renderer.addOverlay(
+      this._overlay
+    );
+  }
+}
+
+declare global {
+  namespace BlockSuite {
+    interface GfxToolsMap {
+      eraser: EraserTool;
+    }
   }
 }

@@ -1,5 +1,10 @@
 import { type Container, createIdentifier } from '@blocksuite/global/di';
 import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
+import {
+  assertType,
+  type Constructor,
+  DisposableGroup,
+} from '@blocksuite/global/utils';
 
 import type { PointerEventState } from '../../event/index.js';
 import type { ExtensionType } from '../../extension/extension.js';
@@ -7,11 +12,22 @@ import type { ExtensionType } from '../../extension/extension.js';
 import { type GfxController, GfxControllerIdentifier } from '../controller.js';
 import { eventTarget, type SupportedEvents } from './tool-controller.js';
 
-export abstract class BaseTool {
+export abstract class BaseTool<Option = Record<string, unknown>> {
   static toolName: string = '';
+
+  activatedOption: Option = {} as Option;
+
+  /**
+   * The `disposable` will be disposed when the tool is unloaded.
+   */
+  protected readonly disposable = new DisposableGroup();
 
   get active() {
     return this.gfx.tool.currentTool$.peek() === this;
+  }
+
+  get controller() {
+    return this.gfx.tool;
   }
 
   get doc() {
@@ -30,9 +46,13 @@ export abstract class BaseTool {
 
   /**
    * Called when the tool is activated.
+   * @note You should call `super.activate(option)` if you override this method.
    * @param option - The data passed as second argument when calling `ToolController.use`.
    */
-  activate(_: Record<string, unknown>): void {}
+  activate(option: Option): void {
+    console.log(option);
+    this.activatedOption = option;
+  }
 
   addHook(
     evtName: SupportedEvents,
@@ -65,8 +85,11 @@ export abstract class BaseTool {
 
   /**
    * Called when the tool is unloaded, usually when the whole `ToolController` is destroyed.
+   * @note You should call `super.onunload()` if you override this method.
    */
-  onunload(): void {}
+  onunload(): void {
+    this.disposable.dispose();
+  }
 
   pointerDown(_: PointerEventState): void {}
 
@@ -82,11 +105,12 @@ export abstract class BaseTool {
 export const ToolIdentifier = createIdentifier<BaseTool>('GfxTool');
 
 export function GfxToolExtension(
-  toolCtors: (typeof BaseTool)[]
+  toolCtors: Constructor<BaseTool>[]
 ): ExtensionType {
   return {
     setup: (di: Container) => {
       toolCtors.forEach(Ctor => {
+        assertType<typeof BaseTool>(Ctor);
         if (!Ctor.toolName) {
           throw new BlockSuiteError(
             ErrorCode.ValueNotExists,
@@ -105,5 +129,7 @@ export function GfxToolExtension(
 declare global {
   namespace BlockSuite {
     interface GfxToolsMap {}
+
+    interface GfxToolsOption {}
   }
 }

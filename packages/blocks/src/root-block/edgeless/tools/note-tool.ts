@@ -108,7 +108,7 @@ export class NoteToolController extends EdgelessToolController<NoteTool> {
     const attributes =
       this._edgeless.std.get(EditPropsStore).lastProps$.value['affine:note'];
     const background = attributes.background;
-    this._noteOverlay = new NoteOverlay(this._edgeless, background);
+    this._noteOverlay = new NoteOverlay(this._service.gfx, background);
     this._noteOverlay.text = newTool.tip;
     this._edgeless.surface.renderer.addOverlay(this._noteOverlay);
   }
@@ -183,7 +183,7 @@ export class NoteToolController extends EdgelessToolController<NoteTool> {
       this._edgeless.std.get(EditPropsStore).lastProps$.value['affine:note'];
     const background = attributes.background;
     this._draggingNoteOverlay = new DraggingNoteOverlay(
-      this._edgeless,
+      this._service.gfx,
       background
     );
     this._edgeless.surface.renderer.addOverlay(this._draggingNoteOverlay);

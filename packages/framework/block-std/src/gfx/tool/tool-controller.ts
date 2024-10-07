@@ -1,23 +1,26 @@
-import { DisposableGroup, type IBound } from '@blocksuite/global/utils';
+import {
+  DisposableGroup,
+  type IBound,
+  type IPoint,
+} from '@blocksuite/global/utils';
 import { Signal } from '@preact/signals-core';
 
-import type {
-  PointerEventState,
-  UIEventStateContext,
-} from '../../event/index.js';
+import type { PointerEventState } from '../../event/index.js';
 import type { BlockStdScope } from '../../scope/block-std-scope.js';
 import type { BaseTool } from './tool.js';
+
+import { GfxControllerIdentifier } from '../controller.js';
 
 const supportedEvents = [
   'dragStart',
   'dragEnd',
   'dragMove',
-  'click',
-  'doubleClick',
-  'tripleClick',
   'pointerMove',
   'pointerDown',
   'pointerUp',
+  'click',
+  'doubleClick',
+  'tripleClick',
   'pointerOut',
   'contextMenu',
 ] as const;
@@ -38,18 +41,42 @@ export class ToolController {
 
   private _tools = new Map<string, BaseTool>();
 
-  readonly currentToolName$ = new Signal<string>('');
+  readonly currentToolName$ = new Signal<keyof BlockSuite.GfxToolsMap>();
 
   readonly dragging$ = new Signal<boolean>(false);
 
-  readonly draggingArea$ = new Signal<IBound>({
+  /**
+   * The area that is being dragged.
+   * The coordinates are in model space.
+   */
+  readonly draggingArea$ = new Signal<
+    IBound & {
+      startX: number;
+      startY: number;
+      endX: number;
+      endY: number;
+    }
+  >({
+    startX: 0,
+    startY: 0,
     x: 0,
     y: 0,
     w: 0,
     h: 0,
+    endX: 0,
+    endY: 0,
   });
 
   readonly [eventTarget]: ToolEventTarget;
+
+  /**
+   * The last mouse move position
+   * The coordinates are in browser space
+   */
+  readonly lastMousePos$ = new Signal<IPoint>({
+    x: 0,
+    y: 0,
+  });
 
   get currentTool$() {
     // eslint-disable-next-line @typescript-eslint/no-this-alias
@@ -63,6 +90,10 @@ export class ToolController {
         return self._tools.get(self.currentToolName$.peek());
       },
     };
+  }
+
+  get gfx() {
+    return this.std.get(GfxControllerIdentifier);
   }
 
   constructor(readonly std: BlockStdScope) {
@@ -80,9 +111,8 @@ export class ToolController {
     > = {};
     const invokeToolHandler = (
       evtName: SupportedEvents,
-      ctx: UIEventStateContext
+      evt: PointerEventState
     ) => {
-      const evt = ctx.get('pointerState');
       const evtHooks = hooks[evtName];
       const stopHandler = evtHooks?.reduce((pre, hook) => {
         return pre || hook(evt) === false;
@@ -117,24 +147,98 @@ export class ToolController {
       };
     };
 
+    let draggingStart: {
+      x: number;
+      y: number;
+    } = {
+      x: 0,
+      y: 0,
+    };
+
     this._disposableGroup.add(
       this.std.event.add('dragStart', ctx => {
         this.dragging$.value = true;
-        invokeToolHandler('dragStart', ctx);
+        const evt = ctx.get('pointerState');
+        const [x, y] = this.gfx.viewport.toModelCoord(evt.x, evt.y);
+
+        draggingStart = { x, y };
+
+        this.draggingArea$.value = {
+          startX: x,
+          startY: y,
+          endX: x,
+          endY: y,
+          x: draggingStart.x,
+          y: draggingStart.y,
+          w: Math.abs(x - draggingStart.x),
+          h: Math.abs(y - draggingStart.y),
+        };
+
+        invokeToolHandler('dragStart', evt);
+      })
+    );
+
+    this._disposableGroup.add(
+      this.std.event.add('dragMove', ctx => {
+        this.dragging$.value = true;
+        const evt = ctx.get('pointerState');
+        const [x, y] = this.gfx.viewport.toModelCoord(evt.x, evt.y);
+
+        this.draggingArea$.value = {
+          ...this.draggingArea$.peek(),
+          w: Math.abs(x - draggingStart.x),
+          h: Math.abs(y - draggingStart.y),
+          endX: x,
+          endY: y,
+        };
+        invokeToolHandler('dragMove', evt);
       })
     );
 
     this._disposableGroup.add(
       this.std.event.add('dragEnd', ctx => {
         this.dragging$.value = false;
-        invokeToolHandler('dragEnd', ctx);
+        const evt = ctx.get('pointerState');
+
+        try {
+          invokeToolHandler('dragEnd', evt);
+        } catch (e) {
+          console.warn('dragEnd handler throws an error', e);
+        }
+
+        this.draggingArea$.value = {
+          x: 0,
+          y: 0,
+          startX: 0,
+          startY: 0,
+          endX: 0,
+          endY: 0,
+          w: 0,
+          h: 0,
+        };
       })
     );
 
-    supportedEvents.slice(2).forEach(evtName => {
+    this._disposableGroup.add(
+      this.std.event.add('pointerMove', ctx => {
+        this.dragging$.value = false;
+        const evt = ctx.get('pointerState');
+
+        this.lastMousePos$.value = {
+          x: evt.x,
+          y: evt.y,
+        };
+
+        invokeToolHandler('pointerMove', evt);
+      })
+    );
+
+    supportedEvents.slice(4).forEach(evtName => {
       this._disposableGroup.add(
         this.std.event.add(evtName, ctx => {
-          invokeToolHandler(evtName, ctx);
+          const evt = ctx.get('pointerState');
+
+          invokeToolHandler(evtName, evt);
         })
       );
     });
@@ -159,9 +263,14 @@ export class ToolController {
     tools.onload();
   }
 
-  use(toolName: string, options: Record<string, unknown> = {}) {
+  setTool<K extends keyof BlockSuite.GfxToolsMap>(
+    toolName: K,
+    ...options: K extends keyof BlockSuite.GfxToolsOption
+      ? [option: BlockSuite.GfxToolsOption[K]]
+      : [option: void]
+  ) {
     this.currentTool$.peek()?.deactivate();
     this.currentToolName$.value = toolName;
-    this.currentTool$.peek()?.activate(options);
+    this.currentTool$.peek()?.activate(options[0] ?? {});
   }
 }

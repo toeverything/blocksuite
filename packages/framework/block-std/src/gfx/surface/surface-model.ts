@@ -525,6 +525,8 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
       throw new Error('Cannot remove element in readonly mode');
     }
 
+    console.trace(id);
+
     if (!this.hasElementById(id)) {
       return;
     }
