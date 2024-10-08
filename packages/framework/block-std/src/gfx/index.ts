@@ -3,10 +3,16 @@ export {
   renderableInEdgeless,
   SortOrder,
 } from '../utils/layer.js';
-export { GfxController, GfxControllerIdentifier } from './controller.js';
+export {
+  GfxController,
+  GfxControllerIdentifier,
+  GfxExtension,
+  GfxExtensionIdentifier,
+} from './controller.js';
 export * from './gfx-block-model.js';
 export { GridManager } from './grid.js';
 export { LayerManager, type ReorderingDirection } from './layer.js';
+export { GfxSelectionManager } from './selection.js';
 export {
   convert,
   convertProps,
@@ -38,8 +44,8 @@ export {
   type SurfaceBlockProps,
   type SurfaceMiddleware,
 } from './surface/surface-model.js';
-export { BaseTool, GfxToolExtension } from './tool/tool.js';
 
+export { BaseTool, GfxToolExtension } from './tool/tool.js';
 export { ToolController } from './tool/tool-controller.js';
 export * from './viewport.js';
 export { GfxViewportElement } from './viewport-element.js';

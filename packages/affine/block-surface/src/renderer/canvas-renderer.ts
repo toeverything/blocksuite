@@ -16,27 +16,10 @@ import {
 } from '@blocksuite/global/utils';
 
 import type { ElementRenderer } from './elements/index.js';
+import type { Overlay } from './overlay.js';
 
 import { SurfaceElementModel } from '../element-model/base.js';
 import { RoughCanvas } from '../utils/rough/canvas.js';
-
-/**
- * An overlay is a layer covered on top of elements,
- * can be used for rendering non-CRDT state indicators.
- */
-export abstract class Overlay {
-  protected _renderer: CanvasRenderer | null = null;
-
-  constructor() {}
-
-  clear() {}
-
-  abstract render(ctx: CanvasRenderingContext2D, rc: RoughCanvas): void;
-
-  setRenderer(renderer: CanvasRenderer | null) {
-    this._renderer = renderer;
-  }
-}
 
 type EnvProvider = {
   generateColorProperty: (color: Color, fallback: string) => string;

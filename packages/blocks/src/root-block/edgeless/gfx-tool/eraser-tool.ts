@@ -68,7 +68,7 @@ export class EraserTool extends BaseTool {
     this._timer = requestAnimationFrame(this._loop);
   };
 
-  private _overlay = new EraserOverlay();
+  private _overlay = new EraserOverlay(this.gfx);
 
   private _prevEraserPoint: IVec = [0, 0];
 

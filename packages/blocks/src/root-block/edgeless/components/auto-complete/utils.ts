@@ -1,3 +1,4 @@
+import type { GfxController } from '@blocksuite/block-std/gfx';
 import type { XYWH } from '@blocksuite/global/utils';
 
 import {
@@ -49,8 +50,8 @@ export type AUTO_COMPLETE_TARGET_TYPE =
 class AutoCompleteTargetOverlay extends Overlay {
   xywh: XYWH;
 
-  constructor(xywh: XYWH) {
-    super();
+  constructor(gfx: GfxController, xywh: XYWH) {
+    super(gfx);
     this.xywh = xywh;
   }
 
@@ -58,8 +59,8 @@ class AutoCompleteTargetOverlay extends Overlay {
 }
 
 export class AutoCompleteTextOverlay extends AutoCompleteTargetOverlay {
-  constructor(xywh: XYWH) {
-    super(xywh);
+  constructor(gfx: GfxController, xywh: XYWH) {
+    super(gfx, xywh);
   }
 
   override render(ctx: CanvasRenderingContext2D, _rc: RoughCanvas) {
@@ -82,8 +83,8 @@ export class AutoCompleteTextOverlay extends AutoCompleteTargetOverlay {
 export class AutoCompleteNoteOverlay extends AutoCompleteTargetOverlay {
   private _background: string;
 
-  constructor(xywh: XYWH, background: string) {
-    super(xywh);
+  constructor(gfx: GfxController, xywh: XYWH, background: string) {
+    super(gfx, xywh);
     this._background = background;
   }
 
@@ -112,8 +113,8 @@ export class AutoCompleteNoteOverlay extends AutoCompleteTargetOverlay {
 export class AutoCompleteFrameOverlay extends AutoCompleteTargetOverlay {
   private _strokeColor;
 
-  constructor(xywh: XYWH, strokeColor: string) {
-    super(xywh);
+  constructor(gfx: GfxController, xywh: XYWH, strokeColor: string) {
+    super(gfx, xywh);
     this._strokeColor = strokeColor;
   }
 
@@ -154,12 +155,13 @@ export class AutoCompleteShapeOverlay extends Overlay {
   private _shape: Shape;
 
   constructor(
+    gfx: GfxController,
     xywh: XYWH,
     type: TARGET_SHAPE_TYPE,
     options: Options,
     shapeStyle: ShapeStyle
   ) {
-    super();
+    super(gfx);
     this._shape = ShapeFactory.createShape(xywh, type, options, shapeStyle);
   }
 

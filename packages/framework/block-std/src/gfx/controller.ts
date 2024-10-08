@@ -1,6 +1,11 @@
-import type { ServiceIdentifier } from '@blocksuite/global/di';
 import type { BlockModel } from '@blocksuite/store';
 
+import {
+  type Container,
+  createIdentifier,
+  type ServiceIdentifier,
+} from '@blocksuite/global/di';
+import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 import {
   assertType,
   Bound,
@@ -13,6 +18,7 @@ import type { BlockStdScope } from '../scope/block-std-scope.js';
 import type { BlockComponent } from '../view/index.js';
 import type { SurfaceBlockModel } from './surface/surface-model.js';
 
+import { Extension } from '../extension/extension.js';
 import { LifeCycleWatcher } from '../extension/lifecycle-watcher.js';
 import { LifeCycleWatcherIdentifier } from '../identifier.js';
 import { onSurfaceAdded } from '../utils/gfx.js';
@@ -227,9 +233,15 @@ export class GfxController extends LifeCycleWatcher {
     this.std.provider.getAll(ToolIdentifier).forEach(tool => {
       this.tool.register(tool);
     });
+    this.std.provider.getAll(GfxExtensionIdentifier).forEach(ext => {
+      ext.mounted();
+    });
   }
 
   override unmounted() {
+    this.std.provider.getAll(GfxExtensionIdentifier).forEach(ext => {
+      ext.unmounted();
+    });
     this._disposables.dispose();
   }
 }
@@ -237,3 +249,34 @@ export class GfxController extends LifeCycleWatcher {
 export const GfxControllerIdentifier = LifeCycleWatcherIdentifier(
   GfxController.key
 ) as ServiceIdentifier<GfxController>;
+
+export const GfxExtensionIdentifier =
+  createIdentifier<GfxExtension>('GfxExtension');
+
+export abstract class GfxExtension extends Extension {
+  static key: string;
+
+  constructor(protected readonly gfx: GfxController) {
+    super();
+  }
+
+  static override setup(di: Container) {
+    if (!this.key) {
+      throw new BlockSuiteError(
+        ErrorCode.ValueNotExists,
+        'key is not defined in the GfxExtension'
+      );
+    }
+    di.add(this as unknown as { new (gfx: GfxController): GfxExtension }, [
+      GfxControllerIdentifier,
+    ]);
+
+    di.addImpl(GfxExtensionIdentifier(this.key), provider =>
+      provider.get(this)
+    );
+  }
+
+  mounted() {}
+
+  unmounted() {}
+}

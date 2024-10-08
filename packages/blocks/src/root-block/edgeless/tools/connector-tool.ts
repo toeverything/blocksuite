@@ -9,8 +9,10 @@ import type { IBound, IVec } from '@blocksuite/global/utils';
 import {
   calculateNearestLocation,
   CanvasElementType,
+  type ConnectionOverlay,
   ConnectorEndpointLocations,
   ConnectorEndpointLocationsOnTriangle,
+  OverlayIdentifier,
 } from '@blocksuite/affine-block-surface';
 import {
   GroupElementModel,
@@ -57,7 +59,9 @@ export class ConnectorToolController extends EdgelessToolController<ConnectorToo
   } as ConnectorTool;
 
   get connector() {
-    return this._edgeless.service.connectorOverlay;
+    return this._service.std.get(
+      OverlayIdentifier('connection')
+    ) as ConnectionOverlay;
   }
 
   private _createConnector() {
@@ -107,7 +111,7 @@ export class ConnectorToolController extends EdgelessToolController<ConnectorToo
       this._edgeless.service.removeElement(id);
     }
 
-    this._edgeless.service.overlays.connector.clear();
+    this.connector.clear();
     this._mode = ConnectorToolMode.Dragging;
     this._connector = null;
     this._source = null;

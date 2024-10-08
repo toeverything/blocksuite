@@ -2,9 +2,12 @@ import type { FrameBlockModel } from '@blocksuite/affine-model';
 import type { PointerEventState } from '@blocksuite/block-std';
 import type { IPoint, IVec } from '@blocksuite/global/utils';
 
+import { OverlayIdentifier } from '@blocksuite/affine-block-surface';
 import { TelemetryProvider } from '@blocksuite/affine-shared/services';
 import { Bound, noop, Vec } from '@blocksuite/global/utils';
 import { DocCollection } from '@blocksuite/store';
+
+import type { FrameOverlay } from '../frame-manager.js';
 
 import { getTopElements } from '../utils/tree.js';
 import { EdgelessToolController } from './edgeless-tool.js';
@@ -21,6 +24,10 @@ export class FrameToolController extends EdgelessToolController<FrameTool> {
   readonly tool = {
     type: 'frame',
   } as FrameTool;
+
+  get frameOverlay() {
+    return this._service.std.get(OverlayIdentifier('frame')) as FrameOverlay;
+  }
 
   private _toModelCoord(p: IPoint): IVec {
     return this._service.viewport.toModelCoord(p.x, p.y);
@@ -69,7 +76,7 @@ export class FrameToolController extends EdgelessToolController<FrameTool> {
 
     this._frame = null;
     this._startPoint = null;
-    this._service.frameOverlay.clear();
+    this.frameOverlay.clear();
   }
 
   override onContainerDragMove(e: PointerEventState): void {
@@ -106,7 +113,7 @@ export class FrameToolController extends EdgelessToolController<FrameTool> {
       xywh: Bound.fromPoints([this._startPoint, currentPoint]).serialize(),
     });
 
-    this._service.frameOverlay.highlight(this._frame, true);
+    this.frameOverlay.highlight(this._frame, true);
   }
 
   override onContainerDragStart(e: PointerEventState): void {

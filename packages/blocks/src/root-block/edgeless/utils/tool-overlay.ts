@@ -232,8 +232,6 @@ export class ShapeFactory {
 class ToolOverlay extends Overlay {
   protected disposables = new DisposableGroup();
 
-  protected gfx: GfxController;
-
   globalAlpha: number;
 
   x: number;
@@ -241,7 +239,7 @@ class ToolOverlay extends Overlay {
   y: number;
 
   constructor(gfx: GfxController) {
-    super();
+    super(gfx);
     this.x = 0;
     this.y = 0;
     this.globalAlpha = 0;
