@@ -584,6 +584,7 @@ export class HtmlAdapter extends BaseAdapter<Html> {
               'children'
             )
             .closeNode();
+          context.skipAllChildren();
           break;
         }
         case 'iframe': {
