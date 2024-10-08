@@ -1544,4 +1544,45 @@ describe('html to snapshot', () => {
     });
     expect(nanoidReplacement(rawBlockSnapshot)).toEqual(blockSnapshot);
   });
+
+  test('span inside h1', async () => {
+    const html = template(`<h1><span>aaa</span></h1>`);
+    const blockSnapshot: BlockSnapshot = {
+      type: 'block',
+      id: 'matchesReplaceMap[0]',
+      flavour: 'affine:note',
+      props: {
+        xywh: '[0,0,800,95]',
+        background: DEFAULT_NOTE_BACKGROUND_COLOR,
+        index: 'a0',
+        hidden: false,
+        displayMode: NoteDisplayMode.DocAndEdgeless,
+      },
+      children: [
+        {
+          type: 'block',
+          id: 'matchesReplaceMap[1]',
+          flavour: 'affine:paragraph',
+          props: {
+            type: 'h1',
+            text: {
+              '$blocksuite:internal:text$': true,
+              delta: [
+                {
+                  insert: 'aaa',
+                },
+              ],
+            },
+          },
+          children: [],
+        },
+      ],
+    };
+
+    const htmlAdapter = new HtmlAdapter(createJob());
+    const rawBlockSnapshot = await htmlAdapter.toBlockSnapshot({
+      file: html,
+    });
+    expect(nanoidReplacement(rawBlockSnapshot)).toEqual(blockSnapshot);
+  });
 });
