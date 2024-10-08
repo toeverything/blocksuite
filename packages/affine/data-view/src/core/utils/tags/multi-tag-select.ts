@@ -1,6 +1,8 @@
 import {
   createPopup,
   popMenu,
+  type PopupTarget,
+  popupTargetFromElement,
 } from '@blocksuite/affine-components/context-menu';
 import { rangeWrap } from '@blocksuite/affine-shared/utils';
 import { ShadowlessElement } from '@blocksuite/block-std';
@@ -48,22 +50,23 @@ export class MultiTagSelect extends WithDisposable(ShadowlessElement) {
     if (!option) {
       return;
     }
-    popMenu(e.target as HTMLElement, {
+    popMenu(popupTargetFromElement(e.target as HTMLElement), {
       options: {
-        input: {
-          initValue: option.value,
-          onComplete: text => {
-            this.changeTag({
-              ...option,
-              value: text,
-            });
-          },
-        },
         items: [
+          {
+            type: 'input',
+            initialValue: option.value,
+            onComplete: text => {
+              this.changeTag({
+                ...option,
+                value: text,
+              });
+            },
+          },
           {
             type: 'action',
             name: 'Delete',
-            icon: DeleteIcon(),
+            prefix: DeleteIcon(),
             class: 'delete-item',
             select: () => {
               this.deleteTag(id);
@@ -72,27 +75,26 @@ export class MultiTagSelect extends WithDisposable(ShadowlessElement) {
           {
             type: 'group',
             name: 'color',
-            children: () =>
-              selectOptionColors.map(item => {
-                const styles = styleMap({
-                  backgroundColor: item.color,
-                  borderRadius: '50%',
-                  width: '20px',
-                  height: '20px',
-                });
-                return {
-                  type: 'action',
-                  name: item.name,
-                  icon: html` <div style=${styles}></div>`,
-                  isSelected: option.color === item.color,
-                  select: () => {
-                    this.changeTag({
-                      ...option,
-                      color: item.color,
-                    });
-                  },
-                };
-              }),
+            items: selectOptionColors.map(item => {
+              const styles = styleMap({
+                backgroundColor: item.color,
+                borderRadius: '50%',
+                width: '20px',
+                height: '20px',
+              });
+              return {
+                type: 'action',
+                name: item.name,
+                prefix: html` <div style=${styles}></div>`,
+                isSelected: option.color === item.color,
+                select: () => {
+                  this.changeTag({
+                    ...option,
+                    color: item.color,
+                  });
+                },
+              };
+            }),
           },
         ],
       },
@@ -464,7 +466,7 @@ declare global {
 }
 
 export const popTagSelect = (
-  target: HTMLElement,
+  target: PopupTarget,
   ops: {
     mode?: 'single' | 'multi';
     value: string[];
@@ -480,10 +482,8 @@ export const popTagSelect = (
   if (ops.mode) {
     component.mode = ops.mode;
   }
-  component.style.width = `${Math.max(
-    ops.minWidth ?? target.offsetWidth,
-    target.offsetWidth
-  )}px`;
+  const width = target.targetRect.getBoundingClientRect().width;
+  component.style.width = `${Math.max(ops.minWidth ?? width, width)}px`;
   component.value = ops.value;
   component.onChange = tags => {
     ops.onChange(tags);

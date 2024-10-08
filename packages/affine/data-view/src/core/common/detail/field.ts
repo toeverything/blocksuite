@@ -1,4 +1,7 @@
-import { popMenu } from '@blocksuite/affine-components/context-menu';
+import {
+  popMenu,
+  popupTargetFromElement,
+} from '@blocksuite/affine-components/context-menu';
 import { ShadowlessElement } from '@blocksuite/block-std';
 import { SignalWatcher, WithDisposable } from '@blocksuite/global/utils';
 import {
@@ -97,6 +100,7 @@ export class RecordField extends SignalWatcher(
     .field-content.is-focus {
       border: 1px solid var(--affine-primary-color);
     }
+
     .field-content.empty::before {
       content: 'Empty';
       color: var(--affine-text-disable-color);
@@ -118,77 +122,82 @@ export class RecordField extends SignalWatcher(
     if (this.readonly) return;
     const ele = e.currentTarget as HTMLElement;
     const properties = this.view.detailProperties$.value;
-    popMenu(ele, {
+    popMenu(popupTargetFromElement(ele), {
       options: {
-        input: inputConfig(this.column),
         items: [
           {
             type: 'group',
             name: 'Column Prop Group ',
-            children: () => [typeConfig(this.column)],
+            items: [inputConfig(this.column), typeConfig(this.column)],
           },
           {
-            type: 'action',
-            name: 'Duplicate Column',
-            icon: DuplicateIcon(),
-            hide: () =>
-              !this.column.duplicate || this.column.type$.value === 'title',
-            select: () => {
-              this.column.duplicate?.();
-            },
-          },
-          {
-            type: 'action',
-            name: 'Move Up',
-            icon: html` <div
-              style="transform: rotate(90deg);display:flex;align-items:center;"
-            >
-              ${MoveLeftIcon()}
-            </div>`,
-            hide: () => properties.findIndex(v => v === this.column.id) === 0,
-            select: () => {
-              const index = properties.findIndex(v => v === this.column.id);
-              const targetId = properties[index - 1];
-              if (!targetId) {
-                return;
-              }
-              this.view.propertyMove(this.column.id, {
-                id: targetId,
-                before: true,
-              });
-            },
-          },
-          {
-            type: 'action',
-            name: 'Move Down',
-            icon: html` <div
-              style="transform: rotate(90deg);display:flex;align-items:center;"
-            >
-              ${MoveRightIcon()}
-            </div>`,
-            hide: () =>
-              properties.findIndex(v => v === this.column.id) ===
-              properties.length - 1,
-            select: () => {
-              const index = properties.findIndex(v => v === this.column.id);
-              const targetId = properties[index + 1];
-              if (!targetId) {
-                return;
-              }
-              this.view.propertyMove(this.column.id, {
-                id: targetId,
-                before: false,
-              });
-            },
+            type: 'group',
+            items: [
+              {
+                type: 'action',
+                name: 'Move Up',
+                prefix: html` <div
+                  style="transform: rotate(90deg);display:flex;align-items:center;"
+                >
+                  ${MoveLeftIcon()}
+                </div>`,
+                hide: () =>
+                  properties.findIndex(v => v === this.column.id) === 0,
+                select: () => {
+                  const index = properties.findIndex(v => v === this.column.id);
+                  const targetId = properties[index - 1];
+                  if (!targetId) {
+                    return;
+                  }
+                  this.view.propertyMove(this.column.id, {
+                    id: targetId,
+                    before: true,
+                  });
+                },
+              },
+              {
+                type: 'action',
+                name: 'Move Down',
+                prefix: html` <div
+                  style="transform: rotate(90deg);display:flex;align-items:center;"
+                >
+                  ${MoveRightIcon()}
+                </div>`,
+                hide: () =>
+                  properties.findIndex(v => v === this.column.id) ===
+                  properties.length - 1,
+                select: () => {
+                  const index = properties.findIndex(v => v === this.column.id);
+                  const targetId = properties[index + 1];
+                  if (!targetId) {
+                    return;
+                  }
+                  this.view.propertyMove(this.column.id, {
+                    id: targetId,
+                    before: false,
+                  });
+                },
+              },
+            ],
           },
           {
             type: 'group',
             name: 'operation',
-            children: () => [
+            items: [
               {
                 type: 'action',
-                name: 'Delete Column',
-                icon: DeleteIcon(),
+                name: 'Duplicate',
+                prefix: DuplicateIcon(),
+                hide: () =>
+                  !this.column.duplicate || this.column.type$.value === 'title',
+                select: () => {
+                  this.column.duplicate?.();
+                },
+              },
+              {
+                type: 'action',
+                name: 'Delete',
+                prefix: DeleteIcon(),
                 hide: () =>
                   !this.column.delete || this.column.type$.value === 'title',
                 select: () => {

@@ -1,3 +1,4 @@
+import { popupTargetFromElement } from '@blocksuite/affine-components/context-menu';
 import { html } from 'lit/static-html.js';
 
 import type { SelectPropertyData } from '../select/define.js';
@@ -32,7 +33,9 @@ export class MultiSelectCellEditing extends BaseCellRenderer<
   private popTagSelect = () => {
     this._disposables.add({
       dispose: popTagSelect(
-        this.querySelector('affine-multi-tag-view') ?? this,
+        popupTargetFromElement(
+          this.querySelector('affine-multi-tag-view') ?? this
+        ),
         {
           options: this._options,
           onOptionsChange: this._onOptionsChange,

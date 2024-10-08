@@ -1,4 +1,7 @@
-import { popMenu } from '@blocksuite/affine-components/context-menu';
+import {
+  popMenu,
+  popupTargetFromElement,
+} from '@blocksuite/affine-components/context-menu';
 import { css, html } from 'lit';
 
 import { BaseGroup } from './base.js';
@@ -21,19 +24,21 @@ export class NumberGroupView extends BaseGroup<NonNullable<unknown>, number> {
     if (this.readonly) {
       return;
     }
-    popMenu(this, {
+    popMenu(popupTargetFromElement(this), {
       options: {
-        input: {
-          initValue: this.value ? `${this.value * 10}` : '',
-          onComplete: text => {
-            const num = Number.parseFloat(text);
-            if (Number.isNaN(num)) {
-              return;
-            }
-            this.updateValue?.(num);
+        items: [
+          {
+            type: 'input',
+            initialValue: this.value ? `${this.value * 10}` : '',
+            onComplete: text => {
+              const num = Number.parseFloat(text);
+              if (Number.isNaN(num)) {
+                return;
+              }
+              this.updateValue?.(num);
+            },
           },
-        },
-        items: [],
+        ],
       },
     });
   };

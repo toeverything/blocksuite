@@ -1,6 +1,7 @@
 import {
-  type Menu,
+  type MenuConfig,
   popFilterableSimpleMenu,
+  popupTargetFromElement,
 } from '@blocksuite/affine-components/context-menu';
 import { ShadowlessElement } from '@blocksuite/block-std';
 import { SignalWatcher, WithDisposable } from '@blocksuite/global/utils';
@@ -101,7 +102,7 @@ export class DatabaseColumnStatsCell extends SignalWatcher(
   });
 
   openMenu = (ev: MouseEvent) => {
-    const menus: Menu[] = Object.entries(this.groups$.value).map(
+    const menus: MenuConfig[] = Object.entries(this.groups$.value).map(
       ([group, funcs]) => {
         return {
           type: 'sub-menu',
@@ -122,7 +123,7 @@ export class DatabaseColumnStatsCell extends SignalWatcher(
         };
       }
     );
-    popFilterableSimpleMenu(ev.target as HTMLElement, [
+    popFilterableSimpleMenu(popupTargetFromElement(ev.target as HTMLElement), [
       {
         type: 'action',
         isSelected: !this.column.statCalcOp$.value,

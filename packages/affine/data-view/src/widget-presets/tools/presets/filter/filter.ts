@@ -1,3 +1,4 @@
+import { popupTargetFromElement } from '@blocksuite/affine-components/context-menu';
 import { FilterIcon } from '@blocksuite/icons/lit';
 import { css, html, nothing } from 'lit';
 
@@ -47,18 +48,21 @@ export class DataViewHeaderToolsFilter extends WidgetBase {
 
   private addFilter(event: MouseEvent) {
     this.showToolBar(true);
-    popCreateFilter(event.target as HTMLElement, {
-      vars: this.view.vars$.value,
-      onSelect: filter => {
-        this._filter = {
-          ...this._filter,
-          conditions: [filter],
-        };
-      },
-      onClose: () => {
-        this.showToolBar(false);
-      },
-    });
+    popCreateFilter(
+      popupTargetFromElement(event.currentTarget as HTMLElement),
+      {
+        vars: this.view.vars$.value,
+        onSelect: filter => {
+          this._filter = {
+            ...this._filter,
+            conditions: [filter],
+          };
+        },
+        onClose: () => {
+          this.showToolBar(false);
+        },
+      }
+    );
     return;
   }
 

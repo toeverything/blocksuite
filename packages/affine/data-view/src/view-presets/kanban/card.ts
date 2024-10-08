@@ -1,3 +1,4 @@
+import { popupTargetFromElement } from '@blocksuite/affine-components/context-menu';
 import { ShadowlessElement } from '@blocksuite/block-std';
 import { SignalWatcher, WithDisposable } from '@blocksuite/global/utils';
 import { CenterPeekIcon, MoreHorizontalIcon } from '@blocksuite/icons/lit';
@@ -140,7 +141,12 @@ export class KanbanCard extends SignalWatcher(
           },
         ],
       };
-      popCardMenu(this.dataViewEle, ele, this.cardId, selection);
+      popCardMenu(
+        this.dataViewEle,
+        popupTargetFromElement(ele),
+        this.cardId,
+        selection
+      );
     }
   };
 
@@ -160,7 +166,12 @@ export class KanbanCard extends SignalWatcher(
       };
       const target = e.target as HTMLElement;
       const ref = target.closest('affine-data-view-kanban-cell') ?? this;
-      popCardMenu(this.dataViewEle, ref, this.cardId, selection);
+      popCardMenu(
+        this.dataViewEle,
+        popupTargetFromElement(ref),
+        this.cardId,
+        selection
+      );
     }
   };
 

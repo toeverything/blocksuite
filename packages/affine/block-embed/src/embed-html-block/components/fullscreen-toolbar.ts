@@ -1,4 +1,7 @@
-import { popMenu } from '@blocksuite/affine-components/context-menu';
+import {
+  popMenu,
+  popupTargetFromElement,
+} from '@blocksuite/affine-components/context-menu';
 import { EditPropsStore } from '@blocksuite/affine-shared/services';
 import {
   CopyIcon,
@@ -6,7 +9,7 @@ import {
   ExpandCloseIcon,
   SettingsIcon,
 } from '@blocksuite/icons/lit';
-import { flip, offset } from '@floating-ui/dom';
+import { autoPlacement, flip, offset } from '@floating-ui/dom';
 import { css, html, LitElement } from 'lit';
 import { property, query, state } from 'lit/decorators.js';
 
@@ -66,7 +69,7 @@ export class EmbedHtmlFullscreenToolbar extends LitElement {
 
   private _popSettings = () => {
     this._popperVisible = true;
-    popMenu(this._fullScreenToolbarContainer, {
+    popMenu(popupTargetFromElement(this._fullScreenToolbarContainer), {
       options: {
         items: [
           {
@@ -80,7 +83,7 @@ export class EmbedHtmlFullscreenToolbar extends LitElement {
           {
             type: 'group',
             name: 'thing',
-            children: () => [
+            items: [
               {
                 type: 'toggle-switch',
                 name: 'Hide toolbar',
@@ -96,9 +99,11 @@ export class EmbedHtmlFullscreenToolbar extends LitElement {
           this._popperVisible = false;
         },
       },
-
-      placement: 'top-end',
-      middleware: [flip(), offset({ mainAxis: 4, crossAxis: -40 })],
+      middleware: [
+        autoPlacement({ allowedPlacements: ['top-end'] }),
+        flip(),
+        offset({ mainAxis: 4, crossAxis: -40 }),
+      ],
       container: this.embedHtml.iframeWrapper,
     });
   };

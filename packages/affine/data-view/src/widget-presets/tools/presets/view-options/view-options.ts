@@ -1,4 +1,8 @@
-import { popMenu } from '@blocksuite/affine-components/context-menu';
+import {
+  popMenu,
+  type PopupTarget,
+  popupTargetFromElement,
+} from '@blocksuite/affine-components/context-menu';
 import {
   ArrowRightSmallIcon,
   DeleteIcon,
@@ -6,15 +10,12 @@ import {
   FilterIcon,
   GroupingIcon,
   InfoIcon,
+  LayoutIcon,
   MoreHorizontalIcon,
 } from '@blocksuite/icons/lit';
 import { css, html } from 'lit';
 
 import type { SingleView } from '../../../../core/view-manager/single-view.js';
-import type {
-  KanbanViewData,
-  TableViewData,
-} from '../../../../view-presets/index.js';
 
 import { emptyFilterGroup } from '../../../../core/common/ast.js';
 import {
@@ -24,6 +25,12 @@ import {
 import { popPropertiesSetting } from '../../../../core/common/properties.js';
 import { renderUniLit } from '../../../../core/index.js';
 import { WidgetBase } from '../../../../core/widget/widget-base.js';
+import {
+  KanbanSingleView,
+  type KanbanViewData,
+  TableSingleView,
+  type TableViewData,
+} from '../../../../view-presets/index.js';
 import { popFilterModal } from '../../../filter/filter-modal.js';
 
 const styles = css`
@@ -55,10 +62,10 @@ export class DataViewHeaderToolsViewOptions extends WidgetBase {
 
   clickMoreAction = (e: MouseEvent) => {
     e.stopPropagation();
-    this.openMoreAction(e.target as HTMLElement);
+    this.openMoreAction(popupTargetFromElement(e.currentTarget as HTMLElement));
   };
 
-  openMoreAction = (target: HTMLElement) => {
+  openMoreAction = (target: PopupTarget) => {
     this.showToolBar(true);
     popViewOptions(target, this.view, () => {
       this.showToolBar(false);
@@ -93,7 +100,7 @@ declare global {
   }
 }
 export const popViewOptions = (
-  target: HTMLElement,
+  target: PopupTarget,
   view: SingleView<TableViewData | KanbanViewData>,
   onClose?: () => void
 ) => {
@@ -102,111 +109,125 @@ export const popViewOptions = (
   };
   popMenu(target, {
     options: {
-      style: 'min-width:300px',
-      input: {
-        initValue: view.name$.value,
-        onComplete: text => {
-          view.nameSet(text);
-        },
-      },
       items: [
         {
-          type: 'group',
+          type: 'input',
+          initialValue: view.name$.value,
+          onComplete: text => {
+            view.nameSet(text);
+          },
+        },
+        {
+          type: 'sub-menu',
           name: 'Layout',
-          children: () => [
-            {
-              type: 'sub-menu',
-              name: 'Layout',
-              options: {
-                input: {
-                  search: true,
+          options: {
+            items: view.manager.viewMetas.map(meta => {
+              return {
+                type: 'action',
+                name: meta.model.defaultName,
+                prefix: renderUniLit(meta.renderer.icon),
+                isSelected: meta.type === view.manager.currentView$.value.type,
+                select: () => {
+                  view.manager.viewChangeType(
+                    view.manager.currentViewId$.value,
+                    meta.type
+                  );
                 },
-                items: view.manager.viewMetas.map(meta => {
-                  return {
-                    type: 'action',
-                    name: meta.model.defaultName,
-                    icon: renderUniLit(meta.renderer.icon),
-                    isSelected:
-                      meta.type === view.manager.currentView$.value.type,
-                    select: () => {
-                      console.log(meta.type);
-                      view.manager.viewChangeType(
-                        view.manager.currentViewId$.value,
-                        meta.type
-                      );
-                    },
-                  };
-                }),
+              };
+            }),
+          },
+          prefix: LayoutIcon(),
+          postfix: html` <div
+            style="font-size: 14px;text-transform: capitalize;"
+          >
+            ${view.type}
+          </div>`,
+        },
+        {
+          type: 'group',
+          items: [
+            {
+              type: 'action',
+              name: 'Properties',
+              prefix: InfoIcon(),
+              postfix: html` <div style="font-size: 14px;">
+                  ${view.properties$.value.length} shown
+                </div>
+                ${ArrowRightSmallIcon()}`,
+              select: () => {
+                requestAnimationFrame(() => {
+                  popPropertiesSetting(target, {
+                    view: view,
+                    onBack: reopen,
+                  });
+                });
               },
-              icon: InfoIcon(),
+            },
+            {
+              type: 'action',
+              name: 'Filter',
+              prefix: FilterIcon(),
+              postfix: html` <div style="font-size: 14px;">
+                  ${view.filter$.value.conditions.length
+                    ? `${view.filter$.value.conditions.length} filters`
+                    : ''}
+                </div>
+                ${ArrowRightSmallIcon()}`,
+              select: () => {
+                popFilterModal(target, {
+                  vars: view.vars$.value,
+                  value: view.filter$.value ?? emptyFilterGroup,
+                  onChange: view.filterSet.bind(view),
+                  isRoot: true,
+                  onBack: reopen,
+                  onDelete: () => {
+                    view.filterSet({
+                      ...(view.filter$.value ?? emptyFilterGroup),
+                      conditions: [],
+                    });
+                  },
+                });
+              },
+            },
+            {
+              type: 'action',
+              name: 'Group',
+              prefix: GroupingIcon(),
+              postfix: html` <div style="font-size: 14px;">
+                  ${view instanceof TableSingleView ||
+                  view instanceof KanbanSingleView
+                    ? view.groupManager.property$.value?.name$.value
+                    : ''}
+                </div>
+                ${ArrowRightSmallIcon()}`,
+              select: () => {
+                const groupBy = view.data$.value?.groupBy;
+                if (!groupBy) {
+                  popSelectGroupByProperty(target, view, () =>
+                    popGroupSetting(target, view, reopen)
+                  );
+                } else {
+                  popGroupSetting(target, view, reopen);
+                }
+              },
             },
           ],
         },
         {
-          type: 'action',
-          name: 'Properties',
-          icon: InfoIcon(),
-          postfix: ArrowRightSmallIcon(),
-          select: () => {
-            requestAnimationFrame(() => {
-              popPropertiesSetting(target, {
-                view: view,
-                onBack: reopen,
-              });
-            });
-          },
-        },
-        {
-          type: 'action',
-          name: 'Filter',
-          icon: FilterIcon(),
-          postfix: ArrowRightSmallIcon(),
-          select: () => {
-            popFilterModal(target, {
-              vars: view.vars$.value,
-              value: view.filter$.value ?? emptyFilterGroup,
-              onChange: view.filterSet.bind(view),
-              isRoot: true,
-              onBack: reopen,
-              onDelete: () => {
-                view.filterSet({
-                  ...(view.filter$.value ?? emptyFilterGroup),
-                  conditions: [],
-                });
-              },
-            });
-          },
-        },
-        {
-          type: 'action',
-          name: 'Group',
-          icon: GroupingIcon(),
-          postfix: ArrowRightSmallIcon(),
-          select: () => {
-            const groupBy = view.data$.value?.groupBy;
-            if (!groupBy) {
-              popSelectGroupByProperty(target, view);
-            } else {
-              popGroupSetting(target, view, reopen);
-            }
-          },
-        },
-        {
-          type: 'action',
-          name: 'Duplicate',
-          icon: DuplicateIcon(),
-          select: () => {
-            view.duplicate();
-          },
-        },
-        {
           type: 'group',
-          name: '',
-          children: () => [
+          items: [
             {
               type: 'action',
-              name: 'Delete View',
-              icon: DeleteIcon(),
+              name: 'Duplicate',
+              prefix: DuplicateIcon(),
+              select: () => {
+                view.duplicate();
+              },
+            },
+            {
+              type: 'action',
+              name: 'Delete',
+              prefix: DeleteIcon(),
               select: () => {
                 view.delete();
               },

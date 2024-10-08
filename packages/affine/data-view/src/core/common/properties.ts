@@ -1,4 +1,7 @@
-import { createPopup } from '@blocksuite/affine-components/context-menu';
+import {
+  createPopup,
+  type PopupTarget,
+} from '@blocksuite/affine-components/context-menu';
 import { ShadowlessElement } from '@blocksuite/block-std';
 import { SignalWatcher, WithDisposable } from '@blocksuite/global/utils';
 import {
@@ -243,7 +246,7 @@ declare global {
 }
 
 export const popPropertiesSetting = (
-  target: HTMLElement,
+  target: PopupTarget,
   props: {
     view: SingleView;
     onClose?: () => void;

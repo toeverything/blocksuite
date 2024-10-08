@@ -1,4 +1,8 @@
-import { popFilterableSimpleMenu } from '@blocksuite/affine-components/context-menu';
+import {
+  popFilterableSimpleMenu,
+  type PopupTarget,
+  popupTargetFromElement,
+} from '@blocksuite/affine-components/context-menu';
 import { ShadowlessElement } from '@blocksuite/block-std';
 import { WithDisposable } from '@blocksuite/global/utils';
 import { AddCursorIcon } from '@blocksuite/icons/lit';
@@ -67,11 +71,11 @@ export class VariableRefView extends WithDisposable(ShadowlessElement) {
     super.connectedCallback();
     this.disposables.addFromEvent(this, 'click', e => {
       popFilterableSimpleMenu(
-        e.target as HTMLElement,
+        popupTargetFromElement(e.target as HTMLElement),
         this.vars.map(v => ({
           type: 'action',
           name: v.name,
-          icon: renderUniLit(v.icon, {}),
+          prefix: renderUniLit(v.icon, {}),
           select: () => {
             this.setData({
               type: 'ref',
@@ -104,7 +108,7 @@ declare global {
   }
 }
 export const popCreateFilter = (
-  target: HTMLElement,
+  target: PopupTarget,
   props: {
     vars: Variable[];
     onSelect: (filter: Filter) => void;
@@ -117,7 +121,7 @@ export const popCreateFilter = (
       ...props.vars.map(v => ({
         type: 'action' as const,
         name: v.name,
-        icon: renderUniLit(v.icon, {}),
+        prefix: renderUniLit(v.icon, {}),
         select: () => {
           props.onSelect(
             firstFilterByRef(props.vars, {
@@ -130,11 +134,11 @@ export const popCreateFilter = (
       {
         type: 'group',
         name: '',
-        children: () => [
+        items: [
           {
             type: 'action',
             name: 'Add filter group',
-            icon: AddCursorIcon(),
+            prefix: AddCursorIcon(),
             select: () => {
               props.onSelect(firstFilterInGroup(props.vars));
             },

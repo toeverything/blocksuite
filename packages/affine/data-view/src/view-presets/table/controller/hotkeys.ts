@@ -1,5 +1,7 @@
 import type { ReactiveController } from 'lit';
 
+import { popupTargetFromElement } from '@blocksuite/affine-components/context-menu';
+
 import type { DataViewTable } from '../table-view.js';
 
 import { popRowMenu } from '../components/menu.js';
@@ -372,7 +374,7 @@ export class TableHotkeysController implements ReactiveController {
             });
             popRowMenu(
               this.host.props.dataViewEle,
-              cell,
+              popupTargetFromElement(cell),
               this.selectionController
             );
           }

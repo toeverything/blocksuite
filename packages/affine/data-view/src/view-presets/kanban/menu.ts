@@ -1,4 +1,7 @@
-import { popFilterableSimpleMenu } from '@blocksuite/affine-components/context-menu';
+import {
+  popFilterableSimpleMenu,
+  type PopupTarget,
+} from '@blocksuite/affine-components/context-menu';
 import {
   ArrowRightBigIcon,
   DeleteIcon,
@@ -29,7 +32,7 @@ export const openDetail = (
 
 export const popCardMenu = (
   dataViewEle: DataViewRenderer,
-  ele: HTMLElement,
+  ele: PopupTarget,
   rowId: string,
   selection: KanbanSelectionController
 ) => {
@@ -37,7 +40,7 @@ export const popCardMenu = (
     {
       type: 'action',
       name: 'Expand Card',
-      icon: ExpandFullIcon(),
+      prefix: ExpandFullIcon(),
       select: () => {
         openDetail(dataViewEle, rowId, selection);
       },
@@ -45,11 +48,8 @@ export const popCardMenu = (
     {
       type: 'sub-menu',
       name: 'Move To',
-      icon: ArrowRightBigIcon(),
+      prefix: ArrowRightBigIcon(),
       options: {
-        input: {
-          search: true,
-        },
         items:
           selection.view.groupManager.groupsDataList$.value
             ?.filter(v => {
@@ -77,7 +77,7 @@ export const popCardMenu = (
     //     {
     //       type: 'action',
     //       name: 'Copy',
-    //       icon: CopyIcon,
+    //       prefix: CopyIcon,
     //       select: () => {
     //         //TODO
     //       },
@@ -85,7 +85,7 @@ export const popCardMenu = (
     //     {
     //       type: 'action',
     //       name: 'Paste',
-    //       icon: PasteIcon,
+    //       prefix: PasteIcon,
     //       select: () => {
     //         //TODO
     //       },
@@ -95,11 +95,11 @@ export const popCardMenu = (
     {
       type: 'group',
       name: '',
-      children: () => [
+      items: [
         {
           type: 'action',
           name: 'Insert Before',
-          icon: html` <div
+          prefix: html` <div
             style="transform: rotate(90deg);display:flex;align-items:center;"
           >
             ${MoveLeftIcon()}
@@ -111,7 +111,7 @@ export const popCardMenu = (
         {
           type: 'action',
           name: 'Insert After',
-          icon: html` <div
+          prefix: html` <div
             style="transform: rotate(90deg);display:flex;align-items:center;"
           >
             ${MoveRightIcon()}
@@ -125,12 +125,12 @@ export const popCardMenu = (
     {
       type: 'group',
       name: '',
-      children: () => [
+      items: [
         {
           type: 'action',
           name: 'Delete Card',
           class: 'delete-item',
-          icon: DeleteIcon(),
+          prefix: DeleteIcon(),
           select: () => {
             selection.deleteCard();
           },

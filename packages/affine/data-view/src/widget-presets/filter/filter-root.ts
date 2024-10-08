@@ -1,4 +1,7 @@
-import { popFilterableSimpleMenu } from '@blocksuite/affine-components/context-menu';
+import {
+  popFilterableSimpleMenu,
+  popupTargetFromElement,
+} from '@blocksuite/affine-components/context-menu';
 import { ShadowlessElement } from '@blocksuite/block-std';
 import { WithDisposable } from '@blocksuite/global/utils';
 import {
@@ -153,7 +156,7 @@ export class FilterRootView extends WithDisposable(ShadowlessElement) {
   `;
 
   private _addNew = (e: MouseEvent) => {
-    popAddNewFilter(e.target as HTMLElement, {
+    popAddNewFilter(popupTargetFromElement(e.target as HTMLElement), {
       value: this.data,
       onChange: this.setData,
       vars: this.vars,
@@ -171,11 +174,11 @@ export class FilterRootView extends WithDisposable(ShadowlessElement) {
 
   private _clickConditionOps(target: HTMLElement, i: number) {
     const filter = this.data.conditions[i];
-    popFilterableSimpleMenu(target, [
+    popFilterableSimpleMenu(popupTargetFromElement(target), [
       {
         type: 'action',
         name: filter.type === 'filter' ? 'Turn into group' : 'Wrap in group',
-        icon: ConvertIcon(),
+        prefix: ConvertIcon(),
         onHover: hover => {
           this.containerClass = hover
             ? { index: i, class: 'hover-style' }
@@ -189,7 +192,7 @@ export class FilterRootView extends WithDisposable(ShadowlessElement) {
       {
         type: 'action',
         name: 'Duplicate',
-        icon: DuplicateIcon(),
+        prefix: DuplicateIcon(),
         onHover: hover => {
           this.containerClass = hover
             ? { index: i, class: 'hover-style' }
@@ -208,11 +211,11 @@ export class FilterRootView extends WithDisposable(ShadowlessElement) {
       {
         type: 'group',
         name: '',
-        children: () => [
+        items: [
           {
             type: 'action',
             name: 'Delete',
-            icon: DeleteIcon(),
+            prefix: DeleteIcon(),
             class: 'delete-item',
             onHover: hover => {
               this.containerClass = hover

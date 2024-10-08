@@ -1,4 +1,8 @@
-import { popFilterableSimpleMenu } from '@blocksuite/affine-components/context-menu';
+import {
+  popFilterableSimpleMenu,
+  type PopupTarget,
+  popupTargetFromElement,
+} from '@blocksuite/affine-components/context-menu';
 import { ShadowlessElement } from '@blocksuite/block-std';
 import { WithDisposable } from '@blocksuite/global/utils';
 import { CloseIcon } from '@blocksuite/icons/lit';
@@ -118,7 +122,7 @@ export class FilterConditionView extends WithDisposable(ShadowlessElement) {
     const target = e.currentTarget as HTMLElement;
     const list = this._filterList();
     popFilterableSimpleMenu(
-      target,
+      popupTargetFromElement(target),
       list.map(v => {
         const selected = v.name === this.data.function;
         return {
@@ -165,7 +169,7 @@ export class FilterConditionView extends WithDisposable(ShadowlessElement) {
           };
           const click = (e: MouseEvent) => {
             popLiteralEdit(
-              e.currentTarget as HTMLElement,
+              popupTargetFromElement(e.currentTarget as HTMLElement),
               v,
               value?.value,
               onChange
@@ -210,7 +214,7 @@ declare global {
   }
 }
 export const popAddNewFilter = (
-  target: HTMLElement,
+  target: PopupTarget,
   props: {
     value: FilterGroup;
     onChange: (value: FilterGroup) => void;

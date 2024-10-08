@@ -32,9 +32,6 @@ export const literalMatchers = [
     popEdit: (position, { value, onChange }) => {
       popMenu(position, {
         options: {
-          input: {
-            search: true,
-          },
           items: [true, false].map(v => {
             return {
               type: 'action',
@@ -54,13 +51,15 @@ export const literalMatchers = [
     popEdit: (position, { value, onChange }) => {
       popMenu(position, {
         options: {
-          input: {
-            initValue: value?.toString() ?? '',
-            onComplete: text => {
-              onChange(text || undefined);
+          items: [
+            {
+              type: 'input',
+              initialValue: value?.toString() ?? '',
+              onComplete: text => {
+                onChange(text || undefined);
+              },
             },
-          },
-          items: [],
+          ],
         },
       });
     },
@@ -70,20 +69,22 @@ export const literalMatchers = [
     popEdit: (position, { value, onChange }) => {
       popMenu(position, {
         options: {
-          input: {
-            initValue: value?.toString() ?? '',
-            onComplete: text => {
-              if (!text) {
-                onChange(undefined);
-                return;
-              }
-              const number = Number.parseFloat(text);
-              if (!Number.isNaN(number)) {
-                onChange(number);
-              }
+          items: [
+            {
+              type: 'input',
+              initialValue: value?.toString() ?? '',
+              onComplete: text => {
+                if (!text) {
+                  onChange(undefined);
+                  return;
+                }
+                const number = Number.parseFloat(text);
+                if (!Number.isNaN(number)) {
+                  onChange(number);
+                }
+              },
             },
-          },
-          items: [],
+          ],
         },
       });
     },
@@ -100,9 +101,6 @@ export const literalMatchers = [
       let list = Array.isArray(value) ? value : [];
       popMenu(position, {
         options: {
-          input: {
-            search: true,
-          },
           items:
             type.ele.data?.tags.map(tag => {
               const styles = styleMap({
@@ -143,9 +141,6 @@ export const literalMatchers = [
       }
       popMenu(position, {
         options: {
-          input: {
-            search: true,
-          },
           items:
             type.data?.tags.map(tag => {
               const styles = styleMap({
