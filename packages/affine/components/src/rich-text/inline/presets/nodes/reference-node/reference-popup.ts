@@ -156,10 +156,6 @@ export class ReferencePopup extends WithDisposable(LitElement) {
   }
 
   private _openDoc() {
-    const pageId = this.referenceDocId;
-    const block = this.block;
-    if (pageId === block.doc.id) return;
-
     this.std
       .getOptional(RefNodeSlotsProvider)
       ?.docLinkClicked.emit(this.referenceInfo);

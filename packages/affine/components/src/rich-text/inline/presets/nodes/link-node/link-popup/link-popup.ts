@@ -58,6 +58,7 @@ export class LinkPopup extends WithDisposable(LitElement) {
           type="text"
           spellcheck="false"
           placeholder="Paste or type a link"
+          @paste=${this._updateConfirmBtn}
           @input=${this._updateConfirmBtn}
         />
         ${this._confirmBtnTemplate()}
@@ -127,6 +128,11 @@ export class LinkPopup extends WithDisposable(LitElement) {
   private _embedOptions: EmbedOptions | null = null;
 
   private _openLink = () => {
+    if (this.openLink) {
+      this.openLink();
+      return;
+    }
+
     let link = this.currentLink;
     if (!link) return;
     if (!link.match(/^[a-zA-Z]+:\/\//)) {
@@ -160,6 +166,7 @@ export class LinkPopup extends WithDisposable(LitElement) {
           href=${this.currentLink}
           rel="noopener noreferrer"
           target="_blank"
+          @click=${(e: MouseEvent) => this.openLink?.(e)}
         >
           <span>${getHostName(this.currentLink)}</span>
         </a>
@@ -434,7 +441,9 @@ export class LinkPopup extends WithDisposable(LitElement) {
       return;
     }
     const link = this.linkInput?.value.trim();
-    this.confirmButton.disabled = !(link && isValidUrl(link));
+    const disabled = !(link && isValidUrl(link));
+    this.confirmButton.disabled = disabled;
+    this.confirmButton.active = !disabled;
     this.confirmButton.requestUpdate();
   }
 
@@ -615,6 +624,9 @@ export class LinkPopup extends WithDisposable(LitElement) {
 
   @query('.mock-selection-container')
   accessor mockSelectionContainer!: HTMLDivElement;
+
+  @property({ attribute: false })
+  accessor openLink: ((e?: MouseEvent) => void) | null = null;
 
   @query('.affine-link-popover-container')
   accessor popupContainer!: HTMLDivElement;

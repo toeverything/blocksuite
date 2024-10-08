@@ -273,10 +273,18 @@ export function expectConsoleMessage(
   page.on('console', (message: ConsoleMessage) => {
     if (
       [
+        '',
+        // React devtools:
         '%cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold',
+        // Vite:
         '[vite] connected.',
         '[vite] connecting...',
+        // Figma embed:
+        'Fullscreen: Using 4GB WASM heap',
+        // Lit:
         'Lit is in dev mode. Not recommended for production! See https://lit.dev/msg/dev-mode for more information.',
+        // Figma embed:
+        'Running frontend commit',
       ].includes(message.text())
     ) {
       ignoredLog(message);

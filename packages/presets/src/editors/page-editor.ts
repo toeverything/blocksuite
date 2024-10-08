@@ -42,7 +42,6 @@ export class PageEditor extends WithDisposable(ShadowlessElement) {
     .page-editor-container {
       display: block;
       height: 100%;
-      position: relative;
     }
   `;
 

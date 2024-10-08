@@ -497,6 +497,19 @@ test.describe('slash menu should show and hide correctly', () => {
   });
 });
 
+test.describe('slash menu should not be shown in ignored blocks', () => {
+  test('code block', async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyParagraphState(page);
+    await focusRichText(page);
+
+    await type(page, '```');
+    await pressEnter(page);
+    await type(page, '/');
+    await expect(page.locator('.slash-menu')).toBeHidden();
+  });
+});
+
 test('should slash menu works with fast type', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);

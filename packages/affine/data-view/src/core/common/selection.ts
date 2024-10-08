@@ -1,4 +1,4 @@
-import { BaseSelection } from '@blocksuite/block-std';
+import { BaseSelection, SelectionExtension } from '@blocksuite/block-std';
 import { z } from 'zod';
 
 import type { DataViewSelection, GetDataViewSelection } from '../types.js';
@@ -129,3 +129,5 @@ declare global {
     }
   }
 }
+
+export const DatabaseSelectionExtension = SelectionExtension(DatabaseSelection);

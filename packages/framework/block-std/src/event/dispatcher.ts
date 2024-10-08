@@ -1,10 +1,9 @@
 import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 import { DisposableGroup } from '@blocksuite/global/utils';
 
-import type { BlockComponent } from '../view/index.js';
-
 import { LifeCycleWatcher } from '../extension/index.js';
 import { KeymapIdentifier } from '../identifier.js';
+import { type BlockComponent, EditorHost } from '../view/index.js';
 import {
   type UIEventHandler,
   UIEventState,
@@ -267,6 +266,7 @@ export class UIEventDispatcher extends LifeCycleWatcher {
     return (
       element instanceof HTMLInputElement ||
       element instanceof HTMLTextAreaElement ||
+      (element instanceof EditorHost && !element.doc.readonly) ||
       (element as HTMLElement).isContentEditable
     );
   }

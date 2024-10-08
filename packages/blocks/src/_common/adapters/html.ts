@@ -40,6 +40,7 @@ import {
   hastGetTextChildren,
   hastGetTextChildrenOnlyAst,
   hastGetTextContent,
+  hastIsParagraphLike,
   hastQuerySelector,
   type HtmlAST,
 } from './hast.js';
@@ -437,30 +438,9 @@ export class HtmlAdapter extends BaseAdapter<Html> {
         case 'span':
         case 'footer': {
           if (
-            // Check if it is a paragraph like div
             o.parent?.node.type === 'element' &&
             !['li', 'p'].includes(o.parent.node.tagName) &&
-            (hastGetElementChildren(o.node).every(child =>
-              [
-                'a',
-                'b',
-                'bdi',
-                'bdo',
-                'br',
-                'code',
-                'del',
-                'em',
-                'i',
-                'ins',
-                'mark',
-                'span',
-                'strong',
-                'u',
-              ].includes(child.tagName)
-            ) ||
-              o.node.children
-                .map(child => child.type)
-                .every(type => type === 'text'))
+            hastIsParagraphLike(o.node)
           ) {
             context
               .openNode(

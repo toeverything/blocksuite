@@ -1,7 +1,6 @@
 import type { ReferenceInfo } from '@blocksuite/affine-model';
 import type { Doc, DocMeta } from '@blocksuite/store';
 
-import { getModelByElement } from '@blocksuite/affine-shared/utils';
 import {
   BLOCK_ID_ATTR,
   type BlockComponent,
@@ -20,6 +19,7 @@ import { css, html, nothing } from 'lit';
 import { property, state } from 'lit/decorators.js';
 import { choose } from 'lit/directives/choose.js';
 import { ref } from 'lit/directives/ref.js';
+import { styleMap } from 'lit/directives/style-map.js';
 
 import type { ReferenceNodeConfigProvider } from './reference-config.js';
 
@@ -70,18 +70,12 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
     }
   `;
 
-  private _refAttribute: NonNullable<AffineTextAttributes['reference']> = {
-    type: 'LinkedPage',
-    pageId: '0',
-  };
-
   private _updateRefMeta = (doc: Doc) => {
     const refAttribute = this.delta.attributes?.reference;
     if (!refAttribute) {
       return;
     }
 
-    this._refAttribute = refAttribute;
     const refMeta = doc.collection.meta.docMetas.find(
       doc => doc.id === refAttribute.pageId
     );
@@ -166,8 +160,8 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
 
   get referenceInfo(): ReferenceInfo {
     const reference = this.delta.attributes?.reference;
-    const id = this.doc?.id;
-    if (!reference) return { pageId: id ?? '' };
+    const id = this.doc?.id ?? '';
+    if (!reference) return { pageId: id };
 
     const { pageId, params } = reference;
     const info: ReferenceInfo = { pageId };
@@ -199,22 +193,9 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
 
   private _onClick() {
     if (!this.config.interactable) return;
-
-    const refMeta = this.refMeta;
-    const model = getModelByElement(this);
-    if (!refMeta) {
-      // The doc is deleted
-      console.warn('The doc is deleted', this._refAttribute.pageId);
-      return;
-    }
-    if (!model || refMeta.id === model.doc.id) {
-      // the doc is the current doc.
-      return;
-    }
-    const targetDocId = refMeta.id;
     this.std
       .getOptional(RefNodeSlotsProvider)
-      ?.docLinkClicked.emit({ pageId: targetDocId });
+      ?.docLinkClicked.emit(this.referenceInfo);
   }
 
   override connectedCallback() {
@@ -252,13 +233,9 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
 
   // linking block/element
   isLinkedNode() {
-    const reference = this.delta.attributes?.reference;
-    if (!reference?.params) return false;
-    const { mode, blockIds, elementIds } = reference.params;
-    if (!mode) return false;
-    if (blockIds && blockIds.length > 0) return true;
-    if (elementIds && elementIds.length > 0) return true;
-    return false;
+    return Boolean(
+      this.referenceInfo.params && Object.keys(this.referenceInfo.params).length
+    );
   }
 
   override render() {
@@ -314,7 +291,7 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
       ${this.config.interactable ? ref(this._whenHover.setReference) : ''}
       data-selected=${this.selected}
       class="affine-reference"
-      style=${style}
+      style=${styleMap(style)}
       @click=${this._onClick}
       >${content}<v-text .str=${ZERO_WIDTH_NON_JOINER}></v-text
     ></span>`;

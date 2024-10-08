@@ -6,6 +6,7 @@ import { DragIndicator } from '@blocksuite/affine-components/drag-indicator';
 import { PeekViewProvider } from '@blocksuite/affine-components/peek';
 import { toast } from '@blocksuite/affine-components/toast';
 import { NOTE_SELECTOR } from '@blocksuite/affine-shared/consts';
+import { DocModeProvider } from '@blocksuite/affine-shared/services';
 import { RANGE_SYNC_EXCLUDE_ATTR } from '@blocksuite/block-std';
 import {
   createRecordDetail,
@@ -327,6 +328,9 @@ export class DatabaseBlockComponent extends CaptionedBlockComponent<
 
   listenFullWidthChange() {
     if (!this.doc.awarenessStore.getFlag('enable_database_full_width')) {
+      return;
+    }
+    if (this.std.get(DocModeProvider).getEditorMode() === 'edgeless') {
       return;
     }
     this.disposables.add(

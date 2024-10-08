@@ -82,9 +82,12 @@ export class ImageEdgelessBlockComponent extends GfxBlockComponent<
   }
 
   override renderGfxBlock() {
+    const rotate = this.model.rotate ?? 0;
     const containerStyleMap = styleMap({
       position: 'relative',
       width: '100%',
+      transform: `rotate(${rotate}deg)`,
+      transformOrigin: 'center',
     });
 
     return html`

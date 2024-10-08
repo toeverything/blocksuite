@@ -119,6 +119,7 @@ export function createLitPortal({
   computePosition: positionConfigOrFn,
   abortController,
   closeOnClickAway = false,
+  positionStrategy = 'absolute',
   ...portalOptions
 }: AdvancedPortalOptions) {
   let positionSlot = new Slot<ComputePositionReturn>();
@@ -160,7 +161,7 @@ export function createLitPortal({
 
   const visibility = portalRoot.style.visibility;
   portalRoot.style.visibility = 'hidden';
-  portalRoot.style.position = 'absolute';
+  portalRoot.style.position = positionStrategy;
   portalRoot.style.left = '0';
   portalRoot.style.top = '0';
   portalRoot.style.zIndex = cssVar('zIndexPopover');
@@ -181,7 +182,10 @@ export function createLitPortal({
     ) {
       abortController.abort();
     }
-    computePosition(referenceElement, portalRoot, options)
+    computePosition(referenceElement, portalRoot, {
+      strategy: positionStrategy,
+      ...options,
+    })
       .then(positionReturn => {
         const { x, y } = positionReturn;
         // Use transform maybe cause overlay-mask offset issue

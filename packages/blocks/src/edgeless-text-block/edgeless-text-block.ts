@@ -39,7 +39,7 @@ export class EdgelessTextBlockComponent extends GfxBlockComponent<EdgelessTextBl
       return;
     }
 
-    if (!this.checkVisibility?.() || !this._editing) {
+    if (!this._editing) {
       return;
     }
 
@@ -68,11 +68,10 @@ export class EdgelessTextBlockComponent extends GfxBlockComponent<EdgelessTextBl
     const rootComponent = this
       .rootComponent as EdgelessRootBlockComponent | null;
 
-    if (!rootComponent || !edgelessSelection) {
-      return;
-    }
+    if (!rootComponent || !edgelessSelection) return;
 
     const selectedRect = rootComponent.selectedRect;
+    if (!selectedRect) return;
 
     disposables.add(
       selectedRect.slots.dragStart
@@ -82,8 +81,19 @@ export class EdgelessTextBlockComponent extends GfxBlockComponent<EdgelessTextBl
             selectedRect.dragDirection === HandleDirection.Left ||
             selectedRect.dragDirection === HandleDirection.Right
           ) {
-            this._editing = true;
             this._horizontalResizing = true;
+          }
+        })
+    );
+    disposables.add(
+      selectedRect.slots.dragMove
+        .filter(() => edgelessSelection.selectedElements.includes(this.model))
+        .on(() => {
+          if (
+            selectedRect.dragDirection === HandleDirection.Left ||
+            selectedRect.dragDirection === HandleDirection.Right
+          ) {
+            this._updateH();
           }
         })
     );
@@ -96,7 +106,6 @@ export class EdgelessTextBlockComponent extends GfxBlockComponent<EdgelessTextBl
             selectedRect.dragDirection === HandleDirection.Right
           ) {
             this._horizontalResizing = false;
-            this._editing = false;
           }
         })
     );

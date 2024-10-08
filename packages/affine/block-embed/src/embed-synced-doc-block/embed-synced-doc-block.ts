@@ -20,7 +20,8 @@ import {
   BlockStdScope,
   type EditorHost,
 } from '@blocksuite/block-std';
-import { assertExists } from '@blocksuite/global/utils';
+import { GfxControllerIdentifier } from '@blocksuite/block-std/gfx';
+import { assertExists, Bound, getCommonBound } from '@blocksuite/global/utils';
 import { BlockViewType, DocCollection, type Query } from '@blocksuite/store';
 import { html, type PropertyValues } from 'lit';
 import { query, state } from 'lit/decorators.js';
@@ -41,18 +42,37 @@ import { blockStyles } from './styles.js';
 export class EmbedSyncedDocBlockComponent extends EmbedBlockComponent<EmbedSyncedDocModel> {
   static override styles = blockStyles;
 
+  // Caches total bounds, includes all blocks and elements.
+  private _cachedBounds: Bound | null = null;
+
   private _initEdgelessFitEffect = () => {
     const fitToContent = () => {
       if (this.syncedDocMode !== 'edgeless') return;
 
-      const service = this.syncedDocEditorHost?.std.getService('affine:page');
+      const controller = this.syncedDocEditorHost?.std.getOptional(
+        GfxControllerIdentifier
+      );
+      if (!controller) return;
 
-      if (!service) return;
+      const viewport = controller.viewport;
+      if (!viewport) return;
 
-      // @ts-expect-error TODO: fix after edgeless refactor
-      service.viewport.onResize();
-      // @ts-expect-error TODO: fix after edgeless refactor
-      service.zoomToFit();
+      if (!this._cachedBounds) {
+        this._cachedBounds = getCommonBound([
+          ...controller.layer.blocks.map(block =>
+            Bound.deserialize(block.xywh)
+          ),
+          ...controller.layer.canvasElements,
+        ]);
+      }
+
+      viewport.onResize();
+
+      const { centerX, centerY, zoom } = viewport.getFitToScreenData(
+        this._cachedBounds
+      );
+      viewport.setCenter(centerX, centerY);
+      viewport.setZoom(zoom);
     };
 
     const observer = new ResizeObserver(fitToContent);
@@ -65,9 +85,7 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockComponent<EmbedSynce
     });
 
     this.syncedDocEditorHost?.updateComplete
-      .then(() => {
-        fitToContent();
-      })
+      .then(() => fitToContent())
       .catch(() => {});
   };
 
@@ -461,10 +479,8 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockComponent<EmbedSynce
       this.syncedDocEditorHost?.std.getOptional(RefNodeSlotsProvider);
     if (refNodeProvider) {
       this.disposables.add(
-        refNodeProvider.docLinkClicked.on(({ pageId }) => {
-          this.std
-            .getOptional(RefNodeSlotsProvider)
-            ?.docLinkClicked.emit({ pageId });
+        refNodeProvider.docLinkClicked.on(args => {
+          this.std.getOptional(RefNodeSlotsProvider)?.docLinkClicked.emit(args);
         })
       );
     }

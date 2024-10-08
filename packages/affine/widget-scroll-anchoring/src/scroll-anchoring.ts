@@ -1,6 +1,6 @@
 import type { DocMode } from '@blocksuite/affine-model';
 
-import { HighlightSelection } from '@blocksuite/affine-shared/selection';
+import '@blocksuite/affine-shared/selection';
 import { WidgetComponent } from '@blocksuite/block-std';
 import {
   GfxControllerIdentifier,
@@ -180,8 +180,6 @@ export class AffineScrollAnchoringWidget extends WidgetComponent {
 
   override connectedCallback() {
     super.connectedCallback();
-
-    this.std.selection.register(HighlightSelection);
 
     this.#resizeObserver.observe(this.offsetParent!);
     this.handleEvent('wheel', this.#requestUpdateFn);

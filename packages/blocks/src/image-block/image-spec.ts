@@ -1,3 +1,4 @@
+import { ImageSelectionExtension } from '@blocksuite/affine-shared/selection';
 import {
   BlockViewExtension,
   CommandExtension,
@@ -27,4 +28,5 @@ export const ImageBlockSpec: ExtensionType[] = [
     imageToolbar: literal`affine-image-toolbar-widget`,
   }),
   ImageDragHandleOption,
+  ImageSelectionExtension,
 ];

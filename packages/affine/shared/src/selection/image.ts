@@ -1,4 +1,4 @@
-import { BaseSelection } from '@blocksuite/block-std';
+import { BaseSelection, SelectionExtension } from '@blocksuite/block-std';
 import z from 'zod';
 
 const ImageSelectionSchema = z.object({
@@ -37,3 +37,5 @@ declare global {
     }
   }
 }
+
+export const ImageSelectionExtension = SelectionExtension(ImageSelection);

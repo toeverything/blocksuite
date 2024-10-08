@@ -11,8 +11,6 @@ export const styles = css`
   .affine-embed-linked-doc-block {
     box-sizing: border-box;
     display: flex;
-    max-width: 100%;
-    min-width: ${EMBED_CARD_MIN_WIDTH}px;
     width: ${EMBED_CARD_WIDTH.horizontal}px;
     border-radius: 8px;
     border: 1px solid var(--affine-background-tertiary-color);
@@ -181,11 +179,17 @@ export const styles = css`
     border-radius: 4px 4px var(--1, 0px) var(--1, 0px);
   }
 
+  .affine-embed-linked-doc-block:not(.in-canvas) {
+    max-width: 100%;
+    min-width: ${EMBED_CARD_MIN_WIDTH}px;
+  }
+
   .affine-embed-linked-doc-block.loading {
     .affine-embed-linked-doc-content-date {
       display: none;
     }
   }
+
   .affine-embed-linked-doc-block:not(.loading):not(.note-empty) {
     .affine-embed-linked-doc-content-note.render {
       display: block;
