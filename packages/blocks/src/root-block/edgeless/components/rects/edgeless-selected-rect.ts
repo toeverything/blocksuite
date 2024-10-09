@@ -829,10 +829,6 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     return this._resizeManager.dragDirection;
   }
 
-  get dragging() {
-    return this._resizeManager.dragging || this.edgeless.tools.dragging;
-  }
-
   get edgelessSlots() {
     return this.edgeless.slots;
   }

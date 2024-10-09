@@ -13,10 +13,10 @@ export const buildLassoDenseMenu: DenseMenuBuilder = edgeless => {
   //   edgeless.service.editPropsStore.getLastProps('lasso').mode ??
   //   LassoMode.FreeHand;
 
-  const isActive = edgeless.tools.edgelessTool.type === 'lasso';
+  const isActive = edgeless.gfx.tool.currentToolName$.peek() === 'lasso';
 
   const createSelect = (mode: LassoMode) => () => {
-    edgeless.tools.setEdgelessTool({ type: 'lasso', mode });
+    edgeless.gfx.tool.setTool('lasso', { mode });
   };
 
   return {

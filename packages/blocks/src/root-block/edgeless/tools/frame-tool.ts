@@ -59,6 +59,7 @@ export class FrameToolController extends EdgelessToolController<FrameTool> {
       this._doc.transact(() => {
         frame.pop('xywh');
       });
+      // @ts-ignore
       this._edgeless.tools.setEdgelessTool({ type: 'default' });
       this._edgeless.service.selection.set({
         elements: [frame.id],

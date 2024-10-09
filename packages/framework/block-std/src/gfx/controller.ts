@@ -286,6 +286,15 @@ export class GfxController extends LifeCycleWatcher {
     });
     this._disposables.dispose();
   }
+
+  updateElement(element: GfxModel, props: Record<string, unknown>): void {
+    if (this.surface?.hasElementById(element.id)) {
+      this.surface.updateElement(element.id, props);
+    } else {
+      const hasBlock = this.doc.hasBlock(element.id);
+      hasBlock && this.doc.updateBlock(element as GfxBlockElementModel, props);
+    }
+  }
 }
 
 export const GfxControllerIdentifier = LifeCycleWatcherIdentifier(

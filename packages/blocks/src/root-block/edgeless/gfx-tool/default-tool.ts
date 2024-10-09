@@ -446,11 +446,11 @@ export class DefaultTool extends BaseTool {
           element.moveTo(bound);
         }
 
-        this.gfx.surface?.updateElement(element.id, {
+        this.gfx.updateElement(element, {
           xywh: bound.serialize(),
         });
       } else {
-        this.gfx.surface?.updateElement(element.id, {
+        this.gfx.updateElement(element, {
           xywh: bound.serialize(),
         });
       }
@@ -560,7 +560,7 @@ export class DefaultTool extends BaseTool {
     );
     const distance = connector.getOffsetDistanceByPoint(center as IVec);
     bounds.center = center;
-    this.gfx.surface?.updateElement(connector.id, {
+    this.gfx.updateElement(connector, {
       labelXYWH: bounds.toXYWH(),
       labelOffset: {
         distance,

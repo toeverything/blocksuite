@@ -33,7 +33,6 @@ import { Bound, getCommonBound, last } from '@blocksuite/global/utils';
 import { type BlockModel, Slot } from '@blocksuite/store';
 
 import type { EdgelessFrameManager } from './frame-manager.js';
-import type { EdgelessToolConstructor } from './services/tools-manager.js';
 import type { EdgelessTool } from './types.js';
 
 import { getSurfaceBlock } from '../../surface-ref-block/utils.js';
@@ -47,7 +46,6 @@ import {
   createStickerMiddleware,
   replaceIdMiddleware,
 } from './services/template-middlewares.js';
-import { EdgelessToolsManager } from './services/tools-manager.js';
 import { FIT_TO_SCREEN_PADDING } from './utils/consts.js';
 import { getLastPropsKey } from './utils/get-last-props-key.js';
 import { getCursorMode } from './utils/query.js';
@@ -65,8 +63,6 @@ export class EdgelessRootService extends RootService implements SurfaceContext {
   private _selection: EdgelessSelectionManager;
 
   private _surface: SurfaceBlockModel;
-
-  private _tool: EdgelessToolsManager;
 
   elementRenderers: Record<string, ElementRenderer> = elementRenderers;
 
@@ -157,10 +153,6 @@ export class EdgelessRootService extends RootService implements SurfaceContext {
     return this._surface;
   }
 
-  get tool() {
-    return this._tool;
-  }
-
   get viewport() {
     return this.std.get(GfxControllerIdentifier).viewport;
   }
@@ -180,7 +172,6 @@ export class EdgelessRootService extends RootService implements SurfaceContext {
     }
     this._surface = surface;
     this._selection = new EdgelessSelectionManager(this);
-    this._tool = EdgelessToolsManager.create(this, []);
   }
 
   private _initReadonlyListener() {
@@ -203,12 +194,6 @@ export class EdgelessRootService extends RootService implements SurfaceContext {
     disposables.add(
       slots.edgelessToolUpdated.on(edgelessTool => {
         slots.cursorUpdated.emit(getCursorMode(edgelessTool));
-      })
-    );
-
-    disposables.add(
-      slots.pressShiftKeyUpdated.on(pressed => {
-        this.tool.shiftKey = pressed;
       })
     );
   }
@@ -442,10 +427,6 @@ export class EdgelessRootService extends RootService implements SurfaceContext {
     return (picked ?? first) as BlockSuite.EdgelessModel | null;
   }
 
-  registerTool(Tool: EdgelessToolConstructor) {
-    return this.tool.register(Tool);
-  }
-
   removeElement(id: string | BlockSuite.EdgelessModel) {
     id = typeof id === 'string' ? id : id.id;
 
@@ -542,7 +523,6 @@ export class EdgelessRootService extends RootService implements SurfaceContext {
 
     this._selection?.dispose();
     this.viewport?.dispose();
-    this.tool?.dispose();
     this.selectionManager.set([]);
     this.disposables.dispose();
   }

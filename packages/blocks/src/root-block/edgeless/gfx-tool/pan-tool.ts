@@ -3,7 +3,11 @@ import type { PointerEventState } from '@blocksuite/block-std';
 import { BaseTool } from '@blocksuite/block-std/gfx';
 import { Signal } from '@preact/signals-core';
 
-export class PanTool extends BaseTool {
+export type PanToolOption = {
+  panning: boolean;
+};
+
+export class PanTool extends BaseTool<PanToolOption> {
   static override toolName = 'pan';
 
   private _lastPoint: [number, number] | null = null;
@@ -40,6 +44,10 @@ declare global {
   namespace BlockSuite {
     interface GfxToolsMap {
       pan: PanTool;
+    }
+
+    interface GfxToolsOption {
+      pan: PanToolOption;
     }
   }
 }

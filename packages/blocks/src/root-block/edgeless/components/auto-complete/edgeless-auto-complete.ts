@@ -440,6 +440,14 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
     return result;
   }
 
+  private _initOverlay() {
+    const { surface } = this.edgeless;
+    this._autoCompleteOverlay = new AutoCompleteOverlay(
+      this.std.get(GfxControllerIdentifier)
+    );
+    surface.renderer.addOverlay(this._autoCompleteOverlay);
+  }
+
   private _renderArrow() {
     const isShape = this.current instanceof ShapeElementModel;
     const { selectedRect } = this;
@@ -605,11 +613,6 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
   ) {
     const { surface } = this.edgeless;
 
-    this._autoCompleteOverlay = new AutoCompleteOverlay(
-      this.std.get(GfxControllerIdentifier)
-    );
-    surface.renderer.addOverlay(this._autoCompleteOverlay);
-
     this._autoCompleteOverlay.stroke = surface.renderer.getColorValue(
       current.strokeColor,
       DEFAULT_SHAPE_STROKE_COLOR,
@@ -627,6 +630,7 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
     this._pathGenerator = new ConnectorPathGenerator({
       getElementById: id => this.edgeless.service.getElementById(id),
     });
+    this._initOverlay();
   }
 
   override firstUpdated() {
@@ -642,15 +646,17 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
     _disposables.add(() => this.removeOverlay());
 
     _disposables.add(
-      edgeless.host.event.add('pointerMove', () => {
-        const state = edgeless.tools.getHoverState();
+      edgeless.host.event.add('pointerMove', ctx => {
+        const evt = ctx.get('pointerState');
+        const [x, y] = edgeless.gfx.viewport.toModelCoord(evt.x, evt.y);
+        const elm = edgeless.gfx.getElementByPoint(x, y);
 
-        if (!state) {
+        if (!elm) {
           this._isHover = false;
           return;
         }
 
-        this._isHover = state.content === this.current ? true : false;
+        this._isHover = elm === this.current ? true : false;
       })
     );
 

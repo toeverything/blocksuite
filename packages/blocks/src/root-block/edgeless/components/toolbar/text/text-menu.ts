@@ -1,7 +1,6 @@
 import { css, html, LitElement, nothing } from 'lit';
 import { property } from 'lit/decorators.js';
 
-import type { EdgelessTool } from '../../../types.js';
 import type { ColorEvent } from '../../panel/color-panel.js';
 
 import { EdgelessToolbarToolMixin } from '../mixins/tool.mixin.js';
@@ -15,7 +14,7 @@ export class EdgelessTextMenu extends EdgelessToolbarToolMixin(LitElement) {
     }
   `;
 
-  override type: EdgelessTool['type'] = 'text';
+  override type: BlockSuite.GfxToolsFullOptionValue['type'] = 'text';
 
   override render() {
     if (this.edgelessTool.type !== 'text') return nothing;

@@ -530,8 +530,8 @@ export class QuickEdgelessMenu extends ShadowlessElement {
                     circle
                     @click=${() => {
                       if (this.rootService instanceof EdgelessRootService) {
-                        this.rootService.tool.setEdgelessTool({
-                          type: 'frameNavigator',
+                        this.rootService.gfx.tool.setTool('frameNavigator', {
+                          mode: 'fit',
                         });
                       }
                     }}

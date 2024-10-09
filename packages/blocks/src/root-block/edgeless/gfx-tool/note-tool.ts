@@ -12,8 +12,6 @@ import { BaseTool, type GfxController } from '@blocksuite/block-std/gfx';
 import { type IPoint, Point, serializeXYWH } from '@blocksuite/global/utils';
 import { effect } from '@preact/signals-core';
 
-import type { EdgelessTool } from '../types.js';
-
 import {
   hasClassNameInList,
   type NoteChildrenFlavour,
@@ -139,7 +137,6 @@ function addNote(
 }
 
 export type NoteToolOption = {
-  type: 'affine:note';
   childFlavour: NoteChildrenFlavour;
   childType: string | null;
   tip: string;
@@ -210,14 +207,12 @@ export class NoteTool extends BaseTool<NoteToolOption> {
     (this.gfx.surfaceComponent as SurfaceBlockComponent).refresh();
   }
 
-  override activate(newTool: EdgelessTool) {
-    if (newTool.type !== 'affine:note') return;
-
+  override activate() {
     const attributes =
       this.std.get(EditPropsStore).lastProps$.value['affine:note'];
     const background = attributes.background;
     this._noteOverlay = new NoteOverlay(this.gfx, background);
-    this._noteOverlay.text = newTool.tip;
+    this._noteOverlay.text = this.activatedOption.tip;
     (this.gfx.surfaceComponent as SurfaceBlockComponent).renderer.addOverlay(
       this._noteOverlay
     );

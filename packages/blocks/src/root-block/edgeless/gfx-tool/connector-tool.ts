@@ -154,7 +154,7 @@ export class ConnectorTool extends BaseTool<ConnectorToolOptions> {
     }
 
     const target = this._overlay?.renderConnector(point, excludedIds);
-    this.gfx.surface.updateElement(_connector.id, { target });
+    this.gfx.updateElement(_connector, { target });
   }
 
   override pointerDown(e: PointerEventState) {
@@ -178,7 +178,7 @@ export class ConnectorTool extends BaseTool<ConnectorToolOptions> {
       this._sourceBounds,
       this._sourceLocations
     );
-    this.gfx.surface?.updateElement(this._connector.id, {
+    this.gfx.updateElement(this._connector, {
       target,
       source: this._connector.source,
     });
@@ -223,6 +223,10 @@ declare global {
   namespace BlockSuite {
     interface GfxToolsMap {
       connector: ConnectorTool;
+    }
+
+    interface GfxToolsOption {
+      connector: ConnectorToolOptions;
     }
   }
 }

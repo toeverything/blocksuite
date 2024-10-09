@@ -22,6 +22,7 @@ import { CopilotTool } from '../../root-block/edgeless/gfx-tool/copilot-tool.js'
 import { DefaultTool } from '../../root-block/edgeless/gfx-tool/default-tool.js';
 import { EmptyTool } from '../../root-block/edgeless/gfx-tool/empty-tool.js';
 import { EraserTool } from '../../root-block/edgeless/gfx-tool/eraser-tool.js';
+import { PresentTool } from '../../root-block/edgeless/gfx-tool/frame-navigator-tool.js';
 import { FrameTool } from '../../root-block/edgeless/gfx-tool/frame-tool.js';
 import { LassoTool } from '../../root-block/edgeless/gfx-tool/lasso-tool.js';
 import { NoteTool } from '../../root-block/edgeless/gfx-tool/note-tool.js';
@@ -56,6 +57,7 @@ export const EdgelessEditorBlockSpecs: ExtensionType[] = [
     EmptyTool,
     FrameTool,
     LassoTool,
+    PresentTool,
   ]),
   OverlayExtension([ConnectionOverlay, FrameOverlay, EdgelessSnapManager]),
   EdgelessFrameManager,

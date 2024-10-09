@@ -1,4 +1,5 @@
 import type { ColorScheme } from '@blocksuite/affine-model';
+import type { ToolController } from '@blocksuite/block-std/gfx';
 import type { LitElement } from 'lit';
 
 import {
@@ -7,11 +8,11 @@ import {
   WithDisposable,
 } from '@blocksuite/global/utils';
 import { consume } from '@lit/context';
+import { effect } from '@preact/signals-core';
 import { cssVar } from '@toeverything/theme';
 import { property, state } from 'lit/decorators.js';
 
 import type { EdgelessRootBlockComponent } from '../../../edgeless-root-block.js';
-import type { EdgelessTool } from '../../../types.js';
 import type { EdgelessToolbar } from '../edgeless-toolbar.js';
 
 import { createPopper, type MenuPopper } from '../common/create-popper.js';
@@ -22,6 +23,8 @@ import {
   edgelessToolbarThemeContext,
 } from '../context.js';
 
+type ValueOf<T> = T[keyof T];
+
 export declare abstract class EdgelessToolbarToolClass extends DisposableClass {
   active: boolean;
 
@@ -29,13 +32,13 @@ export declare abstract class EdgelessToolbarToolClass extends DisposableClass {
 
   edgeless: EdgelessRootBlockComponent;
 
-  edgelessTool: EdgelessTool;
+  edgelessTool: BlockSuite.GfxToolsFullOptionValue;
 
   enableActiveBackground?: boolean;
 
   popper: MenuPopper<HTMLElement> | null;
 
-  setEdgelessTool: EdgelessRootBlockComponent['tools']['setEdgelessTool'];
+  setEdgelessTool: ToolController['setTool'];
 
   theme: ColorScheme;
 
@@ -48,7 +51,9 @@ export declare abstract class EdgelessToolbarToolClass extends DisposableClass {
    */
   tryDisposePopper: () => boolean;
 
-  abstract type: EdgelessTool['type'] | EdgelessTool['type'][];
+  abstract type:
+    | BlockSuite.GfxToolsFullOptionValue['type']
+    | BlockSuite.GfxToolsFullOptionValue['type'][];
 
   accessor toolbar: EdgelessToolbar;
 }
@@ -59,18 +64,28 @@ export const EdgelessToolbarToolMixin = <T extends Constructor<LitElement>>(
   abstract class DerivedClass extends WithDisposable(SuperClass) {
     enableActiveBackground = false;
 
-    abstract type: EdgelessTool['type'] | EdgelessTool['type'][];
+    abstract type:
+      | BlockSuite.GfxToolsFullOptionValue['type']
+      | BlockSuite.GfxToolsFullOptionValue['type'][];
 
     get active() {
       const { type } = this;
-      const activeType = this.edgelessTool.type;
-      return Array.isArray(type)
-        ? type.includes(activeType)
-        : activeType === type;
+      const activeType = this.edgelessTool?.type;
+
+      return activeType
+        ? Array.isArray(type)
+          ? type.includes(activeType)
+          : activeType === type
+        : false;
     }
 
     get setEdgelessTool() {
-      return this.edgeless.tools.setEdgelessTool;
+      return (...args: Parameters<ToolController['setTool']>) => {
+        this.edgeless.gfx.tool.setTool(
+          // @ts-ignore
+          ...args
+        );
+      };
     }
 
     private _applyActiveStyle() {
@@ -80,8 +95,9 @@ export const EdgelessToolbarToolMixin = <T extends Constructor<LitElement>>(
         : 'transparent';
     }
 
-    private _updateActiveEdgelessTool(newTool?: EdgelessTool) {
-      this.edgelessTool = newTool ?? this.edgeless.edgelessTool;
+    private _updateActiveEdgelessTool() {
+      this.edgelessTool = this.edgeless.gfx.tool.currentToolOption$.value;
+      this._applyActiveStyle();
     }
 
     override connectedCallback() {
@@ -89,10 +105,10 @@ export const EdgelessToolbarToolMixin = <T extends Constructor<LitElement>>(
       if (!this.edgeless) return;
       this._updateActiveEdgelessTool();
       this._applyActiveStyle();
+
       this._disposables.add(
-        this.edgeless.slots.edgelessToolUpdated.on(newTool => {
-          this._updateActiveEdgelessTool(newTool);
-          this._applyActiveStyle();
+        effect(() => {
+          this._updateActiveEdgelessTool();
         })
       );
     }
@@ -133,7 +149,7 @@ export const EdgelessToolbarToolMixin = <T extends Constructor<LitElement>>(
     accessor edgeless!: EdgelessRootBlockComponent;
 
     @state()
-    accessor edgelessTool!: EdgelessTool;
+    accessor edgelessTool!: ValueOf<BlockSuite.GfxToolsFullOption> | null;
 
     @state()
     public accessor popper: MenuPopper<HTMLElement> | null = null;

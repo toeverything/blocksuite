@@ -67,6 +67,24 @@ export class ToolController {
     endY: 0,
   });
 
+  readonly draggingClientArea$ = new Signal<
+    IBound & {
+      startX: number;
+      startY: number;
+      endX: number;
+      endY: number;
+    }
+  >({
+    startX: 0,
+    startY: 0,
+    x: 0,
+    y: 0,
+    w: 0,
+    h: 0,
+    endX: 0,
+    endY: 0,
+  });
+
   readonly [eventTarget]: ToolEventTarget;
 
   /**
@@ -88,6 +106,41 @@ export class ToolController {
       },
       peek() {
         return self._tools.get(self.currentToolName$.peek());
+      },
+    };
+  }
+
+  get currentToolOption$() {
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
+    const self = this;
+
+    return {
+      peek(): BlockSuite.GfxToolsFullOptionValue | null {
+        const currentTool = self.currentTool$.peek();
+        const option = currentTool?.activatedOption ?? {};
+
+        if (currentTool) {
+          return {
+            type: currentTool.toolName,
+            ...option,
+          } as unknown as BlockSuite.GfxToolsFullOptionValue;
+        }
+
+        return null;
+      },
+
+      get value(): BlockSuite.GfxToolsFullOptionValue | null {
+        const currentTool = self.currentTool$.value;
+        const option = currentTool?.activatedOption ?? {};
+
+        if (currentTool) {
+          return {
+            type: currentTool.toolName,
+            ...option,
+          } as unknown as BlockSuite.GfxToolsFullOptionValue;
+        }
+
+        return null;
       },
     };
   }
@@ -150,9 +203,13 @@ export class ToolController {
     let draggingStart: {
       x: number;
       y: number;
+      originX: number;
+      originY: number;
     } = {
       x: 0,
       y: 0,
+      originX: 0,
+      originY: 0,
     };
 
     this._disposableGroup.add(
@@ -161,7 +218,7 @@ export class ToolController {
         const evt = ctx.get('pointerState');
         const [x, y] = this.gfx.viewport.toModelCoord(evt.x, evt.y);
 
-        draggingStart = { x, y };
+        draggingStart = { x, y, originX: evt.x, originY: evt.y };
 
         this.draggingArea$.value = {
           startX: x,
@@ -170,8 +227,19 @@ export class ToolController {
           endY: y,
           x: draggingStart.x,
           y: draggingStart.y,
-          w: Math.abs(x - draggingStart.x),
-          h: Math.abs(y - draggingStart.y),
+          w: 0,
+          h: 0,
+        };
+
+        this.draggingClientArea$.value = {
+          startX: evt.x,
+          startY: evt.y,
+          endX: evt.x,
+          endY: evt.y,
+          x: evt.x,
+          y: evt.y,
+          w: 0,
+          h: 0,
         };
 
         invokeToolHandler('dragStart', evt);
@@ -188,9 +256,26 @@ export class ToolController {
           ...this.draggingArea$.peek(),
           w: Math.abs(x - draggingStart.x),
           h: Math.abs(y - draggingStart.y),
-          endX: x,
-          endY: y,
+          x: Math.min(x, draggingStart.x),
+          y: Math.min(y, draggingStart.y),
+          startX: Math.min(x, draggingStart.x),
+          startY: Math.min(y, draggingStart.y),
+          endX: Math.max(x, draggingStart.x),
+          endY: Math.max(y, draggingStart.y),
         };
+
+        this.draggingClientArea$.value = {
+          ...this.draggingClientArea$.peek(),
+          w: Math.abs(evt.x - draggingStart.originX),
+          h: Math.abs(evt.y - draggingStart.originY),
+          x: Math.min(evt.x, draggingStart.originX),
+          y: Math.min(evt.y, draggingStart.originY),
+          startX: Math.min(evt.x, draggingStart.originX),
+          startY: Math.min(evt.y, draggingStart.originY),
+          endX: Math.max(evt.x, draggingStart.originX),
+          endY: Math.max(evt.y, draggingStart.originY),
+        };
+
         invokeToolHandler('dragMove', evt);
       })
     );
@@ -203,10 +288,24 @@ export class ToolController {
         try {
           invokeToolHandler('dragEnd', evt);
         } catch (e) {
-          console.warn('dragEnd handler throws an error', e);
+          console.warn(
+            `dragEnd handler of ${this.currentToolName$.peek()} throws an error`,
+            e
+          );
         }
 
         this.draggingArea$.value = {
+          x: 0,
+          y: 0,
+          startX: 0,
+          startY: 0,
+          endX: 0,
+          endY: 0,
+          w: 0,
+          h: 0,
+        };
+
+        this.draggingClientArea$.value = {
           x: 0,
           y: 0,
           startX: 0,
@@ -254,6 +353,12 @@ export class ToolController {
     });
   }
 
+  get<K extends keyof BlockSuite.GfxToolsMap>(
+    key: K
+  ): BlockSuite.GfxToolsMap[K] {
+    return this._tools.get(key) as BlockSuite.GfxToolsMap[K];
+  }
+
   register(tools: BaseTool) {
     if (this._tools.has(tools.toolName)) {
       this._tools.get(tools.toolName)?.onunload();
@@ -263,14 +368,27 @@ export class ToolController {
     tools.onload();
   }
 
+  // @ts-ignore
+  setTool(toolName: BlockSuite.GfxToolsFullOptionValue): void;
   setTool<K extends keyof BlockSuite.GfxToolsMap>(
     toolName: K,
     ...options: K extends keyof BlockSuite.GfxToolsOption
       ? [option: BlockSuite.GfxToolsOption[K]]
-      : [option: void]
-  ) {
+      : [void]
+  ): void;
+  setTool<K extends keyof BlockSuite.GfxToolsMap>(
+    toolName: K | BlockSuite.GfxToolsFullOptionValue,
+    ...options: K extends keyof BlockSuite.GfxToolsOption
+      ? [option: BlockSuite.GfxToolsOption[K]]
+      : [void]
+  ): void {
     this.currentTool$.peek()?.deactivate();
-    this.currentToolName$.value = toolName;
+
+    this.currentToolName$.value =
+      typeof toolName === 'string'
+        ? toolName
+        : // @ts-ignore
+          (toolName.type as K);
     this.currentTool$.peek()?.activate(options[0] ?? {});
   }
 }

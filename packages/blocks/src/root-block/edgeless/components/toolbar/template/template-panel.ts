@@ -347,7 +347,7 @@ export class EdgelessTemplatePanel extends WithDisposable(LitElement) {
       }
     } finally {
       this._loadingTemplate = null;
-      this.edgeless.service.tool.setEdgelessTool({ type: 'default' });
+      this.edgeless.gfx.tool.setTool('default');
     }
   }
 

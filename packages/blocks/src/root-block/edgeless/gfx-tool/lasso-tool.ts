@@ -55,7 +55,12 @@ class LassoOverlay extends Overlay {
   }
 }
 
-export class LassoTool extends BaseTool {
+export type LassoToolOption = {
+  mode: LassoMode;
+};
+export class LassoTool extends BaseTool<LassoToolOption> {
+  static override toolName: string = 'lasso';
+
   private _currentSelectionState = new Set<string>();
 
   private _isSelecting = false;
@@ -313,6 +318,10 @@ declare global {
   namespace BlockSuite {
     interface GfxToolsMap {
       lasso: LassoTool;
+    }
+
+    interface GfxToolsOption {
+      lasso: LassoToolOption;
     }
   }
 }

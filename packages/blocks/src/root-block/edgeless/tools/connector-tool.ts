@@ -151,6 +151,7 @@ export class ConnectorToolController extends EdgelessToolController<ConnectorToo
       this._allowCancel = true;
     }
 
+    // @ts-ignore
     this._edgeless.tools.switchToDefaultMode({
       elements: [focusedId],
       editing: false,
@@ -170,6 +171,7 @@ export class ConnectorToolController extends EdgelessToolController<ConnectorToo
     if (!this._connector) return;
 
     this._doc.captureSync();
+    // @ts-ignore
     this._edgeless.tools.switchToDefaultMode({
       elements: [this._connector.id],
       editing: false,

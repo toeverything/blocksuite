@@ -173,7 +173,7 @@ export class NoteToolController extends EdgelessToolController<NoteTool> {
     if (!this._draggingNoteOverlay || !this._draggingArea) return;
 
     this._draggingArea.end = new DOMPoint(e.x, e.y);
-    this._resize(e.keys.shift || this._edgeless.tools.shiftKey);
+    this._resize(e.keys.shift || this._edgeless.gfx.keyboard.shiftKey$.peek());
   }
 
   onContainerDragStart(e: PointerEventState) {

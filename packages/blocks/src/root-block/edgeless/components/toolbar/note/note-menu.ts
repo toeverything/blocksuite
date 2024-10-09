@@ -5,7 +5,6 @@ import { property, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
 import type { NoteTool } from '../../../tools/note-tool.js';
-import type { EdgelessTool } from '../../../types.js';
 
 import {
   getImageFilesFromLocal,
@@ -49,17 +48,15 @@ export class EdgelessNoteMenu extends EdgelessToolbarToolMixin(LitElement) {
     }
   `;
 
-  override type: EdgelessTool['type'] = 'affine:note';
+  override type: BlockSuite.GfxToolsFullOptionValue['type'] = 'affine:note';
 
   private async _addImages() {
     this._imageLoading = true;
     const imageFiles = await getImageFilesFromLocal();
     const ids = await this.edgeless.addImages(imageFiles);
     this._imageLoading = false;
-    this.edgeless.service.tool.setEdgelessTool(
-      { type: 'default' },
-      { elements: ids, editing: false }
-    );
+    this.edgeless.gfx.tool.setTool('default');
+    this.edgeless.gfx.selection.set({ elements: ids });
   }
 
   private _onHandleLinkButtonClick() {
@@ -133,7 +130,7 @@ export class EdgelessNoteMenu extends EdgelessToolbarToolMixin(LitElement) {
                 const file = await openFileOrFiles();
                 if (!file) return;
                 await this.edgeless.addAttachments([file]);
-                this.edgeless.service.tool.setEdgelessTool({ type: 'default' });
+                this.edgeless.gfx.tool.setTool('default');
                 this.edgeless.std
                   .getOptional(TelemetryProvider)
                   ?.track('CanvasElementAdded', {

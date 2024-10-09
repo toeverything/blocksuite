@@ -111,7 +111,8 @@ export class LassoToolController extends EdgelessToolController<LassoTool> {
   }
 
   private _getSelectionMode(ev: PointerEventState): 'add' | 'sub' | 'set' {
-    const shiftKey = ev.keys.shift ?? this._edgeless.tools.shiftKey;
+    const shiftKey =
+      ev.keys.shift ?? this._edgeless.gfx.keyboard.shiftKey$.peek();
     const altKey = ev.keys.alt ?? false;
     if (shiftKey) return 'add';
     else if (altKey) return 'sub';

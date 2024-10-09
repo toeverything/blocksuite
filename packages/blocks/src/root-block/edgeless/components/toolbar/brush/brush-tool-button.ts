@@ -53,13 +53,13 @@ export class EdgelessBrushToolButton extends EdgelessToolbarToolMixin(
 
   private _toggleBrushMenu() {
     if (this.tryDisposePopper()) return;
-    !this.active && this.setEdgelessTool({ type: this.type });
+    !this.active && this.setEdgelessTool(this.type);
     const menu = this.createPopper('edgeless-brush-menu', this);
     Object.assign(menu.element, {
       edgeless: this.edgeless,
       onChange: (props: Record<string, unknown>) => {
         this.edgeless.std.get(EditPropsStore).recordLastProps('brush', props);
-        this.setEdgelessTool({ type: 'brush' });
+        this.setEdgelessTool('brush');
       },
     });
   }

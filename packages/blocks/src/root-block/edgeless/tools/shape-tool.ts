@@ -240,6 +240,7 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
     const element = this._service.getElementById(id);
     if (!element) return;
 
+    // @ts-ignore
     this._edgeless.tools.switchToDefaultMode({
       elements: [element.id],
       editing: false,
@@ -287,6 +288,7 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
     const element = this._service.getElementById(id);
     if (!element) return;
 
+    // @ts-ignore
     this._edgeless.tools.switchToDefaultMode({
       elements: [element.id],
       editing: false,
@@ -300,11 +302,11 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
 
     this._draggingArea.end = new DOMPoint(e.x, e.y);
 
-    if (this._edgeless.tools.spaceBar) {
+    if (this._edgeless.gfx.keyboard.spaceKey$.peek()) {
       this._move();
     }
 
-    this._resize(e.keys.shift || this._edgeless.tools.shiftKey);
+    this._resize(e.keys.shift || this._edgeless.gfx.keyboard.shiftKey$.peek());
   }
 
   onContainerDragStart(e: PointerEventState) {
@@ -362,8 +364,8 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
   }
 
   onPressSpaceBar(pressed: boolean): void {
-    const { tools } = this._edgeless;
-    if (tools.dragging && pressed) {
+    const { gfx } = this._edgeless;
+    if (gfx.tool.dragging$.peek() && pressed) {
       if (!this._draggingArea) return;
 
       const x = this._draggingArea.end.x;

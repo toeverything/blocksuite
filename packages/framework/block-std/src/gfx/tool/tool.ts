@@ -50,7 +50,6 @@ export abstract class BaseTool<Option = Record<string, unknown>> {
    * @param option - The data passed as second argument when calling `ToolController.use`.
    */
   activate(option: Option): void {
-    console.log(option);
     this.activatedOption = option;
   }
 
@@ -114,7 +113,7 @@ export function GfxToolExtension(
         if (!Ctor.toolName) {
           throw new BlockSuiteError(
             ErrorCode.ValueNotExists,
-            'The tool must have a static property `toolName`'
+            `The tool ${Ctor.name} must have a static property 'toolName'`
           );
         }
 
@@ -131,5 +130,13 @@ declare global {
     interface GfxToolsMap {}
 
     interface GfxToolsOption {}
+
+    type GfxToolsFullOption = {
+      [Key in keyof GfxToolsMap]: Key extends keyof GfxToolsOption
+        ? { type: Key } & GfxToolsOption[Key]
+        : { type: Key };
+    };
+
+    type GfxToolsFullOptionValue = GfxToolsFullOption[keyof GfxToolsFullOption];
   }
 }

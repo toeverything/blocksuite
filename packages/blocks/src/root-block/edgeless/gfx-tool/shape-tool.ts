@@ -29,9 +29,11 @@ import {
 } from '../utils/consts.js';
 import { ShapeOverlay } from '../utils/tool-overlay.js';
 
-export class ShapeTool extends BaseTool<{
+export type ShapeToolOption = {
   shapeName: ShapeName;
-}> {
+};
+
+export class ShapeTool extends BaseTool<ShapeToolOption> {
   static override toolName: string = 'shape';
 
   private _disableOverlay = false;
@@ -91,57 +93,6 @@ export class ShapeTool extends BaseTool<{
     return id;
   }
 
-  private _clearOverlay() {
-    if (!this._shapeOverlay) return;
-
-    this._shapeOverlay.dispose();
-    (
-      this.gfx.surfaceComponent as SurfaceBlockComponent
-    )?.renderer.removeOverlay(this._shapeOverlay);
-    this._shapeOverlay = null;
-    (this.gfx.surfaceComponent as SurfaceBlockComponent)?.renderer.refresh();
-  }
-
-  private _createOverlay() {
-    this._clearOverlay();
-    if (this._disableOverlay) return;
-    const options = SHAPE_OVERLAY_OPTIONS;
-    const { shapeName } = this.activatedOption;
-    const attributes =
-      this.std.get(EditPropsStore).lastProps$.value[`shape:${shapeName}`];
-
-    options.stroke = ThemeObserver.getColorValue(
-      attributes.strokeColor,
-      DEFAULT_SHAPE_STROKE_COLOR,
-      true
-    );
-    options.fill = ThemeObserver.getColorValue(
-      attributes.fillColor,
-      DEFAULT_SHAPE_FILL_COLOR,
-      true
-    );
-
-    switch (attributes.strokeStyle!) {
-      case 'dash':
-        options.strokeLineDash = [12, 12];
-        break;
-      case 'none':
-        options.strokeLineDash = [];
-        options.stroke = 'transparent';
-        break;
-      default:
-        options.strokeLineDash = [];
-    }
-    this._shapeOverlay = new ShapeOverlay(this.gfx, shapeName, options, {
-      shapeStyle: attributes.shapeStyle,
-      fillColor: attributes.fillColor,
-      strokeColor: attributes.strokeColor,
-    });
-    (this.gfx.surfaceComponent as SurfaceBlockComponent)?.renderer.addOverlay(
-      this._shapeOverlay
-    );
-  }
-
   private _hideOverlay() {
     if (!this._shapeOverlay) return;
 
@@ -150,8 +101,8 @@ export class ShapeTool extends BaseTool<{
   }
 
   private _resize(shiftPressed = false, spacePressed = false) {
-    const { _draggingElementId: id, controller } = this;
-    if (!id) return;
+    const { _draggingElement, _draggingElementId: id, controller } = this;
+    if (!id || !_draggingElement) return;
 
     const { viewport } = this.gfx;
     const draggingArea = this.controller.draggingArea$.peek();
@@ -195,7 +146,7 @@ export class ShapeTool extends BaseTool<{
       Math.abs(startY - endY)
     );
 
-    this.gfx.surface?.updateElement(id, {
+    this.gfx.updateElement(_draggingElement, {
       xywh: bound.serialize(),
     });
   }
@@ -209,11 +160,22 @@ export class ShapeTool extends BaseTool<{
 
   override activate(option: typeof this.activatedOption) {
     super.activate(option);
-    this._createOverlay();
+    this.createOverlay();
+  }
+
+  clearOverlay() {
+    if (!this._shapeOverlay) return;
+
+    this._shapeOverlay.dispose();
+    (
+      this.gfx.surfaceComponent as SurfaceBlockComponent
+    )?.renderer.removeOverlay(this._shapeOverlay);
+    this._shapeOverlay = null;
+    (this.gfx.surfaceComponent as SurfaceBlockComponent)?.renderer.refresh();
   }
 
   override click(e: PointerEventState): void {
-    this._clearOverlay();
+    this.clearOverlay();
     if (this._disableOverlay) return;
 
     this.doc.captureSync();
@@ -230,8 +192,48 @@ export class ShapeTool extends BaseTool<{
     });
   }
 
+  createOverlay() {
+    this.clearOverlay();
+    if (this._disableOverlay) return;
+    const options = SHAPE_OVERLAY_OPTIONS;
+    const { shapeName } = this.activatedOption;
+    const attributes =
+      this.std.get(EditPropsStore).lastProps$.value[`shape:${shapeName}`];
+
+    options.stroke = ThemeObserver.getColorValue(
+      attributes.strokeColor,
+      DEFAULT_SHAPE_STROKE_COLOR,
+      true
+    );
+    options.fill = ThemeObserver.getColorValue(
+      attributes.fillColor,
+      DEFAULT_SHAPE_FILL_COLOR,
+      true
+    );
+
+    switch (attributes.strokeStyle!) {
+      case 'dash':
+        options.strokeLineDash = [12, 12];
+        break;
+      case 'none':
+        options.strokeLineDash = [];
+        options.stroke = 'transparent';
+        break;
+      default:
+        options.strokeLineDash = [];
+    }
+    this._shapeOverlay = new ShapeOverlay(this.gfx, shapeName, options, {
+      shapeStyle: attributes.shapeStyle,
+      fillColor: attributes.fillColor,
+      strokeColor: attributes.strokeColor,
+    });
+    (this.gfx.surfaceComponent as SurfaceBlockComponent)?.renderer.addOverlay(
+      this._shapeOverlay
+    );
+  }
+
   override deactivate() {
-    this._clearOverlay();
+    this.clearOverlay();
   }
 
   override dragEnd() {
@@ -276,7 +278,7 @@ export class ShapeTool extends BaseTool<{
 
   override dragStart(e: PointerEventState) {
     if (this._disableOverlay) return;
-    this._clearOverlay();
+    this.clearOverlay();
 
     this.doc.captureSync();
 
@@ -333,8 +335,6 @@ export class ShapeTool extends BaseTool<{
     )
       return;
     this._hideOverlay();
-
-    this.gfx.tool.setTool('pan');
   }
 
   setDisableOverlay(disable: boolean) {
@@ -349,9 +349,7 @@ declare global {
     }
 
     interface GfxToolsOption {
-      shape: {
-        shapeName: ShapeName;
-      };
+      shape: ShapeToolOption;
     }
   }
 }

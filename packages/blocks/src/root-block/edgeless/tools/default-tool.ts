@@ -191,10 +191,10 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
   private _toBeMoved: BlockSuite.EdgelessModel[] = [];
 
   private _updateSelectingState = () => {
-    const { tools, service } = this._edgeless;
+    const { gfx, service } = this._edgeless;
     const { selection } = service;
 
-    if (tools.spaceBar) {
+    if (gfx.keyboard.spaceKey$.peek()) {
       /* Move the selection if space is pressed */
       const [moveCurX, moveCurY] = this._dragLastPos;
       const zoom = service.viewport.zoom;
@@ -229,7 +229,9 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     const elements = getTopElements(service.gfx.getElementsByBound(bound));
 
     const set = new Set(
-      tools.shiftKey ? [...elements, ...selection.selectedElements] : elements
+      gfx.keyboard.shiftKey$.peek()
+        ? [...elements, ...selection.selectedElements]
+        : elements
     );
 
     this.edgelessSelectionManager.set({
@@ -1020,7 +1022,8 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
         const dx = (e.x - this._dragStartPos[0]) / zoom;
         const dy = (e.y - this._dragStartPos[1]) / zoom;
         const alignBound = this._alignBound.clone();
-        const shifted = e.keys.shift || this._edgeless.tools.shiftKey;
+        const shifted =
+          e.keys.shift || this._edgeless.gfx.keyboard.shiftKey$.peek();
 
         this._moveContent([dx, dy], alignBound, shifted, true);
         break;

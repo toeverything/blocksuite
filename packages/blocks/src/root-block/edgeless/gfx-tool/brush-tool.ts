@@ -84,7 +84,8 @@ export class BrushTool extends BaseTool {
   }
 
   override dragMove(e: PointerEventState) {
-    if (!this._draggingElementId || !this.gfx.surface) return;
+    if (!this._draggingElementId || !this._draggingElement || !this.gfx.surface)
+      return;
 
     assertExists(this._draggingElementId);
     assertExists(this._draggingPathPoints);
@@ -113,7 +114,7 @@ export class BrushTool extends BaseTool {
     this._lastPoint = [pointX, pointY];
     this._draggingPathPoints = points;
 
-    this.gfx.surface?.updateElement(this._draggingElementId, {
+    this.gfx.updateElement(this._draggingElement!, {
       points: this._tryGetPressurePoints(e),
     });
 

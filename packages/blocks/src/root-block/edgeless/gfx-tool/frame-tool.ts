@@ -13,6 +13,8 @@ import type { EdgelessFrameManager, FrameOverlay } from '../frame-manager.js';
 import { getTopElements } from '../utils/tree.js';
 
 export class FrameTool extends BaseTool {
+  static override toolName = 'frame';
+
   private _frame: FrameBlockModel | null = null;
 
   private _startPoint: IVec | null = null;
@@ -89,7 +91,7 @@ export class FrameTool extends BaseTool {
       return;
     }
 
-    this.gfx.surface!.updateElement(this._frame.id, {
+    this.gfx.doc.updateBlock(this._frame, {
       xywh: Bound.fromPoints([this._startPoint, currentPoint]).serialize(),
     });
 
