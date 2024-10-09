@@ -28,6 +28,7 @@ import { KeyboardController } from './keyboard.js';
 import { LayerManager } from './layer.js';
 import { GfxSelectionManager } from './selection.js';
 import {
+  GfxGroupLikeElementModel,
   GfxPrimitiveElementModel,
   type PointTestOptions,
 } from './surface/element-model.js';
@@ -177,6 +178,47 @@ export class GfxController extends LifeCycleWatcher {
 
     return last(picked) ?? null;
   }
+
+  getElementInGroup(
+    x: number,
+    y: number,
+    options?: PointTestOptions
+  ): GfxModel | null {
+    const selectionManager = this.selection;
+    const results = this.getElementByPoint(x, y, {
+      ...options,
+      all: true,
+    });
+
+    let picked = last(results) ?? null;
+    const { activeGroup } = selectionManager;
+    const first = picked;
+
+    if (activeGroup && picked && activeGroup.hasDescendant(picked.id)) {
+      let index = results.length - 1;
+
+      while (
+        picked === activeGroup ||
+        (picked instanceof GfxGroupLikeElementModel &&
+          picked.hasDescendant(activeGroup))
+      ) {
+        picked = results[--index];
+      }
+    } else if (picked) {
+      let index = results.length - 1;
+
+      while (picked.group !== null) {
+        if (--index < 0) {
+          picked = null;
+          break;
+        }
+        picked = results[index];
+      }
+    }
+
+    return (picked ?? first) as GfxModel | null;
+  }
+
   /**
    * Query all elements in an area.
    * @param bound

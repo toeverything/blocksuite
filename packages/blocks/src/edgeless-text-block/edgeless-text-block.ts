@@ -52,6 +52,7 @@ export class EdgelessTextBlockComponent extends GfxBlockComponent<EdgelessTextBl
 
   get dragMoving() {
     const controller = this.rootService.tool.currentController;
+
     return (
       controller instanceof DefaultToolController &&
       controller.dragType === DefaultModeDragType.ContentMoving
