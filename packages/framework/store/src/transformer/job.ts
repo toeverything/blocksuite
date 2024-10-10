@@ -275,14 +275,55 @@ export class Job {
       const { content, pageVersion, workspaceVersion, workspaceId, pageId } =
         snapshot;
 
-      const contentBlocks = await Promise.all(
-        content.map((block, i) =>
-          this.snapshotToBlock(block, doc, parent, (index ?? 0) + i)
-        )
+      // Create a temporary root snapshot to encompass all content blocks
+      const tmpRootSnapshot: BlockSnapshot = {
+        id: 'temporary-root',
+        flavour: 'affine:page',
+        props: {},
+        type: 'block',
+        children: content,
+      };
+
+      // Flatten all snapshots
+      const flatSnapshots: FlatSnapshot[] = [];
+      this._flattenSnapshot(tmpRootSnapshot, flatSnapshots, parent, index);
+
+      // Convert snapshots to draft models in parallel
+      const draftModels = await Promise.all(
+        flatSnapshots.map(async flat => {
+          const draft = await this._convertSnapshotToDraftModel(flat);
+          if (draft) {
+            draft.id = flat.snapshot.id;
+          }
+          return {
+            draft,
+            snapshot: flat.snapshot,
+            parentId: flat.parentId,
+            index: flat.index,
+          };
+        })
       );
 
+      // Filter out the models that failed to convert
+      const validDraftModels = draftModels.filter(item => !!item.draft) as {
+        draft: DraftModel;
+        snapshot: BlockSnapshot;
+        parentId?: string;
+        index?: number;
+      }[];
+
+      // Rebuild the block trees
+      const blockTree = this._rebuildBlockTree(validDraftModels);
+
+      // Instantiate the block trees
+      this._initBlockTree(blockTree.children, doc, parent, index);
+
+      const contentBlocks = blockTree.children
+        .map(tree => doc.getBlockById(tree.draft.id))
+        .filter(Boolean) as DraftModel[];
+
       const slice = new Slice({
-        content: contentBlocks.filter(block => block) as DraftModel[],
+        content: contentBlocks,
         pageVersion,
         workspaceVersion,
         workspaceId,
@@ -483,33 +524,35 @@ export class Job {
   }
 
   private _initBlockTree(
-    node: DraftBlockTreeNode,
+    nodes: DraftBlockTreeNode[],
     doc: Doc,
     parentId?: string,
-    index?: number
+    startIndex?: number
   ) {
-    const { draft } = node;
-    const { id, flavour } = draft;
+    nodes.forEach((node, index) => {
+      const { draft } = node;
+      const { id, flavour } = draft;
 
-    doc.addBlock(flavour as BlockSuite.Flavour, draft, parentId, index);
+      const actualIndex =
+        startIndex !== undefined ? startIndex + index : undefined;
+      doc.addBlock(flavour as BlockSuite.Flavour, draft, parentId, actualIndex);
 
-    const model = doc.getBlockById(id);
-    if (!model) {
-      throw new BlockSuiteError(
-        ErrorCode.TransformerError,
-        `Block not found by id ${id}`
-      );
-    }
+      const model = doc.getBlockById(id);
+      if (!model) {
+        throw new BlockSuiteError(
+          ErrorCode.TransformerError,
+          `Block not found by id ${id}`
+        );
+      }
 
-    this._slots.afterImport.emit({
-      type: 'block',
-      model,
-      snapshot: node.snapshot,
-    });
+      this._slots.afterImport.emit({
+        type: 'block',
+        model,
+        snapshot: node.snapshot,
+      });
 
-    node.children.forEach((childNode, idx) => {
-      if (childNode) {
-        this._initBlockTree(childNode, doc, id, idx);
+      if (node.children.length > 0) {
+        this._initBlockTree(node.children, doc, id);
       }
     });
   }
@@ -627,7 +670,7 @@ export class Job {
     const blockTree = this._rebuildBlockTree(validDraftModels);
 
     // Phase 4: Instantiate the block tree
-    this._initBlockTree(blockTree, doc, parent, index);
+    this._initBlockTree([blockTree], doc, parent, index);
 
     return doc.getBlockById(snapshot.id) || null;
   }
