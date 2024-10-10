@@ -20,7 +20,6 @@ import { styleMap } from 'lit/directives/style-map.js';
 
 import type { AIItemGroupConfig } from '../../../_common/components/ai-item/types.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
-import type { CopilotSelectionController } from '../../edgeless/tools/copilot-tool.js';
 import type { AffineAIPanelWidget } from '../ai-panel/ai-panel.js';
 
 import { AFFINE_AI_PANEL_WIDGET } from '../ai-panel/ai-panel.js';
@@ -189,9 +188,7 @@ export class EdgelessCopilotWidget extends WidgetComponent<
   override connectedCallback(): void {
     super.connectedCallback();
 
-    const CopilotSelectionTool = this.edgeless.tools.controllers[
-      'copilot'
-    ] as CopilotSelectionController;
+    const CopilotSelectionTool = this.edgeless.gfx.tool.get('copilot');
 
     this._disposables.add(
       CopilotSelectionTool.draggingAreaUpdated.on(shouldShowPanel => {

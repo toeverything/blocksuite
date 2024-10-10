@@ -1,8 +1,6 @@
 import { css, html, LitElement } from 'lit';
 import { repeat } from 'lit/directives/repeat.js';
 
-import type { EdgelessTool } from '../../../types.js';
-
 import { EdgelessToolbarToolMixin } from '../mixins/tool.mixin.js';
 import { FrameConfig } from './config.js';
 
@@ -65,7 +63,7 @@ export class EdgelessFrameMenu extends EdgelessToolbarToolMixin(LitElement) {
     }
   `;
 
-  override type: EdgelessTool['type'] = 'frame';
+  override type: BlockSuite.GfxToolsFullOptionValue['type'] = 'frame';
 
   override render() {
     const { edgeless } = this;
@@ -80,7 +78,7 @@ export class EdgelessFrameMenu extends EdgelessToolbarToolMixin(LitElement) {
             (item, index) => html`
               <div
                 @click=${() => {
-                  edgeless.tools.setEdgelessTool({ type: 'default' });
+                  edgeless.gfx.tool.setTool('default');
                   edgeless.service.frame.createFrameOnViewportCenter(item.wh);
                 }}
                 class="frame-add-button ${index}"

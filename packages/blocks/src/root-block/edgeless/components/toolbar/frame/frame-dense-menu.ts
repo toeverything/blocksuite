@@ -10,14 +10,14 @@ export const buildFrameDenseMenu: DenseMenuBuilder = edgeless => ({
   type: 'sub-menu',
   name: 'Frame',
   icon: FrameIcon,
-  select: () => edgeless.tools.setEdgelessTool({ type: 'frame' }),
-  isSelected: edgeless.tools.edgelessTool.type === 'frame',
+  select: () => edgeless.gfx.tool.setTool('frame'),
+  isSelected: edgeless.gfx.tool.currentToolName$.peek() === 'frame',
   options: {
     items: [
       {
         type: 'action',
         name: 'Custom',
-        select: () => edgeless.tools.setEdgelessTool({ type: 'frame' }),
+        select: () => edgeless.gfx.tool.setTool('frame'),
       },
       ...FrameConfig.map(
         config =>
@@ -25,7 +25,7 @@ export const buildFrameDenseMenu: DenseMenuBuilder = edgeless => ({
             type: 'action',
             name: `Slide ${config.name}`,
             select: () => {
-              edgeless.tools.setEdgelessTool({ type: 'default' });
+              edgeless.gfx.tool.setTool('default');
               edgeless.service.frame.createFrameOnViewportCenter(config.wh);
             },
           }) satisfies Menu

@@ -258,10 +258,6 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
 
   edgeless: EdgelessRootBlockComponent;
 
-  setEdgelessTool = (edgelessTool: EdgelessTool) => {
-    this.edgeless.tools.setEdgelessTool(edgelessTool);
-  };
-
   // calculate all the width manually
   private get _availableWidth() {
     return this.containerWidth - 2 * SAFE_AREA_WIDTH;
@@ -557,7 +553,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
               }
               return;
             }
-            this.setEdgelessTool({ type: 'default' });
+            this.edgeless.gfx.tool.setTool('default');
           },
         },
         { global: true }

@@ -17,7 +17,6 @@ import { property, state } from 'lit/decorators.js';
 
 import type { NavigatorMode } from '../../../../_common/edgeless/frame/consts.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
-import type { EdgelessTool } from '../../types.js';
 
 import { isFrameBlock } from '../../utils/query.js';
 import { launchIntoFullscreen } from '../utils.js';
@@ -106,7 +105,7 @@ export class PresentationToolbar extends EdgelessToolbarToolMixin(LitElement) {
 
   private _timer?: ReturnType<typeof setTimeout>;
 
-  override type: EdgelessTool['type'] = 'frameNavigator';
+  override type: BlockSuite.GfxToolsFullOptionValue['type'] = 'frameNavigator';
 
   private get _cachedPresentHideToolbar() {
     return !!this.edgeless.std

@@ -22,7 +22,6 @@ import {
   isRightButtonPressed,
 } from '../../../_common/utils/index.js';
 import { CopilotSelectionController } from '../tools/copilot-tool.js';
-import { edgelessElementsBound } from '../utils/bound-utils.js';
 import { isNoteBlock } from '../utils/query.js';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -445,24 +444,6 @@ export class EdgelessToolsManager {
 
   dispose() {
     this._disposables.dispose();
-  }
-
-  getHoverState(): EdgelessHoverState | null {
-    if (!this.currentController.enableHover) {
-      return null;
-    }
-    const { x, y } = this._lastMousePos;
-    const [modelX, modelY] = this.service.viewport.toModelCoord(x, y);
-    const hovered = this.service.gfx.getElementByPoint(modelX, modelY);
-
-    if (!hovered || this.selection?.editing) {
-      return null;
-    }
-
-    return {
-      rect: this.service.viewport.toViewBound(edgelessElementsBound([hovered])),
-      content: hovered,
-    };
   }
 
   mount(container: EdgelessRootBlockComponent) {

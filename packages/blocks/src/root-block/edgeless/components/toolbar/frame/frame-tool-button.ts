@@ -5,8 +5,6 @@ import {
 import { css, html, LitElement } from 'lit';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type { EdgelessTool } from '../../../types.js';
-
 import { getTooltipWithShortcut } from '../../../components/utils.js';
 import { QuickToolMixin } from '../mixins/quick-tool.mixin.js';
 
@@ -24,7 +22,7 @@ export class EdgelessFrameToolButton extends QuickToolMixin(LitElement) {
     }
   `;
 
-  override type: EdgelessTool['type'] = 'frame';
+  override type: BlockSuite.GfxToolsFullOptionValue['type'] = 'frame';
 
   private _toggleFrameMenu() {
     if (this.tryDisposePopper()) return;

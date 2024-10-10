@@ -67,7 +67,7 @@ export class EraserToolController extends EdgelessToolController<EraserTool> {
     this._timer = requestAnimationFrame(this._loop);
   };
 
-  private _overlay = new EraserOverlay();
+  private _overlay = new EraserOverlay(this._service.gfx);
 
   private _prevEraserPoint: IVec = [0, 0];
 

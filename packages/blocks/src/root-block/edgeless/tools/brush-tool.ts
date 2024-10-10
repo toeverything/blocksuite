@@ -118,7 +118,8 @@ export class BrushToolController extends EdgelessToolController<BrushTool> {
 
     let pointX = e.point.x;
     let pointY = e.point.y;
-    const holdingShiftKey = e.keys.shift || this._edgeless.tools.shiftKey;
+    const holdingShiftKey =
+      e.keys.shift || this._edgeless.gfx.keyboard.shiftKey$.peek();
     if (holdingShiftKey) {
       if (!this._straightLineType) {
         this._straightLineType = this._getStraightLineType([pointX, pointY]);

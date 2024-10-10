@@ -38,6 +38,7 @@ export class PanToolController extends EdgelessToolController<PanTool> {
 
   onContainerDragEnd() {
     this._lastPoint = null;
+    // @ts-ignore
     this._edgeless.tools.setEdgelessTool({
       type: 'pan',
       panning: false,
@@ -61,6 +62,7 @@ export class PanToolController extends EdgelessToolController<PanTool> {
 
   onContainerDragStart(e: PointerEventState) {
     this._lastPoint = [e.x, e.y];
+    // @ts-ignore
     this._edgeless.tools.setEdgelessTool({
       type: 'pan',
       panning: true,

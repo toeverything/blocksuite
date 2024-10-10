@@ -32,7 +32,7 @@ import {
   Vec,
 } from '@blocksuite/global/utils';
 
-import { Overlay } from '../renderer/canvas-renderer.js';
+import { Overlay } from '../renderer/overlay.js';
 import { AStarRunner } from '../utils/a-star.js';
 
 export type Connectable = Exclude<
@@ -820,6 +820,8 @@ function renderRect(
 }
 
 export class ConnectionOverlay extends Overlay {
+  static override overlayName = 'connection';
+
   highlightPoint: IVec | null = null;
 
   points: IVec[] = [];
@@ -828,12 +830,12 @@ export class ConnectionOverlay extends Overlay {
 
   targetBounds: IBound | null = null;
 
-  constructor(private _gfx: GfxController) {
-    super();
+  constructor(gfx: GfxController) {
+    super(gfx);
   }
 
   private _findConnectablesInViews() {
-    const gfx = this._gfx;
+    const gfx = this.gfx;
     const bound = gfx.viewport.viewportBounds;
     return gfx.getElementsByBound(bound).filter(ele => ele.connectable);
   }
@@ -851,9 +853,9 @@ export class ConnectionOverlay extends Overlay {
   }
 
   override render(ctx: CanvasRenderingContext2D): void {
-    const zoom = this._gfx.viewport.zoom;
+    const zoom = this.gfx.viewport.zoom;
     const radius = 5 / zoom;
-    const color = getComputedStyle(this._gfx.std.host).getPropertyValue(
+    const color = getComputedStyle(this.gfx.std.host).getPropertyValue(
       '--affine-text-emphasis-color'
     );
 
@@ -902,7 +904,7 @@ export class ConnectionOverlay extends Overlay {
    */
   renderConnector(point: IVec, excludedIds: string[] = []) {
     const connectables = this._findConnectablesInViews();
-    const context = this._gfx;
+    const context = this.gfx;
     const target = [];
 
     this._clearRect();
@@ -980,7 +982,7 @@ export class ConnectionOverlay extends Overlay {
           {
             ignoreTransparent: false,
           },
-          this._gfx.std.host
+          this.gfx.std.host
         )
       ) {
         target.push(connectable);

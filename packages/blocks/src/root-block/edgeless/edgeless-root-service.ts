@@ -11,12 +11,8 @@ import type { IBound } from '@blocksuite/global/utils';
 import {
   type ElementRenderer,
   elementRenderers,
-  type Overlay,
   type SurfaceBlockModel,
   type SurfaceContext,
-} from '@blocksuite/affine-block-surface';
-import {
-  ConnectionOverlay,
   SurfaceGroupLikeModel,
 } from '@blocksuite/affine-block-surface';
 import {
@@ -28,18 +24,20 @@ import {
 } from '@blocksuite/affine-model';
 import { EditPropsStore } from '@blocksuite/affine-shared/services';
 import { clamp } from '@blocksuite/affine-shared/utils';
-import { GfxControllerIdentifier } from '@blocksuite/block-std/gfx';
+import {
+  GfxControllerIdentifier,
+  GfxExtensionIdentifier,
+} from '@blocksuite/block-std/gfx';
 import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 import { Bound, getCommonBound, last } from '@blocksuite/global/utils';
 import { type BlockModel, Slot } from '@blocksuite/store';
 
-import type { EdgelessToolConstructor } from './services/tools-manager.js';
+import type { EdgelessFrameManager } from './frame-manager.js';
 import type { EdgelessTool } from './types.js';
 
 import { getSurfaceBlock } from '../../surface-ref-block/utils.js';
 import { RootService } from '../root-service.js';
 import { GfxBlockModel } from './block-model.js';
-import { EdgelessFrameManager, FrameOverlay } from './frame-manager.js';
 import { EdgelessSelectionManager } from './services/selection-manager.js';
 import { TemplateJob } from './services/template.js';
 import {
@@ -48,11 +46,9 @@ import {
   createStickerMiddleware,
   replaceIdMiddleware,
 } from './services/template-middlewares.js';
-import { EdgelessToolsManager } from './services/tools-manager.js';
 import { FIT_TO_SCREEN_PADDING } from './utils/consts.js';
 import { getLastPropsKey } from './utils/get-last-props-key.js';
 import { getCursorMode } from './utils/query.js';
-import { EdgelessSnapManager } from './utils/snap-manager.js';
 import {
   ZOOM_INITIAL,
   ZOOM_MAX,
@@ -64,22 +60,11 @@ import {
 export class EdgelessRootService extends RootService implements SurfaceContext {
   static override readonly flavour = RootBlockSchema.model.flavour;
 
-  private _frame: EdgelessFrameManager;
-
   private _selection: EdgelessSelectionManager;
-
-  private _snap: EdgelessSnapManager;
 
   private _surface: SurfaceBlockModel;
 
-  private _tool: EdgelessToolsManager;
-
   elementRenderers: Record<string, ElementRenderer> = elementRenderers;
-
-  overlays: Record<string, Overlay> = {
-    connector: new ConnectionOverlay(this.gfx),
-    frame: new FrameOverlay(this),
-  };
 
   slots = {
     edgelessToolUpdated: new Slot<EdgelessTool>(),
@@ -112,10 +97,6 @@ export class EdgelessRootService extends RootService implements SurfaceContext {
     return this.layer.blocks;
   }
 
-  get connectorOverlay() {
-    return this.overlays.connector as ConnectionOverlay;
-  }
-
   /**
    * sorted edgeless elements
    */
@@ -133,11 +114,9 @@ export class EdgelessRootService extends RootService implements SurfaceContext {
   }
 
   get frame() {
-    return this._frame;
-  }
-
-  get frameOverlay() {
-    return this.overlays.frame as FrameOverlay;
+    return this.std.get(
+      GfxExtensionIdentifier('frame-manager')
+    ) as EdgelessFrameManager;
   }
 
   get frames() {
@@ -170,16 +149,8 @@ export class EdgelessRootService extends RootService implements SurfaceContext {
     return this._selection;
   }
 
-  get snap() {
-    return this._snap;
-  }
-
   get surface() {
     return this._surface;
-  }
-
-  get tool() {
-    return this._tool;
   }
 
   get viewport() {
@@ -200,10 +171,7 @@ export class EdgelessRootService extends RootService implements SurfaceContext {
       );
     }
     this._surface = surface;
-    this._frame = new EdgelessFrameManager(this);
-    this._snap = new EdgelessSnapManager(this);
     this._selection = new EdgelessSelectionManager(this);
-    this._tool = EdgelessToolsManager.create(this, []);
   }
 
   private _initReadonlyListener() {
@@ -226,12 +194,6 @@ export class EdgelessRootService extends RootService implements SurfaceContext {
     disposables.add(
       slots.edgelessToolUpdated.on(edgelessTool => {
         slots.cursorUpdated.emit(getCursorMode(edgelessTool));
-      })
-    );
-
-    disposables.add(
-      slots.pressShiftKeyUpdated.on(pressed => {
-        this.tool.shiftKey = pressed;
       })
     );
   }
@@ -465,10 +427,6 @@ export class EdgelessRootService extends RootService implements SurfaceContext {
     return (picked ?? first) as BlockSuite.EdgelessModel | null;
   }
 
-  registerTool(Tool: EdgelessToolConstructor) {
-    return this.tool.register(Tool);
-  }
-
   removeElement(id: string | BlockSuite.EdgelessModel) {
     id = typeof id === 'string' ? id : id.id;
 
@@ -565,8 +523,6 @@ export class EdgelessRootService extends RootService implements SurfaceContext {
 
     this._selection?.dispose();
     this.viewport?.dispose();
-    this.tool?.dispose();
-    this._frame?.dispose();
     this.selectionManager.set([]);
     this.disposables.dispose();
   }

@@ -10,7 +10,6 @@ import { css, html, LitElement, nothing, unsafeCSS } from 'lit';
 import { property } from 'lit/decorators.js';
 
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
-import type { EdgelessTool } from '../../edgeless/types.js';
 
 import { ZOOM_STEP } from '../../edgeless/utils/zoom.js';
 
@@ -83,10 +82,6 @@ export class EdgelessZoomToolbar extends WithDisposable(LitElement) {
       color: var(--affine-text-disable-color);
     }
   `;
-
-  setEdgelessTool = (edgelessTool: EdgelessTool) => {
-    this.edgeless.tools.setEdgelessTool(edgelessTool);
-  };
 
   get edgelessService() {
     return this.edgeless.service;

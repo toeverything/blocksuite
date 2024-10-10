@@ -5,7 +5,6 @@ import { computed } from '@preact/signals-core';
 import { css, html, LitElement } from 'lit';
 import { property } from 'lit/decorators.js';
 
-import type { EdgelessTool } from '../../../types.js';
 import type { LineWidthEvent } from '../../panel/line-width-panel.js';
 
 import {
@@ -44,7 +43,7 @@ export class EdgelessBrushMenu extends EdgelessToolbarToolMixin(
     };
   });
 
-  type: EdgelessTool['type'] = 'brush';
+  type: BlockSuite.GfxToolsFullOptionValue['type'] = 'brush';
 
   override render() {
     const color = ThemeObserver.getColorValue(

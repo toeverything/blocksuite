@@ -8,22 +8,21 @@ import {
   GfxControllerIdentifier,
   type Viewport,
 } from '@blocksuite/block-std/gfx';
-import { Bound, values } from '@blocksuite/global/utils';
+import { Bound } from '@blocksuite/global/utils';
 import { css, html } from 'lit';
 import { query } from 'lit/decorators.js';
 
-import type { Overlay } from './renderer/canvas-renderer.js';
 import type { ElementRenderer } from './renderer/elements/index.js';
 import type { SurfaceBlockModel } from './surface-model.js';
 import type { SurfaceBlockService } from './surface-service.js';
 
 import { ConnectorElementModel } from './element-model/index.js';
 import { CanvasRenderer } from './renderer/canvas-renderer.js';
+import { OverlayIdentifier } from './renderer/overlay.js';
 
 export interface SurfaceContext {
   viewport: Viewport;
   host: EditorHost;
-  overlays: Record<string, Overlay>;
   elementRenderers: Record<string, ElementRenderer>;
   selection: {
     selectedIds: string[];
@@ -166,8 +165,14 @@ export class SurfaceBlockComponent extends BlockComponent<
   }
 
   private _initOverlays() {
-    values(this._edgelessService.overlays).forEach(overlay => {
+    this.std.provider.getAll(OverlayIdentifier).forEach(overlay => {
       this._renderer.addOverlay(overlay);
+    });
+
+    this._disposables.add(() => {
+      this.std.provider.getAll(OverlayIdentifier).forEach(overlay => {
+        this._renderer.removeOverlay(overlay);
+      });
     });
   }
 
