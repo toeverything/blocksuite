@@ -290,7 +290,7 @@ export class Job {
       const flatSnapshots: FlatSnapshot[] = [];
       this._flattenSnapshot(tmpRootSnapshot, flatSnapshots, parent, index);
 
-      const blockTree = await this._processFlatSnapshots(flatSnapshots);
+      const blockTree = await this._parallelConvertFlatSnapshots(flatSnapshots);
 
       this._initBlockTree(blockTree.children, doc, parent, index);
 
@@ -533,7 +533,7 @@ export class Job {
     });
   }
 
-  private async _processFlatSnapshots(flatSnapshots: FlatSnapshot[]) {
+  private async _parallelConvertFlatSnapshots(flatSnapshots: FlatSnapshot[]) {
     // Phase 1: Convert snapshots to draft models in parallel
     const draftModels = await Promise.all(
       flatSnapshots.map(async flat => {
@@ -561,6 +561,24 @@ export class Job {
     // Phase 3: Rebuild the block trees
     const blockTree = this._rebuildBlockTree(validDraftModels);
     return blockTree;
+  }
+
+  private async _parallelSnapshotToBlock(
+    snapshot: BlockSnapshot,
+    doc: Doc,
+    parent?: string,
+    index?: number
+  ): Promise<BlockModel | null> {
+    this._triggerBeforeImportEvent(snapshot, parent, index);
+
+    const flatSnapshots: FlatSnapshot[] = [];
+    this._flattenSnapshot(snapshot, flatSnapshots, parent, index);
+
+    const blockTree = await this._parallelConvertFlatSnapshots(flatSnapshots);
+
+    this._initBlockTree([blockTree], doc, parent, index);
+
+    return doc.getBlockById(snapshot.id) || null;
   }
 
   private _rebuildBlockTree(
@@ -598,12 +616,6 @@ export class Job {
     return root;
   }
 
-  /**
-   * traverse the snapshot tree and trigger beforeImport event for all blocks
-   * @param snapshot
-   * @param parent
-   * @param index
-   */
   private _triggerBeforeImportEvent(
     snapshot: BlockSnapshot,
     parent?: string,
@@ -627,31 +639,6 @@ export class Job {
       }
     };
     traverseAndTrigger(snapshot, parent, index);
-  }
-
-  /**
-   * New method to convert snapshot tree to block tree in parallel.
-   * @param snapshot The root snapshot node.
-   * @param doc The document to add blocks to.
-   * @param parent Optional parent block ID.
-   * @param index Optional index position.
-   */
-  async _parallelSnapshotToBlock(
-    snapshot: BlockSnapshot,
-    doc: Doc,
-    parent?: string,
-    index?: number
-  ): Promise<BlockModel | null> {
-    this._triggerBeforeImportEvent(snapshot, parent, index);
-
-    const flatSnapshots: FlatSnapshot[] = [];
-    this._flattenSnapshot(snapshot, flatSnapshots, parent, index);
-
-    const blockTree = await this._processFlatSnapshots(flatSnapshots);
-
-    this._initBlockTree([blockTree], doc, parent, index);
-
-    return doc.getBlockById(snapshot.id) || null;
   }
 
   reset() {
