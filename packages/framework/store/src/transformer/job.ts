@@ -265,6 +265,7 @@ export class Job {
     parent?: string,
     index?: number
   ): Promise<Slice | undefined> => {
+    SliceSnapshotSchema.parse(snapshot);
     try {
       this._slots.beforeImport.emit({
         type: 'slice',
@@ -274,36 +275,18 @@ export class Job {
       const { content, pageVersion, workspaceVersion, workspaceId, pageId } =
         snapshot;
 
-      // Create a temporary root snapshot to encompass all content blocks
-      const temporaryRootSnapshot: BlockSnapshot = {
-        id: 'temporary-root',
-        flavour: 'temporary',
-        props: {},
-        type: 'block',
-        children: content,
-      };
-
-      // Use _parallelSnapshotToBlock to process the entire tree
-      const temporaryRoot = await this._parallelSnapshotToBlock(
-        temporaryRootSnapshot,
-        doc,
-        parent,
-        index
-      );
-
-      if (!temporaryRoot) return;
-
-      // Extract the processed content blocks from the temporary root
-      const contentBlocks: DraftModel[] = temporaryRoot.children.map(child => {
-        const block = doc.getBlockById(child.id);
-        if (!block) {
-          throw new BlockSuiteError(
-            ErrorCode.TransformerError,
-            `Block not found by id ${child.id}`
-          );
+      const contentBlocks: DraftModel[] = [];
+      for (const block of content) {
+        const blockModel = await this.snapshotToBlock(
+          block,
+          doc,
+          parent,
+          index
+        );
+        if (blockModel) {
+          contentBlocks.push(blockModel);
         }
-        return block;
-      });
+      }
 
       const slice = new Slice({
         content: contentBlocks,
