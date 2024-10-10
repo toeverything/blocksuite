@@ -154,8 +154,9 @@ export class LatexEditorMenu extends SignalWatcher(
       .then(async () => {
         await this.richText?.updateComplete;
 
-        this.richText?.inlineEditorContainer.focus();
-        this.richText?.inlineEditor?.focusEnd();
+        setTimeout(() => {
+          this.richText?.inlineEditor?.focusEnd();
+        });
       })
       .catch(console.error);
   }
