@@ -287,38 +287,11 @@ export class Job {
       for (const block of content) {
         this._triggerBeforeImportEvent(block, parent, index);
       }
-      // Flatten all snapshots
       const flatSnapshots: FlatSnapshot[] = [];
       this._flattenSnapshot(tmpRootSnapshot, flatSnapshots, parent, index);
 
-      // Convert snapshots to draft models in parallel
-      const draftModels = await Promise.all(
-        flatSnapshots.map(async flat => {
-          const draft = await this._convertSnapshotToDraftModel(flat);
-          if (draft) {
-            draft.id = flat.snapshot.id;
-          }
-          return {
-            draft,
-            snapshot: flat.snapshot,
-            parentId: flat.parentId,
-            index: flat.index,
-          };
-        })
-      );
+      const blockTree = await this._processFlatSnapshots(flatSnapshots);
 
-      // Filter out the models that failed to convert
-      const validDraftModels = draftModels.filter(item => !!item.draft) as {
-        draft: DraftModel;
-        snapshot: BlockSnapshot;
-        parentId?: string;
-        index?: number;
-      }[];
-
-      // Rebuild the block trees
-      const blockTree = this._rebuildBlockTree(validDraftModels);
-
-      // Instantiate the block trees
       this._initBlockTree(blockTree.children, doc, parent, index);
 
       const contentBlocks = blockTree.children
@@ -560,6 +533,36 @@ export class Job {
     });
   }
 
+  private async _processFlatSnapshots(flatSnapshots: FlatSnapshot[]) {
+    // Phase 1: Convert snapshots to draft models in parallel
+    const draftModels = await Promise.all(
+      flatSnapshots.map(async flat => {
+        const draft = await this._convertSnapshotToDraftModel(flat);
+        if (draft) {
+          draft.id = flat.snapshot.id;
+        }
+        return {
+          draft,
+          snapshot: flat.snapshot,
+          parentId: flat.parentId,
+          index: flat.index,
+        };
+      })
+    );
+
+    // Phase 2: Filter out the models that failed to convert
+    const validDraftModels = draftModels.filter(item => !!item.draft) as {
+      draft: DraftModel;
+      snapshot: BlockSnapshot;
+      parentId?: string;
+      index?: number;
+    }[];
+
+    // Phase 3: Rebuild the block trees
+    const blockTree = this._rebuildBlockTree(validDraftModels);
+    return blockTree;
+  }
+
   private _rebuildBlockTree(
     draftModels: {
       draft: DraftModel;
@@ -641,38 +644,11 @@ export class Job {
   ): Promise<BlockModel | null> {
     this._triggerBeforeImportEvent(snapshot, parent, index);
 
-    // Phase 1: Flatten the snapshot tree
     const flatSnapshots: FlatSnapshot[] = [];
     this._flattenSnapshot(snapshot, flatSnapshots, parent, index);
 
-    // Phase 2: Convert snapshots to draft models in parallel
-    const draftModels = await Promise.all(
-      flatSnapshots.map(async flat => {
-        const draft = await this._convertSnapshotToDraftModel(flat);
-        if (draft) {
-          draft.id = flat.snapshot.id;
-        }
-        return {
-          draft,
-          snapshot: flat.snapshot,
-          parentId: flat.parentId,
-          index: flat.index,
-        };
-      })
-    );
+    const blockTree = await this._processFlatSnapshots(flatSnapshots);
 
-    // Filter out the models that failed to convert
-    const validDraftModels = draftModels.filter(item => !!item.draft) as {
-      draft: DraftModel;
-      snapshot: BlockSnapshot;
-      parentId?: string;
-      index?: number;
-    }[];
-
-    // Phase 3: Rebuild the block tree
-    const blockTree = this._rebuildBlockTree(validDraftModels);
-
-    // Phase 4: Instantiate the block tree
     this._initBlockTree([blockTree], doc, parent, index);
 
     return doc.getBlockById(snapshot.id) || null;
