@@ -1,5 +1,24 @@
 # @blocksuite/store
 
+## 0.17.18
+
+### Patch Changes
+
+- 9f70715: Bug Fixes:
+
+  - fix(blocks): can not search in at menu with IME. [#8481](https://github.com/toeverything/blocksuite/pull/8481)
+  - fix(std): dispatcher pointerUp calls twice. [#8485](https://github.com/toeverything/blocksuite/pull/8485)
+  - fix(blocks): pasting elements with css inline style. [#8491](https://github.com/toeverything/blocksuite/pull/8491)
+  - fix(blocks): hide outline panel toggle button when callback is null. [#8493](https://github.com/toeverything/blocksuite/pull/8493)
+  - fix(blocks): pasting twice when span inside h tag. [#8496](https://github.com/toeverything/blocksuite/pull/8496)
+  - fix(blocks): image should be displayed when in vertical mode. [#8497](https://github.com/toeverything/blocksuite/pull/8497)
+  - fix: press backspace at the start of first line when edgeless text exist. [#8498](https://github.com/toeverything/blocksuite/pull/8498)
+
+- Updated dependencies [9f70715]
+  - @blocksuite/global@0.17.18
+  - @blocksuite/inline@0.17.18
+  - @blocksuite/sync@0.17.18
+
 ## 0.17.17
 
 ### Patch Changes
