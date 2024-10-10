@@ -284,6 +284,9 @@ export class Job {
         children: content,
       };
 
+      for (const block of content) {
+        this._triggerBeforeImportEvent(block, parent, index);
+      }
       // Flatten all snapshots
       const flatSnapshots: FlatSnapshot[] = [];
       this._flattenSnapshot(tmpRootSnapshot, flatSnapshots, parent, index);
