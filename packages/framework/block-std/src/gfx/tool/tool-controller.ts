@@ -1,3 +1,5 @@
+import type { ServiceIdentifier } from '@blocksuite/global/di';
+
 import {
   DisposableGroup,
   type IBound,
@@ -6,10 +8,9 @@ import {
 import { Signal } from '@preact/signals-core';
 
 import type { PointerEventState } from '../../event/index.js';
-import type { BlockStdScope } from '../../scope/block-std-scope.js';
-import type { BaseTool } from './tool.js';
 
-import { GfxControllerIdentifier } from '../controller.js';
+import { GfxExtension, GfxExtensionIdentifier } from '../extension.js';
+import { type BaseTool, ToolIdentifier } from './tool.js';
 
 const supportedEvents = [
   'dragStart',
@@ -36,7 +37,9 @@ export type SupportedEvents = (typeof supportedEvents)[number];
 
 export const eventTarget = Symbol('eventTarget');
 
-export class ToolController {
+export class ToolController extends GfxExtension {
+  static override key = 'ToolController';
+
   private _disposableGroup = new DisposableGroup();
 
   private _tools = new Map<string, BaseTool>();
@@ -85,7 +88,7 @@ export class ToolController {
     endY: 0,
   });
 
-  readonly [eventTarget]: ToolEventTarget;
+  readonly [eventTarget]!: ToolEventTarget;
 
   /**
    * The last mouse move position
@@ -145,16 +148,8 @@ export class ToolController {
     };
   }
 
-  get gfx() {
-    return this.std.get(GfxControllerIdentifier);
-  }
-
-  constructor(readonly std: BlockStdScope) {
-    const { addHook } = this._initializeEvents();
-
-    this[eventTarget] = {
-      addHook,
-    };
+  get std() {
+    return this.gfx.std;
   }
 
   private _initializeEvents() {
@@ -347,19 +342,7 @@ export class ToolController {
     };
   }
 
-  dispose() {
-    this._tools.forEach(tool => {
-      tool.onunload();
-    });
-  }
-
-  get<K extends keyof BlockSuite.GfxToolsMap>(
-    key: K
-  ): BlockSuite.GfxToolsMap[K] {
-    return this._tools.get(key) as BlockSuite.GfxToolsMap[K];
-  }
-
-  register(tools: BaseTool) {
+  private _register(tools: BaseTool) {
     if (this._tools.has(tools.toolName)) {
       this._tools.get(tools.toolName)?.onunload();
     }
@@ -368,8 +351,27 @@ export class ToolController {
     tools.onload();
   }
 
+  get<K extends keyof BlockSuite.GfxToolsMap>(
+    key: K
+  ): BlockSuite.GfxToolsMap[K] {
+    return this._tools.get(key) as BlockSuite.GfxToolsMap[K];
+  }
+
+  override mounted(): void {
+    const { addHook } = this._initializeEvents();
+
+    // @ts-ignore
+    this[eventTarget] = {
+      addHook,
+    };
+    this.std.provider.getAll(ToolIdentifier).forEach(tool => {
+      this._register(tool);
+    });
+  }
+
   // @ts-ignore
   setTool(toolName: BlockSuite.GfxToolsFullOptionValue): void;
+
   setTool<K extends keyof BlockSuite.GfxToolsMap>(
     toolName: K,
     ...options: K extends keyof BlockSuite.GfxToolsOption
@@ -391,4 +393,15 @@ export class ToolController {
           (toolName.type as K);
     this.currentTool$.peek()?.activate(options[0] ?? {});
   }
+
+  override unmounted(): void {
+    this.currentTool$.peek()?.deactivate();
+    this._tools.forEach(tool => {
+      tool.onunload();
+    });
+  }
 }
+
+export const ToolControllerIdentifier = GfxExtensionIdentifier(
+  'ToolController'
+) as ServiceIdentifier<ToolController>;

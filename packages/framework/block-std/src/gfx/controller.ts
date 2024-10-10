@@ -1,11 +1,6 @@
+import type { ServiceIdentifier } from '@blocksuite/global/di';
 import type { BlockModel } from '@blocksuite/store';
 
-import {
-  type Container,
-  createIdentifier,
-  type ServiceIdentifier,
-} from '@blocksuite/global/di';
-import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 import {
   assertType,
   Bound,
@@ -18,10 +13,10 @@ import type { BlockStdScope } from '../scope/block-std-scope.js';
 import type { BlockComponent } from '../view/index.js';
 import type { SurfaceBlockModel } from './surface/surface-model.js';
 
-import { Extension } from '../extension/extension.js';
 import { LifeCycleWatcher } from '../extension/lifecycle-watcher.js';
 import { LifeCycleWatcherIdentifier } from '../identifier.js';
 import { onSurfaceAdded } from '../utils/gfx.js';
+import { GfxExtensionIdentifier } from './extension.js';
 import { GfxBlockElementModel, type GfxModel } from './gfx-block-model.js';
 import { GridManager } from './grid.js';
 import { KeyboardController } from './keyboard.js';
@@ -32,8 +27,7 @@ import {
   GfxPrimitiveElementModel,
   type PointTestOptions,
 } from './surface/element-model.js';
-import { ToolIdentifier } from './tool/tool.js';
-import { ToolController } from './tool/tool-controller.js';
+import { ToolControllerIdentifier } from './tool/tool-controller.js';
 import { Viewport } from './viewport.js';
 
 export class GfxController extends LifeCycleWatcher {
@@ -51,8 +45,6 @@ export class GfxController extends LifeCycleWatcher {
 
   readonly selection: GfxSelectionManager;
 
-  readonly tool: ToolController;
-
   readonly viewport: Viewport = new Viewport();
 
   get doc() {
@@ -69,13 +61,16 @@ export class GfxController extends LifeCycleWatcher {
       : null;
   }
 
+  get tool() {
+    return this.std.get(ToolControllerIdentifier);
+  }
+
   constructor(std: BlockStdScope) {
     super(std);
 
     this.grid = new GridManager();
     this.layer = new LayerManager(this.doc, null);
     this.keyboard = new KeyboardController(std);
-    this.tool = new ToolController(std);
     this.selection = new GfxSelectionManager(std);
 
     this._disposables.add(
@@ -92,7 +87,6 @@ export class GfxController extends LifeCycleWatcher {
     this._disposables.add(this.layer);
     this._disposables.add(this.viewport);
     this._disposables.add(this.keyboard);
-    this._disposables.add(this.tool);
     this._disposables.add(this.selection);
   }
 
@@ -272,9 +266,6 @@ export class GfxController extends LifeCycleWatcher {
 
   override mounted() {
     this.viewport.setViewportElm(this.std.host);
-    this.std.provider.getAll(ToolIdentifier).forEach(tool => {
-      this.tool.register(tool);
-    });
     this.std.provider.getAll(GfxExtensionIdentifier).forEach(ext => {
       ext.mounted();
     });
@@ -300,34 +291,3 @@ export class GfxController extends LifeCycleWatcher {
 export const GfxControllerIdentifier = LifeCycleWatcherIdentifier(
   GfxController.key
 ) as ServiceIdentifier<GfxController>;
-
-export const GfxExtensionIdentifier =
-  createIdentifier<GfxExtension>('GfxExtension');
-
-export abstract class GfxExtension extends Extension {
-  static key: string;
-
-  constructor(protected readonly gfx: GfxController) {
-    super();
-  }
-
-  static override setup(di: Container) {
-    if (!this.key) {
-      throw new BlockSuiteError(
-        ErrorCode.ValueNotExists,
-        'key is not defined in the GfxExtension'
-      );
-    }
-    di.add(this as unknown as { new (gfx: GfxController): GfxExtension }, [
-      GfxControllerIdentifier,
-    ]);
-
-    di.addImpl(GfxExtensionIdentifier(this.key), provider =>
-      provider.get(this)
-    );
-  }
-
-  mounted() {}
-
-  unmounted() {}
-}

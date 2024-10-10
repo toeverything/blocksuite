@@ -3,12 +3,8 @@ export {
   renderableInEdgeless,
   SortOrder,
 } from '../utils/layer.js';
-export {
-  GfxController,
-  GfxControllerIdentifier,
-  GfxExtension,
-  GfxExtensionIdentifier,
-} from './controller.js';
+export { GfxController, GfxControllerIdentifier } from './controller.js';
+export { GfxExtension, GfxExtensionIdentifier } from './extension.js';
 export * from './gfx-block-model.js';
 export { GridManager } from './grid.js';
 export { LayerManager, type ReorderingDirection } from './layer.js';
