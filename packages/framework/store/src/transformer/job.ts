@@ -275,21 +275,14 @@ export class Job {
       const { content, pageVersion, workspaceVersion, workspaceId, pageId } =
         snapshot;
 
-      const contentBlocks: DraftModel[] = [];
-      for (const block of content) {
-        const blockModel = await this.snapshotToBlock(
-          block,
-          doc,
-          parent,
-          index
-        );
-        if (blockModel) {
-          contentBlocks.push(blockModel);
-        }
-      }
+      const contentBlocks = await Promise.all(
+        content.map((block, i) =>
+          this.snapshotToBlock(block, doc, parent, (index ?? 0) + i)
+        )
+      );
 
       const slice = new Slice({
-        content: contentBlocks,
+        content: contentBlocks.filter(block => block) as DraftModel[],
         pageVersion,
         workspaceVersion,
         workspaceId,
