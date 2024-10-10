@@ -46,12 +46,9 @@ export abstract class BaseTool<Option = Record<string, unknown>> {
 
   /**
    * Called when the tool is activated.
-   * @note You should call `super.activate(option)` if you override this method.
-   * @param option - The data passed as second argument when calling `ToolController.use`.
+   * @param _ - The data passed as second argument when calling `ToolController.use`.
    */
-  activate(option: Option): void {
-    this.activatedOption = option;
-  }
+  activate(_: Option): void {}
 
   addHook(
     evtName: SupportedEvents,
@@ -84,11 +81,8 @@ export abstract class BaseTool<Option = Record<string, unknown>> {
 
   /**
    * Called when the tool is unloaded, usually when the whole `ToolController` is destroyed.
-   * @note You should call `super.onunload()` if you override this method.
    */
-  onunload(): void {
-    this.disposable.dispose();
-  }
+  onunload(): void {}
 
   pointerDown(_: PointerEventState): void {}
 

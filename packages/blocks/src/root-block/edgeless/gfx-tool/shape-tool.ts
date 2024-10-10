@@ -158,8 +158,7 @@ export class ShapeTool extends BaseTool<ShapeToolOption> {
     (this.gfx.surfaceComponent as SurfaceBlockComponent)?.refresh();
   }
 
-  override activate(option: typeof this.activatedOption) {
-    super.activate(option);
+  override activate() {
     this.createOverlay();
   }
 

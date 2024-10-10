@@ -374,30 +374,40 @@ export class ToolController extends GfxExtension {
 
   setTool<K extends keyof BlockSuite.GfxToolsMap>(
     toolName: K,
-    ...options: K extends keyof BlockSuite.GfxToolsOption
+    ...args: K extends keyof BlockSuite.GfxToolsOption
       ? [option: BlockSuite.GfxToolsOption[K]]
       : [void]
   ): void;
   setTool<K extends keyof BlockSuite.GfxToolsMap>(
     toolName: K | BlockSuite.GfxToolsFullOptionValue,
-    ...options: K extends keyof BlockSuite.GfxToolsOption
+    ...args: K extends keyof BlockSuite.GfxToolsOption
       ? [option: BlockSuite.GfxToolsOption[K]]
       : [void]
   ): void {
     this.currentTool$.peek()?.deactivate();
+
+    const option = typeof toolName === 'string' ? args[0] : toolName;
 
     this.currentToolName$.value =
       typeof toolName === 'string'
         ? toolName
         : // @ts-ignore
           (toolName.type as K);
-    this.currentTool$.peek()?.activate(options[0] ?? {});
+
+    const currentTool = this.currentTool$.peek();
+    if (!currentTool) {
+      throw new Error(`Tool "${this.currentToolName$.value}" is not defined`);
+    }
+
+    currentTool.activatedOption = option ?? {};
+    currentTool.activate(currentTool.activatedOption);
   }
 
   override unmounted(): void {
     this.currentTool$.peek()?.deactivate();
     this._tools.forEach(tool => {
       tool.onunload();
+      tool['disposable'].dispose();
     });
   }
 }
