@@ -10,6 +10,7 @@ import { Clipboard } from '../clipboard/index.js';
 import { CommandManager } from '../command/index.js';
 import { UIEventDispatcher } from '../event/index.js';
 import { GfxController } from '../gfx/controller.js';
+import { GfxSelectionManager } from '../gfx/selection.js';
 import { ToolController } from '../gfx/tool/tool-controller.js';
 import {
   BlockServiceIdentifier,
@@ -39,6 +40,7 @@ const internalExtensions = [
   Clipboard,
   GfxController,
   ToolController,
+  GfxSelectionManager,
 ];
 
 export class BlockStdScope {

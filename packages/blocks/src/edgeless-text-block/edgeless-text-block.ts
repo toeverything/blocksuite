@@ -10,13 +10,13 @@ import { css, html } from 'lit';
 import { query, state } from 'lit/decorators.js';
 import { type StyleInfo, styleMap } from 'lit/directives/style-map.js';
 
+import type { DefaultTool } from '../root-block/edgeless/gfx-tool/default-tool.js';
 import type {
   EdgelessRootBlockComponent,
   EdgelessRootService,
 } from '../root-block/index.js';
 
 import { HandleDirection } from '../root-block/edgeless/components/resize/resize-handles.js';
-import { DefaultTool } from '../root-block/edgeless/gfx-tool/default-tool.js';
 import { DefaultModeDragType } from '../root-block/edgeless/tools/default-tool.js';
 
 export const EDGELESS_TEXT_BLOCK_MIN_WIDTH = 50;
@@ -52,8 +52,8 @@ export class EdgelessTextBlockComponent extends GfxBlockComponent<EdgelessTextBl
     const controller = this.rootService.gfx.tool.currentTool$.peek();
 
     return (
-      controller instanceof DefaultTool &&
-      controller.dragType === DefaultModeDragType.ContentMoving
+      controller?.toolName === 'default' &&
+      (controller as DefaultTool).dragType === DefaultModeDragType.ContentMoving
     );
   }
 

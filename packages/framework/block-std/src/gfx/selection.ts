@@ -7,11 +7,14 @@ import {
   Slot,
 } from '@blocksuite/global/utils';
 
-import type { BlockStdScope } from '../scope/block-std-scope.js';
 import type { CursorSelection, SurfaceSelection } from '../selection/index.js';
 import type { GfxModel } from './gfx-block-model.js';
 
-import { GfxControllerIdentifier } from './controller.js';
+import {
+  type GfxController,
+  GfxExtension,
+  GfxExtensionIdentifier,
+} from './controller.js';
 import { GfxGroupLikeElementModel } from './surface/element-model.js';
 
 export interface SurfaceSelectionState {
@@ -35,7 +38,9 @@ export interface SurfaceSelectionState {
  * GfxSelectionManager is just a wrapper of std selection providing
  * convenient method and states in gfx
  */
-export class GfxSelectionManager {
+export class GfxSelectionManager extends GfxExtension {
+  static override key = 'gfxSelection';
+
   private _activeGroup: GfxGroupLikeElementModel | null = null;
 
   private _cursorSelection: CursorSelection | null = null;
@@ -80,10 +85,6 @@ export class GfxSelectionManager {
 
   get firstElement() {
     return this.selectedElements[0];
-  }
-
-  get gfx() {
-    return this.std.get(GfxControllerIdentifier);
   }
 
   get inoperable() {
@@ -141,8 +142,12 @@ export class GfxSelectionManager {
     return this._surfaceSelections;
   }
 
-  constructor(readonly std: BlockStdScope) {
-    this.mount();
+  static override extendGfx(gfx: GfxController): void {
+    Object.defineProperty(gfx, 'selection', {
+      get() {
+        return gfx.std.get(GfxExtensionIdentifier('gfxSelection'));
+      },
+    });
   }
 
   clear() {
@@ -156,10 +161,6 @@ export class GfxSelectionManager {
 
   clearLast() {
     this._lastSurfaceSelections = [];
-  }
-
-  dispose() {
-    this.disposable.dispose();
   }
 
   equals(selection: SurfaceSelection[]) {
@@ -215,7 +216,7 @@ export class GfxSelectionManager {
     return false;
   }
 
-  mount() {
+  override mounted() {
     this.disposable.add(
       this.stdSelection.slots.changed.on(selections => {
         const { cursor = [], surface = [] } = groupBy(selections, sel => {
@@ -375,5 +376,15 @@ export class GfxSelectionManager {
     const instance = this.stdSelection.create('cursor', cursor.x, cursor.y);
 
     this.stdSelection.setGroup('gfx', [...this.surfaceSelections, instance]);
+  }
+
+  override unmounted() {
+    this.disposable.dispose();
+  }
+}
+
+declare module './controller.js' {
+  interface GfxController {
+    readonly selection: GfxSelectionManager;
   }
 }

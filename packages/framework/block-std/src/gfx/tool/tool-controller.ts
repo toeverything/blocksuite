@@ -8,8 +8,9 @@ import {
 import { Signal } from '@preact/signals-core';
 
 import type { PointerEventState } from '../../event/index.js';
+import type { GfxController } from '../controller.js';
 
-import { GfxExtension, GfxExtensionIdentifier } from '../extension.js';
+import { GfxExtension, GfxExtensionIdentifier } from '../controller.js';
 import { type BaseTool, ToolIdentifier } from './tool.js';
 
 const supportedEvents = [
@@ -88,8 +89,6 @@ export class ToolController extends GfxExtension {
     endY: 0,
   });
 
-  readonly [eventTarget]!: ToolEventTarget;
-
   /**
    * The last mouse move position
    * The coordinates are in browser space
@@ -148,8 +147,16 @@ export class ToolController extends GfxExtension {
     };
   }
 
-  get std() {
-    return this.gfx.std;
+  static override extendGfx(gfx: GfxController) {
+    if (gfx.tool) {
+      throw new Error('The "tool" field has been taken in GfxController');
+    }
+
+    Object.defineProperty(gfx, 'tool', {
+      get() {
+        return gfx.std.provider.get(ToolControllerIdentifier);
+      },
+    });
   }
 
   private _initializeEvents() {
@@ -360,11 +367,13 @@ export class ToolController extends GfxExtension {
   override mounted(): void {
     const { addHook } = this._initializeEvents();
 
-    // @ts-ignore
-    this[eventTarget] = {
+    const eventTarget: ToolEventTarget = {
       addHook,
     };
+
     this.std.provider.getAll(ToolIdentifier).forEach(tool => {
+      // @ts-ignore
+      tool['eventTarget'] = eventTarget;
       this._register(tool);
     });
   }
@@ -415,3 +424,9 @@ export class ToolController extends GfxExtension {
 export const ToolControllerIdentifier = GfxExtensionIdentifier(
   'ToolController'
 ) as ServiceIdentifier<ToolController>;
+
+declare module '../controller.js' {
+  interface GfxController {
+    readonly tool: ToolController;
+  }
+}

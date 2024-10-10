@@ -8,12 +8,14 @@ import {
 
 import type { PointerEventState } from '../../event/index.js';
 import type { ExtensionType } from '../../extension/extension.js';
+import type { SupportedEvents, ToolEventTarget } from './tool-controller.js';
 
 import { type GfxController, GfxControllerIdentifier } from '../controller.js';
-import { eventTarget, type SupportedEvents } from './tool-controller.js';
 
 export abstract class BaseTool<Option = Record<string, unknown>> {
   static toolName: string = '';
+
+  private readonly eventTarget!: ToolEventTarget;
 
   activatedOption: Option = {} as Option;
 
@@ -54,7 +56,7 @@ export abstract class BaseTool<Option = Record<string, unknown>> {
     evtName: SupportedEvents,
     handler: (evtState: PointerEventState) => undefined | boolean
   ): void {
-    this.gfx.tool[eventTarget].addHook(evtName, handler);
+    this.eventTarget.addHook(evtName, handler);
   }
 
   click(_: PointerEventState): void {}
