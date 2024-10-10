@@ -20,6 +20,7 @@ import type { EditorHost } from '../../view/index.js';
 import type { GfxBlockElementModel, GfxModel } from '../gfx-block-model.js';
 import type { SurfaceBlockModel } from './surface-model.js';
 
+import { descendantsImpl, hasDescendantImpl } from '../tree.js';
 import {
   convertProps,
   field,
@@ -87,14 +88,21 @@ export interface GfxElementGeometry {
 export const gfxContainerSymbol = Symbol('GfxContainerElement');
 
 export const isGfxContainerElm = (elm: unknown): elm is GfxContainerElement => {
-  return (elm as GfxContainerElement)[gfxContainerSymbol] === true;
+  if (typeof elm !== 'object' || elm === null) return false;
+  return gfxContainerSymbol in elm && elm[gfxContainerSymbol] === true;
 };
 
 export interface GfxContainerElement extends GfxCompatibleProps {
   [gfxContainerSymbol]: true;
   childIds: string[];
   childElements: GfxModel[];
-  hasDescendant(element: string | GfxModel): boolean;
+
+  addChild(element: GfxModel): void;
+  removeChild(element: GfxModel): void;
+  hasChild(element: GfxModel): boolean;
+
+  hasDescendant(element: GfxModel): boolean;
+  descendants(): GfxModel[];
 }
 
 export abstract class GfxPrimitiveElementModel<
@@ -132,6 +140,10 @@ export abstract class GfxPrimitiveElementModel<
 
   get connectable() {
     return true;
+  }
+
+  get container() {
+    return this.surface.getContainer(this.id);
   }
 
   get deserializedXYWH() {
@@ -466,52 +478,31 @@ export abstract class GfxGroupLikeElementModel<
     });
   }
 
-  /**
-   * @deprecated Use `getAllDescendantElements` instead.
-   * Get all descendants of this group
-   * @param withoutGroup if true, will not include group element
-   */
-  descendants(withoutGroup = true) {
-    return this.childElements.reduce((prev, child) => {
-      if (child instanceof GfxGroupLikeElementModel) {
-        prev = prev.concat(child.descendants());
+  abstract addChild(element: GfxModel): void;
 
-        !withoutGroup && prev.push(child as GfxPrimitiveElementModel);
-      } else {
-        prev.push(child);
-      }
-
-      return prev;
-    }, [] as GfxModel[]);
+  descendants(): GfxModel[] {
+    return descendantsImpl(this);
   }
 
   /**
    * The actual field that stores the children of the group.
    * It should be a ymap decorated with `@field`.
    */
-  hasChild(element: string | GfxModel) {
-    return (
-      (typeof element === 'string'
-        ? this.children?.has(element)
-        : this.children?.has(element.id)) ?? false
-    );
+  hasChild(element: GfxModel) {
+    return this.childElements.includes(element);
   }
 
   /**
    * Check if the group has the given descendant.
    */
-  hasDescendant(element: string | GfxModel) {
-    const groups = this.surface.getGroups(
-      typeof element === 'string' ? element : element.id
-    );
-
-    return groups.some(group => group.id === this.id);
+  hasDescendant(element: GfxModel): boolean {
+    return hasDescendantImpl(this, element);
   }
 
   /**
    * Remove the child from the group
    */
-  abstract removeChild(id: string): void;
+  abstract removeChild(element: GfxModel): void;
 
   /**
    * Set the new value of the childIds

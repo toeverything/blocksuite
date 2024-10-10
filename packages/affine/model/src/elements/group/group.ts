@@ -1,5 +1,6 @@
 import type {
   BaseElementProps,
+  GfxModel,
   SerializedElement,
 } from '@blocksuite/block-std/gfx';
 import type { Y } from '@blocksuite/store';
@@ -58,13 +59,9 @@ export class GroupElementModel extends GfxGroupLikeElementModel<GroupElementProp
     return props as GroupElementProps;
   }
 
-  addChild(element: BlockSuite.EdgelessModel | string) {
-    const id = typeof element === 'string' ? element : element.id;
-    if (!this.children) {
-      return;
-    }
+  override addChild(element: GfxModel) {
     this.surface.doc.transact(() => {
-      this.children.set(id, true);
+      this.children.set(element.id, true);
     });
   }
 
@@ -80,13 +77,12 @@ export class GroupElementModel extends GfxGroupLikeElementModel<GroupElementProp
     return linePolygonIntersects(start, end, bound.points);
   }
 
-  removeChild(element: BlockSuite.EdgelessModel | string) {
-    const id = typeof element === 'string' ? element : element.id;
+  removeChild(element: GfxModel) {
     if (!this.children) {
       return;
     }
     this.surface.doc.transact(() => {
-      this.children.delete(id);
+      this.children.delete(element.id);
     });
   }
 

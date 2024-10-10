@@ -1,9 +1,11 @@
 import {
+  descendantsImpl,
   type GfxBlockElementModel,
   type GfxContainerElement,
   gfxContainerSymbol,
   type GfxElementGeometry,
   type GfxModel,
+  hasDescendantImpl,
   type PointTestOptions,
   SurfaceBlockModel,
 } from '@blocksuite/block-std/gfx';
@@ -71,10 +73,9 @@ export class FrameBlockModel
     return [...(this.childElementIds ? Object.keys(this.childElementIds) : [])];
   }
 
-  addChild(element: BlockSuite.EdgelessModel | string): void {
-    const id = typeof element === 'string' ? element : element.id;
+  addChild(element: GfxModel) {
     this.doc.transact(() => {
-      this.childElementIds = { ...this.childElementIds, [id]: true };
+      this.childElementIds = { ...this.childElementIds, [element.id]: true };
     });
   }
 
@@ -99,9 +100,16 @@ export class FrameBlockModel
     return this.elementBound.contains(bound);
   }
 
-  hasDescendant(element: string | GfxModel): boolean {
-    const id = typeof element === 'string' ? element : element.id;
-    return !!this.childElementIds?.[id];
+  descendants(): GfxModel[] {
+    return descendantsImpl(this);
+  }
+
+  hasChild(element: GfxModel): boolean {
+    return this.childElementIds ? element.id in this.childElementIds : false;
+  }
+
+  hasDescendant(element: GfxModel): boolean {
+    return hasDescendantImpl(this, element);
   }
 
   override includesPoint(x: number, y: number, _: PointTestOptions): boolean {
@@ -116,10 +124,9 @@ export class FrameBlockModel
     );
   }
 
-  removeChild(element: BlockSuite.EdgelessModel | string): void {
-    const id = typeof element === 'string' ? element : element.id;
+  removeChild(element: GfxModel): void {
     this.doc.transact(() => {
-      this.childElementIds && delete this.childElementIds[id];
+      this.childElementIds && delete this.childElementIds[element.id];
     });
   }
 }

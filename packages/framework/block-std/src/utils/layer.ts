@@ -97,6 +97,9 @@ export function renderableInEdgeless(
  * @returns
  */
 export function compare(a: GfxModel, b: GfxModel) {
+  const surface = a.surface ?? b.surface;
+  if (!surface) return SortOrder.SAME;
+
   if (isGfxContainerElm(a) && a.hasDescendant(b)) {
     return SortOrder.BEFORE;
   } else if (isGfxContainerElm(b) && b.hasDescendant(a)) {

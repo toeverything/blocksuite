@@ -20,6 +20,7 @@ import { BlockModel } from '@blocksuite/store';
 import type { EditorHost } from '../view/index.js';
 import type {
   GfxCompatibleProps,
+  GfxContainerElement,
   GfxElementGeometry,
   GfxGroupLikeElementModel,
   GfxPrimitiveElementModel,
@@ -40,6 +41,10 @@ export class GfxBlockElementModel<
 
   rotate = 0;
 
+  get container(): (GfxModel & GfxContainerElement) | null {
+    return this.surface?.getContainer(this.id) ?? null;
+  }
+
   get elementBound() {
     const bound = Bound.deserialize(this.xywh);
     return Bound.from(getBoundsWithRotation({ ...bound, rotate: this.rotate }));
@@ -58,23 +63,22 @@ export class GfxBlockElementModel<
   }
 
   get group(): GfxGroupLikeElementModel | null {
-    const surface = this.doc
-      .getBlocks()
-      .find(block => block instanceof SurfaceBlockModel);
+    if (!this.surface) return null;
 
-    if (!surface) return null;
-
-    return (surface as SurfaceBlockModel).getGroup(this.id) ?? null;
+    return this.surface.getGroup(this.id) ?? null;
   }
 
   get groups(): GfxGroupLikeElementModel[] {
+    if (!this.surface) return [];
+
+    return this.surface.getGroups(this.id);
+  }
+
+  get surface(): SurfaceBlockModel | null {
     const surface = this.doc
       .getBlocks()
       .find(block => block instanceof SurfaceBlockModel);
-
-    if (!surface) return [];
-
-    return (surface as SurfaceBlockModel).getGroups(this.id);
+    return surface ?? null;
   }
 
   containsBound(bounds: Bound): boolean {
