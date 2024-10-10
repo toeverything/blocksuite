@@ -30,6 +30,7 @@ import {
   type ToDocSnapshotPayload,
 } from '@blocksuite/store';
 import { format } from 'date-fns/format';
+import remarkMath from 'remark-math';
 import remarkParse from 'remark-parse';
 import remarkStringify from 'remark-stringify';
 import { unified } from 'unified';
@@ -388,6 +389,23 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
             })
             .closeNode();
           context.skipAllChildren();
+          break;
+        }
+        case 'math': {
+          context
+            .openNode(
+              {
+                type: 'block',
+                id: nanoid(),
+                flavour: 'affine:latex',
+                props: {
+                  latex: o.node.value as string,
+                },
+                children: [],
+              },
+              'children'
+            )
+            .closeNode();
           break;
         }
       }
@@ -821,6 +839,17 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
             .closeNode();
           break;
         }
+        case 'affine:latex': {
+          context
+            .openNode(
+              {
+                type: 'math',
+                value: o.node.props.latex as string,
+              },
+              'children'
+            )
+            .closeNode();
+        }
       }
     });
     walker.setLeave((o, context) => {
@@ -878,6 +907,7 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
       .use(remarkStringify, {
         resourceLink: true,
       })
+      .use(remarkMath)
       .stringify(ast)
       .replace(/&#x20;\n/g, ' \n');
   }
@@ -945,15 +975,25 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
           };
         }
       }
+      if (delta.attributes?.latex) {
+        mdast = {
+          type: 'inlineMath',
+          value: delta.attributes.latex as string,
+        };
+      }
       return mdast;
     });
   }
 
   private _markdownToAst(markdown: Markdown) {
-    return unified().use(remarkParse).use(remarkGfm).parse(markdown);
+    return unified()
+      .use(remarkParse)
+      .use(remarkGfm)
+      .use(remarkMath)
+      .parse(markdown);
   }
 
-  private _mdastToDelta(ast: MarkdownAST): DeltaInsert[] {
+  private _mdastToDelta(ast: MarkdownAST): DeltaInsert<AffineTextAttributes>[] {
     switch (ast.type) {
       case 'text': {
         return [{ insert: ast.value }];
@@ -995,6 +1035,9 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
       }
       case 'list': {
         return [];
+      }
+      case 'inlineMath': {
+        return [{ insert: ' ', attributes: { latex: ast.value } }];
       }
     }
     return 'children' in ast

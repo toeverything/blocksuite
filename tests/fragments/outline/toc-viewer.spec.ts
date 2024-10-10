@@ -1,3 +1,6 @@
+import type { OutlineViewer } from '@blocksuite/presets';
+
+import { noop } from '@blocksuite/global/utils';
 import { expect, type Page } from '@playwright/test';
 import { addNote, switchEditorMode } from 'utils/actions/edgeless.js';
 import { pressEnter, type } from 'utils/actions/keyboard.js';
@@ -179,5 +182,28 @@ test.describe('toc-viewer', () => {
     await expect(viewer).toBeVisible();
     const hiddenTitle = viewer.locator('.hidden-title');
     await expect(hiddenTitle).toBeHidden();
+  });
+
+  test('outline panel toggle button', async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyParagraphState(page);
+    const viewer = await toggleTocViewer(page);
+
+    await focusRichTextEnd(page);
+    await createHeadingsWithGap(page);
+
+    const toggleButton = viewer.locator(
+      '[data-testid="toggle-outline-panel-button"]'
+    );
+    await expect(toggleButton).toHaveCount(0);
+    await viewer.evaluate((el: OutlineViewer) => {
+      el.toggleOutlinePanel = () => {
+        noop();
+      };
+    });
+
+    await waitNextFrame(page);
+    await expect(toggleButton).toHaveCount(1);
+    await expect(toggleButton).toBeVisible();
   });
 });

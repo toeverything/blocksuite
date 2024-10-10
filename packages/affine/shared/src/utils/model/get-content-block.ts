@@ -30,7 +30,18 @@ export function getPrevContentBlock(
 
     const index = parent.children.indexOf(model);
     if (index > 0) {
-      let prev = parent.children[index - 1];
+      let tmpIndex = index - 1;
+      let prev = parent.children[tmpIndex];
+
+      if (parent.role === 'root' && model.role === 'hub') {
+        while (prev && prev.flavour !== 'affine:note') {
+          prev = parent.children[tmpIndex];
+          tmpIndex--;
+        }
+      }
+
+      if (!prev) return null;
+
       while (prev.children.length > 0) {
         prev = prev.children[prev.children.length - 1];
       }

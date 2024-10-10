@@ -181,8 +181,19 @@ async function renderNoteContent(
     return;
   }
 
+  const cardStyle = card.model.style;
+  const isHorizontal = cardStyle === 'horizontal';
+  const allowFlavours: (keyof BlockSuite.BlockModels)[] = isHorizontal
+    ? []
+    : ['affine:image'];
+
   const noteChildren = notes.flatMap(note =>
-    note.children.filter(filterTextModel)
+    note.children.filter(model => {
+      if (matchFlavours(model, allowFlavours)) {
+        return true;
+      }
+      return filterTextModel(model);
+    })
   );
 
   if (!noteChildren.length) {
@@ -190,8 +201,6 @@ async function renderNoteContent(
   }
 
   card.isNoteContentEmpty = false;
-
-  const cardStyle = card.model.style;
 
   const noteContainer = await card.noteContainer;
   while (noteContainer.firstChild) {
@@ -203,7 +212,7 @@ async function renderNoteContent(
   noteBlocksContainer.contentEditable = 'false';
   noteContainer.append(noteBlocksContainer);
 
-  if (cardStyle === 'horizontal') {
+  if (isHorizontal) {
     // When the card is horizontal, we only render the first block
     noteChildren.splice(1);
   } else {

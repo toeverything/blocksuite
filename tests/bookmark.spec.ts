@@ -419,6 +419,7 @@ test.describe('embed figma card', () => {
   test(scoped`change figma card style`, async ({ page }) => {
     expectConsoleMessage(page, /Failed to load resource/);
     expectConsoleMessage(page, /Refused to frame/);
+    expectConsoleMessage(page, /Running frontend commit/, 'log');
     await createBookmarkBlockBySlashMenu(page, FIGMA_URL);
     const youtube = page.locator('affine-embed-figma-block');
     await youtube.click();

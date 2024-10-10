@@ -158,3 +158,77 @@ export const hastFlatNodes = (
   }
   return ast;
 };
+
+// Check if it is a paragraph like element
+// https://html.spec.whatwg.org/#paragraph
+export const hastIsParagraphLike = (node: Element): boolean => {
+  // Flex container
+  return (
+    (typeof node.properties?.style === 'string' &&
+      node.properties.style.match(/display:\s*flex/) !== null) ||
+    hastGetElementChildren(node).every(
+      // Phrasing content
+      child =>
+        [
+          'a',
+          'abbr',
+          'audio',
+          'b',
+          'bdi',
+          'bdo',
+          'br',
+          'button',
+          'canvas',
+          'cite',
+          'code',
+          'data',
+          'datalist',
+          'del',
+          'dfn',
+          'em',
+          'embed',
+          'i',
+          // 'iframe' is not included because it needs special handling
+          // 'img' is not included because it needs special handling
+          'input',
+          'ins',
+          'kbd',
+          'label',
+          'link',
+          'map',
+          'mark',
+          'math',
+          'meta',
+          'meter',
+          'noscript',
+          'object',
+          'output',
+          'picture',
+          'progress',
+          'q',
+          'ruby',
+          's',
+          'samp',
+          'script',
+          'select',
+          'slot',
+          'small',
+          'span',
+          'strong',
+          'sub',
+          'sup',
+          'svg',
+          'template',
+          'textarea',
+          'time',
+          'u',
+          'var',
+          'video',
+          'wbr',
+        ].includes(child.tagName) ||
+        // Inline elements
+        (typeof child.properties?.style === 'string' &&
+          child.properties.style.match(/display:\s*inline/))
+    )
+  );
+};

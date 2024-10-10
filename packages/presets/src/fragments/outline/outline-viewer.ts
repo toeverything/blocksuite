@@ -207,6 +207,19 @@ export class OutlineViewer extends SignalWatcher(WithDisposable(LitElement)) {
       ...headingBlocks,
     ];
 
+    const toggleOutlinePanelButton =
+      this.toggleOutlinePanel !== null
+        ? html`<edgeless-tool-icon-button
+            .tooltip=${'Open in sidebar'}
+            .tipPosition=${'top-end'}
+            .activeMode=${'background'}
+            @click=${this._toggleOutlinePanel}
+            data-testid="toggle-outline-panel-button"
+          >
+            ${TocIcon}
+          </edgeless-tool-icon-button>`
+        : nothing;
+
     return html`
       <div class="outline-viewer-root" @mouseenter=${this._scrollPanel}>
         <div class="outline-viewer-indicators-container">
@@ -227,14 +240,7 @@ export class OutlineViewer extends SignalWatcher(WithDisposable(LitElement)) {
         <div class="outline-viewer-panel">
           <div class="outline-viewer-item outline-viewer-header">
             <span>Table of Contents</span>
-            <edgeless-tool-icon-button
-              .tooltip=${'Open in sidebar'}
-              .tipPosition=${'top-end'}
-              .activeMode=${'background'}
-              @click=${this._toggleOutlinePanel}
-            >
-              ${TocIcon}
-            </edgeless-tool-icon-button>
+            ${toggleOutlinePanelButton}
           </div>
           ${repeat(
             items,
