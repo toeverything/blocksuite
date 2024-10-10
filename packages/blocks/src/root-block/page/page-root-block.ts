@@ -1,6 +1,5 @@
 import type { NoteBlockModel, RootBlockModel } from '@blocksuite/affine-model';
 import type { Viewport } from '@blocksuite/affine-shared/types';
-import type { PointerEventState } from '@blocksuite/block-std';
 import type { BlockModel, Text } from '@blocksuite/store';
 
 import { focusTextModel } from '@blocksuite/affine-components/rich-text';
@@ -11,7 +10,7 @@ import {
   getScrollContainer,
   matchFlavours,
 } from '@blocksuite/affine-shared/utils';
-import { BlockComponent } from '@blocksuite/block-std';
+import { BLOCK_ID_ATTR, BlockComponent } from '@blocksuite/block-std';
 import { css, html } from 'lit';
 import { query } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
@@ -26,26 +25,6 @@ import { PageKeyboardManager } from '../keyboard/keyboard-manager.js';
 const DOC_BLOCK_CHILD_PADDING = 24;
 const DOC_BOTTOM_PADDING = 32;
 
-function testClickOnBlankArea(
-  state: PointerEventState,
-  viewportLeft: number,
-  viewportWidth: number,
-  pageWidth: number,
-  paddingLeft: number,
-  paddingRight: number
-) {
-  const blankLeft =
-    viewportLeft + (viewportWidth - pageWidth) / 2 + paddingLeft;
-  const blankRight =
-    viewportLeft + (viewportWidth - pageWidth) / 2 + pageWidth - paddingRight;
-
-  if (state.raw.clientX < blankLeft || state.raw.clientX > blankRight) {
-    return true;
-  }
-
-  return false;
-}
-
 export class PageRootBlockComponent extends BlockComponent<
   RootBlockModel,
   PageRootService,
@@ -57,41 +36,46 @@ export class PageRootBlockComponent extends BlockComponent<
       height: 100%;
     }
 
-    affine-page-root {
-      display: block;
-      height: 100%;
-    }
-
     .affine-page-root-block-container {
-      display: flex;
-      flex-direction: column;
-      width: 100%;
-      height: 100%;
+      display: grid;
+      /* prettier-ignore */
+      grid-template-columns: var(--affine-editor-side-padding, ${DOC_BLOCK_CHILD_PADDING}px) auto var(--affine-editor-side-padding, ${DOC_BLOCK_CHILD_PADDING}px);
+      grid-template-rows: 1fr auto;
+      grid-template-areas:
+        'left content right'
+        'bottom bottom bottom';
       font-family: var(--affine-font-family);
       font-size: var(--affine-font-base);
       line-height: var(--affine-line-height);
       color: var(--affine-text-primary-color);
       font-weight: 400;
       max-width: var(--affine-editor-width);
+      width: 100%;
       margin: 0 auto;
       /* cursor: crosshair; */
       cursor: default;
+    }
 
-      /* Leave a place for drag-handle */
-      /* Do not use prettier format this style, or it will be broken */
-      /* prettier-ignore */
-      padding-left: var(--affine-editor-side-padding, ${DOC_BLOCK_CHILD_PADDING}px);
-      /* prettier-ignore */
-      padding-right: var(--affine-editor-side-padding, ${DOC_BLOCK_CHILD_PADDING}px);
-      /* prettier-ignore */
-      padding-bottom: var(--affine-editor-bottom-padding, ${DOC_BOTTOM_PADDING}px);
+    .affine-page-root-left-blank {
+      grid-area: left;
+    }
+    .affine-page-root-right-blank {
+      grid-area: right;
+    }
+    .affine-page-root-content {
+      grid-area: content;
+    }
+
+    .affine-page-root-bottom-blank {
+      grid-area: bottom;
+      height: var(--affine-editor-bottom-padding, ${DOC_BOTTOM_PADDING}px);
     }
 
     /* Extra small devices (phones, 640px and down) */
     @container viewport (width <= 640px) {
       .affine-page-root-block-container {
-        padding-left: ${DOC_BLOCK_CHILD_PADDING}px;
-        padding-right: ${DOC_BLOCK_CHILD_PADDING}px;
+        /* prettier-ignore */
+        grid-template-columns: ${DOC_BLOCK_CHILD_PADDING}px auto ${DOC_BLOCK_CHILD_PADDING}px;
       }
     }
 
@@ -299,94 +283,129 @@ export class PageRootBlockComponent extends BlockComponent<
       },
     });
 
-    this.handleEvent('click', ctx => {
-      const event = ctx.get('pointerState');
-      if (
-        event.raw.target !== this &&
-        event.raw.target !== this.viewportElement &&
-        event.raw.target !== this.rootElementContainer
-      ) {
-        return;
-      }
+    const getBlockAreaHandler = (side: 'left' | 'right') => (e: MouseEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
 
-      const { paddingLeft, paddingRight } = window.getComputedStyle(
-        this.rootElementContainer
-      );
-      if (!this.viewport) return;
-      const isClickOnBlankArea = testClickOnBlankArea(
-        event,
-        this.viewport.left,
-        this.viewport.clientWidth,
-        this.rootElementContainer.clientWidth,
-        parseFloat(paddingLeft),
-        parseFloat(paddingRight)
-      );
-      if (isClickOnBlankArea) {
-        this.host.selection.clear(['block']);
-        return;
-      }
-
-      let newTextSelectionId: string | null = null;
-      const readonly = this.doc.readonly;
-      const lastNote = this.model.children
-        .slice()
-        .reverse()
-        .find(child => {
-          const isNote = matchFlavours(child, ['affine:note']);
-          if (!isNote) return false;
-          const note = child as NoteBlockModel;
-          const displayOnDoc =
-            !!note.displayMode &&
-            note.displayMode !== NoteDisplayMode.EdgelessOnly;
-          return displayOnDoc;
-        });
-      if (!lastNote) {
-        if (readonly) return;
-        const noteId = this.doc.addBlock('affine:note', {}, this.model.id);
-        const paragraphId = this.doc.addBlock('affine:paragraph', {}, noteId);
-        newTextSelectionId = paragraphId;
-      } else {
-        const last = lastNote.children.at(-1);
-        if (
-          !last ||
-          !last.text ||
-          matchFlavours(last, [
-            'affine:code',
-            'affine:divider',
-            'affine:image',
-            'affine:database',
-            'affine:bookmark',
-            'affine:attachment',
-            'affine:surface-ref',
-          ]) ||
-          /affine:embed-*/.test(last.flavour)
-        ) {
-          if (readonly) return;
-          const paragraphId = this.doc.addBlock(
-            'affine:paragraph',
-            {},
-            lastNote.id
-          );
-          newTextSelectionId = paragraphId;
+      let blockComponent: BlockComponent | null | undefined = null;
+      if (side === 'left') {
+        const rect = this.leftBlankArea.getBoundingClientRect();
+        let el = document.elementFromPoint(rect.right + 50, e.clientY);
+        if (!el) {
+          el = document.elementFromPoint(rect.right - 50, e.clientY - 10);
         }
+        blockComponent = el?.closest(`[${BLOCK_ID_ATTR}]`);
+      } else {
+        const rect = this.rightBlankArea.getBoundingClientRect();
+        let el = document.elementFromPoint(rect.left - 50, e.clientY);
+        if (!el) {
+          el = document.elementFromPoint(rect.left - 50, e.clientY - 10);
+        }
+        blockComponent = el?.closest(`[${BLOCK_ID_ATTR}]`);
       }
 
-      this.updateComplete
-        .then(() => {
-          if (!newTextSelectionId) return;
-          this.host.selection.setGroup('note', [
-            this.host.selection.create('text', {
-              from: {
-                blockId: newTextSelectionId,
-                index: 0,
-                length: 0,
-              },
-              to: null,
+      this.selection.clear(['block', 'text']);
+
+      if (blockComponent) {
+        if (blockComponent.model.text) {
+          if (side === 'left') {
+            focusTextModel(this.std, blockComponent.model.id);
+          } else {
+            focusTextModel(
+              this.std,
+              blockComponent.model.id,
+              blockComponent.model.text.length
+            );
+          }
+        } else {
+          this.selection.setGroup('note', [
+            this.selection.create('block', {
+              blockId: blockComponent.blockId,
             }),
           ]);
-        })
-        .catch(console.error);
-    });
+        }
+      }
+    };
+    this.updateComplete
+      .then(() => {
+        this.disposables.addFromEvent(
+          this.leftBlankArea,
+          'click',
+          getBlockAreaHandler('left')
+        );
+        this.disposables.addFromEvent(
+          this.rightBlankArea,
+          'click',
+          getBlockAreaHandler('right')
+        );
+        this.disposables.addFromEvent(this.bottomBlankArea, 'click', () => {
+          let newTextSelectionId: string | null = null;
+          const readonly = this.doc.readonly;
+          const lastNote = this.model.children
+            .slice()
+            .reverse()
+            .find(child => {
+              const isNote = matchFlavours(child, ['affine:note']);
+              if (!isNote) return false;
+              const note = child as NoteBlockModel;
+              const displayOnDoc =
+                !!note.displayMode &&
+                note.displayMode !== NoteDisplayMode.EdgelessOnly;
+              return displayOnDoc;
+            });
+          if (!lastNote) {
+            if (readonly) return;
+            const noteId = this.doc.addBlock('affine:note', {}, this.model.id);
+            const paragraphId = this.doc.addBlock(
+              'affine:paragraph',
+              {},
+              noteId
+            );
+            newTextSelectionId = paragraphId;
+          } else {
+            const last = lastNote.children.at(-1);
+            if (
+              !last ||
+              !last.text ||
+              matchFlavours(last, [
+                'affine:code',
+                'affine:divider',
+                'affine:image',
+                'affine:database',
+                'affine:bookmark',
+                'affine:attachment',
+                'affine:surface-ref',
+              ]) ||
+              /affine:embed-*/.test(last.flavour)
+            ) {
+              if (readonly) return;
+              const paragraphId = this.doc.addBlock(
+                'affine:paragraph',
+                {},
+                lastNote.id
+              );
+              newTextSelectionId = paragraphId;
+            }
+          }
+
+          this.updateComplete
+            .then(() => {
+              if (!newTextSelectionId) return;
+              this.host.selection.setGroup('note', [
+                this.host.selection.create('text', {
+                  from: {
+                    blockId: newTextSelectionId,
+                    index: 0,
+                    length: 0,
+                  },
+                  to: null,
+                }),
+              ]);
+            })
+            .catch(console.error);
+        });
+      })
+      .catch(console.error);
   }
 
   override disconnectedCallback() {
@@ -429,9 +448,25 @@ export class PageRootBlockComponent extends BlockComponent<
     });
 
     return html`
-      <div class="affine-page-root-block-container">${children} ${widgets}</div>
+      <div class="affine-page-root-block-container">
+        <div class="affine-page-root-left-blank"></div>
+        <div class="affine-page-root-content" contenteditable="true">
+          ${children} ${widgets}
+        </div>
+        <div class="affine-page-root-right-blank"></div>
+        <div class="affine-page-root-bottom-blank"></div>
+      </div>
     `;
   }
+
+  @query('.affine-page-root-bottom-blank')
+  accessor bottomBlankArea!: HTMLDivElement;
+
+  @query('.affine-page-root-left-blank')
+  accessor leftBlankArea!: HTMLDivElement;
+
+  @query('.affine-page-root-right-blank')
+  accessor rightBlankArea!: HTMLDivElement;
 
   @query('.affine-page-root-block-container')
   accessor rootElementContainer!: HTMLDivElement;

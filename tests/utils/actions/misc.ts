@@ -39,7 +39,6 @@ export const defaultPlaygroundURL = new URL(
 
 const NEXT_FRAME_TIMEOUT = 50;
 const DEFAULT_PLAYGROUND = defaultPlaygroundURL.toString();
-const RICH_TEXT_SELECTOR = '.inline-editor';
 
 function generateRandomRoomId() {
   return `playwright-${uuidv4()}`;
@@ -740,20 +739,12 @@ export async function initEmptyCodeBlockState(
   return ids;
 }
 
-type FocusRichTextOptions = {
-  clickPosition?: { x: number; y: number };
-};
-
-export async function focusRichText(
-  page: Page,
-  i = 0,
-  options?: FocusRichTextOptions
-) {
-  await page.mouse.move(0, 0);
-  const editor = getEditorHostLocator(page);
-  const locator = editor.locator(RICH_TEXT_SELECTOR).nth(i);
-  // need to set `force` to true when clicking on `affine-selected-blocks`
-  await locator.click({ force: true, position: options?.clickPosition });
+/**
+ * @deprecated
+ * use `focusRichTextEnd`
+ */
+export async function focusRichText(page: Page, i = 0) {
+  await focusRichTextEnd(page, i);
 }
 
 export async function focusRichTextEnd(page: Page, i = 0) {

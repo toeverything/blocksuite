@@ -235,7 +235,7 @@ export class DataViewBlockComponent extends CaptionedBlockComponent<DataViewBloc
       const note = this.closest<NoteBlockComponent>('affine-note');
       return note;
     }
-    return this.rootComponent;
+    return super.topContenteditableElement;
   }
 
   get view() {
