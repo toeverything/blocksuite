@@ -64,6 +64,7 @@
     "pdf-lib": "^1.17.1",
     "rehype-parse": "^9.0.0",
     "rehype-stringify": "^10.0.0",
+    "remark-math": "^6.0.0",
     "remark-parse": "^11.0.0",
     "remark-stringify": "^11.0.0",
     "shiki": "^1.14.1",

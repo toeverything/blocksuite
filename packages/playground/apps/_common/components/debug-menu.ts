@@ -14,6 +14,7 @@ import {
   ExportManager,
   FontFamilyVariables,
   HtmlTransformer,
+  MarkdownAdapter,
   MarkdownTransformer,
   NotionHtmlAdapter,
   openFileOrFiles,
@@ -234,6 +235,23 @@ export class DebugMenu extends ShadowlessElement {
     a.click();
     a.remove();
     URL.revokeObjectURL(url);
+  }
+
+  private async _importMarkdown() {
+    const file = await openFileOrFiles({
+      acceptType: 'Markdown',
+      multiple: false,
+    });
+    if (!file) return;
+    const job = new Job({
+      collection: this.collection,
+      middlewares: [defaultImageProxyMiddleware],
+    });
+    const markdownAdapter = new MarkdownAdapter(job);
+    await markdownAdapter.toDoc({
+      file: await file.text(),
+      assets: job.assetsManager,
+    });
   }
 
   private async _importNotionHTML() {
@@ -604,6 +622,9 @@ export class DebugMenu extends ShadowlessElement {
               </sl-menu-item>
               <sl-menu-item @click="${this._importNotionHTML}">
                 Import Notion HTML
+              </sl-menu-item>
+              <sl-menu-item @click="${this._importMarkdown}">
+                Import Markdown
               </sl-menu-item>
               <sl-menu-item @click="${this._toggleStyleDebugMenu}">
                 Toggle CSS Debug Menu
