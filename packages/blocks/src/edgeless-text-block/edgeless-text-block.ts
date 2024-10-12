@@ -273,6 +273,27 @@ export class EdgelessTextBlockComponent extends GfxBlockComponent<EdgelessTextBl
 
       this.rootService.selectionManager.clear();
     });
+
+    let composingWidth = EDGELESS_TEXT_BLOCK_MIN_WIDTH;
+    disposables.addFromEvent(this, 'compositionupdate', () => {
+      composingWidth = Math.max(
+        this._textContainer.offsetWidth,
+        EDGELESS_TEXT_BLOCK_MIN_HEIGHT
+      );
+    });
+    disposables.addFromEvent(this, 'compositionend', () => {
+      if (this.model.hasMaxWidth) {
+        composingWidth = EDGELESS_TEXT_BLOCK_MIN_WIDTH;
+        return;
+      }
+      // when IME finish container will crash to a small width, so
+      // we set a max width to prevent this
+      this._textContainer.style.width = `${composingWidth}px`;
+      this.model.hasMaxWidth = true;
+      requestAnimationFrame(() => {
+        this._textContainer.style.width = '';
+      });
+    });
   }
 
   override getRenderingRect() {
