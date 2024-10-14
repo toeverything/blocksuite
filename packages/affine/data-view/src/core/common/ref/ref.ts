@@ -1,5 +1,8 @@
+import type { ReadonlySignal } from '@preact/signals-core';
+
 import {
   popFilterableSimpleMenu,
+  popMenu,
   type PopupTarget,
   popupTargetFromElement,
 } from '@blocksuite/affine-components/context-menu';
@@ -110,42 +113,48 @@ declare global {
 export const popCreateFilter = (
   target: PopupTarget,
   props: {
-    vars: Variable[];
+    vars: ReadonlySignal<Variable[]>;
     onSelect: (filter: Filter) => void;
     onClose?: () => void;
+    onBack?: () => void;
   }
 ) => {
-  popFilterableSimpleMenu(
-    target,
-    [
-      ...props.vars.map(v => ({
-        type: 'action' as const,
-        name: v.name,
-        prefix: renderUniLit(v.icon, {}),
-        select: () => {
-          props.onSelect(
-            firstFilterByRef(props.vars, {
-              type: 'ref',
-              name: v.id,
-            })
-          );
-        },
-      })),
-      {
-        type: 'group',
-        name: '',
-        items: [
-          {
-            type: 'action',
-            name: 'Add filter group',
-            prefix: AddCursorIcon(),
-            select: () => {
-              props.onSelect(firstFilterInGroup(props.vars));
-            },
-          },
-        ],
+  popMenu(target, {
+    options: {
+      onClose: props.onClose,
+      title: {
+        onBack: props.onBack,
+        text: 'New filter',
       },
-    ],
-    props.onClose
-  );
+      items: [
+        ...props.vars.value.map(v => ({
+          type: 'action' as const,
+          name: v.name,
+          prefix: renderUniLit(v.icon, {}),
+          select: () => {
+            props.onSelect(
+              firstFilterByRef(props.vars.value, {
+                type: 'ref',
+                name: v.id,
+              })
+            );
+          },
+        })),
+        {
+          type: 'group',
+          name: '',
+          items: [
+            {
+              type: 'action',
+              name: 'Add filter group',
+              prefix: AddCursorIcon(),
+              select: () => {
+                props.onSelect(firstFilterInGroup(props.vars.value));
+              },
+            },
+          ],
+        },
+      ],
+    },
+  });
 };

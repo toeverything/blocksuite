@@ -3,13 +3,14 @@ import {
   popupTargetFromElement,
 } from '@blocksuite/affine-components/context-menu';
 import { ShadowlessElement } from '@blocksuite/block-std';
-import { WithDisposable } from '@blocksuite/global/utils';
+import { SignalWatcher } from '@blocksuite/global/utils';
 import {
   ConvertIcon,
   DeleteIcon,
   DuplicateIcon,
   MoreHorizontalIcon,
 } from '@blocksuite/icons/lit';
+import { computed, type ReadonlySignal } from '@preact/signals-core';
 import { css, html, nothing } from 'lit';
 import { property, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
@@ -18,10 +19,9 @@ import { repeat } from 'lit/directives/repeat.js';
 import type { Filter, FilterGroup, Variable } from '../../core/common/ast.js';
 import type { FilterGroupView } from './filter-group.js';
 
-import { popAddNewFilter } from './condition.js';
 import { getDepth } from './filter-group.js';
 
-export class FilterRootView extends WithDisposable(ShadowlessElement) {
+export class FilterRootView extends SignalWatcher(ShadowlessElement) {
   static override styles = css`
     .filter-root-title {
       padding: 12px;
@@ -144,25 +144,17 @@ export class FilterRootView extends WithDisposable(ShadowlessElement) {
     }
   `;
 
-  private _addNew = (e: MouseEvent) => {
-    popAddNewFilter(popupTargetFromElement(e.target as HTMLElement), {
-      value: this.data,
-      onChange: this.setData,
-      vars: this.vars,
-    });
-  };
-
   private _setFilter = (index: number, filter: Filter) => {
-    this.setData({
-      ...this.data,
-      conditions: this.data.conditions.map((v, i) =>
+    this.onChange({
+      ...this.filterGroup.value,
+      conditions: this.filterGroup.value.conditions.map((v, i) =>
         index === i ? filter : v
       ),
     });
   };
 
   private _clickConditionOps(target: HTMLElement, i: number) {
-    const filter = this.data.conditions[i];
+    const filter = this.filterGroup.value.conditions[i];
     popFilterableSimpleMenu(popupTargetFromElement(target), [
       {
         type: 'action',
@@ -175,7 +167,11 @@ export class FilterRootView extends WithDisposable(ShadowlessElement) {
         },
         hide: () => getDepth(filter) > 3,
         select: () => {
-          this.setData({ type: 'group', op: 'and', conditions: [this.data] });
+          this.onChange({
+            type: 'group',
+            op: 'and',
+            conditions: [this.filterGroup.value],
+          });
         },
       },
       {
@@ -188,13 +184,13 @@ export class FilterRootView extends WithDisposable(ShadowlessElement) {
             : undefined;
         },
         select: () => {
-          const conditions = [...this.data.conditions];
+          const conditions = [...this.filterGroup.value.conditions];
           conditions.splice(
             i + 1,
             0,
             JSON.parse(JSON.stringify(conditions[i]))
           );
-          this.setData({ ...this.data, conditions: conditions });
+          this.onChange({ ...this.filterGroup.value, conditions: conditions });
         },
       },
       {
@@ -212,10 +208,10 @@ export class FilterRootView extends WithDisposable(ShadowlessElement) {
                 : undefined;
             },
             select: () => {
-              const conditions = [...this.data.conditions];
+              const conditions = [...this.filterGroup.value.conditions];
               conditions.splice(i, 1);
-              this.setData({
-                ...this.data,
+              this.onChange({
+                ...this.filterGroup.value,
                 conditions,
               });
             },
@@ -226,7 +222,7 @@ export class FilterRootView extends WithDisposable(ShadowlessElement) {
   }
 
   override render() {
-    const data = this.data;
+    const data = this.filterGroup.value;
     return html`
       <div class="filter-root-container">
         ${repeat(data.conditions, (filter, i) => {
@@ -250,7 +246,7 @@ export class FilterRootView extends WithDisposable(ShadowlessElement) {
                       <div class="filter-root-grabber"></div>
                       <filter-condition-view
                         .setData="${(v: Filter) => this._setFilter(i, v)}"
-                        .vars="${this.vars}"
+                        .vars="${this.vars.value}"
                         .data="${filter}"
                       ></filter-condition-view>
                     </div>
@@ -271,9 +267,9 @@ export class FilterRootView extends WithDisposable(ShadowlessElement) {
                     <div style="width: 100%;padding: 12px 0 0;">
                       <filter-group-view
                         style="padding: 0"
-                        .setData="${(v: Filter) => this._setFilter(i, v)}"
+                        .onChange="${(v: Filter) => this._setFilter(i, v)}"
                         .vars="${this.vars}"
-                        .data="${filter}"
+                        .filterGroup="${computed(() => filter)}"
                       ></filter-group-view>
                     </div>
                   </div>
@@ -306,16 +302,16 @@ export class FilterRootView extends WithDisposable(ShadowlessElement) {
     | undefined = undefined;
 
   @property({ attribute: false })
-  accessor data!: FilterGroup;
+  accessor filterGroup!: ReadonlySignal<FilterGroup>;
 
   @property({ attribute: false })
   accessor onBack!: () => void;
 
   @property({ attribute: false })
-  accessor setData!: (filter: FilterGroup) => void;
+  accessor onChange!: (filter: FilterGroup) => void;
 
   @property({ attribute: false })
-  accessor vars!: Variable[];
+  accessor vars!: ReadonlySignal<Variable[]>;
 }
 
 declare global {

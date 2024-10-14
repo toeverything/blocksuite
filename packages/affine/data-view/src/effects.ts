@@ -75,7 +75,6 @@ import { DatabaseColumnStatsCell } from './view-presets/table/stats/column-stats
 import { FilterConditionView } from './widget-presets/filter/condition.js';
 import { FilterBar } from './widget-presets/filter/filter-bar.js';
 import { FilterGroupView } from './widget-presets/filter/filter-group.js';
-import { AdvancedFilterModal } from './widget-presets/filter/filter-modal.js';
 import { FilterRootView } from './widget-presets/filter/filter-root.js';
 import { DataViewHeaderToolsFilter } from './widget-presets/tools/presets/filter/filter.js';
 import { DataViewHeaderToolsSearch } from './widget-presets/tools/presets/search/search.js';
@@ -143,7 +142,6 @@ export function effects() {
   customElements.define('data-view-literal-number-view', NumberLiteral);
   customElements.define('data-view-literal-string-view', StringLiteral);
   customElements.define('data-view-group-setting', GroupSetting);
-  customElements.define('advanced-filter-modal', AdvancedFilterModal);
   customElements.define('data-view-literal-tag-view', TagLiteral);
   customElements.define('data-view-literal-multi-tag-view', MultiTagLiteral);
   customElements.define('data-view-literal-union-string-view', UnionTagLiteral);

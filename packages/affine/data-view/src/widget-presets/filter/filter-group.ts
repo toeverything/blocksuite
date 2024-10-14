@@ -5,7 +5,7 @@ import {
   popupTargetFromElement,
 } from '@blocksuite/affine-components/context-menu';
 import { ShadowlessElement } from '@blocksuite/block-std';
-import { WithDisposable } from '@blocksuite/global/utils';
+import { SignalWatcher } from '@blocksuite/global/utils';
 import {
   ArrowDownSmallIcon,
   ConvertIcon,
@@ -14,6 +14,7 @@ import {
   MoreHorizontalIcon,
   PlusIcon,
 } from '@blocksuite/icons/lit';
+import { computed, type ReadonlySignal } from '@preact/signals-core';
 import { css, html, nothing } from 'lit';
 import { property, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
@@ -27,11 +28,10 @@ import {
 } from '../../core/common/ast.js';
 import { popAddNewFilter } from './condition.js';
 
-export class FilterGroupView extends WithDisposable(ShadowlessElement) {
+export class FilterGroupView extends SignalWatcher(ShadowlessElement) {
   static override styles = css`
     filter-group-view {
       border-radius: 4px;
-      padding: 8px 4px 4px;
       display: flex;
       flex-direction: column;
       user-select: none;
@@ -155,16 +155,19 @@ export class FilterGroupView extends WithDisposable(ShadowlessElement) {
 
   private _addNew = (e: MouseEvent) => {
     if (this.isMaxDepth) {
-      this.setData({
-        ...this.data,
-        conditions: [...this.data.conditions, firstFilter(this.vars)],
+      this.onChange({
+        ...this.filterGroup.value,
+        conditions: [
+          ...this.filterGroup.value.conditions,
+          firstFilter(this.vars.value),
+        ],
       });
       return;
     }
     popAddNewFilter(popupTargetFromElement(e.currentTarget as HTMLElement), {
-      value: this.data,
-      onChange: this.setData,
-      vars: this.vars,
+      value: this.filterGroup.value,
+      onChange: this.onChange,
+      vars: this.vars.value,
     });
   };
 
@@ -176,8 +179,8 @@ export class FilterGroupView extends WithDisposable(ShadowlessElement) {
           type: 'action',
           name: 'And',
           select: () => {
-            this.setData({
-              ...this.data,
+            this.onChange({
+              ...this.filterGroup.value,
               op: 'and',
             });
           },
@@ -186,8 +189,8 @@ export class FilterGroupView extends WithDisposable(ShadowlessElement) {
           type: 'action',
           name: 'Or',
           select: () => {
-            this.setData({
-              ...this.data,
+            this.onChange({
+              ...this.filterGroup.value,
               op: 'or',
             });
           },
@@ -197,9 +200,9 @@ export class FilterGroupView extends WithDisposable(ShadowlessElement) {
   };
 
   private _setFilter = (index: number, filter: Filter) => {
-    this.setData({
-      ...this.data,
-      conditions: this.data.conditions.map((v, i) =>
+    this.onChange({
+      ...this.filterGroup.value,
+      conditions: this.filterGroup.value.conditions.map((v, i) =>
         index === i ? filter : v
       ),
     });
@@ -215,7 +218,7 @@ export class FilterGroupView extends WithDisposable(ShadowlessElement) {
   }
 
   private _clickConditionOps(target: HTMLElement, i: number) {
-    const filter = this.data.conditions[i];
+    const filter = this.filterGroup.value.conditions[i];
     popFilterableSimpleMenu(popupTargetFromElement(target), [
       {
         type: 'action',
@@ -228,7 +231,11 @@ export class FilterGroupView extends WithDisposable(ShadowlessElement) {
         },
         hide: () => this.depth + getDepth(filter) > 3,
         select: () => {
-          this.setData({ type: 'group', op: 'and', conditions: [this.data] });
+          this.onChange({
+            type: 'group',
+            op: 'and',
+            conditions: [this.filterGroup.value],
+          });
         },
       },
       {
@@ -241,13 +248,13 @@ export class FilterGroupView extends WithDisposable(ShadowlessElement) {
             : undefined;
         },
         select: () => {
-          const conditions = [...this.data.conditions];
+          const conditions = [...this.filterGroup.value.conditions];
           conditions.splice(
             i + 1,
             0,
             JSON.parse(JSON.stringify(conditions[i]))
           );
-          this.setData({ ...this.data, conditions: conditions });
+          this.onChange({ ...this.filterGroup.value, conditions: conditions });
         },
       },
       {
@@ -265,10 +272,10 @@ export class FilterGroupView extends WithDisposable(ShadowlessElement) {
                 : undefined;
             },
             select: () => {
-              const conditions = [...this.data.conditions];
+              const conditions = [...this.filterGroup.value.conditions];
               conditions.splice(i, 1);
-              this.setData({
-                ...this.data,
+              this.onChange({
+                ...this.filterGroup.value,
                 conditions,
               });
             },
@@ -279,7 +286,7 @@ export class FilterGroupView extends WithDisposable(ShadowlessElement) {
   }
 
   override render() {
-    const data = this.data;
+    const data = this.filterGroup.value;
     return html`
       <div class="filter-group-container">
         ${repeat(data.conditions, (filter, i) => {
@@ -320,7 +327,7 @@ export class FilterGroupView extends WithDisposable(ShadowlessElement) {
                 ? html`
                     <filter-condition-view
                       .setData="${(v: Filter) => this._setFilter(i, v)}"
-                      .vars="${this.vars}"
+                      .vars="${this.vars.value}"
                       .data="${filter}"
                     ></filter-condition-view>
                   `
@@ -329,9 +336,9 @@ export class FilterGroupView extends WithDisposable(ShadowlessElement) {
                       class="${groupClassList}"
                       style="width: 100%;"
                       .depth="${this.depth + 1}"
-                      .setData="${(v: Filter) => this._setFilter(i, v)}"
+                      .onChange="${(v: Filter) => this._setFilter(i, v)}"
                       .vars="${this.vars}"
-                      .data="${filter}"
+                      .filterGroup="${computed(() => filter)}"
                     ></filter-group-view>
                   `}
               <div class="filter-group-item-ops" @click="${clickOps}">
@@ -356,16 +363,16 @@ export class FilterGroupView extends WithDisposable(ShadowlessElement) {
     | undefined = undefined;
 
   @property({ attribute: false })
-  accessor data!: FilterGroup;
-
-  @property({ attribute: false })
   accessor depth = 1;
 
   @property({ attribute: false })
-  accessor setData!: (filter: FilterGroup) => void;
+  accessor filterGroup!: ReadonlySignal<FilterGroup>;
 
   @property({ attribute: false })
-  accessor vars!: Variable[];
+  accessor onChange!: (filter: FilterGroup) => void;
+
+  @property({ attribute: false })
+  accessor vars!: ReadonlySignal<Variable[]>;
 }
 
 declare global {

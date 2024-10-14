@@ -1,4 +1,6 @@
 import {
+  type MenuButtonData,
+  type NormalMenuConfig,
   popMenu,
   type PopupTarget,
   popupTargetFromElement,
@@ -14,16 +16,17 @@ import {
   MoreHorizontalIcon,
 } from '@blocksuite/icons/lit';
 import { css, html } from 'lit';
+import { styleMap } from 'lit/directives/style-map.js';
 
 import type { SingleView } from '../../../../core/view-manager/single-view.js';
 
-import { emptyFilterGroup } from '../../../../core/common/ast.js';
 import {
   popGroupSetting,
   popSelectGroupByProperty,
 } from '../../../../core/common/group-by/setting.js';
 import { popPropertiesSetting } from '../../../../core/common/properties.js';
-import { renderUniLit } from '../../../../core/index.js';
+import { popCreateFilter } from '../../../../core/common/ref/ref.js';
+import { emptyFilterGroup, renderUniLit } from '../../../../core/index.js';
 import { WidgetBase } from '../../../../core/widget/widget-base.js';
 import {
   KanbanSingleView,
@@ -118,30 +121,109 @@ export const popViewOptions = (
           },
         },
         {
-          type: 'sub-menu',
+          type: 'action',
           name: 'Layout',
-          options: {
-            items: view.manager.viewMetas.map(meta => {
+          postfix: html` <div
+              style="font-size: 14px;text-transform: capitalize;"
+            >
+              ${view.type}
+            </div>
+            ${ArrowRightSmallIcon()}`,
+          select: () => {
+            const viewTypes = view.manager.viewMetas.map(meta => {
               return {
-                type: 'action',
-                name: meta.model.defaultName,
-                prefix: renderUniLit(meta.renderer.icon),
-                isSelected: meta.type === view.manager.currentView$.value.type,
-                select: () => {
-                  view.manager.viewChangeType(
-                    view.manager.currentViewId$.value,
-                    meta.type
-                  );
+                type: 'custom',
+                render: menu => {
+                  if (!menu.search(meta.model.defaultName)) {
+                    return;
+                  }
+                  const isSelected =
+                    meta.type === view.manager.currentView$.value.type;
+                  const iconStyle = styleMap({
+                    fontSize: '24px',
+                    color: isSelected
+                      ? 'var(--affine-icon-primary)'
+                      : 'var(--affine-icon-secondary)',
+                  });
+                  const textStyle = styleMap({
+                    fontSize: '14px',
+                    lineHeight: '22px',
+                    color: isSelected
+                      ? 'var(--affine-text-primary-color)'
+                      : 'var(--affine-text-secondary-color)',
+                  });
+                  const data: MenuButtonData = {
+                    content: () => html`
+                      <div
+                        style="width:100%;display: flex;flex-direction: column;align-items: center;justify-content: center;padding: 6px 16px;"
+                      >
+                        <div style="${iconStyle}">
+                          ${renderUniLit(meta.renderer.icon)}
+                        </div>
+                        <div style="${textStyle}">
+                          ${meta.model.defaultName}
+                        </div>
+                      </div>
+                    `,
+                    select: () => {
+                      view.manager.viewChangeType(
+                        view.manager.currentViewId$.value,
+                        meta.type
+                      );
+                    },
+                    class: '',
+                  };
+                  const containerStyle = styleMap({
+                    flex: '1',
+                  });
+                  return html` <affine-menu-button
+                    style="${containerStyle}"
+                    .data="${data}"
+                    .menu="${menu}"
+                  ></affine-menu-button>`;
                 },
-              };
-            }),
+              } satisfies NormalMenuConfig;
+            });
+            popMenu(target, {
+              options: {
+                title: {
+                  onBack: reopen,
+                  text: 'Layout',
+                },
+                items: [
+                  {
+                    type: 'custom',
+                    render: menu => {
+                      const result = menu.renderItems(viewTypes);
+                      if (result.length) {
+                        return html` <div style="display: flex">
+                          ${result}
+                        </div>`;
+                      }
+                      return html``;
+                    },
+                  },
+                  {
+                    type: 'toggle-switch',
+                    name: 'Show block icon',
+                    on: true,
+                    onChange: value => {
+                      console.log(value);
+                    },
+                  },
+                  {
+                    type: 'toggle-switch',
+                    name: 'Show Vertical lines',
+                    on: true,
+                    onChange: value => {
+                      console.log(value);
+                    },
+                  },
+                ],
+              },
+            });
           },
           prefix: LayoutIcon(),
-          postfix: html` <div
-            style="font-size: 14px;text-transform: capitalize;"
-          >
-            ${view.type}
-          </div>`,
         },
         {
           type: 'group',
@@ -172,19 +254,28 @@ export const popViewOptions = (
                 </div>
                 ${ArrowRightSmallIcon()}`,
               select: () => {
-                popFilterRoot(target, {
-                  vars: view.vars$.value,
-                  value: view.filter$.value ?? emptyFilterGroup,
-                  onChange: view.filterSet.bind(view),
-                  isRoot: true,
-                  onBack: reopen,
-                  onDelete: () => {
-                    view.filterSet({
-                      ...(view.filter$.value ?? emptyFilterGroup),
-                      conditions: [],
-                    });
-                  },
-                });
+                if (!view.filter$.value.conditions.length) {
+                  popCreateFilter(target, {
+                    vars: view.vars$,
+                    onBack: reopen,
+                    onSelect: filter => {
+                      console.log(filter, view.filter$.value);
+                      view.filterSet({
+                        ...(view.filter$.value ?? emptyFilterGroup),
+                        conditions: [...view.filter$.value.conditions, filter],
+                      });
+                      popFilterRoot(target, {
+                        view: view,
+                        onBack: reopen,
+                      });
+                    },
+                  });
+                } else {
+                  popFilterRoot(target, {
+                    view: view,
+                    onBack: reopen,
+                  });
+                }
               },
             },
             {

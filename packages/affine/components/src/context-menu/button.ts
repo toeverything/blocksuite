@@ -186,17 +186,21 @@ export const menuButtonItems = {
         <div class="affine-menu-action-text">
           ${config.label?.() ?? config.name}
         </div>
-
         <toggle-switch
           .on="${config.on}"
           .onChange="${onChange}"
         ></toggle-switch>
         ${config.postfix}
       `,
-      select: () => config.onChange(config.on),
+      select: () => {
+        config.onChange(config.on);
+        return false;
+      },
       class: config.class ?? '',
     };
-    return html`
-      <affine-menu-button.data='${data}'.menu='${menu}'></affine-menu-button>`;
+    return html` <affine-menu-button
+      .data="${data}"
+      .menu="${menu}"
+    ></affine-menu-button>`;
   },
 } satisfies Record<string, MenuItemRender<never>>;

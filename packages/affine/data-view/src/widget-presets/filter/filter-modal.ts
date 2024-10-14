@@ -1,157 +1,26 @@
+import type { ReadonlySignal } from '@preact/signals-core';
+
 import {
   popMenu,
   type PopupTarget,
   popupTargetFromElement,
 } from '@blocksuite/affine-components/context-menu';
-import { ShadowlessElement } from '@blocksuite/block-std';
-import { WithDisposable } from '@blocksuite/global/utils';
-import { PlusIcon } from '@blocksuite/icons/lit';
-import { css, html } from 'lit';
-import { property } from 'lit/decorators.js';
+import { DeleteIcon, PlusIcon } from '@blocksuite/icons/lit';
+import { html } from 'lit';
 
-import type { FilterGroup, Variable } from '../../core/common/ast.js';
+import type { SingleView } from '../../core/index.js';
 
+import {
+  emptyFilterGroup,
+  type FilterGroup,
+  type Variable,
+} from '../../core/common/ast.js';
 import { popAddNewFilter } from './condition.js';
 
-export class AdvancedFilterModal extends WithDisposable(ShadowlessElement) {
-  static override styles = css`
-    advanced-filter-modal {
-      background-color: var(--affine-background-overlay-panel-color);
-      position: absolute;
-      border-radius: 8px;
-      box-shadow: var(--affine-shadow-2);
-      min-width: 500px;
-    }
-
-    .filter-modal-bottom {
-      border-top: 1px solid var(--affine-border-color);
-      padding: 8px;
-    }
-
-    .filter-modal-button {
-      padding: 8px 12px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 14px;
-      line-height: 22px;
-      border-radius: 4px;
-      cursor: pointer;
-      color: var(--affine-text-secondary-color);
-    }
-
-    .filter-modal-button svg {
-      fill: var(--affine-text-secondary-color);
-      color: var(--affine-text-secondary-color);
-      width: 20px;
-      height: 20px;
-    }
-
-    .filter-modal-button:hover {
-      background-color: var(--affine-hover-color);
-      color: var(--affine-text-primary-color);
-    }
-    .filter-modal-button:hover svg {
-      fill: var(--affine-text-primary-color);
-      color: var(--affine-text-primary-color);
-    }
-
-    .filter-delete-button:hover {
-      background-color: var(--affine-background-error-color);
-      color: var(--affine-error-color);
-    }
-
-    .filter-exactly-hover-container {
-      transition: background-color 0.2s ease-in-out;
-    }
-
-    .filter-exactly-hover-background {
-      background-color: var(--affine-hover-color);
-    }
-  `;
-
-  override connectedCallback() {
-    super.connectedCallback();
-    this.disposables.addFromEvent(this, 'mouseover', e => {
-      let current: HTMLElement | null = e.target as HTMLElement;
-      while (current && current !== this) {
-        if (current.classList.contains('filter-exactly-hover-container')) {
-          current.classList.add('filter-exactly-hover-background');
-          break;
-        }
-        current = current.parentElement;
-      }
-    });
-    this.disposables.addFromEvent(this, 'mouseout', e => {
-      let current: HTMLElement | null = e.target as HTMLElement;
-      while (current && current !== this) {
-        if (current.classList.contains('filter-exactly-hover-container')) {
-          current.classList.remove('filter-exactly-hover-background');
-          break;
-        }
-        current = current.parentElement;
-      }
-    });
-  }
-
-  override render() {
-    return html`
-      <div class="filter-modal-container">
-        ${this.isRoot
-          ? html` <filter-root-view
-              .onBack=${this.onBack}
-              .vars="${this.vars}"
-              .data="${this.data}"
-              .setData="${this.setData}"
-            ></filter-root-view>`
-          : html` <filter-group-view
-              .vars="${this.vars}"
-              .data="${this.data}"
-              .setData="${this.setData}"
-            ></filter-group-view>`}
-      </div>
-      <div class="filter-modal-bottom">
-        <div
-          @click=${this.onDelete}
-          class="filter-modal-button filter-delete-button"
-        >
-          Delete
-        </div>
-      </div>
-    `;
-  }
-
-  @property({ attribute: false })
-  accessor data!: FilterGroup;
-
-  @property({ attribute: false })
-  accessor isRoot = false;
-
-  @property({ attribute: false })
-  accessor onBack!: () => void;
-
-  @property({ attribute: false })
-  accessor onDelete!: () => void;
-
-  @property({ attribute: false })
-  accessor setData!: (filter: FilterGroup) => void;
-
-  @property({ attribute: false })
-  accessor vars!: Variable[];
-}
-
-declare global {
-  interface HTMLElementTagNameMap {
-    'advanced-filter-modal': AdvancedFilterModal;
-  }
-}
 export const popFilterRoot = (
   target: PopupTarget,
   props: {
-    vars: Variable[];
-    value: FilterGroup;
-    onChange: (value: FilterGroup) => void;
-    onDelete: () => void;
+    view: SingleView;
     onBack: () => void;
   }
 ) => {
@@ -167,13 +36,16 @@ export const popFilterRoot = (
           items: [
             {
               type: 'custom',
-              render: () =>
-                html` <filter-root-view
+              render: () => {
+                const view = props.view;
+                const onChange = view.filterSet.bind(view);
+                return html` <filter-root-view
                   .onBack=${props.onBack}
-                  .vars="${props.vars}"
-                  .data="${props.value}"
-                  .setData="${props.onChange}"
-                ></filter-root-view>`,
+                  .vars="${view.vars$}"
+                  .filterGroup="${view.filter$}"
+                  .onChange="${onChange}"
+                ></filter-root-view>`;
+              },
             },
           ],
         },
@@ -185,10 +57,14 @@ export const popFilterRoot = (
               name: 'Add',
               prefix: PlusIcon(),
               select: ele => {
+                const view = props.view;
+                const vars = view.vars$.value;
+                const value = view.filter$.value ?? emptyFilterGroup;
+                const onChange = view.filterSet.bind(view);
                 popAddNewFilter(popupTargetFromElement(ele), {
-                  value: props.value,
-                  onChange: props.onChange,
-                  vars: props.vars,
+                  value: value,
+                  onChange: onChange,
+                  vars: vars,
                 });
                 return false;
               },
@@ -198,21 +74,53 @@ export const popFilterRoot = (
       ],
     },
   });
-  // const filter = new AdvancedFilterModal();
-  // filter.vars = props.vars;
-  // filter.data = props.value;
-  // filter.isRoot = props.isRoot;
-  // filter.onDelete = () => {
-  //   props.onDelete();
-  //   close();
-  // };
-  // filter.onBack = () => {
-  //   props.onBack();
-  //   close();
-  // };
-  // filter.setData = group => {
-  //   props.onChange(group);
-  //   filter.data = group;
-  // };
-  // const close = createPopup(target, filter);
+};
+export const popFilterGroup = (
+  target: PopupTarget,
+  props: {
+    vars: ReadonlySignal<Variable[]>;
+    value$: ReadonlySignal<FilterGroup>;
+    onChange: (value?: FilterGroup) => void;
+    onBack?: () => void;
+  }
+) => {
+  popMenu(target, {
+    options: {
+      title: {
+        text: 'Filter group',
+        onBack: props.onBack,
+      },
+      items: [
+        {
+          type: 'group',
+          items: [
+            {
+              type: 'custom',
+              render: () => {
+                return html` <filter-group-view
+                  .vars="${props.vars}"
+                  .filterGroup="${props.value$}"
+                  .onChange="${props.onChange}"
+                ></filter-group-view>`;
+              },
+            },
+          ],
+        },
+        {
+          type: 'group',
+          items: [
+            {
+              type: 'action',
+              name: 'Delete',
+              class: 'delete-item',
+              prefix: DeleteIcon(),
+              select: () => {
+                props.onChange();
+              },
+            },
+          ],
+        },
+      ],
+    },
+  });
 };

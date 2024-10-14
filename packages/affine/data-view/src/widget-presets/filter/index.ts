@@ -11,9 +11,9 @@ export const widgetFilterBar = defineUniComponent(
       return html``;
     }
     return html`<filter-bar
-      .vars=${view.vars$.value}
-      .data=${view.filter$.value}
-      .setData=${view.filterSet.bind(view)}
+      .vars=${view.vars$}
+      .filterGroup=${view.filter$}
+      .onChange=${view.filterSet.bind(view)}
     ></filter-bar>`;
   }
 );

@@ -4,7 +4,7 @@ import {
   popupTargetFromElement,
 } from '@blocksuite/affine-components/context-menu';
 import { ShadowlessElement } from '@blocksuite/block-std';
-import { WithDisposable } from '@blocksuite/global/utils';
+import { SignalWatcher } from '@blocksuite/global/utils';
 import { CloseIcon } from '@blocksuite/icons/lit';
 import { css, html, nothing } from 'lit';
 import { property } from 'lit/decorators.js';
@@ -28,7 +28,7 @@ import { tBoolean } from '../../core/logical/data-type.js';
 import { typesystem } from '../../core/logical/typesystem.js';
 import { filterMatcher } from './matcher/matcher.js';
 
-export class FilterConditionView extends WithDisposable(ShadowlessElement) {
+export class FilterConditionView extends SignalWatcher(ShadowlessElement) {
   static override styles = css`
     filter-condition-view {
       display: flex;
