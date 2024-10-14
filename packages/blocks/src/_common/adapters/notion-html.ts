@@ -30,6 +30,7 @@ import { unified } from 'unified';
 
 import {
   hastGetElementChildren,
+  hastGetInlineOnlyElementAST,
   hastGetTextChildrenOnlyAst,
   hastGetTextContent,
   hastQuerySelector,
@@ -94,8 +95,9 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
     option: {
       trim?: boolean;
       pre?: boolean;
+      removeLastBr?: boolean;
       pageMap?: Map<string, string>;
-    } = { trim: true, pre: false }
+    } = { trim: true, pre: false, removeLastBr: true }
   ): DeltaInsert<object>[] => {
     return this._hastToDeltaSpreaded(ast, option).reduce((acc, cur) => {
       if (acc.length === 0) {
@@ -119,8 +121,9 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
     option: {
       trim?: boolean;
       pre?: boolean;
+      removeLastBr?: boolean;
       pageMap?: Map<string, string>;
-    } = { trim: true, pre: false }
+    } = { trim: true, pre: false, removeLastBr: true }
   ): DeltaInsert<object>[] => {
     if (option.trim === undefined) {
       option.trim = true;
@@ -225,6 +228,9 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
               })
             );
           }
+          case 'br': {
+            return [{ insert: '\n' }];
+          }
           case 'mark': {
             // TODO: add support for highlight
             return ast.children.flatMap(child =>
@@ -237,9 +243,20 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
         }
       }
     }
-    return 'children' in ast
-      ? ast.children.flatMap(child => this._hastToDeltaSpreaded(child, option))
-      : [];
+    const result =
+      'children' in ast
+        ? ast.children.flatMap(child =>
+            this._hastToDeltaSpreaded(child, option)
+          )
+        : [];
+
+    if (option.removeLastBr && result.length > 0) {
+      const lastItem = result[result.length - 1];
+      if (lastItem.insert === '\n') {
+        result.pop();
+      }
+    }
+    return result;
   };
 
   private _traverseNotionHtml = async (
@@ -367,27 +384,25 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
         }
         case 'blockquote': {
           context.setGlobalContext('hast:blockquote', true);
-          context
-            .openNode(
-              {
-                type: 'block',
-                id: nanoid(),
-                flavour: 'affine:paragraph',
-                props: {
-                  type: 'quote',
-                  text: {
-                    '$blocksuite:internal:text$': true,
-                    delta: this._hastToDelta(
-                      hastGetTextChildrenOnlyAst(o.node),
-                      { pageMap }
-                    ),
-                  },
+          context.openNode(
+            {
+              type: 'block',
+              id: nanoid(),
+              flavour: 'affine:paragraph',
+              props: {
+                type: 'quote',
+                text: {
+                  '$blocksuite:internal:text$': true,
+                  delta: this._hastToDelta(
+                    hastGetInlineOnlyElementAST(o.node),
+                    { pageMap, removeLastBr: true }
+                  ),
                 },
-                children: [],
               },
-              'children'
-            )
-            .closeNode();
+              children: [],
+            },
+            'children'
+          );
           break;
         }
         case 'p': {
@@ -968,6 +983,7 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
           break;
         }
         case 'blockquote': {
+          context.closeNode();
           context.setGlobalContext('hast:blockquote', false);
           break;
         }
