@@ -46,8 +46,9 @@ export type MenuOptions = {
   onClose?: () => void;
   title?: {
     text: string;
-    onBack?: () => void;
+    onBack?: (menu: Menu) => void;
     onClose?: () => void;
+    postfix?: () => TemplateResult;
   };
   disableSearch?: boolean;
   items: MenuConfig[];

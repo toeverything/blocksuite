@@ -24,9 +24,22 @@ export class MenuSubMenu extends MenuFocusable {
   override connectedCallback() {
     super.connectedCallback();
     this.disposables.addFromEvent(this, 'mouseenter', this.onMouseEnter);
+    this.disposables.addFromEvent(this, 'click', e => {
+      e.preventDefault();
+      e.stopPropagation();
+      this.openSubMenu();
+    });
   }
 
   onMouseEnter() {
+    this.openSubMenu();
+  }
+
+  override onPressEnter() {
+    this.onMouseEnter();
+  }
+
+  openSubMenu() {
     const focus = this.menu.currentFocused$.value;
     const menu = new Menu({
       ...this.data.options,
@@ -54,10 +67,6 @@ export class MenuSubMenu extends MenuFocusable {
         .catch(err => console.error(err));
     });
     this.menu.openSubMenu(menu);
-  }
-
-  override onPressEnter() {
-    this.onMouseEnter();
   }
 
   protected override render(): unknown {

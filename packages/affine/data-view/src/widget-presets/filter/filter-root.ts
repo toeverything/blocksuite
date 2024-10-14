@@ -5,12 +5,10 @@ import {
 import { ShadowlessElement } from '@blocksuite/block-std';
 import { WithDisposable } from '@blocksuite/global/utils';
 import {
-  ArrowDownSmallIcon,
   ConvertIcon,
   DeleteIcon,
   DuplicateIcon,
   MoreHorizontalIcon,
-  PlusIcon,
 } from '@blocksuite/icons/lit';
 import { css, html, nothing } from 'lit';
 import { property, state } from 'lit/decorators.js';
@@ -20,19 +18,11 @@ import { repeat } from 'lit/directives/repeat.js';
 import type { Filter, FilterGroup, Variable } from '../../core/common/ast.js';
 import type { FilterGroupView } from './filter-group.js';
 
-import { menuTitle } from '../../core/utils/menu-title.js';
 import { popAddNewFilter } from './condition.js';
 import { getDepth } from './filter-group.js';
 
 export class FilterRootView extends WithDisposable(ShadowlessElement) {
   static override styles = css`
-    filter-root-view {
-      border-radius: 4px;
-      display: flex;
-      flex-direction: column;
-      user-select: none;
-    }
-
     .filter-root-title {
       padding: 12px;
       font-size: 14px;
@@ -65,7 +55,6 @@ export class FilterRootView extends WithDisposable(ShadowlessElement) {
       gap: 4px;
       max-height: 400px;
       overflow: auto;
-      padding: 0 12px 0 8px;
     }
 
     .filter-root-button {
@@ -239,11 +228,6 @@ export class FilterRootView extends WithDisposable(ShadowlessElement) {
   override render() {
     const data = this.data;
     return html`
-      <div style="padding: 15px 20px">
-        ${menuTitle('FILTER', () => {
-          this.onBack?.();
-        })}
-      </div>
       <div class="filter-root-container">
         ${repeat(data.conditions, (filter, i) => {
           const clickOps = (e: MouseEvent) => {
@@ -276,7 +260,7 @@ export class FilterRootView extends WithDisposable(ShadowlessElement) {
               : html`
                   <div style="width: 100%;">
                     <div
-                      style="display:flex;align-items:center;justify-content: space-between;gap:8px;padding: 4px 4px 0 4px;"
+                      style="display:flex;align-items:center;justify-content: space-between;gap:8px"
                     >
                       <div class="filter-group-title">
                         <div class="filter-root-grabber"></div>
@@ -309,9 +293,6 @@ export class FilterRootView extends WithDisposable(ShadowlessElement) {
               ${content}
             </div>`;
         })}
-      </div>
-      <div class="filter-root-button add-new" @click="${this._addNew}">
-        ${PlusIcon()} Add ${ArrowDownSmallIcon()}
       </div>
     `;
   }

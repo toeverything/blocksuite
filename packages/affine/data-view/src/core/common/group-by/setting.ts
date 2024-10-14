@@ -153,11 +153,18 @@ export class GroupSetting extends SignalWatcher(
 
 export const selectGroupByProperty = (
   view: SingleView<TableViewData | KanbanViewData>,
-  onSelect?: (id?: string) => void,
-  onClose?: () => void
+  ops?: {
+    onSelect?: (id?: string) => void;
+    onClose?: () => void;
+    onBack?: () => void;
+  }
 ): MenuOptions => {
   return {
-    onClose,
+    onClose: ops?.onClose,
+    title: {
+      text: 'Group by',
+      onBack: ops?.onBack,
+    },
     items: [
       ...view.propertiesWithoutFilter$.value
         .filter(id => {
@@ -179,7 +186,7 @@ export const selectGroupByProperty = (
                 view instanceof KanbanSingleView
               ) {
                 view.changeGroup(id);
-                onSelect?.(id);
+                ops?.onSelect?.(id);
               }
             },
           };
@@ -199,7 +206,7 @@ export const selectGroupByProperty = (
             select: () => {
               if (view instanceof TableSingleView) {
                 view.changeGroup(undefined);
-                onSelect?.();
+                ops?.onSelect?.();
               }
             },
           },
@@ -211,11 +218,14 @@ export const selectGroupByProperty = (
 export const popSelectGroupByProperty = (
   target: PopupTarget,
   view: SingleView<TableViewData | KanbanViewData>,
-  onSelect?: () => void,
-  onClose?: () => void
+  ops?: {
+    onSelect?: () => void;
+    onClose?: () => void;
+    onBack?: () => void;
+  }
 ) => {
   popMenu(target, {
-    options: selectGroupByProperty(view, onSelect, onClose),
+    options: selectGroupByProperty(view, ops),
   });
 };
 export const popGroupSetting = (
@@ -236,10 +246,7 @@ export const popGroupSetting = (
     options: {
       title: {
         text: 'Group',
-        onBack: () => {
-          menuHandler.close();
-          onBack();
-        },
+        onBack: onBack,
       },
       items: [
         {
@@ -263,9 +270,11 @@ export const popGroupSetting = (
                   Group By
                 </div>
               `,
-              options: selectGroupByProperty(view, () => {
-                menuHandler.close();
-                popGroupSetting(target, view, onBack);
+              options: selectGroupByProperty(view, {
+                onSelect: () => {
+                  menuHandler.close();
+                  popGroupSetting(target, view, onBack);
+                },
               }),
             },
           ],

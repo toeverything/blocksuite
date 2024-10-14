@@ -185,7 +185,10 @@ export class MenuComponent extends SignalWatcher(
       >
         ${title.onBack
           ? html` <div
-              @click="${title.onBack}"
+              @click="${() => {
+                title.onBack?.(this.menu);
+                this.menu.close();
+              }}"
               class="dv-icon-20 dv-hover dv-pd-2 dv-round-4"
               style="display:flex;"
             >
@@ -193,10 +196,11 @@ export class MenuComponent extends SignalWatcher(
             </div>`
           : nothing}
         <div
-          style="font-weight:500;font-size: 14px;line-height: 22px;color: var(--affine-text-primary-color)"
+          style="flex:1;font-weight:500;font-size: 14px;line-height: 22px;color: var(--affine-text-primary-color)"
         >
           ${title.text}
         </div>
+        ${title.postfix?.()}
         ${title.onClose
           ? html` <div
               @click="${title.onClose}"

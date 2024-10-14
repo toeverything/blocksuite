@@ -14,7 +14,7 @@ import { MenuFocusable } from './focusable.js';
 export type MenuButtonData = {
   content: () => TemplateResult;
   class: string;
-  select: () => void;
+  select: (ele: HTMLElement) => void | false;
   onHover?: (hover: boolean) => void;
 };
 
@@ -75,8 +75,9 @@ export class MenuButton extends MenuFocusable {
   }
 
   onClick() {
-    this.data.select();
-    this.menu.close();
+    if (this.data.select(this) !== false) {
+      this.menu.close();
+    }
   }
 
   override onPressEnter() {
@@ -104,7 +105,7 @@ export const menuButtonItems = {
       prefix?: TemplateResult;
       postfix?: TemplateResult;
       isSelected?: boolean;
-      select: () => void;
+      select: (ele: HTMLElement) => void | false;
       onHover?: (hover: boolean) => void;
       class?: MenuClass;
     },
@@ -136,7 +137,7 @@ export const menuButtonItems = {
       checked: boolean;
       postfix?: TemplateResult;
       label?: () => TemplateResult;
-      select: (checked: boolean) => boolean;
+      select: (checked: boolean) => void | false;
       class?: string;
     },
     menu

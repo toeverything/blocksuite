@@ -1,13 +1,17 @@
 import {
-  createPopup,
+  popMenu,
   type PopupTarget,
+  popupTargetFromElement,
 } from '@blocksuite/affine-components/context-menu';
 import { ShadowlessElement } from '@blocksuite/block-std';
 import { WithDisposable } from '@blocksuite/global/utils';
+import { PlusIcon } from '@blocksuite/icons/lit';
 import { css, html } from 'lit';
 import { property } from 'lit/decorators.js';
 
 import type { FilterGroup, Variable } from '../../core/common/ast.js';
+
+import { popAddNewFilter } from './condition.js';
 
 export class AdvancedFilterModal extends WithDisposable(ShadowlessElement) {
   static override styles = css`
@@ -141,10 +145,9 @@ declare global {
     'advanced-filter-modal': AdvancedFilterModal;
   }
 }
-export const popFilterModal = (
+export const popFilterRoot = (
   target: PopupTarget,
   props: {
-    isRoot: boolean;
     vars: Variable[];
     value: FilterGroup;
     onChange: (value: FilterGroup) => void;
@@ -152,21 +155,64 @@ export const popFilterModal = (
     onBack: () => void;
   }
 ) => {
-  const filter = new AdvancedFilterModal();
-  filter.vars = props.vars;
-  filter.data = props.value;
-  filter.isRoot = props.isRoot;
-  filter.onDelete = () => {
-    props.onDelete();
-    close();
-  };
-  filter.onBack = () => {
-    props.onBack();
-    close();
-  };
-  filter.setData = group => {
-    props.onChange(group);
-    filter.data = group;
-  };
-  const close = createPopup(target, filter);
+  popMenu(target, {
+    options: {
+      title: {
+        text: 'Filters',
+        onBack: props.onBack,
+      },
+      items: [
+        {
+          type: 'group',
+          items: [
+            {
+              type: 'custom',
+              render: () =>
+                html` <filter-root-view
+                  .onBack=${props.onBack}
+                  .vars="${props.vars}"
+                  .data="${props.value}"
+                  .setData="${props.onChange}"
+                ></filter-root-view>`,
+            },
+          ],
+        },
+        {
+          type: 'group',
+          items: [
+            {
+              type: 'action',
+              name: 'Add',
+              prefix: PlusIcon(),
+              select: ele => {
+                popAddNewFilter(popupTargetFromElement(ele), {
+                  value: props.value,
+                  onChange: props.onChange,
+                  vars: props.vars,
+                });
+                return false;
+              },
+            },
+          ],
+        },
+      ],
+    },
+  });
+  // const filter = new AdvancedFilterModal();
+  // filter.vars = props.vars;
+  // filter.data = props.value;
+  // filter.isRoot = props.isRoot;
+  // filter.onDelete = () => {
+  //   props.onDelete();
+  //   close();
+  // };
+  // filter.onBack = () => {
+  //   props.onBack();
+  //   close();
+  // };
+  // filter.setData = group => {
+  //   props.onChange(group);
+  //   filter.data = group;
+  // };
+  // const close = createPopup(target, filter);
 };

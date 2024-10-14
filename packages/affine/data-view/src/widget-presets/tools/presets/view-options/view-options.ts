@@ -31,7 +31,7 @@ import {
   TableSingleView,
   type TableViewData,
 } from '../../../../view-presets/index.js';
-import { popFilterModal } from '../../../filter/filter-modal.js';
+import { popFilterRoot } from '../../../filter/filter-modal.js';
 
 const styles = css`
   .affine-database-toolbar-item.more-action {
@@ -155,11 +155,9 @@ export const popViewOptions = (
                 </div>
                 ${ArrowRightSmallIcon()}`,
               select: () => {
-                requestAnimationFrame(() => {
-                  popPropertiesSetting(target, {
-                    view: view,
-                    onBack: reopen,
-                  });
+                popPropertiesSetting(target, {
+                  view: view,
+                  onBack: reopen,
                 });
               },
             },
@@ -174,7 +172,7 @@ export const popViewOptions = (
                 </div>
                 ${ArrowRightSmallIcon()}`,
               select: () => {
-                popFilterModal(target, {
+                popFilterRoot(target, {
                   vars: view.vars$.value,
                   value: view.filter$.value ?? emptyFilterGroup,
                   onChange: view.filterSet.bind(view),
@@ -203,9 +201,10 @@ export const popViewOptions = (
               select: () => {
                 const groupBy = view.data$.value?.groupBy;
                 if (!groupBy) {
-                  popSelectGroupByProperty(target, view, () =>
-                    popGroupSetting(target, view, reopen)
-                  );
+                  popSelectGroupByProperty(target, view, {
+                    onSelect: () => popGroupSetting(target, view, reopen),
+                    onBack: reopen,
+                  });
                 } else {
                   popGroupSetting(target, view, reopen);
                 }

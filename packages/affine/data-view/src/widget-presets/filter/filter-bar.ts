@@ -14,7 +14,7 @@ import type { Filter, FilterGroup, Variable } from '../../core/common/ast.js';
 
 import { popCreateFilter } from '../../core/common/ref/ref.js';
 import { renderTemplate } from '../../core/utils/uni-component/render-template.js';
-import { popFilterModal } from './filter-modal.js';
+import { popFilterRoot } from './filter-modal.js';
 
 export class FilterBar extends WithDisposable(ShadowlessElement) {
   static override styles = css`
@@ -79,7 +79,7 @@ export class FilterBar extends WithDisposable(ShadowlessElement) {
     if (value.type !== 'group') {
       return;
     }
-    popFilterModal(position, {
+    popFilterRoot(position, {
       isRoot: false,
       vars: this.vars,
       value: value,
