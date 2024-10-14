@@ -1,5 +1,6 @@
 import type { InsertToPosition } from '@blocksuite/affine-shared/utils';
-import type { ReadonlySignal } from '@preact/signals-core';
+
+import { computed, type ReadonlySignal } from '@preact/signals-core';
 
 import type { TType } from '../../logical/index.js';
 import type { PropertyMetaConfig } from '../../property/property-config.js';
@@ -15,6 +16,10 @@ export interface DataSource {
   featureFlags$: ReadonlySignal<DatabaseFlags>;
 
   cellValueGet(rowId: string, propertyId: string): unknown;
+  cellValueGet$(
+    rowId: string,
+    propertyId: string
+  ): ReadonlySignal<unknown | undefined>;
   cellValueChange(rowId: string, propertyId: string, value: unknown): void;
 
   rows$: ReadonlySignal<string[]>;
@@ -24,17 +29,26 @@ export interface DataSource {
 
   propertyMetas: PropertyMetaConfig[];
 
+  propertyNameGet$(propertyId: string): ReadonlySignal<string | undefined>;
   propertyNameGet(propertyId: string): string;
   propertyNameSet(propertyId: string, name: string): void;
 
   propertyTypeGet(propertyId: string): string | undefined;
+  propertyTypeGet$(propertyId: string): ReadonlySignal<string | undefined>;
   propertyTypeSet(propertyId: string, type: string): void;
 
   propertyDataGet(propertyId: string): Record<string, unknown>;
+  propertyDataGet$(
+    propertyId: string
+  ): ReadonlySignal<Record<string, unknown> | undefined>;
   propertyDataSet(propertyId: string, data: Record<string, unknown>): void;
 
   propertyDataTypeGet(propertyId: string): TType | undefined;
+  propertyDataTypeGet$(propertyId: string): ReadonlySignal<TType | undefined>;
+
   propertyReadonlyGet(propertyId: string): boolean;
+  propertyReadonlyGet$(propertyId: string): ReadonlySignal<boolean>;
+
   propertyMetaGet(type: string): PropertyMetaConfig;
   propertyAdd(insertToPosition: InsertToPosition, type?: string): string;
   propertyDuplicate(propertyId: string): string;
@@ -47,17 +61,23 @@ export interface DataSource {
   viewMetas: ViewMeta[];
   viewDataList$: ReadonlySignal<DataViewDataType[]>;
 
+  viewDataGet(viewId: string): DataViewDataType | undefined;
+  viewDataGet$(viewId: string): ReadonlySignal<DataViewDataType | undefined>;
+
   viewDataAdd(viewData: DataViewDataType): string;
   viewDataDuplicate(id: string): string;
   viewDataDelete(viewId: string): void;
-  viewDataGet(viewId: string): DataViewDataType | undefined;
   viewDataMoveTo(id: string, position: InsertToPosition): void;
   viewDataUpdate<ViewData extends DataViewDataType>(
     id: string,
     updater: (data: ViewData) => Partial<ViewData>
   ): void;
+
   viewMetaGet(type: string): ViewMeta;
+  viewMetaGet$(type: string): ReadonlySignal<ViewMeta | undefined>;
+
   viewMetaGetById(viewId: string): ViewMeta;
+  viewMetaGetById$(viewId: string): ReadonlySignal<ViewMeta | undefined>;
 }
 
 export abstract class DataSourceBase implements DataSource {
@@ -95,6 +115,13 @@ export abstract class DataSourceBase implements DataSource {
 
   abstract cellValueGet(rowId: string, propertyId: string): unknown;
 
+  cellValueGet$(
+    rowId: string,
+    propertyId: string
+  ): ReadonlySignal<unknown | undefined> {
+    return computed(() => this.cellValueGet(rowId, propertyId));
+  }
+
   contextGet<T>(key: DataViewContextKey<T>): T | undefined {
     return this.context.get(key) as T;
   }
@@ -110,12 +137,22 @@ export abstract class DataSourceBase implements DataSource {
 
   abstract propertyDataGet(propertyId: string): Record<string, unknown>;
 
+  propertyDataGet$(
+    propertyId: string
+  ): ReadonlySignal<Record<string, unknown> | undefined> {
+    return computed(() => this.propertyDataGet(propertyId));
+  }
+
   abstract propertyDataSet(
     propertyId: string,
     data: Record<string, unknown>
   ): void;
 
   abstract propertyDataTypeGet(propertyId: string): TType | undefined;
+
+  propertyDataTypeGet$(propertyId: string): ReadonlySignal<TType | undefined> {
+    return computed(() => this.propertyDataTypeGet(propertyId));
+  }
 
   abstract propertyDelete(id: string): void;
 
@@ -125,13 +162,25 @@ export abstract class DataSourceBase implements DataSource {
 
   abstract propertyNameGet(propertyId: string): string;
 
+  propertyNameGet$(propertyId: string): ReadonlySignal<string | undefined> {
+    return computed(() => this.propertyNameGet(propertyId));
+  }
+
   abstract propertyNameSet(propertyId: string, name: string): void;
 
   propertyReadonlyGet(_propertyId: string): boolean {
     return false;
   }
 
+  propertyReadonlyGet$(propertyId: string): ReadonlySignal<boolean> {
+    return computed(() => this.propertyReadonlyGet(propertyId));
+  }
+
   abstract propertyTypeGet(propertyId: string): string;
+
+  propertyTypeGet$(propertyId: string): ReadonlySignal<string | undefined> {
+    return computed(() => this.propertyTypeGet(propertyId));
+  }
 
   abstract propertyTypeSet(propertyId: string, type: string): void;
 
@@ -149,6 +198,10 @@ export abstract class DataSourceBase implements DataSource {
 
   abstract viewDataGet(viewId: string): DataViewDataType;
 
+  viewDataGet$(viewId: string): ReadonlySignal<DataViewDataType | undefined> {
+    return computed(() => this.viewDataGet(viewId));
+  }
+
   abstract viewDataMoveTo(id: string, position: InsertToPosition): void;
 
   abstract viewDataUpdate<ViewData extends DataViewDataType>(
@@ -158,5 +211,13 @@ export abstract class DataSourceBase implements DataSource {
 
   abstract viewMetaGet(type: string): ViewMeta;
 
+  viewMetaGet$(type: string): ReadonlySignal<ViewMeta | undefined> {
+    return computed(() => this.viewMetaGet(type));
+  }
+
   abstract viewMetaGetById(viewId: string): ViewMeta;
+
+  viewMetaGetById$(viewId: string): ReadonlySignal<ViewMeta | undefined> {
+    return computed(() => this.viewMetaGetById(viewId));
+  }
 }
