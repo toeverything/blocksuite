@@ -12,7 +12,7 @@
     "typedoc": "^0.26.6",
     "typedoc-plugin-markdown": "4.2.9",
     "vite-plugin-wasm": "^3.3.0",
-    "vitepress": "1.4.0",
+    "vitepress": "1.4.1",
     "vue": "^3.4.38"
   },
   "scripts": {
