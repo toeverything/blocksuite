@@ -270,9 +270,9 @@ export class AffineDragHandleWidget extends WidgetComponent<RootBlockModel> {
 
     this.anchorBlockId.value = null;
 
-    if (this.dragHandleContainer) {
-      this.dragHandleContainer.style.display = 'none';
-    }
+    // if (this.dragHandleContainer) {
+    //   this.dragHandleContainer.style.display = 'none';
+    // }
 
     if (force) {
       this._reset();
@@ -423,7 +423,7 @@ export class AffineDragHandleWidget extends WidgetComponent<RootBlockModel> {
 
     return html`
       <div class="affine-drag-handle-widget">
-        <div class="affine-drag-handle-container">
+        <div class="affine-drag-handle-container" draggable="true">
           <div class="affine-drag-handle-grabber"></div>
         </div>
         <div class="affine-drag-hover-rect" style=${hoverRectStyle}></div>

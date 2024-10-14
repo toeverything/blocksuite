@@ -1,5 +1,6 @@
 import type {
   BlockComponent,
+  DndEventState,
   EditorHost,
   ExtensionType,
   PointerEventState,
@@ -10,10 +11,10 @@ import { createIdentifier } from '@blocksuite/global/di';
 
 export type DropType = 'before' | 'after' | 'in';
 export type OnDragStartProps = {
-  state: PointerEventState;
+  state: DndEventState;
   startDragging: (
     blocks: BlockComponent[],
-    state: PointerEventState,
+    state: DndEventState,
     dragPreview?: HTMLElement,
     dragPreviewOffset?: Point
   ) => void;

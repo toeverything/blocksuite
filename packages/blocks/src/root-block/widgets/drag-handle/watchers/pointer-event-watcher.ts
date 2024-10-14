@@ -331,7 +331,8 @@ export class PointerEventWatcher {
 
   watch() {
     this.widget.disposables.addFromEvent(this.widget, 'pointerdown', e => {
-      e.preventDefault();
+      e.stopPropagation();
+      return true;
     });
 
     this.widget.handleEvent('click', this._clickHandler);

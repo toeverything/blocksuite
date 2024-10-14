@@ -95,6 +95,7 @@ export class DragEventWatcher {
    * Update drop block id
    */
   private _dragMoveHandler: UIEventHandler = ctx => {
+    console.log('--move--');
     if (
       this.widget.isHoverDragHandleVisible ||
       this.widget.isTopLevelDragHandleVisible
@@ -128,7 +129,7 @@ export class DragEventWatcher {
    * When start dragging, should set dragging elements and create drag preview
    */
   private _dragStartHandler: UIEventHandler = ctx => {
-    const state = ctx.get('pointerState');
+    const state = ctx.get('dndState');
     // If not click left button to start dragging, should do nothing
     const { button } = state.raw;
     if (button !== 0) {
@@ -454,8 +455,14 @@ export class DragEventWatcher {
   constructor(readonly widget: AffineDragHandleWidget) {}
 
   watch() {
-    this.widget.handleEvent('dragStart', this._dragStartHandler);
-    this.widget.handleEvent('dragMove', this._dragMoveHandler);
-    this.widget.handleEvent('dragEnd', this._dragEndHandler, { global: true });
+    this.widget.handleEvent('nativeDragStart', this._dragStartHandler, {
+      global: true,
+    });
+    this.widget.handleEvent('nativeDragMove', this._dragMoveHandler, {
+      global: true,
+    });
+    this.widget.handleEvent('nativeDrop', this._dragEndHandler, {
+      global: true,
+    });
   }
 }
