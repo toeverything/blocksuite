@@ -7,6 +7,7 @@ import {
   MindmapElementModel,
 } from '@blocksuite/affine-model';
 import {
+  getTopElements,
   type GfxModel,
   isGfxContainerElm,
   renderableInEdgeless,
@@ -30,7 +31,6 @@ import { GfxBlockModel } from './block-model.js';
 import { edgelessElementsBound } from './utils/bound-utils.js';
 import { areSetsEqual } from './utils/misc.js';
 import { isFrameBlock } from './utils/query.js';
-import { getAllDescendantElements, getTopElements } from './utils/tree.js';
 
 const MIN_FRAME_WIDTH = 800;
 const MIN_FRAME_HEIGHT = 640;
@@ -142,7 +142,7 @@ export class EdgelessFrameManager {
   }
 
   constructor(private _rootService: EdgelessRootService) {
-    this._watchElementAddedOrDeleted();
+    this._watchElementAdded();
   }
 
   private _addChildrenToLegacyFrame(frame: FrameBlockModel) {
@@ -180,12 +180,18 @@ export class EdgelessFrameManager {
     return frameModel;
   }
 
-  private _watchElementAddedOrDeleted() {
+  private _watchElementAdded() {
     this._disposable.add(
       this._rootService.surface.elementAdded.on(({ id, local }) => {
         let element = this._rootService.surface.getElementById(id);
         if (element && local) {
           const frame = this.getFrameFromPoint(element.elementBound.center);
+
+          // if the container created with a frame, skip it.
+          // |<-- Container |< -- frame -->| Container -->|
+          if (isGfxContainerElm(element) && frame && element.hasChild(frame)) {
+            return;
+          }
 
           // TODO(@L-Sun): refactor this in a tree manager
           if (element.group instanceof MindmapElementModel) {
@@ -259,23 +265,8 @@ export class EdgelessFrameManager {
 
     if (elements.length === 0) return;
 
-    // Remove other relations
     elements.forEach(element => {
-      // TODO(@L-Sun): refactor this. This branch is avoid circle, but it's better to handle in a tree manager
-      if (isGfxContainerElm(element) && element.childIds.includes(frame.id)) {
-        if (isFrameBlock(element)) {
-          this.removeParentFrame(frame);
-        } else if (element instanceof GroupElementModel) {
-          // eslint-disable-next-line unicorn/prefer-dom-node-remove
-          element.removeChild(frame.id);
-        }
-      }
-
-      const parentFrame = this.getParentFrame(element);
-      if (parentFrame) {
-        // eslint-disable-next-line unicorn/prefer-dom-node-remove
-        parentFrame.removeChild(element);
-      }
+      frame.addChild(element);
     });
 
     frame.addChildren(elements);
@@ -395,9 +386,8 @@ export class EdgelessFrameManager {
   }
 
   getParentFrame(element: GfxModel) {
-    return this.frames.find(frame => {
-      return frame.childIds.includes(element.id);
-    });
+    const container = element.container;
+    return container && isFrameBlock(container) ? container : null;
   }
 
   removeAllChildrenFromFrame(frame: FrameBlockModel) {
@@ -412,7 +402,7 @@ export class EdgelessFrameManager {
     // this is a workaround to avoid this
     if (element.group instanceof MindmapElementModel) element = element.group;
     if (element instanceof MindmapElementModel) {
-      [element, ...getAllDescendantElements(element)].forEach(child => {
+      [element, ...element.descendantElements].forEach(child => {
         const parentFrame = this.getParentFrame(child);
         if (!parentFrame) return;
         // eslint-disable-next-line unicorn/prefer-dom-node-remove

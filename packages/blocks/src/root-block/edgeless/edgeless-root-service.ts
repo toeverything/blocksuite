@@ -307,14 +307,15 @@ export class EdgelessRootService extends RootService implements SurfaceContext {
     if (parent !== null) {
       selection.selectedElements.forEach(element => {
         // eslint-disable-next-line unicorn/prefer-dom-node-remove
-        parent.removeChild(element.id);
+        parent.removeChild(element);
       });
     }
 
     const groupId = this.createGroup(selection.selectedElements);
+    const group = this.surface.getElementById(groupId);
 
-    if (parent !== null) {
-      parent.addChild(groupId);
+    if (parent !== null && group) {
+      parent.addChild(group);
     }
 
     selection.set({
@@ -440,7 +441,7 @@ export class EdgelessRootService extends RootService implements SurfaceContext {
     const { activeGroup } = selectionManager;
     const first = picked;
 
-    if (activeGroup && picked && activeGroup.hasDescendant(picked.id)) {
+    if (activeGroup && picked && activeGroup.hasDescendant(picked)) {
       let index = results.length - 1;
 
       while (
@@ -531,12 +532,12 @@ export class EdgelessRootService extends RootService implements SurfaceContext {
 
     if (parent !== null) {
       // eslint-disable-next-line unicorn/prefer-dom-node-remove
-      parent.removeChild(group.id);
+      parent.removeChild(group);
     }
 
     elements.forEach(element => {
       // eslint-disable-next-line unicorn/prefer-dom-node-remove
-      group.removeChild(element.id);
+      group.removeChild(element);
     });
 
     // keep relative index order of group children after ungroup
@@ -550,7 +551,7 @@ export class EdgelessRootService extends RootService implements SurfaceContext {
 
     if (parent !== null) {
       elements.forEach(element => {
-        parent.addChild(element.id);
+        parent.addChild(element);
       });
     }
 

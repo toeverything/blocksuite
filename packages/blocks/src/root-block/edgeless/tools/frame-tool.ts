@@ -3,10 +3,10 @@ import type { PointerEventState } from '@blocksuite/block-std';
 import type { IPoint, IVec } from '@blocksuite/global/utils';
 
 import { TelemetryProvider } from '@blocksuite/affine-shared/services';
+import { getTopElements } from '@blocksuite/block-std/gfx';
 import { Bound, noop, Vec } from '@blocksuite/global/utils';
 import { DocCollection } from '@blocksuite/store';
 
-import { getTopElements } from '../utils/tree.js';
 import { EdgelessToolController } from './edgeless-tool.js';
 
 type FrameTool = {

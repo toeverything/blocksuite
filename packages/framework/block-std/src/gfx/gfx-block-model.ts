@@ -18,6 +18,7 @@ import {
 import { BlockModel } from '@blocksuite/store';
 
 import type { EditorHost } from '../view/index.js';
+import type { GfxContainerElement } from './surface/container-element.js';
 import type {
   GfxCompatibleProps,
   GfxElementGeometry,
@@ -25,8 +26,7 @@ import type {
   GfxPrimitiveElementModel,
   PointTestOptions,
 } from './surface/element-model.js';
-
-import { SurfaceBlockModel } from './surface/surface-model.js';
+import type { SurfaceBlockModel } from './surface/surface-model.js';
 
 export class GfxBlockElementModel<
     Props extends GfxCompatibleProps = GfxCompatibleProps,
@@ -39,6 +39,10 @@ export class GfxBlockElementModel<
   connectable = true;
 
   rotate = 0;
+
+  get container(): (GfxModel & GfxContainerElement) | null {
+    return this.surface?.getContainer(this.id) ?? null;
+  }
 
   get elementBound() {
     const bound = Bound.deserialize(this.xywh);
@@ -58,23 +62,21 @@ export class GfxBlockElementModel<
   }
 
   get group(): GfxGroupLikeElementModel | null {
-    const surface = this.doc
-      .getBlocks()
-      .find(block => block instanceof SurfaceBlockModel);
+    if (!this.surface) return null;
 
-    if (!surface) return null;
-
-    return (surface as SurfaceBlockModel).getGroup(this.id) ?? null;
+    return this.surface.getGroup(this.id) ?? null;
   }
 
   get groups(): GfxGroupLikeElementModel[] {
-    const surface = this.doc
-      .getBlocks()
-      .find(block => block instanceof SurfaceBlockModel);
+    if (!this.surface) return [];
 
-    if (!surface) return [];
+    return this.surface.getGroups(this.id);
+  }
 
-    return (surface as SurfaceBlockModel).getGroups(this.id);
+  get surface(): SurfaceBlockModel | null {
+    const result = this.doc.getBlocksByFlavour('affine:surface');
+    if (result.length === 0) return null;
+    return result[0].model as SurfaceBlockModel;
   }
 
   containsBound(bounds: Bound): boolean {
