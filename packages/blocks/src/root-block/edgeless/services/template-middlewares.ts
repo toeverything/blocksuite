@@ -1,5 +1,5 @@
 import type { ConnectorElementModel } from '@blocksuite/affine-model';
-import type { BlockSnapshot, SnapshotReturn } from '@blocksuite/store';
+import type { BlockSnapshot, SnapshotNode } from '@blocksuite/store';
 
 import { CommonUtils, sortIndex } from '@blocksuite/affine-block-surface';
 import { assertExists, assertType, Bound } from '@blocksuite/global/utils';
@@ -35,7 +35,7 @@ export const replaceIdMiddleware = (job: TemplateJob) => {
 
     if (blockJson.flavour === 'affine:surface-ref') {
       assertType<
-        SnapshotReturn<{
+        SnapshotNode<{
           reference: string;
         }>
       >(blockJson);
