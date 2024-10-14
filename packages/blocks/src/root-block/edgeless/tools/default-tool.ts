@@ -944,7 +944,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
       } else {
         // only apply to root nodes of trees
         toBeMovedTopElements.map(element =>
-          frameManager.removeParentFrame(element)
+          frameManager.removeFromParentFrame(element)
         );
       }
     }

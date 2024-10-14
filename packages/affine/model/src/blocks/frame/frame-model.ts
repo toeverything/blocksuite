@@ -82,7 +82,7 @@ export class FrameBlockModel
     });
   }
 
-  addChildren(elements: (BlockSuite.EdgelessModel | string)[]): void {
+  addChildren(elements: (GfxModel | string)[]): void {
     elements = [...new Set(elements)];
 
     const newChildren: Record<string, boolean> = {};

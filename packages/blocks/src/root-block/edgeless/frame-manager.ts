@@ -2,10 +2,7 @@ import type { SurfaceBlockModel } from '@blocksuite/affine-block-surface';
 import type { Doc } from '@blocksuite/store';
 
 import { Overlay } from '@blocksuite/affine-block-surface';
-import {
-  GroupElementModel,
-  MindmapElementModel,
-} from '@blocksuite/affine-model';
+import { MindmapElementModel } from '@blocksuite/affine-model';
 import {
   getTopElements,
   type GfxModel,
@@ -188,33 +185,16 @@ export class EdgelessFrameManager {
           const frame = this.getFrameFromPoint(element.elementBound.center);
 
           // if the container created with a frame, skip it.
-          // |<-- Container |< -- frame -->| Container -->|
           if (isGfxContainerElm(element) && frame && element.hasChild(frame)) {
             return;
           }
 
-          // TODO(@L-Sun): refactor this in a tree manager
           if (element.group instanceof MindmapElementModel) {
             element = element.group;
           }
 
-          // TODO(@L-Sun): refactor this in a tree manager
-          if (element instanceof GroupElementModel) {
-            if (frame && element.hasChild(frame)) return;
-            element.childElements.forEach(child => {
-              // The children of new group may already have a parent frame
-              this.removeParentFrame(child);
-            });
-          }
-
           frame && this.addElementsToFrame(frame, [element]);
         }
-      })
-    );
-
-    this._disposable.add(
-      this._rootService.surface.elementRemoved.on(({ model, local }) => {
-        local && this.removeParentFrame(model);
       })
     );
 
@@ -243,10 +223,6 @@ export class EdgelessFrameManager {
           }
           this.addElementsToFrame(frame, [payload.model]);
         }
-        if (payload.type === 'delete') {
-          const element = this._rootService.getElementById(payload.model.id);
-          if (element) this.removeParentFrame(element);
-        }
       })
     );
   }
@@ -260,14 +236,10 @@ export class EdgelessFrameManager {
     }
 
     elements = elements.filter(
-      ({ id }) => id !== frame.id && !frame.childIds.includes(id)
+      el => el !== frame && !frame.childElements.includes(el)
     );
 
     if (elements.length === 0) return;
-
-    elements.forEach(element => {
-      frame.addChild(element);
-    });
 
     frame.addChildren(elements);
   }
@@ -396,26 +368,10 @@ export class EdgelessFrameManager {
     });
   }
 
-  removeParentFrame(element: GfxModel) {
-    // TODO(@L-Sun): refactor this with tree manager
-    // since current implementation may cause one element has multiple parent containers
-    // this is a workaround to avoid this
-    if (element.group instanceof MindmapElementModel) element = element.group;
-    if (element instanceof MindmapElementModel) {
-      [element, ...element.descendantElements].forEach(child => {
-        const parentFrame = this.getParentFrame(child);
-        if (!parentFrame) return;
-        // eslint-disable-next-line unicorn/prefer-dom-node-remove
-        parentFrame.removeChild(child);
-      });
-      return;
-    }
-
+  removeFromParentFrame(element: GfxModel) {
     const parentFrame = this.getParentFrame(element);
-    if (!parentFrame) return;
-
     // eslint-disable-next-line unicorn/prefer-dom-node-remove
-    parentFrame.removeChild(element);
+    parentFrame?.removeChild(element);
   }
 }
 
@@ -443,9 +399,8 @@ export function getBlocksInFrameBound(
   fullyContained: boolean = true
 ) {
   const bound = Bound.deserialize(model.xywh);
-  const surfaceModel = doc.getBlockByFlavour([
-    'affine:surface',
-  ]) as SurfaceBlockModel[];
+  const surface = model.surface;
+  if (!surface) return [];
 
   return (
     getNotesInFrameBound(
@@ -454,7 +409,7 @@ export function getBlocksInFrameBound(
       fullyContained
     ) as BlockSuite.EdgelessBlockModelType[]
   ).concat(
-    surfaceModel[0].children.filter(ele => {
+    surface.children.filter(ele => {
       if (ele.id === model.id) return;
       if (ele instanceof GfxBlockModel) {
         const blockBound = Bound.deserialize(ele.xywh);
