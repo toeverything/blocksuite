@@ -137,7 +137,7 @@ export const menuButtonItems = {
       checked: boolean;
       postfix?: TemplateResult;
       label?: () => TemplateResult;
-      select: (checked: boolean) => void | false;
+      select: (checked: boolean) => boolean;
       class?: string;
     },
     menu
@@ -157,7 +157,10 @@ export const menuButtonItems = {
         </div>
         ${config.postfix}
       `,
-      select: () => config.select(config.checked),
+      select: () => {
+        config.select(config.checked);
+        return false;
+      },
       class: config.class ?? '',
     };
     return html`
