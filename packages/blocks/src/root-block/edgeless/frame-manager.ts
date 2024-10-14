@@ -7,6 +7,7 @@ import {
   MindmapElementModel,
 } from '@blocksuite/affine-model';
 import {
+  type GfxModel,
   isGfxContainerElm,
   renderableInEdgeless,
 } from '@blocksuite/block-std/gfx';
@@ -27,6 +28,7 @@ import type {
 
 import { GfxBlockModel } from './block-model.js';
 import { edgelessElementsBound } from './utils/bound-utils.js';
+import { areSetsEqual } from './utils/misc.js';
 import { isFrameBlock } from './utils/query.js';
 import { getAllDescendantElements, getTopElements } from './utils/tree.js';
 
@@ -39,7 +41,7 @@ export class FrameOverlay extends Overlay {
 
   private _frame: FrameBlockModel | null = null;
 
-  private _innerElements: BlockSuite.EdgelessModel[] = [];
+  private _innerElements = new Set<GfxModel>();
 
   private get _frameManager() {
     return this._edgelessService.frame;
@@ -54,26 +56,31 @@ export class FrameOverlay extends Overlay {
     this._disposable = new DisposableGroup();
 
     this._frame = null;
-    this._innerElements = [];
+    this._innerElements.clear();
   }
 
   override clear() {
+    if (this._frame === null && this._innerElements.size === 0) return;
     this._reset();
     this._renderer?.refresh();
   }
 
-  highlight(frame: FrameBlockModel, highlightInnerElements: boolean = false) {
-    this._reset();
-    this._disposable.add(
-      frame.deleted.once(() => {
-        this.clear();
-      })
-    );
+  highlight(
+    frame: FrameBlockModel,
+    highlightElementsInBound = false,
+    highlightOutline = true
+  ) {
+    if (!highlightElementsInBound && !highlightOutline) return;
 
-    this._frame = frame;
+    let needRefresh = false;
 
-    if (highlightInnerElements) {
-      const innerElements = new Set(
+    if (highlightOutline && this._frame !== frame) {
+      needRefresh = true;
+    }
+
+    let innerElements = new Set<GfxModel>();
+    if (highlightElementsInBound) {
+      innerElements = new Set(
         getTopElements(
           this._frameManager.getElementsInFrameBound(frame)
         ).concat(
@@ -82,20 +89,32 @@ export class FrameOverlay extends Overlay {
           })
         )
       );
-
-      this._innerElements = [...innerElements];
+      if (!areSetsEqual(this._innerElements, innerElements)) {
+        needRefresh = true;
+      }
     }
+
+    if (!needRefresh) return;
+
+    this._reset();
+    if (highlightOutline) this._frame = frame;
+    if (highlightElementsInBound) this._innerElements = innerElements;
+
+    this._disposable.add(
+      frame.deleted.once(() => {
+        this.clear();
+      })
+    );
     this._renderer?.refresh();
   }
 
   override render(ctx: CanvasRenderingContext2D): void {
-    if (!this._frame) return;
     ctx.beginPath();
     ctx.strokeStyle = '#1E96EB';
     ctx.lineWidth = 2 / this._edgelessService.viewport.zoom;
     const radius = 2 / this._edgelessService.viewport.zoom;
 
-    {
+    if (this._frame) {
       const { x, y, w, h } = this._frame.elementBound;
       ctx.roundRect(x, y, w, h, radius);
       ctx.stroke();
@@ -229,10 +248,7 @@ export class EdgelessFrameManager {
   /**
    * Reset parent of elements to the frame
    */
-  addElementsToFrame(
-    frame: FrameBlockModel,
-    elements: BlockSuite.EdgelessModel[]
-  ) {
+  addElementsToFrame(frame: FrameBlockModel, elements: GfxModel[]) {
     if (frame.childElementIds === undefined) {
       this._addChildrenToLegacyFrame(frame);
     }
@@ -283,7 +299,7 @@ export class EdgelessFrameManager {
     return frameModel;
   }
 
-  createFrameOnElements(elements: BlockSuite.EdgelessModel[]) {
+  createFrameOnElements(elements: GfxModel[]) {
     let bound = edgelessElementsBound(
       this._rootService.selection.selectedElements
     );
@@ -338,7 +354,7 @@ export class EdgelessFrameManager {
    * 1. The frame doesn't have `childElements`, return all elements in the frame bound but not owned by another frame.
    * 2. Return all child elements of the frame if `childElements` exists.
    */
-  getChildElementsInFrame(frame: FrameBlockModel): BlockSuite.EdgelessModel[] {
+  getChildElementsInFrame(frame: FrameBlockModel): GfxModel[] {
     if (frame.childElementIds === undefined) {
       return this.getElementsInFrameBound(frame).filter(
         element => this.getParentFrame(element) !== null
@@ -358,7 +374,7 @@ export class EdgelessFrameManager {
    */
   getElementsInFrameBound(frame: FrameBlockModel, fullyContained = true) {
     const bound = Bound.deserialize(frame.xywh);
-    const elements: BlockSuite.EdgelessModel[] = this._rootService.gfx.grid
+    const elements: GfxModel[] = this._rootService.gfx.grid
       .search(bound, fullyContained)
       .filter(element => element !== frame);
 
@@ -378,7 +394,7 @@ export class EdgelessFrameManager {
     return null;
   }
 
-  getParentFrame(element: BlockSuite.EdgelessModel) {
+  getParentFrame(element: GfxModel) {
     return this.frames.find(frame => {
       return frame.childIds.includes(element.id);
     });
@@ -390,7 +406,7 @@ export class EdgelessFrameManager {
     });
   }
 
-  removeParentFrame(element: BlockSuite.EdgelessModel) {
+  removeParentFrame(element: GfxModel) {
     // TODO(@L-Sun): refactor this with tree manager
     // since current implementation may cause one element has multiple parent containers
     // this is a workaround to avoid this

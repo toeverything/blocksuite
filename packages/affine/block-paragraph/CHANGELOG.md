@@ -1,5 +1,60 @@
 # @blocksuite/affine-block-paragraph
 
+## 0.17.18
+
+### Patch Changes
+
+- 9f70715: Bug Fixes:
+
+  - fix(blocks): can not search in at menu with IME. [#8481](https://github.com/toeverything/blocksuite/pull/8481)
+  - fix(std): dispatcher pointerUp calls twice. [#8485](https://github.com/toeverything/blocksuite/pull/8485)
+  - fix(blocks): pasting elements with css inline style. [#8491](https://github.com/toeverything/blocksuite/pull/8491)
+  - fix(blocks): hide outline panel toggle button when callback is null. [#8493](https://github.com/toeverything/blocksuite/pull/8493)
+  - fix(blocks): pasting twice when span inside h tag. [#8496](https://github.com/toeverything/blocksuite/pull/8496)
+  - fix(blocks): image should be displayed when in vertical mode. [#8497](https://github.com/toeverything/blocksuite/pull/8497)
+  - fix: press backspace at the start of first line when edgeless text exist. [#8498](https://github.com/toeverything/blocksuite/pull/8498)
+
+- Updated dependencies [9f70715]
+  - @blocksuite/affine-components@0.17.18
+  - @blocksuite/affine-model@0.17.18
+  - @blocksuite/affine-shared@0.17.18
+  - @blocksuite/block-std@0.17.18
+  - @blocksuite/global@0.17.18
+  - @blocksuite/inline@0.17.18
+  - @blocksuite/store@0.17.18
+
+## 0.17.17
+
+### Patch Changes
+
+- a89c9c1: ## Features
+
+  - feat: selection extension [#8464](https://github.com/toeverything/blocksuite/pull/8464)
+
+  ## Bug Fixes
+
+  - perf(edgeless): reduce refresh of frame overlay [#8476](https://github.com/toeverything/blocksuite/pull/8476)
+  - fix(blocks): improve edgeless text block resizing behavior [#8473](https://github.com/toeverything/blocksuite/pull/8473)
+  - fix: turn off smooth scaling and cache bounds [#8472](https://github.com/toeverything/blocksuite/pull/8472)
+  - fix: add strategy option for portal [#8470](https://github.com/toeverything/blocksuite/pull/8470)
+  - fix(blocks): fix slash menu is triggered in ignored blocks [#8469](https://github.com/toeverything/blocksuite/pull/8469)
+  - fix(blocks): incorrect width of embed-linked-doc-block in edgeless [#8463](https://github.com/toeverything/blocksuite/pull/8463)
+  - fix: improve open link on link popup [#8462](https://github.com/toeverything/blocksuite/pull/8462)
+  - fix: do not enable shift-click center peek in edgeless [#8460](https://github.com/toeverything/blocksuite/pull/8460)
+  - fix(database): disable database block full-width in edgeless mode [#8461](https://github.com/toeverything/blocksuite/pull/8461)
+  - fix: check editable element active more accurately [#8457](https://github.com/toeverything/blocksuite/pull/8457)
+  - fix: edgeless image block rotate [#8458](https://github.com/toeverything/blocksuite/pull/8458)
+  - fix: outline popup ref area [#8456](https://github.com/toeverything/blocksuite/pull/8456)
+
+- Updated dependencies [a89c9c1]
+  - @blocksuite/affine-components@0.17.17
+  - @blocksuite/affine-model@0.17.17
+  - @blocksuite/affine-shared@0.17.17
+  - @blocksuite/block-std@0.17.17
+  - @blocksuite/global@0.17.17
+  - @blocksuite/inline@0.17.17
+  - @blocksuite/store@0.17.17
+
 ## 0.17.16
 
 ### Patch Changes

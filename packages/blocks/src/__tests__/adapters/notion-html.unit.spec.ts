@@ -1730,4 +1730,44 @@ describe('notion html to snapshot', () => {
     });
     expect(nanoidReplacement(rawBlockSnapshot)).toEqual(blockSnapshot);
   });
+
+  test('block equation', async () => {
+    const html = `<div class="page-body">
+      <figure id="11b088dd-6fdb-804f-8299-cc84de0b4909" class="equation">
+        <div class="equation-container">
+          <annotation encoding="application/x-tex">E = mc^2</annotation>
+        </div>
+      </figure>
+  </div>`;
+
+    const blockSnapshot: BlockSnapshot = {
+      type: 'block',
+      id: 'matchesReplaceMap[0]',
+      flavour: 'affine:note',
+      props: {
+        xywh: '[0,0,800,95]',
+        background: DEFAULT_NOTE_BACKGROUND_COLOR,
+        index: 'a0',
+        hidden: false,
+        displayMode: NoteDisplayMode.DocAndEdgeless,
+      },
+      children: [
+        {
+          type: 'block',
+          id: 'matchesReplaceMap[1]',
+          flavour: 'affine:latex',
+          props: {
+            latex: 'E = mc^2',
+          },
+          children: [],
+        },
+      ],
+    };
+
+    const adapter = new NotionHtmlAdapter(createJob());
+    const rawBlockSnapshot = await adapter.toBlockSnapshot({
+      file: html,
+    });
+    expect(nanoidReplacement(rawBlockSnapshot)).toEqual(blockSnapshot);
+  });
 });

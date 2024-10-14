@@ -38,6 +38,11 @@ export class LanguageListButton extends WithDisposable(
     .lang-button[hover] {
       background: var(--affine-hover-color-filled);
     }
+
+    .lang-button-icon {
+      display: flex;
+      align-items: center;
+    }
   `;
 
   private _abortController?: AbortController;
@@ -121,7 +126,7 @@ export class LanguageListButton extends WithDisposable(
       @click=${this._clickLangBtn}
       ?disabled=${this.blockComponent.doc.readonly}
     >
-      <span slot="suffix">
+      <span class="lang-button-icon" slot="suffix">
         ${!this.blockComponent.doc.readonly ? ArrowDownIcon : nothing}
       </span>
     </icon-button> `;

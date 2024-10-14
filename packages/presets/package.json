@@ -1,6 +1,6 @@
 {
   "name": "@blocksuite/presets",
-  "version": "0.17.16",
+  "version": "0.17.18",
   "description": "Prebuilt BlockSuite editors and opt-in additional UI components.",
   "type": "module",
   "repository": {
@@ -11,7 +11,7 @@
   "scripts": {
     "build": "tsc",
     "test:unit": "nx vite:test --browser.headless --run",
-    "test:debug": "nx vite:test"
+    "test:debug": "PWDEBUG=1 npx vitest"
   },
   "sideEffects": false,
   "keywords": [],

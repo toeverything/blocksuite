@@ -538,6 +538,28 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
             context.skipAllChildren();
             break;
           }
+          // Notion equation
+          if (hastQuerySelector(o.node, '.equation-container')) {
+            const latex = hastGetTextContent(
+              hastQuerySelector(o.node, 'annotation')
+            );
+            context
+              .openNode(
+                {
+                  type: 'block',
+                  id: nanoid(),
+                  flavour: 'affine:latex',
+                  props: {
+                    latex,
+                  },
+                  children: [],
+                },
+                'children'
+              )
+              .closeNode();
+            context.skipAllChildren();
+            break;
+          }
           // Notion callout
           if (hastQuerySelector(o.node, '.callout')) {
             context
