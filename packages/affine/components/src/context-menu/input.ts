@@ -86,7 +86,7 @@ export class MenuInput extends MenuFocusable {
         this.menu.setFocusOnly(this);
       }}"
       class="${classString}"
-      value="${this.data.initialValue}"
+      value="${this.data.initialValue ?? ''}"
       type="text"
     />`;
   }
