@@ -22,10 +22,10 @@ import {
 import {
   getCanvasElementsCount,
   getConnectorPath,
+  getContainerChildIds,
+  getContainerIds,
+  getContainerOfElements,
   getEdgelessSelectedRectModel,
-  getGroupChildrenIds,
-  getGroupIds,
-  getGroupOfElements,
   getNoteRect,
   getSelectedBound,
   getSortedIdsInViewport,
@@ -1123,11 +1123,11 @@ export async function assertSelectedBound(
  * @param page
  * @param expected the expected group id and the count of of its children
  */
-export async function assertGroupIds(
+export async function assertContainerIds(
   page: Page,
   expected: Record<string, number>
 ) {
-  const ids = await getGroupIds(page);
+  const ids = await getContainerIds(page);
   const result = toIdCountMap(ids);
 
   expect(result).toEqual(expected);
@@ -1138,44 +1138,44 @@ export async function assertSortedIds(page: Page, expected: string[]) {
   expect(ids).toEqual(expected);
 }
 
-export async function assertGroupChildrenIds(
+export async function assertContainerChildIds(
   page: Page,
   expected: Record<string, number>,
   id: string
 ) {
-  const ids = await getGroupChildrenIds(page, id);
+  const ids = await getContainerChildIds(page, id);
   const result = toIdCountMap(ids);
 
   expect(result).toEqual(expected);
 }
 
-export async function assertGroupOfElements(
+export async function assertContainerOfElements(
   page: Page,
   elements: string[],
-  groupId: string
+  containerId: string
 ) {
-  const elementGroups = await getGroupOfElements(page, elements);
+  const elementGroups = await getContainerOfElements(page, elements);
 
   elementGroups.forEach(elementGroup => {
-    expect(elementGroup).toEqual(groupId);
+    expect(elementGroup).toEqual(containerId);
   });
 }
 
 /**
- * Assert the given group has the expected children count.
- * And the children's group id should equal to the given group id.
+ * Assert the given container has the expected children count.
+ * And the children's container id should equal to the given container id.
  * @param page
- * @param groupId
+ * @param containerId
  * @param childrenCount
  */
-export async function assertGroupChildren(
+export async function assertContainerChildren(
   page: Page,
-  groupId: string,
+  containerId: string,
   childrenCount: number
 ) {
-  const ids = await getGroupChildrenIds(page, groupId);
+  const ids = await getContainerChildIds(page, containerId);
 
-  await assertGroupOfElements(page, ids, groupId);
+  await assertContainerOfElements(page, ids, containerId);
   expect(new Set(ids).size).toBe(childrenCount);
 }
 

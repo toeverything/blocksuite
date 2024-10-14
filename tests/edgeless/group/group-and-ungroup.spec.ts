@@ -5,7 +5,7 @@ import {
   clickView,
   createShapeElement,
   edgelessCommonSetup,
-  getFirstGroupId,
+  getFirstContainerId,
   getIds,
   redoByKeyboard,
   selectAllByKeyboard,
@@ -16,9 +16,9 @@ import {
   undoByKeyboard,
 } from '../../utils/actions/index.js';
 import {
-  assertGroupChildren,
-  assertGroupChildrenIds,
-  assertGroupIds,
+  assertContainerChildIds,
+  assertContainerChildren,
+  assertContainerIds,
   assertSelectedBound,
 } from '../../utils/asserts.js';
 import { test } from '../../utils/playwright.js';
@@ -43,7 +43,7 @@ test.describe('group and ungroup in group', () => {
     )[0];
     await selectAllByKeyboard(page);
     await triggerComponentToolbarAction(page, 'addGroup');
-    outterGroupId = await getFirstGroupId(page);
+    outterGroupId = await getFirstContainerId(page);
   });
 
   test('group in group', async ({ page }) => {
@@ -51,33 +51,33 @@ test.describe('group and ungroup in group', () => {
     await shiftClickView(page, [150, 50]);
     await captureHistory(page);
     await triggerComponentToolbarAction(page, 'addGroup');
-    const groupId = await getFirstGroupId(page, [outterGroupId]);
+    const groupId = await getFirstContainerId(page, [outterGroupId]);
     await assertSelectedBound(page, [0, 0, 200, 100]);
-    await assertGroupIds(page, {
+    await assertContainerIds(page, {
       [groupId]: 2,
       [outterGroupId]: 2,
       null: 1,
     });
-    await assertGroupChildren(page, groupId, 2);
-    await assertGroupChildren(page, outterGroupId, 2);
+    await assertContainerChildren(page, groupId, 2);
+    await assertContainerChildren(page, outterGroupId, 2);
 
     // undo the creation
     await undoByKeyboard(page);
-    await assertGroupIds(page, {
+    await assertContainerIds(page, {
       [outterGroupId]: 3,
       null: 1,
     });
-    await assertGroupChildren(page, outterGroupId, 3);
+    await assertContainerChildren(page, outterGroupId, 3);
 
     // redo the creation
     await redoByKeyboard(page);
-    await assertGroupIds(page, {
+    await assertContainerIds(page, {
       [groupId]: 2,
       [outterGroupId]: 2,
       null: 1,
     });
-    await assertGroupChildren(page, groupId, 2);
-    await assertGroupChildren(page, outterGroupId, 2);
+    await assertContainerChildren(page, groupId, 2);
+    await assertContainerChildren(page, outterGroupId, 2);
   });
 
   test('ungroup in group', async ({ page }) => {
@@ -85,10 +85,10 @@ test.describe('group and ungroup in group', () => {
     await shiftClickView(page, [150, 50]);
     await triggerComponentToolbarAction(page, 'addGroup');
     await captureHistory(page);
-    const groupId = await getFirstGroupId(page, [outterGroupId]);
+    const groupId = await getFirstContainerId(page, [outterGroupId]);
     await triggerComponentToolbarAction(page, 'ungroup');
-    await assertGroupIds(page, { [outterGroupId]: 3, null: 1 });
-    await assertGroupChildrenIds(
+    await assertContainerIds(page, { [outterGroupId]: 3, null: 1 });
+    await assertContainerChildIds(
       page,
       toIdCountMap(await getIds(page, true)),
       outterGroupId
@@ -96,13 +96,13 @@ test.describe('group and ungroup in group', () => {
 
     // undo, group should in group again
     await undoByKeyboard(page);
-    await assertGroupIds(page, {
+    await assertContainerIds(page, {
       [outterGroupId]: 2,
       [groupId]: 2,
       null: 1,
     });
-    await assertGroupChildrenIds(page, toIdCountMap(initShapes), groupId);
-    await assertGroupChildrenIds(
+    await assertContainerChildIds(page, toIdCountMap(initShapes), groupId);
+    await assertContainerChildIds(
       page,
       {
         [groupId]: 1,
@@ -113,8 +113,8 @@ test.describe('group and ungroup in group', () => {
 
     // redo, group should be ungroup again
     await redoByKeyboard(page);
-    await assertGroupIds(page, { [outterGroupId]: 3, null: 1 });
-    await assertGroupChildrenIds(
+    await assertContainerIds(page, { [outterGroupId]: 3, null: 1 });
+    await assertContainerChildIds(
       page,
       toIdCountMap(await getIds(page, true)),
       outterGroupId

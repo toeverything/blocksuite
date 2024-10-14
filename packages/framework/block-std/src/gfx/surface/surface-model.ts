@@ -3,7 +3,13 @@ import type { Boxed, Y } from '@blocksuite/store';
 import { type Constructor, Slot } from '@blocksuite/global/utils';
 import { BlockModel, DocCollection, nanoid } from '@blocksuite/store';
 
+import type { GfxModel } from '../gfx-block-model.js';
+
 import { TreeManager } from '../tree.js';
+import {
+  type GfxContainerElement,
+  isGfxContainerElm,
+} from './container-element.js';
 import { createDecoratorState } from './decorators/common.js';
 import { initializeObservers, initializeWatchers } from './decorators/index.js';
 import {
@@ -449,6 +455,22 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
 
   hasElementById(id: string): boolean {
     return this._elementModels.has(id);
+  }
+
+  isContainer(element: GfxModel): element is GfxModel & GfxContainerElement;
+  isContainer(id: string): boolean;
+  isContainer(element: string | GfxModel): boolean {
+    if (typeof element === 'string') {
+      const el = this.getElementById(element);
+      if (el) return isGfxContainerElm(el);
+
+      const blockModel = this.doc.getBlock(element)?.model;
+      if (blockModel) return isGfxContainerElm(blockModel);
+
+      return false;
+    } else {
+      return isGfxContainerElm(element);
+    }
   }
 
   isInMindmap(id: string) {

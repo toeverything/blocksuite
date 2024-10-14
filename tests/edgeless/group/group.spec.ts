@@ -5,7 +5,7 @@ import {
   createShapeElement,
   dragBetweenViewCoords,
   edgelessCommonSetup,
-  getFirstGroupId,
+  getFirstContainerId,
   Shape,
   shiftClickView,
   triggerComponentToolbarAction,
@@ -20,9 +20,9 @@ import {
 import { captureHistory } from '../../utils/actions/misc.js';
 import {
   assertCanvasElementsCount,
+  assertContainerChildren,
+  assertContainerIds,
   assertEdgelessNonSelectedRect,
-  assertGroupChildren,
-  assertGroupIds,
   assertSelectedBound,
 } from '../../utils/asserts.js';
 import { test } from '../../utils/playwright.js';
@@ -163,7 +163,7 @@ test.describe('group', () => {
     test('delete root group', async ({ page }) => {
       await selectAllByKeyboard(page);
       await triggerComponentToolbarAction(page, 'addGroup');
-      const groupId = await getFirstGroupId(page);
+      const groupId = await getFirstContainerId(page);
       await captureHistory(page);
       await pressBackspace(page);
       await assertCanvasElementsCount(page, 0);
@@ -171,11 +171,11 @@ test.describe('group', () => {
       // undo the delete
       await undoByKeyboard(page);
       await assertCanvasElementsCount(page, 3);
-      await assertGroupIds(page, {
+      await assertContainerIds(page, {
         [groupId]: 2,
         null: 1,
       });
-      await assertGroupChildren(page, groupId, 2);
+      await assertContainerChildren(page, groupId, 2);
 
       // redo the delete
       await redoByKeyboard(page);
@@ -185,76 +185,76 @@ test.describe('group', () => {
     test('delete sub-element in group', async ({ page }) => {
       await selectAllByKeyboard(page);
       await triggerComponentToolbarAction(page, 'addGroup');
-      const groupId = await getFirstGroupId(page);
+      const groupId = await getFirstContainerId(page);
       await captureHistory(page);
       await clickView(page, [50, 50]);
       await pressBackspace(page);
 
       await assertCanvasElementsCount(page, 2);
-      await assertGroupIds(page, {
+      await assertContainerIds(page, {
         [groupId]: 1,
         null: 1,
       });
-      await assertGroupChildren(page, groupId, 1);
+      await assertContainerChildren(page, groupId, 1);
 
       // undo the delete
       await undoByKeyboard(page);
       await assertCanvasElementsCount(page, 3);
-      await assertGroupIds(page, {
+      await assertContainerIds(page, {
         [groupId]: 2,
         null: 1,
       });
-      await assertGroupChildren(page, groupId, 2);
+      await assertContainerChildren(page, groupId, 2);
 
       // redo the delete
       await redoByKeyboard(page);
       await assertCanvasElementsCount(page, 2);
-      await assertGroupIds(page, {
+      await assertContainerIds(page, {
         [groupId]: 1,
         null: 1,
       });
-      await assertGroupChildren(page, groupId, 1);
+      await assertContainerChildren(page, groupId, 1);
     });
 
     test('delete group in group', async ({ page }) => {
       await createShapeElement(page, [200, 0], [300, 100], Shape.Square);
       await selectAllByKeyboard(page);
       await triggerComponentToolbarAction(page, 'addGroup');
-      const firstGroup = await getFirstGroupId(page);
+      const firstGroup = await getFirstContainerId(page);
       await clickView(page, [50, 50]);
       await shiftClickView(page, [150, 50]);
       await triggerComponentToolbarAction(page, 'addGroup');
-      const secondGroup = await getFirstGroupId(page, [firstGroup]);
+      const secondGroup = await getFirstContainerId(page, [firstGroup]);
       await captureHistory(page);
 
       // delete group in group
       await pressBackspace(page);
       await assertCanvasElementsCount(page, 2);
-      await assertGroupIds(page, {
+      await assertContainerIds(page, {
         [firstGroup]: 1,
         null: 1,
       });
-      await assertGroupChildren(page, firstGroup, 1);
+      await assertContainerChildren(page, firstGroup, 1);
 
       // undo the delete
       await undoByKeyboard(page);
       await assertCanvasElementsCount(page, 5);
-      await assertGroupIds(page, {
+      await assertContainerIds(page, {
         [firstGroup]: 2,
         [secondGroup]: 2,
         null: 1,
       });
-      await assertGroupChildren(page, firstGroup, 2);
-      await assertGroupChildren(page, secondGroup, 2);
+      await assertContainerChildren(page, firstGroup, 2);
+      await assertContainerChildren(page, secondGroup, 2);
 
       // redo the delete
       await redoByKeyboard(page);
       await assertCanvasElementsCount(page, 2);
-      await assertGroupIds(page, {
+      await assertContainerIds(page, {
         [firstGroup]: 1,
         null: 1,
       });
-      await assertGroupChildren(page, firstGroup, 1);
+      await assertContainerChildren(page, firstGroup, 1);
     });
   });
 });

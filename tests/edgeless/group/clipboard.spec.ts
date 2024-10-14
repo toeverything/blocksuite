@@ -9,7 +9,7 @@ import {
   decreaseZoomLevel,
   edgelessCommonSetup,
   getAllSortedIds,
-  getFirstGroupId,
+  getFirstContainerId,
   pasteByKeyboard,
   selectAllByKeyboard,
   Shape,
@@ -17,7 +17,10 @@ import {
   triggerComponentToolbarAction,
   waitNextFrame,
 } from '../../utils/actions/index.js';
-import { assertGroupChildren, assertGroupIds } from '../../utils/asserts.js';
+import {
+  assertContainerChildren,
+  assertContainerIds,
+} from '../../utils/asserts.js';
 import { test } from '../../utils/playwright.js';
 
 test.describe('clipboard', () => {
@@ -27,7 +30,7 @@ test.describe('clipboard', () => {
     await createShapeElement(page, [100, 0], [200, 100], Shape.Square);
     await selectAllByKeyboard(page);
     await triggerComponentToolbarAction(page, 'addGroup');
-    const originGroupId = await getFirstGroupId(page);
+    const originGroupId = await getFirstContainerId(page);
 
     await copyByKeyboard(page);
     await waitNextFrame(page, 100);
@@ -35,15 +38,15 @@ test.describe('clipboard', () => {
     await page.mouse.click(move[0], move[1]);
     await waitNextFrame(page, 1000);
     await pasteByKeyboard(page, false);
-    const copyedGroupId = await getFirstGroupId(page, [originGroupId]);
+    const copyedGroupId = await getFirstContainerId(page, [originGroupId]);
 
-    await assertGroupIds(page, {
+    await assertContainerIds(page, {
       [originGroupId]: 2,
       [copyedGroupId]: 2,
       null: 2,
     });
-    await assertGroupChildren(page, originGroupId, 2);
-    await assertGroupChildren(page, copyedGroupId, 2);
+    await assertContainerChildren(page, originGroupId, 2);
+    await assertContainerChildren(page, copyedGroupId, 2);
   });
 
   test('copy and paste group with connector', async ({ page }) => {
@@ -53,7 +56,7 @@ test.describe('clipboard', () => {
     await createConnectorElement(page, [100, 50], [200, 50]);
     await selectAllByKeyboard(page);
     await triggerComponentToolbarAction(page, 'addGroup');
-    const originGroupId = await getFirstGroupId(page);
+    const originGroupId = await getFirstContainerId(page);
 
     await copyByKeyboard(page);
     await waitNextFrame(page, 100);
@@ -61,15 +64,15 @@ test.describe('clipboard', () => {
     await page.mouse.click(move[0], move[1]);
     await waitNextFrame(page, 1000);
     await pasteByKeyboard(page, false);
-    const copyedGroupId = await getFirstGroupId(page, [originGroupId]);
+    const copyedGroupId = await getFirstContainerId(page, [originGroupId]);
 
-    await assertGroupIds(page, {
+    await assertContainerIds(page, {
       [originGroupId]: 3,
       [copyedGroupId]: 3,
       null: 2,
     });
-    await assertGroupChildren(page, originGroupId, 3);
-    await assertGroupChildren(page, copyedGroupId, 3);
+    await assertContainerChildren(page, originGroupId, 3);
+    await assertContainerChildren(page, copyedGroupId, 3);
   });
 });
 

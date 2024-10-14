@@ -5,7 +5,7 @@ import {
   clickView,
   createShapeElement,
   edgelessCommonSetup,
-  getFirstGroupId,
+  getFirstContainerId,
   redoByKeyboard,
   selectAllByKeyboard,
   Shape,
@@ -14,8 +14,8 @@ import {
   undoByKeyboard,
 } from '../../utils/actions/index.js';
 import {
-  assertGroupChildren,
-  assertGroupIds,
+  assertContainerChildren,
+  assertContainerIds,
   assertSelectedBound,
 } from '../../utils/asserts.js';
 import { test } from '../../utils/playwright.js';
@@ -35,36 +35,36 @@ test.describe('release from group', () => {
     await selectAllByKeyboard(page);
     await triggerComponentToolbarAction(page, 'addGroup');
 
-    outterGroupId = await getFirstGroupId(page);
+    outterGroupId = await getFirstContainerId(page);
   });
 
   test('release element from group', async ({ page }) => {
     await clickView(page, [50, 50]);
     await captureHistory(page);
     await triggerComponentToolbarAction(page, 'releaseFromGroup');
-    await assertGroupIds(page, {
+    await assertContainerIds(page, {
       [outterGroupId]: 2,
       null: 2,
     });
-    await assertGroupChildren(page, outterGroupId, 2);
+    await assertContainerChildren(page, outterGroupId, 2);
     await assertSelectedBound(page, [0, 0, 100, 100]);
 
     // undo the release
     await undoByKeyboard(page);
-    await assertGroupIds(page, {
+    await assertContainerIds(page, {
       [outterGroupId]: 3,
       null: 1,
     });
-    await assertGroupChildren(page, outterGroupId, 3);
+    await assertContainerChildren(page, outterGroupId, 3);
     await assertSelectedBound(page, [0, 0, 100, 100]);
 
     // redo the release
     await redoByKeyboard(page);
-    await assertGroupIds(page, {
+    await assertContainerIds(page, {
       [outterGroupId]: 2,
       null: 2,
     });
-    await assertGroupChildren(page, outterGroupId, 2);
+    await assertContainerChildren(page, outterGroupId, 2);
     await assertSelectedBound(page, [0, 0, 100, 100]);
   });
 
@@ -73,44 +73,44 @@ test.describe('release from group', () => {
     await shiftClickView(page, [150, 50]);
     await triggerComponentToolbarAction(page, 'addGroup');
     await captureHistory(page);
-    const groupId = await getFirstGroupId(page, [outterGroupId]);
+    const groupId = await getFirstContainerId(page, [outterGroupId]);
 
-    await assertGroupIds(page, {
+    await assertContainerIds(page, {
       [groupId]: 2,
       [outterGroupId]: 2,
       null: 1,
     });
-    await assertGroupChildren(page, groupId, 2);
-    await assertGroupChildren(page, outterGroupId, 2);
+    await assertContainerChildren(page, groupId, 2);
+    await assertContainerChildren(page, outterGroupId, 2);
 
     // release group from group
     await triggerComponentToolbarAction(page, 'releaseFromGroup');
-    await assertGroupIds(page, {
+    await assertContainerIds(page, {
       [groupId]: 2,
       [outterGroupId]: 1,
       null: 2,
     });
-    await assertGroupChildren(page, outterGroupId, 1);
-    await assertGroupChildren(page, groupId, 2);
+    await assertContainerChildren(page, outterGroupId, 1);
+    await assertContainerChildren(page, groupId, 2);
 
     // undo the release
     await undoByKeyboard(page);
-    await assertGroupIds(page, {
+    await assertContainerIds(page, {
       [groupId]: 2,
       [outterGroupId]: 2,
       null: 1,
     });
-    await assertGroupChildren(page, groupId, 2);
-    await assertGroupChildren(page, outterGroupId, 2);
+    await assertContainerChildren(page, groupId, 2);
+    await assertContainerChildren(page, outterGroupId, 2);
 
     // redo the release
     await redoByKeyboard(page);
-    await assertGroupIds(page, {
+    await assertContainerIds(page, {
       [groupId]: 2,
       [outterGroupId]: 1,
       null: 2,
     });
-    await assertGroupChildren(page, outterGroupId, 1);
-    await assertGroupChildren(page, groupId, 2);
+    await assertContainerChildren(page, outterGroupId, 1);
+    await assertContainerChildren(page, groupId, 2);
   });
 });

@@ -17,7 +17,7 @@ export class TreeManager {
 
   private _watched = false;
 
-  constructor(readonly surface: SurfaceBlockModel) {}
+  constructor(private readonly _surface: SurfaceBlockModel) {}
 
   getContainer(elementId: string): (GfxModel & GfxContainerElement) | null {
     const container = this._elementToContainer.get(elementId);
@@ -82,7 +82,7 @@ export class TreeManager {
 
     // Graphic Block Elements
 
-    const { doc } = this.surface;
+    const { doc } = this._surface;
     const elements = doc
       .getBlocks()
       .filter(model => model instanceof GfxBlockElementModel) as GfxModel[];
@@ -132,7 +132,7 @@ export class TreeManager {
 
     // Canvas Elements
 
-    this.surface.elementModels.forEach(el => {
+    this._surface.elementModels.forEach(el => {
       if (isGfxContainerElm(el)) {
         // we use `childIds` here because some blocks in doc may not be ready
         el.childIds.forEach(childId => {
@@ -142,21 +142,21 @@ export class TreeManager {
     });
 
     disposable.add(
-      this.surface.elementAdded.on(({ id }) => {
-        const element = this.surface.getElementById(id);
+      this._surface.elementAdded.on(({ id }) => {
+        const element = this._surface.getElementById(id);
         element && onGfxModelAdded(element);
       })
     );
 
     disposable.add(
-      this.surface.elementRemoved.on(({ model }) => {
+      this._surface.elementRemoved.on(({ model }) => {
         onGfxModelDeleted(model);
       })
     );
 
     disposable.add(
-      this.surface.elementUpdated.on(({ id, oldValues }) => {
-        const element = this.surface.getElementById(id);
+      this._surface.elementUpdated.on(({ id, oldValues }) => {
+        const element = this._surface.getElementById(id);
         if (!isGfxContainerElm(element)) return;
 
         // Since the implement of GfxContainer may be different,

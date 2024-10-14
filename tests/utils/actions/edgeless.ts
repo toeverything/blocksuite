@@ -1589,36 +1589,37 @@ export async function getSelectedBound(
   );
 }
 
-export async function getGroupOfElements(page: Page, ids: string[]) {
+export async function getContainerOfElements(page: Page, ids: string[]) {
   return page.evaluate(
     ([ids]) => {
       const container = document.querySelector('affine-edgeless-root');
       if (!container) throw new Error('container not found');
 
-      return ids.map(id => container.service.surface.getGroup(id)?.id ?? null);
+      return ids.map(
+        id => container.service.surface.getContainer(id)?.id ?? null
+      );
     },
     [ids]
   );
 }
 
-export async function getGroupIds(page: Page) {
+export async function getContainerIds(page: Page) {
   return page.evaluate(() => {
     const container = document.querySelector('affine-edgeless-root');
     if (!container) throw new Error('container not found');
-    return container.service.elements.map(el => el.group?.id ?? 'null');
+    return container.service.elements.map(el => el.container?.id ?? 'null');
   });
 }
 
-export async function getGroupChildrenIds(page: Page, id: string) {
+export async function getContainerChildIds(page: Page, id: string) {
   return page.evaluate(
     ([id]) => {
       const container = document.querySelector('affine-edgeless-root');
       if (!container) throw new Error('container not found');
-      return Array.from(
-        container.service
-          .getElementsByType('group')
-          .find(group => group.id === id)?.childIds ?? []
-      );
+      const gfxModel = container.service.getElementById(id);
+      return gfxModel && container.service.surface.isContainer(gfxModel)
+        ? gfxModel.childIds
+        : [];
     },
     [id]
   );
@@ -1673,14 +1674,15 @@ export async function getIds(page: Page, filterGroup = false) {
   );
 }
 
-export async function getFirstGroupId(page: Page, exclude: string[] = []) {
+export async function getFirstContainerId(page: Page, exclude: string[] = []) {
   return page.evaluate(
     ([exclude]) => {
       const container = document.querySelector('affine-edgeless-root');
       if (!container) throw new Error('container not found');
       return (
         container.service.elements.find(
-          e => e.type === 'group' && !exclude.includes(e.id)
+          e =>
+            container.service.surface.isContainer(e) && !exclude.includes(e.id)
         )?.id ?? ''
       );
     },
