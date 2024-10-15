@@ -130,13 +130,13 @@ export const menuButtonItems = {
         select: config.select,
         class: config.class ?? (config.isSelected ? 'selected-item' : ''),
       };
-      return keyed(
+      return html`${keyed(
         config.name,
         html`<affine-menu-button
           .data="${data}"
           .menu="${menu}"
         ></affine-menu-button>`
-      );
+      )}`;
     },
   checkbox:
     (config: {
@@ -169,13 +169,13 @@ export const menuButtonItems = {
         },
         class: config.class ?? '',
       };
-      return keyed(
+      return html`${keyed(
         config.name,
         html`<affine-menu-button
           .data="${data}"
           .menu="${menu}"
         ></affine-menu-button>`
-      );
+      )}`;
     },
   toggleSwitch:
     (config: {
@@ -211,12 +211,12 @@ export const menuButtonItems = {
         },
         class: config.class ?? '',
       };
-      return keyed(
+      return html`${keyed(
         config.name,
         html`<affine-menu-button
           .data="${data}"
           .menu="${menu}"
         ></affine-menu-button>`
-      );
+      )}`;
     },
 } satisfies Record<string, MenuItemRender<never>>;
