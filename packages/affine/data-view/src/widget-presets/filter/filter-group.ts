@@ -1,8 +1,12 @@
 import type { TemplateResult } from 'lit';
 
-import { popFilterableSimpleMenu } from '@blocksuite/affine-components/context-menu';
+import {
+  menu,
+  popFilterableSimpleMenu,
+  popupTargetFromElement,
+} from '@blocksuite/affine-components/context-menu';
 import { ShadowlessElement } from '@blocksuite/block-std';
-import { WithDisposable } from '@blocksuite/global/utils';
+import { SignalWatcher } from '@blocksuite/global/utils';
 import {
   ArrowDownSmallIcon,
   ConvertIcon,
@@ -11,6 +15,7 @@ import {
   MoreHorizontalIcon,
   PlusIcon,
 } from '@blocksuite/icons/lit';
+import { computed, type ReadonlySignal } from '@preact/signals-core';
 import { css, html, nothing } from 'lit';
 import { property, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
@@ -24,11 +29,10 @@ import {
 } from '../../core/common/ast.js';
 import { popAddNewFilter } from './condition.js';
 
-export class FilterGroupView extends WithDisposable(ShadowlessElement) {
+export class FilterGroupView extends SignalWatcher(ShadowlessElement) {
   static override styles = css`
     filter-group-view {
       border-radius: 4px;
-      padding: 8px 4px 4px;
       display: flex;
       flex-direction: column;
       user-select: none;
@@ -141,6 +145,7 @@ export class FilterGroupView extends WithDisposable(ShadowlessElement) {
       background-color: var(--affine-background-tertiary-color);
       border: 1px solid var(--affine-border-color);
     }
+
     .hover-style {
       background-color: var(--affine-hover-color);
     }
@@ -152,48 +157,52 @@ export class FilterGroupView extends WithDisposable(ShadowlessElement) {
 
   private _addNew = (e: MouseEvent) => {
     if (this.isMaxDepth) {
-      this.setData({
-        ...this.data,
-        conditions: [...this.data.conditions, firstFilter(this.vars)],
+      this.onChange({
+        ...this.filterGroup.value,
+        conditions: [
+          ...this.filterGroup.value.conditions,
+          firstFilter(this.vars.value),
+        ],
       });
       return;
     }
-    popAddNewFilter(e.target as HTMLElement, {
-      value: this.data,
-      onChange: this.setData,
-      vars: this.vars,
+    popAddNewFilter(popupTargetFromElement(e.currentTarget as HTMLElement), {
+      value: this.filterGroup.value,
+      onChange: this.onChange,
+      vars: this.vars.value,
     });
   };
 
   private _selectOp = (event: MouseEvent) => {
-    popFilterableSimpleMenu(event.target as HTMLElement, [
-      {
-        type: 'action',
-        name: 'And',
-        select: () => {
-          this.setData({
-            ...this.data,
-            op: 'and',
-          });
-        },
-      },
-      {
-        type: 'action',
-        name: 'Or',
-        select: () => {
-          this.setData({
-            ...this.data,
-            op: 'or',
-          });
-        },
-      },
-    ]);
+    popFilterableSimpleMenu(
+      popupTargetFromElement(event.currentTarget as HTMLElement),
+      [
+        menu.action({
+          name: 'And',
+          select: () => {
+            this.onChange({
+              ...this.filterGroup.value,
+              op: 'and',
+            });
+          },
+        }),
+        menu.action({
+          name: 'Or',
+          select: () => {
+            this.onChange({
+              ...this.filterGroup.value,
+              op: 'or',
+            });
+          },
+        }),
+      ]
+    );
   };
 
   private _setFilter = (index: number, filter: Filter) => {
-    this.setData({
-      ...this.data,
-      conditions: this.data.conditions.map((v, i) =>
+    this.onChange({
+      ...this.filterGroup.value,
+      conditions: this.filterGroup.value.conditions.map((v, i) =>
         index === i ? filter : v
       ),
     });
@@ -209,12 +218,11 @@ export class FilterGroupView extends WithDisposable(ShadowlessElement) {
   }
 
   private _clickConditionOps(target: HTMLElement, i: number) {
-    const filter = this.data.conditions[i];
-    popFilterableSimpleMenu(target, [
-      {
-        type: 'action',
+    const filter = this.filterGroup.value.conditions[i];
+    popFilterableSimpleMenu(popupTargetFromElement(target), [
+      menu.action({
         name: filter.type === 'filter' ? 'Turn into group' : 'Wrap in group',
-        icon: ConvertIcon(),
+        prefix: ConvertIcon(),
         onHover: hover => {
           this.containerClass = hover
             ? { index: i, class: 'hover-style' }
@@ -222,36 +230,37 @@ export class FilterGroupView extends WithDisposable(ShadowlessElement) {
         },
         hide: () => this.depth + getDepth(filter) > 3,
         select: () => {
-          this.setData({ type: 'group', op: 'and', conditions: [this.data] });
+          this.onChange({
+            type: 'group',
+            op: 'and',
+            conditions: [this.filterGroup.value],
+          });
         },
-      },
-      {
-        type: 'action',
+      }),
+      menu.action({
         name: 'Duplicate',
-        icon: DuplicateIcon(),
+        prefix: DuplicateIcon(),
         onHover: hover => {
           this.containerClass = hover
             ? { index: i, class: 'hover-style' }
             : undefined;
         },
         select: () => {
-          const conditions = [...this.data.conditions];
+          const conditions = [...this.filterGroup.value.conditions];
           conditions.splice(
             i + 1,
             0,
             JSON.parse(JSON.stringify(conditions[i]))
           );
-          this.setData({ ...this.data, conditions: conditions });
+          this.onChange({ ...this.filterGroup.value, conditions: conditions });
         },
-      },
-      {
-        type: 'group',
+      }),
+      menu.group({
         name: '',
-        children: () => [
-          {
-            type: 'action',
+        items: [
+          menu.action({
             name: 'Delete',
-            icon: DeleteIcon(),
+            prefix: DeleteIcon(),
             class: 'delete-item',
             onHover: hover => {
               this.containerClass = hover
@@ -259,21 +268,21 @@ export class FilterGroupView extends WithDisposable(ShadowlessElement) {
                 : undefined;
             },
             select: () => {
-              const conditions = [...this.data.conditions];
+              const conditions = [...this.filterGroup.value.conditions];
               conditions.splice(i, 1);
-              this.setData({
-                ...this.data,
+              this.onChange({
+                ...this.filterGroup.value,
                 conditions,
               });
             },
-          },
+          }),
         ],
-      },
+      }),
     ]);
   }
 
   override render() {
-    const data = this.data;
+    const data = this.filterGroup.value;
     return html`
       <div class="filter-group-container">
         ${repeat(data.conditions, (filter, i) => {
@@ -314,7 +323,7 @@ export class FilterGroupView extends WithDisposable(ShadowlessElement) {
                 ? html`
                     <filter-condition-view
                       .setData="${(v: Filter) => this._setFilter(i, v)}"
-                      .vars="${this.vars}"
+                      .vars="${this.vars.value}"
                       .data="${filter}"
                     ></filter-condition-view>
                   `
@@ -323,9 +332,9 @@ export class FilterGroupView extends WithDisposable(ShadowlessElement) {
                       class="${groupClassList}"
                       style="width: 100%;"
                       .depth="${this.depth + 1}"
-                      .setData="${(v: Filter) => this._setFilter(i, v)}"
+                      .onChange="${(v: Filter) => this._setFilter(i, v)}"
                       .vars="${this.vars}"
-                      .data="${filter}"
+                      .filterGroup="${computed(() => filter)}"
                     ></filter-group-view>
                   `}
               <div class="filter-group-item-ops" @click="${clickOps}">
@@ -350,16 +359,16 @@ export class FilterGroupView extends WithDisposable(ShadowlessElement) {
     | undefined = undefined;
 
   @property({ attribute: false })
-  accessor data!: FilterGroup;
-
-  @property({ attribute: false })
   accessor depth = 1;
 
   @property({ attribute: false })
-  accessor setData!: (filter: FilterGroup) => void;
+  accessor filterGroup!: ReadonlySignal<FilterGroup>;
 
   @property({ attribute: false })
-  accessor vars!: Variable[];
+  accessor onChange!: (filter: FilterGroup) => void;
+
+  @property({ attribute: false })
+  accessor vars!: ReadonlySignal<Variable[]>;
 }
 
 declare global {

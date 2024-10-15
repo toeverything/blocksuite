@@ -203,14 +203,14 @@ export const styles = css`
     .affine-database-column-type-menu-icon {
         border: 1px solid var(--affine-border-color);
         border-radius: 4px;
-        padding: 4px;
+        padding: 5px;
         background-color: var(--affine-background-secondary-color);
     }
 
     .affine-database-column-type-menu-icon svg {
         color: var(--affine-text-secondary-color);
-        width: 24px;
-        height: 24px;
+        width: 20px;
+        height: 20px;
 
     }
 

@@ -1,4 +1,8 @@
-import { popFilterableSimpleMenu } from '@blocksuite/affine-components/context-menu';
+import {
+  menu,
+  popFilterableSimpleMenu,
+  type PopupTarget,
+} from '@blocksuite/affine-components/context-menu';
 import {
   CopyIcon,
   DeleteIcon,
@@ -31,7 +35,7 @@ export const openDetail = (
 
 export const popRowMenu = (
   dataViewEle: DataViewRenderer,
-  ele: HTMLElement,
+  ele: PopupTarget,
   selectionController: TableSelectionController
 ) => {
   const selection = selectionController.selection;
@@ -41,14 +45,12 @@ export const popRowMenu = (
   if (selection.rows.length > 1) {
     const rows = TableRowSelection.rowsIds(selection);
     popFilterableSimpleMenu(ele, [
-      {
-        type: 'group',
+      menu.group({
         name: '',
-        children: () => [
-          {
-            type: 'action',
+        items: [
+          menu.action({
             name: 'Copy',
-            icon: html` <div
+            prefix: html` <div
               style="transform: rotate(90deg);display:flex;align-items:center;"
             >
               ${CopyIcon()}
@@ -56,67 +58,40 @@ export const popRowMenu = (
             select: () => {
               selectionController.host.clipboardController.copy();
             },
-          },
+          }),
         ],
-      },
-      {
-        type: 'group',
+      }),
+      menu.group({
         name: '',
-        children: () => [
-          {
-            type: 'action',
+        items: [
+          menu.action({
             name: 'Delete Rows',
             class: 'delete-item',
-            icon: DeleteIcon(),
+            prefix: DeleteIcon(),
             select: () => {
               selectionController.view.rowDelete(rows);
             },
-          },
+          }),
         ],
-      },
+      }),
     ]);
     return;
   }
   const row = selection.rows[0];
   popFilterableSimpleMenu(ele, [
-    {
-      type: 'action',
+    menu.action({
       name: 'Expand Row',
-      icon: ExpandFullIcon(),
+      prefix: ExpandFullIcon(),
       select: () => {
         openDetail(dataViewEle, row.id, selectionController);
       },
-    },
-    // {
-    //   type: 'group',
-    //   name: '',
-    //   children: () => [
-    //     {
-    //       type: 'action',
-    //       name: 'Copy',
-    //       icon: CopyIcon,
-    //       select: () => {
-    //         //TODO
-    //       },
-    //     },
-    //     {
-    //       type: 'action',
-    //       name: 'Paste',
-    //       icon: PasteIcon,
-    //       select: () => {
-    //         //TODO
-    //       },
-    //     },
-    //   ],
-    // },
-    {
-      type: 'group',
+    }),
+    menu.group({
       name: '',
-      children: () => [
-        {
-          type: 'action',
+      items: [
+        menu.action({
           name: 'Insert Before',
-          icon: html` <div
+          prefix: html` <div
             style="transform: rotate(90deg);display:flex;align-items:center;"
           >
             ${MoveLeftIcon()}
@@ -124,11 +99,10 @@ export const popRowMenu = (
           select: () => {
             selectionController.insertRowBefore(row.groupKey, row.id);
           },
-        },
-        {
-          type: 'action',
+        }),
+        menu.action({
           name: 'Insert After',
-          icon: html` <div
+          prefix: html` <div
             style="transform: rotate(90deg);display:flex;align-items:center;"
           >
             ${MoveRightIcon()}
@@ -136,31 +110,21 @@ export const popRowMenu = (
           select: () => {
             selectionController.insertRowAfter(row.groupKey, row.id);
           },
-        },
-        // {
-        //   type: 'action',
-        //   name: 'Duplicate',
-        //   icon: DuplicateIcon,
-        //   select: () => {
-        //     selectionController.duplicateRow(rowId);
-        //   },
-        // },
+        }),
       ],
-    },
-    {
-      type: 'group',
+    }),
+    menu.group({
       name: '',
-      children: () => [
-        {
-          type: 'action',
+      items: [
+        menu.action({
           name: 'Delete Row',
           class: 'delete-item',
-          icon: DeleteIcon(),
+          prefix: DeleteIcon(),
           select: () => {
             selectionController.deleteRow(row.id);
           },
-        },
+        }),
       ],
-    },
+    }),
   ]);
 };

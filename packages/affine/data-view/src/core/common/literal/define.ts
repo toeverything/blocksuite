@@ -1,7 +1,9 @@
 import {
   createPopup,
+  menu,
   popMenu,
 } from '@blocksuite/affine-components/context-menu';
+import { computed, signal } from '@preact/signals-core';
 import { html } from 'lit';
 import { styleMap } from 'lit/directives/style-map.js';
 
@@ -29,21 +31,17 @@ const literalMatcherCreator = new MatcherCreator<LiteralData>();
 export const literalMatchers = [
   literalMatcherCreator.createMatcher(tBoolean.create(), {
     view: createUniComponentFromWebComponent(BooleanLiteral),
-    popEdit: (position, { value, onChange }) => {
+    popEdit: (position, { value$, onChange }) => {
       popMenu(position, {
         options: {
-          input: {
-            search: true,
-          },
           items: [true, false].map(v => {
-            return {
-              type: 'action',
+            return menu.action({
               name: v.toString().toUpperCase(),
-              isSelected: v === value,
+              isSelected: v === value$.value,
               select: () => {
                 onChange(v);
               },
-            };
+            });
           }),
         },
       });
@@ -51,58 +49,60 @@ export const literalMatchers = [
   }),
   literalMatcherCreator.createMatcher(tString.create(), {
     view: createUniComponentFromWebComponent(StringLiteral),
-    popEdit: (position, { value, onChange }) => {
+    popEdit: (position, { value$, onChange }) => {
       popMenu(position, {
         options: {
-          input: {
-            initValue: value?.toString() ?? '',
-            onComplete: text => {
-              onChange(text || undefined);
-            },
-          },
-          items: [],
+          items: [
+            menu.input({
+              initialValue: value$.value?.toString() ?? '',
+              onComplete: text => {
+                onChange(text || undefined);
+              },
+            }),
+          ],
         },
       });
     },
   }),
   literalMatcherCreator.createMatcher(tNumber.create(), {
     view: createUniComponentFromWebComponent(NumberLiteral),
-    popEdit: (position, { value, onChange }) => {
+    popEdit: (position, { value$, onChange }) => {
       popMenu(position, {
         options: {
-          input: {
-            initValue: value?.toString() ?? '',
-            onComplete: text => {
-              if (!text) {
-                onChange(undefined);
-                return;
-              }
-              const number = Number.parseFloat(text);
-              if (!Number.isNaN(number)) {
-                onChange(number);
-              }
-            },
-          },
-          items: [],
+          items: [
+            menu.input({
+              initialValue: value$.value?.toString() ?? '',
+              onComplete: text => {
+                if (!text) {
+                  onChange(undefined);
+                  return;
+                }
+                const number = Number.parseFloat(text);
+                if (!Number.isNaN(number)) {
+                  onChange(number);
+                }
+              },
+            }),
+          ],
         },
       });
     },
   }),
   literalMatcherCreator.createMatcher(tArray(tTag.create()), {
     view: createUniComponentFromWebComponent(MultiTagLiteral),
-    popEdit: (position, { value, onChange, type }) => {
+    popEdit: (position, { value$, onChange, type }) => {
       if (!isTArray(type)) {
         return;
       }
       if (!tTag.is(type.ele)) {
         return;
       }
-      let list = Array.isArray(value) ? value : [];
+      const list$ = signal(Array.isArray(value$.value) ? value$.value : []);
+      // const list$ = computed(()=>{
+      //   return Array.isArray(value$.value) ? value$.value : []
+      // });
       popMenu(position, {
         options: {
-          input: {
-            search: true,
-          },
           items:
             type.ele.data?.tags.map(tag => {
               const styles = styleMap({
@@ -110,26 +110,25 @@ export const literalMatchers = [
                 padding: '0 8px',
                 width: 'max-content',
               });
-              return {
-                type: 'checkbox',
+              return menu.checkbox({
                 name: tag.value,
-                checked: list.includes(tag.id),
+                checked: computed(() => list$.value.includes(tag.id)),
                 label: () =>
                   html` <div class="dv-round-4" style=${styles}>
                     ${tag.value}
                   </div>`,
                 select: checked => {
                   if (checked) {
-                    list = list.filter(v => v !== tag.id);
-                    onChange(list);
+                    list$.value = list$.value.filter(v => v !== tag.id);
+                    onChange(list$.value);
                     return false;
                   } else {
-                    list = [...list, tag.id];
-                    onChange(list);
+                    list$.value = [...list$.value, tag.id];
+                    onChange(list$.value);
                     return true;
                   }
                 },
-              };
+              });
             }) ?? [],
         },
       });
@@ -143,9 +142,6 @@ export const literalMatchers = [
       }
       popMenu(position, {
         options: {
-          input: {
-            search: true,
-          },
           items:
             type.data?.tags.map(tag => {
               const styles = styleMap({
@@ -153,8 +149,7 @@ export const literalMatchers = [
                 padding: '0 8px',
                 width: 'max-content',
               });
-              return {
-                type: 'action',
+              return menu.action({
                 name: tag.value,
                 label: () =>
                   html` <div class="dv-round-4" style=${styles}>
@@ -163,7 +158,7 @@ export const literalMatchers = [
                 select: () => {
                   onChange(tag.id);
                 },
-              };
+              });
             }) ?? [],
         },
       });
@@ -171,11 +166,11 @@ export const literalMatchers = [
   }),
   literalMatcherCreator.createMatcher(tDate.create(), {
     view: createUniComponentFromWebComponent(DateLiteral),
-    popEdit: (position, { value, onChange }) => {
+    popEdit: (position, { value$, onChange }) => {
       const input = document.createElement('input');
       input.type = 'date';
       input.click();
-      input.valueAsNumber = value as number;
+      input.valueAsNumber = value$.value as number;
       document.body.append(input);
       input.style.position = 'absolute';
       const close = createPopup(position, input);

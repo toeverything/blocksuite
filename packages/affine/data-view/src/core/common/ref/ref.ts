@@ -1,4 +1,12 @@
-import { popFilterableSimpleMenu } from '@blocksuite/affine-components/context-menu';
+import type { ReadonlySignal } from '@preact/signals-core';
+
+import {
+  menu,
+  popFilterableSimpleMenu,
+  popMenu,
+  type PopupTarget,
+  popupTargetFromElement,
+} from '@blocksuite/affine-components/context-menu';
 import { ShadowlessElement } from '@blocksuite/block-std';
 import { WithDisposable } from '@blocksuite/global/utils';
 import { AddCursorIcon } from '@blocksuite/icons/lit';
@@ -67,18 +75,19 @@ export class VariableRefView extends WithDisposable(ShadowlessElement) {
     super.connectedCallback();
     this.disposables.addFromEvent(this, 'click', e => {
       popFilterableSimpleMenu(
-        e.target as HTMLElement,
-        this.vars.map(v => ({
-          type: 'action',
-          name: v.name,
-          icon: renderUniLit(v.icon, {}),
-          select: () => {
-            this.setData({
-              type: 'ref',
-              name: v.id,
-            });
-          },
-        }))
+        popupTargetFromElement(e.target as HTMLElement),
+        this.vars.map(v =>
+          menu.action({
+            name: v.name,
+            prefix: renderUniLit(v.icon, {}),
+            select: () => {
+              this.setData({
+                type: 'ref',
+                name: v.id,
+              });
+            },
+          })
+        )
       );
     });
   }
@@ -104,44 +113,49 @@ declare global {
   }
 }
 export const popCreateFilter = (
-  target: HTMLElement,
+  target: PopupTarget,
   props: {
-    vars: Variable[];
+    vars: ReadonlySignal<Variable[]>;
     onSelect: (filter: Filter) => void;
     onClose?: () => void;
+    onBack?: () => void;
   }
 ) => {
-  popFilterableSimpleMenu(
-    target,
-    [
-      ...props.vars.map(v => ({
-        type: 'action' as const,
-        name: v.name,
-        icon: renderUniLit(v.icon, {}),
-        select: () => {
-          props.onSelect(
-            firstFilterByRef(props.vars, {
-              type: 'ref',
-              name: v.id,
-            })
-          );
-        },
-      })),
-      {
-        type: 'group',
-        name: '',
-        children: () => [
-          {
-            type: 'action',
-            name: 'Add filter group',
-            icon: AddCursorIcon(),
-            select: () => {
-              props.onSelect(firstFilterInGroup(props.vars));
-            },
-          },
-        ],
+  popMenu(target, {
+    options: {
+      onClose: props.onClose,
+      title: {
+        onBack: props.onBack,
+        text: 'New filter',
       },
-    ],
-    props.onClose
-  );
+      items: [
+        ...props.vars.value.map(v =>
+          menu.action({
+            name: v.name,
+            prefix: renderUniLit(v.icon, {}),
+            select: () => {
+              props.onSelect(
+                firstFilterByRef(props.vars.value, {
+                  type: 'ref',
+                  name: v.id,
+                })
+              );
+            },
+          })
+        ),
+        menu.group({
+          name: '',
+          items: [
+            menu.action({
+              name: 'Add filter group',
+              prefix: AddCursorIcon(),
+              select: () => {
+                props.onSelect(firstFilterInGroup(props.vars.value));
+              },
+            }),
+          ],
+        }),
+      ],
+    },
+  });
 };

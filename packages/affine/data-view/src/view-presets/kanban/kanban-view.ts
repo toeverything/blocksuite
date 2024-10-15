@@ -1,4 +1,8 @@
-import { popMenu } from '@blocksuite/affine-components/context-menu';
+import {
+  menu,
+  popMenu,
+  popupTargetFromElement,
+} from '@blocksuite/affine-components/context-menu';
 import { AddCursorIcon } from '@blocksuite/icons/lit';
 import { css } from 'lit';
 import { query } from 'lit/decorators.js';
@@ -144,19 +148,20 @@ export class DataViewKanban extends DataViewBase<
     }
     const add = (e: MouseEvent) => {
       const ele = e.currentTarget as HTMLElement;
-      popMenu(ele, {
+      popMenu(popupTargetFromElement(ele), {
         options: {
-          input: {
-            onComplete: text => {
-              const column = this.groupManager.property$.value;
-              if (column) {
-                column.dataUpdate(
-                  () => addGroup(text, column.data$.value) as never
-                );
-              }
-            },
-          },
-          items: [],
+          items: [
+            menu.input({
+              onComplete: text => {
+                const column = this.groupManager.property$.value;
+                if (column) {
+                  column.dataUpdate(
+                    () => addGroup(text, column.data$.value) as never
+                  );
+                }
+              },
+            }),
+          ],
         },
       });
     };

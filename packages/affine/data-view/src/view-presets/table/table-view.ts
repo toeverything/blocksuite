@@ -1,4 +1,8 @@
-import { popMenu } from '@blocksuite/affine-components/context-menu';
+import {
+  menu,
+  popMenu,
+  popupTargetFromElement,
+} from '@blocksuite/affine-components/context-menu';
 import {
   insertPositionToIndex,
   type InsertToPosition,
@@ -216,19 +220,20 @@ export class DataViewTable extends DataViewBase<
     }
     const add = (e: MouseEvent) => {
       const ele = e.currentTarget as HTMLElement;
-      popMenu(ele, {
+      popMenu(popupTargetFromElement(ele), {
         options: {
-          input: {
-            onComplete: text => {
-              const column = groupHelper.property$.value;
-              if (column) {
-                column.dataUpdate(
-                  () => addGroup(text, column.data$.value) as never
-                );
-              }
-            },
-          },
-          items: [],
+          items: [
+            menu.input({
+              onComplete: text => {
+                const column = groupHelper.property$.value;
+                if (column) {
+                  column.dataUpdate(
+                    () => addGroup(text, column.data$.value) as never
+                  );
+                }
+              },
+            }),
+          ],
         },
       });
     };

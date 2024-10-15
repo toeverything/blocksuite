@@ -1,7 +1,12 @@
-import { createPopup } from '@blocksuite/affine-components/context-menu';
+import {
+  createPopup,
+  type PopupTarget,
+  popupTargetFromElement,
+} from '@blocksuite/affine-components/context-menu';
 import { ShadowlessElement } from '@blocksuite/block-std';
-import { WithDisposable } from '@blocksuite/global/utils';
+import { SignalWatcher } from '@blocksuite/global/utils';
 import { CloseIcon, FilterIcon, PlusIcon } from '@blocksuite/icons/lit';
+import { computed, type ReadonlySignal } from '@preact/signals-core';
 import { css, html, type TemplateResult } from 'lit';
 import { property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
@@ -10,9 +15,9 @@ import type { Filter, FilterGroup, Variable } from '../../core/common/ast.js';
 
 import { popCreateFilter } from '../../core/common/ref/ref.js';
 import { renderTemplate } from '../../core/utils/uni-component/render-template.js';
-import { popFilterModal } from './filter-modal.js';
+import { popFilterGroup } from './filter-modal.js';
 
-export class FilterBar extends WithDisposable(ShadowlessElement) {
+export class FilterBar extends SignalWatcher(ShadowlessElement) {
   static override styles = css`
     filter-bar {
       margin-top: 8px;
@@ -45,23 +50,23 @@ export class FilterBar extends WithDisposable(ShadowlessElement) {
   `;
 
   private _setFilter = (index: number, filter: Filter) => {
-    this.setData({
-      ...this.data,
-      conditions: this.data.conditions.map((v, i) =>
+    this.onChange({
+      ...this.filterGroup.value,
+      conditions: this.filterGroup.value.conditions.map((v, i) =>
         index === i ? filter : v
       ),
     });
   };
 
   private addFilter = (e: MouseEvent) => {
-    const element = e.target as HTMLElement;
+    const element = popupTargetFromElement(e.target as HTMLElement);
     popCreateFilter(element, {
       vars: this.vars,
       onSelect: filter => {
-        const index = this.data.conditions.length;
-        this.setData({
-          ...this.data,
-          conditions: [...this.data.conditions, filter],
+        const index = this.filterGroup.value.conditions.length;
+        this.onChange({
+          ...this.filterGroup.value,
+          conditions: [...this.filterGroup.value.conditions, filter],
         });
         requestAnimationFrame(() => {
           this.expandGroup(element, index);
@@ -70,21 +75,21 @@ export class FilterBar extends WithDisposable(ShadowlessElement) {
     });
   };
 
-  private expandGroup = (position: HTMLElement, i: number) => {
-    const value = this.data.conditions[i];
-    if (value.type !== 'group') {
+  private expandGroup = (position: PopupTarget, i: number) => {
+    if (this.filterGroup.value.conditions[i]?.type !== 'group') {
       return;
     }
-    popFilterModal(position, {
-      isRoot: false,
+    popFilterGroup(position, {
       vars: this.vars,
-      value: value,
-      onBack: () => {
-        // do nothing
-      },
-      onChange: filter => this._setFilter(i, filter),
-      onDelete: () => {
-        this.deleteFilter(i);
+      value$: computed(() => {
+        return this.filterGroup.value.conditions[i] as FilterGroup;
+      }),
+      onChange: filter => {
+        if (filter) {
+          this._setFilter(i, filter);
+        } else {
+          this.deleteFilter(i);
+        }
       },
     });
   };
@@ -100,7 +105,7 @@ export class FilterBar extends WithDisposable(ShadowlessElement) {
   };
 
   renderMore = (count: number) => {
-    const max = this.data.conditions.length;
+    const max = this.filterGroup.value.conditions.length;
     if (count === max) {
       return this.renderAddFilter();
     }
@@ -122,7 +127,7 @@ export class FilterBar extends WithDisposable(ShadowlessElement) {
       style="padding: 8px;background-color: var(--affine-background-overlay-panel-color);display:flex;flex-direction: column;gap: 8px;"
     >
       ${repeat(
-        this.data.conditions.slice(count),
+        this.filterGroup.value.conditions.slice(count),
         (_, i) =>
           html` <div style="width: max-content;">
             ${this.renderCondition(i + count)}
@@ -137,7 +142,7 @@ export class FilterBar extends WithDisposable(ShadowlessElement) {
     const ins = renderTemplate(() => this.renderMoreFilter(count));
     ins.style.position = 'absolute';
     this.updateMoreFilterPanel = () => {
-      const max = this.data.conditions.length;
+      const max = this.filterGroup.value.conditions.length;
       if (count === max) {
         close();
         this.updateMoreFilterPanel = undefined;
@@ -145,19 +150,25 @@ export class FilterBar extends WithDisposable(ShadowlessElement) {
       }
       ins.requestUpdate();
     };
-    const close = createPopup(e.target as HTMLElement, ins, {
-      onClose: () => {
-        this.updateMoreFilterPanel = undefined;
-      },
-    });
+    const close = createPopup(
+      popupTargetFromElement(e.target as HTMLElement),
+      ins,
+      {
+        onClose: () => {
+          this.updateMoreFilterPanel = undefined;
+        },
+      }
+    );
   };
 
   updateMoreFilterPanel?: () => void;
 
   private deleteFilter(i: number) {
-    this.setData({
-      ...this.data,
-      conditions: this.data.conditions.filter((_, index) => index !== i),
+    this.onChange({
+      ...this.filterGroup.value,
+      conditions: this.filterGroup.value.conditions.filter(
+        (_, index) => index !== i
+      ),
     });
   }
 
@@ -171,21 +182,26 @@ export class FilterBar extends WithDisposable(ShadowlessElement) {
   }
 
   renderCondition(i: number) {
-    const condition = this.data.conditions[i];
+    const condition = this.filterGroup.value.conditions[i];
     const deleteFilter = () => {
       this.deleteFilter(i);
     };
+    if (!condition) {
+      return;
+    }
     if (condition.type === 'filter') {
       return html` <filter-condition-view
         style="margin-right: 8px;"
-        .vars="${this.vars}"
+        .vars="${this.vars.value}"
         .data="${condition}"
         .setData="${(v: Filter) => this._setFilter(i, v)}"
         .onDelete="${deleteFilter}"
       ></filter-condition-view>`;
     }
     const expandGroup = (e: MouseEvent) => {
-      this.expandGroup(e.target as HTMLElement, i);
+      const element = (e.currentTarget as HTMLElement)
+        .parentElement as HTMLElement;
+      this.expandGroup(popupTargetFromElement(element), i);
     };
     const length = condition.conditions.length;
     const text = length > 1 ? `${length} rules` : `${length} rule`;
@@ -211,7 +227,9 @@ export class FilterBar extends WithDisposable(ShadowlessElement) {
   }
 
   renderFilters() {
-    return this.data.conditions.map((_, i) => () => this.renderCondition(i));
+    return this.filterGroup.value.conditions.map(
+      (_, i) => () => this.renderCondition(i)
+    );
   }
 
   override updated() {
@@ -219,13 +237,13 @@ export class FilterBar extends WithDisposable(ShadowlessElement) {
   }
 
   @property({ attribute: false })
-  accessor data!: FilterGroup;
+  accessor filterGroup!: ReadonlySignal<FilterGroup>;
 
   @property({ attribute: false })
-  accessor setData!: (filter: FilterGroup) => void;
+  accessor onChange!: (filter: FilterGroup) => void;
 
   @property({ attribute: false })
-  accessor vars!: Variable[];
+  accessor vars!: ReadonlySignal<Variable[]>;
 }
 
 declare global {

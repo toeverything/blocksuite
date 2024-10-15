@@ -1,7 +1,13 @@
-import { popFilterableSimpleMenu } from '@blocksuite/affine-components/context-menu';
+import {
+  menu,
+  popFilterableSimpleMenu,
+  type PopupTarget,
+  popupTargetFromElement,
+} from '@blocksuite/affine-components/context-menu';
 import { ShadowlessElement } from '@blocksuite/block-std';
-import { WithDisposable } from '@blocksuite/global/utils';
+import { SignalWatcher } from '@blocksuite/global/utils';
 import { CloseIcon } from '@blocksuite/icons/lit';
+import { computed } from '@preact/signals-core';
 import { css, html, nothing } from 'lit';
 import { property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
@@ -24,7 +30,7 @@ import { tBoolean } from '../../core/logical/data-type.js';
 import { typesystem } from '../../core/logical/typesystem.js';
 import { filterMatcher } from './matcher/matcher.js';
 
-export class FilterConditionView extends WithDisposable(ShadowlessElement) {
+export class FilterConditionView extends SignalWatcher(ShadowlessElement) {
   static override styles = css`
     filter-condition-view {
       display: flex;
@@ -118,11 +124,10 @@ export class FilterConditionView extends WithDisposable(ShadowlessElement) {
     const target = e.currentTarget as HTMLElement;
     const list = this._filterList();
     popFilterableSimpleMenu(
-      target,
+      popupTargetFromElement(target),
       list.map(v => {
         const selected = v.name === this.data.function;
-        return {
-          type: 'action',
+        return menu.action({
           name: v.label,
           isSelected: selected,
           select: () => {
@@ -131,7 +136,7 @@ export class FilterConditionView extends WithDisposable(ShadowlessElement) {
               function: v.name,
             });
           },
-        };
+        });
       })
     );
   }
@@ -153,8 +158,10 @@ export class FilterConditionView extends WithDisposable(ShadowlessElement) {
         >
           ${this._filterLabel()}
         </div>
-        ${repeat(this._args(), (v, i) => {
-          const value = this.data.args[i];
+        ${repeat(this._args(), (type, i) => {
+          const value$ = computed(() => {
+            return this.data.args[i]?.value;
+          });
           const onChange = (value: unknown) => {
             const newArr = this.data.args.slice();
             newArr[i] = { type: 'literal', value };
@@ -165,9 +172,9 @@ export class FilterConditionView extends WithDisposable(ShadowlessElement) {
           };
           const click = (e: MouseEvent) => {
             popLiteralEdit(
-              e.currentTarget as HTMLElement,
-              v,
-              value?.value,
+              popupTargetFromElement(e.currentTarget as HTMLElement),
+              type,
+              value$,
               onChange
             );
           };
@@ -175,7 +182,7 @@ export class FilterConditionView extends WithDisposable(ShadowlessElement) {
             class="dv-hover dv-round-4 filter-condition-arg"
             @click="${click}"
           >
-            ${renderLiteral(v, value?.value, onChange)}
+            ${renderLiteral(type, value$, onChange)}
           </div>`;
         })}
       </div>
@@ -210,7 +217,7 @@ declare global {
   }
 }
 export const popAddNewFilter = (
-  target: HTMLElement,
+  target: PopupTarget,
   props: {
     value: FilterGroup;
     onChange: (value: FilterGroup) => void;
@@ -218,8 +225,7 @@ export const popAddNewFilter = (
   }
 ) => {
   popFilterableSimpleMenu(target, [
-    {
-      type: 'action',
+    menu.action({
       name: 'Add filter',
       select: () => {
         props.onChange({
@@ -227,9 +233,8 @@ export const popAddNewFilter = (
           conditions: [...props.value.conditions, firstFilter(props.vars)],
         });
       },
-    },
-    {
-      type: 'action',
+    }),
+    menu.action({
       name: 'Add filter group',
       select: () => {
         props.onChange({
@@ -240,6 +245,6 @@ export const popAddNewFilter = (
           ],
         });
       },
-    },
+    }),
   ]);
 };
