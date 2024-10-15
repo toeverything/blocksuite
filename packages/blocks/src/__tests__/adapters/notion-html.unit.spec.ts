@@ -669,7 +669,7 @@ describe('notion html to snapshot', () => {
           id: 'matchesReplaceMap[16]',
           flavour: 'affine:list',
           props: {
-            type: 'toggle',
+            type: 'bulleted',
             text: {
               '$blocksuite:internal:text$': true,
               delta: [
@@ -687,7 +687,7 @@ describe('notion html to snapshot', () => {
               id: 'matchesReplaceMap[17]',
               flavour: 'affine:list',
               props: {
-                type: 'toggle',
+                type: 'bulleted',
                 text: {
                   '$blocksuite:internal:text$': true,
                   delta: [
@@ -705,7 +705,7 @@ describe('notion html to snapshot', () => {
                   id: 'matchesReplaceMap[18]',
                   flavour: 'affine:list',
                   props: {
-                    type: 'toggle',
+                    type: 'bulleted',
                     text: {
                       '$blocksuite:internal:text$': true,
                       delta: [
