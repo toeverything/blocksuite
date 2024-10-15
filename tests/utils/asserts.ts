@@ -908,8 +908,7 @@ export async function assertEdgelessDraggingArea(page: Page, xywh: number[]) {
   expect(box.height).toBeCloseTo(h, 0);
 }
 
-export async function assertEdgelessSelectedRect(page: Page, xywh: number[]) {
-  const [x, y, w, h] = xywh;
+export async function getSelectedRect(page: Page) {
   const editor = getEditorLocator(page);
   const selectedRect = editor
     .locator('edgeless-selected-rect')
@@ -918,6 +917,12 @@ export async function assertEdgelessSelectedRect(page: Page, xywh: number[]) {
   await page.waitForTimeout(50);
   const box = await selectedRect.boundingBox();
   if (!box) throw new Error('Missing edgeless selected rect');
+  return box;
+}
+
+export async function assertEdgelessSelectedRect(page: Page, xywh: number[]) {
+  const [x, y, w, h] = xywh;
+  const box = await getSelectedRect(page);
 
   expect(box.x).toBeCloseTo(x, 0);
   expect(box.y).toBeCloseTo(y, 0);

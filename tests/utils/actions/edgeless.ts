@@ -510,6 +510,15 @@ export async function addBasicConnectorElement(
   await dragBetweenCoords(page, start, end, { steps: 100 });
 }
 
+export async function addBasicFrameElement(
+  page: Page,
+  start: Point,
+  end: Point
+) {
+  await setEdgelessTool(page, 'frame');
+  await dragBetweenCoords(page, start, end, { steps: 50 });
+}
+
 export async function addNote(page: Page, text: string, x: number, y: number) {
   await setEdgelessTool(page, 'note');
   await page.mouse.click(x, y);
@@ -1019,7 +1028,9 @@ type Action =
   | 'createLinkedDoc'
   | 'openLinkedDoc'
   | 'toCardView'
-  | 'toEmbedView';
+  | 'toEmbedView'
+  | 'autoArrange'
+  | 'autoResize';
 
 export async function triggerComponentToolbarAction(
   page: Page,
@@ -1314,6 +1325,28 @@ export async function triggerComponentToolbarAction(
           hasText: 'Embed view',
         });
       await button.click();
+      break;
+    }
+    case 'autoArrange': {
+      const button = locatorComponentToolbar(page).locator(
+        'edgeless-align-button'
+      );
+      await button.click();
+      const arrange = button.locator('editor-icon-button').filter({
+        hasText: 'Auto arrange',
+      });
+      await arrange.click();
+      break;
+    }
+    case 'autoResize': {
+      const button = locatorComponentToolbar(page).locator(
+        'edgeless-align-button'
+      );
+      await button.click();
+      const resize = button.locator('editor-icon-button').filter({
+        hasText: 'Resize & Align',
+      });
+      await resize.click();
       break;
     }
   }
@@ -1780,6 +1813,20 @@ export async function createConnectorElement(
   const start = await toViewCoord(page, coord1);
   const end = await toViewCoord(page, coord2);
   await addBasicConnectorElement(
+    page,
+    { x: start[0], y: start[1] },
+    { x: end[0], y: end[1] }
+  );
+}
+
+export async function createFrameElement(
+  page: Page,
+  coord1: number[],
+  coord2: number[]
+) {
+  const start = await toViewCoord(page, coord1);
+  const end = await toViewCoord(page, coord2);
+  await addBasicFrameElement(
     page,
     { x: start[0], y: start[1] },
     { x: end[0], y: end[1] }

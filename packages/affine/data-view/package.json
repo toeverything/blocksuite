@@ -23,7 +23,7 @@
     "@blocksuite/affine-shared": "workspace:*",
     "@blocksuite/block-std": "workspace:*",
     "@blocksuite/global": "workspace:*",
-    "@blocksuite/icons": "^2.1.67",
+    "@blocksuite/icons": "^2.1.68",
     "@blocksuite/store": "workspace:*",
     "@floating-ui/dom": "^1.6.10",
     "@lit/context": "^1.1.2",
