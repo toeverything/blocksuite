@@ -1,5 +1,7 @@
+import type { ReadonlySignal } from '@preact/signals-core';
+
 import { ShadowlessElement } from '@blocksuite/block-std';
-import { WithDisposable } from '@blocksuite/global/utils';
+import { SignalWatcher, WithDisposable } from '@blocksuite/global/utils';
 import { css, html } from 'lit';
 import { property } from 'lit/decorators.js';
 
@@ -7,7 +9,7 @@ import type { TType } from '../../../logical/typesystem.js';
 import type { LiteralViewProps } from '../types.js';
 
 export abstract class LiteralElement<T = unknown, Type extends TType = TType>
-  extends WithDisposable(ShadowlessElement)
+  extends SignalWatcher(WithDisposable(ShadowlessElement))
   implements LiteralViewProps<T, Type>
 {
   @property({ attribute: false })
@@ -17,12 +19,12 @@ export abstract class LiteralElement<T = unknown, Type extends TType = TType>
   accessor type!: Type;
 
   @property({ attribute: false })
-  accessor value$: T | undefined = undefined;
+  accessor value$!: ReadonlySignal<T | undefined>;
 }
 
 export class BooleanLiteral extends LiteralElement<boolean> {
   override render() {
-    return this.value$ ? 'True' : 'False';
+    return this.value$.value ? 'True' : 'False';
   }
 }
 
@@ -39,7 +41,8 @@ export class NumberLiteral extends LiteralElement<number> {
 
   override render() {
     return (
-      this.value$?.toString() ?? html`<span class="dv-color-2">Value</span>`
+      this.value$.value?.toString() ??
+      html`<span class="dv-color-2">Value</span>`
     );
   }
 }
@@ -57,7 +60,8 @@ export class StringLiteral extends LiteralElement<string> {
 
   override render() {
     return (
-      this.value$?.toString() ?? html`<span class="dv-color-2">Value</span>`
+      this.value$.value?.toString() ??
+      html`<span class="dv-color-2">Value</span>`
     );
   }
 }
