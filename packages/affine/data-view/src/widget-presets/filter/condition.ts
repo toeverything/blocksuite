@@ -7,6 +7,7 @@ import {
 import { ShadowlessElement } from '@blocksuite/block-std';
 import { SignalWatcher } from '@blocksuite/global/utils';
 import { CloseIcon } from '@blocksuite/icons/lit';
+import { computed } from '@preact/signals-core';
 import { css, html, nothing } from 'lit';
 import { property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
@@ -157,8 +158,10 @@ export class FilterConditionView extends SignalWatcher(ShadowlessElement) {
         >
           ${this._filterLabel()}
         </div>
-        ${repeat(this._args(), (v, i) => {
-          const value = this.data.args[i];
+        ${repeat(this._args(), (type, i) => {
+          const value$ = computed(() => {
+            return this.data.args[i]?.value;
+          });
           const onChange = (value: unknown) => {
             const newArr = this.data.args.slice();
             newArr[i] = { type: 'literal', value };
@@ -170,8 +173,8 @@ export class FilterConditionView extends SignalWatcher(ShadowlessElement) {
           const click = (e: MouseEvent) => {
             popLiteralEdit(
               popupTargetFromElement(e.currentTarget as HTMLElement),
-              v,
-              value?.value,
+              type,
+              value$,
               onChange
             );
           };
@@ -179,7 +182,7 @@ export class FilterConditionView extends SignalWatcher(ShadowlessElement) {
             class="dv-hover dv-round-4 filter-condition-arg"
             @click="${click}"
           >
-            ${renderLiteral(v, value?.value, onChange)}
+            ${renderLiteral(type, value$, onChange)}
           </div>`;
         })}
       </div>

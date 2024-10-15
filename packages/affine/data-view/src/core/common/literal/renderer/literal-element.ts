@@ -17,12 +17,12 @@ export abstract class LiteralElement<T = unknown, Type extends TType = TType>
   accessor type!: Type;
 
   @property({ attribute: false })
-  accessor value: T | undefined = undefined;
+  accessor value$: T | undefined = undefined;
 }
 
 export class BooleanLiteral extends LiteralElement<boolean> {
   override render() {
-    return this.value ? 'True' : 'False';
+    return this.value$ ? 'True' : 'False';
   }
 }
 
@@ -39,7 +39,7 @@ export class NumberLiteral extends LiteralElement<number> {
 
   override render() {
     return (
-      this.value?.toString() ?? html`<span class="dv-color-2">Value</span>`
+      this.value$?.toString() ?? html`<span class="dv-color-2">Value</span>`
     );
   }
 }
@@ -57,7 +57,7 @@ export class StringLiteral extends LiteralElement<string> {
 
   override render() {
     return (
-      this.value?.toString() ?? html`<span class="dv-color-2">Value</span>`
+      this.value$?.toString() ?? html`<span class="dv-color-2">Value</span>`
     );
   }
 }

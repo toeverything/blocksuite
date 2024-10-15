@@ -1,3 +1,5 @@
+import type { ReadonlySignal } from '@preact/signals-core';
+
 import {
   CheckBoxCkeckSolidIcon,
   CheckBoxUnIcon,
@@ -141,7 +143,7 @@ export const menuButtonItems = {
   checkbox:
     (config: {
       name: string;
-      checked: boolean;
+      checked: ReadonlySignal<boolean>;
       postfix?: TemplateResult;
       label?: () => TemplateResult;
       select: (checked: boolean) => boolean;
@@ -153,18 +155,16 @@ export const menuButtonItems = {
       }
       const data: MenuButtonData = {
         content: () => html`
-          <div class="icon">
-            ${config.checked
-              ? CheckBoxCkeckSolidIcon({ style: `color:#1E96EB` })
-              : CheckBoxUnIcon()}
-          </div>
+          ${config.checked.value
+            ? CheckBoxCkeckSolidIcon({ style: `color:#1E96EB` })
+            : CheckBoxUnIcon()}
           <div class="affine-menu-action-text">
             ${config.label?.() ?? config.name}
           </div>
           ${config.postfix}
         `,
         select: () => {
-          config.select(config.checked);
+          config.select(config.checked.value);
           return false;
         },
         class: config.class ?? '',

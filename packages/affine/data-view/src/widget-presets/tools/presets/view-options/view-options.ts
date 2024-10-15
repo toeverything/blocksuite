@@ -113,6 +113,9 @@ export const popViewOptions = (
   };
   popMenu(target, {
     options: {
+      title: {
+        text: 'View settings',
+      },
       items: [
         menu.input({
           initialValue: view.name$.value,

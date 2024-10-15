@@ -3,6 +3,7 @@ import {
   menu,
   popMenu,
 } from '@blocksuite/affine-components/context-menu';
+import { computed, signal } from '@preact/signals-core';
 import { html } from 'lit';
 import { styleMap } from 'lit/directives/style-map.js';
 
@@ -30,13 +31,13 @@ const literalMatcherCreator = new MatcherCreator<LiteralData>();
 export const literalMatchers = [
   literalMatcherCreator.createMatcher(tBoolean.create(), {
     view: createUniComponentFromWebComponent(BooleanLiteral),
-    popEdit: (position, { value, onChange }) => {
+    popEdit: (position, { value$, onChange }) => {
       popMenu(position, {
         options: {
           items: [true, false].map(v => {
             return menu.action({
               name: v.toString().toUpperCase(),
-              isSelected: v === value,
+              isSelected: v === value$.value,
               select: () => {
                 onChange(v);
               },
@@ -48,12 +49,12 @@ export const literalMatchers = [
   }),
   literalMatcherCreator.createMatcher(tString.create(), {
     view: createUniComponentFromWebComponent(StringLiteral),
-    popEdit: (position, { value, onChange }) => {
+    popEdit: (position, { value$, onChange }) => {
       popMenu(position, {
         options: {
           items: [
             menu.input({
-              initialValue: value?.toString() ?? '',
+              initialValue: value$.value?.toString() ?? '',
               onComplete: text => {
                 onChange(text || undefined);
               },
@@ -65,12 +66,12 @@ export const literalMatchers = [
   }),
   literalMatcherCreator.createMatcher(tNumber.create(), {
     view: createUniComponentFromWebComponent(NumberLiteral),
-    popEdit: (position, { value, onChange }) => {
+    popEdit: (position, { value$, onChange }) => {
       popMenu(position, {
         options: {
           items: [
             menu.input({
-              initialValue: value?.toString() ?? '',
+              initialValue: value$.value?.toString() ?? '',
               onComplete: text => {
                 if (!text) {
                   onChange(undefined);
@@ -89,14 +90,17 @@ export const literalMatchers = [
   }),
   literalMatcherCreator.createMatcher(tArray(tTag.create()), {
     view: createUniComponentFromWebComponent(MultiTagLiteral),
-    popEdit: (position, { value, onChange, type }) => {
+    popEdit: (position, { value$, onChange, type }) => {
       if (!isTArray(type)) {
         return;
       }
       if (!tTag.is(type.ele)) {
         return;
       }
-      let list = Array.isArray(value) ? value : [];
+      const list$ = signal(Array.isArray(value$.value) ? value$.value : []);
+      // const list$ = computed(()=>{
+      //   return Array.isArray(value$.value) ? value$.value : []
+      // });
       popMenu(position, {
         options: {
           items:
@@ -108,19 +112,19 @@ export const literalMatchers = [
               });
               return menu.checkbox({
                 name: tag.value,
-                checked: list.includes(tag.id),
+                checked: computed(() => list$.value.includes(tag.id)),
                 label: () =>
                   html` <div class="dv-round-4" style=${styles}>
                     ${tag.value}
                   </div>`,
                 select: checked => {
                   if (checked) {
-                    list = list.filter(v => v !== tag.id);
-                    onChange(list);
+                    list$.value = list$.value.filter(v => v !== tag.id);
+                    onChange(list$.value);
                     return false;
                   } else {
-                    list = [...list, tag.id];
-                    onChange(list);
+                    list$.value = [...list$.value, tag.id];
+                    onChange(list$.value);
                     return true;
                   }
                 },
@@ -162,11 +166,11 @@ export const literalMatchers = [
   }),
   literalMatcherCreator.createMatcher(tDate.create(), {
     view: createUniComponentFromWebComponent(DateLiteral),
-    popEdit: (position, { value, onChange }) => {
+    popEdit: (position, { value$, onChange }) => {
       const input = document.createElement('input');
       input.type = 'date';
       input.click();
-      input.valueAsNumber = value as number;
+      input.valueAsNumber = value$.value as number;
       document.body.append(input);
       input.style.position = 'absolute';
       const close = createPopup(position, input);
