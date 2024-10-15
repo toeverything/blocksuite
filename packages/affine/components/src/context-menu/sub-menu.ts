@@ -49,6 +49,9 @@ export class MenuSubMenu extends MenuFocusable {
     const focus = this.menu.currentFocused$.value;
     const menu = new Menu({
       ...this.data.options,
+      onComplete: () => {
+        this.menu.close();
+      },
       onClose: () => {
         menu.menuElement.remove();
         this.menu.focusTo(focus);

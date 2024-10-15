@@ -3,9 +3,11 @@ import {
   CheckBoxUnIcon,
   DoneIcon,
 } from '@blocksuite/icons/lit';
-import { css, html, type TemplateResult } from 'lit';
+import { cssVarV2 } from '@toeverything/theme/v2';
+import { css, html, type TemplateResult, unsafeCSS } from 'lit';
 import { property } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
+import { keyed } from 'lit/directives/keyed.js';
 
 import type { MenuClass, MenuItemRender } from './types.js';
 
@@ -44,7 +46,8 @@ export class MenuButton extends MenuFocusable {
     }
 
     .affine-menu-button.focused {
-      outline: 1px solid var(--affine-layer-insideBorder-primaryBorder);
+      outline: 1px solid
+        ${unsafeCSS(cssVarV2('layer/insideBorder/primaryBorder'))};
     }
 
     .affine-menu-button.delete-item:hover {
@@ -76,6 +79,7 @@ export class MenuButton extends MenuFocusable {
 
   onClick() {
     if (this.data.select(this) !== false) {
+      this.menu.options.onComplete?.();
       this.menu.close();
     }
   }
@@ -126,10 +130,13 @@ export const menuButtonItems = {
         select: config.select,
         class: config.class ?? (config.isSelected ? 'selected-item' : ''),
       };
-      return html` <affine-menu-button
-        .data="${data}"
-        .menu="${menu}"
-      ></affine-menu-button>`;
+      return keyed(
+        config.name,
+        html`<affine-menu-button
+          .data="${data}"
+          .menu="${menu}"
+        ></affine-menu-button>`
+      );
     },
   checkbox:
     (config: {
@@ -162,8 +169,13 @@ export const menuButtonItems = {
         },
         class: config.class ?? '',
       };
-      return html`
-      <affine-menu-button.data='${data}'.menu='${menu}'></affine-menu-button>`;
+      return keyed(
+        config.name,
+        html`<affine-menu-button
+          .data="${data}"
+          .menu="${menu}"
+        ></affine-menu-button>`
+      );
     },
   toggleSwitch:
     (config: {
@@ -199,9 +211,12 @@ export const menuButtonItems = {
         },
         class: config.class ?? '',
       };
-      return html` <affine-menu-button
-        .data="${data}"
-        .menu="${menu}"
-      ></affine-menu-button>`;
+      return keyed(
+        config.name,
+        html`<affine-menu-button
+          .data="${data}"
+          .menu="${menu}"
+        ></affine-menu-button>`
+      );
     },
 } satisfies Record<string, MenuItemRender<never>>;

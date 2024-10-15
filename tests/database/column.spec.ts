@@ -7,6 +7,7 @@ import {
   getBoundingBox,
   initDatabaseDynamicRowWithData,
   initEmptyDatabaseState,
+  pressArrowRight,
   pressArrowUp,
   pressArrowUpWithShiftKey,
   pressBackspace,
@@ -44,6 +45,8 @@ test.describe('column operations', () => {
     const { textElement } = await getDatabaseHeaderColumn(page, 1);
     expect(await textElement.innerText()).toBe('abc');
     await textElement.click();
+    await waitNextFrame(page, 200);
+    await pressArrowRight(page);
     await type(page, '123');
     await pressEnter(page);
     expect(await textElement.innerText()).toBe('abc123');
@@ -176,6 +179,8 @@ test.describe('column operations', () => {
     await column.click();
     const moveLeft = page.locator('.action', { hasText: 'Move left' });
     expect(await moveLeft.count()).toBe(0);
+    await waitNextFrame(page, 200);
+    await pressEscape(page);
     await pressEscape(page);
 
     await performColumnAction(page, '2', 'Move left');

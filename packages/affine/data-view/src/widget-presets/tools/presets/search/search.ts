@@ -20,7 +20,7 @@ const styles = css`
     width: 24px;
     height: 32px;
     border-radius: 8px;
-    transition: all 0.3s ease;
+    transition: width 0.3s ease;
     overflow: hidden;
   }
   .affine-database-search-container svg {
@@ -59,7 +59,6 @@ const styles = css`
     cursor: pointer;
     padding: 2px;
     border-radius: 4px;
-    height: max-content;
   }
   .affine-database-search-input-icon:hover {
     background: var(--affine-hover-color);

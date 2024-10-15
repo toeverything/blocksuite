@@ -12,6 +12,7 @@ import {
   shift,
   type VirtualElement,
 } from '@floating-ui/dom';
+import { computed } from '@preact/signals-core';
 import { css, html, nothing } from 'lit';
 import { property } from 'lit/decorators.js';
 import { createRef, ref } from 'lit/directives/ref.js';
@@ -87,6 +88,10 @@ export class MenuComponent extends SignalWatcher(
 
   private searchRef = createRef<HTMLInputElement>();
 
+  showSearch = computed(() => {
+    return this.menu.isSearchMode && this.menu.searchName$.value.length > 0;
+  });
+
   override firstUpdated() {
     const input = this.searchRef.value;
     if (input) {
@@ -99,6 +104,12 @@ export class MenuComponent extends SignalWatcher(
         e.stopPropagation();
         if (e.key === 'Escape') {
           this.menu.close();
+          return;
+        }
+        const onBack = this.menu.options.title?.onBack;
+        if (e.key === 'Backspace' && onBack && !this.showSearch.value) {
+          this.menu.close();
+          onBack(this.menu);
           return;
         }
         if (e.key === 'Enter' && !e.isComposing) {
@@ -144,8 +155,7 @@ export class MenuComponent extends SignalWatcher(
   }
 
   renderSearch() {
-    const showSearch =
-      this.menu.isSearchMode && this.menu.searchName$.value.length > 0;
+    const showSearch = this.showSearch.value;
     const searchStyle = styleMap({
       opacity: showSearch ? '1' : '0',
       height: showSearch ? undefined : '0',

@@ -9,7 +9,6 @@ import { expect, type Locator, type Page } from '@playwright/test';
 
 import {
   pressEnter,
-  pressEscape,
   selectAllByKeyboard,
   type,
 } from '../utils/actions/keyboard.js';
@@ -25,7 +24,7 @@ export async function initDatabaseColumn(page: Page, title = '') {
   await editor.locator('affine-data-view-table-group').first().hover();
   const columnAddBtn = editor.locator('.header-add-column-button');
   await columnAddBtn.click();
-  await waitNextFrame(page, 100);
+  await waitNextFrame(page, 200);
 
   if (title) {
     await selectAllByKeyboard(page);
@@ -33,7 +32,7 @@ export async function initDatabaseColumn(page: Page, title = '') {
     await waitNextFrame(page);
     await pressEnter(page);
   } else {
-    await pressEscape(page);
+    await pressEnter(page);
   }
 }
 
@@ -51,7 +50,7 @@ export async function performColumnAction(
 ) {
   await renameColumn(page, name);
 
-  const actionMenu = page.locator(`.affine-menu-action`, { hasText: action });
+  const actionMenu = page.locator(`.affine-menu-button`, { hasText: action });
   await actionMenu.click();
 }
 
@@ -67,7 +66,7 @@ export async function switchColumnType(
 }
 
 export function clickColumnType(page: Page, columnType: string) {
-  const typeMenu = page.locator(`.affine-menu-action`, {
+  const typeMenu = page.locator(`.affine-menu-button`, {
     hasText: new RegExp(`${columnType}`),
   });
   return typeMenu.click();
@@ -557,7 +556,9 @@ export const changeColumnType = async (
 ) => {
   await waitNextFrame(page);
   await page.locator('affine-database-header-column').nth(column).click();
-  await pressKey(page, 'ArrowDown', 2);
+  await waitNextFrame(page, 200);
+  await pressKey(page, 'Escape');
+  await pressKey(page, 'ArrowDown');
   await pressKey(page, 'Enter');
   await type(page, name);
   await pressKey(page, 'ArrowDown');
