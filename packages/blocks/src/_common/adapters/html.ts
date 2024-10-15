@@ -1,6 +1,6 @@
 import type { AffineTextAttributes } from '@blocksuite/affine-components/rich-text';
 import type { DeltaInsert } from '@blocksuite/inline';
-import type { Root } from 'hast';
+import type { Element, Root } from 'hast';
 
 import {
   ColorScheme,
@@ -12,6 +12,8 @@ import { getFilenameFromContentDisposition } from '@blocksuite/affine-shared/uti
 import { sha } from '@blocksuite/global/utils';
 import {
   type AssetsManager,
+  ASTWalker,
+  BaseAdapter,
   type BlockSnapshot,
   BlockSnapshotSchema,
   type DocSnapshot,
@@ -27,7 +29,6 @@ import {
   type ToBlockSnapshotPayload,
   type ToDocSnapshotPayload,
 } from '@blocksuite/store';
-import { ASTWalker, BaseAdapter } from '@blocksuite/store';
 import { collapseWhiteSpace } from 'collapse-white-space';
 import rehypeParse from 'rehype-parse';
 import rehypeStringify from 'rehype-stringify';
@@ -44,7 +45,7 @@ import {
   hastQuerySelector,
   type HtmlAST,
 } from './hast.js';
-import { fetchable, fetchImage, mergeDeltas } from './utils.js';
+import { fetchable, fetchImage, isNullish, mergeDeltas } from './utils.js';
 
 export type Html = string;
 
@@ -685,6 +686,7 @@ export class HtmlAdapter extends BaseAdapter<Html> {
       const text = (o.node.props.text ?? { delta: [] }) as {
         delta: DeltaInsert[];
       };
+      const currentTNode = context.currentNode();
       switch (o.node.flavour) {
         case 'affine:page': {
           context
@@ -935,32 +937,6 @@ export class HtmlAdapter extends BaseAdapter<Html> {
           break;
         }
         case 'affine:list': {
-          context
-            .openNode(
-              {
-                type: 'element',
-                tagName: 'div',
-                properties: {
-                  className: ['affine-list-block-container'],
-                },
-                children: [],
-              },
-              'children'
-            )
-            .openNode(
-              {
-                type: 'element',
-                tagName: o.node.props.type === 'numbered' ? 'ol' : 'ul',
-                properties: {
-                  style:
-                    o.node.props.type === 'todo'
-                      ? 'list-style-type: none;'
-                      : '',
-                },
-                children: [],
-              },
-              'children'
-            );
           const liChildren = this._deltaToHast(text.delta);
           if (o.node.props.type === 'todo') {
             liChildren.unshift({
@@ -974,36 +950,62 @@ export class HtmlAdapter extends BaseAdapter<Html> {
                 {
                   type: 'element',
                   tagName: 'label',
-                  properties: {},
+                  properties: {
+                    style: 'margin-right: 3px;',
+                  },
                   children: [],
                 },
               ],
             });
           }
-          context
-            .openNode(
+          // check if the list is of the same type
+          if (
+            context.getNodeContext('affine:list:parent') === o.parent &&
+            currentTNode.type === 'element' &&
+            currentTNode.tagName ===
+              (o.node.props.type === 'numbered' ? 'ol' : 'ul') &&
+            !(
+              Array.isArray(currentTNode.properties.className) &&
+              currentTNode.properties.className.includes('todo-list')
+            ) ===
+              isNullish(
+                o.node.props.type === 'todo'
+                  ? (o.node.props.checked as boolean)
+                  : undefined
+              )
+          ) {
+            // if true, add the list item to the list
+          } else {
+            // if false, create a new list
+            context.openNode(
               {
                 type: 'element',
-                tagName: 'li',
-                properties: {},
-                children: liChildren,
-              },
-              'children'
-            )
-            .closeNode()
-            .closeNode()
-            .openNode(
-              {
-                type: 'element',
-                tagName: 'div',
+                tagName: o.node.props.type === 'numbered' ? 'ol' : 'ul',
                 properties: {
-                  className: ['affine-block-children-container'],
-                  style: 'padding-left: 26px;',
+                  style:
+                    o.node.props.type === 'todo'
+                      ? 'list-style-type: none; padding-inline-start: 18px;'
+                      : null,
+                  className: [o.node.props.type + '-list'],
                 },
                 children: [],
               },
               'children'
             );
+            context.setNodeContext('affine:list:parent', o.parent);
+          }
+
+          context.openNode(
+            {
+              type: 'element',
+              tagName: 'li',
+              properties: {
+                className: ['affine-list-block-container'],
+              },
+              children: liChildren,
+            },
+            'children'
+          );
           break;
         }
         case 'affine:divider': {
@@ -1083,7 +1085,34 @@ export class HtmlAdapter extends BaseAdapter<Html> {
           break;
         }
         case 'affine:list': {
-          context.closeNode().closeNode();
+          const currentTNode = context.currentNode() as Element;
+          const previousTNode = context.previousNode() as Element;
+          if (
+            context.getPreviousNodeContext('affine:list:parent') === o.parent &&
+            currentTNode.tagName === 'li' &&
+            previousTNode.tagName ===
+              (o.node.props.type === 'numbered' ? 'ol' : 'ul') &&
+            !(
+              Array.isArray(previousTNode.properties.className) &&
+              previousTNode.properties.className.includes('todo-list')
+            ) ===
+              isNullish(
+                o.node.props.type === 'todo'
+                  ? (o.node.props.checked as boolean)
+                  : undefined
+              )
+          ) {
+            context.closeNode();
+            if (
+              o.next?.flavour !== 'affine:list' ||
+              o.next.props.type !== o.node.props.type
+            ) {
+              // If the next node is not a list or different type of list, close the list
+              context.closeNode();
+            }
+          } else {
+            context.closeNode().closeNode();
+          }
           break;
         }
       }

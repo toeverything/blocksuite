@@ -1,38 +1,46 @@
 [
   {
     "type": "block",
-    "id": "4",
-    "flavour": "affine:paragraph",
-    "version": 1,
-    "props": {
-      "type": "text",
-      "text": {
-        "$blocksuite:internal:text$": true,
-        "delta": [
-          {
-            "insert": "hi"
+    "id": "",
+    "flavour": "affine:note",
+    "props": {},
+    "children": [
+      {
+        "type": "block",
+        "id": "4",
+        "flavour": "affine:paragraph",
+        "version": 1,
+        "props": {
+          "type": "text",
+          "text": {
+            "$blocksuite:internal:text$": true,
+            "delta": [
+              {
+                "insert": "hi"
+              }
+            ]
           }
-        ]
-      }
-    },
-    "children": []
-  },
-  {
-    "type": "block",
-    "id": "5",
-    "flavour": "affine:paragraph",
-    "version": 1,
-    "props": {
-      "type": "text",
-      "text": {
-        "$blocksuite:internal:text$": true,
-        "delta": [
-          {
-            "insert": "j"
+        },
+        "children": []
+      },
+      {
+        "type": "block",
+        "id": "5",
+        "flavour": "affine:paragraph",
+        "version": 1,
+        "props": {
+          "type": "text",
+          "text": {
+            "$blocksuite:internal:text$": true,
+            "delta": [
+              {
+                "insert": "j"
+              }
+            ]
           }
-        ]
+        },
+        "children": []
       }
-    },
-    "children": []
+    ]
   }
 ]

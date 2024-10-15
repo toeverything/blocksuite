@@ -520,8 +520,6 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
         }
         case 'affine:list': {
           // check if the list is of the same type
-          // if true, add the list item to the list
-          // if false, create a new list
           if (
             context.getNodeContext('affine:list:parent') === o.parent &&
             currentTNode.type === 'list' &&
@@ -533,28 +531,9 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
                   : undefined
               )
           ) {
-            context
-              .openNode(
-                {
-                  type: 'listItem',
-                  checked:
-                    o.node.props.type === 'todo'
-                      ? (o.node.props.checked as boolean)
-                      : undefined,
-                  spread: false,
-                  children: [],
-                },
-                'children'
-              )
-              .openNode(
-                {
-                  type: 'paragraph',
-                  children: this._deltaToMdAST(text.delta),
-                },
-                'children'
-              )
-              .closeNode();
+            // if true, add the list item to the list
           } else {
+            // if false, create a new list
             context
               .openNode(
                 {
@@ -565,28 +544,29 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
                 },
                 'children'
               )
-              .setNodeContext('affine:list:parent', o.parent)
-              .openNode(
-                {
-                  type: 'listItem',
-                  checked:
-                    o.node.props.type === 'todo'
-                      ? (o.node.props.checked as boolean)
-                      : undefined,
-                  spread: false,
-                  children: [],
-                },
-                'children'
-              )
-              .openNode(
-                {
-                  type: 'paragraph',
-                  children: this._deltaToMdAST(text.delta),
-                },
-                'children'
-              )
-              .closeNode();
+              .setNodeContext('affine:list:parent', o.parent);
           }
+          context
+            .openNode(
+              {
+                type: 'listItem',
+                checked:
+                  o.node.props.type === 'todo'
+                    ? (o.node.props.checked as boolean)
+                    : undefined,
+                spread: false,
+                children: [],
+              },
+              'children'
+            )
+            .openNode(
+              {
+                type: 'paragraph',
+                children: this._deltaToMdAST(text.delta),
+              },
+              'children'
+            )
+            .closeNode();
           break;
         }
         case 'affine:divider': {
@@ -877,8 +857,11 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
               )
           ) {
             context.closeNode();
-            if (o.next?.flavour !== 'affine:list') {
-              // If the next node is not a list, close the list
+            if (
+              o.next?.flavour !== 'affine:list' ||
+              o.next.props.type !== o.node.props.type
+            ) {
+              // If the next node is not a list or different type of list, close the list
               context.closeNode();
             }
           } else {

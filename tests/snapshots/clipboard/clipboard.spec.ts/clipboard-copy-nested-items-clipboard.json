@@ -1,24 +1,13 @@
 [
   {
     "type": "block",
-    "id": "2",
-    "flavour": "affine:paragraph",
-    "version": 1,
-    "props": {
-      "type": "text",
-      "text": {
-        "$blocksuite:internal:text$": true,
-        "delta": [
-          {
-            "insert": "bc"
-          }
-        ]
-      }
-    },
+    "id": "",
+    "flavour": "affine:note",
+    "props": {},
     "children": [
       {
         "type": "block",
-        "id": "3",
+        "id": "2",
         "flavour": "affine:paragraph",
         "version": 1,
         "props": {
@@ -27,12 +16,31 @@
             "$blocksuite:internal:text$": true,
             "delta": [
               {
-                "insert": "d"
+                "insert": "bc"
               }
             ]
           }
         },
-        "children": []
+        "children": [
+          {
+            "type": "block",
+            "id": "3",
+            "flavour": "affine:paragraph",
+            "version": 1,
+            "props": {
+              "type": "text",
+              "text": {
+                "$blocksuite:internal:text$": true,
+                "delta": [
+                  {
+                    "insert": "d"
+                  }
+                ]
+              }
+            },
+            "children": []
+          }
+        ]
       }
     ]
   }
