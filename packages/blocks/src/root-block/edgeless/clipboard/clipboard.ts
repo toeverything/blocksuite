@@ -73,6 +73,7 @@ import {
   getSortedCloneElements,
   serializeElement,
 } from '../utils/clone-utils.js';
+import { addAttachments, addImages } from '../utils/common.js';
 import { DEFAULT_NOTE_HEIGHT, DEFAULT_NOTE_WIDTH } from '../utils/consts.js';
 import { deleteElements } from '../utils/crud.js';
 import {
@@ -240,9 +241,9 @@ export class EdgelessClipboardController extends PageClipboard {
 
       // when only images in clipboard, add image-blocks else add all files as attachments
       if (attachmentFiles.length === 0) {
-        await this.host.addImages(imageFiles, point);
+        await addImages(this.std, imageFiles, point);
       } else {
-        await this.host.addAttachments([...files], point);
+        await addAttachments(this.std, [...files], point);
       }
 
       this.std.getOptional(TelemetryProvider)?.track('CanvasElementAdded', {
@@ -355,7 +356,7 @@ export class EdgelessClipboardController extends PageClipboard {
 
     const svg = tryGetSvgFromClipboard(data);
     if (svg) {
-      await this.host.addImages([svg], point);
+      await addImages(this.std, [svg], point);
       return;
     }
     try {

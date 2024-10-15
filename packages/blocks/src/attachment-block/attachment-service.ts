@@ -11,9 +11,8 @@ import {
   matchFlavours,
 } from '@blocksuite/affine-shared/utils';
 import { BlockService } from '@blocksuite/block-std';
-import { Slot } from '@blocksuite/store';
+import { GfxControllerIdentifier } from '@blocksuite/block-std/gfx';
 
-import type { RootBlockComponent } from '../root-block/types.js';
 import type { AttachmentBlockComponent } from './attachment-block.js';
 
 import {
@@ -21,7 +20,7 @@ import {
   type FileDropOptions,
 } from '../_common/components/file-drop-manager.js';
 import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../_common/consts.js';
-import { EdgelessRootBlockComponent } from '../root-block/edgeless/edgeless-root-block.js';
+import { addAttachments } from '../root-block/edgeless/utils/common.js';
 import { AttachmentEdgelessBlockComponent } from './attachment-edgeless-block.js';
 import { addSiblingAttachmentBlocks } from './utils.js';
 
@@ -47,10 +46,9 @@ export class AttachmentBlockService extends BlockService {
           place
         );
       } else if (isInsideEdgelessEditor(this.host)) {
-        const edgelessRoot = this.rootComponent;
-        if (!(edgelessRoot instanceof EdgelessRootBlockComponent)) return false;
-        point = edgelessRoot.service.viewport.toViewCoordFromClientCoord(point);
-        await edgelessRoot.addAttachments(attachmentFiles, point);
+        const gfx = this.std.get(GfxControllerIdentifier);
+        point = gfx.viewport.toViewCoordFromClientCoord(point);
+        await addAttachments(this.std, attachmentFiles, point);
 
         this.std.getOptional(TelemetryProvider)?.track('CanvasElementAdded', {
           control: 'canvas:drop',
@@ -61,7 +59,6 @@ export class AttachmentBlockService extends BlockService {
         });
       }
 
-      this.slots.onFilesDropped.emit(attachmentFiles);
       return true;
     },
   };
@@ -69,19 +66,6 @@ export class AttachmentBlockService extends BlockService {
   fileDropManager!: FileDropManager;
 
   maxFileSize = 10 * 1000 * 1000; // 10MB (default)
-
-  slots = {
-    onFilesDropped: new Slot<File[]>(),
-  };
-
-  get rootComponent(): RootBlockComponent | null {
-    const rootModel = this.doc.root;
-    if (!rootModel) return null;
-    const rootComponent = this.std.view.getBlock(
-      rootModel.id
-    ) as RootBlockComponent | null;
-    return rootComponent;
-  }
 
   override mounted(): void {
     super.mounted();

@@ -3,8 +3,6 @@ import type {
   SurfaceBlockModel,
 } from '@blocksuite/affine-block-surface';
 import type {
-  AttachmentBlockProps,
-  ImageBlockProps,
   RootBlockModel,
   ShapeElementModel,
 } from '@blocksuite/affine-model';
@@ -13,11 +11,9 @@ import type {
   SurfaceSelection,
   UIEventHandler,
 } from '@blocksuite/block-std';
-import type { IBound, IPoint, IVec } from '@blocksuite/global/utils';
-import type { BlockModel } from '@blocksuite/store';
+import type { IBound, IPoint } from '@blocksuite/global/utils';
 
 import { CommonUtils } from '@blocksuite/affine-block-surface';
-import { focusTextModel } from '@blocksuite/affine-components/rich-text';
 import { toast } from '@blocksuite/affine-components/toast';
 import { NoteDisplayMode } from '@blocksuite/affine-model';
 import {
@@ -27,8 +23,6 @@ import {
 } from '@blocksuite/affine-shared/services';
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import {
-  handleNativeRangeAtPoint,
-  humanFileSize,
   isTouchPadPinchEvent,
   requestConnectedFrame,
   requestThrottledConnectedFrame,
@@ -59,15 +53,9 @@ import type { EdgelessRootBlockWidgetName } from '../types.js';
 import type { EdgelessSelectedRect } from './components/rects/edgeless-selected-rect.js';
 import type { EdgelessRootService } from './edgeless-root-service.js';
 
-import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../../_common/consts.js';
 import { isSelectSingleMindMap } from '../../_common/edgeless/mindmap/index.js';
-import {
-  setAttachmentUploaded,
-  setAttachmentUploading,
-} from '../../attachment-block/utils.js';
 import { EdgelessClipboardController } from './clipboard/clipboard.js';
 import { EdgelessToolbar } from './components/toolbar/edgeless-toolbar.js';
-import { calcBoundByOrigin, readImageSize } from './components/utils.js';
 import { EdgelessPageKeyboardManager } from './edgeless-keyboard.js';
 import { edgelessElementsBound } from './utils/bound-utils.js';
 import {
@@ -461,227 +449,6 @@ export class EdgelessRootBlockComponent extends BlockComponent<
     );
   }
 
-  async addAttachments(files: File[], point?: IVec): Promise<string[]> {
-    if (!files.length) return [];
-
-    const attachmentService = this.std.getService('affine:attachment');
-    if (!attachmentService) {
-      console.error('Attachment service not found');
-      return [];
-    }
-    const maxFileSize = attachmentService.maxFileSize;
-    const isSizeExceeded = files.some(file => file.size > maxFileSize);
-    if (isSizeExceeded) {
-      toast(
-        this.host,
-        `You can only upload files less than ${humanFileSize(
-          maxFileSize,
-          true,
-          0
-        )}`
-      );
-      return [];
-    }
-
-    let { x, y } = this.service.viewport.center;
-    if (point) [x, y] = this.service.viewport.toModelCoord(...point);
-
-    const CARD_STACK_GAP = 32;
-
-    const dropInfos: { blockId: string; file: File }[] = files.map(
-      (file, index) => {
-        const point = new Point(
-          x + index * CARD_STACK_GAP,
-          y + index * CARD_STACK_GAP
-        );
-        const center = Vec.toVec(point);
-        const bound = Bound.fromCenter(
-          center,
-          EMBED_CARD_WIDTH.cubeThick,
-          EMBED_CARD_HEIGHT.cubeThick
-        );
-        const blockId = this.service.addBlock(
-          'affine:attachment',
-          {
-            name: file.name,
-            size: file.size,
-            type: file.type,
-            style: 'cubeThick',
-            xywh: bound.serialize(),
-          } satisfies Partial<AttachmentBlockProps>,
-          this.surface.model
-        );
-
-        return { blockId, file };
-      }
-    );
-
-    // upload file and update the attachment model
-    const uploadPromises = dropInfos.map(async ({ blockId, file }) => {
-      let sourceId: string | undefined;
-      try {
-        setAttachmentUploading(blockId);
-        sourceId = await this.doc.blobSync.set(file);
-      } catch (error) {
-        console.error(error);
-        if (error instanceof Error) {
-          toast(
-            this.host,
-            `Failed to upload attachment! ${error.message || error.toString()}`
-          );
-        }
-      } finally {
-        setAttachmentUploaded(blockId);
-        this.doc.withoutTransact(() => {
-          this.service.updateElement(blockId, {
-            sourceId,
-          } satisfies Partial<AttachmentBlockProps>);
-        });
-      }
-      return blockId;
-    });
-    const blockIds = await Promise.all(uploadPromises);
-
-    this.service.selection.set({
-      elements: blockIds,
-      editing: false,
-    });
-
-    return blockIds;
-  }
-
-  async addImages(files: File[], point?: IVec): Promise<string[]> {
-    const imageFiles = [...files].filter(file =>
-      file.type.startsWith('image/')
-    );
-    if (!imageFiles.length) return [];
-
-    const imageService = this.std.getService('affine:image');
-    if (!imageService) {
-      console.error('Image service not found');
-      return [];
-    }
-    const maxFileSize = imageService.maxFileSize;
-    const isSizeExceeded = imageFiles.some(file => file.size > maxFileSize);
-    if (isSizeExceeded) {
-      toast(
-        this.host,
-        `You can only upload files less than ${humanFileSize(
-          maxFileSize,
-          true,
-          0
-        )}`
-      );
-      return [];
-    }
-
-    let { x, y } = this.service.viewport.center;
-    if (point) [x, y] = this.service.viewport.toModelCoord(...point);
-
-    const dropInfos: { point: Point; blockId: string }[] = [];
-
-    const IMAGE_STACK_GAP = 32;
-
-    const isMultipleFiles = imageFiles.length > 1;
-
-    const inTopLeft = isMultipleFiles ? true : false;
-
-    // create image cards without image data
-    imageFiles.map((file, index) => {
-      const point = new Point(
-        x + index * IMAGE_STACK_GAP,
-        y + index * IMAGE_STACK_GAP
-      );
-      const center = Vec.toVec(point);
-      const bound = calcBoundByOrigin(center, inTopLeft);
-      const blockId = this.service.addBlock(
-        'affine:image',
-        {
-          size: file.size,
-          xywh: bound.serialize(),
-        },
-        this.surface.model
-      );
-      dropInfos.push({ point, blockId });
-    });
-
-    // upload image data and update the image model
-    const uploadPromises = imageFiles.map(async (file, index) => {
-      const { point, blockId } = dropInfos[index];
-
-      const sourceId = await this.doc.blobSync.set(file);
-      const imageSize = await readImageSize(file);
-
-      const center = Vec.toVec(point);
-      const bound = calcBoundByOrigin(
-        center,
-        inTopLeft,
-        imageSize.width,
-        imageSize.height
-      );
-
-      this.doc.withoutTransact(() => {
-        this.service.updateElement(blockId, {
-          sourceId,
-          ...imageSize,
-          xywh: bound.serialize(),
-        } satisfies Partial<ImageBlockProps>);
-      });
-    });
-    await Promise.all(uploadPromises);
-
-    const blockIds = dropInfos.map(info => info.blockId);
-    this.service.selection.set({
-      elements: blockIds,
-      editing: false,
-    });
-    if (isMultipleFiles) {
-      this.std.command.exec('autoResizeElements');
-    }
-    return blockIds;
-  }
-
-  /**
-   * Adds a new note with the given blocks and point.
-   * @param blocks Array\<Partial\<BlockModel\>\>
-   * @param point Point
-   */
-  addNewNote(
-    blocks: Array<Partial<BlockModel>>,
-    point: IPoint,
-    options?: {
-      width?: number;
-      height?: number;
-      parentId?: string;
-      noteIndex?: number;
-      offsetX?: number;
-      offsetY?: number;
-    }
-  ): {
-    noteId: string;
-    ids: string[];
-  } {
-    this.doc.captureSync();
-    const { left, top } = this.service.viewport;
-    point.x -= left;
-    point.y -= top;
-    const noteId = this.addNoteWithPoint(point, options);
-    const ids = this.doc.addBlocks(
-      blocks.map(({ flavour, ...blockProps }) => {
-        assertExists(flavour);
-        return {
-          flavour,
-          blockProps,
-        };
-      }),
-      noteId
-    );
-    return {
-      noteId,
-      ids,
-    };
-  }
-
   /**
    * Adds a new note with the given point on the affine-editor-container.
    *
@@ -920,36 +687,6 @@ export class EdgelessRootBlockComponent extends BlockComponent<
 
       <div class="widgets-container">${widgets}</div>
     `;
-  }
-
-  /*
-   * Set selection state by giving noteId & blockId.
-   * Not supports surface elements.
-   */
-  setSelection(noteId: string, _active = true, blockId: string, point?: Point) {
-    const noteBlock = this.service.blocks
-      .filter(block => block.flavour === 'affine:note')
-      .find(b => b.id === noteId);
-    assertExists(noteBlock);
-
-    requestAnimationFrame(() => {
-      this.service.selection.set({
-        elements: [noteBlock.id],
-        editing: false,
-      });
-      // Waiting dom updated, `note mask` is removed
-      this.updateComplete
-        .then(() => {
-          if (blockId) {
-            focusTextModel(this.std, blockId);
-          } else if (point) {
-            // Cannot reuse `handleNativeRangeClick` directly here,
-            // since `retargetClick` will re-target to pervious editor
-            handleNativeRangeAtPoint(point.x, point.y);
-          }
-        })
-        .catch(console.error);
-    });
   }
 
   @state()
