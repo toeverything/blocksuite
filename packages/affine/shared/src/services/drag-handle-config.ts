@@ -3,7 +3,6 @@ import type {
   DndEventState,
   EditorHost,
   ExtensionType,
-  PointerEventState,
 } from '@blocksuite/block-std';
 import type { Point } from '@blocksuite/global/utils';
 
@@ -23,7 +22,7 @@ export type OnDragStartProps = {
 };
 
 export type OnDragEndProps = {
-  state: PointerEventState;
+  state: DndEventState;
   draggingElements: BlockComponent[];
   dropBlockId: string;
   dropType: DropType | null;
@@ -33,7 +32,7 @@ export type OnDragEndProps = {
 };
 
 export type OnDragMoveProps = {
-  state: PointerEventState;
+  state: DndEventState;
   draggingElements?: BlockComponent[];
 };
 

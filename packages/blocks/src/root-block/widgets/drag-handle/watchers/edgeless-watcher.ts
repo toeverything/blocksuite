@@ -1,4 +1,4 @@
-import type { PointerEventState } from '@blocksuite/block-std';
+import type { DndEventState } from '@blocksuite/block-std';
 
 import { GfxControllerIdentifier } from '@blocksuite/block-std/gfx';
 import { type IVec, Rect } from '@blocksuite/global/utils';
@@ -144,7 +144,7 @@ export class EdgelessWatcher {
     this._showDragHandleOnTopLevelBlocks().catch(console.error);
   };
 
-  updateDragPreviewPosition = (state: PointerEventState) => {
+  updateDragPreviewPosition = (state: DndEventState) => {
     if (!this.widget.dragPreview) return;
 
     const offsetParentRect =
