@@ -577,6 +577,11 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
           }
           // Notion callout
           if (hastQuerySelector(o.node, '.callout')) {
+            const firstElementChild = hastGetElementChildren(o.node)[0];
+            const secondElementChild = hastGetElementChildren(o.node)[1];
+
+            const iconSpan = hastQuerySelector(firstElementChild, '.icon');
+            const iconText = iconSpan ? hastGetTextContent(iconSpan) : '';
             context
               .openNode(
                 {
@@ -584,10 +589,13 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
                   id: nanoid(),
                   flavour: 'affine:paragraph',
                   props: {
-                    type: 'text',
+                    type: 'quote',
                     text: {
                       '$blocksuite:internal:text$': true,
-                      delta: this._hastToDelta(o.node, { pageMap }),
+                      delta: [
+                        { insert: iconText + '\n' },
+                        ...this._hastToDelta(secondElementChild, { pageMap }),
+                      ],
                     },
                   },
                   children: [],

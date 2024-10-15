@@ -915,12 +915,15 @@ describe('notion html to snapshot', () => {
           id: 'matchesReplaceMap[1]',
           flavour: 'affine:paragraph',
           props: {
-            type: 'text',
+            type: 'quote',
             text: {
               '$blocksuite:internal:text$': true,
               delta: [
                 {
-                  insert: '💡aaa',
+                  insert: '💡\n',
+                },
+                {
+                  insert: 'aaa',
                 },
               ],
             },
