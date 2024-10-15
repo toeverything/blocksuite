@@ -20,7 +20,7 @@ import {
 import { captureHistory } from '../../utils/actions/misc.js';
 import {
   assertCanvasElementsCount,
-  assertContainerChildren,
+  assertContainerChildCount,
   assertContainerIds,
   assertEdgelessNonSelectedRect,
   assertSelectedBound,
@@ -175,7 +175,7 @@ test.describe('group', () => {
         [groupId]: 2,
         null: 1,
       });
-      await assertContainerChildren(page, groupId, 2);
+      await assertContainerChildCount(page, groupId, 2);
 
       // redo the delete
       await redoByKeyboard(page);
@@ -195,7 +195,7 @@ test.describe('group', () => {
         [groupId]: 1,
         null: 1,
       });
-      await assertContainerChildren(page, groupId, 1);
+      await assertContainerChildCount(page, groupId, 1);
 
       // undo the delete
       await undoByKeyboard(page);
@@ -204,7 +204,7 @@ test.describe('group', () => {
         [groupId]: 2,
         null: 1,
       });
-      await assertContainerChildren(page, groupId, 2);
+      await assertContainerChildCount(page, groupId, 2);
 
       // redo the delete
       await redoByKeyboard(page);
@@ -213,7 +213,7 @@ test.describe('group', () => {
         [groupId]: 1,
         null: 1,
       });
-      await assertContainerChildren(page, groupId, 1);
+      await assertContainerChildCount(page, groupId, 1);
     });
 
     test('delete group in group', async ({ page }) => {
@@ -234,7 +234,7 @@ test.describe('group', () => {
         [firstGroup]: 1,
         null: 1,
       });
-      await assertContainerChildren(page, firstGroup, 1);
+      await assertContainerChildCount(page, firstGroup, 1);
 
       // undo the delete
       await undoByKeyboard(page);
@@ -244,8 +244,8 @@ test.describe('group', () => {
         [secondGroup]: 2,
         null: 1,
       });
-      await assertContainerChildren(page, firstGroup, 2);
-      await assertContainerChildren(page, secondGroup, 2);
+      await assertContainerChildCount(page, firstGroup, 2);
+      await assertContainerChildCount(page, secondGroup, 2);
 
       // redo the delete
       await redoByKeyboard(page);
@@ -254,7 +254,7 @@ test.describe('group', () => {
         [firstGroup]: 1,
         null: 1,
       });
-      await assertContainerChildren(page, firstGroup, 1);
+      await assertContainerChildCount(page, firstGroup, 1);
     });
   });
 });

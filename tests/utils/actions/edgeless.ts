@@ -1617,6 +1617,7 @@ export async function getContainerChildIds(page: Page, id: string) {
       const container = document.querySelector('affine-edgeless-root');
       if (!container) throw new Error('container not found');
       const gfxModel = container.service.getElementById(id);
+
       return gfxModel && container.service.surface.isContainer(gfxModel)
         ? gfxModel.childIds
         : [];
@@ -1680,7 +1681,7 @@ export async function getFirstContainerId(page: Page, exclude: string[] = []) {
       const container = document.querySelector('affine-edgeless-root');
       if (!container) throw new Error('container not found');
       return (
-        container.service.elements.find(
+        container.service.edgelessElements.find(
           e =>
             container.service.surface.isContainer(e) && !exclude.includes(e.id)
         )?.id ?? ''

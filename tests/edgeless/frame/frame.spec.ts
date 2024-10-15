@@ -8,6 +8,7 @@ import {
   createShapeElement,
   dragBetweenViewCoords,
   edgelessCommonSetup,
+  getFirstContainerId,
   setEdgelessTool,
   Shape,
   shiftClickView,
@@ -21,7 +22,10 @@ import {
   selectAllByKeyboard,
   SHORT_KEY,
 } from '../../utils/actions/keyboard.js';
-import { assertSelectedBound } from '../../utils/asserts.js';
+import {
+  assertContainerChildCount,
+  assertSelectedBound,
+} from '../../utils/asserts.js';
 import { test } from '../../utils/playwright.js';
 
 const createFrame = async (
@@ -48,17 +52,6 @@ test.describe('add a frame then drag to move', () => {
     await shiftClickView(page, [150, 50]);
   };
 
-  const assertFrameHasTwoShapeChildren = async (page: Page) => {
-    await page.waitForTimeout(500);
-    await dragBetweenViewCoords(page, [50, 50], [100, 50]);
-
-    await selectAllByKeyboard(page);
-    await assertSelectedBound(page, [50, 0, 100, 100], 0);
-    await assertSelectedBound(page, [150, 0, 100, 100], 1);
-    // the third shape should not be moved
-    await assertSelectedBound(page, [200, 0, 100, 100], 2);
-  };
-
   test('multi select and add frame by shortcut F', async ({ page }) => {
     await createThreeShapesAndSelectTowShape(page);
     await page.keyboard.press('f');
@@ -66,7 +59,8 @@ test.describe('add a frame then drag to move', () => {
     await expect(page.locator('affine-frame')).toHaveCount(1);
     await assertSelectedBound(page, [-300, -270, 800, 640]);
 
-    await assertFrameHasTwoShapeChildren(page);
+    const frameId = await getFirstContainerId(page);
+    await assertContainerChildCount(page, frameId, 2);
   });
 
   test('multi select and add frame by component toolbar', async ({ page }) => {
@@ -76,7 +70,8 @@ test.describe('add a frame then drag to move', () => {
     await expect(page.locator('affine-frame')).toHaveCount(1);
     await assertSelectedBound(page, [-300, -270, 800, 640]);
 
-    await assertFrameHasTwoShapeChildren(page);
+    const frameId = await getFirstContainerId(page);
+    await assertContainerChildCount(page, frameId, 2);
   });
 
   test('multi select and add frame by more option create frame', async ({
@@ -88,7 +83,8 @@ test.describe('add a frame then drag to move', () => {
     await expect(page.locator('affine-frame')).toHaveCount(1);
     await assertSelectedBound(page, [-300, -270, 800, 640]);
 
-    await assertFrameHasTwoShapeChildren(page);
+    const frameId = await getFirstContainerId(page);
+    await assertContainerChildCount(page, frameId, 2);
   });
 
   test('multi select add frame by edgeless toolbar', async ({ page }) => {
@@ -101,13 +97,9 @@ test.describe('add a frame then drag to move', () => {
     await button.click();
     await assertSelectedBound(page, [-450, -550, 1200, 1200]);
 
-    await dragBetweenViewCoords(page, [50, 50], [100, 50]);
-
-    await selectAllByKeyboard(page);
-    await assertSelectedBound(page, [50, 0, 100, 100], 0);
-    await assertSelectedBound(page, [150, 0, 100, 100], 1);
-    // the third shape should be moved
-    await assertSelectedBound(page, [250, 0, 100, 100], 2);
+    // the third should be inner frame because
+    const frameId = await getFirstContainerId(page);
+    await assertContainerChildCount(page, frameId, 3);
   });
 
   test('add frame by dragging with shortcut F', async ({ page }) => {
@@ -120,7 +112,8 @@ test.describe('add a frame then drag to move', () => {
     await expect(page.locator('affine-frame')).toHaveCount(1);
     await assertSelectedBound(page, [-10, -10, 220, 120]);
 
-    await assertFrameHasTwoShapeChildren(page);
+    const frameId = await getFirstContainerId(page);
+    await assertContainerChildCount(page, frameId, 2);
   });
 });
 

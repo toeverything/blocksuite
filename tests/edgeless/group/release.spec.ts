@@ -14,7 +14,7 @@ import {
   undoByKeyboard,
 } from '../../utils/actions/index.js';
 import {
-  assertContainerChildren,
+  assertContainerChildCount,
   assertContainerIds,
   assertSelectedBound,
 } from '../../utils/asserts.js';
@@ -46,7 +46,7 @@ test.describe('release from group', () => {
       [outterGroupId]: 2,
       null: 2,
     });
-    await assertContainerChildren(page, outterGroupId, 2);
+    await assertContainerChildCount(page, outterGroupId, 2);
     await assertSelectedBound(page, [0, 0, 100, 100]);
 
     // undo the release
@@ -55,7 +55,7 @@ test.describe('release from group', () => {
       [outterGroupId]: 3,
       null: 1,
     });
-    await assertContainerChildren(page, outterGroupId, 3);
+    await assertContainerChildCount(page, outterGroupId, 3);
     await assertSelectedBound(page, [0, 0, 100, 100]);
 
     // redo the release
@@ -64,7 +64,7 @@ test.describe('release from group', () => {
       [outterGroupId]: 2,
       null: 2,
     });
-    await assertContainerChildren(page, outterGroupId, 2);
+    await assertContainerChildCount(page, outterGroupId, 2);
     await assertSelectedBound(page, [0, 0, 100, 100]);
   });
 
@@ -80,8 +80,8 @@ test.describe('release from group', () => {
       [outterGroupId]: 2,
       null: 1,
     });
-    await assertContainerChildren(page, groupId, 2);
-    await assertContainerChildren(page, outterGroupId, 2);
+    await assertContainerChildCount(page, groupId, 2);
+    await assertContainerChildCount(page, outterGroupId, 2);
 
     // release group from group
     await triggerComponentToolbarAction(page, 'releaseFromGroup');
@@ -90,8 +90,8 @@ test.describe('release from group', () => {
       [outterGroupId]: 1,
       null: 2,
     });
-    await assertContainerChildren(page, outterGroupId, 1);
-    await assertContainerChildren(page, groupId, 2);
+    await assertContainerChildCount(page, outterGroupId, 1);
+    await assertContainerChildCount(page, groupId, 2);
 
     // undo the release
     await undoByKeyboard(page);
@@ -100,8 +100,8 @@ test.describe('release from group', () => {
       [outterGroupId]: 2,
       null: 1,
     });
-    await assertContainerChildren(page, groupId, 2);
-    await assertContainerChildren(page, outterGroupId, 2);
+    await assertContainerChildCount(page, groupId, 2);
+    await assertContainerChildCount(page, outterGroupId, 2);
 
     // redo the release
     await redoByKeyboard(page);
@@ -110,7 +110,7 @@ test.describe('release from group', () => {
       [outterGroupId]: 1,
       null: 2,
     });
-    await assertContainerChildren(page, outterGroupId, 1);
-    await assertContainerChildren(page, groupId, 2);
+    await assertContainerChildCount(page, outterGroupId, 1);
+    await assertContainerChildCount(page, groupId, 2);
   });
 });

@@ -2,7 +2,6 @@ import type { SurfaceBlockModel } from '@blocksuite/affine-block-surface';
 import type { Doc } from '@blocksuite/store';
 
 import { Overlay } from '@blocksuite/affine-block-surface';
-import { MindmapElementModel } from '@blocksuite/affine-model';
 import {
   getTopElements,
   type GfxModel,
@@ -180,17 +179,13 @@ export class EdgelessFrameManager {
   private _watchElementAdded() {
     this._disposable.add(
       this._rootService.surface.elementAdded.on(({ id, local }) => {
-        let element = this._rootService.surface.getElementById(id);
+        const element = this._rootService.surface.getElementById(id);
         if (element && local) {
           const frame = this.getFrameFromPoint(element.elementBound.center);
 
           // if the container created with a frame, skip it.
           if (isGfxContainerElm(element) && frame && element.hasChild(frame)) {
             return;
-          }
-
-          if (element.group instanceof MindmapElementModel) {
-            element = element.group;
           }
 
           frame && this.addElementsToFrame(frame, [element]);

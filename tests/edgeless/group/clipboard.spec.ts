@@ -18,7 +18,7 @@ import {
   waitNextFrame,
 } from '../../utils/actions/index.js';
 import {
-  assertContainerChildren,
+  assertContainerChildCount,
   assertContainerIds,
 } from '../../utils/asserts.js';
 import { test } from '../../utils/playwright.js';
@@ -45,8 +45,8 @@ test.describe('clipboard', () => {
       [copyedGroupId]: 2,
       null: 2,
     });
-    await assertContainerChildren(page, originGroupId, 2);
-    await assertContainerChildren(page, copyedGroupId, 2);
+    await assertContainerChildCount(page, originGroupId, 2);
+    await assertContainerChildCount(page, copyedGroupId, 2);
   });
 
   test('copy and paste group with connector', async ({ page }) => {
@@ -71,8 +71,8 @@ test.describe('clipboard', () => {
       [copyedGroupId]: 3,
       null: 2,
     });
-    await assertContainerChildren(page, originGroupId, 3);
-    await assertContainerChildren(page, copyedGroupId, 3);
+    await assertContainerChildCount(page, originGroupId, 3);
+    await assertContainerChildCount(page, copyedGroupId, 3);
   });
 });
 

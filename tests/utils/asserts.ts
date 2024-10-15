@@ -1152,12 +1152,12 @@ export async function assertContainerChildIds(
 export async function assertContainerOfElements(
   page: Page,
   elements: string[],
-  containerId: string
+  containerId: string | null
 ) {
-  const elementGroups = await getContainerOfElements(page, elements);
+  const elementContainers = await getContainerOfElements(page, elements);
 
-  elementGroups.forEach(elementGroup => {
-    expect(elementGroup).toEqual(containerId);
+  elementContainers.forEach(elementContainer => {
+    expect(elementContainer).toEqual(containerId);
   });
 }
 
@@ -1168,7 +1168,7 @@ export async function assertContainerOfElements(
  * @param containerId
  * @param childrenCount
  */
-export async function assertContainerChildren(
+export async function assertContainerChildCount(
   page: Page,
   containerId: string,
   childrenCount: number

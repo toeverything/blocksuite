@@ -16,8 +16,8 @@ import {
   undoByKeyboard,
 } from '../../utils/actions/index.js';
 import {
+  assertContainerChildCount,
   assertContainerChildIds,
-  assertContainerChildren,
   assertContainerIds,
   assertSelectedBound,
 } from '../../utils/asserts.js';
@@ -58,8 +58,8 @@ test.describe('group and ungroup in group', () => {
       [outterGroupId]: 2,
       null: 1,
     });
-    await assertContainerChildren(page, groupId, 2);
-    await assertContainerChildren(page, outterGroupId, 2);
+    await assertContainerChildCount(page, groupId, 2);
+    await assertContainerChildCount(page, outterGroupId, 2);
 
     // undo the creation
     await undoByKeyboard(page);
@@ -67,7 +67,7 @@ test.describe('group and ungroup in group', () => {
       [outterGroupId]: 3,
       null: 1,
     });
-    await assertContainerChildren(page, outterGroupId, 3);
+    await assertContainerChildCount(page, outterGroupId, 3);
 
     // redo the creation
     await redoByKeyboard(page);
@@ -76,8 +76,8 @@ test.describe('group and ungroup in group', () => {
       [outterGroupId]: 2,
       null: 1,
     });
-    await assertContainerChildren(page, groupId, 2);
-    await assertContainerChildren(page, outterGroupId, 2);
+    await assertContainerChildCount(page, groupId, 2);
+    await assertContainerChildCount(page, outterGroupId, 2);
   });
 
   test('ungroup in group', async ({ page }) => {
