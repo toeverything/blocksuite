@@ -44,7 +44,6 @@ export interface SingleView<
   readonly detailProperties$: ReadonlySignal<string[]>;
   readonly rows$: ReadonlySignal<string[]>;
 
-  readonly filterVisible$: ReadonlySignal<boolean>;
   readonly filter$: ReadonlySignal<FilterGroup>;
   filterSet(filter: FilterGroup): void;
 
@@ -108,7 +107,7 @@ export interface SingleView<
 
   IconGet(type: string): UniComponent | undefined;
 
-  contextGet<T>(key: DataViewContextKey<T>): T | undefined;
+  contextGet<T>(key: DataViewContextKey<T>): T;
 
   mainProperties$: ReadonlySignal<MainProperties>;
 }
@@ -261,7 +260,7 @@ export abstract class SingleViewBase<
     this.dataSource.cellValueChange(rowId, propertyId, value);
   }
 
-  contextGet<T>(key: DataViewContextKey<T>): T | undefined {
+  contextGet<T>(key: DataViewContextKey<T>): T {
     return this.dataSource.contextGet(key);
   }
 

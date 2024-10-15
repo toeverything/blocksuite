@@ -192,20 +192,20 @@ export const popViewOptions = (
                     }
                     return html``;
                   },
-                  menu.toggleSwitch({
-                    name: 'Show block icon',
-                    on: true,
-                    onChange: value => {
-                      console.log(value);
-                    },
-                  }),
-                  menu.toggleSwitch({
-                    name: 'Show Vertical lines',
-                    on: true,
-                    onChange: value => {
-                      console.log(value);
-                    },
-                  }),
+                  // menu.toggleSwitch({
+                  //   name: 'Show block icon',
+                  //   on: true,
+                  //   onChange: value => {
+                  //     console.log(value);
+                  //   },
+                  // }),
+                  // menu.toggleSwitch({
+                  //   name: 'Show Vertical lines',
+                  //   on: true,
+                  //   onChange: value => {
+                  //     console.log(value);
+                  //   },
+                  // }),
                 ],
               },
             });

@@ -54,7 +54,7 @@ export interface DataSource {
   propertyDuplicate(propertyId: string): string;
   propertyDelete(id: string): void;
 
-  contextGet<T>(key: DataViewContextKey<T>): T | undefined;
+  contextGet<T>(key: DataViewContextKey<T>): T;
 
   viewConverts: ViewConvertConfig[];
   viewManager: ViewManager;
@@ -81,7 +81,7 @@ export interface DataSource {
 }
 
 export abstract class DataSourceBase implements DataSource {
-  context = new Map<DataViewContextKey<unknown>, unknown>();
+  context = new Map<symbol, unknown>();
 
   abstract featureFlags$: ReadonlySignal<DatabaseFlags>;
 
@@ -122,12 +122,12 @@ export abstract class DataSourceBase implements DataSource {
     return computed(() => this.cellValueGet(rowId, propertyId));
   }
 
-  contextGet<T>(key: DataViewContextKey<T>): T | undefined {
-    return this.context.get(key) as T;
+  contextGet<T>(key: DataViewContextKey<T>): T {
+    return (this.context.get(key.key) as T) ?? key.defaultValue;
   }
 
   contextSet<T>(key: DataViewContextKey<T>, value: T): void {
-    this.context.set(key, value);
+    this.context.set(key.key, value);
   }
 
   abstract propertyAdd(
