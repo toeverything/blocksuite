@@ -134,7 +134,7 @@ export class MenuComponent extends SignalWatcher(
     return html`
       ${this.renderTitle()} ${this.renderSearch()}
       <div class="affine-menu-body">
-        ${this.menu.searchResult$.value.length === 0 && this.menu.isSearchMode
+        ${this.menu.searchResult$.value.length === 0 && this.menu.enableSearch
           ? html` <div class="no-results">No Results</div>`
           : ''}
         ${this.menu.searchResult$.value}
@@ -143,7 +143,8 @@ export class MenuComponent extends SignalWatcher(
   }
 
   renderSearch() {
-    const showSearch = this.menu.showSearch$.value;
+    const config = this.menu.options.search;
+    const showSearch = this.menu.showSearch$.value || config?.placeholder;
     const searchStyle = styleMap({
       opacity: showSearch ? '1' : '0',
       height: showSearch ? undefined : '0',
@@ -151,16 +152,16 @@ export class MenuComponent extends SignalWatcher(
       position: showSearch ? undefined : 'absolute',
       pointerEvents: showSearch ? undefined : 'none',
     });
-
     return html` <div style=${searchStyle} class="affine-menu-search-container">
       <div
-        style="display:flex;align-items:center;color: var(--affine-text-secondary-color)"
+        style="font-size:20px;display:flex;align-items:center;color: var(--affine-text-secondary-color)"
       >
         ${SearchIcon()}
       </div>
       <input
         autocomplete="off"
         class="affine-menu-search"
+        placeholder="${config?.placeholder ?? ''}"
         data-1p-ignore
         ${ref(this.searchRef)}
         type="text"

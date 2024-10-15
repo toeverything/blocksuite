@@ -15,7 +15,7 @@ import {
   PlusIcon,
 } from '@blocksuite/icons/lit';
 import { nanoid } from '@blocksuite/store';
-import { autoPlacement, flip, offset } from '@floating-ui/dom';
+import { flip, offset } from '@floating-ui/dom';
 import { property, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { repeat } from 'lit/directives/repeat.js';
@@ -51,7 +51,7 @@ export class MultiTagSelect extends WithDisposable(ShadowlessElement) {
     if (!option) {
       return;
     }
-    popMenu(popupTargetFromElement(e.target as HTMLElement), {
+    popMenu(popupTargetFromElement(e.currentTarget as HTMLElement), {
       options: {
         items: [
           menu.input({
@@ -95,7 +95,6 @@ export class MultiTagSelect extends WithDisposable(ShadowlessElement) {
           }),
         ],
       },
-      middleware: [autoPlacement()],
     });
   };
 

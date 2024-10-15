@@ -31,7 +31,9 @@ export type MenuOptions = {
     onClose?: () => void;
     postfix?: () => TemplateResult;
   };
-  disableSearch?: boolean;
+  search?: {
+    placeholder?: string;
+  };
   items: MenuConfig[];
 };
 
@@ -51,11 +53,11 @@ export class Menu {
   });
 
   showSearch$ = computed(() => {
-    return this.isSearchMode && this.searchName$.value.length > 0;
+    return this.enableSearch && this.searchName$.value.length > 0;
   });
 
-  get isSearchMode() {
-    return !this.options.disableSearch;
+  get enableSearch() {
+    return true;
   }
 
   constructor(public options: MenuOptions) {
