@@ -342,7 +342,9 @@ export class EdgelessTextBlockComponent extends GfxBlockComponent<EdgelessTextBl
         <div
           style=${styleMap({
             pointerEvents: this._editing ? 'auto' : 'none',
+            userSelect: this._editing ? 'auto' : 'none',
           })}
+          contenteditable=${this._editing}
         >
           ${this.renderPageContent()}
         </div>
