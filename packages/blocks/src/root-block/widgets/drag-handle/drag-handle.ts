@@ -15,7 +15,7 @@ import {
 } from '@blocksuite/affine-shared/utils';
 import {
   type BlockComponent,
-  type PointerEventState,
+  type DndEventState,
   WidgetComponent,
 } from '@blocksuite/block-std';
 import { DisposableGroup, Point, Rect } from '@blocksuite/global/utils';
@@ -67,7 +67,7 @@ export class AffineDragHandleWidget extends WidgetComponent<RootBlockModel> {
   /**
    * When dragging, should update indicator position and target drop block id
    */
-  private _getDropResult = (state: PointerEventState): DropResult | null => {
+  private _getDropResult = (state: DndEventState): DropResult | null => {
     const point = new Point(state.raw.x, state.raw.y);
     const closestBlock = getClosestBlockByPoint(
       this.host,
@@ -285,7 +285,7 @@ export class AffineDragHandleWidget extends WidgetComponent<RootBlockModel> {
 
   isTopLevelDragHandleVisible = false;
 
-  lastDragPointerState: PointerEventState | null = null;
+  lastDragPointerState: DndEventState | null = null;
 
   noteScale = signal(1);
 
@@ -304,7 +304,7 @@ export class AffineDragHandleWidget extends WidgetComponent<RootBlockModel> {
   selectionHelper = new SelectionHelper(this);
 
   updateDropIndicator = (
-    state: PointerEventState,
+    state: DndEventState,
     shouldAutoScroll: boolean = false
   ) => {
     const point = new Point(state.raw.x, state.raw.y);

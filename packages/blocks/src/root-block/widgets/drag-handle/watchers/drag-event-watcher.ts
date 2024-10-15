@@ -9,8 +9,8 @@ import {
 } from '@blocksuite/affine-shared/utils';
 import {
   type BlockComponent,
+  type DndEventState,
   isGfxBlockComponent,
-  type PointerEventState,
   type UIEventHandler,
 } from '@blocksuite/block-std';
 import { GfxControllerIdentifier } from '@blocksuite/block-std/gfx';
@@ -51,7 +51,7 @@ export class DragEventWatcher {
       return false;
     }
 
-    const state = ctx.get('pointerState');
+    const state = ctx.get('dndState');
     const { target } = state.raw;
     if (!this.widget.host.contains(target as Node)) {
       this.widget.hide(true);
@@ -95,7 +95,6 @@ export class DragEventWatcher {
    * Update drop block id
    */
   private _dragMoveHandler: UIEventHandler = ctx => {
-    console.log('--move--');
     if (
       this.widget.isHoverDragHandleVisible ||
       this.widget.isTopLevelDragHandleVisible
@@ -108,7 +107,7 @@ export class DragEventWatcher {
     }
 
     ctx.get('defaultState').event.preventDefault();
-    const state = ctx.get('pointerState');
+    const state = ctx.get('dndState');
 
     for (const option of this.widget.optionRunner.options) {
       if (
@@ -152,7 +151,7 @@ export class DragEventWatcher {
     return this._onDragStart(state);
   };
 
-  private _onDragEnd = (state: PointerEventState) => {
+  private _onDragEnd = (state: DndEventState) => {
     const targetBlockId = this.widget.dropBlockId;
     const dropType = this.widget.dropType;
     const draggingElements = this.widget.draggingElements;
@@ -301,7 +300,7 @@ export class DragEventWatcher {
     return true;
   };
 
-  private _onDragMove = (state: PointerEventState) => {
+  private _onDragMove = (state: DndEventState) => {
     this.widget.clearRaf();
 
     this.widget.rafID = requestAnimationFrame(() => {
@@ -311,7 +310,7 @@ export class DragEventWatcher {
     return true;
   };
 
-  private _onDragStart = (state: PointerEventState) => {
+  private _onDragStart = (state: DndEventState) => {
     // Get current hover block element by path
     const hoverBlock = this.widget.anchorBlockComponent.peek();
     if (!hoverBlock) return false;
@@ -429,7 +428,7 @@ export class DragEventWatcher {
 
   private _startDragging = (
     blocks: BlockComponent[],
-    state: PointerEventState,
+    state: DndEventState,
     dragPreviewEl?: HTMLElement,
     dragPreviewOffset?: Point
   ) => {
@@ -459,6 +458,9 @@ export class DragEventWatcher {
       global: true,
     });
     this.widget.handleEvent('nativeDragMove', this._dragMoveHandler, {
+      global: true,
+    });
+    this.widget.handleEvent('nativeDragEnd', this._dragEndHandler, {
       global: true,
     });
     this.widget.handleEvent('nativeDrop', this._dragEndHandler, {
