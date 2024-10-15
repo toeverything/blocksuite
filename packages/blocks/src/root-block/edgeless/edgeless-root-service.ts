@@ -28,7 +28,10 @@ import {
 } from '@blocksuite/affine-model';
 import { EditPropsStore } from '@blocksuite/affine-shared/services';
 import { clamp } from '@blocksuite/affine-shared/utils';
-import { GfxControllerIdentifier } from '@blocksuite/block-std/gfx';
+import {
+  GfxControllerIdentifier,
+  isGfxContainerElm,
+} from '@blocksuite/block-std/gfx';
 import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 import { Bound, getCommonBound, last } from '@blocksuite/global/utils';
 import { type BlockModel, Slot } from '@blocksuite/store';
@@ -474,6 +477,12 @@ export class EdgelessRootService extends RootService implements SurfaceContext {
     id = typeof id === 'string' ? id : id.id;
 
     const el = this.getElementById(id);
+    if (isGfxContainerElm(el)) {
+      el.childIds.forEach(childId => {
+        this.removeElement(childId);
+      });
+    }
+
     if (el instanceof GfxBlockModel) {
       this.doc.deleteBlock(el);
       return;

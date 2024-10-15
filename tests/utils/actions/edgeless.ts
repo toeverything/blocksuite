@@ -498,6 +498,7 @@ export async function addBasicShapeElement(
 ) {
   await setEdgelessTool(page, 'shape', shape);
   await dragBetweenCoords(page, start, end, { steps: 50 });
+  return (await getSelectedIds(page))[0];
 }
 
 export async function addBasicConnectorElement(
@@ -1566,6 +1567,30 @@ export async function getConnectorPath(page: Page, index = 0): Promise<IVec[]> {
   );
 }
 
+export async function getEdgelessElementBound(
+  page: Page,
+  elementId: string
+): Promise<[number, number, number, number]> {
+  return page.evaluate(
+    ([elementId]) => {
+      const container = document.querySelector('affine-edgeless-root');
+      if (!container) throw new Error('container not found');
+      const element = container.service.getElementById(elementId);
+      if (!element) throw new Error(`element not found: ${elementId}`);
+      return JSON.parse(element.xywh);
+    },
+    [elementId]
+  );
+}
+
+export async function getSelectedIds(page: Page) {
+  return page.evaluate(() => {
+    const container = document.querySelector('affine-edgeless-root');
+    if (!container) throw new Error('container not found');
+    return container.service.selection.selectedElements.map(e => e.id);
+  });
+}
+
 export async function getSelectedBoundCount(page: Page) {
   return page.evaluate(() => {
     const container = document.querySelector('affine-edgeless-root');
@@ -1727,6 +1752,7 @@ export async function createFrame(
 ) {
   await page.keyboard.press('f');
   await dragBetweenViewCoords(page, coord1, coord2);
+  return (await getSelectedIds(page))[0];
 }
 
 export async function createShapeElement(
@@ -1737,12 +1763,13 @@ export async function createShapeElement(
 ) {
   const start = await toViewCoord(page, coord1);
   const end = await toViewCoord(page, coord2);
-  await addBasicShapeElement(
+  const shapeId = await addBasicShapeElement(
     page,
     { x: start[0], y: start[1] },
     { x: end[0], y: end[1] },
     shape
   );
+  return shapeId;
 }
 
 export async function createConnectorElement(

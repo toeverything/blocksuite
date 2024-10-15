@@ -25,6 +25,7 @@ import {
   getContainerChildIds,
   getContainerIds,
   getContainerOfElements,
+  getEdgelessElementBound,
   getEdgelessSelectedRectModel,
   getNoteRect,
   getSelectedBound,
@@ -1107,6 +1108,15 @@ export function assertRectExist(
   rect: { x: number; y: number; width: number; height: number } | null
 ): asserts rect is { x: number; y: number; width: number; height: number } {
   expect(rect).not.toBe(null);
+}
+
+export async function assertEdgelessElementBound(
+  page: Page,
+  elementId: string,
+  bound: Bound
+) {
+  const actual = await getEdgelessElementBound(page, elementId);
+  assertBound(actual, bound);
 }
 
 export async function assertSelectedBound(
