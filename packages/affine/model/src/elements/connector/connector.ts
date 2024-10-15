@@ -15,7 +15,6 @@ import {
   Bound,
   curveIntersects,
   getBezierNearestPoint,
-  getBezierNearestTime,
   getBezierParameters,
   getBezierPoint,
   linePolylineIntersects,
@@ -184,13 +183,14 @@ export class ConnectorElementModel extends GfxPrimitiveElementModel<ConnectorEle
       return Polyline.nearestPoint(points, point);
     }
 
-    const b = getBezierParameters(path);
-    const t = getBezierNearestTime(b, point);
-    const p = getBezierPoint(b, t);
-    if (p) return p;
+    try {
+      const { point: nearestPoint } = getBezierNearestPoint(path, point);
 
-    const { x, y } = this;
-    return [x, y];
+      return nearestPoint;
+    } catch (_) {
+      const { x, y } = this;
+      return [x, y];
+    }
   }
 
   /**
@@ -228,8 +228,7 @@ export class ConnectorElementModel extends GfxPrimitiveElementModel<ConnectorEle
       return pl / fl;
     }
 
-    const b = getBezierParameters(path);
-    return getBezierNearestTime(b, point);
+    return getBezierNearestPoint(path, point).t;
   }
 
   /**
@@ -261,9 +260,13 @@ export class ConnectorElementModel extends GfxPrimitiveElementModel<ConnectorEle
       return [x + w / 2, y + h / 2];
     }
 
-    const b = getBezierParameters(path);
-    const point = getBezierPoint(b, offsetDistance);
-    if (point) return point;
+    for (let i = 1; i < path.length; i++) {
+      const b = getBezierParameters([path[i - 1], path[i]]);
+      const point = getBezierPoint(b, offsetDistance);
+
+      if (point) return point;
+    }
+
     return [x + w / 2, y + h / 2];
   }
 
@@ -292,7 +295,7 @@ export class ConnectorElementModel extends GfxPrimitiveElementModel<ConnectorEle
 
     const point =
       mode === ConnectorMode.Curve
-        ? getBezierNearestPoint(getBezierParameters(path), currentPoint)
+        ? getBezierNearestPoint(path, currentPoint).point
         : polyLineNearestPoint(path, currentPoint);
 
     return (
@@ -467,6 +470,9 @@ export class ConnectorElementModel extends GfxPrimitiveElementModel<ConnectorEle
   })
   @local()
   accessor path: PointLocation[] = [];
+
+  @field([] as Vec[])
+  accessor points: Vec[] = [];
 
   @field('Arrow' as PointStyle)
   accessor rearEndpointStyle!: PointStyle;

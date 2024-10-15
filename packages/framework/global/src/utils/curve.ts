@@ -131,18 +131,31 @@ export function getBezierNearestTime(
   return minT;
 }
 
-export function getBezierNearestPoint(
-  values: BezierCurveParameters,
-  point: IVec
-) {
-  const t = getBezierNearestTime(values, point);
-  const pointOnCurve = getBezierPoint(values, t);
-  assertExists(pointOnCurve);
-  return pointOnCurve;
+export function getBezierNearestPoint(points: PointLocation[], point: IVec) {
+  let nearestPointOnCurve: IVec | null = null;
+  let minT = 0;
+  let minLen2PointOnCurve = Infinity;
+
+  for (let i = 1; i < points.length; i++) {
+    const b = getBezierParameters([points[i - 1], points[i]]);
+    const t = getBezierNearestTime(b, point);
+    const pointOnCurve = getBezierPoint(b, t);
+    const len2PointOnCurve = pointOnCurve ? Vec.len2(pointOnCurve) : Infinity;
+
+    if (len2PointOnCurve < minLen2PointOnCurve) {
+      nearestPointOnCurve = pointOnCurve;
+      minLen2PointOnCurve = len2PointOnCurve;
+      minT = t;
+    }
+  }
+
+  assertExists(nearestPointOnCurve);
+
+  return { point: nearestPointOnCurve, t: minT } as const;
 }
 
 export function getBezierParameters(
-  points: PointLocation[]
+  points: [PointLocation, PointLocation]
 ): BezierCurveParameters {
   return [points[0], points[0].absOut, points[1].absIn, points[1]];
 }
@@ -254,6 +267,22 @@ export function getBezierCurveBoundingBox(values: BezierCurveParameters) {
   const bottom = Math.max.apply(null, bounds[1]);
 
   return new Bound(left, top, right - left, bottom - top);
+}
+
+export function getEntireBezierCurveBoundingBox(points: PointLocation[]) {
+  let entireBox = getBezierCurveBoundingBox(
+    getBezierParameters([points[0], points[1]])
+  );
+
+  for (let i = 2; i < points.length; i++) {
+    const box = getBezierCurveBoundingBox(
+      getBezierParameters([points[i - 1], points[i]])
+    );
+
+    entireBox = entireBox.unite(box);
+  }
+
+  return entireBox;
 }
 
 // https://pomax.github.io/bezierjs/#intersect-line
@@ -385,14 +414,30 @@ function roots(points: BezierCurveParameters, line: IVec[]) {
 
 export function curveIntersects(path: PointLocation[], line: [IVec, IVec]) {
   const { minX, maxX, minY, maxY } = Bound.fromPoints(line);
-  const points = getBezierParameters(path);
-  const intersectedPoints = roots(points, line)
-    .map(t => getBezierPoint(points, t))
-    .filter(point =>
-      point
-        ? between(point[0], minX, maxX) && between(point[1], minY, maxY)
-        : false
-    )
-    .map(point => new PointLocation(point!));
+
+  const intersectedPoints = path.reduce<PointLocation[]>(
+    (acc, point, index) => {
+      if (index === 0) {
+        return acc;
+      }
+
+      const points = getBezierParameters([path[index - 1], point]);
+
+      const intersectedPoints = roots(points, line)
+        .map(t => getBezierPoint(points, t))
+        .filter(point =>
+          point
+            ? between(point[0], minX, maxX) && between(point[1], minY, maxY)
+            : false
+        )
+        .map(point => new PointLocation(point!));
+
+      acc.push(...intersectedPoints);
+
+      return acc;
+    },
+    []
+  );
+
   return intersectedPoints.length > 0 ? intersectedPoints : null;
 }

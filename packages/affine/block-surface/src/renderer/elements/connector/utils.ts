@@ -1,19 +1,11 @@
-import type {
-  BezierCurveParameters,
-  IVec,
-  PointLocation,
-} from '@blocksuite/global/utils';
+import type { IVec, PointLocation } from '@blocksuite/global/utils';
 
 import {
   type ConnectorElementModel,
   ConnectorMode,
   type LocalConnectorElementModel,
 } from '@blocksuite/affine-model';
-import {
-  getBezierParameters,
-  getBezierTangent,
-  Vec,
-} from '@blocksuite/global/utils';
+import { Vec } from '@blocksuite/global/utils';
 
 import type { RoughCanvas } from '../../../utils/rough/canvas.js';
 
@@ -25,16 +17,10 @@ export function getArrowPoints(
   points: PointLocation[],
   size = 10,
   mode: ConnectorMode,
-  bezierParameters: BezierCurveParameters,
   endPoint: ConnectorEnd = 'Rear',
   radians: number = Math.PI / 4
 ) {
-  const anchorPoint = getPointWithTangent(
-    points,
-    mode,
-    endPoint,
-    bezierParameters
-  );
+  const anchorPoint = getPointWithTangent(points, mode, endPoint);
   const unit = Vec.mul(anchorPoint.tangent, -1);
   const angle = endPoint === 'Front' ? Math.PI : 0;
 
@@ -51,15 +37,9 @@ export function getCircleCenterPoint(
   points: PointLocation[],
   radius = 5,
   mode: ConnectorMode,
-  bezierParameters: BezierCurveParameters,
   endPoint: ConnectorEnd = 'Rear'
 ) {
-  const anchorPoint = getPointWithTangent(
-    points,
-    mode,
-    endPoint,
-    bezierParameters
-  );
+  const anchorPoint = getPointWithTangent(points, mode, endPoint);
 
   const unit = Vec.mul(anchorPoint.tangent, -1);
   const angle = endPoint === 'Front' ? Math.PI : 0;
@@ -70,8 +50,7 @@ export function getCircleCenterPoint(
 export function getPointWithTangent(
   points: PointLocation[],
   mode: ConnectorMode,
-  endPoint: ConnectorEnd,
-  bezierParameters: BezierCurveParameters
+  endPoint: ConnectorEnd
 ) {
   const anchorIndex = endPoint === 'Rear' ? points.length - 1 : 0;
   const pointToAnchorIndex =
@@ -89,8 +68,8 @@ export function getPointWithTangent(
   } else {
     tangent =
       endPoint === 'Rear'
-        ? getBezierTangent(bezierParameters, 1)
-        : getBezierTangent(bezierParameters, 0);
+        ? Vec.mul(Vec.normalize(anchorPoint.in), -1)
+        : Vec.normalize(anchorPoint.out);
   }
   clone.tangent = tangent ?? [0, 0];
 
@@ -124,7 +103,7 @@ export function getArrowOptions(
   model: ConnectorElementModel | LocalConnectorElementModel,
   strokeColor: string
 ) {
-  const { seed, mode, rough, roughness, strokeWidth, path } = model;
+  const { seed, mode, rough, roughness, strokeWidth } = model;
 
   return {
     end,
@@ -136,7 +115,6 @@ export function getArrowOptions(
     strokeColor,
     fillColor: strokeColor,
     fillStyle: 'solid',
-    bezierParameters: getBezierParameters(path),
   };
 }
 
@@ -190,15 +168,13 @@ export function renderArrow(
   rc: RoughCanvas,
   options: ArrowOptions
 ) {
-  const { mode, end, bezierParameters, rough, strokeColor, strokeWidth } =
-    options;
+  const { mode, end, rough, strokeColor, strokeWidth } = options;
   const radians = Math.PI / 4;
   const size = DEFAULT_ARROW_SIZE * (strokeWidth / 2);
   const { points: arrowPoints } = getArrowPoints(
     points,
     size,
     mode,
-    bezierParameters,
     end,
     radians
   );
@@ -216,15 +192,13 @@ export function renderTriangle(
   rc: RoughCanvas,
   options: ArrowOptions
 ) {
-  const { mode, end, bezierParameters, rough, strokeColor, strokeWidth } =
-    options;
+  const { mode, end, rough, strokeColor, strokeWidth } = options;
   const radians = Math.PI / 6;
   const size = DEFAULT_ARROW_SIZE * (strokeWidth / 2);
   const { points: trianglePoints } = getArrowPoints(
     points,
     size,
     mode,
-    bezierParameters,
     end,
     radians
   );
@@ -249,9 +223,8 @@ export function renderDiamond(
   rc: RoughCanvas,
   options: ArrowOptions
 ) {
-  const { mode, end, rough, bezierParameters, strokeColor, strokeWidth } =
-    options;
-  const anchorPoint = getPointWithTangent(points, mode, end, bezierParameters);
+  const { mode, end, rough, strokeColor, strokeWidth } = options;
+  const anchorPoint = getPointWithTangent(points, mode, end);
   const size = 10 * (strokeWidth / 2);
   const { points: diamondPoints } = getDiamondPoints(anchorPoint, size, end);
 
@@ -276,23 +249,9 @@ export function renderCircle(
   rc: RoughCanvas,
   options: ArrowOptions
 ) {
-  const {
-    bezierParameters,
-    mode,
-    end,
-    fillColor,
-    strokeColor,
-    strokeWidth,
-    rough,
-  } = options;
+  const { mode, end, fillColor, strokeColor, strokeWidth, rough } = options;
   const radius = 5 * (strokeWidth / 2);
-  const centerPoint = getCircleCenterPoint(
-    points,
-    radius,
-    mode,
-    bezierParameters,
-    end
-  );
+  const centerPoint = getCircleCenterPoint(points, radius, mode, end);
   const cx = centerPoint[0];
   const cy = centerPoint[1];
 

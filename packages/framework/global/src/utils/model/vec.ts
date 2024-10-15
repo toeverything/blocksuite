@@ -252,6 +252,35 @@ export class Vec {
   };
 
   /**
+   * Cubic interpolate anchor vector A to anchor D by control vector B and control vector C with a scalar t (Cubic Bézier curve)
+   * @param A
+   * @param B
+   * @param C
+   * @param D
+   * @param t scalar
+   */
+  static lrpCubic = (A: IVec, B: IVec, C: IVec, D: IVec, t: number): IVec => {
+    const p0 = Vec.lrpQuadratic(A, B, C, t);
+    const p1 = Vec.lrpQuadratic(B, C, D, t);
+
+    return Vec.lrp(p0, p1, t);
+  };
+
+  /**
+   * Quadratic interpolate anchor vector A to anchor C by control vector B with a scalar t (Quadratic Bézier curve)
+   * @param A
+   * @param B
+   * @param C
+   * @param t scalar
+   */
+  static lrpQuadratic = (A: IVec, B: IVec, C: IVec, t: number): IVec => {
+    const p0 = Vec.lrp(A, B, t);
+    const p1 = Vec.lrp(B, C, t);
+
+    return Vec.lrp(p0, p1, t);
+  };
+
+  /**
    * Get a vector comprised of the maximum of two or more vectors.
    */
   static max = (...v: number[][]) => {

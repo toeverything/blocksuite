@@ -19,7 +19,10 @@ export const connectorMiddleware: SurfaceMiddleware = (
       ((connector.target?.id && hasElementById(connector.target.id)) ||
         (!connector.target?.id && connector.target?.position))
     ) {
-      ConnectorPathGenerator.updatePath(connector, null, elementGetter);
+      ConnectorPathGenerator.updatePath(connector, null, elementGetter, [
+        0,
+        connector.path.length - 1,
+      ]);
     }
   };
   const pendingList = new Set<ConnectorElementModel>();
