@@ -13,6 +13,7 @@ import {
   openFileOrFiles,
 } from '../../../../../_common/utils/index.js';
 import { ImageIcon } from '../../../../../image-block/styles.js';
+import { addAttachments, addImages } from '../../../utils/common.js';
 import { getTooltipWithShortcut } from '../../utils.js';
 import { EdgelessToolbarToolMixin } from '../mixins/tool.mixin.js';
 import { NOTE_MENU_ITEMS } from './note-menu-config.js';
@@ -54,7 +55,7 @@ export class EdgelessNoteMenu extends EdgelessToolbarToolMixin(LitElement) {
   private async _addImages() {
     this._imageLoading = true;
     const imageFiles = await getImageFilesFromLocal();
-    const ids = await this.edgeless.addImages(imageFiles);
+    const ids = await addImages(this.edgeless.std, imageFiles);
     this._imageLoading = false;
     this.edgeless.service.tool.setEdgelessTool(
       { type: 'default' },
@@ -132,7 +133,7 @@ export class EdgelessNoteMenu extends EdgelessToolbarToolMixin(LitElement) {
               @click=${async () => {
                 const file = await openFileOrFiles();
                 if (!file) return;
-                await this.edgeless.addAttachments([file]);
+                await addAttachments(this.edgeless.std, [file]);
                 this.edgeless.service.tool.setEdgelessTool({ type: 'default' });
                 this.edgeless.std
                   .getOptional(TelemetryProvider)
