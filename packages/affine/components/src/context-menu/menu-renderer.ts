@@ -4,16 +4,14 @@ import { ArrowLeftBigIcon, CloseIcon, SearchIcon } from '@blocksuite/icons/lit';
 import {
   autoPlacement,
   autoUpdate,
-  type ClientRectObject,
   computePosition,
   type Middleware,
   offset,
   type ReferenceElement,
   shift,
-  type VirtualElement,
 } from '@floating-ui/dom';
-import { computed } from '@preact/signals-core';
-import { css, html, nothing } from 'lit';
+import { cssVarV2 } from '@toeverything/theme/v2';
+import { css, html, nothing, unsafeCSS } from 'lit';
 import { property } from 'lit/decorators.js';
 import { createRef, ref } from 'lit/directives/ref.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -36,31 +34,25 @@ export class MenuComponent extends SignalWatcher(
       padding: 8px;
       position: absolute;
       z-index: 999;
-      gap: 4px;
+      gap: 8px;
     }
 
     .affine-menu-search-container {
-      position: absolute;
-      left: 0;
-      top: -40px;
-      border-radius: 8px;
-      width: 100%;
+      border-radius: 4px;
       display: flex;
-      box-shadow: var(--affine-shadow-2);
-      background-color: var(--affine-background-overlay-panel-color);
       align-items: center;
-      padding-left: 8px;
+      padding: 4px 10px;
+      gap: 8px;
+      border: 1px solid ${unsafeCSS(cssVarV2('input/border/default'))};
     }
 
     .affine-menu-search {
       flex: 1;
-      border-radius: 8px;
       outline: none;
       font-size: 14px;
       line-height: 22px;
-      padding: 5px 12px;
-      width: 100%;
       border: none;
+      background-color: transparent;
     }
 
     .affine-menu-body {
@@ -88,10 +80,6 @@ export class MenuComponent extends SignalWatcher(
 
   private searchRef = createRef<HTMLInputElement>();
 
-  showSearch = computed(() => {
-    return this.menu.isSearchMode && this.menu.searchName$.value.length > 0;
-  });
-
   override firstUpdated() {
     const input = this.searchRef.value;
     if (input) {
@@ -107,7 +95,7 @@ export class MenuComponent extends SignalWatcher(
           return;
         }
         const onBack = this.menu.options.title?.onBack;
-        if (e.key === 'Backspace' && onBack && !this.showSearch.value) {
+        if (e.key === 'Backspace' && onBack && !this.menu.showSearch$.value) {
           this.menu.close();
           onBack(this.menu);
           return;
@@ -144,7 +132,7 @@ export class MenuComponent extends SignalWatcher(
 
   override render() {
     return html`
-      ${this.renderSearch()} ${this.renderTitle()}
+      ${this.renderTitle()} ${this.renderSearch()}
       <div class="affine-menu-body">
         ${this.menu.searchResult$.value.length === 0 && this.menu.isSearchMode
           ? html` <div class="no-results">No Results</div>`
@@ -155,7 +143,7 @@ export class MenuComponent extends SignalWatcher(
   }
 
   renderSearch() {
-    const showSearch = this.showSearch.value;
+    const showSearch = this.menu.showSearch$.value;
     const searchStyle = styleMap({
       opacity: showSearch ? '1' : '0',
       height: showSearch ? undefined : '0',
@@ -221,9 +209,6 @@ export class MenuComponent extends SignalWatcher(
             </div>`
           : nothing}
       </div>
-      <div
-        style="height: 1px;background-color: var(--affine-divider-color);margin: 4px 0"
-      ></div>
     `;
   }
 
@@ -256,22 +241,6 @@ export const createModal = (container: HTMLElement = document.body) => {
   div.style.fontFamily = 'var(--affine-font-family)';
   container.append(div);
   return div;
-};
-export const positionToVRect = (x: number, y: number): VirtualElement => {
-  return {
-    getBoundingClientRect(): ClientRectObject {
-      return {
-        x: x,
-        y: y,
-        width: 0,
-        height: 0,
-        top: y,
-        bottom: y,
-        left: x,
-        right: x,
-      };
-    },
-  };
 };
 export type PopupTarget = {
   targetRect: ReferenceElement;

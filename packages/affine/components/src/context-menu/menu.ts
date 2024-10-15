@@ -50,6 +50,10 @@ export class Menu {
     return this.renderItems(this.options.items);
   });
 
+  showSearch$ = computed(() => {
+    return this.isSearchMode && this.searchName$.value.length > 0;
+  });
+
   get isSearchMode() {
     return !this.options.disableSearch;
   }

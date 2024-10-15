@@ -112,6 +112,9 @@ export const menuInputItems = {
       class?: string;
     }) =>
     menu => {
+      if (menu.showSearch$.value) {
+        return;
+      }
       const data: MenuInputData = {
         placeholder: config.placeholder,
         initialValue: config.initialValue,
