@@ -98,8 +98,8 @@ export class MenuButton extends MenuFocusable {
 }
 
 export const menuButtonItems = {
-  action: (
-    config: {
+  action:
+    (config: {
       name: string;
       label?: () => TemplateResult;
       prefix?: TemplateResult;
@@ -108,102 +108,100 @@ export const menuButtonItems = {
       select: (ele: HTMLElement) => void | false;
       onHover?: (hover: boolean) => void;
       class?: MenuClass;
+      hide?: () => boolean;
+    }) =>
+    menu => {
+      if (config.hide?.() || !menu.search(config.name)) {
+        return;
+      }
+      const data: MenuButtonData = {
+        content: () => html`
+          ${config.prefix}
+          <div class="affine-menu-action-text">
+            ${config.label?.() ?? config.name}
+          </div>
+          ${config.postfix ?? (config.isSelected ? DoneIcon() : undefined)}
+        `,
+        onHover: config.onHover,
+        select: config.select,
+        class: config.class ?? (config.isSelected ? 'selected-item' : ''),
+      };
+      return html` <affine-menu-button
+        .data="${data}"
+        .menu="${menu}"
+      ></affine-menu-button>`;
     },
-    menu
-  ) => {
-    if (!menu.search(config.name)) {
-      return;
-    }
-    const data: MenuButtonData = {
-      content: () => html`
-        ${config.prefix}
-        <div class="affine-menu-action-text">
-          ${config.label?.() ?? config.name}
-        </div>
-        ${config.postfix ?? (config.isSelected ? DoneIcon() : undefined)}
-      `,
-      onHover: config.onHover,
-      select: config.select,
-      class: config.class ?? (config.isSelected ? 'selected-item' : ''),
-    };
-    return html` <affine-menu-button
-      .data="${data}"
-      .menu="${menu}"
-    ></affine-menu-button>`;
-  },
-  checkbox: (
-    config: {
+  checkbox:
+    (config: {
       name: string;
       checked: boolean;
       postfix?: TemplateResult;
       label?: () => TemplateResult;
       select: (checked: boolean) => boolean;
       class?: string;
-    },
-    menu
-  ) => {
-    if (!menu.search(config.name)) {
-      return;
-    }
-    const data: MenuButtonData = {
-      content: () => html`
-        <div class="icon">
-          ${config.checked
-            ? CheckBoxCkeckSolidIcon({ style: `color:#1E96EB` })
-            : CheckBoxUnIcon()}
-        </div>
-        <div class="affine-menu-action-text">
-          ${config.label?.() ?? config.name}
-        </div>
-        ${config.postfix}
-      `,
-      select: () => {
-        config.select(config.checked);
-        return false;
-      },
-      class: config.class ?? '',
-    };
-    return html`
+    }) =>
+    menu => {
+      if (!menu.search(config.name)) {
+        return;
+      }
+      const data: MenuButtonData = {
+        content: () => html`
+          <div class="icon">
+            ${config.checked
+              ? CheckBoxCkeckSolidIcon({ style: `color:#1E96EB` })
+              : CheckBoxUnIcon()}
+          </div>
+          <div class="affine-menu-action-text">
+            ${config.label?.() ?? config.name}
+          </div>
+          ${config.postfix}
+        `,
+        select: () => {
+          config.select(config.checked);
+          return false;
+        },
+        class: config.class ?? '',
+      };
+      return html`
       <affine-menu-button.data='${data}'.menu='${menu}'></affine-menu-button>`;
-  },
-  'toggle-switch': (
-    config: {
+    },
+  toggleSwitch:
+    (config: {
       name: string;
       on: boolean;
       postfix?: TemplateResult;
       label?: () => TemplateResult;
       onChange: (on: boolean) => void;
       class?: string;
-    },
-    menu
-  ) => {
-    if (!menu.search(config.name)) {
-      return;
-    }
-    const onChange = (on: boolean) => {
-      config.onChange(on);
-    };
+    }) =>
+    menu => {
+      if (!menu.search(config.name)) {
+        return;
+      }
+      const onChange = (on: boolean) => {
+        config.onChange(on);
+      };
 
-    const data: MenuButtonData = {
-      content: () => html`
-        <div class="affine-menu-action-text">
-          ${config.label?.() ?? config.name}
-        </div>
-        <toggle-switch
-          .on="${config.on}"
-          .onChange="${onChange}"
-        ></toggle-switch>
-        ${config.postfix}
-      `,
-      select: () => {
-        config.onChange(config.on);
-        return false;
-      },
-      class: config.class ?? '',
-    };
-    return html` <affine-menu-button
-      .data="${data}"
-      .menu="${menu}"
-    ></affine-menu-button>`;
-  },
+      const data: MenuButtonData = {
+        content: () => html`
+          <div class="affine-menu-action-text">
+            ${config.label?.() ?? config.name}
+          </div>
+          <toggle-switch
+            .on="${config.on}"
+            .onChange="${onChange}"
+          ></toggle-switch>
+          ${config.postfix}
+        `,
+        select: () => {
+          config.onChange(config.on);
+          return false;
+        },
+        class: config.class ?? '',
+      };
+      return html` <affine-menu-button
+        .data="${data}"
+        .menu="${menu}"
+      ></affine-menu-button>`;
+    },
 } satisfies Record<string, MenuItemRender<never>>;

@@ -1,5 +1,6 @@
 import {
   createPopup,
+  menu,
   popMenu,
 } from '@blocksuite/affine-components/context-menu';
 import { html } from 'lit';
@@ -33,14 +34,13 @@ export const literalMatchers = [
       popMenu(position, {
         options: {
           items: [true, false].map(v => {
-            return {
-              type: 'action',
+            return menu.action({
               name: v.toString().toUpperCase(),
               isSelected: v === value,
               select: () => {
                 onChange(v);
               },
-            };
+            });
           }),
         },
       });
@@ -52,13 +52,12 @@ export const literalMatchers = [
       popMenu(position, {
         options: {
           items: [
-            {
-              type: 'input',
+            menu.input({
               initialValue: value?.toString() ?? '',
               onComplete: text => {
                 onChange(text || undefined);
               },
-            },
+            }),
           ],
         },
       });
@@ -70,8 +69,7 @@ export const literalMatchers = [
       popMenu(position, {
         options: {
           items: [
-            {
-              type: 'input',
+            menu.input({
               initialValue: value?.toString() ?? '',
               onComplete: text => {
                 if (!text) {
@@ -83,7 +81,7 @@ export const literalMatchers = [
                   onChange(number);
                 }
               },
-            },
+            }),
           ],
         },
       });
@@ -108,8 +106,7 @@ export const literalMatchers = [
                 padding: '0 8px',
                 width: 'max-content',
               });
-              return {
-                type: 'checkbox',
+              return menu.checkbox({
                 name: tag.value,
                 checked: list.includes(tag.id),
                 label: () =>
@@ -127,7 +124,7 @@ export const literalMatchers = [
                     return true;
                   }
                 },
-              };
+              });
             }) ?? [],
         },
       });
@@ -148,8 +145,7 @@ export const literalMatchers = [
                 padding: '0 8px',
                 width: 'max-content',
               });
-              return {
-                type: 'action',
+              return menu.action({
                 name: tag.value,
                 label: () =>
                   html` <div class="dv-round-4" style=${styles}>
@@ -158,7 +154,7 @@ export const literalMatchers = [
                 select: () => {
                   onChange(tag.id);
                 },
-              };
+              });
             }) ?? [],
         },
       });

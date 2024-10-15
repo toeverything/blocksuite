@@ -1,6 +1,7 @@
 import type { PropertyValues } from 'lit';
 
 import {
+  menu,
   type MenuConfig,
   type MenuOptions,
   popMenu,
@@ -175,8 +176,7 @@ export const selectGroupByProperty = (
         })
         .map<MenuConfig>(id => {
           const property = view.propertyGet(id);
-          return {
-            type: 'action',
+          return menu.action({
             name: property.name$.value,
             isSelected: view.data$.value?.groupBy?.columnId === id,
             prefix: html` <uni-lit .uni="${property.icon}"></uni-lit>`,
@@ -189,14 +189,11 @@ export const selectGroupByProperty = (
                 ops?.onSelect?.(id);
               }
             },
-          };
+          });
         }),
-      {
-        type: 'group',
-        name: '',
+      menu.group({
         items: [
-          {
-            type: 'action',
+          menu.action({
             prefix: DeleteIcon(),
             hide: () =>
               view instanceof KanbanSingleView ||
@@ -209,9 +206,9 @@ export const selectGroupByProperty = (
                 ops?.onSelect?.();
               }
             },
-          },
+          }),
         ],
-      },
+      }),
     ],
   };
 };
@@ -249,12 +246,9 @@ export const popGroupSetting = (
         onBack: onBack,
       },
       items: [
-        {
-          type: 'group',
-          name: '',
+        menu.group({
           items: [
-            {
-              type: 'sub-menu',
+            menu.subMenu({
               name: 'Group By',
               postfix: html`
                 <div
@@ -276,30 +270,22 @@ export const popGroupSetting = (
                   popGroupSetting(target, view, onBack);
                 },
               }),
-            },
+            }),
           ],
-        },
-        {
-          type: 'group',
-          name: '',
+        }),
+        menu.group({
           items: [
-            {
-              type: 'custom',
-              render: menu =>
-                html` <data-view-group-setting
-                  @mouseenter="${() => menu.closeSubMenu()}"
-                  .view="${view}"
-                  .columnId="${groupBy.columnId}"
-                ></data-view-group-setting>`,
-            },
+            menu =>
+              html` <data-view-group-setting
+                @mouseenter="${() => menu.closeSubMenu()}"
+                .view="${view}"
+                .columnId="${groupBy.columnId}"
+              ></data-view-group-setting>`,
           ],
-        },
-        {
-          type: 'group',
-          name: '',
+        }),
+        menu.group({
           items: [
-            {
-              type: 'action',
+            menu.action({
               name: 'Remove grouping',
               prefix: DeleteIcon(),
               class: 'delete-item',
@@ -309,9 +295,9 @@ export const popGroupSetting = (
                   view.changeGroup(undefined);
                 }
               },
-            },
+            }),
           ],
-        },
+        }),
       ],
     },
   });

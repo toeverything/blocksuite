@@ -1,10 +1,4 @@
-import type { TemplateResult } from 'lit';
-
-import type { Menu } from './menu.js';
+import type { MenuConfig } from './menu.js';
 
 export type MenuClass = (string & {}) | 'delete-item';
-export type MenuItemRender<Props> = (
-  props: Props,
-  menu: Menu,
-  index: number
-) => TemplateResult | undefined;
+export type MenuItemRender<Props> = (props: Props) => MenuConfig;

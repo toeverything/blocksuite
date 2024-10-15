@@ -1,4 +1,5 @@
 import {
+  menu,
   popMenu,
   popupTargetFromElement,
 } from '@blocksuite/affine-components/context-menu';
@@ -39,13 +40,12 @@ export class KanbanHeader extends SignalWatcher(
         items: this.view.properties$.value
           .filter(column => column.id !== this.view.view?.groupBy?.columnId)
           .map(column => {
-            return {
-              type: 'action',
+            return menu.action({
               name: column.name$.value,
               select: () => {
                 this.view.changeGroup(column.id);
               },
-            };
+            });
           }),
       },
     });

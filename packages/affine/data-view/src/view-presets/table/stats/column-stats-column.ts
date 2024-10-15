@@ -1,4 +1,5 @@
 import {
+  menu,
   type MenuConfig,
   popFilterableSimpleMenu,
   popupTargetFromElement,
@@ -104,34 +105,30 @@ export class DatabaseColumnStatsCell extends SignalWatcher(
   openMenu = (ev: MouseEvent) => {
     const menus: MenuConfig[] = Object.entries(this.groups$.value).map(
       ([group, funcs]) => {
-        return {
-          type: 'sub-menu',
+        return menu.subMenu({
           name: group,
           options: {
-            input: { search: true },
             items: Object.values(funcs).map(func => {
-              return {
-                type: 'action',
+              return menu.action({
                 isSelected: func.type === this.column.statCalcOp$.value,
                 name: func.menuName ?? func.type,
                 select: () => {
                   this.column.updateStatCalcOp(func.type);
                 },
-              };
+              });
             }),
           },
-        };
+        });
       }
     );
     popFilterableSimpleMenu(popupTargetFromElement(ev.target as HTMLElement), [
-      {
-        type: 'action',
+      menu.action({
         isSelected: !this.column.statCalcOp$.value,
         name: 'None',
         select: () => {
           this.column.updateStatCalcOp();
         },
-      },
+      }),
       ...menus,
     ]);
   };

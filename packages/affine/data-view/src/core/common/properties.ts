@@ -1,4 +1,5 @@
 import {
+  menu,
   popMenu,
   type PopupTarget,
 } from '@blocksuite/affine-components/context-menu';
@@ -241,18 +242,14 @@ export const popPropertiesSetting = (
         },
       },
       items: [
-        {
-          type: 'group',
+        menu.group({
           items: [
-            {
-              type: 'custom',
-              render: () =>
-                html`<data-view-properties-setting
-                  .view="${props.view}"
-                ></data-view-properties-setting>`,
-            },
+            () =>
+              html`<data-view-properties-setting
+                .view="${props.view}"
+              ></data-view-properties-setting>`,
           ],
-        },
+        }),
       ],
     },
   });

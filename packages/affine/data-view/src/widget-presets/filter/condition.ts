@@ -1,4 +1,5 @@
 import {
+  menu,
   popFilterableSimpleMenu,
   type PopupTarget,
   popupTargetFromElement,
@@ -125,8 +126,7 @@ export class FilterConditionView extends SignalWatcher(ShadowlessElement) {
       popupTargetFromElement(target),
       list.map(v => {
         const selected = v.name === this.data.function;
-        return {
-          type: 'action',
+        return menu.action({
           name: v.label,
           isSelected: selected,
           select: () => {
@@ -135,7 +135,7 @@ export class FilterConditionView extends SignalWatcher(ShadowlessElement) {
               function: v.name,
             });
           },
-        };
+        });
       })
     );
   }
@@ -222,8 +222,7 @@ export const popAddNewFilter = (
   }
 ) => {
   popFilterableSimpleMenu(target, [
-    {
-      type: 'action',
+    menu.action({
       name: 'Add filter',
       select: () => {
         props.onChange({
@@ -231,9 +230,8 @@ export const popAddNewFilter = (
           conditions: [...props.value.conditions, firstFilter(props.vars)],
         });
       },
-    },
-    {
-      type: 'action',
+    }),
+    menu.action({
       name: 'Add filter group',
       select: () => {
         props.onChange({
@@ -244,6 +242,6 @@ export const popAddNewFilter = (
           ],
         });
       },
-    },
+    }),
   ]);
 };

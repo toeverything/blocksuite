@@ -1,4 +1,5 @@
 import {
+  menu,
   popFilterableSimpleMenu,
   popupTargetFromElement,
 } from '@blocksuite/affine-components/context-menu';
@@ -113,14 +114,13 @@ export class RecordDetail extends SignalWatcher(
     popFilterableSimpleMenu(
       popupTargetFromElement(this.addPropertyButton),
       this.view.propertyMetas.map(meta => {
-        return {
-          type: 'action',
+        return menu.action({
           name: meta.config.name,
           prefix: renderUniLit(this.view.IconGet(meta.type)),
           select: () => {
             this.view.propertyAdd('end', meta.type);
           },
-        };
+        });
       })
     );
   };

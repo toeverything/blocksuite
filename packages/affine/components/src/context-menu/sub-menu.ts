@@ -17,6 +17,7 @@ import { Menu, type MenuOptions } from './menu.js';
 export type MenuSubMenuData = {
   content: () => TemplateResult;
   options: MenuOptions;
+  select?: () => void;
   class?: string;
 };
 
@@ -27,7 +28,12 @@ export class MenuSubMenu extends MenuFocusable {
     this.disposables.addFromEvent(this, 'click', e => {
       e.preventDefault();
       e.stopPropagation();
-      this.openSubMenu();
+      if (this.data.select) {
+        this.data.select();
+        this.menu.close();
+      } else {
+        this.openSubMenu();
+      }
     });
   }
 
@@ -83,35 +89,37 @@ export class MenuSubMenu extends MenuFocusable {
 }
 
 export const subMenuItems = {
-  'sub-menu': (
-    config: {
+  subMenu:
+    (config: {
       name: string;
       label?: () => TemplateResult;
+      select?: () => void;
+      isSelected?: boolean;
       postfix?: TemplateResult;
       prefix?: TemplateResult;
       class?: string;
       options: MenuOptions;
       disableArrow?: boolean;
+      hide?: () => boolean;
+    }) =>
+    menu => {
+      if (config.hide?.() || !menu.search(config.name)) {
+        return;
+      }
+      const data: MenuSubMenuData = {
+        content: () =>
+          html`${config.prefix}
+            <div class="affine-menu-action-text">
+              ${config.label?.() ?? config.name}
+            </div>
+            ${config.postfix}
+            ${config.disableArrow ? nothing : ArrowRightSmallIcon()} `,
+        class: config.class,
+        options: config.options,
+      };
+      return html` <affine-menu-sub-menu
+        .data="${data}"
+        .menu="${menu}"
+      ></affine-menu-sub-menu>`;
     },
-    menu
-  ) => {
-    if (!menu.search(config.name)) {
-      return;
-    }
-    const data: MenuSubMenuData = {
-      content: () =>
-        html`${config.prefix}
-          <div class="affine-menu-action-text">
-            ${config.label?.() ?? config.name}
-          </div>
-          ${config.postfix}
-          ${config.disableArrow ? nothing : ArrowRightSmallIcon()} `,
-      class: config.class,
-      options: config.options,
-    };
-    return html` <affine-menu-sub-menu
-      .data="${data}"
-      .menu="${menu}"
-    ></affine-menu-sub-menu>`;
-  },
 } satisfies Record<string, MenuItemRender<never>>;

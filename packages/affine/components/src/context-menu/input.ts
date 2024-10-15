@@ -99,33 +99,34 @@ export class MenuInput extends MenuFocusable {
 }
 
 export const menuInputItems = {
-  input: (
-    config: {
+  input:
+    (config: {
       placeholder?: string;
       initialValue?: string;
       postfix?: TemplateResult;
       prefix?: TemplateResult;
       onComplete: (value: string) => void;
       class?: string;
+    }) =>
+    menu => {
+      const data: MenuInputData = {
+        placeholder: config.placeholder,
+        initialValue: config.initialValue,
+        class: config.class,
+        onComplete: config.onComplete,
+      };
+      return html`
+        <div
+          style="display:flex;align-items:center;margin-bottom: 8px;gap: 4px;"
+        >
+          ${config.prefix}
+          <affine-menu-input
+            style="flex:1"
+            .data="${data}"
+            .menu="${menu}"
+          ></affine-menu-input>
+          ${config.postfix}
+        </div>
+      `;
     },
-    menu
-  ) => {
-    const data: MenuInputData = {
-      placeholder: config.placeholder,
-      initialValue: config.initialValue,
-      class: config.class,
-      onComplete: config.onComplete,
-    };
-    return html`
-      <div style="display:flex;align-items:center;margin-bottom: 8px;gap: 4px;">
-        ${config.prefix}
-        <affine-menu-input
-          style="flex:1"
-          .data="${data}"
-          .menu="${menu}"
-        ></affine-menu-input>
-        ${config.postfix}
-      </div>
-    `;
-  },
 } satisfies Record<string, MenuItemRender<never>>;

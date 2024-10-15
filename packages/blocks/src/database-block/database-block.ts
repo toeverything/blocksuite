@@ -2,6 +2,7 @@ import type { DatabaseBlockModel } from '@blocksuite/affine-model';
 
 import { CaptionedBlockComponent } from '@blocksuite/affine-components/caption';
 import {
+  menu,
   popMenu,
   popupTargetFromElement,
 } from '@blocksuite/affine-components/context-menu';
@@ -104,16 +105,14 @@ export class DatabaseBlockComponent extends CaptionedBlockComponent<
   private _clickDatabaseOps = (e: MouseEvent) => {
     const options = this.optionsConfig.configure(this.model, {
       items: [
-        {
-          type: 'input',
+        menu.input({
           initialValue: this.model.title.toString(),
           placeholder: 'Untitled',
           onComplete: text => {
             this.model.title.replace(0, this.model.title.length, text);
           },
-        },
-        {
-          type: 'action',
+        }),
+        menu.action({
           prefix: CopyIcon(),
           name: 'Copy',
           select: () => {
@@ -125,13 +124,10 @@ export class DatabaseBlockComponent extends CaptionedBlockComponent<
               })
               .catch(console.error);
           },
-        },
-        {
-          type: 'group',
-          name: '',
+        }),
+        menu.group({
           items: [
-            {
-              type: 'action',
+            menu.action({
               prefix: DeleteIcon(),
               class: 'delete-item',
               name: 'Delete Database',
@@ -141,9 +137,9 @@ export class DatabaseBlockComponent extends CaptionedBlockComponent<
                 });
                 this.doc.deleteBlock(this.model);
               },
-            },
+            }),
           ],
-        },
+        }),
       ],
     });
 

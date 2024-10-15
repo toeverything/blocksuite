@@ -1,4 +1,5 @@
 import {
+  menu,
   popFilterableSimpleMenu,
   popupTargetFromElement,
 } from '@blocksuite/affine-components/context-menu';
@@ -134,8 +135,7 @@ export class KanbanGroup extends SignalWatcher(
   private clickGroupOptions = (e: MouseEvent) => {
     const ele = e.currentTarget as HTMLElement;
     popFilterableSimpleMenu(popupTargetFromElement(ele), [
-      {
-        type: 'action',
+      menu.action({
         name: 'Ungroup',
         hide: () => this.group.value == null,
         select: () => {
@@ -143,14 +143,13 @@ export class KanbanGroup extends SignalWatcher(
             this.group.manager.removeFromGroup(id, this.group.key);
           });
         },
-      },
-      {
-        type: 'action',
+      }),
+      menu.action({
         name: 'Delete Cards',
         select: () => {
           this.view.rowDelete(this.group.rows);
         },
-      },
+      }),
     ]);
   };
 

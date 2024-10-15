@@ -1,5 +1,6 @@
 import {
   createPopup,
+  menu,
   popMenu,
   type PopupTarget,
   popupTargetFromElement,
@@ -53,8 +54,7 @@ export class MultiTagSelect extends WithDisposable(ShadowlessElement) {
     popMenu(popupTargetFromElement(e.target as HTMLElement), {
       options: {
         items: [
-          {
-            type: 'input',
+          menu.input({
             initialValue: option.value,
             onComplete: text => {
               this.changeTag({
@@ -62,18 +62,16 @@ export class MultiTagSelect extends WithDisposable(ShadowlessElement) {
                 value: text,
               });
             },
-          },
-          {
-            type: 'action',
+          }),
+          menu.action({
             name: 'Delete',
             prefix: DeleteIcon(),
             class: 'delete-item',
             select: () => {
               this.deleteTag(id);
             },
-          },
-          {
-            type: 'group',
+          }),
+          menu.group({
             name: 'color',
             items: selectOptionColors.map(item => {
               const styles = styleMap({
@@ -82,8 +80,7 @@ export class MultiTagSelect extends WithDisposable(ShadowlessElement) {
                 width: '20px',
                 height: '20px',
               });
-              return {
-                type: 'action',
+              return menu.action({
                 name: item.name,
                 prefix: html` <div style=${styles}></div>`,
                 isSelected: option.color === item.color,
@@ -93,9 +90,9 @@ export class MultiTagSelect extends WithDisposable(ShadowlessElement) {
                     color: item.color,
                   });
                 },
-              };
+              });
             }),
-          },
+          }),
         ],
       },
       middleware: [autoPlacement()],

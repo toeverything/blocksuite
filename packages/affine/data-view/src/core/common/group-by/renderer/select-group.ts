@@ -1,5 +1,5 @@
 import {
-  type NormalMenuConfig,
+  menu,
   popMenu,
   popupTargetFromElement,
 } from '@blocksuite/affine-components/context-menu';
@@ -50,30 +50,28 @@ export class SelectGroupView extends BaseGroup<
     popMenu(popupTargetFromElement(this), {
       options: {
         items: [
-          {
-            type: 'input',
+          menu.input({
             initialValue: this.tag?.value ?? '',
             onComplete: text => {
               this.updateTag({ value: text });
             },
-          },
-          ...(selectOptionColors.map(({ color, name }) => {
+          }),
+          ...selectOptionColors.map(({ color, name }) => {
             const styles = styleMap({
               backgroundColor: color,
               borderRadius: '50%',
               width: '20px',
               height: '20px',
             });
-            return {
-              type: 'action',
+            return menu.action({
               name: name,
               isSelected: this.tag?.color === color,
               prefix: html` <div style=${styles}></div>`,
               select: () => {
                 this.updateTag({ color });
               },
-            };
-          }) satisfies NormalMenuConfig[]),
+            });
+          }),
         ],
       },
     });

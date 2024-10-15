@@ -1,4 +1,5 @@
 import {
+  menu,
   popMenu,
   popupTargetFromElement,
 } from '@blocksuite/affine-components/context-menu';
@@ -222,8 +223,7 @@ export class DataViewTable extends DataViewBase<
       popMenu(popupTargetFromElement(ele), {
         options: {
           items: [
-            {
-              type: 'input',
+            menu.input({
               onComplete: text => {
                 const column = groupHelper.property$.value;
                 if (column) {
@@ -232,7 +232,7 @@ export class DataViewTable extends DataViewBase<
                   );
                 }
               },
-            },
+            }),
           ],
         },
       });

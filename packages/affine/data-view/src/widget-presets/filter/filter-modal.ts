@@ -1,6 +1,7 @@
 import type { ReadonlySignal } from '@preact/signals-core';
 
 import {
+  menu,
   popMenu,
   type PopupTarget,
   popupTargetFromElement,
@@ -31,29 +32,23 @@ export const popFilterRoot = (
         onBack: props.onBack,
       },
       items: [
-        {
-          type: 'group',
+        menu.group({
           items: [
-            {
-              type: 'custom',
-              render: () => {
-                const view = props.view;
-                const onChange = view.filterSet.bind(view);
-                return html` <filter-root-view
-                  .onBack=${props.onBack}
-                  .vars="${view.vars$}"
-                  .filterGroup="${view.filter$}"
-                  .onChange="${onChange}"
-                ></filter-root-view>`;
-              },
+            () => {
+              const view = props.view;
+              const onChange = view.filterSet.bind(view);
+              return html` <filter-root-view
+                .onBack=${props.onBack}
+                .vars="${view.vars$}"
+                .filterGroup="${view.filter$}"
+                .onChange="${onChange}"
+              ></filter-root-view>`;
             },
           ],
-        },
-        {
-          type: 'group',
+        }),
+        menu.group({
           items: [
-            {
-              type: 'action',
+            menu.action({
               name: 'Add',
               prefix: PlusIcon(),
               select: ele => {
@@ -68,9 +63,9 @@ export const popFilterRoot = (
                 });
                 return false;
               },
-            },
+            }),
           ],
-        },
+        }),
       ],
     },
   });
@@ -91,35 +86,29 @@ export const popFilterGroup = (
         onBack: props.onBack,
       },
       items: [
-        {
-          type: 'group',
+        menu.group({
           items: [
-            {
-              type: 'custom',
-              render: () => {
-                return html` <filter-group-view
-                  .vars="${props.vars}"
-                  .filterGroup="${props.value$}"
-                  .onChange="${props.onChange}"
-                ></filter-group-view>`;
-              },
+            () => {
+              return html` <filter-group-view
+                .vars="${props.vars}"
+                .filterGroup="${props.value$}"
+                .onChange="${props.onChange}"
+              ></filter-group-view>`;
             },
           ],
-        },
-        {
-          type: 'group',
+        }),
+        menu.group({
           items: [
-            {
-              type: 'action',
+            menu.action({
               name: 'Delete',
               class: 'delete-item',
               prefix: DeleteIcon(),
               select: () => {
                 props.onChange();
               },
-            },
+            }),
           ],
-        },
+        }),
       ],
     },
   });

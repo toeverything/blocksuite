@@ -1,14 +1,12 @@
-import type { NormalMenuConfig } from '@blocksuite/affine-components/context-menu';
-
+import { menu } from '@blocksuite/affine-components/context-menu';
 import { html } from 'lit/static-html.js';
 
 import type { Property } from '../view-manager/property.js';
 
 import { renderUniLit } from '../utils/uni-component/index.js';
 
-export const inputConfig = (property: Property): NormalMenuConfig => {
-  return {
-    type: 'input',
+export const inputConfig = (property: Property) => {
+  return menu.input({
     prefix: html`
       <div class="affine-database-column-type-menu-icon">
         ${renderUniLit(property.icon)}
@@ -18,11 +16,10 @@ export const inputConfig = (property: Property): NormalMenuConfig => {
     onComplete: text => {
       property.nameSet(text);
     },
-  };
+  });
 };
-export const typeConfig = (property: Property): NormalMenuConfig => {
-  return {
-    type: 'sub-menu',
+export const typeConfig = (property: Property) => {
+  return menu.subMenu({
     name: 'Type',
     hide: () => !property.typeSet || property.type$.value === 'title',
     postfix: html` <div
@@ -35,8 +32,7 @@ export const typeConfig = (property: Property): NormalMenuConfig => {
     </div>`,
     options: {
       items: property.view.propertyMetas.map(config => {
-        return {
-          type: 'action',
+        return menu.action({
           isSelected: config.type === property.type$.value,
           name: config.config.name,
           prefix: renderUniLit(property.view.IconGet(config.type)),
@@ -46,8 +42,8 @@ export const typeConfig = (property: Property): NormalMenuConfig => {
             }
             property.typeSet?.(config.type);
           },
-        };
+        });
       }),
     },
-  };
+  });
 };

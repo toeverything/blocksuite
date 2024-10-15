@@ -1,4 +1,5 @@
 import {
+  menu,
   popFilterableSimpleMenu,
   popMenu,
   type PopupTarget,
@@ -70,15 +71,14 @@ export class DataViewHeaderViews extends WidgetBase {
     popFilterableSimpleMenu(
       popupTargetFromElement(event.currentTarget as HTMLElement),
       this.dataSource.viewMetas.map(v => {
-        return {
-          type: 'action',
+        return menu.action({
           name: v.model.defaultName,
           prefix: html`<uni-lit .uni=${v.renderer.icon}></uni-lit>`,
           select: () => {
             const id = this.viewManager.viewAdd(v.type);
             this.viewManager.setCurrentView(id);
           },
-        };
+        });
       })
     );
   };
@@ -97,8 +97,7 @@ export class DataViewHeaderViews extends WidgetBase {
             );
           };
           const view = this.viewManager.viewGet(id);
-          return {
-            type: 'action' as const,
+          return menu.action({
             prefix: html`<uni-lit .uni=${this.getRenderer(id).icon}></uni-lit>`,
             name: view.data$.value?.name ?? '',
             label: () => html`${view.data$.value?.name}`,
@@ -113,13 +112,11 @@ export class DataViewHeaderViews extends WidgetBase {
             >
               ${MoreHorizontalIcon()}
             </div>`,
-          };
+          });
         }),
-        {
-          type: 'group',
+        menu.group({
           items: this.dataSource.viewMetas.map(v => {
-            return {
-              type: 'action',
+            return menu.action({
               name: `Create ${v.model.defaultName}`,
               hide: () => this.readonly,
               prefix: html`<uni-lit .uni=${v.renderer.icon}></uni-lit>`,
@@ -127,9 +124,9 @@ export class DataViewHeaderViews extends WidgetBase {
                 const id = this.viewManager.viewAdd(v.type);
                 this.viewManager.setCurrentView(id);
               },
-            };
+            });
           }),
-        },
+        }),
       ]
     );
   };
@@ -147,17 +144,15 @@ export class DataViewHeaderViews extends WidgetBase {
     popMenu(target, {
       options: {
         items: [
-          {
-            type: 'input',
+          menu.input({
             initialValue: view.data$.value?.name,
             onComplete: text => {
               view.dataUpdate(_data => ({
                 name: text,
               }));
             },
-          },
-          {
-            type: 'action',
+          }),
+          menu.action({
             name: 'Edit View',
             prefix: InfoIcon(),
             select: () => {
@@ -165,9 +160,8 @@ export class DataViewHeaderViews extends WidgetBase {
                 ?.querySelector('data-view-header-tools-view-options')
                 ?.openMoreAction(target);
             },
-          },
-          {
-            type: 'action',
+          }),
+          menu.action({
             name: 'Move Left',
             hide: () => index === 0,
             prefix: MoveLeftIcon(),
@@ -178,9 +172,8 @@ export class DataViewHeaderViews extends WidgetBase {
                 targetId ? { before: true, id: targetId } : 'start'
               );
             },
-          },
-          {
-            type: 'action',
+          }),
+          menu.action({
             name: 'Move Right',
             prefix: MoveRightIcon(),
             hide: () => index === views.length - 1,
@@ -191,30 +184,26 @@ export class DataViewHeaderViews extends WidgetBase {
                 targetId ? { before: false, id: targetId } : 'end'
               );
             },
-          },
-          {
-            type: 'group',
-            name: '',
+          }),
+          menu.group({
             items: [
-              {
-                type: 'action',
+              menu.action({
                 name: 'Duplicate',
                 prefix: DuplicateIcon(),
                 select: () => {
                   this.viewManager.viewDuplicate(id);
                 },
-              },
-              {
-                type: 'action',
+              }),
+              menu.action({
                 name: 'Delete',
                 prefix: DeleteIcon(),
                 select: () => {
                   view.delete();
                 },
                 class: 'delete-item',
-              },
+              }),
             ],
-          },
+          }),
         ],
       },
     });

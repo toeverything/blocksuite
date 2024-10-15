@@ -1,6 +1,7 @@
 import type { ReadonlySignal } from '@preact/signals-core';
 
 import {
+  menu,
   popFilterableSimpleMenu,
   popMenu,
   type PopupTarget,
@@ -75,17 +76,18 @@ export class VariableRefView extends WithDisposable(ShadowlessElement) {
     this.disposables.addFromEvent(this, 'click', e => {
       popFilterableSimpleMenu(
         popupTargetFromElement(e.target as HTMLElement),
-        this.vars.map(v => ({
-          type: 'action',
-          name: v.name,
-          prefix: renderUniLit(v.icon, {}),
-          select: () => {
-            this.setData({
-              type: 'ref',
-              name: v.id,
-            });
-          },
-        }))
+        this.vars.map(v =>
+          menu.action({
+            name: v.name,
+            prefix: renderUniLit(v.icon, {}),
+            select: () => {
+              this.setData({
+                type: 'ref',
+                name: v.id,
+              });
+            },
+          })
+        )
       );
     });
   }
@@ -127,33 +129,32 @@ export const popCreateFilter = (
         text: 'New filter',
       },
       items: [
-        ...props.vars.value.map(v => ({
-          type: 'action' as const,
-          name: v.name,
-          prefix: renderUniLit(v.icon, {}),
-          select: () => {
-            props.onSelect(
-              firstFilterByRef(props.vars.value, {
-                type: 'ref',
-                name: v.id,
-              })
-            );
-          },
-        })),
-        {
-          type: 'group',
+        ...props.vars.value.map(v =>
+          menu.action({
+            name: v.name,
+            prefix: renderUniLit(v.icon, {}),
+            select: () => {
+              props.onSelect(
+                firstFilterByRef(props.vars.value, {
+                  type: 'ref',
+                  name: v.id,
+                })
+              );
+            },
+          })
+        ),
+        menu.group({
           name: '',
           items: [
-            {
-              type: 'action',
+            menu.action({
               name: 'Add filter group',
               prefix: AddCursorIcon(),
               select: () => {
                 props.onSelect(firstFilterInGroup(props.vars.value));
               },
-            },
+            }),
           ],
-        },
+        }),
       ],
     },
   });

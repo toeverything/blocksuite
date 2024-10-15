@@ -1,6 +1,7 @@
 import {
+  menu,
   type MenuButtonData,
-  type NormalMenuConfig,
+  type MenuConfig,
   popMenu,
   type PopupTarget,
   popupTargetFromElement,
@@ -113,15 +114,13 @@ export const popViewOptions = (
   popMenu(target, {
     options: {
       items: [
-        {
-          type: 'input',
+        menu.input({
           initialValue: view.name$.value,
           onComplete: text => {
             view.nameSet(text);
           },
-        },
-        {
-          type: 'action',
+        }),
+        menu.action({
           name: 'Layout',
           postfix: html` <div
               style="font-size: 14px;text-transform: capitalize;"
@@ -130,59 +129,54 @@ export const popViewOptions = (
             </div>
             ${ArrowRightSmallIcon()}`,
           select: () => {
-            const viewTypes = view.manager.viewMetas.map(meta => {
-              return {
-                type: 'custom',
-                render: menu => {
-                  if (!menu.search(meta.model.defaultName)) {
-                    return;
-                  }
-                  const isSelected =
-                    meta.type === view.manager.currentView$.value.type;
-                  const iconStyle = styleMap({
-                    fontSize: '24px',
-                    color: isSelected
-                      ? 'var(--affine-icon-primary)'
-                      : 'var(--affine-icon-secondary)',
-                  });
-                  const textStyle = styleMap({
-                    fontSize: '14px',
-                    lineHeight: '22px',
-                    color: isSelected
-                      ? 'var(--affine-text-primary-color)'
-                      : 'var(--affine-text-secondary-color)',
-                  });
-                  const data: MenuButtonData = {
-                    content: () => html`
-                      <div
-                        style="width:100%;display: flex;flex-direction: column;align-items: center;justify-content: center;padding: 6px 16px;"
-                      >
-                        <div style="${iconStyle}">
-                          ${renderUniLit(meta.renderer.icon)}
-                        </div>
-                        <div style="${textStyle}">
-                          ${meta.model.defaultName}
-                        </div>
+            const viewTypes = view.manager.viewMetas.map<MenuConfig>(meta => {
+              return menu => {
+                if (!menu.search(meta.model.defaultName)) {
+                  return;
+                }
+                const isSelected =
+                  meta.type === view.manager.currentView$.value.type;
+                const iconStyle = styleMap({
+                  fontSize: '24px',
+                  color: isSelected
+                    ? 'var(--affine-text-emphasis-color)'
+                    : 'var(--affine-icon-secondary)',
+                });
+                const textStyle = styleMap({
+                  fontSize: '14px',
+                  lineHeight: '22px',
+                  color: isSelected
+                    ? 'var(--affine-text-emphasis-color)'
+                    : 'var(--affine-text-secondary-color)',
+                });
+                const data: MenuButtonData = {
+                  content: () => html`
+                    <div
+                      style="color:var(--affine-text-emphasis-color);width:100%;display: flex;flex-direction: column;align-items: center;justify-content: center;padding: 6px 16px;"
+                    >
+                      <div style="${iconStyle}">
+                        ${renderUniLit(meta.renderer.icon)}
                       </div>
-                    `,
-                    select: () => {
-                      view.manager.viewChangeType(
-                        view.manager.currentViewId$.value,
-                        meta.type
-                      );
-                    },
-                    class: '',
-                  };
-                  const containerStyle = styleMap({
-                    flex: '1',
-                  });
-                  return html` <affine-menu-button
-                    style="${containerStyle}"
-                    .data="${data}"
-                    .menu="${menu}"
-                  ></affine-menu-button>`;
-                },
-              } satisfies NormalMenuConfig;
+                      <div style="${textStyle}">${meta.model.defaultName}</div>
+                    </div>
+                  `,
+                  select: () => {
+                    view.manager.viewChangeType(
+                      view.manager.currentViewId$.value,
+                      meta.type
+                    );
+                  },
+                  class: '',
+                };
+                const containerStyle = styleMap({
+                  flex: '1',
+                });
+                return html` <affine-menu-button
+                  style="${containerStyle}"
+                  .data="${data}"
+                  .menu="${menu}"
+                ></affine-menu-button>`;
+              };
             });
             popMenu(target, {
               options: {
@@ -191,45 +185,36 @@ export const popViewOptions = (
                   text: 'Layout',
                 },
                 items: [
-                  {
-                    type: 'custom',
-                    render: menu => {
-                      const result = menu.renderItems(viewTypes);
-                      if (result.length) {
-                        return html` <div style="display: flex">
-                          ${result}
-                        </div>`;
-                      }
-                      return html``;
-                    },
+                  menu => {
+                    const result = menu.renderItems(viewTypes);
+                    if (result.length) {
+                      return html` <div style="display: flex">${result}</div>`;
+                    }
+                    return html``;
                   },
-                  {
-                    type: 'toggle-switch',
+                  menu.toggleSwitch({
                     name: 'Show block icon',
                     on: true,
                     onChange: value => {
                       console.log(value);
                     },
-                  },
-                  {
-                    type: 'toggle-switch',
+                  }),
+                  menu.toggleSwitch({
                     name: 'Show Vertical lines',
                     on: true,
                     onChange: value => {
                       console.log(value);
                     },
-                  },
+                  }),
                 ],
               },
             });
           },
           prefix: LayoutIcon(),
-        },
-        {
-          type: 'group',
+        }),
+        menu.group({
           items: [
-            {
-              type: 'action',
+            menu.action({
               name: 'Properties',
               prefix: InfoIcon(),
               postfix: html` <div style="font-size: 14px;">
@@ -242,9 +227,8 @@ export const popViewOptions = (
                   onBack: reopen,
                 });
               },
-            },
-            {
-              type: 'action',
+            }),
+            menu.action({
               name: 'Filter',
               prefix: FilterIcon(),
               postfix: html` <div style="font-size: 14px;">
@@ -277,9 +261,8 @@ export const popViewOptions = (
                   });
                 }
               },
-            },
-            {
-              type: 'action',
+            }),
+            menu.action({
               name: 'Group',
               prefix: GroupingIcon(),
               postfix: html` <div style="font-size: 14px;">
@@ -300,31 +283,28 @@ export const popViewOptions = (
                   popGroupSetting(target, view, reopen);
                 }
               },
-            },
+            }),
           ],
-        },
-        {
-          type: 'group',
+        }),
+        menu.group({
           items: [
-            {
-              type: 'action',
+            menu.action({
               name: 'Duplicate',
               prefix: DuplicateIcon(),
               select: () => {
                 view.duplicate();
               },
-            },
-            {
-              type: 'action',
+            }),
+            menu.action({
               name: 'Delete',
               prefix: DeleteIcon(),
               select: () => {
                 view.delete();
               },
               class: 'delete-item',
-            },
+            }),
           ],
-        },
+        }),
       ],
       onClose: onClose,
     },

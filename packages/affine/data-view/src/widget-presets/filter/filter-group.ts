@@ -1,6 +1,7 @@
 import type { TemplateResult } from 'lit';
 
 import {
+  menu,
   popFilterableSimpleMenu,
   popupTargetFromElement,
 } from '@blocksuite/affine-components/context-menu';
@@ -144,6 +145,7 @@ export class FilterGroupView extends SignalWatcher(ShadowlessElement) {
       background-color: var(--affine-background-tertiary-color);
       border: 1px solid var(--affine-border-color);
     }
+
     .hover-style {
       background-color: var(--affine-hover-color);
     }
@@ -175,8 +177,7 @@ export class FilterGroupView extends SignalWatcher(ShadowlessElement) {
     popFilterableSimpleMenu(
       popupTargetFromElement(event.currentTarget as HTMLElement),
       [
-        {
-          type: 'action',
+        menu.action({
           name: 'And',
           select: () => {
             this.onChange({
@@ -184,9 +185,8 @@ export class FilterGroupView extends SignalWatcher(ShadowlessElement) {
               op: 'and',
             });
           },
-        },
-        {
-          type: 'action',
+        }),
+        menu.action({
           name: 'Or',
           select: () => {
             this.onChange({
@@ -194,7 +194,7 @@ export class FilterGroupView extends SignalWatcher(ShadowlessElement) {
               op: 'or',
             });
           },
-        },
+        }),
       ]
     );
   };
@@ -220,8 +220,7 @@ export class FilterGroupView extends SignalWatcher(ShadowlessElement) {
   private _clickConditionOps(target: HTMLElement, i: number) {
     const filter = this.filterGroup.value.conditions[i];
     popFilterableSimpleMenu(popupTargetFromElement(target), [
-      {
-        type: 'action',
+      menu.action({
         name: filter.type === 'filter' ? 'Turn into group' : 'Wrap in group',
         prefix: ConvertIcon(),
         onHover: hover => {
@@ -237,9 +236,8 @@ export class FilterGroupView extends SignalWatcher(ShadowlessElement) {
             conditions: [this.filterGroup.value],
           });
         },
-      },
-      {
-        type: 'action',
+      }),
+      menu.action({
         name: 'Duplicate',
         prefix: DuplicateIcon(),
         onHover: hover => {
@@ -256,13 +254,11 @@ export class FilterGroupView extends SignalWatcher(ShadowlessElement) {
           );
           this.onChange({ ...this.filterGroup.value, conditions: conditions });
         },
-      },
-      {
-        type: 'group',
+      }),
+      menu.group({
         name: '',
         items: [
-          {
-            type: 'action',
+          menu.action({
             name: 'Delete',
             prefix: DeleteIcon(),
             class: 'delete-item',
@@ -279,9 +275,9 @@ export class FilterGroupView extends SignalWatcher(ShadowlessElement) {
                 conditions,
               });
             },
-          },
+          }),
         ],
-      },
+      }),
     ]);
   }
 

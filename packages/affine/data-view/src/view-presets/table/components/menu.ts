@@ -1,4 +1,5 @@
 import {
+  menu,
   popFilterableSimpleMenu,
   type PopupTarget,
 } from '@blocksuite/affine-components/context-menu';
@@ -44,12 +45,10 @@ export const popRowMenu = (
   if (selection.rows.length > 1) {
     const rows = TableRowSelection.rowsIds(selection);
     popFilterableSimpleMenu(ele, [
-      {
-        type: 'group',
+      menu.group({
         name: '',
         items: [
-          {
-            type: 'action',
+          menu.action({
             name: 'Copy',
             prefix: html` <div
               style="transform: rotate(90deg);display:flex;align-items:center;"
@@ -59,65 +58,38 @@ export const popRowMenu = (
             select: () => {
               selectionController.host.clipboardController.copy();
             },
-          },
+          }),
         ],
-      },
-      {
-        type: 'group',
+      }),
+      menu.group({
         name: '',
         items: [
-          {
-            type: 'action',
+          menu.action({
             name: 'Delete Rows',
             class: 'delete-item',
             prefix: DeleteIcon(),
             select: () => {
               selectionController.view.rowDelete(rows);
             },
-          },
+          }),
         ],
-      },
+      }),
     ]);
     return;
   }
   const row = selection.rows[0];
   popFilterableSimpleMenu(ele, [
-    {
-      type: 'action',
+    menu.action({
       name: 'Expand Row',
       prefix: ExpandFullIcon(),
       select: () => {
         openDetail(dataViewEle, row.id, selectionController);
       },
-    },
-    // {
-    //   type: 'group',
-    //   name: '',
-    //   children: () => [
-    //     {
-    //       type: 'action',
-    //       name: 'Copy',
-    //       prefix: CopyIcon,
-    //       select: () => {
-    //         //TODO
-    //       },
-    //     },
-    //     {
-    //       type: 'action',
-    //       name: 'Paste',
-    //       prefix: PasteIcon,
-    //       select: () => {
-    //         //TODO
-    //       },
-    //     },
-    //   ],
-    // },
-    {
-      type: 'group',
+    }),
+    menu.group({
       name: '',
       items: [
-        {
-          type: 'action',
+        menu.action({
           name: 'Insert Before',
           prefix: html` <div
             style="transform: rotate(90deg);display:flex;align-items:center;"
@@ -127,9 +99,8 @@ export const popRowMenu = (
           select: () => {
             selectionController.insertRowBefore(row.groupKey, row.id);
           },
-        },
-        {
-          type: 'action',
+        }),
+        menu.action({
           name: 'Insert After',
           prefix: html` <div
             style="transform: rotate(90deg);display:flex;align-items:center;"
@@ -139,31 +110,21 @@ export const popRowMenu = (
           select: () => {
             selectionController.insertRowAfter(row.groupKey, row.id);
           },
-        },
-        // {
-        //   type: 'action',
-        //   name: 'Duplicate',
-        //   prefix: DuplicateIcon,
-        //   select: () => {
-        //     selectionController.duplicateRow(rowId);
-        //   },
-        // },
+        }),
       ],
-    },
-    {
-      type: 'group',
+    }),
+    menu.group({
       name: '',
       items: [
-        {
-          type: 'action',
+        menu.action({
           name: 'Delete Row',
           class: 'delete-item',
           prefix: DeleteIcon(),
           select: () => {
             selectionController.deleteRow(row.id);
           },
-        },
+        }),
       ],
-    },
+    }),
   ]);
 };

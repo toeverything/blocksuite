@@ -1,4 +1,5 @@
 import {
+  menu,
   popMenu,
   popupTargetFromElement,
 } from '@blocksuite/affine-components/context-menu';
@@ -27,13 +28,12 @@ export class StringGroupView extends BaseGroup<NonNullable<unknown>, string> {
     popMenu(popupTargetFromElement(this), {
       options: {
         items: [
-          {
-            type: 'input',
+          menu.input({
             initialValue: this.value ?? '',
             onComplete: text => {
               this.updateValue?.(text);
             },
-          },
+          }),
         ],
       },
     });

@@ -1,4 +1,5 @@
 import {
+  menu,
   popMenu,
   popupTargetFromElement,
 } from '@blocksuite/affine-components/context-menu';
@@ -125,16 +126,13 @@ export class RecordField extends SignalWatcher(
     popMenu(popupTargetFromElement(ele), {
       options: {
         items: [
-          {
-            type: 'group',
+          menu.group({
             name: 'Column Prop Group ',
             items: [inputConfig(this.column), typeConfig(this.column)],
-          },
-          {
-            type: 'group',
+          }),
+          menu.group({
             items: [
-              {
-                type: 'action',
+              menu.action({
                 name: 'Move Up',
                 prefix: html` <div
                   style="transform: rotate(90deg);display:flex;align-items:center;"
@@ -154,9 +152,8 @@ export class RecordField extends SignalWatcher(
                     before: true,
                   });
                 },
-              },
-              {
-                type: 'action',
+              }),
+              menu.action({
                 name: 'Move Down',
                 prefix: html` <div
                   style="transform: rotate(90deg);display:flex;align-items:center;"
@@ -177,15 +174,13 @@ export class RecordField extends SignalWatcher(
                     before: false,
                   });
                 },
-              },
+              }),
             ],
-          },
-          {
-            type: 'group',
+          }),
+          menu.group({
             name: 'operation',
             items: [
-              {
-                type: 'action',
+              menu.action({
                 name: 'Duplicate',
                 prefix: DuplicateIcon(),
                 hide: () =>
@@ -193,9 +188,8 @@ export class RecordField extends SignalWatcher(
                 select: () => {
                   this.column.duplicate?.();
                 },
-              },
-              {
-                type: 'action',
+              }),
+              menu.action({
                 name: 'Delete',
                 prefix: DeleteIcon(),
                 hide: () =>
@@ -204,9 +198,9 @@ export class RecordField extends SignalWatcher(
                   this.column.delete?.();
                 },
                 class: 'delete-item',
-              },
+              }),
             ],
-          },
+          }),
         ],
       },
     });

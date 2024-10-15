@@ -1,4 +1,5 @@
 import {
+  menu,
   popFilterableSimpleMenu,
   popupTargetFromElement,
 } from '@blocksuite/affine-components/context-menu';
@@ -103,8 +104,7 @@ export class TableGroup extends SignalWatcher(
     }
     const ele = e.currentTarget as HTMLElement;
     popFilterableSimpleMenu(popupTargetFromElement(ele), [
-      {
-        type: 'action',
+      menu.action({
         name: 'Ungroup',
         hide: () => group.value == null,
         select: () => {
@@ -112,14 +112,13 @@ export class TableGroup extends SignalWatcher(
             group.manager.removeFromGroup(id, group.key);
           });
         },
-      },
-      {
-        type: 'action',
+      }),
+      menu.action({
         name: 'Delete Cards',
         select: () => {
           this.view.rowDelete(group.rows);
         },
-      },
+      }),
     ]);
   };
 

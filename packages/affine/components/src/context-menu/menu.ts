@@ -11,35 +11,16 @@ import { menuInputItems } from './input.js';
 import { MenuComponent } from './menu-renderer.js';
 import { subMenuItems } from './sub-menu.js';
 
-const normalMenus = {
+export const menu = {
   ...menuButtonItems,
   ...subMenuItems,
   ...menuInputItems,
-  custom: (
-    config: {
-      render: (menu: Menu) => TemplateResult | undefined;
-    },
-    menu
-  ) => {
-    return config.render(menu);
-  },
+  ...menuGroupItems,
 } satisfies Record<string, MenuItemRender<never>>;
-const groupMenus = menuGroupItems;
-type normalMenus = typeof normalMenus;
-type groupMenus = typeof groupMenus;
-export type GroupMenuConfig = {
-  [K in keyof groupMenus]: {
-    type: K;
-  } & Parameters<groupMenus[K]>[0];
-}[keyof groupMenus];
-export type NormalMenuConfig = {
-  [K in keyof normalMenus]: {
-    type: K;
-    hide?: () => boolean;
-  } & Parameters<normalMenus[K]>[0];
-}[keyof normalMenus];
-const menus = { ...normalMenus, ...groupMenus };
-export type MenuConfig = NormalMenuConfig | GroupMenuConfig;
+export type MenuConfig = (
+  menu: Menu,
+  index: number
+) => TemplateResult | undefined;
 
 export type MenuOptions = {
   onComplete?: () => void;
@@ -76,13 +57,6 @@ export class Menu {
   constructor(public options: MenuOptions) {
     this.menuElement = new MenuComponent();
     this.menuElement.menu = this;
-  }
-
-  private renderItem(item: MenuConfig, index: number) {
-    if (item.type !== 'group' && item.hide?.() === true) {
-      return;
-    }
-    return menus[item.type](item as never, this, index);
   }
 
   close() {
@@ -147,10 +121,7 @@ export class Menu {
     const result = [];
     for (let i = 0; i < items.length; i++) {
       const item = items[i];
-      if (item.type !== 'group' && item.hide?.() === true) {
-        continue;
-      }
-      const template = this.renderItem(item, result.length);
+      const template = item(this, result.length);
       if (template != null) {
         result.push(template);
       }

@@ -1,4 +1,5 @@
 import {
+  menu,
   popFilterableSimpleMenu,
   type PopupTarget,
 } from '@blocksuite/affine-components/context-menu';
@@ -37,16 +38,14 @@ export const popCardMenu = (
   selection: KanbanSelectionController
 ) => {
   popFilterableSimpleMenu(ele, [
-    {
-      type: 'action',
+    menu.action({
       name: 'Expand Card',
       prefix: ExpandFullIcon(),
       select: () => {
         openDetail(dataViewEle, rowId, selection);
       },
-    },
-    {
-      type: 'sub-menu',
+    }),
+    menu.subMenu({
       name: 'Move To',
       prefix: ArrowRightBigIcon(),
       options: {
@@ -60,44 +59,19 @@ export const popCardMenu = (
               return false;
             })
             .map(group => {
-              return {
-                type: 'action',
+              return menu.action({
                 name: group.value != null ? group.name : 'Ungroup',
                 select: () => {
                   selection.moveCard(rowId, group.key);
                 },
-              };
+              });
             }) ?? [],
       },
-    },
-    // {
-    //   type: 'group',
-    //   name: '',
-    //   children: () => [
-    //     {
-    //       type: 'action',
-    //       name: 'Copy',
-    //       prefix: CopyIcon,
-    //       select: () => {
-    //         //TODO
-    //       },
-    //     },
-    //     {
-    //       type: 'action',
-    //       name: 'Paste',
-    //       prefix: PasteIcon,
-    //       select: () => {
-    //         //TODO
-    //       },
-    //     },
-    //   ],
-    // },
-    {
-      type: 'group',
+    }),
+    menu.group({
       name: '',
       items: [
-        {
-          type: 'action',
+        menu.action({
           name: 'Insert Before',
           prefix: html` <div
             style="transform: rotate(90deg);display:flex;align-items:center;"
@@ -107,9 +81,8 @@ export const popCardMenu = (
           select: () => {
             selection.insertRowBefore();
           },
-        },
-        {
-          type: 'action',
+        }),
+        menu.action({
           name: 'Insert After',
           prefix: html` <div
             style="transform: rotate(90deg);display:flex;align-items:center;"
@@ -119,23 +92,21 @@ export const popCardMenu = (
           select: () => {
             selection.insertRowAfter();
           },
-        },
+        }),
       ],
-    },
-    {
-      type: 'group',
+    }),
+    menu.group({
       name: '',
       items: [
-        {
-          type: 'action',
+        menu.action({
           name: 'Delete Card',
           class: 'delete-item',
           prefix: DeleteIcon(),
           select: () => {
             selection.deleteCard();
           },
-        },
+        }),
       ],
-    },
+    }),
   ]);
 };

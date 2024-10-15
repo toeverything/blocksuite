@@ -1,5 +1,6 @@
 import {
-  type NormalMenuConfig,
+  menu,
+  type MenuConfig,
   popMenu,
   popupTargetFromElement,
 } from '@blocksuite/affine-components/context-menu';
@@ -75,15 +76,14 @@ export class DatabaseHeaderColumn extends SignalWatcher(
     popMenu(popupTargetFromElement(this), {
       options: {
         items: this.tableViewManager.propertyMetas.map(config => {
-          return {
-            type: 'action',
+          return menu.action({
             name: config.config.name,
             isSelected: config.type === this.column.type$.value,
             prefix: renderUniLit(this.tableViewManager.IconGet(config.type)),
             select: () => {
               this.column.typeSet?.(config.type);
             },
-          };
+          });
         }),
       },
     });
@@ -321,26 +321,23 @@ export class DatabaseHeaderColumn extends SignalWatcher(
           typeConfig(this.column),
           // Number format begin
           ...(enableNumberFormatting
-            ? ([
-                {
-                  type: 'sub-menu',
+            ? [
+                menu.subMenu({
                   name: 'Number Format',
-
                   hide: () =>
                     !this.column.dataUpdate ||
                     this.column.type$.value !== 'number',
                   options: {
                     items: [
                       numberFormatConfig(this.column),
-                      ...(numberFormats.map(format => {
+                      ...numberFormats.map(format => {
                         const data = (
                           this.column as Property<
                             number,
                             NumberPropertyDataType
                           >
                         ).data$.value;
-                        return {
-                          type: 'action',
+                        return menu.action({
                           isSelected: data.format === format.type,
                           prefix: html`<span
                             style="font-size: var(--affine-font-base); scale: 1.2;"
@@ -353,19 +350,17 @@ export class DatabaseHeaderColumn extends SignalWatcher(
                               format: format.type,
                             }));
                           },
-                        };
-                      }) as NormalMenuConfig[]),
+                        });
+                      }),
                     ],
                   },
-                },
-              ] as NormalMenuConfig[])
+                }),
+              ]
             : []),
           // Number format end
-          {
-            type: 'group',
+          menu.group({
             items: [
-              {
-                type: 'action',
+              menu.action({
                 name: 'Hide In View',
                 prefix: ViewIcon(),
                 hide: () =>
@@ -374,14 +369,12 @@ export class DatabaseHeaderColumn extends SignalWatcher(
                 select: () => {
                   this.column.hideSet(true);
                 },
-              },
+              }),
             ],
-          },
-          {
-            type: 'group',
+          }),
+          menu.group({
             items: [
-              {
-                type: 'action',
+              menu.action({
                 name: 'Insert Left Column',
                 prefix: InsertLeftIcon(),
                 select: () => {
@@ -402,9 +395,8 @@ export class DatabaseHeaderColumn extends SignalWatcher(
                     })
                     .catch(console.error);
                 },
-              },
-              {
-                type: 'action',
+              }),
+              menu.action({
                 name: 'Insert Right Column',
                 prefix: InsertRightIcon(),
                 select: () => {
@@ -425,9 +417,8 @@ export class DatabaseHeaderColumn extends SignalWatcher(
                     })
                     .catch(console.error);
                 },
-              },
-              {
-                type: 'action',
+              }),
+              menu.action({
                 name: 'Move Left',
                 prefix: MoveLeftIcon(),
                 hide: () => this.column.isFirst,
@@ -443,9 +434,8 @@ export class DatabaseHeaderColumn extends SignalWatcher(
                     before: true,
                   });
                 },
-              },
-              {
-                type: 'action',
+              }),
+              menu.action({
                 name: 'Move Right',
                 prefix: MoveRightIcon(),
                 hide: () => this.column.isLast,
@@ -461,14 +451,12 @@ export class DatabaseHeaderColumn extends SignalWatcher(
                     before: false,
                   });
                 },
-              },
+              }),
             ],
-          },
-          {
-            type: 'group',
+          }),
+          menu.group({
             items: [
-              {
-                type: 'action',
+              menu.action({
                 name: 'Duplicate',
                 prefix: DuplicateIcon(),
                 hide: () =>
@@ -476,9 +464,8 @@ export class DatabaseHeaderColumn extends SignalWatcher(
                 select: () => {
                   this.column.duplicate?.();
                 },
-              },
-              {
-                type: 'action',
+              }),
+              menu.action({
                 name: 'Delete',
                 prefix: DeleteIcon(),
                 hide: () =>
@@ -487,9 +474,9 @@ export class DatabaseHeaderColumn extends SignalWatcher(
                   this.column.delete?.();
                 },
                 class: 'delete-item',
-              },
+              }),
             ],
-          },
+          }),
         ],
       },
     });
@@ -625,14 +612,11 @@ const createDragPreview = (
   };
 };
 
-function numberFormatConfig(column: Property): NormalMenuConfig {
-  return {
-    type: 'custom',
-    render: () =>
-      html` <affine-database-number-format-bar
-        .column="${column}"
-      ></affine-database-number-format-bar>`,
-  };
+function numberFormatConfig(column: Property): MenuConfig {
+  return () =>
+    html` <affine-database-number-format-bar
+      .column="${column}"
+    ></affine-database-number-format-bar>`;
 }
 
 declare global {

@@ -1,4 +1,5 @@
 import {
+  menu,
   popFilterableSimpleMenu,
   popupTargetFromElement,
 } from '@blocksuite/affine-components/context-menu';
@@ -156,8 +157,7 @@ export class FilterRootView extends SignalWatcher(ShadowlessElement) {
   private _clickConditionOps(target: HTMLElement, i: number) {
     const filter = this.filterGroup.value.conditions[i];
     popFilterableSimpleMenu(popupTargetFromElement(target), [
-      {
-        type: 'action',
+      menu.action({
         name: filter.type === 'filter' ? 'Turn into group' : 'Wrap in group',
         prefix: ConvertIcon(),
         onHover: hover => {
@@ -173,9 +173,8 @@ export class FilterRootView extends SignalWatcher(ShadowlessElement) {
             conditions: [this.filterGroup.value],
           });
         },
-      },
-      {
-        type: 'action',
+      }),
+      menu.action({
         name: 'Duplicate',
         prefix: DuplicateIcon(),
         onHover: hover => {
@@ -192,13 +191,11 @@ export class FilterRootView extends SignalWatcher(ShadowlessElement) {
           );
           this.onChange({ ...this.filterGroup.value, conditions: conditions });
         },
-      },
-      {
-        type: 'group',
+      }),
+      menu.group({
         name: '',
         items: [
-          {
-            type: 'action',
+          menu.action({
             name: 'Delete',
             prefix: DeleteIcon(),
             class: 'delete-item',
@@ -215,9 +212,9 @@ export class FilterRootView extends SignalWatcher(ShadowlessElement) {
                 conditions,
               });
             },
-          },
+          }),
         ],
-      },
+      }),
     ]);
   }
 
