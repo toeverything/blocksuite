@@ -475,7 +475,9 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
         }
         case 'li': {
           const firstElementChild = hastGetElementChildren(o.node)[0];
-          const listType = context.getNodeContext('hast:list:type');
+          const notionListType = context.getNodeContext('hast:list:type');
+          const listType =
+            notionListType === 'toggle' ? 'bulleted' : notionListType;
           context.openNode(
             {
               type: 'block',
@@ -486,7 +488,7 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
                 text: {
                   '$blocksuite:internal:text$': true,
                   delta:
-                    listType !== 'toggle'
+                    notionListType !== 'toggle'
                       ? this._hastToDelta(o.node, { pageMap })
                       : this._hastToDelta(
                           hastQuerySelector(o.node, 'summary') ?? o.node,
@@ -494,7 +496,7 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
                         ),
                 },
                 checked:
-                  listType === 'todo'
+                  notionListType === 'todo'
                     ? firstElementChild &&
                       Array.isArray(firstElementChild.properties?.className) &&
                       firstElementChild.properties.className.includes(
@@ -502,7 +504,7 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
                       )
                     : false,
                 collapsed:
-                  listType === 'toggle'
+                  notionListType === 'toggle'
                     ? firstElementChild &&
                       firstElementChild.tagName === 'details' &&
                       firstElementChild.properties.open === undefined
