@@ -1,7 +1,6 @@
 import type {
   Connection,
   ConnectorElementModel,
-  NoteBlockModel,
   ShapeElementModel,
 } from '@blocksuite/affine-model';
 import type { XYWH } from '@blocksuite/global/utils';
@@ -25,6 +24,7 @@ import {
   FontWeight,
   getShapeName,
   GroupElementModel,
+  NoteBlockModel,
   ShapeStyle,
   TextElementModel,
 } from '@blocksuite/affine-model';
@@ -184,11 +184,13 @@ export class EdgelessAutoCompletePanel extends WithDisposable(LitElement) {
       },
       doc.root?.id
     );
+    const note = doc.getBlock(id)?.model;
+    assertInstanceOf(note, NoteBlockModel);
     doc.addBlock('affine:paragraph', { type: 'text' }, id);
     const group = this.currentSource.group;
 
     if (group instanceof GroupElementModel) {
-      group.addChild(id);
+      group.addChild(note);
     }
     this.connector.target = {
       id,
@@ -245,11 +247,15 @@ export class EdgelessAutoCompletePanel extends WithDisposable(LitElement) {
         y: bound.y,
       });
       if (!textId) return;
+
+      const textElement = edgelessService.getElementById(textId);
+      if (!textElement) return;
+
       edgelessService.updateElement(this.connector.id, {
         target: { id: textId, position },
       });
       if (this.currentSource.group instanceof GroupElementModel) {
-        this.currentSource.group.addChild(textId);
+        this.currentSource.group.addChild(textElement);
       }
 
       this.edgeless.service.selection.set({
@@ -275,7 +281,7 @@ export class EdgelessAutoCompletePanel extends WithDisposable(LitElement) {
         target: { id: textId, position },
       });
       if (this.currentSource.group instanceof GroupElementModel) {
-        this.currentSource.group.addChild(textId);
+        this.currentSource.group.addChild(textElement);
       }
 
       this.edgeless.service.selection.set({

@@ -1,4 +1,4 @@
-import { assertEquals } from '@blocksuite/global/utils';
+import { BlockSuiteError } from '@blocksuite/global/exceptions';
 
 import type { Doc } from '../store/index.js';
 import type { AssetsManager } from '../transformer/assets.js';
@@ -48,6 +48,20 @@ export type ToSliceSnapshotPayload<Target> = {
   assets?: AssetsManager;
 };
 
+export function wrapFakeNote(snapshot: SliceSnapshot) {
+  if (snapshot.content[0]?.flavour !== 'affine:note') {
+    snapshot.content = [
+      {
+        type: 'block',
+        id: '',
+        flavour: 'affine:note',
+        props: {},
+        children: snapshot.content,
+      },
+    ];
+  }
+}
+
 export abstract class BaseAdapter<AdapterTarget = unknown> {
   job: Job;
 
@@ -59,9 +73,9 @@ export abstract class BaseAdapter<AdapterTarget = unknown> {
     this.job = job;
   }
 
-  async fromBlock(mode: DraftModel) {
+  async fromBlock(model: DraftModel) {
     try {
-      const blockSnapshot = await this.job.blockToSnapshot(mode);
+      const blockSnapshot = await this.job.blockToSnapshot(model);
       if (!blockSnapshot) return;
       return await this.fromBlockSnapshot({
         snapshot: blockSnapshot,
@@ -105,6 +119,7 @@ export abstract class BaseAdapter<AdapterTarget = unknown> {
     try {
       const sliceSnapshot = await this.job.sliceToSnapshot(slice);
       if (!sliceSnapshot) return;
+      wrapFakeNote(sliceSnapshot);
       return await this.fromSliceSnapshot({
         snapshot: sliceSnapshot,
         assets: this.job.assetsManager,
@@ -280,7 +295,10 @@ export class ASTWalker<ONode extends object, TNode extends object | never> {
   walk = async (oNode: ONode, tNode: TNode) => {
     this.context.openNode(tNode);
     await this._visit({ node: oNode, parent: null, prop: null, index: null });
-    assertEquals(this.context.stack.length, 1, 'There are unclosed nodes');
+    if (this.context.stack.length !== 1) {
+      console.error(this.context.stack.map(n => n.node));
+      throw new BlockSuiteError(1, 'There are unclosed nodes');
+    }
     return this.context.currentNode();
   };
 

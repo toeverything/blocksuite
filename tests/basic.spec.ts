@@ -1,3 +1,5 @@
+import type { DeltaInsert } from '@inline/types.js';
+
 import { expect } from '@playwright/test';
 
 import {
@@ -78,7 +80,7 @@ test(scoped`basic init with external text`, async ({ page }) => {
     doc.addBlock(
       'affine:paragraph',
       {
-        text: doc.Text.fromDelta(delta),
+        text: new doc.Text(delta as DeltaInsert[]),
       },
       note
     );

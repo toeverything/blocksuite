@@ -14,7 +14,6 @@ export class EdgelessReleaseFromGroupButton extends WithDisposable(LitElement) {
     if (!(element.group instanceof GroupElementModel)) return;
 
     const group = element.group;
-
     // eslint-disable-next-line unicorn/prefer-dom-node-remove
     group.removeChild(element);
 
@@ -22,7 +21,7 @@ export class EdgelessReleaseFromGroupButton extends WithDisposable(LitElement) {
 
     const parent = group.group;
     if (parent instanceof GroupElementModel) {
-      parent.addChild(element.id);
+      parent.addChild(element);
     }
   }
 

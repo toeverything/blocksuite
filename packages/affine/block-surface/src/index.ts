@@ -52,10 +52,10 @@ export {
 } from './surface-spec.js';
 export { SurfaceBlockTransformer } from './surface-transformer.js';
 export { AStarRunner } from './utils/a-star.js';
+export { LayoutableMindmapElementModel } from './utils/mindmap/utils.js';
 export { RoughCanvas } from './utils/rough/canvas.js';
-export type { Options } from './utils/rough/core.js';
 
-export { sortIndex } from './utils/sort.js';
+export type { Options } from './utils/rough/core.js';
 
 import {
   almostEqual,
@@ -92,6 +92,7 @@ import {
   moveMindMapSubtree,
   showMergeIndicator,
 } from './utils/mindmap/utils.js';
+export { sortIndex } from './utils/sort.js';
 
 export const ConnectorUtils = {
   isConnectorAndBindingsAllSelected,

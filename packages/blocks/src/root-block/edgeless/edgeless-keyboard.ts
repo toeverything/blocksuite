@@ -259,7 +259,7 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
               ...service.blocks
                 .filter(
                   block =>
-                    block.group === null &&
+                    block.container === null &&
                     !(
                       matchFlavours(block, ['affine:note']) &&
                       block.displayMode === NoteDisplayMode.DocOnly
@@ -267,7 +267,7 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
                 )
                 .map(block => block.id),
               ...service.elements
-                .filter(el => el.group === null)
+                .filter(el => el.container === null)
                 .map(el => el.id),
             ],
             editing: false,

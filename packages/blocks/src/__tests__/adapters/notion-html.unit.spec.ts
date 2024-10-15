@@ -841,27 +841,10 @@ describe('notion html to snapshot', () => {
               ],
             },
           },
-          children: [],
-        },
-        {
-          type: 'block',
-          id: 'matchesReplaceMap[3]',
-          flavour: 'affine:paragraph',
-          props: {
-            type: 'quote',
-            text: {
-              '$blocksuite:internal:text$': true,
-              delta: [
-                {
-                  insert: 'ccc',
-                },
-              ],
-            },
-          },
           children: [
             {
               type: 'block',
-              id: 'matchesReplaceMap[4]',
+              id: 'matchesReplaceMap[3]',
               flavour: 'affine:paragraph',
               props: {
                 type: 'quote',
@@ -869,12 +852,30 @@ describe('notion html to snapshot', () => {
                   '$blocksuite:internal:text$': true,
                   delta: [
                     {
-                      insert: 'ddd',
+                      insert: 'ccc',
                     },
                   ],
                 },
               },
-              children: [],
+              children: [
+                {
+                  type: 'block',
+                  id: 'matchesReplaceMap[4]',
+                  flavour: 'affine:paragraph',
+                  props: {
+                    type: 'quote',
+                    text: {
+                      '$blocksuite:internal:text$': true,
+                      delta: [
+                        {
+                          insert: 'ddd',
+                        },
+                      ],
+                    },
+                  },
+                  children: [],
+                },
+              ],
             },
           ],
         },
@@ -914,12 +915,15 @@ describe('notion html to snapshot', () => {
           id: 'matchesReplaceMap[1]',
           flavour: 'affine:paragraph',
           props: {
-            type: 'text',
+            type: 'quote',
             text: {
               '$blocksuite:internal:text$': true,
               delta: [
                 {
-                  insert: '💡aaa',
+                  insert: '💡\n',
+                },
+                {
+                  insert: 'aaa',
                 },
               ],
             },

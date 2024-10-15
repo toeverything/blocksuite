@@ -49,7 +49,9 @@ export class Text {
       this._yText = new Y.Text(text);
     } else if (input instanceof Y.Text) {
       this._yText = input;
-      length = input.length;
+      if (input.doc) {
+        length = input.length;
+      }
     } else if (input instanceof Array) {
       for (const delta of input) {
         if (delta.insert) {
@@ -71,16 +73,6 @@ export class Text {
       this._deltas$.value = this._yText.toDelta();
       this._onChange?.(this._yText);
     });
-  }
-
-  /**
-   * @deprecated
-   * This method will lose the change observer unless you pass the onChange callback.
-   */
-  static fromDelta(delta: DeltaOperation[], onChange?: OnTextChange) {
-    const result = new Y.Text();
-    result.applyDelta(delta);
-    return new Text(result, onChange);
   }
 
   private _transact(callback: () => void) {

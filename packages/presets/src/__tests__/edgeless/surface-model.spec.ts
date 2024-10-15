@@ -181,10 +181,6 @@ describe('group', () => {
     model.removeElement(groupId);
     expect(model.getGroup(id)).toBeNull();
     expect(model.getGroup(id2)).toBeNull();
-    // @ts-ignore
-    expect(model._elementToGroup.get(id)).toBeUndefined();
-    // @ts-ignore
-    expect(model._elementToGroup.get(id2)).toBeUndefined();
   });
 
   test('children can be updated with a plain object', () => {

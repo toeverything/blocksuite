@@ -3,7 +3,7 @@ import { expect, type Page } from '@playwright/test';
 import {
   createShapeElement,
   edgelessCommonSetup,
-  getFirstGroupId,
+  getFirstContainerId,
   getSelectedBound,
   getSortedIds,
   initThreeOverlapFilledShapes,
@@ -47,7 +47,7 @@ test.describe('reordering', () => {
       await clickView(page, [50, 50]);
       await shiftClickView(page, [150, 50]);
       await triggerComponentToolbarAction(page, 'addGroup');
-      const groupId = await getFirstGroupId(page);
+      const groupId = await getFirstContainerId(page);
       const currentSortedIds = await getSortedIds(page);
 
       expect(currentSortedIds).toEqual([
@@ -62,7 +62,7 @@ test.describe('reordering', () => {
       await clickView(page, [50, 50]);
       await shiftClickView(page, [150, 50]);
       await triggerComponentToolbarAction(page, 'addGroup');
-      const groupId = await getFirstGroupId(page);
+      const groupId = await getFirstContainerId(page);
       await clickView(page, [50, 50]);
       await triggerComponentToolbarAction(page, 'releaseFromGroup');
       const currentSortedIds = await getSortedIds(page);

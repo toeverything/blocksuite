@@ -23,9 +23,9 @@ import {
 import { GfxBlockElementModel, type GfxModel } from './gfx-block-model.js';
 import {
   type GfxContainerElement,
-  GfxPrimitiveElementModel,
   isGfxContainerElm,
-} from './surface/element-model.js';
+} from './surface/container-element.js';
+import { GfxPrimitiveElementModel } from './surface/element-model.js';
 import { SurfaceBlockModel } from './surface/surface-model.js';
 
 export type ReorderingDirection = 'front' | 'forward' | 'backward' | 'back';

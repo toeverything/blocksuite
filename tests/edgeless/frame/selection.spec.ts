@@ -5,13 +5,18 @@ import {
   addNote,
   autoFit,
   createShapeElement,
+  dragBetweenViewCoords,
   edgelessCommonSetup,
   getSelectedBoundCount,
   Shape,
   toViewCoord,
   zoomResetByKeyboard,
 } from 'utils/actions/edgeless.js';
-import { pressEscape, type } from 'utils/actions/keyboard.js';
+import {
+  pressEscape,
+  selectAllByKeyboard,
+  type,
+} from 'utils/actions/keyboard.js';
 import {
   assertEdgelessCanvasText,
   assertRichTexts,
@@ -70,5 +75,24 @@ test.describe('frame selection', () => {
     await dblclickView(page, [150, 150]);
     await type(page, 'hello');
     await assertRichTexts(page, ['hello']);
+  });
+
+  test('element in frame should not be selected when frame is selected by drag or Cmd/Ctrl + A', async ({
+    page,
+  }) => {
+    await createFrame(page, [50, 50], [200, 200]);
+    await createShapeElement(page, [100, 100], [150, 150], Shape.Square);
+    await pressEscape(page);
+
+    await dragBetweenViewCoords(page, [0, 0], [250, 250]);
+    expect(await getSelectedBoundCount(page)).toBe(1);
+    await assertSelectedBound(page, [50, 50, 150, 150]);
+
+    await pressEscape(page);
+    expect(await getSelectedBoundCount(page)).toBe(0);
+
+    await selectAllByKeyboard(page);
+    expect(await getSelectedBoundCount(page)).toBe(1);
+    await assertSelectedBound(page, [50, 50, 150, 150]);
   });
 });

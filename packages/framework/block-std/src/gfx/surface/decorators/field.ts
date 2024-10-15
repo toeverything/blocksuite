@@ -55,7 +55,7 @@ export function field<V, T extends GfxPrimitiveElementModel>(fallback?: V) {
       },
       get(this: GfxPrimitiveElementModel) {
         return (
-          this.yMap.get(prop as string) ??
+          (this.yMap.doc ? this.yMap.get(prop as string) : null) ??
           this._preserved.get(prop as string) ??
           fallback
         );

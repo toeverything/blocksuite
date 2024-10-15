@@ -1,12 +1,7 @@
 import type { TemplateResult } from 'lit';
 
 import { CanvasElementType } from '@blocksuite/affine-block-surface';
-import {
-  type MindmapElementModel,
-  type MindmapStyle,
-  type ShapeElementModel,
-  TextElementModel,
-} from '@blocksuite/affine-model';
+import { type MindmapStyle, TextElementModel } from '@blocksuite/affine-model';
 import { TelemetryProvider } from '@blocksuite/affine-shared/services';
 import { assertInstanceOf, Bound } from '@blocksuite/global/utils';
 import { DocCollection } from '@blocksuite/store';
@@ -51,23 +46,6 @@ export const getMindmapRender =
   (mindmapStyle: MindmapStyle): DraggableTool['render'] =>
   (bound, edgelessService) => {
     const [x, y, _, h] = bound.toXYWH();
-    const mindmapId = edgelessService.addElement('mindmap', {
-      style: mindmapStyle,
-    }) as string;
-
-    edgelessService.std
-      .getOptional(TelemetryProvider)
-      ?.track('CanvasElementAdded', {
-        control: 'toolbar:dnd', // for now we use toolbar:dnd for all mindmap creation here
-        page: 'whiteboard editor',
-        module: 'toolbar',
-        segment: 'toolbar',
-        type: 'mindmap',
-      });
-
-    const mindmap = edgelessService.getElementById(
-      mindmapId
-    ) as MindmapElementModel;
 
     const rootW = 145;
     const rootH = 50;
@@ -79,26 +57,42 @@ export const getMindmapRender =
     const rootX = x;
     const rootY = centerVertical - rootH / 2;
 
-    const createNode = (
-      ...args: Parameters<MindmapElementModel['addNode']>
-    ) => {
-      const id = mindmap.addNode(...args);
-      const node = edgelessService.getElementById(id) as ShapeElementModel;
-      return { node, id };
+    type MindMapNode = {
+      children: MindMapNode[];
+      text: string;
+      xywh: string;
     };
-    const root = createNode(null, undefined, undefined, {
+
+    const root: MindMapNode = {
+      children: [],
       text: 'Mind Map',
       xywh: `[${rootX},${rootY},${rootW},${rootH}]`,
-    });
+    };
 
     for (let i = 0; i < 3; i++) {
       const nodeX = x + rootW + 300;
       const nodeY = centerVertical - nodeH / 2 + (i - 1) * 50;
-      createNode(root.id, undefined, undefined, {
+      root.children.push({
+        children: [],
         text: 'Text',
         xywh: `[${nodeX},${nodeY},${nodeW},${nodeH}]`,
       });
     }
+
+    const mindmapId = edgelessService.addElement('mindmap', {
+      style: mindmapStyle,
+      children: root,
+    }) as string;
+
+    edgelessService.std
+      .getOptional(TelemetryProvider)
+      ?.track('CanvasElementAdded', {
+        control: 'toolbar:dnd', // for now we use toolbar:dnd for all mindmap creation here
+        page: 'whiteboard editor',
+        module: 'toolbar',
+        segment: 'toolbar',
+        type: 'mindmap',
+      });
 
     return mindmapId;
   };

@@ -33,6 +33,7 @@ import {
   requestThrottledConnectedFrame,
   stopPropagation,
 } from '@blocksuite/affine-shared/utils';
+import { getTopElements } from '@blocksuite/block-std/gfx';
 import {
   assertType,
   Bound,
@@ -81,7 +82,6 @@ import {
   isImageBlock,
   isNoteBlock,
 } from '../../utils/query.js';
-import { getTopElements } from '../../utils/tree.js';
 import { HandleDirection } from '../resize/resize-handles.js';
 import { ResizeHandles, type ResizeMode } from '../resize/resize-handles.js';
 import { HandleResizeManager } from '../resize/resize-manager.js';

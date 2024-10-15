@@ -721,6 +721,170 @@ hhh
     expect(target.file).toEqual(markdown);
   });
 
+  test('different list', async () => {
+    const blockSnapshot: BlockSnapshot = {
+      type: 'block',
+      id: 'block:m5hvdXHXS2',
+      flavour: 'affine:page',
+      version: 2,
+      props: {
+        title: {
+          '$blocksuite:internal:text$': true,
+          delta: [],
+        },
+      },
+      children: [
+        {
+          type: 'block',
+          id: 'block:Y4J-oO9h9d',
+          flavour: 'affine:surface',
+          version: 5,
+          props: {
+            elements: {},
+          },
+          children: [],
+        },
+        {
+          type: 'block',
+          id: 'block:1Ll22zT992',
+          flavour: 'affine:note',
+          version: 1,
+          props: {
+            xywh: '[0,0,800,95]',
+            background: DEFAULT_NOTE_BACKGROUND_COLOR,
+            index: 'a0',
+            hidden: false,
+            displayMode: 'both',
+            edgeless: {
+              style: {
+                borderRadius: 8,
+                borderSize: 4,
+                borderStyle: 'solid',
+                shadowType: '--affine-note-shadow-box',
+              },
+            },
+          },
+          children: [
+            {
+              type: 'block',
+              id: 'block:Fd0ZCYB7a4',
+              flavour: 'affine:list',
+              version: 1,
+              props: {
+                type: 'numbered',
+                text: {
+                  '$blocksuite:internal:text$': true,
+                  delta: [
+                    {
+                      insert: 'aaa',
+                    },
+                  ],
+                },
+                checked: false,
+                collapsed: false,
+              },
+              children: [
+                {
+                  type: 'block',
+                  id: 'block:8-GeKDc06x',
+                  flavour: 'affine:list',
+                  version: 1,
+                  props: {
+                    type: 'numbered',
+                    text: {
+                      '$blocksuite:internal:text$': true,
+                      delta: [
+                        {
+                          insert: 'bbb',
+                        },
+                      ],
+                    },
+                    checked: false,
+                    collapsed: false,
+                  },
+                  children: [],
+                },
+                {
+                  type: 'block',
+                  id: 'block:f0c-9xKaEL',
+                  flavour: 'affine:list',
+                  version: 1,
+                  props: {
+                    type: 'bulleted',
+                    text: {
+                      '$blocksuite:internal:text$': true,
+                      delta: [
+                        {
+                          insert: 'ccc',
+                        },
+                      ],
+                    },
+                    checked: false,
+                    collapsed: false,
+                  },
+                  children: [],
+                },
+                {
+                  type: 'block',
+                  id: 'block:f0c-9xKaEL',
+                  flavour: 'affine:list',
+                  version: 1,
+                  props: {
+                    type: 'numbered',
+                    text: {
+                      '$blocksuite:internal:text$': true,
+                      delta: [
+                        {
+                          insert: 'ddd',
+                        },
+                      ],
+                    },
+                    checked: false,
+                    collapsed: false,
+                  },
+                  children: [],
+                },
+              ],
+            },
+            {
+              type: 'block',
+              id: 'block:Fd0ZCYB7a5',
+              flavour: 'affine:list',
+              version: 1,
+              props: {
+                type: 'numbered',
+                text: {
+                  '$blocksuite:internal:text$': true,
+                  delta: [
+                    {
+                      insert: 'eee',
+                    },
+                  ],
+                },
+                checked: false,
+                collapsed: false,
+              },
+              children: [],
+            },
+          ],
+        },
+      ],
+    };
+
+    const markdown = `1. aaa
+   1. bbb
+   * ccc
+   1. ddd
+2. eee
+`;
+
+    const mdAdapter = new MarkdownAdapter(createJob());
+    const target = await mdAdapter.fromBlockSnapshot({
+      snapshot: blockSnapshot,
+    });
+    expect(target.file).toEqual(markdown);
+  });
+
   test('code inline', async () => {
     const blockSnapshot: BlockSnapshot = {
       type: 'block',
