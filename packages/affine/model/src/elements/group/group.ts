@@ -89,10 +89,12 @@ export class GroupElementModel extends GfxGroupLikeElementModel<GroupElementProp
   @observe(
     // use `GroupElementModel` type in decorator will cause playwright error
     (_, instance: GfxGroupLikeElementModel<GroupElementProps>, transaction) => {
-      instance.setChildIds(
-        Array.from(instance.children.keys()),
-        transaction?.local ?? false
-      );
+      if (instance.children.doc) {
+        instance.setChildIds(
+          Array.from(instance.children.keys()),
+          transaction?.local ?? false
+        );
+      }
     }
   )
   @field()

@@ -1,3 +1,5 @@
+import type { DeltaInsert } from '@inline/types.js';
+
 import { expect } from '@playwright/test';
 
 import {
@@ -867,8 +869,8 @@ test('press arrow up in the second line should move caret to the first line', as
       return i % 2 === 0
         ? { insert: 'i', attributes: { italic: true } }
         : { insert: 'b', attributes: { bold: true } };
-    });
-    const text = doc.Text.fromDelta(delta);
+    }) as DeltaInsert[];
+    const text = new doc.Text(delta);
     doc.addBlock('affine:paragraph', { text }, note);
     doc.addBlock('affine:paragraph', {}, note);
   });

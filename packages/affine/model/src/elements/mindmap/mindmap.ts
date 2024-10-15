@@ -90,13 +90,15 @@ function observeChildren(
   instance: MindmapElementModel,
   transaction: Y.Transaction | null
 ) {
-  instance.setChildIds(
-    Array.from(instance.children.keys()),
-    transaction?.local ?? true
-  );
+  if (instance.children.doc) {
+    instance.setChildIds(
+      Array.from(instance.children.keys()),
+      transaction?.local ?? true
+    );
 
-  instance.buildTree();
-  instance.connectors.clear();
+    instance.buildTree();
+    instance.connectors.clear();
+  }
 }
 
 function watchLayoutType(

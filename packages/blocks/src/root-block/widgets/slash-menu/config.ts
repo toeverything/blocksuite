@@ -2,6 +2,7 @@ import type {
   FrameBlockModel,
   ParagraphBlockModel,
 } from '@blocksuite/affine-model';
+import type { DeltaInsert } from '@blocksuite/inline';
 import type { BlockModel } from '@blocksuite/store';
 import type { TemplateResult } from 'lit';
 
@@ -888,7 +889,9 @@ export const defaultSlashMenuConfig: SlashMenuConfig = {
           model.flavour as never,
           {
             type: (model as ParagraphBlockModel).type,
-            text: rootComponent.doc.Text.fromDelta(model.text.toDelta()),
+            text: new rootComponent.doc.Text(
+              model.text.toDelta() as DeltaInsert[]
+            ),
             // @ts-expect-error
             checked: model.checked,
           },

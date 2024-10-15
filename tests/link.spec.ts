@@ -129,7 +129,7 @@ async function createLinkBlock(page: Page, str: string, link: string) {
       });
       const noteId = doc.addBlock('affine:note', {}, rootId);
 
-      const text = doc.Text.fromDelta([
+      const text = new doc.Text([
         { insert: 'Hello' },
         { insert: str, attributes: { link } },
       ]);

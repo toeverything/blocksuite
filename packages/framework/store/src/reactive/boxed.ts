@@ -35,6 +35,7 @@ export class Boxed<T = unknown> {
     this._onChange = onChange;
     if (
       value instanceof Y.Map &&
+      value.doc &&
       value.get('type') === NATIVE_UNIQ_IDENTIFIER
     ) {
       this._map = value;

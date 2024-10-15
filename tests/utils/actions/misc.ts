@@ -314,8 +314,6 @@ export async function enterPlaygroundRoom(
         '[vite] connecting...',
         // Figma embed:
         'Fullscreen: Using 4GB WASM heap',
-        // Yjs:
-        'Invalid access: Add Yjs type to a document before reading data.',
         // Lit:
         'Lit is in dev mode. Not recommended for production! See https://lit.dev/msg/dev-mode for more information.',
         // Figma embed:
