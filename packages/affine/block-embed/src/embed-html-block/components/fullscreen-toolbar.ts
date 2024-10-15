@@ -1,4 +1,5 @@
 import {
+  menu,
   popMenu,
   popupTargetFromElement,
 } from '@blocksuite/affine-components/context-menu';
@@ -72,28 +73,22 @@ export class EmbedHtmlFullscreenToolbar extends LitElement {
     popMenu(popupTargetFromElement(this._fullScreenToolbarContainer), {
       options: {
         items: [
-          {
-            type: 'custom',
-            render: () =>
-              html`<div class="settings-header">
-                <span>Settings</span>
-              </div>`,
-          },
-
-          {
-            type: 'group',
+          () =>
+            html` <div class="settings-header">
+              <span>Settings</span>
+            </div>`,
+          menu.group({
             name: 'thing',
             items: [
-              {
-                type: 'toggle-switch',
+              menu.toggleSwitch({
                 name: 'Hide toolbar',
                 on: this.autoHideToolbar,
                 onChange: on => {
                   this.autoHideToolbar = on;
                 },
-              },
+              }),
             ],
-          },
+          }),
         ],
         onClose: () => {
           this._popperVisible = false;
@@ -140,25 +135,26 @@ export class EmbedHtmlFullscreenToolbar extends LitElement {
   override render() {
     const hideToolbar = !this._popperVisible && this.autoHideToolbar;
 
-    return html`<div
-      data-auto-hide=${hideToolbar}
-      class="toolbar-toggle-control"
-    >
-      <div class="fullscreen-toolbar-container">
-        <icon-button @click=${this.embedHtml.close}
-          >${ExpandCloseIcon()}</icon-button
-        >
-        <icon-button @click=${this._popSettings} hover=${this._popperVisible}
-          >${SettingsIcon()}</icon-button
-        >
+    return html`
+      <div data-auto-hide="${hideToolbar}" class="toolbar-toggle-control">
+        <div class="fullscreen-toolbar-container">
+          <icon-button @click="${this.embedHtml.close}"
+            >${ExpandCloseIcon()}
+          </icon-button>
+          <icon-button
+            @click="${this._popSettings}"
+            hover="${this._popperVisible}"
+            >${SettingsIcon()}
+          </icon-button>
 
-        <div class="short-v-divider"></div>
+          <div class="short-v-divider"></div>
 
-        <icon-button class="copy-button" @click=${this.copyCode}
-          >${this._copied ? DoneIcon() : CopyIcon()}
-        </icon-button>
+          <icon-button class="copy-button" @click="${this.copyCode}"
+            >${this._copied ? DoneIcon() : CopyIcon()}
+          </icon-button>
+        </div>
       </div>
-    </div> `;
+    `;
   }
 
   @state()
