@@ -458,6 +458,7 @@ test.describe('select column tag action', () => {
     await pressEnter(page);
     await clickSelectOption(page);
     await waitNextFrame(page);
+    await pressArrowRight(page);
     await type(page, '4567abc00');
     await pressEnter(page);
     const options = page.locator('.select-option-name');
@@ -473,18 +474,13 @@ test.describe('select column tag action', () => {
     await initDatabaseDynamicRowWithData(page, '123', true);
     await clickSelectOption(page);
     await waitNextFrame(page);
+    await pressArrowRight(page);
     await type(page, '456');
     // esc
     await pressEscape(page);
+    await pressEscape(page);
     const options = page.locator('.select-option-name');
     const option1 = options.nth(0);
-    expect(await option1.innerText()).toBe('123');
-
-    await clickSelectOption(page);
-    await waitNextFrame(page);
-    await type(page, '456');
-    // enter
-    await pressEnter(page);
     expect(await option1.innerText()).toBe('123456');
   });
 

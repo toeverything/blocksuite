@@ -164,7 +164,7 @@ export async function performSelectColumnTagAction(
 ) {
   await clickSelectOption(page, index);
   await page
-    .locator('.affine-menu-action', { hasText: new RegExp(name) })
+    .locator('.affine-menu-button', { hasText: new RegExp(name) })
     .click();
 }
 
