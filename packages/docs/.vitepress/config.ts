@@ -12,7 +12,22 @@ export default defineConfig({
     build: {
       target: 'ES2022',
     },
-    plugins: [wasm()],
+    plugins: [
+      wasm(),
+      {
+        name: 'redirect-plugin',
+        configureServer(server) {
+          server.middlewares.use((req, res, next) => {
+            if (req.url === '/blocksuite-overview.html') {
+              res.writeHead(301, { Location: '/guide/overview.html' });
+              res.end();
+            } else {
+              next();
+            }
+          });
+        },
+      },
+    ],
   },
   lang: 'en-US',
   head: [
