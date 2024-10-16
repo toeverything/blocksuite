@@ -152,6 +152,10 @@ export class EdgelessRootBlockComponent extends BlockComponent<
     ) as SurfaceBlockModel;
   }
 
+  /**
+   * Don't confuse with `gfx.viewport` which is edgeless-only concept.
+   * This refers to the wrapper element of the EditorHost.
+   */
   get viewport(): Viewport {
     const {
       scrollLeft,
