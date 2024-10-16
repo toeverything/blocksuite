@@ -64,6 +64,7 @@ const FLAGS_PRESET = {
   enable_color_picker: false,
   enable_mind_map_import: false,
   enable_advanced_block_visibility: false,
+  enable_shape_shadow_blur: false,
   readonly: {},
 } satisfies BlockSuiteFlags;
 

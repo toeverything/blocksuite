@@ -72,6 +72,7 @@ export function createStarterDocCollection() {
       enable_color_picker: true,
       enable_mind_map_import: true,
       enable_advanced_block_visibility: true,
+      enable_shape_shadow_blur: false,
       ...flags,
     },
     awarenessSources: [new BroadcastChannelAwarenessSource(id)],

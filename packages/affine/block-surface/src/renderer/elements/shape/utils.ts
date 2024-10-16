@@ -69,9 +69,18 @@ export function drawGeneralShape(
     const { blur, offsetX, offsetY, color } = shapeModel.shadow;
     const scale = ctx.getTransform().a;
 
-    ctx.shadowBlur = blur * scale;
-    ctx.shadowOffsetX = offsetX * scale;
-    ctx.shadowOffsetY = offsetY * scale;
+    const enableShadowBlur = shapeModel.surface.doc.awarenessStore.getFlag(
+      'enable_shape_shadow_blur'
+    );
+
+    // hard shadow, or soft shadow if `enable_shape_shadow_blur` is true
+    // see comment of `shape.shadow` in `ShapeElementModel`
+    if (blur === 0 || enableShadowBlur) {
+      ctx.shadowBlur = blur * scale;
+      ctx.shadowOffsetX = offsetX * scale;
+      ctx.shadowOffsetY = offsetY * scale;
+    }
+
     ctx.shadowColor = renderer.getPropertyValue(color);
   }
 
