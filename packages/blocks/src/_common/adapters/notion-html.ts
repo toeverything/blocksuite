@@ -68,6 +68,8 @@ const ColumnClassMap: Record<string, string> = {
   typesTitle: 'title',
 };
 
+const NotionInlineEquationToken = 'notion-text-equation-token';
+
 type BlocksuiteTableColumn = {
   type: string;
   name: string;
@@ -148,10 +150,21 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
       case 'element': {
         switch (ast.tagName) {
           case 'ol':
-          case 'ul': {
+          case 'ul':
+          case 'style': {
             return [];
           }
           case 'span': {
+            if (
+              Array.isArray(ast.properties?.className) &&
+              ast.properties?.className.includes(NotionInlineEquationToken)
+            ) {
+              const latex = hastGetTextContent(
+                hastQuerySelector(ast, 'annotation')
+              );
+              return [{ insert: ' ', attributes: { latex } }];
+            }
+
             return ast.children.flatMap(child =>
               this._hastToDeltaSpreaded(child, option)
             );

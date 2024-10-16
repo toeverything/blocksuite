@@ -1774,4 +1774,59 @@ describe('notion html to snapshot', () => {
     });
     expect(nanoidReplacement(rawBlockSnapshot)).toEqual(blockSnapshot);
   });
+
+  test('inline equation', async () => {
+    const html = `<div class="page-body">
+      <p id="121088dd-6fdb-803c-8d6e-f80b56c2eb4f" class="">inline equation
+        <style>@import url('https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css')</style>
+        <span data-token-index="0" contenteditable="false" class="notion-text-equation-token">
+          <annotation encoding="application/x-tex">E = mc^2</annotation>
+        </span>
+      </p>
+    </div>`;
+
+    const blockSnapshot: BlockSnapshot = {
+      type: 'block',
+      id: 'matchesReplaceMap[0]',
+      flavour: 'affine:note',
+      props: {
+        xywh: '[0,0,800,95]',
+        background: DEFAULT_NOTE_BACKGROUND_COLOR,
+        index: 'a0',
+        hidden: false,
+        displayMode: NoteDisplayMode.DocAndEdgeless,
+      },
+      children: [
+        {
+          type: 'block',
+          id: 'matchesReplaceMap[1]',
+          flavour: 'affine:paragraph',
+          props: {
+            text: {
+              '$blocksuite:internal:text$': true,
+              delta: [
+                {
+                  insert: 'inline equation',
+                },
+                {
+                  insert: ' ',
+                  attributes: {
+                    latex: 'E = mc^2',
+                  },
+                },
+              ],
+            },
+            type: 'text',
+          },
+          children: [],
+        },
+      ],
+    };
+
+    const adapter = new NotionHtmlAdapter(createJob());
+    const rawBlockSnapshot = await adapter.toBlockSnapshot({
+      file: html,
+    });
+    expect(nanoidReplacement(rawBlockSnapshot)).toEqual(blockSnapshot);
+  });
 });
