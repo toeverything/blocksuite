@@ -4,6 +4,7 @@ import {
   assertType,
   Bound,
   DisposableGroup,
+  getCommonBoundWithRotation,
   type IBound,
   last,
 } from '@blocksuite/global/utils';
@@ -47,6 +48,14 @@ export class GfxController extends LifeCycleWatcher {
 
   get doc() {
     return this.std.doc;
+  }
+
+  get elementsBound() {
+    return getCommonBoundWithRotation(this.gfxElements);
+  }
+
+  get gfxElements(): GfxModel[] {
+    return [...this.layer.blocks, ...this.layer.canvasElements];
   }
 
   get surface() {

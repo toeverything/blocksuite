@@ -34,7 +34,12 @@ import {
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import { requestConnectedFrame } from '@blocksuite/affine-shared/utils';
 import { WidgetComponent } from '@blocksuite/block-std';
-import { atLeastNMatches, groupBy, pickValues } from '@blocksuite/global/utils';
+import {
+  atLeastNMatches,
+  getCommonBoundWithRotation,
+  groupBy,
+  pickValues,
+} from '@blocksuite/global/utils';
 import { css, html, nothing, type TemplateResult } from 'lit';
 import { property, state } from 'lit/decorators.js';
 import { join } from 'lit/directives/join.js';
@@ -43,7 +48,6 @@ import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-bl
 import type { ElementToolbarMoreMenuContext } from './more-menu/context.js';
 
 import { getMoreMenuConfig } from '../../configs/toolbar.js';
-import { edgelessElementsBound } from '../../edgeless/utils/bound-utils.js';
 import {
   isAttachmentBlock,
   isBookmarkBlock,
@@ -193,7 +197,7 @@ export class EdgelessElementToolbarWidget extends WidgetComponent<
       return;
     }
 
-    const bound = edgelessElementsBound(elements);
+    const bound = getCommonBoundWithRotation(elements);
 
     const { width, height } = viewport;
     const [x, y] = viewport.toViewCoord(bound.x, bound.y);

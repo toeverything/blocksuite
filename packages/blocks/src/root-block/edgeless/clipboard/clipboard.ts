@@ -13,7 +13,6 @@ import type { IBound, IVec, SerializedXYWH } from '@blocksuite/global/utils';
 
 import {
   CanvasElementType,
-  CommonUtils,
   SurfaceGroupLikeModel,
   TextUtils,
 } from '@blocksuite/affine-block-surface';
@@ -1346,7 +1345,7 @@ export class EdgelessClipboardController extends PageClipboard {
       bounds.push(Bound.deserialize(block.xywh));
     });
     shapes.forEach(shape => {
-      bounds.push(CommonUtils.getBoundsWithRotation(shape.elementBound));
+      bounds.push(shape.elementBound);
     });
     const bound = getCommonBound(bounds);
     assertExists(bound, 'bound not exist');

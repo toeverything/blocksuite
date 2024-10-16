@@ -1,7 +1,7 @@
 import {
   assertType,
   DisposableGroup,
-  getUnitedBound,
+  getCommonBoundWithRotation,
   groupBy,
   type IPoint,
   Slot,
@@ -105,7 +105,7 @@ export class GfxSelectionManager extends GfxExtension {
   }
 
   get selectedBound() {
-    return getUnitedBound(this.selectedElements.map(el => el.elementBound));
+    return getCommonBoundWithRotation(this.selectedElements);
   }
 
   get selectedElements() {
@@ -204,8 +204,7 @@ export class GfxSelectionManager extends GfxExtension {
     const selected = this.selectedElements;
     if (!selected.length) return false;
 
-    const commonBound = getUnitedBound(selected.map(el => el.elementBound));
-
+    const commonBound = getCommonBoundWithRotation(selected);
     const [modelX, modelY] = this.gfx.viewport.toModelCoord(viewX, viewY);
     if (commonBound && commonBound.isPointInBound([modelX, modelY])) {
       return true;

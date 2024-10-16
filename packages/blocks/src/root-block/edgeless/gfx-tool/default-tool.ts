@@ -36,6 +36,7 @@ import {
 import {
   Bound,
   DisposableGroup,
+  getCommonBoundWithRotation,
   intersects,
   noop,
   Vec,
@@ -47,7 +48,6 @@ import type { EdgelessFrameManager, FrameOverlay } from '../frame-manager.js';
 import type { EdgelessSnapManager } from '../utils/snap-manager.js';
 
 import { isSelectSingleMindMap } from '../../../_common/edgeless/mindmap/index.js';
-import { edgelessElementsBound } from '../utils/bound-utils.js';
 import { prepareCloneData } from '../utils/clone-utils.js';
 import { calPanDelta } from '../utils/panning-utils.js';
 import {
@@ -302,7 +302,7 @@ export class DefaultTool extends BaseTool {
     const clipboardController = this._edgeless?.clipboardController;
     const snapshot = await prepareCloneData(this._toBeMoved, this.std);
 
-    const bound = edgelessElementsBound(this._toBeMoved);
+    const bound = getCommonBoundWithRotation(this._toBeMoved);
     const { canvasElements, blockModels } =
       await clipboardController.createElementsFromClipboardData(
         snapshot,

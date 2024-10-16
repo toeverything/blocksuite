@@ -23,7 +23,6 @@ import { DocCollection, Text } from '@blocksuite/store';
 import type { FrameBlockModel, NoteBlockModel } from '../../index.js';
 
 import { GfxBlockModel } from './block-model.js';
-import { edgelessElementsBound } from './utils/bound-utils.js';
 import { areSetsEqual } from './utils/misc.js';
 import { isFrameBlock } from './utils/query.js';
 
@@ -267,7 +266,7 @@ export class EdgelessFrameManager extends GfxExtension {
   }
 
   createFrameOnElements(elements: GfxModel[]) {
-    let bound = edgelessElementsBound(this.gfx.selection.selectedElements);
+    let bound = this.gfx.selection.selectedBound;
     bound = bound.expand(FRAME_PADDING);
     if (bound.w < MIN_FRAME_WIDTH) {
       const offset = (MIN_FRAME_WIDTH - bound.w) / 2;

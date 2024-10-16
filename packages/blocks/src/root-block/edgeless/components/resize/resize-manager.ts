@@ -1,6 +1,7 @@
 import { CommonUtils } from '@blocksuite/affine-block-surface';
 import {
   assertExists,
+  getQuadBoundWithRotation,
   type IPoint,
   type IVec,
   type PointLocation,
@@ -12,7 +13,7 @@ import type { SelectableProps } from '../../utils/query.js';
 import { NOTE_MIN_WIDTH } from '../../utils/consts.js';
 import { HandleDirection, type ResizeMode } from './resize-handles.js';
 
-const { rotatePoints, getQuadBoundsWithRotation } = CommonUtils;
+const { rotatePoints } = CommonUtils;
 
 // 15deg
 const SHIFT_LOCKING_ANGLE = Math.PI / 12;
@@ -558,7 +559,7 @@ export class HandleResizeManager {
 
         // TODO: determine if it is a note
         if (rotate) {
-          const { width } = getQuadBoundsWithRotation({ x, y, w, h, rotate });
+          const { width } = getQuadBoundWithRotation({ x, y, w, h, rotate });
           const hrw = width / 2;
 
           center.y = cy;

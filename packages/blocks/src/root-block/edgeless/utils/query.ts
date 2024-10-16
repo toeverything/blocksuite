@@ -31,14 +31,18 @@ import {
   ShapeElementModel,
   TextElementModel,
 } from '@blocksuite/affine-model';
-import { Bound, deserializeXYWH } from '@blocksuite/global/utils';
+import {
+  Bound,
+  deserializeXYWH,
+  getQuadBoundWithRotation,
+} from '@blocksuite/global/utils';
 
 import type { Connectable } from '../../../_common/utils/index.js';
 import type { GfxBlockModel } from '../block-model.js';
 
 import { getElementsWithoutGroup } from './group.js';
 
-const { clamp, getQuadBoundsWithRotation } = CommonUtils;
+const { clamp } = CommonUtils;
 
 export function isMindmapNode(
   element: GfxBlockModel | BlockSuite.EdgelessModel | null
@@ -277,7 +281,7 @@ export function getSelectedRect(selected: BlockSuite.EdgelessModel[]): DOMRect {
     (bounds, selectable, index) => {
       const rotate = isTopLevelBlock(selectable) ? 0 : selectable.rotate;
       const [x, y, w, h] = deserializeXYWH(selectable.xywh);
-      let { left, top, right, bottom } = getQuadBoundsWithRotation({
+      let { left, top, right, bottom } = getQuadBoundWithRotation({
         x,
         y,
         w,

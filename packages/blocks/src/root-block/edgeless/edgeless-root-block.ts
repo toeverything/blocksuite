@@ -11,7 +11,6 @@ import type {
   SurfaceSelection,
   UIEventHandler,
 } from '@blocksuite/block-std';
-import type { IBound } from '@blocksuite/global/utils';
 
 import { CommonUtils } from '@blocksuite/affine-block-surface';
 import { toast } from '@blocksuite/affine-components/toast';
@@ -54,7 +53,6 @@ import { isSelectSingleMindMap } from '../../_common/edgeless/mindmap/index.js';
 import { EdgelessClipboardController } from './clipboard/clipboard.js';
 import { EdgelessToolbar } from './components/toolbar/edgeless-toolbar.js';
 import { EdgelessPageKeyboardManager } from './edgeless-keyboard.js';
-import { edgelessElementsBound } from './utils/bound-utils.js';
 import { getBackgroundGrid, isCanvasElement } from './utils/query.js';
 import { mountShapeTextEditor } from './utils/text.js';
 
@@ -135,7 +133,7 @@ export class EdgelessRootBlockComponent extends BlockComponent<
   keyboardManager: EdgelessPageKeyboardManager | null = null;
 
   get dispatcher() {
-    return this.service?.uiEventDispatcher;
+    return this.std.event;
   }
 
   get gfx() {
@@ -554,11 +552,6 @@ export class EdgelessRootBlockComponent extends BlockComponent<
     );
 
     this._refreshLayerViewport();
-  }
-
-  getElementsBound(): IBound | null {
-    const { service } = this;
-    return edgelessElementsBound([...service.elements, ...service.blocks]);
   }
 
   override renderBlock() {

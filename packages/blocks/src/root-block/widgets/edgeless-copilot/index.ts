@@ -5,7 +5,7 @@ import {
   requestConnectedFrame,
 } from '@blocksuite/affine-shared/utils';
 import { WidgetComponent } from '@blocksuite/block-std';
-import { Bound, getElementsBound } from '@blocksuite/global/utils';
+import { Bound, getCommonBoundWithRotation } from '@blocksuite/global/utils';
 import {
   autoUpdate,
   computePosition,
@@ -231,9 +231,7 @@ export class EdgelessCopilotWidget extends WidgetComponent<
     const offsetY = 20 / this.edgeless.service.viewport.zoom;
     const bounds = new Bound(0, 0, width, height);
     if (elements.length) {
-      const { x, y, h } = getElementsBound(
-        elements.map(ele => ele.elementBound)
-      );
+      const { x, y, h } = getCommonBoundWithRotation(elements);
       bounds.x = x;
       bounds.y = y + h + offsetY;
     } else {

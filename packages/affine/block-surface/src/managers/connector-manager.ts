@@ -19,7 +19,7 @@ import {
   getBezierCurveBoundingBox,
   getBezierParameters,
   getBoundFromPoints,
-  getBoundsWithRotation,
+  getBoundWithRotation,
   getPointFromBoundsWithRotation,
   isOverlap,
   isVecZero,
@@ -917,9 +917,7 @@ export class ConnectionOverlay extends Overlay {
 
       // then check if in expanded bound
       const bound = Bound.deserialize(connectable.xywh);
-      const rotateBound = Bound.from(
-        getBoundsWithRotation(rBound(connectable))
-      );
+      const rotateBound = Bound.from(getBoundWithRotation(rBound(connectable)));
       // FIXME: the real path needs to be expanded: diamod, ellipse, trangle.
       if (!rotateBound.expand(10).isPointInBound(point)) continue;
 
@@ -1103,10 +1101,10 @@ export class ConnectorPathGenerator {
       const [startPoint, endPoint] = this._computeStartEndPoint(connector);
 
       const startBound = start
-        ? Bound.from(getBoundsWithRotation(rBound(start)))
+        ? Bound.from(getBoundWithRotation(rBound(start)))
         : null;
       const endBound = end
-        ? Bound.from(getBoundsWithRotation(rBound(end)))
+        ? Bound.from(getBoundWithRotation(rBound(end)))
         : null;
       const path = this.generateOrthogonalConnectorPath({
         startPoint,

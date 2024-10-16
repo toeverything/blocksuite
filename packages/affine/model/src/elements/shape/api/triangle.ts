@@ -4,7 +4,7 @@ import type { IBound, IVec } from '@blocksuite/global/utils';
 import {
   Bound,
   getCenterAreaBounds,
-  getPointsFromBoundsWithRotation,
+  getPointsFromBoundWithRotation,
   linePolygonIntersects,
   pointInPolygon,
   PointLocation,
@@ -50,7 +50,7 @@ export const triangle = {
     options: PointTestOptions
   ) {
     const point: IVec = [x, y];
-    const points = getPointsFromBoundsWithRotation(this, triangle.points);
+    const points = getPointsFromBoundWithRotation(this, triangle.points);
 
     let hit = pointOnPolygonStoke(
       point,
@@ -70,7 +70,7 @@ export const triangle = {
             this,
             DEFAULT_CENTRAL_AREA_RATIO
           );
-          const centralPoints = getPointsFromBoundsWithRotation(
+          const centralPoints = getPointsFromBoundWithRotation(
             centralBounds,
             triangle.points
           );
@@ -78,7 +78,7 @@ export const triangle = {
         } else if (this.textBound) {
           hit = pointInPolygon(
             point,
-            getPointsFromBoundsWithRotation(
+            getPointsFromBoundWithRotation(
               this,
               () => Bound.from(this.textBound!).points
             )
@@ -90,17 +90,17 @@ export const triangle = {
     return hit;
   },
   containsBound(bounds: Bound, element: ShapeElementModel): boolean {
-    const points = getPointsFromBoundsWithRotation(element, triangle.points);
+    const points = getPointsFromBoundWithRotation(element, triangle.points);
     return points.some(point => bounds.containsPoint(point));
   },
 
   getNearestPoint(point: IVec, element: ShapeElementModel) {
-    const points = getPointsFromBoundsWithRotation(element, triangle.points);
+    const points = getPointsFromBoundWithRotation(element, triangle.points);
     return polygonNearestPoint(points, point);
   },
 
   getLineIntersections(start: IVec, end: IVec, element: ShapeElementModel) {
-    const points = getPointsFromBoundsWithRotation(element, triangle.points);
+    const points = getPointsFromBoundWithRotation(element, triangle.points);
     return linePolygonIntersects(start, end, points);
   },
 

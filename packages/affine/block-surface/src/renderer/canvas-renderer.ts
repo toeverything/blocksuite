@@ -9,7 +9,7 @@ import { type Color, ColorScheme } from '@blocksuite/affine-model';
 import { requestConnectedFrame } from '@blocksuite/affine-shared/utils';
 import {
   DisposableGroup,
-  getBoundsWithRotation,
+  getBoundWithRotation,
   intersects,
   last,
   Slot,
@@ -278,7 +278,7 @@ export class CanvasRenderer {
       ctx.save();
 
       const display = element.display ?? true;
-      if (display && intersects(getBoundsWithRotation(element), bound)) {
+      if (display && intersects(getBoundWithRotation(element), bound)) {
         const renderFn =
           this.elementRenderers[
             element.type as keyof typeof this.elementRenderers
