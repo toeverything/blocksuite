@@ -1,0 +1,9 @@
+{
+  "redirects": [
+    {
+      "source": "/blocksuite-overview.html",
+      "destination": "/guide/overview.html",
+      "permanent": true
+    }
+  ]
+}
