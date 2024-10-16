@@ -5,7 +5,7 @@ import { css, html, LitElement } from 'lit';
 import { property, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
-import type { NoteTool } from '../../../tools/note-tool.js';
+import type { NoteToolOption } from '../../../gfx-tool/note-tool.js';
 
 import {
   getImageFilesFromLocal,
@@ -190,7 +190,7 @@ export class EdgelessNoteMenu extends EdgelessToolbarToolMixin(LitElement) {
   @property({ attribute: false })
   accessor onChange!: (
     props: Partial<{
-      childFlavour: NoteTool['childFlavour'];
+      childFlavour: NoteToolOption['childFlavour'];
       childType: string | null;
       tip: string;
     }>

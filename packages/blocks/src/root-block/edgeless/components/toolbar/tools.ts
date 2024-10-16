@@ -3,14 +3,13 @@ import type { MenuConfig } from '@blocksuite/affine-components/context-menu';
 import { html, type TemplateResult } from 'lit';
 
 import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
-import type { EdgelessTool } from '../../types.js';
 
 import { buildConnectorDenseMenu } from './connector/connector-dense-menu.js';
 import { buildFrameDenseMenu } from './frame/frame-dense-menu.js';
 import { buildLinkDenseMenu } from './link/link-dense-menu.js';
 
 export interface QuickTool {
-  type?: EdgelessTool['type'];
+  type?: keyof BlockSuite.GfxToolsMap;
   content: TemplateResult;
   /**
    * if not configured, the tool will not be shown in dense mode

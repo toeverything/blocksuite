@@ -41,7 +41,6 @@ import {
 import { effect } from '@preact/signals-core';
 
 import type { EdgelessFrameManager, FrameOverlay } from '../frame-manager.js';
-import type { EdgelessTool } from '../types.js';
 import type { EdgelessSnapManager } from '../utils/snap-manager.js';
 
 import { isSelectSingleMindMap } from '../../../_common/edgeless/mindmap/index.js';
@@ -96,12 +95,6 @@ export class DefaultTool extends BaseTool {
     if (this._disposables) {
       this._disposables.dispose();
       this._disposables = null;
-    }
-  };
-
-  private _clearLastSelection = () => {
-    if (this.edgelessSelectionManager.empty) {
-      this.edgelessSelectionManager.clearLast();
     }
   };
 
@@ -776,10 +769,7 @@ export class DefaultTool extends BaseTool {
     this._isDoubleClickedOnMask = false;
   }
 
-  override deactivate(edgelessTool?: EdgelessTool) {
-    if (edgelessTool?.type === 'pan') {
-      this._clearLastSelection();
-    }
+  override deactivate() {
     this._stopAutoPanning();
     this._clearDisposable();
     this._accumulateDelta = [0, 0];

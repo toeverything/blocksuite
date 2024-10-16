@@ -4,7 +4,7 @@ import { css, html, LitElement } from 'lit';
 import { state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type { NoteTool } from '../../../tools/note-tool.js';
+import type { NoteToolOption } from '../../../gfx-tool/note-tool.js';
 import type { EdgelessNoteMenu } from './note-menu.js';
 
 import { getTooltipWithShortcut } from '../../../components/utils.js';
@@ -54,7 +54,7 @@ export class EdgelessNoteToolButton extends QuickToolMixin(LitElement) {
       this._noteMenu.element.tip = this.tip;
       this._noteMenu.element.onChange = (
         props: Partial<{
-          childFlavour: NoteTool['childFlavour'];
+          childFlavour: NoteToolOption['childFlavour'];
           childType: string | null;
           tip: string;
         }>
@@ -113,7 +113,7 @@ export class EdgelessNoteToolButton extends QuickToolMixin(LitElement) {
   }
 
   @state()
-  accessor childFlavour: NoteTool['childFlavour'] = 'affine:paragraph';
+  accessor childFlavour: NoteToolOption['childFlavour'] = 'affine:paragraph';
 
   @state()
   accessor childType = 'text';

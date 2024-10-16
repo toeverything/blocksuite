@@ -43,5 +43,7 @@ declare global {
     type SurfaceModelKeyType =
       | SurfaceElementModelKeys
       | SurfaceGroupLikeModelKeys;
+
+    type EdgelessModelKeys = EdgelessBlockModelKeyType | SurfaceModelKeyType;
   }
 }

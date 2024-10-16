@@ -17,7 +17,7 @@ import type {
 } from '../root-block/index.js';
 
 import { HandleDirection } from '../root-block/edgeless/components/resize/resize-handles.js';
-import { DefaultModeDragType } from '../root-block/edgeless/tools/default-tool.js';
+import { DefaultModeDragType } from '../root-block/edgeless/gfx-tool/default-tool.js';
 
 export const EDGELESS_TEXT_BLOCK_MIN_WIDTH = 50;
 export const EDGELESS_TEXT_BLOCK_MIN_HEIGHT = 50;
