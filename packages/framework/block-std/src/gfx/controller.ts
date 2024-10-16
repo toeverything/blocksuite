@@ -274,11 +274,15 @@ export class GfxController extends LifeCycleWatcher {
     this._disposables.dispose();
   }
 
-  updateElement(element: GfxModel, props: Record<string, unknown>): void {
-    if (this.surface?.hasElementById(element.id)) {
-      this.surface.updateElement(element.id, props);
+  updateElement(
+    element: GfxModel | string,
+    props: Record<string, unknown>
+  ): void {
+    const elemId = typeof element === 'string' ? element : element.id;
+    if (this.surface?.hasElementById(elemId)) {
+      this.surface.updateElement(elemId, props);
     } else {
-      const hasBlock = this.doc.hasBlock(element.id);
+      const hasBlock = this.doc.hasBlock(elemId);
       hasBlock && this.doc.updateBlock(element as GfxBlockElementModel, props);
     }
   }
