@@ -40,11 +40,11 @@ import {
 } from '@blocksuite/global/utils';
 import { effect } from '@preact/signals-core';
 
+import type { EdgelessRootBlockComponent } from '../edgeless-root-block.js';
 import type { EdgelessFrameManager, FrameOverlay } from '../frame-manager.js';
 import type { EdgelessSnapManager } from '../utils/snap-manager.js';
 
 import { isSelectSingleMindMap } from '../../../_common/edgeless/mindmap/index.js';
-import { EdgelessRootBlockComponent } from '../edgeless-root-block.js';
 import { edgelessElementsBound } from '../utils/bound-utils.js';
 import { prepareCloneData } from '../utils/clone-utils.js';
 import { calPanDelta } from '../utils/panning-utils.js';
@@ -257,11 +257,7 @@ export class DefaultTool extends BaseTool {
   private get _edgeless() {
     const block = this.std.view.getBlock(this.doc.root!.id);
 
-    if (block instanceof EdgelessRootBlockComponent) {
-      return block;
-    }
-
-    return null;
+    return (block as EdgelessRootBlockComponent) ?? null;
   }
 
   private get _frameMgr() {
