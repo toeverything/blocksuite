@@ -1,3 +1,7 @@
+import {
+  DEFAULT_NOTE_HEIGHT,
+  DEFAULT_NOTE_WIDTH,
+} from '@blocks/root-block/edgeless/utils/consts.js';
 import { NOTE_WIDTH, NoteDisplayMode } from '@blocksuite/affine-model';
 import { expect } from '@playwright/test';
 
@@ -93,7 +97,12 @@ test('add Note', async ({ page }) => {
   await assertRichTexts(page, ['', 'hello']);
   await page.mouse.click(300, 200);
   await page.mouse.click(350, 320);
-  await assertEdgelessSelectedRect(page, [270, 260, 448, 92]);
+  await assertEdgelessSelectedRect(page, [
+    270,
+    260,
+    DEFAULT_NOTE_WIDTH,
+    DEFAULT_NOTE_HEIGHT,
+  ]);
 });
 
 test('add empty Note', async ({ page }) => {

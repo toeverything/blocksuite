@@ -1111,11 +1111,6 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       scale = bound.w / width;
       this._scalePercent = `${Math.round(scale * 100)}%`;
       this._scaleDirection = direction;
-    } else if (curBound.h !== bound.h) {
-      this.edgeless.doc.updateBlock(element, () => {
-        element.edgeless.collapse = true;
-        element.edgeless.collapsedHeight = bound.h / scale;
-      });
     }
 
     width = bound.w / scale;
@@ -1128,6 +1123,18 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
 
     this._isWidthLimit = width === NOTE_MIN_WIDTH;
     this._isHeightLimit = height === NOTE_MIN_HEIGHT;
+
+    if (bound.h > NOTE_MIN_HEIGHT * scale) {
+      this.edgeless.doc.updateBlock(element, () => {
+        element.edgeless.collapse = true;
+        element.edgeless.collapsedHeight = bound.h / scale;
+      });
+    } else {
+      this.edgeless.doc.updateBlock(element, () => {
+        element.edgeless.collapse = false;
+        element.edgeless.collapsedHeight = undefined;
+      });
+    }
 
     this.edgeless.service.updateElement(element.id, {
       edgeless: {

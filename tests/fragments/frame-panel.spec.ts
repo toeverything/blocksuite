@@ -146,7 +146,7 @@ test.describe('frame panel', () => {
       await dragBetweenCoords(
         page,
         { x: 100, y: 440 },
-        { x: 600, y: 600 },
+        { x: 640, y: 600 },
         { steps: 10 }
       );
       await waitNextFrame(page, 100);
@@ -258,7 +258,7 @@ test.describe('frame panel', () => {
       await page.mouse.click(0, 0);
 
       await setEdgelessTool(page, 'frame');
-      await dragBetweenCoords(page, { x: 100, y: 440 }, { x: 600, y: 600 });
+      await dragBetweenCoords(page, { x: 100, y: 440 }, { x: 640, y: 600 });
       await waitNextFrame(page);
 
       const frames = page.locator('affine-frame');
@@ -274,7 +274,7 @@ test.describe('frame panel', () => {
 
       // click on the first frame card
       await frameCards.nth(0).click();
-      await assertEdgelessSelectedRect(page, [100, 440, 500, 160]);
+      await assertEdgelessSelectedRect(page, [100, 440, 540, 160]);
 
       await frameCards.nth(0).click();
       await assertEdgelessNonSelectedRect(page);
@@ -285,7 +285,7 @@ test.describe('frame panel', () => {
 
       // click on the first frame card
       await frameCards.nth(0).click();
-      await assertEdgelessSelectedRect(page, [100, 440, 500, 160]);
+      await assertEdgelessSelectedRect(page, [100, 440, 540, 160]);
 
       const framePanel = page.locator('.frame-panel-container');
       const panelRect = await framePanel.boundingBox();

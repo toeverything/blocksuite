@@ -1,3 +1,7 @@
+import {
+  DEFAULT_NOTE_HEIGHT,
+  DEFAULT_NOTE_WIDTH,
+} from '@blocks/root-block/edgeless/utils/consts.js';
 import { expect, type Page } from '@playwright/test';
 
 import { clickView } from '../../utils/actions/click.js';
@@ -144,7 +148,12 @@ test.describe('add element to frame and then move frame', () => {
 
       await assertEdgelessElementBound(page, shapeId, [150, 150, 100, 100]);
       await assertEdgelessElementBound(page, frameId, [100, 100, 500, 500]);
-      await assertEdgelessElementBound(page, noteId, [220, 210, 448, 92]);
+      await assertEdgelessElementBound(page, noteId, [
+        220,
+        210,
+        DEFAULT_NOTE_WIDTH,
+        DEFAULT_NOTE_HEIGHT,
+      ]);
     });
 
     test('element should be not moved since it is created not in frame', async ({

@@ -1,5 +1,5 @@
 import {
-  NOTE_INIT_HEIGHT,
+  NOTE_MIN_HEIGHT,
   NOTE_MIN_WIDTH,
 } from '@blocks/root-block/edgeless/utils/consts.js';
 import { expect } from '@playwright/test';
@@ -71,6 +71,74 @@ test('resize note in edgeless mode', async ({ page }) => {
   assertRectEqual(newRect, draggedRect);
 });
 
+test('resize note then collapse note', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  const { noteId } = await initEmptyEdgelessState(page);
+  await switchEditorMode(page);
+  await zoomResetByKeyboard(page);
+  await activeNoteInEdgeless(page, noteId);
+  await waitNextFrame(page, 400);
+  await type(page, 'hello');
+  await assertRichTexts(page, ['hello']);
+
+  // unselect note
+  await page.mouse.click(50, 50);
+
+  expect(noteId).toBe('2'); // 0 for page, 1 for surface
+  await selectNoteInEdgeless(page, noteId);
+
+  const initRect = await getNoteRect(page, noteId);
+  const leftHandle = page.locator('.handle[aria-label="left"] .resize');
+  let box = await leftHandle.boundingBox();
+  assertExists(box);
+
+  await dragBetweenCoords(
+    page,
+    { x: box.x + 50, y: box.y + box.height },
+    { x: box.x + 50, y: box.y + box.height + 100 }
+  );
+  let noteRect = await getNoteRect(page, noteId);
+  await expect(page.locator('.edgeless-note-collapse-button')).toBeVisible();
+  assertRectEqual(noteRect, {
+    x: initRect.x,
+    y: initRect.y,
+    w: initRect.w,
+    h: initRect.h + 100,
+  });
+
+  await page.locator('.edgeless-note-collapse-button')!.click();
+  let domRect = await page.locator('affine-edgeless-note').boundingBox();
+  expect(domRect!.height).toBeCloseTo(NOTE_MIN_HEIGHT);
+
+  await page.locator('.edgeless-note-collapse-button')!.click();
+  domRect = await page.locator('affine-edgeless-note').boundingBox();
+  expect(domRect!.height).toBeCloseTo(initRect.h + 100);
+
+  await selectNoteInEdgeless(page, noteId);
+  box = await leftHandle.boundingBox();
+  assertExists(box);
+  await dragBetweenCoords(
+    page,
+    { x: box.x + 50, y: box.y + box.height },
+    { x: box.x + 50, y: box.y + box.height - 150 }
+  );
+  noteRect = await getNoteRect(page, noteId);
+  await expect(
+    page.locator('.edgeless-note-collapse-button')
+  ).not.toBeVisible();
+  assertRectEqual(noteRect, {
+    x: initRect.x,
+    y: initRect.y,
+    w: initRect.w,
+    h: NOTE_MIN_HEIGHT,
+  });
+
+  await switchEditorMode(page);
+  await switchEditorMode(page);
+  const newRect = await getNoteRect(page, noteId);
+  assertRectEqual(newRect, noteRect);
+});
+
 test('resize note then auto size and custom size', async ({ page }) => {
   await enterPlaygroundRoom(page);
   const { noteId } = await initEmptyEdgelessState(page);
@@ -115,6 +183,7 @@ test('resize note then auto size and custom size', async ({ page }) => {
   await assertNoteRectEqual(page, noteId, draggedRect);
 
   await undoByClick(page);
+  await page.mouse.click(50, 50);
   await waitNextFrame(page, 200);
   await assertNoteRectEqual(page, noteId, initRect);
 
@@ -184,6 +253,6 @@ test('drag to add customized size note: should clamp to min width and min height
     270,
     260,
     NOTE_MIN_WIDTH,
-    NOTE_INIT_HEIGHT,
+    NOTE_MIN_HEIGHT,
   ]);
 });

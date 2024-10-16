@@ -11,9 +11,9 @@ import {
   type NoteChildrenFlavour,
 } from '../../../_common/utils/index.js';
 import {
+  DEFAULT_NOTE_HEIGHT,
+  DEFAULT_NOTE_WIDTH,
   EXCLUDING_MOUSE_OUT_CLASS_LIST,
-  NOTE_INIT_HEIGHT,
-  NOTE_MIN_WIDTH,
 } from '../utils/consts.js';
 import { addNote } from '../utils/note.js';
 import { DraggingNoteOverlay, NoteOverlay } from '../utils/tool-overlay.js';
@@ -164,8 +164,8 @@ export class NoteToolController extends EdgelessToolController<NoteTool> {
       this._edgeless,
       point,
       options,
-      Math.max(width, NOTE_MIN_WIDTH),
-      Math.max(height, NOTE_INIT_HEIGHT)
+      Math.max(width, DEFAULT_NOTE_WIDTH),
+      Math.max(height, DEFAULT_NOTE_HEIGHT)
     );
   }
 
