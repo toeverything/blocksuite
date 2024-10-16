@@ -130,7 +130,10 @@ export const components: DefaultTheme.NavItem[] = [
         // @ts-ignore
         link: 'components/editors/edgeless-editor',
         items: [
-          { text: 'Data Structure', link: 'components/editors/edgeless-data-structure' },
+          {
+            text: 'Data Structure',
+            link: 'components/editors/edgeless-data-structure',
+          },
         ],
       },
     ],
