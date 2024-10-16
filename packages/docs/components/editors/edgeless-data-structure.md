@@ -107,7 +107,7 @@ The note block and image block 1 have `index` fields and can adjust their hierar
 
 All indexable blocks and surface elements have an `xywh` field, determining their absolute position on the edgeless canvas.
 
-> This hierarchy determination technique is called fractional indexing, [also used by Figma](https://www.figma.com/blog/how-figmas-multiplayer-technology-works/).
+> This hierarchy determination technique is called fractional indexing, [also used by Figma](https://www.figma.com/blog/realtime-editing-of-ordered-sequences/).
 
 ## Frames and Groups
 
