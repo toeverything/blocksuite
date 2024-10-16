@@ -11,15 +11,13 @@ import type {
   SurfaceSelection,
   UIEventHandler,
 } from '@blocksuite/block-std';
-import type { IBound, IPoint } from '@blocksuite/global/utils';
+import type { IBound } from '@blocksuite/global/utils';
 
 import { CommonUtils } from '@blocksuite/affine-block-surface';
 import { toast } from '@blocksuite/affine-components/toast';
-import { NoteDisplayMode } from '@blocksuite/affine-model';
 import {
   EditPropsStore,
   FontLoaderService,
-  TelemetryProvider,
 } from '@blocksuite/affine-shared/services';
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import {
@@ -39,7 +37,6 @@ import {
   assertExists,
   Bound,
   Point,
-  serializeXYWH,
   throttle,
   Vec,
 } from '@blocksuite/global/utils';
@@ -58,12 +55,6 @@ import { EdgelessClipboardController } from './clipboard/clipboard.js';
 import { EdgelessToolbar } from './components/toolbar/edgeless-toolbar.js';
 import { EdgelessPageKeyboardManager } from './edgeless-keyboard.js';
 import { edgelessElementsBound } from './utils/bound-utils.js';
-import {
-  DEFAULT_NOTE_HEIGHT,
-  DEFAULT_NOTE_OFFSET_X,
-  DEFAULT_NOTE_OFFSET_Y,
-  DEFAULT_NOTE_WIDTH,
-} from './utils/consts.js';
 import { getBackgroundGrid, isCanvasElement } from './utils/query.js';
 import { mountShapeTextEditor } from './utils/text.js';
 
@@ -141,16 +132,7 @@ export class EdgelessRootBlockComponent extends BlockComponent<
     toolbar: null as EdgelessToolbar | null,
   };
 
-  /**
-   * Disable components
-   *
-   * Toolbar is not allowed to display in `syncd doc block`.
-   */
-  disableComponents = false;
-
   keyboardManager: EdgelessPageKeyboardManager | null = null;
-
-  mouseRoot!: HTMLElement;
 
   get dispatcher() {
     return this.service?.uiEventDispatcher;
@@ -449,60 +431,6 @@ export class EdgelessRootBlockComponent extends BlockComponent<
     );
   }
 
-  /**
-   * Adds a new note with the given point on the affine-editor-container.
-   *
-   * @param: point Point
-   * @returns: The id of new note
-   */
-  addNoteWithPoint(
-    point: IPoint,
-    options: {
-      width?: number;
-      height?: number;
-      parentId?: string;
-      noteIndex?: number;
-      offsetX?: number;
-      offsetY?: number;
-      scale?: number;
-    } = {}
-  ) {
-    const {
-      width = DEFAULT_NOTE_WIDTH,
-      height = DEFAULT_NOTE_HEIGHT,
-      offsetX = DEFAULT_NOTE_OFFSET_X,
-      offsetY = DEFAULT_NOTE_OFFSET_Y,
-      parentId = this.doc.root?.id,
-      noteIndex: noteIndex,
-      scale = 1,
-    } = options;
-    const [x, y] = this.service.viewport.toModelCoord(point.x, point.y);
-    const blockId = this.service.addBlock(
-      'affine:note',
-      {
-        xywh: serializeXYWH(
-          x - offsetX * scale,
-          y - offsetY * scale,
-          width,
-          height
-        ),
-        displayMode: NoteDisplayMode.EdgelessOnly,
-      },
-      parentId,
-      noteIndex
-    );
-
-    this.std.getOptional(TelemetryProvider)?.track('CanvasElementAdded', {
-      control: 'canvas:draw',
-      page: 'whiteboard editor',
-      module: 'toolbar',
-      segment: 'toolbar',
-      type: 'note',
-    });
-
-    return blockId;
-  }
-
   override bindHotKey(
     keymap: Record<string, UIEventHandler>,
     options?: { global?: boolean; flavour?: boolean }
@@ -558,8 +486,6 @@ export class EdgelessRootBlockComponent extends BlockComponent<
       return;
     });
 
-    this.mouseRoot = this.parentElement!;
-
     this._disposables.add(
       this.slots.elementResizeStart.on(() => {
         this._isResizing = true;
@@ -612,7 +538,6 @@ export class EdgelessRootBlockComponent extends BlockComponent<
       this.gfx.tool.setTool('default');
     }
 
-    if (this.disableComponents) return;
     requestConnectedFrame(() => {
       this._handleToolbarFlag();
       this.requestUpdate();

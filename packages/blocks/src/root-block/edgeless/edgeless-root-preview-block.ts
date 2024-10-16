@@ -81,8 +81,6 @@ export class EdgelessRootPreviewBlockComponent extends BlockComponent<
 
   private _viewportElement: HTMLElement | null = null;
 
-  mouseRoot!: HTMLElement;
-
   get dispatcher() {
     return this.service?.uiEventDispatcher;
   }

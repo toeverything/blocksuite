@@ -20,6 +20,7 @@ import { render } from 'lit';
 import type { EdgelessRootBlockComponent } from '../../../edgeless/index.js';
 import type { AffineDragHandleWidget } from '../drag-handle.js';
 
+import { addNoteAtPoint } from '../../../edgeless/utils/common.js';
 import { DropIndicator } from '../components/drop-indicator.js';
 import { AFFINE_DRAG_HANDLE_WIDGET } from '../consts.js';
 import {
@@ -182,7 +183,8 @@ export class DragEventWatcher {
 
       const { left: viewportLeft, top: viewportTop } = edgelessRoot.viewport;
 
-      const newNoteId = edgelessRoot.addNoteWithPoint(
+      const newNoteId = addNoteAtPoint(
+        edgelessRoot.std,
         new Point(state.raw.x - viewportLeft, state.raw.y - viewportTop),
         {
           scale: this.widget.noteScale.peek(),
