@@ -10,7 +10,6 @@ import {
   UIEventStateContext,
 } from './base.js';
 import { ClipboardControl } from './control/clipboard.js';
-import { DndControl } from './control/dnd.js';
 import { KeyboardControl } from './control/keyboard.js';
 import { PointerControl } from './control/pointer.js';
 import { RangeControl } from './control/range.js';
@@ -83,8 +82,6 @@ export class UIEventDispatcher extends LifeCycleWatcher {
 
   private _clipboardControl: ClipboardControl;
 
-  private _dndControl: DndControl;
-
   private _handlersMap = Object.fromEntries(
     eventNames.map((name): [EventName, Array<EventHandlerRunner>] => [name, []])
   ) as Record<EventName, Array<EventHandlerRunner>>;
@@ -118,7 +115,6 @@ export class UIEventDispatcher extends LifeCycleWatcher {
     this._keyboardControl = new KeyboardControl(this);
     this._rangeControl = new RangeControl(this);
     this._clipboardControl = new ClipboardControl(this);
-    this._dndControl = new DndControl(this);
   }
 
   private _bindEvents() {
@@ -150,7 +146,6 @@ export class UIEventDispatcher extends LifeCycleWatcher {
     this._keyboardControl.listen();
     this._rangeControl.listen();
     this._clipboardControl.listen();
-    this._dndControl.listen();
 
     let _dragging = false;
     this.disposables.addFromEvent(this.host, 'pointerdown', () => {
