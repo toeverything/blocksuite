@@ -255,7 +255,7 @@ export class DefaultTool extends BaseTool {
     return [startX, startY] as IVec;
   }
 
-  private get _edgeless() {
+  private get _edgeless(): EdgelessRootBlockComponent | null {
     const block = this.std.view.getBlock(this.doc.root!.id);
 
     return (block as EdgelessRootBlockComponent) ?? null;
