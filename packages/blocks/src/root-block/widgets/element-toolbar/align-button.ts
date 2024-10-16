@@ -1,4 +1,4 @@
-import { LayoutableMindmapElementModel } from '@blocksuite/affine-block-surface';
+import { updateXYWH } from '@blocksuite/affine-block-surface';
 import {
   AlignBottomIcon,
   AlignDistributeHorizontallyIcon,
@@ -10,22 +10,12 @@ import {
   AlignVerticallyIcon,
   SmallArrowDownIcon,
 } from '@blocksuite/affine-components/icons';
-import {
-  ConnectorElementModel,
-  EdgelessTextBlockModel,
-  MindmapElementModel,
-} from '@blocksuite/affine-model';
-import {
-  type GfxContainerElement,
-  type GfxModel,
-  isGfxContainerElm,
-} from '@blocksuite/block-std/gfx';
+import { MindmapElementModel } from '@blocksuite/affine-model';
 import { Bound, WithDisposable } from '@blocksuite/global/utils';
 import { AutoTidyUpIcon, ResizeTidyUpIcon } from '@blocksuite/icons/lit';
 import { css, html, LitElement, nothing, type TemplateResult } from 'lit';
 import { property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
-import chunk from 'lodash.chunk';
 
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 
@@ -41,9 +31,6 @@ const enum Alignment {
   Top = 'Align top',
   Vertically = 'Align vertically',
 }
-
-const ALIGN_HEIGHT = 200;
-const ALIGN_PADDING = 20;
 
 interface AlignmentIcon {
   name: Alignment;
@@ -144,57 +131,12 @@ export class EdgelessAlignButton extends WithDisposable(LitElement) {
         this._alignDistributeVertically();
         break;
       case Alignment.AutoArrange:
-        this._alignAutoArrange();
+        this.edgeless.std.command.exec('autoArrangeElements');
         break;
       case Alignment.AutoResize:
-        this._alignAutoResize();
+        this.edgeless.std.command.exec('autoResizeElements');
         break;
     }
-  }
-
-  private _alignAutoArrange() {
-    const chunks = this._splitElementsToChunks(this.elements);
-    // update element XY
-    const startX: number = chunks[0][0].elementBound.x;
-    let startY: number = chunks[0][0].elementBound.y;
-    chunks.forEach(items => {
-      let posX = startX;
-      let maxHeight = 0;
-      items.forEach(ele => {
-        const { x: eleX, y: eleY } = ele.elementBound;
-        const bound = Bound.deserialize(ele.xywh);
-        const xOffset = bound.x - eleX;
-        const yOffset = bound.y - eleY;
-        bound.x = posX + xOffset;
-        bound.y = startY + yOffset;
-        this._updateXYWH(ele, bound);
-        if (ele.elementBound.h > maxHeight) {
-          maxHeight = ele.elementBound.h;
-        }
-        posX += ele.elementBound.w + ALIGN_PADDING;
-      });
-      startY += maxHeight + ALIGN_PADDING;
-    });
-  }
-
-  private _alignAutoResize() {
-    // resize to fixed height
-    this.elements.forEach(ele => {
-      if (
-        ele instanceof ConnectorElementModel ||
-        ele instanceof EdgelessTextBlockModel ||
-        ele instanceof LayoutableMindmapElementModel
-      ) {
-        return;
-      }
-      const bound = Bound.deserialize(ele.xywh);
-      const scale = ALIGN_HEIGHT / ele.elementBound.h;
-      bound.h = scale * bound.h;
-      bound.w = scale * bound.w;
-      this._updateXYWH(ele, bound);
-    });
-    // arrange
-    this._alignAutoArrange();
   }
 
   private _alignBottom() {
@@ -324,66 +266,8 @@ export class EdgelessAlignButton extends WithDisposable(LitElement) {
     });
   }
 
-  private _splitElementsToChunks(models: GfxModel[]) {
-    const sortByCenterX = (a: GfxModel, b: GfxModel) =>
-      a.elementBound.center[0] - b.elementBound.center[0];
-    const sortByCenterY = (a: GfxModel, b: GfxModel) =>
-      a.elementBound.center[1] - b.elementBound.center[1];
-    const elements = models.filter(ele => {
-      if (
-        ele instanceof ConnectorElementModel &&
-        (ele.target.id || ele.source.id)
-      ) {
-        return false;
-      }
-      return true;
-    });
-    elements.sort(sortByCenterY);
-    const chunks = chunk(elements, 4);
-    chunks.forEach(items => items.sort(sortByCenterX));
-    return chunks;
-  }
-
-  private _updatChildElementsXYWH(
-    container: GfxContainerElement,
-    targetBound: Bound
-  ) {
-    const containerBound = Bound.deserialize(container.xywh);
-    const scaleX = targetBound.w / containerBound.w;
-    const scaleY = targetBound.h / containerBound.h;
-    container.childElements.forEach(child => {
-      const childBound = Bound.deserialize(child.xywh);
-      childBound.x = targetBound.x + scaleX * (childBound.x - containerBound.x);
-      childBound.y = targetBound.y + scaleY * (childBound.y - containerBound.y);
-      childBound.w = scaleX * childBound.w;
-      childBound.h = scaleY * childBound.h;
-      this._updateXYWH(child, childBound);
-    });
-  }
-
   private _updateXYWH(ele: BlockSuite.EdgelessModel, bound: Bound) {
-    if (ele instanceof ConnectorElementModel) {
-      ele.moveTo(bound);
-    } else if (ele instanceof LayoutableMindmapElementModel) {
-      const rootId = ele.tree.id;
-      const rootEle = ele.childElements.find(child => child.id === rootId);
-      if (rootEle) {
-        const rootBound = Bound.deserialize(rootEle.xywh);
-        rootBound.x += bound.x - ele.x;
-        rootBound.y += bound.y - ele.y;
-        this._updateXYWH(rootEle, rootBound);
-      }
-      ele.layout();
-    } else if (isGfxContainerElm(ele)) {
-      this._updatChildElementsXYWH(ele, bound);
-      this.edgeless.service.updateElement(ele.id, {
-        xywh: bound.serialize(),
-      });
-    } else {
-      this.edgeless.service.updateElement(ele.id, {
-        xywh: bound.serialize(),
-      });
-    }
+    updateXYWH(ele, bound, this.edgeless.service.updateElement);
   }
 
   private renderIcons(icons: AlignmentIcon[]) {

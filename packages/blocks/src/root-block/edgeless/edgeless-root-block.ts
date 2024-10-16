@@ -595,11 +595,7 @@ export class EdgelessRootBlockComponent extends BlockComponent<
     return blockIds;
   }
 
-  async addImages(
-    files: File[],
-    point?: IVec,
-    inTopLeft?: boolean
-  ): Promise<string[]> {
+  async addImages(files: File[], point?: IVec): Promise<string[]> {
     const imageFiles = [...files].filter(file =>
       file.type.startsWith('image/')
     );
@@ -630,6 +626,10 @@ export class EdgelessRootBlockComponent extends BlockComponent<
     const dropInfos: { point: Point; blockId: string }[] = [];
 
     const IMAGE_STACK_GAP = 32;
+
+    const isMultipleFiles = imageFiles.length > 1;
+
+    const inTopLeft = isMultipleFiles ? true : false;
 
     // create image cards without image data
     imageFiles.map((file, index) => {
@@ -680,6 +680,9 @@ export class EdgelessRootBlockComponent extends BlockComponent<
       elements: blockIds,
       editing: false,
     });
+    if (isMultipleFiles) {
+      this.std.command.exec('autoResizeElements');
+    }
     return blockIds;
   }
 

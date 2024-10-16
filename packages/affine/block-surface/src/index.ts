@@ -93,6 +93,7 @@ import {
   showMergeIndicator,
 } from './utils/mindmap/utils.js';
 export { sortIndex } from './utils/sort.js';
+export { updateXYWH } from './utils/update-xywh.js';
 
 export const ConnectorUtils = {
   isConnectorAndBindingsAllSelected,

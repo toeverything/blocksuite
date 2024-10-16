@@ -50,7 +50,6 @@
     "html2canvas": "^1.4.1",
     "katex": "^0.16.11",
     "lit": "^3.2.0",
-    "lodash.chunk": "^4.2.0",
     "mdast-util-gfm-autolink-literal": "^2.0.1",
     "mdast-util-gfm-strikethrough": "^2.0.0",
     "mdast-util-gfm-table": "^2.0.0",
@@ -108,7 +107,6 @@
   ],
   "devDependencies": {
     "@types/dompurify": "^3.0.5",
-    "@types/katex": "^0.16.7",
-    "@types/lodash.chunk": "^4.2.9"
+    "@types/katex": "^0.16.7"
   }
 }

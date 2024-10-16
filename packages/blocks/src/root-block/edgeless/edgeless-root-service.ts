@@ -111,6 +111,29 @@ export class EdgelessRootService extends RootService implements SurfaceContext {
 
   TemplateJob = TemplateJob;
 
+  updateElement = (id: string, props: Record<string, unknown>) => {
+    const element = this._surface.getElementById(id);
+    if (element) {
+      const key = getLastPropsKey(
+        element.type as BlockSuite.EdgelessModelKeys,
+        { ...element.yMap.toJSON(), ...props }
+      );
+      key && this.std.get(EditPropsStore).recordLastProps(key, props);
+      this._surface.updateElement(id, props);
+      return;
+    }
+
+    const block = this.doc.getBlockById(id);
+    if (block) {
+      const key = getLastPropsKey(
+        block.flavour as BlockSuite.EdgelessModelKeys,
+        { ...block.yBlock.toJSON(), ...props }
+      );
+      key && this.std.get(EditPropsStore).recordLastProps(key, props);
+      this.doc.updateBlock(block, props);
+    }
+  };
+
   get blocks(): GfxBlockModel[] {
     return this.layer.blocks;
   }
@@ -579,29 +602,6 @@ export class EdgelessRootService extends RootService implements SurfaceContext {
     this._frame?.dispose();
     this.selectionManager.set([]);
     this.disposables.dispose();
-  }
-
-  updateElement(id: string, props: Record<string, unknown>) {
-    const element = this._surface.getElementById(id);
-    if (element) {
-      const key = getLastPropsKey(
-        element.type as BlockSuite.EdgelessModelKeys,
-        { ...element.yMap.toJSON(), ...props }
-      );
-      key && this.std.get(EditPropsStore).recordLastProps(key, props);
-      this._surface.updateElement(id, props);
-      return;
-    }
-
-    const block = this.doc.getBlockById(id);
-    if (block) {
-      const key = getLastPropsKey(
-        block.flavour as BlockSuite.EdgelessModelKeys,
-        { ...block.yBlock.toJSON(), ...props }
-      );
-      key && this.std.get(EditPropsStore).recordLastProps(key, props);
-      this.doc.updateBlock(block, props);
-    }
   }
 
   zoomToFit() {
