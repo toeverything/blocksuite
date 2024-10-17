@@ -1,4 +1,6 @@
 import type {
+  GfxModel,
+  GfxPrimitiveElementModel,
   GfxToolsFullOptionValue,
   Viewport,
 } from '@blocksuite/block-std/gfx';
@@ -206,8 +208,8 @@ export function isEmbedHtmlBlock(
 }
 
 export function isCanvasElement(
-  selectable: BlockSuite.EdgelessModel | null
-): selectable is BlockSuite.SurfaceModel {
+  selectable: GfxModel | BlockModel | null
+): selectable is GfxPrimitiveElementModel {
   return !isTopLevelBlock(selectable);
 }
 

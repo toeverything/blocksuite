@@ -131,7 +131,7 @@ pie.command({
 pie.command({
   label: 'Present',
   icon: ({ rootComponent }) => {
-    const { type } = rootComponent.edgelessTool;
+    const { type } = rootComponent.gfx.tool.currentToolOption$.peek();
     if (type === 'frameNavigator') {
       return html`
         <span
@@ -167,7 +167,7 @@ pie.command({
 pie.beginSubmenu({
   label: 'Connector',
   icon: ({ rootComponent }) => {
-    const tool = rootComponent.edgelessTool;
+    const tool = rootComponent.gfx.tool.currentToolOption$.peek();
 
     if (tool.type === 'connector') {
       switch (tool.mode) {

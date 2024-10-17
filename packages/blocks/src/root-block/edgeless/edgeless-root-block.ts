@@ -28,7 +28,6 @@ import { BlockComponent } from '@blocksuite/block-std';
 import {
   GfxBlockElementModel,
   GfxControllerIdentifier,
-  type GfxToolsFullOptionValue,
   type GfxViewportElement,
 } from '@blocksuite/block-std/gfx';
 import { IS_WINDOWS } from '@blocksuite/global/env';
@@ -39,7 +38,6 @@ import {
   throttle,
   Vec,
 } from '@blocksuite/global/utils';
-import { effect } from '@preact/signals-core';
 import { css, html, nothing } from 'lit';
 import { query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
@@ -55,6 +53,7 @@ import { EdgelessToolbar } from './components/toolbar/edgeless-toolbar.js';
 import { EdgelessPageKeyboardManager } from './edgeless-keyboard.js';
 import { getBackgroundGrid, isCanvasElement } from './utils/query.js';
 import { mountShapeTextEditor } from './utils/text.js';
+import { fitToScreen } from './utils/viewport.js';
 
 const { normalizeWheelDeltaY } = CommonUtils;
 
@@ -102,7 +101,7 @@ export class EdgelessRootBlockComponent extends BlockComponent<
   `;
 
   private _refreshLayerViewport = requestThrottledConnectedFrame(() => {
-    const { zoom, translateX, translateY } = this.service.viewport;
+    const { zoom, translateX, translateY } = this.gfx.viewport;
     const { gap } = getBackgroundGrid(zoom, true);
 
     if (this.backgroundElm) {
@@ -219,14 +218,14 @@ export class EdgelessRootBlockComponent extends BlockComponent<
     });
 
     this._disposables.add(
-      this.service.layer.slots.layerUpdated.on(() => updateLayers())
+      this.gfx.layer.slots.layerUpdated.on(() => updateLayers())
     );
   }
 
   private _initPanEvent() {
     this.disposables.add(
       this.dispatcher.add('pan', ctx => {
-        const { viewport } = this.service;
+        const { viewport } = this.gfx;
         if (viewport.locked) return;
 
         const multiPointersState = ctx.get('multiPointerState');
@@ -246,7 +245,7 @@ export class EdgelessRootBlockComponent extends BlockComponent<
   private _initPinchEvent() {
     this.disposables.add(
       this.dispatcher.add('pinch', ctx => {
-        const { viewport } = this.service;
+        const { viewport } = this.gfx;
         if (viewport.locked) return;
 
         const multiPointersState = ctx.get('multiPointerState');
@@ -282,7 +281,7 @@ export class EdgelessRootBlockComponent extends BlockComponent<
 
     const onPixelRatioChange = () => {
       if (media) {
-        this.service.viewport.onResize();
+        this.gfx.viewport.onResize();
         media.removeEventListener('change', onPixelRatioChange);
       }
 
@@ -303,9 +302,9 @@ export class EdgelessRootBlockComponent extends BlockComponent<
     const setRemoteCursor = (pos: { x: number; y: number }) => {
       if (rafId) cancelAnimationFrame(rafId);
       rafId = requestConnectedFrame(() => {
-        if (!this.service?.viewport) return;
-        const cursorPosition = this.service.viewport.toModelCoord(pos.x, pos.y);
-        this.service.selection.setCursor({
+        if (!this.gfx.viewport) return;
+        const cursorPosition = this.gfx.viewport.toModelCoord(pos.x, pos.y);
+        this.gfx.selection.setCursor({
           x: cursorPosition[0],
           y: cursorPosition[1],
         });
@@ -321,13 +320,8 @@ export class EdgelessRootBlockComponent extends BlockComponent<
 
   private _initResizeEffect() {
     const resizeObserver = new ResizeObserver((_: ResizeObserverEntry[]) => {
-      // FIXME: find a better way to get rid of empty check
-      if (!this.service || !this.service.selection || !this.service.viewport) {
-        console.error('Service not ready');
-        return;
-      }
-      this.service.selection.set(this.service.selection.surfaceSelections);
-      this.service.viewport.onResize();
+      this.gfx.selection.set(this.gfx.selection.surfaceSelections);
+      this.gfx.viewport.onResize();
     });
 
     resizeObserver.observe(this.viewportElement);
@@ -367,18 +361,24 @@ export class EdgelessRootBlockComponent extends BlockComponent<
   }
 
   private _initViewport() {
-    const { service, std } = this;
+    const { std, gfx } = this;
 
     const run = () => {
-      const viewport =
-        std.get(EditPropsStore).getStorage('viewport') ??
-        service.getFitToScreenData();
-      if ('xywh' in viewport) {
-        const bound = Bound.deserialize(viewport.xywh);
-        service.viewport.setViewportByBound(bound, viewport.padding);
+      const storedViewport = std.get(EditPropsStore).getStorage('viewport');
+
+      if (!storedViewport) {
+        fitToScreen(this.gfx.gfxElements, gfx.viewport, {
+          smooth: false,
+        });
+        return;
+      }
+
+      if ('xywh' in storedViewport) {
+        const bound = Bound.deserialize(storedViewport.xywh);
+        gfx.viewport.setViewportByBound(bound, storedViewport.padding);
       } else {
-        const { zoom, centerX, centerY } = viewport;
-        service.viewport.setViewport(zoom, [centerX, centerY]);
+        const { zoom, centerX, centerY } = storedViewport;
+        gfx.viewport.setViewport(zoom, [centerX, centerY]);
       }
     };
 
@@ -386,9 +386,9 @@ export class EdgelessRootBlockComponent extends BlockComponent<
 
     this._disposables.add(() => {
       std.get(EditPropsStore).setStorage('viewport', {
-        centerX: service.viewport.centerX,
-        centerY: service.viewport.centerY,
-        zoom: service.viewport.zoom,
+        centerX: gfx.viewport.centerX,
+        centerY: gfx.viewport.centerY,
+        zoom: gfx.viewport.zoom,
       });
     });
   }
@@ -401,14 +401,14 @@ export class EdgelessRootBlockComponent extends BlockComponent<
 
         e.preventDefault();
 
-        const { viewport, locked } = this.service;
-        if (locked) return;
+        const { viewport } = this.gfx;
+        if (viewport.locked) return;
 
         // zoom
         if (isTouchPadPinchEvent(e)) {
           const rect = this.getBoundingClientRect();
           // Perform zooming relative to the mouse position
-          const [baseX, baseY] = this.service.viewport.toModelCoord(
+          const [baseX, baseY] = this.gfx.viewport.toModelCoord(
             e.clientX - rect.x,
             e.clientY - rect.y
           );
@@ -437,8 +437,8 @@ export class EdgelessRootBlockComponent extends BlockComponent<
     keymap: Record<string, UIEventHandler>,
     options?: { global?: boolean; flavour?: boolean }
   ): () => void {
-    const { service } = this;
-    const selection = service.selection;
+    const { gfx } = this;
+    const selection = gfx.selection;
 
     Object.keys(keymap).forEach(key => {
       if (key.length === 1 && key >= 'A' && key <= 'z') {
@@ -448,7 +448,7 @@ export class EdgelessRootBlockComponent extends BlockComponent<
           const elements = selection.selectedElements;
 
           if (isSelectSingleMindMap(elements) && !selection.editing) {
-            const target = service.getElementById(
+            const target = gfx.getElementById(
               elements[0].id
             ) as ShapeElementModel;
             if (target.text) {
@@ -470,8 +470,10 @@ export class EdgelessRootBlockComponent extends BlockComponent<
 
   override connectedCallback() {
     super.connectedCallback();
-    this.clipboardController.hostConnected();
 
+    this._initViewport();
+
+    this.clipboardController.hostConnected();
     this.keyboardManager = new EdgelessPageKeyboardManager(this);
 
     this.handleEvent('selectionChange', () => {
@@ -480,7 +482,7 @@ export class EdgelessRootBlockComponent extends BlockComponent<
       );
       if (!surface) return;
 
-      const el = this.service.getElementById(surface.elements[0]);
+      const el = this.gfx.getElementById(surface.elements[0]);
       if (isCanvasElement(el)) {
         return true;
       }
@@ -497,13 +499,6 @@ export class EdgelessRootBlockComponent extends BlockComponent<
     this._disposables.add(
       this.slots.elementResizeEnd.on(() => {
         this._isResizing = false;
-      })
-    );
-
-    this._disposables.add(
-      effect(() => {
-        this.edgelessTool =
-          this.gfx.tool.currentToolOption$.value ?? this.edgelessTool;
       })
     );
   }
@@ -529,7 +524,6 @@ export class EdgelessRootBlockComponent extends BlockComponent<
     this._initRemoteCursor();
     this._initLayerUpdateEffect();
 
-    this._initViewport();
     this._initWheelEvent();
     this._initPanEvent();
     this._initPinchEvent();
@@ -546,7 +540,7 @@ export class EdgelessRootBlockComponent extends BlockComponent<
     }, this);
 
     this._disposables.add(
-      this.service.viewport.viewportUpdated.on(() => {
+      this.gfx.viewport.viewportUpdated.on(() => {
         this._refreshLayerViewport();
       })
     );
@@ -565,10 +559,10 @@ export class EdgelessRootBlockComponent extends BlockComponent<
       <div class="edgeless-background edgeless-container">
         <gfx-viewport
           .maxConcurrentRenders=${6}
-          .viewport=${this.service.viewport}
+          .viewport=${this.gfx.viewport}
           .getModelsInViewport=${() => {
-            const blocks = this.service.gfx.grid.search(
-              this.service.viewport.viewportBounds,
+            const blocks = this.gfx.grid.search(
+              this.gfx.viewport.viewportBounds,
               undefined,
               {
                 useSet: true,
@@ -616,11 +610,6 @@ export class EdgelessRootBlockComponent extends BlockComponent<
 
   @query('.edgeless-background')
   accessor backgroundElm: HTMLDivElement | null = null;
-
-  @state()
-  accessor edgelessTool: GfxToolsFullOptionValue = {
-    type: localStorage.defaultTool ?? 'default',
-  };
 
   @query('gfx-viewport')
   accessor gfxViewportElm!: GfxViewportElement;
