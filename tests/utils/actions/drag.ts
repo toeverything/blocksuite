@@ -128,9 +128,9 @@ export async function dragHandleFromBlockToBlockBottomById(
     sourceBlock.y + sourceBlock.height / 2
   );
   await waitNextFrame(page);
-  const handle = await page
-    .locator('.affine-drag-handle-container')
-    .boundingBox();
+  const dragHandleContainer = page.locator('.affine-drag-handle-container');
+  await dragHandleContainer.hover();
+  const handle = await dragHandleContainer.boundingBox();
   if (!handle) {
     throw new Error();
   }
