@@ -12,6 +12,8 @@ import {
 } from '../../../_common/utils/index.js';
 import { addNote } from '../utils/common.js';
 import {
+  DEFAULT_NOTE_HEIGHT,
+  DEFAULT_NOTE_WIDTH,
   EXCLUDING_MOUSE_OUT_CLASS_LIST,
 } from '../utils/consts.js';
 import { DraggingNoteOverlay, NoteOverlay } from '../utils/tool-overlay.js';
