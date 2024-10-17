@@ -7,7 +7,8 @@ import {
 } from '../config.js';
 
 export class HandleEventWatcher {
-  private _onDragHandlePointerDown = () => {
+  private _onDragHandlePointerDown = (event: PointerEvent) => {
+    event.stopPropagation();
     if (!this.widget.isHoverDragHandleVisible || !this.widget.anchorBlockId)
       return;
 
