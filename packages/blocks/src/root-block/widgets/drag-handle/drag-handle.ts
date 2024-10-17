@@ -262,7 +262,7 @@ export class AffineDragHandleWidget extends WidgetComponent<RootBlockModel> {
   };
 
   hide = (force = false) => {
-    // if (this.dragging && !force) return;
+    if (this.dragging && !force) return;
     updateDragHandleClassName();
 
     this.isHoverDragHandleVisible = false;
@@ -271,9 +271,9 @@ export class AffineDragHandleWidget extends WidgetComponent<RootBlockModel> {
 
     this.anchorBlockId.value = null;
 
-    // if (this.dragHandleContainer) {
-    //   this.dragHandleContainer.style.display = 'none';
-    // }
+    if (this.dragHandleContainer) {
+      this.dragHandleContainer.style.display = 'none';
+    }
 
     if (force) {
       this._reset();
