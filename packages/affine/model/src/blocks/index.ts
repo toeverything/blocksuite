@@ -11,5 +11,6 @@ export * from './latex/index.js';
 export * from './list/index.js';
 export * from './note/index.js';
 export * from './paragraph/index.js';
+export * from './pdf/index.js';
 export * from './root/index.js';
 export * from './surface-ref/index.js';
