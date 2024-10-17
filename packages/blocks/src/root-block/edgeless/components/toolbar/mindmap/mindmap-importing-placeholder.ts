@@ -1,7 +1,7 @@
 import { LightLoadingIcon } from '@blocksuite/affine-components/icons';
+import { unsafeCSSVarV2 } from '@blocksuite/affine-shared/theme';
 import { ShadowlessElement } from '@blocksuite/block-std';
-import { cssVarV2 } from '@toeverything/theme/v2';
-import { css, html, unsafeCSS } from 'lit';
+import { css, html } from 'lit';
 
 import { importMindMapIcon } from './icons.js';
 
@@ -19,9 +19,9 @@ export class MindMapPlaceholder extends ShadowlessElement {
       border-radius: 12px;
       gap: 12px;
 
-      background-color: ${unsafeCSS(cssVarV2('layer/background/secondary'))};
-      border: 1px solid ${unsafeCSS(cssVarV2('layer/insideBorder/border'))};
-      color: ${unsafeCSS(cssVarV2('text/placeholder'))};
+      background-color: ${unsafeCSSVarV2('layer/background/secondary')};
+      border: 1px solid ${unsafeCSSVarV2('layer/insideBorder/border')};
+      color: ${unsafeCSSVarV2('text/placeholder')};
 
       box-shadow: 0px 0px 4px 0px rgba(66, 65, 73, 0.14);
     }
@@ -34,7 +34,7 @@ export class MindMapPlaceholder extends ShadowlessElement {
       display: flex;
       gap: 8px;
 
-      color: ${unsafeCSS(cssVarV2('text/placeholder'))};
+      color: ${unsafeCSSVarV2('text/placeholder')};
       font-size: 14px;
       line-height: 22px;
 

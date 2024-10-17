@@ -1,8 +1,8 @@
 import type { InsertToPosition } from '@blocksuite/affine-shared/utils';
 
+import { unsafeCSSVarV2 } from '@blocksuite/affine-shared/theme';
 import { PlusIcon } from '@blocksuite/icons/lit';
-import { cssVarV2 } from '@toeverything/theme/v2';
-import { css, html, unsafeCSS } from 'lit';
+import { css, html } from 'lit';
 import { state } from 'lit/decorators.js';
 
 import { startDrag } from '../../../../core/utils/drag.js';
@@ -23,13 +23,13 @@ const styles = css`
     font-size: 15px;
     font-weight: 500;
     line-height: 24px;
-    color: ${unsafeCSS(cssVarV2('text/primary'))};
-    border: 1px solid ${unsafeCSS(cssVarV2('layer/insideBorder/blackBorder'))};
+    color: ${unsafeCSSVarV2('text/primary')};
+    border: 1px solid ${unsafeCSSVarV2('layer/insideBorder/blackBorder')};
   }
 
   .new-record svg {
     font-size: 20px;
-    color: ${unsafeCSS(cssVarV2('icon/primary'))};
+    color: ${unsafeCSSVarV2('icon/primary')};
   }
 `;
 

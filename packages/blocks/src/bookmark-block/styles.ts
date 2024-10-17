@@ -1,4 +1,5 @@
-import { baseTheme, cssVar } from '@toeverything/theme';
+import { unsafeCSSVar } from '@blocksuite/affine-shared/theme';
+import { baseTheme } from '@toeverything/theme';
 import { css, unsafeCSS } from 'lit';
 
 import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../_common/consts.js';
@@ -140,7 +141,7 @@ export const styles = css`
   .affine-bookmark-content-url-icon {
     height: 12px;
     width: 12px;
-    color: ${unsafeCSS(cssVar('iconSecondary'))};
+    color: ${unsafeCSSVar('iconSecondary')};
   }
 
   .affine-bookmark-banner {

@@ -1,6 +1,5 @@
-import { cssVar } from '@toeverything/theme';
-import { cssVarV2 } from '@toeverything/theme/v2';
-import { css, unsafeCSS } from 'lit';
+import { unsafeCSSVar, unsafeCSSVarV2 } from '@blocksuite/affine-shared/theme';
+import { css } from 'lit';
 
 export const latexBlockStyles = css`
   .latex-block-container {
@@ -18,11 +17,11 @@ export const latexBlockStyles = css`
   }
 
   .latex-block-container:hover {
-    background: ${unsafeCSS(cssVar('hoverColor'))};
+    background: ${unsafeCSSVar('hoverColor')};
   }
 
   .latex-block-error-placeholder {
-    color: ${unsafeCSS(cssVarV2('text/highlight/fg/red'))};
+    color: ${unsafeCSSVarV2('text/highlight/fg/red')};
     font-family: Inter;
     font-size: 12px;
     font-weight: 500;
@@ -31,7 +30,7 @@ export const latexBlockStyles = css`
   }
 
   .latex-block-empty-placeholder {
-    color: ${unsafeCSS(cssVarV2('text/secondary'))};
+    color: ${unsafeCSSVarV2('text/secondary')};
     font-family: Inter;
     font-size: 12px;
     font-weight: 500;

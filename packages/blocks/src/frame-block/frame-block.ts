@@ -2,7 +2,7 @@ import type { BlockStdScope } from '@blocksuite/block-std';
 import type { Doc } from '@blocksuite/store';
 
 import { ColorScheme, FrameBlockModel } from '@blocksuite/affine-model';
-import { ThemeObserver } from '@blocksuite/affine-shared/theme';
+import { ThemeObserver, unsafeCSSVarV2 } from '@blocksuite/affine-shared/theme';
 import {
   docContext,
   GfxBlockComponent,
@@ -15,7 +15,7 @@ import { SignalWatcher, WithDisposable } from '@blocksuite/global/utils';
 import { Bound, type SerializedXYWH } from '@blocksuite/global/utils';
 import { consume } from '@lit/context';
 import { cssVarV2 } from '@toeverything/theme/v2';
-import { css, html, nothing, unsafeCSS } from 'lit';
+import { css, html, nothing } from 'lit';
 import { query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
@@ -45,7 +45,7 @@ export class EdgelessFrameTitle extends SignalWatcher(
       z-index: 1;
       left: 0px;
       top: 0px;
-      border: 1px solid ${unsafeCSS(cssVarV2('edgeless/frame/border/default'))};
+      border: 1px solid ${unsafeCSSVarV2('edgeless/frame/border/default')};
       border-radius: 4px;
       width: fit-content;
       height: ${frameTitleStyleVars.height}px;
