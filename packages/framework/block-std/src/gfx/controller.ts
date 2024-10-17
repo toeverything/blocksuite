@@ -288,11 +288,12 @@ export class GfxController extends LifeCycleWatcher {
     props: Record<string, unknown>
   ): void {
     const elemId = typeof element === 'string' ? element : element.id;
+
     if (this.surface?.hasElementById(elemId)) {
       this.surface.updateElement(elemId, props);
     } else {
-      const hasBlock = this.doc.hasBlock(elemId);
-      hasBlock && this.doc.updateBlock(element as GfxBlockElementModel, props);
+      const block = this.doc.getBlock(elemId);
+      block && this.doc.updateBlock(block.model, props);
     }
   }
 }
