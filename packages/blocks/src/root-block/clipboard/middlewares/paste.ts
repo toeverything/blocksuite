@@ -544,14 +544,6 @@ export const pasteMiddleware = (std: EditorHost['std']): JobMiddleware => {
     });
     slots.afterImport.on(payload => {
       if (tr && payload.type === 'slice') {
-        const context = std.command.exec('getSelectedModels', {
-          types: ['block'],
-        });
-        for (const model of context.selectedModels ?? []) {
-          // Only delete block when there is a paste tree.
-          // In the duplicate case, the block should be kept.
-          std.doc.deleteBlock(model);
-        }
         tr.pasted();
         tr.focusPasted();
         tr.convertToLinkedDoc();

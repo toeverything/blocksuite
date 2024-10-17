@@ -1,7 +1,7 @@
 import type { BlockComponent, UIEventHandler } from '@blocksuite/block-std';
 import type { BlockSnapshot, Doc } from '@blocksuite/store';
 
-import { assertExists, DisposableGroup } from '@blocksuite/global/utils';
+import { DisposableGroup } from '@blocksuite/global/utils';
 
 import {
   AttachmentAdapter,
@@ -165,7 +165,12 @@ export class PageClipboard {
       ])
       .getBlockIndex()
       .inline((ctx, next) => {
-        assertExists(ctx.parentBlock);
+        if (!ctx.parentBlock) {
+          return next();
+        }
+        const { selectedModels } = this._std.command.exec('getSelectedModels', {
+          types: ['block'],
+        });
         this._std.clipboard
           .paste(
             e,
@@ -173,6 +178,11 @@ export class PageClipboard {
             ctx.parentBlock.model.id,
             ctx.blockIndex ? ctx.blockIndex + 1 : 1
           )
+          .then(() => {
+            for (const model of selectedModels ?? []) {
+              this._std.doc.deleteBlock(model);
+            }
+          })
           .catch(console.error);
 
         return next();
