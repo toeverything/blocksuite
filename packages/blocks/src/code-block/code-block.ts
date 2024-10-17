@@ -74,7 +74,7 @@ export class CodeBlockComponent extends CaptionedBlockComponent<
       const el = this.closest<BlockComponent>(NOTE_SELECTOR);
       return el;
     }
-    return this.rootComponent;
+    return super.topContenteditableElement;
   }
 
   private _updateHighlightTokens() {

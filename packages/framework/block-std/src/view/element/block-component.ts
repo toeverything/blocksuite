@@ -158,7 +158,9 @@ export class BlockComponent<
   }
 
   get topContenteditableElement(): BlockComponent | null {
-    return this.rootComponent;
+    return (
+      this.rootComponent?.querySelector('[contenteditable="true"]') ?? null
+    );
   }
 
   get widgetComponents(): Partial<Record<WidgetName, WidgetComponent>> {
