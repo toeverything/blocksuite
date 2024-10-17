@@ -1,4 +1,7 @@
-import type { Viewport } from '@blocksuite/block-std/gfx';
+import type {
+  GfxToolsFullOptionValue,
+  Viewport,
+} from '@blocksuite/block-std/gfx';
 import type { PointLocation } from '@blocksuite/global/utils';
 import type { BlockModel } from '@blocksuite/store';
 
@@ -32,7 +35,6 @@ import { Bound, deserializeXYWH } from '@blocksuite/global/utils';
 
 import type { Connectable } from '../../../_common/utils/index.js';
 import type { GfxBlockModel } from '../block-model.js';
-import type { EdgelessTool } from '../types.js';
 
 import { getElementsWithoutGroup } from './group.js';
 
@@ -226,7 +228,10 @@ export function getSelectionBoxBound(viewport: Viewport, bound: Bound) {
 }
 
 // https://developer.mozilla.org/en-US/docs/Web/CSS/cursor
-export function getCursorMode(edgelessTool: EdgelessTool) {
+export function getCursorMode(edgelessTool: GfxToolsFullOptionValue | null) {
+  if (!edgelessTool) {
+    return 'default';
+  }
   switch (edgelessTool.type) {
     case 'default':
       return 'default';

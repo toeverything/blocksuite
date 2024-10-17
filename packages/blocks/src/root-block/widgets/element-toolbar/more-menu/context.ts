@@ -1,11 +1,13 @@
 import type { SurfaceBlockComponent } from '@blocksuite/affine-block-surface';
 import type { BlockModel } from '@blocksuite/store';
 
-import { GfxPrimitiveElementModel } from '@blocksuite/block-std/gfx';
+import {
+  GfxPrimitiveElementModel,
+  type GfxSelectionManager,
+} from '@blocksuite/block-std/gfx';
 
 import type { EdgelessRootBlockComponent } from '../../../edgeless/edgeless-root-block.js';
 import type { EdgelessRootService } from '../../../edgeless/edgeless-root-service.js';
-import type { EdgelessSelectionManager } from '../../../edgeless/services/selection-manager.js';
 
 import { MenuContext } from '../../../configs/toolbar.js';
 import {
@@ -61,7 +63,7 @@ export class ElementToolbarMoreMenuContext extends MenuContext {
     return this.selection.selectedElements;
   }
 
-  get selection(): EdgelessSelectionManager {
+  get selection(): GfxSelectionManager {
     return this.service.selection;
   }
 

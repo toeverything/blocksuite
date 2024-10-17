@@ -40,7 +40,6 @@ import { property, state } from 'lit/decorators.js';
 import { join } from 'lit/directives/join.js';
 
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
-import type { ConnectorToolController } from '../../edgeless/tools/connector-tool.js';
 import type { ElementToolbarMoreMenuContext } from './more-menu/context.js';
 
 import { getMoreMenuConfig } from '../../configs/toolbar.js';
@@ -124,14 +123,11 @@ export class EdgelessElementToolbarWidget extends WidgetComponent<
       y,
     ]);
     this.edgeless.doc.captureSync();
-    this.edgeless.tools.setEdgelessTool({
-      type: 'connector',
+    this.edgeless.gfx.tool.setTool('connector', {
       mode: ConnectorMode.Curve,
     });
 
-    const ctc = this.edgeless.tools.controllers[
-      'connector'
-    ] as ConnectorToolController;
+    const ctc = this.edgeless.gfx.tool.get('connector');
     ctc.quickConnect(point, element);
   };
 

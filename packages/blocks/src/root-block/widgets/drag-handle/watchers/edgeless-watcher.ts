@@ -1,12 +1,15 @@
 import type { PointerEventState } from '@blocksuite/block-std';
 
-import { GfxControllerIdentifier } from '@blocksuite/block-std/gfx';
+import {
+  GfxControllerIdentifier,
+  type GfxToolsFullOptionValue,
+} from '@blocksuite/block-std/gfx';
 import { type IVec, Rect } from '@blocksuite/global/utils';
+import { effect } from '@preact/signals-core';
 
 import type {
   EdgelessRootBlockComponent,
   EdgelessRootService,
-  EdgelessTool,
 } from '../../../edgeless/index.js';
 import type { AffineDragHandleWidget } from '../drag-handle.js';
 
@@ -23,7 +26,7 @@ import {
 } from '../config.js';
 
 export class EdgelessWatcher {
-  private _handleEdgelessToolUpdated = (newTool: EdgelessTool) => {
+  private _handleEdgelessToolUpdated = (newTool: GfxToolsFullOptionValue) => {
     if (newTool.type === 'default') {
       this.checkTopLevelBlockSelection();
     } else {
@@ -234,7 +237,11 @@ export class EdgelessWatcher {
     );
 
     disposables.add(
-      edgelessSlots.edgelessToolUpdated.on(this._handleEdgelessToolUpdated)
+      effect(() => {
+        const value = gfxController.tool.currentToolOption$.value;
+
+        value && this._handleEdgelessToolUpdated(value);
+      })
     );
 
     disposables.add(

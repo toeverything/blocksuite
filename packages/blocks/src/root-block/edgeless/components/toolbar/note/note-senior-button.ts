@@ -10,7 +10,7 @@ import { computed } from '@preact/signals-core';
 import { css, html, LitElement } from 'lit';
 import { state } from 'lit/decorators.js';
 
-import type { NoteTool } from '../../../tools/note-tool.js';
+import type { NoteToolOption } from '../../../gfx-tool/note-tool.js';
 
 import { getTooltipWithShortcut } from '../../utils.js';
 import { EdgelessToolbarToolMixin } from '../mixins/tool.mixin.js';
@@ -157,7 +157,7 @@ export class EdgelessNoteSeniorButton extends EdgelessToolbarToolMixin(
       tip,
       onChange: (
         props: Partial<{
-          childFlavour: NoteTool['childFlavour'];
+          childFlavour: NoteToolOption['childFlavour'];
           childType: string | null;
           tip: string;
         }>
@@ -201,7 +201,7 @@ export class EdgelessNoteSeniorButton extends EdgelessToolbarToolMixin(
 
   // TODO: better to extract these states outside of component?
   @state()
-  accessor childFlavour: NoteTool['childFlavour'] = 'affine:paragraph';
+  accessor childFlavour: NoteToolOption['childFlavour'] = 'affine:paragraph';
 
   @state()
   accessor childType = 'text';

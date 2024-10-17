@@ -352,7 +352,7 @@ export async function setEdgelessTool(
       await shapeToolButton.click({ position: { x: 5, y: 5 } });
 
       const squareShapeButton = page
-        .locator('edgeless-tool-icon-button')
+        .locator('edgeless-slide-menu edgeless-tool-icon-button')
         .filter({ hasText: shape });
       await squareShapeButton.click();
       break;

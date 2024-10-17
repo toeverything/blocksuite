@@ -8,7 +8,7 @@ import { property } from 'lit/decorators.js';
 
 import type { AIItemGroupConfig } from '../../../_common/components/ai-item/types.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
-import type { CopilotSelectionController } from '../../edgeless/tools/copilot-tool.js';
+import type { CopilotTool } from '../../edgeless/gfx-tool/copilot-tool.js';
 
 import { sortEdgelessElements } from '../../edgeless/utils/clone-utils.js';
 
@@ -42,11 +42,9 @@ export class EdgelessCopilotToolbarEntry extends WithDisposable(LitElement) {
       }
     });
 
-    this.edgeless.service.tool.setEdgelessTool({
-      type: 'copilot',
-    });
+    this.edgeless.gfx.tool.setTool('copilot');
     (
-      this.edgeless.tools.controllers['copilot'] as CopilotSelectionController
+      this.edgeless.gfx.tool.currentTool$.peek() as CopilotTool
     ).updateSelectionWith(Array.from(toBeSelected), 10);
   }
 

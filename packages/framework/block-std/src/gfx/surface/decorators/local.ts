@@ -52,16 +52,6 @@ export function local<V, T extends GfxPrimitiveElementModel>() {
             },
             local: true,
           });
-
-          this.surface['hooks'].update.emit({
-            id: this.id,
-            props: {
-              [prop]: newVal,
-            },
-            oldValues: {
-              [prop]: oldValue,
-            },
-          });
         }
       },
     } as ClassAccessorDecoratorResult<T, V>;

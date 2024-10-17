@@ -405,7 +405,7 @@ export class FramePanelBody extends WithDisposable(ShadowlessElement) {
           editing: false,
         });
       } else {
-        this._selected = [];
+        this._selected = this._selected.length ? [] : this._selected;
       }
       this._lastEdgelessRootId = this.editorHost.doc.id;
     }

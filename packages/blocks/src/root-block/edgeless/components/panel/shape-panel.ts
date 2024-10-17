@@ -4,7 +4,7 @@ import { css, html, LitElement } from 'lit';
 import { property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
-import type { ShapeTool } from '../../tools/shape-tool.js';
+import type { ShapeTool } from '../../gfx-tool/shape-tool.js';
 
 import { ShapeComponentConfig } from '../toolbar/shape/shape-menu-config.js';
 
@@ -19,10 +19,10 @@ export class EdgelessShapePanel extends LitElement {
   `;
 
   slots = {
-    select: new Slot<ShapeTool['shapeName']>(),
+    select: new Slot<ShapeTool['activatedOption']['shapeName']>(),
   };
 
-  private _onSelect(value: ShapeTool['shapeName']) {
+  private _onSelect(value: ShapeTool['activatedOption']['shapeName']) {
     this.selectedShape = value;
     this.slots.select.emit(value);
   }
@@ -55,7 +55,10 @@ export class EdgelessShapePanel extends LitElement {
   }
 
   @property({ attribute: false })
-  accessor selectedShape: ShapeTool['shapeName'] | null | undefined = undefined;
+  accessor selectedShape:
+    | ShapeTool['activatedOption']['shapeName']
+    | null
+    | undefined = undefined;
 
   @property({ attribute: false })
   accessor shapeStyle: ShapeStyle = ShapeStyle.Scribbled;

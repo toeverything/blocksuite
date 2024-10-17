@@ -2,6 +2,7 @@ import type {
   MindmapElementModel,
   MindmapStyle,
 } from '@blocksuite/affine-model';
+import type { GfxToolsFullOptionValue } from '@blocksuite/block-std/gfx';
 import type { Bound } from '@blocksuite/global/utils';
 
 import { EditPropsStore } from '@blocksuite/affine-shared/services';
@@ -12,8 +13,6 @@ import { property, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
-
-import type { EdgelessTool } from '../../../types.js';
 
 import { EdgelessDraggableElementController } from '../common/draggable/draggable-element.controller.js';
 import { EdgelessToolbarToolMixin } from '../mixins/tool.mixin.js';
@@ -133,7 +132,7 @@ export class EdgelessMindmapToolButton extends EdgelessToolbarToolMixin(
 
   override enableActiveBackground = true;
 
-  override type: EdgelessTool['type'][] = ['mindmap', 'text'];
+  override type: GfxToolsFullOptionValue['type'][] = ['empty', 'text'];
 
   get draggableTools(): DraggableTool[] {
     const style = this._style$.value;
@@ -184,13 +183,11 @@ export class EdgelessMindmapToolButton extends EdgelessToolbarToolMixin(
           ) as MindmapElementModel;
 
           this.tryDisposePopper();
-          this.setEdgelessTool(
-            { type: 'default' },
-            {
-              elements: [element.tree.id],
-              editing: false,
-            }
-          );
+          this.setEdgelessTool({ type: 'default' });
+          this.edgeless.gfx.selection.set({
+            elements: [element.tree.id],
+            editing: false,
+          });
         });
       },
     });
@@ -244,10 +241,8 @@ export class EdgelessMindmapToolButton extends EdgelessToolbarToolMixin(
         const id = el.data.render(bound, this.edgeless.service, this.edgeless);
         this.readyToDrop = false;
         if (el.data.name === 'mindmap') {
-          this.setEdgelessTool(
-            { type: 'default' },
-            { elements: [id], editing: false }
-          );
+          this.setEdgelessTool({ type: 'default' });
+          this.edgeless.gfx.selection.set({ elements: [id], editing: false });
         } else if (el.data.name === 'text') {
           this.setEdgelessTool({ type: 'default' });
         }
@@ -278,9 +273,9 @@ export class EdgelessMindmapToolButton extends EdgelessToolbarToolMixin(
             });
             return;
           }
-          this.setEdgelessTool({ type: 'mindmap' });
+          this.setEdgelessTool({ type: 'empty' });
           const icon = this.mindmapElement;
-          const { x, y } = service.tool.lastMousePos;
+          const { x, y } = service.gfx.tool.lastMousePos$.peek();
           const { left, top } = this.edgeless.viewport;
           const clientPos = { x: x + left, y: y + top };
           this.draggableController.clickToDrag(icon, clientPos);

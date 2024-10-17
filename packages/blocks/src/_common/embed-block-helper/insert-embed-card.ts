@@ -111,9 +111,7 @@ export function insertEmbedCard(
       editing: false,
     });
 
-    edgelessRoot.tools.setEdgelessTool({
-      type: 'default',
-    });
+    edgelessRoot.gfx.tool.setTool('default');
     return;
   }
 }

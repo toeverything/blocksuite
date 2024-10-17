@@ -53,8 +53,7 @@ export class EdgelessConnectorToolButton extends QuickToolMixin(
     menu.element.edgeless = this.edgeless;
     menu.element.onChange = (props: Record<string, unknown>) => {
       this.edgeless.std.get(EditPropsStore).recordLastProps('connector', props);
-      this.setEdgelessTool({
-        type: this.type,
+      this.setEdgelessTool(this.type, {
         mode: this._mode$.value,
       });
     };
@@ -76,9 +75,8 @@ export class EdgelessConnectorToolButton extends QuickToolMixin(
         @click=${() => {
           // don't update tool before toggling menu
           this._toggleMenu();
-          this.edgeless.tools.setEdgelessTool({
-            type: 'connector',
-            mode: mode,
+          this.edgeless.gfx.tool.setTool('connector', {
+            mode,
           });
         }}
       >

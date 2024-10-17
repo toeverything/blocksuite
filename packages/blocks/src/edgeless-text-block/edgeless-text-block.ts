@@ -10,16 +10,14 @@ import { css, html } from 'lit';
 import { query, state } from 'lit/decorators.js';
 import { type StyleInfo, styleMap } from 'lit/directives/style-map.js';
 
+import type { DefaultTool } from '../root-block/edgeless/gfx-tool/default-tool.js';
 import type {
   EdgelessRootBlockComponent,
   EdgelessRootService,
 } from '../root-block/index.js';
 
 import { HandleDirection } from '../root-block/edgeless/components/resize/resize-handles.js';
-import {
-  DefaultModeDragType,
-  DefaultToolController,
-} from '../root-block/edgeless/tools/default-tool.js';
+import { DefaultModeDragType } from '../root-block/edgeless/gfx-tool/default-tool.js';
 
 export const EDGELESS_TEXT_BLOCK_MIN_WIDTH = 50;
 export const EDGELESS_TEXT_BLOCK_MIN_HEIGHT = 50;
@@ -51,10 +49,11 @@ export class EdgelessTextBlockComponent extends GfxBlockComponent<EdgelessTextBl
   });
 
   get dragMoving() {
-    const controller = this.rootService.tool.currentController;
+    const controller = this.rootService.gfx.tool.currentTool$.peek();
+
     return (
-      controller instanceof DefaultToolController &&
-      controller.dragType === DefaultModeDragType.ContentMoving
+      controller?.toolName === 'default' &&
+      (controller as DefaultTool).dragType === DefaultModeDragType.ContentMoving
     );
   }
 

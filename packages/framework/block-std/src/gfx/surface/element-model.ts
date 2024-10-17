@@ -335,16 +335,6 @@ export abstract class GfxPrimitiveElementModel<
           local: true,
         });
 
-        this.surface['hooks'].update.emit({
-          id: this.id,
-          props: {
-            [prop]: value,
-          },
-          oldValues: {
-            [prop]: oldValue,
-          },
-        });
-
         updateDerivedProps(
           derivedProps,
           this as unknown as GfxPrimitiveElementModel
@@ -508,16 +498,6 @@ export abstract class GfxGroupLikeElementModel<
         childIds: oldChildIds,
       },
       local: fromLocal,
-    });
-
-    this.surface['hooks'].update.emit({
-      id: this.id,
-      props: {
-        childIds: value,
-      },
-      oldValues: {
-        childIds: oldChildIds,
-      },
     });
   }
 }
