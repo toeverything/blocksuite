@@ -1,7 +1,7 @@
 import type { PointerEventState } from '@blocksuite/block-std';
 
 import { BaseTool } from '@blocksuite/block-std/gfx';
-import { Bound, getElementsBound } from '@blocksuite/global/utils';
+import { Bound, getCommonBoundWithRotation } from '@blocksuite/global/utils';
 import { Slot } from '@blocksuite/store';
 
 import {
@@ -116,9 +116,9 @@ export class CopilotTool extends BaseTool {
     selectedElements: BlockSuite.EdgelessModel[],
     padding = 0
   ) {
-    const bounds = getElementsBound(
-      selectedElements.map(e => e.elementBound)
-    ).expand(padding / this.gfx.viewport.zoom);
+    const bounds = getCommonBoundWithRotation(selectedElements).expand(
+      padding / this.gfx.viewport.zoom
+    );
 
     this.dragStartPoint = bounds.tl as [number, number];
     this.dragLastPoint = bounds.br as [number, number];

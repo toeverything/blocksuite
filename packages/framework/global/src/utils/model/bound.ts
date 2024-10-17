@@ -1,12 +1,8 @@
 import type { SerializedXYWH, XYWH } from '../xywh.js';
 import type { IVec } from './vec.js';
 
-import {
-  EPSILON,
-  getBoundsFromPoints,
-  lineIntersects,
-  polygonPointDistance,
-} from '../math.js';
+import { getIBoundFromPoints } from '../bound.js';
+import { EPSILON, lineIntersects, polygonPointDistance } from '../math.js';
 import { deserializeXYWH, serializeXYWH } from '../xywh.js';
 
 /**
@@ -157,8 +153,7 @@ export class Bound implements IBound {
   }
 
   static fromPoints(points: IVec[]) {
-    const { minX, minY, maxX, maxY } = getBoundsFromPoints(points);
-    return new Bound(minX, minY, maxX - minX, maxY - minY);
+    return Bound.from(getIBoundFromPoints(points));
   }
 
   static fromXYWH(xywh: XYWH) {

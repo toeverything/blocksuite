@@ -5,10 +5,10 @@ import type {
 import type { ConnectorElementModel } from '@blocksuite/affine-model';
 import type { GfxController } from '@blocksuite/block-std/gfx';
 
-import { CommonUtils, Overlay } from '@blocksuite/affine-block-surface';
-import { Bound, deserializeXYWH, Point } from '@blocksuite/global/utils';
+import { Overlay } from '@blocksuite/affine-block-surface';
+import { Bound, Point } from '@blocksuite/global/utils';
 
-import { isConnectable, isTopLevelBlock } from '../utils/query.js';
+import { isConnectable } from '../utils/query.js';
 
 interface Distance {
   absXDistance: number;
@@ -277,16 +277,6 @@ export class EdgelessSnapManager extends Overlay {
     this._surface.refresh();
   }
 
-  private _getBoundsWithRotationByAlignable(
-    alignable: BlockSuite.EdgelessModel
-  ) {
-    const rotate = isTopLevelBlock(alignable) ? 0 : alignable.rotate;
-    const [x, y, w, h] = deserializeXYWH(alignable.xywh);
-    return Bound.from(
-      CommonUtils.getBoundsWithRotation({ x, y, w, h, rotate })
-    );
-  }
-
   // Update X align point
   private _updateXAlignPoint(
     rst: { dx: number; dy: number },
@@ -449,7 +439,7 @@ export class EdgelessSnapManager extends Overlay {
         ...canvasElements,
       ] as BlockSuite.EdgelessModel[]
     ).forEach(alignable => {
-      const bounds = this._getBoundsWithRotationByAlignable(alignable);
+      const bounds = alignable.elementBound;
       if (
         viewportBounds.isOverlapWithBound(bounds) &&
         !excludes.has(alignable)
@@ -459,7 +449,7 @@ export class EdgelessSnapManager extends Overlay {
     });
 
     return alignables.reduce((prev, element) => {
-      const bounds = this._getBoundsWithRotationByAlignable(element);
+      const bounds = element.elementBound;
       return prev.unite(bounds);
     }, Bound.deserialize(alignables[0].xywh));
   }

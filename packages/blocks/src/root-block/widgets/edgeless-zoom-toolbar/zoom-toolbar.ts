@@ -89,7 +89,7 @@ export class EdgelessZoomToolbar extends WithDisposable(LitElement) {
   }
 
   get edgelessTool() {
-    return this.edgeless.edgelessTool;
+    return this.edgeless.gfx.tool.currentToolOption$.peek();
   }
 
   get locked() {

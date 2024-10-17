@@ -6,11 +6,10 @@ import type {
   NoteBlockModel,
 } from '@blocksuite/affine-model';
 
-import { groupBy } from '@blocksuite/global/utils';
+import { getCommonBoundWithRotation, groupBy } from '@blocksuite/global/utils';
 
 import type { EdgelessRootBlockComponent } from '../edgeless-root-block.js';
 
-import { edgelessElementsBound } from './bound-utils.js';
 import { getSortedCloneElements, prepareCloneData } from './clone-utils.js';
 import { getElementsWithoutGroup } from './group.js';
 import {
@@ -29,7 +28,7 @@ export async function duplicate(
 ) {
   const { clipboardController } = edgeless;
   const copyElements = getSortedCloneElements(elements);
-  const totalBound = edgelessElementsBound(copyElements);
+  const totalBound = getCommonBoundWithRotation(copyElements);
   totalBound.x += totalBound.w + offset;
 
   const snapshot = await prepareCloneData(copyElements, edgeless.std);
