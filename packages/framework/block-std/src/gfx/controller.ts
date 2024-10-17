@@ -1,4 +1,3 @@
-import type { ServiceIdentifier } from '@blocksuite/global/di';
 import type { BlockModel } from '@blocksuite/store';
 
 import {
@@ -12,10 +11,10 @@ import type { BlockStdScope } from '../scope/block-std-scope.js';
 import type { SurfaceBlockModel } from './surface/surface-model.js';
 
 import { LifeCycleWatcher } from '../extension/lifecycle-watcher.js';
-import { LifeCycleWatcherIdentifier } from '../identifier.js';
 import { onSurfaceAdded } from '../utils/gfx.js';
 import { GfxBlockElementModel, type GfxModel } from './gfx-block-model.js';
 import { GridManager } from './grid.js';
+import { gfxControllerKey } from './identifiers.js';
 import { KeyboardController } from './keyboard.js';
 import { LayerManager } from './layer.js';
 import {
@@ -27,7 +26,7 @@ import { ToolController } from './tool/tool-controller.js';
 import { Viewport } from './viewport.js';
 
 export class GfxController extends LifeCycleWatcher {
-  static override key = 'gfxController';
+  static override key = gfxControllerKey;
 
   private _disposables: DisposableGroup = new DisposableGroup();
 
@@ -206,7 +205,3 @@ export class GfxController extends LifeCycleWatcher {
     this._disposables.dispose();
   }
 }
-
-export const GfxControllerIdentifier = LifeCycleWatcherIdentifier(
-  GfxController.key
-) as ServiceIdentifier<GfxController>;

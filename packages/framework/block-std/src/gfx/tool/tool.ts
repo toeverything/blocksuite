@@ -3,8 +3,9 @@ import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 
 import type { UIEventStateContext } from '../../event/base.js';
 import type { ExtensionType } from '../../extension/extension.js';
+import type { GfxController } from '../controller.js';
 
-import { type GfxController, GfxControllerIdentifier } from '../controller.js';
+import { GfxControllerIdentifier } from '../identifiers.js';
 import { eventTarget, type SupportedEvents } from './tool-controller.js';
 
 export abstract class BaseTool {
@@ -53,12 +54,7 @@ export abstract class BaseTool {
   /**
    * Called when the tool is registered.
    */
-  onload(): void {}
-
-  /**
-   * Called when the tool is unloaded, usually when the whole `ToolController` is destroyed.
-   */
-  onunload(): void {}
+  mounted(): void {}
 
   pointerDown(_: UIEventStateContext): void {}
 
@@ -69,6 +65,11 @@ export abstract class BaseTool {
   pointerUp(_: UIEventStateContext): void {}
 
   tripleClick(_: UIEventStateContext): void {}
+
+  /**
+   * Called when the tool is unloaded, usually when the whole `ToolController` is destroyed.
+   */
+  unmounted(): void {}
 }
 
 export const ToolIdentifier = createIdentifier<BaseTool>('GfxTool');
@@ -94,8 +95,4 @@ export function GfxToolExtension(
   };
 }
 
-declare global {
-  namespace BlockSuite {
-    interface GfxToolsMap {}
-  }
-}
+export interface GfxToolsMap {}

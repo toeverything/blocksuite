@@ -142,17 +142,17 @@ export class ToolController {
 
   dispose() {
     this._tools.forEach(tool => {
-      tool.onunload();
+      tool.unmounted();
     });
   }
 
   register(tools: BaseTool) {
     if (this._tools.has(tools.toolName)) {
-      this._tools.get(tools.toolName)?.onunload();
+      this._tools.get(tools.toolName)?.unmounted();
     }
 
     this._tools.set(tools.toolName, tools);
-    tools.onload();
+    tools.mounted();
   }
 
   use(toolName: string, options: Record<string, unknown> = {}) {
