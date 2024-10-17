@@ -1,4 +1,4 @@
-import type { GfxController , GfxModel } from '@blocksuite/block-std/gfx';
+import type { GfxController, GfxModel } from '@blocksuite/block-std/gfx';
 import type { XYWH } from '@blocksuite/global/utils';
 
 import {

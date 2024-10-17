@@ -4,8 +4,6 @@ import type { Doc } from '@blocksuite/store';
 import { Overlay } from '@blocksuite/affine-block-surface';
 import {
   getTopElements,
-} from '@blocksuite/affine-model';
-import {
   type GfxController,
   GfxExtension,
   GfxExtensionIdentifier,

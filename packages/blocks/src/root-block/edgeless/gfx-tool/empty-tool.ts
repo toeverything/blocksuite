@@ -7,10 +7,8 @@ export class EmptyTool extends BaseTool {
   static override toolName: string = 'empty';
 }
 
-declare global {
-  namespace BlockSuite {
-    interface GfxToolsMap {
-      empty: EmptyTool;
-    }
+declare module '@blocksuite/block-std/gfx' {
+  interface GfxToolsMap {
+    empty: EmptyTool;
   }
 }

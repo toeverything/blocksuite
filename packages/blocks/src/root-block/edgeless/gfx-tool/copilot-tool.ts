@@ -144,10 +144,8 @@ export class CopilotTool extends BaseTool {
   }
 }
 
-declare global {
-  namespace BlockSuite {
-    interface GfxToolsMap {
-      copilot: CopilotTool;
-    }
+declare module '@blocksuite/block-std/gfx' {
+  interface GfxToolsMap {
+    copilot: CopilotTool;
   }
 }

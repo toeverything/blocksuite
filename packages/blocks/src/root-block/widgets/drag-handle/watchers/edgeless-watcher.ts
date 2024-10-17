@@ -1,6 +1,9 @@
 import type { PointerEventState } from '@blocksuite/block-std';
 
-import { GfxControllerIdentifier } from '@blocksuite/block-std/gfx';
+import {
+  GfxControllerIdentifier,
+  type GfxToolsFullOptionValue,
+} from '@blocksuite/block-std/gfx';
 import { type IVec, Rect } from '@blocksuite/global/utils';
 import { effect } from '@preact/signals-core';
 
@@ -23,9 +26,7 @@ import {
 } from '../config.js';
 
 export class EdgelessWatcher {
-  private _handleEdgelessToolUpdated = (
-    newTool: BlockSuite.GfxToolsFullOptionValue
-  ) => {
+  private _handleEdgelessToolUpdated = (newTool: GfxToolsFullOptionValue) => {
     if (newTool.type === 'default') {
       this.checkTopLevelBlockSelection();
     } else {

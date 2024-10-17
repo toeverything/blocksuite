@@ -1,3 +1,5 @@
+import type { GfxToolsFullOptionValue } from '@blocksuite/block-std/gfx';
+
 import {
   ArrowUpIcon,
   LargeFrameIcon,
@@ -22,7 +24,7 @@ export class EdgelessFrameToolButton extends QuickToolMixin(LitElement) {
     }
   `;
 
-  override type: BlockSuite.GfxToolsFullOptionValue['type'] = 'frame';
+  override type: GfxToolsFullOptionValue['type'] = 'frame';
 
   private _toggleFrameMenu() {
     if (this.tryDisposePopper()) return;

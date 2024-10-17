@@ -37,6 +37,7 @@ import { BlockComponent } from '@blocksuite/block-std';
 import {
   GfxBlockElementModel,
   GfxControllerIdentifier,
+  type GfxToolsFullOptionValue,
   type GfxViewportElement,
 } from '@blocksuite/block-std/gfx';
 import { IS_WINDOWS } from '@blocksuite/global/env';
@@ -958,7 +959,7 @@ export class EdgelessRootBlockComponent extends BlockComponent<
   accessor backgroundElm: HTMLDivElement | null = null;
 
   @state()
-  accessor edgelessTool: BlockSuite.GfxToolsFullOptionValue = {
+  accessor edgelessTool: GfxToolsFullOptionValue = {
     type: localStorage.defaultTool ?? 'default',
   };
 

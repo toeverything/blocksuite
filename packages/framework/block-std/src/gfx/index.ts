@@ -54,7 +54,13 @@ export {
   SurfaceMiddlewareExtension,
 } from './surface-middleware.js';
 
-export { BaseTool } from './tool/tool.js';
+export {
+  BaseTool,
+  type GfxToolsFullOption,
+  type GfxToolsFullOptionValue,
+  type GfxToolsMap,
+  type GfxToolsOption,
+} from './tool/tool.js';
 export { ToolController } from './tool/tool-controller.js';
 export * from './viewport.js';
 export { GfxViewportElement } from './viewport-element.js';

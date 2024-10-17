@@ -1,3 +1,5 @@
+import type { GfxToolsMap, GfxToolsOption } from '@blocksuite/block-std/gfx';
+
 import {
   LayoutType,
   MindmapElementModel,
@@ -634,10 +636,10 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
     });
   }
 
-  private _setEdgelessTool<K extends keyof BlockSuite.GfxToolsMap>(
+  private _setEdgelessTool<K extends keyof GfxToolsMap>(
     toolName: K,
-    ...options: K extends keyof BlockSuite.GfxToolsOption
-      ? [option: BlockSuite.GfxToolsOption[K], ignoreActiveState?: boolean]
+    ...options: K extends keyof GfxToolsOption
+      ? [option: GfxToolsOption[K], ignoreActiveState?: boolean]
       : [option: void, ignoreActiveState?: boolean]
   ) {
     const ignoreActiveState =

@@ -314,14 +314,12 @@ export class LassoTool extends BaseTool<LassoToolOption> {
   }
 }
 
-declare global {
-  namespace BlockSuite {
-    interface GfxToolsMap {
-      lasso: LassoTool;
-    }
+declare module '@blocksuite/block-std/gfx' {
+  interface GfxToolsMap {
+    lasso: LassoTool;
+  }
 
-    interface GfxToolsOption {
-      lasso: LassoToolOption;
-    }
+  interface GfxToolsOption {
+    lasso: LassoToolOption;
   }
 }

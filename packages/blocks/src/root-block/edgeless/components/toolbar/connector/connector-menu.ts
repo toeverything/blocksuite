@@ -1,3 +1,5 @@
+import type { GfxToolsFullOptionValue } from '@blocksuite/block-std/gfx';
+
 import {
   ConnectorCWithArrowIcon,
   ConnectorLWithArrowIcon,
@@ -101,7 +103,7 @@ export class EdgelessConnectorMenu extends EdgelessToolbarToolMixin(
     return { mode, stroke, strokeWidth };
   });
 
-  override type: BlockSuite.GfxToolsFullOptionValue['type'] = 'connector';
+  override type: GfxToolsFullOptionValue['type'] = 'connector';
 
   override render() {
     const { stroke, strokeWidth, mode } = this._props$.value;

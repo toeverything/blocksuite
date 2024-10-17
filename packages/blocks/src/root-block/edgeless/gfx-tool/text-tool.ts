@@ -62,10 +62,8 @@ export class TextTool extends BaseTool {
   }
 }
 
-declare global {
-  namespace BlockSuite {
-    interface GfxToolsMap {
-      text: TextTool;
-    }
+declare module '@blocksuite/block-std/gfx' {
+  interface GfxToolsMap {
+    text: TextTool;
   }
 }

@@ -1,5 +1,9 @@
 import type { ColorScheme } from '@blocksuite/affine-model';
-import type { ToolController } from '@blocksuite/block-std/gfx';
+import type {
+  GfxToolsFullOption,
+  GfxToolsFullOptionValue,
+  ToolController,
+} from '@blocksuite/block-std/gfx';
 import type { LitElement } from 'lit';
 
 import {
@@ -32,7 +36,7 @@ export declare abstract class EdgelessToolbarToolClass extends DisposableClass {
 
   edgeless: EdgelessRootBlockComponent;
 
-  edgelessTool: BlockSuite.GfxToolsFullOptionValue;
+  edgelessTool: GfxToolsFullOptionValue;
 
   enableActiveBackground?: boolean;
 
@@ -52,8 +56,8 @@ export declare abstract class EdgelessToolbarToolClass extends DisposableClass {
   tryDisposePopper: () => boolean;
 
   abstract type:
-    | BlockSuite.GfxToolsFullOptionValue['type']
-    | BlockSuite.GfxToolsFullOptionValue['type'][];
+    | GfxToolsFullOptionValue['type']
+    | GfxToolsFullOptionValue['type'][];
 
   accessor toolbar: EdgelessToolbar;
 }
@@ -65,8 +69,8 @@ export const EdgelessToolbarToolMixin = <T extends Constructor<LitElement>>(
     enableActiveBackground = false;
 
     abstract type:
-      | BlockSuite.GfxToolsFullOptionValue['type']
-      | BlockSuite.GfxToolsFullOptionValue['type'][];
+      | GfxToolsFullOptionValue['type']
+      | GfxToolsFullOptionValue['type'][];
 
     get active() {
       const { type } = this;
@@ -149,7 +153,7 @@ export const EdgelessToolbarToolMixin = <T extends Constructor<LitElement>>(
     accessor edgeless!: EdgelessRootBlockComponent;
 
     @state()
-    accessor edgelessTool!: ValueOf<BlockSuite.GfxToolsFullOption> | null;
+    accessor edgelessTool!: ValueOf<GfxToolsFullOption> | null;
 
     @state()
     public accessor popper: MenuPopper<HTMLElement> | null = null;

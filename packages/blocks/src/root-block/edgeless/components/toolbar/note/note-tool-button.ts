@@ -1,3 +1,5 @@
+import type { GfxToolsFullOptionValue } from '@blocksuite/block-std/gfx';
+
 import { ArrowUpIcon, NoteIcon } from '@blocksuite/affine-components/icons';
 import { effect } from '@preact/signals-core';
 import { css, html, LitElement } from 'lit';
@@ -29,7 +31,7 @@ export class EdgelessNoteToolButton extends QuickToolMixin(LitElement) {
 
   private _states = ['childFlavour', 'childType', 'tip'] as const;
 
-  override type: BlockSuite.GfxToolsFullOptionValue['type'] = 'affine:note';
+  override type: GfxToolsFullOptionValue['type'] = 'affine:note';
 
   private _disposeMenu() {
     this._noteMenu?.dispose();

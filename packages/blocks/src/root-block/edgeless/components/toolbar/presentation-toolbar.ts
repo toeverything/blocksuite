@@ -1,4 +1,5 @@
 import type { FrameBlockModel } from '@blocksuite/affine-model';
+import type { GfxToolsFullOptionValue } from '@blocksuite/block-std/gfx';
 
 import { CommonUtils } from '@blocksuite/affine-block-surface';
 import {
@@ -106,7 +107,7 @@ export class PresentationToolbar extends EdgelessToolbarToolMixin(LitElement) {
 
   private _timer?: ReturnType<typeof setTimeout>;
 
-  override type: BlockSuite.GfxToolsFullOptionValue['type'] = 'frameNavigator';
+  override type: GfxToolsFullOptionValue['type'] = 'frameNavigator';
 
   private get _cachedPresentHideToolbar() {
     return !!this.edgeless.std

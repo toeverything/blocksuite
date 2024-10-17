@@ -172,10 +172,8 @@ export class BrushTool extends BaseTool {
   }
 }
 
-declare global {
-  namespace BlockSuite {
-    interface GfxToolsMap {
-      brush: BrushTool;
-    }
+declare module '@blocksuite/block-std/gfx' {
+  interface GfxToolsMap {
+    brush: BrushTool;
   }
 }

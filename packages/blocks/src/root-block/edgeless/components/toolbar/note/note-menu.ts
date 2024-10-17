@@ -1,3 +1,5 @@
+import type { GfxToolsFullOptionValue } from '@blocksuite/block-std/gfx';
+
 import { AttachmentIcon, LinkIcon } from '@blocksuite/affine-components/icons';
 import { TelemetryProvider } from '@blocksuite/affine-shared/services';
 import { effect } from '@preact/signals-core';
@@ -49,7 +51,7 @@ export class EdgelessNoteMenu extends EdgelessToolbarToolMixin(LitElement) {
     }
   `;
 
-  override type: BlockSuite.GfxToolsFullOptionValue['type'] = 'affine:note';
+  override type: GfxToolsFullOptionValue['type'] = 'affine:note';
 
   private async _addImages() {
     this._imageLoading = true;

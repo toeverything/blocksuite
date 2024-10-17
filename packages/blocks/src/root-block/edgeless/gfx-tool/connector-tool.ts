@@ -221,14 +221,12 @@ export class ConnectorTool extends BaseTool<ConnectorToolOptions> {
   }
 }
 
-declare global {
-  namespace BlockSuite {
-    interface GfxToolsMap {
-      connector: ConnectorTool;
-    }
+declare module '@blocksuite/block-std/gfx' {
+  interface GfxToolsMap {
+    connector: ConnectorTool;
+  }
 
-    interface GfxToolsOption {
-      connector: ConnectorToolOptions;
-    }
+  interface GfxToolsOption {
+    connector: ConnectorToolOptions;
   }
 }

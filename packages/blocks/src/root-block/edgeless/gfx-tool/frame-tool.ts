@@ -4,13 +4,15 @@ import type { IPoint, IVec } from '@blocksuite/global/utils';
 
 import { OverlayIdentifier } from '@blocksuite/affine-block-surface';
 import { TelemetryProvider } from '@blocksuite/affine-shared/services';
-import { BaseTool, GfxExtensionIdentifier } from '@blocksuite/block-std/gfx';
+import {
+  BaseTool,
+  getTopElements,
+  GfxExtensionIdentifier,
+} from '@blocksuite/block-std/gfx';
 import { Bound, Vec } from '@blocksuite/global/utils';
 import { DocCollection, Text } from '@blocksuite/store';
 
 import type { EdgelessFrameManager, FrameOverlay } from '../frame-manager.js';
-
-import { getTopElements } from '../utils/tree.js';
 
 export class FrameTool extends BaseTool {
   static override toolName = 'frame';
@@ -105,10 +107,8 @@ export class FrameTool extends BaseTool {
   }
 }
 
-declare global {
-  namespace BlockSuite {
-    interface GfxToolsMap {
-      frame: FrameTool;
-    }
+declare module '@blocksuite/block-std/gfx' {
+  interface GfxToolsMap {
+    frame: FrameTool;
   }
 }

@@ -1,3 +1,5 @@
+import type { GfxToolsFullOptionValue } from '@blocksuite/block-std/gfx';
+
 import { css, html, LitElement } from 'lit';
 import { repeat } from 'lit/directives/repeat.js';
 
@@ -63,7 +65,7 @@ export class EdgelessFrameMenu extends EdgelessToolbarToolMixin(LitElement) {
     }
   `;
 
-  override type: BlockSuite.GfxToolsFullOptionValue['type'] = 'frame';
+  override type: GfxToolsFullOptionValue['type'] = 'frame';
 
   override render() {
     const { edgeless } = this;

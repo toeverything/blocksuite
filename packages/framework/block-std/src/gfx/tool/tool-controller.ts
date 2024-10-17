@@ -13,7 +13,13 @@ import type { PointerEventState } from '../../event/index.js';
 import type { GfxController } from '../controller.js';
 
 import { GfxExtension, GfxExtensionIdentifier } from '../extension.js';
-import { type BaseTool, type GfxToolsFullOptionValue, type GfxToolsMap, type GfxToolsOption, ToolIdentifier } from './tool.js';
+import {
+  type BaseTool,
+  type GfxToolsFullOptionValue,
+  type GfxToolsMap,
+  type GfxToolsOption,
+  ToolIdentifier,
+} from './tool.js';
 
 type BuiltInHookEvent<T> = {
   data: T;
@@ -383,9 +389,7 @@ export class ToolController extends GfxExtension {
     tools.mounted();
   }
 
-  get<K extends keyof GfxToolsMap>(
-    key: K
-  ): GfxToolsMap[K] {
+  get<K extends keyof GfxToolsMap>(key: K): GfxToolsMap[K] {
     return this._tools.get(key) as GfxToolsMap[K];
   }
 

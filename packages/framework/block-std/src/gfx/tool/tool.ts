@@ -112,10 +112,11 @@ export interface GfxToolsMap {}
 
 export interface GfxToolsOption {}
 
-type GfxToolsFullOption = {
+export type GfxToolsFullOption = {
   [Key in keyof GfxToolsMap]: Key extends keyof GfxToolsOption
     ? { type: Key } & GfxToolsOption[Key]
     : { type: Key };
 };
 
-export type GfxToolsFullOptionValue = GfxToolsFullOption[keyof GfxToolsFullOption];
+export type GfxToolsFullOptionValue =
+  GfxToolsFullOption[keyof GfxToolsFullOption];

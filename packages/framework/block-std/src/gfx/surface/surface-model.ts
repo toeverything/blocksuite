@@ -423,7 +423,6 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
 
     this.doc.transact(() => {
       const element = this.getElementById(id)!;
-      const group = this.getGroup(id);
 
       if (element instanceof GfxGroupLikeElementModel) {
         element.childIds.forEach(childId => {
@@ -433,11 +432,6 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
             this.doc.deleteBlock(this.doc.getBlock(childId)!.model);
           }
         });
-      }
-
-      if (group) {
-        // eslint-disable-next-line unicorn/prefer-dom-node-remove
-        group.removeChild(id);
       }
 
       this.elements.getValue()!.delete(id);

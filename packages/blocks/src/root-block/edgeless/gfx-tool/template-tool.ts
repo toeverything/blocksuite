@@ -4,10 +4,8 @@ export class TemplateTool extends BaseTool {
   static override toolName: string = 'template';
 }
 
-declare global {
-  namespace BlockSuite {
-    interface GfxToolsMap {
-      template: TemplateTool;
-    }
+declare module '@blocksuite/block-std/gfx' {
+  interface GfxToolsMap {
+    template: TemplateTool;
   }
 }

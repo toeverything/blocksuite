@@ -1,3 +1,5 @@
+import type { GfxToolsFullOptionValue } from '@blocksuite/block-std/gfx';
+
 import {
   type MenuHandler,
   popMenu,
@@ -657,7 +659,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
   accessor containerWidth = 1920;
 
   @state()
-  accessor edgelessTool: BlockSuite.GfxToolsFullOptionValue = {
+  accessor edgelessTool: GfxToolsFullOptionValue = {
     type: localStorage.defaultTool ?? 'default',
   };
 

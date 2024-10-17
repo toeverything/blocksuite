@@ -22,9 +22,7 @@ import {
   DEFAULT_NOTE_OFFSET_Y,
   DEFAULT_NOTE_WIDTH,
   EXCLUDING_MOUSE_OUT_CLASS_LIST,
-  NOTE_INIT_HEIGHT,
   NOTE_MIN_HEIGHT,
-  NOTE_MIN_WIDTH,
 } from '../utils/consts.js';
 import { addBlock } from '../utils/crud.js';
 import { DraggingNoteOverlay, NoteOverlay } from '../utils/tool-overlay.js';
@@ -262,8 +260,8 @@ export class NoteTool extends BaseTool<NoteToolOption> {
       this.gfx,
       point,
       options,
-      Math.max(width, NOTE_MIN_WIDTH),
-      Math.max(height, NOTE_INIT_HEIGHT)
+      Math.max(width, DEFAULT_NOTE_WIDTH),
+      Math.max(height, DEFAULT_NOTE_HEIGHT)
     );
   }
 
@@ -285,7 +283,7 @@ export class NoteTool extends BaseTool<NoteToolOption> {
     );
   }
 
-  override onload() {
+  override mounted() {
     this.disposable.add(
       effect(() => {
         const shiftPressed = this.gfx.keyboard.shiftKey$.value;
@@ -322,14 +320,12 @@ export class NoteTool extends BaseTool<NoteToolOption> {
   }
 }
 
-declare global {
-  namespace BlockSuite {
-    interface GfxToolsMap {
-      'affine:note': NoteTool;
-    }
+declare module '@blocksuite/block-std/gfx' {
+  interface GfxToolsMap {
+    'affine:note': NoteTool;
+  }
 
-    interface GfxToolsOption {
-      'affine:note': NoteToolOption;
-    }
+  interface GfxToolsOption {
+    'affine:note': NoteToolOption;
   }
 }

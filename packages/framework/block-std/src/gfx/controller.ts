@@ -184,7 +184,7 @@ export class GfxController extends LifeCycleWatcher {
     const { activeGroup } = selectionManager;
     const first = picked;
 
-    if (activeGroup && picked && activeGroup.hasDescendant(picked.id)) {
+    if (activeGroup && picked && activeGroup.hasDescendant(picked)) {
       let index = results.length - 1;
 
       while (

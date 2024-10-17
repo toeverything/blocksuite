@@ -1,3 +1,5 @@
+import type { GfxToolsFullOptionValue } from '@blocksuite/block-std/gfx';
+
 import { ArrowDownSmallIcon } from '@blocksuite/affine-components/icons';
 import { once } from '@blocksuite/affine-shared/utils';
 import {
@@ -115,11 +117,11 @@ export class EdgelessTemplateButton extends EdgelessToolbarToolMixin(
 
   private _cleanup: (() => void) | null = null;
 
-  private _prevTool: BlockSuite.GfxToolsFullOptionValue | null = null;
+  private _prevTool: GfxToolsFullOptionValue | null = null;
 
   override enableActiveBackground = true;
 
-  override type: BlockSuite.GfxToolsFullOptionValue['type'] = 'template';
+  override type: GfxToolsFullOptionValue['type'] = 'template';
 
   get cards() {
     const { theme } = this;

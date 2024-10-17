@@ -40,14 +40,12 @@ export class PanTool extends BaseTool<PanToolOption> {
   }
 }
 
-declare global {
-  namespace BlockSuite {
-    interface GfxToolsMap {
-      pan: PanTool;
-    }
+declare module '@blocksuite/block-std/gfx' {
+  interface GfxToolsMap {
+    pan: PanTool;
+  }
 
-    interface GfxToolsOption {
-      pan: PanToolOption;
-    }
+  interface GfxToolsOption {
+    pan: PanToolOption;
   }
 }

@@ -1,4 +1,4 @@
-import type { GfxController } from '@blocksuite/block-std/gfx';
+import type { GfxController, GfxToolsMap } from '@blocksuite/block-std/gfx';
 import type { XYWH } from '@blocksuite/global/utils';
 
 import {
@@ -370,7 +370,7 @@ export class NoteOverlay extends ToolOverlay {
         // when change note child type, update overlay text
         if (this.gfx.tool.currentToolName$.value !== 'affine:note') return;
         const tool =
-          this.gfx.tool.currentTool$.peek() as BlockSuite.GfxToolsMap['affine:note'];
+          this.gfx.tool.currentTool$.peek() as GfxToolsMap['affine:note'];
         this.text = this._getOverlayText(tool.activatedOption.tip);
         (this.gfx.surfaceComponent as SurfaceBlockComponent).refresh();
       })

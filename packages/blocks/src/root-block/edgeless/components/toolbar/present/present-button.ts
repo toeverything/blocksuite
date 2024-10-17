@@ -1,3 +1,5 @@
+import type { GfxToolsFullOptionValue } from '@blocksuite/block-std/gfx';
+
 import { FrameNavigatorIcon } from '@blocksuite/affine-components/icons';
 import { css, html, LitElement } from 'lit';
 
@@ -23,7 +25,7 @@ export class EdgelessPresentButton extends QuickToolMixin(
     }
   `;
 
-  override type: BlockSuite.GfxToolsFullOptionValue['type'] = 'frameNavigator';
+  override type: GfxToolsFullOptionValue['type'] = 'frameNavigator';
 
   override render() {
     return html`<edgeless-tool-icon-button

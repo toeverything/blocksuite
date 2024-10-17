@@ -28,7 +28,9 @@ import {
 } from '@blocksuite/affine-shared/utils';
 import {
   BaseTool,
+  getTopElements,
   GfxExtensionIdentifier,
+  isGfxContainerElm,
   type PointTestOptions,
 } from '@blocksuite/block-std/gfx';
 import {
@@ -62,7 +64,6 @@ import {
   mountShapeTextEditor,
   mountTextElementEditor,
 } from '../utils/text.js';
-import { getAllDescendantElements, getTopElements } from '../utils/tree.js';
 import { fitToScreen } from '../utils/viewport.js';
 
 export enum DefaultModeDragType {
@@ -919,7 +920,7 @@ export class DefaultTool extends BaseTool {
       } else {
         // only apply to root nodes of trees
         toBeMovedTopElements.map(element =>
-          frameManager.removeParentFrame(element)
+          frameManager.removeFromParentFrame(element)
         );
       }
     }
@@ -1004,11 +1005,12 @@ export class DefaultTool extends BaseTool {
 
     elements.forEach(element => {
       if (element.group instanceof MindmapElementModel && elements.length > 1) {
-        getAllDescendantElements(element.group).forEach(ele =>
-          toBeMoved.add(ele)
-        );
-      } else {
-        getAllDescendantElements(element).forEach(ele => {
+        element.group.descendantElements.forEach(ele => toBeMoved.add(ele));
+      } else if (isGfxContainerElm(element)) {
+        element.descendantElements.forEach(ele => {
+          if (ele.group instanceof MindmapElementModel) {
+            ele.group.descendantElements.forEach(_el => toBeMoved.add(_el));
+          }
           toBeMoved.add(ele);
         });
       }
@@ -1054,7 +1056,7 @@ export class DefaultTool extends BaseTool {
     }
   }
 
-  override onload() {
+  override mounted() {
     this.disposable.add(
       effect(() => {
         const pressed = this.gfx.keyboard.spaceKey$.value;
@@ -1106,10 +1108,8 @@ export class DefaultTool extends BaseTool {
   }
 }
 
-declare global {
-  namespace BlockSuite {
-    interface GfxToolsMap {
-      default: DefaultTool;
-    }
+declare module '@blocksuite/block-std/gfx' {
+  interface GfxToolsMap {
+    default: DefaultTool;
   }
 }

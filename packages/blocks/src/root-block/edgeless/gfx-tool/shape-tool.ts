@@ -291,7 +291,7 @@ export class ShapeTool extends BaseTool<ShapeToolOption> {
     this._draggingElement.stash('xywh');
   }
 
-  override onload() {
+  override mounted() {
     this.disposable.add(
       effect(() => {
         const pressed = this.gfx.keyboard.shiftKey$.value;
@@ -342,14 +342,12 @@ export class ShapeTool extends BaseTool<ShapeToolOption> {
   }
 }
 
-declare global {
-  namespace BlockSuite {
-    interface GfxToolsMap {
-      shape: ShapeTool;
-    }
+declare module '@blocksuite/block-std/gfx' {
+  interface GfxToolsMap {
+    shape: ShapeTool;
+  }
 
-    interface GfxToolsOption {
-      shape: ShapeToolOption;
-    }
+  interface GfxToolsOption {
+    shape: ShapeToolOption;
   }
 }

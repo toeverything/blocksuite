@@ -1,3 +1,5 @@
+import type { GfxToolsFullOptionValue } from '@blocksuite/block-std/gfx';
+
 import {
   ArrowUpIcon,
   HandIcon,
@@ -32,10 +34,7 @@ export class EdgelessDefaultToolButton extends QuickToolMixin(LitElement) {
     }
   `;
 
-  override type: BlockSuite.GfxToolsFullOptionValue['type'][] = [
-    'default',
-    'pan',
-  ];
+  override type: GfxToolsFullOptionValue['type'][] = ['default', 'pan'];
 
   private _changeTool() {
     if (this.toolbar.activePopper) {

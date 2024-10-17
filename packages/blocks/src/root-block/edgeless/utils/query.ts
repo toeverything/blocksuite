@@ -1,4 +1,7 @@
-import type { Viewport } from '@blocksuite/block-std/gfx';
+import type {
+  GfxToolsFullOptionValue,
+  Viewport,
+} from '@blocksuite/block-std/gfx';
 import type { PointLocation } from '@blocksuite/global/utils';
 import type { BlockModel } from '@blocksuite/store';
 
@@ -225,9 +228,7 @@ export function getSelectionBoxBound(viewport: Viewport, bound: Bound) {
 }
 
 // https://developer.mozilla.org/en-US/docs/Web/CSS/cursor
-export function getCursorMode(
-  edgelessTool: BlockSuite.GfxToolsFullOptionValue | null
-) {
+export function getCursorMode(edgelessTool: GfxToolsFullOptionValue | null) {
   if (!edgelessTool) {
     return 'default';
   }

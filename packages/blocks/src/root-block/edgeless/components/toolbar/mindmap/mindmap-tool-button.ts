@@ -2,6 +2,7 @@ import type {
   MindmapElementModel,
   MindmapStyle,
 } from '@blocksuite/affine-model';
+import type { GfxToolsFullOptionValue } from '@blocksuite/block-std/gfx';
 import type { Bound } from '@blocksuite/global/utils';
 
 import { EditPropsStore } from '@blocksuite/affine-shared/services';
@@ -131,10 +132,7 @@ export class EdgelessMindmapToolButton extends EdgelessToolbarToolMixin(
 
   override enableActiveBackground = true;
 
-  override type: BlockSuite.GfxToolsFullOptionValue['type'][] = [
-    'empty',
-    'text',
-  ];
+  override type: GfxToolsFullOptionValue['type'][] = ['empty', 'text'];
 
   get draggableTools(): DraggableTool[] {
     const style = this._style$.value;
