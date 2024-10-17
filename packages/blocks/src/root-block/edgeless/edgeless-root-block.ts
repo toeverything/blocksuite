@@ -19,7 +19,11 @@ import type { BlockModel } from '@blocksuite/store';
 import { CommonUtils } from '@blocksuite/affine-block-surface';
 import { focusTextModel } from '@blocksuite/affine-components/rich-text';
 import { toast } from '@blocksuite/affine-components/toast';
-import { NoteDisplayMode } from '@blocksuite/affine-model';
+import {
+  DEFAULT_NOTE_HEIGHT,
+  DEFAULT_NOTE_WIDTH,
+  NoteDisplayMode,
+} from '@blocksuite/affine-model';
 import {
   EditPropsStore,
   FontLoaderService,
@@ -86,10 +90,8 @@ import {
 } from './tools/index.js';
 import { edgelessElementsBound } from './utils/bound-utils.js';
 import {
-  DEFAULT_NOTE_HEIGHT,
   DEFAULT_NOTE_OFFSET_X,
   DEFAULT_NOTE_OFFSET_Y,
-  DEFAULT_NOTE_WIDTH,
 } from './utils/consts.js';
 import { getBackgroundGrid, isCanvasElement } from './utils/query.js';
 import { mountShapeTextEditor } from './utils/text.js';

@@ -10,8 +10,9 @@ import {
   DEFAULT_NOTE_BORDER_SIZE,
   DEFAULT_NOTE_BORDER_STYLE,
   DEFAULT_NOTE_CORNER,
+  DEFAULT_NOTE_HEIGHT,
   DEFAULT_NOTE_SHADOW,
-  NOTE_WIDTH,
+  DEFAULT_NOTE_WIDTH,
   NoteDisplayMode,
   type StrokeStyle,
 } from '../../consts/index.js';
@@ -20,7 +21,7 @@ import { GfxCompatible } from '../../utils/index.js';
 export const NoteBlockSchema = defineBlockSchema({
   flavour: 'affine:note',
   props: (): NoteProps => ({
-    xywh: `[0,0,${NOTE_WIDTH},95]`,
+    xywh: `[0,0,${DEFAULT_NOTE_WIDTH},${DEFAULT_NOTE_HEIGHT}]`,
     background: DEFAULT_NOTE_BACKGROUND_COLOR,
     index: 'a0',
     hidden: false,

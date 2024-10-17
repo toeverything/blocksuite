@@ -4,6 +4,7 @@ import { Bound } from '@blocksuite/global/utils';
 import { expect, type Page } from '@playwright/test';
 
 import {
+  autoFit,
   captureHistory,
   dragBetweenIndices,
   enterPlaygroundRoom,
@@ -18,6 +19,7 @@ import {
   pressEscape,
   setEdgelessTool,
   switchEditorMode,
+  toViewCoord,
   type,
   undoByKeyboard,
   waitNextFrame,
@@ -32,7 +34,11 @@ import {
 import { test } from '../utils/playwright.js';
 import { getFormatBar } from '../utils/query.js';
 
-async function assertEdgelessTextRect(page: Page, id: string, bound: Bound) {
+async function assertEdgelessTextModelRect(
+  page: Page,
+  id: string,
+  bound: Bound
+) {
   const realXYWH = await page.evaluate(id => {
     const block = window.host.view.getBlock(id) as EdgelessTextBlockComponent;
     return block?.model.xywh;
@@ -141,23 +147,24 @@ test.describe('edgeless text block', () => {
 
   test('edgeless text width auto-adjusting', async ({ page }) => {
     await setEdgelessTool(page, 'default');
-    await page.mouse.dblclick(130, 140, {
+    const point = await toViewCoord(page, [0, 0]);
+    await page.mouse.dblclick(point[0], point[1], {
       delay: 100,
     });
     await waitNextFrame(page);
-    await assertEdgelessTextRect(page, '4', new Bound(25, -287.5, 50, 56));
+    await assertEdgelessTextModelRect(page, '4', new Bound(-25, -25, 50, 56));
 
     await type(page, 'aaaaaa');
     await waitNextFrame(page, 200);
-    await assertEdgelessTextRect(page, '4', new Bound(25, -287.5, 71, 56));
+    await assertEdgelessTextModelRect(page, '4', new Bound(-25, -25, 71, 56));
 
     await type(page, '\nbbb');
     // width not changed
-    await assertEdgelessTextRect(page, '4', new Bound(25, -287.5, 71, 90));
+    await assertEdgelessTextModelRect(page, '4', new Bound(-25, -25, 71, 90));
     await type(page, '\nccccccc');
 
     // width changed
-    await assertEdgelessTextRect(page, '4', new Bound(25, -287.5, 79, 124));
+    await assertEdgelessTextModelRect(page, '4', new Bound(-25, -25, 79, 124));
   });
 
   test('edgeless text width fixed when drag moving', async ({ page }) => {
@@ -265,24 +272,25 @@ test.describe('edgeless text block', () => {
 
   test('edgeless text max width', async ({ page }) => {
     await setEdgelessTool(page, 'default');
-    await page.mouse.dblclick(130, 140, {
+    const point = await toViewCoord(page, [0, 0]);
+    await page.mouse.dblclick(point[0], point[1], {
       delay: 100,
     });
     await waitNextFrame(page);
-    await assertEdgelessTextRect(page, '4', new Bound(25, -287.5, 50, 56));
+    await assertEdgelessTextModelRect(page, '4', new Bound(-25, -25, 50, 56));
 
     await type(page, 'aaaaaa');
     await waitNextFrame(page);
-    await assertEdgelessTextRect(page, '4', new Bound(25, -287.5, 71, 56));
+    await assertEdgelessTextModelRect(page, '4', new Bound(-25, -25, 71, 56));
     await type(page, 'bbb');
     await waitNextFrame(page, 200);
     // height not changed
-    await assertEdgelessTextRect(page, '4', new Bound(25, -287.5, 98, 56));
+    await assertEdgelessTextModelRect(page, '4', new Bound(-25, -25, 98, 56));
 
     // blur
     await page.mouse.click(0, 0);
     // select text element
-    await page.mouse.click(130, 140);
+    await page.mouse.click(point[0] + 10, point[1] + 10);
 
     let selectedRect = await getEdgelessSelectedRect(page);
 
@@ -302,7 +310,7 @@ test.describe('edgeless text block', () => {
       }
     );
     await page.mouse.up();
-    await assertEdgelessTextRect(page, '4', new Bound(25, -287.5, 128, 56));
+    await assertEdgelessTextModelRect(page, '4', new Bound(-25, -25, 128, 56));
     selectedRect = await getEdgelessSelectedRect(page);
     let textRect = await page
       .locator('affine-edgeless-text[data-block-id="4"]')
@@ -328,7 +336,7 @@ test.describe('edgeless text block', () => {
     );
     await page.mouse.up();
     // height changed
-    await assertEdgelessTextRect(page, '4', new Bound(25, -287.5, 83, 80));
+    await assertEdgelessTextModelRect(page, '4', new Bound(-25, -25, 83, 80));
     selectedRect = await getEdgelessSelectedRect(page);
     textRect = await page
       .locator('affine-edgeless-text[data-block-id="4"]')
@@ -342,7 +350,8 @@ test.describe('edgeless text block', () => {
 
   test('min width limit for embed block', async ({ page }, testInfo) => {
     await setEdgelessTool(page, 'default');
-    await page.mouse.dblclick(130, 140, {
+    const point = await toViewCoord(page, [0, 0]);
+    await page.mouse.dblclick(point[0], point[1], {
       delay: 100,
     });
     await waitNextFrame(page);
@@ -360,6 +369,7 @@ test.describe('edgeless text block', () => {
 
     await page.getByLabel('Switch view').click();
     await page.getByTestId('link-to-card').click();
+    await autoFit(page);
 
     await waitNextFrame(page);
 
@@ -370,7 +380,7 @@ test.describe('edgeless text block', () => {
     // blur
     await page.mouse.click(0, 0);
     // select text element
-    await page.mouse.click(130, 140);
+    await page.mouse.click(point[0] + 10, point[1] + 10);
     const selectedRect0 = await getEdgelessSelectedRect(page);
 
     // from right to left
@@ -437,7 +447,8 @@ test('press backspace at the start of first line when edgeless text exist', asyn
   await switchEditorMode(page);
 
   await setEdgelessTool(page, 'default');
-  await page.mouse.dblclick(130, 140, {
+  const point = await toViewCoord(page, [0, 0]);
+  await page.mouse.dblclick(point[0], point[1], {
     delay: 100,
   });
   await waitNextFrame(page);

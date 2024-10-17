@@ -9,7 +9,10 @@ import type { InlineRootElement } from '@inline/inline-editor.js';
 import type { BlockModel } from '@store/index.js';
 import type { JSXElement } from '@store/utils/jsx.js';
 
-import { NOTE_WIDTH } from '@blocksuite/affine-model';
+import {
+  DEFAULT_NOTE_HEIGHT,
+  DEFAULT_NOTE_WIDTH,
+} from '@blocksuite/affine-model';
 import { BLOCK_ID_ATTR } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import { expect, type Locator, type Page } from '@playwright/test';
@@ -26,7 +29,6 @@ import {
   getContainerIds,
   getContainerOfElements,
   getEdgelessElementBound,
-  getEdgelessSelectedRectModel,
   getNoteRect,
   getSelectedBound,
   getSortedIdsInViewport,
@@ -109,7 +111,7 @@ export const defaultStore = {
           'sys:id': '1',
           'sys:children': ['2'],
           'sys:version': 1,
-          'prop:xywh': `[0,0,${NOTE_WIDTH},95]`,
+          'prop:xywh': `[0,0,${DEFAULT_NOTE_WIDTH}, ${DEFAULT_NOTE_HEIGHT}]`,
           'prop:background': '--affine-note-background-white',
           'prop:index': 'a0',
           'prop:hidden': false,
@@ -921,6 +923,7 @@ export async function getSelectedRect(page: Page) {
   return box;
 }
 
+// Better to use xxSelectedModelRect
 export async function assertEdgelessSelectedRect(page: Page, xywh: number[]) {
   const [x, y, w, h] = xywh;
   const box = await getSelectedRect(page);
@@ -938,6 +941,7 @@ export async function assertEdgelessSelectedModelRect(
   const [x, y, w, h] = xywh;
   const box = await getSelectedRect(page);
   const [mX, mY] = await toModelCoord(page, [box.x, box.y]);
+
   expect(mX).toBeCloseTo(x, 0);
   expect(mY).toBeCloseTo(y, 0);
   expect(box.width).toBeCloseTo(w, 0);
@@ -953,6 +957,7 @@ export async function assertEdgelessSelectedElementHandleCount(
   await expect(handles).toHaveCount(count);
 }
 
+// Better to use xxSelectedModelRect
 export async function assertEdgelessRemoteSelectedRect(
   page: Page,
   xywh: number[],
@@ -994,19 +999,6 @@ export async function assertEdgelessRemoteSelectedModelRect(
   expect(mY).toBeCloseTo(y, 0);
   expect(box.width).toBeCloseTo(w, 0);
   expect(box.height).toBeCloseTo(h, 0);
-}
-
-export async function assertEdgelessSelectedRectModel(
-  page: Page,
-  xywh: number[]
-) {
-  const [x, y, w, h] = xywh;
-  const box = await getEdgelessSelectedRectModel(page);
-
-  expect(box[0]).toBeCloseTo(x, 0);
-  expect(box[1]).toBeCloseTo(y, 0);
-  expect(box[2]).toBeCloseTo(w, 0);
-  expect(box[3]).toBeCloseTo(h, 0);
 }
 
 export async function assertEdgelessSelectedRectRotation(page: Page, deg = 0) {

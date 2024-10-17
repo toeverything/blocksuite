@@ -2,7 +2,7 @@ import type { DatabaseBlockModel } from '@blocksuite/affine-model';
 
 import { assertExists } from '@blocksuite/global/utils';
 import { expect, type Page } from '@playwright/test';
-import { switchEditorMode, zoomOutByKeyboard } from 'utils/actions/edgeless.js';
+import { switchEditorMode } from 'utils/actions/edgeless.js';
 import { getLinkedDocPopover } from 'utils/actions/linked-doc.js';
 import {
   enterPlaygroundRoom,
@@ -105,8 +105,6 @@ test.describe('Embed synced doc', () => {
     // Switch to edgeless mode
     await switchEditorMode(page);
     await waitNextFrame(page, 200);
-    await page.mouse.click(100, 100);
-    await zoomOutByKeyboard(page);
 
     // Double click on note to enter edit status
     const noteBlock = page.locator('affine-edgeless-note');

@@ -1,5 +1,9 @@
 import type { PointerEventState } from '@blocksuite/block-std';
 
+import {
+  DEFAULT_NOTE_HEIGHT,
+  DEFAULT_NOTE_WIDTH,
+} from '@blocksuite/affine-model';
 import { EditPropsStore } from '@blocksuite/affine-shared/services';
 import { noop, Point } from '@blocksuite/global/utils';
 
@@ -10,11 +14,7 @@ import {
   hasClassNameInList,
   type NoteChildrenFlavour,
 } from '../../../_common/utils/index.js';
-import {
-  DEFAULT_NOTE_HEIGHT,
-  DEFAULT_NOTE_WIDTH,
-  EXCLUDING_MOUSE_OUT_CLASS_LIST,
-} from '../utils/consts.js';
+import { EXCLUDING_MOUSE_OUT_CLASS_LIST } from '../utils/consts.js';
 import { addNote } from '../utils/note.js';
 import { DraggingNoteOverlay, NoteOverlay } from '../utils/tool-overlay.js';
 import { EdgelessToolController } from './edgeless-tool.js';

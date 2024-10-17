@@ -1,7 +1,7 @@
 import {
   DEFAULT_NOTE_HEIGHT,
   DEFAULT_NOTE_WIDTH,
-} from '@blocks/root-block/edgeless/utils/consts.js';
+} from '@blocksuite/affine-model';
 import { expect, type Page } from '@playwright/test';
 
 import {

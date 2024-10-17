@@ -1833,6 +1833,20 @@ export async function createFrameElement(
   );
 }
 
+export async function createBrushElement(
+  page: Page,
+  coord1: number[],
+  coord2: number[]
+) {
+  const start = await toViewCoord(page, coord1);
+  const end = await toViewCoord(page, coord2);
+  await addBasicBrushElement(
+    page,
+    { x: start[0], y: start[1] },
+    { x: end[0], y: end[1] }
+  );
+}
+
 export async function createNote(
   page: Page,
   coord1: number[],

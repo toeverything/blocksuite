@@ -1,8 +1,8 @@
 import {
   DEFAULT_NOTE_HEIGHT,
   DEFAULT_NOTE_WIDTH,
-} from '@blocks/root-block/edgeless/utils/consts.js';
-import { NOTE_WIDTH, NoteDisplayMode } from '@blocksuite/affine-model';
+  NoteDisplayMode,
+} from '@blocksuite/affine-model';
 import { expect } from '@playwright/test';
 
 import {
@@ -69,7 +69,7 @@ test('can drag selected non-active note', async ({ page }) => {
 
   await switchEditorMode(page);
   await zoomResetByKeyboard(page);
-  await assertNoteXYWH(page, [0, 0, NOTE_WIDTH, 92]);
+  await assertNoteXYWH(page, [0, 0, DEFAULT_NOTE_WIDTH, DEFAULT_NOTE_HEIGHT]);
 
   // selected, non-active
   await page.mouse.click(CENTER_X, CENTER_Y);
@@ -78,11 +78,11 @@ test('can drag selected non-active note', async ({ page }) => {
     { x: CENTER_X, y: CENTER_Y },
     { x: CENTER_X, y: CENTER_Y + 100 }
   );
-  await assertNoteXYWH(page, [0, 100, NOTE_WIDTH, 92]);
+  await assertNoteXYWH(page, [0, 100, DEFAULT_NOTE_WIDTH, DEFAULT_NOTE_HEIGHT]);
 
   await undoByKeyboard(page);
   await waitNextFrame(page);
-  await assertNoteXYWH(page, [0, 0, NOTE_WIDTH, 92]);
+  await assertNoteXYWH(page, [0, 0, DEFAULT_NOTE_WIDTH, DEFAULT_NOTE_HEIGHT]);
 });
 
 test('add Note', async ({ page }) => {
@@ -489,7 +489,7 @@ test('delete first block in edgeless note', async ({ page }) => {
   await initEmptyEdgelessState(page);
   await switchEditorMode(page);
   await zoomResetByKeyboard(page);
-  await assertNoteXYWH(page, [0, 0, NOTE_WIDTH, 92]);
+  await assertNoteXYWH(page, [0, 0, DEFAULT_NOTE_WIDTH, DEFAULT_NOTE_HEIGHT]);
   await page.mouse.dblclick(CENTER_X, CENTER_Y);
 
   // first block without children, nothing should happen

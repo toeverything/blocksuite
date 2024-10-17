@@ -13,6 +13,7 @@ const ALIGN_HEIGHT = 200;
 const ALIGN_PADDING = 20;
 
 import type { Command } from '@blocksuite/block-std';
+import type { BlockModel, BlockProps } from '@blocksuite/store';
 
 import { updateXYWH } from '../utils/update-xywh.js';
 
@@ -23,13 +24,14 @@ export const autoArrangeElementsCommand: Command<never, never, {}> = (
   ctx,
   next
 ) => {
+  const { updateBlock } = ctx.std.doc;
   const rootService = ctx.std.getService('affine:page');
   // @ts-ignore TODO: fix after edgeless refactor
   const elements = rootService?.selection.selectedElements;
   // @ts-ignore TODO: fix after edgeless refactor
   const updateElement = rootService?.updateElement;
   if (elements && updateElement) {
-    autoArrangeElements(elements, updateElement);
+    autoArrangeElements(elements, updateElement, updateBlock);
   }
   next();
 };
@@ -41,13 +43,14 @@ export const autoResizeElementsCommand: Command<never, never, {}> = (
   ctx,
   next
 ) => {
+  const { updateBlock } = ctx.std.doc;
   const rootService = ctx.std.getService('affine:page');
   // @ts-ignore TODO: fix after edgeless refactor
   const elements = rootService?.selection.selectedElements;
   // @ts-ignore TODO: fix after edgeless refactor
   const updateElement = rootService?.updateElement;
   if (elements && updateElement) {
-    autoResizeElements(elements, updateElement);
+    autoResizeElements(elements, updateElement, updateBlock);
   }
   next();
 };
@@ -74,7 +77,11 @@ function splitElementsToChunks(models: GfxModel[]) {
 
 function autoArrangeElements(
   elements: GfxModel[],
-  updateElement: (id: string, props: Record<string, unknown>) => void
+  updateElement: (id: string, props: Record<string, unknown>) => void,
+  updateBlock: (
+    model: BlockModel,
+    callBackOrProps: (() => void) | Partial<BlockProps>
+  ) => void
 ) {
   const chunks = splitElementsToChunks(elements);
   // update element XY
@@ -90,7 +97,7 @@ function autoArrangeElements(
       const yOffset = bound.y - eleY;
       bound.x = posX + xOffset;
       bound.y = startY + yOffset;
-      updateXYWH(ele, bound, updateElement);
+      updateXYWH(ele, bound, updateElement, updateBlock);
       if (ele.elementBound.h > maxHeight) {
         maxHeight = ele.elementBound.h;
       }
@@ -102,7 +109,11 @@ function autoArrangeElements(
 
 function autoResizeElements(
   elements: GfxModel[],
-  updateElement: (id: string, props: Record<string, unknown>) => void
+  updateElement: (id: string, props: Record<string, unknown>) => void,
+  updateBlock: (
+    model: BlockModel,
+    callBackOrProps: (() => void) | Partial<BlockProps>
+  ) => void
 ) {
   // resize to fixed height
   elements.forEach(ele => {
@@ -117,8 +128,8 @@ function autoResizeElements(
     const scale = ALIGN_HEIGHT / ele.elementBound.h;
     bound.h = scale * bound.h;
     bound.w = scale * bound.w;
-    updateXYWH(ele, bound, updateElement);
+    updateXYWH(ele, bound, updateElement, updateBlock);
   });
   // arrange
-  autoArrangeElements(elements, updateElement);
+  autoArrangeElements(elements, updateElement, updateBlock);
 }

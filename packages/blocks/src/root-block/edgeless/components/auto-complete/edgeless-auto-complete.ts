@@ -19,6 +19,7 @@ import {
   NoteAutoCompleteIcon,
 } from '@blocksuite/affine-components/icons';
 import {
+  DEFAULT_NOTE_HEIGHT,
   DEFAULT_SHAPE_STROKE_COLOR,
   LayoutType,
   MindmapElementModel,
@@ -40,7 +41,6 @@ import { styleMap } from 'lit/directives/style-map.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
 import type { SelectedRect } from '../rects/edgeless-selected-rect.js';
 
-import { DEFAULT_NOTE_HEIGHT } from '../../utils/consts.js';
 import { isNoteBlock } from '../../utils/query.js';
 import { mountShapeTextEditor } from '../../utils/text.js';
 import { EdgelessAutoCompletePanel } from './auto-complete-panel.js';

@@ -2,7 +2,11 @@ import { z } from 'zod';
 
 import { createEnumMap } from '../utils/enum.js';
 
-export const NOTE_WIDTH = 800;
+export const NOTE_MIN_WIDTH = 450 + 24 * 2;
+export const NOTE_MIN_HEIGHT = 92;
+
+export const DEFAULT_NOTE_WIDTH = NOTE_MIN_WIDTH;
+export const DEFAULT_NOTE_HEIGHT = NOTE_MIN_HEIGHT;
 
 export enum NoteBackgroundColor {
   Black = '--affine-note-background-black',
