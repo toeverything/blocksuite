@@ -51,7 +51,7 @@ export class EdgelessRemoteSelectionWidget extends WidgetComponent<
       position: absolute;
       top: 0;
       left: 0;
-      border-radius: 50%;
+      transform-origin: left top;
       z-index: 1;
     }
 
@@ -151,14 +151,14 @@ export class EdgelessRemoteSelectionWidget extends WidgetComponent<
   };
 
   private _updateTransform = requestThrottledConnectedFrame(() => {
-    const { translateX, translateY } = this.edgeless.service.viewport;
+    const { translateX, translateY, zoom } = this.edgeless.service.viewport;
+
+    this.style.setProperty('--v-zoom', `${zoom}`);
 
     this.style.setProperty(
       'transform',
-      `translate(${translateX}px, ${translateY}px)`
+      `translate(${translateX}px, ${translateY}px) scale(var(--v-zoom))`
     );
-
-    this.requestUpdate();
   }, this);
 
   get edgeless() {
@@ -210,7 +210,6 @@ export class EdgelessRemoteSelectionWidget extends WidgetComponent<
   override render() {
     const { _remoteRects, _remoteCursors, _remoteColorManager } = this;
     assertExists(_remoteColorManager);
-    const { zoom } = this.edgeless.service.viewport;
 
     const rects = repeat(
       _remoteRects.entries(),
@@ -221,13 +220,11 @@ export class EdgelessRemoteSelectionWidget extends WidgetComponent<
           class="remote-rect"
           style=${styleMap({
             pointerEvents: 'none',
-            width: `${zoom * rect.width}px`,
-            height: `${zoom * rect.height}px`,
+            width: `${rect.width}px`,
+            height: `${rect.height}px`,
             borderStyle: rect.borderStyle,
             borderColor: _remoteColorManager.get(id),
-            transform: `translate(${zoom * rect.left}px, ${
-              zoom * rect.top
-            }px) rotate(${rect.rotate}deg)`,
+            transform: `translate(${rect.left}px, ${rect.top}px) rotate(${rect.rotate}deg)`,
           })}
         ></div>`
     );
@@ -241,7 +238,7 @@ export class EdgelessRemoteSelectionWidget extends WidgetComponent<
           class="remote-cursor"
           style=${styleMap({
             pointerEvents: 'none',
-            transform: `translate(${zoom * cursor.x}px, ${zoom * cursor.y}px)`,
+            transform: `translate(${cursor.x}px, ${cursor.y}px) scale(calc(1/var(--v-zoom)))`,
             color: _remoteColorManager.get(id),
           })}
         >
