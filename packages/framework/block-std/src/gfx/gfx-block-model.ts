@@ -61,7 +61,7 @@ export class GfxBlockElementModel<
   }
 
   get elementBound() {
-    return Bound.from(getBoundWithRotation({ ...this, rotate: this.rotate }));
+    return Bound.from(getBoundWithRotation(this));
   }
 
   get externalBound(): Bound | null {
