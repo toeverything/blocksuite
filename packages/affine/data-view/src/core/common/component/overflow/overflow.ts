@@ -31,6 +31,8 @@ export class Overflow extends SignalWatcher(WithDisposable(ShadowlessElement)) {
    */
   protected _maxMoreWidth = -1;
 
+  widthList: number[] = [];
+
   adjustStyle() {
     if (this._frameId) {
       cancelAnimationFrame(this._frameId);
@@ -52,7 +54,27 @@ export class Overflow extends SignalWatcher(WithDisposable(ShadowlessElement)) {
     });
   }
 
-  protected doAdjustStyle() {
+  doAdjustStyle() {
+    const moreWidth = this.more.getBoundingClientRect().width;
+    this.widthList[this.renderCount] = moreWidth;
+    const maxWidth = this.getBoundingClientRect().width;
+    let width = 0;
+    for (let i = 0; i < this.items.length; i++) {
+      const itemWidth = this.items[i].getBoundingClientRect().width;
+      // Try to calculate the width occupied by rendering n+1 items;
+      // if it exceeds the limit, render n items(in i++ round).
+      const totalWidth =
+        width + itemWidth + (this.widthList[i + 1] ?? moreWidth);
+      if (totalWidth > maxWidth) {
+        this.renderCount = i;
+        return;
+      }
+      width += itemWidth;
+    }
+    this.renderCount = this.items.length;
+  }
+
+  protected doAdjustStyle1() {
     this._maxMoreWidth = Math.max(
       this._maxMoreWidth,
       this.more.getBoundingClientRect().width
