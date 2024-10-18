@@ -23,42 +23,22 @@ export class Overflow extends SignalWatcher(WithDisposable(ShadowlessElement)) {
     }
   `;
 
-  /**
-   * cache the count state to avoid flickering
-   *
-   * the first element is the cache key, which is the width of the container and the number of items
-   */
-  protected _countCache: [string, number] = ['', -1];
-
   protected _frameId: number | undefined = undefined;
 
-  adjustStyle(ignoreCache = false) {
-    const rectWidth = this.getBoundingClientRect().width;
-    const cacheKey = `${rectWidth}-${this.items.length}`;
+  /**
+   * if the width of `more` may change, the UI may flicker
+   * because the width of `more` is not stable, we need to calculate the max width of `more`
+   */
+  protected _maxMoreWidth = -1;
 
-    if (
-      !!ignoreCache &&
-      this._countCache[0] === cacheKey &&
-      this._countCache[1] !== -1
-    ) {
-      this.renderCount = this._countCache[1];
-      return;
+  adjustStyle() {
+    if (this._frameId) {
+      cancelAnimationFrame(this._frameId);
     }
 
-    this._countCache[0] = cacheKey;
-    this._countCache[1] = -1;
-
-    let maxWidth = rectWidth - this.more.getBoundingClientRect().width;
-    for (let i = 0; i < this.items.length; i++) {
-      const width = this.items[i].getBoundingClientRect().width;
-      maxWidth -= width;
-      if (maxWidth < 0) {
-        this.renderCount = i;
-        this._countCache[1] = this.renderCount;
-        return;
-      }
-    }
-    this.renderCount = this.items.length;
+    this._frameId = requestAnimationFrame(() => {
+      this.doAdjustStyle();
+    });
   }
 
   override connectedCallback() {
@@ -70,6 +50,24 @@ export class Overflow extends SignalWatcher(WithDisposable(ShadowlessElement)) {
     this.disposables.add(() => {
       resize.unobserve(this);
     });
+  }
+
+  protected doAdjustStyle() {
+    this._maxMoreWidth = Math.max(
+      this._maxMoreWidth,
+      this.more.getBoundingClientRect().width
+    );
+
+    let maxWidth = this.getBoundingClientRect().width - this._maxMoreWidth;
+    for (let i = 0; i < this.items.length; i++) {
+      const width = this.items[i].getBoundingClientRect().width;
+      maxWidth -= width;
+      if (maxWidth < 0) {
+        this.renderCount = i;
+        return;
+      }
+    }
+    this.renderCount = this.items.length;
   }
 
   override render() {
@@ -89,15 +87,7 @@ export class Overflow extends SignalWatcher(WithDisposable(ShadowlessElement)) {
 
   protected override updated(_changedProperties: PropertyValues) {
     super.updated(_changedProperties);
-    if (this._frameId) {
-      cancelAnimationFrame(this._frameId);
-    }
-
-    this._frameId = requestAnimationFrame(() => {
-      // when `updated` is invoked, it usually means user has changed the data
-      // so any item may change its size, we need to re-calculate the size
-      this.adjustStyle(true);
-    });
+    this.adjustStyle();
   }
 
   @queryAll(':scope > .component-overflow-item')
