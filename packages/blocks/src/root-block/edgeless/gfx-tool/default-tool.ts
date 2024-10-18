@@ -113,7 +113,10 @@ export class DefaultTool extends BaseTool {
   private _draggingSingleMindmap: null | {
     mindmap: MindmapElementModel;
     node: MindmapNode;
-    startElementBound: Bound;
+    /**
+     * The bound of the mind map which the dragging node belongs to
+     */
+    originMindMapBound: Bound;
     clear?: () => void;
     detach?: boolean;
   } = null;
@@ -466,7 +469,7 @@ export class DefaultTool extends BaseTool {
       const {
         node: currentNode,
         mindmap: currentMindmap,
-        startElementBound,
+        originMindMapBound: startElementBound,
       } = this._draggingSingleMindmap;
       const current = currentNode.element;
       const subtree = currentMindmap.getNode(current.id)!;
@@ -614,6 +617,7 @@ export class DefaultTool extends BaseTool {
       const mindmap = this._toBeMoved[0].group as MindmapElementModel;
 
       this._alignBound = this._snapOverlay.setupAlignables(this._toBeMoved, [
+        mindmap,
         ...(mindmap?.childElements || []),
       ]);
     }
@@ -1043,7 +1047,7 @@ export class DefaultTool extends BaseTool {
         mindmap,
         node: mindmap.getNode(this._toBeMoved[0].id)!,
         clear: mindmap.stashTree(this._toBeMoved[0].id),
-        startElementBound: mindmap.elementBound,
+        originMindMapBound: mindmap.elementBound,
       };
     } else {
       this._toBeMoved.forEach(ele => {
