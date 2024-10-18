@@ -23,22 +23,16 @@ export class Overflow extends SignalWatcher(WithDisposable(ShadowlessElement)) {
     }
   `;
 
-  protected _frameId: number | undefined = undefined;
+  protected frameId: number | undefined = undefined;
 
-  /**
-   * if the width of `more` may change, the UI may flicker
-   * because the width of `more` is not stable, we need to calculate the max width of `more`
-   */
-  protected _maxMoreWidth = -1;
-
-  widthList: number[] = [];
+  protected widthList: number[] = [];
 
   adjustStyle() {
-    if (this._frameId) {
-      cancelAnimationFrame(this._frameId);
+    if (this.frameId) {
+      cancelAnimationFrame(this.frameId);
     }
 
-    this._frameId = requestAnimationFrame(() => {
+    this.frameId = requestAnimationFrame(() => {
       this.doAdjustStyle();
     });
   }
@@ -54,10 +48,12 @@ export class Overflow extends SignalWatcher(WithDisposable(ShadowlessElement)) {
     });
   }
 
-  doAdjustStyle() {
+  protected doAdjustStyle() {
     const moreWidth = this.more.getBoundingClientRect().width;
     this.widthList[this.renderCount] = moreWidth;
-    const maxWidth = this.getBoundingClientRect().width;
+
+    const containerWidth = this.getBoundingClientRect().width;
+
     let width = 0;
     for (let i = 0; i < this.items.length; i++) {
       const itemWidth = this.items[i].getBoundingClientRect().width;
@@ -65,29 +61,11 @@ export class Overflow extends SignalWatcher(WithDisposable(ShadowlessElement)) {
       // if it exceeds the limit, render n items(in i++ round).
       const totalWidth =
         width + itemWidth + (this.widthList[i + 1] ?? moreWidth);
-      if (totalWidth > maxWidth) {
+      if (totalWidth > containerWidth) {
         this.renderCount = i;
         return;
       }
       width += itemWidth;
-    }
-    this.renderCount = this.items.length;
-  }
-
-  protected doAdjustStyle1() {
-    this._maxMoreWidth = Math.max(
-      this._maxMoreWidth,
-      this.more.getBoundingClientRect().width
-    );
-
-    let maxWidth = this.getBoundingClientRect().width - this._maxMoreWidth;
-    for (let i = 0; i < this.items.length; i++) {
-      const width = this.items[i].getBoundingClientRect().width;
-      maxWidth -= width;
-      if (maxWidth < 0) {
-        this.renderCount = i;
-        return;
-      }
     }
     this.renderCount = this.items.length;
   }
