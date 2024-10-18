@@ -1,15 +1,9 @@
-import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
-import {
-  INLINE_ROOT_ATTR,
-  type InlineRange,
-  type InlineRangeProvider,
-} from '@blocksuite/inline';
+import type { InlineRange, InlineRangeProvider } from '@blocksuite/inline';
+
 import { signal } from '@preact/signals-core';
 
 import type { TextSelection } from '../selection/index.js';
 import type { BlockComponent } from '../view/element/block-component.js';
-
-import { BLOCK_ID_ATTR } from '../view/index.js';
 
 export const getInlineRangeProvider: (
   element: BlockComponent
@@ -22,33 +16,10 @@ export const getInlineRangeProvider: (
     return null;
   }
 
-  const isElementSelected = (range: Range): boolean => {
-    // Most cases, the range is collapsed, so we no need to use `intersectsNode`
-    // because its performance is not good enough.
-    if (range.collapsed) {
-      const startElement =
-        range.startContainer instanceof Element
-          ? range.startContainer
-          : range.startContainer.parentElement;
-      const inlineRoot = startElement?.closest(`[${INLINE_ROOT_ATTR}]`);
-      if (!inlineRoot) return false;
-
-      const block = startElement?.closest(`[${BLOCK_ID_ATTR}]`);
-      if (!block || block !== element) return false;
-    } else {
-      if (!range.intersectsNode(element)) return false;
-    }
-    return true;
-  };
-
   const calculateInlineRange = (
     range: Range,
     textSelection: TextSelection
   ): InlineRange | null => {
-    if (!isElementSelected(range)) {
-      return null;
-    }
-
     const { from, to } = textSelection;
 
     if (from.blockId === element.blockId) {
@@ -66,16 +37,32 @@ export const getInlineRangeProvider: (
     }
 
     if (!element.model.text) {
-      throw new BlockSuiteError(
-        ErrorCode.SelectionError,
-        'element to set text selection has no text'
-      );
+      return null;
     }
 
-    return {
-      index: 0,
-      length: element.model.text.length,
-    };
+    const elementRange = rangeManager.textSelectionToRange(
+      selectionManager.create('text', {
+        from: {
+          index: 0,
+          blockId: element.blockId,
+          length: element.model.text.length,
+        },
+        to: null,
+      })
+    );
+
+    if (
+      elementRange &&
+      elementRange.compareBoundaryPoints(Range.START_TO_START, range) > -1 &&
+      elementRange.compareBoundaryPoints(Range.END_TO_END, range) < 1
+    ) {
+      return {
+        index: 0,
+        length: element.model.text.length,
+      };
+    }
+
+    return null;
   };
 
   const setInlineRange = (inlineRange: InlineRange | null) => {
