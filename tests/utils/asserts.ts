@@ -32,6 +32,7 @@ import {
   getSortedIdsInViewport,
   getZoomLevel,
   toIdCountMap,
+  toModelCoord,
 } from './actions/edgeless.js';
 import {
   pressArrowLeft,
@@ -930,6 +931,19 @@ export async function assertEdgelessSelectedRect(page: Page, xywh: number[]) {
   expect(box.height).toBeCloseTo(h, 0);
 }
 
+export async function assertEdgelessSelectedModelRect(
+  page: Page,
+  xywh: number[]
+) {
+  const [x, y, w, h] = xywh;
+  const box = await getSelectedRect(page);
+  const [mX, mY] = await toModelCoord(page, [box.x, box.y]);
+  expect(mX).toBeCloseTo(x, 0);
+  expect(mY).toBeCloseTo(y, 0);
+  expect(box.width).toBeCloseTo(w, 0);
+  expect(box.height).toBeCloseTo(h, 0);
+}
+
 export async function assertEdgelessSelectedElementHandleCount(
   page: Page,
   count: number
@@ -956,6 +970,28 @@ export async function assertEdgelessRemoteSelectedRect(
 
   expect(box.x).toBeCloseTo(x, 0);
   expect(box.y).toBeCloseTo(y, 0);
+  expect(box.width).toBeCloseTo(w, 0);
+  expect(box.height).toBeCloseTo(h, 0);
+}
+
+export async function assertEdgelessRemoteSelectedModelRect(
+  page: Page,
+  xywh: number[],
+  index = 0
+) {
+  const [x, y, w, h] = xywh;
+  const editor = getEditorLocator(page);
+  const remoteSelectedRect = editor
+    .locator('affine-edgeless-remote-selection-widget')
+    .locator('.remote-rect')
+    .nth(index);
+
+  const box = await remoteSelectedRect.boundingBox();
+  if (!box) throw new Error('Missing edgeless remote selected rect');
+
+  const [mX, mY] = await toModelCoord(page, [box.x, box.y]);
+  expect(mX).toBeCloseTo(x, 0);
+  expect(mY).toBeCloseTo(y, 0);
   expect(box.width).toBeCloseTo(w, 0);
   expect(box.height).toBeCloseTo(h, 0);
 }

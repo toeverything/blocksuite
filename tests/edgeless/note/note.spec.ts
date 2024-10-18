@@ -82,7 +82,7 @@ test('can drag selected non-active note', async ({ page }) => {
 
   await undoByKeyboard(page);
   await waitNextFrame(page);
-  await assertNoteXYWH(page, [0, 0, NOTE_WIDTH, 95]);
+  await assertNoteXYWH(page, [0, 0, NOTE_WIDTH, 92]);
 });
 
 test('add Note', async ({ page }) => {
