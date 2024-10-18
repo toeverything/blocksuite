@@ -23,15 +23,34 @@ export class Overflow extends SignalWatcher(WithDisposable(ShadowlessElement)) {
     }
   `;
 
+  /**
+   * cache the count state to avoid flickering
+   *
+   * the first element is the cache key, which is the width of the container and the number of items
+   */
+  protected _countCache: [string, number] = ['', -1];
+
+  protected _frameId: number | undefined = undefined;
+
   adjustStyle() {
-    let maxWidth =
-      this.getBoundingClientRect().width -
-      this.more.getBoundingClientRect().width;
+    const rectWidth = this.getBoundingClientRect().width;
+    const cacheKey = `${rectWidth}-${this.items.length}`;
+
+    if (this._countCache[0] === cacheKey && this._countCache[1] !== -1) {
+      this.renderCount = this._countCache[1];
+      return;
+    }
+
+    this._countCache[0] = cacheKey;
+    this._countCache[1] = -1;
+
+    let maxWidth = rectWidth - this.more.getBoundingClientRect().width;
     for (let i = 0; i < this.items.length; i++) {
       const width = this.items[i].getBoundingClientRect().width;
       maxWidth -= width;
       if (maxWidth < 0) {
         this.renderCount = i;
+        this._countCache[1] = this.renderCount;
         return;
       }
     }
@@ -66,7 +85,11 @@ export class Overflow extends SignalWatcher(WithDisposable(ShadowlessElement)) {
 
   protected override updated(_changedProperties: PropertyValues) {
     super.updated(_changedProperties);
-    requestAnimationFrame(() => {
+    if (this._frameId) {
+      cancelAnimationFrame(this._frameId);
+    }
+
+    this._frameId = requestAnimationFrame(() => {
       this.adjustStyle();
     });
   }
