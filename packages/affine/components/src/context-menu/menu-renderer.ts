@@ -1,3 +1,4 @@
+import { unsafeCSSVarV2 } from '@blocksuite/affine-shared/theme';
 import { ShadowlessElement } from '@blocksuite/block-std';
 import { SignalWatcher, WithDisposable } from '@blocksuite/global/utils';
 import { ArrowLeftBigIcon, CloseIcon, SearchIcon } from '@blocksuite/icons/lit';
@@ -10,8 +11,7 @@ import {
   type ReferenceElement,
   shift,
 } from '@floating-ui/dom';
-import { cssVarV2 } from '@toeverything/theme/v2';
-import { css, html, nothing, unsafeCSS } from 'lit';
+import { css, html, nothing } from 'lit';
 import { property } from 'lit/decorators.js';
 import { createRef, ref } from 'lit/directives/ref.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -43,7 +43,7 @@ export class MenuComponent extends SignalWatcher(
       align-items: center;
       padding: 4px 10px;
       gap: 8px;
-      border: 1px solid ${unsafeCSS(cssVarV2('input/border/default'))};
+      border: 1px solid ${unsafeCSSVarV2('input/border/default')};
     }
 
     .affine-menu-search {
