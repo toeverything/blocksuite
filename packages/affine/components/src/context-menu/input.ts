@@ -1,5 +1,5 @@
-import { cssVarV2 } from '@toeverything/theme/v2';
-import { css, html, type TemplateResult, unsafeCSS } from 'lit';
+import { unsafeCSSVarV2 } from '@blocksuite/affine-shared/theme';
+import { css, html, type TemplateResult } from 'lit';
 import { property, query } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 
@@ -29,13 +29,11 @@ export class MenuInput extends MenuFocusable {
     }
 
     .affine-menu-input.focused {
-      border: 1px solid
-        ${unsafeCSS(cssVarV2('layer/insideBorder/primaryBorder'))};
+      border: 1px solid ${unsafeCSSVarV2('layer/insideBorder/primaryBorder')};
     }
 
     .affine-menu-input:focus {
-      border: 1px solid
-        ${unsafeCSS(cssVarV2('layer/insideBorder/primaryBorder'))};
+      border: 1px solid ${unsafeCSSVarV2('layer/insideBorder/primaryBorder')};
       box-shadow: 0px 0px 0px 2px rgba(28, 158, 228, 0.3);
     }
   `;

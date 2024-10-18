@@ -385,7 +385,10 @@ export class DatabaseBlockComponent extends CaptionedBlockComponent<
                 },
               });
               if (peekViewService) {
-                return peekViewService.peek(target, template);
+                return peekViewService.peek({
+                  target,
+                  template,
+                });
               } else {
                 return popSideDetail(template);
               }

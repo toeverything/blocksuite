@@ -1,3 +1,4 @@
+import { unsafeCSSVar, unsafeCSSVarV2 } from '@blocksuite/affine-shared/theme';
 import {
   type BlockComponent,
   type BlockStdScope,
@@ -11,10 +12,8 @@ import {
   ZERO_WIDTH_SPACE,
 } from '@blocksuite/inline';
 import { effect, signal } from '@preact/signals-core';
-import { cssVar } from '@toeverything/theme';
-import { cssVarV2 } from '@toeverything/theme/v2';
 import katex from 'katex';
-import { css, html, render, unsafeCSS } from 'lit';
+import { css, html, render } from 'lit';
 import { property } from 'lit/decorators.js';
 
 import type { AffineTextAttributes } from '../../../../extension/index.js';
@@ -32,7 +31,7 @@ export class AffineLatexNode extends SignalWatcher(
     affine-latex-node .affine-latex {
       white-space: nowrap;
       word-break: break-word;
-      color: ${unsafeCSS(cssVar('textPrimaryColor'))};
+      color: ${unsafeCSSVar('textPrimaryColor')};
       fill: var(--affine-icon-color);
       border-radius: 4px;
       text-decoration: none;
@@ -46,10 +45,10 @@ export class AffineLatexNode extends SignalWatcher(
       margin: 0 2px;
     }
     affine-latex-node .affine-latex:hover {
-      background: ${unsafeCSS(cssVar('hoverColor'))};
+      background: ${unsafeCSSVar('hoverColor')};
     }
     affine-latex-node .affine-latex[data-selected='true'] {
-      background: ${unsafeCSS(cssVar('hoverColor'))};
+      background: ${unsafeCSSVar('hoverColor')};
     }
 
     affine-latex-node .error-placeholder {
@@ -60,9 +59,9 @@ export class AffineLatexNode extends SignalWatcher(
       gap: 10px;
 
       border-radius: 4px;
-      background: ${unsafeCSS(cssVarV2('label/red'))};
+      background: ${unsafeCSSVarV2('label/red')};
 
-      color: ${unsafeCSS(cssVarV2('text/highlight/fg/red'))};
+      color: ${unsafeCSSVarV2('text/highlight/fg/red')};
       font-family: Inter;
       font-size: 12px;
       font-weight: 500;
@@ -76,9 +75,9 @@ export class AffineLatexNode extends SignalWatcher(
       align-items: flex-start;
 
       border-radius: 4px;
-      background: ${unsafeCSS(cssVarV2('layer/background/secondary'))};
+      background: ${unsafeCSSVarV2('layer/background/secondary')};
 
-      color: ${unsafeCSS(cssVarV2('text/secondary'))};
+      color: ${unsafeCSSVarV2('text/secondary')};
       font-family: Inter;
       font-size: 12px;
       font-weight: 500;
