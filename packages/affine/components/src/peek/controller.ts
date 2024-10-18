@@ -11,7 +11,10 @@ export class PeekableController<T extends PeekableClass> {
 
   peek = (template?: TemplateResult) => {
     return Promise.resolve<void>(
-      this._getPeekViewService()?.peek(this.target, template)
+      this._getPeekViewService()?.peek({
+        target: this.target,
+        template,
+      })
     );
   };
 

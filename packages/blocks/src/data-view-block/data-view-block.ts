@@ -287,7 +287,7 @@ export class DataViewBlockComponent extends CaptionedBlockComponent<DataViewBloc
                     ),
                   },
                 });
-                return peekViewService.peek(target, template);
+                return peekViewService.peek({ target, template });
               } else {
                 return Promise.resolve();
               }
