@@ -83,3 +83,31 @@ export const isText = (o: unknown) => {
   }
   return false;
 };
+
+export function toURLSearchParams(
+  params?: Partial<Record<string, string | string[]>>
+) {
+  if (!params) return;
+
+  const items = Object.entries(params)
+    .filter(([_, v]) => !isNullish(v))
+    .filter(([_, v]) => {
+      if (typeof v === 'string') {
+        return v.length > 0;
+      }
+      if (Array.isArray(v)) {
+        return v.length > 0;
+      }
+      return false;
+    })
+    .map(([k, v]) => [k, Array.isArray(v) ? v.filter(v => v.length) : v]) as [
+    string,
+    string | string[],
+  ][];
+
+  return new URLSearchParams(
+    items
+      .filter(([_, v]) => v.length)
+      .map(([k, v]) => [k, Array.isArray(v) ? v.join(',') : v])
+  );
+}

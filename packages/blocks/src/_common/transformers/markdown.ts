@@ -5,11 +5,18 @@ import { assertExists } from '@blocksuite/global/utils';
 import { Job } from '@blocksuite/store';
 
 import { MarkdownAdapter } from '../adapters/index.js';
-import { defaultImageProxyMiddleware } from './middlewares.js';
+import {
+  defaultImageProxyMiddleware,
+  docLinkBaseURLMiddleware,
+  titleMiddleware,
+} from './middlewares.js';
 import { createAssetsArchive, download } from './utils.js';
 
 async function exportDoc(doc: Doc) {
-  const job = new Job({ collection: doc.collection });
+  const job = new Job({
+    collection: doc.collection,
+    middlewares: [docLinkBaseURLMiddleware, titleMiddleware],
+  });
   const snapshot = await job.docToSnapshot(doc);
 
   const adapter = new MarkdownAdapter(job);

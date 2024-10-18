@@ -36,7 +36,13 @@ import remarkStringify from 'remark-stringify';
 import { unified } from 'unified';
 
 import { remarkGfm } from './gfm.js';
-import { createText, fetchable, fetchImage, isNullish } from './utils.js';
+import {
+  createText,
+  fetchable,
+  fetchImage,
+  isNullish,
+  toURLSearchParams,
+} from './utils.js';
 
 export type Markdown = string;
 
@@ -782,6 +788,50 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
 
           break;
         }
+        case 'affine:embed-linked-doc': {
+          // Parse as link
+          if (!o.node.props.pageId) {
+            break;
+          }
+          const title =
+            this.configs.get('title:' + o.node.props.pageId) ?? 'untitled';
+          const { mode, blockIds, elementIds } = o.node.props;
+          const baseUrl = this.configs.get('docLinkBaseUrl') ?? '';
+          const search = toURLSearchParams({
+            mode: mode as string,
+            blockIds: blockIds as string[],
+            elementIds: elementIds as string[],
+          });
+          const query = search?.size ? `?${search.toString()}` : '';
+          const url = baseUrl
+            ? `${baseUrl}/${o.node.props.pageId}${query}`
+            : '';
+          context
+            .openNode(
+              {
+                type: 'paragraph',
+                children: [],
+              },
+              'children'
+            )
+            .openNode(
+              {
+                type: 'link',
+                url,
+                title: o.node.props.caption as string | null,
+                children: [
+                  {
+                    type: 'text',
+                    value: title,
+                  },
+                ],
+              },
+              'children'
+            )
+            .closeNode()
+            .closeNode();
+          break;
+        }
         case 'affine:embed-loom':
         case 'affine:embed-github':
         case 'affine:embed-youtube':
@@ -913,10 +963,24 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
         const title = this.configs.get(
           'title:' + delta.attributes.reference.pageId
         );
+        const { mode, blockIds, elementIds } =
+          delta.attributes?.reference.params ?? {};
+        const baseUrl = this.configs.get('docLinkBaseUrl') ?? '';
+        const search = toURLSearchParams({ mode, blockIds, elementIds });
+        const query = search?.size ? `?${search.toString()}` : '';
+        const url = baseUrl
+          ? `${baseUrl}/${delta.attributes.reference.pageId}${query}`
+          : '';
         if (typeof title === 'string') {
           mdast = {
-            type: 'text',
-            value: title,
+            type: 'link',
+            url,
+            children: [
+              {
+                type: 'text',
+                value: title,
+              },
+            ],
           };
         }
       }
