@@ -15,7 +15,6 @@ import {
   FontFamilyVariables,
   HtmlTransformer,
   importNotion,
-  MarkdownAdapter,
   MarkdownTransformer,
   NotionHtmlAdapter,
   openFileOrFiles,
@@ -239,20 +238,53 @@ export class DebugMenu extends ShadowlessElement {
   }
 
   private async _importMarkdown() {
-    const file = await openFileOrFiles({
-      acceptType: 'Markdown',
-      multiple: false,
-    });
-    if (!file) return;
-    const job = new Job({
-      collection: this.collection,
-      middlewares: [defaultImageProxyMiddleware],
-    });
-    const markdownAdapter = new MarkdownAdapter(job);
-    await markdownAdapter.toDoc({
-      file: await file.text(),
-      assets: job.assetsManager,
-    });
+    try {
+      const files = await openFileOrFiles({
+        acceptType: 'Markdown',
+        multiple: true,
+      });
+
+      if (!files) return;
+
+      const pageIds: string[] = [];
+      for (const file of files) {
+        const text = await file.text();
+        const fileName = file.name.split('.').slice(0, -1).join('.');
+        const pageId = await MarkdownTransformer.importMarkdownToDoc({
+          collection: this.collection,
+          markdown: text,
+          fileName,
+        });
+        if (pageId) {
+          pageIds.push(pageId);
+        }
+      }
+      if (!this.editor.host) return;
+      toast(
+        this.editor.host,
+        `Successfully imported ${pageIds.length} markdown files.`
+      );
+    } catch (error) {
+      console.error(' Import markdown files failed:', error);
+    }
+  }
+
+  private async _importMarkdownZip() {
+    try {
+      const file = await openFileOrFiles({ acceptType: 'Zip' });
+      if (!file) return;
+      const result = await MarkdownTransformer.importMarkdownZip({
+        collection: this.collection,
+        imported: file,
+      });
+      if (!this.editor.host) return;
+      toast(
+        this.editor.host,
+        `Successfully imported ${result.length} markdown files.`
+      );
+    } catch (error) {
+      console.error('Import markdown zip files failed:', error);
+    }
   }
 
   private async _importNotionHTML() {
@@ -662,8 +694,16 @@ export class DebugMenu extends ShadowlessElement {
                       </sl-menu-item>
                     </sl-menu>
                   </sl-menu-item>
-                  <sl-menu-item @click="${this._importMarkdown}">
+                  <sl-menu-item>
                     Import Markdown
+                    <sl-menu slot="submenu">
+                      <sl-menu-item @click="${this._importMarkdown}">
+                        Markdown Files
+                      </sl-menu-item>
+                      <sl-menu-item @click="${this._importMarkdownZip}">
+                        Markdown Zip
+                      </sl-menu-item>
+                    </sl-menu>
                   </sl-menu-item>
                 </sl-menu>
               </sl-menu-item>
