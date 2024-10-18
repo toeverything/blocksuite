@@ -625,37 +625,47 @@ export class DebugMenu extends ShadowlessElement {
             </sl-button>
             <sl-menu>
               <sl-menu-item @click="${this._print}">Print</sl-menu-item>
-              <sl-menu-item @click="${this._exportMarkDown}">
-                Export Markdown
-              </sl-menu-item>
-              <sl-menu-item @click="${this._exportHtml}">
-                Export HTML
-              </sl-menu-item>
-              <sl-menu-item @click="${this._exportPdf}">
-                Export PDF
-              </sl-menu-item>
-              <sl-menu-item @click="${this._exportPng}">
-                Export PNG
-              </sl-menu-item>
-              <sl-menu-item @click="${this._exportSnapshot}">
-                Export Snapshot
-              </sl-menu-item>
-              <sl-menu-item @click="${this._importSnapshot}">
-                Import Snapshot
-              </sl-menu-item>
               <sl-menu-item>
-                Import Notion HTML
+                Export
                 <sl-menu slot="submenu">
-                  <sl-menu-item @click="${this._importNotionHTML}">
-                    Single Notion HTML Page
+                  <sl-menu-item @click="${this._exportMarkDown}">
+                    Export Markdown
                   </sl-menu-item>
-                  <sl-menu-item @click="${this._importNotionHTMLZip}">
-                    Notion HTML Zip
+                  <sl-menu-item @click="${this._exportHtml}">
+                    Export HTML
+                  </sl-menu-item>
+                  <sl-menu-item @click="${this._exportPdf}">
+                    Export PDF
+                  </sl-menu-item>
+                  <sl-menu-item @click="${this._exportPng}">
+                    Export PNG
+                  </sl-menu-item>
+                  <sl-menu-item @click="${this._exportSnapshot}">
+                    Export Snapshot
                   </sl-menu-item>
                 </sl-menu>
               </sl-menu-item>
-              <sl-menu-item @click="${this._importMarkdown}">
-                Import Markdown
+              <sl-menu-item>
+                Import
+                <sl-menu slot="submenu">
+                  <sl-menu-item @click="${this._importSnapshot}">
+                    Import Snapshot
+                  </sl-menu-item>
+                  <sl-menu-item>
+                    Import Notion HTML
+                    <sl-menu slot="submenu">
+                      <sl-menu-item @click="${this._importNotionHTML}">
+                        Single Notion HTML Page
+                      </sl-menu-item>
+                      <sl-menu-item @click="${this._importNotionHTMLZip}">
+                        Notion HTML Zip
+                      </sl-menu-item>
+                    </sl-menu>
+                  </sl-menu-item>
+                  <sl-menu-item @click="${this._importMarkdown}">
+                    Import Markdown
+                  </sl-menu-item>
+                </sl-menu>
               </sl-menu-item>
               <sl-menu-item @click="${this._toggleStyleDebugMenu}">
                 Toggle CSS Debug Menu
