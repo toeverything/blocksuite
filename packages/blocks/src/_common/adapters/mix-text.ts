@@ -245,6 +245,13 @@ export class MixTextAdapter extends BaseAdapter<MixText> {
       return null;
     }
     payload.file = payload.file.replaceAll('\r', '');
+    const lines = payload.file.split('\n');
+    for (let i = 0; i < lines.length - 1; i++) {
+      if (lines[i].length !== 0 && lines[i + 1].length !== 0) {
+        lines[i] += '\n';
+      }
+    }
+    payload.file = lines.join('\n');
     const sliceSnapshot = await this._markdownAdapter.toSliceSnapshot({
       file: payload.file,
       assets: payload.assets,
