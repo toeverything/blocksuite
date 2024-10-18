@@ -71,13 +71,13 @@ test('undo/redo should work correctly after resizing', async ({ page }) => {
   await dragBetweenCoords(
     page,
     { x: box.x + 5, y: box.y + 5 },
-    { x: box.x - 45, y: box.y + 5 }
+    { x: box.x + 105, y: box.y + 5 }
   );
   const draggedRect = await getNoteRect(page, noteId);
   assertRectEqual(draggedRect, {
     x: initRect.x,
     y: initRect.y,
-    w: initRect.w - 50,
+    w: initRect.w + 100,
     h: draggedRect.h, // not assert `h` here
   });
   expect(draggedRect.h).toBe(initRect.h);

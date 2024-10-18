@@ -14,13 +14,12 @@ import { property, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type {
-  EdgelessRootBlockComponent,
-  NoteBlockComponent,
-  NoteBlockModel,
+import {
+  DEFAULT_NOTE_HEIGHT,
+  type EdgelessRootBlockComponent,
+  type NoteBlockComponent,
+  type NoteBlockModel,
 } from '../../../../index.js';
-
-import { DEFAULT_NOTE_HEIGHT } from '../../utils/consts.js';
 import { isNoteBlock } from '../../utils/query.js';
 
 const DIVIDING_LINE_OFFSET = 4;

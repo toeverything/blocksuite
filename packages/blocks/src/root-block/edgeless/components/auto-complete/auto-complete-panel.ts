@@ -16,6 +16,7 @@ import {
 } from '@blocksuite/affine-components/icons';
 import {
   DEFAULT_NOTE_BACKGROUND_COLOR,
+  DEFAULT_NOTE_WIDTH,
   DEFAULT_SHAPE_FILL_COLOR,
   DEFAULT_SHAPE_STROKE_COLOR,
   DEFAULT_TEXT_COLOR,
@@ -48,7 +49,6 @@ import { styleMap } from 'lit/directives/style-map.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
 
 import {
-  DEFAULT_NOTE_WIDTH,
   SHAPE_OVERLAY_HEIGHT,
   SHAPE_OVERLAY_WIDTH,
 } from '../../utils/consts.js';

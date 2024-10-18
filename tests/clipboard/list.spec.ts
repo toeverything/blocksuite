@@ -48,7 +48,7 @@ import {
 import {
   assertBlockTypes,
   assertEdgelessNoteBackground,
-  assertEdgelessSelectedRectModel,
+  assertEdgelessSelectedModelRect,
   assertExists,
   assertRichTextModelType,
   assertRichTexts,
@@ -536,7 +536,7 @@ test(`copy canvas element and text note in edgeless mode`, async ({ page }) => {
   await page.waitForTimeout(300);
   await pasteByKeyboard(page, false);
   bound[1] = bound[1] + 200;
-  await assertEdgelessSelectedRectModel(page, bound);
+  await assertEdgelessSelectedModelRect(page, bound);
 });
 
 test(scoped`copy when text note active in edgeless`, async ({ page }) => {
