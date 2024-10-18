@@ -47,7 +47,7 @@ export interface DataViewRendererConfig {
     {
       props: DataViewProps;
     },
-    DataViewExpose
+    { expose: DataViewExpose }
   >;
   icon: UniComponent;
 }
