@@ -32,11 +32,15 @@ export class Overflow extends SignalWatcher(WithDisposable(ShadowlessElement)) {
 
   protected _frameId: number | undefined = undefined;
 
-  adjustStyle() {
+  adjustStyle(ignoreCache = false) {
     const rectWidth = this.getBoundingClientRect().width;
     const cacheKey = `${rectWidth}-${this.items.length}`;
 
-    if (this._countCache[0] === cacheKey && this._countCache[1] !== -1) {
+    if (
+      !!ignoreCache &&
+      this._countCache[0] === cacheKey &&
+      this._countCache[1] !== -1
+    ) {
       this.renderCount = this._countCache[1];
       return;
     }
@@ -90,7 +94,9 @@ export class Overflow extends SignalWatcher(WithDisposable(ShadowlessElement)) {
     }
 
     this._frameId = requestAnimationFrame(() => {
-      this.adjustStyle();
+      // when `updated` is invoked, it usually means user has changed the data
+      // so any item may change its size, we need to re-calculate the size
+      this.adjustStyle(true);
     });
   }
 
