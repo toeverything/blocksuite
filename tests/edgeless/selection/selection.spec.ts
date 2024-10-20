@@ -21,7 +21,9 @@ import {
 } from '../../utils/actions/index.js';
 import {
   assertBlockCount,
+  assertEdgelessRemoteSelectedModelRect,
   assertEdgelessRemoteSelectedRect,
+  assertEdgelessSelectedModelRect,
   assertEdgelessSelectedRect,
   assertSelectionInNote,
 } from '../../utils/asserts.js';
@@ -91,12 +93,18 @@ test('should update react of remote selection when resizing viewport', async ({
   await actions.switchEditorMode(pageB);
   await actions.zoomResetByKeyboard(pageB);
 
-  await addBasicRectShapeElement(pageA, { x: 100, y: 100 }, { x: 200, y: 200 });
-  await click(pageA, { x: 110, y: 110 });
-  await click(pageB, { x: 110, y: 110 });
+  await actions.createShapeElement(
+    pageA,
+    [0, 0],
+    [100, 100],
+    actions.Shape.Square
+  );
+  const point = await actions.toViewCoord(pageA, [50, 50]);
+  await click(pageA, { x: point[0], y: point[1] });
+  await click(pageB, { x: point[0], y: point[1] });
 
-  await assertEdgelessSelectedRect(pageB, [100, 100, 100, 100]);
-  await assertEdgelessRemoteSelectedRect(pageB, [100, 100, 100, 100]);
+  await assertEdgelessSelectedModelRect(pageB, [0, 0, 100, 100]);
+  await assertEdgelessRemoteSelectedModelRect(pageB, [0, 0, 100, 100]);
 
   // to 50%
   await actions.decreaseZoomLevel(pageB);
