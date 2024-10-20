@@ -46,6 +46,50 @@ export class PointerEventWatcher {
     );
   };
 
+  /**
+   * When click on drag handle
+   * Should select the block and show slash menu if current block is not selected
+   * Should clear selection if current block is the first selected block
+   */
+  private _clickHandler: UIEventHandler = ctx => {
+    if (!this.widget.isHoverDragHandleVisible) return;
+
+    const state = ctx.get('pointerState');
+    const { target } = state.raw;
+    const element = captureEventTarget(target);
+    const insideDragHandle = !!element?.closest(AFFINE_DRAG_HANDLE_WIDGET);
+    if (!insideDragHandle) return;
+
+    const anchorBlockId = this.widget.anchorBlockId.peek();
+
+    if (!anchorBlockId) return;
+
+    const { selection } = this.widget.std;
+    const selectedBlocks = this.widget.selectionHelper.selectedBlocks;
+
+    // Should clear selection if current block is the first selected block
+    if (
+      selectedBlocks.length > 0 &&
+      !includeTextSelection(selectedBlocks) &&
+      selectedBlocks[0].blockId === anchorBlockId
+    ) {
+      selection.clear(['block']);
+      this.widget.dragHoverRect = null;
+      this.showDragHandleOnHoverBlock();
+      return;
+    }
+
+    // Should select the block if current block is not selected
+    const block = this.widget.anchorBlockComponent.peek();
+    if (!block) return;
+
+    if (selectedBlocks.length > 1) {
+      this.showDragHandleOnHoverBlock();
+    }
+
+    this.widget.selectionHelper.setSelectedBlocks([block]);
+  };
+
   private _containerStyle = computed(() => {
     const draggingAreaRect = this.widget.draggingAreaRect.value;
     if (!draggingAreaRect) return null;
@@ -103,37 +147,6 @@ export class PointerEventWatcher {
   private _lastHoveredBlockId: string | null = null;
 
   private _lastShowedBlock: { id: string; el: BlockComponent } | null = null;
-
-  private _onClick = () => {
-    const anchorBlockId = this.widget.anchorBlockId.peek();
-
-    if (!anchorBlockId) return;
-
-    const { selection } = this.widget.std;
-    const selectedBlocks = this.widget.selectionHelper.selectedBlocks;
-
-    // Should clear selection if current block is the first selected block
-    if (
-      selectedBlocks.length > 0 &&
-      !includeTextSelection(selectedBlocks) &&
-      selectedBlocks[0].blockId === anchorBlockId
-    ) {
-      selection.clear(['block']);
-      this.widget.dragHoverRect = null;
-      this.showDragHandleOnHoverBlock();
-      return;
-    }
-
-    // Should select the block if current block is not selected
-    const block = this.widget.anchorBlockComponent.peek();
-    if (!block) return;
-
-    if (selectedBlocks.length > 1) {
-      this.showDragHandleOnHoverBlock();
-    }
-
-    this.widget.selectionHelper.setSelectedBlocks([block]);
-  };
 
   /**
    * When pointer move on block, should show drag handle
@@ -317,19 +330,7 @@ export class PointerEventWatcher {
   }
 
   watch() {
-    // this.widget.disposables.addFromEvent(this.widget, 'pointerdown', e => {
-    //   e.stopPropagation();
-    //   return true;
-    // });
-
-    requestAnimationFrame(() => {
-      this.widget.disposables.addFromEvent(
-        this.widget.dragHandleContainer,
-        'click',
-        this._onClick
-      );
-    });
-    // this.widget.handleEvent('click', this._clickHandler);
+    this.widget.handleEvent('click', this._clickHandler);
     this.widget.handleEvent('pointerMove', this._throttledPointerMoveHandler);
     this.widget.handleEvent('pointerOut', this._pointerOutHandler);
   }

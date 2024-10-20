@@ -421,6 +421,8 @@ export class DragEventWatcher {
 
     if (blocksExcludingChildren.length === 0) return false;
 
+    console.log(blocks);
+    console.log(blocksExcludingChildren);
     this._startDragging(blocksExcludingChildren, state);
     this.widget.hide();
     return true;
