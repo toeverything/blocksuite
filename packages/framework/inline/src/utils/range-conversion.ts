@@ -269,10 +269,7 @@ export function inlineRangeToDomRange(
 
     const texts = getTextNodesFromElement(lineElements[i]);
     if (texts.length === 0) {
-      throw new BlockSuiteError(
-        ErrorCode.InlineEditorError,
-        'text node in v-text not found'
-      );
+      return null;
     }
 
     for (const text of texts) {
