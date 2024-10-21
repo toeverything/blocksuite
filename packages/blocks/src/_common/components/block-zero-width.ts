@@ -34,6 +34,7 @@ export class BlockZeroWidth extends LitElement {
   }
 
   override render() {
+    return html`<div></div>`;
     return html`<div class="block-zero-width" @click=${this.handleClick}>
       <span>${ZERO_WIDTH_SPACE}</span>
     </div>`;

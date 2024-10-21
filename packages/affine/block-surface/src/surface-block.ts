@@ -107,10 +107,10 @@ export class SurfaceBlockComponent extends BlockComponent<
 
   private _initCanvasTransform = () => {
     const refresh = () => {
-      this._surfaceContainer.style.setProperty(
-        '--canvas-transform',
-        this._getReversedTransform()
-      );
+      // this._surfaceContainer.style.setProperty(
+      //   '--canvas-transform',
+      //   this._getReversedTransform()
+      // );
     };
 
     this._disposables.add(
@@ -179,6 +179,8 @@ export class SurfaceBlockComponent extends BlockComponent<
       layerManager: gfx.layer,
       gridManager: gfx.grid,
       enableStackingCanvas: true,
+      // @ts-expect-error
+      renderDpr: this.std.getConfig('affine:page')?.renderDpr ?? 1,
       provider: {
         generateColorProperty: (color: Color, fallback: string) =>
           ThemeObserver.generateColorProperty(color, fallback),
