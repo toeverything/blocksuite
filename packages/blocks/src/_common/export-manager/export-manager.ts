@@ -399,8 +399,7 @@ export class ExportManager {
         this.editorHost,
         rootModel
       ) as EdgelessRootBlockComponent;
-      const bound = edgeless.getElementsBound();
-      if (!bound) return;
+      const bound = edgeless.gfx.elementsBound;
       return this.edgelessToCanvas(edgeless.surface.renderer, bound, edgeless);
     }
   }

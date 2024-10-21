@@ -4,6 +4,7 @@ import {
   assertType,
   Bound,
   DisposableGroup,
+  getCommonBoundWithRotation,
   type IBound,
   last,
 } from '@blocksuite/global/utils';
@@ -47,6 +48,14 @@ export class GfxController extends LifeCycleWatcher {
 
   get doc() {
     return this.std.doc;
+  }
+
+  get elementsBound() {
+    return getCommonBoundWithRotation(this.gfxElements);
+  }
+
+  get gfxElements(): GfxModel[] {
+    return [...this.layer.blocks, ...this.layer.canvasElements];
   }
 
   get surface() {
@@ -274,12 +283,17 @@ export class GfxController extends LifeCycleWatcher {
     this._disposables.dispose();
   }
 
-  updateElement(element: GfxModel, props: Record<string, unknown>): void {
-    if (this.surface?.hasElementById(element.id)) {
-      this.surface.updateElement(element.id, props);
+  updateElement(
+    element: GfxModel | string,
+    props: Record<string, unknown>
+  ): void {
+    const elemId = typeof element === 'string' ? element : element.id;
+
+    if (this.surface?.hasElementById(elemId)) {
+      this.surface.updateElement(elemId, props);
     } else {
-      const hasBlock = this.doc.hasBlock(element.id);
-      hasBlock && this.doc.updateBlock(element as GfxBlockElementModel, props);
+      const block = this.doc.getBlock(elemId);
+      block && this.doc.updateBlock(block.model, props);
     }
   }
 }

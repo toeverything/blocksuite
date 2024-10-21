@@ -48,7 +48,9 @@ export class EdgelessNavigatorBlackBackground extends WithDisposable(
           this._blackBackground = blackBackground;
 
           this.show =
-            blackBackground && edgeless.edgelessTool.type === 'frameNavigator';
+            blackBackground &&
+            edgeless.gfx.tool.currentToolOption$.peek().type ===
+              'frameNavigator';
         }
       })
     );

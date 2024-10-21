@@ -1,11 +1,16 @@
-import type { IVec, SerializedXYWH, XYWH } from '@blocksuite/global/utils';
+import type {
+  IBound,
+  IVec,
+  SerializedXYWH,
+  XYWH,
+} from '@blocksuite/global/utils';
 
 import {
   Bound,
   deserializeXYWH,
   DisposableGroup,
-  getBoundsWithRotation,
-  getPointsFromBoundsWithRotation,
+  getBoundWithRotation,
+  getPointsFromBoundWithRotation,
   linePolygonIntersects,
   PointLocation,
   polygonGetPointTangent,
@@ -93,8 +98,9 @@ export interface GfxElementGeometry {
 }
 
 export abstract class GfxPrimitiveElementModel<
-  Props extends BaseElementProps = BaseElementProps,
-> implements GfxElementGeometry
+    Props extends BaseElementProps = BaseElementProps,
+  >
+  implements GfxElementGeometry, IBound
 {
   private _lastXYWH!: SerializedXYWH;
 
@@ -149,7 +155,7 @@ export abstract class GfxPrimitiveElementModel<
    */
   get elementBound() {
     if (this.rotate) {
-      return Bound.from(getBoundsWithRotation(this));
+      return Bound.from(getBoundWithRotation(this));
     }
 
     return Bound.deserialize(this.xywh);
@@ -229,18 +235,18 @@ export abstract class GfxPrimitiveElementModel<
   }
 
   containsBound(bounds: Bound): boolean {
-    return getPointsFromBoundsWithRotation(this).some(point =>
+    return getPointsFromBoundWithRotation(this).some(point =>
       bounds.containsPoint(point)
     );
   }
 
   getLineIntersections(start: IVec, end: IVec) {
-    const points = getPointsFromBoundsWithRotation(this);
+    const points = getPointsFromBoundWithRotation(this);
     return linePolygonIntersects(start, end, points);
   }
 
   getNearestPoint(point: IVec) {
-    const points = getPointsFromBoundsWithRotation(this);
+    const points = getPointsFromBoundWithRotation(this);
     return polygonNearestPoint(points, point);
   }
 

@@ -1,4 +1,5 @@
-import { Bound, type IBound } from './model/bound.js';
+import type { Bound, IBound } from './model/bound.js';
+
 import { PointLocation } from './model/point-location.js';
 import { type IVec, Vec } from './model/vec.js';
 
@@ -7,123 +8,8 @@ export const MACHINE_EPSILON = 1.12e-16;
 export const PI2 = Math.PI * 2;
 export const CURVETIME_EPSILON = 1e-8;
 
-interface TLBounds {
-  minX: number;
-  minY: number;
-  maxX: number;
-  maxY: number;
-  width: number;
-  height: number;
-  rotation?: number;
-}
-
 export function randomSeed(): number {
   return Math.floor(Math.random() * 2 ** 31);
-}
-
-export function getBoundsFromPoints(points: IVec[], rotation = 0): TLBounds {
-  let minX = Infinity;
-  let minY = Infinity;
-  let maxX = -Infinity;
-  let maxY = -Infinity;
-
-  if (points.length < 1) {
-    minX = 0;
-    minY = 0;
-    maxX = 1;
-    maxY = 1;
-  } else {
-    for (const [x, y] of points) {
-      minX = Math.min(x, minX);
-      minY = Math.min(y, minY);
-      maxX = Math.max(x, maxX);
-      maxY = Math.max(y, maxY);
-    }
-  }
-
-  if (rotation !== 0) {
-    return getBoundsFromPoints(
-      points.map(pt =>
-        Vec.rotWith(pt, [(minX + maxX) / 2, (minY + maxY) / 2], rotation)
-      )
-    );
-  }
-
-  return {
-    minX,
-    minY,
-    maxX,
-    maxY,
-    width: Math.max(1, maxX - minX),
-    height: Math.max(1, maxY - minY),
-  };
-}
-
-export function getPointsFromBoundsWithRotation(
-  bounds: IBound,
-  getPoints: (bounds: IBound) => IVec[] = ({ x, y, w, h }: IBound) => [
-    // left-top
-    [x, y],
-    // right-top
-    [x + w, y],
-    // right-bottom
-    [x + w, y + h],
-    // left-bottom
-    [x, y + h],
-  ],
-  resPadding: [number, number] = [0, 0]
-): IVec[] {
-  const { rotate } = bounds;
-  let points = getPoints({
-    x: bounds.x - resPadding[1],
-    y: bounds.y - resPadding[0],
-    w: bounds.w + resPadding[1] * 2,
-    h: bounds.h + resPadding[0] * 2,
-  });
-
-  if (rotate) {
-    const { x, y, w, h } = bounds;
-    const cx = x + w / 2;
-    const cy = y + h / 2;
-
-    const m = new DOMMatrix()
-      .translateSelf(cx, cy)
-      .rotateSelf(rotate)
-      .translateSelf(-cx, -cy);
-
-    points = points.map(point => {
-      const { x, y } = new DOMPoint(...point).matrixTransform(m);
-      return [x, y];
-    });
-  }
-
-  return points;
-}
-
-export function getQuadBoundsWithRotation(bounds: IBound): DOMRect {
-  const { x, y, w, h, rotate } = bounds;
-  const rect = new DOMRect(x, y, w, h);
-
-  if (!rotate) return rect;
-
-  return new DOMQuad(
-    ...getPointsFromBoundsWithRotation(bounds).map(
-      point => new DOMPoint(...point)
-    )
-  ).getBounds();
-}
-
-export function getBoundsWithRotation(bounds: IBound): IBound {
-  const { x, y, width: w, height: h } = getQuadBoundsWithRotation(bounds);
-  return { x, y, w, h };
-}
-
-export function getUnitedBound(bounds: Bound[]): Bound {
-  if (bounds.length === 0) return new Bound(0, 0, 0, 0);
-
-  return bounds.reduce((pre, bound) => {
-    return pre.unite(bound);
-  }, bounds[0]);
 }
 
 export function lineIntersects(

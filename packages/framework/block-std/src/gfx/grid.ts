@@ -3,7 +3,7 @@ import type { BlockModel, Doc } from '@blocksuite/store';
 
 import {
   Bound,
-  getBoundsWithRotation,
+  getBoundWithRotation,
   intersects,
   isPointIn,
 } from '@blocksuite/global/utils';
@@ -17,7 +17,7 @@ function getGridIndex(val: number) {
 }
 
 function rangeFromBound(a: IBound): number[] {
-  if (a.rotate) a = getBoundsWithRotation(a);
+  if (a.rotate) a = getBoundWithRotation(a);
   const minRow = getGridIndex(a.x);
   const maxRow = getGridIndex(a.x + a.w);
   const minCol = getGridIndex(a.y);
@@ -221,7 +221,7 @@ export class GridManager {
     const results: GfxModel[] = [];
     for (const element of gridElements) {
       if (
-        isPointIn(getBoundsWithRotation(Bound.deserialize(element.xywh)), x, y)
+        isPointIn(getBoundWithRotation(Bound.deserialize(element.xywh)), x, y)
       ) {
         results.push(element);
       }
