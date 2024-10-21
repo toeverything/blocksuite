@@ -17,6 +17,7 @@ import { DataViewBlockSpec } from '../../data-view-block/data-view-spec.js';
 import { DatabaseBlockSpec } from '../../database-block/database-spec.js';
 import { DividerBlockSpec } from '../../divider-block/divider-spec.js';
 import { ImageBlockSpec } from '../../image-block/image-spec.js';
+import { MicrosheetBlockSpec } from '../../microsheet-block/microsheet-spec.js';
 import {
   EdgelessNoteBlockSpec,
   NoteBlockSpec,
@@ -39,6 +40,7 @@ export {
   EmbedYoutubeBlockSpec,
   ImageBlockSpec,
   ListBlockSpec,
+  MicrosheetBlockSpec,
   NoteBlockSpec,
   ParagraphBlockSpec,
 };

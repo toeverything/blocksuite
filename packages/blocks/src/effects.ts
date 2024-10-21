@@ -19,6 +19,11 @@ import { effects as inlineEffects } from '@blocksuite/inline/effects';
 
 import type { insertBookmarkCommand } from './bookmark-block/commands/insert-bookmark.js';
 import type { insertEdgelessTextCommand } from './edgeless-text-block/commands/insert-edgeless-text.js';
+import type {
+  MicrosheetBlockComponent,
+  MicrosheetBlockService,
+  type MicrosheetBlockService,
+} from './microsheet-block/index.js';
 import type { updateBlockType } from './note-block/commands/block-type.js';
 import type { dedentBlock } from './note-block/commands/dedent-block.js';
 import type { dedentBlockToRoot } from './note-block/commands/dedent-block-to-root.js';
@@ -410,6 +415,7 @@ export function effects() {
   );
   customElements.define('affine-custom-modal', AffineCustomModal);
   customElements.define('affine-database', DatabaseBlockComponent);
+  customElements.define('affine-microsheet', MicrosheetBlockComponent);
   customElements.define('affine-surface-ref', SurfaceRefBlockComponent);
   customElements.define('pie-node-child', PieNodeChild);
   customElements.define('pie-node-content', PieNodeContent);
@@ -721,6 +727,7 @@ declare global {
       'affine:attachment': AttachmentBlockService;
       'affine:bookmark': BookmarkBlockService;
       'affine:database': DatabaseBlockService;
+      'affine:microsheet': MicrosheetBlockService;
       'affine:image': ImageBlockService;
       'affine:surface-ref': SurfaceRefBlockService;
     }

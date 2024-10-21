@@ -13,6 +13,7 @@ import { DataViewBlockSpec } from '../data-view-block/data-view-spec.js';
 import { DatabaseBlockSpec } from '../database-block/database-spec.js';
 import { DividerBlockSpec } from '../divider-block/divider-spec.js';
 import { ImageBlockSpec } from '../image-block/image-spec.js';
+import { MicrosheetBlockSpec } from '../microsheet-block/microsheet-spec.js';
 import {
   EdgelessNoteBlockSpec,
   NoteBlockSpec,
@@ -24,6 +25,7 @@ export const CommonFirstPartyBlockSpecs: ExtensionType[] = [
   ListBlockSpec,
   NoteBlockSpec,
   DatabaseBlockSpec,
+  MicrosheetBlockSpec,
   DataViewBlockSpec,
   DividerBlockSpec,
   CodeBlockSpec,
@@ -40,6 +42,7 @@ export const EdgelessFirstPartyBlockSpecs: ExtensionType[] = [
   ListBlockSpec,
   EdgelessNoteBlockSpec,
   DatabaseBlockSpec,
+  MicrosheetBlockSpec,
   DataViewBlockSpec,
   DividerBlockSpec,
   CodeBlockSpec,

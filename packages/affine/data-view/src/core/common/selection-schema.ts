@@ -122,6 +122,63 @@ export class DatabaseSelection extends BaseSelection {
   }
 }
 
+export class MicrosheetSelection extends BaseSelection {
+  static override group = 'note';
+
+  static override type = 'microsheet';
+
+  readonly viewSelection: DataViewSelection;
+
+  get viewId() {
+    return this.viewSelection.viewId;
+  }
+
+  constructor({
+    blockId,
+    viewSelection,
+  }: {
+    blockId: string;
+    viewSelection: DataViewSelection;
+  }) {
+    super({
+      blockId,
+    });
+
+    this.viewSelection = viewSelection;
+  }
+
+  static override fromJSON(json: Record<string, unknown>): DatabaseSelection {
+    DatabaseSelectionSchema.parse(json);
+    return new DatabaseSelection({
+      blockId: json.blockId as string,
+      viewSelection: json.viewSelection as DataViewSelection,
+    });
+  }
+
+  override equals(other: BaseSelection): boolean {
+    if (!(other instanceof DatabaseSelection)) {
+      return false;
+    }
+    return this.blockId === other.blockId;
+  }
+
+  getSelection<T extends DataViewSelection['type']>(
+    type: T
+  ): GetDataViewSelection<T> | undefined {
+    return this.viewSelection.type === type
+      ? (this.viewSelection as GetDataViewSelection<T>)
+      : undefined;
+  }
+
+  override toJSON(): Record<string, unknown> {
+    return {
+      type: 'microsheet',
+      blockId: this.blockId,
+      viewSelection: this.viewSelection,
+    };
+  }
+}
+
 declare global {
   namespace BlockSuite {
     interface Selection {
@@ -131,3 +188,5 @@ declare global {
 }
 
 export const DatabaseSelectionExtension = SelectionExtension(DatabaseSelection);
+export const MicrosheetSelectionExtension =
+  SelectionExtension(MicrosheetSelection);
