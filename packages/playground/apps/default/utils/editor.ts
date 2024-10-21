@@ -1,7 +1,11 @@
-import type { EditorHost, ExtensionType } from '@blocksuite/block-std';
 import type { BlockCollection, DocCollection } from '@blocksuite/store';
 
 import { PeekViewExtension } from '@blocksuite/affine-components/peek';
+import {
+  ConfigExtension,
+  type EditorHost,
+  type ExtensionType,
+} from '@blocksuite/block-std';
 import {
   CommunityCanvasTextFonts,
   DocModeExtension,
@@ -33,6 +37,12 @@ function setDocModeFromUrlParams(service: DocModeProvider, docId: string) {
     service.setPrimaryMode(docMode, docId);
     service.setEditorMode(docMode);
   }
+}
+
+function getRenderDprFromUrlParams() {
+  const params = new URLSearchParams(location.search);
+  const paramDpr = params.get('dpr');
+  return paramDpr ? parseFloat(paramDpr) : undefined;
 }
 
 export async function mountDefaultDocEditor(collection: DocCollection) {
@@ -120,6 +130,9 @@ export async function mountDefaultDocEditor(collection: DocCollection) {
       ),
       ParseDocUrlExtension(mockParseDocUrlService(collection)),
       NotificationExtension(mockNotificationService(editor)),
+      ConfigExtension('affine:page', {
+        renderDpr: 1,
+      }),
       FontConfigExtension(CommunityCanvasTextFonts),
       PeekViewExtension({
         peek(target: unknown) {

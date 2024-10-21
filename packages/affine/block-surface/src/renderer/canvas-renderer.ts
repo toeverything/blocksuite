@@ -54,6 +54,7 @@ type RendererOptions = {
   onStackingCanvasCreated?: (canvas: HTMLCanvasElement) => void;
   elementRenderers: Record<string, ElementRenderer>;
   gridManager: GridManager;
+  renderDpr?: number;
 };
 
 export class CanvasRenderer {
@@ -70,6 +71,8 @@ export class CanvasRenderer {
   canvas: HTMLCanvasElement;
 
   ctx: CanvasRenderingContext2D;
+
+  dpr: number;
 
   elementRenderers: Record<string, ElementRenderer>;
 
@@ -101,6 +104,7 @@ export class CanvasRenderer {
     this.grid = options.gridManager;
     this.provider = options.provider ?? {};
     this.elementRenderers = options.elementRenderers;
+    this.dpr = options.renderDpr ?? window.devicePixelRatio;
     this._initViewport();
 
     options.enableStackingCanvas = options.enableStackingCanvas ?? false;
@@ -116,7 +120,7 @@ export class CanvasRenderer {
    *
    * It is not recommended to set width and height to 100%.
    */
-  private _canvasSizeUpdater(dpr = window.devicePixelRatio) {
+  private _canvasSizeUpdater(dpr = this.dpr) {
     const { width, height } = this.viewport;
     const actualWidth = Math.ceil(width * dpr);
     const actualHeight = Math.ceil(height * dpr);
@@ -234,7 +238,7 @@ export class CanvasRenderer {
   private _render() {
     const { viewportBounds, zoom } = this.viewport;
     const { ctx } = this;
-    const dpr = window.devicePixelRatio;
+    const dpr = this.dpr;
     const scale = zoom * dpr;
     const matrix = new DOMMatrix().scaleSelf(scale);
     /**
@@ -376,7 +380,7 @@ export class CanvasRenderer {
   ): HTMLCanvasElement {
     canvas = canvas || document.createElement('canvas');
 
-    const dpr = window.devicePixelRatio || 1;
+    const dpr = this.dpr || 1;
     if (canvas.width !== bound.w * dpr) canvas.width = bound.w * dpr;
     if (canvas.height !== bound.h * dpr) canvas.height = bound.h * dpr;
 

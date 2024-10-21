@@ -65,6 +65,7 @@ export class SurfaceRefRenderer {
       layerManager: std.get(GfxControllerIdentifier).layer,
       gridManager: std.get(GfxControllerIdentifier).grid,
       enableStackingCanvas: options.enableStackingCanvas,
+      renderDpr: this.std.getConfig('affine:page')?.renderDpr ?? 1,
       provider: {
         generateColorProperty: (color: Color, fallback: string) =>
           ThemeObserver.generateColorProperty(color, fallback),

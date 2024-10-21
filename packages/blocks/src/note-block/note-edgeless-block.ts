@@ -54,7 +54,7 @@ export class EdgelessNoteMask extends WithDisposable(ShadowlessElement) {
       }
     });
 
-    observer.observe(maskDOM!);
+    // observer.observe(maskDOM!);
 
     this._disposables.add(() => {
       // check if model still exist
@@ -199,6 +199,7 @@ export class EdgelessNoteBlockComponent extends toGfxBlockComponent(
           borderBottom: '2px var(--affine-blue) solid',
           borderRight: '2px var(--affine-blue) solid',
           borderRadius: '0 0 8px 8px',
+          contain: 'strict',
         })}
       ></div>
     `;
@@ -487,14 +488,6 @@ export class EdgelessNoteBlockComponent extends toGfxBlockComponent(
             </div>`
           : nothing}
         ${this._collapsedContent()}
-
-        <edgeless-note-mask
-          .model=${this.model}
-          .display=${!this._editing}
-          .host=${this.host}
-          .zoom=${this.gfx.viewport.zoom ?? 1}
-          .editing=${this._editing}
-        ></edgeless-note-mask>
       </div>
     `;
   }

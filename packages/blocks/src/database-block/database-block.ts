@@ -347,6 +347,7 @@ export class DatabaseBlockComponent extends CaptionedBlockComponent<
 
   override renderBlock() {
     const peekViewService = this.std.getOptional(PeekViewProvider);
+    return null;
     return html`
       <div
         contenteditable="false"

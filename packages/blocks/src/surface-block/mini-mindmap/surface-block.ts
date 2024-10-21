@@ -98,6 +98,7 @@ export class MindmapSurfaceBlock extends BlockComponent<SurfaceBlockModel> {
       layerManager: this._layer,
       gridManager: this._grid,
       enableStackingCanvas: true,
+      renderDpr: this.std.getConfig('affine:page')?.renderDpr ?? 1,
       provider: {
         selectedElements: () => [],
         getColorScheme: () => ThemeObserver.mode,
