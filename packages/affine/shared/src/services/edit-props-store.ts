@@ -5,6 +5,7 @@ import {
   DisposableGroup,
   Slot,
 } from '@blocksuite/global/utils';
+import { DocCollection } from '@blocksuite/store';
 import { computed, type Signal, signal } from '@preact/signals-core';
 import clonedeep from 'lodash.clonedeep';
 import mergeWith from 'lodash.mergewith';
@@ -63,7 +64,12 @@ function isSessionProp(key: string): key is keyof SessionProps {
 }
 
 function customizer(_target: unknown, source: unknown) {
-  if (ColorSchema.safeParse(source).success) {
+  if (
+    ColorSchema.safeParse(source).success ||
+    source instanceof DocCollection.Y.Text ||
+    source instanceof DocCollection.Y.Array ||
+    source instanceof DocCollection.Y.Map
+  ) {
     return source;
   }
   return;

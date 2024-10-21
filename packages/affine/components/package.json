@@ -1,6 +1,6 @@
 {
   "name": "@blocksuite/affine-components",
-  "version": "0.17.17",
+  "version": "0.17.19",
   "description": "Default BlockSuite editable blocks.",
   "type": "module",
   "repository": {
@@ -23,7 +23,7 @@
     "@blocksuite/affine-shared": "workspace:*",
     "@blocksuite/block-std": "workspace:*",
     "@blocksuite/global": "workspace:*",
-    "@blocksuite/icons": "^2.1.67",
+    "@blocksuite/icons": "^2.1.68",
     "@blocksuite/inline": "workspace:*",
     "@blocksuite/store": "workspace:*",
     "@floating-ui/dom": "^1.6.10",

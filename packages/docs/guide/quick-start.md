@@ -11,51 +11,55 @@ If this is your first time using BlockSuite, referring to the [overview](./overv
 BlockSuite works with all common frameworks, you can start from these examples that basically builds a TodoMVC-like note app based on BlockSuite.
 
 <table>
-  <tr>
-    <td>Framework</td>
-    <td>Link</td>
-    <td>Maintaining</td>
-  </tr>
-  <tr>
-    <td><Icon name="TypeScript" />Vanilla</td>
-    <td><a href="https://stackblitz.com/github/toeverything/blocksuite-examples/tree/master/vanilla-indexeddb" target="_blank">vanilla-indexeddb</a></td>
-    <td>✅</td>
-  </tr>
-  <tr>
-    <td><Icon name="Next" />Next</td>
-    <td><a href="https://github.com/toeverything/blocksuite-examples/tree/master/react-basic-next" target="_blank">react-basic-next</a></td>
-    <td>✅</td>
-  </tr>
-  <tr>
-    <td><Icon name="React" />React</td>
-    <td><a href="https://stackblitz.com/github/toeverything/blocksuite-examples/tree/master/react-basic" target="_blank">react-basic</a></td>
-    <td>✅</td>
-  </tr>
-  <tr>
-    <td><Icon name="Vue" />Vue</td>
-    <td><a href="https://stackblitz.com/github/toeverything/blocksuite-examples/tree/master/vue-basic" target="_blank">vue-basic</a></td>
-    <td>✅</td>
-  </tr>
-  <tr>
-    <td><Icon name="Angular" />Angular</td>
-    <td><a href="https://github.com/toeverything/blocksuite-examples/tree/master/angular-basic" target="_blank">angular-basic</a></td>
-    <td>✅</td>
-  </tr>
-  <tr>
-    <td><Icon name="Preact" icon="https://raw.githubusercontent.com/preactjs/preact-www/master/src/assets/branding/symbol.svg" />Preact</td>
-    <td><a href="https://stackblitz.com/github/toeverything/blocksuite-examples/tree/master/preact-basic" target="_blank">preact-basic</a></td>
-    <td>✅</td>
-  </tr>
-  <tr>
-    <td><Icon name="Svelte" />Svelte</td>
-    <td><a href="https://stackblitz.com/github/toeverything/blocksuite-examples/tree/master/svelte-basic" target="_blank">svelte-basic</a></td>
-    <td>✅</td>
-  </tr>
-  <tr>
-    <td><Icon name="Solid" icon="https://www.solidjs.com/img/favicons/favicon-32x32.png" />Solid</td>
-    <td><a href="https://stackblitz.com/github/toeverything/blocksuite-examples/tree/master/solid-basic" target="_blank">solid-basic</a></td>
-    <td>✅</td>
-  </tr>
+  <thead>
+    <tr>
+      <th>Framework</th>
+      <th>Link</th>
+      <th>Maintaining</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><Icon name="TypeScript" />Vanilla</td>
+      <td><a href="https://stackblitz.com/github/toeverything/blocksuite-examples/tree/master/vanilla-indexeddb" target="_blank">vanilla-indexeddb</a></td>
+      <td>✅</td>
+    </tr>
+    <tr>
+      <td><Icon name="Next" />Next</td>
+      <td><a href="https://github.com/toeverything/blocksuite-examples/tree/master/react-basic-next" target="_blank">react-basic-next</a></td>
+      <td>✅</td>
+    </tr>
+    <tr>
+      <td><Icon name="React" />React</td>
+      <td><a href="https://stackblitz.com/github/toeverything/blocksuite-examples/tree/master/react-basic" target="_blank">react-basic</a></td>
+      <td>✅</td>
+    </tr>
+    <tr>
+      <td><Icon name="Vue" />Vue</td>
+      <td><a href="https://stackblitz.com/github/toeverything/blocksuite-examples/tree/master/vue-basic" target="_blank">vue-basic</a></td>
+      <td>✅</td>
+    </tr>
+    <tr>
+      <td><Icon name="Angular" />Angular</td>
+      <td><a href="https://github.com/toeverything/blocksuite-examples/tree/master/angular-basic" target="_blank">angular-basic</a></td>
+      <td>✅</td>
+    </tr>
+    <tr>
+      <td><Icon name="Preact" icon="https://raw.githubusercontent.com/preactjs/preact-www/master/src/assets/branding/symbol.svg" />Preact</td>
+      <td><a href="https://stackblitz.com/github/toeverything/blocksuite-examples/tree/master/preact-basic" target="_blank">preact-basic</a></td>
+      <td>✅</td>
+    </tr>
+    <tr>
+      <td><Icon name="Svelte" />Svelte</td>
+      <td><a href="https://stackblitz.com/github/toeverything/blocksuite-examples/tree/master/svelte-basic" target="_blank">svelte-basic</a></td>
+      <td>✅</td>
+    </tr>
+    <tr>
+      <td><Icon name="Solid" icon="https://www.solidjs.com/img/favicons/favicon-32x32.png" />Solid</td>
+      <td><a href="https://stackblitz.com/github/toeverything/blocksuite-examples/tree/master/solid-basic" target="_blank">solid-basic</a></td>
+      <td>✅</td>
+    </tr>
+  </tbody>
 </table>
 
 ## Init From Scratch

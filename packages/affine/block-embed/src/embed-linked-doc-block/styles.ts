@@ -289,11 +289,6 @@ export const styles = css`
       width: 100%;
     }
 
-    .affine-embed-linked-doc-content-note {
-      -webkit-line-clamp: 6;
-      max-height: 130px;
-    }
-
     .affine-embed-linked-doc-banner {
       width: 340px;
       height: 170px;

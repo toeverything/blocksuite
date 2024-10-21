@@ -23,9 +23,12 @@ const addRow = async (page: Page, count: number = 1) => {
 const insertRightColumn = async (page: Page, index = 0) => {
   await waitNextFrame(page);
   await page.locator('affine-database-header-column').nth(index).click();
+  await waitNextFrame(page, 200);
+  await pressKey(page, 'Escape');
   await pressKey(page, 'ArrowDown', 3);
   await pressKey(page, 'Enter');
-  await pressKey(page, 'Escape');
+  await waitNextFrame(page, 200);
+  await pressKey(page, 'Enter');
 };
 const menuSelect = async (
   page: Page,

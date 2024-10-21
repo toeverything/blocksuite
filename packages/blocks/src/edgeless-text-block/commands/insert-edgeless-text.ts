@@ -60,6 +60,7 @@ export const insertEdgelessTextCommand: Command<
           edgelessText.addEventListener(
             'focusout',
             e => {
+              if (edgelessText.model.children.length > 1) return;
               if (
                 !paragraph.model.text ||
                 (paragraph.model.text.length === 0 && e.relatedTarget !== null)

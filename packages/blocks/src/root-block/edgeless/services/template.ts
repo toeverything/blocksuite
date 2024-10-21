@@ -17,7 +17,7 @@ import {
   type DocSnapshot,
   DocSnapshotSchema,
   Job,
-  type SnapshotReturn,
+  type SnapshotNode,
   type Y,
 } from '@blocksuite/store';
 
@@ -160,7 +160,7 @@ export class TemplateJob {
     modelDataList: {
       flavour: string;
       json: BlockSnapshot;
-      modelData: SnapshotReturn<object> | null;
+      modelData: SnapshotNode<object> | null;
       parent?: string;
       index?: number;
     }[]
@@ -225,7 +225,7 @@ export class TemplateJob {
     const modelDataList: {
       flavour: string;
       json: BlockSnapshot;
-      modelData: SnapshotReturn<object> | null;
+      modelData: SnapshotNode<object> | null;
       parent?: string;
       index?: number;
     }[] = [];

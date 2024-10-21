@@ -1,7 +1,11 @@
 import type { DatabaseBlockModel } from '@blocksuite/affine-model';
 
 import { CaptionedBlockComponent } from '@blocksuite/affine-components/caption';
-import { popMenu } from '@blocksuite/affine-components/context-menu';
+import {
+  menu,
+  popMenu,
+  popupTargetFromElement,
+} from '@blocksuite/affine-components/context-menu';
 import { DragIndicator } from '@blocksuite/affine-components/drag-indicator';
 import { PeekViewProvider } from '@blocksuite/affine-components/peek';
 import { toast } from '@blocksuite/affine-components/toast';
@@ -100,17 +104,16 @@ export class DatabaseBlockComponent extends CaptionedBlockComponent<
 
   private _clickDatabaseOps = (e: MouseEvent) => {
     const options = this.optionsConfig.configure(this.model, {
-      input: {
-        initValue: this.model.title.toString(),
-        placeholder: 'Untitled',
-        onComplete: text => {
-          this.model.title.replace(0, this.model.title.length, text);
-        },
-      },
       items: [
-        {
-          type: 'action',
-          icon: CopyIcon(),
+        menu.input({
+          initialValue: this.model.title.toString(),
+          placeholder: 'Untitled',
+          onComplete: text => {
+            this.model.title.replace(0, this.model.title.length, text);
+          },
+        }),
+        menu.action({
+          prefix: CopyIcon(),
           name: 'Copy',
           select: () => {
             const slice = Slice.fromModels(this.doc, [this.model]);
@@ -121,14 +124,11 @@ export class DatabaseBlockComponent extends CaptionedBlockComponent<
               })
               .catch(console.error);
           },
-        },
-        {
-          type: 'group',
-          name: '',
-          children: () => [
-            {
-              type: 'action',
-              icon: DeleteIcon(),
+        }),
+        menu.group({
+          items: [
+            menu.action({
+              prefix: DeleteIcon(),
               class: 'delete-item',
               name: 'Delete Database',
               select: () => {
@@ -137,13 +137,15 @@ export class DatabaseBlockComponent extends CaptionedBlockComponent<
                 });
                 this.doc.deleteBlock(this.model);
               },
-            },
+            }),
           ],
-        },
+        }),
       ],
     });
 
-    popMenu(e.currentTarget as HTMLElement, { options });
+    popMenu(popupTargetFromElement(e.currentTarget as HTMLElement), {
+      options,
+    });
   };
 
   private _dataSource?: DatabaseBlockDataSource;
@@ -383,7 +385,10 @@ export class DatabaseBlockComponent extends CaptionedBlockComponent<
                 },
               });
               if (peekViewService) {
-                return peekViewService.peek(target, template);
+                return peekViewService.peek({
+                  target,
+                  template,
+                });
               } else {
                 return popSideDetail(template);
               }

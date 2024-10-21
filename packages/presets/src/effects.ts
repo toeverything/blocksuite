@@ -1,19 +1,6 @@
 import '@blocksuite/affine-shared/commands';
 import '@blocksuite/blocks/effects';
 
-import { AIChatMessage } from './blocks/ai-chat-block/components/ai-chat-messages.js';
-import {
-  ChatImage,
-  ChatImages,
-} from './blocks/ai-chat-block/components/chat-images.js';
-import { ImagePlaceholder } from './blocks/ai-chat-block/components/image-placeholder.js';
-import { TextRenderer } from './blocks/ai-chat-block/components/text-renderer.js';
-import { UserInfo } from './blocks/ai-chat-block/components/user-info.js';
-import {
-  AIChatBlockComponent,
-  AIChatMessages,
-  EdgelessAIChatBlockComponent,
-} from './blocks/index.js';
 import {
   AffineEditorContainer,
   EdgelessEditor,
@@ -88,14 +75,9 @@ export function effects() {
     AFFINE_OUTLINE_NOTE_PREVIEW_SETTING_MENU,
     OutlineNotePreviewSettingMenu
   );
-  customElements.define(
-    'affine-edgeless-ai-chat',
-    EdgelessAIChatBlockComponent
-  );
   customElements.define(AFFINE_FRAME_PANEL, FramePanel);
   customElements.define(AFFINE_OUTLINE_NOTICE, OutlineNotice);
   customElements.define('comment-panel', CommentPanel);
-  customElements.define('affine-ai-chat', AIChatBlockComponent);
   customElements.define(AFFINE_OUTLINE_PANEL, OutlinePanel);
   customElements.define('backlink-button', BacklinkButton);
   customElements.define(AFFINE_OUTLINE_PANEL_HEADER, OutlinePanelHeader);
@@ -103,16 +85,9 @@ export function effects() {
   customElements.define(AFFINE_OUTLINE_NOTE_CARD, OutlineNoteCard);
   customElements.define(AFFINE_FRAME_TITLE_EDITOR, FrameCardTitleEditor);
   customElements.define('edgeless-editor', EdgelessEditor);
-  customElements.define('ai-chat-message', AIChatMessage);
-  customElements.define('ai-chat-messages', AIChatMessages);
-  customElements.define('image-placeholder', ImagePlaceholder);
-  customElements.define('chat-image', ChatImage);
-  customElements.define('chat-images', ChatImages);
   customElements.define(AFFINE_FRAME_CARD, FrameCard);
-  customElements.define('user-info', UserInfo);
   customElements.define(AFFINE_OUTLINE_VIEWER, OutlineViewer);
   customElements.define(AFFINE_FRAME_CARD_TITLE, FrameCardTitle);
-  customElements.define('text-renderer', TextRenderer);
   customElements.define(AFFINE_OUTLINE_BLOCK_PREVIEW, OutlineBlockPreview);
   customElements.define(AFFINE_FRAME_PANEL_BODY, FramePanelBody);
   customElements.define(AFFINE_FRAME_PANEL_HEADER, FramePanelHeader);

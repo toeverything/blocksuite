@@ -30,12 +30,19 @@ import {
   type ToDocSnapshotPayload,
 } from '@blocksuite/store';
 import { format } from 'date-fns/format';
+import remarkMath from 'remark-math';
 import remarkParse from 'remark-parse';
 import remarkStringify from 'remark-stringify';
 import { unified } from 'unified';
 
 import { remarkGfm } from './gfm.js';
-import { createText, fetchable, fetchImage, isNullish } from './utils.js';
+import {
+  createText,
+  fetchable,
+  fetchImage,
+  isNullish,
+  toURLSearchParams,
+} from './utils.js';
 
 export type Markdown = string;
 
@@ -390,6 +397,23 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
           context.skipAllChildren();
           break;
         }
+        case 'math': {
+          context
+            .openNode(
+              {
+                type: 'block',
+                id: nanoid(),
+                flavour: 'affine:latex',
+                props: {
+                  latex: o.node.value as string,
+                },
+                children: [],
+              },
+              'children'
+            )
+            .closeNode();
+          break;
+        }
       }
     });
     walker.setLeave((o, context) => {
@@ -502,8 +526,6 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
         }
         case 'affine:list': {
           // check if the list is of the same type
-          // if true, add the list item to the list
-          // if false, create a new list
           if (
             context.getNodeContext('affine:list:parent') === o.parent &&
             currentTNode.type === 'list' &&
@@ -515,28 +537,9 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
                   : undefined
               )
           ) {
-            context
-              .openNode(
-                {
-                  type: 'listItem',
-                  checked:
-                    o.node.props.type === 'todo'
-                      ? (o.node.props.checked as boolean)
-                      : undefined,
-                  spread: false,
-                  children: [],
-                },
-                'children'
-              )
-              .openNode(
-                {
-                  type: 'paragraph',
-                  children: this._deltaToMdAST(text.delta),
-                },
-                'children'
-              )
-              .closeNode();
+            // if true, add the list item to the list
           } else {
+            // if false, create a new list
             context
               .openNode(
                 {
@@ -547,28 +550,29 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
                 },
                 'children'
               )
-              .setNodeContext('affine:list:parent', o.parent)
-              .openNode(
-                {
-                  type: 'listItem',
-                  checked:
-                    o.node.props.type === 'todo'
-                      ? (o.node.props.checked as boolean)
-                      : undefined,
-                  spread: false,
-                  children: [],
-                },
-                'children'
-              )
-              .openNode(
-                {
-                  type: 'paragraph',
-                  children: this._deltaToMdAST(text.delta),
-                },
-                'children'
-              )
-              .closeNode();
+              .setNodeContext('affine:list:parent', o.parent);
           }
+          context
+            .openNode(
+              {
+                type: 'listItem',
+                checked:
+                  o.node.props.type === 'todo'
+                    ? (o.node.props.checked as boolean)
+                    : undefined,
+                spread: false,
+                children: [],
+              },
+              'children'
+            )
+            .openNode(
+              {
+                type: 'paragraph',
+                children: this._deltaToMdAST(text.delta),
+              },
+              'children'
+            )
+            .closeNode();
           break;
         }
         case 'affine:divider': {
@@ -784,6 +788,50 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
 
           break;
         }
+        case 'affine:embed-linked-doc': {
+          // Parse as link
+          if (!o.node.props.pageId) {
+            break;
+          }
+          const title =
+            this.configs.get('title:' + o.node.props.pageId) ?? 'untitled';
+          const { mode, blockIds, elementIds } = o.node.props;
+          const baseUrl = this.configs.get('docLinkBaseUrl') ?? '';
+          const search = toURLSearchParams({
+            mode: mode as string,
+            blockIds: blockIds as string[],
+            elementIds: elementIds as string[],
+          });
+          const query = search?.size ? `?${search.toString()}` : '';
+          const url = baseUrl
+            ? `${baseUrl}/${o.node.props.pageId}${query}`
+            : '';
+          context
+            .openNode(
+              {
+                type: 'paragraph',
+                children: [],
+              },
+              'children'
+            )
+            .openNode(
+              {
+                type: 'link',
+                url,
+                title: o.node.props.caption as string | null,
+                children: [
+                  {
+                    type: 'text',
+                    value: title,
+                  },
+                ],
+              },
+              'children'
+            )
+            .closeNode()
+            .closeNode();
+          break;
+        }
         case 'affine:embed-loom':
         case 'affine:embed-github':
         case 'affine:embed-youtube':
@@ -821,6 +869,17 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
             .closeNode();
           break;
         }
+        case 'affine:latex': {
+          context
+            .openNode(
+              {
+                type: 'math',
+                value: o.node.props.latex as string,
+              },
+              'children'
+            )
+            .closeNode();
+        }
       }
     });
     walker.setLeave((o, context) => {
@@ -848,8 +907,11 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
               )
           ) {
             context.closeNode();
-            if (o.next?.flavour !== 'affine:list') {
-              // If the next node is not a list, close the list
+            if (
+              o.next?.flavour !== 'affine:list' ||
+              o.next.props.type !== o.node.props.type
+            ) {
+              // If the next node is not a list or different type of list, close the list
               context.closeNode();
             }
           } else {
@@ -878,6 +940,7 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
       .use(remarkStringify, {
         resourceLink: true,
       })
+      .use(remarkMath)
       .stringify(ast)
       .replace(/&#x20;\n/g, ' \n');
   }
@@ -900,10 +963,24 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
         const title = this.configs.get(
           'title:' + delta.attributes.reference.pageId
         );
+        const { mode, blockIds, elementIds } =
+          delta.attributes?.reference.params ?? {};
+        const baseUrl = this.configs.get('docLinkBaseUrl') ?? '';
+        const search = toURLSearchParams({ mode, blockIds, elementIds });
+        const query = search?.size ? `?${search.toString()}` : '';
+        const url = baseUrl
+          ? `${baseUrl}/${delta.attributes.reference.pageId}${query}`
+          : '';
         if (typeof title === 'string') {
           mdast = {
-            type: 'text',
-            value: title,
+            type: 'link',
+            url,
+            children: [
+              {
+                type: 'text',
+                value: title,
+              },
+            ],
           };
         }
       }
@@ -945,15 +1022,25 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
           };
         }
       }
+      if (delta.attributes?.latex) {
+        mdast = {
+          type: 'inlineMath',
+          value: delta.attributes.latex as string,
+        };
+      }
       return mdast;
     });
   }
 
   private _markdownToAst(markdown: Markdown) {
-    return unified().use(remarkParse).use(remarkGfm).parse(markdown);
+    return unified()
+      .use(remarkParse)
+      .use(remarkGfm)
+      .use(remarkMath)
+      .parse(markdown);
   }
 
-  private _mdastToDelta(ast: MarkdownAST): DeltaInsert[] {
+  private _mdastToDelta(ast: MarkdownAST): DeltaInsert<AffineTextAttributes>[] {
     switch (ast.type) {
       case 'text': {
         return [{ insert: ast.value }];
@@ -995,6 +1082,9 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
       }
       case 'list': {
         return [];
+      }
+      case 'inlineMath': {
+        return [{ insert: ' ', attributes: { latex: ast.value } }];
       }
     }
     return 'children' in ast

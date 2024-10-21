@@ -1,4 +1,8 @@
-import { popMenu } from '@blocksuite/affine-components/context-menu';
+import {
+  menu,
+  popMenu,
+  popupTargetFromElement,
+} from '@blocksuite/affine-components/context-menu';
 import { EditPropsStore } from '@blocksuite/affine-shared/services';
 import {
   CopyIcon,
@@ -6,7 +10,7 @@ import {
   ExpandCloseIcon,
   SettingsIcon,
 } from '@blocksuite/icons/lit';
-import { flip, offset } from '@floating-ui/dom';
+import { autoPlacement, flip, offset } from '@floating-ui/dom';
 import { css, html, LitElement } from 'lit';
 import { property, query, state } from 'lit/decorators.js';
 
@@ -66,39 +70,35 @@ export class EmbedHtmlFullscreenToolbar extends LitElement {
 
   private _popSettings = () => {
     this._popperVisible = true;
-    popMenu(this._fullScreenToolbarContainer, {
+    popMenu(popupTargetFromElement(this._fullScreenToolbarContainer), {
       options: {
         items: [
-          {
-            type: 'custom',
-            render: () =>
-              html`<div class="settings-header">
-                <span>Settings</span>
-              </div>`,
-          },
-
-          {
-            type: 'group',
+          () =>
+            html` <div class="settings-header">
+              <span>Settings</span>
+            </div>`,
+          menu.group({
             name: 'thing',
-            children: () => [
-              {
-                type: 'toggle-switch',
+            items: [
+              menu.toggleSwitch({
                 name: 'Hide toolbar',
                 on: this.autoHideToolbar,
                 onChange: on => {
                   this.autoHideToolbar = on;
                 },
-              },
+              }),
             ],
-          },
+          }),
         ],
         onClose: () => {
           this._popperVisible = false;
         },
       },
-
-      placement: 'top-end',
-      middleware: [flip(), offset({ mainAxis: 4, crossAxis: -40 })],
+      middleware: [
+        autoPlacement({ allowedPlacements: ['top-end'] }),
+        flip(),
+        offset({ mainAxis: 4, crossAxis: -40 }),
+      ],
       container: this.embedHtml.iframeWrapper,
     });
   };
@@ -135,25 +135,26 @@ export class EmbedHtmlFullscreenToolbar extends LitElement {
   override render() {
     const hideToolbar = !this._popperVisible && this.autoHideToolbar;
 
-    return html`<div
-      data-auto-hide=${hideToolbar}
-      class="toolbar-toggle-control"
-    >
-      <div class="fullscreen-toolbar-container">
-        <icon-button @click=${this.embedHtml.close}
-          >${ExpandCloseIcon()}</icon-button
-        >
-        <icon-button @click=${this._popSettings} hover=${this._popperVisible}
-          >${SettingsIcon()}</icon-button
-        >
+    return html`
+      <div data-auto-hide="${hideToolbar}" class="toolbar-toggle-control">
+        <div class="fullscreen-toolbar-container">
+          <icon-button @click="${this.embedHtml.close}"
+            >${ExpandCloseIcon()}
+          </icon-button>
+          <icon-button
+            @click="${this._popSettings}"
+            hover="${this._popperVisible}"
+            >${SettingsIcon()}
+          </icon-button>
 
-        <div class="short-v-divider"></div>
+          <div class="short-v-divider"></div>
 
-        <icon-button class="copy-button" @click=${this.copyCode}
-          >${this._copied ? DoneIcon() : CopyIcon()}
-        </icon-button>
+          <icon-button class="copy-button" @click="${this.copyCode}"
+            >${this._copied ? DoneIcon() : CopyIcon()}
+          </icon-button>
+        </div>
       </div>
-    </div> `;
+    `;
   }
 
   @state()

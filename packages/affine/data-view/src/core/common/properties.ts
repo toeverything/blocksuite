@@ -1,11 +1,11 @@
-import { createPopup } from '@blocksuite/affine-components/context-menu';
+import {
+  menu,
+  popMenu,
+  type PopupTarget,
+} from '@blocksuite/affine-components/context-menu';
 import { ShadowlessElement } from '@blocksuite/block-std';
 import { SignalWatcher, WithDisposable } from '@blocksuite/global/utils';
-import {
-  ArrowLeftBigIcon,
-  InvisibleIcon,
-  ViewIcon,
-} from '@blocksuite/icons/lit';
+import { InvisibleIcon, ViewIcon } from '@blocksuite/icons/lit';
 import { css, html } from 'lit';
 import { property, query } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
@@ -19,15 +19,6 @@ export class DataViewPropertiesSettingView extends SignalWatcher(
   WithDisposable(ShadowlessElement)
 ) {
   static override styles = css`
-    data-view-properties-setting {
-      position: absolute;
-      background-color: var(--affine-background-overlay-panel-color);
-      border-radius: 8px;
-      box-shadow: var(--affine-shadow-2);
-      padding: 8px;
-      min-width: 300px;
-    }
-
     .properties-group-header {
       user-select: none;
       padding: 4px 12px 12px 12px;
@@ -133,14 +124,6 @@ export class DataViewPropertiesSettingView extends SignalWatcher(
     }
   `;
 
-  clickChangeAll = (allShow: boolean) => {
-    this.view.propertiesWithoutFilter$.value.forEach(id => {
-      if (this.view.propertyTypeGet(id) !== 'title') {
-        this.view.propertyHideSet(id, allShow);
-      }
-    });
-  };
-
   renderProperty = (property: Property) => {
     const isTitle = property.type$.value === 'title';
     const icon = property.hide$.value ? InvisibleIcon() : ViewIcon();
@@ -202,24 +185,7 @@ export class DataViewPropertiesSettingView extends SignalWatcher(
 
   override render() {
     const items = this.itemsGroup();
-    const isAllShowed = items.every(v => !v.hide$.value);
-    const clickChangeAll = () => this.clickChangeAll(isAllShowed);
     return html`
-      <div class="properties-group-header">
-        <div class="properties-group-title dv-icon-20">
-          <div
-            @click=${this.onBack}
-            style="display:flex;"
-            class="dv-hover dv-round-4 dv-pd-2"
-          >
-            ${ArrowLeftBigIcon()}
-          </div>
-          PROPERTIES
-        </div>
-        <div class="properties-group-op" @click="${clickChangeAll}">
-          ${isAllShowed ? 'Hide All' : 'Show All'}
-        </div>
-      </div>
       <div class="properties-group">
         ${repeat(items, v => v.id, this.renderProperty)}
       </div>
@@ -243,18 +209,56 @@ declare global {
 }
 
 export const popPropertiesSetting = (
-  target: HTMLElement,
+  target: PopupTarget,
   props: {
     view: SingleView;
     onClose?: () => void;
     onBack?: () => void;
   }
 ) => {
-  const view = new DataViewPropertiesSettingView();
-  view.view = props.view;
-  view.onBack = () => {
-    close();
-    props.onBack?.();
-  };
-  const close = createPopup(target, view, { onClose: props.onClose });
+  popMenu(target, {
+    options: {
+      title: {
+        text: 'Properties',
+        onBack: props.onBack,
+        postfix: () => {
+          const items = props.view.propertiesWithoutFilter$.value.map(id =>
+            props.view.propertyGet(id)
+          );
+          const isAllShowed = items.every(v => !v.hide$.value);
+          const clickChangeAll = () => {
+            props.view.propertiesWithoutFilter$.value.forEach(id => {
+              if (props.view.propertyTypeGet(id) !== 'title') {
+                props.view.propertyHideSet(id, isAllShowed);
+              }
+            });
+          };
+          return html`<div
+            class="properties-group-op"
+            @click="${clickChangeAll}"
+          >
+            ${isAllShowed ? 'Hide All' : 'Show All'}
+          </div>`;
+        },
+      },
+      items: [
+        menu.group({
+          items: [
+            () =>
+              html`<data-view-properties-setting
+                .view="${props.view}"
+              ></data-view-properties-setting>`,
+          ],
+        }),
+      ],
+    },
+  });
+
+  // const view = new DataViewPropertiesSettingView();
+  // view.view = props.view;
+  // view.onBack = () => {
+  //   close();
+  //   props.onBack?.();
+  // };
+  // const close = createPopup(target, view, { onClose: props.onClose });
 };

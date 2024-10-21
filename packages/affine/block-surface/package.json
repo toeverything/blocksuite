@@ -1,6 +1,6 @@
 {
   "name": "@blocksuite/affine-block-surface",
-  "version": "0.17.17",
+  "version": "0.17.19",
   "description": "Surface block for BlockSuite.",
   "type": "module",
   "repository": {
@@ -31,11 +31,13 @@
     "@toeverything/theme": "^1.0.8",
     "fractional-indexing": "^3.2.0",
     "lit": "^3.2.0",
+    "lodash.chunk": "^4.2.0",
     "nanoid": "^5.0.7",
     "zod": "^3.23.8"
   },
   "devDependencies": {
-    "@types/dompurify": "^3.0.5"
+    "@types/dompurify": "^3.0.5",
+    "@types/lodash.chunk": "^4.2.9"
   },
   "exports": {
     ".": "./src/index.ts",

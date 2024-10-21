@@ -1,6 +1,8 @@
 import {
-  type Menu,
+  menu,
+  type MenuConfig,
   popFilterableSimpleMenu,
+  popupTargetFromElement,
 } from '@blocksuite/affine-components/context-menu';
 import { ShadowlessElement } from '@blocksuite/block-std';
 import { SignalWatcher, WithDisposable } from '@blocksuite/global/utils';
@@ -101,36 +103,32 @@ export class DatabaseColumnStatsCell extends SignalWatcher(
   });
 
   openMenu = (ev: MouseEvent) => {
-    const menus: Menu[] = Object.entries(this.groups$.value).map(
+    const menus: MenuConfig[] = Object.entries(this.groups$.value).map(
       ([group, funcs]) => {
-        return {
-          type: 'sub-menu',
+        return menu.subMenu({
           name: group,
           options: {
-            input: { search: true },
             items: Object.values(funcs).map(func => {
-              return {
-                type: 'action',
+              return menu.action({
                 isSelected: func.type === this.column.statCalcOp$.value,
                 name: func.menuName ?? func.type,
                 select: () => {
                   this.column.updateStatCalcOp(func.type);
                 },
-              };
+              });
             }),
           },
-        };
+        });
       }
     );
-    popFilterableSimpleMenu(ev.target as HTMLElement, [
-      {
-        type: 'action',
+    popFilterableSimpleMenu(popupTargetFromElement(ev.target as HTMLElement), [
+      menu.action({
         isSelected: !this.column.statCalcOp$.value,
         name: 'None',
         select: () => {
           this.column.updateStatCalcOp();
         },
-      },
+      }),
       ...menus,
     ]);
   };

@@ -5,7 +5,6 @@ import type {
   NoteBlockModel,
 } from '@blocksuite/affine-model';
 import type { PointerEventState } from '@blocksuite/block-std';
-import type { PointTestOptions } from '@blocksuite/block-std/gfx';
 import type { IVec } from '@blocksuite/global/utils';
 
 import { ConnectorUtils, MindmapUtils } from '@blocksuite/affine-block-surface';
@@ -23,6 +22,11 @@ import {
   handleNativeRangeAtPoint,
   resetNativeSelection,
 } from '@blocksuite/affine-shared/utils';
+import {
+  getTopElements,
+  isGfxContainerElm,
+  type PointTestOptions,
+} from '@blocksuite/block-std/gfx';
 import {
   Bound,
   DisposableGroup,
@@ -51,7 +55,6 @@ import {
   mountShapeTextEditor,
   mountTextElementEditor,
 } from '../utils/text.js';
-import { getAllDescendantElements, getTopElements } from '../utils/tree.js';
 import { EdgelessToolController } from './edgeless-tool.js';
 
 export enum DefaultModeDragType {
@@ -941,7 +944,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
       } else {
         // only apply to root nodes of trees
         toBeMovedTopElements.map(element =>
-          frameManager.removeParentFrame(element)
+          frameManager.removeFromParentFrame(element)
         );
       }
     }
@@ -1032,11 +1035,12 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     const toBeMoved = new Set(elements);
     elements.forEach(element => {
       if (element.group instanceof MindmapElementModel && elements.length > 1) {
-        getAllDescendantElements(element.group).forEach(ele =>
-          toBeMoved.add(ele)
-        );
-      } else {
-        getAllDescendantElements(element).forEach(ele => {
+        element.group.descendantElements.forEach(ele => toBeMoved.add(ele));
+      } else if (isGfxContainerElm(element)) {
+        element.descendantElements.forEach(ele => {
+          if (ele.group instanceof MindmapElementModel) {
+            ele.group.descendantElements.forEach(_el => toBeMoved.add(_el));
+          }
           toBeMoved.add(ele);
         });
       }

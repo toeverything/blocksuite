@@ -127,7 +127,14 @@ export const components: DefaultTheme.NavItem[] = [
       { text: '📝 Page Editor', link: 'components/editors/page-editor' },
       {
         text: '🎨 Edgeless Editor',
+        // @ts-ignore
         link: 'components/editors/edgeless-editor',
+        items: [
+          {
+            text: 'Data Structure',
+            link: 'components/editors/edgeless-data-structure',
+          },
+        ],
       },
     ],
   },

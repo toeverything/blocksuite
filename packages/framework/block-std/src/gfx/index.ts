@@ -3,10 +3,21 @@ export {
   renderableInEdgeless,
   SortOrder,
 } from '../utils/layer.js';
+export {
+  descendantElementsImpl,
+  getAncestorContainersImpl,
+  getTopElements,
+  hasDescendantElementImpl,
+} from '../utils/tree.js';
 export { GfxController, GfxControllerIdentifier } from './controller.js';
 export * from './gfx-block-model.js';
 export { GridManager } from './grid.js';
 export { LayerManager, type ReorderingDirection } from './layer.js';
+export {
+  type GfxContainerElement,
+  gfxContainerSymbol,
+  isGfxContainerElm,
+} from './surface/container-element.js';
 export {
   convert,
   convertProps,
@@ -23,13 +34,10 @@ export {
 } from './surface/decorators/index.js';
 export {
   type BaseElementProps,
-  type GfxContainerElement,
-  gfxContainerSymbol,
   type GfxElementGeometry,
   GfxGroupLikeElementModel as GfxGroupLikeElementModel,
   GfxLocalElementModel,
   GfxPrimitiveElementModel as GfxPrimitiveElementModel,
-  isGfxContainerElm,
   type PointTestOptions,
   type SerializedElement,
 } from './surface/element-model.js';

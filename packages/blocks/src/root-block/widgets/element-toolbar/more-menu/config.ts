@@ -322,6 +322,10 @@ export const conversionsGroup: MenuItemGroup<ElementToolbarMoreMenuContext> = {
           elements,
           title
         );
+        // delete selected elements
+        doc.transact(() => {
+          deleteElements(edgeless, elements);
+        });
         // insert linked doc card
         const width = 364;
         const height = 390;
@@ -335,6 +339,10 @@ export const conversionsGroup: MenuItemGroup<ElementToolbarMoreMenuContext> = {
           },
           surface.model.id
         );
+        selection.set({
+          elements: [cardId],
+          editing: false,
+        });
         std.getOptional(TelemetryProvider)?.track('CanvasElementAdded', {
           control: 'context-menu',
           page: 'whiteboard editor',
@@ -354,14 +362,6 @@ export const conversionsGroup: MenuItemGroup<ElementToolbarMoreMenuContext> = {
           module: 'format toolbar',
           type: 'embed-linked-doc',
           other: 'new doc',
-        });
-        // delete selected elements
-        doc.transact(() => {
-          deleteElements(edgeless, elements);
-        });
-        selection.set({
-          elements: [cardId],
-          editing: false,
         });
 
         notifyDocCreated(host, doc);

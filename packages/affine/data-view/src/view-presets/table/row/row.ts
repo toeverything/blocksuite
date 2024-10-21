@@ -1,3 +1,4 @@
+import { popupTargetFromElement } from '@blocksuite/affine-components/context-menu';
 import { ShadowlessElement } from '@blocksuite/block-std';
 import { SignalWatcher, WithDisposable } from '@blocksuite/global/utils';
 import { CenterPeekIcon, MoreHorizontalIcon } from '@blocksuite/icons/lit';
@@ -140,7 +141,7 @@ export class TableRow extends SignalWatcher(WithDisposable(ShadowlessElement)) {
       (e.target as HTMLElement).closest('.database-cell') ?? // for last add btn cell
       (e.target as HTMLElement);
 
-    popRowMenu(this.dataViewEle, target, selection);
+    popRowMenu(this.dataViewEle, popupTargetFromElement(target), selection);
   };
 
   setSelection = (selection?: TableViewSelection) => {
@@ -215,7 +216,11 @@ export class TableRow extends SignalWatcher(WithDisposable(ShadowlessElement)) {
                 rows: [row],
               })
             );
-            popRowMenu(this.dataViewEle, ele, this.selectionController);
+            popRowMenu(
+              this.dataViewEle,
+              popupTargetFromElement(ele),
+              this.selectionController
+            );
           };
           return html`
             <div>

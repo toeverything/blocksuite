@@ -28,7 +28,10 @@ import {
 } from '@blocksuite/affine-model';
 import { EditPropsStore } from '@blocksuite/affine-shared/services';
 import { clamp } from '@blocksuite/affine-shared/utils';
-import { GfxControllerIdentifier } from '@blocksuite/block-std/gfx';
+import {
+  GfxControllerIdentifier,
+  isGfxContainerElm,
+} from '@blocksuite/block-std/gfx';
 import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 import { Bound, getCommonBound, last } from '@blocksuite/global/utils';
 import { type BlockModel, Slot } from '@blocksuite/store';
@@ -107,6 +110,29 @@ export class EdgelessRootService extends RootService implements SurfaceContext {
   };
 
   TemplateJob = TemplateJob;
+
+  updateElement = (id: string, props: Record<string, unknown>) => {
+    const element = this._surface.getElementById(id);
+    if (element) {
+      const key = getLastPropsKey(
+        element.type as BlockSuite.EdgelessModelKeys,
+        { ...element.yMap.toJSON(), ...props }
+      );
+      key && this.std.get(EditPropsStore).recordLastProps(key, props);
+      this._surface.updateElement(id, props);
+      return;
+    }
+
+    const block = this.doc.getBlockById(id);
+    if (block) {
+      const key = getLastPropsKey(
+        block.flavour as BlockSuite.EdgelessModelKeys,
+        { ...block.yBlock.toJSON(), ...props }
+      );
+      key && this.std.get(EditPropsStore).recordLastProps(key, props);
+      this.doc.updateBlock(block, props);
+    }
+  };
 
   get blocks(): GfxBlockModel[] {
     return this.layer.blocks;
@@ -307,14 +333,15 @@ export class EdgelessRootService extends RootService implements SurfaceContext {
     if (parent !== null) {
       selection.selectedElements.forEach(element => {
         // eslint-disable-next-line unicorn/prefer-dom-node-remove
-        parent.removeChild(element.id);
+        parent.removeChild(element);
       });
     }
 
     const groupId = this.createGroup(selection.selectedElements);
+    const group = this.surface.getElementById(groupId);
 
-    if (parent !== null) {
-      parent.addChild(groupId);
+    if (parent !== null && group) {
+      parent.addChild(group);
     }
 
     selection.set({
@@ -440,7 +467,7 @@ export class EdgelessRootService extends RootService implements SurfaceContext {
     const { activeGroup } = selectionManager;
     const first = picked;
 
-    if (activeGroup && picked && activeGroup.hasDescendant(picked.id)) {
+    if (activeGroup && picked && activeGroup.hasDescendant(picked)) {
       let index = results.length - 1;
 
       while (
@@ -473,6 +500,12 @@ export class EdgelessRootService extends RootService implements SurfaceContext {
     id = typeof id === 'string' ? id : id.id;
 
     const el = this.getElementById(id);
+    if (isGfxContainerElm(el)) {
+      el.childIds.forEach(childId => {
+        this.removeElement(childId);
+      });
+    }
+
     if (el instanceof GfxBlockModel) {
       this.doc.deleteBlock(el);
       return;
@@ -531,12 +564,12 @@ export class EdgelessRootService extends RootService implements SurfaceContext {
 
     if (parent !== null) {
       // eslint-disable-next-line unicorn/prefer-dom-node-remove
-      parent.removeChild(group.id);
+      parent.removeChild(group);
     }
 
     elements.forEach(element => {
       // eslint-disable-next-line unicorn/prefer-dom-node-remove
-      group.removeChild(element.id);
+      group.removeChild(element);
     });
 
     // keep relative index order of group children after ungroup
@@ -550,7 +583,7 @@ export class EdgelessRootService extends RootService implements SurfaceContext {
 
     if (parent !== null) {
       elements.forEach(element => {
-        parent.addChild(element.id);
+        parent.addChild(element);
       });
     }
 
@@ -569,29 +602,6 @@ export class EdgelessRootService extends RootService implements SurfaceContext {
     this._frame?.dispose();
     this.selectionManager.set([]);
     this.disposables.dispose();
-  }
-
-  updateElement(id: string, props: Record<string, unknown>) {
-    const element = this._surface.getElementById(id);
-    if (element) {
-      const key = getLastPropsKey(
-        element.type as BlockSuite.EdgelessModelKeys,
-        { ...element.yMap.toJSON(), ...props }
-      );
-      key && this.std.get(EditPropsStore).recordLastProps(key, props);
-      this._surface.updateElement(id, props);
-      return;
-    }
-
-    const block = this.doc.getBlockById(id);
-    if (block) {
-      const key = getLastPropsKey(
-        block.flavour as BlockSuite.EdgelessModelKeys,
-        { ...block.yBlock.toJSON(), ...props }
-      );
-      key && this.std.get(EditPropsStore).recordLastProps(key, props);
-      this.doc.updateBlock(block, props);
-    }
   }
 
   zoomToFit() {

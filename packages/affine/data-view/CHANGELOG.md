@@ -1,5 +1,115 @@
 # @blocksuite/data-view
 
+## 0.17.19
+
+### Patch Changes
+
+- b69b00e: ---
+
+  '@blocksuite/affine-block-list': patch
+  '@blocksuite/affine-block-paragraph': patch
+  '@blocksuite/affine-block-surface': patch
+  '@blocksuite/affine-components': patch
+  '@blocksuite/data-view': patch
+  '@blocksuite/affine-model': patch
+  '@blocksuite/affine-shared': patch
+  '@blocksuite/blocks': patch
+  '@blocksuite/docs': patch
+  '@blocksuite/block-std': patch
+  '@blocksuite/global': patch
+  '@blocksuite/inline': patch
+  '@blocksuite/store': patch
+  '@blocksuite/sync': patch
+  '@blocksuite/presets': patch
+
+  ***
+
+  [feat: markdown adapter with latex](https://github.com/toeverything/blocksuite/pull/8503)
+
+  [feat: support notion block equation html import](https://github.com/toeverything/blocksuite/pull/8504)
+
+  [feat: support edgeless tidy up](https://github.com/toeverything/blocksuite/pull/8516)
+
+  [feat: support notion callout block to blocksuite quote block](https://github.com/toeverything/blocksuite/pull/8523)
+
+  [feat(playground): add import notion zip entry](https://github.com/toeverything/blocksuite/pull/8527)
+
+  [fix(blocks): auto focus latex block](https://github.com/toeverything/blocksuite/pull/8505)
+
+  [fix: enhance button layout with icon alignment](https://github.com/toeverything/blocksuite/pull/8508)
+
+  [fix(edgeless): ime will crash edgeless text width](https://github.com/toeverything/blocksuite/pull/8506)
+
+  [fix(edgeless): edgeless text is deleted when first block is empty](https://github.com/toeverything/blocksuite/pull/8512)
+
+  [fix: notion html quote block import](https://github.com/toeverything/blocksuite/pull/8515)
+
+  [fix: yjs warning](https://github.com/toeverything/blocksuite/pull/8519)
+
+  [fix(blocks): real nested list on html export](https://github.com/toeverything/blocksuite/pull/8511)
+
+  [fix(edgeless): cmd a will select element inner frame](https://github.com/toeverything/blocksuite/pull/8517)
+
+  [fix(edgeless): disable contenteditable when edgeless text not in editing state](https://github.com/toeverything/blocksuite/pull/8525)
+
+  [fix: import notion toggle list as toggle bulleted list](https://github.com/toeverything/blocksuite/pull/8528)
+
+  [refactor(database): signals version datasource api](https://github.com/toeverything/blocksuite/pull/8513)
+
+  [refactor(edgeless): element tree manager](https://github.com/toeverything/blocksuite/pull/8239)
+
+  [refactor(blocks): simplify frame manager implementation](https://github.com/toeverything/blocksuite/pull/8507)
+
+  [refactor: update group test utils using container interface](https://github.com/toeverything/blocksuite/pull/8518)
+
+  [refactor: update frame test with container test uitls](https://github.com/toeverything/blocksuite/pull/8520)
+
+  [refactor(database): context-menu ui and ux](https://github.com/toeverything/blocksuite/pull/8467)
+
+  [refactor: move chat block to affine](https://github.com/toeverything/blocksuite/pull/8420)
+
+  [perf: optimize snapshot job handling](https://github.com/toeverything/blocksuite/pull/8428)
+
+  [perf(edgeless): disable shape shadow blur](https://github.com/toeverything/blocksuite/pull/8532)
+
+  [chore: bump up all non-major dependencies](https://github.com/toeverything/blocksuite/pull/8514)
+
+  [chore: Lock file maintenance](https://github.com/toeverything/blocksuite/pull/8510)
+
+  [docs: fix table structure warning](https://github.com/toeverything/blocksuite/pull/8509)
+
+  [docs: edgeless data structure desc](https://github.com/toeverything/blocksuite/pull/8531)
+
+  [docs: update link](https://github.com/toeverything/blocksuite/pull/8533)
+
+- Updated dependencies [b69b00e]
+  - @blocksuite/affine-components@0.17.19
+  - @blocksuite/affine-shared@0.17.19
+  - @blocksuite/block-std@0.17.19
+  - @blocksuite/global@0.17.19
+  - @blocksuite/store@0.17.19
+
+## 0.17.18
+
+### Patch Changes
+
+- 9f70715: Bug Fixes:
+
+  - fix(blocks): can not search in at menu with IME. [#8481](https://github.com/toeverything/blocksuite/pull/8481)
+  - fix(std): dispatcher pointerUp calls twice. [#8485](https://github.com/toeverything/blocksuite/pull/8485)
+  - fix(blocks): pasting elements with css inline style. [#8491](https://github.com/toeverything/blocksuite/pull/8491)
+  - fix(blocks): hide outline panel toggle button when callback is null. [#8493](https://github.com/toeverything/blocksuite/pull/8493)
+  - fix(blocks): pasting twice when span inside h tag. [#8496](https://github.com/toeverything/blocksuite/pull/8496)
+  - fix(blocks): image should be displayed when in vertical mode. [#8497](https://github.com/toeverything/blocksuite/pull/8497)
+  - fix: press backspace at the start of first line when edgeless text exist. [#8498](https://github.com/toeverything/blocksuite/pull/8498)
+
+- Updated dependencies [9f70715]
+  - @blocksuite/affine-components@0.17.18
+  - @blocksuite/affine-shared@0.17.18
+  - @blocksuite/block-std@0.17.18
+  - @blocksuite/global@0.17.18
+  - @blocksuite/store@0.17.18
+
 ## 0.17.17
 
 ### Patch Changes

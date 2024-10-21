@@ -1,5 +1,6 @@
 import type { InsertToPosition } from '@blocksuite/affine-shared/utils';
 
+import { unsafeCSSVarV2 } from '@blocksuite/affine-shared/theme';
 import { PlusIcon } from '@blocksuite/icons/lit';
 import { css, html } from 'lit';
 import { state } from 'lit/decorators.js';
@@ -14,20 +15,21 @@ const styles = css`
     display: flex;
     align-items: center;
     gap: 4px;
-    width: 120px;
     height: 32px;
-    padding: 6px 8px;
-    border-radius: 8px;
-    font-size: 14px;
+    padding: 4px 8px 4px 4px;
+    border-radius: 4px;
     background: var(--affine-white);
-    box-shadow: 0px 0px 0px 0.5px rgba(0, 0, 0, 0.1);
     cursor: grab;
+    font-size: 15px;
+    font-weight: 500;
+    line-height: 24px;
+    color: ${unsafeCSSVarV2('text/primary')};
+    border: 1px solid ${unsafeCSSVarV2('layer/insideBorder/blackBorder')};
   }
 
   .new-record svg {
-    width: 16px;
-    height: 16px;
-    fill: var(--affine-icon-color);
+    font-size: 20px;
+    color: ${unsafeCSSVarV2('icon/primary')};
   }
 `;
 

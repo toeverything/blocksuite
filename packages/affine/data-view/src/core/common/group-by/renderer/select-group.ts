@@ -1,4 +1,8 @@
-import { popMenu } from '@blocksuite/affine-components/context-menu';
+import {
+  menu,
+  popMenu,
+  popupTargetFromElement,
+} from '@blocksuite/affine-components/context-menu';
 import { css, html } from 'lit';
 import { classMap } from 'lit/directives/class-map.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -18,6 +22,7 @@ export class SelectGroupView extends BaseGroup<
     data-view-group-title-select-view {
       overflow: hidden;
     }
+
     .data-view-group-title-select-view {
       width: 100%;
       cursor: pointer;
@@ -42,31 +47,32 @@ export class SelectGroupView extends BaseGroup<
     if (this.readonly) {
       return;
     }
-    popMenu(this, {
+    popMenu(popupTargetFromElement(this), {
       options: {
-        input: {
-          initValue: this.tag?.value ?? '',
-          onComplete: text => {
-            this.updateTag({ value: text });
-          },
-        },
-        items: selectOptionColors.map(({ color, name }) => {
-          const styles = styleMap({
-            backgroundColor: color,
-            borderRadius: '50%',
-            width: '20px',
-            height: '20px',
-          });
-          return {
-            type: 'action',
-            name: name,
-            isSelected: this.tag?.color === color,
-            icon: html` <div style=${styles}></div>`,
-            select: () => {
-              this.updateTag({ color });
+        items: [
+          menu.input({
+            initialValue: this.tag?.value ?? '',
+            onComplete: text => {
+              this.updateTag({ value: text });
             },
-          };
-        }),
+          }),
+          ...selectOptionColors.map(({ color, name }) => {
+            const styles = styleMap({
+              backgroundColor: color,
+              borderRadius: '50%',
+              width: '20px',
+              height: '20px',
+            });
+            return menu.action({
+              name: name,
+              isSelected: this.tag?.color === color,
+              prefix: html` <div style=${styles}></div>`,
+              select: () => {
+                this.updateTag({ color });
+              },
+            });
+          }),
+        ],
       },
     });
   };

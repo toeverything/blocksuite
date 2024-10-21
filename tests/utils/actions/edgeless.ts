@@ -498,6 +498,7 @@ export async function addBasicShapeElement(
 ) {
   await setEdgelessTool(page, 'shape', shape);
   await dragBetweenCoords(page, start, end, { steps: 50 });
+  return (await getSelectedIds(page))[0];
 }
 
 export async function addBasicConnectorElement(
@@ -507,6 +508,15 @@ export async function addBasicConnectorElement(
 ) {
   await setEdgelessTool(page, 'connector');
   await dragBetweenCoords(page, start, end, { steps: 100 });
+}
+
+export async function addBasicFrameElement(
+  page: Page,
+  start: Point,
+  end: Point
+) {
+  await setEdgelessTool(page, 'frame');
+  await dragBetweenCoords(page, start, end, { steps: 50 });
 }
 
 export async function addNote(page: Page, text: string, x: number, y: number) {
@@ -1018,7 +1028,9 @@ type Action =
   | 'createLinkedDoc'
   | 'openLinkedDoc'
   | 'toCardView'
-  | 'toEmbedView';
+  | 'toEmbedView'
+  | 'autoArrange'
+  | 'autoResize';
 
 export async function triggerComponentToolbarAction(
   page: Page,
@@ -1315,6 +1327,28 @@ export async function triggerComponentToolbarAction(
       await button.click();
       break;
     }
+    case 'autoArrange': {
+      const button = locatorComponentToolbar(page).locator(
+        'edgeless-align-button'
+      );
+      await button.click();
+      const arrange = button.locator('editor-icon-button').filter({
+        hasText: 'Auto arrange',
+      });
+      await arrange.click();
+      break;
+    }
+    case 'autoResize': {
+      const button = locatorComponentToolbar(page).locator(
+        'edgeless-align-button'
+      );
+      await button.click();
+      const resize = button.locator('editor-icon-button').filter({
+        hasText: 'Resize & Align',
+      });
+      await resize.click();
+      break;
+    }
   }
 }
 
@@ -1566,6 +1600,30 @@ export async function getConnectorPath(page: Page, index = 0): Promise<IVec[]> {
   );
 }
 
+export async function getEdgelessElementBound(
+  page: Page,
+  elementId: string
+): Promise<[number, number, number, number]> {
+  return page.evaluate(
+    ([elementId]) => {
+      const container = document.querySelector('affine-edgeless-root');
+      if (!container) throw new Error('container not found');
+      const element = container.service.getElementById(elementId);
+      if (!element) throw new Error(`element not found: ${elementId}`);
+      return JSON.parse(element.xywh);
+    },
+    [elementId]
+  );
+}
+
+export async function getSelectedIds(page: Page) {
+  return page.evaluate(() => {
+    const container = document.querySelector('affine-edgeless-root');
+    if (!container) throw new Error('container not found');
+    return container.service.selection.selectedElements.map(e => e.id);
+  });
+}
+
 export async function getSelectedBoundCount(page: Page) {
   return page.evaluate(() => {
     const container = document.querySelector('affine-edgeless-root');
@@ -1589,36 +1647,38 @@ export async function getSelectedBound(
   );
 }
 
-export async function getGroupOfElements(page: Page, ids: string[]) {
+export async function getContainerOfElements(page: Page, ids: string[]) {
   return page.evaluate(
     ([ids]) => {
       const container = document.querySelector('affine-edgeless-root');
       if (!container) throw new Error('container not found');
 
-      return ids.map(id => container.service.surface.getGroup(id)?.id ?? null);
+      return ids.map(
+        id => container.service.surface.getContainer(id)?.id ?? null
+      );
     },
     [ids]
   );
 }
 
-export async function getGroupIds(page: Page) {
+export async function getContainerIds(page: Page) {
   return page.evaluate(() => {
     const container = document.querySelector('affine-edgeless-root');
     if (!container) throw new Error('container not found');
-    return container.service.elements.map(el => el.group?.id ?? 'null');
+    return container.service.elements.map(el => el.container?.id ?? 'null');
   });
 }
 
-export async function getGroupChildrenIds(page: Page, id: string) {
+export async function getContainerChildIds(page: Page, id: string) {
   return page.evaluate(
     ([id]) => {
       const container = document.querySelector('affine-edgeless-root');
       if (!container) throw new Error('container not found');
-      return Array.from(
-        container.service
-          .getElementsByType('group')
-          .find(group => group.id === id)?.childIds ?? []
-      );
+      const gfxModel = container.service.getElementById(id);
+
+      return gfxModel && container.service.surface.isContainer(gfxModel)
+        ? gfxModel.childIds
+        : [];
     },
     [id]
   );
@@ -1673,14 +1733,15 @@ export async function getIds(page: Page, filterGroup = false) {
   );
 }
 
-export async function getFirstGroupId(page: Page, exclude: string[] = []) {
+export async function getFirstContainerId(page: Page, exclude: string[] = []) {
   return page.evaluate(
     ([exclude]) => {
       const container = document.querySelector('affine-edgeless-root');
       if (!container) throw new Error('container not found');
       return (
-        container.service.elements.find(
-          e => e.type === 'group' && !exclude.includes(e.id)
+        container.service.edgelessElements.find(
+          e =>
+            container.service.surface.isContainer(e) && !exclude.includes(e.id)
         )?.id ?? ''
       );
     },
@@ -1724,6 +1785,7 @@ export async function createFrame(
 ) {
   await page.keyboard.press('f');
   await dragBetweenViewCoords(page, coord1, coord2);
+  return (await getSelectedIds(page))[0];
 }
 
 export async function createShapeElement(
@@ -1734,12 +1796,13 @@ export async function createShapeElement(
 ) {
   const start = await toViewCoord(page, coord1);
   const end = await toViewCoord(page, coord2);
-  await addBasicShapeElement(
+  const shapeId = await addBasicShapeElement(
     page,
     { x: start[0], y: start[1] },
     { x: end[0], y: end[1] },
     shape
   );
+  return shapeId;
 }
 
 export async function createConnectorElement(
@@ -1750,6 +1813,20 @@ export async function createConnectorElement(
   const start = await toViewCoord(page, coord1);
   const end = await toViewCoord(page, coord2);
   await addBasicConnectorElement(
+    page,
+    { x: start[0], y: start[1] },
+    { x: end[0], y: end[1] }
+  );
+}
+
+export async function createFrameElement(
+  page: Page,
+  coord1: number[],
+  coord2: number[]
+) {
+  const start = await toViewCoord(page, coord1);
+  const end = await toViewCoord(page, coord2);
+  await addBasicFrameElement(
     page,
     { x: start[0], y: start[1] },
     { x: end[0], y: end[1] }

@@ -59,6 +59,48 @@ export const hastGetTextChildrenOnlyAst = (ast: Element): Element => {
   };
 };
 
+const isInlineElement = (tagName: string): boolean => {
+  const inlineElements = [
+    'a',
+    'br',
+    'code',
+    'del',
+    'em',
+    'mark',
+    'span',
+    'strong',
+    'u',
+  ];
+  return inlineElements.includes(tagName);
+};
+
+const getInlineElementsAndText = (ast: Element): (Element | Text)[] => {
+  if (!ast || !ast.children) {
+    return [];
+  }
+
+  return ast.children.filter((child): child is Element | Text => {
+    if (child.type === 'text') {
+      return true;
+    }
+    if (
+      child.type === 'element' &&
+      child.tagName &&
+      isInlineElement(child.tagName)
+    ) {
+      return true;
+    }
+    return false;
+  });
+};
+
+export const hastGetInlineOnlyElementAST = (ast: Element): Element => {
+  return {
+    ...ast,
+    children: getInlineElementsAndText(ast),
+  };
+};
+
 const querySelectorTag = (
   ast: HtmlAST,
   tagName: string

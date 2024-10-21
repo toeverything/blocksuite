@@ -1,4 +1,8 @@
-import { popFilterableSimpleMenu } from '@blocksuite/affine-components/context-menu';
+import {
+  menu,
+  popFilterableSimpleMenu,
+  type PopupTarget,
+} from '@blocksuite/affine-components/context-menu';
 import {
   ArrowRightBigIcon,
   DeleteIcon,
@@ -29,27 +33,22 @@ export const openDetail = (
 
 export const popCardMenu = (
   dataViewEle: DataViewRenderer,
-  ele: HTMLElement,
+  ele: PopupTarget,
   rowId: string,
   selection: KanbanSelectionController
 ) => {
   popFilterableSimpleMenu(ele, [
-    {
-      type: 'action',
+    menu.action({
       name: 'Expand Card',
-      icon: ExpandFullIcon(),
+      prefix: ExpandFullIcon(),
       select: () => {
         openDetail(dataViewEle, rowId, selection);
       },
-    },
-    {
-      type: 'sub-menu',
+    }),
+    menu.subMenu({
       name: 'Move To',
-      icon: ArrowRightBigIcon(),
+      prefix: ArrowRightBigIcon(),
       options: {
-        input: {
-          search: true,
-        },
         items:
           selection.view.groupManager.groupsDataList$.value
             ?.filter(v => {
@@ -60,46 +59,21 @@ export const popCardMenu = (
               return false;
             })
             .map(group => {
-              return {
-                type: 'action',
+              return menu.action({
                 name: group.value != null ? group.name : 'Ungroup',
                 select: () => {
                   selection.moveCard(rowId, group.key);
                 },
-              };
+              });
             }) ?? [],
       },
-    },
-    // {
-    //   type: 'group',
-    //   name: '',
-    //   children: () => [
-    //     {
-    //       type: 'action',
-    //       name: 'Copy',
-    //       icon: CopyIcon,
-    //       select: () => {
-    //         //TODO
-    //       },
-    //     },
-    //     {
-    //       type: 'action',
-    //       name: 'Paste',
-    //       icon: PasteIcon,
-    //       select: () => {
-    //         //TODO
-    //       },
-    //     },
-    //   ],
-    // },
-    {
-      type: 'group',
+    }),
+    menu.group({
       name: '',
-      children: () => [
-        {
-          type: 'action',
+      items: [
+        menu.action({
           name: 'Insert Before',
-          icon: html` <div
+          prefix: html` <div
             style="transform: rotate(90deg);display:flex;align-items:center;"
           >
             ${MoveLeftIcon()}
@@ -107,11 +81,10 @@ export const popCardMenu = (
           select: () => {
             selection.insertRowBefore();
           },
-        },
-        {
-          type: 'action',
+        }),
+        menu.action({
           name: 'Insert After',
-          icon: html` <div
+          prefix: html` <div
             style="transform: rotate(90deg);display:flex;align-items:center;"
           >
             ${MoveRightIcon()}
@@ -119,23 +92,21 @@ export const popCardMenu = (
           select: () => {
             selection.insertRowAfter();
           },
-        },
+        }),
       ],
-    },
-    {
-      type: 'group',
+    }),
+    menu.group({
       name: '',
-      children: () => [
-        {
-          type: 'action',
+      items: [
+        menu.action({
           name: 'Delete Card',
           class: 'delete-item',
-          icon: DeleteIcon(),
+          prefix: DeleteIcon(),
           select: () => {
             selection.deleteCard();
           },
-        },
+        }),
       ],
-    },
+    }),
   ]);
 };

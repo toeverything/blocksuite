@@ -50,6 +50,7 @@ export class EdgelessNoteMask extends WithDisposable(ShadowlessElement) {
           bound.h = height;
           this.model.stash('xywh');
           this.model.xywh = bound.serialize();
+          this.model.pop('xywh');
         }
       }
     });
@@ -57,10 +58,6 @@ export class EdgelessNoteMask extends WithDisposable(ShadowlessElement) {
     observer.observe(maskDOM!);
 
     this._disposables.add(() => {
-      // check if model still exist
-      if (this.model.doc.getBlockById(this.model.id)) {
-        this.model.pop('xywh');
-      }
       observer.disconnect();
     });
   }

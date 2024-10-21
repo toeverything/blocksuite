@@ -13,32 +13,34 @@ import {
   MindmapElementModel,
 } from '@blocksuite/affine-model';
 import {
+  getTopElements,
+  type GfxModel,
   isGfxContainerElm,
   type SerializedElement,
 } from '@blocksuite/block-std/gfx';
 import { type BlockSnapshot, Job } from '@blocksuite/store';
 
 import { GfxBlockModel } from '../block-model.js';
-import { getAllDescendantElements, getTopElements } from './tree.js';
 
 /**
  * return all elements in the tree of the elements
  */
-export function getSortedCloneElements(elements: BlockSuite.EdgelessModel[]) {
-  const set = new Set<BlockSuite.EdgelessModel>();
+export function getSortedCloneElements(elements: GfxModel[]) {
+  const set = new Set<GfxModel>();
   elements.forEach(element => {
     // this element subtree has been added
     if (set.has(element)) return;
 
-    getAllDescendantElements(element, true).map(descendant =>
-      set.add(descendant)
-    );
+    set.add(element);
+    if (isGfxContainerElm(element)) {
+      element.descendantElements.map(descendant => set.add(descendant));
+    }
   });
   return sortEdgelessElements([...set]);
 }
 
 export async function prepareCloneData(
-  elements: BlockSuite.EdgelessModel[],
+  elements: GfxModel[],
   std: BlockStdScope
 ) {
   elements = sortEdgelessElements(elements);
@@ -55,8 +57,8 @@ export async function prepareCloneData(
 }
 
 export async function serializeElement(
-  element: BlockSuite.EdgelessModel,
-  elements: BlockSuite.EdgelessModel[],
+  element: GfxModel,
+  elements: GfxModel[],
   job: Job
 ) {
   if (element instanceof GfxBlockModel) {
@@ -74,7 +76,7 @@ export async function serializeElement(
 
 export function serializeConnector(
   connector: ConnectorElementModel,
-  elements: BlockSuite.EdgelessModel[]
+  elements: GfxModel[]
 ) {
   const sourceId = connector.source?.id;
   const targetId = connector.target?.id;
@@ -98,18 +100,19 @@ export function serializeConnector(
  * @param elements edgeless model list
  * @returns sorted edgeless model list
  */
-export function sortEdgelessElements(elements: BlockSuite.EdgelessModel[]) {
+export function sortEdgelessElements(elements: GfxModel[]) {
   // Since each element has a parent-child relationship, and from-to connector relationship
   // the child element must be added before the parent element
   // and the connected elements must be added before the connector element
   // To achieve this, we do a post-order traversal of the tree
 
-  const result: BlockSuite.EdgelessModel[] = [];
+  if (elements.length === 0) return [];
+  const result: GfxModel[] = [];
 
   const topElements = getTopElements(elements);
 
   // the connector element must be added after the connected elements
-  const moveConnectorToEnd = (elements: BlockSuite.EdgelessModel[]) => {
+  const moveConnectorToEnd = (elements: GfxModel[]) => {
     const connectors = elements.filter(
       element => element instanceof ConnectorElementModel
     );
@@ -119,7 +122,7 @@ export function sortEdgelessElements(elements: BlockSuite.EdgelessModel[]) {
     return [...rest, ...connectors];
   };
 
-  const traverse = (element: BlockSuite.EdgelessModel) => {
+  const traverse = (element: GfxModel) => {
     if (isGfxContainerElm(element)) {
       moveConnectorToEnd(element.childElements).forEach(child =>
         traverse(child)

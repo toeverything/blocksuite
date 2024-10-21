@@ -270,26 +270,6 @@ export function expectConsoleMessage(
     | 'timeEnd' = 'error'
 ) {
   page.on('console', (message: ConsoleMessage) => {
-    if (
-      [
-        '',
-        // React devtools:
-        '%cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold',
-        // Vite:
-        '[vite] connected.',
-        '[vite] connecting...',
-        // Figma embed:
-        'Fullscreen: Using 4GB WASM heap',
-        // Lit:
-        'Lit is in dev mode. Not recommended for production! See https://lit.dev/msg/dev-mode for more information.',
-        // Figma embed:
-        'Running frontend commit',
-      ].includes(message.text())
-    ) {
-      ignoredLog(message);
-      return;
-    }
-
     const sameType = message.type() === type;
     const textMatch =
       logPrefixOrRegex instanceof RegExp
@@ -320,11 +300,27 @@ export async function enterPlaygroundRoom(
   url.searchParams.set('room', room);
   url.searchParams.set('blobSource', blobSource?.join(',') || 'idb');
   await page.goto(url.toString());
-  // const readyPromise = waitForPageReady(page);
 
   // See https://github.com/microsoft/playwright/issues/5546
-  // See https://github.com/microsoft/playwright/discussions/17813
   page.on('console', message => {
+    if (
+      [
+        '',
+        // React devtools:
+        '%cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold',
+        // Vite:
+        '[vite] connected.',
+        '[vite] connecting...',
+        // Figma embed:
+        'Fullscreen: Using 4GB WASM heap',
+        // Lit:
+        'Lit is in dev mode. Not recommended for production! See https://lit.dev/msg/dev-mode for more information.',
+        // Figma embed:
+        'Running frontend commit',
+      ].includes(message.text())
+    ) {
+      return;
+    }
     const ignore = isIgnoredLog(message) || !process.env.CI;
     if (!ignore) {
       expect
@@ -380,16 +376,6 @@ export async function waitNextFrame(
   frameTimeout = NEXT_FRAME_TIMEOUT
 ) {
   await page.waitForTimeout(frameTimeout);
-}
-
-export async function waitForPageReady(page: Page) {
-  await page.evaluate(async () => {
-    return new Promise<void>(resolve => {
-      window.addEventListener('blocksuite:doc-ready', () => resolve(), {
-        once: true,
-      });
-    });
-  });
 }
 
 export async function clearLog(page: Page) {
@@ -681,9 +667,9 @@ export async function initDatabaseDynamicRowWithData(
   const editorHost = getEditorHostLocator(page);
   if (addRow) {
     await initDatabaseRow(page);
+    await waitNextFrame(page, 100);
     await pressEscape(page);
   }
-  // await focusDatabaseTitle(page);
   const lastRow = editorHost.locator('.affine-database-block-row').last();
   const cell = lastRow.locator('.database-cell').nth(index + 1);
   await cell.click();

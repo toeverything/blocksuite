@@ -137,6 +137,12 @@ export class ShapeElementModel extends GfxPrimitiveElementModel<ShapeProps> {
 
   @field()
   accessor shadow: {
+    /**
+     * @deprecated Since the shadow blur will reduce the performance of canvas rendering,
+     * we already disable the shadow blur rendering by default, so set this field will not take effect.
+     * You can enable it by setting the flag `enable_shape_shadow_blur` in the awareness store.
+     * https://web.dev/articles/canvas-performance#avoid_shadowblur
+     */
     blur: number;
     offsetX: number;
     offsetY: number;

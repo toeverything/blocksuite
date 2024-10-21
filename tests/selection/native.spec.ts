@@ -43,6 +43,7 @@ import {
   scrollToTop,
   selectAllByKeyboard,
   setInlineRangeInInlineEditor,
+  setSelection,
   SHORT_KEY,
   switchEditorMode,
   type,
@@ -1764,4 +1765,35 @@ test.describe('should scroll text to view when drag to select at top or bottom e
     const lastParagraph = page.locator('[data-block-id="51"]');
     await expect(lastParagraph).toBeInViewport();
   });
+});
+
+test('abnormal cursor jumping', async ({ page }) => {
+  // https://github.com/toeverything/blocksuite/pull/8552
+
+  await enterPlaygroundRoom(page);
+  await initImageState(page);
+
+  await pressEnter(page);
+  await page.locator('affine-image block-zero-width .block-zero-width').click();
+  await pressArrowUp(page);
+  await pressTab(page);
+  await pressArrowDown(page);
+  await pressTab(page);
+  await pressEnter(page, 12);
+
+  const image = page.locator('affine-image');
+  const rect = await image.boundingBox();
+  // make sure the image is out of view
+  expect(rect?.y).toBeLessThan(0);
+
+  await setSelection(page, 4, 0, 4, 0);
+  await type(page, 'aaaaaaaaaaaaaa');
+  await page.locator('[data-block-id="4"]').dblclick({
+    position: {
+      x: 50,
+      y: 5,
+    },
+  });
+  const newRect = await image.boundingBox();
+  expect(rect).toEqual(newRect);
 });

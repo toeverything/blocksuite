@@ -297,6 +297,7 @@ export class RangeService<TextAttributes extends BaseTextAttributes> {
           if (newRange) {
             selection.removeAllRanges();
             selection.addRange(newRange);
+            this.editor.rootElement.focus();
 
             this.editor.slots.inlineRangeSync.emit(newRange);
           } else {

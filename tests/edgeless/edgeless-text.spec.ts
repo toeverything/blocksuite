@@ -202,10 +202,21 @@ test.describe('edgeless text block', () => {
       delay: 100,
     });
     await waitNextFrame(page);
-    const block = page.locator('affine-edgeless-text[data-block-id="4"]');
+    let block = page.locator('affine-edgeless-text[data-block-id="4"]');
     expect(await block.isVisible()).toBe(true);
     await page.mouse.click(0, 0);
     expect(await block.isVisible()).toBe(false);
+
+    block = page.locator('affine-edgeless-text[data-block-id="6"]');
+    expect(await block.isVisible()).not.toBe(true);
+    await page.mouse.dblclick(130, 140, {
+      delay: 100,
+    });
+    expect(await block.isVisible()).toBe(true);
+    await type(page, '\na');
+    expect(await block.isVisible()).toBe(true);
+    await page.mouse.click(0, 0);
+    expect(await block.isVisible()).not.toBe(false);
   });
 
   test('edgeless text should maintain selection when deleting across multiple lines', async ({
@@ -401,4 +412,54 @@ test.describe('edgeless text block', () => {
       `${testInfo.title}_drag.json`
     );
   });
+});
+
+test('press backspace at the start of first line when edgeless text exist', async ({
+  page,
+}, testInfo) => {
+  await enterPlaygroundRoom(page, {
+    flags: {
+      enable_edgeless_text: true,
+    },
+  });
+  await page.evaluate(() => {
+    const { doc } = window;
+    const rootId = doc.addBlock('affine:page', {
+      title: new doc.Text(),
+    });
+    doc.addBlock('affine:surface', {}, rootId);
+    doc.addBlock('affine:note', {}, rootId);
+
+    // do not add paragraph block
+
+    doc.resetHistory();
+  });
+  await switchEditorMode(page);
+
+  await setEdgelessTool(page, 'default');
+  await page.mouse.dblclick(130, 140, {
+    delay: 100,
+  });
+  await waitNextFrame(page);
+  await type(page, 'aaa');
+
+  await switchEditorMode(page);
+
+  expect(await getPageSnapshot(page, true)).toMatchSnapshot(
+    `${testInfo.title}_note_empty.json`
+  );
+
+  await page.locator('.affine-page-root-block-container').click();
+  expect(await getPageSnapshot(page, true)).toMatchSnapshot(
+    `${testInfo.title}_note_not_empty.json`
+  );
+
+  await type(page, 'bbb');
+  await pressArrowLeft(page, 3);
+  await pressBackspace(page);
+  await waitNextFrame(page);
+
+  expect(await getPageSnapshot(page, true)).toMatchSnapshot(
+    `${testInfo.title}_finial.json`
+  );
 });

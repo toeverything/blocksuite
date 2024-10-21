@@ -571,7 +571,112 @@ describe('snapshot to html', () => {
       ],
     };
     const html = template(
-      `<div class="affine-list-block-container"><ul style=""><li>aaa</li></ul><div class="affine-block-children-container" style="padding-left: 26px;"><div class="affine-list-block-container"><ul style=""><li>bbb</li></ul><div class="affine-block-children-container" style="padding-left: 26px;"><div class="affine-list-block-container"><ul style=""><li>ccc</li></ul><div class="affine-block-children-container" style="padding-left: 26px;"></div></div></div></div><div class="affine-list-block-container"><ul style=""><li>ddd</li></ul><div class="affine-block-children-container" style="padding-left: 26px;"></div></div></div></div><div class="affine-list-block-container"><ul style=""><li>eee</li></ul><div class="affine-block-children-container" style="padding-left: 26px;"></div></div>`
+      `<ul class="bulleted-list"><li class="affine-list-block-container">aaa<ul class="bulleted-list"><li class="affine-list-block-container">bbb<ul class="bulleted-list"><li class="affine-list-block-container">ccc</li></ul></li><li class="affine-list-block-container">ddd</li></ul></li><li class="affine-list-block-container">eee</li></ul>`
+    );
+
+    const htmlAdapter = new HtmlAdapter(createJob());
+    const target = await htmlAdapter.fromBlockSnapshot({
+      snapshot: blockSnapshot,
+    });
+    expect(target.file).toBe(html);
+  });
+
+  test('different list', async () => {
+    const blockSnapshot: BlockSnapshot = {
+      type: 'block',
+      id: 'block:vu6SK6WJpW',
+      flavour: 'affine:page',
+      props: {
+        title: {
+          '$blocksuite:internal:text$': true,
+          delta: [],
+        },
+      },
+      children: [
+        {
+          type: 'block',
+          id: 'block:Tk4gSPocAt',
+          flavour: 'affine:surface',
+          props: {
+            elements: {},
+          },
+          children: [],
+        },
+        {
+          type: 'block',
+          id: 'block:WfnS5ZDCJT',
+          flavour: 'affine:note',
+          props: {
+            xywh: '[0,0,800,95]',
+            background: DEFAULT_NOTE_BACKGROUND_COLOR,
+            index: 'a0',
+            hidden: false,
+            displayMode: NoteDisplayMode.DocAndEdgeless,
+          },
+          children: [
+            {
+              type: 'block',
+              id: 'block:imiLDMKSkx',
+              flavour: 'affine:list',
+              props: {
+                type: 'bulleted',
+                text: {
+                  '$blocksuite:internal:text$': true,
+                  delta: [
+                    {
+                      insert: 'aaa',
+                    },
+                  ],
+                },
+                checked: false,
+                collapsed: false,
+              },
+              children: [],
+            },
+            {
+              type: 'block',
+              id: 'block:imiLDMKSkx',
+              flavour: 'affine:list',
+              props: {
+                type: 'todo',
+                text: {
+                  '$blocksuite:internal:text$': true,
+                  delta: [
+                    {
+                      insert: 'bbb',
+                    },
+                  ],
+                },
+                checked: false,
+                collapsed: false,
+              },
+              children: [],
+            },
+            {
+              type: 'block',
+              id: 'block:imiLDMKSkx',
+              flavour: 'affine:list',
+              props: {
+                type: 'bulleted',
+                text: {
+                  '$blocksuite:internal:text$': true,
+                  delta: [
+                    {
+                      insert: 'ccc',
+                    },
+                  ],
+                },
+                checked: false,
+                collapsed: false,
+              },
+              children: [],
+            },
+          ],
+        },
+      ],
+    };
+    const html = template(
+      `<ul class="bulleted-list"><li class="affine-list-block-container">aaa</li></ul><ul style="list-style-type: none; padding-inline-start: 18px;" class="todo-list"><li class="affine-list-block-container"><input type="checkbox"><label style="margin-right: 3px;"></label></input>bbb</li></ul><ul class="bulleted-list"><li class="affine-list-block-container">ccc</li></ul>`
     );
 
     const htmlAdapter = new HtmlAdapter(createJob());
@@ -1529,6 +1634,47 @@ describe('html to snapshot', () => {
                 },
                 {
                   insert: 'ccc',
+                },
+              ],
+            },
+          },
+          children: [],
+        },
+      ],
+    };
+
+    const htmlAdapter = new HtmlAdapter(createJob());
+    const rawBlockSnapshot = await htmlAdapter.toBlockSnapshot({
+      file: html,
+    });
+    expect(nanoidReplacement(rawBlockSnapshot)).toEqual(blockSnapshot);
+  });
+
+  test('span inside h1', async () => {
+    const html = template(`<h1><span>aaa</span></h1>`);
+    const blockSnapshot: BlockSnapshot = {
+      type: 'block',
+      id: 'matchesReplaceMap[0]',
+      flavour: 'affine:note',
+      props: {
+        xywh: '[0,0,800,95]',
+        background: DEFAULT_NOTE_BACKGROUND_COLOR,
+        index: 'a0',
+        hidden: false,
+        displayMode: NoteDisplayMode.DocAndEdgeless,
+      },
+      children: [
+        {
+          type: 'block',
+          id: 'matchesReplaceMap[1]',
+          flavour: 'affine:paragraph',
+          props: {
+            type: 'h1',
+            text: {
+              '$blocksuite:internal:text$': true,
+              delta: [
+                {
+                  insert: 'aaa',
                 },
               ],
             },

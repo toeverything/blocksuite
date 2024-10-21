@@ -1,3 +1,5 @@
+import type { DeltaInsert } from '@inline/types.js';
+
 import { expect } from '@playwright/test';
 
 import {
@@ -722,7 +724,7 @@ test('should format bar style active correctly', async ({ page }) => {
       { insert: '2', attributes: { bold: true, underline: true } },
       { insert: '3', attributes: { bold: true, code: true } },
     ];
-    const text = doc.Text.fromDelta(delta);
+    const text = new doc.Text(delta as DeltaInsert[]);
     doc.addBlock('affine:paragraph', { text }, note);
   });
 
@@ -876,7 +878,7 @@ test('should update the format quick bar state when there is a change in keyboar
       { insert: '2', attributes: { bold: true } },
       { insert: '3', attributes: { bold: false } },
     ];
-    const text = doc.Text.fromDelta(delta);
+    const text = new doc.Text(delta as DeltaInsert[]);
     doc.addBlock('affine:paragraph', { text }, note);
   });
   await focusTitle(page);

@@ -1,7 +1,8 @@
 import {
-  type Menu,
-  type NormalMenu,
+  menu,
+  type MenuConfig,
   popMenu,
+  popupTargetFromElement,
 } from '@blocksuite/affine-components/context-menu';
 import {
   insertPositionToIndex,
@@ -72,22 +73,17 @@ export class DatabaseHeaderColumn extends SignalWatcher(
       return;
     }
     event.stopPropagation();
-    popMenu(this, {
+    popMenu(popupTargetFromElement(this), {
       options: {
-        input: {
-          search: true,
-          placeholder: 'Search',
-        },
         items: this.tableViewManager.propertyMetas.map(config => {
-          return {
-            type: 'action',
+          return menu.action({
             name: config.config.name,
             isSelected: config.type === this.column.type$.value,
-            icon: renderUniLit(this.tableViewManager.IconGet(config.type)),
+            prefix: renderUniLit(this.tableViewManager.IconGet(config.type)),
             select: () => {
               this.column.typeSet?.(config.type);
             },
-          };
+          });
         }),
       },
     });
@@ -175,7 +171,7 @@ export class DatabaseHeaderColumn extends SignalWatcher(
       return;
     }
     e.preventDefault();
-    this.popMenu(e.target as HTMLElement);
+    this.popMenu(e.currentTarget as HTMLElement);
   };
 
   private _enterWidthDragBar = () => {
@@ -318,186 +314,169 @@ export class DatabaseHeaderColumn extends SignalWatcher(
     const enableNumberFormatting =
       this.tableViewManager.featureFlags$.value.enable_number_formatting;
 
-    popMenu(ele ?? this, {
+    popMenu(popupTargetFromElement(ele ?? this), {
       options: {
-        input: inputConfig(this.column),
         items: [
-          {
-            type: 'group',
-            name: 'Column Prop Group',
-            children: () => [
-              typeConfig(this.column),
-              // Number format begin
-              ...(enableNumberFormatting
-                ? ([
-                    {
-                      type: 'sub-menu',
-                      name: 'Number Format',
-
-                      hide: () =>
-                        !this.column.dataUpdate ||
-                        this.column.type$.value !== 'number',
-                      options: {
-                        input: {
-                          search: true,
-                        },
-                        items: [
-                          numberFormatConfig(this.column),
-                          ...(numberFormats.map(format => {
-                            const data = (
-                              this.column as Property<
-                                number,
-                                NumberPropertyDataType
-                              >
-                            ).data$.value;
-                            return {
-                              type: 'action',
-                              isSelected: data.format === format.type,
-                              icon: html`<span
-                                style="font-size: var(--affine-font-base); scale: 1.2;"
-                                >${format.symbol}</span
-                              >`,
-                              name: format.label,
-                              select: () => {
-                                if (data.format === format.type) return;
-                                this.column.dataUpdate(() => ({
-                                  format: format.type,
-                                }));
-                              },
-                            };
-                          }) as Menu[]),
-                        ],
-                      },
-                    },
-                  ] as Menu[])
-                : []),
-              // Number format end
-            ],
-          },
-          {
-            type: 'group',
-            name: 'col-ops-p1',
-            children: () => [
-              {
-                type: 'action',
+          inputConfig(this.column),
+          typeConfig(this.column),
+          // Number format begin
+          ...(enableNumberFormatting
+            ? [
+                menu.subMenu({
+                  name: 'Number Format',
+                  hide: () =>
+                    !this.column.dataUpdate ||
+                    this.column.type$.value !== 'number',
+                  options: {
+                    items: [
+                      numberFormatConfig(this.column),
+                      ...numberFormats.map(format => {
+                        const data = (
+                          this.column as Property<
+                            number,
+                            NumberPropertyDataType
+                          >
+                        ).data$.value;
+                        return menu.action({
+                          isSelected: data.format === format.type,
+                          prefix: html`<span
+                            style="font-size: var(--affine-font-base); scale: 1.2;"
+                            >${format.symbol}</span
+                          >`,
+                          name: format.label,
+                          select: () => {
+                            if (data.format === format.type) return;
+                            this.column.dataUpdate(() => ({
+                              format: format.type,
+                            }));
+                          },
+                        });
+                      }),
+                    ],
+                  },
+                }),
+              ]
+            : []),
+          // Number format end
+          menu.group({
+            items: [
+              menu.action({
                 name: 'Hide In View',
-                icon: ViewIcon(),
+                prefix: ViewIcon(),
                 hide: () =>
                   this.column.hide$.value ||
                   this.column.type$.value === 'title',
                 select: () => {
                   this.column.hideSet(true);
                 },
-              },
+              }),
             ],
-          },
-
-          {
-            type: 'action',
-            name: 'Duplicate Column',
-            icon: DuplicateIcon(),
-            hide: () =>
-              !this.column.duplicate || this.column.type$.value === 'title',
-            select: () => {
-              this.column.duplicate?.();
-            },
-          },
-          {
-            type: 'action',
-            name: 'Insert Left Column',
-            icon: InsertLeftIcon(),
-            select: () => {
-              this.tableViewManager.propertyAdd({
-                id: this.column.id,
-                before: true,
-              });
-              Promise.resolve()
-                .then(() => {
-                  const pre = this.previousElementSibling;
-                  if (pre instanceof DatabaseHeaderColumn) {
-                    pre.editTitle();
-                    pre.scrollIntoView({ inline: 'nearest', block: 'nearest' });
+          }),
+          menu.group({
+            items: [
+              menu.action({
+                name: 'Insert Left Column',
+                prefix: InsertLeftIcon(),
+                select: () => {
+                  this.tableViewManager.propertyAdd({
+                    id: this.column.id,
+                    before: true,
+                  });
+                  Promise.resolve()
+                    .then(() => {
+                      const pre = this.previousElementSibling;
+                      if (pre instanceof DatabaseHeaderColumn) {
+                        pre.editTitle();
+                        pre.scrollIntoView({
+                          inline: 'nearest',
+                          block: 'nearest',
+                        });
+                      }
+                    })
+                    .catch(console.error);
+                },
+              }),
+              menu.action({
+                name: 'Insert Right Column',
+                prefix: InsertRightIcon(),
+                select: () => {
+                  this.tableViewManager.propertyAdd({
+                    id: this.column.id,
+                    before: false,
+                  });
+                  Promise.resolve()
+                    .then(() => {
+                      const next = this.nextElementSibling;
+                      if (next instanceof DatabaseHeaderColumn) {
+                        next.editTitle();
+                        next.scrollIntoView({
+                          inline: 'nearest',
+                          block: 'nearest',
+                        });
+                      }
+                    })
+                    .catch(console.error);
+                },
+              }),
+              menu.action({
+                name: 'Move Left',
+                prefix: MoveLeftIcon(),
+                hide: () => this.column.isFirst,
+                select: () => {
+                  const preId = this.tableViewManager.propertyPreGet(
+                    this.column.id
+                  )?.id;
+                  if (!preId) {
+                    return;
                   }
-                })
-                .catch(console.error);
-            },
-          },
-          {
-            type: 'action',
-            name: 'Insert Right Column',
-            icon: InsertRightIcon(),
-            select: () => {
-              this.tableViewManager.propertyAdd({
-                id: this.column.id,
-                before: false,
-              });
-              Promise.resolve()
-                .then(() => {
-                  const next = this.nextElementSibling;
-                  if (next instanceof DatabaseHeaderColumn) {
-                    next.editTitle();
-                    next.scrollIntoView({
-                      inline: 'nearest',
-                      block: 'nearest',
-                    });
+                  this.tableViewManager.propertyMove(this.column.id, {
+                    id: preId,
+                    before: true,
+                  });
+                },
+              }),
+              menu.action({
+                name: 'Move Right',
+                prefix: MoveRightIcon(),
+                hide: () => this.column.isLast,
+                select: () => {
+                  const nextId = this.tableViewManager.propertyNextGet(
+                    this.column.id
+                  )?.id;
+                  if (!nextId) {
+                    return;
                   }
-                })
-                .catch(console.error);
-            },
-          },
-          {
-            type: 'action',
-            name: 'Move Left',
-            icon: MoveLeftIcon(),
-            hide: () => this.column.isFirst,
-            select: () => {
-              const preId = this.tableViewManager.propertyPreGet(
-                this.column.id
-              )?.id;
-              if (!preId) {
-                return;
-              }
-              this.tableViewManager.propertyMove(this.column.id, {
-                id: preId,
-                before: true,
-              });
-            },
-          },
-          {
-            type: 'action',
-            name: 'Move Right',
-            icon: MoveRightIcon(),
-            hide: () => this.column.isLast,
-            select: () => {
-              const nextId = this.tableViewManager.propertyNextGet(
-                this.column.id
-              )?.id;
-              if (!nextId) {
-                return;
-              }
-              this.tableViewManager.propertyMove(this.column.id, {
-                id: nextId,
-                before: false,
-              });
-            },
-          },
-          {
-            type: 'group',
-            name: 'col-ops-p2',
-            children: () => [
-              {
-                type: 'action',
-                name: 'Delete Column',
-                icon: DeleteIcon(),
+                  this.tableViewManager.propertyMove(this.column.id, {
+                    id: nextId,
+                    before: false,
+                  });
+                },
+              }),
+            ],
+          }),
+          menu.group({
+            items: [
+              menu.action({
+                name: 'Duplicate',
+                prefix: DuplicateIcon(),
+                hide: () =>
+                  !this.column.duplicate || this.column.type$.value === 'title',
+                select: () => {
+                  this.column.duplicate?.();
+                },
+              }),
+              menu.action({
+                name: 'Delete',
+                prefix: DeleteIcon(),
                 hide: () =>
                   !this.column.delete || this.column.type$.value === 'title',
                 select: () => {
                   this.column.delete?.();
                 },
                 class: 'delete-item',
-              },
+              }),
             ],
-          },
+          }),
         ],
       },
     });
@@ -633,14 +612,11 @@ const createDragPreview = (
   };
 };
 
-function numberFormatConfig(column: Property): NormalMenu {
-  return {
-    type: 'custom',
-    render: () =>
-      html` <affine-database-number-format-bar
-        .column="${column}"
-      ></affine-database-number-format-bar>`,
-  };
+function numberFormatConfig(column: Property): MenuConfig {
+  return () =>
+    html` <affine-database-number-format-bar
+      .column="${column}"
+    ></affine-database-number-format-bar>`;
 }
 
 declare global {

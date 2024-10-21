@@ -40,7 +40,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
 import type { SelectedRect } from '../rects/edgeless-selected-rect.js';
 
-import { NOTE_INIT_HEIGHT } from '../../utils/consts.js';
+import { DEFAULT_NOTE_HEIGHT } from '../../utils/consts.js';
 import { isNoteBlock } from '../../utils/query.js';
 import { mountShapeTextEditor } from '../../utils/text.js';
 import { EdgelessAutoCompletePanel } from './auto-complete-panel.js';
@@ -358,7 +358,7 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
       assertExists(model);
       const [x, y] = service.viewport.toViewCoord(
         bound.center[0],
-        bound.y + NOTE_INIT_HEIGHT / 2
+        bound.y + DEFAULT_NOTE_HEIGHT / 2
       );
       requestAnimationFrame(() => {
         handleNativeRangeAtPoint(x, y);

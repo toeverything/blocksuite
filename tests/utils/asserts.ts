@@ -22,15 +22,17 @@ import {
 import {
   getCanvasElementsCount,
   getConnectorPath,
+  getContainerChildIds,
+  getContainerIds,
+  getContainerOfElements,
+  getEdgelessElementBound,
   getEdgelessSelectedRectModel,
-  getGroupChildrenIds,
-  getGroupIds,
-  getGroupOfElements,
   getNoteRect,
   getSelectedBound,
   getSortedIdsInViewport,
   getZoomLevel,
   toIdCountMap,
+  toModelCoord,
 } from './actions/edgeless.js';
 import {
   pressArrowLeft,
@@ -907,8 +909,7 @@ export async function assertEdgelessDraggingArea(page: Page, xywh: number[]) {
   expect(box.height).toBeCloseTo(h, 0);
 }
 
-export async function assertEdgelessSelectedRect(page: Page, xywh: number[]) {
-  const [x, y, w, h] = xywh;
+export async function getSelectedRect(page: Page) {
   const editor = getEditorLocator(page);
   const selectedRect = editor
     .locator('edgeless-selected-rect')
@@ -917,9 +918,28 @@ export async function assertEdgelessSelectedRect(page: Page, xywh: number[]) {
   await page.waitForTimeout(50);
   const box = await selectedRect.boundingBox();
   if (!box) throw new Error('Missing edgeless selected rect');
+  return box;
+}
+
+export async function assertEdgelessSelectedRect(page: Page, xywh: number[]) {
+  const [x, y, w, h] = xywh;
+  const box = await getSelectedRect(page);
 
   expect(box.x).toBeCloseTo(x, 0);
   expect(box.y).toBeCloseTo(y, 0);
+  expect(box.width).toBeCloseTo(w, 0);
+  expect(box.height).toBeCloseTo(h, 0);
+}
+
+export async function assertEdgelessSelectedModelRect(
+  page: Page,
+  xywh: number[]
+) {
+  const [x, y, w, h] = xywh;
+  const box = await getSelectedRect(page);
+  const [mX, mY] = await toModelCoord(page, [box.x, box.y]);
+  expect(mX).toBeCloseTo(x, 0);
+  expect(mY).toBeCloseTo(y, 0);
   expect(box.width).toBeCloseTo(w, 0);
   expect(box.height).toBeCloseTo(h, 0);
 }
@@ -950,6 +970,28 @@ export async function assertEdgelessRemoteSelectedRect(
 
   expect(box.x).toBeCloseTo(x, 0);
   expect(box.y).toBeCloseTo(y, 0);
+  expect(box.width).toBeCloseTo(w, 0);
+  expect(box.height).toBeCloseTo(h, 0);
+}
+
+export async function assertEdgelessRemoteSelectedModelRect(
+  page: Page,
+  xywh: number[],
+  index = 0
+) {
+  const [x, y, w, h] = xywh;
+  const editor = getEditorLocator(page);
+  const remoteSelectedRect = editor
+    .locator('affine-edgeless-remote-selection-widget')
+    .locator('.remote-rect')
+    .nth(index);
+
+  const box = await remoteSelectedRect.boundingBox();
+  if (!box) throw new Error('Missing edgeless remote selected rect');
+
+  const [mX, mY] = await toModelCoord(page, [box.x, box.y]);
+  expect(mX).toBeCloseTo(x, 0);
+  expect(mY).toBeCloseTo(y, 0);
   expect(box.width).toBeCloseTo(w, 0);
   expect(box.height).toBeCloseTo(h, 0);
 }
@@ -1109,6 +1151,15 @@ export function assertRectExist(
   expect(rect).not.toBe(null);
 }
 
+export async function assertEdgelessElementBound(
+  page: Page,
+  elementId: string,
+  bound: Bound
+) {
+  const actual = await getEdgelessElementBound(page, elementId);
+  assertBound(actual, bound);
+}
+
 export async function assertSelectedBound(
   page: Page,
   expected: Bound,
@@ -1123,11 +1174,11 @@ export async function assertSelectedBound(
  * @param page
  * @param expected the expected group id and the count of of its children
  */
-export async function assertGroupIds(
+export async function assertContainerIds(
   page: Page,
   expected: Record<string, number>
 ) {
-  const ids = await getGroupIds(page);
+  const ids = await getContainerIds(page);
   const result = toIdCountMap(ids);
 
   expect(result).toEqual(expected);
@@ -1138,44 +1189,44 @@ export async function assertSortedIds(page: Page, expected: string[]) {
   expect(ids).toEqual(expected);
 }
 
-export async function assertGroupChildrenIds(
+export async function assertContainerChildIds(
   page: Page,
   expected: Record<string, number>,
   id: string
 ) {
-  const ids = await getGroupChildrenIds(page, id);
+  const ids = await getContainerChildIds(page, id);
   const result = toIdCountMap(ids);
 
   expect(result).toEqual(expected);
 }
 
-export async function assertGroupOfElements(
+export async function assertContainerOfElements(
   page: Page,
   elements: string[],
-  groupId: string
+  containerId: string | null
 ) {
-  const elementGroups = await getGroupOfElements(page, elements);
+  const elementContainers = await getContainerOfElements(page, elements);
 
-  elementGroups.forEach(elementGroup => {
-    expect(elementGroup).toEqual(groupId);
+  elementContainers.forEach(elementContainer => {
+    expect(elementContainer).toEqual(containerId);
   });
 }
 
 /**
- * Assert the given group has the expected children count.
- * And the children's group id should equal to the given group id.
+ * Assert the given container has the expected children count.
+ * And the children's container id should equal to the given container id.
  * @param page
- * @param groupId
+ * @param containerId
  * @param childrenCount
  */
-export async function assertGroupChildren(
+export async function assertContainerChildCount(
   page: Page,
-  groupId: string,
+  containerId: string,
   childrenCount: number
 ) {
-  const ids = await getGroupChildrenIds(page, groupId);
+  const ids = await getContainerChildIds(page, containerId);
 
-  await assertGroupOfElements(page, ids, groupId);
+  await assertContainerOfElements(page, ids, containerId);
   expect(new Set(ids).size).toBe(childrenCount);
 }
 

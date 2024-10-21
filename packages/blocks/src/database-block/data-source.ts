@@ -316,9 +316,12 @@ export class DatabaseBlockDataSource extends DataSourceBase {
 
   rowDelete(ids: string[]): void {
     this.doc.captureSync();
-    this.doc.updateBlock(this._model, {
-      children: this._model.children.filter(v => !ids.includes(v.id)),
-    });
+    for (const id of ids) {
+      const block = this.doc.getBlock(id);
+      if (block) {
+        this.doc.deleteBlock(block.model);
+      }
+    }
     deleteRows(this._model, ids);
   }
 

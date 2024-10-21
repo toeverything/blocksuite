@@ -1,3 +1,4 @@
+import { updateXYWH } from '@blocksuite/affine-block-surface';
 import {
   AlignBottomIcon,
   AlignDistributeHorizontallyIcon,
@@ -9,19 +10,18 @@ import {
   AlignVerticallyIcon,
   SmallArrowDownIcon,
 } from '@blocksuite/affine-components/icons';
-import {
-  ConnectorElementModel,
-  GroupElementModel,
-  MindmapElementModel,
-} from '@blocksuite/affine-model';
+import { MindmapElementModel } from '@blocksuite/affine-model';
 import { Bound, WithDisposable } from '@blocksuite/global/utils';
-import { html, LitElement, nothing } from 'lit';
+import { AutoTidyUpIcon, ResizeTidyUpIcon } from '@blocksuite/icons/lit';
+import { css, html, LitElement, nothing, type TemplateResult } from 'lit';
 import { property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 
 const enum Alignment {
+  AutoArrange = 'Auto arrange',
+  AutoResize = 'Resize & Align',
   Bottom = 'Align bottom',
   DistributeHorizontally = 'Distribute horizontally',
   DistributeVertically = 'Distribute vertically',
@@ -32,7 +32,12 @@ const enum Alignment {
   Vertically = 'Align vertically',
 }
 
-const ALIGNMENT_LIST = [
+interface AlignmentIcon {
+  name: Alignment;
+  content: TemplateResult<1>;
+}
+
+const HORIZONTAL_ALIGNMENT: AlignmentIcon[] = [
   {
     name: Alignment.Left,
     content: AlignLeftIcon,
@@ -49,10 +54,9 @@ const ALIGNMENT_LIST = [
     name: Alignment.DistributeHorizontally,
     content: AlignDistributeHorizontallyIcon,
   },
-  {
-    name: 'separator',
-    content: html`<editor-toolbar-separator></editor-toolbar-separator>`,
-  },
+];
+
+const VERTICAL_ALIGNMENT: AlignmentIcon[] = [
   {
     name: Alignment.Top,
     content: AlignTopIcon,
@@ -69,9 +73,33 @@ const ALIGNMENT_LIST = [
     name: Alignment.DistributeVertically,
     content: AlignDistributeVerticallyIcon,
   },
-] as const;
+];
+
+const AUTO_ALIGNMENT: AlignmentIcon[] = [
+  {
+    name: Alignment.AutoArrange,
+    content: AutoTidyUpIcon({ width: '20px', height: '20px' }),
+  },
+  {
+    name: Alignment.AutoResize,
+    content: ResizeTidyUpIcon({ width: '20px', height: '20px' }),
+  },
+];
 
 export class EdgelessAlignButton extends WithDisposable(LitElement) {
+  static override styles = css`
+    .align-menu-content {
+      max-width: 120px;
+      flex-wrap: wrap;
+      padding: 8px 2px;
+    }
+    .align-menu-separator {
+      width: 120px;
+      height: 1px;
+      background-color: var(--affine-background-tertiary-color);
+    }
+  `;
+
   private get elements() {
     return this.edgeless.service.selection.selectedElements;
   }
@@ -101,6 +129,12 @@ export class EdgelessAlignButton extends WithDisposable(LitElement) {
         break;
       case Alignment.DistributeVertically:
         this._alignDistributeVertically();
+        break;
+      case Alignment.AutoArrange:
+        this.edgeless.std.command.exec('autoArrangeElements');
+        break;
+      case Alignment.AutoResize:
+        this.edgeless.std.command.exec('autoResizeElements');
         break;
     }
   }
@@ -233,21 +267,27 @@ export class EdgelessAlignButton extends WithDisposable(LitElement) {
   }
 
   private _updateXYWH(ele: BlockSuite.EdgelessModel, bound: Bound) {
-    if (ele instanceof ConnectorElementModel) {
-      ele.moveTo(bound);
-    } else if (ele instanceof GroupElementModel) {
-      const groupBound = Bound.deserialize(ele.xywh);
-      ele.childElements.forEach(child => {
-        const newBound = Bound.deserialize(child.xywh);
-        newBound.x += bound.x - groupBound.x;
-        newBound.y += bound.y - groupBound.y;
-        this._updateXYWH(child, newBound);
-      });
-    } else {
-      this.edgeless.service.updateElement(ele.id, {
-        xywh: bound.serialize(),
-      });
-    }
+    updateXYWH(ele, bound, this.edgeless.service.updateElement);
+  }
+
+  private renderIcons(icons: AlignmentIcon[]) {
+    return html`
+      ${repeat(
+        icons,
+        (item, index) => item.name + index,
+        ({ name, content }) => {
+          return html`
+            <editor-icon-button
+              aria-label=${name}
+              .tooltip=${name}
+              @click=${() => this._align(name)}
+            >
+              ${content}
+            </editor-icon-button>
+          `;
+        }
+      )}
+    `;
   }
 
   override firstUpdated() {
@@ -270,23 +310,11 @@ export class EdgelessAlignButton extends WithDisposable(LitElement) {
           </editor-icon-button>
         `}
       >
-        <div>
-          ${repeat(
-            ALIGNMENT_LIST,
-            (item, index) => item.name + index,
-            ({ name, content }) => {
-              if (name === 'separator') return content;
-              return html`
-                <editor-icon-button
-                  aria-label=${name}
-                  .tooltip=${name}
-                  @click=${() => this._align(name)}
-                >
-                  ${content}
-                </editor-icon-button>
-              `;
-            }
-          )}
+        <div class="align-menu-content">
+          ${this.renderIcons(HORIZONTAL_ALIGNMENT)}
+          ${this.renderIcons(VERTICAL_ALIGNMENT)}
+          <div class="align-menu-separator"></div>
+          ${this.renderIcons(AUTO_ALIGNMENT)}
         </div>
       </editor-menu-button>
     `;

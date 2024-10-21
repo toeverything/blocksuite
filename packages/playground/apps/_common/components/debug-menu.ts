@@ -14,6 +14,8 @@ import {
   ExportManager,
   FontFamilyVariables,
   HtmlTransformer,
+  importNotion,
+  MarkdownAdapter,
   MarkdownTransformer,
   NotionHtmlAdapter,
   openFileOrFiles,
@@ -236,19 +238,58 @@ export class DebugMenu extends ShadowlessElement {
     URL.revokeObjectURL(url);
   }
 
-  private async _importNotionHTML() {
-    const file = await openFileOrFiles({ acceptType: 'Html', multiple: false });
+  private async _importMarkdown() {
+    const file = await openFileOrFiles({
+      acceptType: 'Markdown',
+      multiple: false,
+    });
     if (!file) return;
     const job = new Job({
       collection: this.collection,
       middlewares: [defaultImageProxyMiddleware],
     });
-    const htmlAdapter = new NotionHtmlAdapter(job);
-    await htmlAdapter.toDoc({
+    const markdownAdapter = new MarkdownAdapter(job);
+    await markdownAdapter.toDoc({
       file: await file.text(),
-      pageId: this.collection.idGenerator(),
       assets: job.assetsManager,
     });
+  }
+
+  private async _importNotionHTML() {
+    try {
+      const file = await openFileOrFiles({
+        acceptType: 'Html',
+        multiple: false,
+      });
+      if (!file) return;
+      const job = new Job({
+        collection: this.collection,
+        middlewares: [defaultImageProxyMiddleware],
+      });
+      const htmlAdapter = new NotionHtmlAdapter(job);
+      await htmlAdapter.toDoc({
+        file: await file.text(),
+        pageId: this.collection.idGenerator(),
+        assets: job.assetsManager,
+      });
+    } catch (error) {
+      console.error('Failed to import Notion HTML:', error);
+    }
+  }
+
+  private async _importNotionHTMLZip() {
+    try {
+      const file = await openFileOrFiles({ acceptType: 'Zip' });
+      if (!file) return;
+      const result = await importNotion(this.collection, file);
+      if (!this.editor.host) return;
+      toast(
+        this.editor.host,
+        `Successfully imported ${result.pageIds.length} Notion HTML pages.`
+      );
+    } catch (error) {
+      console.error('Failed to import Notion HTML Zip:', error);
+    }
   }
 
   private _importSnapshot() {
@@ -584,26 +625,47 @@ export class DebugMenu extends ShadowlessElement {
             </sl-button>
             <sl-menu>
               <sl-menu-item @click="${this._print}">Print</sl-menu-item>
-              <sl-menu-item @click="${this._exportMarkDown}">
-                Export Markdown
+              <sl-menu-item>
+                Export
+                <sl-menu slot="submenu">
+                  <sl-menu-item @click="${this._exportMarkDown}">
+                    Export Markdown
+                  </sl-menu-item>
+                  <sl-menu-item @click="${this._exportHtml}">
+                    Export HTML
+                  </sl-menu-item>
+                  <sl-menu-item @click="${this._exportPdf}">
+                    Export PDF
+                  </sl-menu-item>
+                  <sl-menu-item @click="${this._exportPng}">
+                    Export PNG
+                  </sl-menu-item>
+                  <sl-menu-item @click="${this._exportSnapshot}">
+                    Export Snapshot
+                  </sl-menu-item>
+                </sl-menu>
               </sl-menu-item>
-              <sl-menu-item @click="${this._exportHtml}">
-                Export HTML
-              </sl-menu-item>
-              <sl-menu-item @click="${this._exportPdf}">
-                Export PDF
-              </sl-menu-item>
-              <sl-menu-item @click="${this._exportPng}">
-                Export PNG
-              </sl-menu-item>
-              <sl-menu-item @click="${this._exportSnapshot}">
-                Export Snapshot
-              </sl-menu-item>
-              <sl-menu-item @click="${this._importSnapshot}">
-                Import Snapshot
-              </sl-menu-item>
-              <sl-menu-item @click="${this._importNotionHTML}">
-                Import Notion HTML
+              <sl-menu-item>
+                Import
+                <sl-menu slot="submenu">
+                  <sl-menu-item @click="${this._importSnapshot}">
+                    Import Snapshot
+                  </sl-menu-item>
+                  <sl-menu-item>
+                    Import Notion HTML
+                    <sl-menu slot="submenu">
+                      <sl-menu-item @click="${this._importNotionHTML}">
+                        Single Notion HTML Page
+                      </sl-menu-item>
+                      <sl-menu-item @click="${this._importNotionHTMLZip}">
+                        Notion HTML Zip
+                      </sl-menu-item>
+                    </sl-menu>
+                  </sl-menu-item>
+                  <sl-menu-item @click="${this._importMarkdown}">
+                    Import Markdown
+                  </sl-menu-item>
+                </sl-menu>
               </sl-menu-item>
               <sl-menu-item @click="${this._toggleStyleDebugMenu}">
                 Toggle CSS Debug Menu

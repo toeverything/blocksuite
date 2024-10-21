@@ -253,8 +253,8 @@ export class StyleThree extends MindmapStyleGetter {
       node: {
         radius: 10,
 
-        strokeWidth: 0,
-        strokeColor: 'transparent',
+        strokeWidth: 2,
+        strokeColor: strokeColor,
 
         fontFamily: FontFamily.Poppins,
         fontSize: 16,
