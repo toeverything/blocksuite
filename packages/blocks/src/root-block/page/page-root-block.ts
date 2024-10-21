@@ -389,6 +389,8 @@ export class PageRootBlockComponent extends BlockComponent<
     });
 
     this.disposables.addFromEvent(this, 'pointerdown', e => {
+      if (e.target !== this.rootElementContainer) return;
+
       const containerRect = this.rootElementContainer.getBoundingClientRect();
       const containerStyles = window.getComputedStyle(
         this.rootElementContainer
