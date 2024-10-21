@@ -32,8 +32,8 @@ import {
 import {
   assertBlockCount,
   assertEdgelessNonSelectedRect,
+  assertEdgelessSelectedModelRect,
   assertEdgelessSelectedRect,
-  assertEdgelessSelectedRectModel,
 } from '../utils/asserts.js';
 import { test } from '../utils/playwright.js';
 
@@ -173,13 +173,11 @@ test.describe('zooming', () => {
     await zoomResetByKeyboard(page);
 
     const start = { x: 0, y: 0 };
-    const end = { x: 200, y: 200 };
+    const end = { x: 900, y: 200 };
     await addBasicRectShapeElement(page, start, end);
-
     await zoomFitByKeyboard(page);
 
     const zoom = await getZoomLevel(page);
-
     expect(zoom).not.toBe(100);
   });
   test('zoom out', async ({ page }) => {
@@ -245,7 +243,7 @@ test('cmd + A should select all elements by default', async ({ page }) => {
   await createShapeElement(page, [0, 0], [100, 100]);
   await createShapeElement(page, [100, 0], [200, 100]);
   await selectAllByKeyboard(page);
-  await assertEdgelessSelectedRectModel(page, [0, 0, 200, 100]);
+  await assertEdgelessSelectedModelRect(page, [0, 0, 200, 100]);
 });
 
 test('cmd + A should not fire inside active note', async ({ page }) => {

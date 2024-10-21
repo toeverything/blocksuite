@@ -17,7 +17,11 @@ import {
   SurfaceGroupLikeModel,
   TextUtils,
 } from '@blocksuite/affine-block-surface';
-import { BookmarkStyles } from '@blocksuite/affine-model';
+import {
+  BookmarkStyles,
+  DEFAULT_NOTE_HEIGHT,
+  DEFAULT_NOTE_WIDTH,
+} from '@blocksuite/affine-model';
 import {
   EmbedOptionProvider,
   ParseDocUrlProvider,
@@ -73,7 +77,6 @@ import {
   getSortedCloneElements,
   serializeElement,
 } from '../utils/clone-utils.js';
-import { DEFAULT_NOTE_HEIGHT, DEFAULT_NOTE_WIDTH } from '../utils/consts.js';
 import { deleteElements } from '../utils/crud.js';
 import {
   isAttachmentBlock,

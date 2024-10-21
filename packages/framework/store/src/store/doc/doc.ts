@@ -75,6 +75,67 @@ export class Doc {
     >;
   };
 
+  updateBlock: {
+    <T extends Partial<BlockProps>>(model: BlockModel, props: T): void;
+    (model: BlockModel, callback: () => void): void;
+  } = (
+    model: BlockModel,
+    callBackOrProps: (() => void) | Partial<BlockProps>
+  ) => {
+    if (this.readonly) {
+      console.error('cannot modify data in readonly mode');
+      return;
+    }
+
+    const isCallback = typeof callBackOrProps === 'function';
+
+    if (!isCallback) {
+      const parent = this.getParent(model);
+      this.schema.validate(
+        model.flavour,
+        parent?.flavour,
+        callBackOrProps.children?.map(child => child.flavour)
+      );
+    }
+
+    const yBlock = this._yBlocks.get(model.id);
+    if (!yBlock) {
+      throw new BlockSuiteError(
+        ErrorCode.ModelCRUDError,
+        `updating block: ${model.id} not found`
+      );
+    }
+
+    const block = this.getBlock(model.id);
+    if (!block) return;
+
+    this.transact(() => {
+      if (isCallback) {
+        callBackOrProps();
+        this._runQuery(block);
+        return;
+      }
+
+      if (callBackOrProps.children) {
+        this._crud.updateBlockChildren(
+          model.id,
+          callBackOrProps.children.map(child => child.id)
+        );
+      }
+
+      const schema = this.schema.flavourSchemaMap.get(model.flavour);
+      if (!schema) {
+        throw new BlockSuiteError(
+          ErrorCode.ModelCRUDError,
+          `schema for flavour: ${model.flavour} not found`
+        );
+      }
+      syncBlockProps(schema, model, yBlock, callBackOrProps);
+      this._runQuery(block);
+      return;
+    });
+  };
+
   private get _yBlocks() {
     return this._blockCollection.yBlocks;
   }
@@ -604,68 +665,6 @@ export class Doc {
         targetSibling?.id ?? null,
         shouldInsertBeforeSibling
       );
-    });
-  }
-
-  updateBlock<T extends Partial<BlockProps>>(model: BlockModel, props: T): void;
-
-  updateBlock(model: BlockModel, callback: () => void): void;
-
-  updateBlock(
-    model: BlockModel,
-    callBackOrProps: (() => void) | Partial<BlockProps>
-  ): void {
-    if (this.readonly) {
-      console.error('cannot modify data in readonly mode');
-      return;
-    }
-
-    const isCallback = typeof callBackOrProps === 'function';
-
-    if (!isCallback) {
-      const parent = this.getParent(model);
-      this.schema.validate(
-        model.flavour,
-        parent?.flavour,
-        callBackOrProps.children?.map(child => child.flavour)
-      );
-    }
-
-    const yBlock = this._yBlocks.get(model.id);
-    if (!yBlock) {
-      throw new BlockSuiteError(
-        ErrorCode.ModelCRUDError,
-        `updating block: ${model.id} not found`
-      );
-    }
-
-    const block = this.getBlock(model.id);
-    if (!block) return;
-
-    this.transact(() => {
-      if (isCallback) {
-        callBackOrProps();
-        this._runQuery(block);
-        return;
-      }
-
-      if (callBackOrProps.children) {
-        this._crud.updateBlockChildren(
-          model.id,
-          callBackOrProps.children.map(child => child.id)
-        );
-      }
-
-      const schema = this.schema.flavourSchemaMap.get(model.flavour);
-      if (!schema) {
-        throw new BlockSuiteError(
-          ErrorCode.ModelCRUDError,
-          `schema for flavour: ${model.flavour} not found`
-        );
-      }
-      syncBlockProps(schema, model, yBlock, callBackOrProps);
-      this._runQuery(block);
-      return;
     });
   }
 }

@@ -1,17 +1,16 @@
-import type { NoteBlockModel } from '@blocksuite/affine-model';
 import type { Point } from '@blocksuite/global/utils';
 
 import { focusTextModel } from '@blocksuite/affine-components/rich-text';
-import { handleNativeRangeAtPoint } from '@blocksuite/affine-shared/utils';
-
-import type { NoteChildrenFlavour } from '../../../_common/utils/index.js';
-import type { EdgelessRootBlockComponent } from '../edgeless-root-block.js';
-
 import {
   DEFAULT_NOTE_HEIGHT,
   DEFAULT_NOTE_WIDTH,
   NOTE_MIN_HEIGHT,
-} from './consts.js';
+  type NoteBlockModel,
+} from '@blocksuite/affine-model';
+import { handleNativeRangeAtPoint } from '@blocksuite/affine-shared/utils';
+
+import type { NoteChildrenFlavour } from '../../../_common/utils/index.js';
+import type { EdgelessRootBlockComponent } from '../edgeless-root-block.js';
 
 export type NoteOptions = {
   childFlavour: NoteChildrenFlavour;

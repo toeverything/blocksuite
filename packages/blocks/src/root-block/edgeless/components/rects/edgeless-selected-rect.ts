@@ -24,6 +24,8 @@ import {
   type EmbedHtmlModel,
   type EmbedSyncedDocModel,
   FrameBlockModel,
+  NOTE_MIN_HEIGHT,
+  NOTE_MIN_WIDTH,
   NoteBlockModel,
   ShapeElementModel,
   TextElementModel,
@@ -58,8 +60,6 @@ import {
   AI_CHAT_BLOCK_MAX_WIDTH,
   AI_CHAT_BLOCK_MIN_HEIGHT,
   AI_CHAT_BLOCK_MIN_WIDTH,
-  NOTE_MIN_HEIGHT,
-  NOTE_MIN_WIDTH,
 } from '../../utils/consts.js';
 import { getElementsWithoutGroup } from '../../utils/group.js';
 import {
@@ -1104,35 +1104,22 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     const curBound = Bound.deserialize(element.xywh);
 
     let scale = element.edgeless.scale ?? 1;
-    let width = curBound.w / scale;
-    let height = curBound.h / scale;
-
     if (this._shiftKey) {
-      scale = bound.w / width;
+      scale = (bound.w / curBound.w) * scale;
       this._scalePercent = `${Math.round(scale * 100)}%`;
       this._scaleDirection = direction;
     }
 
-    width = bound.w / scale;
-    width = clamp(width, NOTE_MIN_WIDTH, Infinity);
-    bound.w = width * scale;
+    bound.w = clamp(bound.w, NOTE_MIN_WIDTH * scale, Infinity);
+    bound.h = clamp(bound.h, NOTE_MIN_HEIGHT * scale, Infinity);
 
-    height = bound.h / scale;
-    height = clamp(height, NOTE_MIN_HEIGHT, Infinity);
-    bound.h = height * scale;
+    this._isWidthLimit = bound.w === NOTE_MIN_WIDTH * scale;
+    this._isHeightLimit = bound.h === NOTE_MIN_HEIGHT * scale;
 
-    this._isWidthLimit = width === NOTE_MIN_WIDTH;
-    this._isHeightLimit = height === NOTE_MIN_HEIGHT;
-
-    if (bound.h > NOTE_MIN_HEIGHT * scale) {
+    if (bound.h >= NOTE_MIN_HEIGHT * scale) {
       this.edgeless.doc.updateBlock(element, () => {
         element.edgeless.collapse = true;
         element.edgeless.collapsedHeight = bound.h / scale;
-      });
-    } else {
-      this.edgeless.doc.updateBlock(element, () => {
-        element.edgeless.collapse = false;
-        element.edgeless.collapsedHeight = undefined;
       });
     }
 

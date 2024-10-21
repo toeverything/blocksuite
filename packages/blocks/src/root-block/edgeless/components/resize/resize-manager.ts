@@ -1,4 +1,5 @@
 import { CommonUtils } from '@blocksuite/affine-block-surface';
+import { NOTE_MIN_WIDTH } from '@blocksuite/affine-model';
 import {
   assertExists,
   type IPoint,
@@ -9,7 +10,6 @@ import { Bound } from '@blocksuite/global/utils';
 
 import type { SelectableProps } from '../../utils/query.js';
 
-import { NOTE_MIN_WIDTH } from '../../utils/consts.js';
 import { HandleDirection, type ResizeMode } from './resize-handles.js';
 
 const { rotatePoints, getQuadBoundsWithRotation } = CommonUtils;
