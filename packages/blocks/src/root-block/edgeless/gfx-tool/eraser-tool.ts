@@ -1,12 +1,15 @@
 import type { PointerEventState } from '@blocksuite/block-std';
-import type { IPoint, IVec } from '@blocksuite/global/utils';
 
-import { CommonUtils, Overlay } from '@blocksuite/affine-block-surface';
-import { Bound, noop } from '@blocksuite/global/utils';
+import {
+  CommonUtils,
+  Overlay,
+  type SurfaceBlockComponent,
+} from '@blocksuite/affine-block-surface';
+import { BaseTool } from '@blocksuite/block-std/gfx';
+import { Bound, type IVec } from '@blocksuite/global/utils';
 
-import { deleteElements } from '../utils/crud.js';
+import { deleteElementsV2 } from '../utils/crud.js';
 import { isTopLevelBlock } from '../utils/query.js';
-import { EdgelessToolController } from './edgeless-tool.js';
 
 const { getSvgPathFromStroke, getStroke, linePolygonIntersects } = CommonUtils;
 
@@ -21,12 +24,10 @@ class EraserOverlay extends Overlay {
   }
 }
 
-type EraserTool = {
-  type: 'eraser';
-};
+export class EraserTool extends BaseTool {
+  static override toolName = 'eraser';
 
-export class EraserToolController extends EdgelessToolController<EraserTool> {
-  private _erasables = new Set<BlockSuite.EdgelessModel>();
+  private _erasable = new Set<BlockSuite.EdgelessModel>();
 
   private _eraserPoints: IVec[] = [];
 
@@ -54,7 +55,7 @@ export class EraserToolController extends EdgelessToolController<EraserTool> {
       }
     }
     if (didUpdate) {
-      const zoom = this._service.viewport.zoom;
+      const zoom = this.gfx.viewport.zoom;
       const d = getSvgPathFromStroke(
         getStroke(this._eraserPoints, {
           size: 16 / zoom,
@@ -62,12 +63,12 @@ export class EraserToolController extends EdgelessToolController<EraserTool> {
         })
       );
       this._overlay.d = d;
-      this._edgeless.surface.refresh();
+      (this.gfx.surfaceComponent as SurfaceBlockComponent)?.refresh();
     }
     this._timer = requestAnimationFrame(this._loop);
   };
 
-  private _overlay = new EraserOverlay();
+  private _overlay = new EraserOverlay(this.gfx);
 
   private _prevEraserPoint: IVec = [0, 0];
 
@@ -77,29 +78,24 @@ export class EraserToolController extends EdgelessToolController<EraserTool> {
 
   private _timestamp = 0;
 
-  override readonly tool: EraserTool = {
-    type: 'eraser',
-  };
-
   private _reset() {
     cancelAnimationFrame(this._timer);
-    this._edgeless.surface.renderer.removeOverlay(this._overlay);
-    this._erasables.clear();
+
+    if (!this.gfx.surface) {
+      return;
+    }
+
+    (
+      this.gfx.surfaceComponent as SurfaceBlockComponent
+    )?.renderer.removeOverlay(this._overlay);
+    this._erasable.clear();
     this._eraseTargets.clear();
   }
 
-  private toModelCoord(p: IPoint): IVec {
-    return this._service.viewport.toModelCoord(p.x, p.y);
-  }
-
-  override afterModeSwitch(_newMode: EraserTool): void {
-    noop();
-  }
-
-  override beforeModeSwitch() {
+  override activate(_: Record<string, unknown>): void {
     this._eraseTargets.forEach(erasable => {
       if (isTopLevelBlock(erasable)) {
-        const ele = this._edgeless.host.view.getBlock(erasable.id);
+        const ele = this.std.view.getBlock(erasable.id);
         ele && ((ele as HTMLElement).style.opacity = '1');
       } else {
         erasable.opacity = 1;
@@ -108,27 +104,15 @@ export class EraserToolController extends EdgelessToolController<EraserTool> {
     this._reset();
   }
 
-  override onContainerClick(): void {
-    noop();
-  }
-
-  override onContainerContextMenu(): void {
-    noop();
-  }
-
-  override onContainerDblClick(): void {
-    noop();
-  }
-
-  override onContainerDragEnd(): void {
-    deleteElements(this._edgeless, Array.from(this._eraseTargets));
+  override dragEnd(_: PointerEventState): void {
+    deleteElementsV2(this.gfx, Array.from(this._eraseTargets));
     this._reset();
-    this._doc.captureSync();
+    this.doc.captureSync();
   }
 
-  override onContainerDragMove(e: PointerEventState): void {
-    const currentPoint = this.toModelCoord(e.point);
-    this._erasables.forEach(erasable => {
+  override dragMove(e: PointerEventState): void {
+    const currentPoint = this.gfx.viewport.toModelCoord(e.point.x, e.point.y);
+    this._erasable.forEach(erasable => {
       if (this._eraseTargets.has(erasable)) return;
       if (isTopLevelBlock(erasable)) {
         const bound = Bound.deserialize(erasable.xywh);
@@ -136,7 +120,7 @@ export class EraserToolController extends EdgelessToolController<EraserTool> {
           linePolygonIntersects(this._prevPoint, currentPoint, bound.points)
         ) {
           this._eraseTargets.add(erasable);
-          const ele = this._edgeless.host.view.getBlock(erasable.id);
+          const ele = this.std.view.getBlock(erasable.id);
           ele && ((ele as HTMLElement).style.opacity = '0.3');
         }
       } else {
@@ -155,50 +139,26 @@ export class EraserToolController extends EdgelessToolController<EraserTool> {
     this._prevPoint = currentPoint;
   }
 
-  override onContainerDragStart(e: PointerEventState): void {
-    this._doc.captureSync();
+  override dragStart(e: PointerEventState): void {
+    this.doc.captureSync();
 
     const { point } = e;
-    const [x, y] = this.toModelCoord(point);
+    const [x, y] = this.gfx.viewport.toModelCoord(point.x, point.y);
     this._eraserPoints = [[x, y]];
     this._prevPoint = [x, y];
-    this._erasables = new Set([
-      ...this._service.elements,
-      ...this._service.blocks,
+    this._erasable = new Set([
+      ...this.gfx.layer.canvasElements,
+      ...this.gfx.layer.blocks,
     ]);
     this._loop();
-    this._edgeless.surface.renderer.addOverlay(this._overlay);
-  }
-
-  override onContainerMouseMove(): void {
-    noop();
-  }
-
-  override onContainerMouseOut(): void {
-    noop();
-  }
-
-  onContainerPointerDown(): void {
-    noop();
-  }
-
-  override onContainerTripleClick(): void {
-    noop();
-  }
-
-  override onPressShiftKey(_pressed: boolean): void {
-    noop();
-  }
-
-  override onPressSpaceBar(_pressed: boolean): void {
-    noop();
+    (this.gfx.surfaceComponent as SurfaceBlockComponent)?.renderer.addOverlay(
+      this._overlay
+    );
   }
 }
 
-declare global {
-  namespace BlockSuite {
-    interface EdgelessToolMap {
-      eraser: EraserToolController;
-    }
+declare module '@blocksuite/block-std/gfx' {
+  interface GfxToolsMap {
+    eraser: EraserTool;
   }
 }

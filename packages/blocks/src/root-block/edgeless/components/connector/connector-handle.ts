@@ -1,6 +1,18 @@
 import type { ConnectorElementModel } from '@blocksuite/affine-model';
+import type { Doc } from '@blocksuite/store';
 
+import {
+  type ConnectionOverlay,
+  OverlayIdentifier,
+} from '@blocksuite/affine-block-surface';
+import {
+  type BlockStdScope,
+  docContext,
+  stdContext,
+} from '@blocksuite/block-std';
+import { GfxControllerIdentifier } from '@blocksuite/block-std/gfx';
 import { DisposableGroup, Vec, WithDisposable } from '@blocksuite/global/utils';
+import { consume } from '@lit/context';
 import { css, html, LitElement } from 'lit';
 import { property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -38,6 +50,14 @@ export class EdgelessConnectorHandle extends WithDisposable(LitElement) {
 
   private _lastZoom = 1;
 
+  get connectionOverlay() {
+    return this.std.get(OverlayIdentifier('connection')) as ConnectionOverlay;
+  }
+
+  get gfx() {
+    return this.std.get(GfxControllerIdentifier);
+  }
+
   private _bindEvent() {
     const edgeless = this.edgeless;
 
@@ -50,7 +70,7 @@ export class EdgelessConnectorHandle extends WithDisposable(LitElement) {
       this._capPointerDown(e, 'target');
     });
     this._disposables.add(() => {
-      edgeless.service.connectorOverlay.clear();
+      this.connectionOverlay.clear();
     });
   }
 
@@ -63,7 +83,7 @@ export class EdgelessConnectorHandle extends WithDisposable(LitElement) {
       const isStartPointer = connection === 'source';
       const otherSideId = connector[isStartPointer ? 'target' : 'source'].id;
 
-      connector[connection] = edgeless.service.connectorOverlay.renderConnector(
+      connector[connection] = this.connectionOverlay.renderConnector(
         point,
         otherSideId ? [otherSideId] : []
       );
@@ -71,8 +91,7 @@ export class EdgelessConnectorHandle extends WithDisposable(LitElement) {
     });
 
     _disposables.addFromEvent(document, 'pointerup', () => {
-      edgeless.service.overlays.connector.clear();
-      edgeless.doc.captureSync();
+      this.doc.captureSync();
       _disposables.dispose();
       this._disposables = new DisposableGroup();
       this._bindEvent();
@@ -129,8 +148,18 @@ export class EdgelessConnectorHandle extends WithDisposable(LitElement) {
   @property({ attribute: false })
   accessor connector!: ConnectorElementModel;
 
+  @consume({
+    context: docContext,
+  })
+  accessor doc!: Doc;
+
   @property({ attribute: false })
   accessor edgeless!: EdgelessRootBlockComponent;
+
+  @consume({
+    context: stdContext,
+  })
+  accessor std!: BlockStdScope;
 }
 
 declare global {

@@ -11,8 +11,8 @@ import {
   matchFlavours,
 } from '@blocksuite/affine-shared/utils';
 import { BlockService } from '@blocksuite/block-std';
+import { GfxControllerIdentifier } from '@blocksuite/block-std/gfx';
 
-import type { RootBlockComponent } from '../root-block/types.js';
 import type { ImageBlockComponent } from './image-block.js';
 
 import {
@@ -20,7 +20,7 @@ import {
   type FileDropOptions,
 } from '../_common/components/file-drop-manager.js';
 import { setImageProxyMiddlewareURL } from '../_common/transformers/middlewares.js';
-import { EdgelessRootBlockComponent } from '../root-block/edgeless/edgeless-root-block.js';
+import { addImages } from '../root-block/edgeless/utils/common.js';
 import { ImageEdgelessBlockComponent } from './image-edgeless-block.js';
 import { addSiblingImageBlock } from './utils.js';
 
@@ -44,10 +44,9 @@ export class ImageBlockService extends BlockService {
           place
         );
       } else if (isInsideEdgelessEditor(this.host)) {
-        const edgelessRoot = this.rootComponent;
-        if (!(edgelessRoot instanceof EdgelessRootBlockComponent)) return false;
-        point = edgelessRoot.service.viewport.toViewCoordFromClientCoord(point);
-        await edgelessRoot.addImages(imageFiles, point);
+        const gfx = this.std.get(GfxControllerIdentifier);
+        point = gfx.viewport.toViewCoordFromClientCoord(point);
+        await addImages(this.std, files, point);
 
         this.std.getOptional(TelemetryProvider)?.track('CanvasElementAdded', {
           control: 'canvas:drop',
@@ -65,15 +64,6 @@ export class ImageBlockService extends BlockService {
   fileDropManager!: FileDropManager;
 
   maxFileSize = 10 * 1000 * 1000; // 10MB (default)
-
-  get rootComponent(): RootBlockComponent | null {
-    const rootModel = this.doc.root;
-    if (!rootModel) return null;
-    const rootComponent = this.std.view.getBlock(
-      rootModel.id
-    ) as RootBlockComponent | null;
-    return rootComponent;
-  }
 
   override mounted(): void {
     super.mounted();

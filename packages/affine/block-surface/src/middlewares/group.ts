@@ -14,7 +14,7 @@ export const groupRelationMiddleware: SurfaceMiddleware = (
         // remove the group if it has no children
         if (element instanceof SurfaceGroupLikeModel && props['childIds']) {
           if (element.childIds.length === 0) {
-            surface.removeElement(id);
+            surface.deleteElement(id);
           }
         }
       }),

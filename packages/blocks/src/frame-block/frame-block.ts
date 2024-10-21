@@ -196,12 +196,6 @@ export class EdgelessFrameTitle extends SignalWatcher(
     );
 
     _disposables.add(
-      rootService.slots.edgelessToolUpdated.on(tool => {
-        this._isNavigator = tool.type === 'frameNavigator';
-      })
-    );
-
-    _disposables.add(
       gfx.viewport.viewportUpdated.on(({ zoom }) => {
         this._zoom = zoom;
       })
@@ -232,9 +226,10 @@ export class EdgelessFrameTitle extends SignalWatcher(
     const model = this.model;
     const bound = Bound.deserialize(model.xywh);
 
-    const { _isNavigator, _editing, _zoom: zoom } = this;
-
+    const { _editing, _zoom: zoom } = this;
     const { nestedFrameOffset, height } = frameTitleStyleVars;
+    const _isNavigator =
+      this.gfx.tool.currentToolName$.value === 'frameNavigator';
 
     const nestedFrame = this._nestedFrame;
     const maxWidth = nestedFrame
@@ -311,9 +306,6 @@ export class EdgelessFrameTitle extends SignalWatcher(
   private accessor _frameTitleEl!: HTMLDivElement;
 
   @state()
-  private accessor _isNavigator = false;
-
-  @state()
   private accessor _nestedFrame = false;
 
   @state()
@@ -351,18 +343,14 @@ export class FrameBlockComponent extends GfxBlockComponent<FrameBlockModel> {
     );
   }
 
-  override firstUpdated() {
-    this.rootService.slots.edgelessToolUpdated.on(tool => {
-      this._isNavigator = tool.type === 'frameNavigator';
-    });
-  }
-
   override renderGfxBlock() {
-    const { model, _isNavigator, showBorder, rootService } = this;
+    const { model, showBorder, rootService } = this;
     const backgroundColor = ThemeObserver.generateColorProperty(
       model.background,
       '--affine-platte-transparent'
     );
+    const _isNavigator =
+      this.gfx.tool.currentToolName$.value === 'frameNavigator';
     const frameIndex = rootService.layer.getZIndex(model);
 
     return html`
@@ -391,9 +379,6 @@ export class FrameBlockComponent extends GfxBlockComponent<FrameBlockModel> {
   override toZIndex(): string {
     return 'auto';
   }
-
-  @state()
-  private accessor _isNavigator = false;
 
   @state()
   accessor showBorder = true;

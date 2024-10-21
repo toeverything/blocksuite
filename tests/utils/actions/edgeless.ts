@@ -352,7 +352,7 @@ export async function setEdgelessTool(
       await shapeToolButton.click({ position: { x: 5, y: 5 } });
 
       const squareShapeButton = page
-        .locator('edgeless-tool-icon-button')
+        .locator('edgeless-slide-menu edgeless-tool-icon-button')
         .filter({ hasText: shape });
       await squareShapeButton.click();
       break;
@@ -372,10 +372,10 @@ export async function assertEdgelessShapeType(page: Page, type: ShapeName) {
     if (!container) {
       throw new Error('Missing edgeless page');
     }
-    if (container.edgelessTool.type !== 'shape')
-      throw new Error('Expected shape tool');
+    const tool = container.gfx.tool.currentToolOption$.peek();
+    if (tool.type !== 'shape') throw new Error('Expected shape tool');
 
-    return container.edgelessTool.shapeName;
+    return tool.shapeName;
   });
 
   expect(type).toEqual(curType);
@@ -387,7 +387,7 @@ export async function assertEdgelessTool(page: Page, mode: EdgelessTool) {
     if (!container) {
       throw new Error('Missing edgeless page');
     }
-    return container.edgelessTool.type;
+    return container.gfx.tool.currentToolOption$.peek().type;
   });
   expect(type).toEqual(mode);
 }
@@ -401,7 +401,7 @@ export async function assertEdgelessConnectorToolMode(
     if (!container) {
       throw new Error('Missing edgeless page');
     }
-    return container.edgelessTool;
+    return container.gfx.tool.currentToolOption$.peek();
   });
   if (tool.type !== 'connector') {
     throw new Error('Expected connector tool');
@@ -415,7 +415,7 @@ export async function assertEdgelessLassoToolMode(page: Page, mode: LassoMode) {
     if (!container) {
       throw new Error('Missing edgeless page');
     }
-    return container.edgelessTool;
+    return container.gfx.tool.currentToolOption$.peek();
   });
   if (tool.type !== 'lasso') {
     throw new Error('Expected lasso tool');

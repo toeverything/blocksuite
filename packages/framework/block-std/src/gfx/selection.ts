@@ -1,22 +1,20 @@
-import type { SurfaceBlockModel } from '@blocksuite/affine-block-surface';
-import type { CursorSelection, SurfaceSelection } from '@blocksuite/block-std';
-
-import {
-  GroupElementModel,
-  MindmapElementModel,
-} from '@blocksuite/affine-model';
 import {
   assertType,
   DisposableGroup,
+  getCommonBoundWithRotation,
   groupBy,
+  type IPoint,
   Slot,
 } from '@blocksuite/global/utils';
 
-import type { EdgelessRootService } from '../edgeless-root-service.js';
+import type { CursorSelection, SurfaceSelection } from '../selection/index.js';
+import type { GfxController } from './controller.js';
+import type { GfxModel } from './gfx-block-model.js';
 
-import { edgelessElementsBound } from '../utils/bound-utils.js';
+import { GfxExtension, GfxExtensionIdentifier } from './extension.js';
+import { GfxGroupLikeElementModel } from './surface/element-model.js';
 
-export interface EdgelessSelectionState {
+export interface SurfaceSelectionState {
   /**
    * The selected elements. Could be blocks or canvas elements
    */
@@ -25,7 +23,7 @@ export interface EdgelessSelectionState {
   /**
    * Indicate whether the selected element is in editing mode
    */
-  editing: boolean;
+  editing?: boolean;
 
   /**
    *  Cannot be operated, only box is displayed
@@ -33,13 +31,14 @@ export interface EdgelessSelectionState {
   inoperable?: boolean;
 }
 
-export interface CursorSelectionState {
-  x: number;
-  y: number;
-}
+/**
+ * GfxSelectionManager is just a wrapper of std selection providing
+ * convenient method and states in gfx
+ */
+export class GfxSelectionManager extends GfxExtension {
+  static override key = 'gfxSelection';
 
-export class EdgelessSelectionManager {
-  private _activeGroup: GroupElementModel | MindmapElementModel | null = null;
+  private _activeGroup: GfxGroupLikeElementModel | null = null;
 
   private _cursorSelection: CursorSelection | null = null;
 
@@ -57,8 +56,6 @@ export class EdgelessSelectionManager {
 
   disposable: DisposableGroup = new DisposableGroup();
 
-  service!: EdgelessRootService;
-
   readonly slots = {
     updated: new Slot<SurfaceSelection[]>(),
     remoteUpdated: new Slot(),
@@ -66,8 +63,6 @@ export class EdgelessSelectionManager {
     cursorUpdated: new Slot<CursorSelection>(),
     remoteCursorUpdated: new Slot(),
   };
-
-  surfaceModel!: SurfaceBlockModel;
 
   get activeGroup() {
     return this._activeGroup;
@@ -110,14 +105,14 @@ export class EdgelessSelectionManager {
   }
 
   get selectedBound() {
-    return edgelessElementsBound(this.selectedElements);
+    return getCommonBoundWithRotation(this.selectedElements);
   }
 
   get selectedElements() {
-    const elements: BlockSuite.EdgelessModel[] = [];
+    const elements: GfxModel[] = [];
 
     this.selectedIds.forEach(id => {
-      const el = this.service.getElementById(id);
+      const el = this.gfx.getElementById(id) as GfxModel;
       el && elements.push(el);
     });
 
@@ -132,22 +127,28 @@ export class EdgelessSelectionManager {
     return this._selectedSet;
   }
 
-  get stdSelectionManager() {
-    return this.service.std.selection;
+  get stdSelection() {
+    return this.std.selection;
+  }
+
+  get surfaceModel() {
+    return this.gfx.surface;
   }
 
   get surfaceSelections() {
     return this._surfaceSelections;
   }
 
-  constructor(service: EdgelessRootService) {
-    this.service = service;
-    this.surfaceModel = service.surface;
-    this.mount();
+  static override extendGfx(gfx: GfxController): void {
+    Object.defineProperty(gfx, 'selection', {
+      get() {
+        return this.std.get(GfxExtensionIdentifier('gfxSelection'));
+      },
+    });
   }
 
   clear() {
-    this.stdSelectionManager.clear();
+    this.stdSelection.clear();
 
     this.set({
       elements: [],
@@ -157,10 +158,6 @@ export class EdgelessSelectionManager {
 
   clearLast() {
     this._lastSurfaceSelections = [];
-  }
-
-  dispose() {
-    this.disposable.dispose();
   }
 
   equals(selection: SurfaceSelection[]) {
@@ -207,18 +204,17 @@ export class EdgelessSelectionManager {
     const selected = this.selectedElements;
     if (!selected.length) return false;
 
-    const commonBound = edgelessElementsBound(selected);
-
-    const [modelX, modelY] = this.service.viewport.toModelCoord(viewX, viewY);
+    const commonBound = getCommonBoundWithRotation(selected);
+    const [modelX, modelY] = this.gfx.viewport.toModelCoord(viewX, viewY);
     if (commonBound && commonBound.isPointInBound([modelX, modelY])) {
       return true;
     }
     return false;
   }
 
-  mount() {
+  override mounted() {
     this.disposable.add(
-      this.stdSelectionManager.slots.changed.on(selections => {
+      this.stdSelection.slots.changed.on(selections => {
         const { cursor = [], surface = [] } = groupBy(selections, sel => {
           if (sel.is('surface')) {
             return 'surface';
@@ -256,7 +252,7 @@ export class EdgelessSelectionManager {
     );
 
     this.disposable.add(
-      this.stdSelectionManager.slots.remoteChanged.on(states => {
+      this.stdSelection.slots.remoteChanged.on(states => {
         const surfaceMap = new Map<number, SurfaceSelection[]>();
         const cursorMap = new Map<number, CursorSelection>();
         const selectedSet = new Set<string>();
@@ -306,9 +302,9 @@ export class EdgelessSelectionManager {
     );
   }
 
-  set(selection: EdgelessSelectionState | SurfaceSelection[]) {
+  set(selection: SurfaceSelectionState | SurfaceSelection[]) {
     if (Array.isArray(selection)) {
-      this.stdSelectionManager.setGroup(
+      this.stdSelection.setGroup(
         'gfx',
         this.cursorSelection ? [...selection, this.cursorSelection] : selection
       );
@@ -316,17 +312,17 @@ export class EdgelessSelectionManager {
     }
 
     const { blocks = [], elements = [] } = groupBy(selection.elements, id => {
-      return this.service.doc.getBlockById(id) ? 'blocks' : 'elements';
+      return this.std.doc.getBlockById(id) ? 'blocks' : 'elements';
     });
     let instances: (SurfaceSelection | CursorSelection)[] = [];
 
-    if (elements.length > 0) {
+    if (elements.length > 0 && this.surfaceModel) {
       instances.push(
-        this.stdSelectionManager.create(
+        this.stdSelection.create(
           'surface',
           this.surfaceModel.id,
           elements,
-          selection.editing,
+          selection.editing ?? false,
           selection.inoperable
         )
       );
@@ -335,18 +331,18 @@ export class EdgelessSelectionManager {
     if (blocks.length > 0) {
       instances = instances.concat(
         blocks.map(blockId =>
-          this.stdSelectionManager.create(
+          this.stdSelection.create(
             'surface',
             blockId,
             [blockId],
-            selection.editing,
+            selection.editing ?? false,
             selection.inoperable
           )
         )
       );
     }
 
-    this.stdSelectionManager.setGroup(
+    this.stdSelection.setGroup(
       'gfx',
       this.cursorSelection
         ? instances.concat([this.cursorSelection])
@@ -354,13 +350,12 @@ export class EdgelessSelectionManager {
     );
 
     if (instances.length > 0) {
-      this.stdSelectionManager.setGroup('note', []);
+      this.stdSelection.setGroup('note', []);
     }
 
     if (
       selection.elements.length === 1 &&
-      (this.firstElement instanceof GroupElementModel ||
-        this.firstElement instanceof MindmapElementModel)
+      this.firstElement instanceof GfxGroupLikeElementModel
     ) {
       this._activeGroup = this.firstElement;
     } else {
@@ -373,16 +368,19 @@ export class EdgelessSelectionManager {
     }
   }
 
-  setCursor(cursor: CursorSelection | CursorSelectionState) {
-    const instance = this.stdSelectionManager.create(
-      'cursor',
-      cursor.x,
-      cursor.y
-    );
+  setCursor(cursor: CursorSelection | IPoint) {
+    const instance = this.stdSelection.create('cursor', cursor.x, cursor.y);
 
-    this.stdSelectionManager.setGroup('gfx', [
-      ...this.surfaceSelections,
-      instance,
-    ]);
+    this.stdSelection.setGroup('gfx', [...this.surfaceSelections, instance]);
+  }
+
+  override unmounted() {
+    this.disposable.dispose();
+  }
+}
+
+declare module './controller.js' {
+  interface GfxController {
+    readonly selection: GfxSelectionManager;
   }
 }

@@ -17,7 +17,7 @@ import { property, query, state } from 'lit/decorators.js';
 
 import type { EdgelessRootBlockComponent } from '../../../edgeless-root-block.js';
 
-import { ShapeToolController } from '../../../tools/shape-tool.js';
+import { ShapeTool } from '../../../gfx-tool/shape-tool.js';
 
 export interface Shape {
   name: ShapeName;
@@ -96,7 +96,7 @@ export class EdgelessShapeToolElement extends WithDisposable(LitElement) {
       return;
     }
     this._dragging = false;
-    this.edgeless.tools.setEdgelessTool({ type: 'default' });
+    this.edgeless.gfx.tool.setTool('default');
     if (this._isOutside) {
       const rect = this._shapeElement.getBoundingClientRect();
       this._backupShapeElement.style.setProperty('transition', 'none');
@@ -123,8 +123,8 @@ export class EdgelessShapeToolElement extends WithDisposable(LitElement) {
     if (!this._dragging) {
       return;
     }
-    const controller = this.edgeless.tools.currentController;
-    if (controller instanceof ShapeToolController) {
+    const controller = this.edgeless.gfx.tool.currentTool$.peek();
+    if (controller instanceof ShapeTool) {
       controller.clearOverlay();
     }
     const { x, y } = coord;

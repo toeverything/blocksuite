@@ -1,4 +1,4 @@
-import { WithDisposable } from '@blocksuite/global/utils';
+import { SignalWatcher, WithDisposable } from '@blocksuite/global/utils';
 import { cssVarV2 } from '@toeverything/theme/v2';
 import { css, html, LitElement, nothing, unsafeCSS } from 'lit';
 import { property } from 'lit/decorators.js';
@@ -6,7 +6,14 @@ import { styleMap } from 'lit/directives/style-map.js';
 
 import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
 
-export class EdgelessDraggingAreaRect extends WithDisposable(LitElement) {
+import {
+  DefaultModeDragType,
+  DefaultTool,
+} from '../../gfx-tool/default-tool.js';
+
+export class EdgelessDraggingAreaRect extends SignalWatcher(
+  WithDisposable(LitElement)
+) {
   static override styles = css`
     .affine-edgeless-dragging-area {
       position: absolute;
@@ -25,22 +32,25 @@ export class EdgelessDraggingAreaRect extends WithDisposable(LitElement) {
     }
   `;
 
-  protected override firstUpdated() {
-    this._disposables.add(
-      this.edgeless.slots.draggingAreaUpdated.on(() => this.requestUpdate())
-    );
-  }
-
   protected override render() {
-    const rect = this.edgeless.tools.draggingArea;
-    if (rect === null) return nothing;
+    const rect = this.edgeless.gfx.tool.draggingViewArea$.value;
+    const tool = this.edgeless.gfx.tool.currentTool$.value;
+
+    if (
+      rect.w === 0 ||
+      rect.h === 0 ||
+      !(tool instanceof DefaultTool) ||
+      tool.dragType !== DefaultModeDragType.Selecting
+    )
+      return nothing;
 
     const style = {
-      left: rect.left + 'px',
-      top: rect.top + 'px',
-      width: rect.width + 'px',
-      height: rect.height + 'px',
+      left: rect.x + 'px',
+      top: rect.y + 'px',
+      width: rect.w + 'px',
+      height: rect.h + 'px',
     };
+
     return html`
       <div class="affine-edgeless-dragging-area" style=${styleMap(style)}></div>
     `;

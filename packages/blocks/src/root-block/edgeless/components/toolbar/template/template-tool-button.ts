@@ -1,3 +1,5 @@
+import type { GfxToolsFullOptionValue } from '@blocksuite/block-std/gfx';
+
 import { ArrowDownSmallIcon } from '@blocksuite/affine-components/icons';
 import { once } from '@blocksuite/affine-shared/utils';
 import {
@@ -12,7 +14,6 @@ import { state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { repeat } from 'lit/directives/repeat.js';
 
-import type { EdgelessTool } from '../../../types.js';
 import type { EdgelessTemplatePanel } from './template-panel.js';
 
 import { EdgelessToolbarToolMixin } from '../mixins/tool.mixin.js';
@@ -116,11 +117,11 @@ export class EdgelessTemplateButton extends EdgelessToolbarToolMixin(
 
   private _cleanup: (() => void) | null = null;
 
-  private _prevTool: EdgelessTool | null = null;
+  private _prevTool: GfxToolsFullOptionValue | null = null;
 
   override enableActiveBackground = true;
 
-  override type: EdgelessTool['type'] = 'template';
+  override type: GfxToolsFullOptionValue['type'] = 'template';
 
   get cards() {
     const { theme } = this;
@@ -139,7 +140,7 @@ export class EdgelessTemplateButton extends EdgelessToolbarToolMixin(
         this.setEdgelessTool(this._prevTool);
         this._prevTool = null;
       } else {
-        this.setEdgelessTool({ type: 'default' });
+        this.setEdgelessTool('default');
       }
     }
   }
@@ -156,7 +157,7 @@ export class EdgelessTemplateButton extends EdgelessToolbarToolMixin(
 
     this._prevTool = this.edgelessTool ? { ...this.edgelessTool } : null;
 
-    this.setEdgelessTool({ type: 'template' });
+    this.setEdgelessTool('template');
 
     const panel = document.createElement('edgeless-templates-panel');
     panel.edgeless = this.edgeless;

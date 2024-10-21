@@ -13,8 +13,8 @@ import {
 import {
   Bound,
   getBoundFromPoints,
-  getPointsFromBoundsWithRotation,
-  getQuadBoundsWithRotation,
+  getPointsFromBoundWithRotation,
+  getQuadBoundWithRotation,
   getSolidStrokePoints,
   getSvgPathFromStroke,
   inflateBound,
@@ -69,17 +69,17 @@ export class BrushElementModel extends GfxPrimitiveElementModel<BrushProps> {
   }
 
   override containsBound(bounds: Bound) {
-    const points = getPointsFromBoundsWithRotation(this);
+    const points = getPointsFromBoundWithRotation(this);
     return points.some(point => bounds.containsPoint(point));
   }
 
   override getLineIntersections(start: IVec, end: IVec) {
     const tl = [this.x, this.y];
-    const points = getPointsFromBoundsWithRotation(this, _ =>
+    const points = getPointsFromBoundWithRotation(this, _ =>
       this.points.map(point => Vec.add(point, tl))
     );
 
-    const box = Bound.fromDOMRect(getQuadBoundsWithRotation(this));
+    const box = Bound.fromDOMRect(getQuadBoundWithRotation(this));
 
     if (box.w < 8 && box.h < 8) {
       return Vec.distanceToLineSegment(start, end, box.center) < 5 ? [] : null;

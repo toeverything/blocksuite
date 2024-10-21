@@ -21,9 +21,7 @@ describe('default tool', () => {
     surface = getSurface(window.doc, window.editor);
     service = edgeless.service;
 
-    edgeless.tools.edgelessTool = {
-      type: 'default',
-    };
+    edgeless.gfx.tool.setTool('default');
 
     return cleanup;
   });

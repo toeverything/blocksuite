@@ -1,3 +1,5 @@
+import type { GfxToolsMap, GfxToolsOption } from '@blocksuite/block-std/gfx';
+
 import {
   LayoutType,
   MindmapElementModel,
@@ -19,7 +21,6 @@ import { IS_MAC } from '@blocksuite/global/env';
 import { Bound } from '@blocksuite/global/utils';
 
 import type { EdgelessRootBlockComponent } from './edgeless-root-block.js';
-import type { EdgelessTool } from './types.js';
 
 import {
   getNearestTranslation,
@@ -30,9 +31,9 @@ import { LassoMode } from '../../_common/types.js';
 import { EdgelessTextBlockComponent } from '../../edgeless-text-block/edgeless-text-block.js';
 import { PageKeyboardManager } from '../keyboard/keyboard-manager.js';
 import { GfxBlockModel } from './block-model.js';
-import { CopilotSelectionController } from './tools/copilot-tool.js';
-import { LassoToolController } from './tools/lasso-tool.js';
-import { ShapeToolController } from './tools/shape-tool.js';
+import { CopilotTool } from './gfx-tool/copilot-tool.js';
+import { LassoTool } from './gfx-tool/lasso-tool.js';
+import { ShapeTool } from './gfx-tool/shape-tool.js';
 import {
   DEFAULT_NOTE_CHILD_FLAVOUR,
   DEFAULT_NOTE_CHILD_TYPE,
@@ -52,38 +53,26 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
     this.rootComponent.bindHotKey(
       {
         v: () => {
-          this._setEdgelessTool(rootComponent, {
-            type: 'default',
-          });
+          this._setEdgelessTool('default');
         },
         t: () => {
-          this._setEdgelessTool(rootComponent, {
-            type: 'text',
-          });
+          this._setEdgelessTool('text');
         },
         c: () => {
           const mode = ConnectorMode.Curve;
           rootComponent.std.get(EditPropsStore).recordLastProps('connector', {
             mode,
           });
-          this._setEdgelessTool(rootComponent, { type: 'connector', mode });
+          this._setEdgelessTool('connector', { mode });
         },
         l: () => {
           if (!rootComponent.doc.awarenessStore.getFlag('enable_lasso_tool')) {
             return;
           }
-          // select the current lasso mode
-          const edgeless = rootComponent;
-          const lassoController = edgeless.tools.controllers['lasso'];
-          const tool: EdgelessTool = {
-            type: 'lasso',
+
+          this._setEdgelessTool('lasso', {
             mode: LassoMode.Polygonal,
-          };
-
-          if (lassoController instanceof LassoToolController)
-            tool.mode = lassoController.tool.mode;
-
-          this._setEdgelessTool(edgeless, tool);
+          });
         },
         'Shift-l': () => {
           if (!rootComponent.doc.awarenessStore.getFlag('enable_lasso_tool')) {
@@ -91,41 +80,34 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
           }
           // toggle between lasso modes
           const edgeless = rootComponent;
-          const cur = edgeless.edgelessTool;
-          const tool: EdgelessTool = {
-            type: 'lasso',
+          const cur = edgeless.gfx.tool.currentTool$.peek();
+
+          this._setEdgelessTool('lasso', {
             mode:
-              cur.type === 'lasso'
-                ? cur.mode === LassoMode.FreeHand
+              cur?.toolName === 'lasso'
+                ? (cur as LassoTool).activatedOption.mode === LassoMode.FreeHand
                   ? LassoMode.Polygonal
                   : LassoMode.FreeHand
                 : LassoMode.FreeHand,
-          };
-          this._setEdgelessTool(edgeless, tool);
+          });
         },
         h: () => {
-          this._setEdgelessTool(rootComponent, {
-            type: 'pan',
+          this._setEdgelessTool('pan', {
             panning: false,
           });
         },
         n: () => {
-          this._setEdgelessTool(rootComponent, {
-            type: 'affine:note',
+          this._setEdgelessTool('affine:note', {
             childFlavour: DEFAULT_NOTE_CHILD_FLAVOUR,
             childType: DEFAULT_NOTE_CHILD_TYPE,
             tip: DEFAULT_NOTE_TIP,
           });
         },
         p: () => {
-          this._setEdgelessTool(rootComponent, {
-            type: 'brush',
-          });
+          this._setEdgelessTool('brush');
         },
         e: () => {
-          this._setEdgelessTool(rootComponent, {
-            type: 'eraser',
-          });
+          this._setEdgelessTool('eraser');
         },
         k: () => {
           if (this.rootComponent.service.locked) return;
@@ -161,7 +143,7 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
               });
             rootComponent.surface.fitToViewport(Bound.deserialize(frame.xywh));
           } else if (!this.rootComponent.service.selection.editing) {
-            this._setEdgelessTool(rootComponent, { type: 'frame' });
+            this._setEdgelessTool('frame');
           }
         },
         '-': () => {
@@ -209,17 +191,16 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
         },
         'Shift-s': () => {
           if (this.rootComponent.service.locked) return;
-          const controller = rootComponent.tools.currentController;
+          const controller = rootComponent.gfx.tool.currentTool$.peek();
           if (
             this.rootComponent.service.selection.editing ||
-            !(controller instanceof ShapeToolController)
+            !(controller instanceof ShapeTool)
           ) {
             return;
           }
-          const { shapeName } = controller.tool;
+          const { shapeName } = controller.activatedOption;
           const nextShapeName = getNextShapeType(shapeName);
-          this._setEdgelessTool(rootComponent, {
-            type: 'shape',
+          this._setEdgelessTool('shape', {
             shapeName: nextShapeName,
           });
 
@@ -300,15 +281,12 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
           this._delete();
         },
         Escape: () => {
-          const { currentController } = this.rootComponent.tools;
-          if (
-            currentController instanceof LassoToolController &&
-            currentController.isSelecting
-          ) {
-            currentController.abort();
+          const currentTool = this.rootComponent.gfx.tool.currentTool$.peek();
+          if (currentTool instanceof LassoTool && currentTool.isSelecting) {
+            currentTool.abort();
           }
-          if (currentController instanceof CopilotSelectionController) {
-            currentController.abort();
+          if (currentTool instanceof CopilotTool) {
+            currentTool.abort();
           }
 
           if (!this.rootComponent.service.selection.empty) {
@@ -658,16 +636,31 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
     });
   }
 
-  private _setEdgelessTool(
-    edgeless: EdgelessRootBlockComponent,
-    edgelessTool: EdgelessTool,
-    ignoreActiveState = false
+  private _setEdgelessTool<K extends keyof GfxToolsMap>(
+    toolName: K,
+    ...options: K extends keyof GfxToolsOption
+      ? [option: GfxToolsOption[K], ignoreActiveState?: boolean]
+      : [option: void, ignoreActiveState?: boolean]
   ) {
+    const ignoreActiveState =
+      typeof options === 'boolean'
+        ? options[0]
+        : options[1] === undefined
+          ? false
+          : options[1];
+
     // when editing, should not update mouse mode by shortcut
-    if (!ignoreActiveState && edgeless.service.selection.editing) {
+    if (!ignoreActiveState && this.rootComponent.gfx.selection.editing) {
       return;
     }
-    edgeless.tools.setEdgelessTool(edgelessTool);
+
+    this.rootComponent.gfx.tool.setTool<K>(
+      toolName,
+      // @ts-ignore
+      options[0] !== undefined && typeof options[0] !== 'boolean'
+        ? options[0]
+        : undefined
+    );
   }
 
   private _shift(event: KeyboardEvent) {
@@ -692,33 +685,32 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
 
     const edgeless = this.rootComponent;
     const selection = edgeless.service.selection;
-    const currentTool = edgeless.edgelessTool;
-    const type = currentTool.type;
-
+    const currentTool = edgeless.gfx.tool.currentTool$.peek()!;
     const isKeyDown = event.type === 'keydown';
 
-    if (isKeyDown) {
-      edgeless.tools.spaceBar = true;
-    } else {
-      edgeless.tools.spaceBar = false;
-    }
-
-    if (edgeless.service.tool.dragging) {
+    if (edgeless.gfx.tool.dragging$.peek()) {
       return; // Don't do anything if currently dragging
     }
 
     const revertToPrevTool = (ev: KeyboardEvent) => {
       if (ev.code === 'Space') {
-        this._setEdgelessTool(edgeless, currentTool);
+        this._setEdgelessTool(
+          // @ts-ignore
+          currentTool.toolName,
+          currentTool?.activatedOption
+        );
         document.removeEventListener('keyup', revertToPrevTool, false);
       }
     };
 
     if (isKeyDown) {
-      if (type === 'pan' || (type === 'default' && selection.editing)) {
+      if (
+        currentTool.toolName === 'pan' ||
+        (currentTool.toolName === 'default' && selection.editing)
+      ) {
         return;
       }
-      this._setEdgelessTool(edgeless, { type: 'pan', panning: false });
+      this._setEdgelessTool('pan', { panning: false });
 
       edgeless.dispatcher.disposables.addFromEvent(
         document,

@@ -1,10 +1,10 @@
+import type { GfxToolsFullOptionValue } from '@blocksuite/block-std/gfx';
+
 import {
   EdgelessEraserDarkIcon,
   EdgelessEraserLightIcon,
 } from '@blocksuite/affine-components/icons';
 import { css, html, LitElement } from 'lit';
-
-import type { EdgelessTool } from '../../../types.js';
 
 import { getTooltipWithShortcut } from '../../utils.js';
 import { EdgelessToolbarToolMixin } from '../mixins/tool.mixin.js';
@@ -37,7 +37,7 @@ export class EdgelessEraserToolButton extends EdgelessToolbarToolMixin(
 
   override enableActiveBackground = true;
 
-  override type: EdgelessTool['type'] = 'eraser';
+  override type: GfxToolsFullOptionValue['type'] = 'eraser';
 
   override firstUpdated() {
     this.disposables.add(

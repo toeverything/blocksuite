@@ -14,10 +14,10 @@ import {
 } from '@blocksuite/affine-components/icons';
 import { ShapeType } from '@blocksuite/affine-model';
 
-import type { ShapeTool } from '../../../tools/shape-tool.js';
+import type { ShapeToolOption } from '../../../gfx-tool/shape-tool.js';
 
 type Config = {
-  name: ShapeTool['shapeName'];
+  name: ShapeToolOption['shapeName'];
   generalIcon: TemplateResult<1>;
   scribbledIcon: TemplateResult<1>;
   tooltip: string;
