@@ -159,24 +159,17 @@ export const SurfaceBlockSchema = defineBlockSchema({
   toModel: () => new SurfaceBlockModel(),
 });
 
-export type SurfaceMiddleware = (
-  surface: SurfaceBlockModel,
-  hooks: SurfaceBlockModel['hooks']
-) => () => void;
+export type SurfaceMiddleware = (surface: SurfaceBlockModel) => () => void;
 
 export class SurfaceBlockModel extends BaseSurfaceModel {
   private _disposables: DisposableGroup = new DisposableGroup();
 
   override _init() {
+    [connectorMiddleware(this), groupRelationMiddleware(this)].forEach(
+      disposable => this._disposables.add(disposable)
+    );
     this._extendElement(elementsCtorMap);
     super._init();
-  }
-
-  override applyMiddlewares() {
-    [
-      connectorMiddleware(this, this.hooks),
-      groupRelationMiddleware(this, this.hooks),
-    ].forEach(disposable => this._disposables.add(disposable));
   }
 
   getConnectors(id: string) {

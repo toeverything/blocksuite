@@ -4,7 +4,7 @@ import type { IVec, SerializedXYWH } from '@blocksuite/global/utils';
 import { field, GfxPrimitiveElementModel } from '@blocksuite/block-std/gfx';
 import {
   Bound,
-  getPointsFromBoundsWithRotation,
+  getPointsFromBoundWithRotation,
   linePolygonIntersects,
   pointInPolygon,
   polygonNearestPoint,
@@ -40,12 +40,12 @@ export class TextElementModel extends GfxPrimitiveElementModel<TextElementProps>
   }
 
   override containsBound(bounds: Bound): boolean {
-    const points = getPointsFromBoundsWithRotation(this);
+    const points = getPointsFromBoundWithRotation(this);
     return points.some(point => bounds.containsPoint(point));
   }
 
   override getLineIntersections(start: IVec, end: IVec) {
-    const points = getPointsFromBoundsWithRotation(this);
+    const points = getPointsFromBoundWithRotation(this);
     return linePolygonIntersects(start, end, points);
   }
 
@@ -57,7 +57,7 @@ export class TextElementModel extends GfxPrimitiveElementModel<TextElementProps>
   }
 
   override includesPoint(x: number, y: number): boolean {
-    const points = getPointsFromBoundsWithRotation(this);
+    const points = getPointsFromBoundWithRotation(this);
     return pointInPolygon([x, y], points);
   }
 

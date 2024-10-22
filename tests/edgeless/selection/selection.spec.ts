@@ -339,7 +339,8 @@ test('should auto panning when selection rectangle reaches viewport edges', asyn
     }
   );
   await setEdgelessTool(page, 'default');
-  await page.mouse.click(200, 800);
+  await waitNextFrame(page, 500);
+  await page.mouse.click(400, 400);
   selectedRect = page.locator(selectedRectClass);
   await page.waitForTimeout(100);
   await expect(selectedRect).toBeHidden();

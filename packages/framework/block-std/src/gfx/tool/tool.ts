@@ -1,70 +1,104 @@
 import { type Container, createIdentifier } from '@blocksuite/global/di';
 import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
+import { DisposableGroup } from '@blocksuite/global/utils';
 
-import type { UIEventStateContext } from '../../event/base.js';
-import type { ExtensionType } from '../../extension/extension.js';
+import type { PointerEventState } from '../../event/index.js';
 import type { GfxController } from '../controller.js';
+import type { ToolEventTarget } from './tool-controller.js';
 
+import { Extension } from '../../extension/extension.js';
 import { GfxControllerIdentifier } from '../identifiers.js';
-import { eventTarget, type SupportedEvents } from './tool-controller.js';
 
-export abstract class BaseTool {
+export abstract class BaseTool<
+  Option = Record<string, unknown>,
+> extends Extension {
   static toolName: string = '';
+
+  private readonly eventTarget!: ToolEventTarget;
+
+  activatedOption: Option = {} as Option;
+
+  addHook: ToolEventTarget['addHook'] = (evtName, handler) => {
+    this.eventTarget.addHook(evtName, handler);
+  };
+
+  /**
+   * The `disposable` will be disposed when the tool is unloaded.
+   */
+  protected readonly disposable = new DisposableGroup();
 
   get active() {
     return this.gfx.tool.currentTool$.peek() === this;
+  }
+
+  get controller() {
+    return this.gfx.tool;
+  }
+
+  get doc() {
+    return this.gfx.doc;
+  }
+
+  get std() {
+    return this.gfx.std;
   }
 
   get toolName() {
     return (this.constructor as typeof BaseTool).toolName;
   }
 
-  constructor(readonly gfx: GfxController) {}
+  constructor(readonly gfx: GfxController) {
+    super();
+  }
+
+  static override setup(di: Container): void {
+    if (!this.toolName) {
+      throw new BlockSuiteError(
+        ErrorCode.ValueNotExists,
+        `The tool constructor '${this.name}' should have a static 'toolName' property.`
+      );
+    }
+
+    di.addImpl(ToolIdentifier(this.toolName), this, [GfxControllerIdentifier]);
+  }
 
   /**
    * Called when the tool is activated.
-   * @param option - The data passed as second argument when calling `ToolController.use`.
+   * @param _ - The data passed as second argument when calling `ToolController.use`.
    */
-  activate(_: Record<string, unknown>): void {}
+  activate(_: Option): void {}
 
-  addHook(
-    evtName: SupportedEvents,
-    handler: (evtState: UIEventStateContext) => undefined | boolean
-  ): void {
-    this.gfx.tool[eventTarget].addHook(evtName, handler);
-  }
+  click(_: PointerEventState): void {}
 
-  click(_: UIEventStateContext): void {}
-
-  contextMenu(_: UIEventStateContext): void {}
+  contextMenu(_: PointerEventState): void {}
 
   /**
    * Called when the tool is deactivated.
    */
   deactivate(): void {}
 
-  doubleClick(_: UIEventStateContext): void {}
+  doubleClick(_: PointerEventState): void {}
 
-  dragEnd(_: UIEventStateContext): void {}
+  dragEnd(_: PointerEventState): void {}
 
-  dragMove(_: UIEventStateContext): void {}
+  dragMove(_: PointerEventState): void {}
 
-  dragStart(_: UIEventStateContext): void {}
+  dragStart(_: PointerEventState): void {}
 
   /**
    * Called when the tool is registered.
    */
   mounted(): void {}
 
-  pointerDown(_: UIEventStateContext): void {}
+  pointerDown(_: PointerEventState): void {}
 
-  pointerMove(_: UIEventStateContext): void {}
+  pointerMove(_: PointerEventState): void {}
 
-  pointerOut(_: UIEventStateContext): void {}
+  pointerOut(_: PointerEventState): void {}
 
-  pointerUp(_: UIEventStateContext): void {}
+  pointerUp(_: PointerEventState): void {}
 
-  tripleClick(_: UIEventStateContext): void {}
+  tripleClick(_: PointerEventState): void {}
 
   /**
    * Called when the tool is unloaded, usually when the whole `ToolController` is destroyed.
@@ -74,25 +108,15 @@ export abstract class BaseTool {
 
 export const ToolIdentifier = createIdentifier<BaseTool>('GfxTool');
 
-export function GfxToolExtension(
-  toolCtors: (typeof BaseTool)[]
-): ExtensionType {
-  return {
-    setup: (di: Container) => {
-      toolCtors.forEach(Ctor => {
-        if (!Ctor.toolName) {
-          throw new BlockSuiteError(
-            ErrorCode.ValueNotExists,
-            'The tool must have a static property `toolName`'
-          );
-        }
-
-        di.addImpl(ToolIdentifier(Ctor.toolName), Ctor, [
-          GfxControllerIdentifier,
-        ]);
-      });
-    },
-  };
-}
-
 export interface GfxToolsMap {}
+
+export interface GfxToolsOption {}
+
+export type GfxToolsFullOption = {
+  [Key in keyof GfxToolsMap]: Key extends keyof GfxToolsOption
+    ? { type: Key } & GfxToolsOption[Key]
+    : { type: Key };
+};
+
+export type GfxToolsFullOptionValue =
+  GfxToolsFullOption[keyof GfxToolsFullOption];
