@@ -4,6 +4,7 @@ import {
   AttachmentIcon16,
   getAttachmentFileIcons,
 } from '@blocksuite/affine-components/icons';
+import { Peekable } from '@blocksuite/affine-components/peek';
 import { toast } from '@blocksuite/affine-components/toast';
 import {
   type AttachmentBlockModel,
@@ -27,6 +28,7 @@ import { renderEmbedView } from './embed.js';
 import { styles } from './styles.js';
 import { checkAttachmentBlob, downloadAttachmentBlob } from './utils.js';
 
+@Peekable()
 export class AttachmentBlockComponent extends CaptionedBlockComponent<
   AttachmentBlockModel,
   AttachmentBlockService
@@ -176,20 +178,18 @@ export class AttachmentBlockComponent extends CaptionedBlockComponent<
     super.disconnectedCallback();
   }
 
+  override firstUpdated() {
+    // lazy bindings
+    this.disposables.addFromEvent(this, 'click', this.onClick);
+  }
+
   protected onClick(event: MouseEvent) {
+    // the peek view need handle shift + click
+    if (event.defaultPrevented) return;
+
     event.stopPropagation();
 
     this._selectBlock();
-  }
-
-  protected onDoubleClick(event: MouseEvent) {
-    event.stopPropagation();
-
-    if (this.allowEmbed) {
-      this.open();
-    } else {
-      this.download();
-    }
   }
 
   override renderBlock() {
@@ -214,11 +214,7 @@ export class AttachmentBlockComponent extends CaptionedBlockComponent<
         style=${this.containerStyleMap}
       >
         ${embedView
-          ? html`<div
-              class="affine-attachment-embed-container"
-              @click=${this.onClick}
-              @dblclick=${this.onDoubleClick}
-            >
+          ? html`<div class="affine-attachment-embed-container">
               ${embedView}
 
               <div
@@ -236,8 +232,6 @@ export class AttachmentBlockComponent extends CaptionedBlockComponent<
                 error: this.error,
                 unsynced: false,
               })}
-              @click=${this.onClick}
-              @dblclick=${this.onDoubleClick}
             >
               <div class="affine-attachment-content">
                 <div class="affine-attachment-content-title">
