@@ -1,21 +1,19 @@
 import type { Command } from '@blocksuite/block-std';
 
-export const deleteSelectedModelsCommand: Command<'selectedModels'> = (
+export const retainFirstModelCommand: Command<'selectedModels'> = (
   ctx,
   next
 ) => {
-  const models = ctx.selectedModels;
-
-  if (!models) {
+  if (!ctx.selectedModels) {
     console.error(
       '`selectedModels` is required, you need to use `getSelectedModels` command before adding this command to the pipeline.'
     );
     return;
   }
 
-  models.forEach(model => {
-    ctx.std.doc.deleteBlock(model);
-  });
+  if (ctx.selectedModels.length > 0) {
+    ctx.selectedModels.shift();
+  }
 
   return next();
 };
@@ -23,7 +21,7 @@ export const deleteSelectedModelsCommand: Command<'selectedModels'> = (
 declare global {
   namespace BlockSuite {
     interface Commands {
-      deleteSelectedModels: typeof deleteSelectedModelsCommand;
+      retainFirstModel: typeof retainFirstModelCommand;
     }
   }
 }

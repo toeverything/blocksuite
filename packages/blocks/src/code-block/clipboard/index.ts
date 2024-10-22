@@ -55,8 +55,11 @@ export class CodeClipboardController {
         }),
       ])
       .getBlockIndex()
+      .try(cmd => [cmd.getTextSelection().deleteText()])
       .inline((ctx, next) => {
-        assertExists(ctx.parentBlock);
+        if (!ctx.parentBlock) {
+          return;
+        }
         this._clipboard
           .paste(
             e,

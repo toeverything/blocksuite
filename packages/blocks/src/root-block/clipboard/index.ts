@@ -1,7 +1,7 @@
 import type { BlockComponent, UIEventHandler } from '@blocksuite/block-std';
 import type { BlockSnapshot, Doc } from '@blocksuite/store';
 
-import { assertExists, DisposableGroup } from '@blocksuite/global/utils';
+import { DisposableGroup } from '@blocksuite/global/utils';
 
 import {
   AttachmentAdapter,
@@ -164,8 +164,18 @@ export class PageClipboard {
         }),
       ])
       .getBlockIndex()
+      .try(cmd => [
+        cmd.getTextSelection().deleteText(),
+        cmd
+          .getSelectedModels()
+          .clearAndSelectFirstModel()
+          .retainFirstModel()
+          .deleteSelectedModels(),
+      ])
       .inline((ctx, next) => {
-        assertExists(ctx.parentBlock);
+        if (!ctx.parentBlock) {
+          return;
+        }
         this._std.clipboard
           .paste(
             e,
