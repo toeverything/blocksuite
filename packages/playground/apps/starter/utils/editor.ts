@@ -2,6 +2,7 @@ import type { BlockCollection, DocCollection } from '@blocksuite/store';
 
 import {
   BlockServiceWatcher,
+  ConfigExtension,
   type EditorHost,
   type ExtensionType,
 } from '@blocksuite/block-std';
@@ -46,6 +47,12 @@ function setDocModeFromUrlParams(service: DocModeProvider, docId: string) {
   }
 }
 
+function getRenderDprFromUrlParams() {
+  const params = new URLSearchParams(location.search);
+  const paramDpr = params.get('dpr');
+  return paramDpr ? parseFloat(paramDpr) : undefined;
+}
+
 function configureFormatBar(formatBar: AffineFormatBarWidget) {
   toolbarDefaultConfig(formatBar);
 }
@@ -85,6 +92,9 @@ export async function mountDefaultDocEditor(collection: DocCollection) {
     refNodeSlotsExtension,
     PatchPageServiceWatcher,
     FontConfigExtension(CommunityCanvasTextFonts),
+    ConfigExtension('affine:page', {
+      renderDpr: getRenderDprFromUrlParams(),
+    }),
     ParseDocUrlExtension(mockParseDocUrlService(collection)),
     NotificationExtension(mockNotificationService(editor)),
     {

@@ -8,4 +8,8 @@ export interface RootBlockConfig {
   docRemoteSelectionWidget?: Partial<DocRemoteSelectionConfig>;
   toolbarMoreMenu?: Partial<ToolbarMoreMenuConfig>;
   databaseOptions?: Partial<DatabaseOptionsConfig>;
+  /**
+   * The device pixel ratio for rendering, defaults is `window.devicePixelRatio`.
+   */
+  renderDpr?: number;
 }
