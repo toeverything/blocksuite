@@ -1,4 +1,3 @@
-import type { ServiceIdentifier } from '@blocksuite/global/di';
 import type { BlockModel } from '@blocksuite/store';
 
 import {
@@ -12,19 +11,22 @@ import type { BlockStdScope } from '../scope/block-std-scope.js';
 import type { SurfaceBlockModel } from './surface/surface-model.js';
 
 import { LifeCycleWatcher } from '../extension/lifecycle-watcher.js';
-import { LifeCycleWatcherIdentifier } from '../identifier.js';
 import { onSurfaceAdded } from '../utils/gfx.js';
 import { GfxBlockElementModel, type GfxModel } from './gfx-block-model.js';
 import { GridManager } from './grid.js';
+import { gfxControllerKey } from './identifiers.js';
+import { KeyboardController } from './keyboard.js';
 import { LayerManager } from './layer.js';
 import {
   GfxPrimitiveElementModel,
   type PointTestOptions,
 } from './surface/element-model.js';
+import { ToolIdentifier } from './tool/tool.js';
+import { ToolController } from './tool/tool-controller.js';
 import { Viewport } from './viewport.js';
 
 export class GfxController extends LifeCycleWatcher {
-  static override key = 'gfxController';
+  static override key = gfxControllerKey;
 
   private _disposables: DisposableGroup = new DisposableGroup();
 
@@ -32,7 +34,11 @@ export class GfxController extends LifeCycleWatcher {
 
   readonly grid: GridManager;
 
+  readonly keyboard: KeyboardController;
+
   readonly layer: LayerManager;
+
+  readonly tool: ToolController;
 
   readonly viewport: Viewport = new Viewport();
 
@@ -49,6 +55,8 @@ export class GfxController extends LifeCycleWatcher {
 
     this.grid = new GridManager();
     this.layer = new LayerManager(this.doc, null);
+    this.keyboard = new KeyboardController(std);
+    this.tool = new ToolController(std);
 
     this._disposables.add(
       onSurfaceAdded(this.doc, surface => {
@@ -63,6 +71,8 @@ export class GfxController extends LifeCycleWatcher {
     this._disposables.add(this.grid.watch({ doc: this.doc }));
     this._disposables.add(this.layer);
     this._disposables.add(this.viewport);
+    this._disposables.add(this.keyboard);
+    this._disposables.add(this.tool);
   }
 
   /**
@@ -186,13 +196,12 @@ export class GfxController extends LifeCycleWatcher {
 
   override mounted() {
     this.viewport.setViewportElm(this.std.host);
+    this.std.provider.getAll(ToolIdentifier).forEach(tool => {
+      this.tool.register(tool);
+    });
   }
 
   override unmounted() {
     this._disposables.dispose();
   }
 }
-
-export const GfxControllerIdentifier = LifeCycleWatcherIdentifier(
-  GfxController.key
-) as ServiceIdentifier<GfxController>;
