@@ -33,6 +33,11 @@ export function mergeWithPrev(editorHost: EditorHost, model: BlockModel) {
   const doc = model.doc;
   const parent = doc.getParent(model);
   if (!parent) return false;
+
+  if (matchFlavours(parent, ['affine:edgeless-text'])) {
+    return true;
+  }
+
   const prevBlock = getPrevContentBlock(editorHost, model);
   if (!prevBlock) {
     return handleNoPreviousSibling(editorHost, model);
@@ -79,10 +84,6 @@ export function mergeWithPrev(editorHost: EditorHost, model: BlockModel) {
       });
     }
 
-    return true;
-  }
-
-  if (matchFlavours(prevBlock, ['affine:edgeless-text'])) {
     return true;
   }
 
