@@ -35,6 +35,21 @@ export function addProperty(
       col
     );
   });
+  model.children.forEach(item => {
+    const cellContainerId = model.doc.addBlock('affine:cell', {}, item.id);
+    model.doc.addBlock(
+      'affine:paragraph',
+      {
+        text: new model.doc.Text(``),
+      },
+      cellContainerId
+    );
+    updateCell(model, item.id, {
+      columnId: id,
+      value: '',
+      ref: cellContainerId,
+    });
+  });
   return id;
 }
 
@@ -238,3 +253,99 @@ export const MICROSHEET_CONVERT_WHITE_LIST = [
   'affine:list',
   'affine:paragraph',
 ];
+
+const checkTypes = ['affine:paragraph', 'affine:list'];
+
+export function getTheOnlyTextSelection(
+  std: BlockStdScope
+): TextSelection | null {
+  const value = std.selection.value;
+  if (value.length === 1 && value[0].type === 'text') {
+    return value[0] as TextSelection;
+  }
+
+  return null;
+}
+
+export function isInCellStart(std: BlockStdScope, atTextStart = false) {
+  const value = getTheOnlyTextSelection(std);
+  const doc = std.doc;
+
+  if (value) {
+    const currentModel = doc.getBlockById(value.blockId);
+    if (currentModel && checkTypes.includes(currentModel.flavour)) {
+      const parentModel = doc.getParent(currentModel);
+      if (
+        parentModel?.flavour === 'affine:cell' &&
+        parentModel.firstChild() === currentModel
+      ) {
+        if (!atTextStart) return true;
+        return value.start.index === 0;
+      }
+    }
+  }
+
+  return false;
+}
+
+export function isInCellEnd(std: BlockStdScope, atTextEnd = false) {
+  const value = getTheOnlyTextSelection(std);
+  const doc = std.doc;
+
+  if (value) {
+    const currentModel = doc.getBlockById(value.blockId);
+    if (currentModel && checkTypes.includes(currentModel.flavour)) {
+      const parentModel = doc.getParent(currentModel);
+      if (
+        parentModel?.flavour === 'affine:cell' &&
+        parentModel.lastChild() === currentModel
+      ) {
+        if (!atTextEnd) return true;
+        const textLength = currentModel.text?.length;
+        return textLength ? value.end.index === textLength : true;
+      }
+    }
+  }
+
+  return false;
+}
+
+export function calculateLineNum(std: BlockStdScope) {
+  const value = getTheOnlyTextSelection(std);
+  const doc = std.doc;
+  assertExists(value);
+
+  const currentModel = doc.getBlockById(value.blockId);
+  const element = std.host.querySelector(
+    `[data-block-id="${value.blockId}"] .inline-editor`
+  );
+  assertExists(element);
+
+  const text = currentModel?.text?.toString().slice(0, value.start.index + 1);
+  assertExists(text);
+
+  const temp = document.createElement('div');
+  temp.style.margin = '0';
+  temp.style.padding = '0';
+  // @ts-ignore
+  temp.style.fontFamily = element.style.fontFamily;
+  // @ts-ignore
+  temp.style.fontSize = element.style.fontSize;
+  temp.style.width = element.getBoundingClientRect().width + 'px';
+
+  element.parentElement?.append(temp);
+  temp.innerHTML = 'A';
+  const lineHeight = temp.clientHeight;
+
+  temp.innerHTML = text || 'A';
+  const currentHeight = temp.clientHeight;
+  temp?.remove();
+
+  const lines = Math.floor(element.getBoundingClientRect().height / lineHeight);
+  const line = Math.floor(currentHeight / lineHeight);
+
+  return {
+    isFirst: line <= 1,
+    isLast: line >= lines,
+  };
+}

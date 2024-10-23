@@ -11,6 +11,7 @@ import {
 import { ShadowlessElement } from '@blocksuite/block-std';
 import { SignalWatcher, WithDisposable } from '@blocksuite/global/utils';
 import {
+  AddCursorIcon,
   DeleteIcon,
   DuplicateIcon,
   InsertLeftIcon,
@@ -524,7 +525,6 @@ export class MicrosheetHeaderColumn extends SignalWatcher(
   }
 
   override render() {
-    const column = this.column;
     const style = styleMap({
       height: DEFAULT_COLUMN_TITLE_HEIGHT + 'px',
     });
@@ -542,32 +542,41 @@ export class MicrosheetHeaderColumn extends SignalWatcher(
         ${this.readonly
           ? null
           : html` <button class="${classes}">
-              <div class="hover-trigger"></div>
               <div class="control-h"></div>
               <div class="control-l"></div>
-              <div class="control-r"></div>
             </button>`}
-        <div class="affine-microsheet-column-text ${column.type$.value}">
-          <div
-            class="affine-microsheet-column-type-icon dv-hover"
-            @click="${this._clickTypeIcon}"
-          >
-            <microsheet-uni-lit .uni="${column.icon}"></microsheet-uni-lit>
-          </div>
-          <div class="affine-microsheet-column-text-content">
-            <div class="affine-microsheet-column-text-input">
-              ${column.name$.value}
-            </div>
-          </div>
+        <div
+          ${ref(this.widthDragBar)}
+          @mouseenter="${this._enterWidthDragBar}"
+          @mouseleave="${this._leaveWidthDragBar}"
+          style="width: 0;position: relative;height: 100%;z-index: 1;cursor: col-resize"
+        >
+          <div style="width: 8px;height: 100%;margin-left: -4px;"></div>
         </div>
-      </div>
-      <div
-        ${ref(this.widthDragBar)}
-        @mouseenter="${this._enterWidthDragBar}"
-        @mouseleave="${this._leaveWidthDragBar}"
-        style="width: 0;position: relative;height: 100%;z-index: 1;cursor: col-resize"
-      >
-        <div style="width: 8px;height: 100%;margin-left: -4px;"></div>
+        <div
+          class="affine-microsheet-column-add-icon"
+          @click=${() => {
+            this.tableViewManager.propertyAdd({
+              id: this.column.id,
+              before: true,
+            });
+          }}
+        >
+          <div class="affine-microsheet-column-add-not-active-icon"></div>
+          ${AddCursorIcon()}
+        </div>
+        <div
+          class="affine-microsheet-column-add-icon affine-microsheet-column-right-add-icon"
+          @click=${() => {
+            this.tableViewManager.propertyAdd({
+              id: this.column.id,
+              before: false,
+            });
+          }}
+        >
+          <div class="affine-microsheet-column-add-not-active-icon"></div>
+          ${AddCursorIcon()}
+        </div>
       </div>
     `;
   }

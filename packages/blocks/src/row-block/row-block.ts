@@ -18,6 +18,7 @@ export class RowBlockComponent extends CaptionedBlockComponent<
       padding: 10px;
     }
     affine-row {
+      border-right: 1px solid var(--affine-border-color);
       // border-left: 1px solid var(--affine-border-color);
       // border-top: 1px solid var(--affine-border-color);
     }

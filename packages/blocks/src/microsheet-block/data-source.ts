@@ -152,6 +152,7 @@ export class MicrosheetBlockDataSource extends DataSourceBase {
       updateCell(this._model, rowId, {
         columnId: propertyId,
         value: newValue,
+        ref: '',
       });
       applyCellsUpdate(this._model);
     }
@@ -267,6 +268,7 @@ export class MicrosheetBlockDataSource extends DataSourceBase {
   }
 
   propertyTypeGet(propertyId: string): string {
+    return 'rich-text';
     if (propertyId === 'type') {
       return 'image';
     }
@@ -309,13 +311,46 @@ export class MicrosheetBlockDataSource extends DataSourceBase {
     applyPropertyUpdate(this._model);
   }
 
+  refContentDelete(rowId: string, columnId: string): void {
+    const cellId = this.cellRefGet(rowId, columnId);
+    const doc = this.doc;
+    if (typeof cellId === 'string') {
+      const cellBlock = doc.getBlock(cellId);
+      if (cellBlock) {
+        const children = cellBlock.model.children;
+        children.forEach(b => doc.deleteBlock(b));
+        doc.addBlock('affine:paragraph', {}, cellId);
+      }
+    }
+  }
+
   rowAdd(insertPosition: InsertToPosition | number): string {
     this.doc.captureSync();
     const index =
       typeof insertPosition === 'number'
         ? insertPosition
         : insertPositionToIndex(insertPosition, this._model.children);
-    return this.doc.addBlock('affine:paragraph', {}, this._model.id, index);
+    const rowId = this.doc.addBlock('affine:row', {}, this._model.id, index);
+    const columnIds = this._model.columns.map(column => column.id);
+    columnIds.forEach((id: string, index: number) => {
+      if (!index) return;
+      // 调用cellContainer的add
+      const cellContainerId = this.doc.addBlock('affine:cell', {}, rowId);
+      this.doc.addBlock(
+        'affine:paragraph',
+        {
+          text: new this.doc.Text(``),
+        },
+        cellContainerId
+      );
+
+      updateCell(this._model, rowId, {
+        columnId: id,
+        value: '',
+        ref: cellContainerId,
+      });
+    });
+    return rowId;
   }
 
   rowDelete(ids: string[]): void {

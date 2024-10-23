@@ -38,7 +38,7 @@ export class TableRow extends SignalWatcher(WithDisposable(ShadowlessElement)) {
       width: 100%;
       display: flex;
       flex-direction: row;
-      border-bottom: 1px solid var(--affine-border-color);
+      /* border-bottom: 1px solid var(--affine-border-color); */
       position: relative;
     }
 
@@ -200,45 +200,47 @@ export class TableRow extends SignalWatcher(WithDisposable(ShadowlessElement)) {
               this.selectionController
             );
           };
-          return html`
-            <div>
-              <affine-microsheet-cell-container
-                class="microsheet-cell"
-                style=${styleMap({
-                  width: `${column.width$.value}px`,
-                  border: i === 0 ? 'none' : undefined,
-                })}
-                .view="${view}"
-                .column="${column}"
-                .rowId="${this.rowId}"
-                data-row-id="${this.rowId}"
-                .rowIndex="${this.rowIndex}"
-                data-row-index="${this.rowIndex}"
-                .columnId="${column.id}"
-                data-column-id="${column.id}"
-                .columnIndex="${i}"
-                data-column-index="${i}"
-                .std="${this.std}"
-              >
-              </affine-microsheet-cell-container>
-            </div>
-            ${!column.readonly$.value &&
-            column.view.mainProperties$.value.titleColumn === column.id
-              ? html`<div class="row-ops show-on-hover-row">
-                  <div class="row-op" @click="${clickDetail}">
-                    ${CenterPeekIcon()}
-                  </div>
-                  ${!view.readonly$.value
-                    ? html`<div class="row-op" @click="${openMenu}">
-                        ${MoreHorizontalIcon()}
-                      </div>`
-                    : nothing}
-                </div>`
-              : nothing}
-          `;
+          return i === 0
+            ? nothing
+            : html`
+                <div>
+                  <affine-microsheet-cell-container
+                    class="microsheet-cell"
+                    style=${styleMap({
+                      width: `${column.width$.value}px`,
+                      border: i === 0 ? 'none' : undefined,
+                    })}
+                    .view="${view}"
+                    .column="${column}"
+                    .rowId="${this.rowId}"
+                    data-row-id="${this.rowId}"
+                    .rowIndex="${this.rowIndex}"
+                    data-row-index="${this.rowIndex}"
+                    .columnId="${column.id}"
+                    data-column-id="${column.id}"
+                    .columnIndex="${i}"
+                    data-column-index="${i}"
+                    .std="${this.std}"
+                  >
+                  </affine-microsheet-cell-container>
+                </div>
+                ${!column.readonly$.value &&
+                column.view.mainProperties$.value.titleColumn === column.id
+                  ? html`<div class="row-ops show-on-hover-row">
+                      <div class="row-op" @click="${clickDetail}">
+                        ${CenterPeekIcon()}
+                      </div>
+                      ${!view.readonly$.value
+                        ? html`<div class="row-op" @click="${openMenu}">
+                            ${MoreHorizontalIcon()}
+                          </div>`
+                        : nothing}
+                    </div>`
+                  : nothing}
+              `;
         }
       )}
-      <div class="microsheet-cell add-column-button"></div>
+      <!-- <div class="microsheet-cell add-column-button"></div> -->
     `;
   }
 

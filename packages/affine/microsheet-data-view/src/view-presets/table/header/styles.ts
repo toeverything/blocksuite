@@ -19,8 +19,8 @@ export const styles = css`
         position: relative;
         display: flex;
         flex-direction: row;
-        border-bottom: 1px solid var(--affine-border-color);
-        border-top: 1px solid var(--affine-border-color);
+        /* border-bottom: 1px solid var(--affine-border-color);
+        border-top: 1px solid var(--affine-border-color); */
         box-sizing: border-box;
         user-select: none;
         background-color: var(--affine-background-primary-color);
@@ -52,11 +52,12 @@ export const styles = css`
         padding: 8px;
         box-sizing: border-box;
         position: relative;
+        padding:0;
     }
 
     .affine-microsheet-column-content:hover,
     .affine-microsheet-column-content.edit {
-        background: var(--affine-hover-color);
+        background: blue
     }
 
     .affine-microsheet-column-content.edit .affine-microsheet-column-text-icon {
@@ -155,6 +156,7 @@ export const styles = css`
     .affine-microsheet-column-move {
         display: flex;
         align-items: center;
+        padding: 0;
     }
 
     .affine-microsheet-column-move svg {
@@ -351,4 +353,49 @@ export const styles = css`
         --delay: 0.4s;
         opacity: 1;
     }
+
+
+    .affine-microsheet-column-add-icon {
+      position: absolute;
+      // right: -12px;
+      left: -10px;
+      top: -16px;
+      z-index: 9;
+      width: 20px;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .affine-microsheet-column-add-icon svg {
+        width: 20px;
+        height: 20px;
+        border-radius: 100px;
+        background: #4949fe;
+        color: white;
+        display: none;
+      }
+
+       .affine-microsheet-column-right-add-icon {
+      left: unset;
+      right: -10px;
+    }
+  
+      .affine-microsheet-column-add-icon:hover svg {
+        display: block;
+      }
+  
+      .affine-microsheet-column-add-icon:hover
+        .affine-microsheet-column-add-not-active-icon {
+        display: none;
+      }
+
+  .affine-microsheet-column-add-not-active-icon {
+    margin-top: -4px;
+    width: 4px;
+    height: 4px;
+    border-radius: 4px;
+    background: #ddd;
+  }
 `;

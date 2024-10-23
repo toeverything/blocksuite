@@ -1,7 +1,6 @@
 import { getScrollContainer } from '@blocksuite/affine-shared/utils';
 import { ShadowlessElement } from '@blocksuite/block-std';
 import { SignalWatcher, WithDisposable } from '@blocksuite/global/utils';
-import { PlusIcon } from '@blocksuite/icons/lit';
 import { autoUpdate } from '@floating-ui/dom';
 import { nothing, type TemplateResult } from 'lit';
 import { property, query } from 'lit/decorators.js';
@@ -87,9 +86,6 @@ export class MicrosheetColumnHeader extends SignalWatcher(
     return html`
       ${this.renderGroupHeader?.()}
       <div class="affine-microsheet-column-header microsheet-row">
-        ${this.readonly
-          ? nothing
-          : html`<div class="data-view-table-left-bar"></div>`}
         ${repeat(
           this.tableViewManager.properties$.value,
           column => column.id,
@@ -98,26 +94,18 @@ export class MicrosheetColumnHeader extends SignalWatcher(
               width: `${column.width$.value}px`,
               border: index === 0 ? 'none' : undefined,
             });
-            return html` <affine-microsheet-header-column
-              style="${style}"
-              data-column-id="${column.id}"
-              data-column-index="${index}"
-              class="affine-microsheet-column microsheet-cell"
-              .column="${column}"
-              .tableViewManager="${this.tableViewManager}"
-            ></affine-microsheet-header-column>`;
+            return index === 0
+              ? nothing
+              : html` <affine-microsheet-header-column
+                  style="${style}"
+                  data-column-id="${column.id}"
+                  data-column-index="${index}"
+                  class="affine-microsheet-column"
+                  .column="${column}"
+                  .tableViewManager="${this.tableViewManager}"
+                ></affine-microsheet-header-column>`;
           }
         )}
-        <div
-          style="background-color: var(--affine-border-color);width: 1px;"
-        ></div>
-        <div
-          @click="${this._onAddColumn}"
-          class="header-add-column-button dv-hover"
-        >
-          ${PlusIcon()}
-        </div>
-        <div class="scale-div" style="width: 1px;height: 1px;"></div>
       </div>
     `;
   }

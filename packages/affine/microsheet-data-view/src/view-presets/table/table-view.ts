@@ -16,7 +16,6 @@ import type { GroupManager } from '../../core/common/group-by/helper.js';
 import type { DataViewExpose } from '../../core/index.js';
 import type { TableSingleView } from './table-view-manager.js';
 
-import { renderUniLit } from '../../core/utils/uni-component/uni-component.js';
 import { DataViewBase } from '../../core/view/data-view-base.js';
 import { LEFT_TOOL_BAR_WIDTH } from './consts.js';
 import { TableClipboardController } from './controller/clipboard.js';
@@ -33,6 +32,10 @@ const styles = css`
     position: relative;
     display: flex;
     flex-direction: column;
+    overflow: hidden;
+    margin-left: -16px;
+    padding-top: 16px;
+    padding-bottom: 10px;
   }
 
   affine-microsheet-table * {
@@ -114,6 +117,7 @@ const styles = css`
 
   .microsheet-cell {
     border-left: 1px solid var(--affine-border-color);
+    border-top: 1px solid var(--affine-border-color);
   }
 
   .data-view-table-left-bar {
@@ -131,6 +135,13 @@ const styles = css`
     flex-direction: column;
     justify-content: center;
     align-items: flex-start;
+  }
+
+  .affine-microsheet-block-rows
+    > affine-row:last-child
+    microsheet-data-view-table-row
+    affine-microsheet-cell-container {
+    border-bottom: 1px solid var(--affine-border-color);
   }
 `;
 
@@ -256,23 +267,6 @@ export class DataViewTable extends DataViewBase<
   }
 
   private renderTable() {
-    const groups = this.props.view.groupManager.groupsDataList$.value;
-    if (groups) {
-      return html`
-        <div style="display:flex;flex-direction: column;gap: 16px;">
-          ${groups.map(group => {
-            return html` <affine-microsheet-data-view-table-group
-              data-group-key="${group.key}"
-              .dataViewEle="${this.props.dataViewEle}"
-              .view="${this.props.view}"
-              .viewEle="${this}"
-              .group="${group}"
-            ></affine-microsheet-data-view-table-group>`;
-          })}
-          ${this.renderAddGroup(this.props.view.groupManager)}
-        </div>
-      `;
-    }
     return html` <affine-microsheet-data-view-table-group
       .dataViewEle="${this.props.dataViewEle}"
       .view="${this.props.view}"
@@ -291,10 +285,6 @@ export class DataViewTable extends DataViewBase<
       paddingRight: `${vPadding}px`,
     });
     return html`
-      ${renderUniLit(this.props.headerWidget, {
-        view: this.props.view,
-        viewMethods: this.expose,
-      })}
       <div class="affine-microsheet-table" style="${wrapperStyle}">
         <div class="affine-microsheet-block-table" @wheel="${this.onWheel}">
           <div

@@ -51,6 +51,9 @@ export class TableSelectionController implements ReactiveController {
 
   __selectionElement;
 
+  // custom
+  focus: null | CellFocus = null;
+
   selectionStyleUpdateTask = 0;
 
   private get areaSelectionElement() {
@@ -143,7 +146,7 @@ export class TableSelectionController implements ReactiveController {
             }
             this.startDrag(event, cell, fillValues);
             event.preventDefault();
-            return true;
+            // return true;
           }
           return false;
         }
@@ -369,14 +372,20 @@ export class TableSelectionController implements ReactiveController {
     } satisfies TableAreaSelection;
   }
 
-  focusToCell(position: 'left' | 'right' | 'up' | 'down') {
-    if (!this.selection || this.selection.selectionType !== 'area') {
+  focusToCell(
+    position: 'left' | 'right' | 'up' | 'down',
+    focusTo?: 'start' | 'end'
+  ) {
+    // if (!this.selection || this.selection.selectionType !== 'area') {
+    //   return;
+    // }
+    if (!this.focus) {
       return;
     }
     const cell = this.getCellContainer(
-      this.selection.groupKey,
-      this.selection.focus.rowIndex,
-      this.selection.focus.columnIndex
+      undefined,
+      this.focus.rowIndex,
+      this.focus.columnIndex
     );
     if (!cell) {
       return;
@@ -414,6 +423,7 @@ export class TableSelectionController implements ReactiveController {
     if (position === 'up') {
       if (rowIndex === 0) {
         //
+        return false;
       } else {
         rowIndex--;
       }
@@ -421,6 +431,7 @@ export class TableSelectionController implements ReactiveController {
     if (position === 'down') {
       if (rowIndex === rows.length - 1) {
         //
+        return false;
       } else {
         rowIndex++;
       }
@@ -428,7 +439,15 @@ export class TableSelectionController implements ReactiveController {
     rows[rowIndex]
       ?.querySelectorAll('affine-microsheet-cell-container')
       ?.item(columnIndex)
-      ?.selectCurrentCell(false);
+      ?.selectCurrentCell(
+        false,
+        focusTo
+          ? focusTo
+          : position === 'up' || position === 'left'
+            ? 'end'
+            : 'start'
+      );
+    return true;
   }
 
   getCellContainer(
@@ -541,6 +560,7 @@ export class TableSelectionController implements ReactiveController {
   }
 
   navigateRowSelection(direction: 'up' | 'down', append = false) {
+    return;
     if (!TableRowSelection.is(this.selection)) return;
     const rows = this.selection.rows;
     const lastRow = rows[rows.length - 1];
@@ -811,6 +831,12 @@ export class TableSelectionController implements ReactiveController {
     const startOffsetX = evt.x - tableRect.left;
     const startOffsetY = evt.y - tableRect.top;
     const offsetToSelection = this.cellPosition(groupKey);
+    const isInSingleCell = (
+      selection: ReturnType<typeof offsetToSelection>
+    ) => {
+      const { row, column } = selection;
+      return row.end - row.start === 0 && column.end - column.start === 0;
+    };
     const select = (selection: {
       row: MultiSelection;
       column: MultiSelection;
@@ -862,7 +888,7 @@ export class TableSelectionController implements ReactiveController {
             start: cell.columnIndex,
             end: cell.columnIndex,
           };
-
+        if (isInSingleCell(selection)) return selection;
         select(selection);
         return selection;
       },
@@ -870,6 +896,7 @@ export class TableSelectionController implements ReactiveController {
         if (!selection) {
           return;
         }
+        if (isInSingleCell(selection)) return selection;
         select(selection);
         if (fillValues && this.selection) {
           this.__dragToFillElement.dragging = false;
@@ -900,10 +927,15 @@ export class TableSelectionController implements ReactiveController {
       groupKey,
     };
     const isSelected = TableRowSelection.includes(this.selection, row);
-    this.rowSelectionChange({
-      add: isSelected ? [] : [row],
-      remove: isSelected ? [row] : [],
-    });
+    if (isSelected) {
+      this.selection = TableRowSelection.create({
+        rows: [],
+      });
+    } else {
+      this.selection = TableRowSelection.create({
+        rows: [row],
+      });
+    }
   }
 }
 
@@ -1002,7 +1034,6 @@ export class SelectionElement extends WithDisposable(ShadowlessElement) {
         <div class="area-border area-top"></div>
         <div class="area-border area-bottom"></div>
       </div>
-      <div tabindex="0" ${ref(this.focusRef)} class="microsheet-focus"></div>
     `;
   }
 

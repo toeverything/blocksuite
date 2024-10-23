@@ -19,7 +19,7 @@ type JsonAreaData = string[][];
 const TEXT = 'text/plain';
 
 export class TableClipboardController implements ReactiveController {
-  private _onCopy = (
+  private _onCopy = async (
     tableSelection: TableViewSelectionWithType,
     isCut = false
   ) => {
@@ -35,6 +35,40 @@ export class TableClipboardController implements ReactiveController {
     const jsonResult: JsonAreaData = area.map(row =>
       row.cells.map(cell => cell.stringValue$.value)
     );
+
+    const promiseArr: Promise<void>[] = [];
+    area.forEach(row => {
+      row.cells.forEach(cell => {
+        promiseArr.push(
+          (async () => {
+            const { ref } = cell;
+            const cellContainerModel = this.std.doc.getBlockById(ref as string);
+            if (cellContainerModel) {
+              const slice = Slice.fromModels(
+                this.std.doc,
+                cellContainerModel.children
+              );
+              const item = await this.std.clipboard._getClipboardItem(
+                slice,
+                'BLOCKSUITE/SNAPSHOT'
+              );
+              cell['cellContainerSlice'] = item;
+              if (isCut) {
+                const children = cellContainerModel.children;
+                children.forEach(b => this.std.doc.deleteBlock(b));
+                this.std.doc.addBlock(
+                  'affine:paragraph',
+                  {},
+                  cellContainerModel.id
+                );
+              }
+            }
+          })()
+        );
+      });
+    });
+    await Promise.all(promiseArr);
+
     if (isCut) {
       const deleteRows: string[] = [];
       for (const row of area) {
@@ -78,7 +112,9 @@ export class TableClipboardController implements ReactiveController {
   };
 
   private _onCut = (tableSelection: TableViewSelectionWithType) => {
-    this._onCopy(tableSelection, true);
+    this._onCopy(tableSelection, true)
+      .then()
+      .catch(() => {});
   };
 
   private _onPaste = async (_context: UIEventStateContext) => {
@@ -99,6 +135,29 @@ export class TableClipboardController implements ReactiveController {
       if (!dataString) return;
       const jsonAreaData = JSON.parse(dataString) as JsonAreaData;
       pasteToCells(view, jsonAreaData, tableSelection);
+    } else if (this.host.selectionController.focus) {
+      const json = await this.std.clipboard.readFromClipboard(clipboardData);
+      const copiedValues = json[BLOCKSUITE_MICROSHEET_TABLE];
+      if (!copiedValues) return;
+      const copyedSelectionData = JSON.parse(
+        copiedValues
+      ) as CopyedSelectionData;
+
+      const rowStartIndex = this.host.selectionController.focus.rowIndex;
+      const columnStartIndex = this.host.selectionController.focus.columnIndex;
+      const rowLength = copyedSelectionData.length;
+      const columnLength = copyedSelectionData[0].length;
+
+      pasteToCells(
+        data,
+        view,
+        copyedSelectionData,
+        undefined,
+        rowStartIndex,
+        columnStartIndex,
+        rowLength,
+        columnLength
+      );
     }
 
     return true;
@@ -125,7 +184,7 @@ export class TableClipboardController implements ReactiveController {
     if (!tableSelection) {
       return;
     }
-    this._onCopy(tableSelection);
+    this._onCopy(tableSelection).catch(console.error);
   }
 
   cut() {
@@ -133,7 +192,7 @@ export class TableClipboardController implements ReactiveController {
     if (!tableSelection) {
       return;
     }
-    this._onCopy(tableSelection, true);
+    this._onCopy(tableSelection, true).catch(err => console.log(err));
   }
 
   hostConnected() {
@@ -142,7 +201,7 @@ export class TableClipboardController implements ReactiveController {
         const tableSelection = this.host.selectionController.selection;
         if (!tableSelection) return false;
 
-        this._onCopy(tableSelection);
+        this._onCopy(tableSelection).catch(console.error);
         return true;
       })
     );
@@ -153,7 +212,6 @@ export class TableClipboardController implements ReactiveController {
         if (!tableSelection) return false;
 
         this._onCut(tableSelection);
-        return true;
       })
     );
 
@@ -162,7 +220,6 @@ export class TableClipboardController implements ReactiveController {
         if (this.readonly) return false;
 
         this._onPaste(ctx).catch(console.error);
-        return true;
       })
     );
   }

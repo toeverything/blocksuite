@@ -1,11 +1,10 @@
 import type { ReactiveController } from 'lit';
 
-import { popupTargetFromElement } from '@blocksuite/affine-components/context-menu';
+import { assertExists } from '@blocksuite/global/utils';
 
 import type { DataViewTable } from '../table-view.js';
 
-import { popRowMenu } from '../components/menu.js';
-import { TableAreaSelection, TableRowSelection } from '../types.js';
+import { TableRowSelection } from '../types.js';
 
 export class TableHotkeysController implements ReactiveController {
   get selectionController() {
@@ -20,6 +19,7 @@ export class TableHotkeysController implements ReactiveController {
     this.host.disposables.add(
       this.host.props.bindHotkey({
         Backspace: () => {
+          return;
           const selection = this.selectionController.selection;
           if (!selection) {
             return;
@@ -70,262 +70,272 @@ export class TableHotkeysController implements ReactiveController {
             }
           }
         },
-        Escape: () => {
-          const selection = this.selectionController.selection;
-          if (!selection) {
-            return false;
-          }
-          if (TableRowSelection.is(selection)) {
-            const result = this.selectionController.rowsToArea(
-              selection.rows.map(v => v.id)
-            );
-            if (result) {
-              this.selectionController.selection = TableAreaSelection.create({
-                groupKey: result.groupKey,
-                focus: {
-                  rowIndex: result.start,
-                  columnIndex: 0,
-                },
-                rowsSelection: {
-                  start: result.start,
-                  end: result.end,
-                },
-                isEditing: false,
-              });
-            } else {
-              this.selectionController.selection = undefined;
-            }
-          } else if (selection.isEditing) {
-            this.selectionController.selection = {
-              ...selection,
-              isEditing: false,
-            };
-          } else {
-            const rows = this.selectionController.areaToRows(selection);
-            this.selectionController.rowSelectionChange({
-              add: rows,
-              remove: [],
-            });
-          }
-          return true;
-        },
-        Enter: context => {
-          const selection = this.selectionController.selection;
-          if (!selection) {
-            return false;
-          }
-          if (TableRowSelection.is(selection)) {
-            const result = this.selectionController.rowsToArea(
-              selection.rows.map(v => v.id)
-            );
-            if (result) {
-              this.selectionController.selection = TableAreaSelection.create({
-                groupKey: result.groupKey,
-                focus: {
-                  rowIndex: result.start,
-                  columnIndex: 0,
-                },
-                rowsSelection: {
-                  start: result.start,
-                  end: result.end,
-                },
-                isEditing: false,
-              });
-            }
-          } else if (selection.isEditing) {
-            return false;
-          } else {
-            this.selectionController.selection = {
-              ...selection,
-              isEditing: true,
-            };
-          }
-          context.get('keyboardState').raw.preventDefault();
-          return true;
-        },
-        'Shift-Enter': () => {
-          const selection = this.selectionController.selection;
-          if (
-            !selection ||
-            TableRowSelection.is(selection) ||
-            selection.isEditing
-          ) {
-            return false;
-          }
-          const cell = this.selectionController.getCellContainer(
-            selection.groupKey,
-            selection.focus.rowIndex,
-            selection.focus.columnIndex
-          );
-          if (cell) {
-            this.selectionController.insertRowAfter(
-              selection.groupKey,
-              cell.rowId
-            );
-          }
-          return true;
-        },
-        Tab: ctx => {
-          const selection = this.selectionController.selection;
-          if (
-            !selection ||
-            TableRowSelection.is(selection) ||
-            selection.isEditing
-          ) {
-            return false;
-          }
-          ctx.get('keyboardState').raw.preventDefault();
-          this.selectionController.focusToCell('right');
-          return true;
-        },
-        'Shift-Tab': ctx => {
-          const selection = this.selectionController.selection;
-          if (
-            !selection ||
-            TableRowSelection.is(selection) ||
-            selection.isEditing
-          ) {
-            return false;
-          }
-          ctx.get('keyboardState').raw.preventDefault();
-          this.selectionController.focusToCell('left');
-          return true;
-        },
-        ArrowLeft: context => {
-          const selection = this.selectionController.selection;
-          if (
-            !selection ||
-            TableRowSelection.is(selection) ||
-            selection.isEditing
-          ) {
-            return false;
-          }
-          this.selectionController.focusToCell('left');
-          context.get('keyboardState').raw.preventDefault();
-          return true;
-        },
-        ArrowRight: context => {
-          const selection = this.selectionController.selection;
-          if (
-            !selection ||
-            TableRowSelection.is(selection) ||
-            selection.isEditing
-          ) {
-            return false;
-          }
-          this.selectionController.focusToCell('right');
-          context.get('keyboardState').raw.preventDefault();
-          return true;
-        },
-        ArrowUp: context => {
-          const selection = this.selectionController.selection;
-          if (!selection) {
-            return false;
-          }
+        // Escape: () => {
+        //   const selection = this.selectionController.selection;
+        //   if (!selection) {
+        //     return false;
+        //   }
+        //   if (TableRowSelection.is(selection)) {
+        //     const result = this.selectionController.rowsToArea(
+        //       selection.rows.map(v => v.id)
+        //     );
+        //     if (result) {
+        //       this.selectionController.selection = TableAreaSelection.create({
+        //         groupKey: result.groupKey,
+        //         focus: {
+        //           rowIndex: result.start,
+        //           columnIndex: 0,
+        //         },
+        //         rowsSelection: {
+        //           start: result.start,
+        //           end: result.end,
+        //         },
+        //         isEditing: false,
+        //       });
+        //     } else {
+        //       this.selectionController.selection = undefined;
+        //     }
+        //   } else if (selection.isEditing) {
+        //     this.selectionController.selection = {
+        //       ...selection,
+        //       isEditing: false,
+        //     };
+        //   } else {
+        //     const rows = this.selectionController.areaToRows(selection);
+        //     this.selectionController.rowSelectionChange({
+        //       add: rows,
+        //       remove: [],
+        //     });
+        //   }
+        //   return true;
+        // },
+        // Enter: context => {
+        //   const selection = this.selectionController.selection;
+        //   if (!selection) {
+        //     return false;
+        //   }
+        //   if (TableRowSelection.is(selection)) {
+        //     const result = this.selectionController.rowsToArea(
+        //       selection.rows.map(v => v.id)
+        //     );
+        //     if (result) {
+        //       this.selectionController.selection = TableAreaSelection.create({
+        //         groupKey: result.groupKey,
+        //         focus: {
+        //           rowIndex: result.start,
+        //           columnIndex: 0,
+        //         },
+        //         rowsSelection: {
+        //           start: result.start,
+        //           end: result.end,
+        //         },
+        //         isEditing: false,
+        //       });
+        //     }
+        //   } else if (selection.isEditing) {
+        //     return false;
+        //   } else {
+        //     this.selectionController.selection = {
+        //       ...selection,
+        //       isEditing: true,
+        //     };
+        //   }
+        //   context.get('keyboardState').raw.preventDefault();
+        //   return true;
+        // },
+        // 'Shift-Enter': () => {
+        //   const selection = this.selectionController.selection;
+        //   if (
+        //     !selection ||
+        //     TableRowSelection.is(selection) ||
+        //     selection.isEditing
+        //   ) {
+        //     return false;
+        //   }
+        //   const cell = this.selectionController.getCellContainer(
+        //     selection.groupKey,
+        //     selection.focus.rowIndex,
+        //     selection.focus.columnIndex
+        //   );
+        //   if (cell) {
+        //     this.selectionController.insertRowAfter(
+        //       selection.groupKey,
+        //       cell.rowId
+        //     );
+        //   }
+        //   return true;
+        // },
+        // Tab: ctx => {
+        //   const selection = this.selectionController.selection;
+        //   if (
+        //     !selection ||
+        //     TableRowSelection.is(selection) ||
+        //     selection.isEditing
+        //   ) {
+        //     return false;
+        //   }
+        //   ctx.get('keyboardState').raw.preventDefault();
+        //   this.selectionController.focusToCell('right');
+        //   return true;
+        // },
+        // 'Shift-Tab': ctx => {
+        //   const selection = this.selectionController.selection;
+        //   if (
+        //     !selection ||
+        //     TableRowSelection.is(selection) ||
+        //     selection.isEditing
+        //   ) {
+        //     return false;
+        //   }
+        //   ctx.get('keyboardState').raw.preventDefault();
+        //   this.selectionController.focusToCell('left');
+        //   return true;
+        // },
+        // ArrowLeft: context => {
+        //   const selection = this.selectionController.selection;
+        //   if (
+        //     !selection ||
+        //     TableRowSelection.is(selection) ||
+        //     selection.isEditing
+        //   ) {
+        //     return false;
+        //   }
+        //   this.selectionController.focusToCell('left');
+        //   context.get('keyboardState').raw.preventDefault();
+        //   return true;
+        // },
+        // ArrowRight: context => {
+        //   const selection = this.selectionController.selection;
+        //   if (
+        //     !selection ||
+        //     TableRowSelection.is(selection) ||
+        //     selection.isEditing
+        //   ) {
+        //     return false;
+        //   }
+        //   this.selectionController.focusToCell('right');
+        //   context.get('keyboardState').raw.preventDefault();
+        //   return true;
+        // },
+        // ArrowUp: context => {
+        //   const selection = this.selectionController.selection;
+        //   if (!selection) {
+        //     return false;
+        //   }
 
-          if (TableRowSelection.is(selection)) {
-            this.selectionController.navigateRowSelection('up', false);
-          } else if (selection.isEditing) {
-            return false;
-          } else {
-            this.selectionController.focusToCell('up');
-          }
+        //   if (TableRowSelection.is(selection)) {
+        //     this.selectionController.navigateRowSelection('up', false);
+        //   } else if (selection.isEditing) {
+        //     return false;
+        //   } else {
+        //     this.selectionController.focusToCell('up');
+        //   }
 
-          context.get('keyboardState').raw.preventDefault();
-          return true;
-        },
-        ArrowDown: context => {
-          const selection = this.selectionController.selection;
-          if (!selection) {
-            return false;
-          }
+        //   context.get('keyboardState').raw.preventDefault();
+        //   return true;
+        // },
+        // ArrowDown: context => {
+        //   const selection = this.selectionController.selection;
+        //   if (!selection) {
+        //     return false;
+        //   }
 
-          if (TableRowSelection.is(selection)) {
-            this.selectionController.navigateRowSelection('down', false);
-          } else if (selection.isEditing) {
-            return false;
-          } else {
-            this.selectionController.focusToCell('down');
-          }
+        //   if (TableRowSelection.is(selection)) {
+        //     this.selectionController.navigateRowSelection('down', false);
+        //   } else if (selection.isEditing) {
+        //     return false;
+        //   } else {
+        //     this.selectionController.focusToCell('down');
+        //   }
 
-          context.get('keyboardState').raw.preventDefault();
-          return true;
-        },
+        //   context.get('keyboardState').raw.preventDefault();
+        //   return true;
+        // },
 
-        'Shift-ArrowUp': context => {
-          const selection = this.selectionController.selection;
-          if (!selection) {
-            return false;
-          }
+        // 'Shift-ArrowUp': context => {
+        //   const selection = this.selectionController.selection;
+        //   if (!selection) {
+        //     return false;
+        //   }
 
-          if (TableRowSelection.is(selection)) {
-            this.selectionController.navigateRowSelection('up', true);
-          } else if (selection.isEditing) {
-            return false;
-          } else {
-            this.selectionController.selectionAreaUp();
-          }
+        //   if (TableRowSelection.is(selection)) {
+        //     this.selectionController.navigateRowSelection('up', true);
+        //   } else if (selection.isEditing) {
+        //     return false;
+        //   } else {
+        //     this.selectionController.selectionAreaUp();
+        //   }
 
-          context.get('keyboardState').raw.preventDefault();
-          return true;
-        },
+        //   context.get('keyboardState').raw.preventDefault();
+        //   return true;
+        // },
 
-        'Shift-ArrowDown': context => {
-          const selection = this.selectionController.selection;
-          if (!selection) {
-            return false;
-          }
+        // 'Shift-ArrowDown': context => {
+        //   const selection = this.selectionController.selection;
+        //   if (!selection) {
+        //     return false;
+        //   }
 
-          if (TableRowSelection.is(selection)) {
-            this.selectionController.navigateRowSelection('down', true);
-          } else if (selection.isEditing) {
-            return false;
-          } else {
-            this.selectionController.selectionAreaDown();
-          }
+        //   if (TableRowSelection.is(selection)) {
+        //     this.selectionController.navigateRowSelection('down', true);
+        //   } else if (selection.isEditing) {
+        //     return false;
+        //   } else {
+        //     this.selectionController.selectionAreaDown();
+        //   }
 
-          context.get('keyboardState').raw.preventDefault();
-          return true;
-        },
+        //   context.get('keyboardState').raw.preventDefault();
+        //   return true;
+        // },
 
-        'Shift-ArrowLeft': context => {
-          const selection = this.selectionController.selection;
-          if (
-            !selection ||
-            TableRowSelection.is(selection) ||
-            selection.isEditing ||
-            this.selectionController.isRowSelection()
-          ) {
-            return false;
-          }
+        // 'Shift-ArrowLeft': context => {
+        //   const selection = this.selectionController.selection;
+        //   if (
+        //     !selection ||
+        //     TableRowSelection.is(selection) ||
+        //     selection.isEditing ||
+        //     this.selectionController.isRowSelection()
+        //   ) {
+        //     return false;
+        //   }
 
-          this.selectionController.selectionAreaLeft();
+        //   this.selectionController.selectionAreaLeft();
 
-          context.get('keyboardState').raw.preventDefault();
-          return true;
-        },
+        //   context.get('keyboardState').raw.preventDefault();
+        //   return true;
+        // },
 
-        'Shift-ArrowRight': context => {
-          const selection = this.selectionController.selection;
-          if (
-            !selection ||
-            TableRowSelection.is(selection) ||
-            selection.isEditing ||
-            this.selectionController.isRowSelection()
-          ) {
-            return false;
-          }
+        // 'Shift-ArrowRight': context => {
+        //   const selection = this.selectionController.selection;
+        //   if (
+        //     !selection ||
+        //     TableRowSelection.is(selection) ||
+        //     selection.isEditing ||
+        //     this.selectionController.isRowSelection()
+        //   ) {
+        //     return false;
+        //   }
 
-          this.selectionController.selectionAreaRight();
+        //   this.selectionController.selectionAreaRight();
 
-          context.get('keyboardState').raw.preventDefault();
-          return true;
-        },
+        //   context.get('keyboardState').raw.preventDefault();
+        //   return true;
+        // },
 
         'Mod-a': context => {
           const selection = this.selectionController.selection;
           if (TableRowSelection.is(selection)) {
             return false;
+          }
+          if (!selection) {
+            const microsheet = this.host.closest('affine-microsheet');
+            assertExists(microsheet);
+            const stdSelection = this.host.std.selection;
+
+            stdSelection.set([
+              stdSelection.create('block', { blockId: microsheet.blockId }),
+            ]);
+            return true;
           }
           if (selection?.isEditing) {
             return true;
@@ -346,39 +356,39 @@ export class TableHotkeysController implements ReactiveController {
           }
           return;
         },
-        '/': context => {
-          const selection = this.selectionController.selection;
-          if (!selection) {
-            return;
-          }
-          if (TableRowSelection.is(selection)) {
-            // open multi-rows context-menu
-            return;
-          }
-          if (selection.isEditing) {
-            return;
-          }
-          const cell = this.selectionController.getCellContainer(
-            selection.groupKey,
-            selection.focus.rowIndex,
-            selection.focus.columnIndex
-          );
-          if (cell) {
-            context.get('keyboardState').raw.preventDefault();
-            const row = {
-              id: cell.rowId,
-              groupKey: selection.groupKey,
-            };
-            this.selectionController.selection = TableRowSelection.create({
-              rows: [row],
-            });
-            popRowMenu(
-              this.host.props.dataViewEle,
-              popupTargetFromElement(cell),
-              this.selectionController
-            );
-          }
-        },
+        // '/': context => {
+        //   const selection = this.selectionController.selection;
+        //   if (!selection) {
+        //     return;
+        //   }
+        //   if (TableRowSelection.is(selection)) {
+        //     // open multi-rows context-menu
+        //     return;
+        //   }
+        //   if (selection.isEditing) {
+        //     return;
+        //   }
+        //   const cell = this.selectionController.getCellContainer(
+        //     selection.groupKey,
+        //     selection.focus.rowIndex,
+        //     selection.focus.columnIndex
+        //   );
+        //   if (cell) {
+        //     context.get('keyboardState').raw.preventDefault();
+        //     const row = {
+        //       id: cell.rowId,
+        //       groupKey: selection.groupKey,
+        //     };
+        //     this.selectionController.selection = TableRowSelection.create({
+        //       rows: [row],
+        //     });
+        //     popRowMenu(
+        //       this.host.props.dataViewEle,
+        //       popupTargetFromElement(cell),
+        //       this.selectionController
+        //     );
+        //   }
+        // },
       })
     );
   }

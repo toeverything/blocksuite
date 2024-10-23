@@ -10,9 +10,7 @@ import { DragIndicator } from '@blocksuite/affine-components/drag-indicator';
 import { PeekViewProvider } from '@blocksuite/affine-components/peek';
 import { toast } from '@blocksuite/affine-components/toast';
 import { NOTE_SELECTOR } from '@blocksuite/affine-shared/consts';
-import { DocModeProvider } from '@blocksuite/affine-shared/services';
-import { RANGE_SYNC_EXCLUDE_ATTR } from '@blocksuite/block-std';
-import { Rect } from '@blocksuite/global/utils';
+import { Rect, Slot } from '@blocksuite/global/utils';
 import {
   CopyIcon,
   DeleteIcon,
@@ -33,11 +31,13 @@ import {
   renderUniLit,
   uniMap,
 } from '@blocksuite/microsheet-data-view';
+// eslint-disable-next-line @typescript-eslint/no-restricted-imports
+import { TableRowSelection } from '@blocksuite/microsheet-data-view/src/view-presets/table/types.js';
 import { widgetPresets } from '@blocksuite/microsheet-data-view/widget-presets';
 import { Slice } from '@blocksuite/store';
-import { autoUpdate } from '@floating-ui/dom';
 import { computed, signal } from '@preact/signals-core';
 import { css, html, nothing, unsafeCSS } from 'lit';
+import { query } from 'lit/decorators.js';
 
 import type { NoteBlockComponent } from '../note-block/index.js';
 import type { MicrosheetOptionsConfig } from './config.js';
@@ -53,6 +53,7 @@ import { HostContextKey } from './context/host-context.js';
 import { MicrosheetBlockDataSource } from './data-source.js';
 import { BlockRenderer } from './detail-panel/block-renderer.js';
 import { NoteRenderer } from './detail-panel/note-renderer.js';
+import { calculateLineNum, isInCellEnd, isInCellStart } from './utils.js';
 
 export class MicrosheetBlockComponent extends CaptionedBlockComponent<
   MicrosheetBlockModel,
@@ -66,6 +67,18 @@ export class MicrosheetBlockComponent extends CaptionedBlockComponent<
       background-color: var(--affine-background-primary-color);
       padding: 8px;
       margin: 8px -8px -8px;
+    }
+
+    affine-microsheet:hover .affine-microsheet-column-header {
+      visibility: visible;
+    }
+
+    affine-microsheet:hover .microsheet-data-view-table-left-bar {
+      visibility: visible;
+    }
+
+    affine-microsheet affine-paragraph .affine-block-component {
+      // margin: 0 !important;
     }
 
     .microsheet-block-selected {
@@ -243,6 +256,8 @@ export class MicrosheetBlockComponent extends CaptionedBlockComponent<
     return () => {};
   };
 
+  selectionUpdated = new Slot<DataViewSelection | undefined>();
+
   setSelection = (selection: DataViewSelection | undefined) => {
     this.selection.setGroup(
       'note',
@@ -326,24 +341,140 @@ export class MicrosheetBlockComponent extends CaptionedBlockComponent<
 
   override connectedCallback() {
     super.connectedCallback();
+    this._disposables.add(
+      this.bindHotKey({
+        Backspace: () => {
+          const selectionController =
+            this._DataViewTableElement?.selectionController;
+          const selection = selectionController?.selection;
+          if (!selectionController || !selection) return;
+          const data = this.dataSource;
+          if (TableRowSelection.is(selection)) {
+            const rows = TableRowSelection.rowsIds(selection);
+            selectionController.selection = undefined;
+            rows.forEach(rowId => {
+              this.model.columns.forEach(column => {
+                if (rowId && column.id) {
+                  data.refContentDelete(rowId, column.id);
+                }
+              });
+            });
+            return;
+          }
+          const {
+            focus,
+            rowsSelection,
+            columnsSelection,
+            isEditing,
+            groupKey,
+          } = selection;
+          if (focus && !isEditing) {
+            if (rowsSelection && columnsSelection) {
+              // multi cell
+              for (let i = rowsSelection.start; i <= rowsSelection.end; i++) {
+                const { start, end } = columnsSelection;
+                for (let j = start; j <= end; j++) {
+                  const container = selectionController.getCellContainer(
+                    groupKey,
+                    i,
+                    j
+                  );
+                  const rowId = container?.dataset.rowId;
+                  const columnId = container?.dataset.columnId;
+                  if (rowId && columnId) {
+                    data.refContentDelete(rowId, columnId);
+                  }
+                }
+              }
+            } else {
+              // single cell
+              const container = selectionController.getCellContainer(
+                groupKey,
+                focus.rowIndex,
+                focus.columnIndex
+              );
+              const rowId = container?.dataset.rowId;
+              const columnId = container?.dataset.columnId;
+              if (rowId && columnId) {
+                data.refContentDelete(rowId, columnId);
+              }
+            }
+          }
+        },
+        Tab: context => {
+          const selectionController =
+            this._DataViewTableElement?.selectionController;
+          if (!selectionController || !selectionController.focus) return;
+          context.get('keyboardState').raw.preventDefault();
+          selectionController.focusToCell('right', 'start');
+          return true;
+        },
+        'Shift-Tab': context => {
+          const selectionController =
+            this._DataViewTableElement?.selectionController;
+          if (!selectionController) return;
+          context.get('keyboardState').raw.preventDefault();
+          selectionController.focusToCell('left', 'start');
+          return true;
+        },
+        ArrowLeft: context => {
+          const selectionController =
+            this._DataViewTableElement?.selectionController;
+          if (!selectionController) return;
+          if (isInCellStart(this.host.std, true)) {
+            const stop = selectionController.focusToCell('left');
+            if (stop) {
+              context.get('keyboardState').raw.preventDefault();
+              return true;
+            }
+          }
+          return;
+        },
+        ArrowRight: context => {
+          const selectionController =
+            this._DataViewTableElement?.selectionController;
+          if (!selectionController || !selectionController.focus) return;
+          if (isInCellEnd(this.host.std, true)) {
+            const stop = selectionController.focusToCell('right');
+            if (stop) {
+              context.get('keyboardState').raw.preventDefault();
+              return true;
+            }
+          }
+          return;
+        },
+        ArrowUp: context => {
+          const selectionController =
+            this._DataViewTableElement?.selectionController;
+          if (!selectionController || !selectionController.focus) return;
+          if (isInCellStart(this.host.std)) {
+            const { isFirst } = calculateLineNum(this.host.std);
+            if (!isFirst) return false;
 
-    this.setAttribute(RANGE_SYNC_EXCLUDE_ATTR, 'true');
-    this.listenFullWidthChange();
-  }
+            const stop = selectionController.focusToCell('up');
+            if (stop) {
+              context.get('keyboardState').raw.preventDefault();
+              return true;
+            }
+          }
+          return;
+        },
+        ArrowDown: context => {
+          const selectionController =
+            this._DataViewTableElement?.selectionController;
+          if (!selectionController || !selectionController.focus) return;
+          if (isInCellEnd(this.host.std)) {
+            const { isLast } = calculateLineNum(this.host.std);
+            if (!isLast) return;
 
-  listenFullWidthChange() {
-    if (!this.doc.awarenessStore.getFlag('enable_microsheet_full_width')) {
-      return;
-    }
-    if (this.std.get(DocModeProvider).getEditorMode() === 'edgeless') {
-      return;
-    }
-    this.disposables.add(
-      autoUpdate(this.host, this, () => {
-        const padding =
-          this.getBoundingClientRect().left -
-          this.host.getBoundingClientRect().left;
-        this.virtualPadding$.value = Math.max(0, padding - 72);
+            const stop = selectionController.focusToCell('down');
+            if (stop) {
+              context.get('keyboardState').raw.preventDefault();
+              return true;
+            }
+          }
+          return;
+        },
       })
     );
   }
@@ -363,6 +494,7 @@ export class MicrosheetBlockComponent extends CaptionedBlockComponent<
           setSelection: this.setSelection,
           dataSource: this.dataSource,
           headerWidget: this.headerWidget,
+          selectionUpdated: this.selectionUpdated,
           onDrag: this.onDrag,
           std: this.std,
           detailPanelConfig: {
@@ -401,6 +533,9 @@ export class MicrosheetBlockComponent extends CaptionedBlockComponent<
       </div>
     `;
   }
+
+  @query('affine-microsheet-table')
+  private accessor _DataViewTableElement: DataViewTable | null = null;
 
   override accessor useZeroWidth = true;
 }

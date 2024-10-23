@@ -15,12 +15,9 @@ import type {
 } from '../../core/property/index.js';
 import type { SingleView } from '../../core/view-manager/single-view.js';
 import type { TableColumn } from './table-view-manager.js';
+import type { TableViewSelectionWithType } from './types.js';
 
 import { renderUniLit } from '../../core/index.js';
-import {
-  TableAreaSelection,
-  type TableViewSelectionWithType,
-} from './types.js';
 
 export class MicrosheetCellContainer extends SignalWatcher(
   WithDisposable(ShadowlessElement)
@@ -56,31 +53,48 @@ export class MicrosheetCellContainer extends SignalWatcher(
     return this.column.cellGet(this.rowId);
   });
 
-  selectCurrentCell = (editing: boolean) => {
+  selectCurrentCell = (editing: boolean, focusTo?: 'start' | 'end') => {
     if (this.view.readonly$.value) {
       return;
     }
     const selectionView = this.selectionView;
     if (selectionView) {
-      const selection = selectionView.selection;
-      if (selection && this.isSelected(selection) && editing) {
-        selectionView.selection = TableAreaSelection.create({
-          groupKey: this.groupKey,
-          focus: {
-            rowIndex: this.rowIndex,
-            columnIndex: this.columnIndex,
-          },
-          isEditing: true,
-        });
-      } else {
-        selectionView.selection = TableAreaSelection.create({
-          groupKey: this.groupKey,
-          focus: {
-            rowIndex: this.rowIndex,
-            columnIndex: this.columnIndex,
-          },
-          isEditing: false,
-        });
+      // if (selection && this.isSelected(selection) && editing) {
+      //   selectionView.selection = TableAreaSelection.create({
+      //     groupKey: this.groupKey,
+      //     focus: {
+      //       rowIndex: this.rowIndex,
+      //       columnIndex: this.columnIndex,
+      //     },
+      //     isEditing: true,
+      //   });
+      // } else {
+      //   selectionView.selection = TableAreaSelection.create({
+      //     groupKey: this.groupKey,
+      //     focus: {
+      //       rowIndex: this.rowIndex,
+      //       columnIndex: this.columnIndex,
+      //     },
+      //     isEditing: false,
+      //   });
+      // }
+      if (selectionView) {
+        this.selectionView.focus = {
+          rowIndex: this.rowIndex,
+          columnIndex: this.columnIndex,
+        };
+      }
+
+      if (focusTo && this.std) {
+        const richTexts = this.querySelectorAll('rich-text');
+
+        if (richTexts.length) {
+          if (focusTo === 'start') {
+            richTexts[0].inlineEditor?.focusStart();
+          } else {
+            richTexts[richTexts.length - 1].inlineEditor?.focusEnd();
+          }
+        }
       }
     }
   };
@@ -109,9 +123,16 @@ export class MicrosheetCellContainer extends SignalWatcher(
 
   override connectedCallback() {
     super.connectedCallback();
-    this._disposables.addFromEvent(this, 'click', () => {
+    this._disposables.addFromEvent(this, 'click', e => {
       if (!this.isEditing) {
-        this.selectCurrentCell(!this.column.readonly$.value);
+        if (
+          e.target &&
+          e.target.tagName === 'AFFINE-MICROSHEET-CELL-CONTAINER'
+        ) {
+          this.selectCurrentCell(!this.column.readonly$.value, 'end');
+        } else {
+          this.selectCurrentCell(!this.column.readonly$.value);
+        }
       }
     });
   }

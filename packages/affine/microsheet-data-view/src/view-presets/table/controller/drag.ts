@@ -137,6 +137,7 @@ export class TableDragController implements ReactiveController {
     }
     this.host.disposables.add(
       this.host.props.handleEvent('dragStart', context => {
+        return;
         const event = context.get('pointerState').raw;
         const target = event.target;
         if (
