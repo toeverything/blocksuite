@@ -4,7 +4,6 @@ import type {
   MindmapNode,
   NoteBlockModel,
 } from '@blocksuite/affine-model';
-import type { PointerEventState } from '@blocksuite/block-std';
 import type { IVec } from '@blocksuite/global/utils';
 
 import {
@@ -26,13 +25,22 @@ import {
   handleNativeRangeAtPoint,
   resetNativeSelection,
 } from '@blocksuite/affine-shared/utils';
+import { Extension, type PointerEventState } from '@blocksuite/block-std';
 import {
   BaseTool,
   getTopElements,
   GfxExtensionIdentifier,
+  type GfxModel,
   isGfxContainerElm,
   type PointTestOptions,
+  ToolIdentifier,
 } from '@blocksuite/block-std/gfx';
+import {
+  type Container,
+  createIdentifier,
+  type ServiceIdentifier,
+} from '@blocksuite/global/di';
+import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 import {
   Bound,
   DisposableGroup,
@@ -77,8 +85,6 @@ export enum DefaultModeDragType {
   NativeEditing = 'native-editing',
   /** Default void state */
   None = 'none',
-  /** Dragging preview */
-  PreviewDragging = 'preview-dragging',
   /** Expanding the dragging area, select the content covered inside */
   Selecting = 'selecting',
 }
@@ -131,9 +137,6 @@ export class DefaultTool extends BaseTool {
       undefined
     >['mergeInfo'];
   } = null;
-
-  // Do not select the text, when click again after activating the note.
-  private _isDoubleClickedOnMask = false;
 
   private _lock = false;
 
@@ -319,7 +322,7 @@ export class DefaultTool extends BaseTool {
     });
   }
 
-  private _determineDragType(e: PointerEventState): DefaultModeDragType {
+  private _getDragType(e: PointerEventState): DefaultModeDragType {
     const { x, y } = e;
     // Is dragging started from current selected rect
     if (this.edgelessSelectionManager.isInSelectedRect(x, y)) {
@@ -385,24 +388,6 @@ export class DefaultTool extends BaseTool {
         return DefaultModeDragType.Selecting;
       }
     }
-  }
-
-  private _filterConnectedConnector() {
-    this._toBeMoved = this._toBeMoved.filter(ele => {
-      if (
-        ele instanceof ConnectorElementModel &&
-        ele.source?.id &&
-        ele.target?.id
-      ) {
-        if (
-          this._toBeMoved.some(e => e.id === ele.source.id) &&
-          this._toBeMoved.some(e => e.id === ele.target.id)
-        ) {
-          return false;
-        }
-      }
-      return true;
-    });
   }
 
   private _isDraggable(element: BlockSuite.EdgelessModel) {
@@ -616,7 +601,7 @@ export class DefaultTool extends BaseTool {
     ) {
       const mindmap = this._toBeMoved[0].group as MindmapElementModel;
 
-      this._alignBound = this._snapOverlay.setupAlignables(this._toBeMoved, [
+      this._alignBound = this._snapOverlay.setupSnapState(this._toBeMoved, [
         mindmap,
         ...(mindmap?.childElements || []),
       ]);
@@ -665,7 +650,7 @@ export class DefaultTool extends BaseTool {
               );
             }
 
-            this._alignBound = this._snapOverlay.setupAlignables(
+            this._alignBound = this._snapOverlay.setupSnapState(
               this._toBeMoved
             );
 
@@ -766,8 +751,6 @@ export class DefaultTool extends BaseTool {
       this.edgelessSelectionManager.clear();
       resetNativeSelection(null);
     }
-
-    this._isDoubleClickedOnMask = false;
   }
 
   override deactivate() {
@@ -851,7 +834,6 @@ export class DefaultTool extends BaseTool {
       e.raw.target.classList.contains('affine-note-mask')
     ) {
       this.click(e);
-      this._isDoubleClickedOnMask = true;
       return;
     }
   }
@@ -1002,7 +984,7 @@ export class DefaultTool extends BaseTool {
   override async dragStart(e: PointerEventState) {
     if (this.edgelessSelectionManager.editing) return;
     // Determine the drag type based on the current state and event
-    let dragType = this._determineDragType(e);
+    let dragType = this._getDragType(e);
 
     const elements = this.edgelessSelectionManager.selectedElements;
     const toBeMoved = new Set(elements);
@@ -1027,12 +1009,6 @@ export class DefaultTool extends BaseTool {
       dragType = DefaultModeDragType.AltCloning;
       await this._cloneContent();
     }
-    this._filterConnectedConnector();
-
-    // Connector needs to be updated first
-    this._toBeMoved.sort((a, _) =>
-      a instanceof ConnectorElementModel ? -1 : 1
-    );
 
     // Set up drag state
     this.initializeDragState(dragType);
@@ -1106,9 +1082,68 @@ export class DefaultTool extends BaseTool {
       this.frameOverlay.clear();
     }
   }
+}
 
-  override tripleClick() {
-    if (this._isDoubleClickedOnMask) return;
+export type DragBehaviorContext = {
+  dragElements: GfxModel[];
+  dragType: DefaultModeDragType;
+  snap: EdgelessSnapManager;
+};
+
+export const DragBehaviorIdentifier = createIdentifier<DragBehaviorExtension>(
+  'GfxDefaultDragBehavior'
+);
+
+export abstract class DragBehaviorExtension extends Extension {
+  static key: string;
+
+  get gfx() {
+    return this.defaultTool.gfx;
+  }
+
+  get tool() {
+    return this.defaultTool.controller;
+  }
+
+  constructor(protected defaultTool: DefaultTool) {
+    super();
+  }
+
+  static override setup(di: Container) {
+    if (this.key) {
+      throw new BlockSuiteError(
+        ErrorCode.ValueNotExists,
+        'The key of DragBehaviorExtension is not defined.'
+      );
+    }
+
+    di.addImpl(DragBehaviorIdentifier(this.key), this, [
+      ToolIdentifier('default') as ServiceIdentifier<DefaultTool>,
+    ]);
+  }
+
+  /**
+   * Initialize the drag behavior. Called when the drag starts.
+   * In this method, you can modify the dragElements array to add or remove elements.
+   * Return an object that will be executed during the drag process.
+   */
+  initializeDragEvent(_: DragBehaviorContext): {
+    dragStart?: (e: PointerEventState) => void;
+    dragEnd?: (e: PointerEventState) => void;
+    dragMove?: (e: PointerEventState) => void;
+  } {
+    return {};
+  }
+
+  /**
+   * Initialize the pointer event. Called when default tool is mounted.
+   */
+  initializePointerEvent(): {
+    pointerMove?: (e: PointerEventState) => void;
+    pointerDown?: (e: PointerEventState) => void;
+    pointerUp?: (e: PointerEventState) => void;
+  } {
+    return {};
   }
 }
 
