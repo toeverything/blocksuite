@@ -3,14 +3,14 @@ import { html } from 'lit';
 import type { DataViewWidgetProps } from '../../core/widget/types.js';
 
 import { defineUniComponent } from '../../core/index.js';
-import { ShowFilterContextKey } from './context.js';
+import { ShowFilterBarContextKey } from './context.js';
 
 export const widgetFilterBar = defineUniComponent(
   (props: DataViewWidgetProps) => {
     const view = props.view;
     if (
       view.filter$.value.conditions.length <= 0 ||
-      !view.contextGet(ShowFilterContextKey).value[view.id]
+      !view.contextGet(ShowFilterBarContextKey).value[view.id]
     ) {
       return html``;
     }

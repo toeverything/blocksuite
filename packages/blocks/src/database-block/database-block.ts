@@ -260,12 +260,14 @@ export class DatabaseBlockComponent extends CaptionedBlockComponent<
   toolsWidget: DataViewWidget = widgetPresets.createTools({
     table: [
       widgetPresets.tools.filter,
+      widgetPresets.tools.sort,
       widgetPresets.tools.search,
       widgetPresets.tools.viewOptions,
       widgetPresets.tools.tableAddRow,
     ],
     kanban: [
       widgetPresets.tools.filter,
+      widgetPresets.tools.sort,
       widgetPresets.tools.search,
       widgetPresets.tools.viewOptions,
     ],

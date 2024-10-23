@@ -1,25 +1,25 @@
-import { Overflow } from './core/common/component/overflow/overflow.js';
-import { RecordDetail } from './core/common/detail/detail.js';
-import { RecordField } from './core/common/detail/field.js';
-import { BooleanGroupView } from './core/common/group-by/renderer/boolean-group.js';
-import { NumberGroupView } from './core/common/group-by/renderer/number-group.js';
-import { SelectGroupView } from './core/common/group-by/renderer/select-group.js';
-import { StringGroupView } from './core/common/group-by/renderer/string-group.js';
-import { GroupSetting } from './core/common/group-by/setting.js';
-import { DateLiteral } from './core/common/literal/renderer/date-literal.js';
+import { DataViewPropertiesSettingView } from './core/common/properties.js';
+import { Overflow } from './core/component/overflow/overflow.js';
+import { DataViewRenderer } from './core/data-view.js';
+import { RecordDetail } from './core/detail/detail.js';
+import { RecordField } from './core/detail/field.js';
+import { DateLiteral } from './core/expression/literal/renderer/date-literal.js';
 import {
   BooleanLiteral,
   NumberLiteral,
   StringLiteral,
-} from './core/common/literal/renderer/literal-element.js';
+} from './core/expression/literal/renderer/literal-element.js';
 import {
   MultiTagLiteral,
   TagLiteral,
-} from './core/common/literal/renderer/tag-literal.js';
-import { TagLiteral as UnionTagLiteral } from './core/common/literal/renderer/union-string.js';
-import { DataViewPropertiesSettingView } from './core/common/properties.js';
-import { VariableRefView } from './core/common/ref/ref.js';
-import { DataViewRenderer } from './core/data-view.js';
+} from './core/expression/literal/renderer/tag-literal.js';
+import { TagLiteral as UnionTagLiteral } from './core/expression/literal/renderer/union-string.js';
+import { VariableRefView } from './core/expression/ref/ref-view.js';
+import { BooleanGroupView } from './core/group-by/renderer/boolean-group.js';
+import { NumberGroupView } from './core/group-by/renderer/number-group.js';
+import { SelectGroupView } from './core/group-by/renderer/select-group.js';
+import { StringGroupView } from './core/group-by/renderer/string-group.js';
+import { GroupSetting } from './core/group-by/setting.js';
 import {
   AffineLitIcon,
   MultiTagSelect,
@@ -72,17 +72,18 @@ import { TableRow } from './view-presets/table/row/row.js';
 import { RowSelectCheckbox } from './view-presets/table/row/row-select-checkbox.js';
 import { DataBaseColumnStats } from './view-presets/table/stats/column-stats-bar.js';
 import { DatabaseColumnStatsCell } from './view-presets/table/stats/column-stats-column.js';
-import { FilterConditionView } from './widget-presets/filter/condition.js';
-import { FilterBar } from './widget-presets/filter/filter-bar.js';
-import { FilterGroupView } from './widget-presets/filter/filter-group.js';
-import { FilterRootView } from './widget-presets/filter/filter-root.js';
+import { FilterConditionView } from './widget-presets/filter/condition-view.js';
+import { FilterGroupView } from './widget-presets/filter/group-panel-view.js';
+import { FilterBar } from './widget-presets/filter/list-view.js';
+import { FilterRootView } from './widget-presets/filter/root-panel-view.js';
 import { DataViewHeaderToolsFilter } from './widget-presets/tools/presets/filter/filter.js';
 import { DataViewHeaderToolsSearch } from './widget-presets/tools/presets/search/search.js';
+import { DataViewHeaderToolsSort } from './widget-presets/tools/presets/sort/sort.js';
 import { DataViewHeaderToolsAddRow } from './widget-presets/tools/presets/table-add-row/add-row.js';
 import { NewRecordPreview } from './widget-presets/tools/presets/table-add-row/new-record-preview.js';
 import { DataViewHeaderToolsViewOptions } from './widget-presets/tools/presets/view-options/view-options.js';
-import { DataViewHeaderTools } from './widget-presets/tools/tools-renderer.js';
-import { DataViewHeaderViews } from './widget-presets/views-bar/views.js';
+import { DataViewHeaderTools } from './widget-presets/tools/tools-view.js';
+import { DataViewHeaderViews } from './widget-presets/views-bar/views-view.js';
 
 export function effects() {
   customElements.define('affine-database-progress-cell', ProgressCell);
@@ -168,6 +169,7 @@ export function effects() {
     'data-view-header-tools-filter',
     DataViewHeaderToolsFilter
   );
+  customElements.define('data-view-header-tools-sort', DataViewHeaderToolsSort);
   customElements.define(
     'data-view-header-tools-view-options',
     DataViewHeaderToolsViewOptions

@@ -5,13 +5,12 @@ import { cssVarV2 } from '@toeverything/theme/v2';
 import { css, html, nothing } from 'lit';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import {
-  emptyFilterGroup,
-  type FilterGroup,
-} from '../../../../core/common/ast.js';
-import { popCreateFilter } from '../../../../core/common/ref/ref.js';
+import type { FilterGroup } from '../../../../core/filter/types.js';
+
+import { popCreateFilter } from '../../../../core/expression/ref/ref-view.js';
+import { emptyFilterGroup } from '../../../../core/filter/utils.js';
 import { WidgetBase } from '../../../../core/widget/widget-base.js';
-import { ShowFilterContextKey } from '../../../filter/context.js';
+import { ShowFilterBarContextKey } from '../../../filter/context.js';
 
 const styles = css`
   .affine-database-filter-button {
@@ -101,7 +100,7 @@ export class DataViewHeaderToolsFilter extends WidgetBase {
   }
 
   toggleShowFilter(show?: boolean) {
-    const map = this.view.contextGet(ShowFilterContextKey);
+    const map = this.view.contextGet(ShowFilterBarContextKey);
     map.value = {
       ...map.value,
       [this.view.id]: show ?? !map.value[this.view.id],

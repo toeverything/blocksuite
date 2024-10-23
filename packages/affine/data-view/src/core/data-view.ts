@@ -10,7 +10,7 @@ import { keyed } from 'lit/directives/keyed.js';
 import { createRef, ref } from 'lit/directives/ref.js';
 import { html } from 'lit/static-html.js';
 
-import type { DataSource } from './common/data-source/base.js';
+import type { DataSource } from './data-source/base.js';
 import type { DataViewSelection, DataViewSelectionState } from './types.js';
 import type { DataViewExpose, DataViewProps } from './view/types.js';
 import type { SingleView } from './view-manager/single-view.js';

@@ -1,12 +1,13 @@
 import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 
-import type { FilterGroup } from '../../core/common/ast.js';
-import type { GroupBy, GroupProperty, Sort } from '../../core/common/types.js';
+import type { GroupBy, GroupProperty } from '../../core/common/types.js';
+import type { FilterGroup } from '../../core/filter/types.js';
 
 import {
   defaultGroupBy,
   groupByMatcher,
   isTArray,
+  type Sort,
   tRichText,
   tString,
   tTag,

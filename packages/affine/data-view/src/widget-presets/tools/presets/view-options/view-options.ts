@@ -21,12 +21,12 @@ import { styleMap } from 'lit/directives/style-map.js';
 
 import type { SingleView } from '../../../../core/view-manager/single-view.js';
 
+import { popPropertiesSetting } from '../../../../core/common/properties.js';
+import { popCreateFilter } from '../../../../core/expression/ref/ref-view.js';
 import {
   popGroupSetting,
   popSelectGroupByProperty,
-} from '../../../../core/common/group-by/setting.js';
-import { popPropertiesSetting } from '../../../../core/common/properties.js';
-import { popCreateFilter } from '../../../../core/common/ref/ref.js';
+} from '../../../../core/group-by/setting.js';
 import { emptyFilterGroup, renderUniLit } from '../../../../core/index.js';
 import { WidgetBase } from '../../../../core/widget/widget-base.js';
 import {
@@ -35,7 +35,7 @@ import {
   TableSingleView,
   type TableViewData,
 } from '../../../../view-presets/index.js';
-import { popFilterRoot } from '../../../filter/filter-modal.js';
+import { popFilterRoot } from '../../../filter/root-panel-view.js';
 
 const styles = css`
   .affine-database-toolbar-item.more-action {

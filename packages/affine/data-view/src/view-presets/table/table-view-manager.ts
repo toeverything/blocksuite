@@ -4,17 +4,16 @@ import {
 } from '@blocksuite/affine-shared/utils';
 import { computed, type ReadonlySignal } from '@preact/signals-core';
 
+import type { FilterGroup } from '../../core/filter/types.js';
 import type { ViewManager } from '../../core/view-manager/view-manager.js';
 import type { TableViewData } from './define.js';
 import type { StatCalcOpType } from './types.js';
 
-import { emptyFilterGroup, type FilterGroup } from '../../core/common/ast.js';
-import { defaultGroupBy } from '../../core/common/group-by.js';
-import {
-  GroupManager,
-  sortByManually,
-} from '../../core/common/group-by/helper.js';
-import { evalFilter } from '../../core/logical/eval-filter.js';
+import { evalFilter } from '../../core/filter/eval.js';
+import { emptyFilterGroup } from '../../core/filter/utils.js';
+import { defaultGroupBy } from '../../core/group-by/default.js';
+import { GroupManager, sortByManually } from '../../core/group-by/manager.js';
+import { SortManager } from '../../core/sort/manager.js';
 import { PropertyBase } from '../../core/view-manager/property.js';
 import {
   type SingleView,
@@ -35,6 +34,14 @@ export class TableSingleView extends SingleViewBase<TableViewData> {
     });
   });
 
+  private groupBy$ = computed(() => {
+    return this.data$.value?.groupBy;
+  });
+
+  private sortList$ = computed(() => {
+    return this.data$.value?.sort;
+  });
+
   detailProperties$ = computed(() => {
     return this.propertiesWithoutFilter$.value.filter(
       id => this.propertyTypeGet(id) !== 'title'
@@ -43,10 +50,6 @@ export class TableSingleView extends SingleViewBase<TableViewData> {
 
   filter$ = computed(() => {
     return this.data$.value?.filter ?? emptyFilterGroup;
-  });
-
-  groupBy$ = computed(() => {
-    return this.data$.value?.groupBy;
   });
 
   groupManager = new GroupManager(this.groupBy$, this, {
@@ -142,6 +145,19 @@ export class TableSingleView extends SingleViewBase<TableViewData> {
 
   readonly$ = computed(() => {
     return this.manager.readonly$.value;
+  });
+
+  sortManager = new SortManager(this.sortList$, this, {
+    changeSortList: sortList => {
+      this.dataUpdate(data => {
+        return {
+          sort: {
+            ...data.sort,
+            ...sortList,
+          },
+        };
+      });
+    },
   });
 
   get groupProperties() {
@@ -324,6 +340,10 @@ export class TableSingleView extends SingleViewBase<TableViewData> {
   override rowPrevGet(rowId: string): string {
     const index = this.rows$.value.indexOf(rowId);
     return this.rows$.value[index - 1];
+  }
+
+  override rowsMapping(rows: string[]) {
+    return this.sortManager.sort(super.rowsMapping(rows));
   }
 }
 
