@@ -3,6 +3,7 @@ import { toast } from '@blocksuite/affine-components/toast';
 import { renderToolbarSeparator } from '@blocksuite/affine-components/toolbar';
 import {
   type ColorScheme,
+  DEFAULT_NOTE_HEIGHT,
   FRAME_BACKGROUND_COLORS,
   type FrameBlockModel,
   NoteDisplayMode,
@@ -29,7 +30,6 @@ import {
   packColor,
   packColorsWithColorScheme,
 } from '../../edgeless/components/color-picker/utils.js';
-import { DEFAULT_NOTE_HEIGHT } from '../../edgeless/utils/consts.js';
 import { mountFrameTitleEditor } from '../../edgeless/utils/text.js';
 
 function getMostCommonColor(

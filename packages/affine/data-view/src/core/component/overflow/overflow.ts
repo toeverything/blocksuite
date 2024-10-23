@@ -23,19 +23,18 @@ export class Overflow extends SignalWatcher(WithDisposable(ShadowlessElement)) {
     }
   `;
 
+  protected frameId: number | undefined = undefined;
+
+  protected widthList: number[] = [];
+
   adjustStyle() {
-    let maxWidth =
-      this.getBoundingClientRect().width -
-      this.more.getBoundingClientRect().width;
-    for (let i = 0; i < this.items.length; i++) {
-      const width = this.items[i].getBoundingClientRect().width;
-      maxWidth -= width;
-      if (maxWidth < 0) {
-        this.renderCount = i;
-        return;
-      }
+    if (this.frameId) {
+      cancelAnimationFrame(this.frameId);
     }
-    this.renderCount = this.items.length;
+
+    this.frameId = requestAnimationFrame(() => {
+      this.doAdjustStyle();
+    });
   }
 
   override connectedCallback() {
@@ -47,6 +46,28 @@ export class Overflow extends SignalWatcher(WithDisposable(ShadowlessElement)) {
     this.disposables.add(() => {
       resize.unobserve(this);
     });
+  }
+
+  protected doAdjustStyle() {
+    const moreWidth = this.more.getBoundingClientRect().width;
+    this.widthList[this.renderCount] = moreWidth;
+
+    const containerWidth = this.getBoundingClientRect().width;
+
+    let width = 0;
+    for (let i = 0; i < this.items.length; i++) {
+      const itemWidth = this.items[i].getBoundingClientRect().width;
+      // Try to calculate the width occupied by rendering n+1 items;
+      // if it exceeds the limit, render n items(in i++ round).
+      const totalWidth =
+        width + itemWidth + (this.widthList[i + 1] ?? moreWidth);
+      if (totalWidth > containerWidth) {
+        this.renderCount = i;
+        return;
+      }
+      width += itemWidth;
+    }
+    this.renderCount = this.items.length;
   }
 
   override render() {
@@ -66,9 +87,7 @@ export class Overflow extends SignalWatcher(WithDisposable(ShadowlessElement)) {
 
   protected override updated(_changedProperties: PropertyValues) {
     super.updated(_changedProperties);
-    requestAnimationFrame(() => {
-      this.adjustStyle();
-    });
+    this.adjustStyle();
   }
 
   @queryAll(':scope > .component-overflow-item')

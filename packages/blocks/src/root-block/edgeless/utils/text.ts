@@ -59,7 +59,8 @@ export function mountTextElementEditor(
     })
     .catch(console.error);
 
-  edgeless.tools.switchToDefaultMode({
+  edgeless.gfx.tool.setTool('default');
+  edgeless.gfx.selection.set({
     elements: [textElement.id],
     editing: true,
   });
@@ -95,7 +96,8 @@ export function mountShapeTextEditor(
   shapeEditor.mountEditor = mountShapeTextEditor;
 
   edgeless.mountElm.append(shapeEditor);
-  edgeless.tools.switchToDefaultMode({
+  edgeless.gfx.tool.setTool('default');
+  edgeless.gfx.selection.set({
     elements: [shapeElement.id],
     editing: true,
   });
@@ -117,7 +119,8 @@ export function mountFrameTitleEditor(
   frameEditor.edgeless = edgeless;
 
   edgeless.mountElm.append(frameEditor);
-  edgeless.tools.switchToDefaultMode({
+  edgeless.gfx.tool.setTool('default');
+  edgeless.gfx.selection.set({
     elements: [frame.id],
     editing: true,
   });
@@ -139,7 +142,8 @@ export function mountGroupTitleEditor(
   groupEditor.edgeless = edgeless;
 
   edgeless.mountElm.append(groupEditor);
-  edgeless.tools.switchToDefaultMode({
+  edgeless.gfx.tool.setTool('default');
+  edgeless.gfx.selection.set({
     elements: [group.id],
     editing: true,
   });
@@ -218,7 +222,8 @@ export function mountConnectorLabelEditor(
       editor.inlineEditor?.focusEnd();
     })
     .catch(console.error);
-  edgeless.tools.switchToDefaultMode({
+  edgeless.gfx.tool.setTool('default');
+  edgeless.gfx.selection.set({
     elements: [connector.id],
     editing: true,
   });

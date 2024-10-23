@@ -41,7 +41,6 @@ import {
   assertText,
   assertTitle,
 } from './utils/asserts.js';
-import './utils/declare-test-window.js';
 import { scoped, test } from './utils/playwright.js';
 import { getFormatBar } from './utils/query.js';
 

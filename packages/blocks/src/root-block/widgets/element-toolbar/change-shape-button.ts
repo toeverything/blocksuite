@@ -38,7 +38,7 @@ import type { EdgelessColorPickerButton } from '../../edgeless/components/color-
 import type { PickColorEvent } from '../../edgeless/components/color-picker/types.js';
 import type { EdgelessShapePanel } from '../../edgeless/components/panel/shape-panel.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
-import type { ShapeTool } from '../../edgeless/tools/shape-tool.js';
+import type { ShapeToolOption } from '../../edgeless/gfx-tool/shape-tool.js';
 
 import {
   packColor,
@@ -117,12 +117,12 @@ function getMostCommonStrokeColor(
 
 function getMostCommonShape(
   elements: ShapeElementModel[]
-): ShapeTool['shapeName'] | null {
+): ShapeToolOption['shapeName'] | null {
   const shapeTypes = countBy(elements, (ele: ShapeElementModel) => {
     return getShapeName(ele.shapeType, ele.radius);
   });
   const max = maxBy(Object.entries(shapeTypes), ([_k, count]) => count);
-  return max ? (max[0] as ShapeTool['shapeName']) : null;
+  return max ? (max[0] as ShapeToolOption['shapeName']) : null;
 }
 
 function getMostCommonLineSize(elements: ShapeElementModel[]): LineWidth {

@@ -2,6 +2,7 @@ import type { FrameBlockModel } from '@blocksuite/affine-model';
 
 import { EditPropsStore } from '@blocksuite/affine-shared/services';
 import { Bound, WithDisposable } from '@blocksuite/global/utils';
+import { effect } from '@preact/signals-core';
 import { css, html, LitElement, nothing } from 'lit';
 import { property, state } from 'lit/decorators.js';
 
@@ -47,14 +48,18 @@ export class EdgelessNavigatorBlackBackground extends WithDisposable(
           this._blackBackground = blackBackground;
 
           this.show =
-            blackBackground && edgeless.edgelessTool.type === 'frameNavigator';
+            blackBackground &&
+            edgeless.gfx.tool.currentToolOption$.peek().type ===
+              'frameNavigator';
         }
       })
     );
 
     _disposables.add(
-      edgeless.slots.edgelessToolUpdated.on(tool => {
-        if (tool.type !== 'frameNavigator') {
+      effect(() => {
+        const tool = edgeless.gfx.tool.currentToolName$.value;
+
+        if (tool !== 'frameNavigator') {
           this.show = false;
         } else {
           this.show = this._blackBackground;

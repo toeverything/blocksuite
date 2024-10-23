@@ -21,7 +21,7 @@ export function getFieldPropsSet(target: unknown): Set<string | symbol> {
 
 export function field<V, T extends GfxPrimitiveElementModel>(fallback?: V) {
   return function yDecorator(
-    target: ClassAccessorDecoratorTarget<T, V>,
+    _: ClassAccessorDecoratorTarget<T, V>,
     context: ClassAccessorDecoratorContext
   ) {
     const prop = context.name;
@@ -71,7 +71,6 @@ export function field<V, T extends GfxPrimitiveElementModel>(fallback?: V) {
         const val = isCreating
           ? originalVal
           : convertProps(prop, originalVal, this);
-        const oldValue = target.get.call(this);
 
         if (this.yMap.doc) {
           this.surface.doc.transact(() => {
@@ -86,16 +85,6 @@ export function field<V, T extends GfxPrimitiveElementModel>(fallback?: V) {
 
         if (!isCreating) {
           updateDerivedProps(derivedProps, this);
-
-          this.surface['hooks'].update.emit({
-            id: this.id,
-            props: {
-              [prop]: val,
-            },
-            oldValues: {
-              [prop]: oldValue,
-            },
-          });
         }
       },
     } as ClassAccessorDecoratorResult<T, V>;

@@ -46,7 +46,7 @@ export class ImageBlockComponent extends CaptionedBlockComponent<
 
   private _handleClick(event: MouseEvent) {
     // the peek view need handle shift + click
-    if (event.shiftKey) return;
+    if (event.defaultPrevented) return;
 
     event.stopPropagation();
     const selectionManager = this.host.selection;
@@ -75,6 +75,11 @@ export class ImageBlockComponent extends CaptionedBlockComponent<
     super.disconnectedCallback();
   }
 
+  override firstUpdated() {
+    // lazy bindings
+    this.disposables.addFromEvent(this, 'click', this._handleClick);
+  }
+
   override renderBlock() {
     const containerStyleMap = styleMap({
       position: 'relative',
@@ -82,11 +87,7 @@ export class ImageBlockComponent extends CaptionedBlockComponent<
     });
 
     return html`
-      <div
-        class="affine-image-container"
-        style=${containerStyleMap}
-        @click=${this._handleClick}
-      >
+      <div class="affine-image-container" style=${containerStyleMap}>
         ${when(
           this.loading || this.error,
           () =>

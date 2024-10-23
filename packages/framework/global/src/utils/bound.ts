@@ -1,5 +1,4 @@
-import { getBoundsFromPoints, getBoundsWithRotation } from './math.js';
-import { Bound, type IBound, type IVec } from './model/index.js';
+import { Bound, type IBound, type IVec, Vec } from './model/index.js';
 
 function getExpandedBound(a: IBound, b: IBound): IBound {
   const minX = Math.min(a.x, b.x);
@@ -17,10 +16,76 @@ function getExpandedBound(a: IBound, b: IBound): IBound {
   };
 }
 
+export function getPointsFromBoundWithRotation(
+  bounds: IBound,
+  getPoints: (bounds: IBound) => IVec[] = ({ x, y, w, h }: IBound) => [
+    // left-top
+    [x, y],
+    // right-top
+    [x + w, y],
+    // right-bottom
+    [x + w, y + h],
+    // left-bottom
+    [x, y + h],
+  ],
+  resPadding: [number, number] = [0, 0]
+): IVec[] {
+  const { rotate } = bounds;
+  let points = getPoints({
+    x: bounds.x - resPadding[1],
+    y: bounds.y - resPadding[0],
+    w: bounds.w + resPadding[1] * 2,
+    h: bounds.h + resPadding[0] * 2,
+  });
+
+  if (rotate) {
+    const { x, y, w, h } = bounds;
+    const cx = x + w / 2;
+    const cy = y + h / 2;
+
+    const m = new DOMMatrix()
+      .translateSelf(cx, cy)
+      .rotateSelf(rotate)
+      .translateSelf(-cx, -cy);
+
+    points = points.map(point => {
+      const { x, y } = new DOMPoint(...point).matrixTransform(m);
+      return [x, y];
+    });
+  }
+
+  return points;
+}
+
+export function getQuadBoundWithRotation(bounds: IBound): DOMRect {
+  const { x, y, w, h, rotate } = bounds;
+  const rect = new DOMRect(x, y, w, h);
+
+  if (!rotate) return rect;
+
+  return new DOMQuad(
+    ...getPointsFromBoundWithRotation(bounds).map(
+      point => new DOMPoint(...point)
+    )
+  ).getBounds();
+}
+
+export function getBoundWithRotation(bound: IBound): IBound {
+  const { x, y, width: w, height: h } = getQuadBoundWithRotation(bound);
+  return { x, y, w, h };
+}
+
+/**
+ * Returns the common bound of the given bounds.
+ * The rotation of the bounds is not considered.
+ * @param bounds
+ * @returns
+ */
 export function getCommonBound(bounds: IBound[]): Bound | null {
   if (!bounds.length) {
     return null;
   }
+
   if (bounds.length === 1) {
     const { x, y, w, h } = bounds[0];
     return new Bound(x, y, w, h);
@@ -35,27 +100,75 @@ export function getCommonBound(bounds: IBound[]): Bound | null {
   return new Bound(result.x, result.y, result.w, result.h);
 }
 
-export function getElementsBound(bounds: IBound[]): Bound {
-  let minX = Number.POSITIVE_INFINITY;
-  let minY = Number.POSITIVE_INFINITY;
-  let maxX = Number.NEGATIVE_INFINITY;
-  let maxY = Number.NEGATIVE_INFINITY;
+/**
+ * Like `getCommonBound`, but considers the rotation of the bounds.
+ * @returns
+ */
+export function getCommonBoundWithRotation(bounds: IBound[]): Bound {
+  if (bounds.length === 0) {
+    return new Bound(0, 0, 0, 0);
+  }
 
-  bounds.forEach(ele => {
-    const b = getBoundsWithRotation(ele);
+  return bounds.reduce(
+    (pre, bound) => {
+      return pre.unite(
+        bound instanceof Bound ? bound : Bound.from(getBoundWithRotation(bound))
+      );
+    },
+    Bound.from(getBoundWithRotation(bounds[0]))
+  );
+}
 
-    minX = Math.min(minX, b.x);
-    minY = Math.min(minY, b.y);
-    maxX = Math.max(maxX, b.x + b.w);
-    maxY = Math.max(maxY, b.y + b.h);
-  });
+export function getIBoundFromPoints(
+  points: IVec[],
+  rotation = 0
+): IBound & {
+  maxX: number;
+  maxY: number;
+  minX: number;
+  minY: number;
+} {
+  let minX = Infinity;
+  let minY = Infinity;
+  let maxX = -Infinity;
+  let maxY = -Infinity;
 
-  return new Bound(minX, minY, maxX - minX, maxY - minY);
+  if (points.length < 1) {
+    minX = 0;
+    minY = 0;
+    maxX = 1;
+    maxY = 1;
+  } else {
+    for (const [x, y] of points) {
+      minX = Math.min(x, minX);
+      minY = Math.min(y, minY);
+      maxX = Math.max(x, maxX);
+      maxY = Math.max(y, maxY);
+    }
+  }
+
+  if (rotation !== 0) {
+    return getIBoundFromPoints(
+      points.map(pt =>
+        Vec.rotWith(pt, [(minX + maxX) / 2, (minY + maxY) / 2], rotation)
+      )
+    );
+  }
+
+  return {
+    minX,
+    minY,
+    maxX,
+    maxY,
+    x: minX,
+    y: minY,
+    w: maxX - minX,
+    h: maxY - minY,
+  };
 }
 
 export function getBoundFromPoints(points: IVec[]) {
-  const { minX, minY, width, height } = getBoundsFromPoints(points);
-  return new Bound(minX, minY, width, height);
+  return Bound.from(getIBoundFromPoints(points));
 }
 
 export function inflateBound(bound: IBound, delta: number) {

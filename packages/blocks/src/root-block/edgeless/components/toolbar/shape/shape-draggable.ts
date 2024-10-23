@@ -23,7 +23,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 
 import type { DraggableShape } from './utils.js';
 
-import { ShapeToolController } from '../../../tools/shape-tool.js';
+import { ShapeTool } from '../../../gfx-tool/shape-tool.js';
 import { EdgelessDraggableElementController } from '../common/draggable/draggable-element.controller.js';
 import { EdgelessToolbarToolMixin } from '../mixins/tool.mixin.js';
 import { buildVariablesObject } from './utils.js';
@@ -145,8 +145,8 @@ export class EdgelessToolbarShapeDraggable extends EdgelessToolbarToolMixin(
   }
 
   private _setShapeOverlayLock(lock: boolean) {
-    const controller = this.edgeless.tools.currentController;
-    if (controller instanceof ShapeToolController) {
+    const controller = this.edgeless.gfx.tool.currentTool$.peek();
+    if (controller instanceof ShapeTool) {
       controller.setDisableOverlay(lock);
     }
   }
@@ -180,8 +180,8 @@ export class EdgelessToolbarShapeDraggable extends EdgelessToolbarToolMixin(
           color,
           stroke,
         });
-        const controller = this.edgeless.tools.currentController;
-        if (controller instanceof ShapeToolController) {
+        const controller = this.edgeless.gfx.tool.currentTool$.peek();
+        if (controller instanceof ShapeTool) {
           controller.clearOverlay();
         }
         overlay.element.style.filter = `drop-shadow(${this.shapeShadow})`;
@@ -213,10 +213,11 @@ export class EdgelessToolbarShapeDraggable extends EdgelessToolbarToolMixin(
         this._setShapeOverlayLock(false);
         this.readyToDrop = false;
 
-        this.edgeless.service.tool.setEdgelessTool(
-          { type: 'default' },
-          { elements: [id], editing: false }
-        );
+        this.edgeless.gfx.tool.setTool('default');
+        this.edgeless.gfx.selection.set({
+          elements: [id],
+          editing: false,
+        });
       },
       onCanceled: () => {
         this._setShapeOverlayLock(false);
@@ -257,7 +258,7 @@ export class EdgelessToolbarShapeDraggable extends EdgelessToolbarToolMixin(
             `.shape.${this.draggingShape}`
           ) as HTMLElement;
           assertExists(el, 'Edgeless toolbar Shape element not found');
-          const { x, y } = service.tool.lastMousePos;
+          const { x, y } = service.gfx.tool.lastMousePos$.peek();
           const { left, top } = this.edgeless.viewport;
           const clientPos = { x: x + left, y: y + top };
           this.draggableController.clickToDrag(el, clientPos);

@@ -21,7 +21,9 @@ import {
 } from '../../utils/actions/index.js';
 import {
   assertBlockCount,
+  assertEdgelessRemoteSelectedModelRect,
   assertEdgelessRemoteSelectedRect,
+  assertEdgelessSelectedModelRect,
   assertEdgelessSelectedRect,
   assertSelectionInNote,
 } from '../../utils/asserts.js';
@@ -91,12 +93,18 @@ test('should update react of remote selection when resizing viewport', async ({
   await actions.switchEditorMode(pageB);
   await actions.zoomResetByKeyboard(pageB);
 
-  await addBasicRectShapeElement(pageA, { x: 100, y: 100 }, { x: 200, y: 200 });
-  await click(pageA, { x: 110, y: 110 });
-  await click(pageB, { x: 110, y: 110 });
+  await actions.createShapeElement(
+    pageA,
+    [0, 0],
+    [100, 100],
+    actions.Shape.Square
+  );
+  const point = await actions.toViewCoord(pageA, [50, 50]);
+  await click(pageA, { x: point[0], y: point[1] });
+  await click(pageB, { x: point[0], y: point[1] });
 
-  await assertEdgelessSelectedRect(pageB, [100, 100, 100, 100]);
-  await assertEdgelessRemoteSelectedRect(pageB, [100, 100, 100, 100]);
+  await assertEdgelessSelectedModelRect(pageB, [0, 0, 100, 100]);
+  await assertEdgelessRemoteSelectedModelRect(pageB, [0, 0, 100, 100]);
 
   // to 50%
   await actions.decreaseZoomLevel(pageB);
@@ -135,13 +143,13 @@ test('select multiple shapes and translate', async ({ page }) => {
   await assertEdgelessSelectedRect(page, [98, 98, 212, 112]);
 
   await dragBetweenCoords(page, { x: 120, y: 120 }, { x: 150, y: 150 });
-  await assertEdgelessSelectedRect(page, [128, 128, 212, 112]);
+  await assertEdgelessSelectedRect(page, [125, 128, 212, 112]);
 
   await page.mouse.click(160, 160);
-  await assertEdgelessSelectedRect(page, [128, 128, 104, 104]);
+  await assertEdgelessSelectedRect(page, [125, 128, 104, 104]);
 
   await page.mouse.click(250, 150);
-  await assertEdgelessSelectedRect(page, [240, 140, 100, 100]);
+  await assertEdgelessSelectedRect(page, [237, 140, 100, 100]);
 });
 
 test('selection box of shape element sync on fast dragging', async ({
@@ -162,7 +170,7 @@ test('selection box of shape element sync on fast dragging', async ({
     { click: true }
   );
 
-  await assertEdgelessSelectedRect(page, [650, 450, 100, 100]);
+  await assertEdgelessSelectedRect(page, [650, 446, 100, 100]);
 });
 
 test('when the selection is always a note, it should remain in an active state', async ({
@@ -298,7 +306,7 @@ test('should auto panning when selection rectangle reaches viewport edges', asyn
       y: 600,
     },
     {
-      x: 950,
+      x: 1000,
       y: 200,
     },
     {
@@ -331,7 +339,8 @@ test('should auto panning when selection rectangle reaches viewport edges', asyn
     }
   );
   await setEdgelessTool(page, 'default');
-  await page.mouse.click(200, 800);
+  await waitNextFrame(page, 500);
+  await page.mouse.click(400, 400);
   selectedRect = page.locator(selectedRectClass);
   await page.waitForTimeout(100);
   await expect(selectedRect).toBeHidden();

@@ -58,7 +58,7 @@ export class DataViewRenderer extends SignalWatcher(
     }
   `;
 
-  private _view = createRef<DataViewExpose>();
+  private _view = createRef<{ expose: DataViewExpose }>();
 
   private currentViewId$ = computed(() => {
     return this.config.dataSource.viewManager.currentViewId$.value;
@@ -101,7 +101,7 @@ export class DataViewRenderer extends SignalWatcher(
   });
 
   focusFirstCell = () => {
-    this._view.value?.focusFirstCell();
+    this.view?.expose.focusFirstCell();
   };
 
   openDetailPanel = (ops: {
@@ -127,7 +127,7 @@ export class DataViewRenderer extends SignalWatcher(
     );
   });
 
-  get expose() {
+  get view() {
     return this._view.value;
   }
 
@@ -203,7 +203,7 @@ export class DataView {
   private _ref = createRef<DataViewRenderer>();
 
   get expose() {
-    return this._ref.value?.expose;
+    return this._ref.value?.view?.expose;
   }
 
   render(props: DataViewRendererConfig) {

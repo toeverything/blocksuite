@@ -15,6 +15,7 @@ import {
   CanvasElementType,
   CommonUtils,
   normalizeShapeBound,
+  OverlayIdentifier,
   TextUtils,
 } from '@blocksuite/affine-block-surface';
 import {
@@ -24,6 +25,8 @@ import {
   type EmbedHtmlModel,
   type EmbedSyncedDocModel,
   FrameBlockModel,
+  NOTE_MIN_HEIGHT,
+  NOTE_MIN_WIDTH,
   NoteBlockModel,
   ShapeElementModel,
   TextElementModel,
@@ -33,6 +36,7 @@ import {
   requestThrottledConnectedFrame,
   stopPropagation,
 } from '@blocksuite/affine-shared/utils';
+import { type BlockStdScope, stdContext } from '@blocksuite/block-std';
 import { getTopElements } from '@blocksuite/block-std/gfx';
 import {
   assertType,
@@ -42,6 +46,7 @@ import {
   Slot,
   WithDisposable,
 } from '@blocksuite/global/utils';
+import { consume } from '@lit/context';
 import { css, html, LitElement, nothing } from 'lit';
 import { property, state } from 'lit/decorators.js';
 import { ifDefined } from 'lit/directives/if-defined.js';
@@ -49,6 +54,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 
 import type { EdgelessTextBlockComponent } from '../../../../edgeless-text-block/edgeless-text-block.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
+import type { FrameOverlay } from '../../frame-manager.js';
 
 import { EMBED_CARD_HEIGHT } from '../../../../_common/consts.js';
 import { isMindmapNode } from '../../../../_common/edgeless/mindmap/index.js';
@@ -58,8 +64,6 @@ import {
   AI_CHAT_BLOCK_MAX_WIDTH,
   AI_CHAT_BLOCK_MIN_HEIGHT,
   AI_CHAT_BLOCK_MIN_WIDTH,
-  NOTE_MIN_HEIGHT,
-  NOTE_MIN_WIDTH,
 } from '../../utils/consts.js';
 import { getElementsWithoutGroup } from '../../utils/group.js';
 import {
@@ -462,7 +466,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
 
     this.edgeless.slots.elementResizeEnd.emit();
 
-    this.edgeless.service.frameOverlay.clear();
+    this.frameOverlay.clear();
   };
 
   private _onDragMove = (
@@ -825,12 +829,12 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     return this._resizeManager.dragDirection;
   }
 
-  get dragging() {
-    return this._resizeManager.dragging || this.edgeless.tools.dragging;
-  }
-
   get edgelessSlots() {
     return this.edgeless.slots;
+  }
+
+  get frameOverlay() {
+    return this.std.get(OverlayIdentifier('frame')) as FrameOverlay;
   }
 
   get resizeMode(): ResizeMode {
@@ -1093,7 +1097,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
 
     frameManager.removeAllChildrenFromFrame(frame);
     frameManager.addElementsToFrame(frame, newChildren);
-    this.edgeless.service.frameOverlay.highlight(frame, true, false);
+    this.frameOverlay.highlight(frame, true, false);
   }
 
   #adjustNote(
@@ -1104,35 +1108,22 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     const curBound = Bound.deserialize(element.xywh);
 
     let scale = element.edgeless.scale ?? 1;
-    let width = curBound.w / scale;
-    let height = curBound.h / scale;
-
     if (this._shiftKey) {
-      scale = bound.w / width;
+      scale = (bound.w / curBound.w) * scale;
       this._scalePercent = `${Math.round(scale * 100)}%`;
       this._scaleDirection = direction;
     }
 
-    width = bound.w / scale;
-    width = clamp(width, NOTE_MIN_WIDTH, Infinity);
-    bound.w = width * scale;
+    bound.w = clamp(bound.w, NOTE_MIN_WIDTH * scale, Infinity);
+    bound.h = clamp(bound.h, NOTE_MIN_HEIGHT * scale, Infinity);
 
-    height = bound.h / scale;
-    height = clamp(height, NOTE_MIN_HEIGHT, Infinity);
-    bound.h = height * scale;
+    this._isWidthLimit = bound.w === NOTE_MIN_WIDTH * scale;
+    this._isHeightLimit = bound.h === NOTE_MIN_HEIGHT * scale;
 
-    this._isWidthLimit = width === NOTE_MIN_WIDTH;
-    this._isHeightLimit = height === NOTE_MIN_HEIGHT;
-
-    if (bound.h > NOTE_MIN_HEIGHT * scale) {
+    if (bound.h >= NOTE_MIN_HEIGHT * scale) {
       this.edgeless.doc.updateBlock(element, () => {
         element.edgeless.collapse = true;
         element.edgeless.collapsedHeight = bound.h / scale;
-      });
-    } else {
-      this.edgeless.doc.updateBlock(element, () => {
-        element.edgeless.collapse = false;
-        element.edgeless.collapsedHeight = undefined;
       });
     }
 
@@ -1529,6 +1520,11 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
 
   @property({ attribute: false })
   accessor edgeless!: EdgelessRootBlockComponent;
+
+  @consume({
+    context: stdContext,
+  })
+  accessor std!: BlockStdScope;
 }
 
 declare global {

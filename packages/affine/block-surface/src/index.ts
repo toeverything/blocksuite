@@ -19,7 +19,7 @@ export {
   ConnectorEndpointLocationsOnTriangle,
   ConnectorPathGenerator,
 } from './managers/connector-manager.js';
-export { CanvasRenderer, Overlay } from './renderer/canvas-renderer.js';
+export { CanvasRenderer } from './renderer/canvas-renderer.js';
 export * from './renderer/elements/group/consts.js';
 export type { ElementRenderer } from './renderer/elements/index.js';
 export {
@@ -28,6 +28,7 @@ export {
 } from './renderer/elements/index.js';
 export { fitContent } from './renderer/elements/shape/utils.js';
 export * from './renderer/elements/type.js';
+export { Overlay, OverlayIdentifier } from './renderer/overlay.js';
 import {
   getCursorByCoord,
   getLineHeight,
@@ -60,10 +61,7 @@ export type { Options } from './utils/rough/core.js';
 import {
   almostEqual,
   clamp,
-  getBoundsWithRotation,
   getPointFromBoundsWithRotation,
-  getPointsFromBoundsWithRotation,
-  getQuadBoundsWithRotation,
   getStroke,
   getSvgPathFromStroke,
   intersects,
@@ -118,10 +116,7 @@ export const CommonUtils = {
   clamp,
   generateElementId,
   generateKeyBetween,
-  getBoundsWithRotation,
   getPointFromBoundsWithRotation,
-  getPointsFromBoundsWithRotation,
-  getQuadBoundsWithRotation,
   getStroke,
   getSvgPathFromStroke,
   intersects,

@@ -107,7 +107,7 @@ export class EdgelessMindmapMenu extends EdgelessToolbarToolMixin(
     ToolbarMindmapItem | TextItem | ImportItem
   >;
 
-  override type = 'mindmap' as const;
+  override type = 'empty' as const;
 
   private get _rootBlock(): EdgelessRootBlockComponent {
     return this.std.view.getBlock(this.model.id) as EdgelessRootBlockComponent;
@@ -212,7 +212,7 @@ export class EdgelessMindmapMenu extends EdgelessToolbarToolMixin(
           this.onActiveStyleChange?.(element.data.style);
         }
         // a workaround to active mindmap, so that menu cannot be closed by `Escape`
-        this.setEdgelessTool({ type: 'mindmap' });
+        this.setEdgelessTool({ type: 'empty' });
       },
       onDrop: (element, bound) => {
         if ('render' in element.data) {
@@ -223,10 +223,8 @@ export class EdgelessMindmapMenu extends EdgelessToolbarToolMixin(
           );
           if (element.data.type === 'mindmap') {
             this.onActiveStyleChange?.(element.data.style);
-            this.setEdgelessTool(
-              { type: 'default' },
-              { elements: [id], editing: false }
-            );
+            this.setEdgelessTool({ type: 'default' });
+            this.edgeless.gfx.selection.set({ elements: [id], editing: false });
           } else if (element.data.type === 'text') {
             this.setEdgelessTool({ type: 'default' });
           }
