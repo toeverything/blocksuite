@@ -5,12 +5,12 @@ import {
   normalizeUrl,
   stopPropagation,
 } from '@blocksuite/affine-shared/utils';
+import { PenIcon } from '@blocksuite/icons/lit';
 import {
   BaseCellRenderer,
   createFromBaseCellRenderer,
   createIcon,
-} from '@blocksuite/data-view';
-import { PenIcon } from '@blocksuite/icons/lit';
+} from '@blocksuite/microsheet-data-view';
 import { baseTheme } from '@toeverything/theme';
 import { css, unsafeCSS } from 'lit';
 import { query, state } from 'lit/decorators.js';
@@ -38,8 +38,8 @@ export class LinkCell extends BaseCellRenderer<string> {
       height: 100%;
       outline: none;
       overflow: hidden;
-      font-size: var(--data-view-cell-text-size);
-      line-height: var(--data-view-cell-text-line-height);
+      font-size: var(--microsheet-data-view-cell-text-size);
+      line-height: var(--microsheet-data-view-cell-text-line-height);
       word-break: break-all;
     }
 
@@ -67,13 +67,13 @@ export class LinkCell extends BaseCellRenderer<string> {
       height: 16px;
       fill: var(--affine-icon-color);
     }
-    .data-view-link-column-linked-doc {
+    .microsheet-data-view-link-column-linked-doc {
       text-decoration: underline;
       text-decoration-color: var(--affine-divider-color);
       transition: text-decoration-color 0.2s ease-out;
       cursor: pointer;
     }
-    .data-view-link-column-linked-doc:hover {
+    .microsheet-data-view-link-column-linked-doc:hover {
       text-decoration-color: var(--affine-icon-color);
     }
   `;
@@ -133,7 +133,7 @@ export class LinkCell extends BaseCellRenderer<string> {
       <div class="affine-microsheet-link" @click="${this._onClick}">
         ${docName
           ? html`<span
-              class="data-view-link-column-linked-doc"
+              class="microsheet-data-view-link-column-linked-doc"
               @click="${this.openDoc}"
               >${docName}</span
             >`
@@ -187,8 +187,8 @@ export class LinkCellEditing extends BaseCellRenderer<string> {
       color: var(--affine-text-primary-color);
       font-weight: 400;
       background-color: transparent;
-      font-size: var(--data-view-cell-text-size);
-      line-height: var(--data-view-cell-text-line-height);
+      font-size: var(--microsheet-data-view-cell-text-size);
+      line-height: var(--microsheet-data-view-cell-text-line-height);
       word-break: break-all;
     }
 

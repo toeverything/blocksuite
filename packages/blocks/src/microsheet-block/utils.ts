@@ -140,8 +140,7 @@ export function getCell(
   if (!yCell) return null;
 
   return {
-    columnId: yCell.columnId,
-    value: yCell.value,
+    ...yCell,
   };
 }
 
@@ -178,8 +177,9 @@ export function updateCell(
   }
   model.doc.transact(() => {
     model.cells[rowId][cell.columnId] = {
-      columnId: cell.columnId,
-      value: cell.value,
+      ...cell,
+      // columnId: cell.columnId,
+      // value: cell.value,
     };
   });
 }

@@ -5,7 +5,7 @@ import {
   MicrosheetBlockSchema,
 } from '@blocksuite/affine-model';
 import { BlockService } from '@blocksuite/block-std';
-import { viewPresets } from '@blocksuite/data-view/view-presets';
+import { viewPresets } from '@blocksuite/microsheet-data-view/view-presets';
 
 import {
   microsheetViewAddView,
@@ -40,8 +40,7 @@ export class MicrosheetBlockService extends BlockService {
     doc: Doc,
     model: BlockModel,
     microsheetId: string,
-    viewType: string,
-    isAppendNewRow = true
+    viewType: string
   ) {
     const blockModel = doc.getBlock(microsheetId)?.model as
       | MicrosheetBlockModel
@@ -50,11 +49,6 @@ export class MicrosheetBlockService extends BlockService {
       return;
     }
     microsheetViewInitTemplate(blockModel, viewType);
-    if (isAppendNewRow) {
-      const parent = doc.getParent(model);
-      if (!parent) return;
-      doc.addBlock('affine:paragraph', {}, parent.id);
-    }
     applyPropertyUpdate(blockModel);
   }
 }

@@ -21,6 +21,7 @@ export { type AbstractEditor } from './_common/types.js';
 export * from './_specs/index.js';
 export * from './attachment-block/index.js';
 export * from './bookmark-block/index.js';
+export * from './cell-block/index.js';
 export * from './code-block/index.js';
 export * from './data-view-block/index.js';
 export * from './database-block/index.js';
@@ -30,6 +31,7 @@ export * from './frame-block/index.js';
 export * from './image-block/index.js';
 export * from './latex-block/index.js';
 export * from './microsheet-block/index.js';
+export * from './microsheet-data-view-block/index.js';
 export * from './note-block/index.js';
 export { EdgelessTemplatePanel } from './root-block/edgeless/components/toolbar/template/template-panel.js';
 export type {
@@ -48,6 +50,7 @@ export { EditPropsMiddlewareBuilder } from './root-block/edgeless/middlewares/ba
 export * from './root-block/edgeless/utils/common.js';
 export { EdgelessSnapManager } from './root-block/edgeless/utils/snap-manager.js';
 export * from './root-block/index.js';
+export * from './row-block/index.js';
 export * from './schemas.js';
 export {
   markdownToMindmap,

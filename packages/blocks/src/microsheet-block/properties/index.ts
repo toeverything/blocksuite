@@ -1,6 +1,6 @@
-import type { PropertyMetaConfig } from '@blocksuite/data-view';
+import type { PropertyMetaConfig } from '@blocksuite/microsheet-data-view';
 
-import { propertyPresets } from '@blocksuite/data-view/property-presets';
+import { propertyPresets } from '@blocksuite/microsheet-data-view/property-presets';
 
 import { linkColumnConfig } from './link/cell-renderer.js';
 import { richTextColumnConfig } from './rich-text/cell-renderer.js';

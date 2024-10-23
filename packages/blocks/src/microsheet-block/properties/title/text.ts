@@ -9,9 +9,9 @@ import {
   getViewportElement,
   isValidUrl,
 } from '@blocksuite/affine-shared/utils';
-import { BaseCellRenderer } from '@blocksuite/data-view';
 import { IS_MAC } from '@blocksuite/global/env';
 import { assertExists } from '@blocksuite/global/utils';
+import { BaseCellRenderer } from '@blocksuite/microsheet-data-view';
 import { effect } from '@preact/signals-core';
 import { css } from 'lit';
 import { property, query } from 'lit/decorators.js';
@@ -22,23 +22,23 @@ import type { MicrosheetBlockComponent } from '../../microsheet-block.js';
 import { HostContextKey } from '../../context/host-context.js';
 
 const styles = css`
-  data-view-header-area-text {
+  microsheet-data-view-header-area-text {
     width: 100%;
     display: flex;
   }
 
-  data-view-header-area-text rich-text {
+  microsheet-data-view-header-area-text rich-text {
     pointer-events: none;
     user-select: none;
   }
 
-  data-view-header-area-text-editing {
+  microsheet-data-view-header-area-text-editing {
     width: 100%;
     display: flex;
     cursor: text;
   }
 
-  .data-view-header-area-rich-text {
+  .microsheet-data-view-header-area-rich-text {
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -46,22 +46,22 @@ const styles = css`
     height: 100%;
     outline: none;
     word-break: break-all;
-    font-size: var(--data-view-cell-text-size);
-    line-height: var(--data-view-cell-text-line-height);
+    font-size: var(--microsheet-data-view-cell-text-size);
+    line-height: var(--microsheet-data-view-cell-text-line-height);
   }
 
-  .data-view-header-area-rich-text v-line {
+  .microsheet-data-view-header-area-rich-text v-line {
     display: flex !important;
     align-items: center;
     height: 100%;
     width: 100%;
   }
 
-  .data-view-header-area-rich-text v-line > div {
+  .microsheet-data-view-header-area-rich-text v-line > div {
     flex-grow: 1;
   }
 
-  .data-view-header-area-icon {
+  .microsheet-data-view-header-area-icon {
     height: max-content;
     display: flex;
     align-items: center;
@@ -72,7 +72,7 @@ const styles = css`
     background-color: var(--affine-background-secondary-color);
   }
 
-  .data-view-header-area-icon svg {
+  .microsheet-data-view-header-area-icon svg {
     width: 14px;
     height: 14px;
     fill: var(--affine-icon-color);
@@ -126,7 +126,9 @@ abstract class BaseTextCell extends BaseCellRenderer<Text> {
     const icon = this.view.cellValueGet(this.cell.rowId, iconColumn) as string;
     if (!icon) return;
 
-    return html`<div class="data-view-header-area-icon">${icon}</div>`;
+    return html`<div class="microsheet-data-view-header-area-icon">
+      ${icon}
+    </div>`;
   }
 
   @query('rich-text')
@@ -146,7 +148,7 @@ export class HeaderAreaTextCell extends BaseTextCell {
         .embedChecker=${this.inlineManager?.embedChecker}
         .markdownShortcutHandler=${this.inlineManager?.markdownShortcutHandler}
         .readonly=${true}
-        class="data-view-header-area-rich-text"
+        class="microsheet-data-view-header-area-rich-text"
       ></rich-text>`;
   }
 }
@@ -306,14 +308,14 @@ export class HeaderAreaTextCellEditing extends BaseTextCell {
           this.topContenteditableElement?.host
             ? getViewportElement(this.topContenteditableElement.host)
             : null}
-        class="data-view-header-area-rich-text can-link-doc"
+        class="microsheet-data-view-header-area-rich-text can-link-doc"
       ></rich-text>`;
   }
 }
 
 declare global {
   interface HTMLElementTagNameMap {
-    'data-view-header-area-text': HeaderAreaTextCell;
-    'data-view-header-area-text-editing': HeaderAreaTextCellEditing;
+    'microsheet-data-view-header-area-text': HeaderAreaTextCell;
+    'microsheet-data-view-header-area-text-editing': HeaderAreaTextCellEditing;
   }
 }

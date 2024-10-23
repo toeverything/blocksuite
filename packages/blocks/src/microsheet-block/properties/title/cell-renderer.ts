@@ -3,8 +3,8 @@ import {
   createFromBaseCellRenderer,
   createIcon,
   uniMap,
-} from '@blocksuite/data-view';
-import { TableSingleView } from '@blocksuite/data-view/view-presets';
+} from '@blocksuite/microsheet-data-view';
+import { TableSingleView } from '@blocksuite/microsheet-data-view/view-presets';
 
 import { titlePurePropertyConfig } from './define.js';
 import { HeaderAreaTextCell, HeaderAreaTextCellEditing } from './text.js';

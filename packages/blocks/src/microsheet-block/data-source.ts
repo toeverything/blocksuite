@@ -5,20 +5,19 @@ import {
   insertPositionToIndex,
   type InsertToPosition,
 } from '@blocksuite/affine-shared/utils';
+import { assertExists } from '@blocksuite/global/utils';
 import {
   DataSourceBase,
   type DataViewDataType,
-  getTagColor,
   type MicrosheetFlags,
   type PropertyMetaConfig,
   type TType,
   type ViewManager,
   ViewManagerBase,
   type ViewMeta,
-} from '@blocksuite/data-view';
-import { propertyPresets } from '@blocksuite/data-view/property-presets';
-import { assertExists } from '@blocksuite/global/utils';
-import { type BlockModel, nanoid, Text } from '@blocksuite/store';
+} from '@blocksuite/microsheet-data-view';
+import { propertyPresets } from '@blocksuite/microsheet-data-view/property-presets';
+import { type BlockModel, Text } from '@blocksuite/store';
 import { computed, type ReadonlySignal } from '@preact/signals-core';
 
 import { getIcon } from './block-icons.js';
@@ -126,6 +125,10 @@ export class MicrosheetBlockDataSource extends DataSourceBase {
       i++;
     }
     return `Column ${i}`;
+  }
+
+  cellRefGet(rowId: string, propertyId: string): unknown {
+    return getCell(this._model, rowId, propertyId)?.ref;
   }
 
   cellValueChange(rowId: string, propertyId: string, value: unknown): void {
@@ -413,42 +416,33 @@ export const microsheetViewInitTemplate = (
   model: MicrosheetBlockModel,
   viewType: string
 ) => {
-  const ids = [nanoid(), nanoid(), nanoid()];
-  const statusId = addProperty(
-    model,
-    'end',
-    propertyPresets.selectPropertyConfig.create('Status', {
-      options: [
-        {
-          id: ids[0],
-          color: getTagColor(),
-          value: 'TODO',
-        },
-        {
-          id: ids[1],
-          color: getTagColor(),
-          value: 'In Progress',
-        },
-        {
-          id: ids[2],
-          color: getTagColor(),
-          value: 'Done',
-        },
-      ],
-    })
-  );
-  for (let i = 0; i < 4; i++) {
-    const rowId = model.doc.addBlock(
-      'affine:paragraph',
-      {
-        text: new model.doc.Text(`Task ${i + 1}`),
-      },
-      model.id
+  const columnIds = [];
+  for (let u = 0; u < 3; u++) {
+    columnIds.push(
+      addProperty(
+        model,
+        'end',
+        propertyPresets.textPropertyConfig.create('', {})
+      )
     );
-    updateCell(model, rowId, {
-      columnId: statusId,
-      value: ids[i],
-    });
+  }
+  for (let i = 0; i < 2; i++) {
+    const rowId = model.doc.addBlock('affine:row', {}, model.id);
+    for (let u = 0; u < 3; u++) {
+      const cellId = model.doc.addBlock('affine:cell', {}, rowId);
+      model.doc.addBlock(
+        'affine:paragraph',
+        {
+          text: new model.doc.Text(`Cell...`),
+        },
+        cellId
+      );
+      updateCell(model, rowId, {
+        columnId: columnIds[u],
+        value: '',
+        ref: cellId,
+      });
+    }
   }
   microsheetViewInitEmpty(model, viewType);
 };

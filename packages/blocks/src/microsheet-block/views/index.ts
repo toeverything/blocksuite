@@ -1,6 +1,9 @@
-import type { ViewMeta } from '@blocksuite/data-view';
+import type { ViewMeta } from '@blocksuite/microsheet-data-view';
 
-import { viewConverts, viewPresets } from '@blocksuite/data-view/view-presets';
+import {
+  viewConverts,
+  viewPresets,
+} from '@blocksuite/microsheet-data-view/view-presets';
 
 export const microsheetBlockViews: ViewMeta[] = [
   viewPresets.tableViewMeta,

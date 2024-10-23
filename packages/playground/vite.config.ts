@@ -102,6 +102,7 @@ const chunkGroups = {
     require.resolve('@blocksuite/affine-block-paragraph'),
     require.resolve('@blocksuite/affine-block-surface'),
     require.resolve('@blocksuite/data-view'),
+    require.resolve('@blocksuite/microsheet-data-view'),
   ],
   datefns: [path.dirname(require.resolve('date-fns'))],
   dompurify: [path.dirname(require.resolve('dompurify'))],

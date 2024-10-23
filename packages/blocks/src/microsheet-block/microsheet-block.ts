@@ -12,6 +12,12 @@ import { toast } from '@blocksuite/affine-components/toast';
 import { NOTE_SELECTOR } from '@blocksuite/affine-shared/consts';
 import { DocModeProvider } from '@blocksuite/affine-shared/services';
 import { RANGE_SYNC_EXCLUDE_ATTR } from '@blocksuite/block-std';
+import { Rect } from '@blocksuite/global/utils';
+import {
+  CopyIcon,
+  DeleteIcon,
+  MoreHorizontalIcon,
+} from '@blocksuite/icons/lit';
 import {
   createRecordDetail,
   createUniComponentFromWebComponent,
@@ -26,14 +32,8 @@ import {
   MicrosheetSelection,
   renderUniLit,
   uniMap,
-} from '@blocksuite/data-view';
-import { widgetPresets } from '@blocksuite/data-view/widget-presets';
-import { Rect } from '@blocksuite/global/utils';
-import {
-  CopyIcon,
-  DeleteIcon,
-  MoreHorizontalIcon,
-} from '@blocksuite/icons/lit';
+} from '@blocksuite/microsheet-data-view';
+import { widgetPresets } from '@blocksuite/microsheet-data-view/widget-presets';
 import { Slice } from '@blocksuite/store';
 import { autoUpdate } from '@floating-ui/dom';
 import { computed, signal } from '@preact/signals-core';

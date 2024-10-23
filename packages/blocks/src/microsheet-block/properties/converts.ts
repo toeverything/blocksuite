@@ -3,9 +3,9 @@ import {
   createPropertyConvert,
   getTagColor,
   type SelectTag,
-} from '@blocksuite/data-view';
-import { presetPropertyConverts } from '@blocksuite/data-view/property-presets';
-import { propertyModelPresets } from '@blocksuite/data-view/property-pure-presets';
+} from '@blocksuite/microsheet-data-view';
+import { presetPropertyConverts } from '@blocksuite/microsheet-data-view/property-presets';
+import { propertyModelPresets } from '@blocksuite/microsheet-data-view/property-pure-presets';
 import { nanoid, Text } from '@blocksuite/store';
 
 import { richTextColumnModelConfig } from './rich-text/define.js';

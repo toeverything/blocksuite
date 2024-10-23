@@ -8,6 +8,7 @@ import { EditPropsStore } from '@blocksuite/affine-shared/services';
 
 import { AttachmentBlockSpec } from '../attachment-block/attachment-spec.js';
 import { BookmarkBlockSpec } from '../bookmark-block/bookmark-spec.js';
+import { CellBlockSpec } from '../cell-block/cell-spec.js';
 import { CodeBlockSpec } from '../code-block/code-block-spec.js';
 import { DataViewBlockSpec } from '../data-view-block/data-view-spec.js';
 import { DatabaseBlockSpec } from '../database-block/database-spec.js';
@@ -18,6 +19,7 @@ import {
   EdgelessNoteBlockSpec,
   NoteBlockSpec,
 } from '../note-block/note-spec.js';
+import { RowBlockSpec } from '../row-block/row-spec.js';
 
 export const CommonFirstPartyBlockSpecs: ExtensionType[] = [
   RichTextExtensions,
@@ -26,6 +28,8 @@ export const CommonFirstPartyBlockSpecs: ExtensionType[] = [
   NoteBlockSpec,
   DatabaseBlockSpec,
   MicrosheetBlockSpec,
+  RowBlockSpec,
+  CellBlockSpec,
   DataViewBlockSpec,
   DividerBlockSpec,
   CodeBlockSpec,
@@ -43,6 +47,8 @@ export const EdgelessFirstPartyBlockSpecs: ExtensionType[] = [
   EdgelessNoteBlockSpec,
   DatabaseBlockSpec,
   MicrosheetBlockSpec,
+  RowBlockSpec,
+  CellBlockSpec,
   DataViewBlockSpec,
   DividerBlockSpec,
   CodeBlockSpec,

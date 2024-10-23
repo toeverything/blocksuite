@@ -5,13 +5,13 @@ import {
   type RichText,
 } from '@blocksuite/affine-components/rich-text';
 import { getViewportElement } from '@blocksuite/affine-shared/utils';
+import { IS_MAC } from '@blocksuite/global/env';
+import { assertExists } from '@blocksuite/global/utils';
 import {
   BaseCellRenderer,
   createFromBaseCellRenderer,
   createIcon,
-} from '@blocksuite/data-view';
-import { IS_MAC } from '@blocksuite/global/env';
-import { assertExists } from '@blocksuite/global/utils';
+} from '@blocksuite/microsheet-data-view';
 import { Text } from '@blocksuite/store';
 import { css, nothing, type PropertyValues } from 'lit';
 import { query } from 'lit/decorators.js';
@@ -85,8 +85,8 @@ export class RichTextCell extends BaseCellRenderer<Text> {
       width: 100%;
       height: 100%;
       outline: none;
-      font-size: var(--data-view-cell-text-size);
-      line-height: var(--data-view-cell-text-line-height);
+      font-size: var(--microsheet-data-view-cell-text-size);
+      line-height: var(--microsheet-data-view-cell-text-line-height);
       word-break: break-all;
     }
 

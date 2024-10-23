@@ -1,4 +1,4 @@
-import { propertyType, tRichText } from '@blocksuite/data-view';
+import { propertyType, tRichText } from '@blocksuite/microsheet-data-view';
 import { Text } from '@blocksuite/store';
 
 import { type RichTextCellType, toYText } from '../utils.js';

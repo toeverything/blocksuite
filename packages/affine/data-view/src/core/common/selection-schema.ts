@@ -188,5 +188,3 @@ declare global {
 }
 
 export const DatabaseSelectionExtension = SelectionExtension(DatabaseSelection);
-export const MicrosheetSelectionExtension =
-  SelectionExtension(MicrosheetSelection);

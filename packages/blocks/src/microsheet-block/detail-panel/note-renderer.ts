@@ -1,5 +1,8 @@
 import type { MicrosheetBlockModel } from '@blocksuite/affine-model';
-import type { DetailSlotProps, SingleView } from '@blocksuite/data-view';
+import type {
+  DetailSlotProps,
+  SingleView,
+} from '@blocksuite/microsheet-data-view';
 
 import { focusTextModel } from '@blocksuite/affine-components/rich-text';
 import {

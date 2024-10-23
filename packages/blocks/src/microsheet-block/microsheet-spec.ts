@@ -3,7 +3,7 @@ import {
   type ExtensionType,
   FlavourExtension,
 } from '@blocksuite/block-std';
-import { MicrosheetSelectionExtension } from '@blocksuite/data-view';
+import { MicrosheetSelectionExtension } from '@blocksuite/microsheet-data-view';
 import { literal } from 'lit/static-html.js';
 
 import { MicrosheetDragHandleOption } from './config.js';

@@ -27,7 +27,7 @@ export const MicrosheetBlockSchema = defineBlockSchema({
     role: 'hub',
     version: 3,
     parent: ['affine:note'],
-    children: [],
+    children: ['affine:row'],
   },
   toModel: () => new MicrosheetBlockModel(),
 });

@@ -1697,6 +1697,7 @@ __metadata:
     "@blocksuite/global": "workspace:*"
     "@blocksuite/icons": "npm:^2.1.68"
     "@blocksuite/inline": "workspace:*"
+    "@blocksuite/microsheet-data-view": "workspace:*"
     "@blocksuite/store": "workspace:*"
     "@floating-ui/dom": "npm:^1.6.10"
     "@lit/context": "npm:^1.1.2"
@@ -1834,6 +1835,28 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@blocksuite/microsheet-data-view@workspace:*, @blocksuite/microsheet-data-view@workspace:packages/affine/microsheet-data-view":
+  version: 0.0.0-use.local
+  resolution: "@blocksuite/microsheet-data-view@workspace:packages/affine/microsheet-data-view"
+  dependencies:
+    "@blocksuite/affine-components": "workspace:*"
+    "@blocksuite/affine-shared": "workspace:*"
+    "@blocksuite/block-std": "workspace:*"
+    "@blocksuite/global": "workspace:*"
+    "@blocksuite/icons": "npm:^2.1.68"
+    "@blocksuite/store": "workspace:*"
+    "@floating-ui/dom": "npm:^1.6.10"
+    "@lit/context": "npm:^1.1.2"
+    "@preact/signals-core": "npm:^1.8.0"
+    "@toeverything/theme": "npm:^1.0.8"
+    "@types/sortablejs": "npm:^1.15.8"
+    date-fns: "npm:^4.0.0"
+    lit: "npm:^3.2.0"
+    sortablejs: "npm:^1.15.2"
+    zod: "npm:^3.23.8"
+  languageName: unknown
+  linkType: soft
+
 "@blocksuite/playground@workspace:packages/playground":
   version: 0.0.0-use.local
   resolution: "@blocksuite/playground@workspace:packages/playground"
@@ -1845,6 +1868,7 @@ __metadata:
     "@blocksuite/data-view": "workspace:*"
     "@blocksuite/global": "workspace:*"
     "@blocksuite/inline": "workspace:*"
+    "@blocksuite/microsheet-data-view": "workspace:*"
     "@blocksuite/presets": "workspace:*"
     "@blocksuite/store": "workspace:*"
     "@blocksuite/sync": "workspace:*"
@@ -4525,6 +4549,13 @@ __metadata:
   version: 1.0.15
   resolution: "@toeverything/theme@npm:1.0.15"
   checksum: 10/3588d127a7878706f8f7fb978a571a87193185618f6b6a0cc6b405d0552137c489ba90b9bc2e3b416b19da8872180b6033b1df761927689e45434f2da8988d64
+  languageName: node
+  linkType: hard
+
+"@toeverything/theme@npm:^1.0.8":
+  version: 1.0.17
+  resolution: "@toeverything/theme@npm:1.0.17"
+  checksum: 10/77736bbae737539bbc1ef8e21a7c69a7146c463b7a3d8cdae9c523c4a53a6ac5b7549929efb3912e299f2acb56f0c797b8a077073d2b0826cd244776d4322010
   languageName: node
   linkType: hard
 
