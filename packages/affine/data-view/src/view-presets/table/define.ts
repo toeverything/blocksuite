@@ -1,6 +1,6 @@
 import type { GroupBy, GroupProperty } from '../../core/common/types.js';
 import type { FilterGroup } from '../../core/filter/types.js';
-import type { Sort } from '../../core/index.js';
+import type { Sort } from '../../core/sort/types.js';
 
 import { type BasicViewDataType, viewType } from '../../core/view/data-view.js';
 import { TableSingleView } from './table-view-manager.js';
