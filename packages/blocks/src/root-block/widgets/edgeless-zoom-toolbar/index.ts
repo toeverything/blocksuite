@@ -1,6 +1,7 @@
 import type { RootBlockModel } from '@blocksuite/affine-model';
 
 import { WidgetComponent } from '@blocksuite/block-std';
+import { effect } from '@preact/signals-core';
 import { css, html, nothing } from 'lit';
 import { state } from 'lit/decorators.js';
 
@@ -42,19 +43,27 @@ export class AffineEdgelessZoomToolbarWidget extends WidgetComponent<
     return this.block;
   }
 
-  override firstUpdated() {
-    const {
-      disposables,
-      edgeless: { slots },
-    } = this;
-    disposables.add(
-      slots.edgelessToolUpdated.on(tool => {
-        if (tool.type !== 'frameNavigator') {
+  override connectedCallback() {
+    super.connectedCallback();
+
+    this.disposables.add(
+      effect(() => {
+        const currentTool = this.edgeless.gfx.tool.currentToolName$.value;
+
+        if (currentTool !== 'frameNavigator') {
           this._hide = false;
         }
         this.requestUpdate();
       })
     );
+  }
+
+  override firstUpdated() {
+    const {
+      disposables,
+      edgeless: { slots },
+    } = this;
+
     disposables.add(
       slots.navigatorSettingUpdated.on(({ hideToolbar }) => {
         if (hideToolbar !== undefined) {

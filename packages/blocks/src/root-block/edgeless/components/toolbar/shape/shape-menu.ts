@@ -15,8 +15,8 @@ import {
 } from '@blocksuite/affine-model';
 import { EditPropsStore } from '@blocksuite/affine-shared/services';
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
-import { SignalWatcher } from '@blocksuite/global/utils';
-import { computed, signal } from '@preact/signals-core';
+import { SignalWatcher, WithDisposable } from '@blocksuite/global/utils';
+import { computed, effect, signal } from '@preact/signals-core';
 import { css, html, LitElement } from 'lit';
 import { property } from 'lit/decorators.js';
 
@@ -29,7 +29,9 @@ import {
   ShapeComponentConfig,
 } from './shape-menu-config.js';
 
-export class EdgelessShapeMenu extends SignalWatcher(LitElement) {
+export class EdgelessShapeMenu extends SignalWatcher(
+  WithDisposable(LitElement)
+) {
   static override styles = css`
     :host {
       display: flex;
@@ -106,11 +108,16 @@ export class EdgelessShapeMenu extends SignalWatcher(LitElement) {
 
   override connectedCallback(): void {
     super.connectedCallback();
-    this.edgeless.service.slots.edgelessToolUpdated.on(tool => {
-      if (tool.type === 'shape') {
-        this._shapeName$.value = tool.shapeName;
-      }
-    });
+
+    this._disposables.add(
+      effect(() => {
+        const value = this.edgeless.gfx.tool.currentToolOption$.value;
+
+        if (value && value.type === 'shape') {
+          this._shapeName$.value = value.shapeName;
+        }
+      })
+    );
   }
 
   override render() {

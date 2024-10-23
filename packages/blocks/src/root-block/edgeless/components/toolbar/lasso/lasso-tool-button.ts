@@ -4,6 +4,7 @@ import {
   LassoPolygonalIcon,
 } from '@blocksuite/affine-components/icons';
 import { WithDisposable } from '@blocksuite/global/utils';
+import { effect } from '@preact/signals-core';
 import { css, html, LitElement } from 'lit';
 import { query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -64,11 +65,12 @@ export class EdgelessLassoToolButton extends QuickToolMixin(
     super.connectedCallback();
 
     this.disposables.add(
-      this.edgeless.slots.edgelessToolUpdated.on(tool => {
-        if (tool.type === 'lasso') {
+      effect(() => {
+        const tool = this.edgeless.gfx.tool.currentToolOption$.value;
+
+        if (tool?.type === 'lasso') {
           const { mode } = tool;
           this.curMode = mode;
-          // this.edgeless.service.editPropsStore.record(this.type, { mode });
         }
       })
     );

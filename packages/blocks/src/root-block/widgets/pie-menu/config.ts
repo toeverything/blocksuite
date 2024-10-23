@@ -75,7 +75,7 @@ const pie = new PieMenuBuilder({
 pie.expandableCommand({
   label: 'Pen',
   icon: EdgelessPenLightIcon,
-  action: setEdgelessToolAction({ type: 'brush' }),
+  action: setEdgelessToolAction(tool => tool.setTool('brush')),
   submenus: pie => {
     pie.colorPicker({
       label: 'Pen Color',
@@ -93,36 +93,31 @@ pie.expandableCommand({
 pie.command({
   label: 'Eraser',
   icon: EdgelessEraserLightIcon,
-  action: setEdgelessToolAction({
-    type: 'eraser',
-  }),
+  action: setEdgelessToolAction(tool => tool.setTool('eraser')),
 });
 
 pie.command({
   label: 'Frame',
   icon: FrameIcon,
-  action: setEdgelessToolAction({
-    type: 'frame',
-  }),
+  action: setEdgelessToolAction(tool => tool.setTool('frame')),
 });
 
 pie.command({
   label: 'Select',
   icon: SelectIcon,
-  action: setEdgelessToolAction({
-    type: 'default',
-  }),
+  action: setEdgelessToolAction(tool => tool.setTool('default')),
 });
 
 pie.command({
   label: 'Note',
   icon: NoteIcon,
-  action: setEdgelessToolAction({
-    type: 'affine:note',
-    childFlavour: DEFAULT_NOTE_CHILD_FLAVOUR,
-    childType: DEFAULT_NOTE_CHILD_TYPE,
-    tip: DEFAULT_NOTE_TIP,
-  }),
+  action: setEdgelessToolAction(tool =>
+    tool.setTool('affine:note', {
+      childFlavour: DEFAULT_NOTE_CHILD_FLAVOUR,
+      childType: DEFAULT_NOTE_CHILD_TYPE,
+      tip: DEFAULT_NOTE_TIP,
+    })
+  ),
 });
 
 pie.command({
@@ -136,7 +131,7 @@ pie.command({
 pie.command({
   label: 'Present',
   icon: ({ rootComponent }) => {
-    const { type } = rootComponent.edgelessTool;
+    const { type } = rootComponent.gfx.tool.currentToolOption$.peek();
     if (type === 'frameNavigator') {
       return html`
         <span
@@ -152,9 +147,9 @@ pie.command({
     return FrameNavigatorIcon;
   },
   action: ({ rootComponent }) => {
-    const { type } = rootComponent.edgelessTool;
-    if (type === 'frameNavigator') {
-      rootComponent.tools.setEdgelessTool({ type: 'default' });
+    const toolName = rootComponent.gfx.tool.currentToolName$.peek();
+    if (toolName === 'frameNavigator') {
+      rootComponent.gfx.tool.setTool('default');
 
       if (document.fullscreenElement) {
         document.exitFullscreen().catch(console.error);
@@ -163,8 +158,7 @@ pie.command({
       return;
     }
 
-    rootComponent.tools.setEdgelessTool({
-      type: 'frameNavigator',
+    rootComponent.gfx.tool.setTool('frameNavigator', {
       mode: 'fit',
     });
   },
@@ -173,7 +167,7 @@ pie.command({
 pie.beginSubmenu({
   label: 'Connector',
   icon: ({ rootComponent }) => {
-    const tool = rootComponent.edgelessTool;
+    const tool = rootComponent.gfx.tool.currentToolOption$.peek();
 
     if (tool.type === 'connector') {
       switch (tool.mode) {
@@ -192,28 +186,31 @@ pie.beginSubmenu({
 pie.command({
   label: 'Curved',
   icon: ConnectorCWithArrowIcon,
-  action: setEdgelessToolAction({
-    type: 'connector',
-    mode: ConnectorMode.Curve,
-  }),
+  action: setEdgelessToolAction(tool =>
+    tool.setTool('connector', {
+      mode: ConnectorMode.Curve,
+    })
+  ),
 });
 
 pie.command({
   label: 'Elbowed',
   icon: ConnectorXWithArrowIcon,
-  action: setEdgelessToolAction({
-    type: 'connector',
-    mode: ConnectorMode.Orthogonal,
-  }),
+  action: setEdgelessToolAction(tool =>
+    tool.setTool('connector', {
+      mode: ConnectorMode.Orthogonal,
+    })
+  ),
 });
 
 pie.command({
   label: 'Straight',
   icon: ConnectorLWithArrowIcon,
-  action: setEdgelessToolAction({
-    type: 'connector',
-    mode: ConnectorMode.Straight,
-  }),
+  action: setEdgelessToolAction(tool =>
+    tool.setTool('connector', {
+      mode: ConnectorMode.Straight,
+    })
+  ),
 });
 
 pie.colorPicker({
@@ -274,8 +271,7 @@ shapes.forEach(shape => {
     },
 
     action: ({ rootComponent }) => {
-      rootComponent.service.tool.setEdgelessTool({
-        type: 'shape',
+      rootComponent.gfx.tool.setTool('shape', {
         shapeName: shape.type,
       });
       updateShapeOverlay(rootComponent);

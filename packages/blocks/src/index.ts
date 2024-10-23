@@ -36,7 +36,8 @@ export type {
   TemplateCategory,
   TemplateManager,
 } from './root-block/edgeless/components/toolbar/template/template-type.js';
-export { CopilotSelectionController } from './root-block/edgeless/tools/copilot-tool.js';
+export { CopilotTool } from './root-block/edgeless/gfx-tool/copilot-tool.js';
+export * from './root-block/edgeless/gfx-tool/index.js';
 export * from './root-block/index.js';
 export * from './schemas.js';
 export {

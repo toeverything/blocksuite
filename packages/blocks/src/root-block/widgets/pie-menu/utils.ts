@@ -1,9 +1,9 @@
+import type { ToolController } from '@blocksuite/block-std/gfx';
 import type { IVec } from '@blocksuite/global/utils';
 
 import { EditPropsStore } from '@blocksuite/affine-shared/services';
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 
-import type { EdgelessTool } from '../../edgeless/types.js';
 import type {
   ActionFunction,
   IPieNodeWithAction,
@@ -17,11 +17,11 @@ import type {
 } from './base.js';
 
 import { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
-import { ShapeToolController } from '../../edgeless/tools/shape-tool.js';
+import { ShapeTool } from '../../edgeless/gfx-tool/shape-tool.js';
 
 export function updateShapeOverlay(rootComponent: EdgelessRootBlockComponent) {
-  const controller = rootComponent.tools.currentController;
-  if (controller instanceof ShapeToolController) {
+  const controller = rootComponent.gfx.tool.currentTool$.peek();
+  if (controller instanceof ShapeTool) {
     controller.createOverlay();
   }
 }
@@ -52,9 +52,11 @@ export function getActiveConnectorStrokeColor({
   return '';
 }
 
-export function setEdgelessToolAction(tool: EdgelessTool): ActionFunction {
+export function setEdgelessToolAction(
+  callback: (tool: ToolController) => void
+): ActionFunction {
   return ({ rootComponent }) => {
-    rootComponent.service.tool.setEdgelessTool(tool);
+    callback(rootComponent.gfx.tool);
   };
 }
 

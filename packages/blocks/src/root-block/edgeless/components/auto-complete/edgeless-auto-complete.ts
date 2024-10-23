@@ -8,7 +8,9 @@ import type { Bound, IVec } from '@blocksuite/global/utils';
 
 import {
   CanvasElementType,
+  type ConnectionOverlay,
   Overlay,
+  OverlayIdentifier,
   type RoughCanvas,
 } from '@blocksuite/affine-block-surface';
 import { ConnectorPathGenerator } from '@blocksuite/affine-block-surface';
@@ -27,12 +29,15 @@ import {
   shapeMethods,
 } from '@blocksuite/affine-model';
 import { handleNativeRangeAtPoint } from '@blocksuite/affine-shared/utils';
+import { type BlockStdScope, stdContext } from '@blocksuite/block-std';
+import { GfxControllerIdentifier } from '@blocksuite/block-std/gfx';
 import {
   assertExists,
   DisposableGroup,
   Vec,
   WithDisposable,
 } from '@blocksuite/global/utils';
+import { consume } from '@lit/context';
 import { css, html, LitElement, nothing } from 'lit';
 import { property, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
@@ -153,7 +158,7 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
     }
   `;
 
-  private _autoCompleteOverlay: AutoCompleteOverlay = new AutoCompleteOverlay();
+  private _autoCompleteOverlay!: AutoCompleteOverlay;
 
   private _onPointerDown = (e: PointerEvent, type: Direction) => {
     const { service } = this.edgeless;
@@ -190,11 +195,10 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
         assertExists(connector);
         const otherSideId = connector.source.id;
 
-        connector.target =
-          this.edgeless.service.connectorOverlay.renderConnector(
-            point,
-            otherSideId ? [otherSideId] : []
-          );
+        connector.target = this.connectionOverlay.renderConnector(
+          point,
+          otherSideId ? [otherSideId] : []
+        );
       }
     });
 
@@ -207,7 +211,7 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
       }
 
       this._isMoving = false;
-      this.edgeless.service.connectorOverlay.clear();
+      this.connectionOverlay.clear();
       this._disposables.dispose();
       this._disposables = new DisposableGroup();
     });
@@ -220,6 +224,10 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
   get canShowAutoComplete() {
     const { current } = this;
     return isShape(current) || isNoteBlock(current);
+  }
+
+  get connectionOverlay() {
+    return this.std.get(OverlayIdentifier('connection')) as ConnectionOverlay;
   }
 
   private _addConnector(source: Connection, target: Connection) {
@@ -432,6 +440,14 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
     return result;
   }
 
+  private _initOverlay() {
+    const { surface } = this.edgeless;
+    this._autoCompleteOverlay = new AutoCompleteOverlay(
+      this.std.get(GfxControllerIdentifier)
+    );
+    surface.renderer.addOverlay(this._autoCompleteOverlay);
+  }
+
   private _renderArrow() {
     const isShape = this.current instanceof ShapeElementModel;
     const { selectedRect } = this;
@@ -596,7 +612,6 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
     targetType: ShapeType
   ) {
     const { surface } = this.edgeless;
-    surface.renderer.addOverlay(this._autoCompleteOverlay);
 
     this._autoCompleteOverlay.stroke = surface.renderer.getColorValue(
       current.strokeColor,
@@ -615,6 +630,7 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
     this._pathGenerator = new ConnectorPathGenerator({
       getElementById: id => this.edgeless.service.getElementById(id),
     });
+    this._initOverlay();
   }
 
   override firstUpdated() {
@@ -630,15 +646,17 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
     _disposables.add(() => this.removeOverlay());
 
     _disposables.add(
-      edgeless.host.event.add('pointerMove', () => {
-        const state = edgeless.tools.getHoverState();
+      edgeless.host.event.add('pointerMove', ctx => {
+        const evt = ctx.get('pointerState');
+        const [x, y] = edgeless.gfx.viewport.toModelCoord(evt.x, evt.y);
+        const elm = edgeless.gfx.getElementByPoint(x, y);
 
-        if (!state) {
+        if (!elm) {
           this._isHover = false;
           return;
         }
 
-        this._isHover = state.content === this.current ? true : false;
+        this._isHover = elm === this.current ? true : false;
       })
     );
 
@@ -693,6 +711,11 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
 
   @property({ attribute: false })
   accessor selectedRect!: SelectedRect;
+
+  @consume({
+    context: stdContext,
+  })
+  accessor std!: BlockStdScope;
 }
 
 declare global {

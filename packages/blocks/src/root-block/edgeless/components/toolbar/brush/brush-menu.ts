@@ -1,3 +1,5 @@
+import type { GfxToolsFullOptionValue } from '@blocksuite/block-std/gfx';
+
 import { EditPropsStore } from '@blocksuite/affine-shared/services';
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import { SignalWatcher } from '@blocksuite/global/utils';
@@ -5,7 +7,6 @@ import { computed } from '@preact/signals-core';
 import { css, html, LitElement } from 'lit';
 import { property } from 'lit/decorators.js';
 
-import type { EdgelessTool } from '../../../types.js';
 import type { LineWidthEvent } from '../../panel/line-width-panel.js';
 
 import {
@@ -44,7 +45,7 @@ export class EdgelessBrushMenu extends EdgelessToolbarToolMixin(
     };
   });
 
-  type: EdgelessTool['type'] = 'brush';
+  type: GfxToolsFullOptionValue['type'] = 'brush';
 
   override render() {
     const color = ThemeObserver.getColorValue(

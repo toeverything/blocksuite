@@ -5,7 +5,7 @@ import {
   requestConnectedFrame,
 } from '@blocksuite/affine-shared/utils';
 import { WidgetComponent } from '@blocksuite/block-std';
-import { Bound, getElementsBound } from '@blocksuite/global/utils';
+import { Bound, getCommonBoundWithRotation } from '@blocksuite/global/utils';
 import {
   autoUpdate,
   computePosition,
@@ -14,13 +14,13 @@ import {
   shift,
   size,
 } from '@floating-ui/dom';
+import { effect } from '@preact/signals-core';
 import { css, html, nothing } from 'lit';
 import { query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import type { AIItemGroupConfig } from '../../../_common/components/ai-item/types.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
-import type { CopilotSelectionController } from '../../edgeless/tools/copilot-tool.js';
 import type { AffineAIPanelWidget } from '../ai-panel/ai-panel.js';
 
 import { AFFINE_AI_PANEL_WIDGET } from '../ai-panel/ai-panel.js';
@@ -189,9 +189,7 @@ export class EdgelessCopilotWidget extends WidgetComponent<
   override connectedCallback(): void {
     super.connectedCallback();
 
-    const CopilotSelectionTool = this.edgeless.tools.controllers[
-      'copilot'
-    ] as CopilotSelectionController;
+    const CopilotSelectionTool = this.edgeless.gfx.tool.get('copilot');
 
     this._disposables.add(
       CopilotSelectionTool.draggingAreaUpdated.on(shouldShowPanel => {
@@ -215,8 +213,10 @@ export class EdgelessCopilotWidget extends WidgetComponent<
     );
 
     this._disposables.add(
-      this.edgeless.slots.edgelessToolUpdated.on(({ type }) => {
-        if (!this._visible || type === 'copilot') return;
+      effect(() => {
+        const currentTool = this.edgeless.gfx.tool.currentToolName$.value;
+
+        if (!this._visible || currentTool === 'copilot') return;
 
         this._visible = false;
         this._clickOutsideOff = null;
@@ -231,9 +231,7 @@ export class EdgelessCopilotWidget extends WidgetComponent<
     const offsetY = 20 / this.edgeless.service.viewport.zoom;
     const bounds = new Bound(0, 0, width, height);
     if (elements.length) {
-      const { x, y, h } = getElementsBound(
-        elements.map(ele => ele.elementBound)
-      );
+      const { x, y, h } = getCommonBoundWithRotation(elements);
       bounds.x = x;
       bounds.y = y + h + offsetY;
     } else {
