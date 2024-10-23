@@ -224,17 +224,10 @@ export class DebugMenu extends ShadowlessElement {
   }
 
   private async _exportSnapshot() {
-    const file = await ZipTransformer.exportDocs(
+    await ZipTransformer.exportDocs(
       this.collection,
       [...this.collection.docs.values()].map(collection => collection.getDoc())
     );
-    const url = URL.createObjectURL(file);
-    const a = document.createElement('a');
-    a.setAttribute('href', url);
-    a.setAttribute('download', `${this.doc.id}.bs.zip`);
-    a.click();
-    a.remove();
-    URL.revokeObjectURL(url);
   }
 
   private async _importHTML() {

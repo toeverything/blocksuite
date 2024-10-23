@@ -149,17 +149,10 @@ export class QuickEdgelessMenu extends ShadowlessElement {
   private async _exportSnapshot() {
     if (!this.rootService) return;
     const zipTransformer = this.rootService.transformers.zip;
-    const file = await zipTransformer.exportDocs(
+    await zipTransformer.exportDocs(
       this.collection,
       [...this.collection.docs.values()].map(collection => collection.getDoc())
     );
-    const url = URL.createObjectURL(file);
-    const a = document.createElement('a');
-    a.setAttribute('href', url);
-    a.setAttribute('download', `${this.doc.id}.bs.zip`);
-    a.click();
-    a.remove();
-    URL.revokeObjectURL(url);
   }
 
   private _importSnapshot() {
