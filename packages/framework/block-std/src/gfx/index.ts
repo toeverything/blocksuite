@@ -60,6 +60,7 @@ export {
   type GfxToolsFullOptionValue,
   type GfxToolsMap,
   type GfxToolsOption,
+  ToolIdentifier,
 } from './tool/tool.js';
 export { ToolController } from './tool/tool-controller.js';
 export * from './viewport.js';
