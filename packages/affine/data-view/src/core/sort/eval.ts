@@ -18,6 +18,11 @@ import {
 } from '../logical/index.js';
 import { propertyMatcher } from '../logical/property-matcher.js';
 
+export const Compare = {
+  GT: 'GT',
+  LT: 'LT',
+} as const;
+export type CompareType = keyof typeof Compare | number;
 const evalRef = (
   view: SingleView,
   ref: VariableOrProperty
@@ -49,10 +54,14 @@ const evalRef = (
     return;
   }
 };
-const compareList = <T>(a: T[], b: T[], compare: (a: T, b: T) => number) => {
+const compareList = <T>(
+  listA: T[],
+  listB: T[],
+  compare: (a: T, b: T) => CompareType
+) => {
   let i = 0;
-  while (i < a.length && i < b.length) {
-    const result = compare(a[i], b[i]);
+  while (i < listA.length && i < listB.length) {
+    const result = compare(listA[i], listB[i]);
     if (result !== 0) {
       return result;
     }
@@ -60,12 +69,12 @@ const compareList = <T>(a: T[], b: T[], compare: (a: T, b: T) => number) => {
   }
   return 0;
 };
-const compareString = (a: unknown, b: unknown) => {
-  if (typeof a != 'string') {
-    return -1;
+const compareString = (a: unknown, b: unknown): CompareType => {
+  if (typeof a != 'string' || a === '') {
+    return Compare.GT;
   }
-  if (typeof b != 'string') {
-    return 1;
+  if (typeof b != 'string' || b === '') {
+    return Compare.LT;
   }
   const listA = a.split('.');
   const listB = b.split('.');
@@ -74,37 +83,36 @@ const compareString = (a: unknown, b: unknown) => {
     const lowB = b.toLowerCase();
     const numberA = Number.parseInt(lowA);
     const numberB = Number.parseInt(lowB);
-    if (
-      !Number.isNaN(numberA) &&
-      !Number.isNaN(numberB) &&
-      numberA !== numberB
-    ) {
-      return numberA - numberB;
-    }
-    if (Number.isNaN(numberA)) {
-      return -1;
-    }
-    if (Number.isNaN(numberB)) {
+    const aIsNaN = Number.isNaN(numberA);
+    const bIsNaN = Number.isNaN(numberB);
+    if (aIsNaN && !bIsNaN) {
       return 1;
     }
+    if (!aIsNaN && bIsNaN) {
+      return -1;
+    }
+    if (!aIsNaN && !bIsNaN && numberA !== numberB) {
+      return numberA - numberB;
+    }
+
     return lowA.localeCompare(lowB);
   });
 };
 const compareNumber = (a: unknown, b: unknown) => {
   if (a == null) {
-    return -1;
+    return Compare.GT;
   }
   if (b == null) {
-    return 1;
+    return Compare.LT;
   }
   return Number(a) - Number(b);
 };
 const compareBoolean = (a: unknown, b: unknown) => {
   if (a == null) {
-    return -1;
+    return Compare.GT;
   }
   if (b == null) {
-    return 1;
+    return Compare.LT;
   }
   const bA = a ? 1 : 0;
   const bB = b ? 1 : 0;
@@ -112,10 +120,10 @@ const compareBoolean = (a: unknown, b: unknown) => {
 };
 const compareArray = (type: TArray, a: unknown, b: unknown) => {
   if (!Array.isArray(a)) {
-    return -1;
+    return Compare.GT;
   }
   if (!Array.isArray(b)) {
-    return 1;
+    return Compare.LT;
   }
   return compareList(a, b, (a, b) => {
     return compare(type.ele, a, b);
@@ -123,10 +131,10 @@ const compareArray = (type: TArray, a: unknown, b: unknown) => {
 };
 const compareAny = (a: unknown, b: unknown) => {
   if (!a) {
-    return -1;
+    return Compare.GT;
   }
   if (!b) {
-    return 1;
+    return Compare.LT;
   }
   // @ts-ignore
   return a - b;
@@ -134,22 +142,22 @@ const compareAny = (a: unknown, b: unknown) => {
 
 const compareTag = (type: TypeOfData<typeof tTag>, a: unknown, b: unknown) => {
   if (a == null) {
-    return -1;
+    return Compare.GT;
   }
   if (b == null) {
-    return 1;
+    return Compare.LT;
   }
   const indexA = type.data?.tags?.findIndex(tag => tag.id === a);
   const indexB = type.data?.tags?.findIndex(tag => tag.id === b);
   return compareNumber(indexA, indexB);
 };
 
-const compare = (type: TType, a: unknown, b: unknown): number => {
-  if (typesystem.isSubtype(tString.create(), type)) {
-    return compareString(a, b);
-  }
+const compare = (type: TType, a: unknown, b: unknown): CompareType => {
   if (typesystem.isSubtype(tRichText.create(), type)) {
     return compareString(a?.toString(), b?.toString());
+  }
+  if (typesystem.isSubtype(tString.create(), type)) {
+    return compareString(a, b);
   }
   if (typesystem.isSubtype(tNumber.create(), type)) {
     return compareNumber(a, b);
@@ -189,9 +197,10 @@ export const evalSort = (
           refA?.value,
           refB?.value
         );
-        if (result !== 0) {
+        if (typeof result === 'number' && result !== 0) {
           return sort.desc ? -result : result;
         }
+        return result === Compare.GT ? 1 : -1;
       }
       return 0;
     };

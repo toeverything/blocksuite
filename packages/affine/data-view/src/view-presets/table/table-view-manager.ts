@@ -148,7 +148,7 @@ export class TableSingleView extends SingleViewBase<TableViewData> {
   });
 
   sortManager = new SortManager(this.sortList$, this, {
-    changeSortList: sortList => {
+    setSortList: sortList => {
       this.dataUpdate(data => {
         return {
           sort: {

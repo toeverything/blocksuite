@@ -18,7 +18,6 @@ const styles = css`
     display: flex;
     align-items: center;
     gap: 6px;
-    visibility: hidden;
     opacity: 0;
     transition: opacity 150ms cubic-bezier(0.42, 0, 1, 1);
   }

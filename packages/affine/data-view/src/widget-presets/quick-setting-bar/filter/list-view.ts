@@ -11,17 +11,16 @@ import { css, html, type TemplateResult } from 'lit';
 import { property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
-import type { Variable } from '../../core/expression/types.js';
-import type { Filter, FilterGroup } from '../../core/filter/types.js';
+import type { Variable } from '../../../core/expression/types.js';
+import type { Filter, FilterGroup } from '../../../core/filter/types.js';
 
-import { popCreateFilter } from '../../core/expression/ref/ref-view.js';
-import { renderTemplate } from '../../core/utils/uni-component/render-template.js';
+import { popCreateFilter } from '../../../core/index.js';
+import { renderTemplate } from '../../../core/utils/uni-component/render-template.js';
 import { popFilterGroup } from './group-panel-view.js';
 
 export class FilterBar extends SignalWatcher(ShadowlessElement) {
   static override styles = css`
     filter-bar {
-      margin-top: 8px;
       display: flex;
       gap: 8px;
     }
@@ -175,10 +174,9 @@ export class FilterBar extends SignalWatcher(ShadowlessElement) {
 
   override render() {
     return html`
-      <component-overflow
-        .renderItem="${this.renderFilters()}"
-        .renderMore="${this.renderMore}"
-      ></component-overflow>
+      <div style="display: flex;align-items: center">
+        ${this.renderFilters()} ${this.renderAddFilter()}
+      </div>
     `;
   }
 
@@ -228,8 +226,8 @@ export class FilterBar extends SignalWatcher(ShadowlessElement) {
   }
 
   renderFilters() {
-    return this.filterGroup.value.conditions.map(
-      (_, i) => () => this.renderCondition(i)
+    return this.filterGroup.value.conditions.map((_, i) =>
+      this.renderCondition(i)
     );
   }
 

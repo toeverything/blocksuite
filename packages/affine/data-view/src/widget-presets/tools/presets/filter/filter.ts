@@ -7,10 +7,10 @@ import { styleMap } from 'lit/directives/style-map.js';
 
 import type { FilterGroup } from '../../../../core/filter/types.js';
 
-import { popCreateFilter } from '../../../../core/expression/ref/ref-view.js';
+import { popCreateFilter } from '../../../../core/filter/add-filter.js';
 import { emptyFilterGroup } from '../../../../core/filter/utils.js';
 import { WidgetBase } from '../../../../core/widget/widget-base.js';
-import { ShowFilterBarContextKey } from '../../../filter/context.js';
+import { ShowQuickSettingBarContextKey } from '../../../quick-setting-bar/context.js';
 
 const styles = css`
   .affine-database-filter-button {
@@ -24,7 +24,8 @@ const styles = css`
     font-size: 20px;
   }
 
-  .affine-database-filter-button:hover {
+  .affine-database-filter-button:hover,
+  .affine-database-filter-button.active {
     background-color: var(--affine-hover-color);
   }
 
@@ -100,7 +101,7 @@ export class DataViewHeaderToolsFilter extends WidgetBase {
   }
 
   toggleShowFilter(show?: boolean) {
-    const map = this.view.contextGet(ShowFilterBarContextKey);
+    const map = this.view.contextGet(ShowQuickSettingBarContextKey);
     map.value = {
       ...map.value,
       [this.view.id]: show ?? !map.value[this.view.id],

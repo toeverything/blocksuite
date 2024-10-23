@@ -1,7 +1,6 @@
 import {
   menu,
   popFilterableSimpleMenu,
-  type PopupTarget,
   popupTargetFromElement,
 } from '@blocksuite/affine-components/context-menu';
 import { ShadowlessElement } from '@blocksuite/block-std';
@@ -15,22 +14,18 @@ import { repeat } from 'lit/directives/repeat.js';
 import type {
   Variable,
   VariableOrProperty,
-} from '../../core/expression/types.js';
-import type { FilterGroup, SingleFilter } from '../../core/filter/types.js';
+} from '../../../core/expression/types.js';
+import type { SingleFilter } from '../../../core/filter/types.js';
 
 import {
   popLiteralEdit,
   renderLiteral,
-} from '../../core/expression/literal/matcher.js';
-import { getRefType } from '../../core/expression/ref/ref.js';
-import { filterMatcher } from '../../core/filter/matcher/matcher.js';
-import {
-  firstFilter,
-  firstFilterByRef,
-  firstFilterInGroup,
-} from '../../core/filter/utils.js';
-import { tBoolean } from '../../core/logical/data-type.js';
-import { typesystem } from '../../core/logical/typesystem.js';
+} from '../../../core/expression/literal/matcher.js';
+import { getRefType } from '../../../core/expression/ref/ref.js';
+import { filterMatcher } from '../../../core/filter/matcher/matcher.js';
+import { firstFilterByRef } from '../../../core/filter/utils.js';
+import { tBoolean } from '../../../core/logical/data-type.js';
+import { typesystem } from '../../../core/logical/typesystem.js';
 
 export class FilterConditionView extends SignalWatcher(ShadowlessElement) {
   static override styles = css`
@@ -218,35 +213,3 @@ declare global {
     'filter-condition-view': FilterConditionView;
   }
 }
-export const popAddNewFilter = (
-  target: PopupTarget,
-  props: {
-    value: FilterGroup;
-    onChange: (value: FilterGroup) => void;
-    vars: Variable[];
-  }
-) => {
-  popFilterableSimpleMenu(target, [
-    menu.action({
-      name: 'Add filter',
-      select: () => {
-        props.onChange({
-          ...props.value,
-          conditions: [...props.value.conditions, firstFilter(props.vars)],
-        });
-      },
-    }),
-    menu.action({
-      name: 'Add filter group',
-      select: () => {
-        props.onChange({
-          ...props.value,
-          conditions: [
-            ...props.value.conditions,
-            firstFilterInGroup(props.vars),
-          ],
-        });
-      },
-    }),
-  ]);
-};

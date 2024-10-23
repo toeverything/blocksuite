@@ -1,4 +1,5 @@
 import { DataViewPropertiesSettingView } from './core/common/properties.js';
+import { Button } from './core/component/button/button.js';
 import { Overflow } from './core/component/overflow/overflow.js';
 import { DataViewRenderer } from './core/data-view.js';
 import { RecordDetail } from './core/detail/detail.js';
@@ -72,10 +73,11 @@ import { TableRow } from './view-presets/table/row/row.js';
 import { RowSelectCheckbox } from './view-presets/table/row/row-select-checkbox.js';
 import { DataBaseColumnStats } from './view-presets/table/stats/column-stats-bar.js';
 import { DatabaseColumnStatsCell } from './view-presets/table/stats/column-stats-column.js';
-import { FilterConditionView } from './widget-presets/filter/condition-view.js';
-import { FilterGroupView } from './widget-presets/filter/group-panel-view.js';
-import { FilterBar } from './widget-presets/filter/list-view.js';
-import { FilterRootView } from './widget-presets/filter/root-panel-view.js';
+import { FilterConditionView } from './widget-presets/quick-setting-bar/filter/condition-view.js';
+import { FilterGroupView } from './widget-presets/quick-setting-bar/filter/group-panel-view.js';
+import { FilterBar } from './widget-presets/quick-setting-bar/filter/list-view.js';
+import { FilterRootView } from './widget-presets/quick-setting-bar/filter/root-panel-view.js';
+import { SortRootView } from './widget-presets/quick-setting-bar/sort/root-panel.js';
 import { DataViewHeaderToolsFilter } from './widget-presets/tools/presets/filter/filter.js';
 import { DataViewHeaderToolsSearch } from './widget-presets/tools/presets/search/search.js';
 import { DataViewHeaderToolsSort } from './widget-presets/tools/presets/sort/sort.js';
@@ -130,6 +132,7 @@ export function effects() {
     'affine-data-view-column-preview',
     DataViewColumnPreview
   );
+  customElements.define('data-view-component-button', Button);
   customElements.define('component-overflow', Overflow);
   customElements.define('data-view-group-title-select-view', SelectGroupView);
   customElements.define('data-view-group-title-string-view', StringGroupView);
@@ -179,6 +182,7 @@ export function effects() {
   customElements.define('variable-ref-view', VariableRefView);
   customElements.define('affine-data-view-record-detail', RecordDetail);
   customElements.define('filter-root-view', FilterRootView);
+  customElements.define('sort-root-view', SortRootView);
   customElements.define('affine-database-column-header', DatabaseColumnHeader);
   customElements.define('data-view-header-views', DataViewHeaderViews);
   customElements.define(

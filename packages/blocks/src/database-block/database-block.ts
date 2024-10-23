@@ -198,7 +198,7 @@ export class DatabaseBlockComponent extends CaptionedBlockComponent<
             </div>
             ${renderUniLit(this.toolsWidget, props)}
           </div>
-          ${renderUniLit(widgetPresets.filterBar, props)}
+          ${renderUniLit(widgetPresets.quickSettingBar, props)}
         </div>
       `;
     }

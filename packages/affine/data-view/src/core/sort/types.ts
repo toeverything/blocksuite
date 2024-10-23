@@ -1,7 +1,7 @@
-import type { VariableOrProperty } from '../expression/types.js';
+import type { VariableRef } from '../expression/types.js';
 
 export type SortBy = {
-  ref: VariableOrProperty;
+  ref: VariableRef;
   desc: boolean;
 };
 export type Sort = {

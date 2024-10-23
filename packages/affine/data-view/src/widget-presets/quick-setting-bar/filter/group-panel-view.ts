@@ -21,11 +21,43 @@ import { property, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { repeat } from 'lit/directives/repeat.js';
 
-import type { Variable } from '../../core/expression/types.js';
-import type { Filter, FilterGroup } from '../../core/filter/types.js';
+import type { Variable } from '../../../core/expression/types.js';
+import type { Filter, FilterGroup } from '../../../core/filter/types.js';
 
-import { firstFilter } from '../../core/filter/utils.js';
-import { popAddNewFilter } from './condition-view.js';
+import { firstFilter, firstFilterInGroup } from '../../../core/filter/utils.js';
+
+export const popAddNewFilter = (
+  target: PopupTarget,
+  props: {
+    value: FilterGroup;
+    onChange: (value: FilterGroup) => void;
+    vars: Variable[];
+  }
+) => {
+  popFilterableSimpleMenu(target, [
+    menu.action({
+      name: 'Add filter',
+      select: () => {
+        props.onChange({
+          ...props.value,
+          conditions: [...props.value.conditions, firstFilter(props.vars)],
+        });
+      },
+    }),
+    menu.action({
+      name: 'Add filter group',
+      select: () => {
+        props.onChange({
+          ...props.value,
+          conditions: [
+            ...props.value.conditions,
+            firstFilterInGroup(props.vars),
+          ],
+        });
+      },
+    }),
+  ]);
+};
 
 export class FilterGroupView extends SignalWatcher(ShadowlessElement) {
   static override styles = css`

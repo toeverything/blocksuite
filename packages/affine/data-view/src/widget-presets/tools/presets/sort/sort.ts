@@ -5,15 +5,16 @@ import { cssVarV2 } from '@toeverything/theme/v2';
 import { css, html, nothing } from 'lit';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type { FilterGroup } from '../../../../core/filter/types.js';
+import type { SortBy } from '../../../../core/sort/types.js';
 
-import { popCreateFilter } from '../../../../core/expression/ref/ref-view.js';
-import { emptyFilterGroup } from '../../../../core/filter/utils.js';
+import { popCreateSort } from '../../../../core/sort/add-sort.js';
+import { SortManager } from '../../../../core/sort/manager.js';
 import { WidgetBase } from '../../../../core/widget/widget-base.js';
-import { ShowFilterBarContextKey } from '../../../filter/context.js';
+import { ShowQuickSettingBarContextKey } from '../../../quick-setting-bar/context.js';
+import { popSortRoot } from '../../../quick-setting-bar/sort/root-panel.js';
 
 const styles = css`
-  .affine-database-filter-button {
+  .affine-database-sort-button {
     display: flex;
     align-items: center;
     gap: 6px;
@@ -24,69 +25,80 @@ const styles = css`
     font-size: 20px;
   }
 
-  .affine-database-filter-button:hover {
+  .affine-database-sort-button:hover,
+  .affine-database-sort-button.active {
     background-color: var(--affine-hover-color);
   }
 
-  .affine-database-filter-button {
+  .affine-database-sort-button {
   }
 `;
 
 export class DataViewHeaderToolsSort extends WidgetBase {
   static override styles = styles;
 
-  hasFilter = computed(() => {
-    return this.view.filter$.value.conditions.length > 0;
+  hasSort = computed(() => {
+    return this.sortManager?.hasSort$.value ?? false;
   });
-
-  private get _filter(): FilterGroup {
-    return this.view.filter$.value ?? emptyFilterGroup;
-  }
-
-  private set _filter(filter: FilterGroup) {
-    this.view.filterSet(filter);
-  }
 
   private get readonly() {
     return this.view.readonly$.value;
   }
 
-  private clickFilter(event: MouseEvent) {
-    if (this.hasFilter.value) {
-      this.toggleShowFilter();
+  private get sortList(): SortBy[] {
+    return this.sortManager?.sortList$.value ?? [];
+  }
+
+  private set sortList(sortList: SortBy[]) {
+    this.sortManager?.setSortList(sortList);
+  }
+
+  get sortManager(): SortManager | void {
+    if (SortManager.canSort(this.view)) {
+      return this.view.sortManager;
+    }
+  }
+
+  private clickSort(event: MouseEvent) {
+    if (this.hasSort.value) {
+      this.toggleShowQuickSettingBar();
       return;
     }
     this.showToolBar(true);
-    popCreateFilter(
-      popupTargetFromElement(event.currentTarget as HTMLElement),
-      {
-        vars: this.view.vars$,
-        onSelect: filter => {
-          this._filter = {
-            ...this._filter,
-            conditions: [filter],
-          };
-          this.toggleShowFilter(true);
-        },
-        onClose: () => {
-          this.showToolBar(false);
-        },
-      }
-    );
+    popCreateSort(popupTargetFromElement(event.currentTarget as HTMLElement), {
+      vars: this.view.vars$,
+      onSelect: sort => {
+        this.sortList = [...this.sortList, sort];
+        this.toggleShowQuickSettingBar(true);
+        requestAnimationFrame(() => {
+          const ele = this.closest('affine-data-view-renderer')?.querySelector(
+            '.data-view-sort-button'
+          );
+          if (ele && SortManager.canSort(this.view)) {
+            popSortRoot(popupTargetFromElement(ele as HTMLElement), {
+              view: this.view,
+            });
+          }
+        });
+      },
+      onClose: () => {
+        this.showToolBar(false);
+      },
+    });
     return;
   }
 
   override render() {
     if (this.readonly) return nothing;
     const style = styleMap({
-      color: this.hasFilter.value
+      color: this.hasSort.value
         ? cssVarV2('text/emphasis')
         : cssVarV2('icon/primary'),
     });
     return html` <div
-      @click="${this.clickFilter}"
+      @click="${this.clickSort}"
       style="${style}"
-      class="affine-database-filter-button"
+      class="affine-database-sort-button"
     >
       ${SortIcon()}
     </div>`;
@@ -99,8 +111,8 @@ export class DataViewHeaderToolsSort extends WidgetBase {
     }
   }
 
-  toggleShowFilter(show?: boolean) {
-    const map = this.view.contextGet(ShowFilterBarContextKey);
+  toggleShowQuickSettingBar(show?: boolean) {
+    const map = this.view.contextGet(ShowQuickSettingBarContextKey);
     map.value = {
       ...map.value,
       [this.view.id]: show ?? !map.value[this.view.id],

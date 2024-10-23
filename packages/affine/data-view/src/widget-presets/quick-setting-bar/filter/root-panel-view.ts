@@ -20,13 +20,15 @@ import { property, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { repeat } from 'lit/directives/repeat.js';
 
-import type { Variable } from '../../core/expression/types.js';
-import type { Filter, FilterGroup } from '../../core/filter/types.js';
-import type { FilterGroupView } from './group-panel-view.js';
+import type { Variable } from '../../../core/expression/types.js';
+import type { Filter, FilterGroup } from '../../../core/filter/types.js';
 
-import { emptyFilterGroup, type SingleView } from '../../core/index.js';
-import { popAddNewFilter } from './condition-view.js';
-import { getDepth } from './group-panel-view.js';
+import { emptyFilterGroup, type SingleView } from '../../../core/index.js';
+import {
+  type FilterGroupView,
+  getDepth,
+  popAddNewFilter,
+} from './group-panel-view.js';
 
 export class FilterRootView extends SignalWatcher(ShadowlessElement) {
   static override styles = css`
