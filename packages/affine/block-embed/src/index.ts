@@ -21,6 +21,7 @@ export const EmbedExtensions: ExtensionType[] = [
 ].flat();
 
 export { EmbedBlockComponent } from './common/embed-block-element.js';
+export { insertEmbedCard } from './common/insert-embed-card.js';
 export {
   LinkPreviewer,
   type LinkPreviewResponseData,
