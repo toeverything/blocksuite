@@ -5,10 +5,11 @@ import { cssVarV2 } from '@toeverything/theme/v2';
 import { css, html, nothing } from 'lit';
 import { styleMap } from 'lit/directives/style-map.js';
 
+import type { SortManager } from '../../../../core/sort/manager.js';
 import type { SortBy } from '../../../../core/sort/types.js';
 
 import { popCreateSort } from '../../../../core/sort/add-sort.js';
-import { SortManager } from '../../../../core/sort/manager.js';
+import { canSort } from '../../../../core/sort/utils.js';
 import { WidgetBase } from '../../../../core/widget/widget-base.js';
 import { ShowQuickSettingBarContextKey } from '../../../quick-setting-bar/context.js';
 import { popSortRoot } from '../../../quick-setting-bar/sort/root-panel.js';
@@ -54,7 +55,7 @@ export class DataViewHeaderToolsSort extends WidgetBase {
   }
 
   get sortManager(): SortManager | void {
-    if (SortManager.canSort(this.view)) {
+    if (canSort(this.view)) {
       return this.view.sortManager;
     }
   }
@@ -74,7 +75,7 @@ export class DataViewHeaderToolsSort extends WidgetBase {
           const ele = this.closest('affine-data-view-renderer')?.querySelector(
             '.data-view-sort-button'
           );
-          if (ele && SortManager.canSort(this.view)) {
+          if (ele && canSort(this.view)) {
             popSortRoot(popupTargetFromElement(ele as HTMLElement), {
               view: this.view,
             });

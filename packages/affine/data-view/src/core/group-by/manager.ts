@@ -9,7 +9,6 @@ import type { TType } from '../logical/typesystem.js';
 import type { Property } from '../view-manager/property.js';
 import type { SingleView } from '../view-manager/single-view.js';
 
-import { KanbanSingleView, TableSingleView } from '../../view-presets/index.js';
 import { groupByMatcher } from './matcher.js';
 
 export type GroupData = {
@@ -146,12 +145,6 @@ export class GroupManager {
       ) => void;
     }
   ) {}
-
-  static canGroup(
-    view: SingleView
-  ): view is TableSingleView | KanbanSingleView {
-    return view instanceof TableSingleView || view instanceof KanbanSingleView;
-  }
 
   addToGroup(rowId: string, key: string) {
     const groupMap = this.groupDataMap$.value;

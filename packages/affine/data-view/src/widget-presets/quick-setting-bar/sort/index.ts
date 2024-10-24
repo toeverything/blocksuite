@@ -4,12 +4,12 @@ import { html } from 'lit';
 
 import type { DataViewWidgetProps } from '../../../core/widget/types.js';
 
-import { SortManager } from '../../../core/sort/manager.js';
+import { canSort } from '../../../core/sort/utils.js';
 import { popSortRoot } from './root-panel.js';
 
 export const renderSortBar = (props: DataViewWidgetProps) => {
   const view = props.view;
-  if (!SortManager.canSort(view)) {
+  if (!canSort(view)) {
     return;
   }
   const count = view.sortManager.sortList$.value.length;

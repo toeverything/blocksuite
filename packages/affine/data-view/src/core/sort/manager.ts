@@ -3,10 +3,7 @@ import { computed, type ReadonlySignal } from '@preact/signals-core';
 import type { SingleView } from '../view-manager/index.js';
 import type { Sort, SortBy } from './types.js';
 
-import { TableSingleView } from '../../view-presets/index.js';
 import { evalSort } from './eval.js';
-
-export type SortableView = TableSingleView;
 
 export class SortManager {
   hasSort$ = computed(() => (this.sort$.value?.sortBy?.length ?? 0) > 0);
@@ -41,8 +38,4 @@ export class SortManager {
       setSortList: (sortList: Sort) => void;
     }
   ) {}
-
-  static canSort(view: SingleView): view is SortableView {
-    return view instanceof TableSingleView;
-  }
 }
