@@ -67,6 +67,10 @@ test.describe('edgeless text block', () => {
       delay: 100,
     });
     await waitNextFrame(page);
+
+    // https://github.com/toeverything/blocksuite/pull/8574
+    await pressBackspace(page);
+
     await type(page, 'aaa');
     await pressEnter(page);
     await type(page, 'bbb');
