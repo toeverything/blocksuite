@@ -36,7 +36,8 @@ export class MenuButton extends MenuFocusable {
       color: var(--affine-icon-color);
     }
 
-    .affine-menu-button:hover {
+    .affine-menu-button:hover,
+    affine-menu-button.active .affine-menu-button {
       background-color: var(--affine-hover-color);
     }
 
@@ -95,7 +96,7 @@ export class MenuButton extends MenuFocusable {
       'affine-menu-button': true,
       focused: this.isFocused$.value,
     });
-    return html` <div class="${classString}">${this.data.content()}</div>`;
+    return html`<div class="${classString}">${this.data.content()}</div>`;
   }
 
   @property({ attribute: false })

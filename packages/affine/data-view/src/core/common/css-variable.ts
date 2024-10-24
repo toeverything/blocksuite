@@ -21,7 +21,7 @@ export const dataViewCommonStyle = (selector: string) => `
   .dv-pd-8{
     padding:8px;
   }
-  .dv-hover:hover{
+  .dv-hover:hover, .dv-hover.active{
     background-color: var(--affine-hover-color);
     cursor: pointer;
   }

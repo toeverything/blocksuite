@@ -12,7 +12,7 @@ import { css } from 'lit';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
 
-import type { GroupManager } from '../../core/common/group-by/helper.js';
+import type { GroupManager } from '../../core/group-by/manager.js';
 import type { DataViewExpose } from '../../core/index.js';
 import type { TableSingleView } from './table-view-manager.js';
 

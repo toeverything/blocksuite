@@ -158,13 +158,14 @@ export class DataViewHeaderToolsAddRow extends WidgetBase {
     if (this.readonly) {
       return;
     }
-    return html` <div
-      class="affine-database-toolbar-item new-record"
+    return html` <data-view-component-button
+      class="affine-database-toolbar-item"
       draggable="true"
-      @click="${this._onAddNewRecord}"
+      .onClick="${this._onAddNewRecord}"
+      .icon="${PlusIcon()}"
+      .text="${html`<span style="font-weight: 500">New Record</span>`}"
     >
-      ${PlusIcon()}<span>New Record</span>
-    </div>`;
+    </data-view-component-button>`;
   }
 
   @state()

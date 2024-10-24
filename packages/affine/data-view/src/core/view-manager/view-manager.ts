@@ -3,7 +3,7 @@ import type { InsertToPosition } from '@blocksuite/affine-shared/utils';
 import { nanoid } from '@blocksuite/store';
 import { computed, type ReadonlySignal, signal } from '@preact/signals-core';
 
-import type { DataSource } from '../common/data-source/base.js';
+import type { DataSource } from '../data-source/base.js';
 import type {
   DataViewDataType,
   DataViewMode,

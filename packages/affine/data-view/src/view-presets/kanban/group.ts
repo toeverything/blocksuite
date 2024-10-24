@@ -11,11 +11,11 @@ import { property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { html } from 'lit/static-html.js';
 
-import type { GroupData } from '../../core/common/group-by/helper.js';
 import type { DataViewRenderer } from '../../core/data-view.js';
+import type { GroupData } from '../../core/group-by/manager.js';
 import type { KanbanSingleView } from './kanban-view-manager.js';
 
-import { GroupTitle } from '../../core/common/group-by/group-title.js';
+import { GroupTitle } from '../../core/group-by/group-title.js';
 
 const styles = css`
   affine-data-view-kanban-group {

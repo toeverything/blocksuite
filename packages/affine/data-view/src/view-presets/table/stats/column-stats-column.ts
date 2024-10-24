@@ -13,12 +13,12 @@ import { css, html } from 'lit';
 import { property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type { GroupData } from '../../../core/common/group-by/helper.js';
-import type { StatsFunction } from '../../../core/common/stats/type.js';
+import type { GroupData } from '../../../core/group-by/manager.js';
+import type { StatsFunction } from '../../../core/statistics/types.js';
 import type { TableColumn } from '../table-view-manager.js';
 
-import { statsFunctions } from '../../../core/common/stats/index.js';
 import { typesystem } from '../../../core/logical/typesystem.js';
+import { statsFunctions } from '../../../core/statistics/index.js';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../consts.js';
 
 const styles = css`

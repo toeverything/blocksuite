@@ -198,7 +198,7 @@ export class DatabaseBlockComponent extends CaptionedBlockComponent<
             </div>
             ${renderUniLit(this.toolsWidget, props)}
           </div>
-          ${renderUniLit(widgetPresets.filterBar, props)}
+          ${renderUniLit(widgetPresets.quickSettingBar, props)}
         </div>
       `;
     }
@@ -260,12 +260,14 @@ export class DatabaseBlockComponent extends CaptionedBlockComponent<
   toolsWidget: DataViewWidget = widgetPresets.createTools({
     table: [
       widgetPresets.tools.filter,
+      widgetPresets.tools.sort,
       widgetPresets.tools.search,
       widgetPresets.tools.viewOptions,
       widgetPresets.tools.tableAddRow,
     ],
     kanban: [
       widgetPresets.tools.filter,
+      widgetPresets.tools.sort,
       widgetPresets.tools.search,
       widgetPresets.tools.viewOptions,
     ],

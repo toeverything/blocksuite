@@ -169,7 +169,7 @@ export class DataViewBlockComponent extends CaptionedBlockComponent<DataViewBloc
             </div>
             ${renderUniLit(this.toolsWidget, props)}
           </div>
-          ${renderUniLit(widgetPresets.filterBar, props)}
+          ${renderUniLit(widgetPresets.quickSettingBar, props)}
         </div>
       `;
     }
