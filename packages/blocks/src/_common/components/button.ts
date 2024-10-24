@@ -41,8 +41,11 @@ export class IconButton extends LitElement {
       padding: 4px;
     }
 
-    :host(:hover) {
-      background: var(--affine-hover-color);
+    // This media query can detect if the device has a hover capability
+    @media (hover: hover) {
+      :host(:hover) {
+        background: var(--affine-hover-color);
+      }
     }
 
     :host(:active) {
