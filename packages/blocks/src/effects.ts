@@ -274,6 +274,7 @@ import { EdgelessReleaseFromGroupButton } from './root-block/widgets/element-too
 import { AffineImageToolbar } from './root-block/widgets/image-toolbar/components/image-toolbar.js';
 import { AFFINE_IMAGE_TOOLBAR_WIDGET } from './root-block/widgets/image-toolbar/index.js';
 import { AFFINE_INNER_MODAL_WIDGET } from './root-block/widgets/inner-modal/inner-modal.js';
+import { effects as widgetMobileToolbarEffects } from './root-block/widgets/keyboard-toolbar/effects.js';
 import { ImportDoc } from './root-block/widgets/linked-doc/import-doc/import-doc.js';
 import { AFFINE_LINKED_DOC_WIDGET } from './root-block/widgets/linked-doc/index.js';
 import { LinkedDocPopover } from './root-block/widgets/linked-doc/linked-doc-popover.js';
@@ -331,6 +332,7 @@ export function effects() {
   componentDragIndicatorEffects();
 
   widgetScrollAnchoringEffects();
+  widgetMobileToolbarEffects();
 
   customElements.define('affine-database-title', DatabaseTitle);
   customElements.define(
