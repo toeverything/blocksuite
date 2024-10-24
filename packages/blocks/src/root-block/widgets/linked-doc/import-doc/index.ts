@@ -6,8 +6,6 @@ import {
   type OnSuccessHandler,
 } from './import-doc.js';
 
-export { importHtml, importMarkDown, importNotion } from './import-doc.js';
-
 export function showImportModal({
   collection,
   onSuccess,

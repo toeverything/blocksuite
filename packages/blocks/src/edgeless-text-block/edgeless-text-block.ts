@@ -69,7 +69,7 @@ export class EdgelessTextBlockComponent extends GfxBlockComponent<EdgelessTextBl
 
     if (!rootComponent || !edgelessSelection) return;
 
-    const selectedRect = rootComponent.selectedRect;
+    const selectedRect = rootComponent.selectedRectWidget;
     if (!selectedRect) return;
 
     disposables.add(

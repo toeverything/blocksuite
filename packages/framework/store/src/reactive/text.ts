@@ -8,6 +8,7 @@ export interface OptionalAttributes {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   attributes?: Record<string, any>;
 }
+
 export type DeltaOperation = {
   insert?: string;
   delete?: number;
@@ -67,7 +68,7 @@ export class Text {
     }
 
     this._length$ = signal(length);
-    this._deltas$ = signal([]);
+    this._deltas$ = signal(this._yText.doc ? this._yText.toDelta() : []);
     this._yText.observe(() => {
       this._length$.value = this._yText.length;
       this._deltas$.value = this._yText.toDelta();

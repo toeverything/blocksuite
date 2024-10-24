@@ -30,6 +30,7 @@ import { DetailSelection } from './selection.js';
 export type DetailSlotProps = {
   view: SingleView;
   rowId: string;
+  openDoc: (docId: string) => void;
 };
 
 export interface DetailSlots {
@@ -143,6 +144,7 @@ export class RecordDetail extends SignalWatcher(
       const props: DetailSlotProps = {
         view: this.view,
         rowId: this.rowId,
+        openDoc: this.openDoc,
       };
       return renderUniLit(header, props);
     }
@@ -155,6 +157,7 @@ export class RecordDetail extends SignalWatcher(
       const props: DetailSlotProps = {
         view: this.view,
         rowId: this.rowId,
+        openDoc: this.openDoc,
       };
       return renderUniLit(note, props);
     }
@@ -257,6 +260,9 @@ export class RecordDetail extends SignalWatcher(
   accessor detailSlots: DetailSlots | undefined;
 
   @property({ attribute: false })
+  accessor openDoc!: (docId: string) => void;
+
+  @property({ attribute: false })
   accessor rowId!: string;
 
   @property({ attribute: false })
@@ -272,11 +278,13 @@ export const createRecordDetail = (ops: {
   view: SingleView;
   rowId: string;
   detail: DetailSlots;
+  openDoc: (docId: string) => void;
 }) => {
   return html` <affine-data-view-record-detail
     .view=${ops.view}
     .rowId=${ops.rowId}
     .detailSlots=${ops.detail}
+    .openDoc=${ops.openDoc}
     class="data-view-popup-container"
   ></affine-data-view-record-detail>`;
 };

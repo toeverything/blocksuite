@@ -25,6 +25,7 @@ import {
   type DataViewWidgetProps,
   defineUniComponent,
   renderUniLit,
+  type SingleView,
   uniMap,
 } from '@blocksuite/data-view';
 import { widgetPresets } from '@blocksuite/data-view/widget-presets';
@@ -52,7 +53,10 @@ import { popSideDetail } from './components/layout.js';
 import { HostContextKey } from './context/host-context.js';
 import { DatabaseBlockDataSource } from './data-source.js';
 import { BlockRenderer } from './detail-panel/block-renderer.js';
-import { NoteRenderer } from './detail-panel/note-renderer.js';
+import {
+  getDocIdsFromText,
+  NoteRenderer,
+} from './detail-panel/note-renderer.js';
 
 export class DatabaseBlockComponent extends CaptionedBlockComponent<
   DatabaseBlockModel,
@@ -176,6 +180,36 @@ export class DatabaseBlockComponent extends CaptionedBlockComponent<
         blockId: this.blockId,
       }),
     };
+  };
+
+  createTemplate = (
+    data: {
+      view: SingleView;
+      rowId: string;
+    },
+    openDoc: (docId: string) => void
+  ) => {
+    return createRecordDetail({
+      ...data,
+      openDoc,
+      detail: {
+        header: uniMap(
+          createUniComponentFromWebComponent(BlockRenderer),
+          props => ({
+            ...props,
+            host: this.host,
+          })
+        ),
+        note: uniMap(
+          createUniComponentFromWebComponent(NoteRenderer),
+          props => ({
+            ...props,
+            model: this.model,
+            host: this.host,
+          })
+        ),
+      },
+    });
   };
 
   getRootService = () => {
@@ -364,33 +398,38 @@ export class DatabaseBlockComponent extends CaptionedBlockComponent<
           std: this.std,
           detailPanelConfig: {
             openDetailPanel: (target, data) => {
-              const template = createRecordDetail({
-                ...data,
-                detail: {
-                  header: uniMap(
-                    createUniComponentFromWebComponent(BlockRenderer),
-                    props => ({
-                      ...props,
-                      host: this.host,
-                    })
-                  ),
-                  note: uniMap(
-                    createUniComponentFromWebComponent(NoteRenderer),
-                    props => ({
-                      ...props,
-                      model: this.model,
-                      host: this.host,
-                    })
-                  ),
-                },
-              });
               if (peekViewService) {
-                return peekViewService.peek({
-                  target,
-                  template,
+                const openDoc = (docId: string) => {
+                  return peekViewService.peek({ docId });
+                };
+                const docs = getDocIdsFromText(
+                  this.model.doc.getBlock(data.rowId)?.model?.text
+                );
+                if (docs.length === 1) {
+                  return openDoc(docs[0]);
+                }
+                const abort = new AbortController();
+                return new Promise<void>(focusBack => {
+                  peekViewService
+                    .peek(
+                      {
+                        target,
+                        template: this.createTemplate(data, docId => {
+                          // abort.abort();
+                          openDoc(docId).then(focusBack).catch(focusBack);
+                        }),
+                      },
+                      { abortSignal: abort.signal }
+                    )
+                    .then(focusBack)
+                    .catch(focusBack);
                 });
               } else {
-                return popSideDetail(template);
+                return popSideDetail(
+                  this.createTemplate(data, () => {
+                    //
+                  })
+                );
               }
             },
           },

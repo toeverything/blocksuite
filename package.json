@@ -38,7 +38,8 @@
     "ci:publish": "yarn build:packages && yarn workspaces foreach -Ap --no-private npm publish --tolerate-republish --access public --tag latest",
     "ci:version:canary": "changeset version --snapshot canary && yarn install --no-frozen-lockfile",
     "ci:publish:canary": "yarn build:packages && yarn workspaces foreach -Ap --no-private npm publish --access public --tag canary",
-    "postinstall": "husky"
+    "postinstall": "husky",
+    "changeset": "changeset && node scripts/changelog.mjs"
   },
   "lint-staged": {
     "*": [

@@ -17,7 +17,7 @@ import { cssVar } from '@toeverything/theme';
 import { property, state } from 'lit/decorators.js';
 
 import type { EdgelessRootBlockComponent } from '../../../edgeless-root-block.js';
-import type { EdgelessToolbar } from '../edgeless-toolbar.js';
+import type { EdgelessToolbarWidget } from '../edgeless-toolbar.js';
 
 import { createPopper, type MenuPopper } from '../common/create-popper.js';
 import {
@@ -59,7 +59,7 @@ export declare abstract class EdgelessToolbarToolClass extends DisposableClass {
     | GfxToolsFullOptionValue['type']
     | GfxToolsFullOptionValue['type'][];
 
-  accessor toolbar: EdgelessToolbar;
+  accessor toolbar: EdgelessToolbarWidget;
 }
 
 export const EdgelessToolbarToolMixin = <T extends Constructor<LitElement>>(
@@ -162,7 +162,7 @@ export const EdgelessToolbarToolMixin = <T extends Constructor<LitElement>>(
     accessor theme!: ColorScheme;
 
     @consume({ context: edgelessToolbarContext })
-    accessor toolbar!: EdgelessToolbar;
+    accessor toolbar!: EdgelessToolbarWidget;
 
     @property({ attribute: false })
     accessor toolbarContainer: HTMLElement | null = null;

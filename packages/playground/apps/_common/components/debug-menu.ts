@@ -16,6 +16,7 @@ import {
   HtmlTransformer,
   MarkdownTransformer,
   NotionHtmlAdapter,
+  NotionHtmlTransformer,
   openFileOrFiles,
   printToPdf,
   SizeVariables,
@@ -52,7 +53,6 @@ import type { DocsPanel } from './docs-panel.js';
 import type { LeftSidePanel } from './left-side-panel.js';
 import type { SidePanel } from './side-panel.js';
 
-import { NotionHtmlTransformer } from './../../../../blocks/src/_common/transformers/notion-html';
 import './left-side-panel.js';
 import './side-panel.js';
 
