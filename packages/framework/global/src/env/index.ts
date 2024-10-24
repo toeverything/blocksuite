@@ -25,3 +25,5 @@ export const IS_IPAD =
   (/Macintosh/i.test(agent) && globalThis.navigator?.maxTouchPoints > 2);
 
 export const IS_WINDOWS = /Win/.test(platform);
+
+export const IS_MOBILE = IS_IOS || IS_IPAD || IS_ANDROID;

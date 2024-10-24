@@ -17,3 +17,4 @@ export interface BlockSuiteFlags {
   enable_new_dnd: boolean;
   readonly: Record<string, boolean>;
 }
+export * from './virtual-keyboard.js';
