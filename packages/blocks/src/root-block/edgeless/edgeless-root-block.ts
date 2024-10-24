@@ -38,18 +38,17 @@ import {
   throttle,
   Vec,
 } from '@blocksuite/global/utils';
-import { css, html, nothing } from 'lit';
-import { query, state } from 'lit/decorators.js';
+import { css, html } from 'lit';
+import { query } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
 import type { Viewport } from '../../_common/utils/index.js';
 import type { EdgelessRootBlockWidgetName } from '../types.js';
-import type { EdgelessSelectedRect } from './components/rects/edgeless-selected-rect.js';
+import type { EdgelessSelectedRectWidget } from './components/rects/edgeless-selected-rect.js';
 import type { EdgelessRootService } from './edgeless-root-service.js';
 
 import { isSelectSingleMindMap } from '../../_common/edgeless/mindmap/index.js';
 import { EdgelessClipboardController } from './clipboard/clipboard.js';
-import { EdgelessToolbar } from './components/toolbar/edgeless-toolbar.js';
 import { EdgelessPageKeyboardManager } from './edgeless-keyboard.js';
 import { getBackgroundGrid, isCanvasElement } from './utils/query.js';
 import { mountShapeTextEditor } from './utils/text.js';
@@ -75,9 +74,14 @@ export class EdgelessRootBlockComponent extends BlockComponent<
       position: absolute;
       left: 0;
       top: 0;
+      pointer-events: none;
       contain: size layout;
-      z-index: 1;
       height: 100%;
+      width: 100%;
+    }
+
+    .widgets-container > * {
+      pointer-events: auto;
     }
 
     .edgeless-background {
@@ -122,13 +126,6 @@ export class EdgelessRootBlockComponent extends BlockComponent<
 
   clipboardController = new EdgelessClipboardController(this);
 
-  /**
-   * Shared components
-   */
-  components = {
-    toolbar: null as EdgelessToolbar | null,
-  };
-
   keyboardManager: EdgelessPageKeyboardManager | null = null;
 
   get dispatcher() {
@@ -137,6 +134,13 @@ export class EdgelessRootBlockComponent extends BlockComponent<
 
   get gfx() {
     return this.std.get(GfxControllerIdentifier);
+  }
+
+  get selectedRectWidget() {
+    return this.host.view.getWidget(
+      'edgeless-selected-rect',
+      this.host.id
+    ) as EdgelessSelectedRectWidget;
   }
 
   get slots() {
@@ -182,19 +186,6 @@ export class EdgelessRootBlockComponent extends BlockComponent<
     ) as HTMLElement | null;
     assertExists(this._viewportElement);
     return this._viewportElement;
-  }
-
-  private _handleToolbarFlag() {
-    const createToolbar = () => {
-      const toolbar = new EdgelessToolbar(this);
-
-      this.append(toolbar);
-      this.components.toolbar = toolbar;
-    };
-
-    if (!this.components.toolbar) {
-      createToolbar();
-    }
   }
 
   private _initFontLoader() {
@@ -489,18 +480,6 @@ export class EdgelessRootBlockComponent extends BlockComponent<
 
       return;
     });
-
-    this._disposables.add(
-      this.slots.elementResizeStart.on(() => {
-        this._isResizing = true;
-      })
-    );
-
-    this._disposables.add(
-      this.slots.elementResizeEnd.on(() => {
-        this._isResizing = false;
-      })
-    );
   }
 
   override disconnectedCallback() {
@@ -512,8 +491,6 @@ export class EdgelessRootBlockComponent extends BlockComponent<
     }
 
     this.keyboardManager = null;
-    this.components.toolbar?.remove();
-    this.components.toolbar = null;
   }
 
   override firstUpdated() {
@@ -535,7 +512,6 @@ export class EdgelessRootBlockComponent extends BlockComponent<
     }
 
     requestConnectedFrame(() => {
-      this._handleToolbarFlag();
       this.requestUpdate();
     }, this);
 
@@ -586,27 +562,9 @@ export class EdgelessRootBlockComponent extends BlockComponent<
       -->
       <div class="edgeless-mount-point"></div>
 
-      <!-- need to be converted to widget -->
-      <edgeless-dragging-area-rect
-        .edgeless=${this}
-      ></edgeless-dragging-area-rect>
-
-      ${this._isResizing
-        ? nothing
-        : html`<note-slicer .edgeless=${this}></note-slicer>`}
-
-      <edgeless-selected-rect .edgeless=${this}></edgeless-selected-rect>
-      <edgeless-navigator-black-background
-        .edgeless=${this}
-      ></edgeless-navigator-black-background>
-      <!-- end -->
-
       <div class="widgets-container">${widgets}</div>
     `;
   }
-
-  @state()
-  private accessor _isResizing = false;
 
   @query('.edgeless-background')
   accessor backgroundElm: HTMLDivElement | null = null;
@@ -616,9 +574,6 @@ export class EdgelessRootBlockComponent extends BlockComponent<
 
   @query('.edgeless-mount-point')
   accessor mountElm: HTMLDivElement | null = null;
-
-  @query('edgeless-selected-rect')
-  accessor selectedRect!: EdgelessSelectedRect;
 
   @query('affine-surface')
   accessor surface!: SurfaceBlockComponent;
