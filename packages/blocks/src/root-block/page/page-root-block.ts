@@ -387,6 +387,67 @@ export class PageRootBlockComponent extends BlockComponent<
         })
         .catch(console.error);
     });
+
+    this.disposables.addFromEvent(this, 'pointerdown', e => {
+      if (e.target !== this.rootElementContainer) return;
+
+      const containerRect = this.rootElementContainer.getBoundingClientRect();
+      const containerStyles = window.getComputedStyle(
+        this.rootElementContainer
+      );
+      const paddingLeft = parseFloat(containerStyles.paddingLeft);
+      const paddingRight = parseFloat(containerStyles.paddingRight);
+
+      if (
+        e.clientX >= containerRect.left &&
+        e.clientX <= containerRect.left + paddingLeft
+      ) {
+        const el = document.elementFromPoint(
+          containerRect.left + paddingLeft + 20,
+          e.clientY
+        );
+        if (!el) return;
+        const block = el.closest<BlockComponent>('[data-block-id]');
+        if (!block) return;
+
+        if (block.model.text) {
+          this.host.command.exec('focusBlockStart', {
+            focusBlock: block,
+          });
+        } else {
+          this.host.command.exec('selectBlock', {
+            focusBlock: block,
+          });
+        }
+
+        e.preventDefault();
+        e.stopPropagation();
+      } else if (
+        e.clientX >= containerRect.right - paddingRight &&
+        e.clientX <= containerRect.right
+      ) {
+        const el = document.elementFromPoint(
+          containerRect.right - paddingRight - 20,
+          e.clientY
+        );
+        if (!el) return;
+        const block = el.closest<BlockComponent>('[data-block-id]');
+        if (!block) return;
+
+        if (block.model.text) {
+          this.host.command.exec('focusBlockEnd', {
+            focusBlock: block,
+          });
+        } else {
+          this.host.command.exec('selectBlock', {
+            focusBlock: block,
+          });
+        }
+
+        e.preventDefault();
+        e.stopPropagation();
+      }
+    });
   }
 
   override disconnectedCallback() {
