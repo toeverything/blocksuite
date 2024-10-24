@@ -43,13 +43,16 @@ export class NoteRenderer
     }
   `;
 
-  allowCreateDoc$ = computed(() => {
-    console.log(this.rowText$.value, getDocIdsFromText(this.rowText$.value));
-    return getDocIdsFromText(this.rowText$.value).length === 0;
-  });
+  @property({ attribute: false })
+  accessor rowId!: string;
 
   rowText$ = computed(() => {
     return this.databaseBlock.doc.getBlock(this.rowId)?.model?.text;
+  });
+
+  allowCreateDoc$ = computed(() => {
+    console.log(this.rowText$.value, getDocIdsFromText(this.rowText$.value));
+    return getDocIdsFromText(this.rowText$.value).length === 0;
   });
 
   get databaseBlock(): DatabaseBlockModel {
@@ -123,9 +126,6 @@ export class NoteRenderer
 
   @property({ attribute: false })
   accessor openDoc!: (docId: string) => void;
-
-  @property({ attribute: false })
-  accessor rowId!: string;
 
   @property({ attribute: false })
   accessor view!: SingleView;

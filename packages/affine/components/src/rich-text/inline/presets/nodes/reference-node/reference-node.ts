@@ -86,6 +86,10 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
       : undefined;
   };
 
+  // Since the linked doc may be deleted, the `_refMeta` could be undefined.
+  @state()
+  accessor refMeta: DocMeta | undefined = undefined;
+
   private _whenHover: HoverController = new HoverController(
     this,
     ({ abortController }) => {
@@ -314,10 +318,6 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
     insert: ZERO_WIDTH_SPACE,
     attributes: {},
   };
-
-  // Since the linked doc may be deleted, the `_refMeta` could be undefined.
-  @state()
-  accessor refMeta: DocMeta | undefined = undefined;
 
   @property({ type: Boolean })
   accessor selected = false;

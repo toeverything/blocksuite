@@ -64,6 +64,9 @@ export class EdgelessRootPreviewBlockComponent extends BlockComponent<
     }
   `;
 
+  @query('.edgeless-background')
+  accessor background!: HTMLDivElement;
+
   private _refreshLayerViewport = requestThrottledConnectedFrame(() => {
     const { zoom, translateX, translateY } = this.service.viewport;
     const { gap } = getBackgroundGrid(zoom, true);
@@ -243,9 +246,6 @@ export class EdgelessRootPreviewBlockComponent extends BlockComponent<
       this._initResizeEffect();
     }
   }
-
-  @query('.edgeless-background')
-  accessor background!: HTMLDivElement;
 
   @state()
   accessor editorViewportSelector = '.affine-edgeless-viewport';

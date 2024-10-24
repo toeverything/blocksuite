@@ -796,6 +796,17 @@ export class EdgelessSelectedRectWidget extends WidgetComponent<
     _resizeManager.updateBounds(getSelectableBounds(selectedElements));
   };
 
+  @state()
+  private accessor _selectedRect: SelectedRect = {
+    width: 0,
+    height: 0,
+    left: 0,
+    top: 0,
+    rotate: 0,
+    borderWidth: 0,
+    borderStyle: 'solid',
+  };
+
   private _updateSelectedRect = requestThrottledConnectedFrame(() => {
     const { zoom, selection, gfx } = this;
 
@@ -1509,17 +1520,6 @@ export class EdgelessSelectedRectWidget extends WidgetComponent<
 
   @state()
   private accessor _scalePercent: string | undefined = undefined;
-
-  @state()
-  private accessor _selectedRect: SelectedRect = {
-    width: 0,
-    height: 0,
-    left: 0,
-    top: 0,
-    rotate: 0,
-    borderWidth: 0,
-    borderStyle: 'solid',
-  };
 
   @state()
   private accessor _shiftKey = false;

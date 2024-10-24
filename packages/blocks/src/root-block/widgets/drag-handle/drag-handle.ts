@@ -204,13 +204,13 @@ export class AffineDragHandleWidget extends WidgetComponent<RootBlockModel> {
     }
   };
 
+  anchorBlockId = signal<string | null>(null);
+
   anchorBlockComponent = computed<BlockComponent | null>(() => {
     if (!this.anchorBlockId.value) return null;
 
     return this.std.view.getBlock(this.anchorBlockId.value);
   });
-
-  anchorBlockId = signal<string | null>(null);
 
   anchorEdgelessElement: ReadonlySignal<GfxBlockElementModel | null> = computed(
     () => {

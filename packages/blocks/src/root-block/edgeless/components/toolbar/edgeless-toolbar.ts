@@ -214,6 +214,9 @@ export class EdgelessToolbarWidget extends WidgetComponent<
 
   private _moreQuickToolsMenuRef: HTMLElement | null = null;
 
+  @state()
+  accessor containerWidth = 1920;
+
   private _onContainerResize = debounce(({ w }: { w: number }) => {
     this.slots.resize.emit({ w, h: TOOLBAR_HEIGHT });
     this.containerWidth = w;
@@ -648,9 +651,6 @@ export class EdgelessToolbarWidget extends WidgetComponent<
       </div>
     `;
   }
-
-  @state()
-  accessor containerWidth = 1920;
 
   @state()
   accessor presentFrameMenuShow = false;

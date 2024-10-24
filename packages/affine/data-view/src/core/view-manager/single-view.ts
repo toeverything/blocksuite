@@ -136,6 +136,8 @@ export abstract class SingleViewBase<
     return this.data$.value?.name ?? '';
   });
 
+  abstract propertyIds$: ReadonlySignal<string[]>;
+
   properties$ = computed(() => {
     return this.propertyIds$.value.map(
       id => this.propertyGet(id) as ReturnType<this['propertyGet']>
@@ -143,8 +145,6 @@ export abstract class SingleViewBase<
   });
 
   abstract propertiesWithoutFilter$: ReadonlySignal<string[]>;
-
-  abstract propertyIds$: ReadonlySignal<string[]>;
 
   abstract readonly$: ReadonlySignal<boolean>;
 
