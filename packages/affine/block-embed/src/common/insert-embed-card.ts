@@ -2,12 +2,16 @@ import type { DocMode, EmbedCardStyle } from '@blocksuite/affine-model';
 import type { BlockStdScope } from '@blocksuite/block-std';
 import type { BlockModel, Doc } from '@blocksuite/store';
 
+import { SurfaceBlockComponent } from '@blocksuite/affine-block-surface';
 import {
   EMBED_CARD_HEIGHT,
   EMBED_CARD_WIDTH,
 } from '@blocksuite/affine-shared/consts';
 import { DocModeProvider } from '@blocksuite/affine-shared/services';
-import { getLastNoteBlock } from '@blocksuite/affine-shared/utils';
+import {
+  getLastNoteBlock,
+  matchFlavours,
+} from '@blocksuite/affine-shared/utils';
 import { Bound, Vec } from '@blocksuite/global/utils';
 
 function getParentModelBySelection(
@@ -76,11 +80,11 @@ export function insertEmbedCard(
   const { model, index } = getParentModelBySelection(doc, mode, selectedBlock);
   const { flavour, targetStyle, props } = properties;
 
-  if (mode === 'page') {
+  if (!model) return;
+
+  if (!matchFlavours(model, ['affine:surface'])) {
     host.doc.addBlock(flavour as never, props, model, index);
-    return;
-  }
-  if (mode === 'edgeless') {
+  } else {
     const rootId = std.doc.root?.id;
     if (!rootId) return;
     const edgelessRoot = std.view.getBlock(rootId);
@@ -88,9 +92,9 @@ export function insertEmbedCard(
 
     // @ts-expect-error TODO: fix after edgeless refactor
     edgelessRoot.service.viewport.smoothZoom(1);
-    // @ts-expect-error TODO: fix after edgeless refactor
-    const surface = edgelessRoot.surface;
-    const center = Vec.toVec(surface.renderer.viewport.center);
+    const surfaceBlock = host.view.getBlock(model.id);
+    if (!(surfaceBlock instanceof SurfaceBlockComponent)) return;
+    const center = Vec.toVec(surfaceBlock.renderer.viewport.center);
     // @ts-expect-error TODO: fix after edgeless refactor
     const cardId = edgelessRoot.service.addBlock(
       flavour,
@@ -103,7 +107,7 @@ export function insertEmbedCard(
         ).serialize(),
         style: targetStyle,
       },
-      surface.model
+      model
     );
 
     // @ts-expect-error TODO: fix after edgeless refactor
@@ -116,6 +120,5 @@ export function insertEmbedCard(
     edgelessRoot.tools.setEdgelessTool({
       type: 'default',
     });
-    return;
   }
 }

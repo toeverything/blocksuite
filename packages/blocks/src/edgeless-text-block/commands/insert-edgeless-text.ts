@@ -76,6 +76,15 @@ export const insertEdgelessTextCommand: Command<
           paragraph.model.deleted.once(() => {
             abortController.abort();
           });
+          edgelessText.addEventListener(
+            'beforeinput',
+            () => {
+              abortController.abort();
+            },
+            {
+              once: true,
+            }
+          );
         })
         .catch(console.error);
     })
