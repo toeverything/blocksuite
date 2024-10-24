@@ -7,7 +7,6 @@ import type {
   GfxBlockComponent,
   SurfaceSelection,
 } from '@blocksuite/block-std';
-import type { IBound } from '@blocksuite/global/utils';
 
 import { FontLoaderService } from '@blocksuite/affine-shared/services';
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
@@ -24,7 +23,6 @@ import type { EdgelessRootBlockWidgetName } from '../types.js';
 import type { EdgelessRootService } from './edgeless-root-service.js';
 
 import { requestThrottledConnectedFrame } from '../../_common/utils/index.js';
-import { edgelessElementsBound } from './utils/bound-utils.js';
 import { getBackgroundGrid, isCanvasElement } from './utils/query.js';
 
 export class EdgelessRootPreviewBlockComponent extends BlockComponent<
@@ -66,6 +64,9 @@ export class EdgelessRootPreviewBlockComponent extends BlockComponent<
     }
   `;
 
+  @query('.edgeless-background')
+  accessor background!: HTMLDivElement;
+
   private _refreshLayerViewport = requestThrottledConnectedFrame(() => {
     const { zoom, translateX, translateY } = this.service.viewport;
     const { gap } = getBackgroundGrid(zoom, true);
@@ -80,8 +81,6 @@ export class EdgelessRootPreviewBlockComponent extends BlockComponent<
   private _resizeObserver: ResizeObserver | null = null;
 
   private _viewportElement: HTMLElement | null = null;
-
-  mouseRoot!: HTMLElement;
 
   get dispatcher() {
     return this.service?.uiEventDispatcher;
@@ -168,13 +167,9 @@ export class EdgelessRootPreviewBlockComponent extends BlockComponent<
   }
 
   private _initSlotEffects() {
-    const { disposables } = this;
-
     this.disposables.add(
       ThemeObserver.instance.mode$.subscribe(() => this.surface.refresh())
     );
-
-    disposables.add(this.service.selection);
   }
 
   override connectedCallback() {
@@ -220,11 +215,6 @@ export class EdgelessRootPreviewBlockComponent extends BlockComponent<
     this._refreshLayerViewport();
   }
 
-  getElementsBound(): IBound | null {
-    const { service } = this;
-    return edgelessElementsBound([...service.elements, ...service.blocks]);
-  }
-
   override renderBlock() {
     return html`
       <div class="edgeless-background edgeless-container">
@@ -256,9 +246,6 @@ export class EdgelessRootPreviewBlockComponent extends BlockComponent<
       this._initResizeEffect();
     }
   }
-
-  @query('.edgeless-background')
-  accessor background!: HTMLDivElement;
 
   @state()
   accessor editorViewportSelector = '.affine-edgeless-viewport';

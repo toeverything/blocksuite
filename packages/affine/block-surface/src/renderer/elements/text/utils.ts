@@ -8,7 +8,7 @@ import type { Bound } from '@blocksuite/global/utils';
 import type { Y } from '@blocksuite/store';
 
 import {
-  getPointsFromBoundsWithRotation,
+  getPointsFromBoundWithRotation,
   rotatePoints,
 } from '@blocksuite/global/utils';
 import { deltaInsertsToChunks } from '@blocksuite/inline';
@@ -235,7 +235,7 @@ export function getTextCursorPosition(
   model: TextElementModel,
   coord: { x: number; y: number }
 ) {
-  const leftTop = getPointsFromBoundsWithRotation(model)[0];
+  const leftTop = getPointsFromBoundWithRotation(model)[0];
   const mousePos = rotatePoints(
     [[coord.x, coord.y]],
     leftTop,

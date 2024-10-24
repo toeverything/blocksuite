@@ -82,6 +82,9 @@ export class GfxViewportElement extends WithDisposable(LitElement) {
     resolve: () => void;
   }[] = [];
 
+  @property({ attribute: false })
+  accessor viewport!: Viewport;
+
   private _refreshViewport = requestThrottledConnectedFrame(() => {
     const { translateX, translateY, zoom } = this.viewport;
 
@@ -174,7 +177,4 @@ export class GfxViewportElement extends WithDisposable(LitElement) {
 
   @property({ type: Number })
   accessor maxConcurrentRenders: number = 2;
-
-  @property({ attribute: false })
-  accessor viewport!: Viewport;
 }

@@ -4,7 +4,7 @@ import type { IBound, IVec } from '@blocksuite/global/utils';
 import {
   Bound,
   getCenterAreaBounds,
-  getPointsFromBoundsWithRotation,
+  getPointsFromBoundWithRotation,
   linePolygonIntersects,
   pointInPolygon,
   PointLocation,
@@ -42,7 +42,7 @@ export const rect = {
     options: PointTestOptions
   ) {
     const point: IVec = [x, y];
-    const points = getPointsFromBoundsWithRotation(
+    const points = getPointsFromBoundWithRotation(
       this,
       undefined,
       options.responsePadding
@@ -69,13 +69,13 @@ export const rect = {
             this,
             DEFAULT_CENTRAL_AREA_RATIO
           );
-          const centralPoints = getPointsFromBoundsWithRotation(centralBounds);
+          const centralPoints = getPointsFromBoundWithRotation(centralBounds);
           // Check if the point is in the center area
           hit = pointInPolygon([x, y], centralPoints);
         } else if (this.textBound) {
           hit = pointInPolygon(
             point,
-            getPointsFromBoundsWithRotation(
+            getPointsFromBoundWithRotation(
               this,
               () => Bound.from(this.textBound!).points
             )
@@ -88,17 +88,17 @@ export const rect = {
   },
 
   containsBound(bounds: Bound, element: ShapeElementModel): boolean {
-    const points = getPointsFromBoundsWithRotation(element);
+    const points = getPointsFromBoundWithRotation(element);
     return points.some(point => bounds.containsPoint(point));
   },
 
   getNearestPoint(point: IVec, element: ShapeElementModel) {
-    const points = getPointsFromBoundsWithRotation(element);
+    const points = getPointsFromBoundWithRotation(element);
     return polygonNearestPoint(points, point);
   },
 
   getLineIntersections(start: IVec, end: IVec, element: ShapeElementModel) {
-    const points = getPointsFromBoundsWithRotation(element);
+    const points = getPointsFromBoundWithRotation(element);
     return linePolygonIntersects(start, end, points);
   },
 

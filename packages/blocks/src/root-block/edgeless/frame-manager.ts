@@ -4,6 +4,9 @@ import type { Doc } from '@blocksuite/store';
 import { Overlay } from '@blocksuite/affine-block-surface';
 import {
   getTopElements,
+  type GfxController,
+  GfxExtension,
+  GfxExtensionIdentifier,
   type GfxModel,
   isGfxContainerElm,
   renderableInEdgeless,
@@ -15,16 +18,11 @@ import {
   DisposableGroup,
   type IVec,
 } from '@blocksuite/global/utils';
-import { DocCollection } from '@blocksuite/store';
+import { DocCollection, Text } from '@blocksuite/store';
 
-import type {
-  EdgelessRootService,
-  FrameBlockModel,
-  NoteBlockModel,
-} from '../../index.js';
+import type { FrameBlockModel, NoteBlockModel } from '../../index.js';
 
 import { GfxBlockModel } from './block-model.js';
-import { edgelessElementsBound } from './utils/bound-utils.js';
 import { areSetsEqual } from './utils/misc.js';
 import { isFrameBlock } from './utils/query.js';
 
@@ -33,6 +31,8 @@ const MIN_FRAME_HEIGHT = 640;
 const FRAME_PADDING = 40;
 
 export class FrameOverlay extends Overlay {
+  static override overlayName: string = 'frame';
+
   private _disposable = new DisposableGroup();
 
   private _frame: FrameBlockModel | null = null;
@@ -40,11 +40,13 @@ export class FrameOverlay extends Overlay {
   private _innerElements = new Set<GfxModel>();
 
   private get _frameManager() {
-    return this._edgelessService.frame;
+    return this.gfx.std.get(
+      GfxExtensionIdentifier('frame-manager')
+    ) as EdgelessFrameManager;
   }
 
-  constructor(private _edgelessService: EdgelessRootService) {
-    super();
+  constructor(gfx: GfxController) {
+    super(gfx);
   }
 
   private _reset() {
@@ -107,8 +109,8 @@ export class FrameOverlay extends Overlay {
   override render(ctx: CanvasRenderingContext2D): void {
     ctx.beginPath();
     ctx.strokeStyle = '#1E96EB';
-    ctx.lineWidth = 2 / this._edgelessService.viewport.zoom;
-    const radius = 2 / this._edgelessService.viewport.zoom;
+    ctx.lineWidth = 2 / this.gfx.viewport.zoom;
+    const radius = 2 / this.gfx.viewport.zoom;
 
     if (this._frame) {
       const { x, y, w, h } = this._frame.elementBound;
@@ -127,17 +129,22 @@ export class FrameOverlay extends Overlay {
   }
 }
 
-export class EdgelessFrameManager {
+export class EdgelessFrameManager extends GfxExtension {
+  static override key = 'frame-manager';
+
   private _disposable = new DisposableGroup();
 
   /**
    * Get all sorted frames
    */
   get frames() {
-    return this._rootService.frames;
+    return this.gfx.layer.blocks.filter(
+      block => block.flavour === 'affine:frame'
+    ) as FrameBlockModel[];
   }
 
-  constructor(private _rootService: EdgelessRootService) {
+  constructor(gfx: GfxController) {
+    super(gfx);
     this._watchElementAdded();
   }
 
@@ -152,19 +159,18 @@ export class EdgelessFrameManager {
   }
 
   private _addFrameBlock(bound: Bound) {
-    const surfaceModel = this._rootService.doc.getBlocksByFlavour(
-      'affine:surface'
-    )[0].model as SurfaceBlockModel;
-
-    const id = this._rootService.addBlock(
+    const surfaceModel = this.gfx.surface as SurfaceBlockModel;
+    const id = this.gfx.doc.addBlock(
       'affine:frame',
       {
-        title: new DocCollection.Y.Text(`Frame ${this.frames.length + 1}`),
+        title: new Text(
+          new DocCollection.Y.Text(`Frame ${this.frames.length + 1}`)
+        ),
         xywh: bound.serialize(),
       },
       surfaceModel
     );
-    const frameModel = this._rootService.getElementById(id);
+    const frameModel = this.gfx.getElementById(id);
 
     if (!frameModel || !isFrameBlock(frameModel)) {
       throw new BlockSuiteError(
@@ -177,9 +183,15 @@ export class EdgelessFrameManager {
   }
 
   private _watchElementAdded() {
+    if (!this.gfx.surface) {
+      return;
+    }
+
+    const { surface: surfaceModel, doc } = this.gfx;
+
     this._disposable.add(
-      this._rootService.surface.elementAdded.on(({ id, local }) => {
-        const element = this._rootService.surface.getElementById(id);
+      surfaceModel.elementAdded.on(({ id, local }) => {
+        const element = surfaceModel.getElementById(id);
         if (element && local) {
           const frame = this.getFrameFromPoint(element.elementBound.center);
 
@@ -194,15 +206,11 @@ export class EdgelessFrameManager {
     );
 
     this._disposable.add(
-      this._rootService.doc.slots.blockUpdated.on(payload => {
+      doc.slots.blockUpdated.on(payload => {
         if (
           payload.type === 'add' &&
           payload.model instanceof GfxBlockModel &&
-          renderableInEdgeless(
-            this._rootService.doc,
-            this._rootService.surface,
-            payload.model
-          )
+          renderableInEdgeless(doc, surfaceModel, payload.model)
         ) {
           const frame = this.getFrameFromPoint(
             payload.model.elementBound.center,
@@ -247,9 +255,9 @@ export class EdgelessFrameManager {
       getTopElements(this.getElementsInFrameBound(frameModel))
     );
 
-    this._rootService.doc.captureSync();
+    this.gfx.doc.captureSync();
 
-    this._rootService.selection.set({
+    this.gfx.selection.set({
       elements: [frameModel.id],
       editing: false,
     });
@@ -258,9 +266,7 @@ export class EdgelessFrameManager {
   }
 
   createFrameOnElements(elements: GfxModel[]) {
-    let bound = edgelessElementsBound(
-      this._rootService.selection.selectedElements
-    );
+    let bound = this.gfx.selection.selectedBound;
     bound = bound.expand(FRAME_PADDING);
     if (bound.w < MIN_FRAME_WIDTH) {
       const offset = (MIN_FRAME_WIDTH - bound.w) / 2;
@@ -275,9 +281,9 @@ export class EdgelessFrameManager {
 
     this.addElementsToFrame(frameModel, getTopElements(elements));
 
-    this._rootService.doc.captureSync();
+    this.gfx.doc.captureSync();
 
-    this._rootService.selection.set({
+    this.gfx.selection.set({
       elements: [frameModel.id],
       editing: false,
     });
@@ -286,13 +292,11 @@ export class EdgelessFrameManager {
   }
 
   createFrameOnSelected() {
-    return this.createFrameOnElements(
-      this._rootService.selection.selectedElements
-    );
+    return this.createFrameOnElements(this.gfx.selection.selectedElements);
   }
 
   createFrameOnViewportCenter(wh: [number, number]) {
-    const center = this._rootService.viewport.center;
+    const center = this.gfx.viewport.center;
     const bound = new Bound(
       center.x - wh[0] / 2,
       center.y - wh[1] / 2,
@@ -301,10 +305,6 @@ export class EdgelessFrameManager {
     );
 
     this.createFrameOnBound(bound);
-  }
-
-  dispose() {
-    this._disposable.dispose();
   }
 
   /**
@@ -320,10 +320,10 @@ export class EdgelessFrameManager {
     }
 
     const childElements = frame.childIds
-      .map(id => this._rootService.getElementById(id))
+      .map(id => this.gfx.getElementById(id))
       .filter(element => element !== null);
 
-    return childElements;
+    return childElements as BlockSuite.EdgelessModel[];
   }
 
   /**
@@ -332,7 +332,7 @@ export class EdgelessFrameManager {
    */
   getElementsInFrameBound(frame: FrameBlockModel, fullyContained = true) {
     const bound = Bound.deserialize(frame.xywh);
-    const elements: GfxModel[] = this._rootService.gfx.grid
+    const elements: GfxModel[] = this.gfx.grid
       .search(bound, fullyContained)
       .filter(element => element !== frame);
 
@@ -358,7 +358,7 @@ export class EdgelessFrameManager {
   }
 
   removeAllChildrenFromFrame(frame: FrameBlockModel) {
-    this._rootService.doc.transact(() => {
+    this.gfx.doc.transact(() => {
       frame.childElementIds = {};
     });
   }
@@ -367,6 +367,10 @@ export class EdgelessFrameManager {
     const parentFrame = this.getParentFrame(element);
     // eslint-disable-next-line unicorn/prefer-dom-node-remove
     parentFrame?.removeChild(element);
+  }
+
+  override unmounted(): void {
+    this._disposable.dispose();
   }
 }
 

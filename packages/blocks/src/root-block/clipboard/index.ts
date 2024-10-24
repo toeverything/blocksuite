@@ -192,10 +192,12 @@ export class PageClipboard {
     if (this._disposables.disposed) {
       this._disposables = new DisposableGroup();
     }
-    this.host.handleEvent('copy', this.onPageCopy);
-    this.host.handleEvent('paste', this.onPagePaste);
-    this.host.handleEvent('cut', this.onPageCut);
-    this._init();
+    if (navigator.clipboard) {
+      this.host.handleEvent('copy', this.onPageCopy);
+      this.host.handleEvent('paste', this.onPagePaste);
+      this.host.handleEvent('cut', this.onPageCut);
+      this._init();
+    }
   }
 
   hostDisconnected() {

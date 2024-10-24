@@ -152,6 +152,9 @@ export class BlockRenderer
   accessor host!: EditorHost;
 
   @property({ attribute: false })
+  accessor openDoc!: (docId: string) => void;
+
+  @property({ attribute: false })
   accessor rowId!: string;
 
   @property({ attribute: false })

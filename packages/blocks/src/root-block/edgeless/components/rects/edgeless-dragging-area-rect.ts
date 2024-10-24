@@ -1,12 +1,23 @@
-import { WithDisposable } from '@blocksuite/global/utils';
+import type { RootBlockModel } from '@blocksuite/affine-model';
+
+import { WidgetComponent } from '@blocksuite/block-std';
 import { cssVarV2 } from '@toeverything/theme/v2';
-import { css, html, LitElement, nothing, unsafeCSS } from 'lit';
-import { property } from 'lit/decorators.js';
+import { css, html, nothing, unsafeCSS } from 'lit';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
 
-export class EdgelessDraggingAreaRect extends WithDisposable(LitElement) {
+import {
+  DefaultModeDragType,
+  DefaultTool,
+} from '../../gfx-tool/default-tool.js';
+
+export const EDGELESS_DRAGGING_AREA_WIDGET = 'edgeless-dragging-area-rect';
+
+export class EdgelessDraggingAreaRectWidget extends WidgetComponent<
+  RootBlockModel,
+  EdgelessRootBlockComponent
+> {
   static override styles = css`
     .affine-edgeless-dragging-area {
       position: absolute;
@@ -25,33 +36,33 @@ export class EdgelessDraggingAreaRect extends WithDisposable(LitElement) {
     }
   `;
 
-  protected override firstUpdated() {
-    this._disposables.add(
-      this.edgeless.slots.draggingAreaUpdated.on(() => this.requestUpdate())
-    );
-  }
+  override render() {
+    const rect = this.block.gfx.tool.draggingViewArea$.value;
+    const tool = this.block.gfx.tool.currentTool$.value;
 
-  protected override render() {
-    const rect = this.edgeless.tools.draggingArea;
-    if (rect === null) return nothing;
+    if (
+      rect.w === 0 ||
+      rect.h === 0 ||
+      !(tool instanceof DefaultTool) ||
+      tool.dragType !== DefaultModeDragType.Selecting
+    )
+      return nothing;
 
     const style = {
-      left: rect.left + 'px',
-      top: rect.top + 'px',
-      width: rect.width + 'px',
-      height: rect.height + 'px',
+      left: rect.x + 'px',
+      top: rect.y + 'px',
+      width: rect.w + 'px',
+      height: rect.h + 'px',
     };
+
     return html`
       <div class="affine-edgeless-dragging-area" style=${styleMap(style)}></div>
     `;
   }
-
-  @property({ attribute: false })
-  accessor edgeless!: EdgelessRootBlockComponent;
 }
 
 declare global {
   interface HTMLElementTagNameMap {
-    'edgeless-dragging-area-rect': EdgelessDraggingAreaRect;
+    'edgeless-dragging-area-rect': EdgelessDraggingAreaRectWidget;
   }
 }

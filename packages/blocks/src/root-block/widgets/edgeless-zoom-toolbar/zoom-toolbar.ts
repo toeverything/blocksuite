@@ -5,12 +5,12 @@ import {
 } from '@blocksuite/affine-components/icons';
 import { stopPropagation } from '@blocksuite/affine-shared/utils';
 import { WithDisposable } from '@blocksuite/global/utils';
+import { effect } from '@preact/signals-core';
 import { baseTheme } from '@toeverything/theme';
 import { css, html, LitElement, nothing, unsafeCSS } from 'lit';
 import { property } from 'lit/decorators.js';
 
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
-import type { EdgelessTool } from '../../edgeless/types.js';
 
 import { ZOOM_STEP } from '../../edgeless/utils/zoom.js';
 
@@ -84,16 +84,12 @@ export class EdgelessZoomToolbar extends WithDisposable(LitElement) {
     }
   `;
 
-  setEdgelessTool = (edgelessTool: EdgelessTool) => {
-    this.edgeless.tools.setEdgelessTool(edgelessTool);
-  };
-
   get edgelessService() {
     return this.edgeless.service;
   }
 
   get edgelessTool() {
-    return this.edgeless.edgelessTool;
+    return this.edgeless.gfx.tool.currentToolOption$.peek();
   }
 
   get locked() {
@@ -121,15 +117,23 @@ export class EdgelessZoomToolbar extends WithDisposable(LitElement) {
     return this.layout === 'vertical';
   }
 
+  override connectedCallback() {
+    super.connectedCallback();
+
+    this.disposables.add(
+      effect(() => {
+        this.edgeless.gfx.tool.currentToolName$.value;
+        this.requestUpdate();
+      })
+    );
+  }
+
   override firstUpdated() {
     const { disposables } = this;
     disposables.add(
       this.edgeless.service.viewport.viewportUpdated.on(() =>
         this.requestUpdate()
       )
-    );
-    disposables.add(
-      this.edgeless.slots.edgelessToolUpdated.on(() => this.requestUpdate())
     );
     disposables.add(
       this.edgeless.slots.readonlyUpdated.on(() => {

@@ -2,7 +2,7 @@ import type { PointTestOptions } from '@blocksuite/block-std/gfx';
 
 import {
   clamp,
-  getPointsFromBoundsWithRotation,
+  getPointsFromBoundWithRotation,
   type IBound,
   type IVec,
   lineEllipseIntersects,
@@ -71,7 +71,7 @@ export const ellipse = {
         } else if (this.textBound) {
           hit = pointInPolygon(
             point,
-            getPointsFromBoundsWithRotation(
+            getPointsFromBoundWithRotation(
               this,
               () => Bound.from(this.textBound!).points
             )
@@ -83,7 +83,7 @@ export const ellipse = {
     return hit;
   },
   containsBound(bounds: Bound, element: ShapeElementModel): boolean {
-    const points = getPointsFromBoundsWithRotation(element, ellipse.points);
+    const points = getPointsFromBoundWithRotation(element, ellipse.points);
     return points.some(point => bounds.containsPoint(point));
   },
 

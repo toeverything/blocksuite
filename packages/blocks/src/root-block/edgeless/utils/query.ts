@@ -1,4 +1,9 @@
-import type { Viewport } from '@blocksuite/block-std/gfx';
+import type {
+  GfxModel,
+  GfxPrimitiveElementModel,
+  GfxToolsFullOptionValue,
+  Viewport,
+} from '@blocksuite/block-std/gfx';
 import type { PointLocation } from '@blocksuite/global/utils';
 import type { BlockModel } from '@blocksuite/store';
 
@@ -28,15 +33,18 @@ import {
   ShapeElementModel,
   TextElementModel,
 } from '@blocksuite/affine-model';
-import { Bound, deserializeXYWH } from '@blocksuite/global/utils';
+import {
+  Bound,
+  deserializeXYWH,
+  getQuadBoundWithRotation,
+} from '@blocksuite/global/utils';
 
 import type { Connectable } from '../../../_common/utils/index.js';
 import type { GfxBlockModel } from '../block-model.js';
-import type { EdgelessTool } from '../types.js';
 
 import { getElementsWithoutGroup } from './group.js';
 
-const { clamp, getQuadBoundsWithRotation } = CommonUtils;
+const { clamp } = CommonUtils;
 
 export function isMindmapNode(
   element: GfxBlockModel | BlockSuite.EdgelessModel | null
@@ -200,8 +208,8 @@ export function isEmbedHtmlBlock(
 }
 
 export function isCanvasElement(
-  selectable: BlockSuite.EdgelessModel | null
-): selectable is BlockSuite.SurfaceModel {
+  selectable: GfxModel | BlockModel | null
+): selectable is GfxPrimitiveElementModel {
   return !isTopLevelBlock(selectable);
 }
 
@@ -226,7 +234,10 @@ export function getSelectionBoxBound(viewport: Viewport, bound: Bound) {
 }
 
 // https://developer.mozilla.org/en-US/docs/Web/CSS/cursor
-export function getCursorMode(edgelessTool: EdgelessTool) {
+export function getCursorMode(edgelessTool: GfxToolsFullOptionValue | null) {
+  if (!edgelessTool) {
+    return 'default';
+  }
   switch (edgelessTool.type) {
     case 'default':
       return 'default';
@@ -272,7 +283,7 @@ export function getSelectedRect(selected: BlockSuite.EdgelessModel[]): DOMRect {
     (bounds, selectable, index) => {
       const rotate = isTopLevelBlock(selectable) ? 0 : selectable.rotate;
       const [x, y, w, h] = deserializeXYWH(selectable.xywh);
-      let { left, top, right, bottom } = getQuadBoundsWithRotation({
+      let { left, top, right, bottom } = getQuadBoundWithRotation({
         x,
         y,
         w,

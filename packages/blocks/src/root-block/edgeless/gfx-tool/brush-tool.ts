@@ -4,16 +4,13 @@ import type { IVec } from '@blocksuite/global/utils';
 
 import { CanvasElementType } from '@blocksuite/affine-block-surface';
 import { TelemetryProvider } from '@blocksuite/affine-shared/services';
-import { assertExists, noop } from '@blocksuite/global/utils';
+import { BaseTool } from '@blocksuite/block-std/gfx';
+import { assertExists } from '@blocksuite/global/utils';
 
-import { EdgelessToolController } from './edgeless-tool.js';
-
-type BrushTool = {
-  type: 'brush';
-};
-
-export class BrushToolController extends EdgelessToolController<BrushTool> {
+export class BrushTool extends BaseTool {
   static BRUSH_POP_GAP = 20;
+
+  static override toolName: string = 'brush';
 
   private _draggingElement: BrushElementModel | null = null;
 
@@ -30,10 +27,6 @@ export class BrushToolController extends EdgelessToolController<BrushTool> {
   protected _draggingPathPoints: number[][] | null = null;
 
   protected _draggingPathPressures: number[] | null = null;
-
-  readonly tool = {
-    type: 'brush',
-  } as BrushTool;
 
   private _getStraightLineType(currentPoint: IVec) {
     const lastPoint = this._lastPoint;
@@ -73,30 +66,10 @@ export class BrushToolController extends EdgelessToolController<BrushTool> {
     }
   }
 
-  afterModeSwitch() {
-    noop();
-  }
-
-  beforeModeSwitch() {
-    noop();
-  }
-
-  onContainerClick(): void {
-    noop();
-  }
-
-  onContainerContextMenu(): void {
-    noop();
-  }
-
-  onContainerDblClick(): void {
-    noop();
-  }
-
-  onContainerDragEnd() {
+  override dragEnd() {
     if (this._draggingElement) {
       const { _draggingElement } = this;
-      this._doc.withoutTransact(() => {
+      this.doc.withoutTransact(() => {
         _draggingElement.pop('points');
         _draggingElement.pop('xywh');
       });
@@ -107,18 +80,19 @@ export class BrushToolController extends EdgelessToolController<BrushTool> {
     this._draggingPathPressures = null;
     this._lastPoint = null;
     this._straightLineType = null;
-    this._doc.captureSync();
+    this.doc.captureSync();
   }
 
-  onContainerDragMove(e: PointerEventState) {
-    if (!this._draggingElementId) return;
+  override dragMove(e: PointerEventState) {
+    if (!this._draggingElementId || !this._draggingElement || !this.gfx.surface)
+      return;
 
     assertExists(this._draggingElementId);
     assertExists(this._draggingPathPoints);
 
     let pointX = e.point.x;
     let pointY = e.point.y;
-    const holdingShiftKey = e.keys.shift || this._edgeless.tools.shiftKey;
+    const holdingShiftKey = e.keys.shift || this.gfx.keyboard.shiftKey$.peek();
     if (holdingShiftKey) {
       if (!this._straightLineType) {
         this._straightLineType = this._getStraightLineType([pointX, pointY]);
@@ -133,26 +107,23 @@ export class BrushToolController extends EdgelessToolController<BrushTool> {
       this._straightLineType = null;
     }
 
-    const [modelX, modelY] = this._service.viewport.toModelCoord(
-      pointX,
-      pointY
-    );
+    const [modelX, modelY] = this.gfx.viewport.toModelCoord(pointX, pointY);
 
     const points = [...this._draggingPathPoints, [modelX, modelY]];
 
     this._lastPoint = [pointX, pointY];
     this._draggingPathPoints = points;
 
-    this._edgeless.service.updateElement(this._draggingElementId, {
+    this.gfx.updateElement(this._draggingElement!, {
       points: this._tryGetPressurePoints(e),
     });
 
     if (
-      this._lastPopLength + BrushToolController.BRUSH_POP_GAP <
+      this._lastPopLength + BrushTool.BRUSH_POP_GAP <
       this._draggingElement!.points.length
     ) {
       this._lastPopLength = this._draggingElement!.points.length;
-      this._doc.withoutTransact(() => {
+      this.doc.withoutTransact(() => {
         this._draggingElement!.pop('points');
         this._draggingElement!.pop('xywh');
       });
@@ -162,29 +133,32 @@ export class BrushToolController extends EdgelessToolController<BrushTool> {
     }
   }
 
-  onContainerDragStart(e: PointerEventState) {
-    this._doc.captureSync();
-    const { viewport } = this._edgeless.service;
+  override dragStart(e: PointerEventState) {
+    if (!this.gfx.surface) {
+      return;
+    }
+
+    this.doc.captureSync();
+
+    const { viewport } = this.gfx;
 
     // create a shape block when drag start
     const [modelX, modelY] = viewport.toModelCoord(e.point.x, e.point.y);
     const points = [[modelX, modelY]];
-
-    const id = this._service.addElement(CanvasElementType.BRUSH, {
+    const id = this.gfx.surface.addElement({
+      type: CanvasElementType.BRUSH,
       points,
     });
 
-    this._service.std
-      .getOptional(TelemetryProvider)
-      ?.track('CanvasElementAdded', {
-        control: 'canvas:draw',
-        page: 'whiteboard editor',
-        module: 'toolbar',
-        segment: 'toolbar',
-        type: CanvasElementType.BRUSH,
-      });
+    this.std.getOptional(TelemetryProvider)?.track('CanvasElementAdded', {
+      control: 'canvas:draw',
+      page: 'whiteboard editor',
+      module: 'toolbar',
+      segment: 'toolbar',
+      type: CanvasElementType.BRUSH,
+    });
 
-    const element = this._service.getElementById(id) as BrushElementModel;
+    const element = this.gfx.getElementById(id) as BrushElementModel;
 
     element.stash('points');
     element.stash('xywh');
@@ -196,36 +170,10 @@ export class BrushToolController extends EdgelessToolController<BrushTool> {
     this._draggingPathPressures = [e.pressure];
     this._lastPopLength = 0;
   }
-
-  onContainerMouseMove() {
-    noop();
-  }
-
-  onContainerMouseOut() {
-    noop();
-  }
-
-  onContainerPointerDown(): void {
-    noop();
-  }
-
-  onContainerTripleClick() {
-    noop();
-  }
-
-  onPressShiftKey(_: boolean) {
-    noop();
-  }
-
-  onPressSpaceBar(_pressed: boolean): void {
-    noop();
-  }
 }
 
-declare global {
-  namespace BlockSuite {
-    interface EdgelessToolMap {
-      brush: BrushToolController;
-    }
+declare module '@blocksuite/block-std/gfx' {
+  interface GfxToolsMap {
+    brush: BrushTool;
   }
 }

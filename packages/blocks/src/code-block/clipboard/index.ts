@@ -84,9 +84,11 @@ export class CodeClipboardController {
     if (this._disposables.disposed) {
       this._disposables = new DisposableGroup();
     }
-    this._clipboard = new Clipboard(this._std);
-    this.host.handleEvent('paste', this.onPagePaste);
-    this._init();
+    if (navigator.clipboard) {
+      this._clipboard = new Clipboard(this._std);
+      this.host.handleEvent('paste', this.onPagePaste);
+      this._init();
+    }
   }
 
   hostDisconnected() {

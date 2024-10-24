@@ -1,23 +1,24 @@
 import type { PointerEventState } from '@blocksuite/block-std';
 import type { IPoint, IVec } from '@blocksuite/global/utils';
 
-import { CommonUtils, Overlay } from '@blocksuite/affine-block-surface';
+import {
+  CommonUtils,
+  Overlay,
+  type SurfaceBlockComponent,
+} from '@blocksuite/affine-block-surface';
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
+import { BaseTool } from '@blocksuite/block-std/gfx';
 import {
   Bound,
   getBoundFromPoints,
   getPolygonPathFromPoints,
   linePolygonIntersects,
-  noop,
   pointInPolygon,
   rotatePoints,
   Vec,
 } from '@blocksuite/global/utils';
 
-import type { EdgelessTool } from '../types.js';
-
 import { LassoMode } from '../../../_common/types.js';
-import { EdgelessToolController } from './edgeless-tool.js';
 
 class LassoOverlay extends Overlay {
   d = '';
@@ -54,12 +55,12 @@ class LassoOverlay extends Overlay {
   }
 }
 
-export type LassoTool = {
-  type: 'lasso';
+export type LassoToolOption = {
   mode: LassoMode;
 };
+export class LassoTool extends BaseTool<LassoToolOption> {
+  static override toolName: string = 'lasso';
 
-export class LassoToolController extends EdgelessToolController<LassoTool> {
   private _currentSelectionState = new Set<string>();
 
   private _isSelecting = false;
@@ -70,29 +71,29 @@ export class LassoToolController extends EdgelessToolController<LassoTool> {
 
   private _loop = () => {
     const path =
-      this.tool.mode === LassoMode.FreeHand
+      this.activatedOption.mode === LassoMode.FreeHand
         ? CommonUtils.getSvgPathFromStroke(this._lassoPoints)
         : getPolygonPathFromPoints(this._lassoPoints);
 
     this._overlay.d = path;
-    this._surface.refresh();
+    (this.gfx.surfaceComponent as SurfaceBlockComponent)?.refresh?.();
     this._raf = requestAnimationFrame(this._loop);
   };
 
-  private _overlay = new LassoOverlay();
+  private _overlay = new LassoOverlay(this.gfx);
 
   private _raf = 0;
-
-  readonly tool = {
-    type: 'lasso',
-  } as LassoTool; // to finalize the selection
 
   get isSelecting() {
     return this._isSelecting;
   }
 
   get selection() {
-    return this._edgeless.service.selection;
+    return this.gfx.selection;
+  }
+
+  get surfaceComponent() {
+    return this.gfx.surfaceComponent as SurfaceBlockComponent;
   }
 
   private _clearLastSelection() {
@@ -103,7 +104,7 @@ export class LassoToolController extends EdgelessToolController<LassoTool> {
 
   private _getElementsInsideLasso() {
     const lassoBounds = getBoundFromPoints(this._lassoPoints);
-    return this._service.gfx
+    return this.gfx
       .getElementsByBound(lassoBounds)
       .filter(e =>
         this.isInsideLassoSelection(Bound.deserialize(e.xywh), e.rotate)
@@ -111,7 +112,7 @@ export class LassoToolController extends EdgelessToolController<LassoTool> {
   }
 
   private _getSelectionMode(ev: PointerEventState): 'add' | 'sub' | 'set' {
-    const shiftKey = ev.keys.shift ?? this._edgeless.tools.shiftKey;
+    const shiftKey = ev.keys.shift ?? this.gfx.keyboard.shiftKey$.peek();
     const altKey = ev.keys.alt ?? false;
     if (shiftKey) return 'add';
     else if (altKey) return 'sub';
@@ -122,7 +123,9 @@ export class LassoToolController extends EdgelessToolController<LassoTool> {
 
   private _reset() {
     cancelAnimationFrame(this._raf);
-    this._edgeless.surface.renderer.removeOverlay(this._overlay);
+    (
+      this.gfx.surfaceComponent as SurfaceBlockComponent
+    )?.renderer.removeOverlay(this._overlay);
     this._overlay.d = '';
     this._overlay.startPoint = null;
 
@@ -195,47 +198,34 @@ export class LassoToolController extends EdgelessToolController<LassoTool> {
   }
 
   private toModelCoord(p: IPoint): IVec {
-    return this._service.viewport.toModelCoord(p.x, p.y);
+    return this.gfx.viewport.toModelCoord(p.x, p.y);
   }
 
   abort() {
     this._reset();
   }
 
-  override afterModeSwitch(newTool?: EdgelessTool): void {
-    if (newTool?.type === 'lasso')
-      this._currentSelectionState = new Set(
-        this.selection.selectedElements.map(el => el.id)
-      );
+  override activate(): void {
+    this._currentSelectionState = new Set(
+      this.selection.selectedElements.map(el => el.id)
+    );
     this._reset();
   }
 
-  override beforeModeSwitch(edgelessTool?: EdgelessTool) {
-    if (edgelessTool?.type === 'pan') {
-      this._clearLastSelection();
-    }
+  override deactivate() {
+    this._clearLastSelection();
   }
 
-  override onContainerClick(): void {}
-
-  override onContainerContextMenu(): void {
-    noop();
-  }
-
-  override onContainerDblClick(): void {
-    noop();
-  }
-
-  override onContainerDragEnd(e: PointerEventState): void {
-    if (this.tool.mode !== LassoMode.FreeHand) return;
+  override dragEnd(e: PointerEventState): void {
+    if (this.activatedOption.mode !== LassoMode.FreeHand) return;
 
     this._updateSelection(e);
 
     this._reset();
   }
 
-  override onContainerDragMove(e: PointerEventState): void {
-    if (this.tool.mode !== LassoMode.FreeHand) return;
+  override dragMove(e: PointerEventState): void {
+    if (this.activatedOption.mode !== LassoMode.FreeHand) return;
 
     const { point } = e;
     const [x, y] = this.toModelCoord(point);
@@ -245,8 +235,8 @@ export class LassoToolController extends EdgelessToolController<LassoTool> {
   }
 
   // For Freehand Mode =
-  override onContainerDragStart(e: PointerEventState): void {
-    if (this.tool.mode !== LassoMode.FreeHand) return;
+  override dragStart(e: PointerEventState): void {
+    if (this.activatedOption.mode !== LassoMode.FreeHand) return;
     const { alt, shift } = e.keys;
 
     if (!shift && !alt) {
@@ -265,27 +255,11 @@ export class LassoToolController extends EdgelessToolController<LassoTool> {
     this._lassoPoints = [[x, y]];
     this._raf = requestAnimationFrame(this._loop);
     this._overlay.startPoint = this._lassoPoints[0];
-    this._surface.renderer.addOverlay(this._overlay);
+    this.surfaceComponent.renderer.addOverlay(this._overlay);
   }
 
-  override onContainerMouseMove(e: PointerEventState): void {
-    if (this.tool.mode !== LassoMode.Polygonal || !this._isSelecting) return;
-
-    const lastPoint = this._lastPoint;
-    const [x, y] = this.toModelCoord(e.point);
-    if (lastPoint) {
-      lastPoint[0] = x;
-      lastPoint[1] = y;
-    }
-    this._updateSelection(e);
-  }
-
-  override onContainerMouseOut(): void {
-    noop();
-  }
-
-  override onContainerPointerDown(e: PointerEventState): void {
-    const { mode } = this.tool;
+  override pointerDown(e: PointerEventState): void {
+    const { mode } = this.activatedOption;
     if (mode !== LassoMode.Polygonal) return;
 
     const { alt, shift } = e.keys;
@@ -309,7 +283,7 @@ export class LassoToolController extends EdgelessToolController<LassoTool> {
       this._lastPoint = b;
       this._overlay.startPoint = a;
       this._raf = requestAnimationFrame(this._loop);
-      this._surface.renderer.addOverlay(this._overlay);
+      this.surfaceComponent.renderer.addOverlay(this._overlay);
     } else {
       const firstPoint = this._lassoPoints[0];
       const lastPoint = this._lastPoint;
@@ -326,23 +300,26 @@ export class LassoToolController extends EdgelessToolController<LassoTool> {
     }
   }
 
-  override onContainerTripleClick(): void {
-    noop();
-  }
+  override pointerMove(e: PointerEventState): void {
+    if (this.activatedOption.mode !== LassoMode.Polygonal || !this._isSelecting)
+      return;
 
-  override onPressShiftKey(): void {
-    noop();
-  }
-
-  override onPressSpaceBar(): void {
-    noop();
+    const lastPoint = this._lastPoint;
+    const [x, y] = this.toModelCoord(e.point);
+    if (lastPoint) {
+      lastPoint[0] = x;
+      lastPoint[1] = y;
+    }
+    this._updateSelection(e);
   }
 }
 
-declare global {
-  namespace BlockSuite {
-    interface EdgelessToolMap {
-      lasso: LassoToolController;
-    }
+declare module '@blocksuite/block-std/gfx' {
+  interface GfxToolsMap {
+    lasso: LassoTool;
+  }
+
+  interface GfxToolsOption {
+    lasso: LassoToolOption;
   }
 }

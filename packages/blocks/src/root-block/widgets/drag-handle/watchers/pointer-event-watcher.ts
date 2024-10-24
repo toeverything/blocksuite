@@ -90,6 +90,19 @@ export class PointerEventWatcher {
     this.widget.selectionHelper.setSelectedBlocks([block]);
   };
 
+  // Need to consider block padding and scale
+  private _getTopWithBlockComponent = (block: BlockComponent) => {
+    const computedStyle = getComputedStyle(block);
+    const { top } = block.getBoundingClientRect();
+    const paddingTop =
+      parseInt(computedStyle.paddingTop) * this.widget.scale.peek();
+    return (
+      top +
+      paddingTop -
+      this.widget.dragHandleContainerOffsetParent.getBoundingClientRect().top
+    );
+  };
+
   private _containerStyle = computed(() => {
     const draggingAreaRect = this.widget.draggingAreaRect.value;
     if (!draggingAreaRect) return null;
@@ -122,19 +135,6 @@ export class PointerEventWatcher {
       height: `${draggingAreaRect.height}px`,
     };
   });
-
-  // Need to consider block padding and scale
-  private _getTopWithBlockComponent = (block: BlockComponent) => {
-    const computedStyle = getComputedStyle(block);
-    const { top } = block.getBoundingClientRect();
-    const paddingTop =
-      parseInt(computedStyle.paddingTop) * this.widget.scale.peek();
-    return (
-      top +
-      paddingTop -
-      this.widget.dragHandleContainerOffsetParent.getBoundingClientRect().top
-    );
-  };
 
   private _grabberStyle = computed(() => {
     const scaleInNote = this.widget.scaleInNote.value;
@@ -330,10 +330,6 @@ export class PointerEventWatcher {
   }
 
   watch() {
-    this.widget.disposables.addFromEvent(this.widget, 'pointerdown', e => {
-      e.preventDefault();
-    });
-
     this.widget.handleEvent('click', this._clickHandler);
     this.widget.handleEvent('pointerMove', this._throttledPointerMoveHandler);
     this.widget.handleEvent('pointerOut', this._pointerOutHandler);

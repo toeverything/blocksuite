@@ -34,6 +34,9 @@ export class BlockComponent<
   Service extends BlockService = BlockService,
   WidgetName extends string = string,
 > extends SignalWatcher(WithDisposable(ShadowlessElement)) {
+  @consume({ context: stdContext })
+  accessor std!: BlockStdScope;
+
   private _selected = computed(() => {
     const selection = this.std.selection.value.find(selection => {
       return selection.blockId === this.model?.id;
@@ -307,9 +310,6 @@ export class BlockComponent<
 
   @consume({ context: docContext })
   accessor doc!: Doc;
-
-  @consume({ context: stdContext })
-  accessor std!: BlockStdScope;
 
   @property({ attribute: false })
   accessor viewType: BlockViewType = BlockViewType.Display;

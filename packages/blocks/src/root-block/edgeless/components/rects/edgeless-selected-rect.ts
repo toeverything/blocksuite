@@ -15,6 +15,7 @@ import {
   CanvasElementType,
   CommonUtils,
   normalizeShapeBound,
+  OverlayIdentifier,
   TextUtils,
 } from '@blocksuite/affine-block-surface';
 import {
@@ -27,6 +28,7 @@ import {
   NOTE_MIN_HEIGHT,
   NOTE_MIN_WIDTH,
   NoteBlockModel,
+  type RootBlockModel,
   ShapeElementModel,
   TextElementModel,
 } from '@blocksuite/affine-model';
@@ -35,22 +37,31 @@ import {
   requestThrottledConnectedFrame,
   stopPropagation,
 } from '@blocksuite/affine-shared/utils';
-import { getTopElements } from '@blocksuite/block-std/gfx';
+import { WidgetComponent } from '@blocksuite/block-std';
+import {
+  getTopElements,
+  GfxControllerIdentifier,
+  GfxExtensionIdentifier,
+  type GfxModel,
+} from '@blocksuite/block-std/gfx';
 import {
   assertType,
   Bound,
   deserializeXYWH,
   pickValues,
   Slot,
-  WithDisposable,
 } from '@blocksuite/global/utils';
-import { css, html, LitElement, nothing } from 'lit';
-import { property, state } from 'lit/decorators.js';
+import { css, html, nothing } from 'lit';
+import { state } from 'lit/decorators.js';
 import { ifDefined } from 'lit/directives/if-defined.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import type { EdgelessTextBlockComponent } from '../../../../edgeless-text-block/edgeless-text-block.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
+import type {
+  EdgelessFrameManager,
+  FrameOverlay,
+} from '../../frame-manager.js';
 
 import { EMBED_CARD_HEIGHT } from '../../../../_common/consts.js';
 import { isMindmapNode } from '../../../../_common/edgeless/mindmap/index.js';
@@ -104,7 +115,12 @@ export type SelectedRect = {
   rotate: number;
 };
 
-export class EdgelessSelectedRect extends WithDisposable(LitElement) {
+export const EDGELESS_SELECTED_RECT_WIDGET = 'edgeless-selected-rect';
+
+export class EdgelessSelectedRectWidget extends WidgetComponent<
+  RootBlockModel,
+  EdgelessRootBlockComponent
+> {
   // disable change-in-update warning
   static override enabledWarnings = [];
 
@@ -460,9 +476,9 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     this._scaleDirection = undefined;
     this._updateMode();
 
-    this.edgeless.slots.elementResizeEnd.emit();
+    this.block.slots.elementResizeEnd.emit();
 
-    this.edgeless.service.frameOverlay.clear();
+    this.frameOverlay.clear();
   };
 
   private _onDragMove = (
@@ -478,10 +494,10 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
   ) => {
     this.slots.dragMove.emit();
 
-    const { edgeless } = this;
+    const { gfx } = this;
 
     newBounds.forEach(({ bound, matrix, path }, id) => {
-      const element = edgeless.service.getElementById(id);
+      const element = gfx.getElementById(id) as GfxModel;
       if (!element) return;
 
       if (isNoteBlock(element)) {
@@ -572,7 +588,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
           element.absolutePath.map(p => p.clone())
         );
       } else {
-        this.edgeless.service.updateElement(id, {
+        this.gfx.updateElement(id, {
           xywh: bounds.serialize(),
           rotate: CommonUtils.normalizeDegAngle(rotate + delta),
         });
@@ -589,7 +605,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     const rotation = this._resizeManager.rotation;
 
     this._dragEndCallback = [];
-    this.edgeless.slots.elementResizeStart.emit();
+    this.block.slots.elementResizeStart.emit();
     this.selection.selectedElements.forEach(el => {
       el.stash('xywh');
 
@@ -671,8 +687,8 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
               target,
               point,
               new DOMRect(
-                left + this.edgeless.viewport.left,
-                top + this.edgeless.viewport.top,
+                left + this.gfx.viewport.left,
+                top + this.gfx.viewport.top,
                 width,
                 height
               ),
@@ -780,18 +796,26 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     _resizeManager.updateBounds(getSelectableBounds(selectedElements));
   };
 
+  @state()
+  private accessor _selectedRect: SelectedRect = {
+    width: 0,
+    height: 0,
+    left: 0,
+    top: 0,
+    rotate: 0,
+    borderWidth: 0,
+    borderStyle: 'solid',
+  };
+
   private _updateSelectedRect = requestThrottledConnectedFrame(() => {
-    const { zoom, selection, edgeless } = this;
+    const { zoom, selection, gfx } = this;
 
     const elements = selection.selectedElements;
     // in surface
     const rect = getSelectedRect(elements);
 
     // in viewport
-    const [left, top] = edgeless.service.viewport.toViewCoord(
-      rect.left,
-      rect.top
-    );
+    const [left, top] = gfx.viewport.toViewCoord(rect.left, rect.top);
     const [width, height] = [rect.width * zoom, rect.height * zoom];
 
     let rotate = 0;
@@ -817,20 +841,20 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     dragEnd: new Slot(),
   };
 
-  get doc() {
-    return this.edgeless.doc;
-  }
-
   get dragDirection() {
     return this._resizeManager.dragDirection;
   }
 
-  get dragging() {
-    return this._resizeManager.dragging || this.edgeless.tools.dragging;
+  get edgelessSlots() {
+    return this.block.slots;
   }
 
-  get edgelessSlots() {
-    return this.edgeless.slots;
+  get frameOverlay() {
+    return this.std.get(OverlayIdentifier('frame')) as FrameOverlay;
+  }
+
+  get gfx() {
+    return this.std.get(GfxControllerIdentifier);
   }
 
   get resizeMode(): ResizeMode {
@@ -899,15 +923,15 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
   }
 
   get selection() {
-    return this.edgeless.service.selection;
+    return this.gfx.selection;
   }
 
   get surface() {
-    return this.edgeless.surface;
+    return this.gfx.surface;
   }
 
   get zoom() {
-    return this.edgeless.service.viewport.zoom;
+    return this.gfx.viewport.zoom;
   }
 
   constructor() {
@@ -961,7 +985,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       height === AI_CHAT_BLOCK_MIN_HEIGHT ||
       height === AI_CHAT_BLOCK_MAX_HEIGHT;
 
-    this.edgeless.service.updateElement(element.id, {
+    this.gfx.updateElement(element.id, {
       scale,
       xywh: bound.serialize(),
     });
@@ -974,7 +998,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     originalPath: PointLocation[]
   ) {
     const props = element.resize(bounds, originalPath, matrix);
-    this.edgeless.service.updateElement(element.id, props);
+    this.gfx.updateElement(element.id, props);
   }
 
   #adjustEdgelessText(
@@ -994,7 +1018,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       this._scaleDirection = direction;
 
       bound.h = bound.w * (oldXYWH.h / oldXYWH.w);
-      this.edgeless.service.updateElement(element.id, {
+      this.gfx.updateElement(element.id, {
         scale: newScale,
         xywh: bound.serialize(),
       });
@@ -1002,7 +1026,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       direction === HandleDirection.Left ||
       direction === HandleDirection.Right
     ) {
-      const textPortal = this.edgeless.host.view.getBlock(
+      const textPortal = this.host.view.getBlock(
         element.id
       ) as EdgelessTextBlockComponent | null;
       if (!textPortal) return;
@@ -1015,7 +1039,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
         Infinity
       );
       bound.w = newRealWidth * element.scale;
-      this.edgeless.service.updateElement(element.id, {
+      this.gfx.updateElement(element.id, {
         xywh: Bound.serialize({
           ...bound,
           h: oldXYWH.h,
@@ -1036,7 +1060,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     this._isWidthLimit = bound.w === EMBED_HTML_MIN_WIDTH;
     this._isHeightLimit = bound.h === EMBED_HTML_MIN_HEIGHT;
 
-    this.edgeless.service.updateElement(element.id, {
+    this.gfx.updateElement(element.id, {
       xywh: bound.serialize(),
     });
   }
@@ -1068,18 +1092,20 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     this._isWidthLimit = width === SYNCED_MIN_WIDTH;
     this._isHeightLimit = height === SYNCED_MIN_HEIGHT;
 
-    this.edgeless.service.updateElement(element.id, {
+    this.gfx.updateElement(element.id, {
       scale,
       xywh: bound.serialize(),
     });
   }
 
   #adjustFrame(frame: FrameBlockModel, bound: Bound) {
-    const frameManager = this.edgeless.service.frame;
+    const frameManager = this.std.get(
+      GfxExtensionIdentifier('frame-manager')
+    ) as EdgelessFrameManager;
 
     const oldChildren = frameManager.getChildElementsInFrame(frame);
 
-    this.edgeless.service.updateElement(frame.id, {
+    this.gfx.updateElement(frame.id, {
       xywh: bound.serialize(),
     });
 
@@ -1093,7 +1119,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
 
     frameManager.removeAllChildrenFromFrame(frame);
     frameManager.addElementsToFrame(frame, newChildren);
-    this.edgeless.service.frameOverlay.highlight(frame, true, false);
+    this.frameOverlay.highlight(frame, true, false);
   }
 
   #adjustNote(
@@ -1117,13 +1143,13 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     this._isHeightLimit = bound.h === NOTE_MIN_HEIGHT * scale;
 
     if (bound.h >= NOTE_MIN_HEIGHT * scale) {
-      this.edgeless.doc.updateBlock(element, () => {
+      this.doc.updateBlock(element, () => {
         element.edgeless.collapse = true;
         element.edgeless.collapsedHeight = bound.h / scale;
       });
     }
 
-    this.edgeless.service.updateElement(element.id, {
+    this.gfx.updateElement(element.id, {
       edgeless: {
         ...element.edgeless,
         scale,
@@ -1163,7 +1189,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       bound.w = (curBound.w / curBound.h) * bound.h;
     }
 
-    this.edgeless.service.updateElement(element.id, {
+    this.gfx.updateElement(element.id, {
       xywh: bound.serialize(),
     });
   }
@@ -1174,7 +1200,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     _direction: HandleDirection
   ) {
     bound = normalizeShapeBound(element, bound);
-    this.edgeless.service.updateElement(element.id, {
+    this.gfx.updateElement(element.id, {
       xywh: bound.serialize(),
     });
   }
@@ -1213,7 +1239,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       );
       // If the width of the text element has been changed by dragging,
       // We need to set hasMaxWidth to true for wrapping the text
-      this.edgeless.service.updateElement(element.id, {
+      this.gfx.updateElement(element.id, {
         xywh: bound.serialize(),
         fontSize: element.fontSize * p,
         hasMaxWidth: true,
@@ -1223,7 +1249,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       // const newFontsize = element.fontSize * p;
       // bound = normalizeTextBound(element, bound, false, newFontsize);
 
-      this.edgeless.service.updateElement(element.id, {
+      this.gfx.updateElement(element.id, {
         xywh: bound.serialize(),
         fontSize: element.fontSize * p,
       });
@@ -1235,7 +1261,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     bound: Bound,
     _direction: HandleDirection
   ) {
-    this.edgeless.service.updateElement(element.id, {
+    this.gfx.updateElement(element.id, {
       xywh: bound.serialize(),
     });
   }
@@ -1280,14 +1306,14 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
   }
 
   override firstUpdated() {
-    const { _disposables, edgelessSlots, selection, edgeless } = this;
+    const { _disposables, edgelessSlots, block, selection, gfx } = this;
 
     _disposables.add(
       // viewport zooming / scrolling
-      edgeless.service.viewport.viewportUpdated.on(this._updateOnViewportChange)
+      gfx.viewport.viewportUpdated.on(this._updateOnViewportChange)
     );
 
-    pickValues(edgeless.service.surface, [
+    pickValues(gfx.surface!, [
       'elementAdded',
       'elementRemoved',
       'elementUpdated',
@@ -1311,14 +1337,14 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     _disposables.add(selection.slots.updated.on(this._updateOnSelectionChange));
 
     _disposables.add(
-      edgeless.slots.readonlyUpdated.on(() => this.requestUpdate())
+      block.slots.readonlyUpdated.on(() => this.requestUpdate())
     );
 
     _disposables.add(
-      edgeless.slots.elementResizeStart.on(() => (this._isResizing = true))
+      block.slots.elementResizeStart.on(() => (this._isResizing = true))
     );
     _disposables.add(
-      edgeless.slots.elementResizeEnd.on(() => (this._isResizing = false))
+      block.slots.elementResizeEnd.on(() => (this._isResizing = false))
     );
     _disposables.add(() => {
       this._propDisposables.forEach(disposable => disposable.dispose());
@@ -1334,7 +1360,8 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     if (!this._shouldRenderSelection(elements)) return nothing;
 
     const {
-      edgeless,
+      block,
+      gfx,
       doc,
       resizeMode,
       _resizeManager,
@@ -1380,7 +1407,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
           ? html`
               <edgeless-connector-handle
                 .connector=${elements[0]}
-                .edgeless=${edgeless}
+                .edgeless=${block}
               ></edgeless-connector-handle>
             `
           : nothing;
@@ -1393,10 +1420,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
         )
           ? elements.map(element => {
               const [modelX, modelY, w, h] = deserializeXYWH(element.xywh);
-              const [x, y] = edgeless.service.viewport.toViewCoord(
-                modelX,
-                modelY
-              );
+              const [x, y] = gfx.viewport.toViewCoord(modelX, modelY);
               const { left, top, borderWidth } = this._selectedRect;
               const style = {
                 position: 'absolute',
@@ -1454,7 +1478,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       ${!doc.readonly && !inoperable && this._canAutoComplete()
         ? html`<edgeless-auto-complete
             .current=${this.selection.selectedElements[0]}
-            .edgeless=${edgeless}
+            .edgeless=${block}
             .selectedRect=${_selectedRect}
           >
           </edgeless-auto-complete>`
@@ -1498,28 +1522,14 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
   private accessor _scalePercent: string | undefined = undefined;
 
   @state()
-  private accessor _selectedRect: SelectedRect = {
-    width: 0,
-    height: 0,
-    left: 0,
-    top: 0,
-    rotate: 0,
-    borderWidth: 0,
-    borderStyle: 'solid',
-  };
-
-  @state()
   private accessor _shiftKey = false;
 
   @state()
   accessor autoCompleteOff = false;
-
-  @property({ attribute: false })
-  accessor edgeless!: EdgelessRootBlockComponent;
 }
 
 declare global {
   interface HTMLElementTagNameMap {
-    'edgeless-selected-rect': EdgelessSelectedRect;
+    'edgeless-selected-rect': EdgelessSelectedRectWidget;
   }
 }

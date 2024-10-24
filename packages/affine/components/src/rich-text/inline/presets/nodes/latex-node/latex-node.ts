@@ -59,7 +59,10 @@ export class AffineLatexNode extends SignalWatcher(
       gap: 10px;
 
       border-radius: 4px;
-      background: ${unsafeCSSVarV2('label/red')};
+      background: ${
+        // @ts-ignore
+        unsafeCSSVarV2('label/red')
+      };
 
       color: ${unsafeCSSVarV2('text/highlight/fg/red')};
       font-family: Inter;

@@ -34,7 +34,6 @@ export { AffineImageToolbarWidget } from './image-toolbar/index.js';
 export { AffineInnerModalWidget } from './inner-modal/inner-modal.js';
 export { LinkedWidgetUtils } from './linked-doc/config.js';
 export {
-  importNotion,
   // It's used in the AFFiNE!
   showImportModal,
 } from './linked-doc/import-doc/index.js';

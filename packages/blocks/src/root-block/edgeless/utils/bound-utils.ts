@@ -1,18 +1,11 @@
 import type { SerializedElement } from '@blocksuite/block-std/gfx';
 
-import { Bound, getBoundsWithRotation } from '@blocksuite/global/utils';
+import { Bound, getBoundWithRotation } from '@blocksuite/global/utils';
 import { type BlockSnapshot, BlockSnapshotSchema } from '@blocksuite/store';
-
-export function edgelessElementsBound(elements: BlockSuite.EdgelessModel[]) {
-  if (elements.length === 0) return new Bound();
-  return elements.reduce((prev, element) => {
-    return prev.unite(element.elementBound);
-  }, elements[0].elementBound);
-}
 
 export function getBoundFromSerializedElement(element: SerializedElement) {
   return Bound.from(
-    getBoundsWithRotation({
+    getBoundWithRotation({
       ...Bound.deserialize(element.xywh),
       rotate: typeof element.rotate === 'number' ? element.rotate : 0,
     })

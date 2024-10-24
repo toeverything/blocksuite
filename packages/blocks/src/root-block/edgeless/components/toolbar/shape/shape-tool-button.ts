@@ -4,7 +4,7 @@ import { css, html, LitElement } from 'lit';
 
 import type { DraggableShape } from './utils.js';
 
-import { ShapeToolController } from '../../../tools/shape-tool.js';
+import { ShapeTool } from '../../../gfx-tool/shape-tool.js';
 import { getTooltipWithShortcut } from '../../utils.js';
 import { EdgelessToolbarToolMixin } from '../mixins/tool.mixin.js';
 
@@ -25,8 +25,7 @@ export class EdgelessShapeToolButton extends EdgelessToolbarToolMixin(
   `;
 
   private _handleShapeClick = (shape: DraggableShape) => {
-    this.setEdgelessTool({
-      type: this.type,
+    this.setEdgelessTool(this.type, {
       shapeName: shape.name,
     });
     if (!this.popper) this._toggleMenu();
@@ -35,8 +34,7 @@ export class EdgelessShapeToolButton extends EdgelessToolbarToolMixin(
   private _handleWrapperClick = () => {
     if (this.tryDisposePopper()) return;
 
-    this.setEdgelessTool({
-      type: this.type,
+    this.setEdgelessTool(this.type, {
       shapeName: ShapeType.Rect,
     });
     if (!this.popper) this._toggleMenu();
@@ -49,8 +47,7 @@ export class EdgelessShapeToolButton extends EdgelessToolbarToolMixin(
       setProps: ele => {
         ele.edgeless = this.edgeless;
         ele.onChange = (shapeName: ShapeName) => {
-          this.setEdgelessTool({
-            type: this.type,
+          this.setEdgelessTool(this.type, {
             shapeName,
           });
           this._updateOverlay();
@@ -60,8 +57,8 @@ export class EdgelessShapeToolButton extends EdgelessToolbarToolMixin(
   }
 
   private _updateOverlay() {
-    const controller = this.edgeless.tools.currentController;
-    if (controller instanceof ShapeToolController) {
+    const controller = this.edgeless.gfx.tool.currentTool$.peek();
+    if (controller instanceof ShapeTool) {
       controller.createOverlay();
     }
   }

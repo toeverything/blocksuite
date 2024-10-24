@@ -60,8 +60,18 @@ export class DataViewRenderer extends SignalWatcher(
 
   private _view = createRef<{ expose: DataViewExpose }>();
 
+  @property({ attribute: false })
+  accessor config!: DataViewRendererConfig;
+
   private currentViewId$ = computed(() => {
     return this.config.dataSource.viewManager.currentViewId$.value;
+  });
+
+  viewMap$ = computed(() => {
+    const manager = this.config.dataSource.viewManager;
+    return Object.fromEntries(
+      manager.views$.value.map(view => [view, manager.viewGet(view)])
+    );
   });
 
   currentViewConfig$ = computed<ViewProps | undefined>(() => {
@@ -119,13 +129,6 @@ export class DataViewRenderer extends SignalWatcher(
         .finally(ops.onClose);
     }
   };
-
-  viewMap$ = computed(() => {
-    const manager = this.config.dataSource.viewManager;
-    return Object.fromEntries(
-      manager.views$.value.map(view => [view, manager.viewGet(view)])
-    );
-  });
 
   get view() {
     return this._view.value;
@@ -185,9 +188,6 @@ export class DataViewRenderer extends SignalWatcher(
       </div>
     `;
   }
-
-  @property({ attribute: false })
-  accessor config!: DataViewRendererConfig;
 
   @state()
   accessor currentView: string | undefined = undefined;

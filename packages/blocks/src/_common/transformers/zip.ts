@@ -9,7 +9,7 @@ import type {
 import { sha } from '@blocksuite/global/utils';
 import { extMimeMap, getAssetName, Job } from '@blocksuite/store';
 
-import { Unzip, Zip } from '../transformers/utils.js';
+import { download, Unzip, Zip } from '../transformers/utils.js';
 import { replaceIdMiddleware, titleMiddleware } from './middlewares.js';
 
 async function exportDocs(collection: DocCollection, docs: Doc[]) {
@@ -38,7 +38,8 @@ async function exportDocs(collection: DocCollection, docs: Doc[]) {
     await assets.file(name, blob);
   }
 
-  return zip.generate();
+  const downloadBlob = await zip.generate();
+  return download(downloadBlob, `${collection.id}.bs.zip`);
 }
 
 async function importDocs(collection: DocCollection, imported: Blob) {

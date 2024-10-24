@@ -2,7 +2,6 @@ import type { BlockComponent } from '@blocksuite/block-std';
 
 import { focusTextModel } from '@blocksuite/affine-components/rich-text';
 import { stopPropagation } from '@blocksuite/affine-shared/utils';
-import { ZERO_WIDTH_SPACE } from '@blocksuite/inline/consts';
 import { css, html, LitElement } from 'lit';
 import { property } from 'lit/decorators.js';
 
@@ -10,7 +9,8 @@ export class BlockZeroWidth extends LitElement {
   static override styles = css`
     .block-zero-width {
       position: absolute;
-      bottom: -10px;
+      bottom: -15px;
+      height: 10px;
       width: 100%;
       cursor: text;
       z-index: 1;
@@ -24,7 +24,7 @@ export class BlockZeroWidth extends LitElement {
   handleClick(e: MouseEvent) {
     stopPropagation(e);
     if (this.block.doc.readonly) return;
-    const nextBlock = this.block.model.doc.getNext(this.block.model);
+    const nextBlock = this.block.doc.getNext(this.block.model);
     if (nextBlock?.flavour !== 'affine:paragraph') {
       const [paragraphId] = this.block.doc.addSiblingBlocks(this.block.model, [
         { flavour: 'affine:paragraph' },
@@ -34,9 +34,10 @@ export class BlockZeroWidth extends LitElement {
   }
 
   override render() {
-    return html`<div class="block-zero-width" @click=${this.handleClick}>
-      <span>${ZERO_WIDTH_SPACE}</span>
-    </div>`;
+    return html`<div
+      class="block-zero-width"
+      @click=${this.handleClick}
+    ></div>`;
   }
 
   @property({ attribute: false })

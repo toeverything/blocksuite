@@ -117,7 +117,10 @@ import { EdgelessColorPickerButton } from './root-block/edgeless/components/colo
 import { EdgelessColorPicker } from './root-block/edgeless/components/color-picker/color-picker.js';
 import { EdgelessColorCustomButton } from './root-block/edgeless/components/color-picker/custom-button.js';
 import { EdgelessConnectorHandle } from './root-block/edgeless/components/connector/connector-handle.js';
-import { NoteSlicer } from './root-block/edgeless/components/note-slicer/index.js';
+import {
+  NOTE_SLICER_WIDGET,
+  NoteSlicer,
+} from './root-block/edgeless/components/note-slicer/index.js';
 import { EdgelessAlignPanel } from './root-block/edgeless/components/panel/align-panel.js';
 import { CardStylePanel } from './root-block/edgeless/components/panel/card-style-panel.js';
 import {
@@ -136,9 +139,18 @@ import { EdgelessShapePanel } from './root-block/edgeless/components/panel/shape
 import { EdgelessShapeStylePanel } from './root-block/edgeless/components/panel/shape-style-panel.js';
 import { EdgelessSizePanel } from './root-block/edgeless/components/panel/size-panel.js';
 import { StrokeStylePanel } from './root-block/edgeless/components/panel/stroke-style-panel.js';
-import { EdgelessNavigatorBlackBackground } from './root-block/edgeless/components/presentation/edgeless-navigator-black-background.js';
-import { EdgelessDraggingAreaRect } from './root-block/edgeless/components/rects/edgeless-dragging-area-rect.js';
-import { EdgelessSelectedRect } from './root-block/edgeless/components/rects/edgeless-selected-rect.js';
+import {
+  EDGELESS_NAVIGATOR_BLACK_BACKGROUND_WIDGET,
+  EdgelessNavigatorBlackBackgroundWidget,
+} from './root-block/edgeless/components/presentation/edgeless-navigator-black-background.js';
+import {
+  EDGELESS_DRAGGING_AREA_WIDGET,
+  EdgelessDraggingAreaRectWidget,
+} from './root-block/edgeless/components/rects/edgeless-dragging-area-rect.js';
+import {
+  EDGELESS_SELECTED_RECT_WIDGET,
+  EdgelessSelectedRectWidget,
+} from './root-block/edgeless/components/rects/edgeless-selected-rect.js';
 import { EdgelessConnectorLabelEditor } from './root-block/edgeless/components/text/edgeless-connector-label-editor.js';
 import { EdgelessFrameTitleEditor } from './root-block/edgeless/components/text/edgeless-frame-title-editor.js';
 import { EdgelessGroupTitleEditor } from './root-block/edgeless/components/text/edgeless-group-title-editor.js';
@@ -150,7 +162,10 @@ import { EdgelessSlideMenu } from './root-block/edgeless/components/toolbar/comm
 import { EdgelessConnectorMenu } from './root-block/edgeless/components/toolbar/connector/connector-menu.js';
 import { EdgelessConnectorToolButton } from './root-block/edgeless/components/toolbar/connector/connector-tool-button.js';
 import { EdgelessDefaultToolButton } from './root-block/edgeless/components/toolbar/default/default-tool-button.js';
-import { EdgelessToolbar } from './root-block/edgeless/components/toolbar/edgeless-toolbar.js';
+import {
+  EDGELESS_TOOLBAR_WIDGET,
+  EdgelessToolbarWidget,
+} from './root-block/edgeless/components/toolbar/edgeless-toolbar.js';
 import { EdgelessEraserToolButton } from './root-block/edgeless/components/toolbar/eraser/eraser-tool-button.js';
 import { EdgelessFrameMenu } from './root-block/edgeless/components/toolbar/frame/frame-menu.js';
 import { EdgelessFrameToolButton } from './root-block/edgeless/components/toolbar/frame/frame-tool-button.js';
@@ -395,15 +410,15 @@ export function effects() {
   customElements.define('generating-placeholder', GeneratingPlaceholder);
   customElements.define('ai-finish-tip', AIFinishTip);
   customElements.define('ai-panel-divider', AIPanelDivider);
-  customElements.define('note-slicer', NoteSlicer);
+  customElements.define(NOTE_SLICER_WIDGET, NoteSlicer);
   customElements.define(
-    'edgeless-navigator-black-background',
-    EdgelessNavigatorBlackBackground
+    EDGELESS_NAVIGATOR_BLACK_BACKGROUND_WIDGET,
+    EdgelessNavigatorBlackBackgroundWidget
   );
   customElements.define('zoom-bar-toggle-button', ZoomBarToggleButton);
   customElements.define(
-    'edgeless-dragging-area-rect',
-    EdgelessDraggingAreaRect
+    EDGELESS_DRAGGING_AREA_WIDGET,
+    EdgelessDraggingAreaRectWidget
   );
   customElements.define('icon-button', IconButton);
   customElements.define('affine-pie-menu', PieMenu);
@@ -446,7 +461,10 @@ export function effects() {
   customElements.define('edgeless-lasso-tool-button', EdgelessLassoToolButton);
   customElements.define('affine-filterable-list', FilterableListComponent);
   customElements.define('ai-panel-error', AIPanelError);
-  customElements.define('edgeless-selected-rect', EdgelessSelectedRect);
+  customElements.define(
+    EDGELESS_SELECTED_RECT_WIDGET,
+    EdgelessSelectedRectWidget
+  );
   customElements.define('mindmap-import-placeholder', MindMapPlaceholder);
   customElements.define(
     'edgeless-note-senior-button',
@@ -579,7 +597,7 @@ export function effects() {
     'edgeless-change-note-button',
     EdgelessChangeNoteButton
   );
-  customElements.define('edgeless-toolbar', EdgelessToolbar);
+  customElements.define(EDGELESS_TOOLBAR_WIDGET, EdgelessToolbarWidget);
   customElements.define(
     'edgeless-release-from-group-button',
     EdgelessReleaseFromGroupButton
