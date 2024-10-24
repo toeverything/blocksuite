@@ -330,10 +330,6 @@ export class PointerEventWatcher {
   }
 
   watch() {
-    this.widget.disposables.addFromEvent(this.widget, 'pointerdown', e => {
-      e.preventDefault();
-    });
-
     this.widget.handleEvent('click', this._clickHandler);
     this.widget.handleEvent('pointerMove', this._throttledPointerMoveHandler);
     this.widget.handleEvent('pointerOut', this._pointerOutHandler);

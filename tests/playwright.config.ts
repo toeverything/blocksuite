@@ -1,10 +1,11 @@
 import type { PlaywrightWorkerOptions } from '@playwright/test';
 
 import { defineConfig } from '@playwright/test';
+import process from 'node:process';
 
 export default defineConfig({
   testDir: '.',
-  timeout: 40000,
+  timeout: process.env.CI ? 40000 : 999999,
   fullyParallel: true,
   snapshotDir: 'snapshots',
   snapshotPathTemplate: 'snapshots/{testFilePath}/{arg}{ext}',

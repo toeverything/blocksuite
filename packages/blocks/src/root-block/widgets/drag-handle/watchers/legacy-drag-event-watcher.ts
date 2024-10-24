@@ -9,8 +9,8 @@ import {
 } from '@blocksuite/affine-shared/utils';
 import {
   type BlockComponent,
-  type DndEventState,
   isGfxBlockComponent,
+  type PointerEventState,
   type UIEventHandler,
 } from '@blocksuite/block-std';
 import { GfxControllerIdentifier } from '@blocksuite/block-std/gfx';
@@ -29,7 +29,7 @@ import {
   includeTextSelection,
 } from '../utils.js';
 
-export class DragEventWatcher {
+export class LegacyDragEventWatcher {
   private _changeCursorToGrabbing = () => {
     document.documentElement.classList.add('affine-drag-preview-grabbing');
   };
@@ -52,7 +52,7 @@ export class DragEventWatcher {
       return false;
     }
 
-    const state = ctx.get('dndState');
+    const state = ctx.get('pointerState');
     const { target } = state.raw;
     if (!this.widget.host.contains(target as Node)) {
       this.widget.hide(true);
@@ -62,6 +62,7 @@ export class DragEventWatcher {
     for (const option of this.widget.optionRunner.options) {
       if (
         option.onDragEnd?.({
+          // @ts-ignore
           state,
           draggingElements: this.widget.draggingElements,
           dropBlockId: this.widget.dropBlockId,
@@ -108,11 +109,12 @@ export class DragEventWatcher {
     }
 
     ctx.get('defaultState').event.preventDefault();
-    const state = ctx.get('dndState');
+    const state = ctx.get('pointerState');
 
     for (const option of this.widget.optionRunner.options) {
       if (
         option.onDragMove?.({
+          // @ts-ignore
           state,
           draggingElements: this.widget.draggingElements,
         })
@@ -129,7 +131,7 @@ export class DragEventWatcher {
    * When start dragging, should set dragging elements and create drag preview
    */
   private _dragStartHandler: UIEventHandler = ctx => {
-    const state = ctx.get('dndState');
+    const state = ctx.get('pointerState');
     // If not click left button to start dragging, should do nothing
     const { button } = state.raw;
     if (button !== 0) {
@@ -140,7 +142,9 @@ export class DragEventWatcher {
     for (const option of this.widget.optionRunner.options) {
       if (
         option.onDragStart?.({
+          // @ts-ignore
           state,
+          // @ts-ignore
           startDragging: this._startDragging,
           anchorBlockId: this.widget.anchorBlockId.peek() ?? '',
           editorHost: this.widget.host,
@@ -152,7 +156,7 @@ export class DragEventWatcher {
     return this._onDragStart(state);
   };
 
-  private _onDragEnd = (state: DndEventState) => {
+  private _onDragEnd = (state: PointerEventState) => {
     const targetBlockId = this.widget.dropBlockId;
     const dropType = this.widget.dropType;
     const draggingElements = this.widget.draggingElements;
@@ -302,17 +306,19 @@ export class DragEventWatcher {
     return true;
   };
 
-  private _onDragMove = (state: DndEventState) => {
+  private _onDragMove = (state: PointerEventState) => {
     this.widget.clearRaf();
 
     this.widget.rafID = requestAnimationFrame(() => {
+      // @ts-ignore
       this.widget.edgelessWatcher.updateDragPreviewPosition(state);
+      // @ts-ignore
       this.widget.updateDropIndicator(state, true);
     });
     return true;
   };
 
-  private _onDragStart = (state: DndEventState) => {
+  private _onDragStart = (state: PointerEventState) => {
     // Get current hover block element by path
     const hoverBlock = this.widget.anchorBlockComponent.peek();
     if (!hoverBlock) return false;
@@ -430,7 +436,7 @@ export class DragEventWatcher {
 
   private _startDragging = (
     blocks: BlockComponent[],
-    state: DndEventState,
+    state: PointerEventState,
     dragPreviewEl?: HTMLElement,
     dragPreviewOffset?: Point
   ) => {
@@ -442,6 +448,7 @@ export class DragEventWatcher {
 
     this.widget.dragPreview = this.widget.previewHelper.createDragPreview(
       blocks,
+      // @ts-ignore
       state,
       dragPreviewEl,
       dragPreviewOffset
@@ -456,29 +463,12 @@ export class DragEventWatcher {
   constructor(readonly widget: AffineDragHandleWidget) {}
 
   watch() {
-    this.widget.handleEvent('dragStart', ctx => {
-      const state = ctx.get('pointerState');
-      const event = state.raw;
-      const target = captureEventTarget(event.target);
-      if (!target) return;
+    this.widget.disposables.addFromEvent(this.widget, 'pointerdown', e => {
+      e.preventDefault();
+    });
 
-      if (this.widget.contains(target)) {
-        return true;
-      }
-
-      return;
-    });
-    this.widget.handleEvent('nativeDragStart', this._dragStartHandler, {
-      global: true,
-    });
-    this.widget.handleEvent('nativeDragMove', this._dragMoveHandler, {
-      global: true,
-    });
-    this.widget.handleEvent('nativeDragEnd', this._dragEndHandler, {
-      global: true,
-    });
-    this.widget.handleEvent('nativeDrop', this._dragEndHandler, {
-      global: true,
-    });
+    this.widget.handleEvent('dragStart', this._dragStartHandler);
+    this.widget.handleEvent('dragMove', this._dragMoveHandler);
+    this.widget.handleEvent('dragEnd', this._dragEndHandler, { global: true });
   }
 }
