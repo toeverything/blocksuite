@@ -22,8 +22,12 @@ import { fitContent } from '../../renderer/elements/shape/utils.js';
 import { layout } from './layout.js';
 
 export class LayoutableMindmapElementModel extends MindmapElementModel {
-  override layout() {
-    handleLayout(this, this.tree, true, this.layoutType);
+  override layout(
+    _tree: MindmapNode | MindmapRoot = this.tree,
+    _applyStyle = true,
+    _layoutType?: LayoutType
+  ) {
+    handleLayout(this, _tree, _applyStyle, _layoutType);
   }
 }
 
@@ -49,13 +53,14 @@ export function getHoveredArea(
  */
 export function showMergeIndicator(
   targetMindmap: MindmapElementModel,
+
   /**
    * The hovered node
    */
   target: string | MindmapNode,
 
   /**
-   * The node that will be merged
+   * The node about to be merged
    */
   source: MindmapNode,
   position: [number, number]
@@ -329,10 +334,12 @@ export function addTree(
 }
 
 /**
- * Detach a mindmap. It is similar to `removeChild` but
+ * Detach a mindmap node or subtree. It is similar to `removeChild` but
  * it does not delete the node.
  *
  * So the node can be used to create a new mind map or merge into other mind map
+ * @param mindmap the mind map that the subtree belongs to
+ * @param subtree the subtree to detach
  */
 export function detachMindmap(
   mindmap: MindmapElementModel,

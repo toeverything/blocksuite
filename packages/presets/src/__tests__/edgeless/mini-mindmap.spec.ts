@@ -1,6 +1,8 @@
 import type { EditorHost } from '@blocksuite/block-std';
 
+import { GfxControllerIdentifier } from '@blocksuite/block-std/gfx';
 import {
+  type MindmapElementModel,
   type MindmapSurfaceBlock,
   MiniMindmapPreview,
 } from '@blocksuite/blocks';
@@ -60,4 +62,36 @@ test('mind map preview', async () => {
   return () => {
     miniMindMapPreview.remove();
   };
+});
+
+test('new mind map should layout automatically', async () => {
+  const gfx = editor.std.get(GfxControllerIdentifier);
+  const mindmapId = gfx.surface!.addElement({
+    type: 'mindmap',
+    children: {
+      text: 'Main node',
+      children: [
+        {
+          text: 'Child node',
+        },
+        {
+          text: 'Second child node',
+        },
+        {
+          text: 'Third child node',
+        },
+      ],
+    },
+  });
+  const mindmap = gfx.getElementById(mindmapId) as MindmapElementModel;
+  await wait(0);
+  const [child1, child2, child3] = mindmap.tree.children;
+
+  expect(mindmapId).not.toBeUndefined();
+  expect(mindmap.tree.children.length).toBe(3);
+  expect(mindmap.tree.element.x).toBeLessThan(child1.element.x);
+  expect(child1.element.x).toBe(child2.element.x);
+  expect(child2.element.x).toBe(child3.element.x);
+  expect(child1.element.y).toBeLessThan(child2.element.y);
+  expect(child2.element.y).toBeLessThan(child3.element.y);
 });
