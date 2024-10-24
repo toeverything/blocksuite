@@ -11,7 +11,7 @@ export type SurfaceMiddlewareBuilder = (
 export function SurfaceMiddlewareExtension(
   middlewares: SurfaceMiddlewareBuilder[]
 ) {
-  return class extends LifeCycleWatcher {
+  return class SurfaceMiddlewareExtension extends LifeCycleWatcher {
     static override key: string = 'surfaceMiddleware';
 
     override mounted(): void {
