@@ -34,15 +34,7 @@ import { EdgelessSnapManager } from '../../root-block/edgeless/utils/snap-manage
 import { EdgelessSurfaceRefBlockSpec } from '../../surface-ref-block/surface-ref-spec.js';
 import { EdgelessFirstPartyBlockSpecs } from '../common.js';
 
-export const EdgelessEditorBlockSpecs: ExtensionType[] = [
-  EdgelessRootBlockSpec,
-  ...EdgelessFirstPartyBlockSpecs,
-  EdgelessSurfaceBlockSpec,
-  EdgelessSurfaceRefBlockSpec,
-  FrameBlockSpec,
-  EdgelessTextBlockSpec,
-  LatexBlockSpec,
-  FontLoaderService,
+export const EdgelessToolExtension: ExtensionType[] = [
   DefaultTool,
   PanTool,
   EraserTool,
@@ -57,9 +49,25 @@ export const EdgelessEditorBlockSpecs: ExtensionType[] = [
   FrameTool,
   LassoTool,
   PresentTool,
+];
+
+export const EdgelessBuiltInManager: ExtensionType[] = [
   ConnectionOverlay,
   FrameOverlay,
   EdgelessSnapManager,
-  SurfaceMiddlewareExtension([EditPropsMiddlewareBuilder]),
   EdgelessFrameManager,
+  SurfaceMiddlewareExtension([EditPropsMiddlewareBuilder]),
+];
+
+export const EdgelessEditorBlockSpecs: ExtensionType[] = [
+  EdgelessRootBlockSpec,
+  ...EdgelessFirstPartyBlockSpecs,
+  EdgelessSurfaceBlockSpec,
+  EdgelessSurfaceRefBlockSpec,
+  FrameBlockSpec,
+  EdgelessTextBlockSpec,
+  LatexBlockSpec,
+  FontLoaderService,
+  EdgelessToolExtension,
+  EdgelessBuiltInManager,
 ].flat();
