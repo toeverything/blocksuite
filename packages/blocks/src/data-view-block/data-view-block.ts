@@ -269,6 +269,7 @@ export class DataViewBlockComponent extends CaptionedBlockComponent<DataViewBloc
               if (peekViewService) {
                 const template = createRecordDetail({
                   ...data,
+                  openDoc: () => {},
                   detail: {
                     header: uniMap(
                       createUniComponentFromWebComponent(BlockRenderer),

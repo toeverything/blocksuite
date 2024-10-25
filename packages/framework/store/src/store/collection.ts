@@ -65,6 +65,8 @@ const FLAGS_PRESET = {
   enable_mind_map_import: false,
   enable_advanced_block_visibility: false,
   enable_shape_shadow_blur: false,
+  enable_new_dnd: false,
+  enable_mobile_keyboard_toolbar: false,
   readonly: {},
 } satisfies BlockSuiteFlags;
 

@@ -1,21 +1,38 @@
-import type { DatabaseBlockModel } from '@blocksuite/affine-model';
+import type {
+  DatabaseBlockModel,
+  RootBlockModel,
+} from '@blocksuite/affine-model';
 import type { DetailSlotProps, SingleView } from '@blocksuite/data-view';
+import type { BaseTextAttributes } from '@blocksuite/inline';
+import type { Text } from '@blocksuite/store';
 
-import { focusTextModel } from '@blocksuite/affine-components/rich-text';
+import {
+  type AffineTextAttributes,
+  REFERENCE_NODE,
+} from '@blocksuite/affine-components/rich-text';
 import {
   createDefaultDoc,
   matchFlavours,
 } from '@blocksuite/affine-shared/utils';
-import {
-  BlockStdScope,
-  type EditorHost,
-  ShadowlessElement,
-} from '@blocksuite/block-std';
-import { WithDisposable } from '@blocksuite/global/utils';
+import { type EditorHost, ShadowlessElement } from '@blocksuite/block-std';
+import { SignalWatcher, WithDisposable } from '@blocksuite/global/utils';
+import { computed } from '@preact/signals-core';
 import { css, html } from 'lit';
-import { property, query } from 'lit/decorators.js';
+import { property } from 'lit/decorators.js';
+
+export const getDocIdsFromText = (text?: Text) => {
+  return (
+    text?.deltas$.value
+      ?.filter(delta => {
+        const attributes: AffineTextAttributes | undefined = delta.attributes;
+        return attributes?.reference?.type === 'LinkedPage';
+      })
+      ?.map(delta => delta.attributes?.reference?.pageId as string) ?? []
+  );
+};
+
 export class NoteRenderer
-  extends WithDisposable(ShadowlessElement)
+  extends SignalWatcher(WithDisposable(ShadowlessElement))
   implements DetailSlotProps
 {
   static override styles = css`
@@ -26,6 +43,18 @@ export class NoteRenderer
     }
   `;
 
+  @property({ attribute: false })
+  accessor rowId!: string;
+
+  rowText$ = computed(() => {
+    return this.databaseBlock.doc.getBlock(this.rowId)?.model?.text;
+  });
+
+  allowCreateDoc$ = computed(() => {
+    console.log(this.rowText$.value, getDocIdsFromText(this.rowText$.value));
+    return getDocIdsFromText(this.rowText$.value).length === 0;
+  });
+
   get databaseBlock(): DatabaseBlockModel {
     return this.model;
   }
@@ -35,15 +64,25 @@ export class NoteRenderer
     if (!collection) {
       return;
     }
-    if (!this.databaseBlock.notes) {
-      this.databaseBlock.notes = {};
-    }
     const note = createDefaultDoc(collection);
     if (note) {
-      this.databaseBlock.notes[this.rowId] = note.id;
-      this.requestUpdate();
-      requestAnimationFrame(() => {
-        const block = note.root?.children
+      this.openDoc(note.id);
+      const rowContent = this.rowText$.value?.toString();
+      this.rowText$.value?.replace(
+        0,
+        this.rowText$.value.length,
+        REFERENCE_NODE,
+        {
+          reference: {
+            type: 'LinkedPage',
+            pageId: note.id,
+          },
+        } satisfies AffineTextAttributes as BaseTextAttributes
+      );
+      collection.setDocMeta(note.id, { title: rowContent });
+      if (note.root) {
+        (note.root as RootBlockModel).title.insert(rowContent ?? '', 0);
+        note.root.children
           .find(child => child.flavour === 'affine:note')
           ?.children.find(block =>
             matchFlavours(block, [
@@ -52,28 +91,11 @@ export class NoteRenderer
               'affine:code',
             ])
           );
-        if (this.subHost && block) {
-          focusTextModel(this.subHost.std, block.id);
-        }
-      });
-    }
-  }
-
-  override connectedCallback() {
-    super.connectedCallback();
-    this.databaseBlock.propsUpdated.on(({ key }) => {
-      if (key === 'notes') {
-        this.requestUpdate();
       }
-    });
+    }
   }
 
   protected override render(): unknown {
-    if (
-      !this.model.doc.awarenessStore.getFlag('enable_database_attachment_note')
-    ) {
-      return null;
-    }
     return html`
       <div
         style="height: 1px;max-width: var(--affine-editor-width);background-color: var(--affine-border-color);margin: auto;margin-bottom: 16px"
@@ -83,31 +105,17 @@ export class NoteRenderer
   }
 
   renderNote() {
-    const host = this.host;
-    const std = host?.std;
-    if (!std || !host) {
-      return;
-    }
-    const pageId = this.databaseBlock.notes?.[this.rowId];
-    if (!pageId) {
+    if (this.allowCreateDoc$.value) {
       return html` <div>
         <div
           @click="${this.addNote}"
           style="max-width: var(--affine-editor-width);margin: auto;cursor: pointer;color: var(--affine-text-disable-color)"
         >
-          Click to add note
+          Click to create a linked doc in center peek.
         </div>
       </div>`;
     }
-    const page = std.collection.getDoc(pageId);
-    if (!page) {
-      return;
-    }
-    const previewStd = new BlockStdScope({
-      doc: page,
-      extensions: std.userExtensions,
-    });
-    return html`${previewStd.render()} `;
+    return;
   }
 
   @property({ attribute: false })
@@ -117,10 +125,7 @@ export class NoteRenderer
   accessor model!: DatabaseBlockModel;
 
   @property({ attribute: false })
-  accessor rowId!: string;
-
-  @query('editor-host')
-  accessor subHost!: EditorHost;
+  accessor openDoc!: (docId: string) => void;
 
   @property({ attribute: false })
   accessor view!: SingleView;

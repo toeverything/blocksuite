@@ -247,6 +247,7 @@ export const scrollbarStyle = (container: string) => {
     ${unsafeCSS(container)}::-webkit-scrollbar {
       -webkit-appearance: none;
       width: 4px;
+      height: 4px;
     }
     ${unsafeCSS(container)}::-webkit-scrollbar-thumb {
       border-radius: 2px;

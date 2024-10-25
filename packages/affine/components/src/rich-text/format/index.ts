@@ -12,6 +12,7 @@ export {
 } from './consts.js';
 import { formatNativeCommand } from './format-native.js';
 import { formatTextCommand } from './format-text.js';
+import { insertInlineLatex } from './insert-inline-latex.js';
 import {
   getTextStyle,
   isTextStyleActive,
@@ -38,4 +39,5 @@ export const textCommands: BlockCommands = {
   isTextStyleActive: isTextStyleActive,
   getTextStyle: getTextStyle,
   getTextSelection: getTextSelectionCommand,
+  insertInlineLatex: insertInlineLatex,
 };

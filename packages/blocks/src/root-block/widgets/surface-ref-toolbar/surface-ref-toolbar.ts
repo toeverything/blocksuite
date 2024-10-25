@@ -37,6 +37,13 @@ export class AffineSurfaceRefToolbar extends WidgetComponent<
   SurfaceRefBlockModel,
   SurfaceRefBlockComponent
 > {
+  /*
+   * Caches the more menu items.
+   * Currently only supports configuring more menu.
+   */
+  moreGroups: MenuItemGroup<SurfaceRefToolbarContext>[] =
+    cloneGroups(BUILT_IN_GROUPS);
+
   private _hoverController = new HoverController(
     this,
     ({ abortController }) => {
@@ -87,13 +94,6 @@ export class AffineSurfaceRefToolbar extends WidgetComponent<
       };
     }
   );
-
-  /*
-   * Caches the more menu items.
-   * Currently only supports configuring more menu.
-   */
-  moreGroups: MenuItemGroup<SurfaceRefToolbarContext>[] =
-    cloneGroups(BUILT_IN_GROUPS);
 
   override connectedCallback() {
     super.connectedCallback();

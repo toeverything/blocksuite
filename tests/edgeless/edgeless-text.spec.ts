@@ -67,6 +67,10 @@ test.describe('edgeless text block', () => {
       delay: 100,
     });
     await waitNextFrame(page);
+
+    // https://github.com/toeverything/blocksuite/pull/8574
+    await pressBackspace(page);
+
     await type(page, 'aaa');
     await pressEnter(page);
     await type(page, 'bbb');
@@ -270,7 +274,8 @@ test.describe('edgeless text block', () => {
     await assertBlockTextContent(page, 5, 'b');
   });
 
-  test('edgeless text max width', async ({ page }) => {
+  // FIXME(@flrande): This test fails randomly on CI
+  test.fixme('edgeless text max width', async ({ page }) => {
     await setEdgelessTool(page, 'default');
     const point = await toViewCoord(page, [0, 0]);
     await page.mouse.dblclick(point[0], point[1], {

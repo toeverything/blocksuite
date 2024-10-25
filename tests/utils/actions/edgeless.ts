@@ -214,7 +214,7 @@ export async function locatorEdgelessToolButton(
   // TODO: quickTool locator is different
   const button = await locatorEdgelessToolButtonSenior(
     page,
-    `edgeless-toolbar ${buttonType}${selector}`
+    `edgeless-toolbar-widget ${buttonType}${selector}`
   );
 
   return innerContainer ? button.locator('.icon-container') : button;

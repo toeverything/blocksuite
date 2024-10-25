@@ -92,10 +92,6 @@ export class AffineEditorContainer
 
   private _edgelessSpecs = signal<ExtensionType[]>(EdgelessEditorBlockSpecs);
 
-  private _editorTemplate = computed(() => {
-    return this._std.value.render();
-  });
-
   private _mode = signal<DocMode>('page');
 
   private _pageSpecs = signal<ExtensionType[]>(PageEditorBlockSpecs);
@@ -111,6 +107,10 @@ export class AffineEditorContainer
       doc: this.doc,
       extensions: this._specs.value,
     });
+  });
+
+  private _editorTemplate = computed(() => {
+    return this._std.value.render();
   });
 
   /**

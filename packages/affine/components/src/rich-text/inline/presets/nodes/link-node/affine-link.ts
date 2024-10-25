@@ -44,6 +44,23 @@ export class AffineLink extends ShadowlessElement {
 
   private _referenceInfo: ReferenceInfo | null = null;
 
+  openLink = (e?: MouseEvent) => {
+    if (!this._identified) {
+      this._identified = true;
+      this._identify();
+    }
+
+    const referenceInfo = this._referenceInfo;
+    if (!referenceInfo) return;
+
+    const refNodeSlotsProvider = this.std?.getOptional(RefNodeSlotsProvider);
+    if (!refNodeSlotsProvider) return;
+
+    e?.preventDefault();
+
+    refNodeSlotsProvider.docLinkClicked.emit(referenceInfo);
+  };
+
   private _whenHover = new HoverController(
     this,
     ({ abortController }) => {
@@ -80,23 +97,6 @@ export class AffineLink extends ShadowlessElement {
     },
     { enterDelay: 500 }
   );
-
-  openLink = (e?: MouseEvent) => {
-    if (!this._identified) {
-      this._identified = true;
-      this._identify();
-    }
-
-    const referenceInfo = this._referenceInfo;
-    if (!referenceInfo) return;
-
-    const refNodeSlotsProvider = this.std?.getOptional(RefNodeSlotsProvider);
-    if (!refNodeSlotsProvider) return;
-
-    e?.preventDefault();
-
-    refNodeSlotsProvider.docLinkClicked.emit(referenceInfo);
-  };
 
   // Workaround for links not working in contenteditable div
   // see also https://stackoverflow.com/questions/12059211/how-to-make-clickable-anchor-in-contenteditable-div

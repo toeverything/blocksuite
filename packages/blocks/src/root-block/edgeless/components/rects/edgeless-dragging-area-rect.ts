@@ -1,7 +1,8 @@
-import { SignalWatcher, WithDisposable } from '@blocksuite/global/utils';
+import type { RootBlockModel } from '@blocksuite/affine-model';
+
+import { WidgetComponent } from '@blocksuite/block-std';
 import { cssVarV2 } from '@toeverything/theme/v2';
-import { css, html, LitElement, nothing, unsafeCSS } from 'lit';
-import { property } from 'lit/decorators.js';
+import { css, html, nothing, unsafeCSS } from 'lit';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
@@ -11,9 +12,12 @@ import {
   DefaultTool,
 } from '../../gfx-tool/default-tool.js';
 
-export class EdgelessDraggingAreaRect extends SignalWatcher(
-  WithDisposable(LitElement)
-) {
+export const EDGELESS_DRAGGING_AREA_WIDGET = 'edgeless-dragging-area-rect';
+
+export class EdgelessDraggingAreaRectWidget extends WidgetComponent<
+  RootBlockModel,
+  EdgelessRootBlockComponent
+> {
   static override styles = css`
     .affine-edgeless-dragging-area {
       position: absolute;
@@ -32,9 +36,9 @@ export class EdgelessDraggingAreaRect extends SignalWatcher(
     }
   `;
 
-  protected override render() {
-    const rect = this.edgeless.gfx.tool.draggingViewArea$.value;
-    const tool = this.edgeless.gfx.tool.currentTool$.value;
+  override render() {
+    const rect = this.block.gfx.tool.draggingViewArea$.value;
+    const tool = this.block.gfx.tool.currentTool$.value;
 
     if (
       rect.w === 0 ||
@@ -55,13 +59,10 @@ export class EdgelessDraggingAreaRect extends SignalWatcher(
       <div class="affine-edgeless-dragging-area" style=${styleMap(style)}></div>
     `;
   }
-
-  @property({ attribute: false })
-  accessor edgeless!: EdgelessRootBlockComponent;
 }
 
 declare global {
   interface HTMLElementTagNameMap {
-    'edgeless-dragging-area-rect': EdgelessDraggingAreaRect;
+    'edgeless-dragging-area-rect': EdgelessDraggingAreaRectWidget;
   }
 }

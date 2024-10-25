@@ -2,7 +2,7 @@ import { SpecProvider } from '@blocksuite/affine-shared/utils';
 import {
   type BlockComponent,
   BlockStdScope,
-  type PointerEventState,
+  type DndEventState,
 } from '@blocksuite/block-std';
 import { Point } from '@blocksuite/global/utils';
 import { BlockViewType, type Query } from '@blocksuite/store';
@@ -14,7 +14,7 @@ import { DragPreview } from '../components/drag-preview.js';
 export class PreviewHelper {
   private _calculatePreviewOffset = (
     blocks: BlockComponent[],
-    state: PointerEventState
+    state: DndEventState
   ) => {
     const { top, left } = blocks[0].getBoundingClientRect();
     const previewOffset = new Point(state.raw.x - left, state.raw.y - top);
@@ -58,7 +58,7 @@ export class PreviewHelper {
 
   createDragPreview = (
     blocks: BlockComponent[],
-    state: PointerEventState,
+    state: DndEventState,
     dragPreviewEl?: HTMLElement,
     dragPreviewOffset?: Point
   ): DragPreview => {

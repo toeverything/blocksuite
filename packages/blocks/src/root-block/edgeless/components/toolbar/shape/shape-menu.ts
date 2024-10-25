@@ -59,6 +59,11 @@ export class EdgelessShapeMenu extends SignalWatcher(
     }
   `;
 
+  private _shapeName$: Signal<ShapeName> = signal(ShapeType.Rect);
+
+  @property({ attribute: false })
+  accessor edgeless!: EdgelessRootBlockComponent;
+
   private _props$ = computed(() => {
     const shapeName: ShapeName = this._shapeName$.value;
     const { shapeStyle, fillColor, strokeColor, radius } =
@@ -103,8 +108,6 @@ export class EdgelessShapeMenu extends SignalWatcher(
         shapeStyle,
       });
   };
-
-  private _shapeName$: Signal<ShapeName> = signal(ShapeType.Rect);
 
   override connectedCallback(): void {
     super.connectedCallback();
@@ -185,9 +188,6 @@ export class EdgelessShapeMenu extends SignalWatcher(
       </edgeless-slide-menu>
     `;
   }
-
-  @property({ attribute: false })
-  accessor edgeless!: EdgelessRootBlockComponent;
 
   @property({ attribute: false })
   accessor onChange!: (name: ShapeName) => void;

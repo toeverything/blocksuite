@@ -1,0 +1,144 @@
+import type { ReactiveController, ReactiveControllerHost } from 'lit';
+
+import { DisposableGroup } from '@blocksuite/global/utils';
+import { signal } from '@preact/signals-core';
+
+import type { PageRootBlockComponent } from '../../page/page-root-block.js';
+import type {
+  KeyboardSubToolbarConfig,
+  KeyboardToolbarActionItem,
+  KeyboardToolbarItem,
+  KeyboardToolPanelConfig,
+} from './config.js';
+
+function notSupportedWarning() {
+  console.warn('VirtualKeyboard API and VisualViewport API are not supported');
+}
+
+export class VirtualKeyboardController implements ReactiveController {
+  private _disposables = new DisposableGroup();
+
+  private readonly _keyboardHeight$ = signal(0);
+
+  private readonly _updateKeyboardHeight = () => {
+    if (navigator.virtualKeyboard) {
+      this._keyboardHeight$.value =
+        navigator.virtualKeyboard.boundingRect.height;
+    } else if (visualViewport) {
+      this._keyboardHeight$.value = window.innerHeight - visualViewport.height;
+    } else {
+      notSupportedWarning();
+    }
+  };
+
+  hide = () => {
+    if (navigator.virtualKeyboard) {
+      navigator.virtualKeyboard.hide();
+    } else {
+      if (document.activeElement !== this.host.rootComponent) return;
+      this.host.rootComponent.inputMode = 'none';
+    }
+  };
+
+  host: ReactiveControllerHost & { rootComponent: PageRootBlockComponent };
+
+  show = () => {
+    if (navigator.virtualKeyboard) {
+      navigator.virtualKeyboard.show();
+    } else {
+      if (document.activeElement !== this.host.rootComponent) return;
+      this.host.rootComponent.inputMode = '';
+    }
+  };
+
+  toggle = () => {
+    if (this.opened) {
+      this.hide();
+    } else {
+      this.show();
+    }
+  };
+
+  get keyboardHeight() {
+    return this._keyboardHeight$.value;
+  }
+
+  get opened() {
+    return this.keyboardHeight !== 0;
+  }
+
+  constructor(
+    host: ReactiveControllerHost & { rootComponent: PageRootBlockComponent }
+  ) {
+    (this.host = host).addController(this);
+  }
+
+  hostConnected() {
+    if (navigator.virtualKeyboard) {
+      const { overlaysContent } = navigator.virtualKeyboard;
+      const { virtualKeyboardPolicy } = this.host.rootComponent;
+
+      navigator.virtualKeyboard.overlaysContent = true;
+      this.host.rootComponent.virtualKeyboardPolicy = 'manual';
+
+      this._disposables.add(() => {
+        if (!navigator.virtualKeyboard) return;
+        navigator.virtualKeyboard.overlaysContent = overlaysContent;
+        this.host.rootComponent.virtualKeyboardPolicy = virtualKeyboardPolicy;
+      });
+
+      this._disposables.addFromEvent(
+        this.host.rootComponent,
+        'focus',
+        this.show
+      );
+      this._disposables.addFromEvent(
+        this.host.rootComponent,
+        'blur',
+        this.hide
+      );
+      this._disposables.addFromEvent(
+        navigator.virtualKeyboard,
+        'geometrychange',
+        this._updateKeyboardHeight
+      );
+    } else if (visualViewport) {
+      this._disposables.addFromEvent(
+        visualViewport,
+        'resize',
+        this._updateKeyboardHeight
+      );
+      this._disposables.addFromEvent(
+        visualViewport,
+        'scroll',
+        this._updateKeyboardHeight
+      );
+    } else {
+      notSupportedWarning();
+    }
+
+    this._updateKeyboardHeight();
+  }
+
+  hostDisconnected() {
+    this._disposables.dispose();
+  }
+}
+
+export function isKeyboardToolBarActionItem(
+  item: KeyboardToolbarItem
+): item is KeyboardToolbarActionItem {
+  return 'action' in item;
+}
+
+export function isKeyboardSubToolBarConfig(
+  item: KeyboardToolbarItem
+): item is KeyboardSubToolbarConfig {
+  return 'items' in item;
+}
+
+export function isKeyboardToolPanelConfig(
+  item: KeyboardToolbarItem
+): item is KeyboardToolPanelConfig {
+  return 'groups' in item;
+}

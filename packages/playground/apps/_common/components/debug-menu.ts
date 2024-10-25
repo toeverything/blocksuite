@@ -14,9 +14,9 @@ import {
   ExportManager,
   FontFamilyVariables,
   HtmlTransformer,
-  importNotion,
   MarkdownTransformer,
   NotionHtmlAdapter,
+  NotionHtmlTransformer,
   openFileOrFiles,
   printToPdf,
   SizeVariables,
@@ -39,8 +39,8 @@ import '@shoelace-style/shoelace/dist/components/select/select.js';
 import '@shoelace-style/shoelace/dist/components/tab/tab.js';
 import '@shoelace-style/shoelace/dist/components/tab-group/tab-group.js';
 import '@shoelace-style/shoelace/dist/components/tooltip/tooltip.js';
-import '@shoelace-style/shoelace/dist/themes/light.css';
 import '@shoelace-style/shoelace/dist/themes/dark.css';
+import '@shoelace-style/shoelace/dist/themes/light.css';
 import { setBasePath } from '@shoelace-style/shoelace/dist/utilities/base-path.js';
 import { css, html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
@@ -356,7 +356,10 @@ export class DebugMenu extends ShadowlessElement {
     try {
       const file = await openFileOrFiles({ acceptType: 'Zip' });
       if (!file) return;
-      const result = await importNotion(this.collection, file);
+      const result = await NotionHtmlTransformer.importNotionZip({
+        collection: this.collection,
+        imported: file,
+      });
       if (!this.editor.host) return;
       toast(
         this.editor.host,
