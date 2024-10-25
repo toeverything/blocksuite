@@ -218,6 +218,8 @@ export class EdgelessToolbarWidget extends WidgetComponent<
   accessor containerWidth = 1920;
 
   private _onContainerResize = debounce(({ w }: { w: number }) => {
+    if (!this.isConnected) return;
+
     this.slots.resize.emit({ w, h: TOOLBAR_HEIGHT });
     this.containerWidth = w;
 
