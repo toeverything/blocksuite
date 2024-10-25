@@ -14,7 +14,12 @@ export class AffineKeyboardToolbarWidget extends WidgetComponent {
   keyboardToolbarConfig = defaultKeyboardToolbarConfig;
 
   override render() {
-    if (!IS_MOBILE) return nothing;
+    if (
+      this.doc.readonly ||
+      !IS_MOBILE ||
+      !this.doc.awarenessStore.getFlag('enable_mobile_keyboard_toolbar')
+    )
+      return nothing;
 
     if (!(this.block.rootComponent instanceof PageRootBlockComponent))
       return nothing;
