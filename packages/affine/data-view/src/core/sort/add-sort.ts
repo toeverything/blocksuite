@@ -15,6 +15,7 @@ export const popCreateSort = (
   target: PopupTarget,
   props: {
     vars: ReadonlySignal<Variable[]>;
+    sortList: SortBy[];
     onSelect: (sort: SortBy) => void;
     onClose?: () => void;
     onBack?: () => void;
@@ -27,21 +28,23 @@ export const popCreateSort = (
         text: 'New sort',
         onBack: props.onBack,
       },
-      items: props.vars.value.map(v =>
-        menu.action({
-          name: v.name,
-          prefix: renderUniLit(v.icon, {}),
-          select: () => {
-            props.onSelect({
-              ref: {
-                type: 'ref',
-                name: v.id,
-              },
-              desc: false,
-            });
-          },
-        })
-      ),
+      items: props.vars.value
+        .filter(v => !props.sortList.some(sort => sort.ref.name === v.id))
+        .map(v =>
+          menu.action({
+            name: v.name,
+            prefix: renderUniLit(v.icon, {}),
+            select: () => {
+              props.onSelect({
+                ref: {
+                  type: 'ref',
+                  name: v.id,
+                },
+                desc: false,
+              });
+            },
+          })
+        ),
     },
   });
 };

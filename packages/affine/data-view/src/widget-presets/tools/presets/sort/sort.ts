@@ -68,6 +68,7 @@ export class DataViewHeaderToolsSort extends WidgetBase {
     this.showToolBar(true);
     popCreateSort(popupTargetFromElement(event.currentTarget as HTMLElement), {
       vars: this.view.vars$,
+      sortList: this.sortList,
       onSelect: sort => {
         this.sortList = [...this.sortList, sort];
         this.toggleShowQuickSettingBar(true);

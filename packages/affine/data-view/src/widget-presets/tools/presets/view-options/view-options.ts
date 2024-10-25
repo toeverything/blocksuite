@@ -188,6 +188,7 @@ const createSettingMenus = (
           const sortList = sortManager.sortList$.value;
           if (!sortList.length) {
             popCreateSort(target, {
+              sortList: sortList,
               vars: view.vars$,
               onBack: reopen,
               onSelect: sort => {

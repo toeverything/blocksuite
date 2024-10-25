@@ -1,5 +1,3 @@
-import type { ReadonlySignal } from '@preact/signals-core';
-
 import {
   menu,
   popMenu,
@@ -8,15 +6,17 @@ import {
 } from '@blocksuite/affine-components/context-menu';
 import { unsafeCSSVarV2 } from '@blocksuite/affine-shared/theme';
 import { ShadowlessElement } from '@blocksuite/block-std';
-import { SignalWatcher } from '@blocksuite/global/utils';
+import { SignalWatcher, WithDisposable } from '@blocksuite/global/utils';
 import {
   ArrowDownSmallIcon,
   CloseIcon,
   DeleteIcon,
   PlusIcon,
 } from '@blocksuite/icons/lit';
+import { computed, type ReadonlySignal } from '@preact/signals-core';
 import { css, html } from 'lit';
 import { property } from 'lit/decorators.js';
+import { keyed } from 'lit/directives/keyed.js';
 import { repeat } from 'lit/directives/repeat.js';
 
 import type { Variable } from '../../../core/expression/types.js';
@@ -25,8 +25,17 @@ import type { SortableView } from '../../../core/sort/utils.js';
 
 import { renderUniLit } from '../../../core/index.js';
 import { popCreateSort } from '../../../core/sort/add-sort.js';
+import { dragHandler } from '../../../core/utils/wc-dnd/dnd-context.js';
+import {
+  createSortContext,
+  sortable,
+} from '../../../core/utils/wc-dnd/sort/sort-context.js';
+import { verticalListSortingStrategy } from '../../../core/utils/wc-dnd/sort/strategies/index.js';
+import { arrayMove } from '../../../core/utils/wc-dnd/utils/arrayMove.js';
 
-export class SortRootView extends SignalWatcher(ShadowlessElement) {
+export class SortRootView extends SignalWatcher(
+  WithDisposable(ShadowlessElement)
+) {
   static override styles = css`
     .sort-root-container {
       margin-bottom: 8px;
@@ -34,7 +43,45 @@ export class SortRootView extends SignalWatcher(ShadowlessElement) {
       display: flex;
       flex-direction: column;
     }
+
+    .sort-item {
+      display: flex;
+      align-items: center;
+      transition: transform 0.2s;
+    }
   `;
+
+  items$ = computed(() => {
+    return this.sortList.value.map(v => v.ref.name);
+  });
+
+  sortContext = createSortContext({
+    dnd: {
+      container: this,
+      onDragEnd: evt => {
+        const over = evt.over;
+        if (over) {
+          this.onChange(
+            arrayMove(
+              this.sortList.value,
+              this.sortList.value.findIndex(v => v.ref.name === evt.active.id),
+              this.sortList.value.findIndex(v => v.ref.name === over.id)
+            )
+          );
+        }
+      },
+      modifiers: [
+        ({ transform }) => {
+          return {
+            ...transform,
+            x: 0,
+          };
+        },
+      ],
+    },
+    items: this.items$,
+    strategy: verticalListSortingStrategy,
+  });
 
   override render() {
     const list = this.sortList.value;
@@ -73,7 +120,7 @@ export class SortRootView extends SignalWatcher(ShadowlessElement) {
                       return menu.action({
                         name: v.name,
                         prefix: renderUniLit(v.icon),
-                        isSelected: v.id === sort.ref.name,
+                        isSelected: v.id === id,
                         select: () => {
                           changeRule({
                             ...sort,
@@ -105,11 +152,6 @@ export class SortRootView extends SignalWatcher(ShadowlessElement) {
               );
             };
             content = html`
-              <div
-                style="border-radius:2px;cursor:pointer;width: 4px;height: 12px;background-color: ${unsafeCSSVarV2(
-                  'button/grabber/default'
-                )}"
-              ></div>
               <data-view-component-button
                 style="margin-right: 6px;margin-left: 4px"
                 @click="${clickField}"
@@ -124,20 +166,31 @@ export class SortRootView extends SignalWatcher(ShadowlessElement) {
               ></data-view-component-button>
             `;
           }
-
-          return html`
-            <div style='display: flex;align-items: center'>
-              <div style='display: flex;align-items: center;flex:1;margin-right: 16px;'>
-                ${content}
-              </div>
+          return keyed(
+            id,
+            html`
               <div
-                @click='${deleteRule}'
-                style='padding: 2px;display: flex;align-items: center;border-radius: 2px;color:${unsafeCSSVarV2('icon/primary')}'
-                class='dv-hover dv-rounded'>${CloseIcon({ width: '16px', height: '16px' })}
+                ${sortable(id)}
+                class='sort-item'
+                >
+                <div style='display: flex;align-items: center;flex:1;margin-right: 16px;'>
+                  <div
+                    ${dragHandler(id)}
+                    style='border-radius:2px;cursor:pointer;width: 4px;height: 12px;background-color: ${unsafeCSSVarV2(
+                      'button/grabber/default'
+                    )}'
+                  ></div>
+                  ${content}
+                </div>
+                <div
+                  @click='${deleteRule}'
+                  style='padding: 2px;display: flex;align-items: center;border-radius: 2px;color:${unsafeCSSVarV2('icon/primary')}'
+                  class='dv-hover dv-rounded'>${CloseIcon({ width: '16px', height: '16px' })}
+                </div>
               </div>
-            </div>
-            </div>
-          `;
+              </div>
+            `
+          );
         })}
       </div>
     `;
@@ -158,6 +211,7 @@ declare global {
     'sort-root-view': SortRootView;
   }
 }
+
 export const popSortRoot = (
   target: PopupTarget,
   props: {
@@ -195,6 +249,7 @@ export const popSortRoot = (
           prefix: PlusIcon(),
           select: ele => {
             popCreateSort(popupTargetFromElement(ele), {
+              sortList: sortManager.sortList$.value,
               vars: props.view.vars$,
               onSelect: sort => {
                 sortManager.setSortList([...sortManager.sortList$.value, sort]);
