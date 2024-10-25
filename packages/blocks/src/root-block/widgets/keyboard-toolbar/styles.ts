@@ -28,7 +28,7 @@ export const keyboardToolbarStyles = css`
 
     background-color: ${unsafeCSSVarV2('layer/background/primary')};
     border-top: 0.5px solid ${unsafeCSSVarV2('layer/insideBorder/border')};
-    box-shadow: ${unsafeCSSVarV2('mobile/keyboardShadow')};
+    box-shadow: 0px -4px 10px 0px rgba(0, 0, 0, 0.05);
 
     > div {
       padding-top: 4px;
