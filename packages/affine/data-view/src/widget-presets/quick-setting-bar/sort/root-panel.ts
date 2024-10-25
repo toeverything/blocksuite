@@ -20,8 +20,8 @@ import { property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
 import type { Variable } from '../../../core/expression/types.js';
-import type { SortableView } from '../../../core/sort/manager.js';
 import type { SortBy } from '../../../core/sort/types.js';
+import type { SortableView } from '../../../core/sort/utils.js';
 
 import { renderUniLit } from '../../../core/index.js';
 import { popCreateSort } from '../../../core/sort/add-sort.js';
