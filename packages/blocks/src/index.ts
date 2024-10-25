@@ -44,6 +44,7 @@ export { CopilotTool } from './root-block/edgeless/gfx-tool/copilot-tool.js';
 
 export * from './root-block/edgeless/gfx-tool/index.js';
 export { EditPropsMiddlewareBuilder } from './root-block/edgeless/middlewares/base.js';
+export * from './root-block/edgeless/utils/common.js';
 export { EdgelessSnapManager } from './root-block/edgeless/utils/snap-manager.js';
 export * from './root-block/index.js';
 export * from './schemas.js';
