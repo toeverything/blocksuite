@@ -87,9 +87,7 @@ export class EmbedCardCreateModal extends WithDisposable(ShadowlessElement) {
         surface.model
       );
 
-      edgelessRoot.tools.setEdgelessTool({
-        type: 'default',
-      });
+      edgelessRoot.gfx.tool.setTool('default');
     }
     this.onConfirm();
     this.remove();

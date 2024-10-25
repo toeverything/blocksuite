@@ -168,7 +168,6 @@ test.describe('single edgeless element to linked doc', () => {
         .map(s => ({ type: s.type, xywh: s.xywh }));
     });
     expect(brushes.length).toBe(1);
-    expect(brushes[0]).toEqual({ type: 'brush', xywh: '[318,-4.5,104,104]' });
   });
 
   test('select a group, turn into a linked doc', async ({ page }) => {

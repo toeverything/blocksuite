@@ -9,8 +9,6 @@ export type DatabaseBlockProps = {
   title: Text;
   cells: SerializedCells;
   columns: Array<Column>;
-  // rowId -> pageId
-  notes?: Record<string, string>;
 };
 
 export class DatabaseBlockModel extends BlockModel<DatabaseBlockProps> {}

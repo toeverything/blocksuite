@@ -8,6 +8,7 @@ import {
   createShapeElement,
   setEdgelessTool,
   Shape,
+  toViewCoord,
   triggerComponentToolbarAction,
 } from '../utils/actions/edgeless.js';
 import {
@@ -18,7 +19,7 @@ import {
   waitNextFrame,
 } from '../utils/actions/index.js';
 import {
-  assertEdgelessSelectedRect,
+  assertEdgelessSelectedModelRect,
   getSelectedRect,
 } from '../utils/asserts.js';
 import { test } from '../utils/playwright.js';
@@ -39,32 +40,33 @@ test.describe('auto arrange align', () => {
 
     await page.mouse.click(0, 0);
     await selectAllByKeyboard(page);
-    await assertEdgelessSelectedRect(page, [80, 302.5, 500, 500]);
+    await assertEdgelessSelectedModelRect(page, [0, -100, 500, 500]);
 
     // arrange
     await triggerComponentToolbarAction(page, 'autoArrange');
     await waitNextFrame(page, 200);
-    await assertEdgelessSelectedRect(page, [80, 402.5, 560, 320]);
+    await assertEdgelessSelectedModelRect(page, [0, 0, 560, 320]);
   });
 
   test('arrange rotated shapes', async ({ page }) => {
     await commonSetup(page);
-    await createShapeElement(page, [0, 0], [100, 100], Shape.Square);
-    await createShapeElement(page, [100, 100], [200, 200], Shape.Ellipse);
+    await createShapeElement(page, [0, 0], [100, 100], Shape.Ellipse);
+    await createShapeElement(page, [100, 100], [200, 200], Shape.Square);
 
-    await page.mouse.click(100, 420);
-    await page.mouse.move(75, 395);
+    const point = await toViewCoord(page, [100, 100]);
+    await page.mouse.click(point[0] + 50, point[1] + 50);
+    await page.mouse.move(point[0] - 5, point[1] - 5);
     await page.mouse.down();
-    await page.mouse.move(125, 395);
+    await page.mouse.move(point[0] - 5, point[1] + 45);
     await page.mouse.up();
 
     await selectAllByKeyboard(page);
-    await assertEdgelessSelectedRect(page, [60, 382, 220, 220]);
+    await assertEdgelessSelectedModelRect(page, [0, 0, 220, 220]);
 
     // arrange
     await triggerComponentToolbarAction(page, 'autoArrange');
     await waitNextFrame(page, 200);
-    await assertEdgelessSelectedRect(page, [60, 382, 260.5, 140.5]);
+    await assertEdgelessSelectedModelRect(page, [0, 0, 261, 141]);
   });
 
   test('arrange connected shapes', async ({ page }) => {
@@ -74,12 +76,12 @@ test.describe('auto arrange align', () => {
     await createConnectorElement(page, [50, 100], [150, 100]);
 
     await selectAllByKeyboard(page);
-    await assertEdgelessSelectedRect(page, [80, 402.5, 200, 200]);
+    await assertEdgelessSelectedModelRect(page, [0, 0, 200, 200]);
 
     // arrange
     await triggerComponentToolbarAction(page, 'autoArrange');
     await waitNextFrame(page, 200);
-    await assertEdgelessSelectedRect(page, [80, 381.7, 220, 141.4]);
+    await assertEdgelessSelectedModelRect(page, [0, -21, 220, 141.4]);
   });
 
   test('arrange connector', async ({ page }) => {
@@ -88,19 +90,21 @@ test.describe('auto arrange align', () => {
     await createConnectorElement(page, [200, 200], [300, 200]);
 
     await selectAllByKeyboard(page);
-    await assertEdgelessSelectedRect(page, [80, 402.5, 300, 200]);
+    await assertEdgelessSelectedModelRect(page, [0, 0, 300, 200]);
 
     // arrange
     await triggerComponentToolbarAction(page, 'autoArrange');
     await waitNextFrame(page, 200);
-    await assertEdgelessSelectedRect(page, [80, 402.5, 220, 100]);
+    await assertEdgelessSelectedModelRect(page, [0, 0, 220, 100]);
   });
 
   test('arrange edgeless text', async ({ page }) => {
     await commonSetup(page);
     await createShapeElement(page, [0, 0], [100, 100], Shape.Square);
+
+    const point = await toViewCoord(page, [200, -100]);
     await setEdgelessTool(page, 'default');
-    await page.mouse.dblclick(300, 300, {
+    await page.mouse.dblclick(point[0], point[1], {
       delay: 100,
     });
     await waitNextFrame(page);
@@ -108,12 +112,27 @@ test.describe('auto arrange align', () => {
     await page.mouse.click(0, 0);
 
     await selectAllByKeyboard(page);
-    await assertEdgelessSelectedRect(page, [80, 275, 245, 227.5]);
+    await assertEdgelessSelectedModelRect(page, [0, -125, 225, 225]);
 
     // arrange
     await triggerComponentToolbarAction(page, 'autoArrange');
     await waitNextFrame(page, 200);
-    await assertEdgelessSelectedRect(page, [80, 402.5, 170, 100]);
+    await assertEdgelessSelectedModelRect(page, [0, 0, 170, 100]);
+  });
+
+  test('arrange note', async ({ page }) => {
+    await commonSetup(page);
+    await createShapeElement(page, [0, 0], [100, 100], Shape.Square);
+    await createNote(page, [200, 200], 'Hello World');
+    await page.mouse.click(0, 0);
+
+    await selectAllByKeyboard(page);
+    await assertEdgelessSelectedModelRect(page, [0, 0, 668, 252]);
+
+    // arrange
+    await triggerComponentToolbarAction(page, 'autoArrange');
+    await waitNextFrame(page, 200);
+    await assertEdgelessSelectedModelRect(page, [0, 0, 618, 100]);
   });
 
   test('arrange group', async ({ page }) => {
@@ -125,12 +144,12 @@ test.describe('auto arrange align', () => {
 
     await createShapeElement(page, [0, 0], [100, 100], Shape.Diamond);
     await selectAllByKeyboard(page);
-    await assertEdgelessSelectedRect(page, [80, 402.5, 500, 400]);
+    await assertEdgelessSelectedModelRect(page, [0, 0, 500, 400]);
 
     // arrange
     await triggerComponentToolbarAction(page, 'autoArrange');
     await waitNextFrame(page, 200);
-    await assertEdgelessSelectedRect(page, [80, 402.5, 420, 300]);
+    await assertEdgelessSelectedModelRect(page, [0, 0, 420, 300]);
   });
 
   test('arrange frame', async ({ page }) => {
@@ -147,12 +166,12 @@ test.describe('auto arrange align', () => {
     await page.mouse.down();
     await page.mouse.move(650, 880);
     await page.mouse.up();
-    await assertEdgelessSelectedRect(page, [80, 402.5, 550, 450]);
+    await assertEdgelessSelectedModelRect(page, [0, 0, 550, 450]);
 
     // arrange
     await triggerComponentToolbarAction(page, 'autoArrange');
     await waitNextFrame(page, 200);
-    await assertEdgelessSelectedRect(page, [80, 402.5, 520, 400]);
+    await assertEdgelessSelectedModelRect(page, [0, 0, 520, 400]);
   });
 
   // TODO mindmap size different on CI
@@ -183,7 +202,7 @@ test.describe('auto arrange align', () => {
     await createShapeElement(page, [0, 0], [100, 100], Shape.Square);
     await createShapeElement(page, [150, 150], [300, 300], Shape.Ellipse);
     //note
-    await createNote(page, [150, 50], 'Hello World');
+    await createNote(page, [200, 100], 'Hello World');
     // connector
     await createConnectorElement(page, [200, -200], [400, -100]);
     // brush
@@ -191,8 +210,9 @@ test.describe('auto arrange align', () => {
     const end = { x: 480, y: 480 };
     await addBasicBrushElement(page, start, end);
     // edgeless text
+    const point = await toViewCoord(page, [-100, -100]);
     await setEdgelessTool(page, 'default');
-    await page.mouse.dblclick(100, 300, {
+    await page.mouse.dblclick(point[0], point[1], {
       delay: 100,
     });
     await waitNextFrame(page);
@@ -201,11 +221,11 @@ test.describe('auto arrange align', () => {
     await page.mouse.click(0, 0);
     await selectAllByKeyboard(page);
 
-    await assertEdgelessSelectedRect(page, [75, 202.5, 623, 500]);
+    await assertEdgelessSelectedModelRect(page, [-125, -200, 793, 500]);
     // arrange
     await triggerComponentToolbarAction(page, 'autoArrange');
     await waitNextFrame(page, 200);
-    await assertEdgelessSelectedRect(page, [75, 275, 668, 270]);
+    await assertEdgelessSelectedModelRect(page, [-125, -125, 668, 270]);
   });
 });
 
@@ -226,31 +246,32 @@ test.describe('auto resize align', () => {
     await page.mouse.click(0, 0);
     await selectAllByKeyboard(page);
 
-    await assertEdgelessSelectedRect(page, [80, 302.5, 500, 500]);
+    await assertEdgelessSelectedModelRect(page, [0, -100, 500, 500]);
     // arrange
     await triggerComponentToolbarAction(page, 'autoResize');
     await waitNextFrame(page, 200);
-    await assertEdgelessSelectedRect(page, [80, 402.5, 860, 420]);
+    await assertEdgelessSelectedModelRect(page, [0, 0, 860, 420]);
   });
 
   test('resize and arrange rotated shapes', async ({ page }) => {
     await commonSetup(page);
-    await createShapeElement(page, [0, 0], [100, 100], Shape.Square);
-    await createShapeElement(page, [100, 100], [200, 200], Shape.Ellipse);
+    await createShapeElement(page, [0, 0], [100, 100], Shape.Ellipse);
+    await createShapeElement(page, [100, 100], [200, 200], Shape.Square);
 
-    await page.mouse.click(100, 420);
-    await page.mouse.move(75, 395);
+    const point = await toViewCoord(page, [100, 100]);
+    await page.mouse.click(point[0] + 50, point[1] + 50);
+    await page.mouse.move(point[0] - 5, point[1] - 5);
     await page.mouse.down();
-    await page.mouse.move(125, 395);
+    await page.mouse.move(point[0] - 5, point[1] + 45);
     await page.mouse.up();
 
     await selectAllByKeyboard(page);
-    await assertEdgelessSelectedRect(page, [60, 382, 220, 220]);
+    await assertEdgelessSelectedModelRect(page, [0, 0, 220, 220]);
 
     // arrange
     await triggerComponentToolbarAction(page, 'autoResize');
     await waitNextFrame(page, 200);
-    await assertEdgelessSelectedRect(page, [51, 373.5, 420, 200]);
+    await assertEdgelessSelectedModelRect(page, [0, 0, 420, 200]);
   });
 
   test('resize and arrange connected shapes', async ({ page }) => {
@@ -260,12 +281,12 @@ test.describe('auto resize align', () => {
     await createConnectorElement(page, [50, 100], [150, 100]);
 
     await selectAllByKeyboard(page);
-    await assertEdgelessSelectedRect(page, [80, 402.5, 200, 200]);
+    await assertEdgelessSelectedModelRect(page, [0, 0, 200, 200]);
 
     // arrange
     await triggerComponentToolbarAction(page, 'autoResize');
     await waitNextFrame(page, 200);
-    await assertEdgelessSelectedRect(page, [80, 386, 420, 232]);
+    await assertEdgelessSelectedModelRect(page, [0, -16, 420, 232]);
   });
 
   test('resize and arrange connector', async ({ page }) => {
@@ -274,19 +295,21 @@ test.describe('auto resize align', () => {
     await createConnectorElement(page, [200, 200], [300, 200]);
 
     await selectAllByKeyboard(page);
-    await assertEdgelessSelectedRect(page, [80, 402.5, 300, 200]);
+    await assertEdgelessSelectedModelRect(page, [0, 0, 300, 200]);
 
     // arrange
     await triggerComponentToolbarAction(page, 'autoResize');
     await waitNextFrame(page, 200);
-    await assertEdgelessSelectedRect(page, [80, 402.5, 320, 200]);
+    await assertEdgelessSelectedModelRect(page, [0, 0, 320, 200]);
   });
 
   test('resize and arrange edgeless text', async ({ page }) => {
     await commonSetup(page);
     await createShapeElement(page, [0, 0], [100, 100], Shape.Square);
+
+    const point = await toViewCoord(page, [200, -100]);
     await setEdgelessTool(page, 'default');
-    await page.mouse.dblclick(300, 300, {
+    await page.mouse.dblclick(point[0], point[1], {
       delay: 100,
     });
     await waitNextFrame(page);
@@ -294,12 +317,27 @@ test.describe('auto resize align', () => {
     await page.mouse.click(0, 0);
 
     await selectAllByKeyboard(page);
-    await assertEdgelessSelectedRect(page, [80, 275, 245, 227.5]);
+    await assertEdgelessSelectedModelRect(page, [0, -125, 225, 225]);
 
     // arrange
     await triggerComponentToolbarAction(page, 'autoResize');
     await waitNextFrame(page, 200);
-    await assertEdgelessSelectedRect(page, [80, 402.5, 270, 200]);
+    await assertEdgelessSelectedModelRect(page, [0, 0, 270, 200]);
+  });
+
+  test('resize and arrange note', async ({ page }) => {
+    await commonSetup(page);
+    await createShapeElement(page, [0, 0], [100, 100], Shape.Square);
+    await createNote(page, [200, 200], 'Hello World');
+    await page.mouse.click(0, 0);
+
+    await selectAllByKeyboard(page);
+    await assertEdgelessSelectedModelRect(page, [0, 0, 668, 252]);
+
+    // arrange
+    await triggerComponentToolbarAction(page, 'autoResize');
+    await waitNextFrame(page, 200);
+    await assertEdgelessSelectedModelRect(page, [0, 0, 1302.5, 200]);
   });
 
   test('resize and arrange group', async ({ page }) => {
@@ -311,12 +349,12 @@ test.describe('auto resize align', () => {
 
     await createShapeElement(page, [0, 0], [100, 100], Shape.Diamond);
     await selectAllByKeyboard(page);
-    await assertEdgelessSelectedRect(page, [80, 402.5, 500, 400]);
+    await assertEdgelessSelectedModelRect(page, [0, 0, 500, 400]);
 
     // arrange
     await triggerComponentToolbarAction(page, 'autoResize');
     await waitNextFrame(page, 200);
-    await assertEdgelessSelectedRect(page, [80, 402.5, 420, 200]);
+    await assertEdgelessSelectedModelRect(page, [0, 0, 420, 200]);
   });
 
   test('resize and arrange frame', async ({ page }) => {
@@ -333,12 +371,12 @@ test.describe('auto resize align', () => {
     await page.mouse.down();
     await page.mouse.move(650, 880);
     await page.mouse.up();
-    await assertEdgelessSelectedRect(page, [80, 402.5, 550, 450]);
+    await assertEdgelessSelectedModelRect(page, [0, 0, 550, 450]);
 
     // arrange
     await triggerComponentToolbarAction(page, 'autoResize');
     await waitNextFrame(page, 200);
-    await assertEdgelessSelectedRect(page, [80, 402.5, 420, 200]);
+    await assertEdgelessSelectedModelRect(page, [0, 0, 420, 200]);
   });
 
   // TODO mindmap size different on CI
@@ -369,7 +407,7 @@ test.describe('auto resize align', () => {
     await createShapeElement(page, [0, 0], [100, 100], Shape.Square);
     await createShapeElement(page, [150, 150], [300, 300], Shape.Ellipse);
     //note
-    await createNote(page, [150, 50], 'Hello World');
+    await createNote(page, [200, 100], 'Hello World');
     // connector
     await createConnectorElement(page, [200, -200], [400, -100]);
     // brush
@@ -377,19 +415,21 @@ test.describe('auto resize align', () => {
     const end = { x: 480, y: 480 };
     await addBasicBrushElement(page, start, end);
     // edgeless text
+    const point = await toViewCoord(page, [-100, -100]);
     await setEdgelessTool(page, 'default');
-    await page.mouse.dblclick(100, 300, {
+    await page.mouse.dblclick(point[0], point[1], {
       delay: 100,
     });
     await waitNextFrame(page);
     await type(page, 'edgeless text');
-    await page.mouse.click(0, 0);
 
+    await page.mouse.click(0, 0);
     await selectAllByKeyboard(page);
-    await assertEdgelessSelectedRect(page, [75, 202.5, 623, 500]);
+
+    await assertEdgelessSelectedModelRect(page, [-125, -200, 793, 500]);
     // arrange
     await triggerComponentToolbarAction(page, 'autoResize');
     await waitNextFrame(page, 200);
-    await assertEdgelessSelectedRect(page, [75, 275, 1303, 420]);
+    await assertEdgelessSelectedModelRect(page, [-125, -125, 1303, 420]);
   });
 });

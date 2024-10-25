@@ -139,23 +139,16 @@ export class RangeControl {
   }
 
   listen() {
-    this._dispatcher.disposables.addFromEvent(
+    const { host, disposables } = this._dispatcher;
+    disposables.addFromEvent(
       document,
       'selectionchange',
       this._selectionChange
     );
-    this._dispatcher.disposables.addFromEvent(
-      this._dispatcher.host,
-      'compositionstart',
-      this._compositionStart
-    );
-    this._dispatcher.disposables.addFromEvent(
-      this._dispatcher.host,
-      'compositionend',
-      this._compositionEnd
-    );
-    this._dispatcher.disposables.addFromEvent(
-      this._dispatcher.host,
+    disposables.addFromEvent(host, 'compositionstart', this._compositionStart);
+    disposables.addFromEvent(host, 'compositionend', this._compositionEnd);
+    disposables.addFromEvent(
+      host,
       'compositionupdate',
       this._compositionUpdate
     );

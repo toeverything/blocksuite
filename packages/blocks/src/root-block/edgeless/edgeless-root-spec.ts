@@ -28,9 +28,14 @@ import { AFFINE_MODAL_WIDGET } from '../widgets/modal/modal.js';
 import { AFFINE_PIE_MENU_WIDGET } from '../widgets/pie-menu/index.js';
 import { AFFINE_SLASH_MENU_WIDGET } from '../widgets/slash-menu/index.js';
 import { AFFINE_VIEWPORT_OVERLAY_WIDGET } from '../widgets/viewport-overlay/viewport-overlay.js';
+import { NOTE_SLICER_WIDGET } from './components/note-slicer/index.js';
+import { EDGELESS_NAVIGATOR_BLACK_BACKGROUND_WIDGET } from './components/presentation/edgeless-navigator-black-background.js';
+import { EDGELESS_DRAGGING_AREA_WIDGET } from './components/rects/edgeless-dragging-area-rect.js';
+import { EDGELESS_SELECTED_RECT_WIDGET } from './components/rects/edgeless-selected-rect.js';
+import { EDGELESS_TOOLBAR_WIDGET } from './components/toolbar/edgeless-toolbar.js';
 import { EdgelessRootService } from './edgeless-root-service.js';
 
-export const edgelessRootWigetViewMap = {
+export const edgelessRootWidgetViewMap = {
   [AFFINE_MODAL_WIDGET]: literal`${unsafeStatic(AFFINE_MODAL_WIDGET)}`,
   [AFFINE_INNER_MODAL_WIDGET]: literal`${unsafeStatic(AFFINE_INNER_MODAL_WIDGET)}`,
   [AFFINE_PIE_MENU_WIDGET]: literal`${unsafeStatic(AFFINE_PIE_MENU_WIDGET)}`,
@@ -66,6 +71,11 @@ export const edgelessRootWigetViewMap = {
     AFFINE_EDGELESS_AUTO_CONNECT_WIDGET
   )}`,
   [AFFINE_SCROLL_ANCHORING_WIDGET]: literal`${unsafeStatic(AFFINE_SCROLL_ANCHORING_WIDGET)}`,
+  [EDGELESS_DRAGGING_AREA_WIDGET]: literal`${unsafeStatic(EDGELESS_DRAGGING_AREA_WIDGET)}`,
+  [NOTE_SLICER_WIDGET]: literal`${unsafeStatic(NOTE_SLICER_WIDGET)}`,
+  [EDGELESS_NAVIGATOR_BLACK_BACKGROUND_WIDGET]: literal`${unsafeStatic(EDGELESS_NAVIGATOR_BLACK_BACKGROUND_WIDGET)}`,
+  [EDGELESS_SELECTED_RECT_WIDGET]: literal`${unsafeStatic(EDGELESS_SELECTED_RECT_WIDGET)}`,
+  [EDGELESS_TOOLBAR_WIDGET]: literal`${unsafeStatic(EDGELESS_TOOLBAR_WIDGET)}`,
 };
 
 const EdgelessCommonExtension: ExtensionType[] = [
@@ -80,7 +90,7 @@ const EdgelessCommonExtension: ExtensionType[] = [
 export const EdgelessRootBlockSpec: ExtensionType[] = [
   ...EdgelessCommonExtension,
   BlockViewExtension('affine:page', literal`affine-edgeless-root`),
-  WidgetViewMapExtension('affine:page', edgelessRootWigetViewMap),
+  WidgetViewMapExtension('affine:page', edgelessRootWidgetViewMap),
 ];
 
 class EdgelessLocker extends BlockServiceWatcher {

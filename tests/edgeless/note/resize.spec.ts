@@ -1,7 +1,4 @@
-import {
-  NOTE_MIN_HEIGHT,
-  NOTE_MIN_WIDTH,
-} from '@blocks/root-block/edgeless/utils/consts.js';
+import { NOTE_MIN_HEIGHT, NOTE_MIN_WIDTH } from '@blocksuite/affine-model';
 import { expect } from '@playwright/test';
 
 import {
@@ -24,7 +21,6 @@ import {
 import {
   assertBlockCount,
   assertEdgelessSelectedRect,
-  assertExists,
   assertNoteRectEqual,
   assertRectEqual,
   assertRichTexts,
@@ -50,18 +46,18 @@ test('resize note in edgeless mode', async ({ page }) => {
   const initRect = await getNoteRect(page, noteId);
   const leftHandle = page.locator('.handle[aria-label="left"] .resize');
   const box = await leftHandle.boundingBox();
-  assertExists(box);
+  if (box === null) throw new Error();
 
   await dragBetweenCoords(
     page,
     { x: box.x + 5, y: box.y + 5 },
-    { x: box.x + 105, y: box.y + 5 }
+    { x: box.x - 95, y: box.y + 5 }
   );
   const draggedRect = await getNoteRect(page, noteId);
   assertRectEqual(draggedRect, {
-    x: initRect.x + 100,
+    x: initRect.x - 100,
     y: initRect.y,
-    w: initRect.w - 100,
+    w: initRect.w + 100,
     h: initRect.h,
   });
 
@@ -90,7 +86,7 @@ test('resize note then collapse note', async ({ page }) => {
   const initRect = await getNoteRect(page, noteId);
   const leftHandle = page.locator('.handle[aria-label="left"] .resize');
   let box = await leftHandle.boundingBox();
-  assertExists(box);
+  if (box === null) throw new Error();
 
   await dragBetweenCoords(
     page,
@@ -116,7 +112,7 @@ test('resize note then collapse note', async ({ page }) => {
 
   await selectNoteInEdgeless(page, noteId);
   box = await leftHandle.boundingBox();
-  assertExists(box);
+  if (box === null) throw new Error();
   await dragBetweenCoords(
     page,
     { x: box.x + 50, y: box.y + box.height },
@@ -157,7 +153,7 @@ test('resize note then auto size and custom size', async ({ page }) => {
     '.handle[aria-label="bottom-right"] .resize'
   );
   const box = await bottomRightResize.boundingBox();
-  assertExists(box);
+  if (box === null) throw new Error();
 
   await dragBetweenCoords(
     page,

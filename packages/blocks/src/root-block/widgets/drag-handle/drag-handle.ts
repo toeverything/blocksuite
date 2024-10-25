@@ -15,7 +15,7 @@ import {
 } from '@blocksuite/affine-shared/utils';
 import {
   type BlockComponent,
-  type PointerEventState,
+  type DndEventState,
   WidgetComponent,
 } from '@blocksuite/block-std';
 import { DisposableGroup, Point, Rect } from '@blocksuite/global/utils';
@@ -50,6 +50,7 @@ import { DragEventWatcher } from './watchers/drag-event-watcher.js';
 import { EdgelessWatcher } from './watchers/edgeless-watcher.js';
 import { HandleEventWatcher } from './watchers/handle-event-watcher.js';
 import { KeyboardEventWatcher } from './watchers/keyboard-event-watcher.js';
+import { LegacyDragEventWatcher } from './watchers/legacy-drag-event-watcher.js';
 import { PageWatcher } from './watchers/page-watcher.js';
 import { PointerEventWatcher } from './watchers/pointer-event-watcher.js';
 
@@ -67,7 +68,7 @@ export class AffineDragHandleWidget extends WidgetComponent<RootBlockModel> {
   /**
    * When dragging, should update indicator position and target drop block id
    */
-  private _getDropResult = (state: PointerEventState): DropResult | null => {
+  private _getDropResult = (state: DndEventState): DropResult | null => {
     const point = new Point(state.raw.x, state.raw.y);
     const closestBlock = getClosestBlockByPoint(
       this.host,
@@ -141,6 +142,8 @@ export class AffineDragHandleWidget extends WidgetComponent<RootBlockModel> {
 
   private _keyboardEventWatcher = new KeyboardEventWatcher(this);
 
+  private _legacyDragEventWatcher = new LegacyDragEventWatcher(this);
+
   private _pageWatcher = new PageWatcher(this);
 
   private _removeDropIndicator = () => {
@@ -201,13 +204,13 @@ export class AffineDragHandleWidget extends WidgetComponent<RootBlockModel> {
     }
   };
 
+  anchorBlockId = signal<string | null>(null);
+
   anchorBlockComponent = computed<BlockComponent | null>(() => {
     if (!this.anchorBlockId.value) return null;
 
     return this.std.view.getBlock(this.anchorBlockId.value);
   });
-
-  anchorBlockId = signal<string | null>(null);
 
   anchorEdgelessElement: ReadonlySignal<GfxBlockElementModel | null> = computed(
     () => {
@@ -262,6 +265,7 @@ export class AffineDragHandleWidget extends WidgetComponent<RootBlockModel> {
   };
 
   hide = (force = false) => {
+    if (this.dragging && !force) return;
     updateDragHandleClassName();
 
     this.isHoverDragHandleVisible = false;
@@ -285,7 +289,7 @@ export class AffineDragHandleWidget extends WidgetComponent<RootBlockModel> {
 
   isTopLevelDragHandleVisible = false;
 
-  lastDragPointerState: PointerEventState | null = null;
+  lastDragPointerState: DndEventState | null = null;
 
   noteScale = signal(1);
 
@@ -304,7 +308,7 @@ export class AffineDragHandleWidget extends WidgetComponent<RootBlockModel> {
   selectionHelper = new SelectionHelper(this);
 
   updateDropIndicator = (
-    state: PointerEventState,
+    state: DndEventState,
     shouldAutoScroll: boolean = false
   ) => {
     const point = new Point(state.raw.x, state.raw.y);
@@ -355,6 +359,10 @@ export class AffineDragHandleWidget extends WidgetComponent<RootBlockModel> {
     );
   };
 
+  private get _enableNewDnd() {
+    return this.std.doc.awarenessStore.getFlag('enable_new_dnd') ?? false;
+  }
+
   get dragHandleContainerOffsetParent() {
     return this.dragHandleContainer.parentElement!;
   }
@@ -382,7 +390,11 @@ export class AffineDragHandleWidget extends WidgetComponent<RootBlockModel> {
 
     this.pointerEventWatcher.watch();
     this._keyboardEventWatcher.watch();
-    this._dragEventWatcher.watch();
+    if (this._enableNewDnd) {
+      this._dragEventWatcher.watch();
+    } else {
+      this._legacyDragEventWatcher.watch();
+    }
   }
 
   override disconnectedCallback() {
@@ -423,7 +435,7 @@ export class AffineDragHandleWidget extends WidgetComponent<RootBlockModel> {
 
     return html`
       <div class="affine-drag-handle-widget">
-        <div class="affine-drag-handle-container">
+        <div class="affine-drag-handle-container" draggable="true">
           <div class="affine-drag-handle-grabber"></div>
         </div>
         <div class="affine-drag-hover-rect" style=${hoverRectStyle}></div>

@@ -14,12 +14,14 @@ export const buildConnectorDenseMenu: DenseMenuBuilder = edgeless => {
   const prevMode =
     edgeless.std.get(EditPropsStore).lastProps$.value.connector.mode;
 
-  const isSelected = edgeless.tools.edgelessTool.type === 'connector';
+  const isSelected = edgeless.gfx.tool.currentToolName$.peek() === 'connector';
 
   const createSelect =
     (mode: ConnectorMode, record = true) =>
     () => {
-      edgeless.tools.setEdgelessTool({ type: 'connector', mode });
+      edgeless.gfx.tool.setTool('connector', {
+        mode,
+      });
       record &&
         edgeless.std.get(EditPropsStore).recordLastProps('connector', { mode });
     };

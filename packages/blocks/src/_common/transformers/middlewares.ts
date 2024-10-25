@@ -274,3 +274,25 @@ export const embedSyncedDocMiddleware =
   ({ adapterConfigs }) => {
     adapterConfigs.set('embedSyncedDocExportType', type);
   };
+
+export const fileNameMiddleware =
+  (fileName?: string): JobMiddleware =>
+  ({ slots }) => {
+    slots.beforeImport.on(payload => {
+      if (payload.type !== 'page') {
+        return;
+      }
+      if (!fileName) {
+        return;
+      }
+      payload.snapshot.meta.title = fileName;
+      payload.snapshot.blocks.props.title = {
+        '$blocksuite:internal:text$': true,
+        delta: [
+          {
+            insert: fileName,
+          },
+        ],
+      };
+    });
+  };

@@ -1189,7 +1189,7 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
       type: 'page',
       meta: {
         id: payload.pageId ?? nanoid(),
-        title: hastGetTextContent(titleAst, 'Untitled'),
+        title: hastGetTextContent(titleAst, ''),
         createDate: Date.now(),
         tags: [],
       },
@@ -1203,7 +1203,7 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
             delta: this._hastToDelta(
               titleAst ?? {
                 type: 'text',
-                value: 'Untitled',
+                value: '',
               }
             ),
           },

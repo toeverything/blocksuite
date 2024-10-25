@@ -13,11 +13,14 @@ import type { IBound, IVec, SerializedXYWH } from '@blocksuite/global/utils';
 
 import {
   CanvasElementType,
-  CommonUtils,
   SurfaceGroupLikeModel,
   TextUtils,
 } from '@blocksuite/affine-block-surface';
-import { BookmarkStyles } from '@blocksuite/affine-model';
+import {
+  BookmarkStyles,
+  DEFAULT_NOTE_HEIGHT,
+  DEFAULT_NOTE_WIDTH,
+} from '@blocksuite/affine-model';
 import {
   EmbedOptionProvider,
   ParseDocUrlProvider,
@@ -73,7 +76,7 @@ import {
   getSortedCloneElements,
   serializeElement,
 } from '../utils/clone-utils.js';
-import { DEFAULT_NOTE_HEIGHT, DEFAULT_NOTE_WIDTH } from '../utils/consts.js';
+import { addAttachments, addImages } from '../utils/common.js';
 import { deleteElements } from '../utils/crud.js';
 import {
   isAttachmentBlock,
@@ -220,7 +223,7 @@ export class EdgelessClipboardController extends PageClipboard {
     const data = event.clipboardData;
     if (!data) return;
 
-    const { lastMousePos } = this.toolManager;
+    const lastMousePos = this.toolManager.lastMousePos$.peek();
     const point: IVec = [lastMousePos.x, lastMousePos.y];
 
     if (isPureFileInClipboard(data)) {
@@ -240,9 +243,9 @@ export class EdgelessClipboardController extends PageClipboard {
 
       // when only images in clipboard, add image-blocks else add all files as attachments
       if (attachmentFiles.length === 0) {
-        await this.host.addImages(imageFiles, point);
+        await addImages(this.std, imageFiles, point);
       } else {
-        await this.host.addAttachments([...files], point);
+        await addAttachments(this.std, [...files], point);
       }
 
       this.std.getOptional(TelemetryProvider)?.track('CanvasElementAdded', {
@@ -258,7 +261,7 @@ export class EdgelessClipboardController extends PageClipboard {
 
     if (isUrlInClipboard(data)) {
       const url = data.getData('text/plain');
-      const { lastMousePos } = this.toolManager;
+      const lastMousePos = this.toolManager.lastMousePos$.peek();
       const [x, y] = this.host.service.viewport.toModelCoord(
         lastMousePos.x,
         lastMousePos.y
@@ -355,7 +358,7 @@ export class EdgelessClipboardController extends PageClipboard {
 
     const svg = tryGetSvgFromClipboard(data);
     if (svg) {
-      await this.host.addImages([svg], point);
+      await addImages(this.std, [svg], point);
       return;
     }
     try {
@@ -411,7 +414,7 @@ export class EdgelessClipboardController extends PageClipboard {
   }
 
   private get toolManager() {
-    return this.host.tools;
+    return this.host.gfx.tool;
   }
 
   constructor(public override host: EdgelessRootBlockComponent) {
@@ -1047,7 +1050,7 @@ export class EdgelessClipboardController extends PageClipboard {
 
   private async _pasteTextContentAsNote(content: BlockSnapshot[] | string) {
     const edgeless = this.host;
-    const { lastMousePos } = this.toolManager;
+    const lastMousePos = this.toolManager.lastMousePos$.peek();
     const [x, y] = edgeless.service.viewport.toModelCoord(
       lastMousePos.x,
       lastMousePos.y
@@ -1100,7 +1103,7 @@ export class EdgelessClipboardController extends PageClipboard {
       elements: [noteId],
       editing: false,
     });
-    edgeless.tools.setEdgelessTool({ type: 'default' });
+    edgeless.gfx.tool.setTool('default');
   }
 
   private _replaceRichTextWithSvgElement(element: HTMLElement) {
@@ -1212,7 +1215,7 @@ export class EdgelessClipboardController extends PageClipboard {
   ) {
     let oldCommonBound, pasteX, pasteY;
     {
-      const { lastMousePos } = this.toolManager;
+      const lastMousePos = this.toolManager.lastMousePos$.peek();
       pasteCenter =
         pasteCenter ??
         this.host.service.viewport.toModelCoord(lastMousePos.x, lastMousePos.y);
@@ -1345,7 +1348,7 @@ export class EdgelessClipboardController extends PageClipboard {
       bounds.push(Bound.deserialize(block.xywh));
     });
     shapes.forEach(shape => {
-      bounds.push(CommonUtils.getBoundsWithRotation(shape.elementBound));
+      bounds.push(shape.elementBound);
     });
     const bound = getCommonBound(bounds);
     assertExists(bound, 'bound not exist');

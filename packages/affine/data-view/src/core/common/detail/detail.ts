@@ -30,6 +30,7 @@ import { DetailSelection } from './selection.js';
 export type DetailSlotProps = {
   view: SingleView;
   rowId: string;
+  openDoc: (docId: string) => void;
 };
 
 export interface DetailSlots {
@@ -125,6 +126,9 @@ export class RecordDetail extends SignalWatcher(
     );
   };
 
+  @property({ attribute: false })
+  accessor view!: SingleView;
+
   properties$ = computed(() => {
     return this.view.detailProperties$.value.map(id =>
       this.view.propertyGet(id)
@@ -143,6 +147,7 @@ export class RecordDetail extends SignalWatcher(
       const props: DetailSlotProps = {
         view: this.view,
         rowId: this.rowId,
+        openDoc: this.openDoc,
       };
       return renderUniLit(header, props);
     }
@@ -155,6 +160,7 @@ export class RecordDetail extends SignalWatcher(
       const props: DetailSlotProps = {
         view: this.view,
         rowId: this.rowId,
+        openDoc: this.openDoc,
       };
       return renderUniLit(note, props);
     }
@@ -257,10 +263,10 @@ export class RecordDetail extends SignalWatcher(
   accessor detailSlots: DetailSlots | undefined;
 
   @property({ attribute: false })
-  accessor rowId!: string;
+  accessor openDoc!: (docId: string) => void;
 
   @property({ attribute: false })
-  accessor view!: SingleView;
+  accessor rowId!: string;
 }
 
 declare global {
@@ -272,11 +278,13 @@ export const createRecordDetail = (ops: {
   view: SingleView;
   rowId: string;
   detail: DetailSlots;
+  openDoc: (docId: string) => void;
 }) => {
   return html` <affine-data-view-record-detail
     .view=${ops.view}
     .rowId=${ops.rowId}
     .detailSlots=${ops.detail}
+    .openDoc=${ops.openDoc}
     class="data-view-popup-container"
   ></affine-data-view-record-detail>`;
 };

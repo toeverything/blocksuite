@@ -179,6 +179,13 @@ export class BlockModel<
   Props extends object = object,
   PropsSignal extends object = SignaledProps<Props>,
 > extends MagicProps()<PropsSignal> {
+  private _children = signal<string[]>([]);
+
+  /**
+   * @deprecated use doc instead
+   */
+  page!: Doc;
+
   private _childModels = computed(() => {
     const value: BlockModel[] = [];
     this._children.value.map(id => {
@@ -189,8 +196,6 @@ export class BlockModel<
     });
     return value;
   });
-
-  private _children = signal<string[]>([]);
 
   private _onCreated: Disposable;
 
@@ -219,11 +224,6 @@ export class BlockModel<
 
   // This is used to avoid https://stackoverflow.com/questions/55886792/infer-typescript-generic-class-type
   [modelLabel]: Props = 'type_info_label' as never;
-
-  /**
-   * @deprecated use doc instead
-   */
-  page!: Doc;
 
   pop!: (prop: keyof Props & string) => void;
 

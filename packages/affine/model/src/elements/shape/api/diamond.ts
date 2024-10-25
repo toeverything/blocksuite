@@ -4,7 +4,7 @@ import type { IBound, IVec } from '@blocksuite/global/utils';
 import {
   Bound,
   getCenterAreaBounds,
-  getPointsFromBoundsWithRotation,
+  getPointsFromBoundWithRotation,
   linePolygonIntersects,
   pointInPolygon,
   PointLocation,
@@ -53,7 +53,7 @@ export const diamond = {
     options: PointTestOptions
   ) {
     const point: IVec = [x, y];
-    const points = getPointsFromBoundsWithRotation(this, diamond.points);
+    const points = getPointsFromBoundWithRotation(this, diamond.points);
 
     let hit = pointOnPolygonStoke(
       point,
@@ -73,7 +73,7 @@ export const diamond = {
             this,
             DEFAULT_CENTRAL_AREA_RATIO
           );
-          const centralPoints = getPointsFromBoundsWithRotation(
+          const centralPoints = getPointsFromBoundWithRotation(
             centralBounds,
             diamond.points
           );
@@ -81,7 +81,7 @@ export const diamond = {
         } else if (this.textBound) {
           hit = pointInPolygon(
             point,
-            getPointsFromBoundsWithRotation(
+            getPointsFromBoundWithRotation(
               this,
               () => Bound.from(this.textBound!).points
             )
@@ -94,17 +94,17 @@ export const diamond = {
   },
 
   containsBound(bounds: Bound, element: ShapeElementModel) {
-    const points = getPointsFromBoundsWithRotation(element, diamond.points);
+    const points = getPointsFromBoundWithRotation(element, diamond.points);
     return points.some(point => bounds.containsPoint(point));
   },
 
   getNearestPoint(point: IVec, element: ShapeElementModel) {
-    const points = getPointsFromBoundsWithRotation(element, diamond.points);
+    const points = getPointsFromBoundWithRotation(element, diamond.points);
     return polygonNearestPoint(points, point);
   },
 
   getLineIntersections(start: IVec, end: IVec, element: ShapeElementModel) {
-    const points = getPointsFromBoundsWithRotation(element, diamond.points);
+    const points = getPointsFromBoundWithRotation(element, diamond.points);
     return linePolygonIntersects(start, end, points);
   },
 

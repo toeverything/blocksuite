@@ -67,6 +67,7 @@ export class Viewport {
   }
 
   get height() {
+    this._height = this._el?.offsetHeight ?? this._height;
     return this._height;
   }
 
@@ -141,6 +142,7 @@ export class Viewport {
   }
 
   get width() {
+    this._width = this._el?.offsetWidth ?? this._width;
     return this._width;
   }
 
@@ -218,8 +220,6 @@ export class Viewport {
   setRect(left: number, top: number, width: number, height: number) {
     this._left = left;
     this._top = top;
-    this._width = width;
-    this._height = height;
     this.sizeUpdated.emit({
       left,
       top,
@@ -277,7 +277,7 @@ export class Viewport {
 
     this._el = elm;
 
-    this.setRect(rect.left, rect.top, rect.width, rect.height);
+    this.setRect(rect.left, rect.top, elm.offsetWidth, elm.offsetHeight);
   }
 
   setZoom(zoom: number, focusPoint?: IPoint) {

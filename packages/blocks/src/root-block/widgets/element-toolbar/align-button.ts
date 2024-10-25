@@ -267,7 +267,9 @@ export class EdgelessAlignButton extends WithDisposable(LitElement) {
   }
 
   private _updateXYWH(ele: BlockSuite.EdgelessModel, bound: Bound) {
-    updateXYWH(ele, bound, this.edgeless.service.updateElement);
+    const { updateElement } = this.edgeless.service;
+    const { updateBlock } = this.edgeless.doc;
+    updateXYWH(ele, bound, updateElement, updateBlock);
   }
 
   private renderIcons(icons: AlignmentIcon[]) {

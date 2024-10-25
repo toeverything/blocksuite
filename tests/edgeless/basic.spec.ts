@@ -1,4 +1,7 @@
-import { NOTE_WIDTH } from '@blocksuite/affine-model';
+import {
+  DEFAULT_NOTE_HEIGHT,
+  DEFAULT_NOTE_WIDTH,
+} from '@blocksuite/affine-model';
 import { assertExists } from '@blocksuite/global/utils';
 import { expect } from '@playwright/test';
 
@@ -7,7 +10,6 @@ import {
   decreaseZoomLevel,
   deleteAll,
   edgelessCommonSetup,
-  getEdgelessSelectedRect,
   increaseZoomLevel,
   locatorEdgelessComponentToolButton,
   multiTouchDown,
@@ -37,8 +39,8 @@ import {
 } from '../utils/actions/index.js';
 import {
   assertEdgelessNonSelectedRect,
+  assertEdgelessSelectedModelRect,
   assertEdgelessSelectedRect,
-  assertEdgelessSelectedRectModel,
   assertNoteXYWH,
   assertRichTextInlineRange,
   assertRichTexts,
@@ -75,11 +77,11 @@ test('can zoom viewport', async ({ page }) => {
   await switchEditorMode(page);
   await zoomResetByKeyboard(page);
 
-  await assertNoteXYWH(page, [0, 0, NOTE_WIDTH, 92]);
+  await assertNoteXYWH(page, [0, 0, DEFAULT_NOTE_WIDTH, DEFAULT_NOTE_HEIGHT]);
 
   await page.mouse.click(CENTER_X, CENTER_Y);
-  const original = [80, 402.5, NOTE_WIDTH, 92];
-  await assertEdgelessSelectedRect(page, original);
+  const original = [0, 0, DEFAULT_NOTE_WIDTH, DEFAULT_NOTE_HEIGHT];
+  await assertEdgelessSelectedModelRect(page, original);
   await assertZoomLevel(page, 100);
 
   await decreaseZoomLevel(page);
@@ -87,15 +89,14 @@ test('can zoom viewport', async ({ page }) => {
   await decreaseZoomLevel(page);
   await assertZoomLevel(page, 50);
 
-  const box = await getEdgelessSelectedRect(page);
-  const zoomed = [box.x, box.y, original[2] * 0.5, original[3] * 0.5];
-  await assertEdgelessSelectedRect(page, zoomed);
+  const zoomed = [0, 0, original[2] * 0.5, original[3] * 0.5];
+  await assertEdgelessSelectedModelRect(page, zoomed);
 
   await increaseZoomLevel(page);
   await assertZoomLevel(page, 75);
   await increaseZoomLevel(page);
   await assertZoomLevel(page, 100);
-  await assertEdgelessSelectedRect(page, original);
+  await assertEdgelessSelectedModelRect(page, original);
 });
 
 test('zoom by mouse', async ({ page }) => {
@@ -106,17 +107,17 @@ test('zoom by mouse', async ({ page }) => {
   await zoomResetByKeyboard(page);
   await assertZoomLevel(page, 100);
 
-  await assertNoteXYWH(page, [0, 0, NOTE_WIDTH, 92]);
+  await assertNoteXYWH(page, [0, 0, DEFAULT_NOTE_WIDTH, DEFAULT_NOTE_HEIGHT]);
 
   await page.mouse.click(CENTER_X, CENTER_Y);
-  const original = [80, 402.5, NOTE_WIDTH, 92];
-  await assertEdgelessSelectedRect(page, original);
+  const original = [0, 0, DEFAULT_NOTE_WIDTH, DEFAULT_NOTE_HEIGHT];
+  await assertEdgelessSelectedModelRect(page, original);
 
   await zoomByMouseWheel(page, 0, 125);
   await assertZoomLevel(page, 90);
 
-  const zoomed = [117, 407.25, original[2] * 0.9, original[3] * 0.9];
-  await assertEdgelessSelectedRect(page, zoomed);
+  const zoomed = [0, 0, original[2] * 0.9, original[3] * 0.9];
+  await assertEdgelessSelectedModelRect(page, zoomed);
 });
 
 test('zoom by pinch', async ({ page }) => {
@@ -127,11 +128,11 @@ test('zoom by pinch', async ({ page }) => {
   await zoomResetByKeyboard(page);
   await assertZoomLevel(page, 100);
 
-  await assertNoteXYWH(page, [0, 0, NOTE_WIDTH, 92]);
+  await assertNoteXYWH(page, [0, 0, DEFAULT_NOTE_WIDTH, DEFAULT_NOTE_HEIGHT]);
 
   await page.mouse.click(CENTER_X, CENTER_Y);
-  const original = [80, 402.5, NOTE_WIDTH, 92];
-  await assertEdgelessSelectedRect(page, original);
+  const original = [0, 0, DEFAULT_NOTE_WIDTH, DEFAULT_NOTE_HEIGHT];
+  await assertEdgelessSelectedModelRect(page, original);
 
   const from = [
     { x: CENTER_X - 100, y: CENTER_Y },
@@ -146,8 +147,8 @@ test('zoom by pinch', async ({ page }) => {
   await multiTouchUp(page, to);
 
   await assertZoomLevel(page, 50);
-  const zoomed = [265, 426.25, 0.5 * NOTE_WIDTH, 46];
-  await assertEdgelessSelectedRect(page, zoomed);
+  const zoomed = [0, 0, 0.5 * DEFAULT_NOTE_WIDTH, 46];
+  await assertEdgelessSelectedModelRect(page, zoomed);
 });
 
 test('zoom by pinch when edgeless is readonly', async ({ page }) => {
@@ -184,11 +185,11 @@ test('move by pan', async ({ page }) => {
   await zoomResetByKeyboard(page);
   await assertZoomLevel(page, 100);
 
-  await assertNoteXYWH(page, [0, 0, NOTE_WIDTH, 92]);
+  await assertNoteXYWH(page, [0, 0, DEFAULT_NOTE_WIDTH, DEFAULT_NOTE_HEIGHT]);
 
   await page.mouse.click(CENTER_X, CENTER_Y);
-  const original = [80, 402.5, NOTE_WIDTH, 92];
-  await assertEdgelessSelectedRect(page, original);
+  const original = [0, 0, DEFAULT_NOTE_WIDTH, DEFAULT_NOTE_HEIGHT];
+  await assertEdgelessSelectedModelRect(page, original);
 
   const from = [
     { x: CENTER_X - 100, y: CENTER_Y },
@@ -203,8 +204,8 @@ test('move by pan', async ({ page }) => {
   await multiTouchMove(page, from, to);
   await multiTouchUp(page, to);
 
-  const moved = [130, 452.5, NOTE_WIDTH, 92];
-  await assertEdgelessSelectedRect(page, moved);
+  const moved = [0, 0, DEFAULT_NOTE_WIDTH, DEFAULT_NOTE_HEIGHT];
+  await assertEdgelessSelectedModelRect(page, moved);
 });
 
 test('option/alt mouse drag duplicate a new element', async ({ page }) => {
@@ -297,16 +298,16 @@ test('shift click multi select and de-select', async ({ page }) => {
   await createShapeElement(page, start, end, Shape.Square);
 
   await clickView(page, [50, 0]);
-  await assertEdgelessSelectedRectModel(page, [0, 0, 100, 100]);
+  await assertEdgelessSelectedModelRect(page, [0, 0, 100, 100]);
 
   await shiftClickView(page, [150, 50]);
-  await assertEdgelessSelectedRectModel(page, [0, 0, 200, 100]);
+  await assertEdgelessSelectedModelRect(page, [0, 0, 200, 100]);
 
   // we will try to write text on a shape element when we dbclick it
 
   await waitNextFrame(page, 500);
   await shiftClickView(page, [150, 50]);
-  await assertEdgelessSelectedRectModel(page, [0, 0, 100, 100]);
+  await assertEdgelessSelectedModelRect(page, [0, 0, 100, 100]);
 });
 
 test('Before and after switching to Edgeless, the previous zoom ratio and position when Edgeless was opened should be remembered', async ({

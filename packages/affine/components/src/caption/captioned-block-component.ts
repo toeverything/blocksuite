@@ -42,7 +42,7 @@ export class CaptionedBlockComponent<
       ${this.showBlockSelection
         ? html`<affine-block-selection .block=${this}></affine-block-selection>`
         : nothing}
-      ${this.useZeroWidth
+      ${this.useZeroWidth && !this.doc.readonly
         ? html`<block-zero-width .block=${this}></block-zero-width>`
         : nothing}
     </div>`;

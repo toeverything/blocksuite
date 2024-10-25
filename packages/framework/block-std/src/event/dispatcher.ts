@@ -21,7 +21,6 @@ const bypassEventNames = [
 
   'blur',
   'focus',
-  'drop',
   'contextMenu',
   'wheel',
 ] as const;
@@ -54,6 +53,11 @@ const eventNames = [
   'cut',
   'copy',
   'paste',
+
+  'nativeDragStart',
+  'nativeDragMove',
+  'nativeDragEnd',
+  'nativeDrop',
 
   ...bypassEventNames,
 ] as const;

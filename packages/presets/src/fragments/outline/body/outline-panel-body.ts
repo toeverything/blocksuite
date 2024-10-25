@@ -586,9 +586,7 @@ export class OutlinePanelBody extends SignalWatcher(
 
     if (!edgeless) return;
 
-    const bound = edgeless.getElementsBound();
-
-    if (!bound) return;
+    const bound = edgeless.gfx.elementsBound;
 
     this._oldViewport = {
       zoom: edgeless.service.viewport.zoom,

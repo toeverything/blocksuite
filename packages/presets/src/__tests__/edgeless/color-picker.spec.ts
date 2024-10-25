@@ -18,9 +18,7 @@ describe('theme observer', () => {
 
     edgeless = getDocRootBlock(doc, editor, 'edgeless');
 
-    edgeless.tools.edgelessTool = {
-      type: 'default',
-    };
+    edgeless.gfx.tool.setTool('default');
 
     return cleanup;
   });

@@ -19,6 +19,7 @@ import { AFFINE_DRAG_HANDLE_WIDGET } from '../widgets/drag-handle/consts.js';
 import { AFFINE_EMBED_CARD_TOOLBAR_WIDGET } from '../widgets/embed-card-toolbar/embed-card-toolbar.js';
 import { AFFINE_FORMAT_BAR_WIDGET } from '../widgets/format-bar/format-bar.js';
 import { AFFINE_INNER_MODAL_WIDGET } from '../widgets/inner-modal/inner-modal.js';
+import { AFFINE_KEYBOARD_TOOLBAR_WIDGET } from '../widgets/keyboard-toolbar/index.js';
 import { AFFINE_LINKED_DOC_WIDGET } from '../widgets/linked-doc/index.js';
 import { AFFINE_MODAL_WIDGET } from '../widgets/modal/modal.js';
 import { AFFINE_PAGE_DRAGGING_AREA_WIDGET } from '../widgets/page-dragging-area/page-dragging-area.js';
@@ -27,6 +28,7 @@ import { AFFINE_VIEWPORT_OVERLAY_WIDGET } from '../widgets/viewport-overlay/view
 import { PageRootService } from './page-root-service.js';
 
 export const pageRootWidgetViewMap = {
+  [AFFINE_KEYBOARD_TOOLBAR_WIDGET]: literal`${unsafeStatic(AFFINE_KEYBOARD_TOOLBAR_WIDGET)}`,
   [AFFINE_MODAL_WIDGET]: literal`${unsafeStatic(AFFINE_MODAL_WIDGET)}`,
   [AFFINE_INNER_MODAL_WIDGET]: literal`${unsafeStatic(AFFINE_INNER_MODAL_WIDGET)}`,
   [AFFINE_SLASH_MENU_WIDGET]: literal`${unsafeStatic(

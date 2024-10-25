@@ -36,9 +36,9 @@ export const synced: InitFn = (collection: DocCollection, id: string) => {
     const noteId = docSyncedPage.addBlock('affine:note', {}, rootId);
 
     // Add markdown to note block
-    MarkdownTransformer.importMarkdown({
+    MarkdownTransformer.importMarkdownToBlock({
       doc: docSyncedPage,
-      noteId,
+      blockId: noteId,
       markdown: syncedDocMarkdown,
     }).catch(console.error);
   });
@@ -55,9 +55,9 @@ export const synced: InitFn = (collection: DocCollection, id: string) => {
     const noteId = docSyncedEdgeless.addBlock('affine:note', {}, rootId);
 
     // Add markdown to note block
-    MarkdownTransformer.importMarkdown({
+    MarkdownTransformer.importMarkdownToBlock({
       doc: docSyncedEdgeless,
-      noteId,
+      blockId: noteId,
       markdown: syncedDocMarkdown,
     }).catch(console.error);
   });
@@ -72,9 +72,9 @@ export const synced: InitFn = (collection: DocCollection, id: string) => {
     const noteId = docMain.addBlock('affine:note', {}, rootId);
 
     // Add markdown to note block
-    MarkdownTransformer.importMarkdown({
+    MarkdownTransformer.importMarkdownToBlock({
       doc: docMain,
-      noteId,
+      blockId: noteId,
       markdown: syncedDocMarkdown,
     })
       .then(() => {

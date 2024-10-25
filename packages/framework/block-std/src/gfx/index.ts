@@ -9,10 +9,13 @@ export {
   getTopElements,
   hasDescendantElementImpl,
 } from '../utils/tree.js';
-export { GfxController, GfxControllerIdentifier } from './controller.js';
+export { GfxController } from './controller.js';
+export { GfxExtension, GfxExtensionIdentifier } from './extension.js';
 export * from './gfx-block-model.js';
 export { GridManager } from './grid.js';
+export { GfxControllerIdentifier } from './identifiers.js';
 export { LayerManager, type ReorderingDirection } from './layer.js';
+export { GfxSelectionManager } from './selection.js';
 export {
   type GfxContainerElement,
   gfxContainerSymbol,
@@ -44,9 +47,21 @@ export {
 export {
   SurfaceBlockModel,
   type SurfaceBlockProps,
-  type SurfaceMiddleware,
 } from './surface/surface-model.js';
-export * from './viewport.js';
 
+export {
+  type SurfaceMiddlewareBuilder,
+  SurfaceMiddlewareExtension,
+} from './surface-middleware.js';
+
+export {
+  BaseTool,
+  type GfxToolsFullOption,
+  type GfxToolsFullOptionValue,
+  type GfxToolsMap,
+  type GfxToolsOption,
+} from './tool/tool.js';
+export { ToolController } from './tool/tool-controller.js';
+export * from './viewport.js';
 export { GfxViewportElement } from './viewport-element.js';
 export { generateKeyBetween, generateNKeysBetween } from 'fractional-indexing';

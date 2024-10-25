@@ -214,7 +214,7 @@ export async function locatorEdgelessToolButton(
   // TODO: quickTool locator is different
   const button = await locatorEdgelessToolButtonSenior(
     page,
-    `edgeless-toolbar ${buttonType}${selector}`
+    `edgeless-toolbar-widget ${buttonType}${selector}`
   );
 
   return innerContainer ? button.locator('.icon-container') : button;
@@ -352,7 +352,7 @@ export async function setEdgelessTool(
       await shapeToolButton.click({ position: { x: 5, y: 5 } });
 
       const squareShapeButton = page
-        .locator('edgeless-tool-icon-button')
+        .locator('edgeless-slide-menu edgeless-tool-icon-button')
         .filter({ hasText: shape });
       await squareShapeButton.click();
       break;
@@ -372,10 +372,10 @@ export async function assertEdgelessShapeType(page: Page, type: ShapeName) {
     if (!container) {
       throw new Error('Missing edgeless page');
     }
-    if (container.edgelessTool.type !== 'shape')
-      throw new Error('Expected shape tool');
+    const tool = container.gfx.tool.currentToolOption$.peek();
+    if (tool.type !== 'shape') throw new Error('Expected shape tool');
 
-    return container.edgelessTool.shapeName;
+    return tool.shapeName;
   });
 
   expect(type).toEqual(curType);
@@ -387,7 +387,7 @@ export async function assertEdgelessTool(page: Page, mode: EdgelessTool) {
     if (!container) {
       throw new Error('Missing edgeless page');
     }
-    return container.edgelessTool.type;
+    return container.gfx.tool.currentToolOption$.peek().type;
   });
   expect(type).toEqual(mode);
 }
@@ -401,7 +401,7 @@ export async function assertEdgelessConnectorToolMode(
     if (!container) {
       throw new Error('Missing edgeless page');
     }
-    return container.edgelessTool;
+    return container.gfx.tool.currentToolOption$.peek();
   });
   if (tool.type !== 'connector') {
     throw new Error('Expected connector tool');
@@ -415,7 +415,7 @@ export async function assertEdgelessLassoToolMode(page: Page, mode: LassoMode) {
     if (!container) {
       throw new Error('Missing edgeless page');
     }
-    return container.edgelessTool;
+    return container.gfx.tool.currentToolOption$.peek();
   });
   if (tool.type !== 'lasso') {
     throw new Error('Expected lasso tool');
@@ -1827,6 +1827,20 @@ export async function createFrameElement(
   const start = await toViewCoord(page, coord1);
   const end = await toViewCoord(page, coord2);
   await addBasicFrameElement(
+    page,
+    { x: start[0], y: start[1] },
+    { x: end[0], y: end[1] }
+  );
+}
+
+export async function createBrushElement(
+  page: Page,
+  coord1: number[],
+  coord2: number[]
+) {
+  const start = await toViewCoord(page, coord1);
+  const end = await toViewCoord(page, coord2);
+  await addBasicBrushElement(
     page,
     { x: start[0], y: start[1] },
     { x: end[0], y: end[1] }

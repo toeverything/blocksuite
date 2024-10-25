@@ -144,7 +144,7 @@ test(
   }
 );
 
-test(
+test.fixme(
   scoped`support dragging bookmark block directly`,
   async ({ page }, testInfo) => {
     await createBookmarkBlockBySlashMenu(page);

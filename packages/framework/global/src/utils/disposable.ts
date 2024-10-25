@@ -45,9 +45,21 @@ export class DisposableGroup implements Disposable {
     handler: (e: HTMLElementEventMap[N]) => void,
     eventOptions?: boolean | AddEventListenerOptions
   ): void;
+  addFromEvent<N extends keyof VisualViewportEventMap>(
+    element: VisualViewport,
+    eventName: N,
+    handler: (e: VisualViewportEventMap[N]) => void,
+    eventOptions?: boolean | AddEventListenerOptions
+  ): void;
+  addFromEvent<N extends keyof VirtualKeyboardEventMap>(
+    element: VirtualKeyboard,
+    eventName: N,
+    handler: (e: VirtualKeyboardEventMap[N]) => void,
+    eventOptions?: boolean | AddEventListenerOptions
+  ): void;
 
   addFromEvent(
-    target: HTMLElement | Window | Document,
+    target: HTMLElement | Window | Document | VisualViewport | VirtualKeyboard,
     type: string,
     handler: (e: Event) => void,
     eventOptions?: boolean | AddEventListenerOptions

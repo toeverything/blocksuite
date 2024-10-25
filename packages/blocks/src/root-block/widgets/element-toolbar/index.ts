@@ -34,17 +34,20 @@ import {
 import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import { requestConnectedFrame } from '@blocksuite/affine-shared/utils';
 import { WidgetComponent } from '@blocksuite/block-std';
-import { atLeastNMatches, groupBy, pickValues } from '@blocksuite/global/utils';
+import {
+  atLeastNMatches,
+  getCommonBoundWithRotation,
+  groupBy,
+  pickValues,
+} from '@blocksuite/global/utils';
 import { css, html, nothing, type TemplateResult } from 'lit';
 import { property, state } from 'lit/decorators.js';
 import { join } from 'lit/directives/join.js';
 
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
-import type { ConnectorToolController } from '../../edgeless/tools/connector-tool.js';
 import type { ElementToolbarMoreMenuContext } from './more-menu/context.js';
 
 import { getMoreMenuConfig } from '../../configs/toolbar.js';
-import { edgelessElementsBound } from '../../edgeless/utils/bound-utils.js';
 import {
   isAttachmentBlock,
   isBookmarkBlock,
@@ -124,14 +127,11 @@ export class EdgelessElementToolbarWidget extends WidgetComponent<
       y,
     ]);
     this.edgeless.doc.captureSync();
-    this.edgeless.tools.setEdgelessTool({
-      type: 'connector',
+    this.edgeless.gfx.tool.setTool('connector', {
       mode: ConnectorMode.Curve,
     });
 
-    const ctc = this.edgeless.tools.controllers[
-      'connector'
-    ] as ConnectorToolController;
+    const ctc = this.edgeless.gfx.tool.get('connector');
     ctc.quickConnect(point, element);
   };
 
@@ -197,7 +197,7 @@ export class EdgelessElementToolbarWidget extends WidgetComponent<
       return;
     }
 
-    const bound = edgelessElementsBound(elements);
+    const bound = getCommonBoundWithRotation(elements);
 
     const { width, height } = viewport;
     const [x, y] = viewport.toViewCoord(bound.x, bound.y);

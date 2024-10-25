@@ -22,9 +22,9 @@ export const preset: InitFn = async (collection: DocCollection, id: string) => {
   );
 
   // Import preset markdown content inside note block
-  await MarkdownTransformer.importMarkdown({
+  await MarkdownTransformer.importMarkdownToBlock({
     doc,
-    noteId,
+    blockId: noteId,
     markdown: presetMarkdown,
   });
 

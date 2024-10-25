@@ -14,10 +14,9 @@ import {
   ExportManager,
   FontFamilyVariables,
   HtmlTransformer,
-  importNotion,
-  MarkdownAdapter,
   MarkdownTransformer,
   NotionHtmlAdapter,
+  NotionHtmlTransformer,
   openFileOrFiles,
   printToPdf,
   SizeVariables,
@@ -40,8 +39,8 @@ import '@shoelace-style/shoelace/dist/components/select/select.js';
 import '@shoelace-style/shoelace/dist/components/tab/tab.js';
 import '@shoelace-style/shoelace/dist/components/tab-group/tab-group.js';
 import '@shoelace-style/shoelace/dist/components/tooltip/tooltip.js';
-import '@shoelace-style/shoelace/dist/themes/light.css';
 import '@shoelace-style/shoelace/dist/themes/dark.css';
+import '@shoelace-style/shoelace/dist/themes/light.css';
 import { setBasePath } from '@shoelace-style/shoelace/dist/utilities/base-path.js';
 import { css, html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
@@ -225,34 +224,110 @@ export class DebugMenu extends ShadowlessElement {
   }
 
   private async _exportSnapshot() {
-    const file = await ZipTransformer.exportDocs(
+    await ZipTransformer.exportDocs(
       this.collection,
       [...this.collection.docs.values()].map(collection => collection.getDoc())
     );
-    const url = URL.createObjectURL(file);
-    const a = document.createElement('a');
-    a.setAttribute('href', url);
-    a.setAttribute('download', `${this.doc.id}.bs.zip`);
-    a.click();
-    a.remove();
-    URL.revokeObjectURL(url);
+  }
+
+  private async _importHTML() {
+    try {
+      const files = await openFileOrFiles({
+        acceptType: 'Html',
+        multiple: true,
+      });
+
+      if (!files) return;
+
+      const pageIds: string[] = [];
+      for (const file of files) {
+        const text = await file.text();
+        const fileName = file.name.split('.').slice(0, -1).join('.');
+        const pageId = await HtmlTransformer.importHTMLToDoc({
+          collection: this.collection,
+          html: text,
+          fileName,
+        });
+        if (pageId) {
+          pageIds.push(pageId);
+        }
+      }
+      if (!this.editor.host) return;
+      toast(
+        this.editor.host,
+        `Successfully imported ${pageIds.length} HTML files.`
+      );
+    } catch (error) {
+      console.error(' Import HTML files failed:', error);
+    }
+  }
+
+  private async _importHTMLZip() {
+    try {
+      const file = await openFileOrFiles({ acceptType: 'Zip' });
+      if (!file) return;
+      const result = await HtmlTransformer.importHTMLZip({
+        collection: this.collection,
+        imported: file,
+      });
+      if (!this.editor.host) return;
+      toast(
+        this.editor.host,
+        `Successfully imported ${result.length} HTML files.`
+      );
+    } catch (error) {
+      console.error('Import HTML zip files failed:', error);
+    }
   }
 
   private async _importMarkdown() {
-    const file = await openFileOrFiles({
-      acceptType: 'Markdown',
-      multiple: false,
-    });
-    if (!file) return;
-    const job = new Job({
-      collection: this.collection,
-      middlewares: [defaultImageProxyMiddleware],
-    });
-    const markdownAdapter = new MarkdownAdapter(job);
-    await markdownAdapter.toDoc({
-      file: await file.text(),
-      assets: job.assetsManager,
-    });
+    try {
+      const files = await openFileOrFiles({
+        acceptType: 'Markdown',
+        multiple: true,
+      });
+
+      if (!files) return;
+
+      const pageIds: string[] = [];
+      for (const file of files) {
+        const text = await file.text();
+        const fileName = file.name.split('.').slice(0, -1).join('.');
+        const pageId = await MarkdownTransformer.importMarkdownToDoc({
+          collection: this.collection,
+          markdown: text,
+          fileName,
+        });
+        if (pageId) {
+          pageIds.push(pageId);
+        }
+      }
+      if (!this.editor.host) return;
+      toast(
+        this.editor.host,
+        `Successfully imported ${pageIds.length} markdown files.`
+      );
+    } catch (error) {
+      console.error(' Import markdown files failed:', error);
+    }
+  }
+
+  private async _importMarkdownZip() {
+    try {
+      const file = await openFileOrFiles({ acceptType: 'Zip' });
+      if (!file) return;
+      const result = await MarkdownTransformer.importMarkdownZip({
+        collection: this.collection,
+        imported: file,
+      });
+      if (!this.editor.host) return;
+      toast(
+        this.editor.host,
+        `Successfully imported ${result.length} markdown files.`
+      );
+    } catch (error) {
+      console.error('Import markdown zip files failed:', error);
+    }
   }
 
   private async _importNotionHTML() {
@@ -281,7 +356,10 @@ export class DebugMenu extends ShadowlessElement {
     try {
       const file = await openFileOrFiles({ acceptType: 'Zip' });
       if (!file) return;
-      const result = await importNotion(this.collection, file);
+      const result = await NotionHtmlTransformer.importNotionZip({
+        collection: this.collection,
+        imported: file,
+      });
       if (!this.editor.host) return;
       toast(
         this.editor.host,
@@ -368,8 +446,7 @@ export class DebugMenu extends ShadowlessElement {
     }
 
     const edgelessRootService = rootService as EdgelessRootService;
-    edgelessRootService?.tool.setEdgelessTool({
-      type: 'frameNavigator',
+    edgelessRootService?.gfx.tool.setTool('frameNavigator', {
       mode: 'fit',
     });
   }
@@ -662,8 +739,27 @@ export class DebugMenu extends ShadowlessElement {
                       </sl-menu-item>
                     </sl-menu>
                   </sl-menu-item>
-                  <sl-menu-item @click="${this._importMarkdown}">
+                  <sl-menu-item>
                     Import Markdown
+                    <sl-menu slot="submenu">
+                      <sl-menu-item @click="${this._importMarkdown}">
+                        Markdown Files
+                      </sl-menu-item>
+                      <sl-menu-item @click="${this._importMarkdownZip}">
+                        Markdown Zip
+                      </sl-menu-item>
+                    </sl-menu>
+                  </sl-menu-item>
+                  <sl-menu-item>
+                    Import HTML
+                    <sl-menu slot="submenu">
+                      <sl-menu-item @click="${this._importHTML}">
+                        HTML Files
+                      </sl-menu-item>
+                      <sl-menu-item @click="${this._importHTMLZip}">
+                        HTML Zip
+                      </sl-menu-item>
+                    </sl-menu>
                   </sl-menu-item>
                 </sl-menu>
               </sl-menu-item>

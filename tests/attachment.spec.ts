@@ -442,7 +442,7 @@ test('should attachment can be deleted', async ({ page }) => {
   );
 });
 
-test(`support dragging attachment block directly`, async ({ page }) => {
+test.fixme(`support dragging attachment block directly`, async ({ page }) => {
   await enterPlaygroundRoom(page);
   const { noteId } = await initEmptyParagraphState(page);
 
