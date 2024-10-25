@@ -28,15 +28,18 @@ import { popCreateSort } from '../../../core/sort/add-sort.js';
 
 export class SortRootView extends SignalWatcher(ShadowlessElement) {
   static override styles = css`
-    .filter-root-container {
+    .sort-root-container {
       margin-bottom: 8px;
+      gap: 8px;
+      display: flex;
+      flex-direction: column;
     }
   `;
 
   override render() {
     const list = this.sortList.value;
     return html`
-      <div class="filter-root-container">
+      <div class="sort-root-container">
         ${repeat(list, (sort, index) => {
           const id = sort.ref.name;
           const variable = this.vars.value.find(v => v.id === id);
@@ -102,7 +105,13 @@ export class SortRootView extends SignalWatcher(ShadowlessElement) {
               );
             };
             content = html`
+              <div
+                style="border-radius:2px;cursor:pointer;width: 4px;height: 12px;background-color: ${unsafeCSSVarV2(
+                  'button/grabber/default'
+                )}"
+              ></div>
               <data-view-component-button
+                style="margin-right: 6px;margin-left: 4px"
                 @click="${clickField}"
                 .icon="${renderUniLit(variable.icon)}"
                 .text="${variable.name}"
@@ -110,7 +119,6 @@ export class SortRootView extends SignalWatcher(ShadowlessElement) {
               ></data-view-component-button>
               <data-view-component-button
                 @click="${clickOrder}"
-                style="margin-left: 6px;"
                 .text="${html` <div style="padding: 0 4px">${descName}</div>`}"
                 .postfix="${ArrowDownSmallIcon()}"
               ></data-view-component-button>
@@ -119,7 +127,7 @@ export class SortRootView extends SignalWatcher(ShadowlessElement) {
 
           return html`
             <div style='display: flex;align-items: center'>
-              <div style='display: flex;align-items: center;flex:1'>
+              <div style='display: flex;align-items: center;flex:1;margin-right: 16px;'>
                 ${content}
               </div>
               <div
