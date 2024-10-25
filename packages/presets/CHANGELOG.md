@@ -1,5 +1,40 @@
 # @blocksuite/presets
 
+## 0.17.21
+
+### Patch Changes
+
+- 24db578: ## Feat
+
+  - feat(blocks): mobile keyboard toolbar widget (#8585)
+  - feat: add mobile detection and virtual keyboard support (#8584)
+  - feat(blocks): handle event only when nav.clipboard is available (#8587)
+  - feat: add new dnd (#8524)
+
+  ## Fix
+
+  - fix(edgeless): delete at the start of edgeless text (#8574)
+
+  ## Chore
+
+  - chore: organize edgeless spec exports (#8595)
+  - chore: Lock file maintenance (#8569)
+
+  ## Refactor
+
+  - refactor(blocks): extract insert inline latex to command (#8594)
+  - refactor(blocks): remove hover state after button pressed in mobile (#8586)
+
+- Updated dependencies [24db578]
+  - @blocksuite/affine-block-surface@0.17.21
+  - @blocksuite/affine-model@0.17.21
+  - @blocksuite/affine-shared@0.17.21
+  - @blocksuite/blocks@0.17.21
+  - @blocksuite/block-std@0.17.21
+  - @blocksuite/global@0.17.21
+  - @blocksuite/inline@0.17.21
+  - @blocksuite/store@0.17.21
+
 ## 0.17.20
 
 ### Patch Changes
