@@ -13,6 +13,7 @@ import {
   MoreHorizontalIcon,
   MoveLeftIcon,
   MoveRightIcon,
+  PlusIcon,
 } from '@blocksuite/icons/lit';
 import { css, html } from 'lit';
 import { classMap } from 'lit/directives/class-map.js';
@@ -22,7 +23,7 @@ import { WidgetBase } from '../../core/widget/widget-base.js';
 export class DataViewHeaderViews extends WidgetBase {
   static override styles = css`
     data-view-header-views {
-      height: 32px;
+      height: 28px;
       display: flex;
       user-select: none;
       gap: 4px;
@@ -34,26 +35,31 @@ export class DataViewHeaderViews extends WidgetBase {
     .database-view-button {
       height: 100%;
       cursor: pointer;
-      padding: 4px 8px;
+      padding: 2px 4px;
       border-radius: 4px;
       font-size: 14px;
       display: flex;
       align-items: center;
+      justify-content: center;
       color: var(--affine-text-secondary-color);
       white-space: nowrap;
+      max-width: 200px;
     }
 
     .database-view-button .name {
       align-items: center;
-      height: 22px;
-      max-width: 200px;
+      font-size: 15px;
+      line-height: 24px;
       overflow: hidden;
       text-overflow: ellipsis;
+      font-weight: 500;
+      padding-right: 2px;
     }
 
     .database-view-button .icon {
       margin-right: 6px;
       display: block;
+      flex-shrink: 0;
     }
 
     .database-view-button .icon svg {
@@ -119,7 +125,7 @@ export class DataViewHeaderViews extends WidgetBase {
             return menu.action({
               name: `Create ${v.model.defaultName}`,
               hide: () => this.readonly,
-              prefix: html`<uni-lit .uni=${v.renderer.icon}></uni-lit>`,
+              prefix: PlusIcon(),
               select: () => {
                 const id = this.viewManager.viewAdd(v.type);
                 this.viewManager.setCurrentView(id);
