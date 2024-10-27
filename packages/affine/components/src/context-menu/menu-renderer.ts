@@ -29,12 +29,13 @@ export class MenuComponent extends SignalWatcher(
       user-select: none;
       min-width: 276px;
       box-shadow: var(--affine-shadow-2);
-      border-radius: 8px;
+      border-radius: 4px;
       background-color: var(--affine-background-overlay-panel-color);
       padding: 8px;
       position: absolute;
       z-index: 999;
       gap: 8px;
+      border: 0.5px solid ${unsafeCSSVarV2('layer/insideBorder/border')};
     }
 
     .affine-menu-search-container {
@@ -320,10 +321,15 @@ export const popMenu = (
   }
 ): MenuHandler => {
   const classList = target.button.classList;
-  classList.add('active');
+  const hasActive = classList.contains('active');
+  if (!hasActive) {
+    classList.add('active');
+  }
   const onClose = () => {
     props.options.onClose?.();
-    classList.remove('active');
+    if (!hasActive) {
+      classList.remove('active');
+    }
   };
   const menu = new Menu({
     ...props.options,
