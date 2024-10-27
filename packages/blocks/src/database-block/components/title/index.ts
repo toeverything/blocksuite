@@ -20,25 +20,29 @@ export class DatabaseTitle extends WithDisposable(ShadowlessElement) {
     }
 
     .database-title {
-      font-size: 20px;
-      font-weight: 600;
-      line-height: 28px;
       color: var(--affine-text-primary-color);
       font-family: inherit;
       /* overflow-x: scroll; */
       overflow: hidden;
       cursor: text;
+      font-size: 20px;
+      line-height: 28px;
+      font-weight: 600;
     }
-
+    .database-title v-line {
+      height: 28px;
+    }
     .database-title [data-v-text='true'] {
       display: block;
       word-break: break-all !important;
+      white-space: nowrap !important;
+      overflow: hidden;
     }
 
     .database-title.ellipsis [data-v-text='true'] {
-      white-space: nowrap !important;
       text-overflow: ellipsis;
       overflow: hidden;
+      white-space: nowrap;
     }
 
     .affine-database-title [data-title-empty='true']::before {
@@ -99,6 +103,12 @@ export class DatabaseTitle extends WithDisposable(ShadowlessElement) {
           effect(() => {
             const inlineRange = this.inlineEditor.inlineRange$.value;
             if (inlineRange) {
+              if (
+                this.database?.viewSelection$?.value &&
+                getSelection()?.rangeCount
+              ) {
+                this.database?.setSelection(undefined);
+              }
               if (!beforeInlineRange) {
                 this.isActive = true;
               }
@@ -129,17 +139,17 @@ export class DatabaseTitle extends WithDisposable(ShadowlessElement) {
       ellipsis: !this.isActive,
     });
 
-    return html`<div class="affine-database-title">
+    return html` <div class="affine-database-title">
       <rich-text
-        .yText=${this.titleText.yText}
-        .inlineEventSource=${this.topContenteditableElement}
-        .undoManager=${this.database?.doc.history}
-        .enableFormat=${false}
-        .readonly=${this.readonly}
-        .verticalScrollContainerGetter=${() =>
+        .yText="${this.titleText.yText}"
+        .inlineEventSource="${this.topContenteditableElement}"
+        .undoManager="${this.database?.doc.history}"
+        .enableFormat="${false}"
+        .readonly="${this.readonly}"
+        .verticalScrollContainerGetter="${() =>
           this.topContenteditableElement?.host
             ? getViewportElement(this.topContenteditableElement.host)
-            : null}
+            : null}"
         class="${classList}"
         data-title-empty="${isEmpty}"
         data-title-focus="${this.isActive}"

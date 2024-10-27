@@ -7,6 +7,7 @@ export const booleanFilter = {
   isChecked: {
     type: tFunction({ args: [tBoolean.create()], rt: tBoolean.create() }),
     label: 'Is checked',
+    shortString: () => 'checked',
     impl: value => {
       return !!value;
     },
@@ -14,6 +15,7 @@ export const booleanFilter = {
   isUnchecked: {
     type: tFunction({ args: [tBoolean.create()], rt: tBoolean.create() }),
     label: 'Is unchecked',
+    shortString: () => 'unchecked',
     impl: value => {
       return !value;
     },

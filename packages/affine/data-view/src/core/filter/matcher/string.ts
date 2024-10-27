@@ -10,6 +10,7 @@ export const stringFilter = {
       rt: tBoolean.create(),
     }),
     label: 'Is',
+    shortString: target => target?.toString(),
     impl: (value, target) => {
       if (
         typeof value !== 'string' ||
@@ -27,6 +28,7 @@ export const stringFilter = {
       rt: tBoolean.create(),
     }),
     label: 'Is not',
+    shortString: target => target?.toString(),
     impl: (value, target) => {
       if (
         typeof value !== 'string' ||

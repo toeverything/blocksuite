@@ -66,7 +66,10 @@ export class MenuSubMenu extends MenuFocusable {
           autoPlacement({
             allowedPlacements: ['right-start', 'left-start'],
           }),
-          offset(16),
+          offset({
+            mainAxis: 16,
+            crossAxis: -8.5,
+          }),
         ],
       })
         .then(({ x, y }) => {

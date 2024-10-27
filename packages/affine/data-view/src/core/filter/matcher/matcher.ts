@@ -8,10 +8,11 @@ import { stringFilter } from './string.js';
 import { tagFilter } from './tag.js';
 import { unknownFilter } from './unknown.js';
 
-export type FilterMatcherDataType = {
+export type FilterMatcherDataType<Args extends unknown[] = unknown[]> = {
   name: string;
   label: string;
-  impl: (...args: unknown[]) => boolean;
+  shortString: (...args: Args) => string;
+  impl: (...args: Args) => boolean;
 };
 export type FilterDefineType = {
   type: TFunction;

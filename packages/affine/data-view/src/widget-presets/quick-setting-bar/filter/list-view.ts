@@ -1,21 +1,22 @@
 import {
-  createPopup,
   type PopupTarget,
   popupTargetFromElement,
 } from '@blocksuite/affine-components/context-menu';
 import { ShadowlessElement } from '@blocksuite/block-std';
 import { SignalWatcher } from '@blocksuite/global/utils';
-import { CloseIcon, FilterIcon, PlusIcon } from '@blocksuite/icons/lit';
+import {
+  ArrowDownSmallIcon,
+  FilterIcon,
+  PlusIcon,
+} from '@blocksuite/icons/lit';
 import { computed, type ReadonlySignal } from '@preact/signals-core';
-import { css, html, type TemplateResult } from 'lit';
+import { css, html } from 'lit';
 import { property } from 'lit/decorators.js';
-import { repeat } from 'lit/directives/repeat.js';
 
 import type { Variable } from '../../../core/expression/types.js';
 import type { Filter, FilterGroup } from '../../../core/filter/types.js';
 
 import { popCreateFilter } from '../../../core/index.js';
-import { renderTemplate } from '../../../core/utils/uni-component/render-template.js';
 import { popFilterGroup } from './group-panel-view.js';
 
 export class FilterBar extends SignalWatcher(ShadowlessElement) {
@@ -23,6 +24,7 @@ export class FilterBar extends SignalWatcher(ShadowlessElement) {
     filter-bar {
       display: flex;
       gap: 8px;
+      overflow: hidden;
     }
 
     .filter-group-tag {
@@ -37,6 +39,7 @@ export class FilterBar extends SignalWatcher(ShadowlessElement) {
     }
 
     .filter-bar-add-filter {
+      white-space: nowrap;
       color: var(--affine-text-secondary-color);
       padding: 4px 8px;
       display: flex;
@@ -104,63 +107,6 @@ export class FilterBar extends SignalWatcher(ShadowlessElement) {
     </div>`;
   };
 
-  renderMore = (count: number) => {
-    const max = this.filterGroup.value.conditions.length;
-    if (count === max) {
-      return this.renderAddFilter();
-    }
-    const showMore = (e: MouseEvent) => {
-      this.showMoreFilter(e, count);
-    };
-    return html` <div
-      class="filter-bar-add-filter dv-icon-16 dv-round-4 dv-hover"
-      style="height: 100%;"
-      @click="${showMore}"
-    >
-      ${max - count} More
-    </div>`;
-  };
-
-  renderMoreFilter = (count: number): TemplateResult => {
-    return html` <div
-      class="dv-shadow-2 dv-round-8"
-      style="padding: 8px;background-color: var(--affine-background-overlay-panel-color);display:flex;flex-direction: column;gap: 8px;"
-    >
-      ${repeat(
-        this.filterGroup.value.conditions.slice(count),
-        (_, i) =>
-          html` <div style="width: max-content;">
-            ${this.renderCondition(i + count)}
-          </div>`
-      )}
-      <div class="dv-divider-h"></div>
-      ${this.renderAddFilter()}
-    </div>`;
-  };
-
-  showMoreFilter = (e: MouseEvent, count: number) => {
-    const ins = renderTemplate(() => this.renderMoreFilter(count));
-    ins.style.position = 'absolute';
-    this.updateMoreFilterPanel = () => {
-      const max = this.filterGroup.value.conditions.length;
-      if (count === max) {
-        close();
-        this.updateMoreFilterPanel = undefined;
-        return;
-      }
-      ins.requestUpdate();
-    };
-    const close = createPopup(
-      popupTargetFromElement(e.target as HTMLElement),
-      ins,
-      {
-        onClose: () => {
-          this.updateMoreFilterPanel = undefined;
-        },
-      }
-    );
-  };
-
   updateMoreFilterPanel?: () => void;
 
   private deleteFilter(i: number) {
@@ -174,7 +120,7 @@ export class FilterBar extends SignalWatcher(ShadowlessElement) {
 
   override render() {
     return html`
-      <div style="display: flex;align-items: center">
+      <div style="display: flex;align-items: center;gap: 8px;overflow-x: auto">
         ${this.renderFilters()} ${this.renderAddFilter()}
       </div>
     `;
@@ -190,7 +136,6 @@ export class FilterBar extends SignalWatcher(ShadowlessElement) {
     }
     if (condition.type === 'filter') {
       return html` <filter-condition-view
-        style="margin-right: 8px;"
         .vars="${this.vars.value}"
         .data="${condition}"
         .setData="${(v: Filter) => this._setFilter(i, v)}"
@@ -198,31 +143,20 @@ export class FilterBar extends SignalWatcher(ShadowlessElement) {
       ></filter-condition-view>`;
     }
     const expandGroup = (e: MouseEvent) => {
-      const element = (e.currentTarget as HTMLElement)
-        .parentElement as HTMLElement;
-      this.expandGroup(popupTargetFromElement(element), i);
+      this.expandGroup(
+        popupTargetFromElement(e.currentTarget as HTMLElement),
+        i
+      );
     };
     const length = condition.conditions.length;
     const text = length > 1 ? `${length} rules` : `${length} rule`;
-    return html` <div
-      style="margin-right: 8px;"
-      class="filter-group-tag dv-icon-16 dv-border dv-round-8"
-    >
-      <div
-        class="dv-round-4 dv-hover"
-        @click="${expandGroup}"
-        style="display:flex;gap: 6px;padding: 0 4px;align-items:center;height: 100%;"
-      >
-        ${FilterIcon()} ${text}
-      </div>
-      <div
-        class="dv-icon-16 dv-round-4 dv-pd-4 dv-hover"
-        style="display:flex;align-items:center;margin-left: 16px;"
-        @click="${deleteFilter}"
-      >
-        ${CloseIcon()}
-      </div>
-    </div>`;
+    return html` <data-view-component-button
+      hoverType="border"
+      .icon="${FilterIcon()}"
+      @click="${expandGroup}"
+      .text="${html`${text}`}"
+      .postfix="${ArrowDownSmallIcon()}"
+    ></data-view-component-button>`;
   }
 
   renderFilters() {

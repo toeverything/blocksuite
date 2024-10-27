@@ -7,6 +7,7 @@ export const unknownFilter = {
   isNotEmpty: {
     type: tFunction({ args: [tUnknown.create()], rt: tBoolean.create() }),
     label: 'Is not empty',
+    shortString: () => 'not empty',
     impl: value => {
       if (Array.isArray(value)) {
         return value.length > 0;
@@ -20,6 +21,7 @@ export const unknownFilter = {
   isEmpty: {
     type: tFunction({ args: [tUnknown.create()], rt: tBoolean.create() }),
     label: 'Is empty',
+    shortString: () => 'empty',
     impl: value => {
       if (Array.isArray(value)) {
         return value.length === 0;

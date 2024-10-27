@@ -60,7 +60,6 @@ export class DataViewBlockComponent extends CaptionedBlockComponent<DataViewBloc
     }
 
     .database-ops {
-      margin-top: 4px;
       padding: 2px;
       border-radius: 4px;
       display: flex;
