@@ -4,7 +4,7 @@ import { css, html } from 'lit';
 import { property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
-import type { GroupData } from '../../../core/common/group-by/helper.js';
+import type { GroupData } from '../../../core/group-by/manager.js';
 import type { TableSingleView } from '../table-view-manager.js';
 
 import { LEFT_TOOL_BAR_WIDTH, STATS_BAR_HEIGHT } from '../consts.js';

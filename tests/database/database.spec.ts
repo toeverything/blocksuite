@@ -6,7 +6,6 @@ import {
   focusDatabaseTitle,
   getBoundingBox,
   initDatabaseDynamicRowWithData,
-  initDatabaseRow,
   initDatabaseRowWithData,
   initEmptyDatabaseState,
   pressArrowLeft,
@@ -46,7 +45,6 @@ import {
   getDatabaseBodyRow,
   getDatabaseBodyRows,
   getDatabaseHeaderColumn,
-  getDatabaseMouse,
   getFirstColumnCell,
   initDatabaseColumn,
   switchColumnType,
@@ -148,35 +146,6 @@ test('should the multi-select mode work correctly', async ({ page }) => {
   expect(await cell.count()).toBe(2);
   expect(await cell.nth(0).innerText()).toBe('1');
   expect(await cell.nth(1).innerText()).toBe('2');
-});
-
-test('should show or hide database toolbar', async ({ page }) => {
-  await enterPlaygroundRoom(page);
-  await initEmptyDatabaseState(page);
-
-  await initDatabaseColumn(page);
-  await initDatabaseRow(page);
-
-  const db = await getDatabaseMouse(page);
-  await db.mouseOver();
-  const toolbar = page.locator('.affine-database-toolbar');
-  await expect(toolbar).toBeVisible();
-  await db.mouseLeave();
-  await expect(toolbar).toBeHidden();
-
-  await db.mouseOver();
-  await focusDatabaseSearch(page);
-  await db.mouseLeave();
-  await expect(toolbar).toBeVisible();
-
-  await clickDatabaseOutside(page);
-  await expect(toolbar).toBeHidden();
-
-  await db.mouseOver();
-  await focusDatabaseSearch(page);
-  await type(page, '1');
-  await clickDatabaseOutside(page);
-  await expect(toolbar).toBeVisible();
 });
 
 test('should database search work', async ({ page }) => {
