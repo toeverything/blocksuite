@@ -6,7 +6,7 @@ import type {
   DroppableContainer,
 } from '../types.js';
 
-import { distanceBetween } from './distanceBetweenPoints.js';
+import { distanceBetween } from './distance-between-points.js';
 
 interface CollisionDescriptor extends Collision {
   data: {

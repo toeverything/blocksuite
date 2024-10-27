@@ -31,7 +31,7 @@ import {
   sortable,
 } from '../../../core/utils/wc-dnd/sort/sort-context.js';
 import { verticalListSortingStrategy } from '../../../core/utils/wc-dnd/sort/strategies/index.js';
-import { arrayMove } from '../../../core/utils/wc-dnd/utils/arrayMove.js';
+import { arrayMove } from '../../../core/utils/wc-dnd/utils/array-move.js';
 
 export class SortRootView extends SignalWatcher(
   WithDisposable(ShadowlessElement)

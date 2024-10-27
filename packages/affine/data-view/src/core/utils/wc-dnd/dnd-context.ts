@@ -21,12 +21,12 @@ import type {
 } from './types.js';
 
 import { mouseSensor } from './sensors/mouse.js';
-import { applyModifiers } from './utils/applyModifiers.js';
-import { closestCenter } from './utils/closestCenter.js';
+import { applyModifiers } from './utils/apply-modifiers.js';
+import { closestCenter } from './utils/closest-center.js';
 import { createDataDirective } from './utils/data-directive.js';
 import { asHTMLElement } from './utils/element.js';
-import { getClientRect } from './utils/getRect.js';
-import { getAdjustedRect } from './utils/rectAdjustment.js';
+import { getClientRect } from './utils/rect.js';
+import { getAdjustedRect } from './utils/rect-adjustment.js';
 import { computedCache } from './utils/signal.js';
 
 export interface OverlayData {

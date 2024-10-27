@@ -11,7 +11,7 @@ import { dragHandlerDataName } from '../dnd-context.js';
 import { subtract } from '../utils/adjustment.js';
 import { asHTMLElement } from '../utils/element.js';
 import { preventDefault } from '../utils/events.js';
-import { hasExceededDistance } from '../utils/hasExceededDistance.js';
+import { hasExceededDistance } from '../utils/has-exceeded-distance.js';
 import { Listeners } from '../utils/listeners.js';
 
 interface DistanceConstraint {

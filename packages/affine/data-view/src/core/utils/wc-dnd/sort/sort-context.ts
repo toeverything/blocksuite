@@ -9,7 +9,7 @@ import {
   draggableDataName,
   droppableDataName,
 } from '../dnd-context.js';
-import { closestCenter } from '../utils/closestCenter.js';
+import { closestCenter } from '../utils/closest-center.js';
 import { createDataDirective } from '../utils/data-directive.js';
 import { asHTMLElement } from '../utils/element.js';
 import { horizontalListSortingStrategy } from './strategies/index.js';
