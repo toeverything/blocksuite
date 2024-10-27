@@ -46,12 +46,6 @@ export class DatabaseCellContainer extends SignalWatcher(
 
   private _cell = createRef<DataViewCellLifeCycle>();
 
-  @property({ attribute: false })
-  accessor column!: TableColumn;
-
-  @property({ attribute: false })
-  accessor rowId!: string;
-
   cell$ = computed(() => {
     return this.column.cellGet(this.rowId);
   });
@@ -151,6 +145,9 @@ export class DatabaseCellContainer extends SignalWatcher(
   }
 
   @property({ attribute: false })
+  accessor column!: TableColumn;
+
+  @property({ attribute: false })
   accessor columnId!: string;
 
   @property({ attribute: false })
@@ -158,6 +155,9 @@ export class DatabaseCellContainer extends SignalWatcher(
 
   @state()
   accessor isEditing = false;
+
+  @property({ attribute: false })
+  accessor rowId!: string;
 
   @property({ attribute: false })
   accessor rowIndex!: number;

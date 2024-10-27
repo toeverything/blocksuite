@@ -13,9 +13,6 @@ export abstract class BaseCellRenderer<
   extends SignalWatcher(WithDisposable(ShadowlessElement))
   implements DataViewCellLifeCycle, CellRenderProps<Data, Value>
 {
-  @property({ attribute: false })
-  accessor cell!: Cell<Value, Data>;
-
   readonly$ = computed(() => {
     return this.cell.property.readonly$.value;
   });
@@ -105,6 +102,9 @@ export abstract class BaseCellRenderer<
   }
 
   onPaste(_e: ClipboardEvent) {}
+
+  @property({ attribute: false })
+  accessor cell!: Cell<Value, Data>;
 
   @property({ attribute: false })
   accessor isEditing!: boolean;

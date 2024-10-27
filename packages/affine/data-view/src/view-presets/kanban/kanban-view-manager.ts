@@ -17,19 +17,6 @@ import { PropertyBase } from '../../core/view-manager/property.js';
 import { SingleViewBase } from '../../core/view-manager/single-view.js';
 
 export class KanbanSingleView extends SingleViewBase<KanbanViewData> {
-  propertiesWithoutFilter$ = computed(() => {
-    const needShow = new Set(this.dataSource.properties$.value);
-    const result: string[] = [];
-    this.data$.value?.columns.forEach(v => {
-      if (needShow.has(v.id)) {
-        result.push(v.id);
-        needShow.delete(v.id);
-      }
-    });
-    result.push(...needShow);
-    return result;
-  });
-
   detailProperties$ = computed(() => {
     return this.propertiesWithoutFilter$.value.filter(
       id => this.propertyTypeGet(id) !== 'title'
@@ -114,6 +101,19 @@ export class KanbanSingleView extends SingleViewBase<KanbanViewData> {
         iconColumn: 'type',
       }
     );
+  });
+
+  propertiesWithoutFilter$ = computed(() => {
+    const needShow = new Set(this.dataSource.properties$.value);
+    const result: string[] = [];
+    this.data$.value?.columns.forEach(v => {
+      if (needShow.has(v.id)) {
+        result.push(v.id);
+        needShow.delete(v.id);
+      }
+    });
+    result.push(...needShow);
+    return result;
   });
 
   propertyIds$: ReadonlySignal<string[]> = computed(() => {

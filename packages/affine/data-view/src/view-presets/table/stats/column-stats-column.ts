@@ -71,9 +71,6 @@ export class DatabaseColumnStatsCell extends SignalWatcher(
 ) {
   static override styles = styles;
 
-  @property({ attribute: false })
-  accessor column!: TableColumn;
-
   cellValues$ = computed(() => {
     if (this.group) {
       return this.group.rows.map(id => {
@@ -142,8 +139,6 @@ export class DatabaseColumnStatsCell extends SignalWatcher(
       .find(func => func.type === this.column.statCalcOp$.value);
   });
 
-  values$ = signal<unknown[]>([]);
-
   statsResult$ = computed(() => {
     const meta = this.column.view.propertyMetaGet(this.column.type$.value);
     if (!meta) {
@@ -160,6 +155,8 @@ export class DatabaseColumnStatsCell extends SignalWatcher(
   });
 
   subscriptionMap = new Map<unknown, () => void>();
+
+  values$ = signal<unknown[]>([]);
 
   override connectedCallback(): void {
     super.connectedCallback();
@@ -217,6 +214,9 @@ export class DatabaseColumnStatsCell extends SignalWatcher(
       </div>
     </div>`;
   }
+
+  @property({ attribute: false })
+  accessor column!: TableColumn;
 
   @property({ attribute: false })
   accessor group: GroupData | undefined = undefined;

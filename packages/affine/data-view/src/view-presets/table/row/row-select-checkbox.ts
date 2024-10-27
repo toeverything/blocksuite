@@ -35,15 +35,6 @@ export class RowSelectCheckbox extends SignalWatcher(
     }
   `;
 
-  @property({ attribute: false })
-  accessor groupKey: string | undefined;
-
-  @property({ attribute: false })
-  accessor rowId!: string;
-
-  @property({ attribute: false })
-  accessor selection!: ReadonlySignal<TableViewSelectionWithType | undefined>;
-
   isSelected$ = computed(() => {
     const selection = this.selection.value;
     if (!selection || selection.selectionType !== 'row') {
@@ -79,4 +70,13 @@ export class RowSelectCheckbox extends SignalWatcher(
       </div>
     `;
   }
+
+  @property({ attribute: false })
+  accessor groupKey: string | undefined;
+
+  @property({ attribute: false })
+  accessor rowId!: string;
+
+  @property({ attribute: false })
+  accessor selection!: ReadonlySignal<TableViewSelectionWithType | undefined>;
 }

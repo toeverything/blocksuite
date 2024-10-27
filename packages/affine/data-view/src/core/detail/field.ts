@@ -206,12 +206,6 @@ export class RecordField extends SignalWatcher(
     });
   };
 
-  @property({ attribute: false })
-  accessor column!: Property;
-
-  @property({ attribute: false })
-  accessor rowId!: string;
-
   cell$ = computed(() => {
     return this.column.cellGet(this.rowId);
   });
@@ -271,11 +265,17 @@ export class RecordField extends SignalWatcher(
     `;
   }
 
+  @property({ attribute: false })
+  accessor column!: Property;
+
   @state()
   accessor editing = false;
 
   @state()
   accessor isFocus = false;
+
+  @property({ attribute: false })
+  accessor rowId!: string;
 
   @property({ attribute: false })
   accessor view!: SingleView;

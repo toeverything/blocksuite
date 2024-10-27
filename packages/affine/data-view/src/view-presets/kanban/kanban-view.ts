@@ -100,8 +100,6 @@ export class DataViewKanban extends DataViewBase<
 
   clipboardController = new KanbanClipboardController(this);
 
-  selectionController = new KanbanSelectionController(this);
-
   expose: DataViewExpose = {
     focusFirstCell: () => {
       this.selectionController.focusFirstCell();
@@ -174,6 +172,8 @@ export class DataViewKanban extends DataViewBase<
       <div class="add-group-icon">${AddCursorIcon()}</div>
     </div>`;
   };
+
+  selectionController = new KanbanSelectionController(this);
 
   get groupManager() {
     return this.props.view.groupManager;

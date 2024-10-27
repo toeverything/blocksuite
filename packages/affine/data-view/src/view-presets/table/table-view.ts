@@ -169,8 +169,6 @@ export class DataViewTable extends DataViewBase<
 
   dragController = new TableDragController(this);
 
-  selectionController = new TableSelectionController(this);
-
   expose: DataViewExpose = {
     addRow: position => {
       this._addRow(this.props.view, position);
@@ -250,6 +248,8 @@ export class DataViewTable extends DataViewBase<
       </div>
     </div>`;
   };
+
+  selectionController = new TableSelectionController(this);
 
   private get readonly() {
     return this.props.view.readonly$.value;

@@ -22,19 +22,6 @@ import {
 import { DEFAULT_COLUMN_WIDTH } from './consts.js';
 
 export class TableSingleView extends SingleViewBase<TableViewData> {
-  propertiesWithoutFilter$ = computed(() => {
-    const needShow = new Set(this.dataSource.properties$.value);
-    const result: string[] = [];
-    this.data$.value?.columns.forEach(v => {
-      if (needShow.has(v.id)) {
-        result.push(v.id);
-        needShow.delete(v.id);
-      }
-    });
-    result.push(...needShow);
-    return result;
-  });
-
   private computedColumns$ = computed(() => {
     return this.propertiesWithoutFilter$.value.map(id => {
       const column = this.propertyGet(id);
@@ -135,6 +122,19 @@ export class TableSingleView extends SingleViewBase<TableViewData> {
         iconColumn: 'type',
       }
     );
+  });
+
+  propertiesWithoutFilter$ = computed(() => {
+    const needShow = new Set(this.dataSource.properties$.value);
+    const result: string[] = [];
+    this.data$.value?.columns.forEach(v => {
+      if (needShow.has(v.id)) {
+        result.push(v.id);
+        needShow.delete(v.id);
+      }
+    });
+    result.push(...needShow);
+    return result;
   });
 
   propertyIds$ = computed(() => {

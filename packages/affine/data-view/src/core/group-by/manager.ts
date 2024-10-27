@@ -34,38 +34,6 @@ export class GroupManager {
     return result.data;
   });
 
-  property$ = computed(() => {
-    const groupBy = this.groupBy$.value;
-    if (!groupBy) {
-      return;
-    }
-    return this.viewManager.propertyGet(groupBy.columnId);
-  });
-
-  staticGroupDataMap$ = computed<
-    Record<string, Omit<GroupData, 'rows'>> | undefined
-  >(() => {
-    const config = this.config$.value;
-    const property = this.property$.value;
-    const tType = property?.dataType$.value;
-    if (!config || !tType || !property) {
-      return;
-    }
-    return Object.fromEntries(
-      config.defaultKeys(tType).map(({ key, value }) => [
-        key,
-        {
-          key,
-          property,
-          name: config.groupName(tType, value),
-          manager: this,
-          type: tType,
-          value,
-        },
-      ])
-    );
-  });
-
   groupDataMap$ = computed<Record<string, GroupData> | undefined>(() => {
     const staticGroupMap = this.staticGroupDataMap$.value;
     const config = this.config$.value;
@@ -109,6 +77,38 @@ export class GroupManager {
       groupMap[key].rows = this.ops.sortRow(key, groupMap[key].rows);
     });
     return sortedGroup.map(key => groupMap[key]);
+  });
+
+  property$ = computed(() => {
+    const groupBy = this.groupBy$.value;
+    if (!groupBy) {
+      return;
+    }
+    return this.viewManager.propertyGet(groupBy.columnId);
+  });
+
+  staticGroupDataMap$ = computed<
+    Record<string, Omit<GroupData, 'rows'>> | undefined
+  >(() => {
+    const config = this.config$.value;
+    const property = this.property$.value;
+    const tType = property?.dataType$.value;
+    if (!config || !tType || !property) {
+      return;
+    }
+    return Object.fromEntries(
+      config.defaultKeys(tType).map(({ key, value }) => [
+        key,
+        {
+          key,
+          property,
+          name: config.groupName(tType, value),
+          manager: this,
+          type: tType,
+          value,
+        },
+      ])
+    );
   });
 
   updateData = (data: NonNullable<unknown>) => {
