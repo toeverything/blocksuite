@@ -41,20 +41,20 @@ export interface ViewManager {
 export class ViewManagerBase implements ViewManager {
   _currentViewId$ = signal<string | undefined>(undefined);
 
-  currentView$ = computed(() => {
-    return this.viewGet(this.currentViewId$.value);
+  views$ = computed(() => {
+    return this.dataSource.viewDataList$.value.map(data => data.id);
   });
 
   currentViewId$ = computed(() => {
     return this._currentViewId$.value ?? this.views$.value[0];
   });
 
-  readonly$ = computed(() => {
-    return this.dataSource.readonly$.value;
+  currentView$ = computed(() => {
+    return this.viewGet(this.currentViewId$.value);
   });
 
-  views$ = computed(() => {
-    return this.dataSource.viewDataList$.value.map(data => data.id);
+  readonly$ = computed(() => {
+    return this.dataSource.readonly$.value;
   });
 
   get viewMetas() {

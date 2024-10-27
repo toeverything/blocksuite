@@ -26,6 +26,19 @@ export class CellBase<
   Data extends Record<string, unknown> = Record<string, unknown>,
 > implements Cell<Value, Data>
 {
+  meta$ = computed(() => {
+    return this.view.manager.dataSource.propertyMetaGet(
+      this.property.type$.value
+    );
+  });
+
+  value$ = computed(() => {
+    return this.view.manager.dataSource.cellValueGet(
+      this.rowId,
+      this.propertyId
+    ) as Value;
+  });
+
   isEmpty$: ReadonlySignal<boolean> = computed(() => {
     return this.meta$.value.config.isEmpty(this.value$.value);
   });
@@ -34,25 +47,12 @@ export class CellBase<
     return this.view.cellJsonValueGet(this.rowId, this.propertyId);
   });
 
-  meta$ = computed(() => {
-    return this.view.manager.dataSource.propertyMetaGet(
-      this.property.type$.value
-    );
-  });
-
   property$ = computed(() => {
     return this.view.propertyGet(this.propertyId) as Property<Value, Data>;
   });
 
   stringValue$: ReadonlySignal<string> = computed(() => {
     return this.view.cellStringValueGet(this.rowId, this.propertyId)!;
-  });
-
-  value$ = computed(() => {
-    return this.view.manager.dataSource.cellValueGet(
-      this.rowId,
-      this.propertyId
-    ) as Value;
   });
 
   get property(): Property<Value, Data> {

@@ -129,6 +129,9 @@ export class DataViewPropertiesSettingView extends SignalWatcher(
     }
   `;
 
+  @property({ attribute: false })
+  accessor view!: SingleView;
+
   items$ = computed(() => {
     return this.view.propertiesWithoutFilter$.value;
   });
@@ -219,9 +222,6 @@ export class DataViewPropertiesSettingView extends SignalWatcher(
 
   @property({ attribute: false })
   accessor onBack: (() => void) | undefined = undefined;
-
-  @property({ attribute: false })
-  accessor view!: SingleView;
 }
 
 declare global {

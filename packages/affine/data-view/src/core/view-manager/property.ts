@@ -75,12 +75,12 @@ export abstract class PropertyBase<
     return this.view.readonly$.value || this.view.propertyReadonlyGet(this.id);
   });
 
-  renderer$ = computed(() => {
-    return this.view.propertyMetaGet(this.type$.value)?.renderer.cellRenderer;
-  });
-
   type$ = computed(() => {
     return this.view.propertyTypeGet(this.id)!;
+  });
+
+  renderer$ = computed(() => {
+    return this.view.propertyMetaGet(this.type$.value)?.renderer.cellRenderer;
   });
 
   get delete(): (() => void) | undefined {

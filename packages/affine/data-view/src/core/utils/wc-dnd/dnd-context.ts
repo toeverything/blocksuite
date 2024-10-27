@@ -55,11 +55,13 @@ const defaultCoordinates: Coordinates = {
 };
 
 export class DndContext {
-  private droppableNodes = signal<DroppableNodes>(new Map());
+  private droppableNodes$ = signal<DroppableNodes>(new Map());
 
   private initialCoordinates$ = signal<Coordinates>();
 
   private session$ = signal<DndSession>();
+
+  activationCoordinates$ = signal<Coordinates>();
 
   private translate$ = computed(() => {
     const init = this.initialCoordinates$.value;
@@ -73,8 +75,6 @@ export class DndContext {
     };
   });
 
-  activationCoordinates$ = signal<Coordinates>();
-
   active$ = signal<Active | undefined>();
 
   activeNodeRect$ = computed<DndClientRect | undefined>(() => {
@@ -84,6 +84,8 @@ export class DndContext {
     }
     return getClientRect(node);
   });
+
+  initActiveRect$ = signal<DndClientRect>();
 
   activeNodeRectDelta$ = computed(() => {
     const initCoord = this.initialCoordinates$.value;
@@ -97,13 +99,21 @@ export class DndContext {
     };
   });
 
-  collisionRect$ = computed(() => {
-    return this.activeNodeRect$.value
-      ? getAdjustedRect(
-          this.activeNodeRect$.value,
-          this.modifiedTranslate$.value
-        )
-      : undefined;
+  enabledDroppableContainers$ = computed(() => {
+    return [...this.droppableNodes$.value.values()].filter(
+      node => !node.disabled
+    );
+  });
+
+  droppableRects$ = computed(() => {
+    const map = new Map<UniqueIdentifier, DndClientRect>();
+    this.enabledDroppableContainers$.value.forEach(container => {
+      const element = container.node;
+      if (element) {
+        map.set(container.id, container.rect);
+      }
+    });
+    return map;
   });
 
   collisions$ = computed(() => {
@@ -118,49 +128,11 @@ export class DndContext {
       : undefined;
   });
 
-  disposables: Array<() => void> = [];
-
-  dragEndCleanupQueue: Array<() => void> = [];
-
-  dragMove = (coordinates: Coordinates) => {
-    this.activationCoordinates$.value = coordinates;
-  };
-
-  droppableRects$ = computed(() => {
-    const map = new Map<UniqueIdentifier, DndClientRect>();
-    this.enabledDroppableContainers$.value.forEach(container => {
-      const element = container.node;
-      if (element) {
-        map.set(container.id, container.rect);
-      }
-    });
-    return map;
+  overId$ = computed(() => {
+    return this.collisions$.value?.[0]?.id;
   });
 
-  enabledDroppableContainers$ = computed(() => {
-    return [...this.droppableNodes.value.values()].filter(
-      node => !node.disabled
-    );
-  });
-
-  initActiveRect$ = signal<DndClientRect>();
-
-  modifiedTranslate$ = computed(() => {
-    return applyModifiers(this.config.modifiers, {
-      transform: {
-        x: this.translate$.value.x - this.activeNodeRectDelta$.value.x,
-        y: this.translate$.value.y - this.activeNodeRectDelta$.value.y,
-        scaleX: 1,
-        scaleY: 1,
-      },
-      active: this.active$.value,
-      activeNodeRect: this.activeNodeRect$.value,
-      over: this.over.preValue,
-      // overlayNodeRect: dragOverlay.rect,
-    });
-  });
-
-  over = computedCache<Over | undefined>(() => {
+  over$ = computedCache<Over | undefined>(() => {
     const active = this.active$.value;
     if (!active) {
       return;
@@ -176,9 +148,38 @@ export class DndContext {
       : undefined;
   });
 
-  overId$ = computed(() => {
-    return this.collisions$.value?.[0]?.id;
+  modifiedTranslate$ = computed(() => {
+    return applyModifiers(this.config.modifiers, {
+      transform: {
+        x: this.translate$.value.x - this.activeNodeRectDelta$.value.x,
+        y: this.translate$.value.y - this.activeNodeRectDelta$.value.y,
+        scaleX: 1,
+        scaleY: 1,
+      },
+      active: this.active$.value,
+      activeNodeRect: this.activeNodeRect$.value,
+      over: this.over$.preValue,
+      // overlayNodeRect: dragOverlay.rect,
+    });
   });
+
+  // eslint-disable-next-line perfectionist/sort-classes
+  collisionRect$ = computed(() => {
+    return this.activeNodeRect$.value
+      ? getAdjustedRect(
+          this.activeNodeRect$.value,
+          this.modifiedTranslate$.value
+        )
+      : undefined;
+  });
+
+  disposables: Array<() => void> = [];
+
+  dragEndCleanupQueue: Array<() => void> = [];
+
+  dragMove = (coordinates: Coordinates) => {
+    this.activationCoordinates$.value = coordinates;
+  };
 
   overlay$ = signal<HTMLElement>();
 
@@ -242,14 +243,14 @@ export class DndContext {
         });
       }
     });
-    this.droppableNodes.value = map;
+    this.droppableNodes$.value = map;
   }
 
   private getDroppableNode(id: Identifier) {
     if (id == null) {
       return;
     }
-    return this.droppableNodes.value.get(id);
+    return this.droppableNodes$.value.get(id);
   }
 
   private listenMoveEvent() {
@@ -267,7 +268,7 @@ export class DndContext {
             x: translate.x,
             y: translate.y,
           },
-          over: this.over.value,
+          over: this.over$.value,
         });
       })
     );
@@ -286,7 +287,7 @@ export class DndContext {
             x: this.modifiedTranslate$.peek().x,
             y: this.modifiedTranslate$.peek().y,
           },
-          over: this.over.value,
+          over: this.over$.value,
         });
       })
     );
@@ -314,7 +315,7 @@ export class DndContext {
           active: active,
           collisions: this.collisions$.peek(),
           delta: this.modifiedTranslate$.peek(),
-          over: this.over.peek(),
+          over: this.over$.peek(),
         };
       }
       this.dragEndCleanup();

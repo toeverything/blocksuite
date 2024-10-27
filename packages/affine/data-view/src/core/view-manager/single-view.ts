@@ -138,6 +138,8 @@ export interface SingleView<
   contextGet<T>(key: DataViewContextKey<T>): T;
 
   mainProperties$: ReadonlySignal<MainProperties>;
+
+  lockRows(lock: boolean): void;
 }
 
 export abstract class SingleViewBase<
@@ -154,11 +156,17 @@ export abstract class SingleViewBase<
 
   abstract filter$: ReadonlySignal<FilterGroup>;
 
+  protected lockRows$ = signal(false);
+
   abstract mainProperties$: ReadonlySignal<MainProperties>;
 
   name$: ReadonlySignal<string> = computed(() => {
     return this.data$.value?.name ?? '';
   });
+
+  preRows: string[] = [];
+
+  abstract propertyIds$: ReadonlySignal<string[]>;
 
   properties$ = computed(() => {
     return this.propertyIds$.value.map(
@@ -168,12 +176,13 @@ export abstract class SingleViewBase<
 
   abstract propertiesWithoutFilter$: ReadonlySignal<string[]>;
 
-  abstract propertyIds$: ReadonlySignal<string[]>;
-
   abstract readonly$: ReadonlySignal<boolean>;
 
   rows$ = computed(() => {
-    return this.rowsMapping(this.dataSource.rows$.value);
+    if (this.lockRows$.value) {
+      return this.preRows;
+    }
+    return (this.preRows = this.rowsMapping(this.dataSource.rows$.value));
   });
 
   vars$ = computed(() => {
@@ -307,6 +316,10 @@ export abstract class SingleViewBase<
   }
 
   abstract isShow(rowId: string): boolean;
+
+  lockRows(lock: boolean) {
+    this.lockRows$.value = lock;
+  }
 
   nameSet(name: string): void {
     this.dataUpdate(() => {

@@ -126,6 +126,9 @@ export class RecordDetail extends SignalWatcher(
     );
   };
 
+  @property({ attribute: false })
+  accessor view!: SingleView;
+
   properties$ = computed(() => {
     return this.view.detailProperties$.value.map(id =>
       this.view.propertyGet(id)
@@ -264,9 +267,6 @@ export class RecordDetail extends SignalWatcher(
 
   @property({ attribute: false })
   accessor rowId!: string;
-
-  @property({ attribute: false })
-  accessor view!: SingleView;
 }
 
 declare global {

@@ -51,6 +51,9 @@ export class SortRootView extends SignalWatcher(
     }
   `;
 
+  @property({ attribute: false })
+  accessor sortList!: ReadonlySignal<SortBy[]>;
+
   items$ = computed(() => {
     return this.sortList.value.map(v => v.ref.name);
   });
@@ -198,9 +201,6 @@ export class SortRootView extends SignalWatcher(
 
   @property({ attribute: false })
   accessor onChange!: (filter: SortBy[]) => void;
-
-  @property({ attribute: false })
-  accessor sortList!: ReadonlySignal<SortBy[]>;
 
   @property({ attribute: false })
   accessor vars!: ReadonlySignal<Variable[]>;
