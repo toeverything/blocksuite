@@ -381,7 +381,7 @@ export const BUILT_IN_GROUPS: MenuItemGroup<FormatBarContext>[] = [
                     slice,
                     ctx.std.doc,
                     ctx.parentBlock?.model.id,
-                    ctx.blockIndex ? ctx.blockIndex + 1 : undefined
+                    ctx.blockIndex ? ctx.blockIndex + 1 : 1
                   );
                 })
                 .catch(console.error);
