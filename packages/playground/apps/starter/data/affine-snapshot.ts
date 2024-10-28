@@ -10,7 +10,7 @@ export async function affineSnapshot(collection: DocCollection, id: string) {
   });
   doc.addBlock('affine:surface', {}, rootId);
 
-  const path = '/apps/starter/data/snapshots/affine-default.zip';
+  const path = '/apps/starter/data/snapshots/travel-tibet.zip';
   const response = await fetch(path);
   const file = await response.blob();
   await ZipTransformer.importDocs(collection, file);

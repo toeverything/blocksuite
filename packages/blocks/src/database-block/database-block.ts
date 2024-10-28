@@ -380,6 +380,8 @@ export class DatabaseBlockComponent extends CaptionedBlockComponent<
   }
 
   override renderBlock() {
+    return null;
+
     const peekViewService = this.std.getOptional(PeekViewProvider);
     return html`
       <div

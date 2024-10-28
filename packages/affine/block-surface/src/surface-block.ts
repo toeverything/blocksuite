@@ -183,7 +183,7 @@ export class SurfaceBlockComponent extends BlockComponent<
       viewport: gfx.viewport,
       layerManager: gfx.layer,
       gridManager: gfx.grid,
-      enableStackingCanvas: true,
+      enableStackingCanvas: false,
       provider: {
         generateColorProperty: (color: Color, fallback: string) =>
           ThemeObserver.generateColorProperty(color, fallback),

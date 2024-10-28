@@ -106,7 +106,7 @@ export class GfxViewportElement extends WithDisposable(LitElement) {
     translateY: number,
     zoom: number
   ) {
-    return `translate3d(${translateX}px, ${translateY}px, 0) scale(${zoom})`;
+    return `translate(${translateX}px, ${translateY}px) scale(${zoom})`;
   }
 
   override connectedCallback(): void {
