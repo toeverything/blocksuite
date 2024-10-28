@@ -10,14 +10,7 @@ import { css, html } from 'lit';
 import { query, state } from 'lit/decorators.js';
 import { type StyleInfo, styleMap } from 'lit/directives/style-map.js';
 
-import type { DefaultTool } from '../root-block/edgeless/gfx-tool/default-tool.js';
-import type {
-  EdgelessRootBlockComponent,
-  EdgelessRootService,
-} from '../root-block/index.js';
-
-import { HandleDirection } from '../root-block/edgeless/components/resize/resize-handles.js';
-import { DefaultModeDragType } from '../root-block/edgeless/gfx-tool/default-tool.js';
+import type { EdgelessRootService } from '../root-block/index.js';
 
 export const EDGELESS_TEXT_BLOCK_MIN_WIDTH = 50;
 export const EDGELESS_TEXT_BLOCK_MIN_HEIGHT = 50;
@@ -25,19 +18,13 @@ export const EDGELESS_TEXT_BLOCK_MIN_HEIGHT = 50;
 export class EdgelessTextBlockComponent extends GfxBlockComponent<EdgelessTextBlockModel> {
   static override styles = css`
     .edgeless-text-block-container[data-max-width='false'] .inline-editor span {
-      word-break: normal !important;
-      overflow-wrap: normal !important;
+      word-break: keep-all !important;
+      text-wrap: nowrap !important;
     }
   `;
 
-  private _horizontalResizing = false;
-
   private _resizeObserver = new ResizeObserver(() => {
     if (this.doc.readonly) {
-      return;
-    }
-
-    if (!this._editing) {
       return;
     }
 
@@ -48,75 +35,14 @@ export class EdgelessTextBlockComponent extends GfxBlockComponent<EdgelessTextBl
     this._updateH();
   });
 
-  get dragMoving() {
-    const controller = this.rootService.gfx.tool.currentTool$.peek();
-
-    return (
-      controller?.toolName === 'default' &&
-      (controller as DefaultTool).dragType === DefaultModeDragType.ContentMoving
-    );
-  }
-
   get rootService() {
     return this.std.getService('affine:page') as EdgelessRootService;
-  }
-
-  private _initDragEffect() {
-    const disposables = this.disposables;
-    const edgelessSelection = this.rootService.selection;
-    const rootComponent = this
-      .rootComponent as EdgelessRootBlockComponent | null;
-
-    if (!rootComponent || !edgelessSelection) return;
-
-    const selectedRect = rootComponent.selectedRectWidget;
-    if (!selectedRect) return;
-
-    disposables.add(
-      selectedRect.slots.dragStart
-        .filter(() => edgelessSelection.selectedElements.includes(this.model))
-        .on(() => {
-          if (
-            selectedRect.dragDirection === HandleDirection.Left ||
-            selectedRect.dragDirection === HandleDirection.Right
-          ) {
-            this._horizontalResizing = true;
-          }
-        })
-    );
-    disposables.add(
-      selectedRect.slots.dragMove
-        .filter(() => edgelessSelection.selectedElements.includes(this.model))
-        .on(() => {
-          if (
-            selectedRect.dragDirection === HandleDirection.Left ||
-            selectedRect.dragDirection === HandleDirection.Right
-          ) {
-            this._updateH();
-          }
-        })
-    );
-    disposables.add(
-      selectedRect.slots.dragEnd
-        .filter(() => edgelessSelection.selectedElements.includes(this.model))
-        .on(() => {
-          if (
-            selectedRect.dragDirection === HandleDirection.Left ||
-            selectedRect.dragDirection === HandleDirection.Right
-          ) {
-            this._horizontalResizing = false;
-          }
-        })
-    );
   }
 
   private _updateH() {
     const bound = Bound.deserialize(this.model.xywh);
     const rect = this._textContainer.getBoundingClientRect();
-    bound.h = Math.max(
-      rect.height / this.gfx.viewport.zoom,
-      EDGELESS_TEXT_BLOCK_MIN_HEIGHT * this.gfx.viewport.zoom
-    );
+    bound.h = rect.height / this.gfx.viewport.zoom;
 
     this.doc.updateBlock(this.model, {
       xywh: bound.serialize(),
@@ -201,8 +127,6 @@ export class EdgelessTextBlockComponent extends GfxBlockComponent<EdgelessTextBl
     const { disposables, rootService } = this;
     const edgelessSelection = rootService.selection;
 
-    this._initDragEffect();
-
     disposables.add(
       edgelessSelection.slots.updated.on(() => {
         if (edgelessSelection.has(this.model.id) && edgelessSelection.editing) {
@@ -214,7 +138,6 @@ export class EdgelessTextBlockComponent extends GfxBlockComponent<EdgelessTextBl
     );
 
     this._resizeObserver.observe(this._textContainer);
-
     disposables.add(() => {
       this._resizeObserver.disconnect();
     });
@@ -298,10 +221,7 @@ export class EdgelessTextBlockComponent extends GfxBlockComponent<EdgelessTextBl
   override getRenderingRect() {
     const { xywh, scale, rotate, hasMaxWidth } = this.model;
     const bound = Bound.deserialize(xywh);
-    const w =
-      hasMaxWidth || this._horizontalResizing || this.dragMoving
-        ? bound.w / scale
-        : undefined;
+    const w = hasMaxWidth ? bound.w / scale : undefined;
 
     return {
       x: bound.x,
@@ -316,16 +236,14 @@ export class EdgelessTextBlockComponent extends GfxBlockComponent<EdgelessTextBl
   override renderGfxBlock() {
     const { model } = this;
     const { scale, rotate, hasMaxWidth } = model;
+    const editing = this._editing;
     const containerStyle: StyleInfo = {
       transform: `rotate(${rotate}deg)`,
       transformOrigin: 'center',
-      padding: '5px 10px',
-      border: `1px solid ${this._editing ? 'var(--affine—primary—color, #1e96eb)' : 'transparent'}`,
+      border: `1px solid ${editing ? 'var(--affine—primary—color, #1e96eb)' : 'transparent'}`,
       borderRadius: '4px',
       boxSizing: 'border-box',
-      boxShadow: this._editing
-        ? '0px 0px 0px 2px rgba(30, 150, 235, 0.3)'
-        : 'none',
+      boxShadow: editing ? '0px 0px 0px 2px rgba(30, 150, 235, 0.3)' : 'none',
       fontWeight: '400',
       lineHeight: 'var(--affine-line-height)',
     };
@@ -340,10 +258,10 @@ export class EdgelessTextBlockComponent extends GfxBlockComponent<EdgelessTextBl
       >
         <div
           style=${styleMap({
-            pointerEvents: this._editing ? 'auto' : 'none',
-            userSelect: this._editing ? 'auto' : 'none',
+            pointerEvents: editing ? 'auto' : 'none',
+            userSelect: editing ? 'auto' : 'none',
           })}
-          contenteditable=${this._editing}
+          contenteditable=${editing}
         >
           ${this.renderPageContent()}
         </div>
@@ -367,10 +285,8 @@ export class EdgelessTextBlockComponent extends GfxBlockComponent<EdgelessTextBl
     });
 
     return html`
-      <div style=${style} class="affine-edgeless-text-block-container">
-        <div class="affine-block-children-container">
-          ${this.renderChildren(this.model)}
-        </div>
+      <div style=${style} class="affine-block-children-container">
+        ${this.renderChildren(this.model)}
       </div>
     `;
   }
