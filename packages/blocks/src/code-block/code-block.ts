@@ -7,8 +7,8 @@ import {
   focusTextModel,
   type RichText,
 } from '@blocksuite/affine-components/rich-text';
-import { toast } from '@blocksuite/affine-components/toast';
 import { BRACKET_PAIRS, NOTE_SELECTOR } from '@blocksuite/affine-shared/consts';
+import { NotificationProvider } from '@blocksuite/affine-shared/services';
 import { getViewportElement } from '@blocksuite/affine-shared/utils';
 import { getInlineRangeProvider } from '@blocksuite/block-std';
 import { IS_MAC } from '@blocksuite/global/env';
@@ -63,6 +63,10 @@ export class CodeBlockComponent extends CaptionedBlockComponent<
 
   get inlineManager() {
     return this.std.get(CodeBlockInlineManagerExtension.identifier);
+  }
+
+  get notificationService() {
+    return this.std.getOptional(NotificationProvider);
   }
 
   get readonly() {
@@ -355,10 +359,10 @@ export class CodeBlockComponent extends CaptionedBlockComponent<
     this.std.clipboard
       .copySlice(slice)
       .then(() => {
-        toast(this.host, 'Copied to clipboard');
+        this.notificationService?.toast('Copied to clipboard');
       })
       .catch(e => {
-        toast(this.host, 'Copied failed, something went wrong');
+        this.notificationService?.toast('Copied failed, something went wrong');
         console.error(e);
       });
   }
