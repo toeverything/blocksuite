@@ -25,6 +25,7 @@ import {
   isKeyboardSubToolBarConfig,
   isKeyboardToolBarActionItem,
   isKeyboardToolPanelConfig,
+  scrollCurrentBlockIntoView,
   VirtualKeyboardController,
 } from './utils.js';
 
@@ -73,6 +74,7 @@ export class AffineKeyboardToolbar extends SignalWatcher(
         this._currentPanelIndex$.value = index;
         this._shrink$.value = false;
         this._keyboardController.hide();
+        scrollCurrentBlockIntoView(this.rootComponent.std);
       }
     }
   };
@@ -86,12 +88,18 @@ export class AffineKeyboardToolbar extends SignalWatcher(
         this._keyboardController.show();
         this._shrink$.value = false;
         this._closeToolPanel();
+
+        // workaround for the virtual keyboard showing transition animation
+        setTimeout(() => {
+          scrollCurrentBlockIntoView(this.rootComponent.std);
+        }, 100);
       }
     });
   };
 
   private readonly _keyboardController = new VirtualKeyboardController(this);
 
+  /** This field records the panel static height, which dose not aim to control the panel opening */
   private readonly _panelHeight$ = signal(0);
 
   private readonly _path$ = signal<number[]>([]);
@@ -190,9 +198,11 @@ export class AffineKeyboardToolbar extends SignalWatcher(
 
     this.disposables.addFromEvent(this.rootComponent, 'focus', () => {
       this._showToolbar$.value = true;
+      this._shrink$.value = false;
     });
     this.disposables.addFromEvent(this.rootComponent, 'blur', () => {
       this._showToolbar$.value = false;
+      this._shrink$.value = true;
     });
 
     // prevent editor blur when click item in toolbar
@@ -202,8 +212,10 @@ export class AffineKeyboardToolbar extends SignalWatcher(
 
     this.disposables.add(
       effect(() => {
-        if (this._keyboardController.keyboardHeight !== 0) {
+        if (this._keyboardController.opened) {
           this._panelHeight$.value = this._keyboardController.keyboardHeight;
+        } else if (this._isPanelOpened && this._panelHeight$.peek() === 0) {
+          this._panelHeight$.value = 260;
         }
       })
     );
@@ -214,10 +226,12 @@ export class AffineKeyboardToolbar extends SignalWatcher(
           document.body.style.paddingBottom = '0px';
         } else if (this._shrink$.value) {
           document.body.style.paddingBottom = `${TOOLBAR_HEIGHT}px`;
-        } else if (this._keyboardController.keyboardHeight !== 0) {
+        } else if (this._keyboardController.opened) {
           document.body.style.paddingBottom = `${this._keyboardController.keyboardHeight + TOOLBAR_HEIGHT}px`;
-        } else {
+        } else if (this._isPanelOpened) {
           document.body.style.paddingBottom = `${this._panelHeight$.value + TOOLBAR_HEIGHT}px`;
+        } else {
+          document.body.style.paddingBottom = '0px';
         }
       })
     );

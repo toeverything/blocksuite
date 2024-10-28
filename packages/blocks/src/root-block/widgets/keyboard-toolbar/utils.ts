@@ -1,3 +1,4 @@
+import type { BlockStdScope } from '@blocksuite/block-std';
 import type { ReactiveController, ReactiveControllerHost } from 'lit';
 
 import { DisposableGroup } from '@blocksuite/global/utils';
@@ -64,7 +65,7 @@ export class VirtualKeyboardController implements ReactiveController {
   }
 
   get opened() {
-    return this.keyboardHeight !== 0;
+    return this.keyboardHeight > 0;
   }
 
   constructor(
@@ -141,4 +142,22 @@ export function isKeyboardToolPanelConfig(
   item: KeyboardToolbarItem
 ): item is KeyboardToolPanelConfig {
   return 'groups' in item;
+}
+
+export function scrollCurrentBlockIntoView(std: BlockStdScope) {
+  std.command
+    .chain()
+    .getSelectedModels()
+    .inline(({ selectedModels }) => {
+      if (!selectedModels?.length) return;
+
+      const block = std.view.getBlock(selectedModels[0].id);
+      if (!block) return;
+
+      block.scrollIntoView({
+        behavior: 'instant',
+        block: 'nearest',
+      });
+    })
+    .run();
 }

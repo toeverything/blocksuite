@@ -55,14 +55,17 @@ export class CodeClipboardController {
         }),
       ])
       .getBlockIndex()
+      .try(cmd => [cmd.getTextSelection().deleteText()])
       .inline((ctx, next) => {
-        assertExists(ctx.parentBlock);
+        if (!ctx.parentBlock) {
+          return;
+        }
         this._clipboard
           .paste(
             e,
             this._std.doc,
             ctx.parentBlock.model.id,
-            ctx.blockIndex ? ctx.blockIndex + 1 : undefined
+            ctx.blockIndex ? ctx.blockIndex + 1 : 1
           )
           .catch(console.error);
 
