@@ -6,7 +6,7 @@ import {
 } from '@blocksuite/block-std/gfx';
 import { BlockModel, defineBlockSchema } from '@blocksuite/store';
 
-type LatexProps = {
+export type LatexProps = {
   xywh: SerializedXYWH;
   index: string;
   scale: number;

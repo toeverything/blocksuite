@@ -53,6 +53,5 @@ export {
   type AffineSlashMenuItemGenerator,
   AffineSlashMenuWidget,
   type AffineSlashSubMenu,
-  insertContent,
 } from './slash-menu/index.js';
 export { AffineSurfaceRefToolbar } from './surface-ref-toolbar/surface-ref-toolbar.js';
