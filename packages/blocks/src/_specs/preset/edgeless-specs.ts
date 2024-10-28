@@ -5,7 +5,6 @@ import {
   EdgelessSurfaceBlockSpec,
 } from '@blocksuite/affine-block-surface';
 import { FontLoaderService } from '@blocksuite/affine-shared/services';
-import { SurfaceMiddlewareExtension } from '@blocksuite/block-std/gfx';
 
 import { EdgelessTextBlockSpec } from '../../edgeless-text-block/edgeless-text-spec.js';
 import { FrameBlockSpec } from '../../frame-block/frame-spec.js';
@@ -56,7 +55,7 @@ export const EdgelessBuiltInManager: ExtensionType[] = [
   FrameOverlay,
   EdgelessSnapManager,
   EdgelessFrameManager,
-  SurfaceMiddlewareExtension([EditPropsMiddlewareBuilder]),
+  EditPropsMiddlewareBuilder,
 ];
 
 export const EdgelessEditorBlockSpecs: ExtensionType[] = [

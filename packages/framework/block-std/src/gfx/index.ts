@@ -47,10 +47,11 @@ export {
 export {
   SurfaceBlockModel,
   type SurfaceBlockProps,
+  type SurfaceMiddleware,
 } from './surface/surface-model.js';
 
 export {
-  type SurfaceMiddlewareBuilder,
+  SurfaceMiddlewareBuilder,
   SurfaceMiddlewareExtension,
 } from './surface-middleware.js';
 
