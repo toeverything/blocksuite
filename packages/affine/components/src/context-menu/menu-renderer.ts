@@ -29,12 +29,13 @@ export class MenuComponent extends SignalWatcher(
       user-select: none;
       min-width: 276px;
       box-shadow: var(--affine-shadow-2);
-      border-radius: 8px;
+      border-radius: 4px;
       background-color: var(--affine-background-overlay-panel-color);
       padding: 8px;
       position: absolute;
       z-index: 999;
       gap: 8px;
+      border: 0.5px solid ${unsafeCSSVarV2('layer/insideBorder/border')};
     }
 
     .affine-menu-search-container {
@@ -246,6 +247,7 @@ export const createModal = (container: HTMLElement = document.body) => {
 export type PopupTarget = {
   targetRect: ReferenceElement;
   root: HTMLElement;
+  button: HTMLElement;
 };
 export const popupTargetFromElement = (element: HTMLElement): PopupTarget => {
   let rect = element.getBoundingClientRect();
@@ -259,6 +261,7 @@ export const popupTargetFromElement = (element: HTMLElement): PopupTarget => {
       },
     },
     root: getDefaultModalRoot(element),
+    button: element,
   };
 };
 export const createPopup = (
@@ -270,6 +273,10 @@ export const createPopup = (
     container?: HTMLElement;
   }
 ) => {
+  const close = () => {
+    modal.remove();
+    options?.onClose?.();
+  };
   const modal = createModal(target.root);
   autoUpdate(target.targetRect, content, () => {
     computePosition(target.targetRect, content, {
@@ -287,20 +294,18 @@ export const createPopup = (
 
   modal.onmousedown = ev => {
     if (ev.target === modal) {
-      modal.remove();
-      options?.onClose?.();
+      close();
     }
   };
 
   modal.oncontextmenu = ev => {
     ev.preventDefault();
     if (ev.target === modal) {
-      modal.remove();
-      options?.onClose?.();
+      close();
     }
   };
 
-  return () => modal.remove();
+  return close;
 };
 
 export type MenuHandler = {
@@ -315,15 +320,25 @@ export const popMenu = (
     container?: HTMLElement;
   }
 ): MenuHandler => {
+  const classList = target.button.classList;
+  const hasActive = classList.contains('active');
+  if (!hasActive) {
+    classList.add('active');
+  }
+  const onClose = () => {
+    props.options.onClose?.();
+    if (!hasActive) {
+      classList.remove('active');
+    }
+  };
   const menu = new Menu({
     ...props.options,
     onClose: () => {
-      props.options.onClose?.();
-      close();
+      closePopup();
     },
   });
-  const close = createPopup(target, menu.menuElement, {
-    onClose: props.options.onClose,
+  const closePopup = createPopup(target, menu.menuElement, {
+    onClose: onClose,
     middleware: props.middleware ?? [
       autoPlacement({
         allowedPlacements: [
@@ -338,7 +353,7 @@ export const popMenu = (
     container: props.container,
   });
   return {
-    close,
+    close: closePopup,
   };
 };
 export const popFilterableSimpleMenu = (

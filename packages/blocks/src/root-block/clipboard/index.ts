@@ -1,7 +1,7 @@
 import type { BlockComponent, UIEventHandler } from '@blocksuite/block-std';
 import type { BlockSnapshot, Doc } from '@blocksuite/store';
 
-import { assertExists, DisposableGroup } from '@blocksuite/global/utils';
+import { DisposableGroup } from '@blocksuite/global/utils';
 
 import {
   AttachmentAdapter,
@@ -132,13 +132,20 @@ export class PageClipboard {
     this._std.command
       .chain()
       .try(cmd => [
+        cmd.getTextSelection().deleteText(),
+        cmd
+          .getSelectedModels()
+          .clearAndSelectFirstModel()
+          .retainFirstModel()
+          .deleteSelectedModels(),
+      ])
+      .try(cmd => [
         cmd.getTextSelection().inline<'currentSelectionPath'>((ctx, next) => {
           const textSelection = ctx.currentTextSelection;
           if (!textSelection) {
             return;
           }
-          const end = textSelection.to ?? textSelection.from;
-          next({ currentSelectionPath: end.blockId });
+          next({ currentSelectionPath: textSelection.from.blockId });
         }),
         cmd.getBlockSelections().inline<'currentSelectionPath'>((ctx, next) => {
           const currentBlockSelections = ctx.currentBlockSelections;
@@ -165,7 +172,9 @@ export class PageClipboard {
       ])
       .getBlockIndex()
       .inline((ctx, next) => {
-        assertExists(ctx.parentBlock);
+        if (!ctx.parentBlock) {
+          return;
+        }
         this._std.clipboard
           .paste(
             e,

@@ -6,14 +6,21 @@ import {
 import { ShadowlessElement } from '@blocksuite/block-std';
 import { SignalWatcher, WithDisposable } from '@blocksuite/global/utils';
 import { InvisibleIcon, ViewIcon } from '@blocksuite/icons/lit';
+import { computed } from '@preact/signals-core';
 import { css, html } from 'lit';
 import { property, query } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { repeat } from 'lit/directives/repeat.js';
-import Sortable from 'sortablejs';
 
 import type { Property } from '../view-manager/property.js';
 import type { SingleView } from '../view-manager/single-view.js';
+
+import { dragHandler } from '../utils/wc-dnd/dnd-context.js';
+import {
+  createSortContext,
+  sortable,
+} from '../utils/wc-dnd/sort/sort-context.js';
+import { verticalListSortingStrategy } from '../utils/wc-dnd/sort/strategies/index.js';
 
 export class DataViewPropertiesSettingView extends SignalWatcher(
   WithDisposable(ShadowlessElement)
@@ -63,10 +70,7 @@ export class DataViewPropertiesSettingView extends SignalWatcher(
       user-select: none;
       cursor: pointer;
       border-radius: 4px;
-    }
-
-    .property-item:hover {
-      background-color: var(--affine-hover-color);
+      transition: transform 0.2s;
     }
 
     .property-item-drag-bar {
@@ -101,6 +105,7 @@ export class DataViewPropertiesSettingView extends SignalWatcher(
     .property-item-op-icon:hover {
       background-color: var(--affine-hover-color);
     }
+
     .property-item-op-icon.disabled:hover {
       background-color: transparent;
     }
@@ -124,6 +129,13 @@ export class DataViewPropertiesSettingView extends SignalWatcher(
     }
   `;
 
+  @property({ attribute: false })
+  accessor view!: SingleView;
+
+  items$ = computed(() => {
+    return this.view.propertiesWithoutFilter$.value;
+  });
+
   renderProperty = (property: Property) => {
     const isTitle = property.type$.value === 'title';
     const icon = property.hide$.value ? InvisibleIcon() : ViewIcon();
@@ -136,13 +148,51 @@ export class DataViewPropertiesSettingView extends SignalWatcher(
       'property-item-op-icon': true,
       disabled: isTitle,
     });
-    return html` <div class="property-item">
-      <div class="property-item-drag-bar"></div>
+    return html` <div ${sortable(property.id)} class="property-item">
+      <div ${dragHandler(property.id)} class="property-item-drag-bar"></div>
       <uni-lit class="property-item-icon" .uni="${property.icon}"></uni-lit>
       <div class="property-item-name">${property.name$.value}</div>
       <div class="${classList}" @click="${changeVisible}">${icon}</div>
     </div>`;
   };
+
+  sortContext = createSortContext({
+    dnd: {
+      container: this,
+      onDragEnd: evt => {
+        const over = evt.over;
+        const activeId = evt.active.id;
+        if (over && over.id !== activeId) {
+          const properties = this.items$.value;
+          const activeIndex = properties.findIndex(id => id === activeId);
+          const overIndex = properties.findIndex(id => id === over.id);
+
+          this.view.propertyMove(
+            activeId,
+            activeIndex > overIndex
+              ? {
+                  before: true,
+                  id: over.id,
+                }
+              : {
+                  before: false,
+                  id: over.id,
+                }
+          );
+        }
+      },
+      modifiers: [
+        ({ transform }) => {
+          return {
+            ...transform,
+            x: 0,
+          };
+        },
+      ],
+    },
+    items: this.items$,
+    strategy: verticalListSortingStrategy,
+  });
 
   private itemsGroup() {
     return this.view.propertiesWithoutFilter$.value.map(id =>
@@ -155,32 +205,7 @@ export class DataViewPropertiesSettingView extends SignalWatcher(
     this._disposables.addFromEvent(this, 'pointerdown', e => {
       e.stopPropagation();
     });
-  }
-
-  override firstUpdated() {
-    const sortable = new Sortable(this.groupContainer, {
-      animation: 150,
-      group: `properties-sort-${this.view.id}`,
-      onEnd: evt => {
-        const properties = [...this.view.propertiesWithoutFilter$.value];
-        const index = evt.oldIndex ?? -1;
-        const from = properties[index];
-        properties.splice(index, 1);
-        const to = properties[evt.newIndex ?? -1];
-        this.view.propertyMove(
-          from,
-          to
-            ? {
-                before: true,
-                id: to,
-              }
-            : 'end'
-        );
-      },
-    });
-    this._disposables.add({
-      dispose: () => sortable.destroy(),
-    });
+    // this.disposables.add(this.sortContext)
   }
 
   override render() {
@@ -197,9 +222,6 @@ export class DataViewPropertiesSettingView extends SignalWatcher(
 
   @property({ attribute: false })
   accessor onBack: (() => void) | undefined = undefined;
-
-  @property({ attribute: false })
-  accessor view!: SingleView;
 }
 
 declare global {
@@ -233,7 +255,7 @@ export const popPropertiesSetting = (
               }
             });
           };
-          return html`<div
+          return html` <div
             class="properties-group-op"
             @click="${clickChangeAll}"
           >
@@ -245,7 +267,7 @@ export const popPropertiesSetting = (
         menu.group({
           items: [
             () =>
-              html`<data-view-properties-setting
+              html` <data-view-properties-setting
                 .view="${props.view}"
               ></data-view-properties-setting>`,
           ],

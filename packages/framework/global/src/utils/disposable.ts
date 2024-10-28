@@ -4,7 +4,11 @@ export interface Disposable {
   dispose: DisposeCallback;
 }
 
-export class DisposableGroup implements Disposable {
+export interface DisposableManager extends Disposable {
+  add(d: Disposable | DisposeCallback): void;
+}
+
+export class DisposableGroup implements DisposableManager {
   private _disposables: Disposable[] = [];
 
   private _disposed = false;

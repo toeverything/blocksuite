@@ -156,19 +156,31 @@ test.describe('edgeless text block', () => {
       delay: 100,
     });
     await waitNextFrame(page);
-    await assertEdgelessTextModelRect(page, '4', new Bound(-25, -25, 50, 56));
+    await assertEdgelessTextModelRect(page, '4', new Bound(-25, -25, 50, 46));
 
-    await type(page, 'aaaaaa');
-    await waitNextFrame(page, 200);
-    await assertEdgelessTextModelRect(page, '4', new Bound(-25, -25, 71, 56));
+    await type(page, 'aaaaaaaaaa');
+    await waitNextFrame(page, 1000);
+    // just width changed
+    await assertEdgelessTextModelRect(page, '4', new Bound(-25, -25, 83, 46));
 
     await type(page, '\nbbb');
-    // width not changed
-    await assertEdgelessTextModelRect(page, '4', new Bound(-25, -25, 71, 90));
-    await type(page, '\nccccccc');
+    // width not changed, height changed
+    await assertEdgelessTextModelRect(page, '4', new Bound(-25, -25, 83, 80));
+    await type(page, '\ncccccccccccccccc');
 
-    // width changed
-    await assertEdgelessTextModelRect(page, '4', new Bound(-25, -25, 79, 124));
+    // width and height changed
+    await assertEdgelessTextModelRect(page, '4', new Bound(-25, -25, 131, 114));
+
+    // blur, max width set to true
+    await page.mouse.click(point[0] - 50, point[1], {
+      delay: 100,
+    });
+    await page.mouse.dblclick(point[0], point[1], {
+      delay: 100,
+    });
+    await type(page, 'dddddddddd');
+    // width not changed, height changed
+    await assertEdgelessTextModelRect(page, '4', new Bound(-25, -25, 131, 138));
   });
 
   test('edgeless text width fixed when drag moving', async ({ page }) => {
@@ -367,11 +379,13 @@ test.describe('edgeless text block', () => {
 
     await type(page, '@');
     await pressEnter(page);
+    await waitNextFrame(page, 200);
 
     expect(await getPageSnapshot(page, true)).toMatchSnapshot(
       `${testInfo.title}_add_linked_doc.json`
     );
 
+    await page.locator('affine-reference').hover();
     await page.getByLabel('Switch view').click();
     await page.getByTestId('link-to-card').click();
     await autoFit(page);
@@ -386,6 +400,7 @@ test.describe('edgeless text block', () => {
     await page.mouse.click(0, 0);
     // select text element
     await page.mouse.click(point[0] + 10, point[1] + 10);
+    await waitNextFrame(page, 200);
     const selectedRect0 = await getEdgelessSelectedRect(page);
 
     // from right to left

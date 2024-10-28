@@ -1,9 +1,11 @@
+import type { BlockModel } from '@blocksuite/store';
+
 import {
   BLOCK_ID_ATTR,
   type BlockComponent,
   type Chain,
-  type Command,
   type CommandKeyToData,
+  type EditorHost,
   type InitCommandCtx,
 } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
@@ -18,59 +20,12 @@ import { effect } from '@preact/signals-core';
 import type { AffineTextAttributes } from '../extension/index.js';
 import type { AffineInlineEditor } from '../inline/index.js';
 
+import { getInlineEditorByModel } from '../dom.js';
 import {
   FORMAT_BLOCK_SUPPORT_FLAVOURS,
   FORMAT_NATIVE_SUPPORT_FLAVOURS,
   FORMAT_TEXT_SUPPORT_FLAVOURS,
 } from './consts.js';
-
-function isActive(std: BlockSuite.Std, key: keyof AffineTextAttributes) {
-  const [result] = std.command.chain().isTextStyleActive({ key }).run();
-  return result;
-}
-
-function handleCommonStyle(
-  std: BlockSuite.Std,
-  key: Extract<
-    keyof AffineTextAttributes,
-    'bold' | 'italic' | 'underline' | 'strike' | 'code'
-  >
-) {
-  const active = isActive(std, key);
-  const payload: {
-    styles: AffineTextAttributes;
-    mode?: 'replace' | 'merge';
-  } = {
-    styles: {
-      [key]: active ? null : true,
-    },
-  };
-  return std.command
-    .chain()
-    .try(chain => [
-      chain.getTextSelection().formatText(payload),
-      chain.getBlockSelections().formatBlock(payload),
-      chain.formatNative(payload),
-    ])
-    .run();
-}
-
-export function generateTextStyleCommand(
-  key: Extract<
-    keyof AffineTextAttributes,
-    'bold' | 'italic' | 'underline' | 'strike' | 'code'
-  >
-): Command {
-  return (ctx, next) => {
-    const [result] = handleCommonStyle(ctx.std, key);
-
-    if (result) {
-      return next();
-    }
-
-    return false;
-  };
-}
 
 function getCombinedFormatFromInlineEditors(
   inlineEditors: [AffineInlineEditor, InlineRange | null][]
@@ -268,5 +223,30 @@ export function clearMarksOnDiscontinuousInput(
       inlineEditor.resetMarks();
       dispose();
     }
+  });
+}
+
+export function insertContent(
+  editorHost: EditorHost,
+  model: BlockModel,
+  text: string,
+  attributes?: AffineTextAttributes
+) {
+  if (!model.text) {
+    console.error("Can't insert text! Text not found");
+    return;
+  }
+  const inlineEditor = getInlineEditorByModel(editorHost, model);
+  if (!inlineEditor) {
+    console.error("Can't insert text! Inline editor not found");
+    return;
+  }
+  const inlineRange = inlineEditor.getInlineRange();
+  const index = inlineRange ? inlineRange.index : model.text.length;
+  model.text.insert(text, index, attributes as Record<string, unknown>);
+  // Update the caret to the end of the inserted text
+  inlineEditor.setInlineRange({
+    index: index + text.length,
+    length: 0,
   });
 }

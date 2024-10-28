@@ -67,19 +67,10 @@ export class AffineKeyboardToolPanel extends SignalWatcher(
   protected override willUpdate(changedProperties: PropertyValues<this>) {
     if (changedProperties.has('height')) {
       this.style.height = `${this.height}px`;
-    }
-
-    // Make panel be available when there is not virtual keyboard,
-    // such as mobile simulator in developer tools, or physical keyboard is used in mobile.
-    if (changedProperties.has('config')) {
       if (this.height === 0) {
-        if (this.config !== null) {
-          this.style.padding = '';
-          this.style.height = '250px';
-        } else {
-          this.style.padding = '0';
-          this.style.height = '0';
-        }
+        this.style.padding = '0';
+      } else {
+        this.style.padding = '';
       }
     }
   }

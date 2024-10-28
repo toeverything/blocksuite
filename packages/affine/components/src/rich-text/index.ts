@@ -15,8 +15,10 @@ export {
   FORMAT_BLOCK_SUPPORT_FLAVOURS,
   FORMAT_NATIVE_SUPPORT_FLAVOURS,
   FORMAT_TEXT_SUPPORT_FLAVOURS,
+  insertContent,
   isFormatSupported,
   textCommands,
+  type TextFormatConfig,
   textFormatConfigs,
 } from './format/index.js';
 export * from './inline/index.js';

@@ -40,3 +40,5 @@ declare global {
     virtualKeyboardPolicy: string;
   }
 }
+
+export {};

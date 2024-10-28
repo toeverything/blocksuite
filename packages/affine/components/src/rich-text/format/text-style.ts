@@ -5,13 +5,64 @@ import { INLINE_ROOT_ATTR, type InlineRootElement } from '@blocksuite/inline';
 import type { AffineTextAttributes } from '../extension/index.js';
 
 import { toggleLinkPopup } from '../inline/index.js';
-import { generateTextStyleCommand, getCombinedTextStyle } from './utils.js';
+import { getCombinedTextStyle } from './utils.js';
 
-export const toggleBold: Command = generateTextStyleCommand('bold');
-export const toggleItalic: Command = generateTextStyleCommand('italic');
-export const toggleUnderline: Command = generateTextStyleCommand('underline');
-export const toggleStrike: Command = generateTextStyleCommand('strike');
-export const toggleCode: Command = generateTextStyleCommand('code');
+export const toggleTextStyleCommand: Command<
+  never,
+  never,
+  {
+    key: Extract<
+      keyof AffineTextAttributes,
+      'bold' | 'italic' | 'underline' | 'strike' | 'code'
+    >;
+  }
+> = (ctx, next) => {
+  const { std, key } = ctx;
+  const [active] = std.command.chain().isTextStyleActive({ key }).run();
+
+  const payload: {
+    styles: AffineTextAttributes;
+    mode?: 'replace' | 'merge';
+  } = {
+    styles: {
+      [key]: active ? null : true,
+    },
+  };
+
+  const [result] = std.command
+    .chain()
+    .try(chain => [
+      chain.getTextSelection().formatText(payload),
+      chain.getBlockSelections().formatBlock(payload),
+      chain.formatNative(payload),
+    ])
+    .run();
+
+  if (result) {
+    return next();
+  }
+
+  return false;
+};
+
+const toggleTextStyleCommandWrapper = (
+  key: Extract<
+    keyof AffineTextAttributes,
+    'bold' | 'italic' | 'underline' | 'strike' | 'code'
+  >
+): Command => {
+  return (ctx, next) => {
+    const { success } = ctx.std.command.exec('toggleTextStyle', { key });
+    if (success) next();
+    return false;
+  };
+};
+
+export const toggleBold = toggleTextStyleCommandWrapper('bold');
+export const toggleItalic = toggleTextStyleCommandWrapper('italic');
+export const toggleUnderline = toggleTextStyleCommandWrapper('underline');
+export const toggleStrike = toggleTextStyleCommandWrapper('strike');
+export const toggleCode = toggleTextStyleCommandWrapper('code');
 
 export const toggleLink: Command = (_ctx, next) => {
   const selection = document.getSelection();
