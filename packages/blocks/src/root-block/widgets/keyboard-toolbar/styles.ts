@@ -66,6 +66,7 @@ export const keyboardToolPanelStyles = css`
     padding: 16px 4px 8px 8px;
     overflow-y: auto;
     box-sizing: border-box;
+    background-color: ${unsafeCSSVarV2('layer/background/primary')};
   }
 
   ${scrollbarStyle(':host')}
@@ -92,7 +93,7 @@ export const keyboardToolPanelStyles = css`
   .keyboard-tool-panel-group-item-container {
     width: 100%;
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     column-gap: 12px;
     row-gap: 12px;
   }
@@ -123,11 +124,15 @@ export const keyboardToolPanelStyles = css`
     }
 
     span {
+      width: 100%;
       font-family: SF Pro;
       font-size: 13px;
       font-weight: 400;
       line-height: 18px;
       text-align: center;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      overflow-x: hidden;
       color: ${unsafeCSSVarV2('text/secondary')};
     }
   }
