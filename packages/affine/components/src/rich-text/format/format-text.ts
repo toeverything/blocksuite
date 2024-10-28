@@ -52,7 +52,6 @@ export const formatTextCommand: Command<
 
         if (inlineRange.length === 0) {
           const delta = inlineEditor.getDeltaByRangeIndex(inlineRange.index);
-          if (!delta) return;
 
           inlineEditor.setMarks({
             ...inlineEditor.marks,
@@ -63,7 +62,8 @@ export const formatTextCommand: Command<
                     key,
                     (inlineEditor.marks &&
                       inlineEditor.marks[key as keyof AffineTextAttributes]) ||
-                    (delta.attributes &&
+                    (delta &&
+                      delta.attributes &&
                       delta.attributes[key as keyof AffineTextAttributes])
                       ? null
                       : value,

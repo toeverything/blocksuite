@@ -162,6 +162,22 @@ test('use formatted cursor with hotkey', async ({ page }, testInfo) => {
   );
 });
 
+test('use formatted cursor with hotkey at empty line', async ({
+  page,
+}, testInfo) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusRichText(page);
+
+  // format bold
+  await page.keyboard.press(`${SHORT_KEY}+b`, { delay: 50 });
+  await type(page, 'aaa');
+
+  expect(await getPageSnapshot(page, true)).toMatchSnapshot(
+    `${testInfo.title}_bold.json`
+  );
+});
+
 test('should single line format hotkey work', async ({ page }, testInfo) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
