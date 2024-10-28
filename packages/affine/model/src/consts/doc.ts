@@ -9,6 +9,8 @@ export const ReferenceParamsSchema = z
     mode: z.enum(DocModes),
     blockIds: z.string().array(),
     elementIds: z.string().array(),
+    databaseId: z.string().optional(),
+    databaseRowId: z.string().optional(),
   })
   .partial();
 
