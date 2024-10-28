@@ -402,7 +402,12 @@ export class DatabaseBlockComponent extends CaptionedBlockComponent<
             openDetailPanel: (target, data) => {
               if (peekViewService) {
                 const openDoc = (docId: string) => {
-                  return peekViewService.peek({ docId });
+                  return peekViewService.peek({
+                    docId,
+                    databaseId: this.blockId,
+                    databaseRowId: data.rowId,
+                    target: this,
+                  });
                 };
                 const docs = getDocIdsFromText(
                   this.model.doc.getBlock(data.rowId)?.model?.text
