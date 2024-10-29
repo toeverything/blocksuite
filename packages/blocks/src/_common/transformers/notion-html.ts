@@ -58,15 +58,6 @@ async function importNotionZip({
           isWorkspaceFile = true;
           continue;
         }
-        if (lastSplitIndex !== -1) {
-          const text = await content.text();
-          const doc = new DOMParser().parseFromString(text, 'text/html');
-          const pageBody = doc.querySelector('.page-body');
-          if (pageBody && pageBody.children.length == 0) {
-            // Skip empty pages
-            continue;
-          }
-        }
         const id = collection.idGenerator();
         const splitPath = path.split('/');
         while (splitPath.length > 0) {
