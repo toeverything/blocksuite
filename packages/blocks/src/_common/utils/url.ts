@@ -1,4 +1,3 @@
-import type { DocMode, ReferenceInfo } from '@blocksuite/affine-model';
 import type { TemplateResult } from 'lit';
 
 import {
@@ -15,8 +14,12 @@ import {
   EmbedCardLightVerticalIcon,
   LightLoadingIcon,
 } from '@blocksuite/affine-components/icons';
+import {
+  ColorScheme,
+  type DocMode,
+  type ReferenceInfo,
+} from '@blocksuite/affine-model';
 import { DocModes } from '@blocksuite/affine-model';
-import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 
 type EmbedCardIcons = {
   LoadingIcon: TemplateResult<1>;
@@ -27,9 +30,8 @@ type EmbedCardIcons = {
   EmbedCardCubeIcon: TemplateResult<1>;
 };
 
-export function getEmbedCardIcons(): EmbedCardIcons {
-  const theme = ThemeObserver.mode;
-  if (theme === 'light') {
+export function getEmbedCardIcons(theme: ColorScheme): EmbedCardIcons {
+  if (theme === ColorScheme.Light) {
     return {
       LoadingIcon: LightLoadingIcon,
       EmbedCardBannerIcon: EmbedCardLightBannerIcon,

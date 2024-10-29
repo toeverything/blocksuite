@@ -1,13 +1,16 @@
 import type { AffineEditorContainer } from '@blocksuite/presets';
 
 import {
+  ColorScheme,
   type DocMode,
   type DocModeProvider,
   type NotificationService,
   type ParseDocUrlService,
+  type ThemeExtension,
   toast,
 } from '@blocksuite/blocks';
 import { type DocCollection, Slot } from '@blocksuite/store';
+import { signal } from '@preact/signals-core';
 
 function getModeFromStorage() {
   const mapJson = localStorage.getItem('playground:docMode');
@@ -114,3 +117,58 @@ export function mockParseDocUrlService(collection: DocCollection) {
   };
   return parseDocUrlService;
 }
+
+export class MockAppTheme {
+  private observer: MutationObserver;
+
+  theme$ = signal(ColorScheme.Light);
+
+  constructor() {
+    const COLOR_SCHEMES: string[] = Object.values(ColorScheme);
+    this.observer = new MutationObserver(() => {
+      const mode = document.documentElement.dataset.theme;
+      if (!mode) return;
+      if (!COLOR_SCHEMES.includes(mode)) return;
+      if (mode === this.theme$.value) return;
+
+      this.theme$.value = mode as ColorScheme;
+    });
+    this.observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['data-theme'],
+    });
+  }
+
+  destroy() {
+    this.observer.disconnect();
+  }
+}
+
+export const mockAppTheme = new MockAppTheme();
+
+export class MockEdgelessTheme {
+  theme$ = signal(ColorScheme.Light);
+
+  setTheme(theme: ColorScheme) {
+    this.theme$.value = theme;
+  }
+
+  toggleTheme() {
+    const theme =
+      this.theme$.value === ColorScheme.Dark
+        ? ColorScheme.Light
+        : ColorScheme.Dark;
+    this.theme$.value = theme;
+  }
+}
+
+export const mockEdgelessTheme = new MockEdgelessTheme();
+
+export const themeExtension: ThemeExtension = {
+  getAppTheme() {
+    return mockAppTheme.theme$;
+  },
+  getEdgelessTheme() {
+    return mockEdgelessTheme.theme$;
+  },
+};

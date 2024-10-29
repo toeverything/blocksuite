@@ -1,6 +1,9 @@
 import type { BaseSelection } from '@blocksuite/block-std';
 
-import { NotificationProvider } from '@blocksuite/affine-shared/services';
+import {
+  NotificationProvider,
+  ThemeProvider,
+} from '@blocksuite/affine-shared/services';
 import {
   getPageRootByElement,
   stopPropagation,
@@ -459,6 +462,7 @@ export class AffineAIPanelWidget extends WidgetComponent {
       })
       .catch(console.error);
 
+    const theme = this.std.get(ThemeProvider).theme;
     const mainTemplate = choose(this.state, [
       [
         'input',
@@ -486,6 +490,7 @@ export class AffineAIPanelWidget extends WidgetComponent {
             : nothing}
           <ai-panel-generating
             .config=${config.generatingStateConfig}
+            .theme=${theme}
             .stopGenerating=${this.stopGenerating}
             .withAnswer=${!!this.answer}
           ></ai-panel-generating>

@@ -1,18 +1,18 @@
+import type { AttachmentBlockModel } from '@blocksuite/affine-model';
+
 import {
   CaptionIcon,
   DownloadIcon,
   PaletteIcon,
 } from '@blocksuite/affine-components/icons';
+import { ThemeProvider } from '@blocksuite/affine-shared/services';
 import { assertExists, Bound, WithDisposable } from '@blocksuite/global/utils';
 import { html, LitElement, nothing, type TemplateResult } from 'lit';
 import { property } from 'lit/decorators.js';
 
 import type { EmbedCardStyle } from '../../../_common/types.js';
-import type {
-  AttachmentBlockComponent,
-  AttachmentBlockModel,
-  EdgelessRootBlockComponent,
-} from '../../../index.js';
+import type { AttachmentBlockComponent } from '../../../attachment-block/index.js';
+import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 
 import {
   EMBED_CARD_HEIGHT,
@@ -65,7 +65,8 @@ export class EdgelessChangeAttachmentButton extends WithDisposable(LitElement) {
     Icon: TemplateResult<1>;
     tooltip: string;
   }[] {
-    const { EmbedCardListIcon, EmbedCardCubeIcon } = getEmbedCardIcons();
+    const theme = this.std.get(ThemeProvider).theme;
+    const { EmbedCardListIcon, EmbedCardCubeIcon } = getEmbedCardIcons(theme);
     return [
       {
         style: 'horizontalThin',

@@ -29,6 +29,7 @@ import {
 import {
   EmbedOptionProvider,
   type EmbedOptions,
+  ThemeProvider,
 } from '@blocksuite/affine-shared/services';
 import { getHostName } from '@blocksuite/affine-shared/utils';
 import { WidgetComponent } from '@blocksuite/block-std';
@@ -181,9 +182,10 @@ export class EmbedCardToolbar extends WidgetComponent<
   }
 
   private _cardStyleMenuButton() {
+    const theme = this.std.get(ThemeProvider).theme;
     if (this.focusModel && this._canShowCardStylePanel(this.focusModel)) {
       const { EmbedCardHorizontalIcon, EmbedCardListIcon } =
-        getEmbedCardIcons();
+        getEmbedCardIcons(theme);
 
       const buttons = [
         {

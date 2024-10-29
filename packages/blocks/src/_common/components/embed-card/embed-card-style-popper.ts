@@ -1,5 +1,6 @@
 import type {
   BookmarkBlockModel,
+  ColorScheme,
   EmbedGithubModel,
   EmbedLinkedDocModel,
 } from '@blocksuite/affine-model';
@@ -47,7 +48,9 @@ export class EmbedCardStyleMenu extends WithDisposable(LitElement) {
   }
 
   override render() {
-    const { EmbedCardHorizontalIcon, EmbedCardListIcon } = getEmbedCardIcons();
+    const { EmbedCardHorizontalIcon, EmbedCardListIcon } = getEmbedCardIcons(
+      this.theme
+    );
     return html`
       <div class="embed-card-style-menu">
         <div
@@ -93,6 +96,9 @@ export class EmbedCardStyleMenu extends WithDisposable(LitElement) {
 
   @property({ attribute: false })
   accessor model!: BookmarkBlockModel | EmbedGithubModel | EmbedLinkedDocModel;
+
+  @property({ attribute: false })
+  accessor theme!: ColorScheme;
 }
 
 declare global {

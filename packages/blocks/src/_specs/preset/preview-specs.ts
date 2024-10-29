@@ -7,6 +7,7 @@ import {
   DocModeService,
   EmbedOptionService,
   FontLoaderService,
+  ThemeService,
 } from '@blocksuite/affine-shared/services';
 import {
   BlockViewExtension,
@@ -33,6 +34,7 @@ const PreviewPageSpec: ExtensionType[] = [
   FlavourExtension('affine:page'),
   PageRootService,
   DocModeService,
+  ThemeService,
   EmbedOptionService,
   BlockViewExtension('affine:page', literal`affine-preview-root`),
 ];

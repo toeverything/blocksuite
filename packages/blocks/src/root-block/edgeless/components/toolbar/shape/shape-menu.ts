@@ -13,8 +13,10 @@ import {
   ShapeStyle,
   ShapeType,
 } from '@blocksuite/affine-model';
-import { EditPropsStore } from '@blocksuite/affine-shared/services';
-import { ThemeObserver } from '@blocksuite/affine-shared/theme';
+import {
+  EditPropsStore,
+  ThemeProvider,
+} from '@blocksuite/affine-shared/services';
 import { SignalWatcher, WithDisposable } from '@blocksuite/global/utils';
 import { computed, effect, signal } from '@preact/signals-core';
 import { css, html, LitElement } from 'lit';
@@ -125,10 +127,9 @@ export class EdgelessShapeMenu extends SignalWatcher(
 
   override render() {
     const { fillColor, shapeStyle, shapeName } = this._props$.value;
-    const color = ThemeObserver.getColorValue(
-      fillColor,
-      DEFAULT_SHAPE_FILL_COLOR
-    );
+    const color = this.edgeless.std
+      .get(ThemeProvider)
+      .getColorValue(fillColor, DEFAULT_SHAPE_FILL_COLOR);
 
     return html`
       <edgeless-slide-menu>

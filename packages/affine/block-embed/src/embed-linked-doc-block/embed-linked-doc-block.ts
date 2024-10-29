@@ -15,7 +15,10 @@ import {
   EMBED_CARD_HEIGHT,
   EMBED_CARD_WIDTH,
 } from '@blocksuite/affine-shared/consts';
-import { DocModeProvider } from '@blocksuite/affine-shared/services';
+import {
+  DocModeProvider,
+  ThemeProvider,
+} from '@blocksuite/affine-shared/services';
 import { matchFlavours } from '@blocksuite/affine-shared/utils';
 import { Bound } from '@blocksuite/global/utils';
 import { DocCollection } from '@blocksuite/store';
@@ -359,6 +362,7 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockComponent<EmbedLinke
       [this._cardStyle]: true,
     });
 
+    const theme = this.std.get(ThemeProvider).theme;
     const {
       LoadingIcon,
       ReloadIcon,
@@ -367,7 +371,7 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockComponent<EmbedLinke
       LinkedDocDeletedBanner,
       LinkedDocEmptyBanner,
       SyncedDocErrorBanner,
-    } = getEmbedLinkedDocIcons(this._linkedDocMode, this._cardStyle);
+    } = getEmbedLinkedDocIcons(theme, this._linkedDocMode, this._cardStyle);
 
     const titleIcon = isError
       ? SyncedDocErrorIcon

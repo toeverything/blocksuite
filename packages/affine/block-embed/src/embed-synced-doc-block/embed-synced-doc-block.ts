@@ -12,8 +12,11 @@ import {
   type EmbedSyncedDocModel,
   NoteDisplayMode,
 } from '@blocksuite/affine-model';
-import { DocModeProvider } from '@blocksuite/affine-shared/services';
-import { ThemeObserver } from '@blocksuite/affine-shared/theme';
+import {
+  DocModeProvider,
+  ThemeExtensionIdentifier,
+  ThemeProvider,
+} from '@blocksuite/affine-shared/services';
 import { SpecProvider } from '@blocksuite/affine-shared/utils';
 import {
   BlockServiceWatcher,
@@ -153,7 +156,13 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockComponent<EmbedSynce
       width: '100%',
     });
 
-    const theme = ThemeObserver.mode;
+    const themeService = this.std.get(ThemeProvider);
+    const themeExtension = this.std.getOptional(ThemeExtensionIdentifier);
+    const appTheme = themeService.app$.value;
+    const edgelessTheme =
+      themeExtension?.getEdgelessTheme(this.syncedDoc?.id).value ||
+      themeService.edgeless$.value;
+    const theme = this.isPageMode ? appTheme : edgelessTheme;
     const isSelected = !!this.selected?.is('block');
 
     this.dataset.nestedEditor = '';
@@ -163,7 +172,7 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockComponent<EmbedSynce
         [
           'page',
           () => html`
-            <div class="affine-page-viewport">
+            <div class="affine-page-viewport" data-theme=${appTheme}>
               ${new BlockStdScope({
                 doc: syncedDoc,
                 extensions: this._buildPreviewSpec('page:preview'),
@@ -174,7 +183,7 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockComponent<EmbedSynce
         [
           'edgeless',
           () => html`
-            <div class="affine-edgeless-viewport">
+            <div class="affine-edgeless-viewport" data-theme=${edgelessTheme}>
               ${new BlockStdScope({
                 doc: syncedDoc,
                 extensions: this._buildPreviewSpec('edgeless:preview'),

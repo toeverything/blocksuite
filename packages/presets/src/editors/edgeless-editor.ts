@@ -1,13 +1,15 @@
 import type { Doc } from '@blocksuite/store';
 
 import { BlockStdScope, ShadowlessElement } from '@blocksuite/block-std';
-import { EdgelessEditorBlockSpecs } from '@blocksuite/blocks';
-import { WithDisposable } from '@blocksuite/global/utils';
+import { EdgelessEditorBlockSpecs, ThemeProvider } from '@blocksuite/blocks';
+import { SignalWatcher, WithDisposable } from '@blocksuite/global/utils';
 import { css, html, nothing, type TemplateResult } from 'lit';
 import { property, state } from 'lit/decorators.js';
 import { guard } from 'lit/directives/guard.js';
 
-export class EdgelessEditor extends WithDisposable(ShadowlessElement) {
+export class EdgelessEditor extends SignalWatcher(
+  WithDisposable(ShadowlessElement)
+) {
   static override styles = css`
     edgeless-editor {
       font-family: var(--affine-font-family);
@@ -60,11 +62,12 @@ export class EdgelessEditor extends WithDisposable(ShadowlessElement) {
   }
 
   override render() {
-    const std = this.std;
     if (!this.doc.root) return nothing;
 
+    const std = this.std;
+    const theme = std.get(ThemeProvider).edgeless$.value;
     return html`
-      <div class="affine-edgeless-viewport">
+      <div class="affine-edgeless-viewport" data-theme=${theme}>
         ${guard([std], () => std.render())}
       </div>
     `;

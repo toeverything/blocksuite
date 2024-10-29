@@ -2,7 +2,7 @@ import type { RichText } from '@blocksuite/affine-components/rich-text';
 import type { TextElementModel } from '@blocksuite/affine-model';
 
 import { CommonUtils, TextUtils } from '@blocksuite/affine-block-surface';
-import { ThemeObserver } from '@blocksuite/affine-shared/theme';
+import { ThemeProvider } from '@blocksuite/affine-shared/services';
 import {
   RANGE_SYNC_EXCLUDE_ATTR,
   ShadowlessElement,
@@ -359,10 +359,9 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
     ];
 
     const isEmpty = !text.length && !this._isComposition;
-    const color = ThemeObserver.generateColorProperty(
-      this.element.color,
-      '#000000'
-    );
+    const color = this.edgeless.std
+      .get(ThemeProvider)
+      .generateColorProperty(this.element.color, '#000000');
 
     return html`<div
       style=${styleMap({

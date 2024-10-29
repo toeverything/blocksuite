@@ -4,7 +4,11 @@ import type {
 } from '@blocksuite/blocks';
 import type { Doc } from '@blocksuite/store';
 
-import { BlocksUtils, NoteDisplayMode } from '@blocksuite/blocks';
+import {
+  BlocksUtils,
+  NoteDisplayMode,
+  ThemeProvider,
+} from '@blocksuite/blocks';
 import {
   Bound,
   DisposableGroup,
@@ -340,6 +344,7 @@ export class OutlinePanelBody extends SignalWatcher(
 
   private _PanelList(withEdgelessOnlyNotes: boolean) {
     const selectedNotesSet = new Set(this._selected);
+    const theme = this.editor.std.get(ThemeProvider).theme;
 
     return html`<div class="panel-list">
       ${this.insertIndex !== undefined
@@ -357,6 +362,7 @@ export class OutlinePanelBody extends SignalWatcher(
               <affine-outline-note-card
                 data-note-id=${note.note.id}
                 .note=${note.note}
+                .theme=${theme}
                 .number=${idx + 1}
                 .index=${note.index}
                 .doc=${this.doc}
@@ -389,6 +395,7 @@ export class OutlinePanelBody extends SignalWatcher(
                 html`<affine-outline-note-card
                   data-note-id=${note.note.id}
                   .note=${note.note}
+                  .theme=${theme}
                   .number=${idx + 1}
                   .index=${note.index}
                   .doc=${this.doc}

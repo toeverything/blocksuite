@@ -14,8 +14,8 @@ import {
 import {
   DocModeProvider,
   DragHandleConfigExtension,
+  ThemeProvider,
 } from '@blocksuite/affine-shared/services';
-import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import {
   captureEventTarget,
   convertDragPreviewDocToEdgeless,
@@ -96,7 +96,7 @@ export class EmbedBlockComponent<
   protected embedContainerStyle: StyleInfo = {};
 
   renderEmbed = (content: () => TemplateResult) => {
-    const theme = ThemeObserver.mode;
+    const theme = this.std.get(ThemeProvider).theme;
     const isSelected = !!this.selected?.is('block');
 
     if (

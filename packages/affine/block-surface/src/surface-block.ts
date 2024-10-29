@@ -2,7 +2,7 @@ import type { Color } from '@blocksuite/affine-model';
 import type { EditorHost, SurfaceSelection } from '@blocksuite/block-std';
 import type { Slot } from '@blocksuite/global/utils';
 
-import { ThemeObserver } from '@blocksuite/affine-shared/theme';
+import { ThemeProvider } from '@blocksuite/affine-shared/services';
 import { BlockComponent, RANGE_SYNC_EXCLUDE_ATTR } from '@blocksuite/block-std';
 import {
   GfxControllerIdentifier,
@@ -122,7 +122,8 @@ export class SurfaceBlockComponent extends BlockComponent<
   };
 
   private _initThemeObserver = () => {
-    this.disposables.add(ThemeObserver.subscribe(() => this.requestUpdate()));
+    const theme = this.std.get(ThemeProvider);
+    this.disposables.add(theme.theme$.subscribe(() => this.requestUpdate()));
   };
 
   private _lastTime = 0;
@@ -178,6 +179,7 @@ export class SurfaceBlockComponent extends BlockComponent<
 
   private _initRenderer() {
     const gfx = this._gfx;
+    const themeService = this.std.get(ThemeProvider);
 
     this._renderer = new CanvasRenderer({
       viewport: gfx.viewport,
@@ -186,12 +188,12 @@ export class SurfaceBlockComponent extends BlockComponent<
       enableStackingCanvas: true,
       provider: {
         generateColorProperty: (color: Color, fallback: string) =>
-          ThemeObserver.generateColorProperty(color, fallback),
+          themeService.generateColorProperty(color, fallback),
         getColorValue: (color: Color, fallback?: string, real?: boolean) =>
-          ThemeObserver.getColorValue(color, fallback, real),
-        getColorScheme: () => ThemeObserver.mode,
+          themeService.getColorValue(color, fallback, real),
+        getColorScheme: () => themeService.theme,
         getPropertyValue: (property: string) =>
-          ThemeObserver.getPropertyValue(property),
+          themeService.getCssVariableColor(property),
         selectedElements: () => this._edgelessService.selection.selectedIds,
       },
       onStackingCanvasCreated(canvas) {

@@ -2,7 +2,10 @@ import {
   EMBED_CARD_HEIGHT,
   EMBED_CARD_WIDTH,
 } from '@blocksuite/affine-shared/consts';
-import { ThemeObserver } from '@blocksuite/affine-shared/theme';
+import {
+  ThemeExtensionIdentifier,
+  ThemeProvider,
+} from '@blocksuite/affine-shared/services';
 import { BlockStdScope } from '@blocksuite/block-std';
 import { assertExists, Bound } from '@blocksuite/global/utils';
 import { html } from 'lit';
@@ -39,7 +42,14 @@ export class EmbedEdgelessSyncedDocBlockComponent extends toEdgelessEmbedBlock(
       transformOrigin: '0 0',
     });
 
-    const theme = ThemeObserver.mode;
+    const themeService = this.std.get(ThemeProvider);
+    const themeExtension = this.std.getOptional(ThemeExtensionIdentifier);
+    const appTheme = themeService.app$.value;
+    const edgelessTheme =
+      themeExtension?.getEdgelessTheme(this.syncedDoc?.id).value ||
+      themeService.edgeless$.value;
+    const theme = this.isPageMode ? appTheme : edgelessTheme;
+
     const isSelected = !!this.selected?.is('block');
     const scale = this.model.scale ?? 1;
 
@@ -50,7 +60,7 @@ export class EmbedEdgelessSyncedDocBlockComponent extends toEdgelessEmbedBlock(
         [
           'page',
           () => html`
-            <div class="affine-page-viewport">
+            <div class="affine-page-viewport" data-theme=${appTheme}>
               ${new BlockStdScope({
                 doc: syncedDoc,
                 extensions: this._buildPreviewSpec('page:preview'),
@@ -61,7 +71,7 @@ export class EmbedEdgelessSyncedDocBlockComponent extends toEdgelessEmbedBlock(
         [
           'edgeless',
           () => html`
-            <div class="affine-edgeless-viewport">
+            <div class="affine-edgeless-viewport" data-theme=${edgelessTheme}>
               ${new BlockStdScope({
                 doc: syncedDoc,
                 extensions: this._buildPreviewSpec('edgeless:preview'),

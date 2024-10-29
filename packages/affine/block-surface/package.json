@@ -28,7 +28,7 @@
     "@blocksuite/store": "workspace:*",
     "@lit/context": "^1.1.2",
     "@preact/signals-core": "^1.8.0",
-    "@toeverything/theme": "^1.0.8",
+    "@toeverything/theme": "^1.0.15",
     "fractional-indexing": "^3.2.0",
     "lit": "^3.2.0",
     "lodash.chunk": "^4.2.0",

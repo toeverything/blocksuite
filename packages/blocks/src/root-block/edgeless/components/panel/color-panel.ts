@@ -1,11 +1,11 @@
 import { TransparentIcon } from '@blocksuite/affine-components/icons';
 import {
+  ColorScheme,
   LINE_COLORS,
   LineColor,
   NoteBackgroundColor,
   ShapeFillColor,
 } from '@blocksuite/affine-model';
-import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import { css, html, LitElement, nothing } from 'lit';
 import { property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
@@ -27,8 +27,9 @@ export class ColorEvent extends Event {
   }
 }
 
-export const GET_DEFAULT_LINE_COLOR = () =>
-  ThemeObserver.mode === 'dark' ? LineColor.White : LineColor.Black;
+export const GET_DEFAULT_LINE_COLOR = (theme: ColorScheme) => {
+  return theme === ColorScheme.Dark ? LineColor.White : LineColor.Black;
+};
 
 export function isTransparent(color: string) {
   return color.toLowerCase().endsWith('transparent');

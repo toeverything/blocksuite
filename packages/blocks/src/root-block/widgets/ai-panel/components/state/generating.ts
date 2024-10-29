@@ -1,3 +1,5 @@
+import type { ColorScheme } from '@blocksuite/affine-model';
+
 import {
   AIStarIconWithAnimation,
   AIStopIcon,
@@ -78,6 +80,7 @@ export class AIPanelGenerating extends WithDisposable(LitElement) {
       ${stages && stages.length > 0
         ? html`<generating-placeholder
             .height=${height}
+            .theme=${this.theme}
             .loadingProgress=${this.loadingProgress}
             .stages=${stages}
             .showHeader=${!this.withAnswer}
@@ -106,6 +109,9 @@ export class AIPanelGenerating extends WithDisposable(LitElement) {
 
   @property({ attribute: false })
   accessor stopGenerating!: () => void;
+
+  @property({ attribute: false })
+  accessor theme!: ColorScheme;
 
   @property({ attribute: false })
   accessor withAnswer!: boolean;
