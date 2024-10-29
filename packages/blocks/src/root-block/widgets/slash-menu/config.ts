@@ -55,12 +55,11 @@ import { toggleEmbedCardCreateModal } from '../../../_common/components/embed-ca
 import { textConversionConfigs } from '../../../_common/configs/text-conversion.js';
 import { addSiblingAttachmentBlocks } from '../../../attachment-block/utils.js';
 import { getSurfaceBlock } from '../../../surface-ref-block/utils.js';
+import { formatDate, formatTime } from '../../utils/misc.js';
 import { type SlashMenuTooltip, slashMenuToolTips } from './tooltips/index.js';
 import {
   createConversionItem,
   createTextFormatItem,
-  formatDate,
-  formatTime,
   insideEdgelessText,
   tryRemoveEmptyLine,
 } from './utils.js';

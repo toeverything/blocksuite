@@ -9,6 +9,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 import { when } from 'lit/directives/when.js';
 
 import type {
+  KeyboardIconType,
   KeyboardToolbarConfig,
   KeyboardToolbarContext,
   KeyboardToolbarItem,
@@ -77,6 +78,7 @@ export class AffineKeyboardToolbar extends SignalWatcher(
         scrollCurrentBlockIntoView(this.rootComponent.std);
       }
     }
+    this._lastActiveItem$.value = item;
   };
 
   private _handleKeyboardButtonClicked = () => {
@@ -99,6 +101,8 @@ export class AffineKeyboardToolbar extends SignalWatcher(
 
   private readonly _keyboardController = new VirtualKeyboardController(this);
 
+  private readonly _lastActiveItem$ = signal<KeyboardToolbarItem | null>(null);
+
   /** This field records the panel static height, which dose not aim to control the panel opening */
   private readonly _panelHeight$ = signal(0);
 
@@ -110,7 +114,14 @@ export class AffineKeyboardToolbar extends SignalWatcher(
 
   private get _context(): KeyboardToolbarContext {
     return {
+      std: this.rootComponent.std,
       rootComponent: this.rootComponent,
+      closeToolbar: () => {
+        this._showToolbar$.value = false;
+      },
+      closeToolPanel: () => {
+        this._closeToolPanel();
+      },
     };
   }
 
@@ -133,7 +144,11 @@ export class AffineKeyboardToolbar extends SignalWatcher(
       }
     }
 
-    return items;
+    return items.filter(item =>
+      isKeyboardToolBarActionItem(item)
+        ? (item.showWhen?.(this._context) ?? true)
+        : true
+    );
   }
 
   private get _isPanelOpened() {
@@ -144,27 +159,43 @@ export class AffineKeyboardToolbar extends SignalWatcher(
     return this._path$.value.length > 0;
   }
 
+  private _renderIcon(icon: KeyboardIconType) {
+    return typeof icon === 'function' ? icon(this._context) : icon;
+  }
+
   private _renderItem(item: KeyboardToolbarItem, index: number) {
     let icon = item.icon;
     let style = styleMap({});
+    const disabled =
+      ('disableWhen' in item && item.disableWhen?.(this._context)) ?? false;
 
-    if (isKeyboardToolPanelConfig(item)) {
+    if (isKeyboardToolBarActionItem(item)) {
+      const background =
+        typeof item.background === 'function'
+          ? item.background(this._context)
+          : item.background;
+      if (background)
+        style = styleMap({
+          background: background,
+        });
+    } else if (isKeyboardToolPanelConfig(item)) {
       const { activeIcon, activeBackground } = item;
       const active = this._currentPanelIndex$.value === index;
 
       if (active && activeIcon) icon = activeIcon;
       if (active && activeBackground)
-        style = styleMap({ backgroundColor: activeBackground });
+        style = styleMap({ background: activeBackground });
     }
 
     return html`<icon-button
       size="36px"
       style=${style}
+      ?disabled=${disabled}
       @click=${() => {
         this._handleItemClick(item, index);
       }}
     >
-      ${icon}
+      ${this._renderIcon(icon)}
     </icon-button>`;
   }
 

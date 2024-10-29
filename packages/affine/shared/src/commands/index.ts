@@ -9,6 +9,7 @@ export {
   copySelectedModelsCommand,
   deleteSelectedModelsCommand,
   draftSelectedModelsCommand,
+  duplicateSelectedModelsCommand,
   getSelectedModelsCommand,
   retainFirstModelCommand,
 } from './model-crud/index.js';
