@@ -21,6 +21,15 @@ export class EdgelessTextBlockComponent extends GfxBlockComponent<EdgelessTextBl
       word-break: keep-all !important;
       text-wrap: nowrap !important;
     }
+
+    .edgeless-text-block-container affine-paragraph,
+    affine-list {
+      color: var(--edgeless-text-color);
+      font-family: var(--edgeless-text-font-family);
+      font-style: var(--edgeless-text-font-style);
+      font-weight: var(--edgeless-text-font-weight);
+      text-align: var(--edgeless-text-text-align);
+    }
   `;
 
   private _resizeObserver = new ResizeObserver(() => {
@@ -277,11 +286,11 @@ export class EdgelessTextBlockComponent extends GfxBlockComponent<EdgelessTextBl
     );
 
     const style = styleMap({
-      color,
-      fontFamily: TextUtils.wrapFontFamily(fontFamily),
-      fontStyle,
-      fontWeight,
-      textAlign,
+      '--edgeless-text-color': color,
+      '--edgeless-text-font-family': TextUtils.wrapFontFamily(fontFamily),
+      '--edgeless-text-font-style': fontStyle,
+      '--edgeless-text-font-weight': fontWeight,
+      '--edgeless-text-text-align': textAlign,
     });
 
     return html`
