@@ -27,7 +27,6 @@ import {
   LinkIcon,
   NewDocIcon,
   NowIcon,
-  PasteIcon,
   TodayIcon,
   TomorrowIcon,
   YesterdayIcon,
@@ -45,7 +44,7 @@ import {
 } from '@blocksuite/affine-shared/utils';
 import { viewPresets } from '@blocksuite/data-view/view-presets';
 import { assertType } from '@blocksuite/global/utils';
-import { GroupingIcon, TeXIcon } from '@blocksuite/icons/lit';
+import { DualLinkIcon, GroupingIcon, TeXIcon } from '@blocksuite/icons/lit';
 import { Slice, Text } from '@blocksuite/store';
 
 import type { DataViewBlockComponent } from '../../../data-view-block/index.js';
@@ -659,7 +658,7 @@ export const defaultSlashMenuConfig: SlashMenuConfig = {
     {
       name: 'Copy',
       description: 'Copy this line to clipboard.',
-      icon: PasteIcon,
+      icon: CopyIcon,
       tooltip: slashMenuToolTips['Copy'],
       action: ({ rootComponent, model }) => {
         const slice = Slice.fromModels(rootComponent.std.doc, [model]);
@@ -677,7 +676,7 @@ export const defaultSlashMenuConfig: SlashMenuConfig = {
     {
       name: 'Duplicate',
       description: 'Create a duplicate of this line.',
-      icon: CopyIcon,
+      icon: DualLinkIcon({ width: '20', height: '20' }),
       tooltip: slashMenuToolTips['Copy'],
       action: ({ rootComponent, model }) => {
         if (!model.text || !(model.text instanceof Text)) {
