@@ -1122,6 +1122,9 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
             context.openNode(child, 'children').closeNode();
           });
           context.closeNode();
+          context.cleanGlobalContextStack('hast:table:column');
+          context.cleanGlobalContextStack('hast:table:rows');
+          context.cleanGlobalContextStack('hast:table:children');
           break;
         }
         case 'th': {
