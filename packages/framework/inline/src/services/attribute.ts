@@ -21,11 +21,18 @@ export class AttributeService<TextAttributes extends BaseTextAttributes> {
   getFormat = (inlineRange: InlineRange, loose = false): TextAttributes => {
     const deltas = this.editor.deltaService
       .getDeltasByInlineRange(inlineRange)
-      .filter(
-        ([_, position]) =>
-          position.index + position.length > inlineRange.index &&
-          position.index <= inlineRange.index + inlineRange.length
-      );
+      .filter(([_, position]) => {
+        const deltaStart = position.index;
+        const deltaEnd = position.index + position.length;
+        const inlineStart = inlineRange.index;
+        const inlineEnd = inlineRange.index + inlineRange.length;
+
+        if (inlineStart === inlineEnd) {
+          return deltaStart < inlineStart && inlineStart <= deltaEnd;
+        } else {
+          return deltaEnd > inlineStart && deltaStart <= inlineEnd;
+        }
+      });
     const maybeAttributesList = deltas.map(([delta]) => delta.attributes);
     if (loose) {
       return maybeAttributesList.reduce(
