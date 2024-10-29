@@ -118,7 +118,7 @@ export class EdgelessClipboardController extends PageClipboard {
 
         if (selectedIds.length === 0) return false;
 
-        this._onCopy(ctx, surfaceSelections);
+        this._onCopy(ctx, surfaceSelections).catch(console.error);
         return;
       },
       { global: true }
@@ -135,13 +135,13 @@ export class EdgelessClipboardController extends PageClipboard {
     this.host.handleEvent(
       'cut',
       ctx => {
-        this._onCut(ctx);
+        this._onCut(ctx).catch(console.error);
       },
       { global: true }
     );
   };
 
-  private _onCopy = (
+  private _onCopy = async (
     _context: UIEventStateContext,
     surfaceSelection: SurfaceSelection[]
   ) => {
@@ -160,18 +160,16 @@ export class EdgelessClipboardController extends PageClipboard {
       return;
     }
 
-    this.std.clipboard
-      .writeToClipboard(async _items => {
-        const data = await prepareClipboardData(elements, this.std);
-        return {
-          ..._items,
-          [BLOCKSUITE_SURFACE]: JSON.stringify(data),
-        };
-      })
-      .catch(console.error);
+    await this.std.clipboard.writeToClipboard(async _items => {
+      const data = await prepareClipboardData(elements, this.std);
+      return {
+        ..._items,
+        [BLOCKSUITE_SURFACE]: JSON.stringify(data),
+      };
+    });
   };
 
-  private _onCut = (_context: UIEventStateContext) => {
+  private _onCut = async (_context: UIEventStateContext) => {
     const { surfaceSelections, selectedElements } = this.selectionManager;
 
     if (selectedElements.length === 0) return;
@@ -179,7 +177,7 @@ export class EdgelessClipboardController extends PageClipboard {
     const event = _context.get('clipboardState').event;
     event.preventDefault();
 
-    this._onCopy(_context, surfaceSelections);
+    await this._onCopy(_context, surfaceSelections);
 
     if (surfaceSelections[0]?.editing) {
       // use build-in cut handler in rich-text when cut in surface text element
