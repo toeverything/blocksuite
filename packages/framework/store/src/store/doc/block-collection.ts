@@ -38,7 +38,7 @@ export type GetDocOptions = {
 };
 
 export class BlockCollection {
-  private _awarenessUpdateDisposable: Disposable;
+  private _awarenessUpdateDisposable: Disposable | null = null;
 
   private readonly _canRedo$ = signal(false);
 
@@ -239,13 +239,6 @@ export class BlockCollection {
     this._collection = collection;
     this._idGenerator = idGenerator;
     this._docCRUD = new DocCRUD(this._yBlocks, collection.schema);
-
-    this._awarenessUpdateDisposable = this.awarenessStore.slots.update.on(
-      () => {
-        // change readonly state will affect the undo/redo state
-        this._updateCanUndoRedoSignals();
-      }
-    );
   }
 
   private _getReadonlyKey(readonly?: boolean): 'true' | 'false' | 'undefined' {
@@ -330,7 +323,7 @@ export class BlockCollection {
 
   dispose() {
     this.slots.historyUpdated.dispose();
-    this._awarenessUpdateDisposable.dispose();
+    this._awarenessUpdateDisposable?.dispose();
 
     if (this.ready) {
       this._yBlocks.unobserveDeep(this._handleYEvents);
@@ -380,6 +373,13 @@ export class BlockCollection {
     this._yBlocks.forEach((_, id) => {
       this._handleYBlockAdd(id);
     });
+
+    this._awarenessUpdateDisposable = this.awarenessStore.slots.update.on(
+      () => {
+        // change readonly state will affect the undo/redo state
+        this._updateCanUndoRedoSignals();
+      }
+    );
 
     initFn?.();
 
