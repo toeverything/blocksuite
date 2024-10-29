@@ -1,3 +1,4 @@
+import type { IndentContext } from '@blocksuite/affine-shared/types';
 import type { Command } from '@blocksuite/block-std';
 
 import { focusTextModel } from '@blocksuite/affine-components/rich-text';
@@ -5,13 +6,10 @@ import { matchFlavours } from '@blocksuite/affine-shared/utils';
 
 import { correctNumberedListsOrderToPrev } from './utils.js';
 
-export const dedentListCommand: Command<
+export const canDedentListCommand: Command<
   never,
-  never,
-  {
-    blockId?: string;
-    inlineIndex?: number;
-  }
+  'indentContext',
+  Partial<Omit<IndentContext, 'flavour' | 'type'>>
 > = (ctx, next) => {
   let { blockId, inlineIndex } = ctx;
   const { std } = ctx;
@@ -57,7 +55,6 @@ export const dedentListCommand: Command<
    */
   const model = doc.getBlock(blockId)?.model;
   if (!model || !matchFlavours(model, ['affine:list'])) {
-    console.error(`block ${blockId} is not a list block`);
     return;
   }
   /**
@@ -65,7 +62,6 @@ export const dedentListCommand: Command<
    */
   const parent = doc.getParent(model);
   if (!parent) {
-    console.error(`block ${blockId} has no parent`);
     return;
   }
   if (doc.readonly || parent.role !== 'content') {
@@ -77,7 +73,6 @@ export const dedentListCommand: Command<
    */
   const grandParent = doc.getParent(parent);
   if (!grandParent) {
-    console.error(`block ${blockId} has no grand parent`);
     return;
   }
   /**
@@ -85,9 +80,44 @@ export const dedentListCommand: Command<
    */
   const modelIndex = parent.children.indexOf(model);
   if (modelIndex === -1) {
-    console.error(`block ${blockId} is not a child of its parent`);
     return;
   }
+
+  return next({
+    indentContext: {
+      blockId,
+      inlineIndex,
+      type: 'dedent',
+      flavour: 'affine:list',
+    },
+  });
+};
+
+export const dedentListCommand: Command<'indentContext'> = (ctx, next) => {
+  const { indentContext: dedentContext, std } = ctx;
+  const { doc } = std;
+
+  if (
+    !dedentContext ||
+    dedentContext.type !== 'dedent' ||
+    dedentContext.flavour !== 'affine:list'
+  ) {
+    console.warn(
+      'you need to use `canDedentList` command before running `dedentList` command'
+    );
+    return;
+  }
+
+  const { blockId, inlineIndex } = dedentContext;
+
+  const model = doc.getBlock(blockId)?.model;
+  if (!model) return;
+
+  const parent = doc.getParent(model);
+  if (!parent) return;
+
+  const grandParent = doc.getParent(parent);
+  if (!grandParent) return;
 
   doc.captureSync();
 

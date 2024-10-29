@@ -44,10 +44,14 @@ export const ListKeymapExtension = KeymapExtension(
         if (!text) return false;
 
         ctx.get('keyboardState').raw.preventDefault();
-        std.command.exec('indentList', {
-          blockId: text.from.blockId,
-          inlineIndex: text.from.index,
-        });
+        std.command
+          .chain()
+          .canIndentList({
+            blockId: text.from.blockId,
+            inlineIndex: text.from.index,
+          })
+          .indentList()
+          .run();
         return true;
       },
       'Shift-Tab': ctx => {
@@ -61,10 +65,14 @@ export const ListKeymapExtension = KeymapExtension(
         if (!text) return false;
 
         ctx.get('keyboardState').raw.preventDefault();
-        std.command.exec('dedentList', {
-          blockId: text.from.blockId,
-          inlineIndex: text.from.index,
-        });
+        std.command
+          .chain()
+          .canDedentList({
+            blockId: text.from.blockId,
+            inlineIndex: text.from.index,
+          })
+          .dedentList()
+          .run();
         return true;
       },
       Backspace: ctx => {
