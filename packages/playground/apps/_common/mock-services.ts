@@ -118,34 +118,6 @@ export function mockParseDocUrlService(collection: DocCollection) {
   return parseDocUrlService;
 }
 
-export class MockAppTheme {
-  private observer: MutationObserver;
-
-  theme$ = signal(ColorScheme.Light);
-
-  constructor() {
-    const COLOR_SCHEMES: string[] = Object.values(ColorScheme);
-    this.observer = new MutationObserver(() => {
-      const mode = document.documentElement.dataset.theme;
-      if (!mode) return;
-      if (!COLOR_SCHEMES.includes(mode)) return;
-      if (mode === this.theme$.value) return;
-
-      this.theme$.value = mode as ColorScheme;
-    });
-    this.observer.observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ['data-theme'],
-    });
-  }
-
-  destroy() {
-    this.observer.disconnect();
-  }
-}
-
-export const mockAppTheme = new MockAppTheme();
-
 export class MockEdgelessTheme {
   theme$ = signal(ColorScheme.Light);
 
@@ -165,9 +137,6 @@ export class MockEdgelessTheme {
 export const mockEdgelessTheme = new MockEdgelessTheme();
 
 export const themeExtension: ThemeExtension = {
-  getAppTheme() {
-    return mockAppTheme.theme$;
-  },
   getEdgelessTheme() {
     return mockEdgelessTheme.theme$;
   },

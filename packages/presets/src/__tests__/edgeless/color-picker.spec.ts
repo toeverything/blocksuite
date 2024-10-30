@@ -20,26 +20,26 @@ describe('theme service', () => {
 
     edgeless.gfx.tool.setTool('default');
 
+    const themeService = edgeless.gfx.std.get(ThemeProvider);
+    themeService.theme$.value = ColorScheme.Light;
+
     return cleanup;
   });
 
   test('switches theme', () => {
     const themeService = edgeless.gfx.std.get(ThemeProvider);
-    expect(themeService.appTheme).toBe(ColorScheme.Light);
-    expect(themeService.edgelessTheme).toBe(ColorScheme.Light);
+    expect(themeService.theme).toBe(ColorScheme.Light);
 
-    themeService.app$.value = ColorScheme.Dark;
-    expect(themeService.appTheme).toBe(ColorScheme.Dark);
-    expect(themeService.edgelessTheme).toBe(ColorScheme.Light);
+    themeService.theme$.value = ColorScheme.Dark;
+    expect(themeService.theme).toBe(ColorScheme.Dark);
 
-    themeService.edgeless$.value = ColorScheme.Dark;
-    expect(themeService.appTheme).toBe(ColorScheme.Dark);
-    expect(themeService.edgelessTheme).toBe(ColorScheme.Dark);
+    themeService.theme$.value = ColorScheme.Light;
+    expect(themeService.theme).toBe(ColorScheme.Light);
   });
 
   test('generates a color property', () => {
     const themeService = edgeless.gfx.std.get(ThemeProvider);
-    expect(themeService.edgelessTheme).toBe(ColorScheme.Light);
+    expect(themeService.theme).toBe(ColorScheme.Light);
 
     expect(themeService.generateColorProperty('--affine-hover-color')).toBe(
       'var(--affine-hover-color)'
@@ -57,8 +57,8 @@ describe('theme service', () => {
       themeService.generateColorProperty({ dark: 'white', light: 'black' })
     ).toBe('black');
 
-    themeService.edgeless$.value = ColorScheme.Dark;
-    expect(themeService.edgelessTheme).toBe(ColorScheme.Dark);
+    themeService.theme$.value = ColorScheme.Dark;
+    expect(themeService.theme).toBe(ColorScheme.Dark);
 
     expect(
       themeService.generateColorProperty({ dark: 'white', light: 'black' })
@@ -72,7 +72,7 @@ describe('theme service', () => {
 
   test('gets a color value', () => {
     const themeService = edgeless.gfx.std.get(ThemeProvider);
-    expect(themeService.edgelessTheme).toBe(ColorScheme.Light);
+    expect(themeService.theme).toBe(ColorScheme.Light);
 
     expect(themeService.getColorValue('--affine-transparent')).toBe(
       '--affine-transparent'
@@ -101,8 +101,8 @@ describe('theme service', () => {
       themeService.getColorValue({ normal: 'grey' }, undefined, true)
     ).toBe('grey');
 
-    themeService.edgeless$.value = ColorScheme.Dark;
-    expect(themeService.edgelessTheme).toBe(ColorScheme.Dark);
+    themeService.theme$.value = ColorScheme.Dark;
+    expect(themeService.theme).toBe(ColorScheme.Dark);
 
     expect(
       themeService.getColorValue('--affine-hover-color', 'transparent', true)

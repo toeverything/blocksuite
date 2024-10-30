@@ -23,8 +23,8 @@ export const ThemeExtensionIdentifier = createIdentifier<ThemeExtension>(
 );
 
 export interface ThemeExtension {
-  getAppTheme: () => Signal<ColorScheme>;
-  getEdgelessTheme: (docId?: string) => Signal<ColorScheme>;
+  getAppTheme?: () => Signal<ColorScheme>;
+  getEdgelessTheme?: (docId?: string) => Signal<ColorScheme>;
 }
 
 export function OverrideThemeExtension(service: ThemeExtension): ExtensionType {
@@ -44,18 +44,10 @@ export class ThemeService extends Extension {
 
   edgeless$: Signal<ColorScheme>;
 
-  get appTheme() {
-    return this.app$.peek();
-  }
-
-  get edgelessTheme() {
-    return this.edgeless$.peek();
-  }
-
   get theme() {
     return this.docMode.getEditorMode() === 'page'
-      ? this.appTheme
-      : this.edgelessTheme;
+      ? this.app$.peek()
+      : this.edgeless$.peek();
   }
 
   get theme$() {
@@ -68,8 +60,8 @@ export class ThemeService extends Extension {
   ) {
     super();
     const extension = this.std.getOptional(ThemeExtensionIdentifier);
-    this.app$ = extension?.getAppTheme() || signal(ColorScheme.Light);
-    this.edgeless$ = extension?.getEdgelessTheme() || signal(ColorScheme.Light);
+    this.app$ = extension?.getAppTheme?.() || themeObserver.theme$;
+    this.edgeless$ = extension?.getEdgelessTheme?.() || themeObserver.theme$;
   }
 
   static override setup(di: Container) {
@@ -157,7 +149,7 @@ export class ThemeService extends Extension {
     return result ?? TRANSPARENT;
   }
 
-  getCssVariableColor(property: string, theme = this.edgelessTheme) {
+  getCssVariableColor(property: string, theme = this.theme) {
     if (property.startsWith('--')) {
       if (property.endsWith(TRANSPARENT)) {
         return TRANSPARENT;
@@ -172,6 +164,34 @@ export class ThemeService extends Extension {
     return property;
   }
 }
+
+class ThemeObserver {
+  private observer: MutationObserver;
+
+  theme$ = signal(ColorScheme.Light);
+
+  constructor() {
+    const COLOR_SCHEMES: string[] = Object.values(ColorScheme);
+    this.observer = new MutationObserver(() => {
+      const mode = document.documentElement.dataset.theme;
+      if (!mode) return;
+      if (!COLOR_SCHEMES.includes(mode)) return;
+      if (mode === this.theme$.value) return;
+
+      this.theme$.value = mode as ColorScheme;
+    });
+    this.observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['data-theme'],
+    });
+  }
+
+  destroy() {
+    this.observer.disconnect();
+  }
+}
+
+const themeObserver = new ThemeObserver();
 
 const toolbarColorKeys: Array<keyof AffineCssVariables> = [
   '--affine-background-overlay-panel-color',

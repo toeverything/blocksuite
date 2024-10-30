@@ -45,9 +45,10 @@ export class EmbedEdgelessSyncedDocBlockComponent extends toEdgelessEmbedBlock(
     const themeService = this.std.get(ThemeProvider);
     const themeExtension = this.std.getOptional(ThemeExtensionIdentifier);
     const appTheme = themeService.app$.value;
-    const edgelessTheme =
-      themeExtension?.getEdgelessTheme(this.syncedDoc?.id).value ||
-      themeService.edgeless$.value;
+    let edgelessTheme = themeService.edgeless$.value;
+    if (themeExtension?.getEdgelessTheme && this.syncedDoc?.id) {
+      edgelessTheme = themeExtension.getEdgelessTheme(this.syncedDoc.id).value;
+    }
     const theme = this.isPageMode ? appTheme : edgelessTheme;
 
     const isSelected = !!this.selected?.is('block');
