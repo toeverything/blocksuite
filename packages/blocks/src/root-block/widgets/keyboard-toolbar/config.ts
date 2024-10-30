@@ -32,7 +32,6 @@ import {
   DeleteIcon,
   DividerIcon,
   DuplicateIcon,
-  FigmaDuotoneIcon,
   FontIcon,
   FrameIcon,
   GithubIcon,
@@ -68,6 +67,7 @@ import { addSiblingAttachmentBlocks } from '../../../attachment-block/utils.js';
 import { getSurfaceBlock } from '../../../surface-ref-block/utils.js';
 import { formatDate, formatTime } from '../../utils/misc.js';
 import {
+  FigmaDuotoneIcon,
   HeadingIcon,
   HighLightDuotoneIcon,
   TextBackgroundDuotoneIcon,
@@ -457,7 +457,7 @@ const contentMediaToolGroup: KeyboardToolPanelGroup = {
     },
     {
       name: 'Figma',
-      icon: FigmaDuotoneIcon(TOOL_PANEL_ICON_STYLE),
+      icon: FigmaDuotoneIcon,
       showWhen: ({ std }) =>
         std.doc.schema.flavourSchemaMap.has('affine:embed-figma'),
       action: async ({ std }) => {
