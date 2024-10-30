@@ -5,7 +5,10 @@ import type {
 import type { GfxToolsFullOptionValue } from '@blocksuite/block-std/gfx';
 import type { Bound } from '@blocksuite/global/utils';
 
-import { EditPropsStore } from '@blocksuite/affine-shared/services';
+import {
+  EditPropsStore,
+  ThemeProvider,
+} from '@blocksuite/affine-shared/services';
 import { SignalWatcher } from '@blocksuite/global/utils';
 import { computed } from '@preact/signals-core';
 import { css, html, LitElement, nothing } from 'lit';
@@ -286,10 +289,11 @@ export class EdgelessMindmapToolButton extends EdgelessToolbarToolMixin(
   }
 
   override render() {
-    const { popper, theme } = this;
-    const basketIcon = theme === 'light' ? basketIconLight : basketIconDark;
+    const { popper } = this;
+    const appTheme = this.edgeless.std.get(ThemeProvider).app$.value;
+    const basketIcon = appTheme === 'light' ? basketIconLight : basketIconDark;
     const glassBg =
-      theme === 'light' ? 'rgba(255,255,255,0.5)' : 'rgba(74, 74, 74, 0.6)';
+      appTheme === 'light' ? 'rgba(255,255,255,0.5)' : 'rgba(74, 74, 74, 0.6)';
 
     const { cancelled, dragOut, draggingElement } =
       this.draggableController?.states || {};

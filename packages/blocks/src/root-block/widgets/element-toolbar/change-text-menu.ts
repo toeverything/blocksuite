@@ -128,7 +128,7 @@ function getMostCommonColor(
       : color;
   });
   const max = maxBy(Object.entries(colors), ([_k, count]) => count);
-  return max ? (max[0] as string) : GET_DEFAULT_LINE_COLOR();
+  return max ? (max[0] as string) : GET_DEFAULT_LINE_COLOR(colorScheme);
 }
 
 function getMostCommonFontFamily(elements: BlockSuite.EdgelessTextModelType[]) {

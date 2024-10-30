@@ -1,6 +1,6 @@
 {
   "name": "@blocksuite/affine-widget-scroll-anchoring",
-  "version": "0.17.22",
+  "version": "0.17.23",
   "description": "Affine scroll anchoring widget.",
   "type": "module",
   "repository": {
@@ -24,7 +24,7 @@
     "@blocksuite/block-std": "workspace:*",
     "@blocksuite/global": "workspace:*",
     "@preact/signals-core": "^1.8.0",
-    "@toeverything/theme": "^1.0.8",
+    "@toeverything/theme": "^1.0.15",
     "lit": "^3.2.0"
   },
   "exports": {

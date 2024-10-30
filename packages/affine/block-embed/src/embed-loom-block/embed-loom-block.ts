@@ -1,6 +1,7 @@
 import type { EmbedLoomModel, EmbedLoomStyles } from '@blocksuite/affine-model';
 
 import { OpenIcon } from '@blocksuite/affine-components/icons';
+import { ThemeProvider } from '@blocksuite/affine-shared/services';
 import { html } from 'lit';
 import { property, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
@@ -119,7 +120,8 @@ export class EmbedLoomBlockComponent extends EmbedBlockComponent<
     this._cardStyle = style;
 
     const loading = this.loading;
-    const { LoadingIcon, EmbedCardBannerIcon } = getEmbedCardIcons();
+    const theme = this.std.get(ThemeProvider).theme;
+    const { LoadingIcon, EmbedCardBannerIcon } = getEmbedCardIcons(theme);
     const titleIcon = loading ? LoadingIcon : LoomIcon;
     const titleText = loading ? 'Loading...' : title;
     const descriptionText = loading ? '' : description;

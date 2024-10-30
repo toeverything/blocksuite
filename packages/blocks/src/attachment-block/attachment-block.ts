@@ -10,7 +10,7 @@ import {
   type AttachmentBlockModel,
   AttachmentBlockStyles,
 } from '@blocksuite/affine-model';
-import { ThemeObserver } from '@blocksuite/affine-shared/theme';
+import { ThemeProvider } from '@blocksuite/affine-shared/services';
 import { humanFileSize } from '@blocksuite/affine-shared/utils';
 import { Slice } from '@blocksuite/store';
 import { flip, offset } from '@floating-ui/dom';
@@ -145,7 +145,9 @@ export class AttachmentBlockComponent extends CaptionedBlockComponent<
     });
 
     // Workaround for https://github.com/toeverything/blocksuite/issues/4724
-    this.disposables.add(ThemeObserver.subscribe(() => this.requestUpdate()));
+    this.disposables.add(
+      this.std.get(ThemeProvider).theme$.subscribe(() => this.requestUpdate())
+    );
 
     // this is required to prevent iframe from capturing pointer events
     this.disposables.add(
@@ -196,7 +198,8 @@ export class AttachmentBlockComponent extends CaptionedBlockComponent<
     const { name, size, style } = this.model;
     const cardStyle = style ?? AttachmentBlockStyles[1];
 
-    const { LoadingIcon } = getEmbedCardIcons();
+    const theme = this.std.get(ThemeProvider).theme;
+    const { LoadingIcon } = getEmbedCardIcons(theme);
 
     const titleIcon = this.loading ? LoadingIcon : AttachmentIcon16;
     const titleText = this.loading ? 'Loading...' : name;

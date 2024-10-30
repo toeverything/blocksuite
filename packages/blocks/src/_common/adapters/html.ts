@@ -3,11 +3,9 @@ import type { DeltaInsert } from '@blocksuite/inline';
 import type { Element, Root } from 'hast';
 
 import {
-  ColorScheme,
   DEFAULT_NOTE_BACKGROUND_COLOR,
   NoteDisplayMode,
 } from '@blocksuite/affine-model';
-import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import { getFilenameFromContentDisposition } from '@blocksuite/affine-shared/utils';
 import { sha } from '@blocksuite/global/utils';
 import {
@@ -793,10 +791,7 @@ export class HtmlAdapter extends BaseAdapter<Html> {
           const code = text.map(delta => delta.insert).join('');
           const hast = await codeToHast(code, {
             lang: matchedLang,
-            theme:
-              ThemeObserver.mode === ColorScheme.Dark
-                ? 'dark-plus'
-                : 'light-plus',
+            theme: 'light-plus',
           });
 
           // @ts-ignore

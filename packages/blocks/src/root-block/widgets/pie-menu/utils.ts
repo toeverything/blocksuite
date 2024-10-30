@@ -2,7 +2,6 @@ import type { ToolController } from '@blocksuite/block-std/gfx';
 import type { IVec } from '@blocksuite/global/utils';
 
 import { EditPropsStore } from '@blocksuite/affine-shared/services';
-import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 
 import type {
   ActionFunction,
@@ -34,7 +33,7 @@ export function getActiveShapeColor(type: 'fill' | 'stroke') {
           'shape:roundedRect'
         ];
       const color = type == 'fill' ? props.fillColor : props.strokeColor;
-      return ThemeObserver.getColorValue(color);
+      return color.toString();
     }
     return '';
   };
@@ -47,7 +46,7 @@ export function getActiveConnectorStrokeColor({
     const props =
       rootComponent.std.get(EditPropsStore).lastProps$.value.connector;
     const color = props.stroke;
-    return ThemeObserver.getColorValue(color);
+    return color.toString();
   }
   return '';
 }

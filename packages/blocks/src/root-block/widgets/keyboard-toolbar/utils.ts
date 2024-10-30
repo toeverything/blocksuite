@@ -21,12 +21,31 @@ export class VirtualKeyboardController implements ReactiveController {
 
   private readonly _keyboardHeight$ = signal(0);
 
+  private readonly _keyboardOpened$ = signal(false);
+
   private readonly _updateKeyboardHeight = () => {
-    if (navigator.virtualKeyboard) {
-      this._keyboardHeight$.value =
-        navigator.virtualKeyboard.boundingRect.height;
+    const { virtualKeyboard } = navigator;
+    if (virtualKeyboard) {
+      this._keyboardOpened$.value = virtualKeyboard.boundingRect.height > 0;
+      this._keyboardHeight$.value = virtualKeyboard.boundingRect.height;
     } else if (visualViewport) {
-      this._keyboardHeight$.value = window.innerHeight - visualViewport.height;
+      /**
+       * ┌───────────────┐ - window top
+       * │               │
+       * │               │
+       * │               │
+       * │               │
+       * │               │
+       * └───────────────┘ - keyboard top        --
+       * │               │                       │ keyboard height in layout viewport
+       * └───────────────┘ - page(html) bottom   --
+       * │               │                       │ visualViewport.offsetTop
+       * └───────────────┘ - window bottom       --
+       */
+      this._keyboardOpened$.value =
+        window.innerHeight - visualViewport.height > 0;
+      this._keyboardHeight$.value =
+        window.innerHeight - visualViewport.height - visualViewport.offsetTop;
     } else {
       notSupportedWarning();
     }
@@ -60,12 +79,16 @@ export class VirtualKeyboardController implements ReactiveController {
     }
   };
 
+  /**
+   * Return the height of keyboard in layout viewport
+   * see comment in the `_updateKeyboardHeight` method
+   */
   get keyboardHeight() {
     return this._keyboardHeight$.value;
   }
 
   get opened() {
-    return this.keyboardHeight > 0;
+    return this._keyboardOpened$.value;
   }
 
   constructor(

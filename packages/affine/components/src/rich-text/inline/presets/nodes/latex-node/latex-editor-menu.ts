@@ -1,7 +1,8 @@
 import type { Y } from '@blocksuite/store';
 
 import { ColorScheme } from '@blocksuite/affine-model';
-import { ThemeObserver, unsafeCSSVar } from '@blocksuite/affine-shared/theme';
+import { ThemeProvider } from '@blocksuite/affine-shared/services';
+import { unsafeCSSVar } from '@blocksuite/affine-shared/theme';
 import { type BlockStdScope, ShadowlessElement } from '@blocksuite/block-std';
 import { noop, SignalWatcher, WithDisposable } from '@blocksuite/global/utils';
 import { DoneIcon } from '@blocksuite/icons/lit';
@@ -95,10 +96,8 @@ export class LatexEditorMenu extends SignalWatcher(
   }
 
   private _updateHighlightTokens(text: string) {
-    const theme =
-      ThemeObserver.instance.mode$.value === ColorScheme.Dark
-        ? 'dark-plus'
-        : 'light-plus';
+    const editorTheme = this.std.get(ThemeProvider).theme;
+    const theme = editorTheme === ColorScheme.Dark ? 'dark-plus' : 'light-plus';
 
     codeToTokensBase(text, {
       lang: 'latex',
@@ -136,7 +135,7 @@ export class LatexEditorMenu extends SignalWatcher(
     );
 
     this.disposables.add(
-      ThemeObserver.subscribe(() => {
+      this.std.get(ThemeProvider).theme$.subscribe(() => {
         this._updateHighlightTokens(this.yText.toString());
       })
     );

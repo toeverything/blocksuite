@@ -1,4 +1,3 @@
-import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 import { INLINE_ROOT_ATTR, type InlineRootElement } from '@blocksuite/inline';
 
 import type { TextSelection } from '../selection/index.js';
@@ -101,10 +100,7 @@ export class RangeManager extends LifeCycleWatcher {
 
     const firstElement = this.getClosestBlock(range.startContainer);
     if (!firstElement) {
-      throw new BlockSuiteError(
-        ErrorCode.SelectionError,
-        'First element not found'
-      );
+      return [];
     }
 
     if (mode === 'flat') {

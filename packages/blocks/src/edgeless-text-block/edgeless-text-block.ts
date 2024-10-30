@@ -2,7 +2,7 @@ import type { EdgelessTextBlockModel } from '@blocksuite/affine-model';
 import type { BlockComponent } from '@blocksuite/block-std';
 
 import { TextUtils } from '@blocksuite/affine-block-surface';
-import { ThemeObserver } from '@blocksuite/affine-shared/theme';
+import { ThemeProvider } from '@blocksuite/affine-shared/services';
 import { matchFlavours } from '@blocksuite/affine-shared/utils';
 import { GfxBlockComponent } from '@blocksuite/block-std';
 import { Bound } from '@blocksuite/global/utils';
@@ -280,10 +280,9 @@ export class EdgelessTextBlockComponent extends GfxBlockComponent<EdgelessTextBl
 
   override renderPageContent() {
     const { fontFamily, fontStyle, fontWeight, textAlign } = this.model;
-    const color = ThemeObserver.generateColorProperty(
-      this.model.color,
-      '#000000'
-    );
+    const color = this.std
+      .get(ThemeProvider)
+      .generateColorProperty(this.model.color, '#000000');
 
     const style = styleMap({
       '--edgeless-text-color': color,

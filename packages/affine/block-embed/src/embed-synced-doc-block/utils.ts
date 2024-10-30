@@ -7,7 +7,7 @@ import {
   LightLoadingIcon,
   ReloadIcon,
 } from '@blocksuite/affine-components/icons';
-import { ThemeObserver } from '@blocksuite/affine-shared/theme';
+import { ColorScheme } from '@blocksuite/affine-model';
 
 import {
   DarkSyncedDocDeletedBanner,
@@ -32,10 +32,10 @@ type SyncedCardImages = {
 };
 
 export function getSyncedDocIcons(
+  theme: ColorScheme,
   editorMode: 'page' | 'edgeless'
 ): SyncedCardImages {
-  const theme = ThemeObserver.mode;
-  if (theme === 'light') {
+  if (theme === ColorScheme.Light) {
     return {
       LoadingIcon: LightLoadingIcon,
       SyncedDocIcon: editorMode === 'page' ? EmbedPageIcon : EmbedEdgelessIcon,

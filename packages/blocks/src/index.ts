@@ -99,7 +99,6 @@ export {
   FontFamilyVariables,
   SizeVariables,
   StyleVariables,
-  ThemeObserver,
 } from '@blocksuite/affine-shared/theme';
 export {
   createButtonPopper,

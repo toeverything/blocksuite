@@ -334,7 +334,8 @@ export class EdgelessChangeConnectorButton extends WithDisposable(LitElement) {
     const colorScheme = this.edgeless.surface.renderer.getColorScheme();
     const elements = this.elements;
     const selectedColor =
-      getMostCommonColor(elements, colorScheme) ?? GET_DEFAULT_LINE_COLOR();
+      getMostCommonColor(elements, colorScheme) ??
+      GET_DEFAULT_LINE_COLOR(colorScheme);
     const selectedMode = getMostCommonMode(elements);
     const selectedLineSize = getMostCommonLineWidth(elements) ?? LineWidth.Four;
     const selectedRough = getMostCommonRough(elements);

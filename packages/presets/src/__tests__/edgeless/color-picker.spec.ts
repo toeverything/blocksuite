@@ -1,16 +1,16 @@
 import {
+  ColorScheme,
   type EdgelessRootBlockComponent,
-  ThemeObserver,
+  ThemeProvider,
 } from '@blocksuite/blocks';
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import '@toeverything/theme/style.css';
 import { beforeEach, describe, expect, test } from 'vitest';
 
-import { wait } from '../utils/common.js';
 import { getDocRootBlock } from '../utils/edgeless.js';
 import { setupEditor } from '../utils/setup.js';
 
-describe('theme observer', () => {
+describe('theme service', () => {
   let edgeless!: EdgelessRootBlockComponent;
 
   beforeEach(async () => {
@@ -20,102 +20,95 @@ describe('theme observer', () => {
 
     edgeless.gfx.tool.setTool('default');
 
+    const themeService = edgeless.gfx.std.get(ThemeProvider);
+    themeService.theme$.value = ColorScheme.Light;
+
     return cleanup;
   });
 
-  test('switches theme', async () => {
-    expect(ThemeObserver.mode).toBe('light');
+  test('switches theme', () => {
+    const themeService = edgeless.gfx.std.get(ThemeProvider);
+    expect(themeService.theme).toBe(ColorScheme.Light);
 
-    document.documentElement.dataset.theme = 'dark';
-    await wait();
+    themeService.theme$.value = ColorScheme.Dark;
+    expect(themeService.theme).toBe(ColorScheme.Dark);
 
-    expect(ThemeObserver.mode).toBe('dark');
-
-    document.documentElement.dataset.theme = 'light';
-    await wait();
-
-    expect(ThemeObserver.mode).toBe('light');
-
-    document.documentElement.dataset.theme = 'dark';
-    await wait();
-
-    expect(ThemeObserver.mode).toBe('dark');
+    themeService.theme$.value = ColorScheme.Light;
+    expect(themeService.theme).toBe(ColorScheme.Light);
   });
 
-  test('generates a color property', async () => {
-    document.documentElement.dataset.theme = 'light';
-    await wait();
+  test('generates a color property', () => {
+    const themeService = edgeless.gfx.std.get(ThemeProvider);
+    expect(themeService.theme).toBe(ColorScheme.Light);
 
-    expect(ThemeObserver.generateColorProperty('--affine-hover-color')).toBe(
+    expect(themeService.generateColorProperty('--affine-hover-color')).toBe(
       'var(--affine-hover-color)'
     );
 
-    expect(ThemeObserver.generateColorProperty('--affine-transparent')).toBe(
+    expect(themeService.generateColorProperty('--affine-transparent')).toBe(
       'transparent'
     );
 
-    expect(ThemeObserver.generateColorProperty('transparent')).toBe(
+    expect(themeService.generateColorProperty('transparent')).toBe(
       'transparent'
     );
 
     expect(
-      ThemeObserver.generateColorProperty({ dark: 'white', light: 'black' })
+      themeService.generateColorProperty({ dark: 'white', light: 'black' })
     ).toBe('black');
 
-    document.documentElement.dataset.theme = 'dark';
-    await wait();
+    themeService.theme$.value = ColorScheme.Dark;
+    expect(themeService.theme).toBe(ColorScheme.Dark);
 
     expect(
-      ThemeObserver.generateColorProperty({ dark: 'white', light: 'black' })
+      themeService.generateColorProperty({ dark: 'white', light: 'black' })
     ).toBe('white');
 
-    expect(ThemeObserver.generateColorProperty({ normal: 'grey' })).toBe(
-      'grey'
-    );
+    expect(themeService.generateColorProperty({ normal: 'grey' })).toBe('grey');
 
-    expect(ThemeObserver.generateColorProperty('', 'blue')).toBe('blue');
-    expect(ThemeObserver.generateColorProperty({}, 'red')).toBe('red');
+    expect(themeService.generateColorProperty('', 'blue')).toBe('blue');
+    expect(themeService.generateColorProperty({}, 'red')).toBe('red');
   });
 
-  test('gets a color value', async () => {
-    document.documentElement.dataset.theme = 'light';
-    await wait();
+  test('gets a color value', () => {
+    const themeService = edgeless.gfx.std.get(ThemeProvider);
+    expect(themeService.theme).toBe(ColorScheme.Light);
 
-    expect(ThemeObserver.getColorValue('--affine-transparent')).toBe(
+    expect(themeService.getColorValue('--affine-transparent')).toBe(
       '--affine-transparent'
     );
     expect(
-      ThemeObserver.getColorValue('--affine-transparent', 'transparent', true)
+      themeService.getColorValue('--affine-transparent', 'transparent', true)
     ).toBe('transparent');
     expect(
-      ThemeObserver.getColorValue('--affine-hover-color', 'transparent', true)
-    ).toBe('rgba(0, 0, 0, .04)');
+      themeService.getColorValue('--affine-hover-color', 'transparent', true)
+    ).toBe('rgba(0, 0, 0, 0.04)');
     expect(
-      ThemeObserver.getColorValue('--affine-tooltip', undefined, true)
+      themeService.getColorValue('--affine-tooltip', undefined, true)
     ).toBe('rgba(0, 0, 0, 1)');
 
     expect(
-      ThemeObserver.getColorValue(
+      themeService.getColorValue(
         { dark: 'white', light: 'black' },
         undefined,
         true
       )
     ).toBe('black');
     expect(
-      ThemeObserver.getColorValue({ dark: 'white', light: '' }, undefined, true)
+      themeService.getColorValue({ dark: 'white', light: '' }, undefined, true)
     ).toBe('transparent');
     expect(
-      ThemeObserver.getColorValue({ normal: 'grey' }, undefined, true)
+      themeService.getColorValue({ normal: 'grey' }, undefined, true)
     ).toBe('grey');
 
-    document.documentElement.dataset.theme = 'dark';
-    await wait();
+    themeService.theme$.value = ColorScheme.Dark;
+    expect(themeService.theme).toBe(ColorScheme.Dark);
 
     expect(
-      ThemeObserver.getColorValue('--affine-hover-color', 'transparent', true)
-    ).toEqual('rgba(255, 255, 255, .1)');
+      themeService.getColorValue('--affine-hover-color', 'transparent', true)
+    ).toEqual('rgba(255, 255, 255, 0.1)');
     expect(
-      ThemeObserver.getColorValue('--affine-tooltip', undefined, true)
+      themeService.getColorValue('--affine-tooltip', undefined, true)
     ).toEqual('rgba(234, 234, 234, 1)'); // #eaeaea
   });
 });

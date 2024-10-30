@@ -8,6 +8,7 @@ import {
   DocModeProvider,
   FontConfigExtension,
   NotificationExtension,
+  OverrideThemeExtension,
   ParseDocUrlExtension,
   RefNodeSlotsExtension,
   RefNodeSlotsProvider,
@@ -22,6 +23,7 @@ import {
   mockDocModeService,
   mockNotificationService,
   mockParseDocUrlService,
+  themeExtension,
 } from '../../_common/mock-services.js';
 import { getExampleSpecs } from '../specs-examples/index.js';
 
@@ -118,6 +120,7 @@ export async function mountDefaultDocEditor(collection: DocCollection) {
       DocModeExtension(
         mockDocModeService(getEditorModeCallback, setEditorModeCallBack)
       ),
+      OverrideThemeExtension(themeExtension),
       ParseDocUrlExtension(mockParseDocUrlService(collection)),
       NotificationExtension(mockNotificationService(editor)),
       FontConfigExtension(CommunityCanvasTextFonts),

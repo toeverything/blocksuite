@@ -31,7 +31,11 @@ import {
   GroupElementModel,
   ShapeElementModel,
 } from '@blocksuite/affine-model';
-import { ThemeObserver } from '@blocksuite/affine-shared/theme';
+import {
+  darkToolbarStyles,
+  lightToolbarStyles,
+  ThemeProvider,
+} from '@blocksuite/affine-shared/services';
 import { requestConnectedFrame } from '@blocksuite/affine-shared/utils';
 import { WidgetComponent } from '@blocksuite/block-std';
 import {
@@ -40,7 +44,7 @@ import {
   groupBy,
   pickValues,
 } from '@blocksuite/global/utils';
-import { css, html, nothing, type TemplateResult } from 'lit';
+import { css, html, nothing, type TemplateResult, unsafeCSS } from 'lit';
 import { property, state } from 'lit/decorators.js';
 import { join } from 'lit/directives/join.js';
 
@@ -117,6 +121,12 @@ export class EdgelessElementToolbarWidget extends WidgetComponent<
       will-change: transform;
       -webkit-user-select: none;
       user-select: none;
+    }
+    editor-toolbar[data-app-theme='light'] {
+      ${unsafeCSS(lightToolbarStyles.join('\n'))}
+    }
+    editor-toolbar[data-app-theme='dark'] {
+      ${unsafeCSS(darkToolbarStyles.join('\n'))}
     }
   `;
 
@@ -326,7 +336,11 @@ export class EdgelessElementToolbarWidget extends WidgetComponent<
 
     this.updateComplete
       .then(() => {
-        _disposables.add(ThemeObserver.subscribe(() => this.requestUpdate()));
+        _disposables.add(
+          this.std
+            .get(ThemeProvider)
+            .theme$.subscribe(() => this.requestUpdate())
+        );
       })
       .catch(console.error);
   }
@@ -420,8 +434,9 @@ export class EdgelessElementToolbarWidget extends WidgetComponent<
       ></edgeless-more-button>
     `);
 
+    const appTheme = this.std.get(ThemeProvider).app$.value;
     return html`
-      <editor-toolbar>
+      <editor-toolbar data-app-theme=${appTheme}>
         ${join(
           buttons.filter(b => b !== nothing),
           renderToolbarSeparator
