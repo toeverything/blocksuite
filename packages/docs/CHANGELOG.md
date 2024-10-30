@@ -1,5 +1,22 @@
 # @blocksuite/docs
 
+## 0.17.23
+
+### Patch Changes
+
+- dc63724: ## Feat
+
+  - feat: support edgeless theme (#8624)
+
+  ## Fix
+
+  - fix(inline): get text format from left delta by default when it is collapsed (#8615)
+
+- Updated dependencies [dc63724]
+  - @blocksuite/blocks@0.17.23
+  - @blocksuite/store@0.17.23
+  - @blocksuite/presets@0.17.23
+
 ## 0.17.22
 
 ### Patch Changes
