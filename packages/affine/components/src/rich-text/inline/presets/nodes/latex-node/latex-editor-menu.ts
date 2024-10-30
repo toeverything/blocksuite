@@ -148,6 +148,13 @@ export class LatexEditorMenu extends SignalWatcher(
       }
     });
 
+    this.disposables.addFromEvent(this, 'pointerdown', e => {
+      e.stopPropagation();
+    });
+    this.disposables.addFromEvent(this, 'pointerup', e => {
+      e.stopPropagation();
+    });
+
     this.updateComplete
       .then(async () => {
         await this.richText?.updateComplete;

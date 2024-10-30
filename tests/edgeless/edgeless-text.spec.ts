@@ -19,6 +19,7 @@ import {
   pressBackspace,
   pressEnter,
   pressEscape,
+  selectAllByKeyboard,
   setEdgelessTool,
   switchEditorMode,
   toViewCoord,
@@ -473,6 +474,73 @@ test.describe('edgeless text block', () => {
     await pasteByKeyboard(page);
     expect(await edgelessText.count()).toBe(1);
     expect(await paragraph.count()).toBe(3);
+  });
+
+  test('latex in edgeless text', async ({ page }) => {
+    await setEdgelessTool(page, 'default');
+    await page.mouse.dblclick(130, 140, {
+      delay: 100,
+    });
+    await waitNextFrame(page);
+    await type(page, '$$bbb$$ ');
+    await assertRichTextInlineDeltas(
+      page,
+      [
+        {
+          insert: ' ',
+          attributes: {
+            latex: 'bbb',
+          },
+        },
+      ],
+      1
+    );
+
+    await page.locator('affine-latex-node').click();
+    await waitNextFrame(page);
+    await type(page, 'ccc');
+    await assertRichTextInlineDeltas(
+      page,
+      [
+        {
+          insert: ' ',
+          attributes: {
+            latex: 'bbbccc',
+          },
+        },
+      ],
+      1
+    );
+
+    await page.locator('.latex-editor-hint').click();
+    await type(page, 'sss');
+    await assertRichTextInlineDeltas(
+      page,
+      [
+        {
+          insert: ' ',
+          attributes: {
+            latex: 'bbbccc',
+          },
+        },
+      ],
+      1
+    );
+    await page.locator('latex-editor-unit').click();
+    await selectAllByKeyboard(page);
+    await type(page, 'sss');
+    await assertRichTextInlineDeltas(
+      page,
+      [
+        {
+          insert: ' ',
+          attributes: {
+            latex: 'sss',
+          },
+        },
+      ],
+      1
+    );
   });
 });
 
