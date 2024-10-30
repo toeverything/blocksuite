@@ -29,6 +29,19 @@ export class VirtualKeyboardController implements ReactiveController {
       this._keyboardOpened$.value = virtualKeyboard.boundingRect.height > 0;
       this._keyboardHeight$.value = virtualKeyboard.boundingRect.height;
     } else if (visualViewport) {
+      /**
+       * ┌───────────────┐ - window top
+       * │               │
+       * │               │
+       * │               │
+       * │               │
+       * │               │
+       * └───────────────┘ - keyboard top        --
+       * │               │                       │ keyboard height in layout viewport
+       * └───────────────┘ - page(html) bottom   --
+       * │               │                       │ visualViewport.offsetTop
+       * └───────────────┘ - window bottom       --
+       */
       this._keyboardOpened$.value =
         window.innerHeight - visualViewport.height > 0;
       this._keyboardHeight$.value =
@@ -66,6 +79,10 @@ export class VirtualKeyboardController implements ReactiveController {
     }
   };
 
+  /**
+   * Return the height of keyboard in layout viewport
+   * see comment in the `_updateKeyboardHeight` method
+   */
   get keyboardHeight() {
     return this._keyboardHeight$.value;
   }
