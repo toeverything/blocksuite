@@ -48,7 +48,7 @@ export class NumberCell extends BaseCellRenderer<
     const decimals = this.property.data$.value.decimal ?? 0;
     const formatMode = (this.property.data$.value.format ??
       'number') as NumberFormat;
-    return this.value
+    return this.value != undefined
       ? enableNewFormatting
         ? formatNumber(this.value, formatMode, decimals)
         : this.value.toString()
