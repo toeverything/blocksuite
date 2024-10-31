@@ -1,6 +1,6 @@
 {
   "name": "@blocksuite/affine-block-list",
-  "version": "0.17.23",
+  "version": "0.17.24",
   "description": "List block for BlockSuite.",
   "type": "module",
   "repository": {
