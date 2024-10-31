@@ -188,12 +188,24 @@ export class SurfaceBlockComponent extends BlockComponent<
       enableStackingCanvas: true,
       provider: {
         generateColorProperty: (color: Color, fallback: string) =>
-          themeService.generateColorProperty(color, fallback),
+          themeService.generateColorProperty(
+            color,
+            fallback,
+            themeService.edgelessTheme
+          ),
         getColorValue: (color: Color, fallback?: string, real?: boolean) =>
-          themeService.getColorValue(color, fallback, real),
-        getColorScheme: () => themeService.theme,
+          themeService.getColorValue(
+            color,
+            fallback,
+            real,
+            themeService.edgelessTheme
+          ),
+        getColorScheme: () => themeService.edgelessTheme,
         getPropertyValue: (property: string) =>
-          themeService.getCssVariableColor(property),
+          themeService.getCssVariableColor(
+            property,
+            themeService.edgelessTheme
+          ),
         selectedElements: () => this._edgelessService.selection.selectedIds,
       },
       onStackingCanvasCreated(canvas) {

@@ -19,6 +19,7 @@ import {
 import {
   DocModeProvider,
   EditPropsStore,
+  ThemeProvider,
 } from '@blocksuite/affine-shared/services';
 import { requestConnectedFrame } from '@blocksuite/affine-shared/utils';
 import {
@@ -609,10 +610,12 @@ export class SurfaceRefBlockComponent extends BlockComponent<
     const content = isEmpty
       ? this._renderRefPlaceholder(model)
       : this._renderRefContent(_referencedModel);
+    const edgelessTheme = this.std.get(ThemeProvider).edgeless$.value;
 
     return html`
       <div
         class="affine-surface-ref"
+        data-theme=${edgelessTheme}
         @click=${this._focusBlock}
         style=${styleMap({
           outline: this._focused

@@ -9,6 +9,7 @@ import {
   CommunityCanvasTextFonts,
   FontConfigExtension,
   NotificationExtension,
+  OverrideThemeExtension,
   type PageRootService,
   ParseDocUrlExtension,
   RefNodeSlotsExtension,
@@ -34,6 +35,7 @@ import {
   mockDocModeService,
   mockNotificationService,
   mockParseDocUrlService,
+  themeExtension,
 } from '../../_common/mock-services';
 
 function setDocModeFromUrlParams(service: DocModeProvider, docId: string) {
@@ -87,6 +89,7 @@ export async function mountDefaultDocEditor(collection: DocCollection) {
     FontConfigExtension(CommunityCanvasTextFonts),
     ParseDocUrlExtension(mockParseDocUrlService(collection)),
     NotificationExtension(mockNotificationService(editor)),
+    OverrideThemeExtension(themeExtension),
     {
       setup: di => {
         di.override(DocModeProvider, () =>

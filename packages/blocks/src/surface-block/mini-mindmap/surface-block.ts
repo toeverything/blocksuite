@@ -101,13 +101,25 @@ export class MindmapSurfaceBlock extends BlockComponent<SurfaceBlockModel> {
       enableStackingCanvas: true,
       provider: {
         selectedElements: () => [],
-        getColorScheme: () => themeService.theme,
+        getColorScheme: () => themeService.edgelessTheme,
         getColorValue: (color: Color, fallback?: string, real?: boolean) =>
-          themeService.getColorValue(color, fallback, real),
+          themeService.getColorValue(
+            color,
+            fallback,
+            real,
+            themeService.edgelessTheme
+          ),
         generateColorProperty: (color: Color, fallback: string) =>
-          themeService.generateColorProperty(color, fallback),
+          themeService.generateColorProperty(
+            color,
+            fallback,
+            themeService.edgelessTheme
+          ),
         getPropertyValue: (property: string) =>
-          themeService.getCssVariableColor(property),
+          themeService.getCssVariableColor(
+            property,
+            themeService.edgelessTheme
+          ),
       },
       elementRenderers,
     });
