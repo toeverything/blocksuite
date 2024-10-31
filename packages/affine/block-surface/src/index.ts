@@ -86,7 +86,7 @@ import {
   addTree,
   createFromTree,
   detachMindmap,
-  hideTargetConnector,
+  hideNodeConnector,
   moveMindMapSubtree,
   showMergeIndicator,
 } from './utils/mindmap/utils.js';
@@ -140,7 +140,7 @@ export const MindmapUtils = {
   addTree,
   createFromTree,
   detachMindmap,
-  hideTargetConnector,
+  hideNodeConnector,
   moveMindMapSubtree,
   showMergeIndicator,
 };

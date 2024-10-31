@@ -178,6 +178,14 @@ export class GfxController extends LifeCycleWatcher {
     return last(picked) ?? null;
   }
 
+  /**
+   * This will return the element in the group if the group is currently selected, otherwise
+   * it will return the first group it finds.
+   * @param x
+   * @param y
+   * @param options
+   * @returns
+   */
   getElementInGroup(
     x: number,
     y: number,

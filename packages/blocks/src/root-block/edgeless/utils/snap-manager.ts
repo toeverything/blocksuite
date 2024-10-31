@@ -33,6 +33,8 @@ export class EdgelessSnapManager extends Overlay {
    */
   private _distributedAlignLines: [Point, Point][] = [];
 
+  private _draggedBound: Bound = new Bound();
+
   private _draggedElms: GfxModel[] = [];
 
   private _excludeElms = new Set<GfxModel>();
@@ -48,7 +50,7 @@ export class EdgelessSnapManager extends Overlay {
 
   private _referenceBounds: Bound[] = [];
 
-  cleanupAlignables = () => {
+  resetSnapState = () => {
     this._referenceBounds = [];
     this._intraGraphicAlignLines = [];
     this._distributedAlignLines = [];
@@ -329,10 +331,13 @@ export class EdgelessSnapManager extends Overlay {
     ];
   }
 
+  /**
+   * Add the exclusion reference elements.
+   */
   addExclusion(exclusion: GfxModel[]): Bound {
     exclusion.forEach(el => this._excludeElms.add(el));
 
-    return this.updateReferenceBound();
+    return this.updateBound();
   }
 
   align(bound: Bound): { dx: number; dy: number } {
@@ -442,10 +447,10 @@ export class EdgelessSnapManager extends Overlay {
     this._draggedElms = draggedElms;
     this._excludeElms = excludes;
 
-    return this.updateReferenceBound();
+    return this.updateBound();
   }
 
-  updateReferenceBound(): Bound {
+  updateBound(): Bound {
     const { viewport, layer } = this.gfx;
     const excludes = this._excludeElms;
     const viewportBounds = Bound.from(viewport.viewportBounds);
@@ -464,9 +469,11 @@ export class EdgelessSnapManager extends Overlay {
       }
     });
 
-    return this._draggedElms.reduce(
+    this._draggedBound = this._draggedElms.reduce(
       (prev, element) => prev.unite(element.elementBound),
       Bound.deserialize(this._draggedElms[0].xywh)
     );
+
+    return this._draggedBound;
   }
 }

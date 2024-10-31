@@ -47,7 +47,7 @@ import type { EdgelessRootBlockWidgetName } from '../types.js';
 import type { EdgelessSelectedRectWidget } from './components/rects/edgeless-selected-rect.js';
 import type { EdgelessRootService } from './edgeless-root-service.js';
 
-import { isSelectSingleMindMap } from '../../_common/edgeless/mindmap/index.js';
+import { isSingleMindMapNode } from '../../_common/edgeless/mindmap/index.js';
 import { EdgelessClipboardController } from './clipboard/clipboard.js';
 import { EdgelessPageKeyboardManager } from './edgeless-keyboard.js';
 import { getBackgroundGrid, isCanvasElement } from './utils/query.js';
@@ -438,7 +438,7 @@ export class EdgelessRootBlockComponent extends BlockComponent<
         keymap[key] = ctx => {
           const elements = selection.selectedElements;
 
-          if (isSelectSingleMindMap(elements) && !selection.editing) {
+          if (isSingleMindMapNode(elements) && !selection.editing) {
             const target = gfx.getElementById(
               elements[0].id
             ) as ShapeElementModel;

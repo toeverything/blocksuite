@@ -1,14 +1,12 @@
 import type {
   EdgelessTextBlockModel,
   FrameBlockModel,
-  MindmapNode,
   NoteBlockModel,
 } from '@blocksuite/affine-model';
 import type { IVec } from '@blocksuite/global/utils';
 
 import {
   ConnectorUtils,
-  MindmapUtils,
   OverlayIdentifier,
 } from '@blocksuite/affine-block-surface';
 import { focusTextModel } from '@blocksuite/affine-components/rich-text';
@@ -45,7 +43,6 @@ import {
   Bound,
   DisposableGroup,
   getCommonBoundWithRotation,
-  intersects,
   noop,
   Vec,
 } from '@blocksuite/global/utils';
@@ -55,7 +52,6 @@ import type { EdgelessRootBlockComponent } from '../edgeless-root-block.js';
 import type { EdgelessFrameManager, FrameOverlay } from '../frame-manager.js';
 import type { EdgelessSnapManager } from '../utils/snap-manager.js';
 
-import { isSelectSingleMindMap } from '../../../_common/edgeless/mindmap/index.js';
 import { prepareCloneData } from '../utils/clone-utils.js';
 import { calPanDelta } from '../utils/panning-utils.js';
 import {
@@ -99,13 +95,11 @@ export class DefaultTool extends BaseTool {
   private _autoPanTimer: number | null = null;
 
   private _clearDisposable = () => {
-    if (this._disposables) {
-      this._disposables.dispose();
-      this._disposables = null;
+    if (this._draggingDisposable) {
+      this._draggingDisposable.dispose();
+      this._draggingDisposable = null;
     }
   };
-
-  private _clearMindMapHoverState: (() => void)[] = [];
 
   private _clearSelectingState = () => {
     this._stopAutoPanning();
@@ -114,29 +108,17 @@ export class DefaultTool extends BaseTool {
     this._wheeling = false;
   };
 
-  private _disposables: DisposableGroup | null = null;
+  private _dragBehaviorExts: DragBehaviorExtension[] = [];
 
-  private _draggingSingleMindmap: null | {
-    mindmap: MindmapElementModel;
-    node: MindmapNode;
-    /**
-     * The bound of the mind map which the dragging node belongs to
-     */
-    originMindMapBound: Bound;
-    clear?: () => void;
-    detach?: boolean;
-  } = null;
+  private _dragExtHandlers: {
+    dragStart?: (e: PointerEventState) => void;
+    dragEnd?: (e: PointerEventState) => void;
+    dragMove?: (e: PointerEventState) => void;
+  }[] = [];
+
+  private _draggingDisposable: DisposableGroup | null = null;
 
   private _hoveredFrame: FrameBlockModel | null = null;
-
-  private _hoveredMindMap: null | {
-    mindmap: MindmapElementModel;
-    node: MindmapNode;
-    mergeInfo?: Exclude<
-      ReturnType<typeof MindmapUtils.showMergeIndicator>,
-      undefined
-    >['mergeInfo'];
-  } = null;
 
   private _lock = false;
 
@@ -243,24 +225,6 @@ export class DefaultTool extends BaseTool {
 
   enableHover = true;
 
-  /**
-   * Get the end position of the dragging area in the model coordinate
-   */
-  private get _dragLastPos() {
-    const { endX, endY } = this.controller.draggingArea$.peek();
-
-    return [endX, endY] as IVec;
-  }
-
-  /**
-   * Get the start position of the dragging area in the model coordinate
-   */
-  private get _dragStartPos() {
-    const { startX, startY } = this.controller.draggingArea$.peek();
-
-    return [startX, startY] as IVec;
-  }
-
   private get _edgeless(): EdgelessRootBlockComponent | null {
     const block = this.std.view.getBlock(this.doc.root!.id);
 
@@ -277,6 +241,24 @@ export class DefaultTool extends BaseTool {
     return this.std.get(
       OverlayIdentifier('snap-manager')
     ) as EdgelessSnapManager;
+  }
+
+  /**
+   * Get the end position of the dragging area in the model coordinate
+   */
+  get dragLastPos() {
+    const { endX, endY } = this.controller.draggingArea$.peek();
+
+    return [endX, endY] as IVec;
+  }
+
+  /**
+   * Get the start position of the dragging area in the model coordinate
+   */
+  get dragStartPos() {
+    const { startX, startY } = this.controller.draggingArea$.peek();
+
+    return [startX, startY] as IVec;
   }
 
   get edgelessSelectionManager() {
@@ -450,86 +432,8 @@ export class DefaultTool extends BaseTool {
       }
     });
 
-    if (this._draggingSingleMindmap) {
-      const {
-        node: currentNode,
-        mindmap: currentMindmap,
-        originMindMapBound: startElementBound,
-      } = this._draggingSingleMindmap;
-      const current = currentNode.element;
-      const subtree = currentMindmap.getNode(current.id)!;
-      const [x, y] = this._dragLastPos;
-
-      this._clearMindMapHoverState.forEach(fn => fn());
-      this._clearMindMapHoverState = [];
-
-      const hoveredMindmap = this.gfx
-        .getElementByPoint(x, y, {
-          all: true,
-          responsePadding: [25, 60],
-        })
-        .filter(
-          el =>
-            el !== current &&
-            (el.group as BlockSuite.SurfaceElementModel)?.type === 'mindmap'
-        )
-        .map(el => ({
-          element: el as ShapeElementModel,
-          node: (el.group as MindmapElementModel).getNode(el.id)!,
-          mindmap: el.group as MindmapElementModel,
-        }))[0];
-
-      if (hoveredMindmap) {
-        const { node, element, mindmap } = hoveredMindmap;
-        element.opacity = 0.8;
-
-        const { clear, mergeInfo } =
-          MindmapUtils.showMergeIndicator(mindmap, node, subtree, [x, y]) ?? {};
-        clear && this._clearMindMapHoverState.push(clear);
-        const clearHide = MindmapUtils.hideTargetConnector(
-          currentMindmap,
-          subtree
-        );
-        clearHide && this._clearMindMapHoverState.push(clearHide);
-
-        const layoutType = mergeInfo?.layoutType;
-
-        this._clearMindMapHoverState.push(() => {
-          element.opacity = 1;
-        });
-        currentMindmap.layout(subtree, false, layoutType ?? undefined);
-        this._hoveredMindMap = {
-          node,
-          mindmap,
-          mergeInfo,
-        };
-      } else {
-        const bound = new Bound(x, y, 40, 40);
-
-        if (
-          !(
-            intersects(startElementBound, bound) ||
-            startElementBound.contains(bound)
-          ) &&
-          currentMindmap.tree.id !== currentNode.id
-        ) {
-          const clearHide = MindmapUtils.hideTargetConnector(
-            currentMindmap,
-            subtree
-          );
-          clearHide && this._clearMindMapHoverState.push(clearHide);
-          this._draggingSingleMindmap.detach = true;
-        } else {
-          this._draggingSingleMindmap.detach = false;
-        }
-
-        currentMindmap.layout(subtree, false);
-        this._hoveredMindMap = null;
-      }
-    }
-
     this._hoveredFrame = this._frameMgr.getFrameFromPoint(
-      this._dragLastPos,
+      this.dragLastPos,
       this._toBeMoved.filter(ele => isFrameBlock(ele))
     );
 
@@ -590,30 +494,14 @@ export class DefaultTool extends BaseTool {
       Bound.deserialize(element.xywh)
     );
 
-    if (
-      (this._toBeMoved.length &&
-        this._toBeMoved.every(
-          ele => !(ele.group instanceof MindmapElementModel)
-        )) ||
-      (isSelectSingleMindMap(this._toBeMoved) &&
-        this._toBeMoved[0].id ===
-          (this._toBeMoved[0].group as MindmapElementModel).tree.id)
-    ) {
-      const mindmap = this._toBeMoved[0].group as MindmapElementModel;
-
-      this._alignBound = this._snapOverlay.setupSnapState(this._toBeMoved, [
-        mindmap,
-        ...(mindmap?.childElements || []),
-      ]);
-    }
-
+    this._alignBound = this._snapOverlay.setupSnapState(this._toBeMoved);
     this._clearDisposable();
-    this._disposables = new DisposableGroup();
+    this._draggingDisposable = new DisposableGroup();
 
     // If the drag type is selecting, set up the dragging area disposable group
     // If the viewport updates when dragging, should update the dragging area and selection
     if (this.dragType === DefaultModeDragType.Selecting) {
-      this._disposables.add(
+      this._draggingDisposable.add(
         this.gfx.viewport.viewportUpdated.on(() => {
           if (
             this.dragType === DefaultModeDragType.Selecting &&
@@ -628,7 +516,7 @@ export class DefaultTool extends BaseTool {
     }
 
     if (this.dragType === DefaultModeDragType.ContentMoving) {
-      this._disposables.add(
+      this._draggingDisposable.add(
         this.gfx.viewport.viewportMoved.on(delta => {
           if (
             this.dragType === DefaultModeDragType.ContentMoving &&
@@ -660,6 +548,16 @@ export class DefaultTool extends BaseTool {
       );
       return;
     }
+
+    const dragCtx: DragBehaviorContext = {
+      dragElements: this._toBeMoved,
+      dragType,
+      snap: this._snapOverlay,
+    };
+
+    this._dragExtHandlers = this._dragBehaviorExts.map(ext =>
+      ext.initializeDragEvent(dragCtx)
+    );
   }
 
   override click(e: PointerEventState) {
@@ -838,58 +736,18 @@ export class DefaultTool extends BaseTool {
     }
   }
 
-  override dragEnd() {
-    // mindmap
-    if (this._draggingSingleMindmap) {
-      if (this._hoveredMindMap && this._hoveredMindMap.mergeInfo) {
-        const { mergeInfo, mindmap } = this._hoveredMindMap;
-        const { node: currentNode, mindmap: currentMindmap } =
-          this._draggingSingleMindmap;
+  override dragEnd(e: PointerEventState) {
+    this._dragExtHandlers.forEach(handler => handler.dragEnd?.(e));
 
-        MindmapUtils.moveMindMapSubtree(
-          currentMindmap,
-          currentNode!,
-          mindmap,
-          mergeInfo.target,
-          mergeInfo.index,
-          mergeInfo.layoutType
-        );
-      } else if (this._draggingSingleMindmap.detach) {
-        const { mindmap } = this._draggingSingleMindmap;
-        const subtree = MindmapUtils.detachMindmap(
-          mindmap,
-          this._draggingSingleMindmap.node
-        );
-
-        if (subtree) {
-          MindmapUtils.createFromTree(
-            subtree,
-            mindmap.style,
-            mindmap.layoutType,
-            this.gfx.surface!
-          );
-        }
-      } else {
-        this._draggingSingleMindmap.mindmap.layout();
-        this._toBeMoved.forEach(el => el.pop('xywh'));
-      }
-
-      this._draggingSingleMindmap.clear?.();
-    } else {
-      this._toBeMoved.forEach(el => {
-        this.doc.transact(() => {
-          el.pop('xywh');
-        });
-
-        if (el instanceof ConnectorElementModel) {
-          el.pop('labelXYWH');
-        }
-
-        if (el instanceof MindmapElementModel) {
-          el.requestLayout();
-        }
+    this._toBeMoved.forEach(el => {
+      this.doc.transact(() => {
+        el.pop('xywh');
       });
-    }
+
+      if (el instanceof ConnectorElementModel) {
+        el.pop('labelXYWH');
+      }
+    });
 
     {
       const frameManager = this._frameMgr;
@@ -919,14 +777,12 @@ export class DefaultTool extends BaseTool {
     if (this.edgelessSelectionManager.editing) return;
 
     this._selectedBounds = [];
-    this._snapOverlay.cleanupAlignables();
+    this._snapOverlay.resetSnapState();
     this.frameOverlay.clear();
     this._toBeMoved = [];
     this._selectedConnector = null;
     this._selectedConnectorLabelBounds = null;
     this._clearSelectingState();
-    this._clearMindMapHoverState.forEach(fn => fn());
-    this._draggingSingleMindmap = null;
     this.dragType = DefaultModeDragType.None;
   }
 
@@ -959,8 +815,8 @@ export class DefaultTool extends BaseTool {
           this._wheeling = false;
         }
 
-        const dx = this._dragLastPos[0] - this._dragStartPos[0];
-        const dy = this._dragLastPos[1] - this._dragStartPos[1];
+        const dx = this.dragLastPos[0] - this.dragStartPos[0];
+        const dy = this.dragLastPos[1] - this.dragStartPos[1];
         const alignBound = this._alignBound.clone();
         const shifted = e.keys.shift || this.gfx.keyboard.shiftKey$.peek();
 
@@ -968,8 +824,8 @@ export class DefaultTool extends BaseTool {
         break;
       }
       case DefaultModeDragType.ConnectorLabelMoving: {
-        const dx = this._dragLastPos[0] - this._dragStartPos[0];
-        const dy = this._dragLastPos[1] - this._dragStartPos[1];
+        const dx = this.dragLastPos[0] - this.dragStartPos[0];
+        const dy = this.dragLastPos[1] - this.dragStartPos[1];
         this._moveLabel([dx, dy]);
         break;
       }
@@ -978,6 +834,8 @@ export class DefaultTool extends BaseTool {
         break;
       }
     }
+
+    this._dragExtHandlers.forEach(handler => handler.dragMove?.(e));
   }
 
   // eslint-disable-next-line @typescript-eslint/no-misused-promises
@@ -1014,26 +872,15 @@ export class DefaultTool extends BaseTool {
     this.initializeDragState(dragType);
 
     // stash the state
-    if (
-      this._toBeMoved.length === 1 &&
-      this._toBeMoved[0].group instanceof MindmapElementModel
-    ) {
-      const mindmap = this._toBeMoved[0].group as MindmapElementModel;
-      this._draggingSingleMindmap = {
-        mindmap,
-        node: mindmap.getNode(this._toBeMoved[0].id)!,
-        clear: mindmap.stashTree(this._toBeMoved[0].id),
-        originMindMapBound: mindmap.elementBound,
-      };
-    } else {
-      this._toBeMoved.forEach(ele => {
-        ele.stash('xywh');
+    this._toBeMoved.forEach(ele => {
+      ele.stash('xywh');
 
-        if (ele instanceof ConnectorElementModel) {
-          ele.stash('labelXYWH');
-        }
-      });
-    }
+      if (ele instanceof ConnectorElementModel) {
+        ele.stash('labelXYWH');
+      }
+    });
+
+    this._dragExtHandlers.forEach(handler => handler.dragStart?.(e));
   }
 
   override mounted() {
@@ -1065,6 +912,11 @@ export class DefaultTool extends BaseTool {
         this.gfx.selection.set(this.gfx.selection.lastSurfaceSelections);
       }
     });
+
+    this.std.provider.getAll(DragBehaviorIdentifier).forEach(ext => {
+      this._dragBehaviorExts.push(ext);
+      ext.mounted();
+    });
   }
 
   override pointerMove(e: PointerEventState) {
@@ -1081,6 +933,12 @@ export class DefaultTool extends BaseTool {
     } else {
       this.frameOverlay.clear();
     }
+  }
+
+  override unmounted() {
+    this._dragBehaviorExts.forEach(ext => {
+      ext.unmounted();
+    });
   }
 }
 
@@ -1135,16 +993,9 @@ export abstract class DragBehaviorExtension extends Extension {
     return {};
   }
 
-  /**
-   * Initialize the pointer event. Called when default tool is mounted.
-   */
-  initializePointerEvent(): {
-    pointerMove?: (e: PointerEventState) => void;
-    pointerDown?: (e: PointerEventState) => void;
-    pointerUp?: (e: PointerEventState) => void;
-  } {
-    return {};
-  }
+  mounted() {}
+
+  unmounted() {}
 }
 
 declare module '@blocksuite/block-std/gfx' {

@@ -150,6 +150,9 @@ export function showMergeIndicator(
   source.overriddenDir = mergeInfo.layoutType;
 
   return {
+    /**
+     * clear the merge indicator
+     */
     clear: () => {
       targetMindmap.extraConnectors.delete(connector.id);
       delete source.overriddenDir;
@@ -159,26 +162,27 @@ export function showMergeIndicator(
 }
 
 /**
- * Hide the connector that the target end point is given node
+ * Hide the connector between the given node and its parent node.
+ * @returns a function to restore the connector
  */
-export function hideTargetConnector(
+export function hideNodeConnector(
   mindmap: MindmapElementModel,
   /**
    * The mind map node which's connector will be hide
    */
-  target: MindmapNode
+  node: MindmapNode
 ) {
-  const parent = mindmap.getParentNode(target.id);
+  const parent = mindmap.getParentNode(node.id);
 
   if (!parent) {
-    return;
+    return () => {};
   }
 
-  const connectorId = `#${parent.id}-${target.id}`;
+  const connectorId = `#${parent.id}-${node.id}`;
   const connector = mindmap.connectors.get(connectorId);
 
   if (!connector) {
-    return;
+    return () => {};
   }
 
   connector.opacity = 0;
