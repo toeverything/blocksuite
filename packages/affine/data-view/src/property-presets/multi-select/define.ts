@@ -3,7 +3,7 @@ import { nanoid } from '@blocksuite/store';
 import type { SelectTag } from '../../core/utils/tags/multi-tag-select.js';
 import type { SelectPropertyData } from '../select/define.js';
 
-import { tTag } from '../../core/logical/data-type.js';
+import { tTag } from '../../core/logical/data-type-presets.js';
 import { tArray } from '../../core/logical/typesystem.js';
 import { propertyType } from '../../core/property/property-config.js';
 import { getTagColor } from '../../core/utils/tags/colors.js';

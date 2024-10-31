@@ -1,4 +1,4 @@
-import { tNumber } from '../../core/logical/data-type.js';
+import { tNumber } from '../../core/logical/data-type-presets.js';
 import { propertyType } from '../../core/property/property-config.js';
 
 export const progressPropertyType = propertyType('progress');

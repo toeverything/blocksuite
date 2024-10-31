@@ -1,4 +1,4 @@
-import { tDate } from '../../core/logical/data-type.js';
+import { tDate } from '../../core/logical/data-type-presets.js';
 import { propertyType } from '../../core/property/property-config.js';
 
 export const datePropertyType = propertyType('date');

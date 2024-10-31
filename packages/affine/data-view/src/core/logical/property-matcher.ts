@@ -1,6 +1,6 @@
 import type { TFunction } from './typesystem.js';
 
-import { tDate, tNumber, tString } from './data-type.js';
+import { tDate, tNumber, tString } from './data-type-presets.js';
 import { Matcher, MatcherCreator } from './matcher.js';
 import { tArray, tFunction, tUnknown, typesystem } from './typesystem.js';
 

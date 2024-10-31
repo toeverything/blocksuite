@@ -8,7 +8,7 @@ import { createRef, ref } from 'lit/directives/ref.js';
 import type { DataViewTable } from '../table-view.js';
 import type { TableAreaSelection } from '../types.js';
 
-import { tRichText } from '../../../core/logical/data-type.js';
+import { tRichText } from '../../../core/logical/data-type-presets.js';
 
 export class DragToFillElement extends ShadowlessElement {
   static override styles = css`

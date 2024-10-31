@@ -2,7 +2,7 @@ import { css, html } from 'lit';
 
 import type { TArray, TypeOfData } from '../../../logical/typesystem.js';
 
-import { tTag } from '../../../logical/data-type.js';
+import { tTag } from '../../../logical/data-type-presets.js';
 import { LiteralElement } from './literal-element.js';
 
 export class TagLiteral extends LiteralElement<

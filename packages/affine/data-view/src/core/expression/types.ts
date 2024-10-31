@@ -1,5 +1,5 @@
-import type { TType } from '../logical/index.js';
 import type { UniComponent } from '../utils/index.js';
+import type { TypeInstance } from '../logical/type.js';
 
 export type VariableRef = {
   type: 'ref';
@@ -16,7 +16,7 @@ export type VariableOrProperty = VariableRef | Property;
 
 export type Variable = {
   name: string;
-  type: TType;
+  type: TypeInstance;
   id: string;
   icon?: UniComponent;
 };

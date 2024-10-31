@@ -1,35 +1,37 @@
-import type { FilterDefineType } from './matcher.js';
+import { t } from '../../logical/data-type-presets.js';
+import { createFilter } from '../create-filter.js';
 
-import { tBoolean } from '../../logical/data-type.js';
-import { tFunction, tUnknown } from '../../logical/typesystem.js';
-
-export const unknownFilter = {
-  isNotEmpty: {
-    type: tFunction({ args: [tUnknown.create()], rt: tBoolean.create() }),
+export const unknownFilter = [
+  createFilter({
+    name: 'isNotEmpty',
+    self: t.unknown.instance(),
+    args: [] as const,
     label: 'Is not empty',
     shortString: () => 'not empty',
-    impl: value => {
-      if (Array.isArray(value)) {
-        return value.length > 0;
+    impl: self => {
+      if (Array.isArray(self)) {
+        return self.length > 0;
       }
-      if (typeof value === 'string') {
-        return !!value;
+      if (typeof self === 'string') {
+        return !!self;
       }
-      return value != null;
+      return self != null;
     },
-  },
-  isEmpty: {
-    type: tFunction({ args: [tUnknown.create()], rt: tBoolean.create() }),
+  }),
+  createFilter({
+    name: 'isEmpty',
+    self: t.unknown.instance(),
+    args: [] as const,
     label: 'Is empty',
     shortString: () => 'empty',
-    impl: value => {
-      if (Array.isArray(value)) {
-        return value.length === 0;
+    impl: self => {
+      if (Array.isArray(self)) {
+        return self.length === 0;
       }
-      if (typeof value === 'string') {
-        return !value;
+      if (typeof self === 'string') {
+        return !self;
       }
-      return value == null;
+      return self == null;
     },
-  },
-} satisfies Record<string, FilterDefineType>;
+  }),
+];

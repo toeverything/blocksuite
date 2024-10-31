@@ -79,23 +79,26 @@ export const tFunction = (fn: {
 };
 
 export type TType = TDataType | TArray | TUnion | TTypeRef | TFunction;
-
+export type AnyTypeInstance = {
+  readonly name: string;
+};
 export type DataTypeShape = Record<string, unknown>;
 export type TDataType<Data extends DataTypeShape = Record<string, unknown>> = {
   type: 'data';
   name: string;
   data?: Data;
 };
-export type ValueOfData<T extends DataDefine> =
-  T extends DataDefine<infer R> ? R : never;
-export type TypeOfData<T extends DataDefine> =
-  T extends DataDefine<infer R> ? TDataType<R> : never;
+export type ValueOfData<T extends DataTypeDefinition> =
+  T extends DataTypeDefinition<infer R> ? R : never;
+export type TypeOfData<T extends DataTypeDefinition> =
+  T extends DataTypeDefinition<infer R> ? TDataType<R> : never;
 
-export class DataDefine<Data extends DataTypeShape = Record<string, unknown>> {
+export class DataTypeDefinition<Data extends DataTypeShape = Record<string, unknown>> {
   constructor(
     private config: DataDefineConfig<Data>,
-    private dataMap: Map<string, DataDefine>
-  ) {}
+    private dataMap: Map<string, DataTypeDefinition>,
+  ) {
+  }
 
   private isByName(name: string): boolean {
     return name === this.config.name;
@@ -135,7 +138,7 @@ export class DataDefine<Data extends DataTypeShape = Record<string, unknown>> {
     if (!dataDefine) {
       throw new BlockSuiteError(
         ErrorCode.DatabaseBlockError,
-        'data config not found'
+        'data config not found',
       );
     }
     return dataDefine.isSubOfByName(this.config.name);
@@ -147,19 +150,19 @@ export class DataDefine<Data extends DataTypeShape = Record<string, unknown>> {
 // TODO support generic data type
 interface DataDefineConfig<_T extends DataTypeShape> {
   name: string;
-  supers: DataDefine[];
+  supers: DataTypeDefinition[];
 }
 
 interface DataHelper<T extends DataTypeShape> {
   create<V = Record<string, unknown>>(name: string): DataDefineConfig<T & V>;
 
   extends<V extends DataTypeShape>(
-    dataDefine: DataDefine<V>
+    dataDefine: DataTypeDefinition<V>,
   ): DataHelper<T & V>;
 }
 
 const createDataHelper = <T extends DataTypeShape = Record<string, unknown>>(
-  ...supers: DataDefine[]
+  ...supers: DataTypeDefinition[]
 ): DataHelper<T> => {
   return {
     create(name: string) {
@@ -176,12 +179,12 @@ const createDataHelper = <T extends DataTypeShape = Record<string, unknown>>(
 const DataHelper = createDataHelper();
 
 export class Typesystem {
-  dataMap = new Map<string, DataDefine>();
+  dataMap = new Map<string, DataTypeDefinition>();
 
   defineData<MetaData extends DataTypeShape>(
-    config: DataDefineConfig<MetaData>
-  ): DataDefine<MetaData> {
-    const result = new DataDefine(config, this.dataMap);
+    config: DataDefineConfig<MetaData>,
+  ): DataTypeDefinition<MetaData> {
+    const result = new DataTypeDefinition(config, this.dataMap);
     this.dataMap.set(config.name, result);
     return result;
   }
@@ -190,7 +193,7 @@ export class Typesystem {
     context: Record<string, TType>,
     realArgs: TType[],
     realRt: TType,
-    template: TFunction
+    template: TFunction,
   ): TFunction {
     const ctx = { ...context };
     template.args.forEach((arg, i) => {
@@ -210,7 +213,7 @@ export class Typesystem {
   isSubtype(
     superType: TType,
     sub: TType,
-    context?: Record<string, TType>
+    context?: Record<string, TType>,
   ): boolean {
     if (superType.type === 'typeRef') {
       // TODO both are ref
@@ -242,7 +245,7 @@ export class Typesystem {
       if (!dataDefine) {
         throw new BlockSuiteError(
           ErrorCode.DatabaseBlockError,
-          'data config not found'
+          'data config not found',
         );
       }
       if (!this.isDataType(superType)) {
@@ -275,7 +278,7 @@ export class Typesystem {
         case 'function':
           throw new BlockSuiteError(
             ErrorCode.DatabaseBlockError,
-            'not implement yet'
+            'not implement yet',
           );
       }
     };

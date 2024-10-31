@@ -1,111 +1,65 @@
-import type { FilterDefineType } from './matcher.js';
+import { t } from '../../logical/data-type-presets.js';
+import { createFilter } from '../create-filter.js';
 
-import { tBoolean, tString } from '../../logical/data-type.js';
-import { tFunction } from '../../logical/typesystem.js';
-
-export const stringFilter = {
-  is: {
-    type: tFunction({
-      args: [tString.create(), tString.create()],
-      rt: tBoolean.create(),
-    }),
+export const stringFilter = [
+  createFilter({
+    name: 'is',
+    self: t.string.instance(),
+    args: [t.string.instance()] as const,
     label: 'Is',
-    shortString: target => target?.toString(),
-    impl: (value, target) => {
-      if (
-        typeof value !== 'string' ||
-        typeof target !== 'string' ||
-        target === ''
-      ) {
-        return true;
-      }
-      return value == target;
+    shortString: value => value.toString(),
+    impl: (self = '', value) => {
+      return self == value;
     },
-  },
-  isNot: {
-    type: tFunction({
-      args: [tString.create(), tString.create()],
-      rt: tBoolean.create(),
-    }),
+  }),
+  createFilter({
+    name: 'isNot',
+    self: t.string.instance(),
+    args: [t.string.instance()] as const,
     label: 'Is not',
-    shortString: target => target?.toString(),
-    impl: (value, target) => {
-      if (
-        typeof value !== 'string' ||
-        typeof target !== 'string' ||
-        target === ''
-      ) {
-        return true;
-      }
-      return value != target;
+    shortString: value => value.toString(),
+    impl: (self = '', value) => {
+      return self != value;
     },
-  },
-  contains: {
-    type: tFunction({
-      args: [tString.create(), tString.create()],
-      rt: tBoolean.create(),
-    }),
+  }),
+  createFilter({
+    name: 'contains',
+    self: t.string.instance(),
+    args: [t.string.instance()] as const,
     label: 'Contains',
-    impl: (value, target) => {
-      if (
-        typeof value !== 'string' ||
-        typeof target !== 'string' ||
-        target === ''
-      ) {
-        return true;
-      }
-      return value.includes(target);
+    shortString: () => 'contains',
+    impl: (self = '', value) => {
+      return self.includes(value);
     },
-  },
-  doesNoContains: {
-    type: tFunction({
-      args: [tString.create(), tString.create()],
-      rt: tBoolean.create(),
-    }),
+  }),
+  createFilter({
+    name: 'doesNoContains',
+    self: t.string.instance(),
+    args: [t.string.instance()] as const,
     label: 'Does no contains',
-    impl: (value, target) => {
-      if (
-        typeof value !== 'string' ||
-        typeof target !== 'string' ||
-        target === ''
-      ) {
-        return true;
-      }
-      return !value.includes(target);
+    shortString: () => 'not contains',
+    impl: (self = '', value) => {
+      return !self.includes(value);
     },
-  },
-  startsWith: {
-    type: tFunction({
-      args: [tString.create(), tString.create()],
-      rt: tBoolean.create(),
-    }),
+  }),
+  createFilter({
+    name: 'startsWith',
+    self: t.string.instance(),
+    args: [t.string.instance()] as const,
     label: 'Starts with',
-    impl: (value, target) => {
-      if (
-        typeof value !== 'string' ||
-        typeof target !== 'string' ||
-        target === ''
-      ) {
-        return true;
-      }
-      return value.startsWith(target);
+    shortString: () => 'starts with',
+    impl: (self = '', value) => {
+      return self.startsWith(value);
     },
-  },
-  endsWith: {
-    type: tFunction({
-      args: [tString.create(), tString.create()],
-      rt: tBoolean.create(),
-    }),
+  }),
+  createFilter({
+    name: 'endsWith',
+    self: t.string.instance(),
+    args: [t.string.instance()] as const,
     label: 'Ends with',
-    impl: (value, target) => {
-      if (
-        typeof value !== 'string' ||
-        typeof target !== 'string' ||
-        target === ''
-      ) {
-        return true;
-      }
-      return value.endsWith(target);
+    shortString: () => 'ends with',
+    impl: (self = '', value) => {
+      return self.endsWith(value);
     },
-  },
-} as Record<string, FilterDefineType>;
+  }),
+];

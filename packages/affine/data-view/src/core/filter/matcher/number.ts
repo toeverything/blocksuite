@@ -1,91 +1,83 @@
-import type { FilterDefineType } from './matcher.js';
+import { t } from '../../logical/data-type-presets.js';
+import { createFilter } from '../create-filter.js';
 
-import { tBoolean, tNumber } from '../../logical/data-type.js';
-import { tFunction } from '../../logical/typesystem.js';
-
-export const numberFilter = {
-  greatThan: {
-    type: tFunction({
-      args: [tNumber.create(), tNumber.create()],
-      rt: tBoolean.create(),
-    }),
+export const numberFilter = [
+  createFilter({
+    name: 'equal',
+    self: t.number.instance(),
+    args: [t.number.instance()] as const,
+    label: '=',
+    shortString: () => '=',
+    impl: (self, target) => {
+      if (self == null) {
+        return false;
+      }
+      return self == target;
+    },
+  }),
+  createFilter({
+    name: 'notEqual',
+    self: t.number.instance(),
+    args: [t.number.instance()] as const,
+    label: '≠',
+    shortString: () => '≠',
+    impl: (self, target) => {
+      if (self == null) {
+        return false;
+      }
+      return self != target;
+    },
+  }),
+  createFilter({
+    name: 'greatThan',
+    self: t.number.instance(),
+    args: [t.number.instance()] as const,
     label: '>',
-    impl: (value, target) => {
-      value = value ?? 0;
-      if (typeof value !== 'number' || typeof target !== 'number') {
-        return true;
+    shortString: () => '>',
+    impl: (self, target) => {
+      if (self == null) {
+        return false;
       }
-      return value > target;
+      return self > target;
     },
-  },
-  greatThanOrEqual: {
-    type: tFunction({
-      args: [tNumber.create(), tNumber.create()],
-      rt: tBoolean.create(),
-    }),
-    label: '>=',
-    impl: (value, target) => {
-      value = value ?? 0;
-      if (typeof value !== 'number' || typeof target !== 'number') {
-        return true;
-      }
-      return value >= target;
-    },
-  },
-  lessThan: {
-    type: tFunction({
-      args: [tNumber.create(), tNumber.create()],
-      rt: tBoolean.create(),
-    }),
+  }),
+  createFilter({
+    name: 'lessThan',
+    self: t.number.instance(),
+    args: [t.number.instance()] as const,
     label: '<',
-    impl: (value, target) => {
-      value = value ?? 0;
-      if (typeof value !== 'number' || typeof target !== 'number') {
-        return true;
+    shortString: () => '<',
+    impl: (self, target) => {
+      if (self == null) {
+        return false;
       }
-      return value < target;
+      return self < target;
     },
-  },
-  lessThanOrEqual: {
-    type: tFunction({
-      args: [tNumber.create(), tNumber.create()],
-      rt: tBoolean.create(),
-    }),
-    label: '<=',
-    impl: (value, target) => {
-      value = value ?? 0;
-      if (typeof value !== 'number' || typeof target !== 'number') {
-        return true;
+  }),
+  createFilter({
+    name: 'greatThanOrEqual',
+    self: t.number.instance(),
+    args: [t.number.instance()] as const,
+    label: '≥',
+    shortString: () => '≥',
+    impl: (self, target) => {
+      if (self == null) {
+        return false;
       }
-      return value <= target;
+      return self >= target;
     },
-  },
-  equal: {
-    type: tFunction({
-      args: [tNumber.create(), tNumber.create()],
-      rt: tBoolean.create(),
-    }),
-    label: '==',
-    impl: (value, target) => {
-      value = value ?? 0;
-      if (typeof value !== 'number' || typeof target !== 'number') {
-        return true;
+  }),
+  createFilter({
+    name: 'lessThanOrEqual',
+    self: t.number.instance(),
+    args: [t.number.instance()] as const,
+    label: '≤',
+    shortString: () => '≤',
+    impl: (self, target) => {
+      if (self == null) {
+        return false;
       }
-      return value == target;
+      return self <= target;
     },
-  },
-  notEqual: {
-    type: tFunction({
-      args: [tNumber.create(), tNumber.create()],
-      rt: tBoolean.create(),
-    }),
-    label: '!=',
-    impl: (value, target) => {
-      value = value ?? 0;
-      if (typeof value !== 'number' || typeof target !== 'number') {
-        return true;
-      }
-      return value != target;
-    },
-  },
-} as Record<string, FilterDefineType>;
+  }),
+];

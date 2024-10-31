@@ -1,40 +1,42 @@
-import type { FilterDefineType } from './matcher.js';
+import { ct } from '../../logical/composite-type.js';
+import { t } from '../../logical/data-type-presets.js';
+import { tRef, tVar } from '../../logical/type-variable.js';
+import { createFilter } from '../create-filter.js';
 
-import { tBoolean, tTag } from '../../logical/data-type.js';
-import {
-  tArray,
-  tFunction,
-  tTypeRef,
-  tTypeVar,
-} from '../../logical/typesystem.js';
-
-export const tagFilter = {
-  isOneOf: {
-    type: tFunction({
-      typeVars: [tTypeVar('options', tTag.create())],
-      args: [tTypeRef('options'), tArray(tTypeRef('options'))],
-      rt: tBoolean.create(),
-    }),
+const optionName = 'options' as const;
+export const tagFilter = [
+  createFilter({
+    name: 'isOneOf',
+    vars: [tVar(optionName, t.tag.instance())] as const,
+    self: tRef(optionName),
+    args: [ct.array.instance(tRef(optionName))] as const,
     label: 'Is one of',
-    impl: (value, target) => {
-      if (!Array.isArray(target) || !target.length) {
+    shortString: () => '',
+    impl: (self, value) => {
+      if (!value.length) {
         return true;
       }
-      return target.includes(value);
+      if (self == null) {
+        return false;
+      }
+      return value.includes(self);
     },
-  },
-  isNotOneOf: {
-    type: tFunction({
-      typeVars: [tTypeVar('options', tTag.create())],
-      args: [tTypeRef('options'), tArray(tTypeRef('options'))],
-      rt: tBoolean.create(),
-    }),
+  }),
+  createFilter({
+    name: 'isNotOneOf',
+    vars: [tVar(optionName, t.tag.instance())] as const,
+    self: tRef(optionName),
+    args: [ct.array.instance(tRef(optionName))] as const,
     label: 'Is not one of',
-    impl: (value, target) => {
-      if (!Array.isArray(target) || !target.length) {
+    shortString: () => 'not',
+    impl: (self, value) => {
+      if (!value.length) {
         return true;
       }
-      return !target.includes(value);
+      if (self == null) {
+        return true;
+      }
+      return !value.includes(self);
     },
-  },
-} as Record<string, FilterDefineType>;
+  }),
+];

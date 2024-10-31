@@ -1,6 +1,6 @@
 import type { StatsFunction } from './types.js';
 
-import { tNumber } from '../logical/data-type.js';
+import { tNumber } from '../logical/data-type-presets.js';
 
 export const numberStatsFunctions: StatsFunction[] = [
   {

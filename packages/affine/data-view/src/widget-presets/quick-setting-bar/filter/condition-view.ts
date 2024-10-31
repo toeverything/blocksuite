@@ -17,8 +17,8 @@ import type { SingleFilter } from '../../../core/filter/types.js';
 
 import { getRefType } from '../../../core/expression/ref/ref.js';
 import { filterMatcher } from '../../../core/filter/matcher/matcher.js';
-import { renderUniLit } from '../../../core/index.js';
-import { tBoolean } from '../../../core/logical/data-type.js';
+import { renderUniLit, t } from '../../../core/index.js';
+import { tBoolean } from '../../../core/logical/data-type-presets.js';
 import { typesystem } from '../../../core/logical/typesystem.js';
 
 export class FilterConditionView extends SignalWatcher(ShadowlessElement) {
@@ -76,7 +76,7 @@ export class FilterConditionView extends SignalWatcher(ShadowlessElement) {
 
   private onClickButton = (evt: Event) => {
     this.popConditionEdit(
-      popupTargetFromElement(evt.currentTarget as HTMLElement)
+      popupTargetFromElement(evt.currentTarget as HTMLElement),
     );
   };
 
@@ -94,7 +94,7 @@ export class FilterConditionView extends SignalWatcher(ShadowlessElement) {
       options: {
         items: [
           menu.subMenu({
-            name: fn.data.name,
+            name: fn.name,
             options: {
               items: this.getFunctionItems(target),
             },
@@ -112,7 +112,7 @@ export class FilterConditionView extends SignalWatcher(ShadowlessElement) {
   });
 
   function$ = computed(() => {
-    return filterMatcher.find(v => v.data.name === this.data.function);
+    return filterMatcher.getFilterByName(this.data.function);
   });
 
   getFunctionItems = (target: PopupTarget) => {
@@ -120,7 +120,7 @@ export class FilterConditionView extends SignalWatcher(ShadowlessElement) {
     if (!type) {
       return [];
     }
-    return filterMatcher.allMatchedData(type).map(v => {
+    return filterMatcher.filterListBySelfType(t.number.instance()).map(v => {
       const selected = v.name === this.data.function;
       return menu.action({
         name: v.label,
@@ -145,7 +145,7 @@ export class FilterConditionView extends SignalWatcher(ShadowlessElement) {
 
   text$ = computed(() => {
     const name = this.leftVar$.value?.name ?? '';
-    const data = this.function$.value?.data;
+    const data = this.function$.value;
     const valueString = data?.shortString?.(...this.args$.value);
     if (valueString) {
       return `${name}: ${valueString}`;
@@ -153,7 +153,8 @@ export class FilterConditionView extends SignalWatcher(ShadowlessElement) {
     return name;
   });
 
-  private getArgItems() {}
+  private getArgItems() {
+  }
 
   private getArgsItems() {
     const fn = filterMatcher.find(v => v.data.name === this.data.function);
@@ -171,18 +172,19 @@ export class FilterConditionView extends SignalWatcher(ShadowlessElement) {
   override render() {
     const leftVar = this.leftVar$.value;
     if (!leftVar) {
-      return html` <data-view-component-button
-        hoverType="border"
-        .text="${html`Invalid filter rule`}"
-      ></data-view-component-button>`;
+      return html`
+        <data-view-component-button
+          hoverType='border'
+          .text='${html`Invalid filter rule`}'
+        ></data-view-component-button>`;
     }
     return html`
       <data-view-component-button
-        hoverType="border"
-        .icon="${renderUniLit(leftVar.icon)}"
-        @click="${this.onClickButton}"
-        .text="${html`${this.text$.value}`}"
-        .postfix="${ArrowDownSmallIcon()}"
+        hoverType='border'
+        .icon='${renderUniLit(leftVar.icon)}'
+        @click='${this.onClickButton}'
+        .text='${html`${this.text$.value}`}'
+        .postfix='${ArrowDownSmallIcon()}'
       ></data-view-component-button>
     `;
   }

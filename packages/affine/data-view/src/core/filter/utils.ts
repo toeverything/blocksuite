@@ -1,16 +1,12 @@
 import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 
-import type {
-  Variable,
-  VariableOrProperty,
-  VariableRef,
-} from '../expression/types.js';
+import type { Variable, VariableRef } from '../expression/types.js';
 import type { FilterGroup, SingleFilter } from './types.js';
 
 import { getRefType } from '../expression/ref/ref.js';
 import { filterMatcher } from './matcher/matcher.js';
 
-export const firstFilterName = (vars: Variable[], ref: VariableOrProperty) => {
+export const firstFilterName = (vars: Variable[], ref: VariableRef) => {
   const type = getRefType(vars, ref);
   if (!type) {
     throw new BlockSuiteError(
@@ -18,11 +14,11 @@ export const firstFilterName = (vars: Variable[], ref: VariableOrProperty) => {
       `can't resolve ref type`
     );
   }
-  return filterMatcher.match(type)?.name;
+  return filterMatcher.firstMatchedBySelfType(type)?.name;
 };
 export const firstFilterByRef = (
   vars: Variable[],
-  ref: VariableOrProperty
+  ref: VariableRef
 ): SingleFilter => {
   return {
     type: 'filter',

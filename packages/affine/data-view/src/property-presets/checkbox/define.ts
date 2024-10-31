@@ -1,4 +1,4 @@
-import { tBoolean } from '../../core/logical/data-type.js';
+import { tBoolean } from '../../core/logical/data-type-presets.js';
 import { propertyType } from '../../core/property/property-config.js';
 
 export const checkboxPropertyType = propertyType('checkbox');

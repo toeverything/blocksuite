@@ -1,6 +1,6 @@
 import type { GroupByConfig } from './types.js';
 
-import { tBoolean, tNumber, tString, tTag } from '../logical/data-type.js';
+import { tBoolean, tNumber, tString, tTag } from '../logical/data-type-presets.js';
 import { MatcherCreator } from '../logical/matcher.js';
 import { isTArray, tArray } from '../logical/typesystem.js';
 import { createUniComponentFromWebComponent } from '../utils/uni-component/uni-component.js';

@@ -1,33 +1,31 @@
-import type { FilterDefineType } from './matcher.js';
+import { t } from '../../logical/data-type-presets.js';
+import { createFilter } from '../create-filter.js';
 
-import { tBoolean, tDate } from '../../logical/data-type.js';
-import { tFunction } from '../../logical/typesystem.js';
-
-export const dateFilter = {
-  before: {
-    type: tFunction({
-      args: [tDate.create(), tDate.create()],
-      rt: tBoolean.create(),
-    }),
+export const dateFilter = [
+  createFilter({
+    name: 'before',
+    self: t.date.instance(),
+    args: [t.date.instance()] as const,
     label: 'Before',
-    impl: (value, target) => {
-      if (typeof value !== 'number' || typeof target !== 'number') {
-        return true;
+    shortString: () => 'before',
+    impl: (self, value) => {
+      if (self == null) {
+        return false;
       }
-      return value < target;
+      return self < value;
     },
-  },
-  after: {
-    type: tFunction({
-      args: [tDate.create(), tDate.create()],
-      rt: tBoolean.create(),
-    }),
+  }),
+  createFilter({
+    name: 'after',
+    self: t.date.instance(),
+    args: [t.date.instance()] as const,
     label: 'After',
-    impl: (value, target) => {
-      if (typeof value !== 'number' || typeof target !== 'number') {
-        return true;
+    shortString: () => 'after',
+    impl: (self, value) => {
+      if (self == null) {
+        return false;
       }
-      return value > target;
+      return self > value;
     },
-  },
-} as Record<string, FilterDefineType>;
+  }),
+];

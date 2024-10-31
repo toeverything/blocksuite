@@ -1,2 +1,2 @@
-export * from './data-type.js';
+export * from './data-type-presets.js';
 export * from './typesystem.js';

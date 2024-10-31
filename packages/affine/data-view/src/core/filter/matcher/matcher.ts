@@ -1,5 +1,9 @@
-import { Matcher, MatcherCreator } from '../../logical/matcher.js';
-import { type TFunction, typesystem } from '../../logical/typesystem.js';
+import type { TypeInstance } from '../../logical/type.js';
+import type { FilterConfig } from '../create-filter.js';
+
+import { ct } from '../../logical/composite-type.js';
+import { t } from '../../logical/index.js';
+import { newTypeSystem } from '../../logical/new-type-system.js';
 import { booleanFilter } from './boolean.js';
 import { dateFilter } from './date.js';
 import { multiTagFilter } from './multi-tag.js';
@@ -8,16 +12,8 @@ import { stringFilter } from './string.js';
 import { tagFilter } from './tag.js';
 import { unknownFilter } from './unknown.js';
 
-export type FilterMatcherDataType<Args extends unknown[] = unknown[]> = {
-  name: string;
-  label: string;
-  shortString: (...args: Args) => string;
-  impl: (...args: Args) => boolean;
-};
-export type FilterDefineType = {
-  type: TFunction;
-} & Omit<FilterMatcherDataType, 'name'>;
-const allFilter = {
+
+const allFilter = [
   ...dateFilter,
   ...multiTagFilter,
   ...numberFilter,
@@ -25,30 +21,32 @@ const allFilter = {
   ...tagFilter,
   ...booleanFilter,
   ...unknownFilter,
+] as FilterConfig[];
+
+const getPredicate = (selfType: TypeInstance) => (filter: FilterConfig) => {
+  const fn = ct.fn.instance([filter.self, ...filter.args], t.boolean.instance(), filter.vars);
+  const staticType = fn.subst(Object.fromEntries(filter.vars?.map(v => [v.varName, {
+    define: v,
+    type: v.typeConstraint,
+  }]) ?? []));
+  if (!staticType) {
+    return false;
+  }
+  const firstArg = staticType.args[0];
+  return firstArg && newTypeSystem.unify({}, selfType, firstArg);
 };
-const filterMatcherCreator = new MatcherCreator<
-  FilterMatcherDataType,
-  TFunction
->();
-const filterMatchers = Object.entries(allFilter).map(
-  ([name, { type, ...data }]) => {
-    return filterMatcherCreator.createMatcher(type, {
-      name: name,
-      ...data,
-    });
-  }
-);
-export const filterMatcher = new Matcher<FilterMatcherDataType, TFunction>(
-  filterMatchers,
-  (type, target) => {
-    if (type.type !== 'function') {
-      return false;
+
+export const filterMatcher = {
+  filterListBySelfType: (selfType: TypeInstance) => {
+    return allFilter.filter(getPredicate(selfType));
+  },
+  firstMatchedBySelfType: (selfType: TypeInstance) => {
+    return allFilter.find(getPredicate(selfType));
+  },
+  getFilterByName: (name?: string) => {
+    if (!name) {
+      return;
     }
-    const staticType = typesystem.subst(
-      Object.fromEntries(type.typeVars?.map(v => [v.name, v.bound]) ?? []),
-      type
-    );
-    const firstArg = staticType.args[0];
-    return firstArg && typesystem.isSubtype(firstArg, target);
-  }
-);
+    return allFilter.find(v => v.name === name);
+  },
+};

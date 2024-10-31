@@ -1,69 +1,76 @@
-import type { FilterDefineType } from './matcher.js';
+import { ct } from '../../logical/composite-type.js';
+import { t } from '../../logical/data-type-presets.js';
+import { tRef, tVar } from '../../logical/type-variable.js';
+import { createFilter } from '../create-filter.js';
 
-import { tBoolean, tTag } from '../../logical/data-type.js';
-import {
-  tArray,
-  tFunction,
-  tTypeRef,
-  tTypeVar,
-} from '../../logical/typesystem.js';
-
-export const multiTagFilter = {
-  containsAll: {
-    type: tFunction({
-      typeVars: [tTypeVar('options', tTag.create())],
-      args: [tArray(tTypeRef('options')), tArray(tTypeRef('options'))],
-      rt: tBoolean.create(),
-    }),
+const optionName = 'option' as const;
+export const multiTagFilter = [
+  createFilter({
+    name: 'containsAll',
+    vars: [tVar(optionName, t.tag.instance())] as const,
+    self: ct.array.instance(tRef(optionName)),
+    args: [ct.array.instance(tRef(optionName))] as const,
     label: 'Contains all',
-    impl: (value, target) => {
-      if (!Array.isArray(target) || !Array.isArray(value) || !target.length) {
+    shortString: () => 'contains',
+    impl: (self, value) => {
+      if (!value.length) {
         return true;
       }
-      return target.every(v => value.includes(v));
+      if (self == null) {
+        return false;
+      }
+      return value.every(v => self.includes(v));
     },
-  },
-  containsOneOf: {
-    type: tFunction({
-      typeVars: [tTypeVar('options', tTag.create())],
-      args: [tArray(tTypeRef('options')), tArray(tTypeRef('options'))],
-      rt: tBoolean.create(),
-    }),
+  }),
+  createFilter({
     name: 'containsOneOf',
+    vars: [tVar(optionName, t.tag.instance())] as const,
+    self: ct.array.instance(tRef(optionName)),
+    args: [ct.array.instance(tRef(optionName))] as const,
     label: 'Contains one of',
-    impl: (value, target) => {
-      if (!Array.isArray(target) || !Array.isArray(value) || !target.length) {
+    shortString: () => 'contains',
+    impl: (self, value) => {
+      if (!value.length) {
         return true;
       }
-      return target.some(v => value.includes(v));
+      if (self == null) {
+        return false;
+      }
+      return value.some(v => self.includes(v));
     },
-  },
-  doesNotContainsOneOf: {
-    type: tFunction({
-      typeVars: [tTypeVar('options', tTag.create())],
-      args: [tArray(tTypeRef('options')), tArray(tTypeRef('options'))],
-      rt: tBoolean.create(),
-    }),
+  }),
+  createFilter({
+    name: 'doesNotContainOneOf',
+    vars: [tVar(optionName, t.tag.instance())] as const,
+    self: ct.array.instance(tRef(optionName)),
+    args: [ct.array.instance(tRef(optionName))] as const,
     label: 'Does not contains one of',
-    impl: (value, target) => {
-      if (!Array.isArray(target) || !Array.isArray(value) || !target.length) {
+    shortString: () => 'not contains',
+    impl: (self, value) => {
+      if (!value.length) {
         return true;
       }
-      return target.every(v => !value.includes(v));
+      if (self == null) {
+        return true;
+      }
+      return value.every(v => !self.includes(v));
     },
-  },
-  doesNotContainsAll: {
-    type: tFunction({
-      typeVars: [tTypeVar('options', tTag.create())],
-      args: [tArray(tTypeRef('options')), tArray(tTypeRef('options'))],
-      rt: tBoolean.create(),
-    }),
+  }),
+  createFilter({
+    name: 'doesNotContainAll',
+    vars: [tVar(optionName, t.tag.instance())] as const,
+    self: ct.array.instance(tRef(optionName)),
+    args: [ct.array.instance(tRef(optionName))] as const,
     label: 'Does not contains all',
-    impl: (value, target) => {
-      if (!Array.isArray(target) || !Array.isArray(value) || !target.length) {
+    shortString: () => 'not contains',
+    impl: (self, value) => {
+      if (!value.length) {
         return true;
       }
-      return !target.every(v => value.includes(v));
+      if (self == null) {
+        return true;
+      }
+      return !value.every(v => self.includes(v));
     },
-  },
-} as Record<string, FilterDefineType>;
+  }),
+];

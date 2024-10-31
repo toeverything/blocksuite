@@ -23,13 +23,6 @@ const evalRef = (
 
 const evalValue = (value: Value, _row: Record<string, unknown>): unknown => {
   return value.value;
-  // TODO
-  // switch (value.type) {
-  //     case "ref":
-  //         return evalRef(value, row)
-  //     case "literal":
-  //         return value.value;
-  // }
 };
 export const evalFilter = (
   filterGroup: Filter,
@@ -38,7 +31,7 @@ export const evalFilter = (
   const evalF = (filter: Filter): boolean => {
     if (filter.type === 'filter') {
       const value = evalRef(filter.left, row);
-      const func = filterMatcher.findData(v => v.name === filter.function);
+      const func = filterMatcher.getFilterByName(filter.function);
       const args = filter.args.map(value => evalValue(value, row));
       try {
         if ((func?.impl.length ?? 0) > args.length + 1) {
