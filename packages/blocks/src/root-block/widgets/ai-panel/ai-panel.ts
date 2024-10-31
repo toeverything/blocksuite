@@ -244,15 +244,17 @@ export class AffineAIPanelWidget extends WidgetComponent {
     });
   };
 
-  hide = () => {
+  hide = (shouldTriggerCallback: boolean = true) => {
     this._resetAbortController();
     this.state = 'hidden';
     this._stopAutoUpdate?.();
     this._inputText = null;
     this._answer = null;
     this._stopAutoUpdate = undefined;
-    this.config?.hideCallback?.();
     this.viewportOverlayWidget?.unlock();
+    if (shouldTriggerCallback) {
+      this.config?.hideCallback?.();
+    }
   };
 
   onInput = (text: string) => {
@@ -285,13 +287,17 @@ export class AffineAIPanelWidget extends WidgetComponent {
     }
   };
 
-  toggle = (reference: Element, input?: string) => {
+  toggle = (
+    reference: Element,
+    input?: string,
+    shouldTriggerCallback?: boolean
+  ) => {
     if (input) {
       this._inputText = input;
       this.generate();
     } else {
       // reset state
-      this.hide();
+      this.hide(shouldTriggerCallback);
       this.state = 'input';
     }
 
