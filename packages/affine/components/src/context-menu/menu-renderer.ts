@@ -1,4 +1,4 @@
-import { unsafeCSSVarV2 } from '@blocksuite/affine-shared/theme';
+import { unsafeCSSVar, unsafeCSSVarV2 } from '@blocksuite/affine-shared/theme';
 import { ShadowlessElement } from '@blocksuite/block-std';
 import { SignalWatcher, WithDisposable } from '@blocksuite/global/utils';
 import { ArrowLeftBigIcon, CloseIcon, SearchIcon } from '@blocksuite/icons/lit';
@@ -28,9 +28,9 @@ export class MenuComponent extends SignalWatcher(
       flex-direction: column;
       user-select: none;
       min-width: 276px;
-      box-shadow: var(--affine-shadow-2);
+      box-shadow: ${unsafeCSSVar('overlayPanelShadow')};
       border-radius: 4px;
-      background-color: var(--affine-background-overlay-panel-color);
+      background-color: ${unsafeCSSVarV2('layer/background/overlayPanel')};
       padding: 8px;
       position: absolute;
       z-index: 999;

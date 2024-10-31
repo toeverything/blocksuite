@@ -26,6 +26,8 @@ export class MenuInput extends MenuFocusable {
       padding: 4px 6px;
       border: 1px solid var(--affine-border-color);
       width: 100%;
+      color: ${unsafeCSSVarV2('text/primary')};
+      background-color: transparent;
     }
 
     .affine-menu-input.focused {
