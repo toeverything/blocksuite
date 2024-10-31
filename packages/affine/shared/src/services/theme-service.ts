@@ -44,10 +44,18 @@ export class ThemeService extends Extension {
 
   edgeless$: Signal<ColorScheme>;
 
+  get appTheme() {
+    return this.app$.peek();
+  }
+
+  get edgelessTheme() {
+    return this.edgeless$.peek();
+  }
+
   get theme() {
     return this.docMode.getEditorMode() === 'page'
-      ? this.app$.peek()
-      : this.edgeless$.peek();
+      ? this.appTheme
+      : this.edgelessTheme;
   }
 
   get theme$() {
@@ -60,8 +68,9 @@ export class ThemeService extends Extension {
   ) {
     super();
     const extension = this.std.getOptional(ThemeExtensionIdentifier);
-    this.app$ = extension?.getAppTheme?.() || themeObserver.theme$;
-    this.edgeless$ = extension?.getEdgelessTheme?.() || themeObserver.theme$;
+    this.app$ = extension?.getAppTheme?.() || getThemeObserver().theme$;
+    this.edgeless$ =
+      extension?.getEdgelessTheme?.() || getThemeObserver().theme$;
   }
 
   static override setup(di: Container) {
@@ -143,7 +152,7 @@ export class ThemeService extends Extension {
     if (real && result.startsWith('--')) {
       result = result.endsWith(TRANSPARENT)
         ? TRANSPARENT
-        : this.getCssVariableColor(result);
+        : this.getCssVariableColor(result, theme);
     }
 
     return result ?? TRANSPARENT;
@@ -165,7 +174,7 @@ export class ThemeService extends Extension {
   }
 }
 
-class ThemeObserver {
+export class ThemeObserver {
   private observer: MutationObserver;
 
   theme$ = signal(ColorScheme.Light);
@@ -191,7 +200,14 @@ class ThemeObserver {
   }
 }
 
-const themeObserver = new ThemeObserver();
+export const getThemeObserver = (function () {
+  let observer: ThemeObserver;
+  return function () {
+    if (observer) return observer;
+    observer = new ThemeObserver();
+    return observer;
+  };
+})();
 
 const toolbarColorKeys: Array<keyof AffineCssVariables> = [
   '--affine-background-overlay-panel-color',

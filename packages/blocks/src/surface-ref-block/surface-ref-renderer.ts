@@ -69,12 +69,24 @@ export class SurfaceRefRenderer {
       enableStackingCanvas: options.enableStackingCanvas,
       provider: {
         generateColorProperty: (color: Color, fallback: string) =>
-          themeService.generateColorProperty(color, fallback),
-        getColorScheme: () => themeService.theme,
+          themeService.generateColorProperty(
+            color,
+            fallback,
+            themeService.edgelessTheme
+          ),
+        getColorScheme: () => themeService.edgelessTheme,
         getColorValue: (color: Color, fallback?: string, real?: boolean) =>
-          themeService.getColorValue(color, fallback, real),
+          themeService.getColorValue(
+            color,
+            fallback,
+            real,
+            themeService.edgelessTheme
+          ),
         getPropertyValue: (property: string) =>
-          themeService.getCssVariableColor(property),
+          themeService.getCssVariableColor(
+            property,
+            themeService.edgelessTheme
+          ),
       },
       elementRenderers,
     });
