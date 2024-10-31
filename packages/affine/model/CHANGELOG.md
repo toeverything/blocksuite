@@ -1,5 +1,40 @@
 # @blocksuite/affine-model
 
+## 0.17.24
+
+### Patch Changes
+
+- 5e23d07: fix(edgeless): failed to add link in edgeless text (#8589)
+
+  ## Feat
+
+  - feat(blocks): add callback control to AI panel hide and toggle (#8639)
+
+  ## Fix
+
+  - fix(edgeless): failed to add link in edgeless text (#8589)
+  - fix: add data-theme on surface ref component (#8638)
+  - fix(edgeless): stop pointer event propagation from latex editor menu (#8633)
+  - fix: use html theme observer result as default app theme value (#8635)
+  - fix(blocks): incorrect mobile keyboard toolbar when scroll (#8634)
+
+  ## Chore
+
+  - chore: release patch version (#8636)
+
+- 39a840a: ## Fix
+
+  - fix(edgeless): stop pointer event propagation from latex editor menu (#8633)
+  - fix: use html theme observer result as default app theme value (#8635)
+  - fix(blocks): incorrect mobile keyboard toolbar when scroll (#8634)
+
+- Updated dependencies [5e23d07]
+- Updated dependencies [39a840a]
+  - @blocksuite/block-std@0.17.24
+  - @blocksuite/global@0.17.24
+  - @blocksuite/inline@0.17.24
+  - @blocksuite/store@0.17.24
+
 ## 0.17.23
 
 ### Patch Changes
