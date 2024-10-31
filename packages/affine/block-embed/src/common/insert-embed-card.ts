@@ -30,49 +30,8 @@ export function insertEmbedCard(
     blockId = textSelection.blockId;
   } else if (blockSelection) {
     blockId = blockSelection.blockId;
-  } else if (surfaceSelection) {
-    if (surfaceSelection.editing) {
-      blockId = surfaceSelection.blockId;
-    } else {
-      const rootId = std.doc.root?.id;
-      if (!rootId) return;
-      const edgelessRoot = std.view.getBlock(rootId);
-      if (!edgelessRoot) return;
-
-      // @ts-expect-error TODO: fix after edgeless refactor
-      edgelessRoot.service.viewport.smoothZoom(1);
-      // @ts-expect-error TODO: fix after edgeless refactor
-      const surfaceBlock = edgelessRoot.surface;
-      if (!(surfaceBlock instanceof SurfaceBlockComponent)) return;
-      const center = Vec.toVec(surfaceBlock.renderer.viewport.center);
-      // @ts-expect-error TODO: fix after edgeless refactor
-      const cardId = edgelessRoot.service.addBlock(
-        flavour,
-        {
-          ...props,
-          xywh: Bound.fromCenter(
-            center,
-            EMBED_CARD_WIDTH[targetStyle],
-            EMBED_CARD_HEIGHT[targetStyle]
-          ).serialize(),
-          style: targetStyle,
-        },
-        surfaceBlock.model
-      );
-
-      // @ts-expect-error TODO: fix after edgeless refactor
-      edgelessRoot.service.selection.set({
-        elements: [cardId],
-        editing: false,
-      });
-
-      // @ts-expect-error TODO: fix after edgeless refactor
-      edgelessRoot.tools.setEdgelessTool({
-        type: 'default',
-      });
-
-      return;
-    }
+  } else if (surfaceSelection && surfaceSelection.editing) {
+    blockId = surfaceSelection.blockId;
   }
 
   if (blockId) {
@@ -82,5 +41,42 @@ export function insertEmbedCard(
     if (!parent) return;
     const index = parent.children.indexOf(block.model);
     host.doc.addBlock(flavour as never, props, parent, index + 1);
+  } else {
+    const rootId = std.doc.root?.id;
+    if (!rootId) return;
+    const edgelessRoot = std.view.getBlock(rootId);
+    if (!edgelessRoot) return;
+
+    // @ts-expect-error TODO: fix after edgeless refactor
+    edgelessRoot.service.viewport.smoothZoom(1);
+    // @ts-expect-error TODO: fix after edgeless refactor
+    const surfaceBlock = edgelessRoot.surface;
+    if (!(surfaceBlock instanceof SurfaceBlockComponent)) return;
+    const center = Vec.toVec(surfaceBlock.renderer.viewport.center);
+    // @ts-expect-error TODO: fix after edgeless refactor
+    const cardId = edgelessRoot.service.addBlock(
+      flavour,
+      {
+        ...props,
+        xywh: Bound.fromCenter(
+          center,
+          EMBED_CARD_WIDTH[targetStyle],
+          EMBED_CARD_HEIGHT[targetStyle]
+        ).serialize(),
+        style: targetStyle,
+      },
+      surfaceBlock.model
+    );
+
+    // @ts-expect-error TODO: fix after edgeless refactor
+    edgelessRoot.service.selection.set({
+      elements: [cardId],
+      editing: false,
+    });
+
+    // @ts-expect-error TODO: fix after edgeless refactor
+    edgelessRoot.tools.setEdgelessTool({
+      type: 'default',
+    });
   }
 }
