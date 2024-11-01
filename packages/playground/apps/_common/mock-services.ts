@@ -1,13 +1,16 @@
 import type { AffineEditorContainer } from '@blocksuite/presets';
 
 import {
+  ColorScheme,
   type DocMode,
   type DocModeProvider,
   type NotificationService,
   type ParseDocUrlService,
+  type ThemeExtension,
   toast,
 } from '@blocksuite/blocks';
 import { type DocCollection, Slot } from '@blocksuite/store';
+import { signal } from '@preact/signals-core';
 
 function getModeFromStorage() {
   const mapJson = localStorage.getItem('playground:docMode');
@@ -114,3 +117,27 @@ export function mockParseDocUrlService(collection: DocCollection) {
   };
   return parseDocUrlService;
 }
+
+export class MockEdgelessTheme {
+  theme$ = signal(ColorScheme.Light);
+
+  setTheme(theme: ColorScheme) {
+    this.theme$.value = theme;
+  }
+
+  toggleTheme() {
+    const theme =
+      this.theme$.value === ColorScheme.Dark
+        ? ColorScheme.Light
+        : ColorScheme.Dark;
+    this.theme$.value = theme;
+  }
+}
+
+export const mockEdgelessTheme = new MockEdgelessTheme();
+
+export const themeExtension: ThemeExtension = {
+  getEdgelessTheme() {
+    return mockEdgelessTheme.theme$;
+  },
+};

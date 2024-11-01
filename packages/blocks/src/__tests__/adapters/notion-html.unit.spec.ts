@@ -286,35 +286,33 @@ describe('notion html to snapshot', () => {
       <ul id="ed3d2ae9-62f5-433a-9049-9ddbd1c81ac5" class="bulleted-list">
         <li style="list-style-type:disc">eee</li>
       </ul>
-      <ul id="ed3d2ae9-62f5-433a-9049-9ddbd1c81ac5" class="to-do-list">
+      <ul id="12d088dd-6fdb-8036-bead-e3940734de95" class="to-do-list">
         <li>
           <div class="checkbox checkbox-off"></div> <span class="to-do-children-unchecked">aaa</span>
           <div class="indented">
-            <ul id="ed3d2ae9-62f5-433a-9049-9ddbd1c81ac5" class="to-do-list">
+            <ul id="12d088dd-6fdb-8007-8f38-d3eaaca6975f" class="to-do-list">
               <li>
                 <div class="checkbox checkbox-on"></div> <span class="to-do-children-checked">bbb</span>
                 <div class="indented">
-                  <ul id="ed3d2ae9-62f5-433a-9049-9ddbd1c81ac5" class="to-do-list">
+                  <ul id="12d088dd-6fdb-807e-8495-fca8f43a33bf" class="to-do-list">
                     <li>
-                      <div class="checkbox checkbox-off"></div> <span
-                        class="to-do-children-unchecked">ccc</span>
+                      <div class="checkbox checkbox-off"></div> <span class="to-do-children-unchecked">ccc</span>
                       <div class="indented"></div>
                     </li>
                   </ul>
                 </div>
               </li>
             </ul>
-            <ul id="ed3d2ae9-62f5-433a-9049-9ddbd1c81ac5" class="to-do-list">
+            <ul id="12d088dd-6fdb-8023-813a-ff842af9299c" class="to-do-list">
               <li>
-                <div class="checkbox checkbox-off"></div> <span
-                  class="to-do-children-unchecked">ddd</span>
+                <div class="checkbox checkbox-off"></div> <span class="to-do-children-unchecked">ddd</span>
                 <div class="indented"></div>
               </li>
             </ul>
           </div>
         </li>
       </ul>
-      <ul id="ed3d2ae9-62f5-433a-9049-9ddbd1c81ac5" class="to-do-list">
+      <ul id="12d088dd-6fdb-8049-a520-c565437969b5" class="to-do-list">
         <li>
           <div class="checkbox checkbox-on"></div> <span class="to-do-children-checked">eee</span>
           <div class="indented"></div>
@@ -1812,6 +1810,91 @@ describe('notion html to snapshot', () => {
                   insert: ' ',
                   attributes: {
                     latex: 'E = mc^2',
+                  },
+                },
+              ],
+            },
+            type: 'text',
+          },
+          children: [],
+        },
+      ],
+    };
+
+    const adapter = new NotionHtmlAdapter(createJob());
+    const rawBlockSnapshot = await adapter.toBlockSnapshot({
+      file: html,
+    });
+    expect(nanoidReplacement(rawBlockSnapshot)).toEqual(blockSnapshot);
+  });
+
+  test('inline style', async () => {
+    const html = `<div class="page-body">
+      <p id="12d088dd-6fdb-80e5-97be-ebd049a327f5" class="">
+        <strong>strong</strong> <em>italic</em> <span style="border-bottom:0.05em solid">underline</span> <del>strikethrough</del> <code>code</code> 
+      </p>
+    </div>`;
+
+    const blockSnapshot: BlockSnapshot = {
+      type: 'block',
+      id: 'matchesReplaceMap[0]',
+      flavour: 'affine:note',
+      props: {
+        xywh: '[0,0,800,95]',
+        background: DEFAULT_NOTE_BACKGROUND_COLOR,
+        index: 'a0',
+        hidden: false,
+        displayMode: NoteDisplayMode.DocAndEdgeless,
+      },
+      children: [
+        {
+          type: 'block',
+          id: 'matchesReplaceMap[1]',
+          flavour: 'affine:paragraph',
+          props: {
+            text: {
+              '$blocksuite:internal:text$': true,
+              delta: [
+                {
+                  insert: 'strong',
+                  attributes: {
+                    bold: true,
+                  },
+                },
+                {
+                  insert: ' ',
+                },
+                {
+                  insert: 'italic',
+                  attributes: {
+                    italic: true,
+                  },
+                },
+                {
+                  insert: ' ',
+                },
+                {
+                  insert: 'underline',
+                  attributes: {
+                    underline: true,
+                  },
+                },
+                {
+                  insert: ' ',
+                },
+                {
+                  insert: 'strikethrough',
+                  attributes: {
+                    strike: true,
+                  },
+                },
+                {
+                  insert: ' ',
+                },
+                {
+                  insert: 'code',
+                  attributes: {
+                    code: true,
                   },
                 },
               ],

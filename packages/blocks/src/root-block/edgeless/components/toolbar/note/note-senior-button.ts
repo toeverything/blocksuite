@@ -3,8 +3,10 @@ import {
   LinkIcon,
   TextIcon,
 } from '@blocksuite/affine-components/icons';
-import { EditPropsStore } from '@blocksuite/affine-shared/services';
-import { ThemeObserver } from '@blocksuite/affine-shared/theme';
+import {
+  EditPropsStore,
+  ThemeProvider,
+} from '@blocksuite/affine-shared/services';
 import { SignalWatcher } from '@blocksuite/global/utils';
 import { computed } from '@preact/signals-core';
 import { css, html, LitElement } from 'lit';
@@ -30,7 +32,7 @@ export class EdgelessNoteSeniorButton extends EdgelessToolbarToolMixin(
       box-sizing: border-box;
     }
 
-    .note-root {
+    .note-root[data-app-theme='light'] {
       --paper-border-color: var(--affine-pure-white);
       --paper-foriegn-color: rgba(0, 0, 0, 0.1);
       --paper-shadow: 0px 2px 4px rgba(0, 0, 0, 0.25);
@@ -38,7 +40,7 @@ export class EdgelessNoteSeniorButton extends EdgelessToolbarToolMixin(
       --icon-card-shadow: 0px 2px 4px rgba(0, 0, 0, 0.22),
         inset 0px -2px 1px rgba(0, 0, 0, 0.14);
     }
-    .note-root[data-dark='true'] {
+    .note-root[data-app-theme='dark'] {
       --paper-border-color: var(--affine-divider-color);
       --paper-foriegn-color: rgba(255, 255, 255, 0.12);
       --paper-shadow: 0px 2px 6px rgba(0, 0, 0, 0.8);
@@ -125,10 +127,12 @@ export class EdgelessNoteSeniorButton extends EdgelessToolbarToolMixin(
   `;
 
   private _noteBg$ = computed(() => {
-    return ThemeObserver.generateColorProperty(
-      this.edgeless.std.get(EditPropsStore).lastProps$.value['affine:note']
-        .background
-    );
+    return this.edgeless.std
+      .get(ThemeProvider)
+      .generateColorProperty(
+        this.edgeless.std.get(EditPropsStore).lastProps$.value['affine:note']
+          .background
+      );
   });
 
   private _states = ['childFlavour', 'childType', 'tip'] as const;
@@ -178,7 +182,7 @@ export class EdgelessNoteSeniorButton extends EdgelessToolbarToolMixin(
   }
 
   override render() {
-    const { theme } = this;
+    const appTheme = this.edgeless.std.get(ThemeProvider).app$.value;
 
     return html`<edgeless-toolbar-button
       class="edgeless-note-button"
@@ -187,7 +191,7 @@ export class EdgelessNoteSeniorButton extends EdgelessToolbarToolMixin(
     >
       <div
         class="note-root"
-        data-dark=${theme === 'dark'}
+        data-app-theme=${appTheme}
         @click=${this._toggleNoteMenu}
         style="--paper-bg: ${this._noteBg$.value}"
       >

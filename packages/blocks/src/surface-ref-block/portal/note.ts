@@ -6,7 +6,7 @@ import {
   NoteDisplayMode,
   NoteShadow,
 } from '@blocksuite/affine-model';
-import { ThemeObserver } from '@blocksuite/affine-shared/theme';
+import { ThemeProvider } from '@blocksuite/affine-shared/services';
 import { SpecProvider } from '@blocksuite/affine-shared/utils';
 import {
   BlockStdScope,
@@ -73,10 +73,9 @@ export class SurfaceRefNotePortal extends WithDisposable(ShadowlessElement) {
     if (!!displayMode && displayMode === NoteDisplayMode.DocOnly)
       return nothing;
 
-    const backgroundColor = ThemeObserver.generateColorProperty(
-      model.background,
-      DEFAULT_NOTE_BACKGROUND_COLOR
-    );
+    const backgroundColor = this.host.std
+      .get(ThemeProvider)
+      .generateColorProperty(model.background, DEFAULT_NOTE_BACKGROUND_COLOR);
 
     const [modelX, modelY, modelW, modelH] = deserializeXYWH(model.xywh);
     const style = {

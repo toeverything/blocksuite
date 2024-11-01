@@ -1,7 +1,3 @@
-import type {
-  EmbedLinkedDocModel,
-  EmbedLinkedDocStyles,
-} from '@blocksuite/affine-model';
 import type { TemplateResult } from 'lit';
 
 import {
@@ -11,7 +7,11 @@ import {
   LightLoadingIcon,
   ReloadIcon,
 } from '@blocksuite/affine-components/icons';
-import { ThemeObserver } from '@blocksuite/affine-shared/theme';
+import {
+  ColorScheme,
+  type EmbedLinkedDocModel,
+  type EmbedLinkedDocStyles,
+} from '@blocksuite/affine-model';
 
 import {
   DarkSyncedDocErrorBanner,
@@ -48,13 +48,13 @@ type EmbedCardImages = {
 };
 
 export function getEmbedLinkedDocIcons(
+  theme: ColorScheme,
   editorMode: 'page' | 'edgeless',
   style: (typeof EmbedLinkedDocStyles)[number]
 ): EmbedCardImages {
-  const theme = ThemeObserver.mode;
   const small = style !== 'vertical';
   if (editorMode === 'page') {
-    if (theme === 'light') {
+    if (theme === ColorScheme.Light) {
       return {
         LoadingIcon: LightLoadingIcon,
         ReloadIcon,
@@ -84,7 +84,7 @@ export function getEmbedLinkedDocIcons(
       };
     }
   } else {
-    if (theme === 'light') {
+    if (theme === ColorScheme.Light) {
       return {
         ReloadIcon,
         LoadingIcon: LightLoadingIcon,

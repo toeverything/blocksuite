@@ -14,8 +14,8 @@ import {
 import {
   EditPropsStore,
   TelemetryProvider,
+  ThemeProvider,
 } from '@blocksuite/affine-shared/services';
-import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import { BaseTool } from '@blocksuite/block-std/gfx';
 import { Bound } from '@blocksuite/global/utils';
 import { effect } from '@preact/signals-core';
@@ -201,16 +201,12 @@ export class ShapeTool extends BaseTool<ShapeToolOption> {
     const attributes =
       this.std.get(EditPropsStore).lastProps$.value[`shape:${shapeName}`];
 
-    options.stroke = ThemeObserver.getColorValue(
-      attributes.strokeColor,
-      DEFAULT_SHAPE_STROKE_COLOR,
-      true
-    );
-    options.fill = ThemeObserver.getColorValue(
-      attributes.fillColor,
-      DEFAULT_SHAPE_FILL_COLOR,
-      true
-    );
+    options.stroke = this.std
+      .get(ThemeProvider)
+      .getColorValue(attributes.strokeColor, DEFAULT_SHAPE_STROKE_COLOR, true);
+    options.fill = this.std
+      .get(ThemeProvider)
+      .getColorValue(attributes.fillColor, DEFAULT_SHAPE_FILL_COLOR, true);
 
     switch (attributes.strokeStyle!) {
       case 'dash':

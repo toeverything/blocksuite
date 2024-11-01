@@ -8,6 +8,7 @@ import type { PageRootBlockComponent } from '../../page/page-root-block.js';
 import type {
   KeyboardSubToolbarConfig,
   KeyboardToolbarActionItem,
+  KeyboardToolbarConfig,
   KeyboardToolbarItem,
   KeyboardToolPanelConfig,
 } from './config.js';
@@ -21,12 +22,34 @@ export class VirtualKeyboardController implements ReactiveController {
 
   private readonly _keyboardHeight$ = signal(0);
 
+  private readonly _keyboardOpened$ = signal(false);
+
   private readonly _updateKeyboardHeight = () => {
-    if (navigator.virtualKeyboard) {
-      this._keyboardHeight$.value =
-        navigator.virtualKeyboard.boundingRect.height;
+    const { virtualKeyboard } = navigator;
+    if (virtualKeyboard) {
+      this._keyboardOpened$.value = virtualKeyboard.boundingRect.height > 0;
+      this._keyboardHeight$.value = virtualKeyboard.boundingRect.height;
     } else if (visualViewport) {
-      this._keyboardHeight$.value = window.innerHeight - visualViewport.height;
+      const windowHeight = this.host.config.useScreenHeight
+        ? window.screen.height
+        : window.innerHeight;
+
+      /**
+       * ┌───────────────┐ - window top
+       * │               │
+       * │               │
+       * │               │
+       * │               │
+       * │               │
+       * └───────────────┘ - keyboard top        --
+       * │               │                       │ keyboard height in layout viewport
+       * └───────────────┘ - page(html) bottom   --
+       * │               │                       │ visualViewport.offsetTop
+       * └───────────────┘ - window bottom       --
+       */
+      this._keyboardOpened$.value = windowHeight - visualViewport.height > 0;
+      this._keyboardHeight$.value =
+        windowHeight - visualViewport.height - visualViewport.offsetTop;
     } else {
       notSupportedWarning();
     }
@@ -41,7 +64,10 @@ export class VirtualKeyboardController implements ReactiveController {
     }
   };
 
-  host: ReactiveControllerHost & { rootComponent: PageRootBlockComponent };
+  host: ReactiveControllerHost & {
+    rootComponent: PageRootBlockComponent;
+    config: KeyboardToolbarConfig;
+  };
 
   show = () => {
     if (navigator.virtualKeyboard) {
@@ -60,17 +86,19 @@ export class VirtualKeyboardController implements ReactiveController {
     }
   };
 
+  /**
+   * Return the height of keyboard in layout viewport
+   * see comment in the `_updateKeyboardHeight` method
+   */
   get keyboardHeight() {
     return this._keyboardHeight$.value;
   }
 
   get opened() {
-    return this.keyboardHeight > 0;
+    return this._keyboardOpened$.value;
   }
 
-  constructor(
-    host: ReactiveControllerHost & { rootComponent: PageRootBlockComponent }
-  ) {
+  constructor(host: VirtualKeyboardController['host']) {
     (this.host = host).addController(this);
   }
 

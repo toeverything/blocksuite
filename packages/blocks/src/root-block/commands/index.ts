@@ -10,6 +10,7 @@ import {
   copySelectedModelsCommand,
   deleteSelectedModelsCommand,
   draftSelectedModelsCommand,
+  duplicateSelectedModelsCommand,
   getSelectedModelsCommand,
   retainFirstModelCommand,
 } from '@blocksuite/affine-shared/commands';
@@ -20,6 +21,7 @@ export const commands: BlockCommands = {
   copySelectedModels: copySelectedModelsCommand,
   deleteSelectedModels: deleteSelectedModelsCommand,
   draftSelectedModels: draftSelectedModelsCommand,
+  duplicateSelectedModels: duplicateSelectedModelsCommand,
   getSelectedModels: getSelectedModelsCommand,
   retainFirstModel: retainFirstModelCommand,
   // text

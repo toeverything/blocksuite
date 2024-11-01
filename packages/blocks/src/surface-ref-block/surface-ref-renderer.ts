@@ -10,7 +10,7 @@ import {
   CanvasRenderer,
   elementRenderers,
 } from '@blocksuite/affine-block-surface';
-import { ThemeObserver } from '@blocksuite/affine-shared/theme';
+import { ThemeProvider } from '@blocksuite/affine-shared/services';
 import { GfxControllerIdentifier, Viewport } from '@blocksuite/block-std/gfx';
 import { DisposableGroup, Slot } from '@blocksuite/global/utils';
 
@@ -60,6 +60,8 @@ export class SurfaceRefRenderer {
     }
   ) {
     const viewport = new Viewport();
+    const themeService = std.get(ThemeProvider);
+
     const renderer = new CanvasRenderer({
       viewport,
       layerManager: std.get(GfxControllerIdentifier).layer,
@@ -67,12 +69,24 @@ export class SurfaceRefRenderer {
       enableStackingCanvas: options.enableStackingCanvas,
       provider: {
         generateColorProperty: (color: Color, fallback: string) =>
-          ThemeObserver.generateColorProperty(color, fallback),
-        getColorScheme: () => ThemeObserver.mode,
+          themeService.generateColorProperty(
+            color,
+            fallback,
+            themeService.edgelessTheme
+          ),
+        getColorScheme: () => themeService.edgelessTheme,
         getColorValue: (color: Color, fallback?: string, real?: boolean) =>
-          ThemeObserver.getColorValue(color, fallback, real),
+          themeService.getColorValue(
+            color,
+            fallback,
+            real,
+            themeService.edgelessTheme
+          ),
         getPropertyValue: (property: string) =>
-          ThemeObserver.getPropertyValue(property),
+          themeService.getCssVariableColor(
+            property,
+            themeService.edgelessTheme
+          ),
       },
       elementRenderers,
     });

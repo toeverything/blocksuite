@@ -9,6 +9,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 import { when } from 'lit/directives/when.js';
 
 import type {
+  KeyboardIconType,
   KeyboardToolbarConfig,
   KeyboardToolbarContext,
   KeyboardToolbarItem,
@@ -77,6 +78,7 @@ export class AffineKeyboardToolbar extends SignalWatcher(
         scrollCurrentBlockIntoView(this.rootComponent.std);
       }
     }
+    this._lastActiveItem$.value = item;
   };
 
   private _handleKeyboardButtonClicked = () => {
@@ -99,6 +101,8 @@ export class AffineKeyboardToolbar extends SignalWatcher(
 
   private readonly _keyboardController = new VirtualKeyboardController(this);
 
+  private readonly _lastActiveItem$ = signal<KeyboardToolbarItem | null>(null);
+
   /** This field records the panel static height, which dose not aim to control the panel opening */
   private readonly _panelHeight$ = signal(0);
 
@@ -110,7 +114,14 @@ export class AffineKeyboardToolbar extends SignalWatcher(
 
   private get _context(): KeyboardToolbarContext {
     return {
+      std: this.rootComponent.std,
       rootComponent: this.rootComponent,
+      closeToolbar: () => {
+        this._showToolbar$.value = false;
+      },
+      closeToolPanel: () => {
+        this._closeToolPanel();
+      },
     };
   }
 
@@ -133,7 +144,11 @@ export class AffineKeyboardToolbar extends SignalWatcher(
       }
     }
 
-    return items;
+    return items.filter(item =>
+      isKeyboardToolBarActionItem(item)
+        ? (item.showWhen?.(this._context) ?? true)
+        : true
+    );
   }
 
   private get _isPanelOpened() {
@@ -144,27 +159,55 @@ export class AffineKeyboardToolbar extends SignalWatcher(
     return this._path$.value.length > 0;
   }
 
+  private get _safeBottomPaddingStyle() {
+    const safeBottomPadding = this.config.safeBottomPadding;
+    return styleMap(
+      this._shrink$.value && safeBottomPadding
+        ? {
+            paddingBottom: safeBottomPadding,
+            height: `calc(${TOOLBAR_HEIGHT}px + ${safeBottomPadding})`,
+          }
+        : {}
+    );
+  }
+
+  private _renderIcon(icon: KeyboardIconType) {
+    return typeof icon === 'function' ? icon(this._context) : icon;
+  }
+
   private _renderItem(item: KeyboardToolbarItem, index: number) {
     let icon = item.icon;
     let style = styleMap({});
+    const disabled =
+      ('disableWhen' in item && item.disableWhen?.(this._context)) ?? false;
 
-    if (isKeyboardToolPanelConfig(item)) {
+    if (isKeyboardToolBarActionItem(item)) {
+      const background =
+        typeof item.background === 'function'
+          ? item.background(this._context)
+          : item.background;
+      if (background)
+        style = styleMap({
+          background: background,
+        });
+    } else if (isKeyboardToolPanelConfig(item)) {
       const { activeIcon, activeBackground } = item;
       const active = this._currentPanelIndex$.value === index;
 
       if (active && activeIcon) icon = activeIcon;
       if (active && activeBackground)
-        style = styleMap({ backgroundColor: activeBackground });
+        style = styleMap({ background: activeBackground });
     }
 
     return html`<icon-button
       size="36px"
       style=${style}
+      ?disabled=${disabled}
       @click=${() => {
         this._handleItemClick(item, index);
       }}
     >
-      ${icon}
+      ${this._renderIcon(icon)}
     </icon-button>`;
   }
 
@@ -226,10 +269,11 @@ export class AffineKeyboardToolbar extends SignalWatcher(
           document.body.style.paddingBottom = '0px';
         } else if (this._shrink$.value) {
           document.body.style.paddingBottom = `${TOOLBAR_HEIGHT}px`;
-        } else if (this._keyboardController.opened) {
+        } else if (
+          this._keyboardController.opened &&
+          !this.config.useScreenHeight
+        ) {
           document.body.style.paddingBottom = `${this._keyboardController.keyboardHeight + TOOLBAR_HEIGHT}px`;
-        } else if (this._isPanelOpened) {
-          document.body.style.paddingBottom = `${this._panelHeight$.value + TOOLBAR_HEIGHT}px`;
         } else {
           document.body.style.paddingBottom = '0px';
         }
@@ -240,10 +284,14 @@ export class AffineKeyboardToolbar extends SignalWatcher(
   override render() {
     if (!this._showToolbar$.value) return nothing;
 
-    this.style.bottom = `${this._shrink$.value ? -this._panelHeight$.value : 0}px`;
+    this.style.bottom =
+      (this.config.useScreenHeight && this._keyboardController.opened) ||
+      this._shrink$.value
+        ? `${-this._panelHeight$.value}px`
+        : '0px';
 
     return html`
-      <div class="keyboard-toolbar">
+      <div class="keyboard-toolbar" style=${this._safeBottomPaddingStyle}>
         ${this._renderItems()}
         <div class="divider"></div>
         ${this._renderKeyboardButton()}

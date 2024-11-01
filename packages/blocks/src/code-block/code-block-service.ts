@@ -1,6 +1,6 @@
 import { textKeymap } from '@blocksuite/affine-components/rich-text';
 import { CodeBlockSchema, ColorScheme } from '@blocksuite/affine-model';
-import { ThemeObserver } from '@blocksuite/affine-shared/theme';
+import { ThemeProvider } from '@blocksuite/affine-shared/services';
 import { BlockService } from '@blocksuite/block-std';
 import { type Signal, signal } from '@preact/signals-core';
 import {
@@ -30,7 +30,8 @@ export class CodeBlockService extends BlockService {
   }
 
   get themeKey() {
-    return ThemeObserver.instance.mode$.value === ColorScheme.Dark
+    const theme = this.std.get(ThemeProvider).theme;
+    return theme === ColorScheme.Dark
       ? this._darkThemeKey
       : this._lightThemeKey;
   }

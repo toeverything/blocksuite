@@ -6,7 +6,7 @@ import {
   Overlay,
   type SurfaceBlockComponent,
 } from '@blocksuite/affine-block-surface';
-import { ThemeObserver } from '@blocksuite/affine-shared/theme';
+import { ThemeProvider } from '@blocksuite/affine-shared/services';
 import { BaseTool } from '@blocksuite/block-std/gfx';
 import {
   Bound,
@@ -29,12 +29,12 @@ class LassoOverlay extends Overlay {
     const path = new Path2D(this.d);
     const zoom = this._renderer?.viewport.zoom ?? 1.0;
     ctx.save();
-    const primaryColor = ThemeObserver.getPropertyValue(
-      '--affine-primary-color'
-    );
-    const strokeColor = ThemeObserver.getPropertyValue(
-      '--affine-secondary-color'
-    );
+    const primaryColor = this.gfx.std
+      .get(ThemeProvider)
+      .getCssVariableColor('--affine-primary-color');
+    const strokeColor = this.gfx.std
+      .get(ThemeProvider)
+      .getCssVariableColor('--affine-secondary-color');
     if (this.startPoint) {
       const [x, y] = this.startPoint;
       ctx.beginPath();

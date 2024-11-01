@@ -22,6 +22,8 @@ export interface PeekViewService {
     pageRef: {
       docId: string;
       blockIds?: string[];
+      databaseId?: string;
+      databaseRowId?: string;
       elementIds?: string[];
       target?: HTMLElement;
     },

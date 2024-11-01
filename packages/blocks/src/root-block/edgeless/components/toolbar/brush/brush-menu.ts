@@ -1,7 +1,9 @@
 import type { GfxToolsFullOptionValue } from '@blocksuite/block-std/gfx';
 
-import { EditPropsStore } from '@blocksuite/affine-shared/services';
-import { ThemeObserver } from '@blocksuite/affine-shared/theme';
+import {
+  EditPropsStore,
+  ThemeProvider,
+} from '@blocksuite/affine-shared/services';
 import { SignalWatcher } from '@blocksuite/global/utils';
 import { computed } from '@preact/signals-core';
 import { css, html, LitElement } from 'lit';
@@ -48,10 +50,10 @@ export class EdgelessBrushMenu extends EdgelessToolbarToolMixin(
   type: GfxToolsFullOptionValue['type'] = 'brush';
 
   override render() {
-    const color = ThemeObserver.getColorValue(
-      this._props$.value.color,
-      GET_DEFAULT_LINE_COLOR()
-    );
+    const theme = this.edgeless.std.get(ThemeProvider).theme;
+    const color = this.edgeless.std
+      .get(ThemeProvider)
+      .getColorValue(this._props$.value.color, GET_DEFAULT_LINE_COLOR(theme));
 
     return html`
       <edgeless-slide-menu>

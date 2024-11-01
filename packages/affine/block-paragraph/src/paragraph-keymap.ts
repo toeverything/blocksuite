@@ -43,7 +43,7 @@ export const ParagraphKeymapExtension = KeymapExtension(
           return true;
         }
 
-        std.command.exec('dedentParagraph');
+        std.command.chain().canDedentParagraph().dedentParagraph().run();
         return true;
       },
       'Mod-Enter': ctx => {
@@ -164,7 +164,11 @@ export const ParagraphKeymapExtension = KeymapExtension(
         return true;
       },
       Tab: ctx => {
-        const { success } = std.command.exec('indentParagraph');
+        const [success] = std.command
+          .chain()
+          .canIndentParagraph()
+          .indentParagraph()
+          .run();
         if (!success) {
           return;
         }
@@ -172,7 +176,11 @@ export const ParagraphKeymapExtension = KeymapExtension(
         return true;
       },
       'Shift-Tab': ctx => {
-        const { success } = std.command.exec('dedentParagraph');
+        const [success] = std.command
+          .chain()
+          .canDedentParagraph()
+          .dedentParagraph()
+          .run();
         if (!success) {
           return;
         }

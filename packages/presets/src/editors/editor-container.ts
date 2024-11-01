@@ -10,6 +10,7 @@ import {
   type DocMode,
   EdgelessEditorBlockSpecs,
   PageEditorBlockSpecs,
+  ThemeProvider,
 } from '@blocksuite/blocks';
 import { SignalWatcher, Slot, WithDisposable } from '@blocksuite/global/utils';
 import { computed, signal } from '@preact/signals-core';
@@ -193,11 +194,15 @@ export class AffineEditorContainer
 
   override render() {
     const mode = this._mode.value;
+    const themeService = this.std.get(ThemeProvider);
+    const appTheme = themeService.app$.value;
+    const edgelessTheme = themeService.edgeless$.value;
 
     return html`${keyed(
       this.rootModel.id + mode,
       html`
         <div
+          data-theme=${mode === 'page' ? appTheme : edgelessTheme}
           class=${mode === 'page'
             ? 'affine-page-viewport'
             : 'affine-edgeless-viewport'}

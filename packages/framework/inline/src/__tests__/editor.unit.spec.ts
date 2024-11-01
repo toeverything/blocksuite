@@ -413,6 +413,60 @@ test('cursor with format', () => {
   ]);
 });
 
+test('getFormat', () => {
+  const yDoc = new Y.Doc();
+  const yText = yDoc.getText('text');
+  const inlineEditor = new InlineEditor(yText);
+
+  inlineEditor.insertText(
+    {
+      index: 0,
+      length: 0,
+    },
+    'aaa',
+    {
+      bold: true,
+    }
+  );
+
+  inlineEditor.insertText(
+    {
+      index: 3,
+      length: 0,
+    },
+    'bbb',
+    {
+      italic: true,
+    }
+  );
+
+  expect(inlineEditor.getFormat({ index: 0, length: 0 })).toEqual({});
+
+  expect(inlineEditor.getFormat({ index: 0, length: 1 })).toEqual({
+    bold: true,
+  });
+
+  expect(inlineEditor.getFormat({ index: 0, length: 3 })).toEqual({
+    bold: true,
+  });
+
+  expect(inlineEditor.getFormat({ index: 3, length: 0 })).toEqual({
+    bold: true,
+  });
+
+  expect(inlineEditor.getFormat({ index: 3, length: 1 })).toEqual({
+    italic: true,
+  });
+
+  expect(inlineEditor.getFormat({ index: 3, length: 3 })).toEqual({
+    italic: true,
+  });
+
+  expect(inlineEditor.getFormat({ index: 6, length: 0 })).toEqual({
+    italic: true,
+  });
+});
+
 test('incorrect format value `false`', () => {
   const yDoc = new Y.Doc();
   const yText = yDoc.getText('text');

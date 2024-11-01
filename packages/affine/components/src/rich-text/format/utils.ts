@@ -91,11 +91,8 @@ function handleCurrentSelection<
         filter: el => FORMAT_TEXT_SUPPORT_FLAVOURS.includes(el.model.flavour),
       })
       .inline<InlineOut>((ctx, next) => {
-        const { selectedBlocks, currentTextSelection } = ctx;
+        const { selectedBlocks } = ctx;
         assertExists(selectedBlocks);
-
-        assertExists(currentTextSelection);
-        if (currentTextSelection.isCollapsed()) return false;
 
         const selectedInlineEditors = getSelectedInlineEditors(
           selectedBlocks,

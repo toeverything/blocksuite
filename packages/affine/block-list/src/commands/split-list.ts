@@ -99,10 +99,14 @@ export const splitListCommand: Command<
      *   - ccc
      */
     if (parent.role === 'content') {
-      host.command.exec('dedentList', {
-        blockId,
-        inlineIndex: 0,
-      });
+      host.command
+        .chain()
+        .canDedentList({
+          blockId,
+          inlineIndex: 0,
+        })
+        .dedentList()
+        .run();
 
       next();
       return;

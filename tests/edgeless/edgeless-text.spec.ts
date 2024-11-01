@@ -6,17 +6,20 @@ import { expect, type Page } from '@playwright/test';
 import {
   autoFit,
   captureHistory,
+  cutByKeyboard,
   dragBetweenIndices,
   enterPlaygroundRoom,
   getEdgelessSelectedRect,
   getPageSnapshot,
   initEmptyEdgelessState,
+  pasteByKeyboard,
   pressArrowLeft,
   pressArrowRight,
   pressArrowUp,
   pressBackspace,
   pressEnter,
   pressEscape,
+  selectAllByKeyboard,
   setEdgelessTool,
   switchEditorMode,
   toViewCoord,
@@ -440,6 +443,103 @@ test.describe('edgeless text block', () => {
 
     expect(await getPageSnapshot(page, true)).toMatchSnapshot(
       `${testInfo.title}_drag.json`
+    );
+  });
+
+  test('cut edgeless text', async ({ page }) => {
+    await setEdgelessTool(page, 'default');
+    await page.mouse.dblclick(130, 140, {
+      delay: 100,
+    });
+    await waitNextFrame(page);
+    await type(page, 'aaaa\nbbbb\ncccc');
+
+    const edgelessText = page.locator('affine-edgeless-text');
+    const paragraph = page.locator('affine-edgeless-text affine-paragraph');
+
+    expect(await edgelessText.count()).toBe(1);
+    expect(await paragraph.count()).toBe(3);
+
+    await page.mouse.click(50, 50, {
+      delay: 100,
+    });
+    await waitNextFrame(page);
+    await page.mouse.click(130, 140, {
+      delay: 100,
+    });
+    await cutByKeyboard(page);
+    expect(await edgelessText.count()).toBe(0);
+    expect(await paragraph.count()).toBe(0);
+
+    await pasteByKeyboard(page);
+    expect(await edgelessText.count()).toBe(1);
+    expect(await paragraph.count()).toBe(3);
+  });
+
+  test('latex in edgeless text', async ({ page }) => {
+    await setEdgelessTool(page, 'default');
+    await page.mouse.dblclick(130, 140, {
+      delay: 100,
+    });
+    await waitNextFrame(page);
+    await type(page, '$$bbb$$ ');
+    await assertRichTextInlineDeltas(
+      page,
+      [
+        {
+          insert: ' ',
+          attributes: {
+            latex: 'bbb',
+          },
+        },
+      ],
+      1
+    );
+
+    await page.locator('affine-latex-node').click();
+    await waitNextFrame(page);
+    await type(page, 'ccc');
+    await assertRichTextInlineDeltas(
+      page,
+      [
+        {
+          insert: ' ',
+          attributes: {
+            latex: 'bbbccc',
+          },
+        },
+      ],
+      1
+    );
+
+    await page.locator('.latex-editor-hint').click();
+    await type(page, 'sss');
+    await assertRichTextInlineDeltas(
+      page,
+      [
+        {
+          insert: ' ',
+          attributes: {
+            latex: 'bbbccc',
+          },
+        },
+      ],
+      1
+    );
+    await page.locator('latex-editor-unit').click();
+    await selectAllByKeyboard(page);
+    await type(page, 'sss');
+    await assertRichTextInlineDeltas(
+      page,
+      [
+        {
+          insert: ' ',
+          attributes: {
+            latex: 'sss',
+          },
+        },
+      ],
+      1
     );
   });
 });

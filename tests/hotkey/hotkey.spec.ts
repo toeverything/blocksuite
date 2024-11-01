@@ -61,19 +61,19 @@ test('single line rich-text inline code hotkey', async ({ page }) => {
   await type(page, 'hello');
   await dragBetweenIndices(page, [0, 0], [0, 5]);
   await inlineCode(page);
-  await assertTextFormat(page, 0, 0, { code: true });
+  await assertTextFormat(page, 0, 5, { code: true });
 
   // undo
   await undoByKeyboard(page);
-  await assertTextFormat(page, 0, 0, {});
+  await assertTextFormat(page, 0, 5, {});
   // redo
   await redoByKeyboard(page);
   await waitNextFrame(page);
-  await assertTextFormat(page, 0, 0, { code: true });
+  await assertTextFormat(page, 0, 5, { code: true });
 
   // the format should be removed after trigger the hotkey again
   await inlineCode(page);
-  await assertTextFormat(page, 0, 0, {});
+  await assertTextFormat(page, 0, 5, {});
 });
 
 test('type character jump out code node', async ({ page }, testInfo) => {
@@ -101,18 +101,18 @@ test('single line rich-text strikethrough hotkey', async ({ page }) => {
   await type(page, 'hello');
   await dragBetweenIndices(page, [0, 0], [0, 5]);
   await strikethrough(page);
-  await assertTextFormat(page, 0, 0, { strike: true });
+  await assertTextFormat(page, 0, 5, { strike: true });
 
   await undoByClick(page);
-  await assertTextFormat(page, 0, 0, {});
+  await assertTextFormat(page, 0, 5, {});
 
   await redoByClick(page);
-  await assertTextFormat(page, 0, 0, { strike: true });
+  await assertTextFormat(page, 0, 5, { strike: true });
 
   await waitNextFrame(page);
   // the format should be removed after trigger the hotkey again
   await strikethrough(page);
-  await assertTextFormat(page, 0, 0, {});
+  await assertTextFormat(page, 0, 5, {});
 });
 
 test('use formatted cursor with hotkey', async ({ page }, testInfo) => {

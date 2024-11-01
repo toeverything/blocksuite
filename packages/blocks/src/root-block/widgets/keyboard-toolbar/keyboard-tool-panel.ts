@@ -5,10 +5,11 @@ import { property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
 import type {
+  KeyboardIconType,
+  KeyboardToolbarActionItem,
   KeyboardToolbarContext,
   KeyboardToolPanelConfig,
   KeyboardToolPanelGroup,
-  KeyboardToolPanelItem,
 } from './config.js';
 
 import { keyboardToolPanelStyles } from './styles.js';
@@ -23,19 +24,23 @@ export class AffineKeyboardToolPanel extends SignalWatcher(
 ) {
   static override styles = keyboardToolPanelStyles;
 
-  private readonly _handleItemClick = (item: KeyboardToolPanelItem) => {
-    if (item.disable && item.disable(this.context)) return;
+  private readonly _handleItemClick = (item: KeyboardToolbarActionItem) => {
+    if (item.disableWhen && item.disableWhen(this.context)) return;
     if (item.action) {
       Promise.resolve(item.action(this.context)).catch(console.error);
     }
   };
 
   private _renderGroup(group: KeyboardToolPanelGroup) {
+    const items = group.items.filter(
+      item => item.showWhen?.(this.context) ?? true
+    );
+
     return html`<div class="keyboard-tool-panel-group">
       <div class="keyboard-tool-panel-group-header">${group.name}</div>
       <div class="keyboard-tool-panel-group-item-container">
         ${repeat(
-          group.items,
+          items,
           item => item.name,
           item => this._renderItem(item)
         )}
@@ -43,9 +48,15 @@ export class AffineKeyboardToolPanel extends SignalWatcher(
     </div>`;
   }
 
-  private _renderItem(item: KeyboardToolPanelItem) {
+  private _renderIcon(icon: KeyboardIconType) {
+    return typeof icon === 'function' ? icon(this.context) : icon;
+  }
+
+  private _renderItem(item: KeyboardToolbarActionItem) {
     return html`<div class="keyboard-tool-panel-item">
-      <button @click=${() => this._handleItemClick(item)}>${item.icon}</button>
+      <button @click=${() => this._handleItemClick(item)}>
+        ${this._renderIcon(item.icon)}
+      </button>
       <span>${item.name}</span>
     </div>`;
   }

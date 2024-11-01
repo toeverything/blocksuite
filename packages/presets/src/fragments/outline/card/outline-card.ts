@@ -1,12 +1,12 @@
 import type { BlockModel, Doc } from '@blocksuite/store';
 
 import {
+  type ColorScheme,
   createButtonPopper,
   type NoteBlockModel,
   NoteDisplayMode,
   on,
   once,
-  ThemeObserver,
 } from '@blocksuite/blocks';
 import { SignalWatcher, WithDisposable } from '@blocksuite/global/utils';
 import { baseTheme } from '@toeverything/theme';
@@ -307,7 +307,6 @@ export class OutlineNoteCard extends SignalWatcher(WithDisposable(LitElement)) {
   override render() {
     if (this.note.isEmpty.peek()) return nothing;
 
-    const mode = ThemeObserver.mode;
     const { children, displayMode } = this.note;
     const currentMode = this._getCurrentModeLabel(displayMode);
     const cardHeaderClasses = classMap({
@@ -319,7 +318,7 @@ export class OutlineNoteCard extends SignalWatcher(WithDisposable(LitElement)) {
       <div
         data-invisible="${this.invisible ? 'true' : 'false'}"
         data-sortable="${this.enableNotesSorting ? 'true' : 'false'}"
-        class="card-container ${this.status ?? ''} ${mode}"
+        class="card-container ${this.status ?? ''} ${this.theme}"
       >
         <div
           class="card-preview ${this.editorMode}"
@@ -423,6 +422,9 @@ export class OutlineNoteCard extends SignalWatcher(WithDisposable(LitElement)) {
 
   @property({ attribute: false })
   accessor status: 'selected' | 'placeholder' | undefined = undefined;
+
+  @property({ attribute: false })
+  accessor theme!: ColorScheme;
 }
 
 declare global {

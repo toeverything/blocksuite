@@ -2,7 +2,7 @@ import type { EdgelessTextBlockModel } from '@blocksuite/affine-model';
 import type { BlockComponent } from '@blocksuite/block-std';
 
 import { TextUtils } from '@blocksuite/affine-block-surface';
-import { ThemeObserver } from '@blocksuite/affine-shared/theme';
+import { ThemeProvider } from '@blocksuite/affine-shared/services';
 import { matchFlavours } from '@blocksuite/affine-shared/utils';
 import { GfxBlockComponent } from '@blocksuite/block-std';
 import { Bound } from '@blocksuite/global/utils';
@@ -20,6 +20,15 @@ export class EdgelessTextBlockComponent extends GfxBlockComponent<EdgelessTextBl
     .edgeless-text-block-container[data-max-width='false'] .inline-editor span {
       word-break: keep-all !important;
       text-wrap: nowrap !important;
+    }
+
+    .edgeless-text-block-container affine-paragraph,
+    affine-list {
+      color: var(--edgeless-text-color);
+      font-family: var(--edgeless-text-font-family);
+      font-style: var(--edgeless-text-font-style);
+      font-weight: var(--edgeless-text-font-weight);
+      text-align: var(--edgeless-text-text-align);
     }
   `;
 
@@ -271,17 +280,16 @@ export class EdgelessTextBlockComponent extends GfxBlockComponent<EdgelessTextBl
 
   override renderPageContent() {
     const { fontFamily, fontStyle, fontWeight, textAlign } = this.model;
-    const color = ThemeObserver.generateColorProperty(
-      this.model.color,
-      '#000000'
-    );
+    const color = this.std
+      .get(ThemeProvider)
+      .generateColorProperty(this.model.color, '#000000');
 
     const style = styleMap({
-      color,
-      fontFamily: TextUtils.wrapFontFamily(fontFamily),
-      fontStyle,
-      fontWeight,
-      textAlign,
+      '--edgeless-text-color': color,
+      '--edgeless-text-font-family': TextUtils.wrapFontFamily(fontFamily),
+      '--edgeless-text-font-style': fontStyle,
+      '--edgeless-text-font-weight': fontWeight,
+      '--edgeless-text-text-align': textAlign,
     });
 
     return html`

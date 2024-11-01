@@ -1,35 +1,41 @@
 import type { FrameBlockModel } from '@blocksuite/affine-model';
+import type { BlockStdScope } from '@blocksuite/block-std';
 import type { TemplateResult } from 'lit';
 
+import {
+  type AffineTextAttributes,
+  getInlineEditorByModel,
+  insertContent,
+  REFERENCE_NODE,
+} from '@blocksuite/affine-components/rich-text';
+import { toast } from '@blocksuite/affine-components/toast';
+import {
+  createDefaultDoc,
+  openFileOrFiles,
+} from '@blocksuite/affine-shared/utils';
+import { viewPresets } from '@blocksuite/data-view/view-presets';
+import { assertType } from '@blocksuite/global/utils';
 import {
   ArrowDownBigIcon,
   ArrowUpBigIcon,
   AttachmentIcon,
-  BlockLinkIcon,
   BoldIcon,
   BulletedListIcon,
   CheckBoxCheckLinearIcon,
   CloseIcon,
   CodeBlockIcon,
   CodeIcon,
+  CollapseTabIcon,
   CopyIcon,
   DatabaseKanbanViewIcon,
   DatabaseTableViewIcon,
   DeleteIcon,
   DividerIcon,
   DuplicateIcon,
-  FigmaDuotoneIcon,
   FontIcon,
   FrameIcon,
   GithubIcon,
   GroupIcon,
-  Heading1Icon,
-  Heading2Icon,
-  Heading3Icon,
-  Heading4Icon,
-  Heading5Icon,
-  Heading6Icon,
-  HighLightDuotoneIcon,
   ItalicIcon,
   LinkedPageIcon,
   LinkIcon,
@@ -40,10 +46,9 @@ import {
   PlusIcon,
   QuoteIcon,
   RedoIcon,
+  RightTabIcon,
   StrikeThroughIcon,
   TeXIcon,
-  TextBackgroundDuotoneIcon,
-  TextColorIcon,
   TextIcon,
   TodayIcon,
   TomorrowIcon,
@@ -55,12 +60,34 @@ import {
 import { cssVarV2 } from '@toeverything/theme/v2';
 
 import type { PageRootBlockComponent } from '../../page/page-root-block.js';
+import type { AffineLinkedDocWidget } from '../linked-doc/index.js';
 
+import { toggleEmbedCardCreateModal } from '../../../_common/components/embed-card/modal/embed-card-create-modal.js';
+import { addSiblingAttachmentBlocks } from '../../../attachment-block/utils.js';
 import { getSurfaceBlock } from '../../../surface-ref-block/utils.js';
+import { formatDate, formatTime } from '../../utils/misc.js';
+import {
+  FigmaDuotoneIcon,
+  HeadingIcon,
+  HighLightDuotoneIcon,
+  TextBackgroundDuotoneIcon,
+  TextColorIcon,
+} from './icons.js';
 import { TOOL_PANEL_ICON_STYLE, TOOLBAR_ICON_STYLE } from './styles.js';
 
 export type KeyboardToolbarConfig = {
   items: KeyboardToolbarItem[];
+  /**
+   * @description Whether to use the screen height as the keyboard height when the virtual keyboard API is not supported.
+   * It is useful when the app is running in a webview and the keyboard is not overlaid on the content.
+   * @default false
+   */
+  useScreenHeight?: boolean;
+  /**
+   * @description The safe bottom padding of the keyboard toolbar.
+   * It is useful when the device has a rounded corner screen.
+   */
+  safeBottomPadding?: string;
 };
 
 export type KeyboardToolbarItem =
@@ -68,111 +95,175 @@ export type KeyboardToolbarItem =
   | KeyboardSubToolbarConfig
   | KeyboardToolPanelConfig;
 
+export type KeyboardIconType =
+  | TemplateResult
+  | ((ctx: KeyboardToolbarContext) => TemplateResult);
+
 export type KeyboardToolbarActionItem = {
-  icon: TemplateResult;
-  disable?: () => boolean;
+  name: string;
+  icon: KeyboardIconType;
+  background?: string | ((ctx: KeyboardToolbarContext) => string | undefined);
+  /**
+   * @default true
+   * @description Whether to show the item in the toolbar.
+   */
+  showWhen?: (ctx: KeyboardToolbarContext) => boolean;
+  /**
+   * @default false
+   * @description Whether to set the item as disabled status.
+   */
+  disableWhen?: (ctx: KeyboardToolbarContext) => boolean;
+  /**
+   * @description The action to be executed when the item is clicked.
+   */
   action?: (ctx: KeyboardToolbarContext) => void | Promise<void>;
 };
 
 export type KeyboardSubToolbarConfig = {
-  icon: TemplateResult;
+  icon: KeyboardIconType;
   items: KeyboardToolbarItem[];
 };
 
 export type KeyboardToolbarContext = {
+  std: BlockStdScope;
   rootComponent: PageRootBlockComponent;
+  /**
+   * Close tool bar
+   */
+  closeToolbar: () => void;
+  /**
+   * Close current tool panel and show virtual keyboard
+   */
+  closeToolPanel: () => void;
 };
 
 export type KeyboardToolPanelConfig = {
-  icon: TemplateResult;
-  activeIcon?: TemplateResult;
+  icon: KeyboardIconType;
+  activeIcon?: KeyboardIconType;
   activeBackground?: string;
   groups: (KeyboardToolPanelGroup | DynamicKeyboardToolPanelGroup)[];
 };
 
 export type KeyboardToolPanelGroup = {
   name: string;
-  items: KeyboardToolPanelItem[];
+  items: KeyboardToolbarActionItem[];
 };
 
 export type DynamicKeyboardToolPanelGroup = (
   ctx: KeyboardToolbarContext
 ) => KeyboardToolPanelGroup | null;
 
-export type KeyboardToolPanelItem = {
-  name: string;
-  icon: TemplateResult;
-  disable?: (ctx: KeyboardToolbarContext) => boolean;
-  action?: (ctx: KeyboardToolbarContext) => void | Promise<void>;
-};
+const textToolActionItems: KeyboardToolbarActionItem[] = [
+  {
+    name: 'Text',
+    icon: TextIcon(TOOL_PANEL_ICON_STYLE),
+    showWhen: ({ std }) =>
+      std.doc.schema.flavourSchemaMap.has('affine:paragraph'),
+    action: ({ std }) => {
+      std.command.exec('updateBlockType', {
+        flavour: 'affine:paragraph',
+        props: { type: 'text' },
+      });
+    },
+  },
+  ...([1, 2, 3, 4, 5, 6] as const).map(i => ({
+    name: `Heading ${i}`,
+    icon: HeadingIcon(i),
+    showWhen: ({ std }: KeyboardToolbarContext) =>
+      std.doc.schema.flavourSchemaMap.has('affine:paragraph'),
+    action: ({ std }: KeyboardToolbarContext) => {
+      std.command.exec('updateBlockType', {
+        flavour: 'affine:paragraph',
+        props: { type: `h${i}` },
+      });
+    },
+  })),
+  {
+    name: 'CodeBlock',
+    showWhen: ({ std }) => std.doc.schema.flavourSchemaMap.has('affine:code'),
+    icon: CodeBlockIcon(TOOL_PANEL_ICON_STYLE),
+    action: ({ std }) => {
+      std.command.exec('updateBlockType', {
+        flavour: 'affine:code',
+      });
+    },
+  },
+  {
+    name: 'Quote',
+    showWhen: ({ std }) =>
+      std.doc.schema.flavourSchemaMap.has('affine:paragraph'),
+    icon: QuoteIcon(TOOL_PANEL_ICON_STYLE),
+    action: ({ std }) => {
+      std.command.exec('updateBlockType', {
+        flavour: 'affine:paragraph',
+        props: { type: 'quote' },
+      });
+    },
+  },
+  {
+    name: 'Divider',
+    icon: DividerIcon(TOOL_PANEL_ICON_STYLE),
+    showWhen: ({ std }) =>
+      std.doc.schema.flavourSchemaMap.has('affine:divider'),
+    action: ({ std }) => {
+      std.command.exec('updateBlockType', {
+        flavour: 'affine:divider',
+        props: { type: 'divider' },
+      });
+    },
+  },
+  {
+    name: 'Inline equation',
+    icon: TeXIcon(TOOL_PANEL_ICON_STYLE),
+    showWhen: ({ std }) =>
+      std.doc.schema.flavourSchemaMap.has('affine:paragraph'),
+    action: ({ std }) => {
+      std.command.chain().getTextSelection().insertInlineLatex().run();
+    },
+  },
+];
 
-const basicToolGroup: KeyboardToolPanelGroup = {
-  name: 'Basic',
-  items: [
-    {
-      name: 'Text',
-      icon: TextIcon(TOOL_PANEL_ICON_STYLE),
+const listToolActionItems: KeyboardToolbarActionItem[] = [
+  {
+    name: 'BulletedList',
+    icon: BulletedListIcon(TOOL_PANEL_ICON_STYLE),
+    showWhen: ({ std }) => std.doc.schema.flavourSchemaMap.has('affine:list'),
+    action: ({ std }) => {
+      std.command.exec('updateBlockType', {
+        flavour: 'affine:list',
+        props: {
+          type: 'bulleted',
+        },
+      });
     },
-    {
-      name: 'Heading1',
-      icon: Heading1Icon(TOOL_PANEL_ICON_STYLE),
+  },
+  {
+    name: 'NumberedList',
+    icon: NumberedListIcon(TOOL_PANEL_ICON_STYLE),
+    showWhen: ({ std }) => std.doc.schema.flavourSchemaMap.has('affine:list'),
+    action: ({ std }) => {
+      std.command.exec('updateBlockType', {
+        flavour: 'affine:list',
+        props: {
+          type: 'numbered',
+        },
+      });
     },
-    {
-      name: 'Heading2',
-      icon: Heading2Icon(TOOL_PANEL_ICON_STYLE),
+  },
+  {
+    name: 'CheckBox',
+    icon: CheckBoxCheckLinearIcon(TOOL_PANEL_ICON_STYLE),
+    showWhen: ({ std }) => std.doc.schema.flavourSchemaMap.has('affine:list'),
+    action: ({ std }) => {
+      std.command.exec('updateBlockType', {
+        flavour: 'affine:list',
+        props: {
+          type: 'todo',
+        },
+      });
     },
-    {
-      name: 'Heading3',
-      icon: Heading3Icon(TOOL_PANEL_ICON_STYLE),
-    },
-    {
-      name: 'Heading4',
-      icon: Heading4Icon(TOOL_PANEL_ICON_STYLE),
-    },
-    {
-      name: 'Heading5',
-      icon: Heading5Icon(TOOL_PANEL_ICON_STYLE),
-    },
-    {
-      name: 'Heading6',
-      icon: Heading6Icon(TOOL_PANEL_ICON_STYLE),
-    },
-    {
-      name: 'CodeBlock',
-      icon: CodeBlockIcon(TOOL_PANEL_ICON_STYLE),
-    },
-    {
-      name: 'Quote',
-      icon: QuoteIcon(TOOL_PANEL_ICON_STYLE),
-    },
-    {
-      name: 'Divider',
-      icon: DividerIcon(TOOL_PANEL_ICON_STYLE),
-    },
-    {
-      name: 'TeX',
-      icon: TeXIcon(TOOL_PANEL_ICON_STYLE),
-    },
-  ],
-};
-
-const listToolGroup: KeyboardToolPanelGroup = {
-  name: 'List',
-  items: [
-    {
-      name: 'BulletedList',
-      icon: BulletedListIcon(TOOL_PANEL_ICON_STYLE),
-    },
-    {
-      name: 'NumberedList',
-      icon: NumberedListIcon(TOOL_PANEL_ICON_STYLE),
-    },
-    {
-      name: 'CheckBox',
-      icon: CheckBoxCheckLinearIcon(TOOL_PANEL_ICON_STYLE),
-    },
-  ],
-};
+  },
+];
 
 const pageToolGroup: KeyboardToolPanelGroup = {
   name: 'Page',
@@ -180,10 +271,80 @@ const pageToolGroup: KeyboardToolPanelGroup = {
     {
       name: 'NewPage',
       icon: NewPageIcon(TOOL_PANEL_ICON_STYLE),
+      showWhen: ({ std }) =>
+        std.doc.schema.flavourSchemaMap.has('affine:embed-linked-doc'),
+      action: ({ std }) => {
+        std.command
+          .chain()
+          .getSelectedModels()
+          .inline(({ selectedModels }) => {
+            const newDoc = createDefaultDoc(std.doc.collection);
+            if (!selectedModels?.length) return;
+            insertContent(std.host, selectedModels[0], REFERENCE_NODE, {
+              reference: {
+                type: 'LinkedPage',
+                pageId: newDoc.id,
+              },
+            });
+          })
+          .run();
+      },
     },
     {
       name: 'LinkedPage',
       icon: LinkedPageIcon(TOOL_PANEL_ICON_STYLE),
+      showWhen: ({ std, rootComponent }) => {
+        const linkedDocWidget = std.view.getWidget(
+          'affine-linked-doc-widget',
+          rootComponent.model.id
+        );
+        if (!linkedDocWidget) return false;
+
+        const hasLinkedDocSchema = std.doc.schema.flavourSchemaMap.has(
+          'affine:embed-linked-doc'
+        );
+        if (!hasLinkedDocSchema) return false;
+
+        if (!('showLinkedDocPopover' in linkedDocWidget)) {
+          console.warn(
+            'You may not have correctly implemented the linkedDoc widget! "showLinkedDoc(model)" method not found on widget'
+          );
+          return false;
+        }
+        return true;
+      },
+      action: ({ rootComponent, closeToolbar }) => {
+        const { std } = rootComponent;
+
+        const triggerKey =
+          std.getConfig('affine:page')?.linkedWidget?.triggerKeys?.[0] ?? '@';
+
+        std.command
+          .chain()
+          .getSelectedModels()
+          .inline(ctx => {
+            const { selectedModels } = ctx;
+            if (!selectedModels?.length) return;
+
+            const currentModel = selectedModels[0];
+            insertContent(std.host, currentModel, triggerKey);
+
+            const linkedDocWidget = std.view.getWidget(
+              'affine-linked-doc-widget',
+              rootComponent.model.id
+            );
+            if (!linkedDocWidget) return;
+            assertType<AffineLinkedDocWidget>(linkedDocWidget);
+
+            const inlineEditor = getInlineEditorByModel(std.host, currentModel);
+            // Wait for range to be updated
+            inlineEditor?.slots.inlineRangeSync.once(() => {
+              linkedDocWidget.showLinkedDocPopover(inlineEditor, triggerKey);
+              closeToolbar();
+            });
+          })
+          .run();
+      },
     },
   ],
 };
@@ -194,14 +355,63 @@ const contentMediaToolGroup: KeyboardToolPanelGroup = {
     {
       name: 'Image',
       icon: NewPageIcon(TOOL_PANEL_ICON_STYLE),
+      showWhen: ({ std }) =>
+        std.doc.schema.flavourSchemaMap.has('affine:image'),
+      action: ({ std }) => {
+        std.command
+          .chain()
+          .getSelectedModels()
+          .insertImages({ removeEmptyLine: true })
+          .run();
+      },
     },
     {
       name: 'Link',
       icon: LinkIcon(TOOL_PANEL_ICON_STYLE),
+      showWhen: ({ std }) =>
+        std.doc.schema.flavourSchemaMap.has('affine:bookmark'),
+      action: async ({ std }) => {
+        const { selectedModels } = std.command.exec('getSelectedModels');
+        const model = selectedModels?.[0];
+        if (!model) return;
+
+        const parentModel = std.doc.getParent(model);
+        if (!parentModel) return;
+
+        const index = parentModel.children.indexOf(model) + 1;
+        await toggleEmbedCardCreateModal(
+          std.host,
+          'Links',
+          'The added link will be displayed as a card view.',
+          { mode: 'page', parentModel, index }
+        );
+        if (model.text?.length === 0) {
+          std.doc.deleteBlock(model);
+        }
+      },
     },
     {
       name: 'Attachment',
       icon: AttachmentIcon(TOOL_PANEL_ICON_STYLE),
+      showWhen: ({ std }) =>
+        std.doc.schema.flavourSchemaMap.has('affine:attachment'),
+      action: async ({ std }) => {
+        const { selectedModels } = std.command.exec('getSelectedModels');
+        const model = selectedModels?.[0];
+        if (!model) return;
+
+        const file = await openFileOrFiles();
+        if (!file) return;
+
+        const attachmentService = std.getService('affine:attachment');
+        if (!attachmentService) return;
+        const maxFileSize = attachmentService.maxFileSize;
+
+        await addSiblingAttachmentBlocks(std.host, [file], maxFileSize, model);
+        if (model.text?.length === 0) {
+          std.doc.deleteBlock(model);
+        }
+      },
     },
     {
       name: 'Youtube',
@@ -209,38 +419,146 @@ const contentMediaToolGroup: KeyboardToolPanelGroup = {
         ...TOOL_PANEL_ICON_STYLE,
         style: `color: white`,
       }),
+      showWhen: ({ std }) =>
+        std.doc.schema.flavourSchemaMap.has('affine:embed-youtube'),
+      action: async ({ std }) => {
+        const { selectedModels } = std.command.exec('getSelectedModels');
+        const model = selectedModels?.[0];
+        if (!model) return;
+
+        const parentModel = std.doc.getParent(model);
+        if (!parentModel) return;
+
+        const index = parentModel.children.indexOf(model) + 1;
+        await toggleEmbedCardCreateModal(
+          std.host,
+          'YouTube',
+          'The added YouTube video link will be displayed as an embed view.',
+          { mode: 'page', parentModel, index }
+        );
+        if (model.text?.length === 0) {
+          std.doc.deleteBlock(model);
+        }
+      },
     },
     {
       name: 'Github',
       icon: GithubIcon({ ...TOOL_PANEL_ICON_STYLE, style: `color: black` }),
+      showWhen: ({ std }) =>
+        std.doc.schema.flavourSchemaMap.has('affine:embed-github'),
+      action: async ({ std }) => {
+        const { selectedModels } = std.command.exec('getSelectedModels');
+        const model = selectedModels?.[0];
+        if (!model) return;
+
+        const parentModel = std.doc.getParent(model);
+        if (!parentModel) return;
+
+        const index = parentModel.children.indexOf(model) + 1;
+        await toggleEmbedCardCreateModal(
+          std.host,
+          'GitHub',
+          'The added GitHub issue or pull request link will be displayed as a card view.',
+          { mode: 'page', parentModel, index }
+        );
+        if (model.text?.length === 0) {
+          std.doc.deleteBlock(model);
+        }
+      },
     },
     {
       name: 'Figma',
-      icon: FigmaDuotoneIcon(TOOL_PANEL_ICON_STYLE),
+      icon: FigmaDuotoneIcon,
+      showWhen: ({ std }) =>
+        std.doc.schema.flavourSchemaMap.has('affine:embed-figma'),
+      action: async ({ std }) => {
+        const { selectedModels } = std.command.exec('getSelectedModels');
+        const model = selectedModels?.[0];
+        if (!model) return;
+
+        const parentModel = std.doc.getParent(model);
+        if (!parentModel) {
+          return;
+        }
+        const index = parentModel.children.indexOf(model) + 1;
+        await toggleEmbedCardCreateModal(
+          std.host,
+          'Figma',
+          'The added Figma link will be displayed as an embed view.',
+          { mode: 'page', parentModel, index }
+        );
+        if (model.text?.length === 0) {
+          std.doc.deleteBlock(model);
+        }
+      },
     },
     {
       name: 'Loom',
       icon: LoomLogoIcon({ ...TOOL_PANEL_ICON_STYLE, style: `color: #625DF5` }),
+      showWhen: ({ std }) =>
+        std.doc.schema.flavourSchemaMap.has('affine:embed-loom'),
+      action: async ({ std }) => {
+        const { selectedModels } = std.command.exec('getSelectedModels');
+        const model = selectedModels?.[0];
+        if (!model) return;
+
+        const parentModel = std.doc.getParent(model);
+        if (!parentModel) return;
+
+        const index = parentModel.children.indexOf(model) + 1;
+        await toggleEmbedCardCreateModal(
+          std.host,
+          'Loom',
+          'The added Loom video link will be displayed as an embed view.',
+          { mode: 'page', parentModel, index }
+        );
+        if (model.text?.length === 0) {
+          std.doc.deleteBlock(model);
+        }
+      },
     },
     {
-      name: 'TeX',
+      name: 'Equation',
       icon: TeXIcon(TOOL_PANEL_ICON_STYLE),
+      showWhen: ({ std }) =>
+        std.doc.schema.flavourSchemaMap.has('affine:latex'),
+      action: ({ std }) => {
+        std.command
+          .chain()
+          .getSelectedModels()
+          .insertLatexBlock({
+            place: 'after',
+            removeEmptyLine: true,
+          })
+          .run();
+      },
     },
   ],
 };
 
 const documentGroupFrameToolGroup: DynamicKeyboardToolPanelGroup = ({
-  rootComponent,
+  std,
 }) => {
-  const { doc } = rootComponent;
+  const { doc } = std;
 
   const frameModels = doc
     .getBlocksByFlavour('affine:frame')
     .map(block => block.model) as FrameBlockModel[];
 
-  const frameItems = frameModels.map<KeyboardToolPanelItem>(frameModel => ({
+  const frameItems = frameModels.map<KeyboardToolbarActionItem>(frameModel => ({
     name: 'Frame: ' + frameModel.title.toString(),
     icon: FrameIcon(TOOL_PANEL_ICON_STYLE),
+    action: ({ std }) => {
+      std.command
+        .chain()
+        .getSelectedModels()
+        .insertSurfaceRefBlock({
+          reference: frameModel.id,
+          place: 'after',
+          removeEmptyLine: true,
+        })
+        .run();
+    },
   }));
 
   const surfaceModel = getSurfaceBlock(doc);
@@ -249,9 +567,20 @@ const documentGroupFrameToolGroup: DynamicKeyboardToolPanelGroup = ({
     ? surfaceModel.getElementsByType('group')
     : [];
 
-  const groupItems = groupElements.map<KeyboardToolPanelItem>(group => ({
+  const groupItems = groupElements.map<KeyboardToolbarActionItem>(group => ({
     name: 'Group: ' + group.title.toString(),
     icon: GroupIcon(TOOL_PANEL_ICON_STYLE),
+    action: ({ std }) => {
+      std.command
+        .chain()
+        .getSelectedModels()
+        .insertSurfaceRefBlock({
+          reference: group.id,
+          place: 'after',
+          removeEmptyLine: true,
+        })
+        .run();
+    },
   }));
 
   const items = [...frameItems, ...groupItems];
@@ -270,18 +599,50 @@ const dateToolGroup: KeyboardToolPanelGroup = {
     {
       name: 'Today',
       icon: TodayIcon(TOOL_PANEL_ICON_STYLE),
+      action: ({ std }) => {
+        const { selectedModels } = std.command.exec('getSelectedModels');
+        const model = selectedModels?.[0];
+        if (!model) return;
+
+        insertContent(std.host, model, formatDate(new Date()));
+      },
     },
     {
       name: 'Tomorrow',
       icon: TomorrowIcon(TOOL_PANEL_ICON_STYLE),
+      action: ({ std }) => {
+        const { selectedModels } = std.command.exec('getSelectedModels');
+        const model = selectedModels?.[0];
+        if (!model) return;
+
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        insertContent(std.host, model, formatDate(tomorrow));
+      },
     },
     {
       name: 'Yesterday',
       icon: YesterdayIcon(TOOL_PANEL_ICON_STYLE),
+      action: ({ std }) => {
+        const { selectedModels } = std.command.exec('getSelectedModels');
+        const model = selectedModels?.[0];
+        if (!model) return;
+
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        insertContent(std.host, model, formatDate(yesterday));
+      },
     },
     {
       name: 'Now',
       icon: NowIcon(TOOL_PANEL_ICON_STYLE),
+      action: ({ std }) => {
+        const { selectedModels } = std.command.exec('getSelectedModels');
+        const model = selectedModels?.[0];
+        if (!model) return;
+
+        insertContent(std.host, model, formatTime(new Date()));
+      },
     },
   ],
 };
@@ -292,10 +653,36 @@ const databaseToolGroup: KeyboardToolPanelGroup = {
     {
       name: 'Table view',
       icon: DatabaseTableViewIcon(TOOL_PANEL_ICON_STYLE),
+      showWhen: ({ std }) =>
+        std.doc.schema.flavourSchemaMap.has('affine:database'),
+      action: ({ std }) => {
+        std.command
+          .chain()
+          .getSelectedModels()
+          .insertDatabaseBlock({
+            viewType: viewPresets.tableViewMeta.type,
+            place: 'after',
+            removeEmptyLine: true,
+          })
+          .run();
+      },
     },
     {
       name: 'Kanban view',
       icon: DatabaseKanbanViewIcon(TOOL_PANEL_ICON_STYLE),
+      showWhen: ({ std }) =>
+        std.doc.schema.flavourSchemaMap.has('affine:database'),
+      action: ({ std }) => {
+        std.command
+          .chain()
+          .getSelectedModels()
+          .insertDatabaseBlock({
+            viewType: viewPresets.kanbanViewMeta.type,
+            place: 'after',
+            removeEmptyLine: true,
+          })
+          .run();
+      },
     },
   ],
 };
@@ -308,8 +695,8 @@ const moreToolPanel: KeyboardToolPanelConfig = {
   }),
   activeBackground: cssVarV2('edgeless/selection/selectionMarqueeBackground'),
   groups: [
-    basicToolGroup,
-    listToolGroup,
+    { name: 'Basic', items: textToolActionItems },
+    { name: 'List', items: listToolActionItems },
     pageToolGroup,
     contentMediaToolGroup,
     documentGroupFrameToolGroup,
@@ -323,121 +710,127 @@ const textToolPanel: KeyboardToolPanelConfig = {
   groups: [
     {
       name: 'Turn into',
-      items: [
-        {
-          name: 'Text',
-          icon: TextIcon(TOOL_PANEL_ICON_STYLE),
-        },
-        {
-          name: 'Heading1',
-          icon: Heading1Icon(TOOL_PANEL_ICON_STYLE),
-        },
-        {
-          name: 'Heading2',
-          icon: Heading2Icon(TOOL_PANEL_ICON_STYLE),
-        },
-        {
-          name: 'Heading3',
-          icon: Heading3Icon(TOOL_PANEL_ICON_STYLE),
-        },
-        {
-          name: 'Heading4',
-          icon: Heading4Icon(TOOL_PANEL_ICON_STYLE),
-        },
-        {
-          name: 'Heading5',
-          icon: Heading5Icon(TOOL_PANEL_ICON_STYLE),
-        },
-        {
-          name: 'Heading6',
-          icon: Heading6Icon(TOOL_PANEL_ICON_STYLE),
-        },
-        {
-          name: 'CodeBlock',
-          icon: CodeBlockIcon(TOOL_PANEL_ICON_STYLE),
-        },
-        {
-          name: 'Quote',
-          icon: QuoteIcon(TOOL_PANEL_ICON_STYLE),
-        },
-        {
-          name: 'Divider',
-          icon: DividerIcon(TOOL_PANEL_ICON_STYLE),
-        },
-      ],
+      items: textToolActionItems,
     },
   ],
 };
 
+const textStyleToolItems: KeyboardToolbarItem[] = [
+  {
+    name: 'Bold',
+    icon: BoldIcon(TOOLBAR_ICON_STYLE),
+    background: ({ std }) => {
+      const { textStyle } = std.command.exec('getTextStyle');
+      return textStyle?.bold ? '#00000012' : '';
+    },
+    action: ({ std }) => {
+      std.command.exec('toggleBold');
+    },
+  },
+  {
+    name: 'Italic',
+    icon: ItalicIcon(TOOLBAR_ICON_STYLE),
+    background: ({ std }) => {
+      const { textStyle } = std.command.exec('getTextStyle');
+      return textStyle?.italic ? '#00000012' : '';
+    },
+    action: ({ std }) => {
+      std.command.exec('toggleItalic');
+    },
+  },
+  {
+    name: 'UnderLine',
+    icon: UnderLineIcon(TOOLBAR_ICON_STYLE),
+    background: ({ std }) => {
+      const { textStyle } = std.command.exec('getTextStyle');
+      return textStyle?.underline ? '#00000012' : '';
+    },
+    action: ({ std }) => {
+      std.command.exec('toggleUnderline');
+    },
+  },
+  {
+    name: 'StrikeThrough',
+    icon: StrikeThroughIcon(TOOLBAR_ICON_STYLE),
+    background: ({ std }) => {
+      const { textStyle } = std.command.exec('getTextStyle');
+      return textStyle?.strike ? '#00000012' : '';
+    },
+    action: ({ std }) => {
+      std.command.exec('toggleStrike');
+    },
+  },
+  {
+    name: 'Code',
+    icon: CodeIcon(TOOLBAR_ICON_STYLE),
+    background: ({ std }) => {
+      const { textStyle } = std.command.exec('getTextStyle');
+      return textStyle?.code ? '#00000012' : '';
+    },
+    action: ({ std }) => {
+      std.command.exec('toggleCode');
+    },
+  },
+  {
+    name: 'Link',
+    icon: LinkIcon(TOOLBAR_ICON_STYLE),
+    background: ({ std }) => {
+      const { textStyle } = std.command.exec('getTextStyle');
+      return textStyle?.link ? '#00000012' : '';
+    },
+    action: ({ std }) => {
+      std.command.exec('toggleLink');
+    },
+  },
+];
+
 const highlightToolPanel: KeyboardToolPanelConfig = {
-  icon: HighLightDuotoneIcon(TOOLBAR_ICON_STYLE),
+  icon: ({ std }) => {
+    const { textStyle } = std.command.exec('getTextStyle');
+    if (textStyle?.color) {
+      return HighLightDuotoneIcon(textStyle.color);
+    } else {
+      return HighLightDuotoneIcon(cssVarV2('icon/primary'));
+    }
+  },
   groups: [
     {
       name: 'Color',
       items: [
         {
           name: 'Default Color',
-          icon: TextColorIcon({
-            ...TOOL_PANEL_ICON_STYLE,
-            style: `color: ${cssVarV2('text/highlight/fg/orange')}`,
-          }),
+          icon: TextColorIcon(cssVarV2('text/highlight/fg/orange')),
         },
-        {
-          name: 'Red',
-          icon: TextColorIcon({
-            ...TOOL_PANEL_ICON_STYLE,
-            style: `color: ${cssVarV2('text/highlight/fg/red')}`,
-          }),
-        },
-        {
-          name: 'Orange',
-          icon: TextColorIcon({
-            ...TOOL_PANEL_ICON_STYLE,
-            style: `color: ${cssVarV2('text/highlight/fg/orange')}`,
-          }),
-        },
-        {
-          name: 'Yellow',
-          icon: TextColorIcon({
-            ...TOOL_PANEL_ICON_STYLE,
-            style: `color: ${cssVarV2('text/highlight/fg/yellow')}`,
-          }),
-        },
-        {
-          name: 'Green',
-          icon: TextColorIcon({
-            ...TOOL_PANEL_ICON_STYLE,
-            style: `color: ${cssVarV2('text/highlight/fg/green')}`,
-          }),
-        },
-        {
-          name: 'Teal',
-          icon: TextColorIcon({
-            ...TOOL_PANEL_ICON_STYLE,
-            style: `color: ${cssVarV2('text/highlight/fg/teal')}`,
-          }),
-        },
-        {
-          name: 'Blue',
-          icon: TextColorIcon({
-            ...TOOL_PANEL_ICON_STYLE,
-            style: `color: ${cssVarV2('text/highlight/fg/blue')}`,
-          }),
-        },
-        {
-          name: 'Purple',
-          icon: TextColorIcon({
-            ...TOOL_PANEL_ICON_STYLE,
-            style: `color: ${cssVarV2('text/highlight/fg/purple')}`,
-          }),
-        },
-        {
-          name: 'Grey',
-          icon: TextColorIcon({
-            ...TOOL_PANEL_ICON_STYLE,
-            style: `color: ${cssVarV2('text/highlight/fg/grey')}`,
-          }),
-        },
+        ...(
+          [
+            'red',
+            'orange',
+            'yellow',
+            'green',
+            'teal',
+            'blue',
+            'purple',
+            'grey',
+          ] as const
+        ).map<KeyboardToolbarActionItem>(color => ({
+          name: color.charAt(0).toUpperCase() + color.slice(1),
+          icon: TextColorIcon(cssVarV2(`text/highlight/fg/${color}`)),
+          action: ({ std }) => {
+            const payload = {
+              styles: {
+                color: cssVarV2(`text/highlight/fg/${color}`),
+              } satisfies AffineTextAttributes,
+            };
+            std.command
+              .chain()
+              .try(chain => [
+                chain.getTextSelection().formatText(payload),
+                chain.getBlockSelections().formatBlock(payload),
+                chain.formatNative(payload),
+              ])
+              .run();
+          },
+        })),
       ],
     },
     {
@@ -445,84 +838,58 @@ const highlightToolPanel: KeyboardToolPanelConfig = {
       items: [
         {
           name: 'Default Color',
-          icon: TextBackgroundDuotoneIcon({
-            ...TOOL_PANEL_ICON_STYLE,
-            style: `color: ${cssVarV2('text/highlight/bg/orange')}`,
-          }),
+          icon: TextBackgroundDuotoneIcon(cssVarV2('text/highlight/bg/orange')),
         },
-        {
-          name: 'Red',
-          icon: TextBackgroundDuotoneIcon({
-            ...TOOL_PANEL_ICON_STYLE,
-            style: `color: ${cssVarV2('text/highlight/bg/red')}`,
-          }),
-        },
-        {
-          name: 'Orange',
-          icon: TextBackgroundDuotoneIcon({
-            ...TOOL_PANEL_ICON_STYLE,
-            style: `color: ${cssVarV2('text/highlight/bg/orange')}`,
-          }),
-        },
-        {
-          name: 'Yellow',
-          icon: TextBackgroundDuotoneIcon({
-            ...TOOL_PANEL_ICON_STYLE,
-            style: `color: ${cssVarV2('text/highlight/bg/yellow')}`,
-          }),
-        },
-        {
-          name: 'Green',
-          icon: TextBackgroundDuotoneIcon({
-            ...TOOL_PANEL_ICON_STYLE,
-            style: `color: ${cssVarV2('text/highlight/bg/green')}`,
-          }),
-        },
-        {
-          name: 'Teal',
-          icon: TextBackgroundDuotoneIcon({
-            ...TOOL_PANEL_ICON_STYLE,
-            style: `color: ${cssVarV2('text/highlight/bg/teal')}`,
-          }),
-        },
-        {
-          name: 'Blue',
-          icon: TextBackgroundDuotoneIcon({
-            ...TOOL_PANEL_ICON_STYLE,
-            style: `color: ${cssVarV2('text/highlight/bg/blue')}`,
-          }),
-        },
-        {
-          name: 'Purple',
-          icon: TextBackgroundDuotoneIcon({
-            ...TOOL_PANEL_ICON_STYLE,
-            style: `color: ${cssVarV2('text/highlight/bg/purple')}`,
-          }),
-        },
-        {
-          name: 'Grey',
-          icon: TextBackgroundDuotoneIcon({
-            ...TOOL_PANEL_ICON_STYLE,
-            style: `color: ${cssVarV2('text/highlight/bg/grey')}`,
-          }),
-        },
+        ...(
+          [
+            'red',
+            'orange',
+            'yellow',
+            'green',
+            'teal',
+            'blue',
+            'purple',
+            'grey',
+          ] as const
+        ).map<KeyboardToolbarActionItem>(color => ({
+          name: color.charAt(0).toUpperCase() + color.slice(1),
+          icon: TextBackgroundDuotoneIcon(
+            cssVarV2(`text/highlight/bg/${color}`)
+          ),
+          action: ({ std }) => {
+            const payload = {
+              styles: {
+                background: cssVarV2(`text/highlight/bg/${color}`),
+              } satisfies AffineTextAttributes,
+            };
+            std.command
+              .chain()
+              .try(chain => [
+                chain.getTextSelection().formatText(payload),
+                chain.getBlockSelections().formatBlock(payload),
+                chain.formatNative(payload),
+              ])
+              .run();
+          },
+        })),
       ],
     },
   ],
 };
 
-const textMenuToolbarConfig: KeyboardSubToolbarConfig = {
+const textSubToolbarConfig: KeyboardSubToolbarConfig = {
   icon: FontIcon(TOOLBAR_ICON_STYLE),
   items: [
     textToolPanel,
-    { icon: BoldIcon(TOOLBAR_ICON_STYLE) },
-    { icon: ItalicIcon(TOOLBAR_ICON_STYLE) },
-    { icon: UnderLineIcon(TOOLBAR_ICON_STYLE) },
-    { icon: StrikeThroughIcon(TOOLBAR_ICON_STYLE) },
+    ...textStyleToolItems,
+    {
+      name: 'InlineTex',
+      icon: TeXIcon(TOOLBAR_ICON_STYLE),
+      action: ({ std }) => {
+        std.command.chain().getTextSelection().insertInlineLatex().run();
+      },
+    },
     highlightToolPanel,
-    { icon: CodeIcon(TOOLBAR_ICON_STYLE) },
-    { icon: LinkIcon(TOOLBAR_ICON_STYLE) },
-    { icon: TeXIcon(TOOLBAR_ICON_STYLE) },
   ],
 };
 
@@ -531,22 +898,137 @@ export const defaultKeyboardToolbarConfig: KeyboardToolbarConfig = {
     moreToolPanel,
     // TODO(@L-Sun): add ai function in AFFiNE side
     // { icon: AiIcon(iconStyle) },
-    textMenuToolbarConfig,
-    { icon: BulletedListIcon(TOOLBAR_ICON_STYLE) },
-    { icon: NumberedListIcon(TOOLBAR_ICON_STYLE) },
-    { icon: CheckBoxCheckLinearIcon(TOOLBAR_ICON_STYLE) },
-    { icon: DividerIcon(TOOLBAR_ICON_STYLE) },
-    { icon: UndoIcon(TOOLBAR_ICON_STYLE) },
-    { icon: RedoIcon(TOOLBAR_ICON_STYLE) },
-    // { icon: RightTabIcon({width:iconSize,height:iconSize}) },
-    // { icon: CollapseTabIcon({width:iconSize,height:iconSize}) },
-    { icon: CopyIcon(TOOLBAR_ICON_STYLE) },
-    { icon: DuplicateIcon(TOOLBAR_ICON_STYLE) },
-    { icon: BlockLinkIcon(TOOLBAR_ICON_STYLE) },
-    { icon: DatabaseTableViewIcon(TOOLBAR_ICON_STYLE) },
-    { icon: LinkedPageIcon(TOOLBAR_ICON_STYLE) },
-    { icon: ArrowUpBigIcon(TOOLBAR_ICON_STYLE) },
-    { icon: ArrowDownBigIcon(TOOLBAR_ICON_STYLE) },
-    { icon: DeleteIcon(TOOLBAR_ICON_STYLE) },
+    textSubToolbarConfig,
+    ...listToolActionItems,
+    ...textToolActionItems.filter(({ name }) => name === 'Divider'),
+    {
+      name: 'Undo',
+      icon: UndoIcon(TOOLBAR_ICON_STYLE),
+      disableWhen: ({ std }) => !std.doc.canUndo,
+      action: ({ std }) => {
+        std.doc.undo();
+      },
+    },
+    {
+      name: 'Redo',
+      icon: RedoIcon(TOOLBAR_ICON_STYLE),
+      disableWhen: ({ std }) => !std.doc.canRedo,
+      action: ({ std }) => {
+        std.doc.redo();
+      },
+    },
+    {
+      name: 'RightTab',
+      icon: RightTabIcon(TOOLBAR_ICON_STYLE),
+      disableWhen: ({ std }) => {
+        const [success] = std.command
+          .chain()
+          .tryAll(chain => [chain.canIndentParagraph(), chain.canIndentList()])
+          .run();
+        return !success;
+      },
+      action: ({ std }) => {
+        std.command
+          .chain()
+          .tryAll(chain => [
+            chain.canIndentParagraph().indentParagraph(),
+            chain.canIndentList().indentList(),
+          ])
+          .run();
+      },
+    },
+    {
+      name: 'CollapseTab',
+      icon: CollapseTabIcon(TOOLBAR_ICON_STYLE),
+      disableWhen: ({ std }) => {
+        const [success] = std.command
+          .chain()
+          .tryAll(chain => [chain.canDedentParagraph(), chain.canDedentList()])
+          .run();
+        return !success;
+      },
+      action: ({ std }) => {
+        std.command
+          .chain()
+          .tryAll(chain => [
+            chain.canDedentParagraph().dedentParagraph(),
+            chain.canDedentList().dedentList(),
+          ])
+          .run();
+      },
+    },
+    {
+      name: 'Copy',
+      icon: CopyIcon(TOOLBAR_ICON_STYLE),
+      action: ({ std }) => {
+        std.command
+          .chain()
+          .getSelectedModels()
+          .with({
+            onCopy: () => {
+              toast(std.host, 'Copied to clipboard');
+            },
+          })
+          .draftSelectedModels()
+          .copySelectedModels()
+          .run();
+      },
+    },
+    {
+      name: 'Duplicate',
+      icon: DuplicateIcon(TOOLBAR_ICON_STYLE),
+      action: ({ std }) => {
+        std.command
+          .chain()
+          .getSelectedModels()
+          .draftSelectedModels()
+          .duplicateSelectedModels()
+          .run();
+      },
+    },
+    ...databaseToolGroup.items.filter(({ name }) => name === 'Table view'),
+    ...pageToolGroup.items.filter(({ name }) => name === 'LinkedPage'),
+    {
+      name: 'Move Up',
+      icon: ArrowUpBigIcon(TOOLBAR_ICON_STYLE),
+      action: ({ std }) => {
+        const { selectedModels } = std.command.exec('getSelectedModels');
+        const model = selectedModels?.[0];
+        if (!model) return;
+
+        const previousSiblingModel = std.doc.getPrev(model);
+        if (!previousSiblingModel) return;
+
+        const parentModel = std.doc.getParent(previousSiblingModel);
+        if (!parentModel) return;
+
+        std.doc.moveBlocks([model], parentModel, previousSiblingModel, true);
+      },
+    },
+    {
+      name: 'Move Down',
+      icon: ArrowDownBigIcon(TOOLBAR_ICON_STYLE),
+      action: ({ std }) => {
+        const { selectedModels } = std.command.exec('getSelectedModels');
+        const model = selectedModels?.[0];
+        if (!model) return;
+
+        const nextSiblingModel = std.doc.getNext(model);
+        if (!nextSiblingModel) return;
+
+        const parentModel = std.doc.getParent(nextSiblingModel);
+        if (!parentModel) return;
+
+        std.doc.moveBlocks([model], parentModel, nextSiblingModel, true);
+      },
+    },
+    {
+      name: 'Delete',
+      icon: DeleteIcon(TOOLBAR_ICON_STYLE),
+      action: ({ std }) => {
+        std.command.chain().getSelectedModels().deleteSelectedModels().run();
+      },
+    },
   ],
+  useScreenHeight: false,
 };

@@ -9,8 +9,10 @@ import {
   ConnectorMode,
   DEFAULT_CONNECTOR_COLOR,
 } from '@blocksuite/affine-model';
-import { EditPropsStore } from '@blocksuite/affine-shared/services';
-import { ThemeObserver } from '@blocksuite/affine-shared/theme';
+import {
+  EditPropsStore,
+  ThemeProvider,
+} from '@blocksuite/affine-shared/services';
 import { SignalWatcher } from '@blocksuite/global/utils';
 import { computed } from '@preact/signals-core';
 import { css, html, LitElement } from 'lit';
@@ -111,7 +113,9 @@ export class EdgelessConnectorMenu extends EdgelessToolbarToolMixin(
       mode,
       this.onChange
     );
-    const color = ThemeObserver.getColorValue(stroke, DEFAULT_CONNECTOR_COLOR);
+    const color = this.edgeless.std
+      .get(ThemeProvider)
+      .getColorValue(stroke, DEFAULT_CONNECTOR_COLOR);
 
     return html`
       <edgeless-slide-menu>
