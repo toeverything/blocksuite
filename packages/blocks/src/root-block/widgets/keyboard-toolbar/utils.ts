@@ -8,6 +8,7 @@ import type { PageRootBlockComponent } from '../../page/page-root-block.js';
 import type {
   KeyboardSubToolbarConfig,
   KeyboardToolbarActionItem,
+  KeyboardToolbarConfig,
   KeyboardToolbarItem,
   KeyboardToolPanelConfig,
 } from './config.js';
@@ -29,6 +30,10 @@ export class VirtualKeyboardController implements ReactiveController {
       this._keyboardOpened$.value = virtualKeyboard.boundingRect.height > 0;
       this._keyboardHeight$.value = virtualKeyboard.boundingRect.height;
     } else if (visualViewport) {
+      const windowHeight = this.host.config.useScreenHeight
+        ? window.screen.height
+        : window.innerHeight;
+
       /**
        * ┌───────────────┐ - window top
        * │               │
@@ -42,10 +47,9 @@ export class VirtualKeyboardController implements ReactiveController {
        * │               │                       │ visualViewport.offsetTop
        * └───────────────┘ - window bottom       --
        */
-      this._keyboardOpened$.value =
-        window.innerHeight - visualViewport.height > 0;
+      this._keyboardOpened$.value = windowHeight - visualViewport.height > 0;
       this._keyboardHeight$.value =
-        window.innerHeight - visualViewport.height - visualViewport.offsetTop;
+        windowHeight - visualViewport.height - visualViewport.offsetTop;
     } else {
       notSupportedWarning();
     }
@@ -60,7 +64,10 @@ export class VirtualKeyboardController implements ReactiveController {
     }
   };
 
-  host: ReactiveControllerHost & { rootComponent: PageRootBlockComponent };
+  host: ReactiveControllerHost & {
+    rootComponent: PageRootBlockComponent;
+    config: KeyboardToolbarConfig;
+  };
 
   show = () => {
     if (navigator.virtualKeyboard) {
@@ -91,9 +98,7 @@ export class VirtualKeyboardController implements ReactiveController {
     return this._keyboardOpened$.value;
   }
 
-  constructor(
-    host: ReactiveControllerHost & { rootComponent: PageRootBlockComponent }
-  ) {
+  constructor(host: VirtualKeyboardController['host']) {
     (this.host = host).addController(this);
   }
 

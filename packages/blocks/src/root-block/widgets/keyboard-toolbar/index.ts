@@ -6,12 +6,19 @@ import { html, nothing } from 'lit';
 import { PageRootBlockComponent } from '../../page/page-root-block.js';
 import { defaultKeyboardToolbarConfig } from './config.js';
 
+export * from './config.js';
+
 export const AFFINE_KEYBOARD_TOOLBAR_WIDGET = 'affine-keyboard-toolbar-widget';
 
 export class AffineKeyboardToolbarWidget extends WidgetComponent {
   private readonly _showToolPanel$ = signal(false);
 
-  keyboardToolbarConfig = defaultKeyboardToolbarConfig;
+  get config() {
+    return {
+      ...defaultKeyboardToolbarConfig,
+      ...this.std.getConfig('affine:page')?.keyboardToolbar,
+    };
+  }
 
   override render() {
     if (
@@ -26,7 +33,7 @@ export class AffineKeyboardToolbarWidget extends WidgetComponent {
 
     return html`<blocksuite-portal
       .template=${html`<affine-keyboard-toolbar
-        .config=${this.keyboardToolbarConfig}
+        .config=${this.config}
         .rootComponent=${this.block.rootComponent}
         .showToolPanel=${this._showToolPanel$}
       ></affine-keyboard-toolbar> `}
