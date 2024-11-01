@@ -246,6 +246,8 @@ export class AffineKeyboardToolbar extends SignalWatcher(
     this.disposables.addFromEvent(this.rootComponent, 'blur', () => {
       this._showToolbar$.value = false;
       this._shrink$.value = true;
+      this._currentPanelIndex$.value = -1;
+      this._path$.value = [];
     });
 
     // prevent editor blur when click item in toolbar

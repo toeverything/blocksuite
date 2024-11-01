@@ -59,7 +59,6 @@ export class VirtualKeyboardController implements ReactiveController {
     if (navigator.virtualKeyboard) {
       navigator.virtualKeyboard.hide();
     } else {
-      if (document.activeElement !== this.host.rootComponent) return;
       this.host.rootComponent.inputMode = 'none';
     }
   };
@@ -73,7 +72,6 @@ export class VirtualKeyboardController implements ReactiveController {
     if (navigator.virtualKeyboard) {
       navigator.virtualKeyboard.show();
     } else {
-      if (document.activeElement !== this.host.rootComponent) return;
       this.host.rootComponent.inputMode = '';
     }
   };
@@ -115,17 +113,6 @@ export class VirtualKeyboardController implements ReactiveController {
         navigator.virtualKeyboard.overlaysContent = overlaysContent;
         this.host.rootComponent.virtualKeyboardPolicy = virtualKeyboardPolicy;
       });
-
-      this._disposables.addFromEvent(
-        this.host.rootComponent,
-        'focus',
-        this.show
-      );
-      this._disposables.addFromEvent(
-        this.host.rootComponent,
-        'blur',
-        this.hide
-      );
       this._disposables.addFromEvent(
         navigator.virtualKeyboard,
         'geometrychange',
@@ -145,6 +132,9 @@ export class VirtualKeyboardController implements ReactiveController {
     } else {
       notSupportedWarning();
     }
+
+    this._disposables.addFromEvent(this.host.rootComponent, 'focus', this.show);
+    this._disposables.addFromEvent(this.host.rootComponent, 'blur', this.hide);
 
     this._updateKeyboardHeight();
   }
