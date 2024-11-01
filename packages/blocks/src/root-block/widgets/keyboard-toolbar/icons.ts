@@ -9,24 +9,22 @@ import {
 import { cssVarV2 } from '@toeverything/theme/v2';
 import { html } from 'lit';
 
-import { TOOL_PANEL_ICON_STYLE } from './styles.js';
-
 export function HeadingIcon(i: 1 | 2 | 3 | 4 | 5 | 6) {
   switch (i) {
     case 1:
-      return Heading1Icon(TOOL_PANEL_ICON_STYLE);
+      return Heading1Icon();
     case 2:
-      return Heading2Icon(TOOL_PANEL_ICON_STYLE);
+      return Heading2Icon();
     case 3:
-      return Heading3Icon(TOOL_PANEL_ICON_STYLE);
+      return Heading3Icon();
     case 4:
-      return Heading4Icon(TOOL_PANEL_ICON_STYLE);
+      return Heading4Icon();
     case 5:
-      return Heading5Icon(TOOL_PANEL_ICON_STYLE);
+      return Heading5Icon();
     case 6:
-      return Heading6Icon(TOOL_PANEL_ICON_STYLE);
+      return Heading6Icon();
     default:
-      return Heading1Icon(TOOL_PANEL_ICON_STYLE);
+      return Heading1Icon();
   }
 }
 
@@ -53,9 +51,9 @@ export const HighLightDuotoneIcon = (color: string) =>
 export const TextColorIcon = (color: string) =>
   html`<svg
     xmlns="http://www.w3.org/2000/svg"
-    width="${TOOL_PANEL_ICON_STYLE.width}"
-    height="${TOOL_PANEL_ICON_STYLE.height}"
-    viewBox="0 0 ${TOOL_PANEL_ICON_STYLE.width} ${TOOL_PANEL_ICON_STYLE.height}"
+    width="32"
+    height="32"
+    viewBox="0 0 32 32"
     fill="none"
   >
     <path
@@ -77,9 +75,9 @@ export const TextColorIcon = (color: string) =>
 export const TextBackgroundDuotoneIcon = (color: string) =>
   html`<svg
     xmlns="http://www.w3.org/2000/svg"
-    width="${TOOL_PANEL_ICON_STYLE.width}"
-    height="${TOOL_PANEL_ICON_STYLE.height}"
-    viewBox="0 0 ${TOOL_PANEL_ICON_STYLE.width} ${TOOL_PANEL_ICON_STYLE.height}"
+    width="32"
+    height="32"
+    viewBox="0 0 32 32"
     fill="none"
   >
     <path
@@ -104,8 +102,8 @@ export const TextBackgroundDuotoneIcon = (color: string) =>
   </svg>`;
 
 export const FigmaDuotoneIcon = html`<svg
-  width="${TOOL_PANEL_ICON_STYLE.width}"
-  height="${TOOL_PANEL_ICON_STYLE.height}"
+  width="32"
+  height="32"
   viewBox="0 0 24 24"
   fill="none"
   xmlns="http://www.w3.org/2000/svg"
