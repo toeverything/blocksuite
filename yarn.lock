@@ -1853,6 +1853,7 @@ __metadata:
     "@tweakpane/core": "npm:^2.0.4"
     "@types/katex": "npm:^0.16.7"
     "@types/micromatch": "npm:^4.0.9"
+    "@vitejs/plugin-basic-ssl": "npm:^1.1.0"
     browser-fs-access: "npm:^0.35.0"
     graphql: "npm:^16.9.0"
     jszip: "npm:^3.10.1"
@@ -5200,6 +5201,15 @@ __metadata:
   version: 1.2.0
   resolution: "@ungap/structured-clone@npm:1.2.0"
   checksum: 10/c6fe89a505e513a7592e1438280db1c075764793a2397877ff1351721fe8792a966a5359769e30242b3cd023f2efb9e63ca2ca88019d73b564488cc20e3eab12
+  languageName: node
+  linkType: hard
+
+"@vitejs/plugin-basic-ssl@npm:^1.1.0":
+  version: 1.1.0
+  resolution: "@vitejs/plugin-basic-ssl@npm:1.1.0"
+  peerDependencies:
+    vite: ^3.0.0 || ^4.0.0 || ^5.0.0
+  checksum: 10/2c0631d1202a1b5f198a96c761cbcdde3730cc03a9be565ea12c37b47c22dd22976dc4bd614a400c431a55be0270359cf59fbb0530e77fafc0e591b1f58858ef
   languageName: node
   linkType: hard
 

@@ -39,6 +39,7 @@
   "devDependencies": {
     "@tweakpane/core": "^2.0.4",
     "@types/micromatch": "^4.0.9",
+    "@vitejs/plugin-basic-ssl": "^1.1.0",
     "graphql": "^16.9.0",
     "magic-string": "^0.30.11",
     "vite-plugin-wasm": "^3.3.0"

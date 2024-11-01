@@ -1,6 +1,7 @@
 import type { GetManualChunk } from 'rollup';
 import type { Plugin } from 'vite';
 
+import basicSsl from '@vitejs/plugin-basic-ssl';
 import fs from 'node:fs';
 import { createRequire } from 'node:module';
 import { cpus } from 'node:os';
@@ -163,6 +164,9 @@ export default ({ mode }) => {
 
   return defineConfig({
     envDir: __dirname,
+    server: {
+      https: {},
+    },
     define: {
       'import.meta.env.PLAYGROUND_SERVER': JSON.stringify(
         process.env.PLAYGROUND_SERVER ?? 'http://localhost:8787'
@@ -187,6 +191,7 @@ export default ({ mode }) => {
         }),
       wasm(),
       clearSiteDataPlugin(),
+      basicSsl(),
     ],
     esbuild: {
       target: 'es2018',
