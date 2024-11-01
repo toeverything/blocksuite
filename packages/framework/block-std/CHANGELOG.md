@@ -1,5 +1,27 @@
 # @blocksuite/block-std
 
+## 0.17.25
+
+### Patch Changes
+
+- 4d0bd4c: fix(blocks): reset keyboard toolbar after blur (#8646)
+
+  ## Fix
+
+  - fix(blocks): reset keyboard toolbar after blur (#8646)
+  - fix: scale note and edgeless-text when resize and align elements (#8642)
+  - fix(edgeless): can not insert link when no selection (#8644)
+  - fix(database): prevent 0 in number cells from getting rendered as an empty string (#8629)
+
+  ## Refactor
+
+  - refactor(blocks): provide position controll config for keyboard toolbar (#8645)
+
+- Updated dependencies [4d0bd4c]
+  - @blocksuite/global@0.17.25
+  - @blocksuite/inline@0.17.25
+  - @blocksuite/store@0.17.25
+
 ## 0.17.24
 
 ### Patch Changes
