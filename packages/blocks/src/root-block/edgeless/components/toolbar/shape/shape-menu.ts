@@ -100,6 +100,7 @@ export class EdgelessShapeMenu extends SignalWatcher(
         fillColor,
         strokeColor,
       });
+    this.onChange(shapeName);
   };
 
   private _setShapeStyle = (shapeStyle: ShapeStyle) => {
@@ -109,6 +110,7 @@ export class EdgelessShapeMenu extends SignalWatcher(
       .recordLastProps(`shape:${shapeName}`, {
         shapeStyle,
       });
+    this.onChange(shapeName);
   };
 
   override connectedCallback(): void {
