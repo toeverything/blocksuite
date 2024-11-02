@@ -1,11 +1,11 @@
 import { WithDisposable } from '@blocksuite/global/utils';
-import { css, html, LitElement } from 'lit';
+import { css, html } from 'lit';
 import { property, query } from 'lit/decorators.js';
 
-import type { EditorHost } from '../view/index.js';
 import type { GfxBlockElementModel } from './gfx-block-model.js';
 
 import { PropTypes, requiredProperties } from '../view/decorators/required.js';
+import { type EditorHost, ShadowlessElement } from '../view/index.js';
 import { Viewport } from './viewport.js';
 
 /**
@@ -35,7 +35,7 @@ export function requestThrottledConnectedFrame<
 @requiredProperties({
   viewport: PropTypes.instanceOf(Viewport),
 })
-export class GfxViewportElement extends WithDisposable(LitElement) {
+export class GfxViewportElement extends WithDisposable(ShadowlessElement) {
   static override styles = css`
     .gfx-viewport {
       position: absolute;
