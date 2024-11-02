@@ -159,12 +159,6 @@ export class SurfaceBlockComponent extends BlockComponent<
     return this._renderer;
   }
 
-  private _getReversedTransform() {
-    const { translateX, translateY, zoom } = this._gfx.viewport;
-
-    return `scale(${1 / zoom}) translate(${-translateX}px, ${-translateY}px)`;
-  }
-
   private _initOverlays() {
     this.std.provider.getAll(OverlayIdentifier).forEach(overlay => {
       this._renderer.addOverlay(overlay);
