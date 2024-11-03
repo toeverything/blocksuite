@@ -1,6 +1,6 @@
 import { WithDisposable } from '@blocksuite/global/utils';
 import { css, html } from 'lit';
-import { property, query } from 'lit/decorators.js';
+import { property } from 'lit/decorators.js';
 
 import type { GfxBlockElementModel } from './gfx-block-model.js';
 
@@ -37,7 +37,7 @@ export function requestThrottledConnectedFrame<
 })
 export class GfxViewportElement extends WithDisposable(ShadowlessElement) {
   static override styles = css`
-    .gfx-viewport {
+    gfx-viewport {
       position: absolute;
       left: 0;
       top: 0;
@@ -87,14 +87,7 @@ export class GfxViewportElement extends WithDisposable(ShadowlessElement) {
 
   private _refreshViewport = requestThrottledConnectedFrame(() => {
     const { translateX, translateY, zoom } = this.viewport;
-
-    if (this.container) {
-      this.container.style.transform = this._toCSSTransform(
-        translateX,
-        translateY,
-        zoom
-      );
-    }
+    this.style.transform = this._toCSSTransform(translateX, translateY, zoom);
   }, this);
 
   private _updatingChildrenFlag = false;
@@ -127,9 +120,7 @@ export class GfxViewportElement extends WithDisposable(ShadowlessElement) {
   }
 
   override render() {
-    return html`<div class="gfx-viewport">
-      <slot></slot>
-    </div>`;
+    return html``;
   }
 
   scheduleUpdateChildren(id: string) {
@@ -165,9 +156,6 @@ export class GfxViewportElement extends WithDisposable(ShadowlessElement) {
 
     return promise;
   }
-
-  @query('.gfx-viewport')
-  accessor container: HTMLDivElement | null = null;
 
   @property({ attribute: false })
   accessor getModelsInViewport: undefined | (() => Set<GfxBlockElementModel>);
