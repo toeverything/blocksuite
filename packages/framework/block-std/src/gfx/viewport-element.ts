@@ -43,6 +43,7 @@ export class GfxViewportElement extends WithDisposable(ShadowlessElement) {
       top: 0;
       contain: size layout style;
       display: block;
+      transform: none;
     }
   `;
 
@@ -50,12 +51,19 @@ export class GfxViewportElement extends WithDisposable(ShadowlessElement) {
     if (this.getModelsInViewport && this.host) {
       const host = this.host;
       const modelsInViewport = this.getModelsInViewport();
+      const { translateX, translateY, zoom } = this.viewport;
 
       modelsInViewport.forEach(model => {
         const view = host.std.view.getBlock(model.id);
 
         if (view) {
           view.style.display = '';
+          view.style.position = 'absolute';
+          view.style.transform = this._toCSSTransform(
+            translateX,
+            translateY,
+            zoom
+          );
         }
 
         if (this._lastVisibleModels?.has(model)) {
@@ -82,12 +90,8 @@ export class GfxViewportElement extends WithDisposable(ShadowlessElement) {
     resolve: () => void;
   }[] = [];
 
-  @property({ attribute: false })
-  accessor viewport!: Viewport;
-
   private _refreshViewport = requestThrottledConnectedFrame(() => {
-    const { translateX, translateY, zoom } = this.viewport;
-    this.style.transform = this._toCSSTransform(translateX, translateY, zoom);
+    this._hideOutsideBlock();
   }, this);
 
   private _updatingChildrenFlag = false;
@@ -165,4 +169,7 @@ export class GfxViewportElement extends WithDisposable(ShadowlessElement) {
 
   @property({ type: Number })
   accessor maxConcurrentRenders: number = 2;
+
+  @property({ attribute: false })
+  accessor viewport!: Viewport;
 }
