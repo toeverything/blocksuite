@@ -9,7 +9,7 @@ export const dateFilter = [
     self: t.date.instance(),
     args: [t.date.instance()] as const,
     label: 'Before',
-    shortString: v => (v ? `< ${format(v.value, 'yyyy/MM/dd')}` : undefined),
+    shortString: v => (v ? ` < ${format(v.value, 'yyyy/MM/dd')}` : undefined),
     impl: (self, value) => {
       if (self == null) {
         return false;
@@ -22,7 +22,7 @@ export const dateFilter = [
     self: t.date.instance(),
     args: [t.date.instance()] as const,
     label: 'After',
-    shortString: v => (v ? `> ${format(v.value, 'yyyy/MM/dd')}` : undefined),
+    shortString: v => (v ? ` > ${format(v.value, 'yyyy/MM/dd')}` : undefined),
     impl: (self, value) => {
       if (self == null) {
         return false;

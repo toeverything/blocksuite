@@ -55,5 +55,4 @@ export const converts: TypeConvertConfig[] = [
   ),
   createTypeConvert(t.richText.instance(), t.string.instance(), value => value),
   createTypeConvert(t.url.instance(), t.string.instance(), value => value),
-  createTypeConvert(t.date.instance(), t.number.instance(), value => value),
 ];

@@ -92,7 +92,7 @@ export class DatePicker extends WithDisposable(LitElement) {
   }
 
   get minHeight() {
-    const rowNum = 8;
+    const rowNum = this._matrix.length;
     return this.size * rowNum + this.padding * 2 + this.gapV * (rowNum - 1) - 2;
   }
 

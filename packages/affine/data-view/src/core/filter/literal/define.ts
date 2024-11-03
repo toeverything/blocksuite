@@ -10,6 +10,22 @@ import { createLiteral } from './create.js';
 
 export const allLiteralConfig: LiteralItemsConfig[] = [
   createLiteral({
+    type: t.date.instance(),
+    getItems: (_type, value, onChange) => {
+      return [
+        () => {
+          return html` <date-picker
+            .padding="${8}"
+            .value="${value.value}"
+            .onChange="${(date: Date) => {
+              onChange(date.getTime());
+            }}"
+          ></date-picker>`;
+        },
+      ];
+    },
+  }),
+  createLiteral({
     type: t.boolean.instance(),
     getItems: (_type, _value, _onChange) => {
       return [
@@ -126,12 +142,6 @@ export const allLiteralConfig: LiteralItemsConfig[] = [
           });
         }) ?? []
       );
-    },
-  }),
-  createLiteral({
-    type: t.date.instance(),
-    getItems: (_type, _value, _onChange) => {
-      return [];
     },
   }),
 ];

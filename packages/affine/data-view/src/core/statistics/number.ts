@@ -8,6 +8,7 @@ export const numberStatsFunctions: StatisticsConfig[] = [
     group: 'More options',
     menuName: 'Sum',
     type: 'sum',
+    displayName: 'Sum',
     dataType: t.number.instance(),
     impl: data => {
       const numbers = withoutNull(data);
@@ -20,6 +21,7 @@ export const numberStatsFunctions: StatisticsConfig[] = [
   createStatisticConfig({
     group: 'More options',
     menuName: 'Average',
+    displayName: 'Average',
     type: 'average',
     dataType: t.number.instance(),
     impl: data => {
@@ -33,6 +35,7 @@ export const numberStatsFunctions: StatisticsConfig[] = [
   createStatisticConfig({
     group: 'More options',
     menuName: 'Median',
+    displayName: 'Median',
     type: 'median',
     dataType: t.number.instance(),
     impl: data => {
@@ -50,6 +53,7 @@ export const numberStatsFunctions: StatisticsConfig[] = [
   createStatisticConfig({
     group: 'More options',
     menuName: 'Min',
+    displayName: 'Min',
     type: 'min',
     dataType: t.number.instance(),
     impl: data => {
@@ -69,6 +73,7 @@ export const numberStatsFunctions: StatisticsConfig[] = [
   createStatisticConfig({
     group: 'More options',
     menuName: 'Max',
+    displayName: 'Max',
     type: 'max',
     dataType: t.number.instance(),
     impl: data => {
@@ -88,6 +93,7 @@ export const numberStatsFunctions: StatisticsConfig[] = [
   createStatisticConfig({
     group: 'More options',
     menuName: 'Range',
+    displayName: 'Range',
     type: 'range',
     dataType: t.number.instance(),
     impl: data => {
