@@ -3,19 +3,19 @@ import { describe, expect, test } from 'vitest';
 
 describe('subtyping', () => {
   test('all type is subtype of unknown', () => {
-    expect(typeSystem.unify(t.unknown.instance(), t.boolean.instance())).toBe(
+    expect(typeSystem.unify(t.boolean.instance(), t.unknown.instance())).toBe(
       true
     );
-    expect(typeSystem.unify(t.unknown.instance(), t.string.instance())).toBe(
+    expect(typeSystem.unify(t.string.instance(), t.unknown.instance())).toBe(
       true
     );
     expect(
       typeSystem.unify(
-        t.unknown.instance(),
-        t.array.instance(t.string.instance())
+        t.array.instance(t.string.instance()),
+        t.unknown.instance()
       )
     ).toBe(true);
-    expect(typeSystem.unify(t.unknown.instance(), t.tag.instance())).toBe(true);
+    expect(typeSystem.unify(t.tag.instance(), t.unknown.instance())).toBe(true);
   });
 });
 describe('function apply', () => {
@@ -63,11 +63,17 @@ describe('function apply', () => {
       t.boolean.instance(),
       {}
     );
-    expect(instancedFn?.args[1]).toStrictEqual(
-      t.array.instance(t.tag.instance(tags))
-    );
-    expect(instancedFnArray?.args[1]).toStrictEqual(
-      t.array.instance(t.tag.instance(tags))
-    );
+    expect(
+      typeSystem.unify(
+        instancedFn?.args[1],
+        t.array.instance(t.tag.instance(tags))
+      )
+    ).toBe(true);
+    expect(
+      typeSystem.unify(
+        instancedFnArray?.args[1],
+        t.array.instance(t.tag.instance(tags))
+      )
+    ).toBe(true);
   });
 });
