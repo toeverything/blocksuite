@@ -45,3 +45,13 @@ export type EmbedOptions = {
   styles: EmbedCardStyle[];
   viewType: 'card' | 'embed';
 };
+
+export type IndentContext = {
+  blockId: string;
+  inlineIndex: number;
+  flavour: Extract<
+    keyof BlockSuite.BlockModels,
+    'affine:paragraph' | 'affine:list'
+  >;
+  type: 'indent' | 'dedent';
+};

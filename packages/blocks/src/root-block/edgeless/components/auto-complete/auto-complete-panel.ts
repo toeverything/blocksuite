@@ -29,8 +29,10 @@ import {
   ShapeStyle,
   TextElementModel,
 } from '@blocksuite/affine-model';
-import { EditPropsStore } from '@blocksuite/affine-shared/services';
-import { ThemeObserver } from '@blocksuite/affine-shared/theme';
+import {
+  EditPropsStore,
+  ThemeProvider,
+} from '@blocksuite/affine-shared/services';
 import { captureEventTarget } from '@blocksuite/affine-shared/utils';
 import { type BlockStdScope, stdContext } from '@blocksuite/block-std';
 import { GfxControllerIdentifier } from '@blocksuite/block-std/gfx';
@@ -449,7 +451,9 @@ export class EdgelessAutoCompletePanel extends WithDisposable(LitElement) {
     const xywh = this._getTargetXYWH(w, h)?.xywh;
     if (!xywh) return;
 
-    const strokeColor = ThemeObserver.getPropertyValue('--affine-black-30');
+    const strokeColor = this.std
+      .get(ThemeProvider)
+      .getCssVariableColor('--affine-black-30');
     this._overlay = new AutoCompleteFrameOverlay(this.gfx, xywh, strokeColor);
     this.edgeless.surface.renderer.addOverlay(this._overlay);
   }
@@ -461,12 +465,14 @@ export class EdgelessAutoCompletePanel extends WithDisposable(LitElement) {
     )?.xywh;
     if (!xywh) return;
 
-    const background = ThemeObserver.getColorValue(
-      this.edgeless.std.get(EditPropsStore).lastProps$.value['affine:note']
-        .background,
-      DEFAULT_NOTE_BACKGROUND_COLOR,
-      true
-    );
+    const background = this.edgeless.std
+      .get(ThemeProvider)
+      .getColorValue(
+        this.edgeless.std.get(EditPropsStore).lastProps$.value['affine:note']
+          .background,
+        DEFAULT_NOTE_BACKGROUND_COLOR,
+        true
+      );
     this._overlay = new AutoCompleteNoteOverlay(this.gfx, xywh, background);
     this.edgeless.surface.renderer.addOverlay(this._overlay);
   }
@@ -503,16 +509,12 @@ export class EdgelessAutoCompletePanel extends WithDisposable(LitElement) {
         `shape:${targetType}`
       ];
 
-    const stroke = ThemeObserver.getColorValue(
-      strokeColor,
-      DEFAULT_SHAPE_STROKE_COLOR,
-      true
-    );
-    const fill = ThemeObserver.getColorValue(
-      fillColor,
-      DEFAULT_SHAPE_FILL_COLOR,
-      true
-    );
+    const stroke = this.edgeless.std
+      .get(ThemeProvider)
+      .getColorValue(strokeColor, DEFAULT_SHAPE_STROKE_COLOR, true);
+    const fill = this.edgeless.std
+      .get(ThemeProvider)
+      .getColorValue(fillColor, DEFAULT_SHAPE_FILL_COLOR, true);
 
     const options = {
       seed: 666,

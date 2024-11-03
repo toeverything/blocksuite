@@ -34,8 +34,6 @@ import {
 import { SlashMenu } from './slash-menu-popover.js';
 import { filterEnabledSlashMenuItems } from './utils.js';
 
-export { insertContent } from './utils.js';
-
 export type AffineSlashMenuContext = SlashMenuContext;
 export type AffineSlashMenuItem = SlashMenuItem;
 export type AffineSlashMenuActionItem = SlashMenuActionItem;

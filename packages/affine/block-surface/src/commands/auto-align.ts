@@ -3,6 +3,8 @@ import type { GfxModel } from '@blocksuite/block-std/gfx';
 import {
   ConnectorElementModel,
   EdgelessTextBlockModel,
+  EmbedSyncedDocModel,
+  NoteBlockModel,
 } from '@blocksuite/affine-model';
 import { Bound } from '@blocksuite/global/utils';
 import chunk from 'lodash.chunk';
@@ -115,21 +117,50 @@ function autoResizeElements(
     callBackOrProps: (() => void) | Partial<BlockProps>
   ) => void
 ) {
-  // resize to fixed height
+  // resize or scale to fixed height
   elements.forEach(ele => {
     if (
       ele instanceof ConnectorElementModel ||
-      ele instanceof EdgelessTextBlockModel ||
       ele instanceof LayoutableMindmapElementModel
     ) {
       return;
     }
-    const bound = Bound.deserialize(ele.xywh);
-    const scale = ALIGN_HEIGHT / ele.elementBound.h;
-    bound.h = scale * bound.h;
-    bound.w = scale * bound.w;
-    updateXYWH(ele, bound, updateElement, updateBlock);
+
+    if (ele instanceof NoteBlockModel) {
+      const curScale = ele.edgeless.scale ?? 1;
+      const nextScale = curScale * (ALIGN_HEIGHT / ele.elementBound.h);
+      const bound = Bound.deserialize(ele.xywh);
+      bound.h = bound.h * (nextScale / curScale);
+      bound.w = bound.w * (nextScale / curScale);
+      updateElement(ele.id, {
+        edgeless: {
+          ...ele.edgeless,
+          scale: nextScale,
+        },
+        xywh: bound.serialize(),
+      });
+    } else if (
+      ele instanceof EdgelessTextBlockModel ||
+      ele instanceof EmbedSyncedDocModel
+    ) {
+      const curScale = ele.scale ?? 1;
+      const nextScale = curScale * (ALIGN_HEIGHT / ele.elementBound.h);
+      const bound = Bound.deserialize(ele.xywh);
+      bound.h = bound.h * (nextScale / curScale);
+      bound.w = bound.w * (nextScale / curScale);
+      updateElement(ele.id, {
+        scale: nextScale,
+        xywh: bound.serialize(),
+      });
+    } else {
+      const bound = Bound.deserialize(ele.xywh);
+      const scale = ALIGN_HEIGHT / ele.elementBound.h;
+      bound.h = scale * bound.h;
+      bound.w = scale * bound.w;
+      updateXYWH(ele, bound, updateElement, updateBlock);
+    }
   });
+
   // arrange
   autoArrangeElements(elements, updateElement, updateBlock);
 }

@@ -1,3 +1,4 @@
+import type { IndentContext } from '@blocksuite/affine-shared/types';
 import type { Command } from '@blocksuite/block-std';
 
 import { focusTextModel } from '@blocksuite/affine-components/rich-text';
@@ -5,13 +6,10 @@ import { matchFlavours } from '@blocksuite/affine-shared/utils';
 
 import { correctNumberedListsOrderToPrev } from './utils.js';
 
-export const indentListCommand: Command<
+export const canIndentListCommand: Command<
   never,
-  never,
-  {
-    blockId?: string;
-    inlineIndex?: number;
-  }
+  'indentContext',
+  Partial<Omit<IndentContext, 'type' | 'flavour'>>
 > = (ctx, next) => {
   let { blockId, inlineIndex } = ctx;
   const { std } = ctx;
@@ -55,7 +53,6 @@ export const indentListCommand: Command<
    */
   const model = doc.getBlock(blockId)?.model;
   if (!model || !matchFlavours(model, ['affine:list'])) {
-    console.error(`block ${blockId} is not a list block`);
     return;
   }
   const schema = std.doc.schema;
@@ -74,6 +71,43 @@ export const indentListCommand: Command<
   /**
    * eee
    */
+  // const nextSibling = doc.getNext(model);
+
+  return next({
+    indentContext: {
+      blockId,
+      inlineIndex,
+      type: 'indent',
+      flavour: 'affine:list',
+    },
+  });
+};
+
+export const indentListCommand: Command<'indentContext', never> = (
+  ctx,
+  next
+) => {
+  const { indentContext, std } = ctx;
+  if (
+    !indentContext ||
+    indentContext.type !== 'indent' ||
+    indentContext.flavour !== 'affine:list'
+  ) {
+    console.warn(
+      'you need to use `canIndentList` command before running `indentList` command'
+    );
+    return;
+  }
+
+  const { blockId, inlineIndex } = indentContext;
+  const { doc } = std;
+
+  const model = doc.getBlock(blockId)?.model;
+  if (!model) return;
+
+  const previousSibling = doc.getPrev(model);
+  if (!previousSibling) return;
+
   const nextSibling = doc.getNext(model);
 
   doc.captureSync();

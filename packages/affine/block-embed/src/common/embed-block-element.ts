@@ -5,7 +5,10 @@ import type {
 import type { BlockModel } from '@blocksuite/store';
 import type { TemplateResult } from 'lit';
 
-import { CaptionedBlockComponent } from '@blocksuite/affine-components/caption';
+import {
+  CaptionedBlockComponent,
+  SelectedStyle,
+} from '@blocksuite/affine-components/caption';
 import {
   EMBED_CARD_HEIGHT,
   EMBED_CARD_MIN_WIDTH,
@@ -15,7 +18,6 @@ import {
   DocModeProvider,
   DragHandleConfigExtension,
 } from '@blocksuite/affine-shared/services';
-import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import {
   captureEventTarget,
   convertDragPreviewDocToEdgeless,
@@ -26,8 +28,6 @@ import { html } from 'lit';
 import { query } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { type StyleInfo, styleMap } from 'lit/directives/style-map.js';
-
-import { styles } from './styles.js';
 
 export const EmbedDragHandleOption = DragHandleConfigExtension({
   flavour: /affine:embed-*/,
@@ -76,8 +76,6 @@ export class EmbedBlockComponent<
   Service extends BlockService = BlockService,
   WidgetName extends string = string,
 > extends CaptionedBlockComponent<Model, Service, WidgetName> {
-  static override styles = styles;
-
   private _fetchAbortController = new AbortController();
 
   _cardStyle: EmbedCardStyle = 'horizontal';
@@ -96,9 +94,6 @@ export class EmbedBlockComponent<
   protected embedContainerStyle: StyleInfo = {};
 
   renderEmbed = (content: () => TemplateResult) => {
-    const theme = ThemeObserver.mode;
-    const isSelected = !!this.selected?.is('block');
-
     if (
       this._cardStyle === 'horizontal' ||
       this._cardStyle === 'horizontalThin' ||
@@ -112,12 +107,12 @@ export class EmbedBlockComponent<
       }
     }
 
+    const selected = !!this.selected?.is('block');
     return html`
       <div
         class=${classMap({
           'embed-block-container': true,
-          [theme]: true,
-          selected: isSelected,
+          'selected-style': selected,
         })}
         style=${styleMap({
           height: `${this._cardHeight}px`,
@@ -169,7 +164,7 @@ export class EmbedBlockComponent<
   @query('.embed-block-container')
   protected accessor embedBlock!: HTMLDivElement;
 
-  override accessor showBlockSelection = false;
+  override accessor selectedStyle = SelectedStyle.Border;
 
   override accessor useCaptionEditor = true;
 

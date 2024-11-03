@@ -1,8 +1,8 @@
 import type { DocMode } from '@blocksuite/affine-model';
-import type { BlockStdScope, ExtensionType } from '@blocksuite/block-std';
+import type { ExtensionType } from '@blocksuite/block-std';
 import type { Container } from '@blocksuite/global/di';
 
-import { Extension, StdIdentifier } from '@blocksuite/block-std';
+import { Extension } from '@blocksuite/block-std';
 import { createIdentifier } from '@blocksuite/global/di';
 import { type Disposable, noop, Slot } from '@blocksuite/global/utils';
 
@@ -64,15 +64,11 @@ const modeMap = new Map<string, DocMode>();
 const slotMap = new Map<string, Slot<DocMode>>();
 
 export class DocModeService extends Extension implements DocModeProvider {
-  constructor(public std: BlockStdScope) {
-    super();
-  }
-
   static override setup(di: Container) {
-    di.addImpl(DocModeProvider, DocModeService, [StdIdentifier]);
+    di.addImpl(DocModeProvider, DocModeService);
   }
 
-  getEditorMode() {
+  getEditorMode(): DocMode | null {
     return null;
   }
 

@@ -1,19 +1,17 @@
 import type { ListBlockModel } from '@blocksuite/affine-model';
+import type { IndentContext } from '@blocksuite/affine-shared/types';
 import type { Command } from '@blocksuite/block-std';
 
 import { focusTextModel } from '@blocksuite/affine-components/rich-text';
 import { matchFlavours } from '@blocksuite/affine-shared/utils';
 
-export const indentParagraphCommand: Command<
+export const canIndentParagraphCommand: Command<
   never,
-  never,
-  {
-    blockId?: string;
-    inlineIndex?: number;
-  }
-> = (ctx, next) => {
-  let { blockId, inlineIndex } = ctx;
-  const { std } = ctx;
+  'indentContext',
+  Partial<Omit<IndentContext, 'flavour' | 'type'>>
+> = (cxt, next) => {
+  let { blockId, inlineIndex } = cxt;
+  const { std } = cxt;
   const { selection, doc } = std;
   const { schema } = doc;
 
@@ -37,7 +35,6 @@ export const indentParagraphCommand: Command<
 
   const model = std.doc.getBlock(blockId)?.model;
   if (!model || !matchFlavours(model, ['affine:paragraph'])) {
-    console.error(`block ${blockId} is not a paragraph block`);
     return;
   }
 
@@ -50,6 +47,39 @@ export const indentParagraphCommand: Command<
     // Bottom, can not indent, do nothing
     return;
   }
+
+  return next({
+    indentContext: {
+      blockId,
+      inlineIndex,
+      type: 'indent',
+      flavour: 'affine:paragraph',
+    },
+  });
+};
+
+export const indentParagraphCommand: Command<'indentContext'> = (ctx, next) => {
+  const { indentContext, std } = ctx;
+  const { doc } = std;
+
+  if (
+    !indentContext ||
+    indentContext.type !== 'indent' ||
+    indentContext.flavour !== 'affine:paragraph'
+  ) {
+    console.warn(
+      'you need to use `canIndentParagraph` command before running `indentParagraph` command'
+    );
+    return;
+  }
+  const { blockId, inlineIndex } = indentContext;
+
+  const model = doc.getBlock(blockId)?.model;
+  if (!model) return;
+
+  const previousSibling = doc.getPrev(model);
+  if (!previousSibling) return;
+
   doc.captureSync();
   doc.moveBlocks([model], previousSibling);
 

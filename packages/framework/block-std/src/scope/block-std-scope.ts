@@ -11,6 +11,7 @@ import { CommandManager } from '../command/index.js';
 import { UIEventDispatcher } from '../event/index.js';
 import { GfxController } from '../gfx/controller.js';
 import { GfxSelectionManager } from '../gfx/selection.js';
+import { SurfaceMiddlewareExtension } from '../gfx/surface-middleware.js';
 import { ToolController } from '../gfx/tool/tool-controller.js';
 import {
   BlockServiceIdentifier,
@@ -51,6 +52,7 @@ const internalExtensions = [
   CursorSelectionExtension,
   ToolController,
   GfxSelectionManager,
+  SurfaceMiddlewareExtension,
 ];
 
 export class BlockStdScope {

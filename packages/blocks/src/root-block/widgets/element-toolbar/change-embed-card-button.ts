@@ -38,6 +38,7 @@ import { BookmarkStyles } from '@blocksuite/affine-model';
 import {
   EmbedOptionProvider,
   type EmbedOptions,
+  ThemeProvider,
 } from '@blocksuite/affine-shared/services';
 import { getHostName } from '@blocksuite/affine-shared/utils';
 import { Bound, WithDisposable } from '@blocksuite/global/utils';
@@ -316,12 +317,13 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
     Icon: TemplateResult<1>;
     tooltip: string;
   }[] {
+    const theme = this.std.get(ThemeProvider).theme;
     const {
       EmbedCardHorizontalIcon,
       EmbedCardListIcon,
       EmbedCardVerticalIcon,
       EmbedCardCubeIcon,
-    } = getEmbedCardIcons();
+    } = getEmbedCardIcons(theme);
     return [
       {
         style: 'horizontal',

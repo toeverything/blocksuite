@@ -1,6 +1,7 @@
 import {
   DocModeService,
   EmbedOptionService,
+  ThemeService,
 } from '@blocksuite/affine-shared/services';
 import { AFFINE_SCROLL_ANCHORING_WIDGET } from '@blocksuite/affine-widget-scroll-anchoring';
 import {
@@ -62,6 +63,7 @@ export const PageRootBlockSpec: ExtensionType[] = [
   FlavourExtension('affine:page'),
   PageRootService,
   DocModeService,
+  ThemeService,
   EmbedOptionService,
   CommandExtension(commands),
   BlockViewExtension('affine:page', literal`affine-page-root`),

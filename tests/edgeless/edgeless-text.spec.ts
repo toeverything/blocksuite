@@ -6,17 +6,20 @@ import { expect, type Page } from '@playwright/test';
 import {
   autoFit,
   captureHistory,
+  cutByKeyboard,
   dragBetweenIndices,
   enterPlaygroundRoom,
   getEdgelessSelectedRect,
   getPageSnapshot,
   initEmptyEdgelessState,
+  pasteByKeyboard,
   pressArrowLeft,
   pressArrowRight,
   pressArrowUp,
   pressBackspace,
   pressEnter,
   pressEscape,
+  selectAllByKeyboard,
   setEdgelessTool,
   switchEditorMode,
   toViewCoord,
@@ -156,19 +159,31 @@ test.describe('edgeless text block', () => {
       delay: 100,
     });
     await waitNextFrame(page);
-    await assertEdgelessTextModelRect(page, '4', new Bound(-25, -25, 50, 56));
+    await assertEdgelessTextModelRect(page, '4', new Bound(-25, -25, 50, 46));
 
-    await type(page, 'aaaaaa');
-    await waitNextFrame(page, 200);
-    await assertEdgelessTextModelRect(page, '4', new Bound(-25, -25, 71, 56));
+    await type(page, 'aaaaaaaaaa');
+    await waitNextFrame(page, 1000);
+    // just width changed
+    await assertEdgelessTextModelRect(page, '4', new Bound(-25, -25, 83, 46));
 
     await type(page, '\nbbb');
-    // width not changed
-    await assertEdgelessTextModelRect(page, '4', new Bound(-25, -25, 71, 90));
-    await type(page, '\nccccccc');
+    // width not changed, height changed
+    await assertEdgelessTextModelRect(page, '4', new Bound(-25, -25, 83, 80));
+    await type(page, '\ncccccccccccccccc');
 
-    // width changed
-    await assertEdgelessTextModelRect(page, '4', new Bound(-25, -25, 79, 124));
+    // width and height changed
+    await assertEdgelessTextModelRect(page, '4', new Bound(-25, -25, 131, 114));
+
+    // blur, max width set to true
+    await page.mouse.click(point[0] - 50, point[1], {
+      delay: 100,
+    });
+    await page.mouse.dblclick(point[0], point[1], {
+      delay: 100,
+    });
+    await type(page, 'dddddddddd');
+    // width not changed, height changed
+    await assertEdgelessTextModelRect(page, '4', new Bound(-25, -25, 131, 138));
   });
 
   test('edgeless text width fixed when drag moving', async ({ page }) => {
@@ -367,11 +382,13 @@ test.describe('edgeless text block', () => {
 
     await type(page, '@');
     await pressEnter(page);
+    await waitNextFrame(page, 200);
 
     expect(await getPageSnapshot(page, true)).toMatchSnapshot(
       `${testInfo.title}_add_linked_doc.json`
     );
 
+    await page.locator('affine-reference').hover();
     await page.getByLabel('Switch view').click();
     await page.getByTestId('link-to-card').click();
     await autoFit(page);
@@ -386,6 +403,7 @@ test.describe('edgeless text block', () => {
     await page.mouse.click(0, 0);
     // select text element
     await page.mouse.click(point[0] + 10, point[1] + 10);
+    await waitNextFrame(page, 200);
     const selectedRect0 = await getEdgelessSelectedRect(page);
 
     // from right to left
@@ -425,6 +443,103 @@ test.describe('edgeless text block', () => {
 
     expect(await getPageSnapshot(page, true)).toMatchSnapshot(
       `${testInfo.title}_drag.json`
+    );
+  });
+
+  test('cut edgeless text', async ({ page }) => {
+    await setEdgelessTool(page, 'default');
+    await page.mouse.dblclick(130, 140, {
+      delay: 100,
+    });
+    await waitNextFrame(page);
+    await type(page, 'aaaa\nbbbb\ncccc');
+
+    const edgelessText = page.locator('affine-edgeless-text');
+    const paragraph = page.locator('affine-edgeless-text affine-paragraph');
+
+    expect(await edgelessText.count()).toBe(1);
+    expect(await paragraph.count()).toBe(3);
+
+    await page.mouse.click(50, 50, {
+      delay: 100,
+    });
+    await waitNextFrame(page);
+    await page.mouse.click(130, 140, {
+      delay: 100,
+    });
+    await cutByKeyboard(page);
+    expect(await edgelessText.count()).toBe(0);
+    expect(await paragraph.count()).toBe(0);
+
+    await pasteByKeyboard(page);
+    expect(await edgelessText.count()).toBe(1);
+    expect(await paragraph.count()).toBe(3);
+  });
+
+  test('latex in edgeless text', async ({ page }) => {
+    await setEdgelessTool(page, 'default');
+    await page.mouse.dblclick(130, 140, {
+      delay: 100,
+    });
+    await waitNextFrame(page);
+    await type(page, '$$bbb$$ ');
+    await assertRichTextInlineDeltas(
+      page,
+      [
+        {
+          insert: ' ',
+          attributes: {
+            latex: 'bbb',
+          },
+        },
+      ],
+      1
+    );
+
+    await page.locator('affine-latex-node').click();
+    await waitNextFrame(page);
+    await type(page, 'ccc');
+    await assertRichTextInlineDeltas(
+      page,
+      [
+        {
+          insert: ' ',
+          attributes: {
+            latex: 'bbbccc',
+          },
+        },
+      ],
+      1
+    );
+
+    await page.locator('.latex-editor-hint').click();
+    await type(page, 'sss');
+    await assertRichTextInlineDeltas(
+      page,
+      [
+        {
+          insert: ' ',
+          attributes: {
+            latex: 'bbbccc',
+          },
+        },
+      ],
+      1
+    );
+    await page.locator('latex-editor-unit').click();
+    await selectAllByKeyboard(page);
+    await type(page, 'sss');
+    await assertRichTextInlineDeltas(
+      page,
+      [
+        {
+          insert: ' ',
+          attributes: {
+            latex: 'sss',
+          },
+        },
+      ],
+      1
     );
   });
 });

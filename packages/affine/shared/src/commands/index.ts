@@ -5,10 +5,13 @@ export {
   getSelectedBlocksCommand,
 } from './block-crud/index.js';
 export {
+  clearAndSelectFirstModelCommand,
   copySelectedModelsCommand,
   deleteSelectedModelsCommand,
   draftSelectedModelsCommand,
+  duplicateSelectedModelsCommand,
   getSelectedModelsCommand,
+  retainFirstModelCommand,
 } from './model-crud/index.js';
 export {
   getBlockSelectionsCommand,

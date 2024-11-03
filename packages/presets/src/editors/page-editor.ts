@@ -5,15 +5,17 @@ import {
   EditorHost,
   ShadowlessElement,
 } from '@blocksuite/block-std';
-import { PageEditorBlockSpecs } from '@blocksuite/blocks';
-import { noop, WithDisposable } from '@blocksuite/global/utils';
+import { PageEditorBlockSpecs, ThemeProvider } from '@blocksuite/blocks';
+import { noop, SignalWatcher, WithDisposable } from '@blocksuite/global/utils';
 import { css, html, nothing } from 'lit';
 import { property, state } from 'lit/decorators.js';
 import { guard } from 'lit/directives/guard.js';
 
 noop(EditorHost);
 
-export class PageEditor extends WithDisposable(ShadowlessElement) {
+export class PageEditor extends SignalWatcher(
+  WithDisposable(ShadowlessElement)
+) {
   static override styles = css`
     page-editor {
       font-family: var(--affine-font-family);
@@ -71,11 +73,13 @@ export class PageEditor extends WithDisposable(ShadowlessElement) {
   }
 
   override render() {
-    const std = this.std;
     if (!this.doc.root) return nothing;
 
+    const std = this.std;
+    const theme = std.get(ThemeProvider).app$.value;
     return html`
       <div
+        data-theme=${theme}
         class=${this.hasViewport
           ? 'affine-page-viewport'
           : 'page-editor-container'}

@@ -183,11 +183,12 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
   }
 
   private _getTextColor(fillColor: string) {
+    const colorScheme = this.edgeless.surface.renderer.getColorScheme();
     // When the shape is filled with black color, the text color should be white.
     // When the shape is transparent, the text color should be set according to the theme.
     // Otherwise, the text color should be black.
     const textColor = isTransparent(fillColor)
-      ? GET_DEFAULT_LINE_COLOR()
+      ? GET_DEFAULT_LINE_COLOR(colorScheme)
       : fillColor === SHAPE_FILL_COLOR_BLACK
         ? SHAPE_TEXT_COLOR_PURE_WHITE
         : SHAPE_TEXT_COLOR_PURE_BLACK;

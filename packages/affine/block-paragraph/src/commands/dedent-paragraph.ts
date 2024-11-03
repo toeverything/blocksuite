@@ -1,15 +1,13 @@
+import type { IndentContext } from '@blocksuite/affine-shared/types';
 import type { Command } from '@blocksuite/block-std';
 
 import { focusTextModel } from '@blocksuite/affine-components/rich-text';
 import { matchFlavours } from '@blocksuite/affine-shared/utils';
 
-export const dedentParagraphCommand: Command<
+export const canDedentParagraphCommand: Command<
   never,
-  never,
-  {
-    blockId?: string;
-    inlineIndex?: number;
-  }
+  'indentContext',
+  Partial<Omit<IndentContext, 'flavour' | 'type'>>
 > = (ctx, next) => {
   let { blockId, inlineIndex } = ctx;
   const { std } = ctx;
@@ -33,9 +31,8 @@ export const dedentParagraphCommand: Command<
     return;
   }
 
-  const model = std.doc.getBlock(blockId)?.model;
+  const model = doc.getBlock(blockId)?.model;
   if (!model || !matchFlavours(model, ['affine:paragraph'])) {
-    console.error(`block ${blockId} is not a paragraph block`);
     return;
   }
 
@@ -47,6 +44,43 @@ export const dedentParagraphCommand: Command<
 
   const grandParent = doc.getParent(parent);
   if (!grandParent) return;
+
+  return next({
+    indentContext: {
+      blockId,
+      inlineIndex,
+      type: 'dedent',
+      flavour: 'affine:paragraph',
+    },
+  });
+};
+
+export const dedentParagraphCommand: Command<'indentContext'> = (ctx, next) => {
+  const { indentContext: dedentContext, std } = ctx;
+  const { doc } = std;
+
+  if (
+    !dedentContext ||
+    dedentContext.type !== 'dedent' ||
+    dedentContext.flavour !== 'affine:paragraph'
+  ) {
+    console.warn(
+      'you need to use `canDedentParagraph` command before running `dedentParagraph` command'
+    );
+    return;
+  }
+
+  const { blockId, inlineIndex } = dedentContext;
+
+  const model = doc.getBlock(blockId)?.model;
+  if (!model) return;
+
+  const parent = doc.getParent(model);
+  if (!parent) return;
+
+  const grandParent = doc.getParent(parent);
+  if (!grandParent) return;
+
   doc.captureSync();
 
   const nextSiblings = doc.getNexts(model);

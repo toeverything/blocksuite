@@ -1,6 +1,9 @@
 import type { BaseSelection } from '@blocksuite/block-std';
 
-import { NotificationProvider } from '@blocksuite/affine-shared/services';
+import {
+  NotificationProvider,
+  ThemeProvider,
+} from '@blocksuite/affine-shared/services';
 import {
   getPageRootByElement,
   stopPropagation,
@@ -241,15 +244,17 @@ export class AffineAIPanelWidget extends WidgetComponent {
     });
   };
 
-  hide = () => {
+  hide = (shouldTriggerCallback: boolean = true) => {
     this._resetAbortController();
     this.state = 'hidden';
     this._stopAutoUpdate?.();
     this._inputText = null;
     this._answer = null;
     this._stopAutoUpdate = undefined;
-    this.config?.hideCallback?.();
     this.viewportOverlayWidget?.unlock();
+    if (shouldTriggerCallback) {
+      this.config?.hideCallback?.();
+    }
   };
 
   onInput = (text: string) => {
@@ -282,13 +287,17 @@ export class AffineAIPanelWidget extends WidgetComponent {
     }
   };
 
-  toggle = (reference: Element, input?: string) => {
+  toggle = (
+    reference: Element,
+    input?: string,
+    shouldTriggerCallback?: boolean
+  ) => {
     if (input) {
       this._inputText = input;
       this.generate();
     } else {
       // reset state
-      this.hide();
+      this.hide(shouldTriggerCallback);
       this.state = 'input';
     }
 
@@ -459,6 +468,7 @@ export class AffineAIPanelWidget extends WidgetComponent {
       })
       .catch(console.error);
 
+    const theme = this.std.get(ThemeProvider).theme;
     const mainTemplate = choose(this.state, [
       [
         'input',
@@ -486,6 +496,7 @@ export class AffineAIPanelWidget extends WidgetComponent {
             : nothing}
           <ai-panel-generating
             .config=${config.generatingStateConfig}
+            .theme=${theme}
             .stopGenerating=${this.stopGenerating}
             .withAnswer=${!!this.answer}
           ></ai-panel-generating>

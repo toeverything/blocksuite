@@ -12,8 +12,8 @@ import {
 import {
   EditPropsStore,
   TelemetryProvider,
+  ThemeProvider,
 } from '@blocksuite/affine-shared/services';
-import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import { assertExists, SignalWatcher } from '@blocksuite/global/utils';
 import { css, html, LitElement, nothing } from 'lit';
 import { property, query, state } from 'lit/decorators.js';
@@ -174,8 +174,12 @@ export class EdgelessToolbarShapeDraggable extends EdgelessToolbarToolMixin(
           this.edgeless.std.get(EditPropsStore).lastProps$.value[
             `shape:${shapeName}`
           ];
-        const color = ThemeObserver.generateColorProperty(shape$.fillColor);
-        const stroke = ThemeObserver.generateColorProperty(shape$.strokeColor);
+        const color = this.edgeless.std
+          .get(ThemeProvider)
+          .generateColorProperty(shape$.fillColor);
+        const stroke = this.edgeless.std
+          .get(ThemeProvider)
+          .generateColorProperty(shape$.strokeColor);
         Object.assign(overlay.element.style, {
           color,
           stroke,
@@ -282,10 +286,12 @@ export class EdgelessToolbarShapeDraggable extends EdgelessToolbarToolMixin(
             this.edgeless.std.get(EditPropsStore).lastProps$.value[
               `shape:${shape.name}`
             ];
-          const color = ThemeObserver.generateColorProperty(shape$.fillColor);
-          const stroke = ThemeObserver.generateColorProperty(
-            shape$.strokeColor
-          );
+          const color = this.edgeless.std
+            .get(ThemeProvider)
+            .generateColorProperty(shape$.fillColor);
+          const stroke = this.edgeless.std
+            .get(ThemeProvider)
+            .generateColorProperty(shape$.strokeColor);
           const baseStyle = {
             ...buildVariablesObject(shape.style),
             filter: `drop-shadow(${this.shapeShadow})`,

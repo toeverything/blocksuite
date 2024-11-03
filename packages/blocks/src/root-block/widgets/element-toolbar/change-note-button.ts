@@ -19,6 +19,7 @@ import {
   NoteDisplayMode,
   type StrokeStyle,
 } from '@blocksuite/affine-model';
+import { ThemeProvider } from '@blocksuite/affine-shared/services';
 import { matchFlavours } from '@blocksuite/affine-shared/utils';
 import {
   assertExists,
@@ -266,7 +267,7 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
     const currentMode = DisplayModeMap[displayMode];
     const onlyOne = len === 1;
     const isDocOnly = displayMode === NoteDisplayMode.DocOnly;
-
+    const theme = this.edgeless.std.get(ThemeProvider).theme;
     const buttons = [
       onlyOne && this._advancedVisibilityEnabled
         ? html`
@@ -358,6 +359,7 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
               `}
             >
               <edgeless-note-shadow-panel
+                .theme=${theme}
                 .value=${shadowType}
                 .background=${background}
                 .onSelect=${(value: string) => this._setShadowType(value)}

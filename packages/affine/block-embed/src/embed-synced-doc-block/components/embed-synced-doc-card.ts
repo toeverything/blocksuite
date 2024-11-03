@@ -1,3 +1,4 @@
+import { ThemeProvider } from '@blocksuite/affine-shared/services';
 import { isGfxBlockComponent, ShadowlessElement } from '@blocksuite/block-std';
 import { WithDisposable } from '@blocksuite/global/utils';
 import { html, nothing } from 'lit';
@@ -146,6 +147,7 @@ export class EmbedSyncedDocCard extends WithDisposable(ShadowlessElement) {
       'note-empty': this.isNoteContentEmpty,
     });
 
+    const theme = this.std.get(ThemeProvider).theme;
     const {
       LoadingIcon,
       SyncedDocIcon,
@@ -155,7 +157,7 @@ export class EmbedSyncedDocCard extends WithDisposable(ShadowlessElement) {
       SyncedDocEmptyBanner,
       SyncedDocErrorBanner,
       SyncedDocDeletedBanner,
-    } = getSyncedDocIcons(this.editorMode);
+    } = getSyncedDocIcons(theme, this.editorMode);
 
     const titleIcon = error
       ? SyncedDocErrorIcon

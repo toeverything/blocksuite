@@ -3,10 +3,6 @@ import { css } from 'lit';
 
 import { scrollbarStyle } from '../../../_common/components/utils.js';
 
-export const TOOLBAR_ICON_STYLE = { width: '24px', height: '24px' };
-
-export const TOOL_PANEL_ICON_STYLE = { width: '32px', height: '32px' };
-
 export const TOOLBAR_HEIGHT = 46;
 
 export const keyboardToolbarStyles = css`
@@ -35,6 +31,11 @@ export const keyboardToolbarStyles = css`
     }
     > div:not(.item-container) {
       padding-bottom: 4px;
+    }
+
+    icon-button svg {
+      width: 24px;
+      height: 24px;
     }
   }
 
@@ -66,6 +67,7 @@ export const keyboardToolPanelStyles = css`
     padding: 16px 4px 8px 8px;
     overflow-y: auto;
     box-sizing: border-box;
+    background-color: ${unsafeCSSVarV2('layer/background/primary')};
   }
 
   ${scrollbarStyle(':host')}
@@ -92,7 +94,7 @@ export const keyboardToolPanelStyles = css`
   .keyboard-tool-panel-group-item-container {
     width: 100%;
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     column-gap: 12px;
     row-gap: 12px;
   }
@@ -122,12 +124,21 @@ export const keyboardToolPanelStyles = css`
       background: #00000012;
     }
 
+    button svg {
+      width: 32px;
+      height: 32px;
+    }
+
     span {
+      width: 100%;
       font-family: SF Pro;
       font-size: 13px;
       font-weight: 400;
       line-height: 18px;
       text-align: center;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      overflow-x: hidden;
       color: ${unsafeCSSVarV2('text/secondary')};
     }
   }

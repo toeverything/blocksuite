@@ -1,4 +1,5 @@
-import { Slot } from '@blocksuite/global/utils';
+import { type Disposable, Slot } from '@blocksuite/global/utils';
+import { signal } from '@preact/signals-core';
 import { uuidv4 } from 'lib0/random.js';
 import * as Y from 'yjs';
 
@@ -37,6 +38,12 @@ export type GetDocOptions = {
 };
 
 export class BlockCollection {
+  private _awarenessUpdateDisposable: Disposable | null = null;
+
+  private readonly _canRedo$ = signal(false);
+
+  private readonly _canUndo$ = signal(false);
+
   private readonly _collection: DocCollection;
 
   private readonly _docCRUD: DocCRUD;
@@ -55,6 +62,7 @@ export class BlockCollection {
   private _history!: Y.UndoManager;
 
   private _historyObserver = () => {
+    this._updateCanUndoRedoSignals();
     this.slots.historyUpdated.emit();
   };
 
@@ -98,6 +106,17 @@ export class BlockCollection {
 
   private _shouldTransact = true;
 
+  private _updateCanUndoRedoSignals = () => {
+    const canRedo = this.readonly ? false : this._history.canRedo();
+    const canUndo = this.readonly ? false : this._history.canUndo();
+    if (this._canRedo$.peek() !== canRedo) {
+      this._canRedo$.value = canRedo;
+    }
+    if (this._canUndo$.peek() !== canUndo) {
+      this._canUndo$.value = canUndo;
+    }
+  };
+
   protected readonly _yBlocks: Y.Map<YBlock>;
 
   /**
@@ -136,17 +155,19 @@ export class BlockCollection {
   }
 
   get canRedo() {
-    if (this.readonly) {
-      return false;
-    }
-    return this._history.canRedo();
+    return this._canRedo$.peek();
+  }
+
+  get canRedo$() {
+    return this._canRedo$;
   }
 
   get canUndo() {
-    if (this.readonly) {
-      return false;
-    }
-    return this._history.canUndo();
+    return this._canUndo$.peek();
+  }
+
+  get canUndo$() {
+    return this._canUndo$;
   }
 
   get collection() {
@@ -302,6 +323,7 @@ export class BlockCollection {
 
   dispose() {
     this.slots.historyUpdated.dispose();
+    this._awarenessUpdateDisposable?.dispose();
 
     if (this.ready) {
       this._yBlocks.unobserveDeep(this._handleYEvents);
@@ -351,6 +373,13 @@ export class BlockCollection {
     this._yBlocks.forEach((_, id) => {
       this._handleYBlockAdd(id);
     });
+
+    this._awarenessUpdateDisposable = this.awarenessStore.slots.update.on(
+      () => {
+        // change readonly state will affect the undo/redo state
+        this._updateCanUndoRedoSignals();
+      }
+    );
 
     initFn?.();
 
