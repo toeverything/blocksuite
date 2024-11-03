@@ -59,10 +59,16 @@ export class GfxViewportElement extends WithDisposable(ShadowlessElement) {
         if (view) {
           view.style.display = '';
           view.style.position = 'absolute';
+          const originalX = parseFloat(view.style.left || '0');
+          const originalY = parseFloat(view.style.top || '0');
+
+          view.style.transformOrigin = '0 0';
           view.style.transform = this._toCSSTransform(
             translateX,
             translateY,
-            zoom
+            zoom,
+            originalX,
+            originalY
           );
         }
 
@@ -101,9 +107,16 @@ export class GfxViewportElement extends WithDisposable(ShadowlessElement) {
   private _toCSSTransform(
     translateX: number,
     translateY: number,
-    zoom: number
+    zoom: number,
+    originalX: number = 0,
+    originalY: number = 0
   ) {
-    return `translate(${translateX}px, ${translateY}px) scale(${zoom})`;
+    const scaledX = originalX * zoom;
+    const scaledY = originalY * zoom;
+    const deltaX = scaledX - originalX;
+    const deltaY = scaledY - originalY;
+
+    return `translate(${translateX + deltaX}px, ${translateY + deltaY}px) scale(${zoom})`;
   }
 
   override connectedCallback(): void {
