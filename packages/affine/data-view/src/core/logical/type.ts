@@ -1,13 +1,18 @@
-import type { AnyTypeInstance } from './typesystem.js';
-import Zod from 'zod';
+import type Zod from 'zod';
+
 import type { TypeVarContext } from './type-variable.js';
+
+export type AnyTypeInstance = {
+  readonly name: string;
+};
 
 export interface TypeDefinition {
   is(typeInstance: AnyTypeInstance): boolean;
 }
 
 export interface TypeInstance extends AnyTypeInstance {
-  readonly _valueType: unknown;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  readonly _valueType: any;
   readonly _validate: Zod.ZodSchema;
 
   valueValidate(value: unknown): value is this['_valueType'];
@@ -19,4 +24,16 @@ export interface TypeInstance extends AnyTypeInstance {
 
 export type ValueTypeOf<T> = T extends TypeInstance ? T['_valueType'] : never;
 
-export type Unify = (ctx: TypeVarContext, left: TypeInstance | undefined, right: TypeInstance | undefined, covariance?: boolean) => boolean
+export type Unify = (
+  ctx: TypeVarContext,
+  type: TypeInstance | undefined,
+  expect: TypeInstance | undefined
+) => boolean;
+export type TypeConvertConfig<
+  From extends TypeInstance = TypeInstance,
+  To extends TypeInstance = TypeInstance,
+> = {
+  from: From;
+  to: To;
+  convert: (value: ValueTypeOf<From>) => ValueTypeOf<To>;
+};

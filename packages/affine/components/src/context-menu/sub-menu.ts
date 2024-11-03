@@ -20,6 +20,14 @@ export type MenuSubMenuData = {
   select?: () => void;
   class?: string;
 };
+export const subMenuOffset = offset({
+  mainAxis: 16,
+  crossAxis: -8.5,
+});
+export const subMenuPlacements = autoPlacement({
+  allowedPlacements: ['right-start', 'left-start', 'right-end', 'left-end'],
+});
+export const subMenuMiddleware = [subMenuOffset, subMenuPlacements];
 
 export class MenuSubMenu extends MenuFocusable {
   override connectedCallback() {
@@ -62,15 +70,7 @@ export class MenuSubMenu extends MenuFocusable {
     this.menu.menuElement.parentElement?.append(menu.menuElement);
     const unsub = autoUpdate(this, menu.menuElement, () => {
       computePosition(this, menu.menuElement, {
-        middleware: [
-          autoPlacement({
-            allowedPlacements: ['right-start', 'left-start'],
-          }),
-          offset({
-            mainAxis: 16,
-            crossAxis: -8.5,
-          }),
-        ],
+        middleware: subMenuMiddleware,
       })
         .then(({ x, y }) => {
           menu.menuElement.style.left = `${x}px`;

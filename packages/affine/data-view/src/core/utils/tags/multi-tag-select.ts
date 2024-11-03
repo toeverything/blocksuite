@@ -8,7 +8,12 @@ import {
 import { rangeWrap } from '@blocksuite/affine-shared/utils';
 import { ShadowlessElement } from '@blocksuite/block-std';
 import { WithDisposable } from '@blocksuite/global/utils';
-import { CloseIcon, DeleteIcon, MoreHorizontalIcon, PlusIcon } from '@blocksuite/icons/lit';
+import {
+  CloseIcon,
+  DeleteIcon,
+  MoreHorizontalIcon,
+  PlusIcon,
+} from '@blocksuite/icons/lit';
 import { nanoid } from '@blocksuite/store';
 import { flip, offset } from '@floating-ui/dom';
 import { property, query, state } from 'lit/decorators.js';
@@ -17,10 +22,11 @@ import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
 
+import type { SelectTag } from '../../logical/index.js';
+
 import { stopPropagation } from '../event.js';
 import { getTagColor, selectOptionColors } from './colors.js';
 import { styles } from './styles.js';
-import type { SelectTag } from '../../logical/index.js';
 
 type RenderOption = {
   value: string;
@@ -55,7 +61,9 @@ export class MultiTagSelect extends WithDisposable(ShadowlessElement) {
           menu.action({
             name: 'Delete',
             prefix: DeleteIcon(),
-            class: 'delete-item',
+            class: {
+              'delete-item': true,
+            },
             select: () => {
               this.deleteTag(id);
             },
@@ -71,8 +79,7 @@ export class MultiTagSelect extends WithDisposable(ShadowlessElement) {
               });
               return menu.action({
                 name: item.name,
-                prefix: html`
-                  <div style=${styles}></div>`,
+                prefix: html` <div style=${styles}></div>`,
                 isSelected: option.color === item.color,
                 select: () => {
                   this.changeTag({
@@ -183,7 +190,7 @@ export class MultiTagSelect extends WithDisposable(ShadowlessElement) {
         .map(v => ({
           ...v,
           parentId: v.parentId === id ? undefined : v.parentId,
-        })),
+        }))
     );
   };
 
@@ -257,7 +264,7 @@ export class MultiTagSelect extends WithDisposable(ShadowlessElement) {
     for (const text of names) {
       const parent = result[result.length - 1];
       const tag = this.options.find(
-        v => v.parentId === parent?.id && v.value === text,
+        v => v.parentId === parent?.id && v.value === text
       );
       if (!tag) {
         return;
@@ -316,8 +323,8 @@ export class MultiTagSelect extends WithDisposable(ShadowlessElement) {
     const selectedTag = this.value;
     const map = new Map<string, SelectTag>(this.options.map(v => [v.id, v]));
     return html`
-      <div class='affine-select-cell-select'>
-        <div class='select-input-container'>
+      <div class="affine-select-cell-select">
+        <div class="select-input-container">
           ${selectedTag.map(id => {
             const option = map.get(id);
             if (!option) {
@@ -326,27 +333,26 @@ export class MultiTagSelect extends WithDisposable(ShadowlessElement) {
             const style = styleMap({
               backgroundColor: option.color,
             });
-            return html`
-              <div class='select-selected' style=${style}>
-                <div class='select-selected-text'>${option.value}</div>
-                <span
-                  class='close-icon'
-                  @click='${() => this._onDeleteSelected(selectedTag, id)}'
+            return html` <div class="select-selected" style=${style}>
+              <div class="select-selected-text">${option.value}</div>
+              <span
+                class="close-icon"
+                @click="${() => this._onDeleteSelected(selectedTag, id)}"
                 >${CloseIcon()}</span
-                >
-              </div>`;
+              >
+            </div>`;
           })}
           <input
-            class='select-input'
-            placeholder='Type here...'
-            .value='${this.text}'
-            @input='${this._onInput}'
-            @keydown='${this._onInputKeydown}'
-            @pointerdown='${stopPropagation}'
+            class="select-input"
+            placeholder="Type here..."
+            .value="${this.text}"
+            @input="${this._onInput}"
+            @keydown="${this._onInputKeydown}"
+            @pointerdown="${stopPropagation}"
           />
         </div>
-        <div class='select-option-container'>
-          <div class='select-option-container-header'>
+        <div class="select-option-container">
+          <div class="select-option-container-header">
             Select tag or create one
           </div>
           ${repeat(
@@ -367,53 +373,51 @@ export class MultiTagSelect extends WithDisposable(ShadowlessElement) {
               const clickOption = (e: MouseEvent) =>
                 this._clickItemOption(e, select.id);
               return html`
-                <div class='${classes}' @mouseenter='${mouseenter}'>
+                <div class="${classes}" @mouseenter="${mouseenter}">
                   <div
-                    class='select-option-text-container'
-                    @click='${select.select}'
+                    class="select-option-text-container"
+                    @click="${select.select}"
                   >
                     ${select.isCreate
-                      ? html`
-                        <div class='select-option-new-icon'>
+                      ? html` <div class="select-option-new-icon">
                           Create ${PlusIcon()}
                         </div>`
                       : ''}
-                    <div style='display:flex;flex-direction: column'>
+                    <div style="display:flex;flex-direction: column">
                       <div
-                        style='display:flex;align-items:center;margin-bottom: 2px;opacity: 0.5;'
+                        style="display:flex;align-items:center;margin-bottom: 2px;opacity: 0.5;"
                       >
                         ${select.group.map((v, i) => {
                           const style = styleMap({
                             backgroundColor: v.color,
                           });
                           return html`${i === 0
-                            ? ''
-                            : html`<span style='margin: 0 1px'>/</span>`}<span
-                            class='select-option-group-name'
-                            style=${style}
-                          >${v.value}</span
-                          >`;
+                              ? ''
+                              : html`<span style="margin: 0 1px">/</span>`}<span
+                              class="select-option-group-name"
+                              style=${style}
+                              >${v.value}</span
+                            >`;
                         })}
                       </div>
-                      <div style='display:flex;'>
-                        <div style=${style} class='select-option-name'>
+                      <div style="display:flex;">
+                        <div style=${style} class="select-option-name">
                           ${select.value}
                         </div>
                       </div>
                     </div>
                   </div>
                   ${!select.isCreate
-                    ? html`
-                      <div
-                        class='select-option-icon'
-                        @click='${clickOption}'
+                    ? html` <div
+                        class="select-option-icon"
+                        @click="${clickOption}"
                       >
                         ${MoreHorizontalIcon()}
                       </div>`
                     : null}
                 </div>
               `;
-            },
+            }
           )}
         </div>
       </div>
@@ -465,7 +469,7 @@ export const popTagSelect = (
     onComplete?: () => void;
     minWidth?: number;
     container?: HTMLElement;
-  },
+  }
 ) => {
   const component = new MultiTagSelect();
   if (ops.mode) {

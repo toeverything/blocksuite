@@ -5,7 +5,7 @@ import {
 import { computed, type ReadonlySignal } from '@preact/signals-core';
 
 import type { GroupBy, GroupProperty } from '../common/types.js';
-import type { TType } from '../logical/typesystem.js';
+import type { TypeInstance } from '../logical/type.js';
 import type { Property } from '../view-manager/property.js';
 import type { SingleView } from '../view-manager/single-view.js';
 
@@ -16,7 +16,7 @@ export type GroupData = {
   property: Property;
   key: string;
   name: string;
-  type: TType;
+  type: TypeInstance;
   value: unknown;
   rows: string[];
 };

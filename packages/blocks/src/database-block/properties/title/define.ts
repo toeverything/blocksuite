@@ -1,12 +1,12 @@
 import type { Text } from '@blocksuite/store';
 
-import { propertyType, tRichText } from '@blocksuite/data-view';
+import { propertyType, t } from '@blocksuite/data-view';
 
 export const titleColumnType = propertyType('title');
 
 export const titlePurePropertyConfig = titleColumnType.modelConfig<Text>({
   name: 'Title',
-  type: () => tRichText.create(),
+  type: () => t.richText.instance(),
   defaultData: () => ({}),
   cellToString: data => data?.toString() ?? '',
   cellFromString: data => {

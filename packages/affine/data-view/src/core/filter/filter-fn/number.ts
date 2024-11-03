@@ -1,5 +1,5 @@
-import { t } from '../../logical/data-type-presets.js';
-import { createFilter } from '../create-filter.js';
+import { t } from '../../logical/type-presets.js';
+import { createFilter } from './create.js';
 
 export const numberFilter = [
   createFilter({
@@ -7,7 +7,7 @@ export const numberFilter = [
     self: t.number.instance(),
     args: [t.number.instance()] as const,
     label: '=',
-    shortString: () => '=',
+    shortString: v => (v ? ` = ${v.value}` : undefined),
     impl: (self, target) => {
       if (self == null) {
         return false;
@@ -20,7 +20,7 @@ export const numberFilter = [
     self: t.number.instance(),
     args: [t.number.instance()] as const,
     label: '≠',
-    shortString: () => '≠',
+    shortString: v => (v ? ` ≠ ${v.value}` : undefined),
     impl: (self, target) => {
       if (self == null) {
         return false;
@@ -33,7 +33,7 @@ export const numberFilter = [
     self: t.number.instance(),
     args: [t.number.instance()] as const,
     label: '>',
-    shortString: () => '>',
+    shortString: v => (v ? ` > ${v.value}` : undefined),
     impl: (self, target) => {
       if (self == null) {
         return false;
@@ -46,7 +46,7 @@ export const numberFilter = [
     self: t.number.instance(),
     args: [t.number.instance()] as const,
     label: '<',
-    shortString: () => '<',
+    shortString: v => (v ? ` < ${v.value}` : undefined),
     impl: (self, target) => {
       if (self == null) {
         return false;
@@ -59,7 +59,7 @@ export const numberFilter = [
     self: t.number.instance(),
     args: [t.number.instance()] as const,
     label: '≥',
-    shortString: () => '≥',
+    shortString: v => (v ? ` ≥ ${v.value}` : undefined),
     impl: (self, target) => {
       if (self == null) {
         return false;
@@ -72,7 +72,7 @@ export const numberFilter = [
     self: t.number.instance(),
     args: [t.number.instance()] as const,
     label: '≤',
-    shortString: () => '≤',
+    shortString: v => (v ? ` ≤ ${v.value}` : undefined),
     impl: (self, target) => {
       if (self == null) {
         return false;

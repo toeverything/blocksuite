@@ -302,7 +302,7 @@ export const popViewOptions = (
                   meta.type
                 );
               },
-              class: '',
+              class: {},
             };
             const containerStyle = styleMap({
               flex: '1',
@@ -371,7 +371,7 @@ export const popViewOptions = (
           select: () => {
             view.delete();
           },
-          class: 'delete-item',
+          class: { 'delete-item': true },
         }),
       ],
     })

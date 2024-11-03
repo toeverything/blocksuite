@@ -1,23 +1,39 @@
 import Zod from 'zod';
 
-import type { TypeInstance, Unify, ValueTypeOf } from './type.js';
-import { type TypeVarContext, TypeVarDefinitionInstance } from './type-variable.js';
-import type { AnyTypeInstance } from './typesystem.js';
+import type {
+  AnyTypeInstance,
+  TypeInstance,
+  Unify,
+  ValueTypeOf,
+} from './type.js';
+import type {
+  TypeVarContext,
+  TypeVarDefinitionInstance,
+} from './type-variable.js';
 
-type FnValueType<Args extends readonly TypeInstance[], Return extends TypeInstance> = (...args: { [K in keyof Args]: ValueTypeOf<Args[K]> }) => ValueTypeOf<Return>;
+type FnValueType<
+  Args extends readonly TypeInstance[],
+  Return extends TypeInstance,
+> = (
+  ...args: { [K in keyof Args]: ValueTypeOf<Args[K]> }
+) => ValueTypeOf<Return>;
 
 export class FnTypeInstance<
   Args extends readonly TypeInstance[] = readonly TypeInstance[],
-  Return extends TypeInstance = TypeInstance
-> implements TypeInstance {
+  Return extends TypeInstance = TypeInstance,
+> implements TypeInstance
+{
   _validate = fnSchema;
 
   readonly _valueType = undefined as never as FnValueType<Args, Return>;
 
   name = 'function';
 
-  constructor(readonly args: Args, readonly rt: Return, readonly vars: TypeVarDefinitionInstance[]) {
-  }
+  constructor(
+    readonly args: Args,
+    readonly rt: Return,
+    readonly vars: TypeVarDefinitionInstance[]
+  ) {}
 
   subst(ctx: TypeVarContext) {
     const newCtx = { ...ctx };
@@ -60,7 +76,9 @@ export class FnTypeInstance<
 
 const fnSchema = Zod.function();
 
-export class ArrayTypeInstance<Element extends TypeInstance = TypeInstance> implements TypeInstance {
+export class ArrayTypeInstance<Element extends TypeInstance = TypeInstance>
+  implements TypeInstance
+{
   readonly _validate;
 
   readonly _valueType = undefined as never as ValueTypeOf<Element>[];
@@ -70,7 +88,6 @@ export class ArrayTypeInstance<Element extends TypeInstance = TypeInstance> impl
   constructor(readonly element: Element) {
     this._validate = Zod.array(element._validate);
   }
-
 
   subst(ctx: TypeVarContext) {
     const ele = this.element.subst(ctx);
@@ -94,10 +111,13 @@ export const ct = {
     is: (type: AnyTypeInstance): type is FnTypeInstance => {
       return type.name === 'function';
     },
-    instance: <Args extends readonly TypeInstance[], Return extends TypeInstance>(
+    instance: <
+      Args extends readonly TypeInstance[],
+      Return extends TypeInstance,
+    >(
       args: Args,
       rt: Return,
-      vars?: TypeVarDefinitionInstance[],
+      vars?: TypeVarDefinitionInstance[]
     ) => {
       return new FnTypeInstance(args, rt, vars ?? []);
     },
@@ -106,7 +126,9 @@ export const ct = {
     is: (type: AnyTypeInstance): type is ArrayTypeInstance => {
       return type.name === 'array';
     },
-    instance: <Element extends TypeInstance>(element: Element): ArrayTypeInstance<Element> => {
+    instance: <Element extends TypeInstance>(
+      element: Element
+    ): ArrayTypeInstance<Element> => {
       return new ArrayTypeInstance(element);
     },
   },

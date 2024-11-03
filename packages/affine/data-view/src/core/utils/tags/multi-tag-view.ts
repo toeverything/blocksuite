@@ -6,7 +6,7 @@ import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
 
-import type { SelectTag } from './multi-tag-select.js';
+import type { SelectTag } from '../../logical/index.js';
 
 export class MultiTagView extends WithDisposable(ShadowlessElement) {
   static override styles = css`

@@ -1,6 +1,6 @@
 import { computed, type ReadonlySignal } from '@preact/signals-core';
 
-import type { TType } from '../logical/typesystem.js';
+import type { TypeInstance } from '../logical/type.js';
 import type { CellRenderer } from '../property/index.js';
 import type { PropertyDataUpdater } from '../types.js';
 import type { UniComponent } from '../utils/uni-component/index.js';
@@ -19,7 +19,7 @@ export interface Property<
   readonly readonly$: ReadonlySignal<boolean>;
   readonly renderer$: ReadonlySignal<CellRenderer | undefined>;
   readonly cells$: ReadonlySignal<Cell[]>;
-  readonly dataType$: ReadonlySignal<TType>;
+  readonly dataType$: ReadonlySignal<TypeInstance>;
   readonly icon?: UniComponent;
 
   readonly delete?: () => void;

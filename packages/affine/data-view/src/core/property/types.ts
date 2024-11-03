@@ -1,6 +1,6 @@
 import type { Disposable } from '@blocksuite/global/utils';
 
-import type { TType } from '../logical/index.js';
+import type { TypeInstance } from '../logical/type.js';
 
 export type GetPropertyDataFromConfig<T> =
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -14,7 +14,7 @@ export type PropertyConfig<
 > = {
   name: string;
   defaultData: () => Data;
-  type: (data: Data) => TType;
+  type: (data: Data) => TypeInstance;
   formatValue?: (value: unknown, colData: Data) => Value;
   isEmpty: (value?: Value) => boolean;
   values?: (value?: Value) => unknown[];

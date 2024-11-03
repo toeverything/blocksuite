@@ -1,4 +1,4 @@
-import type { TType } from '../logical/index.js';
+import type { TypeInstance } from '../logical/type.js';
 import type { UniComponent } from '../utils/index.js';
 
 export interface GroupRenderProps<
@@ -14,14 +14,14 @@ export interface GroupRenderProps<
 
 export type GroupByConfig = {
   name: string;
-  groupName: (type: TType, value: unknown) => string;
-  defaultKeys: (type: TType) => {
+  groupName: (type: TypeInstance, value: unknown) => string;
+  defaultKeys: (type: TypeInstance) => {
     key: string;
     value: unknown;
   }[];
   valuesGroup: (
     value: unknown,
-    type: TType
+    type: TypeInstance
   ) => {
     key: string;
     value: unknown;

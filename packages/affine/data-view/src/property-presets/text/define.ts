@@ -1,11 +1,11 @@
-import { tString } from '../../core/logical/data-type-presets.js';
+import { t } from '../../core/index.js';
 import { propertyType } from '../../core/property/property-config.js';
 
 export const textPropertyType = propertyType('text');
 
 export const textPropertyModelConfig = textPropertyType.modelConfig<string>({
   name: 'Plain-Text',
-  type: () => tString.create(),
+  type: () => t.string.instance(),
   defaultData: () => ({}),
   cellToString: data => data ?? '',
   cellFromString: data => {

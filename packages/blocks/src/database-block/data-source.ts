@@ -11,7 +11,7 @@ import {
   type DataViewDataType,
   getTagColor,
   type PropertyMetaConfig,
-  type TType,
+  type TypeInstance,
   type ViewManager,
   ViewManagerBase,
   type ViewMeta,
@@ -195,7 +195,7 @@ export class DatabaseBlockDataSource extends DataSourceBase {
     applyPropertyUpdate(this._model);
   }
 
-  propertyDataTypeGet(propertyId: string): TType | undefined {
+  propertyDataTypeGet(propertyId: string): TypeInstance | undefined {
     const data = this._model.columns$.value.find(v => v.id === propertyId);
     if (!data) {
       return;

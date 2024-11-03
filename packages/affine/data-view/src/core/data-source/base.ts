@@ -2,7 +2,7 @@ import type { InsertToPosition } from '@blocksuite/affine-shared/utils';
 
 import { computed, type ReadonlySignal } from '@preact/signals-core';
 
-import type { TType } from '../logical/index.js';
+import type { TypeInstance } from '../logical/type.js';
 import type { PropertyMetaConfig } from '../property/property-config.js';
 import type { DatabaseFlags } from '../types.js';
 import type { ViewConvertConfig } from '../view/convert.js';
@@ -43,8 +43,10 @@ export interface DataSource {
   ): ReadonlySignal<Record<string, unknown> | undefined>;
   propertyDataSet(propertyId: string, data: Record<string, unknown>): void;
 
-  propertyDataTypeGet(propertyId: string): TType | undefined;
-  propertyDataTypeGet$(propertyId: string): ReadonlySignal<TType | undefined>;
+  propertyDataTypeGet(propertyId: string): TypeInstance | undefined;
+  propertyDataTypeGet$(
+    propertyId: string
+  ): ReadonlySignal<TypeInstance | undefined>;
 
   propertyReadonlyGet(propertyId: string): boolean;
   propertyReadonlyGet$(propertyId: string): ReadonlySignal<boolean>;
@@ -148,9 +150,11 @@ export abstract class DataSourceBase implements DataSource {
     data: Record<string, unknown>
   ): void;
 
-  abstract propertyDataTypeGet(propertyId: string): TType | undefined;
+  abstract propertyDataTypeGet(propertyId: string): TypeInstance | undefined;
 
-  propertyDataTypeGet$(propertyId: string): ReadonlySignal<TType | undefined> {
+  propertyDataTypeGet$(
+    propertyId: string
+  ): ReadonlySignal<TypeInstance | undefined> {
     return computed(() => this.propertyDataTypeGet(propertyId));
   }
 

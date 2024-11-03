@@ -131,7 +131,9 @@ export class DatabaseBlockComponent extends CaptionedBlockComponent<
           items: [
             menu.action({
               prefix: DeleteIcon(),
-              class: 'delete-item',
+              class: {
+                'delete-item': true,
+              },
               name: 'Delete Database',
               select: () => {
                 this.model.children.slice().forEach(block => {

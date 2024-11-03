@@ -1588,6 +1588,7 @@ __metadata:
     date-fns: "npm:^4.0.0"
     katex: "npm:^0.16.11"
     lit: "npm:^3.2.0"
+    lit-html: "npm:^3.2.1"
     shiki: "npm:^1.12.0"
     zod: "npm:^3.23.8"
   languageName: unknown
@@ -10184,7 +10185,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"lit-html@npm:^3.2.0":
+"lit-html@npm:^3.2.0, lit-html@npm:^3.2.1":
   version: 3.2.1
   resolution: "lit-html@npm:3.2.1"
   dependencies:

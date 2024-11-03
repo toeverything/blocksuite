@@ -1,4 +1,4 @@
-import { tNumber } from '../../core/logical/data-type-presets.js';
+import { t } from '../../core/logical/type-presets.js';
 import { propertyType } from '../../core/property/property-config.js';
 
 export const progressPropertyType = propertyType('progress');
@@ -6,7 +6,7 @@ export const progressPropertyType = propertyType('progress');
 export const progressPropertyModelConfig =
   progressPropertyType.modelConfig<number>({
     name: 'Progress',
-    type: () => tNumber.create(),
+    type: () => t.number.instance(),
     defaultData: () => ({}),
     cellToString: data => data?.toString() ?? '',
     cellFromString: data => {

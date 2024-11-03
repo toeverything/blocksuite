@@ -1,5 +1,5 @@
-import { t } from '../../logical/data-type-presets.js';
-import { createFilter } from '../create-filter.js';
+import { t } from '../../logical/type-presets.js';
+import { createFilter } from './create.js';
 
 export const booleanFilter = [
   createFilter({
@@ -7,7 +7,7 @@ export const booleanFilter = [
     self: t.boolean.instance(),
     args: [],
     label: 'Is checked',
-    shortString: () => 'checked',
+    shortString: () => ': Checked',
     impl: value => {
       return !!value;
     },
@@ -17,7 +17,7 @@ export const booleanFilter = [
     self: t.boolean.instance(),
     args: [],
     label: 'Is unchecked',
-    shortString: () => 'unchecked',
+    shortString: () => ': Unchecked',
     impl: value => {
       return !value;
     },

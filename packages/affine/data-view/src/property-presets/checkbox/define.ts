@@ -1,4 +1,4 @@
-import { tBoolean } from '../../core/logical/data-type-presets.js';
+import { t } from '../../core/logical/type-presets.js';
 import { propertyType } from '../../core/property/property-config.js';
 
 export const checkboxPropertyType = propertyType('checkbox');
@@ -6,7 +6,7 @@ export const checkboxPropertyType = propertyType('checkbox');
 export const checkboxPropertyModelConfig =
   checkboxPropertyType.modelConfig<boolean>({
     name: 'Checkbox',
-    type: () => tBoolean.create(),
+    type: () => t.boolean.instance(),
     defaultData: () => ({}),
     cellToString: data => (data ? 'True' : 'False'),
     cellFromString: data => {

@@ -97,6 +97,13 @@ export class FilterBar extends SignalWatcher(ShadowlessElement) {
     });
   };
 
+  @property({ attribute: false })
+  accessor filterGroup!: ReadonlySignal<FilterGroup>;
+
+  conditions$ = computed(() => {
+    return this.filterGroup.value.conditions;
+  });
+
   renderAddFilter = () => {
     return html` <div
       style="height: 100%;"
@@ -105,6 +112,13 @@ export class FilterBar extends SignalWatcher(ShadowlessElement) {
     >
       ${PlusIcon()} Add filter
     </div>`;
+  };
+
+  setConditions = (conditions: Filter[]) => {
+    this.onChange({
+      ...this.filterGroup.value,
+      conditions: conditions,
+    });
   };
 
   updateMoreFilterPanel?: () => void;
@@ -127,19 +141,16 @@ export class FilterBar extends SignalWatcher(ShadowlessElement) {
   }
 
   renderCondition(i: number) {
-    const condition = this.filterGroup.value.conditions[i];
-    const deleteFilter = () => {
-      this.deleteFilter(i);
-    };
+    const condition = this.conditions$.value[i];
     if (!condition) {
       return;
     }
     if (condition.type === 'filter') {
       return html` <filter-condition-view
-        .vars="${this.vars.value}"
-        .data="${condition}"
-        .setData="${(v: Filter) => this._setFilter(i, v)}"
-        .onDelete="${deleteFilter}"
+        .vars="${this.vars}"
+        .index="${i}"
+        .value="${this.conditions$}"
+        .onChange="${this.setConditions}"
       ></filter-condition-view>`;
     }
     const expandGroup = (e: MouseEvent) => {
@@ -168,9 +179,6 @@ export class FilterBar extends SignalWatcher(ShadowlessElement) {
   override updated() {
     this.updateMoreFilterPanel?.();
   }
-
-  @property({ attribute: false })
-  accessor filterGroup!: ReadonlySignal<FilterGroup>;
 
   @property({ attribute: false })
   accessor onChange!: (filter: FilterGroup) => void;

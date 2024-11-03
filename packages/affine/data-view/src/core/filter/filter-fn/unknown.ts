@@ -1,5 +1,5 @@
-import { t } from '../../logical/data-type-presets.js';
-import { createFilter } from '../create-filter.js';
+import { t } from '../../logical/type-presets.js';
+import { createFilter } from './create.js';
 
 export const unknownFilter = [
   createFilter({
@@ -7,7 +7,7 @@ export const unknownFilter = [
     self: t.unknown.instance(),
     args: [] as const,
     label: 'Is not empty',
-    shortString: () => 'not empty',
+    shortString: () => ': Is not empty',
     impl: self => {
       if (Array.isArray(self)) {
         return self.length > 0;
@@ -23,7 +23,7 @@ export const unknownFilter = [
     self: t.unknown.instance(),
     args: [] as const,
     label: 'Is empty',
-    shortString: () => 'empty',
+    shortString: () => ': Is empty',
     impl: self => {
       if (Array.isArray(self)) {
         return self.length === 0;

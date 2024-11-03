@@ -4,6 +4,7 @@ import {
   popMenu,
   type PopupTarget,
   popupTargetFromElement,
+  subMenuMiddleware,
 } from '@blocksuite/affine-components/context-menu';
 import { ShadowlessElement } from '@blocksuite/block-std';
 import { SignalWatcher } from '@blocksuite/global/utils';
@@ -23,12 +24,12 @@ import { repeat } from 'lit/directives/repeat.js';
 import type { Variable } from '../../../core/expression/types.js';
 import type { Filter, FilterGroup } from '../../../core/filter/types.js';
 
-import { emptyFilterGroup, type SingleView } from '../../../core/index.js';
 import {
-  type FilterGroupView,
-  getDepth,
-  popAddNewFilter,
-} from './group-panel-view.js';
+  emptyFilterGroup,
+  popCreateFilter,
+  type SingleView,
+} from '../../../core/index.js';
+import { type FilterGroupView, getDepth } from './group-panel-view.js';
 
 export class FilterRootView extends SignalWatcher(ShadowlessElement) {
   static override styles = css`
@@ -162,6 +163,20 @@ export class FilterRootView extends SignalWatcher(ShadowlessElement) {
     });
   };
 
+  @property({ attribute: false })
+  accessor filterGroup!: ReadonlySignal<FilterGroup>;
+
+  conditions$ = computed(() => {
+    return this.filterGroup.value.conditions;
+  });
+
+  setConditions = (conditions: Filter[]) => {
+    this.onChange({
+      ...this.filterGroup.value,
+      conditions: conditions,
+    });
+  };
+
   private _clickConditionOps(target: HTMLElement, i: number) {
     const filter = this.filterGroup.value.conditions[i];
     popFilterableSimpleMenu(popupTargetFromElement(target), [
@@ -206,7 +221,7 @@ export class FilterRootView extends SignalWatcher(ShadowlessElement) {
           menu.action({
             name: 'Delete',
             prefix: DeleteIcon(),
-            class: 'delete-item',
+            class: { 'delete-item': true },
             onHover: hover => {
               this.containerClass = hover
                 ? { index: i, class: 'delete-style' }
@@ -250,9 +265,10 @@ export class FilterRootView extends SignalWatcher(ShadowlessElement) {
                     <div style="display:flex;align-items:center;gap:6px;">
                       <div class="filter-root-grabber"></div>
                       <filter-condition-view
-                        .setData="${(v: Filter) => this._setFilter(i, v)}"
-                        .vars="${this.vars.value}"
-                        .data="${filter}"
+                        .vars="${this.vars}"
+                        .index="${i}"
+                        .value="${this.conditions$}"
+                        .onChange="${this.setConditions}"
                       ></filter-condition-view>
                     </div>
                     ${ops}
@@ -307,9 +323,6 @@ export class FilterRootView extends SignalWatcher(ShadowlessElement) {
     | undefined = undefined;
 
   @property({ attribute: false })
-  accessor filterGroup!: ReadonlySignal<FilterGroup>;
-
-  @property({ attribute: false })
   accessor onBack!: () => void;
 
   @property({ attribute: false })
@@ -359,14 +372,20 @@ export const popFilterRoot = (
               prefix: PlusIcon(),
               select: ele => {
                 const view = props.view;
-                const vars = view.vars$.value;
                 const value = view.filter$.value ?? emptyFilterGroup;
-                const onChange = view.filterSet.bind(view);
-                popAddNewFilter(popupTargetFromElement(ele), {
-                  value: value,
-                  onChange: onChange,
-                  vars: vars,
-                });
+                popCreateFilter(
+                  popupTargetFromElement(ele),
+                  {
+                    vars: view.vars$,
+                    onSelect: filter => {
+                      view.filterSet({
+                        ...value,
+                        conditions: [...value.conditions, filter],
+                      });
+                    },
+                  },
+                  { middleware: subMenuMiddleware }
+                );
                 return false;
               },
             }),

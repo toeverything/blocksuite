@@ -5,6 +5,7 @@ import { computed, signal } from '@preact/signals-core';
 import type { MenuItemRender } from './types.js';
 
 import { menuButtonItems } from './button.js';
+import { menuDynamicItems } from './dynamic.js';
 import { MenuFocusable } from './focusable.js';
 import { menuGroupItems } from './group.js';
 import { menuInputItems } from './input.js';
@@ -16,6 +17,7 @@ export const menu = {
   ...subMenuItems,
   ...menuInputItems,
   ...menuGroupItems,
+  ...menuDynamicItems,
 } satisfies Record<string, MenuItemRender<never>>;
 export type MenuConfig = (
   menu: Menu,

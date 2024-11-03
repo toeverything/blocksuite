@@ -1,10 +1,10 @@
-import { tDate } from '../../core/logical/data-type-presets.js';
+import { t } from '../../core/logical/type-presets.js';
 import { propertyType } from '../../core/property/property-config.js';
 
 export const datePropertyType = propertyType('date');
 export const datePropertyModelConfig = datePropertyType.modelConfig<number>({
   name: 'Date',
-  type: () => tDate.create(),
+  type: () => t.date.instance(),
   defaultData: () => ({}),
   cellToString: data => data?.toString() ?? '',
   cellFromString: data => {

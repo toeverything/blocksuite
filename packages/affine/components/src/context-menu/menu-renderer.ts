@@ -132,13 +132,14 @@ export class MenuComponent extends SignalWatcher(
   }
 
   override render() {
+    const result = this.menu.renderItems(this.menu.options.items);
     return html`
       ${this.renderTitle()} ${this.renderSearch()}
       <div class="affine-menu-body">
-        ${this.menu.searchResult$.value.length === 0 && this.menu.enableSearch
+        ${result.length === 0 && this.menu.enableSearch
           ? html` <div class="no-results">No Results</div>`
           : ''}
-        ${this.menu.searchResult$.value}
+        ${result}
       </div>
     `;
   }

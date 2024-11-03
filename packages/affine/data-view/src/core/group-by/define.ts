@@ -1,8 +1,7 @@
 import type { GroupByConfig } from './types.js';
 
-import { tBoolean, tNumber, tString, tTag } from '../logical/data-type-presets.js';
 import { MatcherCreator } from '../logical/matcher.js';
-import { isTArray, tArray } from '../logical/typesystem.js';
+import { t } from '../logical/type-presets.js';
 import { createUniComponentFromWebComponent } from '../utils/uni-component/uni-component.js';
 import { BooleanGroupView } from './renderer/boolean-group.js';
 import { NumberGroupView } from './renderer/number-group.js';
@@ -15,19 +14,19 @@ const ungroups = {
   value: null,
 };
 export const groupByMatchers = [
-  groupByMatcherCreator.createMatcher(tTag.create(), {
+  groupByMatcherCreator.createMatcher(t.tag.instance(), {
     name: 'select',
     groupName: (type, value) => {
-      if (tTag.is(type) && type.data) {
-        return type.data.tags.find(v => v.id === value)?.value ?? '';
+      if (t.tag.is(type) && type.data) {
+        return type.data.find(v => v.id === value)?.value ?? '';
       }
       return '';
     },
     defaultKeys: type => {
-      if (tTag.is(type) && type.data) {
+      if (t.tag.is(type) && type.data) {
         return [
           ungroups,
-          ...type.data.tags.map(v => ({
+          ...type.data.map(v => ({
             key: v.id,
             value: v.id,
           })),
@@ -48,19 +47,19 @@ export const groupByMatchers = [
     },
     view: createUniComponentFromWebComponent(SelectGroupView),
   }),
-  groupByMatcherCreator.createMatcher(tArray(tTag.create()), {
+  groupByMatcherCreator.createMatcher(t.array.instance(t.tag.instance()), {
     name: 'multi-select',
     groupName: (type, value) => {
-      if (tTag.is(type) && type.data) {
-        return type.data.tags.find(v => v.id === value)?.value ?? '';
+      if (t.tag.is(type) && type.data) {
+        return type.data.find(v => v.id === value)?.value ?? '';
       }
       return '';
     },
     defaultKeys: type => {
-      if (isTArray(type) && tTag.is(type.ele) && type.ele.data) {
+      if (t.array.is(type) && t.tag.is(type.element) && type.element.data) {
         return [
           ungroups,
-          ...type.ele.data.tags.map(v => ({
+          ...type.element.data.map(v => ({
             key: v.id,
             value: v.id,
           })),
@@ -96,7 +95,7 @@ export const groupByMatchers = [
     },
     view: createUniComponentFromWebComponent(SelectGroupView),
   }),
-  groupByMatcherCreator.createMatcher(tString.create(), {
+  groupByMatcherCreator.createMatcher(t.string.instance(), {
     name: 'text',
     groupName: (_type, value) => {
       return `${value ?? ''}`;
@@ -117,7 +116,7 @@ export const groupByMatchers = [
     },
     view: createUniComponentFromWebComponent(StringGroupView),
   }),
-  groupByMatcherCreator.createMatcher(tNumber.create(), {
+  groupByMatcherCreator.createMatcher(t.number.instance(), {
     name: 'number',
     groupName: (_type, value) => {
       return `${value ?? ''}`;
@@ -139,7 +138,7 @@ export const groupByMatchers = [
     addToGroup: value => (typeof value === 'number' ? value * 10 : undefined),
     view: createUniComponentFromWebComponent(NumberGroupView),
   }),
-  groupByMatcherCreator.createMatcher(tBoolean.create(), {
+  groupByMatcherCreator.createMatcher(t.boolean.instance(), {
     name: 'boolean',
     groupName: (_type, value) => {
       return `${value?.toString() ?? ''}`;

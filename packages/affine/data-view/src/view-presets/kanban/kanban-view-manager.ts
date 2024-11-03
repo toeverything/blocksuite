@@ -5,7 +5,7 @@ import {
 import { computed, type ReadonlySignal } from '@preact/signals-core';
 
 import type { FilterGroup } from '../../core/filter/types.js';
-import type { TType } from '../../core/logical/typesystem.js';
+import type { TypeInstance } from '../../core/logical/type.js';
 import type { KanbanViewData } from './define.js';
 
 import { evalFilter } from '../../core/filter/eval.js';
@@ -180,7 +180,11 @@ export class KanbanSingleView extends SingleViewBase<KanbanViewData> {
     });
   }
 
-  checkGroup(columnId: string, type: TType, target: TType): boolean {
+  checkGroup(
+    columnId: string,
+    type: TypeInstance,
+    target: TypeInstance
+  ): boolean {
     if (!groupByMatcher.isMatched(type, target)) {
       this.changeGroup(columnId);
       return false;

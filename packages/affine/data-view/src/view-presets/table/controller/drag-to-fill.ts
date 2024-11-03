@@ -8,7 +8,7 @@ import { createRef, ref } from 'lit/directives/ref.js';
 import type { DataViewTable } from '../table-view.js';
 import type { TableAreaSelection } from '../types.js';
 
-import { tRichText } from '../../../core/logical/data-type-presets.js';
+import { t } from '../../../core/index.js';
 
 export class DragToFillElement extends ShadowlessElement {
   static override styles = css`
@@ -89,7 +89,7 @@ export function fillSelectionWithFocusCellData(
 
       const curCell = cellContainer.cell$.value;
 
-      if (tRichText.is(curCol.dataType$.value)) {
+      if (t.richText.is(curCol.dataType$.value)) {
         const focusCellText = focusData as Text | undefined;
 
         const delta = focusCellText?.toDelta() ?? [{ insert: '' }];

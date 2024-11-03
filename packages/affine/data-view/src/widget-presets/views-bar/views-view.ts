@@ -206,7 +206,7 @@ export class DataViewHeaderViews extends WidgetBase {
                 select: () => {
                   view.delete();
                 },
-                class: 'delete-item',
+                class: { 'delete-item': true },
               }),
             ],
           }),

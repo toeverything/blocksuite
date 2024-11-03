@@ -1,5 +1,7 @@
-import { t } from '../../logical/data-type-presets.js';
-import { createFilter } from '../create-filter.js';
+import { format } from 'date-fns/format';
+
+import { t } from '../../logical/type-presets.js';
+import { createFilter } from './create.js';
 
 export const dateFilter = [
   createFilter({
@@ -7,7 +9,7 @@ export const dateFilter = [
     self: t.date.instance(),
     args: [t.date.instance()] as const,
     label: 'Before',
-    shortString: () => 'before',
+    shortString: v => (v ? `< ${format(v.value, 'yyyy/MM/dd')}` : undefined),
     impl: (self, value) => {
       if (self == null) {
         return false;
@@ -20,7 +22,7 @@ export const dateFilter = [
     self: t.date.instance(),
     args: [t.date.instance()] as const,
     label: 'After',
-    shortString: () => 'after',
+    shortString: v => (v ? `> ${format(v.value, 'yyyy/MM/dd')}` : undefined),
     impl: (self, value) => {
       if (self == null) {
         return false;

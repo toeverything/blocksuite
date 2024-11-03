@@ -1,6 +1,6 @@
 import type { NumberPropertyDataType } from './types.js';
 
-import { tNumber } from '../../core/logical/data-type-presets.js';
+import { t } from '../../core/logical/type-presets.js';
 import { propertyType } from '../../core/property/property-config.js';
 
 export const numberPropertyType = propertyType('number');
@@ -10,7 +10,7 @@ export const numberPropertyModelConfig = numberPropertyType.modelConfig<
   NumberPropertyDataType
 >({
   name: 'Number',
-  type: () => tNumber.create(),
+  type: () => t.number.instance(),
   defaultData: () => ({ decimal: 0, format: 'number' }),
   cellToString: data => data?.toString() ?? '',
   cellFromString: data => {

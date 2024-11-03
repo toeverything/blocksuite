@@ -8,7 +8,7 @@ import { WithDisposable } from '@blocksuite/global/utils';
 import { css, html } from 'lit';
 import { property } from 'lit/decorators.js';
 
-import type { Variable, VariableOrProperty } from '../types.js';
+import type { Variable, VariableRef } from '../types.js';
 
 import { renderUniLit } from '../../utils/uni-component/uni-component.js';
 
@@ -41,10 +41,7 @@ export class VariableRefView extends WithDisposable(ShadowlessElement) {
     if (!this.data) {
       return;
     }
-    if (this.data.type === 'ref') {
-      return this.data.name;
-    }
-    return this.data.ref.name;
+    return this.data.name;
   }
 
   get fieldData() {
@@ -53,16 +50,6 @@ export class VariableRefView extends WithDisposable(ShadowlessElement) {
       return;
     }
     return this.vars.find(v => v.id === id);
-  }
-
-  get property() {
-    if (!this.data) {
-      return;
-    }
-    if (this.data.type === 'ref') {
-      return;
-    }
-    return this.data.propertyFuncName;
   }
 
   override connectedCallback() {
@@ -92,10 +79,10 @@ export class VariableRefView extends WithDisposable(ShadowlessElement) {
   }
 
   @property({ attribute: false })
-  accessor data: VariableOrProperty | undefined = undefined;
+  accessor data: VariableRef | undefined = undefined;
 
   @property({ attribute: false })
-  accessor setData!: (filter: VariableOrProperty) => void;
+  accessor setData!: (filter: VariableRef) => void;
 
   @property({ attribute: false })
   accessor vars!: Variable[];

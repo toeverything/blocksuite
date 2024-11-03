@@ -1,32 +1,32 @@
-import type { TType } from './typesystem.js';
+import type { TypeInstance } from './type.js';
 
-import { typesystem } from './typesystem.js';
+import { typeSystem } from './type-system.js';
 
-type MatcherData<Data, Type extends TType = TType> = {
+type MatcherData<Data, Type extends TypeInstance = TypeInstance> = {
   type: Type;
   data: Data;
 };
 
-export class MatcherCreator<Data, Type extends TType = TType> {
+export class MatcherCreator<Data, Type extends TypeInstance = TypeInstance> {
   createMatcher(type: Type, data: Data) {
     return { type, data };
   }
 }
 
-export class Matcher<Data, Type extends TType = TType> {
+export class Matcher<Data, Type extends TypeInstance = TypeInstance> {
   constructor(
     private list: MatcherData<Data, Type>[],
-    private _match: (
-      type: Type,
-      target: TType
-    ) => boolean = typesystem.isSubtype.bind(typesystem)
+    private _match: (type: Type, target: TypeInstance) => boolean = (
+      type,
+      target
+    ) => typeSystem.unify(type, target)
   ) {}
 
   all(): MatcherData<Data, Type>[] {
     return this.list;
   }
 
-  allMatched(type: TType): MatcherData<Data>[] {
+  allMatched(type: TypeInstance): MatcherData<Data>[] {
     const result: MatcherData<Data>[] = [];
     for (const t of this.list) {
       if (this._match(t.type, type)) {
@@ -36,7 +36,7 @@ export class Matcher<Data, Type extends TType = TType> {
     return result;
   }
 
-  allMatchedData(type: TType): Data[] {
+  allMatchedData(type: TypeInstance): Data[] {
     const result: Data[] = [];
     for (const t of this.list) {
       if (this._match(t.type, type)) {
@@ -56,11 +56,11 @@ export class Matcher<Data, Type extends TType = TType> {
     return this.list.find(data => f(data.data))?.data;
   }
 
-  isMatched(type: Type, target: TType) {
+  isMatched(type: Type, target: TypeInstance) {
     return this._match(type, target);
   }
 
-  match(type: TType) {
+  match(type: TypeInstance) {
     for (const t of this.list) {
       if (this._match(t.type, type)) {
         return t.data;

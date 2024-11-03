@@ -1,21 +1,32 @@
 import type Zod from 'zod';
 
-import type { TypeDefinition, TypeInstance, Unify } from './type.js';
+import type {
+  AnyTypeInstance,
+  TypeDefinition,
+  TypeInstance,
+  Unify,
+} from './type.js';
 import type { TypeVarContext } from './type-variable.js';
-import type { AnyTypeInstance } from './typesystem.js';
 
-export class DTInstance<Name extends string = string, Data = unknown, ValueSchema extends Zod.ZodType = Zod.ZodType> implements TypeInstance {
+export type DataTypeOf<T extends DataType> = ReturnType<T['instance']>;
+
+export class DTInstance<
+  Name extends string = string,
+  Data = unknown,
+  ValueSchema extends Zod.ZodType = Zod.ZodType,
+> implements TypeInstance
+{
   readonly _valueType = undefined as never as Zod.TypeOf<ValueSchema>;
 
   constructor(
     readonly name: Name,
     readonly _validate: ValueSchema,
-    readonly data?: Data) {
-  }
+    readonly data?: Data
+  ) {}
 
   subst(_ctx: TypeVarContext): void | TypeInstance {
     return this;
-  };
+  }
 
   unify(_ctx: TypeVarContext, type: DTInstance, _unify: Unify): boolean {
     if (this.name !== type.name) {
@@ -32,23 +43,37 @@ export class DTInstance<Name extends string = string, Data = unknown, ValueSchem
   }
 }
 
-export class DataType<Name extends string, DataSchema extends Zod.ZodType, ValueSchema extends Zod.ZodType> implements TypeDefinition {
-  constructor(private name: Name, _dataSchema: DataSchema, private valueSchema: ValueSchema) {
-  }
+export class DataType<
+  Name extends string = string,
+  DataSchema extends Zod.ZodType = Zod.ZodType,
+  ValueSchema extends Zod.ZodType = Zod.ZodType,
+> implements TypeDefinition
+{
+  constructor(
+    private name: Name,
+    _dataSchema: DataSchema,
+    private valueSchema: ValueSchema
+  ) {}
 
   instance(literal?: Zod.TypeOf<DataSchema>) {
     return new DTInstance(this.name, this.valueSchema, literal);
   }
 
-  is(type: AnyTypeInstance): type is DTInstance<Name, DataSchema, ValueSchema> {
+  is(
+    type: AnyTypeInstance
+  ): type is DTInstance<Name, Zod.TypeOf<DataSchema>, ValueSchema> {
     return type.name === this.name;
   }
 }
 
-export const defineDataType = <Name extends string, Data extends Zod.ZodType, Value extends Zod.ZodType>(
+export const defineDataType = <
+  Name extends string,
+  Data extends Zod.ZodType,
+  Value extends Zod.ZodType,
+>(
   name: Name,
   validateData: Data,
-  validateValue: Value,
+  validateValue: Value
 ) => {
   return new DataType(name, validateData, validateValue);
 };
