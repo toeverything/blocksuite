@@ -5,29 +5,38 @@ import type { TypeInstance, Unify } from './type.js';
 
 const unknownSchema = Zod.unknown();
 
-export class TypeVarDefinitionInstance<Name extends string = string, Type extends TypeInstance = TypeInstance> {
+export class TypeVarDefinitionInstance<
+  Name extends string = string,
+  Type extends TypeInstance = TypeInstance,
+> {
   readonly name = '__TypeVarDefine';
 
-  constructor(readonly varName: Name, readonly typeConstraint?: Type) {
-  }
+  constructor(
+    readonly varName: Name,
+    readonly typeConstraint?: Type
+  ) {}
 }
 
-export class TypeVarReferenceInstance<Name extends string = string> implements TypeInstance {
+export class TypeVarReferenceInstance<Name extends string = string>
+  implements TypeInstance
+{
   readonly _validate = unknownSchema;
 
   readonly _valueType = undefined as unknown;
 
   readonly name = '__TypeVarReference';
 
-  constructor(readonly varName: Name) {
-  }
+  constructor(readonly varName: Name) {}
 
   subst(ctx: TypeVarContext): void | TypeInstance {
     return ctx[this.varName].type;
-  };
+  }
 
   unify(_ctx: TypeVarContext, _type: TypeInstance, _unify: Unify): boolean {
-    throw new BlockSuiteError(ErrorCode.DatabaseBlockError, 'unexpected type unify, type var reference');
+    throw new BlockSuiteError(
+      ErrorCode.DatabaseBlockError,
+      'unexpected type unify, type var reference'
+    );
   }
 
   valueValidate(_value: unknown): _value is unknown {
@@ -37,9 +46,12 @@ export class TypeVarReferenceInstance<Name extends string = string> implements T
 
 export const tv = {
   typeVarDefine: {
-    create: <Name extends string = string, Type extends TypeInstance = TypeInstance>(
+    create: <
+      Name extends string = string,
+      Type extends TypeInstance = TypeInstance,
+    >(
       name: Name,
-      typeConstraint?: Type,
+      typeConstraint?: Type
     ) => {
       return new TypeVarDefinitionInstance(name, typeConstraint);
     },
@@ -55,8 +67,8 @@ export const tv = {
 };
 
 export type TypeVarDefine = {
-  define: TypeVarDefinitionInstance,
-  type?: TypeInstance
+  define: TypeVarDefinitionInstance;
+  type?: TypeInstance;
 };
 
 export type TypeVarContext = Record<string, TypeVarDefine>;
