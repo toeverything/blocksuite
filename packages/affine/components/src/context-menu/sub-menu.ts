@@ -30,8 +30,11 @@ export const subMenuPlacements = autoPlacement({
 export const subMenuMiddleware = [subMenuOffset, subMenuPlacements];
 
 export class MenuSubMenu extends MenuFocusable {
+  createTime = 0;
+
   override connectedCallback() {
     super.connectedCallback();
+    this.createTime = Date.now();
     this.disposables.addFromEvent(this, 'mouseenter', this.onMouseEnter);
     this.disposables.addFromEvent(this, 'click', e => {
       e.preventDefault();
@@ -46,7 +49,9 @@ export class MenuSubMenu extends MenuFocusable {
   }
 
   onMouseEnter() {
-    this.openSubMenu();
+    if (Date.now() - this.createTime > 100) {
+      this.openSubMenu();
+    }
   }
 
   override onPressEnter() {

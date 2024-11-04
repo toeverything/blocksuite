@@ -19,10 +19,12 @@ import lz from 'lz-string';
 import '../declare-test-window.js';
 import { currentEditorIndex, multiEditor } from '../multiple-editor.js';
 import {
+  pressArrowRight,
   pressEnter,
   pressEscape,
   pressSpace,
   pressTab,
+  selectAllBlocksByKeyboard,
   SHORT_KEY,
   type,
 } from './keyboard.js';
@@ -695,6 +697,8 @@ export async function focusDatabaseTitle(page: Page) {
 
     dbTitle.focus();
   });
+  await selectAllBlocksByKeyboard(page);
+  await pressArrowRight(page);
   await waitNextFrame(page);
 }
 
