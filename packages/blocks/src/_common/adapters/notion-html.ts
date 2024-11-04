@@ -71,6 +71,8 @@ const ColumnClassMap: Record<string, string> = {
 const NotionInlineEquationToken = 'notion-text-equation-token';
 const NotionUnderlineStyleToken = 'border-bottom:0.05em solid';
 const NotionCheckboxToken = '.checkbox';
+const NotionDatabaseToken = '.collection-content';
+const NotionDatabaseTitleToken = '.collection-title';
 
 type BlocksuiteTableColumn = {
   type: string;
@@ -477,6 +479,9 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
         case 'h4':
         case 'h5':
         case 'h6': {
+          if (hastQuerySelector(o.node, NotionDatabaseTitleToken)) {
+            break;
+          }
           context
             .openNode(
               {
@@ -1082,6 +1087,15 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
               cells[children.at(i)?.id ?? nanoid()] = row;
             });
           context.setGlobalContextStack('hast:table:cells', []);
+          let databaseTitle = '';
+          if (
+            o.parent?.node.type === 'element' &&
+            hastQuerySelector(o.parent.node, NotionDatabaseToken)
+          ) {
+            databaseTitle = hastGetTextContent(
+              hastQuerySelector(o.parent.node, NotionDatabaseTitleToken)
+            );
+          }
           context.openNode(
             {
               type: 'block',
@@ -1109,7 +1123,13 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
                 ],
                 title: {
                   '$blocksuite:internal:text$': true,
-                  delta: [],
+                  delta: databaseTitle
+                    ? [
+                        {
+                          insert: databaseTitle,
+                        },
+                      ]
+                    : [],
                 },
                 columns,
                 cells,
