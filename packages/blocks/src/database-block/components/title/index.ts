@@ -5,7 +5,6 @@ import { WithDisposable } from '@blocksuite/global/utils';
 import { css, html } from 'lit';
 import { property, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
-import { ifDefined } from 'lit/directives/if-defined.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import type { DatabaseBlockComponent } from '../../database-block.js';
@@ -137,7 +136,7 @@ export class DatabaseTitle extends WithDisposable(ShadowlessElement) {
       <div class="text" style="${untitledStyle}">Untitled</div>
       <div class="text">${this.text}</div>
       <textarea
-        disabled="${ifDefined(this.readonly ? true : undefined)}"
+        .disabled="${this.readonly}"
         @input="${this.onInput}"
         @keydown="${this.onKeyDown}"
         @focus="${this.onFocus}"
