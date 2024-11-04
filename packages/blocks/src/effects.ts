@@ -209,7 +209,6 @@ import {
   AffineFormatBarWidget,
   AffineImageToolbarWidget,
   AffineInnerModalWidget,
-  AffineLinkedDocWidget,
   AffineModalWidget,
   AffinePageDraggingAreaWidget,
   AffinePieMenuWidget,
@@ -278,9 +277,7 @@ import { AffineImageToolbar } from './root-block/widgets/image-toolbar/component
 import { AFFINE_IMAGE_TOOLBAR_WIDGET } from './root-block/widgets/image-toolbar/index.js';
 import { AFFINE_INNER_MODAL_WIDGET } from './root-block/widgets/inner-modal/inner-modal.js';
 import { effects as widgetMobileToolbarEffects } from './root-block/widgets/keyboard-toolbar/effects.js';
-import { ImportDoc } from './root-block/widgets/linked-doc/import-doc/import-doc.js';
-import { AFFINE_LINKED_DOC_WIDGET } from './root-block/widgets/linked-doc/index.js';
-import { LinkedDocPopover } from './root-block/widgets/linked-doc/linked-doc-popover.js';
+import { effects as widgetLinkedDocEffects } from './root-block/widgets/linked-doc/effects.js';
 import { AffineCustomModal } from './root-block/widgets/modal/custom-modal.js';
 import { AFFINE_MODAL_WIDGET } from './root-block/widgets/modal/modal.js';
 import { AFFINE_PAGE_DRAGGING_AREA_WIDGET } from './root-block/widgets/page-dragging-area/page-dragging-area.js';
@@ -341,6 +338,7 @@ export function effects() {
 
   widgetScrollAnchoringEffects();
   widgetMobileToolbarEffects();
+  widgetLinkedDocEffects();
 
   customElements.define('affine-database-title', DatabaseTitle);
   customElements.define(
@@ -378,7 +376,6 @@ export function effects() {
   customElements.define('edgeless-note-mask', EdgelessNoteMask);
   customElements.define('affine-edgeless-note', EdgelessNoteBlockComponent);
   customElements.define('affine-preview-root', PreviewRootBlockComponent);
-  customElements.define('affine-linked-doc-popover', LinkedDocPopover);
   customElements.define('affine-page-image', ImageBlockPageComponent);
   customElements.define('affine-code', CodeBlockComponent);
   customElements.define('affine-image-fallback-card', ImageBlockFallbackCard);
@@ -657,7 +654,6 @@ export function effects() {
   customElements.define(AFFINE_PIE_MENU_WIDGET, AffinePieMenuWidget);
   customElements.define(AFFINE_EDGELESS_COPILOT_WIDGET, EdgelessCopilotWidget);
 
-  customElements.define(AFFINE_LINKED_DOC_WIDGET, AffineLinkedDocWidget);
   customElements.define(
     EDGELESS_ELEMENT_TOOLBAR_WIDGET,
     EdgelessElementToolbarWidget
