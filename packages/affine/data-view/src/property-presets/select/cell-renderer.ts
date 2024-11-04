@@ -1,11 +1,12 @@
 import { popupTargetFromElement } from '@blocksuite/affine-components/context-menu';
+import { computed } from '@preact/signals-core';
 import { html } from 'lit/static-html.js';
 
 import type { SelectTag } from '../../core/index.js';
 
+import { popTagSelect } from '../../core/component/tags/multi-tag-select.js';
 import { BaseCellRenderer } from '../../core/property/index.js';
 import { createFromBaseCellRenderer } from '../../core/property/renderer.js';
-import { popTagSelect } from '../../core/utils/tags/multi-tag-select.js';
 import { createIcon } from '../../core/utils/uni-icon.js';
 import {
   type SelectPropertyData,
@@ -36,7 +37,7 @@ export class SelectCellEditing extends BaseCellRenderer<
         ),
         {
           mode: 'single',
-          options: this._options,
+          options: this.options$,
           onOptionsChange: this._onOptionsChange,
           value: this._value,
           onChange: this._onChange,
@@ -64,9 +65,9 @@ export class SelectCellEditing extends BaseCellRenderer<
     });
   };
 
-  get _options(): SelectTag[] {
+  options$ = computed(() => {
     return this.property.data$.value.options;
-  }
+  });
 
   get _value() {
     const value = this.value;
@@ -81,7 +82,7 @@ export class SelectCellEditing extends BaseCellRenderer<
     return html`
       <affine-multi-tag-view
         .value="${this._value}"
-        .options="${this._options}"
+        .options="${this.options$.value}"
       ></affine-multi-tag-view>
     `;
   }

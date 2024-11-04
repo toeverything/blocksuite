@@ -338,6 +338,20 @@ export class DndContext {
     this.initialCoordinates$.value = coordinates;
     this.createOverlay(active);
     active.node.classList.add('dnd-active');
+    const style = this.config.container.style;
+    const pointerEvents = style.pointerEvents;
+    style.pointerEvents = 'none';
+    const clearups = [...this.droppableNodes$.value.values()].map(v => {
+      const old = v.node.style.transition;
+      v.node.style.transition = 'transform 0.2s';
+      return () => {
+        v.node.style.transition = old;
+      };
+    });
+    this.dragEndCleanupQueue.push(() => {
+      style.pointerEvents = pointerEvents;
+      clearups.forEach(f => f());
+    });
   }
 
   listenActivators() {

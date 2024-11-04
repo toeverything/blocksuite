@@ -9,7 +9,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 
 import type { SelectTag } from '../../logical/index.js';
 
-import { selectOptionColors } from '../../utils/tags/colors.js';
+import { selectOptionColors } from '../../component/tags/colors.js';
 import { BaseGroup } from './base.js';
 
 export class SelectGroupView extends BaseGroup<
