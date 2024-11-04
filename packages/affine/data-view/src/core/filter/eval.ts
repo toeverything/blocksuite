@@ -1,35 +1,14 @@
-import type { Value, VariableOrProperty } from '../expression/types.js';
+import type { Value, VariableRef } from '../expression/types.js';
 import type { Filter } from './types.js';
 
-import { propertyMatcher } from '../logical/property-matcher.js';
-import { filterMatcher } from './matcher/matcher.js';
+import { filterMatcher } from './filter-fn/matcher.js';
 
-const evalRef = (
-  ref: VariableOrProperty,
-  row: Record<string, unknown>
-): unknown => {
-  if (ref.type === 'ref') {
-    return row[ref.name];
-  }
-  const value = evalRef(ref.ref, row);
-  const fn = propertyMatcher.findData(v => v.name === ref.propertyFuncName);
-  try {
-    return fn?.impl(value);
-  } catch (e) {
-    console.error(e);
-    return;
-  }
+const evalRef = (ref: VariableRef, row: Record<string, unknown>): unknown => {
+  return row[ref.name];
 };
 
-const evalValue = (value: Value, _row: Record<string, unknown>): unknown => {
-  return value.value;
-  // TODO
-  // switch (value.type) {
-  //     case "ref":
-  //         return evalRef(value, row)
-  //     case "literal":
-  //         return value.value;
-  // }
+const evalValue = (value?: Value): unknown => {
+  return value?.value;
 };
 export const evalFilter = (
   filterGroup: Filter,
@@ -38,15 +17,26 @@ export const evalFilter = (
   const evalF = (filter: Filter): boolean => {
     if (filter.type === 'filter') {
       const value = evalRef(filter.left, row);
-      const func = filterMatcher.findData(v => v.name === filter.function);
-      const args = filter.args.map(value => evalValue(value, row));
-      try {
-        if ((func?.impl.length ?? 0) > args.length + 1) {
-          // skip
+      const func = filterMatcher.getFilterByName(filter.function);
+      if (!func) {
+        return true;
+      }
+      const expectArgLen = func.args.length;
+      const args: unknown[] = [];
+      for (let i = 0; i < expectArgLen; i++) {
+        const argValue = evalValue(filter.args[i]);
+        const argType = func.args[i];
+        if (argValue == null) {
           return true;
         }
-        const impl = func?.impl(value, ...args);
-        return impl ?? true;
+        if (!argType.valueValidate(argValue)) {
+          return true;
+        }
+        args.push(argValue);
+      }
+      const impl = func.impl;
+      try {
+        return impl(value, ...args);
       } catch (e) {
         console.error(e);
         return true;
@@ -60,6 +50,5 @@ export const evalFilter = (
     }
     return true;
   };
-  // console.log(evalF(filterGroup))
   return evalF(filterGroup);
 };

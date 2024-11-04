@@ -22,6 +22,7 @@ export class Button extends SignalWatcher(WithDisposable(ShadowlessElement)) {
         color 0.2s,
         background-color 0.2s,
         border-color 0.2s;
+      white-space: nowrap;
     }
 
     data-view-component-button.border:hover,
@@ -29,6 +30,7 @@ export class Button extends SignalWatcher(WithDisposable(ShadowlessElement)) {
       color: ${unsafeCSSVarV2('text/emphasis')};
       border-color: ${unsafeCSSVarV2('icon/activated')};
     }
+
     data-view-component-button.background:hover,
     data-view-component-button.background.active {
       background-color: ${unsafeCSSVarV2('layer/background/hoverOverlay')};

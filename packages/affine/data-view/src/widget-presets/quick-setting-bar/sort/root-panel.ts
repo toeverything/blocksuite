@@ -260,7 +260,7 @@ export const popSortRoot = (
         }),
         menu.action({
           name: 'Delete',
-          class: 'delete-item',
+          class: { 'delete-item': true },
           prefix: DeleteIcon(),
           select: () => {
             sortManager.setSortList([]);

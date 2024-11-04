@@ -1,3 +1,4 @@
+import type { Middleware } from '@floating-ui/dom';
 import type { ReadonlySignal } from '@preact/signals-core';
 
 import {
@@ -20,9 +21,13 @@ export const popCreateFilter = (
     onSelect: (filter: Filter) => void;
     onClose?: () => void;
     onBack?: () => void;
+  },
+  ops?: {
+    middleware?: Middleware[];
   }
 ) => {
   popMenu(target, {
+    middleware: ops?.middleware,
     options: {
       onClose: props.onClose,
       title: {

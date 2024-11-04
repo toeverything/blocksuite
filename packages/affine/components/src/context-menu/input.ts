@@ -1,7 +1,10 @@
+import type { StyleInfo } from 'lit-html/directives/style-map.js';
+
 import { unsafeCSSVarV2 } from '@blocksuite/affine-shared/theme';
 import { css, html, type TemplateResult } from 'lit';
 import { property, query } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
+import { styleMap } from 'lit/directives/style-map.js';
 
 import type { MenuItemRender } from './types.js';
 
@@ -11,7 +14,8 @@ export type MenuInputData = {
   placeholder?: string;
   initialValue?: string;
   class?: string;
-  onComplete: (value: string) => void;
+  onComplete?: (value: string) => void;
+  onChange?: (value: string) => void;
   disableAutoFocus?: boolean;
 };
 
@@ -26,6 +30,8 @@ export class MenuInput extends MenuFocusable {
       padding: 4px 6px;
       border: 1px solid var(--affine-border-color);
       width: 100%;
+      color: ${unsafeCSSVarV2('text/primary')};
+      background-color: transparent;
     }
 
     .affine-menu-input.focused {
@@ -39,7 +45,7 @@ export class MenuInput extends MenuFocusable {
   `;
 
   complete() {
-    this.data.onComplete(this.inputRef.value);
+    this.data.onComplete?.(this.inputRef.value);
   }
 
   override connectedCallback() {
@@ -71,6 +77,11 @@ export class MenuInput extends MenuFocusable {
     });
   }
 
+  onInput(e: InputEvent) {
+    if (e.isComposing) return;
+    this.data.onChange?.(this.inputRef.value);
+  }
+
   override onPressEnter() {
     this.inputRef.focus();
   }
@@ -86,6 +97,7 @@ export class MenuInput extends MenuFocusable {
       @focus="${() => {
         this.menu.setFocusOnly(this);
       }}"
+      @input="${this.onInput}"
       class="${classString}"
       value="${this.data.initialValue ?? ''}"
       type="text"
@@ -106,8 +118,10 @@ export const menuInputItems = {
       initialValue?: string;
       postfix?: TemplateResult;
       prefix?: TemplateResult;
-      onComplete: (value: string) => void;
+      onComplete?: (value: string) => void;
+      onChange?: (value: string) => void;
       class?: string;
+      style?: Readonly<StyleInfo>;
     }) =>
     menu => {
       if (menu.showSearch$.value) {
@@ -118,11 +132,17 @@ export const menuInputItems = {
         initialValue: config.initialValue,
         class: config.class,
         onComplete: config.onComplete,
+        onChange: config.onChange,
       };
+      const style = styleMap({
+        display: 'flex',
+        alignItems: 'center',
+        gap: '4px',
+        marginBottom: '8px',
+        ...config.style,
+      });
       return html`
-        <div
-          style="display:flex;align-items:center;margin-bottom: 8px;gap: 4px;"
-        >
+        <div style="${style}">
           ${config.prefix}
           <affine-menu-input
             style="flex:1"

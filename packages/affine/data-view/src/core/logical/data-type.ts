@@ -1,44 +1,79 @@
-import type { SelectTag } from '../utils/tags/multi-tag-select.js';
+import type Zod from 'zod';
 
-import { typesystem } from './typesystem.js';
+import type {
+  AnyTypeInstance,
+  TypeDefinition,
+  TypeInstance,
+  Unify,
+} from './type.js';
+import type { TypeVarContext } from './type-variable.js';
 
-export const tNumber = typesystem.defineData<{ value: number }>({
-  name: 'Number',
-  supers: [],
-});
-export const tString = typesystem.defineData<{ value: string }>({
-  name: 'String',
-  supers: [],
-});
-export const tRichText = typesystem.defineData<{ value: string }>({
-  name: 'RichText',
-  supers: [tString],
-});
-export const tBoolean = typesystem.defineData<{ value: boolean }>({
-  name: 'Boolean',
-  supers: [],
-});
-export const tDate = typesystem.defineData<{ value: number }>({
-  name: 'Date',
-  supers: [],
-});
-export const tURL = typesystem.defineData({
-  name: 'URL',
-  supers: [tString],
-});
-export const tImage = typesystem.defineData({
-  name: 'Image',
-  supers: [],
-});
-export const tEmail = typesystem.defineData({
-  name: 'Email',
-  supers: [tString],
-});
-export const tPhone = typesystem.defineData({
-  name: 'Phone',
-  supers: [tString],
-});
-export const tTag = typesystem.defineData<{ tags: SelectTag[] }>({
-  name: 'Tag',
-  supers: [],
-});
+export type DataTypeOf<T extends DataType> = ReturnType<T['instance']>;
+
+export class DTInstance<
+  Name extends string = string,
+  Data = unknown,
+  ValueSchema extends Zod.ZodType = Zod.ZodType,
+> implements TypeInstance
+{
+  readonly _valueType = undefined as never as Zod.TypeOf<ValueSchema>;
+
+  constructor(
+    readonly name: Name,
+    readonly _validate: ValueSchema,
+    readonly data?: Data
+  ) {}
+
+  subst(_ctx: TypeVarContext): void | TypeInstance {
+    return this;
+  }
+
+  unify(_ctx: TypeVarContext, type: DTInstance, _unify: Unify): boolean {
+    if (this.name !== type.name) {
+      return false;
+    }
+    if (type.data == null) {
+      return true;
+    }
+    return this.data != null;
+  }
+
+  valueValidate(value: unknown): value is this['_valueType'] {
+    return this._validate.safeParse(value).success;
+  }
+}
+
+export class DataType<
+  Name extends string = string,
+  DataSchema extends Zod.ZodType = Zod.ZodType,
+  ValueSchema extends Zod.ZodType = Zod.ZodType,
+> implements TypeDefinition
+{
+  constructor(
+    private name: Name,
+    _dataSchema: DataSchema,
+    private valueSchema: ValueSchema
+  ) {}
+
+  instance(literal?: Zod.TypeOf<DataSchema>) {
+    return new DTInstance(this.name, this.valueSchema, literal);
+  }
+
+  is(
+    type: AnyTypeInstance
+  ): type is DTInstance<Name, Zod.TypeOf<DataSchema>, ValueSchema> {
+    return type.name === this.name;
+  }
+}
+
+export const defineDataType = <
+  Name extends string,
+  Data extends Zod.ZodType,
+  Value extends Zod.ZodType,
+>(
+  name: Name,
+  validateData: Data,
+  validateValue: Value
+) => {
+  return new DataType(name, validateData, validateValue);
+};

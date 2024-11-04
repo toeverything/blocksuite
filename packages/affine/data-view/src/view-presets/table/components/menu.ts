@@ -66,7 +66,9 @@ export const popRowMenu = (
         items: [
           menu.action({
             name: 'Delete Rows',
-            class: 'delete-item',
+            class: {
+              'delete-item': true,
+            },
             prefix: DeleteIcon(),
             select: () => {
               selectionController.view.rowDelete(rows);
@@ -118,7 +120,7 @@ export const popRowMenu = (
       items: [
         menu.action({
           name: 'Delete Row',
-          class: 'delete-item',
+          class: { 'delete-item': true },
           prefix: DeleteIcon(),
           select: () => {
             selectionController.deleteRow(row.id);
