@@ -1,22 +1,12 @@
-import type { VariableOrProperty } from '../expression/types.js';
+import type { VariableRef } from '../expression/types.js';
+import type { ArrayTypeInstance } from '../logical/composite-type.js';
+import type { DataTypeOf } from '../logical/data-type.js';
+import type { TypeInstance } from '../logical/type.js';
 import type { SingleView } from '../view-manager/index.js';
 import type { Sort } from './types.js';
 
-import {
-  isTArray,
-  type TArray,
-  tBoolean,
-  tDate,
-  tNumber,
-  tRichText,
-  tString,
-  tTag,
-  type TType,
-  tUnknown,
-  type TypeOfData,
-  typesystem,
-} from '../logical/index.js';
-import { propertyMatcher } from '../logical/property-matcher.js';
+import { t } from '../logical/index.js';
+import { typeSystem } from '../logical/type-system.js';
 
 export const Compare = {
   GT: 'GT',
@@ -25,34 +15,18 @@ export const Compare = {
 export type CompareType = keyof typeof Compare | number;
 const evalRef = (
   view: SingleView,
-  ref: VariableOrProperty
+  ref: VariableRef
 ):
   | ((row: string) => {
       value: unknown;
-      ttype?: TType;
+      ttype?: TypeInstance;
     })
   | undefined => {
-  if (ref.type === 'ref') {
-    const ttype = view.propertyDataTypeGet(ref.name);
-    return row => ({
-      value: view.cellValueGet(row, ref.name),
-      ttype,
-    });
-  }
-  const getValue = evalRef(view, ref.ref);
-  const result = propertyMatcher.find(
-    v => v.data.name === ref.propertyFuncName
-  );
-
-  try {
-    return row => ({
-      value: result?.data.impl(getValue?.(row)?.value),
-      ttype: result?.type?.rt,
-    });
-  } catch (e) {
-    console.error(e);
-    return;
-  }
+  const ttype = view.propertyDataTypeGet(ref.name);
+  return row => ({
+    value: view.cellValueGet(row, ref.name),
+    ttype,
+  });
 };
 const compareList = <T>(
   listA: T[],
@@ -118,7 +92,7 @@ const compareBoolean = (a: unknown, b: unknown) => {
   const bB = b ? 1 : 0;
   return bA - bB;
 };
-const compareArray = (type: TArray, a: unknown, b: unknown) => {
+const compareArray = (type: ArrayTypeInstance, a: unknown, b: unknown) => {
   if (!Array.isArray(a)) {
     return Compare.GT;
   }
@@ -126,7 +100,7 @@ const compareArray = (type: TArray, a: unknown, b: unknown) => {
     return Compare.LT;
   }
   return compareList(a, b, (a, b) => {
-    return compare(type.ele, a, b);
+    return compare(type.element, a, b);
   });
 };
 const compareAny = (a: unknown, b: unknown) => {
@@ -140,38 +114,38 @@ const compareAny = (a: unknown, b: unknown) => {
   return a - b;
 };
 
-const compareTag = (type: TypeOfData<typeof tTag>, a: unknown, b: unknown) => {
+const compareTag = (type: DataTypeOf<typeof t.tag>, a: unknown, b: unknown) => {
   if (a == null) {
     return Compare.GT;
   }
   if (b == null) {
     return Compare.LT;
   }
-  const indexA = type.data?.tags?.findIndex(tag => tag.id === a);
-  const indexB = type.data?.tags?.findIndex(tag => tag.id === b);
+  const indexA = type.data?.findIndex(tag => tag.id === a);
+  const indexB = type.data?.findIndex(tag => tag.id === b);
   return compareNumber(indexA, indexB);
 };
 
-const compare = (type: TType, a: unknown, b: unknown): CompareType => {
-  if (typesystem.isSubtype(tRichText.create(), type)) {
+const compare = (type: TypeInstance, a: unknown, b: unknown): CompareType => {
+  if (typeSystem.unify(type, t.richText.instance())) {
     return compareString(a?.toString(), b?.toString());
   }
-  if (typesystem.isSubtype(tString.create(), type)) {
+  if (typeSystem.unify(type, t.string.instance())) {
     return compareString(a, b);
   }
-  if (typesystem.isSubtype(tNumber.create(), type)) {
+  if (typeSystem.unify(type, t.number.instance())) {
     return compareNumber(a, b);
   }
-  if (typesystem.isSubtype(tDate.create(), type)) {
+  if (typeSystem.unify(type, t.date.instance())) {
     return compareNumber(a, b);
   }
-  if (typesystem.isSubtype(tBoolean.create(), type)) {
+  if (typeSystem.unify(type, t.boolean.instance())) {
     return compareBoolean(a, b);
   }
-  if (typesystem.isSubtype(tTag.create(), type)) {
-    return compareTag(type as TypeOfData<typeof tTag>, a, b);
+  if (typeSystem.unify(type, t.tag.instance())) {
+    return compareTag(type, a, b);
   }
-  if (isTArray(type)) {
+  if (t.array.is(type)) {
     return compareArray(type, a, b);
   }
   return compareAny(a, b);
@@ -193,7 +167,7 @@ export const evalSort = (
         const refA = sort.ref?.(rowA);
         const refB = sort.ref?.(rowB);
         const result = compare(
-          refA?.ttype ?? tUnknown.create(),
+          refA?.ttype ?? t.unknown.instance(),
           refA?.value,
           refB?.value
         );

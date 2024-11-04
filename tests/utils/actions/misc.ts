@@ -19,10 +19,12 @@ import lz from 'lz-string';
 import '../declare-test-window.js';
 import { currentEditorIndex, multiEditor } from '../multiple-editor.js';
 import {
+  pressArrowRight,
   pressEnter,
   pressEscape,
   pressSpace,
   pressTab,
+  selectAllBlocksByKeyboard,
   SHORT_KEY,
   type,
 } from './keyboard.js';
@@ -687,14 +689,16 @@ export async function focusDatabaseTitle(page: Page) {
 
   await page.evaluate(() => {
     const dbTitle = document.querySelector(
-      'affine-database-title rich-text'
-    ) as RichText | null;
+      'affine-database-title textarea'
+    ) as HTMLTextAreaElement | null;
     if (!dbTitle) {
       throw new Error('Cannot find database title');
     }
 
-    dbTitle.inlineEditor!.focusEnd();
+    dbTitle.focus();
   });
+  await selectAllBlocksByKeyboard(page);
+  await pressArrowRight(page);
   await waitNextFrame(page);
 }
 

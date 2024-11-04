@@ -1,42 +1,38 @@
 import {
   menu,
   popFilterableSimpleMenu,
+  popMenu,
+  type PopupTarget,
   popupTargetFromElement,
+  subMenuMiddleware,
 } from '@blocksuite/affine-components/context-menu';
 import { ShadowlessElement } from '@blocksuite/block-std';
 import { SignalWatcher } from '@blocksuite/global/utils';
-import { CloseIcon } from '@blocksuite/icons/lit';
-import { computed } from '@preact/signals-core';
-import { css, html, nothing } from 'lit';
-import { property } from 'lit/decorators.js';
-import { repeat } from 'lit/directives/repeat.js';
-
-import type {
-  Variable,
-  VariableOrProperty,
-} from '../../../core/expression/types.js';
-import type { SingleFilter } from '../../../core/filter/types.js';
-
 import {
-  popLiteralEdit,
-  renderLiteral,
-} from '../../../core/expression/literal/matcher.js';
+  ArrowDownSmallIcon,
+  ArrowRightSmallIcon,
+  DeleteIcon,
+} from '@blocksuite/icons/lit';
+import { computed, type ReadonlySignal } from '@preact/signals-core';
+import { css, html } from 'lit';
+import { property } from 'lit/decorators.js';
+
+import type { Variable } from '../../../core/expression/types.js';
+import type { Filter, SingleFilter } from '../../../core/filter/types.js';
+
 import { getRefType } from '../../../core/expression/ref/ref.js';
-import { filterMatcher } from '../../../core/filter/matcher/matcher.js';
-import { firstFilterByRef } from '../../../core/filter/utils.js';
-import { tBoolean } from '../../../core/logical/data-type.js';
-import { typesystem } from '../../../core/logical/typesystem.js';
+import { filterMatcher } from '../../../core/filter/filter-fn/matcher.js';
+import { literalItemsMatcher } from '../../../core/filter/literal/index.js';
+import {
+  renderUniLit,
+  t,
+  type TypeInstance,
+  typeSystem,
+} from '../../../core/index.js';
 
 export class FilterConditionView extends SignalWatcher(ShadowlessElement) {
   static override styles = css`
     filter-condition-view {
-      display: flex;
-      align-items: center;
-      padding: 4px;
-      gap: 16px;
-      border: 1px solid var(--affine-border-color);
-      border-radius: 8px;
-      background-color: var(--affine-white);
     }
 
     .filter-condition-expression {
@@ -87,125 +83,215 @@ export class FilterConditionView extends SignalWatcher(ShadowlessElement) {
     }
   `;
 
-  private _setRef = (ref: VariableOrProperty) => {
-    this.setData(firstFilterByRef(this.vars, ref));
+  private onClickButton = (evt: Event) => {
+    this.popConditionEdit(
+      popupTargetFromElement(evt.currentTarget as HTMLElement)
+    );
   };
 
-  private _args() {
-    const fn = filterMatcher.find(v => v.data.name === this.data.function);
+  private popConditionEdit = (target: PopupTarget) => {
+    const type = this.leftVar$.value?.type;
+    if (!type) {
+      return;
+    }
+    const fn = this.fnConfig$.value;
     if (!fn) {
-      return [];
+      popFilterableSimpleMenu(target, this.getFunctionItems(target));
+      return;
     }
-    const refType = getRefType(this.vars, this.data.left);
+    const handler = popMenu(target, {
+      options: {
+        items: [
+          menu.action({
+            name: fn.label,
+            postfix: ArrowRightSmallIcon(),
+            select: ele => {
+              popMenu(popupTargetFromElement(ele), {
+                options: {
+                  items: this.getFunctionItems(target, () => {
+                    handler.close();
+                  }),
+                },
+                middleware: subMenuMiddleware,
+              });
+              return false;
+            },
+          }),
+          menu.dynamic(() => this.getArgsItems()),
+          menu.group({
+            items: [
+              menu.action({
+                name: 'Delete',
+                class: { 'delete-item': true },
+                prefix: DeleteIcon(),
+                select: () => {
+                  const list = this.value.value.slice();
+                  list.splice(this.index, 1);
+                  this.onChange(list);
+                },
+              }),
+            ],
+          }),
+        ],
+      },
+    });
+  };
+
+  @property({ attribute: false })
+  accessor value!: ReadonlySignal<Filter[]>;
+
+  filter$ = computed(() => {
+    const filter = this.value.value[this.index];
+    if (!filter || filter.type !== 'filter') {
+      return;
+    }
+    return filter;
+  });
+
+  args$ = computed(() => {
+    return this.filter$.value?.args.map(v => v.value);
+  });
+
+  fnConfig$ = computed(() => {
+    return filterMatcher.getFilterByName(this.filter$.value?.function);
+  });
+
+  @property({ attribute: false })
+  accessor vars!: ReadonlySignal<Variable[]>;
+
+  fnType$ = computed(() => {
+    const fnConfig = this.fnConfig$.value;
+    const filter = this.filter$.value;
+    if (!fnConfig || !filter) {
+      return;
+    }
+    const refType = getRefType(this.vars.value, filter.left);
     if (!refType) {
+      return;
+    }
+    const fnTemplate = t.fn.instance(
+      [fnConfig.self, ...fnConfig.args],
+      t.boolean.instance(),
+      fnConfig.vars
+    );
+    return typeSystem.instanceFn(
+      fnTemplate,
+      [refType],
+      t.boolean.instance(),
+      {}
+    );
+  });
+
+  getFunctionItems = (target: PopupTarget, onSelect?: () => void) => {
+    const filter = this.filter$.value;
+    if (!filter) {
       return [];
     }
-    const type = typesystem.instance({}, [refType], tBoolean.create(), fn.type);
-    return type.args.slice(1);
-  }
-
-  private _filterLabel() {
-    return filterMatcher.find(v => v.data.name === this.data.function)?.data
-      .label;
-  }
-
-  private _filterList() {
-    const type = getRefType(this.vars, this.data.left);
+    const type = getRefType(this.vars.value, filter?.left);
     if (!type) {
       return [];
     }
-    return filterMatcher.allMatchedData(type);
+    return filterMatcher.filterListBySelfType(type).map(v => {
+      const selected = v.name === filter.function;
+      return menu.action({
+        name: v.label,
+        isSelected: selected,
+        select: () => {
+          this.setFilter({
+            ...filter,
+            function: v.name,
+          });
+          onSelect?.();
+          this.popConditionEdit(target);
+        },
+      });
+    });
+  };
+
+  leftVar$ = computed(() => {
+    return this.vars.value.find(v => v.id === this.filter$.value?.left.name);
+  });
+
+  setFilter = (filter: SingleFilter) => {
+    const list = this.value.value.slice();
+    list[this.index] = filter;
+    this.onChange(list);
+  };
+
+  text$ = computed(() => {
+    const name = this.leftVar$.value?.name ?? '';
+    const data = this.fnConfig$.value;
+    const type = this.fnType$.value;
+    const argValues = this.args$.value;
+    if (!type || !argValues || !data) {
+      return;
+    }
+    const argDataList = argValues.map((v, i) =>
+      v ? { value: v, type: type.args[i + 1] } : undefined
+    );
+    const valueString = data.shortString?.(...argDataList) ?? '';
+    if (valueString) {
+      return `${name}${valueString}`;
+    }
+    return name;
+  });
+
+  private getArgItems(argType: TypeInstance, index: number) {
+    return literalItemsMatcher.getItems(
+      argType,
+      computed(() => {
+        return this.filter$.value?.args[index]?.value;
+      }),
+      value => {
+        const filter = this.filter$.value;
+        if (!filter) {
+          return;
+        }
+        const args = filter.args.slice();
+        args[index] = { type: 'literal', value };
+        this.setFilter({
+          ...filter,
+          args: args,
+        });
+      }
+    );
   }
 
-  private _selectFilter(e: MouseEvent) {
-    const target = e.currentTarget as HTMLElement;
-    const list = this._filterList();
-    popFilterableSimpleMenu(
-      popupTargetFromElement(target),
-      list.map(v => {
-        const selected = v.name === this.data.function;
-        return menu.action({
-          name: v.label,
-          isSelected: selected,
-          select: () => {
-            this.setData({
-              ...this.data,
-              function: v.name,
-            });
-          },
-        });
-      })
+  private getArgsItems() {
+    return (
+      this.fnType$.value?.args
+        .slice(1)
+        .flatMap((arg, i) => this.getArgItems(arg, i)) ?? []
     );
   }
 
   override render() {
-    const data = this.data;
-
+    const leftVar = this.leftVar$.value;
+    if (!leftVar) {
+      return html` <data-view-component-button
+        hoverType="border"
+        .text="${html`Invalid filter rule`}"
+      ></data-view-component-button>`;
+    }
     return html`
-      <div class="filter-condition-expression">
-        <variable-ref-view
-          .data="${data.left}"
-          .setData="${this._setRef}"
-          .vars="${this.vars}"
-          style="height: 24px"
-        ></variable-ref-view>
-        <div
-          class="filter-condition-function-name"
-          @click="${this._selectFilter}"
-        >
-          ${this._filterLabel()}
-        </div>
-        ${repeat(this._args(), (type, i) => {
-          const value$ = computed(() => {
-            return this.data.args[i]?.value;
-          });
-          const onChange = (value: unknown) => {
-            const newArr = this.data.args.slice();
-            newArr[i] = { type: 'literal', value };
-            this.setData({
-              ...this.data,
-              args: newArr,
-            });
-          };
-          const click = (e: MouseEvent) => {
-            popLiteralEdit(
-              popupTargetFromElement(e.currentTarget as HTMLElement),
-              type,
-              value$,
-              onChange
-            );
-          };
-          return html` <div
-            class="dv-hover dv-round-4 filter-condition-arg"
-            @click="${click}"
-          >
-            ${renderLiteral(type, value$, onChange)}
-          </div>`;
-        })}
-      </div>
-      ${this.onDelete
-        ? html` <div
-            @click="${this.onDelete}"
-            class="dv-icon-16 dv-round-4 dv-pd-4 dv-hover"
-            style="display:flex;align-items:center;"
-          >
-            ${CloseIcon()}
-          </div>`
-        : nothing}
+      <data-view-component-button
+        hoverType="border"
+        .icon="${renderUniLit(leftVar.icon)}"
+        @click="${this.onClickButton}"
+        .text="${html`<span
+          style="overflow: hidden;max-width: 230px;text-overflow: ellipsis"
+          >${this.text$.value}</span
+        >`}"
+        .postfix="${ArrowDownSmallIcon()}"
+      ></data-view-component-button>
     `;
   }
 
   @property({ attribute: false })
-  accessor data!: SingleFilter;
+  accessor index!: number;
 
   @property({ attribute: false })
-  accessor onDelete: (() => void) | undefined = undefined;
-
-  @property({ attribute: false })
-  accessor setData!: (filter: SingleFilter) => void;
-
-  @property({ attribute: false })
-  accessor vars!: Variable[];
+  accessor onChange!: (filters: Filter[]) => void;
 }
 
 declare global {

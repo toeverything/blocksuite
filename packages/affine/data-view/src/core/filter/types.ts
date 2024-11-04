@@ -1,8 +1,8 @@
-import type { Value, VariableOrProperty } from '../expression/types.js';
+import type { Value, VariableRef } from '../expression/types.js';
 
 export type SingleFilter = {
   type: 'filter';
-  left: VariableOrProperty;
+  left: VariableRef;
   function?: string;
   args: Value[];
 };

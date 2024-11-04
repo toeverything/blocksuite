@@ -4,17 +4,6 @@ import { Overflow } from './core/component/overflow/overflow.js';
 import { DataViewRenderer } from './core/data-view.js';
 import { RecordDetail } from './core/detail/detail.js';
 import { RecordField } from './core/detail/field.js';
-import { DateLiteral } from './core/expression/literal/renderer/date-literal.js';
-import {
-  BooleanLiteral,
-  NumberLiteral,
-  StringLiteral,
-} from './core/expression/literal/renderer/literal-element.js';
-import {
-  MultiTagLiteral,
-  TagLiteral,
-} from './core/expression/literal/renderer/tag-literal.js';
-import { TagLiteral as UnionTagLiteral } from './core/expression/literal/renderer/union-string.js';
 import { VariableRefView } from './core/expression/ref/ref-view.js';
 import { BooleanGroupView } from './core/group-by/renderer/boolean-group.js';
 import { NumberGroupView } from './core/group-by/renderer/number-group.js';
@@ -142,16 +131,9 @@ export function effects() {
   customElements.define('affine-data-view-kanban-cell', KanbanCell);
   customElements.define('affine-lit-icon', AffineLitIcon);
   customElements.define('filter-condition-view', FilterConditionView);
-  customElements.define('data-view-literal-boolean-view', BooleanLiteral);
-  customElements.define('data-view-literal-number-view', NumberLiteral);
-  customElements.define('data-view-literal-string-view', StringLiteral);
   customElements.define('data-view-group-setting', GroupSetting);
-  customElements.define('data-view-literal-tag-view', TagLiteral);
-  customElements.define('data-view-literal-multi-tag-view', MultiTagLiteral);
-  customElements.define('data-view-literal-union-string-view', UnionTagLiteral);
   customElements.define('affine-multi-tag-select', MultiTagSelect);
   customElements.define('data-view-group-title-boolean-view', BooleanGroupView);
-  customElements.define('data-view-literal-date-view', DateLiteral);
   customElements.define('affine-database-table', DataViewTable);
   customElements.define('affine-multi-tag-view', MultiTagView);
   customElements.define(

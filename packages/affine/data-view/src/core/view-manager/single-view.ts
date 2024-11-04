@@ -5,7 +5,7 @@ import { computed, type ReadonlySignal, signal } from '@preact/signals-core';
 import type { DataViewContextKey } from '../data-source/context.js';
 import type { Variable } from '../expression/types.js';
 import type { FilterGroup } from '../filter/types.js';
-import type { TType } from '../logical/typesystem.js';
+import type { TypeInstance } from '../logical/type.js';
 import type { PropertyMetaConfig } from '../property/property-config.js';
 import type { DatabaseFlags } from '../types.js';
 import type { UniComponent } from '../utils/uni-component/index.js';
@@ -123,7 +123,7 @@ export interface SingleView<
 
   propertyDataSet(propertyId: string, data: Record<string, unknown>): void;
 
-  propertyDataTypeGet(propertyId: string): TType | undefined;
+  propertyDataTypeGet(propertyId: string): TypeInstance | undefined;
 
   propertyIndexGet(propertyId: string): number;
 
@@ -343,7 +343,7 @@ export abstract class SingleViewBase<
     this.dataSource.propertyDataSet(propertyId, data);
   }
 
-  propertyDataTypeGet(propertyId: string): TType | undefined {
+  propertyDataTypeGet(propertyId: string): TypeInstance | undefined {
     const type = this.propertyTypeGet(propertyId);
     if (!type) {
       return;

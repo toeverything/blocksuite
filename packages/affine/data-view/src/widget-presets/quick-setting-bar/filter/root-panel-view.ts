@@ -4,18 +4,21 @@ import {
   popMenu,
   type PopupTarget,
   popupTargetFromElement,
+  subMenuMiddleware,
 } from '@blocksuite/affine-components/context-menu';
 import { ShadowlessElement } from '@blocksuite/block-std';
 import { SignalWatcher } from '@blocksuite/global/utils';
 import {
+  ArrowDownSmallIcon,
   ConvertIcon,
   DeleteIcon,
   DuplicateIcon,
+  FilterIcon,
   MoreHorizontalIcon,
   PlusIcon,
 } from '@blocksuite/icons/lit';
 import { computed, type ReadonlySignal } from '@preact/signals-core';
-import { css, html, nothing } from 'lit';
+import { css, html } from 'lit';
 import { property, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { repeat } from 'lit/directives/repeat.js';
@@ -23,11 +26,15 @@ import { repeat } from 'lit/directives/repeat.js';
 import type { Variable } from '../../../core/expression/types.js';
 import type { Filter, FilterGroup } from '../../../core/filter/types.js';
 
-import { emptyFilterGroup, type SingleView } from '../../../core/index.js';
+import {
+  emptyFilterGroup,
+  popCreateFilter,
+  type SingleView,
+} from '../../../core/index.js';
 import {
   type FilterGroupView,
   getDepth,
-  popAddNewFilter,
+  popFilterGroup,
 } from './group-panel-view.js';
 
 export class FilterRootView extends SignalWatcher(ShadowlessElement) {
@@ -90,6 +97,7 @@ export class FilterRootView extends SignalWatcher(ShadowlessElement) {
       background-color: var(--affine-hover-color);
       color: var(--affine-text-primary-color);
     }
+
     .filter-root-button:hover svg {
       fill: var(--affine-text-primary-color);
       color: var(--affine-text-primary-color);
@@ -132,6 +140,7 @@ export class FilterRootView extends SignalWatcher(ShadowlessElement) {
       width: 18px;
       height: 18px;
     }
+
     .filter-root-item-ops:hover svg {
       fill: var(--affine-text-primary-color);
       color: var(--affine-text-primary-color);
@@ -159,6 +168,39 @@ export class FilterRootView extends SignalWatcher(ShadowlessElement) {
       conditions: this.filterGroup.value.conditions.map((v, i) =>
         index === i ? filter : v
       ),
+    });
+  };
+
+  private expandGroup = (position: PopupTarget, i: number) => {
+    if (this.filterGroup.value.conditions[i]?.type !== 'group') {
+      return;
+    }
+    popFilterGroup(position, {
+      vars: this.vars,
+      value$: computed(() => {
+        return this.filterGroup.value.conditions[i] as FilterGroup;
+      }),
+      onChange: filter => {
+        if (filter) {
+          this._setFilter(i, filter);
+        } else {
+          this.deleteFilter(i);
+        }
+      },
+    });
+  };
+
+  @property({ attribute: false })
+  accessor filterGroup!: ReadonlySignal<FilterGroup>;
+
+  conditions$ = computed(() => {
+    return this.filterGroup.value.conditions;
+  });
+
+  setConditions = (conditions: Filter[]) => {
+    this.onChange({
+      ...this.filterGroup.value,
+      conditions: conditions,
     });
   };
 
@@ -206,7 +248,7 @@ export class FilterRootView extends SignalWatcher(ShadowlessElement) {
           menu.action({
             name: 'Delete',
             prefix: DeleteIcon(),
-            class: 'delete-item',
+            class: { 'delete-item': true },
             onHover: hover => {
               this.containerClass = hover
                 ? { index: i, class: 'delete-style' }
@@ -226,11 +268,20 @@ export class FilterRootView extends SignalWatcher(ShadowlessElement) {
     ]);
   }
 
+  private deleteFilter(i: number) {
+    this.onChange({
+      ...this.filterGroup.value,
+      conditions: this.filterGroup.value.conditions.filter(
+        (_, index) => index !== i
+      ),
+    });
+  }
+
   override render() {
     const data = this.filterGroup.value;
     return html`
       <div class="filter-root-container">
-        ${repeat(data.conditions, (filter, i) => {
+        ${repeat(data.conditions, (_, i) => {
           const clickOps = (e: MouseEvent) => {
             e.stopPropagation();
             e.preventDefault();
@@ -241,44 +292,17 @@ export class FilterRootView extends SignalWatcher(ShadowlessElement) {
               ${MoreHorizontalIcon()}
             </div>
           `;
-          const content =
-            filter.type === 'filter'
-              ? html`
-                  <div
-                    style="display:flex;align-items:center;justify-content: space-between;width: 100%;gap:8px;"
-                  >
-                    <div style="display:flex;align-items:center;gap:6px;">
-                      <div class="filter-root-grabber"></div>
-                      <filter-condition-view
-                        .setData="${(v: Filter) => this._setFilter(i, v)}"
-                        .vars="${this.vars.value}"
-                        .data="${filter}"
-                      ></filter-condition-view>
-                    </div>
-                    ${ops}
-                  </div>
-                `
-              : html`
-                  <div style="width: 100%;">
-                    <div
-                      style="display:flex;align-items:center;justify-content: space-between;gap:8px"
-                    >
-                      <div class="filter-group-title">
-                        <div class="filter-root-grabber"></div>
-                        Filter group
-                      </div>
-                      ${ops}
-                    </div>
-                    <div style="width: 100%;padding: 12px 0 0;">
-                      <filter-group-view
-                        style="padding: 0"
-                        .onChange="${(v: Filter) => this._setFilter(i, v)}"
-                        .vars="${this.vars}"
-                        .filterGroup="${computed(() => filter)}"
-                      ></filter-group-view>
-                    </div>
-                  </div>
-                `;
+          const content = html`
+            <div
+              style="display:flex;align-items:center;justify-content: space-between;width: 100%;gap:8px;"
+            >
+              <div style="display:flex;align-items:center;gap:6px;">
+                <div class="filter-root-grabber"></div>
+                ${this.renderCondition(i)}
+              </div>
+              ${ops}
+            </div>
+          `;
           const classList = classMap({
             'filter-root-item': true,
             'filter-exactly-hover-container': true,
@@ -286,16 +310,42 @@ export class FilterRootView extends SignalWatcher(ShadowlessElement) {
             [this.containerClass?.class ?? '']:
               this.containerClass?.index === i,
           });
-          return html` ${data.conditions[i - 1]?.type === 'group' ||
-            filter.type === 'group'
-              ? html`<div class="divider"></div>`
-              : nothing}
-            <div @contextmenu=${clickOps} class="${classList}">
-              ${content}
-            </div>`;
+          return html` <div @contextmenu="${clickOps}" class="${classList}">
+            ${content}
+          </div>`;
         })}
       </div>
     `;
+  }
+
+  renderCondition(i: number) {
+    const condition = this.conditions$.value[i];
+    if (!condition) {
+      return;
+    }
+    if (condition.type === 'filter') {
+      return html` <filter-condition-view
+        .vars="${this.vars}"
+        .index="${i}"
+        .value="${this.conditions$}"
+        .onChange="${this.setConditions}"
+      ></filter-condition-view>`;
+    }
+    const expandGroup = (e: MouseEvent) => {
+      this.expandGroup(
+        popupTargetFromElement(e.currentTarget as HTMLElement),
+        i
+      );
+    };
+    const length = condition.conditions.length;
+    const text = length > 1 ? `${length} rules` : `${length} rule`;
+    return html` <data-view-component-button
+      hoverType="border"
+      .icon="${FilterIcon()}"
+      @click="${expandGroup}"
+      .text="${html`${text}`}"
+      .postfix="${ArrowDownSmallIcon()}"
+    ></data-view-component-button>`;
   }
 
   @state()
@@ -305,9 +355,6 @@ export class FilterRootView extends SignalWatcher(ShadowlessElement) {
         class: string;
       }
     | undefined = undefined;
-
-  @property({ attribute: false })
-  accessor filterGroup!: ReadonlySignal<FilterGroup>;
 
   @property({ attribute: false })
   accessor onBack!: () => void;
@@ -359,14 +406,20 @@ export const popFilterRoot = (
               prefix: PlusIcon(),
               select: ele => {
                 const view = props.view;
-                const vars = view.vars$.value;
                 const value = view.filter$.value ?? emptyFilterGroup;
-                const onChange = view.filterSet.bind(view);
-                popAddNewFilter(popupTargetFromElement(ele), {
-                  value: value,
-                  onChange: onChange,
-                  vars: vars,
-                });
+                popCreateFilter(
+                  popupTargetFromElement(ele),
+                  {
+                    vars: view.vars$,
+                    onSelect: filter => {
+                      view.filterSet({
+                        ...value,
+                        conditions: [...value.conditions, filter],
+                      });
+                    },
+                  },
+                  { middleware: subMenuMiddleware }
+                );
                 return false;
               },
             }),

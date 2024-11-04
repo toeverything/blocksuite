@@ -427,7 +427,7 @@ export const LatexExtension = InlineMarkdownExtension({
   name: 'latex',
   /* eslint-disable no-useless-escape */
   pattern:
-    /(?:\$\$)(?<content>[^\s\$]+)(?:\$\$)$|(?<blockPrefix>\$\$\$\$)|(?<inlinePrefix>\$\$)$/g,
+    /(?:\$\$)(?<content>[^\$]+)(?:\$\$)$|(?<blockPrefix>\$\$\$\$)|(?<inlinePrefix>\$\$)$/g,
   action: ({ inlineEditor, prefixText, inlineRange, pattern, undoManager }) => {
     const match = pattern.exec(prefixText);
     if (!match || !match.groups) {

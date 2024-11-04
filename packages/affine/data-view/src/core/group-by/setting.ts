@@ -198,7 +198,7 @@ export const selectGroupByProperty = (
             hide: () =>
               view instanceof KanbanSingleView ||
               view.data$.value?.groupBy == null,
-            class: 'delete-item',
+            class: { 'delete-item': true },
             name: 'Remove Grouping',
             select: () => {
               if (view instanceof TableSingleView) {
@@ -288,7 +288,7 @@ export const popGroupSetting = (
             menu.action({
               name: 'Remove grouping',
               prefix: DeleteIcon(),
-              class: 'delete-item',
+              class: { 'delete-item': true },
               hide: () => !(view instanceof TableSingleView),
               select: () => {
                 if (view instanceof TableSingleView) {

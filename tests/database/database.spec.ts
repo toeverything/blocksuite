@@ -61,9 +61,9 @@ test('edit database block title and create new rows', async ({ page }) => {
     title: dbTitle,
   });
   await focusDatabaseTitle(page);
-  for (let i = 0; i < dbTitle.length; i++) {
-    await pressBackspace(page);
-  }
+  await selectAllByKeyboard(page);
+  await pressBackspace(page);
+
   const expected = 'hello';
   await type(page, expected);
   await assertBlockProps(page, '2', {
@@ -507,7 +507,7 @@ test('database format-bar in header and text column', async ({ page }) => {
   // header | column
 
   const formatBar = getFormatBar(page);
-  await setInlineRangeInInlineEditor(page, { index: 1, length: 4 }, 2);
+  await setInlineRangeInInlineEditor(page, { index: 1, length: 4 }, 1);
   expect(await formatBar.formatBar.isVisible()).toBe(true);
   // Title    | Column1
   // ----------------
@@ -520,7 +520,7 @@ test('database format-bar in header and text column', async ({ page }) => {
         insert: 'header',
       },
     ],
-    2
+    1
   );
   await formatBar.boldBtn.click();
   await assertInlineEditorDeltas(
@@ -539,13 +539,13 @@ test('database format-bar in header and text column', async ({ page }) => {
         insert: 'r',
       },
     ],
-    2
+    1
   );
 
   await pressEscape(page);
   await pressArrowRight(page);
   await pressEnter(page);
-  await setInlineRangeInInlineEditor(page, { index: 2, length: 2 }, 3);
+  await setInlineRangeInInlineEditor(page, { index: 2, length: 2 }, 2);
   expect(await formatBar.formatBar.isVisible()).toBe(true);
   // Title  | Column1
   // ----------------
@@ -558,7 +558,7 @@ test('database format-bar in header and text column', async ({ page }) => {
         insert: 'column',
       },
     ],
-    3
+    2
   );
   await formatBar.boldBtn.click();
   await assertInlineEditorDeltas(
@@ -577,7 +577,7 @@ test('database format-bar in header and text column', async ({ page }) => {
         insert: 'mn',
       },
     ],
-    3
+    2
   );
 });
 
@@ -597,7 +597,8 @@ test.describe('readonly mode', () => {
     });
 
     await focusDatabaseTitle(page);
-    await pressBackspace(page, dbTitle.length);
+    await selectAllByKeyboard(page);
+    await pressBackspace(page);
 
     await type(page, 'hello');
     await assertBlockProps(page, '2', {

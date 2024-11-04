@@ -10,6 +10,7 @@ export * from './input.js';
 export * from './item.js';
 export * from './menu.js';
 export * from './menu-renderer.js';
+export * from './sub-menu.js';
 
 export function effects() {
   customElements.define('affine-menu', MenuComponent);

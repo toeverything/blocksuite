@@ -1,14 +1,12 @@
 import { popupTargetFromElement } from '@blocksuite/affine-components/context-menu';
 import { html } from 'lit/static-html.js';
 
+import type { SelectTag } from '../../core/index.js';
 import type { SelectPropertyData } from '../select/define.js';
 
 import { BaseCellRenderer } from '../../core/property/index.js';
 import { createFromBaseCellRenderer } from '../../core/property/renderer.js';
-import {
-  popTagSelect,
-  type SelectTag,
-} from '../../core/utils/tags/multi-tag-select.js';
+import { popTagSelect } from '../../core/utils/tags/multi-tag-select.js';
 import { createIcon } from '../../core/utils/uni-icon.js';
 import { multiSelectPropertyModelConfig } from './define.js';
 

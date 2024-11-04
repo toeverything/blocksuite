@@ -1,9 +1,9 @@
-import { propertyType, tString } from '@blocksuite/data-view';
+import { propertyType, t } from '@blocksuite/data-view';
 
 export const linkColumnType = propertyType('link');
 export const linkColumnModelConfig = linkColumnType.modelConfig<string>({
   name: 'Link',
-  type: () => tString.create(),
+  type: () => t.string.instance(),
   defaultData: () => ({}),
   cellToString: data => data?.toString() ?? '',
   cellFromString: data => {

@@ -22,16 +22,11 @@ import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
 
+import type { SelectTag } from '../../logical/index.js';
+
 import { stopPropagation } from '../event.js';
 import { getTagColor, selectOptionColors } from './colors.js';
 import { styles } from './styles.js';
-
-export type SelectTag = {
-  id: string;
-  color: string;
-  value: string;
-  parentId?: string;
-};
 
 type RenderOption = {
   value: string;
@@ -66,7 +61,9 @@ export class MultiTagSelect extends WithDisposable(ShadowlessElement) {
           menu.action({
             name: 'Delete',
             prefix: DeleteIcon(),
-            class: 'delete-item',
+            class: {
+              'delete-item': true,
+            },
             select: () => {
               this.deleteTag(id);
             },
