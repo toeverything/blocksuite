@@ -613,7 +613,6 @@ export function effects() {
     'edgeless-change-attachment-button',
     EdgelessChangeAttachmentButton
   );
-  customElements.define('import-doc', ImportDoc);
   customElements.define('edgeless-more-button', EdgelessMoreButton);
   customElements.define('edgeless-shape-style-panel', EdgelessShapeStylePanel);
   customElements.define(

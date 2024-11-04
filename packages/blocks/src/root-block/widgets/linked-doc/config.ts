@@ -1,4 +1,4 @@
-import type { EditorHost } from '@blocksuite/block-std';
+import type { BlockStdScope, EditorHost } from '@blocksuite/block-std';
 import type { TemplateResult } from 'lit';
 
 import {
@@ -40,6 +40,14 @@ export type LinkedMenuGroup = {
   maxDisplay?: number;
   // copywriting when display quantity exceeds
   overflowText?: string;
+};
+
+export type LinkedDocContext = {
+  std: BlockStdScope;
+  inlineEditor: AffineInlineEditor;
+  triggerKey: string;
+  getMenus: typeof getMenus;
+  close: () => void;
 };
 
 const DEFAULT_DOC_NAME = 'Untitled';

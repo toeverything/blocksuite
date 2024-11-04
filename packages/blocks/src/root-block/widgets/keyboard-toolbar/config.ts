@@ -315,8 +315,14 @@ const pageToolGroup: KeyboardToolPanelGroup = {
       action: ({ rootComponent, closeToolbar }) => {
         const { std } = rootComponent;
 
-        const triggerKey =
-          std.getConfig('affine:page')?.linkedWidget?.triggerKeys?.[0] ?? '@';
+        const linkedDocWidget = std.view.getWidget(
+          'affine-linked-doc-widget',
+          rootComponent.model.id
+        );
+        if (!linkedDocWidget) return;
+        assertType<AffineLinkedDocWidget>(linkedDocWidget);
+
+        const triggerKey = linkedDocWidget.config.triggerKeys[0];
 
         std.command
           .chain()
@@ -328,17 +334,10 @@ const pageToolGroup: KeyboardToolPanelGroup = {
             const currentModel = selectedModels[0];
             insertContent(std.host, currentModel, triggerKey);
 
-            const linkedDocWidget = std.view.getWidget(
-              'affine-linked-doc-widget',
-              rootComponent.model.id
-            );
-            if (!linkedDocWidget) return;
-            assertType<AffineLinkedDocWidget>(linkedDocWidget);
-
             const inlineEditor = getInlineEditorByModel(std.host, currentModel);
             // Wait for range to be updated
             inlineEditor?.slots.inlineRangeSync.once(() => {
-              linkedDocWidget.showLinkedDocPopover(inlineEditor, triggerKey);
+              linkedDocWidget.showLinkedDocPopover();
               closeToolbar();
             });
           })

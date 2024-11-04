@@ -1,52 +1,60 @@
-import type { AffineInlineEditor } from '@blocksuite/affine-components/rich-text';
-import type { EditorHost } from '@blocksuite/block-std';
+import type { InlineRange } from '@blocksuite/inline';
 
 import { MoreHorizontalIcon } from '@blocksuite/affine-components/icons';
-import { WithDisposable } from '@blocksuite/global/utils';
+import {
+  getCurrentNativeRange,
+  getViewportElement,
+} from '@blocksuite/affine-shared/utils';
+import { PropTypes, requiredProperties } from '@blocksuite/block-std';
+import { throttle, WithDisposable } from '@blocksuite/global/utils';
 import { html, LitElement, nothing } from 'lit';
-import { query, queryAll, state } from 'lit/decorators.js';
+import { property, query, queryAll, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import type { IconButton } from '../../../_common/components/button.js';
-import type { LinkedMenuGroup } from './config.js';
+import type { LinkedDocContext, LinkedMenuGroup } from './config.js';
 
 import {
   cleanSpecifiedTail,
   createKeydownObserver,
   getQuery,
 } from '../../../_common/components/utils.js';
+import { getPopperPosition } from '../../utils/position.js';
 import { styles } from './styles.js';
 
+@requiredProperties({
+  context: PropTypes.object,
+})
 export class LinkedDocPopover extends WithDisposable(LitElement) {
   static override styles = styles;
 
   private _abort = () => {
     // remove popover dom
-    this.abortController.abort();
+    this.context.close();
     // clear input query
     cleanSpecifiedTail(
-      this.editorHost,
-      this.inlineEditor,
-      this.triggerKey + (this._query || '')
+      this.context.std.host,
+      this.context.inlineEditor,
+      this.context.triggerKey + (this._query || '')
     );
   };
 
   private _expanded = new Map<string, boolean>();
 
-  private _startRange = this.inlineEditor.getInlineRange();
+  private _startRange: InlineRange | null = null;
 
   private _updateLinkedDocGroup = async () => {
     const query = this._query;
 
     if (query === null) {
-      this.abortController.abort();
+      this.context.close();
       return;
     }
-    this._linkedDocGroup = await this.getMenus(
+    this._linkedDocGroup = await this.context.getMenus(
       query,
       this._abort,
-      this.editorHost,
-      this.inlineEditor
+      this.context.std.host,
+      this.context.inlineEditor
     );
   };
 
@@ -68,22 +76,7 @@ export class LinkedDocPopover extends WithDisposable(LitElement) {
   }
 
   private get _query() {
-    return getQuery(this.inlineEditor, this._startRange);
-  }
-
-  constructor(
-    private triggerKey: string,
-    private getMenus: (
-      query: string,
-      abort: () => void,
-      editorHost: EditorHost,
-      inlineEditor: AffineInlineEditor
-    ) => Promise<LinkedMenuGroup[]>,
-    private editorHost: EditorHost,
-    private inlineEditor: AffineInlineEditor,
-    private abortController: AbortController
-  ) {
-    super();
+    return getQuery(this.context.inlineEditor, this._startRange);
   }
 
   private _getActionItems(group: LinkedMenuGroup) {
@@ -115,23 +108,33 @@ export class LinkedDocPopover extends WithDisposable(LitElement) {
     super.connectedCallback();
 
     // init
+    this._startRange = this.context.inlineEditor.getInlineRange();
+
     void this._updateLinkedDocGroup();
     this._disposables.addFromEvent(this, 'mousedown', e => {
       // Prevent input from losing focus
       e.preventDefault();
     });
+    this._disposables.addFromEvent(window, 'mousedown', e => {
+      if (e.target === this) return;
+      this._abort();
+    });
 
-    const { eventSource } = this.inlineEditor;
+    const keydownObserverAbortController = new AbortController();
+    this._disposables.add(() => keydownObserverAbortController.abort());
+
+    const { eventSource } = this.context.inlineEditor;
     if (!eventSource) return;
+
     createKeydownObserver({
       target: eventSource,
-      signal: this.abortController.signal,
+      signal: keydownObserverAbortController.signal,
       onInput: isComposition => {
         this._activatedItemIndex = 0;
         if (isComposition) {
           this._updateLinkedDocGroup().catch(console.error);
         } else {
-          this.inlineEditor.slots.renderComplete.once(
+          this.context.inlineEditor.slots.renderComplete.once(
             this._updateLinkedDocGroup
           );
         }
@@ -143,15 +146,17 @@ export class LinkedDocPopover extends WithDisposable(LitElement) {
         }, 50);
       },
       onDelete: () => {
-        const curRange = this.inlineEditor.getInlineRange();
+        const curRange = this.context.inlineEditor.getInlineRange();
         if (!this._startRange || !curRange) {
           return;
         }
         if (curRange.index < this._startRange.index) {
-          this.abortController.abort();
+          this.context.close();
         }
         this._activatedItemIndex = 0;
-        this.inlineEditor.slots.renderComplete.once(this._updateLinkedDocGroup);
+        this.context.inlineEditor.slots.renderComplete.once(
+          this._updateLinkedDocGroup
+        );
       },
       onMove: step => {
         const itemLen = this._flattenActionList.length;
@@ -182,7 +187,7 @@ export class LinkedDocPopover extends WithDisposable(LitElement) {
           ?.catch(console.error);
       },
       onAbort: () => {
-        this.abortController.abort();
+        this.context.close();
       },
     });
   }
@@ -253,6 +258,33 @@ export class LinkedDocPopover extends WithDisposable(LitElement) {
     this._position = position;
   }
 
+  override willUpdate() {
+    if (!this.hasUpdated) {
+      const curRange = getCurrentNativeRange();
+      if (!curRange) return;
+
+      const updatePosition = throttle(() => {
+        const position = getPopperPosition(this, curRange);
+        this.updatePosition(position);
+      }, 10);
+
+      this.disposables.addFromEvent(window, 'resize', updatePosition);
+      const scrollContainer = getViewportElement(this.context.std.host);
+      if (scrollContainer) {
+        // Note: in edgeless mode, the scroll container is not exist!
+        this.disposables.addFromEvent(
+          scrollContainer,
+          'scroll',
+          updatePosition,
+          {
+            passive: true,
+          }
+        );
+      }
+      updatePosition();
+    }
+  }
+
   @state()
   private accessor _activatedItemIndex = 0;
 
@@ -268,6 +300,9 @@ export class LinkedDocPopover extends WithDisposable(LitElement) {
 
   @state()
   private accessor _showTooltip = false;
+
+  @property({ attribute: false })
+  accessor context!: LinkedDocContext;
 
   @queryAll('icon-button')
   accessor iconButtons!: NodeListOf<IconButton>;
