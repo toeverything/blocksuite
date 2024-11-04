@@ -50,7 +50,8 @@
     "./caption": "./src/caption/index.ts",
     "./context-menu": "./src/context-menu/index.ts",
     "./date-picker": "./src/date-picker/index.ts",
-    "./drag-indicator": "./src/drag-indicator/index.ts"
+    "./drag-indicator": "./src/drag-indicator/index.ts",
+    "./virtual-keyboard": "./src/virtual-keyboard/index.ts"
   },
   "publishConfig": {
     "access": "public",
@@ -104,6 +105,10 @@
       "./drag-indicator": {
         "types": "./dist/drag-indicator/index.d.ts",
         "import": "./dist/drag-indicator/index.js"
+      },
+      "./virtual-keyboard": {
+        "types": "./dist/virtual-keyboard/index.d.ts",
+        "import": "./dist/virtual-keyboard/index.js"
       }
     }
   },

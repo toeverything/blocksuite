@@ -1,3 +1,7 @@
+import {
+  VirtualKeyboardController,
+  type VirtualKeyboardControllerConfig,
+} from '@blocksuite/affine-components/virtual-keyboard';
 import { PropTypes, requiredProperties } from '@blocksuite/block-std';
 import { SignalWatcher, WithDisposable } from '@blocksuite/global/utils';
 import { ArrowLeftBigIcon, KeyboardIcon } from '@blocksuite/icons/lit';
@@ -23,7 +27,6 @@ import {
   isKeyboardToolBarActionItem,
   isKeyboardToolPanelConfig,
   scrollCurrentBlockIntoView,
-  VirtualKeyboardController,
 } from './utils.js';
 
 export const AFFINE_KEYBOARD_TOOLBAR = 'affine-keyboard-toolbar';
@@ -165,6 +168,13 @@ export class AffineKeyboardToolbar extends SignalWatcher(
           }
         : {}
     );
+  }
+
+  get virtualKeyboardControllerConfig(): VirtualKeyboardControllerConfig {
+    return {
+      useScreenHeight: this.config.useScreenHeight ?? false,
+      inputElement: this.rootComponent,
+    };
   }
 
   private _renderIcon(icon: KeyboardIconType) {
