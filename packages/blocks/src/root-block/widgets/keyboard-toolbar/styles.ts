@@ -3,10 +3,6 @@ import { css } from 'lit';
 
 import { scrollbarStyle } from '../../../_common/components/utils.js';
 
-export const TOOLBAR_ICON_STYLE = { width: '24', height: '24' };
-
-export const TOOL_PANEL_ICON_STYLE = { width: '32', height: '32' };
-
 export const TOOLBAR_HEIGHT = 46;
 
 export const keyboardToolbarStyles = css`
@@ -35,6 +31,11 @@ export const keyboardToolbarStyles = css`
     }
     > div:not(.item-container) {
       padding-bottom: 4px;
+    }
+
+    icon-button svg {
+      width: 24px;
+      height: 24px;
     }
   }
 
@@ -121,6 +122,11 @@ export const keyboardToolPanelStyles = css`
 
     button:active {
       background: #00000012;
+    }
+
+    button svg {
+      width: 32px;
+      height: 32px;
     }
 
     span {

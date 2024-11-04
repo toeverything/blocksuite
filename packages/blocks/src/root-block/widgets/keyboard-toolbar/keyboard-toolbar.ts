@@ -17,11 +17,7 @@ import type {
 } from './config.js';
 
 import { PageRootBlockComponent } from '../../page/page-root-block.js';
-import {
-  keyboardToolbarStyles,
-  TOOLBAR_HEIGHT,
-  TOOLBAR_ICON_STYLE,
-} from './styles.js';
+import { keyboardToolbarStyles, TOOLBAR_HEIGHT } from './styles.js';
 import {
   isKeyboardSubToolBarConfig,
   isKeyboardToolBarActionItem,
@@ -216,7 +212,7 @@ export class AffineKeyboardToolbar extends SignalWatcher(
       this._isSubToolbarOpened,
       () =>
         html`<icon-button size="36px" @click=${this._goPrevToolbar}>
-          ${ArrowLeftBigIcon(TOOLBAR_ICON_STYLE)}
+          ${ArrowLeftBigIcon()}
         </icon-button>`
     );
 
@@ -231,7 +227,7 @@ export class AffineKeyboardToolbar extends SignalWatcher(
   private _renderKeyboardButton() {
     return html`<div class="keyboard-container">
       <icon-button size="36px" @click=${this._handleKeyboardButtonClicked}>
-        ${KeyboardIcon(TOOLBAR_ICON_STYLE)}
+        ${KeyboardIcon()}
       </icon-button>
     </div>`;
   }
