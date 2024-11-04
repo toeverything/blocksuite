@@ -227,7 +227,7 @@ export class FilterConditionView extends SignalWatcher(ShadowlessElement) {
       return;
     }
     const argDataList = argValues.map((v, i) =>
-      v ? { value: v, type: type.args[i] } : undefined
+      v ? { value: v, type: type.args[i + 1] } : undefined
     );
     const valueString = data.shortString?.(...argDataList) ?? '';
     if (valueString) {
