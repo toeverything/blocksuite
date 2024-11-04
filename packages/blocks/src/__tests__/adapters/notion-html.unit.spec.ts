@@ -1198,80 +1198,84 @@ describe('notion html to snapshot', () => {
 
   test('table', async () => {
     const html = `<div class="page-body">
-      <table class="collection-content">
-        <thead>
-          <tr>
-            <th><span class="icon property-icon"><svg role="graphics-symbol" viewBox="0 0 16 16"
-                  style="width:14px;height:14px;display:block;fill:rgba(55, 53, 47, 0.45);flex-shrink:0"
-                  class="typesTitle">
-                </svg></span>Name</th>
-            <th><span class="icon property-icon"><svg role="graphics-symbol" viewBox="0 0 16 16"
-                  style="width:14px;height:14px;display:block;fill:rgba(55, 53, 47, 0.45);flex-shrink:0"
-                  class="typesMultipleSelect">
-                </svg></span>Tags</th>
-            <th><span class="icon property-icon"><svg role="graphics-symbol" viewBox="0 0 16 16"
-                  style="width:14px;height:14px;display:block;fill:rgba(55, 53, 47, 0.45);flex-shrink:0"
-                  class="typesMultipleSelect">
-                </svg></span>Multi-select</th>
-            <th><span class="icon property-icon"><svg role="graphics-symbol" viewBox="0 0 16 16"
-                  style="width:14px;height:14px;display:block;fill:rgba(55, 53, 47, 0.45);flex-shrink:0"
-                  class="typesNumber">
-                </svg></span>Number</th>
-            <th><span class="icon property-icon"><svg role="graphics-symbol" viewBox="0 0 16 16"
-                  style="width:14px;height:14px;display:block;fill:rgba(55, 53, 47, 0.45);flex-shrink:0"
-                  class="typesStatus">
-                </svg></span>Status</th>
-            <th><span class="icon property-icon"><svg role="graphics-symbol" viewBox="0 0 16 16"
-                  style="width:14px;height:14px;display:block;fill:rgba(55, 53, 47, 0.45);flex-shrink:0"
-                  class="typesCheckbox">
-                </svg></span>Checkbox</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr id="ed3d2ae9-62f5-433a-9049-9ddbd1c81ac5">
-            <td class="cell-title"><a
-                href="https://www.notion.so/https-affine-pro-ed3d2ae962f5433a90499ddbd1c81ac5?pvs=21">https://affine.pro</a>
-            </td>
-            <td class="cell-tC]_"><span class="selected-value select-value-color-red">aaa</span></td>
-            <td class="cell-GFq@"><span class="selected-value select-value-color-gray">aaa</span><span
-                class="selected-value select-value-color-blue">bbb</span></td>
-            <td class="cell-Kruh">5</td>
-            <td class="cell-S_z"><span class="status-value">
-                <div class="status-dot"></div>Not started
-              </span></td>
-            <td class="cell-Wgk@">
-              <div class="checkbox checkbox-off"></div>
-            </td>
-          </tr>
-          <tr id="ed3d2ae9-62f5-433a-9049-9ddbd1c81ac5">
-            <td class="cell-title"><a
-                href="https://www.notion.so/ed3d2ae962f5433a90499ddbd1c81ac5?pvs=21">Untitled</a></td>
-            <td class="cell-tC]_"><span class="selected-value select-value-color-green">bbb</span></td>
-            <td class="cell-GFq@"><span class="selected-value select-value-color-gray">aaa</span><span
-                class="selected-value select-value-color-brown">ccc</span></td>
-            <td class="cell-Kruh">7</td>
-            <td class="cell-S_z"><span class="status-value">
-                <div class="status-dot"></div>Not started
-              </span></td>
-            <td class="cell-Wgk@">
-              <div class="checkbox checkbox-on"></div>
-            </td>
-          </tr>
-          <tr id="ed3d2ae9-62f5-433a-9049-9ddbd1c81ac5">
-            <td class="cell-title"><a
-                href="https://www.notion.so/ed3d2ae962f5433a90499ddbd1c81ac5?pvs=21">Untitled</a></td>
-            <td class="cell-tC]_"><span class="selected-value select-value-color-red">aaa</span></td>
-            <td class="cell-GFq@"><span class="selected-value select-value-color-blue">bbb</span></td>
-            <td class="cell-Kruh">9</td>
-            <td class="cell-S_z"><span class="status-value">
-                <div class="status-dot"></div>Not started
-              </span></td>
-            <td class="cell-Wgk@">
-              <div class="checkbox checkbox-off"></div>
-            </td>
-          </tr>
-        </tbody>
-      </table><br /><br />
+      <div id="11f088dd-6fdb-80d1-82fa-cbdf6e445620" class="collection-content">
+        <h4 class="collection-title">Table View</h4>
+        <table class="collection-content">
+          <thead>
+            <tr>
+              <th><span class="icon property-icon"><svg role="graphics-symbol" viewBox="0 0 16 16"
+                    style="width:14px;height:14px;display:block;fill:rgba(55, 53, 47, 0.45);flex-shrink:0"
+                    class="typesTitle">
+                  </svg></span>Name</th>
+              <th><span class="icon property-icon"><svg role="graphics-symbol" viewBox="0 0 16 16"
+                    style="width:14px;height:14px;display:block;fill:rgba(55, 53, 47, 0.45);flex-shrink:0"
+                    class="typesMultipleSelect">
+                  </svg></span>Tags</th>
+              <th><span class="icon property-icon"><svg role="graphics-symbol" viewBox="0 0 16 16"
+                    style="width:14px;height:14px;display:block;fill:rgba(55, 53, 47, 0.45);flex-shrink:0"
+                    class="typesMultipleSelect">
+                  </svg></span>Multi-select</th>
+              <th><span class="icon property-icon"><svg role="graphics-symbol" viewBox="0 0 16 16"
+                    style="width:14px;height:14px;display:block;fill:rgba(55, 53, 47, 0.45);flex-shrink:0"
+                    class="typesNumber">
+                  </svg></span>Number</th>
+              <th><span class="icon property-icon"><svg role="graphics-symbol" viewBox="0 0 16 16"
+                    style="width:14px;height:14px;display:block;fill:rgba(55, 53, 47, 0.45);flex-shrink:0"
+                    class="typesStatus">
+                  </svg></span>Status</th>
+              <th><span class="icon property-icon"><svg role="graphics-symbol" viewBox="0 0 16 16"
+                    style="width:14px;height:14px;display:block;fill:rgba(55, 53, 47, 0.45);flex-shrink:0"
+                    class="typesCheckbox">
+                  </svg></span>Checkbox</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr id="ed3d2ae9-62f5-433a-9049-9ddbd1c81ac5">
+              <td class="cell-title"><a
+                  href="https://www.notion.so/https-affine-pro-ed3d2ae962f5433a90499ddbd1c81ac5?pvs=21">https://affine.pro</a>
+              </td>
+              <td class="cell-tC]_"><span class="selected-value select-value-color-red">aaa</span></td>
+              <td class="cell-GFq@"><span class="selected-value select-value-color-gray">aaa</span><span
+                  class="selected-value select-value-color-blue">bbb</span></td>
+              <td class="cell-Kruh">5</td>
+              <td class="cell-S_z"><span class="status-value">
+                  <div class="status-dot"></div>Not started
+                </span></td>
+              <td class="cell-Wgk@">
+                <div class="checkbox checkbox-off"></div>
+              </td>
+            </tr>
+            <tr id="ed3d2ae9-62f5-433a-9049-9ddbd1c81ac5">
+              <td class="cell-title"><a
+                  href="https://www.notion.so/ed3d2ae962f5433a90499ddbd1c81ac5?pvs=21">Untitled</a></td>
+              <td class="cell-tC]_"><span class="selected-value select-value-color-green">bbb</span></td>
+              <td class="cell-GFq@"><span class="selected-value select-value-color-gray">aaa</span><span
+                  class="selected-value select-value-color-brown">ccc</span></td>
+              <td class="cell-Kruh">7</td>
+              <td class="cell-S_z"><span class="status-value">
+                  <div class="status-dot"></div>Not started
+                </span></td>
+              <td class="cell-Wgk@">
+                <div class="checkbox checkbox-on"></div>
+              </td>
+            </tr>
+            <tr id="ed3d2ae9-62f5-433a-9049-9ddbd1c81ac5">
+              <td class="cell-title"><a
+                  href="https://www.notion.so/ed3d2ae962f5433a90499ddbd1c81ac5?pvs=21">Untitled</a></td>
+              <td class="cell-tC]_"><span class="selected-value select-value-color-red">aaa</span></td>
+              <td class="cell-GFq@"><span class="selected-value select-value-color-blue">bbb</span></td>
+              <td class="cell-Kruh">9</td>
+              <td class="cell-S_z"><span class="status-value">
+                  <div class="status-dot"></div>Not started
+                </span></td>
+              <td class="cell-Wgk@">
+                <div class="checkbox checkbox-off"></div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <br /><br />
     </div>`;
 
     const blockSnapshot: BlockSnapshot = {
@@ -1310,7 +1314,11 @@ describe('notion html to snapshot', () => {
             ],
             title: {
               '$blocksuite:internal:text$': true,
-              delta: [],
+              delta: [
+                {
+                  insert: 'Table View',
+                },
+              ],
             },
             columns: [
               {
