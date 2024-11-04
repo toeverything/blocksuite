@@ -61,9 +61,9 @@ test('edit database block title and create new rows', async ({ page }) => {
     title: dbTitle,
   });
   await focusDatabaseTitle(page);
-  for (let i = 0; i < dbTitle.length; i++) {
-    await pressBackspace(page);
-  }
+  await selectAllByKeyboard(page);
+  await pressBackspace(page);
+
   const expected = 'hello';
   await type(page, expected);
   await assertBlockProps(page, '2', {
@@ -597,7 +597,8 @@ test.describe('readonly mode', () => {
     });
 
     await focusDatabaseTitle(page);
-    await pressBackspace(page, dbTitle.length);
+    await selectAllByKeyboard(page);
+    await pressBackspace(page);
 
     await type(page, 'hello');
     await assertBlockProps(page, '2', {

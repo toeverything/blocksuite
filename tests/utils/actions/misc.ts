@@ -687,13 +687,13 @@ export async function focusDatabaseTitle(page: Page) {
 
   await page.evaluate(() => {
     const dbTitle = document.querySelector(
-      'affine-database-title rich-text'
-    ) as RichText | null;
+      'affine-database-title textarea'
+    ) as HTMLTextAreaElement | null;
     if (!dbTitle) {
       throw new Error('Cannot find database title');
     }
 
-    dbTitle.inlineEditor!.focusEnd();
+    dbTitle.focus();
   });
   await waitNextFrame(page);
 }

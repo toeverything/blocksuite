@@ -19,7 +19,7 @@ export class Matcher<Data, Type extends TypeInstance = TypeInstance> {
     private _match: (type: Type, target: TypeInstance) => boolean = (
       type,
       target
-    ) => typeSystem.unify(type, target)
+    ) => typeSystem.unify(target, type)
   ) {}
 
   all(): MatcherData<Data, Type>[] {
