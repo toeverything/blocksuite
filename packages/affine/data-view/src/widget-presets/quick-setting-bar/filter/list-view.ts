@@ -24,7 +24,10 @@ export class FilterBar extends SignalWatcher(ShadowlessElement) {
     filter-bar {
       display: flex;
       gap: 8px;
-      overflow: hidden;
+      overflow-x: scroll;
+      margin-bottom: -10px;
+      padding-bottom: 2px;
+      align-items: center;
     }
 
     .filter-group-tag {
@@ -49,6 +52,29 @@ export class FilterBar extends SignalWatcher(ShadowlessElement) {
       font-style: normal;
       font-weight: 400;
       line-height: 22px;
+    }
+
+    filter-bar::-webkit-scrollbar {
+      -webkit-appearance: none;
+      display: block;
+    }
+
+    filter-bar::-webkit-scrollbar-thumb {
+      border-radius: 2px;
+      background-color: transparent;
+    }
+
+    filter-bar::-webkit-scrollbar:horizontal {
+      height: 8px;
+    }
+
+    filter-bar:hover::-webkit-scrollbar-thumb {
+      border-radius: 16px;
+      background-color: var(--affine-black-30);
+    }
+
+    filter-bar:hover::-webkit-scrollbar-track {
+      //background-color: var(--affine-hover-color);
     }
   `;
 
@@ -133,11 +159,7 @@ export class FilterBar extends SignalWatcher(ShadowlessElement) {
   }
 
   override render() {
-    return html`
-      <div style="display: flex;align-items: center;gap: 8px;overflow-x: auto">
-        ${this.renderFilters()} ${this.renderAddFilter()}
-      </div>
-    `;
+    return html` ${this.renderFilters()} ${this.renderAddFilter()} `;
   }
 
   renderCondition(i: number) {

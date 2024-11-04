@@ -278,7 +278,10 @@ export class FilterConditionView extends SignalWatcher(ShadowlessElement) {
         hoverType="border"
         .icon="${renderUniLit(leftVar.icon)}"
         @click="${this.onClickButton}"
-        .text="${html`${this.text$.value}`}"
+        .text="${html`<span
+          style="overflow: hidden;max-width: 230px;text-overflow: ellipsis"
+          >${this.text$.value}</span
+        >`}"
         .postfix="${ArrowDownSmallIcon()}"
       ></data-view-component-button>
     `;
