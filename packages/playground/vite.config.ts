@@ -133,7 +133,6 @@ const chunkGroups = {
     require.resolve('@toeverything/theme'),
     require.resolve('@toeverything/y-indexeddb'),
     require.resolve('@preact/signals-core'),
-    require.resolve('@preact/signals-core'),
     require.resolve('@lit/context'),
     require.resolve('lit'),
     require.resolve('zod'),
