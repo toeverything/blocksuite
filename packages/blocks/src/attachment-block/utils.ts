@@ -11,8 +11,6 @@ import { humanFileSize } from '@blocksuite/affine-shared/utils';
 
 import type { AttachmentBlockComponent } from './attachment-block.js';
 
-import { allowEmbed } from './embed.js';
-
 export function cloneAttachmentProperties(model: AttachmentBlockModel) {
   const clonedProps = {} as AttachmentBlockProps;
   for (const cur in defaultAttachmentProps) {
@@ -123,7 +121,7 @@ export async function checkAttachmentBlob(block: AttachmentBlockComponent) {
 
     block.loading = false;
     block.error = false;
-    block.allowEmbed = allowEmbed(model, block.service.maxFileSize);
+    block.allowEmbed = block.embedded();
     if (block.blobUrl) {
       URL.revokeObjectURL(block.blobUrl);
     }

@@ -2,13 +2,18 @@ import type {
   AttachmentBlockModel,
   ImageBlockProps,
 } from '@blocksuite/affine-model';
+import type { ExtensionType } from '@blocksuite/block-std';
+import type { Container } from '@blocksuite/global/di';
+import type { TemplateResult } from 'lit';
 
 import { withTempBlobData } from '@blocksuite/affine-shared/utils';
-import { html, type TemplateResult } from 'lit';
+import { Extension } from '@blocksuite/block-std';
+import { createIdentifier } from '@blocksuite/global/di';
+import { html } from 'lit';
 
 import { transformModel } from '../root-block/utils/operations/model.js';
 
-type EmbedConfig = {
+export type AttachmentEmbedConfig = {
   name: string;
   /**
    * Check if the attachment can be turned into embed view.
@@ -21,16 +26,96 @@ type EmbedConfig = {
   /**
    * The template will be used to render the embed view.
    */
-  template?: (
-    model: AttachmentBlockModel,
-    blobUrl: string
-  ) => TemplateResult<1>;
+  template?: (model: AttachmentBlockModel, blobUrl: string) => TemplateResult;
 };
 
-// 10MB
-const MAX_EMBED_SIZE = 10 * 1024 * 1024;
+// Single embed config.
+export const AttachmentEmbedConfigIdentifier =
+  createIdentifier<AttachmentEmbedConfig>(
+    'AffineAttachmentEmbedConfigIdentifier'
+  );
 
-const embedConfig: EmbedConfig[] = [
+export function AttachmentEmbedConfigExtension(
+  configs: AttachmentEmbedConfig[] = embedConfig
+): ExtensionType {
+  return {
+    setup: di => {
+      configs.forEach(option => {
+        di.addImpl(AttachmentEmbedConfigIdentifier(option.name), () => option);
+      });
+    },
+  };
+}
+
+// A embed config map.
+export const AttachmentEmbedConfigMapIdentifier = createIdentifier<
+  Map<string, AttachmentEmbedConfig>
+>('AffineAttachmentEmbedConfigMapIdentifier');
+
+export const AttachmentEmbedProvider = createIdentifier<AttachmentEmbedService>(
+  'AffineAttachmentEmbedProvider'
+);
+
+export class AttachmentEmbedService extends Extension {
+  // 10MB
+  static MAX_EMBED_SIZE = 10 * 1024 * 1024;
+
+  get keys() {
+    return this.configs.keys();
+  }
+
+  get values() {
+    return this.configs.values();
+  }
+
+  constructor(private configs: Map<string, AttachmentEmbedConfig>) {
+    super();
+  }
+
+  static override setup(di: Container) {
+    di.addImpl(AttachmentEmbedConfigMapIdentifier, provider =>
+      provider.getAll(AttachmentEmbedConfigIdentifier)
+    );
+    di.addImpl(AttachmentEmbedProvider, AttachmentEmbedService, [
+      AttachmentEmbedConfigMapIdentifier,
+    ]);
+  }
+
+  // Converts to embed view.
+  convertTo(
+    model: AttachmentBlockModel,
+    maxFileSize = AttachmentEmbedService.MAX_EMBED_SIZE
+  ) {
+    const config = this.values.find(config => config.check(model, maxFileSize));
+    if (!config || !config.action) {
+      model.doc.updateBlock(model, { embed: true });
+      return;
+    }
+    config.action(model)?.catch(console.error);
+  }
+
+  embedded(
+    model: AttachmentBlockModel,
+    maxFileSize = AttachmentEmbedService.MAX_EMBED_SIZE
+  ) {
+    return this.values.some(config => config.check(model, maxFileSize));
+  }
+
+  render(
+    model: AttachmentBlockModel,
+    blobUrl: string,
+    maxFileSize = AttachmentEmbedService.MAX_EMBED_SIZE
+  ) {
+    const config = this.values.find(config => config.check(model, maxFileSize));
+    if (!config || !config.template) {
+      console.error('No embed view template found!', model, model.type);
+      return null;
+    }
+    return config.template(model, blobUrl);
+  }
+}
+
+const embedConfig: AttachmentEmbedConfig[] = [
   {
     name: 'image',
     check: model =>
@@ -74,40 +159,6 @@ const embedConfig: EmbedConfig[] = [
       html`<audio controls src=${blobUrl} style="margin: 4px;"></audio>`,
   },
 ];
-
-export function allowEmbed(
-  model: AttachmentBlockModel,
-  maxFileSize: number = MAX_EMBED_SIZE
-) {
-  return embedConfig.some(config => config.check(model, maxFileSize));
-}
-
-export function convertToEmbed(
-  model: AttachmentBlockModel,
-  maxFileSize: number = MAX_EMBED_SIZE
-) {
-  const config = embedConfig.find(config => config.check(model, maxFileSize));
-  if (!config || !config.action) {
-    model.doc.updateBlock<Partial<AttachmentBlockModel>>(model, {
-      embed: true,
-    });
-    return;
-  }
-  config.action(model)?.catch(console.error);
-}
-
-export function renderEmbedView(
-  model: AttachmentBlockModel,
-  blobUrl: string,
-  maxFileSize: number = MAX_EMBED_SIZE
-) {
-  const config = embedConfig.find(config => config.check(model, maxFileSize));
-  if (!config || !config.template) {
-    console.error('No embed view template found!', model, embedConfig);
-    return null;
-  }
-  return config.template(model, blobUrl);
-}
 
 /**
  * Turn the attachment block into an image block.

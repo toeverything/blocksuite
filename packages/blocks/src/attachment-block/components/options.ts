@@ -21,7 +21,6 @@ import { repeat } from 'lit/directives/repeat.js';
 import type { AttachmentBlockComponent } from '../attachment-block.js';
 
 import { getMoreMenuConfig } from '../../root-block/configs/toolbar.js';
-import { allowEmbed, convertToEmbed } from '../embed.js';
 import { BUILT_IN_GROUPS } from './config.js';
 import { AttachmentToolbarMoreMenuContext } from './context.js';
 import { RenameModal } from './rename-model.js';
@@ -36,7 +35,7 @@ export function AttachmentOptionsTemplate({
   model: AttachmentBlockModel;
   abortController: AbortController;
 }) {
-  const disableEmbed = !allowEmbed(model, anchor.service.maxFileSize);
+  const disableEmbed = !anchor.embedded();
   const readonly = model.doc.readonly;
   const viewType = model.embed ? 'embed' : 'card';
 
@@ -55,7 +54,7 @@ export function AttachmentOptionsTemplate({
       label: 'Embed view',
       disabled: readonly || disableEmbed,
       action: () => {
-        convertToEmbed(model, anchor.service.maxFileSize);
+        anchor.convertTo();
         abortController.abort();
       },
     },
