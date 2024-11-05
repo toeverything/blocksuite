@@ -11,6 +11,7 @@ import {
   WidgetViewMapExtension,
 } from '@blocksuite/block-std';
 import { BlockServiceWatcher, FlavourExtension } from '@blocksuite/block-std';
+import { ToolController } from '@blocksuite/block-std/gfx';
 import { literal, unsafeStatic } from 'lit/static-html.js';
 
 import { ExportManagerExtension } from '../../_common/export-manager/export-manager.js';
@@ -87,6 +88,7 @@ const EdgelessCommonExtension: ExtensionType[] = [
   EmbedOptionService,
   CommandExtension(commands),
   ExportManagerExtension,
+  ToolController,
 ];
 
 export const EdgelessRootBlockSpec: ExtensionType[] = [

@@ -5,8 +5,8 @@ export class BlockSuiteError extends Error {
 
   isFatal: boolean;
 
-  constructor(code: ErrorCode, message: string) {
-    super(message);
+  constructor(code: ErrorCode, message: string, options?: { cause: Error }) {
+    super(message, options);
     this.name = 'BlockSuiteError';
     this.code = code;
     this.isFatal = code >= 10000;

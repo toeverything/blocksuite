@@ -86,6 +86,38 @@ test('pan tool shortcut', async ({ page }) => {
   await assertEdgelessSelectedRect(page, [120, 120, 100, 100]);
 });
 
+// FIXME(@doouding): Failed on CI
+test.skip('pan tool with middle button', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+  await switchEditorMode(page);
+
+  const start = { x: 100, y: 100 };
+  const end = { x: 200, y: 200 };
+  await addBasicRectShapeElement(page, start, end);
+
+  await page.mouse.click(start.x + 5, start.y + 5);
+  await assertEdgelessSelectedRect(page, [100, 100, 100, 100]);
+
+  await dragBetweenCoords(
+    page,
+    {
+      x: 400,
+      y: 400,
+    },
+    {
+      x: 420,
+      y: 420,
+    },
+    {
+      button: 'middle',
+    }
+  );
+
+  await assertEdgelessTool(page, 'default');
+  await assertEdgelessSelectedRect(page, [120, 120, 100, 100]);
+});
+
 test('pan tool shortcut should revert to the previous tool on keyup', async ({
   page,
 }) => {
