@@ -20,6 +20,7 @@ export enum ErrorCode {
   DatabaseBlockError,
   ParsingError,
   UserAbortError,
+  ExecutionError,
 
   // Fatal error should be greater than 10000
   DefaultFatalError = 10000,

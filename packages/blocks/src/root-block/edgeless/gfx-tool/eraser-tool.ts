@@ -92,7 +92,7 @@ export class EraserTool extends BaseTool {
     this._eraseTargets.clear();
   }
 
-  override activate(_: Record<string, unknown>): void {
+  override activate(): void {
     this._eraseTargets.forEach(erasable => {
       if (isTopLevelBlock(erasable)) {
         const ele = this.std.view.getBlock(erasable.id);

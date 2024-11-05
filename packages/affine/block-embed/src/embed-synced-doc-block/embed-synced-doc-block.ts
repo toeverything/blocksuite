@@ -569,5 +569,5 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockComponent<EmbedSynce
   @state()
   accessor syncedDocMode: DocMode = 'page';
 
-  override accessor useCaptionEditor = false;
+  override accessor useCaptionEditor = true;
 }

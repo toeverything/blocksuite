@@ -12,17 +12,20 @@ export async function dragBetweenCoords(
     beforeMouseUp?: () => Promise<void>;
     steps?: number;
     click?: boolean;
+    button?: 'left' | 'right' | 'middle';
   }
 ) {
   const steps = options?.steps ?? 20;
+  const button: 'left' | 'right' | 'middle' = options?.button ?? 'left';
+
   const { x: x1, y: y1 } = from;
   const { x: x2, y: y2 } = to;
   options?.click && (await page.mouse.click(x1, y1));
   await page.mouse.move(x1, y1);
-  await page.mouse.down();
+  await page.mouse.down({ button });
   await page.mouse.move(x2, y2, { steps });
   await options?.beforeMouseUp?.();
-  await page.mouse.up();
+  await page.mouse.up({ button });
 }
 
 export async function dragBetweenIndices(

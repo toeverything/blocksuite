@@ -24,7 +24,7 @@ import type { AttachmentBlockService } from './attachment-service.js';
 
 import { getEmbedCardIcons } from '../_common/utils/url.js';
 import { AttachmentOptionsTemplate } from './components/options.js';
-import { renderEmbedView } from './embed.js';
+import { AttachmentEmbedProvider } from './embed.js';
 import { styles } from './styles.js';
 import { checkAttachmentBlob, downloadAttachmentBlob } from './utils.js';
 
@@ -64,7 +64,7 @@ export class AttachmentBlockComponent extends CaptionedBlockComponent<
 
       return {
         template: AttachmentOptionsTemplate({
-          anchor: this,
+          block: this,
           model: this.model,
           abortController,
         }),
@@ -84,6 +84,12 @@ export class AttachmentBlockComponent extends CaptionedBlockComponent<
     margin: '18px 0px',
   });
 
+  convertTo = () => {
+    return this.std
+      .get(AttachmentEmbedProvider)
+      .convertTo(this.model, this.service.maxFileSize);
+  };
+
   copy = () => {
     const slice = Slice.fromModels(this.doc, [this.model]);
     this.std.clipboard.copySlice(slice).catch(console.error);
@@ -92,6 +98,12 @@ export class AttachmentBlockComponent extends CaptionedBlockComponent<
 
   download = () => {
     downloadAttachmentBlob(this);
+  };
+
+  embedded = () => {
+    return this.std
+      .get(AttachmentEmbedProvider)
+      .embedded(this.model, this.service.maxFileSize);
   };
 
   open = () => {
@@ -106,8 +118,9 @@ export class AttachmentBlockComponent extends CaptionedBlockComponent<
   };
 
   protected get embedView() {
-    if (!this.model.embed || !this.blobUrl) return;
-    return renderEmbedView(this.model, this.blobUrl, this.service.maxFileSize);
+    return this.std
+      .get(AttachmentEmbedProvider)
+      .render(this.model, this.blobUrl, this.service.maxFileSize);
   }
 
   private _selectBlock() {
