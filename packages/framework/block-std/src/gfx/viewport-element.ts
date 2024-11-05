@@ -1,4 +1,4 @@
-import { WithDisposable } from '@blocksuite/global/utils';
+import { Bound, WithDisposable } from '@blocksuite/global/utils';
 import { css, html } from 'lit';
 import { property } from 'lit/decorators.js';
 
@@ -59,8 +59,10 @@ export class GfxViewportElement extends WithDisposable(ShadowlessElement) {
         if (view) {
           view.style.display = '';
           view.style.position = 'absolute';
-          const originalX = parseFloat(view.style.left || '0');
-          const originalY = parseFloat(view.style.top || '0');
+
+          const bound = Bound.deserialize(model.xywh);
+          const originalX = bound.x;
+          const originalY = bound.y;
 
           view.style.transformOrigin = '0 0';
           view.style.transform = this._toCSSTransform(
