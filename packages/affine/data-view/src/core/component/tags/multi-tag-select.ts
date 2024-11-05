@@ -28,6 +28,7 @@ import type { SelectTag } from '../../logical/index.js';
 
 import { stopPropagation } from '../../utils/event.js';
 import { dragHandler } from '../../utils/wc-dnd/dnd-context.js';
+import { defaultActivators } from '../../utils/wc-dnd/sensors/index.js';
 import {
   createSortContext,
   sortable,
@@ -243,6 +244,7 @@ export class MultiTagSelect extends SignalWatcher(
 
   sortContext = createSortContext({
     dnd: {
+      activators: defaultActivators,
       container: this,
       onDragEnd: evt => {
         const over = evt.over;

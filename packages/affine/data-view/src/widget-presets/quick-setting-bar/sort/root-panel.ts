@@ -26,6 +26,7 @@ import type { SortableView } from '../../../core/sort/utils.js';
 import { renderUniLit } from '../../../core/index.js';
 import { popCreateSort } from '../../../core/sort/add-sort.js';
 import { dragHandler } from '../../../core/utils/wc-dnd/dnd-context.js';
+import { defaultActivators } from '../../../core/utils/wc-dnd/sensors/index.js';
 import {
   createSortContext,
   sortable,
@@ -60,6 +61,7 @@ export class SortRootView extends SignalWatcher(
 
   sortContext = createSortContext({
     dnd: {
+      activators: defaultActivators,
       container: this,
       onDragEnd: evt => {
         const over = evt.over;
