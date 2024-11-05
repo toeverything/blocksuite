@@ -26,44 +26,90 @@ import { AttachmentToolbarMoreMenuContext } from './context.js';
 import { RenameModal } from './rename-model.js';
 import { styles } from './styles.js';
 
-export function AttachmentOptionsTemplate({
-  anchor,
-  model,
-  abortController,
+export function attachmentViewToggleMenu({
+  block,
+  callback,
 }: {
-  anchor: AttachmentBlockComponent;
-  model: AttachmentBlockModel;
-  abortController: AbortController;
+  block: AttachmentBlockComponent;
+  callback?: () => void;
 }) {
-  const disableEmbed = !anchor.embedded();
+  const model = block.model;
   const readonly = model.doc.readonly;
-  const viewType = model.embed ? 'embed' : 'card';
-
+  const embedded = model.embed;
+  const viewType = embedded ? 'embed' : 'card';
   const viewActions = [
     {
       type: 'card',
       label: 'Card view',
-      disabled: readonly || !model.embed,
+      disabled: readonly || !embedded,
       action: () => {
         model.doc.updateBlock(model, { embed: false });
-        abortController.abort();
+        callback?.();
       },
     },
     {
       type: 'embed',
       label: 'Embed view',
-      disabled: readonly || disableEmbed,
+      disabled: readonly || embedded || !block.embedded(),
       action: () => {
-        anchor.convertTo();
-        abortController.abort();
+        block.convertTo();
+        callback?.();
       },
     },
   ];
 
-  const context = new AttachmentToolbarMoreMenuContext(anchor, abortController);
-  const groups = getMoreMenuConfig(anchor.std).configure(
-    cloneGroups(BUILT_IN_GROUPS)
-  );
+  return html`
+    <editor-menu-button
+      .contentPadding=${'8px'}
+      .button=${html`
+        <editor-icon-button
+          aria-label="Switch view"
+          .justify=${'space-between'}
+          .labelHeight=${'20px'}
+          .iconContainerWidth=${'110px'}
+        >
+          <div class="label">
+            <span style="text-transform: capitalize">${viewType}</span>
+            view
+          </div>
+          ${SmallArrowDownIcon}
+        </editor-icon-button>
+      `}
+    >
+      <div data-size="small" data-orientation="vertical">
+        ${repeat(
+          viewActions,
+          button => button.type,
+          ({ type, label, action, disabled }) => html`
+            <editor-menu-action
+              data-testid=${`link-to-${type}`}
+              ?data-selected=${type === viewType}
+              ?disabled=${disabled}
+              @click=${action}
+            >
+              ${label}
+            </editor-menu-action>
+          `
+        )}
+      </div>
+    </editor-menu-button>
+  `;
+}
+
+export function AttachmentOptionsTemplate({
+  block,
+  model,
+  abortController,
+}: {
+  block: AttachmentBlockComponent;
+  model: AttachmentBlockModel;
+  abortController: AbortController;
+}) {
+  const std = block.std;
+  const editorHost = block.host;
+  const readonly = model.doc.readonly;
+  const context = new AttachmentToolbarMoreMenuContext(block, abortController);
+  const groups = getMoreMenuConfig(std).configure(cloneGroups(BUILT_IN_GROUPS));
   const moreMenuActions = renderGroups(groups, context);
 
   const buttons = [
@@ -85,12 +131,12 @@ export function AttachmentOptionsTemplate({
               const renameAbortController = new AbortController();
               createLitPortal({
                 template: RenameModal({
-                  editorHost: anchor.host,
                   model,
+                  editorHost,
                   abortController: renameAbortController,
                 }),
                 computePosition: {
-                  referenceElement: anchor,
+                  referenceElement: block,
                   placement: 'top-start',
                   middleware: [flip(), offset(4)],
                   // It has a overlay mask, so we don't need to update the position.
@@ -104,41 +150,10 @@ export function AttachmentOptionsTemplate({
           </editor-icon-button>
         `,
 
-    html`
-      <editor-menu-button
-        .contentPadding=${'8px'}
-        .button=${html`
-          <editor-icon-button
-            aria-label="Switch view"
-            .justify=${'space-between'}
-            .labelHeight=${'20px'}
-            .iconContainerWidth=${'110px'}
-          >
-            <div class="label">
-              <span style="text-transform: capitalize">${viewType}</span>
-              view
-            </div>
-            ${SmallArrowDownIcon}
-          </editor-icon-button>
-        `}
-      >
-        <div data-size="small" data-orientation="vertical">
-          ${repeat(
-            viewActions,
-            button => button.type,
-            ({ type, label, action }) => html`
-              <editor-menu-action
-                data-testid=${`link-to-${type}`}
-                ?data-selected=${type === viewType}
-                @click=${action}
-              >
-                ${label}
-              </editor-menu-action>
-            `
-          )}
-        </div>
-      </editor-menu-button>
-    `,
+    attachmentViewToggleMenu({
+      block,
+      callback: () => abortController.abort(),
+    }),
 
     readonly
       ? nothing
@@ -146,7 +161,7 @@ export function AttachmentOptionsTemplate({
           <editor-icon-button
             aria-label="Download"
             .tooltip=${'Download'}
-            @click=${() => anchor.download()}
+            @click=${() => block.download()}
           >
             ${DownloadIcon}
           </editor-icon-button>
@@ -158,7 +173,7 @@ export function AttachmentOptionsTemplate({
           <editor-icon-button
             aria-label="Caption"
             .tooltip=${'Caption'}
-            @click=${() => anchor.captionEditor?.show()}
+            @click=${() => block.captionEditor?.show()}
           >
             ${CaptionIcon}
           </editor-icon-button>

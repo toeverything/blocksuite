@@ -64,7 +64,7 @@ export class AttachmentBlockComponent extends CaptionedBlockComponent<
 
       return {
         template: AttachmentOptionsTemplate({
-          anchor: this,
+          block: this,
           model: this.model,
           abortController,
         }),
@@ -118,7 +118,6 @@ export class AttachmentBlockComponent extends CaptionedBlockComponent<
   };
 
   protected get embedView() {
-    if (!this.model.embed || !this.blobUrl) return;
     return this.std
       .get(AttachmentEmbedProvider)
       .render(this.model, this.blobUrl, this.service.maxFileSize);

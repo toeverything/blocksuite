@@ -103,14 +103,17 @@ export class AttachmentEmbedService extends Extension {
 
   render(
     model: AttachmentBlockModel,
-    blobUrl: string,
+    blobUrl?: string,
     maxFileSize = AttachmentEmbedService.MAX_EMBED_SIZE
   ) {
+    if (!model.embed || !blobUrl) return;
+
     const config = this.values.find(config => config.check(model, maxFileSize));
     if (!config || !config.template) {
       console.error('No embed view template found!', model, model.type);
-      return null;
+      return;
     }
+
     return config.template(model, blobUrl);
   }
 }
