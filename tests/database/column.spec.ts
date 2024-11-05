@@ -461,7 +461,7 @@ test.describe('select column tag action', () => {
     await pressArrowRight(page);
     await type(page, '4567abc00');
     await pressEnter(page);
-    const options = page.locator('.select-option-name');
+    const options = page.locator('.select-options-container .tag-text');
     expect(await options.nth(0).innerText()).toBe('abc4567abc00');
     expect(await options.nth(1).innerText()).toBe('123');
   });
@@ -479,7 +479,7 @@ test.describe('select column tag action', () => {
     // esc
     await pressEscape(page);
     await pressEscape(page);
-    const options = page.locator('.select-option-name');
+    const options = page.locator('.select-options-container .tag-text');
     const option1 = options.nth(0);
     expect(await option1.innerText()).toBe('123456');
   });
@@ -503,7 +503,11 @@ test.describe('select column tag action', () => {
     await initDatabaseDynamicRowWithData(page, '123', true);
     await performSelectColumnTagAction(page, 'Red');
     await pressEscape(page);
-    await assertSelectedStyle(page, 'backgroundColor', 'var(--affine-tag-red)');
+    await assertSelectedStyle(
+      page,
+      'backgroundColor',
+      'var(--affine-v2-chip-label-red)'
+    );
   });
 });
 
