@@ -16,6 +16,7 @@ import type { Property } from '../view-manager/property.js';
 import type { SingleView } from '../view-manager/single-view.js';
 
 import { dragHandler } from '../utils/wc-dnd/dnd-context.js';
+import { defaultActivators } from '../utils/wc-dnd/sensors/index.js';
 import {
   createSortContext,
   sortable,
@@ -158,6 +159,7 @@ export class DataViewPropertiesSettingView extends SignalWatcher(
 
   sortContext = createSortContext({
     dnd: {
+      activators: defaultActivators,
       container: this,
       onDragEnd: evt => {
         const over = evt.over;

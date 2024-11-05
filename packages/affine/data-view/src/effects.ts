@@ -1,6 +1,7 @@
 import { DataViewPropertiesSettingView } from './core/common/properties.js';
 import { Button } from './core/component/button/button.js';
 import { Overflow } from './core/component/overflow/overflow.js';
+import { MultiTagSelect, MultiTagView } from './core/component/tags/index.js';
 import { DataViewRenderer } from './core/data-view.js';
 import { RecordDetail } from './core/detail/detail.js';
 import { RecordField } from './core/detail/field.js';
@@ -10,13 +11,7 @@ import { NumberGroupView } from './core/group-by/renderer/number-group.js';
 import { SelectGroupView } from './core/group-by/renderer/select-group.js';
 import { StringGroupView } from './core/group-by/renderer/string-group.js';
 import { GroupSetting } from './core/group-by/setting.js';
-import {
-  AffineLitIcon,
-  MultiTagSelect,
-  MultiTagView,
-  UniAnyRender,
-  UniLit,
-} from './core/index.js';
+import { AffineLitIcon, UniAnyRender, UniLit } from './core/index.js';
 import { AnyRender } from './core/utils/uni-component/render-template.js';
 import { CheckboxCell } from './property-presets/checkbox/cell-renderer.js';
 import {

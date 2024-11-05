@@ -1,8 +1,8 @@
 import { nanoid } from '@blocksuite/store';
 
+import { getTagColor } from '../../core/component/tags/colors.js';
 import { type SelectTag, t } from '../../core/index.js';
 import { propertyType } from '../../core/property/property-config.js';
-import { getTagColor } from '../../core/utils/tags/colors.js';
 
 export const selectPropertyType = propertyType('select');
 

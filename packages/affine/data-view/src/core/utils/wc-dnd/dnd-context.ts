@@ -20,7 +20,6 @@ import type {
   UniqueIdentifier,
 } from './types.js';
 
-import { mouseSensor } from './sensors/mouse.js';
 import { applyModifiers } from './utils/apply-modifiers.js';
 import { closestCenter } from './utils/closest-center.js';
 import { createDataDirective } from './utils/data-directive.js';
@@ -38,7 +37,7 @@ export type DndContextConfig = {
   container: HTMLElement;
   collisionDetection?: CollisionDetection;
   modifiers?: Modifiers;
-  activators?: Activators;
+  activators: Activators;
   onDragStart?(event: DragStartEvent): void;
   onDragMove?(event: DragMoveEvent): void;
   onDragOver?(event: DragOverEvent): void;
@@ -46,8 +45,6 @@ export type DndContextConfig = {
   onDragCancel?(event: DragCancelEvent): void;
   createOverlay?: (active: Active) => OverlayData | undefined;
 };
-
-const defaultActivators = [mouseSensor({})];
 
 const defaultCoordinates: Coordinates = {
   x: 0,
@@ -209,7 +206,7 @@ export class DndContext {
   });
 
   get activators() {
-    return this.config.activators ?? defaultActivators;
+    return this.config.activators;
   }
 
   get collisionDetection() {
@@ -338,6 +335,20 @@ export class DndContext {
     this.initialCoordinates$.value = coordinates;
     this.createOverlay(active);
     active.node.classList.add('dnd-active');
+    const style = this.config.container.style;
+    const pointerEvents = style.pointerEvents;
+    style.pointerEvents = 'none';
+    const clearups = [...this.droppableNodes$.value.values()].map(v => {
+      const old = v.node.style.transition;
+      v.node.style.transition = 'transform 0.2s';
+      return () => {
+        v.node.style.transition = old;
+      };
+    });
+    this.dragEndCleanupQueue.push(() => {
+      style.pointerEvents = pointerEvents;
+      clearups.forEach(f => f());
+    });
   }
 
   listenActivators() {
