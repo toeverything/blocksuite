@@ -20,10 +20,21 @@ export type MenuSubMenuData = {
   select?: () => void;
   class?: string;
 };
+export const subMenuOffset = offset({
+  mainAxis: 16,
+  crossAxis: -8.5,
+});
+export const subMenuPlacements = autoPlacement({
+  allowedPlacements: ['right-start', 'left-start', 'right-end', 'left-end'],
+});
+export const subMenuMiddleware = [subMenuOffset, subMenuPlacements];
 
 export class MenuSubMenu extends MenuFocusable {
+  createTime = 0;
+
   override connectedCallback() {
     super.connectedCallback();
+    this.createTime = Date.now();
     this.disposables.addFromEvent(this, 'mouseenter', this.onMouseEnter);
     this.disposables.addFromEvent(this, 'click', e => {
       e.preventDefault();
@@ -38,7 +49,9 @@ export class MenuSubMenu extends MenuFocusable {
   }
 
   onMouseEnter() {
-    this.openSubMenu();
+    if (Date.now() - this.createTime > 100) {
+      this.openSubMenu();
+    }
   }
 
   override onPressEnter() {
@@ -62,12 +75,7 @@ export class MenuSubMenu extends MenuFocusable {
     this.menu.menuElement.parentElement?.append(menu.menuElement);
     const unsub = autoUpdate(this, menu.menuElement, () => {
       computePosition(this, menu.menuElement, {
-        middleware: [
-          autoPlacement({
-            allowedPlacements: ['right-start', 'left-start'],
-          }),
-          offset(16),
-        ],
+        middleware: subMenuMiddleware,
       })
         .then(({ x, y }) => {
           menu.menuElement.style.left = `${x}px`;

@@ -44,10 +44,7 @@ import type { NoteBlockComponent } from '../note-block/index.js';
 import type { DatabaseOptionsConfig } from './config.js';
 import type { DatabaseBlockService } from './database-service.js';
 
-import {
-  EdgelessRootBlockComponent,
-  type RootService,
-} from '../root-block/index.js';
+import { EdgelessRootBlockComponent } from '../root-block/index.js';
 import { getDropResult } from '../root-block/widgets/drag-handle/utils.js';
 import { popSideDetail } from './components/layout.js';
 import { HostContextKey } from './context/host-context.js';
@@ -78,11 +75,12 @@ export class DatabaseBlockComponent extends CaptionedBlockComponent<
     }
 
     .database-ops {
-      margin-top: 4px;
       padding: 2px;
       border-radius: 4px;
       display: flex;
       cursor: pointer;
+      align-items: center;
+      height: max-content;
     }
 
     .database-ops svg {
@@ -133,7 +131,9 @@ export class DatabaseBlockComponent extends CaptionedBlockComponent<
           items: [
             menu.action({
               prefix: DeleteIcon(),
-              class: 'delete-item',
+              class: {
+                'delete-item': true,
+              },
               name: 'Delete Database',
               select: () => {
                 this.model.children.slice().forEach(block => {
@@ -212,15 +212,13 @@ export class DatabaseBlockComponent extends CaptionedBlockComponent<
     });
   };
 
-  getRootService = () => {
-    return this.std.getService<RootService>('affine:page');
-  };
-
   headerWidget: DataViewWidget = defineUniComponent(
     (props: DataViewWidgetProps) => {
       return html`
         <div style="margin-bottom: 16px;display:flex;flex-direction: column">
-          <div style="display:flex;gap:8px;padding: 0 6px;margin-bottom: 8px;">
+          <div
+            style="display:flex;gap:12px;margin-bottom: 8px;align-items: center"
+          >
             ${this.renderTitle(props.viewMethods)} ${this.renderDatabaseOps()}
           </div>
           <div
@@ -232,7 +230,7 @@ export class DatabaseBlockComponent extends CaptionedBlockComponent<
             </div>
             ${renderUniLit(this.toolsWidget, props)}
           </div>
-          ${renderUniLit(widgetPresets.filterBar, props)}
+          ${renderUniLit(widgetPresets.quickSettingBar, props)}
         </div>
       `;
     }
@@ -278,6 +276,9 @@ export class DatabaseBlockComponent extends CaptionedBlockComponent<
   };
 
   setSelection = (selection: DataViewSelection | undefined) => {
+    if (selection) {
+      getSelection()?.removeAllRanges();
+    }
     this.selection.setGroup(
       'note',
       selection
@@ -294,12 +295,14 @@ export class DatabaseBlockComponent extends CaptionedBlockComponent<
   toolsWidget: DataViewWidget = widgetPresets.createTools({
     table: [
       widgetPresets.tools.filter,
+      widgetPresets.tools.sort,
       widgetPresets.tools.search,
       widgetPresets.tools.viewOptions,
       widgetPresets.tools.tableAddRow,
     ],
     kanban: [
       widgetPresets.tools.filter,
+      widgetPresets.tools.sort,
       widgetPresets.tools.search,
       widgetPresets.tools.viewOptions,
     ],
@@ -400,7 +403,12 @@ export class DatabaseBlockComponent extends CaptionedBlockComponent<
             openDetailPanel: (target, data) => {
               if (peekViewService) {
                 const openDoc = (docId: string) => {
-                  return peekViewService.peek({ docId });
+                  return peekViewService.peek({
+                    docId,
+                    databaseId: this.blockId,
+                    databaseRowId: data.rowId,
+                    target: this,
+                  });
                 };
                 const docs = getDocIdsFromText(
                   this.model.doc.getBlock(data.rowId)?.model?.text

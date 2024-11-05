@@ -1,24 +1,25 @@
 import {
   menu,
   type MenuConfig,
-  popFilterableSimpleMenu,
+  popMenu,
   popupTargetFromElement,
 } from '@blocksuite/affine-components/context-menu';
 import { ShadowlessElement } from '@blocksuite/block-std';
 import { SignalWatcher, WithDisposable } from '@blocksuite/global/utils';
 import { ArrowDownSmallIcon } from '@blocksuite/icons/lit';
 import { Text } from '@blocksuite/store';
+import { autoPlacement, offset } from '@floating-ui/dom';
 import { computed, signal } from '@preact/signals-core';
 import { css, html } from 'lit';
 import { property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type { GroupData } from '../../../core/common/group-by/helper.js';
-import type { StatsFunction } from '../../../core/common/stats/type.js';
+import type { GroupData } from '../../../core/group-by/manager.js';
+import type { StatisticsConfig } from '../../../core/statistics/types.js';
 import type { TableColumn } from '../table-view-manager.js';
 
-import { statsFunctions } from '../../../core/common/stats/index.js';
-import { typesystem } from '../../../core/logical/typesystem.js';
+import { typeSystem } from '../../../core/index.js';
+import { statsFunctions } from '../../../core/statistics/index.js';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../consts.js';
 
 const styles = css`
@@ -33,13 +34,16 @@ const styles = css`
     justify-content: flex-end;
     height: 100%;
     align-items: center;
+    user-select: none;
   }
 
   .affine-database-column-stats:hover .stats-cell {
     opacity: 1;
   }
 
-  .stats-cell:hover {
+  .stats-cell:hover,
+  affine-database-column-stats-cell.active .stats-cell {
+    opacity: 1;
     background-color: var(--affine-hover-color);
     cursor: pointer;
   }
@@ -84,17 +88,17 @@ export class DatabaseColumnStatsCell extends SignalWatcher(
   });
 
   groups$ = computed(() => {
-    const groups: Record<string, Record<string, StatsFunction>> = {};
+    const groups: Record<string, Record<string, StatisticsConfig>> = {};
 
     statsFunctions.forEach(func => {
-      if (!typesystem.isSubtype(func.dataType, this.column.dataType$.value)) {
+      if (!typeSystem.unify(this.column.dataType$.value, func.dataType)) {
         return;
       }
       if (!groups[func.group]) {
         groups[func.group] = {};
       }
       const oldFunc = groups[func.group][func.type];
-      if (!oldFunc || typesystem.isSubtype(oldFunc.dataType, func.dataType)) {
+      if (!oldFunc || typeSystem.unify(func.dataType, oldFunc.dataType)) {
         if (!func.impl) {
           delete groups[func.group][func.type];
         } else {
@@ -124,16 +128,24 @@ export class DatabaseColumnStatsCell extends SignalWatcher(
         });
       }
     );
-    popFilterableSimpleMenu(popupTargetFromElement(ev.target as HTMLElement), [
-      menu.action({
-        isSelected: !this.column.statCalcOp$.value,
-        name: 'None',
-        select: () => {
-          this.column.updateStatCalcOp();
-        },
-      }),
-      ...menus,
-    ]);
+    popMenu(popupTargetFromElement(ev.currentTarget as HTMLElement), {
+      options: {
+        items: [
+          menu.action({
+            isSelected: !this.column.statCalcOp$.value,
+            name: 'None',
+            select: () => {
+              this.column.updateStatCalcOp();
+            },
+          }),
+          ...menus,
+        ],
+      },
+      middleware: [
+        autoPlacement({ allowedPlacements: ['top', 'bottom'] }),
+        offset(10),
+      ],
+    });
   };
 
   statsFunc$ = computed(() => {

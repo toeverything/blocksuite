@@ -2,7 +2,7 @@ import type { RichText } from '@blocksuite/affine-components/rich-text';
 import type { ConnectorElementModel } from '@blocksuite/affine-model';
 
 import { TextUtils } from '@blocksuite/affine-block-surface';
-import { ThemeObserver } from '@blocksuite/affine-shared/theme';
+import { ThemeProvider } from '@blocksuite/affine-shared/services';
 import { almostEqual } from '@blocksuite/affine-shared/utils';
 import {
   RANGE_SYNC_EXCLUDE_ATTR,
@@ -259,7 +259,9 @@ export class EdgelessConnectorLabelEditor extends WithDisposable(
     ];
 
     const isEmpty = !connector.text?.length && !this._isComposition;
-    const color = ThemeObserver.generateColorProperty(labelColor, '#000000');
+    const color = this.edgeless.std
+      .get(ThemeProvider)
+      .generateColorProperty(labelColor, '#000000');
 
     return html`
       <div

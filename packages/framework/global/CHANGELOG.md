@@ -1,5 +1,94 @@
 # @blocksuite/global
 
+## 0.17.25
+
+### Patch Changes
+
+- 4d0bd4c: fix(blocks): reset keyboard toolbar after blur (#8646)
+
+  ## Fix
+
+  - fix(blocks): reset keyboard toolbar after blur (#8646)
+  - fix: scale note and edgeless-text when resize and align elements (#8642)
+  - fix(edgeless): can not insert link when no selection (#8644)
+  - fix(database): prevent 0 in number cells from getting rendered as an empty string (#8629)
+
+  ## Refactor
+
+  - refactor(blocks): provide position controll config for keyboard toolbar (#8645)
+
+## 0.17.24
+
+### Patch Changes
+
+- 5e23d07: fix(edgeless): failed to add link in edgeless text (#8589)
+
+  ## Feat
+
+  - feat(blocks): add callback control to AI panel hide and toggle (#8639)
+
+  ## Fix
+
+  - fix(edgeless): failed to add link in edgeless text (#8589)
+  - fix: add data-theme on surface ref component (#8638)
+  - fix(edgeless): stop pointer event propagation from latex editor menu (#8633)
+  - fix: use html theme observer result as default app theme value (#8635)
+  - fix(blocks): incorrect mobile keyboard toolbar when scroll (#8634)
+
+  ## Chore
+
+  - chore: release patch version (#8636)
+
+- 39a840a: ## Fix
+
+  - fix(edgeless): stop pointer event propagation from latex editor menu (#8633)
+  - fix: use html theme observer result as default app theme value (#8635)
+  - fix(blocks): incorrect mobile keyboard toolbar when scroll (#8634)
+
+## 0.17.23
+
+### Patch Changes
+
+- dc63724: ## Feat
+
+  - feat: support edgeless theme (#8624)
+
+  ## Fix
+
+  - fix(inline): get text format from left delta by default when it is collapsed (#8615)
+
+## 0.17.22
+
+### Patch Changes
+
+- ba9613a: ## Feat
+
+  - feat(blocks): add dbid/rowid to peek view (#8614)
+  - feat(blocks): auto scroll block into view when keyboard tool opened (#8609)
+  - feat(database): support sorting functionality (#8583)
+
+  ## Fix
+
+  - fix: use notification service to toast code copy result (#8613)
+  - fix(blocks): del selected in paste handler not paste middleware (#8575)
+  - fix(edgeless): edit behavior in edgeless text (#8607)
+  - fix(blocks): can not toggle text style in empty paragraph (#8606)
+  - fix: the type of VirtualKeyboard type is missing when build (#8605)
+  - fix(edgeless): toolbar resize observer is executed after element disconnect (#8603)
+
+  ## Chore
+
+  - chore: Lock file maintenance (#8612)
+  - chore: bump up all non-major dependencies (#8596)
+  - chore(blocks): add feature flag for keyboard toolbar (#8598)
+  - chore(blocks): disable database search in mobile (#8599)
+
+  ## Refactor
+
+  - refactor(edgeless): rewrite surface middleware builder (#8618)
+  - refactor(blocks): extract some common logics to commands (#8604)
+  - refactor(database): menu ui (#8608)
+
 ## 0.17.21
 
 ### Patch Changes

@@ -1,6 +1,11 @@
 import type { IBound } from '@blocksuite/global/utils';
 
-import { EditPropsStore } from '@blocksuite/affine-shared/services';
+import {
+  darkToolbarStyles,
+  EditPropsStore,
+  lightToolbarStyles,
+  ThemeProvider,
+} from '@blocksuite/affine-shared/services';
 import {
   requestConnectedFrame,
   stopPropagation,
@@ -49,6 +54,12 @@ export class EdgelessTemplatePanel extends WithDisposable(LitElement) {
 
       display: flex;
       flex-direction: column;
+    }
+    .edgeless-templates-panel[data-app-theme='light'] {
+      ${unsafeCSS(lightToolbarStyles.join('\n'))}
+    }
+    .edgeless-templates-panel[data-app-theme='dark'] {
+      ${unsafeCSS(darkToolbarStyles.join('\n'))}
     }
 
     .search-bar {
@@ -407,10 +418,12 @@ export class EdgelessTemplatePanel extends WithDisposable(LitElement) {
   override render() {
     const { _categories, _currentCategory, _templates } = this;
     const { draggingElement } = this.draggableController?.states || {};
+    const appTheme = this.edgeless.std.get(ThemeProvider).app$.value;
 
     return html`
       <div
         class="edgeless-templates-panel"
+        data-app-theme=${appTheme}
         style=${styleMap({
           opacity: this.isDragging ? '0' : '1',
           transition: 'opacity 0.2s',

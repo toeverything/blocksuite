@@ -473,7 +473,9 @@ export class DatabaseHeaderColumn extends SignalWatcher(
                 select: () => {
                   this.column.delete?.();
                 },
-                class: 'delete-item',
+                class: {
+                  'delete-item': true,
+                },
               }),
             ],
           }),

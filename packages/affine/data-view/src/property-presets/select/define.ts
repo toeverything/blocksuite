@@ -1,10 +1,8 @@
 import { nanoid } from '@blocksuite/store';
 
-import type { SelectTag } from '../../core/utils/tags/multi-tag-select.js';
-
-import { tTag } from '../../core/logical/data-type.js';
+import { getTagColor } from '../../core/component/tags/colors.js';
+import { type SelectTag, t } from '../../core/index.js';
 import { propertyType } from '../../core/property/property-config.js';
-import { getTagColor } from '../../core/utils/tags/colors.js';
 
 export const selectPropertyType = propertyType('select');
 
@@ -16,7 +14,7 @@ export const selectPropertyModelConfig = selectPropertyType.modelConfig<
   SelectPropertyData
 >({
   name: 'Select',
-  type: data => tTag.create({ tags: data.options }),
+  type: data => t.tag.instance(data.options),
   defaultData: () => ({
     options: [],
   }),

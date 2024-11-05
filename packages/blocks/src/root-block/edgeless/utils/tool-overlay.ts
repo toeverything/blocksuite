@@ -15,7 +15,7 @@ import {
   shapeMethods,
   type ShapeStyle,
 } from '@blocksuite/affine-model';
-import { ThemeObserver } from '@blocksuite/affine-shared/theme';
+import { ThemeProvider } from '@blocksuite/affine-shared/services';
 import {
   assertType,
   Bound,
@@ -286,16 +286,12 @@ export class ShapeOverlay extends ToolOverlay {
       SHAPE_OVERLAY_HEIGHT,
     ] as XYWH;
     const { shapeStyle, fillColor, strokeColor } = style;
-    const fill = ThemeObserver.getColorValue(
-      fillColor,
-      DEFAULT_SHAPE_FILL_COLOR,
-      true
-    );
-    const stroke = ThemeObserver.getColorValue(
-      strokeColor,
-      DEFAULT_SHAPE_STROKE_COLOR,
-      true
-    );
+    const fill = this.gfx.std
+      .get(ThemeProvider)
+      .getColorValue(fillColor, DEFAULT_SHAPE_FILL_COLOR, true);
+    const stroke = this.gfx.std
+      .get(ThemeProvider)
+      .getColorValue(strokeColor, DEFAULT_SHAPE_STROKE_COLOR, true);
 
     options.fill = fill;
     options.stroke = stroke;
@@ -360,11 +356,9 @@ export class NoteOverlay extends ToolOverlay {
   constructor(gfx: GfxController, background: Color) {
     super(gfx);
     this.globalAlpha = 0;
-    this.backgroundColor = ThemeObserver.getColorValue(
-      background,
-      DEFAULT_NOTE_BACKGROUND_COLOR,
-      true
-    );
+    this.backgroundColor = gfx.std
+      .get(ThemeProvider)
+      .getColorValue(background, DEFAULT_NOTE_BACKGROUND_COLOR, true);
     this.disposables.add(
       effect(() => {
         // when change note child type, update overlay text
@@ -385,7 +379,9 @@ export class NoteOverlay extends ToolOverlay {
     ctx.globalAlpha = this.globalAlpha;
     const overlayX = this.x + NOTE_OVERLAY_OFFSET_X;
     const overlayY = this.y + NOTE_OVERLAY_OFFSET_Y;
-    ctx.strokeStyle = ThemeObserver.getPropertyValue(NOTE_OVERLAY_STOKE_COLOR);
+    ctx.strokeStyle = this.gfx.std
+      .get(ThemeProvider)
+      .getCssVariableColor(NOTE_OVERLAY_STOKE_COLOR);
     // Draw the overlay rectangle
     ctx.fillStyle = this.backgroundColor;
     ctx.lineWidth = 4;
@@ -433,7 +429,9 @@ export class NoteOverlay extends ToolOverlay {
     ctx.fill();
 
     // Draw the overlay text
-    ctx.fillStyle = ThemeObserver.getPropertyValue(NOTE_OVERLAY_TEXT_COLOR);
+    ctx.fillStyle = this.gfx.std
+      .get(ThemeProvider)
+      .getCssVariableColor(NOTE_OVERLAY_TEXT_COLOR);
     let fontSize = 16;
     ctx.font = `${fontSize}px Arial`;
     ctx.textAlign = 'left';

@@ -47,10 +47,11 @@ export {
 export {
   SurfaceBlockModel,
   type SurfaceBlockProps,
+  type SurfaceMiddleware,
 } from './surface/surface-model.js';
 
 export {
-  type SurfaceMiddlewareBuilder,
+  SurfaceMiddlewareBuilder,
   SurfaceMiddlewareExtension,
 } from './surface-middleware.js';
 
@@ -61,7 +62,7 @@ export {
   type GfxToolsMap,
   type GfxToolsOption,
 } from './tool/tool.js';
-export { ToolController } from './tool/tool-controller.js';
+export { MouseButton, ToolController } from './tool/tool-controller.js';
 export * from './viewport.js';
 export { GfxViewportElement } from './viewport-element.js';
 export { generateKeyBetween, generateNKeysBetween } from 'fractional-indexing';

@@ -33,20 +33,6 @@
       "children": [
         {
           "type": "block",
-          "id": "2",
-          "flavour": "affine:paragraph",
-          "version": 1,
-          "props": {
-            "type": "text",
-            "text": {
-              "$blocksuite:internal:text$": true,
-              "delta": []
-            }
-          },
-          "children": []
-        },
-        {
-          "type": "block",
           "id": "3",
           "flavour": "affine:latex",
           "version": 1,

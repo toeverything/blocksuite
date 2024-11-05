@@ -69,6 +69,10 @@ const ColumnClassMap: Record<string, string> = {
 };
 
 const NotionInlineEquationToken = 'notion-text-equation-token';
+const NotionUnderlineStyleToken = 'border-bottom:0.05em solid';
+const NotionCheckboxToken = '.checkbox';
+const NotionDatabaseToken = '.collection-content';
+const NotionDatabaseTitleToken = '.collection-title';
 
 type BlocksuiteTableColumn = {
   type: string;
@@ -132,7 +136,7 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
     }
     switch (ast.type) {
       case 'text': {
-        if (option.pre) {
+        if (option.pre || ast.value === ' ') {
           return [{ insert: ast.value }];
         }
         if (option.trim) {
@@ -163,6 +167,19 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
                 hastQuerySelector(ast, 'annotation')
               );
               return [{ insert: ' ', attributes: { latex } }];
+            }
+
+            // Add underline style detection
+            if (
+              typeof ast.properties?.style === 'string' &&
+              ast.properties?.style?.includes(NotionUnderlineStyleToken)
+            ) {
+              return ast.children.flatMap(child =>
+                this._hastToDeltaSpreaded(child, option).map(delta => {
+                  delta.attributes = { ...delta.attributes, underline: true };
+                  return delta;
+                })
+              );
             }
 
             return ast.children.flatMap(child =>
@@ -252,6 +269,18 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
                 return delta;
               })
             );
+          }
+          case 'li': {
+            if (hastQuerySelector(ast, NotionCheckboxToken)) {
+              // Should ignore the children of to do list which is the checkbox and the space following it
+              const checkBox = hastQuerySelector(ast, NotionCheckboxToken);
+              const checkBoxIndex = ast.children.findIndex(
+                child => child === checkBox
+              );
+              return ast.children
+                .slice(checkBoxIndex + 2)
+                .flatMap(child => this._hastToDeltaSpreaded(child, option));
+            }
           }
         }
       }
@@ -450,6 +479,9 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
         case 'h4':
         case 'h5':
         case 'h6': {
+          if (hastQuerySelector(o.node, NotionDatabaseTitleToken)) {
+            break;
+          }
           context
             .openNode(
               {
@@ -1055,6 +1087,15 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
               cells[children.at(i)?.id ?? nanoid()] = row;
             });
           context.setGlobalContextStack('hast:table:cells', []);
+          let databaseTitle = '';
+          if (
+            o.parent?.node.type === 'element' &&
+            hastQuerySelector(o.parent.node, NotionDatabaseToken)
+          ) {
+            databaseTitle = hastGetTextContent(
+              hastQuerySelector(o.parent.node, NotionDatabaseTitleToken)
+            );
+          }
           context.openNode(
             {
               type: 'block',
@@ -1082,7 +1123,13 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
                 ],
                 title: {
                   '$blocksuite:internal:text$': true,
-                  delta: [],
+                  delta: databaseTitle
+                    ? [
+                        {
+                          insert: databaseTitle,
+                        },
+                      ]
+                    : [],
                 },
                 columns,
                 cells,
@@ -1095,6 +1142,9 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
             context.openNode(child, 'children').closeNode();
           });
           context.closeNode();
+          context.cleanGlobalContextStack('hast:table:column');
+          context.cleanGlobalContextStack('hast:table:rows');
+          context.cleanGlobalContextStack('hast:table:children');
           break;
         }
         case 'th': {

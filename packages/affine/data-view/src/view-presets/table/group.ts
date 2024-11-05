@@ -10,12 +10,12 @@ import { css, html, type PropertyValues } from 'lit';
 import { property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
-import type { GroupData } from '../../core/common/group-by/helper.js';
 import type { DataViewRenderer } from '../../core/data-view.js';
+import type { GroupData } from '../../core/group-by/manager.js';
 import type { DataViewTable } from './table-view.js';
 import type { TableSingleView } from './table-view-manager.js';
 
-import { GroupTitle } from '../../core/common/group-by/group-title.js';
+import { GroupTitle } from '../../core/group-by/group-title.js';
 import { LEFT_TOOL_BAR_WIDTH } from './consts.js';
 import { TableAreaSelection } from './types.js';
 

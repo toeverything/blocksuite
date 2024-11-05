@@ -3,7 +3,7 @@ import type { ShapeElementModel } from '@blocksuite/affine-model';
 
 import { CommonUtils, TextUtils } from '@blocksuite/affine-block-surface';
 import { MindmapElementModel, TextResizing } from '@blocksuite/affine-model';
-import { ThemeObserver } from '@blocksuite/affine-shared/theme';
+import { ThemeProvider } from '@blocksuite/affine-shared/services';
 import {
   RANGE_SYNC_EXCLUDE_ATTR,
   ShadowlessElement,
@@ -246,10 +246,9 @@ export class EdgelessShapeTextEditor extends WithDisposable(ShadowlessElement) {
       leftTopY
     );
     const autoWidth = textResizing === TextResizing.AUTO_WIDTH_AND_HEIGHT;
-    const color = ThemeObserver.generateColorProperty(
-      this.element.color,
-      '#000000'
-    );
+    const color = this.edgeless.std
+      .get(ThemeProvider)
+      .generateColorProperty(this.element.color, '#000000');
 
     const inlineEditorStyle = styleMap({
       position: 'absolute',

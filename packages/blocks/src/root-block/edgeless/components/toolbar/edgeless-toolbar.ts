@@ -9,8 +9,12 @@ import {
   MoreHorizontalIcon,
 } from '@blocksuite/affine-components/icons';
 import { ColorScheme, type RootBlockModel } from '@blocksuite/affine-model';
-import { EditPropsStore } from '@blocksuite/affine-shared/services';
-import { ThemeObserver } from '@blocksuite/affine-shared/theme';
+import {
+  darkToolbarStyles,
+  EditPropsStore,
+  lightToolbarStyles,
+  ThemeProvider,
+} from '@blocksuite/affine-shared/services';
 import { stopPropagation } from '@blocksuite/affine-shared/utils';
 import { WidgetComponent } from '@blocksuite/block-std';
 import { GfxControllerIdentifier } from '@blocksuite/block-std/gfx';
@@ -68,6 +72,12 @@ export class EdgelessToolbarWidget extends WidgetComponent<
       width: 100%;
       display: flex;
       justify-content: center;
+    }
+    .edgeless-toolbar-wrapper[data-app-theme='light'] {
+      ${unsafeCSS(lightToolbarStyles.join('\n'))}
+    }
+    .edgeless-toolbar-wrapper[data-app-theme='dark'] {
+      ${unsafeCSS(darkToolbarStyles.join('\n'))}
     }
     .edgeless-toolbar-toggle-control {
       pointer-events: auto;
@@ -218,6 +228,8 @@ export class EdgelessToolbarWidget extends WidgetComponent<
   accessor containerWidth = 1920;
 
   private _onContainerResize = debounce(({ w }: { w: number }) => {
+    if (!this.isConnected) return;
+
     this.slots.resize.emit({ w, h: TOOLBAR_HEIGHT });
     this.containerWidth = w;
 
@@ -545,8 +557,10 @@ export class EdgelessToolbarWidget extends WidgetComponent<
       }
     });
     this._resizeObserver.observe(this);
-    this._disposables.add(
-      ThemeObserver.subscribe(mode => this._themeProvider.setValue(mode))
+    this.disposables.add(
+      this.std
+        .get(ThemeProvider)
+        .theme$.subscribe(mode => this._themeProvider.setValue(mode))
     );
     this._disposables.add(
       this.block.bindHotKey(
@@ -609,8 +623,9 @@ export class EdgelessToolbarWidget extends WidgetComponent<
       return nothing;
     }
 
+    const appTheme = this.std.get(ThemeProvider).app$.value;
     return html`
-      <div class="edgeless-toolbar-wrapper">
+      <div class="edgeless-toolbar-wrapper" data-app-theme=${appTheme}>
         <div
           class="edgeless-toolbar-toggle-control"
           data-enable=${this._enableAutoHide}

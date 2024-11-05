@@ -1,13 +1,26 @@
+import type {
+  PeekOptions,
+  PeekViewService,
+} from '@blocksuite/affine-components/peek';
 import type { AffineEditorContainer } from '@blocksuite/presets';
+import type { TemplateResult } from 'lit';
 
+import { PeekViewExtension } from '@blocksuite/affine-components/peek';
+import { BlockComponent } from '@blocksuite/block-std';
 import {
+  ColorScheme,
   type DocMode,
   type DocModeProvider,
+  matchFlavours,
   type NotificationService,
   type ParseDocUrlService,
+  type ThemeExtension,
   toast,
 } from '@blocksuite/blocks';
 import { type DocCollection, Slot } from '@blocksuite/store';
+import { signal } from '@preact/signals-core';
+
+import type { AttachmentViewerPanel } from './components/attachment-viewer-panel.js';
 
 function getModeFromStorage() {
   const mapJson = localStorage.getItem('playground:docMode');
@@ -113,4 +126,58 @@ export function mockParseDocUrlService(collection: DocCollection) {
     },
   };
   return parseDocUrlService;
+}
+
+export class MockEdgelessTheme {
+  theme$ = signal(ColorScheme.Light);
+
+  setTheme(theme: ColorScheme) {
+    this.theme$.value = theme;
+  }
+
+  toggleTheme() {
+    const theme =
+      this.theme$.value === ColorScheme.Dark
+        ? ColorScheme.Light
+        : ColorScheme.Dark;
+    this.theme$.value = theme;
+  }
+}
+
+export const mockEdgelessTheme = new MockEdgelessTheme();
+
+export const themeExtension: ThemeExtension = {
+  getEdgelessTheme() {
+    return mockEdgelessTheme.theme$;
+  },
+};
+
+export function mockPeekViewExtension(
+  attachmentViewerPanel: AttachmentViewerPanel
+) {
+  return PeekViewExtension({
+    peek(
+      element: {
+        target: HTMLElement;
+        docId: string;
+        blockIds?: string[];
+        template?: TemplateResult;
+      },
+      options?: PeekOptions
+    ) {
+      const { target } = element;
+
+      if (target instanceof BlockComponent) {
+        if (matchFlavours(target.model, ['affine:attachment'])) {
+          attachmentViewerPanel.open(target.model);
+          return Promise.resolve();
+        }
+      }
+
+      alert('Peek view not implemented in playground');
+      console.log('peek', element, options);
+
+      return Promise.resolve();
+    },
+  } satisfies PeekViewService);
 }

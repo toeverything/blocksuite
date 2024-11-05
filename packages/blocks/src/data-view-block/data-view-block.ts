@@ -60,7 +60,6 @@ export class DataViewBlockComponent extends CaptionedBlockComponent<DataViewBloc
     }
 
     .database-ops {
-      margin-top: 4px;
       padding: 2px;
       border-radius: 4px;
       display: flex;
@@ -112,7 +111,9 @@ export class DataViewBlockComponent extends CaptionedBlockComponent<DataViewBloc
             items: [
               menu.action({
                 prefix: DeleteIcon,
-                class: 'delete-item',
+                class: {
+                  'delete-item': true,
+                },
                 name: 'Delete Database',
                 select: () => {
                   this.model.children.slice().forEach(block => {
@@ -169,7 +170,7 @@ export class DataViewBlockComponent extends CaptionedBlockComponent<DataViewBloc
             </div>
             ${renderUniLit(this.toolsWidget, props)}
           </div>
-          ${renderUniLit(widgetPresets.filterBar, props)}
+          ${renderUniLit(widgetPresets.quickSettingBar, props)}
         </div>
       `;
     }

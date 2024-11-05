@@ -1,4 +1,5 @@
 import type { ReadonlySignal } from '@preact/signals-core';
+import type { ClassInfo } from 'lit-html/directives/class-map.js';
 
 import { unsafeCSSVarV2 } from '@blocksuite/affine-shared/theme';
 import {
@@ -17,7 +18,7 @@ import { MenuFocusable } from './focusable.js';
 
 export type MenuButtonData = {
   content: () => TemplateResult;
-  class: string;
+  class: ClassInfo;
   select: (ele: HTMLElement) => void | false;
   onHover?: (hover: boolean) => void;
 };
@@ -36,7 +37,8 @@ export class MenuButton extends MenuFocusable {
       color: var(--affine-icon-color);
     }
 
-    .affine-menu-button:hover {
+    .affine-menu-button:hover,
+    affine-menu-button.active .affine-menu-button {
       background-color: var(--affine-hover-color);
     }
 
@@ -91,9 +93,9 @@ export class MenuButton extends MenuFocusable {
 
   protected override render(): unknown {
     const classString = classMap({
-      [this.data.class ?? '']: true,
       'affine-menu-button': true,
       focused: this.isFocused$.value,
+      ...this.data.class,
     });
     return html` <div class="${classString}">${this.data.content()}</div>`;
   }
@@ -120,24 +122,26 @@ export const menuButtonItems = {
         return;
       }
       const data: MenuButtonData = {
-        content: () => html`
-          ${config.prefix}
-          <div class="affine-menu-action-text">
-            ${config.label?.() ?? config.name}
-          </div>
-          ${config.postfix ?? (config.isSelected ? DoneIcon() : undefined)}
-        `,
+        content: () => {
+          return html`
+            ${config.prefix}
+            <div class="affine-menu-action-text">
+              ${config.label?.() ?? config.name}
+            </div>
+            ${config.postfix ?? (config.isSelected ? DoneIcon() : undefined)}
+          `;
+        },
         onHover: config.onHover,
         select: config.select,
-        class: config.class ?? (config.isSelected ? 'selected-item' : ''),
+        class: {
+          'selected-item': config.isSelected ?? false,
+          ...config.class,
+        },
       };
-      return html`${keyed(
-        config.name,
-        html`<affine-menu-button
-          .data="${data}"
-          .menu="${menu}"
-        ></affine-menu-button>`
-      )}`;
+      return html` <affine-menu-button
+        .data="${data}"
+        .menu="${menu}"
+      ></affine-menu-button>`;
     },
   checkbox:
     (config: {
@@ -146,7 +150,7 @@ export const menuButtonItems = {
       postfix?: TemplateResult;
       label?: () => TemplateResult;
       select: (checked: boolean) => boolean;
-      class?: string;
+      class?: ClassInfo;
     }) =>
     menu => {
       if (!menu.search(config.name)) {
@@ -166,11 +170,11 @@ export const menuButtonItems = {
           config.select(config.checked.value);
           return false;
         },
-        class: config.class ?? '',
+        class: config.class ?? {},
       };
       return html`${keyed(
         config.name,
-        html`<affine-menu-button
+        html` <affine-menu-button
           .data="${data}"
           .menu="${menu}"
         ></affine-menu-button>`
@@ -183,7 +187,7 @@ export const menuButtonItems = {
       postfix?: TemplateResult;
       label?: () => TemplateResult;
       onChange: (on: boolean) => void;
-      class?: string;
+      class?: ClassInfo;
     }) =>
     menu => {
       if (!menu.search(config.name)) {
@@ -208,11 +212,11 @@ export const menuButtonItems = {
           config.onChange(config.on);
           return false;
         },
-        class: config.class ?? '',
+        class: config.class ?? {},
       };
       return html`${keyed(
         config.name,
-        html`<affine-menu-button
+        html` <affine-menu-button
           .data="${data}"
           .menu="${menu}"
         ></affine-menu-button>`

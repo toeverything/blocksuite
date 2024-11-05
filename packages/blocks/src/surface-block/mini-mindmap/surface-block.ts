@@ -7,7 +7,7 @@ import {
   elementRenderers,
   fitContent,
 } from '@blocksuite/affine-block-surface';
-import { ThemeObserver } from '@blocksuite/affine-shared/theme';
+import { ThemeProvider } from '@blocksuite/affine-shared/services';
 import { BlockComponent } from '@blocksuite/block-std';
 import { GfxControllerIdentifier } from '@blocksuite/block-std/gfx';
 import { html } from 'lit';
@@ -93,6 +93,7 @@ export class MindmapSurfaceBlock extends BlockComponent<SurfaceBlockModel> {
   override connectedCallback(): void {
     super.connectedCallback();
 
+    const themeService = this.std.get(ThemeProvider);
     this.renderer = new CanvasRenderer({
       viewport: this.viewport,
       layerManager: this._layer,
@@ -100,13 +101,25 @@ export class MindmapSurfaceBlock extends BlockComponent<SurfaceBlockModel> {
       enableStackingCanvas: true,
       provider: {
         selectedElements: () => [],
-        getColorScheme: () => ThemeObserver.mode,
+        getColorScheme: () => themeService.edgelessTheme,
         getColorValue: (color: Color, fallback?: string, real?: boolean) =>
-          ThemeObserver.getColorValue(color, fallback, real),
+          themeService.getColorValue(
+            color,
+            fallback,
+            real,
+            themeService.edgelessTheme
+          ),
         generateColorProperty: (color: Color, fallback: string) =>
-          ThemeObserver.generateColorProperty(color, fallback),
+          themeService.generateColorProperty(
+            color,
+            fallback,
+            themeService.edgelessTheme
+          ),
         getPropertyValue: (property: string) =>
-          ThemeObserver.getPropertyValue(property),
+          themeService.getCssVariableColor(
+            property,
+            themeService.edgelessTheme
+          ),
       },
       elementRenderers,
     });

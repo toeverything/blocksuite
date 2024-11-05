@@ -1,16 +1,10 @@
 import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 
-import type { FilterGroup } from '../../core/common/ast.js';
-import type { GroupBy, GroupProperty, Sort } from '../../core/common/types.js';
+import type { GroupBy, GroupProperty } from '../../core/common/types.js';
+import type { FilterGroup } from '../../core/filter/types.js';
+import type { Sort } from '../../core/sort/types.js';
 
-import {
-  defaultGroupBy,
-  groupByMatcher,
-  isTArray,
-  tRichText,
-  tString,
-  tTag,
-} from '../../core/index.js';
+import { defaultGroupBy, groupByMatcher, t } from '../../core/index.js';
 import { type BasicViewDataType, viewType } from '../../core/view/data-view.js';
 import { KanbanSingleView } from './kanban-view-manager.js';
 
@@ -48,13 +42,13 @@ export const kanbanViewModel = kanbanViewType.createModel<KanbanViewData>({
     });
     const getWeight = (columnId: string) => {
       const dataType = viewManager.dataSource.propertyDataTypeGet(columnId);
-      if (!dataType || tString.is(dataType) || tRichText.is(dataType)) {
+      if (!dataType || t.string.is(dataType) || t.richText.is(dataType)) {
         return 0;
       }
-      if (tTag.is(dataType)) {
+      if (t.tag.is(dataType)) {
         return 3;
       }
-      if (isTArray(dataType)) {
+      if (t.array.is(dataType)) {
         return 2;
       }
       return 1;

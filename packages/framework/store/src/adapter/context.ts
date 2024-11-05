@@ -27,6 +27,12 @@ export class ASTWalkerContext<TNode extends object> {
     return this._stack[this._stack.length - 1];
   }
 
+  cleanGlobalContextStack(key: string) {
+    if (this._globalContext[key] instanceof Array) {
+      this._globalContext[key] = [];
+    }
+  }
+
   closeNode() {
     const ele = this._stack.pop();
     if (!ele) return this;

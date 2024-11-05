@@ -4,17 +4,15 @@ import {
 } from '@blocksuite/affine-shared/utils';
 import { computed, type ReadonlySignal } from '@preact/signals-core';
 
-import type { TType } from '../../core/logical/typesystem.js';
+import type { FilterGroup } from '../../core/filter/types.js';
+import type { TypeInstance } from '../../core/logical/type.js';
 import type { KanbanViewData } from './define.js';
 
-import { emptyFilterGroup, type FilterGroup } from '../../core/common/ast.js';
-import { defaultGroupBy } from '../../core/common/group-by.js';
-import {
-  GroupManager,
-  sortByManually,
-} from '../../core/common/group-by/helper.js';
-import { groupByMatcher } from '../../core/common/group-by/matcher.js';
-import { evalFilter } from '../../core/logical/eval-filter.js';
+import { evalFilter } from '../../core/filter/eval.js';
+import { emptyFilterGroup } from '../../core/filter/utils.js';
+import { defaultGroupBy } from '../../core/group-by/default.js';
+import { GroupManager, sortByManually } from '../../core/group-by/manager.js';
+import { groupByMatcher } from '../../core/group-by/matcher.js';
 import { PropertyBase } from '../../core/view-manager/property.js';
 import { SingleViewBase } from '../../core/view-manager/single-view.js';
 
@@ -182,7 +180,11 @@ export class KanbanSingleView extends SingleViewBase<KanbanViewData> {
     });
   }
 
-  checkGroup(columnId: string, type: TType, target: TType): boolean {
+  checkGroup(
+    columnId: string,
+    type: TypeInstance,
+    target: TypeInstance
+  ): boolean {
     if (!groupByMatcher.isMatched(type, target)) {
       this.changeGroup(columnId);
       return false;

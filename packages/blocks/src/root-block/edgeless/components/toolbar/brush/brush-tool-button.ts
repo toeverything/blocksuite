@@ -2,8 +2,10 @@ import {
   EdgelessPenDarkIcon,
   EdgelessPenLightIcon,
 } from '@blocksuite/affine-components/icons';
-import { EditPropsStore } from '@blocksuite/affine-shared/services';
-import { ThemeObserver } from '@blocksuite/affine-shared/theme';
+import {
+  EditPropsStore,
+  ThemeProvider,
+} from '@blocksuite/affine-shared/services';
 import { SignalWatcher } from '@blocksuite/global/utils';
 import { computed } from '@preact/signals-core';
 import { css, html, LitElement } from 'lit';
@@ -42,9 +44,14 @@ export class EdgelessBrushToolButton extends EdgelessToolbarToolMixin(
   `;
 
   private _color$ = computed(() => {
-    return ThemeObserver.generateColorProperty(
-      this.edgeless.std.get(EditPropsStore).lastProps$.value.brush.color
-    );
+    const theme = this.edgeless.std.get(ThemeProvider).theme$.value;
+    return this.edgeless.std
+      .get(ThemeProvider)
+      .generateColorProperty(
+        this.edgeless.std.get(EditPropsStore).lastProps$.value.brush.color,
+        undefined,
+        theme
+      );
   });
 
   override enableActiveBackground = true;
@@ -65,8 +72,10 @@ export class EdgelessBrushToolButton extends EdgelessToolbarToolMixin(
   }
 
   override render() {
-    const { active, theme } = this;
-    const icon = theme === 'dark' ? EdgelessPenDarkIcon : EdgelessPenLightIcon;
+    const { active } = this;
+    const appTheme = this.edgeless.std.get(ThemeProvider).app$.value;
+    const icon =
+      appTheme === 'dark' ? EdgelessPenDarkIcon : EdgelessPenLightIcon;
     const color = this._color$.value;
 
     return html`

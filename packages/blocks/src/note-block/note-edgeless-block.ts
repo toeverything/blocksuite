@@ -9,7 +9,7 @@ import {
   StrokeStyle,
 } from '@blocksuite/affine-model';
 import { EDGELESS_BLOCK_CHILD_PADDING } from '@blocksuite/affine-shared/consts';
-import { ThemeObserver } from '@blocksuite/affine-shared/theme';
+import { ThemeProvider } from '@blocksuite/affine-shared/services';
 import {
   getClosestBlockComponentByPoint,
   handleNativeRangeAtPoint,
@@ -404,10 +404,9 @@ export class EdgelessNoteBlockComponent extends toGfxBlockComponent(
     };
 
     const extra = this._editing ? ACTIVE_NOTE_EXTRA_PADDING : 0;
-    const backgroundColor = ThemeObserver.generateColorProperty(
-      model.background,
-      DEFAULT_NOTE_BACKGROUND_COLOR
-    );
+    const backgroundColor = this.std
+      .get(ThemeProvider)
+      .generateColorProperty(model.background, DEFAULT_NOTE_BACKGROUND_COLOR);
 
     const backgroundStyle = {
       position: 'absolute',

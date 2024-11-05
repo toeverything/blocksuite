@@ -1,4 +1,4 @@
-import { propertyType, tRichText } from '@blocksuite/data-view';
+import { propertyType, t } from '@blocksuite/data-view';
 import { Text } from '@blocksuite/store';
 
 import { type RichTextCellType, toYText } from '../utils.js';
@@ -8,7 +8,7 @@ export const richTextColumnType = propertyType('rich-text');
 export const richTextColumnModelConfig =
   richTextColumnType.modelConfig<RichTextCellType>({
     name: 'Text',
-    type: () => tRichText.create(),
+    type: () => t.richText.instance(),
     defaultData: () => ({}),
     cellToString: data => data?.toString() ?? '',
     cellFromString: data => {

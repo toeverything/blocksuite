@@ -137,8 +137,7 @@ export async function addAttachments(
 export async function addImages(
   std: BlockStdScope,
   files: File[],
-  point?: IVec,
-  inTopLeft?: boolean
+  point?: IVec
 ): Promise<string[]> {
   const imageFiles = [...files].filter(file => file.type.startsWith('image/'));
   if (!imageFiles.length) return [];
@@ -169,8 +168,9 @@ export async function addImages(
   if (point) [x, y] = gfx.viewport.toModelCoord(...point);
 
   const dropInfos: { point: Point; blockId: string }[] = [];
-
   const IMAGE_STACK_GAP = 32;
+  const isMultipleFiles = imageFiles.length > 1;
+  const inTopLeft = isMultipleFiles ? true : false;
 
   // create image cards without image data
   imageFiles.map((file, index) => {
@@ -221,6 +221,9 @@ export async function addImages(
     elements: blockIds,
     editing: false,
   });
+  if (isMultipleFiles) {
+    std.command.exec('autoResizeElements');
+  }
   return blockIds;
 }
 

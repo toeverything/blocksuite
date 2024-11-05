@@ -84,12 +84,12 @@ export class AffineScrollAnchoringWidget extends WidgetComponent {
     const blockComponent = this.std.view.getBlock(id);
     if (!blockComponent) return;
 
-    const container = this.offsetParent!;
+    const container = this.host;
     const containerRect = container.getBoundingClientRect();
     const { left, top, width, height } = blockComponent.getBoundingClientRect();
 
-    const offsetX = containerRect.left + container.scrollLeft;
-    const offsetY = containerRect.top + container.scrollTop;
+    const offsetX = containerRect.left - container.offsetLeft;
+    const offsetY = containerRect.top - container.offsetTop;
 
     return new Bound(left - offsetX, top - offsetY, width, height);
   }
@@ -181,7 +181,7 @@ export class AffineScrollAnchoringWidget extends WidgetComponent {
   override connectedCallback() {
     super.connectedCallback();
 
-    this.#resizeObserver.observe(this.offsetParent!);
+    this.#resizeObserver.observe(this.host);
     this.handleEvent('wheel', this.#requestUpdateFn);
     this.disposables.addFromEvent(window, 'resize', this.#requestUpdateFn);
 

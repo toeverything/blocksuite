@@ -12,6 +12,7 @@ import type {
   toggleItalic,
   toggleLink,
   toggleStrike,
+  toggleTextStyleCommand,
   toggleUnderline,
 } from './format/text-style.js';
 
@@ -63,6 +64,7 @@ declare global {
       toggleStrike: typeof toggleStrike;
       toggleCode: typeof toggleCode;
       toggleLink: typeof toggleLink;
+      toggleTextStyle: typeof toggleTextStyleCommand;
       getTextStyle: typeof getTextStyle;
       isTextStyleActive: typeof isTextStyleActive;
       insertInlineLatex: typeof insertInlineLatex;

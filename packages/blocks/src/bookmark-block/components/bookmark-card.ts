@@ -1,5 +1,5 @@
 import { WebIcon16 } from '@blocksuite/affine-components/icons';
-import { ThemeObserver } from '@blocksuite/affine-shared/theme';
+import { ThemeProvider } from '@blocksuite/affine-shared/services';
 import { getHostName } from '@blocksuite/affine-shared/utils';
 import { ShadowlessElement } from '@blocksuite/block-std';
 import { WithDisposable } from '@blocksuite/global/utils';
@@ -47,7 +47,11 @@ export class BookmarkCard extends WithDisposable(ShadowlessElement) {
       })
     );
 
-    this.disposables.add(ThemeObserver.subscribe(() => this.requestUpdate()));
+    this.disposables.add(
+      this.bookmark.std
+        .get(ThemeProvider)
+        .theme$.subscribe(() => this.requestUpdate())
+    );
 
     this.disposables.add(
       this.bookmark.selection.slots.changed.on(() => {
@@ -80,7 +84,8 @@ export class BookmarkCard extends WithDisposable(ShadowlessElement) {
           : ''
         : title;
 
-    const { LoadingIcon, EmbedCardBannerIcon } = getEmbedCardIcons();
+    const theme = this.bookmark.std.get(ThemeProvider).theme;
+    const { LoadingIcon, EmbedCardBannerIcon } = getEmbedCardIcons(theme);
 
     const titleIconType =
       !icon?.split('.').pop() || icon?.split('.').pop() === 'svg'

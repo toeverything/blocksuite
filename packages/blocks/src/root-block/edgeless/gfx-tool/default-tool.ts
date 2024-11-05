@@ -677,6 +677,12 @@ export class DefaultTool extends BaseTool {
     }
   }
 
+  override activate(_: Record<string, unknown>): void {
+    if (this.gfx.selection.lastSurfaceSelections.length) {
+      this.gfx.selection.set(this.gfx.selection.lastSurfaceSelections);
+    }
+  }
+
   override click(e: PointerEventState) {
     if (this.doc.readonly) return;
 
@@ -1081,14 +1087,6 @@ export class DefaultTool extends BaseTool {
         }
       })
     );
-
-    this.addHook('beforeToolUpdate', ctx => {
-      if (ctx.data.toolName !== 'default') {
-        this.gfx.selection.clear();
-      } else if (this.gfx.selection.lastSurfaceSelections) {
-        this.gfx.selection.set(this.gfx.selection.lastSurfaceSelections);
-      }
-    });
   }
 
   override pointerMove(e: PointerEventState) {

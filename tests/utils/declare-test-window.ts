@@ -24,6 +24,7 @@ declare global {
         WidgetViewMapIdentifier: typeof WidgetViewMapIdentifier;
         QuickSearchProvider: typeof import('../../packages/affine/shared/src/services/quick-search-service.js').QuickSearchProvider;
         DocModeProvider: typeof import('../../packages/affine/shared/src/services/doc-mode-service.js').DocModeProvider;
+        ThemeProvider: typeof import('../../packages/affine/shared/src/services/theme-service.js').ThemeProvider;
         RefNodeSlotsProvider: typeof RefNodeSlotsProvider;
         ParseDocUrlService: typeof import('../../packages/affine/shared/src/services/parse-url-service.js').ParseDocUrlProvider;
       };

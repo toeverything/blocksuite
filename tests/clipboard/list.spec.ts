@@ -428,7 +428,7 @@ test(scoped`should copy and paste of database work`, async ({ page }) => {
   await initDatabaseColumn(page);
   await initDatabaseDynamicRowWithData(page, 'abc', true);
   await pressEscape(page);
-  await focusRichText(page, 2);
+  await focusRichText(page, 1);
   await selectAllByKeyboard(page);
   await selectAllByKeyboard(page);
   await copyByKeyboard(page);

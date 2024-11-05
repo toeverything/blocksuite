@@ -17,8 +17,8 @@ import { toast } from '@blocksuite/affine-components/toast';
 import {
   EditPropsStore,
   FontLoaderService,
+  ThemeProvider,
 } from '@blocksuite/affine-shared/services';
-import { ThemeObserver } from '@blocksuite/affine-shared/theme';
 import {
   isTouchPadPinchEvent,
   requestConnectedFrame,
@@ -323,7 +323,7 @@ export class EdgelessRootBlockComponent extends BlockComponent<
     const { disposables, slots } = this;
 
     this.disposables.add(
-      ThemeObserver.instance.mode$.subscribe(() => this.surface.refresh())
+      this.std.get(ThemeProvider).theme$.subscribe(() => this.surface.refresh())
     );
 
     disposables.add(

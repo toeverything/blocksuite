@@ -10,21 +10,9 @@ import { WidgetBase } from '../../../../core/widget/widget-base.js';
 import { NewRecordPreview } from './new-record-preview.js';
 
 const styles = css`
-  .affine-database-toolbar-item.new-record {
-    margin-left: 12px;
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    height: 32px;
-    padding: 4px 8px 4px 4px;
-    border-radius: 4px;
-    background: var(--affine-white);
+  .new-record {
     cursor: grab;
-    font-size: 15px;
     font-weight: 500;
-    line-height: 24px;
-    color: ${unsafeCSSVarV2('text/primary')};
-    border: 1px solid ${unsafeCSSVarV2('layer/insideBorder/blackBorder')};
   }
 
   .new-record svg {
@@ -158,13 +146,14 @@ export class DataViewHeaderToolsAddRow extends WidgetBase {
     if (this.readonly) {
       return;
     }
-    return html` <div
+    return html` <data-view-component-button
       class="affine-database-toolbar-item new-record"
       draggable="true"
-      @click="${this._onAddNewRecord}"
+      .onClick="${this._onAddNewRecord}"
+      .icon="${PlusIcon()}"
+      .text="${html`<span style="font-weight: 500">New Record</span>`}"
     >
-      ${PlusIcon()}<span>New Record</span>
-    </div>`;
+    </data-view-component-button>`;
   }
 
   @state()

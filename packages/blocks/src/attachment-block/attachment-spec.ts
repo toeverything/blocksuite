@@ -9,6 +9,10 @@ import {
   AttachmentBlockService,
   AttachmentDragHandleOption,
 } from './attachment-service.js';
+import {
+  AttachmentEmbedConfigExtension,
+  AttachmentEmbedService,
+} from './embed.js';
 
 export const AttachmentBlockSpec: ExtensionType[] = [
   FlavourExtension('affine:attachment'),
@@ -19,4 +23,6 @@ export const AttachmentBlockSpec: ExtensionType[] = [
       : literal`affine-attachment`;
   }),
   AttachmentDragHandleOption,
+  AttachmentEmbedConfigExtension(),
+  AttachmentEmbedService,
 ];

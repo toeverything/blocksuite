@@ -32,10 +32,7 @@ export {
 } from './format-bar/format-bar.js';
 export { AffineImageToolbarWidget } from './image-toolbar/index.js';
 export { AffineInnerModalWidget } from './inner-modal/inner-modal.js';
-export {
-  AFFINE_KEYBOARD_TOOLBAR_WIDGET,
-  AffineKeyboardToolbarWidget,
-} from './keyboard-toolbar/index.js';
+export * from './keyboard-toolbar/index.js';
 export { LinkedWidgetUtils } from './linked-doc/config.js';
 export {
   // It's used in the AFFiNE!
@@ -53,6 +50,5 @@ export {
   type AffineSlashMenuItemGenerator,
   AffineSlashMenuWidget,
   type AffineSlashSubMenu,
-  insertContent,
 } from './slash-menu/index.js';
 export { AffineSurfaceRefToolbar } from './surface-ref-toolbar/surface-ref-toolbar.js';

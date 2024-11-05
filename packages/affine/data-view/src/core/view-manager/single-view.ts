@@ -2,9 +2,10 @@ import type { InsertToPosition } from '@blocksuite/affine-shared/utils';
 
 import { computed, type ReadonlySignal, signal } from '@preact/signals-core';
 
-import type { FilterGroup, Variable } from '../common/ast.js';
-import type { DataViewContextKey } from '../common/data-source/context.js';
-import type { TType } from '../logical/typesystem.js';
+import type { DataViewContextKey } from '../data-source/context.js';
+import type { Variable } from '../expression/types.js';
+import type { FilterGroup } from '../filter/types.js';
+import type { TypeInstance } from '../logical/type.js';
 import type { PropertyMetaConfig } from '../property/property-config.js';
 import type { DatabaseFlags } from '../types.js';
 import type { UniComponent } from '../utils/uni-component/index.js';
@@ -29,13 +30,17 @@ export interface SingleView<
   readonly manager: ViewManager;
   readonly meta: ViewMeta;
   readonly readonly$: ReadonlySignal<boolean>;
+
   delete(): void;
+
   duplicate(): void;
 
   data$: ReadonlySignal<ViewData | undefined>;
+
   dataUpdate(updater: (viewData: ViewData) => Partial<ViewData>): void;
 
   readonly name$: ReadonlySignal<string>;
+
   nameSet(name: string): void;
 
   readonly propertyIds$: ReadonlySignal<string[]>;
@@ -45,6 +50,7 @@ export interface SingleView<
   readonly rows$: ReadonlySignal<string[]>;
 
   readonly filter$: ReadonlySignal<FilterGroup>;
+
   filterSet(filter: FilterGroup): void;
 
   readonly vars$: ReadonlySignal<Variable[]>;
@@ -52,11 +58,15 @@ export interface SingleView<
   readonly featureFlags$: ReadonlySignal<DatabaseFlags>;
 
   cellValueGet(rowId: string, propertyId: string): unknown;
+
   cellValueSet(rowId: string, propertyId: string, value: unknown): void;
 
   cellJsonValueGet(rowId: string, propertyId: string): unknown;
+
   cellStringValueGet(rowId: string, propertyId: string): string | undefined;
+
   cellRenderValueSet(rowId: string, propertyId: string, value: unknown): void;
+
   cellGet(rowId: string, propertyId: string): Cell;
 
   propertyParseValueFromString(
@@ -70,39 +80,57 @@ export interface SingleView<
     | undefined;
 
   rowAdd(insertPosition: InsertToPosition): string;
+
   rowDelete(ids: string[]): void;
+
   rowMove(rowId: string, position: InsertToPosition): void;
+
   rowGet(rowId: string): Row;
 
   rowPrevGet(rowId: string): string;
+
   rowNextGet(rowId: string): string;
 
   readonly propertyMetas: PropertyMetaConfig[];
+
   propertyAdd(toAfterOfProperty: InsertToPosition, type?: string): string;
+
   propertyDelete(propertyId: string): void;
+
   propertyDuplicate(propertyId: string): void;
+
   propertyGet(propertyId: string): Property;
+
   propertyMetaGet(type: string): PropertyMetaConfig | undefined;
 
   propertyPreGet(propertyId: string): Property | undefined;
+
   propertyNextGet(propertyId: string): Property | undefined;
 
   propertyNameGet(propertyId: string): string;
+
   propertyNameSet(propertyId: string, name: string): void;
 
   propertyTypeGet(propertyId: string): string | undefined;
+
   propertyTypeSet(propertyId: string, type: string): void;
 
   propertyHideGet(propertyId: string): boolean;
+
   propertyHideSet(propertyId: string, hide: boolean): void;
 
   propertyDataGet(propertyId: string): Record<string, unknown>;
+
   propertyDataSet(propertyId: string, data: Record<string, unknown>): void;
 
-  propertyDataTypeGet(propertyId: string): TType | undefined;
+  propertyDataTypeGet(propertyId: string): TypeInstance | undefined;
+
   propertyIndexGet(propertyId: string): number;
+
   propertyIdGetByIndex(index: number): string;
+
   propertyReadonlyGet(propertyId: string): boolean;
+
   propertyMove(propertyId: string, position: InsertToPosition): void;
 
   IconGet(type: string): UniComponent | undefined;
@@ -110,6 +138,8 @@ export interface SingleView<
   contextGet<T>(key: DataViewContextKey<T>): T;
 
   mainProperties$: ReadonlySignal<MainProperties>;
+
+  lockRows(lock: boolean): void;
 }
 
 export abstract class SingleViewBase<
@@ -126,15 +156,15 @@ export abstract class SingleViewBase<
 
   abstract filter$: ReadonlySignal<FilterGroup>;
 
-  filterVisible$ = computed(() => {
-    return (this.filter$.value?.conditions.length ?? 0) > 0;
-  });
+  protected lockRows$ = signal(false);
 
   abstract mainProperties$: ReadonlySignal<MainProperties>;
 
   name$: ReadonlySignal<string> = computed(() => {
     return this.data$.value?.name ?? '';
   });
+
+  preRows: string[] = [];
 
   abstract propertyIds$: ReadonlySignal<string[]>;
 
@@ -149,7 +179,10 @@ export abstract class SingleViewBase<
   abstract readonly$: ReadonlySignal<boolean>;
 
   rows$ = computed(() => {
-    return this.filteredRows(this.searchString.value);
+    if (this.lockRows$.value) {
+      return this.preRows;
+    }
+    return (this.preRows = this.rowsMapping(this.dataSource.rows$.value));
   });
 
   vars$ = computed(() => {
@@ -188,8 +221,8 @@ export abstract class SingleViewBase<
     public id: string
   ) {}
 
-  private filteredRows(searchString: string): string[] {
-    return this.dataSource.rows$.value.filter(id => {
+  private filterRowsMapping(rows: string[], searchString: string): string[] {
+    return rows.filter(id => {
       if (searchString) {
         const containsSearchString = this.propertyIds$.value.some(
           propertyId => {
@@ -284,6 +317,10 @@ export abstract class SingleViewBase<
 
   abstract isShow(rowId: string): boolean;
 
+  lockRows(lock: boolean) {
+    this.lockRows$.value = lock;
+  }
+
   nameSet(name: string): void {
     this.dataUpdate(() => {
       return {
@@ -306,7 +343,7 @@ export abstract class SingleViewBase<
     this.dataSource.propertyDataSet(propertyId, data);
   }
 
-  propertyDataTypeGet(propertyId: string): TType | undefined {
+  propertyDataTypeGet(propertyId: string): TypeInstance | undefined {
     const type = this.propertyTypeGet(propertyId);
     if (!type) {
       return;
@@ -411,6 +448,10 @@ export abstract class SingleViewBase<
   abstract rowNextGet(rowId: string): string;
 
   abstract rowPrevGet(rowId: string): string;
+
+  protected rowsMapping(rows: string[]): string[] {
+    return this.filterRowsMapping(rows, this.searchString.value);
+  }
 
   setSearch(str: string): void {
     this.searchString.value = str;

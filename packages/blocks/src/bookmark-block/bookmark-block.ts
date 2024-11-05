@@ -1,9 +1,13 @@
 import type { BookmarkBlockModel } from '@blocksuite/affine-model';
 
-import { CaptionedBlockComponent } from '@blocksuite/affine-components/caption';
+import {
+  CaptionedBlockComponent,
+  SelectedStyle,
+} from '@blocksuite/affine-components/caption';
 import { DocModeProvider } from '@blocksuite/affine-shared/services';
 import { html } from 'lit';
 import { property, query } from 'lit/decorators.js';
+import { classMap } from 'lit/directives/class-map.js';
 import { type StyleInfo, styleMap } from 'lit/directives/style-map.js';
 
 import type { BookmarkBlockService } from './bookmark-service.js';
@@ -68,8 +72,15 @@ export class BookmarkBlockComponent extends CaptionedBlockComponent<
   }
 
   override renderBlock() {
+    const selected = !!this.selected?.is('block');
     return html`
-      <div class="affine-bookmark-container" style=${this.containerStyleMap}>
+      <div
+        class=${classMap({
+          'affine-bookmark-container': true,
+          'selected-style': selected,
+        })}
+        style=${this.containerStyleMap}
+      >
         <bookmark-card
           .bookmark=${this}
           .loading=${this.loading}
@@ -91,6 +102,8 @@ export class BookmarkBlockComponent extends CaptionedBlockComponent<
 
   @property({ attribute: false })
   accessor loading = false;
+
+  override accessor selectedStyle = SelectedStyle.Border;
 
   override accessor useCaptionEditor = true;
 

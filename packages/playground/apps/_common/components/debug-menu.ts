@@ -6,6 +6,7 @@ import type { Pane } from 'tweakpane';
 import { ShadowlessElement } from '@blocksuite/block-std';
 import {
   type AffineTextAttributes,
+  ColorScheme,
   ColorVariables,
   defaultImageProxyMiddleware,
   type DocMode,
@@ -53,6 +54,7 @@ import type { DocsPanel } from './docs-panel.js';
 import type { LeftSidePanel } from './left-side-panel.js';
 import type { SidePanel } from './side-panel.js';
 
+import { mockEdgelessTheme } from '../mock-services.js';
 import './left-side-panel.js';
 import './side-panel.js';
 
@@ -472,6 +474,9 @@ export class DebugMenu extends ShadowlessElement {
       html.classList.remove('dark');
       html.classList.remove('sl-theme-dark');
     }
+
+    const theme = dark ? ColorScheme.Dark : ColorScheme.Light;
+    mockEdgelessTheme.setTheme(theme);
   }
 
   private _shareSelection() {

@@ -2,8 +2,7 @@ import {
   NoteNoShadowIcon,
   NoteShadowSampleIcon,
 } from '@blocksuite/affine-components/icons';
-import { NoteShadow } from '@blocksuite/affine-model';
-import { ThemeObserver } from '@blocksuite/affine-shared/theme';
+import { ColorScheme, NoteShadow } from '@blocksuite/affine-model';
 import { WithDisposable } from '@blocksuite/global/utils';
 import { css, html, LitElement } from 'lit';
 import { property } from 'lit/decorators.js';
@@ -96,8 +95,6 @@ export class EdgelessNoteShadowPanel extends WithDisposable(LitElement) {
   `;
 
   override render() {
-    const mode = ThemeObserver.mode;
-
     return repeat(
       SHADOWS,
       shadow => shadow,
@@ -125,7 +122,7 @@ export class EdgelessNoteShadowPanel extends WithDisposable(LitElement) {
               .tipPosition=${'bottom'}
               .iconContainerPadding=${0}
               style=${styleMap({
-                boxShadow: `${mode === 'dark' ? shadow.styles.dark : shadow.styles.light}`,
+                boxShadow: `${this.theme === ColorScheme.Dark ? shadow.styles.dark : shadow.styles.light}`,
               })}
             >
               ${index === 0 ? NoteNoShadowIcon : NoteShadowSampleIcon}
@@ -139,6 +136,9 @@ export class EdgelessNoteShadowPanel extends WithDisposable(LitElement) {
 
   @property({ attribute: false })
   accessor onSelect!: (value: string) => void;
+
+  @property({ attribute: false })
+  accessor theme!: ColorScheme;
 
   @property({ attribute: false })
   accessor value!: string;

@@ -275,7 +275,7 @@ export async function assertDatabaseCellLink(
 
 export async function assertDatabaseTitleText(page: Page, text: string) {
   const dbTitle = page.locator('[data-block-is-database-title="true"]');
-  expect(await dbTitle.textContent()).toEqual(text);
+  expect(await dbTitle.inputValue()).toEqual(text);
 }
 
 export async function waitSearchTransitionEnd(page: Page) {

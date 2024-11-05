@@ -15,6 +15,7 @@ export interface BlockSuiteFlags {
   enable_advanced_block_visibility: boolean;
   enable_shape_shadow_blur: boolean;
   enable_new_dnd: boolean;
+  enable_mobile_keyboard_toolbar: boolean;
   readonly: Record<string, boolean>;
 }
 export * from './virtual-keyboard.js';

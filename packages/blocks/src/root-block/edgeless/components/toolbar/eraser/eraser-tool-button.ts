@@ -4,6 +4,7 @@ import {
   EdgelessEraserDarkIcon,
   EdgelessEraserLightIcon,
 } from '@blocksuite/affine-components/icons';
+import { ThemeProvider } from '@blocksuite/affine-shared/services';
 import { css, html, LitElement } from 'lit';
 
 import { getTooltipWithShortcut } from '../../utils.js';
@@ -56,10 +57,9 @@ export class EdgelessEraserToolButton extends EdgelessToolbarToolMixin(
 
   override render() {
     const type = this.edgelessTool?.type;
-    const { theme } = this;
-
+    const appTheme = this.edgeless.std.get(ThemeProvider).app$.value;
     const icon =
-      theme === 'dark' ? EdgelessEraserDarkIcon : EdgelessEraserLightIcon;
+      appTheme === 'dark' ? EdgelessEraserDarkIcon : EdgelessEraserLightIcon;
 
     return html`
       <edgeless-toolbar-button

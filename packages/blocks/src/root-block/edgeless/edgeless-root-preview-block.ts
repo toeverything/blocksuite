@@ -8,8 +8,10 @@ import type {
   SurfaceSelection,
 } from '@blocksuite/block-std';
 
-import { FontLoaderService } from '@blocksuite/affine-shared/services';
-import { ThemeObserver } from '@blocksuite/affine-shared/theme';
+import {
+  FontLoaderService,
+  ThemeProvider,
+} from '@blocksuite/affine-shared/services';
 import { BlockComponent } from '@blocksuite/block-std';
 import {
   GfxBlockElementModel,
@@ -168,7 +170,7 @@ export class EdgelessRootPreviewBlockComponent extends BlockComponent<
 
   private _initSlotEffects() {
     this.disposables.add(
-      ThemeObserver.instance.mode$.subscribe(() => this.surface.refresh())
+      this.std.get(ThemeProvider).theme$.subscribe(() => this.surface.refresh())
     );
   }
 

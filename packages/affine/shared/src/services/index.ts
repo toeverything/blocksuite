@@ -8,3 +8,4 @@ export * from './notification-service.js';
 export * from './parse-url-service.js';
 export * from './quick-search-service.js';
 export * from './telemetry-service.js';
+export * from './theme-service.js';

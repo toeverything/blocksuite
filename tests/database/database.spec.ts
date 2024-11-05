@@ -6,7 +6,6 @@ import {
   focusDatabaseTitle,
   getBoundingBox,
   initDatabaseDynamicRowWithData,
-  initDatabaseRow,
   initDatabaseRowWithData,
   initEmptyDatabaseState,
   pressArrowLeft,
@@ -46,7 +45,6 @@ import {
   getDatabaseBodyRow,
   getDatabaseBodyRows,
   getDatabaseHeaderColumn,
-  getDatabaseMouse,
   getFirstColumnCell,
   initDatabaseColumn,
   switchColumnType,
@@ -63,9 +61,9 @@ test('edit database block title and create new rows', async ({ page }) => {
     title: dbTitle,
   });
   await focusDatabaseTitle(page);
-  for (let i = 0; i < dbTitle.length; i++) {
-    await pressBackspace(page);
-  }
+  await selectAllByKeyboard(page);
+  await pressBackspace(page);
+
   const expected = 'hello';
   await type(page, expected);
   await assertBlockProps(page, '2', {
@@ -148,35 +146,6 @@ test('should the multi-select mode work correctly', async ({ page }) => {
   expect(await cell.count()).toBe(2);
   expect(await cell.nth(0).innerText()).toBe('1');
   expect(await cell.nth(1).innerText()).toBe('2');
-});
-
-test('should show or hide database toolbar', async ({ page }) => {
-  await enterPlaygroundRoom(page);
-  await initEmptyDatabaseState(page);
-
-  await initDatabaseColumn(page);
-  await initDatabaseRow(page);
-
-  const db = await getDatabaseMouse(page);
-  await db.mouseOver();
-  const toolbar = page.locator('.affine-database-toolbar');
-  await expect(toolbar).toBeVisible();
-  await db.mouseLeave();
-  await expect(toolbar).toBeHidden();
-
-  await db.mouseOver();
-  await focusDatabaseSearch(page);
-  await db.mouseLeave();
-  await expect(toolbar).toBeVisible();
-
-  await clickDatabaseOutside(page);
-  await expect(toolbar).toBeHidden();
-
-  await db.mouseOver();
-  await focusDatabaseSearch(page);
-  await type(page, '1');
-  await clickDatabaseOutside(page);
-  await expect(toolbar).toBeVisible();
 });
 
 test('should database search work', async ({ page }) => {
@@ -538,7 +507,7 @@ test('database format-bar in header and text column', async ({ page }) => {
   // header | column
 
   const formatBar = getFormatBar(page);
-  await setInlineRangeInInlineEditor(page, { index: 1, length: 4 }, 2);
+  await setInlineRangeInInlineEditor(page, { index: 1, length: 4 }, 1);
   expect(await formatBar.formatBar.isVisible()).toBe(true);
   // Title    | Column1
   // ----------------
@@ -551,7 +520,7 @@ test('database format-bar in header and text column', async ({ page }) => {
         insert: 'header',
       },
     ],
-    2
+    1
   );
   await formatBar.boldBtn.click();
   await assertInlineEditorDeltas(
@@ -570,13 +539,13 @@ test('database format-bar in header and text column', async ({ page }) => {
         insert: 'r',
       },
     ],
-    2
+    1
   );
 
   await pressEscape(page);
   await pressArrowRight(page);
   await pressEnter(page);
-  await setInlineRangeInInlineEditor(page, { index: 2, length: 2 }, 3);
+  await setInlineRangeInInlineEditor(page, { index: 2, length: 2 }, 2);
   expect(await formatBar.formatBar.isVisible()).toBe(true);
   // Title  | Column1
   // ----------------
@@ -589,7 +558,7 @@ test('database format-bar in header and text column', async ({ page }) => {
         insert: 'column',
       },
     ],
-    3
+    2
   );
   await formatBar.boldBtn.click();
   await assertInlineEditorDeltas(
@@ -608,7 +577,7 @@ test('database format-bar in header and text column', async ({ page }) => {
         insert: 'mn',
       },
     ],
-    3
+    2
   );
 });
 
@@ -628,7 +597,8 @@ test.describe('readonly mode', () => {
     });
 
     await focusDatabaseTitle(page);
-    await pressBackspace(page, dbTitle.length);
+    await selectAllByKeyboard(page);
+    await pressBackspace(page);
 
     await type(page, 'hello');
     await assertBlockProps(page, '2', {

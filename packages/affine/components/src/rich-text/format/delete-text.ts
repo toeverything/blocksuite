@@ -63,14 +63,17 @@ export const deleteTextCommand: Command<
   selectedElements
     .filter(el => el.model.id !== fromElement.model.id)
     .forEach(el => {
-      ctx.std.doc.deleteBlock(el.model);
+      ctx.std.doc.deleteBlock(el.model, {
+        bringChildrenTo:
+          el.model.id === toElement.model.id ? fromElement.model : undefined,
+      });
     });
 
   ctx.std.selection.setGroup('note', [
     ctx.std.selection.create('text', {
       from: {
-        blockId: to.blockId,
-        index: to.index,
+        blockId: from.blockId,
+        index: from.index,
         length: 0,
       },
       to: null,

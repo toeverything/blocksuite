@@ -71,6 +71,7 @@ import { CenterPeek } from './database-block/components/layout.js';
 import { DatabaseTitle } from './database-block/components/title/index.js';
 import { BlockRenderer } from './database-block/detail-panel/block-renderer.js';
 import { NoteRenderer } from './database-block/detail-panel/note-renderer.js';
+import { effects as blockDatabaseEffects } from './database-block/effects.js';
 import {
   DatabaseBlockComponent,
   type DatabaseBlockService,
@@ -97,11 +98,13 @@ import {
 } from './frame-block/index.js';
 import { ImageBlockFallbackCard } from './image-block/components/image-block-fallback.js';
 import { ImageBlockPageComponent } from './image-block/components/page-image-block.js';
+import { effects as blockImageEffects } from './image-block/effects.js';
 import {
   ImageBlockComponent,
   type ImageBlockService,
   ImageEdgelessBlockComponent,
 } from './image-block/index.js';
+import { effects as blockLatexEffects } from './latex-block/effects.js';
 import { LatexBlockComponent } from './latex-block/index.js';
 import {
   EdgelessNoteBlockComponent,
@@ -303,6 +306,7 @@ import {
   MindmapSurfaceBlock,
   MiniMindmapPreview,
 } from './surface-block/mini-mindmap/index.js';
+import { effects as blockSurfaceRefEffects } from './surface-ref-block/effects.js';
 import {
   EdgelessSurfaceRefBlockComponent,
   SurfaceRefBlockComponent,
@@ -322,6 +326,10 @@ export function effects() {
   blockEmbedEffects();
   blockSurfaceEffects();
   dataViewEffects();
+  blockImageEffects();
+  blockDatabaseEffects();
+  blockSurfaceRefEffects();
+  blockLatexEffects();
 
   componentCaptionEffects();
   componentContextMenuEffects();
