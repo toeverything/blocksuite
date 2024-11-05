@@ -1,11 +1,11 @@
-import type { SerializedXYWH } from '@blocksuite/global/utils';
 import type { BlockModel } from '@blocksuite/store';
 
 import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
+import { Bound, type SerializedXYWH } from '@blocksuite/global/utils';
 import { nothing } from 'lit';
 
 import type { BlockService } from '../../extension/index.js';
-import type { GfxBlockElementModel } from '../../gfx/index.js';
+import type { GfxBlockElementModel, GfxController } from '../../gfx/index.js';
 
 import { GfxControllerIdentifier } from '../../gfx/index.js';
 import { BlockComponent } from './block-component.js';
@@ -17,6 +17,40 @@ export function isGfxBlockComponent(
 }
 
 export const GfxElementSymbol = Symbol('GfxElement');
+
+function toCSSTransform(
+  translateX: number,
+  translateY: number,
+  zoom: number,
+  originalX: number = 0,
+  originalY: number = 0
+) {
+  const scaledX = originalX * zoom;
+  const scaledY = originalY * zoom;
+  const deltaX = scaledX - originalX;
+  const deltaY = scaledY - originalY;
+
+  return `translate(${translateX + deltaX}px, ${translateY + deltaY}px) scale(${zoom})`;
+}
+
+function updateTransform(
+  element: HTMLElement,
+  gfx: GfxController,
+  model: GfxBlockElementModel
+) {
+  const viewport = gfx.viewport;
+  const { translateX, translateY, zoom } = viewport;
+  const bound = Bound.deserialize(model.xywh);
+
+  element.style.transformOrigin = '0 0';
+  element.style.transform = toCSSTransform(
+    translateX,
+    translateY,
+    zoom,
+    bound.x,
+    bound.y
+  );
+}
 
 export abstract class GfxBlockComponent<
   Model extends GfxBlockElementModel = GfxBlockElementModel,
@@ -33,6 +67,14 @@ export abstract class GfxBlockComponent<
     super.connectedCallback();
 
     this.style.position = 'absolute';
+
+    this.disposables.add(
+      this.gfx.viewport.viewportUpdated.on(() => {
+        updateTransform(this, this.gfx, this.model);
+      })
+    );
+
+    updateTransform(this, this.gfx, this.model);
   }
 
   getRenderingRect() {
@@ -112,6 +154,14 @@ export function toGfxBlockComponent<
       super.connectedCallback();
 
       this.style.position = 'absolute';
+
+      this.disposables.add(
+        this.gfx.viewport.viewportUpdated.on(() => {
+          updateTransform(this, this.gfx, this.model);
+        })
+      );
+
+      updateTransform(this, this.gfx, this.model);
     }
 
     getRenderingRect(): {

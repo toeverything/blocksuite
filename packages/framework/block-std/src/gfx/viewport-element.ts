@@ -1,4 +1,4 @@
-import { Bound, WithDisposable } from '@blocksuite/global/utils';
+import { WithDisposable } from '@blocksuite/global/utils';
 import { css, html } from 'lit';
 import { property } from 'lit/decorators.js';
 
@@ -51,27 +51,12 @@ export class GfxViewportElement extends WithDisposable(ShadowlessElement) {
     if (this.getModelsInViewport && this.host) {
       const host = this.host;
       const modelsInViewport = this.getModelsInViewport();
-      const { translateX, translateY, zoom } = this.viewport;
 
       modelsInViewport.forEach(model => {
         const view = host.std.view.getBlock(model.id);
 
         if (view) {
           view.style.display = '';
-          view.style.position = 'absolute';
-
-          const bound = Bound.deserialize(model.xywh);
-          const originalX = bound.x;
-          const originalY = bound.y;
-
-          view.style.transformOrigin = '0 0';
-          view.style.transform = this._toCSSTransform(
-            translateX,
-            translateY,
-            zoom,
-            originalX,
-            originalY
-          );
         }
 
         if (this._lastVisibleModels?.has(model)) {
@@ -105,21 +90,6 @@ export class GfxViewportElement extends WithDisposable(ShadowlessElement) {
   private _updatingChildrenFlag = false;
 
   renderingBlocks = new Set<string>();
-
-  private _toCSSTransform(
-    translateX: number,
-    translateY: number,
-    zoom: number,
-    originalX: number = 0,
-    originalY: number = 0
-  ) {
-    const scaledX = originalX * zoom;
-    const scaledY = originalY * zoom;
-    const deltaX = scaledX - originalX;
-    const deltaY = scaledY - originalY;
-
-    return `translate(${translateX + deltaX}px, ${translateY + deltaY}px) scale(${zoom})`;
-  }
 
   override connectedCallback(): void {
     super.connectedCallback();
