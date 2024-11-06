@@ -20,12 +20,10 @@ export class CellBlockComponent extends CaptionedBlockComponent<
 
   override connectedCallback() {
     super.connectedCallback();
-
     this.keymapController.bind();
   }
 
   override renderBlock() {
-    console.log('renderCell');
     return html`${this.renderChildren(this.model)}`;
   }
 }

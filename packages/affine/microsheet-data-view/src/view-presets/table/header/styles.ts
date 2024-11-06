@@ -19,11 +19,10 @@ export const styles = css`
         position: relative;
         display: flex;
         flex-direction: row;
-        /* border-bottom: 1px solid var(--affine-border-color);
-        border-top: 1px solid var(--affine-border-color); */
         box-sizing: border-box;
         user-select: none;
         background-color: var(--affine-background-primary-color);
+        visibility: hidden;
     }
 
     .affine-microsheet-column {
@@ -53,12 +52,17 @@ export const styles = css`
         box-sizing: border-box;
         position: relative;
         padding:0;
+        background-color: #eee;
     }
 
-    .affine-microsheet-column-content:hover,
-    .affine-microsheet-column-content.edit {
-        background: blue
+    .affine-microsheet-column-move:hover {
+        background-color: blue;
     }
+
+    /* .affine-microsheet-column-content:hover,
+    .affine-microsheet-column-content.edit {
+        background-color: blue
+    } */
 
     .affine-microsheet-column-content.edit .affine-microsheet-column-text-icon {
         opacity: 1;
@@ -377,25 +381,38 @@ export const styles = css`
         display: none;
       }
 
-       .affine-microsheet-column-right-add-icon {
-      left: unset;
-      right: -10px;
+    .affine-microsheet-column-right-add-icon {
+        left: unset;
+        right: -10px;
     }
-  
-      .affine-microsheet-column-add-icon:hover svg {
-        display: block;
-      }
-  
-      .affine-microsheet-column-add-icon:hover
-        .affine-microsheet-column-add-not-active-icon {
-        display: none;
-      }
 
-  .affine-microsheet-column-add-not-active-icon {
-    margin-top: -4px;
-    width: 4px;
-    height: 4px;
-    border-radius: 4px;
-    background: #ddd;
-  }
+    .affine-microsheet-column-add-icon:hover svg {
+        display: block;
+    }
+
+    .affine-microsheet-column-add-icon:hover
+    .affine-microsheet-column-add-not-active-icon {
+        display: none;
+    }
+
+    .affine-microsheet-column-add-not-active-icon {
+        margin-top: -4px;
+        width: 4px;
+        height: 4px;
+        border-radius: 4px;
+        background: #ddd;
+    }
+
+    .data-view-table-left-bar{
+        padding-left: 16px;
+        display: flex;
+        align-items: center;
+        position: sticky;
+        left: 0;
+        width: 24px;
+        flex-shrink: 0;
+        visibility: hidden;
+        background-color: var(--affine-background-primary-color);
+        z-index: 9;
+    }
 `;

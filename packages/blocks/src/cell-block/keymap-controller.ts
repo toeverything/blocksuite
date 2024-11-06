@@ -325,28 +325,21 @@ export class KeymapController implements ReactiveController {
   };
 
   private _onSelectAll: UIEventHandler = ctx => {
-    ctx.get('defaultState').event.preventDefault();
-    const selection = this._std.selection;
-    if (!selection.find('block')) {
+    const childrenModels = this.host.model.children;
+    if (
+      this._std.selection.filter('block').length === childrenModels.length &&
+      this._std.selection
+        .filter('block')
+        .every(block =>
+          childrenModels.some(model => model.id === block.blockId)
+        )
+    ) {
       return;
     }
-
-    try {
-      if (selection.value.length === this.host.model.children.length) return;
-    } catch (err) {
-      console.log(err);
-    }
-    const blocks: BlockSelection[] = this.host.model.children.map(child => {
-      return selection.create('block', {
-        blockId: child.id,
-      });
-    });
-    selection.update(selList => {
-      return selList
-        .filter<BaseSelection>(sel => !sel.is('block'))
-        .concat(blocks);
-    });
-
+    const childrenBlocksSelection = this.host.model.children.map(model =>
+      this._std.selection.create('block', { blockId: model.id })
+    );
+    this._std.selection.setGroup('note', childrenBlocksSelection);
     return true;
   };
 }

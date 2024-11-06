@@ -1,4 +1,5 @@
 import type { MicrosheetBlockModel } from '@blocksuite/affine-model';
+import type { DataViewTable } from '@blocksuite/microsheet-data-view/view-presets';
 
 import { CaptionedBlockComponent } from '@blocksuite/affine-components/caption';
 import {
@@ -31,8 +32,6 @@ import {
   renderUniLit,
   uniMap,
 } from '@blocksuite/microsheet-data-view';
-// eslint-disable-next-line @typescript-eslint/no-restricted-imports
-import { TableRowSelection } from '@blocksuite/microsheet-data-view/src/view-presets/table/types.js';
 import { widgetPresets } from '@blocksuite/microsheet-data-view/widget-presets';
 import { Slice } from '@blocksuite/store';
 import { computed, signal } from '@preact/signals-core';
@@ -43,6 +42,8 @@ import type { NoteBlockComponent } from '../note-block/index.js';
 import type { MicrosheetOptionsConfig } from './config.js';
 import type { MicrosheetBlockService } from './microsheet-service.js';
 
+// eslint-disable-next-line @typescript-eslint/no-restricted-imports
+import { TableRowSelection } from '../../../affine/data-view/src/view-presets/table/types.js';
 import {
   EdgelessRootBlockComponent,
   type RootService,
@@ -63,10 +64,7 @@ export class MicrosheetBlockComponent extends CaptionedBlockComponent<
     ${unsafeCSS(dataViewCommonStyle('affine-microsheet'))}
     affine-microsheet {
       display: block;
-      border-radius: 8px;
       background-color: var(--affine-background-primary-color);
-      padding: 8px;
-      margin: 8px -8px -8px;
     }
 
     affine-microsheet:hover .affine-microsheet-column-header {
@@ -74,6 +72,9 @@ export class MicrosheetBlockComponent extends CaptionedBlockComponent<
     }
 
     affine-microsheet:hover .microsheet-data-view-table-left-bar {
+      visibility: visible;
+    }
+    affine-microsheet:hover .data-view-table-left-bar {
       visibility: visible;
     }
 
@@ -308,6 +309,10 @@ export class MicrosheetBlockComponent extends CaptionedBlockComponent<
     return this._dataSource;
   }
 
+  get dataViewTableElement() {
+    return this._DataViewTableElement;
+  }
+
   get optionsConfig(): MicrosheetOptionsConfig {
     return {
       configure: (_model, options) => options,
@@ -345,7 +350,7 @@ export class MicrosheetBlockComponent extends CaptionedBlockComponent<
       this.bindHotKey({
         Backspace: () => {
           const selectionController =
-            this._DataViewTableElement?.selectionController;
+            this.dataViewTableElement?.selectionController;
           const selection = selectionController?.selection;
           if (!selectionController || !selection) return;
           const data = this.dataSource;
@@ -403,23 +408,23 @@ export class MicrosheetBlockComponent extends CaptionedBlockComponent<
         },
         Tab: context => {
           const selectionController =
-            this._DataViewTableElement?.selectionController;
+            this.dataViewTableElement?.selectionController;
           if (!selectionController || !selectionController.focus) return;
           context.get('keyboardState').raw.preventDefault();
-          selectionController.focusToCell('right', 'start');
+          selectionController.focusToCell('right', 'end');
           return true;
         },
         'Shift-Tab': context => {
           const selectionController =
-            this._DataViewTableElement?.selectionController;
+            this.dataViewTableElement?.selectionController;
           if (!selectionController) return;
           context.get('keyboardState').raw.preventDefault();
-          selectionController.focusToCell('left', 'start');
+          selectionController.focusToCell('left', 'end');
           return true;
         },
         ArrowLeft: context => {
           const selectionController =
-            this._DataViewTableElement?.selectionController;
+            this.dataViewTableElement?.selectionController;
           if (!selectionController) return;
           if (isInCellStart(this.host.std, true)) {
             const stop = selectionController.focusToCell('left');
@@ -432,7 +437,7 @@ export class MicrosheetBlockComponent extends CaptionedBlockComponent<
         },
         ArrowRight: context => {
           const selectionController =
-            this._DataViewTableElement?.selectionController;
+            this.dataViewTableElement?.selectionController;
           if (!selectionController || !selectionController.focus) return;
           if (isInCellEnd(this.host.std, true)) {
             const stop = selectionController.focusToCell('right');
@@ -445,7 +450,7 @@ export class MicrosheetBlockComponent extends CaptionedBlockComponent<
         },
         ArrowUp: context => {
           const selectionController =
-            this._DataViewTableElement?.selectionController;
+            this.dataViewTableElement?.selectionController;
           if (!selectionController || !selectionController.focus) return;
           if (isInCellStart(this.host.std)) {
             const { isFirst } = calculateLineNum(this.host.std);
@@ -461,7 +466,7 @@ export class MicrosheetBlockComponent extends CaptionedBlockComponent<
         },
         ArrowDown: context => {
           const selectionController =
-            this._DataViewTableElement?.selectionController;
+            this.dataViewTableElement?.selectionController;
           if (!selectionController || !selectionController.focus) return;
           if (isInCellEnd(this.host.std)) {
             const { isLast } = calculateLineNum(this.host.std);
@@ -474,6 +479,18 @@ export class MicrosheetBlockComponent extends CaptionedBlockComponent<
             }
           }
           return;
+        },
+        'Mod-a': () => {
+          if (
+            this.std.selection.filter('block').length === 1 &&
+            this.std.selection.filter('block')[0].blockId === this.blockId
+          ) {
+            return;
+          }
+          this.std.selection.setGroup('note', [
+            this.std.selection.create('block', { blockId: this.blockId }),
+          ]);
+          return true;
         },
       })
     );

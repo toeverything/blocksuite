@@ -1,7 +1,11 @@
 import { popupTargetFromElement } from '@blocksuite/affine-components/context-menu';
 import { type BlockStdScope, ShadowlessElement } from '@blocksuite/block-std';
 import { SignalWatcher, WithDisposable } from '@blocksuite/global/utils';
-import { CenterPeekIcon, MoreHorizontalIcon } from '@blocksuite/icons/lit';
+import {
+  AddCursorIcon,
+  CenterPeekIcon,
+  MoreHorizontalIcon,
+} from '@blocksuite/icons/lit';
 import { css, nothing } from 'lit';
 import { property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
@@ -66,10 +70,6 @@ export class TableRow extends SignalWatcher(WithDisposable(ShadowlessElement)) {
       margin-right: 8px;
     }
 
-    .affine-microsheet-block-row .show-on-hover-row {
-      visibility: hidden;
-      opacity: 0;
-    }
     .affine-microsheet-block-row:hover .show-on-hover-row {
       visibility: visible;
       opacity: 1;
@@ -110,6 +110,63 @@ export class TableRow extends SignalWatcher(WithDisposable(ShadowlessElement)) {
       cursor: grab;
       background-color: var(--affine-background-primary-color);
     }
+    .microsheet-data-view-table-left-bar {
+      padding-left: 16px;
+      display: flex;
+      align-items: center;
+      position: sticky;
+      left: 0;
+      width: 24px;
+      flex-shrink: 0;
+      visibility: hidden;
+      z-index: 9;
+      background-color: var(--affine-background-primary-color);
+    }
+    .microsheet-data-view-table-view-drag-handler {
+      width: 8px;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: grab;
+      background-color: #eee;
+    }
+    .microsheet-data-view-table-view-drag-handler:hover {
+      background-color: blue;
+    }
+    .microsheet-data-view-table-view-add-icon {
+      position: absolute;
+      left: 0px;
+      top: -10px;
+      z-index: 9;
+      width: 20px;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .microsheet-data-view-table-view-add-not-active-icon {
+      margin-left: -2px;
+      width: 4px;
+      height: 4px;
+      border-radius: 4px;
+      background: #ddd;
+    }
+    .microsheet-data-view-table-view-bottom-add-icon {
+      top: unset;
+      bottom: -10px;
+    }
+    .microsheet-data-view-table-view-add-icon svg {
+      width: 20px;
+      height: 20px;
+      border-radius: 100px;
+      background: #4949fe;
+      color: white;
+      display: none;
+    }
+    .microsheet-data-view-table-view-add-icon:hover svg {
+      display: block;
+    }
   `;
 
   private _clickDragHandler = () => {
@@ -117,6 +174,13 @@ export class TableRow extends SignalWatcher(WithDisposable(ShadowlessElement)) {
       return;
     }
     this.selectionController?.toggleRow(this.rowId, this.groupKey);
+  };
+
+  private rowAdd = (before: boolean) => {
+    this.view.rowAdd({
+      id: this.rowId,
+      before: before,
+    });
   };
 
   contextMenu = (e: MouseEvent) => {
@@ -168,6 +232,35 @@ export class TableRow extends SignalWatcher(WithDisposable(ShadowlessElement)) {
   protected override render(): unknown {
     const view = this.view;
     return html`
+      ${view.readonly$.value
+        ? nothing
+        : html`<div
+            class="microsheet-data-view-table-left-bar"
+            style="min-height: 44px"
+          >
+            <div
+              class="microsheet-data-view-table-view-drag-handler show-on-hover-row row-selected-bg"
+              @click=${this._clickDragHandler}
+            ></div>
+            <div
+              class="microsheet-data-view-table-view-add-icon"
+              @click="${() => this.rowAdd(true)}"
+            >
+              <div
+                class="microsheet-data-view-table-view-add-not-active-icon"
+              ></div>
+              ${AddCursorIcon()}
+            </div>
+            <div
+              class="microsheet-data-view-table-view-add-icon microsheet-data-view-table-view-bottom-add-icon"
+              @click="${() => this.rowAdd(false)}"
+            >
+              <div
+                class="microsheet-data-view-table-view-add-not-active-icon"
+              ></div>
+              ${AddCursorIcon()}
+            </div>
+          </div> `}
       ${repeat(
         view.properties$.value,
         v => v.id,
@@ -200,44 +293,41 @@ export class TableRow extends SignalWatcher(WithDisposable(ShadowlessElement)) {
               this.selectionController
             );
           };
-          return i === 0
-            ? nothing
-            : html`
-                <div>
-                  <affine-microsheet-cell-container
-                    class="microsheet-cell"
-                    style=${styleMap({
-                      width: `${column.width$.value}px`,
-                      border: i === 0 ? 'none' : undefined,
-                    })}
-                    .view="${view}"
-                    .column="${column}"
-                    .rowId="${this.rowId}"
-                    data-row-id="${this.rowId}"
-                    .rowIndex="${this.rowIndex}"
-                    data-row-index="${this.rowIndex}"
-                    .columnId="${column.id}"
-                    data-column-id="${column.id}"
-                    .columnIndex="${i}"
-                    data-column-index="${i}"
-                    .std="${this.std}"
-                  >
-                  </affine-microsheet-cell-container>
-                </div>
-                ${!column.readonly$.value &&
-                column.view.mainProperties$.value.titleColumn === column.id
-                  ? html`<div class="row-ops show-on-hover-row">
-                      <div class="row-op" @click="${clickDetail}">
-                        ${CenterPeekIcon()}
-                      </div>
-                      ${!view.readonly$.value
-                        ? html`<div class="row-op" @click="${openMenu}">
-                            ${MoreHorizontalIcon()}
-                          </div>`
-                        : nothing}
-                    </div>`
-                  : nothing}
-              `;
+          return html`
+            <div>
+              <affine-microsheet-cell-container
+                class="microsheet-cell"
+                style=${styleMap({
+                  width: `${column.width$.value}px`,
+                })}
+                .view="${view}"
+                .column="${column}"
+                .rowId="${this.rowId}"
+                data-row-id="${this.rowId}"
+                .rowIndex="${this.rowIndex}"
+                data-row-index="${this.rowIndex}"
+                .columnId="${column.id}"
+                data-column-id="${column.id}"
+                .columnIndex="${i}"
+                data-column-index="${i}"
+                .std="${this.std}"
+              >
+              </affine-microsheet-cell-container>
+            </div>
+            ${!column.readonly$.value &&
+            column.view.mainProperties$.value.titleColumn === column.id
+              ? html`<div class="row-ops show-on-hover-row">
+                  <div class="row-op" @click="${clickDetail}">
+                    ${CenterPeekIcon()}
+                  </div>
+                  ${!view.readonly$.value
+                    ? html`<div class="row-op" @click="${openMenu}">
+                        ${MoreHorizontalIcon()}
+                      </div>`
+                    : nothing}
+                </div>`
+              : nothing}
+          `;
         }
       )}
       <!-- <div class="microsheet-cell add-column-button"></div> -->

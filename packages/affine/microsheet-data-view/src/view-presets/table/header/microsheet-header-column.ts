@@ -230,12 +230,13 @@ export class MicrosheetHeaderColumn extends SignalWatcher(
     column.tableViewManager = this.tableViewManager;
     column.column = this.column;
     column.table = tableContainer;
+
     const dragPreview = createDragPreview(
       tableContainer,
       columnHeaderRect.width / scale,
       headerContainerRect.height / scale,
       startOffset,
-      column
+      this.column.id
     );
     const rectList = getTableGroupRects(tableContainer);
     const dropPreview = getVerticalIndicator();
@@ -601,18 +602,25 @@ const createDragPreview = (
   width: number,
   height: number,
   startLeft: number,
-  content: HTMLElement
+  id: string
 ) => {
   const div = document.createElement('div');
-  div.append(content);
-  // div.style.pointerEvents='none';
+  const cells = container.querySelectorAll(
+    `affine-microsheet-cell-container[data-column-id="${id}"]`
+  );
+  cells.forEach(cell => {
+    div.append(cell.cloneNode(true));
+  });
+  div.style.pointerEvents = 'none';
   div.style.opacity = '0.8';
   div.style.position = 'absolute';
   div.style.width = `${width}px`;
   div.style.height = `${height}px`;
   div.style.left = `${startLeft}px`;
+  div.style.opacity = '0.8';
   div.style.top = `0px`;
   div.style.zIndex = '9';
+  div.style.backgroundColor = 'var(--affine-background-primary-color)';
   container.append(div);
   return {
     display(offset: number) {

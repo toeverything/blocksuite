@@ -69,12 +69,6 @@ export class DataViewRenderer extends SignalWatcher(
 
   viewMap$ = computed(() => {
     const manager = this.config.dataSource.viewManager;
-    console.log(
-      11112222222,
-      Object.fromEntries(
-        manager.views$.value.map(view => [view, manager.viewGet(view)])
-      )
-    );
     return Object.fromEntries(
       manager.views$.value.map(view => [view, manager.viewGet(view)])
     );

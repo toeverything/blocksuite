@@ -3,10 +3,10 @@
 import type { InsertToPosition } from '@blocksuite/affine-shared/utils';
 import type { ReactiveController } from 'lit';
 
+import type { TableRow } from '../row/row.js';
 import type { DataViewTable } from '../table-view.js';
 
 import { startDrag } from '../../../core/utils/drag.js';
-import { TableRow } from '../row/row.js';
 
 export class TableDragController implements ReactiveController {
   dragStart = (row: TableRow, evt: PointerEvent) => {
@@ -93,7 +93,7 @@ export class TableDragController implements ReactiveController {
     | undefined => {
     const y = evt.y;
     const tableRect = this.host.getBoundingClientRect();
-    const rows = this.host.querySelectorAll('data-view-table-row');
+    const rows = this.host.querySelectorAll('microsheet-data-view-table-row');
     if (!rows || !tableRect || y < tableRect.top) {
       return;
     }
@@ -137,16 +137,15 @@ export class TableDragController implements ReactiveController {
     }
     this.host.disposables.add(
       this.host.props.handleEvent('dragStart', context => {
-        return;
         const event = context.get('pointerState').raw;
         const target = event.target;
         if (
           target instanceof Element &&
           this.host.contains(target) &&
-          target.closest('.data-view-table-view-drag-handler')
+          target.closest('.microsheet-data-view-table-view-drag-handler')
         ) {
           event.preventDefault();
-          const row = target.closest('data-view-table-row');
+          const row = target.closest('microsheet-data-view-table-row');
           if (row) {
             getSelection()?.removeAllRanges();
             this.dragStart(row, event);
@@ -161,14 +160,9 @@ export class TableDragController implements ReactiveController {
 
 const createDragPreview = (row: TableRow, x: number, y: number) => {
   const div = document.createElement('div');
-  const cloneRow = new TableRow();
-  cloneRow.view = row.view;
-  cloneRow.rowIndex = row.rowIndex;
-  cloneRow.rowId = row.rowId;
-  cloneRow.dataViewEle = row.dataViewEle;
-  div.append(cloneRow);
+  div.append(row.cloneNode(true));
   div.className = 'with-data-view-css-variable';
-  div.style.width = `${row.getBoundingClientRect().width}px`;
+  div.style.opacity = '0.8';
   div.style.position = 'fixed';
   div.style.pointerEvents = 'none';
   div.style.backgroundColor = 'var(--affine-background-primary-color)';

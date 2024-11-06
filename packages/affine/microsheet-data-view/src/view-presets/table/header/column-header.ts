@@ -2,7 +2,7 @@ import { getScrollContainer } from '@blocksuite/affine-shared/utils';
 import { ShadowlessElement } from '@blocksuite/block-std';
 import { SignalWatcher, WithDisposable } from '@blocksuite/global/utils';
 import { autoUpdate } from '@floating-ui/dom';
-import { nothing, type TemplateResult } from 'lit';
+import { nothing } from 'lit';
 import { property, query } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -84,8 +84,10 @@ export class MicrosheetColumnHeader extends SignalWatcher(
 
   override render() {
     return html`
-      ${this.renderGroupHeader?.()}
       <div class="affine-microsheet-column-header microsheet-row">
+        ${this.readonly
+          ? nothing
+          : html`<div class="data-view-table-left-bar"></div>`}
         ${repeat(
           this.tableViewManager.properties$.value,
           column => column.id,
@@ -94,24 +96,19 @@ export class MicrosheetColumnHeader extends SignalWatcher(
               width: `${column.width$.value}px`,
               border: index === 0 ? 'none' : undefined,
             });
-            return index === 0
-              ? nothing
-              : html` <affine-microsheet-header-column
-                  style="${style}"
-                  data-column-id="${column.id}"
-                  data-column-index="${index}"
-                  class="affine-microsheet-column"
-                  .column="${column}"
-                  .tableViewManager="${this.tableViewManager}"
-                ></affine-microsheet-header-column>`;
+            return html` <affine-microsheet-header-column
+              style="${style}"
+              data-column-id="${column.id}"
+              data-column-index="${index}"
+              class="affine-microsheet-column"
+              .column="${column}"
+              .tableViewManager="${this.tableViewManager}"
+            ></affine-microsheet-header-column>`;
           }
         )}
       </div>
     `;
   }
-
-  @property({ attribute: false })
-  accessor renderGroupHeader: (() => TemplateResult) | undefined;
 
   @query('.scale-div')
   accessor scaleDiv!: HTMLDivElement;

@@ -2,9 +2,11 @@ import type { UIEventStateContext } from '@blocksuite/block-std';
 import type { ReactiveController } from 'lit';
 
 import { toast } from '@blocksuite/affine-components/toast';
+import { Slice } from '@blocksuite/store';
 
 import type { Cell } from '../../../core/view-manager/cell.js';
 import type { Row } from '../../../core/view-manager/row.js';
+import type { MicrosheetCellContainer } from '../cell.js';
 import type { DataViewTable } from '../table-view.js';
 
 import {
@@ -14,8 +16,7 @@ import {
   type TableViewSelectionWithType,
 } from '../types.js';
 
-const BLOCKSUITE_MICROSHEET_TABLE = 'blocksuite/microsheet/table';
-type JsonAreaData = string[][];
+const BLOCKSUITE_MICROSHEET_TABLE = 'blocksuite/microsheet';
 const TEXT = 'text/plain';
 
 export class TableClipboardController implements ReactiveController {
@@ -25,24 +26,19 @@ export class TableClipboardController implements ReactiveController {
   ) => {
     const table = this.host;
 
-    const area = getSelectedArea(tableSelection, table);
+    const area = getSelectedAreaValues(tableSelection, table);
     if (!area) {
       return;
     }
-    const stringResult = area
-      .map(row => row.cells.map(cell => cell.stringValue$.value).join('\t'))
-      .join('\n');
-    const jsonResult: JsonAreaData = area.map(row =>
-      row.cells.map(cell => cell.stringValue$.value)
-    );
 
     const promiseArr: Promise<void>[] = [];
     area.forEach(row => {
-      row.cells.forEach(cell => {
+      row.forEach(cell => {
         promiseArr.push(
           (async () => {
-            const { ref } = cell;
-            const cellContainerModel = this.std.doc.getBlockById(ref as string);
+            const cellContainerModel = this.std.doc.getBlockById(
+              cell.ref as string
+            );
             if (cellContainerModel) {
               const slice = Slice.fromModels(
                 this.std.doc,
@@ -68,43 +64,20 @@ export class TableClipboardController implements ReactiveController {
       });
     });
     await Promise.all(promiseArr);
-
-    if (isCut) {
-      const deleteRows: string[] = [];
-      for (const row of area) {
-        if (row.row) {
-          deleteRows.push(row.row.rowId);
-        } else {
-          for (const cell of row.cells) {
-            cell.valueSet(undefined);
-          }
-        }
-      }
-      if (deleteRows.length) {
-        this.props.view.rowDelete(deleteRows);
-      }
-    }
     this.std.clipboard
       .writeToClipboard(items => {
         return {
           ...items,
-          [TEXT]: stringResult,
-          [BLOCKSUITE_MICROSHEET_TABLE]: JSON.stringify(jsonResult),
+          [TEXT]: 'microsheet-copy-block',
+          [BLOCKSUITE_MICROSHEET_TABLE]: JSON.stringify(area),
         };
       })
       .then(() => {
-        if (area[0]?.row) {
-          toast(
-            this.std.host,
-            `${area.length} row${area.length > 1 ? 's' : ''} copied to clipboard`
-          );
-        } else {
-          const count = area.flatMap(row => row.cells).length;
-          toast(
-            this.std.host,
-            `${count} cell${count > 1 ? 's' : ''} copied to clipboard`
-          );
-        }
+        const count = area.flatMap(row => row).length;
+        toast(
+          this.std.host,
+          `${count} cell${count > 1 ? 's' : ''} copied to clipboard`
+        );
       })
       .catch(console.error);
 
@@ -131,10 +104,10 @@ export class TableClipboardController implements ReactiveController {
     }
     if (tableSelection) {
       const json = await this.std.clipboard.readFromClipboard(clipboardData);
-      const dataString = json[BLOCKSUITE_MICROSHEET_TABLE];
-      if (!dataString) return;
-      const jsonAreaData = JSON.parse(dataString) as JsonAreaData;
-      pasteToCells(view, jsonAreaData, tableSelection);
+      const copiedValues = json[BLOCKSUITE_MICROSHEET_TABLE];
+      if (!copiedValues) return;
+      const jsonAreaData = JSON.parse(copiedValues) as CopyedSelectionData;
+      this.pasteToCells(view, jsonAreaData, tableSelection);
     } else if (this.host.selectionController.focus) {
       const json = await this.std.clipboard.readFromClipboard(clipboardData);
       const copiedValues = json[BLOCKSUITE_MICROSHEET_TABLE];
@@ -142,22 +115,26 @@ export class TableClipboardController implements ReactiveController {
       const copyedSelectionData = JSON.parse(
         copiedValues
       ) as CopyedSelectionData;
-
       const rowStartIndex = this.host.selectionController.focus.rowIndex;
       const columnStartIndex = this.host.selectionController.focus.columnIndex;
       const rowLength = copyedSelectionData.length;
       const columnLength = copyedSelectionData[0].length;
-
-      pasteToCells(
-        data,
-        view,
-        copyedSelectionData,
-        undefined,
-        rowStartIndex,
-        columnStartIndex,
-        rowLength,
-        columnLength
-      );
+      const tableAreaSelection = TableAreaSelection.create({
+        focus: {
+          rowIndex: rowStartIndex,
+          columnIndex: columnStartIndex,
+        },
+        rowsSelection: {
+          start: rowStartIndex,
+          end: rowStartIndex + rowLength - 1,
+        },
+        columnsSelection: {
+          start: columnStartIndex,
+          end: columnStartIndex + columnLength - 1,
+        },
+        isEditing: false,
+      });
+      this.pasteToCells(view, copyedSelectionData, tableAreaSelection);
     }
 
     return true;
@@ -177,6 +154,66 @@ export class TableClipboardController implements ReactiveController {
 
   constructor(public host: DataViewTable) {
     host.addController(this);
+  }
+
+  private pasteToCells(
+    table: DataViewTable,
+    copied: CopyedSelectionData,
+    tableAreaSelection: TableAreaSelection
+  ) {
+    const { view } = table.props;
+    for (
+      let i = 0;
+      i <=
+      tableAreaSelection.rowsSelection.end -
+        tableAreaSelection.rowsSelection.start;
+      i++
+    ) {
+      for (
+        let j = 0;
+        j <=
+        tableAreaSelection.columnsSelection.end -
+          tableAreaSelection.columnsSelection.start;
+        j++
+      ) {
+        const copyCell = copied?.[i]?.[j];
+        if (!copyCell) continue;
+        const targetContainer = table.selectionController.getCellContainer(
+          tableAreaSelection.groupKey,
+          i + tableAreaSelection.rowsSelection.start,
+          j + tableAreaSelection.columnsSelection.start
+        );
+        const rowId = targetContainer?.dataset.rowId;
+        const columnId = targetContainer?.dataset.columnId;
+        if (rowId && columnId) {
+          const { cellContainerSlice } = copyCell;
+          const targetCellContainerId = view.cellRefGet(
+            rowId,
+            columnId
+          ) as string;
+          if (targetCellContainerId) {
+            const cellContainerBlock = this.std.doc.getBlockById(
+              targetCellContainerId
+            );
+            if (cellContainerBlock) {
+              const children = cellContainerBlock.children;
+              children.forEach(b => {
+                this.std.doc.deleteBlock(b);
+              });
+            }
+            (async () => {
+              await this.std.clipboard.pasteCellSliceSnapshot(
+                JSON.parse(cellContainerSlice as string)?.snapshot,
+                this.std.doc,
+                targetCellContainerId
+              );
+            })()
+              .then()
+              .catch(() => {});
+          }
+        }
+      }
+    }
   }
 
   copy() {
@@ -220,11 +257,31 @@ export class TableClipboardController implements ReactiveController {
         if (this.readonly) return false;
 
         this._onPaste(ctx).catch(console.error);
+        return true;
       })
     );
   }
 }
-
+function getSelectedAreaValues(
+  selection: TableViewSelection,
+  table: DataViewTable
+): { ref: string; cellContainerSlice: string }[][] {
+  const view = table.props.view;
+  const rsl: { ref: string; cellContainerSlice: string }[][] = [];
+  const values = getSelectedArea(selection, table);
+  values?.forEach((row, index) => {
+    const cells = row.cells;
+    if (!rsl[index]) {
+      rsl[index] = [];
+    }
+    cells.forEach(cell => {
+      rsl[index].push({
+        ref: view.cellRefGet(cell.rowId, cell.propertyId) as string,
+      });
+    });
+  });
+  return rsl;
+}
 function getSelectedArea(
   selection: TableViewSelection,
   table: DataViewTable
@@ -282,62 +339,11 @@ type SelectedArea = {
   cells: Cell[];
 }[];
 
-function getTargetRangeFromSelection(
-  selection: TableAreaSelection,
-  data: JsonAreaData
-) {
-  const { rowsSelection, columnsSelection, focus } = selection;
-  return TableAreaSelection.isFocus(selection)
-    ? {
-        row: {
-          start: focus.rowIndex,
-          length: data.length,
-        },
-        column: {
-          start: focus.columnIndex,
-          length: data[0].length,
-        },
-      }
-    : {
-        row: {
-          start: rowsSelection.start,
-          length: rowsSelection.end - rowsSelection.start + 1,
-        },
-        column: {
-          start: columnsSelection.start,
-          length: columnsSelection.end - columnsSelection.start + 1,
-        },
-      };
-}
-
-function pasteToCells(
-  table: DataViewTable,
-  rows: JsonAreaData,
-  selection: TableAreaSelection
-) {
-  const srcRowLength = rows.length;
-  const srcColumnLength = rows[0].length;
-  const targetRange = getTargetRangeFromSelection(selection, rows);
-  for (let i = 0; i < targetRange.row.length; i++) {
-    for (let j = 0; j < targetRange.column.length; j++) {
-      const rowIndex = targetRange.row.start + i;
-      const columnIndex = targetRange.column.start + j;
-
-      const srcRowIndex = i % srcRowLength;
-      const srcColumnIndex = j % srcColumnLength;
-      const dataString = rows[srcRowIndex][srcColumnIndex];
-
-      const targetContainer = table.selectionController.getCellContainer(
-        selection.groupKey,
-        rowIndex,
-        columnIndex
-      );
-      const rowId = targetContainer?.dataset.rowId;
-      const columnId = targetContainer?.dataset.columnId;
-
-      if (rowId && columnId) {
-        targetContainer?.column.valueSetFromString(rowId, dataString);
-      }
-    }
-  }
-}
+type CopyedColumn = {
+  type: string;
+  value: string;
+  ref: unknown;
+  cellContainerSlice?: unknown;
+  container?: MicrosheetCellContainer;
+};
+type CopyedSelectionData = CopyedColumn[][];

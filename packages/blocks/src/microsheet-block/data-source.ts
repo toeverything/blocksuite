@@ -268,7 +268,6 @@ export class MicrosheetBlockDataSource extends DataSourceBase {
   }
 
   propertyTypeGet(propertyId: string): string {
-    return 'rich-text';
     if (propertyId === 'type') {
       return 'image';
     }

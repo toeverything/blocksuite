@@ -23,6 +23,7 @@ export class NoteBlockComponent extends BlockComponent<
   }
 
   override renderBlock() {
+    console.log(111, this.std.doc);
     return html`
       <div class="affine-note-block-container">
         <div class="affine-block-children-container">

@@ -1,6 +1,9 @@
+import type { RichText } from '@blocksuite/affine-components/rich-text';
+
 import { type BlockStdScope, ShadowlessElement } from '@blocksuite/block-std';
 import {
   assertExists,
+  noop,
   SignalWatcher,
   WithDisposable,
 } from '@blocksuite/global/utils';
@@ -30,6 +33,7 @@ export class MicrosheetCellContainer extends SignalWatcher(
       height: 100%;
       border: none;
       outline: none;
+      padding: 2px 8px;
     }
 
     affine-microsheet-cell-container * {
@@ -85,16 +89,37 @@ export class MicrosheetCellContainer extends SignalWatcher(
         };
       }
 
-      if (focusTo && this.std) {
-        const richTexts = this.querySelectorAll('rich-text');
+      assertExists(this.refModel);
 
-        if (richTexts.length) {
-          if (focusTo === 'start') {
-            richTexts[0].inlineEditor?.focusStart();
-          } else {
-            richTexts[richTexts.length - 1].inlineEditor?.focusEnd();
+      const focus = () => {
+        if (focusTo && this.std) {
+          const richTexts = this.querySelectorAll('rich-text');
+
+          if (richTexts.length) {
+            if (focusTo === 'start') {
+              (richTexts[0] as RichText).inlineEditor?.focusStart();
+            } else {
+              richTexts[richTexts.length - 1].inlineEditor?.focusEnd();
+            }
           }
         }
+      };
+
+      if (this.children.length === 0) {
+        this.std.doc.addBlock(
+          'affine:paragraph',
+          {
+            text: new this.std.doc.Text(),
+          },
+          this.refModel
+        );
+        void this.updateComplete
+          .then(() => {
+            focus();
+          })
+          .catch(noop);
+      } else {
+        focus();
       }
     }
   };
@@ -109,6 +134,12 @@ export class MicrosheetCellContainer extends SignalWatcher(
 
   private get readonly() {
     return this.column.readonly$.value;
+  }
+
+  get refModel() {
+    const refId = this.view.cellRefGet(this.rowId, this.column.id);
+    if (!refId) return;
+    return this.std.doc.getBlockById(refId as string);
   }
 
   private get selectionView() {
@@ -153,13 +184,8 @@ export class MicrosheetCellContainer extends SignalWatcher(
   override render() {
     if (!this.std) return nothing;
 
-    const refId = this.view.cellRefGet(this.rowId, this.column.id);
-    if (!refId) return;
-
-    const refModel = this.std.doc.getBlockById(refId as string);
-
-    assertExists(refModel);
-    return html`<affine-cell data-block-id=${refModel.id}></affine-cell>`;
+    assertExists(this.refModel);
+    return html`<affine-cell data-block-id=${this.refModel.id}></affine-cell>`;
     const renderer = this.column.renderer$.value;
     if (!renderer) {
       return;

@@ -77,6 +77,7 @@ export class TableSelectionController implements ReactiveController {
       this.clearSelection();
       return;
     }
+
     const selection: TableViewSelectionWithType = {
       ...data,
       viewId: this.view.id,
@@ -390,11 +391,11 @@ export class TableSelectionController implements ReactiveController {
     if (!cell) {
       return;
     }
-    const row = cell.closest('data-view-table-row');
+    const row = cell.closest('microsheet-data-view-table-row');
     const rows = Array.from(
       row
         ?.closest('.affine-microsheet-table-container')
-        ?.querySelectorAll('data-view-table-row') ?? []
+        ?.querySelectorAll('microsheet-data-view-table-row') ?? []
     );
     const cells = Array.from(
       row?.querySelectorAll('affine-microsheet-cell-container') ?? []
@@ -436,6 +437,7 @@ export class TableSelectionController implements ReactiveController {
         rowIndex++;
       }
     }
+
     rows[rowIndex]
       ?.querySelectorAll('affine-microsheet-cell-container')
       ?.item(columnIndex)
@@ -513,7 +515,7 @@ export class TableSelectionController implements ReactiveController {
 
   getRow(groupKey: string | undefined, rowId: string) {
     return this.getGroup(groupKey)?.querySelector(
-      `data-view-table-row[data-row-id='${rowId}']`
+      `microsheet-data-view-table-row[data-row-id='${rowId}']`
     );
   }
 
@@ -623,7 +625,7 @@ export class TableSelectionController implements ReactiveController {
             `affine-microsheet-data-view-table-group[data-group-key="${groupKey}"]`
           )
         : this.tableContainer;
-    return container?.querySelectorAll('data-view-table-row');
+    return container?.querySelectorAll('microsheet-data-view-table-row');
   }
 
   rowSelectionChange({
@@ -659,7 +661,7 @@ export class TableSelectionController implements ReactiveController {
     const set = new Set(rows);
     if (!this.tableContainer) return;
     for (const row of this.tableContainer
-      ?.querySelectorAll('data-view-table-row')
+      ?.querySelectorAll('microsheet-data-view-table-row')
       .values() ?? []) {
       if (!set.has(row.rowId)) {
         continue;
@@ -1076,6 +1078,8 @@ export class SelectionElement extends WithDisposable(ShadowlessElement) {
       this.preTask = requestAnimationFrame(() =>
         this.startUpdate(this.selection$.value)
       );
+    } else if (selection?.selectionType === 'row') {
+      this.updateRowSelectionStyle(selection.rows[0]);
     } else {
       this.clearFocusStyle();
       this.clearAreaStyle();
@@ -1164,6 +1168,35 @@ export class SelectionElement extends WithDisposable(ShadowlessElement) {
     dragToFill.style.left = `${x + w}px`;
     dragToFill.style.top = `${y + h}px`;
     dragToFill.style.display = showDragToFillHandle ? 'block' : 'none';
+  }
+
+  updateRowSelectionStyle(row: RowWithGroup) {
+    const div = this.selectionRef.value;
+    if (!div) return;
+    const tableContainer = this.controller.tableContainer;
+    if (!tableContainer) return;
+    const tableRect = tableContainer.getBoundingClientRect();
+    const rowIndex = this.controller.view.rows$.value?.findIndex(
+      r => r === row.id
+    );
+    if (rowIndex === -1) return;
+    const rect = this.controller.getRect(
+      undefined,
+      rowIndex,
+      rowIndex,
+      0,
+      this.controller.view.properties$.value.length - 1
+    );
+    if (!rect) {
+      this.clearAreaStyle();
+      return;
+    }
+    const { left, top, width, height, scale } = rect;
+    div.style.left = `${left - tableRect.left / scale}px`;
+    div.style.top = `${top - tableRect.top / scale}px`;
+    div.style.width = `${width}px`;
+    div.style.height = `${height}px`;
+    div.style.display = 'block';
   }
 
   @property({ attribute: false })

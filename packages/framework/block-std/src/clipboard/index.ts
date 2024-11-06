@@ -4,6 +4,7 @@ import type {
   Doc,
   JobMiddleware,
   Slice,
+  SliceSnapshot,
 } from '@blocksuite/store';
 import type { RootContentMap } from 'hast';
 
@@ -243,6 +244,16 @@ export class Clipboard extends LifeCycleWatcher {
     index?: number
   ) => {
     return this._getJob().snapshotToBlock(snapshot, doc, parent, index);
+  };
+
+  pasteCellSliceSnapshot = async (
+    snapshot: SliceSnapshot,
+    doc: Doc,
+    parent?: string,
+    index?: number
+  ) => {
+    const job = this._getJob();
+    return job.snapshotToCellSlice(snapshot, doc, parent, index);
   };
 
   registerAdapter = <T extends BaseAdapter>(

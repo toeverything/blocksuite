@@ -5,6 +5,7 @@ import type {
   MicrosheetBlockModel,
   ViewBasicDataType,
 } from '@blocksuite/affine-model';
+import type { BlockStdScope } from '@blocksuite/block-std';
 import type { BlockModel } from '@blocksuite/store';
 
 import {
@@ -12,6 +13,7 @@ import {
   insertPositionToIndex,
   type InsertToPosition,
 } from '@blocksuite/affine-shared/utils';
+import { assertExists } from '@blocksuite/global/utils';
 
 export function addProperty(
   model: MicrosheetBlockModel,

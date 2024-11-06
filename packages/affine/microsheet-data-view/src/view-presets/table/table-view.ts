@@ -32,10 +32,8 @@ const styles = css`
     position: relative;
     display: flex;
     flex-direction: column;
-    overflow: hidden;
     margin-left: -16px;
-    padding-top: 16px;
-    padding-bottom: 10px;
+    overflow: hidden;
   }
 
   affine-microsheet-table * {
@@ -44,8 +42,12 @@ const styles = css`
 
   .affine-microsheet-table {
     overflow-y: auto;
+    padding-top: 16px;
+    padding-bottom: 10px;
   }
-
+  .affine-microsheet-table::-webkit-scrollbar {
+    display: none;
+  }
   .affine-microsheet-block-title-container {
     display: flex;
     align-items: center;
@@ -59,8 +61,8 @@ const styles = css`
     width: 100%;
     padding-bottom: 4px;
     z-index: 1;
-    overflow-x: scroll;
-    overflow-y: hidden;
+    /* overflow-x: scroll;
+    overflow-y: hidden; */
   }
 
   .affine-microsheet-block-table:hover {

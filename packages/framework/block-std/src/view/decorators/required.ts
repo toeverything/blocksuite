@@ -27,6 +27,13 @@ function validatePropTypes<T extends InstanceType<Constructor>>(
 ) {
   for (const [propName, validator] of Object.entries(propTypes)) {
     const key = propName as keyof T;
+    if (
+      (instance.flavour === 'affine:row' ||
+        instance.flavour === 'affine:cell') &&
+      propName === 'widgets'
+    ) {
+      continue;
+    }
     if (instance[key] === undefined) {
       throw new BlockSuiteError(
         ErrorCode.DefaultRuntimeError,

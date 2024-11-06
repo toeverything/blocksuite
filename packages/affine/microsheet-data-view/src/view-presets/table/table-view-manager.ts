@@ -49,9 +49,9 @@ export class TableSingleView extends SingleViewBase<TableViewData> {
   });
 
   detailProperties$ = computed(() => {
-    return this.propertiesWithoutFilter$.value.filter(
-      id => this.propertyTypeGet(id) !== 'title'
-    );
+    return this.propertiesWithoutFilter$.value.filter(id => {
+      return this.propertyTypeGet(id) !== 'title';
+    });
   });
 
   filter$ = computed(() => {
@@ -135,9 +135,7 @@ export class TableSingleView extends SingleViewBase<TableViewData> {
   });
 
   propertyIds$ = computed(() => {
-    return this.propertiesWithoutFilter$.value.filter(
-      id => !this.propertyHideGet(id)
-    );
+    return this.detailProperties$.value.filter(id => !this.propertyHideGet(id));
   });
 
   readonly$ = computed(() => {

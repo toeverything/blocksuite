@@ -80,6 +80,14 @@ export function getFirstNotDividerItem(
   return firstItem ?? null;
 }
 
+export function insideDatabase(model: BlockModel) {
+  return isInsideBlockByFlavour(model.doc, model, 'affine:database');
+}
+
+export function insideMicrosheet(model: BlockModel) {
+  return isInsideBlockByFlavour(model.doc, model, 'affine:microsheet');
+}
+
 export function insideEdgelessText(model: BlockModel) {
   return isInsideBlockByFlavour(model.doc, model, 'affine:edgeless-text');
 }

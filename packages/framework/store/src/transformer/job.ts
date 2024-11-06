@@ -211,6 +211,64 @@ export class Job {
     }
   };
 
+  snapshotToCellSlice = async (
+    snapshot: SliceSnapshot,
+    doc: Doc,
+    parent?: string,
+    index?: number
+  ): Promise<Slice | undefined> => {
+    SliceSnapshotSchema.parse(snapshot);
+    try {
+      const { content, pageVersion, workspaceVersion, workspaceId, pageId } =
+        snapshot;
+
+      // Create a temporary root snapshot to encompass all content blocks
+      const tmpRootSnapshot: BlockSnapshot = {
+        id: 'temporary-root',
+        flavour: 'affine:cell',
+        props: {},
+        type: 'block',
+        children: content,
+      };
+
+      for (const block of content) {
+        this._triggerBeforeImportEvent(block, parent, index);
+      }
+      const flatSnapshots: FlatSnapshot[] = [];
+      this._flattenSnapshot(tmpRootSnapshot, flatSnapshots, parent, index);
+
+      const blockTree = await this._convertFlatSnapshots(flatSnapshots);
+
+      await this._insertBlockTree(blockTree.children, doc, parent, index);
+
+      const contentBlocks = blockTree.children
+        .map(tree => {
+          return doc.getBlockById(tree.draft.id);
+        })
+        .filter(Boolean) as DraftModel[];
+
+      const slice = new Slice({
+        content: contentBlocks,
+        pageVersion,
+        workspaceVersion,
+        workspaceId,
+        pageId,
+      });
+
+      this._slots.afterImport.emit({
+        type: 'slice',
+        snapshot,
+        slice,
+      });
+
+      return slice;
+    } catch (error) {
+      console.error(`Error when transforming snapshot to slice:`);
+      console.error(error);
+      return;
+    }
+  };
+
   snapshotToDoc = async (snapshot: DocSnapshot): Promise<Doc | undefined> => {
     try {
       this._slots.beforeImport.emit({
@@ -291,13 +349,14 @@ export class Job {
       }
       const flatSnapshots: FlatSnapshot[] = [];
       this._flattenSnapshot(tmpRootSnapshot, flatSnapshots, parent, index);
-
       const blockTree = await this._convertFlatSnapshots(flatSnapshots);
 
       await this._insertBlockTree(blockTree.children, doc, parent, index);
 
       const contentBlocks = blockTree.children
-        .map(tree => doc.getBlockById(tree.draft.id))
+        .map(tree => {
+          return doc.getBlockById(tree.draft.id);
+        })
         .filter(Boolean) as DraftModel[];
 
       const slice = new Slice({
@@ -449,6 +508,7 @@ export class Job {
       return {
         id: flat.snapshot.id,
         flavour: flat.snapshot.flavour,
+        // children: flat.snapshot.children,
         children: [],
         ...props,
       } as DraftModel;

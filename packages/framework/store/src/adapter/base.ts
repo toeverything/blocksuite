@@ -119,7 +119,7 @@ export abstract class BaseAdapter<AdapterTarget = unknown> {
     try {
       const sliceSnapshot = await this.job.sliceToSnapshot(slice);
       if (!sliceSnapshot) return;
-      wrapFakeNote(sliceSnapshot);
+      // wrapFakeNote(sliceSnapshot);
       return await this.fromSliceSnapshot({
         snapshot: sliceSnapshot,
         assets: this.job.assetsManager,
