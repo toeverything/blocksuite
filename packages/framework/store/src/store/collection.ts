@@ -67,6 +67,7 @@ const FLAGS_PRESET = {
   enable_shape_shadow_blur: false,
   enable_new_dnd: false,
   enable_mobile_keyboard_toolbar: false,
+  enable_mobile_linked_doc_menu: false,
   readonly: {},
 } satisfies BlockSuiteFlags;
 

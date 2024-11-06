@@ -20,13 +20,13 @@ import {
   getQuery,
 } from '../../../_common/components/utils.js';
 import { getPopperPosition } from '../../utils/position.js';
-import { styles } from './styles.js';
+import { linkedDocPopoverStyles } from './styles.js';
 
 @requiredProperties({
   context: PropTypes.object,
 })
 export class LinkedDocPopover extends WithDisposable(LitElement) {
-  static override styles = styles;
+  static override styles = linkedDocPopoverStyles;
 
   private _abort = () => {
     // remove popover dom
@@ -50,7 +50,7 @@ export class LinkedDocPopover extends WithDisposable(LitElement) {
       this.context.close();
       return;
     }
-    this._linkedDocGroup = await this.context.getMenus(
+    this._linkedDocGroup = await this.context.config.getMenus(
       query,
       this._abort,
       this.context.std.host,

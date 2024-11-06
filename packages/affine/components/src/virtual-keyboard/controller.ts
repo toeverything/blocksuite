@@ -9,7 +9,7 @@ function notSupportedWarning() {
 
 export type VirtualKeyboardControllerConfig = {
   useScreenHeight: boolean;
-  inputElement: HTMLElement;
+  inputElement: HTMLElement | null;
 };
 
 export class VirtualKeyboardController implements ReactiveController {
@@ -54,19 +54,22 @@ export class VirtualKeyboardController implements ReactiveController {
     if (navigator.virtualKeyboard) {
       navigator.virtualKeyboard.hide();
     } else {
-      this.config.inputElement.inputMode = 'none';
+      const { inputElement } = this.config;
+      inputElement && (inputElement.inputMode = 'none');
     }
   };
 
   host: ReactiveControllerHost & {
     virtualKeyboardControllerConfig: VirtualKeyboardControllerConfig;
+    hasUpdated: boolean;
   };
 
   show = () => {
     if (navigator.virtualKeyboard) {
       navigator.virtualKeyboard.show();
     } else {
-      this.config.inputElement.inputMode = '';
+      const { inputElement } = this.config;
+      inputElement && (inputElement.inputMode = '');
     }
   };
 
@@ -98,18 +101,31 @@ export class VirtualKeyboardController implements ReactiveController {
     (this.host = host).addController(this);
   }
 
-  hostConnected() {
+  hostDisconnected() {
+    this._disposables.dispose();
+  }
+
+  hostUpdated() {
+    // return if the first update has been handled
+    if (this.host.hasUpdated) return;
+
+    const { inputElement } = this.config;
+    if (!inputElement) {
+      console.warn('inputElement is not found');
+      return;
+    }
+
     if (navigator.virtualKeyboard) {
       const { overlaysContent } = navigator.virtualKeyboard;
-      const { virtualKeyboardPolicy } = this.config.inputElement;
+      const { virtualKeyboardPolicy } = inputElement;
 
       navigator.virtualKeyboard.overlaysContent = true;
-      this.config.inputElement.virtualKeyboardPolicy = 'manual';
+      inputElement.virtualKeyboardPolicy = 'manual';
 
       this._disposables.add(() => {
         if (!navigator.virtualKeyboard) return;
         navigator.virtualKeyboard.overlaysContent = overlaysContent;
-        this.config.inputElement.virtualKeyboardPolicy = virtualKeyboardPolicy;
+        inputElement.virtualKeyboardPolicy = virtualKeyboardPolicy;
       });
       this._disposables.addFromEvent(
         navigator.virtualKeyboard,
@@ -131,17 +147,9 @@ export class VirtualKeyboardController implements ReactiveController {
       notSupportedWarning();
     }
 
-    this._disposables.addFromEvent(
-      this.config.inputElement,
-      'focus',
-      this.show
-    );
-    this._disposables.addFromEvent(this.config.inputElement, 'blur', this.hide);
+    this._disposables.addFromEvent(inputElement, 'focus', this.show);
+    this._disposables.addFromEvent(inputElement, 'blur', this.hide);
 
     this._updateKeyboardHeight();
-  }
-
-  hostDisconnected() {
-    this._disposables.dispose();
   }
 }

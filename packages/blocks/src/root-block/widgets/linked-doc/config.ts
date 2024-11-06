@@ -23,6 +23,30 @@ import {
 
 import { showImportModal } from './import-doc/index.js';
 
+export interface LinkedWidgetConfig {
+  /**
+   * The first item of the trigger keys will be the primary key
+   * e.g. @, [[
+   */
+  triggerKeys: [string, ...string[]];
+  /**
+   * Convert trigger key to primary key (the first item of the trigger keys)
+   * [[ -> @
+   */
+  convertTriggerKey: boolean;
+  ignoreBlockTypes: (keyof BlockSuite.BlockModels)[];
+  getMenus: (
+    query: string,
+    abort: () => void,
+    editorHost: EditorHost,
+    inlineEditor: AffineInlineEditor
+  ) => Promise<LinkedMenuGroup[]>;
+
+  mobile: {
+    useScreenHeight?: boolean;
+  };
+}
+
 export type LinkedMenuItem = {
   key: string;
   name: string;
@@ -46,7 +70,7 @@ export type LinkedDocContext = {
   std: BlockStdScope;
   inlineEditor: AffineInlineEditor;
   triggerKey: string;
-  getMenus: typeof getMenus;
+  config: LinkedWidgetConfig;
   close: () => void;
 };
 
