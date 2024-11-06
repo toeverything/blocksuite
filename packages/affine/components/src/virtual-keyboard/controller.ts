@@ -1,5 +1,6 @@
 import type { ReactiveController, ReactiveControllerHost } from 'lit';
 
+import { IS_IOS } from '@blocksuite/global/env';
 import { DisposableGroup } from '@blocksuite/global/utils';
 import { signal } from '@preact/signals-core';
 
@@ -9,7 +10,7 @@ function notSupportedWarning() {
 
 export type VirtualKeyboardControllerConfig = {
   useScreenHeight: boolean;
-  inputElement: HTMLElement | null;
+  inputElement: HTMLElement;
 };
 
 export class VirtualKeyboardController implements ReactiveController {
@@ -44,7 +45,9 @@ export class VirtualKeyboardController implements ReactiveController {
        */
       this._keyboardOpened$.value = windowHeight - visualViewport.height > 0;
       this._keyboardHeight$.value =
-        windowHeight - visualViewport.height - visualViewport.offsetTop;
+        windowHeight -
+        visualViewport.height -
+        (IS_IOS ? 0 : visualViewport.offsetTop);
     } else {
       notSupportedWarning();
     }
@@ -54,8 +57,7 @@ export class VirtualKeyboardController implements ReactiveController {
     if (navigator.virtualKeyboard) {
       navigator.virtualKeyboard.hide();
     } else {
-      const { inputElement } = this.config;
-      inputElement && (inputElement.inputMode = 'none');
+      this.config.inputElement.inputMode = 'none';
     }
   };
 
@@ -68,8 +70,7 @@ export class VirtualKeyboardController implements ReactiveController {
     if (navigator.virtualKeyboard) {
       navigator.virtualKeyboard.show();
     } else {
-      const { inputElement } = this.config;
-      inputElement && (inputElement.inputMode = '');
+      this.config.inputElement.inputMode = '';
     }
   };
 
@@ -101,19 +102,8 @@ export class VirtualKeyboardController implements ReactiveController {
     (this.host = host).addController(this);
   }
 
-  hostDisconnected() {
-    this._disposables.dispose();
-  }
-
-  hostUpdated() {
-    // return if the first update has been handled
-    if (this.host.hasUpdated) return;
-
+  hostConnected() {
     const { inputElement } = this.config;
-    if (!inputElement) {
-      console.warn('inputElement is not found');
-      return;
-    }
 
     if (navigator.virtualKeyboard) {
       const { overlaysContent } = navigator.virtualKeyboard;
@@ -151,5 +141,9 @@ export class VirtualKeyboardController implements ReactiveController {
     this._disposables.addFromEvent(inputElement, 'blur', this.hide);
 
     this._updateKeyboardHeight();
+  }
+
+  hostDisconnected() {
+    this._disposables.dispose();
   }
 }

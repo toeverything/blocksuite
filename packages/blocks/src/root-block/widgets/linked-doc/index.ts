@@ -2,10 +2,13 @@ import type { AffineInlineEditor } from '@blocksuite/affine-components/rich-text
 import type { UIEventStateContext } from '@blocksuite/block-std';
 
 import { getInlineEditorByModel } from '@blocksuite/affine-components/rich-text';
-import { matchFlavours } from '@blocksuite/affine-shared/utils';
+import {
+  getViewportElement,
+  matchFlavours,
+} from '@blocksuite/affine-shared/utils';
 import { WidgetComponent } from '@blocksuite/block-std';
 import { IS_MOBILE } from '@blocksuite/global/env';
-import { InlineEditor } from '@blocksuite/inline';
+import { InlineEditor, type InlineRange } from '@blocksuite/inline';
 import { signal } from '@preact/signals-core';
 import { html, nothing } from 'lit';
 import { state } from 'lit/decorators.js';
@@ -50,6 +53,8 @@ export class AffineLinkedDocWidget extends WidgetComponent {
 
     return getInlineEditorByModel(this.host, model);
   };
+
+  private _inlineEditor: AffineInlineEditor | null = null;
 
   private readonly _onCompositionEnd = (ctx: UIEventStateContext) => {
     const event = ctx.get('defaultState').event as CompositionEvent;
@@ -113,10 +118,13 @@ export class AffineLinkedDocWidget extends WidgetComponent {
 
   private readonly _show$ = signal<'desktop' | 'mobile' | 'none'>('none');
 
+  private _startRange: InlineRange | null = null;
+
   close = () => {
     this._inlineEditor = null;
     this._triggerKey = '';
     this._show$.value = 'none';
+    this._startRange = null;
   };
 
   show = (mode: 'desktop' | 'mobile' = 'desktop') => {
@@ -126,6 +134,8 @@ export class AffineLinkedDocWidget extends WidgetComponent {
     if (this._triggerKey === '') {
       this._triggerKey = this.config.triggerKeys[0];
     }
+
+    this._startRange = this._inlineEditor?.getInlineRange() ?? null;
 
     const enableMobile = this.doc.awarenessStore.getFlag(
       'enable_mobile_linked_doc_menu'
@@ -138,6 +148,7 @@ export class AffineLinkedDocWidget extends WidgetComponent {
     return {
       std: this.std,
       inlineEditor: this._inlineEditor!,
+      startRange: this._startRange!,
       triggerKey: this._triggerKey,
       config: this.config,
       close: this.close,
@@ -150,7 +161,11 @@ export class AffineLinkedDocWidget extends WidgetComponent {
       ignoreBlockTypes: ['affine:code'],
       convertTriggerKey: true,
       getMenus,
-      mobile: {},
+      mobile: {
+        useScreenHeight: false,
+        scrollContainer: getViewportElement(this.std.host) ?? window,
+        scrollTopOffset: 46,
+      },
       ...this.std.getConfig('affine:page')?.linkedWidget,
     };
   }
@@ -235,9 +250,6 @@ export class AffineLinkedDocWidget extends WidgetComponent {
       )}
     ></blocksuite-portal>`;
   }
-
-  @state()
-  private accessor _inlineEditor: AffineInlineEditor | null = null;
 
   @state()
   private accessor _triggerKey = '';

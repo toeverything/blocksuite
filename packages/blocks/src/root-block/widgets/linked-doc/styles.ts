@@ -53,51 +53,10 @@ export const linkedDocPopoverStyles = css`
 `;
 
 export const mobileLinkedDocMenuStyles = css`
-  .input-container {
-    display: flex;
-    position: fixed;
-    /* TODO(@L-Sun): configurable this */
-    top: 44px;
-    margin: 0px 16px;
-    width: calc(100% - 2 * 16px);
-    padding: 2px 0;
-    box-sizing: border-box;
-    display: flex;
-    flex-direction: row;
-    justify-content: flex-start;
-    align-items: center;
-
-    border-radius: 4px;
-    background: ${unsafeCSSVarV2('layer/background/secondary')};
-
-    > .prefix,
-    input {
-      background: inherit;
-
-      /* MobileTypeface/base */
-      color: ${unsafeCSSVarV2('text/primary')};
-      font-family: 'SF Pro Text';
-      font-size: 16px;
-      line-height: 22px;
-      font-style: normal;
-      font-weight: 400;
-    }
-
-    > input {
-      flex: 1;
-      border: none;
-    }
-
-    > input:focus-visible {
-      outline: none;
-    }
-  }
-
-  .mobile-linked-doc-menu {
+  :host {
     height: 220px;
     width: 100%;
     position: fixed;
-    bottom: 0;
     overflow-y: auto;
 
     display: flex;
@@ -115,7 +74,7 @@ export const mobileLinkedDocMenuStyles = css`
     box-shadow: 0px -3px 10px 0px rgba(0, 0, 0, 0.07);
   }
 
-  ${scrollbarStyle('.mobile-linked-doc-menu')}
+  ${scrollbarStyle(':host')}
 
   .mobile-linked-doc-menu-item {
     display: flex;
@@ -128,9 +87,13 @@ export const mobileLinkedDocMenuStyles = css`
     flex-shrink: 0;
     box-sizing: border-box;
 
+    border: none;
+    background: inherit;
+
     > svg {
       width: 20px;
       height: 20px;
+      color: ${unsafeCSSVarV2('icon/primary')};
     }
 
     .text {
@@ -146,5 +109,9 @@ export const mobileLinkedDocMenuStyles = css`
       line-height: 22px;
       letter-spacing: -0.43px;
     }
+  }
+
+  .mobile-linked-doc-menu-item:active {
+    background: ${unsafeCSSVarV2('layer/background/hoverOverlay')};
   }
 `;
