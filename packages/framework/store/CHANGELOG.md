@@ -1,5 +1,23 @@
 # @blocksuite/store
 
+## 0.17.27
+
+### Patch Changes
+
+- f70b950: fix: color of canvas element under embed dark theme whiteboard is wrong (#8677)
+
+  ## Fix
+
+  - fix: color of canvas element under embed dark theme whiteboard is wrong (#8677)
+  - fix(edgeless): tool controller potential problem (#8675)
+  - fix: typeError: f.\_def.innerType.shape[e] is undefined (#8676)
+  - fix: whiteboard is first loaded, size of the linked doc card is scaled to wrong size (#8674)
+
+- Updated dependencies [f70b950]
+  - @blocksuite/global@0.17.27
+  - @blocksuite/inline@0.17.27
+  - @blocksuite/sync@0.17.27
+
 ## 0.17.26
 
 ### Patch Changes
