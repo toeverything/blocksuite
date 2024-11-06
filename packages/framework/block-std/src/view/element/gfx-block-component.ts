@@ -52,6 +52,27 @@ function updateTransform(
   );
 }
 
+// Add this new function to handle the common connection logic
+function handleGfxConnection(instance: GfxBlockComponent) {
+  instance.style.position = 'absolute';
+
+  instance.disposables.add(
+    instance.gfx.viewport.viewportUpdated.on(() => {
+      updateTransform(instance, instance.gfx, instance.model);
+    })
+  );
+
+  instance.disposables.add(
+    instance.doc.slots.blockUpdated.on(({ type, id }) => {
+      if (id === instance.model.id && type === 'update') {
+        updateTransform(instance, instance.gfx, instance.model);
+      }
+    })
+  );
+
+  updateTransform(instance, instance.gfx, instance.model);
+}
+
 export abstract class GfxBlockComponent<
   Model extends GfxBlockElementModel = GfxBlockElementModel,
   Service extends BlockService = BlockService,
@@ -65,16 +86,7 @@ export abstract class GfxBlockComponent<
 
   override connectedCallback(): void {
     super.connectedCallback();
-
-    this.style.position = 'absolute';
-
-    this.disposables.add(
-      this.gfx.viewport.viewportUpdated.on(() => {
-        updateTransform(this, this.gfx, this.model);
-      })
-    );
-
-    updateTransform(this, this.gfx, this.model);
+    handleGfxConnection(this);
   }
 
   getRenderingRect() {
@@ -152,16 +164,7 @@ export function toGfxBlockComponent<
 
     override connectedCallback(): void {
       super.connectedCallback();
-
-      this.style.position = 'absolute';
-
-      this.disposables.add(
-        this.gfx.viewport.viewportUpdated.on(() => {
-          updateTransform(this, this.gfx, this.model);
-        })
-      );
-
-      updateTransform(this, this.gfx, this.model);
+      handleGfxConnection(this);
     }
 
     getRenderingRect(): {
