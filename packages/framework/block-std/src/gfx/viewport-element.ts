@@ -106,6 +106,14 @@ export class GfxViewportElement extends WithDisposable(ShadowlessElement) {
     this.disposables.add(
       this.viewport.sizeUpdated.on(() => viewportUpdateCallback())
     );
+
+    this.disposables.add(
+      this.host!.doc.slots.blockUpdated.on(payload => {
+        if (payload.type === 'update' && payload.props.key === 'xywh') {
+          viewportUpdateCallback();
+        }
+      })
+    );
   }
 
   override render() {
