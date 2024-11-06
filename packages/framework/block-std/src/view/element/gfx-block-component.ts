@@ -52,7 +52,6 @@ function updateTransform(
   );
 }
 
-// Add this new function to handle the common connection logic
 function handleGfxConnection(instance: GfxBlockComponent) {
   instance.style.position = 'absolute';
 
@@ -154,7 +153,6 @@ export function toGfxBlockComponent<
   WidgetName extends string,
   B extends typeof BlockComponent<Model, Service, WidgetName>,
 >(CustomBlock: B) {
-  // @ts-ignore
   return class extends CustomBlock {
     [GfxElementSymbol] = true;
 
