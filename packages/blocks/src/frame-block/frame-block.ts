@@ -372,10 +372,6 @@ export class FrameBlockComponent extends GfxBlockComponent<FrameBlockModel> {
     `;
   }
 
-  override toZIndex(): string {
-    return 'auto';
-  }
-
   @state()
   accessor showBorder = true;
 
