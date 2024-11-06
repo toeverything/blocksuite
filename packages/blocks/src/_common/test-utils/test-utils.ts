@@ -1,3 +1,5 @@
+import type { BlockSnapshot, SliceSnapshot } from '@blocksuite/store';
+
 import {
   mergeToCodeModel,
   transformModel,
@@ -14,8 +16,6 @@ export class TestUtils {
   docTestUtils = new DocTestUtils();
 }
 
-import type { BlockSnapshot, SliceSnapshot } from '@blocksuite/store';
-
 export function nanoidReplacement(snapshot: BlockSnapshot | SliceSnapshot) {
   return JSON.parse(nanoidReplacementString(JSON.stringify(snapshot)));
 }
@@ -29,7 +29,7 @@ const escapedSnapshotAttributes = [
 
 function nanoidReplacementString(snapshotString: string) {
   const re =
-    /("block:[A-Za-z0-9-_]{10}")|("[A-Za-z0-9-_]{10}")|("var\(--affine-tag-[a-z]{3,10}\)")|("[A-Za-z0-9-_=]{44}")/g;
+    /("block:[A-Za-z0-9-_]{10}")|("[A-Za-z0-9-_]{10}")|("var\(--affine-v2-chip-label-[a-z]{3,10}\)")|("[A-Za-z0-9-_=]{44}")/g;
   const matches = snapshotString.matchAll(re);
   const matchesReplaceMap = new Map();
   let escapedNumber = 0;

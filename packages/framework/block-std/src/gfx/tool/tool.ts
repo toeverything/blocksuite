@@ -31,6 +31,10 @@ export abstract class BaseTool<
     return this.gfx.tool.currentTool$.peek() === this;
   }
 
+  get allowDragWithRightButton() {
+    return false;
+  }
+
   get controller() {
     return this.gfx.tool;
   }

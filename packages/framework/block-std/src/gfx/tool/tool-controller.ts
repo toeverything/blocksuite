@@ -44,18 +44,32 @@ const supportedEvents = [
   'dragEnd',
   'dragMove',
   'pointerMove',
+  'contextMenu',
   'pointerDown',
   'pointerUp',
   'click',
   'doubleClick',
   'tripleClick',
   'pointerOut',
-  'contextMenu',
 ] as const;
 
 export type SupportedEvents = (typeof supportedEvents)[number];
 
+export enum MouseButton {
+  FIFTH = 4,
+  FOURTH = 3,
+  MAIN = 0,
+  MIDDLE = 1,
+  SECONDARY = 2,
+}
+
 export interface ToolEventTarget {
+  /**
+   * Add a hook before the event is handled by the tool.
+   * Return false to prevent the tool from handling the event.
+   * @param evtName
+   * @param handler
+   */
   addHook<K extends SupportedHooks | SupportedEvents>(
     evtName: K,
     handler: (
@@ -230,20 +244,38 @@ export class ToolController extends GfxExtension {
         evtState: PointerEventState | BuiltInSlotContext
       ) => undefined | boolean)[]
     > = {};
+    /**
+     * Invoke the hook and the tool handler.
+     * @returns false if the handler is prevented by the hook
+     */
     const invokeToolHandler = (
       evtName: SupportedEvents,
-      evt: PointerEventState
+      evt: PointerEventState,
+      tool?: BaseTool
     ) => {
       const evtHooks = hooks[evtName];
       const stopHandler = evtHooks?.reduce((pre, hook) => {
         return pre || hook(evt) === false;
       }, false);
 
-      if (stopHandler || !this.currentTool$.peek()) {
-        return;
+      tool = tool ?? this.currentTool$.peek();
+
+      if (stopHandler) {
+        return false;
       }
 
-      this.currentTool$.peek()?.[evtName](evt);
+      try {
+        tool?.[evtName](evt);
+        return true;
+      } catch (e) {
+        throw new BlockSuiteError(
+          ErrorCode.ExecutionError,
+          `Error occurred while executing ${evtName} handler of tool "${tool?.toolName}"`,
+          {
+            cause: e as Error,
+          }
+        );
+      }
     };
 
     /**
@@ -273,11 +305,26 @@ export class ToolController extends GfxExtension {
       };
     };
 
+    let dragContext: {
+      tool: BaseTool;
+    } | null = null;
+
     this._disposableGroup.add(
       this.std.event.add('dragStart', ctx => {
-        this.dragging$.value = true;
         const evt = ctx.get('pointerState');
 
+        if (
+          evt.button === MouseButton.SECONDARY &&
+          !this.currentTool$.peek()?.allowDragWithRightButton
+        ) {
+          return;
+        }
+
+        if (evt.button === MouseButton.MIDDLE) {
+          evt.raw.preventDefault();
+        }
+
+        this.dragging$.value = true;
         this.draggingViewArea$.value = {
           startX: evt.x,
           startY: evt.y,
@@ -289,13 +336,29 @@ export class ToolController extends GfxExtension {
           h: 0,
         };
 
-        invokeToolHandler('dragStart', evt);
+        // this means the dragEnd event is not even fired
+        // so we need to manually call the dragEnd method
+        if (dragContext?.tool) {
+          dragContext.tool.dragEnd(evt);
+          dragContext = null;
+        }
+
+        if (invokeToolHandler('dragStart', evt)) {
+          dragContext = this.currentTool$.peek()
+            ? {
+                tool: this.currentTool$.peek()!,
+              }
+            : null;
+        }
       })
     );
 
     this._disposableGroup.add(
       this.std.event.add('dragMove', ctx => {
-        this.dragging$.value = true;
+        if (!this.dragging$.peek()) {
+          return;
+        }
+
         const evt = ctx.get('pointerState');
         const draggingStart = {
           x: this.draggingArea$.peek().startX,
@@ -314,26 +377,28 @@ export class ToolController extends GfxExtension {
           endY: evt.y,
         };
 
-        invokeToolHandler('dragMove', evt);
+        invokeToolHandler('dragMove', evt, dragContext?.tool);
       })
     );
 
     this._disposableGroup.add(
       this.std.event.add('dragEnd', ctx => {
+        if (!this.dragging$.peek()) {
+          return;
+        }
+
         this.dragging$.value = false;
         const evt = ctx.get('pointerState');
 
-        try {
-          invokeToolHandler('dragEnd', evt);
-        } catch (e) {
-          throw new Error(
-            `dragEnd handler of ${this.currentToolName$.peek()} throws an error`,
-            {
-              cause: e,
-            }
-          );
+        if (!invokeToolHandler('dragEnd', evt, dragContext?.tool)) {
+          // if the tool dragEnd is prevented by the hook, call the dragEnd method manually
+          // this guarantee the dragStart and dragEnd events are always called together
+          if (dragContext?.tool) {
+            dragContext.tool.dragEnd(evt);
+          }
         }
 
+        dragContext = null;
         this.draggingViewArea$.value = {
           x: 0,
           y: 0,
@@ -349,7 +414,6 @@ export class ToolController extends GfxExtension {
 
     this._disposableGroup.add(
       this.std.event.add('pointerMove', ctx => {
-        this.dragging$.value = false;
         const evt = ctx.get('pointerState');
 
         this.lastMousePos$.value = {
@@ -361,7 +425,18 @@ export class ToolController extends GfxExtension {
       })
     );
 
-    supportedEvents.slice(4).forEach(evtName => {
+    this._disposableGroup.add(
+      this.std.event.add('contextMenu', ctx => {
+        const evt = ctx.get('defaultState');
+
+        // when in editing mode, allow context menu to pop up
+        if (this.gfx.selection.editing) return;
+
+        evt.event.preventDefault();
+      })
+    );
+
+    supportedEvents.slice(5).forEach(evtName => {
       this._disposableGroup.add(
         this.std.event.add(evtName, ctx => {
           const evt = ctx.get('pointerState');
@@ -430,6 +505,12 @@ export class ToolController extends GfxExtension {
       toolName: toolNameStr,
     });
     this._builtInHookSlot.emit(beforeUpdateCtx.slotCtx);
+
+    if (beforeUpdateCtx.prevented) {
+      return;
+    }
+
+    this.gfx.selection.clear();
 
     this.currentTool$.peek()?.deactivate();
     this.currentToolName$.value = toolNameStr;

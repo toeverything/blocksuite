@@ -1,3 +1,4 @@
+import { unsafeCSSVarV2 } from '@blocksuite/affine-shared/theme';
 import { ShadowlessElement } from '@blocksuite/block-std';
 import { WithDisposable } from '@blocksuite/global/utils';
 import { css } from 'lit';
@@ -7,6 +8,8 @@ import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
 
 import type { SelectTag } from '../../logical/index.js';
+
+import { getColorByColor } from './colors.js';
 
 export class MultiTagView extends WithDisposable(ShadowlessElement) {
   static override styles = css`
@@ -34,13 +37,14 @@ export class MultiTagView extends WithDisposable(ShadowlessElement) {
     .affine-select-cell-container .select-selected {
       height: 22px;
       font-size: 14px;
-      line-height: 22px;
+      line-height: 20px;
       padding: 0 8px;
       border-radius: 4px;
       white-space: nowrap;
       background: var(--affine-tag-white);
       overflow: hidden;
       text-overflow: ellipsis;
+      border: 1px solid ${unsafeCSSVarV2('database/border')};
     }
   `;
 
@@ -55,7 +59,7 @@ export class MultiTagView extends WithDisposable(ShadowlessElement) {
             return;
           }
           const style = styleMap({
-            backgroundColor: option.color,
+            backgroundColor: getColorByColor(option.color),
           });
           return html`<span class="select-selected" style=${style}
             >${option.value}</span

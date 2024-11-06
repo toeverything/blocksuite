@@ -1,4 +1,5 @@
 export * from './common/index.js';
+export * from './component/index.js';
 export { DataSourceBase } from './data-source/base.js';
 export { DataView } from './data-view.js';
 export * from './filter/index.js';

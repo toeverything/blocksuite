@@ -181,6 +181,7 @@ function SurfaceRefToolbarOptions({
       : html`
           <editor-icon-button
             aria-label="Caption"
+            .tooltip=${'Add Caption'}
             @click=${() => {
               abortController.abort();
               blockComponent.captionElement.show();

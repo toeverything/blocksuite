@@ -30,7 +30,7 @@ export class CodeBlockService extends BlockService {
   }
 
   get themeKey() {
-    const theme = this.std.get(ThemeProvider).theme;
+    const theme = this.std.get(ThemeProvider).theme$.value;
     return theme === ColorScheme.Dark
       ? this._darkThemeKey
       : this._lightThemeKey;

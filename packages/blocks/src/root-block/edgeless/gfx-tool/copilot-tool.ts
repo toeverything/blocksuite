@@ -1,6 +1,7 @@
 import type { PointerEventState } from '@blocksuite/block-std';
 
-import { BaseTool } from '@blocksuite/block-std/gfx';
+import { BaseTool, MouseButton } from '@blocksuite/block-std/gfx';
+import { IS_MAC } from '@blocksuite/global/env';
 import { Bound, getCommonBoundWithRotation } from '@blocksuite/global/utils';
 import { Slot } from '@blocksuite/store';
 
@@ -19,6 +20,10 @@ export class CopilotTool extends BaseTool {
   dragLastPoint: [number, number] = [0, 0];
 
   dragStartPoint: [number, number] = [0, 0];
+
+  override get allowDragWithRightButton() {
+    return true;
+  }
 
   get area() {
     const start = new DOMPoint(this.dragStartPoint[0], this.dragStartPoint[1]);
@@ -59,6 +64,10 @@ export class CopilotTool extends BaseTool {
 
   override activate(): void {
     this.gfx.viewport.locked = true;
+
+    if (this.gfx.selection.lastSurfaceSelections) {
+      this.gfx.selection.set(this.gfx.selection.lastSurfaceSelections);
+    }
   }
 
   override deactivate(): void {
@@ -103,7 +112,24 @@ export class CopilotTool extends BaseTool {
     this.draggingAreaUpdated.emit();
   }
 
-  onContainerPointerDown(e: PointerEventState): void {
+  override mounted(): void {
+    this.addHook('pointerDown', evt => {
+      const useCopilot =
+        evt.raw.button === MouseButton.SECONDARY ||
+        (evt.raw.button === MouseButton.MAIN && IS_MAC
+          ? evt.raw.metaKey
+          : evt.raw.ctrlKey);
+
+      if (useCopilot) {
+        this.controller.setTool('copilot');
+        return false;
+      }
+
+      return;
+    });
+  }
+
+  override pointerDown(e: PointerEventState): void {
     if (this.processing) {
       e.raw.stopPropagation();
       return;

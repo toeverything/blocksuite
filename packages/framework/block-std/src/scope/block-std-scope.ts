@@ -12,7 +12,6 @@ import { UIEventDispatcher } from '../event/index.js';
 import { GfxController } from '../gfx/controller.js';
 import { GfxSelectionManager } from '../gfx/selection.js';
 import { SurfaceMiddlewareExtension } from '../gfx/surface-middleware.js';
-import { ToolController } from '../gfx/tool/tool-controller.js';
 import {
   BlockServiceIdentifier,
   BlockViewIdentifier,
@@ -50,7 +49,6 @@ const internalExtensions = [
   TextSelectionExtension,
   SurfaceSelectionExtension,
   CursorSelectionExtension,
-  ToolController,
   GfxSelectionManager,
   SurfaceMiddlewareExtension,
 ];

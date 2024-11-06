@@ -427,6 +427,7 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockComponent<EmbedSynce
 
   override connectedCallback() {
     super.connectedCallback();
+    this._cardStyle = this.model.style;
 
     this.style.display = 'block';
     this._load().catch(e => {
@@ -501,10 +502,6 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockComponent<EmbedSynce
   override renderBlock() {
     delete this.dataset.nestedEditor;
 
-    const { style } = this.model;
-
-    this._cardStyle = style;
-
     const syncedDoc = this.syncedDoc;
     const { isLoading, isError, isDeleted, isCycle } = this.blockState;
     const isCardOnly = this.depth >= 1;
@@ -569,5 +566,5 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockComponent<EmbedSynce
   @state()
   accessor syncedDocMode: DocMode = 'page';
 
-  override accessor useCaptionEditor = false;
+  override accessor useCaptionEditor = true;
 }

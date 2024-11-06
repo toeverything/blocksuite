@@ -1850,6 +1850,7 @@ __metadata:
     "@blocksuite/sync": "workspace:*"
     "@preact/signals-core": "npm:^1.8.0"
     "@shoelace-style/shoelace": "npm:2.18.0"
+    "@toeverything/pdf-viewer": "npm:^0.1.0"
     "@toeverything/y-indexeddb": "npm:0.10.0-canary.9"
     "@tweakpane/core": "npm:^2.0.4"
     "@types/katex": "npm:^0.16.7"
@@ -4493,6 +4494,30 @@ __metadata:
   peerDependencies:
     "@testing-library/dom": ">=7.21.4"
   checksum: 10/49821459d81c6bc435d97128d6386ca24f1e4b3ba8e46cb5a96fe3643efa6e002d88c1b02b7f2ec58da593e805c59b78d7fdf0db565c1f02ba782f63ee984040
+  languageName: node
+  linkType: hard
+
+"@toeverything/pdf-viewer-types@npm:0.1.0":
+  version: 0.1.0
+  resolution: "@toeverything/pdf-viewer-types@npm:0.1.0"
+  checksum: 10/aed8a2e9375e121a663e96147d6a726d4dd7b4917cfa35bac5c422c820125b2bc3e129281cad8c3983d1da12191ba4c6e0e45231123fce5d89091ce18dbc9560
+  languageName: node
+  linkType: hard
+
+"@toeverything/pdf-viewer@npm:^0.1.0":
+  version: 0.1.0
+  resolution: "@toeverything/pdf-viewer@npm:0.1.0"
+  dependencies:
+    "@toeverything/pdf-viewer-types": "npm:0.1.0"
+    "@toeverything/pdfium": "npm:0.1.0"
+  checksum: 10/75e1df49ecce97e667ac9ec1a630ba4492f1b712d4380a9c999f05535e305e4fd2a069d004449477520ea308ec5928f02b51268659f75788ae4715a7b6e14da7
+  languageName: node
+  linkType: hard
+
+"@toeverything/pdfium@npm:0.1.0":
+  version: 0.1.0
+  resolution: "@toeverything/pdfium@npm:0.1.0"
+  checksum: 10/5fee0f76608d27d747b9266096cdd153027e8f3e8774571524f86afd88757833a61472400df5dcf2a6ea2e16bcfe9864b090ef7e483c260998ba3fad418a9ba8
   languageName: node
   linkType: hard
 

@@ -76,6 +76,7 @@ export class EmbedGithubBlockComponent extends EmbedBlockComponent<
 
   override connectedCallback() {
     super.connectedCallback();
+    this._cardStyle = this.model.style;
 
     if (!this.model.owner || !this.model.repo || !this.model.githubId) {
       this.doc.withoutTransact(() => {
@@ -131,8 +132,6 @@ export class EmbedGithubBlockComponent extends EmbedBlockComponent<
       image,
       style,
     } = this.model;
-
-    this._cardStyle = style;
 
     const loading = this.loading;
     const theme = this.std.get(ThemeProvider).theme;
