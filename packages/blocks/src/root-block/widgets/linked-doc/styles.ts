@@ -105,12 +105,12 @@ export const mobileLinkedDocMenuStyles = css`
     align-items: flex-start;
     flex-shrink: 0;
 
-    --boarder-style: 1px solid ${unsafeCSSVarV2('layer/insideBorder/border')};
+    --border-style: 1px solid ${unsafeCSSVarV2('layer/insideBorder/border')};
 
     border-radius: 12px 12px 0px 0px;
-    border-top: var(--boarder-style);
-    border-right: var(--boarder-style);
-    border-left: var(--boarder-style);
+    border-top: var(--border-style);
+    border-right: var(--border-style);
+    border-left: var(--border-style);
     background: ${unsafeCSSVarV2('layer/background/primary')};
     box-shadow: 0px -3px 10px 0px rgba(0, 0, 0, 0.07);
   }
