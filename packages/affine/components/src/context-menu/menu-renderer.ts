@@ -294,6 +294,12 @@ export const createPopup = (
   });
   modal.append(content);
 
+  modal.onpointerdown = ev => {
+    if (ev.target === modal) {
+      close();
+    }
+  };
+
   modal.onmousedown = ev => {
     if (ev.target === modal) {
       close();
