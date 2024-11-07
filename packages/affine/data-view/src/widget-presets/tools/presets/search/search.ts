@@ -1,3 +1,4 @@
+import { unsafeCSSVarV2 } from '@blocksuite/affine-shared/theme';
 import { IS_MOBILE } from '@blocksuite/global/env';
 import { CloseIcon, SearchIcon } from '@blocksuite/icons/lit';
 import { baseTheme } from '@toeverything/theme';
@@ -21,16 +22,10 @@ const styles = css`
     align-items: center;
     gap: 8px;
     width: 24px;
-    height: 32px;
-    border-radius: 8px;
+    height: 24px;
+    border-radius: 4px;
     transition: width 0.3s ease;
     overflow: hidden;
-  }
-
-  .affine-database-search-container svg {
-    width: 20px;
-    height: 20px;
-    fill: var(--affine-icon-color);
   }
 
   .search-container-expand {
@@ -55,7 +50,7 @@ const styles = css`
   .affine-database-search-input-icon {
     position: absolute;
     left: 0;
-    height: 100%;
+    font-size: 20px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -63,6 +58,7 @@ const styles = css`
     cursor: pointer;
     padding: 2px;
     border-radius: 4px;
+    color: ${unsafeCSSVarV2('icon/primary')};
   }
 
   .affine-database-search-input-icon:hover {
@@ -159,9 +155,7 @@ export class DataViewHeaderToolsSearch extends WidgetBase<
     });
     return html`
       <label class="${searchToolClassMap}" @click="${this._clickSearch}">
-        <div class="affine-database-search-input-icon dv-icon-20">
-          ${SearchIcon()}
-        </div>
+        <div class="affine-database-search-input-icon">${SearchIcon()}</div>
         <input
           placeholder="Search..."
           class="affine-database-search-input"

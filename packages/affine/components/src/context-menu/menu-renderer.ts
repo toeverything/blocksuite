@@ -36,6 +36,7 @@ export class MenuComponent extends SignalWatcher(
       z-index: 999;
       gap: 8px;
       border: 0.5px solid ${unsafeCSSVarV2('layer/insideBorder/border')};
+      color: ${unsafeCSSVarV2('text/primary')};
     }
 
     .affine-menu-search-container {
