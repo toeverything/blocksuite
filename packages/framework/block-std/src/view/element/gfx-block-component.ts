@@ -7,7 +7,7 @@ import { nothing } from 'lit';
 import type { BlockService } from '../../extension/index.js';
 import type { GfxBlockElementModel } from '../../gfx/index.js';
 
-import { GfxControllerIdentifier } from '../../gfx/index.js';
+import { GfxControllerIdentifier } from '../../gfx/identifiers.js';
 import { BlockComponent } from './block-component.js';
 
 export function isGfxBlockComponent(
