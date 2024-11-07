@@ -12,6 +12,7 @@ import {
   draftSelectedModelsCommand,
   duplicateSelectedModelsCommand,
   getSelectedModelsCommand,
+  getSelectionRectsCommand,
   retainFirstModelCommand,
 } from '@blocksuite/affine-shared/commands';
 
@@ -29,4 +30,6 @@ export const commands: BlockCommands = {
   // peekable
   peekSelectedBlock: peekSelectedBlockCommand,
   getSelectedPeekableBlocks: getSelectedPeekableBlocksCommand,
+  // rect
+  getSelectionRects: getSelectionRectsCommand,
 };
