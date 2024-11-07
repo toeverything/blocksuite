@@ -1,4 +1,5 @@
-import type { Text } from '@blocksuite/store';
+import type { DeltaInsert } from '@blocksuite/inline';
+import type { BlockSnapshot, Text } from '@blocksuite/store';
 
 import {
   DefaultInlineManagerExtension,
@@ -19,6 +20,7 @@ import { html } from 'lit/static-html.js';
 
 import type { DatabaseBlockComponent } from '../../database-block.js';
 
+import { ClipboardAdapter } from '../../../root-block/clipboard/adapter.js';
 import { HostContextKey } from '../../context/host-context.js';
 
 const styles = css`
@@ -193,11 +195,29 @@ export class HeaderAreaTextCellEditing extends BaseTextCell {
 
   private _onPaste = (e: ClipboardEvent) => {
     const inlineEditor = this.inlineEditor;
-    assertExists(inlineEditor);
-
     const inlineRange = inlineEditor.getInlineRange();
     if (!inlineRange) return;
-
+    if (e.clipboardData) {
+      try {
+        const getDeltas = (snapshot: BlockSnapshot): DeltaInsert[] => {
+          // @ts-ignore
+          const text = snapshot.props?.text?.delta;
+          return text
+            ? [...text, ...(snapshot.children?.flatMap(getDeltas) ?? [])]
+            : snapshot.children?.flatMap(getDeltas);
+        };
+        const snapshot = this.std?.clipboard?.readFromClipboard(
+          e.clipboardData
+        )[ClipboardAdapter.MIME];
+        const deltas = (
+          JSON.parse(snapshot).snapshot.content as BlockSnapshot[]
+        ).flatMap(getDeltas);
+        deltas.forEach(delta => this.insertDelta(delta));
+        return;
+      } catch (_e) {
+        //
+      }
+    }
     const text = e.clipboardData
       ?.getData('text/plain')
       ?.replace(/\r?\n|\r/g, '\n');
@@ -240,6 +260,19 @@ export class HeaderAreaTextCellEditing extends BaseTextCell {
         length: 0,
       });
     }
+  };
+
+  insertDelta = (delta: DeltaInsert) => {
+    const inlineEditor = this.inlineEditor;
+    const range = inlineEditor.getInlineRange();
+    if (!range || !delta.insert) {
+      return;
+    }
+    inlineEditor.insertText(range, delta.insert, delta.attributes);
+    inlineEditor.setInlineRange({
+      index: range.index + delta.insert.length,
+      length: 0,
+    });
   };
 
   private get std() {
