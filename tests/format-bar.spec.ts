@@ -71,7 +71,7 @@ test('should format quick bar show when select text', async ({ page }) => {
 
   const noteEl = page.locator('affine-note');
   const { x, y } = await getBoundingBox(noteEl);
-  await page.mouse.click(x, y);
+  await page.mouse.click(x + 100, y + 20);
   await expect(formatBar).not.toBeVisible();
 });
 

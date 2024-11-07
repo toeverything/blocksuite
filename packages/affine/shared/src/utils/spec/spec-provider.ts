@@ -46,4 +46,17 @@ export class SpecProvider {
   hasSpec(id: string) {
     return this.specMap.has(id);
   }
+
+  omitSpec(id: string, targetSpec: ExtensionType) {
+    const existingSpec = this.specMap.get(id);
+    if (!existingSpec) {
+      console.error(`Spec not found for ${id}`);
+      return;
+    }
+
+    this.specMap.set(
+      id,
+      existingSpec.filter(spec => spec !== targetSpec)
+    );
+  }
 }

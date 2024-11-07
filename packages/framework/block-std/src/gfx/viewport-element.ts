@@ -1,11 +1,11 @@
 import { WithDisposable } from '@blocksuite/global/utils';
-import { css, html, LitElement } from 'lit';
-import { property, query } from 'lit/decorators.js';
+import { css, html } from 'lit';
+import { property } from 'lit/decorators.js';
 
-import type { EditorHost } from '../view/index.js';
 import type { GfxBlockElementModel } from './gfx-block-model.js';
 
 import { PropTypes, requiredProperties } from '../view/decorators/required.js';
+import { type EditorHost, ShadowlessElement } from '../view/index.js';
 import { Viewport } from './viewport.js';
 
 /**
@@ -35,14 +35,15 @@ export function requestThrottledConnectedFrame<
 @requiredProperties({
   viewport: PropTypes.instanceOf(Viewport),
 })
-export class GfxViewportElement extends WithDisposable(LitElement) {
+export class GfxViewportElement extends WithDisposable(ShadowlessElement) {
   static override styles = css`
-    .gfx-viewport {
+    gfx-viewport {
       position: absolute;
       left: 0;
       top: 0;
       contain: size layout style;
       display: block;
+      transform: none;
     }
   `;
 
@@ -82,32 +83,13 @@ export class GfxViewportElement extends WithDisposable(LitElement) {
     resolve: () => void;
   }[] = [];
 
-  @property({ attribute: false })
-  accessor viewport!: Viewport;
-
   private _refreshViewport = requestThrottledConnectedFrame(() => {
-    const { translateX, translateY, zoom } = this.viewport;
-
-    if (this.container) {
-      this.container.style.transform = this._toCSSTransform(
-        translateX,
-        translateY,
-        zoom
-      );
-    }
+    this._hideOutsideBlock();
   }, this);
 
   private _updatingChildrenFlag = false;
 
   renderingBlocks = new Set<string>();
-
-  private _toCSSTransform(
-    translateX: number,
-    translateY: number,
-    zoom: number
-  ) {
-    return `translate3d(${translateX}px, ${translateY}px, 0) scale(${zoom})`;
-  }
 
   override connectedCallback(): void {
     super.connectedCallback();
@@ -127,9 +109,7 @@ export class GfxViewportElement extends WithDisposable(LitElement) {
   }
 
   override render() {
-    return html`<div class="gfx-viewport">
-      <slot></slot>
-    </div>`;
+    return html``;
   }
 
   scheduleUpdateChildren(id: string) {
@@ -166,9 +146,6 @@ export class GfxViewportElement extends WithDisposable(LitElement) {
     return promise;
   }
 
-  @query('.gfx-viewport')
-  accessor container: HTMLDivElement | null = null;
-
   @property({ attribute: false })
   accessor getModelsInViewport: undefined | (() => Set<GfxBlockElementModel>);
 
@@ -177,4 +154,7 @@ export class GfxViewportElement extends WithDisposable(LitElement) {
 
   @property({ type: Number })
   accessor maxConcurrentRenders: number = 2;
+
+  @property({ attribute: false })
+  accessor viewport!: Viewport;
 }

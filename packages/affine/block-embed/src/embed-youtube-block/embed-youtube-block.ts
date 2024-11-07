@@ -64,6 +64,7 @@ export class EmbedYoutubeBlockComponent extends EmbedBlockComponent<
 
   override connectedCallback() {
     super.connectedCallback();
+    this._cardStyle = this.model.style;
 
     if (!this.model.videoId) {
       this.doc.withoutTransact(() => {
@@ -129,10 +130,7 @@ export class EmbedYoutubeBlockComponent extends EmbedBlockComponent<
       creator,
       creatorImage,
       videoId,
-      style,
     } = this.model;
-
-    this._cardStyle = style;
 
     const loading = this.loading;
     const theme = this.std.get(ThemeProvider).theme;

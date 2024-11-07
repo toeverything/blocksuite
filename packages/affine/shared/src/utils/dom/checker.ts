@@ -8,6 +8,8 @@ export function isInsidePageEditor(host: EditorHost) {
 
 export function isInsideEdgelessEditor(host: EditorHost) {
   return Array.from(host.children).some(
-    v => v.tagName.toLowerCase() === 'affine-edgeless-root'
+    v =>
+      v.tagName.toLowerCase() === 'affine-edgeless-root' ||
+      v.tagName.toLowerCase() === 'affine-edgeless-root-preview'
   );
 }

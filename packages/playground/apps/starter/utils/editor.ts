@@ -114,6 +114,10 @@ export async function mountDefaultDocEditor(collection: DocCollection) {
   edgelessSpecs.extend([...extensions]);
   editor.edgelessSpecs = edgelessSpecs.value;
 
+  SpecProvider.getInstance().extendSpec('edgeless:preview', [
+    OverrideThemeExtension(themeExtension),
+  ]);
+
   editor.mode = 'page';
   editor.doc = doc;
   editor.std

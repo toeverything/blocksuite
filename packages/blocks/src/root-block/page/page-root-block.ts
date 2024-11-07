@@ -60,6 +60,7 @@ export class PageRootBlockComponent extends BlockComponent<
     affine-page-root {
       display: block;
       height: 100%;
+      cursor: default;
     }
 
     .affine-page-root-block-container {
@@ -74,8 +75,6 @@ export class PageRootBlockComponent extends BlockComponent<
       font-weight: 400;
       max-width: var(--affine-editor-width);
       margin: 0 auto;
-      /* cursor: crosshair; */
-      cursor: default;
 
       /* Leave a place for drag-handle */
       /* Do not use prettier format this style, or it will be broken */
@@ -349,17 +348,7 @@ export class PageRootBlockComponent extends BlockComponent<
         const last = lastNote.children.at(-1);
         if (
           !last ||
-          !last.text ||
-          matchFlavours(last, [
-            'affine:code',
-            'affine:divider',
-            'affine:image',
-            'affine:database',
-            'affine:bookmark',
-            'affine:attachment',
-            'affine:surface-ref',
-          ]) ||
-          /affine:embed-*/.test(last.flavour)
+          !(matchFlavours(last, ['affine:paragraph']) && last.text.length === 0)
         ) {
           if (readonly) return;
           const paragraphId = this.doc.addBlock(

@@ -56,6 +56,7 @@ export class EmbedFigmaBlockComponent extends EmbedBlockComponent<
 
   override connectedCallback() {
     super.connectedCallback();
+    this._cardStyle = this.model.style;
 
     if (!this.model.description && !this.model.title) {
       this.doc.withoutTransact(() => {
@@ -99,10 +100,7 @@ export class EmbedFigmaBlockComponent extends EmbedBlockComponent<
   }
 
   override renderBlock() {
-    const { title, description, style, url } = this.model;
-
-    this._cardStyle = style;
-
+    const { title, description, url } = this.model;
     const titleText = title ?? 'Figma';
     const descriptionText = description ?? url;
 

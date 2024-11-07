@@ -260,6 +260,7 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockComponent<EmbedLinke
   override connectedCallback() {
     super.connectedCallback();
 
+    this._cardStyle = this.model.style;
     this._isLinkToNode = isLinkToNode(this.model);
 
     this._load().catch(e => {
@@ -342,8 +343,6 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockComponent<EmbedLinke
   }
 
   override renderBlock() {
-    this._cardStyle = this.model.style;
-
     const linkedDoc = this.linkedDoc;
     const isDeleted = !linkedDoc;
     const isLoading = this._loading;

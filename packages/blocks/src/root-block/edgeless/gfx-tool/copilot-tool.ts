@@ -122,11 +122,14 @@ export class CopilotTool extends BaseTool {
 
       if (useCopilot) {
         this.controller.setTool('copilot');
+        return false;
       }
+
+      return;
     });
   }
 
-  onContainerPointerDown(e: PointerEventState): void {
+  override pointerDown(e: PointerEventState): void {
     if (this.processing) {
       e.raw.stopPropagation();
       return;

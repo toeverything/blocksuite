@@ -69,6 +69,8 @@ export class PanTool extends BaseTool<PanToolOption> {
           dispose();
         }
       });
+
+      return false;
     });
   }
 }

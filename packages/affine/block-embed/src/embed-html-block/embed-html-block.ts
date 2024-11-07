@@ -49,6 +49,7 @@ export class EmbedHtmlBlockComponent extends EmbedBlockComponent<EmbedHtmlModel>
 
   override connectedCallback() {
     super.connectedCallback();
+    this._cardStyle = this.model.style;
 
     // this is required to prevent iframe from capturing pointer events
     this.disposables.add(
@@ -75,10 +76,6 @@ export class EmbedHtmlBlockComponent extends EmbedBlockComponent<EmbedHtmlModel>
   }
 
   override renderBlock(): unknown {
-    const { style } = this.model;
-
-    this._cardStyle = style;
-
     const titleText = 'Basic HTML Page Structure';
 
     const htmlSrc = `

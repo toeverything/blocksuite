@@ -61,6 +61,7 @@ export class EmbedLoomBlockComponent extends EmbedBlockComponent<
 
   override connectedCallback() {
     super.connectedCallback();
+    this._cardStyle = this.model.style;
 
     if (!this.model.videoId) {
       this.doc.withoutTransact(() => {
@@ -115,9 +116,7 @@ export class EmbedLoomBlockComponent extends EmbedBlockComponent<
   }
 
   override renderBlock() {
-    const { image, title = 'Loom', description, videoId, style } = this.model;
-
-    this._cardStyle = style;
+    const { image, title = 'Loom', description, videoId } = this.model;
 
     const loading = this.loading;
     const theme = this.std.get(ThemeProvider).theme;
