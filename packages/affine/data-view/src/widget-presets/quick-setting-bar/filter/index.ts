@@ -3,7 +3,7 @@ import { html } from 'lit';
 import type { DataViewWidgetProps } from '../../../core/widget/types.js';
 
 export const renderFilterBar = (props: DataViewWidgetProps) => {
-  const view = props.view;
+  const view = props.dataViewInstance.view;
   if (view.filter$.value.conditions.length <= 0) {
     return;
   }

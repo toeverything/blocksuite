@@ -7,5 +7,5 @@ export * from './font-loader/index.js';
 export * from './notification-service.js';
 export * from './parse-url-service.js';
 export * from './quick-search-service.js';
-export * from './telemetry-service.js';
+export * from './telemetry-service/index.js';
 export * from './theme-service.js';

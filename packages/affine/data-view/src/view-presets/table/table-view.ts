@@ -13,7 +13,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
 
 import type { GroupManager } from '../../core/group-by/manager.js';
-import type { DataViewExpose } from '../../core/index.js';
+import type { DataViewInstance } from '../../core/index.js';
 import type { TableSingleView } from './table-view-manager.js';
 
 import { renderUniLit } from '../../core/utils/uni-component/uni-component.js';
@@ -169,37 +169,6 @@ export class DataViewTable extends DataViewBase<
 
   dragController = new TableDragController(this);
 
-  selectionController = new TableSelectionController(this);
-
-  expose: DataViewExpose = {
-    addRow: position => {
-      this._addRow(this.props.view, position);
-    },
-    focusFirstCell: () => {
-      this.selectionController.focusFirstCell();
-    },
-    showIndicator: evt => {
-      return this.dragController.showIndicator(evt) != null;
-    },
-    hideIndicator: () => {
-      this.dragController.dropPreview.remove();
-    },
-    moveTo: (id, evt) => {
-      const result = this.dragController.getInsertPosition(evt);
-      if (result) {
-        this.props.view.rowMove(
-          id,
-          result.position,
-          undefined,
-          result.groupKey
-        );
-      }
-    },
-    getSelection: () => {
-      return this.selectionController.selection;
-    },
-  };
-
   hotkeysController = new TableHotkeysController(this);
 
   onWheel = (event: WheelEvent) => {
@@ -251,6 +220,41 @@ export class DataViewTable extends DataViewBase<
     </div>`;
   };
 
+  selectionController = new TableSelectionController(this);
+
+  get expose(): DataViewInstance {
+    return {
+      addRow: position => {
+        this._addRow(this.props.view, position);
+      },
+      focusFirstCell: () => {
+        this.selectionController.focusFirstCell();
+      },
+      showIndicator: evt => {
+        return this.dragController.showIndicator(evt) != null;
+      },
+      hideIndicator: () => {
+        this.dragController.dropPreview.remove();
+      },
+      moveTo: (id, evt) => {
+        const result = this.dragController.getInsertPosition(evt);
+        if (result) {
+          this.props.view.rowMove(
+            id,
+            result.position,
+            undefined,
+            result.groupKey
+          );
+        }
+      },
+      getSelection: () => {
+        return this.selectionController.selection;
+      },
+      view: this.props.view,
+      eventTrace: this.props.eventTrace,
+    };
+  }
+
   private get readonly() {
     return this.props.view.readonly$.value;
   }
@@ -292,8 +296,7 @@ export class DataViewTable extends DataViewBase<
     });
     return html`
       ${renderUniLit(this.props.headerWidget, {
-        view: this.props.view,
-        viewMethods: this.expose,
+        dataViewInstance: this.expose,
       })}
       <div class="affine-database-table" style="${wrapperStyle}">
         <div class="affine-database-block-table" @wheel="${this.onWheel}">

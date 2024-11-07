@@ -5,12 +5,9 @@ import { repeat } from 'lit/directives/repeat.js';
 
 import type { SingleView } from '../../core/view-manager/single-view.js';
 import type { ViewManager } from '../../core/view-manager/view-manager.js';
-import type {
-  DataViewWidget,
-  DataViewWidgetProps,
-} from '../../core/widget/types.js';
+import type { DataViewWidget } from '../../core/widget/types.js';
 
-import { type DataViewExpose, renderUniLit } from '../../core/index.js';
+import { type DataViewInstance, renderUniLit } from '../../core/index.js';
 import { WidgetBase } from '../../core/widget/widget-base.js';
 
 const styles = css`
@@ -50,11 +47,9 @@ export class DataViewHeaderTools extends WidgetBase {
     const tools = this.toolsMap[this.view.type];
     return html` <div class="${classList}">
       ${repeat(tools ?? [], uni => {
-        const props: DataViewWidgetProps = {
-          view: this.view,
-          viewMethods: this.viewMethods,
-        };
-        return renderUniLit(uni, props);
+        return renderUniLit(uni, {
+          dataViewInstance: this.dataViewInstance,
+        });
       })}
     </div>`;
   }
@@ -73,7 +68,7 @@ declare global {
 }
 export const renderTools = (
   view: SingleView,
-  viewMethods: DataViewExpose,
+  viewMethods: DataViewInstance,
   viewSource: ViewManager
 ) => {
   return html` <data-view-header-tools

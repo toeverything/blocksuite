@@ -14,7 +14,7 @@ import Sortable from 'sortablejs';
 import type { KanbanSingleView } from './kanban-view-manager.js';
 import type { KanbanViewSelectionWithType } from './types.js';
 
-import { type DataViewExpose, renderUniLit } from '../../core/index.js';
+import { type DataViewInstance, renderUniLit } from '../../core/index.js';
 import { DataViewBase } from '../../core/view/data-view-base.js';
 import { KanbanClipboardController } from './controller/clipboard.js';
 import { KanbanDragController } from './controller/drag.js';
@@ -102,7 +102,7 @@ export class DataViewKanban extends DataViewBase<
 
   selectionController = new KanbanSelectionController(this);
 
-  expose: DataViewExpose = {
+  expose: DataViewInstance = {
     focusFirstCell: () => {
       this.selectionController.focusFirstCell();
     },
@@ -126,6 +126,8 @@ export class DataViewKanban extends DataViewBase<
     showIndicator: evt => {
       return this.dragController.shooIndicator(evt, undefined) != null;
     },
+    view: this.props.view,
+    eventTrace: this.props.eventTrace,
   };
 
   hotkeysController = new KanbanHotkeysController(this);
@@ -228,8 +230,7 @@ export class DataViewKanban extends DataViewBase<
     });
     return html`
       ${renderUniLit(this.props.headerWidget, {
-        view: this.props.view,
-        viewMethods: this.expose,
+        dataViewInstance: this.expose,
       })}
       <div
         class="affine-data-view-kanban-groups"

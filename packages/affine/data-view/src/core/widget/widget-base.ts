@@ -2,8 +2,7 @@ import { ShadowlessElement } from '@blocksuite/block-std';
 import { SignalWatcher, WithDisposable } from '@blocksuite/global/utils';
 import { property } from 'lit/decorators.js';
 
-import type { DataViewExpose } from '../view/types.js';
-import type { SingleView } from '../view-manager/single-view.js';
+import type { DataViewInstance } from '../view/types.js';
 import type { DataViewWidgetProps } from './types.js';
 
 export class WidgetBase
@@ -14,13 +13,18 @@ export class WidgetBase
     return this.view.manager.dataSource;
   }
 
+  get view() {
+    return this.dataViewInstance.view;
+  }
+
   get viewManager() {
     return this.view.manager;
   }
 
-  @property({ attribute: false })
-  accessor view!: SingleView;
+  get viewMethods() {
+    return this.dataViewInstance;
+  }
 
   @property({ attribute: false })
-  accessor viewMethods!: DataViewExpose;
+  accessor dataViewInstance!: DataViewInstance;
 }
