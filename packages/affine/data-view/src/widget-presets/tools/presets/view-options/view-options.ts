@@ -6,6 +6,7 @@ import {
   type PopupTarget,
   popupTargetFromElement,
 } from '@blocksuite/affine-components/context-menu';
+import { unsafeCSSVarV2 } from '@blocksuite/affine-shared/theme';
 import {
   ArrowRightSmallIcon,
   DeleteIcon,
@@ -52,10 +53,9 @@ const styles = css`
     background: var(--affine-hover-color);
   }
 
-  .affine-database-toolbar-item.more-action svg {
-    width: 20px;
-    height: 20px;
-    fill: var(--affine-icon-color);
+  .affine-database-toolbar-item.more-action {
+    font-size: 20px;
+    color: ${unsafeCSSVarV2('icon/primary')};
   }
 
   .more-action.active {
@@ -83,7 +83,7 @@ export class DataViewHeaderToolsViewOptions extends WidgetBase {
       return;
     }
     return html` <div
-      class="affine-database-toolbar-item more-action dv-icon-20"
+      class="affine-database-toolbar-item more-action"
       @click="${this.clickMoreAction}"
     >
       ${MoreHorizontalIcon()}
