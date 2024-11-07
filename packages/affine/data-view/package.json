@@ -31,11 +31,7 @@
     "@toeverything/theme": "^1.0.15",
     "date-fns": "^4.0.0",
     "lit": "^3.2.0",
-    "sortablejs": "^1.15.2",
     "zod": "^3.23.8"
-  },
-  "devDependencies": {
-    "@types/sortablejs": "^1.15.8"
   },
   "exports": {
     ".": "./src/index.ts",

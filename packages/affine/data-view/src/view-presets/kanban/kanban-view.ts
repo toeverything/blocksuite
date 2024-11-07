@@ -4,23 +4,28 @@ import {
   popupTargetFromElement,
 } from '@blocksuite/affine-components/context-menu';
 import { AddCursorIcon } from '@blocksuite/icons/lit';
+import { computed } from '@preact/signals-core';
 import { css } from 'lit';
 import { query } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
-import Sortable from 'sortablejs';
 
 import type { KanbanSingleView } from './kanban-view-manager.js';
 import type { KanbanViewSelectionWithType } from './types.js';
 
 import { type DataViewInstance, renderUniLit } from '../../core/index.js';
+import { defaultActivators } from '../../core/utils/wc-dnd/sensors/index.js';
+import {
+  createSortContext,
+  sortable,
+} from '../../core/utils/wc-dnd/sort/sort-context.js';
+import { horizontalListSortingStrategy } from '../../core/utils/wc-dnd/sort/strategies/index.js';
 import { DataViewBase } from '../../core/view/data-view-base.js';
 import { KanbanClipboardController } from './controller/clipboard.js';
 import { KanbanDragController } from './controller/drag.js';
 import { KanbanHotkeysController } from './controller/hotkeys.js';
 import { KanbanSelectionController } from './controller/selection.js';
-import { KanbanGroup } from './group.js';
 
 const styles = css`
   affine-data-view-kanban {
@@ -149,6 +154,47 @@ export class DataViewKanban extends DataViewBase<
 
   selectionController = new KanbanSelectionController(this);
 
+  sortContext = createSortContext({
+    dnd: {
+      activators: defaultActivators,
+      container: this,
+      onDragEnd: evt => {
+        const over = evt.over;
+        const activeId = evt.active.id;
+        const groups = this.groupManager.groupsDataList$.value;
+        if (over && over.id !== activeId && groups) {
+          const activeIndex = groups.findIndex(data => data.key === activeId);
+          const overIndex = groups.findIndex(data => data.key === over.id);
+
+          this.groupManager.moveGroupTo(
+            activeId,
+            activeIndex > overIndex
+              ? {
+                  before: true,
+                  id: over.id,
+                }
+              : {
+                  before: false,
+                  id: over.id,
+                }
+          );
+        }
+      },
+      modifiers: [
+        ({ transform }) => {
+          return {
+            ...transform,
+            y: 0,
+          };
+        },
+      ],
+    },
+    items: computed(() => {
+      return this.groupManager.groupsDataList$.value?.map(v => v.key) ?? [];
+    }),
+    strategy: horizontalListSortingStrategy,
+  });
+
   get expose(): DataViewInstance {
     return {
       focusFirstCell: () => {
@@ -183,41 +229,6 @@ export class DataViewKanban extends DataViewBase<
     return this.props.view.groupManager;
   }
 
-  override firstUpdated() {
-    const sortable = Sortable.create(this.groups, {
-      group: `kanban-group-drag-${this.props.view.id}`,
-      handle: '.group-header',
-      draggable: 'affine-data-view-kanban-group',
-      animation: 100,
-      onEnd: evt => {
-        if (evt.item instanceof KanbanGroup) {
-          const groups = Array.from(
-            this.groups.querySelectorAll('affine-data-view-kanban-group')
-          );
-
-          const key =
-            evt.newIndex != null
-              ? groups[evt.newIndex - 1]?.group.key
-              : undefined;
-          this.groupManager?.moveGroupTo(
-            evt.item.group.key,
-            key
-              ? {
-                  before: false,
-                  id: key,
-                }
-              : 'start'
-          );
-        }
-      },
-    });
-    this._disposables.add({
-      dispose: () => {
-        sortable.destroy();
-      },
-    });
-  }
-
   override render() {
     const groups = this.groupManager.groupsDataList$.value;
     if (!groups) {
@@ -244,6 +255,7 @@ export class DataViewKanban extends DataViewBase<
           group => group.key,
           group => {
             return html` <affine-data-view-kanban-group
+              ${sortable(group.key)}
               data-key="${group.key}"
               .dataViewEle="${this.props.dataViewEle}"
               .view="${this.props.view}"
