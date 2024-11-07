@@ -71,7 +71,6 @@ export class DataViewPropertiesSettingView extends SignalWatcher(
       user-select: none;
       cursor: pointer;
       border-radius: 4px;
-      transition: transform 0.2s;
     }
 
     .property-item-drag-bar {
