@@ -1,13 +1,13 @@
-import type { SerializedXYWH } from '@blocksuite/global/utils';
 import type { BlockModel } from '@blocksuite/store';
 
 import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
+import { Bound, type SerializedXYWH } from '@blocksuite/global/utils';
 import { nothing } from 'lit';
 
 import type { BlockService } from '../../extension/index.js';
 import type { GfxBlockElementModel } from '../../gfx/index.js';
 
-import { GfxControllerIdentifier } from '../../gfx/index.js';
+import { GfxControllerIdentifier } from '../../gfx/identifiers.js';
 import { BlockComponent } from './block-component.js';
 
 export function isGfxBlockComponent(
@@ -17,6 +17,31 @@ export function isGfxBlockComponent(
 }
 
 export const GfxElementSymbol = Symbol('GfxElement');
+
+function updateTransform(element: GfxBlockComponent) {
+  element.style.transformOrigin = '0 0';
+  element.style.transform = element.getCSSTransform();
+}
+
+function handleGfxConnection(instance: GfxBlockComponent) {
+  instance.style.position = 'absolute';
+
+  instance.disposables.add(
+    instance.gfx.viewport.viewportUpdated.on(() => {
+      updateTransform(instance);
+    })
+  );
+
+  instance.disposables.add(
+    instance.doc.slots.blockUpdated.on(({ type, id }) => {
+      if (id === instance.model.id && type === 'update') {
+        updateTransform(instance);
+      }
+    })
+  );
+
+  updateTransform(instance);
+}
 
 export abstract class GfxBlockComponent<
   Model extends GfxBlockElementModel = GfxBlockElementModel,
@@ -31,8 +56,20 @@ export abstract class GfxBlockComponent<
 
   override connectedCallback(): void {
     super.connectedCallback();
+    handleGfxConnection(this);
+  }
 
-    this.style.position = 'absolute';
+  getCSSTransform() {
+    const viewport = this.gfx.viewport;
+    const { translateX, translateY, zoom } = viewport;
+    const bound = Bound.deserialize(this.model.xywh);
+
+    const scaledX = bound.x * zoom;
+    const scaledY = bound.y * zoom;
+    const deltaX = scaledX - bound.x;
+    const deltaY = scaledY - bound.y;
+
+    return `translate(${translateX + deltaX}px, ${translateY + deltaY}px) scale(${zoom})`;
   }
 
   getRenderingRect() {
@@ -110,8 +147,20 @@ export function toGfxBlockComponent<
 
     override connectedCallback(): void {
       super.connectedCallback();
+      handleGfxConnection(this);
+    }
 
-      this.style.position = 'absolute';
+    getCSSTransform() {
+      const viewport = this.gfx.viewport;
+      const { translateX, translateY, zoom } = viewport;
+      const bound = Bound.deserialize(this.model.xywh);
+
+      const scaledX = bound.x * zoom;
+      const scaledY = bound.y * zoom;
+      const deltaX = scaledX - bound.x;
+      const deltaY = scaledY - bound.y;
+
+      return `translate(${translateX + deltaX}px, ${translateY + deltaY}px) scale(${zoom})`;
     }
 
     getRenderingRect(): {

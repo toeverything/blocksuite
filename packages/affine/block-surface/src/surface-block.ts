@@ -54,8 +54,6 @@ export class SurfaceBlockComponent extends BlockComponent<
       position: absolute;
       z-index: 1;
       pointer-events: none;
-      transform-origin: 0 0;
-      transform: var(--canvas-transform);
     }
 
     edgeless-block-portal-container {
@@ -104,23 +102,6 @@ export class SurfaceBlockComponent extends BlockComponent<
 
   private _cachedViewport = new Bound();
 
-  private _initCanvasTransform = () => {
-    const refresh = () => {
-      this._surfaceContainer.style.setProperty(
-        '--canvas-transform',
-        this._getReversedTransform()
-      );
-    };
-
-    this._disposables.add(
-      this._gfx.viewport.viewportUpdated.on(() => {
-        refresh();
-      })
-    );
-
-    refresh();
-  };
-
   private _initThemeObserver = () => {
     const theme = this.std.get(ThemeProvider);
     this.disposables.add(theme.theme$.subscribe(() => this.requestUpdate()));
@@ -157,12 +138,6 @@ export class SurfaceBlockComponent extends BlockComponent<
 
   get renderer() {
     return this._renderer;
-  }
-
-  private _getReversedTransform() {
-    const { translateX, translateY, zoom } = this._gfx.viewport;
-
-    return `scale(${1 / zoom}) translate(${-translateX}px, ${-translateY}px)`;
   }
 
   private _initOverlays() {
@@ -267,7 +242,6 @@ export class SurfaceBlockComponent extends BlockComponent<
   override firstUpdated() {
     this._renderer.attach(this._surfaceContainer);
     this._surfaceContainer.append(...this._renderer.stackingCanvas);
-    this._initCanvasTransform();
   }
 
   override render() {
