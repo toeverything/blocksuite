@@ -46,7 +46,6 @@ export class SortRootView extends SignalWatcher(
     .sort-item {
       display: flex;
       align-items: center;
-      transition: transform 0.2s;
     }
   `;
 
