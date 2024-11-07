@@ -38,6 +38,7 @@ export class DatabaseTitle extends WithDisposable(ShadowlessElement) {
       right: 0;
       outline: none;
       resize: none;
+      scrollbar-width: none;
     }
 
     .affine-database-title .text {
