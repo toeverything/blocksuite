@@ -348,17 +348,7 @@ export class PageRootBlockComponent extends BlockComponent<
         const last = lastNote.children.at(-1);
         if (
           !last ||
-          !last.text ||
-          matchFlavours(last, [
-            'affine:code',
-            'affine:divider',
-            'affine:image',
-            'affine:database',
-            'affine:bookmark',
-            'affine:attachment',
-            'affine:surface-ref',
-          ]) ||
-          /affine:embed-*/.test(last.flavour)
+          !(matchFlavours(last, ['affine:paragraph']) && last.text.length === 0)
         ) {
           if (readonly) return;
           const paragraphId = this.doc.addBlock(
