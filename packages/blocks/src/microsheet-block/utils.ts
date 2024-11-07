@@ -5,7 +5,7 @@ import type {
   MicrosheetBlockModel,
   ViewBasicDataType,
 } from '@blocksuite/affine-model';
-import type { BlockStdScope } from '@blocksuite/block-std';
+import type { BlockStdScope, TextSelection } from '@blocksuite/block-std';
 import type { BlockModel } from '@blocksuite/store';
 
 import {
@@ -150,6 +150,7 @@ export function getCell(
     return {
       columnId: 'title',
       value: rowId,
+      ref: '',
     };
   }
   const yRow = model.cells$.value[rowId];

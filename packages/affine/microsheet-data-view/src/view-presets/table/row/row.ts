@@ -1,9 +1,14 @@
-import { popupTargetFromElement } from '@blocksuite/affine-components/context-menu';
+import {
+  menu,
+  popMenu,
+  popupTargetFromElement,
+} from '@blocksuite/affine-components/context-menu';
 import { type BlockStdScope, ShadowlessElement } from '@blocksuite/block-std';
 import { SignalWatcher, WithDisposable } from '@blocksuite/global/utils';
 import {
   AddCursorIcon,
   CenterPeekIcon,
+  DeleteIcon,
   MoreHorizontalIcon,
 } from '@blocksuite/icons/lit';
 import { css, nothing } from 'lit';
@@ -169,11 +174,12 @@ export class TableRow extends SignalWatcher(WithDisposable(ShadowlessElement)) {
     }
   `;
 
-  private _clickDragHandler = () => {
+  private _clickDragHandler = (e: MouseEvent) => {
     if (this.view.readonly$.value) {
       return;
     }
     this.selectionController?.toggleRow(this.rowId, this.groupKey);
+    this.popMenu(e.currentTarget as HTMLElement);
   };
 
   private rowAdd = (before: boolean) => {
@@ -220,6 +226,30 @@ export class TableRow extends SignalWatcher(WithDisposable(ShadowlessElement)) {
 
   get selectionController() {
     return this.closest('affine-microsheet-table')?.selectionController;
+  }
+
+  private popMenu(ele?: HTMLElement) {
+    popMenu(popupTargetFromElement(ele ?? this), {
+      options: {
+        items: [
+          menu.group({
+            items: [
+              menu.action({
+                name: 'Delete',
+                prefix: DeleteIcon(),
+                select: () => {
+                  const selection = this.selectionController;
+                  if (selection) {
+                    selection.deleteRow(this.rowId);
+                  }
+                },
+                class: 'delete-item',
+              }),
+            ],
+          }),
+        ],
+      },
+    });
   }
 
   override connectedCallback() {

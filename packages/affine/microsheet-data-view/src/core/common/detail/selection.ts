@@ -1,8 +1,5 @@
-import type { KanbanCard } from '../../../view-presets/kanban/card.js';
-import type { KanbanCardSelection } from '../../../view-presets/kanban/types.js';
 import type { RecordDetail } from './detail.js';
 
-import { KanbanCell } from '../../../view-presets/kanban/cell.js';
 import { RecordField } from './field.js';
 
 type DetailViewSelection = {
@@ -101,14 +98,7 @@ export class DetailSelection {
     if (!selection || selection?.isEditing) {
       return;
     }
-    const nextContainer =
-      this.getFocusCellContainer(selection)?.nextElementSibling;
-    if (nextContainer instanceof KanbanCell) {
-      this.selection = {
-        propertyId: nextContainer.column.id,
-        isEditing: false,
-      };
-    }
+    this.getFocusCellContainer(selection)?.nextElementSibling;
   }
 
   focusFirstCell() {
@@ -142,17 +132,5 @@ export class DetailSelection {
     return this.viewEle.querySelector(
       `affine-microsheet-data-view-record-field[data-column-id="${selection.propertyId}"]`
     ) as RecordField | undefined;
-  }
-
-  getSelectCard(selection: KanbanCardSelection) {
-    const { groupKey, cardId } = selection.cards[0];
-
-    return this.viewEle
-      .querySelector(
-        `affine-microsheet-data-view-kanban-group[data-key="${groupKey}"]`
-      )
-      ?.querySelector(
-        `affine-microsheet-data-view-kanban-card[data-card-id="${cardId}"]`
-      ) as KanbanCard | undefined;
   }
 }

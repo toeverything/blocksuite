@@ -54,11 +54,7 @@ import {
   TextCell,
   TextCellEditing,
 } from './property-presets/text/cell-renderer.js';
-import { DataViewKanban, DataViewTable } from './view-presets/index.js';
-import { KanbanCard } from './view-presets/kanban/card.js';
-import { KanbanCell } from './view-presets/kanban/cell.js';
-import { KanbanGroup } from './view-presets/kanban/group.js';
-import { KanbanHeader } from './view-presets/kanban/header.js';
+import { DataViewTable } from './view-presets/index.js';
 import { MicrosheetCellContainer } from './view-presets/table/cell.js';
 import { DragToFillElement } from './view-presets/table/controller/drag-to-fill.js';
 import { SelectionElement } from './view-presets/table/controller/selection.js';
@@ -147,13 +143,11 @@ export function effects() {
     'microsheet-data-view-group-title-string-view',
     StringGroupView
   );
-  customElements.define('affine-microsheet-data-view-kanban-card', KanbanCard);
   customElements.define('microsheet-filter-bar', FilterBar);
   customElements.define(
     'microsheet-data-view-group-title-number-view',
     NumberGroupView
   );
-  customElements.define('affine-microsheet-data-view-kanban-cell', KanbanCell);
   customElements.define('affine-microsheet-lit-icon', AffineLitIcon);
   customElements.define(
     'microsheet-filter-condition-view',
@@ -209,21 +203,12 @@ export function effects() {
     NewRecordPreview
   );
   customElements.define(
-    'affine-microsheet-data-view-kanban-group',
-    KanbanGroup
-  );
-  customElements.define(
     'microsheet-data-view-header-tools-filter',
     DataViewHeaderToolsFilter
   );
   customElements.define(
     'microsheet-data-view-header-tools-view-options',
     DataViewHeaderToolsViewOptions
-  );
-  customElements.define('affine-microsheet-data-view-kanban', DataViewKanban);
-  customElements.define(
-    'affine-microsheet-data-view-kanban-header',
-    KanbanHeader
   );
   customElements.define('microsheet-variable-ref-view', VariableRefView);
   customElements.define(

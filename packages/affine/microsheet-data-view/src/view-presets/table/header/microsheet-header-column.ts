@@ -1,6 +1,5 @@
 import {
   menu,
-  type MenuConfig,
   popMenu,
   popupTargetFromElement,
 } from '@blocksuite/affine-components/context-menu';
@@ -10,16 +9,7 @@ import {
 } from '@blocksuite/affine-shared/utils';
 import { ShadowlessElement } from '@blocksuite/block-std';
 import { SignalWatcher, WithDisposable } from '@blocksuite/global/utils';
-import {
-  AddCursorIcon,
-  DeleteIcon,
-  DuplicateIcon,
-  InsertLeftIcon,
-  InsertRightIcon,
-  MoveLeftIcon,
-  MoveRightIcon,
-  ViewIcon,
-} from '@blocksuite/icons/lit';
+import { AddCursorIcon, DeleteIcon } from '@blocksuite/icons/lit';
 import { css } from 'lit';
 import { property } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
@@ -27,16 +17,12 @@ import { createRef, ref } from 'lit/directives/ref.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
 
-import type { Property } from '../../../core/view-manager/property.js';
-import type { NumberPropertyDataType } from '../../../property-presets/index.js';
 import type { TableColumn, TableSingleView } from '../table-view-manager.js';
 
-import { inputConfig, typeConfig } from '../../../core/common/property-menu.js';
 import { renderUniLit } from '../../../core/index.js';
 import { startDrag } from '../../../core/utils/drag.js';
 import { autoScrollOnBoundary } from '../../../core/utils/frame-loop.js';
 import { getResultInRange } from '../../../core/utils/utils.js';
-import { numberFormats } from '../../../property-presets/number/utils/formats.js';
 import { DEFAULT_COLUMN_TITLE_HEIGHT } from '../consts.js';
 import { getTableContainer } from '../types.js';
 import { DataViewColumnPreview } from './column-renderer.js';
@@ -316,160 +302,11 @@ export class MicrosheetHeaderColumn extends SignalWatcher(
   }
 
   private popMenu(ele?: HTMLElement) {
-    const enableNumberFormatting =
-      this.tableViewManager.featureFlags$.value.enable_number_formatting;
-
     popMenu(popupTargetFromElement(ele ?? this), {
       options: {
         items: [
-          inputConfig(this.column),
-          typeConfig(this.column),
-          // Number format begin
-          ...(enableNumberFormatting
-            ? [
-                menu.subMenu({
-                  name: 'Number Format',
-                  hide: () =>
-                    !this.column.dataUpdate ||
-                    this.column.type$.value !== 'number',
-                  options: {
-                    items: [
-                      numberFormatConfig(this.column),
-                      ...numberFormats.map(format => {
-                        const data = (
-                          this.column as Property<
-                            number,
-                            NumberPropertyDataType
-                          >
-                        ).data$.value;
-                        return menu.action({
-                          isSelected: data.format === format.type,
-                          prefix: html`<span
-                            style="font-size: var(--affine-font-base); scale: 1.2;"
-                            >${format.symbol}</span
-                          >`,
-                          name: format.label,
-                          select: () => {
-                            if (data.format === format.type) return;
-                            this.column.dataUpdate(() => ({
-                              format: format.type,
-                            }));
-                          },
-                        });
-                      }),
-                    ],
-                  },
-                }),
-              ]
-            : []),
-          // Number format end
           menu.group({
             items: [
-              menu.action({
-                name: 'Hide In View',
-                prefix: ViewIcon(),
-                hide: () =>
-                  this.column.hide$.value ||
-                  this.column.type$.value === 'title',
-                select: () => {
-                  this.column.hideSet(true);
-                },
-              }),
-            ],
-          }),
-          menu.group({
-            items: [
-              menu.action({
-                name: 'Insert Left Column',
-                prefix: InsertLeftIcon(),
-                select: () => {
-                  this.tableViewManager.propertyAdd({
-                    id: this.column.id,
-                    before: true,
-                  });
-                  Promise.resolve()
-                    .then(() => {
-                      const pre = this.previousElementSibling;
-                      if (pre instanceof MicrosheetHeaderColumn) {
-                        pre.editTitle();
-                        pre.scrollIntoView({
-                          inline: 'nearest',
-                          block: 'nearest',
-                        });
-                      }
-                    })
-                    .catch(console.error);
-                },
-              }),
-              menu.action({
-                name: 'Insert Right Column',
-                prefix: InsertRightIcon(),
-                select: () => {
-                  this.tableViewManager.propertyAdd({
-                    id: this.column.id,
-                    before: false,
-                  });
-                  Promise.resolve()
-                    .then(() => {
-                      const next = this.nextElementSibling;
-                      if (next instanceof MicrosheetHeaderColumn) {
-                        next.editTitle();
-                        next.scrollIntoView({
-                          inline: 'nearest',
-                          block: 'nearest',
-                        });
-                      }
-                    })
-                    .catch(console.error);
-                },
-              }),
-              menu.action({
-                name: 'Move Left',
-                prefix: MoveLeftIcon(),
-                hide: () => this.column.isFirst,
-                select: () => {
-                  const preId = this.tableViewManager.propertyPreGet(
-                    this.column.id
-                  )?.id;
-                  if (!preId) {
-                    return;
-                  }
-                  this.tableViewManager.propertyMove(this.column.id, {
-                    id: preId,
-                    before: true,
-                  });
-                },
-              }),
-              menu.action({
-                name: 'Move Right',
-                prefix: MoveRightIcon(),
-                hide: () => this.column.isLast,
-                select: () => {
-                  const nextId = this.tableViewManager.propertyNextGet(
-                    this.column.id
-                  )?.id;
-                  if (!nextId) {
-                    return;
-                  }
-                  this.tableViewManager.propertyMove(this.column.id, {
-                    id: nextId,
-                    before: false,
-                  });
-                },
-              }),
-            ],
-          }),
-          menu.group({
-            items: [
-              menu.action({
-                name: 'Duplicate',
-                prefix: DuplicateIcon(),
-                hide: () =>
-                  !this.column.duplicate || this.column.type$.value === 'title',
-                select: () => {
-                  this.column.duplicate?.();
-                },
-              }),
               menu.action({
                 name: 'Delete',
                 prefix: DeleteIcon(),
@@ -631,13 +468,6 @@ const createDragPreview = (
     },
   };
 };
-
-function numberFormatConfig(column: Property): MenuConfig {
-  return () =>
-    html` <affine-microsheet-number-format-bar
-      .column="${column}"
-    ></affine-microsheet-number-format-bar>`;
-}
 
 declare global {
   interface HTMLElementTagNameMap {

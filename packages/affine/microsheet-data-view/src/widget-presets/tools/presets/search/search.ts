@@ -5,7 +5,6 @@ import { query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type { KanbanSingleView } from '../../../../view-presets/kanban/kanban-view-manager.js';
 import type { TableSingleView } from '../../../../view-presets/table/table-view-manager.js';
 
 import { stopPropagation } from '../../../../core/utils/event.js';
@@ -189,7 +188,7 @@ export class DataViewHeaderToolsSearch extends WidgetBase {
   @state()
   private accessor _showSearch = false;
 
-  public override accessor view!: TableSingleView | KanbanSingleView;
+  public override accessor view!: TableSingleView;
 }
 
 declare global {

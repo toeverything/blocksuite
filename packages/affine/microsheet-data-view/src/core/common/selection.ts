@@ -32,37 +32,9 @@ const TableViewSelectionSchema = z.union([
   }),
 ]);
 
-const KanbanCellSelectionSchema = z.object({
-  selectionType: z.literal('cell'),
-  groupKey: z.string(),
-  cardId: z.string(),
-  columnId: z.string(),
-  isEditing: z.boolean(),
-});
-
-const KanbanCardSelectionSchema = z.object({
-  selectionType: z.literal('card'),
-  cards: z.array(
-    z.object({
-      groupKey: z.string(),
-      cardId: z.string(),
-    })
-  ),
-});
-
-const KanbanGroupSelectionSchema = z.object({
-  selectionType: z.literal('group'),
-  groupKeys: z.array(z.string()),
-});
-
 const MicrosheetSelectionSchema = z.object({
   blockId: z.string(),
-  viewSelection: z.union([
-    TableViewSelectionSchema,
-    KanbanCellSelectionSchema,
-    KanbanCardSelectionSchema,
-    KanbanGroupSelectionSchema,
-  ]),
+  viewSelection: z.union([TableViewSelectionSchema]),
 });
 
 export class MicrosheetSelection extends BaseSelection {

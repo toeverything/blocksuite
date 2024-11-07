@@ -1,9 +1,6 @@
 import type { EditorHost } from '@blocksuite/block-std';
 import type { DetailSlotProps } from '@blocksuite/microsheet-data-view';
-import type {
-  KanbanSingleView,
-  TableSingleView,
-} from '@blocksuite/microsheet-data-view/view-presets';
+import type { TableSingleView } from '@blocksuite/microsheet-data-view/view-presets';
 
 import { DefaultInlineManagerExtension } from '@blocksuite/affine-components/rich-text';
 import { ShadowlessElement } from '@blocksuite/block-std';
@@ -155,5 +152,5 @@ export class BlockRenderer
   accessor rowId!: string;
 
   @property({ attribute: false })
-  accessor view!: TableSingleView | KanbanSingleView;
+  accessor view!: TableSingleView;
 }

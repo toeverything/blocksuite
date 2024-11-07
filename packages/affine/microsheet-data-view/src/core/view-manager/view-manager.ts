@@ -34,8 +34,6 @@ export interface ViewManager {
   viewDataGet(id: string): DataViewDataType | undefined;
 
   moveTo(id: string, position: InsertToPosition): void;
-
-  viewChangeType(id: string, type: string): void;
 }
 
 export class ViewManagerBase implements ViewManager {
@@ -82,29 +80,6 @@ export class ViewManagerBase implements ViewManager {
     });
     this.setCurrentView(id);
     return id;
-  }
-
-  viewChangeType(id: string, type: string): void {
-    const from = this.viewGet(id).type;
-    const meta = this.dataSource.viewMetaGet(type);
-    this.dataSource.viewDataUpdate(id, old => {
-      let data = {
-        ...meta.model.defaultData(this),
-        id: old.id,
-        name: old.name,
-        mode: type,
-      };
-      const convertFunction = this.dataSource.viewConverts.find(
-        v => v.from === from && v.to === type
-      );
-      if (convertFunction) {
-        data = {
-          ...data,
-          ...convertFunction.convert(old),
-        };
-      }
-      return data;
-    });
   }
 
   viewDataGet(id: string): DataViewDataType | undefined {

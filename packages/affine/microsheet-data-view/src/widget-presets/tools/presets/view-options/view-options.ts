@@ -30,8 +30,6 @@ import { popCreateFilter } from '../../../../core/common/ref/ref.js';
 import { emptyFilterGroup, renderUniLit } from '../../../../core/index.js';
 import { WidgetBase } from '../../../../core/widget/widget-base.js';
 import {
-  KanbanSingleView,
-  type KanbanViewData,
   TableSingleView,
   type TableViewData,
 } from '../../../../view-presets/index.js';
@@ -95,7 +93,7 @@ export class DataViewHeaderToolsViewOptions extends WidgetBase {
     }
   }
 
-  override accessor view!: SingleView<TableViewData | KanbanViewData>;
+  override accessor view!: SingleView<TableViewData>;
 }
 
 declare global {
@@ -105,7 +103,7 @@ declare global {
 }
 export const popViewOptions = (
   target: PopupTarget,
-  view: SingleView<TableViewData | KanbanViewData>,
+  view: SingleView<TableViewData>,
   onClose?: () => void
 ) => {
   const reopen = () => {
@@ -163,12 +161,7 @@ export const popViewOptions = (
                       <div style="${textStyle}">${meta.model.defaultName}</div>
                     </div>
                   `,
-                  select: () => {
-                    view.manager.viewChangeType(
-                      view.manager.currentViewId$.value,
-                      meta.type
-                    );
-                  },
+                  select: () => {},
                   class: '',
                 };
                 const containerStyle = styleMap({
@@ -269,8 +262,7 @@ export const popViewOptions = (
               name: 'Group',
               prefix: GroupingIcon(),
               postfix: html` <div style="font-size: 14px;">
-                  ${view instanceof TableSingleView ||
-                  view instanceof KanbanSingleView
+                  ${view instanceof TableSingleView
                     ? view.groupManager.property$.value?.name$.value
                     : ''}
                 </div>

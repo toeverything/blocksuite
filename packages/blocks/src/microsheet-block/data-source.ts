@@ -44,11 +44,7 @@ import {
   updateProperty,
   updateView,
 } from './utils.js';
-import {
-  microsheetBlockViewConverts,
-  microsheetBlockViewMap,
-  microsheetBlockViews,
-} from './views/index.js';
+import { microsheetBlockViewMap, microsheetBlockViews } from './views/index.js';
 
 export class MicrosheetBlockDataSource extends DataSourceBase {
   private _batch = 0;
@@ -77,8 +73,6 @@ export class MicrosheetBlockDataSource extends DataSourceBase {
   rows$: ReadonlySignal<string[]> = computed(() => {
     return this._model.children.map(v => v.id);
   });
-
-  viewConverts = microsheetBlockViewConverts;
 
   viewDataList$: ReadonlySignal<DataViewDataType[]> = computed(() => {
     return this._model.views$.value as DataViewDataType[];
@@ -213,6 +207,12 @@ export class MicrosheetBlockDataSource extends DataSourceBase {
     this.doc.captureSync();
     const index = findPropertyIndex(this._model, id);
     if (index < 0) return;
+
+    this.rows$.value.forEach(rowId => {
+      const cell = this._model.cells[rowId][id];
+      this.doc.getBlock(cell.ref)?.model &&
+        this.doc.deleteBlock(this.doc.getBlock(cell.ref)!.model);
+    });
 
     this.doc.transact(() => {
       this._model.columns = this._model.columns.filter((_, i) => i !== index);
@@ -358,6 +358,11 @@ export class MicrosheetBlockDataSource extends DataSourceBase {
       const block = this.doc.getBlock(id);
       if (block) {
         this.doc.deleteBlock(block.model);
+        const cell = this._model.cells[id];
+        Object.values(cell).forEach(v => {
+          this.doc.getBlock(v.ref)?.model &&
+            this.doc.deleteBlock(this.doc.getBlock(v.ref)!.model);
+        });
       }
     }
     deleteRows(this._model, ids);

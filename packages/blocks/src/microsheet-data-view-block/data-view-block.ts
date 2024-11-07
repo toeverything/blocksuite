@@ -208,11 +208,6 @@ export class DataViewBlockComponent extends CaptionedBlockComponent<DataViewBloc
       widgetPresets.tools.viewOptions,
       widgetPresets.tools.tableAddRow,
     ],
-    kanban: [
-      widgetPresets.tools.filter,
-      widgetPresets.tools.search,
-      widgetPresets.tools.viewOptions,
-    ],
   });
 
   get dataSource(): DataSource {

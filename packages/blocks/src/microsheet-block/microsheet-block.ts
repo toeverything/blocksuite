@@ -280,11 +280,6 @@ export class MicrosheetBlockComponent extends CaptionedBlockComponent<
       widgetPresets.tools.viewOptions,
       widgetPresets.tools.tableAddRow,
     ],
-    kanban: [
-      widgetPresets.tools.filter,
-      widgetPresets.tools.search,
-      widgetPresets.tools.viewOptions,
-    ],
   });
 
   viewSelection$ = computed(() => {

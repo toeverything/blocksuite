@@ -15,14 +15,10 @@ import { property, query } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import Sortable from 'sortablejs';
 
-import type {
-  KanbanViewData,
-  TableViewData,
-} from '../../../view-presets/index.js';
+import type { TableViewData } from '../../../view-presets/index.js';
 import type { SingleView } from '../../view-manager/single-view.js';
 import type { GroupRenderProps } from './types.js';
 
-import { KanbanSingleView } from '../../../view-presets/kanban/kanban-view-manager.js';
 import { TableSingleView } from '../../../view-presets/table/table-view-manager.js';
 import { renderUniLit } from '../../utils/uni-component/uni-component.js';
 import { dataViewCssVariable } from '../css-variable.js';
@@ -149,11 +145,11 @@ export class GroupSetting extends SignalWatcher(
   accessor groupContainer!: HTMLElement;
 
   @property({ attribute: false })
-  accessor view!: TableSingleView | KanbanSingleView;
+  accessor view!: TableSingleView;
 }
 
 export const selectGroupByProperty = (
-  view: SingleView<TableViewData | KanbanViewData>,
+  view: SingleView<TableViewData>,
   ops?: {
     onSelect?: (id?: string) => void;
     onClose?: () => void;
@@ -183,10 +179,7 @@ export const selectGroupByProperty = (
               .uni="${property.icon}"
             ></microsheet-uni-lit>`,
             select: () => {
-              if (
-                view instanceof TableSingleView ||
-                view instanceof KanbanSingleView
-              ) {
+              if (view instanceof TableSingleView) {
                 view.changeGroup(id);
                 ops?.onSelect?.(id);
               }
@@ -197,9 +190,7 @@ export const selectGroupByProperty = (
         items: [
           menu.action({
             prefix: DeleteIcon(),
-            hide: () =>
-              view instanceof KanbanSingleView ||
-              view.data$.value?.groupBy == null,
+            hide: () => view.data$.value?.groupBy == null,
             class: 'delete-item',
             name: 'Remove Grouping',
             select: () => {
@@ -216,7 +207,7 @@ export const selectGroupByProperty = (
 };
 export const popSelectGroupByProperty = (
   target: PopupTarget,
-  view: SingleView<TableViewData | KanbanViewData>,
+  view: SingleView<TableViewData>,
   ops?: {
     onSelect?: () => void;
     onClose?: () => void;
@@ -229,7 +220,7 @@ export const popSelectGroupByProperty = (
 };
 export const popGroupSetting = (
   target: PopupTarget,
-  view: SingleView<TableViewData | KanbanViewData>,
+  view: SingleView<TableViewData>,
   onBack: () => void
 ) => {
   const groupBy = view.data$.value?.groupBy;
