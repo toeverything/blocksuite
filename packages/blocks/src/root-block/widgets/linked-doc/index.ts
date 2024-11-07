@@ -1,5 +1,7 @@
 import type { AffineInlineEditor } from '@blocksuite/affine-components/rich-text';
+import type { SelectionRect } from '@blocksuite/affine-shared/commands';
 import type { UIEventStateContext } from '@blocksuite/block-std';
+import type { Disposable } from '@blocksuite/global/utils';
 
 import { getInlineEditorByModel } from '@blocksuite/affine-components/rich-text';
 import {
@@ -13,18 +15,24 @@ import { signal } from '@preact/signals-core';
 import { html, nothing } from 'lit';
 import { state } from 'lit/decorators.js';
 import { choose } from 'lit/directives/choose.js';
+import { repeat } from 'lit/directives/repeat.js';
+import { styleMap } from 'lit/directives/style-map.js';
 
 import {
   getMenus,
   type LinkedDocContext,
   type LinkedWidgetConfig,
 } from './config.js';
-
+import { linkedDocWidgetStyles } from './styles.js';
 export { type LinkedWidgetConfig } from './config.js';
 
 export const AFFINE_LINKED_DOC_WIDGET = 'affine-linked-doc-widget';
 
 export class AffineLinkedDocWidget extends WidgetComponent {
+  static override styles = linkedDocWidgetStyles;
+
+  private _disposeObserveInputRects: Disposable | null = null;
+
   private readonly _getInlineEditor = (
     evt?: KeyboardEvent | CompositionEvent
   ) => {
@@ -55,6 +63,41 @@ export class AffineLinkedDocWidget extends WidgetComponent {
   };
 
   private _inlineEditor: AffineInlineEditor | null = null;
+
+  private _observeInputRects = () => {
+    if (!this._inlineEditor) return;
+
+    const updateInputRects = () => {
+      const blockId =
+        this.std.command.exec('getSelectedModels').selectedModels?.[0]?.id;
+      if (!blockId) return;
+
+      if (!this._startRange) return;
+      const index = this._startRange.index - this._triggerKey.length;
+      if (index < 0) return;
+
+      const currentRange = this._inlineEditor?.getInlineRange();
+      if (!currentRange) return;
+      const length = currentRange.index + currentRange.length - index;
+
+      const textSelection = this.std.selection.create('text', {
+        from: { blockId, index, length },
+        to: null,
+      });
+
+      const { selectionRects } = this.std.command.exec('getSelectionRects', {
+        textSelection,
+      });
+
+      if (!selectionRects) return;
+
+      this._inputRects = selectionRects;
+    };
+
+    updateInputRects();
+    this._disposeObserveInputRects =
+      this._inlineEditor.slots.renderComplete.on(updateInputRects);
+  };
 
   private readonly _onCompositionEnd = (ctx: UIEventStateContext) => {
     const event = ctx.get('defaultState').event as CompositionEvent;
@@ -121,6 +164,8 @@ export class AffineLinkedDocWidget extends WidgetComponent {
   private _startRange: InlineRange | null = null;
 
   close = () => {
+    this._disposeObserveInputRects?.dispose();
+    this._disposeObserveInputRects = null;
     this._inlineEditor = null;
     this._triggerKey = '';
     this._show$.value = 'none';
@@ -140,6 +185,8 @@ export class AffineLinkedDocWidget extends WidgetComponent {
     const enableMobile = this.doc.awarenessStore.getFlag(
       'enable_mobile_linked_doc_menu'
     );
+
+    this._observeInputRects();
 
     this._show$.value = enableMobile ? mode : 'desktop';
   };
@@ -229,6 +276,25 @@ export class AffineLinkedDocWidget extends WidgetComponent {
     });
   }
 
+  private _renderInputMask() {
+    return html`${repeat(
+      this._inputRects,
+      ({ top, left, width, height }, index) => {
+        const last = index === this._inputRects.length - 1;
+        const padding = 2;
+        return html`<div
+          class="input-mask"
+          style=${styleMap({
+            top: `${top - padding}px`,
+            left: `${left}px`,
+            width: `${width + (last ? 10 : 0)}px`,
+            height: `${height + 2 * padding}px`,
+          })}
+        ></div>`;
+      }
+    )}`;
+  }
+
   override connectedCallback() {
     super.connectedCallback();
     this.handleEvent('keyDown', this._onKeyDown);
@@ -238,18 +304,22 @@ export class AffineLinkedDocWidget extends WidgetComponent {
   override render() {
     if (this._show$.value === 'none') return nothing;
 
-    return html`<blocksuite-portal
-      .shadowDom=${false}
-      .template=${choose(
-        this._show$.value,
-        [
-          ['desktop', this._renderLinkedDocPopover],
-          ['mobile', this._renderLinkedDocMenu],
-        ],
-        () => html`${nothing}`
-      )}
-    ></blocksuite-portal>`;
+    return html`${this._renderInputMask()}
+      <blocksuite-portal
+        .shadowDom=${false}
+        .template=${choose(
+          this._show$.value,
+          [
+            ['desktop', this._renderLinkedDocPopover],
+            ['mobile', this._renderLinkedDocMenu],
+          ],
+          () => html`${nothing}`
+        )}
+      ></blocksuite-portal>`;
   }
+
+  @state()
+  private accessor _inputRects: SelectionRect[] = [];
 
   @state()
   private accessor _triggerKey = '';
