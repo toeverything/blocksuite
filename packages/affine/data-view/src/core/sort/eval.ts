@@ -82,12 +82,8 @@ const compareNumber = (a: unknown, b: unknown) => {
   return Number(a) - Number(b);
 };
 const compareBoolean = (a: unknown, b: unknown) => {
-  if (a == null) {
-    return Compare.GT;
-  }
-  if (b == null) {
-    return Compare.LT;
-  }
+  a = Boolean(a);
+  b = Boolean(b);
   const bA = a ? 1 : 0;
   const bB = b ? 1 : 0;
   return bA - bB;
