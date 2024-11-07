@@ -3,9 +3,10 @@ import { SignalWatcher, WithDisposable } from '@blocksuite/global/utils';
 import { property } from 'lit/decorators.js';
 
 import type { DataViewInstance } from '../view/types.js';
+import type { SingleView } from '../view-manager/index.js';
 import type { DataViewWidgetProps } from './types.js';
 
-export class WidgetBase
+export class WidgetBase<View extends SingleView = SingleView>
   extends SignalWatcher(WithDisposable(ShadowlessElement))
   implements DataViewWidgetProps
 {
@@ -26,5 +27,5 @@ export class WidgetBase
   }
 
   @property({ attribute: false })
-  accessor dataViewInstance!: DataViewInstance;
+  accessor dataViewInstance!: DataViewInstance<View>;
 }
