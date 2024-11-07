@@ -13,7 +13,7 @@ export const inputConfig = (property: Property) => {
       </div>
     `,
     initialValue: property.name$.value,
-    onComplete: text => {
+    onChange: text => {
       property.nameSet(text);
     },
   });

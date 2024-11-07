@@ -238,7 +238,7 @@ export const popViewOptions = (
   items.push(
     menu.input({
       initialValue: view.name$.value,
-      onComplete: text => {
+      onChange: text => {
         view.nameSet(text);
       },
     })

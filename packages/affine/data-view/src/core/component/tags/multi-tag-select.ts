@@ -62,7 +62,7 @@ export class MultiTagSelect extends SignalWatcher(
         items: [
           menu.input({
             initialValue: option.value,
-            onComplete: text => {
+            onChange: text => {
               this.changeTag({
                 ...option,
                 value: text,

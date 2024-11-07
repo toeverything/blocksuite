@@ -152,7 +152,7 @@ export class DataViewHeaderViews extends WidgetBase {
         items: [
           menu.input({
             initialValue: view.data$.value?.name,
-            onComplete: text => {
+            onChange: text => {
               view.dataUpdate(_data => ({
                 name: text,
               }));

@@ -44,26 +44,42 @@ export class MenuInput extends MenuFocusable {
     }
   `;
 
+  private onCompositionEnd = () => {
+    this.data.onChange?.(this.inputRef.value);
+  };
+
+  private onInput = (e: InputEvent) => {
+    e.stopPropagation();
+    if (e.isComposing) return;
+    this.data.onChange?.(this.inputRef.value);
+  };
+
+  private onKeydown = (e: KeyboardEvent) => {
+    e.stopPropagation();
+    if (e.isComposing) return;
+    if (e.key === 'Escape') {
+      this.complete();
+      this.inputRef.blur();
+      this.menu.focusTo(this);
+      return;
+    }
+    if (e.key === 'Enter') {
+      this.complete();
+      this.menu.close();
+      return;
+    }
+  };
+
+  private stopPropagation = (e: Event) => {
+    e.stopPropagation();
+  };
+
   complete() {
     this.data.onComplete?.(this.inputRef.value);
   }
 
   override connectedCallback() {
     super.connectedCallback();
-    this.disposables.addFromEvent(this, 'keydown', e => {
-      e.stopPropagation();
-      if (e.key === 'Escape') {
-        this.complete();
-        this.inputRef.blur();
-        this.menu.focusTo(this);
-        return;
-      }
-      if (e.key === 'Enter') {
-        this.complete();
-        this.menu.close();
-        return;
-      }
-    });
     this.disposables.addFromEvent(this, 'click', e => {
       e.stopPropagation();
     });
@@ -75,11 +91,6 @@ export class MenuInput extends MenuFocusable {
         this.inputRef.select();
       });
     });
-  }
-
-  onInput(e: InputEvent) {
-    if (e.isComposing) return;
-    this.data.onChange?.(this.inputRef.value);
   }
 
   override onPressEnter() {
@@ -98,6 +109,10 @@ export class MenuInput extends MenuFocusable {
         this.menu.setFocusOnly(this);
       }}"
       @input="${this.onInput}"
+      @keydown="${this.onKeydown}"
+      @copy="${this.stopPropagation}"
+      @paste="${this.stopPropagation}"
+      @compositionend="${this.onCompositionEnd}"
       class="${classString}"
       value="${this.data.initialValue ?? ''}"
       type="text"
