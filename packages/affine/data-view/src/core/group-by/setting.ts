@@ -1,5 +1,3 @@
-import type { PropertyValues } from 'lit';
-
 import {
   menu,
   type MenuConfig,
@@ -10,10 +8,10 @@ import {
 import { ShadowlessElement } from '@blocksuite/block-std';
 import { SignalWatcher, WithDisposable } from '@blocksuite/global/utils';
 import { DeleteIcon } from '@blocksuite/icons/lit';
+import { computed } from '@preact/signals-core';
 import { css, html, unsafeCSS } from 'lit';
 import { property, query } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
-import Sortable from 'sortablejs';
 
 import type {
   KanbanViewData,
@@ -26,6 +24,13 @@ import { KanbanSingleView } from '../../view-presets/kanban/kanban-view-manager.
 import { TableSingleView } from '../../view-presets/table/table-view-manager.js';
 import { dataViewCssVariable } from '../common/css-variable.js';
 import { renderUniLit } from '../utils/uni-component/uni-component.js';
+import { dragHandler } from '../utils/wc-dnd/dnd-context.js';
+import { defaultActivators } from '../utils/wc-dnd/sensors/index.js';
+import {
+  createSortContext,
+  sortable,
+} from '../utils/wc-dnd/sort/sort-context.js';
+import { verticalListSortingStrategy } from '../utils/wc-dnd/sort/strategies/index.js';
 import { groupByMatcher } from './matcher.js';
 
 export class GroupSetting extends SignalWatcher(
@@ -63,42 +68,60 @@ export class GroupSetting extends SignalWatcher(
     }
   `;
 
+  @property({ attribute: false })
+  accessor view!: TableSingleView | KanbanSingleView;
+
+  groups$ = computed(() => {
+    return this.view.groupManager.groupsDataList$.value;
+  });
+
+  sortContext = createSortContext({
+    dnd: {
+      activators: defaultActivators,
+      container: this,
+      onDragEnd: evt => {
+        const over = evt.over;
+        const activeId = evt.active.id;
+        const groups = this.groups$.value;
+        if (over && over.id !== activeId && groups) {
+          const activeIndex = groups.findIndex(data => data.key === activeId);
+          const overIndex = groups.findIndex(data => data.key === over.id);
+
+          this.view.groupManager.moveGroupTo(
+            activeId,
+            activeIndex > overIndex
+              ? {
+                  before: true,
+                  id: over.id,
+                }
+              : {
+                  before: false,
+                  id: over.id,
+                }
+          );
+        }
+      },
+      modifiers: [
+        ({ transform }) => {
+          return {
+            ...transform,
+            x: 0,
+          };
+        },
+      ],
+    },
+    items: computed(() => {
+      return (
+        this.view.groupManager.groupsDataList$.value?.map(v => v.key) ?? []
+      );
+    }),
+    strategy: verticalListSortingStrategy,
+  });
+
   override connectedCallback() {
     super.connectedCallback();
     this._disposables.addFromEvent(this, 'pointerdown', e => {
       e.stopPropagation();
-    });
-  }
-
-  protected override firstUpdated(_changedProperties: PropertyValues) {
-    super.firstUpdated(_changedProperties);
-    const sortable = new Sortable(this.groupContainer, {
-      animation: 150,
-      group: `group-sort-${this.view.id}`,
-      onEnd: evt => {
-        const groupManager = this.view.groupManager;
-        const oldGroups = groupManager.groupsDataList$.value;
-        if (!oldGroups) {
-          return;
-        }
-        const groups = [...oldGroups];
-        const index = evt.oldIndex ?? -1;
-        const from = groups[index];
-        groups.splice(index, 1);
-        const to = groups[evt.newIndex ?? -1];
-        groupManager.moveGroupTo(
-          from.key,
-          to
-            ? {
-                before: true,
-                id: to.key,
-              }
-            : 'end'
-        );
-      },
-    });
-    this._disposables.add({
-      dispose: () => sortable.destroy(),
     });
   }
 
@@ -130,7 +153,11 @@ export class GroupSetting extends SignalWatcher(
               readonly: true,
             };
             const config = group.manager.config$.value;
-            return html` <div class="dv-hover dv-round-4 group-item">
+            return html` <div
+              ${sortable(group.key)}
+              ${dragHandler(group.key)}
+              class="dv-hover dv-round-4 group-item"
+            >
               <div class="group-item-drag-bar"></div>
               <div style="padding: 0 4px;position:relative;">
                 ${renderUniLit(config?.view, props)}
@@ -147,9 +174,6 @@ export class GroupSetting extends SignalWatcher(
 
   @query('.group-sort-setting')
   accessor groupContainer!: HTMLElement;
-
-  @property({ attribute: false })
-  accessor view!: TableSingleView | KanbanSingleView;
 }
 
 export const selectGroupByProperty = (

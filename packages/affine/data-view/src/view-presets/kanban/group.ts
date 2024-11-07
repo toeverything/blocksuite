@@ -16,6 +16,7 @@ import type { GroupData } from '../../core/group-by/manager.js';
 import type { KanbanSingleView } from './kanban-view-manager.js';
 
 import { GroupTitle } from '../../core/group-by/group-title.js';
+import { dragHandler } from '../../core/utils/wc-dnd/dnd-context.js';
 
 const styles = css`
   affine-data-view-kanban-group {
@@ -156,7 +157,7 @@ export class KanbanGroup extends SignalWatcher(
   override render() {
     const cards = this.group.rows;
     return html`
-      <div class="group-header">
+      <div class="group-header" ${dragHandler(this.group.key)}>
         ${GroupTitle(this.group, {
           readonly: this.view.readonly$.value,
           clickAdd: this.clickAddCardInStart,
