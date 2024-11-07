@@ -180,6 +180,8 @@ export class EditPropsStore extends LifeCycleWatcher {
 
   recordLastProps(key: LastPropsKey, props: Partial<LastProps[LastPropsKey]>) {
     const schema = OptionalPropsSchema._def.innerType.shape[key];
+    if (!schema) return;
+
     const overrideProps = schema.parse(props);
     if (Object.keys(overrideProps).length === 0) return;
 

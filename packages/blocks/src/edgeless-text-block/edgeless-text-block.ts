@@ -126,8 +126,6 @@ export class EdgelessTextBlockComponent extends GfxBlockComponent<EdgelessTextBl
           .catch(console.error);
       })
     );
-
-    this.style.transformOrigin = '0 0';
   }
 
   override firstUpdated(props: Map<string, unknown>) {
@@ -227,6 +225,19 @@ export class EdgelessTextBlockComponent extends GfxBlockComponent<EdgelessTextBl
     });
   }
 
+  override getCSSTransform(): string {
+    const viewport = this.gfx.viewport;
+    const { translateX, translateY, zoom } = viewport;
+    const bound = Bound.deserialize(this.model.xywh);
+
+    const scaledX = bound.x * zoom;
+    const scaledY = bound.y * zoom;
+    const deltaX = scaledX - bound.x;
+    const deltaY = scaledY - bound.y;
+
+    return `translate(${translateX + deltaX}px, ${translateY + deltaY}px) scale(${zoom * this.model.scale})`;
+  }
+
   override getRenderingRect() {
     const { xywh, scale, rotate, hasMaxWidth } = this.model;
     const bound = Bound.deserialize(xywh);
@@ -244,7 +255,7 @@ export class EdgelessTextBlockComponent extends GfxBlockComponent<EdgelessTextBl
 
   override renderGfxBlock() {
     const { model } = this;
-    const { scale, rotate, hasMaxWidth } = model;
+    const { rotate, hasMaxWidth } = model;
     const editing = this._editing;
     const containerStyle: StyleInfo = {
       transform: `rotate(${rotate}deg)`,
@@ -256,8 +267,6 @@ export class EdgelessTextBlockComponent extends GfxBlockComponent<EdgelessTextBl
       fontWeight: '400',
       lineHeight: 'var(--affine-line-height)',
     };
-
-    this.style.transform = `scale(${scale})`;
 
     return html`
       <div

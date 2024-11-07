@@ -11,6 +11,7 @@ import {
   ParseDocUrlExtension,
   RefNodeSlotsExtension,
   RefNodeSlotsProvider,
+  SpecProvider,
 } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
 import { AffineEditorContainer } from '@blocksuite/presets';
@@ -62,6 +63,9 @@ export async function mountDefaultDocEditor(collection: DocCollection) {
   editor.edgelessSpecs = patchPageRootSpec([
     refNodeSlotsExtension,
     ...specs.edgelessModeSpecs,
+  ]);
+  SpecProvider.getInstance().extendSpec('edgeless:preview', [
+    OverrideThemeExtension(themeExtension),
   ]);
   editor.doc = doc;
   editor.mode = 'page';
@@ -130,7 +134,6 @@ export async function mountDefaultDocEditor(collection: DocCollection) {
       FontConfigExtension(CommunityCanvasTextFonts),
       mockPeekViewExtension(attachmentViewerPanel),
     ];
-
     return newSpec;
   }
 }

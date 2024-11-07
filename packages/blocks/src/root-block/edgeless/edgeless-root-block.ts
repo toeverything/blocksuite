@@ -95,6 +95,7 @@ export class EdgelessRootBlockComponent extends BlockComponent<
 
     .edgeless-container {
       color: var(--affine-text-primary-color);
+      position: relative;
     }
 
     @media print {
@@ -550,9 +551,8 @@ export class EdgelessRootBlockComponent extends BlockComponent<
           }}
           .host=${this.host}
         >
-          ${this.renderChildren(this.model)}${this.renderChildren(
-            this.surfaceBlockModel
-          )}
+          ${this.renderChildren(this.model)}
+          ${this.renderChildren(this.surfaceBlockModel)}
         </gfx-viewport>
       </div>
 

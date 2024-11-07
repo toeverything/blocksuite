@@ -14,7 +14,7 @@ import {
 } from '@toeverything/theme';
 import { unsafeCSS } from 'lit';
 
-import { DocModeProvider, type DocModeService } from './doc-mode-service.js';
+import { isInsideEdgelessEditor } from '../utils/index.js';
 
 const TRANSPARENT = 'transparent';
 
@@ -53,28 +53,26 @@ export class ThemeService extends Extension {
   }
 
   get theme() {
-    return this.docMode.getEditorMode() === 'page'
-      ? this.appTheme
-      : this.edgelessTheme;
+    return isInsideEdgelessEditor(this.std.host)
+      ? this.edgelessTheme
+      : this.appTheme;
   }
 
   get theme$() {
-    return this.docMode.getEditorMode() === 'page' ? this.app$ : this.edgeless$;
+    return isInsideEdgelessEditor(this.std.host) ? this.edgeless$ : this.app$;
   }
 
-  constructor(
-    private std: BlockStdScope,
-    private docMode: DocModeService
-  ) {
+  constructor(private std: BlockStdScope) {
     super();
     const extension = this.std.getOptional(ThemeExtensionIdentifier);
     this.app$ = extension?.getAppTheme?.() || getThemeObserver().theme$;
     this.edgeless$ =
-      extension?.getEdgelessTheme?.() || getThemeObserver().theme$;
+      extension?.getEdgelessTheme?.(this.std.doc.id) ||
+      getThemeObserver().theme$;
   }
 
   static override setup(di: Container) {
-    di.addImpl(ThemeProvider, ThemeService, [StdIdentifier, DocModeProvider]);
+    di.addImpl(ThemeProvider, ThemeService, [StdIdentifier]);
   }
 
   /**
