@@ -131,7 +131,7 @@ export class DataViewKanban extends DataViewBase<
         options: {
           items: [
             menu.input({
-              onComplete: text => {
+              onChange: text => {
                 const column = this.groupManager.property$.value;
                 if (column) {
                   column.dataUpdate(

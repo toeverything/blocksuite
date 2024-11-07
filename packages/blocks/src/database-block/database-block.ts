@@ -115,7 +115,7 @@ export class DatabaseBlockComponent extends CaptionedBlockComponent<
         menu.input({
           initialValue: this.model.title.toString(),
           placeholder: 'Untitled',
-          onComplete: text => {
+          onChange: text => {
             this.model.title.replace(0, this.model.title.length, text);
           },
         }),

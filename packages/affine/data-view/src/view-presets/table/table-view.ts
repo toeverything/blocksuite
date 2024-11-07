@@ -195,7 +195,7 @@ export class DataViewTable extends DataViewBase<
         options: {
           items: [
             menu.input({
-              onComplete: text => {
+              onChange: text => {
                 const column = groupHelper.property$.value;
                 if (column) {
                   column.dataUpdate(

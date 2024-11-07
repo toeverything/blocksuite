@@ -30,7 +30,7 @@ export class NumberGroupView extends BaseGroup<NonNullable<unknown>, number> {
         items: [
           menu.input({
             initialValue: this.value ? `${this.value * 10}` : '',
-            onComplete: text => {
+            onChange: text => {
               const num = Number.parseFloat(text);
               if (Number.isNaN(num)) {
                 return;

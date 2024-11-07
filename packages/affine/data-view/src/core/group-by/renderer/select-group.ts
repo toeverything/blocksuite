@@ -52,7 +52,7 @@ export class SelectGroupView extends BaseGroup<
         items: [
           menu.input({
             initialValue: this.tag?.value ?? '',
-            onComplete: text => {
+            onChange: text => {
               this.updateTag({ value: text });
             },
           }),
