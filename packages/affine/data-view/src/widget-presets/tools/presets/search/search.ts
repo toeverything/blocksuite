@@ -6,8 +6,10 @@ import { query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type { KanbanSingleView } from '../../../../view-presets/kanban/kanban-view-manager.js';
-import type { TableSingleView } from '../../../../view-presets/table/table-view-manager.js';
+import type {
+  KanbanSingleView,
+  TableSingleView,
+} from '../../../../view-presets/index.js';
 
 import { stopPropagation } from '../../../../core/utils/event.js';
 import { WidgetBase } from '../../../../core/widget/widget-base.js';
@@ -24,6 +26,7 @@ const styles = css`
     transition: width 0.3s ease;
     overflow: hidden;
   }
+
   .affine-database-search-container svg {
     width: 20px;
     height: 20px;
@@ -61,6 +64,7 @@ const styles = css`
     padding: 2px;
     border-radius: 4px;
   }
+
   .affine-database-search-input-icon:hover {
     background: var(--affine-hover-color);
   }
@@ -89,7 +93,9 @@ const styles = css`
   }
 `;
 
-export class DataViewHeaderToolsSearch extends WidgetBase {
+export class DataViewHeaderToolsSearch extends WidgetBase<
+  TableSingleView | KanbanSingleView
+> {
   static override styles = styles;
 
   private _clearSearch = () => {
@@ -191,8 +197,6 @@ export class DataViewHeaderToolsSearch extends WidgetBase {
 
   @state()
   private accessor _showSearch = false;
-
-  public override accessor view!: TableSingleView | KanbanSingleView;
 }
 
 declare global {

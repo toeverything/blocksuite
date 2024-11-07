@@ -5,11 +5,8 @@ import { cssVarV2 } from '@toeverything/theme/v2';
 import { css, html, nothing } from 'lit';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type { SortManager } from '../../../../core/sort/manager.js';
-import type { SortBy } from '../../../../core/sort/types.js';
-
 import { popCreateSort } from '../../../../core/sort/add-sort.js';
-import { canSort } from '../../../../core/sort/utils.js';
+import { canSort, createSortUtils } from '../../../../core/sort/utils.js';
 import { WidgetBase } from '../../../../core/widget/widget-base.js';
 import { ShowQuickSettingBarContextKey } from '../../../quick-setting-bar/context.js';
 import { popSortRoot } from '../../../quick-setting-bar/sort/root-panel.js';
@@ -38,50 +35,48 @@ const styles = css`
 export class DataViewHeaderToolsSort extends WidgetBase {
   static override styles = styles;
 
+  sortUtils$ = computed(() => {
+    if (canSort(this.view)) {
+      return createSortUtils(this.view, this.dataViewInstance.eventTrace);
+    }
+    return;
+  });
+
   hasSort = computed(() => {
-    return this.sortManager?.hasSort$.value ?? false;
+    return (this.sortUtils$.value?.sortList$?.value?.length ?? 0) > 0;
   });
 
   private get readonly() {
     return this.view.readonly$.value;
   }
 
-  private get sortList(): SortBy[] {
-    return this.sortManager?.sortList$.value ?? [];
-  }
-
-  private set sortList(sortList: SortBy[]) {
-    this.sortManager?.setSortList(sortList);
-  }
-
-  get sortManager(): SortManager | void {
-    if (canSort(this.view)) {
-      return this.view.sortManager;
-    }
-  }
-
   private clickSort(event: MouseEvent) {
+    const sortUtils = this.sortUtils$.value;
+    if (!sortUtils) {
+      return;
+    }
     if (this.hasSort.value) {
       this.toggleShowQuickSettingBar();
       return;
     }
     this.showToolBar(true);
     popCreateSort(popupTargetFromElement(event.currentTarget as HTMLElement), {
-      vars: this.view.vars$,
-      sortList: this.sortList,
-      onSelect: sort => {
-        this.sortList = [...this.sortList, sort];
-        this.toggleShowQuickSettingBar(true);
-        requestAnimationFrame(() => {
-          const ele = this.closest('affine-data-view-renderer')?.querySelector(
-            '.data-view-sort-button'
-          );
-          if (ele && canSort(this.view)) {
-            popSortRoot(popupTargetFromElement(ele as HTMLElement), {
-              view: this.view,
-            });
-          }
-        });
+      sortUtils: {
+        ...sortUtils,
+        add: sort => {
+          sortUtils.add(sort);
+          this.toggleShowQuickSettingBar(true);
+          requestAnimationFrame(() => {
+            const ele = this.closest(
+              'affine-data-view-renderer'
+            )?.querySelector('.data-view-sort-button');
+            if (ele && canSort(this.view)) {
+              popSortRoot(popupTargetFromElement(ele as HTMLElement), {
+                sortUtils: sortUtils,
+              });
+            }
+          });
+        },
       },
       onClose: () => {
         this.showToolBar(false);

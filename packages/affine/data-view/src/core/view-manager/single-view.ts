@@ -194,6 +194,7 @@ export abstract class SingleViewBase<
         name: v.name$.value,
         type: propertyMeta.config.type(v.data$.value),
         icon: v.icon,
+        propertyType: v.type$.value,
       };
     });
   });

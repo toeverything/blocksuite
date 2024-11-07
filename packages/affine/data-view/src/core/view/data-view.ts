@@ -1,7 +1,7 @@
 import type { UniComponent } from '../utils/uni-component/index.js';
 import type { SingleView } from '../view-manager/single-view.js';
 import type { ViewManager } from '../view-manager/view-manager.js';
-import type { DataViewExpose, DataViewProps } from './types.js';
+import type { DataViewInstance, DataViewProps } from './types.js';
 
 export type BasicViewDataType<
   Type extends string = string,
@@ -47,7 +47,7 @@ export interface DataViewRendererConfig {
     {
       props: DataViewProps;
     },
-    { expose: DataViewExpose }
+    { expose: DataViewInstance }
   >;
   icon: UniComponent;
 }

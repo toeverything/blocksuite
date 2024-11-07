@@ -11,7 +11,7 @@ import { renderSortBar } from './sort/index.js';
 
 export const widgetQuickSettingBar = defineUniComponent(
   (props: DataViewWidgetProps) => {
-    const view = props.view;
+    const view = props.dataViewInstance.view;
     if (!view.contextGet(ShowQuickSettingBarContextKey).value[view.id]) {
       return html``;
     }

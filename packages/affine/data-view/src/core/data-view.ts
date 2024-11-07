@@ -1,4 +1,7 @@
-import type { BlockStdScope } from '@blocksuite/block-std';
+import type {
+  DatabaseAllEvents,
+  EventTraceFn,
+} from '@blocksuite/affine-shared/services';
 
 import { ShadowlessElement } from '@blocksuite/block-std';
 import { SignalWatcher, WithDisposable } from '@blocksuite/global/utils';
@@ -10,9 +13,8 @@ import { keyed } from 'lit/directives/keyed.js';
 import { createRef, ref } from 'lit/directives/ref.js';
 import { html } from 'lit/static-html.js';
 
-import type { DataSource } from './data-source/base.js';
 import type { DataViewSelection, DataViewSelectionState } from './types.js';
-import type { DataViewExpose, DataViewProps } from './view/types.js';
+import type { DataViewInstance, DataViewProps } from './view/types.js';
 import type { SingleView } from './view-manager/single-view.js';
 
 import { dataViewCommonStyle } from './common/css-variable.js';
@@ -26,13 +28,20 @@ type ViewProps = {
   handleEvent: DataViewProps['handleEvent'];
 };
 
-export type DataViewRendererConfig = {
-  bindHotkey: DataViewProps['bindHotkey'];
-  handleEvent: DataViewProps['handleEvent'];
-  virtualPadding$: DataViewProps['virtualPadding$'];
+export type DataViewRendererConfig = Pick<
+  DataViewProps,
+  | 'bindHotkey'
+  | 'handleEvent'
+  | 'virtualPadding$'
+  | 'clipboard'
+  | 'dataSource'
+  | 'headerWidget'
+  | 'onDrag'
+  | 'notification'
+> & {
   selection$: ReadonlySignal<DataViewSelection | undefined>;
   setSelection: (selection: DataViewSelection | undefined) => void;
-  dataSource: DataSource;
+  eventTrace: EventTraceFn<DatabaseAllEvents>;
   detailPanelConfig: {
     openDetailPanel: (
       target: HTMLElement,
@@ -42,9 +51,6 @@ export type DataViewRendererConfig = {
       }
     ) => Promise<void>;
   };
-  headerWidget: DataViewProps['headerWidget'];
-  onDrag?: DataViewProps['onDrag'];
-  std: BlockStdScope;
 };
 
 export class DataViewRenderer extends SignalWatcher(
@@ -58,7 +64,9 @@ export class DataViewRenderer extends SignalWatcher(
     }
   `;
 
-  private _view = createRef<{ expose: DataViewExpose }>();
+  private _view = createRef<{
+    expose: DataViewInstance;
+  }>();
 
   @property({ attribute: false })
   accessor config!: DataViewRendererConfig;
@@ -141,15 +149,23 @@ export class DataViewRenderer extends SignalWatcher(
     const props: DataViewProps = {
       dataViewEle: this,
       headerWidget: this.config.headerWidget,
+      onDrag: this.config.onDrag,
+      dataSource: this.config.dataSource,
+      virtualPadding$: this.config.virtualPadding$,
+      clipboard: this.config.clipboard,
+      notification: this.config.notification,
       view: viewData.view,
       selection$: viewData.selection$,
       setSelection: viewData.setSelection,
       bindHotkey: viewData.bindHotkey,
       handleEvent: viewData.handleEvent,
-      onDrag: this.config.onDrag,
-      std: this.config.std,
-      dataSource: this.config.dataSource,
-      virtualPadding$: this.config.virtualPadding$,
+      eventTrace: (key, params) => {
+        this.config.eventTrace(key, {
+          ...(params as DatabaseAllEvents[typeof key]),
+          viewId: viewData.view.id,
+          viewType: viewData.view.type,
+        });
+      },
     };
     return keyed(
       viewData.view.id,

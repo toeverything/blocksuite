@@ -1,9 +1,7 @@
 import type { UniComponent } from '../utils/uni-component/index.js';
-import type { DataViewExpose } from '../view/types.js';
-import type { SingleView } from '../view-manager/single-view.js';
+import type { DataViewInstance } from '../view/types.js';
 
 export type DataViewWidgetProps = {
-  view: SingleView;
-  viewMethods: DataViewExpose;
+  dataViewInstance: DataViewInstance;
 };
 export type DataViewWidget = UniComponent<DataViewWidgetProps>;

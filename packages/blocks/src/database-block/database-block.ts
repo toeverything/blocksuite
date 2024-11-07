@@ -10,7 +10,12 @@ import { DragIndicator } from '@blocksuite/affine-components/drag-indicator';
 import { PeekViewProvider } from '@blocksuite/affine-components/peek';
 import { toast } from '@blocksuite/affine-components/toast';
 import { NOTE_SELECTOR } from '@blocksuite/affine-shared/consts';
-import { DocModeProvider } from '@blocksuite/affine-shared/services';
+import {
+  DocModeProvider,
+  NotificationProvider,
+  type TelemetryEventMap,
+  TelemetryProvider,
+} from '@blocksuite/affine-shared/services';
 import { RANGE_SYNC_EXCLUDE_ATTR } from '@blocksuite/block-std';
 import {
   createRecordDetail,
@@ -18,7 +23,7 @@ import {
   DatabaseSelection,
   DataView,
   dataViewCommonStyle,
-  type DataViewExpose,
+  type DataViewInstance,
   type DataViewProps,
   type DataViewSelection,
   type DataViewWidget,
@@ -156,7 +161,7 @@ export class DatabaseBlockComponent extends CaptionedBlockComponent<
 
   private dataView = new DataView();
 
-  private renderTitle = (dataViewMethod: DataViewExpose) => {
+  private renderTitle = (dataViewMethod: DataViewInstance) => {
     const addRow = () => dataViewMethod.addRow?.('start');
     return html` <affine-database-title
       style="overflow: hidden"
@@ -219,7 +224,8 @@ export class DatabaseBlockComponent extends CaptionedBlockComponent<
           <div
             style="display:flex;gap:12px;margin-bottom: 8px;align-items: center"
           >
-            ${this.renderTitle(props.viewMethods)} ${this.renderDatabaseOps()}
+            ${this.renderTitle(props.dataViewInstance)}
+            ${this.renderDatabaseOps()}
           </div>
           <div
             style="display:flex;align-items:center;justify-content: space-between;gap: 12px"
@@ -384,6 +390,7 @@ export class DatabaseBlockComponent extends CaptionedBlockComponent<
 
   override renderBlock() {
     const peekViewService = this.std.getOptional(PeekViewProvider);
+    const telemetryService = this.std.getOptional(TelemetryProvider);
     return html`
       <div
         contenteditable="false"
@@ -398,7 +405,24 @@ export class DatabaseBlockComponent extends CaptionedBlockComponent<
           dataSource: this.dataSource,
           headerWidget: this.headerWidget,
           onDrag: this.onDrag,
-          std: this.std,
+          clipboard: this.std.clipboard,
+          notification: {
+            toast: message => {
+              const notification = this.std.getOptional(NotificationProvider);
+              if (notification) {
+                notification.toast(message);
+              } else {
+                toast(this.host, message);
+              }
+            },
+          },
+          eventTrace: (key, params) => {
+            console.log(key, params);
+            telemetryService?.track(key, {
+              ...(params as TelemetryEventMap[typeof key]),
+              blockId: this.blockId,
+            });
+          },
           detailPanelConfig: {
             openDetailPanel: (target, data) => {
               if (peekViewService) {
