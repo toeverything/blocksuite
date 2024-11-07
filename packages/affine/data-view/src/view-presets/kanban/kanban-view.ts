@@ -100,36 +100,6 @@ export class DataViewKanban extends DataViewBase<
 
   clipboardController = new KanbanClipboardController(this);
 
-  selectionController = new KanbanSelectionController(this);
-
-  expose: DataViewInstance = {
-    focusFirstCell: () => {
-      this.selectionController.focusFirstCell();
-    },
-    getSelection: () => {
-      return this.selectionController.selection;
-    },
-    hideIndicator: () => {
-      this.dragController.dropPreview.remove();
-    },
-    moveTo: (id, evt) => {
-      const position = this.dragController.getInsertPosition(evt);
-      if (position) {
-        position.group.group.manager.moveCardTo(
-          id,
-          '',
-          position.group.group.key,
-          position.position
-        );
-      }
-    },
-    showIndicator: evt => {
-      return this.dragController.shooIndicator(evt, undefined) != null;
-    },
-    view: this.props.view,
-    eventTrace: this.props.eventTrace,
-  };
-
   hotkeysController = new KanbanHotkeysController(this);
 
   onWheel = (event: WheelEvent) => {
@@ -176,6 +146,38 @@ export class DataViewKanban extends DataViewBase<
       <div class="add-group-icon">${AddCursorIcon()}</div>
     </div>`;
   };
+
+  selectionController = new KanbanSelectionController(this);
+
+  get expose(): DataViewInstance {
+    return {
+      focusFirstCell: () => {
+        this.selectionController.focusFirstCell();
+      },
+      getSelection: () => {
+        return this.selectionController.selection;
+      },
+      hideIndicator: () => {
+        this.dragController.dropPreview.remove();
+      },
+      moveTo: (id, evt) => {
+        const position = this.dragController.getInsertPosition(evt);
+        if (position) {
+          position.group.group.manager.moveCardTo(
+            id,
+            '',
+            position.group.group.key,
+            position.position
+          );
+        }
+      },
+      showIndicator: evt => {
+        return this.dragController.shooIndicator(evt, undefined) != null;
+      },
+      view: this.props.view,
+      eventTrace: this.props.eventTrace,
+    };
+  }
 
   get groupManager() {
     return this.props.view.groupManager;
