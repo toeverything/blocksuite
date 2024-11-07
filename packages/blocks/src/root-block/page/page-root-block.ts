@@ -60,6 +60,7 @@ export class PageRootBlockComponent extends BlockComponent<
     affine-page-root {
       display: block;
       height: 100%;
+      cursor: default;
     }
 
     .affine-page-root-block-container {
@@ -74,8 +75,6 @@ export class PageRootBlockComponent extends BlockComponent<
       font-weight: 400;
       max-width: var(--affine-editor-width);
       margin: 0 auto;
-      /* cursor: crosshair; */
-      cursor: default;
 
       /* Leave a place for drag-handle */
       /* Do not use prettier format this style, or it will be broken */
