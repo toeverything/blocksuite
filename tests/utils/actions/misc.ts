@@ -1253,6 +1253,7 @@ export function inlineEditorInnerTextToString(innerText: string): string {
 }
 
 export async function focusTitle(page: Page) {
+  await page.locator('doc-title rich-text').click();
   await page.evaluate(i => {
     const docTitle = document.querySelectorAll('doc-title')[i];
     if (!docTitle) {
@@ -1267,7 +1268,7 @@ export async function focusTitle(page: Page) {
     }
     docTitleRichText.inlineEditor.focusEnd();
   }, currentEditorIndex);
-  await waitNextFrame(page);
+  await waitNextFrame(page, 200);
 }
 
 /**
