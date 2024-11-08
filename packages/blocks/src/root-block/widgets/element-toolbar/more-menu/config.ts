@@ -201,6 +201,18 @@ export const clipboardGroup: MenuItemGroup<ElementToolbarMoreMenuContext> = {
       action: ({ edgeless }) => edgeless.clipboardController.copy(),
     },
     {
+      icon: CopyIcon({ width: '20', height: '20' }),
+      label: 'Copy as PNG',
+      type: 'copy-as-png',
+      action: async ({ edgeless, selectedElements }) => {
+        const blocks = selectedElements.filter(
+          el => 'xywh' in el
+        ) as BlockSuite.EdgelessBlockModelType[];
+        const shapes = selectedElements.filter(el => !('xywh' in el));
+        await edgeless.clipboardController.copyAsPng(blocks, shapes);
+      },
+    },
+    {
       icon: DuplicateIcon({ width: '20', height: '20' }),
       label: 'Duplicate',
       type: 'duplicate',
