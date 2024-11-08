@@ -232,8 +232,6 @@ export const defaultSlashMenuConfig: SlashMenuConfig = {
         return true;
       },
       action: ({ model, rootComponent }) => {
-        const triggerKey = '@';
-        insertContent(rootComponent.host, model, triggerKey);
         const { std } = rootComponent;
 
         const linkedDocWidget = std.view.getWidget(
@@ -243,10 +241,14 @@ export const defaultSlashMenuConfig: SlashMenuConfig = {
         if (!linkedDocWidget) return;
         assertType<AffineLinkedDocWidget>(linkedDocWidget);
 
+        const triggerKey = linkedDocWidget.config.triggerKeys[0];
+
+        insertContent(rootComponent.host, model, triggerKey);
+
         const inlineEditor = getInlineEditorByModel(rootComponent.host, model);
         // Wait for range to be updated
         inlineEditor?.slots.inlineRangeSync.once(() => {
-          linkedDocWidget.showLinkedDocPopover(inlineEditor, triggerKey);
+          linkedDocWidget.showLinkedDocPopover();
         });
       },
     },

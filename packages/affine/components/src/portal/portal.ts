@@ -1,4 +1,4 @@
-import { html, LitElement } from 'lit';
+import { html, LitElement, type TemplateResult } from 'lit';
 import { property } from 'lit/decorators.js';
 
 /**
@@ -50,7 +50,7 @@ export class Portal extends LitElement {
   accessor shadowDom: boolean | ShadowRootInit = true;
 
   @property({ attribute: false })
-  accessor template = html``;
+  accessor template: TemplateResult | undefined = html``;
 }
 
 declare global {
