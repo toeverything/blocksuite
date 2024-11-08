@@ -8,6 +8,8 @@ import type {
 import { BlockLinkIcon } from '@blocksuite/affine-components/icons';
 import { isPeekable, Peekable } from '@blocksuite/affine-components/peek';
 import {
+  cloneReferenceInfo,
+  isLinkToNode,
   REFERENCE_NODE,
   RefNodeSlotsProvider,
 } from '@blocksuite/affine-components/rich-text';
@@ -35,7 +37,7 @@ import {
   EmbedLinkedDocBlockConfigIdentifier,
 } from './embed-linked-doc-config.js';
 import { styles } from './styles.js';
-import { getEmbedLinkedDocIcons, isLinkToNode } from './utils.js';
+import { getEmbedLinkedDocIcons } from './utils.js';
 
 @Peekable({
   enableOn: ({ doc }: EmbedLinkedDocBlockComponent) => !doc.readonly,
@@ -211,16 +213,7 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockComponent<EmbedLinke
   }
 
   get referenceInfo(): ReferenceInfo {
-    const { pageId, params } = this.model;
-    const info: ReferenceInfo = { pageId };
-    if (!params) return info;
-
-    const { mode, blockIds, elementIds } = params;
-    info.params = {};
-    if (mode) info.params.mode = mode;
-    if (blockIds?.length) info.params.blockIds = [...blockIds];
-    if (elementIds?.length) info.params.elementIds = [...elementIds];
-    return info;
+    return cloneReferenceInfo(this.model);
   }
 
   private _handleDoubleClick(event: MouseEvent) {

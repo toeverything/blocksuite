@@ -116,6 +116,7 @@ export class ReferencePopup extends WithDisposable(LitElement) {
 
     const index = parent.children.indexOf(block.model);
     const docId = this.referenceDocId;
+
     doc.addBlock(
       'affine:embed-synced-doc',
       { pageId: docId },
@@ -221,7 +222,7 @@ export class ReferencePopup extends WithDisposable(LitElement) {
     `;
   }
 
-  private _viewMenuButton() {
+  private _viewToggleMenu() {
     // synced doc entry controlled by awareness flag
     const isSyncedDocEnabled = this.doc.awarenessStore.getFlag(
       'enable_synced_doc_block'
@@ -276,7 +277,7 @@ export class ReferencePopup extends WithDisposable(LitElement) {
                 aria-label=${label}
                 data-testid=${`link-to-${type}`}
                 ?data-selected=${type === 'inline'}
-                ?disabled=${disabled}
+                ?disabled=${disabled || type === 'inline'}
                 @click=${action}
               >
                 ${label}
@@ -311,7 +312,7 @@ export class ReferencePopup extends WithDisposable(LitElement) {
     const buttons = [
       this._openMenuButton(),
 
-      this._viewMenuButton(),
+      this._viewToggleMenu(),
 
       html`
         <editor-menu-button
