@@ -19,7 +19,7 @@ import { computed } from '@preact/signals-core';
 import { css, html } from 'lit';
 import { property } from 'lit/decorators.js';
 
-import { getDocIdsFromText } from '../utils/title-doc.js';
+import { isPureText } from '../utils/title-doc.js';
 
 export class NoteRenderer
   extends SignalWatcher(WithDisposable(ShadowlessElement))
@@ -41,7 +41,7 @@ export class NoteRenderer
   });
 
   allowCreateDoc$ = computed(() => {
-    return getDocIdsFromText(this.rowText$.value).length === 0;
+    return isPureText(this.rowText$.value);
   });
 
   get databaseBlock(): DatabaseBlockModel {

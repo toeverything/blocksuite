@@ -25,7 +25,7 @@ import type { DatabaseBlockComponent } from '../../database-block.js';
 
 import { ClipboardAdapter } from '../../../root-block/clipboard/adapter.js';
 import { HostContextKey } from '../../context/host-context.js';
-import { getDocIdsFromText } from '../../utils/title-doc.js';
+import { getSingleDocIdFromText } from '../../utils/title-doc.js';
 
 const styles = css`
   data-view-header-area-text {
@@ -139,12 +139,8 @@ abstract class BaseTextCell extends BaseCellRenderer<Text> {
     const yText = this.value?.yText;
     if (yText) {
       const cb = () => {
-        const ids = getDocIdsFromText(this.value);
-        if (ids.length === 1) {
-          this.docId$.value = ids[0];
-        } else {
-          this.docId$.value = undefined;
-        }
+        const id = getSingleDocIdFromText(this.value);
+        this.docId$.value = id;
       };
       cb();
       if (this.activity) {
