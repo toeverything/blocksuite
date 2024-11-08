@@ -287,6 +287,7 @@ export const popViewOptions = (
                   view.manager.currentViewId$.value,
                   meta.type
                 );
+                dataViewInstance.clearSelection();
               },
               class: {},
             };

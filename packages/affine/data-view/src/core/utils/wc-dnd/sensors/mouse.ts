@@ -58,9 +58,9 @@ export const mouseSensor: Sensor<MouseSensorProps> = props => {
         );
       }
     };
-    container.addEventListener('mousedown', mousedown);
+    container.addEventListener('pointerdown', mousedown);
     return () => {
-      container.removeEventListener('mousedown', mousedown);
+      container.removeEventListener('pointerdown', mousedown);
     };
   };
 };
@@ -200,8 +200,8 @@ export class MouseSession implements DndSession {
   }
 
   private attach() {
-    this.windowListeners.add('mousemove', this.handleMove);
-    this.windowListeners.add('mouseup', this.handleEnd);
+    this.windowListeners.add('pointermove', this.handleMove);
+    this.windowListeners.add('pointerup', this.handleEnd);
     this.windowListeners.add('resize', this.handleCancel);
     this.windowListeners.add('dragstart', preventDefault);
     this.windowListeners.add('visibilitichange', this.handleCancel);

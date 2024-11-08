@@ -18,7 +18,7 @@ import { KanbanCard } from '../card.js';
 import { KanbanCell } from '../cell.js';
 
 export class KanbanSelectionController implements ReactiveController {
-  _selection?: KanbanViewSelectionWithType;
+  private _selection?: KanbanViewSelectionWithType;
 
   shiftClickCard = (event: MouseEvent) => {
     event.preventDefault();
@@ -109,6 +109,10 @@ export class KanbanSelectionController implements ReactiveController {
     } else {
       container.blur();
     }
+  }
+
+  clear() {
+    this.selection = undefined;
   }
 
   deleteCard() {
@@ -284,7 +288,10 @@ export class KanbanSelectionController implements ReactiveController {
     selection: KanbanCardSelection,
     index: number,
     nextPosition: 'up' | 'down' | 'left' | 'right'
-  ): { card: KanbanCard; cards: KanbanCardSelectionCard[] } {
+  ): {
+    card: KanbanCard;
+    cards: KanbanCardSelectionCard[];
+  } {
     const group = this.host.querySelector(
       `affine-data-view-kanban-group[data-key="${selection.cards[0].groupKey}"]`
     );
@@ -558,6 +565,7 @@ type NextFocusCard = {
     groupKey: string;
   }[];
 };
+
 function getNextGroupFocusElement(
   viewElement: Element,
   groups: KanbanGroup[],
@@ -742,6 +750,7 @@ function getYOffset(srcRect: DOMRect, targetRect: DOMRect) {
       (targetRect.top + (targetRect.bottom - targetRect.top) / 2)
   );
 }
+
 const atLeastOne = <T>(v: T[]): v is [T, ...T[]] => {
   return v.length > 0;
 };

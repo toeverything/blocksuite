@@ -224,6 +224,9 @@ export class DataViewTable extends DataViewBase<
 
   get expose(): DataViewInstance {
     return {
+      clearSelection: () => {
+        this.selectionController.clear();
+      },
       addRow: position => {
         this._addRow(this.props.view, position);
       },

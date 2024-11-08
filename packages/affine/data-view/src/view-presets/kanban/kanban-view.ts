@@ -197,6 +197,9 @@ export class DataViewKanban extends DataViewBase<
 
   get expose(): DataViewInstance {
     return {
+      clearSelection: () => {
+        this.selectionController.clear();
+      },
       focusFirstCell: () => {
         this.selectionController.focusFirstCell();
       },

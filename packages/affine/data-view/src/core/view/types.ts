@@ -65,4 +65,6 @@ export interface DataViewInstance<T extends SingleView = SingleView> {
   view: T;
 
   eventTrace: EventTraceFn<DatabaseAllViewEvents>;
+
+  clearSelection(): void;
 }
