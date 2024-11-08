@@ -115,11 +115,10 @@ export class ReferencePopup extends WithDisposable(LitElement) {
     assertExists(parent);
 
     const index = parent.children.indexOf(block.model);
-    const docId = this.referenceDocId;
 
     doc.addBlock(
       'affine:embed-synced-doc',
-      { pageId: docId },
+      this.referenceInfo,
       parent,
       index + 1
     );

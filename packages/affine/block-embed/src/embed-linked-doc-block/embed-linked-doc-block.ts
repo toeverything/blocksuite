@@ -127,7 +127,7 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockComponent<EmbedLinke
   convertToEmbed = () => {
     if (this._isLinkToNode) return;
 
-    const { doc, pageId, caption } = this.model;
+    const { doc, caption } = this.model;
 
     // synced doc entry controlled by awareness flag
     const isSyncedDocEnabled = doc.awarenessStore.getFlag(
@@ -143,7 +143,12 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockComponent<EmbedLinke
     }
     const index = parent.children.indexOf(this.model);
 
-    doc.addBlock('affine:embed-synced-doc', { pageId, caption }, parent, index);
+    doc.addBlock(
+      'affine:embed-synced-doc',
+      { caption, ...this.referenceInfo },
+      parent,
+      index
+    );
 
     this.std.selection.setGroup('note', []);
     doc.deleteBlock(this.model);

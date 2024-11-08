@@ -536,7 +536,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
                   data-testid=${`link-to-${type}`}
                   aria-label=${ifDefined(label)}
                   ?data-selected=${this._viewType === type}
-                  ?disabled=${disabled}
+                  ?disabled=${disabled || this._viewType === type}
                   @click=${handler}
                 >
                   ${label}
