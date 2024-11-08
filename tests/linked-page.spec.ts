@@ -95,7 +95,7 @@ test.describe('multiple page', () => {
 });
 
 test.describe('reference node', () => {
-  test('linked page popover can show and hide correctly', async ({ page }) => {
+  test('linked doc popover can show and hide correctly', async ({ page }) => {
     await enterPlaygroundRoom(page);
     const { paragraphId } = await initEmptyParagraphState(page);
     await focusRichText(page);
@@ -118,6 +118,23 @@ test.describe('reference node', () => {
     await type(page, '@');
     await expect(linkedDocPopover).toBeVisible();
     await assertRichTexts(page, ['@@']);
+    await pressBackspace(page);
+    await expect(linkedDocPopover).toBeHidden();
+  });
+
+  test('linked doc popover should not show when the current content is @xx and pressing backspace', async ({
+    page,
+  }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyParagraphState(page);
+    await focusRichText(page);
+    await type(page, '@');
+    await page.keyboard.press('Escape');
+    await type(page, 'a');
+
+    const { linkedDocPopover } = getLinkedDocPopover(page);
+    await expect(linkedDocPopover).toBeHidden();
+
     await pressBackspace(page);
     await expect(linkedDocPopover).toBeHidden();
   });

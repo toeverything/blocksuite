@@ -1,5 +1,3 @@
-import type { InlineRange } from '@blocksuite/inline';
-
 import { MoreHorizontalIcon } from '@blocksuite/affine-components/icons';
 import {
   getCurrentNativeRange,
@@ -20,13 +18,13 @@ import {
   getQuery,
 } from '../../../_common/components/utils.js';
 import { getPopperPosition } from '../../utils/position.js';
-import { styles } from './styles.js';
+import { linkedDocPopoverStyles } from './styles.js';
 
 @requiredProperties({
   context: PropTypes.object,
 })
 export class LinkedDocPopover extends WithDisposable(LitElement) {
-  static override styles = styles;
+  static override styles = linkedDocPopoverStyles;
 
   private _abort = () => {
     // remove popover dom
@@ -41,8 +39,6 @@ export class LinkedDocPopover extends WithDisposable(LitElement) {
 
   private _expanded = new Map<string, boolean>();
 
-  private _startRange: InlineRange | null = null;
-
   private _updateLinkedDocGroup = async () => {
     const query = this._query;
 
@@ -50,7 +46,7 @@ export class LinkedDocPopover extends WithDisposable(LitElement) {
       this.context.close();
       return;
     }
-    this._linkedDocGroup = await this.context.getMenus(
+    this._linkedDocGroup = await this.context.config.getMenus(
       query,
       this._abort,
       this.context.std.host,
@@ -76,7 +72,7 @@ export class LinkedDocPopover extends WithDisposable(LitElement) {
   }
 
   private get _query() {
-    return getQuery(this.context.inlineEditor, this._startRange);
+    return getQuery(this.context.inlineEditor, this.context.startRange);
   }
 
   private _getActionItems(group: LinkedMenuGroup) {
@@ -108,8 +104,6 @@ export class LinkedDocPopover extends WithDisposable(LitElement) {
     super.connectedCallback();
 
     // init
-    this._startRange = this.context.inlineEditor.getInlineRange();
-
     void this._updateLinkedDocGroup();
     this._disposables.addFromEvent(this, 'mousedown', e => {
       // Prevent input from losing focus
@@ -147,10 +141,10 @@ export class LinkedDocPopover extends WithDisposable(LitElement) {
       },
       onDelete: () => {
         const curRange = this.context.inlineEditor.getInlineRange();
-        if (!this._startRange || !curRange) {
+        if (!this.context.startRange || !curRange) {
           return;
         }
-        if (curRange.index < this._startRange.index) {
+        if (curRange.index < this.context.startRange.index) {
           this.context.close();
         }
         this._activatedItemIndex = 0;

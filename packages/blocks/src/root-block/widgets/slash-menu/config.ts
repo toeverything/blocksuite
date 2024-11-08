@@ -218,18 +218,7 @@ export const defaultSlashMenuConfig: SlashMenuConfig = {
         );
         if (!linkedDocWidget) return false;
 
-        const hasLinkedDocSchema = model.doc.schema.flavourSchemaMap.has(
-          'affine:embed-linked-doc'
-        );
-        if (!hasLinkedDocSchema) return false;
-
-        if (!('showLinkedDocPopover' in linkedDocWidget)) {
-          console.warn(
-            'You may not have correctly implemented the linkedDoc widget! "showLinkedDoc(model)" method not found on widget'
-          );
-          return false;
-        }
-        return true;
+        return model.doc.schema.flavourSchemaMap.has('affine:embed-linked-doc');
       },
       action: ({ model, rootComponent }) => {
         const { std } = rootComponent;
@@ -248,7 +237,7 @@ export const defaultSlashMenuConfig: SlashMenuConfig = {
         const inlineEditor = getInlineEditorByModel(rootComponent.host, model);
         // Wait for range to be updated
         inlineEditor?.slots.inlineRangeSync.once(() => {
-          linkedDocWidget.showLinkedDocPopover();
+          linkedDocWidget.show();
         });
       },
     },

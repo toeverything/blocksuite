@@ -1,5 +1,6 @@
 import type { ReactiveController, ReactiveControllerHost } from 'lit';
 
+import { IS_IOS } from '@blocksuite/global/env';
 import { DisposableGroup } from '@blocksuite/global/utils';
 import { signal } from '@preact/signals-core';
 
@@ -44,7 +45,9 @@ export class VirtualKeyboardController implements ReactiveController {
        */
       this._keyboardOpened$.value = windowHeight - visualViewport.height > 0;
       this._keyboardHeight$.value =
-        windowHeight - visualViewport.height - visualViewport.offsetTop;
+        windowHeight -
+        visualViewport.height -
+        (IS_IOS ? 0 : visualViewport.offsetTop);
     } else {
       notSupportedWarning();
     }
@@ -60,6 +63,7 @@ export class VirtualKeyboardController implements ReactiveController {
 
   host: ReactiveControllerHost & {
     virtualKeyboardControllerConfig: VirtualKeyboardControllerConfig;
+    hasUpdated: boolean;
   };
 
   show = () => {
@@ -99,17 +103,19 @@ export class VirtualKeyboardController implements ReactiveController {
   }
 
   hostConnected() {
+    const { inputElement } = this.config;
+
     if (navigator.virtualKeyboard) {
       const { overlaysContent } = navigator.virtualKeyboard;
-      const { virtualKeyboardPolicy } = this.config.inputElement;
+      const { virtualKeyboardPolicy } = inputElement;
 
       navigator.virtualKeyboard.overlaysContent = true;
-      this.config.inputElement.virtualKeyboardPolicy = 'manual';
+      inputElement.virtualKeyboardPolicy = 'manual';
 
       this._disposables.add(() => {
         if (!navigator.virtualKeyboard) return;
         navigator.virtualKeyboard.overlaysContent = overlaysContent;
-        this.config.inputElement.virtualKeyboardPolicy = virtualKeyboardPolicy;
+        inputElement.virtualKeyboardPolicy = virtualKeyboardPolicy;
       });
       this._disposables.addFromEvent(
         navigator.virtualKeyboard,
@@ -131,12 +137,8 @@ export class VirtualKeyboardController implements ReactiveController {
       notSupportedWarning();
     }
 
-    this._disposables.addFromEvent(
-      this.config.inputElement,
-      'focus',
-      this.show
-    );
-    this._disposables.addFromEvent(this.config.inputElement, 'blur', this.hide);
+    this._disposables.addFromEvent(inputElement, 'focus', this.show);
+    this._disposables.addFromEvent(inputElement, 'blur', this.hide);
 
     this._updateKeyboardHeight();
   }
