@@ -111,7 +111,8 @@ export class LinkedDocPopover extends WithDisposable(LitElement) {
     });
     this._disposables.addFromEvent(window, 'mousedown', e => {
       if (e.target === this) return;
-      this._abort();
+      // We don't clear the query when clicking outside the popover
+      this.context.close();
     });
 
     const keydownObserverAbortController = new AbortController();

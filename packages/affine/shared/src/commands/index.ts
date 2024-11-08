@@ -16,7 +16,9 @@ export {
 export {
   getBlockSelectionsCommand,
   getImageSelectionsCommand,
+  getSelectionRectsCommand,
   getTextSelectionCommand,
+  type SelectionRect,
 } from './selection/index.js';
 
 declare global {

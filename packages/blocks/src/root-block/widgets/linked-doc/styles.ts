@@ -4,6 +4,15 @@ import { css, unsafeCSS } from 'lit';
 
 import { scrollbarStyle } from '../../../_common/components/utils.js';
 
+export const linkedDocWidgetStyles = css`
+  .input-mask {
+    position: absolute;
+    pointer-events: none;
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 4px;
+  }
+`;
+
 export const linkedDocPopoverStyles = css`
   :host {
     position: absolute;
