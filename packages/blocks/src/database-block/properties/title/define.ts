@@ -1,6 +1,10 @@
+import type { RootBlockModel } from '@blocksuite/affine-model';
 import type { Text } from '@blocksuite/store';
 
 import { propertyType, t } from '@blocksuite/data-view';
+
+import { HostContextKey } from '../../context/host-context.js';
+import { isLinkedDoc } from '../../utils/title-doc.js';
 
 export const titleColumnType = propertyType('title');
 
@@ -8,14 +12,32 @@ export const titlePurePropertyConfig = titleColumnType.modelConfig<Text>({
   name: 'Title',
   type: () => t.richText.instance(),
   defaultData: () => ({}),
-  cellToString: data => data?.toString() ?? '',
-  cellFromString: data => {
+  cellToString: ({ value }) => value?.toString() ?? '',
+  cellFromString: ({ value }) => {
     return {
-      value: data,
+      value: value,
     };
   },
-  cellToJson: data => data?.toString() ?? null,
-  onUpdate: (value, _data, callback) => {
+  cellToJson: ({ value, dataSource }) => {
+    const host = dataSource.contextGet(HostContextKey);
+    if (host) {
+      const collection = host.std.collection;
+      const deltas = value.deltas$.value;
+      const text = deltas
+        .map(delta => {
+          if (isLinkedDoc(delta)) {
+            const linkedDocId = delta.attributes?.reference?.pageId as string;
+            const root = collection.getDoc(linkedDocId)?.root as RootBlockModel;
+            return root.title?.toString();
+          }
+          return delta.insert;
+        })
+        .join('');
+      return text;
+    }
+    return value?.toString() ?? null;
+  },
+  onUpdate: ({ value, callback }) => {
     value.yText.observe(callback);
     callback();
     return {
@@ -24,7 +46,7 @@ export const titlePurePropertyConfig = titleColumnType.modelConfig<Text>({
       },
     };
   },
-  valueUpdate: (value, _data, newValue) => {
+  valueUpdate: ({ value, newValue }) => {
     const v = newValue as unknown;
     if (typeof v === 'string') {
       value.replace(0, value.length, v);
@@ -36,6 +58,6 @@ export const titlePurePropertyConfig = titleColumnType.modelConfig<Text>({
     }
     return newValue;
   },
-  isEmpty: data => data == null || data.length === 0,
-  values: data => (data?.toString() ? [data.toString()] : []),
+  isEmpty: ({ value }) => value == null || value.length === 0,
+  values: ({ value }) => (value?.toString() ? [value.toString()] : []),
 });

@@ -8,12 +8,12 @@ export const checkboxPropertyModelConfig =
     name: 'Checkbox',
     type: () => t.boolean.instance(),
     defaultData: () => ({}),
-    cellToString: data => (data ? 'True' : 'False'),
-    cellFromString: data => {
+    cellToString: ({ value }) => (value ? 'True' : 'False'),
+    cellFromString: ({ value }) => {
       return {
-        value: data !== 'False',
+        value: value !== 'False',
       };
     },
-    cellToJson: data => data ?? null,
+    cellToJson: ({ value }) => value ?? null,
     isEmpty: () => false,
   });

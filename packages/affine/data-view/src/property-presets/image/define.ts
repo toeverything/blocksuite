@@ -7,12 +7,12 @@ export const imagePropertyModelConfig = imagePropertyType.modelConfig<string>({
   name: 'image',
   type: () => t.image.instance(),
   defaultData: () => ({}),
-  cellToString: data => data ?? '',
-  cellFromString: data => {
+  cellToString: ({ value }) => value ?? '',
+  cellFromString: ({ value }) => {
     return {
-      value: data,
+      value: value,
     };
   },
-  cellToJson: data => data ?? null,
-  isEmpty: data => data == null,
+  cellToJson: ({ value }) => value ?? null,
+  isEmpty: ({ value }) => value == null,
 });

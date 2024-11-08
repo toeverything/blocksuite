@@ -10,14 +10,14 @@ export const richTextColumnModelConfig =
     name: 'Text',
     type: () => t.richText.instance(),
     defaultData: () => ({}),
-    cellToString: data => data?.toString() ?? '',
-    cellFromString: data => {
+    cellToString: ({ value }) => value?.toString() ?? '',
+    cellFromString: ({ value }) => {
       return {
-        value: new Text(data),
+        value: new Text(value),
       };
     },
-    cellToJson: data => data?.toString() ?? null,
-    onUpdate: (value, _data, callback) => {
+    cellToJson: ({ value }) => value?.toString() ?? null,
+    onUpdate: ({ value, callback }) => {
       const yText = toYText(value);
       yText.observe(callback);
       callback();
@@ -27,6 +27,6 @@ export const richTextColumnModelConfig =
         },
       };
     },
-    isEmpty: data => data == null || data.length === 0,
-    values: data => (data?.toString() ? [data.toString()] : []),
+    isEmpty: ({ value }) => value == null || value.length === 0,
+    values: ({ value }) => (value?.toString() ? [value.toString()] : []),
   });
