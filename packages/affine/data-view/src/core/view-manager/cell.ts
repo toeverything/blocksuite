@@ -40,7 +40,10 @@ export class CellBase<
   });
 
   isEmpty$: ReadonlySignal<boolean> = computed(() => {
-    return this.meta$.value.config.isEmpty(this.value$.value);
+    return this.meta$.value.config.isEmpty({
+      value: this.value$.value,
+      dataSource: this.view.manager.dataSource,
+    });
   });
 
   jsonValue$: ReadonlySignal<unknown> = computed(() => {
