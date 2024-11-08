@@ -135,7 +135,12 @@ export class DatabaseBlockDataSource extends DataSourceBase {
     let newValue = value;
     if (update) {
       const old = this.cellValueGet(rowId, propertyId);
-      newValue = update(old, this.propertyDataGet(propertyId), value);
+      newValue = update({
+        value: old,
+        data: this.propertyDataGet(propertyId),
+        dataSource: this,
+        newValue: value,
+      });
     }
     if (type === 'title' && newValue instanceof Text) {
       this._model.doc.transact(() => {
@@ -201,7 +206,10 @@ export class DatabaseBlockDataSource extends DataSourceBase {
       return;
     }
     const meta = this.propertyMetaGet(data.type);
-    return meta.config.type(data);
+    return meta.config.type({
+      data: data.data,
+      dataSource: this,
+    });
   }
 
   propertyDelete(id: string): void {

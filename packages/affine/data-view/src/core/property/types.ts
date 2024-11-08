@@ -45,14 +45,14 @@ export type PropertyConfig<
   onUpdate?: (
     config: WithCommonPropertyConfig<{
       value: Value;
-      Data: Data;
+      data: Data;
       callback: () => void;
     }>
   ) => Disposable;
   valueUpdate?: (
     config: WithCommonPropertyConfig<{
       value: Value;
-      Data: Data;
+      data: Data;
       newValue: Value;
     }>
   ) => Value;
