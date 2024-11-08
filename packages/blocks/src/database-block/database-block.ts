@@ -56,7 +56,7 @@ import { HostContextKey } from './context/host-context.js';
 import { DatabaseBlockDataSource } from './data-source.js';
 import { BlockRenderer } from './detail-panel/block-renderer.js';
 import { NoteRenderer } from './detail-panel/note-renderer.js';
-import { getDocIdsFromText } from './utils/title-doc.js';
+import { getSingleDocIdFromText } from './utils/title-doc.js';
 
 export class DatabaseBlockComponent extends CaptionedBlockComponent<
   DatabaseBlockModel,
@@ -432,11 +432,11 @@ export class DatabaseBlockComponent extends CaptionedBlockComponent<
                     target: this,
                   });
                 };
-                const docs = getDocIdsFromText(
+                const doc = getSingleDocIdFromText(
                   this.model.doc.getBlock(data.rowId)?.model?.text
                 );
-                if (docs.length === 1) {
-                  return openDoc(docs[0]);
+                if (doc) {
+                  return openDoc(doc);
                 }
                 const abort = new AbortController();
                 return new Promise<void>(focusBack => {
