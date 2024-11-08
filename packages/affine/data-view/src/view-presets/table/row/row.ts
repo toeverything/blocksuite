@@ -78,6 +78,10 @@ export class TableRow extends SignalWatcher(WithDisposable(ShadowlessElement)) {
       visibility: visible;
       opacity: 1;
     }
+    .affine-database-block-row:has([data-editing='true']) .show-on-hover-row {
+      visibility: hidden;
+      opacity: 0;
+    }
 
     .row-op {
       display: flex;

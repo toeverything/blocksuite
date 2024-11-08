@@ -79,6 +79,10 @@ const styles = css`
     visibility: visible;
   }
 
+  affine-data-view-kanban-card:has([data-editing='true']) .card-ops {
+    visibility: hidden;
+  }
+
   .card-ops {
     position: absolute;
     right: 8px;
