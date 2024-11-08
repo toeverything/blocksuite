@@ -169,21 +169,6 @@ export class EdgelessToolbarShapeDraggable extends EdgelessToolbarToolMixin(
           type: 'shape',
           shapeName,
         });
-
-        const shape$ =
-          this.edgeless.std.get(EditPropsStore).lastProps$.value[
-            `shape:${shapeName}`
-          ];
-        const color = this.edgeless.std
-          .get(ThemeProvider)
-          .generateColorProperty(shape$.fillColor);
-        const stroke = this.edgeless.std
-          .get(ThemeProvider)
-          .generateColorProperty(shape$.strokeColor);
-        Object.assign(overlay.element.style, {
-          color,
-          stroke,
-        });
         const controller = this.edgeless.gfx.tool.currentTool$.peek();
         if (controller instanceof ShapeTool) {
           controller.clearOverlay();
@@ -282,16 +267,16 @@ export class EdgelessToolbarShapeDraggable extends EdgelessToolbarToolMixin(
         s => s.name,
         shape => {
           const isBeingDragged = draggingShape?.name === shape.name;
-          const shape$ =
+          const { fillColor, strokeColor } =
             this.edgeless.std.get(EditPropsStore).lastProps$.value[
               `shape:${shape.name}`
-            ];
+            ] || {};
           const color = this.edgeless.std
             .get(ThemeProvider)
-            .generateColorProperty(shape$.fillColor);
+            .generateColorProperty(fillColor);
           const stroke = this.edgeless.std
             .get(ThemeProvider)
-            .generateColorProperty(shape$.strokeColor);
+            .generateColorProperty(strokeColor);
           const baseStyle = {
             ...buildVariablesObject(shape.style),
             filter: `drop-shadow(${this.shapeShadow})`,
