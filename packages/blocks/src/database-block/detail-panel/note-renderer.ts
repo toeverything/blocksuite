@@ -4,7 +4,6 @@ import type {
 } from '@blocksuite/affine-model';
 import type { DetailSlotProps, SingleView } from '@blocksuite/data-view';
 import type { BaseTextAttributes } from '@blocksuite/inline';
-import type { Text } from '@blocksuite/store';
 
 import {
   type AffineTextAttributes,
@@ -20,16 +19,7 @@ import { computed } from '@preact/signals-core';
 import { css, html } from 'lit';
 import { property } from 'lit/decorators.js';
 
-export const getDocIdsFromText = (text?: Text) => {
-  return (
-    text?.deltas$.value
-      ?.filter(delta => {
-        const attributes: AffineTextAttributes | undefined = delta.attributes;
-        return attributes?.reference?.type === 'LinkedPage';
-      })
-      ?.map(delta => delta.attributes?.reference?.pageId as string) ?? []
-  );
-};
+import { getDocIdsFromText } from '../utils/title-doc.js';
 
 export class NoteRenderer
   extends SignalWatcher(WithDisposable(ShadowlessElement))
@@ -51,7 +41,6 @@ export class NoteRenderer
   });
 
   allowCreateDoc$ = computed(() => {
-    console.log(this.rowText$.value, getDocIdsFromText(this.rowText$.value));
     return getDocIdsFromText(this.rowText$.value).length === 0;
   });
 

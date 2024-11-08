@@ -318,6 +318,7 @@ export const createPopup = (
 
 export type MenuHandler = {
   close: () => void;
+  reopen: () => void;
 };
 
 export const popMenu = (
@@ -362,6 +363,9 @@ export const popMenu = (
   });
   return {
     close: closePopup,
+    reopen: () => {
+      popMenu(target, props);
+    },
   };
 };
 export const popFilterableSimpleMenu = (

@@ -44,7 +44,7 @@ import {
   updateCells,
   updateProperty,
   updateView,
-} from './utils.js';
+} from './utils/block-utils.js';
 import {
   databaseBlockViewConverts,
   databaseBlockViewMap,

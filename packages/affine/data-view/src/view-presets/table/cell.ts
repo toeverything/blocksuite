@@ -137,6 +137,7 @@ export class DatabaseCellContainer extends SignalWatcher(
     const { edit, view } = renderer;
     const uni = !this.readonly && this.isEditing && edit != null ? edit : view;
     this.view.lockRows(this.isEditing);
+    this.dataset['editing'] = `${this.isEditing}`;
     const props: CellRenderProps = {
       cell: this.cell$.value,
       isEditing: this.isEditing,
