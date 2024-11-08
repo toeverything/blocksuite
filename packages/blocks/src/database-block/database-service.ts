@@ -17,7 +17,7 @@ import {
   applyPropertyUpdate,
   updateCell,
   updateView,
-} from './utils.js';
+} from './utils/block-utils.js';
 
 export class DatabaseBlockService extends BlockService {
   static override readonly flavour = DatabaseBlockSchema.model.flavour;

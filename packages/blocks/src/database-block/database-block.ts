@@ -55,10 +55,8 @@ import { popSideDetail } from './components/layout.js';
 import { HostContextKey } from './context/host-context.js';
 import { DatabaseBlockDataSource } from './data-source.js';
 import { BlockRenderer } from './detail-panel/block-renderer.js';
-import {
-  getDocIdsFromText,
-  NoteRenderer,
-} from './detail-panel/note-renderer.js';
+import { NoteRenderer } from './detail-panel/note-renderer.js';
+import { getDocIdsFromText } from './utils/title-doc.js';
 
 export class DatabaseBlockComponent extends CaptionedBlockComponent<
   DatabaseBlockModel,

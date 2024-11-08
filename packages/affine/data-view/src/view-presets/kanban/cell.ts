@@ -137,6 +137,8 @@ export class KanbanCell extends SignalWatcher(
     const renderer = this.column.renderer$.value;
     if (!renderer) return;
     const { view, edit } = renderer;
+    this.view.lockRows(this.editing);
+    this.dataset['editing'] = `${this.editing}`;
     this.style.border = this.isFocus
       ? '1px solid var(--affine-primary-color)'
       : '';

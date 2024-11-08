@@ -74,6 +74,14 @@ export class TableRow extends SignalWatcher(WithDisposable(ShadowlessElement)) {
       visibility: visible;
       opacity: 1;
     }
+    .affine-database-block-row:has(.active) .show-on-hover-row {
+      visibility: visible;
+      opacity: 1;
+    }
+    .affine-database-block-row:has([data-editing='true']) .show-on-hover-row {
+      visibility: hidden;
+      opacity: 0;
+    }
 
     .row-op {
       display: flex;
@@ -210,12 +218,14 @@ export class TableRow extends SignalWatcher(WithDisposable(ShadowlessElement)) {
               return;
             }
             const ele = e.currentTarget as HTMLElement;
-            const row = { id: this.rowId, groupKey: this.groupKey };
-            this.setSelection(
-              TableRowSelection.create({
-                rows: [row],
-              })
-            );
+            if (!TableRowSelection.is(this.selectionController.selection)) {
+              const row = { id: this.rowId, groupKey: this.groupKey };
+              this.setSelection(
+                TableRowSelection.create({
+                  rows: [row],
+                })
+              );
+            }
             popRowMenu(
               this.dataViewEle,
               popupTargetFromElement(ele),
