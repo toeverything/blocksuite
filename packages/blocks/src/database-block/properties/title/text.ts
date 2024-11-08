@@ -256,7 +256,7 @@ export class HeaderAreaTextCellEditing extends BaseTextCell {
 
   private _onPaste = (e: ClipboardEvent) => {
     const inlineEditor = this.inlineEditor;
-    const inlineRange = inlineEditor.getInlineRange();
+    const inlineRange = inlineEditor?.getInlineRange();
     if (!inlineRange) return;
     if (e.clipboardData) {
       try {
@@ -290,7 +290,7 @@ export class HeaderAreaTextCellEditing extends BaseTextCell {
       const result = std?.getOptional(ParseDocUrlProvider)?.parseDocUrl(text);
       if (result) {
         const text = ' ';
-        inlineEditor.insertText(inlineRange, text, {
+        inlineEditor?.insertText(inlineRange, text, {
           reference: {
             type: 'LinkedPage',
             pageId: result.docId,
@@ -301,22 +301,22 @@ export class HeaderAreaTextCellEditing extends BaseTextCell {
             },
           },
         });
-        inlineEditor.setInlineRange({
+        inlineEditor?.setInlineRange({
           index: inlineRange.index + text.length,
           length: 0,
         });
       } else {
-        inlineEditor.insertText(inlineRange, text, {
+        inlineEditor?.insertText(inlineRange, text, {
           link: text,
         });
-        inlineEditor.setInlineRange({
+        inlineEditor?.setInlineRange({
           index: inlineRange.index + text.length,
           length: 0,
         });
       }
     } else {
-      inlineEditor.insertText(inlineRange, text);
-      inlineEditor.setInlineRange({
+      inlineEditor?.insertText(inlineRange, text);
+      inlineEditor?.setInlineRange({
         index: inlineRange.index + text.length,
         length: 0,
       });
@@ -327,12 +327,12 @@ export class HeaderAreaTextCellEditing extends BaseTextCell {
 
   insertDelta = (delta: DeltaInsert) => {
     const inlineEditor = this.inlineEditor;
-    const range = inlineEditor.getInlineRange();
+    const range = inlineEditor?.getInlineRange();
     if (!range || !delta.insert) {
       return;
     }
-    inlineEditor.insertText(range, delta.insert, delta.attributes);
-    inlineEditor.setInlineRange({
+    inlineEditor?.insertText(range, delta.insert, delta.attributes);
+    inlineEditor?.setInlineRange({
       index: range.index + delta.insert.length,
       length: 0,
     });
