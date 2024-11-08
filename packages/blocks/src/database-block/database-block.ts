@@ -415,7 +415,6 @@ export class DatabaseBlockComponent extends CaptionedBlockComponent<
             },
           },
           eventTrace: (key, params) => {
-            console.log(key, params);
             telemetryService?.track(key, {
               ...(params as TelemetryEventMap[typeof key]),
               blockId: this.blockId,

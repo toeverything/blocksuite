@@ -199,7 +199,12 @@ export class DataViewTable extends DataViewBase<
                 const column = groupHelper.property$.value;
                 if (column) {
                   column.dataUpdate(
-                    () => addGroup(text, column.data$.value) as never
+                    () =>
+                      addGroup({
+                        text,
+                        oldData: column.data$.value,
+                        dataSource: this.props.view.manager.dataSource,
+                      }) as never
                   );
                 }
               },

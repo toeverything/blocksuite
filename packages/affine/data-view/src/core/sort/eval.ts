@@ -24,7 +24,7 @@ const evalRef = (
   | undefined => {
   const ttype = view.propertyDataTypeGet(ref.name);
   return row => ({
-    value: view.cellValueGet(row, ref.name),
+    value: view.cellJsonValueGet(row, ref.name),
     ttype,
   });
 };

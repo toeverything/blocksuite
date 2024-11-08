@@ -189,6 +189,7 @@ export class TableSingleView extends SingleViewBase<TableViewData> {
     this.dataUpdate(_view => {
       return {
         groupBy: defaultGroupBy(
+          this.dataSource,
           this.propertyMetaGet(column.type$.value),
           column.id,
           column.data$.value

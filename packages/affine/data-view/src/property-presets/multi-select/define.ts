@@ -10,11 +10,11 @@ export const multiSelectPropertyType = propertyType('multi-select');
 export const multiSelectPropertyModelConfig =
   multiSelectPropertyType.modelConfig<string[], SelectPropertyData>({
     name: 'Multi-select',
-    type: data => t.array.instance(t.tag.instance(data.options)),
+    type: ({ data }) => t.array.instance(t.tag.instance(data.options)),
     defaultData: () => ({
       options: [],
     }),
-    addGroup: (text, oldData) => {
+    addGroup: ({ text, oldData }) => {
       return {
         options: [
           ...(oldData.options ?? []),
@@ -26,19 +26,17 @@ export const multiSelectPropertyModelConfig =
         ],
       };
     },
-    formatValue: v => {
-      if (Array.isArray(v)) {
-        return v.filter(v => v != null);
+    formatValue: ({ value }) => {
+      if (Array.isArray(value)) {
+        return value.filter(v => v != null);
       }
       return [];
     },
-    cellToString: (data, colData) =>
-      data?.map(id => colData.options.find(v => v.id === id)?.value).join(','),
-    cellFromString: (data, colData) => {
-      const optionMap = Object.fromEntries(
-        colData.options.map(v => [v.value, v])
-      );
-      const optionNames = data
+    cellToString: ({ value, data }) =>
+      value?.map(id => data.options.find(v => v.id === id)?.value).join(','),
+    cellFromString: ({ value: oldValue, data }) => {
+      const optionMap = Object.fromEntries(data.options.map(v => [v.value, v]));
+      const optionNames = oldValue
         .split(',')
         .map(v => v.trim())
         .filter(v => v);
@@ -51,7 +49,7 @@ export const multiSelectPropertyModelConfig =
             value: name,
             color: getTagColor(),
           };
-          colData.options.push(newOption);
+          data.options.push(newOption);
           value.push(newOption.id);
         } else {
           value.push(optionMap[name].id);
@@ -60,9 +58,9 @@ export const multiSelectPropertyModelConfig =
 
       return {
         value,
-        data: colData,
+        data: data,
       };
     },
-    cellToJson: data => data ?? null,
-    isEmpty: data => data == null || data.length === 0,
+    cellToJson: ({ value }) => value ?? null,
+    isEmpty: ({ value }) => value == null || value.length === 0,
   });

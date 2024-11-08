@@ -8,13 +8,13 @@ export const progressPropertyModelConfig =
     name: 'Progress',
     type: () => t.number.instance(),
     defaultData: () => ({}),
-    cellToString: data => data?.toString() ?? '',
-    cellFromString: data => {
-      const num = data ? Number(data) : NaN;
+    cellToString: ({ value }) => value?.toString() ?? '',
+    cellFromString: ({ value }) => {
+      const num = value ? Number(value) : NaN;
       return {
         value: isNaN(num) ? null : num,
       };
     },
-    cellToJson: data => data ?? null,
+    cellToJson: ({ value }) => value ?? null,
     isEmpty: () => false,
   });

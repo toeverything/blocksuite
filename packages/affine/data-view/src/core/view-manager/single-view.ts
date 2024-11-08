@@ -192,7 +192,10 @@ export abstract class SingleViewBase<
       return {
         id: v.id,
         name: v.name$.value,
-        type: propertyMeta.config.type(v.data$.value),
+        type: propertyMeta.config.type({
+          data: v.data$.value,
+          dataSource: this.dataSource,
+        }),
         icon: v.icon,
         propertyType: v.type$.value,
       };
@@ -249,12 +252,11 @@ export abstract class SingleViewBase<
     if (!type) {
       return;
     }
-    return this.dataSource
-      .propertyMetaGet(type)
-      .config.cellToJson(
-        this.dataSource.cellValueGet(rowId, propertyId),
-        this.propertyDataGet(propertyId)
-      );
+    return this.dataSource.propertyMetaGet(type).config.cellToJson({
+      value: this.dataSource.cellValueGet(rowId, propertyId),
+      data: this.propertyDataGet(propertyId),
+      dataSource: this.dataSource,
+    });
   }
 
   cellRenderValueSet(rowId: string, propertyId: string, value: unknown): void {
@@ -267,12 +269,11 @@ export abstract class SingleViewBase<
       return;
     }
     return (
-      this.dataSource
-        .propertyMetaGet(type)
-        .config.cellToString(
-          this.dataSource.cellValueGet(rowId, propertyId),
-          this.propertyDataGet(propertyId)
-        ) ?? ''
+      this.dataSource.propertyMetaGet(type).config.cellToString({
+        value: this.dataSource.cellValueGet(rowId, propertyId),
+        data: this.propertyDataGet(propertyId),
+        dataSource: this.dataSource,
+      }) ?? ''
     );
   }
 
@@ -283,10 +284,11 @@ export abstract class SingleViewBase<
     }
     const cellValue = this.dataSource.cellValueGet(rowId, propertyId);
     return (
-      this.dataSource
-        .propertyMetaGet(type)
-        .config.formatValue?.(cellValue, this.propertyDataGet(propertyId)) ??
-      cellValue
+      this.dataSource.propertyMetaGet(type).config.formatValue?.({
+        value: cellValue,
+        data: this.propertyDataGet(propertyId),
+        dataSource: this.dataSource,
+      }) ?? cellValue
     );
   }
 
@@ -349,9 +351,10 @@ export abstract class SingleViewBase<
     if (!type) {
       return;
     }
-    return this.dataSource
-      .propertyMetaGet(type)
-      .config.type(this.propertyDataGet(propertyId));
+    return this.dataSource.propertyMetaGet(type).config.type({
+      data: this.propertyDataGet(propertyId),
+      dataSource: this.dataSource,
+    });
   }
 
   propertyDelete(propertyId: string): void {
@@ -406,9 +409,11 @@ export abstract class SingleViewBase<
       return;
     }
     return (
-      this.dataSource
-        .propertyMetaGet(type)
-        .config.cellFromString(cellData, this.propertyDataGet(propertyId)) ?? ''
+      this.dataSource.propertyMetaGet(type).config.cellFromString({
+        value: cellData,
+        data: this.propertyDataGet(propertyId),
+        dataSource: this.dataSource,
+      }) ?? ''
     );
   }
 

@@ -18,7 +18,7 @@ export const getSingleDocIdFromText = (text?: Text) => {
   return linkedDocId;
 };
 
-const isLinkedDoc = (delta: DeltaOperation) => {
+export const isLinkedDoc = (delta: DeltaOperation) => {
   const attributes: AffineTextAttributes | undefined = delta.attributes;
   return attributes?.reference?.type === 'LinkedPage';
 };
