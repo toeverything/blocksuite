@@ -17,7 +17,7 @@ export type PropertyConfig<
   Value = unknown,
 > = {
   name: string;
-  defaultData: (config: WithCommonPropertyConfig) => Data;
+  defaultData: () => Data;
   type: (config: WithCommonPropertyConfig<{ data: Data }>) => TypeInstance;
   formatValue?: (
     config: WithCommonPropertyConfig<{ value: Value; data: Data }>

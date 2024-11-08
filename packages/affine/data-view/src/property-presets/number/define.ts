@@ -13,8 +13,8 @@ export const numberPropertyModelConfig = numberPropertyType.modelConfig<
   type: () => t.number.instance(),
   defaultData: () => ({ decimal: 0, format: 'number' }),
   cellToString: ({ value }) => value?.toString() ?? '',
-  cellFromString: ({ data }) => {
-    const num = data ? Number(data) : NaN;
+  cellFromString: ({ value }) => {
+    const num = value ? Number(value) : NaN;
     return {
       value: isNaN(num) ? null : num,
     };
