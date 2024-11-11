@@ -20,6 +20,25 @@ export class VirtualKeyboardController implements ReactiveController {
 
   private readonly _keyboardOpened$ = signal(false);
 
+  private _storeInitialInputElementAttributes = () => {
+    const { inputElement } = this.config;
+    if (navigator.virtualKeyboard) {
+      const { overlaysContent } = navigator.virtualKeyboard;
+      const { virtualKeyboardPolicy } = inputElement;
+
+      this._disposables.add(() => {
+        if (!navigator.virtualKeyboard) return;
+        navigator.virtualKeyboard.overlaysContent = overlaysContent;
+        inputElement.virtualKeyboardPolicy = virtualKeyboardPolicy;
+      });
+    } else if (visualViewport) {
+      const { inputMode } = inputElement;
+      this._disposables.add(() => {
+        inputElement.inputMode = inputMode;
+      });
+    }
+  };
+
   private readonly _updateKeyboardHeight = () => {
     const { virtualKeyboard } = navigator;
     if (virtualKeyboard) {
@@ -103,20 +122,14 @@ export class VirtualKeyboardController implements ReactiveController {
   }
 
   hostConnected() {
+    this._storeInitialInputElementAttributes();
+
     const { inputElement } = this.config;
 
     if (navigator.virtualKeyboard) {
-      const { overlaysContent } = navigator.virtualKeyboard;
-      const { virtualKeyboardPolicy } = inputElement;
-
       navigator.virtualKeyboard.overlaysContent = true;
-      inputElement.virtualKeyboardPolicy = 'manual';
+      this.config.inputElement.virtualKeyboardPolicy = 'manual';
 
-      this._disposables.add(() => {
-        if (!navigator.virtualKeyboard) return;
-        navigator.virtualKeyboard.overlaysContent = overlaysContent;
-        inputElement.virtualKeyboardPolicy = virtualKeyboardPolicy;
-      });
       this._disposables.addFromEvent(
         navigator.virtualKeyboard,
         'geometrychange',

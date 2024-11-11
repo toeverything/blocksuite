@@ -22,12 +22,14 @@ import {
   createKeydownObserver,
   getQuery,
 } from '../../../_common/components/utils.js';
+import { PageRootBlockComponent } from '../../index.js';
 import { mobileLinkedDocMenuStyles } from './styles.js';
 
 export const AFFINE_MOBILE_LINKED_DOC_MENU = 'affine-mobile-linked-doc-menu';
 
 @requiredProperties({
   context: PropTypes.object,
+  rootComponent: PropTypes.instanceOf(PageRootBlockComponent),
 })
 export class AffineMobileLinkedDocMenu extends SignalWatcher(
   WithDisposable(LitElement)
@@ -83,7 +85,7 @@ export class AffineMobileLinkedDocMenu extends SignalWatcher(
   get virtualKeyboardControllerConfig(): VirtualKeyboardControllerConfig {
     return {
       useScreenHeight: this.context.config.mobile.useScreenHeight ?? false,
-      inputElement: this.context.std.host,
+      inputElement: this.rootComponent,
     };
   }
 
@@ -147,6 +149,7 @@ export class AffineMobileLinkedDocMenu extends SignalWatcher(
     }
 
     // scroll block above the menu
+    this._keyboardController.show();
     {
       // TODO(@L-Sun): header offset
 
@@ -231,4 +234,7 @@ export class AffineMobileLinkedDocMenu extends SignalWatcher(
 
   @property({ attribute: false })
   accessor context!: LinkedDocContext;
+
+  @property({ attribute: false })
+  accessor rootComponent!: PageRootBlockComponent;
 }

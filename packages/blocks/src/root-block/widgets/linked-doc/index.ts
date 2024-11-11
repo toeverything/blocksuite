@@ -1,4 +1,5 @@
 import type { AffineInlineEditor } from '@blocksuite/affine-components/rich-text';
+import type { RootBlockModel } from '@blocksuite/affine-model';
 import type { SelectionRect } from '@blocksuite/affine-shared/commands';
 import type { UIEventStateContext } from '@blocksuite/block-std';
 import type { Disposable } from '@blocksuite/global/utils';
@@ -18,6 +19,8 @@ import { choose } from 'lit/directives/choose.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
+import type { PageRootBlockComponent } from '../../index.js';
+
 import {
   getMenus,
   type LinkedDocContext,
@@ -28,7 +31,10 @@ export { type LinkedWidgetConfig } from './config.js';
 
 export const AFFINE_LINKED_DOC_WIDGET = 'affine-linked-doc-widget';
 
-export class AffineLinkedDocWidget extends WidgetComponent {
+export class AffineLinkedDocWidget extends WidgetComponent<
+  RootBlockModel,
+  PageRootBlockComponent
+> {
   static override styles = linkedDocWidgetStyles;
 
   private _disposeObserveInputRects: Disposable | null = null;
@@ -148,8 +154,11 @@ export class AffineLinkedDocWidget extends WidgetComponent {
   };
 
   private readonly _renderLinkedDocMenu = () => {
+    if (!this.block.rootComponent) return nothing;
+
     return html`<affine-mobile-linked-doc-menu
       .context=${this._context}
+      .rootComponent=${this.block.rootComponent}
     ></affine-mobile-linked-doc-menu>`;
   };
 
