@@ -22,12 +22,14 @@ import {
   createKeydownObserver,
   getQuery,
 } from '../../../_common/components/utils.js';
+import { PageRootBlockComponent } from '../../index.js';
 import { mobileLinkedDocMenuStyles } from './styles.js';
 
 export const AFFINE_MOBILE_LINKED_DOC_MENU = 'affine-mobile-linked-doc-menu';
 
 @requiredProperties({
   context: PropTypes.object,
+  rootComponent: PropTypes.instanceOf(PageRootBlockComponent),
 })
 export class AffineMobileLinkedDocMenu extends SignalWatcher(
   WithDisposable(LitElement)
@@ -60,6 +62,42 @@ export class AffineMobileLinkedDocMenu extends SignalWatcher(
     </button>`;
   };
 
+  private _scrollInputToTop = () => {
+    const { inlineEditor } = this.context;
+    const { scrollContainer, scrollTopOffset } = this.context.config.mobile;
+
+    let container = null;
+    let containerScrollTop = 0;
+    if (typeof scrollContainer === 'string') {
+      container = document.querySelector(scrollContainer);
+      containerScrollTop = container?.scrollTop ?? 0;
+    } else if (scrollContainer instanceof HTMLElement) {
+      container = scrollContainer;
+      containerScrollTop = scrollContainer.scrollTop;
+    } else if (scrollContainer === window) {
+      container = window;
+      containerScrollTop = scrollContainer.scrollY;
+    } else {
+      container = getViewportElement(this.context.std.host);
+      containerScrollTop = container?.scrollTop ?? 0;
+    }
+
+    let offset = 0;
+    if (typeof scrollTopOffset === 'function') {
+      offset = scrollTopOffset();
+    } else {
+      offset = scrollTopOffset ?? 0;
+    }
+
+    container?.scrollTo({
+      top:
+        inlineEditor.rootElement.getBoundingClientRect().top +
+        containerScrollTop -
+        offset,
+      behavior: 'smooth',
+    });
+  };
+
   private readonly _updateLinkedDocGroup = async () => {
     this._linkedDocGroup$.value = await this.context.config.getMenus(
       this._query ?? '',
@@ -83,7 +121,7 @@ export class AffineMobileLinkedDocMenu extends SignalWatcher(
   get virtualKeyboardControllerConfig(): VirtualKeyboardControllerConfig {
     return {
       useScreenHeight: this.context.config.mobile.useScreenHeight ?? false,
-      inputElement: this.context.std.host,
+      inputElement: this.rootComponent,
     };
   }
 
@@ -129,13 +167,16 @@ export class AffineMobileLinkedDocMenu extends SignalWatcher(
           }
         },
         onDelete: () => {
-          const curRange = inlineEditor.getInlineRange();
-          if (!this.context.startRange || !curRange) return;
+          inlineEditor.slots.renderComplete.once(() => {
+            const curRange = inlineEditor.getInlineRange();
 
-          if (curRange.index < this.context.startRange.index) {
-            this.context.close();
-          }
-          inlineEditor.slots.renderComplete.once(this._updateLinkedDocGroup);
+            if (!this.context.startRange || !curRange) return;
+
+            if (curRange.index < this.context.startRange.index) {
+              this.context.close();
+            }
+            this._updateLinkedDocGroup().catch(console.error);
+          });
         },
         onConfirm: () => {
           this._firstActionItem?.action()?.catch(console.error);
@@ -145,43 +186,21 @@ export class AffineMobileLinkedDocMenu extends SignalWatcher(
         },
       });
     }
+  }
 
-    // scroll block above the menu
-    {
-      // TODO(@L-Sun): header offset
-
-      const { scrollContainer, scrollTopOffset } = this.context.config.mobile;
-
-      let container = null;
-      let containerScrollTop = 0;
-      if (typeof scrollContainer === 'string') {
-        container = document.querySelector(scrollContainer);
-        containerScrollTop = container?.scrollTop ?? 0;
-      } else if (scrollContainer instanceof HTMLElement) {
-        container = scrollContainer;
-        containerScrollTop = scrollContainer.scrollTop;
-      } else if (scrollContainer === window) {
-        container = window;
-        containerScrollTop = scrollContainer.scrollY;
-      } else {
-        container = getViewportElement(this.context.std.host);
-        containerScrollTop = container?.scrollTop ?? 0;
-      }
-
-      let offset = 0;
-      if (typeof scrollTopOffset === 'function') {
-        offset = scrollTopOffset();
-      } else {
-        offset = scrollTopOffset ?? 0;
-      }
-
-      container?.scrollTo({
-        top:
-          inlineEditor.rootElement.getBoundingClientRect().top +
-          containerScrollTop -
-          offset,
-        behavior: 'smooth',
+  override firstUpdated() {
+    if (!this._keyboardController.opened) {
+      this._keyboardController.show();
+      const id = setInterval(() => {
+        if (!this._keyboardController.opened) return;
+        this._scrollInputToTop();
+        clearInterval(id);
+      }, 50);
+      this.disposables.add(() => {
+        clearInterval(id);
       });
+    } else {
+      this._scrollInputToTop();
     }
   }
 
@@ -231,4 +250,7 @@ export class AffineMobileLinkedDocMenu extends SignalWatcher(
 
   @property({ attribute: false })
   accessor context!: LinkedDocContext;
+
+  @property({ attribute: false })
+  accessor rootComponent!: PageRootBlockComponent;
 }
