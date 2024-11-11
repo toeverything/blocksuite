@@ -14,6 +14,7 @@ import {
   type UIEventHandler,
 } from '@blocksuite/block-std';
 import { GfxControllerIdentifier } from '@blocksuite/block-std/gfx';
+import { IS_MOBILE } from '@blocksuite/global/env';
 import { Bound, Point } from '@blocksuite/global/utils';
 import { render } from 'lit';
 
@@ -466,6 +467,8 @@ export class LegacyDragEventWatcher {
     this.widget.disposables.addFromEvent(this.widget, 'pointerdown', e => {
       e.preventDefault();
     });
+
+    if (IS_MOBILE) return;
 
     this.widget.handleEvent('dragStart', this._dragStartHandler);
     this.widget.handleEvent('dragMove', this._dragMoveHandler);
