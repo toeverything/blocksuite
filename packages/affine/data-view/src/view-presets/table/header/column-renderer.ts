@@ -63,13 +63,7 @@ export class DataViewColumnPreview extends SignalWatcher(
     `;
   }
 
-  override connectedCallback(): void {
-    super.connectedCallback();
-    console.log('columnPreview connected');
-  }
-
   override render() {
-    console.log('columnPreview render');
     return this.renderGroup(
       this.group?.rows ?? this.tableViewManager.rows$.value
     );
