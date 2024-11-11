@@ -159,20 +159,20 @@ test.describe('edgeless text block', () => {
       delay: 100,
     });
     await waitNextFrame(page);
-    await assertEdgelessTextModelRect(page, '4', new Bound(-25, -25, 50, 46));
+    await assertEdgelessTextModelRect(page, '4', new Bound(-25, -25, 50, 26));
 
     await type(page, 'aaaaaaaaaa');
     await waitNextFrame(page, 1000);
     // just width changed
-    await assertEdgelessTextModelRect(page, '4', new Bound(-25, -25, 83, 46));
+    await assertEdgelessTextModelRect(page, '4', new Bound(-25, -25, 83, 26));
 
     await type(page, '\nbbb');
     // width not changed, height changed
-    await assertEdgelessTextModelRect(page, '4', new Bound(-25, -25, 83, 80));
+    await assertEdgelessTextModelRect(page, '4', new Bound(-25, -25, 83, 50));
     await type(page, '\ncccccccccccccccc');
 
     // width and height changed
-    await assertEdgelessTextModelRect(page, '4', new Bound(-25, -25, 131, 114));
+    await assertEdgelessTextModelRect(page, '4', new Bound(-25, -25, 131, 74));
 
     // blur, max width set to true
     await page.mouse.click(point[0] - 50, point[1], {
@@ -181,9 +181,9 @@ test.describe('edgeless text block', () => {
     await page.mouse.dblclick(point[0], point[1], {
       delay: 100,
     });
-    await type(page, 'dddddddddd');
+    await type(page, 'dddddddddddddddddddd');
     // width not changed, height changed
-    await assertEdgelessTextModelRect(page, '4', new Bound(-25, -25, 131, 138));
+    await assertEdgelessTextModelRect(page, '4', new Bound(-25, -25, 131, 98));
   });
 
   test('edgeless text width fixed when drag moving', async ({ page }) => {

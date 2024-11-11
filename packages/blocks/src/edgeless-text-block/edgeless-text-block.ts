@@ -299,6 +299,8 @@ export class EdgelessTextBlockComponent extends GfxBlockComponent<EdgelessTextBl
       '--edgeless-text-font-style': fontStyle,
       '--edgeless-text-font-weight': fontWeight,
       '--edgeless-text-text-align': textAlign,
+      '--affine-list-margin': '0',
+      '--affine-paragraph-margin': '0',
     });
 
     return html`

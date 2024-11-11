@@ -188,5 +188,7 @@ export class ParagraphBlockComponent extends CaptionedBlockComponent<
   @query('rich-text')
   private accessor _richTextElement: RichText | null = null;
 
-  override accessor blockContainerStyles = { margin: '10px 0' };
+  override accessor blockContainerStyles = {
+    margin: 'var(--affine-paragraph-margin, 10px 0)',
+  };
 }

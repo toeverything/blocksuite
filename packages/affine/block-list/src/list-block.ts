@@ -214,6 +214,6 @@ export class ListBlockComponent extends CaptionedBlockComponent<
   private accessor _richTextElement: RichText | null = null;
 
   override accessor blockContainerStyles = {
-    margin: '10px 0',
+    margin: 'var(--affine-list-margin, 10px 0)',
   };
 }
