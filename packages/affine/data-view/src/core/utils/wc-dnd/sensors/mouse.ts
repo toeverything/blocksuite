@@ -156,7 +156,7 @@ export class MouseSession implements DndSession {
     if (event.cancelable) {
       event.preventDefault();
     }
-
+    event.stopPropagation();
     onMove(coordinates);
   };
 
@@ -200,7 +200,9 @@ export class MouseSession implements DndSession {
   }
 
   private attach() {
-    this.windowListeners.add('pointermove', this.handleMove);
+    this.windowListeners.add('pointermove', this.handleMove, {
+      capture: true,
+    });
     this.windowListeners.add('pointerup', this.handleEnd);
     this.windowListeners.add('resize', this.handleCancel);
     this.windowListeners.add('dragstart', preventDefault);

@@ -19,6 +19,7 @@ import type {
 } from '../../view-presets/index.js';
 import type { SingleView } from '../view-manager/single-view.js';
 import type { GroupRenderProps } from './types.js';
+import type { CanGroupView } from './utils.js';
 
 import { KanbanSingleView } from '../../view-presets/kanban/kanban-view-manager.js';
 import { TableSingleView } from '../../view-presets/table/table-view-manager.js';
@@ -76,40 +77,38 @@ export class GroupSetting extends SignalWatcher(
   });
 
   sortContext = createSortContext({
-    dnd: {
-      activators: defaultActivators,
-      container: this,
-      onDragEnd: evt => {
-        const over = evt.over;
-        const activeId = evt.active.id;
-        const groups = this.groups$.value;
-        if (over && over.id !== activeId && groups) {
-          const activeIndex = groups.findIndex(data => data.key === activeId);
-          const overIndex = groups.findIndex(data => data.key === over.id);
+    activators: defaultActivators,
+    container: this,
+    onDragEnd: evt => {
+      const over = evt.over;
+      const activeId = evt.active.id;
+      const groups = this.groups$.value;
+      if (over && over.id !== activeId && groups) {
+        const activeIndex = groups.findIndex(data => data.key === activeId);
+        const overIndex = groups.findIndex(data => data.key === over.id);
 
-          this.view.groupManager.moveGroupTo(
-            activeId,
-            activeIndex > overIndex
-              ? {
-                  before: true,
-                  id: over.id,
-                }
-              : {
-                  before: false,
-                  id: over.id,
-                }
-          );
-        }
-      },
-      modifiers: [
-        ({ transform }) => {
-          return {
-            ...transform,
-            x: 0,
-          };
-        },
-      ],
+        this.view.groupManager.moveGroupTo(
+          activeId,
+          activeIndex > overIndex
+            ? {
+                before: true,
+                id: over.id,
+              }
+            : {
+                before: false,
+                id: over.id,
+              }
+        );
+      }
     },
+    modifiers: [
+      ({ transform }) => {
+        return {
+          ...transform,
+          x: 0,
+        };
+      },
+    ],
     items: computed(() => {
       return (
         this.view.groupManager.groupsDataList$.value?.map(v => v.key) ?? []
@@ -251,7 +250,7 @@ export const popSelectGroupByProperty = (
 };
 export const popGroupSetting = (
   target: PopupTarget,
-  view: SingleView<TableViewData | KanbanViewData>,
+  view: CanGroupView,
   onBack: () => void
 ) => {
   const groupBy = view.data$.value?.groupBy;

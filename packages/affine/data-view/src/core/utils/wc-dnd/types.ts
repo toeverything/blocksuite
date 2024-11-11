@@ -24,6 +24,7 @@ export type DataRef<T = AnyData> = Signal<Data<T> | undefined>;
 export interface Active {
   id: UniqueIdentifier;
   node: HTMLElement;
+  rect: DndClientRect;
 }
 
 export type RectMap = Map<UniqueIdentifier, DndClientRect>;
@@ -37,7 +38,6 @@ export interface DroppableContainer {
 
 export interface Collision {
   id: UniqueIdentifier;
-  data?: Data;
 }
 
 export type CollisionDetection = (args: {

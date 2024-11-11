@@ -157,40 +157,38 @@ export class DataViewPropertiesSettingView extends SignalWatcher(
   };
 
   sortContext = createSortContext({
-    dnd: {
-      activators: defaultActivators,
-      container: this,
-      onDragEnd: evt => {
-        const over = evt.over;
-        const activeId = evt.active.id;
-        if (over && over.id !== activeId) {
-          const properties = this.items$.value;
-          const activeIndex = properties.findIndex(id => id === activeId);
-          const overIndex = properties.findIndex(id => id === over.id);
+    activators: defaultActivators,
+    container: this,
+    onDragEnd: evt => {
+      const over = evt.over;
+      const activeId = evt.active.id;
+      if (over && over.id !== activeId) {
+        const properties = this.items$.value;
+        const activeIndex = properties.findIndex(id => id === activeId);
+        const overIndex = properties.findIndex(id => id === over.id);
 
-          this.view.propertyMove(
-            activeId,
-            activeIndex > overIndex
-              ? {
-                  before: true,
-                  id: over.id,
-                }
-              : {
-                  before: false,
-                  id: over.id,
-                }
-          );
-        }
-      },
-      modifiers: [
-        ({ transform }) => {
-          return {
-            ...transform,
-            x: 0,
-          };
-        },
-      ],
+        this.view.propertyMove(
+          activeId,
+          activeIndex > overIndex
+            ? {
+                before: true,
+                id: over.id,
+              }
+            : {
+                before: false,
+                id: over.id,
+              }
+        );
+      }
     },
+    modifiers: [
+      ({ transform }) => {
+        return {
+          ...transform,
+          x: 0,
+        };
+      },
+    ],
     items: this.items$,
     strategy: verticalListSortingStrategy,
   });

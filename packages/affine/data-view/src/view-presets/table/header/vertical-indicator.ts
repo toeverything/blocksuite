@@ -1,9 +1,9 @@
+import { unsafeCSSVarV2 } from '@blocksuite/affine-shared/theme';
 import { ShadowlessElement } from '@blocksuite/block-std';
 import { WithDisposable } from '@blocksuite/global/utils';
 import { css, html } from 'lit';
 import { property } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
-import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import type { TableColumn } from '../table-view-manager.js';
@@ -11,11 +11,6 @@ import type { TableColumn } from '../table-view-manager.js';
 import { startDrag } from '../../../core/utils/drag.js';
 import { getResultInRange } from '../../../core/utils/utils.js';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../consts.js';
-
-type GroupRectList = {
-  top: number;
-  bottom: number;
-}[];
 
 export class TableVerticalIndicator extends WithDisposable(ShadowlessElement) {
   static override styles = css`
@@ -27,19 +22,14 @@ export class TableVerticalIndicator extends WithDisposable(ShadowlessElement) {
       pointer-events: none;
     }
 
-    .vertical-indicator-container {
+    .vertical-indicator {
       position: absolute;
       pointer-events: none;
+      width: 1px;
+      background-color: ${unsafeCSSVarV2('layer/background/hoverOverlay')};
     }
 
-    .vertical-indicator-group {
-      position: absolute;
-      z-index: 1;
-      width: 100%;
-      background-color: var(--affine-hover-color);
-      pointer-events: none;
-    }
-    .vertical-indicator-group::after {
+    .vertical-indicator::after {
       position: absolute;
       z-index: 1;
       width: 2px;
@@ -49,39 +39,31 @@ export class TableVerticalIndicator extends WithDisposable(ShadowlessElement) {
       background-color: var(--affine-primary-color);
       border-radius: 1px;
     }
-    .with-shadow.vertical-indicator-group::after {
+
+    .with-shadow.vertical-indicator::after {
       box-shadow: 0px 0px 8px 0px rgba(30, 150, 235, 0.35);
     }
   `;
 
   protected override render(): unknown {
-    const containerStyle = styleMap({
+    const style = styleMap({
       top: `${this.top}px`,
       left: `${this.left}px`,
-      width: `${Math.max(this.width, 1)}px`,
+      height: `${this.height}px`,
+      width: `${this.width}px`,
     });
-    return html`
-      <div class="vertical-indicator-container" style=${containerStyle}>
-        ${repeat(this.lines, ({ top, bottom }) => {
-          const groupStyle = styleMap({
-            top: `${top}px`,
-            height: `${bottom - top}px`,
-          });
-          const groupClass = classMap({
-            'with-shadow': this.shadow,
-            'vertical-indicator-group': true,
-          });
-          return html`<div class="${groupClass}" style=${groupStyle}></div>`;
-        })}
-      </div>
-    `;
+    const className = classMap({
+      'with-shadow': this.shadow,
+      'vertical-indicator': true,
+    });
+    return html` <div class="${className}" style=${style}></div> `;
   }
 
   @property({ attribute: false })
-  accessor left!: number;
+  accessor height!: number;
 
   @property({ attribute: false })
-  accessor lines!: GroupRectList;
+  accessor left!: number;
 
   @property({ attribute: false })
   accessor shadow = false;
@@ -93,52 +75,45 @@ export class TableVerticalIndicator extends WithDisposable(ShadowlessElement) {
   accessor width!: number;
 }
 
-export const getTableGroupRects = (tableContainer: HTMLElement) => {
-  const tableRect = tableContainer.getBoundingClientRect();
-  const groups = tableContainer.querySelectorAll(
-    'affine-data-view-table-group'
-  );
-  return Array.from(groups).map(group => {
-    const groupRect = group.getBoundingClientRect();
-    const top =
-      group
-        .querySelector('.affine-database-column-header')
-        ?.getBoundingClientRect().top ?? groupRect.top;
-    const bottom =
-      group
-        .querySelector('.affine-database-block-rows')
-        ?.getBoundingClientRect().bottom ?? groupRect.bottom;
-    return {
-      top: top - tableRect.top,
-      bottom: bottom - tableRect.top,
-    };
-  });
+export const getTableGroupRect = (ele: HTMLElement) => {
+  const group = ele.closest('affine-data-view-table-group');
+  if (!group) {
+    return;
+  }
+  const groupRect = group?.getBoundingClientRect();
+  const top =
+    group
+      .querySelector('.affine-database-column-header')
+      ?.getBoundingClientRect().top ?? groupRect.top;
+  const bottom =
+    group.querySelector('.affine-database-block-rows')?.getBoundingClientRect()
+      .bottom ?? groupRect.bottom;
+  return {
+    top: top,
+    bottom: bottom,
+  };
 };
 export const startDragWidthAdjustmentBar = (
   evt: PointerEvent,
-  tableContainer: HTMLElement,
+  ele: HTMLElement,
   width: number,
   column: TableColumn
 ) => {
   const scale = width / column.width$.value;
-  const tableRect = tableContainer.getBoundingClientRect();
-  const left =
-    tableContainer
-      .querySelector(
-        `affine-database-header-column[data-column-id='${column.id}']`
-      )
-      ?.getBoundingClientRect().left ?? 0;
-  const rectList = getTableGroupRects(tableContainer);
+  const left = ele.getBoundingClientRect().left;
+  const rect = getTableGroupRect(ele);
+  if (!rect) {
+    return;
+  }
   const preview = getVerticalIndicator();
-  preview.display(column.width$.value * scale, tableRect.top, rectList, left);
-  tableContainer.style.pointerEvents = 'none';
+  preview.display(left, rect.top, rect.bottom - rect.top, width * scale);
   startDrag<{ width: number }>(evt, {
     onDrag: () => ({ width: column.width$.value }),
     onMove: ({ x }) => {
       const width = Math.round(
         getResultInRange((x - left) / scale, DEFAULT_COLUMN_MIN_WIDTH, Infinity)
       );
-      preview.display(width * scale, tableRect.top, rectList, left);
+      preview.display(left, rect.top, rect.bottom - rect.top, width * scale);
       return {
         width,
       };
@@ -147,7 +122,6 @@ export const startDragWidthAdjustmentBar = (
       column.updateWidth(width);
     },
     onClear: () => {
-      tableContainer.style.pointerEvents = 'auto';
       preview.remove();
     },
   });
@@ -155,10 +129,10 @@ export const startDragWidthAdjustmentBar = (
 let preview: VerticalIndicator | null = null;
 type VerticalIndicator = {
   display: (
-    width: number,
-    top: number,
-    lines: GroupRectList,
     left: number,
+    top: number,
+    height: number,
+    width?: number,
     shadow?: boolean
   ) => void;
   remove: () => void;
@@ -168,15 +142,15 @@ export const getVerticalIndicator = (): VerticalIndicator => {
     const dragBar = new TableVerticalIndicator();
     preview = {
       display(
-        width: number,
-        top: number,
-        lines: GroupRectList,
         left: number,
+        top: number,
+        height: number,
+        width = 1,
         shadow = false
       ) {
         document.body.append(dragBar);
         dragBar.left = left;
-        dragBar.lines = lines;
+        dragBar.height = height;
         dragBar.top = top;
         dragBar.width = width;
         dragBar.shadow = shadow;

@@ -57,28 +57,26 @@ export class SortRootView extends SignalWatcher(
   });
 
   sortContext = createSortContext({
-    dnd: {
-      activators: defaultActivators,
-      container: this,
-      onDragEnd: evt => {
-        const over = evt.over;
-        if (over) {
-          const list = this.sortUtils.sortList$.value;
-          this.sortUtils.move(
-            list.findIndex(v => v.ref.name === evt.active.id),
-            list.findIndex(v => v.ref.name === over.id)
-          );
-        }
-      },
-      modifiers: [
-        ({ transform }) => {
-          return {
-            ...transform,
-            x: 0,
-          };
-        },
-      ],
+    activators: defaultActivators,
+    container: this,
+    onDragEnd: evt => {
+      const over = evt.over;
+      if (over) {
+        const list = this.sortUtils.sortList$.value;
+        this.sortUtils.move(
+          list.findIndex(v => v.ref.name === evt.active.id),
+          list.findIndex(v => v.ref.name === over.id)
+        );
+      }
     },
+    modifiers: [
+      ({ transform }) => {
+        return {
+          ...transform,
+          x: 0,
+        };
+      },
+    ],
     items: this.items$,
     strategy: verticalListSortingStrategy,
   });

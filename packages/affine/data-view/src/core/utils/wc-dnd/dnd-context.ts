@@ -29,7 +29,7 @@ import { getAdjustedRect } from './utils/rect-adjustment.js';
 import { computedCache } from './utils/signal.js';
 
 export interface OverlayData {
-  overlay: Node;
+  overlay: HTMLElement;
   cleanup?: () => void;
 }
 
@@ -73,14 +73,6 @@ export class DndContext {
   });
 
   active$ = signal<Active | undefined>();
-
-  activeNodeRect$ = computed<DndClientRect | undefined>(() => {
-    const node = this.active$.value?.node;
-    if (!node) {
-      return;
-    }
-    return getClientRect(node);
-  });
 
   initActiveRect$ = signal<DndClientRect>();
 
@@ -154,7 +146,7 @@ export class DndContext {
         scaleY: 1,
       },
       active: this.active$.value,
-      activeNodeRect: this.activeNodeRect$.value,
+      activeNodeRect: this.active$.value?.rect,
       over: this.over$.preValue,
       // overlayNodeRect: dragOverlay.rect,
     });
@@ -162,11 +154,8 @@ export class DndContext {
 
   // eslint-disable-next-line perfectionist/sort-classes
   collisionRect$ = computed(() => {
-    return this.activeNodeRect$.value
-      ? getAdjustedRect(
-          this.activeNodeRect$.value,
-          this.modifiedTranslate$.value
-        )
+    return this.active$.value?.rect
+      ? getAdjustedRect(this.active$.value.rect, this.modifiedTranslate$.value)
       : undefined;
   });
 
@@ -189,7 +178,11 @@ export class DndContext {
     this.session$.value = sessionCreator({
       onStart: coordinates => {
         const { onDragStart } = this.config;
-        const active = { id, node: activeNode };
+        const active = {
+          id,
+          node: activeNode,
+          rect: getClientRect(activeNode),
+        };
         onDragStart?.({
           active: active,
         });
@@ -217,7 +210,7 @@ export class DndContext {
     return this.config.container;
   }
 
-  constructor(private config: DndContextConfig) {
+  constructor(protected config: DndContextConfig) {
     this.listenActivators();
     this.listenMoveEvent();
     this.listenOverEvent();
@@ -267,6 +260,10 @@ export class DndContext {
           },
           over: this.over$.value,
         });
+        if (this.overlay$.value) {
+          const transform = this.transform$.value;
+          this.overlay$.value.style.transform = `translate(${transform.x}px,${transform.y}px)`;
+        }
       })
     );
   }
@@ -295,9 +292,7 @@ export class DndContext {
     if (!overlay) {
       return;
     }
-    const div = document.createElement('div');
-    div.append(overlay.overlay);
-    this.overlay$.value = div;
+    this.overlay$.value = overlay.overlay;
     this.dragEndCleanupQueue.push(() => {
       overlay.cleanup?.();
     });
@@ -338,7 +333,7 @@ export class DndContext {
     const style = this.config.container.style;
     const pointerEvents = style.pointerEvents;
     style.pointerEvents = 'none';
-    const clearups = [...this.droppableNodes$.value.values()].map(v => {
+    const cleanups = [...this.droppableNodes$.value.values()].map(v => {
       const old = v.node.style.transition;
       v.node.style.transition = 'transform 0.2s';
       return () => {
@@ -347,7 +342,7 @@ export class DndContext {
     });
     this.dragEndCleanupQueue.push(() => {
       style.pointerEvents = pointerEvents;
-      clearups.forEach(f => f());
+      cleanups.forEach(f => f());
     });
   }
 
