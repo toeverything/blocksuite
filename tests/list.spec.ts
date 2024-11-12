@@ -7,6 +7,7 @@ import {
   enterPlaygroundWithList,
   focusRichText,
   getPageSnapshot,
+  initEmptyEdgelessState,
   initEmptyParagraphState,
   initThreeLists,
   pressArrowLeft,
@@ -19,6 +20,7 @@ import {
   pressSpace,
   pressTab,
   redoByClick,
+  switchEditorMode,
   switchReadonly,
   type,
   undoByClick,
@@ -794,5 +796,27 @@ test.describe('readonly', () => {
       await checkBox.click();
       await expect(page.locator('.affine-list--checked')).toHaveCount(1);
     }
+  });
+
+  test('should render collapsed list correctly', async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyEdgelessState(page);
+    // await switchEditorMode(page);
+    await initThreeLists(page);
+
+    const toggleIcon = getToggleIcon(page);
+    const collapsed = page.locator('.affine-list__collapsed');
+
+    await expect(collapsed).toHaveCount(0);
+
+    await toggleIcon.click();
+    await expect(collapsed).toHaveCount(1);
+
+    await switchReadonly(page);
+    // trick for render a readonly doc from scratch
+    await switchEditorMode(page);
+    await switchEditorMode(page);
+
+    await expect(collapsed).toHaveCount(1);
   });
 });

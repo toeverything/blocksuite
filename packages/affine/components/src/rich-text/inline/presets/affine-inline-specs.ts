@@ -135,6 +135,9 @@ export const ReferenceInlineSpecExtension = InlineSpecExtension(
     if (config.interactable !== undefined) {
       configProvider.setInteractable(config.interactable);
     }
+    if (config.hidePopup !== undefined) {
+      configProvider.setHidePopup(config.hidePopup);
+    }
     return {
       name: 'reference',
       schema: z

@@ -137,6 +137,7 @@ export class ListBlockComponent extends CaptionedBlockComponent<
     super.connectedCallback();
 
     this._inlineRangeProvider = getInlineRangeProvider(this);
+    this._isCollapsedWhenReadOnly = this.model.collapsed;
 
     this.disposables.add(
       effect(() => {
