@@ -119,7 +119,7 @@ export class OutlinePanelHeader extends WithDisposable(LitElement) {
         </div>
         <edgeless-tool-icon-button
           class="note-sorting-button ${this.enableNotesSorting ? 'active' : ''}"
-          .tooltip=${'Note Sort Options'}
+          .tooltip=${'Visibility and sort'}
           .tipPosition=${'left'}
           .iconContainerPadding=${0}
           .active=${this.enableNotesSorting}
