@@ -1,5 +1,19 @@
 # @blocksuite/store
 
+## 0.17.30
+
+### Patch Changes
+
+- 5c327c8: ## Fix
+
+  - fix(database): title linked-doc convert logic (#8734)
+  - fix(blocks): pdf embed view overflow (#8733)
+
+- Updated dependencies [5c327c8]
+  - @blocksuite/global@0.17.30
+  - @blocksuite/inline@0.17.30
+  - @blocksuite/sync@0.17.30
+
 ## 0.17.29
 
 ### Patch Changes
