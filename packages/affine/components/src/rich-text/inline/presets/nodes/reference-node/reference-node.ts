@@ -95,6 +95,7 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
     this,
     ({ abortController }) => {
       if (
+        this.config.hidePopup ||
         this.doc?.readonly ||
         this.closest('.prevent-reference-popup') ||
         !this.selfInlineRange ||

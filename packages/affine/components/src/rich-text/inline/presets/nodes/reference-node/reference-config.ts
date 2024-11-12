@@ -10,6 +10,7 @@ export interface ReferenceNodeConfig {
   customIcon?: ((reference: AffineReference) => TemplateResult) | null;
   customTitle?: ((reference: AffineReference) => string) | null;
   interactable?: boolean;
+  hidePopup?: boolean;
 }
 
 export const ReferenceNodeConfigIdentifier =
@@ -35,6 +36,8 @@ export class ReferenceNodeConfigProvider {
 
   private _customTitle: ((reference: AffineReference) => string) | null = null;
 
+  private _hidePopup = false;
+
   private _interactable = true;
 
   get customContent() {
@@ -53,6 +56,10 @@ export class ReferenceNodeConfigProvider {
     return this.std.doc;
   }
 
+  get hidePopup() {
+    return this._hidePopup;
+  }
+
   get interactable() {
     return this._interactable;
   }
@@ -69,6 +76,10 @@ export class ReferenceNodeConfigProvider {
 
   setCustomTitle(title: ReferenceNodeConfigProvider['_customTitle']) {
     this._customTitle = title;
+  }
+
+  setHidePopup(hidePopup: boolean) {
+    this._hidePopup = hidePopup;
   }
 
   setInteractable(interactable: boolean) {
