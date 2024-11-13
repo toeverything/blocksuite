@@ -52,13 +52,10 @@ export class VLine extends LitElement {
     this.addEventListener('mousedown', e => {
       if (e.detail >= 3) {
         e.preventDefault();
-
-        const range = document.createRange();
-        range.selectNodeContents(this);
-        const selection = window.getSelection();
-        assertExists(selection);
-        selection.removeAllRanges();
-        selection.addRange(range);
+        this.inlineEditor.setInlineRange({
+          index: this.startOffset,
+          length: this.endOffset - this.startOffset,
+        });
       }
     });
   }
@@ -131,7 +128,13 @@ export class VLine extends LitElement {
   accessor elements: [TemplateResult<1>, DeltaInsert][] = [];
 
   @property({ attribute: false })
+  accessor endOffset!: number;
+
+  @property({ attribute: false })
   accessor index!: number;
+
+  @property({ attribute: false })
+  accessor startOffset!: number;
 }
 
 declare global {
