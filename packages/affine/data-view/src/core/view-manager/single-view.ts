@@ -140,6 +140,8 @@ export interface SingleView<
   mainProperties$: ReadonlySignal<MainProperties>;
 
   lockRows(lock: boolean): void;
+
+  isLocked$: ReadonlySignal<boolean>;
 }
 
 export abstract class SingleViewBase<
@@ -157,6 +159,10 @@ export abstract class SingleViewBase<
   abstract filter$: ReadonlySignal<FilterGroup>;
 
   protected lockRows$ = signal(false);
+
+  isLocked$ = computed(() => {
+    return this.lockRows$.value;
+  });
 
   abstract mainProperties$: ReadonlySignal<MainProperties>;
 
@@ -208,6 +214,10 @@ export abstract class SingleViewBase<
 
   get featureFlags$() {
     return this.dataSource.featureFlags$;
+  }
+
+  get isLocked() {
+    return this.lockRows$.value;
   }
 
   get meta() {

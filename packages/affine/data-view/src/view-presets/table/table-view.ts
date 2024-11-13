@@ -9,6 +9,7 @@ import {
 } from '@blocksuite/affine-shared/utils';
 import { AddCursorIcon } from '@blocksuite/icons/lit';
 import { css } from 'lit';
+import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
 
@@ -272,15 +273,19 @@ export class DataViewTable extends DataViewBase<
     if (groups) {
       return html`
         <div style="display:flex;flex-direction: column;gap: 16px;">
-          ${groups.map(group => {
-            return html` <affine-data-view-table-group
-              data-group-key="${group.key}"
-              .dataViewEle="${this.props.dataViewEle}"
-              .view="${this.props.view}"
-              .viewEle="${this}"
-              .group="${group}"
-            ></affine-data-view-table-group>`;
-          })}
+          ${repeat(
+            groups,
+            v => v.key,
+            group => {
+              return html` <affine-data-view-table-group
+                data-group-key="${group.key}"
+                .dataViewEle="${this.props.dataViewEle}"
+                .view="${this.props.view}"
+                .viewEle="${this}"
+                .group="${group}"
+              ></affine-data-view-table-group>`;
+            }
+          )}
           ${this.renderAddGroup(this.props.view.groupManager)}
         </div>
       `;

@@ -1,3 +1,5 @@
+import hash from '@emotion/hash';
+
 import type { GroupByConfig } from './types.js';
 
 import { MatcherCreator } from '../logical/matcher.js';
@@ -104,12 +106,12 @@ export const groupByMatchers = [
       return [ungroups];
     },
     valuesGroup: (value, _type) => {
-      if (!value) {
+      if (typeof value !== 'string' || !value) {
         return [ungroups];
       }
       return [
         {
-          key: `g:${value}`,
+          key: hash(value),
           value,
         },
       ];

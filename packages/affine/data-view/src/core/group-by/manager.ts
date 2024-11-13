@@ -99,7 +99,13 @@ export class GroupManager {
     return groupMap;
   });
 
+  preDataList: GroupData[] = [];
+
   groupsDataList$ = computed(() => {
+    if (this.viewManager.isLocked$.value) {
+      return this.preDataList;
+    }
+
     const groupMap = this.groupDataMap$.value;
     if (!groupMap) {
       return;
@@ -108,7 +114,7 @@ export class GroupManager {
     sortedGroup.forEach(key => {
       groupMap[key].rows = this.ops.sortRow(key, groupMap[key].rows);
     });
-    return sortedGroup.map(key => groupMap[key]);
+    return (this.preDataList = sortedGroup.map(key => groupMap[key]));
   });
 
   updateData = (data: NonNullable<unknown>) => {
