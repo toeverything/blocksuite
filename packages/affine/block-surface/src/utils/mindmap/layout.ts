@@ -163,7 +163,9 @@ const layoutTree = (
 
     const currentNodePath = [...path, idx];
 
-    subtreeRootEl.xywh = xywh;
+    if (subtreeRootEl.xywh !== xywh) {
+      subtreeRootEl.xywh = xywh;
+    }
 
     layoutTree(
       subtree,

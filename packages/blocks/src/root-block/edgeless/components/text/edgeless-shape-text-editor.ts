@@ -41,8 +41,12 @@ export class EdgelessShapeTextEditor extends WithDisposable(ShadowlessElement) {
     return this.inlineEditor.rootElement;
   }
 
+  get isMindMapNode() {
+    return this.element.group instanceof MindmapElementModel;
+  }
+
   private _initMindmapKeyBindings() {
-    if (!this.element.surface.isInMindmap(this.element.id)) {
+    if (!this.isMindMapNode) {
       return;
     }
 
@@ -72,6 +76,20 @@ export class EdgelessShapeTextEditor extends WithDisposable(ShadowlessElement) {
           break;
         }
       }
+    });
+  }
+
+  private _stashMindMapTree() {
+    if (!this.isMindMapNode) {
+      return;
+    }
+
+    const mindmap = this.element.group as MindmapElementModel;
+    const pop = mindmap.stashTree(mindmap.tree);
+
+    this._disposables.add(() => {
+      mindmap.layout();
+      pop?.();
     });
   }
 
@@ -105,10 +123,6 @@ export class EdgelessShapeTextEditor extends WithDisposable(ShadowlessElement) {
     const containerWidth = this.richText.offsetWidth;
     const textResizing = this.element.textResizing;
 
-    if (this._lastXYWH !== this.element.xywh) {
-      this.requestUpdate();
-    }
-
     if (
       (containerHeight !== this.element.h &&
         textResizing === TextResizing.AUTO_HEIGHT) ||
@@ -135,8 +149,17 @@ export class EdgelessShapeTextEditor extends WithDisposable(ShadowlessElement) {
           containerHeight
         ).serialize(),
       });
-      this.element.group instanceof MindmapElementModel &&
-        this.element.group.layout();
+
+      if (this._lastXYWH !== this.element.xywh) {
+        this.requestUpdate();
+      }
+
+      if (this.isMindMapNode) {
+        const mindmap = this.element.group as MindmapElementModel;
+
+        mindmap.layout();
+      }
+
       this.richText.style.minHeight = `${containerHeight}px`;
     }
 
@@ -216,6 +239,7 @@ export class EdgelessShapeTextEditor extends WithDisposable(ShadowlessElement) {
     });
 
     this._initMindmapKeyBindings();
+    this._stashMindMapTree();
   }
 
   override async getUpdateComplete(): Promise<boolean> {
