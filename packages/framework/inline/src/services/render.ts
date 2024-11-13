@@ -93,8 +93,8 @@ export class RenderService<TextAttributes extends BaseTextAttributes> {
         deltaIndex += 1; // for '\n'
       }
 
+      const lineStartOffset = deltaIndex;
       if (chunk.length > 0) {
-        const lineStartOffset = deltaIndex;
         const elements: VLine['elements'] = chunk.map(delta => {
           const startOffset = deltaIndex;
           deltaIndex += delta.insert.length;
@@ -124,7 +124,12 @@ export class RenderService<TextAttributes extends BaseTextAttributes> {
           .endOffset=${deltaIndex}
         ></v-line>`;
       } else {
-        return html`<v-line .elements=${[]} .index=${lineIndex}></v-line>`;
+        return html`<v-line
+          .elements=${[]}
+          .index=${lineIndex}
+          .startOffset=${lineStartOffset}
+          .endOffset=${deltaIndex}
+        ></v-line>`;
       }
     });
 

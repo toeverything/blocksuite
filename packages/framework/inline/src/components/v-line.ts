@@ -50,6 +50,11 @@ export class VLine extends LitElement {
     this.style.display = 'block';
 
     this.addEventListener('mousedown', e => {
+      if (e.detail >= 2 && this.startOffset === this.endOffset) {
+        e.preventDefault();
+        return;
+      }
+
       if (e.detail >= 3) {
         e.preventDefault();
         this.inlineEditor.setInlineRange({
