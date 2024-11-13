@@ -94,6 +94,7 @@ export class RenderService<TextAttributes extends BaseTextAttributes> {
       }
 
       if (chunk.length > 0) {
+        const lineStartOffset = deltaIndex;
         const elements: VLine['elements'] = chunk.map(delta => {
           const startOffset = deltaIndex;
           deltaIndex += delta.insert.length;
@@ -119,6 +120,8 @@ export class RenderService<TextAttributes extends BaseTextAttributes> {
         return html`<v-line
           .elements=${elements}
           .index=${lineIndex}
+          .startOffset=${lineStartOffset}
+          .endOffset=${deltaIndex}
         ></v-line>`;
       } else {
         return html`<v-line .elements=${[]} .index=${lineIndex}></v-line>`;
