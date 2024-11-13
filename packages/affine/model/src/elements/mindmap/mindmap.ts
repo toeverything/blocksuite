@@ -1,9 +1,10 @@
 import type {
   BaseElementProps,
   GfxModel,
+  PointTestOptions,
   SerializedElement,
 } from '@blocksuite/block-std/gfx';
-import type { SerializedXYWH, XYWH } from '@blocksuite/global/utils';
+import type { Bound, SerializedXYWH, XYWH } from '@blocksuite/global/utils';
 
 import {
   convert,
@@ -45,6 +46,17 @@ export type MindmapNode = {
 
   element: BlockSuite.SurfaceElementModel;
   children: MindmapNode[];
+
+  /**
+   * When dragging another node into this area, it will become a sibling of the target node.
+   * However, if it is dragged into the small area located right after the target node, it will become a child node of the target node.
+   */
+  responseArea?: Bound;
+
+  /**
+   * The bound of the entire subtree
+   */
+  treeBound?: Bound;
 
   /**
    * This property override the preferredDir or default layout direction.
@@ -136,7 +148,8 @@ export class MindmapElementModel extends GfxGroupLikeElementModel<MindmapElement
     _mindmap: MindmapElementModel,
     _tree: MindmapNode | MindmapRoot = this.tree,
     _applyStyle = true,
-    _layoutType?: LayoutType
+    _layoutType?: LayoutType,
+    _calculateTreeBound = true
   ) => {};
 
   private _nodeMap = new Map<string, MindmapNode>();
@@ -229,6 +242,10 @@ export class MindmapElementModel extends GfxGroupLikeElementModel<MindmapElement
     }
 
     return { outdated: true, cacheKey };
+  }
+
+  protected override _getXYWH(): Bound {
+    return super._getXYWH();
   }
 
   /**
@@ -507,7 +524,7 @@ export class MindmapElementModel extends GfxGroupLikeElementModel<MindmapElement
     );
   }
 
-  getLayoutDir(node: string | MindmapNode): LayoutType | null {
+  getLayoutDir(node: string | MindmapNode): LayoutType {
     node = typeof node === 'string' ? this._nodeMap.get(node)! : node;
 
     assertType<MindmapNode>(node);
@@ -525,11 +542,14 @@ export class MindmapElementModel extends GfxGroupLikeElementModel<MindmapElement
         : null;
 
       if (parent === root) {
-        return root.left.includes(current)
-          ? LayoutType.LEFT
-          : root.right.includes(current)
-            ? LayoutType.RIGHT
-            : this.layoutType;
+        return (
+          parent.overriddenDir ??
+          (root.left.includes(current)
+            ? LayoutType.LEFT
+            : root.right.includes(current)
+              ? LayoutType.RIGHT
+              : this.layoutType)
+        );
       }
 
       current = parent;
@@ -618,12 +638,30 @@ export class MindmapElementModel extends GfxGroupLikeElementModel<MindmapElement
     return sibling;
   }
 
+  override includesPoint(x: number, y: number, options: PointTestOptions) {
+    const bound = this.elementBound;
+
+    bound.x -= options.responsePadding?.[0] ?? 0;
+    bound.w += (options.responsePadding?.[0] ?? 0) * 2;
+    bound.y -= options.responsePadding?.[1] ?? 0;
+    bound.h += (options.responsePadding?.[1] ?? 0) * 2;
+
+    return bound.containsPoint([x, y]);
+  }
+
   layout(
     _tree: MindmapNode | MindmapRoot = this.tree,
     _applyStyle = true,
-    _layoutType?: LayoutType
+    _layoutType?: LayoutType,
+    _calculateTreeBound = true
   ) {
-    return this._layoutHandler(this, _tree, _applyStyle, _layoutType);
+    return this._layoutHandler(
+      this,
+      _tree,
+      _applyStyle,
+      _layoutType,
+      _calculateTreeBound
+    );
   }
 
   moveTo(targetXYWH: SerializedXYWH | XYWH) {
