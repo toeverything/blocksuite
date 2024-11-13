@@ -1,5 +1,16 @@
 # @blocksuite/sync
 
+## 0.17.32
+
+### Patch Changes
+
+- 7bc83ab: ## Fix
+
+  - fix: mind map text layout (#8737)
+
+- Updated dependencies [7bc83ab]
+  - @blocksuite/global@0.17.32
+
 ## 0.17.31
 
 ### Patch Changes

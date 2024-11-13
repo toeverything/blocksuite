@@ -1,5 +1,23 @@
 # @blocksuite/presets
 
+## 0.17.32
+
+### Patch Changes
+
+- 7bc83ab: ## Fix
+
+  - fix: mind map text layout (#8737)
+
+- Updated dependencies [7bc83ab]
+  - @blocksuite/affine-block-surface@0.17.32
+  - @blocksuite/affine-model@0.17.32
+  - @blocksuite/affine-shared@0.17.32
+  - @blocksuite/blocks@0.17.32
+  - @blocksuite/block-std@0.17.32
+  - @blocksuite/global@0.17.32
+  - @blocksuite/inline@0.17.32
+  - @blocksuite/store@0.17.32
+
 ## 0.17.31
 
 ### Patch Changes
