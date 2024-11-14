@@ -225,6 +225,8 @@ export class BlockModel<
   // This is used to avoid https://stackoverflow.com/questions/55886792/infer-typescript-generic-class-type
   [modelLabel]: Props = 'type_info_label' as never;
 
+  mutex?: (cb: () => void) => void;
+
   pop!: (prop: keyof Props & string) => void;
 
   propsUpdated = new Slot<{ key: string }>();

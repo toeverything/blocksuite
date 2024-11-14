@@ -334,17 +334,16 @@ export class RichTextCellEditing extends BaseCellRenderer<Text> {
   }
 
   override firstUpdated() {
-    const inlineEditor = this.inlineEditor;
-    if (!inlineEditor) {
-      return;
-    }
     this._richTextElement?.updateComplete
       .then(() => {
-        this.disposables.add(
-          inlineEditor.slots.keydown.on(this._handleKeyDown)
-        );
+        const inlineEditor = this.inlineEditor;
+        if (inlineEditor) {
+          this.disposables.add(
+            inlineEditor.slots.keydown.on(this._handleKeyDown)
+          );
 
-        inlineEditor.focusEnd();
+          inlineEditor.focusEnd();
+        }
       })
       .catch(console.error);
   }

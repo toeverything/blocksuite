@@ -132,6 +132,7 @@ export class SyncController {
     }
 
     const model = schema.model.toModel?.() ?? new BlockModel<object>();
+    model.mutex = _mutex;
     const signalWithProps = Object.entries(props).reduce(
       (acc, [key, value]) => {
         const data = signal(value);

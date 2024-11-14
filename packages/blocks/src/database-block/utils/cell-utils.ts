@@ -5,8 +5,6 @@ import type {
 } from '@blocksuite/affine-model';
 import type { BlockModel } from '@blocksuite/store';
 
-import { Text } from '@blocksuite/store';
-
 import { updateProps } from './block-utils.js';
 
 export function duplicateCellsByProperty(
@@ -60,19 +58,7 @@ export function updateCell(
   rowId: string,
   cell: Cell
 ) {
-  if (cell.value instanceof Text) {
-    model.doc.transact(() => {
-      const cells = model.cells;
-      if (!cells[rowId]) {
-        cells[rowId] = Object.create(null);
-      }
-      cells[rowId][cell.columnId] = cell;
-    });
-    model.columns$.value = [...model.columns$.value];
-    return;
-  }
-
-  updateProps(model, 'cells', cells => {
+  return updateProps(model, 'cells', cells => {
     if (!cells[rowId]) {
       cells[rowId] = Object.create(null);
     }
