@@ -1,4 +1,4 @@
-export interface Column<
+export interface MicrosheetColumn<
   Data extends Record<string, unknown> = Record<string, unknown>,
 > {
   id: string;
@@ -7,15 +7,20 @@ export interface Column<
   data: Data;
 }
 
-export type ColumnUpdater<T extends Column = Column> = (data: T) => Partial<T>;
-export type Cell<ValueType = unknown> = {
-  columnId: Column['id'];
+export type MicrosheetColumnUpdater<
+  T extends MicrosheetColumn = MicrosheetColumn,
+> = (data: T) => Partial<T>;
+export type MicrosheetCell<ValueType = unknown> = {
+  columnId: MicrosheetColumn['id'];
   value: ValueType;
   ref: string;
 };
 
-export type SerializedCells = Record<string, Record<string, Cell>>;
-export type ViewBasicDataType = {
+export type MicrosheetSerializedCells = Record<
+  string,
+  Record<string, MicrosheetCell>
+>;
+export type MicrosheetViewBasicDataType = {
   id: string;
   name: string;
   mode: string;

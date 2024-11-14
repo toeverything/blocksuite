@@ -11,7 +11,6 @@ export type ColumnUpdater<T extends Column = Column> = (data: T) => Partial<T>;
 export type Cell<ValueType = unknown> = {
   columnId: Column['id'];
   value: ValueType;
-  ref: string;
 };
 
 export type SerializedCells = Record<string, Record<string, Cell>>;

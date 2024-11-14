@@ -1,15 +1,17 @@
 import type { TableViewSelectionWithType } from '../view-presets/table/types.js';
 
-export type DataViewSelection = TableViewSelectionWithType;
-export type GetDataViewSelection<
-  K extends DataViewSelection['type'],
-  T = DataViewSelection,
+export type MicrosheetDataViewSelection = TableViewSelectionWithType;
+export type GetMicrosheetDataViewSelection<
+  K extends MicrosheetDataViewSelection['type'],
+  T = MicrosheetDataViewSelection,
 > = T extends {
   type: K;
 }
   ? T
   : never;
-export type DataViewSelectionState = DataViewSelection | undefined;
+export type MicrosheetDataViewSelectionState =
+  | MicrosheetDataViewSelection
+  | undefined;
 export type PropertyDataUpdater<
   Data extends Record<string, unknown> = Record<string, unknown>,
 > = (data: Data) => Partial<Data>;

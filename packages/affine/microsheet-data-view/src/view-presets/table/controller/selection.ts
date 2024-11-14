@@ -9,15 +9,16 @@ import { property } from 'lit/decorators.js';
 import { createRef, ref } from 'lit/directives/ref.js';
 
 import type { MicrosheetCellContainer } from '../cell.js';
-import type { TableRow } from '../row/row.js';
+import type { TableGroup } from '../group.js';
 import type { DataViewTable } from '../table-view.js';
 
 import { startDrag } from '../../../core/utils/drag.js';
 import { autoScrollOnBoundary } from '../../../core/utils/frame-loop.js';
+import { TableRow } from '../row/row.js';
 import {
   type CellFocus,
   type MultiSelection,
-  RowWithGroup,
+  type RowWithGroup,
   TableAreaSelection,
   TableRowSelection,
   type TableViewSelection,
@@ -291,7 +292,7 @@ export class TableSelectionController implements ReactiveController {
       length: selection.rowsSelection.end - selection.rowsSelection.start + 1,
     })
       .map((_, index) => index + selection.rowsSelection.start)
-      .map(row => rows[row]?.rowId);
+      .map(row => (rows[row] as TableRow)?.rowId);
     return ids.map(id => ({ id, groupKey: selection.groupKey }));
   }
 
@@ -345,7 +346,8 @@ export class TableSelectionController implements ReactiveController {
 
   deleteRow(rowId: string) {
     this.view.rowDelete([rowId]);
-    this.focusToCell('up');
+    // this.focusToCell('up');
+    this.clearSelection();
   }
 
   focusFirstCell() {
@@ -442,7 +444,6 @@ export class TableSelectionController implements ReactiveController {
       ?.querySelectorAll('affine-microsheet-cell-container')
       ?.item(columnIndex)
       ?.selectCurrentCell(
-        false,
         focusTo
           ? focusTo
           : position === 'up' || position === 'left'
@@ -561,63 +562,6 @@ export class TableSelectionController implements ReactiveController {
     return true;
   }
 
-  navigateRowSelection(direction: 'up' | 'down', append = false) {
-    return;
-    if (!TableRowSelection.is(this.selection)) return;
-    const rows = this.selection.rows;
-    const lastRow = rows[rows.length - 1];
-    const lastRowIndex =
-      (
-        this.getGroup(lastRow.groupKey)?.querySelector(
-          `data-view-table-row[data-row-id='${lastRow.id}']`
-        ) as TableRow | null
-      )?.rowIndex ?? 0;
-    const getRowByIndex = (index: number) => {
-      const tableRow = this.rows(lastRow.groupKey)?.item(index);
-      if (!tableRow) {
-        return;
-      }
-      return {
-        id: tableRow.rowId,
-        groupKey: lastRow.groupKey,
-      };
-    };
-    const prevRow = getRowByIndex(lastRowIndex - 1);
-    const nextRow = getRowByIndex(lastRowIndex + 1);
-    const includes = (row: RowWithGroup) => {
-      if (!row) {
-        return false;
-      }
-      return rows.some(r => RowWithGroup.equal(r, row));
-    };
-    if (append) {
-      const addList: RowWithGroup[] = [];
-      const removeList: RowWithGroup[] = [];
-      if (direction === 'up' && prevRow != null) {
-        if (includes(prevRow)) {
-          removeList.push(lastRow);
-        } else {
-          addList.push(prevRow);
-        }
-      }
-      if (direction === 'down' && nextRow != null) {
-        if (includes(nextRow)) {
-          removeList.push(lastRow);
-        } else {
-          addList.push(nextRow);
-        }
-      }
-      this.rowSelectionChange({ add: addList, remove: removeList });
-    } else {
-      const target = direction === 'up' ? prevRow : nextRow;
-      if (target != null) {
-        this.selection = TableRowSelection.create({
-          rows: [target],
-        });
-      }
-    }
-  }
-
   rows(groupKey: string | undefined) {
     const container =
       groupKey != null
@@ -663,6 +607,9 @@ export class TableSelectionController implements ReactiveController {
     for (const row of this.tableContainer
       ?.querySelectorAll('microsheet-data-view-table-row')
       .values() ?? []) {
+      if (!(row instanceof TableRow)) {
+        continue;
+      }
       if (!set.has(row.rowId)) {
         continue;
       }
@@ -822,8 +769,9 @@ export class TableSelectionController implements ReactiveController {
     cell: MicrosheetCellContainer,
     fillValues?: boolean
   ) {
-    const groupKey = cell.closest('affine-microsheet-data-view-table-group')
-      ?.group?.key;
+    const groupKey = (
+      cell.closest('affine-microsheet-data-view-table-group') as TableGroup
+    )?.group?.key;
     const table = this.tableContainer;
     const scrollContainer = table?.parentElement;
     if (!table || !scrollContainer) {
@@ -894,6 +842,7 @@ export class TableSelectionController implements ReactiveController {
         select(selection);
         return selection;
       },
+      // @ts-expect-error
       onDrop: selection => {
         if (!selection) {
           return;

@@ -115,6 +115,7 @@ import {
   MicrosheetBlockComponent,
   type MicrosheetBlockService,
 } from './microsheet-block/index.js';
+import { MicrosheetDataViewBlockComponent } from './microsheet-data-view-block/data-view-block.js';
 import {
   EdgelessNoteBlockComponent,
   EdgelessNoteMask,
@@ -398,6 +399,10 @@ export function effects() {
   customElements.define('affine-frame', FrameBlockComponent);
   customElements.define('mini-mindmap-surface-block', MindmapSurfaceBlock);
   customElements.define('affine-data-view', DataViewBlockComponent);
+  customElements.define(
+    'affine-microsheet-data-view',
+    MicrosheetDataViewBlockComponent
+  );
   customElements.define('affine-edgeless-root', EdgelessRootBlockComponent);
   customElements.define('affine-divider', DividerBlockComponent);
   customElements.define('edgeless-copilot-panel', EdgelessCopilotPanel);

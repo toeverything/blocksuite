@@ -1,37 +1,15 @@
 import type { PropertyMetaConfig } from '@blocksuite/microsheet-data-view';
 
-import { propertyPresets } from '@blocksuite/microsheet-data-view/property-presets';
-
-import { linkColumnConfig } from './link/cell-renderer.js';
 import { richTextColumnConfig } from './rich-text/cell-renderer.js';
 import { titleColumnConfig } from './title/cell-renderer.js';
 
-export * from './converts.js';
-const {
-  checkboxPropertyConfig,
-  datePropertyConfig,
-  multiSelectPropertyConfig,
-  numberPropertyConfig,
-  progressPropertyConfig,
-  selectPropertyConfig,
-} = propertyPresets;
 export const microsheetBlockColumns = {
-  checkboxColumnConfig: checkboxPropertyConfig,
-  dateColumnConfig: datePropertyConfig,
-  multiSelectColumnConfig: multiSelectPropertyConfig,
-  numberColumnConfig: numberPropertyConfig,
-  progressColumnConfig: progressPropertyConfig,
-  selectColumnConfig: selectPropertyConfig,
-  linkColumnConfig,
   richTextColumnConfig,
 };
 export const microsheetBlockPropertyList = Object.values(
   microsheetBlockColumns
 );
-export const microsheetBlockHiddenColumns = [
-  propertyPresets.imagePropertyConfig,
-  titleColumnConfig,
-];
+export const microsheetBlockHiddenColumns = [titleColumnConfig];
 const microsheetBlockAllColumns = [
   ...microsheetBlockPropertyList,
   ...microsheetBlockHiddenColumns,

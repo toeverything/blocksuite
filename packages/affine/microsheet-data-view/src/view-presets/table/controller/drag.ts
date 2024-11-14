@@ -20,6 +20,7 @@ export class TableDragController implements ReactiveController {
     );
     const fromGroup = row.groupKey;
 
+    // debugger
     startDrag<
       | undefined
       | {
@@ -103,9 +104,9 @@ export class TableDragController implements ReactiveController {
       const mid = (rect.top + rect.bottom) / 2;
       if (y < rect.bottom) {
         return {
-          groupKey: row.groupKey,
+          groupKey: (row as TableRow).groupKey,
           position: {
-            id: row.dataset.rowId as string,
+            id: (row as TableRow).dataset.rowId as string,
             before: y < mid,
           },
           y: y < mid ? rect.top : rect.bottom,
@@ -148,7 +149,7 @@ export class TableDragController implements ReactiveController {
           const row = target.closest('microsheet-data-view-table-row');
           if (row) {
             getSelection()?.removeAllRanges();
-            this.dragStart(row, event);
+            this.dragStart(row as TableRow, event);
           }
           return true;
         }

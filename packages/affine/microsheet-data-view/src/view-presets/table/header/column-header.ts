@@ -18,16 +18,6 @@ export class MicrosheetColumnHeader extends SignalWatcher(
 ) {
   static override styles = styles;
 
-  private _onAddColumn = (e: MouseEvent) => {
-    if (this.readonly) return;
-    this.tableViewManager.propertyAdd('end');
-    const ele = e.currentTarget as HTMLElement;
-    requestAnimationFrame(() => {
-      this.editLastColumnTitle();
-      ele.scrollIntoView({ block: 'nearest', inline: 'nearest' });
-    });
-  };
-
   editLastColumnTitle = () => {
     const columns = this.querySelectorAll('affine-microsheet-header-column');
     const column = columns.item(columns.length - 1);

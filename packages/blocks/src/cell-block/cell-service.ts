@@ -17,12 +17,6 @@ export const selectBlock: Command<'focusBlock'> = (ctx, next) => {
     return;
   }
 
-  // const { selection } = std;
-
-  // selection.setGroup('cell', [
-  //   selection.create('block', { path: focusBlock.path }),
-  // ]);
-
   return next();
 };
 

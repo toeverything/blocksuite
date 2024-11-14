@@ -1,5 +1,5 @@
 import type { Column } from '@blocksuite/affine-model';
-import type { DataViewDataType } from '@blocksuite/data-view';
+import type { DataViewDataType } from '@blocksuite/microsheet-data-view';
 
 import {
   arrayMove,
@@ -15,7 +15,7 @@ type Props = {
   cells: Record<string, Record<string, unknown>>;
 };
 
-export class DataViewBlockModel extends BlockModel<Props> {
+export class MicrosheetDataViewBlockModel extends BlockModel<Props> {
   constructor() {
     super();
   }
@@ -77,7 +77,7 @@ export class DataViewBlockModel extends BlockModel<Props> {
 }
 
 export const MicrosheetDataViewBlockSchema = defineBlockSchema({
-  flavour: 'affine:data-view',
+  flavour: 'affine:microsheet-data-view',
   props: (): Props => ({
     views: [],
     title: '',
@@ -91,6 +91,6 @@ export const MicrosheetDataViewBlockSchema = defineBlockSchema({
     children: ['affine:paragraph', 'affine:list'],
   },
   toModel: () => {
-    return new DataViewBlockModel();
+    return new MicrosheetDataViewBlockModel();
   },
 });

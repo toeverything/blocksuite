@@ -11,7 +11,10 @@ import { createRef, ref } from 'lit/directives/ref.js';
 import { html } from 'lit/static-html.js';
 
 import type { DataSource } from './common/data-source/base.js';
-import type { DataViewSelection, DataViewSelectionState } from './types.js';
+import type {
+  MicrosheetDataViewSelection,
+  MicrosheetDataViewSelectionState,
+} from './types.js';
 import type { DataViewExpose, DataViewProps } from './view/types.js';
 import type { SingleView } from './view-manager/single-view.js';
 
@@ -20,8 +23,8 @@ import { renderUniLit } from './utils/uni-component/index.js';
 
 type ViewProps = {
   view: SingleView;
-  selection$: ReadonlySignal<DataViewSelectionState>;
-  setSelection: (selection?: DataViewSelectionState) => void;
+  selection$: ReadonlySignal<MicrosheetDataViewSelectionState>;
+  setSelection: (selection?: MicrosheetDataViewSelectionState) => void;
   bindHotkey: DataViewProps['bindHotkey'];
   handleEvent: DataViewProps['handleEvent'];
 };
@@ -30,18 +33,9 @@ export type DataViewRendererConfig = {
   bindHotkey: DataViewProps['bindHotkey'];
   handleEvent: DataViewProps['handleEvent'];
   virtualPadding$: DataViewProps['virtualPadding$'];
-  selection$: ReadonlySignal<DataViewSelection | undefined>;
-  setSelection: (selection: DataViewSelection | undefined) => void;
+  selection$: ReadonlySignal<MicrosheetDataViewSelection | undefined>;
+  setSelection: (selection: MicrosheetDataViewSelection | undefined) => void;
   dataSource: DataSource;
-  detailPanelConfig: {
-    openDetailPanel: (
-      target: HTMLElement,
-      data: {
-        view: SingleView;
-        rowId: string;
-      }
-    ) => Promise<void>;
-  };
   headerWidget: DataViewProps['headerWidget'];
   onDrag?: DataViewProps['onDrag'];
   std: BlockStdScope;
@@ -112,22 +106,6 @@ export class DataViewRenderer extends SignalWatcher(
 
   focusFirstCell = () => {
     this.view?.expose.focusFirstCell();
-  };
-
-  openDetailPanel = (ops: {
-    view: SingleView;
-    rowId: string;
-    onClose?: () => void;
-  }) => {
-    const openDetailPanel = this.config.detailPanelConfig.openDetailPanel;
-    if (openDetailPanel) {
-      openDetailPanel(this, {
-        view: ops.view,
-        rowId: ops.rowId,
-      })
-        .catch(console.error)
-        .finally(ops.onClose);
-    }
   };
 
   get view() {

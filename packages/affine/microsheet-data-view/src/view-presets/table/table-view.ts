@@ -59,7 +59,6 @@ const styles = css`
   .affine-microsheet-block-table {
     position: relative;
     width: 100%;
-    padding-bottom: 4px;
     z-index: 1;
     /* overflow-x: scroll;
     overflow-y: hidden; */

@@ -2,7 +2,11 @@ import type { Text } from '@blocksuite/store';
 
 import { BlockModel, defineBlockSchema } from '@blocksuite/store';
 
-import type { Column, SerializedCells, ViewBasicDataType } from './types.js';
+import type {
+  MicrosheetColumn as Column,
+  MicrosheetSerializedCells as SerializedCells,
+  MicrosheetViewBasicDataType as ViewBasicDataType,
+} from './types.js';
 
 export type MicrosheetBlockProps = {
   views: ViewBasicDataType[];

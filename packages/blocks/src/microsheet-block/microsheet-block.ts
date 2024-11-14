@@ -8,7 +8,6 @@ import {
   popupTargetFromElement,
 } from '@blocksuite/affine-components/context-menu';
 import { DragIndicator } from '@blocksuite/affine-components/drag-indicator';
-import { PeekViewProvider } from '@blocksuite/affine-components/peek';
 import { toast } from '@blocksuite/affine-components/toast';
 import { NOTE_SELECTOR } from '@blocksuite/affine-shared/consts';
 import { Rect, Slot } from '@blocksuite/global/utils';
@@ -18,23 +17,20 @@ import {
   MoreHorizontalIcon,
 } from '@blocksuite/icons/lit';
 import {
-  createRecordDetail,
-  createUniComponentFromWebComponent,
   DataView,
   dataViewCommonStyle,
   type DataViewExpose,
   type DataViewProps,
-  type DataViewSelection,
-  type DataViewWidget,
-  type DataViewWidgetProps,
   defineUniComponent,
+  type MicrosheetDataViewSelection,
+  type MicrosheetDataViewWidget,
+  type MicrosheetDataViewWidgetProps,
   MicrosheetSelection,
   renderUniLit,
-  uniMap,
 } from '@blocksuite/microsheet-data-view';
 import { widgetPresets } from '@blocksuite/microsheet-data-view/widget-presets';
 import { Slice } from '@blocksuite/store';
-import { computed, signal } from '@preact/signals-core';
+import { computed, type ReadonlySignal, signal } from '@preact/signals-core';
 import { css, html, nothing, unsafeCSS } from 'lit';
 import { query } from 'lit/decorators.js';
 
@@ -49,11 +45,8 @@ import {
   type RootService,
 } from '../root-block/index.js';
 import { getDropResult } from '../root-block/widgets/drag-handle/utils.js';
-import { popSideDetail } from './components/layout.js';
 import { HostContextKey } from './context/host-context.js';
 import { MicrosheetBlockDataSource } from './data-source.js';
-import { BlockRenderer } from './detail-panel/block-renderer.js';
-import { NoteRenderer } from './detail-panel/note-renderer.js';
 import { calculateLineNum, isInCellEnd, isInCellStart } from './utils.js';
 
 export class MicrosheetBlockComponent extends CaptionedBlockComponent<
@@ -76,10 +69,6 @@ export class MicrosheetBlockComponent extends CaptionedBlockComponent<
     }
     affine-microsheet:hover .data-view-table-left-bar {
       visibility: visible;
-    }
-
-    affine-microsheet affine-paragraph .affine-block-component {
-      // margin: 0 !important;
     }
 
     .microsheet-block-selected {
@@ -143,7 +132,7 @@ export class MicrosheetBlockComponent extends CaptionedBlockComponent<
           items: [
             menu.action({
               prefix: DeleteIcon(),
-              class: 'delete-item',
+              class: { 'delete-item': true },
               name: 'Delete Microsheet',
               select: () => {
                 this.model.children.slice().forEach(block => {
@@ -196,8 +185,8 @@ export class MicrosheetBlockComponent extends CaptionedBlockComponent<
     return this.std.getService<RootService>('affine:page');
   };
 
-  headerWidget: DataViewWidget = defineUniComponent(
-    (props: DataViewWidgetProps) => {
+  headerWidget: MicrosheetDataViewWidget = defineUniComponent(
+    (props: MicrosheetDataViewWidgetProps) => {
       return html`
         <div style="margin-bottom: 16px;display:flex;flex-direction: column">
           <div style="display:flex;gap:8px;padding: 0 6px;margin-bottom: 8px;">
@@ -207,12 +196,8 @@ export class MicrosheetBlockComponent extends CaptionedBlockComponent<
             style="display:flex;align-items:center;justify-content: space-between;gap: 12px"
             class="microsheet-header-bar"
           >
-            <div style="flex:1">
-              ${renderUniLit(widgetPresets.viewBar, props)}
-            </div>
             ${renderUniLit(this.toolsWidget, props)}
           </div>
-          ${renderUniLit(widgetPresets.filterBar, props)}
         </div>
       `;
     }
@@ -257,9 +242,11 @@ export class MicrosheetBlockComponent extends CaptionedBlockComponent<
     return () => {};
   };
 
-  selectionUpdated = new Slot<DataViewSelection | undefined>();
+  selectionUpdated: Slot<MicrosheetDataViewSelection | undefined> = new Slot<
+    MicrosheetDataViewSelection | undefined
+  >();
 
-  setSelection = (selection: DataViewSelection | undefined) => {
+  setSelection = (selection: MicrosheetDataViewSelection | undefined) => {
     this.selection.setGroup(
       'note',
       selection
@@ -273,26 +260,22 @@ export class MicrosheetBlockComponent extends CaptionedBlockComponent<
     );
   };
 
-  toolsWidget: DataViewWidget = widgetPresets.createTools({
-    table: [
-      widgetPresets.tools.filter,
-      widgetPresets.tools.search,
-      widgetPresets.tools.viewOptions,
-      widgetPresets.tools.tableAddRow,
-    ],
+  toolsWidget: MicrosheetDataViewWidget = widgetPresets.createTools({
+    table: [],
   });
 
-  viewSelection$ = computed(() => {
-    const microsheetSelection = this.selection.value.find(
-      (selection): selection is MicrosheetSelection => {
-        if (selection.blockId !== this.blockId) {
-          return false;
+  viewSelection$: ReadonlySignal<MicrosheetDataViewSelection | undefined> =
+    computed(() => {
+      const microsheetSelection = this.selection.value.find(
+        (selection): selection is MicrosheetSelection => {
+          if (selection.blockId !== this.blockId) {
+            return false;
+          }
+          return selection instanceof MicrosheetSelection;
         }
-        return selection instanceof MicrosheetSelection;
-      }
-    );
-    return microsheetSelection?.viewSelection;
-  });
+      );
+      return microsheetSelection?.viewSelection;
+    });
 
   virtualPadding$ = signal(0);
 
@@ -311,6 +294,7 @@ export class MicrosheetBlockComponent extends CaptionedBlockComponent<
   get optionsConfig(): MicrosheetOptionsConfig {
     return {
       configure: (_model, options) => options,
+      // @ts-expect-error
       ...this.std.getConfig('affine:page')?.microsheetOptions,
     };
   }
@@ -492,7 +476,6 @@ export class MicrosheetBlockComponent extends CaptionedBlockComponent<
   }
 
   override renderBlock() {
-    const peekViewService = this.std.getOptional(PeekViewProvider);
     return html`
       <div
         contenteditable="false"
@@ -506,41 +489,8 @@ export class MicrosheetBlockComponent extends CaptionedBlockComponent<
           setSelection: this.setSelection,
           dataSource: this.dataSource,
           headerWidget: this.headerWidget,
-          selectionUpdated: this.selectionUpdated,
           onDrag: this.onDrag,
           std: this.std,
-          detailPanelConfig: {
-            openDetailPanel: (target, data) => {
-              const template = createRecordDetail({
-                ...data,
-                detail: {
-                  header: uniMap(
-                    createUniComponentFromWebComponent(BlockRenderer),
-                    props => ({
-                      ...props,
-                      host: this.host,
-                    })
-                  ),
-                  note: uniMap(
-                    createUniComponentFromWebComponent(NoteRenderer),
-                    props => ({
-                      ...props,
-                      model: this.model,
-                      host: this.host,
-                    })
-                  ),
-                },
-              });
-              if (peekViewService) {
-                return peekViewService.peek({
-                  target,
-                  template,
-                });
-              } else {
-                return popSideDetail(template);
-              }
-            },
-          },
         })}
       </div>
     `;

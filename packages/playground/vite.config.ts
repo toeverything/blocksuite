@@ -258,5 +258,8 @@ export default ({ mode }) => {
         },
       },
     },
+    server: {
+      port: 8001,
+    },
   });
 };

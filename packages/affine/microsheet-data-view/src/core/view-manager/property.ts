@@ -115,10 +115,6 @@ export abstract class PropertyBase<
     );
   }
 
-  get typeSet(): undefined | ((type: string) => void) {
-    return type => this.view.propertyTypeSet(this.id, type);
-  }
-
   constructor(
     public view: SingleView,
     public propertyId: string

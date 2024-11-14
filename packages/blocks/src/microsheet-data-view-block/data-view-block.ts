@@ -9,41 +9,34 @@ import {
   DeleteIcon,
   MoreHorizontalIcon,
 } from '@blocksuite/affine-components/icons';
-import { PeekViewProvider } from '@blocksuite/affine-components/peek';
 import { RANGE_SYNC_EXCLUDE_ATTR } from '@blocksuite/block-std';
 import {
-  createRecordDetail,
-  createUniComponentFromWebComponent,
-  DatabaseSelection,
   type DataSource,
   DataView,
   dataViewCommonStyle,
   type DataViewProps,
-  type DataViewSelection,
-  type DataViewWidget,
-  type DataViewWidgetProps,
   defineUniComponent,
+  type MicrosheetDataViewSelection,
+  type MicrosheetDataViewWidget,
+  type MicrosheetDataViewWidgetProps,
+  MicrosheetSelection,
   renderUniLit,
-  uniMap,
-} from '@blocksuite/data-view';
-import { widgetPresets } from '@blocksuite/data-view/widget-presets';
+} from '@blocksuite/microsheet-data-view';
+import { widgetPresets } from '@blocksuite/microsheet-data-view/widget-presets';
 import { Slice } from '@blocksuite/store';
-import { computed, signal } from '@preact/signals-core';
+import { computed, type ReadonlySignal, signal } from '@preact/signals-core';
 import { css, nothing, unsafeCSS } from 'lit';
 import { html } from 'lit/static-html.js';
 
 import type { NoteBlockComponent } from '../note-block/index.js';
-import type { DataViewBlockModel } from './data-view-model.js';
+import type { MicrosheetDataViewBlockModel } from './data-view-model.js';
 
-import { BlockRenderer } from '../database-block/detail-panel/block-renderer.js';
-import { NoteRenderer } from '../database-block/detail-panel/note-renderer.js';
 import {
   EdgelessRootBlockComponent,
   type RootService,
 } from '../root-block/index.js';
-import { BlockQueryDataSource } from './data-source.js';
 
-export class DataViewBlockComponent extends CaptionedBlockComponent<DataViewBlockModel> {
+export class MicrosheetDataViewBlockComponent extends CaptionedBlockComponent<MicrosheetDataViewBlockModel> {
   static override styles = css`
     ${unsafeCSS(dataViewCommonStyle('affine-database'))}
     affine-database {
@@ -112,7 +105,7 @@ export class DataViewBlockComponent extends CaptionedBlockComponent<DataViewBloc
             items: [
               menu.action({
                 prefix: DeleteIcon,
-                class: 'delete-item',
+                class: { 'delete-item': true },
                 name: 'Delete Database',
                 select: () => {
                   this.model.children.slice().forEach(block => {
@@ -152,8 +145,8 @@ export class DataViewBlockComponent extends CaptionedBlockComponent<DataViewBloc
     return this.std.getService<RootService>('affine:page');
   };
 
-  headerWidget: DataViewWidget = defineUniComponent(
-    (props: DataViewWidgetProps) => {
+  headerWidget: MicrosheetDataViewWidget = defineUniComponent(
+    (props: MicrosheetDataViewWidgetProps) => {
       return html`
         <div style="margin-bottom: 16px;display:flex;flex-direction: column">
           <div style="display:flex;gap:8px;padding: 0 6px;margin-bottom: 8px;">
@@ -164,35 +157,31 @@ export class DataViewBlockComponent extends CaptionedBlockComponent<DataViewBloc
             style="display:flex;align-items:center;justify-content: space-between;gap: 12px"
             class="database-header-bar"
           >
-            <div style="flex:1">
-              ${renderUniLit(widgetPresets.viewBar, props)}
-            </div>
             ${renderUniLit(this.toolsWidget, props)}
           </div>
-          ${renderUniLit(widgetPresets.filterBar, props)}
         </div>
       `;
     }
   );
 
-  selection$ = computed(() => {
-    const databaseSelection = this.selection.value.find(
-      (selection): selection is DatabaseSelection => {
+  selection$: ReadonlySignal<MicrosheetDataViewSelection> = computed(() => {
+    const microsheetSelection = this.selection.value.find(
+      (selection): selection is MicrosheetSelection => {
         if (selection.blockId !== this.blockId) {
           return false;
         }
-        return selection instanceof DatabaseSelection;
+        return selection instanceof MicrosheetSelection;
       }
     );
-    return databaseSelection?.viewSelection;
+    return microsheetSelection?.viewSelection as MicrosheetDataViewSelection;
   });
 
-  setSelection = (selection: DataViewSelection | undefined) => {
+  setSelection = (selection: MicrosheetDataViewSelection | undefined) => {
     this.selection.setGroup(
       'note',
       selection
         ? [
-            new DatabaseSelection({
+            new MicrosheetSelection({
               blockId: this.blockId,
               viewSelection: selection,
             }),
@@ -201,22 +190,12 @@ export class DataViewBlockComponent extends CaptionedBlockComponent<DataViewBloc
     );
   };
 
-  toolsWidget: DataViewWidget = widgetPresets.createTools({
-    table: [
-      widgetPresets.tools.filter,
-      widgetPresets.tools.search,
-      widgetPresets.tools.viewOptions,
-      widgetPresets.tools.tableAddRow,
-    ],
+  toolsWidget = widgetPresets.createTools({
+    table: [],
   });
 
   get dataSource(): DataSource {
-    if (!this._dataSource) {
-      this._dataSource = new BlockQueryDataSource(this.host, this.model, {
-        type: 'todo',
-      });
-    }
-    return this._dataSource;
+    return this._dataSource as DataSource;
   }
 
   override get topContenteditableElement() {
@@ -247,7 +226,6 @@ export class DataViewBlockComponent extends CaptionedBlockComponent<DataViewBloc
   }
 
   override renderBlock() {
-    const peekViewService = this.std.getOptional(PeekViewProvider);
     return html`
       <div contenteditable="false" style="position: relative">
         ${this.dataView.render({
@@ -259,35 +237,6 @@ export class DataViewBlockComponent extends CaptionedBlockComponent<DataViewBloc
           dataSource: this.dataSource,
           headerWidget: this.headerWidget,
           std: this.std,
-          detailPanelConfig: {
-            openDetailPanel: (target, data) => {
-              if (peekViewService) {
-                const template = createRecordDetail({
-                  ...data,
-                  detail: {
-                    header: uniMap(
-                      createUniComponentFromWebComponent(BlockRenderer),
-                      props => ({
-                        ...props,
-                        host: this.host,
-                      })
-                    ),
-                    note: uniMap(
-                      createUniComponentFromWebComponent(NoteRenderer),
-                      props => ({
-                        ...props,
-                        model: this.model,
-                        host: this.host,
-                      })
-                    ),
-                  },
-                });
-                return peekViewService.peek({ target, template });
-              } else {
-                return Promise.resolve();
-              }
-            },
-          },
         })}
       </div>
     `;
@@ -296,6 +245,6 @@ export class DataViewBlockComponent extends CaptionedBlockComponent<DataViewBloc
 
 declare global {
   interface HTMLElementTagNameMap {
-    'affine-data-view': DataViewBlockComponent;
+    'affine-microsheet-data-view': MicrosheetDataViewBlockComponent;
   }
 }

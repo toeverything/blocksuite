@@ -19,7 +19,6 @@ import { html } from 'lit/static-html.js';
 
 import type { TableColumn, TableSingleView } from '../table-view-manager.js';
 
-import { renderUniLit } from '../../../core/index.js';
 import { startDrag } from '../../../core/utils/drag.js';
 import { autoScrollOnBoundary } from '../../../core/utils/frame-loop.js';
 import { getResultInRange } from '../../../core/utils/utils.js';
@@ -50,30 +49,6 @@ export class MicrosheetHeaderColumn extends SignalWatcher(
       return;
     }
     this.popMenu();
-  };
-
-  private _clickTypeIcon = (event: MouseEvent) => {
-    if (this.tableViewManager.readonly$.value) {
-      return;
-    }
-    if (this.column.type$.value === 'title') {
-      return;
-    }
-    event.stopPropagation();
-    popMenu(popupTargetFromElement(this), {
-      options: {
-        items: this.tableViewManager.propertyMetas.map(config => {
-          return menu.action({
-            name: config.config.name,
-            isSelected: config.type === this.column.type$.value,
-            prefix: renderUniLit(this.tableViewManager.IconGet(config.type)),
-            select: () => {
-              this.column.typeSet?.(config.type);
-            },
-          });
-        }),
-      },
-    });
   };
 
   private _columnsOffset = (header: Element, _scale: number) => {
@@ -315,7 +290,7 @@ export class MicrosheetHeaderColumn extends SignalWatcher(
                 select: () => {
                   this.column.delete?.();
                 },
-                class: 'delete-item',
+                class: { 'delete-item': true },
               }),
             ],
           }),

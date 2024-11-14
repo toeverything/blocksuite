@@ -3,9 +3,8 @@ import {
   popFilterableSimpleMenu,
   popupTargetFromElement,
 } from '@blocksuite/affine-components/context-menu';
-import { ShadowlessElement } from '@blocksuite/block-std';
+import { BlockComponent, ShadowlessElement } from '@blocksuite/block-std';
 import { SignalWatcher, WithDisposable } from '@blocksuite/global/utils';
-import { PlusIcon } from '@blocksuite/icons/lit';
 import { css, html, type PropertyValues } from 'lit';
 import { property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
@@ -60,24 +59,6 @@ export class TableGroup extends SignalWatcher(
   WithDisposable(ShadowlessElement)
 ) {
   static override styles = styles;
-
-  private clickAddRow = () => {
-    this.view.rowAdd('end', this.group?.key);
-    requestAnimationFrame(() => {
-      const selectionController = this.viewEle.selectionController;
-      const index = this.view.properties$.value.findIndex(
-        v => v.type$.value === 'title'
-      );
-      selectionController.selection = TableAreaSelection.create({
-        groupKey: this.group?.key,
-        focus: {
-          rowIndex: this.rows.length - 1,
-          columnIndex: index,
-        },
-        isEditing: true,
-      });
-    });
-  };
 
   private clickAddRowInStart = () => {
     this.view.rowAdd('start', this.group?.key);
@@ -164,44 +145,6 @@ export class TableGroup extends SignalWatcher(
         )}
       </div>
     `;
-    return html`
-      <affine-microsheet-column-header
-        .renderGroupHeader="${this.renderGroupHeader}"
-        .tableViewManager="${this.view}"
-      ></affine-microsheet-column-header>
-      <div class="affine-microsheet-block-rows">
-        ${repeat(
-          ids,
-          id => id,
-          (id, idx) => {
-            return html`<microsheet-data-view-table-row
-              data-row-index="${idx}"
-              data-row-id="${id}"
-              .dataViewEle="${this.dataViewEle}"
-              .view="${this.view}"
-              .rowId="${id}"
-              .rowIndex="${idx}"
-            ></microsheet-data-view-table-row>`;
-          }
-        )}
-      </div>
-      ${this.view.readonly$.value
-        ? null
-        : html` <div
-            class="microsheet-data-view-table-group-add-row dv-hover"
-            @click="${this.clickAddRow}"
-          >
-            <div
-              class="microsheet-data-view-table-group-add-row-button dv-icon-16"
-              data-test-id="affine-microsheet-add-row-button"
-              role="button"
-            >
-              ${PlusIcon()}<span>New Record</span>
-            </div>
-          </div>`}
-      <affine-microsheet-column-stats .view="${this.view}" .group=${this.group}>
-      </affine-microsheet-column-stats>
-    `;
   }
 
   override render() {
@@ -211,7 +154,9 @@ export class TableGroup extends SignalWatcher(
   protected override updated(_changedProperties: PropertyValues) {
     super.updated(_changedProperties);
     this.querySelectorAll('microsheet-data-view-table-row').forEach(ele => {
-      ele.requestUpdate();
+      if (ele instanceof BlockComponent) {
+        ele.requestUpdate();
+      }
     });
   }
 

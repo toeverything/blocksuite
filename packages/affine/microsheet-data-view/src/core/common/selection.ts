@@ -1,7 +1,10 @@
 import { BaseSelection, SelectionExtension } from '@blocksuite/block-std';
 import { z } from 'zod';
 
-import type { DataViewSelection, GetDataViewSelection } from '../types.js';
+import type {
+  GetMicrosheetDataViewSelection,
+  MicrosheetDataViewSelection,
+} from '../types.js';
 
 const TableViewSelectionSchema = z.union([
   z.object({
@@ -34,7 +37,7 @@ const TableViewSelectionSchema = z.union([
 
 const MicrosheetSelectionSchema = z.object({
   blockId: z.string(),
-  viewSelection: z.union([TableViewSelectionSchema]),
+  viewSelection: TableViewSelectionSchema,
 });
 
 export class MicrosheetSelection extends BaseSelection {
@@ -42,7 +45,7 @@ export class MicrosheetSelection extends BaseSelection {
 
   static override type = 'microsheet';
 
-  readonly viewSelection: DataViewSelection;
+  readonly viewSelection: MicrosheetDataViewSelection;
 
   get viewId() {
     return this.viewSelection.viewId;
@@ -53,7 +56,7 @@ export class MicrosheetSelection extends BaseSelection {
     viewSelection,
   }: {
     blockId: string;
-    viewSelection: DataViewSelection;
+    viewSelection: MicrosheetDataViewSelection;
   }) {
     super({
       blockId,
@@ -66,7 +69,7 @@ export class MicrosheetSelection extends BaseSelection {
     MicrosheetSelectionSchema.parse(json);
     return new MicrosheetSelection({
       blockId: json.blockId as string,
-      viewSelection: json.viewSelection as DataViewSelection,
+      viewSelection: json.viewSelection as MicrosheetDataViewSelection,
     });
   }
 
@@ -77,11 +80,11 @@ export class MicrosheetSelection extends BaseSelection {
     return this.blockId === other.blockId;
   }
 
-  getSelection<T extends DataViewSelection['type']>(
+  getSelection<T extends MicrosheetDataViewSelection['type']>(
     type: T
-  ): GetDataViewSelection<T> | undefined {
+  ): GetMicrosheetDataViewSelection<T> | undefined {
     return this.viewSelection.type === type
-      ? (this.viewSelection as GetDataViewSelection<T>)
+      ? (this.viewSelection as GetMicrosheetDataViewSelection<T>)
       : undefined;
   }
 

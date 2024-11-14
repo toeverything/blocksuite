@@ -6,12 +6,15 @@ import {
   insertPositionToIndex,
   type InsertToPosition,
 } from '@blocksuite/affine-shared/utils';
-import { DataSourceBase, type PropertyMetaConfig } from '@blocksuite/data-view';
-import { propertyPresets } from '@blocksuite/data-view/property-presets';
 import { assertExists, Slot } from '@blocksuite/global/utils';
+import {
+  DataSourceBase,
+  type PropertyMetaConfig,
+} from '@blocksuite/microsheet-data-view';
+import { propertyPresets } from '@blocksuite/microsheet-data-view/property-presets';
 
 import type { BlockMeta } from './block-meta/base.js';
-import type { DataViewBlockModel } from './data-view-model.js';
+import type { MicrosheetDataViewBlockModel } from './data-view-model.js';
 
 import {
   databaseBlockAllPropertyMap,
@@ -64,7 +67,7 @@ export class BlockQueryDataSource extends DataSourceBase {
 
   constructor(
     private host: EditorHost,
-    private block: DataViewBlockModel,
+    private block: MicrosheetDataViewBlockModel,
     config: BlockQueryDataSourceConfig
   ) {
     super();
@@ -108,7 +111,12 @@ export class BlockQueryDataSource extends DataSourceBase {
   }
 
   cellRefGet(rowId: string, propertyId: string): string {
-    return this.getProperty(propertyId)?.get(this.block.model).ref ?? '';
+    const block = this.blockMap.get(rowId);
+    if (block) {
+      // @ts-expect-error
+      return this.getProperty(propertyId)?.get(block.model)?.ref ?? '';
+    }
+    return '';
   }
 
   cellValueChange(rowId: string, propertyId: string, value: unknown): void {
@@ -168,7 +176,7 @@ export class BlockQueryDataSource extends DataSourceBase {
     const doc = this.block.doc;
     doc.captureSync();
     const column = databaseBlockAllPropertyMap[
-      type ?? propertyPresets.multiSelectPropertyConfig.type
+      type ?? propertyPresets.textPropertyConfig.type
     ].create(this.newColumnName());
 
     const id = doc.generateBlockId();

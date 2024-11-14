@@ -1,7 +1,3 @@
 import type { BlockMeta } from './base.js';
 
-import { todoMeta } from './todo.js';
-
-export const blockMetaMap = {
-  todo: todoMeta,
-} satisfies Record<string, BlockMeta>;
+export const blockMetaMap = {} satisfies Record<string, BlockMeta>;

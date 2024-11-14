@@ -9,17 +9,17 @@ import type { ReadonlySignal } from '@preact/signals-core';
 
 import type { DataSource } from '../common/index.js';
 import type { DataViewRenderer } from '../data-view.js';
-import type { DataViewSelection } from '../types.js';
+import type { MicrosheetDataViewSelection } from '../types.js';
 import type { SingleView } from '../view-manager/index.js';
-import type { DataViewWidget } from '../widget/index.js';
+import type { MicrosheetDataViewWidget } from '../widget/index.js';
 
 export interface DataViewProps<
   T extends SingleView = SingleView,
-  Selection extends DataViewSelection = DataViewSelection,
+  Selection extends MicrosheetDataViewSelection = MicrosheetDataViewSelection,
 > {
   dataViewEle: DataViewRenderer;
 
-  headerWidget?: DataViewWidget;
+  headerWidget?: MicrosheetDataViewWidget;
 
   view: T;
   dataSource: DataSource;
@@ -42,7 +42,7 @@ export interface DataViewProps<
 export interface DataViewExpose {
   addRow?(position: InsertToPosition | number): void;
 
-  getSelection?(): DataViewSelection | undefined;
+  getSelection?(): MicrosheetDataViewSelection | undefined;
 
   focusFirstCell(): void;
 

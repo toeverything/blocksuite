@@ -4,8 +4,6 @@ import { computed, type ReadonlySignal } from '@preact/signals-core';
 
 import type { TType } from '../../logical/index.js';
 import type { PropertyMetaConfig } from '../../property/property-config.js';
-import type { MicrosheetFlags } from '../../types.js';
-import type { ViewConvertConfig } from '../../view/convert.js';
 import type { DataViewDataType, ViewMeta } from '../../view/data-view.js';
 import type { ViewManager } from '../../view-manager/view-manager.js';
 import type { DataViewContextKey } from './context.js';
@@ -13,7 +11,6 @@ import type { DataViewContextKey } from './context.js';
 export interface DataSource {
   readonly$: ReadonlySignal<boolean>;
   properties$: ReadonlySignal<string[]>;
-  featureFlags$: ReadonlySignal<MicrosheetFlags>;
 
   cellValueGet(rowId: string, propertyId: string): unknown;
   cellRefGet(rowId: string, propertyId: string): unknown;
@@ -36,7 +33,6 @@ export interface DataSource {
 
   propertyTypeGet(propertyId: string): string | undefined;
   propertyTypeGet$(propertyId: string): ReadonlySignal<string | undefined>;
-  propertyTypeSet(propertyId: string, type: string): void;
 
   propertyDataGet(propertyId: string): Record<string, unknown>;
   propertyDataGet$(
@@ -57,7 +53,6 @@ export interface DataSource {
 
   contextGet<T>(key: DataViewContextKey<T>): T;
 
-  viewConverts: ViewConvertConfig[];
   viewManager: ViewManager;
   viewMetas: ViewMeta[];
   viewDataList$: ReadonlySignal<DataViewDataType[]>;
@@ -84,8 +79,6 @@ export interface DataSource {
 export abstract class DataSourceBase implements DataSource {
   context = new Map<symbol, unknown>();
 
-  abstract featureFlags$: ReadonlySignal<MicrosheetFlags>;
-
   abstract properties$: ReadonlySignal<string[]>;
 
   abstract propertyMetas: PropertyMetaConfig[];
@@ -94,13 +87,13 @@ export abstract class DataSourceBase implements DataSource {
 
   abstract rows$: ReadonlySignal<string[]>;
 
-  abstract viewConverts: ViewConvertConfig[];
-
   abstract viewDataList$: ReadonlySignal<DataViewDataType[]>;
 
   abstract viewManager: ViewManager;
 
   abstract viewMetas: ViewMeta[];
+
+  abstract cellRefGet(rowId: string, propertyId: string): unknown;
 
   abstract cellValueChange(
     rowId: string,
@@ -182,8 +175,6 @@ export abstract class DataSourceBase implements DataSource {
   propertyTypeGet$(propertyId: string): ReadonlySignal<string | undefined> {
     return computed(() => this.propertyTypeGet(propertyId));
   }
-
-  abstract propertyTypeSet(propertyId: string, type: string): void;
 
   abstract rowAdd(InsertToPosition: InsertToPosition | number): string;
 

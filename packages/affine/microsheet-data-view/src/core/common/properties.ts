@@ -207,7 +207,7 @@ export class DataViewPropertiesSettingView extends SignalWatcher(
 
 declare global {
   interface HTMLElementTagNameMap {
-    'data-view-properties-setting': DataViewPropertiesSettingView;
+    'microsheet-data-view-properties-setting': DataViewPropertiesSettingView;
   }
 }
 

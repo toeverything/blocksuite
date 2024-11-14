@@ -1,4 +1,4 @@
-import type { BlockModel, Doc } from '@blocksuite/store';
+import type { Doc } from '@blocksuite/store';
 
 import {
   type MicrosheetBlockModel,
@@ -36,12 +36,7 @@ export class MicrosheetBlockService extends BlockService {
 
   viewPresets = viewPresets;
 
-  initMicrosheetBlock(
-    doc: Doc,
-    model: BlockModel,
-    microsheetId: string,
-    viewType: string
-  ) {
+  initMicrosheetBlock(doc: Doc, microsheetId: string, viewType: string) {
     const blockModel = doc.getBlock(microsheetId)?.model as
       | MicrosheetBlockModel
       | undefined;

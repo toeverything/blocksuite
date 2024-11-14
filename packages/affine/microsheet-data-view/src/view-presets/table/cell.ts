@@ -12,15 +12,11 @@ import { css, html, nothing } from 'lit';
 import { property, state } from 'lit/decorators.js';
 import { createRef } from 'lit/directives/ref.js';
 
-import type {
-  CellRenderProps,
-  DataViewCellLifeCycle,
-} from '../../core/property/index.js';
+import type { DataViewCellLifeCycle } from '../../core/property/index.js';
 import type { SingleView } from '../../core/view-manager/single-view.js';
+import type { TableGroup } from './group.js';
 import type { TableColumn } from './table-view-manager.js';
 import type { TableViewSelectionWithType } from './types.js';
-
-import { renderUniLit } from '../../core/index.js';
 
 export class MicrosheetCellContainer extends SignalWatcher(
   WithDisposable(ShadowlessElement)
@@ -57,31 +53,12 @@ export class MicrosheetCellContainer extends SignalWatcher(
     return this.column.cellGet(this.rowId);
   });
 
-  selectCurrentCell = (editing: boolean, focusTo?: 'start' | 'end') => {
+  selectCurrentCell = (focusTo?: 'start' | 'end') => {
     if (this.view.readonly$.value) {
       return;
     }
     const selectionView = this.selectionView;
     if (selectionView) {
-      // if (selection && this.isSelected(selection) && editing) {
-      //   selectionView.selection = TableAreaSelection.create({
-      //     groupKey: this.groupKey,
-      //     focus: {
-      //       rowIndex: this.rowIndex,
-      //       columnIndex: this.columnIndex,
-      //     },
-      //     isEditing: true,
-      //   });
-      // } else {
-      //   selectionView.selection = TableAreaSelection.create({
-      //     groupKey: this.groupKey,
-      //     focus: {
-      //       rowIndex: this.rowIndex,
-      //       columnIndex: this.columnIndex,
-      //     },
-      //     isEditing: false,
-      //   });
-      // }
       if (selectionView) {
         this.selectionView.focus = {
           rowIndex: this.rowIndex,
@@ -105,7 +82,7 @@ export class MicrosheetCellContainer extends SignalWatcher(
         }
       };
 
-      if (this.children.length === 0) {
+      if (this.refModel.children.length === 0) {
         this.std.doc.addBlock(
           'affine:paragraph',
           {
@@ -129,11 +106,9 @@ export class MicrosheetCellContainer extends SignalWatcher(
   }
 
   private get groupKey() {
-    return this.closest('affine-microsheet-data-view-table-group')?.group?.key;
-  }
-
-  private get readonly() {
-    return this.column.readonly$.value;
+    return (
+      this.closest('affine-microsheet-data-view-table-group') as TableGroup
+    )?.group?.key;
   }
 
   get refModel() {
@@ -154,16 +129,18 @@ export class MicrosheetCellContainer extends SignalWatcher(
 
   override connectedCallback() {
     super.connectedCallback();
-    this._disposables.addFromEvent(this, 'click', e => {
+    this._disposables.addFromEvent(this, 'click', (e: UIEvent) => {
       if (!this.isEditing) {
         if (
           e.target &&
+          e.target instanceof HTMLElement &&
           e.target.tagName === 'AFFINE-MICROSHEET-CELL-CONTAINER'
         ) {
-          this.selectCurrentCell(!this.column.readonly$.value, 'end');
+          this.selectCurrentCell('end');
         } else {
-          this.selectCurrentCell(!this.column.readonly$.value);
+          this.selectCurrentCell();
         }
+        // this.selectCurrentCell();
       }
     });
   }
@@ -186,24 +163,6 @@ export class MicrosheetCellContainer extends SignalWatcher(
 
     assertExists(this.refModel);
     return html`<affine-cell data-block-id=${this.refModel.id}></affine-cell>`;
-    const renderer = this.column.renderer$.value;
-    if (!renderer) {
-      return;
-    }
-    const { edit, view } = renderer;
-    const uni = !this.readonly && this.isEditing && edit != null ? edit : view;
-    const props: CellRenderProps = {
-      cell: this.cell$.value,
-      isEditing: this.isEditing,
-      selectCurrentCell: this.selectCurrentCell,
-    };
-
-    return renderUniLit(uni, props, {
-      ref: this._cell,
-      style: {
-        display: 'contents',
-      },
-    });
   }
 
   @property({ attribute: false })

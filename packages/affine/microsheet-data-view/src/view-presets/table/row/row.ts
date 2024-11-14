@@ -20,7 +20,6 @@ import { html } from 'lit/static-html.js';
 import type { DataViewRenderer } from '../../../core/data-view.js';
 import type { TableSingleView } from '../table-view-manager.js';
 
-import { openDetail, popRowMenu } from '../components/menu.js';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../consts.js';
 import { TableRowSelection, type TableViewSelection } from '../types.js';
 
@@ -198,20 +197,12 @@ export class TableRow extends SignalWatcher(WithDisposable(ShadowlessElement)) {
       return;
     }
     e.preventDefault();
-    const ele = e.target as HTMLElement;
-    const cell = ele.closest('affine-microsheet-cell-container');
     const row = { id: this.rowId, groupKey: this.groupKey };
     if (!TableRowSelection.includes(selection.selection, row)) {
       selection.selection = TableRowSelection.create({
         rows: [row],
       });
     }
-    const target =
-      cell ??
-      (e.target as HTMLElement).closest('.microsheet-cell') ?? // for last add btn cell
-      (e.target as HTMLElement);
-
-    popRowMenu(this.dataViewEle, popupTargetFromElement(target), selection);
   };
 
   setSelection = (selection?: TableViewSelection) => {
@@ -243,7 +234,7 @@ export class TableRow extends SignalWatcher(WithDisposable(ShadowlessElement)) {
                     selection.deleteRow(this.rowId);
                   }
                 },
-                class: 'delete-item',
+                class: { 'delete-item': true },
               }),
             ],
           }),
@@ -304,23 +295,16 @@ export class TableRow extends SignalWatcher(WithDisposable(ShadowlessElement)) {
                 rows: [{ id: this.rowId, groupKey: this.groupKey }],
               })
             );
-            openDetail(this.dataViewEle, this.rowId, this.selectionController);
           };
-          const openMenu = (e: MouseEvent) => {
+          const openMenu = () => {
             if (!this.selectionController) {
               return;
             }
-            const ele = e.currentTarget as HTMLElement;
             const row = { id: this.rowId, groupKey: this.groupKey };
             this.setSelection(
               TableRowSelection.create({
                 rows: [row],
               })
-            );
-            popRowMenu(
-              this.dataViewEle,
-              popupTargetFromElement(ele),
-              this.selectionController
             );
           };
           return html`
@@ -341,6 +325,7 @@ export class TableRow extends SignalWatcher(WithDisposable(ShadowlessElement)) {
                 .columnIndex="${i}"
                 data-column-index="${i}"
                 .std="${this.std}"
+                contenteditable="${true}"
               >
               </affine-microsheet-cell-container>
             </div>
@@ -382,6 +367,6 @@ export class TableRow extends SignalWatcher(WithDisposable(ShadowlessElement)) {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'data-view-table-row': TableRow;
+    'microsheet-data-view-table-row': TableRow;
   }
 }

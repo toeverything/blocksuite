@@ -1,17 +1,10 @@
-import type { PropertyMetaConfig } from '@blocksuite/data-view';
+import type { PropertyMetaConfig } from '@blocksuite/microsheet-data-view';
 
-import { propertyPresets } from '@blocksuite/data-view/property-presets';
+import { propertyPresets } from '@blocksuite/microsheet-data-view/property-presets';
 
 import { richTextColumnConfig } from '../../database-block/properties/rich-text/cell-renderer.js';
 
-export const queryBlockColumns = [
-  propertyPresets.datePropertyConfig,
-  propertyPresets.numberPropertyConfig,
-  propertyPresets.progressPropertyConfig,
-  propertyPresets.selectPropertyConfig,
-  propertyPresets.multiSelectPropertyConfig,
-  propertyPresets.checkboxPropertyConfig,
-];
+export const queryBlockColumns = [propertyPresets.textPropertyConfig];
 export const queryBlockHiddenColumns = [richTextColumnConfig];
 const queryBlockAllColumns = [...queryBlockColumns, ...queryBlockHiddenColumns];
 export const queryBlockAllColumnMap = Object.fromEntries(

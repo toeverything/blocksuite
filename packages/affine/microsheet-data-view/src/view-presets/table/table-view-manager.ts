@@ -8,13 +8,11 @@ import type { ViewManager } from '../../core/view-manager/view-manager.js';
 import type { TableViewData } from './define.js';
 import type { StatCalcOpType } from './types.js';
 
-import { emptyFilterGroup, type FilterGroup } from '../../core/common/ast.js';
 import { defaultGroupBy } from '../../core/common/group-by.js';
 import {
   GroupManager,
   sortByManually,
 } from '../../core/common/group-by/helper.js';
-import { evalFilter } from '../../core/logical/eval-filter.js';
 import { PropertyBase } from '../../core/view-manager/property.js';
 import {
   type SingleView,
@@ -52,10 +50,6 @@ export class TableSingleView extends SingleViewBase<TableViewData> {
     return this.propertiesWithoutFilter$.value.filter(id => {
       return this.propertyTypeGet(id) !== 'title';
     });
-  });
-
-  filter$ = computed(() => {
-    return this.data$.value?.filter ?? emptyFilterGroup;
   });
 
   groupBy$ = computed(() => {
@@ -225,24 +219,7 @@ export class TableSingleView extends SingleViewBase<TableViewData> {
     });
   }
 
-  filterSet(filter: FilterGroup): void {
-    this.dataUpdate(() => {
-      return {
-        filter,
-      };
-    });
-  }
-
-  isShow(rowId: string): boolean {
-    if (this.filter$.value?.conditions.length) {
-      const rowMap = Object.fromEntries(
-        this.properties$.value.map(column => [
-          column.id,
-          column.cellGet(rowId).jsonValue$.value,
-        ])
-      );
-      return evalFilter(this.filter$.value, rowMap);
-    }
+  override isShow(): boolean {
     return true;
   }
 

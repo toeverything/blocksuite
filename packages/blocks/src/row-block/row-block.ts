@@ -1,12 +1,12 @@
 /// <reference types="vite/client" />
 
 import type { RowBlockModel } from '@blocksuite/affine-model';
+import type { TableSingleView } from '@blocksuite/microsheet-data-view/view-presets';
 
 import { CaptionedBlockComponent } from '@blocksuite/affine-components/caption';
 import { css, html } from 'lit';
 import { property } from 'lit/decorators.js';
 
-import type { TableSingleView } from '../microsheet-block/data-view/view/presets/table/table-view-manager.js';
 import type { RowBlockService } from './row-service.js';
 
 export class RowBlockComponent extends CaptionedBlockComponent<
@@ -50,6 +50,9 @@ export class RowBlockComponent extends CaptionedBlockComponent<
 
   @property({ attribute: false })
   accessor view!: TableSingleView;
+
+  @property({ attribute: false })
+  override accessor widgets = {};
 }
 
 declare global {

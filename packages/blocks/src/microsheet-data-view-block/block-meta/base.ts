@@ -1,5 +1,5 @@
-import type { PropertyMetaConfig } from '@blocksuite/data-view';
 import type { Disposable } from '@blocksuite/global/utils';
+import type { PropertyMetaConfig } from '@blocksuite/microsheet-data-view';
 import type { Block, BlockModel } from '@blocksuite/store';
 
 type PropertyMeta<

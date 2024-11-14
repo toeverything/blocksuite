@@ -18,6 +18,7 @@ import { DatabaseBlockSpec } from '../../database-block/database-spec.js';
 import { DividerBlockSpec } from '../../divider-block/divider-spec.js';
 import { ImageBlockSpec } from '../../image-block/image-spec.js';
 import { MicrosheetBlockSpec } from '../../microsheet-block/microsheet-spec.js';
+import { MicrosheetDataViewBlockSpec } from '../../microsheet-data-view-block/data-view-spec.js';
 import {
   EdgelessNoteBlockSpec,
   NoteBlockSpec,
@@ -41,6 +42,7 @@ export {
   ImageBlockSpec,
   ListBlockSpec,
   MicrosheetBlockSpec,
+  MicrosheetDataViewBlockSpec,
   NoteBlockSpec,
   ParagraphBlockSpec,
 };

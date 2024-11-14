@@ -565,10 +565,8 @@ export const defaultSlashMenuConfig: SlashMenuConfig = {
         if (!service) return;
         service.initMicrosheetBlock(
           rootComponent.doc,
-          model,
           id,
-          viewPresets.tableViewMeta.type,
-          false
+          viewPresets.tableViewMeta.type
         );
         tryRemoveEmptyLine(model);
       },

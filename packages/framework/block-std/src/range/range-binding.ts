@@ -169,6 +169,8 @@ export class RangeBinding {
   };
 
   private _onNativeSelectionChanged = async () => {
+    console.log(111);
+
     if (this.isComposing) return;
 
     await this.host.updateComplete;

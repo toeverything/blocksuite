@@ -2,11 +2,10 @@ import type { InsertToPosition } from '@blocksuite/affine-shared/utils';
 
 import { computed, type ReadonlySignal, signal } from '@preact/signals-core';
 
-import type { FilterGroup, Variable } from '../common/ast.js';
+import type { Variable } from '../common/ast.js';
 import type { DataViewContextKey } from '../common/data-source/context.js';
 import type { TType } from '../logical/typesystem.js';
 import type { PropertyMetaConfig } from '../property/property-config.js';
-import type { MicrosheetFlags } from '../types.js';
 import type { UniComponent } from '../utils/uni-component/index.js';
 import type { DataViewDataType, ViewMeta } from '../view/data-view.js';
 import type { Property } from './property.js';
@@ -44,12 +43,7 @@ export interface SingleView<
   readonly detailProperties$: ReadonlySignal<string[]>;
   readonly rows$: ReadonlySignal<string[]>;
 
-  readonly filter$: ReadonlySignal<FilterGroup>;
-  filterSet(filter: FilterGroup): void;
-
   readonly vars$: ReadonlySignal<Variable[]>;
-
-  readonly featureFlags$: ReadonlySignal<MicrosheetFlags>;
 
   cellValueGet(rowId: string, propertyId: string): unknown;
   cellValueSet(rowId: string, propertyId: string, value: unknown): void;
@@ -93,7 +87,6 @@ export interface SingleView<
   propertyNameSet(propertyId: string, name: string): void;
 
   propertyTypeGet(propertyId: string): string | undefined;
-  propertyTypeSet(propertyId: string, type: string): void;
 
   propertyHideGet(propertyId: string): boolean;
   propertyHideSet(propertyId: string, hide: boolean): void;
@@ -126,12 +119,6 @@ export abstract class SingleViewBase<
 
   abstract detailProperties$: ReadonlySignal<string[]>;
 
-  abstract filter$: ReadonlySignal<FilterGroup>;
-
-  filterVisible$ = computed(() => {
-    return (this.filter$.value?.conditions.length ?? 0) > 0;
-  });
-
   abstract mainProperties$: ReadonlySignal<MainProperties>;
 
   name$: ReadonlySignal<string> = computed(() => {
@@ -151,7 +138,7 @@ export abstract class SingleViewBase<
   abstract readonly$: ReadonlySignal<boolean>;
 
   rows$ = computed(() => {
-    return this.filteredRows(this.searchString.value);
+    return this.dataSource.rows$.value;
   });
 
   vars$ = computed(() => {
@@ -171,10 +158,6 @@ export abstract class SingleViewBase<
     return this.manager.dataSource;
   }
 
-  get featureFlags$() {
-    return this.dataSource.featureFlags$;
-  }
-
   get meta() {
     return this.dataSource.viewMetaGet(this.type);
   }
@@ -189,24 +172,6 @@ export abstract class SingleViewBase<
     public manager: ViewManager,
     public id: string
   ) {}
-
-  private filteredRows(searchString: string): string[] {
-    return this.dataSource.rows$.value.filter(id => {
-      if (searchString) {
-        const containsSearchString = this.propertyIds$.value.some(
-          propertyId => {
-            return this.cellStringValueGet(id, propertyId)
-              ?.toLowerCase()
-              .includes(searchString?.toLowerCase());
-          }
-        );
-        if (!containsSearchString) {
-          return false;
-        }
-      }
-      return this.isShow(id);
-    });
-  }
 
   cellGet(rowId: string, propertyId: string): Cell {
     return new CellBase(this, propertyId, rowId);
@@ -282,8 +247,6 @@ export abstract class SingleViewBase<
   duplicate(): void {
     this.manager.viewDuplicate(this.id);
   }
-
-  abstract filterSet(filter: FilterGroup): void;
 
   IconGet(type: string): UniComponent | undefined {
     return this.dataSource.propertyMetaGet(type).renderer.icon;
@@ -393,10 +356,6 @@ export abstract class SingleViewBase<
 
   propertyTypeGet(propertyId: string): string | undefined {
     return this.dataSource.propertyTypeGet(propertyId);
-  }
-
-  propertyTypeSet(propertyId: string, type: string): void {
-    this.dataSource.propertyTypeSet(propertyId, type);
   }
 
   rowAdd(insertPosition: InsertToPosition | number): string {

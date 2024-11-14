@@ -2,7 +2,6 @@ import type { CellBlockModel } from '@blocksuite/affine-model';
 import type {
   BlockSnapshot,
   DocSnapshot,
-  DocSnapshot,
   FromBlockSnapshotPayload,
   FromBlockSnapshotResult,
   FromDocSnapshotPayload,
@@ -115,6 +114,7 @@ export class MicrosheetAdapter extends BaseAdapter<string> {
   ):
     | Promise<FromSliceSnapshotResult<string>>
     | FromSliceSnapshotResult<string> {
+    // @ts-expect-error
     return payload;
   }
 
@@ -141,9 +141,13 @@ export class MicrosheetAdapter extends BaseAdapter<string> {
     );
     const snapshot: SliceSnapshot = {
       type: 'slice',
+      // @ts-expect-error
       pageVersion: payload.pageVersion,
+      // @ts-expect-error
       workspaceVersion: payload.workspaceVersion,
+      // @ts-expect-error
       workspaceId: payload.workspaceId,
+      // @ts-expect-error
       pageId: payload.pageId,
       content: [microsheetSnapshotContent.toSnapshotContent()],
     };
@@ -265,17 +269,19 @@ class MicrosheetSnapshotContent {
       const row = this.addRow();
       for (let j = 0; j < this.colCount; j++) {
         const cell = row.addCell(contentColumnIds[j]);
+        // @ts-expect-error
         cell.addChildren(this.getCellContent(i, j));
       }
     }
   }
 
   toSnapshotContent() {
+    // @ts-expect-error
     return {
       type: 'block',
       id: nanoid(),
       flavour: 'affine:microsheet',
-      version: 3,
+      version: 1,
       props: this.getProps(),
       children: this.rows.map(row => row.toSnapshotContent()),
     } as SliceSnapshot['content'][number];

@@ -6,8 +6,8 @@ import { repeat } from 'lit/directives/repeat.js';
 import type { SingleView } from '../../core/view-manager/single-view.js';
 import type { ViewManager } from '../../core/view-manager/view-manager.js';
 import type {
-  DataViewWidget,
-  DataViewWidgetProps,
+  MicrosheetDataViewWidget,
+  MicrosheetDataViewWidgetProps,
 } from '../../core/widget/types.js';
 
 import { type DataViewExpose, renderUniLit } from '../../core/index.js';
@@ -51,7 +51,7 @@ export class DataViewHeaderTools extends WidgetBase {
     const tools = this.toolsMap[this.view.type];
     return html` <div class="${classList}">
       ${repeat(tools ?? [], uni => {
-        const props: DataViewWidgetProps = {
+        const props: MicrosheetDataViewWidgetProps = {
           view: this.view,
           viewMethods: this.viewMethods,
         };
@@ -64,12 +64,12 @@ export class DataViewHeaderTools extends WidgetBase {
   accessor showToolBar = false;
 
   @property({ attribute: false })
-  accessor toolsMap!: Record<string, DataViewWidget[]>;
+  accessor toolsMap!: Record<string, MicrosheetDataViewWidget[]>;
 }
 
 declare global {
   interface HTMLElementTagNameMap {
-    'data-view-header-tools': DataViewHeaderTools;
+    'microsheet-data-view-header-tools': DataViewHeaderTools;
   }
 }
 export const renderTools = (
@@ -77,7 +77,7 @@ export const renderTools = (
   viewMethods: DataViewExpose,
   viewSource: ViewManager
 ) => {
-  return html` <data-view-header-tools
+  return html`<data-view-header-tools
     .viewMethods="${viewMethods}"
     .view="${view}"
     .viewSource="${viewSource}"

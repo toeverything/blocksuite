@@ -1,4 +1,3 @@
-import type { FilterGroup } from '../../core/common/ast.js';
 import type { GroupBy, GroupProperty, Sort } from '../../core/common/types.js';
 
 import { type BasicViewDataType, viewType } from '../../core/view/data-view.js';
@@ -14,7 +13,6 @@ export type TableViewColumn = {
 };
 type DataType = {
   columns: TableViewColumn[];
-  filter: FilterGroup;
   groupBy?: GroupBy;
   groupProperties?: GroupProperty[];
   sort?: Sort;

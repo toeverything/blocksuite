@@ -4,11 +4,11 @@ import { property } from 'lit/decorators.js';
 
 import type { DataViewExpose } from '../view/types.js';
 import type { SingleView } from '../view-manager/single-view.js';
-import type { DataViewWidgetProps } from './types.js';
+import type { MicrosheetDataViewWidgetProps } from './types.js';
 
 export class WidgetBase
   extends SignalWatcher(WithDisposable(ShadowlessElement))
-  implements DataViewWidgetProps
+  implements MicrosheetDataViewWidgetProps
 {
   get dataSource() {
     return this.view.manager.dataSource;

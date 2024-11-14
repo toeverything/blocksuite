@@ -9,7 +9,6 @@ import { assertExists } from '@blocksuite/global/utils';
 import {
   DataSourceBase,
   type DataViewDataType,
-  type MicrosheetFlags,
   type PropertyMetaConfig,
   type TType,
   type ViewManager,
@@ -24,7 +23,6 @@ import { getIcon } from './block-icons.js';
 import {
   microsheetBlockAllPropertyMap,
   microsheetBlockPropertyList,
-  microsheetPropertyConverts,
 } from './properties/index.js';
 import { titlePurePropertyConfig } from './properties/title/define.js';
 import {
@@ -40,7 +38,6 @@ import {
   getProperty,
   moveViewTo,
   updateCell,
-  updateCells,
   updateProperty,
   updateView,
 } from './utils.js';
@@ -50,15 +47,6 @@ export class MicrosheetBlockDataSource extends DataSourceBase {
   private _batch = 0;
 
   private readonly _model: MicrosheetBlockModel;
-
-  override featureFlags$: ReadonlySignal<MicrosheetFlags> = computed(() => {
-    return {
-      enable_number_formatting:
-        this.doc.awarenessStore.getFlag(
-          'enable_microsheet_number_formatting'
-        ) ?? false,
-    };
-  });
 
   properties$: ReadonlySignal<string[]> = computed(() => {
     return this._model.columns$.value.map(column => column.id);
@@ -174,7 +162,7 @@ export class MicrosheetBlockDataSource extends DataSourceBase {
       this._model,
       insertToPosition,
       microsheetBlockAllPropertyMap[
-        type ?? propertyPresets.multiSelectPropertyConfig.type
+        type ?? propertyPresets.textPropertyConfig.type
       ].create(this.newPropertyName())
     );
     applyPropertyUpdate(this._model);
@@ -274,40 +262,6 @@ export class MicrosheetBlockDataSource extends DataSourceBase {
     return (
       this._model.columns$.value.find(v => v.id === propertyId)?.type ?? ''
     );
-  }
-
-  propertyTypeSet(propertyId: string, toType: string): void {
-    const currentType = this.propertyTypeGet(propertyId);
-    const currentData = this.propertyDataGet(propertyId);
-    const rows = this.rows$.value;
-    const currentCells = rows.map(rowId =>
-      this.cellValueGet(rowId, propertyId)
-    );
-    const convertFunction = microsheetPropertyConverts.find(
-      v => v.from === currentType && v.to === toType
-    )?.convert;
-    const result = convertFunction?.(
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      currentData as any,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      currentCells as any
-    ) ?? {
-      property: microsheetBlockAllPropertyMap[toType].config.defaultData(),
-      cells: currentCells.map(() => undefined),
-    };
-    this.doc.captureSync();
-    updateProperty(this._model, propertyId, () => ({
-      type: toType,
-      data: result.property,
-    }));
-    const cells: Record<string, unknown> = {};
-    currentCells.forEach((value, i) => {
-      if (value != null || result.cells[i] != null) {
-        cells[rows[i]] = result.cells[i];
-      }
-    });
-    updateCells(this._model, propertyId, cells);
-    applyPropertyUpdate(this._model);
   }
 
   refContentDelete(rowId: string, columnId: string): void {
@@ -447,7 +401,7 @@ export const microsheetViewInitConvert = (
   addProperty(
     model,
     'end',
-    propertyPresets.multiSelectPropertyConfig.create('Tag', { options: [] })
+    propertyPresets.textPropertyConfig.create('Tag', {})
   );
   microsheetViewInitEmpty(model, viewType);
 };

@@ -44,11 +44,12 @@ export class TableClipboardController implements ReactiveController {
                 this.std.doc,
                 cellContainerModel.children
               );
+              // @ts-expect-error
               const item = await this.std.clipboard._getClipboardItem(
                 slice,
                 'BLOCKSUITE/SNAPSHOT'
               );
-              cell['cellContainerSlice'] = item;
+              cell['cellContainerSlice'] = item as string;
               if (isCut) {
                 const children = cellContainerModel.children;
                 children.forEach(b => this.std.doc.deleteBlock(b));
@@ -249,6 +250,7 @@ export class TableClipboardController implements ReactiveController {
         if (!tableSelection) return false;
 
         this._onCut(tableSelection);
+        return true;
       })
     );
 
@@ -262,12 +264,13 @@ export class TableClipboardController implements ReactiveController {
     );
   }
 }
+
 function getSelectedAreaValues(
   selection: TableViewSelection,
   table: DataViewTable
-): { ref: string; cellContainerSlice: string }[][] {
+): { ref: string; cellContainerSlice?: string }[][] {
   const view = table.props.view;
-  const rsl: { ref: string; cellContainerSlice: string }[][] = [];
+  const rsl: { ref: string; cellContainerSlice?: string }[][] = [];
   const values = getSelectedArea(selection, table);
   values?.forEach((row, index) => {
     const cells = row.cells;

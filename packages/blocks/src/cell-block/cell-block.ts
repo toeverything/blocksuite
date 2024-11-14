@@ -4,6 +4,7 @@ import type { CellBlockModel } from '@blocksuite/affine-model';
 
 import { CaptionedBlockComponent } from '@blocksuite/affine-components/caption';
 import { html } from 'lit';
+import { property } from 'lit/decorators.js';
 
 import type { CellBlockService } from './cell-service.js';
 
@@ -26,6 +27,9 @@ export class CellBlockComponent extends CaptionedBlockComponent<
   override renderBlock() {
     return html`${this.renderChildren(this.model)}`;
   }
+
+  @property({ attribute: false })
+  override accessor widgets = {};
 }
 
 declare global {
