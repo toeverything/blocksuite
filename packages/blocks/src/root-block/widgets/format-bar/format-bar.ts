@@ -45,6 +45,18 @@ import { formatBarStyle } from './styles.js';
 
 export const AFFINE_FORMAT_BAR_WIDGET = 'affine-format-bar-widget';
 
+async function nextTick() {
+  // @ts-ignore
+  if ('scheduler' in window && 'yield' in window.scheduler) {
+    // @ts-ignore
+    return window.scheduler.yield();
+  } else if (typeof requestIdleCallback !== 'undefined') {
+    return new Promise(resolve => requestIdleCallback(resolve));
+  } else {
+    return new Promise(resolve => setTimeout(resolve, 0));
+  }
+}
+
 export class AffineFormatBarWidget extends WidgetComponent {
   static override styles = formatBarStyle;
 
@@ -146,7 +158,7 @@ export class AffineFormatBarWidget extends WidgetComponent {
             }
           }
 
-          await this.host.getUpdateComplete();
+          await nextTick();
 
           if (textSelection) {
             const block = this.host.view.getBlock(textSelection.blockId);
