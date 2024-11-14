@@ -1,18 +1,14 @@
 /* eslint-disable lit/binding-positions, lit/no-invalid-html */
 
-import {
-  BlockSuiteError,
-  ErrorCode,
-  handleError,
-} from '@blocksuite/global/exceptions';
+import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 import { SignalWatcher, Slot, WithDisposable } from '@blocksuite/global/utils';
 import { Doc } from '@blocksuite/store';
 import { type BlockModel, BlockViewType } from '@blocksuite/store';
 import { createContext, provide } from '@lit/context';
-import { css, LitElement, nothing, type TemplateResult } from 'lit';
+import { css, nothing, type TemplateResult } from 'lit';
 import { property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
-import { html, type StaticValue, unsafeStatic } from 'lit/static-html.js';
+import { html, unsafeStatic } from 'lit/static-html.js';
 
 import type { CommandManager } from '../../command/index.js';
 import type { UIEventDispatcher } from '../../event/index.js';
@@ -144,43 +140,6 @@ export class EditorHost extends SignalWatcher(
     super.disconnectedCallback();
     this.std.unmount();
     this.slots.unmounted.emit();
-  }
-
-  override async getUpdateComplete(): Promise<boolean> {
-    try {
-      const result = await super.getUpdateComplete();
-      const rootModel = this.doc.root;
-      if (!rootModel) return result;
-
-      const view = this.std.getView(rootModel.flavour);
-      if (!view) return result;
-
-      const widgetViewMap = this.std.getOptional(
-        WidgetViewMapIdentifier(rootModel.flavour)
-      );
-      const widgetTags = Object.values(widgetViewMap ?? {});
-      const elementsTags: StaticValue[] = [
-        typeof view === 'function' ? view(rootModel) : view,
-        ...widgetTags,
-      ];
-      await Promise.all(
-        elementsTags.map(tag => {
-          const element = this.renderRoot.querySelector(tag._$litStatic$);
-          if (element instanceof LitElement) {
-            return element.updateComplete;
-          }
-          return;
-        })
-      );
-      return result;
-    } catch (e) {
-      if (e instanceof Error) {
-        handleError(e);
-      } else {
-        console.error(e);
-      }
-      return true;
-    }
   }
 
   override render() {
