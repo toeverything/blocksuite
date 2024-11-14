@@ -125,7 +125,7 @@ export const databasePropertyConverts = [
     (_property, cells) => {
       return {
         property: {},
-        cells: cells.map(v => new Text(v ? 'Yes' : 'No').yText),
+        cells: cells.map(v => new Text(v ? 'Yes' : 'No')),
       };
     }
   ),
@@ -139,8 +139,7 @@ export const databasePropertyConverts = [
       return {
         property: {},
         cells: cells.map(
-          arr =>
-            new Text(arr?.map(v => optionMap[v]?.value ?? '').join(',')).yText
+          arr => new Text(arr?.map(v => optionMap[v]?.value ?? '').join(','))
         ),
       };
     }
@@ -150,7 +149,7 @@ export const databasePropertyConverts = [
     richTextColumnModelConfig,
     (_property, cells) => ({
       property: {},
-      cells: cells.map(v => new Text(v?.toString()).yText),
+      cells: cells.map(v => new Text(v?.toString())),
     })
   ),
   createPropertyConvert(
@@ -158,7 +157,7 @@ export const databasePropertyConverts = [
     richTextColumnModelConfig,
     (_property, cells) => ({
       property: {},
-      cells: cells.map(v => new Text(v?.toString()).yText),
+      cells: cells.map(v => new Text(v?.toString())),
     })
   ),
   createPropertyConvert(
@@ -170,7 +169,7 @@ export const databasePropertyConverts = [
       );
       return {
         property: {},
-        cells: cells.map(v => new Text(v ? optionMap[v]?.value : '').yText),
+        cells: cells.map(v => new Text(v ? optionMap[v]?.value : '')),
       };
     }
   ),

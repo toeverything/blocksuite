@@ -3,14 +3,15 @@ import type {
   DatabaseBlockProps,
 } from '@blocksuite/affine-model';
 
-import { produce } from 'immer';
+import { produce, setAutoFreeze } from 'immer';
 
 export const updateProps = <K extends keyof DatabaseBlockProps>(
   model: DatabaseBlockModel,
   key: K,
   update: (columns: DatabaseBlockProps[K]) => void
 ) => {
-  const newData = produce(model[`${key}$`].value, update);
+  setAutoFreeze(false);
+  const newData = produce(model[`${key}$`].peek(), update);
   model.doc.transact(() => {
     update(model[key]);
   });
