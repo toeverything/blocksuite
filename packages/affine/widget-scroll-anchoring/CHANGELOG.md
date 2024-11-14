@@ -1,5 +1,42 @@
 # @blocksuite/affine-widget-scroll-anchoring
 
+## 0.17.32
+
+### Patch Changes
+
+- 7bc83ab: ## Fix
+
+  - fix: mind map text layout (#8737)
+
+- Updated dependencies [7bc83ab]
+  - @blocksuite/affine-model@0.17.32
+  - @blocksuite/affine-shared@0.17.32
+  - @blocksuite/block-std@0.17.32
+  - @blocksuite/global@0.17.32
+
+## 0.17.31
+
+### Patch Changes
+
+- 8ab2800: patch more fix
+
+  ## Fix
+
+  - fix(database): lock the group while editing (#8741)
+  - fix(inline): double click in empty line (#8740)
+  - fix(inline): triple click in v-line (#8739)
+  - fix(database): root block might not exist in AFFiNE (#8738)
+
+  ## Refactor
+
+  - refactor: mind map drag (#8716)
+
+- Updated dependencies [8ab2800]
+  - @blocksuite/affine-model@0.17.31
+  - @blocksuite/affine-shared@0.17.31
+  - @blocksuite/block-std@0.17.31
+  - @blocksuite/global@0.17.31
+
 ## 0.17.30
 
 ### Patch Changes
