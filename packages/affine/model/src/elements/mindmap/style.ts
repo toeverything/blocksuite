@@ -1,4 +1,4 @@
-import { last } from '@blocksuite/global/utils';
+import { isEqual, last } from '@blocksuite/global/utils';
 
 import type { MindmapNode } from './mindmap.js';
 
@@ -7,13 +7,15 @@ import { LineColor } from '../../consts/line.js';
 import { MindmapStyle } from '../../consts/mindmap.js';
 import { StrokeStyle } from '../../consts/note.js';
 import { ShapeFillColor } from '../../consts/shape.js';
-import { FontFamily, FontWeight } from '../../consts/text.js';
+import { FontFamily, FontWeight, TextResizing } from '../../consts/text.js';
 
 export type NodeStyle = {
   radius: number;
 
   strokeWidth: number;
   strokeColor: string;
+
+  textResizing: TextResizing;
 
   fontSize: number;
   fontFamily: string;
@@ -66,6 +68,8 @@ export class StyleOne extends MindmapStyleGetter {
   readonly root = {
     radius: 8,
 
+    textResizing: TextResizing.AUTO_WIDTH_AND_HEIGHT,
+
     strokeWidth: 4,
     strokeColor: '#84CFFF',
 
@@ -108,6 +112,8 @@ export class StyleOne extends MindmapStyleGetter {
       node: {
         radius: 8,
 
+        textResizing: TextResizing.AUTO_WIDTH_AND_HEIGHT,
+
         strokeWidth: 3,
         strokeColor: color,
 
@@ -142,6 +148,8 @@ export class StyleTwo extends MindmapStyleGetter {
 
   readonly root = {
     radius: 3,
+
+    textResizing: TextResizing.AUTO_WIDTH_AND_HEIGHT,
 
     strokeWidth: 3,
     strokeColor: '--affine-black',
@@ -187,6 +195,8 @@ export class StyleTwo extends MindmapStyleGetter {
       node: {
         radius: 3,
 
+        textResizing: TextResizing.AUTO_WIDTH_AND_HEIGHT,
+
         strokeWidth: 3,
         strokeColor: '--affine-black',
 
@@ -217,6 +227,8 @@ export class StyleThree extends MindmapStyleGetter {
 
   readonly root = {
     radius: 10,
+
+    textResizing: TextResizing.AUTO_WIDTH_AND_HEIGHT,
 
     strokeWidth: 0,
     strokeColor: 'transparent',
@@ -252,6 +264,8 @@ export class StyleThree extends MindmapStyleGetter {
     return {
       node: {
         radius: 10,
+
+        textResizing: TextResizing.AUTO_WIDTH_AND_HEIGHT,
 
         strokeWidth: 2,
         strokeColor: strokeColor,
@@ -297,6 +311,8 @@ export class StyleFour extends MindmapStyleGetter {
 
   readonly root = {
     radius: 0,
+
+    textResizing: TextResizing.AUTO_WIDTH_AND_HEIGHT,
 
     strokeWidth: 0,
     strokeColor: 'transparent',
@@ -353,7 +369,7 @@ export const mindmapStyleGetters: {
 export const applyNodeStyle = (node: MindmapNode, nodeStyle: NodeStyle) => {
   Object.entries(nodeStyle).forEach(([key, value]) => {
     // @ts-ignore
-    if (node.element[key] !== value) {
+    if (!isEqual(node.element[key], value)) {
       // @ts-ignore
       node.element[key] = value;
     }

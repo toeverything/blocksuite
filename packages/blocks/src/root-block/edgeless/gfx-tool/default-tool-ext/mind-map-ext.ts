@@ -8,6 +8,7 @@ import {
 } from '@blocksuite/affine-block-surface';
 import {
   type LayoutType,
+  type LocalConnectorElementModel,
   MindmapElementModel,
   type MindmapNode,
 } from '@blocksuite/affine-model';
@@ -70,12 +71,10 @@ export class MindMapExt extends DefaultToolExt {
             dragMindMapCtx.node
           );
 
-          dragMindMapCtx.mindmap.layout(
-            dragMindMapCtx.node,
-            true,
+          dragMindMapCtx.mindmap.layout(dragMindMapCtx.node, {
             layoutType,
-            false
-          );
+            calculateTreeBound: false,
+          });
 
           return () => {
             delete dragMindMapCtx.node.overriddenDir;
@@ -213,6 +212,44 @@ export class MindMapExt extends DefaultToolExt {
     );
   }
 
+  private _updateNodeOpacity(
+    mindmap: MindmapElementModel,
+    mindNode: MindmapNode
+  ) {
+    const OPACITY = 0.3;
+    const updatedNodes = new Set<
+      BlockSuite.SurfaceElementModel | LocalConnectorElementModel
+    >();
+    const traverse = (node: MindmapNode, parent: MindmapNode | null) => {
+      node.element.opacity = OPACITY;
+      updatedNodes.add(node.element);
+
+      if (parent) {
+        const connectorId = `#${parent.element.id}-${node.element.id}`;
+        const connector = mindmap.connectors.get(connectorId);
+
+        if (connector) {
+          connector.opacity = OPACITY;
+          updatedNodes.add(connector);
+        }
+      }
+
+      if (node.children.length) {
+        node.children.forEach(child => traverse(child, node));
+      }
+    };
+
+    const parentNode = mindmap.getParentNode(mindNode.element.id) ?? null;
+
+    traverse(mindNode, parentNode);
+
+    return () => {
+      updatedNodes.forEach(el => {
+        el.opacity = 1;
+      });
+    };
+  }
+
   override initDrag(dragState: DragState) {
     if (dragState.dragType !== DefaultModeDragType.ContentMoving) {
       return {};
@@ -220,6 +257,7 @@ export class MindMapExt extends DefaultToolExt {
 
     if (isSelectSingleMindMap(dragState.movedElements)) {
       const mindmap = dragState.movedElements[0].group as MindmapElementModel;
+      const mindmapNode = mindmap.getNode(dragState.movedElements[0].id)!;
       const mindmapBound = mindmap.elementBound;
 
       mindmapBound.x -= NODE_HORIZONTAL_SPACING;
@@ -227,10 +265,15 @@ export class MindMapExt extends DefaultToolExt {
       mindmapBound.w += NODE_HORIZONTAL_SPACING * 2;
       mindmapBound.h += NODE_VERTICAL_SPACING;
 
+      const clearOpacity = this._updateNodeOpacity(mindmap, mindmapNode);
+      const clearStash = mindmap.stashTree(mindmapNode);
       const mindMapDragCtx: DragMindMapCtx = {
         mindmap,
-        node: mindmap.getNode(dragState.movedElements[0].id)!,
-        clear: mindmap.stashTree(dragState.movedElements[0].id),
+        node: mindmapNode,
+        clear: () => {
+          clearOpacity();
+          clearStash?.();
+        },
         originalMindMapBound: mindmapBound,
       };
 

@@ -11,6 +11,7 @@ import {
   DisposableGroup,
   getBoundWithRotation,
   getPointsFromBoundWithRotation,
+  isEqual,
   linePolygonIntersects,
   PointLocation,
   polygonGetPointTangent,
@@ -291,9 +292,11 @@ export abstract class GfxPrimitiveElementModel<
     delete this[prop];
 
     if (getFieldPropsSet(this).has(prop as string)) {
-      this.surface.doc.transact(() => {
-        this.yMap.set(prop as string, value);
-      });
+      if (!isEqual(value, this.yMap.get(prop as string))) {
+        this.surface.doc.transact(() => {
+          this.yMap.set(prop as string, value);
+        });
+      }
     } else {
       console.warn('pop a prop that is not field or local:', prop);
     }
