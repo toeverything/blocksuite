@@ -12,9 +12,9 @@ import {
 } from '@blocksuite/store';
 
 import { elementsCtorMap } from './element-model/index.js';
-import { connectorMiddleware } from './middlewares/connector.js';
-import { groupRelationMiddleware } from './middlewares/group.js';
 import { SurfaceBlockTransformer } from './surface-transformer.js';
+import { connectorWatcher } from './watchers/connector.js';
+import { groupRelationWatcher } from './watchers/group.js';
 
 const migration = {
   toV4: data => {
@@ -165,11 +165,11 @@ export class SurfaceBlockModel extends BaseSurfaceModel {
   private _disposables: DisposableGroup = new DisposableGroup();
 
   override _init() {
-    [connectorMiddleware(this), groupRelationMiddleware(this)].forEach(
-      disposable => this._disposables.add(disposable)
-    );
     this._extendElement(elementsCtorMap);
     super._init();
+    [connectorWatcher(this), groupRelationWatcher(this)].forEach(disposable =>
+      this._disposables.add(disposable)
+    );
   }
 
   getConnectors(id: string) {

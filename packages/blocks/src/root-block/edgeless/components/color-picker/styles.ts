@@ -40,7 +40,7 @@ export const COLOR_PICKER_STYLE = css`
 
   nav button[active] {
     color: var(--affine-text-primary-color, #121212);
-    background: var(--affine-white);
+    background: var(--affine-background-primary-color);
     box-shadow: var(--affine-shadow-1);
     pointer-events: none;
   }
@@ -95,7 +95,7 @@ export const COLOR_PICKER_STYLE = css`
   }
   .modes .mode button[active] {
     pointer-events: none;
-    outline: 2px solid var(--affine-brand-color);
+    outline: 2px solid var(--affine-brand-color, #1e96eb);
   }
 
   .content {
@@ -255,7 +255,7 @@ export const COLOR_PICKER_STYLE = css`
     gap: 4px;
     border-radius: 8px;
     border: 1px solid var(--affine-border-color);
-    background: var(--affine-white-30);
+    background: var(--affine-background-tertiary-color);
     box-sizing: border-box;
   }
 

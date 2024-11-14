@@ -1,4 +1,6 @@
-import type { Text } from '@blocksuite/store';
+import type { RootBlockModel } from '@blocksuite/affine-model';
+import type { DeltaInsert } from '@blocksuite/inline';
+import type { BlockSnapshot, Text } from '@blocksuite/store';
 
 import {
   DefaultInlineManagerExtension,
@@ -12,14 +14,17 @@ import {
 import { BaseCellRenderer } from '@blocksuite/data-view';
 import { IS_MAC } from '@blocksuite/global/env';
 import { assertExists } from '@blocksuite/global/utils';
-import { effect } from '@preact/signals-core';
-import { css } from 'lit';
+import { LinkedPageIcon } from '@blocksuite/icons/lit';
+import { computed, effect, signal } from '@preact/signals-core';
+import { css, type TemplateResult } from 'lit';
 import { property, query } from 'lit/decorators.js';
 import { html } from 'lit/static-html.js';
 
 import type { DatabaseBlockComponent } from '../../database-block.js';
 
+import { ClipboardAdapter } from '../../../root-block/clipboard/adapter.js';
 import { HostContextKey } from '../../context/host-context.js';
+import { getSingleDocIdFromText } from '../../utils/title-doc.js';
 
 const styles = css`
   data-view-header-area-text {
@@ -83,6 +88,21 @@ const styles = css`
 abstract class BaseTextCell extends BaseCellRenderer<Text> {
   static override styles = styles;
 
+  activity = true;
+
+  docId$ = signal<string>();
+
+  isLinkedDoc$ = computed(() => false);
+
+  linkedDocTitle$ = computed(() => {
+    if (!this.docId$.value) {
+      return this.value;
+    }
+    const doc = this.host?.std.collection.getDoc(this.docId$.value);
+    const root = doc?.root as RootBlockModel;
+    return root.title;
+  });
+
   get attributeRenderer() {
     return this.inlineManager?.getRenderer();
   }
@@ -91,23 +111,20 @@ abstract class BaseTextCell extends BaseCellRenderer<Text> {
     return this.inlineManager?.getSchema();
   }
 
+  get host() {
+    return this.view.contextGet(HostContextKey);
+  }
+
   get inlineEditor() {
-    assertExists(this.richText);
-    const inlineEditor = this.richText.inlineEditor;
-    assertExists(inlineEditor);
-    return inlineEditor;
+    return this.richText.inlineEditor;
   }
 
   get inlineManager() {
-    return this.view
-      .contextGet(HostContextKey)
-      ?.std.get(DefaultInlineManagerExtension.identifier);
+    return this.host?.std.get(DefaultInlineManagerExtension.identifier);
   }
 
   get service() {
-    return this.view
-      .contextGet(HostContextKey)
-      ?.std.getService('affine:database');
+    return this.host?.std.getService('affine:database');
   }
 
   get topContenteditableElement() {
@@ -116,7 +133,36 @@ abstract class BaseTextCell extends BaseCellRenderer<Text> {
     return databaseBlock?.topContenteditableElement;
   }
 
+  override connectedCallback() {
+    super.connectedCallback();
+    const yText = this.value?.yText;
+    if (yText) {
+      const cb = () => {
+        const id = getSingleDocIdFromText(this.value);
+        this.docId$.value = id;
+      };
+      cb();
+      if (this.activity) {
+        yText.observe(cb);
+        this.disposables.add(() => {
+          yText.unobserve(cb);
+        });
+      }
+    }
+  }
+
+  protected override render(): unknown {
+    return html`${this.renderIcon()}${this.renderBlockText()}`;
+  }
+
+  abstract renderBlockText(): TemplateResult;
+
   renderIcon() {
+    if (this.docId$.value) {
+      return html` <div class="data-view-header-area-icon">
+        ${LinkedPageIcon()}
+      </div>`;
+    }
     if (!this.showIcon) {
       return;
     }
@@ -126,8 +172,10 @@ abstract class BaseTextCell extends BaseCellRenderer<Text> {
     const icon = this.view.cellValueGet(this.cell.rowId, iconColumn) as string;
     if (!icon) return;
 
-    return html`<div class="data-view-header-area-icon">${icon}</div>`;
+    return html` <div class="data-view-header-area-icon">${icon}</div>`;
   }
+
+  abstract renderLinkedDoc(): TemplateResult;
 
   @query('rich-text')
   accessor richText!: RichText;
@@ -137,17 +185,24 @@ abstract class BaseTextCell extends BaseCellRenderer<Text> {
 }
 
 export class HeaderAreaTextCell extends BaseTextCell {
-  override render() {
-    return html`${this.renderIcon()}
-      <rich-text
-        .yText=${this.value}
-        .attributesSchema=${this.attributesSchema}
-        .attributeRenderer=${this.attributeRenderer}
-        .embedChecker=${this.inlineManager?.embedChecker}
-        .markdownShortcutHandler=${this.inlineManager?.markdownShortcutHandler}
-        .readonly=${true}
-        class="data-view-header-area-rich-text"
-      ></rich-text>`;
+  override renderBlockText() {
+    return html` <rich-text
+      .yText="${this.value}"
+      .attributesSchema="${this.attributesSchema}"
+      .attributeRenderer="${this.attributeRenderer}"
+      .embedChecker="${this.inlineManager?.embedChecker}"
+      .markdownShortcutHandler="${this.inlineManager?.markdownShortcutHandler}"
+      .readonly="${true}"
+      class="data-view-header-area-rich-text"
+    ></rich-text>`;
+  }
+
+  override renderLinkedDoc(): TemplateResult {
+    return html` <rich-text
+      .yText="${this.linkedDocTitle$.value}"
+      .readonly="${true}"
+      class="data-view-header-area-rich-text"
+    ></rich-text>`;
   }
 }
 
@@ -193,11 +248,29 @@ export class HeaderAreaTextCellEditing extends BaseTextCell {
 
   private _onPaste = (e: ClipboardEvent) => {
     const inlineEditor = this.inlineEditor;
-    assertExists(inlineEditor);
-
-    const inlineRange = inlineEditor.getInlineRange();
+    const inlineRange = inlineEditor?.getInlineRange();
     if (!inlineRange) return;
-
+    if (e.clipboardData) {
+      try {
+        const getDeltas = (snapshot: BlockSnapshot): DeltaInsert[] => {
+          // @ts-ignore
+          const text = snapshot.props?.text?.delta;
+          return text
+            ? [...text, ...(snapshot.children?.flatMap(getDeltas) ?? [])]
+            : snapshot.children?.flatMap(getDeltas);
+        };
+        const snapshot = this.std?.clipboard?.readFromClipboard(
+          e.clipboardData
+        )[ClipboardAdapter.MIME];
+        const deltas = (
+          JSON.parse(snapshot).snapshot.content as BlockSnapshot[]
+        ).flatMap(getDeltas);
+        deltas.forEach(delta => this.insertDelta(delta));
+        return;
+      } catch (_e) {
+        //
+      }
+    }
     const text = e.clipboardData
       ?.getData('text/plain')
       ?.replace(/\r?\n|\r/g, '\n');
@@ -209,7 +282,7 @@ export class HeaderAreaTextCellEditing extends BaseTextCell {
       const result = std?.getOptional(ParseDocUrlProvider)?.parseDocUrl(text);
       if (result) {
         const text = ' ';
-        inlineEditor.insertText(inlineRange, text, {
+        inlineEditor?.insertText(inlineRange, text, {
           reference: {
             type: 'LinkedPage',
             pageId: result.docId,
@@ -220,31 +293,45 @@ export class HeaderAreaTextCellEditing extends BaseTextCell {
             },
           },
         });
-        inlineEditor.setInlineRange({
+        inlineEditor?.setInlineRange({
           index: inlineRange.index + text.length,
           length: 0,
         });
       } else {
-        inlineEditor.insertText(inlineRange, text, {
+        inlineEditor?.insertText(inlineRange, text, {
           link: text,
         });
-        inlineEditor.setInlineRange({
+        inlineEditor?.setInlineRange({
           index: inlineRange.index + text.length,
           length: 0,
         });
       }
     } else {
-      inlineEditor.insertText(inlineRange, text);
-      inlineEditor.setInlineRange({
+      inlineEditor?.insertText(inlineRange, text);
+      inlineEditor?.setInlineRange({
         index: inlineRange.index + text.length,
         length: 0,
       });
     }
   };
 
+  override activity = false;
+
+  insertDelta = (delta: DeltaInsert) => {
+    const inlineEditor = this.inlineEditor;
+    const range = inlineEditor?.getInlineRange();
+    if (!range || !delta.insert) {
+      return;
+    }
+    inlineEditor?.insertText(range, delta.insert, delta.attributes);
+    inlineEditor?.setInlineRange({
+      index: range.index + delta.insert.length,
+      length: 0,
+    });
+  };
+
   private get std() {
-    const host = this.view.contextGet(HostContextKey);
-    return host?.std;
+    return this.host?.std;
   }
 
   override connectedCallback() {
@@ -253,7 +340,7 @@ export class HeaderAreaTextCellEditing extends BaseTextCell {
       if (e.key === 'a' && (IS_MAC ? e.metaKey : e.ctrlKey)) {
         e.stopPropagation();
         e.preventDefault();
-        this.inlineEditor.selectAll();
+        this.inlineEditor?.selectAll();
       }
     };
     this.addEventListener('keydown', selectAll);
@@ -264,18 +351,18 @@ export class HeaderAreaTextCellEditing extends BaseTextCell {
 
   override firstUpdated(props: Map<string, unknown>) {
     super.firstUpdated(props);
-    this.disposables.addFromEvent(this.richText, 'copy', this._onCopy);
-    this.disposables.addFromEvent(this.richText, 'cut', this._onCut);
-    this.disposables.addFromEvent(this.richText, 'paste', e => {
-      this._onPaste(e);
-    });
+    if (!this.isLinkedDoc$.value) {
+      this.disposables.addFromEvent(this.richText, 'copy', this._onCopy);
+      this.disposables.addFromEvent(this.richText, 'cut', this._onCut);
+      this.disposables.addFromEvent(this.richText, 'paste', this._onPaste);
+    }
     this.richText.updateComplete
       .then(() => {
-        this.inlineEditor.focusEnd();
+        this.inlineEditor?.focusEnd();
 
         this.disposables.add(
           effect(() => {
-            const inlineRange = this.inlineEditor.inlineRange$.value;
+            const inlineRange = this.inlineEditor?.inlineRange$.value;
             if (inlineRange) {
               if (!this.isEditing) {
                 this.selectCurrentCell(true);
@@ -291,23 +378,36 @@ export class HeaderAreaTextCellEditing extends BaseTextCell {
       .catch(console.error);
   }
 
-  override render() {
-    return html`${this.renderIcon()}
-      <rich-text
-        .yText=${this.value}
-        .inlineEventSource=${this.topContenteditableElement}
-        .attributesSchema=${this.attributesSchema}
-        .attributeRenderer=${this.attributeRenderer}
-        .embedChecker=${this.inlineManager?.embedChecker}
-        .markdownShortcutHandler=${this.inlineManager?.markdownShortcutHandler}
-        .readonly=${this.readonly}
-        .enableClipboard=${false}
-        .verticalScrollContainerGetter=${() =>
-          this.topContenteditableElement?.host
-            ? getViewportElement(this.topContenteditableElement.host)
-            : null}
-        class="data-view-header-area-rich-text can-link-doc"
-      ></rich-text>`;
+  override renderBlockText() {
+    return html` <rich-text
+      .yText="${this.value}"
+      .inlineEventSource="${this.topContenteditableElement}"
+      .attributesSchema="${this.attributesSchema}"
+      .attributeRenderer="${this.attributeRenderer}"
+      .embedChecker="${this.inlineManager?.embedChecker}"
+      .markdownShortcutHandler="${this.inlineManager?.markdownShortcutHandler}"
+      .readonly="${this.readonly}"
+      .enableClipboard="${false}"
+      .verticalScrollContainerGetter="${() =>
+        this.topContenteditableElement?.host
+          ? getViewportElement(this.topContenteditableElement.host)
+          : null}"
+      class="data-view-header-area-rich-text can-link-doc"
+    ></rich-text>`;
+  }
+
+  override renderLinkedDoc(): TemplateResult {
+    return html` <rich-text
+      .yText="${this.linkedDocTitle$.value}"
+      .inlineEventSource="${this.topContenteditableElement}"
+      .readonly="${this.readonly}"
+      .enableClipboard="${true}"
+      .verticalScrollContainerGetter="${() =>
+        this.topContenteditableElement?.host
+          ? getViewportElement(this.topContenteditableElement.host)
+          : null}"
+      class="data-view-header-area-rich-text"
+    ></rich-text>`;
   }
 }
 

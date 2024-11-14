@@ -37,6 +37,7 @@ import {
 import { affineTextStyles } from '../affine-text.js';
 import { DEFAULT_DOC_NAME, REFERENCE_NODE } from '../consts.js';
 import { toggleReferencePopup } from './reference-popup.js';
+import { cloneReferenceInfo, isLinkToNode } from './utils.js';
 
 @Peekable({ action: false })
 export class AffineReference extends WithDisposable(ShadowlessElement) {
@@ -94,6 +95,7 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
     this,
     ({ abortController }) => {
       if (
+        this.config.hidePopup ||
         this.doc?.readonly ||
         this.closest('.prevent-reference-popup') ||
         !this.selfInlineRange ||
@@ -119,7 +121,7 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
       return {
         template: toggleReferencePopup(
           this,
-          this.isLinkedNode(),
+          this.isLinkToNode(),
           this.referenceInfo,
           this.inlineEditor,
           this.selfInlineRange,
@@ -166,17 +168,7 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
     const reference = this.delta.attributes?.reference;
     const id = this.doc?.id ?? '';
     if (!reference) return { pageId: id };
-
-    const { pageId, params } = reference;
-    const info: ReferenceInfo = { pageId };
-    if (!params) return info;
-
-    const { mode, blockIds, elementIds } = params;
-    info.params = {};
-    if (mode) info.params.mode = mode;
-    if (blockIds?.length) info.params.blockIds = [...blockIds];
-    if (elementIds?.length) info.params.elementIds = [...elementIds];
-    return info;
+    return cloneReferenceInfo(reference);
   }
 
   get selfInlineRange() {
@@ -235,11 +227,9 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
       .catch(console.error);
   }
 
-  // linking block/element
-  isLinkedNode() {
-    return Boolean(
-      this.referenceInfo.params && Object.keys(this.referenceInfo.params).length
-    );
+  // linking to block/element
+  isLinkToNode() {
+    return isLinkToNode(this.referenceInfo);
   }
 
   override render() {
@@ -265,7 +255,7 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
       [
         [
           'LinkedPage',
-          () => (this.isLinkedNode() ? BlockLinkIcon : FontLinkedDocIcon),
+          () => (this.isLinkToNode() ? BlockLinkIcon : FontLinkedDocIcon),
         ],
         ['Subpage', () => FontDocIcon],
       ],

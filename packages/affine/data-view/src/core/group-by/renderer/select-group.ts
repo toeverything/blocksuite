@@ -43,16 +43,17 @@ export class SelectGroupView extends BaseGroup<
     }
   `;
 
-  private _click = () => {
+  private _click = (e: MouseEvent) => {
     if (this.readonly) {
       return;
     }
+    e.stopPropagation();
     popMenu(popupTargetFromElement(this), {
       options: {
         items: [
           menu.input({
             initialValue: this.tag?.value ?? '',
-            onComplete: text => {
+            onChange: text => {
               this.updateTag({ value: text });
             },
           }),

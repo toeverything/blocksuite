@@ -156,10 +156,10 @@ export class GfxController extends LifeCycleWatcher {
     ];
     const all = options.all ?? false;
     const hitTestBound = {
-      x: x - responsePadding[1],
-      y: y - responsePadding[0],
-      w: responsePadding[1] * 2,
-      h: responsePadding[0] * 2,
+      x: x - responsePadding[0],
+      y: y - responsePadding[1],
+      w: responsePadding[0] * 2,
+      h: responsePadding[1] * 2,
     };
 
     const candidates = this.grid.search(hitTestBound);

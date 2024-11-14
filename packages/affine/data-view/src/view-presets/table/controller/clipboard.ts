@@ -1,8 +1,6 @@
 import type { UIEventStateContext } from '@blocksuite/block-std';
 import type { ReactiveController } from 'lit';
 
-import { toast } from '@blocksuite/affine-components/toast';
-
 import type { Cell } from '../../../core/view-manager/cell.js';
 import type { Row } from '../../../core/view-manager/row.js';
 import type { DataViewTable } from '../table-view.js';
@@ -50,7 +48,7 @@ export class TableClipboardController implements ReactiveController {
         this.props.view.rowDelete(deleteRows);
       }
     }
-    this.std.clipboard
+    this.clipboard
       .writeToClipboard(items => {
         return {
           ...items,
@@ -60,14 +58,12 @@ export class TableClipboardController implements ReactiveController {
       })
       .then(() => {
         if (area[0]?.row) {
-          toast(
-            this.std.host,
+          this.notification.toast(
             `${area.length} row${area.length > 1 ? 's' : ''} copied to clipboard`
           );
         } else {
           const count = area.flatMap(row => row.cells).length;
-          toast(
-            this.std.host,
+          this.notification.toast(
             `${count} cell${count > 1 ? 's' : ''} copied to clipboard`
           );
         }
@@ -94,7 +90,7 @@ export class TableClipboardController implements ReactiveController {
       return;
     }
     if (tableSelection) {
-      const json = await this.std.clipboard.readFromClipboard(clipboardData);
+      const json = await this.clipboard.readFromClipboard(clipboardData);
       const dataString = json[BLOCKSUITE_DATABASE_TABLE];
       if (!dataString) return;
       const jsonAreaData = JSON.parse(dataString) as JsonAreaData;
@@ -104,16 +100,20 @@ export class TableClipboardController implements ReactiveController {
     return true;
   };
 
+  private get clipboard() {
+    return this.props.clipboard;
+  }
+
+  private get notification() {
+    return this.props.notification;
+  }
+
   get props() {
     return this.host.props;
   }
 
   private get readonly() {
     return this.props.view.readonly$.value;
-  }
-
-  private get std() {
-    return this.props.std;
   }
 
   constructor(public host: DataViewTable) {

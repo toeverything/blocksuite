@@ -1,8 +1,12 @@
+import {
+  VirtualKeyboardController,
+  type VirtualKeyboardControllerConfig,
+} from '@blocksuite/affine-components/virtual-keyboard';
 import { PropTypes, requiredProperties } from '@blocksuite/block-std';
 import { SignalWatcher, WithDisposable } from '@blocksuite/global/utils';
 import { ArrowLeftBigIcon, KeyboardIcon } from '@blocksuite/icons/lit';
 import { batch, effect, signal } from '@preact/signals-core';
-import { html, LitElement, nothing } from 'lit';
+import { html, LitElement } from 'lit';
 import { property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -23,7 +27,6 @@ import {
   isKeyboardToolBarActionItem,
   isKeyboardToolPanelConfig,
   scrollCurrentBlockIntoView,
-  VirtualKeyboardController,
 } from './utils.js';
 
 export const AFFINE_KEYBOARD_TOOLBAR = 'affine-keyboard-toolbar';
@@ -104,8 +107,6 @@ export class AffineKeyboardToolbar extends SignalWatcher(
 
   private readonly _path$ = signal<number[]>([]);
 
-  private readonly _showToolbar$ = signal(false);
-
   private readonly _shrink$ = signal(false);
 
   private get _context(): KeyboardToolbarContext {
@@ -113,7 +114,7 @@ export class AffineKeyboardToolbar extends SignalWatcher(
       std: this.rootComponent.std,
       rootComponent: this.rootComponent,
       closeToolbar: () => {
-        this._showToolbar$.value = false;
+        this.close();
       },
       closeToolPanel: () => {
         this._closeToolPanel();
@@ -165,6 +166,13 @@ export class AffineKeyboardToolbar extends SignalWatcher(
           }
         : {}
     );
+  }
+
+  get virtualKeyboardControllerConfig(): VirtualKeyboardControllerConfig {
+    return {
+      useScreenHeight: this.config.useScreenHeight ?? false,
+      inputElement: this.rootComponent,
+    };
   }
 
   private _renderIcon(icon: KeyboardIconType) {
@@ -235,17 +243,6 @@ export class AffineKeyboardToolbar extends SignalWatcher(
   override connectedCallback() {
     super.connectedCallback();
 
-    this.disposables.addFromEvent(this.rootComponent, 'focus', () => {
-      this._showToolbar$.value = true;
-      this._shrink$.value = false;
-    });
-    this.disposables.addFromEvent(this.rootComponent, 'blur', () => {
-      this._showToolbar$.value = false;
-      this._shrink$.value = true;
-      this._currentPanelIndex$.value = -1;
-      this._path$.value = [];
-    });
-
     // prevent editor blur when click item in toolbar
     this.disposables.addFromEvent(this, 'pointerdown', e => {
       e.preventDefault();
@@ -263,9 +260,7 @@ export class AffineKeyboardToolbar extends SignalWatcher(
 
     this.disposables.add(
       effect(() => {
-        if (!this._showToolbar$.value) {
-          document.body.style.paddingBottom = '0px';
-        } else if (this._shrink$.value) {
+        if (this._shrink$.value) {
           document.body.style.paddingBottom = `${TOOLBAR_HEIGHT}px`;
         } else if (
           this._keyboardController.opened &&
@@ -280,8 +275,6 @@ export class AffineKeyboardToolbar extends SignalWatcher(
   }
 
   override render() {
-    if (!this._showToolbar$.value) return nothing;
-
     this.style.bottom =
       (this.config.useScreenHeight && this._keyboardController.opened) ||
       this._shrink$.value
@@ -301,6 +294,9 @@ export class AffineKeyboardToolbar extends SignalWatcher(
       ></affine-keyboard-tool-panel>
     `;
   }
+
+  @property({ attribute: false })
+  accessor close = () => {};
 
   @property({ attribute: false })
   accessor config!: KeyboardToolbarConfig;

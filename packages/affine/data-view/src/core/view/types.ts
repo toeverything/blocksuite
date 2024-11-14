@@ -1,6 +1,10 @@
+import type {
+  DatabaseAllViewEvents,
+  EventTraceFn,
+} from '@blocksuite/affine-shared/services';
 import type { InsertToPosition } from '@blocksuite/affine-shared/utils';
 import type {
-  BlockStdScope,
+  Clipboard,
   EventName,
   UIEventHandler,
 } from '@blocksuite/block-std';
@@ -36,10 +40,16 @@ export interface DataViewProps<
 
   onDrag?: (evt: MouseEvent, id: string) => () => void;
 
-  std: BlockStdScope;
+  clipboard: Clipboard;
+
+  notification: {
+    toast: (message: string) => void;
+  };
+
+  eventTrace: EventTraceFn<DatabaseAllViewEvents>;
 }
 
-export interface DataViewExpose {
+export interface DataViewInstance<T extends SingleView = SingleView> {
   addRow?(position: InsertToPosition | number): void;
 
   getSelection?(): DataViewSelection | undefined;
@@ -51,4 +61,10 @@ export interface DataViewExpose {
   hideIndicator?(): void;
 
   moveTo?(id: string, evt: MouseEvent): void;
+
+  view: T;
+
+  eventTrace: EventTraceFn<DatabaseAllViewEvents>;
+
+  clearSelection(): void;
 }

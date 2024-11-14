@@ -22,6 +22,8 @@ export type GroupData = {
 };
 
 export class GroupManager {
+  private preDataList: GroupData[] | undefined;
+
   config$ = computed(() => {
     const groupBy = this.groupBy$.value;
     if (!groupBy) {
@@ -99,7 +101,7 @@ export class GroupManager {
     return groupMap;
   });
 
-  groupsDataList$ = computed(() => {
+  private _groupsDataList$ = computed(() => {
     const groupMap = this.groupDataMap$.value;
     if (!groupMap) {
       return;
@@ -108,7 +110,14 @@ export class GroupManager {
     sortedGroup.forEach(key => {
       groupMap[key].rows = this.ops.sortRow(key, groupMap[key].rows);
     });
-    return sortedGroup.map(key => groupMap[key]);
+    return (this.preDataList = sortedGroup.map(key => groupMap[key]));
+  });
+
+  groupsDataList$ = computed(() => {
+    if (this.viewManager.isLocked$.value) {
+      return this.preDataList;
+    }
+    return (this.preDataList = this._groupsDataList$.value);
   });
 
   updateData = (data: NonNullable<unknown>) => {

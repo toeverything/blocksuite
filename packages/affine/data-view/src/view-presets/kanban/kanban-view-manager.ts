@@ -172,6 +172,7 @@ export class KanbanSingleView extends SingleViewBase<KanbanViewData> {
     this.dataUpdate(_view => {
       return {
         groupBy: defaultGroupBy(
+          this.dataSource,
           this.propertyMetaGet(column.type$.value),
           column.id,
           column.data$.value

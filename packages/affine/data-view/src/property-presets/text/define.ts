@@ -7,12 +7,12 @@ export const textPropertyModelConfig = textPropertyType.modelConfig<string>({
   name: 'Plain-Text',
   type: () => t.string.instance(),
   defaultData: () => ({}),
-  cellToString: data => data ?? '',
-  cellFromString: data => {
+  cellToString: ({ value }) => value ?? '',
+  cellFromString: ({ value }) => {
     return {
-      value: data,
+      value: value,
     };
   },
-  cellToJson: data => data ?? null,
-  isEmpty: data => data == null || data.length === 0,
+  cellToJson: ({ value }) => value ?? null,
+  isEmpty: ({ value }) => value == null || value.length === 0,
 });

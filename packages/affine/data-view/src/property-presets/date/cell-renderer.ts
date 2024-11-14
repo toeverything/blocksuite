@@ -88,6 +88,7 @@ export class DateCellEditing extends BaseCellRenderer<number> {
       template: () => {
         const datePicker = new DatePicker();
         datePicker.value = this.value ?? Date.now();
+        datePicker.popup = true;
         datePicker.onChange = (date: Date) => {
           this.tempValue = date;
         };

@@ -1,5 +1,3 @@
-import { createIdentifier } from '@blocksuite/global/di';
-
 export type ElementCreationSource =
   | 'shortcut'
   | 'toolbar:general'
@@ -41,21 +39,3 @@ export interface ElementCreationEvent extends TelemetryEvent {
   module?: 'toolbar' | 'canvas' | 'ai chat panel';
   control?: ElementCreationSource;
 }
-
-export interface TelemetryEventMap {
-  DocCreated: DocCreatedEvent;
-  LinkedDocCreated: TelemetryEvent;
-  SplitNote: TelemetryEvent;
-  CanvasElementAdded: ElementCreationEvent;
-}
-
-export interface TelemetryService {
-  track<T extends keyof TelemetryEventMap>(
-    eventName: T,
-    props: TelemetryEventMap[T]
-  ): void;
-}
-
-export const TelemetryProvider = createIdentifier<TelemetryService>(
-  'AffineTelemetryService'
-);

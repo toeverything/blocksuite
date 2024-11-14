@@ -15,7 +15,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 import type { DocRemoteSelectionConfig } from './config.js';
 
 import { RemoteColorManager } from '../../../root-block/remote-color-manager/remote-color-manager.js';
-import { cursorStyle, filterCoveringRects, selectionStyle } from './utils.js';
+import { cursorStyle, selectionStyle } from './utils.js';
 
 export interface SelectionRect {
   width: number;
@@ -181,60 +181,30 @@ export class AffineDocRemoteSelectionWidget extends WidgetComponent {
       selection => selection instanceof BlockSelection
     );
 
-    const container = this._container;
-    const containerRect = this._containerRect;
-    if (textSelection) {
-      const range = this.std.range.textSelectionToRange(textSelection);
+    if (!textSelection && !blockSelections.length) return [];
 
-      if (range) {
-        const nativeRects = Array.from(range.getClientRects());
-        const rectsWithoutFiltered = nativeRects
-          .map(rect => ({
-            width: rect.right - rect.left,
-            height: rect.bottom - rect.top,
-            top:
-              rect.top -
-              (containerRect?.top ?? 0) +
-              (container?.scrollTop ?? 0),
-            left:
-              rect.left -
-              (containerRect?.left ?? 0) +
-              (container?.scrollLeft ?? 0),
-          }))
-          .filter(rect => rect.width > 0 && rect.height > 0);
+    const { selectionRects } = this.std.command.exec('getSelectionRects', {
+      textSelection,
+      blockSelections,
+    });
 
-        return filterCoveringRects(rectsWithoutFiltered);
-      }
-    } else if (blockSelections.length > 0) {
-      return blockSelections.flatMap(blockSelection => {
-        const block = this.host.view.getBlock(blockSelection.blockId);
-        if (block) {
-          const rect = block.getBoundingClientRect();
+    if (!selectionRects) return [];
 
-          const transparent = this._config.blockSelectionBackgroundTransparent(
-            block.model
-          );
+    return selectionRects.map(({ blockId, ...rect }) => {
+      if (!blockId) return rect;
 
-          return {
-            width: rect.width,
-            height: rect.height,
-            top:
-              rect.top -
-              (containerRect?.top ?? 0) +
-              (container?.scrollTop ?? 0),
-            left:
-              rect.left -
-              (containerRect?.left ?? 0) +
-              (container?.scrollLeft ?? 0),
-            transparent,
-          };
-        }
+      const block = this.host.view.getBlock(blockId);
+      if (!block) return rect;
 
-        return [];
-      });
-    }
+      const isTransparent = this._config.blockSelectionBackgroundTransparent(
+        block.model
+      );
 
-    return [];
+      return {
+        ...rect,
+        transparent: isTransparent,
+      };
+    });
   }
 
   override connectedCallback() {

@@ -13,15 +13,14 @@ import {
   DeleteIcon,
   PlusIcon,
 } from '@blocksuite/icons/lit';
-import { computed, type ReadonlySignal } from '@preact/signals-core';
+import { computed } from '@preact/signals-core';
 import { css, html } from 'lit';
 import { property } from 'lit/decorators.js';
 import { keyed } from 'lit/directives/keyed.js';
 import { repeat } from 'lit/directives/repeat.js';
 
-import type { Variable } from '../../../core/expression/types.js';
 import type { SortBy } from '../../../core/sort/types.js';
-import type { SortableView } from '../../../core/sort/utils.js';
+import type { SortUtils } from '../../../core/sort/utils.js';
 
 import { renderUniLit } from '../../../core/index.js';
 import { popCreateSort } from '../../../core/sort/add-sort.js';
@@ -32,7 +31,6 @@ import {
   sortable,
 } from '../../../core/utils/wc-dnd/sort/sort-context.js';
 import { verticalListSortingStrategy } from '../../../core/utils/wc-dnd/sort/strategies/index.js';
-import { arrayMove } from '../../../core/utils/wc-dnd/utils/array-move.js';
 
 export class SortRootView extends SignalWatcher(
   WithDisposable(ShadowlessElement)
@@ -48,15 +46,14 @@ export class SortRootView extends SignalWatcher(
     .sort-item {
       display: flex;
       align-items: center;
-      transition: transform 0.2s;
     }
   `;
 
   @property({ attribute: false })
-  accessor sortList!: ReadonlySignal<SortBy[]>;
+  accessor sortUtils!: SortUtils;
 
   items$ = computed(() => {
-    return this.sortList.value.map(v => v.ref.name);
+    return this.sortUtils.sortList$.value.map(v => v.ref.name);
   });
 
   sortContext = createSortContext({
@@ -66,12 +63,10 @@ export class SortRootView extends SignalWatcher(
       onDragEnd: evt => {
         const over = evt.over;
         if (over) {
-          this.onChange(
-            arrayMove(
-              this.sortList.value,
-              this.sortList.value.findIndex(v => v.ref.name === evt.active.id),
-              this.sortList.value.findIndex(v => v.ref.name === over.id)
-            )
+          const list = this.sortUtils.sortList$.value;
+          this.sortUtils.move(
+            list.findIndex(v => v.ref.name === evt.active.id),
+            list.findIndex(v => v.ref.name === over.id)
           );
         }
       },
@@ -89,22 +84,18 @@ export class SortRootView extends SignalWatcher(
   });
 
   override render() {
-    const list = this.sortList.value;
+    const list = this.sortUtils.sortList$.value;
     return html`
       <div class="sort-root-container">
         ${repeat(list, (sort, index) => {
           const id = sort.ref.name;
-          const variable = this.vars.value.find(v => v.id === id);
+          const variable = this.sortUtils.vars$.value.find(v => v.id === id);
           let content;
           const deleteRule = () => {
-            const newList = list.slice();
-            newList.splice(index, 1);
-            this.onChange(newList);
+            this.sortUtils.remove(index);
           };
           const changeRule = (rule: SortBy) => {
-            const newList = list.slice();
-            newList.splice(index, 1, rule);
-            this.onChange(newList);
+            this.sortUtils.change(index, rule);
           };
           if (!variable) {
             content = html`
@@ -121,7 +112,7 @@ export class SortRootView extends SignalWatcher(
                 popupTargetFromElement(event.currentTarget as HTMLElement),
                 {
                   options: {
-                    items: this.vars.value.map(v => {
+                    items: this.sortUtils.vars$.value.map(v => {
                       return menu.action({
                         name: v.name,
                         prefix: renderUniLit(v.icon),
@@ -177,7 +168,7 @@ export class SortRootView extends SignalWatcher(
               <div
                 ${sortable(id)}
                 class='sort-item'
-                >
+              >
                 <div style='display: flex;align-items: center;flex:1;margin-right: 16px;'>
                   <div
                     ${dragHandler(id)}
@@ -200,12 +191,6 @@ export class SortRootView extends SignalWatcher(
       </div>
     `;
   }
-
-  @property({ attribute: false })
-  accessor onChange!: (filter: SortBy[]) => void;
-
-  @property({ attribute: false })
-  accessor vars!: ReadonlySignal<Variable[]>;
 }
 
 declare global {
@@ -217,33 +202,21 @@ declare global {
 export const popSortRoot = (
   target: PopupTarget,
   props: {
-    view: SortableView;
+    sortUtils: SortUtils;
     title?: {
       text: string;
       onBack?: () => void;
     };
   }
 ) => {
-  const sortManager = props.view.sortManager;
-  const onChange = (list: SortBy[]) => {
-    if (list.length > 0) {
-      sortManager.setSortList(list);
-    } else {
-      sortManager.setSortList([]);
-      handle.close();
-    }
-  };
-  const handle = popMenu(target, {
+  const sortUtils = props.sortUtils;
+  popMenu(target, {
     options: {
       title: props.title,
       items: [
         () => {
-          const view = props.view;
-          const manager = view.sortManager;
           return html` <sort-root-view
-            .vars="${view.vars$}"
-            .sortList="${manager.sortList$}"
-            .onChange="${onChange}"
+            .sortUtils="${sortUtils}"
           ></sort-root-view>`;
         },
         menu.action({
@@ -251,11 +224,7 @@ export const popSortRoot = (
           prefix: PlusIcon(),
           select: ele => {
             popCreateSort(popupTargetFromElement(ele), {
-              sortList: sortManager.sortList$.value,
-              vars: props.view.vars$,
-              onSelect: sort => {
-                sortManager.setSortList([...sortManager.sortList$.value, sort]);
-              },
+              sortUtils: props.sortUtils,
             });
             return false;
           },
@@ -265,7 +234,7 @@ export const popSortRoot = (
           class: { 'delete-item': true },
           prefix: DeleteIcon(),
           select: () => {
-            sortManager.setSortList([]);
+            props.sortUtils.removeAll();
           },
         }),
       ],

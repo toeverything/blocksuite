@@ -60,6 +60,7 @@ export class AttachmentEdgelessBlockComponent extends toGfxBlockComponent(
       height: `${height}px`,
       transform: `scale(${scaleX}, ${scaleY})`,
       transformOrigin: '0 0',
+      overflow: 'hidden',
     });
 
     return this.renderPageContent();

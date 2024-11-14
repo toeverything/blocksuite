@@ -1,4 +1,12 @@
 import type {
+  EmbedFigmaBlockComponent,
+  EmbedGithubBlockComponent,
+  EmbedLinkedDocBlockComponent,
+  EmbedLoomBlockComponent,
+  EmbedSyncedDocBlockComponent,
+  EmbedYoutubeBlockComponent,
+} from '@blocksuite/affine-block-embed';
+import type {
   BookmarkBlockModel,
   EmbedFigmaModel,
   EmbedGithubModel,
@@ -10,15 +18,6 @@ import type {
 } from '@blocksuite/affine-model';
 
 import {
-  type EmbedFigmaBlockComponent,
-  type EmbedGithubBlockComponent,
-  type EmbedLinkedDocBlockComponent,
-  type EmbedLoomBlockComponent,
-  type EmbedSyncedDocBlockComponent,
-  type EmbedYoutubeBlockComponent,
-  isLinkToNode,
-} from '@blocksuite/affine-block-embed';
-import {
   CaptionIcon,
   CenterPeekIcon,
   CopyIcon,
@@ -29,6 +28,7 @@ import {
   SmallArrowDownIcon,
 } from '@blocksuite/affine-components/icons';
 import { isPeekable, peek } from '@blocksuite/affine-components/peek';
+import { isLinkToNode } from '@blocksuite/affine-components/rich-text';
 import { toast } from '@blocksuite/affine-components/toast';
 import {
   type MenuItem,
@@ -536,7 +536,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
                   data-testid=${`link-to-${type}`}
                   aria-label=${ifDefined(label)}
                   ?data-selected=${this._viewType === type}
-                  ?disabled=${disabled}
+                  ?disabled=${disabled || this._viewType === type}
                   @click=${handler}
                 >
                   ${label}

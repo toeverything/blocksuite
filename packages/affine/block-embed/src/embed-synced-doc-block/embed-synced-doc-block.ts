@@ -4,6 +4,7 @@ import {
 } from '@blocksuite/affine-components/icons';
 import { Peekable } from '@blocksuite/affine-components/peek';
 import {
+  cloneReferenceInfo,
   REFERENCE_NODE,
   RefNodeSlotsProvider,
 } from '@blocksuite/affine-components/rich-text';
@@ -11,6 +12,7 @@ import {
   type DocMode,
   type EmbedSyncedDocModel,
   NoteDisplayMode,
+  type ReferenceInfo,
 } from '@blocksuite/affine-model';
 import {
   DocModeProvider,
@@ -141,11 +143,12 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockComponent<EmbedSynce
 
   protected _renderSyncedView = () => {
     const syncedDoc = this.syncedDoc;
-    const editorMode = this.syncedDocMode;
+    const editorMode = this.editorMode;
+    const isPageMode = this.isPageMode;
 
     assertExists(syncedDoc);
 
-    if (this.isPageMode) {
+    if (isPageMode) {
       this.style.width = 'calc(100% + 48px)';
       this.style.marginLeft = '-24px';
       this.style.marginRight = '-24px';
@@ -163,7 +166,7 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockComponent<EmbedSynce
     if (themeExtension?.getEdgelessTheme && this.syncedDoc?.id) {
       edgelessTheme = themeExtension.getEdgelessTheme(this.syncedDoc.id).value;
     }
-    const theme = this.isPageMode ? appTheme : edgelessTheme;
+    const theme = isPageMode ? appTheme : edgelessTheme;
     const isSelected = !!this.selected?.is('block');
 
     this.dataset.nestedEditor = '';
@@ -195,7 +198,7 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockComponent<EmbedSynce
       ]);
     };
 
-    const icon = this.isPageMode ? EmbedPageIcon : EmbedEdgelessIcon;
+    const icon = isPageMode ? EmbedPageIcon : EmbedEdgelessIcon;
 
     return this.renderEmbed(
       () => html`
@@ -212,7 +215,7 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockComponent<EmbedSynce
           ?data-scale=${undefined}
         >
           <div class="affine-embed-synced-doc-editor">
-            ${this.isPageMode && this._isEmptySyncedDoc
+            ${isPageMode && this._isEmptySyncedDoc
               ? html`
                   <div class="affine-embed-synced-doc-editor-empty">
                     <span>
@@ -247,20 +250,25 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockComponent<EmbedSynce
   });
 
   convertToCard = () => {
-    const { doc, pageId, caption } = this.model;
+    const { doc, caption } = this.model;
 
     const parent = doc.getParent(this.model);
     assertExists(parent);
     const index = parent.children.indexOf(this.model);
 
-    doc.addBlock('affine:embed-linked-doc', { pageId, caption }, parent, index);
+    doc.addBlock(
+      'affine:embed-linked-doc',
+      { caption, ...this.referenceInfo },
+      parent,
+      index
+    );
 
     this.std.selection.setGroup('note', []);
     doc.deleteBlock(this.model);
   };
 
   covertToInline = () => {
-    const { doc, pageId } = this.model;
+    const { doc } = this.model;
     const parent = doc.getParent(this.model);
     assertExists(parent);
     const index = parent.children.indexOf(this.model);
@@ -268,7 +276,10 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockComponent<EmbedSynce
     const yText = new DocCollection.Y.Text();
     yText.insert(0, REFERENCE_NODE);
     yText.format(0, REFERENCE_NODE.length, {
-      reference: { type: 'LinkedPage', pageId },
+      reference: {
+        type: 'LinkedPage',
+        ...this.referenceInfo,
+      },
     });
     const text = new doc.Text(yText);
 
@@ -326,15 +337,23 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockComponent<EmbedSynce
   }
 
   get editorMode() {
-    return this.syncedDocMode;
+    return this.linkedMode ?? this.syncedDocMode;
   }
 
   protected get isPageMode() {
-    return this.syncedDocMode === 'page';
+    return this.editorMode === 'page';
+  }
+
+  get linkedMode() {
+    return this.referenceInfo.params?.mode;
+  }
+
+  get referenceInfo(): ReferenceInfo {
+    return cloneReferenceInfo(this.model);
   }
 
   get syncedDoc() {
-    return this.syncedDocMode === 'page'
+    return this.isPageMode
       ? this.std.collection.getDoc(this.model.pageId, {
           readonly: true,
           query: this._pageFilter,
@@ -453,7 +472,7 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockComponent<EmbedSynce
       })
     );
 
-    if (this._rootService) {
+    if (this._rootService && !this.linkedMode) {
       const docMode = this._rootService.std.get(DocModeProvider);
       this.syncedDocMode = docMode.getPrimaryMode(this.model.pageId);
       this._isEmptySyncedDoc = isEmptyDoc(this.syncedDoc, this.syncedDocMode);
@@ -468,10 +487,7 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockComponent<EmbedSynce
     this.syncedDoc &&
       this.disposables.add(
         this.syncedDoc.slots.blockUpdated.on(() => {
-          this._isEmptySyncedDoc = isEmptyDoc(
-            this.syncedDoc,
-            this.syncedDocMode
-          );
+          this._isEmptySyncedDoc = isEmptyDoc(this.syncedDoc, this.editorMode);
         })
       );
   }

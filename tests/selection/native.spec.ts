@@ -63,31 +63,6 @@ import {
 } from '../utils/asserts.js';
 import { test } from '../utils/playwright.js';
 
-test('click on blank area', async ({ page }) => {
-  await enterPlaygroundRoom(page);
-  await initEmptyParagraphState(page);
-  await initThreeParagraphs(page);
-  await assertRichTexts(page, ['123', '456', '789']);
-
-  const box123 = await getRichTextBoundingBox(page, '2');
-  const inside123 = { x: box123.left, y: box123.top + 5 };
-  await page.mouse.click(inside123.x, inside123.y);
-  await waitNextFrame(page);
-  await assertRichTextInlineRange(page, 0, 0, 0);
-
-  const box456 = await getRichTextBoundingBox(page, '3');
-  const inside456 = { x: box456.left, y: box456.top + 5 };
-  await page.mouse.click(inside456.x, inside456.y);
-  await waitNextFrame(page);
-  await assertRichTextInlineRange(page, 1, 0, 0);
-
-  const box789 = await getRichTextBoundingBox(page, '4');
-  const inside789 = { x: box789.left, y: box789.bottom - 5 };
-  await page.mouse.click(inside789.x, inside789.y);
-  await waitNextFrame(page);
-  await assertRichTextInlineRange(page, 2, 0, 0);
-});
-
 test('native range delete', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
@@ -1796,4 +1771,38 @@ test('abnormal cursor jumping', async ({ page }) => {
   });
   const newRect = await image.boundingBox();
   expect(rect).toEqual(newRect);
+});
+
+test('unexpected scroll when clicking padding area', async ({ page }) => {
+  // https://github.com/toeverything/blocksuite/pull/8678
+
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusRichText(page);
+
+  await pressEnter(page, 30);
+  await pressArrowUp(page, 5);
+  await type(page, '1. aaa\nbbb');
+  await pressTab(page);
+
+  const list = page.locator('[data-block-id="34"]');
+  const listRect = await list.boundingBox();
+  assertExists(listRect);
+  await page.mouse.click(listRect.x - 30, listRect.y + 5);
+  const newListRect = await list.boundingBox();
+  // not scroll
+  expect(listRect).toEqual(newListRect);
+
+  await pressArrowUp(page, 4);
+  await type(page, '/table\n');
+  const database = page.locator('affine-database');
+  const databaseRect = await database.boundingBox();
+  assertExists(databaseRect);
+  await page.mouse.click(
+    databaseRect.x + databaseRect.width + 10,
+    databaseRect.y + 10
+  );
+  const newDatabaseRect = await database.boundingBox();
+  // not scroll
+  expect(databaseRect).toEqual(newDatabaseRect);
 });

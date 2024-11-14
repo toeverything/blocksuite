@@ -5,7 +5,7 @@ import type { SurfaceBlockModel, SurfaceMiddleware } from '../surface-model.js';
 
 import { ConnectorPathGenerator } from '../managers/connector-manager.js';
 
-export const connectorMiddleware: SurfaceMiddleware = (
+export const connectorWatcher: SurfaceMiddleware = (
   surface: SurfaceBlockModel
 ) => {
   const hasElementById = (id: string) =>

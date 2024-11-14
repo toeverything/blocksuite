@@ -75,6 +75,13 @@ const styles = css`
   affine-data-view-kanban-card:hover .card-ops {
     visibility: visible;
   }
+  affine-data-view-kanban-card:has(.active) .card-ops {
+    visibility: visible;
+  }
+
+  affine-data-view-kanban-card:has([data-editing='true']) .card-ops {
+    visibility: hidden;
+  }
 
   .card-ops {
     position: absolute;

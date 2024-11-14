@@ -339,6 +339,10 @@ export class TableSelectionController implements ReactiveController {
     };
   }
 
+  clear() {
+    this.selection = undefined;
+  }
+
   deleteRow(rowId: string) {
     this.view.rowDelete([rowId]);
     this.focusToCell('up');
@@ -628,9 +632,13 @@ export class TableSelectionController implements ReactiveController {
     });
   }
 
-  rowsToArea(
-    rows: string[]
-  ): { start: number; end: number; groupKey?: string } | undefined {
+  rowsToArea(rows: string[]):
+    | {
+        start: number;
+        end: number;
+        groupKey?: string;
+      }
+    | undefined {
     let groupKey: string | undefined = undefined;
     let minIndex: number | undefined = undefined;
     let maxIndex: number | undefined = undefined;
@@ -930,26 +938,31 @@ export class SelectionElement extends WithDisposable(ShadowlessElement) {
       position: absolute;
       pointer-events: none;
     }
+
     .area-left {
       left: 0;
       height: 100%;
       width: 1px;
     }
+
     .area-right {
       right: 0;
       height: 100%;
       width: 1px;
     }
+
     .area-top {
       top: 0;
       width: 100%;
       height: 1px;
     }
+
     .area-bottom {
       bottom: 0;
       width: 100%;
       height: 1px;
     }
+
     @media print {
       data-view-table-selection {
         display: none;

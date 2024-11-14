@@ -1,5 +1,147 @@
 # @blocksuite/affine
 
+## 0.17.32
+
+### Patch Changes
+
+- 7bc83ab: ## Fix
+
+  - fix: mind map text layout (#8737)
+
+- Updated dependencies [7bc83ab]
+  - @blocksuite/blocks@0.17.32
+  - @blocksuite/block-std@0.17.32
+  - @blocksuite/global@0.17.32
+  - @blocksuite/inline@0.17.32
+  - @blocksuite/store@0.17.32
+  - @blocksuite/presets@0.17.32
+
+## 0.17.31
+
+### Patch Changes
+
+- 8ab2800: patch more fix
+
+  ## Fix
+
+  - fix(database): lock the group while editing (#8741)
+  - fix(inline): double click in empty line (#8740)
+  - fix(inline): triple click in v-line (#8739)
+  - fix(database): root block might not exist in AFFiNE (#8738)
+
+  ## Refactor
+
+  - refactor: mind map drag (#8716)
+
+- Updated dependencies [8ab2800]
+  - @blocksuite/blocks@0.17.31
+  - @blocksuite/block-std@0.17.31
+  - @blocksuite/global@0.17.31
+  - @blocksuite/inline@0.17.31
+  - @blocksuite/store@0.17.31
+  - @blocksuite/presets@0.17.31
+
+## 0.17.30
+
+### Patch Changes
+
+- 5c327c8: ## Fix
+
+  - fix(database): title linked-doc convert logic (#8734)
+  - fix(blocks): pdf embed view overflow (#8733)
+
+- Updated dependencies [5c327c8]
+  - @blocksuite/blocks@0.17.30
+  - @blocksuite/block-std@0.17.30
+  - @blocksuite/global@0.17.30
+  - @blocksuite/inline@0.17.30
+  - @blocksuite/store@0.17.30
+  - @blocksuite/presets@0.17.30
+
+## 0.17.29
+
+### Patch Changes
+
+- 9cc49ff: ## Feat
+
+  - feat(database): support sorting for linked doc (#8715)
+
+  ## Fix
+
+  - fix(blocks): init collapsed state of list (#8727)
+  - fix(blocks): outline header sorting button tooltip (#8730)
+  - fix(database): date-picker styles (#8728)
+  - fix(blocks): only split paragraphs based on newlines (#8702)
+  - fix(edgeless): disable list and paragraph padding in edgeless text (#8723)
+  - fix(blocks): surface ref viewport element undefined (#8722)
+  - fix(blocks): show keyboard when at menu is triggered by keyboard toolbar (#8721)
+  - fix(database): linked doc convert logic (#8714)
+  - fix(database): improve the display logic of the row menu button (#8713)
+
+  ## Chore
+
+  - chore: configurable visibility of reference node popup (#8711)
+  - chore(blocks): disable dragging in mobile (#8724)
+
+- Updated dependencies [9cc49ff]
+  - @blocksuite/blocks@0.17.29
+  - @blocksuite/block-std@0.17.29
+  - @blocksuite/global@0.17.29
+  - @blocksuite/inline@0.17.29
+  - @blocksuite/store@0.17.29
+  - @blocksuite/presets@0.17.29
+
+## 0.17.28
+
+### Patch Changes
+
+- 5ef420d: ## Feat
+
+  - feat(blocks): mobile at menu (#8681)
+  - feat: unify the reference data structure of inline, card and embed (#8689)
+  - feat(database): add placeholder for filter (#8701)
+  - feat(database): support for sorting event tracking (#8691)
+
+  ## Fix
+
+  - fix: color of button is actived on color picker (#8685)
+  - fix: unable to switch to embed view when other pages link with mode (#8688)
+  - fix: the shape will turn black for a moment when dragging from the toolbar (#8698)
+  - fix(database): support for pasting linked doc into title cell (#8703)
+  - fix(database): menu cannot be close when it outside the doc (#8700)
+  - fix(database): number overflow (#8699)
+  - fix(database): prevent certain event propagation in the menu input (#8697)
+  - fix(database): toolbar icon color (#8695)
+  - fix(database): textarea of the title has unexpected line breaks (#8694)
+  - fix(database): can't create tag by clicking (#8693)
+  - fix(database): sorting of checkbox (#8692)
+  - fix: add paragraph when last block in note is not empty paragraph (#8690)
+  - fix: improve drag area (#8678)
+  - fix: edgeless crash on mobile safari (#8680)
+
+  ## Chore
+
+  - chore: lock file maintenance (#8686)
+
+  ## Refactor
+
+  - refactor(blocks): extract computation of selection rect to command (#8705)
+  - refactor(blocks): render linked doc popover with blocksuite-portal (#8664)
+  - refactor(blocks): move virutal keyboard controller to affine components (#8663)
+  - refactor(database): remove sortable.js (#8696)
+
+  ## Other
+
+  - Introducing BlockSuite Guru on Gurubase.io (#8706)
+
+- Updated dependencies [5ef420d]
+  - @blocksuite/blocks@0.17.28
+  - @blocksuite/block-std@0.17.28
+  - @blocksuite/global@0.17.28
+  - @blocksuite/inline@0.17.28
+  - @blocksuite/store@0.17.28
+  - @blocksuite/presets@0.17.28
+
 ## 0.17.27
 
 ### Patch Changes

@@ -36,6 +36,7 @@ export class MenuComponent extends SignalWatcher(
       z-index: 999;
       gap: 8px;
       border: 0.5px solid ${unsafeCSSVarV2('layer/insideBorder/border')};
+      color: ${unsafeCSSVarV2('text/primary')};
     }
 
     .affine-menu-search-container {
@@ -293,6 +294,12 @@ export const createPopup = (
   });
   modal.append(content);
 
+  modal.onpointerdown = ev => {
+    if (ev.target === modal) {
+      close();
+    }
+  };
+
   modal.onmousedown = ev => {
     if (ev.target === modal) {
       close();
@@ -311,6 +318,7 @@ export const createPopup = (
 
 export type MenuHandler = {
   close: () => void;
+  reopen: () => void;
 };
 
 export const popMenu = (
@@ -355,6 +363,9 @@ export const popMenu = (
   });
   return {
     close: closePopup,
+    reopen: () => {
+      popMenu(target, props);
+    },
   };
 };
 export const popFilterableSimpleMenu = (

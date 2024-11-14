@@ -31,21 +31,19 @@ export function mindmap(
         (model.surface.doc.getBlockById(id) as GfxModel);
       ConnectorPathGenerator.updatePath(connector, null, elementGetter);
 
-      if (connector) {
-        const dx = connector.x - bound.x;
-        const dy = connector.y - bound.y;
-        const origin = ctx.globalAlpha;
-        const shouldSetGlobalAlpha = origin !== connector.opacity;
+      const dx = connector.x - bound.x;
+      const dy = connector.y - bound.y;
+      const origin = ctx.globalAlpha;
+      const shouldSetGlobalAlpha = origin !== connector.opacity;
 
-        if (shouldSetGlobalAlpha) {
-          ctx.globalAlpha = connector.opacity;
-        }
+      if (shouldSetGlobalAlpha) {
+        ctx.globalAlpha = connector.opacity;
+      }
 
-        renderConnector(connector, ctx, matrix.translate(dx, dy), renderer, rc);
+      renderConnector(connector, ctx, matrix.translate(dx, dy), renderer, rc);
 
-        if (shouldSetGlobalAlpha) {
-          ctx.globalAlpha = origin;
-        }
+      if (shouldSetGlobalAlpha) {
+        ctx.globalAlpha = origin;
       }
     }
   });

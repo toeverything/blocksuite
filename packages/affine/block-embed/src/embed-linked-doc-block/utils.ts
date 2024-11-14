@@ -9,7 +9,6 @@ import {
 } from '@blocksuite/affine-components/icons';
 import {
   ColorScheme,
-  type EmbedLinkedDocModel,
   type EmbedLinkedDocStyles,
 } from '@blocksuite/affine-model';
 
@@ -114,16 +113,4 @@ export function getEmbedLinkedDocIcons(
       };
     }
   }
-}
-
-/*
- * Returns true if it is a link to block or element.
- */
-export function isLinkToNode({ params }: EmbedLinkedDocModel) {
-  if (!params) return false;
-  const { mode, blockIds, elementIds } = params;
-  if (!mode) return false;
-  if (blockIds && blockIds.length > 0) return true;
-  if (elementIds && elementIds.length > 0) return true;
-  return false;
 }

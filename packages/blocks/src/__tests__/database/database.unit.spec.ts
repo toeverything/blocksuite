@@ -21,7 +21,7 @@ import {
   getCell,
   getProperty,
   updateCell,
-} from '../../database-block/utils.js';
+} from '../../database-block/utils/block-utils.js';
 
 const AffineSchemas = [
   RootBlockSchema,

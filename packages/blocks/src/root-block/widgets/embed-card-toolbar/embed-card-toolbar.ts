@@ -1,4 +1,3 @@
-import { isLinkToNode } from '@blocksuite/affine-block-embed';
 import {
   CaptionIcon,
   CenterPeekIcon,
@@ -11,6 +10,7 @@ import {
   SmallArrowDownIcon,
 } from '@blocksuite/affine-components/icons';
 import { isPeekable, peek } from '@blocksuite/affine-components/peek';
+import { isLinkToNode } from '@blocksuite/affine-components/rich-text';
 import { toast } from '@blocksuite/affine-components/toast';
 import {
   cloneGroups,
@@ -503,7 +503,7 @@ export class EmbedCardToolbar extends WidgetComponent<
     doc.deleteBlock(targetModel);
   }
 
-  private _viewMenuButton() {
+  private _viewToggleMenu() {
     const buttons = [];
 
     buttons.push({
@@ -556,8 +556,11 @@ export class EmbedCardToolbar extends WidgetComponent<
                 data-testid=${`link-to-${type}`}
                 aria-label=${ifDefined(label)}
                 ?data-selected=${this._viewType === type}
-                ?disabled=${disabled}
-                @click=${action}
+                ?disabled=${disabled || this._viewType === type}
+                @click=${() => {
+                  action();
+                  this._hide();
+                }}
               >
                 ${label}
               </editor-menu-action>
@@ -644,7 +647,7 @@ export class EmbedCardToolbar extends WidgetComponent<
 
       this._openMenuButton(),
 
-      this._viewMenuButton(),
+      this._viewToggleMenu(),
 
       this._cardStyleMenuButton(),
 

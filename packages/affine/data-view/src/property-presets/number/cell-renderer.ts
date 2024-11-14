@@ -27,6 +27,7 @@ export class NumberCell extends BaseCellRenderer<
     }
 
     .affine-database-number {
+      overflow: hidden;
       display: flex;
       align-items: center;
       justify-content: flex-end;
@@ -39,6 +40,7 @@ export class NumberCell extends BaseCellRenderer<
       color: var(--affine-text-primary-color);
       font-weight: 400;
       background-color: transparent;
+      word-break: break-all;
     }
   `;
 

@@ -1,6 +1,6 @@
 {
   "name": "@blocksuite/data-view",
-  "version": "0.17.27",
+  "version": "0.17.32",
   "description": "Views of database in affine",
   "type": "module",
   "repository": {
@@ -25,17 +25,14 @@
     "@blocksuite/global": "workspace:*",
     "@blocksuite/icons": "^2.1.68",
     "@blocksuite/store": "workspace:*",
+    "@emotion/hash": "^0.9.2",
     "@floating-ui/dom": "^1.6.10",
     "@lit/context": "^1.1.2",
     "@preact/signals-core": "^1.8.0",
     "@toeverything/theme": "^1.0.15",
     "date-fns": "^4.0.0",
     "lit": "^3.2.0",
-    "sortablejs": "^1.15.2",
     "zod": "^3.23.8"
-  },
-  "devDependencies": {
-    "@types/sortablejs": "^1.15.8"
   },
   "exports": {
     ".": "./src/index.ts",

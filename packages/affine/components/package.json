@@ -1,6 +1,6 @@
 {
   "name": "@blocksuite/affine-components",
-  "version": "0.17.27",
+  "version": "0.17.32",
   "description": "Default BlockSuite editable blocks.",
   "type": "module",
   "repository": {
@@ -35,6 +35,7 @@
     "katex": "^0.16.11",
     "lit": "^3.2.0",
     "lit-html": "^3.2.1",
+    "lodash.clonedeep": "^4.5.0",
     "shiki": "^1.12.0",
     "zod": "^3.23.8"
   },
@@ -50,7 +51,8 @@
     "./caption": "./src/caption/index.ts",
     "./context-menu": "./src/context-menu/index.ts",
     "./date-picker": "./src/date-picker/index.ts",
-    "./drag-indicator": "./src/drag-indicator/index.ts"
+    "./drag-indicator": "./src/drag-indicator/index.ts",
+    "./virtual-keyboard": "./src/virtual-keyboard/index.ts"
   },
   "publishConfig": {
     "access": "public",
@@ -104,6 +106,10 @@
       "./drag-indicator": {
         "types": "./dist/drag-indicator/index.d.ts",
         "import": "./dist/drag-indicator/index.js"
+      },
+      "./virtual-keyboard": {
+        "types": "./dist/virtual-keyboard/index.d.ts",
+        "import": "./dist/virtual-keyboard/index.js"
       }
     }
   },
@@ -114,6 +120,7 @@
     "!dist/__tests__"
   ],
   "devDependencies": {
-    "@types/katex": "^0.16.7"
+    "@types/katex": "^0.16.7",
+    "@types/lodash.clonedeep": "^4.5.9"
   }
 }

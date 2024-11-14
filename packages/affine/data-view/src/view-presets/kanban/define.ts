@@ -73,7 +73,7 @@ export const kanbanViewModel = kanbanViewType.createModel<KanbanViewData>({
         op: 'and',
         conditions: [],
       },
-      groupBy: defaultGroupBy(meta, columnId, data),
+      groupBy: defaultGroupBy(viewManager.dataSource, meta, columnId, data),
       header: {
         titleColumn: viewManager.dataSource.properties$.value.find(
           id => viewManager.dataSource.propertyTypeGet(id) === 'title'

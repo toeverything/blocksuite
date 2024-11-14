@@ -137,6 +137,7 @@ export class ListBlockComponent extends CaptionedBlockComponent<
     super.connectedCallback();
 
     this._inlineRangeProvider = getInlineRangeProvider(this);
+    this._isCollapsedWhenReadOnly = this.model.collapsed;
 
     this.disposables.add(
       effect(() => {
@@ -214,6 +215,6 @@ export class ListBlockComponent extends CaptionedBlockComponent<
   private accessor _richTextElement: RichText | null = null;
 
   override accessor blockContainerStyles = {
-    margin: '10px 0',
+    margin: 'var(--affine-list-margin, 10px 0)',
   };
 }

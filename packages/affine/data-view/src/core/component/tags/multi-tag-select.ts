@@ -62,7 +62,7 @@ export class MultiTagSelect extends SignalWatcher(
         items: [
           menu.input({
             initialValue: option.value,
-            onComplete: text => {
+            onChange: text => {
               this.changeTag({
                 ...option,
                 value: text,
@@ -352,16 +352,18 @@ export class MultiTagSelect extends SignalWatcher(
               'select-option': true,
               selected: isSelected,
             });
-            const clickOption = (e: MouseEvent) =>
+            const clickOption = (e: MouseEvent) => {
+              e.stopPropagation();
               this._clickItemOption(e, select.id);
+            };
             return html`
               <div
                 ${!select.isCreate && sortable(select.id)}
-                @click="${() => this._onSelect(select.id)}"
                 class="${classes}"
                 @mouseenter="${mouseenter}"
+                @click="${select.select}"
               >
-                <div class="select-option-content" @click="${select.select}">
+                <div class="select-option-content">
                   ${select.isCreate
                     ? html` <div class="select-option-new-icon">Create</div>`
                     : html`

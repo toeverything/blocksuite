@@ -20,11 +20,11 @@ export const anyTypeStatsFunctions: StatisticsConfig[] = [
     displayName: 'Values',
     type: 'count-values',
     dataType: t.unknown.instance(),
-    impl: (data, { meta }) => {
+    impl: (data, { meta, dataSource }) => {
       const values = data
         .flatMap(v => {
           if (meta.config.values) {
-            return meta.config.values(v);
+            return meta.config.values({ value: v, dataSource });
           }
           return v;
         })
@@ -38,11 +38,11 @@ export const anyTypeStatsFunctions: StatisticsConfig[] = [
     displayName: 'Unique Values',
     type: 'count-unique-values',
     dataType: t.unknown.instance(),
-    impl: (data, { meta }) => {
+    impl: (data, { meta, dataSource }) => {
       const values = data
         .flatMap(v => {
           if (meta.config.values) {
-            return meta.config.values(v);
+            return meta.config.values({ value: v, dataSource });
           }
           return v;
         })
@@ -56,8 +56,10 @@ export const anyTypeStatsFunctions: StatisticsConfig[] = [
     displayName: 'Empty',
     type: 'count-empty',
     dataType: t.unknown.instance(),
-    impl: (data, { meta }) => {
-      const emptyList = data.filter(value => meta.config.isEmpty(value));
+    impl: (data, { meta, dataSource }) => {
+      const emptyList = data.filter(value =>
+        meta.config.isEmpty({ value, dataSource })
+      );
       return emptyList.length.toString();
     },
   }),
@@ -67,8 +69,10 @@ export const anyTypeStatsFunctions: StatisticsConfig[] = [
     displayName: 'Not Empty',
     type: 'count-not-empty',
     dataType: t.unknown.instance(),
-    impl: (data, { meta }) => {
-      const notEmptyList = data.filter(value => !meta.config.isEmpty(value));
+    impl: (data, { meta, dataSource }) => {
+      const notEmptyList = data.filter(
+        value => !meta.config.isEmpty({ value, dataSource })
+      );
       return notEmptyList.length.toString();
     },
   }),
@@ -78,9 +82,11 @@ export const anyTypeStatsFunctions: StatisticsConfig[] = [
     displayName: 'Empty',
     type: 'percent-empty',
     dataType: t.unknown.instance(),
-    impl: (data, { meta }) => {
+    impl: (data, { meta, dataSource }) => {
       if (data.length === 0) return '';
-      const emptyList = data.filter(value => meta.config.isEmpty(value));
+      const emptyList = data.filter(value =>
+        meta.config.isEmpty({ value, dataSource })
+      );
       return ((emptyList.length / data.length) * 100).toFixed(2) + '%';
     },
   }),
@@ -90,9 +96,11 @@ export const anyTypeStatsFunctions: StatisticsConfig[] = [
     displayName: 'Not Empty',
     type: 'percent-not-empty',
     dataType: t.unknown.instance(),
-    impl: (data, { meta }) => {
+    impl: (data, { meta, dataSource }) => {
       if (data.length === 0) return '';
-      const notEmptyList = data.filter(value => !meta.config.isEmpty(value));
+      const notEmptyList = data.filter(
+        value => !meta.config.isEmpty({ value, dataSource })
+      );
       return ((notEmptyList.length / data.length) * 100).toFixed(2) + '%';
     },
   }),

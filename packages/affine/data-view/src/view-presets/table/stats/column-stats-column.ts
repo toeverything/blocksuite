@@ -167,7 +167,11 @@ export class DatabaseColumnStatsCell extends SignalWatcher(
     }
     return {
       name: func.displayName,
-      value: func.impl?.(this.values$.value, { meta }) ?? '',
+      value:
+        func.impl?.(this.values$.value, {
+          meta,
+          dataSource: this.column.view.manager.dataSource,
+        }) ?? '',
     };
   });
 

@@ -6,6 +6,7 @@ import {
   type PopupTarget,
   popupTargetFromElement,
 } from '@blocksuite/affine-components/context-menu';
+import { unsafeCSSVarV2 } from '@blocksuite/affine-shared/theme';
 import {
   ArrowRightSmallIcon,
   DeleteIcon,
@@ -20,26 +21,22 @@ import {
 import { css, html } from 'lit';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type { SingleView } from '../../../../core/view-manager/single-view.js';
-
 import { popPropertiesSetting } from '../../../../core/common/properties.js';
 import {
   popGroupSetting,
   popSelectGroupByProperty,
 } from '../../../../core/group-by/setting.js';
+import { canGroup } from '../../../../core/group-by/utils.js';
 import {
+  type DataViewInstance,
   emptyFilterGroup,
   popCreateFilter,
   renderUniLit,
 } from '../../../../core/index.js';
 import { popCreateSort } from '../../../../core/sort/add-sort.js';
+import { createSortUtils } from '../../../../core/sort/utils.js';
 import { WidgetBase } from '../../../../core/widget/widget-base.js';
-import {
-  KanbanSingleView,
-  type KanbanViewData,
-  TableSingleView,
-  type TableViewData,
-} from '../../../../view-presets/index.js';
+import { TableSingleView } from '../../../../view-presets/index.js';
 import { popFilterRoot } from '../../../quick-setting-bar/filter/root-panel-view.js';
 import { popSortRoot } from '../../../quick-setting-bar/sort/root-panel.js';
 
@@ -56,10 +53,9 @@ const styles = css`
     background: var(--affine-hover-color);
   }
 
-  .affine-database-toolbar-item.more-action svg {
-    width: 20px;
-    height: 20px;
-    fill: var(--affine-icon-color);
+  .affine-database-toolbar-item.more-action {
+    font-size: 20px;
+    color: ${unsafeCSSVarV2('icon/primary')};
   }
 
   .more-action.active {
@@ -77,7 +73,7 @@ export class DataViewHeaderToolsViewOptions extends WidgetBase {
 
   openMoreAction = (target: PopupTarget) => {
     this.showToolBar(true);
-    popViewOptions(target, this.view, () => {
+    popViewOptions(target, this.dataViewInstance, () => {
       this.showToolBar(false);
     });
   };
@@ -87,7 +83,7 @@ export class DataViewHeaderToolsViewOptions extends WidgetBase {
       return;
     }
     return html` <div
-      class="affine-database-toolbar-item more-action dv-icon-20"
+      class="affine-database-toolbar-item more-action"
       @click="${this.clickMoreAction}"
     >
       ${MoreHorizontalIcon()}
@@ -100,8 +96,6 @@ export class DataViewHeaderToolsViewOptions extends WidgetBase {
       tools.showToolBar = show;
     }
   }
-
-  override accessor view!: SingleView<TableViewData | KanbanViewData>;
 }
 
 declare global {
@@ -111,9 +105,10 @@ declare global {
 }
 const createSettingMenus = (
   target: PopupTarget,
-  view: SingleView<TableViewData | KanbanViewData>,
+  dataViewInstance: DataViewInstance,
   reopen: () => void
 ) => {
+  const view = dataViewInstance.view;
   const settingItems: MenuConfig[] = [];
   settingItems.push(
     menu.action({
@@ -186,25 +181,15 @@ const createSettingMenus = (
           ${ArrowRightSmallIcon()}`,
         select: () => {
           const sortList = sortManager.sortList$.value;
+          const sortUtils = createSortUtils(view, dataViewInstance.eventTrace);
           if (!sortList.length) {
             popCreateSort(target, {
-              sortList: sortList,
-              vars: view.vars$,
+              sortUtils: sortUtils,
               onBack: reopen,
-              onSelect: sort => {
-                sortManager.setSortList([...sortList, sort]);
-                popSortRoot(target, {
-                  view: view,
-                  title: {
-                    text: 'Sort',
-                    onBack: reopen,
-                  },
-                });
-              },
             });
           } else {
             popSortRoot(target, {
-              view: view,
+              sortUtils: sortUtils,
               title: {
                 text: 'Sort',
                 onBack: reopen,
@@ -215,44 +200,45 @@ const createSettingMenus = (
       })
     );
   }
-  settingItems.push(
-    menu.action({
-      name: 'Group',
-      prefix: GroupingIcon(),
-      postfix: html` <div style="font-size: 14px;">
-          ${view instanceof TableSingleView || view instanceof KanbanSingleView
-            ? view.groupManager.property$.value?.name$.value
-            : ''}
-        </div>
-        ${ArrowRightSmallIcon()}`,
-      select: () => {
-        const groupBy = view.data$.value?.groupBy;
-        if (!groupBy) {
-          popSelectGroupByProperty(target, view, {
-            onSelect: () => popGroupSetting(target, view, reopen),
-            onBack: reopen,
-          });
-        } else {
-          popGroupSetting(target, view, reopen);
-        }
-      },
-    })
-  );
+  if (canGroup(view)) {
+    settingItems.push(
+      menu.action({
+        name: 'Group',
+        prefix: GroupingIcon(),
+        postfix: html` <div style="font-size: 14px;">
+            ${view.groupManager.property$.value?.name$.value ?? ''}
+          </div>
+          ${ArrowRightSmallIcon()}`,
+        select: () => {
+          const groupBy = view.data$.value?.groupBy;
+          if (!groupBy) {
+            popSelectGroupByProperty(target, view, {
+              onSelect: () => popGroupSetting(target, view, reopen),
+              onBack: reopen,
+            });
+          } else {
+            popGroupSetting(target, view, reopen);
+          }
+        },
+      })
+    );
+  }
   return settingItems;
 };
 export const popViewOptions = (
   target: PopupTarget,
-  view: SingleView<TableViewData | KanbanViewData>,
+  dataViewInstance: DataViewInstance,
   onClose?: () => void
 ) => {
+  const view = dataViewInstance.view;
   const reopen = () => {
-    popViewOptions(target, view);
+    popViewOptions(target, dataViewInstance);
   };
   const items: MenuConfig[] = [];
   items.push(
     menu.input({
       initialValue: view.name$.value,
-      onComplete: text => {
+      onChange: text => {
         view.nameSet(text);
       },
     })
@@ -301,6 +287,7 @@ export const popViewOptions = (
                   view.manager.currentViewId$.value,
                   meta.type
                 );
+                dataViewInstance.clearSelection();
               },
               class: {},
             };
@@ -352,7 +339,7 @@ export const popViewOptions = (
 
   items.push(
     menu.group({
-      items: createSettingMenus(target, view, reopen),
+      items: createSettingMenus(target, dataViewInstance, reopen),
     })
   );
   items.push(

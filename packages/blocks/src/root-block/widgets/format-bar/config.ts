@@ -47,7 +47,7 @@ import {
   promptDocTitle,
 } from '../../../_common/utils/render-linked-doc.js';
 import { convertToDatabase } from '../../../database-block/data-source.js';
-import { DATABASE_CONVERT_WHITE_LIST } from '../../../database-block/utils.js';
+import { DATABASE_CONVERT_WHITE_LIST } from '../../../database-block/utils/block-utils.js';
 import { FormatBarContext } from './context.js';
 
 export type DividerConfigItem = {

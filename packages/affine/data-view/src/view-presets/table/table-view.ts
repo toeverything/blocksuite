@@ -9,11 +9,12 @@ import {
 } from '@blocksuite/affine-shared/utils';
 import { AddCursorIcon } from '@blocksuite/icons/lit';
 import { css } from 'lit';
+import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
 
 import type { GroupManager } from '../../core/group-by/manager.js';
-import type { DataViewExpose } from '../../core/index.js';
+import type { DataViewInstance } from '../../core/index.js';
 import type { TableSingleView } from './table-view-manager.js';
 
 import { renderUniLit } from '../../core/utils/uni-component/uni-component.js';
@@ -169,37 +170,6 @@ export class DataViewTable extends DataViewBase<
 
   dragController = new TableDragController(this);
 
-  selectionController = new TableSelectionController(this);
-
-  expose: DataViewExpose = {
-    addRow: position => {
-      this._addRow(this.props.view, position);
-    },
-    focusFirstCell: () => {
-      this.selectionController.focusFirstCell();
-    },
-    showIndicator: evt => {
-      return this.dragController.showIndicator(evt) != null;
-    },
-    hideIndicator: () => {
-      this.dragController.dropPreview.remove();
-    },
-    moveTo: (id, evt) => {
-      const result = this.dragController.getInsertPosition(evt);
-      if (result) {
-        this.props.view.rowMove(
-          id,
-          result.position,
-          undefined,
-          result.groupKey
-        );
-      }
-    },
-    getSelection: () => {
-      return this.selectionController.selection;
-    },
-  };
-
   hotkeysController = new TableHotkeysController(this);
 
   onWheel = (event: WheelEvent) => {
@@ -226,11 +196,16 @@ export class DataViewTable extends DataViewBase<
         options: {
           items: [
             menu.input({
-              onComplete: text => {
+              onChange: text => {
                 const column = groupHelper.property$.value;
                 if (column) {
                   column.dataUpdate(
-                    () => addGroup(text, column.data$.value) as never
+                    () =>
+                      addGroup({
+                        text,
+                        oldData: column.data$.value,
+                        dataSource: this.props.view.manager.dataSource,
+                      }) as never
                   );
                 }
               },
@@ -251,6 +226,44 @@ export class DataViewTable extends DataViewBase<
     </div>`;
   };
 
+  selectionController = new TableSelectionController(this);
+
+  get expose(): DataViewInstance {
+    return {
+      clearSelection: () => {
+        this.selectionController.clear();
+      },
+      addRow: position => {
+        this._addRow(this.props.view, position);
+      },
+      focusFirstCell: () => {
+        this.selectionController.focusFirstCell();
+      },
+      showIndicator: evt => {
+        return this.dragController.showIndicator(evt) != null;
+      },
+      hideIndicator: () => {
+        this.dragController.dropPreview.remove();
+      },
+      moveTo: (id, evt) => {
+        const result = this.dragController.getInsertPosition(evt);
+        if (result) {
+          this.props.view.rowMove(
+            id,
+            result.position,
+            undefined,
+            result.groupKey
+          );
+        }
+      },
+      getSelection: () => {
+        return this.selectionController.selection;
+      },
+      view: this.props.view,
+      eventTrace: this.props.eventTrace,
+    };
+  }
+
   private get readonly() {
     return this.props.view.readonly$.value;
   }
@@ -260,15 +273,19 @@ export class DataViewTable extends DataViewBase<
     if (groups) {
       return html`
         <div style="display:flex;flex-direction: column;gap: 16px;">
-          ${groups.map(group => {
-            return html` <affine-data-view-table-group
-              data-group-key="${group.key}"
-              .dataViewEle="${this.props.dataViewEle}"
-              .view="${this.props.view}"
-              .viewEle="${this}"
-              .group="${group}"
-            ></affine-data-view-table-group>`;
-          })}
+          ${repeat(
+            groups,
+            v => v.key,
+            group => {
+              return html` <affine-data-view-table-group
+                data-group-key="${group.key}"
+                .dataViewEle="${this.props.dataViewEle}"
+                .view="${this.props.view}"
+                .viewEle="${this}"
+                .group="${group}"
+              ></affine-data-view-table-group>`;
+            }
+          )}
           ${this.renderAddGroup(this.props.view.groupManager)}
         </div>
       `;
@@ -292,8 +309,7 @@ export class DataViewTable extends DataViewBase<
     });
     return html`
       ${renderUniLit(this.props.headerWidget, {
-        view: this.props.view,
-        viewMethods: this.expose,
+        dataViewInstance: this.expose,
       })}
       <div class="affine-database-table" style="${wrapperStyle}">
         <div class="affine-database-block-table" @wheel="${this.onWheel}">

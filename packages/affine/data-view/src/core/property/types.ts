@@ -1,7 +1,11 @@
 import type { Disposable } from '@blocksuite/global/utils';
 
+import type { DataSource } from '../data-source/base.js';
 import type { TypeInstance } from '../logical/type.js';
 
+export type WithCommonPropertyConfig<T = {}> = T & {
+  dataSource: DataSource;
+};
 export type GetPropertyDataFromConfig<T> =
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   T extends PropertyConfig<infer R, any> ? R : never;
@@ -14,22 +18,44 @@ export type PropertyConfig<
 > = {
   name: string;
   defaultData: () => Data;
-  type: (data: Data) => TypeInstance;
-  formatValue?: (value: unknown, colData: Data) => Value;
-  isEmpty: (value?: Value) => boolean;
-  values?: (value?: Value) => unknown[];
-  cellToString: (data: Value, colData: Data) => string;
+  type: (config: WithCommonPropertyConfig<{ data: Data }>) => TypeInstance;
+  formatValue?: (
+    config: WithCommonPropertyConfig<{ value: Value; data: Data }>
+  ) => Value;
+  isEmpty: (config: WithCommonPropertyConfig<{ value?: Value }>) => boolean;
+  values?: (config: WithCommonPropertyConfig<{ value?: Value }>) => unknown[];
+  cellToString: (
+    config: WithCommonPropertyConfig<{ value: Value; data: Data }>
+  ) => string;
   cellFromString: (
-    data: string,
-    colData: Data
+    config: WithCommonPropertyConfig<{
+      value: string;
+      data: Data;
+    }>
   ) => {
     value: unknown;
     data?: Record<string, unknown>;
   };
-  cellToJson: (data: Value, colData: Data) => DVJSON;
-  addGroup?: (text: string, oldData: Data) => Data;
-  onUpdate?: (value: Value, Data: Data, callback: () => void) => Disposable;
-  valueUpdate?: (value: Value, Data: Data, newValue: Value) => Value;
+  cellToJson: (
+    config: WithCommonPropertyConfig<{ value: Value; data: Data }>
+  ) => DVJSON;
+  addGroup?: (
+    config: WithCommonPropertyConfig<{ text: string; oldData: Data }>
+  ) => Data;
+  onUpdate?: (
+    config: WithCommonPropertyConfig<{
+      value: Value;
+      data: Data;
+      callback: () => void;
+    }>
+  ) => Disposable;
+  valueUpdate?: (
+    config: WithCommonPropertyConfig<{
+      value: Value;
+      data: Data;
+      newValue: Value;
+    }>
+  ) => Value;
 };
 
 export type DVJSON =

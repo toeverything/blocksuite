@@ -5,12 +5,12 @@ export const linkColumnModelConfig = linkColumnType.modelConfig<string>({
   name: 'Link',
   type: () => t.string.instance(),
   defaultData: () => ({}),
-  cellToString: data => data?.toString() ?? '',
-  cellFromString: data => {
+  cellToString: ({ value }) => value?.toString() ?? '',
+  cellFromString: ({ value }) => {
     return {
-      value: data,
+      value: value,
     };
   },
-  cellToJson: data => data ?? null,
-  isEmpty: data => data == null || data.length == 0,
+  cellToJson: ({ value }) => value ?? null,
+  isEmpty: ({ value }) => value == null || value.length == 0,
 });

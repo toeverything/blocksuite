@@ -55,6 +55,7 @@ function renderSurfaceRef(
   );
 
   card.surfaceRefRenderer = card.surfaceRefService.getRenderer(
+    card,
     card.model.id,
     linkedDoc
   );
