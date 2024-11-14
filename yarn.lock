@@ -1626,6 +1626,7 @@ __metadata:
     "@toeverything/theme": "npm:^1.0.15"
     "@types/lodash.clonedeep": "npm:^4.5.9"
     "@types/lodash.mergewith": "npm:^4"
+    fractional-indexing: "npm:^3.2.0"
     lit: "npm:^3.2.0"
     lodash.clonedeep: "npm:^4.5.0"
     lodash.mergewith: "npm:^4.6.2"
@@ -1715,6 +1716,7 @@ __metadata:
     file-type: "npm:^19.5.0"
     fractional-indexing: "npm:^3.2.0"
     html2canvas: "npm:^1.4.1"
+    immer: "npm:^10.1.1"
     katex: "npm:^0.16.11"
     lit: "npm:^3.2.0"
     mdast-util-gfm-autolink-literal: "npm:^2.0.1"
@@ -9195,6 +9197,13 @@ __metadata:
   version: 3.0.6
   resolution: "immediate@npm:3.0.6"
   checksum: 10/f9b3486477555997657f70318cc8d3416159f208bec4cca3ff3442fd266bc23f50f0c9bd8547e1371a6b5e82b821ec9a7044a4f7b944798b25aa3cc6d5e63e62
+  languageName: node
+  linkType: hard
+
+"immer@npm:^10.1.1":
+  version: 10.1.1
+  resolution: "immer@npm:10.1.1"
+  checksum: 10/9dacf1e8c201d69191ccd88dc5d733bafe166cd45a5a360c5d7c88f1de0dff974a94114d72b35f3106adfe587fcfb131c545856184a2247d89d735ad25589863
   languageName: node
   linkType: hard
 

@@ -251,7 +251,7 @@ export const popSelectGroupByProperty = (
 };
 export const popGroupSetting = (
   target: PopupTarget,
-  view: SingleView<TableViewData | KanbanViewData>,
+  view: TableSingleView | KanbanSingleView,
   onBack: () => void
 ) => {
   const groupBy = view.data$.value?.groupBy;

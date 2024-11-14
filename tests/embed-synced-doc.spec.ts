@@ -245,7 +245,6 @@ test.describe('Embed synced doc', () => {
             model,
             databaseService.viewPresets.tableViewMeta.type
           );
-          databaseService.applyColumnUpdate(model);
         }
       });
 

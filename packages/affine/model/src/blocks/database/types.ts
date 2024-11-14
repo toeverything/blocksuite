@@ -16,6 +16,7 @@ export type Cell<ValueType = unknown> = {
 export type SerializedCells = Record<string, Record<string, Cell>>;
 export type ViewBasicDataType = {
   id: string;
+  index?: string;
   name: string;
   mode: string;
 };

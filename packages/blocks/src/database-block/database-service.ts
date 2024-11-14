@@ -12,19 +12,14 @@ import {
   databaseViewInitEmpty,
   databaseViewInitTemplate,
 } from './data-source.js';
-import {
-  addProperty,
-  applyPropertyUpdate,
-  updateCell,
-  updateView,
-} from './utils/block-utils.js';
+import { updateCell } from './utils/cell-utils.js';
+import { addProperty } from './utils/property-utils.js';
+import { updateView } from './utils/view-utils.js';
 
 export class DatabaseBlockService extends BlockService {
   static override readonly flavour = DatabaseBlockSchema.model.flavour;
 
   addColumn = addProperty;
-
-  applyColumnUpdate = applyPropertyUpdate;
 
   databaseViewAddView = databaseViewAddView;
 
@@ -55,6 +50,5 @@ export class DatabaseBlockService extends BlockService {
       if (!parent) return;
       doc.addBlock('affine:paragraph', {}, parent.id);
     }
-    applyPropertyUpdate(blockModel);
   }
 }

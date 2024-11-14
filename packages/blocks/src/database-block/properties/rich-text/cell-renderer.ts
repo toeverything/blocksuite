@@ -11,7 +11,6 @@ import {
   createIcon,
 } from '@blocksuite/data-view';
 import { IS_MAC } from '@blocksuite/global/env';
-import { assertExists } from '@blocksuite/global/utils';
 import { Text } from '@blocksuite/store';
 import { css, nothing, type PropertyValues } from 'lit';
 import { query } from 'lit/decorators.js';
@@ -111,10 +110,7 @@ export class RichTextCell extends BaseCellRenderer<Text> {
   }
 
   get inlineEditor() {
-    assertExists(this._richTextElement);
-    const inlineEditor = this._richTextElement.inlineEditor;
-    assertExists(inlineEditor);
-    return inlineEditor;
+    return this._richTextElement?.inlineEditor;
   }
 
   get inlineManager() {
@@ -127,12 +123,6 @@ export class RichTextCell extends BaseCellRenderer<Text> {
     return this.view
       .contextGet(HostContextKey)
       ?.std.getService('affine:database');
-  }
-
-  get topContenteditableElement() {
-    const databaseBlock =
-      this.closest<DatabaseBlockComponent>('affine-database');
-    return databaseBlock?.topContenteditableElement;
   }
 
   private changeUserSelectAccordToReadOnly() {
@@ -228,7 +218,9 @@ export class RichTextCellEditing extends BaseCellRenderer<Text> {
     }
 
     const inlineEditor = this.inlineEditor;
-
+    if (!inlineEditor) {
+      return;
+    }
     switch (event.key) {
       // bold ctrl+b
       case 'B':
@@ -283,8 +275,7 @@ export class RichTextCellEditing extends BaseCellRenderer<Text> {
   private _onSoftEnter = () => {
     if (this.value && this.inlineEditor) {
       const inlineRange = this.inlineEditor.getInlineRange();
-      assertExists(inlineRange);
-
+      if (!inlineRange) return;
       const text = new Text(this.inlineEditor.yText);
       text.replace(inlineRange.index, inlineRange.length, '\n');
       this.inlineEditor.setInlineRange({
@@ -303,10 +294,7 @@ export class RichTextCellEditing extends BaseCellRenderer<Text> {
   }
 
   get inlineEditor() {
-    assertExists(this._richTextElement);
-    const inlineEditor = this._richTextElement.inlineEditor;
-    assertExists(inlineEditor);
-    return inlineEditor;
+    return this._richTextElement?.inlineEditor;
   }
 
   get inlineManager() {
@@ -338,7 +326,7 @@ export class RichTextCellEditing extends BaseCellRenderer<Text> {
       if (e.key === 'a' && (IS_MAC ? e.metaKey : e.ctrlKey)) {
         e.stopPropagation();
         e.preventDefault();
-        this.inlineEditor.selectAll();
+        this.inlineEditor?.selectAll();
       }
     };
     this.addEventListener('keydown', selectAll);
@@ -346,13 +334,17 @@ export class RichTextCellEditing extends BaseCellRenderer<Text> {
   }
 
   override firstUpdated() {
+    const inlineEditor = this.inlineEditor;
+    if (!inlineEditor) {
+      return;
+    }
     this._richTextElement?.updateComplete
       .then(() => {
         this.disposables.add(
-          this.inlineEditor.slots.keydown.on(this._handleKeyDown)
+          inlineEditor.slots.keydown.on(this._handleKeyDown)
         );
 
-        this.inlineEditor.focusEnd();
+        inlineEditor.focusEnd();
       })
       .catch(console.error);
   }

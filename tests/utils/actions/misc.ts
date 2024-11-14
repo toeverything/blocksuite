@@ -527,7 +527,6 @@ export async function initEmptyDatabaseState(page: Page, rootId?: string) {
         model,
         databaseService.viewPresets.tableViewMeta.type
       );
-      databaseService.applyColumnUpdate(model);
     }
 
     doc.captureSync();
@@ -598,7 +597,6 @@ export async function initKanbanViewState(
           model,
           databaseService.viewPresets.kanbanViewMeta.type
         );
-        databaseService.applyColumnUpdate(model);
       }
       doc.captureSync();
       return { rootId, noteId, databaseId };
@@ -637,7 +635,6 @@ export async function initEmptyDatabaseWithParagraphState(
         model,
         databaseService.viewPresets.tableViewMeta.type
       );
-      databaseService.applyColumnUpdate(model);
     }
     doc.addBlock('affine:paragraph', {}, noteId);
 

@@ -28,25 +28,25 @@ export const selectPropertyModelConfig = selectPropertyType.modelConfig<
   },
   cellToString: ({ value, data }) =>
     data.options.find(v => v.id === value)?.value ?? '',
-  cellFromString: ({ value: oldValue, data }) => {
-    if (!oldValue) {
+  cellFromString: ({ value: stringValue, data }) => {
+    if (!stringValue) {
       return { value: null, data: data };
     }
-    const optionMap = Object.fromEntries(data.options.map(v => [v.value, v]));
-    const name = oldValue
+    const optionMap = new Map(data.options.map(v => [v.value, v]));
+    const name = stringValue
       .split(',')
       .map(v => v.trim())
       .filter(v => v)[0];
 
     let value: string | undefined;
-    const option = optionMap[name];
+    const option = optionMap.get(name);
     if (!option) {
       const newOption: SelectTag = {
         id: nanoid(),
         value: name,
         color: getTagColor(),
       };
-      data.options.push(newOption);
+      optionMap.set(name, newOption);
       value = newOption.id;
     } else {
       value = option.id;
@@ -54,7 +54,10 @@ export const selectPropertyModelConfig = selectPropertyType.modelConfig<
 
     return {
       value,
-      data: data,
+      data: {
+        ...data,
+        options: Array.from(optionMap.values()),
+      },
     };
   },
   cellToJson: ({ value }) => value ?? null,

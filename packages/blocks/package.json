@@ -47,6 +47,7 @@
     "file-type": "^19.5.0",
     "fractional-indexing": "^3.2.0",
     "html2canvas": "^1.4.1",
+    "immer": "^10.1.1",
     "katex": "^0.16.11",
     "lit": "^3.2.0",
     "mdast-util-gfm-autolink-literal": "^2.0.1",

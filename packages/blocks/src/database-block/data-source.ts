@@ -4,6 +4,7 @@ import type { EditorHost } from '@blocksuite/block-std';
 import {
   insertPositionToIndex,
   type InsertToPosition,
+  type NewInsertPosition,
 } from '@blocksuite/affine-shared/utils';
 import {
   type DatabaseFlags,
@@ -29,22 +30,25 @@ import {
 } from './properties/index.js';
 import { titlePurePropertyConfig } from './properties/title/define.js';
 import {
-  addProperty,
-  applyCellsUpdate,
-  applyPropertyUpdate,
-  copyCellsByProperty,
   deleteRows,
-  deleteView,
-  duplicateView,
-  findPropertyIndex,
+  duplicateCellsByProperty,
   getCell,
-  getProperty,
-  moveViewTo,
   updateCell,
   updateCells,
+} from './utils/cell-utils.js';
+import {
+  addProperty,
+  findPropertyIndex,
+  getProperty,
   updateProperty,
+} from './utils/property-utils.js';
+import {
+  deleteView,
+  duplicateView,
+  getViews,
+  moveViewTo,
   updateView,
-} from './utils/block-utils.js';
+} from './utils/view-utils.js';
 import {
   databaseBlockViewConverts,
   databaseBlockViewMap,
@@ -55,6 +59,10 @@ export class DatabaseBlockDataSource extends DataSourceBase {
   private _batch = 0;
 
   private readonly _model: DatabaseBlockModel;
+
+  columnsMap$ = computed(() => {
+    return new Map(this._model.columns$.value.map(v => [v.id, v]));
+  });
 
   override featureFlags$: ReadonlySignal<DatabaseFlags> = computed(() => {
     return {
@@ -81,7 +89,7 @@ export class DatabaseBlockDataSource extends DataSourceBase {
   viewConverts = databaseBlockViewConverts;
 
   viewDataList$: ReadonlySignal<DataViewDataType[]> = computed(() => {
-    return this._model.views$.value as DataViewDataType[];
+    return getViews(this._model);
   });
 
   override viewManager: ViewManager = new ViewManagerBase(this);
@@ -149,12 +157,11 @@ export class DatabaseBlockDataSource extends DataSourceBase {
       });
       return;
     }
-    if (this._model.columns$.value.some(v => v.id === propertyId)) {
+    if (this.columnsMap$.value.has(propertyId)) {
       updateCell(this._model, rowId, {
         columnId: propertyId,
         value: newValue,
       });
-      applyCellsUpdate(this._model);
     }
   }
 
@@ -176,15 +183,13 @@ export class DatabaseBlockDataSource extends DataSourceBase {
 
   propertyAdd(insertToPosition: InsertToPosition, type?: string): string {
     this.doc.captureSync();
-    const result = addProperty(
+    return addProperty(
       this._model,
       insertToPosition,
       databaseBlockAllPropertyMap[
         type ?? propertyPresets.multiSelectPropertyConfig.type
       ].create(this.newPropertyName())
     );
-    applyPropertyUpdate(this._model);
-    return result;
   }
 
   propertyDataGet(propertyId: string): Record<string, unknown> {
@@ -197,7 +202,6 @@ export class DatabaseBlockDataSource extends DataSourceBase {
     this._runCapture();
 
     updateProperty(this._model, propertyId, () => ({ data }));
-    applyPropertyUpdate(this._model);
   }
 
   propertyDataTypeGet(propertyId: string): TypeInstance | undefined {
@@ -241,8 +245,7 @@ export class DatabaseBlockDataSource extends DataSourceBase {
       },
       schema
     );
-    copyCellsByProperty(this._model, copyId, id);
-    applyPropertyUpdate(this._model);
+    duplicateCellsByProperty(this._model, copyId, id);
     return id;
   }
 
@@ -262,7 +265,6 @@ export class DatabaseBlockDataSource extends DataSourceBase {
   propertyNameSet(propertyId: string, name: string): void {
     this.doc.captureSync();
     updateProperty(this._model, propertyId, () => ({ name }));
-    applyPropertyUpdate(this._model);
   }
 
   override propertyReadonlyGet(propertyId: string): boolean {
@@ -310,7 +312,6 @@ export class DatabaseBlockDataSource extends DataSourceBase {
       }
     });
     updateCells(this._model, propertyId, cells);
-    applyPropertyUpdate(this._model);
   }
 
   rowAdd(insertPosition: InsertToPosition | number): string {
@@ -366,7 +367,7 @@ export class DatabaseBlockDataSource extends DataSourceBase {
     return this.viewDataList$.value.find(data => data.id === viewId)!;
   }
 
-  viewDataMoveTo(id: string, position: InsertToPosition): void {
+  viewDataMoveTo(id: string, position: NewInsertPosition): void {
     moveViewTo(this._model, id, position);
   }
 
@@ -452,10 +453,12 @@ export const databaseViewInitTemplate = (
       },
       model.id
     );
-    updateCell(model, rowId, {
-      columnId: statusId,
-      value: ids[i],
-    });
+    if (ids[i]) {
+      updateCell(model, rowId, {
+        columnId: statusId,
+        value: ids[i],
+      });
+    }
   }
   databaseViewInitEmpty(model, viewType);
 };
@@ -489,7 +492,6 @@ export const convertToDatabase = (host: EditorHost, viewType: string) => {
     return;
   }
   databaseViewInitConvert(databaseModel, viewType);
-  applyPropertyUpdate(databaseModel);
   host.doc.moveBlocks(selectedModels, databaseModel);
 
   const selectionManager = host.selection;

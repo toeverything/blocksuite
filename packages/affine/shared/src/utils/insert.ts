@@ -1,3 +1,5 @@
+import { generateKeyBetween } from 'fractional-indexing';
+
 export type InsertToPosition =
   | 'end'
   | 'start'
@@ -34,6 +36,41 @@ export function insertPositionToIndex<T>(
   }
   return arr.findIndex(v => key(v) === position) + 1;
 }
+
+export type NewInsertPosition = {
+  prevId?: string;
+  nextId?: string;
+};
+
+export const numIndexToStrIndex = (index: number) => {
+  return `V${index.toString(10).padStart(6, '0')}`;
+};
+
+export const getIndexMap = <
+  T extends {
+    id: string;
+    index?: string;
+  },
+>(
+  arr: T[]
+): Map<string, string> => {
+  const map = new Map<string, string>();
+  arr.forEach((v, i) => {
+    map.set(v.id, v.index ?? numIndexToStrIndex(i));
+  });
+  return map;
+};
+
+export const genIndexByPosition = (
+  position: NewInsertPosition,
+  indexMap: Map<string, string>
+) => {
+  return generateKeyBetween(
+    position.prevId ? indexMap.get(position.prevId) : null,
+    position.nextId ? indexMap.get(position.nextId) : null
+  );
+};
+
 export const arrayMove = <T>(
   arr: T[],
   from: (t: T) => boolean,

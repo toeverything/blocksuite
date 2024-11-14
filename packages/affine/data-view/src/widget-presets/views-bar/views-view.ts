@@ -172,11 +172,12 @@ export class DataViewHeaderViews extends WidgetBase {
             hide: () => index === 0,
             prefix: MoveLeftIcon(),
             select: () => {
-              const targetId = views[index - 1];
-              this.viewManager.moveTo(
-                id,
-                targetId ? { before: true, id: targetId } : 'start'
-              );
+              const prev = views[index - 2];
+              const next = views[index - 1];
+              this.viewManager.moveTo(id, {
+                prevId: prev,
+                nextId: next,
+              });
             },
           }),
           menu.action({
@@ -184,11 +185,12 @@ export class DataViewHeaderViews extends WidgetBase {
             prefix: MoveRightIcon(),
             hide: () => index === views.length - 1,
             select: () => {
-              const targetId = views[index + 1];
-              this.viewManager.moveTo(
-                id,
-                targetId ? { before: false, id: targetId } : 'end'
-              );
+              const prev = views[index + 1];
+              const next = views[index + 2];
+              this.viewManager.moveTo(id, {
+                prevId: prev,
+                nextId: next,
+              });
             },
           }),
           menu.group({
