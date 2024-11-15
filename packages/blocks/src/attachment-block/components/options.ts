@@ -1,5 +1,3 @@
-import type { AttachmentBlockModel } from '@blocksuite/affine-model';
-
 import {
   CaptionIcon,
   DownloadIcon,
@@ -13,6 +11,15 @@ import {
   renderGroups,
   renderToolbarSeparator,
 } from '@blocksuite/affine-components/toolbar';
+import {
+  type AttachmentBlockModel,
+  defaultAttachmentProps,
+} from '@blocksuite/affine-model';
+import {
+  EMBED_CARD_HEIGHT,
+  EMBED_CARD_WIDTH,
+} from '@blocksuite/affine-shared/consts';
+import { Bound } from '@blocksuite/global/utils';
 import { flip, offset } from '@floating-ui/dom';
 import { html, nothing } from 'lit';
 import { join } from 'lit/directives/join.js';
@@ -43,7 +50,17 @@ export function attachmentViewToggleMenu({
       label: 'Card view',
       disabled: readonly || !embedded,
       action: () => {
-        model.doc.updateBlock(model, { embed: false });
+        const style = defaultAttachmentProps.style!;
+        const width = EMBED_CARD_WIDTH[style];
+        const height = EMBED_CARD_HEIGHT[style];
+        const bound = Bound.deserialize(model.xywh);
+        bound.w = width;
+        bound.h = height;
+        model.doc.updateBlock(model, {
+          style,
+          embed: false,
+          xywh: bound.serialize(),
+        });
         callback?.();
       },
     },

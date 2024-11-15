@@ -27,6 +27,7 @@ type BackwardCompatibleUndefined = undefined;
 export const AttachmentBlockStyles: EmbedCardStyle[] = [
   'cubeThick',
   'horizontalThin',
+  'pdf',
 ] as const;
 
 export interface AttachmentBlockEdgelessProps {

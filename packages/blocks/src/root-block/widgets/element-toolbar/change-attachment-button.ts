@@ -90,26 +90,28 @@ export class EdgelessChangeAttachmentButton extends WithDisposable(LitElement) {
   override render() {
     return join(
       [
-        html`
-          <editor-menu-button
-            .contentPadding=${'8px'}
-            .button=${html`
-              <editor-icon-button
-                aria-label="Card style"
-                .tooltip=${'Card style'}
+        this.model.style === 'pdf'
+          ? null
+          : html`
+              <editor-menu-button
+                .contentPadding=${'8px'}
+                .button=${html`
+                  <editor-icon-button
+                    aria-label="Card style"
+                    .tooltip=${'Card style'}
+                  >
+                    ${PaletteIcon}
+                  </editor-icon-button>
+                `}
               >
-                ${PaletteIcon}
-              </editor-icon-button>
-            `}
-          >
-            <card-style-panel
-              .value=${this.model.style}
-              .options=${this._getCardStyleOptions}
-              .onSelect=${this._setCardStyle}
-            >
-            </card-style-panel>
-          </editor-menu-button>
-        `,
+                <card-style-panel
+                  .value=${this.model.style}
+                  .options=${this._getCardStyleOptions}
+                  .onSelect=${this._setCardStyle}
+                >
+                </card-style-panel>
+              </editor-menu-button>
+            `,
         this.viewToggleMenu,
         html`
           <editor-icon-button

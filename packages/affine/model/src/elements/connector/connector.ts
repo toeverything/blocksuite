@@ -396,6 +396,8 @@ export class ConnectorElementModel extends GfxPrimitiveElementModel<ConnectorEle
   override serialize() {
     const result = super.serialize();
     result.xywh = this.xywh;
+    result.source = structuredClone(this.source);
+    result.target = structuredClone(this.target);
     return result as SerializedConnectorElement;
   }
 

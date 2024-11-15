@@ -8,7 +8,8 @@ export type EmbedCardStyle =
   | 'video'
   | 'figma'
   | 'html'
-  | 'syncedDoc';
+  | 'syncedDoc'
+  | 'pdf';
 
 export type LinkPreviewData = {
   description: string | null;
