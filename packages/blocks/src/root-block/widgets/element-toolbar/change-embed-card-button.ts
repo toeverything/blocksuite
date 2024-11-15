@@ -490,7 +490,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
     this._blockComponent?.captionEditor?.show();
   }
 
-  private _viewMenuButton() {
+  private _viewToggleMenu() {
     if (this._canConvertToEmbedView || this._isEmbedView) {
       const buttons = [
         {
@@ -600,7 +600,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
 
       this._openMenuButton(),
 
-      this._viewMenuButton(),
+      this._viewToggleMenu(),
 
       'style' in model && this._canShowCardStylePanel
         ? html`
