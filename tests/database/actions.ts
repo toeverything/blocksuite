@@ -266,7 +266,7 @@ export async function assertDatabaseCellLink(
           'affine-database-link-cell-editing'
         );
       if (!richText) throw new Error('Missing database rich text cell');
-      return richText.inlineEditor.yText.toString();
+      return richText.inlineEditor?.yText.toString();
     },
     { rowIndex, columnIndex }
   );
