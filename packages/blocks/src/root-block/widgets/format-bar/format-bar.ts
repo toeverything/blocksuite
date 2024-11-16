@@ -182,7 +182,7 @@ export class AffineFormatBarWidget extends WidgetComponent {
             return;
           }
 
-          if (blockSelections.length > 0) {
+          if (this.block && blockSelections.length > 0) {
             this._displayType = 'block';
             const selectedBlocks = blockSelections
               .map(selection => {
