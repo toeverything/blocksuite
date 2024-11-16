@@ -112,3 +112,15 @@ export const debounce = <T extends (...args: any[]) => void>(
     timer = setTimeout(setTimer, limit);
   } as T;
 };
+
+export async function nextTick() {
+  // @ts-ignore
+  if ('scheduler' in window && 'yield' in window.scheduler) {
+    // @ts-ignore
+    return window.scheduler.yield();
+  } else if (typeof requestIdleCallback !== 'undefined') {
+    return new Promise(resolve => requestIdleCallback(resolve));
+  } else {
+    return new Promise(resolve => setTimeout(resolve, 0));
+  }
+}
