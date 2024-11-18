@@ -510,7 +510,7 @@ export class ToolController extends GfxExtension {
       return;
     }
 
-    this.gfx.selection.clear();
+    this.gfx.selection.set({ elements: [] });
 
     this.currentTool$.peek()?.deactivate();
     this.currentToolName$.value = toolNameStr;
