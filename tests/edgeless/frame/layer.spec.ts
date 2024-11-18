@@ -55,7 +55,7 @@ test.describe('layer logic of frame block', () => {
     );
     expect(
       sortedIds[0],
-      'a new frame created by short-cut should also be ont the bottom layer'
+      'a new frame created by short-cut should also be on the bottom layer'
     ).toBe(frameBId);
     expect(sortedIds[1]).toBe(frameAId);
     expect(sortedIds[2]).toBe(shapeId);
