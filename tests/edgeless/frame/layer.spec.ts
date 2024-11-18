@@ -41,7 +41,7 @@ test.describe('layer logic of frame block', () => {
     let sortedIds = await getAllSortedIds(page);
     expect(
       sortedIds[0],
-      'a new frame created by frame-tool should be ont the bottom layer'
+      'a new frame created by frame-tool should be on the bottom layer'
     ).toBe(frameAId);
     expect(sortedIds[1]).toBe(shapeId);
     expect(sortedIds[2]).toBe(noteId);
