@@ -6,24 +6,5 @@ export class CellBlockService extends BlockService {
 
   override mounted(): void {
     super.mounted();
-
-    // this.std.command.add('selectBlock', selectBlock);
-  }
-}
-
-// export const selectBlock: Command<'focusBlock'> = (ctx, next) => {
-//   const { focusBlock } = ctx;
-//   if (!focusBlock) {
-//     return;
-//   }
-
-//   return next();
-// };
-
-declare global {
-  namespace BlockSuite {
-    interface Commands {
-      selectBlock: typeof selectBlock;
-    }
   }
 }
