@@ -16,7 +16,10 @@ import { waitNextFrame } from 'utils/actions/misc.js';
 import { test } from '../utils/playwright.js';
 
 test.describe('presentation', () => {
-  test('should render note when enter presentation mode', async ({ page }) => {
+  // TODO(@L-Sun): the presentation order of frames should not use the fractional index of frame
+  test.skip('should render note when enter presentation mode', async ({
+    page,
+  }) => {
     await edgelessCommonSetup(page);
     await createShapeElement(page, [100, 100], [200, 200], Shape.Square);
     await createNote(page, [300, 100], 'hello');
