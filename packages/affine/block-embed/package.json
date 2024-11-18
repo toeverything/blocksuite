@@ -1,6 +1,6 @@
 {
   "name": "@blocksuite/affine-block-embed",
-  "version": "0.17.28",
+  "version": "0.17.32",
   "description": "Embed blocks for BlockSuite.",
   "type": "module",
   "repository": {

@@ -1,5 +1,96 @@
 # @blocksuite/affine
 
+## 0.17.32
+
+### Patch Changes
+
+- 7bc83ab: ## Fix
+
+  - fix: mind map text layout (#8737)
+
+- Updated dependencies [7bc83ab]
+  - @blocksuite/blocks@0.17.32
+  - @blocksuite/block-std@0.17.32
+  - @blocksuite/global@0.17.32
+  - @blocksuite/inline@0.17.32
+  - @blocksuite/store@0.17.32
+  - @blocksuite/presets@0.17.32
+
+## 0.17.31
+
+### Patch Changes
+
+- 8ab2800: patch more fix
+
+  ## Fix
+
+  - fix(database): lock the group while editing (#8741)
+  - fix(inline): double click in empty line (#8740)
+  - fix(inline): triple click in v-line (#8739)
+  - fix(database): root block might not exist in AFFiNE (#8738)
+
+  ## Refactor
+
+  - refactor: mind map drag (#8716)
+
+- Updated dependencies [8ab2800]
+  - @blocksuite/blocks@0.17.31
+  - @blocksuite/block-std@0.17.31
+  - @blocksuite/global@0.17.31
+  - @blocksuite/inline@0.17.31
+  - @blocksuite/store@0.17.31
+  - @blocksuite/presets@0.17.31
+
+## 0.17.30
+
+### Patch Changes
+
+- 5c327c8: ## Fix
+
+  - fix(database): title linked-doc convert logic (#8734)
+  - fix(blocks): pdf embed view overflow (#8733)
+
+- Updated dependencies [5c327c8]
+  - @blocksuite/blocks@0.17.30
+  - @blocksuite/block-std@0.17.30
+  - @blocksuite/global@0.17.30
+  - @blocksuite/inline@0.17.30
+  - @blocksuite/store@0.17.30
+  - @blocksuite/presets@0.17.30
+
+## 0.17.29
+
+### Patch Changes
+
+- 9cc49ff: ## Feat
+
+  - feat(database): support sorting for linked doc (#8715)
+
+  ## Fix
+
+  - fix(blocks): init collapsed state of list (#8727)
+  - fix(blocks): outline header sorting button tooltip (#8730)
+  - fix(database): date-picker styles (#8728)
+  - fix(blocks): only split paragraphs based on newlines (#8702)
+  - fix(edgeless): disable list and paragraph padding in edgeless text (#8723)
+  - fix(blocks): surface ref viewport element undefined (#8722)
+  - fix(blocks): show keyboard when at menu is triggered by keyboard toolbar (#8721)
+  - fix(database): linked doc convert logic (#8714)
+  - fix(database): improve the display logic of the row menu button (#8713)
+
+  ## Chore
+
+  - chore: configurable visibility of reference node popup (#8711)
+  - chore(blocks): disable dragging in mobile (#8724)
+
+- Updated dependencies [9cc49ff]
+  - @blocksuite/blocks@0.17.29
+  - @blocksuite/block-std@0.17.29
+  - @blocksuite/global@0.17.29
+  - @blocksuite/inline@0.17.29
+  - @blocksuite/store@0.17.29
+  - @blocksuite/presets@0.17.29
+
 ## 0.17.28
 
 ### Patch Changes

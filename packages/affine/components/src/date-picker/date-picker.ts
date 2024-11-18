@@ -514,6 +514,7 @@ export class DatePicker extends WithDisposable(LitElement) {
     const classes = classMap({
       'date-picker': true,
       [`date-picker--mode-${this._mode}`]: true,
+      popup: this.popup,
     });
     const wrapperStyle = styleMap({
       'min-height': `${this.minHeight}px`,
@@ -584,6 +585,9 @@ export class DatePicker extends WithDisposable(LitElement) {
   /** card padding in px */
   @property({ type: Number })
   accessor padding = 20;
+
+  @property({ type: Boolean })
+  accessor popup: boolean = false;
 
   /** cell size in px */
   @property({ type: Number })

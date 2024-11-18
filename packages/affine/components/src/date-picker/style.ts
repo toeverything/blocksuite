@@ -13,7 +13,7 @@ export const datePickerStyle = css`
     font-family: var(--affine-font-family);
   }
 
-  .popup .date-picker {
+  .popup.date-picker {
     background: var(--affine-background-overlay-panel-color);
     border-radius: 12px;
     box-shadow: var(--affine-menu-shadow);

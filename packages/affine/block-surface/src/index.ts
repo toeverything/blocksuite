@@ -53,10 +53,13 @@ export {
 } from './surface-spec.js';
 export { SurfaceBlockTransformer } from './surface-transformer.js';
 export { AStarRunner } from './utils/a-star.js';
+export {
+  NODE_FIRST_LEVEL_HORIZONTAL_SPACING,
+  NODE_HORIZONTAL_SPACING,
+  NODE_VERTICAL_SPACING,
+} from './utils/mindmap/layout.js';
 export { LayoutableMindmapElementModel } from './utils/mindmap/utils.js';
 export { RoughCanvas } from './utils/rough/canvas.js';
-
-export type { Options } from './utils/rough/core.js';
 
 import {
   almostEqual,
@@ -84,12 +87,15 @@ import { generateKeyBetween } from 'fractional-indexing';
 import { generateElementId, normalizeWheelDeltaY } from './utils/index.js';
 import {
   addTree,
+  containsNode,
   createFromTree,
   detachMindmap,
-  hideTargetConnector,
-  moveMindMapSubtree,
-  showMergeIndicator,
+  findTargetNode,
+  hideNodeConnector,
+  moveNode,
+  tryMoveNode,
 } from './utils/mindmap/utils.js';
+export type { Options } from './utils/rough/core.js';
 export { sortIndex } from './utils/sort.js';
 export { updateXYWH } from './utils/update-xywh.js';
 
@@ -140,7 +146,9 @@ export const MindmapUtils = {
   addTree,
   createFromTree,
   detachMindmap,
-  hideTargetConnector,
-  moveMindMapSubtree,
-  showMergeIndicator,
+  moveNode,
+  findTargetNode,
+  tryMoveNode,
+  hideNodeConnector,
+  containsNode,
 };

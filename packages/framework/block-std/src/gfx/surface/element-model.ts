@@ -11,6 +11,7 @@ import {
   DisposableGroup,
   getBoundWithRotation,
   getPointsFromBoundWithRotation,
+  isEqual,
   linePolygonIntersects,
   PointLocation,
   polygonGetPointTangent,
@@ -69,6 +70,7 @@ export interface PointTestOptions {
 
   /**
    * The padding of the response area for each element when do the hit testing. The unit is pixel.
+   * The first value is the padding for the x-axis, and the second value is the padding for the y-axis.
    */
   responsePadding?: [number, number];
 
@@ -290,9 +292,11 @@ export abstract class GfxPrimitiveElementModel<
     delete this[prop];
 
     if (getFieldPropsSet(this).has(prop as string)) {
-      this.surface.doc.transact(() => {
-        this.yMap.set(prop as string, value);
-      });
+      if (!isEqual(value, this.yMap.get(prop as string))) {
+        this.surface.doc.transact(() => {
+          this.yMap.set(prop as string, value);
+        });
+      }
     } else {
       console.warn('pop a prop that is not field or local:', prop);
     }
@@ -381,8 +385,6 @@ export abstract class GfxGroupLikeElementModel<
   extends GfxPrimitiveElementModel<Props>
   implements GfxContainerElement
 {
-  private _childBoundCacheKey: string = '';
-
   private _childIds: string[] = [];
 
   private _mutex = createMutex();
@@ -419,50 +421,47 @@ export abstract class GfxGroupLikeElementModel<
   }
 
   get xywh() {
-    if (
-      !this._local.has('xywh') ||
-      this.childElements.reduce(
-        (pre, model) => pre + (model.xywh ?? ''),
-        ''
-      ) !== this._childBoundCacheKey
-    ) {
-      this._mutex(() => {
-        this._updateXYWH();
-      });
-    }
+    this._mutex(() => {
+      const curXYWH =
+        (this._local.get('xywh') as SerializedXYWH) ?? '[0,0,0,0]';
+      const newXYWH = this._getXYWH().serialize();
+
+      if (curXYWH !== newXYWH || !this._local.has('xywh')) {
+        this._local.set('xywh', newXYWH);
+
+        if (curXYWH !== newXYWH) {
+          this._onChange({
+            props: {
+              xywh: newXYWH,
+            },
+            oldValues: {
+              xywh: curXYWH,
+            },
+            local: true,
+          });
+        }
+      }
+    });
 
     return (this._local.get('xywh') as SerializedXYWH) ?? '[0,0,0,0]';
   }
 
   set xywh(_) {}
 
-  private _updateXYWH() {
+  protected _getXYWH(): Bound {
     let bound: Bound | undefined;
-    let cacheKey = '';
-    const oldValue = (this._local.get('xywh') as SerializedXYWH) ?? '[0,0,0,0]';
 
     this.childElements.forEach(child => {
-      cacheKey += child.xywh ?? '';
       bound = bound ? bound.unite(child.elementBound) : child.elementBound;
     });
 
     if (bound) {
       this._local.set('xywh', bound.serialize());
-      this._childBoundCacheKey = cacheKey;
     } else {
       this._local.delete('xywh');
-      this._childBoundCacheKey = '';
     }
 
-    this._onChange({
-      props: {
-        xywh: bound?.serialize(),
-      },
-      oldValues: {
-        xywh: oldValue,
-      },
-      local: true,
-    });
+    return bound ?? new Bound(0, 0, 0, 0);
   }
 
   abstract addChild(element: GfxModel): void;

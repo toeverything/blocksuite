@@ -18,7 +18,6 @@ import { LinkedPageIcon } from '@blocksuite/icons/lit';
 import { computed, effect, signal } from '@preact/signals-core';
 import { css, type TemplateResult } from 'lit';
 import { property, query } from 'lit/decorators.js';
-import { keyed } from 'lit/directives/keyed.js';
 import { html } from 'lit/static-html.js';
 
 import type { DatabaseBlockComponent } from '../../database-block.js';
@@ -93,9 +92,9 @@ abstract class BaseTextCell extends BaseCellRenderer<Text> {
 
   docId$ = signal<string>();
 
-  isLinkedDoc$ = computed(() => !!this.docId$.value);
+  isLinkedDoc$ = computed(() => false);
 
-  title$ = computed(() => {
+  linkedDocTitle$ = computed(() => {
     if (!this.docId$.value) {
       return this.value;
     }
@@ -153,10 +152,7 @@ abstract class BaseTextCell extends BaseCellRenderer<Text> {
   }
 
   protected override render(): unknown {
-    return html`${this.renderIcon()}${keyed(
-      this.docId$.value,
-      this.isLinkedDoc$.value ? this.renderLinkedDoc() : this.renderBlockText()
-    )}`;
+    return html`${this.renderIcon()}${this.renderBlockText()}`;
   }
 
   abstract renderBlockText(): TemplateResult;
@@ -191,7 +187,7 @@ abstract class BaseTextCell extends BaseCellRenderer<Text> {
 export class HeaderAreaTextCell extends BaseTextCell {
   override renderBlockText() {
     return html` <rich-text
-      .yText="${this.title$.value}"
+      .yText="${this.value}"
       .attributesSchema="${this.attributesSchema}"
       .attributeRenderer="${this.attributeRenderer}"
       .embedChecker="${this.inlineManager?.embedChecker}"
@@ -203,7 +199,7 @@ export class HeaderAreaTextCell extends BaseTextCell {
 
   override renderLinkedDoc(): TemplateResult {
     return html` <rich-text
-      .yText="${this.title$.value}"
+      .yText="${this.linkedDocTitle$.value}"
       .readonly="${true}"
       class="data-view-header-area-rich-text"
     ></rich-text>`;
@@ -384,7 +380,7 @@ export class HeaderAreaTextCellEditing extends BaseTextCell {
 
   override renderBlockText() {
     return html` <rich-text
-      .yText="${this.title$.value}"
+      .yText="${this.value}"
       .inlineEventSource="${this.topContenteditableElement}"
       .attributesSchema="${this.attributesSchema}"
       .attributeRenderer="${this.attributeRenderer}"
@@ -402,7 +398,7 @@ export class HeaderAreaTextCellEditing extends BaseTextCell {
 
   override renderLinkedDoc(): TemplateResult {
     return html` <rich-text
-      .yText="${this.title$.value}"
+      .yText="${this.linkedDocTitle$.value}"
       .inlineEventSource="${this.topContenteditableElement}"
       .readonly="${this.readonly}"
       .enableClipboard="${true}"

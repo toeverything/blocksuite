@@ -2,7 +2,7 @@ import type { SurfaceBlockModel, SurfaceMiddleware } from '../surface-model.js';
 
 import { SurfaceGroupLikeModel } from '../element-model/base.js';
 
-export const groupRelationMiddleware: SurfaceMiddleware = (
+export const groupRelationWatcher: SurfaceMiddleware = (
   surface: SurfaceBlockModel
 ) => {
   const disposables = [

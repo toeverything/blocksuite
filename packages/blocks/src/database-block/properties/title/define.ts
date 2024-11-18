@@ -1,4 +1,3 @@
-import type { RootBlockModel } from '@blocksuite/affine-model';
 import type { Text } from '@blocksuite/store';
 
 import { propertyType, t } from '@blocksuite/data-view';
@@ -27,8 +26,7 @@ export const titlePurePropertyConfig = titleColumnType.modelConfig<Text>({
         .map(delta => {
           if (isLinkedDoc(delta)) {
             const linkedDocId = delta.attributes?.reference?.pageId as string;
-            const root = collection.getDoc(linkedDocId)?.root as RootBlockModel;
-            return root.title?.toString();
+            return collection.getDoc(linkedDocId)?.meta?.title;
           }
           return delta.insert;
         })

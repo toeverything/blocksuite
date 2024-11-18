@@ -1,9 +1,10 @@
 import type {
   BaseElementProps,
   GfxModel,
+  PointTestOptions,
   SerializedElement,
 } from '@blocksuite/block-std/gfx';
-import type { SerializedXYWH, XYWH } from '@blocksuite/global/utils';
+import type { Bound, SerializedXYWH, XYWH } from '@blocksuite/global/utils';
 
 import {
   convert,
@@ -27,7 +28,6 @@ import { z } from 'zod';
 import type { ConnectorStyle, MindmapStyleGetter } from './style.js';
 
 import { LayoutType, MindmapStyle } from '../../consts/mindmap.js';
-import { TextResizing } from '../../consts/text.js';
 import { LocalConnectorElementModel } from '../connector/local-connector.js';
 import { mindmapStyleGetters } from './style.js';
 
@@ -45,6 +45,17 @@ export type MindmapNode = {
 
   element: BlockSuite.SurfaceElementModel;
   children: MindmapNode[];
+
+  /**
+   * When dragging another node into this area, it will become a sibling of the target node.
+   * However, if it is dragged into the small area located right after the target node, it will become a child node of the target node.
+   */
+  responseArea?: Bound;
+
+  /**
+   * The bound of the entire subtree
+   */
+  treeBound?: Bound;
 
   /**
    * This property override the preferredDir or default layout direction.
@@ -132,18 +143,13 @@ function watchStyle(_: unknown, instance: MindmapElementModel, local: boolean) {
 }
 
 export class MindmapElementModel extends GfxGroupLikeElementModel<MindmapElementProps> {
-  private _layoutHandler = (
-    _mindmap: MindmapElementModel,
-    _tree: MindmapNode | MindmapRoot = this.tree,
-    _applyStyle = true,
-    _layoutType?: LayoutType
-  ) => {};
-
   private _nodeMap = new Map<string, MindmapNode>();
 
   private _queueBuildTree = false;
 
   private _queued = false;
+
+  private _stashedNode = new Set<string>();
 
   private _tree!: MindmapRoot;
 
@@ -229,6 +235,10 @@ export class MindmapElementModel extends GfxGroupLikeElementModel<MindmapElement
     }
 
     return { outdated: true, cacheKey };
+  }
+
+  protected override _getXYWH(): Bound {
+    return super._getXYWH();
   }
 
   /**
@@ -347,7 +357,6 @@ export class MindmapElementModel extends GfxGroupLikeElementModel<MindmapElement
         id = this.surface.addElement({
           type,
           xywh: '[0,0,100,30]',
-          textResizing: TextResizing.AUTO_WIDTH_AND_HEIGHT,
           maxWidth: false,
           ...props,
           ...style.node,
@@ -382,8 +391,7 @@ export class MindmapElementModel extends GfxGroupLikeElementModel<MindmapElement
         id = this.surface.addElement({
           type,
           xywh: '[0,0,113,41]',
-          textResizing: TextResizing.AUTO_WIDTH_AND_HEIGHT,
-          maxWidth: 400,
+          maxWidth: false,
           ...props,
           ...rootStyle,
         });
@@ -507,7 +515,7 @@ export class MindmapElementModel extends GfxGroupLikeElementModel<MindmapElement
     );
   }
 
-  getLayoutDir(node: string | MindmapNode): LayoutType | null {
+  getLayoutDir(node: string | MindmapNode): LayoutType {
     node = typeof node === 'string' ? this._nodeMap.get(node)! : node;
 
     assertType<MindmapNode>(node);
@@ -525,11 +533,14 @@ export class MindmapElementModel extends GfxGroupLikeElementModel<MindmapElement
         : null;
 
       if (parent === root) {
-        return root.left.includes(current)
-          ? LayoutType.LEFT
-          : root.right.includes(current)
-            ? LayoutType.RIGHT
-            : this.layoutType;
+        return (
+          parent.overriddenDir ??
+          (root.left.includes(current)
+            ? LayoutType.LEFT
+            : root.right.includes(current)
+              ? LayoutType.RIGHT
+              : this.layoutType)
+        );
       }
 
       current = parent;
@@ -618,12 +629,31 @@ export class MindmapElementModel extends GfxGroupLikeElementModel<MindmapElement
     return sibling;
   }
 
+  override includesPoint(x: number, y: number, options: PointTestOptions) {
+    const bound = this.elementBound;
+
+    bound.x -= options.responsePadding?.[0] ?? 0;
+    bound.w += (options.responsePadding?.[0] ?? 0) * 2;
+    bound.y -= options.responsePadding?.[1] ?? 0;
+    bound.h += (options.responsePadding?.[1] ?? 0) * 2;
+
+    return bound.containsPoint([x, y]);
+  }
+
   layout(
     _tree: MindmapNode | MindmapRoot = this.tree,
-    _applyStyle = true,
-    _layoutType?: LayoutType
+    _options: {
+      applyStyle?: boolean;
+      layoutType?: LayoutType;
+      calculateTreeBound?: boolean;
+      stashed?: boolean;
+    } = {
+      applyStyle: true,
+      calculateTreeBound: true,
+      stashed: true,
+    }
   ) {
-    return this._layoutHandler(this, _tree, _applyStyle, _layoutType);
+    // should be override by subclass
   }
 
   moveTo(targetXYWH: SerializedXYWH | XYWH) {
@@ -705,48 +735,34 @@ export class MindmapElementModel extends GfxGroupLikeElementModel<MindmapElement
     return result as SerializedMindmapElement;
   }
 
+  /**
+   * Stash mind map node and its children's xywh property
+   * @param node
+   * @returns a function that write back the stashed xywh into yjs
+   */
   stashTree(node: MindmapNode | string) {
     const mindNode = typeof node === 'string' ? this.getNode(node) : node;
 
-    if (!mindNode) {
+    if (!mindNode || this._stashedNode.has(mindNode.id)) {
       return;
     }
 
-    const stashed = new Set<
-      BlockSuite.SurfaceElementModel | LocalConnectorElementModel
-    >();
-    const traverse = (node: MindmapNode, parent: MindmapNode | null) => {
+    const stashed = new Set<BlockSuite.SurfaceElementModel>();
+    const traverse = (node: MindmapNode) => {
       node.element.stash('xywh');
-      node.element.opacity = 0.3;
       stashed.add(node.element);
 
-      if (parent) {
-        const connectorId = `#${parent.element.id}-${node.element.id}`;
-        const connector = this.connectors.get(connectorId);
-
-        if (connector) {
-          connector.opacity = 0.3;
-          stashed.add(connector);
-        }
-      }
-
       if (node.children.length) {
-        node.children.forEach(child => traverse(child, node));
+        node.children.forEach(child => traverse(child));
       }
     };
 
-    const parent = this.getParentNode(mindNode.element.id);
-    const parentNode = parent ? this.getNode(parent.id) : null;
-
-    traverse(mindNode, parentNode);
+    traverse(mindNode);
 
     return () => {
+      this._stashedNode.delete(mindNode.id);
       stashed.forEach(el => {
-        if ('pop' in el) {
-          el.pop('xywh');
-        }
-
-        el.opacity = 1;
+        el.pop('xywh');
       });
     };
   }

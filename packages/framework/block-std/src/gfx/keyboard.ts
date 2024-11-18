@@ -28,7 +28,7 @@ export class KeyboardController {
       this.std.event.add('keyUp', evt => {
         const state = evt.get('keyboardState');
 
-        this.shiftKey$.value = !state.raw.shiftKey && state.raw.key === 'Shift';
+        this.shiftKey$.value = state.raw.shiftKey && state.raw.key === 'Shift';
 
         if (state.raw.code === 'Space') {
           this.spaceKey$.value = false;
