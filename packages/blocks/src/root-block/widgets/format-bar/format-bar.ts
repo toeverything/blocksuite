@@ -150,6 +150,8 @@ export class AffineFormatBarWidget extends WidgetComponent {
             }
           }
 
+          // We cannot use `host.getUpdateComplete()` here
+          // because it would cause excessive DOM queries, leading to UI jamming.
           await nextTick();
 
           if (textSelection) {
