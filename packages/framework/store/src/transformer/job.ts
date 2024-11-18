@@ -1,5 +1,5 @@
 import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
-import { Slot } from '@blocksuite/global/utils';
+import { nextTick, Slot } from '@blocksuite/global/utils';
 
 import type { BlockModel, BlockSchemaType } from '../schema/index.js';
 import type { Doc, DocCollection, DocMeta } from '../store/index.js';
@@ -43,18 +43,6 @@ interface DraftBlockTreeNode {
   draft: DraftModel;
   snapshot: BlockSnapshot;
   children: Array<DraftBlockTreeNode>;
-}
-
-async function nextTick() {
-  // @ts-ignore
-  if ('scheduler' in window && 'yield' in window.scheduler) {
-    // @ts-ignore
-    return window.scheduler.yield();
-  } else if (typeof requestIdleCallback !== 'undefined') {
-    return new Promise(resolve => requestIdleCallback(resolve));
-  } else {
-    return new Promise(resolve => setTimeout(resolve, 0));
-  }
 }
 
 // The number of blocks to insert in one batch
