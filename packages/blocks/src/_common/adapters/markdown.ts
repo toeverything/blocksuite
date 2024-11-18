@@ -940,7 +940,7 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
       .use(remarkStringify, {
         resourceLink: true,
       })
-      .use(remarkMath)
+      .use(remarkMath, { singleDollarTextMath: false })
       .stringify(ast)
       .replace(/&#x20;\n/g, ' \n');
   }
@@ -1036,7 +1036,7 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
     return unified()
       .use(remarkParse)
       .use(remarkGfm)
-      .use(remarkMath)
+      .use(remarkMath, { singleDollarTextMath: false })
       .parse(markdown);
   }
 

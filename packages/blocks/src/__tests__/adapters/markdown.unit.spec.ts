@@ -1020,7 +1020,7 @@ hhh
         },
       ],
     };
-    const markdown = 'inline $E=mc^2$ latex\n';
+    const markdown = 'inline $$E=mc^2$$ latex\n';
 
     const mdAdapter = new MarkdownAdapter(createJob());
     const target = await mdAdapter.fromBlockSnapshot({
@@ -1076,7 +1076,7 @@ hhh
       ],
     };
 
-    const markdown = '$$\nE=mc^2\n$$\n';
+    const markdown = '$$$$\nE=mc^2\n$$$$\n';
 
     const mdAdapter = new MarkdownAdapter(createJob());
     const target = await mdAdapter.fromBlockSnapshot({
@@ -3422,7 +3422,7 @@ hhh
   });
 
   test('inline latex', async () => {
-    const markdown = 'inline $E=mc^2$ latex\n';
+    const markdown = 'inline $$E=mc^2$$ latex\n';
     const blockSnapshot: BlockSnapshot = {
       type: 'block',
       id: 'matchesReplaceMap[0]',
@@ -3472,7 +3472,7 @@ hhh
   });
 
   test('latex block', async () => {
-    const markdown = '$$\nE=mc^2\n$$\n';
+    const markdown = '$$$$\nE=mc^2\n$$$$\n';
 
     const blockSnapshot: BlockSnapshot = {
       type: 'block',
