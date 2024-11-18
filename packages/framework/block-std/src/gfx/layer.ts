@@ -646,12 +646,24 @@ export class LayerManager {
     this.slots.layerUpdated.dispose();
   }
 
-  generateIndex(): string {
-    const lastIndex = last(this.layers)?.indexes[1];
+  /**
+   * @param reverse - if true, generate the index in reverse order
+   * @returns
+   */
+  generateIndex(reverse = false): string {
+    if (reverse) {
+      const firstIndex = this.layers[0]?.indexes[0];
 
-    return lastIndex
-      ? generateKeyBetween(ungroupIndex(lastIndex), null)
-      : LayerManager.INITIAL_INDEX;
+      return firstIndex
+        ? generateKeyBetween(null, ungroupIndex(firstIndex))
+        : LayerManager.INITIAL_INDEX;
+    } else {
+      const lastIndex = last(this.layers)?.indexes[1];
+
+      return lastIndex
+        ? generateKeyBetween(ungroupIndex(lastIndex), null)
+        : LayerManager.INITIAL_INDEX;
+    }
   }
 
   getCanvasLayers() {
