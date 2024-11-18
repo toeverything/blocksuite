@@ -592,30 +592,6 @@ export const defaultSlashMenuConfig: SlashMenuConfig = {
       },
     },
     {
-      name: 'Micro Sheet',
-      description: 'Display items in a table format.',
-      alias: ['table'],
-      icon: DatabaseTableViewIcon20,
-      tooltip: slashMenuToolTips['Table'],
-      showWhen: ({ model }) =>
-        model.doc.schema.flavourSchemaMap.has('affine:microsheet') &&
-        !insideEdgelessText(model),
-      action: ({ rootComponent, model }) => {
-        const id = createMicrosheetBlockInNextLine(model);
-        if (!id) {
-          return;
-        }
-        const service = rootComponent.std.getService('affine:microsheet');
-        if (!service) return;
-        service.initMicrosheetBlock(
-          rootComponent.doc,
-          id,
-          viewPresets.tableViewMeta.type
-        );
-        tryRemoveEmptyLine(model);
-      },
-    },
-    {
       name: 'Kanban View',
       description: 'Visualize data in a dashboard.',
       alias: ['database'],
@@ -634,6 +610,30 @@ export const defaultSlashMenuConfig: SlashMenuConfig = {
             removeEmptyLine: true,
           })
           .run();
+      },
+    },
+    {
+      name: 'Normal Table',
+      description: 'Display items in a table format.',
+      alias: ['database'],
+      icon: DatabaseTableViewIcon20,
+      tooltip: slashMenuToolTips['Table'],
+      showWhen: ({ model }) =>
+        model.doc.schema.flavourSchemaMap.has('affine:microsheet') &&
+        !insideEdgelessText(model),
+      action: ({ rootComponent, model }) => {
+        const id = createMicrosheetBlockInNextLine(model);
+        if (!id) {
+          return;
+        }
+        const service = rootComponent.std.getService('affine:microsheet');
+        if (!service) return;
+        service.initMicrosheetBlock(
+          rootComponent.doc,
+          id,
+          viewPresets.tableViewMeta.type
+        );
+        tryRemoveEmptyLine(model);
       },
     },
 
