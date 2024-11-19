@@ -441,7 +441,7 @@ test(scoped`should copy and paste of database work`, async ({ page }) => {
     /*xml*/ `
 <affine:page>
   <affine:note
-    prop:background="--affine-note-background-white"
+    prop:background="--affine-v2-edgeless-note-white"
     prop:displayMode="both"
     prop:edgeless={
       Object {
@@ -491,7 +491,7 @@ test(scoped`should copy and paste of database work`, async ({ page }) => {
     /*xml*/ `
 <affine:page>
   <affine:note
-    prop:background="--affine-note-background-white"
+    prop:background="--affine-v2-edgeless-note-white"
     prop:displayMode="both"
     prop:edgeless={
       Object {
@@ -574,7 +574,7 @@ test(scoped`paste note block with background`, async ({ page }) => {
   await selectNoteInEdgeless(page, ids.noteId);
 
   await triggerComponentToolbarAction(page, 'changeNoteColor');
-  const color = '--affine-note-background-grey';
+  const color = '--affine-v2-edgeless-note-white';
   await changeEdgelessNoteBackground(page, color);
   await assertEdgelessNoteBackground(page, ids.noteId, color);
 

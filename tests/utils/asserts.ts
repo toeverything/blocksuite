@@ -112,7 +112,7 @@ export const defaultStore = {
           'sys:children': ['2'],
           'sys:version': 1,
           'prop:xywh': `[0,0,${DEFAULT_NOTE_WIDTH}, ${DEFAULT_NOTE_HEIGHT}]`,
-          'prop:background': '--affine-note-background-white',
+          'prop:background': '--affine-v2-edgeless-note-white',
           'prop:index': 'a0',
           'prop:hidden': false,
           'prop:displayMode': 'both',

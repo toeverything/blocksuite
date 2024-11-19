@@ -1,5 +1,5 @@
 import { createEnumMap } from '../utils/enum.js';
-import { LineColor } from './line.js';
+import { StrokeColor } from './color.js';
 
 export enum ConnectorEndpoint {
   Front = 'Front',
@@ -16,9 +16,9 @@ export enum PointStyle {
 
 export const PointStyleMap = createEnumMap(PointStyle);
 
-export const DEFAULT_CONNECTOR_COLOR = LineColor.Grey;
+export const DEFAULT_CONNECTOR_COLOR = StrokeColor.Grey;
 
-export const DEFAULT_CONNECTOR_TEXT_COLOR = LineColor.Black;
+export const DEFAULT_CONNECTOR_TEXT_COLOR = StrokeColor.Black;
 
 export const DEFAULT_FRONT_END_POINT_STYLE = PointStyle.None;
 

@@ -6,12 +6,13 @@ import {
 } from '@blocksuite/affine-components/icons';
 import {
   DEFAULT_SHAPE_FILL_COLOR,
-  LineColor,
+  LIGHT_PALETTES,
+  MEDIUM_PALETTES,
   SHAPE_FILL_COLORS,
-  type ShapeFillColor,
   type ShapeName,
   ShapeStyle,
   ShapeType,
+  StrokeColor,
 } from '@blocksuite/affine-model';
 import {
   EditPropsStore,
@@ -25,11 +26,7 @@ import { property } from 'lit/decorators.js';
 import type { EdgelessRootBlockComponent } from '../../../edgeless-root-block.js';
 
 import { type ColorEvent, isTransparent } from '../../panel/color-panel.js';
-import {
-  LINE_COLOR_PREFIX,
-  SHAPE_COLOR_PREFIX,
-  ShapeComponentConfig,
-} from './shape-menu-config.js';
+import { ShapeComponentConfig } from './shape-menu-config.js';
 
 export class EdgelessShapeMenu extends SignalWatcher(
   WithDisposable(LitElement)
@@ -81,15 +78,19 @@ export class EdgelessShapeMenu extends SignalWatcher(
     };
   });
 
-  private _setFillColor = (fillColor: ShapeFillColor) => {
+  private _setFillColor = (fillColor: string) => {
     const filled = !isTransparent(fillColor);
-    let strokeColor = fillColor.replace(
-      SHAPE_COLOR_PREFIX,
-      LINE_COLOR_PREFIX
-    ) as LineColor;
+    let strokeColor = fillColor; // white or black
+
+    if (filled) {
+      const index = LIGHT_PALETTES.findIndex(color => color === fillColor);
+      if (index !== -1) {
+        strokeColor = MEDIUM_PALETTES[index];
+      }
+    }
 
     if (strokeColor.endsWith('transparent')) {
-      strokeColor = LineColor.Grey;
+      strokeColor = StrokeColor.Grey;
     }
 
     const { shapeName } = this._props$.value;
@@ -178,15 +179,15 @@ export class EdgelessShapeMenu extends SignalWatcher(
             )}
           </div>
           <menu-divider .vertical=${true}></menu-divider>
-          <edgeless-one-row-color-panel
+          <edgeless-color-panel
+            class="one-way"
             .value=${color}
-            .options=${SHAPE_FILL_COLORS}
+            .palettes=${SHAPE_FILL_COLORS}
             .hasTransparent=${!this.edgeless.doc.awarenessStore.getFlag(
               'enable_color_picker'
             )}
-            @select=${(e: ColorEvent) =>
-              this._setFillColor(e.detail as ShapeFillColor)}
-          ></edgeless-one-row-color-panel>
+            @select=${(e: ColorEvent) => this._setFillColor(e.detail)}
+          ></edgeless-color-panel>
         </div>
       </edgeless-slide-menu>
     `;

@@ -1,5 +1,6 @@
 import type { GfxToolsFullOptionValue } from '@blocksuite/block-std/gfx';
 
+import { STROKE_COLORS } from '@blocksuite/affine-model';
 import {
   EditPropsStore,
   ThemeProvider,
@@ -65,13 +66,15 @@ export class EdgelessBrushMenu extends EdgelessToolbarToolMixin(
           >
           </edgeless-line-width-panel>
           <menu-divider .vertical=${true}></menu-divider>
-          <edgeless-one-row-color-panel
+          <edgeless-color-panel
+            class="one-way"
             .value=${color}
+            .palettes=${STROKE_COLORS}
             .hasTransparent=${!this.edgeless.doc.awarenessStore.getFlag(
               'enable_color_picker'
             )}
             @select=${(e: ColorEvent) => this.onChange({ color: e.detail })}
-          ></edgeless-one-row-color-panel>
+          ></edgeless-color-panel>
         </div>
       </edgeless-slide-menu>
     `;

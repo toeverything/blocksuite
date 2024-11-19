@@ -1,18 +1,34 @@
+/* eslint perfectionist/sort-enums: "off" */
+
 import { z } from 'zod';
 
 import { createEnumMap } from '../utils/enum.js';
 
 export enum LineWidth {
-  Eight = 8,
+  Two = 2,
   // Thin
   Four = 4,
   Six = 6,
+  Eight = 8,
   // Thick
   Ten = 10,
   Twelve = 12,
-  Two = 2,
 }
 
+export const LINE_WIDTHS = [
+  LineWidth.Two,
+  LineWidth.Four,
+  LineWidth.Six,
+  LineWidth.Eight,
+  LineWidth.Ten,
+  LineWidth.Twelve,
+];
+
+/**
+ * Use `StrokeColor` instead.
+ *
+ * @deprecated
+ */
 export enum LineColor {
   Black = '--affine-palette-line-black',
   Blue = '--affine-palette-line-blue',

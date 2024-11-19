@@ -1,15 +1,9 @@
-import { TransparentIcon } from '@blocksuite/affine-components/icons';
-import {
-  ColorScheme,
-  LINE_COLORS,
-  LineColor,
-  NoteBackgroundColor,
-  ShapeFillColor,
-} from '@blocksuite/affine-model';
-import { css, html, LitElement, nothing } from 'lit';
+import { Black, ColorScheme, PALETTES, White } from '@blocksuite/affine-model';
+import { unsafeCSSVarV2 } from '@blocksuite/affine-shared/theme';
+import { css, html, LitElement, nothing, svg, type TemplateResult } from 'lit';
 import { property } from 'lit/decorators.js';
+import { classMap } from 'lit/directives/class-map.js';
 import { repeat } from 'lit/directives/repeat.js';
-import { styleMap } from 'lit/directives/style-map.js';
 
 export class ColorEvent extends Event {
   detail: string;
@@ -28,70 +22,64 @@ export class ColorEvent extends Event {
 }
 
 export const GET_DEFAULT_LINE_COLOR = (theme: ColorScheme) => {
-  return theme === ColorScheme.Dark ? LineColor.White : LineColor.Black;
+  return theme === ColorScheme.Dark ? White : Black;
 };
 
 export function isTransparent(color: string) {
   return color.toLowerCase().endsWith('transparent');
 }
 
-function isSameColorWithBackground(color: string) {
-  const colors: string[] = [
-    LineColor.Black,
-    LineColor.White,
-    NoteBackgroundColor.Black,
-    NoteBackgroundColor.White,
-    ShapeFillColor.Black,
-    ShapeFillColor.White,
-  ];
-  return colors.includes(color.toLowerCase());
-}
-
-function TransparentColor(hollowCircle = false) {
-  const containerStyle = {
-    position: 'relative',
-    width: '16px',
-    height: '16px',
-    stroke: 'none',
-  };
-  const maskStyle = {
-    position: 'absolute',
-    width: '10px',
-    height: '10px',
-    left: '3px',
-    top: '3.5px',
-    borderRadius: '50%',
-    background: 'var(--affine-background-overlay-panel-color)',
-  };
-
-  const mask = hollowCircle
-    ? html`<div style=${styleMap(maskStyle)}></div>`
+function TransparentIcon(hollowCircle = false) {
+  const CircleIcon: TemplateResult | typeof nothing = hollowCircle
+    ? svg`<circle cx="10" cy="10" r="8" fill="white" />`
     : nothing;
 
   return html`
-    <div style=${styleMap(containerStyle)}>${TransparentIcon} ${mask}</div>
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="20"
+      height="20"
+      viewBox="0 0 20 20"
+      fill="none"
+    >
+      <path
+        fill-rule="evenodd"
+        clip-rule="evenodd"
+        d="M-1.17405 5.17857C-1.2241 5.5285 -1.25 5.88623 -1.25 6.25V8.39286H1.96429V11.6071H-1.25V13.75C-1.25 14.1138 -1.2241 14.4715 -1.17405 14.8214H1.96429V18.0357H0.0943102C0.602244 18.7639 1.23609 19.3978 1.96429 19.9057V18.0357L5.17857 18.0357V21.174C5.5285 21.2241 5.88623 21.25 6.25 21.25H8.39286V18.0357H11.6071V21.25H13.75C14.1138 21.25 14.4715 21.2241 14.8214 21.174V18.0357H18.0357L18.0357 19.9057C18.7639 19.3978 19.3978 18.7639 19.9057 18.0357L18.0357 18.0357V14.8214H21.174C21.2241 14.4715 21.25 14.1138 21.25 13.75V11.6071H18.0357V8.39286H21.25V6.25C21.25 5.88623 21.2241 5.5285 21.174 5.17857H18.0357V1.96429H19.9057C19.3978 1.23609 18.7639 0.602244 18.0357 0.09431L18.0357 1.96429H14.8214V-1.17405C14.4715 -1.2241 14.1138 -1.25 13.75 -1.25H11.6071V1.96429H8.39286V-1.25H6.25C5.88623 -1.25 5.5285 -1.2241 5.17857 -1.17405V1.96429H1.96429V0.0943099C1.23609 0.602244 0.602244 1.23609 0.0943099 1.96429H1.96429V5.17857H-1.17405ZM5.17857 5.17857V1.96429H8.39286V5.17857H5.17857ZM5.17857 8.39286H1.96429V5.17857H5.17857V8.39286ZM8.39286 8.39286V5.17857H11.6071V8.39286H8.39286ZM8.39286 11.6071V8.39286H5.17857V11.6071H1.96429V14.8214H5.17857V18.0357H8.39286V14.8214H11.6071V18.0357H14.8214V14.8214H18.0357V11.6071H14.8214V8.39286H18.0357V5.17857H14.8214V1.96429H11.6071V5.17857H14.8214V8.39286H11.6071V11.6071H8.39286ZM8.39286 11.6071V14.8214H5.17857V11.6071H8.39286ZM11.6071 11.6071H14.8214V14.8214H11.6071V11.6071Z"
+        fill="#D9D9D9"
+      />
+      ${CircleIcon}
+    </svg>
   `;
 }
 
-function BorderedHollowCircle(color: string) {
-  const valid = color.startsWith('--');
-  const strokeWidth = valid && isSameColorWithBackground(color) ? 1 : 0;
-  const style = {
-    fill: valid ? `var(${color})` : color,
-    stroke: 'var(--affine-border-color)',
-  };
+function CircleIcon(color: string) {
   return html`
     <svg
-      width="16"
-      height="16"
-      viewBox="0 0 16 16"
-      fill="none"
       xmlns="http://www.w3.org/2000/svg"
+      width="20"
+      height="20"
+      viewBox="0 0 20 20"
+      fill="${color}"
+    >
+      <circle cx="10" cy="10" r="10" />
+    </svg>
+  `;
+}
+
+function HollowCircleIcon(color: string) {
+  return html`
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="20"
+      height="20"
+      viewBox="0 0 20 20"
+      fill="${color}"
     >
       <path
-        d="M12.3125 8C12.3125 10.3817 10.3817 12.3125 8 12.3125C5.61827 12.3125 3.6875 10.3817 3.6875 8C3.6875 5.61827 5.61827 3.6875 8 3.6875C10.3817 3.6875 12.3125 5.61827 12.3125 8ZM8 15.5C12.1421 15.5 15.5 12.1421 15.5 8C15.5 3.85786 12.1421 0.5 8 0.5C3.85786 0.5 0.5 3.85786 0.5 8C0.5 12.1421 3.85786 15.5 8 15.5Z"
-        stroke-width="${strokeWidth}"
-        style=${styleMap(style)}
+        fill-rule="evenodd"
+        clip-rule="evenodd"
+        d="M10 17C13.866 17 17 13.866 17 10C17 6.13401 13.866 3 10 3C6.13401 3 3 6.13401 3 10C3 13.866 6.13401 17 10 17ZM10 20C15.5228 20 20 15.5228 20 10C20 4.47715 15.5228 0 10 0C4.47715 0 0 4.47715 0 10C0 15.5228 4.47715 20 10 20Z"
       />
     </svg>
   `;
@@ -99,76 +87,82 @@ function BorderedHollowCircle(color: string) {
 
 function AdditionIcon(color: string, hollowCircle: boolean) {
   if (isTransparent(color)) {
-    return TransparentColor(hollowCircle);
+    return TransparentIcon(hollowCircle);
   }
+
   if (hollowCircle) {
-    return BorderedHollowCircle(color);
+    return HollowCircleIcon(color);
   }
-  return nothing;
-}
 
-export function ColorUnit(
-  color: string,
-  {
-    hollowCircle,
-    letter,
-  }: {
-    hollowCircle?: boolean;
-    letter?: boolean;
-  } = {}
-) {
-  const additionIcon = AdditionIcon(color, !!hollowCircle);
-
-  const colorStyle =
-    !hollowCircle && !isTransparent(color)
-      ? { background: `var(${color})` }
-      : {};
-
-  const borderStyle =
-    isSameColorWithBackground(color) && !hollowCircle
-      ? {
-          border: '0.5px solid var(--affine-border-color)',
-        }
-      : {};
-
-  const style = {
-    width: '16px',
-    height: '16px',
-    borderRadius: '50%',
-    boxSizing: 'border-box',
-    overflow: 'hidden',
-    ...borderStyle,
-    ...colorStyle,
-  };
-
-  return html`
-    <div
-      class="color-unit"
-      style=${styleMap(style)}
-      aria-label=${color.toLowerCase()}
-      data-letter=${letter ? 'A' : ''}
-    >
-      ${additionIcon}
-    </div>
-  `;
+  return CircleIcon(color);
 }
 
 export class EdgelessColorButton extends LitElement {
   static override styles = css`
     :host {
+      position: relative;
+      width: 20px;
+      height: 20px;
       display: flex;
       justify-content: center;
       align-items: center;
+      cursor: pointer;
+    }
+
+    .color-unit {
+      position: relative;
+      width: 16px;
+      height: 16px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border-radius: 50%;
+      box-sizing: border-box;
+    }
+    .color-unit svg {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      overflow: hidden;
+    }
+    :host .color-unit:after {
+      position: absolute;
+      display: block;
+      content: '';
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      box-sizing: border-box;
+      overflow: hidden;
+      pointer-events: none;
+      border-width: 0.5px;
+      border-style: solid;
+      border-color: ${unsafeCSSVarV2('layer/insideBorder/blackBorder')};
+    }
+    :host(.black) .color-unit:after {
+      border-color: ${unsafeCSSVarV2('layer/insideBorder/border')};
+    }
+
+    :host(.large) {
+      width: 24px;
+      height: 24px;
+    }
+    :host(.large) .color-unit {
       width: 20px;
       height: 20px;
     }
 
-    .color-unit {
-      width: 16px;
-      height: 16px;
+    :host([active]):after {
+      position: absolute;
+      display: block;
+      content: '';
+      width: 27px;
+      height: 27px;
+      border: 1.5px solid var(--affine-primary-color);
       border-radius: 50%;
       box-sizing: border-box;
       overflow: hidden;
+      pointer-events: none;
     }
   `;
 
@@ -178,85 +172,54 @@ export class EdgelessColorButton extends LitElement {
   }
 
   override render() {
-    const { color, hollowCircle, letter } = this;
-    const additionIcon = AdditionIcon(color, !!hollowCircle);
-    const style: Record<string, string> = {};
-    if (!hollowCircle) {
-      style.background = this.preprocessColor;
-      if (isSameColorWithBackground(color)) {
-        style.border = '0.5px solid var(--affine-border-color)';
-      }
-    }
+    const { color, preprocessColor, hollowCircle, letter } = this;
+    const additionIcon = AdditionIcon(preprocessColor, !!hollowCircle);
     return html`<div
       class="color-unit"
-      aria-label=${color.toLowerCase()}
+      aria-label=${color}
       data-letter=${letter ? 'A' : nothing}
-      style=${styleMap(style)}
     >
       ${additionIcon}
     </div>`;
   }
 
+  @property({ attribute: true, type: Boolean })
+  accessor active: boolean = false;
+
   @property({ attribute: false })
   accessor color!: string;
 
   @property({ attribute: false })
-  accessor hollowCircle: boolean | undefined = undefined;
+  accessor hollowCircle: boolean = false;
 
   @property({ attribute: false })
   accessor letter: boolean | undefined = undefined;
 }
 
-export const colorContainerStyles = css`
-  .color-container {
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
-    box-sizing: border-box;
-    overflow: hidden;
-    cursor: pointer;
-    padding: 2px;
-  }
-
-  .color-unit::before {
-    content: attr(data-letter);
-    display: block;
-    font-size: 12px;
-  }
-
-  .color-container[active]:after {
-    position: absolute;
-    width: 20px;
-    height: 20px;
-    border: 0.5px solid var(--affine-primary-color);
-    border-radius: 50%;
-    box-sizing: border-box;
-    content: attr(data-letter);
-  }
-`;
-
 export class EdgelessColorPanel extends LitElement {
   static override styles = css`
     :host {
-      display: flex;
-      flex-direction: row;
-      flex-wrap: wrap;
-      width: 184px;
-      gap: 8px;
+      display: grid;
+      grid-gap: 4px;
+      grid-template-columns: repeat(9, 1fr);
     }
 
-    ${colorContainerStyles}
-  `;
+    /* note */
+    :host(.small) {
+      grid-template-columns: repeat(6, 1fr);
+      grid-gap: 8px;
+    }
 
-  get palettes() {
-    return this.hasTransparent
-      ? ['--affine-palette-transparent', ...this.options]
-      : this.options;
-  }
+    /* edgeless toolbar */
+    :host(.one-way) {
+      display: flex;
+      flex-wrap: nowrap;
+      padding: 0 2px;
+      gap: 14px;
+      box-sizing: border-box;
+      background: var(--affine-background-overlay-panel-color);
+    }
+  `;
 
   onSelect(value: string) {
     this.dispatchEvent(
@@ -274,24 +237,20 @@ export class EdgelessColorPanel extends LitElement {
       ${repeat(
         this.palettes,
         color => color,
-        color => {
-          const unit = ColorUnit(color, {
-            hollowCircle: this.hollowCircle,
-            letter: this.showLetterMark,
-          });
-
-          return html`
-            <div
-              class="color-container"
-              ?active=${color === this.value}
-              @click=${() => this.onSelect(color)}
-            >
-              ${unit}
-            </div>
-          `;
-        }
+        color =>
+          html`<edgeless-color-button
+            class=${classMap({
+              large: true,
+              black: color.startsWith('--') && color.endsWith('black'),
+            })}
+            .color=${color}
+            .letter=${this.showLetterMark}
+            .hollowCircle=${this.hollowCircle}
+            ?active=${color === this.value}
+            @click=${() => this.onSelect(color)}
+          >
+          </edgeless-color-button>`
       )}
-      </div>
       <slot name="custom"></slot>
     `;
   }
@@ -306,7 +265,7 @@ export class EdgelessColorPanel extends LitElement {
   accessor openColorPicker!: (e: MouseEvent) => void;
 
   @property({ type: Array })
-  accessor options: readonly string[] = LINE_COLORS;
+  accessor palettes: readonly string[] = PALETTES;
 
   @property({ attribute: false })
   accessor showLetterMark = false;
@@ -334,11 +293,11 @@ export class EdgelessTextColorIcon extends LitElement {
   override render() {
     return html`
       <svg
+        xmlns="http://www.w3.org/2000/svg"
         width="20"
         height="20"
         viewBox="0 0 20 20"
         fill="none"
-        xmlns="http://www.w3.org/2000/svg"
       >
         <path
           fill-rule="evenodd"

@@ -1,6 +1,7 @@
 import {
   DEFAULT_NOTE_HEIGHT,
   DEFAULT_NOTE_WIDTH,
+  NoteBackgroundColor,
   NoteDisplayMode,
 } from '@blocksuite/affine-model';
 import { expect } from '@playwright/test';
@@ -304,12 +305,12 @@ test('change note color', async ({ page }) => {
   await assertEdgelessNoteBackground(
     page,
     noteId,
-    '--affine-note-background-white'
+    '--affine-v2-edgeless-note-white'
   );
 
   await selectNoteInEdgeless(page, noteId);
   await triggerComponentToolbarAction(page, 'changeNoteColor');
-  const color = '--affine-note-background-green';
+  const color = NoteBackgroundColor.Green;
   await changeEdgelessNoteBackground(page, color);
   await assertEdgelessNoteBackground(page, noteId, color);
 });

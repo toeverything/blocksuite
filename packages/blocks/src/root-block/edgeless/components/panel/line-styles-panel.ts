@@ -3,7 +3,7 @@ import {
   DashLineIcon,
   StraightLineIcon,
 } from '@blocksuite/affine-components/icons';
-import { type LineWidth, StrokeStyle } from '@blocksuite/affine-model';
+import { LineWidth, StrokeStyle } from '@blocksuite/affine-model';
 import { html } from 'lit';
 import { classMap } from 'lit/directives/class-map.js';
 import { repeat } from 'lit/directives/repeat.js';
@@ -47,14 +47,14 @@ const LINE_STYLE_LIST = [
 
 export function LineStylesPanel({
   onClick,
-  selectedLineSize,
   selectedLineStyle,
+  selectedLineSize = LineWidth.Two,
   lineStyles = [StrokeStyle.Solid, StrokeStyle.Dash, StrokeStyle.None],
 }: LineStylesPanelProps = {}) {
   const lineSizePanel = html`
     <edgeless-line-width-panel
-      .selectedSize=${selectedLineSize as LineWidth}
-      .disable=${selectedLineStyle === StrokeStyle.None}
+      ?disabled=${selectedLineStyle === StrokeStyle.None}
+      .selectedSize=${selectedLineSize}
       @select=${(e: LineWidthEvent) => {
         onClick?.({
           type: 'size',
@@ -69,15 +69,15 @@ export function LineStylesPanel({
     item => item.value,
     ({ name, icon, value }) => {
       const active = selectedLineStyle === value;
-      const classes: Record<string, boolean> = {
+      const classInfo = {
         'line-style-button': true,
         [`mode-${value}`]: true,
       };
-      if (active) classes['active'] = true;
+      if (active) classInfo['active'] = true;
 
       return html`
         <edgeless-tool-icon-button
-          class=${classMap(classes)}
+          class=${classMap(classInfo)}
           .active=${active}
           .activeMode=${'background'}
           .tooltip=${name}
