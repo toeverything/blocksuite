@@ -228,7 +228,6 @@ export class TableGroup extends SignalWatcher(
         const left =
           over.rect.left < active.rect.left ? over.rect.left : over.rect.right;
         const height = bottom - over.rect.top;
-        console.log('height', height, bottom, over.rect.top);
         columnMoveIndicator.display(left, over.rect.top, height);
       })
     );
