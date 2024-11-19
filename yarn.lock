@@ -1491,7 +1491,7 @@ __metadata:
     "@blocksuite/affine-shared": "workspace:*"
     "@blocksuite/block-std": "workspace:*"
     "@blocksuite/global": "workspace:*"
-    "@blocksuite/icons": "npm:^2.1.68"
+    "@blocksuite/icons": "npm:^2.1.70"
     "@blocksuite/inline": "workspace:*"
     "@blocksuite/store": "workspace:*"
     "@floating-ui/dom": "npm:^1.6.10"
@@ -1578,7 +1578,7 @@ __metadata:
     "@blocksuite/affine-shared": "workspace:*"
     "@blocksuite/block-std": "workspace:*"
     "@blocksuite/global": "workspace:*"
-    "@blocksuite/icons": "npm:^2.1.68"
+    "@blocksuite/icons": "npm:^2.1.70"
     "@blocksuite/inline": "workspace:*"
     "@blocksuite/store": "workspace:*"
     "@floating-ui/dom": "npm:^1.6.10"
@@ -1697,7 +1697,7 @@ __metadata:
     "@blocksuite/block-std": "workspace:*"
     "@blocksuite/data-view": "workspace:*"
     "@blocksuite/global": "workspace:*"
-    "@blocksuite/icons": "npm:^2.1.68"
+    "@blocksuite/icons": "npm:^2.1.70"
     "@blocksuite/inline": "workspace:*"
     "@blocksuite/microsheet-data-view": "workspace:*"
     "@blocksuite/store": "workspace:*"
@@ -1750,7 +1750,7 @@ __metadata:
     "@blocksuite/affine-shared": "workspace:*"
     "@blocksuite/block-std": "workspace:*"
     "@blocksuite/global": "workspace:*"
-    "@blocksuite/icons": "npm:^2.1.68"
+    "@blocksuite/icons": "npm:^2.1.70"
     "@blocksuite/store": "workspace:*"
     "@emotion/hash": "npm:^0.9.2"
     "@floating-ui/dom": "npm:^1.6.10"
@@ -1803,9 +1803,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@blocksuite/icons@npm:^2.1.68":
-  version: 2.1.69
-  resolution: "@blocksuite/icons@npm:2.1.69"
+"@blocksuite/icons@npm:^2.1.70":
+  version: 2.1.70
+  resolution: "@blocksuite/icons@npm:2.1.70"
   peerDependencies:
     "@types/react": ^18.0.25
     lit: ^3.1.1
@@ -1815,7 +1815,7 @@ __metadata:
       optional: true
     react:
       optional: true
-  checksum: 10/c2d8e7d72bb950fbaa6de8fd6c67d354932c32c72932c9c6f1132fbde6f2fb865a767ab17035ee3c83fe779b05b09a0d71506c623b17e5f7d1eb7c4bce61df02
+  checksum: 10/ce4f7109c82dba1a2d5e9384c63fe9b6f91540aae203f4a23fcf07c0578db937112c007000d63ecac5b950feb3a27c3022eb13a418afd42b8407bbf32a8fce12
   languageName: node
   linkType: hard
 

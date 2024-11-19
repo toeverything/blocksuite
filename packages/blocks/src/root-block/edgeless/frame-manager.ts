@@ -167,6 +167,7 @@ export class EdgelessFrameManager extends GfxExtension {
           new DocCollection.Y.Text(`Frame ${this.frames.length + 1}`)
         ),
         xywh: bound.serialize(),
+        index: this.gfx.layer.generateIndex(true),
       },
       surfaceModel
     );

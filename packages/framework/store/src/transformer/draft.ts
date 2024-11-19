@@ -1,13 +1,6 @@
 import type { BlockModel } from '../schema/base.js';
 
-type PropsInDraft =
-  | 'version'
-  | 'flavour'
-  | 'role'
-  | 'page'
-  | 'id'
-  | 'keys'
-  | 'text';
+type PropsInDraft = 'version' | 'flavour' | 'role' | 'id' | 'keys' | 'text';
 
 type ModelProps<Model> = Model extends BlockModel<infer U> ? U : never;
 
