@@ -162,12 +162,18 @@ export class TableGroup extends SignalWatcher(
         };
       },
     ],
-    onDragOver: ({ over }) => {
-      if (over) {
-        const column = this.querySelector(
-          `affine-database-header-column[data-column-id="${over.id}"]`
+    onDragEnd: ({ over, active }) => {
+      if (over && over.id !== active.id) {
+        const activeIndex = this.view.properties$.value.findIndex(
+          data => data.id === active.id
         );
-        console.log('drag over', column?.column.name$.value);
+        const overIndex = this.view.properties$.value.findIndex(
+          data => data.id === over.id
+        );
+        this.view.propertyMove(active.id, {
+          before: activeIndex > overIndex,
+          id: over.id,
+        });
       }
     },
     collisionDetection: linearMove(true),
@@ -179,13 +185,14 @@ export class TableGroup extends SignalWatcher(
       preview.container = this;
       preview.style.position = 'absolute';
       preview.style.zIndex = '999';
+      const scale = this.dndContext.scale$.value;
       const offsetParentRect = this.offsetParent?.getBoundingClientRect();
       if (!offsetParentRect) {
         return;
       }
       preview.style.width = `${column.width$.value}px`;
-      preview.style.left = `${active.rect.left - offsetParentRect.left}px`;
-      preview.style.top = `${active.rect.top - offsetParentRect.top - 1}px`;
+      preview.style.top = `${(active.rect.top - offsetParentRect.top - 1) / scale.y}px`;
+      preview.style.left = `${(active.rect.left - offsetParentRect.left) / scale.x}px`;
       const cells = Array.from(
         this.querySelectorAll(`[data-column-id="${active.id}"]`)
       ) as HTMLElement[];

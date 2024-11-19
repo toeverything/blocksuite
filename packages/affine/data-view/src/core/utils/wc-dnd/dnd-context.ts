@@ -20,10 +20,13 @@ import type {
   UniqueIdentifier,
 } from './types.js';
 
+import { add } from './utils/adjustment.js';
 import { applyModifiers } from './utils/apply-modifiers.js';
 import { closestCenter } from './utils/closest-center.js';
 import { createDataDirective } from './utils/data-directive.js';
 import { asHTMLElement } from './utils/element.js';
+import { getFirstScrollableAncestor } from './utils/get-scrollable-ancestors.js';
+import { raf } from './utils/raf.js';
 import { getClientRect } from './utils/rect.js';
 import { getAdjustedRect } from './utils/rect-adjustment.js';
 import { computedCache } from './utils/signal.js';
@@ -45,18 +48,53 @@ export type DndContextConfig = {
   onDragCancel?(event: DragCancelEvent): void;
   createOverlay?: (active: Active) => OverlayData | undefined;
 };
-
+const timeWeight = 1 / 16;
+const distanceWeight = 2 / 8;
+const moveDistance = (diff: number, delta: number) =>
+  (diff * distanceWeight + 4) * delta * timeWeight;
 const defaultCoordinates: Coordinates = {
   x: 0,
   y: 0,
 };
 
 export class DndContext {
+  private dragMove = (coordinates: Coordinates) => {
+    this.activationCoordinates$.value = coordinates;
+    this.autoScroll();
+  };
+
   private droppableNodes$ = signal<DroppableNodes>(new Map());
 
   private initialCoordinates$ = signal<Coordinates>();
 
+  private initScrollOffset$ = signal(defaultCoordinates);
+
   private session$ = signal<DndSession>();
+
+  private startSession = (
+    id: UniqueIdentifier,
+    activeNode: HTMLElement,
+    sessionCreator: DndSessionCreator
+  ) => {
+    this.collectDroppableNodes();
+    this.session$.value = sessionCreator({
+      onStart: coordinates => {
+        const { onDragStart } = this.config;
+        const active = {
+          id,
+          node: activeNode,
+          rect: getClientRect(activeNode),
+        };
+        onDragStart?.({
+          active: active,
+        });
+        this.dragStart(active, coordinates);
+      },
+      onCancel: this.dragComplete(true),
+      onEnd: this.dragComplete(),
+      onMove: this.dragMove,
+    });
+  };
 
   activationCoordinates$ = signal<Coordinates>();
 
@@ -86,6 +124,12 @@ export class DndContext {
       x: initCoord.x - initNodeRect.left,
       y: initCoord.y - initNodeRect.top,
     };
+  });
+
+  collisionRect$ = computed(() => {
+    return this.active$.value?.rect
+      ? getAdjustedRect(this.active$.value.rect, this.appliedTranslate$.value)
+      : undefined;
   });
 
   enabledDroppableContainers$ = computed(() => {
@@ -148,54 +192,47 @@ export class DndContext {
       active: this.active$.value,
       activeNodeRect: this.active$.value?.rect,
       over: this.over$.preValue,
-      // overlayNodeRect: dragOverlay.rect,
     });
   });
 
+  scrollOffset$ = signal<Coordinates>(defaultCoordinates);
+
   // eslint-disable-next-line perfectionist/sort-classes
-  collisionRect$ = computed(() => {
-    return this.active$.value?.rect
-      ? getAdjustedRect(this.active$.value.rect, this.modifiedTranslate$.value)
-      : undefined;
+  appliedTranslate$ = computed(() => {
+    return add(this.modifiedTranslate$.value, this.scrollOffset$.value);
   });
 
   disposables: Array<() => void> = [];
 
   dragEndCleanupQueue: Array<() => void> = [];
 
-  dragMove = (coordinates: Coordinates) => {
-    this.activationCoordinates$.value = coordinates;
-  };
-
   overlay$ = signal<HTMLElement>();
 
-  startSession = (
-    id: UniqueIdentifier,
-    activeNode: HTMLElement,
-    sessionCreator: DndSessionCreator
-  ) => {
-    this.collectDroppableNodes();
-    this.session$.value = sessionCreator({
-      onStart: coordinates => {
-        const { onDragStart } = this.config;
-        const active = {
-          id,
-          node: activeNode,
-          rect: getClientRect(activeNode),
-        };
-        onDragStart?.({
-          active: active,
-        });
-        this.dragStart(active, coordinates);
-      },
-      onCancel: this.dragComplete(true),
-      onEnd: this.dragComplete(),
-      onMove: this.dragMove,
-    });
-  };
+  scale$ = signal<{ x: number; y: number }>({ x: 1, y: 1 });
+
+  scrollableAncestor$ = computed(() => {
+    if (!this.active$.value) {
+      return;
+    }
+    return getFirstScrollableAncestor(this.active$.value.node);
+  });
+
+  scrollableAncestorRect$ = computed(() => {
+    const scrollableAncestor = this.scrollableAncestor$.value;
+    if (!scrollableAncestor) {
+      return;
+    }
+    return getClientRect(scrollableAncestor);
+  });
+
+  scrollAdjustedTranslate$ = computed(() => {
+    const translate = this.translate$.value;
+    const scrollOffset = this.scrollOffset$.value;
+    return add(translate, scrollOffset);
+  });
 
   transform$ = computed<Transform>(() => {
-    return this.modifiedTranslate$.value;
+    return this.appliedTranslate$.value;
   });
 
   get activators() {
@@ -214,6 +251,75 @@ export class DndContext {
     this.listenActivators();
     this.listenMoveEvent();
     this.listenOverEvent();
+  }
+
+  private addActiveClass(node: HTMLElement) {
+    const hasClass = node.classList.contains('dnd-active');
+    if (hasClass) {
+      return;
+    }
+    node.classList.add('dnd-active');
+    this.dragEndCleanupQueue.push(() => {
+      node.classList.remove('dnd-active');
+    });
+  }
+
+  private addTransition(node: HTMLElement) {
+    const old = node.style.transition;
+    node.style.transition = 'transform 0.2s';
+    this.dragEndCleanupQueue.push(() => {
+      node.style.transition = old;
+    });
+  }
+
+  private autoScroll() {
+    const currentOverlayRect = this.overlay$.value
+      ? getClientRect(this.overlay$.value)
+      : {
+          top: this.activationCoordinates$.value?.y ?? 0,
+          left: this.activationCoordinates$.value?.x ?? 0,
+          width: 0,
+          height: 0,
+          bottom: this.activationCoordinates$.value?.y ?? 0,
+          right: this.activationCoordinates$.value?.x ?? 0,
+        };
+    const scrollableAncestor = this.scrollableAncestor$.value;
+    const scrollableAncestorRect = this.scrollableAncestorRect$.value;
+    if (!scrollableAncestorRect || !scrollableAncestor) {
+      return;
+    }
+    let topDiff = 0;
+    let leftDiff = 0;
+    if (currentOverlayRect.top < scrollableAncestorRect.top) {
+      topDiff = currentOverlayRect.top - scrollableAncestorRect.top;
+    }
+    if (currentOverlayRect.left < scrollableAncestorRect.left) {
+      leftDiff = currentOverlayRect.left - scrollableAncestorRect.left;
+    }
+    if (currentOverlayRect.bottom > scrollableAncestorRect.bottom) {
+      topDiff = currentOverlayRect.bottom - scrollableAncestorRect.bottom;
+    }
+    if (currentOverlayRect.right > scrollableAncestorRect.right) {
+      leftDiff = currentOverlayRect.right - scrollableAncestorRect.right;
+    }
+    if (topDiff || leftDiff) {
+      const run = (delta: number) => {
+        if (leftDiff) {
+          scrollableAncestor.scrollLeft += moveDistance(leftDiff, delta);
+        }
+        if (topDiff) {
+          scrollableAncestor.scrollTop += moveDistance(topDiff, delta);
+        }
+        this.onScroll(
+          scrollableAncestor.scrollLeft,
+          scrollableAncestor.scrollTop
+        );
+        raf(run);
+      };
+      raf(run);
+    } else {
+      raf();
+    }
   }
 
   private collectDroppableNodes() {
@@ -236,11 +342,77 @@ export class DndContext {
     this.droppableNodes$.value = map;
   }
 
+  private createOverlay(active: Active) {
+    const overlay = this.config.createOverlay?.(active);
+    if (!overlay) {
+      return;
+    }
+    this.overlay$.value = overlay.overlay;
+    this.dragEndCleanupQueue.push(() => {
+      overlay.cleanup?.();
+    });
+  }
+
+  private dragComplete(cancel: boolean = false) {
+    return () => {
+      let event: DragEndEvent | null = null;
+      const active = this.active$.peek();
+      if (active && this.modifiedTranslate$.value) {
+        event = {
+          active: active,
+          collisions: this.collisions$.peek(),
+          delta: this.modifiedTranslate$.peek(),
+          over: this.over$.peek(),
+        };
+      }
+      this.dragEndCleanup();
+      if (event) {
+        this.config[cancel ? 'onDragCancel' : 'onDragEnd']?.(event);
+      }
+    };
+  }
+
+  private dragEndCleanup() {
+    this.active$.value?.node.classList?.remove('dnd-active');
+    this.activationCoordinates$.value = undefined;
+    this.active$.value = undefined;
+    this.session$.value = undefined;
+    raf();
+    this.dragEndCleanupQueue.forEach(f => f());
+  }
+
+  private dragStart(active: Active, coordinates: Coordinates) {
+    this.active$.value = active;
+    this.initialCoordinates$.value = coordinates;
+    this.scale$.value = {
+      x: active.rect.width / active.node.offsetWidth,
+      y: active.rect.height / active.node.offsetHeight,
+    };
+    this.createOverlay(active);
+    this.listenScroll();
+    this.addActiveClass(active.node);
+    this.setPointerEvents(this.config.container);
+    this.droppableNodes$.value.forEach(v => {
+      this.addTransition(v.node);
+    });
+  }
+
   private getDroppableNode(id: Identifier) {
     if (id == null) {
       return;
     }
     return this.droppableNodes$.value.get(id);
+  }
+
+  private listenActivators() {
+    const unsubList = this.activators.map(activator => {
+      return activator(this.container, this.startSession);
+    });
+    this.disposables.push(() => {
+      unsubList.forEach(unsub => {
+        unsub();
+      });
+    });
   }
 
   private listenMoveEvent() {
@@ -262,7 +434,8 @@ export class DndContext {
         });
         if (this.overlay$.value) {
           const transform = this.transform$.value;
-          this.overlay$.value.style.transform = `translate(${transform.x}px,${transform.y}px)`;
+          const scale = this.scale$.value;
+          this.overlay$.value.style.transform = `translate(${transform.x / scale.x}px,${transform.y / scale.y}px)`;
         }
       })
     );
@@ -287,73 +460,37 @@ export class DndContext {
     );
   }
 
-  createOverlay(active: Active) {
-    const overlay = this.config.createOverlay?.(active);
-    if (!overlay) {
+  private listenScroll() {
+    const scrollAncestor = this.scrollableAncestor$.value;
+    if (!scrollAncestor) {
       return;
     }
-    this.overlay$.value = overlay.overlay;
+    this.initScrollOffset$.value = {
+      x: scrollAncestor.scrollLeft,
+      y: scrollAncestor.scrollTop,
+    };
+    this.scrollOffset$.value = defaultCoordinates;
+    const onScroll = () => {
+      this.onScroll(scrollAncestor.scrollLeft, scrollAncestor.scrollTop);
+    };
+    scrollAncestor.addEventListener('scroll', onScroll);
     this.dragEndCleanupQueue.push(() => {
-      overlay.cleanup?.();
+      scrollAncestor.removeEventListener('scroll', onScroll);
     });
   }
 
-  dragComplete(cancel: boolean = false) {
-    return () => {
-      let event: DragEndEvent | null = null;
-      const active = this.active$.peek();
-      if (active && this.modifiedTranslate$.value) {
-        event = {
-          active: active,
-          collisions: this.collisions$.peek(),
-          delta: this.modifiedTranslate$.peek(),
-          over: this.over$.peek(),
-        };
-      }
-      this.dragEndCleanup();
-      if (event) {
-        this.config[cancel ? 'onDragCancel' : 'onDragEnd']?.(event);
-      }
+  private onScroll(x: number, y: number) {
+    this.scrollOffset$.value = {
+      x: (x - this.initScrollOffset$.value.x) * this.scale$.value.x,
+      y: (y - this.initScrollOffset$.value.y) * this.scale$.value.y,
     };
   }
 
-  dragEndCleanup() {
-    this.active$.value?.node.classList?.remove('dnd-active');
-    this.activationCoordinates$.value = undefined;
-    this.active$.value = undefined;
-    this.session$.value = undefined;
-    this.dragEndCleanupQueue.forEach(f => f());
-  }
-
-  dragStart(active: Active, coordinates: Coordinates) {
-    this.active$.value = active;
-    this.initialCoordinates$.value = coordinates;
-    this.createOverlay(active);
-    active.node.classList.add('dnd-active');
-    const style = this.config.container.style;
-    const pointerEvents = style.pointerEvents;
-    style.pointerEvents = 'none';
-    const cleanups = [...this.droppableNodes$.value.values()].map(v => {
-      const old = v.node.style.transition;
-      v.node.style.transition = 'transform 0.2s';
-      return () => {
-        v.node.style.transition = old;
-      };
-    });
+  private setPointerEvents(container: HTMLElement) {
+    const old = container.style.pointerEvents;
+    container.style.pointerEvents = 'none';
     this.dragEndCleanupQueue.push(() => {
-      style.pointerEvents = pointerEvents;
-      cleanups.forEach(f => f());
-    });
-  }
-
-  listenActivators() {
-    const unsubList = this.activators.map(activator => {
-      return activator(this.container, this.startSession);
-    });
-    this.disposables.push(() => {
-      unsubList.forEach(unsub => {
-        unsub();
-      });
+      container.style.pointerEvents = old;
     });
   }
 }

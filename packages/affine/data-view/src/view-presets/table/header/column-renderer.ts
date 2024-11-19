@@ -27,7 +27,6 @@ export class DataViewColumnPreview extends SignalWatcher(
 
   private renderGroup(rows: string[]) {
     const columnIndex = this.tableViewManager.propertyIndexGet(this.column.id);
-    console.log('columnIndex', columnIndex);
     return html`
       <div
         style="background-color: var(--affine-background-primary-color);border-top: 1px solid var(--affine-border-color);box-shadow: var(--affine-shadow-2);"
