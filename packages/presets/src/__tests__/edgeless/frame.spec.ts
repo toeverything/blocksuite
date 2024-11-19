@@ -1,6 +1,7 @@
 import type {
   EdgelessRootBlockComponent,
   FrameBlockComponent,
+  FrameBlockModel,
 } from '@blocksuite/blocks';
 
 import { assertType } from '@blocksuite/global/utils';
@@ -135,5 +136,37 @@ describe('frame', () => {
 
     service.viewport.setCenter(900, 900);
     expect(frame?.model.externalXYWH).toBeDefined();
+  });
+
+  test('descendant of frame should not contain itself', async () => {
+    const frameIds = [1, 2, 3].map(i => {
+      return service.doc.addBlock(
+        'affine:frame',
+        {
+          xywh: '[0,0,300,300]',
+          title: new Text(`Frame ${i}`),
+        },
+        service.surface.id
+      );
+    });
+
+    await wait();
+
+    const frames = frameIds.map(
+      id => service.doc.getBlock(id)?.model as FrameBlockModel
+    );
+
+    frames.forEach(frame => {
+      expect(frame.descendantElements).toHaveLength(0);
+    });
+
+    frames[0].addChild(frames[1]);
+    frames[1].addChild(frames[2]);
+    frames[2].addChild(frames[0]);
+
+    await wait();
+    expect(frames[0].descendantElements).toHaveLength(2);
+    expect(frames[1].descendantElements).toHaveLength(1);
+    expect(frames[2].descendantElements).toHaveLength(0);
   });
 });

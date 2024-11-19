@@ -191,6 +191,29 @@ describe('group', () => {
     expect(group.w).toBe(0);
     expect(group.h).toBe(0);
   });
+
+  test('descendant of group should not contain itself', () => {
+    const groupIds = [1, 2, 3].map(_ => {
+      return service.addElement('group', {
+        children: new DocCollection.Y.Map<boolean>(),
+      });
+    });
+    const groups = groupIds.map(
+      id => service.getElementById(id) as GroupElementModel
+    );
+
+    groups.forEach(group => {
+      expect(group.descendantElements).toHaveLength(0);
+    });
+
+    groups[0].addChild(groups[1]);
+    groups[1].addChild(groups[2]);
+    groups[2].addChild(groups[0]);
+
+    expect(groups[0].descendantElements).toHaveLength(2);
+    expect(groups[1].descendantElements).toHaveLength(1);
+    expect(groups[2].descendantElements).toHaveLength(0);
+  });
 });
 
 describe('mindmap', () => {
