@@ -27,9 +27,9 @@ import {
   ConnectorMode,
   LINE_COLORS,
   SHAPE_FILL_COLORS,
-  SHAPE_STROKE_COLORS,
   ShapeStyle,
   ShapeType,
+  STROKE_COLORS,
 } from '@blocksuite/affine-model';
 import {
   EditPropsStore,
@@ -331,7 +331,7 @@ pie.colorPicker({
     });
     updateShapeOverlay(rootComponent);
   },
-  colors: SHAPE_STROKE_COLORS.map(color => ({ color, name: 'Color' })),
+  colors: STROKE_COLORS.map(color => ({ color, name: 'Color' })),
 });
 
 pie.endSubmenu();
