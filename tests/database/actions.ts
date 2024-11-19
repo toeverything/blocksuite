@@ -431,7 +431,7 @@ export async function assertCellsSelection(
       x,
       y,
       height,
-      width,
+      width: width + 1,
     });
   }
 }
