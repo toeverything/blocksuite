@@ -4,6 +4,7 @@ export {
   SortOrder,
 } from '../utils/layer.js';
 export {
+  canSafeAddToContainer,
   descendantElementsImpl,
   getAncestorContainersImpl,
   getTopElements,
