@@ -209,7 +209,8 @@ export class DatabaseHeaderColumn extends SignalWatcher(
                   });
                   Promise.resolve()
                     .then(() => {
-                      const pre = this.previousElementSibling;
+                      const pre =
+                        this.previousElementSibling?.previousElementSibling;
                       if (pre instanceof DatabaseHeaderColumn) {
                         pre.editTitle();
                         pre.scrollIntoView({
@@ -231,7 +232,7 @@ export class DatabaseHeaderColumn extends SignalWatcher(
                   });
                   Promise.resolve()
                     .then(() => {
-                      const next = this.nextElementSibling;
+                      const next = this.nextElementSibling?.nextElementSibling;
                       if (next instanceof DatabaseHeaderColumn) {
                         next.editTitle();
                         next.scrollIntoView({
