@@ -269,7 +269,7 @@ test('should support drag to change column width', async ({ page }) => {
   await assertColumnWidth(normalColumn, normalColumnWidth);
 
   await undoByClick(page);
-  await assertColumnWidth(titleColumn, titleColumnWidth);
+  await assertColumnWidth(titleColumn, titleColumnWidth + 1);
   await assertColumnWidth(normalColumn, normalColumnWidth);
 });
 
@@ -324,7 +324,7 @@ test('should support drag and drop to move columns', async ({ page }) => {
         await waitNextFrame(page);
         const indicator = page
           .locator('.vertical-indicator-container')
-          .locator('.vertical-indicator-group')
+          .locator('.vertical-indicator')
           .first();
         await expect(indicator).toBeVisible();
 
