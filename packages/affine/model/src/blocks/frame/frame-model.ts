@@ -7,6 +7,7 @@ import type {
 } from '@blocksuite/block-std/gfx';
 
 import {
+  canSafeAddToContainer,
   descendantElementsImpl,
   gfxContainerSymbol,
   hasDescendantElementImpl,
@@ -77,13 +78,17 @@ export class FrameBlockModel
   }
 
   addChild(element: GfxModel) {
+    if (!canSafeAddToContainer(this, element)) return;
+
     this.doc.transact(() => {
       this.childElementIds = { ...this.childElementIds, [element.id]: true };
     });
   }
 
-  addChildren(elements: (GfxModel | string)[]): void {
-    elements = [...new Set(elements)];
+  addChildren(elements: GfxModel[]): void {
+    elements = [...new Set(elements)].filter(element =>
+      canSafeAddToContainer(this, element)
+    );
 
     const newChildren: Record<string, boolean> = {};
     for (const element of elements) {

@@ -44,18 +44,28 @@ function traverse(
   preCallback?: (element: GfxModel) => void | boolean,
   postCallBack?: (element: GfxModel) => void
 ) {
-  if (preCallback) {
-    const interrupt = preCallback(element);
-    if (interrupt) return;
-  }
+  // avoid infinite loop caused by circular reference
+  const visited = new Set<GfxModel>();
 
-  if (isGfxContainerElm(element)) {
-    element.childElements.forEach(child => {
-      traverse(child, preCallback, postCallBack);
-    });
-  }
+  const innerTraverse = (element: GfxModel) => {
+    if (visited.has(element)) return;
+    visited.add(element);
 
-  postCallBack && postCallBack(element);
+    if (preCallback) {
+      const interrupt = preCallback(element);
+      if (interrupt) return;
+    }
+
+    if (isGfxContainerElm(element)) {
+      element.childElements.forEach(child => {
+        innerTraverse(child);
+      });
+    }
+
+    postCallBack && postCallBack(element);
+  };
+
+  innerTraverse(element);
 }
 
 export function getAncestorContainersImpl(element: GfxModel) {
@@ -92,4 +102,20 @@ export function hasDescendantElementImpl(
     _container = _container.container;
   }
   return false;
+}
+
+/**
+ * This checker is used to prevent circular reference, when adding a child element to a container.
+ */
+export function canSafeAddToContainer(
+  container: GfxContainerElement & GfxModel,
+  element: GfxModel
+) {
+  if (
+    element === container ||
+    (isGfxContainerElm(element) && element.hasDescendant(container))
+  ) {
+    return false;
+  }
+  return true;
 }

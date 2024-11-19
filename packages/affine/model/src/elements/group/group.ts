@@ -7,6 +7,7 @@ import type { IVec, PointLocation } from '@blocksuite/global/utils';
 import type { Y } from '@blocksuite/store';
 
 import {
+  canSafeAddToContainer,
   field,
   GfxGroupLikeElementModel,
   local,
@@ -55,6 +56,10 @@ export class GroupElementModel extends GfxGroupLikeElementModel<GroupElementProp
   }
 
   override addChild(element: GfxModel) {
+    if (!canSafeAddToContainer(this, element)) {
+      return;
+    }
+
     this.surface.doc.transact(() => {
       this.children.set(element.id, true);
     });
