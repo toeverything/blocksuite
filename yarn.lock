@@ -1597,6 +1597,7 @@ __metadata:
     "@blocksuite/global": "workspace:*"
     "@blocksuite/inline": "workspace:*"
     "@blocksuite/store": "workspace:*"
+    "@toeverything/theme": "npm:^1.0.19"
     fractional-indexing: "npm:^3.2.0"
     zod: "npm:^3.23.8"
   languageName: unknown
@@ -11347,8 +11348,8 @@ __metadata:
   linkType: hard
 
 "msw@npm:^2.3.5":
-  version: 2.6.5
-  resolution: "msw@npm:2.6.5"
+  version: 2.6.6
+  resolution: "msw@npm:2.6.6"
   dependencies:
     "@bundled-es-modules/cookie": "npm:^2.0.1"
     "@bundled-es-modules/statuses": "npm:^1.0.1"
@@ -11375,7 +11376,7 @@ __metadata:
       optional: true
   bin:
     msw: cli/index.js
-  checksum: 10/ab02f44c9e54a5b0fe2ef61689886869a4b353f2757d73dea9dbfd16d5d3c1d4fe9b52d5b718bb9e0c18bfa7c6ce95ce8a31bf97f156cef312837c8157309304
+  checksum: 10/7762ba5f1570789328af27167e03c2b8eb4981faa476ae47d74c125c90ddc1792bc28b9ce1100bbc4e105b55e3e7d65e7cae8d27fa7677b6516e42a63c38b7a3
   languageName: node
   linkType: hard
 
