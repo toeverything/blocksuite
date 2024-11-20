@@ -128,10 +128,11 @@ export const quickActionConfig: QuickActionConfig[] = [
           types: ['block'],
           mode: 'highest',
         })
+        .draftSelectedModels()
         .run();
-      const { selectedModels } = ctx;
+      const { selectedModels, draftedModels } = ctx;
       assertExists(selectedModels);
-      if (!selectedModels.length) return;
+      if (!selectedModels.length || !draftedModels) return;
 
       host.selection.clear();
 
@@ -139,7 +140,12 @@ export const quickActionConfig: QuickActionConfig[] = [
       const autofill = getTitleFromSelectedModels(selectedModels);
       void promptDocTitle(host, autofill).then(title => {
         if (title === null) return;
-        convertSelectedBlocksToLinkedDoc(doc, selectedModels, title);
+        convertSelectedBlocksToLinkedDoc(
+          host.std,
+          doc,
+          draftedModels,
+          title
+        ).catch(console.error);
         notifyDocCreated(host, doc);
       });
     },

@@ -310,6 +310,11 @@ export class Clipboard extends LifeCycleWatcher {
     return json;
   }
 
+  sliceToSnapshot(slice: Slice) {
+    const job = this._getJob();
+    return job.sliceToSnapshot(slice);
+  }
+
   async writeToClipboard(
     updateItems: (
       items: Record<string, unknown>
@@ -332,7 +337,7 @@ export class Clipboard extends LifeCycleWatcher {
     delete items['image/png'];
 
     const snapshot = lz.compressToEncodedURIComponent(JSON.stringify(items));
-    const html = `<div data-blocksuite-snapshot=${snapshot}>${innerHTML}</div>`;
+    const html = `<div data-blocksuite-snapshot='${snapshot}'>${innerHTML}</div>`;
     const htmlBlob = new Blob([html], {
       type: 'text/html',
     });

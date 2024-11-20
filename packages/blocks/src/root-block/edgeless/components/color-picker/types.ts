@@ -48,7 +48,7 @@ export type ModeRgba = { type: ModeType; rgba: Rgba };
 
 export type PickColorType = 'palette' | ModeType;
 
-export type PickColorDetail = { [K in PickColorType]?: string };
+export type PickColorDetail = Partial<Record<PickColorType, string>>;
 
 export type PickColorEvent =
   | { type: 'start' | 'end' }
