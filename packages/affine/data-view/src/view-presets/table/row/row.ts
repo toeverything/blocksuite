@@ -233,7 +233,7 @@ export class TableRow extends SignalWatcher(WithDisposable(ShadowlessElement)) {
             );
           };
           return html`
-            <div>
+            <div style="display: flex;">
               <affine-database-cell-container
                 class="database-cell"
                 style=${styleMap({
@@ -252,6 +252,7 @@ export class TableRow extends SignalWatcher(WithDisposable(ShadowlessElement)) {
                 data-column-index="${i}"
               >
               </affine-database-cell-container>
+              <div class="cell-divider"></div>
             </div>
             ${!column.readonly$.value &&
             column.view.mainProperties$.value.titleColumn === column.id

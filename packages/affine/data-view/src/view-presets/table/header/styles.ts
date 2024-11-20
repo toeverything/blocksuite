@@ -1,3 +1,4 @@
+import { unsafeCSSVarV2 } from '@blocksuite/affine-shared/theme';
 import { baseTheme } from '@toeverything/theme';
 import { css, unsafeCSS } from 'lit';
 
@@ -188,16 +189,14 @@ export const styles = css`
         justify-content: center;
         width: 40px;
         cursor: pointer;
+        font-size: 18px;
+        color: ${unsafeCSSVarV2('icon/primary')};
     }
 
     @media print {
         .header-add-column-button {
             display: none;
         }
-    }
-
-    .header-add-column-button svg {
-        color: var(--affine-icon-color);
     }
 
     .affine-database-column-type-menu-icon {

@@ -1,28 +1,10 @@
 import type {
-  Collision,
   CollisionDetection,
   Coordinates,
   DndClientRect,
-  DroppableContainer,
 } from '../types.js';
 
 import { distanceBetween } from './distance-between-points.js';
-
-interface CollisionDescriptor extends Collision {
-  data: {
-    droppableContainer: DroppableContainer;
-    value: number;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    [key: string]: any;
-  };
-}
-
-export function sortCollisionsAsc(
-  { data: { value: a } }: CollisionDescriptor,
-  { data: { value: b } }: CollisionDescriptor
-) {
-  return a - b;
-}
 
 /**
  * Returns the coordinates of the center of a given ClientRect
@@ -45,12 +27,8 @@ export const closestCenter: CollisionDetection = ({
   droppableRects,
   droppableContainers,
 }) => {
-  const centerRect = centerOfRectangle(
-    collisionRect,
-    collisionRect.left,
-    collisionRect.top
-  );
-  const collisions: CollisionDescriptor[] = [];
+  let closest: { id: string; value: number } | undefined;
+  const centerRect = centerOfRectangle(collisionRect);
 
   for (const droppableContainer of droppableContainers) {
     const { id } = droppableContainer;
@@ -58,9 +36,10 @@ export const closestCenter: CollisionDetection = ({
 
     if (rect) {
       const distBetween = distanceBetween(centerOfRectangle(rect), centerRect);
-
-      collisions.push({ id, data: { droppableContainer, value: distBetween } });
+      if (!closest || distBetween < closest.value) {
+        closest = { id, value: distBetween };
+      }
     }
   }
-  return collisions.sort(sortCollisionsAsc);
+  return closest ? [closest] : [];
 };

@@ -184,7 +184,7 @@ export async function clickDatabaseOutside(page: Page) {
 
 export async function assertColumnWidth(locator: Locator, width: number) {
   const box = await getBoundingBox(locator);
-  expect(box.width).toBe(width);
+  expect(box.width).toBe(width + 1);
   return box;
 }
 
@@ -431,7 +431,7 @@ export async function assertCellsSelection(
       x,
       y,
       height,
-      width,
+      width: width + 1,
     });
   }
 }
