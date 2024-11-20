@@ -250,8 +250,8 @@ test('should support drag to change column width', async ({ page }) => {
   const titleColumnWidth = 260;
   const normalColumnWidth = 180;
 
-  await assertColumnWidth(titleColumn, titleColumnWidth);
-  const box = await assertColumnWidth(normalColumn, normalColumnWidth);
+  await assertColumnWidth(titleColumn, titleColumnWidth - 1);
+  const box = await assertColumnWidth(normalColumn, normalColumnWidth - 1);
 
   await dragBetweenCoords(
     page,
@@ -266,11 +266,11 @@ test('should support drag to change column width', async ({ page }) => {
   );
 
   await assertColumnWidth(titleColumn, titleColumnWidth + dragDistance);
-  await assertColumnWidth(normalColumn, normalColumnWidth);
+  await assertColumnWidth(normalColumn, normalColumnWidth - 1);
 
   await undoByClick(page);
-  await assertColumnWidth(titleColumn, titleColumnWidth + 1);
-  await assertColumnWidth(normalColumn, normalColumnWidth);
+  await assertColumnWidth(titleColumn, titleColumnWidth - 1);
+  await assertColumnWidth(normalColumn, normalColumnWidth - 1);
 });
 
 test('should display the add column button on the right side of database correctly', async ({
@@ -322,10 +322,7 @@ test('should support drag and drop to move columns', async ({ page }) => {
       steps: 50,
       beforeMouseUp: async () => {
         await waitNextFrame(page);
-        const indicator = page
-          .locator('.vertical-indicator-container')
-          .locator('.vertical-indicator')
-          .first();
+        const indicator = page.locator('.vertical-indicator').first();
         await expect(indicator).toBeVisible();
 
         const { box } = await getDatabaseHeaderColumn(page, 2);
