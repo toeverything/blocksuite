@@ -40,7 +40,7 @@ export class DatabaseCellContainer extends SignalWatcher(
     }
 
     affine-database-cell-container uni-lit > *:first-child {
-      padding: 8px;
+      padding: 6px;
     }
   `;
 
