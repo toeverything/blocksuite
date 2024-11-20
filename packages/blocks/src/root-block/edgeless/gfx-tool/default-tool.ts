@@ -28,6 +28,7 @@ import {
   BaseTool,
   getTopElements,
   GfxExtensionIdentifier,
+  type GfxPrimitiveElementModel,
   isGfxContainerElm,
   type PointTestOptions,
 } from '@blocksuite/block-std/gfx';
@@ -40,6 +41,7 @@ import {
 } from '@blocksuite/global/utils';
 import { effect } from '@preact/signals-core';
 
+import type { GfxBlockModel } from '../block-model.js';
 import type { EdgelessRootBlockComponent } from '../edgeless-root-block.js';
 import type { EdgelessFrameManager, FrameOverlay } from '../frame-manager.js';
 import type { EdgelessSnapManager } from '../utils/snap-manager.js';
@@ -111,6 +113,13 @@ export class DefaultTool extends BaseTool {
     this._accumulateDelta[1] += delta[1];
     this.gfx.viewport.applyDeltaCenter(delta[0], delta[1]);
   };
+
+  private _pendingUpdates = new Map<
+    GfxBlockModel | GfxPrimitiveElementModel,
+    Partial<GfxBlockModel>
+  >();
+
+  private _rafId: number | null = null;
 
   private _selectedBounds: Bound[] = [];
 
@@ -423,15 +432,11 @@ export class DefaultTool extends BaseTool {
         if (element instanceof ConnectorElementModel) {
           element.moveTo(bound);
         }
-
-        this.gfx.updateElement(element, {
-          xywh: bound.serialize(),
-        });
-      } else {
-        this.gfx.updateElement(element, {
-          xywh: bound.serialize(),
-        });
       }
+
+      this._scheduleUpdate(element, {
+        xywh: bound.serialize(),
+      });
     });
 
     this._hoveredFrame = this._frameMgr.getFrameFromPoint(
@@ -488,6 +493,23 @@ export class DefaultTool extends BaseTool {
     }
 
     return group;
+  }
+
+  private _scheduleUpdate(
+    element: GfxBlockModel | GfxPrimitiveElementModel,
+    updates: Partial<GfxBlockModel>
+  ) {
+    this._pendingUpdates.set(element, updates);
+
+    if (this._rafId !== null) return;
+
+    this._rafId = requestAnimationFrame(() => {
+      this._pendingUpdates.forEach((updates, element) => {
+        this.gfx.updateElement(element, updates);
+      });
+      this._pendingUpdates.clear();
+      this._rafId = null;
+    });
   }
 
   private initializeDragState(dragType: DefaultModeDragType) {
