@@ -23,7 +23,7 @@ import {
   type SingleView,
   SingleViewBase,
 } from '../../core/view-manager/single-view.js';
-import { DEFAULT_COLUMN_WIDTH } from './consts.js';
+import { DEFAULT_COLUMN_MIN_WIDTH, DEFAULT_COLUMN_WIDTH } from './consts.js';
 
 export class TableSingleView extends SingleViewBase<TableViewData> {
   propertiesWithoutFilter$ = computed(() => {
@@ -265,6 +265,12 @@ export class TableSingleView extends SingleViewBase<TableViewData> {
     return true;
   }
 
+  minWidthGet(type: string): number {
+    return (
+      this.propertyMetaGet(type)?.config.minWidth ?? DEFAULT_COLUMN_MIN_WIDTH
+    );
+  }
+
   propertyGet(columnId: string): TableColumn {
     return new TableColumn(this, columnId);
   }
@@ -356,6 +362,10 @@ export class TableColumn extends PropertyBase {
   width$: ReadonlySignal<number> = computed(() => {
     return this.tableView.columnGetWidth(this.id);
   });
+
+  get minWidth() {
+    return this.tableView.minWidthGet(this.type$.value);
+  }
 
   constructor(
     private tableView: TableSingleView,

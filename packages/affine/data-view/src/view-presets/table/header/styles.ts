@@ -4,7 +4,6 @@ import { css, unsafeCSS } from 'lit';
 
 import {
   DEFAULT_ADD_BUTTON_WIDTH,
-  DEFAULT_COLUMN_MIN_WIDTH,
   DEFAULT_COLUMN_TITLE_HEIGHT,
 } from '../consts.js';
 
@@ -32,7 +31,6 @@ export const styles = css`
     }
 
     .database-cell {
-        min-width: ${DEFAULT_COLUMN_MIN_WIDTH}px;
         user-select: none;
     }
 
@@ -50,7 +48,7 @@ export const styles = css`
         gap: 6px;
         width: 100%;
         height: 100%;
-        padding: 8px;
+        padding: 6px;
         box-sizing: border-box;
         position: relative;
     }
@@ -81,12 +79,8 @@ export const styles = css`
         align-items: center;
         border-radius: 4px;
         padding: 2px;
-    }
-
-    .affine-database-column-type-icon svg {
-        width: 16px;
-        height: 16px;
-        fill: var(--affine-icon-color);
+        font-size: 18px;
+        color: ${unsafeCSSVarV2('database/textSecondary')};
     }
 
     .affine-database-column-text-content {
@@ -105,6 +99,7 @@ export const styles = css`
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
+        font-weight: 500;
     }
 
     .affine-database-column-text-icon {

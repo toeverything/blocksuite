@@ -10,7 +10,6 @@ import type { TableColumn } from '../table-view-manager.js';
 
 import { startDrag } from '../../../core/utils/drag.js';
 import { getResultInRange } from '../../../core/utils/utils.js';
-import { DEFAULT_COLUMN_MIN_WIDTH } from '../consts.js';
 
 export class TableVerticalIndicator extends WithDisposable(ShadowlessElement) {
   static override styles = css`
@@ -111,7 +110,7 @@ export const startDragWidthAdjustmentBar = (
     onDrag: () => ({ width: column.width$.value }),
     onMove: ({ x }) => {
       const width = Math.round(
-        getResultInRange((x - left) / scale, DEFAULT_COLUMN_MIN_WIDTH, Infinity)
+        getResultInRange((x - left) / scale, column.minWidth, Infinity)
       );
       preview.display(left, rect.top, rect.bottom - rect.top, width * scale);
       return {

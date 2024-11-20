@@ -12,7 +12,6 @@ import type { DataViewRenderer } from '../../../core/data-view.js';
 import type { TableSingleView } from '../table-view-manager.js';
 
 import { openDetail, popRowMenu } from '../components/menu.js';
-import { DEFAULT_COLUMN_MIN_WIDTH } from '../consts.js';
 import { TableRowSelection, type TableViewSelection } from '../types.js';
 
 export class TableRow extends SignalWatcher(WithDisposable(ShadowlessElement)) {
@@ -44,10 +43,6 @@ export class TableRow extends SignalWatcher(WithDisposable(ShadowlessElement)) {
 
     .affine-database-block-row.selected > .database-cell {
       background: transparent;
-    }
-
-    .database-cell {
-      min-width: ${DEFAULT_COLUMN_MIN_WIDTH}px;
     }
 
     .row-ops {
@@ -178,7 +173,7 @@ export class TableRow extends SignalWatcher(WithDisposable(ShadowlessElement)) {
     return html`
       ${view.readonly$.value
         ? nothing
-        : html`<div class="data-view-table-left-bar" style="height: 38px">
+        : html`<div class="data-view-table-left-bar" style="height: 34px">
             <div style="display: flex;">
               <div
                 class="data-view-table-view-drag-handler show-on-hover-row row-selected-bg"
