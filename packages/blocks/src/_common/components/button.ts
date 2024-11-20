@@ -1,5 +1,13 @@
 import { baseTheme } from '@toeverything/theme';
-import { css, html, LitElement, nothing, unsafeCSS } from 'lit';
+import { cssVarV2 } from '@toeverything/theme/v2';
+import {
+  css,
+  html,
+  LitElement,
+  nothing,
+  type TemplateResult,
+  unsafeCSS,
+} from 'lit';
 import { property, query } from 'lit/decorators.js';
 
 /**
@@ -168,14 +176,14 @@ export class IconButton extends LitElement {
   override render() {
     if (this.hidden) return nothing;
     if (this.disabled) {
-      const disabledColor = 'var(--affine-text-disable-color)';
+      const disabledColor = cssVarV2('icon/disable');
       this.style.setProperty('--svg-icon-color', disabledColor);
       this.dataset.testDisabled = 'true';
     } else {
       this.dataset.testDisabled = 'false';
       const iconColor = this.active
-        ? 'var(--affine-primary-color)'
-        : 'var(--affine-icon-color)';
+        ? cssVarV2('icon/activated')
+        : cssVarV2('icon/primary');
       this.style.setProperty('--svg-icon-color', iconColor);
     }
 
@@ -215,10 +223,10 @@ export class IconButton extends LitElement {
   accessor size: string | number | null = null;
 
   @property()
-  accessor subText: string | null = null;
+  accessor subText: string | TemplateResult<1> | null = null;
 
   @property()
-  accessor text: string | null = null;
+  accessor text: string | TemplateResult<1> | null = null;
 
   @query('.text-container .text')
   accessor textElement: HTMLDivElement | null = null;
