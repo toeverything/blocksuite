@@ -357,9 +357,7 @@ export class StyleFour extends MindmapStyleGetter {
 }
 export const styleFour = new StyleFour();
 
-export const mindmapStyleGetters: {
-  [key in MindmapStyle]: MindmapStyleGetter;
-} = {
+export const mindmapStyleGetters: Record<MindmapStyle, MindmapStyleGetter> = {
   [MindmapStyle.ONE]: styleOne,
   [MindmapStyle.TWO]: styleTwo,
   [MindmapStyle.THREE]: styleThree,
