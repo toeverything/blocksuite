@@ -7,6 +7,7 @@ import type { AFFINE_EDGELESS_ZOOM_TOOLBAR_WIDGET } from './widgets/edgeless-zoo
 import type { EDGELESS_ELEMENT_TOOLBAR_WIDGET } from './widgets/element-toolbar/index.js';
 import type { AFFINE_EMBED_CARD_TOOLBAR_WIDGET } from './widgets/embed-card-toolbar/embed-card-toolbar.js';
 import type { AFFINE_FORMAT_BAR_WIDGET } from './widgets/format-bar/format-bar.js';
+import type { AFFINE_FRAME_TITLE_WIDGET } from './widgets/frame-title/index.js';
 import type { AFFINE_KEYBOARD_TOOLBAR_WIDGET } from './widgets/index.js';
 import type { AFFINE_INNER_MODAL_WIDGET } from './widgets/inner-modal/inner-modal.js';
 import type { AFFINE_LINKED_DOC_WIDGET } from './widgets/linked-doc/index.js';
@@ -43,7 +44,8 @@ export type EdgelessRootBlockWidgetName =
   | typeof AFFINE_EDGELESS_REMOTE_SELECTION_WIDGET
   | typeof AFFINE_EDGELESS_ZOOM_TOOLBAR_WIDGET
   | typeof EDGELESS_ELEMENT_TOOLBAR_WIDGET
-  | typeof AFFINE_VIEWPORT_OVERLAY_WIDGET;
+  | typeof AFFINE_VIEWPORT_OVERLAY_WIDGET
+  | typeof AFFINE_FRAME_TITLE_WIDGET;
 
 export type RootBlockComponent =
   | PageRootBlockComponent

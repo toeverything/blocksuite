@@ -24,6 +24,7 @@ import { AFFINE_EDGELESS_ZOOM_TOOLBAR_WIDGET } from '../widgets/edgeless-zoom-to
 import { EDGELESS_ELEMENT_TOOLBAR_WIDGET } from '../widgets/element-toolbar/index.js';
 import { AFFINE_EMBED_CARD_TOOLBAR_WIDGET } from '../widgets/embed-card-toolbar/embed-card-toolbar.js';
 import { AFFINE_FORMAT_BAR_WIDGET } from '../widgets/format-bar/format-bar.js';
+import { AFFINE_FRAME_TITLE_WIDGET } from '../widgets/frame-title/index.js';
 import { AFFINE_INNER_MODAL_WIDGET } from '../widgets/inner-modal/inner-modal.js';
 import { AFFINE_LINKED_DOC_WIDGET } from '../widgets/linked-doc/index.js';
 import { AFFINE_MODAL_WIDGET } from '../widgets/modal/modal.js';
@@ -65,6 +66,7 @@ export const edgelessRootWidgetViewMap = {
   [AFFINE_EDGELESS_ZOOM_TOOLBAR_WIDGET]: literal`${unsafeStatic(
     AFFINE_EDGELESS_ZOOM_TOOLBAR_WIDGET
   )}`,
+  [AFFINE_FRAME_TITLE_WIDGET]: literal`${unsafeStatic(AFFINE_FRAME_TITLE_WIDGET)}`,
   [EDGELESS_ELEMENT_TOOLBAR_WIDGET]: literal`${unsafeStatic(EDGELESS_ELEMENT_TOOLBAR_WIDGET)}`,
   [AFFINE_VIEWPORT_OVERLAY_WIDGET]: literal`${unsafeStatic(
     AFFINE_VIEWPORT_OVERLAY_WIDGET

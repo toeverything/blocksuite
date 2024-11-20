@@ -27,16 +27,17 @@ import { rect } from './rect.js';
 import { triangle } from './triangle.js';
 import { type Colors, horizontalOffset, verticalOffset } from './utils.js';
 
-const shapeRenderers: {
-  [key in ShapeType]: (
+const shapeRenderers: Record<
+  ShapeType,
+  (
     model: ShapeElementModel,
     ctx: CanvasRenderingContext2D,
     matrix: DOMMatrix,
     renderer: CanvasRenderer,
     rc: RoughCanvas,
     colors: Colors
-  ) => void;
-} = {
+  ) => void
+> = {
   diamond,
   rect,
   triangle,

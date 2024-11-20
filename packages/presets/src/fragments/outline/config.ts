@@ -22,9 +22,10 @@ import {
   SmallTodoIcon,
 } from '../_common/icons.js';
 
-const paragraphIconMap: {
-  [key in ParagraphBlockModel['type']]: TemplateResult<1>;
-} = {
+const paragraphIconMap: Record<
+  ParagraphBlockModel['type'],
+  TemplateResult<1>
+> = {
   quote: SmallQuoteBlockIcon,
   text: SmallTextIcon,
   h1: SmallHeading1Icon,
@@ -49,9 +50,7 @@ export const previewIconMap = {
   attachment: SmallAttachmentIcon,
 };
 
-const paragraphPlaceholderMap: {
-  [key in ParagraphBlockModel['type']]: string;
-} = {
+const paragraphPlaceholderMap: Record<ParagraphBlockModel['type'], string> = {
   quote: 'Quote',
   text: 'Text Block',
   h1: 'Heading 1',

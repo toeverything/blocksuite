@@ -4,12 +4,6 @@ on:
   push:
     branches:
       - master
-    paths-ignore:
-      - '.husky'
-      - '.vscode'
-      - '**.md'
-      - 'scripts/**'
-      - 'packages/docs/**'
   pull_request:
   workflow_dispatch:
 
