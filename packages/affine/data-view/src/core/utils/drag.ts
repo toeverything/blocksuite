@@ -16,9 +16,7 @@ export const startDrag = <
     cursor?: string;
   }
 ) => {
-  const oldPointerEvents = document.body.style.pointerEvents;
   const oldCursor = document.body.style.cursor;
-  document.body.style.pointerEvents = 'none';
   document.body.style.cursor = ops.cursor ?? 'grab';
   const mousePosition = signal<{ x: number; y: number }>({
     x: evt.clientX,
@@ -38,7 +36,6 @@ export const startDrag = <
     window.removeEventListener('pointermove', move);
     window.removeEventListener('pointerup', up);
     window.removeEventListener('keydown', keydown);
-    document.body.style.pointerEvents = oldPointerEvents;
     document.body.style.cursor = oldCursor;
     ops.onClear();
   };

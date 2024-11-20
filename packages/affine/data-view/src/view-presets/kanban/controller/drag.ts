@@ -22,17 +22,6 @@ export class KanbanDragController implements ReactiveController {
       evt.y - offsetTop
     );
     const currentGroup = ele.closest('affine-data-view-kanban-group');
-    const cancelScroll = autoScrollOnBoundary(
-      this.scrollContainer,
-      computed(() => {
-        return {
-          left: drag.mousePosition.value.x,
-          right: drag.mousePosition.value.x,
-          top: drag.mousePosition.value.y,
-          bottom: drag.mousePosition.value.y,
-        };
-      })
-    );
     const drag = startDrag<
       | { type: 'out'; callback: () => void }
       | {
@@ -93,6 +82,17 @@ export class KanbanDragController implements ReactiveController {
         }
       },
     });
+    const cancelScroll = autoScrollOnBoundary(
+      this.scrollContainer,
+      computed(() => {
+        return {
+          left: drag.mousePosition.value.x,
+          right: drag.mousePosition.value.x,
+          top: drag.mousePosition.value.y,
+          bottom: drag.mousePosition.value.y,
+        };
+      })
+    );
   };
 
   dropPreview = createDropPreview();
