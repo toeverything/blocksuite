@@ -148,10 +148,12 @@ export class ProgressCellEditing extends BaseCellRenderer<number> {
     disposables.addFromEvent(this._progressBg, 'pointerdown', this.startDrag);
     disposables.addFromEvent(window, 'keydown', evt => {
       if (evt.key === 'ArrowDown') {
+        evt.preventDefault();
         this._onChange(Math.max(0, this._value - 1));
         return;
       }
       if (evt.key === 'ArrowUp') {
+        evt.preventDefault();
         this._onChange(Math.min(100, this._value + 1));
         return;
       }

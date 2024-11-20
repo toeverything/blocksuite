@@ -1,5 +1,6 @@
 import { RefNodeSlotsProvider } from '@blocksuite/affine-components/rich-text';
 import { ParseDocUrlProvider } from '@blocksuite/affine-shared/services';
+import { unsafeCSSVarV2 } from '@blocksuite/affine-shared/theme';
 import {
   isValidUrl,
   normalizeUrl,
@@ -10,9 +11,9 @@ import {
   createFromBaseCellRenderer,
   createIcon,
 } from '@blocksuite/data-view';
-import { PenIcon } from '@blocksuite/icons/lit';
+import { EditIcon } from '@blocksuite/icons/lit';
 import { baseTheme } from '@toeverything/theme';
-import { css, unsafeCSS } from 'lit';
+import { css, nothing, unsafeCSS } from 'lit';
 import { query, state } from 'lit/decorators.js';
 import { html } from 'lit/static-html.js';
 
@@ -24,6 +25,7 @@ export class LinkCell extends BaseCellRenderer<string> {
     affine-database-link-cell {
       width: 100%;
       user-select: none;
+      position: relative;
     }
 
     affine-database-link-cell:hover .affine-database-link-icon {
@@ -50,29 +52,31 @@ export class LinkCell extends BaseCellRenderer<string> {
 
     .affine-database-link-icon {
       position: absolute;
-      right: 0;
+      right: 8px;
+      top: 8px;
       display: flex;
       align-items: center;
       visibility: hidden;
       cursor: pointer;
-      background: var(--affine-background-primary-color);
+      background: ${unsafeCSSVarV2('button/iconButtonSolid')};
+      color: ${unsafeCSSVarV2('icon/primary')};
+      box-shadow: var(--affine-button-shadow);
       border-radius: 4px;
+      font-size: 14px;
+      padding: 2px;
     }
+
     .affine-database-link-icon:hover {
       background: var(--affine-hover-color);
     }
 
-    .affine-database-link-icon svg {
-      width: 16px;
-      height: 16px;
-      fill: var(--affine-icon-color);
-    }
     .data-view-link-column-linked-doc {
       text-decoration: underline;
       text-decoration-color: var(--affine-divider-color);
       transition: text-decoration-color 0.2s ease-out;
       cursor: pointer;
     }
+
     .data-view-link-column-linked-doc:hover {
       text-decoration-color: var(--affine-icon-color);
     }
@@ -137,13 +141,15 @@ export class LinkCell extends BaseCellRenderer<string> {
               @click="${this.openDoc}"
               >${docName}</span
             >`
-          : html`<affine-database-link-node
+          : html` <affine-database-link-node
               .link="${linkText}"
             ></affine-database-link-node>`}
-        <div class="affine-database-link-icon" @click="${this._onEdit}">
-          ${PenIcon()}
-        </div>
       </div>
+      ${docName || linkText
+        ? html` <div class="affine-database-link-icon" @click="${this._onEdit}">
+            ${EditIcon()}
+          </div>`
+        : nothing}
     `;
   }
 
@@ -235,9 +241,9 @@ export class LinkCellEditing extends BaseCellRenderer<string> {
 
     return html`<input
       class="affine-database-link-editing link"
-      .value=${linkText}
-      @keydown=${this._onKeydown}
-      @pointerdown=${stopPropagation}
+      .value="${linkText}"
+      @keydown="${this._onKeydown}"
+      @pointerdown="${stopPropagation}"
     />`;
   }
 
