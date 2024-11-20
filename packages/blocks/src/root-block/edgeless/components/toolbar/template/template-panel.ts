@@ -480,6 +480,7 @@ export class EdgelessTemplatePanel extends WithDisposable(LitElement) {
                           : html`<img
                               src="${template.preview}"
                               class="template-preview"
+                              loading="lazy"
                             />`
                         : defaultPreview;
 
