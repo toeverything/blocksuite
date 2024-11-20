@@ -14,6 +14,7 @@ import {
   edgelessCommonSetup,
   getFirstContainerId,
   getSelectedIds,
+  pickColorAtPoints,
   setEdgelessTool,
   Shape,
   shiftClickView,
@@ -361,4 +362,21 @@ test('delete frame', async ({ page }) => {
   await expect(page.locator('affine-frame')).toHaveCount(0);
 
   await assertCanvasElementsCount(page, 0);
+});
+
+test('outline should keep updated during a new frame created by frame-tool dragging', async ({
+  page,
+}) => {
+  await page.keyboard.press('f');
+
+  const start = await toViewCoord(page, [0, 0]);
+  const end = await toViewCoord(page, [100, 100]);
+  await page.mouse.move(start[0], start[1]);
+  await page.mouse.down();
+  await page.mouse.move(end[0], end[1], { steps: 10 });
+  await page.waitForTimeout(50);
+
+  expect(
+    await pickColorAtPoints(page, [start, [end[0] - 1, end[1] - 1]])
+  ).toEqual(['#1e96eb', '#1e96eb']);
 });
