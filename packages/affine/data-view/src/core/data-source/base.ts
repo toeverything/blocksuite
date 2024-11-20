@@ -1,4 +1,7 @@
-import type { InsertToPosition } from '@blocksuite/affine-shared/utils';
+import type {
+  InsertToPosition,
+  NewInsertPosition,
+} from '@blocksuite/affine-shared/utils';
 
 import { computed, type ReadonlySignal } from '@preact/signals-core';
 
@@ -69,7 +72,7 @@ export interface DataSource {
   viewDataAdd(viewData: DataViewDataType): string;
   viewDataDuplicate(id: string): string;
   viewDataDelete(viewId: string): void;
-  viewDataMoveTo(id: string, position: InsertToPosition): void;
+  viewDataMoveTo(id: string, position: NewInsertPosition): void;
   viewDataUpdate<ViewData extends DataViewDataType>(
     id: string,
     updater: (data: ViewData) => Partial<ViewData>
@@ -206,7 +209,7 @@ export abstract class DataSourceBase implements DataSource {
     return computed(() => this.viewDataGet(viewId));
   }
 
-  abstract viewDataMoveTo(id: string, position: InsertToPosition): void;
+  abstract viewDataMoveTo(id: string, position: NewInsertPosition): void;
 
   abstract viewDataUpdate<ViewData extends DataViewDataType>(
     id: string,

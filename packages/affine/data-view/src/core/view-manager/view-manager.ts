@@ -1,4 +1,4 @@
-import type { InsertToPosition } from '@blocksuite/affine-shared/utils';
+import type { NewInsertPosition } from '@blocksuite/affine-shared/utils';
 
 import { nanoid } from '@blocksuite/store';
 import { computed, type ReadonlySignal, signal } from '@preact/signals-core';
@@ -33,7 +33,7 @@ export interface ViewManager {
 
   viewDataGet(id: string): DataViewDataType | undefined;
 
-  moveTo(id: string, position: InsertToPosition): void;
+  moveTo(id: string, position: NewInsertPosition): void;
 
   viewChangeType(id: string, type: string): void;
 }
@@ -63,7 +63,7 @@ export class ViewManagerBase implements ViewManager {
 
   constructor(public dataSource: DataSource) {}
 
-  moveTo(id: string, position: InsertToPosition): void {
+  moveTo(id: string, position: NewInsertPosition): void {
     this.dataSource.viewDataMoveTo(id, position);
   }
 

@@ -15,13 +15,15 @@ import { beforeEach, describe, expect, test } from 'vitest';
 
 import { databaseBlockColumns } from '../../database-block/index.js';
 import {
-  addProperty,
-  copyCellsByProperty,
-  deleteColumn,
+  duplicateCellsByProperty,
   getCell,
-  getProperty,
   updateCell,
-} from '../../database-block/utils/block-utils.js';
+} from '../../database-block/utils/cell-utils.js';
+import {
+  addProperty,
+  deleteProperty,
+  getProperty,
+} from '../../database-block/utils/property-utils.js';
 
 const AffineSchemas = [
   RootBlockSchema,
@@ -163,7 +165,7 @@ describe('DatabaseManager', () => {
     addProperty(db, 'end', column);
     expect(getProperty(db, column.id)).toEqual(column);
 
-    deleteColumn(db, column.id);
+    deleteProperty(db, column.id);
     expect(getProperty(db, column.id)).toBeUndefined();
   });
 
@@ -225,7 +227,7 @@ describe('DatabaseManager', () => {
       })
     );
 
-    copyCellsByProperty(db, col2, newColId);
+    duplicateCellsByProperty(db, col2, newColId);
 
     const cell = getCell(db, p2, newColId);
     expect(cell).toEqual({

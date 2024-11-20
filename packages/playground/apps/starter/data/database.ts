@@ -14,6 +14,9 @@ import type { InitFn } from './utils.js';
 import { propertyPresets } from '../../../../affine/data-view/src/property-presets';
 
 export const database: InitFn = (collection: DocCollection, id: string) => {
+  if (collection.getDoc(id)) {
+    return;
+  }
   const doc = collection.createDoc({ id });
   doc.awarenessStore.setFlag('enable_database_number_formatting', true);
   doc.awarenessStore.setFlag('enable_database_attachment_note', true);

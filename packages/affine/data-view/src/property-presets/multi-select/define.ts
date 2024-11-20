@@ -34,31 +34,35 @@ export const multiSelectPropertyModelConfig =
     },
     cellToString: ({ value, data }) =>
       value?.map(id => data.options.find(v => v.id === id)?.value).join(','),
-    cellFromString: ({ value: oldValue, data }) => {
-      const optionMap = Object.fromEntries(data.options.map(v => [v.value, v]));
-      const optionNames = oldValue
+    cellFromString: ({ value: stringValue, data }) => {
+      const optionMap = new Map(data.options.map(v => [v.value, v]));
+      const optionNames = stringValue
         .split(',')
         .map(v => v.trim())
         .filter(v => v);
 
       const value: string[] = [];
       optionNames.forEach(name => {
-        if (!optionMap[name]) {
+        const option = optionMap.get(name);
+        if (!option) {
           const newOption: SelectTag = {
             id: nanoid(),
             value: name,
             color: getTagColor(),
           };
-          data.options.push(newOption);
+          optionMap.set(name, newOption);
           value.push(newOption.id);
         } else {
-          value.push(optionMap[name].id);
+          value.push(option.id);
         }
       });
 
       return {
         value,
-        data: data,
+        data: {
+          ...data,
+          options: Array.from(optionMap.values()),
+        },
       };
     },
     cellToJson: ({ value }) => value ?? null,

@@ -308,7 +308,7 @@ export class MultiTagSelect extends SignalWatcher(
         <input
           class="tag-select-input"
           placeholder="Type here..."
-          .value="${this.text}"
+          .value="${this.text.value}"
           @input="${this._onInput}"
           @keydown="${this._onInputKeydown}"
           @pointerdown="${stopPropagation}"
@@ -358,7 +358,7 @@ export class MultiTagSelect extends SignalWatcher(
             };
             return html`
               <div
-                ${!select.isCreate && sortable(select.id)}
+                ${select.isCreate ? nothing : sortable(select.id)}
                 class="${classes}"
                 @mouseenter="${mouseenter}"
                 @click="${select.select}"
