@@ -48,7 +48,7 @@ export class TableRow extends SignalWatcher(WithDisposable(ShadowlessElement)) {
     .row-ops {
       position: relative;
       width: 0;
-      margin-top: 8px;
+      margin-top: 4px;
       height: max-content;
       visibility: hidden;
       display: flex;
@@ -106,7 +106,7 @@ export class TableRow extends SignalWatcher(WithDisposable(ShadowlessElement)) {
     }
     .data-view-table-view-drag-handler {
       width: 4px;
-      height: 38px;
+      height: 34px;
       display: flex;
       align-items: center;
       justify-content: center;
