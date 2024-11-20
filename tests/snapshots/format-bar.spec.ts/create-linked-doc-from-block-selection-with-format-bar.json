@@ -33,7 +33,7 @@
       "children": [
         {
           "type": "block",
-          "id": "12",
+          "id": "11",
           "flavour": "affine:embed-linked-doc",
           "version": 1,
           "props": {

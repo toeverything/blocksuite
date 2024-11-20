@@ -201,19 +201,24 @@ export function toolbarDefaultConfig(toolbar: AffineFormatBarWidget) {
             types: ['block', 'text'],
             mode: 'highest',
           })
+          .draftSelectedModels()
           .run();
-        const { selectedModels } = ctx;
-        assertExists(selectedModels);
-        if (!selectedModels.length) return;
+        const { draftedModels, selectedModels } = ctx;
+        if (!selectedModels?.length || !draftedModels) return;
 
         const host = formatBar.host;
         host.selection.clear();
 
         const doc = host.doc;
         const autofill = getTitleFromSelectedModels(selectedModels);
-        void promptDocTitle(host, autofill).then(title => {
+        void promptDocTitle(host, autofill).then(async title => {
           if (title === null) return;
-          convertSelectedBlocksToLinkedDoc(doc, selectedModels, title);
+          await convertSelectedBlocksToLinkedDoc(
+            host.std,
+            doc,
+            draftedModels,
+            title
+          );
           notifyDocCreated(host, doc);
           host.std.getOptional(TelemetryProvider)?.track('DocCreated', {
             control: 'create linked doc',
@@ -437,12 +442,12 @@ export function toolbarMoreButton(toolbar: AffineFormatBarWidget) {
 
   return html`
     <editor-menu-button
-      .contentPadding=${'8px'}
-      .button=${html`
+      .contentPadding="${'8px'}"
+      .button="${html`
         <editor-icon-button aria-label="More" .tooltip=${'More'}>
           ${MoreVerticalIcon}
         </editor-icon-button>
-      `}
+      `}"
     >
       <div data-size="large" data-orientation="vertical">${actions}</div>
     </editor-menu-button>

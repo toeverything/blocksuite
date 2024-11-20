@@ -1,6 +1,5 @@
 import type { FrameBlockModel, NoteBlockModel } from '@blocksuite/affine-model';
 import type { EditorHost } from '@blocksuite/block-std';
-import type { BlockModel, Doc } from '@blocksuite/store';
 
 import { NoteDisplayMode } from '@blocksuite/affine-model';
 import {
@@ -9,6 +8,13 @@ import {
 } from '@blocksuite/affine-shared/services';
 import { getBlockProps, matchFlavours } from '@blocksuite/affine-shared/utils';
 import { assertExists } from '@blocksuite/global/utils';
+import {
+  type BlockModel,
+  type BlockSnapshot,
+  type Doc,
+  type DraftModel,
+  Slice,
+} from '@blocksuite/store';
 
 import { GfxBlockModel } from '../../root-block/edgeless/block-model.js';
 import {
@@ -36,7 +42,7 @@ export function promptDocTitle(host: EditorHost, autofill?: string) {
   });
 }
 
-export function getTitleFromSelectedModels(selectedModels: BlockModel[]) {
+export function getTitleFromSelectedModels(selectedModels: DraftModel[]) {
   const firstBlock = selectedModels[0];
   if (
     matchFlavours(firstBlock, ['affine:paragraph']) &&
@@ -105,19 +111,27 @@ export function addBlocksToDoc(
   }
 }
 
-export function convertSelectedBlocksToLinkedDoc(
+export async function convertSelectedBlocksToLinkedDoc(
+  std: BlockSuite.Std,
   doc: Doc,
-  selectedModels: BlockModel[],
+  selectedModels: DraftModel[] | Promise<DraftModel[]>,
   docTitle?: string
 ) {
-  const firstBlock = selectedModels[0];
+  const models = await selectedModels;
+  const slice = await std.clipboard.sliceToSnapshot(
+    Slice.fromModels(doc, models)
+  );
+  if (!slice) {
+    return;
+  }
+  const firstBlock = models[0];
   assertExists(firstBlock);
   // if title undefined, use the first heading block content as doc title
-  const title = docTitle || getTitleFromSelectedModels(selectedModels);
-  const linkedDoc = createLinkedDocFromBlocks(doc, selectedModels, title);
+  const title = docTitle || getTitleFromSelectedModels(models);
+  const linkedDoc = createLinkedDocFromSlice(std, doc, slice.content, title);
   // insert linked doc card
   doc.addSiblingBlocks(
-    firstBlock,
+    doc.getBlock(firstBlock.id)!.model,
     [
       {
         flavour: 'affine:embed-linked-doc',
@@ -127,15 +141,17 @@ export function convertSelectedBlocksToLinkedDoc(
     'before'
   );
   // delete selected elements
-  selectedModels.forEach(model => doc.deleteBlock(model));
+  models.forEach(model => doc.deleteBlock(model));
   return linkedDoc;
 }
 
-export function createLinkedDocFromBlocks(
+export function createLinkedDocFromSlice(
+  std: BlockSuite.Std,
   doc: Doc,
-  blocks: BlockModel[],
+  snapshots: BlockSnapshot[],
   docTitle?: string
 ) {
+  // const modelsWithChildren = (list:BlockModel[]):BlockModel[]=>list.flatMap(model=>[model,...modelsWithChildren(model.children)])
   const linkedDoc = doc.collection.createDoc({});
   linkedDoc.load(() => {
     const rootId = linkedDoc.addBlock('affine:page', {
@@ -143,9 +159,10 @@ export function createLinkedDocFromBlocks(
     });
     linkedDoc.addBlock('affine:surface', {}, rootId);
     const noteId = linkedDoc.addBlock('affine:note', {}, rootId);
-    // Move blocks to linked doc recursively
-    blocks.forEach(model => {
-      addBlocksToDoc(linkedDoc, model, noteId);
+    snapshots.forEach(snapshot => {
+      std.clipboard
+        .pasteBlockSnapshot(snapshot, linkedDoc, noteId)
+        .catch(console.error);
     });
   });
   return linkedDoc;
