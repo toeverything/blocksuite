@@ -36,6 +36,7 @@ import {
   Bound,
   DisposableGroup,
   getCommonBoundWithRotation,
+  last,
   noop,
   Vec,
 } from '@blocksuite/global/utils';
@@ -469,6 +470,20 @@ export class DefaultTool extends BaseTool {
 
   private _pick(x: number, y: number, options?: PointTestOptions) {
     const modelPos = this.gfx.viewport.toModelCoord(x, y);
+
+    const frameByPickingTitle = last(
+      this.gfx
+        .getElementByPoint(modelPos[0], modelPos[1], {
+          ...options,
+          all: true,
+        })
+        .filter(
+          el => isFrameBlock(el) && el.externalBound?.isPointInBound(modelPos)
+        )
+    );
+
+    if (frameByPickingTitle) return frameByPickingTitle;
+
     const group = this.gfx.getElementInGroup(modelPos[0], modelPos[1], options);
 
     if (group instanceof MindmapElementModel) {

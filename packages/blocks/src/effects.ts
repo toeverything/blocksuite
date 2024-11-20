@@ -92,10 +92,7 @@ import {
 } from './database-block/properties/title/text.js';
 import { DividerBlockComponent } from './divider-block/index.js';
 import { EdgelessTextBlockComponent } from './edgeless-text-block/index.js';
-import {
-  EdgelessFrameTitle,
-  FrameBlockComponent,
-} from './frame-block/index.js';
+import { FrameBlockComponent } from './frame-block/index.js';
 import { ImageBlockFallbackCard } from './image-block/components/image-block-fallback.js';
 import { ImageBlockPageComponent } from './image-block/components/page-image-block.js';
 import { effects as blockImageEffects } from './image-block/effects.js';
@@ -155,6 +152,7 @@ import {
   EdgelessSelectedRectWidget,
 } from './root-block/edgeless/components/rects/edgeless-selected-rect.js';
 import { EdgelessConnectorLabelEditor } from './root-block/edgeless/components/text/edgeless-connector-label-editor.js';
+// TODO
 import { EdgelessFrameTitleEditor } from './root-block/edgeless/components/text/edgeless-frame-title-editor.js';
 import { EdgelessGroupTitleEditor } from './root-block/edgeless/components/text/edgeless-group-title-editor.js';
 import { EdgelessShapeTextEditor } from './root-block/edgeless/components/text/edgeless-shape-text-editor.js';
@@ -273,6 +271,7 @@ import { EdgelessChangeShapeButton } from './root-block/widgets/element-toolbar/
 import { EdgelessChangeTextMenu } from './root-block/widgets/element-toolbar/change-text-menu.js';
 import { EdgelessMoreButton } from './root-block/widgets/element-toolbar/more-menu/button.js';
 import { EdgelessReleaseFromGroupButton } from './root-block/widgets/element-toolbar/release-from-group-button.js';
+import { effects as widgetFrameTitleEffects } from './root-block/widgets/frame-title/effects.js';
 import { AffineImageToolbar } from './root-block/widgets/image-toolbar/components/image-toolbar.js';
 import { AFFINE_IMAGE_TOOLBAR_WIDGET } from './root-block/widgets/image-toolbar/index.js';
 import { AFFINE_INNER_MODAL_WIDGET } from './root-block/widgets/inner-modal/inner-modal.js';
@@ -339,6 +338,7 @@ export function effects() {
   widgetScrollAnchoringEffects();
   widgetMobileToolbarEffects();
   widgetLinkedDocEffects();
+  widgetFrameTitleEffects();
 
   customElements.define('affine-database-title', DatabaseTitle);
   customElements.define(
@@ -380,7 +380,6 @@ export function effects() {
   customElements.define('affine-code', CodeBlockComponent);
   customElements.define('affine-image-fallback-card', ImageBlockFallbackCard);
   customElements.define('mini-mindmap-preview', MiniMindmapPreview);
-  customElements.define('edgeless-frame-title', EdgelessFrameTitle);
   customElements.define('affine-frame', FrameBlockComponent);
   customElements.define('mini-mindmap-surface-block', MindmapSurfaceBlock);
   customElements.define('affine-data-view', DataViewBlockComponent);
