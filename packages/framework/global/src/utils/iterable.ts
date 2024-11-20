@@ -139,13 +139,13 @@ export function pickArray<T>(target: Array<T>, keys: number[]): Array<T> {
 export function pick<T, K extends keyof T>(
   target: T,
   keys: K[]
-): { [key in K]: T[K] } {
+): Record<K, T[K]> {
   return keys.reduce(
     (pre, key) => {
       pre[key] = target[key];
       return pre;
     },
-    {} as { [key in K]: T[K] }
+    {} as Record<K, T[K]>
   );
 }
 

@@ -72,7 +72,7 @@ let styleDebugMenuLoaded = false;
 
 function initStyleDebugMenu(
   styleMenu: Pane,
-  { writer, reader }: { [K in 'writer' | 'reader']: CSSStyleDeclaration }
+  { writer, reader }: Record<'writer' | 'reader', CSSStyleDeclaration>
 ) {
   const sizeFolder = styleMenu.addFolder({ title: 'Size', expanded: false });
   const fontFamilyFolder = styleMenu.addFolder({

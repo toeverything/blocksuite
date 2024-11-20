@@ -5,9 +5,7 @@ import { ellipse } from './ellipse.js';
 import { rect } from './rect.js';
 import { triangle } from './triangle.js';
 
-export const shapeMethods: {
-  [key in ShapeType]: typeof rect;
-} = {
+export const shapeMethods: Record<ShapeType, typeof rect> = {
   rect,
   triangle,
   ellipse,

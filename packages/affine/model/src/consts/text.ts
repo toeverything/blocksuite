@@ -6,7 +6,7 @@ export enum ColorScheme {
   Light = 'light',
 }
 
-export type Color = string | { [K in ColorScheme | 'normal']?: string };
+export type Color = string | Partial<Record<ColorScheme | 'normal', string>>;
 
 export enum TextAlign {
   Center = 'center',
