@@ -92,7 +92,9 @@ export class TableDragController implements ReactiveController {
       }
     | undefined => {
     const y = evt.y;
-    const tableRect = this.host.getBoundingClientRect();
+    const tableRect = this.host
+      .querySelector('affine-data-view-table-group')
+      ?.getBoundingClientRect();
     const rows = this.host.querySelectorAll('data-view-table-row');
     if (!rows || !tableRect || y < tableRect.top) {
       return;
@@ -170,6 +172,7 @@ const createDragPreview = (row: TableRow, x: number, y: number) => {
   div.style.width = `${row.getBoundingClientRect().width}px`;
   div.style.position = 'fixed';
   div.style.pointerEvents = 'none';
+  div.style.opacity = '0.5';
   div.style.backgroundColor = 'var(--affine-background-primary-color)';
   div.style.boxShadow = 'var(--affine-shadow-2)';
   div.style.left = `${x}px`;
