@@ -1,5 +1,3 @@
-import type { Signal } from '@preact/signals-core';
-
 export type UniqueIdentifier = string;
 
 export interface DndClientRect {
@@ -15,11 +13,6 @@ export type Coordinates = {
   x: number;
   y: number;
 };
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type AnyData = Record<string, any>;
-export type Data<T = AnyData> = T & AnyData;
-export type DataRef<T = AnyData> = Signal<Data<T> | undefined>;
 
 export interface Active {
   id: UniqueIdentifier;
@@ -80,10 +73,11 @@ export type Transform = {
 };
 export type Modifier = (args: {
   active: Active | undefined;
-  activeNodeRect: DndClientRect | undefined;
+  activeNodeRect: DndClientRect;
   over: Over | undefined;
   transform: Transform;
-  // overlayNodeRect: DndClientRect | undefined;
+  overlayNodeRect: DndClientRect | undefined;
+  scrollContainerRect: DndClientRect | undefined;
 }) => Transform;
 
 export type Modifiers = Modifier[];
@@ -99,18 +93,6 @@ export interface Disabled {
   droppable?: boolean;
 }
 
-export type HTMLElementRefValueType = HTMLElement | null | undefined;
-export type ElementRefValueType = Element | null | undefined;
-export type SetElementRefType = (ele: ElementRefValueType) => void;
-export type DraggableNode = {
-  id: UniqueIdentifier;
-  key: UniqueIdentifier;
-  node: Signal<HTMLElementRefValueType>;
-  activatorNode: Signal<HTMLElementRefValueType>;
-  data: DataRef;
-};
-
-export type DraggableNodes = Map<UniqueIdentifier, DraggableNode>;
 export type DroppableNodes = Map<UniqueIdentifier, DroppableContainer>;
 export type Unsubscription = () => void;
 export type DndSessionProps = {
@@ -139,9 +121,3 @@ export type DistanceMeasurement =
   | Coordinates
   | Pick<Coordinates, 'x'>
   | Pick<Coordinates, 'y'>;
-
-export interface ScrollCoordinates {
-  initial: Coordinates;
-  current: Coordinates;
-  delta: Coordinates;
-}

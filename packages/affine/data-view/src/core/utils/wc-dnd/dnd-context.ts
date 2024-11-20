@@ -16,7 +16,6 @@ import type {
   DroppableNodes,
   Modifiers,
   Over,
-  Transform,
   UniqueIdentifier,
 } from './types.js';
 
@@ -51,7 +50,7 @@ export type DndContextConfig = {
 const timeWeight = 1 / 16;
 const distanceWeight = 2 / 8;
 const moveDistance = (diff: number, delta: number) =>
-  (diff * distanceWeight + 4) * delta * timeWeight;
+  (diff * distanceWeight + (diff / Math.abs(diff)) * 2) * delta * timeWeight;
 const defaultCoordinates: Coordinates = {
   x: 0,
   y: 0,
@@ -181,7 +180,35 @@ export class DndContext {
       : undefined;
   });
 
+  overlay$ = signal<{
+    node: HTMLElement;
+    rect: DndClientRect;
+  }>();
+
+  scrollableAncestor$ = computed(() => {
+    if (!this.active$.value) {
+      return;
+    }
+    const scrollableAncestor = getFirstScrollableAncestor(
+      this.active$.value.node
+    );
+    if (!scrollableAncestor) {
+      return;
+    }
+    return {
+      node: scrollableAncestor,
+      rect: getClientRect(scrollableAncestor),
+      max: {
+        x: scrollableAncestor.scrollWidth - scrollableAncestor.clientWidth,
+        y: scrollableAncestor.scrollHeight - scrollableAncestor.clientHeight,
+      },
+    };
+  });
+
   modifiedTranslate$ = computed(() => {
+    if (!this.active$.value) {
+      return defaultCoordinates;
+    }
     return applyModifiers(this.config.modifiers, {
       transform: {
         x: this.translate$.value.x - this.activeNodeRectDelta$.value.x,
@@ -190,8 +217,10 @@ export class DndContext {
         scaleY: 1,
       },
       active: this.active$.value,
-      activeNodeRect: this.active$.value?.rect,
+      activeNodeRect: this.active$.value.rect,
       over: this.over$.preValue,
+      scrollContainerRect: this.scrollableAncestor$.value?.rect,
+      overlayNodeRect: this.overlay$.value?.rect,
     });
   });
 
@@ -206,24 +235,10 @@ export class DndContext {
 
   dragEndCleanupQueue: Array<() => void> = [];
 
-  overlay$ = signal<HTMLElement>();
-
-  scale$ = signal<{ x: number; y: number }>({ x: 1, y: 1 });
-
-  scrollableAncestor$ = computed(() => {
-    if (!this.active$.value) {
-      return;
-    }
-    return getFirstScrollableAncestor(this.active$.value.node);
-  });
-
-  scrollableAncestorRect$ = computed(() => {
-    const scrollableAncestor = this.scrollableAncestor$.value;
-    if (!scrollableAncestor) {
-      return;
-    }
-    return getClientRect(scrollableAncestor);
-  });
+  scale$ = signal<{
+    x: number;
+    y: number;
+  }>({ x: 1, y: 1 });
 
   scrollAdjustedTranslate$ = computed(() => {
     const translate = this.translate$.value;
@@ -231,7 +246,7 @@ export class DndContext {
     return add(translate, scrollOffset);
   });
 
-  transform$ = computed<Transform>(() => {
+  transform$ = computed<Coordinates>(() => {
     return this.appliedTranslate$.value;
   });
 
@@ -274,7 +289,7 @@ export class DndContext {
 
   private autoScroll() {
     const currentOverlayRect = this.overlay$.value
-      ? getClientRect(this.overlay$.value)
+      ? getClientRect(this.overlay$.value.node)
       : {
           top: this.activationCoordinates$.value?.y ?? 0,
           left: this.activationCoordinates$.value?.x ?? 0,
@@ -284,36 +299,47 @@ export class DndContext {
           right: this.activationCoordinates$.value?.x ?? 0,
         };
     const scrollableAncestor = this.scrollableAncestor$.value;
-    const scrollableAncestorRect = this.scrollableAncestorRect$.value;
-    if (!scrollableAncestorRect || !scrollableAncestor) {
+    if (!scrollableAncestor) {
       return;
     }
+    const { node, rect, max } = scrollableAncestor;
     let topDiff = 0;
     let leftDiff = 0;
-    if (currentOverlayRect.top < scrollableAncestorRect.top) {
-      topDiff = currentOverlayRect.top - scrollableAncestorRect.top;
+    if (currentOverlayRect.top < rect.top) {
+      topDiff = currentOverlayRect.top - rect.top;
     }
-    if (currentOverlayRect.left < scrollableAncestorRect.left) {
-      leftDiff = currentOverlayRect.left - scrollableAncestorRect.left;
+    if (currentOverlayRect.left < rect.left) {
+      leftDiff = currentOverlayRect.left - rect.left;
     }
-    if (currentOverlayRect.bottom > scrollableAncestorRect.bottom) {
-      topDiff = currentOverlayRect.bottom - scrollableAncestorRect.bottom;
+    if (currentOverlayRect.bottom > rect.bottom) {
+      topDiff = currentOverlayRect.bottom - rect.bottom;
     }
-    if (currentOverlayRect.right > scrollableAncestorRect.right) {
-      leftDiff = currentOverlayRect.right - scrollableAncestorRect.right;
+    if (currentOverlayRect.right > rect.right) {
+      leftDiff = currentOverlayRect.right - rect.right;
     }
     if (topDiff || leftDiff) {
       const run = (delta: number) => {
         if (leftDiff) {
-          scrollableAncestor.scrollLeft += moveDistance(leftDiff, delta);
+          const newScrollLeft = node.scrollLeft + moveDistance(leftDiff, delta);
+          if (newScrollLeft < 0) {
+            node.scrollLeft = 0;
+          } else if (newScrollLeft > max.x) {
+            node.scrollLeft = max.x;
+          } else {
+            node.scrollLeft = newScrollLeft;
+          }
         }
         if (topDiff) {
-          scrollableAncestor.scrollTop += moveDistance(topDiff, delta);
+          const newScrollTop = node.scrollTop + moveDistance(topDiff, delta);
+          if (newScrollTop < 0) {
+            node.scrollTop = 0;
+          } else if (newScrollTop > max.y) {
+            node.scrollTop = max.y;
+          } else {
+            node.scrollTop = newScrollTop;
+          }
         }
-        this.onScroll(
-          scrollableAncestor.scrollLeft,
-          scrollableAncestor.scrollTop
-        );
+        this.onScroll(node.scrollLeft, node.scrollTop);
         raf(run);
       };
       raf(run);
@@ -347,7 +373,10 @@ export class DndContext {
     if (!overlay) {
       return;
     }
-    this.overlay$.value = overlay.overlay;
+    this.overlay$.value = {
+      node: overlay.overlay,
+      rect: getClientRect(overlay.overlay),
+    };
     this.dragEndCleanupQueue.push(() => {
       overlay.cleanup?.();
     });
@@ -435,7 +464,7 @@ export class DndContext {
         if (this.overlay$.value) {
           const transform = this.transform$.value;
           const scale = this.scale$.value;
-          this.overlay$.value.style.transform = `translate(${transform.x / scale.x}px,${transform.y / scale.y}px)`;
+          this.overlay$.value.node.style.transform = `translate(${transform.x / scale.x}px,${transform.y / scale.y}px)`;
         }
       })
     );
@@ -461,7 +490,7 @@ export class DndContext {
   }
 
   private listenScroll() {
-    const scrollAncestor = this.scrollableAncestor$.value;
+    const scrollAncestor = this.scrollableAncestor$.value?.node;
     if (!scrollAncestor) {
       return;
     }

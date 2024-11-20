@@ -30,6 +30,7 @@ const styles = css`
     visibility: visible;
     opacity: 1;
   }
+
   .data-view-table-group-add-row {
     display: flex;
     width: 100%;
@@ -222,13 +223,14 @@ export class TableGroup extends SignalWatcher(
           columnMoveIndicator.remove();
           return;
         }
+        const scrollX = this.dndContext.scrollOffset$.value.x;
         const bottom =
           this.rowsContainer?.getBoundingClientRect().bottom ??
           this.getBoundingClientRect().bottom;
         const left =
           over.rect.left < active.rect.left ? over.rect.left : over.rect.right;
         const height = bottom - over.rect.top;
-        columnMoveIndicator.display(left, over.rect.top, height);
+        columnMoveIndicator.display(left - scrollX, over.rect.top, height);
       })
     );
   };
@@ -248,7 +250,7 @@ export class TableGroup extends SignalWatcher(
           ids,
           id => id,
           (id, idx) => {
-            return html`<data-view-table-row
+            return html` <data-view-table-row
               data-row-index="${idx}"
               data-row-id="${id}"
               .dataViewEle="${this.dataViewEle}"
@@ -273,7 +275,7 @@ export class TableGroup extends SignalWatcher(
               ${PlusIcon()}<span style="font-size: 12px">New Record</span>
             </div>
           </div>`}
-      <affine-database-column-stats .view="${this.view}" .group=${this.group}>
+      <affine-database-column-stats .view="${this.view}" .group="${this.group}">
       </affine-database-column-stats>
     `;
   }

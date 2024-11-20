@@ -11,10 +11,9 @@ export function raf(callback?: (delta: number) => void) {
     return;
   }
   const lastTime = performance.now();
-  rafCallback = (time: number) => {
+  rafCallback = () => {
     rafId = null;
-    const delta = time - lastTime;
-    callback(delta);
+    callback(performance.now() - lastTime);
   };
 
   if (rafId === null) {
