@@ -13,6 +13,7 @@ import {
   Heading6Icon,
   NumberedListIcon,
   QuoteIcon,
+  SheetMenuIcon,
   TextIcon,
 } from '@blocksuite/affine-components/icons';
 
@@ -51,6 +52,15 @@ const LIST_ITEMS = [
     description: 'Track tasks with a to-do list.',
     icon: CheckBoxIcon,
     tooltip: 'Drag/Click to insert To-do List',
+  },
+
+  {
+    flavour: 'affine:sheet',
+    type: 'sheet',
+    name: 'Sheet',
+    description: 'Create a sheet for data.',
+    icon: SheetMenuIcon,
+    tooltip: 'Drag/Click to insert Sheet',
   },
 ];
 

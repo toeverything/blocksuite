@@ -28,6 +28,7 @@ import { NowTooltip } from './now.js';
 import { NumberedListTooltip } from './numbered-list.js';
 import { PhotoTooltip } from './photo.js';
 import { QuoteTooltip } from './quote.js';
+import { SheetTooltip } from './sheet.js';
 import { StrikethroughTooltip } from './strikethrough.js';
 import { TableViewTooltip } from './table-view.js';
 import { TextTooltip } from './text.js';
@@ -108,6 +109,11 @@ export const slashMenuToolTips: Record<string, SlashMenuTooltip> = {
   'To-do List': {
     figure: ToDoListTooltip,
     caption: 'To-do List',
+  },
+
+  Sheet: {
+    figure: SheetTooltip,
+    caption: 'Sheet',
   },
 
   Bold: {

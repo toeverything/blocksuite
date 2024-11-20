@@ -349,6 +349,36 @@ export const AttachmentIcon16 = icons.AttachmentIcon({
   height: '16',
 });
 
+// TODO: temporary icons
+export const SheetMenuIcon = html`<svg
+  xmlns="http://www.w3.org/2000/svg"
+  width="20"
+  height="20"
+  viewBox="0 0 20 20"
+  fill="none"
+>
+  <path
+    d="M64 830.74C64 849.109 78.891 864 97.26 864h829.48c18.369 0 33.26-14.891 33.26-33.26V354H64v476.74zM141.34 633H339v153.66H141.34V633zM637 633v153.66H387V633h250z m-250-48V431.34h250V585H387z m298 201.66V633h197.66v153.66H685zM882.66 585H685V431.34h197.66V585zM339 431.34V585H141.34V431.34H339zM942.45 159H685.33v142H960V176.55A17.55 17.55 0 0 0 942.45 159zM386.67 159h250.67v142H386.67zM338.67 159H81.55A17.55 17.55 0 0 0 64 176.55V301h274.67V159z"
+    fill="#000000"
+    p-id="4421"
+  ></path>
+</svg>`;
+
+// TODO: temporary icons
+export const SheetSlashMenuIcon = html`<svg
+  xmlns="http://www.w3.org/2000/svg"
+  width="24"
+  height="24"
+  viewBox="0 0 20 20"
+  fill="none"
+>
+  <path
+    d="M64 830.74C64 849.109 78.891 864 97.26 864h829.48c18.369 0 33.26-14.891 33.26-33.26V354H64v476.74zM141.34 633H339v153.66H141.34V633zM637 633v153.66H387V633h250z m-250-48V431.34h250V585H387z m298 201.66V633h197.66v153.66H685zM882.66 585H685V431.34h197.66V585zM339 431.34V585H141.34V431.34H339zM942.45 159H685.33v142H960V176.55A17.55 17.55 0 0 0 942.45 159zM386.67 159h250.67v142H386.67zM338.67 159H81.55A17.55 17.55 0 0 0 64 176.55V301h274.67V159z"
+    fill="#000000"
+    p-id="4421"
+  ></path>
+</svg>`;
+
 export const TextBackgroundDuotoneIcon = html` <svg
   xmlns="http://www.w3.org/2000/svg"
   width="20"

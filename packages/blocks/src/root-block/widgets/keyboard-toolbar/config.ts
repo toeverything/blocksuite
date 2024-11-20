@@ -2,6 +2,7 @@ import type { FrameBlockModel } from '@blocksuite/affine-model';
 import type { BlockStdScope } from '@blocksuite/block-std';
 import type { TemplateResult } from 'lit';
 
+import { SheetSlashMenuIcon } from '@blocksuite/affine-components/icons';
 import {
   type AffineTextAttributes,
   getInlineEditorByModel,
@@ -258,6 +259,22 @@ const listToolActionItems: KeyboardToolbarActionItem[] = [
         flavour: 'affine:list',
         props: {
           type: 'todo',
+        },
+      });
+    },
+  },
+];
+
+const SheetToolActionItems: KeyboardToolbarActionItem[] = [
+  {
+    name: 'Sheet',
+    icon: () => SheetSlashMenuIcon, // TODO: Need to import the icon from the correct location
+    showWhen: ({ std }) => std.doc.schema.flavourSchemaMap.has('affine:sheet'),
+    action: ({ std }) => {
+      std.command.exec('updateBlockType', {
+        flavour: 'affine:sheet',
+        props: {
+          type: 'sheet',
         },
       });
     },
@@ -682,6 +699,7 @@ const moreToolPanel: KeyboardToolPanelConfig = {
   groups: [
     { name: 'Basic', items: textToolActionItems },
     { name: 'List', items: listToolActionItems },
+    { name: 'Sheet', items: SheetToolActionItems },
     pageToolGroup,
     contentMediaToolGroup,
     documentGroupFrameToolGroup,
@@ -885,6 +903,7 @@ export const defaultKeyboardToolbarConfig: KeyboardToolbarConfig = {
     // { icon: AiIcon(iconStyle) },
     textSubToolbarConfig,
     ...listToolActionItems,
+    ...SheetToolActionItems,
     ...textToolActionItems.filter(({ name }) => name === 'Divider'),
     {
       name: 'Undo',

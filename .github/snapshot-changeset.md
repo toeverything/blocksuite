@@ -2,6 +2,7 @@
 '@blocksuite/affine': patch
 '@blocksuite/affine-block-embed': patch
 '@blocksuite/affine-block-list': patch
+'@blocksuite/affine-block-sheet': patch
 '@blocksuite/affine-block-paragraph': patch
 '@blocksuite/affine-block-surface': patch
 '@blocksuite/affine-components': patch

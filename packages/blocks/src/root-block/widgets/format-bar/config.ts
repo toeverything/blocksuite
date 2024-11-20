@@ -26,6 +26,7 @@ import {
   MoreVerticalIcon,
   NumberedListIcon,
   QuoteIcon,
+  SheetMenuIcon,
   StrikethroughIcon,
   TextIcon,
   UnderlineIcon,
@@ -304,6 +305,12 @@ export function toolbarDefaultConfig(toolbar: AffineFormatBarWidget) {
       type: 'todo',
       name: 'To-do List',
       icon: CheckBoxIcon,
+    })
+    .addBlockTypeSwitch({
+      flavour: 'affine:sheet',
+      type: 'sheet',
+      name: 'Sheet',
+      icon: SheetMenuIcon,
     })
     .addBlockTypeSwitch({
       flavour: 'affine:code',

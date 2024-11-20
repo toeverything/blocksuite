@@ -99,6 +99,7 @@ const chunkGroups = {
     require.resolve('@blocksuite/affine-shared'),
     require.resolve('@blocksuite/affine-model'),
     require.resolve('@blocksuite/affine-block-list'),
+    require.resolve('@blocksuite/affine-block-sheet'),
     require.resolve('@blocksuite/affine-block-paragraph'),
     require.resolve('@blocksuite/affine-block-surface'),
     require.resolve('@blocksuite/data-view'),

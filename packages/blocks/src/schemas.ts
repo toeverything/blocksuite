@@ -24,6 +24,7 @@ import {
   NoteBlockSchema,
   ParagraphBlockSchema,
   RootBlockSchema,
+  SheetBlockSchema,
   SurfaceRefBlockSchema,
 } from '@blocksuite/affine-model';
 
@@ -35,6 +36,7 @@ export const AffineSchemas: z.infer<typeof BlockSchema>[] = [
   ParagraphBlockSchema,
   RootBlockSchema,
   ListBlockSchema,
+  SheetBlockSchema,
   NoteBlockSchema,
   DividerBlockSchema,
   ImageBlockSchema,

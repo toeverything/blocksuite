@@ -4,6 +4,7 @@ import type { BlockModel } from '@blocksuite/store';
 import { effects as blockEmbedEffects } from '@blocksuite/affine-block-embed/effects';
 import { effects as blockListEffects } from '@blocksuite/affine-block-list/effects';
 import { effects as blockParagraphEffects } from '@blocksuite/affine-block-paragraph/effects';
+import { effects as blockSheetEffects } from '@blocksuite/affine-block-sheet/effects';
 import { effects as blockSurfaceEffects } from '@blocksuite/affine-block-surface/effects';
 import { effects as componentCaptionEffects } from '@blocksuite/affine-components/caption';
 import { effects as componentContextMenuEffects } from '@blocksuite/affine-components/context-menu';
@@ -319,6 +320,7 @@ export function effects() {
   inlineEffects();
 
   blockListEffects();
+  blockSheetEffects();
   blockParagraphEffects();
   blockEmbedEffects();
   blockSurfaceEffects();

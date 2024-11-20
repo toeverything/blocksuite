@@ -176,6 +176,12 @@ export const defaultSlashMenuConfig: SlashMenuConfig = {
       .map(createConversionItem),
 
     // ---------------------------------------------------------
+    { groupName: 'Sheet' },
+    ...textConversionConfigs
+      .filter(i => i.flavour === 'affine:sheet')
+      .map(createConversionItem),
+
+    // ---------------------------------------------------------
     { groupName: 'Style' },
     ...textFormatConfigs
       .filter(i => !['Code', 'Link'].includes(i.name))

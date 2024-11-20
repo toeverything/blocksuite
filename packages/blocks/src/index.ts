@@ -57,6 +57,7 @@ export * from './surface-ref-block/index.js';
 export * from '@blocksuite/affine-block-embed';
 export * from '@blocksuite/affine-block-list';
 export * from '@blocksuite/affine-block-paragraph';
+export * from '@blocksuite/affine-block-sheet';
 export * from '@blocksuite/affine-block-surface';
 export { type MenuOptions } from '@blocksuite/affine-components/context-menu';
 export {
