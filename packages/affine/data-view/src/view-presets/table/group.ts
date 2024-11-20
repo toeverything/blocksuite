@@ -6,8 +6,9 @@ import {
 import { ShadowlessElement } from '@blocksuite/block-std';
 import { SignalWatcher, WithDisposable } from '@blocksuite/global/utils';
 import { PlusIcon } from '@blocksuite/icons/lit';
-import { css, html, type PropertyValues } from 'lit';
-import { property } from 'lit/decorators.js';
+import { effect } from '@preact/signals-core';
+import { css, html } from 'lit';
+import { property, query } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
 import type { DataViewRenderer } from '../../core/data-view.js';
@@ -16,7 +17,12 @@ import type { DataViewTable } from './table-view.js';
 import type { TableSingleView } from './table-view-manager.js';
 
 import { GroupTitle } from '../../core/group-by/group-title.js';
+import { createDndContext } from '../../core/utils/wc-dnd/dnd-context.js';
+import { defaultActivators } from '../../core/utils/wc-dnd/sensors/index.js';
+import { linearMove } from '../../core/utils/wc-dnd/utils/linear-move.js';
 import { LEFT_TOOL_BAR_WIDTH } from './consts.js';
+import { DataViewColumnPreview } from './header/column-renderer.js';
+import { getVerticalIndicator } from './header/vertical-indicator.js';
 import { TableAreaSelection } from './types.js';
 
 const styles = css`
@@ -24,6 +30,7 @@ const styles = css`
     visibility: visible;
     opacity: 1;
   }
+
   .data-view-table-group-add-row {
     display: flex;
     width: 100%;
@@ -139,6 +146,95 @@ export class TableGroup extends SignalWatcher(
     `;
   };
 
+  @property({ attribute: false })
+  accessor group: GroupData | undefined = undefined;
+
+  @property({ attribute: false })
+  accessor view!: TableSingleView;
+
+  dndContext = createDndContext({
+    activators: defaultActivators,
+    container: this,
+    modifiers: [
+      ({ transform }) => {
+        return {
+          ...transform,
+          y: 0,
+        };
+      },
+    ],
+    onDragEnd: ({ over, active }) => {
+      if (over && over.id !== active.id) {
+        const activeIndex = this.view.properties$.value.findIndex(
+          data => data.id === active.id
+        );
+        const overIndex = this.view.properties$.value.findIndex(
+          data => data.id === over.id
+        );
+        this.view.propertyMove(active.id, {
+          before: activeIndex > overIndex,
+          id: over.id,
+        });
+      }
+    },
+    collisionDetection: linearMove(true),
+    createOverlay: active => {
+      const column = this.view.propertyGet(active.id);
+      const preview = new DataViewColumnPreview();
+      preview.column = column;
+      preview.group = this.group;
+      preview.container = this;
+      preview.style.position = 'absolute';
+      preview.style.zIndex = '999';
+      const scale = this.dndContext.scale$.value;
+      const offsetParentRect = this.offsetParent?.getBoundingClientRect();
+      if (!offsetParentRect) {
+        return;
+      }
+      preview.style.width = `${column.width$.value}px`;
+      preview.style.top = `${(active.rect.top - offsetParentRect.top - 1) / scale.y}px`;
+      preview.style.left = `${(active.rect.left - offsetParentRect.left) / scale.x}px`;
+      const cells = Array.from(
+        this.querySelectorAll(`[data-column-id="${active.id}"]`)
+      ) as HTMLElement[];
+      cells.forEach(ele => {
+        ele.style.opacity = '0.1';
+      });
+      this.append(preview);
+      return {
+        overlay: preview,
+        cleanup: () => {
+          preview.remove();
+          cells.forEach(ele => {
+            ele.style.opacity = '1';
+          });
+        },
+      };
+    },
+  });
+
+  showIndicator = () => {
+    const columnMoveIndicator = getVerticalIndicator();
+    this.disposables.add(
+      effect(() => {
+        const active = this.dndContext.active$.value;
+        const over = this.dndContext.over$.value;
+        if (!active || !over) {
+          columnMoveIndicator.remove();
+          return;
+        }
+        const scrollX = this.dndContext.scrollOffset$.value.x;
+        const bottom =
+          this.rowsContainer?.getBoundingClientRect().bottom ??
+          this.getBoundingClientRect().bottom;
+        const left =
+          over.rect.left < active.rect.left ? over.rect.left : over.rect.right;
+        const height = bottom - over.rect.top;
+        columnMoveIndicator.display(left - scrollX, over.rect.top, height);
+      })
+    );
+  };
+
   get rows() {
     return this.group?.rows ?? this.view.rows$.value;
   }
@@ -154,7 +250,7 @@ export class TableGroup extends SignalWatcher(
           ids,
           id => id,
           (id, idx) => {
-            return html`<data-view-table-row
+            return html` <data-view-table-row
               data-row-index="${idx}"
               data-row-id="${id}"
               .dataViewEle="${this.dataViewEle}"
@@ -176,33 +272,28 @@ export class TableGroup extends SignalWatcher(
               data-test-id="affine-database-add-row-button"
               role="button"
             >
-              ${PlusIcon()}<span>New Record</span>
+              ${PlusIcon()}<span style="font-size: 12px">New Record</span>
             </div>
           </div>`}
-      <affine-database-column-stats .view="${this.view}" .group=${this.group}>
+      <affine-database-column-stats .view="${this.view}" .group="${this.group}">
       </affine-database-column-stats>
     `;
+  }
+
+  override connectedCallback(): void {
+    super.connectedCallback();
+    this.showIndicator();
   }
 
   override render() {
     return this.renderRows(this.rows);
   }
 
-  protected override updated(_changedProperties: PropertyValues) {
-    super.updated(_changedProperties);
-    this.querySelectorAll('data-view-table-row').forEach(ele => {
-      ele.requestUpdate();
-    });
-  }
-
   @property({ attribute: false })
   accessor dataViewEle!: DataViewRenderer;
 
-  @property({ attribute: false })
-  accessor group: GroupData | undefined = undefined;
-
-  @property({ attribute: false })
-  accessor view!: TableSingleView;
+  @query('.affine-database-block-rows')
+  accessor rowsContainer: HTMLElement | null = null;
 
   @property({ attribute: false })
   accessor viewEle!: DataViewTable;

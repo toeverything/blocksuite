@@ -6,8 +6,8 @@ import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
 
-import type { Property } from '../../../core/view-manager/property.js';
-import type { TableSingleView } from '../table-view-manager.js';
+import type { GroupData } from '../../../core/group-by/manager.js';
+import type { TableColumn, TableSingleView } from '../table-view-manager.js';
 
 export class DataViewColumnPreview extends SignalWatcher(
   WithDisposable(ShadowlessElement)
@@ -16,8 +16,14 @@ export class DataViewColumnPreview extends SignalWatcher(
     affine-data-view-column-preview {
       pointer-events: none;
       display: block;
+      position: fixed;
+      font-family: var(--affine-font-family);
     }
   `;
+
+  get tableViewManager(): TableSingleView {
+    return this.column.view as TableSingleView;
+  }
 
   private renderGroup(rows: string[]) {
     const columnIndex = this.tableViewManager.propertyIndexGet(this.column.id);
@@ -30,7 +36,7 @@ export class DataViewColumnPreview extends SignalWatcher(
           .column="${this.column}"
         ></affine-database-header-column>
         ${repeat(rows, (id, index) => {
-          const height = this.table.querySelector(
+          const height = this.container.querySelector(
             `affine-database-cell-container[data-row-id="${id}"]`
           )?.clientHeight;
           const style = styleMap({
@@ -57,27 +63,19 @@ export class DataViewColumnPreview extends SignalWatcher(
   }
 
   override render() {
-    const groups = this.tableViewManager.groupTrait.groupsDataList$.value;
-    if (!groups) {
-      const rows = this.tableViewManager.rows$.value;
-      return this.renderGroup(rows);
-    }
-    return groups.map(group => {
-      return html`
-        <div style="height: 44px;"></div>
-        ${this.renderGroup(group.rows)}
-      `;
-    });
+    return this.renderGroup(
+      this.group?.rows ?? this.tableViewManager.rows$.value
+    );
   }
 
   @property({ attribute: false })
-  accessor column!: Property;
+  accessor column!: TableColumn;
 
   @property({ attribute: false })
-  accessor table!: HTMLElement;
+  accessor container!: HTMLElement;
 
   @property({ attribute: false })
-  accessor tableViewManager!: TableSingleView;
+  accessor group: GroupData | undefined = undefined;
 }
 
 declare global {

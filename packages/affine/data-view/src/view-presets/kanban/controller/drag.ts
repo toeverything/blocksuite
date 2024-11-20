@@ -2,11 +2,12 @@ import type { InsertToPosition } from '@blocksuite/affine-shared/utils';
 import type { ReactiveController } from 'lit';
 
 import { assertExists, Point, Rect } from '@blocksuite/global/utils';
+import { computed } from '@preact/signals-core';
 
 import type { DataViewKanban } from '../kanban-view.js';
 
+import { autoScrollOnBoundary } from '../../../core/utils/auto-scroll.js';
 import { startDrag } from '../../../core/utils/drag.js';
-import { autoScrollOnBoundary } from '../../../core/utils/frame-loop.js';
 import { KanbanCard } from '../card.js';
 import { KanbanGroup } from '../group.js';
 
@@ -21,8 +22,18 @@ export class KanbanDragController implements ReactiveController {
       evt.y - offsetTop
     );
     const currentGroup = ele.closest('affine-data-view-kanban-group');
-    const cancelScroll = autoScrollOnBoundary(this.scrollContainer);
-    startDrag<
+    const cancelScroll = autoScrollOnBoundary(
+      this.scrollContainer,
+      computed(() => {
+        return {
+          left: drag.mousePosition.value.x,
+          right: drag.mousePosition.value.x,
+          top: drag.mousePosition.value.y,
+          bottom: drag.mousePosition.value.y,
+        };
+      })
+    );
+    const drag = startDrag<
       | { type: 'out'; callback: () => void }
       | {
           type: 'self';

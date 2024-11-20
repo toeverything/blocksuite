@@ -63,9 +63,9 @@ export interface LinkedWidgetConfig {
 
 export type LinkedMenuItem = {
   key: string;
-  name: string;
+  name: string | TemplateResult<1>;
   icon: TemplateResult<1>;
-  // suffix?: TemplateResult<1>;
+  suffix?: string | TemplateResult<1>;
   // disabled?: boolean;
   action: () => Promise<void> | void;
 };

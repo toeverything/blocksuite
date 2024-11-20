@@ -72,40 +72,38 @@ export class GroupSetting extends SignalWatcher(
   });
 
   sortContext = createSortContext({
-    dnd: {
-      activators: defaultActivators,
-      container: this,
-      onDragEnd: evt => {
-        const over = evt.over;
-        const activeId = evt.active.id;
-        const groups = this.groups$.value;
-        if (over && over.id !== activeId && groups) {
-          const activeIndex = groups.findIndex(data => data.key === activeId);
-          const overIndex = groups.findIndex(data => data.key === over.id);
+    activators: defaultActivators,
+    container: this,
+    onDragEnd: evt => {
+      const over = evt.over;
+      const activeId = evt.active.id;
+      const groups = this.groups$.value;
+      if (over && over.id !== activeId && groups) {
+        const activeIndex = groups.findIndex(data => data.key === activeId);
+        const overIndex = groups.findIndex(data => data.key === over.id);
 
-          this.groupTrait.moveGroupTo(
-            activeId,
-            activeIndex > overIndex
-              ? {
-                  before: true,
-                  id: over.id,
-                }
-              : {
-                  before: false,
-                  id: over.id,
-                }
-          );
-        }
-      },
-      modifiers: [
-        ({ transform }) => {
-          return {
-            ...transform,
-            x: 0,
-          };
-        },
-      ],
+        this.groupTrait.moveGroupTo(
+          activeId,
+          activeIndex > overIndex
+            ? {
+                before: true,
+                id: over.id,
+              }
+            : {
+                before: false,
+                id: over.id,
+              }
+        );
+      }
     },
+    modifiers: [
+      ({ transform }) => {
+        return {
+          ...transform,
+          x: 0,
+        };
+      },
+    ],
     items: computed(() => {
       return this.groupTrait.groupsDataList$.value?.map(v => v.key) ?? [];
     }),

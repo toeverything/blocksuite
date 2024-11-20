@@ -113,8 +113,10 @@ const styles = css`
     cursor: pointer;
   }
 
-  .database-cell {
-    border-left: 1px solid var(--affine-border-color);
+  .cell-divider {
+    width: 1px;
+    height: 100%;
+    background-color: var(--affine-border-color);
   }
 
   .data-view-table-left-bar {

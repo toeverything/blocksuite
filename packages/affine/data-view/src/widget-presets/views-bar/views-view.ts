@@ -6,7 +6,6 @@ import {
   popupTargetFromElement,
 } from '@blocksuite/affine-components/context-menu';
 import {
-  AddCursorIcon,
   DeleteIcon,
   DuplicateIcon,
   InfoIcon,
@@ -44,6 +43,7 @@ export class DataViewHeaderViews extends WidgetBase {
       color: var(--affine-text-secondary-color);
       white-space: nowrap;
       max-width: 200px;
+      min-width: 28px;
     }
 
     .database-view-button .name {
@@ -224,7 +224,7 @@ export class DataViewHeaderViews extends WidgetBase {
         data-testid="database-add-view-button"
         @click="${this._addViewMenu}"
       >
-        ${AddCursorIcon()}
+        ${PlusIcon()}
       </div>`;
     }
     return html`
