@@ -7,17 +7,10 @@ import type {
 import { computed, type ReadonlySignal } from '@preact/signals-core';
 
 import type { Variable } from '../expression/index.js';
-import type { SingleView } from '../view-manager/index.js';
+import type { SortManager } from './manager.js';
 import type { SortBy } from './types.js';
 
-import { TableSingleView } from '../../view-presets/index.js';
 import { arrayMove } from '../utils/wc-dnd/utils/array-move.js';
-
-export type SortableView = TableSingleView;
-
-export const canSort = (view: SingleView): view is SortableView => {
-  return view instanceof TableSingleView;
-};
 
 export interface SortUtils {
   sortList$: ReadonlySignal<SortBy[]>;
@@ -30,13 +23,14 @@ export interface SortUtils {
 }
 
 export const createSortUtils = (
-  view: SortableView,
+  sortTrait: SortManager,
   eventTrace: EventTraceFn<DatabaseAllViewEvents>
 ): SortUtils => {
+  const view = sortTrait.view;
   const varsMap$ = computed(() => {
     return new Map(view.vars$.value.map(v => [v.id, v]));
   });
-  const sortList$ = view.sortManager.sortList$;
+  const sortList$ = sortTrait.sortList$;
   const sortParams = (
     sort?: SortBy,
     index?: number
@@ -57,18 +51,18 @@ export const createSortUtils = (
     vars$: view.vars$,
     sortList$: sortList$,
     add: sort => {
-      const list = view.sortManager.sortList$.value;
-      view.sortManager.setSortList([...list, sort]);
+      const list = sortTrait.sortList$.value;
+      sortTrait.setSortList([...list, sort]);
       const params = sortParams(sort, list.length);
       if (params) {
         eventTrace('DatabaseSortAdd', params);
       }
     },
     move: (fromIndex, toIndex) => {
-      const list = view.sortManager.sortList$.value;
+      const list = sortTrait.sortList$.value;
       const from = sortParams(list[fromIndex], fromIndex);
       const newList = arrayMove(list, fromIndex, toIndex);
-      view.sortManager.setSortList(newList);
+      sortTrait.setSortList(newList);
       const prev = sortParams(newList[toIndex - 1], toIndex - 1);
       const next = sortParams(newList[toIndex + 1], toIndex + 1);
       if (from) {
@@ -81,10 +75,10 @@ export const createSortUtils = (
       }
     },
     change: (index, sort) => {
-      const list = view.sortManager.sortList$.value.slice();
+      const list = sortTrait.sortList$.value.slice();
       const old = sortParams(list[index], index);
       list[index] = sort;
-      view.sortManager.setSortList(list);
+      sortTrait.setSortList(list);
 
       const params = sortParams(sort, index);
       if (params && old) {
@@ -97,17 +91,17 @@ export const createSortUtils = (
       }
     },
     remove: index => {
-      const list = view.sortManager.sortList$.value.slice();
+      const list = sortTrait.sortList$.value.slice();
       const old = sortParams(list[index], index);
       list.splice(index, 1);
-      view.sortManager.setSortList([...list]);
+      sortTrait.setSortList([...list]);
       if (old) {
         eventTrace('DatabaseSortRemove', old);
       }
     },
     removeAll: () => {
-      const count = view.sortManager.sortList$.value.length;
-      view.sortManager.setSortList([]);
+      const count = sortTrait.sortList$.value.length;
+      sortTrait.setSortList([]);
       eventTrace('DatabaseSortClear', {
         rulesCount: count,
       });

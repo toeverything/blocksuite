@@ -24,10 +24,7 @@ export interface DataViewModelConfig<
   Data extends DataViewDataType = DataViewDataType,
 > {
   defaultName: string;
-  dataViewManager: new (
-    viewManager: ViewManager,
-    viewId: string
-  ) => SingleView<Data>;
+  dataViewManager: new (viewManager: ViewManager, viewId: string) => SingleView;
   defaultData: (viewManager: ViewManager) => Omit<Data, 'id' | 'name' | 'mode'>;
 }
 

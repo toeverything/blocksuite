@@ -50,7 +50,7 @@ export const popCardMenu = (
       prefix: ArrowRightBigIcon(),
       options: {
         items:
-          selection.view.groupManager.groupsDataList$.value
+          selection.view.groupTrait.groupsDataList$.value
             ?.filter(v => {
               const cardSelection = selection.selection;
               if (cardSelection?.selectionType === 'card') {

@@ -105,8 +105,8 @@ export class DataViewHeaderViews extends WidgetBase {
           const view = this.viewManager.viewGet(id);
           return menu.action({
             prefix: html`<uni-lit .uni=${this.getRenderer(id).icon}></uni-lit>`,
-            name: view.data$.value?.name ?? '',
-            label: () => html`${view.data$.value?.name}`,
+            name: view.name$.value ?? '',
+            label: () => html`${view.name$.value}`,
             isSelected: this.viewManager.currentViewId$.value === id,
             select: () => {
               this.viewManager.setCurrentView(id);
@@ -151,11 +151,9 @@ export class DataViewHeaderViews extends WidgetBase {
       options: {
         items: [
           menu.input({
-            initialValue: view.data$.value?.name,
+            initialValue: view.name$.value,
             onChange: text => {
-              view.dataUpdate(_data => ({
-                name: text,
-              }));
+              view.nameSet(text);
             },
           }),
           menu.action({

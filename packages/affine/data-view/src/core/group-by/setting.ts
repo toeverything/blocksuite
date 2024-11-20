@@ -13,13 +13,8 @@ import { css, html, unsafeCSS } from 'lit';
 import { property, query } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
-import type {
-  KanbanViewData,
-  TableViewData,
-} from '../../view-presets/index.js';
-import type { SingleView } from '../view-manager/single-view.js';
+import type { GroupTrait } from './trait.js';
 import type { GroupRenderProps } from './types.js';
-import type { CanGroupView } from './utils.js';
 
 import { KanbanSingleView } from '../../view-presets/kanban/kanban-view-manager.js';
 import { TableSingleView } from '../../view-presets/table/table-view-manager.js';
@@ -70,10 +65,10 @@ export class GroupSetting extends SignalWatcher(
   `;
 
   @property({ attribute: false })
-  accessor view!: TableSingleView | KanbanSingleView;
+  accessor groupTrait!: GroupTrait;
 
   groups$ = computed(() => {
-    return this.view.groupManager.groupsDataList$.value;
+    return this.groupTrait.groupsDataList$.value;
   });
 
   sortContext = createSortContext({
@@ -87,7 +82,7 @@ export class GroupSetting extends SignalWatcher(
         const activeIndex = groups.findIndex(data => data.key === activeId);
         const overIndex = groups.findIndex(data => data.key === over.id);
 
-        this.view.groupManager.moveGroupTo(
+        this.groupTrait.moveGroupTo(
           activeId,
           activeIndex > overIndex
             ? {
@@ -110,9 +105,7 @@ export class GroupSetting extends SignalWatcher(
       },
     ],
     items: computed(() => {
-      return (
-        this.view.groupManager.groupsDataList$.value?.map(v => v.key) ?? []
-      );
+      return this.groupTrait.groupsDataList$.value?.map(v => v.key) ?? [];
     }),
     strategy: verticalListSortingStrategy,
   });
@@ -125,7 +118,7 @@ export class GroupSetting extends SignalWatcher(
   }
 
   protected override render(): unknown {
-    const groups = this.view.groupManager.groupsDataList$.value;
+    const groups = this.groupTrait.groupsDataList$.value;
     if (!groups) {
       return;
     }
@@ -176,13 +169,14 @@ export class GroupSetting extends SignalWatcher(
 }
 
 export const selectGroupByProperty = (
-  view: SingleView<TableViewData | KanbanViewData>,
+  group: GroupTrait,
   ops?: {
     onSelect?: (id?: string) => void;
     onClose?: () => void;
     onBack?: () => void;
   }
 ): MenuOptions => {
+  const view = group.view;
   return {
     onClose: ops?.onClose,
     title: {
@@ -201,16 +195,11 @@ export const selectGroupByProperty = (
           const property = view.propertyGet(id);
           return menu.action({
             name: property.name$.value,
-            isSelected: view.data$.value?.groupBy?.columnId === id,
+            isSelected: group.property$.value?.id === id,
             prefix: html` <uni-lit .uni="${property.icon}"></uni-lit>`,
             select: () => {
-              if (
-                view instanceof TableSingleView ||
-                view instanceof KanbanSingleView
-              ) {
-                view.changeGroup(id);
-                ops?.onSelect?.(id);
-              }
+              group.changeGroup(id);
+              ops?.onSelect?.(id);
             },
           });
         }),
@@ -219,15 +208,12 @@ export const selectGroupByProperty = (
           menu.action({
             prefix: DeleteIcon(),
             hide: () =>
-              view instanceof KanbanSingleView ||
-              view.data$.value?.groupBy == null,
+              view instanceof KanbanSingleView || group.property$.value == null,
             class: { 'delete-item': true },
             name: 'Remove Grouping',
             select: () => {
-              if (view instanceof TableSingleView) {
-                view.changeGroup(undefined);
-                ops?.onSelect?.();
-              }
+              group.changeGroup(undefined);
+              ops?.onSelect?.();
             },
           }),
         ],
@@ -237,7 +223,7 @@ export const selectGroupByProperty = (
 };
 export const popSelectGroupByProperty = (
   target: PopupTarget,
-  view: SingleView<TableViewData | KanbanViewData>,
+  group: GroupTrait,
   ops?: {
     onSelect?: () => void;
     onClose?: () => void;
@@ -245,23 +231,24 @@ export const popSelectGroupByProperty = (
   }
 ) => {
   popMenu(target, {
-    options: selectGroupByProperty(view, ops),
+    options: selectGroupByProperty(group, ops),
   });
 };
 export const popGroupSetting = (
   target: PopupTarget,
-  view: CanGroupView,
+  group: GroupTrait,
   onBack: () => void
 ) => {
-  const groupBy = view.data$.value?.groupBy;
-  if (groupBy == null) {
+  const view = group.view;
+  const groupProperty = group.property$.value;
+  if (groupProperty == null) {
     return;
   }
-  const type = view.propertyTypeGet(groupBy.columnId);
+  const type = groupProperty.type$.value;
   if (!type) {
     return;
   }
-  const icon = view.IconGet(type);
+  const icon = view.propertyIconGet(type);
   const menuHandler = popMenu(target, {
     options: {
       title: {
@@ -278,8 +265,7 @@ export const popGroupSetting = (
                   style="display:flex;align-items:center;gap: 4px;font-size: 12px;line-height: 20px;color: var(--affine-text-secondary-color);margin-right: 4px;margin-left: 8px;"
                   class="dv-icon-16"
                 >
-                  ${renderUniLit(icon, {})}
-                  ${view.propertyNameGet(groupBy.columnId)}
+                  ${renderUniLit(icon, {})} ${groupProperty.name$.value}
                 </div>
               `,
               label: () => html`
@@ -287,10 +273,10 @@ export const popGroupSetting = (
                   Group By
                 </div>
               `,
-              options: selectGroupByProperty(view, {
+              options: selectGroupByProperty(group, {
                 onSelect: () => {
                   menuHandler.close();
-                  popGroupSetting(target, view, onBack);
+                  popGroupSetting(target, group, onBack);
                 },
               }),
             }),
@@ -301,8 +287,8 @@ export const popGroupSetting = (
             menu =>
               html` <data-view-group-setting
                 @mouseenter="${() => menu.closeSubMenu()}"
-                .view="${view}"
-                .columnId="${groupBy.columnId}"
+                .groupTrait="${group}"
+                .columnId="${groupProperty.id}"
               ></data-view-group-setting>`,
           ],
         }),
@@ -314,9 +300,7 @@ export const popGroupSetting = (
               class: { 'delete-item': true },
               hide: () => !(view instanceof TableSingleView),
               select: () => {
-                if (view instanceof TableSingleView) {
-                  view.changeGroup(undefined);
-                }
+                group.changeGroup(undefined);
               },
             }),
           ],

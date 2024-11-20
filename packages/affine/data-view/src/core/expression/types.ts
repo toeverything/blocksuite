@@ -9,6 +9,7 @@ export type VariableRef = {
 export type Variable = {
   name: string;
   type: TypeInstance;
+  propertyType: string;
   id: string;
   icon?: UniComponent;
 };

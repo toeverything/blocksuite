@@ -24,13 +24,10 @@ import { classMap } from 'lit/directives/class-map.js';
 import { repeat } from 'lit/directives/repeat.js';
 
 import type { Variable } from '../../../core/expression/types.js';
+import type { FilterTrait } from '../../../core/filter/trait.js';
 import type { Filter, FilterGroup } from '../../../core/filter/types.js';
 
-import {
-  emptyFilterGroup,
-  popCreateFilter,
-  type SingleView,
-} from '../../../core/index.js';
+import { popCreateFilter } from '../../../core/index.js';
 import {
   type FilterGroupView,
   getDepth,
@@ -374,10 +371,12 @@ declare global {
 export const popFilterRoot = (
   target: PopupTarget,
   props: {
-    view: SingleView;
+    filterTrait: FilterTrait;
     onBack: () => void;
   }
 ) => {
+  const filterTrait = props.filterTrait;
+  const view = filterTrait.view;
   popMenu(target, {
     options: {
       title: {
@@ -388,13 +387,11 @@ export const popFilterRoot = (
         menu.group({
           items: [
             () => {
-              const view = props.view;
-              const onChange = view.filterSet.bind(view);
               return html` <filter-root-view
                 .onBack="${props.onBack}"
                 .vars="${view.vars$}"
-                .filterGroup="${view.filter$}"
-                .onChange="${onChange}"
+                .filterGroup="${filterTrait.filter$}"
+                .onChange="${filterTrait.filterSet}"
               ></filter-root-view>`;
             },
           ],
@@ -405,14 +402,13 @@ export const popFilterRoot = (
               name: 'Add',
               prefix: PlusIcon(),
               select: ele => {
-                const view = props.view;
-                const value = view.filter$.value ?? emptyFilterGroup;
+                const value = filterTrait.filter$.value;
                 popCreateFilter(
                   popupTargetFromElement(ele),
                   {
                     vars: view.vars$,
                     onSelect: filter => {
-                      view.filterSet({
+                      filterTrait.filterSet({
                         ...value,
                         conditions: [...value.conditions, filter],
                       });

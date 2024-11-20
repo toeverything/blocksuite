@@ -12,7 +12,7 @@ import { property, query } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
 import type { DataViewRenderer } from '../../core/data-view.js';
-import type { GroupData } from '../../core/group-by/manager.js';
+import type { GroupData } from '../../core/group-by/trait.js';
 import type { DataViewTable } from './table-view.js';
 import type { TableSingleView } from './table-view-manager.js';
 

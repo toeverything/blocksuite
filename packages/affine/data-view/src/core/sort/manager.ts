@@ -3,6 +3,7 @@ import { computed, type ReadonlySignal } from '@preact/signals-core';
 import type { SingleView } from '../view-manager/index.js';
 import type { Sort, SortBy } from './types.js';
 
+import { createTraitKey } from '../traits/key.js';
 import { evalSort } from './eval.js';
 
 export class SortManager {
@@ -32,10 +33,12 @@ export class SortManager {
   sortList$ = computed(() => this.sort$.value?.sortBy ?? []);
 
   constructor(
-    private sort$: ReadonlySignal<Sort | undefined>,
-    private view: SingleView,
+    readonly sort$: ReadonlySignal<Sort | undefined>,
+    readonly view: SingleView,
     private ops: {
       setSortList: (sortList: Sort) => void;
     }
   ) {}
 }
+
+export const sortTraitKey = createTraitKey<SortManager>('sort');
