@@ -234,7 +234,7 @@ export class DataViewKanban extends DataViewBase<
   }
 
   get groupManager() {
-    return this.props.view.groupManager;
+    return this.props.view.groupTrait;
   }
 
   override render() {

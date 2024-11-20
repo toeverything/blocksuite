@@ -530,7 +530,7 @@ export class KanbanSelectionController implements ReactiveController {
     if (selection?.selectionType !== 'card') {
       return;
     }
-    this.view.groupManager.moveCardTo(
+    this.view.groupTrait.moveCardTo(
       rowId,
       selection.cards[0].groupKey,
       key,

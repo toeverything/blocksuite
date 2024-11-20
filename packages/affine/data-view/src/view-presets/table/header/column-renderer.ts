@@ -57,7 +57,7 @@ export class DataViewColumnPreview extends SignalWatcher(
   }
 
   override render() {
-    const groups = this.tableViewManager.groupManager.groupsDataList$.value;
+    const groups = this.tableViewManager.groupTrait.groupsDataList$.value;
     if (!groups) {
       const rows = this.tableViewManager.rows$.value;
       return this.renderGroup(rows);

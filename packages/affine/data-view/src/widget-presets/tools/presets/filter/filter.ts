@@ -8,6 +8,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 import type { FilterGroup } from '../../../../core/filter/types.js';
 
 import { popCreateFilter } from '../../../../core/filter/add-filter.js';
+import { filterTraitKey } from '../../../../core/filter/trait.js';
 import { emptyFilterGroup } from '../../../../core/filter/utils.js';
 import { WidgetBase } from '../../../../core/widget/widget-base.js';
 import { ShowQuickSettingBarContextKey } from '../../../quick-setting-bar/context.js';
@@ -37,15 +38,19 @@ export class DataViewHeaderToolsFilter extends WidgetBase {
   static override styles = styles;
 
   hasFilter = computed(() => {
-    return this.view.filter$.value.conditions.length > 0;
+    return this.filterTrait?.hasFilter$.value ?? false;
   });
 
   private get _filter(): FilterGroup {
-    return this.view.filter$.value ?? emptyFilterGroup;
+    return this.filterTrait?.filter$.value ?? emptyFilterGroup;
   }
 
   private set _filter(filter: FilterGroup) {
-    this.view.filterSet(filter);
+    this.filterTrait?.filterSet(filter);
+  }
+
+  get filterTrait() {
+    return this.view.traitGet(filterTraitKey);
   }
 
   private get readonly() {

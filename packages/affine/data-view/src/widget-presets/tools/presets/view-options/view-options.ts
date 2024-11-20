@@ -22,11 +22,12 @@ import { css, html } from 'lit';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { popPropertiesSetting } from '../../../../core/common/properties.js';
+import { filterTraitKey } from '../../../../core/filter/trait.js';
 import {
   popGroupSetting,
   popSelectGroupByProperty,
 } from '../../../../core/group-by/setting.js';
-import { canGroup } from '../../../../core/group-by/utils.js';
+import { groupTraitKey } from '../../../../core/group-by/trait.js';
 import {
   type DataViewInstance,
   emptyFilterGroup,
@@ -34,9 +35,9 @@ import {
   renderUniLit,
 } from '../../../../core/index.js';
 import { popCreateSort } from '../../../../core/sort/add-sort.js';
+import { sortTraitKey } from '../../../../core/sort/manager.js';
 import { createSortUtils } from '../../../../core/sort/utils.js';
 import { WidgetBase } from '../../../../core/widget/widget-base.js';
-import { TableSingleView } from '../../../../view-presets/index.js';
 import { popFilterRoot } from '../../../quick-setting-bar/filter/root-panel-view.js';
 import { popSortRoot } from '../../../quick-setting-bar/sort/root-panel.js';
 
@@ -126,47 +127,50 @@ const createSettingMenus = (
       },
     })
   );
-  const filterCount = view.filter$.value.conditions.length;
-  settingItems.push(
-    menu.action({
-      name: 'Filter',
-      prefix: FilterIcon(),
-      postfix: html` <div style="font-size: 14px;">
-          ${filterCount === 0
-            ? ''
-            : filterCount === 1
-              ? '1 filter'
-              : `${filterCount} filters`}
-        </div>
-        ${ArrowRightSmallIcon()}`,
-      select: () => {
-        if (!view.filter$.value.conditions.length) {
-          popCreateFilter(target, {
-            vars: view.vars$,
-            onBack: reopen,
-            onSelect: filter => {
-              view.filterSet({
-                ...(view.filter$.value ?? emptyFilterGroup),
-                conditions: [...view.filter$.value.conditions, filter],
-              });
-              popFilterRoot(target, {
-                view: view,
-                onBack: reopen,
-              });
-            },
-          });
-        } else {
-          popFilterRoot(target, {
-            view: view,
-            onBack: reopen,
-          });
-        }
-      },
-    })
-  );
-  if (view instanceof TableSingleView) {
-    const sortManager = view.sortManager;
-    const sortCount = sortManager.sortList$.value.length;
+  const filterTrait = view.traitGet(filterTraitKey);
+  if (filterTrait) {
+    const filterCount = filterTrait.filter$.value.conditions.length;
+    settingItems.push(
+      menu.action({
+        name: 'Filter',
+        prefix: FilterIcon(),
+        postfix: html` <div style="font-size: 14px;">
+            ${filterCount === 0
+              ? ''
+              : filterCount === 1
+                ? '1 filter'
+                : `${filterCount} filters`}
+          </div>
+          ${ArrowRightSmallIcon()}`,
+        select: () => {
+          if (!filterTrait.filter$.value.conditions.length) {
+            popCreateFilter(target, {
+              vars: view.vars$,
+              onBack: reopen,
+              onSelect: filter => {
+                filterTrait.filterSet({
+                  ...(filterTrait.filter$.value ?? emptyFilterGroup),
+                  conditions: [...filterTrait.filter$.value.conditions, filter],
+                });
+                popFilterRoot(target, {
+                  filterTrait: filterTrait,
+                  onBack: reopen,
+                });
+              },
+            });
+          } else {
+            popFilterRoot(target, {
+              filterTrait: filterTrait,
+              onBack: reopen,
+            });
+          }
+        },
+      })
+    );
+  }
+  const sortTrait = view.traitGet(sortTraitKey);
+  if (sortTrait) {
+    const sortCount = sortTrait.sortList$.value.length;
     settingItems.push(
       menu.action({
         name: 'Sort',
@@ -180,8 +184,11 @@ const createSettingMenus = (
           </div>
           ${ArrowRightSmallIcon()}`,
         select: () => {
-          const sortList = sortManager.sortList$.value;
-          const sortUtils = createSortUtils(view, dataViewInstance.eventTrace);
+          const sortList = sortTrait.sortList$.value;
+          const sortUtils = createSortUtils(
+            sortTrait,
+            dataViewInstance.eventTrace
+          );
           if (!sortList.length) {
             popCreateSort(target, {
               sortUtils: sortUtils,
@@ -200,24 +207,25 @@ const createSettingMenus = (
       })
     );
   }
-  if (canGroup(view)) {
+  const groupTrait = view.traitGet(groupTraitKey);
+  if (groupTrait) {
     settingItems.push(
       menu.action({
         name: 'Group',
         prefix: GroupingIcon(),
         postfix: html` <div style="font-size: 14px;">
-            ${view.groupManager.property$.value?.name$.value ?? ''}
+            ${groupTrait.property$.value?.name$.value ?? ''}
           </div>
           ${ArrowRightSmallIcon()}`,
         select: () => {
-          const groupBy = view.data$.value?.groupBy;
+          const groupBy = groupTrait.property$.value;
           if (!groupBy) {
-            popSelectGroupByProperty(target, view, {
-              onSelect: () => popGroupSetting(target, view, reopen),
+            popSelectGroupByProperty(target, groupTrait, {
+              onSelect: () => popGroupSetting(target, groupTrait, reopen),
               onBack: reopen,
             });
           } else {
-            popGroupSetting(target, view, reopen);
+            popGroupSetting(target, groupTrait, reopen);
           }
         },
       })

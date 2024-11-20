@@ -229,14 +229,14 @@ export class TableSelectionController implements ReactiveController {
   ) {
     const id = this.view.rowAdd({ before, id: rowId });
     if (groupKey != null) {
-      this.view.groupManager.moveCardTo(id, undefined, groupKey, {
+      this.view.groupTrait.moveCardTo(id, undefined, groupKey, {
         before,
         id: rowId,
       });
     }
     const rows =
       groupKey != null
-        ? this.view.groupManager.groupDataMap$.value?.[groupKey].rows
+        ? this.view.groupTrait.groupDataMap$.value?.[groupKey].rows
         : this.view.rows$.value;
     requestAnimationFrame(() => {
       const index = this.host.props.view.properties$.value.findIndex(
