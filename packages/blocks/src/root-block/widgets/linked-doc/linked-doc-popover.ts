@@ -188,7 +188,7 @@ export class LinkedDocPopover extends WithDisposable(LitElement) {
   }
 
   override render() {
-    const MAX_HEIGHT = 410;
+    const MAX_HEIGHT = 448;
     const style = this._position
       ? styleMap({
           transform: `translate(${this._position.x}, ${this._position.y})`,
@@ -218,9 +218,9 @@ export class LinkedDocPopover extends WithDisposable(LitElement) {
                   : nothing;
                 return html`<icon-button
                   width="280px"
-                  height="32px"
+                  height="34px"
                   data-id=${key}
-                  text=${name}
+                  .text=${name}
                   hover=${this._activatedItemIndex === curIdx}
                   @click=${() => {
                     action()?.catch(console.error);
