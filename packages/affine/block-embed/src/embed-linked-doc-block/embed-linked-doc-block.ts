@@ -118,12 +118,6 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockComponent<EmbedLinke
 
   override _cardStyle: (typeof EmbedLinkedDocStyles)[number] = 'horizontal';
 
-  cleanUpSurfaceRefRenderer = () => {
-    if (this.surfaceRefRenderer) {
-      this.surfaceRefService.removeRenderer(this.surfaceRefRenderer.id);
-    }
-  };
-
   convertToEmbed = () => {
     if (this._isLinkToNode) return;
 
@@ -327,7 +321,6 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockComponent<EmbedLinke
   }
 
   override disconnectedCallback() {
-    this.cleanUpSurfaceRefRenderer();
     super.disconnectedCallback();
   }
 
@@ -513,9 +506,6 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockComponent<EmbedLinke
   @state()
   private accessor _loading = false;
 
-  @queryAsync('.affine-embed-linked-doc-banner.render')
-  accessor bannerContainer!: Promise<HTMLDivElement>;
-
   @property({ attribute: false })
   accessor isBannerEmpty = false;
 
@@ -527,14 +517,4 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockComponent<EmbedLinke
 
   @queryAsync('.affine-embed-linked-doc-content-note.render')
   accessor noteContainer!: Promise<HTMLDivElement>;
-
-  @property({ attribute: false })
-  // TODO: remove any
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  accessor surfaceRefRenderer: any | undefined = undefined;
-
-  @property({ attribute: false })
-  // TODO: remove any
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  accessor surfaceRefService!: any;
 }
