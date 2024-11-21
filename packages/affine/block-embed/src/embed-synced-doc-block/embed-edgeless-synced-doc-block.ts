@@ -21,8 +21,7 @@ export class EmbedEdgelessSyncedDocBlockComponent extends toEdgelessEmbedBlock(
   EmbedSyncedDocBlockComponent
 ) {
   protected override _renderSyncedView = () => {
-    const syncedDoc = this.syncedDoc;
-    const editorMode = this.syncedDocMode;
+    const { syncedDoc, editorMode } = this;
 
     assertExists(syncedDoc, 'Doc should exist');
 
