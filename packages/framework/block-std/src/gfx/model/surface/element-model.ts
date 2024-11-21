@@ -1,9 +1,4 @@
-import type {
-  IBound,
-  IVec,
-  SerializedXYWH,
-  XYWH,
-} from '@blocksuite/global/utils';
+import type { IVec, SerializedXYWH, XYWH } from '@blocksuite/global/utils';
 
 import {
   Bound,
@@ -22,14 +17,16 @@ import {
 import { DocCollection, type Y } from '@blocksuite/store';
 import { createMutex } from 'lib0/mutex';
 
-import type { EditorHost } from '../../view/index.js';
-import type { GfxBlockElementModel, GfxModel } from '../gfx-block-model.js';
+import type { EditorHost } from '../../../view/index.js';
+import type { GfxCompatibleInterface, PointTestOptions } from '../base.js';
+import type { GfxBlockElementModel } from '../gfx-block-model.js';
+import type { GfxModel } from '../model.js';
 import type { SurfaceBlockModel } from './surface-model.js';
 
 import {
   descendantElementsImpl,
   hasDescendantElementImpl,
-} from '../../utils/tree.js';
+} from '../../../utils/tree.js';
 import {
   type GfxContainerElement,
   gfxContainerSymbol,
@@ -49,11 +46,6 @@ export type BaseElementProps = {
   seed: number;
 };
 
-export type GfxCompatibleProps = {
-  xywh: SerializedXYWH;
-  index: string;
-};
-
 export type SerializedElement = Record<string, unknown> & {
   type: string;
   xywh: SerializedXYWH;
@@ -61,48 +53,9 @@ export type SerializedElement = Record<string, unknown> & {
   index: string;
   props: Record<string, unknown>;
 };
-
-export interface PointTestOptions {
-  /**
-   * The threshold of the hit test. The unit is pixel.
-   */
-  hitThreshold?: number;
-
-  /**
-   * The padding of the response area for each element when do the hit testing. The unit is pixel.
-   * The first value is the padding for the x-axis, and the second value is the padding for the y-axis.
-   */
-  responsePadding?: [number, number];
-
-  /**
-   * If true, the transparent area of the element will be ignored during the point inclusion test.
-   * Otherwise, the transparent area will be considered as filled area.
-   *
-   * Default is true.
-   */
-  ignoreTransparent?: boolean;
-
-  zoom?: number;
-}
-
-export interface GfxElementGeometry {
-  containsBound(bound: Bound): boolean;
-  getNearestPoint(point: IVec): IVec;
-  getLineIntersections(start: IVec, end: IVec): PointLocation[] | null;
-  getRelativePointLocation(point: IVec): PointLocation;
-  includesPoint(
-    x: number,
-    y: number,
-    options: PointTestOptions,
-    host: EditorHost
-  ): boolean;
-  intersectsBound(bound: Bound): boolean;
-}
-
 export abstract class GfxPrimitiveElementModel<
-    Props extends BaseElementProps = BaseElementProps,
-  >
-  implements GfxElementGeometry, IBound
+  Props extends BaseElementProps = BaseElementProps,
+> implements GfxCompatibleInterface
 {
   private _lastXYWH!: SerializedXYWH;
 

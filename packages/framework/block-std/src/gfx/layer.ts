@@ -9,6 +9,8 @@ import {
 } from '@blocksuite/global/utils';
 import { generateKeyBetween } from 'fractional-indexing';
 
+import type { GfxModel } from './model/model.js';
+
 import {
   compare,
   getElementIndex,
@@ -20,13 +22,13 @@ import {
   ungroupIndex,
   updateLayersZIndex,
 } from '../utils/layer.js';
-import { GfxBlockElementModel, type GfxModel } from './gfx-block-model.js';
+import { GfxBlockElementModel } from './model/gfx-block-model.js';
 import {
   type GfxContainerElement,
   isGfxContainerElm,
-} from './surface/container-element.js';
-import { GfxPrimitiveElementModel } from './surface/element-model.js';
-import { SurfaceBlockModel } from './surface/surface-model.js';
+} from './model/surface/container-element.js';
+import { GfxPrimitiveElementModel } from './model/surface/element-model.js';
+import { SurfaceBlockModel } from './model/surface/surface-model.js';
 
 export type ReorderingDirection = 'front' | 'forward' | 'backward' | 'back';
 

@@ -1,9 +1,9 @@
-import type { GfxModel } from '../gfx/gfx-block-model.js';
+import type { GfxModel } from '../gfx/model/model.js';
 
 import {
   type GfxContainerElement,
   isGfxContainerElm,
-} from '../gfx/surface/container-element.js';
+} from '../gfx/model/surface/container-element.js';
 
 /**
  * Get the top elements from the list of elements, which are in some tree structures.

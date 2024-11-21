@@ -2,7 +2,7 @@ import type { Doc } from '@blocksuite/store';
 
 import { effect } from '@preact/signals-core';
 
-import { SurfaceBlockModel } from '../gfx/surface/surface-model.js';
+import { SurfaceBlockModel } from '../gfx/model/surface/surface-model.js';
 
 export function onSurfaceAdded(
   doc: Doc,

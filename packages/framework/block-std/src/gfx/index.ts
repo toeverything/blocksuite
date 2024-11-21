@@ -12,16 +12,25 @@ export {
 } from '../utils/tree.js';
 export { GfxController } from './controller.js';
 export { GfxExtension, GfxExtensionIdentifier } from './extension.js';
-export * from './gfx-block-model.js';
 export { GridManager } from './grid.js';
 export { GfxControllerIdentifier } from './identifiers.js';
 export { LayerManager, type ReorderingDirection } from './layer.js';
-export { GfxSelectionManager } from './selection.js';
+export {
+  type GfxCompatibleInterface,
+  type GfxElementGeometry,
+  type PointTestOptions,
+} from './model/base.js';
+export {
+  GfxBlockElementModel,
+  GfxCompatibleBlockModel as GfxCompatible,
+  type GfxCompatibleProps,
+} from './model/gfx-block-model.js';
+export { type GfxModel } from './model/model.js';
 export {
   type GfxContainerElement,
   gfxContainerSymbol,
   isGfxContainerElm,
-} from './surface/container-element.js';
+} from './model/surface/container-element.js';
 export {
   convert,
   convertProps,
@@ -35,21 +44,20 @@ export {
   observe,
   updateDerivedProps,
   watch,
-} from './surface/decorators/index.js';
+} from './model/surface/decorators/index.js';
 export {
   type BaseElementProps,
-  type GfxElementGeometry,
-  GfxGroupLikeElementModel as GfxGroupLikeElementModel,
+  GfxGroupLikeElementModel,
   GfxLocalElementModel,
-  GfxPrimitiveElementModel as GfxPrimitiveElementModel,
-  type PointTestOptions,
+  GfxPrimitiveElementModel,
   type SerializedElement,
-} from './surface/element-model.js';
+} from './model/surface/element-model.js';
 export {
   SurfaceBlockModel,
   type SurfaceBlockProps,
   type SurfaceMiddleware,
-} from './surface/surface-model.js';
+} from './model/surface/surface-model.js';
+export { GfxSelectionManager } from './selection.js';
 
 export {
   SurfaceMiddlewareBuilder,

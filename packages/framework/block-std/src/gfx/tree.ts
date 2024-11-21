@@ -1,13 +1,14 @@
 import { DisposableGroup } from '@blocksuite/global/utils';
 
-import type { SurfaceBlockModel } from './surface/surface-model.js';
+import type { GfxModel } from './model/model.js';
+import type { SurfaceBlockModel } from './model/surface/surface-model.js';
 
-import { GfxBlockElementModel, type GfxModel } from './gfx-block-model.js';
+import { GfxBlockElementModel } from './model/gfx-block-model.js';
 import {
   type GfxContainerElement,
   isGfxContainerElm,
-} from './surface/container-element.js';
-import { GfxGroupLikeElementModel } from './surface/element-model.js';
+} from './model/surface/container-element.js';
+import { GfxGroupLikeElementModel } from './model/surface/element-model.js';
 
 export class TreeManager {
   private _elementToContainer = new Map<

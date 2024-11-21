@@ -3,9 +3,9 @@ import type { Boxed, Y } from '@blocksuite/store';
 import { type Constructor, Slot } from '@blocksuite/global/utils';
 import { BlockModel, DocCollection, nanoid } from '@blocksuite/store';
 
-import type { GfxModel } from '../gfx-block-model.js';
+import type { GfxModel } from '../model.js';
 
-import { TreeManager } from '../tree.js';
+import { TreeManager } from '../../tree.js';
 import {
   type GfxContainerElement,
   isGfxContainerElm,
