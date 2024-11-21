@@ -971,18 +971,16 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
         const url = baseUrl
           ? `${baseUrl}/${delta.attributes.reference.pageId}${query}`
           : '';
-        if (typeof title === 'string') {
-          mdast = {
-            type: 'link',
-            url,
-            children: [
-              {
-                type: 'text',
-                value: title,
-              },
-            ],
-          };
-        }
+        mdast = {
+          type: 'link',
+          url,
+          children: [
+            {
+              type: 'text',
+              value: title ?? '',
+            },
+          ],
+        };
       }
       if (delta.attributes?.code) {
         mdast = {
@@ -1073,6 +1071,42 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
         );
       }
       case 'link': {
+        const baseUrl = this.configs.get('docLinkBaseUrl') ?? '';
+        if (baseUrl && ast.url.startsWith(baseUrl)) {
+          const path = ast.url.substring(baseUrl.length);
+          //    ^ - /{pageId}?mode={mode}&blockIds={blockIds}&elementIds={elementIds}
+          const match = path.match(/^\/([^?]+)(\?.*)?$/);
+          if (match) {
+            const pageId = match?.[1];
+            const search = match?.[2];
+            const searchParams = search
+              ? new URLSearchParams(search)
+              : undefined;
+            const mode = searchParams?.get('mode');
+            const blockIds = searchParams?.get('blockIds')?.split(',');
+            const elementIds = searchParams?.get('elementIds')?.split(',');
+
+            return [
+              {
+                insert: ' ',
+                attributes: {
+                  reference: {
+                    type: 'LinkedPage',
+                    pageId,
+                    params: {
+                      mode:
+                        mode && ['edgeless', 'page'].includes(mode)
+                          ? (mode as 'edgeless' | 'page')
+                          : undefined,
+                      blockIds,
+                      elementIds,
+                    },
+                  },
+                },
+              },
+            ];
+          }
+        }
         return ast.children.flatMap(child =>
           this._mdastToDelta(child).map(delta => {
             delta.attributes = { ...delta.attributes, link: ast.url };
