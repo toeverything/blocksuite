@@ -51,19 +51,25 @@ export const typeConfig = (property: Property) => {
           title: {
             text: 'Property type',
           },
-          items: property.view.propertyMetas.map(config => {
-            return menu.action({
-              isSelected: config.type === property.type$.value,
-              name: config.config.name,
-              prefix: renderUniLit(property.view.propertyIconGet(config.type)),
-              select: () => {
-                if (property.type$.value === config.type) {
-                  return;
-                }
-                property.typeSet?.(config.type);
-              },
-            });
-          }),
+          items: [
+            menu.group({
+              items: property.view.propertyMetas.map(config => {
+                return menu.action({
+                  isSelected: config.type === property.type$.value,
+                  name: config.config.name,
+                  prefix: renderUniLit(
+                    property.view.propertyIconGet(config.type)
+                  ),
+                  select: () => {
+                    if (property.type$.value === config.type) {
+                      return;
+                    }
+                    property.typeSet?.(config.type);
+                  },
+                });
+              }),
+            }),
+          ],
         },
       }),
     ],

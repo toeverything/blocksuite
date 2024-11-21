@@ -30,7 +30,7 @@ export class MobileTableRow extends SignalWatcher(
     .mobile-row-ops {
       position: relative;
       width: 0;
-      margin-top: 8px;
+      margin-top: 5px;
       height: max-content;
       display: flex;
       gap: 4px;
