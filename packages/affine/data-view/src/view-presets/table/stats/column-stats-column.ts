@@ -14,13 +14,12 @@ import { css, html } from 'lit';
 import { property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type { GroupData } from '../../../core/group-by/manager.js';
+import type { GroupData } from '../../../core/group-by/trait.js';
 import type { StatisticsConfig } from '../../../core/statistics/types.js';
 import type { TableColumn } from '../table-view-manager.js';
 
 import { typeSystem } from '../../../core/index.js';
 import { statsFunctions } from '../../../core/statistics/index.js';
-import { DEFAULT_COLUMN_MIN_WIDTH } from '../consts.js';
 
 const styles = css`
   .stats-cell {
@@ -30,7 +29,6 @@ const styles = css`
     color: var(--affine-text-secondary-color);
     display: flex;
     opacity: 0;
-    min-width: ${DEFAULT_COLUMN_MIN_WIDTH}px;
     justify-content: flex-end;
     height: 100%;
     align-items: center;

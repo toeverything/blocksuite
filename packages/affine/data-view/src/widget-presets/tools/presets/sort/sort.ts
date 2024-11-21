@@ -6,7 +6,8 @@ import { css, html, nothing } from 'lit';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { popCreateSort } from '../../../../core/sort/add-sort.js';
-import { canSort, createSortUtils } from '../../../../core/sort/utils.js';
+import { sortTraitKey } from '../../../../core/sort/manager.js';
+import { createSortUtils } from '../../../../core/sort/utils.js';
 import { WidgetBase } from '../../../../core/widget/widget-base.js';
 import { ShowQuickSettingBarContextKey } from '../../../quick-setting-bar/context.js';
 import { popSortRoot } from '../../../quick-setting-bar/sort/root-panel.js';
@@ -36,8 +37,9 @@ export class DataViewHeaderToolsSort extends WidgetBase {
   static override styles = styles;
 
   sortUtils$ = computed(() => {
-    if (canSort(this.view)) {
-      return createSortUtils(this.view, this.dataViewInstance.eventTrace);
+    const sortTrait = this.view.traitGet(sortTraitKey);
+    if (sortTrait) {
+      return createSortUtils(sortTrait, this.dataViewInstance.eventTrace);
     }
     return;
   });
@@ -70,7 +72,7 @@ export class DataViewHeaderToolsSort extends WidgetBase {
             const ele = this.closest(
               'affine-data-view-renderer'
             )?.querySelector('.data-view-sort-button');
-            if (ele && canSort(this.view)) {
+            if (ele) {
               popSortRoot(popupTargetFromElement(ele as HTMLElement), {
                 sortUtils: sortUtils,
               });

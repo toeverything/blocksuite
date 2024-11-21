@@ -69,6 +69,10 @@ export class DatabaseTitle extends WithDisposable(ShadowlessElement) {
     }
   `;
 
+  private compositionEnd = () => {
+    this.titleText.replace(0, this.titleText.length, this.input.value);
+  };
+
   private onBlur = () => {
     this.isFocus = false;
   };
@@ -142,6 +146,7 @@ export class DatabaseTitle extends WithDisposable(ShadowlessElement) {
         @keydown="${this.onKeyDown}"
         @focus="${this.onFocus}"
         @blur="${this.onBlur}"
+        @compositionend="${this.compositionEnd}"
         data-block-is-database-title="true"
         title="${this.titleText.toString()}"
       ></textarea>

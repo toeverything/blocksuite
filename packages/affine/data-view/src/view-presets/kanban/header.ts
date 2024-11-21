@@ -9,7 +9,9 @@ import { css } from 'lit';
 import { property } from 'lit/decorators.js';
 import { html } from 'lit/static-html.js';
 
-import type { KanbanSingleView } from './kanban-view-manager.js';
+import type { SingleView } from '../../core/index.js';
+
+import { groupTraitKey } from '../../core/group-by/trait.js';
 
 const styles = css`
   affine-data-view-kanban-header {
@@ -35,15 +37,19 @@ export class KanbanHeader extends SignalWatcher(
   static override styles = styles;
 
   private clickGroup = (e: MouseEvent) => {
+    const groupTrait = this.view.traitGet(groupTraitKey);
+    if (!groupTrait) {
+      return;
+    }
     popMenu(popupTargetFromElement(e.target as HTMLElement), {
       options: {
         items: this.view.properties$.value
-          .filter(column => column.id !== this.view.view?.groupBy?.columnId)
+          .filter(column => column.id !== groupTrait.property$.value?.id)
           .map(column => {
             return menu.action({
               name: column.name$.value,
               select: () => {
-                this.view.changeGroup(column.id);
+                groupTrait.changeGroup(column.id);
               },
             });
           }),
@@ -61,7 +67,7 @@ export class KanbanHeader extends SignalWatcher(
   }
 
   @property({ attribute: false })
-  accessor view!: KanbanSingleView;
+  accessor view!: SingleView;
 }
 
 declare global {

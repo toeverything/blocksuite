@@ -12,7 +12,7 @@ import { repeat } from 'lit/directives/repeat.js';
 import { html } from 'lit/static-html.js';
 
 import type { DataViewRenderer } from '../../core/data-view.js';
-import type { GroupData } from '../../core/group-by/manager.js';
+import type { GroupData } from '../../core/group-by/trait.js';
 import type { KanbanSingleView } from './kanban-view-manager.js';
 
 import { GroupTitle } from '../../core/group-by/group-title.js';

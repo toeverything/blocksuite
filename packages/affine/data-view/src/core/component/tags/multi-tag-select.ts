@@ -243,35 +243,33 @@ export class MultiTagSelect extends SignalWatcher(
   });
 
   sortContext = createSortContext({
-    dnd: {
-      activators: defaultActivators,
-      container: this,
-      onDragEnd: evt => {
-        const over = evt.over;
-        const activeId = evt.active.id;
-        if (over && over.id !== activeId) {
-          this.onOptionsChange(
-            arrayMove(
-              this.options.value,
-              this.options.value.findIndex(v => v.id === activeId),
-              this.options.value.findIndex(v => v.id === over.id)
-            )
-          );
-          this.requestUpdate();
-          // const properties = this.filteredOptions$.value.map(v=>v.id);
-          // const activeIndex = properties.findIndex(id => id === activeId);
-          // const overIndex = properties.findIndex(id => id === over.id);
-        }
-      },
-      modifiers: [
-        ({ transform }) => {
-          return {
-            ...transform,
-            x: 0,
-          };
-        },
-      ],
+    activators: defaultActivators,
+    container: this,
+    onDragEnd: evt => {
+      const over = evt.over;
+      const activeId = evt.active.id;
+      if (over && over.id !== activeId) {
+        this.onOptionsChange(
+          arrayMove(
+            this.options.value,
+            this.options.value.findIndex(v => v.id === activeId),
+            this.options.value.findIndex(v => v.id === over.id)
+          )
+        );
+        this.requestUpdate();
+        // const properties = this.filteredOptions$.value.map(v=>v.id);
+        // const activeIndex = properties.findIndex(id => id === activeId);
+        // const overIndex = properties.findIndex(id => id === over.id);
+      }
     },
+    modifiers: [
+      ({ transform }) => {
+        return {
+          ...transform,
+          x: 0,
+        };
+      },
+    ],
     items: computed(() => {
       return this.filteredOptions$.value.map(v => v.id);
     }),
@@ -308,7 +306,7 @@ export class MultiTagSelect extends SignalWatcher(
         <input
           class="tag-select-input"
           placeholder="Type here..."
-          .value="${this.text}"
+          .value="${this.text.value}"
           @input="${this._onInput}"
           @keydown="${this._onInputKeydown}"
           @pointerdown="${stopPropagation}"
@@ -358,7 +356,7 @@ export class MultiTagSelect extends SignalWatcher(
             };
             return html`
               <div
-                ${!select.isCreate && sortable(select.id)}
+                ${!select.isCreate ? sortable(select.id) : nothing}
                 class="${classes}"
                 @mouseenter="${mouseenter}"
                 @click="${select.select}"

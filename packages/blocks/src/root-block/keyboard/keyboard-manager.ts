@@ -103,6 +103,7 @@ export class PageKeyboardManager {
         types: ['block'],
         mode: 'highest',
       })
+      .draftSelectedModels()
       .run();
     const selectedModels = ctx.selectedModels?.filter(
       block =>
@@ -110,7 +111,8 @@ export class PageKeyboardManager {
         matchFlavours(doc.getParent(block), ['affine:note'])
     );
 
-    if (!selectedModels?.length) {
+    const draftedModels = ctx.draftedModels;
+    if (!selectedModels?.length || !draftedModels) {
       return;
     }
 
@@ -118,7 +120,12 @@ export class PageKeyboardManager {
     const autofill = getTitleFromSelectedModels(selectedModels);
     void promptDocTitle(rootComponent.host, autofill).then(title => {
       if (title === null) return;
-      convertSelectedBlocksToLinkedDoc(doc, selectedModels, title);
+      convertSelectedBlocksToLinkedDoc(
+        this.rootComponent.std,
+        doc,
+        draftedModels,
+        title
+      ).catch(console.error);
       notifyDocCreated(rootComponent.host, doc);
     });
   }

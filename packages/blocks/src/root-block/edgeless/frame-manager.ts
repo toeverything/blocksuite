@@ -17,6 +17,7 @@ import {
   deserializeXYWH,
   DisposableGroup,
   type IVec,
+  type SerializedXYWH,
 } from '@blocksuite/global/utils';
 import { DocCollection, Text } from '@blocksuite/store';
 
@@ -38,6 +39,8 @@ export class FrameOverlay extends Overlay {
   private _frame: FrameBlockModel | null = null;
 
   private _innerElements = new Set<GfxModel>();
+
+  private _prevXYWH: SerializedXYWH | null = null;
 
   private get _frameManager() {
     return this.gfx.std.get(
@@ -72,7 +75,7 @@ export class FrameOverlay extends Overlay {
 
     let needRefresh = false;
 
-    if (highlightOutline && this._frame !== frame) {
+    if (highlightOutline && this._prevXYWH !== frame.xywh) {
       needRefresh = true;
     }
 

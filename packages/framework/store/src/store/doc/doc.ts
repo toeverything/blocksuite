@@ -3,6 +3,7 @@ import { type Disposable, Slot } from '@blocksuite/global/utils';
 import { signal } from '@preact/signals-core';
 
 import type { BlockModel, Schema } from '../../schema/index.js';
+import type { DraftModel } from '../../transformer/index.js';
 import type { BlockOptions } from './block/index.js';
 import type { BlockCollection, BlockProps } from './block-collection.js';
 import type { DocCRUD } from './crud.js';
@@ -507,7 +508,7 @@ export class Doc {
   }
 
   deleteBlock(
-    model: BlockModel,
+    model: DraftModel,
     options: {
       bringChildrenTo?: BlockModel;
       deleteChildren?: boolean;

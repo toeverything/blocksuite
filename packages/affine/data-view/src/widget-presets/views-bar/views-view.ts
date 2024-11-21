@@ -6,7 +6,6 @@ import {
   popupTargetFromElement,
 } from '@blocksuite/affine-components/context-menu';
 import {
-  AddCursorIcon,
   DeleteIcon,
   DuplicateIcon,
   InfoIcon,
@@ -44,6 +43,7 @@ export class DataViewHeaderViews extends WidgetBase {
       color: var(--affine-text-secondary-color);
       white-space: nowrap;
       max-width: 200px;
+      min-width: 28px;
     }
 
     .database-view-button .name {
@@ -105,8 +105,8 @@ export class DataViewHeaderViews extends WidgetBase {
           const view = this.viewManager.viewGet(id);
           return menu.action({
             prefix: html`<uni-lit .uni=${this.getRenderer(id).icon}></uni-lit>`,
-            name: view.data$.value?.name ?? '',
-            label: () => html`${view.data$.value?.name}`,
+            name: view.name$.value ?? '',
+            label: () => html`${view.name$.value}`,
             isSelected: this.viewManager.currentViewId$.value === id,
             select: () => {
               this.viewManager.setCurrentView(id);
@@ -151,11 +151,9 @@ export class DataViewHeaderViews extends WidgetBase {
       options: {
         items: [
           menu.input({
-            initialValue: view.data$.value?.name,
+            initialValue: view.name$.value,
             onChange: text => {
-              view.dataUpdate(_data => ({
-                name: text,
-              }));
+              view.nameSet(text);
             },
           }),
           menu.action({
@@ -226,7 +224,7 @@ export class DataViewHeaderViews extends WidgetBase {
         data-testid="database-add-view-button"
         @click="${this._addViewMenu}"
       >
-        ${AddCursorIcon()}
+        ${PlusIcon()}
       </div>`;
     }
     return html`

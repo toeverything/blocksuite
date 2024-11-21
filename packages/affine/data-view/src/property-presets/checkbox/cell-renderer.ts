@@ -1,3 +1,4 @@
+import { unsafeCSSVarV2 } from '@blocksuite/affine-shared/theme';
 import { CheckBoxCkeckSolidIcon, CheckBoxUnIcon } from '@blocksuite/icons/lit';
 import { css, html } from 'lit';
 import { query } from 'lit/decorators.js';
@@ -65,10 +66,9 @@ export class CheckboxCell extends BaseCellRenderer<boolean> {
       height: var(--data-view-cell-text-line-height);
       width: 100%;
       position: relative;
-    }
-    .affine-database-checkbox svg {
-      width: 16px;
-      height: 16px;
+      font-size: 24px;
+      color: ${unsafeCSSVarV2('database/textSecondary')};
+      margin-left: -1px;
     }
   `;
 
@@ -77,7 +77,7 @@ export class CheckboxCell extends BaseCellRenderer<boolean> {
 
     this.onChange(checked);
     if (checked) {
-      playCheckAnimation(this._checkbox, { left: -2 }).catch(console.error);
+      playCheckAnimation(this._checkbox, { left: 2 }).catch(console.error);
     }
     return false;
   }

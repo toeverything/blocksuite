@@ -9,10 +9,12 @@ import type { TypeInstance } from '../logical/type.js';
 import type { Property } from '../view-manager/property.js';
 import type { SingleView } from '../view-manager/single-view.js';
 
+import { createTraitKey } from '../traits/key.js';
+import { defaultGroupBy } from './default.js';
 import { groupByMatcher } from './matcher.js';
 
 export type GroupData = {
-  manager: GroupManager;
+  manager: GroupTrait;
   property: Property;
   key: string;
   name: string;
@@ -21,7 +23,7 @@ export type GroupData = {
   rows: string[];
 };
 
-export class GroupManager {
+export class GroupTrait {
   private preDataList: GroupData[] | undefined;
 
   config$ = computed(() => {
@@ -41,7 +43,7 @@ export class GroupManager {
     if (!groupBy) {
       return;
     }
-    return this.viewManager.propertyGet(groupBy.columnId);
+    return this.view.propertyGet(groupBy.columnId);
   });
 
   staticGroupDataMap$ = computed<
@@ -80,8 +82,8 @@ export class GroupManager {
     const groupMap: Record<string, GroupData> = Object.fromEntries(
       Object.entries(staticGroupMap).map(([k, v]) => [k, { ...v, rows: [] }])
     );
-    this.viewManager.rows$.value.forEach(id => {
-      const value = this.viewManager.cellJsonValueGet(id, groupBy.columnId);
+    this.view.rows$.value.forEach(id => {
+      const value = this.view.cellJsonValueGet(id, groupBy.columnId);
       const keys = config.valuesGroup(value, tType);
       keys.forEach(({ key, value }) => {
         if (!groupMap[key]) {
@@ -114,7 +116,7 @@ export class GroupManager {
   });
 
   groupsDataList$ = computed(() => {
-    if (this.viewManager.isLocked$.value) {
+    if (this.view.isLocked$.value) {
       return this.preDataList;
     }
     return (this.preDataList = this._groupsDataList$.value);
@@ -125,7 +127,7 @@ export class GroupManager {
     if (!propertyId) {
       return;
     }
-    this.viewManager.propertyDataSet(propertyId, data);
+    this.view.propertyDataSet(propertyId, data);
   };
 
   get addGroup() {
@@ -133,7 +135,7 @@ export class GroupManager {
     if (!type) {
       return;
     }
-    return this.viewManager.propertyMetaGet(type)?.config.addGroup;
+    return this.view.propertyMetaGet(type)?.config.addGroup;
   }
 
   get propertyId() {
@@ -142,8 +144,9 @@ export class GroupManager {
 
   constructor(
     private groupBy$: ReadonlySignal<GroupBy | undefined>,
-    private viewManager: SingleView,
+    public view: SingleView,
     private ops: {
+      groupBySet: (groupBy: GroupBy | undefined) => void;
       sortGroup: (keys: string[]) => string[];
       sortRow: (groupKey: string, rowIds: string[]) => string[];
       changeGroupSort: (keys: string[]) => void;
@@ -164,9 +167,9 @@ export class GroupManager {
     const addTo = this.config$.value?.addToGroup ?? (value => value);
     const newValue = addTo(
       groupMap[key].value,
-      this.viewManager.cellJsonValueGet(rowId, propertyId)
+      this.view.cellJsonValueGet(rowId, propertyId)
     );
-    this.viewManager.cellValueSet(rowId, propertyId, newValue);
+    this.view.cellValueSet(rowId, propertyId, newValue);
   }
 
   changeCardSort(groupKey: string, cardIds: string[]) {
@@ -179,6 +182,25 @@ export class GroupManager {
       groupKey,
       cardIds
     );
+  }
+
+  changeGroup(columnId: string | undefined) {
+    if (columnId == null) {
+      this.ops.groupBySet(undefined);
+      return;
+    }
+    const column = this.view.propertyGet(columnId);
+    const propertyMeta = this.view.propertyMetaGet(column.type$.value);
+    if (propertyMeta) {
+      this.ops.groupBySet(
+        defaultGroupBy(
+          this.view.manager.dataSource,
+          propertyMeta,
+          column.id,
+          column.data$.value
+        )
+      );
+    }
   }
 
   changeGroupSort(keys: string[]) {
@@ -214,12 +236,12 @@ export class GroupManager {
       if (group) {
         newValue = remove(
           group.value,
-          this.viewManager.cellJsonValueGet(rowId, propertyId)
+          this.view.cellJsonValueGet(rowId, propertyId)
         );
       }
       const addTo = this.config$.value?.addToGroup ?? (value => value);
       newValue = addTo(groupMap[toGroupKey].value, newValue);
-      this.viewManager.cellValueSet(rowId, propertyId, newValue);
+      this.view.cellValueSet(rowId, propertyId, newValue);
     }
     const rows = groupMap[toGroupKey].rows.filter(id => id !== rowId);
     const index = insertPositionToIndex(position, rows, id => id);
@@ -254,9 +276,9 @@ export class GroupManager {
     const remove = this.config$.value?.removeFromGroup ?? (() => undefined);
     const newValue = remove(
       groupMap[key].value,
-      this.viewManager.cellJsonValueGet(rowId, propertyId)
+      this.view.cellJsonValueGet(rowId, propertyId)
     );
-    this.viewManager.cellValueSet(rowId, propertyId, newValue);
+    this.view.cellValueSet(rowId, propertyId, newValue);
   }
 
   updateValue(rows: string[], value: unknown) {
@@ -265,10 +287,12 @@ export class GroupManager {
       return;
     }
     rows.forEach(id => {
-      this.viewManager.cellValueSet(id, propertyId, value);
+      this.view.cellValueSet(id, propertyId, value);
     });
   }
 }
+
+export const groupTraitKey = createTraitKey<GroupTrait>('group');
 
 export const sortByManually = <T>(
   arr: T[],

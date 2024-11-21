@@ -327,6 +327,7 @@ export class ImageBlockPageComponent extends WithDisposable(ShadowlessElement) {
           src=${this.block.blobUrl ?? ''}
           draggable="false"
           @error=${this._handleError}
+          loading="lazy"
         />
 
         ${imageSelectedRect}

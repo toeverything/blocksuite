@@ -1,9 +1,9 @@
-import type { BlockModel, Doc } from '@blocksuite/store';
+import type { BlockModel, Doc, DraftModel } from '@blocksuite/store';
 
 import { minimatch } from 'minimatch';
 
 export function matchFlavours<Key extends (keyof BlockSuite.BlockModels)[]>(
-  model: BlockModel | null,
+  model: DraftModel | null,
   expected: Key
 ): model is BlockSuite.BlockModels[Key[number]] {
   return (

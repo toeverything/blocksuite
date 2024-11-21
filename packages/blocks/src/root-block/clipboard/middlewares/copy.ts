@@ -14,7 +14,6 @@ const handlePoint = (
   model: DraftModel
 ) => {
   const { index, length } = point;
-  // @ts-expect-error TODO: add match flavour type for draft model
   if (matchFlavours(model, ['affine:page'])) {
     if (length === 0) return;
     (snapshot.props.title as Record<string, unknown>).delta =

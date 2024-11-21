@@ -107,6 +107,7 @@ export class ImageEdgelessBlockComponent extends GfxBlockComponent<
                 src=${this.blobUrl ?? ''}
                 draggable="false"
                 @error=${this._handleError}
+                loading="lazy"
               />
             </div>`
         )}

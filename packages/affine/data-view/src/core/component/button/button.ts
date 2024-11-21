@@ -76,10 +76,10 @@ export class Button extends SignalWatcher(WithDisposable(ShadowlessElement)) {
   accessor onClick: ((event: MouseEvent) => void) | undefined;
 
   @property({ attribute: false })
-  accessor postfix: TemplateResult | undefined;
+  accessor postfix: TemplateResult | string | undefined;
 
   @property({ attribute: false })
-  accessor text: TemplateResult | undefined;
+  accessor text: TemplateResult | string | undefined;
 }
 
 declare global {

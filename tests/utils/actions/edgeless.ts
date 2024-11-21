@@ -1876,3 +1876,7 @@ export function toIdCountMap(ids: string[]) {
     {} as Record<string, number>
   );
 }
+
+export function getFrameTitle(page: Page, frame: string) {
+  return page.locator(`affine-frame-title[data-id="${frame}"]`);
+}

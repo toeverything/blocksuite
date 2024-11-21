@@ -148,8 +148,12 @@ export class DataViewPropertiesSettingView extends SignalWatcher(
       'property-item-op-icon': true,
       disabled: isTitle,
     });
-    return html` <div ${sortable(property.id)} class="property-item">
-      <div ${dragHandler(property.id)} class="property-item-drag-bar"></div>
+    return html` <div
+      ${dragHandler(property.id)}
+      ${sortable(property.id)}
+      class="property-item"
+    >
+      <div class="property-item-drag-bar"></div>
       <uni-lit class="property-item-icon" .uni="${property.icon}"></uni-lit>
       <div class="property-item-name">${property.name$.value}</div>
       <div class="${classList}" @click="${changeVisible}">${icon}</div>
@@ -157,40 +161,38 @@ export class DataViewPropertiesSettingView extends SignalWatcher(
   };
 
   sortContext = createSortContext({
-    dnd: {
-      activators: defaultActivators,
-      container: this,
-      onDragEnd: evt => {
-        const over = evt.over;
-        const activeId = evt.active.id;
-        if (over && over.id !== activeId) {
-          const properties = this.items$.value;
-          const activeIndex = properties.findIndex(id => id === activeId);
-          const overIndex = properties.findIndex(id => id === over.id);
+    activators: defaultActivators,
+    container: this,
+    onDragEnd: evt => {
+      const over = evt.over;
+      const activeId = evt.active.id;
+      if (over && over.id !== activeId) {
+        const properties = this.items$.value;
+        const activeIndex = properties.findIndex(id => id === activeId);
+        const overIndex = properties.findIndex(id => id === over.id);
 
-          this.view.propertyMove(
-            activeId,
-            activeIndex > overIndex
-              ? {
-                  before: true,
-                  id: over.id,
-                }
-              : {
-                  before: false,
-                  id: over.id,
-                }
-          );
-        }
-      },
-      modifiers: [
-        ({ transform }) => {
-          return {
-            ...transform,
-            x: 0,
-          };
-        },
-      ],
+        this.view.propertyMove(
+          activeId,
+          activeIndex > overIndex
+            ? {
+                before: true,
+                id: over.id,
+              }
+            : {
+                before: false,
+                id: over.id,
+              }
+        );
+      }
     },
+    modifiers: [
+      ({ transform }) => {
+        return {
+          ...transform,
+          x: 0,
+        };
+      },
+    ],
     items: this.items$,
     strategy: verticalListSortingStrategy,
   });
@@ -206,7 +208,6 @@ export class DataViewPropertiesSettingView extends SignalWatcher(
     this._disposables.addFromEvent(this, 'pointerdown', e => {
       e.stopPropagation();
     });
-    // this.disposables.add(this.sortContext)
   }
 
   override render() {

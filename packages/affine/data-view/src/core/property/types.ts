@@ -18,14 +18,33 @@ export type PropertyConfig<
 > = {
   name: string;
   defaultData: () => Data;
-  type: (config: WithCommonPropertyConfig<{ data: Data }>) => TypeInstance;
+  type: (
+    config: WithCommonPropertyConfig<{
+      data: Data;
+    }>
+  ) => TypeInstance;
   formatValue?: (
-    config: WithCommonPropertyConfig<{ value: Value; data: Data }>
+    config: WithCommonPropertyConfig<{
+      value: Value;
+      data: Data;
+    }>
   ) => Value;
-  isEmpty: (config: WithCommonPropertyConfig<{ value?: Value }>) => boolean;
-  values?: (config: WithCommonPropertyConfig<{ value?: Value }>) => unknown[];
+  isEmpty: (
+    config: WithCommonPropertyConfig<{
+      value?: Value;
+    }>
+  ) => boolean;
+  minWidth?: number;
+  values?: (
+    config: WithCommonPropertyConfig<{
+      value?: Value;
+    }>
+  ) => unknown[];
   cellToString: (
-    config: WithCommonPropertyConfig<{ value: Value; data: Data }>
+    config: WithCommonPropertyConfig<{
+      value: Value;
+      data: Data;
+    }>
   ) => string;
   cellFromString: (
     config: WithCommonPropertyConfig<{
@@ -37,10 +56,16 @@ export type PropertyConfig<
     data?: Record<string, unknown>;
   };
   cellToJson: (
-    config: WithCommonPropertyConfig<{ value: Value; data: Data }>
+    config: WithCommonPropertyConfig<{
+      value: Value;
+      data: Data;
+    }>
   ) => DVJSON;
   addGroup?: (
-    config: WithCommonPropertyConfig<{ text: string; oldData: Data }>
+    config: WithCommonPropertyConfig<{
+      text: string;
+      oldData: Data;
+    }>
   ) => Data;
   onUpdate?: (
     config: WithCommonPropertyConfig<{

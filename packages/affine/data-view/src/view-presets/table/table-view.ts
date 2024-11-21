@@ -13,7 +13,7 @@ import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
 
-import type { GroupManager } from '../../core/group-by/manager.js';
+import type { GroupTrait } from '../../core/group-by/trait.js';
 import type { DataViewInstance } from '../../core/index.js';
 import type { TableSingleView } from './table-view-manager.js';
 
@@ -113,8 +113,10 @@ const styles = css`
     cursor: pointer;
   }
 
-  .database-cell {
-    border-left: 1px solid var(--affine-border-color);
+  .cell-divider {
+    width: 1px;
+    height: 100%;
+    background-color: var(--affine-border-color);
   }
 
   .data-view-table-left-bar {
@@ -185,7 +187,7 @@ export class DataViewTable extends DataViewBase<
     }
   };
 
-  renderAddGroup = (groupHelper: GroupManager) => {
+  renderAddGroup = (groupHelper: GroupTrait) => {
     const addGroup = groupHelper.addGroup;
     if (!addGroup) {
       return;
@@ -269,7 +271,7 @@ export class DataViewTable extends DataViewBase<
   }
 
   private renderTable() {
-    const groups = this.props.view.groupManager.groupsDataList$.value;
+    const groups = this.props.view.groupTrait.groupsDataList$.value;
     if (groups) {
       return html`
         <div style="display:flex;flex-direction: column;gap: 16px;">
@@ -286,7 +288,7 @@ export class DataViewTable extends DataViewBase<
               ></affine-data-view-table-group>`;
             }
           )}
-          ${this.renderAddGroup(this.props.view.groupManager)}
+          ${this.renderAddGroup(this.props.view.groupTrait)}
         </div>
       `;
     }

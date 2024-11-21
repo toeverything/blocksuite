@@ -98,19 +98,19 @@ export class DatabaseColumnHeader extends SignalWatcher(
               width: `${column.width$.value}px`,
               border: index === 0 ? 'none' : undefined,
             });
-            return html` <affine-database-header-column
-              style="${style}"
-              data-column-id="${column.id}"
-              data-column-index="${index}"
-              class="affine-database-column database-cell"
-              .column="${column}"
-              .tableViewManager="${this.tableViewManager}"
-            ></affine-database-header-column>`;
+            return html`
+              <affine-database-header-column
+                style="${style}"
+                data-column-id="${column.id}"
+                data-column-index="${index}"
+                class="affine-database-column database-cell"
+                .column="${column}"
+                .tableViewManager="${this.tableViewManager}"
+              ></affine-database-header-column>
+              <div class="cell-divider" style="height: auto;"></div>
+            `;
           }
         )}
-        <div
-          style="background-color: var(--affine-border-color);width: 1px;"
-        ></div>
         <div
           @click="${this._onAddColumn}"
           class="header-add-column-button dv-hover"

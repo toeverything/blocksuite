@@ -1,5 +1,48 @@
 # @blocksuite/affine-block-surface
 
+## 0.17.33
+
+### Patch Changes
+
+- c65c3ee: ## Feat
+
+  - feat: add pdf style to attachment (#8752)
+  - feat(playground): optimize heavy whiteboard content positioning (#8746)
+
+  ## Fix
+
+  - fix(edgeless): frame title should be render on the top and clickable (#8755)
+  - fix(database): use copy logic when creating a linked doc (#8640)
+  - fix(store): remove page from draft model (#8760)
+  - fix(edgeless): container should not contain itself (#8758)
+  - fix(edgeless): new frame should be on the bottom layer (#8756)
+  - fix(edgeless): only clear surface selection when switching tool (#8753)
+  - fix(edgeless): connector clone (#8747)
+
+  ## Chore
+
+  - chore(blocks): remove trigger key '、' from slash menu (#8768)
+  - chore(blocks): adjust and remove some actions from keyboard-toolbar (#8767)
+  - chore: lock file maintenance (#8659)
+  - chore: bump icons (#8761)
+
+  ## Refactor
+
+  - refactor(edgeless): avoid accumulated updates in batch drag (#8763)
+
+  ## Perf
+
+  - perf(edgeless): optimize selection frame rate (#8751)
+
+- Updated dependencies [c65c3ee]
+  - @blocksuite/affine-components@0.17.33
+  - @blocksuite/affine-model@0.17.33
+  - @blocksuite/affine-shared@0.17.33
+  - @blocksuite/block-std@0.17.33
+  - @blocksuite/global@0.17.33
+  - @blocksuite/inline@0.17.33
+  - @blocksuite/store@0.17.33
+
 ## 0.17.32
 
 ### Patch Changes

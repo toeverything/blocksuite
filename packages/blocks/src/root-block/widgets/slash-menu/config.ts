@@ -120,7 +120,7 @@ export type SlashMenuContext = {
 };
 
 export const defaultSlashMenuConfig: SlashMenuConfig = {
-  triggerKeys: ['/', '、'],
+  triggerKeys: ['/'],
   ignoreBlockTypes: ['affine:code'],
   maxHeight: 344,
   tooltipTimeout: 800,

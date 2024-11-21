@@ -3,7 +3,7 @@ import type { Ref } from 'lit/directives/ref.js';
 
 import { ShadowlessElement } from '@blocksuite/block-std';
 import { WithDisposable } from '@blocksuite/global/utils';
-import { effect } from '@preact/signals-core';
+import { computed, effect } from '@preact/signals-core';
 import { css, html } from 'lit';
 import { property } from 'lit/decorators.js';
 import { createRef, ref } from 'lit/directives/ref.js';
@@ -12,8 +12,8 @@ import type { DatabaseCellContainer } from '../cell.js';
 import type { TableRow } from '../row/row.js';
 import type { DataViewTable } from '../table-view.js';
 
+import { autoScrollOnBoundary } from '../../../core/utils/auto-scroll.js';
 import { startDrag } from '../../../core/utils/drag.js';
-import { autoScrollOnBoundary } from '../../../core/utils/frame-loop.js';
 import {
   type CellFocus,
   type MultiSelection,
@@ -229,14 +229,14 @@ export class TableSelectionController implements ReactiveController {
   ) {
     const id = this.view.rowAdd({ before, id: rowId });
     if (groupKey != null) {
-      this.view.groupManager.moveCardTo(id, undefined, groupKey, {
+      this.view.groupTrait.moveCardTo(id, undefined, groupKey, {
         before,
         id: rowId,
       });
     }
     const rows =
       groupKey != null
-        ? this.view.groupManager.groupDataMap$.value?.[groupKey].rows
+        ? this.view.groupTrait.groupDataMap$.value?.[groupKey].rows
         : this.view.rows$.value;
     requestAnimationFrame(() => {
       const index = this.host.props.view.properties$.value.findIndex(
@@ -830,11 +830,6 @@ export class TableSelectionController implements ReactiveController {
         isEditing: false,
       });
     };
-    const cancelScroll = autoScrollOnBoundary(scrollContainer, {
-      onScroll() {
-        drag.move({ x: drag.last.x, y: drag.last.y });
-      },
-    });
     const drag = startDrag<
       | {
           row: MultiSelection;
@@ -896,6 +891,22 @@ export class TableSelectionController implements ReactiveController {
         cancelScroll();
       },
     });
+    const cancelScroll = autoScrollOnBoundary(
+      scrollContainer,
+      computed(() => {
+        return {
+          left: drag.mousePosition.value.x,
+          right: drag.mousePosition.value.x,
+          top: drag.mousePosition.value.y,
+          bottom: drag.mousePosition.value.y,
+        };
+      }),
+      {
+        onScroll() {
+          drag.move({ x: drag.last.x, y: drag.last.y });
+        },
+      }
+    );
   }
 
   toggleRow(rowId: string, groupKey?: string) {
