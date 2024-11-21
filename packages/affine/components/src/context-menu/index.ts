@@ -1,7 +1,7 @@
 import { MenuButton, MobileMenuButton } from './button.js';
 import { MenuInput, MobileMenuInput } from './input.js';
 import { MenuComponent, MobileMenuComponent } from './menu-renderer.js';
-import { MenuSubMenu } from './sub-menu.js';
+import { MenuSubMenu, MobileSubMenu } from './sub-menu.js';
 
 export * from './button.js';
 export * from './focusable.js';
@@ -20,6 +20,7 @@ export function effects() {
   customElements.define('affine-menu-input', MenuInput);
   customElements.define('mobile-menu-input', MobileMenuInput);
   customElements.define('affine-menu-sub-menu', MenuSubMenu);
+  customElements.define('mobile-sub-menu', MobileSubMenu);
 }
 
 export * from './types.js';

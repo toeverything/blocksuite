@@ -466,6 +466,7 @@ export const createPopup = (
 
 export type MenuHandler = {
   close: () => void;
+  menu: Menu;
   reopen: () => void;
 };
 
@@ -486,6 +487,7 @@ const popMobileMenu = (options: MenuOptions): MenuHandler => {
     close: () => {
       closePopup();
     },
+    menu,
     reopen: () => {
       options.onClose?.();
     },
@@ -537,6 +539,7 @@ export const popMenu = (
   });
   return {
     close: closePopup,
+    menu,
     reopen: () => {
       popMenu(target, props);
     },
