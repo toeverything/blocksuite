@@ -21,9 +21,7 @@ import { BlockModel } from '@blocksuite/store';
 
 import type { EditorHost } from '../../view/index.js';
 import type { GfxCompatibleInterface, PointTestOptions } from './base.js';
-import type { GfxModel } from './model.js';
-import type { GfxContainerElement } from './surface/container-element.js';
-import type { GfxGroupLikeElementModel } from './surface/element-model.js';
+import type { GfxGroupModel } from './model.js';
 import type { SurfaceBlockModel } from './surface/surface-model.js';
 
 /**
@@ -55,10 +53,6 @@ export class GfxBlockElementModel<
 
   rotate = 0;
 
-  get container(): (GfxModel & GfxContainerElement) | null {
-    return this.surface?.getContainer(this.id) ?? null;
-  }
-
   get deserializedXYWH() {
     if (this._cacheDeserKey !== this.xywh || !this._cacheDeserXYWH) {
       this._cacheDeserKey = this.xywh;
@@ -84,13 +78,13 @@ export class GfxBlockElementModel<
     this._externalXYWH = xywh;
   }
 
-  get group(): GfxGroupLikeElementModel | null {
+  get group(): GfxGroupModel | null {
     if (!this.surface) return null;
 
     return this.surface.getGroup(this.id) ?? null;
   }
 
-  get groups(): GfxGroupLikeElementModel[] {
+  get groups(): GfxGroupModel[] {
     if (!this.surface) return [];
 
     return this.surface.getGroups(this.id);

@@ -18,19 +18,20 @@ import { DocCollection, type Y } from '@blocksuite/store';
 import { createMutex } from 'lib0/mutex';
 
 import type { EditorHost } from '../../../view/index.js';
-import type { GfxCompatibleInterface, PointTestOptions } from '../base.js';
+import type {
+  GfxCompatibleInterface,
+  GfxGroupCompatibleInterface,
+  PointTestOptions,
+} from '../base.js';
 import type { GfxBlockElementModel } from '../gfx-block-model.js';
-import type { GfxModel } from '../model.js';
+import type { GfxGroupModel, GfxModel } from '../model.js';
 import type { SurfaceBlockModel } from './surface-model.js';
 
 import {
   descendantElementsImpl,
   hasDescendantElementImpl,
 } from '../../../utils/tree.js';
-import {
-  type GfxContainerElement,
-  gfxContainerSymbol,
-} from './container-element.js';
+import { gfxGroupCompatibleSymbol } from '../base.js';
 import {
   convertProps,
   field,
@@ -90,10 +91,6 @@ export abstract class GfxPrimitiveElementModel<
     return true;
   }
 
-  get container() {
-    return this.surface.getContainer(this.id);
-  }
-
   get deserializedXYWH() {
     if (!this._lastXYWH || this.xywh !== this._lastXYWH) {
       const xywh = this.xywh;
@@ -128,11 +125,11 @@ export abstract class GfxPrimitiveElementModel<
     return this._local.get('externalBound') as Bound | null;
   }
 
-  get group(): GfxGroupLikeElementModel | null {
+  get group(): GfxGroupModel | null {
     return this.surface.getGroup(this.id);
   }
 
-  get groups() {
+  get groups(): GfxGroupModel[] {
     return this.surface.getGroups(this.id);
   }
 
@@ -336,7 +333,7 @@ export abstract class GfxGroupLikeElementModel<
     Props extends BaseElementProps = BaseElementProps,
   >
   extends GfxPrimitiveElementModel<Props>
-  implements GfxContainerElement
+  implements GfxGroupCompatibleInterface
 {
   private _childIds: string[] = [];
 
@@ -345,7 +342,7 @@ export abstract class GfxGroupLikeElementModel<
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   abstract children: Y.Map<any>;
 
-  [gfxContainerSymbol] = true as const;
+  [gfxGroupCompatibleSymbol] = true as const;
 
   get childElements() {
     const elements: GfxModel[] = [];

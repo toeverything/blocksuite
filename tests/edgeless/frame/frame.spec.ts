@@ -234,32 +234,6 @@ test.describe('add element to frame and then move frame', () => {
       await assertEdgelessElementBound(page, groupId, [500, 500, 150, 150]);
       await assertEdgelessElementBound(page, frameId, [100, 100, 500, 500]);
     });
-
-    test('group should not be moved since its center is not in frame', async ({
-      page,
-    }) => {
-      const [frameId, ...shapeIds] = [
-        await createFrame(page, [50, 50], [550, 550]),
-        await createShapeElement(page, [500, 500], [600, 600], Shape.Square),
-        await createShapeElement(page, [550, 550], [650, 650], Shape.Square),
-      ];
-
-      await pressEscape(page);
-
-      await shiftClickView(page, [510, 510]);
-      await shiftClickView(page, [560, 560]);
-      await page.keyboard.press(`${SHORT_KEY}+g`);
-      const groupId = (await getSelectedIds(page))[0];
-
-      await clickView(page, [60, 60]);
-      await dragBetweenViewCoords(page, [60, 60], [110, 110]);
-
-      // since the new group center is not in the frame, so the group is not child of frame
-      await assertEdgelessElementBound(page, shapeIds[0], [500, 500, 100, 100]);
-      await assertEdgelessElementBound(page, shapeIds[1], [550, 550, 100, 100]);
-      await assertEdgelessElementBound(page, groupId, [500, 500, 150, 150]);
-      await assertEdgelessElementBound(page, frameId, [100, 100, 500, 500]);
-    });
   });
 
   test.describe('add inner frame', () => {

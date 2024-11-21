@@ -8,7 +8,7 @@ import {
   GfxExtension,
   GfxExtensionIdentifier,
   type GfxModel,
-  isGfxContainerElm,
+  isGfxGroupCompatibleModel,
   renderableInEdgeless,
 } from '@blocksuite/block-std/gfx';
 import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
@@ -200,11 +200,21 @@ export class EdgelessFrameManager extends GfxExtension {
           const frame = this.getFrameFromPoint(element.elementBound.center);
 
           // if the container created with a frame, skip it.
-          if (isGfxContainerElm(element) && frame && element.hasChild(frame)) {
+          if (
+            isGfxGroupCompatibleModel(element) &&
+            frame &&
+            element.hasChild(frame)
+          ) {
             return;
           }
 
-          frame && this.addElementsToFrame(frame, [element]);
+          // new element may intended to be added to other group
+          // so we need to wait for the next microtask to check if the element can be added to the frame
+          queueMicrotask(() => {
+            if (!element.group && frame) {
+              this.addElementsToFrame(frame, [element]);
+            }
+          });
         }
       })
     );
@@ -357,7 +367,7 @@ export class EdgelessFrameManager extends GfxExtension {
   }
 
   getParentFrame(element: GfxModel) {
-    const container = element.container;
+    const container = element.group;
     return container && isFrameBlock(container) ? container : null;
   }
 

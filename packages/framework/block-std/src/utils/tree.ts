@@ -1,9 +1,9 @@
 import type { GfxModel } from '../gfx/model/model.js';
 
 import {
-  type GfxContainerElement,
-  isGfxContainerElm,
-} from '../gfx/model/surface/container-element.js';
+  type GfxGroupCompatibleInterface,
+  isGfxGroupCompatibleModel,
+} from '../gfx/model/base.js';
 
 /**
  * Get the top elements from the list of elements, which are in some tree structures.
@@ -30,7 +30,7 @@ export function getTopElements(elements: GfxModel[]): GfxModel[] {
 
   elements.forEach(e1 => {
     elements.forEach(e2 => {
-      if (isGfxContainerElm(e1) && e1.hasDescendant(e2)) {
+      if (isGfxGroupCompatibleModel(e1) && e1.hasDescendant(e2)) {
         results.delete(e2);
       }
     });
@@ -56,7 +56,7 @@ function traverse(
       if (interrupt) return;
     }
 
-    if (isGfxContainerElm(element)) {
+    if (isGfxGroupCompatibleModel(element)) {
       element.childElements.forEach(child => {
         innerTraverse(child);
       });
@@ -69,19 +69,19 @@ function traverse(
 }
 
 export function getAncestorContainersImpl(element: GfxModel) {
-  const containers: (GfxContainerElement & GfxModel)[] = [];
+  const containers: GfxGroupCompatibleInterface[] = [];
 
-  let container = element.container;
+  let container = element.group;
   while (container) {
     containers.push(container);
-    container = container.container;
+    container = container.group;
   }
 
   return containers;
 }
 
 export function descendantElementsImpl(
-  container: GfxContainerElement
+  container: GfxGroupCompatibleInterface
 ): GfxModel[] {
   const results: GfxModel[] = [];
   container.childElements.forEach(child => {
@@ -93,13 +93,13 @@ export function descendantElementsImpl(
 }
 
 export function hasDescendantElementImpl(
-  container: GfxContainerElement,
+  container: GfxGroupCompatibleInterface,
   element: GfxModel
 ): boolean {
-  let _container = element.container;
+  let _container = element.group;
   while (_container) {
     if (_container === container) return true;
-    _container = _container.container;
+    _container = _container.group;
   }
   return false;
 }
@@ -108,12 +108,12 @@ export function hasDescendantElementImpl(
  * This checker is used to prevent circular reference, when adding a child element to a container.
  */
 export function canSafeAddToContainer(
-  container: GfxContainerElement & GfxModel,
+  container: GfxGroupCompatibleInterface & GfxModel,
   element: GfxModel
 ) {
   if (
     element === container ||
-    (isGfxContainerElm(element) && element.hasDescendant(container))
+    (isGfxGroupCompatibleModel(element) && element.hasDescendant(container))
   ) {
     return false;
   }

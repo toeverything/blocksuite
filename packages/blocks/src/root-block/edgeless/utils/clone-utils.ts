@@ -15,7 +15,7 @@ import {
 import {
   getTopElements,
   type GfxModel,
-  isGfxContainerElm,
+  isGfxGroupCompatibleModel,
   type SerializedElement,
 } from '@blocksuite/block-std/gfx';
 import { type BlockSnapshot, Job } from '@blocksuite/store';
@@ -32,7 +32,7 @@ export function getSortedCloneElements(elements: GfxModel[]) {
     if (set.has(element)) return;
 
     set.add(element);
-    if (isGfxContainerElm(element)) {
+    if (isGfxGroupCompatibleModel(element)) {
       element.descendantElements.map(descendant => set.add(descendant));
     }
   });
@@ -123,7 +123,7 @@ export function sortEdgelessElements(elements: GfxModel[]) {
   };
 
   const traverse = (element: GfxModel) => {
-    if (isGfxContainerElm(element)) {
+    if (isGfxGroupCompatibleModel(element)) {
       moveConnectorToEnd(element.childElements).forEach(child =>
         traverse(child)
       );

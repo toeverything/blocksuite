@@ -1,7 +1,7 @@
 import type {
   GfxBlockElementModel,
-  GfxContainerElement,
   GfxElementGeometry,
+  GfxGroupCompatibleInterface,
   GfxModel,
   PointTestOptions,
 } from '@blocksuite/block-std/gfx';
@@ -9,7 +9,7 @@ import type {
 import {
   canSafeAddToContainer,
   descendantElementsImpl,
-  gfxContainerSymbol,
+  gfxGroupCompatibleSymbol,
   hasDescendantElementImpl,
 } from '@blocksuite/block-std/gfx';
 import { Bound, type SerializedXYWH } from '@blocksuite/global/utils';
@@ -49,9 +49,9 @@ export const FrameBlockSchema = defineBlockSchema({
 
 export class FrameBlockModel
   extends GfxCompatible<FrameBlockProps>(BlockModel)
-  implements GfxElementGeometry, GfxContainerElement
+  implements GfxElementGeometry, GfxGroupCompatibleInterface
 {
-  [gfxContainerSymbol] = true as const;
+  [gfxGroupCompatibleSymbol] = true as const;
 
   get childElements() {
     if (!this.surface) return [];

@@ -276,7 +276,7 @@ export function renderMindmapButton(
 
     const group = edgeless.service.surface.getGroup(e.id);
 
-    if (group?.type === 'mindmap') {
+    if (group && 'type' in group && group.type === 'mindmap') {
       mindmaps.push(group as MindmapElementModel);
     }
   });
