@@ -1,5 +1,3 @@
-import { assertExists } from '@blocksuite/global/utils';
-
 export type ColumnType = string;
 
 export interface Column<
@@ -13,13 +11,6 @@ export interface Column<
 
 export type StatCalcOpType = string | undefined;
 
-export const getTableContainer = (ele: HTMLElement) => {
-  const element = ele.closest(
-    '.affine-database-table-container'
-  ) as HTMLElement;
-  assertExists(element);
-  return element;
-};
 type WithTableViewType<T> = T extends unknown
   ? {
       viewId: string;

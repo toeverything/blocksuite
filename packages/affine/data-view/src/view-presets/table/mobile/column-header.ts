@@ -4,6 +4,7 @@ import {
   popMenu,
   popupTargetFromElement,
 } from '@blocksuite/affine-components/context-menu';
+import { unsafeCSSVarV2 } from '@blocksuite/affine-shared/theme';
 import { ShadowlessElement } from '@blocksuite/block-std';
 import { SignalWatcher, WithDisposable } from '@blocksuite/global/utils';
 import {
@@ -17,8 +18,6 @@ import {
 } from '@blocksuite/icons/lit';
 import { css } from 'lit';
 import { property } from 'lit/decorators.js';
-import { classMap } from 'lit/directives/class-map.js';
-import { createRef, ref } from 'lit/directives/ref.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
 
@@ -27,30 +26,31 @@ import type { NumberPropertyDataType } from '../../../property-presets/index.js'
 import type { TableColumn, TableSingleView } from '../table-view-manager.js';
 
 import { inputConfig, typeConfig } from '../../../core/common/property-menu.js';
-import { renderUniLit } from '../../../core/index.js';
-import {
-  draggable,
-  dragHandler,
-  droppable,
-} from '../../../core/utils/wc-dnd/dnd-context.js';
 import { numberFormats } from '../../../property-presets/number/utils/formats.js';
 import { DEFAULT_COLUMN_TITLE_HEIGHT } from '../consts.js';
-import {
-  getTableGroupRect,
-  getVerticalIndicator,
-  startDragWidthAdjustmentBar,
-} from './vertical-indicator.js';
 
-export class DatabaseHeaderColumn extends SignalWatcher(
+export class MobileTableColumnHeader extends SignalWatcher(
   WithDisposable(ShadowlessElement)
 ) {
   static override styles = css`
-    affine-database-header-column {
+    .mobile-table-column-header {
       display: flex;
+      padding: 6px;
+      gap: 6px;
+      align-items: center;
     }
 
-    .affine-database-header-column-grabbing * {
-      cursor: grabbing;
+    .mobile-table-column-header-icon {
+      font-size: 18px;
+      color: ${unsafeCSSVarV2('database/textSecondary')};
+      display: flex;
+      align-items: center;
+    }
+
+    .mobile-table-column-header-name {
+      font-weight: 500;
+      font-size: 14px;
+      color: ${unsafeCSSVarV2('database/textSecondary')};
     }
   `;
 
@@ -61,81 +61,9 @@ export class DatabaseHeaderColumn extends SignalWatcher(
     this.popMenu();
   };
 
-  private _clickTypeIcon = (event: MouseEvent) => {
-    if (this.tableViewManager.readonly$.value) {
-      return;
-    }
-    if (this.column.type$.value === 'title') {
-      return;
-    }
-    event.stopPropagation();
-    popMenu(popupTargetFromElement(this), {
-      options: {
-        items: this.tableViewManager.propertyMetas.map(config => {
-          return menu.action({
-            name: config.config.name,
-            isSelected: config.type === this.column.type$.value,
-            prefix: renderUniLit(
-              this.tableViewManager.propertyIconGet(config.type)
-            ),
-            select: () => {
-              this.column.typeSet?.(config.type);
-            },
-          });
-        }),
-      },
-    });
-  };
-
-  private _contextMenu = (e: MouseEvent) => {
-    if (this.tableViewManager.readonly$.value) {
-      return;
-    }
-    e.preventDefault();
-    this.popMenu(e.currentTarget as HTMLElement);
-  };
-
-  private _enterWidthDragBar = () => {
-    if (this.tableViewManager.readonly$.value) {
-      return;
-    }
-    if (this.drawWidthDragBarTask) {
-      cancelAnimationFrame(this.drawWidthDragBarTask);
-      this.drawWidthDragBarTask = 0;
-    }
-    this.drawWidthDragBar();
-  };
-
-  private _leaveWidthDragBar = () => {
-    cancelAnimationFrame(this.drawWidthDragBarTask);
-    this.drawWidthDragBarTask = 0;
-    getVerticalIndicator().remove();
-  };
-
-  private drawWidthDragBar = () => {
-    const rect = getTableGroupRect(this);
-    if (!rect) {
-      return;
-    }
-    getVerticalIndicator().display(
-      this.getBoundingClientRect().right,
-      rect.top,
-      rect.bottom - rect.top
-    );
-    this.drawWidthDragBarTask = requestAnimationFrame(this.drawWidthDragBar);
-  };
-
-  private drawWidthDragBarTask = 0;
-
-  private widthDragBar = createRef();
-
   editTitle = () => {
     this._clickColumn();
   };
-
-  private get readonly() {
-    return this.tableViewManager.readonly$.value;
-  }
 
   private popMenu(ele?: HTMLElement) {
     const enableNumberFormatting =
@@ -143,6 +71,9 @@ export class DatabaseHeaderColumn extends SignalWatcher(
 
     popMenu(popupTargetFromElement(ele ?? this), {
       options: {
+        title: {
+          text: 'Property settings',
+        },
         items: [
           inputConfig(this.column),
           typeConfig(this.column),
@@ -155,6 +86,9 @@ export class DatabaseHeaderColumn extends SignalWatcher(
                     !this.column.dataUpdate ||
                     this.column.type$.value !== 'number',
                   options: {
+                    title: {
+                      text: 'Number Format',
+                    },
                     items: [
                       numberFormatConfig(this.column),
                       ...numberFormats.map(format => {
@@ -213,7 +147,7 @@ export class DatabaseHeaderColumn extends SignalWatcher(
                     .then(() => {
                       const pre =
                         this.previousElementSibling?.previousElementSibling;
-                      if (pre instanceof DatabaseHeaderColumn) {
+                      if (pre instanceof MobileTableColumnHeader) {
                         pre.editTitle();
                         pre.scrollIntoView({
                           inline: 'nearest',
@@ -235,7 +169,7 @@ export class DatabaseHeaderColumn extends SignalWatcher(
                   Promise.resolve()
                     .then(() => {
                       const next = this.nextElementSibling?.nextElementSibling;
-                      if (next instanceof DatabaseHeaderColumn) {
+                      if (next instanceof MobileTableColumnHeader) {
                         next.editTitle();
                         next.scrollIntoView({
                           inline: 'nearest',
@@ -312,97 +246,28 @@ export class DatabaseHeaderColumn extends SignalWatcher(
     });
   }
 
-  private widthDragStart(event: PointerEvent) {
-    startDragWidthAdjustmentBar(
-      event,
-      this,
-      this.getBoundingClientRect().width,
-      this.column
-    );
-  }
-
-  override connectedCallback() {
-    super.connectedCallback();
-    const table = this.closest('affine-database-table');
-    if (table) {
-      this.disposables.add(
-        table.props.handleEvent('dragStart', context => {
-          if (this.tableViewManager.readonly$.value) {
-            return;
-          }
-          const event = context.get('pointerState').raw;
-          const target = event.target;
-          if (target instanceof Element) {
-            if (this.widthDragBar.value?.contains(target)) {
-              event.preventDefault();
-              event.stopPropagation();
-              this.widthDragStart(event);
-              return true;
-            }
-          }
-          return false;
-        })
-      );
-    }
-  }
-
   override render() {
     const column = this.column;
     const style = styleMap({
       height: DEFAULT_COLUMN_TITLE_HEIGHT + 'px',
     });
-    const classes = classMap({
-      'affine-database-column-move': true,
-      [this.grabStatus]: true,
-    });
     return html`
       <div
         style=${style}
-        class="affine-database-column-content"
+        class="mobile-table-column-header"
         @click="${this._clickColumn}"
-        @contextmenu="${this._contextMenu}"
-        ${dragHandler(column.id)}
-        ${draggable(column.id)}
-        ${droppable(column.id)}
       >
-        ${this.readonly
-          ? null
-          : html` <button class="${classes}">
-              <div class="hover-trigger"></div>
-              <div class="control-h"></div>
-              <div class="control-l"></div>
-              <div class="control-r"></div>
-            </button>`}
-        <div class="affine-database-column-text ${column.type$.value}">
-          <div
-            class="affine-database-column-type-icon dv-hover"
-            @click="${this._clickTypeIcon}"
-          >
-            <uni-lit .uni="${column.icon}"></uni-lit>
-          </div>
-          <div class="affine-database-column-text-content">
-            <div class="affine-database-column-text-input">
-              ${column.name$.value}
-            </div>
-          </div>
-        </div>
-      </div>
-      <div
-        ${ref(this.widthDragBar)}
-        @mouseenter="${this._enterWidthDragBar}"
-        @mouseleave="${this._leaveWidthDragBar}"
-        style="width: 0;position: relative;height: 100%;z-index: 1;cursor: col-resize"
-      >
-        <div style="width: 8px;height: 100%;margin-left: -4px;"></div>
+        <uni-lit
+          class="mobile-table-column-header-icon"
+          .uni="${column.icon}"
+        ></uni-lit>
+        <div class="mobile-table-column-header-name">${column.name$.value}</div>
       </div>
     `;
   }
 
   @property({ attribute: false })
   accessor column!: TableColumn;
-
-  @property({ attribute: false })
-  accessor grabStatus: 'grabStart' | 'grabEnd' | 'grabbing' = 'grabEnd';
 
   @property({ attribute: false })
   accessor tableViewManager!: TableSingleView;
@@ -417,6 +282,6 @@ function numberFormatConfig(column: Property): MenuConfig {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'affine-database-header-column': DatabaseHeaderColumn;
+    'mobile-table-column-header': MobileTableColumnHeader;
   }
 }

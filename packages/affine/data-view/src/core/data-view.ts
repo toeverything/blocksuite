@@ -4,6 +4,7 @@ import type {
 } from '@blocksuite/affine-shared/services';
 
 import { ShadowlessElement } from '@blocksuite/block-std';
+import { IS_MOBILE } from '@blocksuite/global/env';
 import { SignalWatcher, WithDisposable } from '@blocksuite/global/utils';
 import { computed, type ReadonlySignal } from '@preact/signals-core';
 import { css, unsafeCSS } from 'lit';
@@ -167,10 +168,14 @@ export class DataViewRenderer extends SignalWatcher(
         });
       },
     };
+    const renderer = viewData.view.meta.renderer;
+    const view = IS_MOBILE
+      ? renderer.mobileView
+      : (renderer.view ?? renderer.view);
     return keyed(
       viewData.view.id,
       renderUniLit(
-        viewData.view.meta.renderer.view,
+        view,
         { props },
         {
           ref: this._view,

@@ -1,6 +1,7 @@
 import type { InsertToPosition } from '@blocksuite/affine-shared/utils';
 
 import { unsafeCSSVarV2 } from '@blocksuite/affine-shared/theme';
+import { IS_MOBILE } from '@blocksuite/global/env';
 import { PlusIcon } from '@blocksuite/icons/lit';
 import { css, html } from 'lit';
 import { state } from 'lit/decorators.js';
@@ -77,7 +78,12 @@ export class DataViewHeaderToolsAddRow extends WidgetBase {
     const getPosition = (
       y: number
     ):
-      | { position: InsertToPosition; y: number; x: number; width: number }
+      | {
+          position: InsertToPosition;
+          y: number;
+          x: number;
+          width: number;
+        }
       | undefined => {
       const data = rects.find(v => y < v.bottom);
       if (!data || y < data.top) {
@@ -96,7 +102,12 @@ export class DataViewHeaderToolsAddRow extends WidgetBase {
 
     const dropPreview = createDropPreview();
     const dragPreview = createDragPreview();
-    startDrag<{ position?: InsertToPosition }, MouseEvent>(e, {
+    startDrag<
+      {
+        position?: InsertToPosition;
+      },
+      MouseEvent
+    >(e, {
       transform: e => e,
       onDrag: () => {
         return {};
@@ -135,7 +146,7 @@ export class DataViewHeaderToolsAddRow extends WidgetBase {
 
   override connectedCallback() {
     super.connectedCallback();
-    if (!this.readonly) {
+    if (!this.readonly && !IS_MOBILE) {
       this.disposables.addFromEvent(this, 'pointerdown', e => {
         this._dragStart(e);
       });
@@ -151,7 +162,9 @@ export class DataViewHeaderToolsAddRow extends WidgetBase {
       draggable="true"
       .onClick="${this._onAddNewRecord}"
       .icon="${PlusIcon()}"
-      .text="${html`<span style="font-weight: 500">New Record</span>`}"
+      .text="${IS_MOBILE
+        ? html`<span style="font-weight: 500">New</span>`
+        : html`<span style="font-weight: 500">New Record</span>`}"
     >
     </data-view-component-button>`;
   }

@@ -252,96 +252,102 @@ export const popViewOptions = (
     })
   );
   items.push(
-    menu.action({
-      name: 'Layout',
-      postfix: html` <div style="font-size: 14px;text-transform: capitalize;">
-          ${view.type}
-        </div>
-        ${ArrowRightSmallIcon()}`,
-      select: () => {
-        const viewTypes = view.manager.viewMetas.map<MenuConfig>(meta => {
-          return menu => {
-            if (!menu.search(meta.model.defaultName)) {
-              return;
-            }
-            const isSelected =
-              meta.type === view.manager.currentView$.value.type;
-            const iconStyle = styleMap({
-              fontSize: '24px',
-              color: isSelected
-                ? 'var(--affine-text-emphasis-color)'
-                : 'var(--affine-icon-secondary)',
-            });
-            const textStyle = styleMap({
-              fontSize: '14px',
-              lineHeight: '22px',
-              color: isSelected
-                ? 'var(--affine-text-emphasis-color)'
-                : 'var(--affine-text-secondary-color)',
-            });
-            const data: MenuButtonData = {
-              content: () => html`
-                <div
-                  style="color:var(--affine-text-emphasis-color);width:100%;display: flex;flex-direction: column;align-items: center;justify-content: center;padding: 6px 16px;"
-                >
-                  <div style="${iconStyle}">
-                    ${renderUniLit(meta.renderer.icon)}
-                  </div>
-                  <div style="${textStyle}">${meta.model.defaultName}</div>
-                </div>
-              `,
-              select: () => {
-                view.manager.viewChangeType(
-                  view.manager.currentViewId$.value,
-                  meta.type
-                );
-                dataViewInstance.clearSelection();
-              },
-              class: {},
-            };
-            const containerStyle = styleMap({
-              flex: '1',
-            });
-            return html` <affine-menu-button
-              style="${containerStyle}"
-              .data="${data}"
-              .menu="${menu}"
-            ></affine-menu-button>`;
-          };
-        });
-        popMenu(target, {
-          options: {
-            title: {
-              onBack: reopen,
-              text: 'Layout',
-            },
-            items: [
-              menu => {
-                const result = menu.renderItems(viewTypes);
-                if (result.length) {
-                  return html` <div style="display: flex">${result}</div>`;
+    menu.group({
+      items: [
+        menu.action({
+          name: 'Layout',
+          postfix: html` <div
+              style="font-size: 14px;text-transform: capitalize;"
+            >
+              ${view.type}
+            </div>
+            ${ArrowRightSmallIcon()}`,
+          select: () => {
+            const viewTypes = view.manager.viewMetas.map<MenuConfig>(meta => {
+              return menu => {
+                if (!menu.search(meta.model.defaultName)) {
+                  return;
                 }
-                return html``;
+                const isSelected =
+                  meta.type === view.manager.currentView$.value.type;
+                const iconStyle = styleMap({
+                  fontSize: '24px',
+                  color: isSelected
+                    ? 'var(--affine-text-emphasis-color)'
+                    : 'var(--affine-icon-secondary)',
+                });
+                const textStyle = styleMap({
+                  fontSize: '14px',
+                  lineHeight: '22px',
+                  color: isSelected
+                    ? 'var(--affine-text-emphasis-color)'
+                    : 'var(--affine-text-secondary-color)',
+                });
+                const data: MenuButtonData = {
+                  content: () => html`
+                    <div
+                      style="color:var(--affine-text-emphasis-color);width:100%;display: flex;flex-direction: column;align-items: center;justify-content: center;padding: 6px 16px;"
+                    >
+                      <div style="${iconStyle}">
+                        ${renderUniLit(meta.renderer.icon)}
+                      </div>
+                      <div style="${textStyle}">${meta.model.defaultName}</div>
+                    </div>
+                  `,
+                  select: () => {
+                    view.manager.viewChangeType(
+                      view.manager.currentViewId$.value,
+                      meta.type
+                    );
+                    dataViewInstance.clearSelection();
+                  },
+                  class: {},
+                };
+                const containerStyle = styleMap({
+                  flex: '1',
+                });
+                return html` <affine-menu-button
+                  style="${containerStyle}"
+                  .data="${data}"
+                  .menu="${menu}"
+                ></affine-menu-button>`;
+              };
+            });
+            popMenu(target, {
+              options: {
+                title: {
+                  onBack: reopen,
+                  text: 'Layout',
+                },
+                items: [
+                  menu => {
+                    const result = menu.renderItems(viewTypes);
+                    if (result.length) {
+                      return html` <div style="display: flex">${result}</div>`;
+                    }
+                    return html``;
+                  },
+                  // menu.toggleSwitch({
+                  //   name: 'Show block icon',
+                  //   on: true,
+                  //   onChange: value => {
+                  //     console.log(value);
+                  //   },
+                  // }),
+                  // menu.toggleSwitch({
+                  //   name: 'Show Vertical lines',
+                  //   on: true,
+                  //   onChange: value => {
+                  //     console.log(value);
+                  //   },
+                  // }),
+                ],
               },
-              // menu.toggleSwitch({
-              //   name: 'Show block icon',
-              //   on: true,
-              //   onChange: value => {
-              //     console.log(value);
-              //   },
-              // }),
-              // menu.toggleSwitch({
-              //   name: 'Show Vertical lines',
-              //   on: true,
-              //   onChange: value => {
-              //     console.log(value);
-              //   },
-              // }),
-            ],
+            });
           },
-        });
-      },
-      prefix: LayoutIcon(),
+          prefix: LayoutIcon(),
+        }),
+      ],
     })
   );
 

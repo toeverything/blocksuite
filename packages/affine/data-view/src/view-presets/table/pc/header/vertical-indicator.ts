@@ -6,10 +6,10 @@ import { property } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type { TableColumn } from '../table-view-manager.js';
+import type { TableColumn } from '../../table-view-manager.js';
 
-import { startDrag } from '../../../core/utils/drag.js';
-import { getResultInRange } from '../../../core/utils/utils.js';
+import { startDrag } from '../../../../core/utils/drag.js';
+import { getResultInRange } from '../../../../core/utils/utils.js';
 
 export class TableVerticalIndicator extends WithDisposable(ShadowlessElement) {
   static override styles = css`

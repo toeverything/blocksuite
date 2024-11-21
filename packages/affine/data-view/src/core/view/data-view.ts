@@ -39,13 +39,18 @@ export type DataViewModel<
 export type GetDataFromDataViewModel<Model> =
   Model extends DataViewModel<infer _, infer R> ? R : never;
 
+type DataViewComponent = UniComponent<
+  {
+    props: DataViewProps;
+  },
+  {
+    expose: DataViewInstance;
+  }
+>;
+
 export interface DataViewRendererConfig {
-  view: UniComponent<
-    {
-      props: DataViewProps;
-    },
-    { expose: DataViewInstance }
-  >;
+  view: DataViewComponent;
+  mobileView?: DataViewComponent;
   icon: UniComponent;
 }
 

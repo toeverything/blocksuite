@@ -11,19 +11,19 @@ import { css, html } from 'lit';
 import { property, query } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
-import type { DataViewRenderer } from '../../core/data-view.js';
-import type { GroupData } from '../../core/group-by/trait.js';
+import type { DataViewRenderer } from '../../../core/data-view.js';
+import type { GroupData } from '../../../core/group-by/trait.js';
+import type { TableSingleView } from '../table-view-manager.js';
 import type { DataViewTable } from './table-view.js';
-import type { TableSingleView } from './table-view-manager.js';
 
-import { GroupTitle } from '../../core/group-by/group-title.js';
-import { createDndContext } from '../../core/utils/wc-dnd/dnd-context.js';
-import { defaultActivators } from '../../core/utils/wc-dnd/sensors/index.js';
-import { linearMove } from '../../core/utils/wc-dnd/utils/linear-move.js';
-import { LEFT_TOOL_BAR_WIDTH } from './consts.js';
+import { GroupTitle } from '../../../core/group-by/group-title.js';
+import { createDndContext } from '../../../core/utils/wc-dnd/dnd-context.js';
+import { defaultActivators } from '../../../core/utils/wc-dnd/sensors/index.js';
+import { linearMove } from '../../../core/utils/wc-dnd/utils/linear-move.js';
+import { LEFT_TOOL_BAR_WIDTH } from '../consts.js';
+import { TableAreaSelection } from '../types.js';
 import { DataViewColumnPreview } from './header/column-renderer.js';
 import { getVerticalIndicator } from './header/vertical-indicator.js';
-import { TableAreaSelection } from './types.js';
 
 const styles = css`
   affine-data-view-table-group:hover .group-header-op {

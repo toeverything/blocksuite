@@ -23,28 +23,32 @@ export const popCreateSort = (
         text: 'New sort',
         onBack: props.onBack,
       },
-      items: props.sortUtils.vars$.value
-        .filter(
-          v =>
-            !props.sortUtils.sortList$.value.some(
-              sort => sort.ref.name === v.id
+      items: [
+        menu.group({
+          items: props.sortUtils.vars$.value
+            .filter(
+              v =>
+                !props.sortUtils.sortList$.value.some(
+                  sort => sort.ref.name === v.id
+                )
             )
-        )
-        .map(v =>
-          menu.action({
-            name: v.name,
-            prefix: renderUniLit(v.icon, {}),
-            select: () => {
-              props.sortUtils.add({
-                ref: {
-                  type: 'ref',
-                  name: v.id,
+            .map(v =>
+              menu.action({
+                name: v.name,
+                prefix: renderUniLit(v.icon, {}),
+                select: () => {
+                  props.sortUtils.add({
+                    ref: {
+                      type: 'ref',
+                      name: v.id,
+                    },
+                    desc: false,
+                  });
                 },
-                desc: false,
-              });
-            },
-          })
-        ),
+              })
+            ),
+        }),
+      ],
     },
   });
 };

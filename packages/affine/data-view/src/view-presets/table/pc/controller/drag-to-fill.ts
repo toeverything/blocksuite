@@ -5,10 +5,10 @@ import { css, html } from 'lit';
 import { state } from 'lit/decorators.js';
 import { createRef, ref } from 'lit/directives/ref.js';
 
+import type { TableAreaSelection } from '../../types.js';
 import type { DataViewTable } from '../table-view.js';
-import type { TableAreaSelection } from '../types.js';
 
-import { t } from '../../../core/index.js';
+import { t } from '../../../../core/index.js';
 
 export class DragToFillElement extends ShadowlessElement {
   static override styles = css`
