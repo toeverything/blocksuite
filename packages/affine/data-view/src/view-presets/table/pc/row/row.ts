@@ -8,11 +8,11 @@ import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
 
-import type { DataViewRenderer } from '../../../core/data-view.js';
-import type { TableSingleView } from '../table-view-manager.js';
+import type { DataViewRenderer } from '../../../../core/data-view.js';
+import type { TableSingleView } from '../../table-view-manager.js';
 
+import { TableRowSelection, type TableViewSelection } from '../../types.js';
 import { openDetail, popRowMenu } from '../components/menu.js';
-import { TableRowSelection, type TableViewSelection } from '../types.js';
 
 export class TableRow extends SignalWatcher(WithDisposable(ShadowlessElement)) {
   static override styles = css`
@@ -48,7 +48,7 @@ export class TableRow extends SignalWatcher(WithDisposable(ShadowlessElement)) {
     .row-ops {
       position: relative;
       width: 0;
-      margin-top: 8px;
+      margin-top: 4px;
       height: max-content;
       visibility: hidden;
       display: flex;
@@ -106,7 +106,7 @@ export class TableRow extends SignalWatcher(WithDisposable(ShadowlessElement)) {
     }
     .data-view-table-view-drag-handler {
       width: 4px;
-      height: 38px;
+      height: 34px;
       display: flex;
       align-items: center;
       justify-content: center;

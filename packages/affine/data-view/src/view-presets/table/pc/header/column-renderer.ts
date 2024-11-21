@@ -6,8 +6,8 @@ import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
 
-import type { GroupData } from '../../../core/group-by/trait.js';
-import type { TableColumn, TableSingleView } from '../table-view-manager.js';
+import type { GroupData } from '../../../../core/group-by/trait.js';
+import type { TableColumn, TableSingleView } from '../../table-view-manager.js';
 
 export class DataViewColumnPreview extends SignalWatcher(
   WithDisposable(ShadowlessElement)

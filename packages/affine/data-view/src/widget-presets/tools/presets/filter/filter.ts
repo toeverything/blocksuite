@@ -1,4 +1,5 @@
 import { popupTargetFromElement } from '@blocksuite/affine-components/context-menu';
+import { IS_MOBILE } from '@blocksuite/global/env';
 import { FilterIcon } from '@blocksuite/icons/lit';
 import { computed } from '@preact/signals-core';
 import { cssVarV2 } from '@toeverything/theme/v2';
@@ -80,6 +81,11 @@ export class DataViewHeaderToolsFilter extends WidgetBase {
       }
     );
     return;
+  }
+
+  override connectedCallback() {
+    super.connectedCallback();
+    this.style.display = IS_MOBILE ? 'none' : 'flex';
   }
 
   override render() {

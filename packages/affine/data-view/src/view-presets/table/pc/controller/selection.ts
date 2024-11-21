@@ -12,8 +12,8 @@ import type { DatabaseCellContainer } from '../cell.js';
 import type { TableRow } from '../row/row.js';
 import type { DataViewTable } from '../table-view.js';
 
-import { autoScrollOnBoundary } from '../../../core/utils/auto-scroll.js';
-import { startDrag } from '../../../core/utils/drag.js';
+import { autoScrollOnBoundary } from '../../../../core/utils/auto-scroll.js';
+import { startDrag } from '../../../../core/utils/drag.js';
 import {
   type CellFocus,
   type MultiSelection,
@@ -22,7 +22,7 @@ import {
   TableRowSelection,
   type TableViewSelection,
   type TableViewSelectionWithType,
-} from '../types.js';
+} from '../../types.js';
 import {
   DragToFillElement,
   fillSelectionWithFocusCellData,

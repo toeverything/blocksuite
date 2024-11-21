@@ -1,3 +1,4 @@
+import { IS_MOBILE } from '@blocksuite/global/env';
 import { css, html } from 'lit';
 import { property, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
@@ -41,7 +42,7 @@ export class DataViewHeaderTools extends WidgetBase {
 
   override render() {
     const classList = classMap({
-      'show-toolbar': this.showToolBar,
+      'show-toolbar': this.showToolBar || IS_MOBILE,
       'affine-database-toolbar': true,
     });
     const tools = this.toolsMap[this.view.type];

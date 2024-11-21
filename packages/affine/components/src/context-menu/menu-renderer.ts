@@ -1,7 +1,13 @@
 import { unsafeCSSVar, unsafeCSSVarV2 } from '@blocksuite/affine-shared/theme';
 import { ShadowlessElement } from '@blocksuite/block-std';
+import { IS_MOBILE } from '@blocksuite/global/env';
 import { SignalWatcher, WithDisposable } from '@blocksuite/global/utils';
-import { ArrowLeftBigIcon, CloseIcon, SearchIcon } from '@blocksuite/icons/lit';
+import {
+  ArrowLeftBigIcon,
+  ArrowLeftSmallIcon,
+  CloseIcon,
+  SearchIcon,
+} from '@blocksuite/icons/lit';
 import {
   autoPlacement,
   autoUpdate,
@@ -16,11 +22,15 @@ import { property } from 'lit/decorators.js';
 import { createRef, ref } from 'lit/directives/ref.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
+import type { MenuFocusable } from './focusable.js';
+import type { MenuComponentInterface } from './types.js';
+
 import { Menu, type MenuConfig, type MenuOptions } from './menu.js';
 
-export class MenuComponent extends SignalWatcher(
-  WithDisposable(ShadowlessElement)
-) {
+export class MenuComponent
+  extends SignalWatcher(WithDisposable(ShadowlessElement))
+  implements MenuComponentInterface
+{
   static override styles = css`
     affine-menu {
       font-family: var(--affine-font-family);
@@ -132,6 +142,19 @@ export class MenuComponent extends SignalWatcher(
     this.searchRef.value?.focus();
   }
 
+  focusTo(ele?: MenuFocusable) {
+    this.menu.setFocusOnly(ele);
+    this.focusInput();
+  }
+
+  getFirstFocusableElement(): HTMLElement | null {
+    return this.querySelector('[data-focusable="true"]');
+  }
+
+  getFocusableElements(): HTMLElement[] {
+    return Array.from(this.querySelectorAll('[data-focusable="true"]'));
+  }
+
   override render() {
     const result = this.menu.renderItems(this.menu.options.items);
     return html`
@@ -225,6 +248,131 @@ declare global {
     'affine-menu': MenuComponent;
   }
 }
+
+export class MobileMenuComponent
+  extends SignalWatcher(WithDisposable(ShadowlessElement))
+  implements MenuComponentInterface
+{
+  static override styles = css`
+    mobile-menu {
+      height: 100%;
+      font-family: var(--affine-font-family);
+      display: flex;
+      flex-direction: column;
+      user-select: none;
+      width: 100%;
+      background-color: ${unsafeCSSVarV2('layer/background/secondary')};
+      padding: 8px;
+      position: absolute;
+      z-index: 999;
+      color: ${unsafeCSSVarV2('text/primary')};
+    }
+
+    .mobile-menu-body {
+      display: flex;
+      flex-direction: column;
+      padding: 24px 16px;
+      gap: 16px;
+      flex: 1;
+      overflow-y: auto;
+    }
+  `;
+
+  onClose = () => {
+    const close = this.menu.options.title?.onClose;
+    if (close) {
+      close();
+    } else {
+      this.menu.close();
+    }
+  };
+
+  focusTo(ele?: MenuFocusable) {
+    this.menu.setFocusOnly(ele);
+  }
+
+  getFirstFocusableElement(): HTMLElement | null {
+    return this.querySelector('[data-focusable="true"]');
+  }
+
+  getFocusableElements(): HTMLElement[] {
+    return Array.from(this.querySelectorAll('[data-focusable="true"]'));
+  }
+
+  override render() {
+    const result = this.menu.renderItems(this.menu.options.items);
+    return html`
+      ${this.renderTitle()}
+      <div class="mobile-menu-body">${result}</div>
+    `;
+  }
+
+  renderTitle() {
+    const title = this.menu.options.title;
+    return html`
+      <div
+        style="display:flex;align-items:center;height: 44px;"
+        @mouseenter="${() => this.menu.closeSubMenu()}"
+      >
+        <div style="width: 50px;flex-shrink: 0;margin-left: 10px;">
+          ${title?.onBack
+            ? html` <div
+                @click="${() => {
+                  title.onBack?.(this.menu);
+                  this.menu.close();
+                }}"
+                style="
+                display:flex;
+                font-size: 24px;
+                align-items:center;
+"
+              >
+                ${ArrowLeftSmallIcon()}
+              </div>`
+            : nothing}
+        </div>
+        <div
+          style="
+          flex:1;
+          font-size: 17px;
+          font-style: normal;
+          font-weight: 500;
+          line-height: 22px;
+          color: var(--affine-text-primary-color);
+          display: flex;
+          justify-content: center;
+"
+        >
+          ${title?.text}
+        </div>
+        <div
+          @click="${this.onClose}"
+          style="
+          display:flex;
+          font-weight: 500;
+          font-size: 17px;
+          color: ${unsafeCSSVarV2('button/primary')};
+          width: 50px;
+          flex-shrink: 0;
+          margin-right: 10px;
+         "
+        >
+          Done
+        </div>
+      </div>
+    `;
+  }
+
+  @property({ attribute: false })
+  accessor menu!: Menu;
+}
+
+declare global {
+  interface HTMLElementTagNameMap {
+    'affine-menu-mobile': MobileMenuComponent;
+  }
+}
+
 export const getDefaultModalRoot = (ele: HTMLElement) => {
   const host: HTMLElement | null =
     ele.closest('editor-host') ?? ele.closest('.data-view-popup-container');
@@ -318,7 +466,32 @@ export const createPopup = (
 
 export type MenuHandler = {
   close: () => void;
+  menu: Menu;
   reopen: () => void;
+};
+
+const popMobileMenu = (options: MenuOptions): MenuHandler => {
+  const model = createModal(document.body);
+  const menu = new Menu({
+    ...options,
+    onClose: () => {
+      closePopup();
+    },
+  });
+  model.append(menu.menuElement);
+  const closePopup = () => {
+    model.remove();
+    options.onClose?.();
+  };
+  return {
+    close: () => {
+      closePopup();
+    },
+    menu,
+    reopen: () => {
+      options.onClose?.();
+    },
+  };
 };
 
 export const popMenu = (
@@ -329,6 +502,9 @@ export const popMenu = (
     container?: HTMLElement;
   }
 ): MenuHandler => {
+  if (IS_MOBILE) {
+    return popMobileMenu(props.options);
+  }
   const classList = target.button.classList;
   const hasActive = classList.contains('active');
   if (!hasActive) {
@@ -363,6 +539,7 @@ export const popMenu = (
   });
   return {
     close: closePopup,
+    menu,
     reopen: () => {
       popMenu(target, props);
     },

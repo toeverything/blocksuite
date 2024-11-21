@@ -9,7 +9,7 @@ import { classMap } from 'lit/directives/class-map.js';
 import {
   TableRowSelection,
   type TableViewSelectionWithType,
-} from '../types.js';
+} from '../../types.js';
 
 export class RowSelectCheckbox extends SignalWatcher(
   WithDisposable(ShadowlessElement)

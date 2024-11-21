@@ -1,8 +1,8 @@
 import type { UIEventStateContext } from '@blocksuite/block-std';
 import type { ReactiveController } from 'lit';
 
-import type { Cell } from '../../../core/view-manager/cell.js';
-import type { Row } from '../../../core/view-manager/row.js';
+import type { Cell } from '../../../../core/view-manager/cell.js';
+import type { Row } from '../../../../core/view-manager/row.js';
 import type { DataViewTable } from '../table-view.js';
 
 import {
@@ -10,7 +10,7 @@ import {
   TableRowSelection,
   type TableViewSelection,
   type TableViewSelectionWithType,
-} from '../types.js';
+} from '../../types.js';
 
 const BLOCKSUITE_DATABASE_TABLE = 'blocksuite/database/table';
 type JsonAreaData = string[][];

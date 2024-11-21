@@ -5,7 +5,7 @@ import type { ReactiveController } from 'lit';
 
 import type { DataViewTable } from '../table-view.js';
 
-import { startDrag } from '../../../core/utils/drag.js';
+import { startDrag } from '../../../../core/utils/drag.js';
 import { TableRow } from '../row/row.js';
 
 export class TableDragController implements ReactiveController {

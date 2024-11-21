@@ -1,3 +1,4 @@
+import { IS_MOBILE } from '@blocksuite/global/env';
 import { ArrowRightSmallIcon } from '@blocksuite/icons/lit';
 import {
   autoPlacement,
@@ -13,6 +14,7 @@ import type { MenuItemRender } from './types.js';
 
 import { MenuFocusable } from './focusable.js';
 import { Menu, type MenuOptions } from './menu.js';
+import { popMenu, popupTargetFromElement } from './menu-renderer.js';
 
 export type MenuSubMenuData = {
   content: () => TemplateResult;
@@ -99,6 +101,66 @@ export class MenuSubMenu extends MenuFocusable {
   accessor data!: MenuSubMenuData;
 }
 
+export class MobileSubMenu extends MenuFocusable {
+  override connectedCallback() {
+    super.connectedCallback();
+    this.disposables.addFromEvent(this, 'click', e => {
+      e.preventDefault();
+      e.stopPropagation();
+      this.openSubMenu();
+    });
+  }
+
+  onMouseEnter() {
+    this.openSubMenu();
+  }
+
+  override onPressEnter() {
+    this.onMouseEnter();
+  }
+
+  openSubMenu() {
+    const { menu } = popMenu(popupTargetFromElement(this), {
+      options: {
+        ...this.data.options,
+        onComplete: () => {
+          this.menu.close();
+        },
+        onClose: () => {
+          menu.menuElement.remove();
+          this.data.options.onClose?.();
+        },
+      },
+    });
+    this.menu.openSubMenu(menu);
+  }
+
+  protected override render(): unknown {
+    const classString = classMap({
+      [this.data.class ?? '']: true,
+      'mobile-menu-button': true,
+      focused: this.isFocused$.value,
+    });
+    return html` <div class="${classString}">${this.data.content()}</div>`;
+  }
+
+  @property({ attribute: false })
+  accessor data!: MenuSubMenuData;
+}
+
+export const renderSubMenu = (data: MenuSubMenuData, menu: Menu) => {
+  if (IS_MOBILE) {
+    return html` <mobile-sub-menu
+      .data="${data}"
+      .menu="${menu}"
+    ></mobile-sub-menu>`;
+  }
+  return html` <affine-menu-sub-menu
+    .data="${data}"
+    .menu="${menu}"
+  ></affine-menu-sub-menu>`;
+};
+
 export const subMenuItems = {
   subMenu:
     (config: {
@@ -128,9 +190,6 @@ export const subMenuItems = {
         class: config.class,
         options: config.options,
       };
-      return html` <affine-menu-sub-menu
-        .data="${data}"
-        .menu="${menu}"
-      ></affine-menu-sub-menu>`;
+      return renderSubMenu(data, menu);
     },
 } satisfies Record<string, MenuItemRender<never>>;

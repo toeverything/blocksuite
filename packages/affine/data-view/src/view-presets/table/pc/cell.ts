@@ -12,15 +12,15 @@ import { createRef } from 'lit/directives/ref.js';
 import type {
   CellRenderProps,
   DataViewCellLifeCycle,
-} from '../../core/property/index.js';
-import type { SingleView } from '../../core/view-manager/single-view.js';
-import type { TableColumn } from './table-view-manager.js';
+} from '../../../core/property/index.js';
+import type { SingleView } from '../../../core/view-manager/single-view.js';
+import type { TableColumn } from '../table-view-manager.js';
 
-import { renderUniLit } from '../../core/index.js';
+import { renderUniLit } from '../../../core/index.js';
 import {
   TableAreaSelection,
   type TableViewSelectionWithType,
-} from './types.js';
+} from '../types.js';
 
 export class DatabaseCellContainer extends SignalWatcher(
   WithDisposable(ShadowlessElement)

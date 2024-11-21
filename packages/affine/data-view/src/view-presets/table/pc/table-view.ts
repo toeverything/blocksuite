@@ -13,21 +13,21 @@ import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
 
-import type { GroupTrait } from '../../core/group-by/trait.js';
-import type { DataViewInstance } from '../../core/index.js';
-import type { TableSingleView } from './table-view-manager.js';
+import type { GroupTrait } from '../../../core/group-by/trait.js';
+import type { DataViewInstance } from '../../../core/index.js';
+import type { TableSingleView } from '../table-view-manager.js';
 
-import { renderUniLit } from '../../core/utils/uni-component/uni-component.js';
-import { DataViewBase } from '../../core/view/data-view-base.js';
-import { LEFT_TOOL_BAR_WIDTH } from './consts.js';
+import { renderUniLit } from '../../../core/utils/uni-component/uni-component.js';
+import { DataViewBase } from '../../../core/view/data-view-base.js';
+import { LEFT_TOOL_BAR_WIDTH } from '../consts.js';
+import {
+  TableAreaSelection,
+  type TableViewSelectionWithType,
+} from '../types.js';
 import { TableClipboardController } from './controller/clipboard.js';
 import { TableDragController } from './controller/drag.js';
 import { TableHotkeysController } from './controller/hotkeys.js';
 import { TableSelectionController } from './controller/selection.js';
-import {
-  TableAreaSelection,
-  type TableViewSelectionWithType,
-} from './types.js';
 
 const styles = css`
   affine-database-table {

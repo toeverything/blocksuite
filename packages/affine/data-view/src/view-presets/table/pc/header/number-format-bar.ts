@@ -2,9 +2,9 @@ import { WithDisposable } from '@blocksuite/global/utils';
 import { css, html, LitElement } from 'lit';
 import { property } from 'lit/decorators.js';
 
-import type { Property } from '../../../core/view-manager/property.js';
+import type { Property } from '../../../../core/view-manager/property.js';
 
-import { formatNumber } from '../../../property-presets/number/utils/formatter.js';
+import { formatNumber } from '../../../../property-presets/number/utils/formatter.js';
 
 const IncreaseDecimalPlacesIcon = html`
   <svg
