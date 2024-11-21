@@ -47,6 +47,10 @@ export class LinkedDocPopover extends SignalWatcher(
 
   private _updateLinkedDocGroup = async () => {
     const query = this._query;
+    if (this._updateLinkedDocGroupAbortController) {
+      this._updateLinkedDocGroupAbortController.abort();
+    }
+    this._updateLinkedDocGroupAbortController = new AbortController();
 
     if (query === null) {
       this.context.close();
@@ -56,9 +60,12 @@ export class LinkedDocPopover extends SignalWatcher(
       query,
       this._abort,
       this.context.std.host,
-      this.context.inlineEditor
+      this.context.inlineEditor,
+      this._updateLinkedDocGroupAbortController.signal
     );
   };
+
+  private _updateLinkedDocGroupAbortController: AbortController | null = null;
 
   private get _actionGroup() {
     return this._linkedDocGroup.map(group => {

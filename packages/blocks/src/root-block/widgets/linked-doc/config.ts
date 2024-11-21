@@ -41,7 +41,8 @@ export interface LinkedWidgetConfig {
     query: string,
     abort: () => void,
     editorHost: EditorHost,
-    inlineEditor: AffineInlineEditor
+    inlineEditor: AffineInlineEditor,
+    abortSignal: AbortSignal
   ) => Promise<LinkedMenuGroup[]> | LinkedMenuGroup[];
 
   mobile: {
