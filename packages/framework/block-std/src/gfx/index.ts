@@ -21,16 +21,16 @@ export {
   type PointTestOptions,
 } from './model/base.js';
 export {
+  type GfxGroupCompatibleInterface,
+  gfxGroupCompatibleSymbol,
+  isGfxGroupCompatibleModel,
+} from './model/base.js';
+export {
   GfxBlockElementModel,
   GfxCompatibleBlockModel as GfxCompatible,
   type GfxCompatibleProps,
 } from './model/gfx-block-model.js';
 export { type GfxModel } from './model/model.js';
-export {
-  type GfxContainerElement,
-  gfxContainerSymbol,
-  isGfxContainerElm,
-} from './model/surface/container-element.js';
 export {
   convert,
   convertProps,

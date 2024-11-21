@@ -207,7 +207,7 @@ export class GfxController extends LifeCycleWatcher {
     } else if (picked) {
       let index = results.length - 1;
 
-      while (picked.group !== null) {
+      while (picked.group instanceof GfxGroupLikeElementModel) {
         if (--index < 0) {
           picked = null;
           break;

@@ -7,16 +7,16 @@ import {
   NoteBlockModel,
 } from '@blocksuite/affine-model';
 import {
-  type GfxContainerElement,
+  type GfxGroupCompatibleInterface,
   type GfxModel,
-  isGfxContainerElm,
+  isGfxGroupCompatibleModel,
 } from '@blocksuite/block-std/gfx';
 import { Bound, clamp } from '@blocksuite/global/utils';
 
 import { LayoutableMindmapElementModel } from './mindmap/utils.js';
 
 function updatChildElementsXYWH(
-  container: GfxContainerElement,
+  container: GfxGroupCompatibleInterface,
   targetBound: Bound,
   updateElement: (id: string, props: Record<string, unknown>) => void,
   updateBlock: (
@@ -71,7 +71,7 @@ export function updateXYWH(
       updateXYWH(rootEle, rootBound, updateElement, updateBlock);
     }
     ele.layout();
-  } else if (isGfxContainerElm(ele)) {
+  } else if (isGfxGroupCompatibleModel(ele)) {
     updatChildElementsXYWH(ele, bound, updateElement, updateBlock);
     updateElement(ele.id, {
       xywh: bound.serialize(),

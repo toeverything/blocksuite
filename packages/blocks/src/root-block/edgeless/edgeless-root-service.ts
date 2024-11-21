@@ -26,7 +26,7 @@ import { clamp } from '@blocksuite/affine-shared/utils';
 import {
   GfxControllerIdentifier,
   GfxExtensionIdentifier,
-  isGfxContainerElm,
+  isGfxGroupCompatibleModel,
 } from '@blocksuite/block-std/gfx';
 import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 import { Bound, getCommonBound } from '@blocksuite/global/utils';
@@ -419,7 +419,7 @@ export class EdgelessRootService extends RootService implements SurfaceContext {
     id = typeof id === 'string' ? id : id.id;
 
     const el = this.getElementById(id);
-    if (isGfxContainerElm(el)) {
+    if (isGfxGroupCompatibleModel(el)) {
       el.childIds.forEach(childId => {
         this.removeElement(childId);
       });

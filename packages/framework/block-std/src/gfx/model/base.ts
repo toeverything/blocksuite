@@ -8,6 +8,7 @@ import type {
 } from '@blocksuite/global/utils';
 
 import type { EditorHost } from '../../view/element/lit-host.js';
+import type { GfxGroupModel, GfxModel } from './model.js';
 
 /**
  * The methods that a graphic element should implement.
@@ -34,9 +35,58 @@ export interface GfxCompatibleInterface extends IBound, GfxElementGeometry {
   xywh: SerializedXYWH;
   index: string;
 
+  readonly group: GfxGroupCompatibleInterface | null;
+
+  readonly groups: GfxGroupCompatibleInterface[];
+
   readonly deserializedXYWH: XYWH;
 
   readonly elementBound: Bound;
+}
+
+/**
+ * The symbol to mark a model as a container.
+ */
+export const gfxGroupCompatibleSymbol = Symbol('GfxGroupCompatible');
+
+/**
+ * Check if the element is a container element.
+ */
+export const isGfxGroupCompatibleModel = (
+  elm: unknown
+): elm is GfxGroupModel => {
+  if (typeof elm !== 'object' || elm === null) return false;
+  return (
+    gfxGroupCompatibleSymbol in elm && elm[gfxGroupCompatibleSymbol] === true
+  );
+};
+
+/**
+ * GfxGroupCompatibleElement is a model that can contain other models.
+ * It just like a group that in common graphic software.
+ */
+export interface GfxGroupCompatibleInterface extends GfxCompatibleInterface {
+  [gfxGroupCompatibleSymbol]: true;
+
+  /**
+   * All child ids of this container.
+   */
+  childIds: string[];
+
+  /**
+   * All child element models of this container.
+   * Note that the `childElements` may not contains all the children in `childIds`,
+   * because some children may not be loaded.
+   */
+  childElements: GfxModel[];
+
+  descendantElements: GfxModel[];
+
+  addChild(element: GfxModel): void;
+  removeChild(element: GfxModel): void;
+  hasChild(element: GfxModel): boolean;
+
+  hasDescendant(element: GfxModel): boolean;
 }
 
 /**
