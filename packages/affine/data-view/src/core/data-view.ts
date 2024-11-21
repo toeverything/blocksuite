@@ -169,9 +169,8 @@ export class DataViewRenderer extends SignalWatcher(
       },
     };
     const renderer = viewData.view.meta.renderer;
-    const view = IS_MOBILE
-      ? renderer.mobileView
-      : (renderer.view ?? renderer.view);
+    const view =
+      (IS_MOBILE ? renderer.mobileView : renderer.view) ?? renderer.view;
     return keyed(
       viewData.view.id,
       renderUniLit(
