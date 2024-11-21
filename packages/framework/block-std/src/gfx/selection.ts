@@ -9,10 +9,10 @@ import {
 
 import type { CursorSelection, SurfaceSelection } from '../selection/index.js';
 import type { GfxController } from './controller.js';
-import type { GfxModel } from './gfx-block-model.js';
+import type { GfxModel } from './model/model.js';
 
 import { GfxExtension, GfxExtensionIdentifier } from './extension.js';
-import { GfxGroupLikeElementModel } from './surface/element-model.js';
+import { GfxGroupLikeElementModel } from './model/surface/element-model.js';
 
 export interface SurfaceSelectionState {
   /**

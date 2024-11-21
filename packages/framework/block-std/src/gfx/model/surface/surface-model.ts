@@ -1,19 +1,17 @@
 import type { Boxed, Y } from '@blocksuite/store';
 
-import { type Constructor, Slot } from '@blocksuite/global/utils';
+import { assertType, type Constructor, Slot } from '@blocksuite/global/utils';
 import { BlockModel, DocCollection, nanoid } from '@blocksuite/store';
 
-import type { GfxModel } from '../gfx-block-model.js';
+import type { GfxGroupModel, GfxModel } from '../model.js';
 
-import { TreeManager } from '../tree.js';
 import {
-  type GfxContainerElement,
-  isGfxContainerElm,
-} from './container-element.js';
+  type GfxGroupCompatibleInterface,
+  isGfxGroupCompatibleModel,
+} from '../base.js';
 import { createDecoratorState } from './decorators/common.js';
 import { initializeObservers, initializeWatchers } from './decorators/index.js';
 import {
-  type BaseElementProps,
   GfxGroupLikeElementModel,
   GfxPrimitiveElementModel,
   syncElementFromY,
@@ -41,8 +39,6 @@ export type MiddlewareCtx = {
 export type SurfaceMiddleware = (ctx: MiddlewareCtx) => void;
 
 export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
-  private _tree = new TreeManager(this);
-
   protected _decoratorState = createDecoratorState();
 
   protected _elementCtorMap: Record<
@@ -63,6 +59,8 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
   >();
 
   protected _elementTypeMap = new Map<string, GfxPrimitiveElementModel[]>();
+
+  protected _groupLikeModels = new Map<string, GfxGroupModel>();
 
   protected _middlewares: SurfaceMiddleware[] = [];
 
@@ -218,6 +216,10 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
       }
 
       this._elementTypeMap.set(type, sameTypeElements);
+
+      if (isGfxGroupCompatibleModel(model)) {
+        this._groupLikeModels.set(model.id, model);
+      }
     };
     const removeFromType = (type: string, model: GfxPrimitiveElementModel) => {
       const sameTypeElements = this._elementTypeMap.get(type) || [];
@@ -225,6 +227,10 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
 
       if (index !== -1) {
         sameTypeElements.splice(index, 1);
+      }
+
+      if (this._groupLikeModels.has(model.id)) {
+        this._groupLikeModels.delete(model.id);
       }
     };
     const onElementsMapChange = (
@@ -310,16 +316,41 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
       addToType(model.type, model);
       mount();
     });
+
+    Object.values(this.doc.blocks.peek()).forEach(block => {
+      if (isGfxGroupCompatibleModel(block.model)) {
+        this._groupLikeModels.set(block.id, block.model);
+      }
+    });
+
     elementsYMap.observe(onElementsMapChange);
+
+    const disposable = this.doc.slots.blockUpdated.on(payload => {
+      switch (payload.type) {
+        case 'add':
+          if (isGfxGroupCompatibleModel(payload.model)) {
+            this._groupLikeModels.set(payload.id, payload.model);
+          }
+          break;
+        case 'delete':
+          if (isGfxGroupCompatibleModel(payload.model)) {
+            this._groupLikeModels.delete(payload.id);
+          }
+          {
+            const group = this.getGroup(payload.id);
+            if (group) {
+              // eslint-disable-next-line unicorn/prefer-dom-node-remove
+              group.removeChild(payload.model as GfxModel);
+            }
+          }
+          break;
+      }
+    });
 
     this.deleted.on(() => {
       elementsYMap.unobserve(onElementsMapChange);
+      disposable.dispose();
     });
-  }
-
-  private _initTreeWatcher() {
-    const disposable = this._tree.watch();
-    this.deleted.on(() => disposable.dispose());
   }
 
   private _propsToY(type: string, props: Record<string, unknown>) {
@@ -367,7 +398,6 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
 
   protected _init() {
     this._initElementModels();
-    this._initTreeWatcher();
     this._watchGroupRelationChange();
   }
 
@@ -423,6 +453,7 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
 
     this.doc.transact(() => {
       const element = this.getElementById(id)!;
+      const group = this.getGroup(id);
 
       if (element instanceof GfxGroupLikeElementModel) {
         element.childIds.forEach(childId => {
@@ -433,6 +464,9 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
           }
         });
       }
+
+      // eslint-disable-next-line unicorn/prefer-dom-node-remove
+      group?.removeChild(element as GfxModel);
 
       this.elements.getValue()!.delete(id);
     });
@@ -449,10 +483,6 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
     this._elementModels.clear();
   }
 
-  getContainer(elementId: string) {
-    return this._tree.getContainer(elementId);
-  }
-
   getElementById(id: string): GfxPrimitiveElementModel | null {
     return this._elementModels.get(id)?.model ?? null;
   }
@@ -461,18 +491,28 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
     return this._elementTypeMap.get(type) || [];
   }
 
-  getGroup<
-    T extends
-      GfxGroupLikeElementModel<BaseElementProps> = GfxGroupLikeElementModel<BaseElementProps>,
-  >(id: string): T | null {
-    const container = this.getContainer(id);
-    return container instanceof GfxGroupLikeElementModel
-      ? (container as T)
-      : null;
+  getGroup(elem: string | GfxModel): GfxGroupModel | null {
+    elem =
+      typeof elem === 'string'
+        ? ((this.getElementById(elem) ??
+            this.doc.getBlock(elem)?.model) as GfxModel)
+        : elem;
+
+    if (!elem) return null;
+
+    assertType<GfxModel>(elem);
+
+    for (const group of this._groupLikeModels.values()) {
+      if (group.hasChild(elem)) {
+        return group;
+      }
+    }
+
+    return null;
   }
 
-  getGroups(id: string): GfxGroupLikeElementModel<BaseElementProps>[] {
-    const groups: GfxGroupLikeElementModel<BaseElementProps>[] = [];
+  getGroups(id: string): GfxGroupModel[] {
+    const groups: GfxGroupModel[] = [];
     let group = this.getGroup(id);
 
     while (group) {
@@ -487,26 +527,20 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
     return this._elementModels.has(id);
   }
 
-  isContainer(element: GfxModel): element is GfxModel & GfxContainerElement;
-  isContainer(id: string): boolean;
-  isContainer(element: string | GfxModel): boolean {
+  isGroup(element: GfxModel): element is GfxModel & GfxGroupCompatibleInterface;
+  isGroup(id: string): boolean;
+  isGroup(element: string | GfxModel): boolean {
     if (typeof element === 'string') {
       const el = this.getElementById(element);
-      if (el) return isGfxContainerElm(el);
+      if (el) return isGfxGroupCompatibleModel(el);
 
       const blockModel = this.doc.getBlock(element)?.model;
-      if (blockModel) return isGfxContainerElm(blockModel);
+      if (blockModel) return isGfxGroupCompatibleModel(blockModel);
 
       return false;
     } else {
-      return isGfxContainerElm(element);
+      return isGfxGroupCompatibleModel(element);
     }
-  }
-
-  isInMindmap(id: string) {
-    const group = this.getGroup(id);
-
-    return group?.type === 'mindmap';
   }
 
   updateElement<T extends object = Record<string, unknown>>(

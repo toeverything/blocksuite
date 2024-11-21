@@ -99,6 +99,10 @@ export class AffineMobileLinkedDocMenu extends SignalWatcher(
   };
 
   private readonly _updateLinkedDocGroup = async () => {
+    if (this._updateLinkedDocGroupAbortController) {
+      this._updateLinkedDocGroupAbortController.abort();
+    }
+    this._updateLinkedDocGroupAbortController = new AbortController();
     this._linkedDocGroup$.value = await this.context.config.getMenus(
       this._query ?? '',
       () => {
@@ -110,9 +114,12 @@ export class AffineMobileLinkedDocMenu extends SignalWatcher(
         );
       },
       this.context.std.host,
-      this.context.inlineEditor
+      this.context.inlineEditor,
+      this._updateLinkedDocGroupAbortController.signal
     );
   };
+
+  private _updateLinkedDocGroupAbortController: AbortController | null = null;
 
   private get _query() {
     return getQuery(this.context.inlineEditor, this.context.startRange);
@@ -205,24 +212,27 @@ export class AffineMobileLinkedDocMenu extends SignalWatcher(
   }
 
   override render() {
-    if (this._linkedDocGroup$.value.length !== 2) {
+    // todo: get rid of hard coded config
+    if (this._linkedDocGroup$.value.length === 0) {
       return nothing;
     }
 
     let group = this._linkedDocGroup$.value[0];
-    let { items } = group;
 
-    if (group.items.length === 0) {
+    let items = Array.isArray(group.items) ? group.items : group.items.value;
+
+    if (items.length === 0) {
       group = this._linkedDocGroup$.value[1];
-      items = group.items.filter(item => item.name !== 'Import');
+      items = (
+        Array.isArray(group.items) ? group.items : group.items.value
+      ).filter(item => item.name !== 'Import');
     }
 
-    const isOverflow =
-      !!group.maxDisplay && group.items.length > group.maxDisplay;
+    const isOverflow = !!group.maxDisplay && items.length > group.maxDisplay;
 
     let moreItem = null;
     if (!this._expand$.value && isOverflow) {
-      items = group.items.slice(0, group.maxDisplay);
+      items = items.slice(0, group.maxDisplay);
 
       moreItem = html`<div
         class="mobile-linked-doc-menu-item"

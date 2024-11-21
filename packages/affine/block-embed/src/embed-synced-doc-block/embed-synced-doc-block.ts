@@ -52,7 +52,7 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockComponent<EmbedSynce
 
   private _initEdgelessFitEffect = () => {
     const fitToContent = () => {
-      if (this.syncedDocMode !== 'edgeless') return;
+      if (this.isPageMode) return;
 
       const controller = this.syncedDocEditorHost?.std.getOptional(
         GfxControllerIdentifier

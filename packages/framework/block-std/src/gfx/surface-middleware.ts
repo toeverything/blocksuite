@@ -2,7 +2,7 @@ import { type Container, createIdentifier } from '@blocksuite/global/di';
 import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 
 import type { BlockStdScope } from '../scope/block-std-scope.js';
-import type { SurfaceMiddleware } from './surface/surface-model.js';
+import type { SurfaceMiddleware } from './model/surface/surface-model.js';
 
 import { Extension } from '../extension/extension.js';
 import { LifeCycleWatcher } from '../extension/lifecycle-watcher.js';

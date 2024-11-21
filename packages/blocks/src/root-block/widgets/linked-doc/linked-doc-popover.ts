@@ -4,7 +4,11 @@ import {
   getViewportElement,
 } from '@blocksuite/affine-shared/utils';
 import { PropTypes, requiredProperties } from '@blocksuite/block-std';
-import { throttle, WithDisposable } from '@blocksuite/global/utils';
+import {
+  SignalWatcher,
+  throttle,
+  WithDisposable,
+} from '@blocksuite/global/utils';
 import { html, LitElement, nothing } from 'lit';
 import { property, query, queryAll, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -23,7 +27,9 @@ import { linkedDocPopoverStyles } from './styles.js';
 @requiredProperties({
   context: PropTypes.object,
 })
-export class LinkedDocPopover extends WithDisposable(LitElement) {
+export class LinkedDocPopover extends SignalWatcher(
+  WithDisposable(LitElement)
+) {
   static override styles = linkedDocPopoverStyles;
 
   private _abort = () => {
@@ -41,6 +47,10 @@ export class LinkedDocPopover extends WithDisposable(LitElement) {
 
   private _updateLinkedDocGroup = async () => {
     const query = this._query;
+    if (this._updateLinkedDocGroupAbortController) {
+      this._updateLinkedDocGroupAbortController.abort();
+    }
+    this._updateLinkedDocGroupAbortController = new AbortController();
 
     if (query === null) {
       this.context.close();
@@ -50,9 +60,12 @@ export class LinkedDocPopover extends WithDisposable(LitElement) {
       query,
       this._abort,
       this.context.std.host,
-      this.context.inlineEditor
+      this.context.inlineEditor,
+      this._updateLinkedDocGroupAbortController.signal
     );
   };
+
+  private _updateLinkedDocGroupAbortController: AbortController | null = null;
 
   private get _actionGroup() {
     return this._linkedDocGroup.map(group => {
@@ -77,13 +90,13 @@ export class LinkedDocPopover extends WithDisposable(LitElement) {
 
   private _getActionItems(group: LinkedMenuGroup) {
     const isExpanded = !!this._expanded.get(group.name);
+    const items = Array.isArray(group.items) ? group.items : group.items.value;
     if (isExpanded) {
-      return group.items;
+      return items;
     }
-    const isOverflow =
-      !!group.maxDisplay && group.items.length > group.maxDisplay;
+    const isOverflow = !!group.maxDisplay && items.length > group.maxDisplay;
     if (isOverflow) {
-      return group.items.slice(0, group.maxDisplay).concat({
+      return items.slice(0, group.maxDisplay).concat({
         key: `${group.name} More`,
         name: group.overflowText || 'more',
         icon: MoreHorizontalIcon,
@@ -93,7 +106,7 @@ export class LinkedDocPopover extends WithDisposable(LitElement) {
         },
       });
     }
-    return group.items;
+    return items;
   }
 
   private _isTextOverflowing(element: HTMLElement) {

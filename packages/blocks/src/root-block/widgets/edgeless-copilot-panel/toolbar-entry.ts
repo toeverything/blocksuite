@@ -1,7 +1,7 @@
 import type { EditorHost } from '@blocksuite/block-std';
 
 import { AIStarIcon } from '@blocksuite/affine-components/icons';
-import { isGfxContainerElm } from '@blocksuite/block-std/gfx';
+import { isGfxGroupCompatibleModel } from '@blocksuite/block-std/gfx';
 import { WithDisposable } from '@blocksuite/global/utils';
 import { css, html, LitElement } from 'lit';
 import { property } from 'lit/decorators.js';
@@ -35,7 +35,7 @@ export class EdgelessCopilotToolbarEntry extends WithDisposable(LitElement) {
 
       toBeSelected.add(element);
 
-      if (isGfxContainerElm(element)) {
+      if (isGfxGroupCompatibleModel(element)) {
         element.descendantElements.forEach(descendant => {
           toBeSelected.add(descendant);
         });

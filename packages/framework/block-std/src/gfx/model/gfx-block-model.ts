@@ -1,6 +1,5 @@
 import type {
   Constructor,
-  IBound,
   IVec,
   SerializedXYWH,
   XYWH,
@@ -20,22 +19,29 @@ import {
 } from '@blocksuite/global/utils';
 import { BlockModel } from '@blocksuite/store';
 
-import type { EditorHost } from '../view/index.js';
-import type { GfxContainerElement } from './surface/container-element.js';
-import type {
-  GfxCompatibleProps,
-  GfxElementGeometry,
-  GfxGroupLikeElementModel,
-  GfxPrimitiveElementModel,
-  PointTestOptions,
-} from './surface/element-model.js';
+import type { EditorHost } from '../../view/index.js';
+import type { GfxCompatibleInterface, PointTestOptions } from './base.js';
+import type { GfxGroupModel } from './model.js';
 import type { SurfaceBlockModel } from './surface/surface-model.js';
 
+/**
+ * The props that a graphics block model should have.
+ */
+export type GfxCompatibleProps = {
+  xywh: SerializedXYWH;
+  index: string;
+};
+
+/**
+ * The graphic block model that can be rendered in the graphics mode.
+ * All the graphic block model should extend this class.
+ * You can use `GfxCompatibleBlockModel` to convert a BlockModel to a subclass that extends it.
+ */
 export class GfxBlockElementModel<
     Props extends GfxCompatibleProps = GfxCompatibleProps,
   >
   extends BlockModel<Props>
-  implements GfxElementGeometry, IBound
+  implements GfxCompatibleInterface
 {
   private _cacheDeserKey: string | null = null;
 
@@ -46,10 +52,6 @@ export class GfxBlockElementModel<
   connectable = true;
 
   rotate = 0;
-
-  get container(): (GfxModel & GfxContainerElement) | null {
-    return this.surface?.getContainer(this.id) ?? null;
-  }
 
   get deserializedXYWH() {
     if (this._cacheDeserKey !== this.xywh || !this._cacheDeserXYWH) {
@@ -76,13 +78,13 @@ export class GfxBlockElementModel<
     this._externalXYWH = xywh;
   }
 
-  get group(): GfxGroupLikeElementModel | null {
+  get group(): GfxGroupModel | null {
     if (!this.surface) return null;
 
     return this.surface.getGroup(this.id) ?? null;
   }
 
-  get groups(): GfxGroupLikeElementModel[] {
+  get groups(): GfxGroupModel[] {
     if (!this.surface) return [];
 
     return this.surface.getGroups(this.id);
@@ -174,7 +176,12 @@ export class GfxBlockElementModel<
   }
 }
 
-export function GfxCompatible<
+/**
+ * Convert a BlockModel to a GfxBlockElementModel.
+ * @param BlockModelSuperClass The BlockModel class to be converted.
+ * @returns The returned class is a subclass of the GfxBlockElementModel class and the given BlockModelSuperClass.
+ */
+export function GfxCompatibleBlockModel<
   Props extends GfxCompatibleProps,
   T extends Constructor<BlockModel<Props>> = Constructor<BlockModel<Props>>,
 >(BlockModelSuperClass: T) {
@@ -205,5 +212,3 @@ export function GfxCompatible<
 
   return BlockModelSuperClass as unknown as typeof GfxBlockElementModel<Props>;
 }
-
-export type GfxModel = GfxBlockElementModel | GfxPrimitiveElementModel;

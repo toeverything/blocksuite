@@ -65,7 +65,6 @@ export const linkedDocPopoverStyles = css`
   .linked-doc-popover .group {
     display: flex;
     flex-direction: column;
-    row-gap: 4px;
   }
 
   ${scrollbarStyle('.linked-doc-popover .group')}

@@ -74,12 +74,8 @@ export function isEdgelessTextBlock(
   );
 }
 
-export function isFrameBlock(
-  element: BlockModel | BlockSuite.EdgelessModel | null
-): element is FrameBlockModel {
-  return (
-    !!element && 'flavour' in element && element.flavour === 'affine:frame'
-  );
+export function isFrameBlock(element: unknown): element is FrameBlockModel {
+  return !!element && (element as BlockModel).flavour === 'affine:frame';
 }
 
 export function isImageBlock(

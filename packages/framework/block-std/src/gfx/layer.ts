@@ -9,6 +9,8 @@ import {
 } from '@blocksuite/global/utils';
 import { generateKeyBetween } from 'fractional-indexing';
 
+import type { GfxModel } from './model/model.js';
+
 import {
   compare,
   getElementIndex,
@@ -20,13 +22,13 @@ import {
   ungroupIndex,
   updateLayersZIndex,
 } from '../utils/layer.js';
-import { GfxBlockElementModel, type GfxModel } from './gfx-block-model.js';
 import {
-  type GfxContainerElement,
-  isGfxContainerElm,
-} from './surface/container-element.js';
-import { GfxPrimitiveElementModel } from './surface/element-model.js';
-import { SurfaceBlockModel } from './surface/surface-model.js';
+  type GfxGroupCompatibleInterface,
+  isGfxGroupCompatibleModel,
+} from './model/base.js';
+import { GfxBlockElementModel } from './model/gfx-block-model.js';
+import { GfxPrimitiveElementModel } from './model/surface/element-model.js';
+import { SurfaceBlockModel } from './model/surface/surface-model.js';
 
 export type ReorderingDirection = 'front' | 'forward' | 'backward' | 'back';
 
@@ -506,7 +508,7 @@ export class LayerManager {
     const indexChanged = !props || 'index' in props;
     const childIdsChanged = props && 'childIds' in props;
     const shouldUpdateGroupChildren =
-      isGfxContainerElm(element) && (indexChanged || childIdsChanged);
+      isGfxGroupCompatibleModel(element) && (indexChanged || childIdsChanged);
     const updateArray = (array: GfxModel[], element: GfxModel) => {
       if (!indexChanged) return;
       removeFromOrderedArray(array, element);
@@ -535,7 +537,7 @@ export class LayerManager {
 
   add(element: GfxModel) {
     const modelType = this._getModelType(element);
-    const isContainer = isGfxContainerElm(element);
+    const isContainer = isGfxGroupCompatibleModel(element);
 
     if (isContainer) {
       element.childElements.forEach(child => {
@@ -615,7 +617,7 @@ export class LayerManager {
 
   delete(element: GfxModel) {
     let deleteType: 'canvas' | 'block' | undefined = undefined;
-    const isGroup = isGfxContainerElm(element);
+    const isGroup = isGfxGroupCompatibleModel(element);
 
     if (isGroup) {
       this._reset();
@@ -671,7 +673,7 @@ export class LayerManager {
   }
 
   getReorderedIndex(element: GfxModel, direction: ReorderingDirection): string {
-    const group = (element.group as GfxContainerElement) || null;
+    const group = (element.group as GfxGroupCompatibleInterface) || null;
 
     let elements: GfxModel[];
 

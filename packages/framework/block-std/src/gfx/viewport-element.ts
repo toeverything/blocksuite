@@ -2,7 +2,7 @@ import { WithDisposable } from '@blocksuite/global/utils';
 import { css, html } from 'lit';
 import { property } from 'lit/decorators.js';
 
-import type { GfxBlockElementModel } from './gfx-block-model.js';
+import type { GfxBlockElementModel } from './model/gfx-block-model.js';
 
 import { PropTypes, requiredProperties } from '../view/decorators/required.js';
 import { type EditorHost, ShadowlessElement } from '../view/index.js';

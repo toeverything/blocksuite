@@ -29,7 +29,7 @@ import {
   getTopElements,
   GfxExtensionIdentifier,
   type GfxPrimitiveElementModel,
-  isGfxContainerElm,
+  isGfxGroupCompatibleModel,
   type PointTestOptions,
 } from '@blocksuite/block-std/gfx';
 import {
@@ -908,7 +908,7 @@ export class DefaultTool extends BaseTool {
     const toBeMoved = new Set(elements);
 
     elements.forEach(element => {
-      if (isGfxContainerElm(element)) {
+      if (isGfxGroupCompatibleModel(element)) {
         element.descendantElements.forEach(ele => {
           toBeMoved.add(ele);
         });
