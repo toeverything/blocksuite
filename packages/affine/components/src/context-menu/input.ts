@@ -1,11 +1,14 @@
 import type { StyleInfo } from 'lit-html/directives/style-map.js';
 
 import { unsafeCSSVarV2 } from '@blocksuite/affine-shared/theme';
+import { IS_MOBILE } from '@blocksuite/global/env';
+import { cssVarV2 } from '@toeverything/theme/v2';
 import { css, html, type TemplateResult } from 'lit';
 import { property, query } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
+import type { Menu } from './menu.js';
 import type { MenuItemRender } from './types.js';
 
 import { MenuFocusable } from './focusable.js';
@@ -126,6 +129,83 @@ export class MenuInput extends MenuFocusable {
   accessor inputRef!: HTMLInputElement;
 }
 
+export class MobileMenuInput extends MenuFocusable {
+  static override styles = css`
+    .mobile-menu-input {
+      flex: 1;
+      outline: none;
+      font-size: 17px;
+      line-height: 22px;
+      border: none;
+      width: 100%;
+      color: ${unsafeCSSVarV2('text/primary')};
+    }
+  `;
+
+  private onCompositionEnd = () => {
+    this.data.onChange?.(this.inputRef.value);
+  };
+
+  private onInput = (e: InputEvent) => {
+    e.stopPropagation();
+    if (e.isComposing) return;
+    this.data.onChange?.(this.inputRef.value);
+  };
+
+  private stopPropagation = (e: Event) => {
+    e.stopPropagation();
+  };
+
+  complete() {
+    this.data.onComplete?.(this.inputRef.value);
+  }
+
+  override onPressEnter() {
+    this.inputRef.focus();
+  }
+
+  protected override render(): unknown {
+    const classString = classMap({
+      [this.data.class ?? '']: true,
+      'mobile-menu-input': true,
+      focused: this.isFocused$.value,
+    });
+
+    return html`<input
+      @focus="${() => {
+        this.menu.setFocusOnly(this);
+      }}"
+      @input="${this.onInput}"
+      @copy="${this.stopPropagation}"
+      @paste="${this.stopPropagation}"
+      @compositionend="${this.onCompositionEnd}"
+      class="${classString}"
+      value="${this.data.initialValue ?? ''}"
+      type="text"
+    />`;
+  }
+
+  @property({ attribute: false })
+  accessor data!: MenuInputData;
+
+  @query('input')
+  accessor inputRef!: HTMLInputElement;
+}
+
+const renderInput = (data: MenuInputData, menu: Menu) => {
+  if (IS_MOBILE) {
+    return html` <mobile-menu-input
+      style="flex:1"
+      .data="${data}"
+      .menu="${menu}"
+    ></mobile-menu-input>`;
+  }
+  return html` <affine-menu-input
+    style="flex:1"
+    .data="${data}"
+    .menu="${menu}"
+  ></affine-menu-input>`;
+};
 export const menuInputItems = {
   input:
     (config: {
@@ -152,19 +232,22 @@ export const menuInputItems = {
       const style = styleMap({
         display: 'flex',
         alignItems: 'center',
-        gap: '4px',
-        marginBottom: '8px',
+        ...(IS_MOBILE
+          ? {
+              borderRadius: '12px',
+              backgroundColor: cssVarV2('layer/background/primary'),
+              padding: '12px',
+              gap: '8px',
+            }
+          : {
+              marginBottom: '8px',
+              gap: '4px',
+            }),
         ...config.style,
       });
       return html`
         <div style="${style}">
-          ${config.prefix}
-          <affine-menu-input
-            style="flex:1"
-            .data="${data}"
-            .menu="${menu}"
-          ></affine-menu-input>
-          ${config.postfix}
+          ${config.prefix} ${renderInput(data, menu)} ${config.postfix}
         </div>
       `;
     },

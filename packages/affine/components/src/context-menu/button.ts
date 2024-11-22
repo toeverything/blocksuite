@@ -2,6 +2,7 @@ import type { ReadonlySignal } from '@preact/signals-core';
 import type { ClassInfo } from 'lit-html/directives/class-map.js';
 
 import { unsafeCSSVarV2 } from '@blocksuite/affine-shared/theme';
+import { IS_MOBILE } from '@blocksuite/global/env';
 import {
   CheckBoxCkeckSolidIcon,
   CheckBoxUnIcon,
@@ -12,6 +13,7 @@ import { property } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { keyed } from 'lit/directives/keyed.js';
 
+import type { Menu } from './menu.js';
 import type { MenuClass, MenuItemRender } from './types.js';
 
 import { MenuFocusable } from './focusable.js';
@@ -104,6 +106,77 @@ export class MenuButton extends MenuFocusable {
   accessor data!: MenuButtonData;
 }
 
+export class MobileMenuButton extends MenuFocusable {
+  static override styles = css`
+    .mobile-menu-button {
+      display: flex;
+      width: 100%;
+      cursor: pointer;
+      align-items: center;
+      font-size: 20px;
+      padding: 11px 8px;
+      gap: 8px;
+      border-radius: 4px;
+      color: var(--affine-icon-color);
+    }
+
+    .mobile-menu-button .affine-menu-action-text {
+      flex: 1;
+      color: var(--affine-text-primary-color);
+      font-size: 17px;
+      line-height: 22px;
+    }
+
+    .mobile-menu-button.delete-item {
+      color: var(--affine-error-color);
+    }
+
+    .mobile-menu-button.delete-item .mobile-menu-action-text {
+      color: var(--affine-error-color);
+    }
+  `;
+
+  override connectedCallback() {
+    super.connectedCallback();
+    this.disposables.addFromEvent(this, 'click', this.onClick);
+  }
+
+  onClick() {
+    if (this.data.select(this) !== false) {
+      this.menu.options.onComplete?.();
+      this.menu.close();
+    }
+  }
+
+  override onPressEnter() {
+    this.onClick();
+  }
+
+  protected override render(): unknown {
+    const classString = classMap({
+      'mobile-menu-button': true,
+      focused: this.isFocused$.value,
+      ...this.data.class,
+    });
+    return html` <div class="${classString}">${this.data.content()}</div>`;
+  }
+
+  @property({ attribute: false })
+  accessor data!: MenuButtonData;
+}
+
+const renderButton = (data: MenuButtonData, menu: Menu) => {
+  if (IS_MOBILE) {
+    return html`<mobile-menu-button
+      .data="${data}"
+      .menu="${menu}"
+    ></mobile-menu-button>`;
+  }
+  return html`<affine-menu-button
+    .data="${data}"
+    .menu="${menu}"
+  ></affine-menu-button>`;
+};
 export const menuButtonItems = {
   action:
     (config: {
@@ -138,10 +211,7 @@ export const menuButtonItems = {
           ...config.class,
         },
       };
-      return html` <affine-menu-button
-        .data="${data}"
-        .menu="${menu}"
-      ></affine-menu-button>`;
+      return renderButton(data, menu);
     },
   checkbox:
     (config: {
@@ -172,13 +242,7 @@ export const menuButtonItems = {
         },
         class: config.class ?? {},
       };
-      return html`${keyed(
-        config.name,
-        html` <affine-menu-button
-          .data="${data}"
-          .menu="${menu}"
-        ></affine-menu-button>`
-      )}`;
+      return html`${keyed(config.name, renderButton(data, menu))}`;
     },
   toggleSwitch:
     (config: {
@@ -214,12 +278,6 @@ export const menuButtonItems = {
         },
         class: config.class ?? {},
       };
-      return html`${keyed(
-        config.name,
-        html` <affine-menu-button
-          .data="${data}"
-          .menu="${menu}"
-        ></affine-menu-button>`
-      )}`;
+      return html`${keyed(config.name, renderButton(data, menu))}`;
     },
 } satisfies Record<string, MenuItemRender<never>>;

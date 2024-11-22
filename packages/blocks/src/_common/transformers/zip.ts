@@ -1,10 +1,4 @@
-import type {
-  CollectionInfoSnapshot,
-  Doc,
-  DocCollection,
-  DocSnapshot,
-  JobMiddleware,
-} from '@blocksuite/store';
+import type { Doc, DocCollection, DocSnapshot } from '@blocksuite/store';
 
 import { sha } from '@blocksuite/global/utils';
 import { extMimeMap, getAssetName, Job } from '@blocksuite/store';
@@ -48,8 +42,6 @@ async function importDocs(collection: DocCollection, imported: Blob) {
 
   const assetBlobs: [string, Blob][] = [];
   const snapshotsBlobs: Blob[] = [];
-  let infoBlob: Blob | undefined;
-  let info: CollectionInfoSnapshot | undefined;
 
   for (const { path, content: blob } of unzip) {
     if (path.includes('MACOSX') || path.includes('DS_Store')) {
@@ -62,7 +54,6 @@ async function importDocs(collection: DocCollection, imported: Blob) {
     }
 
     if (path === 'info.json') {
-      infoBlob = blob;
       continue;
     }
 
@@ -72,25 +63,9 @@ async function importDocs(collection: DocCollection, imported: Blob) {
     }
   }
 
-  {
-    const json = (await infoBlob?.text()) ?? '';
-    info = JSON.parse(json) as CollectionInfoSnapshot;
-  }
-
-  const migrationMiddleware: JobMiddleware = ({ slots, collection }) => {
-    slots.afterImport.on(payload => {
-      if (payload.type === 'page') {
-        collection.schema.upgradeDoc(
-          info?.pageVersion ?? 0,
-          {},
-          payload.page.spaceDoc
-        );
-      }
-    });
-  };
   const job = new Job({
     collection,
-    middlewares: [replaceIdMiddleware, migrationMiddleware, titleMiddleware],
+    middlewares: [replaceIdMiddleware, titleMiddleware],
   });
   const assetsMap = job.assets;
 

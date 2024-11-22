@@ -47,6 +47,10 @@ export class LinkedDocPopover extends SignalWatcher(
 
   private _updateLinkedDocGroup = async () => {
     const query = this._query;
+    if (this._updateLinkedDocGroupAbortController) {
+      this._updateLinkedDocGroupAbortController.abort();
+    }
+    this._updateLinkedDocGroupAbortController = new AbortController();
 
     if (query === null) {
       this.context.close();
@@ -56,9 +60,12 @@ export class LinkedDocPopover extends SignalWatcher(
       query,
       this._abort,
       this.context.std.host,
-      this.context.inlineEditor
+      this.context.inlineEditor,
+      this._updateLinkedDocGroupAbortController.signal
     );
   };
+
+  private _updateLinkedDocGroupAbortController: AbortController | null = null;
 
   private get _actionGroup() {
     return this._linkedDocGroup.map(group => {
@@ -110,7 +117,7 @@ export class LinkedDocPopover extends SignalWatcher(
     super.connectedCallback();
 
     // init
-    void this._updateLinkedDocGroup();
+    this._updateLinkedDocGroup().catch(console.error);
     this._disposables.addFromEvent(this, 'mousedown', e => {
       // Prevent input from losing focus
       e.preventDefault();
@@ -194,7 +201,7 @@ export class LinkedDocPopover extends SignalWatcher(
   }
 
   override render() {
-    const MAX_HEIGHT = 448;
+    const MAX_HEIGHT = 380;
     const style = this._position
       ? styleMap({
           transform: `translate(${this._position.x}, ${this._position.y})`,

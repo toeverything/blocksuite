@@ -114,7 +114,7 @@ export class EmbedEdgelessSyncedDocBlockComponent extends toEdgelessEmbedBlock(
   };
 
   override convertToCard = () => {
-    const { id, doc, pageId, caption, xywh } = this.model;
+    const { id, doc, caption, xywh } = this.model;
 
     const edgelessService = this.rootService;
     const style = 'vertical';
@@ -129,7 +129,12 @@ export class EmbedEdgelessSyncedDocBlockComponent extends toEdgelessEmbedBlock(
     // @ts-expect-error TODO: fix after edgeless refactor
     const newId = edgelessService.addBlock(
       'affine:embed-linked-doc',
-      { pageId, xywh: bound.serialize(), style, caption },
+      {
+        xywh: bound.serialize(),
+        style,
+        caption,
+        ...this.referenceInfo,
+      },
       // @ts-expect-error TODO: fix after edgeless refactor
       edgelessService.surface
     );

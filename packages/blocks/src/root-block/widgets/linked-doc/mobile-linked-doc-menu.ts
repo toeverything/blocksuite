@@ -99,6 +99,10 @@ export class AffineMobileLinkedDocMenu extends SignalWatcher(
   };
 
   private readonly _updateLinkedDocGroup = async () => {
+    if (this._updateLinkedDocGroupAbortController) {
+      this._updateLinkedDocGroupAbortController.abort();
+    }
+    this._updateLinkedDocGroupAbortController = new AbortController();
     this._linkedDocGroup$.value = await this.context.config.getMenus(
       this._query ?? '',
       () => {
@@ -110,9 +114,12 @@ export class AffineMobileLinkedDocMenu extends SignalWatcher(
         );
       },
       this.context.std.host,
-      this.context.inlineEditor
+      this.context.inlineEditor,
+      this._updateLinkedDocGroupAbortController.signal
     );
   };
+
+  private _updateLinkedDocGroupAbortController: AbortController | null = null;
 
   private get _query() {
     return getQuery(this.context.inlineEditor, this.context.startRange);

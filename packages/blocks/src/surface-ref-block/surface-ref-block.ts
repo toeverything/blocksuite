@@ -463,6 +463,7 @@ export class SurfaceRefBlockComponent extends BlockComponent<
 
       override mounted() {
         const edgelessService = this.std.get(EdgelessRootService);
+        const { _disposable } = this;
 
         const referenceElement = edgelessService.getElementById(referenceId);
         if (!referenceElement) {
@@ -473,20 +474,24 @@ export class SurfaceRefBlockComponent extends BlockComponent<
         }
 
         if (referenceElement instanceof FrameBlockModel) {
-          referenceElement.xywh$.subscribe(xywh => {
-            setReferenceXYWH(xywh);
-            refreshViewport();
-          });
-        } else if (referenceElement instanceof GroupElementModel) {
-          edgelessService.surface.elementUpdated.on(({ id, oldValues }) => {
-            if (
-              id === referenceId &&
-              oldValues.xywh !== referenceElement.xywh
-            ) {
-              setReferenceXYWH(referenceElement.xywh);
+          _disposable.add(
+            referenceElement.xywh$.subscribe(xywh => {
+              setReferenceXYWH(xywh);
               refreshViewport();
-            }
-          });
+            })
+          );
+        } else if (referenceElement instanceof GroupElementModel) {
+          _disposable.add(
+            edgelessService.surface.elementUpdated.on(({ id, oldValues }) => {
+              if (
+                id === referenceId &&
+                oldValues.xywh !== referenceElement.xywh
+              ) {
+                setReferenceXYWH(referenceElement.xywh);
+                refreshViewport();
+              }
+            })
+          );
         } else {
           console.warn('Unsupported reference element type');
         }

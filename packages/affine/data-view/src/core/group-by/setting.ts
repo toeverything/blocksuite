@@ -184,25 +184,27 @@ export const selectGroupByProperty = (
       onBack: ops?.onBack,
     },
     items: [
-      ...view.propertiesWithoutFilter$.value
-        .filter(id => {
-          if (view.propertyGet(id).type$.value === 'title') {
-            return false;
-          }
-          return !!groupByMatcher.match(view.propertyGet(id).dataType$.value);
-        })
-        .map<MenuConfig>(id => {
-          const property = view.propertyGet(id);
-          return menu.action({
-            name: property.name$.value,
-            isSelected: group.property$.value?.id === id,
-            prefix: html` <uni-lit .uni="${property.icon}"></uni-lit>`,
-            select: () => {
-              group.changeGroup(id);
-              ops?.onSelect?.(id);
-            },
-          });
-        }),
+      menu.group({
+        items: view.propertiesWithoutFilter$.value
+          .filter(id => {
+            if (view.propertyGet(id).type$.value === 'title') {
+              return false;
+            }
+            return !!groupByMatcher.match(view.propertyGet(id).dataType$.value);
+          })
+          .map<MenuConfig>(id => {
+            const property = view.propertyGet(id);
+            return menu.action({
+              name: property.name$.value,
+              isSelected: group.property$.value?.id === id,
+              prefix: html` <uni-lit .uni="${property.icon}"></uni-lit>`,
+              select: () => {
+                group.changeGroup(id);
+                ops?.onSelect?.(id);
+              },
+            });
+          }),
+      }),
       menu.group({
         items: [
           menu.action({
