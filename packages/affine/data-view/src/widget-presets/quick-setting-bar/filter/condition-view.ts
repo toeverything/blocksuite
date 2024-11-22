@@ -102,20 +102,28 @@ export class FilterConditionView extends SignalWatcher(ShadowlessElement) {
     const handler = popMenu(target, {
       options: {
         items: [
-          menu.action({
-            name: fn.label,
-            postfix: ArrowRightSmallIcon(),
-            select: ele => {
-              popMenu(popupTargetFromElement(ele), {
-                options: {
-                  items: this.getFunctionItems(target, () => {
-                    handler.close();
-                  }),
+          menu.group({
+            items: [
+              menu.action({
+                name: fn.label,
+                postfix: ArrowRightSmallIcon(),
+                select: ele => {
+                  popMenu(popupTargetFromElement(ele), {
+                    options: {
+                      items: [
+                        menu.group({
+                          items: this.getFunctionItems(target, () => {
+                            handler.close();
+                          }),
+                        }),
+                      ],
+                    },
+                    middleware: subMenuMiddleware,
+                  });
+                  return false;
                 },
-                middleware: subMenuMiddleware,
-              });
-              return false;
-            },
+              }),
+            ],
           }),
           menu.dynamic(() => this.getArgsItems()),
           menu.group({

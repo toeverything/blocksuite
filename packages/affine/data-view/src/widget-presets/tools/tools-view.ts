@@ -24,6 +24,10 @@ const styles = css`
     visibility: visible;
     opacity: 1;
   }
+  .toolbar-hover-container:has(.active) .affine-database-toolbar {
+    visibility: visible;
+    opacity: 1;
+  }
 
   .show-toolbar {
     visibility: visible;
@@ -42,7 +46,7 @@ export class DataViewHeaderTools extends WidgetBase {
 
   override render() {
     const classList = classMap({
-      'show-toolbar': this.showToolBar || IS_MOBILE,
+      'show-toolbar': IS_MOBILE,
       'affine-database-toolbar': true,
     });
     const tools = this.toolsMap[this.view.type];
