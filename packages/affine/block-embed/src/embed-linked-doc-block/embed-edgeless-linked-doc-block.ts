@@ -11,7 +11,7 @@ export class EmbedEdgelessLinkedDocBlockComponent extends toEdgelessEmbedBlock(
   EmbedLinkedDocBlockComponent
 ) {
   override convertToEmbed = () => {
-    const { id, doc, pageId, caption, xywh } = this.model;
+    const { id, doc, caption, xywh } = this.model;
 
     // synced doc entry controlled by awareness flag
     const isSyncedDocEnabled = doc.awarenessStore.getFlag(
@@ -35,7 +35,7 @@ export class EmbedEdgelessLinkedDocBlockComponent extends toEdgelessEmbedBlock(
     // @ts-expect-error TODO: fix after edgeless refactor
     const newId = edgelessService.addBlock(
       'affine:embed-synced-doc',
-      { pageId, xywh: bound.serialize(), caption },
+      { xywh: bound.serialize(), caption, ...this.referenceInfo },
       // @ts-expect-error TODO: fix after edgeless refactor
       edgelessService.surface
     );
