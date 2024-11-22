@@ -134,18 +134,6 @@ export class DataViewHeaderToolsSearch extends WidgetBase<
 
   preventBlur = false;
 
-  get showSearch(): boolean {
-    return this._showSearch;
-  }
-
-  set showSearch(value: boolean) {
-    this._showSearch = value;
-    const tools = this.closest('data-view-header-tools');
-    if (tools) {
-      tools.showToolBar = value;
-    }
-  }
-
   override connectedCallback() {
     super.connectedCallback();
     this.style.display = IS_MOBILE ? 'none' : 'flex';
@@ -155,6 +143,7 @@ export class DataViewHeaderToolsSearch extends WidgetBase<
     const searchToolClassMap = classMap({
       'affine-database-search-container': true,
       'search-container-expand': this.showSearch,
+      active: this.showSearch,
     });
     return html`
       <label class="${searchToolClassMap}" @click="${this._clickSearch}">
@@ -193,7 +182,7 @@ export class DataViewHeaderToolsSearch extends WidgetBase<
   private accessor _searchInput!: HTMLInputElement;
 
   @state()
-  private accessor _showSearch = false;
+  private accessor showSearch = false;
 }
 
 declare global {

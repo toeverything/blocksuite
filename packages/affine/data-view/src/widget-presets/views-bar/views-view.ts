@@ -67,7 +67,7 @@ export class DataViewHeaderViews extends WidgetBase {
       height: 16px;
     }
 
-    .database-view-button.active {
+    .database-view-button.selected {
       color: var(--affine-text-primary-color);
       background-color: var(--affine-hover-color-filled);
     }
@@ -248,7 +248,7 @@ export class DataViewHeaderViews extends WidgetBase {
       const classList = classMap({
         'database-view-button': true,
         'dv-hover': true,
-        active: this.viewManager.currentViewId$.value === id,
+        selected: this.viewManager.currentViewId$.value === id,
       });
       const view = this.viewManager.viewDataGet(id);
       return html`

@@ -63,7 +63,6 @@ export class DataViewHeaderToolsFilter extends WidgetBase {
       this.toggleShowFilter();
       return;
     }
-    this.showToolBar(true);
     popCreateFilter(
       popupTargetFromElement(event.currentTarget as HTMLElement),
       {
@@ -74,9 +73,6 @@ export class DataViewHeaderToolsFilter extends WidgetBase {
             conditions: [filter],
           };
           this.toggleShowFilter(true);
-        },
-        onClose: () => {
-          this.showToolBar(false);
         },
       }
     );
@@ -102,13 +98,6 @@ export class DataViewHeaderToolsFilter extends WidgetBase {
     >
       ${FilterIcon()}
     </div>`;
-  }
-
-  showToolBar(show: boolean) {
-    const tools = this.closest('data-view-header-tools');
-    if (tools) {
-      tools.showToolBar = show;
-    }
   }
 
   toggleShowFilter(show?: boolean) {

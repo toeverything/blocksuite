@@ -73,10 +73,7 @@ export class DataViewHeaderToolsViewOptions extends WidgetBase {
   };
 
   openMoreAction = (target: PopupTarget) => {
-    this.showToolBar(true);
-    popViewOptions(target, this.dataViewInstance, () => {
-      this.showToolBar(false);
-    });
+    popViewOptions(target, this.dataViewInstance);
   };
 
   override render() {
@@ -89,13 +86,6 @@ export class DataViewHeaderToolsViewOptions extends WidgetBase {
     >
       ${MoreHorizontalIcon()}
     </div>`;
-  }
-
-  showToolBar(show: boolean) {
-    const tools = this.closest('data-view-header-tools');
-    if (tools) {
-      tools.showToolBar = show;
-    }
   }
 }
 

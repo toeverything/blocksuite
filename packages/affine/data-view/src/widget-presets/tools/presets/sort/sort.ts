@@ -62,7 +62,6 @@ export class DataViewHeaderToolsSort extends WidgetBase {
       this.toggleShowQuickSettingBar();
       return;
     }
-    this.showToolBar(true);
     popCreateSort(popupTargetFromElement(event.currentTarget as HTMLElement), {
       sortUtils: {
         ...sortUtils,
@@ -80,9 +79,6 @@ export class DataViewHeaderToolsSort extends WidgetBase {
             }
           });
         },
-      },
-      onClose: () => {
-        this.showToolBar(false);
       },
     });
     return;
@@ -107,13 +103,6 @@ export class DataViewHeaderToolsSort extends WidgetBase {
     >
       ${SortIcon()}
     </div>`;
-  }
-
-  showToolBar(show: boolean) {
-    const tools = this.closest('data-view-header-tools');
-    if (tools) {
-      tools.showToolBar = show;
-    }
   }
 
   toggleShowQuickSettingBar(show?: boolean) {
