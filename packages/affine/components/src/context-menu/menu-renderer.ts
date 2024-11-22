@@ -397,10 +397,12 @@ export const createModal = (container: HTMLElement = document.body) => {
 export type PopupTarget = {
   targetRect: ReferenceElement;
   root: HTMLElement;
-  button: HTMLElement;
+  popupStart: () => () => void;
 };
 export const popupTargetFromElement = (element: HTMLElement): PopupTarget => {
   let rect = element.getBoundingClientRect();
+  let count = 0;
+  let isActive = false;
   return {
     targetRect: {
       getBoundingClientRect: () => {
@@ -411,7 +413,23 @@ export const popupTargetFromElement = (element: HTMLElement): PopupTarget => {
       },
     },
     root: getDefaultModalRoot(element),
-    button: element,
+    popupStart: () => {
+      console.log(count);
+      if (!count) {
+        isActive = element.classList.contains('active');
+        if (!isActive) {
+          element.classList.add('active');
+        }
+      }
+      count++;
+      return () => {
+        count--;
+        console.log(count);
+        if (!count && !isActive) {
+          element.classList.remove('active');
+        }
+      };
+    },
   };
 };
 export const createPopup = (
@@ -505,16 +523,10 @@ export const popMenu = (
   if (IS_MOBILE) {
     return popMobileMenu(props.options);
   }
-  const classList = target.button.classList;
-  const hasActive = classList.contains('active');
-  if (!hasActive) {
-    classList.add('active');
-  }
+  const popupEnd = target.popupStart();
   const onClose = () => {
     props.options.onClose?.();
-    if (!hasActive) {
-      classList.remove('active');
-    }
+    popupEnd();
   };
   const menu = new Menu({
     ...props.options,

@@ -82,18 +82,20 @@ export const allLiteralConfig: LiteralItemsConfig[] = [
     type: t.array.instance(t.tag.instance()),
     getItems: (type, value, onChange) => {
       const set = new Set(value.value);
-      return (
-        type.element.data?.map(tag => {
-          const selected = set.has(tag.id);
-          const prefix = selected
-            ? CheckBoxCkeckSolidIcon({ style: `color:#1E96EB` })
-            : CheckBoxUnIcon();
-          return menu.action({
-            name: tag.value,
-            prefix,
-            label: () =>
-              html`<span
-                style="
+      return [
+        menu.group({
+          items:
+            type.element.data?.map(tag => {
+              const selected = set.has(tag.id);
+              const prefix = selected
+                ? CheckBoxCkeckSolidIcon({ style: `color:#1E96EB` })
+                : CheckBoxUnIcon();
+              return menu.action({
+                name: tag.value,
+                prefix,
+                label: () =>
+                  html`<span
+                    style="
              background-color: ${tag.color};
              padding:0 8px;
              border-radius:4px;
@@ -101,32 +103,35 @@ export const allLiteralConfig: LiteralItemsConfig[] = [
              line-height: 22px;
              border:1px solid ${unsafeCSSVarV2('layer/insideBorder/border')};
 "
-                >${tag.value}</span
-              >`,
-            select: () => {
-              if (selected) {
-                set.delete(tag.id);
-              } else {
-                set.add(tag.id);
-              }
-              onChange([...set]);
-              return false;
-            },
-          });
-        }) ?? []
-      );
+                    >${tag.value}</span
+                  >`,
+                select: () => {
+                  if (selected) {
+                    set.delete(tag.id);
+                  } else {
+                    set.add(tag.id);
+                  }
+                  onChange([...set]);
+                  return false;
+                },
+              });
+            }) ?? [],
+        }),
+      ];
     },
   }),
   createLiteral({
     type: t.tag.instance(),
     getItems: (type, value, onChange) => {
-      return (
-        type.data?.map(tag => {
-          return menu.action({
-            name: tag.value,
-            label: () =>
-              html`<span
-                style="
+      return [
+        menu.group({
+          items:
+            type.data?.map(tag => {
+              return menu.action({
+                name: tag.value,
+                label: () =>
+                  html`<span
+                    style="
              background-color: ${tag.color};
              padding:0 8px;
              border-radius:4px;
@@ -134,16 +139,17 @@ export const allLiteralConfig: LiteralItemsConfig[] = [
              line-height: 22px;
              border:1px solid ${unsafeCSSVarV2('layer/insideBorder/border')};
 "
-                >${tag.value}</span
-              >`,
-            isSelected: value.value === tag.id,
-            select: () => {
-              onChange(tag.id);
-              return false;
-            },
-          });
-        }) ?? []
-      );
+                    >${tag.value}</span
+                  >`,
+                isSelected: value.value === tag.id,
+                select: () => {
+                  onChange(tag.id);
+                  return false;
+                },
+              });
+            }) ?? [],
+        }),
+      ];
     },
   }),
 ];
