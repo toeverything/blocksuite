@@ -1,6 +1,6 @@
 {
   "name": "@blocksuite/affine-widget-scroll-anchoring",
-  "version": "0.17.33",
+  "version": "0.18.0",
   "description": "Affine scroll anchoring widget.",
   "type": "module",
   "repository": {
