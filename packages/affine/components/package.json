@@ -52,7 +52,8 @@
     "./context-menu": "./src/context-menu/index.ts",
     "./date-picker": "./src/date-picker/index.ts",
     "./drag-indicator": "./src/drag-indicator/index.ts",
-    "./virtual-keyboard": "./src/virtual-keyboard/index.ts"
+    "./virtual-keyboard": "./src/virtual-keyboard/index.ts",
+    "./toggle-button": "./src/toggle-button/index.ts"
   },
   "publishConfig": {
     "access": "public",
@@ -110,6 +111,10 @@
       "./virtual-keyboard": {
         "types": "./dist/virtual-keyboard/index.d.ts",
         "import": "./dist/virtual-keyboard/index.js"
+      },
+      "./toggle-button": {
+        "types": "./dist/toggle-button/index.d.ts",
+        "import": "./dist/toggle-button/index.js"
       }
     }
   },

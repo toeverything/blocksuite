@@ -3,11 +3,7 @@ import type { BaseSelection, BlockComponent } from '@blocksuite/block-std';
 import type { InlineRangeProvider } from '@blocksuite/inline';
 
 import { CaptionedBlockComponent } from '@blocksuite/affine-components/caption';
-import {
-  playCheckAnimation,
-  toggleDown,
-  toggleRight,
-} from '@blocksuite/affine-components/icons';
+import { playCheckAnimation } from '@blocksuite/affine-components/icons';
 import {
   DefaultInlineManagerExtension,
   type RichText,
@@ -23,6 +19,8 @@ import { getInlineRangeProvider } from '@blocksuite/block-std';
 import { effect } from '@preact/signals-core';
 import { html, nothing, type TemplateResult } from 'lit';
 import { query, state } from 'lit/decorators.js';
+import { classMap } from 'lit/directives/class-map.js';
+import { styleMap } from 'lit/directives/style-map.js';
 
 import type { ListBlockService } from './list-service.js';
 
@@ -42,7 +40,15 @@ export class ListBlockComponent extends CaptionedBlockComponent<
     e.stopPropagation();
 
     if (this.model.type === 'toggle') {
-      this._toggleChildren();
+      if (this.doc.readonly) {
+        this._readonlyCollapsed = !this._readonlyCollapsed;
+      } else {
+        this.doc.captureSync();
+        this.doc.updateBlock(this.model, {
+          collapsed: !this.model.collapsed,
+        });
+      }
+
       return;
     } else if (this.model.type === 'todo') {
       if (this.doc.readonly) return;
@@ -97,47 +103,12 @@ export class ListBlockComponent extends CaptionedBlockComponent<
     });
   }
 
-  private _toggleChildren() {
-    if (this.doc.readonly) {
-      this._isCollapsedWhenReadOnly = !this._isCollapsedWhenReadOnly;
-      return;
-    }
-    const newCollapsedState = !this.model.collapsed;
-    this._isCollapsedWhenReadOnly = newCollapsedState;
-    this.doc.captureSync();
-    this.doc.updateBlock(this.model, {
-      collapsed: newCollapsedState,
-    } as Partial<ListBlockModel>);
-  }
-
-  private _toggleTemplate(isCollapsed: boolean) {
-    const noChildren = this.model.children.length === 0;
-    if (noChildren) return nothing;
-
-    const toggleDownTemplate = html`<div
-      contenteditable="false"
-      class="toggle-icon"
-      @click=${this._toggleChildren}
-    >
-      ${toggleDown}
-    </div>`;
-
-    const toggleRightTemplate = html`<div
-      contenteditable="false"
-      class="toggle-icon toggle-icon__collapsed"
-      @click=${this._toggleChildren}
-    >
-      ${toggleRight}
-    </div>`;
-
-    return isCollapsed ? toggleRightTemplate : toggleDownTemplate;
-  }
-
   override connectedCallback() {
     super.connectedCallback();
 
+    this._readonlyCollapsed = this.model.collapsed;
+
     this._inlineRangeProvider = getInlineRangeProvider(this);
-    this._isCollapsedWhenReadOnly = this.model.collapsed;
 
     this.disposables.add(
       effect(() => {
@@ -164,28 +135,48 @@ export class ListBlockComponent extends CaptionedBlockComponent<
   override renderBlock(): TemplateResult<1> {
     const { model, _onClickIcon } = this;
     const collapsed = this.doc.readonly
-      ? this._isCollapsedWhenReadOnly
-      : !!model.collapsed;
+      ? this._readonlyCollapsed
+      : model.collapsed;
+
     const listIcon = getListIcon(model, !collapsed, _onClickIcon);
 
-    const checked =
-      this.model.type === 'todo' && this.model.checked
-        ? 'affine-list--checked'
-        : '';
-
     const children = html`<div
-      class="affine-block-children-container ${collapsed
-        ? 'affine-list__collapsed'
-        : ''}"
-      style="padding-left: ${BLOCK_CHILDREN_CONTAINER_PADDING_LEFT}px;"
+      class="affine-block-children-container"
+      style=${styleMap({
+        paddingLeft: `${BLOCK_CHILDREN_CONTAINER_PADDING_LEFT}px`,
+        display: collapsed ? 'none' : undefined,
+      })}
     >
       ${this.renderChildren(this.model)}
     </div>`;
 
     return html`
       <div class=${'affine-list-block-container'}>
-        <div class=${`affine-list-rich-text-wrapper ${checked}`}>
-          ${this._toggleTemplate(collapsed)} ${listIcon}
+        <div
+          class=${classMap({
+            'affine-list-rich-text-wrapper': true,
+            'affine-list--checked':
+              this.model.type === 'todo' && this.model.checked,
+          })}
+        >
+          ${this.model.children.length > 0
+            ? html`
+                <blocksuite-toggle-button
+                  .collapsed=${collapsed}
+                  .updateCollapsed=${(value: boolean) => {
+                    if (this.doc.readonly) {
+                      this._readonlyCollapsed = value;
+                    } else {
+                      this.doc.captureSync();
+                      this.doc.updateBlock(this.model, {
+                        collapsed: value,
+                      });
+                    }
+                  }}
+                ></blocksuite-toggle-button>
+              `
+            : nothing}
+          ${listIcon}
           <rich-text
             .yText=${this.model.text.yText}
             .inlineEventSource=${this.topContenteditableElement ?? nothing}
@@ -209,7 +200,7 @@ export class ListBlockComponent extends CaptionedBlockComponent<
   }
 
   @state()
-  private accessor _isCollapsedWhenReadOnly = false;
+  private accessor _readonlyCollapsed = false;
 
   @query('rich-text')
   private accessor _richTextElement: RichText | null = null;

@@ -11,6 +11,7 @@ import { effects as componentDatePickerEffects } from '@blocksuite/affine-compon
 import { effects as componentDragIndicatorEffects } from '@blocksuite/affine-components/drag-indicator';
 import { effects as componentPortalEffects } from '@blocksuite/affine-components/portal';
 import { effects as componentRichTextEffects } from '@blocksuite/affine-components/rich-text';
+import { effects as componentToggleButtonEffects } from '@blocksuite/affine-components/toggle-button';
 import { effects as componentToolbarEffects } from '@blocksuite/affine-components/toolbar';
 import { effects as widgetScrollAnchoringEffects } from '@blocksuite/affine-widget-scroll-anchoring/effects';
 import { effects as stdEffects } from '@blocksuite/block-std/effects';
@@ -334,6 +335,7 @@ export function effects() {
   componentRichTextEffects();
   componentToolbarEffects();
   componentDragIndicatorEffects();
+  componentToggleButtonEffects();
 
   widgetScrollAnchoringEffects();
   widgetMobileToolbarEffects();
