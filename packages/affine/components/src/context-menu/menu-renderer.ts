@@ -414,7 +414,6 @@ export const popupTargetFromElement = (element: HTMLElement): PopupTarget => {
     },
     root: getDefaultModalRoot(element),
     popupStart: () => {
-      console.log(count);
       if (!count) {
         isActive = element.classList.contains('active');
         if (!isActive) {
@@ -424,7 +423,6 @@ export const popupTargetFromElement = (element: HTMLElement): PopupTarget => {
       count++;
       return () => {
         count--;
-        console.log(count);
         if (!count && !isActive) {
           element.classList.remove('active');
         }
