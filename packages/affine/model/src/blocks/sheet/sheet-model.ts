@@ -24,9 +24,16 @@ export const SheetBlockSchema = defineBlockSchema({
     parent: [
       'affine:note',
       'affine:database',
-      'affine:sheet',
       'affine:paragraph',
       'affine:edgeless-text',
+    ],
+    children: [
+      'affine:paragraph',
+      'affine:list',
+      'affine:image',
+      'affine:attachment',
+      'affine:embed-*',
+      'affine:latex',
     ],
   },
 });
