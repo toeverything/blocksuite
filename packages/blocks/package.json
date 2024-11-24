@@ -1,6 +1,6 @@
 {
   "name": "@blocksuite/blocks",
-  "version": "0.17.32",
+  "version": "0.18.0",
   "description": "Default BlockSuite editable blocks.",
   "type": "module",
   "repository": {
@@ -38,7 +38,7 @@
     "@floating-ui/dom": "^1.6.10",
     "@lit/context": "^1.1.2",
     "@preact/signals-core": "^1.8.0",
-    "@toeverything/theme": "^1.0.15",
+    "@toeverything/theme": "^1.0.19",
     "@types/hast": "^3.0.4",
     "@types/mdast": "^4.0.4",
     "collapse-white-space": "^2.1.0",

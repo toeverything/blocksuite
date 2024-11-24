@@ -14,6 +14,7 @@ import {
   edgelessCommonSetup,
   getFirstContainerId,
   getSelectedIds,
+  pickColorAtPoints,
   setEdgelessTool,
   Shape,
   shiftClickView,
@@ -233,32 +234,6 @@ test.describe('add element to frame and then move frame', () => {
       await assertEdgelessElementBound(page, groupId, [500, 500, 150, 150]);
       await assertEdgelessElementBound(page, frameId, [100, 100, 500, 500]);
     });
-
-    test('group should not be moved since its center is not in frame', async ({
-      page,
-    }) => {
-      const [frameId, ...shapeIds] = [
-        await createFrame(page, [50, 50], [550, 550]),
-        await createShapeElement(page, [500, 500], [600, 600], Shape.Square),
-        await createShapeElement(page, [550, 550], [650, 650], Shape.Square),
-      ];
-
-      await pressEscape(page);
-
-      await shiftClickView(page, [510, 510]);
-      await shiftClickView(page, [560, 560]);
-      await page.keyboard.press(`${SHORT_KEY}+g`);
-      const groupId = (await getSelectedIds(page))[0];
-
-      await clickView(page, [60, 60]);
-      await dragBetweenViewCoords(page, [60, 60], [110, 110]);
-
-      // since the new group center is not in the frame, so the group is not child of frame
-      await assertEdgelessElementBound(page, shapeIds[0], [500, 500, 100, 100]);
-      await assertEdgelessElementBound(page, shapeIds[1], [550, 550, 100, 100]);
-      await assertEdgelessElementBound(page, groupId, [500, 500, 150, 150]);
-      await assertEdgelessElementBound(page, frameId, [100, 100, 500, 500]);
-    });
   });
 
   test.describe('add inner frame', () => {
@@ -361,4 +336,21 @@ test('delete frame', async ({ page }) => {
   await expect(page.locator('affine-frame')).toHaveCount(0);
 
   await assertCanvasElementsCount(page, 0);
+});
+
+test('outline should keep updated during a new frame created by frame-tool dragging', async ({
+  page,
+}) => {
+  await page.keyboard.press('f');
+
+  const start = await toViewCoord(page, [0, 0]);
+  const end = await toViewCoord(page, [100, 100]);
+  await page.mouse.move(start[0], start[1]);
+  await page.mouse.down();
+  await page.mouse.move(end[0], end[1], { steps: 10 });
+  await page.waitForTimeout(50);
+
+  expect(
+    await pickColorAtPoints(page, [start, [end[0] - 1, end[1] - 1]])
+  ).toEqual(['#1e96eb', '#1e96eb']);
 });

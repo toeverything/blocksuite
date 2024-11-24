@@ -12,7 +12,10 @@ import {
   MindmapElementModel,
   type MindmapNode,
 } from '@blocksuite/affine-model';
-import { type GfxModel, isGfxContainerElm } from '@blocksuite/block-std/gfx';
+import {
+  type GfxModel,
+  isGfxGroupCompatibleModel,
+} from '@blocksuite/block-std/gfx';
 
 import {
   isMindmapNode,
@@ -291,7 +294,7 @@ export class MindMapExt extends DefaultToolExt {
 
         mindmaps.add(mindmap);
         mindmap.childElements.forEach(child => mindmapNodes.add(child));
-      } else if (isGfxContainerElm(el)) {
+      } else if (isGfxGroupCompatibleModel(el)) {
         el.descendantElements.forEach(desc => {
           if (desc.group instanceof MindmapElementModel) {
             mindmaps.add(desc.group);

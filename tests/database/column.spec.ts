@@ -438,7 +438,7 @@ test.describe('switch column type', () => {
 
     // not link text
     await cell.hover();
-    const linkEdit = cell.locator('.affine-database-link-icon');
+    const linkEdit = getFirstColumnCell(page, 'affine-database-link-icon');
     await linkEdit.click();
     await selectAllByKeyboard(page);
     await type(page, 'abc');

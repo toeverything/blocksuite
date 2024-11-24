@@ -1,6 +1,6 @@
 import {
   menu,
-  popFilterableSimpleMenu,
+  popMenu,
   popupTargetFromElement,
 } from '@blocksuite/affine-components/context-menu';
 import { ShadowlessElement } from '@blocksuite/block-std';
@@ -112,18 +112,26 @@ export class RecordDetail extends SignalWatcher(
   static override styles = styles;
 
   _clickAddProperty = () => {
-    popFilterableSimpleMenu(
-      popupTargetFromElement(this.addPropertyButton),
-      this.view.propertyMetas.map(meta => {
-        return menu.action({
-          name: meta.config.name,
-          prefix: renderUniLit(this.view.IconGet(meta.type)),
-          select: () => {
-            this.view.propertyAdd('end', meta.type);
-          },
-        });
-      })
-    );
+    popMenu(popupTargetFromElement(this.addPropertyButton), {
+      options: {
+        title: {
+          text: 'Add property',
+        },
+        items: [
+          menu.group({
+            items: this.view.propertyMetas.map(meta => {
+              return menu.action({
+                name: meta.config.name,
+                prefix: renderUniLit(this.view.propertyIconGet(meta.type)),
+                select: () => {
+                  this.view.propertyAdd('end', meta.type);
+                },
+              });
+            }),
+          }),
+        ],
+      },
+    });
   };
 
   @property({ attribute: false })

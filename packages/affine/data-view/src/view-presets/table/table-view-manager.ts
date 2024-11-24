@@ -10,16 +10,20 @@ import type { TableViewData } from './define.js';
 import type { StatCalcOpType } from './types.js';
 
 import { evalFilter } from '../../core/filter/eval.js';
+import { FilterTrait, filterTraitKey } from '../../core/filter/trait.js';
 import { emptyFilterGroup } from '../../core/filter/utils.js';
-import { defaultGroupBy } from '../../core/group-by/default.js';
-import { GroupManager, sortByManually } from '../../core/group-by/manager.js';
-import { SortManager } from '../../core/sort/manager.js';
+import {
+  GroupTrait,
+  groupTraitKey,
+  sortByManually,
+} from '../../core/group-by/trait.js';
+import { SortManager, sortTraitKey } from '../../core/sort/manager.js';
 import { PropertyBase } from '../../core/view-manager/property.js';
 import {
   type SingleView,
   SingleViewBase,
 } from '../../core/view-manager/single-view.js';
-import { DEFAULT_COLUMN_WIDTH } from './consts.js';
+import { DEFAULT_COLUMN_MIN_WIDTH, DEFAULT_COLUMN_WIDTH } from './consts.js';
 
 export class TableSingleView extends SingleViewBase<TableViewData> {
   propertiesWithoutFilter$ = computed(() => {
@@ -47,6 +51,10 @@ export class TableSingleView extends SingleViewBase<TableViewData> {
     });
   });
 
+  private filter$ = computed(() => {
+    return this.data$.value?.filter ?? emptyFilterGroup;
+  });
+
   private groupBy$ = computed(() => {
     return this.data$.value?.groupBy;
   });
@@ -55,76 +63,111 @@ export class TableSingleView extends SingleViewBase<TableViewData> {
     return this.data$.value?.sort;
   });
 
+  private sortManager = this.traitSet(
+    sortTraitKey,
+    new SortManager(this.sortList$, this, {
+      setSortList: sortList => {
+        this.dataUpdate(data => {
+          return {
+            sort: {
+              ...data.sort,
+              ...sortList,
+            },
+          };
+        });
+      },
+    })
+  );
+
   detailProperties$ = computed(() => {
     return this.propertiesWithoutFilter$.value.filter(
       id => this.propertyTypeGet(id) !== 'title'
     );
   });
 
-  filter$ = computed(() => {
-    return this.data$.value?.filter ?? emptyFilterGroup;
-  });
+  filterTrait = this.traitSet(
+    filterTraitKey,
+    new FilterTrait(this.filter$, this, {
+      filterSet: (filter: FilterGroup) => {
+        this.dataUpdate(() => {
+          return {
+            filter,
+          };
+        });
+      },
+    })
+  );
 
-  groupManager = new GroupManager(this.groupBy$, this, {
-    sortGroup: ids =>
-      sortByManually(
-        ids,
-        v => v,
-        this.groupProperties.map(v => v.key)
-      ),
-    sortRow: (key, ids) => {
-      const property = this.groupProperties.find(v => v.key === key);
-      return sortByManually(ids, v => v, property?.manuallyCardSort ?? []);
-    },
-    changeGroupSort: keys => {
-      const map = new Map(this.groupProperties.map(v => [v.key, v]));
-      this.dataUpdate(() => {
-        return {
-          groupProperties: keys.map(key => {
-            const property = map.get(key);
-            if (property) {
-              return property;
-            }
-            return {
-              key,
-              hide: false,
-              manuallyCardSort: [],
-            };
-          }),
-        };
-      });
-    },
-    changeRowSort: (groupKeys, groupKey, keys) => {
-      const map = new Map(this.groupProperties.map(v => [v.key, v]));
-      this.dataUpdate(() => {
-        return {
-          groupProperties: groupKeys.map(key => {
-            if (key === groupKey) {
-              const group = map.get(key);
-              return group
-                ? {
-                    ...group,
-                    manuallyCardSort: keys,
-                  }
-                : {
+  groupTrait = this.traitSet(
+    groupTraitKey,
+    new GroupTrait(this.groupBy$, this, {
+      groupBySet: groupBy => {
+        this.dataUpdate(() => {
+          return {
+            groupBy,
+          };
+        });
+      },
+      sortGroup: ids =>
+        sortByManually(
+          ids,
+          v => v,
+          this.groupProperties.map(v => v.key)
+        ),
+      sortRow: (key, ids) => {
+        const property = this.groupProperties.find(v => v.key === key);
+        return sortByManually(ids, v => v, property?.manuallyCardSort ?? []);
+      },
+      changeGroupSort: keys => {
+        const map = new Map(this.groupProperties.map(v => [v.key, v]));
+        this.dataUpdate(() => {
+          return {
+            groupProperties: keys.map(key => {
+              const property = map.get(key);
+              if (property) {
+                return property;
+              }
+              return {
+                key,
+                hide: false,
+                manuallyCardSort: [],
+              };
+            }),
+          };
+        });
+      },
+      changeRowSort: (groupKeys, groupKey, keys) => {
+        const map = new Map(this.groupProperties.map(v => [v.key, v]));
+        this.dataUpdate(() => {
+          return {
+            groupProperties: groupKeys.map(key => {
+              if (key === groupKey) {
+                const group = map.get(key);
+                return group
+                  ? {
+                      ...group,
+                      manuallyCardSort: keys,
+                    }
+                  : {
+                      key,
+                      hide: false,
+                      manuallyCardSort: keys,
+                    };
+              } else {
+                return (
+                  map.get(key) ?? {
                     key,
                     hide: false,
-                    manuallyCardSort: keys,
-                  };
-            } else {
-              return (
-                map.get(key) ?? {
-                  key,
-                  hide: false,
-                  manuallyCardSort: [],
-                }
-              );
-            }
-          }),
-        };
-      });
-    },
-  });
+                    manuallyCardSort: [],
+                  }
+                );
+              }
+            }),
+          };
+        });
+      },
+    })
+  );
 
   mainProperties$ = computed(() => {
     return (
@@ -147,19 +190,6 @@ export class TableSingleView extends SingleViewBase<TableViewData> {
     return this.manager.readonly$.value;
   });
 
-  sortManager = new SortManager(this.sortList$, this, {
-    setSortList: sortList => {
-      this.dataUpdate(data => {
-        return {
-          sort: {
-            ...data.sort,
-            ...sortList,
-          },
-        };
-      });
-    },
-  });
-
   get groupProperties() {
     return this.data$.value?.groupProperties ?? [];
   }
@@ -174,28 +204,6 @@ export class TableSingleView extends SingleViewBase<TableViewData> {
 
   constructor(viewManager: ViewManager, viewId: string) {
     super(viewManager, viewId);
-  }
-
-  changeGroup(columnId: string | undefined) {
-    if (columnId == null) {
-      this.dataUpdate(() => {
-        return {
-          groupBy: undefined,
-        };
-      });
-      return;
-    }
-    const column = this.propertyGet(columnId);
-    this.dataUpdate(_view => {
-      return {
-        groupBy: defaultGroupBy(
-          this.dataSource,
-          this.propertyMetaGet(column.type$.value),
-          column.id,
-          column.data$.value
-        ),
-      };
-    });
   }
 
   columnGetStatCalcOp(columnId: string): StatCalcOpType {
@@ -244,14 +252,6 @@ export class TableSingleView extends SingleViewBase<TableViewData> {
     });
   }
 
-  filterSet(filter: FilterGroup): void {
-    this.dataUpdate(() => {
-      return {
-        filter,
-      };
-    });
-  }
-
   isShow(rowId: string): boolean {
     if (this.filter$.value?.conditions.length) {
       const rowMap = Object.fromEntries(
@@ -263,6 +263,12 @@ export class TableSingleView extends SingleViewBase<TableViewData> {
       return evalFilter(this.filter$.value, rowMap);
     }
     return true;
+  }
+
+  minWidthGet(type: string): number {
+    return (
+      this.propertyMetaGet(type)?.config.minWidth ?? DEFAULT_COLUMN_MIN_WIDTH
+    );
   }
 
   propertyGet(columnId: string): TableColumn {
@@ -316,7 +322,7 @@ export class TableSingleView extends SingleViewBase<TableViewData> {
     if (!groupKey) {
       return id;
     }
-    this.groupManager.addToGroup(id, groupKey);
+    this.groupTrait.addToGroup(id, groupKey);
     return id;
   }
 
@@ -330,7 +336,7 @@ export class TableSingleView extends SingleViewBase<TableViewData> {
       super.rowMove(rowId, position);
       return;
     }
-    this.groupManager.moveCardTo(rowId, fromGroup, toGroup, position);
+    this.groupTrait.moveCardTo(rowId, fromGroup, toGroup, position);
   }
 
   override rowNextGet(rowId: string): string {
@@ -356,6 +362,10 @@ export class TableColumn extends PropertyBase {
   width$: ReadonlySignal<number> = computed(() => {
     return this.tableView.columnGetWidth(this.id);
   });
+
+  get minWidth() {
+    return this.tableView.minWidthGet(this.type$.value);
+  }
 
   constructor(
     private tableView: TableSingleView,

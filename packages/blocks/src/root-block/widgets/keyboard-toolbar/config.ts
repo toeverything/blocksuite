@@ -17,8 +17,6 @@ import {
 import { viewPresets } from '@blocksuite/data-view/view-presets';
 import { assertType } from '@blocksuite/global/utils';
 import {
-  ArrowDownBigIcon,
-  ArrowUpBigIcon,
   AttachmentIcon,
   BoldIcon,
   BulletedListIcon,
@@ -941,6 +939,8 @@ export const defaultKeyboardToolbarConfig: KeyboardToolbarConfig = {
           .run();
       },
     },
+    ...listToolActionItems,
+    ...textToolActionItems.filter(({ name }) => name === 'Divider'),
     {
       name: 'CollapseTab',
       icon: CollapseTabIcon(),
@@ -988,42 +988,6 @@ export const defaultKeyboardToolbarConfig: KeyboardToolbarConfig = {
           .draftSelectedModels()
           .duplicateSelectedModels()
           .run();
-      },
-    },
-    ...databaseToolGroup.items.filter(({ name }) => name === 'Table view'),
-    ...pageToolGroup.items.filter(({ name }) => name === 'LinkedPage'),
-    {
-      name: 'Move Up',
-      icon: ArrowUpBigIcon(),
-      action: ({ std }) => {
-        const { selectedModels } = std.command.exec('getSelectedModels');
-        const model = selectedModels?.[0];
-        if (!model) return;
-
-        const previousSiblingModel = std.doc.getPrev(model);
-        if (!previousSiblingModel) return;
-
-        const parentModel = std.doc.getParent(previousSiblingModel);
-        if (!parentModel) return;
-
-        std.doc.moveBlocks([model], parentModel, previousSiblingModel, true);
-      },
-    },
-    {
-      name: 'Move Down',
-      icon: ArrowDownBigIcon(),
-      action: ({ std }) => {
-        const { selectedModels } = std.command.exec('getSelectedModels');
-        const model = selectedModels?.[0];
-        if (!model) return;
-
-        const nextSiblingModel = std.doc.getNext(model);
-        if (!nextSiblingModel) return;
-
-        const parentModel = std.doc.getParent(nextSiblingModel);
-        if (!parentModel) return;
-
-        std.doc.moveBlocks([model], parentModel, nextSiblingModel, true);
       },
     },
     {

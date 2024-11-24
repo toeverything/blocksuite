@@ -1,4 +1,5 @@
 import { popupTargetFromElement } from '@blocksuite/affine-components/context-menu';
+import { IS_MOBILE } from '@blocksuite/global/env';
 import { FilterIcon } from '@blocksuite/icons/lit';
 import { computed } from '@preact/signals-core';
 import { cssVarV2 } from '@toeverything/theme/v2';
@@ -8,6 +9,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 import type { FilterGroup } from '../../../../core/filter/types.js';
 
 import { popCreateFilter } from '../../../../core/filter/add-filter.js';
+import { filterTraitKey } from '../../../../core/filter/trait.js';
 import { emptyFilterGroup } from '../../../../core/filter/utils.js';
 import { WidgetBase } from '../../../../core/widget/widget-base.js';
 import { ShowQuickSettingBarContextKey } from '../../../quick-setting-bar/context.js';
@@ -37,15 +39,19 @@ export class DataViewHeaderToolsFilter extends WidgetBase {
   static override styles = styles;
 
   hasFilter = computed(() => {
-    return this.view.filter$.value.conditions.length > 0;
+    return this.filterTrait?.hasFilter$.value ?? false;
   });
 
   private get _filter(): FilterGroup {
-    return this.view.filter$.value ?? emptyFilterGroup;
+    return this.filterTrait?.filter$.value ?? emptyFilterGroup;
   }
 
   private set _filter(filter: FilterGroup) {
-    this.view.filterSet(filter);
+    this.filterTrait?.filterSet(filter);
+  }
+
+  get filterTrait() {
+    return this.view.traitGet(filterTraitKey);
   }
 
   private get readonly() {
@@ -57,7 +63,6 @@ export class DataViewHeaderToolsFilter extends WidgetBase {
       this.toggleShowFilter();
       return;
     }
-    this.showToolBar(true);
     popCreateFilter(
       popupTargetFromElement(event.currentTarget as HTMLElement),
       {
@@ -69,12 +74,14 @@ export class DataViewHeaderToolsFilter extends WidgetBase {
           };
           this.toggleShowFilter(true);
         },
-        onClose: () => {
-          this.showToolBar(false);
-        },
       }
     );
     return;
+  }
+
+  override connectedCallback() {
+    super.connectedCallback();
+    this.style.display = IS_MOBILE ? 'none' : 'flex';
   }
 
   override render() {
@@ -91,13 +98,6 @@ export class DataViewHeaderToolsFilter extends WidgetBase {
     >
       ${FilterIcon()}
     </div>`;
-  }
-
-  showToolBar(show: boolean) {
-    const tools = this.closest('data-view-header-tools');
-    if (tools) {
-      tools.showToolBar = show;
-    }
   }
 
   toggleShowFilter(show?: boolean) {

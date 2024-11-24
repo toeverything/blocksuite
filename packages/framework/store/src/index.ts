@@ -3,7 +3,6 @@
 
 export type { Y };
 export * from './adapter/index.js';
-export * from './migration/index.js';
 export * from './reactive/index.js';
 export * from './schema/index.js';
 export * from './store/index.js';

@@ -1,4 +1,5 @@
 import { popupTargetFromElement } from '@blocksuite/affine-components/context-menu';
+import { IS_MOBILE } from '@blocksuite/global/env';
 import { SortIcon } from '@blocksuite/icons/lit';
 import { computed } from '@preact/signals-core';
 import { cssVarV2 } from '@toeverything/theme/v2';
@@ -6,7 +7,8 @@ import { css, html, nothing } from 'lit';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { popCreateSort } from '../../../../core/sort/add-sort.js';
-import { canSort, createSortUtils } from '../../../../core/sort/utils.js';
+import { sortTraitKey } from '../../../../core/sort/manager.js';
+import { createSortUtils } from '../../../../core/sort/utils.js';
 import { WidgetBase } from '../../../../core/widget/widget-base.js';
 import { ShowQuickSettingBarContextKey } from '../../../quick-setting-bar/context.js';
 import { popSortRoot } from '../../../quick-setting-bar/sort/root-panel.js';
@@ -36,8 +38,9 @@ export class DataViewHeaderToolsSort extends WidgetBase {
   static override styles = styles;
 
   sortUtils$ = computed(() => {
-    if (canSort(this.view)) {
-      return createSortUtils(this.view, this.dataViewInstance.eventTrace);
+    const sortTrait = this.view.traitGet(sortTraitKey);
+    if (sortTrait) {
+      return createSortUtils(sortTrait, this.dataViewInstance.eventTrace);
     }
     return;
   });
@@ -59,7 +62,6 @@ export class DataViewHeaderToolsSort extends WidgetBase {
       this.toggleShowQuickSettingBar();
       return;
     }
-    this.showToolBar(true);
     popCreateSort(popupTargetFromElement(event.currentTarget as HTMLElement), {
       sortUtils: {
         ...sortUtils,
@@ -70,7 +72,7 @@ export class DataViewHeaderToolsSort extends WidgetBase {
             const ele = this.closest(
               'affine-data-view-renderer'
             )?.querySelector('.data-view-sort-button');
-            if (ele && canSort(this.view)) {
+            if (ele) {
               popSortRoot(popupTargetFromElement(ele as HTMLElement), {
                 sortUtils: sortUtils,
               });
@@ -78,11 +80,13 @@ export class DataViewHeaderToolsSort extends WidgetBase {
           });
         },
       },
-      onClose: () => {
-        this.showToolBar(false);
-      },
     });
     return;
+  }
+
+  override connectedCallback() {
+    super.connectedCallback();
+    this.style.display = IS_MOBILE ? 'none' : 'flex';
   }
 
   override render() {
@@ -99,13 +103,6 @@ export class DataViewHeaderToolsSort extends WidgetBase {
     >
       ${SortIcon()}
     </div>`;
-  }
-
-  showToolBar(show: boolean) {
-    const tools = this.closest('data-view-header-tools');
-    if (tools) {
-      tools.showToolBar = show;
-    }
   }
 
   toggleShowQuickSettingBar(show?: boolean) {

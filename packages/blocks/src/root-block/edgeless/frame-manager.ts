@@ -8,7 +8,7 @@ import {
   GfxExtension,
   GfxExtensionIdentifier,
   type GfxModel,
-  isGfxContainerElm,
+  isGfxGroupCompatibleModel,
   renderableInEdgeless,
 } from '@blocksuite/block-std/gfx';
 import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
@@ -17,6 +17,7 @@ import {
   deserializeXYWH,
   DisposableGroup,
   type IVec,
+  type SerializedXYWH,
 } from '@blocksuite/global/utils';
 import { DocCollection, Text } from '@blocksuite/store';
 
@@ -38,6 +39,8 @@ export class FrameOverlay extends Overlay {
   private _frame: FrameBlockModel | null = null;
 
   private _innerElements = new Set<GfxModel>();
+
+  private _prevXYWH: SerializedXYWH | null = null;
 
   private get _frameManager() {
     return this.gfx.std.get(
@@ -72,7 +75,7 @@ export class FrameOverlay extends Overlay {
 
     let needRefresh = false;
 
-    if (highlightOutline && this._frame !== frame) {
+    if (highlightOutline && this._prevXYWH !== frame.xywh) {
       needRefresh = true;
     }
 
@@ -197,11 +200,21 @@ export class EdgelessFrameManager extends GfxExtension {
           const frame = this.getFrameFromPoint(element.elementBound.center);
 
           // if the container created with a frame, skip it.
-          if (isGfxContainerElm(element) && frame && element.hasChild(frame)) {
+          if (
+            isGfxGroupCompatibleModel(element) &&
+            frame &&
+            element.hasChild(frame)
+          ) {
             return;
           }
 
-          frame && this.addElementsToFrame(frame, [element]);
+          // new element may intended to be added to other group
+          // so we need to wait for the next microtask to check if the element can be added to the frame
+          queueMicrotask(() => {
+            if (!element.group && frame) {
+              this.addElementsToFrame(frame, [element]);
+            }
+          });
         }
       })
     );
@@ -354,7 +367,7 @@ export class EdgelessFrameManager extends GfxExtension {
   }
 
   getParentFrame(element: GfxModel) {
-    const container = element.container;
+    const container = element.group;
     return container && isFrameBlock(container) ? container : null;
   }
 

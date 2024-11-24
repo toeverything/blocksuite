@@ -8,9 +8,11 @@ import {
   isPointIn,
 } from '@blocksuite/global/utils';
 
+import type { GfxModel } from './model/model.js';
+
 import { compare } from '../utils/layer.js';
-import { GfxBlockElementModel, type GfxModel } from './gfx-block-model.js';
-import { SurfaceBlockModel } from './surface/surface-model.js';
+import { GfxBlockElementModel } from './model/gfx-block-model.js';
+import { SurfaceBlockModel } from './model/surface/surface-model.js';
 
 function getGridIndex(val: number) {
   return Math.ceil(val / DEFAULT_GRID_SIZE) - 1;

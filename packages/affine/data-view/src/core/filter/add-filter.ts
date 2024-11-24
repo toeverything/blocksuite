@@ -35,20 +35,22 @@ export const popCreateFilter = (
         text: 'New filter',
       },
       items: [
-        ...props.vars.value.map(v =>
-          menu.action({
-            name: v.name,
-            prefix: renderUniLit(v.icon, {}),
-            select: () => {
-              props.onSelect(
-                firstFilterByRef(props.vars.value, {
-                  type: 'ref',
-                  name: v.id,
-                })
-              );
-            },
-          })
-        ),
+        menu.group({
+          items: props.vars.value.map(v =>
+            menu.action({
+              name: v.name,
+              prefix: renderUniLit(v.icon, {}),
+              select: () => {
+                props.onSelect(
+                  firstFilterByRef(props.vars.value, {
+                    type: 'ref',
+                    name: v.id,
+                  })
+                );
+              },
+            })
+          ),
+        }),
         menu.group({
           name: '',
           items: [

@@ -2,14 +2,15 @@ import type { Doc } from '@blocksuite/store';
 
 import { nToLast } from '@blocksuite/global/utils';
 
-import type { GfxBlockElementModel, GfxModel } from '../gfx/gfx-block-model.js';
 import type { Layer } from '../gfx/layer.js';
-import type { SurfaceBlockModel } from '../gfx/surface/surface-model.js';
+import type { GfxBlockElementModel } from '../gfx/model/gfx-block-model.js';
+import type { GfxModel } from '../gfx/model/model.js';
+import type { SurfaceBlockModel } from '../gfx/model/surface/surface-model.js';
 
 import {
-  type GfxContainerElement,
-  isGfxContainerElm,
-} from '../gfx/surface/container-element.js';
+  type GfxGroupCompatibleInterface,
+  isGfxGroupCompatibleModel,
+} from '../gfx/model/base.js';
 
 export function getLayerEndZIndex(layers: Layer[], layerIndex: number) {
   const layer = layers[layerIndex];
@@ -33,7 +34,7 @@ export function updateLayersZIndex(layers: Layer[], startIdx: number) {
 }
 
 export function getElementIndex(indexable: GfxModel) {
-  const groups = indexable.groups as GfxContainerElement[];
+  const groups = indexable.groups as GfxGroupCompatibleInterface[];
 
   if (groups.length) {
     const groupIndexes = groups
@@ -100,20 +101,20 @@ export function compare(a: GfxModel, b: GfxModel) {
   const surface = a.surface ?? b.surface;
   if (!surface) return SortOrder.SAME;
 
-  if (isGfxContainerElm(a) && a.hasDescendant(b)) {
+  if (isGfxGroupCompatibleModel(a) && a.hasDescendant(b)) {
     return SortOrder.BEFORE;
-  } else if (isGfxContainerElm(b) && b.hasDescendant(a)) {
+  } else if (isGfxGroupCompatibleModel(b) && b.hasDescendant(a)) {
     return SortOrder.AFTER;
   } else {
-    const aGroups = a.groups as GfxContainerElement[];
-    const bGroups = b.groups as GfxContainerElement[];
+    const aGroups = a.groups as GfxGroupCompatibleInterface[];
+    const bGroups = b.groups as GfxGroupCompatibleInterface[];
 
     let i = 1;
-    let aGroup: GfxModel | GfxContainerElement | undefined = nToLast(
+    let aGroup: GfxModel | GfxGroupCompatibleInterface | undefined = nToLast(
       aGroups,
       i
     );
-    let bGroup: GfxModel | GfxContainerElement | undefined = nToLast(
+    let bGroup: GfxModel | GfxGroupCompatibleInterface | undefined = nToLast(
       bGroups,
       i
     );

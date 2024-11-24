@@ -93,7 +93,7 @@ export abstract class PropertyBase<
 
   get icon(): UniComponent | undefined {
     if (!this.type$.value) return undefined;
-    return this.view.IconGet(this.type$.value);
+    return this.view.propertyIconGet(this.type$.value);
   }
 
   get id(): string {

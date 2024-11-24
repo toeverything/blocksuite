@@ -16,12 +16,6 @@ export class EmbedSyncedDocCard extends WithDisposable(ShadowlessElement) {
 
   private _dragging = false;
 
-  cleanUpSurfaceRefRenderer = () => {
-    if (this.surfaceRefRenderer) {
-      this.surfaceRefService.removeRenderer(this.surfaceRefRenderer.id);
-    }
-  };
-
   get blockState() {
     return this.block.blockState;
   }
@@ -123,11 +117,6 @@ export class EmbedSyncedDocCard extends WithDisposable(ShadowlessElement) {
         })
       );
     }
-  }
-
-  override disconnectedCallback() {
-    super.disconnectedCallback();
-    this.cleanUpSurfaceRefRenderer();
   }
 
   override render() {
@@ -271,14 +260,4 @@ export class EmbedSyncedDocCard extends WithDisposable(ShadowlessElement) {
 
   @queryAsync('.affine-embed-synced-doc-content-note.render')
   accessor noteContainer!: Promise<HTMLDivElement>;
-
-  @property({ attribute: false })
-  // TODO: remove any
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  accessor surfaceRefRenderer: any | null = null;
-
-  @property({ attribute: false })
-  // TODO: remove any
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  accessor surfaceRefService!: any;
 }

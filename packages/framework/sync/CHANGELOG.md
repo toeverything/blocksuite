@@ -1,5 +1,85 @@
 # @blocksuite/sync
 
+## 0.18.0
+
+### Minor Changes
+
+- 9daa1f3: ## Feat
+
+  - feat(blocks): markdown adapter reference serialization and deserialization (#8782)
+  - feat(blocks): add lazy loading to image and iframe (#8773)
+
+  ## Fix
+
+  - fix(edgeless): missing reference info during edgeless card conversion (#8790)
+  - fix(blocks): linked popover styles (#8789)
+  - fix(blocks): add abortional to getMenus (#8786)
+  - fix(blocks): incorrect viewport of embed linked doc with edgeless mode (#8785)
+  - fix(database): crash in edgeless on mobile safari (#8784)
+  - fix(blocks): signify at menu config items (#8780)
+  - fix(database): update title on composition end (#8781)
+  - fix(database): kanban/table drag and drop (#8778)
+  - fix(database): prevent the default behavior of arrow keys when a progress cell is focused (#8777)
+  - fix(blocks): update at menu popover styles (#8774)
+  - fix(edgeless): frame overlay is not updated during dragging a new frame (#8771)
+
+  ## Chore
+
+  - chore(blocks): bump theme (#8783)
+  - chore: organize gfx model (#8766)
+
+  ## Refactor
+
+  - refactor(database): make Table View compatible with mobile devices (#8787)
+  - refactor(edgeless): remove legacy surface ref renderer (#8759)
+  - refactor: unify container and group (#8772)
+  - refactor(database): table ui (#8779)
+  - refactor(database): link cell icon (#8776)
+  - refactor(database): use Trait to manage the functionality of Views (#8775)
+  - refactor(database): column move (#8726)
+
+### Patch Changes
+
+- Updated dependencies [9daa1f3]
+  - @blocksuite/global@0.18.0
+
+## 0.17.33
+
+### Patch Changes
+
+- c65c3ee: ## Feat
+
+  - feat: add pdf style to attachment (#8752)
+  - feat(playground): optimize heavy whiteboard content positioning (#8746)
+
+  ## Fix
+
+  - fix(edgeless): frame title should be render on the top and clickable (#8755)
+  - fix(database): use copy logic when creating a linked doc (#8640)
+  - fix(store): remove page from draft model (#8760)
+  - fix(edgeless): container should not contain itself (#8758)
+  - fix(edgeless): new frame should be on the bottom layer (#8756)
+  - fix(edgeless): only clear surface selection when switching tool (#8753)
+  - fix(edgeless): connector clone (#8747)
+
+  ## Chore
+
+  - chore(blocks): remove trigger key '、' from slash menu (#8768)
+  - chore(blocks): adjust and remove some actions from keyboard-toolbar (#8767)
+  - chore: lock file maintenance (#8659)
+  - chore: bump icons (#8761)
+
+  ## Refactor
+
+  - refactor(edgeless): avoid accumulated updates in batch drag (#8763)
+
+  ## Perf
+
+  - perf(edgeless): optimize selection frame rate (#8751)
+
+- Updated dependencies [c65c3ee]
+  - @blocksuite/global@0.17.33
+
 ## 0.17.32
 
 ### Patch Changes

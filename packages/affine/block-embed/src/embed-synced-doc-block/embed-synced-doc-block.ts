@@ -52,7 +52,7 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockComponent<EmbedSynce
 
   private _initEdgelessFitEffect = () => {
     const fitToContent = () => {
-      if (this.syncedDocMode !== 'edgeless') return;
+      if (this.isPageMode) return;
 
       const controller = this.syncedDocEditorHost?.std.getOptional(
         GfxControllerIdentifier
@@ -475,11 +475,11 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockComponent<EmbedSynce
     if (this._rootService && !this.linkedMode) {
       const docMode = this._rootService.std.get(DocModeProvider);
       this.syncedDocMode = docMode.getPrimaryMode(this.model.pageId);
-      this._isEmptySyncedDoc = isEmptyDoc(this.syncedDoc, this.syncedDocMode);
+      this._isEmptySyncedDoc = isEmptyDoc(this.syncedDoc, this.editorMode);
       this.disposables.add(
         docMode.onPrimaryModeChange(mode => {
           this.syncedDocMode = mode;
-          this._isEmptySyncedDoc = isEmptyDoc(this.syncedDoc, mode);
+          this._isEmptySyncedDoc = isEmptyDoc(this.syncedDoc, this.editorMode);
         }, this.model.pageId)
       );
     }

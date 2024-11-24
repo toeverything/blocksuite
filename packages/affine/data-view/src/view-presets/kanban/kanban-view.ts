@@ -160,40 +160,38 @@ export class DataViewKanban extends DataViewBase<
   selectionController = new KanbanSelectionController(this);
 
   sortContext = createSortContext({
-    dnd: {
-      activators: defaultActivators,
-      container: this,
-      onDragEnd: evt => {
-        const over = evt.over;
-        const activeId = evt.active.id;
-        const groups = this.groupManager.groupsDataList$.value;
-        if (over && over.id !== activeId && groups) {
-          const activeIndex = groups.findIndex(data => data.key === activeId);
-          const overIndex = groups.findIndex(data => data.key === over.id);
+    activators: defaultActivators,
+    container: this,
+    onDragEnd: evt => {
+      const over = evt.over;
+      const activeId = evt.active.id;
+      const groups = this.groupManager.groupsDataList$.value;
+      if (over && over.id !== activeId && groups) {
+        const activeIndex = groups.findIndex(data => data.key === activeId);
+        const overIndex = groups.findIndex(data => data.key === over.id);
 
-          this.groupManager.moveGroupTo(
-            activeId,
-            activeIndex > overIndex
-              ? {
-                  before: true,
-                  id: over.id,
-                }
-              : {
-                  before: false,
-                  id: over.id,
-                }
-          );
-        }
-      },
-      modifiers: [
-        ({ transform }) => {
-          return {
-            ...transform,
-            y: 0,
-          };
-        },
-      ],
+        this.groupManager.moveGroupTo(
+          activeId,
+          activeIndex > overIndex
+            ? {
+                before: true,
+                id: over.id,
+              }
+            : {
+                before: false,
+                id: over.id,
+              }
+        );
+      }
     },
+    modifiers: [
+      ({ transform }) => {
+        return {
+          ...transform,
+          y: 0,
+        };
+      },
+    ],
     items: computed(() => {
       return this.groupManager.groupsDataList$.value?.map(v => v.key) ?? [];
     }),
@@ -234,7 +232,7 @@ export class DataViewKanban extends DataViewBase<
   }
 
   get groupManager() {
-    return this.props.view.groupManager;
+    return this.props.view.groupTrait;
   }
 
   override render() {

@@ -30,10 +30,13 @@ export {
   AFFINE_FORMAT_BAR_WIDGET,
   AffineFormatBarWidget,
 } from './format-bar/format-bar.js';
+export { AffineFrameTitleWidget } from './frame-title/index.js';
 export { AffineImageToolbarWidget } from './image-toolbar/index.js';
 export { AffineInnerModalWidget } from './inner-modal/inner-modal.js';
 export * from './keyboard-toolbar/index.js';
 export {
+  type LinkedMenuGroup,
+  type LinkedMenuItem,
   type LinkedWidgetConfig,
   LinkedWidgetUtils,
 } from './linked-doc/config.js';

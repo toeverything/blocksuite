@@ -24,10 +24,7 @@ export interface DataViewModelConfig<
   Data extends DataViewDataType = DataViewDataType,
 > {
   defaultName: string;
-  dataViewManager: new (
-    viewManager: ViewManager,
-    viewId: string
-  ) => SingleView<Data>;
+  dataViewManager: new (viewManager: ViewManager, viewId: string) => SingleView;
   defaultData: (viewManager: ViewManager) => Omit<Data, 'id' | 'name' | 'mode'>;
 }
 
@@ -42,13 +39,18 @@ export type DataViewModel<
 export type GetDataFromDataViewModel<Model> =
   Model extends DataViewModel<infer _, infer R> ? R : never;
 
+type DataViewComponent = UniComponent<
+  {
+    props: DataViewProps;
+  },
+  {
+    expose: DataViewInstance;
+  }
+>;
+
 export interface DataViewRendererConfig {
-  view: UniComponent<
-    {
-      props: DataViewProps;
-    },
-    { expose: DataViewInstance }
-  >;
+  view: DataViewComponent;
+  mobileView?: DataViewComponent;
   icon: UniComponent;
 }
 

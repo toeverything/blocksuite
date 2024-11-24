@@ -49,11 +49,6 @@ export const BlockSchema = z.object({
     .args()
     .returns(z.custom<BaseBlockTransformer>())
     .optional(),
-  onUpgrade: z
-    .function()
-    .args(z.any(), z.number(), z.number())
-    .returns(z.void())
-    .optional(),
 });
 
 export type BlockSchemaType = z.infer<typeof BlockSchema>;
@@ -90,11 +85,6 @@ export function defineBlockSchema<
   flavour: Flavour;
   metadata: Metadata;
   props?: (internalPrimitives: InternalPrimitives) => Props;
-  onUpgrade?: (
-    data: Props,
-    previousVersion: number,
-    latestVersion: number
-  ) => void;
   toModel?: () => Model;
   transformer?: () => Transformer;
 }): {
@@ -103,11 +93,6 @@ export function defineBlockSchema<
     props: PropsGetter<Props>;
     flavour: Flavour;
   } & Metadata;
-  onUpgrade?: (
-    data: Props,
-    previousVersion: number,
-    latestVersion: number
-  ) => void;
   transformer?: () => Transformer;
 };
 
@@ -115,7 +100,6 @@ export function defineBlockSchema({
   flavour,
   props,
   metadata,
-  onUpgrade,
   toModel,
   transformer,
 }: {
@@ -127,11 +111,6 @@ export function defineBlockSchema({
     children?: string[];
   };
   props?: (internalPrimitives: InternalPrimitives) => Record<string, unknown>;
-  onUpgrade?: (
-    data: Record<string, unknown>,
-    previousVersion: number,
-    latestVersion: number
-  ) => void;
   toModel?: () => BlockModel;
   transformer?: () => BaseBlockTransformer;
 }): BlockSchemaType {
@@ -145,7 +124,6 @@ export function defineBlockSchema({
       props,
       toModel,
     },
-    onUpgrade,
     transformer,
   } satisfies z.infer<typeof BlockSchema>;
   BlockSchema.parse(schema);

@@ -1,4 +1,5 @@
 import { unsafeCSSVarV2 } from '@blocksuite/affine-shared/theme';
+import { IS_MOBILE } from '@blocksuite/global/env';
 import { html, nothing } from 'lit';
 
 import {
@@ -12,14 +13,16 @@ import { renderSortBar } from './sort/index.js';
 export const widgetQuickSettingBar = defineUniComponent(
   (props: DataViewWidgetProps) => {
     const view = props.dataViewInstance.view;
-    if (!view.contextGet(ShowQuickSettingBarContextKey).value[view.id]) {
-      return html``;
-    }
     const barList = [renderSortBar(props), renderFilterBar(props)].filter(
       Boolean
     );
-    if (!barList.length) {
-      return html``;
+    if (!IS_MOBILE) {
+      if (!view.contextGet(ShowQuickSettingBarContextKey).value[view.id]) {
+        return html``;
+      }
+      if (!barList.length) {
+        return html``;
+      }
     }
     return html` <div
       style="display: flex;margin-top: 8px;align-items: center;width: 100%;gap:8px"

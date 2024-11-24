@@ -20,6 +20,7 @@ import {
 import {
   createDefaultDoc,
   isFuzzyMatch,
+  type Signal,
 } from '@blocksuite/affine-shared/utils';
 
 import { showImportModal } from './import-doc/index.js';
@@ -40,8 +41,9 @@ export interface LinkedWidgetConfig {
     query: string,
     abort: () => void,
     editorHost: EditorHost,
-    inlineEditor: AffineInlineEditor
-  ) => Promise<LinkedMenuGroup[]>;
+    inlineEditor: AffineInlineEditor,
+    abortSignal: AbortSignal
+  ) => Promise<LinkedMenuGroup[]> | LinkedMenuGroup[];
 
   mobile: {
     useScreenHeight?: boolean;
@@ -63,16 +65,16 @@ export interface LinkedWidgetConfig {
 
 export type LinkedMenuItem = {
   key: string;
-  name: string;
+  name: string | TemplateResult<1>;
   icon: TemplateResult<1>;
-  // suffix?: TemplateResult<1>;
+  suffix?: string | TemplateResult<1>;
   // disabled?: boolean;
   action: () => Promise<void> | void;
 };
 
 export type LinkedMenuGroup = {
   name: string;
-  items: LinkedMenuItem[];
+  items: LinkedMenuItem[] | Signal<LinkedMenuItem[]>;
   styles?: string;
   // maximum quantity displayed by default
   maxDisplay?: number;

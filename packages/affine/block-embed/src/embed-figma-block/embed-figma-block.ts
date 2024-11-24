@@ -123,6 +123,7 @@ export class EmbedFigmaBlockComponent extends EmbedBlockComponent<
               <iframe
                 src=${`https://www.figma.com/embed?embed_host=blocksuite&url=${url}`}
                 allowfullscreen
+                loading="lazy"
               ></iframe>
 
               <div

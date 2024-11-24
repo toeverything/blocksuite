@@ -25,6 +25,9 @@ export const dataViewCommonStyle = (selector: string) => `
     background-color: var(--affine-hover-color);
     cursor: pointer;
   }
+  .dv-icon-16{
+    font-size: 16px;
+  }
   .dv-icon-16 svg{
     width: 16px;
     height: 16px;

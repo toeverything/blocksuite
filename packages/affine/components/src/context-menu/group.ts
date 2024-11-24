@@ -1,3 +1,5 @@
+import { unsafeCSSVarV2 } from '@blocksuite/affine-shared/theme';
+import { IS_MOBILE } from '@blocksuite/global/env';
 import { html, type TemplateResult } from 'lit';
 
 import type { MenuConfig } from './menu.js';
@@ -8,6 +10,19 @@ export const menuGroupItems = {
     const items = menu.renderItems(config.items);
     if (!items.length) {
       return;
+    }
+    if (IS_MOBILE) {
+      return html` <div
+        style="
+          display: flex;
+          flex-direction: column;
+          background-color: ${unsafeCSSVarV2('layer/background/primary')};
+          padding: 4px;
+          border-radius: 12px;
+"
+      >
+        ${items}
+      </div>`;
     }
     const result: TemplateResult = html` ${index === 0
         ? ''

@@ -7,16 +7,17 @@ import {
 } from '@blocksuite/block-std';
 import { assertExists, Bound, WithDisposable } from '@blocksuite/global/utils';
 import { cssVarV2 } from '@toeverything/theme/v2';
-import { css, html } from 'lit';
+import { css, html, nothing } from 'lit';
 import { property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
 
 import {
-  type FrameBlockComponent,
-  frameTitleStyleVars,
-} from '../../../../frame-block/index.js';
+  AFFINE_FRAME_TITLE_WIDGET,
+  type AffineFrameTitleWidget,
+} from '../../../widgets/frame-title/index.js';
+import { frameTitleStyleVars } from '../../../widgets/frame-title/styles.js';
 
 export class EdgelessFrameTitleEditor extends WithDisposable(
   ShadowlessElement
@@ -42,20 +43,8 @@ export class EdgelessFrameTitleEditor extends WithDisposable(
     return this.edgeless.host;
   }
 
-  get frameBlock() {
-    const block = this.editorHost.view.getBlock(
-      this.frameModel.id
-    ) as FrameBlockComponent | null;
-    return block;
-  }
-
   get inlineEditor() {
-    assertExists(this.richText.inlineEditor);
-    return this.richText.inlineEditor;
-  }
-
-  get inlineEditorContainer() {
-    return this.inlineEditor.rootElement;
+    return this.richText?.inlineEditor;
   }
 
   private _unmount() {
@@ -78,6 +67,8 @@ export class EdgelessFrameTitleEditor extends WithDisposable(
     assertExists(dispatcher);
     this.updateComplete
       .then(() => {
+        if (!this.inlineEditor) return;
+
         this.inlineEditor.selectAll();
 
         this.inlineEditor.slots.renderComplete.on(() => {
@@ -106,7 +97,7 @@ export class EdgelessFrameTitleEditor extends WithDisposable(
         this.disposables.add(dispatcher.add('click', () => true));
         this.disposables.add(dispatcher.add('doubleClick', () => true));
         this.disposables.addFromEvent(
-          this.inlineEditorContainer,
+          this.inlineEditor.rootElement,
           'blur',
           () => {
             this._unmount();
@@ -123,6 +114,9 @@ export class EdgelessFrameTitleEditor extends WithDisposable(
   }
 
   override render() {
+    const rootBlockId = this.editorHost.doc.root?.id;
+    if (!rootBlockId) return nothing;
+
     const viewport = this.edgeless.service.viewport;
     const bound = Bound.deserialize(this.frameModel.xywh);
     const [x, y] = viewport.toViewCoord(bound.x, bound.y);
@@ -133,7 +127,16 @@ export class EdgelessFrameTitleEditor extends WithDisposable(
       model => model !== this.frameModel && model instanceof FrameBlockModel
     );
 
-    const colors = this.frameBlock?.titleElement?.colors ?? {
+    const frameTitleWidget = this.edgeless.std.view.getWidget(
+      AFFINE_FRAME_TITLE_WIDGET,
+      rootBlockId
+    ) as AffineFrameTitleWidget | null;
+
+    if (!frameTitleWidget) return nothing;
+
+    const frameTitle = frameTitleWidget.getFrameTitle(this.frameModel);
+
+    const colors = frameTitle?.colors ?? {
       background: cssVarV2('edgeless/frame/background/white'),
       text: 'var(--affine-text-primary-color)',
     };
@@ -170,7 +173,7 @@ export class EdgelessFrameTitleEditor extends WithDisposable(
   accessor frameModel!: FrameBlockModel;
 
   @query('rich-text')
-  accessor richText!: RichText;
+  accessor richText: RichText | null = null;
 }
 
 declare global {

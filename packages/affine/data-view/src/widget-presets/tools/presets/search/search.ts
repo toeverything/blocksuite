@@ -2,7 +2,7 @@ import { unsafeCSSVarV2 } from '@blocksuite/affine-shared/theme';
 import { IS_MOBILE } from '@blocksuite/global/env';
 import { CloseIcon, SearchIcon } from '@blocksuite/icons/lit';
 import { baseTheme } from '@toeverything/theme';
-import { css, html, nothing, unsafeCSS } from 'lit';
+import { css, html, unsafeCSS } from 'lit';
 import { query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -134,24 +134,16 @@ export class DataViewHeaderToolsSearch extends WidgetBase<
 
   preventBlur = false;
 
-  get showSearch(): boolean {
-    return this._showSearch;
-  }
-
-  set showSearch(value: boolean) {
-    this._showSearch = value;
-    const tools = this.closest('data-view-header-tools');
-    if (tools) {
-      tools.showToolBar = value;
-    }
+  override connectedCallback() {
+    super.connectedCallback();
+    this.style.display = IS_MOBILE ? 'none' : 'flex';
   }
 
   override render() {
-    if (IS_MOBILE) return nothing;
-
     const searchToolClassMap = classMap({
       'affine-database-search-container': true,
       'search-container-expand': this.showSearch,
+      active: this.showSearch,
     });
     return html`
       <label class="${searchToolClassMap}" @click="${this._clickSearch}">
@@ -190,7 +182,7 @@ export class DataViewHeaderToolsSearch extends WidgetBase<
   private accessor _searchInput!: HTMLInputElement;
 
   @state()
-  private accessor _showSearch = false;
+  private accessor showSearch = false;
 }
 
 declare global {

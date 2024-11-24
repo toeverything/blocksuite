@@ -109,6 +109,7 @@ export class EmbedHtmlBlockComponent extends EmbedBlockComponent<EmbedHtmlModel>
                   sandbox="allow-scripts"
                   scrolling="no"
                   .srcdoc=${htmlSrc}
+                  loading="lazy"
                 ></iframe>
                 <embed-html-fullscreen-toolbar
                   .embedHtml=${this}
