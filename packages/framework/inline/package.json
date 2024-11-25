@@ -1,6 +1,6 @@
 {
   "name": "@blocksuite/inline",
-  "version": "0.17.33",
+  "version": "0.18.0",
   "description": "A micro editor.",
   "type": "module",
   "repository": {
