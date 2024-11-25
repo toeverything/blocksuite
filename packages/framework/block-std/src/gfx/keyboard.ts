@@ -16,25 +16,40 @@ export class KeyboardController {
 
   private _init() {
     this._disposable.add(
-      this.std.event.add('keyDown', evt => {
-        const state = evt.get('keyboardState');
-
-        this.shiftKey$.value = state.raw.shiftKey && state.raw.key === 'Shift';
-        this.spaceKey$.value = state.raw.code === 'Space';
+      this._listenKeyboard('keydown', evt => {
+        this.shiftKey$.value = evt.shiftKey && evt.key === 'Shift';
+        this.spaceKey$.value = evt.code === 'Space';
       })
     );
 
     this._disposable.add(
-      this.std.event.add('keyUp', evt => {
-        const state = evt.get('keyboardState');
+      this._listenKeyboard('keyup', evt => {
+        this.shiftKey$.value = evt.shiftKey ? true : false;
 
-        this.shiftKey$.value = state.raw.shiftKey && state.raw.key === 'Shift';
-
-        if (state.raw.code === 'Space') {
+        if (evt.code === 'Space') {
           this.spaceKey$.value = false;
         }
       })
     );
+  }
+
+  private _listenKeyboard(
+    event: 'keydown' | 'keyup',
+    callback: (keyboardEvt: KeyboardEvent) => void
+  ) {
+    const handler = (evt: KeyboardEvent) => {
+      if ((evt.target as HTMLElement).tagName === 'INPUT') {
+        return;
+      }
+
+      callback(evt);
+    };
+
+    document.addEventListener(event, handler, false);
+
+    return () => {
+      document.removeEventListener(event, handler, false);
+    };
   }
 
   dispose() {
