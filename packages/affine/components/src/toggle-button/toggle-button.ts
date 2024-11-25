@@ -1,10 +1,12 @@
 import { ShadowlessElement } from '@blocksuite/block-std';
 import { WithDisposable } from '@blocksuite/global/utils';
-import { css } from 'lit';
+import { css, unsafeCSS } from 'lit';
 import { property } from 'lit/decorators.js';
 import { html } from 'lit-html';
 
 import { toggleDown, toggleRight } from '../icons/list.js';
+
+export const TOGGLE_BUTTON_PARENT_CLASS = 'blocksuite-toggle-button-parent';
 
 export class ToggleButton extends WithDisposable(ShadowlessElement) {
   static override styles = css`
@@ -26,6 +28,10 @@ export class ToggleButton extends WithDisposable(ShadowlessElement) {
     }
 
     .toggle-icon[data-collapsed='true'] {
+      opacity: 1;
+    }
+
+    .${unsafeCSS(TOGGLE_BUTTON_PARENT_CLASS)}:hover .toggle-icon {
       opacity: 1;
     }
 

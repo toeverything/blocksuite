@@ -9,6 +9,7 @@ import {
   type RichText,
 } from '@blocksuite/affine-components/rich-text';
 import '@blocksuite/affine-shared/commands';
+import { TOGGLE_BUTTON_PARENT_CLASS } from '@blocksuite/affine-components/toggle-button';
 import {
   BLOCK_CHILDREN_CONTAINER_PADDING_LEFT,
   NOTE_SELECTOR,
@@ -106,9 +107,14 @@ export class ListBlockComponent extends CaptionedBlockComponent<
   override connectedCallback() {
     super.connectedCallback();
 
-    this._readonlyCollapsed = this.model.collapsed;
-
     this._inlineRangeProvider = getInlineRangeProvider(this);
+
+    this.disposables.add(
+      effect(() => {
+        const collapsed = this.model.collapsed$.value;
+        this._readonlyCollapsed = collapsed;
+      })
+    );
 
     this.disposables.add(
       effect(() => {
@@ -157,6 +163,7 @@ export class ListBlockComponent extends CaptionedBlockComponent<
             'affine-list-rich-text-wrapper': true,
             'affine-list--checked':
               this.model.type === 'todo' && this.model.checked,
+            [TOGGLE_BUTTON_PARENT_CLASS]: true,
           })}
         >
           ${this.model.children.length > 0
