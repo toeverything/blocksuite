@@ -14,6 +14,11 @@ export const NODE_FIRST_LEVEL_HORIZONTAL_SPACING = 200;
 
 type TreeSize = {
   /**
+   * The parent of the tree
+   */
+  parent: TreeSize | null;
+
+  /**
    * The root node of the tree
    */
   root: MindmapNode;
@@ -31,18 +36,26 @@ type TreeSize = {
 
 const calculateNodeSize = (
   root: MindmapNode,
-  firstLevel = false,
+  parent: TreeSize | null = null,
   rootChildren?: MindmapNode[]
 ): TreeSize => {
   const bound = root.element.elementBound;
   const children: TreeSize[] = [];
+  const firstLevel = parent === null;
 
   rootChildren = rootChildren ?? root.children;
+
+  const treeSize: TreeSize = {
+    parent,
+    root,
+    bound,
+    children,
+  };
 
   if (rootChildren?.length) {
     const childrenBound = rootChildren.reduce(
       (pre, node) => {
-        const childSize = calculateNodeSize(node);
+        const childSize = calculateNodeSize(node, treeSize);
 
         children.push(childSize);
 
@@ -65,11 +78,28 @@ const calculateNodeSize = (
     bound.h = Math.max(bound.h, childrenBound.h);
   }
 
-  return {
-    root,
-    bound,
-    children,
-  };
+  return treeSize;
+};
+
+const isOnEdge = (tree: TreeSize, direction: 'tail' | 'front') => {
+  let current = tree;
+
+  while (current) {
+    if (!current.parent) return true;
+
+    if (direction === 'tail' && last(current.parent.children) === current) {
+      current = current.parent;
+    } else if (
+      direction === 'front' &&
+      current.parent.children[0] === current
+    ) {
+      current = current.parent;
+    } else {
+      return false;
+    }
+  }
+
+  return true;
 };
 
 const calculateResponseArea = (
@@ -78,6 +108,10 @@ const calculateResponseArea = (
   parent: TreeSize | null
 ) => {
   const TAIL_RESPONSE_AREA = NODE_HORIZONTAL_SPACING;
+  const idx = parent?.children.indexOf(tree) ?? -1;
+  const isLast =
+    idx === (parent?.children.length || -1) - 1 && isOnEdge(tree, 'tail');
+  const isFirst = idx === 0 && isOnEdge(tree, 'front');
 
   // root node
   if (!parent) {
@@ -99,14 +133,20 @@ const calculateResponseArea = (
     return;
   }
 
-  let w =
-    layoutType === LayoutType.RIGHT
+  const upperSpacing = isFirst
+    ? NODE_VERTICAL_SPACING * 2
+    : NODE_VERTICAL_SPACING / 2;
+  const lowerSpacing = isLast
+    ? NODE_VERTICAL_SPACING * 2
+    : NODE_VERTICAL_SPACING / 2;
+
+  const h = tree.bound.h + upperSpacing + lowerSpacing;
+  const w =
+    (layoutType === LayoutType.RIGHT
       ? tree.root.element.x +
         tree.root.element.w -
         (parent.root.element.x + parent.root.element.w)
-      : parent.root.element.x - tree.root.element.x;
-
-  w += TAIL_RESPONSE_AREA;
+      : parent.root.element.x - tree.root.element.x) + TAIL_RESPONSE_AREA;
 
   tree.root.responseArea = new Bound(
     layoutType === LayoutType.RIGHT
@@ -114,9 +154,9 @@ const calculateResponseArea = (
       : parent.root.element.x - w,
     tree.root.element.y -
       (tree.bound.h - tree.root.element.h) / 2 -
-      NODE_VERTICAL_SPACING / 2,
+      upperSpacing,
     w,
-    tree.bound.h + NODE_VERTICAL_SPACING
+    h
   );
   tree.root.treeBound = tree.root.responseArea;
 };
@@ -190,7 +230,7 @@ const layoutRight = (
   path = [0],
   calculateTreeBound = true
 ) => {
-  const rootTree = calculateNodeSize(root, true);
+  const rootTree = calculateNodeSize(root, null);
 
   layoutTree(
     rootTree,
@@ -208,7 +248,7 @@ const layoutLeft = (
   path = [0],
   calculateTreeBound = true
 ) => {
-  const rootTree = calculateNodeSize(root, true);
+  const rootTree = calculateNodeSize(root, null);
 
   layoutTree(
     rootTree,
@@ -226,13 +266,14 @@ const layoutBalance = (
   path = [0],
   calculateTreeBound = true
 ) => {
-  const rootTree = calculateNodeSize(root, true);
+  const rootTree = calculateNodeSize(root, null);
   const leftTree: MindmapNode[] = (root as MindmapRoot).left;
   const rightTree: MindmapNode[] = (root as MindmapRoot).right;
 
   {
-    const leftTreeSize = calculateNodeSize(root, true, leftTree);
+    const leftTreeSize = calculateNodeSize(root, null, leftTree);
     const mockRoot = {
+      parent: null,
       root: rootTree.root,
       bound: leftTreeSize.bound,
       children: leftTreeSize.children,
@@ -249,8 +290,9 @@ const layoutBalance = (
   }
 
   {
-    const rightTreeSize = calculateNodeSize(root, true, rightTree);
+    const rightTreeSize = calculateNodeSize(root, null, rightTree);
     const mockRoot = {
+      parent: null,
       root: rootTree.root,
       bound: rightTreeSize.bound,
       children: rightTreeSize.children,
@@ -291,7 +333,8 @@ const layoutBalance = (
       rootTree.root.treeBound = rootTree.root.treeBound!.unite(leftTreeBound);
     }
 
-    // expand the area of the tree if the height of the left tree and right tree are different
+    // if the height of the left tree and right tree are not equal
+    // expand the response area of lower tree to match the height of the higher tree
     if (
       leftTreeBound &&
       rightTreeBound &&
