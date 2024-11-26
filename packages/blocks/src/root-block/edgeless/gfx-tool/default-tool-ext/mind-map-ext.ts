@@ -196,7 +196,7 @@ export class MindMapExt extends DefaultToolExt {
       (this.gfx
         .getElementByPoint(position[0], position[1], {
           all: true,
-          responsePadding: [NODE_HORIZONTAL_SPACING, NODE_VERTICAL_SPACING / 2],
+          responsePadding: [NODE_HORIZONTAL_SPACING, NODE_VERTICAL_SPACING * 2],
         })
         .find(el => {
           if (!(el instanceof MindmapElementModel)) {
@@ -264,9 +264,9 @@ export class MindMapExt extends DefaultToolExt {
       const mindmapBound = mindmap.elementBound;
 
       mindmapBound.x -= NODE_HORIZONTAL_SPACING;
-      mindmapBound.y -= NODE_VERTICAL_SPACING / 2;
+      mindmapBound.y -= NODE_VERTICAL_SPACING * 2;
       mindmapBound.w += NODE_HORIZONTAL_SPACING * 2;
-      mindmapBound.h += NODE_VERTICAL_SPACING;
+      mindmapBound.h += NODE_VERTICAL_SPACING * 4;
 
       const clearOpacity = this._updateNodeOpacity(mindmap, mindmapNode);
       const clearStash = mindmap.stashTree(mindmapNode);
