@@ -12,10 +12,10 @@ import {
 } from '@blocksuite/icons/lit';
 import { html } from 'lit';
 
-import type { DataViewRenderer } from '../../../../core/data-view.js';
-import type { TableSelectionController } from '../controller/selection.js';
+import type { DataViewRenderer } from '../../../core/data-view.js';
+import type { TableSelectionController } from './controller/selection.js';
 
-import { TableRowSelection } from '../../types.js';
+import { TableRowSelection } from '../types.js';
 
 export const openDetail = (
   dataViewEle: DataViewRenderer,

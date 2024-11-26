@@ -12,7 +12,7 @@ import {
 } from '@blocksuite/icons/lit';
 import { html } from 'lit';
 
-import type { DataViewRenderer } from '../../core/data-view.js';
+import type { DataViewRenderer } from '../../../core/data-view.js';
 import type { KanbanSelectionController } from './controller/selection.js';
 
 export const openDetail = (

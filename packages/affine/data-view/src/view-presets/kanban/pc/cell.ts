@@ -10,12 +10,12 @@ import { html } from 'lit/static-html.js';
 import type {
   CellRenderProps,
   DataViewCellLifeCycle,
-} from '../../core/property/index.js';
-import type { Property } from '../../core/view-manager/property.js';
-import type { KanbanSingleView } from './kanban-view-manager.js';
-import type { KanbanViewSelection } from './types.js';
+} from '../../../core/property/index.js';
+import type { Property } from '../../../core/view-manager/property.js';
+import type { KanbanSingleView } from '../kanban-view-manager.js';
+import type { KanbanViewSelection } from '../types.js';
 
-import { renderUniLit } from '../../core/utils/uni-component/uni-component.js';
+import { renderUniLit } from '../../../core/utils/uni-component/uni-component.js';
 
 const styles = css`
   affine-data-view-kanban-cell {

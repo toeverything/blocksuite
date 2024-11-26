@@ -11,17 +11,17 @@ import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
 
-import type { KanbanSingleView } from './kanban-view-manager.js';
-import type { KanbanViewSelectionWithType } from './types.js';
+import type { KanbanSingleView } from '../kanban-view-manager.js';
+import type { KanbanViewSelectionWithType } from '../types.js';
 
-import { type DataViewInstance, renderUniLit } from '../../core/index.js';
-import { defaultActivators } from '../../core/utils/wc-dnd/sensors/index.js';
+import { type DataViewInstance, renderUniLit } from '../../../core/index.js';
+import { defaultActivators } from '../../../core/utils/wc-dnd/sensors/index.js';
 import {
   createSortContext,
   sortable,
-} from '../../core/utils/wc-dnd/sort/sort-context.js';
-import { horizontalListSortingStrategy } from '../../core/utils/wc-dnd/sort/strategies/index.js';
-import { DataViewBase } from '../../core/view/data-view-base.js';
+} from '../../../core/utils/wc-dnd/sort/sort-context.js';
+import { horizontalListSortingStrategy } from '../../../core/utils/wc-dnd/sort/strategies/index.js';
+import { DataViewBase } from '../../../core/view/data-view-base.js';
 import { KanbanClipboardController } from './controller/clipboard.js';
 import { KanbanDragController } from './controller/drag.js';
 import { KanbanHotkeysController } from './controller/hotkeys.js';

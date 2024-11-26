@@ -9,9 +9,9 @@ import { css } from 'lit';
 import { property } from 'lit/decorators.js';
 import { html } from 'lit/static-html.js';
 
-import type { SingleView } from '../../core/index.js';
+import type { SingleView } from '../../../core/index.js';
 
-import { groupTraitKey } from '../../core/group-by/trait.js';
+import { groupTraitKey } from '../../../core/group-by/trait.js';
 
 const styles = css`
   affine-data-view-kanban-header {

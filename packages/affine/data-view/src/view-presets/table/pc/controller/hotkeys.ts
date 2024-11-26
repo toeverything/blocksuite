@@ -5,7 +5,7 @@ import { popupTargetFromElement } from '@blocksuite/affine-components/context-me
 import type { DataViewTable } from '../table-view.js';
 
 import { TableAreaSelection, TableRowSelection } from '../../types.js';
-import { popRowMenu } from '../components/menu.js';
+import { popRowMenu } from '../menu.js';
 
 export class TableHotkeysController implements ReactiveController {
   get selectionController() {

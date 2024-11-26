@@ -40,10 +40,14 @@ import {
   TextCellEditing,
 } from './property-presets/text/cell-renderer.js';
 import { DataViewKanban, DataViewTable } from './view-presets/index.js';
-import { KanbanCard } from './view-presets/kanban/card.js';
-import { KanbanCell } from './view-presets/kanban/cell.js';
-import { KanbanGroup } from './view-presets/kanban/group.js';
-import { KanbanHeader } from './view-presets/kanban/header.js';
+import { MobileKanbanCard } from './view-presets/kanban/mobile/card.js';
+import { MobileKanbanCell } from './view-presets/kanban/mobile/cell.js';
+import { MobileKanbanGroup } from './view-presets/kanban/mobile/group.js';
+import { MobileDataViewKanban } from './view-presets/kanban/mobile/kanban-view.js';
+import { KanbanCard } from './view-presets/kanban/pc/card.js';
+import { KanbanCell } from './view-presets/kanban/pc/cell.js';
+import { KanbanGroup } from './view-presets/kanban/pc/group.js';
+import { KanbanHeader } from './view-presets/kanban/pc/header.js';
 import { MobileTableCell } from './view-presets/table/mobile/cell.js';
 import { MobileTableColumnHeader } from './view-presets/table/mobile/column-header.js';
 import { MobileTableGroup } from './view-presets/table/mobile/group.js';
@@ -129,9 +133,11 @@ export function effects() {
   customElements.define('data-view-group-title-select-view', SelectGroupView);
   customElements.define('data-view-group-title-string-view', StringGroupView);
   customElements.define('affine-data-view-kanban-card', KanbanCard);
+  customElements.define('mobile-kanban-card', MobileKanbanCard);
   customElements.define('filter-bar', FilterBar);
   customElements.define('data-view-group-title-number-view', NumberGroupView);
   customElements.define('affine-data-view-kanban-cell', KanbanCell);
+  customElements.define('mobile-kanban-cell', MobileKanbanCell);
   customElements.define('affine-lit-icon', AffineLitIcon);
   customElements.define('filter-condition-view', FilterConditionView);
   customElements.define('data-view-group-setting', GroupSetting);
@@ -154,6 +160,7 @@ export function effects() {
   customElements.define('data-view-table-selection', SelectionElement);
   customElements.define('affine-database-new-record-preview', NewRecordPreview);
   customElements.define('affine-data-view-kanban-group', KanbanGroup);
+  customElements.define('mobile-kanban-group', MobileKanbanGroup);
   customElements.define(
     'data-view-header-tools-filter',
     DataViewHeaderToolsFilter
@@ -164,6 +171,7 @@ export function effects() {
     DataViewHeaderToolsViewOptions
   );
   customElements.define('affine-data-view-kanban', DataViewKanban);
+  customElements.define('mobile-data-view-kanban', MobileDataViewKanban);
   customElements.define('affine-data-view-kanban-header', KanbanHeader);
   customElements.define('variable-ref-view', VariableRefView);
   customElements.define('affine-data-view-record-detail', RecordDetail);
