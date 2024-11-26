@@ -3,8 +3,6 @@ import type { ReactiveController } from 'lit';
 import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 import { assertExists } from '@blocksuite/global/utils';
 
-import type { KanbanGroup } from '../group.js';
-import type { DataViewKanban } from '../kanban-view.js';
 import type {
   KanbanCardSelection,
   KanbanCardSelectionCard,
@@ -12,7 +10,9 @@ import type {
   KanbanGroupSelection,
   KanbanViewSelection,
   KanbanViewSelectionWithType,
-} from '../types.js';
+} from '../../types.js';
+import type { KanbanGroup } from '../group.js';
+import type { DataViewKanban } from '../kanban-view.js';
 
 import { KanbanCard } from '../card.js';
 import { KanbanCell } from '../cell.js';

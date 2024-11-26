@@ -109,6 +109,7 @@ export class MobileTableCell extends SignalWatcher(
 
   override connectedCallback() {
     super.connectedCallback();
+    if (this.column.readonly$.value) return;
     this.disposables.add(
       effect(() => {
         const isEditing = this.isEditing$.value;

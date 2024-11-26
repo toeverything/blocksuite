@@ -6,8 +6,8 @@ import { computed } from '@preact/signals-core';
 
 import type { DataViewKanban } from '../kanban-view.js';
 
-import { autoScrollOnBoundary } from '../../../core/utils/auto-scroll.js';
-import { startDrag } from '../../../core/utils/drag.js';
+import { autoScrollOnBoundary } from '../../../../core/utils/auto-scroll.js';
+import { startDrag } from '../../../../core/utils/drag.js';
 import { KanbanCard } from '../card.js';
 import { KanbanGroup } from '../group.js';
 

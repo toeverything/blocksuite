@@ -8,8 +8,8 @@ import { classMap } from 'lit/directives/class-map.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { html } from 'lit/static-html.js';
 
-import type { DataViewRenderer } from '../../core/data-view.js';
-import type { KanbanColumn, KanbanSingleView } from './kanban-view-manager.js';
+import type { DataViewRenderer } from '../../../core/data-view.js';
+import type { KanbanColumn, KanbanSingleView } from '../kanban-view-manager.js';
 
 import { openDetail, popCardMenu } from './menu.js';
 

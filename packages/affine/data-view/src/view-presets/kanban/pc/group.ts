@@ -11,12 +11,12 @@ import { property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { html } from 'lit/static-html.js';
 
-import type { DataViewRenderer } from '../../core/data-view.js';
-import type { GroupData } from '../../core/group-by/trait.js';
-import type { KanbanSingleView } from './kanban-view-manager.js';
+import type { DataViewRenderer } from '../../../core/data-view.js';
+import type { GroupData } from '../../../core/group-by/trait.js';
+import type { KanbanSingleView } from '../kanban-view-manager.js';
 
-import { GroupTitle } from '../../core/group-by/group-title.js';
-import { dragHandler } from '../../core/utils/wc-dnd/dnd-context.js';
+import { GroupTitle } from '../../../core/group-by/group-title.js';
+import { dragHandler } from '../../../core/utils/wc-dnd/dnd-context.js';
 
 const styles = css`
   affine-data-view-kanban-group {

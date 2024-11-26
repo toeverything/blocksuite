@@ -1,8 +1,8 @@
-import type { KanbanCard } from '../../view-presets/kanban/card.js';
+import type { KanbanCard } from '../../view-presets/kanban/pc/card.js';
 import type { KanbanCardSelection } from '../../view-presets/kanban/types.js';
 import type { RecordDetail } from './detail.js';
 
-import { KanbanCell } from '../../view-presets/kanban/cell.js';
+import { KanbanCell } from '../../view-presets/kanban/pc/cell.js';
 import { RecordField } from './field.js';
 
 type DetailViewSelection = {

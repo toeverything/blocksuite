@@ -12,7 +12,7 @@ import type { DataViewRenderer } from '../../../../core/data-view.js';
 import type { TableSingleView } from '../../table-view-manager.js';
 
 import { TableRowSelection, type TableViewSelection } from '../../types.js';
-import { openDetail, popRowMenu } from '../components/menu.js';
+import { openDetail, popRowMenu } from '../menu.js';
 
 export class TableRow extends SignalWatcher(WithDisposable(ShadowlessElement)) {
   static override styles = css`
