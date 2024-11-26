@@ -33,26 +33,14 @@ export class KeyboardController {
     );
   }
 
-  private _isEditableElement(evt: HTMLElement) {
-    return evt.closest('input, textarea, [contenteditable="true")') !== null;
-  }
-
   private _listenKeyboard(
     event: 'keydown' | 'keyup',
     callback: (keyboardEvt: KeyboardEvent) => void
   ) {
-    const handler = (evt: KeyboardEvent) => {
-      if (this._isEditableElement(evt.target as HTMLElement)) {
-        return;
-      }
-
-      callback(evt);
-    };
-
-    document.addEventListener(event, handler, false);
+    document.addEventListener(event, callback, false);
 
     return () => {
-      document.removeEventListener(event, handler, false);
+      document.removeEventListener(event, callback, false);
     };
   }
 
