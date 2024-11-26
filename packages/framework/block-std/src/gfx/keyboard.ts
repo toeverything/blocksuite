@@ -33,12 +33,16 @@ export class KeyboardController {
     );
   }
 
+  private _isEditableElement(evt: HTMLElement) {
+    return evt.closest('input, textarea, [contenteditable="true")') !== null;
+  }
+
   private _listenKeyboard(
     event: 'keydown' | 'keyup',
     callback: (keyboardEvt: KeyboardEvent) => void
   ) {
     const handler = (evt: KeyboardEvent) => {
-      if ((evt.target as HTMLElement).tagName === 'INPUT') {
+      if (this._isEditableElement(evt.target as HTMLElement)) {
         return;
       }
 
