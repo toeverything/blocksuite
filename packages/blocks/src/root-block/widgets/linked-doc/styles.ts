@@ -1,4 +1,4 @@
-import { unsafeCSSVarV2 } from '@blocksuite/affine-shared/theme';
+import { unsafeCSSVar, unsafeCSSVarV2 } from '@blocksuite/affine-shared/theme';
 import { baseTheme } from '@toeverything/theme';
 import { css, unsafeCSS } from 'lit';
 
@@ -31,8 +31,8 @@ export const linkedDocPopoverStyles = css`
     overflow-y: auto;
 
     background: ${unsafeCSSVarV2('layer/background/primary')};
-    box-shadow: var(--affine-shadow-2);
-    border-radius: 12px;
+    box-shadow: ${unsafeCSSVar('overlayPanelShadow')};
+    border-radius: 8px;
     z-index: var(--affine-z-index-popover);
   }
 
