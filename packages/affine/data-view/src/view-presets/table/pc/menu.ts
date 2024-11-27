@@ -116,7 +116,6 @@ export const popRowMenu = (
       ],
     }),
     menu.group({
-      name: '',
       items: [
         menu.action({
           name: 'Delete Row',

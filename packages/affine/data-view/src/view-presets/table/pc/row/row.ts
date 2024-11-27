@@ -213,7 +213,13 @@ export class TableRow extends SignalWatcher(WithDisposable(ShadowlessElement)) {
               return;
             }
             const ele = e.currentTarget as HTMLElement;
-            if (!TableRowSelection.is(this.selectionController.selection)) {
+            const selection = this.selectionController.selection;
+            if (
+              !TableRowSelection.is(selection) ||
+              !selection.rows.some(
+                row => row.id === this.rowId && row.groupKey === this.groupKey
+              )
+            ) {
               const row = { id: this.rowId, groupKey: this.groupKey };
               this.setSelection(
                 TableRowSelection.create({
