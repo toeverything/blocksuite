@@ -1,6 +1,6 @@
 {
   "name": "@blocksuite/affine-components",
-  "version": "0.18.0",
+  "version": "0.18.1",
   "description": "Default BlockSuite editable blocks.",
   "type": "module",
   "repository": {
