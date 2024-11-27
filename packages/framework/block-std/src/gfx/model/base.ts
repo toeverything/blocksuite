@@ -42,6 +42,20 @@ export interface GfxCompatibleInterface extends IBound, GfxElementGeometry {
   readonly deserializedXYWH: XYWH;
 
   readonly elementBound: Bound;
+
+  /**
+   * Indicates whether the current block is explicitly locked by self.
+   * For checking the lock status of the element, use `isLocked` instead.
+   * For locking the element, use `lock` instead.
+   */
+  lockedBySelf?: boolean;
+
+  /**
+   * Check if the element is locked. It will check the lock status of the element and its ancestors.
+   */
+  isLocked(): boolean;
+  isLockedBySelf(): boolean;
+  isLockedByAncestor(): boolean;
 }
 
 /**

@@ -30,6 +30,9 @@ import type { SurfaceBlockModel } from './surface-model.js';
 import {
   descendantElementsImpl,
   hasDescendantElementImpl,
+  isLockedByAncestorImpl,
+  isLockedBySelfImpl,
+  isLockedImpl,
 } from '../../../utils/tree.js';
 import { gfxGroupCompatibleSymbol } from '../base.js';
 import {
@@ -229,6 +232,18 @@ export abstract class GfxPrimitiveElementModel<
         this.getLineIntersections(point, points[(i + 1) % points.length])
       )
     );
+  }
+
+  isLocked(): boolean {
+    return isLockedImpl(this);
+  }
+
+  isLockedByAncestor(): boolean {
+    return isLockedByAncestorImpl(this);
+  }
+
+  isLockedBySelf(): boolean {
+    return isLockedBySelfImpl(this);
   }
 
   onCreated() {}

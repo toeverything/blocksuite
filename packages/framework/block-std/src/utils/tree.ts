@@ -1,6 +1,7 @@
-import type { GfxModel } from '../gfx/model/model.js';
+import type { GfxGroupModel, GfxModel } from '../gfx/model/model.js';
 
 import {
+  type GfxCompatibleInterface,
   type GfxGroupCompatibleInterface,
   isGfxGroupCompatibleModel,
 } from '../gfx/model/base.js';
@@ -68,8 +69,8 @@ function traverse(
   innerTraverse(element);
 }
 
-export function getAncestorContainersImpl(element: GfxModel) {
-  const containers: GfxGroupCompatibleInterface[] = [];
+export function getAncestorContainersImpl(element: GfxCompatibleInterface) {
+  const containers = [];
 
   let container = element.group;
   while (container) {
@@ -108,7 +109,7 @@ export function hasDescendantElementImpl(
  * This checker is used to prevent circular reference, when adding a child element to a container.
  */
 export function canSafeAddToContainer(
-  container: GfxGroupCompatibleInterface & GfxModel,
+  container: GfxGroupModel,
   element: GfxModel
 ) {
   if (
@@ -118,4 +119,18 @@ export function canSafeAddToContainer(
     return false;
   }
   return true;
+}
+
+export function isLockedByAncestorImpl(
+  element: GfxCompatibleInterface
+): boolean {
+  return getAncestorContainersImpl(element).some(isLockedBySelfImpl);
+}
+
+export function isLockedBySelfImpl(element: GfxCompatibleInterface): boolean {
+  return element.lockedBySelf ?? false;
+}
+
+export function isLockedImpl(element: GfxCompatibleInterface): boolean {
+  return isLockedBySelfImpl(element) || isLockedByAncestorImpl(element);
 }
