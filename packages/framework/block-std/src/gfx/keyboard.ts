@@ -24,7 +24,8 @@ export class KeyboardController {
 
     this._disposable.add(
       this._listenKeyboard('keyup', evt => {
-        this.shiftKey$.value = evt.shiftKey ? true : false;
+        this.shiftKey$.value =
+          evt.shiftKey && evt.key === 'Shift' ? true : false;
 
         if (evt.code === 'Space') {
           this.spaceKey$.value = false;
