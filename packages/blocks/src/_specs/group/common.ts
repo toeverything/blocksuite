@@ -9,7 +9,11 @@ import {
 } from '@blocksuite/affine-block-embed';
 import { ListBlockSpec } from '@blocksuite/affine-block-list';
 import { ParagraphBlockSpec } from '@blocksuite/affine-block-paragraph';
-import { SheetBlockSpec } from '@blocksuite/affine-block-sheet';
+import {
+  SheetBlockSpec,
+  SheetCellSpec,
+  SheetRowSpec,
+} from '@blocksuite/affine-block-sheet';
 
 import { AttachmentBlockSpec } from '../../attachment-block/attachment-spec.js';
 import { BookmarkBlockSpec } from '../../bookmark-block/bookmark-spec.js';
@@ -43,4 +47,6 @@ export {
   NoteBlockSpec,
   ParagraphBlockSpec,
   SheetBlockSpec,
+  SheetCellSpec,
+  SheetRowSpec,
 };

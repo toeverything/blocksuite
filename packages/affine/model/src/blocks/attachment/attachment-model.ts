@@ -82,6 +82,7 @@ export const AttachmentBlockSchema = defineBlockSchema({
       'affine:edgeless-text',
       'affine:paragraph',
       'affine:list',
+      'affine:sheet-cell',
     ],
   },
   transformer: () => new AttachmentBlockTransformer(),

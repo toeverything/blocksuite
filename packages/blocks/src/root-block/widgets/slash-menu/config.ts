@@ -27,6 +27,7 @@ import {
   LinkIcon,
   NewDocIcon,
   NowIcon,
+  SheetMenuIcon,
   TodayIcon,
   TomorrowIcon,
   YesterdayIcon,
@@ -59,6 +60,7 @@ import { formatDate, formatTime } from '../../utils/misc.js';
 import { type SlashMenuTooltip, slashMenuToolTips } from './tooltips/index.js';
 import {
   createConversionItem,
+  createSheetBlockInNextLine,
   createTextFormatItem,
   insideEdgelessText,
   tryRemoveEmptyLine,
@@ -177,9 +179,25 @@ export const defaultSlashMenuConfig: SlashMenuConfig = {
 
     // ---------------------------------------------------------
     { groupName: 'Sheet' },
-    ...textConversionConfigs
-      .filter(i => i.flavour === 'affine:sheet')
-      .map(createConversionItem),
+    {
+      name: 'Sheet',
+      description: 'create a sheet for layout.',
+      alias: ['sheet'],
+      icon: SheetMenuIcon,
+      tooltip: slashMenuToolTips['Sheet'],
+      showWhen: ({ model }) =>
+        model.doc.schema.flavourSchemaMap.has('affine:sheet'),
+      action: ({ rootComponent, model }) => {
+        const id = createSheetBlockInNextLine(model);
+        if (!id) {
+          return;
+        }
+        const service = rootComponent.std.getService('affine:sheet');
+        if (!service) return;
+        service.initSheetBlock(rootComponent.doc, model, id);
+        tryRemoveEmptyLine(model);
+      },
+    },
 
     // ---------------------------------------------------------
     { groupName: 'Style' },

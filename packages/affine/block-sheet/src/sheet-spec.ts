@@ -11,7 +11,11 @@ import {
   SheetKeymapExtension,
   SheetTextKeymapExtension,
 } from './sheet-keymap.js';
-import { SheetBlockService } from './sheet-service.js';
+import {
+  SheetBlockService,
+  SheetCellService,
+  SheetRowService,
+} from './sheet-service.js';
 
 export const SheetBlockSpec: ExtensionType[] = [
   FlavourExtension('affine:sheet'),
@@ -20,4 +24,16 @@ export const SheetBlockSpec: ExtensionType[] = [
   BlockViewExtension('affine:sheet', literal`affine-sheet`),
   SheetKeymapExtension,
   SheetTextKeymapExtension,
+];
+
+export const SheetRowSpec: ExtensionType[] = [
+  FlavourExtension('affine:sheet-row'),
+  SheetRowService,
+  BlockViewExtension('affine:sheet-row', literal`affine-sheet-row`),
+];
+
+export const SheetCellSpec: ExtensionType[] = [
+  FlavourExtension('affine:sheet-cell'),
+  SheetCellService,
+  BlockViewExtension('affine:sheet-cell', literal`affine-sheet-cell`),
 ];

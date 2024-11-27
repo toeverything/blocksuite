@@ -31,6 +31,7 @@ export const LatexBlockSchema = defineBlockSchema({
       'affine:edgeless-text',
       'affine:paragraph',
       'affine:list',
+      'affine:sheet-cell',
     ],
   },
   toModel: () => {

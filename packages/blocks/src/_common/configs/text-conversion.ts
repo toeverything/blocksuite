@@ -13,7 +13,6 @@ import {
   Heading6Icon,
   NumberedListIcon,
   QuoteIcon,
-  SheetMenuIcon,
   TextIcon,
 } from '@blocksuite/affine-components/icons';
 
@@ -111,14 +110,7 @@ export const textConversionConfigs: TextConversionConfig[] = [
     hotkey: null,
     icon: CheckBoxIcon,
   },
-  {
-    flavour: 'affine:sheet',
-    type: 'sheet',
-    name: 'Sheet',
-    description: 'Create a sheet for data.',
-    hotkey: null,
-    icon: SheetMenuIcon,
-  },
+
   {
     flavour: 'affine:code',
     type: undefined,

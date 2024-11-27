@@ -3,7 +3,11 @@ import type { ExtensionType } from '@blocksuite/block-std';
 import { EmbedExtensions } from '@blocksuite/affine-block-embed';
 import { ListBlockSpec } from '@blocksuite/affine-block-list';
 import { ParagraphBlockSpec } from '@blocksuite/affine-block-paragraph';
-import { SheetBlockSpec } from '@blocksuite/affine-block-sheet';
+import {
+  SheetBlockSpec,
+  SheetCellSpec,
+  SheetRowSpec,
+} from '@blocksuite/affine-block-sheet';
 import { RichTextExtensions } from '@blocksuite/affine-components/rich-text';
 import { EditPropsStore } from '@blocksuite/affine-shared/services';
 
@@ -24,6 +28,8 @@ export const CommonFirstPartyBlockSpecs: ExtensionType[] = [
   EditPropsStore,
   ListBlockSpec,
   SheetBlockSpec,
+  SheetRowSpec,
+  SheetCellSpec,
   NoteBlockSpec,
   DatabaseBlockSpec,
   DataViewBlockSpec,
@@ -41,6 +47,8 @@ export const EdgelessFirstPartyBlockSpecs: ExtensionType[] = [
   EditPropsStore,
   ListBlockSpec,
   SheetBlockSpec,
+  SheetRowSpec,
+  SheetCellSpec,
   EdgelessNoteBlockSpec,
   DatabaseBlockSpec,
   DataViewBlockSpec,

@@ -142,3 +142,17 @@ export function createTextFormatItem(
     },
   };
 }
+
+export function createSheetBlockInNextLine(model: BlockModel) {
+  let parent = model.doc.getParent(model);
+  while (parent && parent.flavour !== 'affine:note') {
+    model = parent;
+    parent = model.doc.getParent(parent);
+  }
+  if (!parent) {
+    return;
+  }
+  const index = parent.children.indexOf(model);
+
+  return model.doc.addBlock('affine:sheet', {}, parent, index + 1);
+}
