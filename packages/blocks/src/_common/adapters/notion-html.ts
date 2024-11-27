@@ -523,6 +523,19 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
           const notionListType = context.getNodeContext('hast:list:type');
           const listType =
             notionListType === 'toggle' ? 'bulleted' : notionListType;
+          let delta: DeltaInsert[] = [];
+          if (notionListType === 'toggle') {
+            delta = this._hastToDelta(
+              hastQuerySelector(o.node, 'summary') ?? o.node,
+              { pageMap }
+            );
+          } else if (notionListType === 'todo') {
+            delta = this._hastToDelta(o.node, { pageMap });
+          } else {
+            delta = this._hastToDelta(hastGetInlineOnlyElementAST(o.node), {
+              pageMap,
+            });
+          }
           context.openNode(
             {
               type: 'block',
@@ -532,13 +545,7 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
                 type: listType,
                 text: {
                   '$blocksuite:internal:text$': true,
-                  delta:
-                    notionListType !== 'toggle'
-                      ? this._hastToDelta(o.node, { pageMap })
-                      : this._hastToDelta(
-                          hastQuerySelector(o.node, 'summary') ?? o.node,
-                          { pageMap }
-                        ),
+                  delta,
                 },
                 checked:
                   notionListType === 'todo'
@@ -1028,7 +1035,10 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
         case 'div': {
           if (
             o.parent?.node.type === 'element' &&
-            o.parent.node.tagName !== 'li' &&
+            !(
+              o.parent.node.tagName === 'li' &&
+              hastQuerySelector(o.parent.node, NotionCheckboxToken)
+            ) &&
             Array.isArray(o.node.properties?.className)
           ) {
             if (o.node.properties.className.includes('indented')) {
