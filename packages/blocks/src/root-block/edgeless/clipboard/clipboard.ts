@@ -1,8 +1,4 @@
-import type {
-  Connection,
-  GfxCompatibleProps,
-  ReferenceParams,
-} from '@blocksuite/affine-model';
+import type { Connection, ReferenceParams } from '@blocksuite/affine-model';
 import type {
   BlockStdScope,
   EditorHost,
@@ -33,6 +29,7 @@ import {
 } from '@blocksuite/affine-shared/utils';
 import {
   compareLayer,
+  type GfxCompatibleProps,
   type SerializedElement,
   SortOrder,
 } from '@blocksuite/block-std/gfx';

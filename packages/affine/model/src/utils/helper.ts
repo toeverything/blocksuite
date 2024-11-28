@@ -1,13 +1,13 @@
+import type { GfxCompatibleProps } from '@blocksuite/block-std/gfx';
 import type { Constructor } from '@blocksuite/global/utils';
 
+import { GfxCompatible } from '@blocksuite/block-std/gfx';
 import {
   type BaseBlockTransformer,
   type BlockModel,
   defineBlockSchema,
   type InternalPrimitives,
 } from '@blocksuite/store';
-
-import { GfxCompatible, type GfxCompatibleProps } from './gfx-compatible.js';
 
 export function defineEmbedModel<
   Props extends object,
