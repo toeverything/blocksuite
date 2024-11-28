@@ -83,24 +83,24 @@ export class MixTextAdapter extends BaseAdapter<MixText> {
       const text = (o.node.props.text ?? { delta: [] }) as {
         delta: DeltaInsert[];
       };
+      if (buffer.length > 0) {
+        buffer += '\n';
+      }
       switch (o.node.flavour) {
         case 'affine:code': {
           buffer += text.delta.map(delta => delta.insert).join('');
-          buffer += '\n';
           break;
         }
         case 'affine:paragraph': {
           buffer += text.delta.map(delta => delta.insert).join('');
-          buffer += '\n';
           break;
         }
         case 'affine:list': {
           buffer += text.delta.map(delta => delta.insert).join('');
-          buffer += '\n';
           break;
         }
         case 'affine:divider': {
-          buffer += '---\n';
+          buffer += '---';
           break;
         }
       }
