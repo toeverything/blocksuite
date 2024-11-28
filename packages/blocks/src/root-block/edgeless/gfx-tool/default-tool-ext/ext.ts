@@ -30,6 +30,10 @@ export class DefaultToolExt {
     return this.defaultTool.gfx;
   }
 
+  get std() {
+    return this.defaultTool.std;
+  }
+
   constructor(protected defaultTool: DefaultTool) {}
 
   initDrag(_: DragState): {
