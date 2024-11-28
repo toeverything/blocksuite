@@ -276,6 +276,10 @@ export class Bound implements IBound {
     return !(this.maxX < bound.minX || this.minX > bound.maxX);
   }
 
+  moveDelta(dx: number, dy: number) {
+    return new Bound(this.x + dx, this.y + dy, this.w, this.h);
+  }
+
   serialize(): SerializedXYWH {
     return serializeXYWH(this.x, this.y, this.w, this.h);
   }
