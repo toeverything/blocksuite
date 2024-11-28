@@ -63,11 +63,11 @@ export class MindMapIndicatorOverlay extends Overlay {
   }
 
   private _generatePath() {
-    const startRelativePoint =
+    const startRelativePos =
       this.direction === LayoutType.RIGHT
         ? PointLocation.fromVec([1, 0.5])
         : PointLocation.fromVec([0, 0.5]);
-    const endRelativePoint =
+    const endRelativePos =
       this.direction === LayoutType.RIGHT
         ? PointLocation.fromVec([0, 0.5])
         : PointLocation.fromVec([1, 0.5]);
@@ -76,8 +76,8 @@ export class MindMapIndicatorOverlay extends Overlay {
     if (this.mode === ConnectorMode.Orthogonal) {
       return this.pathGen
         .generateOrthogonalConnectorPath({
-          startPoint: startRelativePoint,
-          endPoint: endRelativePoint,
+          startPoint: this._getRelativePoint(parentBound!, startRelativePos),
+          endPoint: this._getRelativePoint(newPosBound!, endRelativePos),
           startBound: parentBound,
           endBound: newPosBound,
         })
@@ -85,11 +85,11 @@ export class MindMapIndicatorOverlay extends Overlay {
     } else if (this.mode === ConnectorMode.Curve) {
       const startPoint = this._getRelativePoint(
         this.parentBound!,
-        startRelativePoint
+        startRelativePos
       );
       const endPoint = this._getRelativePoint(
         this.targetBound!,
-        endRelativePoint
+        endRelativePos
       );
 
       const startTangentVertical = Vec.rot(startPoint.tangent, -Math.PI / 2);
@@ -116,10 +116,10 @@ export class MindMapIndicatorOverlay extends Overlay {
       return [startPoint, endPoint];
     } else {
       const startPoint = new PointLocation(
-        this.parentBound!.getRelativePoint(startRelativePoint)
+        this.parentBound!.getRelativePoint(startRelativePos)
       );
       const endPoint = new PointLocation(
-        this.targetBound!.getRelativePoint(endRelativePoint)
+        this.targetBound!.getRelativePoint(endRelativePos)
       );
 
       return [startPoint, endPoint];
