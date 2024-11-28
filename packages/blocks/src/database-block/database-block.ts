@@ -427,6 +427,7 @@ export class DatabaseBlockComponent extends CaptionedBlockComponent<
                   return peekViewService.peek({
                     docId,
                     databaseId: this.blockId,
+                    databaseDocId: this.model.doc.id,
                     databaseRowId: data.rowId,
                     target: this,
                   });
