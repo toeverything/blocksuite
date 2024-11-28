@@ -11,13 +11,11 @@ import {
 } from '@blocksuite/affine-model';
 import {
   generateKeyBetween,
-  type GfxModel,
   type SurfaceBlockModel,
 } from '@blocksuite/block-std/gfx';
 import { assertType, isEqual, type IVec, last } from '@blocksuite/global/utils';
 import { DocCollection } from '@blocksuite/store';
 
-import { ConnectorPathGenerator } from '../../managers/connector-manager.js';
 import { fitContent } from '../../renderer/elements/shape/utils.js';
 import { layout } from './layout.js';
 
@@ -545,48 +543,32 @@ function determineInsertPosition(
   };
 }
 
-function showInsertPreview(
-  targetMindMap: MindmapElementModel,
-  sourceMindMap: MindmapElementModel,
-  source: MindmapNode,
-  newParent: MindmapNode,
-  insertPosition:
-    | { type: 'sibling'; layoutDir: LayoutType; position: 'prev' | 'next' }
-    | { type: 'child'; layoutDir: LayoutType },
-  path: number[]
-) {
-  const connector = targetMindMap['addConnector'](
-    newParent,
-    source,
-    insertPosition.layoutDir,
-    targetMindMap.styleGetter.getNodeStyle(source, path).connector,
-    true
-  );
-  source.overriddenDir = insertPosition.layoutDir;
-  ConnectorPathGenerator.updatePath(connector, null, (id: string) => {
-    return (targetMindMap.surface.getElementById(id) ??
-      targetMindMap.surface.doc.getBlockById(id)) as GfxModel;
-  });
-
-  sourceMindMap.layout(source, {
-    layoutType: insertPosition.layoutDir,
-    calculateTreeBound: false,
-  });
-
-  return () => {
-    targetMindMap.extraConnectors.delete(connector.id);
-    delete source.overriddenDir;
-  };
-}
-
 function showMergeIndicator(
   targetMindMap: MindmapElementModel,
   target: MindmapNode,
   sourceMindMap: MindmapElementModel,
   source: MindmapNode,
   insertPosition:
-    | { type: 'sibling'; layoutDir: LayoutType; position: 'prev' | 'next' }
-    | { type: 'child'; layoutDir: LayoutType }
+    | {
+        type: 'sibling';
+        layoutDir: Exclude<LayoutType, LayoutType.BALANCE>;
+        position: 'prev' | 'next';
+      }
+    | { type: 'child'; layoutDir: Exclude<LayoutType, LayoutType.BALANCE> },
+  callback: (option: {
+    targetMindMap: MindmapElementModel;
+    sourceMindMap: MindmapElementModel;
+    source: MindmapNode;
+    newParent: MindmapNode;
+    insertPosition:
+      | {
+          type: 'sibling';
+          layoutDir: Exclude<LayoutType, LayoutType.BALANCE>;
+          position: 'prev' | 'next';
+        }
+      | { type: 'child'; layoutDir: Exclude<LayoutType, LayoutType.BALANCE> };
+    path: number[];
+  }) => () => void
 ) {
   const newParent =
     insertPosition.type === 'child'
@@ -631,21 +613,23 @@ function showMergeIndicator(
     }
   }
 
+  sourceMindMap.layout(source, {
+    layoutType: insertPosition.layoutDir,
+    calculateTreeBound: false,
+  });
+
   // hide original connector
-  const abortHide = hideNodeConnector(sourceMindMap, source);
-  // show preview in new mind map
-  const resetPreview = showInsertPreview(
+  const abortPreview = callback({
     targetMindMap,
     sourceMindMap,
     source,
     newParent,
     insertPosition,
-    path
-  );
+    path,
+  });
 
   const abort = () => {
-    abortHide?.();
-    resetPreview();
+    abortPreview?.();
   };
 
   const merge = () => {
@@ -674,7 +658,21 @@ export function tryMoveNode(
   target: MindmapNode,
   sourceMindMap: MindmapElementModel,
   source: MindmapNode,
-  position: IVec
+  position: IVec,
+  callback: (option: {
+    targetMindMap: MindmapElementModel;
+    sourceMindMap: MindmapElementModel;
+    source: MindmapNode;
+    newParent: MindmapNode;
+    insertPosition:
+      | {
+          type: 'sibling';
+          layoutDir: Exclude<LayoutType, LayoutType.BALANCE>;
+          position: 'prev' | 'next';
+        }
+      | { type: 'child'; layoutDir: Exclude<LayoutType, LayoutType.BALANCE> };
+    path: number[];
+  }) => () => void
 ) {
   const insertInfo = determineInsertPosition(targetMindMap, target, position);
 
@@ -687,7 +685,8 @@ export function tryMoveNode(
     target,
     sourceMindMap,
     source,
-    insertInfo
+    insertInfo,
+    callback
   );
 }
 

@@ -1,21 +1,34 @@
 import type { PointerEventState } from '@blocksuite/block-std';
-import type { Bound, IVec } from '@blocksuite/global/utils';
 
 import {
   MindmapUtils,
   NODE_HORIZONTAL_SPACING,
   NODE_VERTICAL_SPACING,
+  Overlay,
+  OverlayIdentifier,
+  PathGenerator,
 } from '@blocksuite/affine-block-surface';
 import {
-  type LayoutType,
+  ConnectorMode,
+  LayoutType,
   type LocalConnectorElementModel,
   MindmapElementModel,
   type MindmapNode,
 } from '@blocksuite/affine-model';
+import { ThemeProvider } from '@blocksuite/affine-shared/services';
 import {
   type GfxModel,
   isGfxGroupCompatibleModel,
 } from '@blocksuite/block-std/gfx';
+import {
+  type Bound,
+  isVecZero,
+  type IVec,
+  last,
+  PointLocation,
+  toRadian,
+  Vec,
+} from '@blocksuite/global/utils';
 
 import {
   isMindmapNode,
@@ -29,6 +42,159 @@ type DragMindMapCtx = {
   clear?: () => void;
   originalMindMapBound: Bound;
 };
+
+export class MindMapIndicatorOverlay extends Overlay {
+  static INDICATOR_SIZE = [48, 22];
+
+  static override overlayName: string = 'mindmap-indicator';
+
+  direction: LayoutType.LEFT | LayoutType.RIGHT = LayoutType.RIGHT;
+
+  mode: ConnectorMode = ConnectorMode.Straight;
+
+  parentBound: Bound | null = null;
+
+  pathGen = new PathGenerator();
+
+  targetBound: Bound | null = null;
+
+  get themeService() {
+    return this.gfx.std.get(ThemeProvider);
+  }
+
+  private _generatePath() {
+    const startRelativePoint =
+      this.direction === LayoutType.RIGHT
+        ? PointLocation.fromVec([1, 0.5])
+        : PointLocation.fromVec([0, 0.5]);
+    const endRelativePoint =
+      this.direction === LayoutType.RIGHT
+        ? PointLocation.fromVec([0, 0.5])
+        : PointLocation.fromVec([1, 0.5]);
+    const { parentBound, targetBound: newPosBound } = this;
+
+    if (this.mode === ConnectorMode.Orthogonal) {
+      return this.pathGen
+        .generateOrthogonalConnectorPath({
+          startPoint: startRelativePoint,
+          endPoint: endRelativePoint,
+          startBound: parentBound,
+          endBound: newPosBound,
+        })
+        .map(p => new PointLocation(p));
+    } else if (this.mode === ConnectorMode.Curve) {
+      const startPoint = this._getRelativePoint(
+        this.parentBound!,
+        startRelativePoint
+      );
+      const endPoint = this._getRelativePoint(
+        this.targetBound!,
+        endRelativePoint
+      );
+
+      const startTangentVertical = Vec.rot(startPoint.tangent, -Math.PI / 2);
+      startPoint.out = Vec.mul(
+        startTangentVertical,
+        Math.max(
+          100,
+          Math.abs(
+            Vec.pry(Vec.sub(endPoint, startPoint), startTangentVertical)
+          ) / 3
+        )
+      );
+
+      const endTangentVertical = Vec.rot(endPoint.tangent, -Math.PI / 2);
+      endPoint.in = Vec.mul(
+        endTangentVertical,
+        Math.max(
+          100,
+          Math.abs(Vec.pry(Vec.sub(startPoint, endPoint), endTangentVertical)) /
+            3
+        )
+      );
+
+      return [startPoint, endPoint];
+    } else {
+      const startPoint = new PointLocation(
+        this.parentBound!.getRelativePoint(startRelativePoint)
+      );
+      const endPoint = new PointLocation(
+        this.targetBound!.getRelativePoint(endRelativePoint)
+      );
+
+      return [startPoint, endPoint];
+    }
+  }
+
+  private _getRelativePoint(bound: Bound, position: IVec) {
+    const location = new PointLocation(
+      bound.getRelativePoint(position as IVec)
+    );
+
+    if (isVecZero(Vec.sub(position, [0, 0.5])))
+      location.tangent = Vec.rot([0, -1], toRadian(0));
+    else if (isVecZero(Vec.sub(position, [1, 0.5])))
+      location.tangent = Vec.rot([0, 1], toRadian(0));
+    else if (isVecZero(Vec.sub(position, [0.5, 0])))
+      location.tangent = Vec.rot([1, 0], toRadian(0));
+    else if (isVecZero(Vec.sub(position, [0.5, 1])))
+      location.tangent = Vec.rot([-1, 0], toRadian(0));
+
+    return location;
+  }
+
+  override clear() {
+    this.targetBound = null;
+    this.parentBound = null;
+  }
+
+  override render(ctx: CanvasRenderingContext2D): void {
+    if (!this.parentBound || !this.targetBound) {
+      return;
+    }
+
+    const targetPos = this.targetBound;
+    const points = this._generatePath();
+    const color = this.themeService.getColorValue(
+      '--affine-primary-color',
+      '#1E96EB',
+      true
+    );
+
+    ctx.strokeStyle = color;
+    ctx.fillStyle = color;
+    ctx.lineWidth = 3;
+
+    ctx.roundRect(targetPos.x, targetPos.y, targetPos.w, targetPos.h, 4);
+    ctx.fill();
+
+    ctx.beginPath();
+    ctx.moveTo(points[0][0], points[0][1]);
+
+    if (this.mode === ConnectorMode.Curve) {
+      points.forEach((point, idx) => {
+        if (idx === 0) return;
+        const last = points[idx - 1];
+        ctx.bezierCurveTo(
+          last.absOut[0],
+          last.absOut[1],
+          point.absIn[0],
+          point.absIn[1],
+          point[0],
+          point[1]
+        );
+      });
+    } else {
+      points.forEach((point, idx) => {
+        if (idx === 0) return;
+        ctx.lineTo(point[0], point[1]);
+      });
+    }
+
+    ctx.stroke();
+    ctx.closePath();
+  }
+}
 
 export class MindMapExt extends DefaultToolExt {
   /**
@@ -98,7 +264,8 @@ export class MindMapExt extends DefaultToolExt {
             hoveredNode,
             dragMindMapCtx.mindmap,
             dragMindMapCtx.node,
-            [x, y]
+            [x, y],
+            options => this._drawIndicator(options)
           );
 
           if (operation) {
@@ -129,7 +296,6 @@ export class MindMapExt extends DefaultToolExt {
       },
       dragEnd: () => {
         if (hoveredCtx?.merge) {
-          hoveredCtx.abort?.();
           hoveredCtx.merge();
         } else {
           hoveredCtx?.abort?.();
@@ -185,6 +351,70 @@ export class MindMapExt extends DefaultToolExt {
           mindmap.layout();
         });
       },
+    };
+  }
+
+  private _drawIndicator(
+    options: Parameters<Parameters<typeof MindmapUtils.tryMoveNode>[5]>[0]
+  ) {
+    const indicatorOverlay = this.std.getOptional(
+      OverlayIdentifier('mindmap-indicator')
+    ) as MindMapIndicatorOverlay | null;
+
+    if (!indicatorOverlay) {
+      return () => {};
+    }
+
+    // draw the indicator at given position
+    const { newParent, insertPosition, path, targetMindMap, source } = options;
+
+    const direction = insertPosition.layoutDir as Exclude<
+      LayoutType,
+      LayoutType.BALANCE
+    >;
+    const parentBound = newParent.element.elementBound;
+
+    const children = newParent.children.filter(
+      node => node.element.id !== source.id
+    );
+    const targetIdx = last(path)!;
+    const targetChild = children[targetIdx];
+
+    const lastChild = last(newParent.children);
+
+    const targetPosition =
+      (children.length === 0
+        ? parentBound.moveDelta(
+            NODE_HORIZONTAL_SPACING / 2 + parentBound.w,
+            parentBound.h / 2 - MindMapIndicatorOverlay.INDICATOR_SIZE[1] / 2
+          )
+        : targetChild?.element.elementBound.moveDelta(
+            0,
+            -(
+              NODE_VERTICAL_SPACING / 2 +
+              MindMapIndicatorOverlay.INDICATOR_SIZE[1] / 2
+            )
+          )) ??
+      lastChild!.element.elementBound.moveDelta(
+        0,
+        lastChild!.element.elementBound.h +
+          NODE_VERTICAL_SPACING / 2 -
+          MindMapIndicatorOverlay.INDICATOR_SIZE[1] / 2
+      );
+
+    targetPosition.w = MindMapIndicatorOverlay.INDICATOR_SIZE[0];
+    targetPosition.h = MindMapIndicatorOverlay.INDICATOR_SIZE[1];
+
+    indicatorOverlay.mode = targetMindMap.styleGetter.getNodeStyle(
+      newParent,
+      path
+    ).connector.mode;
+    indicatorOverlay.direction = direction;
+    indicatorOverlay.parentBound = parentBound;
+    indicatorOverlay.targetBound = targetPosition;
+
+    return () => {
+      indicatorOverlay.clear();
     };
   }
 
