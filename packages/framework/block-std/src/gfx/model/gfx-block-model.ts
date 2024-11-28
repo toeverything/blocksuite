@@ -28,6 +28,8 @@ import {
   isLockedByAncestorImpl,
   isLockedBySelfImpl,
   isLockedImpl,
+  lockElementImpl,
+  unlockElementImpl,
 } from '../../utils/tree.js';
 
 /**
@@ -201,6 +203,14 @@ export class GfxBlockElementModel<
 
   isLockedBySelf(): boolean {
     return isLockedBySelfImpl(this);
+  }
+
+  lock() {
+    lockElementImpl(this.doc, this);
+  }
+
+  unlock() {
+    unlockElementImpl(this.doc, this);
   }
 }
 

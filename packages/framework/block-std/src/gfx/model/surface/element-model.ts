@@ -33,6 +33,8 @@ import {
   isLockedByAncestorImpl,
   isLockedBySelfImpl,
   isLockedImpl,
+  lockElementImpl,
+  unlockElementImpl,
 } from '../../../utils/tree.js';
 import { gfxGroupCompatibleSymbol } from '../base.js';
 import {
@@ -246,6 +248,10 @@ export abstract class GfxPrimitiveElementModel<
     return isLockedBySelfImpl(this);
   }
 
+  lock() {
+    lockElementImpl(this.surface.doc, this);
+  }
+
   onCreated() {}
 
   pop(prop: keyof Props | string) {
@@ -318,6 +324,10 @@ export abstract class GfxPrimitiveElementModel<
         );
       },
     });
+  }
+
+  unlock() {
+    unlockElementImpl(this.surface.doc, this);
   }
 
   @local()

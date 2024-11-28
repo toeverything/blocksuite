@@ -46,7 +46,7 @@ export interface GfxCompatibleInterface extends IBound, GfxElementGeometry {
   /**
    * Indicates whether the current block is explicitly locked by self.
    * For checking the lock status of the element, use `isLocked` instead.
-   * For locking the element, use `lock` instead.
+   * For (un)locking the element, use `(un)lock` instead.
    */
   lockedBySelf?: boolean;
 
@@ -56,6 +56,9 @@ export interface GfxCompatibleInterface extends IBound, GfxElementGeometry {
   isLocked(): boolean;
   isLockedBySelf(): boolean;
   isLockedByAncestor(): boolean;
+
+  lock(): void;
+  unlock(): void;
 }
 
 /**
