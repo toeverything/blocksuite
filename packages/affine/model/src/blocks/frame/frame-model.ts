@@ -33,6 +33,7 @@ export const FrameBlockSchema = defineBlockSchema({
     xywh: `[0,0,100,100]`,
     index: 'a0',
     childElementIds: Object.create(null),
+    lockedBySelf: false,
   }),
   metadata: {
     version: 1,
