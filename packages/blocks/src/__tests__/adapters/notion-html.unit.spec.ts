@@ -783,6 +783,144 @@ describe('notion html to snapshot', () => {
     expect(nanoidReplacement(rawBlockSnapshot)).toEqual(blockSnapshot);
   });
 
+  test('nested list with nested paragraph', async () => {
+    const html = `<div class="page-body">
+      <ul id="14a088dd-6fdb-806b-b6f2-ed515fd6283c" class="bulleted-list">
+        <li style="list-style-type:disc">list 1
+          <ul id="14a088dd-6fdb-80a4-b922-c0e0a246b544" class="bulleted-list">
+            <li style="list-style-type:circle">list 2
+              <ul id="14a088dd-6fdb-80aa-be90-c7b7fd2b25a9" class="bulleted-list">
+                <li style="list-style-type:square">list 3
+                  <p id="14a088dd-6fdb-8071-82ef-d04d31759772" class="">paragraph 1
+                    <div class="indented">
+                      <p id="14a088dd-6fdb-8020-bca3-dfba522960ff" class="">paragraph 2</p>
+                    </div>
+                  </p>
+                </li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </div>`;
+
+    const blockSnapshot: BlockSnapshot = {
+      type: 'block',
+      id: 'matchesReplaceMap[0]',
+      flavour: 'affine:note',
+      props: {
+        xywh: '[0,0,800,95]',
+        background: DEFAULT_NOTE_BACKGROUND_COLOR,
+        index: 'a0',
+        hidden: false,
+        displayMode: NoteDisplayMode.DocAndEdgeless,
+      },
+      children: [
+        {
+          type: 'block',
+          id: 'matchesReplaceMap[1]',
+          flavour: 'affine:list',
+          props: {
+            type: 'bulleted',
+            text: {
+              '$blocksuite:internal:text$': true,
+              delta: [
+                {
+                  insert: 'list 1',
+                },
+              ],
+            },
+            checked: false,
+            collapsed: false,
+          },
+          children: [
+            {
+              type: 'block',
+              id: 'matchesReplaceMap[2]',
+              flavour: 'affine:list',
+              props: {
+                type: 'bulleted',
+                text: {
+                  '$blocksuite:internal:text$': true,
+                  delta: [
+                    {
+                      insert: 'list 2',
+                    },
+                  ],
+                },
+                checked: false,
+                collapsed: false,
+              },
+              children: [
+                {
+                  type: 'block',
+                  id: 'matchesReplaceMap[3]',
+                  flavour: 'affine:list',
+                  props: {
+                    type: 'bulleted',
+                    text: {
+                      '$blocksuite:internal:text$': true,
+                      delta: [
+                        {
+                          insert: 'list 3',
+                        },
+                      ],
+                    },
+                    checked: false,
+                    collapsed: false,
+                  },
+                  children: [
+                    {
+                      type: 'block',
+                      id: 'matchesReplaceMap[4]',
+                      flavour: 'affine:paragraph',
+                      props: {
+                        type: 'text',
+                        text: {
+                          '$blocksuite:internal:text$': true,
+                          delta: [
+                            {
+                              insert: 'paragraph 1',
+                            },
+                          ],
+                        },
+                      },
+                      children: [
+                        {
+                          type: 'block',
+                          id: 'matchesReplaceMap[5]',
+                          flavour: 'affine:paragraph',
+                          props: {
+                            type: 'text',
+                            text: {
+                              '$blocksuite:internal:text$': true,
+                              delta: [
+                                {
+                                  insert: 'paragraph 2',
+                                },
+                              ],
+                            },
+                          },
+                          children: [],
+                        },
+                      ],
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    };
+
+    const adapter = new NotionHtmlAdapter(createJob());
+    const rawBlockSnapshot = await adapter.toBlockSnapshot({
+      file: html,
+    });
+    expect(nanoidReplacement(rawBlockSnapshot)).toEqual(blockSnapshot);
+  });
+
   test('quote', async () => {
     const html = `<div class="page-body">
       <blockquote id="ed3d2ae9-62f5-433a-9049-9ddbd1c81ac5" class="">aaa</blockquote>

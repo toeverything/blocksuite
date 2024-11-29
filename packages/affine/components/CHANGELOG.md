@@ -1,5 +1,86 @@
 # @blocksuite/affine-components
 
+## 0.18.1
+
+### Patch Changes
+
+- e2d574c: ## Feat
+
+  - feat: new doc dnd (#8808)
+
+  ## Fix
+
+  - fix(database): row selection is incorrect when clicking the row options button (#8817)
+  - fix(blocks): notion html import nested list with nested paragraph (#8809)
+  - fix(edgeless): connector endpoint may be null (#8804)
+  - fix(edgeless): connector selected rect width and height is zero (#8803)
+  - fix(blocks): linked popover styles (#8799)
+
+  ## Chore
+
+  - chore: lock file maintenance (#8797)
+
+  ## Refactor
+
+  - refactor(database): make Kanban View compatible with mobile devices (#8807)
+  - refactor: extract toggle button in list block (#8795)
+
+- Updated dependencies [e2d574c]
+  - @blocksuite/affine-model@0.18.1
+  - @blocksuite/affine-shared@0.18.1
+  - @blocksuite/block-std@0.18.1
+  - @blocksuite/global@0.18.1
+  - @blocksuite/inline@0.18.1
+  - @blocksuite/store@0.18.1
+
+## 0.18.0
+
+### Minor Changes
+
+- 9daa1f3: ## Feat
+
+  - feat(blocks): markdown adapter reference serialization and deserialization (#8782)
+  - feat(blocks): add lazy loading to image and iframe (#8773)
+
+  ## Fix
+
+  - fix(edgeless): missing reference info during edgeless card conversion (#8790)
+  - fix(blocks): linked popover styles (#8789)
+  - fix(blocks): add abortional to getMenus (#8786)
+  - fix(blocks): incorrect viewport of embed linked doc with edgeless mode (#8785)
+  - fix(database): crash in edgeless on mobile safari (#8784)
+  - fix(blocks): signify at menu config items (#8780)
+  - fix(database): update title on composition end (#8781)
+  - fix(database): kanban/table drag and drop (#8778)
+  - fix(database): prevent the default behavior of arrow keys when a progress cell is focused (#8777)
+  - fix(blocks): update at menu popover styles (#8774)
+  - fix(edgeless): frame overlay is not updated during dragging a new frame (#8771)
+
+  ## Chore
+
+  - chore(blocks): bump theme (#8783)
+  - chore: organize gfx model (#8766)
+
+  ## Refactor
+
+  - refactor(database): make Table View compatible with mobile devices (#8787)
+  - refactor(edgeless): remove legacy surface ref renderer (#8759)
+  - refactor: unify container and group (#8772)
+  - refactor(database): table ui (#8779)
+  - refactor(database): link cell icon (#8776)
+  - refactor(database): use Trait to manage the functionality of Views (#8775)
+  - refactor(database): column move (#8726)
+
+### Patch Changes
+
+- Updated dependencies [9daa1f3]
+  - @blocksuite/affine-model@0.18.0
+  - @blocksuite/affine-shared@0.18.0
+  - @blocksuite/block-std@0.18.0
+  - @blocksuite/global@0.18.0
+  - @blocksuite/inline@0.18.0
+  - @blocksuite/store@0.18.0
+
 ## 0.17.33
 
 ### Patch Changes

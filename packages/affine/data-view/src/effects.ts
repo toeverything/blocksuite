@@ -40,21 +40,31 @@ import {
   TextCellEditing,
 } from './property-presets/text/cell-renderer.js';
 import { DataViewKanban, DataViewTable } from './view-presets/index.js';
-import { KanbanCard } from './view-presets/kanban/card.js';
-import { KanbanCell } from './view-presets/kanban/cell.js';
-import { KanbanGroup } from './view-presets/kanban/group.js';
-import { KanbanHeader } from './view-presets/kanban/header.js';
-import { DatabaseCellContainer } from './view-presets/table/cell.js';
-import { DragToFillElement } from './view-presets/table/controller/drag-to-fill.js';
-import { SelectionElement } from './view-presets/table/controller/selection.js';
-import { TableGroup } from './view-presets/table/group.js';
-import { DatabaseColumnHeader } from './view-presets/table/header/column-header.js';
-import { DataViewColumnPreview } from './view-presets/table/header/column-renderer.js';
-import { DatabaseHeaderColumn } from './view-presets/table/header/database-header-column.js';
-import { DatabaseNumberFormatBar } from './view-presets/table/header/number-format-bar.js';
-import { TableVerticalIndicator } from './view-presets/table/header/vertical-indicator.js';
-import { TableRow } from './view-presets/table/row/row.js';
-import { RowSelectCheckbox } from './view-presets/table/row/row-select-checkbox.js';
+import { MobileKanbanCard } from './view-presets/kanban/mobile/card.js';
+import { MobileKanbanCell } from './view-presets/kanban/mobile/cell.js';
+import { MobileKanbanGroup } from './view-presets/kanban/mobile/group.js';
+import { MobileDataViewKanban } from './view-presets/kanban/mobile/kanban-view.js';
+import { KanbanCard } from './view-presets/kanban/pc/card.js';
+import { KanbanCell } from './view-presets/kanban/pc/cell.js';
+import { KanbanGroup } from './view-presets/kanban/pc/group.js';
+import { KanbanHeader } from './view-presets/kanban/pc/header.js';
+import { MobileTableCell } from './view-presets/table/mobile/cell.js';
+import { MobileTableColumnHeader } from './view-presets/table/mobile/column-header.js';
+import { MobileTableGroup } from './view-presets/table/mobile/group.js';
+import { MobileTableHeader } from './view-presets/table/mobile/header.js';
+import { MobileTableRow } from './view-presets/table/mobile/row.js';
+import { MobileDataViewTable } from './view-presets/table/mobile/table-view.js';
+import { DatabaseCellContainer } from './view-presets/table/pc/cell.js';
+import { DragToFillElement } from './view-presets/table/pc/controller/drag-to-fill.js';
+import { SelectionElement } from './view-presets/table/pc/controller/selection.js';
+import { TableGroup } from './view-presets/table/pc/group.js';
+import { DatabaseColumnHeader } from './view-presets/table/pc/header/column-header.js';
+import { DataViewColumnPreview } from './view-presets/table/pc/header/column-renderer.js';
+import { DatabaseHeaderColumn } from './view-presets/table/pc/header/database-header-column.js';
+import { DatabaseNumberFormatBar } from './view-presets/table/pc/header/number-format-bar.js';
+import { TableVerticalIndicator } from './view-presets/table/pc/header/vertical-indicator.js';
+import { TableRow } from './view-presets/table/pc/row/row.js';
+import { RowSelectCheckbox } from './view-presets/table/pc/row/row-select-checkbox.js';
 import { DataBaseColumnStats } from './view-presets/table/stats/column-stats-bar.js';
 import { DatabaseColumnStatsCell } from './view-presets/table/stats/column-stats-column.js';
 import { FilterConditionView } from './widget-presets/quick-setting-bar/filter/condition-view.js';
@@ -87,6 +97,7 @@ export function effects() {
     'affine-database-cell-container',
     DatabaseCellContainer
   );
+  customElements.define('mobile-table-cell', MobileTableCell);
   customElements.define('affine-data-view-renderer', DataViewRenderer);
   customElements.define('any-render', AnyRender);
   customElements.define('affine-database-image-cell', ImageTextCell);
@@ -112,6 +123,7 @@ export function effects() {
   customElements.define('affine-data-view-record-field', RecordField);
   customElements.define('data-view-drag-to-fill', DragToFillElement);
   customElements.define('affine-data-view-table-group', TableGroup);
+  customElements.define('mobile-table-group', MobileTableGroup);
   customElements.define(
     'affine-data-view-column-preview',
     DataViewColumnPreview
@@ -121,15 +133,18 @@ export function effects() {
   customElements.define('data-view-group-title-select-view', SelectGroupView);
   customElements.define('data-view-group-title-string-view', StringGroupView);
   customElements.define('affine-data-view-kanban-card', KanbanCard);
+  customElements.define('mobile-kanban-card', MobileKanbanCard);
   customElements.define('filter-bar', FilterBar);
   customElements.define('data-view-group-title-number-view', NumberGroupView);
   customElements.define('affine-data-view-kanban-cell', KanbanCell);
+  customElements.define('mobile-kanban-cell', MobileKanbanCell);
   customElements.define('affine-lit-icon', AffineLitIcon);
   customElements.define('filter-condition-view', FilterConditionView);
   customElements.define('data-view-group-setting', GroupSetting);
   customElements.define('affine-multi-tag-select', MultiTagSelect);
   customElements.define('data-view-group-title-boolean-view', BooleanGroupView);
   customElements.define('affine-database-table', DataViewTable);
+  customElements.define('mobile-data-view-table', MobileDataViewTable);
   customElements.define('affine-multi-tag-view', MultiTagView);
   customElements.define(
     'data-view-header-tools-search',
@@ -145,6 +160,7 @@ export function effects() {
   customElements.define('data-view-table-selection', SelectionElement);
   customElements.define('affine-database-new-record-preview', NewRecordPreview);
   customElements.define('affine-data-view-kanban-group', KanbanGroup);
+  customElements.define('mobile-kanban-group', MobileKanbanGroup);
   customElements.define(
     'data-view-header-tools-filter',
     DataViewHeaderToolsFilter
@@ -155,24 +171,28 @@ export function effects() {
     DataViewHeaderToolsViewOptions
   );
   customElements.define('affine-data-view-kanban', DataViewKanban);
+  customElements.define('mobile-data-view-kanban', MobileDataViewKanban);
   customElements.define('affine-data-view-kanban-header', KanbanHeader);
   customElements.define('variable-ref-view', VariableRefView);
   customElements.define('affine-data-view-record-detail', RecordDetail);
   customElements.define('filter-root-view', FilterRootView);
   customElements.define('sort-root-view', SortRootView);
   customElements.define('affine-database-column-header', DatabaseColumnHeader);
+  customElements.define('mobile-table-header', MobileTableHeader);
   customElements.define('data-view-header-views', DataViewHeaderViews);
   customElements.define(
     'affine-database-number-format-bar',
     DatabaseNumberFormatBar
   );
   customElements.define('affine-database-header-column', DatabaseHeaderColumn);
+  customElements.define('mobile-table-column-header', MobileTableColumnHeader);
   customElements.define('row-select-checkbox', RowSelectCheckbox);
   customElements.define(
     'data-view-table-vertical-indicator',
     TableVerticalIndicator
   );
   customElements.define('data-view-table-row', TableRow);
+  customElements.define('mobile-table-row', MobileTableRow);
   customElements.define('affine-database-column-stats', DataBaseColumnStats);
   customElements.define(
     'affine-database-column-stats-cell',

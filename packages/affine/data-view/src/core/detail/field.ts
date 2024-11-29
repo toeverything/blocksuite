@@ -125,9 +125,11 @@ export class RecordField extends SignalWatcher(
     const properties = this.view.detailProperties$.value;
     popMenu(popupTargetFromElement(ele), {
       options: {
+        title: {
+          text: 'Property settings',
+        },
         items: [
           menu.group({
-            name: 'Column Prop Group ',
             items: [inputConfig(this.column), typeConfig(this.column)],
           }),
           menu.group({

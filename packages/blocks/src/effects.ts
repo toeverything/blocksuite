@@ -11,6 +11,7 @@ import { effects as componentDatePickerEffects } from '@blocksuite/affine-compon
 import { effects as componentDragIndicatorEffects } from '@blocksuite/affine-components/drag-indicator';
 import { effects as componentPortalEffects } from '@blocksuite/affine-components/portal';
 import { effects as componentRichTextEffects } from '@blocksuite/affine-components/rich-text';
+import { effects as componentToggleButtonEffects } from '@blocksuite/affine-components/toggle-button';
 import { effects as componentToolbarEffects } from '@blocksuite/affine-components/toolbar';
 import { effects as widgetScrollAnchoringEffects } from '@blocksuite/affine-widget-scroll-anchoring/effects';
 import { effects as stdEffects } from '@blocksuite/block-std/effects';
@@ -222,10 +223,8 @@ import {
   AffinePieMenuWidget,
   AffineSlashMenuWidget,
   AffineSurfaceRefToolbar,
-  EDGELESS_ELEMENT_TOOLBAR_WIDGET,
   EdgelessCopilotToolbarEntry,
   EdgelessCopilotWidget,
-  EdgelessElementToolbarWidget,
   EdgelessRemoteSelectionWidget,
   EdgelessRootBlockComponent,
   EmbedCardToolbar,
@@ -261,26 +260,7 @@ import { AFFINE_EDGELESS_REMOTE_SELECTION_WIDGET } from './root-block/widgets/ed
 import { AFFINE_EDGELESS_ZOOM_TOOLBAR_WIDGET } from './root-block/widgets/edgeless-zoom-toolbar/index.js';
 import { ZoomBarToggleButton } from './root-block/widgets/edgeless-zoom-toolbar/zoom-bar-toggle-button.js';
 import { EdgelessZoomToolbar } from './root-block/widgets/edgeless-zoom-toolbar/zoom-toolbar.js';
-import { EdgelessAddFrameButton } from './root-block/widgets/element-toolbar/add-frame-button.js';
-import { EdgelessAddGroupButton } from './root-block/widgets/element-toolbar/add-group-button.js';
-import { EdgelessAlignButton } from './root-block/widgets/element-toolbar/align-button.js';
-import { EdgelessChangeAttachmentButton } from './root-block/widgets/element-toolbar/change-attachment-button.js';
-import { EdgelessChangeBrushButton } from './root-block/widgets/element-toolbar/change-brush-button.js';
-import { EdgelessChangeConnectorButton } from './root-block/widgets/element-toolbar/change-connector-button.js';
-import { EdgelessChangeEmbedCardButton } from './root-block/widgets/element-toolbar/change-embed-card-button.js';
-import { EdgelessChangeFrameButton } from './root-block/widgets/element-toolbar/change-frame-button.js';
-import { EdgelessChangeGroupButton } from './root-block/widgets/element-toolbar/change-group-button.js';
-import { EdgelessChangeImageButton } from './root-block/widgets/element-toolbar/change-image-button.js';
-import {
-  EdgelessChangeMindmapButton,
-  EdgelessChangeMindmapLayoutPanel,
-  EdgelessChangeMindmapStylePanel,
-} from './root-block/widgets/element-toolbar/change-mindmap-button.js';
-import { EdgelessChangeNoteButton } from './root-block/widgets/element-toolbar/change-note-button.js';
-import { EdgelessChangeShapeButton } from './root-block/widgets/element-toolbar/change-shape-button.js';
-import { EdgelessChangeTextMenu } from './root-block/widgets/element-toolbar/change-text-menu.js';
-import { EdgelessMoreButton } from './root-block/widgets/element-toolbar/more-menu/button.js';
-import { EdgelessReleaseFromGroupButton } from './root-block/widgets/element-toolbar/release-from-group-button.js';
+import { effects as widgetEdgelessElementToolbarEffects } from './root-block/widgets/element-toolbar/effects.js';
 import { effects as widgetFrameTitleEffects } from './root-block/widgets/frame-title/effects.js';
 import { AffineImageToolbar } from './root-block/widgets/image-toolbar/components/image-toolbar.js';
 import { AFFINE_IMAGE_TOOLBAR_WIDGET } from './root-block/widgets/image-toolbar/index.js';
@@ -346,11 +326,13 @@ export function effects() {
   componentRichTextEffects();
   componentToolbarEffects();
   componentDragIndicatorEffects();
+  componentToggleButtonEffects();
 
   widgetScrollAnchoringEffects();
   widgetMobileToolbarEffects();
   widgetLinkedDocEffects();
   widgetFrameTitleEffects();
+  widgetEdgelessElementToolbarEffects();
 
   customElements.define('affine-database-title', DatabaseTitle);
   customElements.define(
@@ -495,9 +477,6 @@ export function effects() {
     'edgeless-note-senior-button',
     EdgelessNoteSeniorButton
   );
-  customElements.define('edgeless-add-frame-button', EdgelessAddFrameButton);
-  customElements.define('edgeless-add-group-button', EdgelessAddGroupButton);
-  customElements.define('edgeless-align-button', EdgelessAlignButton);
   customElements.define('edgeless-align-panel', EdgelessAlignPanel);
   customElements.define('card-style-panel', CardStylePanel);
   customElements.define(
@@ -508,10 +487,6 @@ export function effects() {
   customElements.define('edgeless-color-panel', EdgelessColorPanel);
   customElements.define('edgeless-text-color-icon', EdgelessTextColorIcon);
   customElements.define('embed-card-create-modal', EmbedCardCreateModal);
-  customElements.define(
-    'edgeless-change-connector-button',
-    EdgelessChangeConnectorButton
-  );
   customElements.define('embed-card-edit-modal', EmbedCardEditModal);
   customElements.define(
     'edgeless-mindmap-tool-button',
@@ -521,10 +496,6 @@ export function effects() {
   customElements.define('edgeless-note-menu', EdgelessNoteMenu);
   customElements.define('edgeless-line-width-panel', EdgelessLineWidthPanel);
   customElements.define('affine-database-link-node', LinkNode);
-  customElements.define(
-    'edgeless-change-frame-button',
-    EdgelessChangeFrameButton
-  );
   customElements.define(
     'edgeless-frame-order-button',
     EdgelessFrameOrderButton
@@ -552,54 +523,22 @@ export function effects() {
     'edgeless-font-weight-and-style-panel',
     EdgelessFontWeightAndStylePanel
   );
-  customElements.define(
-    'edgeless-change-embed-card-button',
-    EdgelessChangeEmbedCardButton
-  );
   customElements.define('edgeless-note-shadow-panel', EdgelessNoteShadowPanel);
   customElements.define('edgeless-templates-panel', EdgelessTemplatePanel);
-  customElements.define(
-    'edgeless-change-group-button',
-    EdgelessChangeGroupButton
-  );
   customElements.define('edgeless-text-menu', EdgelessTextMenu);
-  customElements.define(
-    'edgeless-change-image-button',
-    EdgelessChangeImageButton
-  );
   customElements.define('edgeless-template-button', EdgelessTemplateButton);
   customElements.define('edgeless-tool-icon-button', EdgelessToolIconButton);
   customElements.define('edgeless-size-panel', EdgelessSizePanel);
   customElements.define('edgeless-scale-panel', EdgelessScalePanel);
   customElements.define('edgeless-font-family-panel', EdgelessFontFamilyPanel);
-  customElements.define(
-    'edgeless-change-mindmap-style-panel',
-    EdgelessChangeMindmapStylePanel
-  );
-  customElements.define(
-    'edgeless-change-mindmap-layout-panel',
-    EdgelessChangeMindmapLayoutPanel
-  );
-  customElements.define(
-    'edgeless-change-mindmap-button',
-    EdgelessChangeMindmapButton
-  );
   customElements.define('edgeless-shape-panel', EdgelessShapePanel);
   customElements.define('note-display-mode-panel', NoteDisplayModePanel);
   customElements.define('edgeless-toolbar-button', EdgelessToolbarButton);
   customElements.define('frame-preview', FramePreview);
   customElements.define('bookmark-card', BookmarkCard);
-  customElements.define(
-    'edgeless-change-shape-button',
-    EdgelessChangeShapeButton
-  );
   customElements.define('presentation-toolbar', PresentationToolbar);
   customElements.define('edgeless-shape-menu', EdgelessShapeMenu);
   customElements.define('stroke-style-panel', StrokeStylePanel);
-  customElements.define(
-    'edgeless-change-brush-button',
-    EdgelessChangeBrushButton
-  );
   customElements.define('edgeless-shape-tool-button', EdgelessShapeToolButton);
   customElements.define(
     'edgeless-connector-label-editor',
@@ -616,22 +555,8 @@ export function effects() {
     EdgelessGroupTitleEditor
   );
   customElements.define('language-list-button', LanguageListButton);
-  customElements.define('edgeless-change-text-menu', EdgelessChangeTextMenu);
   customElements.define('affine-drag-preview', DragPreview);
-  customElements.define(
-    'edgeless-change-note-button',
-    EdgelessChangeNoteButton
-  );
   customElements.define(EDGELESS_TOOLBAR_WIDGET, EdgelessToolbarWidget);
-  customElements.define(
-    'edgeless-release-from-group-button',
-    EdgelessReleaseFromGroupButton
-  );
-  customElements.define(
-    'edgeless-change-attachment-button',
-    EdgelessChangeAttachmentButton
-  );
-  customElements.define('edgeless-more-button', EdgelessMoreButton);
   customElements.define('edgeless-shape-style-panel', EdgelessShapeStylePanel);
   customElements.define(
     'edgeless-frame-title-editor',
@@ -671,10 +596,6 @@ export function effects() {
   customElements.define(AFFINE_PIE_MENU_WIDGET, AffinePieMenuWidget);
   customElements.define(AFFINE_EDGELESS_COPILOT_WIDGET, EdgelessCopilotWidget);
 
-  customElements.define(
-    EDGELESS_ELEMENT_TOOLBAR_WIDGET,
-    EdgelessElementToolbarWidget
-  );
   customElements.define(AFFINE_IMAGE_TOOLBAR_WIDGET, AffineImageToolbarWidget);
   customElements.define(AFFINE_SLASH_MENU_WIDGET, AffineSlashMenuWidget);
   customElements.define(

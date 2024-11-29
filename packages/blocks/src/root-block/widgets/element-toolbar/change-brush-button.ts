@@ -181,12 +181,6 @@ export class EdgelessChangeBrushButton extends WithDisposable(LitElement) {
   accessor elements: BrushElementModel[] = [];
 }
 
-declare global {
-  interface HTMLElementTagNameMap {
-    'edgeless-change-brush-button': EdgelessChangeBrushButton;
-  }
-}
-
 export function renderChangeBrushButton(
   edgeless: EdgelessRootBlockComponent,
   elements?: BrushElementModel[]

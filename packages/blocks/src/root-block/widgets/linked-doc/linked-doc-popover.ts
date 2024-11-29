@@ -117,7 +117,7 @@ export class LinkedDocPopover extends SignalWatcher(
     super.connectedCallback();
 
     // init
-    void this._updateLinkedDocGroup();
+    this._updateLinkedDocGroup().catch(console.error);
     this._disposables.addFromEvent(this, 'mousedown', e => {
       // Prevent input from losing focus
       e.preventDefault();
@@ -201,7 +201,7 @@ export class LinkedDocPopover extends SignalWatcher(
   }
 
   override render() {
-    const MAX_HEIGHT = 448;
+    const MAX_HEIGHT = 380;
     const style = this._position
       ? styleMap({
           transform: `translate(${this._position.x}, ${this._position.y})`,

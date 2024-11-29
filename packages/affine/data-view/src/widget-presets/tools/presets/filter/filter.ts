@@ -1,4 +1,5 @@
 import { popupTargetFromElement } from '@blocksuite/affine-components/context-menu';
+import { IS_MOBILE } from '@blocksuite/global/env';
 import { FilterIcon } from '@blocksuite/icons/lit';
 import { computed } from '@preact/signals-core';
 import { cssVarV2 } from '@toeverything/theme/v2';
@@ -62,7 +63,6 @@ export class DataViewHeaderToolsFilter extends WidgetBase {
       this.toggleShowFilter();
       return;
     }
-    this.showToolBar(true);
     popCreateFilter(
       popupTargetFromElement(event.currentTarget as HTMLElement),
       {
@@ -74,12 +74,14 @@ export class DataViewHeaderToolsFilter extends WidgetBase {
           };
           this.toggleShowFilter(true);
         },
-        onClose: () => {
-          this.showToolBar(false);
-        },
       }
     );
     return;
+  }
+
+  override connectedCallback() {
+    super.connectedCallback();
+    this.style.display = IS_MOBILE ? 'none' : 'flex';
   }
 
   override render() {
@@ -96,13 +98,6 @@ export class DataViewHeaderToolsFilter extends WidgetBase {
     >
       ${FilterIcon()}
     </div>`;
-  }
-
-  showToolBar(show: boolean) {
-    const tools = this.closest('data-view-header-tools');
-    if (tools) {
-      tools.showToolBar = show;
-    }
   }
 
   toggleShowFilter(show?: boolean) {

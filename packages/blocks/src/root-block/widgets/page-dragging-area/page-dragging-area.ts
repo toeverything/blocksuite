@@ -197,26 +197,32 @@ export class AffinePageDraggingAreaWidget extends WidgetComponent<
   override connectedCallback() {
     super.connectedCallback();
 
-    this.handleEvent('pointerDown', ctx => {
-      const container = this.block.rootElementContainer;
-      const containerRect = container.getBoundingClientRect();
-      const containerStyles = window.getComputedStyle(container);
-      const paddingLeft = parseFloat(containerStyles.paddingLeft);
-      const paddingRight = parseFloat(containerStyles.paddingRight);
-      const state = ctx.get('pointerState');
-      const raw = state.raw;
+    this.handleEvent(
+      'pointerDown',
+      ctx => {
+        const container = this.block.rootElementContainer;
+        const containerRect = container.getBoundingClientRect();
+        const containerStyles = window.getComputedStyle(container);
+        const paddingLeft = parseFloat(containerStyles.paddingLeft);
+        const paddingRight = parseFloat(containerStyles.paddingRight);
+        const state = ctx.get('pointerState');
+        const raw = state.raw;
 
-      if (
-        raw.clientX > containerRect.left + paddingLeft &&
-        raw.clientX < containerRect.right - paddingRight &&
-        raw.clientY > containerRect.top &&
-        raw.clientY < containerRect.bottom
-      ) {
-        return;
+        if (
+          raw.clientX > containerRect.left + paddingLeft &&
+          raw.clientX < containerRect.right - paddingRight &&
+          raw.clientY > containerRect.top &&
+          raw.clientY < containerRect.bottom
+        ) {
+          return;
+        }
+
+        state.raw.preventDefault();
+      },
+      {
+        global: true,
       }
-
-      state.raw.preventDefault();
-    });
+    );
 
     this.handleEvent(
       'dragStart',

@@ -1,5 +1,7 @@
-import type { GfxCompatibleProps } from '@blocksuite/affine-model';
-import type { GfxBlockElementModel } from '@blocksuite/block-std/gfx';
+import type {
+  GfxBlockElementModel,
+  GfxCompatibleProps,
+} from '@blocksuite/block-std/gfx';
 import type { StyleInfo } from 'lit/directives/style-map.js';
 
 import {

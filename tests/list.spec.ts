@@ -1,4 +1,4 @@
-import { expect, type Locator, type Page } from '@playwright/test';
+import { expect, type Locator } from '@playwright/test';
 import { getFormatBar } from 'utils/query.js';
 
 import {
@@ -40,8 +40,6 @@ import {
 } from './utils/asserts.js';
 import { test } from './utils/playwright.js';
 
-const getToggleIcon = (page: Page) => page.locator('.toggle-icon');
-
 async function isToggleIconVisible(toggleIcon: Locator) {
   const connected = await toggleIcon.isVisible();
   if (!connected) return false;
@@ -56,10 +54,6 @@ async function isToggleIconVisible(toggleIcon: Locator) {
   }
   const isVisible = opacity !== '0';
   return isVisible;
-}
-
-async function assertToggleIconVisible(toggleIcon: Locator, expected = true) {
-  expect(await isToggleIconVisible(toggleIcon)).toBe(expected);
 }
 
 test('add new bulleted list', async ({ page }) => {
@@ -658,39 +652,42 @@ test.describe('toggle list', () => {
     await enterPlaygroundRoom(page);
     await initEmptyParagraphState(page);
     await initThreeLists(page);
-    const toggleIcon = getToggleIcon(page);
+    const toggleIcon = page.locator('.toggle-icon');
     const prefixes = page.locator('.affine-list-block__prefix');
-    const collapsed = page.locator('.affine-list__collapsed');
+    const listChildren = page
+      .locator('[data-block-id="4"] .affine-block-children-container')
+      .nth(0);
     const parentPrefix = prefixes.nth(1);
 
     expect(await getPageSnapshot(page, true)).toMatchSnapshot(
       `${testInfo.title}_init.json`
     );
 
-    await expect(collapsed).toHaveCount(0);
     await parentPrefix.hover();
     await waitNextFrame(page);
-    await assertToggleIconVisible(toggleIcon);
+    expect(await isToggleIconVisible(toggleIcon)).toBe(true);
 
+    await expect(listChildren).toBeVisible();
     await toggleIcon.click();
-    await expect(collapsed).toHaveCount(1);
+    await expect(listChildren).not.toBeVisible();
     expect(await getPageSnapshot(page, true)).toMatchSnapshot(
       `${testInfo.title}_toggle.json`
     );
 
     // Collapsed toggle icon should be show always
     await page.mouse.move(0, 0);
-    await assertToggleIconVisible(toggleIcon);
+    expect(await isToggleIconVisible(toggleIcon)).toBe(true);
 
+    await expect(listChildren).not.toBeVisible();
     await toggleIcon.click();
-    await expect(collapsed).toHaveCount(0);
+    await expect(listChildren).toBeVisible();
     expect(await getPageSnapshot(page, true)).toMatchSnapshot(
       `${testInfo.title}_init.json`
     );
 
     await page.mouse.move(0, 0);
     await waitNextFrame(page, 200);
-    await assertToggleIconVisible(toggleIcon, false);
+    expect(await isToggleIconVisible(toggleIcon)).toBe(false);
   });
 
   test('indent item should expand toggle', async ({ page }, testInfo) => {
@@ -702,15 +699,18 @@ test.describe('toggle list', () => {
     await pressEnter(page);
     await type(page, '012');
 
-    const toggleIcon = getToggleIcon(page);
-    const collapsed = page.locator('.affine-list__collapsed');
+    const toggleIcon = page.locator('.toggle-icon');
+    const listChildren = page
+      .locator('[data-block-id="4"] .affine-block-children-container')
+      .nth(0);
 
     expect(await getPageSnapshot(page, true)).toMatchSnapshot(
       `${testInfo.title}_init.json`
     );
 
+    await expect(listChildren).toBeVisible();
     await toggleIcon.click();
-    await expect(collapsed).toHaveCount(1);
+    await expect(listChildren).not.toBeVisible();
 
     expect(await getPageSnapshot(page, true)).toMatchSnapshot(
       `${testInfo.title}_toggle.json`
@@ -719,7 +719,7 @@ test.describe('toggle list', () => {
     await focusRichText(page, 3);
     await pressTab(page);
     await waitNextFrame(page, 200);
-    await expect(collapsed).toHaveCount(1);
+    await expect(listChildren).not.toBeVisible();
 
     expect(await getPageSnapshot(page, true)).toMatchSnapshot(
       `${testInfo.title}_finial.json`
@@ -730,47 +730,66 @@ test.describe('toggle list', () => {
     await enterPlaygroundRoom(page);
     await initEmptyParagraphState(page);
     await initThreeLists(page);
-    const toggleIcon = getToggleIcon(page);
+    const toggleIcon = page.locator('.toggle-icon');
 
     const prefixes = page.locator('.affine-list-block__prefix');
     const parentPrefix = prefixes.nth(1);
 
-    await assertToggleIconVisible(toggleIcon, false);
+    expect(await isToggleIconVisible(toggleIcon)).toBe(false);
     await parentPrefix.hover();
     await waitNextFrame(page, 200);
-    await assertToggleIconVisible(toggleIcon);
+    expect(await isToggleIconVisible(toggleIcon)).toBe(true);
 
     await page.mouse.move(0, 0);
     await waitNextFrame(page, 300);
-    await assertToggleIconVisible(toggleIcon, false);
+    expect(await isToggleIconVisible(toggleIcon)).toBe(false);
   });
 });
 
 test.describe('readonly', () => {
-  test('can expand toggle in readonly mode', async ({ page }) => {
+  test('can expand toggle in readonly mode', async ({ page }, testInfo) => {
     await enterPlaygroundRoom(page);
     await initEmptyParagraphState(page);
     await initThreeLists(page);
-    const toggleIcon = getToggleIcon(page);
+    const toggleIcon = page.locator('.toggle-icon');
     const prefixes = page.locator('.affine-list-block__prefix');
-    const collapsed = page.locator('.affine-list__collapsed');
+    const listChildren = page
+      .locator('[data-block-id="4"] .affine-block-children-container')
+      .nth(0);
     const parentPrefix = prefixes.nth(1);
-    await expect(collapsed).toHaveCount(0);
 
     await parentPrefix.hover();
-    await assertToggleIconVisible(toggleIcon);
+    await waitNextFrame(page, 200);
+    expect(await isToggleIconVisible(toggleIcon)).toBe(true);
 
+    await expect(listChildren).toBeVisible();
     await toggleIcon.click();
-    await expect(collapsed).toHaveCount(1);
+    await expect(listChildren).not.toBeVisible();
 
+    expect(await getPageSnapshot(page, true)).toMatchSnapshot(
+      `${testInfo.title}_before_readonly.json`
+    );
+
+    await waitNextFrame(page, 200);
     await switchReadonly(page);
-    await assertToggleIconVisible(toggleIcon);
+
+    await waitNextFrame(page, 200);
+    expect(await isToggleIconVisible(toggleIcon)).toBe(true);
+
+    await expect(listChildren).not.toBeVisible();
+    await toggleIcon.click();
+    await expect(listChildren).toBeVisible();
+
+    expect(await getPageSnapshot(page, true)).toMatchSnapshot(
+      `${testInfo.title}_before_readonly.json`
+    );
 
     await toggleIcon.click();
-    await expect(collapsed).toHaveCount(0);
+    await expect(listChildren).not.toBeVisible();
 
-    await toggleIcon.click();
-    await expect(collapsed).toHaveCount(1);
+    expect(await getPageSnapshot(page, true)).toMatchSnapshot(
+      `${testInfo.title}_before_readonly.json`
+    );
   });
 
   test('can not modify todo list in readonly mode', async ({ page }) => {
@@ -804,19 +823,20 @@ test.describe('readonly', () => {
     // await switchEditorMode(page);
     await initThreeLists(page);
 
-    const toggleIcon = getToggleIcon(page);
-    const collapsed = page.locator('.affine-list__collapsed');
+    const toggleIcon = page.locator('.toggle-icon');
+    const listChildren = page
+      .locator('[data-block-id="5"] .affine-block-children-container')
+      .nth(0);
 
-    await expect(collapsed).toHaveCount(0);
-
+    await expect(listChildren).toBeVisible();
     await toggleIcon.click();
-    await expect(collapsed).toHaveCount(1);
+    await expect(listChildren).not.toBeVisible();
 
     await switchReadonly(page);
     // trick for render a readonly doc from scratch
     await switchEditorMode(page);
     await switchEditorMode(page);
 
-    await expect(collapsed).toHaveCount(1);
+    await expect(listChildren).not.toBeVisible();
   });
 });

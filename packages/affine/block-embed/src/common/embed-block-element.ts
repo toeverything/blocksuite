@@ -1,7 +1,5 @@
-import type {
-  EmbedCardStyle,
-  GfxCompatibleProps,
-} from '@blocksuite/affine-model';
+import type { EmbedCardStyle } from '@blocksuite/affine-model';
+import type { GfxCompatibleProps } from '@blocksuite/block-std/gfx';
 import type { BlockModel } from '@blocksuite/store';
 import type { TemplateResult } from 'lit';
 

@@ -34,42 +34,6 @@ export const listPrefix = css`
   }
 `;
 
-export const toggleStyles = css`
-  .toggle-icon {
-    display: flex;
-    align-items: center;
-    height: 16px;
-    margin: 4px 0;
-    position: absolute;
-    left: 0;
-    transform: translateX(-100%);
-    border-radius: 4px;
-    cursor: pointer;
-    opacity: 0;
-    transition: opacity 0.2s ease-in-out;
-  }
-  .toggle-icon:hover {
-    background: var(--affine-hover-color);
-  }
-  .affine-list-rich-text-wrapper:hover .toggle-icon {
-    opacity: 1;
-  }
-  .toggle-icon__collapsed {
-    opacity: 1;
-  }
-
-  .with-drag-handle .affine-list-rich-text-wrapper .toggle-icon {
-    opacity: 1;
-  }
-  .with-drag-handle .affine-block-children-container .toggle-icon {
-    opacity: 0;
-  }
-
-  .affine-list__collapsed {
-    display: none;
-  }
-`;
-
 export const listBlockStyles = css`
   affine-list {
     display: block;
@@ -97,5 +61,4 @@ export const listBlockStyles = css`
   }
 
   ${listPrefix}
-  ${toggleStyles}
 `;

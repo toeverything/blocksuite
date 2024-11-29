@@ -29,6 +29,8 @@ const styles = css`
     display: flex;
     justify-content: center;
     align-items: center;
+    overflow-wrap: anywhere;
+    white-space: pre-wrap;
   }
 
   .arrow {

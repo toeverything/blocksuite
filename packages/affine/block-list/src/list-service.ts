@@ -6,17 +6,9 @@ import { matchFlavours } from '@blocksuite/affine-shared/utils';
 import { BlockService } from '@blocksuite/block-std';
 
 import { correctNumberedListsOrderToPrev } from './commands/utils.js';
-import { listPrefix, toggleStyles } from './styles.js';
-import { getListIcon } from './utils/get-list-icon.js';
 
 export class ListBlockService extends BlockService {
   static override readonly flavour = ListBlockSchema.model.flavour;
-
-  readonly styles = {
-    icon: getListIcon,
-    prefix: listPrefix,
-    toggle: toggleStyles,
-  };
 }
 
 export const ListDragHandleOption = DragHandleConfigExtension({

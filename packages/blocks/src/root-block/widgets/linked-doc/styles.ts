@@ -1,4 +1,4 @@
-import { unsafeCSSVarV2 } from '@blocksuite/affine-shared/theme';
+import { unsafeCSSVar, unsafeCSSVarV2 } from '@blocksuite/affine-shared/theme';
 import { baseTheme } from '@toeverything/theme';
 import { css, unsafeCSS } from 'lit';
 
@@ -29,11 +29,10 @@ export const linkedDocPopoverStyles = css`
     display: flex;
     flex-direction: column;
     overflow-y: auto;
-    row-gap: 4px;
 
     background: ${unsafeCSSVarV2('layer/background/primary')};
-    box-shadow: var(--affine-shadow-2);
-    border-radius: 12px;
+    box-shadow: ${unsafeCSSVar('overlayPanelShadow')};
+    border-radius: 8px;
     z-index: var(--affine-z-index-popover);
   }
 
@@ -50,10 +49,11 @@ export const linkedDocPopoverStyles = css`
     font-size: var(--affine-font-xs);
     display: flex;
     align-items: center;
+    flex-shrink: 0;
   }
 
   .linked-doc-popover .divider {
-    margin: 0 -8px;
+    margin: 4px -8px;
     border-top: 0.5px solid ${unsafeCSSVarV2('layer/insideBorder/border')};
   }
 
@@ -67,7 +67,7 @@ export const linkedDocPopoverStyles = css`
     flex-direction: column;
   }
 
-  ${scrollbarStyle('.linked-doc-popover .group')}
+  ${scrollbarStyle('.linked-doc-popover')}
 `;
 
 export const mobileLinkedDocMenuStyles = css`
@@ -98,6 +98,7 @@ export const mobileLinkedDocMenuStyles = css`
     display: flex;
     width: 100%;
     height: 44px;
+    flex-shrink: 0;
     padding: 11px 20px;
     justify-content: flex-start;
     align-items: center;
