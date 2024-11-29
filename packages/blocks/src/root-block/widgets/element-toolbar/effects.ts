@@ -20,6 +20,7 @@ import {
   EDGELESS_ELEMENT_TOOLBAR_WIDGET,
   EdgelessElementToolbarWidget,
 } from './index.js';
+import { EdgelessLockButton } from './lock-button.js';
 import { EdgelessMoreButton } from './more-menu/button.js';
 import { EdgelessReleaseFromGroupButton } from './release-from-group-button.js';
 
@@ -85,6 +86,7 @@ export function effects() {
     EdgelessReleaseFromGroupButton
   );
   customElements.define('edgeless-more-button', EdgelessMoreButton);
+  customElements.define('edgeless-lock-button', EdgelessLockButton);
 }
 
 declare global {
@@ -107,5 +109,6 @@ declare global {
     'edgeless-change-text-menu': EdgelessChangeTextMenu;
     'edgeless-release-from-group-button': EdgelessReleaseFromGroupButton;
     'edgeless-more-button': EdgelessMoreButton;
+    'edgeless-lock-button': EdgelessLockButton;
   }
 }

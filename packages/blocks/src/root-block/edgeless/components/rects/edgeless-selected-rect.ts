@@ -1371,36 +1371,38 @@ export class EdgelessSelectedRectWidget extends WidgetComponent<
 
     const hasResizeHandles = !selection.editing && !doc.readonly;
     const inoperable = selection.inoperable;
+    const hasElementLocked = elements.some(element => element.isLocked());
     const handlers = [];
 
     if (!inoperable) {
-      const resizeHandles = hasResizeHandles
-        ? ResizeHandles(
-            resizeMode,
-            (e: PointerEvent, direction: HandleDirection) => {
-              const target = e.target as HTMLElement;
-              if (target.classList.contains('rotate') && !this._canRotate()) {
-                return;
+      const resizeHandles =
+        hasResizeHandles && !hasElementLocked
+          ? ResizeHandles(
+              resizeMode,
+              (e: PointerEvent, direction: HandleDirection) => {
+                const target = e.target as HTMLElement;
+                if (target.classList.contains('rotate') && !this._canRotate()) {
+                  return;
+                }
+                const proportional = elements.some(
+                  el => el instanceof TextElementModel
+                );
+                _resizeManager.onPointerDown(e, direction, proportional);
+              },
+              (
+                dragging: boolean,
+                options?: {
+                  type: 'resize' | 'rotate';
+                  angle?: number;
+                  target?: HTMLElement;
+                  point?: IVec;
+                }
+              ) => {
+                if (!this._canRotate() && options?.type === 'rotate') return;
+                _updateCursor(dragging, options);
               }
-              const proportional = elements.some(
-                el => el instanceof TextElementModel
-              );
-              _resizeManager.onPointerDown(e, direction, proportional);
-            },
-            (
-              dragging: boolean,
-              options?: {
-                type: 'resize' | 'rotate';
-                angle?: number;
-                target?: HTMLElement;
-                point?: IVec;
-              }
-            ) => {
-              if (!this._canRotate() && options?.type === 'rotate') return;
-              _updateCursor(dragging, options);
-            }
-          )
-        : nothing;
+            )
+          : nothing;
 
       const connectorHandle =
         elements.length === 1 && elements[0] instanceof ConnectorElementModel
