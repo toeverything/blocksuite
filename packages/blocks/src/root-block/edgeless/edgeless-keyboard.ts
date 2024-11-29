@@ -221,7 +221,8 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
           const { selection } = this.rootComponent.service;
           if (
             selection.selectedElements.length === 1 &&
-            selection.firstElement instanceof GroupElementModel
+            selection.firstElement instanceof GroupElementModel &&
+            !selection.firstElement.isLocked()
           ) {
             ctx.get('keyboardState').event.preventDefault();
             rootComponent.service.ungroup(selection.firstElement);
@@ -335,6 +336,8 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
           if (onlyOne) {
             const element = elements[0];
             const id = element.id;
+
+            if (element.isLocked()) return;
 
             if (element instanceof ConnectorElementModel) {
               selection.set({
@@ -608,6 +611,7 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
     }
 
     selectedElements.forEach(element => {
+      if (element.isLocked()) return;
       const bound = Bound.deserialize(element.xywh).clone();
 
       switch (key) {
