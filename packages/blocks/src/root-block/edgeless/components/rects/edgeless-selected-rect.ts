@@ -1405,7 +1405,9 @@ export class EdgelessSelectedRectWidget extends WidgetComponent<
           : nothing;
 
       const connectorHandle =
-        elements.length === 1 && elements[0] instanceof ConnectorElementModel
+        elements.length === 1 &&
+        elements[0] instanceof ConnectorElementModel &&
+        !elements[0].isLocked()
           ? html`
               <edgeless-connector-handle
                 .connector=${elements[0]}
