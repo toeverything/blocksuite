@@ -131,7 +131,7 @@ export function defineBlockSchema({
 }
 
 type SignaledProps<Props> = Props & {
-  [P in keyof Props & string as `${P}$`]: Signal<Props[P]>;
+  [P in keyof Props as `${Extract<P, string>}$`]: Signal<Props[P]>;
 };
 /**
  * The MagicProps function is used to append the props to the class.

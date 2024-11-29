@@ -48,7 +48,7 @@ export class AttachmentEdgelessBlockComponent extends toGfxBlockComponent(
 
   override renderGfxBlock() {
     const { style$ } = this.model;
-    const cardStyle = style$.value ?? AttachmentBlockStyles[1];
+    const cardStyle = style$?.value ?? AttachmentBlockStyles[1];
     const width = EMBED_CARD_WIDTH[cardStyle];
     const height = EMBED_CARD_HEIGHT[cardStyle];
     const bound = this.model.elementBound;

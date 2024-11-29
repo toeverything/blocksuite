@@ -2,6 +2,9 @@ import { computed, effect } from '@preact/signals-core';
 import { describe, expect, test, vi } from 'vitest';
 import * as Y from 'yjs';
 
+import type { Boxed } from '../reactive/boxed.js';
+import type { Text } from '../reactive/text.js';
+
 import {
   defineBlockSchema,
   internalPrimitives,
@@ -11,9 +14,18 @@ import {
 import { Block, type YBlock } from '../store/doc/block/index.js';
 import { DocCollection, IdGeneratorType } from '../store/index.js';
 
+type PageProps = {
+  title: Text;
+  count: number;
+  toggle: boolean;
+  style: Record<string, unknown>;
+  boxed: Boxed<Y.Map<unknown>>;
+  optional?: string;
+};
+
 const pageSchema = defineBlockSchema({
   flavour: 'page',
-  props: internal => ({
+  props: (internal): PageProps => ({
     title: internal.Text(),
     count: 0,
     toggle: false,
@@ -58,6 +70,7 @@ test('init block without props should add default props', () => {
   expect(yBlock.get('prop:count')).toBe(0);
   expect(model.count).toBe(0);
   expect(model.style).toEqual({});
+  expect(model.optional).toBeUndefined();
 });
 
 describe('block model should has signal props', () => {
@@ -76,12 +89,16 @@ describe('block model should has signal props', () => {
 
     expect(model.count$.value).toBe(0);
     expect(isOdd.peek()).toBe(false);
+    expect(model.optional$).toBeUndefined();
+    expect(model.optional$?.value).toBeUndefined();
 
     // set prop
     model.count = 1;
     expect(model.count$.value).toBe(1);
     expect(isOdd.peek()).toBe(true);
     expect(yBlock.get('prop:count')).toBe(1);
+    model.optional = 'hello';
+    expect(model.optional$?.value).toBe('hello');
 
     // set signal
     model.count$.value = 2;
@@ -89,7 +106,7 @@ describe('block model should has signal props', () => {
     expect(isOdd.peek()).toBe(false);
     expect(yBlock.get('prop:count')).toBe(2);
 
-    // set prop
+    // set y-prop
     yBlock.set('prop:count', 3);
     expect(model.count).toBe(3);
     expect(model.count$.value).toBe(3);
