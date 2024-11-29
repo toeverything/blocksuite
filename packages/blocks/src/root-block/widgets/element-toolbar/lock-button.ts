@@ -1,4 +1,9 @@
-import { GroupElementModel } from '@blocksuite/affine-model';
+import type { GfxModel } from '@blocksuite/block-std/gfx';
+
+import {
+  GroupElementModel,
+  MindmapElementModel,
+} from '@blocksuite/affine-model';
 import { SignalWatcher, WithDisposable } from '@blocksuite/global/utils';
 import { LockIcon, UnlockIcon } from '@blocksuite/icons/lit';
 import { html, LitElement } from 'lit';
@@ -10,7 +15,15 @@ export class EdgelessLockButton extends SignalWatcher(
   WithDisposable(LitElement)
 ) {
   private get _selectedElements() {
-    return this.edgeless.service.selection.selectedElements;
+    const elements = new Set<GfxModel>();
+    this.edgeless.service.selection.selectedElements.forEach(element => {
+      if (element.group instanceof MindmapElementModel) {
+        elements.add(element.group);
+      } else {
+        elements.add(element);
+      }
+    });
+    return [...elements];
   }
 
   private _lock() {
@@ -43,6 +56,10 @@ export class EdgelessLockButton extends SignalWatcher(
 
     if (otherElements.length === 0) {
       topElement.lock();
+      this.edgeless.gfx.selection.set({
+        editing: false,
+        elements: [topElement.id],
+      });
       return;
     }
 
@@ -62,6 +79,10 @@ export class EdgelessLockButton extends SignalWatcher(
 
     selectedElements.forEach(e => {
       e.lock();
+    });
+    this.edgeless.gfx.selection.set({
+      editing: false,
+      elements: selectedElements.map(e => e.id),
     });
   }
 

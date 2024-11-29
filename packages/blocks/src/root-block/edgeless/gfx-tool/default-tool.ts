@@ -526,7 +526,7 @@ export class DefaultTool extends BaseTool {
         break;
       }
 
-      return picked[pickedIdx] ?? null;
+      return tryGetLockedAncestor(picked[pickedIdx]) ?? null;
     }
 
     // if the frame has title, it only can be picked by clicking the title
