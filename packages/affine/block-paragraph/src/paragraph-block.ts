@@ -1,26 +1,67 @@
 import type { ParagraphBlockModel } from '@blocksuite/affine-model';
 import type { BlockComponent } from '@blocksuite/block-std';
 import type { InlineRangeProvider } from '@blocksuite/inline';
+import type { BlockModel } from '@blocksuite/store';
 
 import { CaptionedBlockComponent } from '@blocksuite/affine-components/caption';
 import {
   DefaultInlineManagerExtension,
   type RichText,
 } from '@blocksuite/affine-components/rich-text';
+import { TOGGLE_BUTTON_PARENT_CLASS } from '@blocksuite/affine-components/toggle-button';
 import {
   BLOCK_CHILDREN_CONTAINER_PADDING_LEFT,
   NOTE_SELECTOR,
 } from '@blocksuite/affine-shared/consts';
 import { DocModeProvider } from '@blocksuite/affine-shared/services';
-import { getViewportElement } from '@blocksuite/affine-shared/utils';
+import {
+  getViewportElement,
+  matchFlavours,
+} from '@blocksuite/affine-shared/utils';
 import { getInlineRangeProvider } from '@blocksuite/block-std';
 import { effect, signal } from '@preact/signals-core';
 import { html, nothing, type TemplateResult } from 'lit';
-import { query } from 'lit/decorators.js';
+import { query, state } from 'lit/decorators.js';
+import { classMap } from 'lit/directives/class-map.js';
+import { styleMap } from 'lit/directives/style-map.js';
 
 import type { ParagraphBlockService } from './paragraph-service.js';
 
-import { paragraphBlockStyles } from './styles.js';
+import { PARAGRAPH_COLLAPSED_CLASS, paragraphBlockStyles } from './styles.js';
+
+export function calculateCollapsedSiblings(
+  model: ParagraphBlockModel
+): BlockModel[] {
+  if (!model.type.startsWith('h')) return [];
+
+  const parent = model.parent;
+  if (!parent) return [];
+  const children = parent.children;
+  const index = children.indexOf(model);
+  if (index === -1) return [];
+
+  const collapsedEdgeIndex = children.findIndex((child, i) => {
+    if (
+      i > index &&
+      matchFlavours(child, ['affine:paragraph']) &&
+      child.type.startsWith('h')
+    ) {
+      const modelLevel = parseInt(model.type.slice(1));
+      const childLevel = parseInt(child.type.slice(1));
+      return childLevel <= modelLevel;
+    }
+    return false;
+  });
+
+  let collapsedSiblings: BlockModel[];
+  if (collapsedEdgeIndex === -1) {
+    collapsedSiblings = children.slice(index + 1);
+  } else {
+    collapsedSiblings = children.slice(index + 1, collapsedEdgeIndex);
+  }
+
+  return collapsedSiblings;
+}
 
 export class ParagraphBlockComponent extends CaptionedBlockComponent<
   ParagraphBlockModel,
@@ -101,6 +142,7 @@ export class ParagraphBlockComponent extends CaptionedBlockComponent<
     );
 
     this._inlineRangeProvider = getInlineRangeProvider(this);
+
     this.disposables.add(
       effect(() => {
         const composing = this._composing.value;
@@ -130,6 +172,25 @@ export class ParagraphBlockComponent extends CaptionedBlockComponent<
           .catch(console.error);
       })
     );
+
+    this.disposables.add(
+      effect(() => {
+        const collapsed = this.model.collapsed$.value;
+        this._readonlyCollapsed = collapsed;
+
+        const collapsedSiblings = calculateCollapsedSiblings(this.model);
+        collapsedSiblings.forEach(sibling => {
+          const el = this.host.view.getBlock(sibling.id);
+          if (!el) return;
+
+          if (collapsed) {
+            el.classList.add(PARAGRAPH_COLLAPSED_CLASS);
+          } else {
+            el.classList.remove(PARAGRAPH_COLLAPSED_CLASS);
+          }
+        });
+      })
+    );
   }
 
   override async getUpdateComplete() {
@@ -140,16 +201,46 @@ export class ParagraphBlockComponent extends CaptionedBlockComponent<
 
   override renderBlock(): TemplateResult<1> {
     const { type$ } = this.model;
+    const collapsed = this.doc.readonly
+      ? this._readonlyCollapsed
+      : this.model.collapsed;
+
     const children = html`<div
       class="affine-block-children-container"
-      style="padding-left: ${BLOCK_CHILDREN_CONTAINER_PADDING_LEFT}px"
+      style=${styleMap({
+        paddingLeft: `${BLOCK_CHILDREN_CONTAINER_PADDING_LEFT}px`,
+        display: collapsed ? 'none' : undefined,
+      })}
     >
       ${this.renderChildren(this.model)}
     </div>`;
 
     return html`
       <div class="affine-paragraph-block-container">
-        <div class="affine-paragraph-rich-text-wrapper ${type$.value}">
+        <div
+          class=${classMap({
+            'affine-paragraph-rich-text-wrapper': true,
+            [type$.value]: true,
+            [TOGGLE_BUTTON_PARENT_CLASS]: true,
+          })}
+        >
+          ${this.model.type.startsWith('h')
+            ? html`
+                <blocksuite-toggle-button
+                  .collapsed=${collapsed}
+                  .updateCollapsed=${(value: boolean) => {
+                    if (this.doc.readonly) {
+                      this._readonlyCollapsed = value;
+                    } else {
+                      this.doc.captureSync();
+                      this.doc.updateBlock(this.model, {
+                        collapsed: value,
+                      });
+                    }
+                  }}
+                ></blocksuite-toggle-button>
+              `
+            : nothing}
           <rich-text
             .yText=${this.model.text.yText}
             .inlineEventSource=${this.topContenteditableElement ?? nothing}
@@ -170,10 +261,10 @@ export class ParagraphBlockComponent extends CaptionedBlockComponent<
             : html`
                 <div
                   contenteditable="false"
-                  class="affine-paragraph-placeholder ${this._displayPlaceholder
-                    .value
-                    ? 'visible'
-                    : ''}"
+                  class=${classMap({
+                    'affine-paragraph-placeholder': true,
+                    visible: this._displayPlaceholder.value,
+                  })}
                 >
                   ${this.service.placeholderGenerator(this.model)}
                 </div>
@@ -184,6 +275,9 @@ export class ParagraphBlockComponent extends CaptionedBlockComponent<
       </div>
     `;
   }
+
+  @state()
+  private accessor _readonlyCollapsed = false;
 
   @query('rich-text')
   private accessor _richTextElement: RichText | null = null;

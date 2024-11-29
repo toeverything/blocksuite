@@ -1,8 +1,5 @@
-import {
-  defineBlockSchema,
-  type SchemaToModel,
-  type Text,
-} from '@blocksuite/store';
+import { BlockModel, defineBlockSchema, type Text } from '@blocksuite/store';
+import { effect } from '@preact/signals-core';
 
 export type ParagraphType =
   | 'text'
@@ -17,6 +14,7 @@ export type ParagraphType =
 export type ParagraphProps = {
   type: ParagraphType;
   text: Text;
+  collapsed: boolean;
 };
 
 export const ParagraphBlockSchema = defineBlockSchema({
@@ -24,6 +22,7 @@ export const ParagraphBlockSchema = defineBlockSchema({
   props: (internal): ParagraphProps => ({
     type: 'text',
     text: internal.Text(),
+    collapsed: false,
   }),
   metadata: {
     version: 1,
@@ -36,9 +35,29 @@ export const ParagraphBlockSchema = defineBlockSchema({
       'affine:edgeless-text',
     ],
   },
+  toModel: () => new ParagraphBlockModel(),
 });
 
-export type ParagraphBlockModel = SchemaToModel<typeof ParagraphBlockSchema>;
+export class ParagraphBlockModel extends BlockModel<ParagraphProps> {
+  override flavour!: 'affine:paragraph';
+
+  override text!: Text;
+
+  constructor() {
+    super();
+
+    this.created.once(() => {
+      this.deleted.once(
+        effect(() => {
+          const type = this.type$.value;
+          if (!type.startsWith('h')) {
+            this.collapsed$.value = false;
+          }
+        })
+      );
+    });
+  }
+}
 
 declare global {
   namespace BlockSuite {
