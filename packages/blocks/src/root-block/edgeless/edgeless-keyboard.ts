@@ -393,6 +393,8 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
           const selection = service.selection;
           const elements = selection.selectedElements;
 
+          if (elements.some(e => e.isLocked())) return;
+
           if (!isSelectSingleMindMap(elements)) {
             return;
           }
@@ -510,6 +512,7 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
     }
 
     const selectedElements = edgeless.service.selection.selectedElements;
+    if (selectedElements.some(e => e.isLocked())) return;
 
     if (isSelectSingleMindMap(selectedElements)) {
       const node = selectedElements[0];
@@ -610,8 +613,9 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
       return;
     }
 
+    if (selectedElements.some(e => e.isLocked())) return;
+
     selectedElements.forEach(element => {
-      if (element.isLocked()) return;
       const bound = Bound.deserialize(element.xywh).clone();
 
       switch (key) {
