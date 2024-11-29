@@ -1,17 +1,12 @@
-import type { GfxElementGeometry } from '@blocksuite/block-std/gfx';
-import type { SerializedXYWH } from '@blocksuite/global/utils';
+import type {
+  GfxCommonBlockProps,
+  GfxElementGeometry,
+} from '@blocksuite/block-std/gfx';
 
+import { GfxCompatible } from '@blocksuite/block-std/gfx';
 import { BlockModel, defineBlockSchema } from '@blocksuite/store';
 
 import type { EmbedCardStyle, LinkPreviewData } from '../../utils/index.js';
-
-import { GfxCompatible } from '../../utils/index.js';
-
-export interface BookmarkBlockEdgelessProps {
-  index: string;
-  xywh: SerializedXYWH;
-  rotate: number;
-}
 
 export const BookmarkStyles: EmbedCardStyle[] = [
   'vertical',
@@ -25,7 +20,7 @@ export type BookmarkBlockProps = {
   url: string;
   caption: string | null;
 } & LinkPreviewData &
-  BookmarkBlockEdgelessProps;
+  Omit<GfxCommonBlockProps, 'scale'>;
 
 const defaultBookmarkProps: BookmarkBlockProps = {
   style: BookmarkStyles[1],

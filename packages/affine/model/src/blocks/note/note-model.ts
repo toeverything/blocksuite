@@ -1,6 +1,9 @@
-import type { GfxElementGeometry } from '@blocksuite/block-std/gfx';
-import type { SerializedXYWH } from '@blocksuite/global/utils';
+import type {
+  GfxCompatibleProps,
+  GfxElementGeometry,
+} from '@blocksuite/block-std/gfx';
 
+import { GfxCompatible } from '@blocksuite/block-std/gfx';
 import { Bound } from '@blocksuite/global/utils';
 import { BlockModel, defineBlockSchema } from '@blocksuite/store';
 
@@ -16,7 +19,6 @@ import {
   NoteDisplayMode,
   type StrokeStyle,
 } from '../../consts/index.js';
-import { GfxCompatible } from '../../utils/index.js';
 
 export const NoteBlockSchema = defineBlockSchema({
   flavour: 'affine:note',
@@ -60,9 +62,7 @@ export const NoteBlockSchema = defineBlockSchema({
 });
 
 export type NoteProps = {
-  xywh: SerializedXYWH;
   background: Color;
-  index: string;
   displayMode: NoteDisplayMode;
   edgeless: NoteEdgelessProps;
   /**
@@ -74,7 +74,7 @@ export type NoteProps = {
    *  means the note is visible in the doc and edgeless mode
    */
   hidden: boolean;
-};
+} & GfxCompatibleProps;
 
 export type NoteEdgelessProps = {
   style: {

@@ -1,6 +1,6 @@
 {
   "name": "@blocksuite/blocks",
-  "version": "0.18.0",
+  "version": "0.18.1",
   "description": "Default BlockSuite editable blocks.",
   "type": "module",
   "repository": {
@@ -49,6 +49,7 @@
     "html2canvas": "^1.4.1",
     "katex": "^0.16.11",
     "lit": "^3.2.0",
+    "lz-string": "^1.5.0",
     "mdast-util-gfm-autolink-literal": "^2.0.1",
     "mdast-util-gfm-strikethrough": "^2.0.0",
     "mdast-util-gfm-table": "^2.0.0",

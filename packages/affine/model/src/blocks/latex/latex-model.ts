@@ -1,18 +1,13 @@
-import type { SerializedXYWH } from '@blocksuite/global/utils';
-
 import {
+  type GfxCommonBlockProps,
   GfxCompatible,
   type GfxElementGeometry,
 } from '@blocksuite/block-std/gfx';
 import { BlockModel, defineBlockSchema } from '@blocksuite/store';
 
 export type LatexProps = {
-  xywh: SerializedXYWH;
-  index: string;
-  scale: number;
-  rotate: number;
   latex: string;
-};
+} & GfxCommonBlockProps;
 
 export const LatexBlockSchema = defineBlockSchema({
   flavour: 'affine:latex',

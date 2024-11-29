@@ -1020,7 +1020,7 @@ export class ConnectorPathGenerator {
 
   static updatePath(
     connector: ConnectorElementModel | LocalConnectorElementModel,
-    path: PointLocation[] | null | null,
+    path: PointLocation[] | null,
     elementGetter?: (id: string) => GfxModel | null
   ) {
     const instance = new ConnectorPathGenerator({
@@ -1060,7 +1060,8 @@ export class ConnectorPathGenerator {
     const start = this._getConnectorEndElement(connector, 'source');
     const end = this._getConnectorEndElement(connector, 'target');
 
-    let startPoint: PointLocation, endPoint: PointLocation;
+    let startPoint: PointLocation | null = null;
+    let endPoint: PointLocation | null = null;
     if (source.id && !source.position && target.id && !target.position) {
       assertExists(start);
       assertExists(end);
@@ -1085,6 +1086,9 @@ export class ConnectorPathGenerator {
       startPoint = this._getConnectionPoint(connector, 'source');
       endPoint = this._getConnectionPoint(connector, 'target');
     }
+
+    if (!startPoint || !endPoint) return [];
+
     return [startPoint, endPoint];
   }
 
@@ -1123,10 +1127,10 @@ export class ConnectorPathGenerator {
     connector: ConnectorElementModel | LocalConnectorElementModel
   ) {
     const { source, target } = connector;
+    let startPoint: PointLocation | null = null;
+    let endPoint: PointLocation | null = null;
 
     if (source.id || target.id) {
-      let startPoint: PointLocation;
-      let endPoint: PointLocation;
       if (!source.position && !target.position) {
         const start = this._getConnectorEndElement(
           connector,
@@ -1144,6 +1148,8 @@ export class ConnectorPathGenerator {
         startPoint = this._getConnectionPoint(connector, 'source');
         endPoint = this._getConnectionPoint(connector, 'target');
       }
+
+      if (!startPoint || !endPoint) return [];
 
       if (source.id) {
         const startTangentVertical = Vec.rot(startPoint.tangent, -Math.PI / 2);
@@ -1171,8 +1177,11 @@ export class ConnectorPathGenerator {
       }
       return [startPoint, endPoint];
     } else {
-      const endPoint = this._getConnectionPoint(connector, 'target');
-      const startPoint = this._getConnectionPoint(connector, 'source');
+      startPoint = this._getConnectionPoint(connector, 'source');
+      endPoint = this._getConnectionPoint(connector, 'target');
+
+      if (!startPoint || !endPoint) return [];
+
       if (
         Math.abs(endPoint[0] - startPoint[0]) >
         Math.abs(endPoint[1] - startPoint[1])
@@ -1215,24 +1224,32 @@ export class ConnectorPathGenerator {
   private _getConnectionPoint(
     connector: ConnectorElementModel | LocalConnectorElementModel,
     type: 'source' | 'target'
-  ): PointLocation {
+  ): PointLocation | null {
     const connection = connector[type];
-    const anotherType = type === 'source' ? 'target' : 'source';
 
-    if (connection.id) {
-      const connectable = this._getConnectorEndElement(connector, type);
-      assertExists(connectable);
+    if (!connection) return null;
 
-      if (!connection.position) {
-        const otherPoint = this._getConnectionPoint(connector, anotherType);
-        return getNearestConnectableAnchor(connectable, otherPoint);
-      } else {
-        return getConnectableRelativePosition(connectable, connection.position);
-      }
-    } else {
-      assertExists(connection.position);
+    const connectable = this._getConnectorEndElement(connector, type);
+
+    if (!connectable && connection.position) {
       return PointLocation.fromVec(connection.position);
     }
+
+    if (!connectable) return null;
+
+    let point: PointLocation | null = null;
+
+    if (connection.position) {
+      point = getConnectableRelativePosition(connectable, connection.position);
+    } else {
+      const anotherType = type === 'source' ? 'target' : 'source';
+      const otherPoint = this._getConnectionPoint(connector, anotherType);
+      if (otherPoint) {
+        point = getNearestConnectableAnchor(connectable, otherPoint);
+      }
+    }
+
+    return point;
   }
 
   private _getConnectorEndElement(

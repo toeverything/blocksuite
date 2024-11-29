@@ -1,5 +1,6 @@
 import type {
   GfxBlockElementModel,
+  GfxCompatibleProps,
   GfxElementGeometry,
   GfxGroupCompatibleInterface,
   GfxModel,
@@ -9,23 +10,20 @@ import type {
 import {
   canSafeAddToContainer,
   descendantElementsImpl,
+  GfxCompatible,
   gfxGroupCompatibleSymbol,
   hasDescendantElementImpl,
 } from '@blocksuite/block-std/gfx';
-import { Bound, type SerializedXYWH } from '@blocksuite/global/utils';
+import { Bound } from '@blocksuite/global/utils';
 import { BlockModel, defineBlockSchema, type Text } from '@blocksuite/store';
 
 import type { Color } from '../../consts/index.js';
 
-import { GfxCompatible } from '../../utils/index.js';
-
 export type FrameBlockProps = {
   title: Text;
   background: Color;
-  xywh: SerializedXYWH;
-  index: string;
   childElementIds?: Record<string, boolean>;
-};
+} & GfxCompatibleProps;
 
 export const FrameBlockSchema = defineBlockSchema({
   flavour: 'affine:frame',

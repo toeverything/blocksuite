@@ -1442,11 +1442,8 @@ export class EdgelessSelectedRectWidget extends WidgetComponent<
       handlers.push(resizeHandles, connectorHandle, elementHandle);
     }
 
-    if (elements.length === 1 && elements[0] instanceof ConnectorElementModel) {
-      _selectedRect.width = 0;
-      _selectedRect.height = 0;
-      _selectedRect.borderWidth = 0;
-    }
+    const isConnector =
+      elements.length === 1 && elements[0] instanceof ConnectorElementModel;
 
     return html`
       <style>
@@ -1490,7 +1487,7 @@ export class EdgelessSelectedRectWidget extends WidgetComponent<
           width: `${_selectedRect.width}px`,
           height: `${_selectedRect.height}px`,
           borderWidth: `${_selectedRect.borderWidth}px`,
-          borderStyle: _selectedRect.borderStyle,
+          borderStyle: isConnector ? 'none' : _selectedRect.borderStyle,
           transform: `translate(${_selectedRect.left}px, ${_selectedRect.top}px) rotate(${_selectedRect.rotate}deg)`,
         })}
         disabled="true"

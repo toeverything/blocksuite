@@ -33,6 +33,15 @@ export type GfxCompatibleProps = {
 };
 
 /**
+ * This type include the common props for the graphic block model.
+ * You can use this type with Omit to define the props of a graphic block model.
+ */
+export type GfxCommonBlockProps = GfxCompatibleProps & {
+  rotate: number;
+  scale: number;
+};
+
+/**
  * The graphic block model that can be rendered in the graphics mode.
  * All the graphic block model should extend this class.
  * You can use `GfxCompatibleBlockModel` to convert a BlockModel to a subclass that extends it.

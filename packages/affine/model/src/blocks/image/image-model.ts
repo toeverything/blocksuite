@@ -1,9 +1,11 @@
-import type { GfxElementGeometry } from '@blocksuite/block-std/gfx';
-import type { SerializedXYWH } from '@blocksuite/global/utils';
+import type {
+  GfxCommonBlockProps,
+  GfxElementGeometry,
+} from '@blocksuite/block-std/gfx';
 
+import { GfxCompatible } from '@blocksuite/block-std/gfx';
 import { BlockModel, defineBlockSchema } from '@blocksuite/store';
 
-import { GfxCompatible } from '../../utils/index.js';
 import { ImageBlockTransformer } from './image-transformer.js';
 
 export type ImageBlockProps = {
@@ -11,11 +13,9 @@ export type ImageBlockProps = {
   sourceId?: string;
   width?: number;
   height?: number;
-  index: string;
-  xywh: SerializedXYWH;
   rotate: number;
   size?: number;
-};
+} & Omit<GfxCommonBlockProps, 'scale'>;
 
 const defaultImageProps: ImageBlockProps = {
   caption: '',

@@ -13,6 +13,7 @@ import {
   pressEnter,
   pressEnterWithShortkey,
   pressEscape,
+  selectAllByKeyboard,
   setEdgelessTool,
   switchEditorMode,
   type,
@@ -93,5 +94,34 @@ test.describe('pasting blocks', () => {
     await expect(blocks.nth(1).locator('.resizable-img')).toBeVisible();
     await expect(blocks.nth(2)).toContainText('world');
     await expect(blocks.nth(3)).toContainText('code');
+  });
+
+  test('pasting a note block from doc mode', async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyEdgelessState(page);
+    await focusRichText(page);
+    await type(page, 'hello world');
+
+    await selectAllByKeyboard(page);
+    await copyByKeyboard(page);
+
+    await switchEditorMode(page);
+    await click(page, {
+      x: 100,
+      y: 100,
+    });
+    await pasteByKeyboard(page);
+
+    // not equal to noteId
+    const noteIds = await getAllEdgelessNoteIds(page);
+    expect(noteIds.length).toBe(2);
+
+    const newNoteId = noteIds[1];
+    const newNote = page.locator(
+      `affine-edgeless-note[data-block-id="${newNoteId}"]`
+    );
+    await expect(newNote).toBeVisible();
+    const blocks = newNote.locator('[data-block-id]');
+    await expect(blocks.nth(0)).toContainText('hello world');
   });
 });

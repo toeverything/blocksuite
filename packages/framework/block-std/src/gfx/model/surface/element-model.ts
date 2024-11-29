@@ -306,16 +306,15 @@ export abstract class GfxPrimitiveElementModel<
   @local()
   accessor display: boolean = true;
 
-  @watch((_, instance) => {
-    instance['_local'].delete('externalBound');
-  })
-
   /**
    * In some cases, you need to draw something related to the element, but it does not belong to the element itself.
    * And it is also interactive, you can select element by clicking on it. E.g. the title of the group element.
    * In this case, we need to store this kind of external xywh in order to do hit test. This property should not be synced to the doc.
    * This property should be updated every time it gets rendered.
    */
+  @watch((_, instance) => {
+    instance['_local'].delete('externalBound');
+  })
   @local()
   accessor externalXYWH: SerializedXYWH | undefined = undefined;
 

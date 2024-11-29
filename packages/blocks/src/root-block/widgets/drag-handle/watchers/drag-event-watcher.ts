@@ -1,10 +1,7 @@
-import type { NoteBlockModel } from '@blocksuite/affine-model';
-import type { BlockModel } from '@blocksuite/store';
-
 import {
   captureEventTarget,
-  findNoteBlockModel,
   getBlockComponentsExcludeSubtrees,
+  getClosestBlockComponentByPoint,
   matchFlavours,
 } from '@blocksuite/affine-shared/utils';
 import {
@@ -12,22 +9,27 @@ import {
   type DndEventState,
   isGfxBlockComponent,
   type UIEventHandler,
+  type UIEventStateContext,
 } from '@blocksuite/block-std';
 import { GfxControllerIdentifier } from '@blocksuite/block-std/gfx';
 import { Bound, Point } from '@blocksuite/global/utils';
+import { Job, Slice } from '@blocksuite/store';
 import { render } from 'lit';
+import * as lz from 'lz-string';
 
-import type { EdgelessRootBlockComponent } from '../../../edgeless/index.js';
 import type { AffineDragHandleWidget } from '../drag-handle.js';
 
-import { addNoteAtPoint } from '../../../edgeless/utils/common.js';
+import {
+  HtmlAdapter,
+  MarkdownAdapter,
+} from '../../../../_common/adapters/index.js';
+import {
+  calcDropTarget,
+  type DropResult,
+} from '../../../../_common/utils/index.js';
 import { DropIndicator } from '../components/drop-indicator.js';
 import { AFFINE_DRAG_HANDLE_WIDGET } from '../consts.js';
-import {
-  containBlock,
-  getDuplicateBlocks,
-  includeTextSelection,
-} from '../utils.js';
+import { containBlock, includeTextSelection } from '../utils.js';
 
 export class DragEventWatcher {
   private _changeCursorToGrabbing = () => {
@@ -44,43 +46,9 @@ export class DragEventWatcher {
   /**
    * When drag end, should move blocks to drop position
    */
-  private _dragEndHandler: UIEventHandler = ctx => {
+  private _dragEndHandler: UIEventHandler = () => {
     this.widget.clearRaf();
-    if (!this.widget.dragging || !this.widget.dragPreview) return false;
-    if (this.widget.draggingElements.length === 0 || this.widget.doc.readonly) {
-      this.widget.hide(true);
-      return false;
-    }
-
-    const state = ctx.get('dndState');
-    const { target } = state.raw;
-    if (!this.widget.host.contains(target as Node)) {
-      this.widget.hide(true);
-      return true;
-    }
-
-    for (const option of this.widget.optionRunner.options) {
-      if (
-        option.onDragEnd?.({
-          state,
-          draggingElements: this.widget.draggingElements,
-          dropBlockId: this.widget.dropBlockId,
-          dropType: this.widget.dropType,
-          dragPreview: this.widget.dragPreview,
-          noteScale: this.widget.noteScale.peek(),
-          editorHost: this.widget.host,
-        })
-      ) {
-        this.widget.hide(true);
-        if (this.widget.mode === 'edgeless') {
-          this.widget.edgelessWatcher.checkTopLevelBlockSelection();
-        }
-        return true;
-      }
-    }
-
-    // call default drag end handler if no option return true
-    this._onDragEnd(state);
+    this.widget.hide(true);
 
     if (this.widget.mode === 'edgeless') {
       this.widget.edgelessWatcher.checkTopLevelBlockSelection();
@@ -136,170 +104,7 @@ export class DragEventWatcher {
       return false;
     }
 
-    // call default drag start handler if no option return true
-    for (const option of this.widget.optionRunner.options) {
-      if (
-        option.onDragStart?.({
-          state,
-          startDragging: this._startDragging,
-          anchorBlockId: this.widget.anchorBlockId.peek() ?? '',
-          editorHost: this.widget.host,
-        })
-      ) {
-        return true;
-      }
-    }
     return this._onDragStart(state);
-  };
-
-  private _onDragEnd = (state: DndEventState) => {
-    const targetBlockId = this.widget.dropBlockId;
-    const dropType = this.widget.dropType;
-    const draggingElements = this.widget.draggingElements;
-    this.widget.hide(true);
-
-    // handle drop of blocks from note onto edgeless container
-    if (!targetBlockId) {
-      const target = captureEventTarget(state.raw.target);
-      if (!target) return false;
-
-      const isTargetEdgelessContainer =
-        target.classList.contains('edgeless-container');
-      if (!isTargetEdgelessContainer) return false;
-
-      const selectedBlocks = getBlockComponentsExcludeSubtrees(draggingElements)
-        .map(element => element.model)
-        .filter((x): x is BlockModel => !!x);
-      if (selectedBlocks.length === 0) return false;
-
-      const isSurfaceComponent = selectedBlocks.some(block => {
-        const parent = this.widget.doc.getParent(block.id);
-        return matchFlavours(parent, ['affine:surface']);
-      });
-      if (isSurfaceComponent) return true;
-
-      const edgelessRoot = this.widget
-        .rootComponent as EdgelessRootBlockComponent;
-
-      const { left: viewportLeft, top: viewportTop } = edgelessRoot.viewport;
-
-      const newNoteId = addNoteAtPoint(
-        edgelessRoot.std,
-        new Point(state.raw.x - viewportLeft, state.raw.y - viewportTop),
-        {
-          scale: this.widget.noteScale.peek(),
-        }
-      );
-      const newNoteBlock = this.widget.doc.getBlockById(
-        newNoteId
-      ) as NoteBlockModel;
-      if (!newNoteBlock) return;
-
-      const bound = Bound.deserialize(newNoteBlock.xywh);
-      bound.h *= this.widget.noteScale.peek();
-      bound.w *= this.widget.noteScale.peek();
-      this.widget.doc.updateBlock(newNoteBlock, {
-        xywh: bound.serialize(),
-        edgeless: {
-          ...newNoteBlock.edgeless,
-          scale: this.widget.noteScale.peek(),
-        },
-      });
-
-      const altKey = state.raw.altKey;
-      if (altKey) {
-        const duplicateBlocks = getDuplicateBlocks(selectedBlocks);
-
-        this.widget.doc.addBlocks(duplicateBlocks, newNoteBlock);
-      } else {
-        this.widget.doc.moveBlocks(selectedBlocks, newNoteBlock);
-      }
-
-      edgelessRoot.service.selection.set({
-        elements: [newNoteBlock.id],
-        editing: true,
-      });
-
-      return true;
-    }
-
-    // Should make sure drop block id is not in selected blocks
-    if (
-      containBlock(this.widget.selectionHelper.selectedBlockIds, targetBlockId)
-    ) {
-      return false;
-    }
-
-    const selectedBlocks = getBlockComponentsExcludeSubtrees(draggingElements)
-      .map(element => element.model)
-      .filter((x): x is BlockModel => !!x);
-    if (!selectedBlocks.length) {
-      return false;
-    }
-
-    const targetBlock = this.widget.doc.getBlockById(targetBlockId);
-    if (!targetBlock) return;
-
-    const shouldInsertIn = dropType === 'in';
-
-    const parent = shouldInsertIn
-      ? targetBlock
-      : this.widget.doc.getParent(targetBlockId);
-    if (!parent) return;
-
-    const altKey = state.raw.altKey;
-
-    if (shouldInsertIn) {
-      if (altKey) {
-        const duplicateBlocks = getDuplicateBlocks(selectedBlocks);
-
-        this.widget.doc.addBlocks(duplicateBlocks, targetBlock);
-      } else {
-        this.widget.doc.moveBlocks(selectedBlocks, targetBlock);
-      }
-    } else {
-      if (altKey) {
-        const duplicateBlocks = getDuplicateBlocks(selectedBlocks);
-
-        const parentIndex =
-          parent.children.indexOf(targetBlock) + (dropType === 'after' ? 1 : 0);
-
-        this.widget.doc.addBlocks(duplicateBlocks, parent, parentIndex);
-      } else {
-        this.widget.doc.moveBlocks(
-          selectedBlocks,
-          parent,
-          targetBlock,
-          dropType === 'before'
-        );
-      }
-    }
-
-    // TODO: need a better way to update selection
-    // Should update selection after moving blocks
-    // In doc page mode, update selected blocks
-    // In edgeless mode, focus on the first block
-    setTimeout(() => {
-      if (!parent) return;
-      // Need to update selection when moving blocks successfully
-      // Because the block path may be changed after moving
-      const parentElement = this.widget.std.view.getBlock(parent.id);
-      if (parentElement) {
-        const newSelectedBlocks = selectedBlocks.map(block => {
-          return this.widget.std.view.getBlock(block.id);
-        });
-        if (!newSelectedBlocks) return;
-
-        const note = findNoteBlockModel(parentElement.model);
-        if (!note) return;
-        this.widget.selectionHelper.setSelectedBlocks(
-          newSelectedBlocks as BlockComponent[],
-          note.id
-        );
-      }
-    }, 0);
-
-    return true;
   };
 
   private _onDragMove = (state: DndEventState) => {
@@ -428,6 +233,27 @@ export class DragEventWatcher {
     return true;
   };
 
+  private _onDrop = (context: UIEventStateContext) => {
+    const state = context.get('dndState');
+    const event = state.raw;
+    const { clientX, clientY } = event;
+    const point = new Point(clientX, clientY);
+    const element = getClosestBlockComponentByPoint(point.clone());
+    if (!element) return;
+    const model = element.model;
+    const parent = this.widget.std.doc.getParent(model.id);
+    if (!parent) return;
+    if (matchFlavours(parent, ['affine:surface'])) {
+      return;
+    }
+    const result: DropResult | null = calcDropTarget(point, model, element);
+    if (!result) return;
+
+    const index =
+      parent.children.indexOf(model) + (result.type === 'before' ? 0 : 1);
+    this._deserializeData(state, parent.id, index).catch(console.error);
+  };
+
   private _startDragging = (
     blocks: BlockComponent[],
     state: DndEventState,
@@ -447,15 +273,115 @@ export class DragEventWatcher {
       dragPreviewOffset
     );
 
+    const slice = Slice.fromModels(
+      this.widget.std.doc,
+      blocks.map(block => block.model)
+    );
+
     this.widget.dragging = true;
     this._changeCursorToGrabbing();
     this._createDropIndicator();
     this.widget.hide();
+    this._serializeData(slice, state).catch(console.error);
   };
 
   constructor(readonly widget: AffineDragHandleWidget) {}
 
+  private async _deserializeData(
+    state: DndEventState,
+    parent?: string,
+    index?: number
+  ) {
+    try {
+      const dataTransfer = state.raw.dataTransfer;
+      if (!dataTransfer) throw new Error('No data transfer');
+
+      const job = new Job({
+        collection: this.widget.std.collection,
+      });
+
+      const std = this.widget.std;
+      const html = dataTransfer.getData('text/html');
+      if (html) {
+        const domParser = new DOMParser();
+        const doc = domParser.parseFromString(html, 'text/html');
+        const dom = doc.querySelector<HTMLDivElement>(
+          '[data-blocksuite-snapshot]'
+        );
+        if (dom) {
+          // use snapshot
+          const json = JSON.parse(
+            lz.decompressFromEncodedURIComponent(
+              dom.dataset.blocksuiteSnapshot as string
+            )
+          );
+          const slice = await job.snapshotToSlice(json, std.doc, parent, index);
+          return slice;
+        }
+
+        // use html parser;
+        const htmlAdapter = new HtmlAdapter(job);
+        const slice = await htmlAdapter.toSlice(
+          { file: html },
+          std.doc,
+          parent,
+          index
+        );
+        return slice;
+      }
+
+      const text = dataTransfer.getData('text/plain');
+      const textAdapter = new MarkdownAdapter(job);
+      const slice = await textAdapter.toSlice(
+        { file: text },
+        std.doc,
+        parent,
+        index
+      );
+      return slice;
+    } catch {
+      return null;
+    }
+  }
+
+  private async _serializeData(slice: Slice, state: DndEventState) {
+    const dataTransfer = state.raw.dataTransfer;
+    if (!dataTransfer) return;
+
+    const job = new Job({
+      middlewares: [],
+      collection: this.widget.std.collection,
+    });
+    const textAdapter = new MarkdownAdapter(job);
+    const htmlAdapter = new HtmlAdapter(job);
+
+    const snapshot = await job.sliceToSnapshot(slice);
+    const text = await textAdapter.fromSlice(slice);
+    const innerHTML = await htmlAdapter.fromSlice(slice);
+    if (!snapshot || !text || !innerHTML) return;
+
+    const snapshotCompressed = lz.compressToEncodedURIComponent(
+      JSON.stringify(snapshot)
+    );
+    const html = `<div data-blocksuite-snapshot=${snapshotCompressed}>${innerHTML.file}</div>`;
+    dataTransfer.setData('text/plain', text.file);
+    dataTransfer.setData('text/html', html);
+  }
+
   watch() {
+    this.widget.handleEvent('pointerDown', ctx => {
+      const state = ctx.get('pointerState');
+      const event = state.raw;
+      const target = captureEventTarget(event.target);
+      if (!target) return;
+
+      if (this.widget.contains(target)) {
+        return true;
+      }
+
+      return;
+    });
+
     this.widget.handleEvent('dragStart', ctx => {
       const state = ctx.get('pointerState');
       const event = state.raw;
@@ -477,7 +403,7 @@ export class DragEventWatcher {
     this.widget.handleEvent('nativeDragEnd', this._dragEndHandler, {
       global: true,
     });
-    this.widget.handleEvent('nativeDrop', this._dragEndHandler, {
+    this.widget.handleEvent('nativeDrop', this._onDrop, {
       global: true,
     });
   }

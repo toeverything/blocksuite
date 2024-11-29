@@ -535,7 +535,7 @@ export class Job {
         startIndex !== undefined ? startIndex + index : undefined;
       doc.addBlock(flavour as BlockSuite.Flavour, draft, parentId, actualIndex);
 
-      const model = doc.getBlockById(id);
+      const model = doc.getBlock(id)?.model;
       if (!model) {
         throw new BlockSuiteError(
           ErrorCode.TransformerError,
@@ -618,7 +618,7 @@ export class Job {
 
     await this._insertBlockTree([blockTree], doc, parent, index);
 
-    return doc.getBlockById(snapshot.id) || null;
+    return doc.getBlock(snapshot.id)?.model ?? null;
   }
 
   private _triggerBeforeImportEvent(
