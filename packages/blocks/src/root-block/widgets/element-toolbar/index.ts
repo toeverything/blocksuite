@@ -210,10 +210,12 @@ export class EdgelessElementToolbarWidget extends WidgetComponent<
     const bound = getCommonBoundWithRotation(elements);
 
     const { width, height } = viewport;
-    const [x, y] = viewport.toViewCoord(bound.x, bound.y);
+    const { x, y, w } = viewport.toViewBound(bound);
 
     let left = x;
     let top = y;
+
+    const hasLocked = elements.some(e => e.isLocked());
 
     let offset = 37 + 12;
     // frame, group, shape
@@ -248,7 +250,11 @@ export class EdgelessElementToolbarWidget extends WidgetComponent<
     requestConnectedFrame(() => {
       const rect = this.getBoundingClientRect();
 
-      left = CommonUtils.clamp(x, 10, width - rect.width - 10);
+      if (hasLocked) {
+        left += 0.5 * (w - rect.width);
+      }
+
+      left = CommonUtils.clamp(left, 10, width - rect.width - 10);
       top = CommonUtils.clamp(top, 10, height - rect.height - 150);
 
       this.style.transform = `translate3d(${left}px, ${top}px, 0)`;
