@@ -25,26 +25,23 @@ export class LayoutableMindmapElementModel extends MindmapElementModel {
     options: {
       applyStyle?: boolean;
       layoutType?: LayoutType;
-      calculateTreeBound?: boolean;
       stashed?: boolean;
     } = {
       applyStyle: true,
-      calculateTreeBound: true,
       stashed: true,
     }
   ) {
-    const { stashed, applyStyle, layoutType, calculateTreeBound } =
-      Object.assign(
-        {
-          applyStyle: true,
-          calculateTreeBound: true,
-          stashed: true,
-        },
-        options
-      );
+    const { stashed, applyStyle, layoutType } = Object.assign(
+      {
+        applyStyle: true,
+        calculateTreeBound: true,
+        stashed: true,
+      },
+      options
+    );
 
     const pop = stashed ? this.stashTree(tree) : null;
-    handleLayout(this, tree, applyStyle, layoutType, calculateTreeBound);
+    handleLayout(this, tree, applyStyle, layoutType);
     pop?.();
   }
 }
@@ -369,8 +366,7 @@ export function handleLayout(
   mindmap: MindmapElementModel,
   tree?: MindmapNode | MindmapRoot,
   shouldApplyStyle = true,
-  layoutType?: LayoutType,
-  calculateTreeBound = true
+  layoutType?: LayoutType
 ) {
   if (!tree || !tree.element) return;
 
@@ -380,13 +376,7 @@ export function handleLayout(
 
   mindmap.surface.doc.transact(() => {
     const path = mindmap.getPath(tree.id);
-    layout(
-      tree,
-      mindmap,
-      layoutType ?? mindmap.getLayoutDir(tree.id),
-      path,
-      calculateTreeBound
-    );
+    layout(tree, mindmap, layoutType ?? mindmap.getLayoutDir(tree.id), path);
   });
 }
 
@@ -454,13 +444,19 @@ export function findTargetNode(
   mindmap: MindmapElementModel,
   position: IVec
 ): MindmapNode | null {
-  const find = (mindMapNode: MindmapNode): MindmapNode | null => {
-    if (mindMapNode.treeBound?.containsPoint(position)) {
-      if (mindMapNode.responseArea?.containsPoint(position)) {
-        return mindMapNode;
-      }
+  const find = (node: MindmapNode): MindmapNode | null => {
+    if (!node.responseArea) {
+      return null;
+    }
 
-      for (const child of mindMapNode.children) {
+    const layoutDir = mindmap.getLayoutDir(node);
+
+    if (
+      (layoutDir === LayoutType.RIGHT &&
+        position[0] > node.element.x + node.element.w) ||
+      (layoutDir === LayoutType.LEFT && position[0] < node.element.x)
+    ) {
+      for (const child of node.children) {
         const result = find(child);
         if (result) {
           return result;
@@ -468,7 +464,7 @@ export function findTargetNode(
       }
     }
 
-    return null;
+    return node.responseArea.containsPoint(position) ? node : null;
   };
 
   return find(mindmap.tree);

@@ -66,11 +66,14 @@ export class BroadcastChannelDocSource implements DocSource {
     }
 
     assertExists(this.docMap.get(docId));
-    this.channel.postMessage({
-      type: 'update',
-      docId,
-      data: this.docMap.get(docId)!,
-    } satisfies ChannelMessage);
+
+    setTimeout(() => {
+      this.channel.postMessage({
+        type: 'update',
+        docId,
+        data: this.docMap.get(docId)!,
+      } satisfies ChannelMessage);
+    }, 5000);
   }
 
   subscribe(cb: (docId: string, data: Uint8Array) => void) {

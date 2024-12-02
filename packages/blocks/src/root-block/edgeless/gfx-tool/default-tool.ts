@@ -67,7 +67,7 @@ import {
 } from '../utils/text.js';
 import { fitToScreen } from '../utils/viewport.js';
 import { DefaultModeDragType } from './default-tool-ext/ext.js';
-import { MindMapExt } from './default-tool-ext/mind-map-ext.js';
+import { MindMapExt } from './default-tool-ext/mind-map-ext/mind-map-ext.js';
 
 export class DefaultTool extends BaseTool {
   static override toolName: string = 'default';

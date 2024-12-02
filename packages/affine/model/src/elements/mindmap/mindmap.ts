@@ -46,16 +46,15 @@ export type MindmapNode = {
   element: BlockSuite.SurfaceElementModel;
   children: MindmapNode[];
 
-  /**
-   * When dragging another node into this area, it will become a sibling of the target node.
-   * However, if it is dragged into the small area located right after the target node, it will become a child node of the target node.
-   */
-  responseArea?: Bound;
+  parent: MindmapNode | null;
 
   /**
-   * The bound of the entire subtree
+   * This area is used to determine where to place the dragged node.
+   *
+   * When dragging another node into this area, it will become a sibling of the this node.
+   * But if it is dragged into the small area located right after the this node, it will become a child of the this node.
    */
-  treeBound?: Bound;
+  responseArea?: Bound;
 
   /**
    * This property override the preferredDir or default layout direction.
@@ -147,7 +146,7 @@ export class MindmapElementModel extends GfxGroupLikeElementModel<MindmapElement
 
   private _queueBuildTree = false;
 
-  private _queued = false;
+  private _queuedLayout = false;
 
   private _stashedNode = new Set<string>();
 
@@ -422,39 +421,43 @@ export class MindmapElementModel extends GfxGroupLikeElementModel<MindmapElement
     let rootNode: MindmapRoot | undefined;
 
     nodesMap.forEach((val, id) => {
-      const node = mindmapNodeMap.has(id)
-        ? mindmapNodeMap.get(id)!
-        : ({
-            id,
-            parent: val.parent,
-            index: val.index,
-            detail: val,
-            element: this.surface.getElementById(id)!,
-            children: [],
-          } as MindmapNode);
-
-      if (!node.detail) {
-        node.detail = val;
+      if (!mindmapNodeMap.has(id)) {
+        mindmapNodeMap.set(id, {
+          id,
+          index: val.index,
+          detail: val,
+          element: this.surface.getElementById(id)!,
+          children: [],
+          parent: null,
+        } as MindmapNode);
       }
 
-      if (!mindmapNodeMap.has(id)) {
-        mindmapNodeMap.set(id, node);
+      const node = mindmapNodeMap.get(id)!;
+
+      // some node may be already created during
+      // iterating its children
+      if (!node.detail) {
+        node.detail = val;
       }
 
       if (!val.parent) {
         rootNode = node as MindmapRoot;
         rootNode.left = [];
         rootNode.right = [];
-      } else if (mindmapNodeMap.has(val.parent)) {
-        const parentNode = mindmapNodeMap.get(val.parent)!;
-        parentNode.children = parentNode.children ?? [];
-        parentNode.children.push(node);
       } else {
-        mindmapNodeMap.set(val.parent, {
-          id: val.parent,
-          children: [node],
-          element: this.surface.getElementById(val.parent)!,
-        } as MindmapNode);
+        if (!mindmapNodeMap.has(val.parent)) {
+          mindmapNodeMap.set(val.parent, {
+            id: val.parent,
+            detail: nodesMap.get(val.parent)!,
+            parent: null,
+            children: [],
+            element: this.surface.getElementById(val.parent)!,
+          } as MindmapNode);
+        }
+
+        const parent = mindmapNodeMap.get(val.parent)!;
+        parent.children.push(node);
+        parent.parent = parent;
       }
     });
 
@@ -720,12 +723,12 @@ export class MindmapElementModel extends GfxGroupLikeElementModel<MindmapElement
   }
 
   requestLayout() {
-    if (!this._queued) {
-      this._queued = true;
+    if (!this._queuedLayout) {
+      this._queuedLayout = true;
 
       queueMicrotask(() => {
         this.layout();
-        this._queued = false;
+        this._queuedLayout = false;
       });
     }
   }
