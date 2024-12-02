@@ -32,6 +32,7 @@ import {
   ShapeElementModel,
   TextElementModel,
 } from '@blocksuite/affine-model';
+import { unsafeCSSVarV2 } from '@blocksuite/affine-shared/theme';
 import {
   clamp,
   requestThrottledConnectedFrame,
@@ -148,6 +149,13 @@ export class EdgelessSelectedRectWidget extends WidgetComponent<
       border-width: 2px;
       border-style: solid;
       transform: translate(0, 0) rotate(0);
+    }
+
+    .affine-edgeless-selected-rect[data-locked='true'] {
+      border-color: ${unsafeCSSVarV2(
+        'edgeless/frame/border/locked',
+        '#00000085'
+      )};
     }
 
     .affine-edgeless-selected-rect .handle {
@@ -1498,6 +1506,7 @@ export class EdgelessSelectedRectWidget extends WidgetComponent<
         data-mode=${this._mode}
         data-scale-percent=${ifDefined(this._scalePercent)}
         data-scale-direction=${ifDefined(this._scaleDirection)}
+        data-locked=${hasElementLocked}
       >
         ${handlers}
       </div>
