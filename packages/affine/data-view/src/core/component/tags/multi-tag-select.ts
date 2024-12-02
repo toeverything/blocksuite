@@ -7,6 +7,7 @@ import {
 } from '@blocksuite/affine-components/context-menu';
 import { rangeWrap } from '@blocksuite/affine-shared/utils';
 import { ShadowlessElement } from '@blocksuite/block-std';
+import { IS_MOBILE } from '@blocksuite/global/env';
 import { SignalWatcher, WithDisposable } from '@blocksuite/global/utils';
 import {
   CloseIcon,
@@ -445,19 +446,32 @@ declare global {
   }
 }
 
-export const popTagSelect = (
-  target: PopupTarget,
-  ops: {
-    mode?: 'single' | 'multi';
-    value: string[];
-    onChange: (value: string[]) => void;
-    options: ReadonlySignal<SelectTag[]>;
-    onOptionsChange: (options: SelectTag[]) => void;
-    onComplete?: () => void;
-    minWidth?: number;
-    container?: HTMLElement;
-  }
+const popMobileTagSelect = (
+  target: PopupTarget
+  // ops: TagSelectOptions,
 ) => {
+  popMenu(target, {
+    options: {
+      items: [menu.dynamic(() => [])],
+    },
+  });
+};
+
+export type TagSelectOptions = {
+  mode?: 'single' | 'multi';
+  value: string[];
+  onChange: (value: string[]) => void;
+  options: ReadonlySignal<SelectTag[]>;
+  onOptionsChange: (options: SelectTag[]) => void;
+  onComplete?: () => void;
+  minWidth?: number;
+  container?: HTMLElement;
+};
+export const popTagSelect = (target: PopupTarget, ops: TagSelectOptions) => {
+  if (IS_MOBILE) {
+    popMobileTagSelect(target, ops);
+    return;
+  }
   const component = new MultiTagSelect();
   if (ops.mode) {
     component.mode = ops.mode;
