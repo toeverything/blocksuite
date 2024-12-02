@@ -37,6 +37,96 @@ export type GetDocOptions = {
   readonly?: boolean;
 };
 
+class SimpleHistory {
+  private _currentBatch: Array<() => void> = [];
+
+  private _eventHandlers: {
+    'stack-item-added': Array<() => void>;
+    'stack-item-popped': Array<() => void>;
+    'stack-item-updated': Array<() => void>;
+    'stack-cleared': Array<() => void>;
+  } = {
+    'stack-item-added': [],
+    'stack-item-popped': [],
+    'stack-item-updated': [],
+    'stack-cleared': [],
+  };
+
+  private _isCapturing = false;
+
+  private _redoStack: Array<() => void> = [];
+
+  private _undoStack: Array<() => void> = [];
+
+  constructor() {
+    // No need for constructor params since we're not using Yjs
+  }
+
+  private _emit(
+    event:
+      | 'stack-item-added'
+      | 'stack-item-popped'
+      | 'stack-item-updated'
+      | 'stack-cleared'
+  ) {
+    this._eventHandlers[event].forEach(handler => handler());
+  }
+
+  canRedo() {
+    return this._redoStack.length > 0;
+  }
+
+  canUndo() {
+    return this._undoStack.length > 0;
+  }
+
+  clear() {
+    this._undoStack = [];
+    this._redoStack = [];
+    this._emit('stack-cleared');
+  }
+
+  on(
+    event:
+      | 'stack-item-added'
+      | 'stack-item-popped'
+      | 'stack-item-updated'
+      | 'stack-cleared',
+    callback: () => void
+  ) {
+    this._eventHandlers[event].push(callback);
+  }
+
+  redo() {
+    const operation = this._redoStack.pop();
+    if (operation) {
+      operation();
+      this._emit('stack-item-popped');
+    }
+  }
+
+  stopCapturing() {
+    if (this._isCapturing && this._currentBatch.length > 0) {
+      this._undoStack.push(() => {
+        for (const operation of this._currentBatch.reverse()) {
+          operation();
+        }
+      });
+      this._currentBatch = [];
+      this._emit('stack-item-added');
+    }
+    this._isCapturing = false;
+  }
+
+  undo() {
+    const operation = this._undoStack.pop();
+    if (operation) {
+      operation();
+      this._emit('stack-item-popped');
+    }
+  }
+}
+
 export class BlockCollection {
   private _awarenessUpdateDisposable: Disposable | null = null;
 
@@ -59,7 +149,7 @@ export class BlockCollection {
     events.forEach(event => this._handleYEvent(event));
   };
 
-  private _history!: Y.UndoManager;
+  private _history = new SimpleHistory();
 
   private _historyObserver = () => {
     this._updateCanUndoRedoSignals();
@@ -73,6 +163,7 @@ export class BlockCollection {
     if (!subDoc) {
       subDoc = new Y.Doc({
         guid: this.id,
+        gc: true,
       });
       this.rootDoc.spaces.set(this.id, subDoc);
       this._loaded = true;
@@ -290,9 +381,9 @@ export class BlockCollection {
   private _initYBlocks() {
     const { _yBlocks } = this;
     _yBlocks.observeDeep(this._handleYEvents);
-    this._history = new Y.UndoManager([_yBlocks], {
-      trackedOrigins: new Set([this._ySpaceDoc.clientID]),
-    });
+    // this._history = new Y.UndoManager([_yBlocks], {
+    //   trackedOrigins: new Set([this._ySpaceDoc.clientID]),
+    // });
 
     this._history.on('stack-cleared', this._historyObserver);
     this._history.on('stack-item-added', this._historyObserver);
