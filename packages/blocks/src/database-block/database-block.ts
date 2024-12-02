@@ -56,6 +56,7 @@ import { HostContextKey } from './context/host-context.js';
 import { DatabaseBlockDataSource } from './data-source.js';
 import { BlockRenderer } from './detail-panel/block-renderer.js';
 import { NoteRenderer } from './detail-panel/note-renderer.js';
+import { currentViewStorage } from './utils/current-view.js';
 import { getSingleDocIdFromText } from './utils/title-doc.js';
 
 export class DatabaseBlockComponent extends CaptionedBlockComponent<
@@ -230,7 +231,12 @@ export class DatabaseBlockComponent extends CaptionedBlockComponent<
             class="database-header-bar"
           >
             <div style="flex:1">
-              ${renderUniLit(widgetPresets.viewBar, props)}
+              ${renderUniLit(widgetPresets.viewBar, {
+                ...props,
+                onChangeView: id => {
+                  currentViewStorage.setCurrentView(this.blockId, id);
+                },
+              })}
             </div>
             ${renderUniLit(this.toolsWidget, props)}
           </div>
@@ -330,6 +336,10 @@ export class DatabaseBlockComponent extends CaptionedBlockComponent<
     if (!this._dataSource) {
       this._dataSource = new DatabaseBlockDataSource(this.model);
       this._dataSource.contextSet(HostContextKey, this.host);
+      const id = currentViewStorage.getCurrentView(this.model.id);
+      if (id) {
+        this.dataSource.viewManager.setCurrentView(id);
+      }
     }
     return this._dataSource;
   }
