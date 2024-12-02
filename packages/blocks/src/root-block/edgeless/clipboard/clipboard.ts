@@ -1085,12 +1085,14 @@ export class EdgelessClipboardController extends PageClipboard {
       });
     } else {
       for (let index = 0; index < content.length; index++) {
-        await this.onBlockSnapshotPaste(
-          content[index],
-          this.doc,
-          noteId,
-          index
-        );
+        const blockSnapshot = content[index];
+        if (blockSnapshot.flavour === 'affine:note') {
+          for (const child of blockSnapshot.children) {
+            await this.onBlockSnapshotPaste(child, this.doc, noteId);
+          }
+          continue;
+        }
+        await this.onBlockSnapshotPaste(content[index], this.doc, noteId);
       }
     }
 
