@@ -6,7 +6,7 @@ import {
 } from '@blocksuite/affine-model';
 import { SignalWatcher, WithDisposable } from '@blocksuite/global/utils';
 import { LockIcon, UnlockIcon } from '@blocksuite/icons/lit';
-import { html, LitElement } from 'lit';
+import { html, LitElement, nothing } from 'lit';
 import { property } from 'lit/decorators.js';
 
 import type { EdgelessRootBlockComponent } from '../../edgeless/index.js';
@@ -110,6 +110,9 @@ export class EdgelessLockButton extends SignalWatcher(
       @click=${hasLocked ? this._unlock : this._lock}
     >
       ${icon({ width: '20px', height: '20px' })}
+      ${hasLocked
+        ? html`<span class="label medium">Click to unlock</span>`
+        : nothing}
     </editor-icon-button>`;
   }
 
