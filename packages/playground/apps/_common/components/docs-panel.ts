@@ -1,8 +1,12 @@
 import type { AffineEditorContainer } from '@blocksuite/presets';
-import type { DocCollection } from '@blocksuite/store';
+import type { BlockCollection, DocCollection } from '@blocksuite/store';
 
 import { ShadowlessElement } from '@blocksuite/block-std';
-import { CloseIcon, createDefaultDoc } from '@blocksuite/blocks';
+import {
+  CloseIcon,
+  createDefaultDoc,
+  GenerateDocUrlProvider,
+} from '@blocksuite/blocks';
 import { WithDisposable } from '@blocksuite/global/utils';
 import { css, html, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
@@ -60,6 +64,18 @@ export class DocsPanel extends WithDisposable(ShadowlessElement) {
     createDocBlock(this.editor.doc.collection);
   };
 
+  gotoDoc = (doc: BlockCollection) => {
+    const url = this.editor.std
+      .get(GenerateDocUrlProvider)
+      .generateDocUrl(doc.id);
+    if (url) history.pushState({}, '', url);
+
+    this.editor.doc = doc.getDoc();
+    this.editor.doc.load();
+    this.editor.doc.resetHistory();
+    this.requestUpdate();
+  };
+
   private get collection() {
     return this.editor.doc.collection;
   }
@@ -97,10 +113,7 @@ export class DocsPanel extends WithDisposable(ShadowlessElement) {
             justifyContent: 'space-between',
           });
           const click = () => {
-            this.editor.doc = doc.getDoc();
-            this.editor.doc.load();
-            this.editor.doc.resetHistory();
-            this.requestUpdate();
+            this.gotoDoc(doc);
           };
           const deleteDoc = (e: MouseEvent) => {
             e.stopPropagation();
