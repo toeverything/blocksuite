@@ -1295,6 +1295,7 @@ describe('html to snapshot', () => {
             },
             checked: false,
             collapsed: false,
+            order: null,
           },
           children: [],
         },

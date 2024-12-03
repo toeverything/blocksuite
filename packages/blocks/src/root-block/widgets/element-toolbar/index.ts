@@ -471,9 +471,3 @@ export class EdgelessElementToolbarWidget extends WidgetComponent<
   @state()
   accessor toolbarVisible = false;
 }
-
-declare global {
-  interface HTMLElementTagNameMap {
-    'edgeless-element-toolbar-widget': EdgelessElementToolbarWidget;
-  }
-}

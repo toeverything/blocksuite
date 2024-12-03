@@ -1,3 +1,4 @@
+export * from './adapters/markdown.js';
 export * from './embed-loom-block.js';
 export * from './embed-loom-model.js';
 export * from './embed-loom-service.js';

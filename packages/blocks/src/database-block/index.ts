@@ -1,7 +1,7 @@
 import type { DatabaseBlockModel } from '@blocksuite/affine-model';
 
+export * from './adapters/markdown.js';
 export type { DatabaseOptionsConfig } from './config.js';
-
 export * from './data-source.js';
 export * from './database-block.js';
 export * from './database-service.js';

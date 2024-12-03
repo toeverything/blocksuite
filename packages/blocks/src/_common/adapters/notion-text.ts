@@ -1,4 +1,4 @@
-import type { AffineTextAttributes } from '@blocksuite/affine-components/rich-text';
+import type { AffineTextAttributes } from '@blocksuite/affine-shared/types';
 import type { DeltaInsert } from '@blocksuite/inline';
 
 import { DEFAULT_NOTE_BACKGROUND_COLOR } from '@blocksuite/affine-model';

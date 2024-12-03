@@ -1,5 +1,40 @@
 # @blocksuite/affine-block-embed
 
+## 0.18.1
+
+### Patch Changes
+
+- e2d574c: ## Feat
+
+  - feat: new doc dnd (#8808)
+
+  ## Fix
+
+  - fix(database): row selection is incorrect when clicking the row options button (#8817)
+  - fix(blocks): notion html import nested list with nested paragraph (#8809)
+  - fix(edgeless): connector endpoint may be null (#8804)
+  - fix(edgeless): connector selected rect width and height is zero (#8803)
+  - fix(blocks): linked popover styles (#8799)
+
+  ## Chore
+
+  - chore: lock file maintenance (#8797)
+
+  ## Refactor
+
+  - refactor(database): make Kanban View compatible with mobile devices (#8807)
+  - refactor: extract toggle button in list block (#8795)
+
+- Updated dependencies [e2d574c]
+  - @blocksuite/affine-block-surface@0.18.1
+  - @blocksuite/affine-components@0.18.1
+  - @blocksuite/affine-model@0.18.1
+  - @blocksuite/affine-shared@0.18.1
+  - @blocksuite/block-std@0.18.1
+  - @blocksuite/global@0.18.1
+  - @blocksuite/inline@0.18.1
+  - @blocksuite/store@0.18.1
+
 ## 0.18.0
 
 ### Minor Changes

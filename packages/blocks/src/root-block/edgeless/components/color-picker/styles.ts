@@ -255,16 +255,16 @@ export const COLOR_PICKER_STYLE = css`
     gap: 4px;
     border-radius: 8px;
     border: 1px solid var(--affine-border-color);
-    background: var(--affine-background-tertiary-color);
+    background: var(--affine-background-primary-color);
     box-sizing: border-box;
   }
 
   .field.color {
-    width: 134px;
+    width: 132px;
   }
 
   .field.alpha {
-    width: 56px;
+    width: 58px;
     gap: 0;
   }
 

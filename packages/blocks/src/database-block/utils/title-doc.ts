@@ -1,4 +1,4 @@
-import type { AffineTextAttributes } from '@blocksuite/affine-components/rich-text';
+import type { AffineTextAttributes } from '@blocksuite/affine-shared/types';
 import type { DeltaOperation, Text } from '@blocksuite/store';
 
 export const getSingleDocIdFromText = (text?: Text) => {

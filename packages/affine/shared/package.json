@@ -1,6 +1,6 @@
 {
   "name": "@blocksuite/affine-shared",
-  "version": "0.18.0",
+  "version": "0.18.1",
   "description": "Default BlockSuite editable blocks.",
   "type": "module",
   "repository": {
@@ -28,6 +28,7 @@
     "@lit/context": "^1.1.2",
     "@preact/signals-core": "^1.8.0",
     "@toeverything/theme": "^1.0.19",
+    "@types/mdast": "^4.0.4",
     "lit": "^3.2.0",
     "lodash.clonedeep": "^4.5.0",
     "lodash.mergewith": "^4.6.2",
@@ -44,7 +45,8 @@
     "./mixins": "./src/mixins/index.ts",
     "./theme": "./src/theme/index.ts",
     "./styles": "./src/styles/index.ts",
-    "./services": "./src/services/index.ts"
+    "./services": "./src/services/index.ts",
+    "./adapters": "./src/adapters/index.ts"
   },
   "publishConfig": {
     "access": "public",
@@ -90,6 +92,10 @@
       "./services": {
         "types": "./dist/services/index.d.ts",
         "import": "./dist/services/index.js"
+      },
+      "./adapters": {
+        "types": "./dist/adapters/index.d.ts",
+        "import": "./dist/adapters/index.js"
       }
     }
   },

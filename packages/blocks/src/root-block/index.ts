@@ -1,3 +1,4 @@
+export * from './adapters/markdown.js';
 export * from './clipboard/index.js';
 export * from './configs/index.js';
 export * from './edgeless/edgeless-root-spec.js';

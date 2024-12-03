@@ -1,4 +1,4 @@
-import type { AffineTextAttributes } from '@blocksuite/affine-components/rich-text';
+import type { AffineTextAttributes } from '@blocksuite/affine-shared/types';
 import type { EditorHost } from '@blocksuite/block-std';
 
 import { whenHover } from '@blocksuite/affine-components/hover';

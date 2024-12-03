@@ -146,12 +146,6 @@ export class EdgelessChangeAttachmentButton extends WithDisposable(LitElement) {
   accessor model!: AttachmentBlockModel;
 }
 
-declare global {
-  interface HTMLElementTagNameMap {
-    'edgeless-change-attachment-button': EdgelessChangeAttachmentButton;
-  }
-}
-
 export function renderAttachmentButton(
   edgeless: EdgelessRootBlockComponent,
   attachments?: AttachmentBlockModel[]

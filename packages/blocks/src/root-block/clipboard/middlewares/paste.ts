@@ -114,11 +114,8 @@ class PasteTr {
     this.snapshot.content.forEach((blockSnapshot, i) => {
       if (blockSnapshot.props.text) {
         const text = this._textFromSnapshot(blockSnapshot);
-        if (i != 0 && i !== this.snapshot.content.length - 1) {
+        if (i > 0) {
           deltas.push({ insert: '\n' });
-        }
-        if (i != 0 && i === this.snapshot.content.length - 1) {
-          this.lastIndex -= 1;
         }
         deltas.push(...text.delta);
       }

@@ -15,18 +15,19 @@ export { GfxExtension, GfxExtensionIdentifier } from './extension.js';
 export { GridManager } from './grid.js';
 export { GfxControllerIdentifier } from './identifiers.js';
 export { LayerManager, type ReorderingDirection } from './layer.js';
-export {
-  type GfxCompatibleInterface,
-  type GfxElementGeometry,
-  type PointTestOptions,
+export type {
+  GfxCompatibleInterface,
+  GfxElementGeometry,
+  GfxGroupCompatibleInterface,
+  PointTestOptions,
 } from './model/base.js';
 export {
-  type GfxGroupCompatibleInterface,
   gfxGroupCompatibleSymbol,
   isGfxGroupCompatibleModel,
 } from './model/base.js';
 export {
   GfxBlockElementModel,
+  type GfxCommonBlockProps,
   GfxCompatibleBlockModel as GfxCompatible,
   type GfxCompatibleProps,
 } from './model/gfx-block-model.js';
