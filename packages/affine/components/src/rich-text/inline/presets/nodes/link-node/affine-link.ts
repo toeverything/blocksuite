@@ -1,4 +1,5 @@
 import type { ReferenceInfo, ReferenceParams } from '@blocksuite/affine-model';
+import type { AffineTextAttributes } from '@blocksuite/affine-shared/types';
 import type { BlockComponent } from '@blocksuite/block-std';
 
 import { ParseDocUrlProvider } from '@blocksuite/affine-shared/services';
@@ -15,10 +16,7 @@ import { ref } from 'lit/directives/ref.js';
 import { type StyleInfo, styleMap } from 'lit/directives/style-map.js';
 
 import { HoverController } from '../../../../../hover/index.js';
-import {
-  type AffineTextAttributes,
-  RefNodeSlotsProvider,
-} from '../../../../extension/index.js';
+import { RefNodeSlotsProvider } from '../../../../extension/index.js';
 import { affineTextStyles } from '../affine-text.js';
 import { toggleLinkPopup } from './link-popup/toggle-link-popup.js';
 
