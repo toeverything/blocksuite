@@ -458,7 +458,7 @@ export class MindmapElementModel extends GfxGroupLikeElementModel<MindmapElement
 
         const parent = mindmapNodeMap.get(val.parent)!;
         parent.children.push(node);
-        parent.parent = parent;
+        node.parent = parent;
       }
     });
 

@@ -66,7 +66,6 @@ export class BroadcastChannelDocSource implements DocSource {
     }
 
     assertExists(this.docMap.get(docId));
-
     this.channel.postMessage({
       type: 'update',
       docId,
