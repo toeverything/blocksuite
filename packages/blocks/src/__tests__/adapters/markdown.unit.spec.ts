@@ -12,7 +12,7 @@ import {
 import { AssetsManager, MemoryBlobCRUD } from '@blocksuite/store';
 import { describe, expect, test } from 'vitest';
 
-import { MarkdownAdapter } from '../../_common/adapters/markdown.js';
+import { MarkdownAdapter } from '../../_common/adapters/markdown/index.js';
 import { nanoidReplacement } from '../../_common/test-utils/test-utils.js';
 import { embedSyncedDocMiddleware } from '../../_common/transformers/middlewares.js';
 import { createJob } from '../utils/create-job.js';

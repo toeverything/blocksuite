@@ -1,4 +1,5 @@
 import type { ReferenceInfo } from '@blocksuite/affine-model';
+import type { AffineTextAttributes } from '@blocksuite/affine-shared/types';
 import type { Doc, DocMeta } from '@blocksuite/store';
 
 import {
@@ -30,10 +31,7 @@ import {
   FontLinkedDocIcon,
 } from '../../../../../icons/index.js';
 import { Peekable } from '../../../../../peek/index.js';
-import {
-  type AffineTextAttributes,
-  RefNodeSlotsProvider,
-} from '../../../../extension/index.js';
+import { RefNodeSlotsProvider } from '../../../../extension/index.js';
 import { affineTextStyles } from '../affine-text.js';
 import { DEFAULT_DOC_NAME, REFERENCE_NODE } from '../consts.js';
 import { toggleReferencePopup } from './reference-popup.js';

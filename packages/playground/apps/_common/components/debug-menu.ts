@@ -1,3 +1,4 @@
+import type { AffineTextAttributes } from '@blocksuite/affine-shared/types';
 import type { SerializedXYWH } from '@blocksuite/global/utils';
 import type { DeltaInsert } from '@blocksuite/inline/types';
 import type { SlDropdown } from '@shoelace-style/shoelace';
@@ -5,16 +6,20 @@ import type { Pane } from 'tweakpane';
 
 import { ShadowlessElement } from '@blocksuite/block-std';
 import {
-  type AffineTextAttributes,
   ColorScheme,
   ColorVariables,
+  createAssetsArchive,
   defaultImageProxyMiddleware,
+  docLinkBaseURLMiddleware,
   type DocMode,
   DocModeProvider,
+  download,
   EdgelessRootService,
   ExportManager,
   FontFamilyVariables,
   HtmlTransformer,
+  type MarkdownAdapter,
+  MarkdownAdapterFactoryIdentifier,
   MarkdownTransformer,
   NotionHtmlAdapter,
   NotionHtmlTransformer,
@@ -22,11 +27,11 @@ import {
   printToPdf,
   SizeVariables,
   StyleVariables,
+  titleMiddleware,
   toast,
   ZipTransformer,
 } from '@blocksuite/blocks';
-import { AffineEditorContainer, type CommentPanel } from '@blocksuite/presets';
-import { type DocCollection, Job, Text } from '@blocksuite/store';
+import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 import '@shoelace-style/shoelace/dist/components/button/button.js';
 import '@shoelace-style/shoelace/dist/components/button-group/button-group.js';
 import '@shoelace-style/shoelace/dist/components/color-picker/color-picker.js';
@@ -42,6 +47,8 @@ import '@shoelace-style/shoelace/dist/components/tab-group/tab-group.js';
 import '@shoelace-style/shoelace/dist/components/tooltip/tooltip.js';
 import '@shoelace-style/shoelace/dist/themes/dark.css';
 import '@shoelace-style/shoelace/dist/themes/light.css';
+import { AffineEditorContainer, type CommentPanel } from '@blocksuite/presets';
+import { type DocCollection, Job, Text } from '@blocksuite/store';
 import { setBasePath } from '@shoelace-style/shoelace/dist/utilities/base-path.js';
 import { css, html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
@@ -52,11 +59,13 @@ import type { CustomOutlinePanel } from './custom-outline-panel.js';
 import type { CustomOutlineViewer } from './custom-outline-viewer.js';
 import type { DocsPanel } from './docs-panel.js';
 import type { LeftSidePanel } from './left-side-panel.js';
+
+import './left-side-panel.js';
+import './side-panel.js';
+
 import type { SidePanel } from './side-panel.js';
 
 import { mockEdgelessTheme } from '../mock-services.js';
-import './left-side-panel.js';
-import './side-panel.js';
 import { AdaptersPanel } from './adapters-panel.js';
 
 const basePath =
@@ -214,8 +223,51 @@ export class DebugMenu extends ShadowlessElement {
     HtmlTransformer.exportDoc(this.doc).catch(console.error);
   }
 
-  private _exportMarkDown() {
-    MarkdownTransformer.exportDoc(this.doc).catch(console.error);
+  /**
+   * Export markdown file using markdown adapter factory extension
+   */
+  private async _exportMarkDown() {
+    const doc = this.editor.doc;
+    const job = new Job({
+      collection: this.editor.doc.collection,
+      middlewares: [docLinkBaseURLMiddleware, titleMiddleware],
+    });
+    const markdownAdapterFactory = this.editor.std.provider.get(
+      MarkdownAdapterFactoryIdentifier
+    );
+    const markdownAdapter = markdownAdapterFactory.get(job) as MarkdownAdapter;
+    const markdownResult = await markdownAdapter.fromDoc(doc);
+    if (!markdownResult) {
+      return;
+    }
+
+    const markdown = markdownResult.file;
+    if (!markdown && !markdownResult.assetsIds.length) {
+      return;
+    }
+
+    let downloadBlob: Blob;
+    const docTitle = doc.meta?.title || 'Untitled';
+    let name: string;
+    const contentBlob = new Blob([markdown], { type: 'plain/text' });
+    if (markdownResult.assetsIds.length > 0) {
+      if (!job.assets) {
+        throw new BlockSuiteError(ErrorCode.ValueNotExists, 'No assets found');
+      }
+      const zip = await createAssetsArchive(
+        job.assets,
+        markdownResult.assetsIds
+      );
+
+      await zip.file('index.md', contentBlob);
+
+      downloadBlob = await zip.generate();
+      name = `${docTitle}.zip`;
+    } else {
+      downloadBlob = contentBlob;
+      name = `${docTitle}.md`;
+    }
+    download(downloadBlob, name);
   }
 
   private _exportPdf() {

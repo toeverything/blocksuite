@@ -1,8 +1,7 @@
+import type { AffineTextAttributes } from '@blocksuite/affine-shared/types';
 import type { Command } from '@blocksuite/block-std';
 
 import { INLINE_ROOT_ATTR, type InlineRootElement } from '@blocksuite/inline';
-
-import type { AffineTextAttributes } from '../extension/index.js';
 
 import { toggleLinkPopup } from '../inline/index.js';
 import { getCombinedTextStyle } from './utils.js';

@@ -11,4 +11,5 @@ export {
   titleMiddleware,
 } from './middlewares.js';
 export { NotionHtmlTransformer } from './notion-html.js';
+export { createAssetsArchive, download } from './utils.js';
 export { ZipTransformer } from './zip.js';

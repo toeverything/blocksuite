@@ -24,7 +24,7 @@ import {
   type ToDocSnapshotPayload,
 } from '@blocksuite/store';
 
-import { MarkdownAdapter } from './markdown.js';
+import { MarkdownAdapter } from './markdown/index.js';
 
 export type MixText = string;
 

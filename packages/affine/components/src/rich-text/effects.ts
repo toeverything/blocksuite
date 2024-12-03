@@ -1,4 +1,5 @@
-import type { AffineTextAttributes } from './extension/index.js';
+import type { AffineTextAttributes } from '@blocksuite/affine-shared/types';
+
 import type { deleteTextCommand } from './format/delete-text.js';
 import type { formatBlockCommand } from './format/format-block.js';
 import type { formatNativeCommand } from './format/format-native.js';
