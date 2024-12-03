@@ -30,6 +30,7 @@ import type { ConnectorStyle, MindmapStyleGetter } from './style.js';
 import { LayoutType, MindmapStyle } from '../../consts/mindmap.js';
 import { LocalConnectorElementModel } from '../connector/local-connector.js';
 import { mindmapStyleGetters } from './style.js';
+import { findInfiniteLoop } from './utils.js';
 
 export type NodeDetail = {
   /**
@@ -472,6 +473,29 @@ export class MindmapElementModel extends GfxGroupLikeElementModel<MindmapElement
     });
 
     if (!rootNode) {
+      return;
+    }
+
+    const loops = findInfiniteLoop(rootNode, mindmapNodeMap);
+
+    if (loops.length) {
+      this.surface.doc.withoutTransact(() => {
+        loops.forEach(loop => {
+          if (loop.detached) {
+            loop.chain.forEach(node => {
+              this.children.delete(node.id);
+            });
+          } else {
+            const child = last(loop.chain);
+
+            if (child) {
+              this.children.set(child.id, {
+                index: child.detail.index,
+              });
+            }
+          }
+        });
+      });
       return;
     }
 

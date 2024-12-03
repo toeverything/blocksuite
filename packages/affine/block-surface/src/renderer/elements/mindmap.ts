@@ -21,29 +21,6 @@ export function mindmap(
 
   matrix = matrix.translate(-dx, -dy);
 
-  ctx.save();
-  ctx.globalAlpha = 0.8;
-  model.traverse(node => {
-    const color = renderer.getColorValue(
-      (node.element as ShapeElementModel).strokeColor,
-      undefined,
-      true
-    );
-
-    if (node.responseArea) {
-      ctx.fillStyle = color;
-      ctx.setTransform(
-        matrix.translate(
-          node.responseArea.x - bound.x,
-          node.responseArea.y - bound.y
-        )
-      );
-
-      ctx.fillRect(0, 0, node.responseArea.w, node.responseArea.h);
-    }
-  });
-  ctx.restore();
-
   model.traverse((to, from) => {
     if (from) {
       const connector = model.getConnector(from, to);
