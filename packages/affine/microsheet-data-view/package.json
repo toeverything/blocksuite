@@ -1,0 +1,85 @@
+{
+  "name": "@blocksuite/microsheet-data-view",
+  "version": "0.17.19",
+  "description": "Views of microsheet in affine",
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/toeverything/blocksuite.git",
+    "directory": "packages/affine/microsheet-data-view"
+  },
+  "scripts": {
+    "build": "tsc",
+    "test:unit": "nx vite:test --run --passWithNoTests",
+    "test:unit:coverage": "nx vite:test --run --coverage",
+    "test:e2e": "playwright test"
+  },
+  "sideEffects": false,
+  "keywords": [],
+  "author": "toeverything",
+  "license": "MPL-2.0",
+  "dependencies": {
+    "@blocksuite/affine-components": "workspace:*",
+    "@blocksuite/affine-shared": "workspace:*",
+    "@blocksuite/block-std": "workspace:*",
+    "@blocksuite/global": "workspace:*",
+    "@blocksuite/icons": "^2.1.68",
+    "@blocksuite/store": "workspace:*",
+    "@floating-ui/dom": "^1.6.10",
+    "@lit/context": "^1.1.2",
+    "@preact/signals-core": "^1.8.0",
+    "@toeverything/theme": "^1.0.8",
+    "date-fns": "^4.0.0",
+    "lit": "^3.2.0",
+    "sortablejs": "^1.15.2",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/sortablejs": "^1.15.8"
+  },
+  "exports": {
+    ".": "./src/index.ts",
+    "./property-presets": "./src/property-presets/index.ts",
+    "./property-pure-presets": "./src/property-presets/pure-index.ts",
+    "./view-presets": "./src/view-presets/index.ts",
+    "./widget-presets": "./src/widget-presets/index.ts",
+    "./effects": "./src/effects.ts"
+  },
+  "publishConfig": {
+    "access": "public",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "exports": {
+      ".": {
+        "import": "./dist/index.js",
+        "types": "./dist/index.d.ts"
+      },
+      "./property-presets": {
+        "import": "./dist/property-presets/index.js",
+        "types": "./dist/property-presets/index.d.ts"
+      },
+      "./property-pure-presets": {
+        "import": "./dist/property-presets/pure-index.js",
+        "types": "./dist/property-presets/pure-index.d.ts"
+      },
+      "./view-presets": {
+        "import": "./dist/view-presets/index.js",
+        "types": "./dist/view-presets/index.d.ts"
+      },
+      "./widget-presets": {
+        "import": "./dist/widget-presets/index.js",
+        "types": "./dist/widget-presets/index.d.ts"
+      },
+      "./effects": {
+        "import": "./dist/effects.js",
+        "types": "./dist/effects.d.ts"
+      }
+    }
+  },
+  "files": [
+    "src",
+    "dist",
+    "!src/__tests__",
+    "!dist/__tests__"
+  ]
+}

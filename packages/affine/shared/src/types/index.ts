@@ -20,6 +20,8 @@ export type NoteChildrenFlavour =
   | 'affine:divider'
   | 'affine:database'
   | 'affine:data-view'
+  | 'affine:microsheet'
+  | 'affine:microsheet-data-view'
   | 'affine:image'
   | 'affine:bookmark'
   | 'affine:attachment'

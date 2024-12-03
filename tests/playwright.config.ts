@@ -11,7 +11,7 @@ export default defineConfig({
   snapshotPathTemplate: 'snapshots/{testFilePath}/{arg}{ext}',
   webServer: {
     command: process.env.CI ? 'yarn run -T preview' : 'yarn run -T dev',
-    port: process.env.CI ? 4173 : 5173,
+    port: process.env.CI ? 4173 : 8001,
     reuseExistingServer: !process.env.CI,
     env: {
       COVERAGE: process.env.COVERAGE ?? '',

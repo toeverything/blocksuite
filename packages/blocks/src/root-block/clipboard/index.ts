@@ -15,7 +15,7 @@ import {
   replaceIdMiddleware,
   titleMiddleware,
 } from '../../_common/transformers/middlewares.js';
-import { ClipboardAdapter } from './adapter.js';
+import { ClipboardAdapter, MicrosheetAdapter } from './adapter.js';
 import { copyMiddleware, pasteMiddleware } from './middlewares/index.js';
 
 export class PageClipboard {
@@ -35,6 +35,11 @@ export class PageClipboard {
       ClipboardAdapter.MIME,
       ClipboardAdapter,
       100
+    );
+    this._std.clipboard.registerAdapter(
+      MicrosheetAdapter.MIME,
+      MicrosheetAdapter,
+      98
     );
     this._std.clipboard.registerAdapter(
       'text/_notion-text-production',

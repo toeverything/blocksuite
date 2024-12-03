@@ -34,6 +34,7 @@ export const ParagraphBlockSchema = defineBlockSchema({
       'affine:paragraph',
       'affine:list',
       'affine:edgeless-text',
+      'affine:cell',
     ],
   },
 });

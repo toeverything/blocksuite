@@ -45,6 +45,17 @@ export class ParagraphBlockComponent extends CaptionedBlockComponent<
     return false;
   };
 
+  private _isInMicrosheet = () => {
+    let parent = this.parentElement;
+    while (parent && parent !== document.body) {
+      if (parent.tagName.toLowerCase() === 'affine-microsheet') {
+        return true;
+      }
+      parent = parent.parentElement;
+    }
+    return false;
+  };
+
   get attributeRenderer() {
     return this.inlineManager.getRenderer();
   }
@@ -119,7 +130,8 @@ export class ParagraphBlockComponent extends CaptionedBlockComponent<
           .then(() => {
             if (
               (this.inlineEditor?.yTextLength ?? 0) > 0 ||
-              this._isInDatabase()
+              this._isInDatabase() ||
+              this._isInMicrosheet()
             ) {
               this._displayPlaceholder.value = false;
               return;
