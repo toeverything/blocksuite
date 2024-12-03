@@ -571,4 +571,105 @@ describe('snapshot to plain text', () => {
     });
     expect(target.file).toBe(plainText);
   });
+
+  describe('embed link block', () => {
+    const embedTestCases = [
+      {
+        name: 'bookmark',
+        flavour: 'affine:bookmark',
+        url: 'https://example.com',
+        title: 'example',
+        plainText: '[example](https://example.com)\n',
+      },
+      {
+        name: 'embed github',
+        flavour: 'affine:embed-github',
+        url: 'https://github.com/toeverything/blocksuite/pull/66666',
+        title: 'example github pr title',
+        plainText:
+          '[example github pr title](https://github.com/toeverything/blocksuite/pull/66666)\n',
+      },
+      {
+        name: 'embed figma',
+        flavour: 'affine:embed-figma',
+        url: 'https://www.figma.com/file/1234567890',
+        title: 'example figma title',
+        plainText:
+          '[example figma title](https://www.figma.com/file/1234567890)\n',
+      },
+      {
+        name: 'embed youtube',
+        flavour: 'affine:embed-youtube',
+        url: 'https://www.youtube.com/watch?v=1234567890',
+        title: 'example youtube title',
+        plainText:
+          '[example youtube title](https://www.youtube.com/watch?v=1234567890)\n',
+      },
+      {
+        name: 'embed loom',
+        flavour: 'affine:embed-loom',
+        url: 'https://www.loom.com/share/1234567890',
+        title: 'example loom title',
+        plainText:
+          '[example loom title](https://www.loom.com/share/1234567890)\n',
+      },
+    ];
+
+    for (const testCase of embedTestCases) {
+      test(testCase.name, async () => {
+        const blockSnapshot: BlockSnapshot = {
+          type: 'block',
+          id: 'block:vu6SK6WJpW',
+          flavour: 'affine:page',
+          props: {
+            title: {
+              '$blocksuite:internal:text$': true,
+              delta: [],
+            },
+          },
+          children: [
+            {
+              type: 'block',
+              id: 'block:Tk4gSPocAt',
+              flavour: 'affine:surface',
+              props: {
+                elements: {},
+              },
+              children: [],
+            },
+            {
+              type: 'block',
+              id: 'block:WfnS5ZDCJT',
+              flavour: 'affine:note',
+              props: {
+                xywh: '[0,0,800,95]',
+                background: DEFAULT_NOTE_BACKGROUND_COLOR,
+                index: 'a0',
+                hidden: false,
+                displayMode: NoteDisplayMode.DocAndEdgeless,
+              },
+              children: [
+                {
+                  type: 'block',
+                  id: 'block:Bdn8Yvqcny',
+                  flavour: testCase.flavour,
+                  props: {
+                    url: testCase.url,
+                    title: testCase.title,
+                  },
+                  children: [],
+                },
+              ],
+            },
+          ],
+        };
+
+        const plainTextAdapter = new PlainTextAdapter(createJob());
+        const target = await plainTextAdapter.fromBlockSnapshot({
+          snapshot: blockSnapshot,
+        });
+        expect(target.file).toBe(testCase.plainText);
+      });
+    }
+  });
 });

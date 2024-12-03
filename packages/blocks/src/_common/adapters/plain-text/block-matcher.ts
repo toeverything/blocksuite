@@ -2,6 +2,16 @@ import type { BlockPlainTextAdapterMatcher } from '@blocksuite/affine-shared/ada
 import type { ExtensionType } from '@blocksuite/block-std';
 
 import {
+  EmbedFigmaBlockPlainTextAdapterExtension,
+  embedFigmaBlockPlainTextAdapterMatcher,
+  EmbedGithubBlockPlainTextAdapterExtension,
+  embedGithubBlockPlainTextAdapterMatcher,
+  EmbedLoomBlockPlainTextAdapterExtension,
+  embedLoomBlockPlainTextAdapterMatcher,
+  EmbedYoutubeBlockPlainTextAdapterExtension,
+  embedYoutubeBlockPlainTextAdapterMatcher,
+} from '@blocksuite/affine-block-embed';
+import {
   ListBlockPlainTextAdapterExtension,
   listBlockPlainTextAdapterMatcher,
 } from '@blocksuite/affine-block-list';
@@ -10,6 +20,10 @@ import {
   paragraphBlockPlainTextAdapterMatcher,
 } from '@blocksuite/affine-block-paragraph';
 
+import {
+  BookmarkBlockPlainTextAdapterExtension,
+  bookmarkBlockPlainTextAdapterMatcher,
+} from '../../../bookmark-block/adapters/plain-text.js';
 import {
   CodeBlockPlainTextAdapterExtension,
   codeBlockPlainTextAdapterMatcher,
@@ -25,6 +39,11 @@ export const defaultBlockPlainTextAdapterMatchers: BlockPlainTextAdapterMatcher[
     listBlockPlainTextAdapterMatcher,
     dividerBlockPlainTextAdapterMatcher,
     codeBlockPlainTextAdapterMatcher,
+    bookmarkBlockPlainTextAdapterMatcher,
+    embedFigmaBlockPlainTextAdapterMatcher,
+    embedGithubBlockPlainTextAdapterMatcher,
+    embedLoomBlockPlainTextAdapterMatcher,
+    embedYoutubeBlockPlainTextAdapterMatcher,
   ];
 
 export const BlockPlainTextAdapterExtensions: ExtensionType[] = [
@@ -32,4 +51,9 @@ export const BlockPlainTextAdapterExtensions: ExtensionType[] = [
   ListBlockPlainTextAdapterExtension,
   DividerBlockPlainTextAdapterExtension,
   CodeBlockPlainTextAdapterExtension,
+  BookmarkBlockPlainTextAdapterExtension,
+  EmbedFigmaBlockPlainTextAdapterExtension,
+  EmbedGithubBlockPlainTextAdapterExtension,
+  EmbedLoomBlockPlainTextAdapterExtension,
+  EmbedYoutubeBlockPlainTextAdapterExtension,
 ];

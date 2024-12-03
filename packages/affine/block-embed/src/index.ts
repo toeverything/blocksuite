@@ -21,6 +21,7 @@ export const EmbedExtensions: ExtensionType[] = [
 ].flat();
 
 export { createEmbedBlockMarkdownAdapterMatcher } from './common/adapters/markdown.js';
+export { createEmbedBlockPlainTextAdapterMatcher } from './common/adapters/plain-text.js';
 export { EmbedBlockComponent } from './common/embed-block-element.js';
 export { insertEmbedCard } from './common/insert-embed-card.js';
 export {
