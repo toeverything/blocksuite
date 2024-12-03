@@ -36,6 +36,7 @@ export class MultiSelectCellEditing extends BaseCellRenderer<
           this.querySelector('affine-multi-tag-view') ?? this
         ),
         {
+          name: this.cell.property.name$.value,
           options: this.options$,
           onOptionsChange: this._onOptionsChange,
           value: this._value,

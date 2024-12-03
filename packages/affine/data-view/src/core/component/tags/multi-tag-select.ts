@@ -446,18 +446,43 @@ declare global {
   }
 }
 
-const popMobileTagSelect = (
-  target: PopupTarget
-  // ops: TagSelectOptions,
-) => {
-  popMenu(target, {
+const popMobileTagSelect = (target: PopupTarget, ops: TagSelectOptions) => {
+  return popMenu(target, {
     options: {
-      items: [menu.dynamic(() => [])],
+      onClose: () => {
+        ops.onComplete?.();
+      },
+      title: {
+        text: ops.name,
+      },
+      items: [
+        menu.group({
+          items: ops.options.value.map(option =>
+            menu.action({
+              name: option.value,
+              label: () => {
+                const style = styleMap({
+                  backgroundColor: option.color,
+                  width: 'max-content',
+                });
+                return html` <div class="tag-container" style=${style}>
+                  <div class="tag-text">${option.value}</div>
+                </div>`;
+              },
+              select: () => {
+                ops.onChange([option.id]);
+                ops.onComplete?.();
+              },
+            })
+          ),
+        }),
+      ],
     },
   });
 };
 
 export type TagSelectOptions = {
+  name: string;
   mode?: 'single' | 'multi';
   value: string[];
   onChange: (value: string[]) => void;
@@ -469,8 +494,10 @@ export type TagSelectOptions = {
 };
 export const popTagSelect = (target: PopupTarget, ops: TagSelectOptions) => {
   if (IS_MOBILE) {
-    popMobileTagSelect(target, ops);
-    return;
+    const handler = popMobileTagSelect(target, ops);
+    return () => {
+      handler.close();
+    };
   }
   const component = new MultiTagSelect();
   if (ops.mode) {
