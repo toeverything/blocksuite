@@ -57,6 +57,7 @@ import type { SidePanel } from './side-panel.js';
 import { mockEdgelessTheme } from '../mock-services.js';
 import './left-side-panel.js';
 import './side-panel.js';
+import { AdaptersPanel } from './adapters-panel.js';
 
 const basePath =
   'https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.11.2/dist';
@@ -505,6 +506,26 @@ export class DebugMenu extends ShadowlessElement {
     this._hasOffset = !this._hasOffset;
   }
 
+  private _toggleAdaptersPanel() {
+    const app = document.querySelector('#app');
+    if (!app) return;
+
+    const currentAdaptersPanel = app.querySelector('adapters-panel');
+    if (currentAdaptersPanel) {
+      currentAdaptersPanel.remove();
+      (app as HTMLElement).style.display = 'block';
+      this.editor.style.width = '100%';
+      this.editor.style.flex = '';
+      return;
+    }
+
+    const adaptersPanel = new AdaptersPanel();
+    adaptersPanel.editor = this.editor;
+    app.append(adaptersPanel);
+    this.editor.style.flex = '1';
+    (app as HTMLElement).style.display = 'flex';
+  }
+
   private _toggleCommentPanel() {
     document.body.append(this.commentPanel);
   }
@@ -795,6 +816,9 @@ export class DebugMenu extends ShadowlessElement {
               <sl-menu-item @click="${this._addNote}"> Add Note </sl-menu-item>
               <sl-menu-item @click="${this._toggleMultipleEditors}">
                 Toggle Multiple Editors
+              </sl-menu-item>
+              <sl-menu-item @click="${this._toggleAdaptersPanel}">
+                Toggle Adapters Panel
               </sl-menu-item>
             </sl-menu>
           </sl-dropdown>
