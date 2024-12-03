@@ -565,7 +565,7 @@ describe('snapshot to plain text', () => {
     const plainTextAdapter = new PlainTextAdapter(createJob([middleware]));
 
     const plainText =
-      'aaa: https://affine.pro/\ntest: https://example.com/deadbeef?mode=page&blockIds=abc%2C123&elementIds=def%2C456\nLaTex, with value: E=mc^2\n';
+      'aaa: https://affine.pro/\ntest: https://example.com/deadbeef?mode=page&blockIds=abc%2C123&elementIds=def%2C456\nE=mc^2\n';
     const target = await plainTextAdapter.fromBlockSnapshot({
       snapshot: blockSnapshot,
     });
@@ -671,5 +671,38 @@ describe('snapshot to plain text', () => {
         expect(target.file).toBe(testCase.plainText);
       });
     }
+  });
+
+  test('latex block', async () => {
+    const blockSnapshot: BlockSnapshot = {
+      type: 'block',
+      id: 'matchesReplaceMap[0]',
+      flavour: 'affine:note',
+      props: {
+        xywh: '[0,0,800,95]',
+        background: DEFAULT_NOTE_BACKGROUND_COLOR,
+        index: 'a0',
+        hidden: false,
+        displayMode: NoteDisplayMode.DocAndEdgeless,
+      },
+      children: [
+        {
+          type: 'block',
+          id: 'matchesReplaceMap[1]',
+          flavour: 'affine:latex',
+          props: {
+            latex: 'E=mc^2',
+          },
+          children: [],
+        },
+      ],
+    };
+
+    const plainText = 'LaTex, with value: E=mc^2\n';
+    const plainTextAdapter = new PlainTextAdapter(createJob());
+    const target = await plainTextAdapter.fromBlockSnapshot({
+      snapshot: blockSnapshot,
+    });
+    expect(target.file).toBe(plainText);
   });
 });

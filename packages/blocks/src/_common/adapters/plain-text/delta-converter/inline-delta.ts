@@ -65,7 +65,7 @@ export const latexDeltaMarkdownAdapterMatch: InlineDeltaToPlainTextAdapterMatche
         return node;
       }
       return {
-        content: `LaTex, with value: ${delta.attributes?.latex}`,
+        content: delta.attributes?.latex,
       };
     },
   };
