@@ -32,6 +32,10 @@ import {
   DividerBlockPlainTextAdapterExtension,
   dividerBlockPlainTextAdapterMatcher,
 } from '../../../divider-block/adapters/plain-text.js';
+import {
+  LatexBlockPlainTextAdapterExtension,
+  latexBlockPlainTextAdapterMatcher,
+} from '../../../latex-block/adapters/plain-text.js';
 
 export const defaultBlockPlainTextAdapterMatchers: BlockPlainTextAdapterMatcher[] =
   [
@@ -44,6 +48,7 @@ export const defaultBlockPlainTextAdapterMatchers: BlockPlainTextAdapterMatcher[
     embedGithubBlockPlainTextAdapterMatcher,
     embedLoomBlockPlainTextAdapterMatcher,
     embedYoutubeBlockPlainTextAdapterMatcher,
+    latexBlockPlainTextAdapterMatcher,
   ];
 
 export const BlockPlainTextAdapterExtensions: ExtensionType[] = [
@@ -56,4 +61,5 @@ export const BlockPlainTextAdapterExtensions: ExtensionType[] = [
   EmbedGithubBlockPlainTextAdapterExtension,
   EmbedLoomBlockPlainTextAdapterExtension,
   EmbedYoutubeBlockPlainTextAdapterExtension,
+  LatexBlockPlainTextAdapterExtension,
 ];
