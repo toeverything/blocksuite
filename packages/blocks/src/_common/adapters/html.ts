@@ -484,25 +484,28 @@ export class HtmlAdapter extends BaseAdapter<Html> {
           );
           break;
         }
-        case 'ul':
-        case 'ol': {
-          context.setNodeContext('hast:list:type', 'bulleted');
-          if (o.node.tagName === 'ol') {
-            context.setNodeContext('hast:list:type', 'numbered');
-          } else if (Array.isArray(o.node.properties?.className)) {
-            if (o.node.properties.className.includes('to-do-list')) {
-              context.setNodeContext('hast:list:type', 'todo');
-            } else if (o.node.properties.className.includes('toggle')) {
-              context.setNodeContext('hast:list:type', 'toggle');
-            } else if (o.node.properties.className.includes('bulleted-list')) {
-              context.setNodeContext('hast:list:type', 'bulleted');
+        case 'li': {
+          const parentList = o.parent?.node as Element;
+          let listType = 'bulleted';
+          if (parentList.tagName === 'ol') {
+            listType = 'numbered';
+          } else if (Array.isArray(parentList.properties?.className)) {
+            if (parentList.properties.className.includes('to-do-list')) {
+              listType = 'todo';
+            } else if (parentList.properties.className.includes('toggle')) {
+              listType = 'toggle';
+            } else if (
+              parentList.properties.className.includes('bulleted-list')
+            ) {
+              listType = 'bulleted';
             }
           }
-          break;
-        }
-        case 'li': {
+          const listNumber =
+            typeof parentList.properties.start === 'number'
+              ? parentList.properties.start +
+                parentList.children.indexOf(o.node)
+              : null;
           const firstElementChild = hastGetElementChildren(o.node)[0];
-          const listType = context.getNodeContext('hast:list:type');
           o.node = hastFlatNodes(
             o.node,
             tagName => tagName === 'div' || tagName === 'p'
@@ -537,6 +540,7 @@ export class HtmlAdapter extends BaseAdapter<Html> {
                       firstElementChild.tagName === 'details' &&
                       firstElementChild.properties.open === undefined
                     : false,
+                order: listNumber,
               },
               children: [],
             },

@@ -1,4 +1,5 @@
 import type { DeltaInsert } from '@blocksuite/inline';
+import type { List } from 'mdast';
 
 import { ListBlockSchema } from '@blocksuite/affine-model';
 import {
@@ -20,11 +21,11 @@ export const listBlockMarkdownAdapterMatcher: BlockMarkdownAdapterMatcher = {
   toBlockSnapshot: {
     enter: (o, context) => {
       const { walkerContext, deltaConverter } = context;
-      if (o.node.type === 'list') {
-        walkerContext.setNodeContext('mdast:list:ordered', o.node.ordered);
-        return;
-      }
       if (o.node.type === 'listItem') {
+        const parentList = o.parent?.node as List;
+        const listNumber = parentList.start
+          ? parentList.start + parentList.children.indexOf(o.node)
+          : null;
         walkerContext.openNode(
           {
             type: 'block',
@@ -34,7 +35,7 @@ export const listBlockMarkdownAdapterMatcher: BlockMarkdownAdapterMatcher = {
               type:
                 o.node.checked !== null
                   ? 'todo'
-                  : walkerContext.getNodeContext('mdast:list:ordered')
+                  : parentList.ordered
                     ? 'numbered'
                     : 'bulleted',
               text: {
@@ -46,6 +47,7 @@ export const listBlockMarkdownAdapterMatcher: BlockMarkdownAdapterMatcher = {
               },
               checked: o.node.checked ?? false,
               collapsed: false,
+              order: listNumber,
             },
             children: [],
           },

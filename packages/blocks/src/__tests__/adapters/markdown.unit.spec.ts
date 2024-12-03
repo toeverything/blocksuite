@@ -2754,6 +2754,7 @@ hhh
             },
             checked: false,
             collapsed: false,
+            order: null,
           },
           children: [
             {
@@ -2772,6 +2773,7 @@ hhh
                 },
                 checked: false,
                 collapsed: false,
+                order: null,
               },
               children: [
                 {
@@ -2790,6 +2792,7 @@ hhh
                     },
                     checked: false,
                     collapsed: false,
+                    order: null,
                   },
                   children: [],
                 },
@@ -2811,6 +2814,7 @@ hhh
                 },
                 checked: false,
                 collapsed: false,
+                order: null,
               },
               children: [],
             },
@@ -2832,6 +2836,7 @@ hhh
             },
             checked: false,
             collapsed: false,
+            order: null,
           },
           children: [],
         },
@@ -2885,6 +2890,7 @@ hhh
             },
             checked: false,
             collapsed: false,
+            order: null,
           },
           children: [
             {
@@ -2903,6 +2909,7 @@ hhh
                 },
                 checked: true,
                 collapsed: false,
+                order: null,
               },
               children: [
                 {
@@ -2921,6 +2928,7 @@ hhh
                     },
                     checked: false,
                     collapsed: false,
+                    order: null,
                   },
                   children: [],
                 },
@@ -2942,6 +2950,7 @@ hhh
                 },
                 checked: true,
                 collapsed: false,
+                order: null,
               },
               children: [],
             },
@@ -2963,6 +2972,116 @@ hhh
             },
             checked: false,
             collapsed: false,
+            order: null,
+          },
+          children: [],
+        },
+      ],
+    };
+
+    const mdAdapter = new MarkdownAdapter(createJob());
+    const rawBlockSnapshot = await mdAdapter.toBlockSnapshot({
+      file: markdown,
+    });
+    expect(nanoidReplacement(rawBlockSnapshot)).toEqual(blockSnapshot);
+  });
+
+  test('non consecutive numbered list', async () => {
+    const markdown = `
+1. aaa
+
+bbb
+
+3. ccc
+4. ddd
+`;
+
+    const blockSnapshot: BlockSnapshot = {
+      type: 'block',
+      id: 'matchesReplaceMap[0]',
+      flavour: 'affine:note',
+      props: {
+        xywh: '[0,0,800,95]',
+        background: DEFAULT_NOTE_BACKGROUND_COLOR,
+        index: 'a0',
+        hidden: false,
+        displayMode: NoteDisplayMode.DocAndEdgeless,
+      },
+      children: [
+        {
+          type: 'block',
+          id: 'matchesReplaceMap[1]',
+          flavour: 'affine:list',
+          props: {
+            type: 'numbered',
+            text: {
+              '$blocksuite:internal:text$': true,
+              delta: [
+                {
+                  insert: 'aaa',
+                },
+              ],
+            },
+            checked: false,
+            collapsed: false,
+            order: 1,
+          },
+          children: [],
+        },
+        {
+          type: 'block',
+          id: 'matchesReplaceMap[2]',
+          flavour: 'affine:paragraph',
+          props: {
+            type: 'text',
+            text: {
+              '$blocksuite:internal:text$': true,
+              delta: [
+                {
+                  insert: 'bbb',
+                },
+              ],
+            },
+          },
+          children: [],
+        },
+        {
+          type: 'block',
+          id: 'matchesReplaceMap[3]',
+          flavour: 'affine:list',
+          props: {
+            type: 'numbered',
+            text: {
+              '$blocksuite:internal:text$': true,
+              delta: [
+                {
+                  insert: 'ccc',
+                },
+              ],
+            },
+            checked: false,
+            collapsed: false,
+            order: 3,
+          },
+          children: [],
+        },
+        {
+          type: 'block',
+          id: 'matchesReplaceMap[4]',
+          flavour: 'affine:list',
+          props: {
+            type: 'numbered',
+            text: {
+              '$blocksuite:internal:text$': true,
+              delta: [
+                {
+                  insert: 'ddd',
+                },
+              ],
+            },
+            checked: false,
+            collapsed: false,
+            order: 4,
           },
           children: [],
         },
