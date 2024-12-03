@@ -16,6 +16,7 @@ import type { KanbanViewSelectionWithType } from '../types.js';
 import { type DataViewInstance, renderUniLit } from '../../../core/index.js';
 import { sortable } from '../../../core/utils/wc-dnd/sort/sort-context.js';
 import { DataViewBase } from '../../../core/view/data-view-base.js';
+import { MobileKanbanDragController } from './controller/drag.js';
 
 const styles = css`
   mobile-data-view-kanban {
@@ -51,6 +52,8 @@ export class MobileDataViewKanban extends DataViewBase<
   KanbanViewSelectionWithType
 > {
   static override styles = styles;
+
+  private dragController = new MobileKanbanDragController(this);
 
   renderAddGroup = () => {
     const addGroup = this.groupManager.addGroup;

@@ -4,15 +4,15 @@ import type { ReactiveController } from 'lit';
 import { assertExists, Point, Rect } from '@blocksuite/global/utils';
 import { computed } from '@preact/signals-core';
 
-import type { DataViewKanban } from '../kanban-view.js';
+import type { MobileDataViewKanban } from '../kanban-view.js';
 
 import { autoScrollOnBoundary } from '../../../../core/utils/auto-scroll.js';
 import { startDrag } from '../../../../core/utils/drag.js';
-import { KanbanCard } from '../card.js';
-import { KanbanGroup } from '../group.js';
+import { MobileKanbanCard } from '../card.js';
+import { MobileKanbanGroup } from '../group.js';
 
-export class KanbanDragController implements ReactiveController {
-  dragStart = (ele: KanbanCard, evt: PointerEvent) => {
+export class MobileKanbanDragController implements ReactiveController {
+  dragStart = (ele: MobileKanbanCard, evt: PointerEvent) => {
     const eleRect = ele.getBoundingClientRect();
     const offsetLeft = evt.x - eleRect.left;
     const offsetTop = evt.y - eleRect.top;
@@ -21,7 +21,7 @@ export class KanbanDragController implements ReactiveController {
       evt.x - offsetLeft,
       evt.y - offsetTop
     );
-    const currentGroup = ele.closest('affine-data-view-kanban-group');
+    const currentGroup = ele.closest('mobile-kanban-group');
     const drag = startDrag<
       | { type: 'out'; callback: () => void }
       | {
@@ -100,10 +100,10 @@ export class KanbanDragController implements ReactiveController {
   getInsertPosition = (
     evt: MouseEvent
   ):
-    | { group: KanbanGroup; card?: KanbanCard; position: InsertToPosition }
+    | { group: MobileKanbanGroup; card?: MobileKanbanCard; position: InsertToPosition }
     | undefined => {
     const eles = document.elementsFromPoint(evt.x, evt.y);
-    const target = eles.find(v => v instanceof KanbanGroup) as KanbanGroup;
+    const target = eles.find(v => v instanceof MobileKanbanGroup) as MobileKanbanGroup;
     if (target) {
       const card = getCardByPoint(target, evt.y);
       return {
@@ -123,8 +123,8 @@ export class KanbanDragController implements ReactiveController {
 
   shooIndicator = (
     evt: MouseEvent,
-    self: KanbanCard | undefined
-  ): { group: KanbanGroup; position: InsertToPosition } | undefined => {
+    self: MobileKanbanCard | undefined
+  ): { group: MobileKanbanGroup; position: InsertToPosition } | undefined => {
     const position = this.getInsertPosition(evt);
     if (position) {
       this.dropPreview.display(position.group, self, position.card);
@@ -136,13 +136,13 @@ export class KanbanDragController implements ReactiveController {
 
   get scrollContainer() {
     const scrollContainer = this.host.querySelector(
-      '.affine-data-view-kanban-groups'
+      '.mobile-kanban-groups'
     ) as HTMLElement;
     assertExists(scrollContainer);
     return scrollContainer;
   }
 
-  constructor(private host: DataViewKanban) {
+  constructor(private host: MobileDataViewKanban) {
     this.host.addController(this);
   }
 
@@ -155,12 +155,12 @@ export class KanbanDragController implements ReactiveController {
         const event = context.get('pointerState').raw;
         const target = event.target;
         if (target instanceof Element) {
-          const cell = target.closest('affine-data-view-kanban-cell');
-          if (cell?.editing) {
+          const cell = target.closest('mobile-kanban-cell');
+          if (cell?.isEditing) {
             return;
           }
           cell?.selectCurrentCell(false);
-          const card = target.closest('affine-data-view-kanban-card');
+          const card = target.closest('mobile-kanban-card');
           if (card) {
             this.dragStart(card, event);
           }
@@ -171,11 +171,11 @@ export class KanbanDragController implements ReactiveController {
   }
 }
 
-const createDragPreview = (card: KanbanCard, x: number, y: number) => {
+const createDragPreview = (card: MobileKanbanCard, x: number, y: number) => {
   const preOpacity = card.style.opacity;
   card.style.opacity = '0.5';
   const div = document.createElement('div');
-  const kanbanCard = new KanbanCard();
+  const kanbanCard = new MobileKanbanCard();
   kanbanCard.cardId = card.cardId;
   kanbanCard.view = card.view;
   kanbanCard.isFocus = true;
@@ -209,9 +209,9 @@ const createDropPreview = () => {
   div.style.boxShadow = '0px 0px 8px 0px rgba(30, 150, 235, 0.35)';
   return {
     display(
-      group: KanbanGroup,
-      self: KanbanCard | undefined,
-      card?: KanbanCard
+      group: MobileKanbanGroup,
+      self: MobileKanbanCard | undefined,
+      card?: MobileKanbanCard
     ) {
       const target = card ?? group.querySelector('.add-card');
       assertExists(target);
@@ -231,11 +231,11 @@ const createDropPreview = () => {
 };
 
 const getCardByPoint = (
-  group: KanbanGroup,
+  group: MobileKanbanGroup,
   y: number
-): KanbanCard | undefined => {
+): MobileKanbanCard | undefined => {
   const cards = Array.from(
-    group.querySelectorAll('affine-data-view-kanban-card')
+    group.querySelectorAll('mobile-kanban-card')
   );
   const positions = cards.map(v => {
     const rect = v.getBoundingClientRect();
