@@ -1,5 +1,5 @@
+import type { AffineTextAttributes } from '@blocksuite/affine-shared/types';
 import type {
-  AffineTextAttributes,
   AttachmentBlockModel,
   BookmarkBlockModel,
   CodeBlockModel,

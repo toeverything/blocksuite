@@ -203,7 +203,7 @@ type WalkerFn<ONode extends object, TNode extends object> = (
   context: ASTWalkerContext<TNode>
 ) => Promise<void> | void;
 
-type NodeProps<Node extends object> = {
+export type NodeProps<Node extends object> = {
   node: Node;
   next?: Node | null;
   parent: NodeProps<Node> | null;
@@ -296,7 +296,6 @@ export class ASTWalker<ONode extends object, TNode extends object | never> {
     this.context.openNode(tNode);
     await this._visit({ node: oNode, parent: null, prop: null, index: null });
     if (this.context.stack.length !== 1) {
-      console.error(this.context.stack.map(n => n.node));
       throw new BlockSuiteError(1, 'There are unclosed nodes');
     }
     return this.context.currentNode();

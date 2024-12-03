@@ -294,11 +294,3 @@ export function renderMindmapButton(
     </edgeless-change-mindmap-button>
   `;
 }
-
-declare global {
-  interface HTMLElementTagNameMap {
-    'edgeless-change-mindmap-style-panel': EdgelessChangeMindmapStylePanel;
-    'edgeless-change-mindmap-layout-panel': EdgelessChangeMindmapLayoutPanel;
-    'edgeless-change-mindmap-button': EdgelessChangeMindmapButton;
-  }
-}

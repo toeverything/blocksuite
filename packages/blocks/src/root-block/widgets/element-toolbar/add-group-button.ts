@@ -37,12 +37,6 @@ export class EdgelessAddGroupButton extends WithDisposable(LitElement) {
   accessor edgeless!: EdgelessRootBlockComponent;
 }
 
-declare global {
-  interface HTMLElementTagNameMap {
-    'edgeless-add-group-button': EdgelessAddGroupButton;
-  }
-}
-
 export function renderAddGroupButton(
   edgeless: EdgelessRootBlockComponent,
   elements: BlockSuite.EdgelessModel[]

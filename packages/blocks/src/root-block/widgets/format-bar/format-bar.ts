@@ -1,7 +1,5 @@
-import type {
-  AffineTextAttributes,
-  RichText,
-} from '@blocksuite/affine-components/rich-text';
+import type { RichText } from '@blocksuite/affine-components/rich-text';
+import type { AffineTextAttributes } from '@blocksuite/affine-shared/types';
 import type {
   BaseSelection,
   BlockComponent,

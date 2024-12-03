@@ -1,3 +1,4 @@
+import type { AffineTextAttributes } from '@blocksuite/affine-shared/types';
 import type { Y } from '@blocksuite/store';
 
 import {
@@ -19,11 +20,7 @@ import {
 } from '@blocksuite/inline';
 import { z, type ZodObject, type ZodTypeAny } from 'zod';
 
-import type {
-  AffineTextAttributes,
-  InlineMarkdownMatch,
-  InlineSpecs,
-} from './type.js';
+import type { InlineMarkdownMatch, InlineSpecs } from './type.js';
 
 import { MarkdownMatcherIdentifier } from './markdown-matcher.js';
 

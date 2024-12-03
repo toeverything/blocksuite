@@ -481,12 +481,6 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
   accessor quickConnectButton!: TemplateResult<1> | typeof nothing;
 }
 
-declare global {
-  interface HTMLElementTagNameMap {
-    'edgeless-change-note-button': EdgelessChangeNoteButton;
-  }
-}
-
 export function renderNoteButton(
   edgeless: EdgelessRootBlockComponent,
   notes?: NoteBlockModel[],

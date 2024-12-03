@@ -1,3 +1,4 @@
+import type { AffineTextAttributes } from '@blocksuite/affine-shared/types';
 import type { BlockModel } from '@blocksuite/store';
 
 import {
@@ -17,7 +18,6 @@ import {
 } from '@blocksuite/inline';
 import { effect } from '@preact/signals-core';
 
-import type { AffineTextAttributes } from '../extension/index.js';
 import type { AffineInlineEditor } from '../inline/index.js';
 
 import { getInlineEditorByModel } from '../dom.js';

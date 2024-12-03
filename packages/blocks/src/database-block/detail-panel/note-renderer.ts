@@ -2,13 +2,11 @@ import type {
   DatabaseBlockModel,
   RootBlockModel,
 } from '@blocksuite/affine-model';
+import type { AffineTextAttributes } from '@blocksuite/affine-shared/types';
 import type { DetailSlotProps, SingleView } from '@blocksuite/data-view';
 import type { BaseTextAttributes } from '@blocksuite/inline';
 
-import {
-  type AffineTextAttributes,
-  REFERENCE_NODE,
-} from '@blocksuite/affine-components/rich-text';
+import { REFERENCE_NODE } from '@blocksuite/affine-components/rich-text';
 import {
   createDefaultDoc,
   matchFlavours,

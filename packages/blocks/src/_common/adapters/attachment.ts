@@ -1,3 +1,5 @@
+import type { ExtensionType } from '@blocksuite/block-std';
+
 import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 import { sha } from '@blocksuite/global/utils';
 import {
@@ -11,11 +13,14 @@ import {
   type FromDocSnapshotResult,
   type FromSliceSnapshotPayload,
   type FromSliceSnapshotResult,
+  type Job,
   nanoid,
   type SliceSnapshot,
   type ToBlockSnapshotPayload,
   type ToDocSnapshotPayload,
 } from '@blocksuite/store';
+
+import { AdapterFactoryIdentifier } from './type.js';
 
 export type Attachment = File[];
 
@@ -126,3 +131,14 @@ export class AttachmentAdapter extends BaseAdapter<Attachment> {
     };
   }
 }
+
+export const AttachmentAdapterFactoryIdentifier =
+  AdapterFactoryIdentifier('Attachment');
+
+export const AttachmentAdapterFactoryExtension: ExtensionType = {
+  setup: di => {
+    di.addImpl(AttachmentAdapterFactoryIdentifier, () => ({
+      get: (job: Job) => new AttachmentAdapter(job),
+    }));
+  },
+};

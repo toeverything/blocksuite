@@ -1,3 +1,4 @@
+import type { AffineTextAttributes } from '@blocksuite/affine-shared/types';
 import type { ExtensionType } from '@blocksuite/block-std';
 
 import {
@@ -5,7 +6,7 @@ import {
   type ServiceIdentifier,
 } from '@blocksuite/global/di';
 
-import type { AffineTextAttributes, InlineMarkdownMatch } from './type.js';
+import type { InlineMarkdownMatch } from './type.js';
 
 export const MarkdownMatcherIdentifier = createIdentifier<
   InlineMarkdownMatch<AffineTextAttributes>

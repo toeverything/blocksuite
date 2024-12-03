@@ -505,9 +505,3 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
   @query('edgeless-color-picker-button.text-color')
   accessor textColorButton!: EdgelessColorPickerButton;
 }
-
-declare global {
-  interface HTMLElementTagNameMap {
-    'edgeless-change-text-menu': EdgelessChangeTextMenu;
-  }
-}

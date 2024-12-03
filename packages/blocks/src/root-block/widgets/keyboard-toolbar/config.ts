@@ -1,9 +1,9 @@
 import type { FrameBlockModel } from '@blocksuite/affine-model';
+import type { AffineTextAttributes } from '@blocksuite/affine-shared/types';
 import type { BlockStdScope } from '@blocksuite/block-std';
 import type { TemplateResult } from 'lit';
 
 import {
-  type AffineTextAttributes,
   getInlineEditorByModel,
   insertContent,
   REFERENCE_NODE,

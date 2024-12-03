@@ -496,12 +496,6 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
   accessor fillColorButton!: EdgelessColorPickerButton;
 }
 
-declare global {
-  interface HTMLElementTagNameMap {
-    'edgeless-change-shape-button': EdgelessChangeShapeButton;
-  }
-}
-
 export function renderChangeShapeButton(
   edgeless: EdgelessRootBlockComponent,
   elements?: ShapeElementModel[]

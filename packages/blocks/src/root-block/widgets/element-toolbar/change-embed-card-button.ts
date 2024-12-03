@@ -698,12 +698,6 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
   accessor quickConnectButton!: TemplateResult<1> | typeof nothing;
 }
 
-declare global {
-  interface HTMLElementTagNameMap {
-    'edgeless-change-embed-card-button': EdgelessChangeEmbedCardButton;
-  }
-}
-
 export function renderEmbedButton(
   edgeless: EdgelessRootBlockComponent,
   models?: EdgelessChangeEmbedCardButton['model'][],

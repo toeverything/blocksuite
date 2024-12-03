@@ -66,6 +66,7 @@
     "src",
     "dist",
     "!src/__tests__",
-    "!dist/__tests__"
+    "!dist/__tests__",
+    "shim.d.ts"
   ]
 }

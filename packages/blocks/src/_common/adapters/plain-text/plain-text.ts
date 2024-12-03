@@ -1,9 +1,17 @@
-import type { DeltaInsert } from '@blocksuite/inline';
+import type { ExtensionType } from '@blocksuite/block-std';
 
 import {
   DEFAULT_NOTE_BACKGROUND_COLOR,
   NoteDisplayMode,
 } from '@blocksuite/affine-model';
+import {
+  type AdapterContext,
+  type BlockPlainTextAdapterMatcher,
+  BlockPlainTextAdapterMatcherIdentifier,
+  type PlainText,
+  PlainTextDeltaConverter,
+  type TextBuffer,
+} from '@blocksuite/affine-shared/adapters';
 import {
   type AssetsManager,
   ASTWalker,
@@ -17,13 +25,16 @@ import {
   type FromDocSnapshotResult,
   type FromSliceSnapshotPayload,
   type FromSliceSnapshotResult,
+  type Job,
   nanoid,
   type SliceSnapshot,
   type ToBlockSnapshotPayload,
   type ToDocSnapshotPayload,
 } from '@blocksuite/store';
 
-export type PlainText = string;
+import { AdapterFactoryIdentifier } from '../type.js';
+import { defaultBlockPlainTextAdapterMatchers } from './block-matcher.js';
+import { inlineDeltaToPlainTextAdapterMatchers } from './delta-converter/inline-delta.js';
 
 type PlainTextToSliceSnapshotPayload = {
   file: PlainText;
@@ -36,44 +47,49 @@ type PlainTextToSliceSnapshotPayload = {
 };
 
 export class PlainTextAdapter extends BaseAdapter<PlainText> {
+  deltaConverter: PlainTextDeltaConverter;
+
+  constructor(
+    job: Job,
+    readonly blockMatchers: BlockPlainTextAdapterMatcher[] = defaultBlockPlainTextAdapterMatchers
+  ) {
+    super(job);
+    this.deltaConverter = new PlainTextDeltaConverter(
+      job.adapterConfigs,
+      inlineDeltaToPlainTextAdapterMatchers,
+      []
+    );
+  }
+
   private async _traverseSnapshot(
     snapshot: BlockSnapshot
   ): Promise<{ plaintext: string }> {
-    let buffer = '';
+    const textBuffer: TextBuffer = {
+      content: '',
+    };
     const walker = new ASTWalker<BlockSnapshot, never>();
     walker.setONodeTypeGuard(
       (node): node is BlockSnapshot =>
         BlockSnapshotSchema.safeParse(node).success
     );
-    walker.setEnter(o => {
-      const text = (o.node.props.text ?? { delta: [] }) as {
-        delta: DeltaInsert[];
-      };
-      switch (o.node.flavour) {
-        case 'affine:code': {
-          buffer += text.delta.map(delta => delta.insert).join('');
-          buffer += '\n';
-          break;
-        }
-        case 'affine:paragraph': {
-          buffer += text.delta.map(delta => delta.insert).join('');
-          buffer += '\n';
-          break;
-        }
-        case 'affine:list': {
-          buffer += text.delta.map(delta => delta.insert).join('');
-          buffer += '\n';
-          break;
-        }
-        case 'affine:divider': {
-          buffer += '---\n';
-          break;
+    walker.setEnter(async (o, context) => {
+      for (const matcher of this.blockMatchers) {
+        if (matcher.fromMatch(o)) {
+          const adapterContext: AdapterContext<BlockSnapshot> = {
+            walker,
+            walkerContext: context,
+            configs: this.configs,
+            job: this.job,
+            deltaConverter: this.deltaConverter,
+            textBuffer,
+          };
+          await matcher.fromBlockSnapshot.enter?.(o, adapterContext);
         }
       }
     });
     await walker.walkONode(snapshot);
     return {
-      plaintext: buffer,
+      plaintext: textBuffer.content,
     };
   }
 
@@ -276,3 +292,20 @@ export class PlainTextAdapter extends BaseAdapter<PlainText> {
     };
   }
 }
+
+export const PlainTextAdapterFactoryIdentifier =
+  AdapterFactoryIdentifier('PlainText');
+
+export const PlainTextAdapterFactoryExtension: ExtensionType = {
+  setup: di => {
+    di.addImpl(PlainTextAdapterFactoryIdentifier, provider => ({
+      get: (job: Job) =>
+        new PlainTextAdapter(
+          job,
+          Array.from(
+            provider.getAll(BlockPlainTextAdapterMatcherIdentifier).values()
+          )
+        ),
+    }));
+  },
+};

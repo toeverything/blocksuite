@@ -4,7 +4,7 @@ import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 import { assertExists, sha } from '@blocksuite/global/utils';
 import { extMimeMap, Job } from '@blocksuite/store';
 
-import { MarkdownAdapter } from '../adapters/index.js';
+import { MarkdownAdapter } from '../adapters/markdown/index.js';
 import {
   defaultImageProxyMiddleware,
   docLinkBaseURLMiddleware,

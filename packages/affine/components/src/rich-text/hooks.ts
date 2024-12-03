@@ -1,3 +1,4 @@
+import type { AffineTextAttributes } from '@blocksuite/affine-shared/types';
 import type {
   BeforeinputHookCtx,
   CompositionEndHookCtx,
@@ -5,8 +6,6 @@ import type {
 } from '@blocksuite/inline';
 
 import { isStrictUrl } from '@blocksuite/affine-shared/utils';
-
-import type { AffineTextAttributes } from './extension/index.js';
 
 const EDGE_IGNORED_ATTRIBUTES = ['code', 'link'] as const;
 const GLOBAL_IGNORED_ATTRIBUTES = [] as const;

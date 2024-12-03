@@ -1,3 +1,5 @@
+import type { AffineTextAttributes } from '@blocksuite/affine-shared/types';
+
 import { unsafeCSSVar, unsafeCSSVarV2 } from '@blocksuite/affine-shared/theme';
 import {
   type BlockComponent,
@@ -15,8 +17,6 @@ import { effect, signal } from '@preact/signals-core';
 import katex from 'katex';
 import { css, html, render } from 'lit';
 import { property } from 'lit/decorators.js';
-
-import type { AffineTextAttributes } from '../../../../extension/index.js';
 
 import { createLitPortal } from '../../../../../portal/helper.js';
 

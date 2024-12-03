@@ -46,12 +46,6 @@ export class EdgelessAddFrameButton extends WithDisposable(LitElement) {
   accessor edgeless!: EdgelessRootBlockComponent;
 }
 
-declare global {
-  interface HTMLElementTagNameMap {
-    'edgeless-add-frame-button': EdgelessAddFrameButton;
-  }
-}
-
 export function renderAddFrameButton(
   edgeless: EdgelessRootBlockComponent,
   elements: BlockSuite.EdgelessModel[]

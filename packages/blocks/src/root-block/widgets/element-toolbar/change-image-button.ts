@@ -72,12 +72,6 @@ export class EdgelessChangeImageButton extends WithDisposable(LitElement) {
   accessor model!: ImageBlockModel;
 }
 
-declare global {
-  interface HTMLElementTagNameMap {
-    'edgeless-change-image-button': EdgelessChangeImageButton;
-  }
-}
-
 export function renderChangeImageButton(
   edgeless: EdgelessRootBlockComponent,
   images?: ImageBlockModel[]

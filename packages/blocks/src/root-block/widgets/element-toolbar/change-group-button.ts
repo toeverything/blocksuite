@@ -123,12 +123,6 @@ export class EdgelessChangeGroupButton extends WithDisposable(LitElement) {
   accessor groups!: GroupElementModel[];
 }
 
-declare global {
-  interface HTMLElementTagNameMap {
-    'edgeless-change-group-button': EdgelessChangeGroupButton;
-  }
-}
-
 export function renderGroupButton(
   edgeless: EdgelessRootBlockComponent,
   groups?: GroupElementModel[]

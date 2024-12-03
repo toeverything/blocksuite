@@ -1,6 +1,7 @@
+import type { AffineTextAttributes } from '@blocksuite/affine-shared/types';
+
 import {
   type AffineInlineEditor,
-  type AffineTextAttributes,
   DefaultInlineManagerExtension,
   type RichText,
 } from '@blocksuite/affine-components/rich-text';

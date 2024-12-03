@@ -49,9 +49,3 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
   @property({ attribute: false })
   accessor vertical = false;
 }
-
-declare global {
-  interface HTMLElementTagNameMap {
-    'edgeless-more-button': EdgelessMoreButton;
-  }
-}

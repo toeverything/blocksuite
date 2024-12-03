@@ -609,12 +609,6 @@ export class EdgelessChangeConnectorButton extends WithDisposable(LitElement) {
   accessor strokeColorButton!: EdgelessColorPickerButton;
 }
 
-declare global {
-  interface HTMLElementTagNameMap {
-    'edgeless-change-connector-button': EdgelessChangeConnectorButton;
-  }
-}
-
 export function renderConnectorButton(
   edgeless: EdgelessRootBlockComponent,
   elements?: ConnectorElementModel[]

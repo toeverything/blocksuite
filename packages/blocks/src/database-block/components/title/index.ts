@@ -44,6 +44,7 @@ export class DatabaseTitle extends WithDisposable(ShadowlessElement) {
     .affine-database-title .text {
       user-select: none;
       opacity: 0;
+      white-space: pre-wrap;
     }
 
     .affine-database-title[data-title-focus='false'] textarea {
@@ -53,8 +54,8 @@ export class DatabaseTitle extends WithDisposable(ShadowlessElement) {
     .affine-database-title[data-title-focus='false'] .text {
       text-overflow: ellipsis;
       overflow: hidden;
-      white-space: nowrap;
       opacity: 1;
+      white-space: pre;
     }
 
     .affine-database-title [data-title-empty='true']::before {

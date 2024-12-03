@@ -15,6 +15,7 @@ import {
   PlusIcon,
 } from '@blocksuite/icons/lit';
 import { css, html } from 'lit';
+import { property } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 
 import { WidgetBase } from '../../core/widget/widget-base.js';
@@ -275,6 +276,7 @@ export class DataViewHeaderViews extends WidgetBase {
   _clickView(event: MouseEvent, id: string) {
     if (this.viewManager.currentViewId$.value !== id) {
       this.viewManager.setCurrentView(id);
+      this.onChangeView?.(id);
       return;
     }
     this.openViewOption(
@@ -291,6 +293,9 @@ export class DataViewHeaderViews extends WidgetBase {
       ></component-overflow>
     `;
   }
+
+  @property({ attribute: false })
+  accessor onChangeView: ((id: string) => void) | undefined;
 }
 
 declare global {

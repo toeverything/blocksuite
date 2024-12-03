@@ -1,3 +1,4 @@
+import type { AffineTextAttributes } from '@blocksuite/affine-shared/types';
 import type { ExtensionType } from '@blocksuite/block-std';
 
 import {
@@ -6,7 +7,7 @@ import {
   type ServiceProvider,
 } from '@blocksuite/global/di';
 
-import type { AffineTextAttributes, InlineSpecs } from './type.js';
+import type { InlineSpecs } from './type.js';
 
 export const InlineSpecIdentifier =
   createIdentifier<InlineSpecs<AffineTextAttributes>>('AffineInlineSpec');
