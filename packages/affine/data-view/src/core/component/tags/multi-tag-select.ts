@@ -78,12 +78,12 @@ class TagManager {
     if (value === '') return;
     const id = nanoid();
     this.ops.onOptionsChange([
-      ...this.ops.options.value,
       {
         id: id,
         value: value,
         color: this.color.value,
       },
+      ...this.ops.options.value,
     ]);
     this.selectTag(id);
     this.text.value = '';
