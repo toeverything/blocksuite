@@ -1,4 +1,5 @@
 import {
+  focusTextModel,
   getInlineEditorByModel,
   markdownInput,
   textKeymap,
@@ -8,6 +9,7 @@ import { matchFlavours } from '@blocksuite/affine-shared/utils';
 import { KeymapExtension } from '@blocksuite/block-std';
 import { IS_MAC } from '@blocksuite/global/env';
 
+import { calculateCollapsedSiblings } from './paragraph-block.js';
 import { forwardDelete } from './utils/forward-delete.js';
 import { mergeWithPrev } from './utils/merge-with-prev.js';
 
@@ -119,6 +121,26 @@ export const ParagraphKeymapExtension = KeymapExtension(
         raw.preventDefault();
 
         if (markdownInput(std, model.id)) {
+          return true;
+        }
+
+        if (model.type.startsWith('h') && model.collapsed) {
+          const parent = doc.getParent(model);
+          if (!parent) return true;
+          const index = parent.children.indexOf(model);
+          if (index === -1) return true;
+          const collapsedSiblings = calculateCollapsedSiblings(model);
+
+          const rightText = model.text.split(range.index);
+          const newId = doc.addBlock(
+            model.flavour,
+            { type: model.type, text: rightText },
+            parent,
+            index + collapsedSiblings.length + 1
+          );
+
+          focusTextModel(std, newId);
+
           return true;
         }
 
