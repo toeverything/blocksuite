@@ -24,6 +24,8 @@ import {
   NotionHtmlAdapter,
   NotionHtmlTransformer,
   openFileOrFiles,
+  type PlainTextAdapter,
+  PlainTextAdapterFactoryIdentifier,
   printToPdf,
   SizeVariables,
   StyleVariables,
@@ -272,6 +274,38 @@ export class DebugMenu extends ShadowlessElement {
 
   private _exportPdf() {
     this.editor.std.get(ExportManager).exportPdf().catch(console.error);
+  }
+
+  /**
+   * Export plain text file using plain text adapter factory extension
+   */
+  private async _exportPlainText() {
+    const doc = this.editor.doc;
+    const job = new Job({
+      collection: this.editor.doc.collection,
+      middlewares: [docLinkBaseURLMiddleware, titleMiddleware],
+    });
+    const plainTextAdapterFactory = this.editor.std.provider.get(
+      PlainTextAdapterFactoryIdentifier
+    );
+    const plainTextAdapter = plainTextAdapterFactory.get(
+      job
+    ) as PlainTextAdapter;
+    const plainTextResult = await plainTextAdapter.fromDoc(doc);
+    if (!plainTextResult) {
+      return;
+    }
+
+    const plainText = plainTextResult.file;
+    if (!plainText) {
+      return;
+    }
+
+    const docTitle = doc.meta?.title || 'Untitled';
+    const contentBlob = new Blob([plainText], { type: 'text/plain' });
+    const downloadBlob = contentBlob;
+    const name = `${docTitle}.txt`;
+    download(downloadBlob, name);
   }
 
   private _exportPng() {
@@ -788,6 +822,9 @@ export class DebugMenu extends ShadowlessElement {
                   </sl-menu-item>
                   <sl-menu-item @click="${this._exportHtml}">
                     Export HTML
+                  </sl-menu-item>
+                  <sl-menu-item @click="${this._exportPlainText}">
+                    Export Plain Text
                   </sl-menu-item>
                   <sl-menu-item @click="${this._exportPdf}">
                     Export PDF

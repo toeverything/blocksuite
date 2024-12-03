@@ -78,6 +78,7 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
             configs: this.configs,
             job: this.job,
             deltaConverter: this.deltaConverter,
+            textBuffer: { content: '' },
             assets,
           };
           await matcher.toBlockSnapshot.enter?.(o, adapterContext);
@@ -97,6 +98,7 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
             configs: this.configs,
             job: this.job,
             deltaConverter: this.deltaConverter,
+            textBuffer: { content: '' },
             assets,
           };
           await matcher.toBlockSnapshot.leave?.(o, adapterContext);
@@ -130,6 +132,7 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
             configs: this.configs,
             job: this.job,
             deltaConverter: this.deltaConverter,
+            textBuffer: { content: '' },
             assets,
             updateAssetIds: (assetsId: string) => {
               assetsIds.push(assetsId);
@@ -152,6 +155,7 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
             configs: this.configs,
             job: this.job,
             deltaConverter: this.deltaConverter,
+            textBuffer: { content: '' },
             assets,
           };
           await matcher.fromBlockSnapshot.leave?.(o, adapterContext);

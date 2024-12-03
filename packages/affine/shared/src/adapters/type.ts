@@ -15,16 +15,21 @@ import type { AffineTextAttributes } from '../types/index.js';
 export const isBlockSnapshotNode = (node: unknown): node is BlockSnapshot =>
   BlockSnapshotSchema.safeParse(node).success;
 
+export type TextBuffer = {
+  content: string;
+};
+
 export type AdapterContext<
   ONode extends object,
-  TNode extends object,
-  TConverter extends DeltaASTConverter,
+  TNode extends object = never,
+  TConverter extends DeltaASTConverter = DeltaASTConverter,
 > = {
   walker: ASTWalker<ONode, TNode>;
   walkerContext: ASTWalkerContext<TNode>;
   configs: Map<string, string>;
   job: Job;
   deltaConverter: TConverter;
+  textBuffer: TextBuffer;
   assets?: AssetsManager;
   updateAssetIds?: (assetsId: string) => void;
 };
@@ -37,8 +42,8 @@ export type AdapterContext<
  * @template TConverter - The converter used for handling delta format conversions
  */
 export type BlockAdapterMatcher<
-  TNode extends object,
-  TConverter extends DeltaASTConverter,
+  TNode extends object = never,
+  TConverter extends DeltaASTConverter = DeltaASTConverter,
 > = {
   /** The block flavour identifier */
   flavour: string;
@@ -126,7 +131,7 @@ export abstract class DeltaASTConverter<
   ): AST[];
 }
 
-export type InlineDeltaMatcher<TNode extends object> = {
+export type InlineDeltaMatcher<TNode extends object = never> = {
   name: keyof AffineTextAttributes | string;
   match: (delta: DeltaInsert<AffineTextAttributes>) => boolean;
   toAST: (

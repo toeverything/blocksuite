@@ -11,11 +11,22 @@ export {
   type MarkdownASTToDeltaMatcher,
   MarkdownASTToDeltaMatcherIdentifier,
 } from './markdown/index.js';
+export * from './plain-text/index.js';
+export {
+  BlockPlainTextAdapterExtension,
+  type BlockPlainTextAdapterMatcher,
+  BlockPlainTextAdapterMatcherIdentifier,
+  type InlineDeltaToPlainTextAdapterMatcher,
+  InlineDeltaToPlainTextAdapterMatcherIdentifier,
+  type PlainText,
+  PlainTextDeltaConverter,
+} from './plain-text/index.js';
 export {
   type AdapterContext,
   type BlockAdapterMatcher,
   DeltaASTConverter,
   isBlockSnapshotNode,
+  type TextBuffer,
 } from './type.js';
 export {
   createText,
