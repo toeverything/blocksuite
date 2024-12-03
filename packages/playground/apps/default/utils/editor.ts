@@ -64,6 +64,7 @@ export async function mountDefaultDocEditor(collection: DocCollection) {
     refNodeSlotsExtension,
     ...specs.edgelessModeSpecs,
   ]);
+
   SpecProvider.getInstance().extendSpec('edgeless:preview', [
     OverrideThemeExtension(themeExtension),
   ]);
