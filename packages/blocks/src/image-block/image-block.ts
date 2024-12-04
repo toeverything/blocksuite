@@ -61,11 +61,13 @@ export class ImageBlockComponent extends CaptionedBlockComponent<
 
     this.refreshData();
     this.contentEditable = 'false';
-    this.model.propsUpdated.on(({ key }) => {
-      if (key === 'sourceId') {
-        this.refreshData();
-      }
-    });
+    this._disposables.add(
+      this.model.propsUpdated.on(({ key }) => {
+        if (key === 'sourceId') {
+          this.refreshData();
+        }
+      })
+    );
   }
 
   override disconnectedCallback() {

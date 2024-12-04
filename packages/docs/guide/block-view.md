@@ -87,10 +87,11 @@ class MyBlockView extends BlockComponent<MyBlockModel> {
 
   override connectedCallback() {
     super.connectedCallback();
-
-    this.model.propsUpdated.on(() => {
-      this._yen = `${this.model.count * 100}¥`;
-    });
+    this.disposables.add(
+      this.model.propsUpdated.on(() => {
+        this._yen = `${this.model.count * 100}¥`;
+      })
+    );
   }
 
   override render() {
