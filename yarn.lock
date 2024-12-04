@@ -1488,7 +1488,7 @@ __metadata:
     "@floating-ui/dom": "npm:^1.6.10"
     "@lit/context": "npm:^1.1.2"
     "@preact/signals-core": "npm:^1.8.0"
-    "@toeverything/theme": "npm:^1.0.19"
+    "@toeverything/theme": "npm:^1.1.1"
     lit: "npm:^3.2.0"
     minimatch: "npm:^10.0.1"
     zod: "npm:^3.23.8"
@@ -1509,7 +1509,7 @@ __metadata:
     "@floating-ui/dom": "npm:^1.6.10"
     "@lit/context": "npm:^1.1.2"
     "@preact/signals-core": "npm:^1.8.0"
-    "@toeverything/theme": "npm:^1.0.19"
+    "@toeverything/theme": "npm:^1.1.1"
     "@types/mdast": "npm:^4.0.4"
     lit: "npm:^3.2.0"
     minimatch: "npm:^10.0.1"
@@ -1531,7 +1531,7 @@ __metadata:
     "@floating-ui/dom": "npm:^1.6.10"
     "@lit/context": "npm:^1.1.2"
     "@preact/signals-core": "npm:^1.8.0"
-    "@toeverything/theme": "npm:^1.0.19"
+    "@toeverything/theme": "npm:^1.1.1"
     "@types/mdast": "npm:^4.0.4"
     lit: "npm:^3.2.0"
     minimatch: "npm:^10.0.1"
@@ -1552,7 +1552,7 @@ __metadata:
     "@blocksuite/store": "workspace:*"
     "@lit/context": "npm:^1.1.2"
     "@preact/signals-core": "npm:^1.8.0"
-    "@toeverything/theme": "npm:^1.0.19"
+    "@toeverything/theme": "npm:^1.1.1"
     "@types/dompurify": "npm:^3.0.5"
     "@types/lodash.chunk": "npm:^4.2.9"
     fractional-indexing: "npm:^3.2.0"
@@ -1578,7 +1578,7 @@ __metadata:
     "@lit/context": "npm:^1.1.2"
     "@lottiefiles/dotlottie-wc": "npm:^0.2.16"
     "@preact/signals-core": "npm:^1.8.0"
-    "@toeverything/theme": "npm:^1.0.19"
+    "@toeverything/theme": "npm:^1.1.1"
     "@types/katex": "npm:^0.16.7"
     "@types/lodash.clonedeep": "npm:^4.5.9"
     date-fns: "npm:^4.0.0"
@@ -1616,7 +1616,7 @@ __metadata:
     "@floating-ui/dom": "npm:^1.6.10"
     "@lit/context": "npm:^1.1.2"
     "@preact/signals-core": "npm:^1.8.0"
-    "@toeverything/theme": "npm:^1.0.19"
+    "@toeverything/theme": "npm:^1.1.1"
     "@types/lodash.clonedeep": "npm:^4.5.9"
     "@types/lodash.mergewith": "npm:^4"
     "@types/mdast": "npm:^4.0.4"
@@ -1637,7 +1637,7 @@ __metadata:
     "@blocksuite/block-std": "workspace:*"
     "@blocksuite/global": "workspace:*"
     "@preact/signals-core": "npm:^1.8.0"
-    "@toeverything/theme": "npm:^1.0.19"
+    "@toeverything/theme": "npm:^1.1.1"
     lit: "npm:^3.2.0"
   languageName: unknown
   linkType: soft
@@ -1697,7 +1697,7 @@ __metadata:
     "@floating-ui/dom": "npm:^1.6.10"
     "@lit/context": "npm:^1.1.2"
     "@preact/signals-core": "npm:^1.8.0"
-    "@toeverything/theme": "npm:^1.0.19"
+    "@toeverything/theme": "npm:^1.1.1"
     "@types/dompurify": "npm:^3.0.5"
     "@types/hast": "npm:^3.0.4"
     "@types/katex": "npm:^0.16.7"
@@ -1750,7 +1750,7 @@ __metadata:
     "@floating-ui/dom": "npm:^1.6.10"
     "@lit/context": "npm:^1.1.2"
     "@preact/signals-core": "npm:^1.8.0"
-    "@toeverything/theme": "npm:^1.0.19"
+    "@toeverything/theme": "npm:^1.1.1"
     date-fns: "npm:^4.0.0"
     lit: "npm:^3.2.0"
     zod: "npm:^3.23.8"
@@ -1879,7 +1879,7 @@ __metadata:
     "@floating-ui/dom": "npm:^1.6.10"
     "@lottiefiles/dotlottie-wc": "npm:^0.2.16"
     "@preact/signals-core": "npm:^1.8.0"
-    "@toeverything/theme": "npm:^1.0.19"
+    "@toeverything/theme": "npm:^1.1.1"
     lit: "npm:^3.2.0"
     zod: "npm:^3.23.8"
   languageName: unknown
@@ -4529,10 +4529,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@toeverything/theme@npm:^1.0.19":
-  version: 1.0.19
-  resolution: "@toeverything/theme@npm:1.0.19"
-  checksum: 10/3f7f1a084394f34beb2f065cc6a79a08be3f7197c365daf089a01a8ca152f3ec84533601019dfefb60dc0e0743a98979e719e9f984dcd58b32998e0e58c8fb92
+"@toeverything/theme@npm:^1.1.1":
+  version: 1.1.1
+  resolution: "@toeverything/theme@npm:1.1.1"
+  checksum: 10/a4df493ec8c43312d2b0caa5ec0fa296732042e169ffaef57e115c44f82ca13cb75679c95cf3ba12fc25c73a9dda8a6331196d145acb27445e08e0eafd7fc78a
   languageName: node
   linkType: hard
 
