@@ -1,11 +1,11 @@
 import { EmbedLinkedDocBlockSchema } from '@blocksuite/affine-model';
 import {
-  BlockMarkdownAdapterExtension,
-  type BlockMarkdownAdapterMatcher,
+  BlockPlainTextAdapterExtension,
+  type BlockPlainTextAdapterMatcher,
   toURLSearchParams,
 } from '@blocksuite/affine-shared/adapters';
 
-export const embedLinkedDocBlockMarkdownAdapterMatcher: BlockMarkdownAdapterMatcher =
+export const embedLinkedDocBlockPlainTextAdapterMatcher: BlockPlainTextAdapterMatcher =
   {
     flavour: EmbedLinkedDocBlockSchema.model.flavour,
     toMatch: () => false,
@@ -13,7 +13,7 @@ export const embedLinkedDocBlockMarkdownAdapterMatcher: BlockMarkdownAdapterMatc
     toBlockSnapshot: {},
     fromBlockSnapshot: {
       enter: (o, context) => {
-        const { configs, walkerContext } = context;
+        const { configs, textBuffer } = context;
         // Parse as link
         if (!o.node.props.pageId) {
           return;
@@ -24,33 +24,10 @@ export const embedLinkedDocBlockMarkdownAdapterMatcher: BlockMarkdownAdapterMatc
         const query = search?.size ? `?${search.toString()}` : '';
         const baseUrl = configs.get('docLinkBaseUrl') ?? '';
         const url = baseUrl ? `${baseUrl}/${o.node.props.pageId}${query}` : '';
-        walkerContext
-          .openNode(
-            {
-              type: 'paragraph',
-              children: [],
-            },
-            'children'
-          )
-          .openNode(
-            {
-              type: 'link',
-              url,
-              title: o.node.props.caption as string | null,
-              children: [
-                {
-                  type: 'text',
-                  value: title,
-                },
-              ],
-            },
-            'children'
-          )
-          .closeNode()
-          .closeNode();
+        textBuffer.content += `${title}: ${url}\n`;
       },
     },
   };
 
-export const EmbedLinkedDocMarkdownAdapterExtension =
-  BlockMarkdownAdapterExtension(embedLinkedDocBlockMarkdownAdapterMatcher);
+export const EmbedLinkedDocBlockPlainTextAdapterExtension =
+  BlockPlainTextAdapterExtension(embedLinkedDocBlockPlainTextAdapterMatcher);

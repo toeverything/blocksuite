@@ -6,8 +6,12 @@ import {
   embedFigmaBlockPlainTextAdapterMatcher,
   EmbedGithubBlockPlainTextAdapterExtension,
   embedGithubBlockPlainTextAdapterMatcher,
+  EmbedLinkedDocBlockPlainTextAdapterExtension,
+  embedLinkedDocBlockPlainTextAdapterMatcher,
   EmbedLoomBlockPlainTextAdapterExtension,
   embedLoomBlockPlainTextAdapterMatcher,
+  EmbedSyncedDocBlockPlainTextAdapterExtension,
+  embedSyncedDocBlockPlainTextAdapterMatcher,
   EmbedYoutubeBlockPlainTextAdapterExtension,
   embedYoutubeBlockPlainTextAdapterMatcher,
 } from '@blocksuite/affine-block-embed';
@@ -48,6 +52,8 @@ export const defaultBlockPlainTextAdapterMatchers: BlockPlainTextAdapterMatcher[
     embedGithubBlockPlainTextAdapterMatcher,
     embedLoomBlockPlainTextAdapterMatcher,
     embedYoutubeBlockPlainTextAdapterMatcher,
+    embedLinkedDocBlockPlainTextAdapterMatcher,
+    embedSyncedDocBlockPlainTextAdapterMatcher,
     latexBlockPlainTextAdapterMatcher,
   ];
 
@@ -61,5 +67,7 @@ export const BlockPlainTextAdapterExtensions: ExtensionType[] = [
   EmbedGithubBlockPlainTextAdapterExtension,
   EmbedLoomBlockPlainTextAdapterExtension,
   EmbedYoutubeBlockPlainTextAdapterExtension,
+  EmbedLinkedDocBlockPlainTextAdapterExtension,
+  EmbedSyncedDocBlockPlainTextAdapterExtension,
   LatexBlockPlainTextAdapterExtension,
 ];
