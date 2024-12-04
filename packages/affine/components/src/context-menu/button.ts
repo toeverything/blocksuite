@@ -1,14 +1,14 @@
 import type { ReadonlySignal } from '@preact/signals-core';
 import type { ClassInfo } from 'lit-html/directives/class-map.js';
 
-import { unsafeCSSVarV2 } from '@blocksuite/affine-shared/theme';
 import { IS_MOBILE } from '@blocksuite/global/env';
 import {
   CheckBoxCkeckSolidIcon,
   CheckBoxUnIcon,
   DoneIcon,
 } from '@blocksuite/icons/lit';
-import { css, html, type TemplateResult } from 'lit';
+import { cssVarV2 } from '@toeverything/theme/v2';
+import { css, html, type TemplateResult, unsafeCSS } from 'lit';
 import { property } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { keyed } from 'lit/directives/keyed.js';
@@ -52,7 +52,7 @@ export class MenuButton extends MenuFocusable {
     }
 
     .affine-menu-button.focused {
-      outline: 1px solid ${unsafeCSSVarV2('layer/insideBorder/primaryBorder')};
+      outline: 1px solid ${unsafeCSS(cssVarV2.layer.insideBorder.primaryBorder)};
     }
 
     .affine-menu-button.delete-item:hover {

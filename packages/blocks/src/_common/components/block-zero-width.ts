@@ -17,11 +17,7 @@ export class BlockZeroWidth extends LitElement {
     }
   `;
 
-  override connectedCallback(): void {
-    super.connectedCallback();
-  }
-
-  handleClick(e: MouseEvent) {
+  _handleClick = (e: MouseEvent) => {
     stopPropagation(e);
     if (this.block.doc.readonly) return;
     const nextBlock = this.block.doc.getNext(this.block.model);
@@ -31,13 +27,20 @@ export class BlockZeroWidth extends LitElement {
       ]);
       focusTextModel(this.block.host.std, paragraphId);
     }
+  };
+
+  override connectedCallback(): void {
+    super.connectedCallback();
+    this.addEventListener('click', this._handleClick);
+  }
+
+  override disconnectedCallback(): void {
+    this.removeEventListener('click', this._handleClick);
+    super.disconnectedCallback();
   }
 
   override render() {
-    return html`<div
-      class="block-zero-width"
-      @click=${this.handleClick}
-    ></div>`;
+    return html`<div class="block-zero-width"></div>`;
   }
 
   @property({ attribute: false })

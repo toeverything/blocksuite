@@ -19,9 +19,9 @@ export const referenceDeltaMarkdownAdapterMatch: InlineDeltaToPlainTextAdapterMa
 
       const { configs } = context;
       const title = configs.get(`title:${reference.pageId}`) ?? '';
-      const { mode, blockIds, elementIds } = reference.params ?? {};
+      const params = reference.params ?? {};
       const baseUrl = configs.get('docLinkBaseUrl') ?? '';
-      const search = toURLSearchParams({ mode, blockIds, elementIds });
+      const search = toURLSearchParams(params);
       const query = search?.size ? `?${search.toString()}` : '';
       const url = baseUrl ? `${baseUrl}/${reference.pageId}${query}` : '';
       const content = `${title ? `${title}: ` : ''}${url}`;
@@ -65,7 +65,7 @@ export const latexDeltaMarkdownAdapterMatch: InlineDeltaToPlainTextAdapterMatche
         return node;
       }
       return {
-        content: `LaTex, with value: ${delta.attributes?.latex}`,
+        content: delta.attributes?.latex,
       };
     },
   };

@@ -47,8 +47,10 @@ test.describe('frame copy and paste', () => {
     await createFrame(page, [50, 50], [450, 450]);
     await createShapeElement(page, [200, 200], [300, 300], Shape.Square);
 
+    const frameTitle = page.locator('affine-frame-title');
+
     await pressEscape(page);
-    await clickView(page, [60, 60]);
+    await frameTitle.click();
     await copyByKeyboard(page);
     await deleteAll(page);
     await moveView(page, [500, 500]); // center copy
@@ -68,18 +70,20 @@ test.describe('frame copy and paste', () => {
     await createShapeElement(page, [300, 300], [400, 400], Shape.Square);
     await pressEscape(page);
 
+    const frameTitles = page.locator('affine-frame-title');
+
     await shiftClickView(page, [260, 260]);
     await shiftClickView(page, [310, 310]);
     await triggerComponentToolbarAction(page, 'addGroup');
     await pressEscape(page);
 
-    await clickView(page, [60, 60]);
+    await frameTitles.nth(0).click();
     await page.keyboard.down('Alt');
     await dragBetweenViewCoords(page, [60, 60], [460, 460]);
     await page.keyboard.up('Alt');
     await pressEscape(page);
 
-    await shiftClickView(page, [60, 60]);
+    await frameTitles.nth(0).click({ modifiers: ['Shift'] });
     await shiftClickView(page, [250, 250]);
     await shiftClickView(page, [350, 350]);
     await pressBackspace(page); // remove original elements
@@ -101,12 +105,14 @@ test.describe('frame copy and paste', () => {
     await createShapeElement(page, [100, 100], [200, 200], Shape.Square);
     await pressEscape(page);
 
-    await clickView(page, [60, 60]);
+    const frameTitles = page.locator('affine-frame-title');
+
+    await frameTitles.nth(0).click();
     await page.locator('edgeless-more-button').click();
     await page.locator('editor-menu-action', { hasText: 'Duplicate' }).click();
     await pressEscape(page);
 
-    await shiftClickView(page, [60, 60]);
+    await frameTitles.nth(0).click();
     await shiftClickView(page, [150, 150]);
     await pressBackspace(page); // remove original elements
 

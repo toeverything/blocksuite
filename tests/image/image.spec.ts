@@ -43,19 +43,19 @@ test('can drag resize image by left menu', async ({ page }) => {
 
   await activeEmbed(page);
   await assertRichDragButton(page);
-  await assertImageSize(page, { width: 736, height: 552 });
+  await assertImageSize(page, { width: 752, height: 564 });
 
   await dragEmbedResizeByTopLeft(page);
   await waitNextFrame(page);
-  await assertImageSize(page, { width: 342, height: 256 });
+  await assertImageSize(page, { width: 358, height: 268 });
 
   await undoByKeyboard(page);
   await waitNextFrame(page);
-  await assertImageSize(page, { width: 736, height: 552 });
+  await assertImageSize(page, { width: 752, height: 564 });
 
   await redoByKeyboard(page);
   await waitNextFrame(page);
-  await assertImageSize(page, { width: 342, height: 256 });
+  await assertImageSize(page, { width: 358, height: 268 });
 });
 
 test('can drag resize image by right menu', async ({ page }) => {
@@ -65,16 +65,16 @@ test('can drag resize image by right menu', async ({ page }) => {
 
   await activeEmbed(page);
   await assertRichDragButton(page);
-  await assertImageSize(page, { width: 736, height: 552 });
+  await assertImageSize(page, { width: 752, height: 564 });
 
   await dragEmbedResizeByTopRight(page);
-  await assertImageSize(page, { width: 322, height: 241 });
+  await assertImageSize(page, { width: 338, height: 253 });
 
   await undoByKeyboard(page);
-  await assertImageSize(page, { width: 736, height: 552 });
+  await assertImageSize(page, { width: 752, height: 564 });
 
   await redoByKeyboard(page);
-  await assertImageSize(page, { width: 322, height: 241 });
+  await assertImageSize(page, { width: 338, height: 253 });
 });
 
 test('can click and delete image', async ({ page }) => {

@@ -6,8 +6,12 @@ import {
   embedFigmaBlockPlainTextAdapterMatcher,
   EmbedGithubBlockPlainTextAdapterExtension,
   embedGithubBlockPlainTextAdapterMatcher,
+  EmbedLinkedDocBlockPlainTextAdapterExtension,
+  embedLinkedDocBlockPlainTextAdapterMatcher,
   EmbedLoomBlockPlainTextAdapterExtension,
   embedLoomBlockPlainTextAdapterMatcher,
+  EmbedSyncedDocBlockPlainTextAdapterExtension,
+  embedSyncedDocBlockPlainTextAdapterMatcher,
   EmbedYoutubeBlockPlainTextAdapterExtension,
   embedYoutubeBlockPlainTextAdapterMatcher,
 } from '@blocksuite/affine-block-embed';
@@ -32,6 +36,10 @@ import {
   DividerBlockPlainTextAdapterExtension,
   dividerBlockPlainTextAdapterMatcher,
 } from '../../../divider-block/adapters/plain-text.js';
+import {
+  LatexBlockPlainTextAdapterExtension,
+  latexBlockPlainTextAdapterMatcher,
+} from '../../../latex-block/adapters/plain-text.js';
 
 export const defaultBlockPlainTextAdapterMatchers: BlockPlainTextAdapterMatcher[] =
   [
@@ -44,6 +52,9 @@ export const defaultBlockPlainTextAdapterMatchers: BlockPlainTextAdapterMatcher[
     embedGithubBlockPlainTextAdapterMatcher,
     embedLoomBlockPlainTextAdapterMatcher,
     embedYoutubeBlockPlainTextAdapterMatcher,
+    embedLinkedDocBlockPlainTextAdapterMatcher,
+    embedSyncedDocBlockPlainTextAdapterMatcher,
+    latexBlockPlainTextAdapterMatcher,
   ];
 
 export const BlockPlainTextAdapterExtensions: ExtensionType[] = [
@@ -56,4 +67,7 @@ export const BlockPlainTextAdapterExtensions: ExtensionType[] = [
   EmbedGithubBlockPlainTextAdapterExtension,
   EmbedLoomBlockPlainTextAdapterExtension,
   EmbedYoutubeBlockPlainTextAdapterExtension,
+  EmbedLinkedDocBlockPlainTextAdapterExtension,
+  EmbedSyncedDocBlockPlainTextAdapterExtension,
+  LatexBlockPlainTextAdapterExtension,
 ];

@@ -5,8 +5,10 @@ import {
   type PopupTarget,
   popupTargetFromElement,
 } from '@blocksuite/affine-components/context-menu';
+import { unsafeCSSVarV2 } from '@blocksuite/affine-shared/theme';
 import { rangeWrap } from '@blocksuite/affine-shared/utils';
 import { ShadowlessElement } from '@blocksuite/block-std';
+import { IS_MOBILE } from '@blocksuite/global/env';
 import { SignalWatcher, WithDisposable } from '@blocksuite/global/utils';
 import {
   CloseIcon,
@@ -45,6 +47,134 @@ type RenderOption = {
   isCreate: boolean;
   select: () => void;
 };
+export type TagManagerOptions = {
+  mode?: 'single' | 'multi';
+  value: ReadonlySignal<string[]>;
+  onChange: (value: string[]) => void;
+  options: ReadonlySignal<SelectTag[]>;
+  onOptionsChange: (options: SelectTag[]) => void;
+  onComplete?: () => void;
+};
+
+class TagManager {
+  changeTag = (option: SelectTag) => {
+    this.ops.onOptionsChange(
+      this.ops.options.value.map(item => {
+        if (item.id === option.id) {
+          return {
+            ...item,
+            ...option,
+          };
+        }
+        return item;
+      })
+    );
+  };
+
+  color = signal(getTagColor());
+
+  createOption = () => {
+    const value = this.text.value.trim();
+    if (value === '') return;
+    const id = nanoid();
+    this.ops.onOptionsChange([
+      {
+        id: id,
+        value: value,
+        color: this.color.value,
+      },
+      ...this.ops.options.value,
+    ]);
+    this.selectTag(id);
+    this.text.value = '';
+    this.color.value = getTagColor();
+    if (this.isSingleMode) {
+      this.ops.onComplete?.();
+    }
+  };
+
+  deleteOption = (id: string) => {
+    this.ops.onOptionsChange(
+      this.ops.options.value.filter(item => item.id !== id)
+    );
+  };
+
+  filteredOptions$ = computed(() => {
+    let matched = false;
+    const options: RenderOption[] = [];
+    for (const option of this.options.value) {
+      if (
+        !this.text.value ||
+        option.value
+          .toLocaleLowerCase()
+          .includes(this.text.value.toLocaleLowerCase())
+      ) {
+        options.push({
+          ...option,
+          isCreate: false,
+          select: () => this.selectTag(option.id),
+        });
+      }
+      if (option.value === this.text.value) {
+        matched = true;
+      }
+    }
+    if (this.text.value && !matched) {
+      options.push({
+        id: 'create',
+        color: this.color.value,
+        value: this.text.value,
+        isCreate: true,
+        select: this.createOption,
+      });
+    }
+    return options;
+  });
+
+  optionsMap$ = computed(() => {
+    return new Map<string, SelectTag>(
+      this.ops.options.value.map(v => [v.id, v])
+    );
+  });
+
+  text = signal('');
+
+  get isSingleMode() {
+    return this.ops.mode === 'single';
+  }
+
+  get options() {
+    return this.ops.options;
+  }
+
+  get value() {
+    return this.ops.value;
+  }
+
+  constructor(private ops: TagManagerOptions) {}
+
+  deleteTag(id: string) {
+    this.ops.onChange(this.value.value.filter(item => item !== id));
+  }
+
+  isSelected(id: string) {
+    return this.value.value.includes(id);
+  }
+
+  selectTag(id: string) {
+    if (this.isSelected(id)) {
+      return;
+    }
+    const newValue = this.isSingleMode ? [id] : [...this.value.value, id];
+    this.ops.onChange(newValue);
+    this.text.value = '';
+    if (this.isSingleMode) {
+      requestAnimationFrame(() => {
+        this.ops.onComplete?.();
+      });
+    }
+  }
+}
 
 export class MultiTagSelect extends SignalWatcher(
   WithDisposable(ShadowlessElement)
@@ -63,7 +193,7 @@ export class MultiTagSelect extends SignalWatcher(
           menu.input({
             initialValue: option.value,
             onChange: text => {
-              this.changeTag({
+              this.tagManager.changeTag({
                 ...option,
                 value: text,
               });
@@ -76,7 +206,7 @@ export class MultiTagSelect extends SignalWatcher(
               'delete-item': true,
             },
             select: () => {
-              this.deleteTag(id);
+              this.tagManager.deleteOption(id);
             },
           }),
           menu.group({
@@ -93,7 +223,7 @@ export class MultiTagSelect extends SignalWatcher(
                 prefix: html` <div style=${styles}></div>`,
                 isSelected: option.color === item.color,
                 select: () => {
-                  this.changeTag({
+                  this.tagManager.changeTag({
                     ...option,
                     color: item.color,
                   });
@@ -106,43 +236,15 @@ export class MultiTagSelect extends SignalWatcher(
     });
   };
 
-  private _createOption = () => {
-    const value = this.text.value.trim();
-    if (value === '') return;
-    const tagColor = this.color;
-    this.clearColor();
-    const newSelect: SelectTag = {
-      id: nanoid(),
-      value: value,
-      color: tagColor,
-    };
-    this.newTags([newSelect]);
-    const newValue = this.isSingleMode
-      ? [newSelect.id]
-      : [...this.value, newSelect.id];
-    this.onChange(newValue);
-    this.text.value = '';
-    if (this.isSingleMode) {
-      this.editComplete();
-    }
-  };
-
-  private _currentColor: string | undefined = undefined;
-
-  private _onDeleteSelected = (selectedValue: string[], value: string) => {
-    const filteredValue = selectedValue.filter(item => item !== value);
-    this.onChange(filteredValue);
-  };
-
   private _onInput = (event: KeyboardEvent) => {
-    this.text.value = (event.target as HTMLInputElement).value;
+    this.tagManager.text.value = (event.target as HTMLInputElement).value;
   };
 
   private _onInputKeydown = (event: KeyboardEvent) => {
     event.stopPropagation();
     const inputValue = this.text.value.trim();
     if (event.key === 'Backspace' && inputValue === '') {
-      this._onDeleteSelected(this.value, this.value[this.value.length - 1]);
+      this.tagManager.deleteTag(this.value.value[this.value.value.length - 1]);
     } else if (event.key === 'Enter' && !event.isComposing) {
       this.selectedTag$.value?.select();
     } else if (event.key === 'ArrowUp') {
@@ -152,94 +254,14 @@ export class MultiTagSelect extends SignalWatcher(
       event.preventDefault();
       this.setSelectedOption(this.selectedIndex + 1);
     } else if (event.key === 'Escape') {
-      this.editComplete();
+      this.onComplete();
     }
   };
 
-  private _onSelect = (id: string) => {
-    const isExist = this.value.some(item => item === id);
-    if (isExist) {
-      // this.editComplete();
-      return;
-    }
-
-    const isSelected = this.value.indexOf(id) > -1;
-    if (!isSelected) {
-      const newValue = this.isSingleMode ? [id] : [...this.value, id];
-      this.onChange(newValue);
-      if (this.isSingleMode) {
-        requestAnimationFrame(() => {
-          this.editComplete();
-        });
-      }
-    }
-    this.text.value = '';
-  };
-
-  @property({ attribute: false })
-  accessor options!: ReadonlySignal<SelectTag[]>;
-
-  filteredOptions$ = computed(() => {
-    let matched = false;
-    const options: RenderOption[] = [];
-    for (const option of this.options.value) {
-      if (
-        !this.text.value ||
-        option.value
-          .toLocaleLowerCase()
-          .includes(this.text.value.toLocaleLowerCase())
-      ) {
-        options.push({
-          ...option,
-          isCreate: false,
-          select: () => this._onSelect(option.id),
-        });
-      }
-      if (option.value === this.text.value) {
-        matched = true;
-      }
-    }
-    if (this.text.value && !matched) {
-      options.push({
-        id: 'create',
-        color: this.color,
-        value: this.text.value,
-        isCreate: true,
-        select: this._createOption,
-      });
-    }
-    return options;
-  });
+  private tagManager = new TagManager(this);
 
   private selectedTag$ = computed(() => {
-    return this.filteredOptions$.value[this.selectedIndex];
-  });
-
-  private text = signal('');
-
-  changeTag = (tag: SelectTag) => {
-    this.onOptionsChange(
-      this.options.value.map(v => (v.id === tag.id ? tag : v))
-    );
-  };
-
-  deleteTag = (id: string) => {
-    this.onOptionsChange(
-      this.options.value
-        .filter(v => v.id !== id)
-        .map(v => ({
-          ...v,
-          parentId: v.parentId === id ? undefined : v.parentId,
-        }))
-    );
-  };
-
-  newTags = (tags: SelectTag[]) => {
-    this.onOptionsChange([...tags, ...this.options.value]);
-  };
-
-  optionsMap$ = computed(() => {
-    return new Map<string, SelectTag>(this.options.value.map(v => [v.id, v]));
+    return this.tagManager.filteredOptions$.value[this.selectedIndex];
   });
 
   sortContext = createSortContext({
@@ -271,36 +293,25 @@ export class MultiTagSelect extends SignalWatcher(
       },
     ],
     items: computed(() => {
-      return this.filteredOptions$.value.map(v => v.id);
+      return this.tagManager.filteredOptions$.value.map(v => v.id);
     }),
     strategy: verticalListSortingStrategy,
   });
 
-  private get color() {
-    if (!this._currentColor) {
-      this._currentColor = getTagColor();
-    }
-    return this._currentColor;
-  }
-
-  get isSingleMode() {
-    return this.mode === 'single';
-  }
-
-  private clearColor() {
-    this._currentColor = undefined;
+  private get text() {
+    return this.tagManager.text;
   }
 
   private renderInput() {
     return html`
       <div class="tag-select-input-container">
-        ${this.value.map(id => {
-          const option = this.optionsMap$.value.get(id);
+        ${this.value.value.map(id => {
+          const option = this.tagManager.optionsMap$.value.get(id);
           if (!option) {
             return;
           }
           return this.renderTag(option.value, option.color, () =>
-            this._onDeleteSelected(this.value, id)
+            this.tagManager.deleteTag(id)
           );
         })}
         <input
@@ -339,7 +350,7 @@ export class MultiTagSelect extends SignalWatcher(
       <div class="select-options-tips">Select tag or create one</div>
       <div class="select-options-container">
         ${repeat(
-          this.filteredOptions$.value,
+          this.tagManager.filteredOptions$.value,
           select => select.id,
           (select, index) => {
             const isSelected = index === this.selectedIndex;
@@ -392,7 +403,7 @@ export class MultiTagSelect extends SignalWatcher(
     this.selectedIndex = rangeWrap(
       index,
       0,
-      this.filteredOptions$.value.length
+      this.tagManager.filteredOptions$.value.length
     );
   }
 
@@ -420,9 +431,6 @@ export class MultiTagSelect extends SignalWatcher(
   @query('.tag-select-input')
   private accessor _selectInput!: HTMLInputElement;
 
-  @property({ attribute: false })
-  accessor editComplete!: () => void;
-
   @property()
   accessor mode: 'multi' | 'single' = 'multi';
 
@@ -430,13 +438,19 @@ export class MultiTagSelect extends SignalWatcher(
   accessor onChange!: (value: string[]) => void;
 
   @property({ attribute: false })
+  accessor onComplete!: () => void;
+
+  @property({ attribute: false })
   accessor onOptionsChange!: (options: SelectTag[]) => void;
+
+  @property({ attribute: false })
+  accessor options!: ReadonlySignal<SelectTag[]>;
 
   @state()
   private accessor selectedIndex = 0;
 
   @property({ attribute: false })
-  accessor value: string[] = [];
+  accessor value!: ReadonlySignal<string[]>;
 }
 
 declare global {
@@ -445,19 +459,99 @@ declare global {
   }
 }
 
-export const popTagSelect = (
-  target: PopupTarget,
-  ops: {
-    mode?: 'single' | 'multi';
-    value: string[];
-    onChange: (value: string[]) => void;
-    options: ReadonlySignal<SelectTag[]>;
-    onOptionsChange: (options: SelectTag[]) => void;
-    onComplete?: () => void;
-    minWidth?: number;
-    container?: HTMLElement;
+const popMobileTagSelect = (target: PopupTarget, ops: TagSelectOptions) => {
+  const tagManager = new TagManager(ops);
+  const onInput = (e: InputEvent) => {
+    tagManager.text.value = (e.target as HTMLInputElement).value;
+  };
+  return popMenu(target, {
+    options: {
+      onClose: () => {
+        ops.onComplete?.();
+      },
+      title: {
+        text: ops.name,
+      },
+      items: [
+        () => {
+          return html`
+            <div
+              style="padding: 12px;border-radius: 12px;background-color: ${unsafeCSSVarV2(
+                'layer/background/primary'
+              )};display: flex;gap:8px 12px;"
+            >
+              ${ops.value.value.map(id => {
+                const option = ops.options.value.find(v => v.id === id);
+                if (!option) {
+                  return;
+                }
+                const style = styleMap({
+                  backgroundColor: option.color,
+                  width: 'max-content',
+                });
+                return html` <div class="tag-container" style=${style}>
+                  <div class="tag-text">${option.value}</div>
+                </div>`;
+              })}
+              <input
+                .value="${tagManager.text.value}"
+                @input="${onInput}"
+                placeholder="Type here..."
+                type="text"
+                style="outline: none;border: none;flex:1;min-width: 10px"
+              />
+            </div>
+          `;
+        },
+        menu.group({
+          items: [
+            menu.dynamic(() => {
+              const options = tagManager.filteredOptions$.value;
+              return options.map(option =>
+                menu.action({
+                  name: option.value,
+                  label: () => {
+                    const style = styleMap({
+                      backgroundColor: option.color,
+                      width: 'max-content',
+                    });
+                    return html`
+                      <div style="display: flex; align-items:center;">
+                        ${option.isCreate
+                          ? html` <div style="margin-right: 8px;">Create</div>`
+                          : ''}
+                        <div class="tag-container" style=${style}>
+                          <div class="tag-text">${option.value}</div>
+                        </div>
+                      </div>
+                    `;
+                  },
+                  select: () => {
+                    option.select();
+                    return false;
+                  },
+                })
+              );
+            }),
+          ],
+        }),
+      ],
+    },
+  });
+};
+
+export type TagSelectOptions = {
+  name: string;
+  minWidth?: number;
+  container?: HTMLElement;
+} & TagManagerOptions;
+export const popTagSelect = (target: PopupTarget, ops: TagSelectOptions) => {
+  if (IS_MOBILE) {
+    const handler = popMobileTagSelect(target, ops);
+    return () => {
+      handler.close();
+    };
   }
-) => {
   const component = new MultiTagSelect();
   if (ops.mode) {
     component.mode = ops.mode;
@@ -465,13 +559,10 @@ export const popTagSelect = (
   const width = target.targetRect.getBoundingClientRect().width;
   component.style.width = `${Math.max(ops.minWidth ?? width, width)}px`;
   component.value = ops.value;
-  component.onChange = tags => {
-    ops.onChange(tags);
-    component.value = tags;
-  };
+  component.onChange = ops.onChange;
   component.options = ops.options;
   component.onOptionsChange = ops.onOptionsChange;
-  component.editComplete = () => {
+  component.onComplete = () => {
     ops.onComplete?.();
     remove();
   };

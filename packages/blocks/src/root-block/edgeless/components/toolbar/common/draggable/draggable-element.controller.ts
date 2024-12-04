@@ -418,8 +418,8 @@ export class EdgelessDraggableElementController<T>
     const host = options.edgeless.host;
     const { onMouseUp, onMouseMove, onTouchMove, onTouchEnd } = events;
     onMouseUp && window.removeEventListener('mouseup', onMouseUp);
-    onMouseMove && host.removeEventListener('mousemove', onMouseMove);
-    onTouchMove && host.removeEventListener('touchmove', onTouchMove);
+    onMouseMove && host && host.removeEventListener('mousemove', onMouseMove);
+    onTouchMove && host && host.removeEventListener('touchmove', onTouchMove);
     onTouchEnd && window.removeEventListener('touchend', onTouchEnd);
     this.events = {};
   }

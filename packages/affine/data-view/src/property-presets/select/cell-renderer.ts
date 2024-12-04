@@ -1,5 +1,5 @@
 import { popupTargetFromElement } from '@blocksuite/affine-components/context-menu';
-import { computed } from '@preact/signals-core';
+import { computed, signal } from '@preact/signals-core';
 import { html } from 'lit/static-html.js';
 
 import type { SelectTag } from '../../core/index.js';
@@ -30,17 +30,22 @@ export class SelectCellEditing extends BaseCellRenderer<
   SelectPropertyData
 > {
   private popTagSelect = () => {
+    const value = signal(this._value);
     this._disposables.add({
       dispose: popTagSelect(
         popupTargetFromElement(
           this.querySelector('affine-multi-tag-view') ?? this
         ),
         {
+          name: this.cell.property.name$.value,
           mode: 'single',
           options: this.options$,
           onOptionsChange: this._onOptionsChange,
-          value: this._value,
-          onChange: this._onChange,
+          value: signal(this._value),
+          onChange: v => {
+            this._onChange(v);
+            value.value = v;
+          },
           onComplete: this._editComplete,
           minWidth: 400,
         }

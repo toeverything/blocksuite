@@ -310,14 +310,16 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockComponent<EmbedLinke
       }
     }
 
-    this.model.propsUpdated.on(({ key }) => {
-      if (key === 'pageId' || key === 'style') {
-        this._load().catch(e => {
-          console.error(e);
-          this.isError = true;
-        });
-      }
-    });
+    this.disposables.add(
+      this.model.propsUpdated.on(({ key }) => {
+        if (key === 'pageId' || key === 'style') {
+          this._load().catch(e => {
+            console.error(e);
+            this.isError = true;
+          });
+        }
+      })
+    );
   }
 
   override disconnectedCallback() {

@@ -1758,6 +1758,13 @@ hhh
                     pageId: '4T5ObMgEIMII-4Bexyta1',
                     style: 'horizontal',
                     caption: null,
+                    params: {
+                      mode: 'page',
+                      blockIds: ['abc', '123'],
+                      elementIds: ['def', '456'],
+                      databaseId: 'deadbeef',
+                      databaseRowId: '123',
+                    },
                   },
                   children: [],
                 },
@@ -1816,6 +1823,8 @@ hhh
                                     mode: 'page',
                                     blockIds: ['abc', '123'],
                                     elementIds: ['def', '456'],
+                                    databaseId: 'deadbeef',
+                                    databaseRowId: '123',
                                   },
                                 },
                               },
@@ -1897,13 +1906,13 @@ hhh
 
 &#x20;   bbb
 
-[untitled](https://example.com/4T5ObMgEIMII-4Bexyta1)
+[untitled](https://example.com/4T5ObMgEIMII-4Bexyta1?mode=page\\&blockIds=abc%2C123\\&elementIds=def%2C456\\&databaseId=deadbeef\\&databaseRowId=123)
 
 &#x20;   ccc
 
 &#x20;       ddd
 
-&#x20;       eee[test](https://example.com/deadbeef?mode=page\\&blockIds=abc%2C123\\&elementIds=def%2C456)[](https://example.com/foobar)
+&#x20;       eee[test](https://example.com/deadbeef?mode=page\\&blockIds=abc%2C123\\&elementIds=def%2C456\\&databaseId=deadbeef\\&databaseRowId=123)[](https://example.com/foobar)
 
 &#x20;       fff
 

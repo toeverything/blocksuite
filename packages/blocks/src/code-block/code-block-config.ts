@@ -6,4 +6,10 @@ export interface CodeBlockConfig {
     light?: ThemeInput;
   };
   langs?: BundledLanguageInfo[];
+
+  /**
+   * Whether to show line numbers in the code block.
+   * @default true
+   */
+  showLineNumbers?: boolean;
 }

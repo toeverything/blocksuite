@@ -132,16 +132,14 @@ test('drag whole mindmap into frame, then drag root node of mindmap out.', async
   // drag in
   {
     const mindmapBound = await getSelectedBound(page);
-    await dragBetweenViewCoords(
-      page,
-      [mindmapBound[0] - 10, mindmapBound[1] - 10],
-      [mindmapBound[0] + 10, mindmapBound[1] + 10]
-    );
-    await dragBetweenViewCoords(
-      page,
-      [mindmapBound[0] + 10, mindmapBound[1] + 10],
-      [100, 100]
-    );
+    const rootNodePos = [
+      mindmapBound[0] + 10,
+      mindmapBound[1] + 0.5 * mindmapBound[3],
+    ];
+    await dragBetweenViewCoords(page, rootNodePos, [
+      rootNodePos[0] - 20,
+      rootNodePos[1] + 200,
+    ]);
   }
 
   await assertContainerOfElements(page, [mindmapId], frameId);
@@ -149,15 +147,12 @@ test('drag whole mindmap into frame, then drag root node of mindmap out.', async
   // drag out
   {
     const mindmapBound = await getSelectedBound(page);
-    await clickView(page, [
+    const rootNodePos = [
       mindmapBound[0] + 10,
       mindmapBound[1] + 0.5 * mindmapBound[3],
-    ]);
-    await dragBetweenViewCoords(
-      page,
-      [mindmapBound[0] + 10, mindmapBound[1] + 0.5 * mindmapBound[3]],
-      [0, 0]
-    );
+    ];
+
+    await dragBetweenViewCoords(page, rootNodePos, [-100, -100]);
   }
 
   await assertContainerOfElements(page, [mindmapId], null);

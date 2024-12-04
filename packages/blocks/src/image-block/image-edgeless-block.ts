@@ -67,11 +67,13 @@ export class ImageEdgelessBlockComponent extends GfxBlockComponent<
 
     this.refreshData();
     this.contentEditable = 'false';
-    this.model.propsUpdated.on(({ key }) => {
-      if (key === 'sourceId') {
-        this.refreshData();
-      }
-    });
+    this.disposables.add(
+      this.model.propsUpdated.on(({ key }) => {
+        if (key === 'sourceId') {
+          this.refreshData();
+        }
+      })
+    );
   }
 
   override disconnectedCallback() {

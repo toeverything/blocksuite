@@ -87,6 +87,21 @@ export class PlainTextAdapter extends BaseAdapter<PlainText> {
         }
       }
     });
+    walker.setLeave(async (o, context) => {
+      for (const matcher of this.blockMatchers) {
+        if (matcher.fromMatch(o)) {
+          const adapterContext: AdapterContext<BlockSnapshot, never> = {
+            walker,
+            walkerContext: context,
+            configs: this.configs,
+            job: this.job,
+            deltaConverter: this.deltaConverter,
+            textBuffer,
+          };
+          await matcher.fromBlockSnapshot.leave?.(o, adapterContext);
+        }
+      }
+    });
     await walker.walkONode(snapshot);
     return {
       plaintext: textBuffer.content,

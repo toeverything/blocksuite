@@ -6,11 +6,10 @@ export const codeBlockStyles = css`
   }
 
   .affine-code-block-container {
-    font-size: var(--affine-font-sm);
+    font-size: var(--affine-font-xs);
     line-height: var(--affine-line-height);
     position: relative;
-    padding: 32px 24px;
-    margin-bottom: 4px;
+    padding: 12px;
     background: var(--affine-background-code-block);
     border-radius: 10px;
     box-sizing: border-box;
@@ -33,15 +32,15 @@ export const codeBlockStyles = css`
 
   .affine-code-block-container .line-number {
     position: sticky;
-    text-align: right;
-    padding-right: 10px;
-    width: 46px;
+    text-align: left;
+    padding-right: 4px;
+    width: 24px;
     word-break: break-word;
     white-space: nowrap;
     left: -0.5px;
     z-index: 1;
     background: var(--affine-background-code-block);
-    font-size: var(--affine-font-sm);
+    font-size: var(--affine-font-xs);
     line-height: var(--affine-line-height);
     color: var(--affine-text-secondary);
     box-sizing: border-box;

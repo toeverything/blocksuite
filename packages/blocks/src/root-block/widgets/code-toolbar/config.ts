@@ -9,6 +9,7 @@ import {
   WrapIcon,
 } from '@blocksuite/affine-components/icons';
 import { isInsidePageEditor } from '@blocksuite/affine-shared/utils';
+import { noop, sleep } from '@blocksuite/global/utils';
 import { html } from 'lit';
 import { ifDefined } from 'lit/directives/if-defined.js';
 
@@ -20,6 +21,28 @@ export const PRIMARY_GROUPS: MenuItemGroup<CodeBlockToolbarContext>[] = [
   {
     type: 'primary',
     items: [
+      {
+        type: 'change-lang',
+        generate: ({ blockComponent, setActive }) => {
+          const state = { active: false };
+          return {
+            action: noop,
+            render: () =>
+              html`<language-list-button
+                .blockComponent=${blockComponent}
+                .onActiveStatusChange=${async (active: boolean) => {
+                  state.active = active;
+                  if (!active) {
+                    await sleep(1000);
+                    if (state.active) return;
+                  }
+                  setActive(active);
+                }}
+              >
+              </language-list-button>`,
+          };
+        },
+      },
       {
         type: 'copy-code',
         label: 'Copy code',
@@ -35,6 +58,8 @@ export const PRIMARY_GROUPS: MenuItemGroup<CodeBlockToolbarContext>[] = [
                 aria-label=${ifDefined(item.label)}
                 .tooltip=${item.label}
                 .tooltipOffset=${4}
+                .iconSize=${'16px'}
+                .iconContainerPadding=${4}
                 @click=${(e: MouseEvent) => {
                   e.stopPropagation();
                   item.action();
@@ -62,6 +87,8 @@ export const PRIMARY_GROUPS: MenuItemGroup<CodeBlockToolbarContext>[] = [
                 aria-label=${ifDefined(item.label)}
                 .tooltip=${item.label}
                 .tooltipOffset=${4}
+                .iconSize=${'16px'}
+                .iconContainerPadding=${4}
                 @click=${(e: MouseEvent) => {
                   e.stopPropagation();
                   item.action();

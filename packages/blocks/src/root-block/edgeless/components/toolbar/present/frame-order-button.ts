@@ -24,6 +24,11 @@ export class EdgelessFrameOrderButton extends WithDisposable(LitElement) {
     typeof createButtonPopper
   > | null = null;
 
+  override disconnectedCallback() {
+    super.disconnectedCallback();
+    this._edgelessFrameOrderPopper?.dispose();
+  }
+
   override firstUpdated() {
     this._edgelessFrameOrderPopper = createButtonPopper(
       this._edgelessFrameOrderButton,

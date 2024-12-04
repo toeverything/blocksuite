@@ -379,6 +379,9 @@ export class CodeBlockComponent extends CaptionedBlockComponent<
   }
 
   override renderBlock(): TemplateResult<1> {
+    const showLineNumbers =
+      this.std.getConfig('affine:code')?.showLineNumbers ?? true;
+
     return html`
       <div
         class=${classMap({
@@ -398,14 +401,16 @@ export class CodeBlockComponent extends CaptionedBlockComponent<
           .enableUndoRedo=${false}
           .wrapText=${this.model.wrap}
           .verticalScrollContainerGetter=${() => getViewportElement(this.host)}
-          .vLineRenderer=${(vLine: VLine) => {
-            return html`
-              <span contenteditable="false" class="line-number"
-                >${vLine.index + 1}</span
-              >
-              ${vLine.renderVElements()}
-            `;
-          }}
+          .vLineRenderer=${showLineNumbers
+            ? (vLine: VLine) => {
+                return html`
+                  <span contenteditable="false" class="line-number"
+                    >${vLine.index + 1}</span
+                  >
+                  ${vLine.renderVElements()}
+                `;
+              }
+            : undefined}
         >
         </rich-text>
 
@@ -422,7 +427,7 @@ export class CodeBlockComponent extends CaptionedBlockComponent<
   private accessor _richTextElement: RichText | null = null;
 
   override accessor blockContainerStyles = {
-    margin: '24px 0',
+    margin: '18px 0',
   };
 
   override accessor useCaptionEditor = true;

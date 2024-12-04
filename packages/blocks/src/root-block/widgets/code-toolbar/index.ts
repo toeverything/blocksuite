@@ -51,19 +51,25 @@ export class AffineCodeToolbarWidget extends WidgetComponent<
           return null;
         }
 
-        const context = new CodeBlockToolbarContext(codeBlock, abortController);
+        const setActive = (active: boolean) => {
+          this._isActivated = active;
+          if (!active && !this._hoverController?.isHovering) {
+            this._hoverController?.abort();
+          }
+        };
+
+        const context = new CodeBlockToolbarContext(
+          codeBlock,
+          abortController,
+          setActive
+        );
 
         return {
           template: html`<affine-code-toolbar
             .context=${context}
             .primaryGroups=${this.primaryGroups}
             .moreGroups=${this.moreGroups}
-            .onActiveStatusChange=${(active: boolean) => {
-              this._isActivated = active;
-              if (!active && !this._hoverController?.isHovering) {
-                this._hoverController?.abort();
-              }
-            }}
+            .onActiveStatusChange=${setActive}
           ></affine-code-toolbar>`,
           container: this.block,
           // stacking-context(editor-host)
@@ -149,11 +155,5 @@ export class AffineCodeToolbarWidget extends WidgetComponent<
   override firstUpdated() {
     this.moreGroups = getMoreMenuConfig(this.std).configure(this.moreGroups);
     this._setHoverController();
-  }
-}
-
-declare global {
-  interface HTMLElementTagNameMap {
-    [AFFINE_CODE_TOOLBAR_WIDGET]: AffineCodeToolbarWidget;
   }
 }

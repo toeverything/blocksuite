@@ -118,6 +118,8 @@ export class AffineCodeToolbar extends WithDisposable(LitElement) {
           aria-label="More"
           .tooltip=${'More'}
           .tooltipOffset=${4}
+          .iconSize=${'16px'}
+          .iconContainerPadding=${4}
           .showTooltip=${!this._moreMenuOpen}
           ?disabled=${this.context.doc.readonly}
           @click=${() => this._toggleMoreMenu()}
@@ -145,10 +147,4 @@ export class AffineCodeToolbar extends WithDisposable(LitElement) {
 
   @property({ attribute: false })
   accessor primaryGroups!: MenuItemGroup<CodeBlockToolbarContext>[];
-}
-
-declare global {
-  interface HTMLElementTagNameMap {
-    'affine-code-toolbar': AffineCodeToolbar;
-  }
 }

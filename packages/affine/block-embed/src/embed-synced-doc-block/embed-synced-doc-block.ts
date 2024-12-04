@@ -456,14 +456,16 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockComponent<EmbedSynce
 
     this.contentEditable = 'false';
 
-    this.model.propsUpdated.on(({ key }) => {
-      if (key === 'pageId' || key === 'style') {
-        this._load().catch(e => {
-          console.error(e);
-          this._error = true;
-        });
-      }
-    });
+    this.disposables.add(
+      this.model.propsUpdated.on(({ key }) => {
+        if (key === 'pageId' || key === 'style') {
+          this._load().catch(e => {
+            console.error(e);
+            this._error = true;
+          });
+        }
+      })
+    );
 
     this._setDocUpdatedAt();
     this.disposables.add(

@@ -199,7 +199,17 @@ export class DefaultTool extends BaseTool {
     const { x, y, w, h } = this.controller.draggingArea$.peek();
     const bound = new Bound(x, y, w, h);
 
-    const elements = getTopElements(gfx.getElementsByBound(bound));
+    let elements = gfx.getElementsByBound(bound).filter(el => {
+      if (isFrameBlock(el)) {
+        return el.childElements.length === 0 || bound.contains(el.elementBound);
+      }
+      if (el instanceof MindmapElementModel) {
+        return bound.contains(el.elementBound);
+      }
+      return true;
+    });
+
+    elements = getTopElements(elements);
 
     const set = new Set(
       gfx.keyboard.shiftKey$.peek()
@@ -484,9 +494,13 @@ export class DefaultTool extends BaseTool {
 
     if (frameByPickingTitle) return frameByPickingTitle;
 
-    const group = this.gfx.getElementInGroup(modelPos[0], modelPos[1], options);
+    const result = this.gfx.getElementInGroup(
+      modelPos[0],
+      modelPos[1],
+      options
+    );
 
-    if (group instanceof MindmapElementModel) {
+    if (result instanceof MindmapElementModel) {
       const picked = this.gfx.getElementByPoint(modelPos[0], modelPos[1], {
         ...((options ?? {}) as PointTestOptions),
         all: true,
@@ -496,7 +510,7 @@ export class DefaultTool extends BaseTool {
 
       while (pickedIdx >= 0) {
         const element = picked[pickedIdx];
-        if (element === group) {
+        if (element === result) {
           pickedIdx -= 1;
           continue;
         }
@@ -507,7 +521,12 @@ export class DefaultTool extends BaseTool {
       return picked[pickedIdx] ?? null;
     }
 
-    return group;
+    // if the frame has title, it only can be picked by clicking the title
+    if (isFrameBlock(result) && result.externalXYWH) {
+      return null;
+    }
+
+    return result;
   }
 
   private _scheduleUpdate(

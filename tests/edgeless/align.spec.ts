@@ -164,7 +164,7 @@ test.describe('auto arrange align', () => {
     await page.mouse.click(0, 0);
     await page.mouse.move(75, 395);
     await page.mouse.down();
-    await page.mouse.move(650, 880);
+    await page.mouse.move(900, 900);
     await page.mouse.up();
     await assertEdgelessSelectedModelRect(page, [0, 0, 550, 450]);
 
@@ -369,7 +369,7 @@ test.describe('auto resize align', () => {
     await page.mouse.click(0, 0);
     await page.mouse.move(75, 395);
     await page.mouse.down();
-    await page.mouse.move(650, 880);
+    await page.mouse.move(900, 900);
     await page.mouse.up();
     await assertEdgelessSelectedModelRect(page, [0, 0, 550, 450]);
 
