@@ -190,7 +190,7 @@ export class EditorContainer
     if (!this.model) return null;
 
     const rootContainer = keyed(
-      this.model.id,
+      `${this.model.id}-${this.mode}`,
       html`<block-suite-root
         .page=${this.page}
         .componentMap=${this.mode === 'page' ? pagePreset : edgelessPreset}

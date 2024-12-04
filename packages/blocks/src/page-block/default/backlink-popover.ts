@@ -115,12 +115,14 @@ export class BacklinkButton extends WithDisposable(LitElement) {
     assertExists(page);
     const backlinkIndexer = page.workspace.indexer.backlink;
     this._backlinks = backlinkIndexer.getBacklink(page.id);
-    backlinkIndexer.slots.indexUpdated.on(() => {
-      this._backlinks = backlinkIndexer.getBacklink(page.id);
-      if (!this._backlinks.length) {
-        this._showPopover = false;
-      }
-    });
+    this._disposables.add(
+      backlinkIndexer.slots.indexUpdated.on(() => {
+        this._backlinks = backlinkIndexer.getBacklink(page.id);
+        if (!this._backlinks.length) {
+          this._showPopover = false;
+        }
+      })
+    );
     this._disposables.addFromEvent(window, 'mousedown', this._onClickAway);
   }
 

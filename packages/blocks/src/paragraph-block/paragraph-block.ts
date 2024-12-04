@@ -207,11 +207,15 @@ export class ParagraphBlockComponent extends BlockElement<ParagraphBlockModel> {
   }
 
   override firstUpdated() {
-    this.model.propsUpdated.on(() => {
-      this._updatePlaceholder();
-      this.requestUpdate();
-    });
-    this.model.childrenUpdated.on(() => this.requestUpdate());
+    this._disposables.add(
+      this.model.propsUpdated.on(() => {
+        this._updatePlaceholder();
+        this.requestUpdate();
+      })
+    );
+    this._disposables.add(
+      this.model.childrenUpdated.on(() => this.requestUpdate())
+    );
   }
 
   private _updatePlaceholder = () => {
@@ -269,6 +273,11 @@ export class ParagraphBlockComponent extends BlockElement<ParagraphBlockModel> {
     this._placeholderDisposables.dispose();
     this._placeholderDisposables = new DisposableGroup();
   };
+
+  override disconnectedCallback(): void {
+    super.disconnectedCallback();
+    this._placeholderDisposables.dispose();
+  }
 
   private isInDatabase = () => {
     let parent = this.parentElement;

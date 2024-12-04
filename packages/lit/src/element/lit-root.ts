@@ -1,6 +1,11 @@
 /* eslint-disable lit/binding-positions, lit/no-invalid-html */
 
-import type { BaseBlockModel, BlockSchemaType, Page } from '@blocksuite/store';
+import {
+  type BaseBlockModel,
+  type BlockSchemaType,
+  DisposableGroup,
+  type Page,
+} from '@blocksuite/store';
 import type { TemplateResult } from 'lit';
 import { nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
@@ -19,6 +24,8 @@ export class BlockSuiteRoot extends ShadowlessElement {
   @property()
   page!: Page;
 
+  _disposables = new DisposableGroup();
+
   @property()
   blockIdAttr = 'data-block-id';
 
@@ -33,6 +40,7 @@ export class BlockSuiteRoot extends ShadowlessElement {
 
   override disconnectedCallback() {
     super.disconnectedCallback();
+    this._disposables.dispose();
     this.uiEventDispatcher.unmount();
   }
 
@@ -77,12 +85,16 @@ export class BlockSuiteRoot extends ShadowlessElement {
   _onLoadModel = (model: BaseBlockModel) => {
     const { id } = model;
     if (!this.modelSubscribed.has(id)) {
-      model.propsUpdated.on(() => {
-        this.requestUpdate();
-      });
-      model.childrenUpdated.on(() => {
-        this.requestUpdate();
-      });
+      this._disposables.add(
+        model.propsUpdated.on(() => {
+          this.requestUpdate();
+        })
+      );
+      this._disposables.add(
+        model.childrenUpdated.on(() => {
+          this.requestUpdate();
+        })
+      );
       this.modelSubscribed.add(id);
     }
   };

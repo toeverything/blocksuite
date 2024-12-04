@@ -167,6 +167,9 @@ export class VEditor<
     this._rootElement?.replaceChildren();
     this._rootElement = null;
 
+    this.slots.vRangeUpdated.dispose();
+    this.slots.scrollUpdated.dispose();
+
     this.slots.unmounted.emit();
   }
 

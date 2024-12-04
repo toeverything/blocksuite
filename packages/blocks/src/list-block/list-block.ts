@@ -109,8 +109,12 @@ export class ListBlockComponent extends BlockElement<ListBlockModel> {
   };
 
   override firstUpdated() {
-    this.model.propsUpdated.on(() => this.requestUpdate());
-    this.model.childrenUpdated.on(() => this.requestUpdate());
+    this._disposables.add(
+      this.model.propsUpdated.on(() => this.requestUpdate())
+    );
+    this._disposables.add(
+      this.model.childrenUpdated.on(() => this.requestUpdate())
+    );
   }
 
   override connectedCallback() {

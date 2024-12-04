@@ -213,10 +213,15 @@ export class DefaultPageBlockComponent
       () => (this._isComposing = false)
     );
 
-    this.model.title.yText.observe(() => {
+    const updateTitle = () => {
       this._updateTitleInMeta();
       this.requestUpdate();
+    };
+    this._disposables.add({
+      dispose: () => this.model.title.yText.unobserve(updateTitle),
     });
+    this.model.title.yText.observe(updateTitle);
+
     this._titleVEditor.setReadonly(this.page.readonly);
   }
 
@@ -444,7 +449,9 @@ export class DefaultPageBlockComponent
       this._embedEditingState = embedEditingState;
     });
 
-    this.model.childrenUpdated.on(() => this.requestUpdate());
+    this._disposables.add(
+      this.model.childrenUpdated.on(() => this.requestUpdate())
+    );
   }
 
   private _initFrameSizeEffect() {
@@ -521,6 +528,8 @@ export class DefaultPageBlockComponent
     this.clipboard.dispose();
     this._disposables.dispose();
     this.components.dragHandle?.remove();
+    this._titleVEditor?.unmount();
+    this._titleVEditor = null;
 
     removeHotkeys();
     this.selection.clear();

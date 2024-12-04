@@ -244,6 +244,11 @@ export class RichText extends ShadowlessElement {
     }
   }
 
+  override disconnectedCallback(): void {
+    super.disconnectedCallback();
+    this._vEditor?.unmount();
+  }
+
   override updated() {
     if (this._vEditor) {
       this._vEditor.setReadonly(this.model.page.readonly);
