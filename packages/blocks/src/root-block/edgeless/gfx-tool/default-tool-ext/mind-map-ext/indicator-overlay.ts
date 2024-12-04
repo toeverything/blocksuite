@@ -26,7 +26,13 @@ export class MindMapIndicatorOverlay extends Overlay {
 
   static override overlayName: string = 'mindmap-indicator';
 
+  currentDragPos: IVec | null = null;
+
   direction: LayoutType.LEFT | LayoutType.RIGHT = LayoutType.RIGHT;
+
+  dragNodeImage: HTMLCanvasElement | null = null;
+
+  dragNodePos: IVec = [0, 0];
 
   mode: ConnectorMode = ConnectorMode.Straight;
 
@@ -155,6 +161,19 @@ export class MindMapIndicatorOverlay extends Overlay {
   }
 
   override render(ctx: CanvasRenderingContext2D): void {
+    if (this.currentDragPos && this.dragNodeImage) {
+      ctx.save();
+      ctx.globalAlpha = 0.3;
+      ctx.drawImage(
+        this.dragNodeImage,
+        this.currentDragPos[0] + this.dragNodePos[0],
+        this.currentDragPos[1] + this.dragNodePos[1],
+        this.dragNodeImage.width / 2,
+        this.dragNodeImage.height / 2
+      );
+      ctx.restore();
+    }
+
     if (!this.parentBound || !this.targetBound) {
       return;
     }

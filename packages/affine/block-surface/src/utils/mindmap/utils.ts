@@ -611,11 +611,6 @@ function showMergeIndicator(
     }
   }
 
-  sourceMindMap.layout(source, {
-    layoutType: insertPosition.layoutDir,
-    calculateTreeBound: false,
-  });
-
   // hide original connector
   const abortPreview = callback({
     targetMindMap,

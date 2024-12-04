@@ -6,6 +6,7 @@ import {
   NODE_HORIZONTAL_SPACING,
   NODE_VERTICAL_SPACING,
   OverlayIdentifier,
+  type SurfaceBlockComponent,
 } from '@blocksuite/affine-block-surface';
 import {
   type LayoutType,
@@ -37,16 +38,19 @@ type DragMindMapCtx = {
 export class MindMapExt extends DefaultToolExt {
   private _responseAreaUpdated = new Set<MindmapElementModel>();
 
+  private get _indicatorOverlay() {
+    return this.std.getOptional(
+      OverlayIdentifier('mindmap-indicator')
+    ) as MindMapIndicatorOverlay | null;
+  }
+
   /**
    * Create handlers that can drag and drop mind map nodes
    * @param dragMindMapCtx
    * @param dragState
    * @returns
    */
-  private _createManipulationHandlers(
-    dragMindMapCtx: DragMindMapCtx,
-    _: DragState
-  ): {
+  private _createManipulationHandlers(dragMindMapCtx: DragMindMapCtx): {
     dragStart?: (evt: PointerEventState) => void;
     dragMove?: (evt: PointerEventState) => void;
     dragEnd?: (evt: PointerEventState) => void;
@@ -63,6 +67,12 @@ export class MindMapExt extends DefaultToolExt {
       dragMove: (_: PointerEventState) => {
         const [x, y] = this.defaultTool.dragLastPos;
         const hoveredMindMap = this._getHoveredMindMap([x, y], dragMindMapCtx);
+        const indicator = this._indicatorOverlay;
+
+        if (indicator) {
+          indicator.currentDragPos = [x, y];
+          indicator.refresh();
+        }
 
         hoveredCtx?.abort?.();
 
@@ -76,18 +86,20 @@ export class MindMapExt extends DefaultToolExt {
         };
 
         const layoutDragNode = () => {
-          const layoutType: LayoutType = dragMindMapCtx.mindmap.getLayoutDir(
-            dragMindMapCtx.node
-          );
+          // const layoutType: LayoutType = dragMindMapCtx.mindmap.getLayoutDir(
+          //   dragMindMapCtx.node
+          // );
 
-          dragMindMapCtx.mindmap.layout(dragMindMapCtx.node, {
-            layoutType,
-            calculateTreeBound: false,
-          });
+          // dragMindMapCtx.mindmap.layout(dragMindMapCtx.node, {
+          //   layoutType,
+          //   calculateTreeBound: false,
+          // });
 
-          return () => {
-            delete dragMindMapCtx.node.overriddenDir;
-          };
+          // return () => {
+          //   delete dragMindMapCtx.node.overriddenDir;
+          // };
+
+          return () => {};
         };
 
         if (
@@ -154,15 +166,17 @@ export class MindMapExt extends DefaultToolExt {
               dragMindMapCtx.mindmap.layoutType,
               this.gfx.surface!
             );
-          } else {
-            // restore the original mind map bound
-            dragMindMapCtx.mindmap.layout();
           }
         }
 
         hoveredCtx = null;
         dragMindMapCtx.clear?.();
         this._responseAreaUpdated.clear();
+
+        if (this._indicatorOverlay) {
+          this._indicatorOverlay.dragNodeImage = null;
+          this._indicatorOverlay.currentDragPos = null;
+        }
       },
     };
   }
@@ -210,9 +224,7 @@ export class MindMapExt extends DefaultToolExt {
       | { type: 'child'; layoutDir: Exclude<LayoutType, LayoutType.BALANCE> };
     path: number[];
   }) {
-    const indicatorOverlay = this.std.getOptional(
-      OverlayIdentifier('mindmap-indicator')
-    ) as MindMapIndicatorOverlay | null;
+    const indicatorOverlay = this._indicatorOverlay;
 
     if (!indicatorOverlay) {
       return () => {};
@@ -275,6 +287,33 @@ export class MindMapExt extends DefaultToolExt {
     return mindmap;
   }
 
+  private _setupDragNodeImage(
+    mindmapNode: MindmapNode,
+    event: PointerEventState
+  ) {
+    const surfaceBlock = this.gfx.surfaceComponent as SurfaceBlockComponent;
+    const renderer = surfaceBlock?.renderer;
+    const indicatorOverlay = this._indicatorOverlay;
+
+    if (!renderer || !indicatorOverlay) {
+      return;
+    }
+
+    const nodeBound = mindmapNode.element.elementBound;
+
+    const pos = this.gfx.viewport.toModelCoord(event.x, event.y);
+    const canvas = renderer.getCanvasByBound(
+      mindmapNode.element.elementBound,
+      [mindmapNode.element],
+      undefined,
+      undefined,
+      false
+    );
+
+    indicatorOverlay.dragNodePos = [nodeBound.x - pos[0], nodeBound.y - pos[1]];
+    indicatorOverlay.dragNodeImage = canvas;
+  }
+
   private _updateNodeOpacity(
     mindmap: MindmapElementModel,
     mindNode: MindmapNode
@@ -323,6 +362,8 @@ export class MindMapExt extends DefaultToolExt {
       const mindmapNode = mindmap.getNode(dragState.movedElements[0].id)!;
       const mindmapBound = mindmap.elementBound;
 
+      dragState.movedElements.splice(0, 1);
+
       mindmapBound.x -= NODE_HORIZONTAL_SPACING;
       mindmapBound.y -= NODE_VERTICAL_SPACING * 2;
       mindmapBound.w += NODE_HORIZONTAL_SPACING * 2;
@@ -331,19 +372,19 @@ export class MindMapExt extends DefaultToolExt {
       calculateResponseArea(mindmap);
       this._responseAreaUpdated.add(mindmap);
 
+      this._setupDragNodeImage(mindmapNode, dragState.event);
+
       const clearOpacity = this._updateNodeOpacity(mindmap, mindmapNode);
-      const clearStash = mindmap.stashTree(mindmapNode);
       const mindMapDragCtx: DragMindMapCtx = {
         mindmap,
         node: mindmapNode,
         clear: () => {
           clearOpacity();
-          clearStash?.();
         },
         originalMindMapBound: mindmapBound,
       };
 
-      return this._createManipulationHandlers(mindMapDragCtx, dragState);
+      return this._createManipulationHandlers(mindMapDragCtx);
     }
 
     const mindmapNodes = new Set<GfxModel>();

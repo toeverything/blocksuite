@@ -23,6 +23,7 @@ export enum DefaultModeDragType {
 export type DragState = {
   movedElements: GfxModel[];
   dragType: DefaultModeDragType;
+  event: PointerEventState;
 };
 
 export class DefaultToolExt {
