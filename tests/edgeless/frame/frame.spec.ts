@@ -142,9 +142,11 @@ test.describe('add element to frame and then move frame', () => {
       const noteCoord = await toViewCoord(page, [200, 200]);
       const noteId = await addNote(page, '', noteCoord[0], noteCoord[1]);
 
+      const frameTitle = page.locator('affine-frame-title');
+
       await pressEscape(page);
 
-      await clickView(page, [60, 60]);
+      await frameTitle.click();
       await dragBetweenViewCoords(page, [60, 60], [110, 110]);
 
       await assertEdgelessElementBound(page, shapeId, [150, 150, 100, 100]);
@@ -169,7 +171,9 @@ test.describe('add element to frame and then move frame', () => {
       );
       await pressEscape(page);
 
-      await clickView(page, [60, 60]);
+      const frameTitle = page.locator('affine-frame-title');
+
+      await frameTitle.click();
       await dragBetweenViewCoords(page, [60, 60], [110, 110]);
 
       await assertEdgelessElementBound(page, shapeId, [500, 500, 100, 100]);
@@ -195,13 +199,15 @@ test.describe('add element to frame and then move frame', () => {
       ];
       await pressEscape(page);
 
+      const frameTitle = page.locator('affine-frame-title');
+
       await shiftClickView(page, [110, 110]);
       await shiftClickView(page, [160, 160]);
       await page.keyboard.press(`${SHORT_KEY}+g`);
       const groupId = (await getSelectedIds(page))[0];
       await pressEscape(page);
 
-      await clickView(page, [60, 60]);
+      await frameTitle.click();
       await dragBetweenViewCoords(page, [60, 60], [110, 110]);
 
       await assertEdgelessElementBound(page, shapeIds[0], [150, 150, 100, 100]);
@@ -220,13 +226,15 @@ test.describe('add element to frame and then move frame', () => {
       ];
       await pressEscape(page);
 
+      const frameTitle = page.locator('affine-frame-title');
+
       await shiftClickView(page, [460, 460]);
       await shiftClickView(page, [510, 510]);
       await page.keyboard.press(`${SHORT_KEY}+g`);
       const groupId = (await getSelectedIds(page))[0];
       await pressEscape(page);
 
-      await clickView(page, [60, 60]);
+      await frameTitle.click();
       await dragBetweenViewCoords(page, [60, 60], [110, 110]);
 
       await assertEdgelessElementBound(page, shapeIds[0], [500, 500, 100, 100]);
@@ -247,7 +255,9 @@ test.describe('add element to frame and then move frame', () => {
       ];
       await pressEscape(page);
 
-      await clickView(page, [60, 60]);
+      const frameTitles = page.locator('affine-frame-title');
+
+      await frameTitles.nth(0).click();
       await dragBetweenViewCoords(page, [60, 60], [110, 110]);
 
       await assertEdgelessElementBound(page, shapeId, [200, 200, 100, 100]);
@@ -265,7 +275,9 @@ test.describe('add element to frame and then move frame', () => {
       ];
       await pressEscape(page);
 
-      await clickView(page, [60, 60]);
+      const frameTitles = page.locator('affine-frame-title');
+
+      await frameTitles.nth(0).click();
       await dragBetweenViewCoords(page, [60, 60], [110, 110]);
 
       await assertEdgelessElementBound(page, shapeId, [600, 600, 50, 50]);
@@ -282,7 +294,9 @@ test.describe('add element to frame and then move frame', () => {
         await createShapeElement(page, [550, 550], [600, 600], Shape.Square),
       ];
 
-      await clickView(page, [60, 60]);
+      const frameTitles = page.locator('affine-frame-title');
+
+      await frameTitles.nth(0).click();
       await dragBetweenViewCoords(page, [60, 60], [110, 110]);
 
       await assertEdgelessElementBound(page, shapeId, [600, 600, 50, 50]);
@@ -300,7 +314,9 @@ test.describe('resize frame then move ', () => {
     ];
     await pressEscape(page);
 
-    await clickView(page, [60, 60]);
+    const frameTitle = page.locator('affine-frame-title');
+
+    await frameTitle.click();
     await dragBetweenViewCoords(page, [150, 150], [450, 450]);
 
     await dragBetweenViewCoords(page, [60, 60], [110, 110]);
@@ -316,7 +332,9 @@ test.describe('resize frame then move ', () => {
     ];
     await pressEscape(page);
 
-    await clickView(page, [60, 60]);
+    const frameTitle = page.locator('affine-frame-title');
+
+    await frameTitle.click();
     await dragBetweenViewCoords(page, [450, 450], [150, 150]);
 
     await dragBetweenViewCoords(page, [60, 60], [110, 110]);
@@ -331,7 +349,9 @@ test('delete frame', async ({ page }) => {
   await createShapeElement(page, [200, 200], [300, 300], Shape.Square);
   await pressEscape(page);
 
-  await clickView(page, [60, 60]);
+  const frameTitle = page.locator('affine-frame-title');
+
+  await frameTitle.click();
   await pressBackspace(page);
   await expect(page.locator('affine-frame')).toHaveCount(0);
 

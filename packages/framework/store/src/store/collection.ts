@@ -234,6 +234,10 @@ export class DocCollection extends DocCollectionAddonType {
     return this.getDoc(docId, { query }) as Doc;
   }
 
+  dispose() {
+    this.awarenessStore.destroy();
+  }
+
   /**
    * Terminate the data sync process forcefully, which may cause data loss.
    * It is advised to invoke `canGracefulStop` before calling this method.

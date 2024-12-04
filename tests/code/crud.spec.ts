@@ -512,7 +512,7 @@ test('auto scroll horizontally when typing', async ({ page }) => {
   await focusRichText(page);
   await type(page, '``` ');
 
-  for (let i = 0; i < 60; i++) {
+  for (let i = 0; i < 100; i++) {
     await type(page, String(i));
   }
 

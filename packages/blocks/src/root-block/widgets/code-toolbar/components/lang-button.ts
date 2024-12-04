@@ -1,7 +1,9 @@
 import { ArrowDownIcon } from '@blocksuite/affine-components/icons';
+import { unsafeCSSVarV2 } from '@blocksuite/affine-shared/theme';
 import { noop, SignalWatcher, WithDisposable } from '@blocksuite/global/utils';
 import { css, LitElement, nothing } from 'lit';
 import { property, query } from 'lit/decorators.js';
+import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
 
 import type { CodeBlockComponent } from '../../../../code-block/code-block.js';
@@ -16,13 +18,6 @@ export class LanguageListButton extends WithDisposable(
   SignalWatcher(LitElement)
 ) {
   static override styles = css`
-    :host {
-      position: absolute;
-      top: 0;
-      left: 0;
-      z-index: 1;
-    }
-
     .lang-button {
       background-color: var(--affine-background-primary-color);
       box-shadow: var(--affine-shadow-1);
@@ -42,6 +37,12 @@ export class LanguageListButton extends WithDisposable(
     .lang-button-icon {
       display: flex;
       align-items: center;
+      color: ${unsafeCSSVarV2('icon/primary')};
+
+      svg {
+        height: 16px;
+        width: 16px;
+      }
     }
   `;
 
@@ -117,11 +118,22 @@ export class LanguageListButton extends WithDisposable(
   }
 
   override render() {
+    const textStyles = styleMap({
+      fontFamily: 'Inter',
+      fontSize: 'var(--affine-font-xs)',
+      fontStyle: 'normal',
+      fontWeight: '500',
+      lineHeight: '20px',
+      padding: '0 4px',
+    });
+
     return html`<icon-button
       class="lang-button"
       data-testid="lang-button"
       width="auto"
-      text=${this.blockComponent.languageName$.value}
+      .text=${html`<div style=${textStyles}>
+        ${this.blockComponent.languageName$.value}
+      </div>`}
       height="24px"
       @click=${this._clickLangBtn}
       ?disabled=${this.blockComponent.doc.readonly}
@@ -140,10 +152,4 @@ export class LanguageListButton extends WithDisposable(
 
   @property({ attribute: false })
   accessor onActiveStatusChange: (active: boolean) => void = noop;
-}
-
-declare global {
-  interface HTMLElementTagNameMap {
-    'language-list-button': LanguageListButton;
-  }
 }
