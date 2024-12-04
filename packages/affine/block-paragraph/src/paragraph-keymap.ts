@@ -5,11 +5,13 @@ import {
   textKeymap,
 } from '@blocksuite/affine-components/rich-text';
 import { ParagraphBlockSchema } from '@blocksuite/affine-model';
-import { matchFlavours } from '@blocksuite/affine-shared/utils';
+import {
+  calculateCollapsedSiblings,
+  matchFlavours,
+} from '@blocksuite/affine-shared/utils';
 import { KeymapExtension } from '@blocksuite/block-std';
 import { IS_MAC } from '@blocksuite/global/env';
 
-import { calculateCollapsedSiblings } from './paragraph-block.js';
 import { forwardDelete } from './utils/forward-delete.js';
 import { mergeWithPrev } from './utils/merge-with-prev.js';
 

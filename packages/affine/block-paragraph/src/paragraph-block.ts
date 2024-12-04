@@ -1,7 +1,6 @@
 import type { ParagraphBlockModel } from '@blocksuite/affine-model';
 import type { BlockComponent } from '@blocksuite/block-std';
 import type { InlineRangeProvider } from '@blocksuite/inline';
-import type { BlockModel } from '@blocksuite/store';
 
 import { CaptionedBlockComponent } from '@blocksuite/affine-components/caption';
 import {
@@ -15,8 +14,8 @@ import {
 } from '@blocksuite/affine-shared/consts';
 import { DocModeProvider } from '@blocksuite/affine-shared/services';
 import {
+  calculateCollapsedSiblings,
   getViewportElement,
-  matchFlavours,
 } from '@blocksuite/affine-shared/utils';
 import { getInlineRangeProvider } from '@blocksuite/block-std';
 import { effect, signal } from '@preact/signals-core';
@@ -28,40 +27,6 @@ import { styleMap } from 'lit/directives/style-map.js';
 import type { ParagraphBlockService } from './paragraph-service.js';
 
 import { PARAGRAPH_COLLAPSED_CLASS, paragraphBlockStyles } from './styles.js';
-
-export function calculateCollapsedSiblings(
-  model: ParagraphBlockModel
-): BlockModel[] {
-  if (!model.type.startsWith('h')) return [];
-
-  const parent = model.parent;
-  if (!parent) return [];
-  const children = parent.children;
-  const index = children.indexOf(model);
-  if (index === -1) return [];
-
-  const collapsedEdgeIndex = children.findIndex((child, i) => {
-    if (
-      i > index &&
-      matchFlavours(child, ['affine:paragraph']) &&
-      child.type.startsWith('h')
-    ) {
-      const modelLevel = parseInt(model.type.slice(1));
-      const childLevel = parseInt(child.type.slice(1));
-      return childLevel <= modelLevel;
-    }
-    return false;
-  });
-
-  let collapsedSiblings: BlockModel[];
-  if (collapsedEdgeIndex === -1) {
-    collapsedSiblings = children.slice(index + 1);
-  } else {
-    collapsedSiblings = children.slice(index + 1, collapsedEdgeIndex);
-  }
-
-  return collapsedSiblings;
-}
 
 export class ParagraphBlockComponent extends CaptionedBlockComponent<
   ParagraphBlockModel,

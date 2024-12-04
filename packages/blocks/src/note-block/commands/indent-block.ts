@@ -1,7 +1,10 @@
 import type { ListBlockModel } from '@blocksuite/affine-model';
 import type { Command } from '@blocksuite/block-std';
 
-import { matchFlavours } from '@blocksuite/affine-shared/utils';
+import {
+  getNearestHeadingBefore,
+  matchFlavours,
+} from '@blocksuite/affine-shared/utils';
 
 /**
  * @example
@@ -50,6 +53,19 @@ export const indentBlock: Command<
   }
 
   if (stopCapture) doc.captureSync();
+
+  // update collapsed state of affine paragraph
+  const nearestHeading = getNearestHeadingBefore(model);
+  if (
+    nearestHeading &&
+    matchFlavours(nearestHeading, ['affine:paragraph']) &&
+    nearestHeading.collapsed
+  ) {
+    doc.updateBlock(nearestHeading, {
+      collapsed: false,
+    });
+  }
+
   doc.moveBlocks([model], previousSibling);
 
   // update collapsed state of affine list

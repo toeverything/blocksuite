@@ -3,9 +3,10 @@ import {
   ParagraphBlockSchema,
 } from '@blocksuite/affine-model';
 import { DragHandleConfigExtension } from '@blocksuite/affine-shared/services';
-import { matchFlavours } from '@blocksuite/affine-shared/utils';
-
-import { calculateCollapsedSiblings } from './paragraph-block.js';
+import {
+  calculateCollapsedSiblings,
+  matchFlavours,
+} from '@blocksuite/affine-shared/utils';
 
 export const ParagraphDragHandleOption = DragHandleConfigExtension({
   flavour: ParagraphBlockSchema.model.flavour,
