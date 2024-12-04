@@ -574,6 +574,7 @@ test('press backspace at the start of first line when edgeless text exist', asyn
   await waitNextFrame(page);
   await type(page, 'aaa');
 
+  await waitNextFrame(page);
   await switchEditorMode(page);
 
   expect(await getPageSnapshot(page, true)).toMatchSnapshot(

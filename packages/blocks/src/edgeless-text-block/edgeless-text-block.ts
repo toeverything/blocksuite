@@ -93,6 +93,8 @@ export class EdgelessTextBlockComponent extends GfxBlockComponent<EdgelessTextBl
       this.model.propsUpdated.on(({ key }) => {
         this.updateComplete
           .then(() => {
+            if (!this.host) return;
+
             const command = this.host.command;
             const blockSelections = this.model.children.map(child =>
               this.host.selection.create('block', {
