@@ -65,10 +65,13 @@ export class DocsPanel extends WithDisposable(ShadowlessElement) {
   };
 
   gotoDoc = (doc: BlockCollection) => {
-    const url = this.editor.std
-      .get(GenerateDocUrlProvider)
-      .generateDocUrl(doc.id);
-    if (url) history.pushState({}, '', url);
+    const generateDocUrlProvider = this.editor.std.getOptional(
+      GenerateDocUrlProvider
+    );
+    if (generateDocUrlProvider) {
+      const url = generateDocUrlProvider.generateDocUrl(doc.id);
+      if (url) history.pushState({}, '', url);
+    }
 
     this.editor.doc = doc.getDoc();
     this.editor.doc.load();
