@@ -1,6 +1,6 @@
 {
   "name": "@blocksuite/affine-shared",
-  "version": "0.18.1",
+  "version": "0.18.2",
   "description": "Default BlockSuite editable blocks.",
   "type": "module",
   "repository": {
