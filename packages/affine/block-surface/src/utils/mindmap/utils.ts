@@ -452,6 +452,7 @@ export function findTargetNode(
     const layoutDir = mindmap.getLayoutDir(node);
 
     if (
+      layoutDir === LayoutType.BALANCE ||
       (layoutDir === LayoutType.RIGHT &&
         position[0] > node.element.x + node.element.w) ||
       (layoutDir === LayoutType.LEFT && position[0] < node.element.x)
@@ -553,6 +554,7 @@ function showMergeIndicator(
     | { type: 'child'; layoutDir: Exclude<LayoutType, LayoutType.BALANCE> },
   callback: (option: {
     targetMindMap: MindmapElementModel;
+    target: MindmapNode;
     sourceMindMap: MindmapElementModel;
     source: MindmapNode;
     newParent: MindmapNode;
@@ -617,6 +619,7 @@ function showMergeIndicator(
   // hide original connector
   const abortPreview = callback({
     targetMindMap,
+    target: target,
     sourceMindMap,
     source,
     newParent,
@@ -657,6 +660,7 @@ export function tryMoveNode(
   position: IVec,
   callback: (option: {
     targetMindMap: MindmapElementModel;
+    target: MindmapNode;
     sourceMindMap: MindmapElementModel;
     source: MindmapNode;
     newParent: MindmapNode;

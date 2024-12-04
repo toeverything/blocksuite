@@ -1,4 +1,5 @@
 import type { PointerEventState } from '@blocksuite/block-std';
+import type { Bound, IVec } from '@blocksuite/global/utils';
 
 import {
   MindmapUtils,
@@ -16,7 +17,8 @@ import {
   type GfxModel,
   isGfxGroupCompatibleModel,
 } from '@blocksuite/block-std/gfx';
-import { type Bound, type IVec, last } from '@blocksuite/global/utils';
+
+import type { MindMapIndicatorOverlay } from './indicator-overlay.js';
 
 import {
   isMindmapNode,
@@ -24,7 +26,6 @@ import {
 } from '../../../../../_common/edgeless/mindmap/index.js';
 import { DefaultModeDragType, DefaultToolExt, type DragState } from '../ext.js';
 import { calculateResponseArea } from './drag-utils.js';
-import { MindMapIndicatorOverlay } from './indicator-overlay.js';
 
 type DragMindMapCtx = {
   mindmap: MindmapElementModel;
@@ -196,6 +197,7 @@ export class MindMapExt extends DefaultToolExt {
 
   private _drawIndicator(options: {
     targetMindMap: MindmapElementModel;
+    target: MindmapNode;
     sourceMindMap: MindmapElementModel;
     source: MindmapNode;
     newParent: MindmapNode;
@@ -217,52 +219,20 @@ export class MindMapExt extends DefaultToolExt {
     }
 
     // draw the indicator at given position
-    const { newParent, insertPosition, path, targetMindMap, source } = options;
-
-    const direction = insertPosition.layoutDir as Exclude<
-      LayoutType,
-      LayoutType.BALANCE
-    >;
-    const parentBound = newParent.element.elementBound;
-
+    const { newParent, insertPosition, targetMindMap, target, source, path } =
+      options;
     const children = newParent.children.filter(
       node => node.element.id !== source.id
     );
-    const targetIdx = last(path)!;
-    const targetChild = children[targetIdx];
 
-    const lastChild = last(newParent.children);
-
-    const targetPosition =
-      (children.length === 0
-        ? parentBound.moveDelta(
-            NODE_HORIZONTAL_SPACING / 2 + parentBound.w,
-            parentBound.h / 2 - MindMapIndicatorOverlay.INDICATOR_SIZE[1] / 2
-          )
-        : targetChild?.element.elementBound.moveDelta(
-            0,
-            -(
-              NODE_VERTICAL_SPACING / 2 +
-              MindMapIndicatorOverlay.INDICATOR_SIZE[1] / 2
-            )
-          )) ??
-      lastChild!.element.elementBound.moveDelta(
-        0,
-        lastChild!.element.elementBound.h +
-          NODE_VERTICAL_SPACING / 2 -
-          MindMapIndicatorOverlay.INDICATOR_SIZE[1] / 2
-      );
-
-    targetPosition.w = MindMapIndicatorOverlay.INDICATOR_SIZE[0];
-    targetPosition.h = MindMapIndicatorOverlay.INDICATOR_SIZE[1];
-
-    indicatorOverlay.mode = targetMindMap.styleGetter.getNodeStyle(
-      newParent,
-      path
-    ).connector.mode;
-    indicatorOverlay.direction = direction;
-    indicatorOverlay.parentBound = parentBound;
-    indicatorOverlay.targetBound = targetPosition;
+    indicatorOverlay.setIndicatorInfo({
+      targetMindMap,
+      target,
+      parent: newParent,
+      insertPosition,
+      parentChildren: children,
+      path,
+    });
 
     return () => {
       indicatorOverlay.clear();

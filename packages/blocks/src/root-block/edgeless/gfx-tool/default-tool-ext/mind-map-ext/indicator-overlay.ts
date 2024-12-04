@@ -1,10 +1,21 @@
-import { Overlay, PathGenerator } from '@blocksuite/affine-block-surface';
-import { ConnectorMode, LayoutType } from '@blocksuite/affine-model';
+import {
+  NODE_HORIZONTAL_SPACING,
+  NODE_VERTICAL_SPACING,
+  Overlay,
+  PathGenerator,
+} from '@blocksuite/affine-block-surface';
+import {
+  ConnectorMode,
+  LayoutType,
+  type MindmapElementModel,
+  type MindmapNode,
+} from '@blocksuite/affine-model';
 import { ThemeProvider } from '@blocksuite/affine-shared/services';
 import {
   type Bound,
   isVecZero,
   type IVec,
+  last,
   PointLocation,
   toRadian,
   Vec,
@@ -110,6 +121,34 @@ export class MindMapIndicatorOverlay extends Overlay {
     return location;
   }
 
+  /**
+   * Use to calculate the position of the indicator given its sibling's bound
+   * @param siblingBound
+   * @param direction
+   */
+  private _moveRelativeToBound(
+    siblingBound: Bound,
+    direction: 'up' | 'down',
+    layoutDir: Exclude<LayoutType, LayoutType.BALANCE>
+  ) {
+    const isLeftLayout = layoutDir === LayoutType.LEFT;
+    const isUpDirection = direction === 'up';
+
+    return siblingBound.moveDelta(
+      isLeftLayout
+        ? siblingBound.w - MindMapIndicatorOverlay.INDICATOR_SIZE[0]
+        : 0,
+      isUpDirection
+        ? -(
+            NODE_VERTICAL_SPACING / 2 +
+            MindMapIndicatorOverlay.INDICATOR_SIZE[1] / 2
+          )
+        : siblingBound.h +
+            NODE_VERTICAL_SPACING / 2 -
+            MindMapIndicatorOverlay.INDICATOR_SIZE[1] / 2
+    );
+  }
+
   override clear() {
     this.targetBound = null;
     this.parentBound = null;
@@ -160,5 +199,85 @@ export class MindMapIndicatorOverlay extends Overlay {
 
     ctx.stroke();
     ctx.closePath();
+  }
+
+  setIndicatorInfo(options: {
+    targetMindMap: MindmapElementModel;
+    target: MindmapNode;
+    parent: MindmapNode;
+    parentChildren: MindmapNode[];
+    insertPosition:
+      | {
+          type: 'sibling';
+          layoutDir: Exclude<LayoutType, LayoutType.BALANCE>;
+          position: 'prev' | 'next';
+        }
+      | { type: 'child'; layoutDir: Exclude<LayoutType, LayoutType.BALANCE> };
+    path: number[];
+  }) {
+    const {
+      insertPosition,
+      parent,
+      parentChildren,
+      targetMindMap,
+      target,
+      path,
+    } = options;
+
+    const parentBound = parent.element.elementBound;
+    const isBalancedMindMap = targetMindMap.layoutType === LayoutType.BALANCE;
+    const isLeftLayout = insertPosition.layoutDir === LayoutType.LEFT;
+    const isFirstLevel = path.length === 2;
+
+    this.direction = insertPosition.layoutDir;
+    this.parentBound = parentBound;
+
+    if (insertPosition.type === 'sibling') {
+      const targetBound = target.element.elementBound;
+
+      this.targetBound =
+        isBalancedMindMap && isFirstLevel && isLeftLayout
+          ? this._moveRelativeToBound(
+              targetBound,
+              insertPosition.position === 'next' ? 'up' : 'down',
+              insertPosition.layoutDir
+            )
+          : this._moveRelativeToBound(
+              targetBound,
+              insertPosition.position === 'next' ? 'down' : 'up',
+              insertPosition.layoutDir
+            );
+    } else {
+      if (parentChildren.length === 0) {
+        this.targetBound = parentBound.moveDelta(
+          (isLeftLayout ? -1 : 1) *
+            (NODE_HORIZONTAL_SPACING / 2 + parentBound.w),
+          parentBound.h / 2 - MindMapIndicatorOverlay.INDICATOR_SIZE[1] / 2
+        );
+      } else {
+        const lastChildBound = last(parentChildren)!.element.elementBound;
+
+        this.targetBound =
+          isBalancedMindMap && isFirstLevel && isLeftLayout
+            ? this._moveRelativeToBound(
+                lastChildBound,
+                'up',
+                insertPosition.layoutDir
+              )
+            : this._moveRelativeToBound(
+                lastChildBound,
+                'down',
+                insertPosition.layoutDir
+              );
+      }
+    }
+
+    this.targetBound.w = MindMapIndicatorOverlay.INDICATOR_SIZE[0];
+    this.targetBound.h = MindMapIndicatorOverlay.INDICATOR_SIZE[1];
+
+    this.mode = targetMindMap.styleGetter.getNodeStyle(
+      target,
+      options.path
+    ).connector.mode;
   }
 }
