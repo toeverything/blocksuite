@@ -1,5 +1,6 @@
 import type { Text } from '@blocksuite/store';
 
+import { stopPropagation } from '@blocksuite/affine-shared/utils';
 import { ShadowlessElement } from '@blocksuite/block-std';
 import { WithDisposable } from '@blocksuite/global/utils';
 import { css, html } from 'lit';
@@ -145,6 +146,8 @@ export class DatabaseTitle extends WithDisposable(ShadowlessElement) {
         .disabled="${this.readonly}"
         @input="${this.onInput}"
         @keydown="${this.onKeyDown}"
+        @copy="${stopPropagation}"
+        @paste="${stopPropagation}"
         @focus="${this.onFocus}"
         @blur="${this.onBlur}"
         @compositionend="${this.compositionEnd}"

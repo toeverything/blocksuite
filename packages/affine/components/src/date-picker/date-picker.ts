@@ -176,7 +176,19 @@ export class DatePicker extends WithDisposable(LitElement) {
               ${week.map(cell => this._cellRenderer(cell))}
             </div>`
         )}
-      </div>`;
+      </div>
+      ${this.onClear
+        ? html`<div class="date-picker-footer">
+            <button
+              tabindex="0"
+              aria-label="clear"
+              class="footer-button interactive"
+              @click=${() => this.onClear?.()}
+            >
+              Clear
+            </button>
+          </div>`
+        : nothing}`;
   }
 
   /** Week header */
@@ -578,6 +590,9 @@ export class DatePicker extends WithDisposable(LitElement) {
 
   @property({ attribute: false })
   accessor onChange: ((value: Date) => void) | undefined = undefined;
+
+  @property({ attribute: false })
+  accessor onClear: (() => void) | undefined = undefined;
 
   @property({ attribute: false })
   accessor onEscape: ((value: Date) => void) | undefined = undefined;

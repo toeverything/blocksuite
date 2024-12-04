@@ -73,6 +73,8 @@ export class DateCellEditing extends BaseCellRenderer<number> {
     )
       return;
 
+    this.tempValue$.value = this.value ? new Date(this.value) : undefined;
+
     this._prevPortalAbortController?.abort();
     const abortController = new AbortController();
     abortController.signal.addEventListener(
@@ -110,9 +112,12 @@ height: 46px;
             () => {
               const datePicker = new DatePicker();
               datePicker.padding = 0;
-              datePicker.value = this.value ?? Date.now();
+              datePicker.value = this.tempValue$.value?.getTime() ?? Date.now();
               datePicker.onChange = (date: Date) => {
                 this.tempValue$.value = date;
+              };
+              datePicker.onClear = () => {
+                this.tempValue$.value = undefined;
               };
               datePicker.onEscape = () => {
                 abortController.abort();
@@ -140,8 +145,11 @@ height: 46px;
         },
         template: () => {
           const datePicker = new DatePicker();
-          datePicker.value = this.value ?? Date.now();
+          datePicker.value = this.tempValue$.value?.getTime() ?? Date.now();
           datePicker.popup = true;
+          datePicker.onClear = () => {
+            this.tempValue$.value = undefined;
+          };
           datePicker.onChange = (date: Date) => {
             this.tempValue$.value = date;
           };
@@ -161,19 +169,24 @@ height: 46px;
   };
 
   private updateValue = () => {
-    const tempValue = this.tempValue;
-    if (!tempValue) {
+    const tempValue = this.tempValue$.value;
+    const currentValue = this.value;
+
+    if (
+      (!tempValue && !currentValue) ||
+      (tempValue && currentValue && tempValue.getTime() === currentValue)
+    ) {
       return;
     }
 
-    this.onChange(tempValue.getTime());
+    this.onChange(tempValue?.getTime());
     this.tempValue$.value = undefined;
   };
 
   tempValue$ = signal<Date>();
 
   get dateString() {
-    const value = this.tempValue ?? this.value;
+    const value = this.tempValue;
     return value ? format(value, 'yyyy/MM/dd') : '';
   }
 
