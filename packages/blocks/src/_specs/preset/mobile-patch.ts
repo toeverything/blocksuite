@@ -6,10 +6,13 @@ import {
 } from '@blocksuite/affine-components/rich-text';
 import {
   type BlockStdScope,
+  ConfigIdentifier,
   LifeCycleWatcher,
   WidgetViewMapIdentifier,
   type WidgetViewMapType,
 } from '@blocksuite/block-std';
+
+import type { CodeBlockConfig } from '../../code-block/code-block-config.js';
 
 import { pageRootWidgetViewMap } from '../../root-block/page/page-root-spec.js';
 import { AFFINE_EMBED_CARD_TOOLBAR_WIDGET } from '../../root-block/widgets/embed-card-toolbar/embed-card-toolbar.js';
@@ -37,6 +40,18 @@ export class MobileSpecsPatches extends LifeCycleWatcher {
           ...prev?.(provider),
           hidePopup: true,
         } satisfies ReferenceNodeConfig;
+      });
+    }
+
+    // Hide number lines for code block on mobile.
+    {
+      const codeConfigIdentifier = ConfigIdentifier('affine:code');
+      const prev = di.getFactory(codeConfigIdentifier);
+      di.override(codeConfigIdentifier, provider => {
+        return {
+          ...prev?.(provider),
+          showLineNumbers: false,
+        } satisfies CodeBlockConfig;
       });
     }
 
