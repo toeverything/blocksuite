@@ -1,5 +1,4 @@
 import { BlockModel, defineBlockSchema, type Text } from '@blocksuite/store';
-import { effect } from '@preact/signals-core';
 
 export type ParagraphType =
   | 'text'
@@ -42,21 +41,6 @@ export class ParagraphBlockModel extends BlockModel<ParagraphProps> {
   override flavour!: 'affine:paragraph';
 
   override text!: Text;
-
-  constructor() {
-    super();
-
-    this.created.once(() => {
-      this.deleted.once(
-        effect(() => {
-          const type = this.type$.value;
-          if (!type.startsWith('h')) {
-            this.collapsed$.value = false;
-          }
-        })
-      );
-    });
-  }
 }
 
 declare global {

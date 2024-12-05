@@ -6,8 +6,6 @@ import { matchFlavours } from '../model/checker.js';
 export function calculateCollapsedSiblings(
   model: ParagraphBlockModel
 ): BlockModel[] {
-  if (!model.type.startsWith('h')) return [];
-
   const parent = model.parent;
   if (!parent) return [];
   const children = parent.children;

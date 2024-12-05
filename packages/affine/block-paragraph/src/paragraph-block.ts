@@ -141,7 +141,15 @@ export class ParagraphBlockComponent extends CaptionedBlockComponent<
     this.disposables.add(
       effect(() => {
         const collapsed = this.model.collapsed$.value;
+        const type = this.model.type$.value;
+
         this._readonlyCollapsed = collapsed;
+
+        if (!type.startsWith('h')) {
+          this.doc.updateBlock(this.model, {
+            collapsed: false,
+          });
+        }
 
         const collapsedSiblings = calculateCollapsedSiblings(this.model);
         collapsedSiblings.forEach(sibling => {
