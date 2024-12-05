@@ -184,6 +184,11 @@ export class EdgelessFrameOrderMenu extends WithDisposable(LitElement) {
     });
   }
 
+  override disconnectedCallback(): void {
+    super.disconnectedCallback();
+    this._disposables.dispose();
+  }
+
   override firstUpdated() {
     this._bindEvent();
   }
