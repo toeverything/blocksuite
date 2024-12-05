@@ -17,7 +17,7 @@ test.describe('lock', () => {
     await edgelessCommonSetup(page);
   });
 
-  test('the selected rect of locked element should contains descendant. unlocking will recover', async ({
+  test('the selected rect of locked element should contain descendant. unlocking will recover', async ({
     page,
   }) => {
     await edgelessCommonSetup(page);
@@ -86,7 +86,7 @@ test.describe('lock', () => {
     await edgelessCommonSetup(page);
   });
 
-  test('unlocking a element should not unlock its locked descendant', async ({
+  test('unlocking an element should not unlock its locked descendant', async ({
     page,
   }) => {
     await edgelessCommonSetup(page);
