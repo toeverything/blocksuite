@@ -1,6 +1,6 @@
 {
   "name": "@blocksuite/affine",
-  "version": "0.18.2",
+  "version": "0.18.3",
   "description": "BlockSuite for Affine",
   "type": "module",
   "repository": {
