@@ -144,6 +144,7 @@ export class EditorHost extends SignalWatcher(
     super.disconnectedCallback();
     this.std.unmount();
     this.slots.unmounted.emit();
+    this.slots.unmounted.dispose();
   }
 
   override async getUpdateComplete(): Promise<boolean> {

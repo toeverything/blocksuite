@@ -48,6 +48,11 @@ export class BlockSelection extends SignalWatcher(LitElement) {
     this.style.borderWidth = `${this.borderWidth}px`;
   }
 
+  override disconnectedCallback() {
+    super.disconnectedCallback();
+    this.block = null as unknown as BlockComponent; // force gc
+  }
+
   protected override updated(_changedProperties: PropertyValues): void {
     super.updated(_changedProperties);
     this.style.display = this.block.selected?.is('block') ? 'block' : 'none';

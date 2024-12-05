@@ -4,8 +4,9 @@ import {
   FlavourExtension,
   WidgetViewMapExtension,
 } from '@blocksuite/block-std';
-import { literal } from 'lit/static-html.js';
+import { literal, unsafeStatic } from 'lit/static-html.js';
 
+import { AFFINE_CODE_TOOLBAR_WIDGET } from '../root-block/widgets/code-toolbar/index.js';
 import {
   CodeBlockInlineManagerExtension,
   CodeBlockUnitSpecExtension,
@@ -17,8 +18,7 @@ export const CodeBlockSpec: ExtensionType[] = [
   CodeBlockService,
   BlockViewExtension('affine:code', literal`affine-code`),
   WidgetViewMapExtension('affine:code', {
-    codeToolbar: literal`affine-code-toolbar-widget`,
-    codeLangList: literal`affine-code-language-list-widget`,
+    codeToolbar: literal`${unsafeStatic(AFFINE_CODE_TOOLBAR_WIDGET)}`,
   }),
   CodeBlockInlineManagerExtension,
   CodeBlockUnitSpecExtension,

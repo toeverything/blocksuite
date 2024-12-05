@@ -26,7 +26,8 @@ export class CodeBlockToolbarContext extends MenuContext {
 
   constructor(
     public blockComponent: CodeBlockComponent,
-    public abortController: AbortController
+    public abortController: AbortController,
+    public setActive: (active: boolean) => void
   ) {
     super();
   }

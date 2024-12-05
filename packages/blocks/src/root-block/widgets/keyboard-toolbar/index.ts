@@ -52,6 +52,7 @@ export class AffineKeyboardToolbarWidget extends WidgetComponent<
     if (!this.block.rootComponent) return nothing;
 
     return html`<blocksuite-portal
+      .shadowDom=${false}
       .template=${html`<affine-keyboard-toolbar
         .config=${this.config}
         .rootComponent=${this.block.rootComponent}

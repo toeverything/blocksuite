@@ -4,7 +4,9 @@ import type SlTabPanel from '@shoelace-style/shoelace/dist/components/tab-panel/
 import { ShadowlessElement } from '@blocksuite/block-std';
 import '@shoelace-style/shoelace/dist/components/tab-panel/tab-panel.js';
 import {
-  docLinkBaseURLMiddleware,
+  defaultImageProxyMiddleware,
+  docLinkBaseURLMiddlewareBuilder,
+  embedSyncedDocMiddleware,
   HtmlAdapter,
   MarkdownAdapter,
   PlainTextAdapter,
@@ -60,9 +62,15 @@ export class AdaptersPanel extends WithDisposable(ShadowlessElement) {
   }
 
   private _createJob() {
+    console.log('collection', this.doc.collection.id, this.doc.id);
     return new Job({
       collection: this.doc.collection,
-      middlewares: [docLinkBaseURLMiddleware, titleMiddleware],
+      middlewares: [
+        docLinkBaseURLMiddlewareBuilder('https://example.com').get(),
+        titleMiddleware,
+        embedSyncedDocMiddleware('content'),
+        defaultImageProxyMiddleware,
+      ],
     });
   }
 

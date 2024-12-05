@@ -36,6 +36,9 @@ export class BlockCaptionEditor<
       font-size: var(--affine-font-sm);
       font-family: inherit;
       text-align: center;
+      field-sizing: content;
+      padding: 0;
+      margin-top: 4px;
     }
     .block-caption-editor::placeholder {
       color: var(--affine-placeholder-color);

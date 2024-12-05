@@ -19,14 +19,10 @@ export const embedLinkedDocBlockMarkdownAdapterMatcher: BlockMarkdownAdapterMatc
           return;
         }
         const title = configs.get('title:' + o.node.props.pageId) ?? 'untitled';
-        const { mode, blockIds, elementIds } = o.node.props;
-        const baseUrl = configs.get('docLinkBaseUrl') ?? '';
-        const search = toURLSearchParams({
-          mode: mode as string,
-          blockIds: blockIds as string[],
-          elementIds: elementIds as string[],
-        });
+        const params = o.node.props.params ?? {};
+        const search = toURLSearchParams(params);
         const query = search?.size ? `?${search.toString()}` : '';
+        const baseUrl = configs.get('docLinkBaseUrl') ?? '';
         const url = baseUrl ? `${baseUrl}/${o.node.props.pageId}${query}` : '';
         walkerContext
           .openNode(

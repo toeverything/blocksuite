@@ -92,6 +92,11 @@ export class EdgelessNavigatorSettingButton extends WithDisposable(LitElement) {
     this._tryRestoreSettings();
   }
 
+  override disconnectedCallback(): void {
+    this._navigatorSettingPopper?.dispose();
+    this._navigatorSettingPopper = null;
+  }
+
   override firstUpdated() {
     this._navigatorSettingPopper = createButtonPopper(
       this._navigatorSettingButton,
