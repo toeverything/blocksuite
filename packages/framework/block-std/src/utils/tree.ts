@@ -1,7 +1,4 @@
 import type { Doc } from '@blocksuite/store';
-import type { Signal } from '@preact/signals-core';
-
-import { assertType } from '@blocksuite/global/utils';
 
 import type { GfxCompatibleInterface } from '../gfx/index.js';
 import type { GfxGroupModel, GfxModel } from '../gfx/model/model.js';
@@ -14,20 +11,20 @@ import {
 /**
  * Get the top elements from the list of elements, which are in some tree structures.
  *
- * For example: a list `[C1, E1, C2, E2, E2, E3, E4, C4, E6]`,
+ * For example: a list `[G1, E1, G2, E2, E3, E4, G4, E5, E6]`,
  * and they are in the elements tree like:
  * ```
- *     C1         C4      E6
+ *     G1         G4      E6
  *    /  \        |
- *  E1   C2       E5
+ *  E1   G2       E5
  *       / \
- *      E2  C3*
+ *      E2  G3*
  *         / \
  *        E3 E4
  * ```
  * where the star symbol `*` denote it is not in the list.
  *
- * The result should be `[F1, F2, E6, E3, E4]`.
+ * The result should be `[G1, G4, E6]`
  */
 export function getTopElements(elements: GfxModel[]): GfxModel[] {
   const results = new Set(elements);
@@ -121,11 +118,6 @@ export function isLockedByAncestorImpl(
 }
 
 export function isLockedBySelfImpl(element: GfxCompatibleInterface): boolean {
-  // This is a workaround for reactive rendering
-  if (`lockedBySelf$` in element) {
-    assertType<Signal<boolean>>(element.lockedBySelf$);
-    return element.lockedBySelf$.value ?? false;
-  }
   return element.lockedBySelf ?? false;
 }
 

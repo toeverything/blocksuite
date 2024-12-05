@@ -136,6 +136,9 @@ export abstract class GfxPrimitiveElementModel<
     return this.surface.getGroup(this.id);
   }
 
+  /**
+   * Return the ancestor elements in order from the most recent to the earliest.
+   */
   get groups(): GfxGroupModel[] {
     return this.surface.getGroups(this.id);
   }

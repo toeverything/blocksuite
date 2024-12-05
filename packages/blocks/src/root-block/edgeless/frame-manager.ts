@@ -248,6 +248,8 @@ export class EdgelessFrameManager extends GfxExtension {
    * Reset parent of elements to the frame
    */
   addElementsToFrame(frame: FrameBlockModel, elements: GfxModel[]) {
+    if (frame.isLocked()) return;
+
     if (frame.childElementIds === undefined) {
       this._addChildrenToLegacyFrame(frame);
     }
