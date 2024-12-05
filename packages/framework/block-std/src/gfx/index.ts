@@ -49,10 +49,10 @@ export {
 export {
   type BaseElementProps,
   GfxGroupLikeElementModel,
-  GfxLocalElementModel,
   GfxPrimitiveElementModel,
   type SerializedElement,
 } from './model/surface/element-model.js';
+export { GfxLocalElementModel } from './model/surface/local-element-model.js';
 export {
   SurfaceBlockModel,
   type SurfaceBlockProps,

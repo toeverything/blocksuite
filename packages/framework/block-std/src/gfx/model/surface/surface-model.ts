@@ -4,6 +4,7 @@ import { assertType, type Constructor, Slot } from '@blocksuite/global/utils';
 import { BlockModel, DocCollection, nanoid } from '@blocksuite/store';
 
 import type { GfxGroupModel, GfxModel } from '../model.js';
+import type { GfxLocalElementModel } from './local-element-model.js';
 
 import {
   type GfxGroupCompatibleInterface,
@@ -76,6 +77,12 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
   }>();
 
   elementUpdated = new Slot<ElementUpdatedData>();
+
+  localElementAdded = new Slot<GfxLocalElementModel>();
+
+  localElementDeleted = new Slot<GfxLocalElementModel>();
+
+  protected localElements = new Set<GfxLocalElementModel>();
 
   get elementModels() {
     const models: GfxPrimitiveElementModel[] = [];
@@ -438,6 +445,11 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
     return id;
   }
 
+  addLocalElement(elem: GfxLocalElementModel) {
+    this.localElements.add(elem);
+    this.localElementAdded.emit(elem);
+  }
+
   applyMiddlewares(middlewares: SurfaceMiddleware[]) {
     this._middlewares = middlewares;
   }
@@ -470,6 +482,12 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
 
       this.elements.getValue()!.delete(id);
     });
+  }
+
+  deleteLocalElement(elem: GfxLocalElementModel) {
+    if (this.localElements.delete(elem)) {
+      this.localElementDeleted.emit(elem);
+    }
   }
 
   override dispose(): void {
