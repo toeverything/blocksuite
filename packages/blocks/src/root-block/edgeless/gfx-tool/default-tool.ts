@@ -67,7 +67,7 @@ import {
 } from '../utils/text.js';
 import { fitToScreen } from '../utils/viewport.js';
 import { DefaultModeDragType } from './default-tool-ext/ext.js';
-import { MindMapExt } from './default-tool-ext/mind-map-ext.js';
+import { MindMapExt } from './default-tool-ext/mind-map-ext/mind-map-ext.js';
 
 export class DefaultTool extends BaseTool {
   static override toolName: string = 'default';
@@ -546,7 +546,10 @@ export class DefaultTool extends BaseTool {
     });
   }
 
-  private initializeDragState(dragType: DefaultModeDragType) {
+  private initializeDragState(
+    dragType: DefaultModeDragType,
+    event: PointerEventState
+  ) {
     this.dragType = dragType;
 
     if (
@@ -572,6 +575,7 @@ export class DefaultTool extends BaseTool {
     const ctx = {
       movedElements: this._toBeMoved,
       dragType,
+      event,
     };
 
     this._extHandlers = this._exts.map(ext => ext.initDrag(ctx));
@@ -884,6 +888,7 @@ export class DefaultTool extends BaseTool {
       case DefaultModeDragType.AltCloning:
       case DefaultModeDragType.ContentMoving: {
         if (
+          this._toBeMoved.length &&
           this._toBeMoved.every(ele => {
             return !this._isDraggable(ele);
           })
@@ -949,7 +954,7 @@ export class DefaultTool extends BaseTool {
     );
 
     // Set up drag state
-    this.initializeDragState(dragType);
+    this.initializeDragState(dragType, e);
 
     // stash the state
     this._toBeMoved.forEach(ele => {
