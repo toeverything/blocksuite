@@ -7,16 +7,13 @@ import type {
   GfxBlockComponent,
   SurfaceSelection,
 } from '@blocksuite/block-std';
+import type { GfxViewportElement } from '@blocksuite/block-std/gfx';
 
 import {
   FontLoaderService,
   ThemeProvider,
 } from '@blocksuite/affine-shared/services';
 import { BlockComponent } from '@blocksuite/block-std';
-import {
-  GfxBlockElementModel,
-  type GfxViewportElement,
-} from '@blocksuite/block-std/gfx';
 import { assertExists } from '@blocksuite/global/utils';
 import { css, html } from 'lit';
 import { query, state } from 'lit/decorators.js';
@@ -225,10 +222,9 @@ export class EdgelessRootPreviewBlockComponent extends BlockComponent<
           .getModelsInViewport=${() => {
             const blocks = this.service.gfx.grid.search(
               this.service.viewport.viewportBounds,
-              undefined,
               {
                 useSet: true,
-                filter: model => model instanceof GfxBlockElementModel,
+                filter: ['block'],
               }
             );
             return blocks;
