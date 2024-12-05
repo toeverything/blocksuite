@@ -1,5 +1,25 @@
 # @blocksuite/affine-model
 
+## 0.18.3
+
+### Patch Changes
+
+- 3448094: ## Fix
+
+  - fix(database): storage should be accessed via globalThis (#8863)
+  - fix(edgeless): memory leak in edgeless widgets (#8862)
+  - fix: page switching under starter route (#8860)
+
+  ## Refactor
+
+  - refactor(blocks): shadowless keyboard toolbar (#8864)
+
+- Updated dependencies [3448094]
+  - @blocksuite/block-std@0.18.3
+  - @blocksuite/global@0.18.3
+  - @blocksuite/inline@0.18.3
+  - @blocksuite/store@0.18.3
+
 ## 0.18.2
 
 ### Patch Changes
