@@ -33,8 +33,7 @@ const TAIL_RESPONSE_AREA = NODE_HORIZONTAL_SPACING;
 const fillResponseArea = (
   node: MindmapNode,
   layoutType: LayoutType,
-  parent: MindmapNode | null,
-  children = node.children ?? []
+  parent: MindmapNode | null
 ) => {
   // root node
   if (!parent) {
@@ -61,54 +60,57 @@ const fillResponseArea = (
         fillResponseArea(child, LayoutType.LEFT, node);
       });
     } else {
-      children.forEach(child => {
+      node.children.forEach(child => {
         fillResponseArea(child, layoutType, node);
       });
     }
     return;
-  }
+  } else {
+    const nodeBound = node.element.elementBound;
+    const idx = parent.children.indexOf(node) ?? -1;
+    const isLast =
+      idx === (parent.children.length || -1) - 1 && isOnEdge(node, 'tail');
+    const isFirst = idx === 0 && isOnEdge(node, 'head');
+    const upperSpacing = isFirst
+      ? NODE_VERTICAL_SPACING * 2
+      : NODE_VERTICAL_SPACING / 2;
+    const lowerSpacing = isLast
+      ? NODE_VERTICAL_SPACING * 2
+      : NODE_VERTICAL_SPACING / 2;
 
-  const nodeBound = node.element.elementBound;
-  const idx = children.indexOf(node) ?? -1;
-  const isLast = idx === (children.length || -1) - 1 && isOnEdge(node, 'tail');
-  const isFirst = idx === 0 && isOnEdge(node, 'head');
-  const upperSpacing = isFirst
-    ? NODE_VERTICAL_SPACING * 2
-    : NODE_VERTICAL_SPACING / 2;
-  const lowerSpacing = isLast
-    ? NODE_VERTICAL_SPACING * 2
-    : NODE_VERTICAL_SPACING / 2;
+    const h = nodeBound.h + upperSpacing + lowerSpacing;
+    const w =
+      (layoutType === LayoutType.RIGHT
+        ? node.element.x +
+          node.element.w -
+          (parent.element.x + parent.element.w)
+        : parent.element.x - node.element.x) + TAIL_RESPONSE_AREA;
 
-  const h = nodeBound.h + upperSpacing + lowerSpacing;
-  const w =
-    (layoutType === LayoutType.RIGHT
-      ? node.element.x + node.element.w - (parent.element.x + parent.element.w)
-      : parent.element.x - node.element.x) + TAIL_RESPONSE_AREA;
+    node.responseArea = new Bound(
+      layoutType === LayoutType.RIGHT
+        ? parent.element.x + parent.element.w
+        : parent.element.x - w,
+      node.element.y - upperSpacing,
+      w,
+      h
+    );
 
-  node.responseArea = new Bound(
-    layoutType === LayoutType.RIGHT
-      ? parent.element.x + parent.element.w
-      : parent.element.x - w,
-    node.element.y - upperSpacing,
-    w,
-    h
-  );
+    if (node.children.length > 0) {
+      let responseArea: Bound;
 
-  if (children.length > 0) {
-    let responseArea: Bound;
+      node.children.forEach(child => {
+        fillResponseArea(child, layoutType, node);
 
-    children.forEach(child => {
-      fillResponseArea(child, layoutType, node);
+        if (responseArea) {
+          responseArea = responseArea.unite(child.responseArea!);
+        } else {
+          responseArea = child.responseArea!;
+        }
+      });
 
-      if (responseArea) {
-        responseArea = responseArea.unite(child.responseArea!);
-      } else {
-        responseArea = child.responseArea!;
-      }
-    });
-
-    node.responseArea.h = responseArea!.h;
-    node.responseArea.y = responseArea!.y;
+      node.responseArea.h = responseArea!.h;
+      node.responseArea.y = responseArea!.y;
+    }
   }
 };
 
@@ -177,7 +179,7 @@ export const calculateResponseArea = (mindmap: MindmapElementModel) => {
       break;
     case LayoutType.BALANCE:
       {
-        fillResponseArea(tree, LayoutType.BALANCE, null, tree.left);
+        fillResponseArea(tree, LayoutType.BALANCE, null);
         balanceLeftRightResponseArea(tree);
       }
       break;

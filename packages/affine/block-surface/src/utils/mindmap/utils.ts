@@ -578,6 +578,7 @@ function showMergeIndicator(
   }
 
   const path = targetMindMap.getPath(newParent);
+  const curPath = sourceMindMap.getPath(source.id);
 
   if (insertPosition.type === 'sibling') {
     const curPath = targetMindMap.getPath(target.id);
@@ -603,14 +604,6 @@ function showMergeIndicator(
     path.push(target.children.length);
   }
 
-  if (targetMindMap === sourceMindMap) {
-    const curPath = sourceMindMap.getPath(source.id);
-
-    if (isEqual(path, curPath)) {
-      return null;
-    }
-  }
-
   // hide original connector
   const abortPreview = callback({
     targetMindMap,
@@ -628,6 +621,11 @@ function showMergeIndicator(
 
   const merge = () => {
     abort();
+
+    if (targetMindMap === sourceMindMap && isEqual(path, curPath)) {
+      return;
+    }
+
     moveNode(sourceMindMap, source, targetMindMap, newParent, last(path)!);
   };
 

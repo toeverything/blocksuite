@@ -44,6 +44,11 @@ export class MindMapExt extends DefaultToolExt {
     ) as MindMapIndicatorOverlay | null;
   }
 
+  private _calcDragResponseArea(mindmap: MindmapElementModel) {
+    calculateResponseArea(mindmap);
+    this._responseAreaUpdated.add(mindmap);
+  }
+
   /**
    * Create handlers that can drag and drop mind map nodes
    * @param dragMindMapCtx
@@ -85,64 +90,75 @@ export class MindMapExt extends DefaultToolExt {
           node: hoveredNode,
         };
 
-        const layoutDragNode = () => {
-          // const layoutType: LayoutType = dragMindMapCtx.mindmap.getLayoutDir(
-          //   dragMindMapCtx.node
-          // );
-
-          // dragMindMapCtx.mindmap.layout(dragMindMapCtx.node, {
-          //   layoutType,
-          //   calculateTreeBound: false,
-          // });
-
-          // return () => {
-          //   delete dragMindMapCtx.node.overriddenDir;
-          // };
-
-          return () => {};
-        };
-
+        // 1. not hovered on any mind map or
+        // 2. hovered on the other mind map but not on any node
+        // then consider user is trying to detach the node
         if (
-          hoveredMindMap &&
-          hoveredNode &&
-          !MindmapUtils.containsNode(
-            hoveredMindMap,
-            hoveredNode,
-            dragMindMapCtx.node
-          )
+          !hoveredMindMap ||
+          (hoveredMindMap !== dragMindMapCtx.mindmap && !hoveredNode)
         ) {
-          const operation = MindmapUtils.tryMoveNode(
-            hoveredMindMap,
-            hoveredNode,
+          hoveredCtx.detach = true;
+
+          const reset = (hoveredCtx.abort = MindmapUtils.hideNodeConnector(
             dragMindMapCtx.mindmap,
-            dragMindMapCtx.node,
-            [x, y],
-            options => this._drawIndicator(options)
-          );
+            dragMindMapCtx.node
+          ));
 
-          if (operation) {
-            hoveredCtx.abort = operation.abort;
-            hoveredCtx.merge = operation.merge;
-          } else {
-            hoveredCtx.abort = layoutDragNode();
-          }
+          hoveredCtx.abort = () => {
+            reset?.();
+          };
         } else {
-          const clearDragState = layoutDragNode();
-
-          if (!hoveredCtx.mindmap) {
-            hoveredCtx.detach = true;
-
-            const reset = (hoveredCtx.abort = MindmapUtils.hideNodeConnector(
-              dragMindMapCtx.mindmap,
+          // hovered on the currently dragging mind map but
+          // 1. not hovered on any node or
+          // 2. hovered on the node that is itself or its children (which is not allowed)
+          // then consider user is trying to drop the node to its original position
+          if (
+            !hoveredNode ||
+            MindmapUtils.containsNode(
+              hoveredMindMap,
+              hoveredNode,
               dragMindMapCtx.node
-            ));
+            )
+          ) {
+            const { mindmap, node } = dragMindMapCtx;
 
-            hoveredCtx.abort = () => {
-              reset?.();
-              clearDragState();
-            };
+            // if the node is the root node, then do nothing
+            if (node === mindmap.tree) {
+              return;
+            }
+
+            const nodeBound = node.element.elementBound;
+
+            hoveredCtx.abort = this._drawIndicator({
+              targetMindMap: mindmap,
+              target: node,
+              sourceMindMap: mindmap,
+              source: node,
+              newParent: node.parent!,
+              insertPosition: {
+                type: 'sibling',
+                layoutDir: mindmap.getLayoutDir(node) as Exclude<
+                  LayoutType,
+                  LayoutType.BALANCE
+                >,
+                position: y > nodeBound.y + nodeBound.h / 2 ? 'next' : 'prev',
+              },
+              path: mindmap.getPath(node),
+            });
           } else {
-            hoveredCtx.abort = clearDragState;
+            const operation = MindmapUtils.tryMoveNode(
+              hoveredMindMap,
+              hoveredNode,
+              dragMindMapCtx.mindmap,
+              dragMindMapCtx.node,
+              [x, y],
+              options => this._drawIndicator(options)
+            );
+
+            if (operation) {
+              hoveredCtx.abort = operation.abort;
+              hoveredCtx.merge = operation.merge;
+            }
           }
         }
       },
@@ -172,11 +188,6 @@ export class MindMapExt extends DefaultToolExt {
         hoveredCtx = null;
         dragMindMapCtx.clear?.();
         this._responseAreaUpdated.clear();
-
-        if (this._indicatorOverlay) {
-          this._indicatorOverlay.dragNodeImage = null;
-          this._indicatorOverlay.currentDragPos = null;
-        }
       },
     };
   }
@@ -280,8 +291,7 @@ export class MindMapExt extends DefaultToolExt {
       mindmap &&
       (!this._responseAreaUpdated.has(mindmap) || !mindmap.tree.responseArea)
     ) {
-      calculateResponseArea(mindmap);
-      this._responseAreaUpdated.add(mindmap);
+      this._calcDragResponseArea(mindmap);
     }
 
     return mindmap;
@@ -312,6 +322,11 @@ export class MindMapExt extends DefaultToolExt {
 
     indicatorOverlay.dragNodePos = [nodeBound.x - pos[0], nodeBound.y - pos[1]];
     indicatorOverlay.dragNodeImage = canvas;
+
+    return () => {
+      indicatorOverlay.dragNodeImage = null;
+      indicatorOverlay.currentDragPos = null;
+    };
   }
 
   private _updateNodeOpacity(
@@ -369,17 +384,20 @@ export class MindMapExt extends DefaultToolExt {
       mindmapBound.w += NODE_HORIZONTAL_SPACING * 2;
       mindmapBound.h += NODE_VERTICAL_SPACING * 4;
 
-      calculateResponseArea(mindmap);
-      this._responseAreaUpdated.add(mindmap);
+      this._calcDragResponseArea(mindmap);
 
-      this._setupDragNodeImage(mindmapNode, dragState.event);
-
+      const clearDragImage = this._setupDragNodeImage(
+        mindmapNode,
+        dragState.event
+      );
       const clearOpacity = this._updateNodeOpacity(mindmap, mindmapNode);
+
       const mindMapDragCtx: DragMindMapCtx = {
         mindmap,
         node: mindmapNode,
         clear: () => {
           clearOpacity();
+          clearDragImage?.();
         },
         originalMindMapBound: mindmapBound,
       };
