@@ -188,7 +188,8 @@ export function mockGenerateDocUrlService(collection: DocCollection) {
       const doc = collection.getDoc(docId);
       if (!doc) return;
 
-      const url = new URL(location.origin);
+      const url = new URL(location.pathname, location.origin);
+      url.search = location.search;
       if (params) {
         const search = url.searchParams;
         for (const [key, value] of Object.entries(params)) {
