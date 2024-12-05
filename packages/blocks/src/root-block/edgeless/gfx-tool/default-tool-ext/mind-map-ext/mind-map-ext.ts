@@ -33,6 +33,7 @@ type DragMindMapCtx = {
   node: MindmapNode;
   clear?: () => void;
   originalMindMapBound: Bound;
+  startPoint: PointerEventState;
 };
 
 export class MindMapExt extends DefaultToolExt {
@@ -162,26 +163,40 @@ export class MindMapExt extends DefaultToolExt {
           }
         }
       },
-      dragEnd: () => {
+      dragEnd: (e: PointerEventState) => {
         if (hoveredCtx?.merge) {
           hoveredCtx.merge();
         } else {
           hoveredCtx?.abort?.();
 
-          if (
-            hoveredCtx?.detach &&
-            dragMindMapCtx.node !== dragMindMapCtx.mindmap.tree
-          ) {
-            MindmapUtils.detachMindmap(
-              dragMindMapCtx.mindmap,
-              dragMindMapCtx.node
+          if (hoveredCtx?.detach) {
+            const [startX, startY] = this.gfx.viewport.toModelCoord(
+              dragMindMapCtx.startPoint.x,
+              dragMindMapCtx.startPoint.y
             );
-            MindmapUtils.createFromTree(
-              dragMindMapCtx.node,
-              dragMindMapCtx.mindmap.style,
-              dragMindMapCtx.mindmap.layoutType,
-              this.gfx.surface!
-            );
+            const [endX, endY] = this.gfx.viewport.toModelCoord(e.x, e.y);
+
+            dragMindMapCtx.node.element.xywh =
+              dragMindMapCtx.node.element.elementBound
+                .moveDelta(endX - startX, endY - startY)
+                .serialize();
+
+            if (dragMindMapCtx.node !== dragMindMapCtx.mindmap.tree) {
+              MindmapUtils.detachMindmap(
+                dragMindMapCtx.mindmap,
+                dragMindMapCtx.node
+              );
+              const mindmap = MindmapUtils.createFromTree(
+                dragMindMapCtx.node,
+                dragMindMapCtx.mindmap.style,
+                dragMindMapCtx.mindmap.layoutType,
+                this.gfx.surface!
+              );
+
+              mindmap.layout();
+            } else {
+              dragMindMapCtx.mindmap.layout();
+            }
           }
         }
 
@@ -400,6 +415,7 @@ export class MindMapExt extends DefaultToolExt {
           clearDragImage?.();
         },
         originalMindMapBound: mindmapBound,
+        startPoint: dragState.event,
       };
 
       return this._createManipulationHandlers(mindMapDragCtx);
