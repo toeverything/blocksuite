@@ -1,4 +1,10 @@
-import type { GfxModel } from '../gfx/model/model.js';
+import type { Doc } from '@blocksuite/store';
+import type { Signal } from '@preact/signals-core';
+
+import { assertType } from '@blocksuite/global/utils';
+
+import type { GfxCompatibleInterface } from '../gfx/index.js';
+import type { GfxGroupModel, GfxModel } from '../gfx/model/model.js';
 
 import {
   type GfxGroupCompatibleInterface,
@@ -68,18 +74,6 @@ function traverse(
   innerTraverse(element);
 }
 
-export function getAncestorContainersImpl(element: GfxModel) {
-  const containers: GfxGroupCompatibleInterface[] = [];
-
-  let container = element.group;
-  while (container) {
-    containers.push(container);
-    container = container.group;
-  }
-
-  return containers;
-}
-
 export function descendantElementsImpl(
   container: GfxGroupCompatibleInterface
 ): GfxModel[] {
@@ -108,7 +102,7 @@ export function hasDescendantElementImpl(
  * This checker is used to prevent circular reference, when adding a child element to a container.
  */
 export function canSafeAddToContainer(
-  container: GfxGroupCompatibleInterface & GfxModel,
+  container: GfxGroupModel,
   element: GfxModel
 ) {
   if (
@@ -118,4 +112,35 @@ export function canSafeAddToContainer(
     return false;
   }
   return true;
+}
+
+export function isLockedByAncestorImpl(
+  element: GfxCompatibleInterface
+): boolean {
+  return element.groups.some(isLockedBySelfImpl);
+}
+
+export function isLockedBySelfImpl(element: GfxCompatibleInterface): boolean {
+  // This is a workaround for reactive rendering
+  if (`lockedBySelf$` in element) {
+    assertType<Signal<boolean>>(element.lockedBySelf$);
+    return element.lockedBySelf$.value ?? false;
+  }
+  return element.lockedBySelf ?? false;
+}
+
+export function isLockedImpl(element: GfxCompatibleInterface): boolean {
+  return isLockedBySelfImpl(element) || isLockedByAncestorImpl(element);
+}
+
+export function lockElementImpl(doc: Doc, element: GfxCompatibleInterface) {
+  doc.transact(() => {
+    element.lockedBySelf = true;
+  });
+}
+
+export function unlockElementImpl(doc: Doc, element: GfxCompatibleInterface) {
+  doc.transact(() => {
+    element.lockedBySelf = false;
+  });
 }

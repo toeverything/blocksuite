@@ -6,7 +6,6 @@ export {
 export {
   canSafeAddToContainer,
   descendantElementsImpl,
-  getAncestorContainersImpl,
   getTopElements,
   hasDescendantElementImpl,
 } from '../utils/tree.js';

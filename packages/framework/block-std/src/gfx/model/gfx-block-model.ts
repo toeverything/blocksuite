@@ -24,6 +24,14 @@ import type { GfxCompatibleInterface, PointTestOptions } from './base.js';
 import type { GfxGroupModel } from './model.js';
 import type { SurfaceBlockModel } from './surface/surface-model.js';
 
+import {
+  isLockedByAncestorImpl,
+  isLockedBySelfImpl,
+  isLockedImpl,
+  lockElementImpl,
+  unlockElementImpl,
+} from '../../utils/tree.js';
+
 /**
  * The props that a graphics block model should have.
  */
@@ -183,6 +191,26 @@ export class GfxBlockElementModel<
         this.getLineIntersections(point, points[(i + 1) % points.length])
       )
     );
+  }
+
+  isLocked(): boolean {
+    return isLockedImpl(this);
+  }
+
+  isLockedByAncestor(): boolean {
+    return isLockedByAncestorImpl(this);
+  }
+
+  isLockedBySelf(): boolean {
+    return isLockedBySelfImpl(this);
+  }
+
+  lock() {
+    lockElementImpl(this.doc, this);
+  }
+
+  unlock() {
+    unlockElementImpl(this.doc, this);
   }
 }
 
