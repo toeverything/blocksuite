@@ -2,11 +2,15 @@ import {
   VirtualKeyboardController,
   type VirtualKeyboardControllerConfig,
 } from '@blocksuite/affine-components/virtual-keyboard';
-import { PropTypes, requiredProperties } from '@blocksuite/block-std';
+import {
+  PropTypes,
+  requiredProperties,
+  ShadowlessElement,
+} from '@blocksuite/block-std';
 import { SignalWatcher, WithDisposable } from '@blocksuite/global/utils';
 import { ArrowLeftBigIcon, KeyboardIcon } from '@blocksuite/icons/lit';
 import { batch, effect, signal } from '@preact/signals-core';
-import { html, LitElement } from 'lit';
+import { html } from 'lit';
 import { property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -26,7 +30,6 @@ import {
   isKeyboardSubToolBarConfig,
   isKeyboardToolBarActionItem,
   isKeyboardToolPanelConfig,
-  scrollCurrentBlockIntoView,
 } from './utils.js';
 
 export const AFFINE_KEYBOARD_TOOLBAR = 'affine-keyboard-toolbar';
@@ -36,7 +39,7 @@ export const AFFINE_KEYBOARD_TOOLBAR = 'affine-keyboard-toolbar';
   rootComponent: PropTypes.instanceOf(PageRootBlockComponent),
 })
 export class AffineKeyboardToolbar extends SignalWatcher(
-  WithDisposable(LitElement)
+  WithDisposable(ShadowlessElement)
 ) {
   static override styles = keyboardToolbarStyles;
 
@@ -74,7 +77,7 @@ export class AffineKeyboardToolbar extends SignalWatcher(
         this._currentPanelIndex$.value = index;
         this._shrink$.value = false;
         this._keyboardController.hide();
-        scrollCurrentBlockIntoView(this.rootComponent.std);
+        this.scrollCurrentBlockIntoView();
       }
     }
     this._lastActiveItem$.value = item;
@@ -92,8 +95,8 @@ export class AffineKeyboardToolbar extends SignalWatcher(
 
         // workaround for the virtual keyboard showing transition animation
         setTimeout(() => {
-          scrollCurrentBlockIntoView(this.rootComponent.std);
-        }, 100);
+          this.scrollCurrentBlockIntoView();
+        }, 1000);
       }
     });
   };
@@ -108,6 +111,31 @@ export class AffineKeyboardToolbar extends SignalWatcher(
   private readonly _path$ = signal<number[]>([]);
 
   private readonly _shrink$ = signal(false);
+
+  private scrollCurrentBlockIntoView = () => {
+    const { std } = this.rootComponent;
+    std.command
+      .chain()
+      .getSelectedModels()
+      .inline(({ selectedModels }) => {
+        if (!selectedModels?.length) return;
+
+        const block = std.view.getBlock(selectedModels[0].id);
+        if (!block) return;
+
+        const { y: y1 } = this.getBoundingClientRect();
+        const { bottom: y2 } = block.getBoundingClientRect();
+        const gap = 8;
+
+        if (y2 < y1 + gap) return;
+
+        scrollTo({
+          top: window.scrollY + y2 - y1 + gap,
+          behavior: 'smooth',
+        });
+      })
+      .run();
+  };
 
   private get _context(): KeyboardToolbarContext {
     return {
@@ -154,18 +182,6 @@ export class AffineKeyboardToolbar extends SignalWatcher(
 
   private get _isSubToolbarOpened() {
     return this._path$.value.length > 0;
-  }
-
-  private get _safeBottomPaddingStyle() {
-    const safeBottomPadding = this.config.safeBottomPadding;
-    return styleMap(
-      this._shrink$.value && safeBottomPadding
-        ? {
-            paddingBottom: safeBottomPadding,
-            height: `calc(${TOOLBAR_HEIGHT}px + ${safeBottomPadding})`,
-          }
-        : {}
-    );
   }
 
   get virtualKeyboardControllerConfig(): VirtualKeyboardControllerConfig {
@@ -272,6 +288,22 @@ export class AffineKeyboardToolbar extends SignalWatcher(
         }
       })
     );
+
+    this.disposables.add(
+      effect(() => {
+        this.dataset.shrink = this._shrink$.value ? 'true' : 'false';
+      })
+    );
+
+    this.disposables.add(
+      effect(() => {
+        const std = this.rootComponent.std;
+        std.selection.value;
+        setTimeout(() => {
+          this.scrollCurrentBlockIntoView();
+        }, 100);
+      })
+    );
   }
 
   override render() {
@@ -282,7 +314,7 @@ export class AffineKeyboardToolbar extends SignalWatcher(
         : '0px';
 
     return html`
-      <div class="keyboard-toolbar" style=${this._safeBottomPaddingStyle}>
+      <div class="keyboard-toolbar">
         ${this._renderItems()}
         <div class="divider"></div>
         ${this._renderKeyboardButton()}
@@ -303,10 +335,4 @@ export class AffineKeyboardToolbar extends SignalWatcher(
 
   @property({ attribute: false })
   accessor rootComponent!: PageRootBlockComponent;
-}
-
-declare global {
-  interface HTMLElementTagNameMap {
-    [AFFINE_KEYBOARD_TOOLBAR]: AffineKeyboardToolbar;
-  }
 }
