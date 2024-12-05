@@ -1,4 +1,3 @@
-import type { IPoint } from '../utils.js';
 import type { Bound, IBound } from './model/bound.js';
 
 import { PointLocation } from './model/point-location.js';
@@ -536,12 +535,4 @@ export function getCenterAreaBounds(bounds: IBound, ratio: number) {
     h: nh,
     rotate,
   };
-}
-
-export function dotProduct(vectorA: IPoint, vectorB: IPoint) {
-  return vectorA.x * vectorB.x + vectorA.y * vectorB.y;
-}
-
-export function magnitude(vector: IPoint) {
-  return Math.sqrt(vector.x * vector.x + vector.y * vector.y);
 }

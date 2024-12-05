@@ -1,5 +1,5 @@
 import { IS_IPAD } from '@blocksuite/global/env';
-import { dotProduct, magnitude } from '@blocksuite/global/utils';
+import { Vec } from '@blocksuite/global/utils';
 
 import type { UIEventDispatcher } from '../dispatcher.js';
 
@@ -486,13 +486,16 @@ class PinchController extends DualDragControllerBase {
   override _handleMove(event: PointerEvent, state: MultiPointerEventState) {
     if (event.pointerType !== 'touch') return;
 
-    const deltaFirstPointerVec = state.pointers[0].delta;
-    const deltaSecondPointerVec = state.pointers[1].delta;
+    const deltaFirstPointer = state.pointers[0].delta;
+    const deltaSecondPointer = state.pointers[1].delta;
 
-    const deltaFirstPointerValue = magnitude(deltaFirstPointerVec);
-    const deltaSecondPointerValue = magnitude(deltaSecondPointerVec);
+    const deltaFirstPointerVec = Vec.toVec(deltaFirstPointer);
+    const deltaSecondPointerVec = Vec.toVec(deltaSecondPointer);
 
-    const deltaDotProduct = dotProduct(
+    const deltaFirstPointerValue = Vec.len(deltaFirstPointerVec);
+    const deltaSecondPointerValue = Vec.len(deltaSecondPointerVec);
+
+    const deltaDotProduct = Vec.dpr(
       deltaFirstPointerVec,
       deltaSecondPointerVec
     );
@@ -501,7 +504,7 @@ class PinchController extends DualDragControllerBase {
 
     // the changes of distance between two pointers is not far enough
     if (
-      !isFarEnough(deltaFirstPointerVec, deltaSecondPointerVec) ||
+      !isFarEnough(deltaFirstPointer, deltaSecondPointer) ||
       deltaDotProduct > 0 ||
       deltaFirstPointerValue < deltaValueThreshold ||
       deltaSecondPointerValue < deltaValueThreshold
@@ -516,17 +519,17 @@ class PanController extends DualDragControllerBase {
   override _handleMove(event: PointerEvent, state: MultiPointerEventState) {
     if (event.pointerType !== 'touch') return;
 
-    const deltaFirstPointerVec = state.pointers[0].delta;
-    const deltaSecondPointerVec = state.pointers[1].delta;
+    const deltaFirstPointer = state.pointers[0].delta;
+    const deltaSecondPointer = state.pointers[1].delta;
 
-    const deltaDotProduct = dotProduct(
-      deltaFirstPointerVec,
-      deltaSecondPointerVec
+    const deltaDotProduct = Vec.dpr(
+      Vec.toVec(deltaFirstPointer),
+      Vec.toVec(deltaSecondPointer)
     );
 
     // the center move distance is not far enough
     if (
-      !isFarEnough(deltaFirstPointerVec, deltaSecondPointerVec) &&
+      !isFarEnough(deltaFirstPointer, deltaSecondPointer) &&
       deltaDotProduct < 0
     )
       return;
