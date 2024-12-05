@@ -413,6 +413,7 @@ export class MindMapExt extends DefaultToolExt {
         clear: () => {
           clearOpacity();
           clearDragImage?.();
+          dragState.movedElements.push(mindmapNode.element);
         },
         originalMindMapBound: mindmapBound,
         startPoint: dragState.event,
