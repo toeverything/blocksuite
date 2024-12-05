@@ -152,10 +152,7 @@ export class EdgelessSelectedRectWidget extends WidgetComponent<
     }
 
     .affine-edgeless-selected-rect[data-locked='true'] {
-      border-color: ${unsafeCSSVarV2(
-        'edgeless/frame/border/locked',
-        '#00000085'
-      )};
+      border-color: ${unsafeCSSVarV2('edgeless/lock/locked', '#00000085')};
     }
 
     .affine-edgeless-selected-rect .handle {
