@@ -28,10 +28,10 @@ import { AttachmentViewerPanel } from '../../_common/components/attachment-viewe
 import { CustomFramePanel } from '../../_common/components/custom-frame-panel.js';
 import { CustomOutlinePanel } from '../../_common/components/custom-outline-panel.js';
 import { CustomOutlineViewer } from '../../_common/components/custom-outline-viewer.js';
-import { DebugMenu } from '../../_common/components/debug-menu.js';
 import { DocsPanel } from '../../_common/components/docs-panel.js';
 import { LeftSidePanel } from '../../_common/components/left-side-panel.js';
 import { SidePanel } from '../../_common/components/side-panel.js';
+import { StarterDebugMenu } from '../../_common/components/starter-debug-menu.js';
 import {
   getDocFromUrlParams,
   listenHashChange,
@@ -154,7 +154,7 @@ export async function mountDefaultDocEditor(collection: DocCollection) {
   const commentPanel = new CommentPanel();
   commentPanel.editor = editor;
 
-  const debugMenu = new DebugMenu();
+  const debugMenu = new StarterDebugMenu();
   debugMenu.collection = collection;
   debugMenu.editor = editor;
   debugMenu.outlinePanel = outlinePanel;
