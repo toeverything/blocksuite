@@ -31,6 +31,9 @@ export class DocsPanel extends WithDisposable(ShadowlessElement) {
     .doc-item:hover .delete-doc-icon {
       display: flex;
     }
+    .doc-item {
+      color: var(--affine-text-primary-color);
+    }
     .delete-doc-icon {
       display: none;
       padding: 2px;
@@ -54,6 +57,7 @@ export class DocsPanel extends WithDisposable(ShadowlessElement) {
       align-items: center;
       justify-content: center;
       cursor: pointer;
+      color: var(--affine-text-primary-color);
     }
     .new-doc-button:hover {
       background-color: var(--affine-hover-color);
