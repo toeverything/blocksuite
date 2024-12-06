@@ -2,6 +2,7 @@ import type { ListBlockModel } from '@blocksuite/affine-model';
 import type { Command } from '@blocksuite/block-std';
 
 import {
+  calculateCollapsedSiblings,
   getNearestHeadingBefore,
   matchFlavours,
 } from '@blocksuite/affine-shared/utils';
@@ -66,7 +67,16 @@ export const indentBlock: Command<
     });
   }
 
-  doc.moveBlocks([model], previousSibling);
+  if (
+    matchFlavours(model, ['affine:paragraph']) &&
+    model.type.startsWith('h') &&
+    model.collapsed
+  ) {
+    const collapsedSiblings = calculateCollapsedSiblings(model);
+    doc.moveBlocks([model, ...collapsedSiblings], previousSibling);
+  } else {
+    doc.moveBlocks([model], previousSibling);
+  }
 
   // update collapsed state of affine list
   if (

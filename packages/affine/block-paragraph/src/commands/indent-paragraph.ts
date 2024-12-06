@@ -4,6 +4,7 @@ import type { Command } from '@blocksuite/block-std';
 
 import { focusTextModel } from '@blocksuite/affine-components/rich-text';
 import {
+  calculateCollapsedSiblings,
   getNearestHeadingBefore,
   matchFlavours,
 } from '@blocksuite/affine-shared/utils';
@@ -97,7 +98,16 @@ export const indentParagraphCommand: Command<'indentContext'> = (ctx, next) => {
     });
   }
 
-  doc.moveBlocks([model], previousSibling);
+  if (
+    matchFlavours(model, ['affine:paragraph']) &&
+    model.type.startsWith('h') &&
+    model.collapsed
+  ) {
+    const collapsedSiblings = calculateCollapsedSiblings(model);
+    doc.moveBlocks([model, ...collapsedSiblings], previousSibling);
+  } else {
+    doc.moveBlocks([model], previousSibling);
+  }
 
   // update collapsed state of affine list
   if (
