@@ -27,6 +27,8 @@ export type DragState = {
 };
 
 export class DefaultToolExt {
+  readonly supportedDragTypes: DefaultModeDragType[] = [];
+
   get gfx() {
     return this.defaultTool.gfx;
   }
@@ -37,6 +39,10 @@ export class DefaultToolExt {
 
   constructor(protected defaultTool: DefaultTool) {}
 
+  click(_evt: PointerEventState) {}
+
+  dblClick(_evt: PointerEventState) {}
+
   initDrag(_: DragState): {
     dragStart?: (evt: PointerEventState) => void;
     dragMove?: (evt: PointerEventState) => void;
@@ -46,6 +52,12 @@ export class DefaultToolExt {
   }
 
   mounted() {}
+
+  pointerDown(_evt: PointerEventState) {}
+
+  pointerMove(_evt: PointerEventState) {}
+
+  pointerUp(_evt: PointerEventState) {}
 
   unmounted() {}
 }
