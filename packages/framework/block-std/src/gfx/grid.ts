@@ -315,9 +315,10 @@ export class GridManager {
         if (!gridElements) continue;
         for (const element of gridElements) {
           if (
-            (!filter || filter(element)) && strict
+            (!filter || filter(element)) &&
+            (strict
               ? b.contains(element.elementBound)
-              : intersects(element.elementBound, b)
+              : intersects(element.elementBound, b))
           ) {
             results.add(element);
           }
