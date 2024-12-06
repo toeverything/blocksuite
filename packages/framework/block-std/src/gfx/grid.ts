@@ -11,6 +11,7 @@ import type { GfxModel } from './model/model.js';
 
 import { compare } from '../utils/layer.js';
 import { GfxBlockElementModel } from './model/gfx-block-model.js';
+import { GfxPrimitiveElementModel } from './model/surface/element-model.js';
 import { GfxLocalElementModel } from './model/surface/local-element-model.js';
 import { SurfaceBlockModel } from './model/surface/surface-model.js';
 
@@ -53,7 +54,7 @@ const typeFilters = {
   block: (model: GfxModel | GfxLocalElementModel) =>
     model instanceof GfxBlockElementModel,
   canvas: (model: GfxModel | GfxLocalElementModel) =>
-    model instanceof SurfaceBlockModel,
+    model instanceof GfxPrimitiveElementModel,
   local: (model: GfxModel | GfxLocalElementModel) =>
     model instanceof GfxLocalElementModel,
 };
