@@ -10,6 +10,7 @@ import type {
 import {
   canSafeAddToContainer,
   descendantElementsImpl,
+  generateKeyBetweenV2,
   GfxCompatible,
   gfxGroupCompatibleSymbol,
   hasDescendantElementImpl,
@@ -23,6 +24,7 @@ export type FrameBlockProps = {
   title: Text;
   background: Color;
   childElementIds?: Record<string, boolean>;
+  presentationIndex?: string;
 } & GfxCompatibleProps;
 
 export const FrameBlockSchema = defineBlockSchema({
@@ -33,6 +35,7 @@ export const FrameBlockSchema = defineBlockSchema({
     xywh: `[0,0,100,100]`,
     index: 'a0',
     childElementIds: Object.create(null),
+    presentationIndex: generateKeyBetweenV2(null, null),
   }),
   metadata: {
     version: 1,

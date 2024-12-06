@@ -1,5 +1,3 @@
-import type { FrameBlockModel } from '@blocksuite/affine-model';
-
 import { NavigatorSettingsIcon } from '@blocksuite/affine-components/icons';
 import { EditPropsStore } from '@blocksuite/affine-shared/services';
 import { createButtonPopper } from '@blocksuite/affine-shared/utils';
@@ -161,7 +159,6 @@ export class EdgelessNavigatorSettingButton extends WithDisposable(LitElement) {
 
               <edgeless-frame-order-menu
                 .edgeless=${this.edgeless}
-                .frames=${this.frames}
                 .embed=${true}
               ></edgeless-frame-order-menu>`
           : nothing}
@@ -180,9 +177,6 @@ export class EdgelessNavigatorSettingButton extends WithDisposable(LitElement) {
 
   @property({ attribute: false })
   accessor edgeless!: EdgelessRootBlockComponent;
-
-  @property({ attribute: false })
-  accessor frames!: FrameBlockModel[];
 
   @property({ attribute: false })
   accessor hideToolbar = false;
