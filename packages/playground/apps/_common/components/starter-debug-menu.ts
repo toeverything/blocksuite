@@ -46,8 +46,8 @@ import '@shoelace-style/shoelace/dist/components/select/select.js';
 import '@shoelace-style/shoelace/dist/components/tab/tab.js';
 import '@shoelace-style/shoelace/dist/components/tab-group/tab-group.js';
 import '@shoelace-style/shoelace/dist/components/tooltip/tooltip.js';
-import '@shoelace-style/shoelace/dist/themes/dark.css';
 import '@shoelace-style/shoelace/dist/themes/light.css';
+import '@shoelace-style/shoelace/dist/themes/dark.css';
 import { AffineEditorContainer, type CommentPanel } from '@blocksuite/presets';
 import { type DocCollection, Job, Text } from '@blocksuite/store';
 import { setBasePath } from '@shoelace-style/shoelace/dist/utilities/base-path.js';
@@ -177,8 +177,8 @@ interface AdapterConfig {
   indexFileName: string;
 }
 
-@customElement('debug-menu')
-export class DebugMenu extends ShadowlessElement {
+@customElement('starter-debug-menu')
+export class StarterDebugMenu extends ShadowlessElement {
   static override styles = css`
     :root {
       --sl-font-size-medium: var(--affine-font-xs);
@@ -1032,6 +1032,6 @@ export class DebugMenu extends ShadowlessElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'debug-menu': DebugMenu;
+    'starter-debug-menu': StarterDebugMenu;
   }
 }

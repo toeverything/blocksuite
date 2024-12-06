@@ -18,9 +18,9 @@ import {
 import { AffineEditorContainer } from '@blocksuite/presets';
 
 import { AttachmentViewerPanel } from '../../_common/components/attachment-viewer-panel.js';
+import { CollabDebugMenu } from '../../_common/components/collab-debug-menu.js';
 import { DocsPanel } from '../../_common/components/docs-panel.js';
 import { LeftSidePanel } from '../../_common/components/left-side-panel.js';
-import { QuickEdgelessMenu } from '../../_common/components/quick-edgeless-menu.js';
 import {
   getDocFromUrlParams,
   listenHashChange,
@@ -93,15 +93,15 @@ export async function mountDefaultDocEditor(collection: DocCollection) {
   const docsPanel = new DocsPanel();
   docsPanel.editor = editor;
 
-  const quickEdgelessMenu = new QuickEdgelessMenu();
-  quickEdgelessMenu.collection = collection;
-  quickEdgelessMenu.editor = editor;
-  quickEdgelessMenu.leftSidePanel = leftSidePanel;
-  quickEdgelessMenu.docsPanel = docsPanel;
+  const collabDebugMenu = new CollabDebugMenu();
+  collabDebugMenu.collection = collection;
+  collabDebugMenu.editor = editor;
+  collabDebugMenu.leftSidePanel = leftSidePanel;
+  collabDebugMenu.docsPanel = docsPanel;
 
   document.body.append(attachmentViewerPanel);
   document.body.append(leftSidePanel);
-  document.body.append(quickEdgelessMenu);
+  document.body.append(collabDebugMenu);
 
   // debug info
   window.editor = editor;

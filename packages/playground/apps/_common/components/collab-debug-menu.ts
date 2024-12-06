@@ -44,8 +44,8 @@ const basePath =
   'https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.11.2/dist/';
 setBasePath(basePath);
 
-@customElement('quick-edgeless-menu')
-export class QuickEdgelessMenu extends SignalWatcher(ShadowlessElement) {
+@customElement('collab-debug-menu')
+export class CollabDebugMenu extends SignalWatcher(ShadowlessElement) {
   static override styles = css`
     :root {
       --sl-font-size-medium: var(--affine-font-xs);
@@ -320,7 +320,7 @@ export class QuickEdgelessMenu extends SignalWatcher(ShadowlessElement) {
   override render() {
     return html`
       <style>
-        .quick-edgeless-menu {
+        .collab-debug-menu {
           display: flex;
           flex-wrap: nowrap;
           position: fixed;
@@ -333,7 +333,7 @@ export class QuickEdgelessMenu extends SignalWatcher(ShadowlessElement) {
         }
 
         @media print {
-          .quick-edgeless-menu {
+          .collab-debug-menu {
             display: none;
           }
         }
@@ -372,7 +372,7 @@ export class QuickEdgelessMenu extends SignalWatcher(ShadowlessElement) {
           margin-right: 4px;
         }
       </style>
-      <div class="quick-edgeless-menu default">
+      <div class="collab-debug-menu default">
         <div class="default-toolbar">
           <div class="top-container">
             <sl-dropdown placement="bottom" hoist>
@@ -621,6 +621,6 @@ export class QuickEdgelessMenu extends SignalWatcher(ShadowlessElement) {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'quick-edgeless-menu': QuickEdgelessMenu;
+    'collab-debug-menu': CollabDebugMenu;
   }
 }
