@@ -47,6 +47,7 @@ export interface AffineAIPanelWidgetConfig {
   errorStateConfig: AIPanelErrorConfig;
   hideCallback?: () => void;
   discardCallback?: () => void;
+  inputCallback?: (input: string) => void;
 
   copy?: CopyConfig;
 }

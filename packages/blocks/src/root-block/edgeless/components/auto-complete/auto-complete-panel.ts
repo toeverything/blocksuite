@@ -152,12 +152,14 @@ export class EdgelessAutoCompletePanel extends WithDisposable(LitElement) {
 
     const edgeless = this.edgeless;
     const { service, surfaceBlockModel } = edgeless;
+    const frameMgr = service.frame;
     const frameIndex = service.frames.length + 1;
     const id = service.addBlock(
       'affine:frame',
       {
         title: new DocCollection.Y.Text(`Frame ${frameIndex}`),
         xywh: serializeXYWH(...xywh),
+        presentationIndex: frameMgr.generatePresentationIndex(),
       },
       surfaceBlockModel
     );

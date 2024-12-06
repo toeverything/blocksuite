@@ -1,6 +1,10 @@
-import { PropTypes, requiredProperties } from '@blocksuite/block-std';
+import {
+  PropTypes,
+  requiredProperties,
+  ShadowlessElement,
+} from '@blocksuite/block-std';
 import { SignalWatcher, WithDisposable } from '@blocksuite/global/utils';
-import { html, LitElement, nothing, type PropertyValues } from 'lit';
+import { html, nothing, type PropertyValues } from 'lit';
 import { property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
@@ -20,7 +24,7 @@ export const AFFINE_KEYBOARD_TOOL_PANEL = 'affine-keyboard-tool-panel';
   context: PropTypes.object,
 })
 export class AffineKeyboardToolPanel extends SignalWatcher(
-  WithDisposable(LitElement)
+  WithDisposable(ShadowlessElement)
 ) {
   static override styles = keyboardToolPanelStyles;
 
@@ -94,10 +98,4 @@ export class AffineKeyboardToolPanel extends SignalWatcher(
 
   @property({ type: Number })
   accessor height = 0;
-}
-
-declare global {
-  interface HTMLElementTagNameMap {
-    [AFFINE_KEYBOARD_TOOL_PANEL]: AffineKeyboardToolPanel;
-  }
 }

@@ -22,7 +22,7 @@ import { customElement, property, query, state } from 'lit/decorators.js';
 export class AdaptersPanel extends WithDisposable(ShadowlessElement) {
   static override styles = css`
     adapters-panel {
-      width: 30vw;
+      width: 36vw;
     }
     .adapters-container {
       border: 1px solid var(--affine-border-color, #e3e2e4);
@@ -55,6 +55,41 @@ export class AdaptersPanel extends WithDisposable(ShadowlessElement) {
     .update-button:hover {
       background-color: var(--affine-hover-color);
     }
+    .html-panel {
+      display: flex;
+      gap: 8px;
+      flex-direction: column;
+    }
+    .html-preview-container,
+    .html-panel-content {
+      width: 100%;
+      flex: 1;
+      border: none;
+      box-sizing: border-box;
+      color: var(--affine-text-primary-color);
+      overflow: auto;
+    }
+    .html-panel-footer {
+      width: 100%;
+      height: 32px;
+      display: flex;
+      justify-content: flex-end;
+
+      span {
+        cursor: pointer;
+        padding: 4px 8px;
+        font-size: 12px;
+        font-weight: 500;
+        border: 1px solid var(--affine-border-color);
+        font-family: var(--affine-font-family);
+        color: var(--affine-text-primary-color);
+        background-color: var(--affine-background-primary-color);
+        line-height: 20px;
+      }
+      span[active] {
+        background-color: var(--affine-hover-color);
+      }
+    }
   `;
 
   get doc() {
@@ -62,7 +97,6 @@ export class AdaptersPanel extends WithDisposable(ShadowlessElement) {
   }
 
   private _createJob() {
-    console.log('collection', this.doc.collection.id, this.doc.id);
     return new Job({
       collection: this.doc.collection,
       middlewares: [
@@ -118,6 +152,31 @@ export class AdaptersPanel extends WithDisposable(ShadowlessElement) {
     }
   }
 
+  private _renderHtmlPanel() {
+    return html`
+      ${this._isHtmlPreview
+        ? html`<iframe
+            class="html-preview-container"
+            .srcdoc=${this._htmlContent}
+          ></iframe>`
+        : html`<div class="html-panel-content">${this._htmlContent}</div>`}
+      <div class="html-panel-footer">
+        <span
+          class="html-panel-footer-item"
+          ?active=${!this._isHtmlPreview}
+          @click=${() => (this._isHtmlPreview = false)}
+          >Source</span
+        >
+        <span
+          class="html-panel-footer-item"
+          ?active=${this._isHtmlPreview}
+          @click=${() => (this._isHtmlPreview = true)}
+          >Preview</span
+        >
+      </div>
+    `;
+  }
+
   private async _updateActiveTabContent() {
     if (!this._activeTab) return;
     const activeTabName = this._activeTab.name;
@@ -154,7 +213,9 @@ export class AdaptersPanel extends WithDisposable(ShadowlessElement) {
             <div class="adapter-container">${this._markdownContent}</div>
           </sl-tab-panel>
           <sl-tab-panel name="html">
-            <div class="adapter-container">${this._htmlContent}</div>
+            <div class="adapter-container html-panel">
+              ${this._renderHtmlPanel()}
+            </div>
           </sl-tab-panel>
           <sl-tab-panel name="plaintext">
             <div class="adapter-container">${this._plainTextContent}</div>
@@ -188,6 +249,9 @@ export class AdaptersPanel extends WithDisposable(ShadowlessElement) {
 
   @state()
   private accessor _htmlContent = '';
+
+  @state()
+  private accessor _isHtmlPreview = false;
 
   @state()
   private accessor _markdownContent = '';

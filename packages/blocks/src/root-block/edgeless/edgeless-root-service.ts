@@ -138,10 +138,13 @@ export class EdgelessRootService extends RootService implements SurfaceContext {
     ) as EdgelessFrameManager;
   }
 
+  /**
+   * Get all sorted frames by presentation orderer,
+   * the legacy frame that uses `index` as presentation order
+   * will be put at the beginning of the array.
+   */
   get frames() {
-    return this.layer.blocks.filter(
-      block => block.flavour === 'affine:frame'
-    ) as FrameBlockModel[];
+    return this.frame.frames;
   }
 
   get gfx(): GfxController {

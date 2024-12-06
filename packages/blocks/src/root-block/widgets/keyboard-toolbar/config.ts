@@ -80,11 +80,6 @@ export type KeyboardToolbarConfig = {
    * @default false
    */
   useScreenHeight?: boolean;
-  /**
-   * @description The safe bottom padding of the keyboard toolbar.
-   * It is useful when the device has a rounded corner screen.
-   */
-  safeBottomPadding?: string;
 };
 
 export type KeyboardToolbarItem =

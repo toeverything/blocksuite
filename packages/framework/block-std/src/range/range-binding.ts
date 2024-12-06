@@ -170,6 +170,7 @@ export class RangeBinding {
 
   private _onNativeSelectionChanged = async () => {
     if (this.isComposing) return;
+    if (!this.host) return; // Unstable when switching views, card <-> embed
 
     await this.host.updateComplete;
 

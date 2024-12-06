@@ -50,6 +50,7 @@ export const linkedDocPopoverStyles = css`
     display: flex;
     align-items: center;
     flex-shrink: 0;
+    font-weight: 500;
   }
 
   .linked-doc-popover .divider {

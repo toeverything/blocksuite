@@ -6,7 +6,7 @@ import { scrollbarStyle } from '../../../_common/components/utils.js';
 export const TOOLBAR_HEIGHT = 46;
 
 export const keyboardToolbarStyles = css`
-  :host {
+  affine-keyboard-toolbar {
     position: fixed;
     display: block;
     width: 100vw;
@@ -59,7 +59,7 @@ export const keyboardToolbarStyles = css`
 `;
 
 export const keyboardToolPanelStyles = css`
-  :host {
+  affine-keyboard-tool-panel {
     display: flex;
     flex-direction: column;
     gap: 24px;
@@ -70,7 +70,7 @@ export const keyboardToolPanelStyles = css`
     background-color: ${unsafeCSSVarV2('layer/background/primary')};
   }
 
-  ${scrollbarStyle(':host')}
+  ${scrollbarStyle('affine-keyboard-tool-panel')}
 
   .keyboard-tool-panel-group {
     display: flex;

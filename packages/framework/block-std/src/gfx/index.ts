@@ -1,3 +1,4 @@
+export { generateKeyBetweenV2 } from '../utils/fractional-indexing.js';
 export {
   compare as compareLayer,
   renderableInEdgeless,
@@ -58,13 +59,13 @@ export {
   type SurfaceBlockProps,
   type SurfaceMiddleware,
 } from './model/surface/surface-model.js';
+
 export { GfxSelectionManager } from './selection.js';
 
 export {
   SurfaceMiddlewareBuilder,
   SurfaceMiddlewareExtension,
 } from './surface-middleware.js';
-
 export {
   BaseTool,
   type GfxToolsFullOption,

@@ -1,4 +1,4 @@
-import type { EmbedToolbarBlockComponent } from '../../../_common/components/embed-card/type.js';
+import type { EmbedBlockComponent } from '../../../_common/components/embed-card/type.js';
 
 import { MenuContext } from '../../configs/toolbar.js';
 
@@ -25,7 +25,7 @@ export class EmbedCardToolbarContext extends MenuContext {
   }
 
   constructor(
-    public blockComponent: EmbedToolbarBlockComponent,
+    public blockComponent: EmbedBlockComponent,
     public abortController: AbortController
   ) {
     super();

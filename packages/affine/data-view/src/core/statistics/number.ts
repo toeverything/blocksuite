@@ -15,7 +15,9 @@ export const numberStatsFunctions: StatisticsConfig[] = [
       if (numbers.length === 0) {
         return 'None';
       }
-      return numbers.reduce((a, b) => a + b, 0).toString();
+      return parseFloat(
+        numbers.reduce((a, b) => a + b, 0).toFixed(2)
+      ).toString();
     },
   }),
   createStatisticConfig({

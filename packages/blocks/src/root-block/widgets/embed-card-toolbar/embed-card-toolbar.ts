@@ -1,3 +1,4 @@
+import { getDocContentWithMaxLength } from '@blocksuite/affine-block-embed';
 import {
   CaptionIcon,
   CenterPeekIcon,
@@ -9,6 +10,7 @@ import {
   PaletteIcon,
   SmallArrowDownIcon,
 } from '@blocksuite/affine-components/icons';
+import { notifyLinkedDocSwitchedToEmbed } from '@blocksuite/affine-components/notification';
 import { isPeekable, peek } from '@blocksuite/affine-components/peek';
 import { isLinkToNode } from '@blocksuite/affine-components/rich-text';
 import { toast } from '@blocksuite/affine-components/toast';
@@ -20,6 +22,7 @@ import {
   renderToolbarSeparator,
 } from '@blocksuite/affine-components/toolbar';
 import {
+  type AliasInfo,
   type BookmarkBlockModel,
   BookmarkStyles,
   type EmbedGithubModel,
@@ -29,6 +32,8 @@ import {
 import {
   EmbedOptionProvider,
   type EmbedOptions,
+  GenerateDocUrlProvider,
+  type GenerateDocUrlService,
   ThemeProvider,
 } from '@blocksuite/affine-shared/services';
 import { getHostName } from '@blocksuite/affine-shared/utils';
@@ -48,15 +53,17 @@ import type { RootBlockComponent } from '../../types.js';
 import { toggleEmbedCardCaptionEditModal } from '../../../_common/components/embed-card/modal/embed-card-caption-edit-modal.js';
 import { toggleEmbedCardEditModal } from '../../../_common/components/embed-card/modal/embed-card-edit-modal.js';
 import {
-  type EmbedToolbarBlockComponent,
-  type EmbedToolbarModel,
+  type EmbedBlockComponent,
+  type EmbedModel,
   isEmbedCardBlockComponent,
+  isInternalEmbedModel,
 } from '../../../_common/components/embed-card/type.js';
 import { getEmbedCardIcons } from '../../../_common/utils/url.js';
 import { getMoreMenuConfig } from '../../configs/toolbar.js';
 import {
   isBookmarkBlock,
   isEmbedGithubBlock,
+  isEmbedHtmlBlock,
   isEmbedLinkedDocBlock,
   isEmbedSyncedDocBlock,
 } from '../../edgeless/utils/query.js';
@@ -151,6 +158,23 @@ export class EmbedCardToolbar extends WidgetComponent<
     );
   }
 
+  get _originalDocInfo(): AliasInfo | undefined {
+    const model = this.focusModel;
+    if (!model) return undefined;
+
+    const doc = isInternalEmbedModel(model)
+      ? this.std.collection.getDoc(model.pageId)
+      : null;
+
+    if (doc) {
+      const title = doc.meta?.title;
+      const description = getDocContentWithMaxLength(doc);
+      return { title, description };
+    }
+
+    return undefined;
+  }
+
   private get _selection() {
     return this.host.selection;
   }
@@ -167,7 +191,7 @@ export class EmbedCardToolbar extends WidgetComponent<
     return 'inline';
   }
 
-  get focusModel(): EmbedToolbarModel | undefined {
+  get focusModel(): EmbedModel | undefined {
     return this.focusBlock?.model;
   }
 
@@ -303,7 +327,13 @@ export class EmbedCardToolbar extends WidgetComponent<
     }
 
     if ('convertToEmbed' in this.focusBlock) {
+      const referenceInfo = this.focusBlock.referenceInfo;
+
       this.focusBlock.convertToEmbed();
+
+      if (referenceInfo.title || referenceInfo.description)
+        notifyLinkedDocSwitchedToEmbed(this.std);
+
       return;
     }
 
@@ -339,12 +369,22 @@ export class EmbedCardToolbar extends WidgetComponent<
   }
 
   private _copyUrl() {
-    if (!this.focusModel || !('url' in this.focusModel)) {
-      return;
+    if (!this.focusModel) return;
+
+    let url!: ReturnType<GenerateDocUrlService['generateDocUrl']>;
+
+    if ('url' in this.focusModel) {
+      url = this.focusModel.url;
+    } else if (isInternalEmbedModel(this.focusModel)) {
+      url = this.std
+        .getOptional(GenerateDocUrlProvider)
+        ?.generateDocUrl(this.focusModel.pageId, this.focusModel.params);
     }
 
-    navigator.clipboard.writeText(this.focusModel.url).catch(console.error);
-    toast(this.host, 'Copied link to clipboard');
+    if (!url) return;
+
+    navigator.clipboard.writeText(url).catch(console.error);
+    toast(this.std.host, 'Copied link to clipboard');
   }
 
   private _hide() {
@@ -596,7 +636,7 @@ export class EmbedCardToolbar extends WidgetComponent<
           return;
         }
 
-        this.focusBlock = block as EmbedToolbarBlockComponent;
+        this.focusBlock = block as EmbedBlockComponent;
         this._show();
       })
     );
@@ -606,13 +646,19 @@ export class EmbedCardToolbar extends WidgetComponent<
     if (this.hide) return nothing;
 
     const model = this.focusModel;
+    if (!model) return nothing;
+
     this._embedOptions =
-      model && 'url' in model
+      'url' in model
         ? this.std.get(EmbedOptionProvider).getEmbedBlockOptions(model.url)
         : null;
 
+    const hasUrl = this._canShowUrlOptions && 'url' in model;
+
     const buttons = [
-      this._canShowUrlOptions && model && 'url' in model
+      this._openMenuButton(),
+
+      hasUrl
         ? html`
             <a
               class="affine-link-preview"
@@ -622,12 +668,35 @@ export class EmbedCardToolbar extends WidgetComponent<
             >
               <span>${getHostName(model.url)}</span>
             </a>
+          `
+        : nothing,
 
+      // internal embed model
+      isEmbedLinkedDocBlock(model) && model.title
+        ? html`
             <editor-icon-button
-              aria-label="Copy"
+              class="doc-title"
+              aria-label="Doc title"
+              .hover=${false}
+              .labelHeight=${'20px'}
+              .tooltip=${'Original linked doc title'}
+              @click=${this.focusBlock?.open}
+            >
+              <span class="label"
+                >${this.std.collection.getDoc(model.pageId)?.meta?.title ||
+                'Untitled'}</span
+              >
+            </editor-icon-button>
+          `
+        : nothing,
+
+      isEmbedHtmlBlock(model)
+        ? nothing
+        : html`
+            <editor-icon-button
+              aria-label="Copy link"
               data-testid="copy-link"
-              .tooltip=${'Click to copy link'}
-              ?disabled=${model.doc.readonly}
+              .tooltip=${'Copy link'}
               @click=${() => this._copyUrl()}
             >
               ${CopyIcon}
@@ -638,14 +707,18 @@ export class EmbedCardToolbar extends WidgetComponent<
               data-testid="edit"
               .tooltip=${'Edit'}
               ?disabled=${this.doc.readonly}
-              @click=${() => toggleEmbedCardEditModal(this.host, model)}
+              @click=${(e: MouseEvent) => {
+                e.stopPropagation();
+                const originalDocInfo = this._originalDocInfo;
+
+                this._hide();
+
+                toggleEmbedCardEditModal(this.host, model, originalDocInfo);
+              }}
             >
               ${EditIcon}
             </editor-icon-button>
-          `
-        : nothing,
-
-      this._openMenuButton(),
+          `,
 
       this._viewToggleMenu(),
 
@@ -695,7 +768,7 @@ export class EmbedCardToolbar extends WidgetComponent<
   accessor embedCardToolbarElement!: HTMLElement;
 
   @state()
-  accessor focusBlock: EmbedToolbarBlockComponent | null = null;
+  accessor focusBlock: EmbedBlockComponent | null = null;
 
   @state()
   accessor hide: boolean = true;

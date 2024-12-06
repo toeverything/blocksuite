@@ -1,6 +1,7 @@
 import type { ReferenceInfo } from '@blocksuite/affine-model';
 import type { InlineRange } from '@blocksuite/inline';
 
+import { GenerateDocUrlProvider } from '@blocksuite/affine-shared/services';
 import { isInsideBlockByFlavour } from '@blocksuite/affine-shared/utils';
 import { BLOCK_ID_ATTR, type BlockComponent } from '@blocksuite/block-std';
 import { assertExists, WithDisposable } from '@blocksuite/global/utils';
@@ -16,19 +17,24 @@ import type { AffineInlineEditor } from '../../affine-inline-specs.js';
 
 import {
   CenterPeekIcon,
+  CopyIcon,
   DeleteIcon,
+  EditIcon,
   ExpandFullSmallIcon,
   MoreVerticalIcon,
   OpenIcon,
   SmallArrowDownIcon,
 } from '../../../../../icons/index.js';
+import { notifyLinkedDocSwitchedToEmbed } from '../../../../../notification/index.js';
 import { isPeekable, peek } from '../../../../../peek/index.js';
+import { toast } from '../../../../../toast/toast.js';
 import {
   type MenuItem,
   renderActions,
   renderToolbarSeparator,
 } from '../../../../../toolbar/index.js';
 import { RefNodeSlotsProvider } from '../../../../extension/index.js';
+import { ReferenceAliasPopup } from './reference-alias-popup.js';
 import { styles } from './styles.js';
 
 export class ReferencePopup extends WithDisposable(LitElement) {
@@ -110,18 +116,15 @@ export class ReferencePopup extends WithDisposable(LitElement) {
 
   private _convertToEmbedView() {
     const block = this.block;
+    const std = block.std;
     const doc = block.host.doc;
     const parent = doc.getParent(block.model);
     assertExists(parent);
 
     const index = parent.children.indexOf(block.model);
+    const referenceInfo = this.referenceInfo;
 
-    doc.addBlock(
-      'affine:embed-synced-doc',
-      this.referenceInfo,
-      parent,
-      index + 1
-    );
+    doc.addBlock('affine:embed-synced-doc', referenceInfo, parent, index + 1);
 
     const totalTextLength = this.inlineEditor.yTextLength;
     const inlineTextLength = this.targetInlineRange.length;
@@ -129,6 +132,21 @@ export class ReferencePopup extends WithDisposable(LitElement) {
       doc.deleteBlock(block.model);
     } else {
       this.inlineEditor.insertText(this.targetInlineRange, this.docTitle);
+    }
+
+    if (referenceInfo.title) notifyLinkedDocSwitchedToEmbed(std);
+
+    this.abortController.abort();
+  }
+
+  private _copyLink() {
+    const url = this.std
+      .getOptional(GenerateDocUrlProvider)
+      ?.generateDocUrl(this.referenceInfo.pageId, this.referenceInfo.params);
+
+    if (url) {
+      navigator.clipboard.writeText(url).catch(console.error);
+      toast(this.std.host, 'Copied link to clipboard');
     }
 
     this.abortController.abort();
@@ -221,6 +239,19 @@ export class ReferencePopup extends WithDisposable(LitElement) {
     `;
   }
 
+  private _showAliasPopup() {
+    const aliasPopup = new ReferenceAliasPopup();
+
+    aliasPopup.docTitle = this.docTitle;
+    aliasPopup.referenceInfo = this.referenceInfo;
+    aliasPopup.inlineEditor = this.inlineEditor;
+    aliasPopup.inlineRange = this.targetInlineRange;
+
+    document.body.append(aliasPopup);
+
+    this.abortController.abort();
+  }
+
   private _viewToggleMenu() {
     // synced doc entry controlled by awareness flag
     const isSyncedDocEnabled = this.doc.awarenessStore.getFlag(
@@ -308,8 +339,46 @@ export class ReferencePopup extends WithDisposable(LitElement) {
   }
 
   override render() {
+    const titleButton = this.referenceInfo.title
+      ? html`
+          <editor-icon-button
+            class="doc-title"
+            aria-label="Doc title"
+            .hover=${false}
+            .labelHeight=${'20px'}
+            .tooltip=${'Original linked doc title'}
+            @click=${() => this._openDoc()}
+          >
+            <span class="label">${this.docTitle}</span>
+          </editor-icon-button>
+        `
+      : nothing;
+
     const buttons = [
       this._openMenuButton(),
+
+      html`
+        ${titleButton}
+
+        <editor-icon-button
+          aria-label="Copy link"
+          data-testid="copy-link"
+          .tooltip=${'Copy link'}
+          @click=${() => this._copyLink()}
+        >
+          ${CopyIcon}
+        </editor-icon-button>
+
+        <editor-icon-button
+          aria-label="Edit"
+          data-testid="edit"
+          .tooltip=${'Edit'}
+          ?disabled=${this.doc.readonly}
+          @click=${() => this._showAliasPopup()}
+        >
+          ${EditIcon}
+        </editor-icon-button>
+      `,
 
       this._viewToggleMenu(),
 

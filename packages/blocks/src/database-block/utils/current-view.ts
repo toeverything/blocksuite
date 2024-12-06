@@ -8,9 +8,10 @@ const currentViewListSchema = z.array(
 );
 const maxLength = 20;
 const currentViewListKey = 'blocksuite:databaseBlock:view:currentViewList';
+const storage = globalThis.sessionStorage;
 const createCurrentViewStorage = () => {
   const getList = () => {
-    const string = localStorage.getItem(currentViewListKey);
+    const string = storage?.getItem(currentViewListKey);
     if (!string) {
       return;
     }
@@ -25,7 +26,7 @@ const createCurrentViewStorage = () => {
     return;
   };
   const saveList = () => {
-    localStorage.setItem(currentViewListKey, JSON.stringify(list));
+    storage.setItem(currentViewListKey, JSON.stringify(list));
   };
 
   const list = getList() ?? [];

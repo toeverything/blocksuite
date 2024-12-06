@@ -74,13 +74,15 @@ export const embedCardModalStyles = css`
   .embed-card-modal-row:has(.embed-card-modal-button) {
     flex-direction: row;
     gap: 4px;
-    align-self: flex-end;
+    justify-content: flex-end;
+  }
+  .embed-card-modal-row:has(.embed-card-modal-button.reset) {
+    justify-content: space-between;
   }
 
   .embed-card-modal-button {
     padding: 4px 18px;
     border-radius: 8px;
-    align-self: self-end;
     box-sizing: border-box;
   }
   .embed-card-modal-button.save {
@@ -93,6 +95,14 @@ export const embedCardModalStyles = css`
     cursor: not-allowed;
     color: var(--affine-text-disable-color);
     background: transparent;
+  }
+  .embed-card-modal-button.reset {
+    padding: 4px 0;
+    border: none;
+    background: transparent;
+    text-decoration: underline;
+    color: var(--affine-secondary-color);
+    user-select: none;
   }
 
   .embed-card-modal-title {

@@ -11,7 +11,7 @@ import {
 } from '@blocksuite/affine-components/icons';
 import { toast } from '@blocksuite/affine-components/toast';
 import { EditPropsStore } from '@blocksuite/affine-shared/services';
-import { Bound } from '@blocksuite/global/utils';
+import { Bound, SignalWatcher } from '@blocksuite/global/utils';
 import { effect } from '@preact/signals-core';
 import { cssVar } from '@toeverything/theme';
 import { css, html, LitElement, nothing, type PropertyValues } from 'lit';
@@ -26,7 +26,9 @@ import { EdgelessToolbarToolMixin } from './mixins/tool.mixin.js';
 
 const { clamp } = CommonUtils;
 
-export class PresentationToolbar extends EdgelessToolbarToolMixin(LitElement) {
+export class PresentationToolbar extends EdgelessToolbarToolMixin(
+  SignalWatcher(LitElement)
+) {
   static override styles = css`
     :host {
       align-items: inherit;
@@ -378,7 +380,6 @@ export class PresentationToolbar extends EdgelessToolbarToolMixin(LitElement) {
           : html`<edgeless-frame-order-button
               .popperShow=${this.frameMenuShow}
               .setPopperShow=${this.setFrameMenuShow}
-              .frames=${this._frames}
               .edgeless=${this.edgeless}
             >
             </edgeless-frame-order-button>`}
@@ -391,7 +392,6 @@ export class PresentationToolbar extends EdgelessToolbarToolMixin(LitElement) {
           }}
           .popperShow=${this.settingMenuShow}
           .setPopperShow=${this.setSettingMenuShow}
-          .frames=${this._frames}
           .includeFrameOrder=${this.dense}
         >
         </edgeless-navigator-setting-button>

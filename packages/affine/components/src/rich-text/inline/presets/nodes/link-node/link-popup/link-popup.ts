@@ -6,6 +6,7 @@ import {
   getHostName,
   isValidUrl,
   normalizeUrl,
+  stopPropagation,
 } from '@blocksuite/affine-shared/utils';
 import { BLOCK_ID_ATTR, type BlockComponent } from '@blocksuite/block-std';
 import { WithDisposable } from '@blocksuite/global/utils';
@@ -174,7 +175,7 @@ export class LinkPopup extends WithDisposable(LitElement) {
         <editor-icon-button
           aria-label="Copy"
           data-testid="copy-link"
-          .tooltip=${'Click to copy link'}
+          .tooltip=${'Copy link'}
           @click=${this._copyUrl}
         >
           ${CopyIcon}
@@ -528,15 +529,9 @@ export class LinkPopup extends WithDisposable(LitElement) {
   protected override firstUpdated() {
     if (!this.linkInput) return;
 
-    this._disposables.addFromEvent(this.linkInput, 'copy', e => {
-      e.stopPropagation();
-    });
-    this._disposables.addFromEvent(this.linkInput, 'cut', e => {
-      e.stopPropagation();
-    });
-    this._disposables.addFromEvent(this.linkInput, 'paste', e => {
-      e.stopPropagation();
-    });
+    this._disposables.addFromEvent(this.linkInput, 'copy', stopPropagation);
+    this._disposables.addFromEvent(this.linkInput, 'cut', stopPropagation);
+    this._disposables.addFromEvent(this.linkInput, 'paste', stopPropagation);
   }
 
   override render() {

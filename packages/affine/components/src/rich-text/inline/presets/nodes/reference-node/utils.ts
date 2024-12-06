@@ -5,10 +5,16 @@ import cloneDeep from 'lodash.clonedeep';
 /**
  * Clones reference info.
  */
-export function cloneReferenceInfo({ pageId, params }: ReferenceInfo) {
+export function cloneReferenceInfo({
+  pageId,
+  params,
+  title,
+  description,
+}: ReferenceInfo) {
   const info: ReferenceInfo = { pageId };
-  if (!params) return info;
-  info.params = cloneDeep(params);
+  if (params) info.params = cloneDeep(params);
+  if (title) info.title = title;
+  if (description) info.description = description;
   return info;
 }
 

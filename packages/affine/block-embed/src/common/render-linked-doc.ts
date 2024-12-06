@@ -145,6 +145,11 @@ async function renderNoteContent(
   card.isNoteContentEmpty = false;
 
   const noteContainer = await card.noteContainer;
+
+  if (!noteContainer) {
+    return;
+  }
+
   while (noteContainer.firstChild) {
     noteContainer.firstChild.remove();
   }
@@ -199,13 +204,10 @@ async function renderNoteContent(
 }
 
 function filterTextModel(model: BlockModel) {
-  if (matchFlavours(model, ['affine:divider'])) {
-    return true;
+  if (matchFlavours(model, ['affine:paragraph', 'affine:list'])) {
+    return !!model.text?.toString().length;
   }
-  if (!matchFlavours(model, ['affine:paragraph', 'affine:list'])) {
-    return false;
-  }
-  return !!model.text?.toString().length;
+  return false;
 }
 
 export function getNotesFromDoc(doc: Doc) {
@@ -254,4 +256,42 @@ export function isEmptyNote(note: BlockModel) {
 function getSurfaceBlock(doc: Doc) {
   const blocks = doc.getBlocksByFlavour('affine:surface');
   return blocks.length !== 0 ? (blocks[0].model as SurfaceBlockModel) : null;
+}
+
+/**
+ * Gets the document content with a max length.
+ */
+export function getDocContentWithMaxLength(doc: Doc, maxlength = 500) {
+  const notes = getNotesFromDoc(doc);
+  if (!notes) return;
+
+  const noteChildren = notes.flatMap(note =>
+    note.children.filter(model => filterTextModel(model))
+  );
+  if (!noteChildren.length) return;
+
+  let count = 0;
+  let reached = false;
+  const texts = [];
+
+  for (const model of noteChildren) {
+    let t = model.text?.toString();
+    if (t?.length) {
+      const c: number = count + Math.max(0, texts.length - 1);
+
+      if (t.length + c > maxlength) {
+        t = t.substring(0, maxlength - c);
+        reached = true;
+      }
+
+      texts.push(t);
+      count += t.length;
+
+      if (reached) {
+        break;
+      }
+    }
+  }
+
+  return texts.join('\n');
 }

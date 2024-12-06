@@ -19,6 +19,12 @@ export type TextBuffer = {
   content: string;
 };
 
+export type DeltaASTConverterOptions = {
+  trim?: boolean;
+  pre?: boolean;
+  pageMap?: Map<string, string>;
+};
+
 export type AdapterContext<
   ONode extends object,
   TNode extends object = never,
@@ -120,7 +126,10 @@ export abstract class DeltaASTConverter<
   /**
    * Convert AST format to delta format
    */
-  abstract astToDelta(ast: AST): DeltaInsert<TextAttributes>[];
+  abstract astToDelta(
+    ast: AST,
+    options?: unknown
+  ): DeltaInsert<TextAttributes>[];
 
   /**
    * Convert delta format to AST format
@@ -150,7 +159,11 @@ export type ASTToDeltaMatcher<AST> = {
     ast: AST,
     context: {
       configs: Map<string, string>;
-      toDelta: (ast: AST) => DeltaInsert<AffineTextAttributes>[];
+      options: DeltaASTConverterOptions;
+      toDelta: (
+        ast: AST,
+        options?: DeltaASTConverterOptions
+      ) => DeltaInsert<AffineTextAttributes>[];
     }
   ) => DeltaInsert<AffineTextAttributes>[];
 };

@@ -139,8 +139,8 @@ test('zoom by pinch', async ({ page }) => {
     { x: CENTER_X + 100, y: CENTER_Y },
   ];
   const to = [
-    { x: CENTER_X - 50, y: CENTER_Y },
-    { x: CENTER_X + 50, y: CENTER_Y },
+    { x: CENTER_X - 50, y: CENTER_Y - 35 },
+    { x: CENTER_X + 50, y: CENTER_Y + 35 },
   ];
   await multiTouchDown(page, from);
   await multiTouchMove(page, from, to);
@@ -166,8 +166,8 @@ test('zoom by pinch when edgeless is readonly', async ({ page }) => {
     { x: CENTER_X + 100, y: CENTER_Y },
   ];
   const to = [
-    { x: CENTER_X - 50, y: CENTER_Y },
-    { x: CENTER_X + 50, y: CENTER_Y },
+    { x: CENTER_X - 50, y: CENTER_Y - 35 },
+    { x: CENTER_X + 50, y: CENTER_Y + 35 },
   ];
   await multiTouchDown(page, from);
   await multiTouchMove(page, from, to);

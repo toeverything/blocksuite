@@ -47,13 +47,12 @@ export class AISubItemList extends WithDisposable(LitElement) {
   `;
 
   private _handleClick = (subItem: AISubItemConfig) => {
+    this.onClick?.();
     if (subItem.handler) {
       // TODO: add parameters to ai handler
       subItem.handler(this.host);
     }
-
     this.abortController.abort();
-    this.onClick?.();
   };
 
   override render() {

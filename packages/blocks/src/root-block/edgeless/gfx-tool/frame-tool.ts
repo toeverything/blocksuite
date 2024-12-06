@@ -78,6 +78,7 @@ export class FrameTool extends BaseTool {
           ),
           xywh: Bound.fromPoints([this._startPoint, currentPoint]).serialize(),
           index: this.gfx.layer.generateIndex(true),
+          presentationIndex: this.frameManager.generatePresentationIndex(),
         },
         this.gfx.surface
       );

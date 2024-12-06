@@ -7,7 +7,7 @@ import {
 import { AssetsManager, MemoryBlobCRUD } from '@blocksuite/store';
 import { describe, expect, test } from 'vitest';
 
-import { HtmlAdapter } from '../../_common/adapters/html.js';
+import { HtmlAdapter } from '../../_common/adapters/html-adapter/html.js';
 import { nanoidReplacement } from '../../_common/test-utils/test-utils.js';
 import { createJob } from '../utils/create-job.js';
 
@@ -1068,6 +1068,102 @@ describe('snapshot to html', () => {
     });
     expect(target.file).toBe(html);
   });
+
+  describe('embed link block', () => {
+    const embedTestCases = [
+      {
+        name: 'bookmark',
+        flavour: 'affine:bookmark',
+        url: 'https://example.com',
+        title: 'example',
+      },
+      {
+        name: 'embed github',
+        flavour: 'affine:embed-github',
+        url: 'https://github.com/toeverything/blocksuite/pull/66666',
+        title: 'example github pr title',
+      },
+      {
+        name: 'embed figma',
+        flavour: 'affine:embed-figma',
+        url: 'https://www.figma.com/file/1234567890',
+        title: 'example figma title',
+      },
+      {
+        name: 'embed youtube',
+        flavour: 'affine:embed-youtube',
+        url: 'https://www.youtube.com/watch?v=1234567890',
+        title: 'example youtube title',
+      },
+      {
+        name: 'embed loom',
+        flavour: 'affine:embed-loom',
+        url: 'https://www.loom.com/share/1234567890',
+        title: 'example loom title',
+      },
+    ];
+
+    for (const testCase of embedTestCases) {
+      test(testCase.name, async () => {
+        const blockSnapshot: BlockSnapshot = {
+          type: 'block',
+          id: 'block:vu6SK6WJpW',
+          flavour: 'affine:page',
+          props: {
+            title: {
+              '$blocksuite:internal:text$': true,
+              delta: [],
+            },
+          },
+          children: [
+            {
+              type: 'block',
+              id: 'block:Tk4gSPocAt',
+              flavour: 'affine:surface',
+              props: {
+                elements: {},
+              },
+              children: [],
+            },
+            {
+              type: 'block',
+              id: 'block:WfnS5ZDCJT',
+              flavour: 'affine:note',
+              props: {
+                xywh: '[0,0,800,95]',
+                background: DEFAULT_NOTE_BACKGROUND_COLOR,
+                index: 'a0',
+                hidden: false,
+                displayMode: NoteDisplayMode.DocAndEdgeless,
+              },
+              children: [
+                {
+                  type: 'block',
+                  id: 'block:Bdn8Yvqcny',
+                  flavour: testCase.flavour,
+                  props: {
+                    url: testCase.url,
+                    title: testCase.title,
+                  },
+                  children: [],
+                },
+              ],
+            },
+          ],
+        };
+
+        const html = template(
+          `<div class="affine-paragraph-block-container"><a href="${testCase.url}">${testCase.title}</a></div>`
+        );
+
+        const htmlAdapter = new HtmlAdapter(createJob());
+        const target = await htmlAdapter.fromBlockSnapshot({
+          snapshot: blockSnapshot,
+        });
+        expect(target.file).toBe(html);
+      });
+    }
+  });
 });
 
 describe('html to snapshot', () => {
@@ -1253,6 +1349,72 @@ describe('html to snapshot', () => {
             },
           },
           children: [],
+        },
+      ],
+    };
+
+    const htmlAdapter = new HtmlAdapter(createJob());
+    const rawBlockSnapshot = await htmlAdapter.toBlockSnapshot({
+      file: html,
+    });
+    expect(nanoidReplacement(rawBlockSnapshot)).toEqual(blockSnapshot);
+  });
+
+  test('nested list', async () => {
+    const html = template(`<ul><li>111<ul><li>222</li></ul></li></ul>`);
+
+    const blockSnapshot: BlockSnapshot = {
+      type: 'block',
+      id: 'matchesReplaceMap[0]',
+      flavour: 'affine:note',
+      props: {
+        xywh: '[0,0,800,95]',
+        background: DEFAULT_NOTE_BACKGROUND_COLOR,
+        index: 'a0',
+        hidden: false,
+        displayMode: NoteDisplayMode.DocAndEdgeless,
+      },
+      children: [
+        {
+          type: 'block',
+          id: 'matchesReplaceMap[1]',
+          flavour: 'affine:list',
+          props: {
+            type: 'bulleted',
+            text: {
+              '$blocksuite:internal:text$': true,
+              delta: [
+                {
+                  insert: '111',
+                },
+              ],
+            },
+            checked: false,
+            collapsed: false,
+            order: null,
+          },
+          children: [
+            {
+              type: 'block',
+              id: 'matchesReplaceMap[2]',
+              flavour: 'affine:list',
+              props: {
+                type: 'bulleted',
+                text: {
+                  '$blocksuite:internal:text$': true,
+                  delta: [
+                    {
+                      insert: '222',
+                    },
+                  ],
+                },
+                checked: false,
+                collapsed: false,
+                order: null,
+              },
+              children: [],
+            },
+          ],
         },
       ],
     };

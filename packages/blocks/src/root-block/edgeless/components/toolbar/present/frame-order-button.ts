@@ -59,10 +59,7 @@ export class EdgelessFrameOrderButton extends WithDisposable(LitElement) {
       >
         ${FrameOrderAdjustmentIcon}
       </edgeless-tool-icon-button>
-      <edgeless-frame-order-menu
-        .edgeless=${this.edgeless}
-        .frames=${this.frames}
-      >
+      <edgeless-frame-order-menu .edgeless=${this.edgeless}>
       </edgeless-frame-order-menu>
     `;
   }
