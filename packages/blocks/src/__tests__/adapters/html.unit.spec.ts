@@ -7,7 +7,7 @@ import {
 import { AssetsManager, MemoryBlobCRUD } from '@blocksuite/store';
 import { describe, expect, test } from 'vitest';
 
-import { HtmlAdapter } from '../../_common/adapters/html.js';
+import { HtmlAdapter } from '../../_common/adapters/html-adapter/html.js';
 import { nanoidReplacement } from '../../_common/test-utils/test-utils.js';
 import { createJob } from '../utils/create-job.js';
 
@@ -1253,6 +1253,72 @@ describe('html to snapshot', () => {
             },
           },
           children: [],
+        },
+      ],
+    };
+
+    const htmlAdapter = new HtmlAdapter(createJob());
+    const rawBlockSnapshot = await htmlAdapter.toBlockSnapshot({
+      file: html,
+    });
+    expect(nanoidReplacement(rawBlockSnapshot)).toEqual(blockSnapshot);
+  });
+
+  test('nested list', async () => {
+    const html = template(`<ul><li>111<ul><li>222</li></ul></li></ul>`);
+
+    const blockSnapshot: BlockSnapshot = {
+      type: 'block',
+      id: 'matchesReplaceMap[0]',
+      flavour: 'affine:note',
+      props: {
+        xywh: '[0,0,800,95]',
+        background: DEFAULT_NOTE_BACKGROUND_COLOR,
+        index: 'a0',
+        hidden: false,
+        displayMode: NoteDisplayMode.DocAndEdgeless,
+      },
+      children: [
+        {
+          type: 'block',
+          id: 'matchesReplaceMap[1]',
+          flavour: 'affine:list',
+          props: {
+            type: 'bulleted',
+            text: {
+              '$blocksuite:internal:text$': true,
+              delta: [
+                {
+                  insert: '111',
+                },
+              ],
+            },
+            checked: false,
+            collapsed: false,
+            order: null,
+          },
+          children: [
+            {
+              type: 'block',
+              id: 'matchesReplaceMap[2]',
+              flavour: 'affine:list',
+              props: {
+                type: 'bulleted',
+                text: {
+                  '$blocksuite:internal:text$': true,
+                  delta: [
+                    {
+                      insert: '222',
+                    },
+                  ],
+                },
+                checked: false,
+                collapsed: false,
+                order: null,
+              },
+              children: [],
+            },
+          ],
         },
       ],
     };

@@ -1,3 +1,16 @@
+export {
+  BlockHtmlAdapterExtension,
+  type BlockHtmlAdapterMatcher,
+  BlockHtmlAdapterMatcherIdentifier,
+  type Html,
+  type HtmlAST,
+  type HtmlASTToDeltaMatcher,
+  HtmlASTToDeltaMatcherIdentifier,
+  HtmlDeltaConverter,
+  type InlineDeltaToHtmlAdapterMatcher,
+  InlineDeltaToHtmlAdapterMatcherIdentifier,
+  type InlineHtmlAST,
+} from './html-adapter/index.js';
 export { MarkdownDeltaConverter } from './markdown/delta-converter.js';
 export {
   BlockMarkdownAdapterExtension,
@@ -11,7 +24,6 @@ export {
   type MarkdownASTToDeltaMatcher,
   MarkdownASTToDeltaMatcherIdentifier,
 } from './markdown/index.js';
-export * from './plain-text/index.js';
 export {
   BlockPlainTextAdapterExtension,
   type BlockPlainTextAdapterMatcher,
@@ -37,3 +49,4 @@ export {
   mergeDeltas,
   toURLSearchParams,
 } from './utils.js';
+export * from './utils/index.js';
