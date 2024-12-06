@@ -1,6 +1,12 @@
 import type { ExtensionType } from '@blocksuite/block-std';
 
 import {
+  EmbedFigmaBlockHtmlAdapterExtension,
+  embedFigmaBlockHtmlAdapterMatcher,
+  EmbedGithubBlockHtmlAdapterExtension,
+  embedGithubBlockHtmlAdapterMatcher,
+  EmbedLoomBlockHtmlAdapterExtension,
+  embedLoomBlockHtmlAdapterMatcher,
   EmbedYoutubeBlockHtmlAdapterExtension,
   embedYoutubeBlockHtmlAdapterMatcher,
 } from '@blocksuite/affine-block-embed';
@@ -13,6 +19,10 @@ import {
   paragraphBlockHtmlAdapterMatcher,
 } from '@blocksuite/affine-block-paragraph';
 
+import {
+  BookmarkBlockHtmlAdapterExtension,
+  bookmarkBlockHtmlAdapterMatcher,
+} from '../../../bookmark-block/adapters/html.js';
 import {
   CodeBlockHtmlAdapterExtension,
   codeBlockHtmlAdapterMatcher,
@@ -38,6 +48,10 @@ export const defaultBlockHtmlAdapterMatchers = [
   imageBlockHtmlAdapterMatcher,
   rootBlockHtmlAdapterMatcher,
   embedYoutubeBlockHtmlAdapterMatcher,
+  embedFigmaBlockHtmlAdapterMatcher,
+  embedLoomBlockHtmlAdapterMatcher,
+  embedGithubBlockHtmlAdapterMatcher,
+  bookmarkBlockHtmlAdapterMatcher,
 ];
 
 export const BlockHtmlAdapterExtensions: ExtensionType[] = [
@@ -48,4 +62,8 @@ export const BlockHtmlAdapterExtensions: ExtensionType[] = [
   ImageBlockHtmlAdapterExtension,
   RootBlockHtmlAdapterExtension,
   EmbedYoutubeBlockHtmlAdapterExtension,
+  EmbedFigmaBlockHtmlAdapterExtension,
+  EmbedLoomBlockHtmlAdapterExtension,
+  EmbedGithubBlockHtmlAdapterExtension,
+  BookmarkBlockHtmlAdapterExtension,
 ];

@@ -20,6 +20,7 @@ export const EmbedExtensions: ExtensionType[] = [
   EmbedSyncedDocBlockSpec,
 ].flat();
 
+export { createEmbedBlockHtmlAdapterMatcher } from './common/adapters/html.js';
 export { createEmbedBlockMarkdownAdapterMatcher } from './common/adapters/markdown.js';
 export { createEmbedBlockPlainTextAdapterMatcher } from './common/adapters/plain-text.js';
 export { EmbedBlockComponent } from './common/embed-block-element.js';
