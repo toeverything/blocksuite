@@ -17,6 +17,7 @@ import {
 import { DocCollection, type Y } from '@blocksuite/store';
 import { createMutex } from 'lib0/mutex';
 
+import type { PointerEventState } from '../../../event/index.js';
 import type { EditorHost } from '../../../view/index.js';
 import type {
   GfxCompatibleInterface,
@@ -78,6 +79,20 @@ export abstract class GfxPrimitiveElementModel<
   protected _preserved = new Map<string, unknown>();
 
   protected _stashed: Map<keyof Props | string, unknown>;
+
+  onClick?: ((e: PointerEventState) => void) | undefined;
+
+  onDblClick?: ((e: PointerEventState) => void) | undefined;
+
+  onPointerDown?: ((e: PointerEventState) => void) | undefined;
+
+  onPointerEnter?: ((e: PointerEventState) => void) | undefined;
+
+  onPointerLeave?: ((e: PointerEventState) => void) | undefined;
+
+  onPointerMove?: ((e: PointerEventState) => void) | undefined;
+
+  onPointerUp?: ((e: PointerEventState) => void) | undefined;
 
   abstract rotate: number;
 
