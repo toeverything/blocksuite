@@ -68,6 +68,10 @@ export class CollabDebugMenu extends SignalWatcher(ShadowlessElement) {
     this._setThemeMode(!!e.matches);
   };
 
+  private _handleDocsPanelClose = () => {
+    this.leftSidePanel.toggle(this.docsPanel);
+  };
+
   private _keydown = (e: KeyboardEvent) => {
     if (e.key === 'F1') {
       this._switchEditorMode();
@@ -277,6 +281,7 @@ export class CollabDebugMenu extends SignalWatcher(ShadowlessElement) {
   }
 
   private _toggleDocsPanel() {
+    this.docsPanel.onClose = this._handleDocsPanelClose;
     this.leftSidePanel.toggle(this.docsPanel);
   }
 
@@ -483,7 +488,12 @@ export class CollabDebugMenu extends SignalWatcher(ShadowlessElement) {
               </sl-button>
             </sl-tooltip>
             <sl-tooltip content="Docs" placement="bottom" hoist>
-              <sl-button @click=${this._toggleDocsPanel} size="small" circle>
+              <sl-button
+                @click=${this._toggleDocsPanel}
+                size="small"
+                circle
+                data-docs-panel-toggle
+              >
                 <sl-icon name="filetype-doc" label="Doc"></sl-icon>
               </sl-button>
             </sl-tooltip>

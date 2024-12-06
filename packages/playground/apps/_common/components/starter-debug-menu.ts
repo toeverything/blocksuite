@@ -194,6 +194,10 @@ export class StarterDebugMenu extends ShadowlessElement {
     this._setThemeMode(!!e.matches);
   };
 
+  private _handleDocsPanelClose = () => {
+    this.leftSidePanel.toggle(this.docsPanel);
+  };
+
   private _showStyleDebugMenu = false;
 
   private _styleMenu!: Pane;
@@ -624,6 +628,7 @@ export class StarterDebugMenu extends ShadowlessElement {
   }
 
   private _toggleDocsPanel() {
+    this.docsPanel.onClose = this._handleDocsPanelClose;
     this.leftSidePanel.toggle(this.docsPanel);
   }
 
@@ -953,6 +958,7 @@ export class StarterDebugMenu extends ShadowlessElement {
             data-testid="docs-button"
             size="small"
             @click="${this._toggleDocsPanel}"
+            data-docs-panel-toggle
           >
             Docs
           </sl-button>
