@@ -830,3 +830,321 @@ test('linked doc can be dragged from note to surface top level block', async ({
   await waitNextFrame(page);
   await assertParentBlockFlavour(page, '10', 'affine:surface');
 });
+
+// Aliases
+test.describe('Customize linked doc title and description', () => {
+  // Inline View
+  test('should set a custom title for inline link', async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyParagraphState(page);
+    await focusTitle(page);
+    await type(page, 'title0');
+    await focusRichText(page);
+    await type(page, 'page0');
+    await assertRichTexts(page, ['page0']);
+
+    const { id } = await addNewPage(page);
+    await switchToPage(page, id);
+    await focusTitle(page);
+    await type(page, 'title1');
+    await focusRichText(page);
+    await type(page, 'page1');
+    await assertRichTexts(page, ['page1']);
+
+    await getDebugMenu(page).pagesBtn.click();
+
+    await focusRichText(page);
+    await type(page, '@title0');
+    await pressEnter(page);
+
+    const { findRefNode } = getLinkedDocPopover(page);
+    const page0 = await findRefNode('title0');
+    await page0.hover();
+
+    await waitNextFrame(page, 200);
+    const referencePopup = page.locator('.affine-reference-popover-container');
+    await expect(referencePopup).toBeVisible();
+
+    const editButton = referencePopup.getByRole('button', { name: 'Edit' });
+    await editButton.click();
+
+    await waitNextFrame(page, 200);
+    const popup = page.locator('.alias-form-popup');
+    await expect(popup).toBeVisible();
+
+    const input = popup.locator('input');
+    await expect(input).toBeFocused();
+
+    // title alias
+    await type(page, 'page0-title0');
+    await pressEnter(page);
+
+    await page.mouse.click(0, 0);
+
+    await focusRichText(page);
+    await waitNextFrame(page, 200);
+
+    const page0Alias = await findRefNode('page0-title0');
+    await page0Alias.hover();
+
+    await waitNextFrame(page, 200);
+    await expect(referencePopup).toBeVisible();
+
+    // original title button
+    const docTitle = referencePopup.getByRole('button', { name: 'Doc title' });
+    await expect(docTitle).toHaveText('title0', { useInnerText: true });
+
+    // reedit
+    await editButton.click();
+
+    await waitNextFrame(page, 200);
+
+    // reset
+    await popup.getByRole('button', { name: 'Reset' }).click();
+
+    await waitNextFrame(page, 200);
+
+    const resetedPage0 = await findRefNode('title0');
+    await resetedPage0.hover();
+
+    await waitNextFrame(page, 200);
+    await expect(referencePopup).toBeVisible();
+    await expect(docTitle).not.toBeVisible();
+  });
+
+  // Card View
+  test('should set a custom title and description for card link', async ({
+    page,
+  }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyParagraphState(page);
+    await focusTitle(page);
+    await type(page, 'title0');
+
+    const { id } = await addNewPage(page);
+    await switchToPage(page, id);
+    await focusTitle(page);
+    await type(page, 'title1');
+
+    await getDebugMenu(page).pagesBtn.click();
+
+    await focusRichText(page);
+    await type(page, '@title0');
+    await pressEnter(page);
+
+    const { findRefNode } = getLinkedDocPopover(page);
+    const page0 = await findRefNode('title0');
+    await page0.hover();
+
+    await waitNextFrame(page, 200);
+    const referencePopup = page.locator('.affine-reference-popover-container');
+
+    let editButton = referencePopup.getByRole('button', { name: 'Edit' });
+    await editButton.click();
+
+    // title alias
+    await type(page, 'page0-title0');
+    await pressEnter(page);
+
+    await focusRichText(page);
+    await waitNextFrame(page, 200);
+
+    const page0Alias = await findRefNode('page0-title0');
+    await page0Alias.hover();
+
+    await waitNextFrame(page, 200);
+    const switchButton = referencePopup.getByRole('button', {
+      name: 'Switch view',
+    });
+    await switchButton.click();
+
+    // switches to card view
+    const toCardButton = referencePopup.getByRole('button', {
+      name: 'Card view',
+    });
+    await toCardButton.click();
+
+    await waitNextFrame(page, 200);
+    const linkedDocBlock = page.locator('affine-embed-linked-doc-block');
+    await expect(linkedDocBlock).toBeVisible();
+
+    const linkedDocBlockTitle = linkedDocBlock.locator(
+      '.affine-embed-linked-doc-content-title-text'
+    );
+    await expect(linkedDocBlockTitle).toHaveText('page0-title0');
+
+    await linkedDocBlock.click();
+
+    await waitNextFrame(page, 200);
+    const cardToolbar = page.locator('affine-embed-card-toolbar');
+    const docTitleButton = cardToolbar.getByRole('button', {
+      name: 'Doc title',
+    });
+    await expect(docTitleButton).toBeVisible();
+
+    editButton = cardToolbar.getByRole('button', { name: 'Edit' });
+    await editButton.click();
+
+    await waitNextFrame(page, 200);
+    const editModal = page.locator('embed-card-edit-modal');
+    const resetButton = editModal.getByRole('button', { name: 'Reset' });
+    const saveButton = editModal.getByRole('button', { name: 'Save' });
+
+    // clears aliases
+    await resetButton.click();
+
+    await waitNextFrame(page, 200);
+    await expect(linkedDocBlockTitle).toHaveText('title0');
+
+    await linkedDocBlock.click();
+
+    await waitNextFrame(page, 200);
+    await editButton.click();
+
+    await waitNextFrame(page, 200);
+
+    // title alias
+    await type(page, 'page0-title0');
+    await page.keyboard.press('Tab');
+    // description alias
+    await type(page, 'This is a new description');
+
+    // saves aliases
+    await saveButton.click();
+
+    await waitNextFrame(page, 200);
+    await expect(linkedDocBlockTitle).toHaveText('page0-title0');
+    await expect(
+      page.locator('.affine-embed-linked-doc-content-note.alias')
+    ).toHaveText('This is a new description');
+  });
+
+  // Embed View
+  test('should automatically switch to card view and set a custom title and description', async ({
+    page,
+  }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyParagraphState(page);
+    await focusTitle(page);
+    await type(page, 'title0');
+
+    const { id } = await addNewPage(page);
+    await switchToPage(page, id);
+    await focusTitle(page);
+    await type(page, 'title1');
+
+    await getDebugMenu(page).pagesBtn.click();
+
+    await focusRichText(page);
+    await type(page, '@title0');
+    await pressEnter(page);
+
+    const { findRefNode } = getLinkedDocPopover(page);
+    const page0 = await findRefNode('title0');
+    await page0.hover();
+
+    await waitNextFrame(page, 200);
+    const referencePopup = page.locator('.affine-reference-popover-container');
+
+    let editButton = referencePopup.getByRole('button', { name: 'Edit' });
+    await editButton.click();
+
+    // title alias
+    await type(page, 'page0-title0');
+    await pressEnter(page);
+
+    await focusRichText(page);
+    await waitNextFrame(page, 200);
+
+    const page0Alias = await findRefNode('page0-title0');
+    await page0Alias.hover();
+
+    await waitNextFrame(page, 200);
+    let switchButton = referencePopup.getByRole('button', {
+      name: 'Switch view',
+    });
+    await switchButton.click();
+
+    // switches to card view
+    const toCardButton = referencePopup.getByRole('button', {
+      name: 'Card view',
+    });
+    await toCardButton.click();
+
+    await waitNextFrame(page, 200);
+    const linkedDocBlock = page.locator('affine-embed-linked-doc-block');
+
+    await linkedDocBlock.click();
+
+    await waitNextFrame(page, 200);
+    const cardToolbar = page.locator('affine-embed-card-toolbar');
+    switchButton = cardToolbar.getByRole('button', { name: 'Switch view' });
+    await switchButton.click();
+
+    await waitNextFrame(page, 200);
+
+    // switches to embed view
+    const toEmbedButton = cardToolbar.getByRole('button', {
+      name: 'Embed view',
+    });
+    await toEmbedButton.click();
+
+    await waitNextFrame(page, 200);
+    const syncedDocBlock = page.locator('affine-embed-synced-doc-block');
+
+    await syncedDocBlock.click();
+
+    await waitNextFrame(page, 200);
+    const syncedDocBlockTitle = syncedDocBlock.locator(
+      '.affine-embed-synced-doc-title'
+    );
+    await expect(syncedDocBlockTitle).toHaveText('title0');
+
+    await syncedDocBlock.click();
+
+    await waitNextFrame(page, 200);
+    editButton = cardToolbar.getByRole('button', { name: 'Edit' });
+    await editButton.click();
+
+    await waitNextFrame(page, 200);
+    const editModal = page.locator('embed-card-edit-modal');
+    const cancelButton = editModal.getByRole('button', { name: 'Cancel' });
+    const saveButton = editModal.getByRole('button', { name: 'Save' });
+
+    // closes edit-model
+    await cancelButton.click();
+
+    await waitNextFrame(page, 200);
+    await expect(editModal).not.toBeVisible();
+
+    await syncedDocBlock.click();
+
+    await waitNextFrame(page, 200);
+    await editButton.click();
+
+    await waitNextFrame(page, 200);
+
+    // title alias
+    await type(page, 'page0-title0');
+    await page.keyboard.press('Tab');
+    // description alias
+    await type(page, 'This is a new description');
+
+    // saves aliases
+    await saveButton.click();
+
+    await waitNextFrame(page, 200);
+
+    // automatically switch to card view
+    await expect(syncedDocBlock).not.toBeVisible();
+
+    await expect(linkedDocBlock).toBeVisible();
+    const linkedDocBlockTitle = linkedDocBlock.locator(
+      '.affine-embed-linked-doc-content-title-text'
+    );
+    await expect(linkedDocBlockTitle).toHaveText('page0-title0');
+    await expect(
+      linkedDocBlock.locator('.affine-embed-linked-doc-content-note.alias')
+    ).toHaveText('This is a new description');
+  });
+});

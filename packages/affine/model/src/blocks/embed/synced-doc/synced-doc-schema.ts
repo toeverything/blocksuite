@@ -10,6 +10,9 @@ export const defaultEmbedSyncedDocBlockProps: EmbedSyncedDocBlockProps = {
   style: EmbedSyncedDocStyles[0],
   caption: undefined,
   scale: undefined,
+  // title & description aliases
+  title: undefined,
+  description: undefined,
 };
 
 export const EmbedSyncedDocBlockSchema = createEmbedBlockSchema({

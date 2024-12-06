@@ -1482,7 +1482,7 @@ __metadata:
     "@blocksuite/affine-shared": "workspace:*"
     "@blocksuite/block-std": "workspace:*"
     "@blocksuite/global": "workspace:*"
-    "@blocksuite/icons": "npm:^2.1.70"
+    "@blocksuite/icons": "npm:^2.1.75"
     "@blocksuite/inline": "workspace:*"
     "@blocksuite/store": "workspace:*"
     "@floating-ui/dom": "npm:^1.6.10"
@@ -1571,7 +1571,7 @@ __metadata:
     "@blocksuite/affine-shared": "workspace:*"
     "@blocksuite/block-std": "workspace:*"
     "@blocksuite/global": "workspace:*"
-    "@blocksuite/icons": "npm:^2.1.70"
+    "@blocksuite/icons": "npm:^2.1.75"
     "@blocksuite/inline": "workspace:*"
     "@blocksuite/store": "workspace:*"
     "@floating-ui/dom": "npm:^1.6.10"
@@ -1692,7 +1692,7 @@ __metadata:
     "@blocksuite/block-std": "workspace:*"
     "@blocksuite/data-view": "workspace:*"
     "@blocksuite/global": "workspace:*"
-    "@blocksuite/icons": "npm:^2.1.70"
+    "@blocksuite/icons": "npm:^2.1.75"
     "@blocksuite/inline": "workspace:*"
     "@blocksuite/store": "workspace:*"
     "@floating-ui/dom": "npm:^1.6.10"
@@ -1745,7 +1745,7 @@ __metadata:
     "@blocksuite/affine-shared": "workspace:*"
     "@blocksuite/block-std": "workspace:*"
     "@blocksuite/global": "workspace:*"
-    "@blocksuite/icons": "npm:^2.1.70"
+    "@blocksuite/icons": "npm:^2.1.75"
     "@blocksuite/store": "workspace:*"
     "@emotion/hash": "npm:^0.9.2"
     "@floating-ui/dom": "npm:^1.6.10"
@@ -1798,9 +1798,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@blocksuite/icons@npm:^2.1.70":
-  version: 2.1.74
-  resolution: "@blocksuite/icons@npm:2.1.74"
+"@blocksuite/icons@npm:^2.1.75":
+  version: 2.1.75
+  resolution: "@blocksuite/icons@npm:2.1.75"
   peerDependencies:
     "@types/react": ^18.0.25
     lit: ^3.1.1
@@ -1810,7 +1810,7 @@ __metadata:
       optional: true
     react:
       optional: true
-  checksum: 10/84bdcab64c09d5a15fdbe97d753a9b994bdf00b1606c7672417e199b031a8d2f3f549b6f913ee786259739b11e9f61a44f997ac41950afa4a327151ab140c5ba
+  checksum: 10/25e8c25630690b7b1b13761593d9f776c3e78a7be6db4bd30f2c3a25134acd22a41a3258e324ac843ea04cfc9a2c29456563a254a6e7e627043b5248a82cb778
   languageName: node
   linkType: hard
 

@@ -235,8 +235,9 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
     const isDeleted = !refMeta;
 
     const attributes = this.delta.attributes;
-    const type = attributes?.reference?.type;
-    if (!type) {
+    const reference = attributes?.reference;
+    const type = reference?.type;
+    if (!attributes || !type) {
       return nothing;
     }
 
@@ -244,9 +245,7 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
       ? this.customTitle(this)
       : isDeleted
         ? 'Deleted doc'
-        : refMeta.title.length > 0
-          ? refMeta.title
-          : DEFAULT_DOC_NAME;
+        : reference?.title || refMeta.title || DEFAULT_DOC_NAME;
 
     const icon = choose(
       type,
