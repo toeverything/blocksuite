@@ -53,19 +53,77 @@ const getTextChildrenOnlyAst = (ast: Element): Element => {
   };
 };
 
-const isInlineElement = (tagName: string): boolean => {
+const isTagInline = (tagName: string): boolean => {
+  // Phrasing content
   const inlineElements = [
     'a',
+    'abbr',
+    'audio',
+    'b',
+    'bdi',
+    'bdo',
     'br',
+    'button',
+    'canvas',
+    'cite',
     'code',
+    'data',
+    'datalist',
     'del',
+    'dfn',
     'em',
+    'embed',
+    'i',
+    // 'iframe' is not included because it needs special handling
+    // 'img' is not included because it needs special handling
+    'input',
+    'ins',
+    'kbd',
+    'label',
+    'link',
+    'map',
     'mark',
+    'math',
+    'meta',
+    'meter',
+    'noscript',
+    'object',
+    'output',
+    'picture',
+    'progress',
+    'q',
+    'ruby',
+    's',
+    'samp',
+    'script',
+    'select',
+    'slot',
+    'small',
     'span',
     'strong',
+    'sub',
+    'sup',
+    'svg',
+    'template',
+    'textarea',
+    'time',
     'u',
+    'var',
+    'video',
+    'wbr',
   ];
   return inlineElements.includes(tagName);
+};
+
+const isElementInline = (element: Element): boolean => {
+  return (
+    isTagInline(element.tagName) ||
+    // Inline elements
+    !!(
+      typeof element.properties?.style === 'string' &&
+      element.properties.style.match(/display:\s*inline/)
+    )
+  );
 };
 
 const getInlineElementsAndText = (ast: Element): (Element | Text)[] => {
@@ -77,11 +135,7 @@ const getInlineElementsAndText = (ast: Element): (Element | Text)[] => {
     if (child.type === 'text') {
       return true;
     }
-    if (
-      child.type === 'element' &&
-      child.tagName &&
-      isInlineElement(child.tagName)
-    ) {
+    if (child.type === 'element' && child.tagName && isElementInline(child)) {
       return true;
     }
     return false;
@@ -197,70 +251,7 @@ const isParagraphLike = (node: Element): boolean => {
   return (
     (typeof node.properties?.style === 'string' &&
       node.properties.style.match(/display:\s*flex/) !== null) ||
-    getElementChildren(node).every(
-      // Phrasing content
-      child =>
-        [
-          'a',
-          'abbr',
-          'audio',
-          'b',
-          'bdi',
-          'bdo',
-          'br',
-          'button',
-          'canvas',
-          'cite',
-          'code',
-          'data',
-          'datalist',
-          'del',
-          'dfn',
-          'em',
-          'embed',
-          'i',
-          // 'iframe' is not included because it needs special handling
-          // 'img' is not included because it needs special handling
-          'input',
-          'ins',
-          'kbd',
-          'label',
-          'link',
-          'map',
-          'mark',
-          'math',
-          'meta',
-          'meter',
-          'noscript',
-          'object',
-          'output',
-          'picture',
-          'progress',
-          'q',
-          'ruby',
-          's',
-          'samp',
-          'script',
-          'select',
-          'slot',
-          'small',
-          'span',
-          'strong',
-          'sub',
-          'sup',
-          'svg',
-          'template',
-          'textarea',
-          'time',
-          'u',
-          'var',
-          'video',
-          'wbr',
-        ].includes(child.tagName) ||
-        // Inline elements
-        (typeof child.properties?.style === 'string' &&
-          child.properties.style.match(/display:\s*inline/))
-    )
+    getElementChildren(node).every(child => isElementInline(child))
   );
 };
 
