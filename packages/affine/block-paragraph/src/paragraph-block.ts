@@ -15,6 +15,7 @@ import {
 import { DocModeProvider } from '@blocksuite/affine-shared/services';
 import {
   calculateCollapsedSiblings,
+  getNearestHeadingBefore,
   getViewportElement,
 } from '@blocksuite/affine-shared/utils';
 import { getInlineRangeProvider } from '@blocksuite/block-std';
@@ -150,6 +151,17 @@ export class ParagraphBlockComponent extends CaptionedBlockComponent<
           this.doc.updateBlock(this.model, {
             collapsed: false,
           });
+
+          const nearestHeading = getNearestHeadingBefore(this.model);
+          if (
+            nearestHeading &&
+            nearestHeading.type.startsWith('h') &&
+            nearestHeading.collapsed
+          ) {
+            this.doc.updateBlock(nearestHeading, {
+              collapsed: false,
+            });
+          }
         }
       })
     );
