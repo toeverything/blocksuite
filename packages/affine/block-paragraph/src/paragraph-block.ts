@@ -23,10 +23,11 @@ import { html, nothing, type TemplateResult } from 'lit';
 import { query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { styleMap } from 'lit/directives/style-map.js';
+import { unsafeHTML } from 'lit/directives/unsafe-html.js';
 
 import type { ParagraphBlockService } from './paragraph-service.js';
 
-import { PARAGRAPH_COLLAPSED_CLASS, paragraphBlockStyles } from './styles.js';
+import { paragraphBlockStyles } from './styles.js';
 
 export class ParagraphBlockComponent extends CaptionedBlockComponent<
   ParagraphBlockModel,
@@ -150,18 +151,6 @@ export class ParagraphBlockComponent extends CaptionedBlockComponent<
             collapsed: false,
           });
         }
-
-        const collapsedSiblings = calculateCollapsedSiblings(this.model);
-        collapsedSiblings.forEach(sibling => {
-          const el = this.host.view.getBlock(sibling.id);
-          if (!el) return;
-
-          if (collapsed) {
-            el.classList.add(PARAGRAPH_COLLAPSED_CLASS);
-          } else {
-            el.classList.remove(PARAGRAPH_COLLAPSED_CLASS);
-          }
-        });
       })
     );
   }
@@ -178,6 +167,22 @@ export class ParagraphBlockComponent extends CaptionedBlockComponent<
       ? this._readonlyCollapsed
       : this.model.collapsed;
 
+    let style = html``;
+    if (this.model.type.startsWith('h') && collapsed) {
+      const collapsedSiblings = calculateCollapsedSiblings(this.model);
+      style = html`
+        <style>
+          ${collapsedSiblings.map(sibling =>
+            unsafeHTML(`
+              [data-block-id="${sibling.id}"] {
+                display: none;
+              }
+            `)
+          )}
+        </style>
+      `;
+    }
+
     const children = html`<div
       class="affine-block-children-container"
       style=${styleMap({
@@ -189,6 +194,7 @@ export class ParagraphBlockComponent extends CaptionedBlockComponent<
     </div>`;
 
     return html`
+      ${style}
       <div class="affine-paragraph-block-container">
         <div
           class=${classMap({

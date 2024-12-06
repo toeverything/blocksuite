@@ -1,6 +1,4 @@
-import { css, unsafeCSS } from 'lit';
-
-export const PARAGRAPH_COLLAPSED_CLASS = 'affine-paragraph-collapsed';
+import { css } from 'lit';
 
 export const paragraphBlockStyles = css`
   affine-paragraph {
@@ -146,9 +144,5 @@ export const paragraphBlockStyles = css`
     .affine-paragraph-placeholder.visible {
       display: none;
     }
-  }
-
-  .${unsafeCSS(PARAGRAPH_COLLAPSED_CLASS)} {
-    display: none;
   }
 `;
