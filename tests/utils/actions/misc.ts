@@ -145,7 +145,7 @@ async function initEmptyEditor({
         editor.updateComplete
           .then(() => {
             const debugMenu: StarterDebugMenu =
-              document.createElement('debug-menu');
+              document.createElement('starter-debug-menu');
             const docsPanel: DocsPanel = document.createElement('docs-panel');
             const framePanel: CustomFramePanel =
               document.createElement('custom-frame-panel');
