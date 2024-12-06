@@ -151,7 +151,15 @@ export class ParagraphBlockComponent extends CaptionedBlockComponent<
           this.doc.updateBlock(this.model, {
             collapsed: false,
           });
+        }
+      })
+    );
 
+    let beforeType = this.model.type;
+    this.disposables.add(
+      effect(() => {
+        const type = this.model.type$.value;
+        if (beforeType !== type && !type.startsWith('h')) {
           const nearestHeading = getNearestHeadingBefore(this.model);
           if (
             nearestHeading &&
@@ -163,6 +171,7 @@ export class ParagraphBlockComponent extends CaptionedBlockComponent<
             });
           }
         }
+        beforeType = type;
       })
     );
   }

@@ -5,6 +5,7 @@ import {
 import { DragHandleConfigExtension } from '@blocksuite/affine-shared/services';
 import {
   calculateCollapsedSiblings,
+  captureEventTarget,
   matchFlavours,
 } from '@blocksuite/affine-shared/utils';
 
@@ -12,6 +13,10 @@ export const ParagraphDragHandleOption = DragHandleConfigExtension({
   flavour: ParagraphBlockSchema.model.flavour,
   onDragStart: ({ state, startDragging, anchorBlockId, editorHost }) => {
     if (!anchorBlockId) return false;
+
+    const element = captureEventTarget(state.raw.target);
+    const dragByHandle = !!element?.closest('affine-drag-handle-widget');
+    if (!dragByHandle) return false;
 
     const block = editorHost.doc.getBlock(anchorBlockId);
     if (!block) return false;
