@@ -305,9 +305,10 @@ export class GridManager {
     const [minRow, maxRow, minCol, maxCol] = rangeFromBound(bound);
     const b = Bound.from(bound);
     const returnSet = options.useSet ?? false;
-    const filter = Array.isArray(options.filter)
-      ? this._toFilterFuncs(options.filter)
-      : (options.filter ?? this._toFilterFuncs(['canvas', 'block']));
+    const filter =
+      (Array.isArray(options.filter)
+        ? this._toFilterFuncs(options.filter)
+        : options.filter) ?? this._toFilterFuncs(['canvas', 'block']);
 
     for (let i = minRow; i <= maxRow; i++) {
       for (let j = minCol; j <= maxCol; j++) {
@@ -315,7 +316,7 @@ export class GridManager {
         if (!gridElements) continue;
         for (const element of gridElements) {
           if (
-            (!filter || filter(element)) &&
+            filter(element) &&
             (strict
               ? b.contains(element.elementBound)
               : intersects(element.elementBound, b))
