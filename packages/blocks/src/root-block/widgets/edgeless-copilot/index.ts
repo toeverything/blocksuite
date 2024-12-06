@@ -21,9 +21,11 @@ import { styleMap } from 'lit/directives/style-map.js';
 
 import type { AIItemGroupConfig } from '../../../_common/components/ai-item/types.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
-import type { AffineAIPanelWidget } from '../ai-panel/ai-panel.js';
 
-import { AFFINE_AI_PANEL_WIDGET } from '../ai-panel/ai-panel.js';
+import {
+  AFFINE_AI_PANEL_WIDGET,
+  AffineAIPanelWidget,
+} from '../ai-panel/ai-panel.js';
 import { EdgelessCopilotPanel } from '../edgeless-copilot-panel/index.js';
 
 export const AFFINE_EDGELESS_COPILOT_WIDGET = 'affine-edgeless-copilot-widget';
@@ -93,12 +95,25 @@ export class EdgelessCopilotWidget extends WidgetComponent<
 
       if (!referenceElement || !referenceElement.isConnected) return;
 
+      // show ai input
+      const rootBlockId = this.host.doc.root?.id;
+      if (rootBlockId) {
+        const aiPanel = this.host.view.getWidget(
+          AFFINE_AI_PANEL_WIDGET,
+          rootBlockId
+        );
+        if (aiPanel instanceof AffineAIPanelWidget && aiPanel.config) {
+          aiPanel.setState('input', referenceElement);
+        }
+      }
+
       autoUpdate(referenceElement, panel, () => {
         computePosition(referenceElement, panel, {
           placement: 'right-start',
           middleware: [
             offset({
               mainAxis: 16,
+              crossAxis: 45,
             }),
             flip({
               mainAxis: true,
@@ -165,15 +180,9 @@ export class EdgelessCopilotWidget extends WidgetComponent<
 
         const off = this.block.dispatcher.add('pointerDown', ctx => {
           const e = ctx.get('pointerState').raw;
-          const aiPanel = this.host.view.getWidget(
-            AFFINE_AI_PANEL_WIDGET,
-            this.doc.root!.id
-          ) as AffineAIPanelWidget;
-
           if (
             e.button === MOUSE_BUTTON.MAIN &&
-            !this.contains(e.target as HTMLElement) &&
-            (!aiPanel || aiPanel.state === 'hidden')
+            !this.contains(e.target as HTMLElement)
           ) {
             off();
             this._visible = false;
