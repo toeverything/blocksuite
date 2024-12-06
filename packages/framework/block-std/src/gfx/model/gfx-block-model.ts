@@ -30,6 +30,7 @@ import type { SurfaceBlockModel } from './surface/surface-model.js';
 export type GfxCompatibleProps = {
   xywh: SerializedXYWH;
   index: string;
+  lockedBySelf?: boolean;
 };
 
 /**

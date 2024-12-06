@@ -24,6 +24,7 @@ export const EdgelessTextBlockSchema = defineBlockSchema({
   props: (): EdgelessTextProps => ({
     xywh: '[0,0,16,16]',
     index: 'a0',
+    lockedBySelf: false,
     color: '#000000',
     fontFamily: FontFamily.Inter,
     fontStyle: FontStyle.Normal,

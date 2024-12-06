@@ -26,6 +26,7 @@ export const NoteBlockSchema = defineBlockSchema({
     xywh: `[0,0,${DEFAULT_NOTE_WIDTH},${DEFAULT_NOTE_HEIGHT}]`,
     background: DEFAULT_NOTE_BACKGROUND_COLOR,
     index: 'a0',
+    lockedBySelf: false,
     hidden: false,
     displayMode: NoteDisplayMode.DocAndEdgeless,
     edgeless: {
