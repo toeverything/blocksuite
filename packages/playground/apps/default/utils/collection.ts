@@ -51,7 +51,7 @@ export async function createDefaultDocCollection() {
           shadows: [new BroadcastChannelDocSource()],
         };
         awarenessSources = [
-          new BroadcastChannelAwarenessSource('quickEdgeless'),
+          new BroadcastChannelAwarenessSource('collabPlayground'),
         ];
       });
   }
@@ -63,11 +63,11 @@ export async function createDefaultDocCollection() {
   );
 
   const options: DocCollectionOptions = {
-    id: 'quickEdgeless',
+    id: 'collabPlayground',
     schema,
     idGenerator,
     blobSources: {
-      main: new IndexedDBBlobSource('quickEdgeless'),
+      main: new IndexedDBBlobSource('collabPlayground'),
     },
     docSources,
     awarenessSources,

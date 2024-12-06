@@ -5,7 +5,7 @@ import type {
   WidgetViewMapIdentifier,
 } from '@blocksuite/block-std';
 import type { AffineEditorContainer } from '@blocksuite/presets';
-import type { DebugMenu } from '@playground/apps/_common/components/debug-menu.js';
+import type { StarterDebugMenu } from '@playground/apps/_common/components/starter-debug-menu.js';
 import type { BlockModel, Doc, DocCollection, Job } from '@store/index.js';
 
 declare global {
@@ -39,7 +39,7 @@ declare global {
     collection: DocCollection;
     blockSchema: Record<string, typeof BlockModel>;
     doc: Doc;
-    debugMenu: DebugMenu;
+    debugMenu: StarterDebugMenu;
     editor: AffineEditorContainer;
     host: EditorHost;
     testUtils: TestUtils;
