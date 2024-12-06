@@ -7,6 +7,7 @@ import type {
   XYWH,
 } from '@blocksuite/global/utils';
 
+import type { PointerEventState } from '../../event/index.js';
 import type { EditorHost } from '../../view/element/lit-host.js';
 import type { GfxGroupModel, GfxModel } from './model.js';
 
@@ -42,6 +43,20 @@ export interface GfxCompatibleInterface extends IBound, GfxElementGeometry {
   readonly deserializedXYWH: XYWH;
 
   readonly elementBound: Bound;
+
+  onPointerEnter?: (e: PointerEventState) => void;
+
+  onPointerLeave?: (e: PointerEventState) => void;
+
+  onPointerMove?: (e: PointerEventState) => void;
+
+  onPointerDown?: (e: PointerEventState) => void;
+
+  onPointerUp?: (e: PointerEventState) => void;
+
+  onClick?: (e: PointerEventState) => void;
+
+  onDblClick?: (e: PointerEventState) => void;
 }
 
 /**
