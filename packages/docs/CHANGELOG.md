@@ -1,5 +1,37 @@
 # @blocksuite/docs
 
+## 0.18.4
+
+### Patch Changes
+
+- f517653: Edgeless perf improvement, linked doc aliases support and fixes
+
+  ## Feat
+
+  - feat: linked doc supports aliases (#8806)
+  - feat(playground): add preview view for html adapter panel (#8871)
+  - feat(blocks): add html block adapter for embed link block (#8874)
+  - feat(blocks): show input directly after the user clicks ask ai (#8872)
+
+  ## Fix
+
+  - fix(edgeless): incorrect presentation order (#8840)
+  - fix(std): pan and pinch events were calculate relative to only one finger (#8870)
+  - fix(edgeless): large frame crash on ios safari (#8877)
+  - fix(std): shadowless element should inject styles in parent node (#8861)
+  - fix(blocks): linked popover style issue (#8875)
+  - fix(database): sum shows too many digits after decimal point (#8833)
+
+  ## Refactor
+
+  - refactor: hast utils (#8873)
+  - refactor: migrate html adapter to extension (#8868)
+
+- Updated dependencies [f517653]
+  - @blocksuite/blocks@0.18.4
+  - @blocksuite/store@0.18.4
+  - @blocksuite/presets@0.18.4
+
 ## 0.18.3
 
 ### Patch Changes
