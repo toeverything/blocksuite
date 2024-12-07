@@ -42,18 +42,16 @@ export class KanbanHotkeysController implements ReactiveController {
           context.get('keyboardState').raw.preventDefault();
           return true;
         },
-        ArrowLeft: context => {
+        ArrowLeft: () => {
           if (!this.hasSelection) return false;
 
           this.host.selectionController.focusNext('left');
-          context.get('keyboardState').raw.preventDefault();
           return true;
         },
-        ArrowRight: context => {
+        ArrowRight: () => {
           if (!this.hasSelection) return false;
 
           this.host.selectionController.focusNext('right');
-          context.get('keyboardState').raw.preventDefault();
           return true;
         },
         Backspace: () => {
