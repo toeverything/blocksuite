@@ -244,9 +244,10 @@ export class LinkPopup extends WithDisposable(LitElement) {
   }
 
   get block() {
-    const block = this.inlineEditor.rootElement.closest<BlockComponent>(
-      `[${BLOCK_ID_ATTR}]`
-    );
+    const { rootElement } = this.inlineEditor;
+    if (!rootElement) return null;
+
+    const block = rootElement.closest<BlockComponent>(`[${BLOCK_ID_ATTR}]`);
     if (!block) return null;
     return block;
   }
