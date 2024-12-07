@@ -168,7 +168,9 @@ export class EmbedCardToolbar extends WidgetComponent<
 
     if (doc) {
       const title = doc.meta?.title;
-      const description = getDocContentWithMaxLength(doc);
+      const description = isEmbedLinkedDocBlock(model)
+        ? getDocContentWithMaxLength(doc)
+        : undefined;
       return { title, description };
     }
 
@@ -331,8 +333,9 @@ export class EmbedCardToolbar extends WidgetComponent<
 
       this.focusBlock.convertToEmbed();
 
-      if (referenceInfo.title || referenceInfo.description)
+      if (referenceInfo.title || referenceInfo.description) {
         notifyLinkedDocSwitchedToEmbed(this.std);
+      }
 
       return;
     }

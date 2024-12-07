@@ -1,3 +1,4 @@
+import { cloneReferenceInfoWithoutAliases } from '@blocksuite/affine-components/rich-text';
 import {
   EMBED_CARD_HEIGHT,
   EMBED_CARD_WIDTH,
@@ -35,7 +36,11 @@ export class EmbedEdgelessLinkedDocBlockComponent extends toEdgelessEmbedBlock(
     // @ts-expect-error TODO: fix after edgeless refactor
     const newId = edgelessService.addBlock(
       'affine:embed-synced-doc',
-      { xywh: bound.serialize(), caption, ...this.referenceInfo },
+      {
+        xywh: bound.serialize(),
+        caption,
+        ...cloneReferenceInfoWithoutAliases(this.referenceInfo),
+      },
       // @ts-expect-error TODO: fix after edgeless refactor
       edgelessService.surface
     );
