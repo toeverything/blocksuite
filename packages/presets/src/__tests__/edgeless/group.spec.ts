@@ -316,4 +316,53 @@ describe('mindmap', () => {
 
     expect(leaf4.x).greaterThan(children[2].x + children[2].w);
   });
+
+  test('deliberately creating a circular reference should be resolved correctly', async () => {
+    const tree = {
+      text: 'root',
+      children: [
+        {
+          text: 'leaf1',
+        },
+        {
+          text: 'leaf2',
+        },
+        {
+          text: 'leaf3',
+          children: [
+            {
+              text: 'leaf4',
+            },
+          ],
+        },
+      ],
+    };
+    const mindmapId = service.addElement('mindmap', {
+      type: LayoutType.RIGHT,
+      children: tree,
+    });
+    const mindmap = () =>
+      service.getElementById(mindmapId) as MindmapElementModel;
+
+    doc.captureSync();
+    await wait();
+
+    // create a circular reference
+    doc.transact(() => {
+      const root = mindmap().tree;
+      const leaf3 = root.children[2];
+      const leaf4 = root.children[2].children[0];
+
+      mindmap().children.set(leaf3.id, {
+        index: leaf3.detail.index,
+        parent: leaf4.id,
+      });
+    });
+    doc.captureSync();
+
+    await wait();
+
+    // the circular referenced node should be removed
+    expect(mindmap().nodeMap.size).toBe(3);
+  });
 });
