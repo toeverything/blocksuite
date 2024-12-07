@@ -224,6 +224,11 @@ export class MindmapElementModel extends GfxGroupLikeElementModel<MindmapElement
     updateKey: boolean = true
   ) {
     const { connector, from, to, layout } = options;
+
+    if (!from.element || !to.element) {
+      return { outdated: true, cacheKey: '' };
+    }
+
     const cacheKey = `${from.element.xywh}-${to.element.xywh}-${layout}-${this.style}`;
 
     // @ts-ignore
