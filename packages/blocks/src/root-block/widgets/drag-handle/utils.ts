@@ -321,8 +321,10 @@ export const getDropResult = (
 export function getDragHandleLeftPadding(blocks: BlockComponent[]) {
   const hasToggleList = blocks.some(
     block =>
-      matchFlavours(block.model, ['affine:list']) &&
-      block.model.children.length > 0
+      (matchFlavours(block.model, ['affine:list']) &&
+        block.model.children.length > 0) ||
+      (matchFlavours(block.model, ['affine:paragraph']) &&
+        block.model.type.startsWith('h'))
   );
   const offsetLeft = hasToggleList
     ? DRAG_HANDLE_CONTAINER_OFFSET_LEFT_LIST

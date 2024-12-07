@@ -7,16 +7,24 @@ import {
   DefaultInlineManagerExtension,
   type RichText,
 } from '@blocksuite/affine-components/rich-text';
+import { TOGGLE_BUTTON_PARENT_CLASS } from '@blocksuite/affine-components/toggle-button';
 import {
   BLOCK_CHILDREN_CONTAINER_PADDING_LEFT,
   NOTE_SELECTOR,
 } from '@blocksuite/affine-shared/consts';
 import { DocModeProvider } from '@blocksuite/affine-shared/services';
-import { getViewportElement } from '@blocksuite/affine-shared/utils';
+import {
+  calculateCollapsedSiblings,
+  getNearestHeadingBefore,
+  getViewportElement,
+} from '@blocksuite/affine-shared/utils';
 import { getInlineRangeProvider } from '@blocksuite/block-std';
 import { effect, signal } from '@preact/signals-core';
 import { html, nothing, type TemplateResult } from 'lit';
-import { query } from 'lit/decorators.js';
+import { query, state } from 'lit/decorators.js';
+import { classMap } from 'lit/directives/class-map.js';
+import { styleMap } from 'lit/directives/style-map.js';
+import { unsafeHTML } from 'lit/directives/unsafe-html.js';
 
 import type { ParagraphBlockService } from './paragraph-service.js';
 
@@ -101,6 +109,7 @@ export class ParagraphBlockComponent extends CaptionedBlockComponent<
     );
 
     this._inlineRangeProvider = getInlineRangeProvider(this);
+
     this.disposables.add(
       effect(() => {
         const composing = this._composing.value;
@@ -130,6 +139,41 @@ export class ParagraphBlockComponent extends CaptionedBlockComponent<
           .catch(console.error);
       })
     );
+
+    this.disposables.add(
+      effect(() => {
+        const collapsed = this.model.collapsed$.value;
+        const type = this.model.type$.value;
+
+        this._readonlyCollapsed = collapsed;
+
+        if (!type.startsWith('h')) {
+          this.doc.updateBlock(this.model, {
+            collapsed: false,
+          });
+        }
+      })
+    );
+
+    let beforeType = this.model.type;
+    this.disposables.add(
+      effect(() => {
+        const type = this.model.type$.value;
+        if (beforeType !== type && !type.startsWith('h')) {
+          const nearestHeading = getNearestHeadingBefore(this.model);
+          if (
+            nearestHeading &&
+            nearestHeading.type.startsWith('h') &&
+            nearestHeading.collapsed
+          ) {
+            this.doc.updateBlock(nearestHeading, {
+              collapsed: false,
+            });
+          }
+        }
+        beforeType = type;
+      })
+    );
   }
 
   override async getUpdateComplete() {
@@ -140,16 +184,63 @@ export class ParagraphBlockComponent extends CaptionedBlockComponent<
 
   override renderBlock(): TemplateResult<1> {
     const { type$ } = this.model;
+    const collapsed = this.doc.readonly
+      ? this._readonlyCollapsed
+      : this.model.collapsed;
+
+    let style = html``;
+    if (this.model.type.startsWith('h') && collapsed) {
+      const collapsedSiblings = calculateCollapsedSiblings(this.model);
+      style = html`
+        <style>
+          ${collapsedSiblings.map(sibling =>
+            unsafeHTML(`
+              [data-block-id="${sibling.id}"] {
+                display: none;
+              }
+            `)
+          )}
+        </style>
+      `;
+    }
+
     const children = html`<div
       class="affine-block-children-container"
-      style="padding-left: ${BLOCK_CHILDREN_CONTAINER_PADDING_LEFT}px"
+      style=${styleMap({
+        paddingLeft: `${BLOCK_CHILDREN_CONTAINER_PADDING_LEFT}px`,
+        display: collapsed ? 'none' : undefined,
+      })}
     >
       ${this.renderChildren(this.model)}
     </div>`;
 
     return html`
+      ${style}
       <div class="affine-paragraph-block-container">
-        <div class="affine-paragraph-rich-text-wrapper ${type$.value}">
+        <div
+          class=${classMap({
+            'affine-paragraph-rich-text-wrapper': true,
+            [type$.value]: true,
+            [TOGGLE_BUTTON_PARENT_CLASS]: true,
+          })}
+        >
+          ${this.model.type.startsWith('h')
+            ? html`
+                <blocksuite-toggle-button
+                  .collapsed=${collapsed}
+                  .updateCollapsed=${(value: boolean) => {
+                    if (this.doc.readonly) {
+                      this._readonlyCollapsed = value;
+                    } else {
+                      this.doc.captureSync();
+                      this.doc.updateBlock(this.model, {
+                        collapsed: value,
+                      });
+                    }
+                  }}
+                ></blocksuite-toggle-button>
+              `
+            : nothing}
           <rich-text
             .yText=${this.model.text.yText}
             .inlineEventSource=${this.topContenteditableElement ?? nothing}
@@ -170,10 +261,10 @@ export class ParagraphBlockComponent extends CaptionedBlockComponent<
             : html`
                 <div
                   contenteditable="false"
-                  class="affine-paragraph-placeholder ${this._displayPlaceholder
-                    .value
-                    ? 'visible'
-                    : ''}"
+                  class=${classMap({
+                    'affine-paragraph-placeholder': true,
+                    visible: this._displayPlaceholder.value,
+                  })}
                 >
                   ${this.service.placeholderGenerator(this.model)}
                 </div>
@@ -184,6 +275,9 @@ export class ParagraphBlockComponent extends CaptionedBlockComponent<
       </div>
     `;
   }
+
+  @state()
+  private accessor _readonlyCollapsed = false;
 
   @query('rich-text')
   private accessor _richTextElement: RichText | null = null;

@@ -7,6 +7,7 @@ import {
 import { literal } from 'lit/static-html.js';
 
 import { commands } from './commands/index.js';
+import { ParagraphDragHandleOption } from './paragraph-drag-extension.js';
 import {
   ParagraphKeymapExtension,
   ParagraphTextKeymapExtension,
@@ -20,4 +21,5 @@ export const ParagraphBlockSpec: ExtensionType[] = [
   BlockViewExtension('affine:paragraph', literal`affine-paragraph`),
   ParagraphTextKeymapExtension,
   ParagraphKeymapExtension,
+  ParagraphDragHandleOption,
 ];
