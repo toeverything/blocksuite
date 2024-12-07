@@ -1,3 +1,4 @@
+import { StrokeColor } from '@blocksuite/affine-model';
 import { expect } from '@playwright/test';
 
 import {
@@ -79,7 +80,7 @@ test('add brush element with color', async ({ page }) => {
   await switchEditorMode(page);
 
   await setEdgelessTool(page, 'brush');
-  const color = '--affine-palette-line-blue';
+  const color = StrokeColor.Blue;
   await selectBrushColor(page, color);
 
   const start = { x: 100, y: 100 };
@@ -100,7 +101,7 @@ test('keep same color when mouse mode switched back to brush', async ({
   await deleteAll(page);
 
   await setEdgelessTool(page, 'brush');
-  const color = '--affine-palette-line-blue';
+  const color = StrokeColor.Blue;
   await selectBrushColor(page, color);
   const start = { x: 200, y: 200 };
   const end = { x: 300, y: 300 };
@@ -123,7 +124,7 @@ test('add brush element with different size', async ({ page }) => {
 
   await setEdgelessTool(page, 'brush');
   await selectBrushSize(page, 'ten');
-  const color = '--affine-palette-line-blue';
+  const color = StrokeColor.Blue;
   await selectBrushColor(page, color);
 
   const start = { x: 100, y: 100 };
@@ -144,8 +145,8 @@ test('add brush element with different size', async ({ page }) => {
 
   await assertEdgelessColorSameWithHexColor(page, color, topEdge);
   await assertEdgelessColorSameWithHexColor(page, color, bottomEdge);
-  assertSameColor(nearTopEdge, '#4f90ff');
-  assertSameColor(nearBottomEdge, '#4f90ff');
+  assertSameColor(nearTopEdge, '#84cfff');
+  assertSameColor(nearBottomEdge, '#84cfff');
 });
 
 test('change brush element size by component-toolbar', async ({ page }) => {

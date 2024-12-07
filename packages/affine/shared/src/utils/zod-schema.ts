@@ -14,22 +14,20 @@ import {
   DEFAULT_SHAPE_STROKE_COLOR,
   DEFAULT_SHAPE_TEXT_COLOR,
   DEFAULT_TEXT_COLOR,
-  FillColorsSchema,
   FontFamily,
   FontStyle,
   FontWeight,
-  FrameBackgroundColorsSchema,
   LayoutType,
-  LineColor,
   LineColorsSchema,
   LineWidth,
   MindmapStyle,
-  NoteBackgroundColorsSchema,
+  NoteBackgroundPaletteEnum,
   NoteDisplayMode,
   NoteShadowsSchema,
+  PaletteEnum,
   PointStyle,
   ShapeStyle,
-  StrokeColorsSchema,
+  StrokeColor,
   StrokeStyle,
   TextAlign,
   TextVerticalAlign,
@@ -59,17 +57,12 @@ export const ColorSchema = z.union([
     dark: z.string(),
   }),
 ]);
-const LineColorSchema = z.union([LineColorsSchema, ColorSchema]);
-const ShapeFillColorSchema = z.union([FillColorsSchema, ColorSchema]);
-const ShapeStrokeColorSchema = z.union([StrokeColorsSchema, ColorSchema]);
-const TextColorSchema = z.union([LineColorsSchema, ColorSchema]);
+const ColorPaletteSchema = z.union([ColorSchema, PaletteEnum]);
+const LineColorSchema = z.union([LineColorsSchema, ColorPaletteSchema]);
+const TextColorSchema = z.union([LineColorsSchema, ColorPaletteSchema]);
 const NoteBackgroundColorSchema = z.union([
-  NoteBackgroundColorsSchema,
   ColorSchema,
-]);
-const FrameBackgroundColorSchema = z.union([
-  FrameBackgroundColorsSchema,
-  ColorSchema,
+  NoteBackgroundPaletteEnum,
 ]);
 
 export const ConnectorSchema = z
@@ -110,14 +103,11 @@ export const ConnectorSchema = z
 
 export const BrushSchema = z
   .object({
-    color: LineColorSchema,
+    color: ColorPaletteSchema,
     lineWidth: LineWidthSchema,
   })
   .default({
-    color: {
-      dark: LineColor.White,
-      light: LineColor.Black,
-    },
+    color: StrokeColor.Black,
     lineWidth: LineWidth.Four,
   });
 
@@ -140,8 +130,8 @@ const DEFAULT_SHAPE = {
 
 const ShapeObject = {
   color: TextColorSchema,
-  fillColor: ShapeFillColorSchema,
-  strokeColor: ShapeStrokeColorSchema,
+  fillColor: ColorPaletteSchema,
+  strokeColor: ColorPaletteSchema,
   strokeStyle: StrokeStyleSchema,
   strokeWidth: z.number(),
   shapeStyle: ShapeStyleSchema,
@@ -235,7 +225,7 @@ export const MindmapSchema = z
 
 export const FrameSchema = z
   .object({
-    background: FrameBackgroundColorSchema.optional(),
+    background: ColorPaletteSchema.optional(),
   })
   .default({});
 
