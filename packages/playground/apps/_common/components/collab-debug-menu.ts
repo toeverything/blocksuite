@@ -500,7 +500,7 @@ export class CollabDebugMenu extends SignalWatcher(ShadowlessElement) {
 
             ${new URLSearchParams(location.search).get('room')
               ? html`<sl-input
-                    placeholder="You name in room"
+                    placeholder="Your name in room"
                     clearable
                     size="small"
                     @blur=${(e: Event) => {
