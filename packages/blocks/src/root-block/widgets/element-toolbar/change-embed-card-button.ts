@@ -11,7 +11,7 @@ import {
 } from '@blocksuite/affine-components/icons';
 import { notifyLinkedDocSwitchedToEmbed } from '@blocksuite/affine-components/notification';
 import { isPeekable, peek } from '@blocksuite/affine-components/peek';
-import { isLinkToNode } from '@blocksuite/affine-components/rich-text';
+import { referenceToNode } from '@blocksuite/affine-components/rich-text';
 import { toast } from '@blocksuite/affine-components/toast';
 import {
   type MenuItem,
@@ -323,7 +323,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
     }
     return (
       isEmbedLinkedDocBlock(this.model) &&
-      (isLinkToNode(this.model) ||
+      (referenceToNode(this.model) ||
         !!this._blockComponent?.closest('affine-embed-synced-doc-block') ||
         this.model.pageId === this._doc.id)
     );

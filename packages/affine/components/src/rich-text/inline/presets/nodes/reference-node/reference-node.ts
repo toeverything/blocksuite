@@ -36,7 +36,7 @@ import { RefNodeSlotsProvider } from '../../../../extension/index.js';
 import { affineTextStyles } from '../affine-text.js';
 import { DEFAULT_DOC_NAME, REFERENCE_NODE } from '../consts.js';
 import { toggleReferencePopup } from './reference-popup.js';
-import { cloneReferenceInfo, isLinkToNode } from './utils.js';
+import { cloneReferenceInfo, referenceToNode } from './utils.js';
 
 @Peekable({ action: false })
 export class AffineReference extends WithDisposable(ShadowlessElement) {
@@ -120,7 +120,7 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
       return {
         template: toggleReferencePopup(
           this,
-          this.isLinkToNode(),
+          this.referenceToNode(),
           this.referenceInfo,
           this.inlineEditor,
           this.selfInlineRange,
@@ -226,9 +226,9 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
       .catch(console.error);
   }
 
-  // linking to block/element
-  isLinkToNode() {
-    return isLinkToNode(this.referenceInfo);
+  // reference to block/element
+  referenceToNode() {
+    return referenceToNode(this.referenceInfo);
   }
 
   override render() {
@@ -259,7 +259,7 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
           () =>
             hasTitleAlias
               ? AliasIcon()
-              : this.isLinkToNode()
+              : this.referenceToNode()
                 ? BlockLinkIcon
                 : FontLinkedDocIcon,
         ],
