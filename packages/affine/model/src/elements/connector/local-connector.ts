@@ -29,8 +29,6 @@ export class LocalConnectorElementModel extends GfxLocalElementModel {
 
   roughness: number = DEFAULT_ROUGHNESS;
 
-  seed: number = Math.random();
-
   source: Connection = {
     position: [0, 0],
   };

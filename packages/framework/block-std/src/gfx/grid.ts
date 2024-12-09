@@ -407,17 +407,17 @@ export class GridManager {
         })
       );
 
-      const signalEffects = new WeakMap<GfxLocalElementModel, () => void>();
-
       disposables.push(
         surface.localElementAdded.on(elm => {
           this.add(elm);
-          signalEffects.set(
-            elm,
-            elm.xywhSignal.subscribe(() => {
-              this.update(elm);
-            })
-          );
+        })
+      );
+
+      disposables.push(
+        surface.localElementUpdated.on(payload => {
+          if (payload.props['xywh']) {
+            this.update(payload.model);
+          }
         })
       );
 

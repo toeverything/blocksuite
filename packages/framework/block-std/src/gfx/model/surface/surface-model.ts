@@ -84,10 +84,20 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
 
   protected localElements = new Set<GfxLocalElementModel>();
 
+  localElementUpdated = new Slot<{
+    model: GfxLocalElementModel;
+    props: Record<string, unknown>;
+    oldValues: Record<string, unknown>;
+  }>();
+
   get elementModels() {
     const models: GfxPrimitiveElementModel[] = [];
     this._elementModels.forEach(model => models.push(model.model));
     return models;
+  }
+
+  get localElementModels() {
+    return this.localElements;
   }
 
   get registeredElementTypes() {

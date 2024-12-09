@@ -272,7 +272,7 @@ export class CanvasRenderer {
     const elements =
       surfaceElements ??
       (this.grid.search(bound, {
-        filter: ['canvas'],
+        filter: ['canvas', 'local'],
       }) as SurfaceElementModel[]);
     for (const element of elements) {
       ctx.save();

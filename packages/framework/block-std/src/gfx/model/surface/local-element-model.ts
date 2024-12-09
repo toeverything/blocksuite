@@ -10,7 +10,6 @@ import {
   polygonNearestPoint,
   rotatePoints,
 } from '@blocksuite/global/utils';
-import { signal } from '@preact/signals-core';
 
 import type { EditorHost } from '../../../view/index.js';
 import type { GfxCompatibleInterface, PointTestOptions } from '../base.js';
@@ -18,35 +17,35 @@ import type { GfxGroupModel } from '../model.js';
 import type { SurfaceBlockModel } from './surface-model.js';
 
 export abstract class GfxLocalElementModel implements GfxCompatibleInterface {
-  /**
-   * used to store the properties' cache key
-   * when the properties required heavy computation
-   */
-  protected _cache = new Map<string | symbol, unknown>();
-
   protected _local = new Map<string | symbol, unknown>();
 
   protected _surface: SurfaceBlockModel;
 
-  readonly groupSignal = signal<string>('');
+  /**
+   * used to store the properties' cache key
+   * when the properties required heavy computation
+   */
+  cache = new Map<string | symbol, unknown>();
 
-  readonly indexSignal = signal<string>('a0');
+  groupId: string = '';
+
+  index: string = 'a0';
 
   opacity: number = 1;
 
   rotate: number = 0;
 
-  readonly xywhSignal = signal<SerializedXYWH>('[0,0,0,0]');
+  seed: number = Math.random();
+
+  abstract readonly type: string;
+
+  xywh: SerializedXYWH = '[0,0,0,0]';
 
   get deserializedXYWH() {
-    if (
-      !this._local.has('deserializedXYWH') ||
-      this._cache.get('deserializedXYWH') !== this.xywh
-    ) {
+    if (!this._local.has('deserializedXYWH')) {
       const xywh = this.xywh;
       const deserialized = deserializeXYWH(xywh);
 
-      this._cache.set('deserializedXYWH', xywh);
       this._local.set('deserializedXYWH', deserialized);
     }
 
@@ -58,8 +57,8 @@ export abstract class GfxLocalElementModel implements GfxCompatibleInterface {
   }
 
   get group() {
-    return this._surface.getElementById(
-      this.groupSignal.peek()
+    return (
+      this.groupId ? this._surface.getElementById(this.groupId) : null
     ) as GfxGroupModel | null;
   }
 
@@ -78,12 +77,8 @@ export abstract class GfxLocalElementModel implements GfxCompatibleInterface {
     return this.deserializedXYWH[3];
   }
 
-  get index() {
-    return this.indexSignal.peek();
-  }
-
-  set index(val: string) {
-    this.indexSignal.value = val;
+  get surface() {
+    return this._surface;
   }
 
   get w() {
@@ -94,20 +89,39 @@ export abstract class GfxLocalElementModel implements GfxCompatibleInterface {
     return this.deserializedXYWH[0];
   }
 
-  get xywh() {
-    return this.xywhSignal.peek();
-  }
-
-  set xywh(val: SerializedXYWH) {
-    this.xywhSignal.value = val;
-  }
-
   get y() {
     return this.deserializedXYWH[1];
   }
 
   constructor(surfaceModel: SurfaceBlockModel) {
     this._surface = surfaceModel;
+
+    const p = new Proxy(this, {
+      set: (target, prop, value) => {
+        if (prop === 'xywh') {
+          this._local.delete('deserializedXYWH');
+        }
+        // @ts-ignore
+        const oldValue = target[prop as string];
+
+        surfaceModel.localElementUpdated.emit({
+          model: p,
+          props: {
+            [prop as string]: value,
+          },
+          oldValues: {
+            [prop as string]: oldValue,
+          },
+        });
+
+        // @ts-ignore
+        target[prop as string] = value;
+
+        return true;
+      },
+    });
+
+    return p;
   }
 
   containsBound(bounds: Bound): boolean {

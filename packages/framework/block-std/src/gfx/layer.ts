@@ -288,6 +288,7 @@ export class LayerManager {
     }
 
     this.layers = layers;
+    this._surface?.elementModels.forEach(el => this.add(el));
   }
 
   private _insertIntoLayer(target: GfxModel, type: 'block' | 'canvas') {
@@ -829,8 +830,6 @@ export class LayerManager {
         this._surface = surface;
       }
 
-      const signalEffect = new WeakMap<GfxLocalElementModel, (() => void)[]>();
-
       this._disposable.add(
         surface.elementAdded.on(payload =>
           this.add(surface.getElementById(payload.id)!)
@@ -849,28 +848,18 @@ export class LayerManager {
       this._disposable.add(
         surface.localElementAdded.on(elm => {
           this.add(elm);
-
-          const effects = [
-            elm.indexSignal.subscribe(() => {
-              this.update(elm, {
-                index: true,
-              });
-            }),
-            elm.groupSignal.subscribe(() => {
-              this.delete(elm);
-              this.add(elm);
-            }),
-          ];
-
-          signalEffect.set(elm, effects);
+        })
+      );
+      this._disposable.add(
+        this._surface.localElementUpdated.on(payload => {
+          if (payload.props['index'] || payload.props['groupId']) {
+            this.update(payload.model, payload.props);
+          }
         })
       );
       this._disposable.add(
         surface.localElementDeleted.on(elm => {
           this.delete(elm);
-
-          signalEffect.get(elm)?.forEach(effect => effect());
-          signalEffect.delete(elm);
         })
       );
 
