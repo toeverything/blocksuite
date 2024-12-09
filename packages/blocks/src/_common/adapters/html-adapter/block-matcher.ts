@@ -28,6 +28,10 @@ import {
   codeBlockHtmlAdapterMatcher,
 } from '../../../code-block/adapters/html.js';
 import {
+  DatabaseBlockHtmlAdapterExtension,
+  databaseBlockHtmlAdapterMatcher,
+} from '../../../database-block/adapters/html.js';
+import {
   DividerBlockHtmlAdapterExtension,
   dividerBlockHtmlAdapterMatcher,
 } from '../../../divider-block/adapters/html.js';
@@ -52,6 +56,7 @@ export const defaultBlockHtmlAdapterMatchers = [
   embedLoomBlockHtmlAdapterMatcher,
   embedGithubBlockHtmlAdapterMatcher,
   bookmarkBlockHtmlAdapterMatcher,
+  databaseBlockHtmlAdapterMatcher,
 ];
 
 export const BlockHtmlAdapterExtensions: ExtensionType[] = [
@@ -66,4 +71,5 @@ export const BlockHtmlAdapterExtensions: ExtensionType[] = [
   EmbedLoomBlockHtmlAdapterExtension,
   EmbedGithubBlockHtmlAdapterExtension,
   BookmarkBlockHtmlAdapterExtension,
+  DatabaseBlockHtmlAdapterExtension,
 ];
