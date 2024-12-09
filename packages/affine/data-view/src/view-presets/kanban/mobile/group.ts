@@ -113,7 +113,6 @@ export class MobileKanbanGroup extends SignalWatcher(
       return;
     }
 
-    // 如果目标 group 是空的，直接移动到该 group
     if (!targetCardId) {
       this.view.groupTrait.moveCardTo(
         this.draggedCard.cardId,
