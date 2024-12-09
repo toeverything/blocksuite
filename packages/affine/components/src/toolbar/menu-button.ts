@@ -29,11 +29,12 @@ export class EditorMenuButton extends WithDisposable(LitElement) {
       this._trigger,
       this._content,
       ({ display }) => {
-        this._trigger.showTooltip = display === 'hidden';
+        const opened = display === 'show';
+        this._trigger.showTooltip = !opened;
 
         this.dispatchEvent(
           new CustomEvent('toggle', {
-            detail: display,
+            detail: opened,
             bubbles: false,
             cancelable: false,
             composed: true,

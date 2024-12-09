@@ -2,8 +2,13 @@ import type { ReferenceInfo } from '@blocksuite/affine-model';
 import type { AffineTextAttributes } from '@blocksuite/affine-shared/types';
 import type { DeltaInsert, InlineRange } from '@blocksuite/inline';
 
+import {
+  type LinkEventType,
+  type TelemetryEvent,
+  TelemetryProvider,
+} from '@blocksuite/affine-shared/services';
 import { FONT_XS, PANEL_BASE } from '@blocksuite/affine-shared/styles';
-import { ShadowlessElement } from '@blocksuite/block-std';
+import { type BlockStdScope, ShadowlessElement } from '@blocksuite/block-std';
 import {
   assertExists,
   SignalWatcher,
@@ -95,6 +100,8 @@ export class ReferenceAliasPopup extends SignalWatcher(
 
     this._setTitle(title);
 
+    track(this.std, 'SavedAlias', { control: 'save' });
+
     this.remove();
   };
 
@@ -123,6 +130,8 @@ export class ReferenceAliasPopup extends SignalWatcher(
     this.title$.value = this.docTitle;
 
     this._setTitle();
+
+    track(this.std, 'ResetedAlias', { control: 'reset' });
 
     this.remove();
   }
@@ -255,5 +264,23 @@ export class ReferenceAliasPopup extends SignalWatcher(
   @query('editor-icon-button.save')
   accessor saveButton!: EditorIconButton;
 
+  @property({ attribute: false })
+  accessor std!: BlockStdScope;
+
   accessor title$ = signal<string>('');
+}
+
+function track(
+  std: BlockStdScope,
+  event: LinkEventType,
+  props: Partial<TelemetryEvent>
+) {
+  std.getOptional(TelemetryProvider)?.track(event, {
+    segment: 'toolbar',
+    page: 'doc editor',
+    module: 'reference edit popup',
+    type: 'inline view',
+    category: 'linked doc',
+    ...props,
+  });
 }

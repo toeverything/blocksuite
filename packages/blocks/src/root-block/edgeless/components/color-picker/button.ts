@@ -63,8 +63,8 @@ export class EdgelessColorPickerButton extends WithDisposable(LitElement) {
 
   override firstUpdated() {
     this.disposables.addFromEvent(this.menuButton, 'toggle', (e: Event) => {
-      const newState = (e as CustomEvent).detail;
-      if (newState === 'hidden' && this.tabType !== 'normal') {
+      const opened = (e as CustomEvent<boolean>).detail;
+      if (!opened && this.tabType !== 'normal') {
         this.tabType = 'normal';
       }
     });

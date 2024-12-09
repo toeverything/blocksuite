@@ -1,9 +1,18 @@
 import type { ReferenceInfo } from '@blocksuite/affine-model';
 import type { InlineRange } from '@blocksuite/inline';
 
-import { GenerateDocUrlProvider } from '@blocksuite/affine-shared/services';
+import {
+  GenerateDocUrlProvider,
+  type LinkEventType,
+  type TelemetryEvent,
+  TelemetryProvider,
+} from '@blocksuite/affine-shared/services';
 import { isInsideBlockByFlavour } from '@blocksuite/affine-shared/utils';
-import { BLOCK_ID_ATTR, type BlockComponent } from '@blocksuite/block-std';
+import {
+  BLOCK_ID_ATTR,
+  type BlockComponent,
+  type BlockStdScope,
+} from '@blocksuite/block-std';
 import { assertExists, WithDisposable } from '@blocksuite/global/utils';
 import { computePosition, inline, offset, shift } from '@floating-ui/dom';
 import { effect } from '@preact/signals-core';
@@ -40,6 +49,68 @@ import { cloneReferenceInfoWithoutAliases } from './utils.js';
 
 export class ReferencePopup extends WithDisposable(LitElement) {
   static override styles = styles;
+
+  private _copyLink = () => {
+    const url = this.std
+      .getOptional(GenerateDocUrlProvider)
+      ?.generateDocUrl(this.referenceInfo.pageId, this.referenceInfo.params);
+
+    if (url) {
+      navigator.clipboard.writeText(url).catch(console.error);
+      toast(this.std.host, 'Copied link to clipboard');
+    }
+
+    this.abortController.abort();
+
+    track(this.std, 'CopiedLink', { control: 'copy link' });
+  };
+
+  private _openDoc = () => {
+    this.std
+      .getOptional(RefNodeSlotsProvider)
+      ?.docLinkClicked.emit(this.referenceInfo);
+  };
+
+  private _openEditPopup = (e: MouseEvent) => {
+    e.stopPropagation();
+
+    const {
+      std,
+      docTitle,
+      referenceInfo,
+      inlineEditor,
+      targetInlineRange,
+      abortController,
+    } = this;
+
+    const aliasPopup = new ReferenceAliasPopup();
+
+    aliasPopup.std = std;
+    aliasPopup.docTitle = docTitle;
+    aliasPopup.referenceInfo = referenceInfo;
+    aliasPopup.inlineEditor = inlineEditor;
+    aliasPopup.inlineRange = targetInlineRange;
+
+    document.body.append(aliasPopup);
+
+    abortController.abort();
+
+    track(std, 'OpenedAliasPopup', { control: 'edit' });
+  };
+
+  private _toggleViewSelector = (e: Event) => {
+    const opened = (e as CustomEvent<boolean>).detail;
+    if (!opened) return;
+
+    track(this.std, 'OpenedViewSelector', { control: 'switch view' });
+  };
+
+  private _trackViewSelected = (type: string) => {
+    track(this.std, 'SelectedView', {
+      control: 'select view',
+      type: `${type} view`,
+    });
+  };
 
   get _embedViewButtonDisabled() {
     if (
@@ -148,19 +219,6 @@ export class ReferencePopup extends WithDisposable(LitElement) {
     this.abortController.abort();
   }
 
-  private _copyLink() {
-    const url = this.std
-      .getOptional(GenerateDocUrlProvider)
-      ?.generateDocUrl(this.referenceInfo.pageId, this.referenceInfo.params);
-
-    if (url) {
-      navigator.clipboard.writeText(url).catch(console.error);
-      toast(this.std.host, 'Copied link to clipboard');
-    }
-
-    this.abortController.abort();
-  }
-
   private _delete() {
     if (this.inlineEditor.isValidInlineRange(this.targetInlineRange)) {
       this.inlineEditor.deleteText(this.targetInlineRange);
@@ -182,19 +240,13 @@ export class ReferencePopup extends WithDisposable(LitElement) {
     ]);
   }
 
-  private _openDoc() {
-    this.std
-      .getOptional(RefNodeSlotsProvider)
-      ?.docLinkClicked.emit(this.referenceInfo);
-  }
-
   private _openMenuButton() {
     const buttons: MenuItem[] = [
       {
         label: 'Open this doc',
         type: 'open-this-doc',
         icon: ExpandFullSmallIcon,
-        action: () => this._openDoc(),
+        action: this._openDoc,
         disabled: this._openButtonDisabled,
       },
     ];
@@ -248,20 +300,7 @@ export class ReferencePopup extends WithDisposable(LitElement) {
     `;
   }
 
-  private _showAliasPopup() {
-    const aliasPopup = new ReferenceAliasPopup();
-
-    aliasPopup.docTitle = this.docTitle;
-    aliasPopup.referenceInfo = this.referenceInfo;
-    aliasPopup.inlineEditor = this.inlineEditor;
-    aliasPopup.inlineRange = this.targetInlineRange;
-
-    document.body.append(aliasPopup);
-
-    this.abortController.abort();
-  }
-
-  private _viewToggleMenu() {
+  private _viewSelector() {
     // synced doc entry controlled by awareness flag
     const isSyncedDocEnabled = this.doc.awarenessStore.getFlag(
       'enable_synced_doc_block'
@@ -306,6 +345,7 @@ export class ReferencePopup extends WithDisposable(LitElement) {
             ${SmallArrowDownIcon}
           </editor-icon-button>
         `}
+        @toggle=${this._toggleViewSelector}
       >
         <div data-size="small" data-orientation="vertical">
           ${repeat(
@@ -317,7 +357,10 @@ export class ReferencePopup extends WithDisposable(LitElement) {
                 data-testid=${`link-to-${type}`}
                 ?data-selected=${type === 'inline'}
                 ?disabled=${disabled || type === 'inline'}
-                @click=${action}
+                @click=${() => {
+                  action?.();
+                  this._trackViewSelected(type);
+                }}
               >
                 ${label}
               </editor-menu-action>
@@ -356,7 +399,7 @@ export class ReferencePopup extends WithDisposable(LitElement) {
             .hover=${false}
             .labelHeight=${'20px'}
             .tooltip=${'Original linked doc title'}
-            @click=${() => this._openDoc()}
+            @click=${this._openDoc}
           >
             <span class="label">${this.docTitle}</span>
           </editor-icon-button>
@@ -373,7 +416,7 @@ export class ReferencePopup extends WithDisposable(LitElement) {
           aria-label="Copy link"
           data-testid="copy-link"
           .tooltip=${'Copy link'}
-          @click=${() => this._copyLink()}
+          @click=${this._copyLink}
         >
           ${CopyIcon}
         </editor-icon-button>
@@ -383,13 +426,13 @@ export class ReferencePopup extends WithDisposable(LitElement) {
           data-testid="edit"
           .tooltip=${'Edit'}
           ?disabled=${this.doc.readonly}
-          @click=${() => this._showAliasPopup()}
+          @click=${this._openEditPopup}
         >
           ${EditIcon}
         </editor-icon-button>
       `,
 
-      this._viewToggleMenu(),
+      this._viewSelector(),
 
       html`
         <editor-menu-button
@@ -494,4 +537,19 @@ export function toggleReferencePopup(
   document.body.append(popup);
 
   return popup;
+}
+
+function track(
+  std: BlockStdScope,
+  event: LinkEventType,
+  props: Partial<TelemetryEvent>
+) {
+  std.getOptional(TelemetryProvider)?.track(event, {
+    segment: 'toolbar',
+    page: 'doc editor',
+    module: 'reference toolbar',
+    type: 'inline view',
+    category: 'linked doc',
+    ...props,
+  });
 }

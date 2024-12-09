@@ -1,3 +1,5 @@
+import type { BlockStdScope } from '@blocksuite/block-std';
+
 import { getDocContentWithMaxLength } from '@blocksuite/affine-block-embed';
 import {
   CaptionIcon,
@@ -23,6 +25,9 @@ import {
   type EmbedOptions,
   GenerateDocUrlProvider,
   type GenerateDocUrlService,
+  type LinkEventType,
+  type TelemetryEvent,
+  TelemetryProvider,
   ThemeProvider,
 } from '@blocksuite/affine-shared/services';
 import { getHostName } from '@blocksuite/affine-shared/utils';
@@ -231,6 +236,10 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
     navigator.clipboard.writeText(url).catch(console.error);
     toast(this.std.host, 'Copied link to clipboard');
     this.edgeless.service.selection.clear();
+
+    track(this.std, this.model, this._viewType, 'CopiedLink', {
+      control: 'copy link',
+    });
   };
 
   private _embedOptions: EmbedOptions | null = null;
@@ -250,9 +259,102 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
     this._blockComponent?.open();
   };
 
+  private _openEditPopup = (e: MouseEvent) => {
+    e.stopPropagation();
+
+    if (isEmbedHtmlBlock(this.model)) return;
+
+    this.std.selection.clear();
+
+    const originalDocInfo = this._originalDocInfo;
+
+    toggleEmbedCardEditModal(
+      this.std.host,
+      this.model,
+      this._viewType,
+      originalDocInfo
+    );
+
+    track(this.std, this.model, this._viewType, 'OpenedAliasPopup', {
+      control: 'edit',
+    });
+  };
+
   private _peek = () => {
     if (!this._blockComponent) return;
     peek(this._blockComponent);
+  };
+
+  private _setCardStyle = (style: EmbedCardStyle) => {
+    const bounds = Bound.deserialize(this.model.xywh);
+    bounds.w = EMBED_CARD_WIDTH[style];
+    bounds.h = EMBED_CARD_HEIGHT[style];
+    const xywh = bounds.serialize();
+    this.model.doc.updateBlock(this.model, { style, xywh });
+
+    track(this.std, this.model, this._viewType, 'SelectedCardStyle', {
+      control: 'select card style',
+      type: style,
+    });
+  };
+
+  private _setEmbedScale = (scale: number) => {
+    if (isEmbedHtmlBlock(this.model)) return;
+
+    const bound = Bound.deserialize(this.model.xywh);
+    if ('scale' in this.model) {
+      const oldScale = this.model.scale ?? 1;
+      const ratio = scale / oldScale;
+      bound.w *= ratio;
+      bound.h *= ratio;
+      const xywh = bound.serialize();
+      this.model.doc.updateBlock(this.model, { scale, xywh });
+    } else {
+      bound.h = EMBED_CARD_HEIGHT[this.model.style] * scale;
+      bound.w = EMBED_CARD_WIDTH[this.model.style] * scale;
+      const xywh = bound.serialize();
+      this.model.doc.updateBlock(this.model, { xywh });
+    }
+    this._embedScale = scale;
+
+    track(this.std, this.model, this._viewType, 'SelectedCardScale', {
+      control: 'select card scale',
+      type: `${scale}`,
+    });
+  };
+
+  private _toggleCardScaleSelector = (e: Event) => {
+    const opened = (e as CustomEvent<boolean>).detail;
+    if (!opened) return;
+
+    track(this.std, this.model, this._viewType, 'OpenedCardScaleSelector', {
+      control: 'switch card scale',
+    });
+  };
+
+  private _toggleCardStyleSelector = (e: Event) => {
+    const opened = (e as CustomEvent<boolean>).detail;
+    if (!opened) return;
+
+    track(this.std, this.model, this._viewType, 'OpenedCardStyleSelector', {
+      control: 'switch card style',
+    });
+  };
+
+  private _toggleViewSelector = (e: Event) => {
+    const opened = (e as CustomEvent<boolean>).detail;
+    if (!opened) return;
+
+    track(this.std, this.model, this._viewType, 'OpenedViewSelector', {
+      control: 'switch view',
+    });
+  };
+
+  private _trackViewSelected = (type: string) => {
+    track(this.std, this.model, this._viewType, 'SelectedView', {
+      control: 'select view',
+      type: `${type} view`,
+    });
   };
 
   private get _blockComponent() {
@@ -492,51 +594,27 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
     `;
   }
 
-  private _setCardStyle(style: EmbedCardStyle) {
-    const bounds = Bound.deserialize(this.model.xywh);
-    bounds.w = EMBED_CARD_WIDTH[style];
-    bounds.h = EMBED_CARD_HEIGHT[style];
-    const xywh = bounds.serialize();
-    this.model.doc.updateBlock(this.model, { style, xywh });
-  }
-
-  private _setEmbedScale(scale: number) {
-    if (isEmbedHtmlBlock(this.model)) return;
-
-    const bound = Bound.deserialize(this.model.xywh);
-    if ('scale' in this.model) {
-      const oldScale = this.model.scale ?? 1;
-      const ratio = scale / oldScale;
-      bound.w *= ratio;
-      bound.h *= ratio;
-      const xywh = bound.serialize();
-      this.model.doc.updateBlock(this.model, { scale, xywh });
-    } else {
-      bound.h = EMBED_CARD_HEIGHT[this.model.style] * scale;
-      bound.w = EMBED_CARD_WIDTH[this.model.style] * scale;
-      const xywh = bound.serialize();
-      this.model.doc.updateBlock(this.model, { xywh });
-    }
-    this._embedScale = scale;
-  }
-
   private _showCaption() {
     this._blockComponent?.captionEditor?.show();
+
+    track(this.std, this.model, this._viewType, 'OpenedCaptionEditor', {
+      control: 'add caption',
+    });
   }
 
-  private _viewToggleMenu() {
+  private _viewSelector() {
     if (this._canConvertToEmbedView || this._isEmbedView) {
       const buttons = [
         {
           type: 'card',
           label: 'Card view',
-          handler: () => this._convertToCardView(),
+          action: () => this._convertToCardView(),
           disabled: this.model.doc.readonly,
         },
         {
           type: 'embed',
           label: 'Embed view',
-          handler: () => this._convertToEmbedView(),
+          action: () => this._convertToEmbedView(),
           disabled: this.model.doc.readonly || this._embedViewButtonDisabled,
         },
       ];
@@ -560,18 +638,22 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
               ${SmallArrowDownIcon}
             </editor-icon-button>
           `}
+          @toggle=${this._toggleViewSelector}
         >
           <div data-size="small" data-orientation="vertical">
             ${repeat(
               buttons,
               button => button.type,
-              ({ type, label, handler, disabled }) => html`
+              ({ type, label, action, disabled }) => html`
                 <editor-menu-action
                   data-testid=${`link-to-${type}`}
                   aria-label=${ifDefined(label)}
                   ?data-selected=${this._viewType === type}
                   ?disabled=${disabled || this._viewType === type}
-                  @click=${handler}
+                  @click=${() => {
+                    action();
+                    this._trackViewSelected(type);
+                  }}
                 >
                   ${label}
                 </editor-menu-action>
@@ -653,21 +735,13 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
               .tooltip=${'Edit'}
               class="change-embed-card-button edit"
               ?disabled=${this._doc.readonly}
-              @click=${(e: MouseEvent) => {
-                e.stopPropagation();
-
-                this.std.selection.clear();
-
-                const originalDocInfo = this._originalDocInfo;
-
-                toggleEmbedCardEditModal(this.std.host, model, originalDocInfo);
-              }}
+              @click=${this._openEditPopup}
             >
               ${EditIcon}
             </editor-icon-button>
           `,
 
-      this._viewToggleMenu(),
+      this._viewSelector(),
 
       'style' in model && this._canShowCardStylePanel
         ? html`
@@ -681,12 +755,12 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
                   ${PaletteIcon}
                 </editor-icon-button>
               `}
+              @toggle=${this._toggleCardStyleSelector}
             >
               <card-style-panel
                 .value=${model.style}
                 .options=${this._getCardStyleOptions}
-                .onSelect=${(value: EmbedCardStyle) =>
-                  this._setCardStyle(value)}
+                .onSelect=${this._setCardStyle}
               >
               </card-style-panel>
             </editor-menu-button>
@@ -728,11 +802,12 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
                   ${SmallArrowDownIcon}
                 </editor-icon-button>
               `}
+              @toggle=${this._toggleCardScaleSelector}
             >
               <edgeless-scale-panel
                 class="embed-scale-popper"
                 .scale=${Math.round(this._embedScale * 100)}
-                .onSelect=${(scale: number) => this._setEmbedScale(scale)}
+                .onSelect=${this._setEmbedScale}
               ></edgeless-scale-panel>
             </editor-menu-button>
           `,
@@ -771,4 +846,21 @@ export function renderEmbedButton(
       .quickConnectButton=${quickConnectButton?.pop() ?? nothing}
     ></edgeless-change-embed-card-button>
   `;
+}
+
+function track(
+  std: BlockStdScope,
+  model: EmbedModel,
+  viewType: string,
+  event: LinkEventType,
+  props: Partial<TelemetryEvent>
+) {
+  std.getOptional(TelemetryProvider)?.track(event, {
+    segment: 'toolbar',
+    page: 'whiteboard editor',
+    module: 'element toolbar',
+    type: `${viewType} view`,
+    category: isInternalEmbedModel(model) ? 'linked doc' : 'link',
+    ...props,
+  });
 }
