@@ -63,7 +63,7 @@ export class MobileDataViewKanban extends DataViewBase<
         options: {
           items: [
             menu.input({
-              onChange: text => {
+              onComplete: text => {
                 const column = this.groupManager.property$.value;
                 if (column) {
                   column.dataUpdate(
