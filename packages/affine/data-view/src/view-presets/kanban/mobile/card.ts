@@ -251,13 +251,13 @@ export class MobileKanbanCard extends SignalWatcher(
     const touch = e.touches[0];
     this.currentTouch = touch;
 
-    // 计算基础移动距离
+    // Calculate base movement distance
     const deltaX =
       touch.clientX - (this.initialPosition.x + this.touchOffset.x);
     const deltaY =
       touch.clientY - (this.initialPosition.y + this.touchOffset.y);
 
-    // 计算滚动偏移
+    // Calculate scroll offset
     const horizontalContainer = this.findScrollableParent(this, 'horizontal');
     const verticalContainer = this.findScrollableParent(this, 'vertical');
     const scrollLeft = horizontalContainer?.scrollLeft || 0;
@@ -265,10 +265,10 @@ export class MobileKanbanCard extends SignalWatcher(
     const scrollDeltaX = scrollLeft - this.initialScroll.x;
     const scrollDeltaY = scrollTop - this.initialScroll.y;
 
-    // 使用 transform 移动卡片，加上滚动偏移
+    // Use transform to move card with scroll offset
     this.style.transform = `translate(${deltaX + scrollDeltaX}px, ${deltaY + scrollDeltaY}px) scale(1.02)`;
 
-    // 启动自动滚动
+    // Start auto scroll
     this.startAutoScroll();
 
     // Get all groups
@@ -431,7 +431,7 @@ export class MobileKanbanCard extends SignalWatcher(
       y: touch.clientY - rect.top,
     };
 
-    // 记录初始滚动位置
+    // Record initial scroll position
     const horizontalContainer = this.findScrollableParent(this, 'horizontal');
     const verticalContainer = this.findScrollableParent(this, 'vertical');
     this.initialScroll = {
@@ -443,13 +443,13 @@ export class MobileKanbanCard extends SignalWatcher(
       this.isDragging = true;
       this.classList.add('dragging');
 
-      // 记录初始位置
+      // Record initial position
       this.initialPosition = {
         x: rect.left,
         y: rect.top,
       };
 
-      // 触发拖动开事件
+      // Dispatch drag start event
       const event = new CustomEvent('dragstart', {
         detail: {
           cardId: this.cardId,
@@ -482,11 +482,11 @@ export class MobileKanbanCard extends SignalWatcher(
 
   private longPressTimeout: number | null = null;
 
-  private readonly MAX_SCROLL_SPEED = 15; // 降低最大滚动速度
+  private readonly MAX_SCROLL_SPEED = 15; // Maximum scroll speed
 
-  private readonly MIN_SCROLL_SPEED = 2; // 最小滚动速度
+  private readonly MIN_SCROLL_SPEED = 2; // Minimum scroll speed
 
-  private readonly SCROLL_EDGE_SIZE = 100; // 增大边缘区域
+  private readonly SCROLL_EDGE_SIZE = 100; // Edge trigger area size
 
   private scrollAnimationFrame: number | null = null;
 
@@ -612,7 +612,7 @@ export class MobileKanbanCard extends SignalWatcher(
     const overflow =
       direction === 'vertical' ? style.overflowY : style.overflowX;
 
-    // 检查是否真的可以滚动
+    // Check if element is actually scrollable
     if (
       (overflow === 'auto' || overflow === 'scroll') &&
       (direction === 'vertical'
@@ -642,11 +642,11 @@ export class MobileKanbanCard extends SignalWatcher(
             return '';
           }
 
-          // 获取字段值
+          // Get field value
           const cell = column.cellGet(this.cardId);
           const value = cell.value$.value;
 
-          // 如果值���空,不渲染该字段
+          // Skip empty fields
           if (
             value == null ||
             value === '' ||
@@ -735,7 +735,7 @@ export class MobileKanbanCard extends SignalWatcher(
   override connectedCallback() {
     super.connectedCallback();
 
-    // 加触摸事件监听,使用 passive: false 允许阻止默认行为
+    // Add touch event listeners with passive: false to allow preventDefault
     this.addEventListener('touchstart', this.handleTouchStart, {
       passive: false,
     });
