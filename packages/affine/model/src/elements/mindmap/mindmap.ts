@@ -581,7 +581,7 @@ export class MindmapElementModel extends GfxGroupLikeElementModel<MindmapElement
       buttonBound.w = buttonStyle.width;
       buttonBound.h = buttonStyle.height;
       collapseButton.xywh = buttonBound.serialize();
-      collapseButton.groupSignal.value = this.id;
+      collapseButton.groupId = this.id;
       collapseButton.opacity = 0;
     }
 
