@@ -149,9 +149,7 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockComponent<EmbedSynce
     assertExists(syncedDoc);
 
     if (isPageMode) {
-      this.style.width = 'calc(100% + 48px)';
-      this.style.marginLeft = '-24px';
-      this.style.marginRight = '-24px';
+      this.dataset.pageMode = '';
     }
 
     const containerStyleMap = styleMap({
@@ -232,7 +230,7 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockComponent<EmbedSynce
             })}
           >
             <div class="affine-embed-synced-doc-header">
-              ${icon}
+              <span class="affine-embed-synced-doc-icon">${icon}</span>
               <span class="affine-embed-synced-doc-title">
                 ${this.docTitle}
               </span>
