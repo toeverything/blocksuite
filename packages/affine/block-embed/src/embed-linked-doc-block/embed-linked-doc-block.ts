@@ -313,6 +313,9 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockComponent<EmbedLinke
 
     this.disposables.add(
       this.model.propsUpdated.on(({ key }) => {
+        if (key === 'style') {
+          this._cardStyle = this.model.style;
+        }
         if (key === 'pageId' || key === 'style') {
           this._load().catch(e => {
             console.error(e);
