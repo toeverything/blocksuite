@@ -184,16 +184,13 @@ export class MobileKanbanCard extends SignalWatcher(
       this.isDragging = false;
       this.classList.remove('dragging');
 
-      // 重置 transform
       this.style.transform = '';
 
-      // 获取目标（可能是卡片或空 group）
       const target = document.querySelector(
         '.drag-over-top, .drag-over-bottom, .mobile-group-body.drag-over'
       ) as HTMLElement;
 
       if (target) {
-        // 获取目标所在的 group
         const targetGroup = target.closest(
           'mobile-kanban-group'
         ) as HTMLElement;
@@ -216,7 +213,6 @@ export class MobileKanbanCard extends SignalWatcher(
         this.dispatchEvent(event);
       }
 
-      // 清除所有提示样式
       document
         .querySelectorAll('.drag-over, .drag-over-top, .drag-over-bottom')
         .forEach(el => {
@@ -226,11 +222,9 @@ export class MobileKanbanCard extends SignalWatcher(
         });
     }
 
-    // 停止自动滚动
     this.stopAutoScroll();
     this.currentTouch = null;
 
-    // 重置所有状态
     this.scrollOffset = { x: 0, y: 0 };
     this.initialPosition = { x: 0, y: 0 };
     this.touchOffset = { x: 0, y: 0 };
@@ -543,7 +537,7 @@ export class MobileKanbanCard extends SignalWatcher(
         }
       }
 
-      // 更新卡片位置
+      // Update card position
       if (scrollX !== 0 || scrollY !== 0) {
         const deltaX =
           touch.clientX - (this.initialPosition.x + this.touchOffset.x);
@@ -556,7 +550,7 @@ export class MobileKanbanCard extends SignalWatcher(
 
         this.style.transform = `translate(${deltaX + scrollDeltaX}px, ${deltaY + scrollDeltaY}px) scale(1.02)`;
 
-        // 触发一个新的 touchmove 事件来更新插入位置
+        // Trigger a new touchmove event to update insert position
         const touchMoveEvent = new TouchEvent('touchmove', {
           touches: [
             new Touch({
@@ -590,7 +584,7 @@ export class MobileKanbanCard extends SignalWatcher(
   };
 
   private calculateScrollSpeed(distance: number): number {
-    // 使用线性插值计算速度，让速度变化更平滑
+    // Use linear interpolation to calculate speed for smoother changes
     const normalizedDistance = Math.max(
       0,
       Math.min(distance, this.SCROLL_EDGE_SIZE)
