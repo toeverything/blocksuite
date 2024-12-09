@@ -143,15 +143,15 @@ export const database: InitFn = (collection: DocCollection, id: string) => {
     };
     // Add database block inside note block
     addDatabase('Database 1', false);
-    addDatabase('Database 2');
-    addDatabase('Database 3');
-    addDatabase('Database 4');
-    addDatabase('Database 5');
-    addDatabase('Database 6');
-    addDatabase('Database 7');
-    addDatabase('Database 8');
-    addDatabase('Database 9');
-    addDatabase('Database 10');
+    // addDatabase('Database 2');
+    // addDatabase('Database 3');
+    // addDatabase('Database 4');
+    // addDatabase('Database 5');
+    // addDatabase('Database 6');
+    // addDatabase('Database 7');
+    // addDatabase('Database 8');
+    // addDatabase('Database 9');
+    // addDatabase('Database 10');
   });
 };
 

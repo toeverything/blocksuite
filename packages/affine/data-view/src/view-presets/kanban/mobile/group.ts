@@ -94,6 +94,77 @@ export class MobileKanbanGroup extends SignalWatcher(
     ]);
   };
 
+  private draggedCard: { cardId: string; groupKey: string } | null = null;
+
+  private handleCardDragEnd = (e: CustomEvent) => {
+    if (!this.draggedCard) return;
+
+    const targetGroupKey = e.detail.targetGroupKey;
+    if (!targetGroupKey) {
+      this.draggedCard = null;
+      return;
+    }
+
+    const targetCardId = e.detail.targetId;
+    const position = e.detail.position;
+
+    if (targetCardId && this.draggedCard.cardId === targetCardId) {
+      this.draggedCard = null;
+      return;
+    }
+
+    // 如果目标 group 是空的，直接移动到该 group
+    if (!targetCardId) {
+      this.view.groupTrait.moveCardTo(
+        this.draggedCard.cardId,
+        this.draggedCard.groupKey,
+        targetGroupKey,
+        'start'
+      );
+    } else {
+      this.view.groupTrait.moveCardTo(
+        this.draggedCard.cardId,
+        this.draggedCard.groupKey,
+        targetGroupKey,
+        {
+          id: targetCardId,
+          before: position === 'top',
+        }
+      );
+    }
+
+    this.draggedCard = null;
+  };
+
+  private handleCardDragStart = (e: CustomEvent) => {
+    if (!e.detail?.cardId || !e.detail?.groupKey) return;
+    this.draggedCard = e.detail;
+  };
+
+  override connectedCallback() {
+    super.connectedCallback();
+
+    this.addEventListener(
+      'dragstart',
+      this.handleCardDragStart as EventListener
+    );
+    this.addEventListener('dragend', this.handleCardDragEnd as EventListener);
+    this.addEventListener('contextmenu', e => e.preventDefault());
+  }
+
+  override disconnectedCallback() {
+    super.disconnectedCallback();
+
+    this.removeEventListener(
+      'dragstart',
+      this.handleCardDragStart as EventListener
+    );
+    this.removeEventListener(
+      'dragend',
+      this.handleCardDragEnd as EventListener
+    );
+  }
+
   override render() {
     const cards = this.group.rows;
     return html`
