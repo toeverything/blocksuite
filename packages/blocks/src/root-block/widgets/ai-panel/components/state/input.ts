@@ -1,9 +1,7 @@
-import {
-  AIStarIcon,
-  ArrowUpBigIcon,
-} from '@blocksuite/affine-components/icons';
+import { AIStarIcon } from '@blocksuite/affine-components/icons';
 import { stopPropagation } from '@blocksuite/affine-shared/utils';
 import { WithDisposable } from '@blocksuite/global/utils';
+import { SendIcon } from '@blocksuite/icons/lit';
 import { css, html, LitElement, nothing } from 'lit';
 import { property, query, state } from 'lit/decorators.js';
 
@@ -119,9 +117,7 @@ export class AIPanelInput extends WithDisposable(LitElement) {
   override render() {
     this.updateComplete
       .then(() => {
-        requestAnimationFrame(() => {
-          this._textarea.focus();
-        });
+        this._textarea.focus();
       })
       .catch(console.error);
 
@@ -129,7 +125,7 @@ export class AIPanelInput extends WithDisposable(LitElement) {
       <div class="icon">${AIStarIcon}</div>
       <div class="textarea-container">
         <textarea
-          placeholder="Ask AI to edit or generate..."
+          placeholder="What are your thoughts?"
           rows="1"
           @keydown=${this._onKeyDown}
           @input=${this._onInput}
@@ -146,7 +142,7 @@ export class AIPanelInput extends WithDisposable(LitElement) {
           @click=${this._sendToAI}
           @pointerdown=${stopPropagation}
         >
-          ${ArrowUpBigIcon}
+          ${SendIcon()}
           ${this._hasContent
             ? html`<affine-tooltip .offset=${12}>Send to AI</affine-tooltip>`
             : nothing}

@@ -1,6 +1,6 @@
 {
   "name": "@blocksuite/blocks",
-  "version": "0.18.1",
+  "version": "0.18.5",
   "description": "Default BlockSuite editable blocks.",
   "type": "module",
   "repository": {
@@ -31,7 +31,7 @@
     "@blocksuite/block-std": "workspace:*",
     "@blocksuite/data-view": "workspace:*",
     "@blocksuite/global": "workspace:*",
-    "@blocksuite/icons": "^2.1.70",
+    "@blocksuite/icons": "^2.1.75",
     "@blocksuite/inline": "workspace:*",
     "@blocksuite/store": "workspace:*",
     "@floating-ui/dom": "^1.6.10",

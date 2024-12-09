@@ -1,3 +1,4 @@
+import { getDocContentWithMaxLength } from '@blocksuite/affine-block-embed';
 import {
   CaptionIcon,
   CenterPeekIcon,
@@ -9,8 +10,9 @@ import {
   PaletteIcon,
   SmallArrowDownIcon,
 } from '@blocksuite/affine-components/icons';
+import { notifyLinkedDocSwitchedToEmbed } from '@blocksuite/affine-components/notification';
 import { isPeekable, peek } from '@blocksuite/affine-components/peek';
-import { isLinkToNode } from '@blocksuite/affine-components/rich-text';
+import { referenceToNode } from '@blocksuite/affine-components/rich-text';
 import { toast } from '@blocksuite/affine-components/toast';
 import {
   cloneGroups,
@@ -20,6 +22,7 @@ import {
   renderToolbarSeparator,
 } from '@blocksuite/affine-components/toolbar';
 import {
+  type AliasInfo,
   type BookmarkBlockModel,
   BookmarkStyles,
   type EmbedGithubModel,
@@ -29,10 +32,15 @@ import {
 import {
   EmbedOptionProvider,
   type EmbedOptions,
+  GenerateDocUrlProvider,
+  type GenerateDocUrlService,
+  type LinkEventType,
+  type TelemetryEvent,
+  TelemetryProvider,
   ThemeProvider,
 } from '@blocksuite/affine-shared/services';
 import { getHostName } from '@blocksuite/affine-shared/utils';
-import { WidgetComponent } from '@blocksuite/block-std';
+import { type BlockStdScope, WidgetComponent } from '@blocksuite/block-std';
 import { type BlockModel, DocCollection } from '@blocksuite/store';
 import { autoUpdate, computePosition, flip, offset } from '@floating-ui/dom';
 import { html, nothing, type TemplateResult } from 'lit';
@@ -48,15 +56,17 @@ import type { RootBlockComponent } from '../../types.js';
 import { toggleEmbedCardCaptionEditModal } from '../../../_common/components/embed-card/modal/embed-card-caption-edit-modal.js';
 import { toggleEmbedCardEditModal } from '../../../_common/components/embed-card/modal/embed-card-edit-modal.js';
 import {
-  type EmbedToolbarBlockComponent,
-  type EmbedToolbarModel,
+  type EmbedBlockComponent,
+  type EmbedModel,
   isEmbedCardBlockComponent,
+  isInternalEmbedModel,
 } from '../../../_common/components/embed-card/type.js';
 import { getEmbedCardIcons } from '../../../_common/utils/url.js';
 import { getMoreMenuConfig } from '../../configs/toolbar.js';
 import {
   isBookmarkBlock,
   isEmbedGithubBlock,
+  isEmbedHtmlBlock,
   isEmbedLinkedDocBlock,
   isEmbedSyncedDocBlock,
 } from '../../edgeless/utils/query.js';
@@ -74,11 +84,107 @@ export class EmbedCardToolbar extends WidgetComponent<
 
   private _abortController = new AbortController();
 
+  private _copyUrl = () => {
+    const model = this.focusModel;
+    if (!model) return;
+
+    let url!: ReturnType<GenerateDocUrlService['generateDocUrl']>;
+    const isInternal = isInternalEmbedModel(model);
+
+    if ('url' in model) {
+      url = model.url;
+    } else if (isInternal) {
+      url = this.std
+        .getOptional(GenerateDocUrlProvider)
+        ?.generateDocUrl(model.pageId, model.params);
+    }
+
+    if (!url) return;
+
+    navigator.clipboard.writeText(url).catch(console.error);
+    toast(this.std.host, 'Copied link to clipboard');
+
+    track(this.std, model, this._viewType, 'CopiedLink', {
+      control: 'copy link',
+    });
+  };
+
   private _embedOptions: EmbedOptions | null = null;
+
+  private _openEditPopup = (e: MouseEvent) => {
+    e.stopPropagation();
+
+    const model = this.focusModel;
+    if (!model || isEmbedHtmlBlock(model)) return;
+
+    const originalDocInfo = this._originalDocInfo;
+
+    this._hide();
+
+    toggleEmbedCardEditModal(this.host, model, this._viewType, originalDocInfo);
+
+    track(this.std, model, this._viewType, 'OpenedAliasPopup', {
+      control: 'edit',
+    });
+  };
 
   private _resetAbortController = () => {
     this._abortController.abort();
     this._abortController = new AbortController();
+  };
+
+  private _showCaption = () => {
+    const focusBlock = this.focusBlock;
+    if (!focusBlock) {
+      return;
+    }
+    try {
+      focusBlock.captionEditor?.show();
+    } catch (_) {
+      toggleEmbedCardCaptionEditModal(focusBlock);
+    }
+    this._resetAbortController();
+
+    const model = this.focusModel;
+    if (!model) return;
+
+    track(this.std, model, this._viewType, 'OpenedCaptionEditor', {
+      control: 'add caption',
+    });
+  };
+
+  private _toggleCardStyleSelector = (e: Event) => {
+    const opened = (e as CustomEvent<boolean>).detail;
+    if (!opened) return;
+
+    const model = this.focusModel;
+    if (!model) return;
+
+    track(this.std, model, this._viewType, 'OpenedCardStyleSelector', {
+      control: 'switch card style',
+    });
+  };
+
+  private _toggleViewSelector = (e: Event) => {
+    const opened = (e as CustomEvent<boolean>).detail;
+    if (!opened) return;
+
+    const model = this.focusModel;
+    if (!model) return;
+
+    track(this.std, model, this._viewType, 'OpenedViewSelector', {
+      control: 'switch view',
+    });
+  };
+
+  private _trackViewSelected = (type: string) => {
+    const model = this.focusModel;
+    if (!model) return;
+
+    track(this.std, model, this._viewType, 'SelectedView', {
+      control: 'selected view',
+      type: `${type} view`,
+    });
   };
 
   /*
@@ -119,7 +225,7 @@ export class EmbedCardToolbar extends WidgetComponent<
       this.focusModel &&
       this.focusBlock &&
       isEmbedLinkedDocBlock(this.focusModel) &&
-      (isLinkToNode(this.focusModel) ||
+      (referenceToNode(this.focusModel) ||
         !!this.focusBlock.closest('affine-embed-synced-doc-block') ||
         this.focusModel.pageId === this.doc.id)
     );
@@ -151,6 +257,25 @@ export class EmbedCardToolbar extends WidgetComponent<
     );
   }
 
+  get _originalDocInfo(): AliasInfo | undefined {
+    const model = this.focusModel;
+    if (!model) return undefined;
+
+    const doc = isInternalEmbedModel(model)
+      ? this.std.collection.getDoc(model.pageId)
+      : null;
+
+    if (doc) {
+      const title = doc.meta?.title;
+      const description = isEmbedLinkedDocBlock(model)
+        ? getDocContentWithMaxLength(doc)
+        : undefined;
+      return { title, description };
+    }
+
+    return undefined;
+  }
+
   private get _selection() {
     return this.host.selection;
   }
@@ -167,7 +292,7 @@ export class EmbedCardToolbar extends WidgetComponent<
     return 'inline';
   }
 
-  get focusModel(): EmbedToolbarModel | undefined {
+  get focusModel(): EmbedModel | undefined {
     return this.focusBlock?.model;
   }
 
@@ -181,67 +306,66 @@ export class EmbedCardToolbar extends WidgetComponent<
     );
   }
 
-  private _cardStyleMenuButton() {
+  private _cardStyleSelector() {
+    const model = this.focusModel;
+
+    if (!model) return nothing;
+    if (!this._canShowCardStylePanel(model)) return nothing;
+
     const theme = this.std.get(ThemeProvider).theme;
-    if (this.focusModel && this._canShowCardStylePanel(this.focusModel)) {
-      const { EmbedCardHorizontalIcon, EmbedCardListIcon } =
-        getEmbedCardIcons(theme);
+    const { EmbedCardHorizontalIcon, EmbedCardListIcon } =
+      getEmbedCardIcons(theme);
 
-      const buttons = [
-        {
-          type: 'horizontal',
-          label: 'Large horizontal style',
-          icon: EmbedCardHorizontalIcon,
-        },
-        {
-          type: 'list',
-          label: 'Small horizontal style',
-          icon: EmbedCardListIcon,
-        },
-      ] as {
-        type: EmbedCardStyle;
-        label: string;
-        icon: TemplateResult<1>;
-      }[];
+    const buttons = [
+      {
+        type: 'horizontal',
+        label: 'Large horizontal style',
+        icon: EmbedCardHorizontalIcon,
+      },
+      {
+        type: 'list',
+        label: 'Small horizontal style',
+        icon: EmbedCardListIcon,
+      },
+    ] as {
+      type: EmbedCardStyle;
+      label: string;
+      icon: TemplateResult<1>;
+    }[];
 
-      return html`
-        <editor-menu-button
-          class="card-style-select"
-          .contentPadding=${'8px'}
-          .button=${html`
-            <editor-icon-button
-              aria-label="Card style"
-              .tooltip=${'Card style'}
-            >
-              ${PaletteIcon}
-            </editor-icon-button>
-          `}
-        >
-          <div>
-            ${repeat(
-              buttons,
-              button => button.type,
-              ({ type, label, icon }) => html`
-                <icon-button
-                  width="76px"
-                  height="76px"
-                  aria-label=${label}
-                  class=${classMap({
-                    selected: this.focusModel?.style === type,
-                  })}
-                  @click=${() => this._setEmbedCardStyle(type)}
-                >
-                  ${icon}
-                  <affine-tooltip .offset=${4}>${label}</affine-tooltip>
-                </icon-button>
-              `
-            )}
-          </div>
-        </editor-menu-button>
-      `;
-    }
-
-    return nothing;
+    return html`
+      <editor-menu-button
+        class="card-style-select"
+        .contentPadding=${'8px'}
+        .button=${html`
+          <editor-icon-button aria-label="Card style" .tooltip=${'Card style'}>
+            ${PaletteIcon}
+          </editor-icon-button>
+        `}
+        @toggle=${this._toggleCardStyleSelector}
+      >
+        <div>
+          ${repeat(
+            buttons,
+            button => button.type,
+            ({ type, label, icon }) => html`
+              <icon-button
+                width="76px"
+                height="76px"
+                aria-label=${label}
+                class=${classMap({
+                  selected: model.style === type,
+                })}
+                @click=${() => this._setEmbedCardStyle(type)}
+              >
+                ${icon}
+                <affine-tooltip .offset=${4}>${label}</affine-tooltip>
+              </icon-button>
+            `
+          )}
+        </div>
+      </editor-menu-button>
+    `;
   }
 
   private _convertToCardView() {
@@ -303,7 +427,14 @@ export class EmbedCardToolbar extends WidgetComponent<
     }
 
     if ('convertToEmbed' in this.focusBlock) {
+      const referenceInfo = this.focusBlock.referenceInfo;
+
       this.focusBlock.convertToEmbed();
+
+      if (referenceInfo.title || referenceInfo.description) {
+        notifyLinkedDocSwitchedToEmbed(this.std);
+      }
+
       return;
     }
 
@@ -336,15 +467,6 @@ export class EmbedCardToolbar extends WidgetComponent<
 
     this.std.selection.setGroup('note', []);
     doc.deleteBlock(targetModel);
-  }
-
-  private _copyUrl() {
-    if (!this.focusModel || !('url' in this.focusModel)) {
-      return;
-    }
-
-    navigator.clipboard.writeText(this.focusModel.url).catch(console.error);
-    toast(this.host, 'Copied link to clipboard');
   }
 
   private _hide() {
@@ -429,9 +551,17 @@ export class EmbedCardToolbar extends WidgetComponent<
   }
 
   private _setEmbedCardStyle(style: EmbedCardStyle) {
-    this.focusModel?.doc.updateBlock(this.focusModel, { style });
+    const model = this.focusModel;
+    if (!model) return;
+
+    model.doc.updateBlock(model, { style });
     this.requestUpdate();
     this._abortController.abort();
+
+    track(this.std, model, this._viewType, 'SelectedCardStyle', {
+      control: 'select card style',
+      type: style,
+    });
   }
 
   private _show() {
@@ -456,19 +586,6 @@ export class EmbedCardToolbar extends WidgetComponent<
           .catch(console.error);
       })
     );
-  }
-
-  private _showCaption() {
-    const focusBlock = this.focusBlock;
-    if (!focusBlock) {
-      return;
-    }
-    try {
-      focusBlock.captionEditor?.show();
-    } catch (_) {
-      toggleEmbedCardCaptionEditModal(focusBlock);
-    }
-    this._resetAbortController();
   }
 
   private _turnIntoInlineView() {
@@ -503,7 +620,7 @@ export class EmbedCardToolbar extends WidgetComponent<
     doc.deleteBlock(targetModel);
   }
 
-  private _viewToggleMenu() {
+  private _viewSelector() {
     const buttons = [];
 
     buttons.push({
@@ -546,6 +663,7 @@ export class EmbedCardToolbar extends WidgetComponent<
             ${SmallArrowDownIcon}
           </editor-icon-button>
         `}
+        @toggle=${this._toggleViewSelector}
       >
         <div data-size="small" data-orientation="vertical">
           ${repeat(
@@ -559,6 +677,7 @@ export class EmbedCardToolbar extends WidgetComponent<
                 ?disabled=${disabled || this._viewType === type}
                 @click=${() => {
                   action();
+                  this._trackViewSelected(type);
                   this._hide();
                 }}
               >
@@ -596,7 +715,7 @@ export class EmbedCardToolbar extends WidgetComponent<
           return;
         }
 
-        this.focusBlock = block as EmbedToolbarBlockComponent;
+        this.focusBlock = block as EmbedBlockComponent;
         this._show();
       })
     );
@@ -606,13 +725,19 @@ export class EmbedCardToolbar extends WidgetComponent<
     if (this.hide) return nothing;
 
     const model = this.focusModel;
+    if (!model) return nothing;
+
     this._embedOptions =
-      model && 'url' in model
+      'url' in model
         ? this.std.get(EmbedOptionProvider).getEmbedBlockOptions(model.url)
         : null;
 
+    const hasUrl = this._canShowUrlOptions && 'url' in model;
+
     const buttons = [
-      this._canShowUrlOptions && model && 'url' in model
+      this._openMenuButton(),
+
+      hasUrl
         ? html`
             <a
               class="affine-link-preview"
@@ -622,13 +747,36 @@ export class EmbedCardToolbar extends WidgetComponent<
             >
               <span>${getHostName(model.url)}</span>
             </a>
+          `
+        : nothing,
 
+      // internal embed model
+      isEmbedLinkedDocBlock(model) && model.title
+        ? html`
             <editor-icon-button
-              aria-label="Copy"
+              class="doc-title"
+              aria-label="Doc title"
+              .hover=${false}
+              .labelHeight=${'20px'}
+              .tooltip=${'Original linked doc title'}
+              @click=${this.focusBlock?.open}
+            >
+              <span class="label"
+                >${this.std.collection.getDoc(model.pageId)?.meta?.title ||
+                'Untitled'}</span
+              >
+            </editor-icon-button>
+          `
+        : nothing,
+
+      isEmbedHtmlBlock(model)
+        ? nothing
+        : html`
+            <editor-icon-button
+              aria-label="Copy link"
               data-testid="copy-link"
-              .tooltip=${'Click to copy link'}
-              ?disabled=${model.doc.readonly}
-              @click=${() => this._copyUrl()}
+              .tooltip=${'Copy link'}
+              @click=${this._copyUrl}
             >
               ${CopyIcon}
             </editor-icon-button>
@@ -638,25 +786,22 @@ export class EmbedCardToolbar extends WidgetComponent<
               data-testid="edit"
               .tooltip=${'Edit'}
               ?disabled=${this.doc.readonly}
-              @click=${() => toggleEmbedCardEditModal(this.host, model)}
+              @click=${this._openEditPopup}
             >
               ${EditIcon}
             </editor-icon-button>
-          `
-        : nothing,
+          `,
 
-      this._openMenuButton(),
+      this._viewSelector(),
 
-      this._viewToggleMenu(),
-
-      this._cardStyleMenuButton(),
+      this._cardStyleSelector(),
 
       html`
         <editor-icon-button
           aria-label="Caption"
           .tooltip=${'Add Caption'}
           ?disabled=${this.doc.readonly}
-          @click=${() => this._showCaption()}
+          @click=${this._showCaption}
         >
           ${CaptionIcon}
         </editor-icon-button>
@@ -695,7 +840,7 @@ export class EmbedCardToolbar extends WidgetComponent<
   accessor embedCardToolbarElement!: HTMLElement;
 
   @state()
-  accessor focusBlock: EmbedToolbarBlockComponent | null = null;
+  accessor focusBlock: EmbedBlockComponent | null = null;
 
   @state()
   accessor hide: boolean = true;
@@ -708,4 +853,21 @@ declare global {
   interface HTMLElementTagNameMap {
     [AFFINE_EMBED_CARD_TOOLBAR_WIDGET]: EmbedCardToolbar;
   }
+}
+
+function track(
+  std: BlockStdScope,
+  model: EmbedModel,
+  viewType: string,
+  event: LinkEventType,
+  props: Partial<TelemetryEvent>
+) {
+  std.getOptional(TelemetryProvider)?.track(event, {
+    segment: 'toolbar',
+    page: 'doc editor',
+    module: 'embed card toolbar',
+    type: `${viewType} view`,
+    category: isInternalEmbedModel(model) ? 'linked doc' : 'link',
+    ...props,
+  });
 }

@@ -5,7 +5,7 @@ import { toViewCoord } from './edgeless.js';
 import { waitNextFrame } from './misc.js';
 
 export function getDebugMenu(page: Page) {
-  const debugMenu = page.locator('debug-menu');
+  const debugMenu = page.locator('starter-debug-menu');
   return {
     debugMenu,
     undoBtn: debugMenu.locator('sl-tooltip[content="Undo"]'),

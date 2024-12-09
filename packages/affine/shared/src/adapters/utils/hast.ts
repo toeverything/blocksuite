@@ -1,18 +1,12 @@
-import type { Element, ElementContent, Root, RootContentMap, Text } from 'hast';
+import type { Element, ElementContent, Text } from 'hast';
 
-export type HastUnionType<
-  K extends keyof RootContentMap,
-  V extends RootContentMap[K],
-> = V;
+import type { HtmlAST } from '../html-adapter/type.js';
 
-export type HtmlAST =
-  | HastUnionType<keyof RootContentMap, RootContentMap[keyof RootContentMap]>
-  | Root;
+const isElement = (ast: HtmlAST): ast is Element => {
+  return ast.type === 'element';
+};
 
-export const hastGetTextContent = (
-  ast: HtmlAST | undefined,
-  defaultStr = ''
-): string => {
+const getTextContent = (ast: HtmlAST | undefined, defaultStr = ''): string => {
   if (!ast) {
     return defaultStr;
   }
@@ -26,13 +20,13 @@ export const hastGetTextContent = (
           return '\n';
         }
       }
-      return ast.children.map(child => hastGetTextContent(child)).join('');
+      return ast.children.map(child => getTextContent(child)).join('');
     }
   }
   return defaultStr;
 };
 
-export const hastGetElementChildren = (ast: HtmlAST | undefined): Element[] => {
+const getElementChildren = (ast: HtmlAST | undefined): Element[] => {
   if (!ast) {
     return [];
   }
@@ -42,7 +36,7 @@ export const hastGetElementChildren = (ast: HtmlAST | undefined): Element[] => {
   return [];
 };
 
-export const hastGetTextChildren = (ast: HtmlAST | undefined): Text[] => {
+const getTextChildren = (ast: HtmlAST | undefined): Text[] => {
   if (!ast) {
     return [];
   }
@@ -52,26 +46,84 @@ export const hastGetTextChildren = (ast: HtmlAST | undefined): Text[] => {
   return [];
 };
 
-export const hastGetTextChildrenOnlyAst = (ast: Element): Element => {
+const getTextChildrenOnlyAst = (ast: Element): Element => {
   return {
     ...ast,
-    children: hastGetTextChildren(ast),
+    children: getTextChildren(ast),
   };
 };
 
-const isInlineElement = (tagName: string): boolean => {
+const isTagInline = (tagName: string): boolean => {
+  // Phrasing content
   const inlineElements = [
     'a',
+    'abbr',
+    'audio',
+    'b',
+    'bdi',
+    'bdo',
     'br',
+    'button',
+    'canvas',
+    'cite',
     'code',
+    'data',
+    'datalist',
     'del',
+    'dfn',
     'em',
+    'embed',
+    'i',
+    // 'iframe' is not included because it needs special handling
+    // 'img' is not included because it needs special handling
+    'input',
+    'ins',
+    'kbd',
+    'label',
+    'link',
+    'map',
     'mark',
+    'math',
+    'meta',
+    'meter',
+    'noscript',
+    'object',
+    'output',
+    'picture',
+    'progress',
+    'q',
+    'ruby',
+    's',
+    'samp',
+    'script',
+    'select',
+    'slot',
+    'small',
     'span',
     'strong',
+    'sub',
+    'sup',
+    'svg',
+    'template',
+    'textarea',
+    'time',
     'u',
+    'var',
+    'video',
+    'wbr',
   ];
   return inlineElements.includes(tagName);
+};
+
+const isElementInline = (element: Element): boolean => {
+  return (
+    isTagInline(element.tagName) ||
+    // Inline elements
+    !!(
+      typeof element.properties?.style === 'string' &&
+      element.properties.style.match(/display:\s*inline/)
+    )
+  );
 };
 
 const getInlineElementsAndText = (ast: Element): (Element | Text)[] => {
@@ -83,18 +135,14 @@ const getInlineElementsAndText = (ast: Element): (Element | Text)[] => {
     if (child.type === 'text') {
       return true;
     }
-    if (
-      child.type === 'element' &&
-      child.tagName &&
-      isInlineElement(child.tagName)
-    ) {
+    if (child.type === 'element' && child.tagName && isElementInline(child)) {
       return true;
     }
     return false;
   });
 };
 
-export const hastGetInlineOnlyElementAST = (ast: Element): Element => {
+const getInlineOnlyElementAST = (ast: Element): Element => {
   return {
     ...ast,
     children: getInlineElementsAndText(ast),
@@ -155,13 +203,10 @@ const querySelectorId = (ast: HtmlAST, id: string): Element | undefined => {
   return undefined;
 };
 
-export const hastQuerySelector = (
-  ast: HtmlAST,
-  selector: string
-): Element | undefined => {
+const querySelector = (ast: HtmlAST, selector: string): Element | undefined => {
   if (ast.type === 'root') {
     for (const child of ast.children) {
-      const result = hastQuerySelector(child, selector);
+      const result = querySelector(child, selector);
       if (result) {
         return result;
       }
@@ -178,14 +223,12 @@ export const hastQuerySelector = (
   return undefined;
 };
 
-export const hastFlatNodes = (
+const flatNodes = (
   ast: HtmlAST,
   expression: (tagName: string) => boolean
 ): HtmlAST => {
   if (ast.type === 'element') {
-    const children = ast.children.map(child =>
-      hastFlatNodes(child, expression)
-    );
+    const children = ast.children.map(child => flatNodes(child, expression));
     return {
       ...ast,
       children: children.flatMap(child => {
@@ -203,74 +246,23 @@ export const hastFlatNodes = (
 
 // Check if it is a paragraph like element
 // https://html.spec.whatwg.org/#paragraph
-export const hastIsParagraphLike = (node: Element): boolean => {
+const isParagraphLike = (node: Element): boolean => {
   // Flex container
   return (
     (typeof node.properties?.style === 'string' &&
       node.properties.style.match(/display:\s*flex/) !== null) ||
-    hastGetElementChildren(node).every(
-      // Phrasing content
-      child =>
-        [
-          'a',
-          'abbr',
-          'audio',
-          'b',
-          'bdi',
-          'bdo',
-          'br',
-          'button',
-          'canvas',
-          'cite',
-          'code',
-          'data',
-          'datalist',
-          'del',
-          'dfn',
-          'em',
-          'embed',
-          'i',
-          // 'iframe' is not included because it needs special handling
-          // 'img' is not included because it needs special handling
-          'input',
-          'ins',
-          'kbd',
-          'label',
-          'link',
-          'map',
-          'mark',
-          'math',
-          'meta',
-          'meter',
-          'noscript',
-          'object',
-          'output',
-          'picture',
-          'progress',
-          'q',
-          'ruby',
-          's',
-          'samp',
-          'script',
-          'select',
-          'slot',
-          'small',
-          'span',
-          'strong',
-          'sub',
-          'sup',
-          'svg',
-          'template',
-          'textarea',
-          'time',
-          'u',
-          'var',
-          'video',
-          'wbr',
-        ].includes(child.tagName) ||
-        // Inline elements
-        (typeof child.properties?.style === 'string' &&
-          child.properties.style.match(/display:\s*inline/))
-    )
+    getElementChildren(node).every(child => isElementInline(child))
   );
+};
+
+export const HastUtils = {
+  isElement,
+  getTextContent,
+  getElementChildren,
+  getTextChildren,
+  getTextChildrenOnlyAst,
+  getInlineOnlyElementAST,
+  querySelector,
+  flatNodes,
+  isParagraphLike,
 };

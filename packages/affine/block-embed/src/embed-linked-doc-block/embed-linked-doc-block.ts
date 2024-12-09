@@ -9,8 +9,9 @@ import { BlockLinkIcon } from '@blocksuite/affine-components/icons';
 import { isPeekable, Peekable } from '@blocksuite/affine-components/peek';
 import {
   cloneReferenceInfo,
-  isLinkToNode,
+  cloneReferenceInfoWithoutAliases,
   REFERENCE_NODE,
+  referenceToNode,
   RefNodeSlotsProvider,
 } from '@blocksuite/affine-components/rich-text';
 import {
@@ -23,11 +24,13 @@ import {
 } from '@blocksuite/affine-shared/services';
 import { matchFlavours } from '@blocksuite/affine-shared/utils';
 import { Bound } from '@blocksuite/global/utils';
+import { AliasIcon } from '@blocksuite/icons/lit';
 import { DocCollection } from '@blocksuite/store';
 import { html, nothing } from 'lit';
 import { property, queryAsync, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { styleMap } from 'lit/directives/style-map.js';
+import { when } from 'lit/directives/when.js';
 
 import { EmbedBlockComponent } from '../common/embed-block-element.js';
 import { renderLinkedDocInCard } from '../common/render-linked-doc.js';
@@ -88,7 +91,7 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockComponent<EmbedLinke
     this._loading = false;
 
     // If it is a link to a block or element, the content will not be rendered.
-    if (this._isLinkToNode) {
+    if (this._referenceToNode) {
       return;
     }
 
@@ -119,7 +122,7 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockComponent<EmbedLinke
   override _cardStyle: (typeof EmbedLinkedDocStyles)[number] = 'horizontal';
 
   convertToEmbed = () => {
-    if (this._isLinkToNode) return;
+    if (this._referenceToNode) return;
 
     const { doc, caption } = this.model;
 
@@ -139,7 +142,7 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockComponent<EmbedLinke
 
     doc.addBlock(
       'affine:embed-synced-doc',
-      { caption, ...this.referenceInfo },
+      { caption, ...cloneReferenceInfoWithoutAliases(this.referenceInfo) },
       parent,
       index
     );
@@ -198,9 +201,7 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockComponent<EmbedLinke
   }
 
   get docTitle() {
-    return this.linkedDoc?.meta?.title.length
-      ? this.linkedDoc.meta.title
-      : 'Untitled';
+    return this.model.title || this.linkedDoc?.meta?.title || 'Untitled';
   }
 
   get editorMode() {
@@ -253,7 +254,7 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockComponent<EmbedLinke
     super.connectedCallback();
 
     this._cardStyle = this.model.style;
-    this._isLinkToNode = isLinkToNode(this.model);
+    this._referenceToNode = referenceToNode(this.model);
 
     this._load().catch(e => {
       console.error(e);
@@ -297,7 +298,7 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockComponent<EmbedLinke
         })
       );
 
-      if (this._isLinkToNode) {
+      if (this._referenceToNode) {
         this._linkedDocMode = this.model.params?.mode ?? 'page';
       } else {
         const docMode = this.std.get(DocModeProvider);
@@ -312,6 +313,9 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockComponent<EmbedLinke
 
     this.disposables.add(
       this.model.propsUpdated.on(({ key }) => {
+        if (key === 'style') {
+          this._cardStyle = this.model.style;
+        }
         if (key === 'pageId' || key === 'style') {
           this._load().catch(e => {
             console.error(e);
@@ -320,10 +324,6 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockComponent<EmbedLinke
         }
       })
     );
-  }
-
-  override disconnectedCallback() {
-    super.disconnectedCallback();
   }
 
   getInitialState(): {
@@ -371,17 +371,22 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockComponent<EmbedLinke
         ? LoadingIcon
         : isDeleted
           ? LinkedDocDeletedIcon
-          : this._isLinkToNode
-            ? BlockLinkIcon
-            : LinkedDocIcon;
+          : this.model.title
+            ? AliasIcon({ width: '16px', height: '16pc' })
+            : this._referenceToNode
+              ? BlockLinkIcon
+              : LinkedDocIcon;
+
+    const title = this.docTitle;
+    const description = this.model.description;
 
     const titleText = isError
-      ? linkedDoc?.meta?.title || 'Untitled'
+      ? title
       : isLoading
         ? 'Loading...'
         : isDeleted
           ? `Deleted doc`
-          : linkedDoc?.meta?.title || 'Untitled';
+          : title;
 
     const showDefaultNoteContent = isError || isLoading || isDeleted || isEmpty;
     const defaultNoteContent = isError
@@ -409,6 +414,8 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockComponent<EmbedLinke
           ? LinkedDocDeletedBanner
           : LinkedDocEmptyBanner;
 
+    const hasDescriptionAlias = Boolean(description && description.length > 0);
+
     return this.renderEmbed(
       () => html`
         <div
@@ -431,12 +438,27 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockComponent<EmbedLinke
               </div>
             </div>
 
-            <div class="affine-embed-linked-doc-content-note render"></div>
-            ${showDefaultNoteContent
-              ? html`<div class="affine-embed-linked-doc-content-note default">
-                  ${defaultNoteContent}
-                </div>`
-              : nothing}
+            ${when(
+              hasDescriptionAlias,
+              () =>
+                html`<div class="affine-embed-linked-doc-content-note alias">
+                  ${description}
+                </div>`,
+              () =>
+                when(
+                  showDefaultNoteContent,
+                  () => html`
+                    <div class="affine-embed-linked-doc-content-note default">
+                      ${defaultNoteContent}
+                    </div>
+                  `,
+                  () => html`
+                    <div
+                      class="affine-embed-linked-doc-content-note render"
+                    ></div>
+                  `
+                )
+            )}
             ${isError
               ? html`
                   <div class="affine-embed-linked-doc-card-content-reload">
@@ -498,15 +520,15 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockComponent<EmbedLinke
   @state()
   private accessor _docUpdatedAt: Date = new Date();
 
-  // linking block/element
-  @state()
-  private accessor _isLinkToNode = false;
-
   @state()
   private accessor _linkedDocMode: DocMode = 'page';
 
   @state()
   private accessor _loading = false;
+
+  // reference to block/element
+  @state()
+  private accessor _referenceToNode = false;
 
   @property({ attribute: false })
   accessor isBannerEmpty = false;
@@ -518,5 +540,5 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockComponent<EmbedLinke
   accessor isNoteContentEmpty = false;
 
   @queryAsync('.affine-embed-linked-doc-content-note.render')
-  accessor noteContainer!: Promise<HTMLDivElement>;
+  accessor noteContainer!: Promise<HTMLDivElement | null>;
 }

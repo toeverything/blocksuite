@@ -101,6 +101,7 @@ export class MarkdownDeltaConverter extends DeltaASTConverter<
   astToDelta(ast: MarkdownAST): DeltaInsert<AffineTextAttributes>[] {
     const context = {
       configs: this.configs,
+      options: Object.create(null),
       toDelta: (ast: MarkdownAST) => this.astToDelta(ast),
     };
     for (const matcher of this.markdownASTToDeltaMatchers) {

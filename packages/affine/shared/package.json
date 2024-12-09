@@ -1,6 +1,6 @@
 {
   "name": "@blocksuite/affine-shared",
-  "version": "0.18.1",
+  "version": "0.18.5",
   "description": "Default BlockSuite editable blocks.",
   "type": "module",
   "repository": {
@@ -28,6 +28,7 @@
     "@lit/context": "^1.1.2",
     "@preact/signals-core": "^1.8.0",
     "@toeverything/theme": "^1.1.1",
+    "@types/hast": "^3.0.4",
     "@types/mdast": "^4.0.4",
     "lit": "^3.2.0",
     "lodash.clonedeep": "^4.5.0",

@@ -1,3 +1,4 @@
+import { DndApiExtensionIdentifier } from '@blocksuite/affine-shared/services';
 import {
   captureEventTarget,
   getBlockComponentsExcludeSubtrees,
@@ -15,7 +16,6 @@ import { GfxControllerIdentifier } from '@blocksuite/block-std/gfx';
 import { Bound, Point } from '@blocksuite/global/utils';
 import { Job, Slice } from '@blocksuite/store';
 import { render } from 'lit';
-import * as lz from 'lz-string';
 
 import type { AffineDragHandleWidget } from '../drag-handle.js';
 
@@ -285,6 +285,10 @@ export class DragEventWatcher {
     this._serializeData(slice, state).catch(console.error);
   };
 
+  private get _dndAPI() {
+    return this.widget.std.get(DndApiExtensionIdentifier);
+  }
+
   constructor(readonly widget: AffineDragHandleWidget) {}
 
   private async _deserializeData(
@@ -301,24 +305,20 @@ export class DragEventWatcher {
       });
 
       const std = this.widget.std;
+      const snapshot = this._dndAPI.decodeSnapshot(dataTransfer);
+      if (snapshot) {
+        // use snapshot
+        const slice = await job.snapshotToSlice(
+          snapshot,
+          std.doc,
+          parent,
+          index
+        );
+        return slice;
+      }
+
       const html = dataTransfer.getData('text/html');
       if (html) {
-        const domParser = new DOMParser();
-        const doc = domParser.parseFromString(html, 'text/html');
-        const dom = doc.querySelector<HTMLDivElement>(
-          '[data-blocksuite-snapshot]'
-        );
-        if (dom) {
-          // use snapshot
-          const json = JSON.parse(
-            lz.decompressFromEncodedURIComponent(
-              dom.dataset.blocksuiteSnapshot as string
-            )
-          );
-          const slice = await job.snapshotToSlice(json, std.doc, parent, index);
-          return slice;
-        }
-
         // use html parser;
         const htmlAdapter = new HtmlAdapter(job);
         const slice = await htmlAdapter.toSlice(
@@ -360,12 +360,8 @@ export class DragEventWatcher {
     const innerHTML = await htmlAdapter.fromSlice(slice);
     if (!snapshot || !text || !innerHTML) return;
 
-    const snapshotCompressed = lz.compressToEncodedURIComponent(
-      JSON.stringify(snapshot)
-    );
-    const html = `<div data-blocksuite-snapshot=${snapshotCompressed}>${innerHTML.file}</div>`;
     dataTransfer.setData('text/plain', text.file);
-    dataTransfer.setData('text/html', html);
+    this._dndAPI.encodeSnapshot(snapshot, dataTransfer, innerHTML.file);
   }
 
   watch() {

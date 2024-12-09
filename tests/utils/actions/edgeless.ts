@@ -1782,7 +1782,9 @@ export async function createFrame(
 ) {
   await page.keyboard.press('f');
   await dragBetweenViewCoords(page, coord1, coord2);
-  return (await getSelectedIds(page))[0];
+  const id = (await getSelectedIds(page))[0];
+  await page.keyboard.press('Escape');
+  return id;
 }
 
 export async function createShapeElement(

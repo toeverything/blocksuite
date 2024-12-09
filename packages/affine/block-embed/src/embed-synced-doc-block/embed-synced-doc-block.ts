@@ -9,6 +9,7 @@ import {
   RefNodeSlotsProvider,
 } from '@blocksuite/affine-components/rich-text';
 import {
+  type AliasInfo,
   type DocMode,
   type EmbedSyncedDocModel,
   NoteDisplayMode,
@@ -27,7 +28,12 @@ import {
 } from '@blocksuite/block-std';
 import { GfxControllerIdentifier } from '@blocksuite/block-std/gfx';
 import { assertExists, Bound, getCommonBound } from '@blocksuite/global/utils';
-import { BlockViewType, DocCollection, type Query } from '@blocksuite/store';
+import {
+  BlockViewType,
+  DocCollection,
+  type GetDocOptions,
+  type Query,
+} from '@blocksuite/store';
 import { html, type PropertyValues } from 'lit';
 import { query, state } from 'lit/decorators.js';
 import { choose } from 'lit/directives/choose.js';
@@ -249,7 +255,7 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockComponent<EmbedSynce
     width: '100%',
   });
 
-  convertToCard = () => {
+  convertToCard = (aliasInfo?: AliasInfo) => {
     const { doc, caption } = this.model;
 
     const parent = doc.getParent(this.model);
@@ -258,7 +264,7 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockComponent<EmbedSynce
 
     doc.addBlock(
       'affine:embed-linked-doc',
-      { caption, ...this.referenceInfo },
+      { caption, ...this.referenceInfo, ...aliasInfo },
       parent,
       index
     );
@@ -327,9 +333,7 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockComponent<EmbedSynce
   }
 
   get docTitle() {
-    return this.syncedDoc?.meta?.title.length
-      ? this.syncedDoc.meta.title
-      : 'Untitled';
+    return this.syncedDoc?.meta?.title || 'Untitled';
   }
 
   get docUpdatedAt() {
@@ -353,14 +357,9 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockComponent<EmbedSynce
   }
 
   get syncedDoc() {
-    return this.isPageMode
-      ? this.std.collection.getDoc(this.model.pageId, {
-          readonly: true,
-          query: this._pageFilter,
-        })
-      : this.std.collection.getDoc(this.model.pageId, {
-          readonly: true,
-        });
+    const options: GetDocOptions = { readonly: true };
+    if (this.isPageMode) options.query = this._pageFilter;
+    return this.std.collection.getDoc(this.model.pageId, options);
   }
 
   private _checkCycle() {

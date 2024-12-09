@@ -44,8 +44,8 @@ const basePath =
   'https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.11.2/dist/';
 setBasePath(basePath);
 
-@customElement('quick-edgeless-menu')
-export class QuickEdgelessMenu extends SignalWatcher(ShadowlessElement) {
+@customElement('collab-debug-menu')
+export class CollabDebugMenu extends SignalWatcher(ShadowlessElement) {
   static override styles = css`
     :root {
       --sl-font-size-medium: var(--affine-font-xs);
@@ -66,6 +66,10 @@ export class QuickEdgelessMenu extends SignalWatcher(ShadowlessElement) {
 
   private _darkModeChange = (e: MediaQueryListEvent) => {
     this._setThemeMode(!!e.matches);
+  };
+
+  private _handleDocsPanelClose = () => {
+    this.leftSidePanel.toggle(this.docsPanel);
   };
 
   private _keydown = (e: KeyboardEvent) => {
@@ -277,6 +281,7 @@ export class QuickEdgelessMenu extends SignalWatcher(ShadowlessElement) {
   }
 
   private _toggleDocsPanel() {
+    this.docsPanel.onClose = this._handleDocsPanelClose;
     this.leftSidePanel.toggle(this.docsPanel);
   }
 
@@ -320,7 +325,7 @@ export class QuickEdgelessMenu extends SignalWatcher(ShadowlessElement) {
   override render() {
     return html`
       <style>
-        .quick-edgeless-menu {
+        .collab-debug-menu {
           display: flex;
           flex-wrap: nowrap;
           position: fixed;
@@ -333,7 +338,7 @@ export class QuickEdgelessMenu extends SignalWatcher(ShadowlessElement) {
         }
 
         @media print {
-          .quick-edgeless-menu {
+          .collab-debug-menu {
             display: none;
           }
         }
@@ -372,7 +377,7 @@ export class QuickEdgelessMenu extends SignalWatcher(ShadowlessElement) {
           margin-right: 4px;
         }
       </style>
-      <div class="quick-edgeless-menu default">
+      <div class="collab-debug-menu default">
         <div class="default-toolbar">
           <div class="top-container">
             <sl-dropdown placement="bottom" hoist>
@@ -483,18 +488,19 @@ export class QuickEdgelessMenu extends SignalWatcher(ShadowlessElement) {
               </sl-button>
             </sl-tooltip>
             <sl-tooltip content="Docs" placement="bottom" hoist>
-              <sl-button @click=${this._toggleDocsPanel} size="small" circle>
+              <sl-button
+                @click=${this._toggleDocsPanel}
+                size="small"
+                circle
+                data-docs-panel-toggle
+              >
                 <sl-icon name="filetype-doc" label="Doc"></sl-icon>
               </sl-button>
             </sl-tooltip>
 
             ${new URLSearchParams(location.search).get('room')
-              ? html`<sl-tooltip
-                  content="Your name in Collaboration (default: Unknown)"
-                  placement="bottom"
-                  hoist
-                  ><sl-input
-                    placeholder="Unknown"
+              ? html`<sl-input
+                    placeholder="Your name in room"
                     clearable
                     size="small"
                     @blur=${(e: Event) => {
@@ -621,6 +627,6 @@ export class QuickEdgelessMenu extends SignalWatcher(ShadowlessElement) {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'quick-edgeless-menu': QuickEdgelessMenu;
+    'collab-debug-menu': CollabDebugMenu;
   }
 }

@@ -29,10 +29,10 @@ export class AIItem extends WithDisposable(LitElement) {
       class="menu-item ${className}"
       @pointerdown=${(e: MouseEvent) => e.stopPropagation()}
       @click=${() => {
+        this.onClick?.();
         if (typeof item.handler === 'function') {
           item.handler(this.host);
         }
-        this.onClick?.();
       }}
     >
       <span class="item-icon">${item.icon}</span>

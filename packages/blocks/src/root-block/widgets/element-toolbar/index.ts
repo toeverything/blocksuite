@@ -1,16 +1,8 @@
 import type {
   AttachmentBlockModel,
-  BookmarkBlockModel,
   BrushElementModel,
   ConnectorElementModel,
   EdgelessTextBlockModel,
-  EmbedFigmaModel,
-  EmbedGithubModel,
-  EmbedHtmlModel,
-  EmbedLinkedDocModel,
-  EmbedLoomModel,
-  EmbedSyncedDocModel,
-  EmbedYoutubeModel,
   FrameBlockModel,
   ImageBlockModel,
   MindmapElementModel,
@@ -48,6 +40,7 @@ import { css, html, nothing, type TemplateResult, unsafeCSS } from 'lit';
 import { property, state } from 'lit/decorators.js';
 import { join } from 'lit/directives/join.js';
 
+import type { EmbedModel } from '../../../_common/components/embed-card/type.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 import type { ElementToolbarMoreMenuContext } from './more-menu/context.js';
 
@@ -90,14 +83,7 @@ type CategorizedElements = {
   image?: ImageBlockModel[];
   attachment?: AttachmentBlockModel[];
   mindmap?: MindmapElementModel[];
-  embedCard?: BookmarkBlockModel[] &
-    EmbedGithubModel[] &
-    EmbedYoutubeModel[] &
-    EmbedFigmaModel[] &
-    EmbedLinkedDocModel[] &
-    EmbedSyncedDocModel[] &
-    EmbedHtmlModel[] &
-    EmbedLoomModel[];
+  embedCard?: EmbedModel[];
   edgelessText?: EdgelessTextBlockModel[];
 };
 

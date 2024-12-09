@@ -1,14 +1,18 @@
-import type { FrameBlockModel } from '@blocksuite/affine-model';
-
-import { CommonUtils } from '@blocksuite/affine-block-surface';
-import { DisposableGroup, WithDisposable } from '@blocksuite/global/utils';
+import { generateKeyBetweenV2 } from '@blocksuite/block-std/gfx';
+import {
+  DisposableGroup,
+  SignalWatcher,
+  WithDisposable,
+} from '@blocksuite/global/utils';
 import { css, html, LitElement, nothing } from 'lit';
 import { property, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
 import type { EdgelessRootBlockComponent } from '../../../edgeless-root-block.js';
 
-export class EdgelessFrameOrderMenu extends WithDisposable(LitElement) {
+export class EdgelessFrameOrderMenu extends SignalWatcher(
+  WithDisposable(LitElement)
+) {
   static override styles = css`
     :host {
       position: relative;
@@ -94,6 +98,10 @@ export class EdgelessFrameOrderMenu extends WithDisposable(LitElement) {
     }
   `;
 
+  private get _frames() {
+    return this.edgeless.service.frames;
+  }
+
   private _bindEvent() {
     const { _disposables } = this;
 
@@ -161,17 +169,21 @@ export class EdgelessFrameOrderMenu extends WithDisposable(LitElement) {
         indicatorLine.style.visibility = 'hidden';
         if (
           newIndex >= 0 &&
-          newIndex <= this.frames.length &&
+          newIndex <= this._frames.length &&
           newIndex !== index &&
           newIndex !== index + 1
         ) {
-          const before = this.frames[newIndex - 1]?.index || null;
-          const after = this.frames[newIndex]?.index || null;
+          const frameMgr = this.edgeless.service.frame;
+          // Legacy compatibility
+          frameMgr.refreshLegacyFrameOrder();
 
-          const frame = this.frames[index];
+          const before = this._frames[newIndex - 1]?.presentationIndex || null;
+          const after = this._frames[newIndex]?.presentationIndex || null;
+
+          const frame = this._frames[index];
 
           this.edgeless.service.updateElement(frame.id, {
-            index: CommonUtils.generateKeyBetween(before, after),
+            presentationIndex: generateKeyBetweenV2(before, after),
           });
           this.edgeless.doc.captureSync();
 
@@ -184,12 +196,17 @@ export class EdgelessFrameOrderMenu extends WithDisposable(LitElement) {
     });
   }
 
+  override disconnectedCallback(): void {
+    super.disconnectedCallback();
+    this._disposables.dispose();
+  }
+
   override firstUpdated() {
     this._bindEvent();
   }
 
   override render() {
-    const frame = this.frames[this._curIndex];
+    const frame = this._frames[this._curIndex];
 
     return html`
       <div
@@ -199,7 +216,7 @@ export class EdgelessFrameOrderMenu extends WithDisposable(LitElement) {
         @click=${(e: MouseEvent) => e.stopPropagation()}
       >
         ${repeat(
-          this.frames,
+          this._frames,
           frame => frame.id,
           (frame, index) => html`
             <div class="item draggable" id=${frame.id} index=${index}>
@@ -237,9 +254,6 @@ export class EdgelessFrameOrderMenu extends WithDisposable(LitElement) {
 
   @property({ attribute: false })
   accessor embed = false;
-
-  @property({ attribute: false })
-  accessor frames!: FrameBlockModel[];
 }
 
 declare global {

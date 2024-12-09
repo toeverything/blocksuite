@@ -1,5 +1,5 @@
 export * from './attachment.js';
-export * from './html.js';
+export * from './html-adapter/html.js';
 export * from './image.js';
 export * from './markdown/index.js';
 export * from './mix-text.js';

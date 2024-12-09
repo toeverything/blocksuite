@@ -1,5 +1,6 @@
 import type { ParagraphBlockModel } from '@blocksuite/affine-model';
 
+import { referenceToNode } from '@blocksuite/affine-components/rich-text';
 import {
   ParseDocUrlProvider,
   type ParseDocUrlService,
@@ -409,20 +410,18 @@ class PasteTr {
         const pageId = needToConvert.get(op)!;
         const reference = { pageId, type: 'LinkedPage' };
 
-        const extracted = extractSearchParams(link);
-        const isLinkToNode = Boolean(
-          extracted?.params?.mode &&
-            (extracted.params.blockIds?.length ||
-              extracted.params.elementIds?.length)
-        );
+        const extractedParams = extractSearchParams(link);
+        const isLinkedBlock = extractedParams
+          ? referenceToNode({ pageId, ...extractedParams })
+          : false;
 
-        Object.assign(reference, extracted);
+        Object.assign(reference, extractedParams);
 
         this.std.getOptional(TelemetryProvider)?.track('LinkedDocCreated', {
           page: 'doc editor',
           category: 'pasted link',
-          type: isLinkToNode ? 'block' : 'doc',
           other: 'existing doc',
+          type: isLinkedBlock ? 'block' : 'doc',
         });
 
         transformed = true;

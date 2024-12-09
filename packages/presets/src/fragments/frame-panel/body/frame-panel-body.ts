@@ -1,9 +1,10 @@
 import type { Doc } from '@blocksuite/store';
 
-import { CommonUtils } from '@blocksuite/affine-block-surface';
 import { type EditorHost, ShadowlessElement } from '@blocksuite/block-std';
+import { generateKeyBetweenV2 } from '@blocksuite/block-std/gfx';
 import {
   DocModeProvider,
+  EdgelessFrameManager,
   EdgelessRootService,
   EditPropsStore,
   type FrameBlockModel,
@@ -11,6 +12,7 @@ import {
 import {
   Bound,
   DisposableGroup,
+  SignalWatcher,
   WithDisposable,
 } from '@blocksuite/global/utils';
 import { css, html, nothing, type PropertyValues } from 'lit';
@@ -26,6 +28,8 @@ import type {
 } from '../card/frame-card.js';
 
 import { startDragging } from '../utils/drag.js';
+
+const compare = EdgelessFrameManager.framePresentationComparator;
 
 type FrameListItem = {
   frame: FrameBlockModel;
@@ -84,7 +88,9 @@ const styles = css`
 
 export const AFFINE_FRAME_PANEL_BODY = 'affine-frame-panel-body';
 
-export class FramePanelBody extends WithDisposable(ShadowlessElement) {
+export class FramePanelBody extends SignalWatcher(
+  WithDisposable(ShadowlessElement)
+) {
   static override styles = styles;
 
   private _clearDocDisposables = () => {
@@ -143,7 +149,7 @@ export class FramePanelBody extends WithDisposable(ShadowlessElement) {
   private _updateFrameItems = () => {
     this._frameItems = this.frames.map((frame, idx) => ({
       frame,
-      frameIndex: frame.index,
+      frameIndex: frame.presentationIndex ?? frame.index,
       cardIndex: idx,
     }));
   };
@@ -156,7 +162,7 @@ export class FramePanelBody extends WithDisposable(ShadowlessElement) {
     const frames = this.editorHost.doc
       .getBlocksByFlavour('affine:frame')
       .map(block => block.model as FrameBlockModel);
-    return frames.sort(this.compare);
+    return frames.sort(compare);
   }
 
   get viewportPadding(): [number, number, number, number] {
@@ -303,16 +309,16 @@ export class FramePanelBody extends WithDisposable(ShadowlessElement) {
       const selectedFrames = selected
         .map(id => framesMap.get(id) as FrameListItem)
         .map(frameItem => frameItem.frame)
-        .sort(this.compare);
+        .sort(compare);
 
       // update selected frames index
       // make the indexes larger than the frame before and smaller than the frame after
-      let before = frames[insertIndex - 1]?.index || null;
-      const after = frames[insertIndex]?.index || null;
+      let before = frames[insertIndex - 1]?.presentationIndex || null;
+      const after = frames[insertIndex]?.presentationIndex || null;
       selectedFrames.forEach(frame => {
-        const newIndex = CommonUtils.generateKeyBetween(before, after);
+        const newIndex = generateKeyBetweenV2(before, after);
         frame.doc.updateBlock(frame, {
-          index: newIndex,
+          presentationIndex: newIndex,
         });
         before = newIndex;
       });
@@ -348,11 +354,11 @@ export class FramePanelBody extends WithDisposable(ShadowlessElement) {
     const frameItems: FramePanelBody['_frameItems'] = [];
     const oldSelectedSet = new Set(this._selected);
     const newSelected: string[] = [];
-    const frames = this.frames.sort(this.compare);
+    const frames = this.frames.sort(compare);
     frames.forEach((frame, idx) => {
       const frameItem = {
         frame,
-        frameIndex: frame.index,
+        frameIndex: frame.presentationIndex ?? frame.index,
         cardIndex: idx,
       };
 
@@ -365,12 +371,6 @@ export class FramePanelBody extends WithDisposable(ShadowlessElement) {
     this._frameItems = frameItems;
     this._selected = newSelected;
     this.requestUpdate();
-  }
-
-  compare(a: FrameBlockModel, b: FrameBlockModel) {
-    if (a.index < b.index) return -1;
-    else if (a.index > b.index) return 1;
-    return 0;
   }
 
   override connectedCallback() {

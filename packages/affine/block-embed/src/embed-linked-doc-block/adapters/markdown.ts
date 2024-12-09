@@ -2,8 +2,9 @@ import { EmbedLinkedDocBlockSchema } from '@blocksuite/affine-model';
 import {
   BlockMarkdownAdapterExtension,
   type BlockMarkdownAdapterMatcher,
-  toURLSearchParams,
 } from '@blocksuite/affine-shared/adapters';
+
+import { generateDocUrl } from '../../common/adapters/utils.js';
 
 export const embedLinkedDocBlockMarkdownAdapterMatcher: BlockMarkdownAdapterMatcher =
   {
@@ -19,11 +20,11 @@ export const embedLinkedDocBlockMarkdownAdapterMatcher: BlockMarkdownAdapterMatc
           return;
         }
         const title = configs.get('title:' + o.node.props.pageId) ?? 'untitled';
-        const params = o.node.props.params ?? {};
-        const search = toURLSearchParams(params);
-        const query = search?.size ? `?${search.toString()}` : '';
-        const baseUrl = configs.get('docLinkBaseUrl') ?? '';
-        const url = baseUrl ? `${baseUrl}/${o.node.props.pageId}${query}` : '';
+        const url = generateDocUrl(
+          configs.get('docLinkBaseUrl') ?? '',
+          String(o.node.props.pageId),
+          o.node.props.params ?? Object.create(null)
+        );
         walkerContext
           .openNode(
             {

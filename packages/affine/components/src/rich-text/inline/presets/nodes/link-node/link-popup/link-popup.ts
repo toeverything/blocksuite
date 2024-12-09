@@ -1,13 +1,23 @@
 import type { EmbedOptions } from '@blocksuite/affine-shared/types';
 import type { InlineRange } from '@blocksuite/inline/types';
 
-import { EmbedOptionProvider } from '@blocksuite/affine-shared/services';
+import {
+  EmbedOptionProvider,
+  type LinkEventType,
+  type TelemetryEvent,
+  TelemetryProvider,
+} from '@blocksuite/affine-shared/services';
 import {
   getHostName,
   isValidUrl,
   normalizeUrl,
+  stopPropagation,
 } from '@blocksuite/affine-shared/utils';
-import { BLOCK_ID_ATTR, type BlockComponent } from '@blocksuite/block-std';
+import {
+  BLOCK_ID_ATTR,
+  type BlockComponent,
+  type BlockStdScope,
+} from '@blocksuite/block-std';
 import { WithDisposable } from '@blocksuite/global/utils';
 import { computePosition, inline, offset, shift } from '@floating-ui/dom';
 import { html, LitElement, nothing } from 'lit';
@@ -74,7 +84,11 @@ export class LinkPopup extends WithDisposable(LitElement) {
   };
 
   private _edit = () => {
+    if (!this.host) return;
+
     this.type = 'edit';
+
+    track(this.host.std, 'OpenedAliasPopup', { control: 'edit' });
   };
 
   private _editTemplate = () => {
@@ -151,6 +165,24 @@ export class LinkPopup extends WithDisposable(LitElement) {
     this.abortController.abort();
   };
 
+  private _toggleViewSelector = (e: Event) => {
+    if (!this.host) return;
+
+    const opened = (e as CustomEvent<boolean>).detail;
+    if (!opened) return;
+
+    track(this.host.std, 'OpenedViewSelector', { control: 'switch view' });
+  };
+
+  private _trackViewSelected = (type: string) => {
+    if (!this.host) return;
+
+    track(this.host.std, 'SelectedView', {
+      control: 'select view',
+      type: `${type} view`,
+    });
+  };
+
   private _viewTemplate = () => {
     if (!this.currentLink) return;
 
@@ -174,7 +206,7 @@ export class LinkPopup extends WithDisposable(LitElement) {
         <editor-icon-button
           aria-label="Copy"
           data-testid="copy-link"
-          .tooltip=${'Click to copy link'}
+          .tooltip=${'Copy link'}
           @click=${this._copyUrl}
         >
           ${CopyIcon}
@@ -190,7 +222,7 @@ export class LinkPopup extends WithDisposable(LitElement) {
         </editor-icon-button>
       `,
 
-      this._viewToggleMenu(),
+      this._viewSelector(),
 
       html`
         <editor-menu-button
@@ -243,9 +275,10 @@ export class LinkPopup extends WithDisposable(LitElement) {
   }
 
   get block() {
-    const block = this.inlineEditor.rootElement.closest<BlockComponent>(
-      `[${BLOCK_ID_ATTR}]`
-    );
+    const { rootElement } = this.inlineEditor;
+    if (!rootElement) return null;
+
+    const block = rootElement.closest<BlockComponent>(`[${BLOCK_ID_ATTR}]`);
     if (!block) return null;
     return block;
   }
@@ -352,6 +385,8 @@ export class LinkPopup extends WithDisposable(LitElement) {
     if (!this.host) return;
     toast(this.host, 'Copied link to clipboard');
     this.abortController.abort();
+
+    track(this.host.std, 'CopiedLink', { control: 'copy link' });
   }
 
   private _moreActions() {
@@ -447,7 +482,7 @@ export class LinkPopup extends WithDisposable(LitElement) {
     this.confirmButton.requestUpdate();
   }
 
-  private _viewToggleMenu() {
+  private _viewSelector() {
     if (!this._isBookmarkAllowed) return nothing;
 
     const buttons = [];
@@ -485,6 +520,7 @@ export class LinkPopup extends WithDisposable(LitElement) {
             ${SmallArrowDownIcon}
           </editor-icon-button>
         `}
+        @toggle=${this._toggleViewSelector}
       >
         <div data-size="small" data-orientation="vertical">
           ${repeat(
@@ -495,7 +531,10 @@ export class LinkPopup extends WithDisposable(LitElement) {
                 data-testid=${`link-to-${type}`}
                 ?data-selected=${type === 'inline'}
                 ?disabled=${type === 'inline'}
-                @click=${action}
+                @click=${() => {
+                  action?.();
+                  this._trackViewSelected(type);
+                }}
               >
                 ${label}
               </editor-menu-action>
@@ -528,15 +567,9 @@ export class LinkPopup extends WithDisposable(LitElement) {
   protected override firstUpdated() {
     if (!this.linkInput) return;
 
-    this._disposables.addFromEvent(this.linkInput, 'copy', e => {
-      e.stopPropagation();
-    });
-    this._disposables.addFromEvent(this.linkInput, 'cut', e => {
-      e.stopPropagation();
-    });
-    this._disposables.addFromEvent(this.linkInput, 'paste', e => {
-      e.stopPropagation();
-    });
+    this._disposables.addFromEvent(this.linkInput, 'copy', stopPropagation);
+    this._disposables.addFromEvent(this.linkInput, 'cut', stopPropagation);
+    this._disposables.addFromEvent(this.linkInput, 'paste', stopPropagation);
   }
 
   override render() {
@@ -640,4 +673,19 @@ export class LinkPopup extends WithDisposable(LitElement) {
 
   @property()
   accessor type: 'create' | 'edit' | 'view' = 'create';
+}
+
+function track(
+  std: BlockStdScope,
+  event: LinkEventType,
+  props: Partial<TelemetryEvent>
+) {
+  std.getOptional(TelemetryProvider)?.track(event, {
+    segment: 'toolbar',
+    page: 'doc editor',
+    module: 'link toolbar',
+    type: 'inline view',
+    category: 'link',
+    ...props,
+  });
 }

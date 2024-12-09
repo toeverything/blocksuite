@@ -1,11 +1,9 @@
+import type { InlineDeltaToMarkdownAdapterMatcher } from '@blocksuite/affine-shared/adapters';
 import type { PhrasingContent } from 'mdast';
 
-import {
-  type InlineDeltaToMarkdownAdapterMatcher,
-  toURLSearchParams,
-} from '@blocksuite/affine-shared/adapters';
+import { generateDocUrl } from '@blocksuite/affine-block-embed';
 
-export const boldDeltaMarkdownAdapterMatch: InlineDeltaToMarkdownAdapterMatcher =
+export const boldDeltaToMarkdownAdapterMatcher: InlineDeltaToMarkdownAdapterMatcher =
   {
     name: 'bold',
     match: delta => !!delta.attributes?.bold,
@@ -18,7 +16,7 @@ export const boldDeltaMarkdownAdapterMatch: InlineDeltaToMarkdownAdapterMatcher 
     },
   };
 
-export const italicDeltaMarkdownAdapterMatch: InlineDeltaToMarkdownAdapterMatcher =
+export const italicDeltaToMarkdownAdapterMatcher: InlineDeltaToMarkdownAdapterMatcher =
   {
     name: 'italic',
     match: delta => !!delta.attributes?.italic,
@@ -31,7 +29,7 @@ export const italicDeltaMarkdownAdapterMatch: InlineDeltaToMarkdownAdapterMatche
     },
   };
 
-export const strikeDeltaMarkdownAdapterMatch: InlineDeltaToMarkdownAdapterMatcher =
+export const strikeDeltaToMarkdownAdapterMatcher: InlineDeltaToMarkdownAdapterMatcher =
   {
     name: 'strike',
     match: delta => !!delta.attributes?.strike,
@@ -44,7 +42,7 @@ export const strikeDeltaMarkdownAdapterMatch: InlineDeltaToMarkdownAdapterMatche
     },
   };
 
-export const inlineCodeDeltaMarkdownAdapterMatch: InlineDeltaToMarkdownAdapterMatcher =
+export const inlineCodeDeltaToMarkdownAdapterMatcher: InlineDeltaToMarkdownAdapterMatcher =
   {
     name: 'inlineCode',
     match: delta => !!delta.attributes?.code,
@@ -54,7 +52,7 @@ export const inlineCodeDeltaMarkdownAdapterMatch: InlineDeltaToMarkdownAdapterMa
     }),
   };
 
-export const referenceDeltaMarkdownAdapterMatch: InlineDeltaToMarkdownAdapterMatcher =
+export const referenceDeltaToMarkdownAdapterMatcher: InlineDeltaToMarkdownAdapterMatcher =
   {
     name: 'reference',
     match: delta => !!delta.attributes?.reference,
@@ -71,10 +69,11 @@ export const referenceDeltaMarkdownAdapterMatch: InlineDeltaToMarkdownAdapterMat
       const { configs } = context;
       const title = configs.get(`title:${reference.pageId}`);
       const params = reference.params ?? {};
-      const baseUrl = configs.get('docLinkBaseUrl') ?? '';
-      const search = toURLSearchParams(params);
-      const query = search?.size ? `?${search.toString()}` : '';
-      const url = baseUrl ? `${baseUrl}/${reference.pageId}${query}` : '';
+      const url = generateDocUrl(
+        configs.get('docLinkBaseUrl') ?? '',
+        String(reference.pageId),
+        params
+      );
       mdast = {
         type: 'link',
         url,
@@ -90,7 +89,7 @@ export const referenceDeltaMarkdownAdapterMatch: InlineDeltaToMarkdownAdapterMat
     },
   };
 
-export const linkDeltaMarkdownAdapterMatch: InlineDeltaToMarkdownAdapterMatcher =
+export const linkDeltaToMarkdownAdapterMatcher: InlineDeltaToMarkdownAdapterMatcher =
   {
     name: 'link',
     match: delta => !!delta.attributes?.link,
@@ -124,7 +123,7 @@ export const linkDeltaMarkdownAdapterMatch: InlineDeltaToMarkdownAdapterMatcher 
     },
   };
 
-export const latexDeltaMarkdownAdapterMatch: InlineDeltaToMarkdownAdapterMatcher =
+export const latexDeltaToMarkdownAdapterMatcher: InlineDeltaToMarkdownAdapterMatcher =
   {
     name: 'inlineLatex',
     match: delta => !!delta.attributes?.latex,
@@ -145,11 +144,11 @@ export const latexDeltaMarkdownAdapterMatch: InlineDeltaToMarkdownAdapterMatcher
 
 export const inlineDeltaToMarkdownAdapterMatchers: InlineDeltaToMarkdownAdapterMatcher[] =
   [
-    referenceDeltaMarkdownAdapterMatch,
-    linkDeltaMarkdownAdapterMatch,
-    inlineCodeDeltaMarkdownAdapterMatch,
-    boldDeltaMarkdownAdapterMatch,
-    italicDeltaMarkdownAdapterMatch,
-    strikeDeltaMarkdownAdapterMatch,
-    latexDeltaMarkdownAdapterMatch,
+    referenceDeltaToMarkdownAdapterMatcher,
+    linkDeltaToMarkdownAdapterMatcher,
+    inlineCodeDeltaToMarkdownAdapterMatcher,
+    boldDeltaToMarkdownAdapterMatcher,
+    italicDeltaToMarkdownAdapterMatcher,
+    strikeDeltaToMarkdownAdapterMatcher,
+    latexDeltaToMarkdownAdapterMatcher,
   ];

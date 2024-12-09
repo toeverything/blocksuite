@@ -1,5 +1,5 @@
 import type { EditorHost, ExtensionType } from '@blocksuite/block-std';
-import type { BlockCollection, Doc, DocCollection } from '@blocksuite/store';
+import type { DocCollection } from '@blocksuite/store';
 
 import {
   CommunityCanvasTextFonts,
@@ -15,13 +15,17 @@ import {
   RefNodeSlotsProvider,
   SpecProvider,
 } from '@blocksuite/blocks';
-import { assertExists } from '@blocksuite/global/utils';
 import { AffineEditorContainer } from '@blocksuite/presets';
 
 import { AttachmentViewerPanel } from '../../_common/components/attachment-viewer-panel.js';
+import { CollabDebugMenu } from '../../_common/components/collab-debug-menu.js';
 import { DocsPanel } from '../../_common/components/docs-panel.js';
 import { LeftSidePanel } from '../../_common/components/left-side-panel.js';
-import { QuickEdgelessMenu } from '../../_common/components/quick-edgeless-menu.js';
+import {
+  getDocFromUrlParams,
+  listenHashChange,
+  setDocModeFromUrlParams,
+} from '../../_common/history.js';
 import {
   mockDocModeService,
   mockGenerateDocUrlService,
@@ -31,43 +35,6 @@ import {
   themeExtension,
 } from '../../_common/mock-services.js';
 import { getExampleSpecs } from '../specs-examples/index.js';
-
-function getDocFromUrlParams(collection: DocCollection, url: URL) {
-  let doc: Doc | null = null;
-
-  const docId = decodeURIComponent(url.hash.slice(1));
-
-  if (docId) {
-    doc = collection.getDoc(docId);
-  }
-  if (!doc) {
-    const blockCollection = collection.docs.values().next()
-      .value as BlockCollection;
-    assertExists(blockCollection, 'Need to create a doc first');
-    doc = blockCollection.getDoc();
-  }
-
-  doc.load();
-  doc.resetHistory();
-
-  assertExists(doc.ready, 'Doc is not ready');
-  assertExists(doc.root, 'Doc root is not ready');
-
-  return doc;
-}
-
-function setDocModeFromUrlParams(
-  service: DocModeProvider,
-  search: URLSearchParams,
-  docId: string
-) {
-  const paramMode = search.get('mode');
-  if (paramMode) {
-    const docMode = paramMode === 'page' ? 'page' : 'edgeless';
-    service.setPrimaryMode(docMode, docId);
-    service.setEditorMode(docMode);
-  }
-}
 
 export async function mountDefaultDocEditor(collection: DocCollection) {
   const app = document.getElementById('app');
@@ -126,15 +93,15 @@ export async function mountDefaultDocEditor(collection: DocCollection) {
   const docsPanel = new DocsPanel();
   docsPanel.editor = editor;
 
-  const quickEdgelessMenu = new QuickEdgelessMenu();
-  quickEdgelessMenu.collection = collection;
-  quickEdgelessMenu.editor = editor;
-  quickEdgelessMenu.leftSidePanel = leftSidePanel;
-  quickEdgelessMenu.docsPanel = docsPanel;
+  const collabDebugMenu = new CollabDebugMenu();
+  collabDebugMenu.collection = collection;
+  collabDebugMenu.editor = editor;
+  collabDebugMenu.leftSidePanel = leftSidePanel;
+  collabDebugMenu.docsPanel = docsPanel;
 
   document.body.append(attachmentViewerPanel);
   document.body.append(leftSidePanel);
-  document.body.append(quickEdgelessMenu);
+  document.body.append(collabDebugMenu);
 
   // debug info
   window.editor = editor;
@@ -150,19 +117,7 @@ export async function mountDefaultDocEditor(collection: DocCollection) {
     },
   });
 
-  window.addEventListener('hashchange', () => {
-    const url = new URL(location.toString());
-    const doc = getDocFromUrlParams(collection, url);
-    if (!doc) return;
-
-    if (docsPanel.checkVisibility()) {
-      docsPanel.requestUpdate();
-    }
-
-    editor.doc = doc;
-    editor.doc.load();
-    editor.doc.resetHistory();
-  });
+  listenHashChange(collection, editor, docsPanel);
 
   return editor;
 

@@ -36,6 +36,7 @@ export class PlainTextDeltaConverter extends DeltaASTConverter<
   astToDelta(ast: string) {
     const context = {
       configs: this.configs,
+      options: Object.create(null),
       toDelta: (ast: string) => this.astToDelta(ast),
     };
     for (const matcher of this.plainTextASTToDeltaMatchers) {

@@ -3,7 +3,7 @@ import type { Doc, DocCollection } from '@blocksuite/store';
 import { sha } from '@blocksuite/global/utils';
 import { extMimeMap, Job } from '@blocksuite/store';
 
-import { HtmlAdapter } from '../adapters/index.js';
+import { HtmlAdapter } from '../adapters/html-adapter/html.js';
 import {
   defaultImageProxyMiddleware,
   fileNameMiddleware,

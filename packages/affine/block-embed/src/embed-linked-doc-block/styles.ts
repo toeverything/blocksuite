@@ -87,6 +87,7 @@ export const styles = css`
 
   ${embedNoteContentStyles}
 
+  .affine-embed-linked-doc-content-note.alias,
   .affine-embed-linked-doc-content-note.default {
     flex: 1;
     display: -webkit-box;
@@ -103,6 +104,10 @@ export const styles = css`
     font-style: normal;
     font-weight: 400;
     line-height: 20px;
+  }
+
+  .affine-embed-linked-doc-content-note.alias {
+    color: var(--affine-text-primary-color);
   }
 
   .affine-embed-linked-doc-card-content-reload,

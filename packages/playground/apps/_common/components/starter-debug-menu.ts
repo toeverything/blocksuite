@@ -17,14 +17,13 @@ import {
   EdgelessRootService,
   ExportManager,
   FontFamilyVariables,
+  HtmlAdapterFactoryIdentifier,
   HtmlTransformer,
-  type MarkdownAdapter,
   MarkdownAdapterFactoryIdentifier,
   MarkdownTransformer,
   NotionHtmlAdapter,
   NotionHtmlTransformer,
   openFileOrFiles,
-  type PlainTextAdapter,
   PlainTextAdapterFactoryIdentifier,
   printToPdf,
   SizeVariables,
@@ -47,8 +46,8 @@ import '@shoelace-style/shoelace/dist/components/select/select.js';
 import '@shoelace-style/shoelace/dist/components/tab/tab.js';
 import '@shoelace-style/shoelace/dist/components/tab-group/tab-group.js';
 import '@shoelace-style/shoelace/dist/components/tooltip/tooltip.js';
-import '@shoelace-style/shoelace/dist/themes/dark.css';
 import '@shoelace-style/shoelace/dist/themes/light.css';
+import '@shoelace-style/shoelace/dist/themes/dark.css';
 import { AffineEditorContainer, type CommentPanel } from '@blocksuite/presets';
 import { type DocCollection, Job, Text } from '@blocksuite/store';
 import { setBasePath } from '@shoelace-style/shoelace/dist/utilities/base-path.js';
@@ -161,8 +160,25 @@ function getDarkModeConfig(): boolean {
   return matchMedia.matches;
 }
 
-@customElement('debug-menu')
-export class DebugMenu extends ShadowlessElement {
+interface AdapterResult {
+  file: string;
+  assetsIds: string[];
+}
+
+type AdapterFactoryIdentifier =
+  | typeof HtmlAdapterFactoryIdentifier
+  | typeof MarkdownAdapterFactoryIdentifier
+  | typeof PlainTextAdapterFactoryIdentifier;
+
+interface AdapterConfig {
+  identifier: AdapterFactoryIdentifier;
+  fileExtension: string; // file extension need to be lower case with dot prefix, e.g. '.md', '.txt', '.html'
+  contentType: string;
+  indexFileName: string;
+}
+
+@customElement('starter-debug-menu')
+export class StarterDebugMenu extends ShadowlessElement {
   static override styles = css`
     :root {
       --sl-font-size-medium: var(--affine-font-xs);
@@ -176,6 +192,10 @@ export class DebugMenu extends ShadowlessElement {
 
   private _darkModeChange = (e: MediaQueryListEvent) => {
     this._setThemeMode(!!e.matches);
+  };
+
+  private _handleDocsPanelClose = () => {
+    this.leftSidePanel.toggle(this.docsPanel);
   };
 
   private _showStyleDebugMenu = false;
@@ -221,55 +241,62 @@ export class DebugMenu extends ShadowlessElement {
     this.outlineViewer.toggleDisplay();
   }
 
-  private _exportHtml() {
-    HtmlTransformer.exportDoc(this.doc).catch(console.error);
+  private async _exportFile(config: AdapterConfig) {
+    const doc = this.editor.doc;
+    const job = new Job({
+      collection: this.editor.doc.collection,
+      middlewares: [docLinkBaseURLMiddleware, titleMiddleware],
+    });
+
+    const adapterFactory = this.editor.std.provider.get(config.identifier);
+    const adapter = adapterFactory.get(job);
+    const result = (await adapter.fromDoc(doc)) as AdapterResult;
+
+    if (!result || (!result.file && !result.assetsIds.length)) {
+      return;
+    }
+
+    const docTitle = doc.meta?.title || 'Untitled';
+    const contentBlob = new Blob([result.file], { type: config.contentType });
+
+    let downloadBlob: Blob;
+    let name: string;
+
+    if (result.assetsIds.length > 0) {
+      if (!job.assets) {
+        throw new BlockSuiteError(ErrorCode.ValueNotExists, 'No assets found');
+      }
+      const zip = await createAssetsArchive(job.assets, result.assetsIds);
+      await zip.file(config.indexFileName, contentBlob);
+      downloadBlob = await zip.generate();
+      name = `${docTitle}.zip`;
+    } else {
+      downloadBlob = contentBlob;
+      name = `${docTitle}${config.fileExtension}`;
+    }
+
+    download(downloadBlob, name);
+  }
+
+  private async _exportHtml() {
+    await this._exportFile({
+      identifier: HtmlAdapterFactoryIdentifier,
+      fileExtension: '.html',
+      contentType: 'text/html',
+      indexFileName: 'index.html',
+    });
   }
 
   /**
    * Export markdown file using markdown adapter factory extension
    */
   private async _exportMarkDown() {
-    const doc = this.editor.doc;
-    const job = new Job({
-      collection: this.editor.doc.collection,
-      middlewares: [docLinkBaseURLMiddleware, titleMiddleware],
+    await this._exportFile({
+      identifier: MarkdownAdapterFactoryIdentifier,
+      fileExtension: '.md',
+      contentType: 'text/plain',
+      indexFileName: 'index.md',
     });
-    const markdownAdapterFactory = this.editor.std.provider.get(
-      MarkdownAdapterFactoryIdentifier
-    );
-    const markdownAdapter = markdownAdapterFactory.get(job) as MarkdownAdapter;
-    const markdownResult = await markdownAdapter.fromDoc(doc);
-    if (!markdownResult) {
-      return;
-    }
-
-    const markdown = markdownResult.file;
-    if (!markdown && !markdownResult.assetsIds.length) {
-      return;
-    }
-
-    let downloadBlob: Blob;
-    const docTitle = doc.meta?.title || 'Untitled';
-    let name: string;
-    const contentBlob = new Blob([markdown], { type: 'plain/text' });
-    if (markdownResult.assetsIds.length > 0) {
-      if (!job.assets) {
-        throw new BlockSuiteError(ErrorCode.ValueNotExists, 'No assets found');
-      }
-      const zip = await createAssetsArchive(
-        job.assets,
-        markdownResult.assetsIds
-      );
-
-      await zip.file('index.md', contentBlob);
-
-      downloadBlob = await zip.generate();
-      name = `${docTitle}.zip`;
-    } else {
-      downloadBlob = contentBlob;
-      name = `${docTitle}.md`;
-    }
-    download(downloadBlob, name);
   }
 
   private _exportPdf() {
@@ -280,32 +307,12 @@ export class DebugMenu extends ShadowlessElement {
    * Export plain text file using plain text adapter factory extension
    */
   private async _exportPlainText() {
-    const doc = this.editor.doc;
-    const job = new Job({
-      collection: this.editor.doc.collection,
-      middlewares: [docLinkBaseURLMiddleware, titleMiddleware],
+    await this._exportFile({
+      identifier: PlainTextAdapterFactoryIdentifier,
+      fileExtension: '.txt',
+      contentType: 'text/plain',
+      indexFileName: 'index.txt',
     });
-    const plainTextAdapterFactory = this.editor.std.provider.get(
-      PlainTextAdapterFactoryIdentifier
-    );
-    const plainTextAdapter = plainTextAdapterFactory.get(
-      job
-    ) as PlainTextAdapter;
-    const plainTextResult = await plainTextAdapter.fromDoc(doc);
-    if (!plainTextResult) {
-      return;
-    }
-
-    const plainText = plainTextResult.file;
-    if (!plainText) {
-      return;
-    }
-
-    const docTitle = doc.meta?.title || 'Untitled';
-    const contentBlob = new Blob([plainText], { type: 'text/plain' });
-    const downloadBlob = contentBlob;
-    const name = `${docTitle}.txt`;
-    download(downloadBlob, name);
   }
 
   private _exportPng() {
@@ -621,6 +628,7 @@ export class DebugMenu extends ShadowlessElement {
   }
 
   private _toggleDocsPanel() {
+    this.docsPanel.onClose = this._handleDocsPanelClose;
     this.leftSidePanel.toggle(this.docsPanel);
   }
 
@@ -950,6 +958,7 @@ export class DebugMenu extends ShadowlessElement {
             data-testid="docs-button"
             size="small"
             @click="${this._toggleDocsPanel}"
+            data-docs-panel-toggle
           >
             Docs
           </sl-button>
@@ -1029,6 +1038,6 @@ export class DebugMenu extends ShadowlessElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'debug-menu': DebugMenu;
+    'starter-debug-menu': StarterDebugMenu;
   }
 }
