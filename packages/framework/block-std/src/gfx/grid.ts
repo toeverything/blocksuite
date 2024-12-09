@@ -317,6 +317,7 @@ export class GridManager {
         if (!gridElements) continue;
         for (const element of gridElements) {
           if (
+            !(element as GfxPrimitiveElementModel).hidden &&
             filter(element) &&
             (strict
               ? b.contains(element.elementBound)

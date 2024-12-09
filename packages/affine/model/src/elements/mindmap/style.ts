@@ -247,18 +247,20 @@ export class StyleTwo extends MindmapStyleGetter {
         fillColor: '--affine-white',
 
         strokeColor: '--affine-black',
-        strokeWidth: 2,
+        strokeWidth: 3,
       },
       expandButton: {
         width: 24,
         height: 24,
-        radius: 8,
+        radius: 2,
 
         filled: true,
         fillColor: '--affine-black',
 
+        padding: [4, 0],
+
         strokeColor: '--affine-black',
-        strokeWidth: 2,
+        strokeWidth: 0,
 
         color: '--affine-white',
 
@@ -366,8 +368,8 @@ export class StyleThree extends MindmapStyleGetter {
         filled: true,
         fillColor: '--affine-white',
 
-        strokeColor: 'edgeless/line/green',
-        strokeWidth: 2,
+        strokeColor: '#3CBC36',
+        strokeWidth: 3,
       },
       expandButton: {
         width: 24,
@@ -375,10 +377,12 @@ export class StyleThree extends MindmapStyleGetter {
         radius: 8,
 
         filled: true,
-        fillColor: 'edgeless/line/green',
+        fillColor: '#3CBC36',
 
-        strokeColor: 'edgeless/line/green',
-        strokeWidth: 2,
+        padding: [4, 0],
+
+        strokeColor: '#3CBC36',
+        strokeWidth: 0,
 
         color: '#fff',
 
@@ -451,7 +455,7 @@ export class StyleFour extends MindmapStyleGetter {
         fillColor: '--affine-white',
 
         strokeColor: stroke,
-        strokeWidth: 2,
+        strokeWidth: 3,
       },
       expandButton: {
         width: 24,
@@ -461,8 +465,10 @@ export class StyleFour extends MindmapStyleGetter {
         filled: true,
         fillColor: stroke,
 
+        padding: [4, 0],
+
         strokeColor: stroke,
-        strokeWidth: 2,
+        strokeWidth: 0,
 
         color: '--affine-white',
 

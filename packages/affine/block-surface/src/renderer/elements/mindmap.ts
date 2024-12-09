@@ -1,4 +1,7 @@
-import type { MindmapElementModel } from '@blocksuite/affine-model';
+import type {
+  MindmapElementModel,
+  MindmapNode,
+} from '@blocksuite/affine-model';
 import type { GfxModel } from '@blocksuite/block-std/gfx';
 import type { IBound } from '@blocksuite/global/utils';
 
@@ -21,11 +24,10 @@ export function mindmap(
 
   matrix = matrix.translate(-dx, -dy);
 
-  model.traverse((to, from) => {
-    if (from) {
-      const result = model.getConnector(from, to);
-      if (!result) return;
-
+  const traverse = (node: MindmapNode) => {
+    const connectors = model.getConnectors(node);
+    if (!connectors) return;
+    connectors.reverse().forEach(result => {
       const { connector, outdated } = result;
       const elementGetter = (id: string) =>
         model.surface.getElementById(id) ??
@@ -49,8 +51,17 @@ export function mindmap(
       if (shouldSetGlobalAlpha) {
         ctx.globalAlpha = origin;
       }
-    }
+    });
 
-    model.getCollapseButton(to);
-  });
+    // call to update button style
+    model.getCollapseButton(node);
+
+    if (node.detail.collapsed) {
+      return;
+    } else {
+      node.children.forEach(traverse);
+    }
+  };
+
+  traverse(model.tree);
 }

@@ -278,10 +278,9 @@ export class CanvasRenderer {
       (this.grid.search(bound, {
         filter: ['canvas', 'local'],
       }) as SurfaceElementModel[]);
-    for (const element of elements) {
-      ctx.save();
 
-      const display = element.display ?? true;
+    for (const element of elements) {
+      const display = (element.display ?? true) && !element.hidden;
       if (display && intersects(getBoundWithRotation(element), bound)) {
         const renderFn =
           this.elementRenderers[
@@ -290,9 +289,10 @@ export class CanvasRenderer {
 
         if (!renderFn) {
           console.warn(`Cannot find renderer for ${element.type}`);
-          ctx.restore();
           continue;
         }
+
+        ctx.save();
 
         ctx.globalAlpha = element.opacity ?? 1;
         const dx = element.x - bound.x;

@@ -333,6 +333,9 @@ export abstract class GfxPrimitiveElementModel<
   @local()
   accessor externalXYWH: SerializedXYWH | undefined = undefined;
 
+  @field(false)
+  accessor hidden: boolean = false;
+
   @field()
   accessor index!: string;
 
