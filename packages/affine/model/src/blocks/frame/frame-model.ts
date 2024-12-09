@@ -31,7 +31,7 @@ export const FrameBlockSchema = defineBlockSchema({
   flavour: 'affine:frame',
   props: (internal): FrameBlockProps => ({
     title: internal.Text(),
-    background: '--affine-palette-transparent',
+    background: 'transparent',
     xywh: `[0,0,100,100]`,
     index: 'a0',
     childElementIds: Object.create(null),

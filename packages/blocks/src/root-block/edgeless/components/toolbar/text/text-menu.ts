@@ -1,5 +1,6 @@
 import type { GfxToolsFullOptionValue } from '@blocksuite/block-std/gfx';
 
+import { STROKE_COLORS } from '@blocksuite/affine-model';
 import { css, html, LitElement, nothing } from 'lit';
 import { property } from 'lit/decorators.js';
 
@@ -24,10 +25,12 @@ export class EdgelessTextMenu extends EdgelessToolbarToolMixin(LitElement) {
     return html`
       <edgeless-slide-menu>
         <div class="menu-content">
-          <edgeless-one-row-color-panel
+          <edgeless-color-panel
+            class="one-way"
             .value=${this.color}
+            .palettes=${STROKE_COLORS}
             @select=${(e: ColorEvent) => this.onChange({ color: e.detail })}
-          ></edgeless-one-row-color-panel>
+          ></edgeless-color-panel>
         </div>
       </edgeless-slide-menu>
     `;

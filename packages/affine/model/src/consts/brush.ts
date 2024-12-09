@@ -1,3 +1,3 @@
-import { LineColor } from './line.js';
+import { StrokeColor } from './color.js';
 
-export const DEFAULT_BRUSH_COLOR = LineColor.Blue;
+export const DEFAULT_BRUSH_COLOR = StrokeColor.Blue;

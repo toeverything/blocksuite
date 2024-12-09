@@ -21,7 +21,7 @@ import {
 import {
   ConnectorElementModel,
   EdgelessTextBlockModel,
-  LINE_COLORS,
+  PALETTES,
   ShapeElementModel,
   TextElementModel,
 } from '@blocksuite/affine-model';
@@ -388,7 +388,7 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
                 .color=${selectedColor}
                 .colors=${colors}
                 .colorType=${type}
-                .palettes=${LINE_COLORS}
+                .palettes=${PALETTES}
               >
               </edgeless-color-picker-button>
             `;

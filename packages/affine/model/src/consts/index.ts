@@ -1,4 +1,5 @@
 export * from './brush.js';
+export * from './color.js';
 export * from './connector.js';
 export * from './doc.js';
 export * from './frame.js';
