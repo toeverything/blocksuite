@@ -1,8 +1,9 @@
-import {
-  type InlineDeltaToHtmlAdapterMatcher,
-  type InlineHtmlAST,
-  toURLSearchParams,
+import type {
+  InlineDeltaToHtmlAdapterMatcher,
+  InlineHtmlAST,
 } from '@blocksuite/affine-shared/adapters';
+
+import { generateDocUrl } from '@blocksuite/affine-block-embed';
 
 export const boldDeltaToHtmlAdapterMatcher: InlineDeltaToHtmlAdapterMatcher = {
   name: 'bold',
@@ -89,11 +90,11 @@ export const referenceDeltaToHtmlAdapterMatcher: InlineDeltaToHtmlAdapterMatcher
 
       const { configs } = context;
       const title = configs.get(`title:${reference.pageId}`);
-      const params = reference.params ?? {};
-      const baseUrl = configs.get('docLinkBaseUrl') ?? '';
-      const search = toURLSearchParams(params);
-      const query = search?.size ? `?${search.toString()}` : '';
-      const url = baseUrl ? `${baseUrl}/${reference.pageId}${query}` : '';
+      const url = generateDocUrl(
+        configs.get('docLinkBaseUrl') ?? '',
+        String(reference.pageId),
+        reference.params ?? Object.create(null)
+      );
       if (title) {
         hast.value = title;
       }

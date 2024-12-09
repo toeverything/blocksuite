@@ -61,3 +61,49 @@ export function DragHandleConfigExtension(
     },
   };
 }
+
+export type DndApi = {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  decodeSnapshot: (dataTransfer: DataTransfer) => any | null;
+  encodeSnapshot: (
+    json: Record<string, unknown>,
+    dataTransfer: DataTransfer,
+    html?: string
+  ) => void;
+};
+
+export const DndApiExtensionIdentifier = createIdentifier<DndApi>(
+  'AffineDndApiIdentifier'
+);
+
+export function DNDAPIExtension(): ExtensionType {
+  return {
+    setup: di => {
+      di.addImpl(DndApiExtensionIdentifier, () => ({
+        decodeSnapshot: dataTransfer => {
+          const html = dataTransfer.getData('text/html');
+          if (!html) return null;
+
+          const parser = new DOMParser();
+          const doc = parser.parseFromString(html, 'text/html');
+          const dom = doc.querySelector<HTMLDivElement>(
+            '[data-blocksuite-snapshot]'
+          );
+          if (!dom) return null;
+
+          const json = JSON.parse(
+            decodeURIComponent(dom.dataset.blocksuiteSnapshot as string)
+          );
+          return json;
+        },
+        encodeSnapshot: (json, dataTransfer, htmlBody = '') => {
+          const snapshot = JSON.stringify(json);
+          dataTransfer.setData(
+            'text/html',
+            `<div data-blocksuite-snapshot="${encodeURIComponent(snapshot)}">${htmlBody}</div>`
+          );
+        },
+      }));
+    },
+  };
+}

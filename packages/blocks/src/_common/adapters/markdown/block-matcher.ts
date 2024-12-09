@@ -9,8 +9,8 @@ import {
   EmbedLinkedDocMarkdownAdapterExtension,
   embedLoomBlockMarkdownAdapterMatcher,
   EmbedLoomMarkdownAdapterExtension,
+  EmbedSyncedDocBlockMarkdownAdapterExtension,
   embedSyncedDocBlockMarkdownAdapterMatcher,
-  EmbedSyncedDocMarkdownAdapterExtension,
   embedYoutubeBlockMarkdownAdapterMatcher,
   EmbedYoutubeMarkdownAdapterExtension,
 } from '@blocksuite/affine-block-embed';
@@ -75,7 +75,7 @@ export const BlockMarkdownAdapterExtensions: ExtensionType[] = [
   EmbedGithubMarkdownAdapterExtension,
   EmbedLinkedDocMarkdownAdapterExtension,
   EmbedLoomMarkdownAdapterExtension,
-  EmbedSyncedDocMarkdownAdapterExtension,
+  EmbedSyncedDocBlockMarkdownAdapterExtension,
   EmbedYoutubeMarkdownAdapterExtension,
   ListBlockMarkdownAdapterExtension,
   ParagraphBlockMarkdownAdapterExtension,
