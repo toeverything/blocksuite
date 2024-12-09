@@ -36,6 +36,7 @@ import {
 import { RefNodeSlotsProvider } from '../../../../extension/index.js';
 import { ReferenceAliasPopup } from './reference-alias-popup.js';
 import { styles } from './styles.js';
+import { cloneReferenceInfoWithoutAliases } from './utils.js';
 
 export class ReferencePopup extends WithDisposable(LitElement) {
   static override styles = styles;
@@ -123,8 +124,14 @@ export class ReferencePopup extends WithDisposable(LitElement) {
 
     const index = parent.children.indexOf(block.model);
     const referenceInfo = this.referenceInfo;
+    const hasTitleAlias = Boolean(referenceInfo.title);
 
-    doc.addBlock('affine:embed-synced-doc', referenceInfo, parent, index + 1);
+    doc.addBlock(
+      'affine:embed-synced-doc',
+      cloneReferenceInfoWithoutAliases(referenceInfo),
+      parent,
+      index + 1
+    );
 
     const totalTextLength = this.inlineEditor.yTextLength;
     const inlineTextLength = this.targetInlineRange.length;
@@ -134,7 +141,9 @@ export class ReferencePopup extends WithDisposable(LitElement) {
       this.inlineEditor.insertText(this.targetInlineRange, this.docTitle);
     }
 
-    if (referenceInfo.title) notifyLinkedDocSwitchedToEmbed(std);
+    if (hasTitleAlias) {
+      notifyLinkedDocSwitchedToEmbed(std);
+    }
 
     this.abortController.abort();
   }

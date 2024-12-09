@@ -394,7 +394,9 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
 
     if (doc) {
       const title = doc.meta?.title;
-      const description = getDocContentWithMaxLength(doc);
+      const description = isEmbedLinkedDocBlock(model)
+        ? getDocContentWithMaxLength(doc)
+        : undefined;
       return { title, description };
     }
 

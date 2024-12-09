@@ -1,6 +1,5 @@
 import type { AliasInfo } from '@blocksuite/affine-model';
 import type { BlockComponent, EditorHost } from '@blocksuite/block-std';
-import type { BlockProps } from '@blocksuite/store';
 
 import {
   EmbedLinkedDocBlockComponent,
@@ -178,10 +177,8 @@ export class EmbedCardEditModal extends SignalWatcher(
 
     const description = this.description$.value.trim();
 
-    const props: Partial<BlockProps> = { title };
+    const props: AliasInfo = { title };
     if (description) props.description = description;
-
-    this.model.doc.updateBlock(this.model, props);
 
     const blockComponent = this._blockComponent;
 
@@ -191,10 +188,11 @@ export class EmbedCardEditModal extends SignalWatcher(
     ) {
       const std = blockComponent.std;
 
-      blockComponent.convertToCard();
+      blockComponent.convertToCard(props);
 
       notifyLinkedDocSwitchedToCard(std);
     } else {
+      this.model.doc.updateBlock(this.model, props);
       blockComponent?.requestUpdate();
     }
 

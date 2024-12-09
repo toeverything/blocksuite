@@ -30,3 +30,16 @@ export function referenceToNode({ params }: ReferenceInfo) {
   if (databaseId || databaseRowId) return true;
   return false;
 }
+
+/**
+ * Clones reference info without the aliases.
+ * In `EmbedSyncedDocModel`, the aliases are not needed at the moment.
+ */
+export function cloneReferenceInfoWithoutAliases({
+  pageId,
+  params,
+}: ReferenceInfo) {
+  const info: ReferenceInfo = { pageId };
+  if (params) info.params = cloneDeep(params);
+  return info;
+}
