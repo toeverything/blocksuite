@@ -12,7 +12,7 @@ import {
 } from '@blocksuite/affine-components/icons';
 import { notifyLinkedDocSwitchedToEmbed } from '@blocksuite/affine-components/notification';
 import { isPeekable, peek } from '@blocksuite/affine-components/peek';
-import { isLinkToNode } from '@blocksuite/affine-components/rich-text';
+import { referenceToNode } from '@blocksuite/affine-components/rich-text';
 import { toast } from '@blocksuite/affine-components/toast';
 import {
   cloneGroups,
@@ -126,7 +126,7 @@ export class EmbedCardToolbar extends WidgetComponent<
       this.focusModel &&
       this.focusBlock &&
       isEmbedLinkedDocBlock(this.focusModel) &&
-      (isLinkToNode(this.focusModel) ||
+      (referenceToNode(this.focusModel) ||
         !!this.focusBlock.closest('affine-embed-synced-doc-block') ||
         this.focusModel.pageId === this.doc.id)
     );

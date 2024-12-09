@@ -262,6 +262,11 @@ export function getCursorByCoord(
   const lines = deltaInsertsToChunks(deltas).map(line =>
     line.map(iTextDelta => iTextDelta.insert).join('')
   );
+
+  if (lineIndex < 0 || lineIndex >= lines.length) {
+    return model.text.length;
+  }
+
   const string = lines[lineIndex];
 
   let index = lines.slice(0, lineIndex).join('').length - 1;

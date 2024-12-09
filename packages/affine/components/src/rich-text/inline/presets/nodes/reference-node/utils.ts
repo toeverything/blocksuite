@@ -21,7 +21,7 @@ export function cloneReferenceInfo({
 /**
  * Returns true if it is a link to block or element.
  */
-export function isLinkToNode({ params }: ReferenceInfo) {
+export function referenceToNode({ params }: ReferenceInfo) {
   if (!params) return false;
   if (!params.mode) return false;
   const { blockIds, elementIds, databaseId, databaseRowId } = params;

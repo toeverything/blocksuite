@@ -1,4 +1,4 @@
-import type { Connection, ReferenceParams } from '@blocksuite/affine-model';
+import type { Connection } from '@blocksuite/affine-model';
 import type {
   BlockStdScope,
   EditorHost,
@@ -12,6 +12,7 @@ import {
   SurfaceGroupLikeModel,
   TextUtils,
 } from '@blocksuite/affine-block-surface';
+import { referenceToNode } from '@blocksuite/affine-components/rich-text';
 import {
   BookmarkStyles,
   DEFAULT_NOTE_HEIGHT,
@@ -286,33 +287,19 @@ export class EdgelessClipboardController extends PageClipboard {
 
       let flavour = 'affine:bookmark';
       let style = BookmarkStyles[0];
-      let isLinkToNode = false;
+      let isInternalLink = false;
+      let isLinkedBlock = false;
 
       if (docUrlInfo) {
-        options.pageId = docUrlInfo.docId;
+        const { docId: pageId, ...params } = docUrlInfo;
+
         flavour = 'affine:embed-linked-doc';
         style = 'vertical';
 
-        isLinkToNode = Boolean(
-          docUrlInfo.blockIds?.length || docUrlInfo.elementIds?.length
-        );
-
-        const params: ReferenceParams = {};
-        if (docUrlInfo.mode) {
-          params.mode = docUrlInfo.mode;
-        }
-        if (isLinkToNode) {
-          if (docUrlInfo.blockIds?.length) {
-            params.blockIds = docUrlInfo.blockIds;
-          }
-          if (docUrlInfo.elementIds?.length) {
-            params.elementIds = docUrlInfo.elementIds;
-          }
-        }
-
-        if (Object.keys(params).length) {
-          Object.assign(options, { params });
-        }
+        isInternalLink = true;
+        isLinkedBlock = referenceToNode({ pageId, params });
+        options.pageId = pageId;
+        if (params) options.params = params;
       } else {
         options.url = url;
 
@@ -356,8 +343,8 @@ export class EdgelessClipboardController extends PageClipboard {
         page: 'whiteboard editor',
         segment: 'whiteboard',
         category: 'pasted link',
-        other: 'existing doc',
-        type: isLinkToNode ? 'block' : 'doc',
+        other: isInternalLink ? 'existing doc' : 'external link',
+        type: isInternalLink ? (isLinkedBlock ? 'block' : 'doc') : 'link',
       });
 
       this.selectionManager.set({

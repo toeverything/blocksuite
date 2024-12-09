@@ -201,6 +201,8 @@ export class AffinePageDraggingAreaWidget extends WidgetComponent<
       'pointerDown',
       ctx => {
         const container = this.block.rootElementContainer;
+        if (!container) return;
+
         const containerRect = container.getBoundingClientRect();
         const containerStyles = window.getComputedStyle(container);
         const paddingLeft = parseFloat(containerStyles.paddingLeft);

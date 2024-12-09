@@ -90,6 +90,26 @@ export class DocsPanel extends WithDisposable(ShadowlessElement) {
 
   override connectedCallback() {
     super.connectedCallback();
+
+    requestAnimationFrame(() => {
+      const handleClickOutside = (event: MouseEvent) => {
+        if (!(event.target instanceof Node)) return;
+
+        const toggleButton = document.querySelector(
+          'sl-button[data-docs-panel-toggle]'
+        );
+        if (toggleButton?.contains(event.target as Node)) return;
+
+        if (!this.contains(event.target)) {
+          this.onClose?.();
+        }
+      };
+      document.addEventListener('click', handleClickOutside);
+      this.disposables.add(() => {
+        document.removeEventListener('click', handleClickOutside);
+      });
+    });
+
     this.disposables.add(
       this.editor.doc.collection.slots.docUpdated.on(() => {
         this.requestUpdate();
@@ -145,6 +165,9 @@ export class DocsPanel extends WithDisposable(ShadowlessElement) {
 
   @property({ attribute: false })
   accessor editor!: AffineEditorContainer;
+
+  @property({ attribute: false })
+  accessor onClose!: () => void;
 }
 
 function createDocBlock(collection: DocCollection) {

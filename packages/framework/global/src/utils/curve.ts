@@ -144,6 +144,12 @@ export function getBezierNearestPoint(
 export function getBezierParameters(
   points: PointLocation[]
 ): BezierCurveParameters {
+  // Fallback for degenerate Bezier curve (all points are at the same position)
+  if (points.length === 1) {
+    const point = points[0];
+    return [point, point, point, point];
+  }
+
   return [points[0], points[0].absOut, points[1].absIn, points[1]];
 }
 
