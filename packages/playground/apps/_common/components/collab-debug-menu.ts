@@ -499,12 +499,8 @@ export class CollabDebugMenu extends SignalWatcher(ShadowlessElement) {
             </sl-tooltip>
 
             ${new URLSearchParams(location.search).get('room')
-              ? html`<sl-tooltip
-                  content="Your name in Collaboration (default: Unknown)"
-                  placement="bottom"
-                  hoist
-                  ><sl-input
-                    placeholder="Unknown"
+              ? html`<sl-input
+                    placeholder="Your name in room"
                     clearable
                     size="small"
                     @blur=${(e: Event) => {
