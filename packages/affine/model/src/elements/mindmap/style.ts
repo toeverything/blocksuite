@@ -137,7 +137,7 @@ export class StyleOne extends MindmapStyleGetter {
         fillColor: '--affine-white',
 
         strokeColor: color,
-        strokeWidth: 2,
+        strokeWidth: 3,
       },
       expandButton: {
         width: 24,
@@ -148,7 +148,9 @@ export class StyleOne extends MindmapStyleGetter {
         fillColor: color,
 
         strokeColor: color,
-        strokeWidth: 2,
+        strokeWidth: 0,
+
+        padding: [4, 0],
 
         color: '--affine-white',
 

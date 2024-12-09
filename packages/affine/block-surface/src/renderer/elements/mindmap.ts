@@ -23,13 +23,17 @@ export function mindmap(
 
   model.traverse((to, from) => {
     if (from) {
-      const connector = model.getConnector(from, to);
-      if (!connector) return;
+      const result = model.getConnector(from, to);
+      if (!result) return;
 
+      const { connector, outdated } = result;
       const elementGetter = (id: string) =>
         model.surface.getElementById(id) ??
         (model.surface.doc.getBlockById(id) as GfxModel);
-      ConnectorPathGenerator.updatePath(connector, null, elementGetter);
+
+      if (outdated) {
+        ConnectorPathGenerator.updatePath(connector, null, elementGetter);
+      }
 
       const dx = connector.x - bound.x;
       const dy = connector.y - bound.y;

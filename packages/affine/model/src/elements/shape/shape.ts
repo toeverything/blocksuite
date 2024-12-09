@@ -199,7 +199,7 @@ export class LocalShapeElementModel extends GfxLocalElementModel {
 
   fontFamily: string = FontFamily.Inter;
 
-  fontSize!: number;
+  fontSize: number = 16;
 
   fontStyle: FontStyle = FontStyle.Normal;
 
