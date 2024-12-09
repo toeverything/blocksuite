@@ -14,7 +14,6 @@ import {
 
 import type { CodeBlockConfig } from '../../code-block/code-block-config.js';
 
-import { pageRootWidgetViewMap } from '../../root-block/page/page-root-spec.js';
 import { AFFINE_EMBED_CARD_TOOLBAR_WIDGET } from '../../root-block/widgets/embed-card-toolbar/embed-card-toolbar.js';
 import { AFFINE_FORMAT_BAR_WIDGET } from '../../root-block/widgets/format-bar/format-bar.js';
 import { AFFINE_SLASH_MENU_WIDGET } from '../../root-block/widgets/slash-menu/index.js';
@@ -55,28 +54,32 @@ export class MobileSpecsPatches extends LifeCycleWatcher {
       });
     }
 
-    // Disable some toolbar widgets for mobile.
+    // Disable root level widgets for mobile.
     {
-      di.override(WidgetViewMapIdentifier('affine:page'), () => {
+      const rootWidgetViewMapIdentifier =
+        WidgetViewMapIdentifier('affine:page');
+
+      const prev = di.getFactory(rootWidgetViewMapIdentifier);
+
+      di.override(rootWidgetViewMapIdentifier, provider => {
         const ignoreWidgets = [
           AFFINE_FORMAT_BAR_WIDGET,
           AFFINE_EMBED_CARD_TOOLBAR_WIDGET,
           AFFINE_SLASH_MENU_WIDGET,
         ];
 
-        type pageRootWidgetViewMapKey = keyof typeof pageRootWidgetViewMap;
-        return (
-          Object.keys(pageRootWidgetViewMap) as pageRootWidgetViewMapKey[]
-        ).reduce(
-          (acc, key) => {
-            if (ignoreWidgets.includes(key)) return acc;
-            acc[key] = pageRootWidgetViewMap[key];
-            return acc;
-          },
-          {} as typeof pageRootWidgetViewMap
-        );
-      });
+        const newMap = { ...prev?.(provider) };
 
+        ignoreWidgets.forEach(widget => {
+          if (widget in newMap) delete newMap[widget];
+        });
+
+        return newMap;
+      });
+    }
+
+    // Disable block level toolbar widgets for mobile.
+    {
       di.override(
         WidgetViewMapIdentifier('affine:code'),
         (): WidgetViewMapType => ({})
