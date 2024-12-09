@@ -288,7 +288,7 @@ export class LayerManager {
     }
 
     this.layers = layers;
-    this._surface?.elementModels.forEach(el => this.add(el));
+    this._surface?.localElementModels.forEach(el => this.add(el));
   }
 
   private _insertIntoLayer(target: GfxModel, type: 'block' | 'canvas') {

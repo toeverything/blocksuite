@@ -102,15 +102,9 @@ export function compare(
   a: GfxModel | GfxLocalElementModel,
   b: GfxModel | GfxLocalElementModel
 ) {
-  if (
-    isGfxGroupCompatibleModel(a) &&
-    (a.hasDescendant(b) || b.groups.includes(a))
-  ) {
+  if (isGfxGroupCompatibleModel(a) && b.groups.includes(a)) {
     return SortOrder.BEFORE;
-  } else if (
-    isGfxGroupCompatibleModel(b) &&
-    (b.hasDescendant(a) || a.groups.includes(b))
-  ) {
+  } else if (isGfxGroupCompatibleModel(b) && a.groups.includes(b)) {
     return SortOrder.AFTER;
   } else {
     const aGroups = a.groups as GfxGroupCompatibleInterface[];
