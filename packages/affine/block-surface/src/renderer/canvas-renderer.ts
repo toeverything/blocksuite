@@ -1,6 +1,7 @@
 import type {
   GridManager,
   LayerManager,
+  SurfaceBlockModel,
   Viewport,
 } from '@blocksuite/block-std/gfx';
 import type { IBound } from '@blocksuite/global/utils';
@@ -37,6 +38,7 @@ type RendererOptions = {
   onStackingCanvasCreated?: (canvas: HTMLCanvasElement) => void;
   elementRenderers: Record<string, ElementRenderer>;
   gridManager: GridManager;
+  surfaceModel: SurfaceBlockModel;
 };
 
 export class CanvasRenderer {
@@ -90,6 +92,8 @@ export class CanvasRenderer {
     if (options.enableStackingCanvas) {
       this._initStackingCanvas(options.onStackingCanvasCreated);
     }
+
+    this._watchSurface(options.surfaceModel);
   }
 
   /**
@@ -319,6 +323,28 @@ export class CanvasRenderer {
 
     this._stackingCanvas.forEach(sizeUpdater.update);
     this.refresh();
+  }
+
+  private _watchSurface(surfaceModel: SurfaceBlockModel) {
+    const slots = [
+      'elementAdded',
+      'elementRemoved',
+      'localElementAdded',
+      'localElementDeleted',
+      'localElementUpdated',
+    ] as const;
+
+    slots.forEach(slotName => {
+      this._disposables.add(surfaceModel[slotName].on(() => this.refresh()));
+    });
+
+    this._disposables.add(
+      surfaceModel.elementUpdated.on(payload => {
+        // ignore externalXYWH update cause it's updated by the renderer
+        if (payload.props['externalXYWH']) return;
+        this.refresh();
+      })
+    );
   }
 
   addOverlay(overlay: Overlay) {
