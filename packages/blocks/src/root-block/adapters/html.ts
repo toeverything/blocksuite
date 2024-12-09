@@ -23,6 +23,13 @@ export const rootBlockHtmlAdapterMatcher: BlockHtmlAdapterMatcher = {
   fromBlockSnapshot: {
     enter: (_, context) => {
       const { walkerContext } = context;
+      const htmlRootDocContext =
+        walkerContext.getGlobalContext('hast:html-root-doc');
+      const isRootDoc = htmlRootDocContext ?? true;
+      if (!isRootDoc) {
+        return;
+      }
+
       walkerContext
         .openNode(
           {
@@ -112,6 +119,12 @@ export const rootBlockHtmlAdapterMatcher: BlockHtmlAdapterMatcher = {
     },
     leave: (_, context) => {
       const { walkerContext } = context;
+      const htmlRootDocContext =
+        walkerContext.getGlobalContext('hast:html-root-doc');
+      const isRootDoc = htmlRootDocContext ?? true;
+      if (!isRootDoc) {
+        return;
+      }
       walkerContext.closeNode().closeNode().closeNode();
     },
   },

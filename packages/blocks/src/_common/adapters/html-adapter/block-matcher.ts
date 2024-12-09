@@ -5,8 +5,12 @@ import {
   embedFigmaBlockHtmlAdapterMatcher,
   EmbedGithubBlockHtmlAdapterExtension,
   embedGithubBlockHtmlAdapterMatcher,
+  embedLinkedDocBlockHtmlAdapterMatcher,
+  EmbedLinkedDocHtmlAdapterExtension,
   EmbedLoomBlockHtmlAdapterExtension,
   embedLoomBlockHtmlAdapterMatcher,
+  EmbedSyncedDocBlockHtmlAdapterExtension,
+  embedSyncedDocBlockHtmlAdapterMatcher,
   EmbedYoutubeBlockHtmlAdapterExtension,
   embedYoutubeBlockHtmlAdapterMatcher,
 } from '@blocksuite/affine-block-embed';
@@ -57,6 +61,8 @@ export const defaultBlockHtmlAdapterMatchers = [
   embedGithubBlockHtmlAdapterMatcher,
   bookmarkBlockHtmlAdapterMatcher,
   databaseBlockHtmlAdapterMatcher,
+  embedLinkedDocBlockHtmlAdapterMatcher,
+  embedSyncedDocBlockHtmlAdapterMatcher,
 ];
 
 export const BlockHtmlAdapterExtensions: ExtensionType[] = [
@@ -72,4 +78,6 @@ export const BlockHtmlAdapterExtensions: ExtensionType[] = [
   EmbedGithubBlockHtmlAdapterExtension,
   BookmarkBlockHtmlAdapterExtension,
   DatabaseBlockHtmlAdapterExtension,
+  EmbedLinkedDocHtmlAdapterExtension,
+  EmbedSyncedDocBlockHtmlAdapterExtension,
 ];
