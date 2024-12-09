@@ -10,6 +10,7 @@ import {
   polygonNearestPoint,
   rotatePoints,
 } from '@blocksuite/global/utils';
+import { mutex } from 'lib0';
 
 import type { EditorHost } from '../../../view/index.js';
 import type { GfxCompatibleInterface, PointTestOptions } from '../base.js';
@@ -17,6 +18,8 @@ import type { GfxGroupModel } from '../model.js';
 import type { SurfaceBlockModel } from './surface-model.js';
 
 export abstract class GfxLocalElementModel implements GfxCompatibleInterface {
+  private _mutex: mutex.mutex = mutex.createMutex();
+
   protected _local = new Map<string | symbol, unknown>();
 
   protected _surface: SurfaceBlockModel;
@@ -101,21 +104,39 @@ export abstract class GfxLocalElementModel implements GfxCompatibleInterface {
         if (prop === 'xywh') {
           this._local.delete('deserializedXYWH');
         }
+
         // @ts-ignore
         const oldValue = target[prop as string];
 
-        surfaceModel.localElementUpdated.emit({
-          model: p,
-          props: {
-            [prop as string]: value,
-          },
-          oldValues: {
-            [prop as string]: oldValue,
-          },
-        });
+        if (oldValue === value) {
+          return true;
+        }
 
         // @ts-ignore
         target[prop as string] = value;
+
+        if (
+          typeof prop === 'symbol' ||
+          prop[0] === '_' ||
+          typeof value === 'function' ||
+          prop === 'textBound'
+        ) {
+          return true;
+        }
+
+        if (surfaceModel.localElementModels.has(p)) {
+          this._mutex(() => {
+            surfaceModel.localElementUpdated.emit({
+              model: p,
+              props: {
+                [prop as string]: value,
+              },
+              oldValues: {
+                [prop as string]: oldValue,
+              },
+            });
+          });
+        }
 
         return true;
       },
