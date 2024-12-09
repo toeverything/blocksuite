@@ -96,6 +96,7 @@ export class AwarenessStore<Flags extends BlockSuiteFlags = BlockSuiteFlags> {
   destroy() {
     this.awareness.off('change', this._onAwarenessChange);
     this.slots.update.dispose();
+    this.awareness.destroy();
   }
 
   getFlag<Key extends keyof Flags>(field: Key) {
