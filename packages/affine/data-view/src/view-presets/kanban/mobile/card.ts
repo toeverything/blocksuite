@@ -271,17 +271,17 @@ export class MobileKanbanCard extends SignalWatcher(
     // 启动自动滚动
     this.startAutoScroll();
 
-    // 获取所有 group
+    // Get all groups
     const allGroups = Array.from(
       document.querySelectorAll('mobile-kanban-group')
     ) as HTMLElement[];
 
-    // 清除之前的所有提示样式
+    // Clear all previous indicator styles
     document.querySelectorAll('.drag-over').forEach(el => {
       el.classList.remove('drag-over', 'drag-over-top', 'drag-over-bottom');
     });
 
-    // 获取当前触摸点下的元素
+    // Get the element under touch point
     const elementUnderTouch = document.elementFromPoint(
       touch.clientX,
       touch.clientY
@@ -290,7 +290,7 @@ export class MobileKanbanCard extends SignalWatcher(
       'mobile-kanban-card'
     ) as HTMLElement;
 
-    // 如果触摸点在当前拖动的卡片上，或者是当前卡片的前后位置，不显示提示线
+    // Don't show indicator if touching the dragging card itself
     if (
       elementUnderTouch === this ||
       this.contains(elementUnderTouch) ||
@@ -299,7 +299,7 @@ export class MobileKanbanCard extends SignalWatcher(
       return;
     }
 
-    // 找到当前触摸点所在的 group
+    // Find the group under touch point
     let targetGroup: HTMLElement | null = null;
     for (const group of allGroups) {
       const rect = group.getBoundingClientRect();
@@ -313,7 +313,7 @@ export class MobileKanbanCard extends SignalWatcher(
       return;
     }
 
-    // 获取目标 group 中的所有卡片
+    // Get all cards in target group
     const cards = Array.from(
       targetGroup.querySelectorAll('mobile-kanban-card')
     ).filter(card => card !== this) as HTMLElement[];
@@ -329,13 +329,13 @@ export class MobileKanbanCard extends SignalWatcher(
     const groupRect = groupBody.getBoundingClientRect();
 
     if (cards.length === 0) {
-      // group 为空的情况
+      // Handle empty group case
       if (touch.clientY >= groupRect.top && touch.clientY <= groupRect.bottom) {
         const addCardButton = targetGroup.querySelector(
           '.mobile-add-card'
         ) as HTMLElement;
         if (addCardButton) {
-          // 只有在不同 group 时才显示提示线
+          // Only show indicator when dragging to a different group
           if (targetGroup.dataset.key !== this.groupKey) {
             addCardButton.classList.add('drag-over');
             closestCard = addCardButton;
@@ -344,36 +344,36 @@ export class MobileKanbanCard extends SignalWatcher(
         }
       }
     } else {
-      // 获取当前卡片在目标组中的位置
+      // Get current card's position in target group
       const currentIndex = cards.findIndex(
         card => card.dataset.cardId === this.cardId
       );
       const isInSameGroup = targetGroup.dataset.key === this.groupKey;
 
-      // 检查是否在第一张卡片上方
+      // Check if touching above first card
       const firstCard = cards[0];
       const firstCardRect = firstCard.getBoundingClientRect();
 
       if (touch.clientY < firstCardRect.top) {
-        // 如果是同一个 group，且当前卡片是第一张，不显示提示线
+        // Show indicator if not the first card or in different group
         if (!isInSameGroup || currentIndex > 0) {
           closestCard = firstCard;
           position = 'top';
         }
       }
-      // 检查是否在最后一张卡片下方
+      // Check if touching below last card
       else {
         const lastCard = cards[cards.length - 1];
         const lastCardRect = lastCard.getBoundingClientRect();
 
         if (touch.clientY > lastCardRect.bottom) {
-          // 如果是同一个 group，且当前卡片是最后一张，不显示提示线
+          // Show indicator if not the last card or in different group
           if (!isInSameGroup || currentIndex < cards.length - 1) {
             closestCard = lastCard;
             position = 'bottom';
           }
         }
-        // 在卡片之间
+        // Between cards
         else {
           for (let i = 0; i < cards.length; i++) {
             const card = cards[i];
@@ -383,15 +383,15 @@ export class MobileKanbanCard extends SignalWatcher(
               const midY = rect.top + rect.height / 2;
 
               if (isInSameGroup) {
-                // 在同一个 group 中
+                // In same group
                 if (touch.clientY < midY) {
-                  // 上半部分：不能是当前卡片的下一张卡片
+                  // Upper half: can't be next card of current card
                   if (i !== currentIndex + 1 || currentIndex === 0) {
                     closestCard = card;
                     position = 'top';
                   }
                 } else {
-                  // 下半部分：不能是当前卡片的上一张卡片
+                  // Lower half: can't be previous card of current card
                   if (
                     i !== currentIndex - 1 ||
                     currentIndex === cards.length - 1
@@ -401,7 +401,7 @@ export class MobileKanbanCard extends SignalWatcher(
                   }
                 }
               } else {
-                // 不同 group，没有限制
+                // Different group, no restrictions
                 closestCard = card;
                 position = touch.clientY < midY ? 'top' : 'bottom';
               }
@@ -412,7 +412,7 @@ export class MobileKanbanCard extends SignalWatcher(
       }
     }
 
-    // 显示提示线
+    // Show drop indicator
     if (closestCard) {
       closestCard.classList.add('drag-over', `drag-over-${position}`);
     }
@@ -646,7 +646,7 @@ export class MobileKanbanCard extends SignalWatcher(
           const cell = column.cellGet(this.cardId);
           const value = cell.value$.value;
 
-          // 如果值为空,不渲染该字段
+          // 如果值���空,不渲染该字段
           if (
             value == null ||
             value === '' ||
