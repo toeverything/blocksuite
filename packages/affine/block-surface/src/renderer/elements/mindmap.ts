@@ -46,12 +46,7 @@ export function mindmap(
         ctx.globalAlpha = origin;
       }
     }
-  });
 
-  model.extraConnectors.forEach(connector => {
-    const dx = connector.x - bound.x;
-    const dy = connector.y - bound.y;
-
-    renderConnector(connector, ctx, matrix.translate(dx, dy), renderer, rc);
+    model.getCollapseButton(to);
   });
 }

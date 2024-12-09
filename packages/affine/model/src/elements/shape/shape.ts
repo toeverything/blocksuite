@@ -12,6 +12,7 @@ import type {
 
 import {
   field,
+  GfxLocalElementModel,
   GfxPrimitiveElementModel,
   local,
 } from '@blocksuite/block-std/gfx';
@@ -59,6 +60,9 @@ export const SHAPE_TEXT_PADDING = 20;
 export const SHAPE_TEXT_VERTICAL_PADDING = 10;
 
 export class ShapeElementModel extends GfxPrimitiveElementModel<ShapeProps> {
+  /**
+   * The bound of the text content.
+   */
   textBound: IBound | null = null;
 
   get type() {
@@ -184,6 +188,59 @@ export class ShapeElementModel extends GfxPrimitiveElementModel<ShapeProps> {
 
   @field()
   accessor xywh: SerializedXYWH = '[0,0,100,100]';
+}
+
+export class LocalShapeElementModel extends GfxLocalElementModel {
+  color: Color = '#000000';
+
+  fillColor: Color = ShapeFillColor.Yellow;
+
+  filled: boolean = false;
+
+  fontFamily: string = FontFamily.Inter;
+
+  fontSize!: number;
+
+  fontStyle: FontStyle = FontStyle.Normal;
+
+  fontWeight: FontWeight = FontWeight.Regular;
+
+  padding: [number, number] = [SHAPE_TEXT_VERTICAL_PADDING, SHAPE_TEXT_PADDING];
+
+  radius: number = 0;
+
+  roughness: number = DEFAULT_ROUGHNESS;
+
+  shadow: {
+    blur: number;
+    offsetX: number;
+    offsetY: number;
+    color: string;
+  } | null = null;
+
+  shapeStyle: ShapeStyle = ShapeStyle.General;
+
+  shapeType: ShapeType = ShapeType.Rect;
+
+  strokeColor: Color = LineColor.Yellow;
+
+  strokeStyle: StrokeStyle = StrokeStyle.Solid;
+
+  strokeWidth: number = 4;
+
+  text: string = '';
+
+  textAlign: TextAlign = TextAlign.Center;
+
+  textBound: Bound | null = null;
+
+  textDisplay: boolean = true;
+
+  textVerticalAlign: TextVerticalAlign = TextVerticalAlign.Center;
+
+  get type() {
+    return 'shape';
+  }
 }
 
 declare global {
