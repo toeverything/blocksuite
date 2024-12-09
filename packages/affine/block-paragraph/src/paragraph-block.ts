@@ -226,6 +226,9 @@ export class ParagraphBlockComponent extends CaptionedBlockComponent<
         >
           ${this.model.type.startsWith('h')
             ? html`
+                <affine-paragraph-heading-icon
+                  .model=${this.model}
+                ></affine-paragraph-heading-icon>
                 <blocksuite-toggle-button
                   .collapsed=${collapsed}
                   .updateCollapsed=${(value: boolean) => {
