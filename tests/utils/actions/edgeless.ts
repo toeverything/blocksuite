@@ -13,6 +13,7 @@ import { dragBetweenCoords } from './drag.js';
 import {
   pressBackspace,
   pressEnter,
+  pressEscape,
   selectAllByKeyboard,
   SHIFT_KEY,
   SHORT_KEY,
@@ -517,6 +518,21 @@ export async function addBasicFrameElement(
 ) {
   await setEdgelessTool(page, 'frame');
   await dragBetweenCoords(page, start, end, { steps: 50 });
+}
+
+export async function addBasicEdgelessText(
+  page: Page,
+  text: string,
+  x: number,
+  y: number
+) {
+  await setEdgelessTool(page, 'text');
+  await page.mouse.click(x, y);
+  await page.locator('affine-edgeless-text').waitFor({ state: 'visible' });
+  await waitNextFrame(page, 100);
+  await type(page, text, 20);
+  await pressEscape(page, 2);
+  await setEdgelessTool(page, 'default');
 }
 
 export async function addNote(page: Page, text: string, x: number, y: number) {
@@ -1844,6 +1860,21 @@ export async function createBrushElement(
     { x: start[0], y: start[1] },
     { x: end[0], y: end[1] }
   );
+}
+
+export async function createEdgelessText(
+  page: Page,
+  coord: number[],
+  text = 'text'
+) {
+  const position = await toViewCoord(page, coord);
+  await addBasicEdgelessText(page, text, position[0], position[1]);
+}
+
+export async function createMindmap(page: Page, coord: number[]) {
+  const position = await toViewCoord(page, coord);
+  await page.keyboard.press('m');
+  await page.mouse.click(position[0], position[1]);
 }
 
 export async function createNote(

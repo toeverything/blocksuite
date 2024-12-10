@@ -1,5 +1,3 @@
-import type { GfxToolsMap, GfxToolsOption } from '@blocksuite/block-std/gfx';
-
 import {
   LayoutType,
   MindmapElementModel,
@@ -17,6 +15,11 @@ import {
   TelemetryProvider,
 } from '@blocksuite/affine-shared/services';
 import { matchFlavours } from '@blocksuite/affine-shared/utils';
+import {
+  type GfxToolsMap,
+  type GfxToolsOption,
+  isGfxGroupCompatibleModel,
+} from '@blocksuite/block-std/gfx';
 import { IS_MAC } from '@blocksuite/global/env';
 import { Bound } from '@blocksuite/global/utils';
 
@@ -388,18 +391,20 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
             }
           });
         },
-        Tab: () => {
+        Tab: ctx => {
+          ctx.get('defaultState').event.preventDefault();
+
           const { service } = rootComponent;
           const selection = service.selection;
           const elements = selection.selectedElements;
-
-          if (elements.some(e => e.isLocked())) return;
 
           if (!isSelectSingleMindMap(elements)) {
             return;
           }
 
           const mindmap = elements[0].group as MindmapElementModel;
+          if (mindmap.isLocked()) return;
+
           const node = mindmap.getNode(elements[0].id)!;
           const id = mindmap.addNode(node.id);
           const target = service.getElementById(id) as ShapeElementModel;
@@ -615,7 +620,14 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
 
     if (selectedElements.some(e => e.isLocked())) return;
 
-    selectedElements.forEach(element => {
+    const movedElements = new Set([
+      ...selectedElements,
+      ...selectedElements
+        .map(el => (isGfxGroupCompatibleModel(el) ? el.descendantElements : []))
+        .flat(),
+    ]);
+
+    movedElements.forEach(element => {
       const bound = Bound.deserialize(element.xywh).clone();
 
       switch (key) {

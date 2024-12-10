@@ -104,6 +104,8 @@ export class EdgelessLockButton extends SignalWatcher(
       element.isLocked()
     );
 
+    this.dataset.locked = hasLocked ? 'true' : 'false';
+
     const icon = hasLocked ? UnlockIcon : LockIcon;
 
     return html`<editor-icon-button
