@@ -276,6 +276,17 @@ export class EmbedCardToolbar extends WidgetComponent<
     return undefined;
   }
 
+  get _originalDocTitle() {
+    const model = this.focusModel;
+    if (!model) return undefined;
+
+    const doc = isInternalEmbedModel(model)
+      ? this.std.collection.getDoc(model.pageId)
+      : null;
+
+    return doc?.meta?.title || 'Untitled';
+  }
+
   private get _selection() {
     return this.host.selection;
   }
@@ -758,13 +769,10 @@ export class EmbedCardToolbar extends WidgetComponent<
               aria-label="Doc title"
               .hover=${false}
               .labelHeight=${'20px'}
-              .tooltip=${'Original linked doc title'}
+              .tooltip=${this._originalDocTitle}
               @click=${this.focusBlock?.open}
             >
-              <span class="label"
-                >${this.std.collection.getDoc(model.pageId)?.meta?.title ||
-                'Untitled'}</span
-              >
+              <span class="label">${this._originalDocTitle}</span>
             </editor-icon-button>
           `
         : nothing,
