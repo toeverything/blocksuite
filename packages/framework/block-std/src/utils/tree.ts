@@ -1,6 +1,7 @@
 import type { GfxModel } from '../gfx/model/model.js';
 
 import {
+  type GfxCompatibleInterface,
   type GfxGroupCompatibleInterface,
   isGfxGroupCompatibleModel,
 } from '../gfx/model/base.js';
@@ -94,7 +95,7 @@ export function descendantElementsImpl(
 
 export function hasDescendantElementImpl(
   container: GfxGroupCompatibleInterface,
-  element: GfxModel
+  element: GfxCompatibleInterface
 ): boolean {
   let _container = element.group;
   while (_container) {
@@ -109,7 +110,7 @@ export function hasDescendantElementImpl(
  */
 export function canSafeAddToContainer(
   container: GfxGroupCompatibleInterface & GfxModel,
-  element: GfxModel
+  element: GfxCompatibleInterface
 ) {
   if (
     element === container ||
