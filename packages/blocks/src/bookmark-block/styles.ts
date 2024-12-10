@@ -6,6 +6,7 @@ import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../_common/consts.js';
 
 export const styles = css`
   .affine-bookmark-card {
+    container: affine-bookmark-card / inline-size;
     margin: 0 auto;
     box-sizing: border-box;
     display: flex;
@@ -269,6 +270,15 @@ export const styles = css`
       display: none;
     }
 
+    .affine-bookmark-banner {
+      display: none;
+    }
+  }
+
+  @container affine-bookmark-card (width < 375px) {
+    .affine-bookmark-content {
+      width: 100%;
+    }
     .affine-bookmark-banner {
       display: none;
     }
