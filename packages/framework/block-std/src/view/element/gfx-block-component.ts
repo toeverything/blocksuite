@@ -1,7 +1,5 @@
-import type { BlockModel } from '@blocksuite/store';
-
 import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
-import { Bound, type SerializedXYWH } from '@blocksuite/global/utils';
+import { Bound } from '@blocksuite/global/utils';
 import { nothing } from 'lit';
 
 import type { BlockService } from '../../extension/index.js';
@@ -170,10 +168,7 @@ export function toGfxBlockComponent<
       h: number | string;
       zIndex: string;
     } {
-      const { xywh$ } = this.model as BlockModel<{
-        xywh: SerializedXYWH;
-        index: string;
-      }>;
+      const { xywh$ } = this.model;
 
       if (!xywh$) {
         throw new BlockSuiteError(
