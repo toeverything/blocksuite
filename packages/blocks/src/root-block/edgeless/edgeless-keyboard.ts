@@ -221,7 +221,8 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
           const { selection } = this.rootComponent.service;
           if (
             selection.selectedElements.length === 1 &&
-            selection.firstElement instanceof GroupElementModel
+            selection.firstElement instanceof GroupElementModel &&
+            !selection.firstElement.isLocked()
           ) {
             ctx.get('keyboardState').event.preventDefault();
             rootComponent.service.ungroup(selection.firstElement);
@@ -336,6 +337,8 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
             const element = elements[0];
             const id = element.id;
 
+            if (element.isLocked()) return;
+
             if (element instanceof ConnectorElementModel) {
               selection.set({
                 elements: [id],
@@ -389,6 +392,8 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
           const { service } = rootComponent;
           const selection = service.selection;
           const elements = selection.selectedElements;
+
+          if (elements.some(e => e.isLocked())) return;
 
           if (!isSelectSingleMindMap(elements)) {
             return;
@@ -507,6 +512,7 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
     }
 
     const selectedElements = edgeless.service.selection.selectedElements;
+    if (selectedElements.some(e => e.isLocked())) return;
 
     if (isSelectSingleMindMap(selectedElements)) {
       const node = selectedElements[0];
@@ -606,6 +612,8 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
 
       return;
     }
+
+    if (selectedElements.some(e => e.isLocked())) return;
 
     selectedElements.forEach(element => {
       const bound = Bound.deserialize(element.xywh).clone();

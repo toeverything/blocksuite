@@ -569,6 +569,8 @@ export class EdgelessClipboardController extends PageClipboard {
       clipboardData.xywh = newXYWH;
     }
 
+    clipboardData.lockedBySelf = false;
+
     const id = this.host.service.addElement(
       clipboardData.type as CanvasElementType,
       clipboardData
@@ -1272,9 +1274,13 @@ export class EdgelessClipboardController extends PageClipboard {
           continue;
         }
 
+        assertType<GfxCompatibleProps & unknown>(blockSnapshot.props);
+
         blockSnapshot.props.xywh = getNewXYWH(
           blockSnapshot.props.xywh as SerializedXYWH
         );
+        blockSnapshot.props.lockedBySelf = false;
+
         const newId = await config.createFunction(blockSnapshot, context);
         if (!newId) continue;
 

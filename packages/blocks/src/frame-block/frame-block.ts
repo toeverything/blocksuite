@@ -69,11 +69,6 @@ export class FrameBlockComponent extends GfxBlockComponent<FrameBlockModel> {
     const frameIndex = rootService.layer.getZIndex(model);
 
     return html`
-      <edgeless-frame-title
-        style=${styleMap({
-          zIndex: 2147483647 - -frameIndex,
-        })}
-      ></edgeless-frame-title>
       <div
         class="affine-frame-container"
         style=${styleMap({

@@ -272,6 +272,10 @@ export class EdgelessRootService extends RootService implements SurfaceContext {
     return groupId;
   }
 
+  /**
+   * Create a group from selected elements, if the selected elements are in the same group
+   * @returns the id of the created group
+   */
   createGroupFromSelected() {
     const { selection } = this;
 
