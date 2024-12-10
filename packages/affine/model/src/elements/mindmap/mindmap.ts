@@ -985,7 +985,13 @@ export class MindmapElementModel extends GfxGroupLikeElementModel<MindmapElement
     };
   }
 
-  toggleCollapse(node: MindmapNode) {
+  toggleCollapse(node: MindmapNode, options: { layout?: boolean } = {}) {
+    if (!this._nodeMap.has(node.id)) {
+      return;
+    }
+
+    const { layout = false } = options;
+
     if (node && node.children.length > 0) {
       const collapsed = node.detail.collapsed ? false : true;
       const isExpand = !collapsed;
@@ -1009,6 +1015,10 @@ export class MindmapElementModel extends GfxGroupLikeElementModel<MindmapElement
           collapsed,
         });
       });
+    }
+
+    if (layout) {
+      this.layout();
     }
   }
 

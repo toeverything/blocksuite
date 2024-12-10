@@ -399,6 +399,10 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
           const id = mindmap.addNode(node.id);
           const target = service.getElementById(id) as ShapeElementModel;
 
+          if (node.detail.collapsed) {
+            mindmap.toggleCollapse(node, { layout: true });
+          }
+
           requestAnimationFrame(() => {
             mountShapeTextEditor(target, rootComponent);
 
