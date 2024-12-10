@@ -18,6 +18,7 @@ import { BrushTool } from '../../root-block/edgeless/gfx-tool/brush-tool.js';
 import { ConnectorTool } from '../../root-block/edgeless/gfx-tool/connector-tool.js';
 import { CopilotTool } from '../../root-block/edgeless/gfx-tool/copilot-tool.js';
 import { DefaultTool } from '../../root-block/edgeless/gfx-tool/default-tool.js';
+import { MindMapIndicatorOverlay } from '../../root-block/edgeless/gfx-tool/default-tool-ext/mind-map-ext/indicator-overlay.js';
 import { EmptyTool } from '../../root-block/edgeless/gfx-tool/empty-tool.js';
 import { EraserTool } from '../../root-block/edgeless/gfx-tool/eraser-tool.js';
 import { PresentTool } from '../../root-block/edgeless/gfx-tool/frame-navigator-tool.js';
@@ -53,6 +54,7 @@ export const EdgelessToolExtension: ExtensionType[] = [
 export const EdgelessBuiltInManager: ExtensionType[] = [
   ConnectionOverlay,
   FrameOverlay,
+  MindMapIndicatorOverlay,
   EdgelessSnapManager,
   EdgelessFrameManager,
   EditPropsMiddlewareBuilder,
