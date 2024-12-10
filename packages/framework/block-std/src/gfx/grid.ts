@@ -431,6 +431,9 @@ export class GridManager {
       surface.elementModels.forEach(model => {
         this.add(model);
       });
+      surface.localElementModels.forEach(model => {
+        this.add(model);
+      });
     }
 
     return () => {
