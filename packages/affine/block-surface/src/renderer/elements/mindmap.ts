@@ -63,5 +63,5 @@ export function mindmap(
     }
   };
 
-  traverse(model.tree);
+  model.tree && traverse(model.tree);
 }
