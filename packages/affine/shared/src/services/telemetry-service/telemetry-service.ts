@@ -11,6 +11,7 @@ import type {
 export type TelemetryEventMap = OutDatabaseAllEvents &
   LinkToolbarEvents & {
     DocCreated: DocCreatedEvent;
+    Link: TelemetryEvent;
     LinkedDocCreated: TelemetryEvent;
     SplitNote: TelemetryEvent;
     CanvasElementAdded: ElementCreationEvent;

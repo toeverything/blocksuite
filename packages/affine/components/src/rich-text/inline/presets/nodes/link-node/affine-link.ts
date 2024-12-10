@@ -1,4 +1,4 @@
-import type { ReferenceInfo, ReferenceParams } from '@blocksuite/affine-model';
+import type { ReferenceInfo } from '@blocksuite/affine-model';
 import type { AffineTextAttributes } from '@blocksuite/affine-shared/types';
 import type { BlockComponent } from '@blocksuite/block-std';
 
@@ -131,7 +131,7 @@ export class AffineLink extends ShadowlessElement {
     return std;
   }
 
-  // Identify if url is an in-app link
+  // Identify if url is an internal link
   private _identify() {
     const link = this.link;
     if (!link) return;
@@ -141,12 +141,7 @@ export class AffineLink extends ShadowlessElement {
       ?.parseDocUrl(link);
     if (!result) return;
 
-    const { docId: pageId, mode, blockIds, elementIds } = result;
-
-    let params: ReferenceParams | undefined = undefined;
-    if (mode || blockIds?.length || elementIds?.length) {
-      params = { mode, blockIds, elementIds };
-    }
+    const { docId: pageId, ...params } = result;
 
     this._referenceInfo = { pageId, params };
   }

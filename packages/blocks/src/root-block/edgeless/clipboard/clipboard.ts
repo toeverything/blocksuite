@@ -339,13 +339,15 @@ export class EdgelessClipboardController extends PageClipboard {
         type: flavour.split(':')[1],
       });
 
-      this.std.getOptional(TelemetryProvider)?.track('LinkedDocCreated', {
-        page: 'whiteboard editor',
-        segment: 'whiteboard',
-        category: 'pasted link',
-        other: isInternalLink ? 'existing doc' : 'external link',
-        type: isInternalLink ? (isLinkedBlock ? 'block' : 'doc') : 'link',
-      });
+      this.std
+        .getOptional(TelemetryProvider)
+        ?.track(isInternalLink ? 'LinkedDocCreated' : 'Link', {
+          page: 'whiteboard editor',
+          segment: 'whiteboard',
+          category: 'pasted link',
+          other: isInternalLink ? 'existing doc' : 'external link',
+          type: isInternalLink ? (isLinkedBlock ? 'block' : 'doc') : 'link',
+        });
 
       this.selectionManager.set({
         editing: false,
