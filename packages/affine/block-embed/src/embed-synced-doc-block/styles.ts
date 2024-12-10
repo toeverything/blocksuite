@@ -2,7 +2,8 @@ import {
   EMBED_CARD_HEIGHT,
   EMBED_CARD_WIDTH,
 } from '@blocksuite/affine-shared/consts';
-import { css, html } from 'lit';
+import { cssVarV2 } from '@toeverything/theme/v2';
+import { css, html, unsafeCSS } from 'lit';
 
 import { embedNoteContentStyles } from '../common/embed-note-content-styles.js';
 
@@ -10,6 +11,14 @@ export const SYNCED_MIN_WIDTH = 370;
 export const SYNCED_MIN_HEIGHT = 64;
 
 export const blockStyles = css`
+  affine-embed-synced-doc-block {
+    --embed-padding: 24px;
+  }
+  affine-embed-synced-doc-block[data-page-mode] {
+    width: calc(100% + var(--embed-padding) * 2);
+    margin-left: calc(-1 * var(--embed-padding));
+    margin-right: calc(-1 * var(--embed-padding));
+  }
   .edgeless-block-portal-embed
     > affine-embed-synced-doc-block[data-nested-editor] {
     position: relative;
@@ -39,7 +48,7 @@ export const blockStyles = css`
   affine-embed-synced-doc-block[data-nested-editor],
   affine-embed-edgeless-synced-doc-block[data-nested-editor] {
     .affine-embed-synced-doc-container.page {
-      padding: 0 24px;
+      padding: 0 var(--embed-padding);
     }
   }
 
@@ -89,11 +98,15 @@ export const blockStyles = css`
     align-items: center;
     width: 100%;
     height: 100%;
-    padding: 0 24px;
+    padding: 0 var(--embed-padding);
     background-color: var(--affine-hover-color);
   }
   .affine-embed-synced-doc-header svg {
     flex-shrink: 0;
+  }
+  .affine-embed-synced-doc-icon {
+    line-height: 0;
+    color: ${unsafeCSS(cssVarV2.icon.primary)};
   }
   .affine-embed-synced-doc-title {
     font-size: 14px;
@@ -162,6 +175,18 @@ export const blockStyles = css`
   .affine-embed-synced-doc-editor .affine-page-root-block-container {
     width: 100%;
     max-width: 100%;
+  }
+
+  @container (max-width: 640px) {
+    affine-embed-synced-doc-block {
+      --embed-padding: 8px;
+    }
+    .affine-embed-synced-doc-title {
+      font-weight: 400;
+    }
+    .affine-embed-synced-doc-header-wrapper {
+      height: 33px;
+    }
   }
 `;
 
