@@ -3,7 +3,11 @@ import type { IndentContext } from '@blocksuite/affine-shared/types';
 import type { Command } from '@blocksuite/block-std';
 
 import { focusTextModel } from '@blocksuite/affine-components/rich-text';
-import { matchFlavours } from '@blocksuite/affine-shared/utils';
+import {
+  calculateCollapsedSiblings,
+  getNearestHeadingBefore,
+  matchFlavours,
+} from '@blocksuite/affine-shared/utils';
 
 export const canIndentParagraphCommand: Command<
   never,
@@ -81,9 +85,31 @@ export const indentParagraphCommand: Command<'indentContext'> = (ctx, next) => {
   if (!previousSibling) return;
 
   doc.captureSync();
-  doc.moveBlocks([model], previousSibling);
 
-  // update collapsed state
+  // update collapsed state of affine paragraph
+  const nearestHeading = getNearestHeadingBefore(model);
+  if (
+    nearestHeading &&
+    matchFlavours(nearestHeading, ['affine:paragraph']) &&
+    nearestHeading.collapsed
+  ) {
+    doc.updateBlock(nearestHeading, {
+      collapsed: false,
+    });
+  }
+
+  if (
+    matchFlavours(model, ['affine:paragraph']) &&
+    model.type.startsWith('h') &&
+    model.collapsed
+  ) {
+    const collapsedSiblings = calculateCollapsedSiblings(model);
+    doc.moveBlocks([model, ...collapsedSiblings], previousSibling);
+  } else {
+    doc.moveBlocks([model], previousSibling);
+  }
+
+  // update collapsed state of affine list
   if (
     matchFlavours(previousSibling, ['affine:list']) &&
     previousSibling.collapsed

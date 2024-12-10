@@ -6,6 +6,7 @@ import type {
 } from '@blocksuite/block-std';
 import type { BlockModel } from '@blocksuite/store';
 
+import { ParagraphBlockComponent } from '@blocksuite/affine-block-paragraph';
 import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '@blocksuite/affine-shared/consts';
 import {
   DocModeProvider,
@@ -321,8 +322,11 @@ export const getDropResult = (
 export function getDragHandleLeftPadding(blocks: BlockComponent[]) {
   const hasToggleList = blocks.some(
     block =>
-      matchFlavours(block.model, ['affine:list']) &&
-      block.model.children.length > 0
+      (matchFlavours(block.model, ['affine:list']) &&
+        block.model.children.length > 0) ||
+      (block instanceof ParagraphBlockComponent &&
+        block.model.type.startsWith('h') &&
+        block.collapsedSiblings.length > 0)
   );
   const offsetLeft = hasToggleList
     ? DRAG_HANDLE_CONTAINER_OFFSET_LEFT_LIST
