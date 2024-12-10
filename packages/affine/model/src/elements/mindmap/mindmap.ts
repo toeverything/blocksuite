@@ -275,22 +275,31 @@ export class MindmapElementModel extends GfxGroupLikeElementModel<MindmapElement
   private _updateCollapseButton() {
     const root = this._tree;
 
+    const visited = new Set<LocalShapeElementModel>();
     const update = (node: MindmapNode, collapse: boolean) => {
       const button = this.getCollapseButton(node);
 
-      if (button.hidden) {
-        button.hidden = collapse;
-      }
+      if (button) {
+        if (button.hidden) {
+          button.hidden = collapse;
+        }
 
-      button.text = node.detail.collapsed
-        ? node.children.length.toString()
-        : '';
+        button.text = node.detail.collapsed
+          ? node.children.length.toString()
+          : '';
+      }
 
       node.children.forEach(child => {
         collapse = node.detail.collapsed || collapse || false;
         update(child, collapse);
       });
     };
+
+    this.collapseButtons.forEach(btn => {
+      if (!visited.has(btn)) {
+        this.surface.deleteLocalElement(btn);
+      }
+    });
 
     update(root, root.detail.collapsed ?? false);
   }
@@ -892,6 +901,15 @@ export class MindmapElementModel extends GfxGroupLikeElementModel<MindmapElement
 
   override onCreated(): void {
     this.requestBuildTree();
+  }
+
+  override onDestroyed(): void {
+    super.onDestroyed();
+
+    this._nodeMap.clear();
+    this.collapseButtons.forEach(btn => {
+      this.surface.deleteLocalElement(btn);
+    });
   }
 
   removeChild(element: GfxModel) {

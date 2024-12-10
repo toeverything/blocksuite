@@ -197,7 +197,7 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
 
     const unmount = () => {
       mounted = false;
-      elementModel['_disposable'].dispose();
+      elementModel.onDestroyed();
     };
 
     const mount = () => {

@@ -246,6 +246,10 @@ export abstract class GfxPrimitiveElementModel<
 
   onCreated() {}
 
+  onDestroyed() {
+    this._disposable.dispose();
+  }
+
   pop(prop: keyof Props | string) {
     if (!this._stashed.has(prop)) {
       return;
