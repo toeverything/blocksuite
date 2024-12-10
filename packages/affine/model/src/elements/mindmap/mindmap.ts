@@ -281,6 +281,7 @@ export class MindmapElementModel extends GfxGroupLikeElementModel<MindmapElement
 
       if (button) {
         visited.add(button);
+
         if (button.hidden) {
           button.hidden = collapse;
         }
@@ -296,13 +297,13 @@ export class MindmapElementModel extends GfxGroupLikeElementModel<MindmapElement
       });
     };
 
+    update(root, root.detail.collapsed ?? false);
+
     this.collapseButtons.forEach(btn => {
       if (!visited.has(btn)) {
         this.surface.deleteLocalElement(btn);
       }
     });
-
-    update(root, root.detail.collapsed ?? false);
   }
 
   protected override _getXYWH(): Bound {
@@ -589,6 +590,7 @@ export class MindmapElementModel extends GfxGroupLikeElementModel<MindmapElement
 
     if (!btnExisted) {
       collapseButton.opacity = collapsed ? 1 : 0;
+      collapseButton.id = id;
 
       this.collapseButtons.set(id, collapseButton);
       this.surface.addLocalElement(collapseButton);

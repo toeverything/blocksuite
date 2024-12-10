@@ -205,6 +205,8 @@ export class LocalShapeElementModel extends GfxLocalElementModel {
 
   fontWeight: FontWeight = FontWeight.Regular;
 
+  id: string = '';
+
   padding: [number, number] = [SHAPE_TEXT_VERTICAL_PADDING, SHAPE_TEXT_PADDING];
 
   radius: number = 0;
