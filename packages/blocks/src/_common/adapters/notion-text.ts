@@ -1,4 +1,5 @@
 import type { AffineTextAttributes } from '@blocksuite/affine-shared/types';
+import type { ExtensionType } from '@blocksuite/block-std';
 import type { DeltaInsert } from '@blocksuite/inline';
 
 import { DEFAULT_NOTE_BACKGROUND_COLOR } from '@blocksuite/affine-model';
@@ -11,9 +12,12 @@ import {
   type FromBlockSnapshotResult,
   type FromDocSnapshotResult,
   type FromSliceSnapshotResult,
+  type Job,
   nanoid,
   type SliceSnapshot,
 } from '@blocksuite/store';
+
+import { AdapterFactoryIdentifier } from './type.js';
 
 type NotionEditingStyle = {
   0: string;
@@ -158,3 +162,14 @@ export class NotionTextAdapter extends BaseAdapter<NotionText> {
     };
   }
 }
+
+export const NotionTextAdapterFactoryIdentifier =
+  AdapterFactoryIdentifier('NotionText');
+
+export const NotionTextAdapterFactoryExtension: ExtensionType = {
+  setup: di => {
+    di.addImpl(NotionTextAdapterFactoryIdentifier, () => ({
+      get: (job: Job) => new NotionTextAdapter(job),
+    }));
+  },
+};
