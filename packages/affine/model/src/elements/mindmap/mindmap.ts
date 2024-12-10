@@ -686,15 +686,16 @@ export class MindmapElementModel extends GfxGroupLikeElementModel<MindmapElement
         connector.target = {
           position:
             layout === LayoutType.RIGHT
-              ? [nodeBound.x + nodeBound.w / 2, nodeBound.y + nodeBound.h / 2]
+              ? [nodeBound.x + nodeBound.w + 6, nodeBound.y + nodeBound.h / 2]
               : [nodeBound.x - 6, nodeBound.y + nodeBound.h / 2],
         };
-        connector.mode = ConnectorMode.Straight;
 
         Object.entries(connectorStyle).forEach(([key, value]) => {
           // @ts-ignore
           connector[key as unknown] = value;
         });
+
+        connector.mode = ConnectorMode.Straight;
       }
 
       return [{ outdated, connector }];
