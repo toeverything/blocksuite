@@ -1,8 +1,9 @@
-import {
-  type InlineDeltaToPlainTextAdapterMatcher,
-  type TextBuffer,
-  toURLSearchParams,
+import type {
+  InlineDeltaToPlainTextAdapterMatcher,
+  TextBuffer,
 } from '@blocksuite/affine-shared/adapters';
+
+import { generateDocUrl } from '@blocksuite/affine-block-embed';
 
 export const referenceDeltaMarkdownAdapterMatch: InlineDeltaToPlainTextAdapterMatcher =
   {
@@ -19,11 +20,11 @@ export const referenceDeltaMarkdownAdapterMatch: InlineDeltaToPlainTextAdapterMa
 
       const { configs } = context;
       const title = configs.get(`title:${reference.pageId}`) ?? '';
-      const params = reference.params ?? {};
-      const baseUrl = configs.get('docLinkBaseUrl') ?? '';
-      const search = toURLSearchParams(params);
-      const query = search?.size ? `?${search.toString()}` : '';
-      const url = baseUrl ? `${baseUrl}/${reference.pageId}${query}` : '';
+      const url = generateDocUrl(
+        configs.get('docLinkBaseUrl') ?? '',
+        String(reference.pageId),
+        reference.params ?? Object.create(null)
+      );
       const content = `${title ? `${title}: ` : ''}${url}`;
 
       return {

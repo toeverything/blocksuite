@@ -79,7 +79,7 @@ export class MobileDataViewTable extends DataViewBase<
         options: {
           items: [
             menu.input({
-              onChange: text => {
+              onComplete: text => {
                 const column = groupHelper.property$.value;
                 if (column) {
                   column.dataUpdate(

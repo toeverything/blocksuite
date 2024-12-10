@@ -262,7 +262,8 @@ export class MobileMenuComponent
       user-select: none;
       width: 100%;
       background-color: ${unsafeCSSVarV2('layer/background/secondary')};
-      padding: 8px;
+      padding: calc(8px + env(safe-area-inset-top, 0px)) 8px
+        calc(8px + env(safe-area-inset-bottom, 0px)) 8px;
       position: absolute;
       z-index: 999;
       color: ${unsafeCSSVarV2('text/primary')};

@@ -9,6 +9,7 @@ import { BlockLinkIcon } from '@blocksuite/affine-components/icons';
 import { isPeekable, Peekable } from '@blocksuite/affine-components/peek';
 import {
   cloneReferenceInfo,
+  cloneReferenceInfoWithoutAliases,
   REFERENCE_NODE,
   referenceToNode,
   RefNodeSlotsProvider,
@@ -141,7 +142,7 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockComponent<EmbedLinke
 
     doc.addBlock(
       'affine:embed-synced-doc',
-      { caption, ...this.referenceInfo },
+      { caption, ...cloneReferenceInfoWithoutAliases(this.referenceInfo) },
       parent,
       index
     );
@@ -312,6 +313,9 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockComponent<EmbedLinke
 
     this.disposables.add(
       this.model.propsUpdated.on(({ key }) => {
+        if (key === 'style') {
+          this._cardStyle = this.model.style;
+        }
         if (key === 'pageId' || key === 'style') {
           this._load().catch(e => {
             console.error(e);

@@ -52,7 +52,7 @@ export class TextTool extends BaseTool {
       addText(this.gfx, e);
     }
 
-    this.gfx.std.get(TelemetryProvider)?.track('CanvasElementAdded', {
+    this.gfx.std.getOptional(TelemetryProvider)?.track('CanvasElementAdded', {
       control: 'canvas:draw',
       page: 'whiteboard editor',
       module: 'toolbar',

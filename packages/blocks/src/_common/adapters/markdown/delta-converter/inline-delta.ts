@@ -1,9 +1,7 @@
+import type { InlineDeltaToMarkdownAdapterMatcher } from '@blocksuite/affine-shared/adapters';
 import type { PhrasingContent } from 'mdast';
 
-import {
-  type InlineDeltaToMarkdownAdapterMatcher,
-  toURLSearchParams,
-} from '@blocksuite/affine-shared/adapters';
+import { generateDocUrl } from '@blocksuite/affine-block-embed';
 
 export const boldDeltaToMarkdownAdapterMatcher: InlineDeltaToMarkdownAdapterMatcher =
   {
@@ -71,10 +69,11 @@ export const referenceDeltaToMarkdownAdapterMatcher: InlineDeltaToMarkdownAdapte
       const { configs } = context;
       const title = configs.get(`title:${reference.pageId}`);
       const params = reference.params ?? {};
-      const baseUrl = configs.get('docLinkBaseUrl') ?? '';
-      const search = toURLSearchParams(params);
-      const query = search?.size ? `?${search.toString()}` : '';
-      const url = baseUrl ? `${baseUrl}/${reference.pageId}${query}` : '';
+      const url = generateDocUrl(
+        configs.get('docLinkBaseUrl') ?? '',
+        String(reference.pageId),
+        params
+      );
       mdast = {
         type: 'link',
         url,

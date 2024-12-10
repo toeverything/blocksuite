@@ -5,8 +5,12 @@ import {
   embedFigmaBlockHtmlAdapterMatcher,
   EmbedGithubBlockHtmlAdapterExtension,
   embedGithubBlockHtmlAdapterMatcher,
+  embedLinkedDocBlockHtmlAdapterMatcher,
+  EmbedLinkedDocHtmlAdapterExtension,
   EmbedLoomBlockHtmlAdapterExtension,
   embedLoomBlockHtmlAdapterMatcher,
+  EmbedSyncedDocBlockHtmlAdapterExtension,
+  embedSyncedDocBlockHtmlAdapterMatcher,
   EmbedYoutubeBlockHtmlAdapterExtension,
   embedYoutubeBlockHtmlAdapterMatcher,
 } from '@blocksuite/affine-block-embed';
@@ -27,6 +31,10 @@ import {
   CodeBlockHtmlAdapterExtension,
   codeBlockHtmlAdapterMatcher,
 } from '../../../code-block/adapters/html.js';
+import {
+  DatabaseBlockHtmlAdapterExtension,
+  databaseBlockHtmlAdapterMatcher,
+} from '../../../database-block/adapters/html.js';
 import {
   DividerBlockHtmlAdapterExtension,
   dividerBlockHtmlAdapterMatcher,
@@ -52,6 +60,9 @@ export const defaultBlockHtmlAdapterMatchers = [
   embedLoomBlockHtmlAdapterMatcher,
   embedGithubBlockHtmlAdapterMatcher,
   bookmarkBlockHtmlAdapterMatcher,
+  databaseBlockHtmlAdapterMatcher,
+  embedLinkedDocBlockHtmlAdapterMatcher,
+  embedSyncedDocBlockHtmlAdapterMatcher,
 ];
 
 export const BlockHtmlAdapterExtensions: ExtensionType[] = [
@@ -66,4 +77,7 @@ export const BlockHtmlAdapterExtensions: ExtensionType[] = [
   EmbedLoomBlockHtmlAdapterExtension,
   EmbedGithubBlockHtmlAdapterExtension,
   BookmarkBlockHtmlAdapterExtension,
+  DatabaseBlockHtmlAdapterExtension,
+  EmbedLinkedDocHtmlAdapterExtension,
+  EmbedSyncedDocBlockHtmlAdapterExtension,
 ];
