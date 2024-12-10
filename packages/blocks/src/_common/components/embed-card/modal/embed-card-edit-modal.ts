@@ -340,7 +340,6 @@ export class EmbedCardEditModal extends SignalWatcher(
                     button: true,
                     reset: true,
                   })}
-                  .disabled=${this.resetButtonDisabled$.value}
                   @click=${this._onReset}
                 >
                   Reset
@@ -387,14 +386,6 @@ export class EmbedCardEditModal extends SignalWatcher(
 
   @property({ attribute: false })
   accessor originalDocInfo: AliasInfo | undefined = undefined;
-
-  accessor resetButtonDisabled$ = computed<boolean>(
-    () =>
-      !(
-        Boolean(this.model.title$.value?.length) ||
-        Boolean(this.model.description$.value?.length)
-      )
-  );
 
   accessor saveButtonDisabled$ = computed<boolean>(
     () => this.title$.value.trim().length === 0
