@@ -12,6 +12,7 @@ import {
 } from '@blocksuite/global/utils';
 import { mutex } from 'lib0';
 
+import type { PointerEventState } from '../../../event/index.js';
 import type { EditorHost } from '../../../view/index.js';
 import type { GfxCompatibleInterface, PointTestOptions } from '../base.js';
 import type { GfxGroupModel } from '../model.js';
@@ -33,6 +34,20 @@ export abstract class GfxLocalElementModel implements GfxCompatibleInterface {
   groupId: string = '';
 
   index: string = 'a0';
+
+  onClick?: (e: PointerEventState) => void;
+
+  onDblClick?: (e: PointerEventState) => void;
+
+  onPointerDown?: (e: PointerEventState) => void;
+
+  onPointerEnter?: (e: PointerEventState) => void;
+
+  onPointerLeave?: (e: PointerEventState) => void;
+
+  onPointerMove?: (e: PointerEventState) => void;
+
+  onPointerUp?: (e: PointerEventState) => void;
 
   opacity: number = 1;
 
