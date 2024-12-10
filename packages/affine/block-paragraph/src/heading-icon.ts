@@ -38,7 +38,7 @@ export class ParagraphHeadingIcon extends WithDisposable(ShadowlessElement) {
     affine-paragraph-heading-icon .heading-icon {
       display: flex;
       align-items: start;
-      margin-top: 0.2em;
+      margin-top: 0.3em;
       position: absolute;
       left: 0;
       transform: translateX(-64px);
