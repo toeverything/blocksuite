@@ -280,6 +280,7 @@ export class MindmapElementModel extends GfxGroupLikeElementModel<MindmapElement
       const button = this.getCollapseButton(node);
 
       if (button) {
+        visited.add(button);
         if (button.hidden) {
           button.hidden = collapse;
         }
