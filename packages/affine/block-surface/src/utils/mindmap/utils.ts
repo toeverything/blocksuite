@@ -157,6 +157,10 @@ function moveNodePosition(
     mindmap.children.set(node.id, val);
   });
 
+  if (parent.detail.collapsed) {
+    mindmap.toggleCollapse(parent);
+  }
+
   mindmap.layout();
 
   return mindmap.nodeMap.get(node.id);
@@ -255,6 +259,10 @@ export function addNode(
 
     recursiveAddChild(node);
   });
+
+  if (parentNode.detail.collapsed) {
+    mindmap.toggleCollapse(parentNode);
+  }
 
   mindmap.layout();
 }

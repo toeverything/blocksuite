@@ -613,29 +613,8 @@ export class MindmapElementModel extends GfxGroupLikeElementModel<MindmapElement
       collapseButton.onClick = () => {
         const latestNode = this.getNode(node.id);
 
-        if (latestNode && latestNode.children.length > 0) {
-          const collapsed = latestNode.detail.collapsed ? false : true;
-          const isExpand = !collapsed;
-
-          const changeNodesVisibility = (node: MindmapNode) => {
-            node.element.hidden = collapsed;
-
-            if (isExpand && node.detail.collapsed) {
-              return;
-            }
-
-            node.children.forEach(child => {
-              changeNodesVisibility(child);
-            });
-          };
-
-          this.surface.doc.transact(() => {
-            latestNode.children.forEach(changeNodesVisibility);
-            this.children.set(node.id, {
-              ...latestNode.detail,
-              collapsed,
-            });
-          });
+        if (latestNode) {
+          this.toggleCollapse(latestNode!);
           this.requestLayout();
         }
       };
@@ -1004,6 +983,33 @@ export class MindmapElementModel extends GfxGroupLikeElementModel<MindmapElement
         el.pop('xywh');
       });
     };
+  }
+
+  toggleCollapse(node: MindmapNode) {
+    if (node && node.children.length > 0) {
+      const collapsed = node.detail.collapsed ? false : true;
+      const isExpand = !collapsed;
+
+      const changeNodesVisibility = (node: MindmapNode) => {
+        node.element.hidden = collapsed;
+
+        if (isExpand && node.detail.collapsed) {
+          return;
+        }
+
+        node.children.forEach(child => {
+          changeNodesVisibility(child);
+        });
+      };
+
+      this.surface.doc.transact(() => {
+        node.children.forEach(changeNodesVisibility);
+        this.children.set(node.id, {
+          ...node.detail,
+          collapsed,
+        });
+      });
+    }
   }
 
   traverse(

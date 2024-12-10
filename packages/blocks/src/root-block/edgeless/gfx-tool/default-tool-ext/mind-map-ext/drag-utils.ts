@@ -52,6 +52,10 @@ const fillResponseArea = (
       rootElmBound.h
     );
 
+    if (node.detail.collapsed) {
+      return;
+    }
+
     if (layoutType === LayoutType.BALANCE) {
       (node as MindmapRoot).right.forEach(child => {
         fillResponseArea(child, LayoutType.RIGHT, node);
@@ -95,7 +99,7 @@ const fillResponseArea = (
       h
     );
 
-    if (node.children.length > 0) {
+    if (node.children.length > 0 && !node.detail.collapsed) {
       let responseArea: Bound;
 
       node.children.forEach(child => {

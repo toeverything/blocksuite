@@ -299,9 +299,8 @@ export class CanvasRenderer {
         const dy = element.y - bound.y;
 
         renderFn(element, ctx, matrix.translate(dx, dy), this, rc, bound);
+        ctx.restore();
       }
-
-      ctx.restore();
     }
 
     if (overLay) {

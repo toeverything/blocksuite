@@ -267,7 +267,7 @@ export class MindMapIndicatorOverlay extends Overlay {
               insertPosition.layoutDir
             );
     } else {
-      if (parentChildren.length === 0) {
+      if (parentChildren.length === 0 || parent.detail.collapsed) {
         this.targetBound = parentBound.moveDelta(
           (isLeftLayout ? -1 : 1) *
             (NODE_HORIZONTAL_SPACING / 2 + parentBound.w),

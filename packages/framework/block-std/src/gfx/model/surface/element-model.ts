@@ -423,6 +423,10 @@ export abstract class GfxGroupLikeElementModel<
     let bound: Bound | undefined;
 
     this.childElements.forEach(child => {
+      if (child instanceof GfxPrimitiveElementModel && child.hidden) {
+        return;
+      }
+
       bound = bound ? bound.unite(child.elementBound) : child.elementBound;
     });
 
