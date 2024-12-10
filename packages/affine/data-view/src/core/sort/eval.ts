@@ -170,7 +170,13 @@ export const evalSort = (
         if (typeof result === 'number' && result !== 0) {
           return sort.desc ? -result : result;
         }
-        return result === Compare.GT ? 1 : -1;
+        if (result === Compare.GT) {
+          return 1;
+        }
+        if (result === Compare.LT) {
+          return -1;
+        }
+        continue;
       }
       return 0;
     };
