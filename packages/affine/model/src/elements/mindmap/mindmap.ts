@@ -531,8 +531,9 @@ export class MindmapElementModel extends GfxGroupLikeElementModel<MindmapElement
 
     return node.children;
   }
-
   getCollapseButton(node: MindmapNode) {
+    if (!node?.element) return null;
+    
     const id = `collapse-btn-${node.id}`;
     const btnExisted = this.collapseButtons.has(id);
     const collapseButton =
