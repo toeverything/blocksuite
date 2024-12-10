@@ -1018,7 +1018,7 @@ export class MindmapElementModel extends GfxGroupLikeElementModel<MindmapElement
     }
 
     if (layout) {
-      this.layout();
+      this.requestLayout();
     }
   }
 
