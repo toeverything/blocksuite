@@ -1,5 +1,10 @@
 import type { Command } from '@blocksuite/block-std';
 
+import {
+  calculateCollapsedSiblings,
+  matchFlavours,
+} from '@blocksuite/affine-shared/utils';
+
 /**
  * @example
  * before unindent:
@@ -43,6 +48,16 @@ export const dedentBlock: Command<
   }
 
   if (stopCapture) doc.captureSync();
+
+  if (
+    matchFlavours(model, ['affine:paragraph']) &&
+    model.type.startsWith('h') &&
+    model.collapsed
+  ) {
+    const collapsedSiblings = calculateCollapsedSiblings(model);
+    doc.moveBlocks([model, ...collapsedSiblings], grandParent, parent, false);
+    return next();
+  }
 
   try {
     const nextSiblings = doc.getNexts(model);

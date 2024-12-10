@@ -2,7 +2,10 @@ import type { IndentContext } from '@blocksuite/affine-shared/types';
 import type { Command } from '@blocksuite/block-std';
 
 import { focusTextModel } from '@blocksuite/affine-components/rich-text';
-import { matchFlavours } from '@blocksuite/affine-shared/utils';
+import {
+  getNearestHeadingBefore,
+  matchFlavours,
+} from '@blocksuite/affine-shared/utils';
 
 import { correctNumberedListsOrderToPrev } from './utils.js';
 
@@ -111,6 +114,18 @@ export const indentListCommand: Command<'indentContext', never> = (
   const nextSibling = doc.getNext(model);
 
   doc.captureSync();
+
+  // update collapsed state of affine paragraph
+  const nearestHeading = getNearestHeadingBefore(model);
+  if (
+    nearestHeading &&
+    matchFlavours(nearestHeading, ['affine:paragraph']) &&
+    nearestHeading.collapsed
+  ) {
+    doc.updateBlock(nearestHeading, {
+      collapsed: false,
+    });
+  }
 
   doc.moveBlocks([model], previousSibling);
   correctNumberedListsOrderToPrev(doc, model);

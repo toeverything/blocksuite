@@ -13,9 +13,11 @@ import type {
 import type { splitParagraphCommand } from './commands/split-paragraph.js';
 import type { ParagraphBlockService } from './paragraph-service.js';
 
+import { effects as ParagraphHeadingIconEffects } from './heading-icon.js';
 import { ParagraphBlockComponent } from './paragraph-block.js';
 
 export function effects() {
+  ParagraphHeadingIconEffects();
   customElements.define('affine-paragraph', ParagraphBlockComponent);
 }
 
