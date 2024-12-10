@@ -61,6 +61,10 @@ export class ParagraphBlockComponent extends CaptionedBlockComponent<
     return this.inlineManager.getSchema();
   }
 
+  get collapsedSiblings() {
+    return calculateCollapsedSiblings(this.model);
+  }
+
   get embedChecker() {
     return this.inlineManager.embedChecker;
   }
@@ -187,10 +191,10 @@ export class ParagraphBlockComponent extends CaptionedBlockComponent<
     const collapsed = this.doc.readonly
       ? this._readonlyCollapsed
       : this.model.collapsed;
+    const collapsedSiblings = this.collapsedSiblings;
 
     let style = html``;
     if (this.model.type.startsWith('h') && collapsed) {
-      const collapsedSiblings = calculateCollapsedSiblings(this.model);
       style = html`
         <style>
           ${collapsedSiblings.map(sibling =>
@@ -224,7 +228,7 @@ export class ParagraphBlockComponent extends CaptionedBlockComponent<
             [TOGGLE_BUTTON_PARENT_CLASS]: true,
           })}
         >
-          ${this.model.type.startsWith('h')
+          ${this.model.type.startsWith('h') && collapsedSiblings.length > 0
             ? html`
                 <affine-paragraph-heading-icon
                   .model=${this.model}
