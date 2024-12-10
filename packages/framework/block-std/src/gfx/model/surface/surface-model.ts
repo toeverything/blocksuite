@@ -541,9 +541,11 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
 
   getGroups(id: string): GfxGroupModel[] {
     const groups: GfxGroupModel[] = [];
+    const visited = new Set<GfxGroupModel>();
     let group = this.getGroup(id);
 
-    while (group) {
+    while (group && !visited.has(group)) {
+      visited.add(group);
       groups.push(group);
       group = this.getGroup(group.id);
     }
