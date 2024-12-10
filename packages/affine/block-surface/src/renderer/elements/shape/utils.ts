@@ -1,4 +1,5 @@
 import type {
+  LocalShapeElementModel,
   ShapeElementModel,
   TextAlign,
   TextVerticalAlign,
@@ -28,7 +29,7 @@ export type Colors = {
 
 export function drawGeneralShape(
   ctx: CanvasRenderingContext2D,
-  shapeModel: ShapeElementModel,
+  shapeModel: ShapeElementModel | LocalShapeElementModel,
   renderer: CanvasRenderer,
   filled: boolean,
   fillColor: string,

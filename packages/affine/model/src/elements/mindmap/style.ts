@@ -9,6 +9,26 @@ import { StrokeStyle } from '../../consts/note.js';
 import { ShapeFillColor } from '../../consts/shape.js';
 import { FontFamily, FontWeight, TextResizing } from '../../consts/text.js';
 
+export type CollapseButton = {
+  width: number;
+  height: number;
+  radius: number;
+
+  filled: boolean;
+  fillColor: string;
+
+  strokeColor: string;
+  strokeWidth: number;
+};
+
+export type ExpandButton = CollapseButton & {
+  fontFamily: FontFamily;
+  fontSize: number;
+  fontWeight: FontWeight;
+
+  color: string;
+};
+
 export type NodeStyle = {
   radius: number;
 
@@ -51,6 +71,8 @@ export abstract class MindmapStyleGetter {
     path: number[]
   ): {
     connector: ConnectorStyle;
+    collapseButton: CollapseButton;
+    expandButton: ExpandButton;
     node: NodeStyle;
   };
 }
@@ -95,10 +117,7 @@ export class StyleOne extends MindmapStyleGetter {
     return this._colorOrders[number % this._colorOrders.length];
   }
 
-  getNodeStyle(
-    _: MindmapNode,
-    path: number[]
-  ): { connector: ConnectorStyle; node: NodeStyle } {
+  getNodeStyle(_: MindmapNode, path: number[]) {
     const color = this._getColor(path[1] ?? 0);
 
     return {
@@ -108,6 +127,36 @@ export class StyleOne extends MindmapStyleGetter {
         strokeWidth: 3,
 
         mode: ConnectorMode.Curve,
+      },
+      collapseButton: {
+        width: 16,
+        height: 16,
+        radius: 0.5,
+
+        filled: true,
+        fillColor: '--affine-white',
+
+        strokeColor: color,
+        strokeWidth: 3,
+      },
+      expandButton: {
+        width: 24,
+        height: 24,
+        radius: 8,
+
+        filled: true,
+        fillColor: color,
+
+        strokeColor: color,
+        strokeWidth: 0,
+
+        padding: [4, 0],
+
+        color: '--affine-white',
+
+        fontFamily: FontFamily.Inter,
+        fontWeight: FontWeight.Bold,
+        fontSize: 15,
       },
       node: {
         radius: 8,
@@ -178,10 +227,7 @@ export class StyleTwo extends MindmapStyleGetter {
       : this._colorOrders[number];
   }
 
-  getNodeStyle(
-    _: MindmapNode,
-    path: number[]
-  ): { connector: ConnectorStyle; node: NodeStyle } {
+  getNodeStyle(_: MindmapNode, path: number[]) {
     const color = this._getColor(path.length - 2);
 
     return {
@@ -191,6 +237,36 @@ export class StyleTwo extends MindmapStyleGetter {
         strokeWidth: 3,
 
         mode: ConnectorMode.Orthogonal,
+      },
+      collapseButton: {
+        width: 16,
+        height: 16,
+        radius: 0.5,
+
+        filled: true,
+        fillColor: '--affine-white',
+
+        strokeColor: '--affine-black',
+        strokeWidth: 3,
+      },
+      expandButton: {
+        width: 24,
+        height: 24,
+        radius: 2,
+
+        filled: true,
+        fillColor: '--affine-black',
+
+        padding: [4, 0],
+
+        strokeColor: '--affine-black',
+        strokeWidth: 0,
+
+        color: '--affine-white',
+
+        fontFamily: FontFamily.Inter,
+        fontWeight: FontWeight.Bold,
+        fontSize: 15,
       },
       node: {
         radius: 3,
@@ -255,10 +331,7 @@ export class StyleThree extends MindmapStyleGetter {
     return this._strokeColor[number % this._strokeColor.length];
   }
 
-  override getNodeStyle(
-    _: MindmapNode,
-    path: number[]
-  ): { connector: ConnectorStyle; node: NodeStyle } {
+  override getNodeStyle(_: MindmapNode, path: number[]) {
     const strokeColor = this._getColor(path.length - 2);
 
     return {
@@ -286,6 +359,36 @@ export class StyleThree extends MindmapStyleGetter {
           offsetY: 0,
           color: 'rgba(66, 65, 73, 0.18)',
         },
+      },
+      collapseButton: {
+        width: 16,
+        height: 16,
+        radius: 0.5,
+
+        filled: true,
+        fillColor: '--affine-white',
+
+        strokeColor: '#3CBC36',
+        strokeWidth: 3,
+      },
+      expandButton: {
+        width: 24,
+        height: 24,
+        radius: 8,
+
+        filled: true,
+        fillColor: '#3CBC36',
+
+        padding: [4, 0],
+
+        strokeColor: '#3CBC36',
+        strokeWidth: 0,
+
+        color: '#fff',
+
+        fontFamily: FontFamily.Inter,
+        fontWeight: FontWeight.Bold,
+        fontSize: 15,
       },
       connector: {
         strokeStyle: StrokeStyle.Solid,
@@ -332,10 +435,7 @@ export class StyleFour extends MindmapStyleGetter {
     return this._colors[order % this._colors.length];
   }
 
-  getNodeStyle(
-    _: MindmapNode,
-    path: number[]
-  ): { connector: ConnectorStyle; node: NodeStyle } {
+  getNodeStyle(_: MindmapNode, path: number[]) {
     const stroke = this._getColor(path[1] ?? 0);
 
     return {
@@ -345,6 +445,36 @@ export class StyleFour extends MindmapStyleGetter {
         strokeWidth: 3,
 
         mode: ConnectorMode.Curve,
+      },
+      collapseButton: {
+        width: 16,
+        height: 16,
+        radius: 0.5,
+
+        filled: true,
+        fillColor: '--affine-white',
+
+        strokeColor: stroke,
+        strokeWidth: 3,
+      },
+      expandButton: {
+        width: 24,
+        height: 24,
+        radius: 8,
+
+        filled: true,
+        fillColor: stroke,
+
+        padding: [4, 0],
+
+        strokeColor: stroke,
+        strokeWidth: 0,
+
+        color: '--affine-white',
+
+        fontFamily: FontFamily.Inter,
+        fontWeight: FontWeight.Bold,
+        fontSize: 15,
       },
       node: {
         ...this.root,

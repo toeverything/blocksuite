@@ -8,7 +8,7 @@ export function isMindmapNode(el: BlockSuite.EdgelessModel) {
   );
 }
 
-export function isSelectSingleMindMap(els: BlockSuite.EdgelessModel[]) {
+export function isSingleMindMapNode(els: BlockSuite.EdgelessModel[]) {
   return els.length === 1 && els[0].group instanceof MindmapElementModel;
 }
 

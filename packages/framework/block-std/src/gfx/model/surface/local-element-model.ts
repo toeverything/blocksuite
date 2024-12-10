@@ -33,6 +33,8 @@ export abstract class GfxLocalElementModel implements GfxCompatibleInterface {
 
   groupId: string = '';
 
+  hidden: boolean = false;
+
   index: string = 'a0';
 
   onClick?: (e: PointerEventState) => void;

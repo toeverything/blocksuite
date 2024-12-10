@@ -246,6 +246,10 @@ export abstract class GfxPrimitiveElementModel<
 
   onCreated() {}
 
+  onDestroyed() {
+    this._disposable.dispose();
+  }
+
   pop(prop: keyof Props | string) {
     if (!this._stashed.has(prop)) {
       return;
@@ -333,6 +337,9 @@ export abstract class GfxPrimitiveElementModel<
   @local()
   accessor externalXYWH: SerializedXYWH | undefined = undefined;
 
+  @field(false)
+  accessor hidden: boolean = false;
+
   @field()
   accessor index!: string;
 
@@ -416,6 +423,10 @@ export abstract class GfxGroupLikeElementModel<
     let bound: Bound | undefined;
 
     this.childElements.forEach(child => {
+      if (child instanceof GfxPrimitiveElementModel && child.hidden) {
+        return;
+      }
+
       bound = bound ? bound.unite(child.elementBound) : child.elementBound;
     });
 

@@ -187,25 +187,9 @@ export class SurfaceBlockComponent extends BlockComponent<
         canvas.className = 'indexable-canvas';
       },
       elementRenderers: this._edgelessService.elementRenderers,
+      surfaceModel: this.model,
     });
 
-    this._disposables.add(
-      this.model.elementUpdated.on(payload => {
-        // ignore externalXYWH update cause it's updated by the renderer
-        if (payload.props['externalXYWH']) return;
-        this._renderer.refresh();
-      })
-    );
-    this._disposables.add(
-      this.model.elementAdded.on(() => {
-        this._renderer.refresh();
-      })
-    );
-    this._disposables.add(
-      this.model.elementRemoved.on(() => {
-        this._renderer.refresh();
-      })
-    );
     this._disposables.add(() => {
       this._renderer.dispose();
     });
