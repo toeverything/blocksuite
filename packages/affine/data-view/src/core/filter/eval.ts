@@ -36,7 +36,7 @@ export const evalFilter = (
       }
       const impl = func.impl;
       try {
-        return impl(value, ...args);
+        return impl(value ?? undefined, ...args);
       } catch (e) {
         console.error(e);
         return true;

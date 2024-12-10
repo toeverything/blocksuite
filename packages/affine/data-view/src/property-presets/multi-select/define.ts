@@ -62,5 +62,9 @@ export const multiSelectPropertyModelConfig =
       };
     },
     cellToJson: ({ value }) => value ?? null,
+    cellFromJson: ({ value }) =>
+      Array.isArray(value) && value.every(v => typeof v === 'string')
+        ? value
+        : undefined,
     isEmpty: ({ value }) => value == null || value.length === 0,
   });

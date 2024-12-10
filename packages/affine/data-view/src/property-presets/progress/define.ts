@@ -16,5 +16,9 @@ export const progressPropertyModelConfig =
       };
     },
     cellToJson: ({ value }) => value ?? null,
+    cellFromJson: ({ value }) => {
+      if (typeof value !== 'number') return undefined;
+      return value;
+    },
     isEmpty: () => false,
   });

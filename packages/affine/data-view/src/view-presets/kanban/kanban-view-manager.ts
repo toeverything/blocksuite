@@ -8,6 +8,7 @@ import type { FilterGroup } from '../../core/filter/types.js';
 import type { KanbanViewData } from './define.js';
 
 import { evalFilter } from '../../core/filter/eval.js';
+import { generateDefaultValues } from '../../core/filter/generate-default-values.js';
 import { FilterTrait, filterTraitKey } from '../../core/filter/trait.js';
 import { emptyFilterGroup } from '../../core/filter/utils.js';
 import {
@@ -176,6 +177,24 @@ export class KanbanSingleView extends SingleViewBase<KanbanViewData> {
   addCard(position: InsertToPosition, group: string) {
     const id = this.rowAdd(position);
     this.groupTrait.addToGroup(id, group);
+
+    const filter = this.filter$.value;
+    if (filter.conditions.length > 0) {
+      const defaultValues = generateDefaultValues(filter, this.vars$.value);
+      Object.entries(defaultValues).forEach(([propertyId, jsonValue]) => {
+        const property = this.propertyGet(propertyId);
+        const propertyMeta = this.propertyMetaGet(property.type$.value);
+        if (propertyMeta?.config.cellFromJson) {
+          const value = propertyMeta.config.cellFromJson({
+            value: jsonValue,
+            data: property.data$.value,
+            dataSource: this.dataSource,
+          });
+          this.cellValueSet(id, propertyId, value);
+        }
+      });
+    }
+
     return id;
   }
 

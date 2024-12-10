@@ -58,5 +58,6 @@ export const selectPropertyModelConfig = selectPropertyType.modelConfig<
     };
   },
   cellToJson: ({ value }) => value ?? null,
+  cellFromJson: ({ value }) => (typeof value !== 'string' ? undefined : value),
   isEmpty: ({ value }) => value == null,
 });
