@@ -2,13 +2,12 @@ import { expect, type Locator } from '@playwright/test';
 
 import {
   enterPlaygroundRoom,
+  initDatabaseDynamicRowWithData,
   initEmptyDatabaseState,
-  pressEnter,
-  type,
   waitNextFrame,
 } from '../utils/actions/index.js';
 import { test } from '../utils/playwright.js';
-import { initDatabaseColumn } from './actions.js';
+import { initDatabaseColumn, switchColumnType } from './actions.js';
 
 test('database sort with multiple rules', async ({ page }) => {
   // Initialize database
@@ -17,7 +16,9 @@ test('database sort with multiple rules', async ({ page }) => {
 
   // Add test columns: Name (text) and Age (number)
   await initDatabaseColumn(page, 'Name');
+  await switchColumnType(page, 'Text', 1);
   await initDatabaseColumn(page, 'Age');
+  await switchColumnType(page, 'Number', 2);
 
   // Add test data
   const testData = [
@@ -28,19 +29,8 @@ test('database sort with multiple rules', async ({ page }) => {
   ];
 
   for (const data of testData) {
-    // Click first cell of new row to start editing
-    const rows = page.locator('affine-database-row');
-    const lastRow = rows.last();
-    const firstCell = lastRow.locator('.cell').first();
-    await firstCell.click();
-
-    // Enter name
-    await type(page, data.name);
-    await pressEnter(page);
-
-    // Enter age
-    await type(page, data.age);
-    await pressEnter(page);
+    await initDatabaseDynamicRowWithData(page, data.name, true, 0);
+    await initDatabaseDynamicRowWithData(page, data.age, false, 1);
   }
 
   // Open sort menu
@@ -48,12 +38,12 @@ test('database sort with multiple rules', async ({ page }) => {
   await sortButton.click();
 
   // Add first sort rule: Name ascending
-  await page.getByText('Name').click();
+  await page.locator('affine-menu').getByText('Name').click();
   await waitNextFrame(page);
 
   // Add second sort rule: Age ascending
-  await sortButton.click();
-  await page.getByText('Age').click();
+  await page.getByText('Add sort').click();
+  await page.locator('affine-menu').getByText('Age').click();
   await waitNextFrame(page);
 
   // Get all rows after sorting
@@ -73,8 +63,8 @@ test('database sort with multiple rules', async ({ page }) => {
   ];
 
   for (let i = 0; i < rows.length; i++) {
-    const name = await getCellText(rows[i], 0);
-    const age = await getCellText(rows[i], 1);
+    const name = await getCellText(rows[i], 1);
+    const age = await getCellText(rows[i], 2);
     expect(name).toBe(expectedOrder[i].name);
     expect(age).toBe(expectedOrder[i].age);
   }
@@ -94,8 +84,8 @@ test('database sort with multiple rules', async ({ page }) => {
 
   const rowsAfterDesc = await page.locator('affine-database-row').all();
   for (let i = 0; i < rowsAfterDesc.length; i++) {
-    const name = await getCellText(rowsAfterDesc[i], 0);
-    const age = await getCellText(rowsAfterDesc[i], 1);
+    const name = await getCellText(rowsAfterDesc[i], 1);
+    const age = await getCellText(rowsAfterDesc[i], 2);
     expect(name).toBe(expectedOrderDesc[i].name);
     expect(age).toBe(expectedOrderDesc[i].age);
   }
@@ -114,8 +104,8 @@ test('database sort with multiple rules', async ({ page }) => {
 
   const rowsAfterRemove = await page.locator('affine-database-row').all();
   for (let i = 0; i < rowsAfterRemove.length; i++) {
-    const name = await getCellText(rowsAfterRemove[i], 0);
-    const age = await getCellText(rowsAfterRemove[i], 1);
+    const name = await getCellText(rowsAfterRemove[i], 1);
+    const age = await getCellText(rowsAfterRemove[i], 2);
     expect(name).toBe(expectedOrderAgeOnly[i].name);
     expect(age).toBe(expectedOrderAgeOnly[i].age);
   }
