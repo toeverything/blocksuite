@@ -2,7 +2,6 @@
   "recommendations": [
     "runem.lit-plugin",
     "ms-playwright.playwright",
-    "dbaeumer.vscode-eslint",
-    "vitest.explorer"
+    "dbaeumer.vscode-eslint"
   ]
 }
