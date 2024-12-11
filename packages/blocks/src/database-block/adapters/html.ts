@@ -9,9 +9,9 @@ import {
 import {
   BlockHtmlAdapterExtension,
   type BlockHtmlAdapterMatcher,
-  createText,
   HastUtils,
   type InlineHtmlAST,
+  TextUtils,
 } from '@blocksuite/affine-shared/adapters';
 import { type BlockSnapshot, nanoid } from '@blocksuite/store';
 import { format } from 'date-fns/format';
@@ -56,7 +56,7 @@ export const databaseBlockHtmlAdapterMatcher: BlockHtmlAdapterMatcher = {
           (row as Element).children.forEach((cell, index) => {
             cells[rowId][viewsColumns[index].id] = {
               columnId: viewsColumns[index].id,
-              value: createText(
+              value: TextUtils.createText(
                 (cell as Element).children
                   .map(child => ('value' in child ? child.value : ''))
                   .join('')

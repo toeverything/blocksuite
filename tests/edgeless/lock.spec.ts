@@ -30,6 +30,7 @@ import {
   type,
   undoByKeyboard,
 } from 'utils/actions/keyboard.js';
+import { waitNextFrame } from 'utils/actions/misc.js';
 import {
   assertCanvasElementsCount,
   assertEdgelessElementBound,
@@ -63,14 +64,14 @@ test.describe('lock', () => {
       elementCreateFn: F,
       ...args: Parameters<F>
     ) => {
-      await deleteAll(page);
       await elementCreateFn(...args);
+      await waitNextFrame(page);
       await pressEscape(page);
       await selectAllByKeyboard(page);
 
-      const id = (await getSelectedIds(page))[0];
-      expect(id).not.toBeUndefined();
-      const type = await getTypeById(page, id);
+      const ids = await getSelectedIds(page);
+      expect(ids).toHaveLength(1);
+      const type = await getTypeById(page, ids[0]);
       const message = `element(${type}) should be able to be (un)locked`;
 
       const { lock, unlock } = getButtons(page);
@@ -85,6 +86,8 @@ test.describe('lock', () => {
       await unlock.click();
       await expect(lock, message).toBeVisible();
       await expect(unlock, message).toBeHidden();
+      await deleteAll(page);
+      await waitNextFrame(page);
     };
 
     await wrapTest(createBrushElement, page, [100, 100], [150, 150]);
@@ -94,6 +97,7 @@ test.describe('lock', () => {
     await wrapTest(createMindmap, page, [100, 100]);
     await wrapTest(createFrame, page, [100, 100], [150, 150]);
     await wrapTest(createNote, page, [100, 100]);
+
     await wrapTest(async () => {
       await createShapeElement(page, [100, 100], [150, 150]);
       await createShapeElement(page, [150, 150], [200, 200]);

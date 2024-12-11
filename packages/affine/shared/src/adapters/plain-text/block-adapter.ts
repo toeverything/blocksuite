@@ -5,7 +5,7 @@ import {
   type ServiceIdentifier,
 } from '@blocksuite/global/di';
 
-import type { BlockAdapterMatcher } from '../type.js';
+import type { BlockAdapterMatcher } from '../types/adapter.js';
 
 export type BlockPlainTextAdapterMatcher = BlockAdapterMatcher;
 
