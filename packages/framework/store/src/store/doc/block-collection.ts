@@ -315,19 +315,13 @@ export class BlockCollection {
     this._docMap[readonlyKey].delete(JSON.stringify(query));
   }
 
-  destroy() {
-    this._ySpaceDoc.destroy();
-    this._onLoadSlot.dispose();
-    this._loaded = false;
-  }
-
   dispose() {
     this.slots.historyUpdated.dispose();
     this._awarenessUpdateDisposable?.dispose();
 
     if (this.ready) {
       this._yBlocks.unobserveDeep(this._handleYEvents);
-      this._yBlocks.clear();
+      this._ySpaceDoc.destroy();
     }
   }
 
@@ -397,7 +391,10 @@ export class BlockCollection {
   }
 
   remove() {
-    this.destroy();
+    this.clear();
+    this._ySpaceDoc.destroy();
+    this._onLoadSlot.dispose();
+    this._loaded = false;
     this.rootDoc.spaces.delete(this.id);
   }
 

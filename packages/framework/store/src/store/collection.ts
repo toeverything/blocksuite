@@ -31,6 +31,7 @@ import { DocCollectionAddonType, test } from './addon/index.js';
 import { BlockCollection, type GetDocOptions } from './doc/block-collection.js';
 import { pickIdGenerator } from './id.js';
 import { DocCollectionMeta, type DocMeta } from './meta.js';
+import { ObjectPool, type RcRef } from './object-pool.js';
 
 export type DocCollectionOptions = {
   schema: Schema;
@@ -90,6 +91,13 @@ export class DocCollection extends DocCollectionAddonType {
   readonly blockCollections = new Map<string, BlockCollection>();
 
   readonly doc: BlockSuiteDoc;
+
+  readonly docPool = new ObjectPool<string, Doc>({
+    onDelete: doc => {
+      doc.dispose();
+    },
+    onDangling: doc => doc.docSync.canGracefulStop(),
+  });
 
   readonly docSync: DocEngine;
 
@@ -176,15 +184,15 @@ export class DocCollection extends DocCollectionAddonType {
 
   private _bindDocMetaEvents() {
     this.meta.docMetaAdded.on(docId => {
-      const doc = new BlockCollection({
+      const blockCollection = new BlockCollection({
         id: docId,
         collection: this,
         doc: this.doc,
         awarenessStore: this.awarenessStore,
         idGenerator: this.idGenerator,
       });
-      this.blockCollections.set(doc.id, doc);
-      this.slots.docAdded.emit(doc.id);
+      this.blockCollections.set(blockCollection.id, blockCollection);
+      this.slots.docAdded.emit(blockCollection.id);
     });
 
     this.meta.docMetaUpdated.on(() => this.slots.docUpdated.emit());
@@ -256,6 +264,19 @@ export class DocCollection extends DocCollectionAddonType {
   getDoc(docId: string, options?: GetDocOptions): Doc | null {
     const collection = this.getBlockCollection(docId);
     return collection?.getDoc(options) ?? null;
+  }
+
+  getDocRef(docId: string): RcRef<Doc> | null {
+    const ref = this.docPool.get(docId);
+    if (ref) return ref;
+
+    const doc = this.getBlockCollection(docId)?.getDoc();
+    if (doc) {
+      const newRef = this.docPool.put(docId, doc);
+      return newRef;
+    }
+
+    return null;
   }
 
   removeDoc(docId: string) {
