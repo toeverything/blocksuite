@@ -99,17 +99,14 @@ export class RangeManager extends LifeCycleWatcher {
     }
 
     const firstElement = this.getClosestBlock(range.startContainer);
-    if (!firstElement) {
-      return [];
-    }
+    if (!firstElement) return [];
+    const firstElementIndex = result.indexOf(firstElement);
+    if (firstElementIndex === -1) return [];
 
     if (mode === 'flat') {
-      result = result.filter(
-        el =>
-          firstElement.compareDocumentPosition(el) &
-            Node.DOCUMENT_POSITION_FOLLOWING || el === firstElement
-      );
+      result = result.slice(firstElementIndex);
     } else if (mode === 'highest') {
+      result = result.slice(firstElementIndex);
       let parent = result[0];
       result = result.filter((node, index) => {
         if (index === 0) return true;

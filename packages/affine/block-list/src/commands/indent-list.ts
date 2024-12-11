@@ -1,7 +1,6 @@
 import type { IndentContext } from '@blocksuite/affine-shared/types';
 import type { Command } from '@blocksuite/block-std';
 
-import { focusTextModel } from '@blocksuite/affine-components/rich-text';
 import { matchFlavours } from '@blocksuite/affine-shared/utils';
 
 import { correctNumberedListsOrderToPrev } from './utils.js';
@@ -99,8 +98,8 @@ export const indentListCommand: Command<'indentContext', never> = (
     return;
   }
 
-  const { blockId, inlineIndex } = indentContext;
-  const { doc } = std;
+  const { blockId } = indentContext;
+  const { doc, selection, host, range } = std;
 
   const model = doc.getBlock(blockId)?.model;
   if (!model) return;
@@ -116,7 +115,14 @@ export const indentListCommand: Command<'indentContext', never> = (
   correctNumberedListsOrderToPrev(doc, model);
   if (nextSibling) correctNumberedListsOrderToPrev(doc, nextSibling);
 
-  focusTextModel(std, model.id, inlineIndex);
+  const textSelection = selection.find('text');
+  if (textSelection) {
+    host.updateComplete
+      .then(() => {
+        range.syncTextSelectionToRange(textSelection);
+      })
+      .catch(console.error);
+  }
 
   return next();
 };
