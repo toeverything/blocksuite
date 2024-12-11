@@ -5,6 +5,7 @@ import type { LinkToolbarEvents } from './link.js';
 import type {
   DocCreatedEvent,
   ElementCreationEvent,
+  ElementLockEvent,
   TelemetryEvent,
 } from './types.js';
 
@@ -15,6 +16,7 @@ export type TelemetryEventMap = OutDatabaseAllEvents &
     LinkedDocCreated: TelemetryEvent;
     SplitNote: TelemetryEvent;
     CanvasElementAdded: ElementCreationEvent;
+    EdgelessElementLocked: ElementLockEvent;
   };
 
 export interface TelemetryService {
