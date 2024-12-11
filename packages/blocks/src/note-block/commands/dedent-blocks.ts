@@ -1,6 +1,6 @@
 import type { Command } from '@blocksuite/block-std';
 
-export const indentBlocks: Command<
+export const dedentBlocks: Command<
   never,
   never,
   {
@@ -35,29 +35,28 @@ export const indentBlocks: Command<
     if (!block || !block.model.text) return;
   }
 
-  // Find the first model that can be indented
-  let firstIndentIndex = -1;
+  // Find the first model that can be unindented
+  let firstDedentIndex = -1;
   for (let i = 0; i < blockIds.length; i++) {
-    const previousSibling = doc.getPrev(blockIds[i]);
     const model = doc.getBlock(blockIds[i])?.model;
-    if (
-      model &&
-      previousSibling &&
-      schema.isValid(model.flavour, previousSibling.flavour)
-    ) {
-      firstIndentIndex = i;
+    if (!model) continue;
+    const parent = doc.getParent(blockIds[i]);
+    if (!parent) continue;
+    const grandParent = doc.getParent(parent);
+    if (!grandParent) continue;
+
+    if (schema.isValid(model.flavour, grandParent.flavour)) {
+      firstDedentIndex = i;
       break;
     }
   }
 
-  // No model can be indented
-  if (firstIndentIndex === -1) return;
+  if (firstDedentIndex === -1) return;
 
   if (stopCapture) doc.captureSync();
-  // Models waiting to be indented
-  const indentIds = blockIds.slice(firstIndentIndex);
-  indentIds.forEach(id => {
-    std.command.exec('indentBlock', { blockId: id, stopCapture: false });
+  const dedentIds = blockIds.slice(firstDedentIndex);
+  dedentIds.forEach(id => {
+    std.command.exec('dedentBlock', { blockId: id, stopCapture: false });
   });
 
   const textSelection = selection.find('text');

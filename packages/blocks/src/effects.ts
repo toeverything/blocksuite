@@ -23,8 +23,8 @@ import type { insertEdgelessTextCommand } from './edgeless-text-block/commands/i
 import type { updateBlockType } from './note-block/commands/block-type.js';
 import type { dedentBlock } from './note-block/commands/dedent-block.js';
 import type { dedentBlockToRoot } from './note-block/commands/dedent-block-to-root.js';
+import type { dedentBlocks } from './note-block/commands/dedent-blocks.js';
 import type { dedentBlocksToRoot } from './note-block/commands/dedent-blocks-to-root.js';
-import type { dedentBlocks } from './note-block/commands/dendent-blocks.js';
 import type { focusBlockEnd } from './note-block/commands/focus-block-end.js';
 import type { focusBlockStart } from './note-block/commands/focus-block-start.js';
 import type { indentBlock } from './note-block/commands/indent-block.js';

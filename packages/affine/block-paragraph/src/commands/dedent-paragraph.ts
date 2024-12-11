@@ -1,7 +1,6 @@
 import type { IndentContext } from '@blocksuite/affine-shared/types';
 import type { Command } from '@blocksuite/block-std';
 
-import { focusTextModel } from '@blocksuite/affine-components/rich-text';
 import { matchFlavours } from '@blocksuite/affine-shared/utils';
 
 export const canDedentParagraphCommand: Command<
@@ -57,7 +56,7 @@ export const canDedentParagraphCommand: Command<
 
 export const dedentParagraphCommand: Command<'indentContext'> = (ctx, next) => {
   const { indentContext: dedentContext, std } = ctx;
-  const { doc } = std;
+  const { doc, selection, range, host } = std;
 
   if (
     !dedentContext ||
@@ -70,7 +69,7 @@ export const dedentParagraphCommand: Command<'indentContext'> = (ctx, next) => {
     return;
   }
 
-  const { blockId, inlineIndex } = dedentContext;
+  const { blockId } = dedentContext;
 
   const model = doc.getBlock(blockId)?.model;
   if (!model) return;
@@ -87,7 +86,14 @@ export const dedentParagraphCommand: Command<'indentContext'> = (ctx, next) => {
   doc.moveBlocks(nextSiblings, model);
   doc.moveBlocks([model], grandParent, parent, false);
 
-  focusTextModel(std, model.id, inlineIndex);
+  const textSelection = selection.find('text');
+  if (textSelection) {
+    host.updateComplete
+      .then(() => {
+        range.syncTextSelectionToRange(textSelection);
+      })
+      .catch(console.error);
+  }
 
   return next();
 };
