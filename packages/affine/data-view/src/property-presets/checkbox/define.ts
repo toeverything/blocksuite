@@ -15,6 +15,8 @@ export const checkboxPropertyModelConfig =
       };
     },
     cellToJson: ({ value }) => value ?? null,
+    cellFromJson: ({ value }) =>
+      typeof value !== 'boolean' ? undefined : value,
     isEmpty: () => false,
     minWidth: 34,
   });

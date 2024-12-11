@@ -11,6 +11,7 @@ export const booleanFilter = [
     impl: value => {
       return !!value;
     },
+    defaultValue: () => true,
   }),
   createFilter({
     name: 'isUnchecked',
@@ -21,5 +22,6 @@ export const booleanFilter = [
     impl: value => {
       return !value;
     },
+    defaultValue: () => false,
   }),
 ];

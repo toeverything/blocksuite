@@ -17,6 +17,8 @@ export const richTextColumnModelConfig =
       };
     },
     cellToJson: ({ value }) => value?.toString() ?? null,
+    cellFromJson: ({ value }) =>
+      typeof value !== 'string' ? undefined : new Text(value),
     onUpdate: ({ value, callback }) => {
       const yText = toYText(value);
       yText.observe(callback);

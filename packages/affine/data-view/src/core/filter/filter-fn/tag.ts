@@ -23,6 +23,7 @@ export const tagFilter = [
       }
       return value.includes(self);
     },
+    defaultValue: args => args[0][0],
   }),
   createFilter({
     name: 'isNotOneOf',
