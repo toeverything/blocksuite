@@ -293,7 +293,7 @@ export class DefaultTool extends BaseTool {
     if (!this._edgeless) return;
 
     const clipboardController = this._edgeless?.clipboardController;
-    const snapshot = await prepareCloneData(this._toBeMoved, this.std);
+    const snapshot = prepareCloneData(this._toBeMoved, this.std);
 
     const bound = getCommonBoundWithRotation(this._toBeMoved);
     const { canvasElements, blockModels } =

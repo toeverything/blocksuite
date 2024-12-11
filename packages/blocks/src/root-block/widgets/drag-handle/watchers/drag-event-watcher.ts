@@ -327,7 +327,7 @@ export class DragEventWatcher {
     this._changeCursorToGrabbing();
     this._createDropIndicator();
     this.widget.hide();
-    this._serializeData(slice, state).catch(console.error);
+    this._serializeData(slice, state);
   };
 
   private get _dndAPI() {
@@ -389,7 +389,7 @@ export class DragEventWatcher {
     }
   }
 
-  private async _serializeData(slice: Slice, state: DndEventState) {
+  private _serializeData(slice: Slice, state: DndEventState) {
     const dataTransfer = state.raw.dataTransfer;
     if (!dataTransfer) return;
 
@@ -397,16 +397,11 @@ export class DragEventWatcher {
       middlewares: [],
       collection: this.widget.std.collection,
     });
-    const textAdapter = new MarkdownAdapter(job);
-    const htmlAdapter = new HtmlAdapter(job);
 
-    const snapshot = await job.sliceToSnapshot(slice);
-    const text = await textAdapter.fromSlice(slice);
-    const innerHTML = await htmlAdapter.fromSlice(slice);
-    if (!snapshot || !text || !innerHTML) return;
+    const snapshot = job.sliceToSnapshot(slice);
+    if (!snapshot) return;
 
-    dataTransfer.setData('text/plain', text.file);
-    this._dndAPI.encodeSnapshot(snapshot, dataTransfer, innerHTML.file);
+    this._dndAPI.encodeSnapshot(snapshot, dataTransfer);
   }
 
   watch() {

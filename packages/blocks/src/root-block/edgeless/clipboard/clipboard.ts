@@ -1398,7 +1398,7 @@ export async function prepareClipboardData(
   });
   const selected = await Promise.all(
     selectedAll.map(async selected => {
-      const data = await serializeElement(selected, selectedAll, job);
+      const data = serializeElement(selected, selectedAll, job);
       if (!data) {
         return;
       }

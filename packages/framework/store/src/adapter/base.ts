@@ -75,7 +75,7 @@ export abstract class BaseAdapter<AdapterTarget = unknown> {
 
   async fromBlock(model: DraftModel) {
     try {
-      const blockSnapshot = await this.job.blockToSnapshot(model);
+      const blockSnapshot = this.job.blockToSnapshot(model);
       if (!blockSnapshot) return;
       return await this.fromBlockSnapshot({
         snapshot: blockSnapshot,
@@ -96,7 +96,7 @@ export abstract class BaseAdapter<AdapterTarget = unknown> {
 
   async fromDoc(doc: Doc) {
     try {
-      const docSnapshot = await this.job.docToSnapshot(doc);
+      const docSnapshot = this.job.docToSnapshot(doc);
       if (!docSnapshot) return;
       return await this.fromDocSnapshot({
         snapshot: docSnapshot,
@@ -117,7 +117,7 @@ export abstract class BaseAdapter<AdapterTarget = unknown> {
 
   async fromSlice(slice: Slice) {
     try {
-      const sliceSnapshot = await this.job.sliceToSnapshot(slice);
+      const sliceSnapshot = this.job.sliceToSnapshot(slice);
       if (!sliceSnapshot) return;
       wrapFakeNote(sliceSnapshot);
       return await this.fromSliceSnapshot({

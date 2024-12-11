@@ -118,9 +118,7 @@ export async function convertSelectedBlocksToLinkedDoc(
   docTitle?: string
 ) {
   const models = await selectedModels;
-  const slice = await std.clipboard.sliceToSnapshot(
-    Slice.fromModels(doc, models)
-  );
+  const slice = std.clipboard.sliceToSnapshot(Slice.fromModels(doc, models));
   if (!slice) {
     return;
   }

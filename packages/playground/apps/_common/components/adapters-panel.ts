@@ -108,9 +108,9 @@ export class AdaptersPanel extends WithDisposable(ShadowlessElement) {
     });
   }
 
-  private async _getDocSnapshot() {
+  private _getDocSnapshot() {
     const job = this._createJob();
-    const result = await job.docToSnapshot(this.doc);
+    const result = job.docToSnapshot(this.doc);
     return result;
   }
 
@@ -147,7 +147,7 @@ export class AdaptersPanel extends WithDisposable(ShadowlessElement) {
         this._plainTextContent = (await this._getPlainTextContent()) || '';
         break;
       case 'snapshot':
-        this._docSnapshot = (await this._getDocSnapshot()) || null;
+        this._docSnapshot = this._getDocSnapshot() || null;
         break;
     }
   }

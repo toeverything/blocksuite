@@ -32,7 +32,7 @@ export const embedSyncedDocBlockHtmlAdapterMatcher: BlockHtmlAdapterMatcher = {
         if (!syncedDoc) return;
 
         if (counter === 1) {
-          const syncedSnapshot = await job.docToSnapshot(syncedDoc);
+          const syncedSnapshot = job.docToSnapshot(syncedDoc);
           if (syncedSnapshot) {
             await walker.walkONode(syncedSnapshot.blocks);
           }
