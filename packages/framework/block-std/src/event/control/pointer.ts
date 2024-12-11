@@ -31,6 +31,8 @@ function createContext(
 abstract class PointerControllerBase {
   private _cachedRect: DOMRect | null = null;
 
+  private _mutationObserver: MutationObserver | null = null;
+
   private _resizeObserver: ResizeObserver | null = null;
 
   protected get _rect() {
@@ -42,13 +44,19 @@ abstract class PointerControllerBase {
 
   constructor(protected _dispatcher: UIEventDispatcher) {
     this._resizeObserver = new ResizeObserver(() => this._updateRect());
+    this._mutationObserver = new MutationObserver(() => this._updateRect());
   }
 
   protected _updateRect() {
     if (!this._dispatcher.host) return;
 
-    if (this._resizeObserver && !this._cachedRect) {
+    if (this._resizeObserver && this._mutationObserver && !this._cachedRect) {
       this._resizeObserver.observe(this._dispatcher.host);
+      this._mutationObserver.observe(this._dispatcher.host, {
+        attributes: true,
+        childList: true,
+        subtree: true,
+      });
     }
 
     this._cachedRect = this._dispatcher.host.getBoundingClientRect();
