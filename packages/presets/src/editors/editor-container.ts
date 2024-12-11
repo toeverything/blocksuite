@@ -1,4 +1,4 @@
-import type { BlockModel, Doc } from '@blocksuite/store';
+import type { BlockModel, Doc, RcRef } from '@blocksuite/store';
 
 import {
   BlockStdScope,
@@ -12,6 +12,7 @@ import {
   PageEditorBlockSpecs,
   ThemeProvider,
 } from '@blocksuite/blocks';
+import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 import { SignalWatcher, Slot, WithDisposable } from '@blocksuite/global/utils';
 import { computed, signal } from '@preact/signals-core';
 import { css, html } from 'lit';
@@ -89,7 +90,7 @@ export class AffineEditorContainer
     }
   `;
 
-  private _doc = signal<Doc>();
+  private _docRef = signal<RcRef<Doc> | null>(null);
 
   private _edgelessSpecs = signal<ExtensionType[]>(EdgelessEditorBlockSpecs);
 
@@ -122,11 +123,17 @@ export class AffineEditorContainer
   };
 
   get doc() {
-    return this._doc.value as Doc;
+    if (!this._docRef.value) {
+      throw new BlockSuiteError(ErrorCode.DocCollectionError, 'Doc not found');
+    }
+    return this._docRef.value.obj;
   }
 
   set doc(doc: Doc) {
-    this._doc.value = doc;
+    if (this._docRef.value) {
+      this._docRef.value.release();
+    }
+    this._docRef.value = doc.collection.getDocRef(doc.id);
   }
 
   set edgelessSpecs(specs: ExtensionType[]) {
@@ -178,6 +185,14 @@ export class AffineEditorContainer
     this._disposables.add(
       this.doc.slots.rootAdded.on(() => this.requestUpdate())
     );
+  }
+
+  override disconnectedCallback(): void {
+    super.disconnectedCallback();
+    if (this._docRef.value) {
+      this._docRef.value.release();
+      this._docRef.value = null;
+    }
   }
 
   override firstUpdated() {

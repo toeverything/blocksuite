@@ -539,6 +539,7 @@ export class Doc {
   }
 
   dispose() {
+    // this._blockCollection.dispose();
     this._disposeBlockUpdated.dispose();
     this.slots.ready.dispose();
     this.slots.blockUpdated.dispose();
