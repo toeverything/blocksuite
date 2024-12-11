@@ -9,7 +9,7 @@ import {
   DeltaASTConverter,
   type InlineDeltaMatcher,
   type TextBuffer,
-} from '../type.js';
+} from '../types/adapter.js';
 
 export type InlineDeltaToPlainTextAdapterMatcher =
   InlineDeltaMatcher<TextBuffer>;

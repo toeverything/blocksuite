@@ -1,6 +1,6 @@
 import type { Element, ElementContent, Text } from 'hast';
 
-import type { HtmlAST } from '../html-adapter/type.js';
+import type { HtmlAST } from '../types/hast.js';
 
 const isElement = (ast: HtmlAST): ast is Element => {
   return ast.type === 'element';

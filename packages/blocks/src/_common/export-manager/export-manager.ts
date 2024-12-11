@@ -9,6 +9,7 @@ import {
   GroupElementModel,
   type RootBlockModel,
 } from '@blocksuite/affine-model';
+import { FetchUtils } from '@blocksuite/affine-shared/adapters';
 import {
   CANVAS_EXPORT_IGNORE_TAGS,
   DEFAULT_IMAGE_PROXY_ENDPOINT,
@@ -36,7 +37,6 @@ import {
 import { getBlocksInFrameBound } from '../../root-block/edgeless/frame-manager.js';
 import { xywhArrayToObject } from '../../root-block/edgeless/utils/convert.js';
 import { getBackgroundGrid } from '../../root-block/edgeless/utils/query.js';
-import { fetchImage } from '../adapters/utils.js';
 import { FileExporter } from './file-exporter.js';
 
 type Html2CanvasFunction = typeof import('html2canvas').default;
@@ -66,7 +66,7 @@ export class ExportManager {
     const imgList = Array.from(element.querySelectorAll('img'));
     // Create an array of promises
     const promises = imgList.map(img => {
-      return fetchImage(
+      return FetchUtils.fetchImage(
         img.src,
         undefined,
         this._exportOptions.imageProxyEndpoint

@@ -14,7 +14,7 @@ import {
   type ASTToDeltaMatcher,
   DeltaASTConverter,
   type InlineDeltaMatcher,
-} from '../type.js';
+} from '../types/adapter.js';
 
 export type InlineDeltaToMarkdownAdapterMatcher =
   InlineDeltaMatcher<PhrasingContent>;

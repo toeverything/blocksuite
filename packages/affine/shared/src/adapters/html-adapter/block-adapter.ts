@@ -5,9 +5,9 @@ import {
   type ServiceIdentifier,
 } from '@blocksuite/global/di';
 
-import type { BlockAdapterMatcher } from '../type.js';
+import type { BlockAdapterMatcher } from '../types/adapter.js';
+import type { HtmlAST } from '../types/hast.js';
 import type { HtmlDeltaConverter } from './delta-converter.js';
-import type { HtmlAST } from './type.js';
 
 export type BlockHtmlAdapterMatcher = BlockAdapterMatcher<
   HtmlAST,

@@ -2,8 +2,7 @@ import { ImageBlockSchema } from '@blocksuite/affine-model';
 import {
   BlockMarkdownAdapterExtension,
   type BlockMarkdownAdapterMatcher,
-  fetchable,
-  fetchImage,
+  FetchUtils,
   type MarkdownAST,
 } from '@blocksuite/affine-shared/adapters';
 import { getFilenameFromContentDisposition } from '@blocksuite/affine-shared/utils';
@@ -24,7 +23,7 @@ export const imageBlockMarkdownAdapterMatcher: BlockMarkdownAdapterMatcher = {
       if (!assets || !imageURL) {
         return;
       }
-      if (!fetchable(imageURL)) {
+      if (!FetchUtils.fetchable(imageURL)) {
         const imageURLSplit = imageURL.split('/');
         while (imageURLSplit.length > 0) {
           const key = assets
@@ -37,7 +36,7 @@ export const imageBlockMarkdownAdapterMatcher: BlockMarkdownAdapterMatcher = {
           imageURLSplit.shift();
         }
       } else {
-        const res = await fetchImage(
+        const res = await FetchUtils.fetchImage(
           imageURL,
           undefined,
           configs.get('imageProxy') as string

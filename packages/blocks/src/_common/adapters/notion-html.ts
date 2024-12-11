@@ -4,7 +4,12 @@ import {
   DEFAULT_NOTE_BACKGROUND_COLOR,
   NoteDisplayMode,
 } from '@blocksuite/affine-model';
-import { HastUtils, type HtmlAST } from '@blocksuite/affine-shared/adapters';
+import {
+  FetchUtils,
+  HastUtils,
+  type HtmlAST,
+  TextUtils,
+} from '@blocksuite/affine-shared/adapters';
 import { getFilenameFromContentDisposition } from '@blocksuite/affine-shared/utils';
 import { getTagColor } from '@blocksuite/data-view';
 import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
@@ -28,8 +33,6 @@ import {
 import { collapseWhiteSpace } from 'collapse-white-space';
 import rehypeParse from 'rehype-parse';
 import { unified } from 'unified';
-
-import { createText, fetchable, fetchImage, isText } from './utils.js';
 
 export type NotionHtml = string;
 
@@ -331,7 +334,7 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
               : '';
           if (imageURL) {
             let blobId = '';
-            if (!fetchable(imageURL)) {
+            if (!FetchUtils.fetchable(imageURL)) {
               const imageURLSplit = imageURL.split('/');
               while (imageURLSplit.length > 0) {
                 const key = assets
@@ -344,7 +347,7 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
                 imageURLSplit.shift();
               }
             } else {
-              const res = await fetchImage(
+              const res = await FetchUtils.fetchImage(
                 imageURL,
                 undefined,
                 this.configs.get('imageProxy') as string
@@ -716,7 +719,7 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
           }
           if (imageURL) {
             let blobId = '';
-            if (!fetchable(imageURL)) {
+            if (!FetchUtils.fetchable(imageURL)) {
               const imageURLSplit = imageURL.split('/');
               while (imageURLSplit.length > 0) {
                 const key = assets
@@ -729,7 +732,7 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
                 imageURLSplit.shift();
               }
             } else {
-              const res = await fetchImage(
+              const res = await FetchUtils.fetchImage(
                 imageURL,
                 undefined,
                 this.configs.get('imageProxy') as string
@@ -787,7 +790,7 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
             let name = '';
             let type = '';
             let size = 0;
-            if (!fetchable(embededURL)) {
+            if (!FetchUtils.fetchable(embededURL)) {
               const embededURLSplit = embededURL.split('/');
               while (embededURLSplit.length > 0) {
                 const key = assets
@@ -1007,7 +1010,7 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
                   columns[index].type = 'rich-text';
                   row[columns[index].id] = {
                     columnId: columns[index].id,
-                    value: createText(text),
+                    value: TextUtils.createText(text),
                   };
                 } else {
                   row[columns[index].id] = {
@@ -1023,11 +1026,11 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
               }
               if (
                 columns[index].type === 'rich-text' &&
-                !isText(row[columns[index].id].value)
+                !TextUtils.isText(row[columns[index].id].value)
               ) {
                 row[columns[index].id] = {
                   columnId: columns[index].id,
-                  value: createText(row[columns[index].id].value),
+                  value: TextUtils.createText(row[columns[index].id].value),
                 };
               }
             });
