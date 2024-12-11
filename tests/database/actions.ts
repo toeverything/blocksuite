@@ -462,6 +462,22 @@ export async function focusKanbanCardHeader(page: Page, index = 0) {
   await cardHeader.click();
 }
 
+export async function clickKanbanCardHeader(page: Page, index = 0) {
+  const cardHeader = page.locator('data-view-header-area-text').nth(index);
+  await cardHeader.click();
+  await cardHeader.click();
+}
+
+export async function assertKanbanCardHeaderText(
+  page: Page,
+  text: string,
+  index = 0
+) {
+  const cardHeader = page.locator('data-view-header-area-text').nth(index);
+
+  await expect(cardHeader).toHaveText(text);
+}
+
 export async function assertKanbanCellSelected(
   page: Page,
   {
