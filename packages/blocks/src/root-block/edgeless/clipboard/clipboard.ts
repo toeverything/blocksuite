@@ -17,6 +17,7 @@ import {
   BookmarkStyles,
   DEFAULT_NOTE_HEIGHT,
   DEFAULT_NOTE_WIDTH,
+  ReferenceInfoSchema,
 } from '@blocksuite/affine-model';
 import {
   EmbedOptionProvider,
@@ -339,13 +340,15 @@ export class EdgelessClipboardController extends PageClipboard {
         type: flavour.split(':')[1],
       });
 
-      this.std.getOptional(TelemetryProvider)?.track('LinkedDocCreated', {
-        page: 'whiteboard editor',
-        segment: 'whiteboard',
-        category: 'pasted link',
-        other: isInternalLink ? 'existing doc' : 'external link',
-        type: isInternalLink ? (isLinkedBlock ? 'block' : 'doc') : 'link',
-      });
+      this.std
+        .getOptional(TelemetryProvider)
+        ?.track(isInternalLink ? 'LinkedDocCreated' : 'Link', {
+          page: 'whiteboard editor',
+          segment: 'whiteboard',
+          category: 'pasted link',
+          other: isInternalLink ? 'existing doc' : 'external link',
+          type: isInternalLink ? (isLinkedBlock ? 'block' : 'doc') : 'link',
+        });
 
       this.selectionManager.set({
         editing: false,
@@ -424,10 +427,16 @@ export class EdgelessClipboardController extends PageClipboard {
     this.registerBlock('affine:image', this._createImageBlock);
     this.registerBlock('affine:frame', this._createFrameBlock);
     this.registerBlock('affine:attachment', this._createAttachmentBlock);
+
+    // external links
     this.registerBlock('affine:bookmark', this._createBookmarkBlock);
-    this.registerBlock('affine:embed-github', this._createGithubEmbedBlock);
-    this.registerBlock('affine:embed-youtube', this._createYoutubeEmbedBlock);
     this.registerBlock('affine:embed-figma', this._createFigmaEmbedBlock);
+    this.registerBlock('affine:embed-github', this._createGithubEmbedBlock);
+    this.registerBlock('affine:embed-html', this._createHtmlEmbedBlock);
+    this.registerBlock('affine:embed-loom', this._createLoomEmbedBlock);
+    this.registerBlock('affine:embed-youtube', this._createYoutubeEmbedBlock);
+
+    // internal links
     this.registerBlock(
       'affine:embed-linked-doc',
       this._createLinkedDocEmbedBlock
@@ -436,8 +445,6 @@ export class EdgelessClipboardController extends PageClipboard {
       'affine:embed-synced-doc',
       this._createSyncedDocEmbedBlock
     );
-    this.registerBlock('affine:embed-html', this._createHtmlEmbedBlock);
-    this.registerBlock('affine:embed-loom', this._createLoomEmbedBlock);
   }
 
   private _checkCanContinueToCanvas(
@@ -568,6 +575,8 @@ export class EdgelessClipboardController extends PageClipboard {
     } else {
       clipboardData.xywh = newXYWH;
     }
+
+    clipboardData.lockedBySelf = false;
 
     const id = this.host.service.addElement(
       clipboardData.type as CanvasElementType,
@@ -739,16 +748,23 @@ export class EdgelessClipboardController extends PageClipboard {
   }
 
   private _createLinkedDocEmbedBlock(linkedDocEmbed: BlockSnapshot) {
-    const { xywh, style, caption, pageId, params } = linkedDocEmbed.props;
-    const props: Record<string, unknown> = { xywh, style, caption, pageId };
-
-    if (params) {
-      props.params = { ...params };
-    }
+    const { xywh, style, caption, pageId, params, title, description } =
+      linkedDocEmbed.props;
+    const referenceInfo = ReferenceInfoSchema.parse({
+      pageId,
+      params,
+      title,
+      description,
+    });
 
     return this.host.service.addBlock(
       'affine:embed-linked-doc',
-      props,
+      {
+        xywh,
+        style,
+        caption,
+        ...referenceInfo,
+      },
       this.surface.model.id
     );
   }
@@ -797,7 +813,9 @@ export class EdgelessClipboardController extends PageClipboard {
   }
 
   private _createSyncedDocEmbedBlock(syncedDocEmbed: BlockSnapshot) {
-    const { xywh, style, caption, scale, pageId } = syncedDocEmbed.props;
+    const { xywh, style, caption, scale, pageId, params } =
+      syncedDocEmbed.props;
+    const referenceInfo = ReferenceInfoSchema.parse({ pageId, params });
 
     return this.host.service.addBlock(
       'affine:embed-synced-doc',
@@ -806,7 +824,7 @@ export class EdgelessClipboardController extends PageClipboard {
         style,
         caption,
         scale,
-        pageId,
+        ...referenceInfo,
       },
       this.surface.model.id
     );
@@ -1272,9 +1290,13 @@ export class EdgelessClipboardController extends PageClipboard {
           continue;
         }
 
+        assertType<GfxCompatibleProps & unknown>(blockSnapshot.props);
+
         blockSnapshot.props.xywh = getNewXYWH(
           blockSnapshot.props.xywh as SerializedXYWH
         );
+        blockSnapshot.props.lockedBySelf = false;
+
         const newId = await config.createFunction(blockSnapshot, context);
         if (!newId) continue;
 
@@ -1376,7 +1398,7 @@ export async function prepareClipboardData(
   });
   const selected = await Promise.all(
     selectedAll.map(async selected => {
-      const data = await serializeElement(selected, selectedAll, job);
+      const data = serializeElement(selected, selectedAll, job);
       if (!data) {
         return;
       }

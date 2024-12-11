@@ -398,7 +398,7 @@ export class ReferencePopup extends WithDisposable(LitElement) {
             aria-label="Doc title"
             .hover=${false}
             .labelHeight=${'20px'}
-            .tooltip=${'Original linked doc title'}
+            .tooltip=${this.docTitle}
             @click=${this._openDoc}
           >
             <span class="label">${this.docTitle}</span>

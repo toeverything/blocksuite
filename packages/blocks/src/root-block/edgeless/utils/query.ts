@@ -26,7 +26,7 @@ import {
   type EmbedLoomModel,
   type EmbedSyncedDocModel,
   type EmbedYoutubeModel,
-  type FrameBlockModel,
+  FrameBlockModel,
   type ImageBlockModel,
   MindmapElementModel,
   type NoteBlockModel,
@@ -269,6 +269,17 @@ export function getSelectedRect(selected: BlockSuite.EdgelessModel[]): DOMRect {
   if (selected.length === 0) {
     return new DOMRect();
   }
+
+  const lockedElementsByFrame = selected
+    .map(selectable => {
+      if (selectable instanceof FrameBlockModel && selectable.isLocked()) {
+        return selectable.descendantElements;
+      }
+      return [];
+    })
+    .flat();
+
+  selected = [...new Set([...selected, ...lockedElementsByFrame])];
 
   if (selected.length === 1) {
     const [x, y, w, h] = deserializeXYWH(selected[0].xywh);

@@ -49,6 +49,7 @@ export function createEmbedBlockSchema<
       return {
         index: 'a0',
         xywh: '[0,0,0,0]',
+        lockedBySelf: false,
         rotate: 0,
         ...userProps,
       } as unknown as EmbedProps<Props>;

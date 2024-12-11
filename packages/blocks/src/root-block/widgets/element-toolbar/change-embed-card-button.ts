@@ -505,6 +505,15 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
     return undefined;
   }
 
+  get _originalDocTitle() {
+    const model = this.model;
+    const doc = isInternalEmbedModel(model)
+      ? this.std.collection.getDoc(model.pageId)
+      : null;
+
+    return doc?.meta?.title || 'Untitled';
+  }
+
   private get _viewType(): 'inline' | 'embed' | 'card' {
     if (this._isCardView) {
       return 'card';
@@ -706,13 +715,10 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
               aria-label="Doc title"
               .hover=${false}
               .labelHeight=${'20px'}
-              .tooltip=${'Original linked doc title'}
+              .tooltip=${this._originalDocTitle}
               @click=${this._open}
             >
-              <span class="label"
-                >${this.std.collection.getDoc(model.pageId)?.meta?.title ||
-                'Untitled'}</span
-              >
+              <span class="label">${this._originalDocTitle}</span>
             </editor-icon-button>
           `
         : nothing,

@@ -133,11 +133,14 @@ export class EmbedCardEditModal extends SignalWatcher(
     .row.actions .button:disabled {
       pointer-events: none;
       color: ${unsafeCSSVarV2('text/disable')};
-      background: ${unsafeCSSVarV2('button/disable')};
     }
     .row.actions .button.save {
       color: ${unsafeCSSVarV2('button/pureWhiteText')};
       background: ${unsafeCSSVarV2('button/primary')};
+    }
+    .row.actions .button[disabled].save,
+    .row.actions .button:disabled.save {
+      opacity: 0.5;
     }
   `;
 

@@ -6,7 +6,7 @@ import {
   BlockHtmlAdapterExtension,
   type BlockHtmlAdapterMatcher,
   HastUtils,
-  isNullish,
+  TextUtils,
 } from '@blocksuite/affine-shared/adapters';
 import { nanoid } from '@blocksuite/store';
 
@@ -125,7 +125,7 @@ export const listBlockHtmlAdapterMatcher: BlockHtmlAdapterMatcher = {
           Array.isArray(currentTNode.properties.className) &&
           currentTNode.properties.className.includes('todo-list')
         ) ===
-          isNullish(
+          TextUtils.isNullish(
             o.node.props.type === 'todo'
               ? (o.node.props.checked as boolean)
               : undefined
@@ -178,7 +178,7 @@ export const listBlockHtmlAdapterMatcher: BlockHtmlAdapterMatcher = {
           Array.isArray(previousTNode.properties.className) &&
           previousTNode.properties.className.includes('todo-list')
         ) ===
-          isNullish(
+          TextUtils.isNullish(
             o.node.props.type === 'todo'
               ? (o.node.props.checked as boolean)
               : undefined

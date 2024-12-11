@@ -25,22 +25,20 @@ const insertRightColumn = async (page: Page, index = 0) => {
   await page.locator('affine-database-header-column').nth(index).click();
   await waitNextFrame(page, 200);
   await pressKey(page, 'Escape');
-  await pressKey(page, 'ArrowDown', 3);
-  await pressKey(page, 'Enter');
+  const menu = page.locator('.affine-menu-button', {
+    hasText: new RegExp('Insert Right'),
+  });
+  await menu.click();
   await waitNextFrame(page, 200);
   await pressKey(page, 'Enter');
 };
-const menuSelect = async (
-  page: Page,
-  selectors: Array<string | [string, number]>
-) => {
+const menuSelect = async (page: Page, selectors: string[]) => {
   await waitNextFrame(page);
-  for (const data of selectors) {
-    const name = typeof data === 'string' ? data : data[0];
-    const index = typeof data === 'string' ? 0 : data[1];
-    await type(page, name);
-    await pressKey(page, 'ArrowDown', index + 1);
-    await pressKey(page, 'Enter');
+  for (const name of selectors) {
+    const menu = page.locator('.affine-menu-button', {
+      hasText: new RegExp(name),
+    });
+    await menu.click();
   }
 };
 test.describe('title', () => {
@@ -51,7 +49,7 @@ test.describe('title', () => {
     const statCell = page.locator('affine-database-column-stats-cell').nth(0);
     await moveToCenterOf(page, statCell);
     await statCell.click();
-    await menuSelect(page, ['count', 'empty']);
+    await menuSelect(page, ['Count', 'Count Empty']);
     const value = statCell.locator('.value');
     expect((await value.textContent())?.trim()).toBe('3');
     await page.locator('affine-database-cell-container').nth(0).click();
@@ -72,7 +70,7 @@ test.describe('rich-text', () => {
     const statCell = page.locator('affine-database-column-stats-cell').nth(1);
     await moveToCenterOf(page, statCell);
     await statCell.click();
-    await menuSelect(page, ['count', 'empty']);
+    await menuSelect(page, ['Count', 'Count Empty']);
     const value = statCell.locator('.value');
     expect((await value.textContent())?.trim()).toBe('3');
     await page.locator('affine-database-cell-container').nth(1).click();
@@ -93,7 +91,7 @@ test.describe('select', () => {
     const statCell = page.locator('affine-database-column-stats-cell').nth(1);
     await moveToCenterOf(page, statCell);
     await statCell.click();
-    await menuSelect(page, ['count', 'empty']);
+    await menuSelect(page, ['Count', 'Count Empty']);
     const value = statCell.locator('.value');
     expect((await value.textContent())?.trim()).toBe('3');
     await page.locator('affine-database-cell-container').nth(1).click();

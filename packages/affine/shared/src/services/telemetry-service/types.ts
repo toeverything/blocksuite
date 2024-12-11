@@ -39,3 +39,10 @@ export interface ElementCreationEvent extends TelemetryEvent {
   module?: 'toolbar' | 'canvas' | 'ai chat panel';
   control?: ElementCreationSource;
 }
+
+export interface ElementLockEvent extends TelemetryEvent {
+  page: 'whiteboard editor';
+  segment: 'element toolbar';
+  module: 'element toolbar';
+  control: 'lock' | 'unlock' | 'group-lock';
+}

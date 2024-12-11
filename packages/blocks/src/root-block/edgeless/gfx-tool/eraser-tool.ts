@@ -113,6 +113,7 @@ export class EraserTool extends BaseTool {
   override dragMove(e: PointerEventState): void {
     const currentPoint = this.gfx.viewport.toModelCoord(e.point.x, e.point.y);
     this._erasable.forEach(erasable => {
+      if (erasable.isLocked()) return;
       if (this._eraseTargets.has(erasable)) return;
       if (isTopLevelBlock(erasable)) {
         const bound = Bound.deserialize(erasable.xywh);

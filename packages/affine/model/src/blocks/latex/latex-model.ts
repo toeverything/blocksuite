@@ -14,6 +14,7 @@ export const LatexBlockSchema = defineBlockSchema({
   props: (): LatexProps => ({
     xywh: '[0,0,16,16]',
     index: 'a0',
+    lockedBySelf: false,
     scale: 1,
     rotate: 0,
     latex: '',

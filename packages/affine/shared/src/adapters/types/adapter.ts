@@ -10,7 +10,7 @@ import {
   type NodeProps,
 } from '@blocksuite/store';
 
-import type { AffineTextAttributes } from '../types/index.js';
+import type { AffineTextAttributes } from '../../types/index.js';
 
 export const isBlockSnapshotNode = (node: unknown): node is BlockSnapshot =>
   BlockSnapshotSchema.safeParse(node).success;

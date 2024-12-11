@@ -277,7 +277,7 @@ describe('basic', () => {
   });
 });
 
-import snapshot from '../snapshots/edgeless/surface-ref.spec.ts/surface-ref.json';
+import snapshot from '../snapshots/edgeless/surface-ref.spec.ts/surface-ref.json' assert { type: 'json' };
 
 describe('clipboard', () => {
   test('import surface-ref snapshot should render content correctly', async () => {

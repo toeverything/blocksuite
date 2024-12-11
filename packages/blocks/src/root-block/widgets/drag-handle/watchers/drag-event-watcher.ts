@@ -1,3 +1,5 @@
+import type { NoteBlockModel } from '@blocksuite/affine-model';
+
 import { DndApiExtensionIdentifier } from '@blocksuite/affine-shared/services';
 import {
   captureEventTarget,
@@ -17,6 +19,7 @@ import { Bound, Point } from '@blocksuite/global/utils';
 import { Job, Slice } from '@blocksuite/store';
 import { render } from 'lit';
 
+import type { EdgelessRootBlockComponent } from '../../../edgeless/index.js';
 import type { AffineDragHandleWidget } from '../drag-handle.js';
 
 import {
@@ -27,6 +30,7 @@ import {
   calcDropTarget,
   type DropResult,
 } from '../../../../_common/utils/index.js';
+import { addNoteAtPoint } from '../../../edgeless/utils/common.js';
 import { DropIndicator } from '../components/drop-indicator.js';
 import { AFFINE_DRAG_HANDLE_WIDGET } from '../consts.js';
 import { containBlock, includeTextSelection } from '../utils.js';
@@ -239,7 +243,16 @@ export class DragEventWatcher {
     const { clientX, clientY } = event;
     const point = new Point(clientX, clientY);
     const element = getClosestBlockComponentByPoint(point.clone());
-    if (!element) return;
+    if (!element) {
+      const target = captureEventTarget(event.target);
+      const isEdgelessContainer =
+        target?.classList.contains('edgeless-container');
+      if (!isEdgelessContainer) return;
+
+      // drop to edgeless container
+      this._onDropOnEdgelessCanvas(context);
+      return;
+    }
     const model = element.model;
     const parent = this.widget.std.doc.getParent(model.id);
     if (!parent) return;
@@ -251,7 +264,39 @@ export class DragEventWatcher {
 
     const index =
       parent.children.indexOf(model) + (result.type === 'before' ? 0 : 1);
+    event.preventDefault();
     this._deserializeData(state, parent.id, index).catch(console.error);
+  };
+
+  private _onDropOnEdgelessCanvas = (context: UIEventStateContext) => {
+    const state = context.get('dndState');
+    const edgelessRoot = this.widget
+      .rootComponent as EdgelessRootBlockComponent;
+    const { left: viewportLeft, top: viewportTop } = edgelessRoot.viewport;
+    const newNoteId = addNoteAtPoint(
+      edgelessRoot.std,
+      new Point(state.raw.x - viewportLeft, state.raw.y - viewportTop),
+      {
+        scale: this.widget.noteScale.peek(),
+      }
+    );
+    const newNoteBlock = this.widget.doc.getBlock(newNoteId)?.model as
+      | NoteBlockModel
+      | undefined;
+    if (!newNoteBlock) return;
+
+    const bound = Bound.deserialize(newNoteBlock.xywh);
+    bound.h *= this.widget.noteScale.peek();
+    bound.w *= this.widget.noteScale.peek();
+    this.widget.doc.updateBlock(newNoteBlock, {
+      xywh: bound.serialize(),
+      edgeless: {
+        ...newNoteBlock.edgeless,
+        scale: this.widget.noteScale.peek(),
+      },
+    });
+
+    this._deserializeData(state, newNoteId).catch(console.error);
   };
 
   private _startDragging = (
@@ -282,7 +327,7 @@ export class DragEventWatcher {
     this._changeCursorToGrabbing();
     this._createDropIndicator();
     this.widget.hide();
-    this._serializeData(slice, state).catch(console.error);
+    this._serializeData(slice, state);
   };
 
   private get _dndAPI() {
@@ -344,7 +389,7 @@ export class DragEventWatcher {
     }
   }
 
-  private async _serializeData(slice: Slice, state: DndEventState) {
+  private _serializeData(slice: Slice, state: DndEventState) {
     const dataTransfer = state.raw.dataTransfer;
     if (!dataTransfer) return;
 
@@ -352,16 +397,11 @@ export class DragEventWatcher {
       middlewares: [],
       collection: this.widget.std.collection,
     });
-    const textAdapter = new MarkdownAdapter(job);
-    const htmlAdapter = new HtmlAdapter(job);
 
-    const snapshot = await job.sliceToSnapshot(slice);
-    const text = await textAdapter.fromSlice(slice);
-    const innerHTML = await htmlAdapter.fromSlice(slice);
-    if (!snapshot || !text || !innerHTML) return;
+    const snapshot = job.sliceToSnapshot(slice);
+    if (!snapshot) return;
 
-    dataTransfer.setData('text/plain', text.file);
-    this._dndAPI.encodeSnapshot(snapshot, dataTransfer, innerHTML.file);
+    this._dndAPI.encodeSnapshot(snapshot, dataTransfer);
   }
 
   watch() {

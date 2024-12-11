@@ -487,6 +487,7 @@ test.skip('convert link to embed', async ({ page }) => {
     }
     prop:hidden={false}
     prop:index="a0"
+    prop:lockedBySelf={false}
   >
     <affine:paragraph
       prop:text="aaa"

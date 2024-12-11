@@ -158,10 +158,12 @@ test('can insert attachment from slash menu', async ({ page }) => {
   }
   prop:hidden={false}
   prop:index="a0"
+  prop:lockedBySelf={false}
 >
   <affine:attachment
     prop:embed={false}
     prop:index="a0"
+    prop:lockedBySelf={false}
     prop:name="${FILE_NAME}"
     prop:rotate={0}
     prop:size={${FILE_SIZE}}
@@ -203,10 +205,12 @@ test('should undo/redo works for attachment', async ({ page }) => {
   }
   prop:hidden={false}
   prop:index="a0"
+  prop:lockedBySelf={false}
 >
   <affine:attachment
     prop:embed={false}
     prop:index="a0"
+    prop:lockedBySelf={false}
     prop:name="${FILE_NAME}"
     prop:rotate={0}
     prop:size={${FILE_SIZE}}
@@ -239,6 +243,7 @@ test('should undo/redo works for attachment', async ({ page }) => {
   }
   prop:hidden={false}
   prop:index="a0"
+  prop:lockedBySelf={false}
 >
   <affine:paragraph
     prop:text="/"
@@ -268,10 +273,12 @@ test('should undo/redo works for attachment', async ({ page }) => {
   }
   prop:hidden={false}
   prop:index="a0"
+  prop:lockedBySelf={false}
 >
   <affine:attachment
     prop:embed={false}
     prop:index="a0"
+    prop:lockedBySelf={false}
     prop:name="${FILE_NAME}"
     prop:rotate={0}
     prop:size={${FILE_SIZE}}
@@ -354,11 +361,13 @@ test('should turn attachment to image works', async ({ page }) => {
   }
   prop:hidden={false}
   prop:index="a0"
+  prop:lockedBySelf={false}
 >
   <affine:image
     prop:caption=""
     prop:height={0}
     prop:index="a0"
+    prop:lockedBySelf={false}
     prop:rotate={0}
     prop:size={${FILE_SIZE}}
     prop:sourceId="${FILE_ID}"
@@ -386,11 +395,13 @@ test('should turn attachment to image works', async ({ page }) => {
   }
   prop:hidden={false}
   prop:index="a0"
+  prop:lockedBySelf={false}
 >
   <affine:attachment
     prop:caption=""
     prop:embed={false}
     prop:index="a0"
+    prop:lockedBySelf={false}
     prop:name="${FILE_NAME}"
     prop:rotate={0}
     prop:size={${FILE_SIZE}}
@@ -433,6 +444,7 @@ test('should attachment can be deleted', async ({ page }) => {
   }
   prop:hidden={false}
   prop:index="a0"
+  prop:lockedBySelf={false}
 >
   <affine:paragraph
     prop:type="text"
@@ -475,10 +487,12 @@ test.fixme(`support dragging attachment block directly`, async ({ page }) => {
   }
   prop:hidden={false}
   prop:index="a0"
+  prop:lockedBySelf={false}
 >
   <affine:attachment
     prop:embed={false}
     prop:index="a0"
+    prop:lockedBySelf={false}
     prop:name="${FILE_NAME}"
     prop:rotate={0}
     prop:size={${FILE_SIZE}}
@@ -529,6 +543,7 @@ test.fixme(`support dragging attachment block directly`, async ({ page }) => {
     }
     prop:hidden={false}
     prop:index="a0"
+    prop:lockedBySelf={false}
   >
     <affine:attachment
       prop:embed={false}
@@ -583,6 +598,7 @@ test.fixme(`support dragging attachment block directly`, async ({ page }) => {
     }
     prop:hidden={false}
     prop:index="a0"
+    prop:lockedBySelf={false}
   >
     <affine:paragraph
       prop:text="111"

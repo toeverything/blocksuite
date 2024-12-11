@@ -9,8 +9,8 @@ import {
 import {
   BlockMarkdownAdapterExtension,
   type BlockMarkdownAdapterMatcher,
-  createText,
   type MarkdownAST,
+  TextUtils,
 } from '@blocksuite/affine-shared/adapters';
 import { type BlockSnapshot, nanoid } from '@blocksuite/store';
 import { format } from 'date-fns/format';
@@ -43,7 +43,7 @@ export const databaseBlockMarkdownAdapterMatcher: BlockMarkdownAdapterMatcher =
             row.children.slice(1).forEach((cell, index) => {
               cells[rowId][viewsColumns[index + 1].id] = {
                 columnId: viewsColumns[index + 1].id,
-                value: createText(
+                value: TextUtils.createText(
                   cell.children
                     .map(child => ('value' in child ? child.value : ''))
                     .join('')

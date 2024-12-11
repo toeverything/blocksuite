@@ -186,7 +186,7 @@ export const styles = css`
 
   .affine-embed-linked-doc-block:not(.in-canvas) {
     max-width: 100%;
-    min-width: ${EMBED_CARD_MIN_WIDTH}px;
+    min-width: calc(min(${EMBED_CARD_MIN_WIDTH}px, 100%));
   }
 
   .affine-embed-linked-doc-block.loading {

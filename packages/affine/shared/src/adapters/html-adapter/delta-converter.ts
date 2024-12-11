@@ -7,15 +7,15 @@ import {
 } from '@blocksuite/global/di';
 
 import type { AffineTextAttributes } from '../../types/index.js';
-import type { HtmlAST, InlineHtmlAST } from './type.js';
+import type { HtmlAST, InlineHtmlAST } from '../types/hast.js';
 
 import {
   type ASTToDeltaMatcher,
   DeltaASTConverter,
   type DeltaASTConverterOptions,
   type InlineDeltaMatcher,
-} from '../type.js';
-import { mergeDeltas } from '../utils.js';
+} from '../types/adapter.js';
+import { TextUtils } from '../utils/text.js';
 
 export type InlineDeltaToHtmlAdapterMatcher = InlineDeltaMatcher<InlineHtmlAST>;
 
@@ -74,9 +74,7 @@ export class HtmlDeltaConverter extends DeltaASTConverter<
   ): InlineHtmlAST {
     let mdast: InlineHtmlAST = {
       type: 'text',
-      value: delta.attributes?.underline
-        ? `<u>${delta.insert}</u>`
-        : delta.insert,
+      value: delta.insert,
     };
 
     const context: {
@@ -121,7 +119,7 @@ export class HtmlDeltaConverter extends DeltaASTConverter<
     options: DeltaASTConverterOptions = Object.create(null)
   ): DeltaInsert<AffineTextAttributes>[] {
     return this._spreadAstToDelta(ast, options).reduce((acc, cur) => {
-      return mergeDeltas(acc, cur);
+      return TextUtils.mergeDeltas(acc, cur);
     }, [] as DeltaInsert<AffineTextAttributes>[]);
   }
 

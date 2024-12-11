@@ -22,7 +22,7 @@ const enableCoverage = !!process.env.CI || !!process.env.COVERAGE;
 export const scoped = (stringsArray: TemplateStringsArray) => {
   return `${scope ?? ''}${stringsArray.join()}`;
 };
-export const test = baseTest.extend({
+export const test = baseTest.extend<{}>({
   context: async ({ context }, use) => {
     if (enableCoverage) {
       await context.addInitScript(() =>

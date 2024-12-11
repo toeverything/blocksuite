@@ -3,15 +3,12 @@ export {
   type BlockHtmlAdapterMatcher,
   BlockHtmlAdapterMatcherIdentifier,
   type Html,
-  type HtmlAST,
   type HtmlASTToDeltaMatcher,
   HtmlASTToDeltaMatcherIdentifier,
   HtmlDeltaConverter,
   type InlineDeltaToHtmlAdapterMatcher,
   InlineDeltaToHtmlAdapterMatcherIdentifier,
-  type InlineHtmlAST,
 } from './html-adapter/index.js';
-export { MarkdownDeltaConverter } from './markdown/delta-converter.js';
 export {
   BlockMarkdownAdapterExtension,
   type BlockMarkdownAdapterMatcher,
@@ -23,6 +20,7 @@ export {
   type MarkdownAST,
   type MarkdownASTToDeltaMatcher,
   MarkdownASTToDeltaMatcherIdentifier,
+  MarkdownDeltaConverter,
 } from './markdown/index.js';
 export {
   BlockPlainTextAdapterExtension,
@@ -37,16 +35,9 @@ export {
   type AdapterContext,
   type BlockAdapterMatcher,
   DeltaASTConverter,
+  type HtmlAST,
+  type InlineHtmlAST,
   isBlockSnapshotNode,
   type TextBuffer,
-} from './type.js';
-export {
-  createText,
-  fetchable,
-  fetchImage,
-  isNullish,
-  isText,
-  mergeDeltas,
-  toURLSearchParams,
-} from './utils.js';
+} from './types/index.js';
 export * from './utils/index.js';

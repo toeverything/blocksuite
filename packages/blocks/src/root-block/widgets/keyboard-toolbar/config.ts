@@ -120,9 +120,9 @@ export type KeyboardToolbarContext = {
   std: BlockStdScope;
   rootComponent: PageRootBlockComponent;
   /**
-   * Close tool bar
+   * Close tool bar, and blur the focus if blur is true, default is false
    */
-  closeToolbar: () => void;
+  closeToolbar: (blur?: boolean) => void;
   /**
    * Close current tool panel and show virtual keyboard
    */

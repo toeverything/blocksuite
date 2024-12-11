@@ -1,3 +1,5 @@
+import type { AliasInfo } from '@blocksuite/affine-model';
+
 import {
   EMBED_CARD_HEIGHT,
   EMBED_CARD_WIDTH,
@@ -113,7 +115,7 @@ export class EmbedEdgelessSyncedDocBlockComponent extends toEdgelessEmbedBlock(
     );
   };
 
-  override convertToCard = () => {
+  override convertToCard = (aliasInfo?: AliasInfo) => {
     const { id, doc, caption, xywh } = this.model;
 
     const edgelessService = this.rootService;
@@ -134,6 +136,7 @@ export class EmbedEdgelessSyncedDocBlockComponent extends toEdgelessEmbedBlock(
         style,
         caption,
         ...this.referenceInfo,
+        ...aliasInfo,
       },
       // @ts-expect-error TODO: fix after edgeless refactor
       edgelessService.surface
