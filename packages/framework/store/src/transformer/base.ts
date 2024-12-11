@@ -64,9 +64,7 @@ export class BaseBlockTransformer<Props extends object = object> {
     };
   }
 
-  toSnapshot({
-    model,
-  }: ToSnapshotPayload<Props>): Promise<BlockSnapshotLeaf> | BlockSnapshotLeaf {
+  toSnapshot({ model }: ToSnapshotPayload<Props>): BlockSnapshotLeaf {
     const { id, flavour, version } = model;
 
     const props = this._propsToSnapshot(model);

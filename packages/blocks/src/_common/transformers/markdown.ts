@@ -40,7 +40,7 @@ async function exportDoc(doc: Doc) {
     collection: doc.collection,
     middlewares: [docLinkBaseURLMiddleware, titleMiddleware],
   });
-  const snapshot = await job.docToSnapshot(doc);
+  const snapshot = job.docToSnapshot(doc);
 
   const adapter = new MarkdownAdapter(job);
   if (!snapshot) {

@@ -89,8 +89,8 @@ export class SurfaceBlockTransformer extends BaseBlockTransformer<SurfaceBlockPr
     return snapshotRet;
   }
 
-  override async toSnapshot(payload: ToSnapshotPayload<SurfaceBlockProps>) {
-    const snapshot = await super.toSnapshot(payload);
+  override toSnapshot(payload: ToSnapshotPayload<SurfaceBlockProps>) {
+    const snapshot = super.toSnapshot(payload);
     const elementsValue = payload.model.elements.getValue();
     const value: Record<string, unknown> = {};
     if (elementsValue) {

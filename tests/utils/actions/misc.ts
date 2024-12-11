@@ -1072,9 +1072,9 @@ export async function getClipboardSnapshot(page: Page) {
 }
 
 export async function getPageSnapshot(page: Page, toJSON?: boolean) {
-  const json = await page.evaluate(async () => {
+  const json = await page.evaluate(() => {
     const { job, doc } = window;
-    const snapshot = await job.docToSnapshot(doc);
+    const snapshot = job.docToSnapshot(doc);
     if (!snapshot) {
       throw new Error('Failed to get snapshot');
     }
