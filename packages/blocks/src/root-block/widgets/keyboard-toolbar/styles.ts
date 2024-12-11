@@ -40,6 +40,7 @@ export const keyboardToolbarStyles = css`
   }
 
   .item-container {
+    flex: 1;
     display: flex;
     overflow-x: auto;
     gap: 8px;
@@ -50,7 +51,9 @@ export const keyboardToolbarStyles = css`
     }
   }
 
-  ${scrollbarStyle('.item-container')}
+  .item-container::-webkit-scrollbar {
+    display: none;
+  }
 
   .divider {
     height: 24px;
