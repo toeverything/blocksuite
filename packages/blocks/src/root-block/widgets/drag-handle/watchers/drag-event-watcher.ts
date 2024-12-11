@@ -251,6 +251,7 @@ export class DragEventWatcher {
 
     const index =
       parent.children.indexOf(model) + (result.type === 'before' ? 0 : 1);
+    event.preventDefault();
     this._deserializeData(state, parent.id, index).catch(console.error);
   };
 
