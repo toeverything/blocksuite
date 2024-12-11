@@ -33,7 +33,7 @@ export class ObjectPool<Key, T> {
 
     // check whether we need to keep gc timer
     for (const [_, { rc }] of this.objects) {
-      if (rc === 0) return; // // found object with rc=0, keep GC interval running
+      if (rc === 0) return; // found object with rc=0, keep GC interval running
     }
 
     // if all object has referrer, stop gc
