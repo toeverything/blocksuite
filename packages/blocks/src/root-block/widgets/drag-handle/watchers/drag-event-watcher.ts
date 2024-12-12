@@ -34,6 +34,7 @@ import { addNoteAtPoint } from '../../../edgeless/utils/common.js';
 import { DropIndicator } from '../components/drop-indicator.js';
 import { AFFINE_DRAG_HANDLE_WIDGET } from '../consts.js';
 import { copyEmbedDoc } from '../middleware/copy-embed-doc.js';
+import { surfaceRefToEmbed } from '../middleware/surface-ref-to-embed.js';
 import { containBlock, includeTextSelection } from '../utils.js';
 
 export class DragEventWatcher {
@@ -348,7 +349,7 @@ export class DragEventWatcher {
 
       const job = new Job({
         collection: this.widget.std.collection,
-        middlewares: [copyEmbedDoc],
+        middlewares: [copyEmbedDoc, surfaceRefToEmbed(this.widget.std)],
       });
 
       const std = this.widget.std;
