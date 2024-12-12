@@ -14,10 +14,8 @@ import {
   type UIEventHandler,
   type UIEventStateContext,
 } from '@blocksuite/block-std';
-import { GfxControllerIdentifier } from '@blocksuite/block-std/gfx';
 import { Bound, Point } from '@blocksuite/global/utils';
-import { Job, Slice } from '@blocksuite/store';
-import { render } from 'lit';
+import { Job, Slice, type SliceSnapshot } from '@blocksuite/store';
 
 import type { EdgelessRootBlockComponent } from '../../../edgeless/index.js';
 import type { AffineDragHandleWidget } from '../drag-handle.js';
@@ -133,19 +131,7 @@ export class DragEventWatcher {
     const isInSurface = isGfxBlockComponent(hoverBlock);
 
     if (isInSurface && dragByHandle) {
-      const viewport = this.widget.std.get(GfxControllerIdentifier).viewport;
-      const zoom = viewport.zoom ?? 1;
-      const dragPreviewEl = document.createElement('div');
-      const bound = Bound.deserialize(hoverBlock.model.xywh);
-      const offset = new Point(bound.x * zoom, bound.y * zoom);
-
-      // TODO: not use `dangerouslyRenderModel` to render drag preview
-      render(
-        this.widget.std.host.dangerouslyRenderModel(hoverBlock.model),
-        dragPreviewEl
-      );
-
-      this._startDragging([hoverBlock], state, dragPreviewEl, offset);
+      this._startDragging([hoverBlock], state);
       return true;
     }
 
@@ -241,6 +227,7 @@ export class DragEventWatcher {
 
   private _onDrop = (context: UIEventStateContext) => {
     const state = context.get('dndState');
+
     const event = state.raw;
     const { clientX, clientY } = event;
     const point = new Point(clientX, clientY);
@@ -267,11 +254,57 @@ export class DragEventWatcher {
     const index =
       parent.children.indexOf(model) + (result.type === 'before' ? 0 : 1);
     event.preventDefault();
+
+    if (matchFlavours(parent, ['affine:note'])) {
+      const snapshot = this._deserializeSnapshot(state);
+      if (snapshot) {
+        const [first] = snapshot.content;
+        if (first.flavour === 'affine:note') {
+          this._onDropNoteOnNote(snapshot, parent.id, index);
+          return;
+        }
+      }
+    }
+
     this._deserializeData(state, parent.id, index).catch(console.error);
+  };
+
+  private _onDropNoteOnNote = (
+    snapshot: SliceSnapshot,
+    parent?: string,
+    index?: number
+  ) => {
+    const [first] = snapshot.content;
+    const id = first.id;
+
+    const std = this.widget.std;
+    const job = new Job({
+      collection: this.widget.std.collection,
+    });
+    const snapshotWithoutNote = {
+      ...snapshot,
+      content: first.children,
+    };
+    job
+      .snapshotToSlice(snapshotWithoutNote, std.doc, parent, index)
+      .then(() => {
+        const block = this.widget.std.doc.getBlock(id)?.model;
+        if (block) {
+          this.widget.std.doc.deleteBlock(block);
+        }
+      })
+      .catch(console.error);
   };
 
   private _onDropOnEdgelessCanvas = (context: UIEventStateContext) => {
     const state = context.get('dndState');
+    // If drop a note, should do nothing
+    const snapshot = this._deserializeSnapshot(state);
+    if (snapshot) {
+      const [first] = snapshot.content;
+      if (first.flavour === 'affine:note') return;
+    }
+
     const edgelessRoot = this.widget
       .rootComponent as EdgelessRootBlockComponent;
     const { left: viewportLeft, top: viewportTop } = edgelessRoot.viewport;
@@ -351,10 +384,9 @@ export class DragEventWatcher {
         collection: this.widget.std.collection,
         middlewares: [copyEmbedDoc, surfaceRefToEmbed(this.widget.std)],
       });
-
       const std = this.widget.std;
-      const data = dataTransfer.getData(this._dndAPI.mimeType);
-      const snapshot = this._dndAPI.decodeSnapshot(data);
+
+      const snapshot = this._deserializeSnapshot(state);
       if (snapshot) {
         // use snapshot
         const slice = await job.snapshotToSlice(
@@ -388,6 +420,19 @@ export class DragEventWatcher {
         index
       );
       return slice;
+    } catch {
+      return null;
+    }
+  }
+
+  private _deserializeSnapshot(state: DndEventState) {
+    try {
+      const dataTransfer = state.raw.dataTransfer;
+      if (!dataTransfer) throw new Error('No data transfer');
+      const data = dataTransfer.getData(this._dndAPI.mimeType);
+      const snapshot = this._dndAPI.decodeSnapshot(data);
+
+      return snapshot;
     } catch {
       return null;
     }
