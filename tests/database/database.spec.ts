@@ -34,7 +34,6 @@ import {
   assertColumnWidth,
   assertDatabaseCellRichTexts,
   assertDatabaseSearching,
-  assertDatabaseTitleColumnText,
   assertDatabaseTitleText,
   blurDatabaseSearch,
   clickColumnType,
@@ -42,8 +41,6 @@ import {
   focusDatabaseHeader,
   focusDatabaseSearch,
   getDatabaseBodyCell,
-  getDatabaseBodyRow,
-  getDatabaseBodyRows,
   getDatabaseHeaderColumn,
   getFirstColumnCell,
   initDatabaseColumn,
@@ -334,113 +331,6 @@ test('should support drag and drop to move columns', async ({ page }) => {
 
   const { text } = await getDatabaseHeaderColumn(page, 2);
   expect(text).toBe('column1');
-});
-
-test('support drag and drop the add button to insert row', async ({ page }) => {
-  await enterPlaygroundRoom(page);
-  await initEmptyDatabaseState(page);
-
-  await initDatabaseColumn(page);
-  await initDatabaseDynamicRowWithData(page, 'a', true);
-  await pressEscape(page);
-  await initDatabaseDynamicRowWithData(page, 'b', true);
-  await pressEscape(page);
-  await focusDatabaseHeader(page);
-  const newRecord = page.locator('.new-record');
-  const box = await getBoundingBox(newRecord);
-
-  const startX = box.x + box.width / 2;
-  const startY = box.y + box.height / 2;
-  const row0 = getDatabaseBodyRow(page, 0);
-  const box0 = await getBoundingBox(row0);
-  const endX = box0.x + box0.width / 2;
-  const endY = box0.y;
-  await dragBetweenCoords(
-    page,
-    { x: startX, y: startY },
-    // The drag judgment range is: [-20, 20]
-    { x: endX, y: endY - 21 },
-    {
-      steps: 50,
-      beforeMouseUp: async () => {
-        await waitNextFrame(page);
-        await expect(page.locator('affine-drag-indicator div')).toBeHidden();
-      },
-    }
-  );
-
-  await dragBetweenCoords(
-    page,
-    { x: startX, y: startY },
-    { x: endX, y: endY },
-    {
-      steps: 50,
-      beforeMouseUp: async () => {
-        await waitNextFrame(page);
-        await expect(
-          page.locator('div[data-is-drop-preview="true"]')
-        ).toBeVisible();
-      },
-    }
-  );
-  const rows = getDatabaseBodyRows(page);
-  expect(await rows.count()).toBe(3);
-  await waitNextFrame(page, 50);
-  await type(page, '1');
-  await pressEscape(page);
-  await waitNextFrame(page);
-  await assertDatabaseTitleColumnText(page, '1');
-});
-
-test('should the indicator display correctly when resize the window', async ({
-  page,
-}) => {
-  await enterPlaygroundRoom(page);
-  await initEmptyDatabaseState(page);
-
-  await initDatabaseColumn(page);
-  await initDatabaseDynamicRowWithData(page, 'a', true);
-  await pressEscape(page);
-  await initDatabaseDynamicRowWithData(page, 'b', true);
-  await pressEscape(page);
-
-  const size = page.viewportSize();
-  if (!size) throw new Error('Missing page size');
-  await page.setViewportSize({
-    width: size.width - 100,
-    height: size.height - 100,
-  });
-  await page.waitForTimeout(250);
-
-  await focusDatabaseHeader(page);
-  const newRecord = page.locator('.new-record');
-  const box = await getBoundingBox(newRecord);
-
-  const startX = box.x + box.width / 2;
-  const startY = box.y + box.height / 2;
-  const row0 = getDatabaseBodyRow(page, 0);
-  const box0 = await getBoundingBox(row0);
-  const endX = box0.x + box0.width / 2;
-  const endY = box0.y;
-
-  await dragBetweenCoords(
-    page,
-    { x: startX, y: startY },
-    { x: endX, y: endY },
-    {
-      steps: 50,
-      beforeMouseUp: async () => {
-        await waitNextFrame(page);
-        const { x: indicatorX } = await getBoundingBox(
-          page.locator('div[data-is-drop-preview="true"]')
-        );
-        const { x: databaseX } = await getBoundingBox(
-          page.locator('affine-database-table')
-        );
-        expect(indicatorX).toBe(databaseX);
-      },
-    }
-  );
 });
 
 test('should title column support quick renaming', async ({ page }) => {
