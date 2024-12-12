@@ -203,6 +203,17 @@ export class DataViewKanban extends DataViewBase<
       clearSelection: () => {
         this.selectionController.clear();
       },
+      addRow: position => {
+        if (this.props.view.readonly$.value) return;
+        const rowId = this.props.view.rowAdd(position);
+        if (rowId) {
+          this.props.dataViewEle.openDetailPanel({
+            view: this.props.view,
+            rowId,
+          });
+        }
+        return rowId;
+      },
       focusFirstCell: () => {
         this.selectionController.focusFirstCell();
       },

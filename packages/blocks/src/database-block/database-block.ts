@@ -315,6 +315,7 @@ export class DatabaseBlockComponent extends CaptionedBlockComponent<
       widgetPresets.tools.sort,
       widgetPresets.tools.search,
       widgetPresets.tools.viewOptions,
+      widgetPresets.tools.tableAddRow,
     ],
   });
 
