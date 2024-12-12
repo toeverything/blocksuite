@@ -231,7 +231,7 @@ export class LinkedDocPopover extends SignalWatcher(
                   : nothing;
                 return html`<icon-button
                   width="280px"
-                  height="34px"
+                  height="30px"
                   data-id=${key}
                   .text=${name}
                   hover=${this._activatedItemIndex === curIdx}
