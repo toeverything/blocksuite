@@ -1,6 +1,6 @@
 {
   "name": "@blocksuite/affine-block-paragraph",
-  "version": "0.18.6",
+  "version": "0.18.7",
   "description": "Paragraph block for BlockSuite.",
   "type": "module",
   "repository": {
