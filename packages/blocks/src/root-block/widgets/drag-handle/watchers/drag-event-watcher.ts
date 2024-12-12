@@ -350,7 +350,8 @@ export class DragEventWatcher {
       });
 
       const std = this.widget.std;
-      const snapshot = this._dndAPI.decodeSnapshot(dataTransfer);
+      const data = dataTransfer.getData(this._dndAPI.mimeType);
+      const snapshot = this._dndAPI.decodeSnapshot(data);
       if (snapshot) {
         // use snapshot
         const slice = await job.snapshotToSlice(
@@ -401,7 +402,8 @@ export class DragEventWatcher {
     const snapshot = job.sliceToSnapshot(slice);
     if (!snapshot) return;
 
-    this._dndAPI.encodeSnapshot(snapshot, dataTransfer);
+    const data = this._dndAPI.encodeSnapshot(snapshot);
+    dataTransfer.setData(this._dndAPI.mimeType, data);
   }
 
   watch() {

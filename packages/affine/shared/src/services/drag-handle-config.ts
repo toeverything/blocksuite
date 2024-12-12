@@ -88,15 +88,13 @@ export class DNDAPIExtension extends Extension {
     di.addImpl(DndApiExtensionIdentifier, provider => provider.get(this));
   }
 
-  decodeSnapshot(dataTransfer: DataTransfer): SliceSnapshot {
-    const data = dataTransfer.getData(this.mimeType);
-
+  decodeSnapshot(data: string): SliceSnapshot {
     return JSON.parse(decodeURIComponent(data));
   }
 
-  encodeSnapshot(json: SliceSnapshot, dataTransfer: DataTransfer) {
+  encodeSnapshot(json: SliceSnapshot) {
     const snapshot = JSON.stringify(json);
-    dataTransfer.setData(this.mimeType, encodeURIComponent(snapshot));
+    return encodeURIComponent(snapshot);
   }
 
   fromEntity(docId: string, blockId?: string): SliceSnapshot | null {
