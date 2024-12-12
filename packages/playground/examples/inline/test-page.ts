@@ -34,6 +34,9 @@ function inlineTextStyles(
 
   let inlineCodeStyle = {};
   if (props.code) {
+    const element = document.activeElement;
+    const isInHeading = element?.closest('.h1, .h2, .h3, .h4, .h5, .h6');
+
     inlineCodeStyle = {
       'font-family':
         '"SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace',
@@ -41,7 +44,7 @@ function inlineTextStyles(
       background: 'rgba(135,131,120,0.15)',
       color: '#EB5757',
       'border-radius': '3px',
-      'font-size': '12px',
+      ...(!isInHeading && { 'font-size': 'var(--affine-font-xs)' }),
       padding: '0.2em 0.4em',
     };
   }

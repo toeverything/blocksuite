@@ -20,6 +20,9 @@ export function affineTextStyles(
 
   let inlineCodeStyle = {};
   if (props.code) {
+    const element = document.activeElement;
+    const isInHeading = element?.closest('.h1, .h2, .h3, .h4, .h5, .h6');
+
     inlineCodeStyle = {
       'font-family': 'var(--affine-font-code-family)',
       background: 'var(--affine-background-code-block)',
@@ -28,7 +31,7 @@ export function affineTextStyles(
       color: 'var(--affine-text-primary-color)',
       'font-variant-ligatures': 'none',
       'line-height': 'auto',
-      'font-size': '12px',
+      ...(!isInHeading && { 'font-size': 'var(--affine-font-xs)' }),
     };
   }
 
