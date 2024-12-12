@@ -1,5 +1,5 @@
 import { IS_IPAD } from '@blocksuite/global/env';
-import { Vec } from '@blocksuite/global/utils';
+import { nextTick, Vec } from '@blocksuite/global/utils';
 
 import type { UIEventDispatcher } from '../dispatcher.js';
 
@@ -28,10 +28,14 @@ function createContext(
   );
 }
 
+const POLL_INTERVAL = 1000;
+
 abstract class PointerControllerBase {
   private _cachedRect: DOMRect | null = null;
 
-  private _resizeObserver: ResizeObserver | null = null;
+  // XXX: polling is used instead of MutationObserver
+  // due to potential performance issues
+  private _pollingInterval: number | null = null;
 
   protected get _rect() {
     if (!this._cachedRect) {
@@ -41,22 +45,29 @@ abstract class PointerControllerBase {
   }
 
   constructor(protected _dispatcher: UIEventDispatcher) {
-    this._resizeObserver = new ResizeObserver(() => this._updateRect());
+    this._startPolling();
+  }
+
+  private _startPolling() {
+    const poll = () => {
+      nextTick()
+        .then(() => this._updateRect())
+        .catch(console.error);
+    };
+    this._pollingInterval = window.setInterval(poll, POLL_INTERVAL);
+    poll();
   }
 
   protected _updateRect() {
     if (!this._dispatcher.host) return;
-
-    if (this._resizeObserver && !this._cachedRect) {
-      this._resizeObserver.observe(this._dispatcher.host);
-    }
-
     this._cachedRect = this._dispatcher.host.getBoundingClientRect();
   }
 
   dispose() {
-    this._resizeObserver?.disconnect();
-    this._resizeObserver = null;
+    if (this._pollingInterval !== null) {
+      clearInterval(this._pollingInterval);
+      this._pollingInterval = null;
+    }
   }
 
   abstract listen(): void;
