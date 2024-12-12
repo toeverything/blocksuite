@@ -87,7 +87,7 @@ export const keyboardToolPanelStyles = css`
     color: ${unsafeCSSVarV2('text/secondary')};
 
     /* Footnote/Emphasized */
-    font-family: 'SF Pro';
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
     font-size: 13px;
     font-style: normal;
     font-weight: 590;
@@ -134,7 +134,7 @@ export const keyboardToolPanelStyles = css`
 
     span {
       width: 100%;
-      font-family: SF Pro;
+      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
       font-size: 13px;
       font-weight: 400;
       line-height: 18px;

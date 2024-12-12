@@ -123,7 +123,7 @@ export const mobileLinkedDocMenuStyles = css`
       text-align: justify;
       text-overflow: ellipsis;
 
-      font-family: 'SF Pro';
+      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
       font-size: 17px;
       font-style: normal;
       font-weight: 400;
