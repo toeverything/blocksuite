@@ -23,6 +23,7 @@ export type DeltaASTConverterOptions = {
   trim?: boolean;
   pre?: boolean;
   pageMap?: Map<string, string>;
+  removeLastBr?: boolean;
 };
 
 export type AdapterContext<
@@ -37,6 +38,7 @@ export type AdapterContext<
   deltaConverter: TConverter;
   textBuffer: TextBuffer;
   assets?: AssetsManager;
+  pageMap?: Map<string, string>;
   updateAssetIds?: (assetsId: string) => void;
 };
 

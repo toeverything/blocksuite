@@ -72,7 +72,7 @@ export class HtmlDeltaConverter extends DeltaASTConverter<
   private _applyTextFormatting(
     delta: DeltaInsert<AffineTextAttributes>
   ): InlineHtmlAST {
-    let mdast: InlineHtmlAST = {
+    let hast: InlineHtmlAST = {
       type: 'text',
       value: delta.insert,
     };
@@ -82,16 +82,16 @@ export class HtmlDeltaConverter extends DeltaASTConverter<
       current: InlineHtmlAST;
     } = {
       configs: this.configs,
-      current: mdast,
+      current: hast,
     };
     for (const matcher of this.inlineDeltaMatchers) {
       if (matcher.match(delta)) {
-        mdast = matcher.toAST(delta, context);
-        context.current = mdast;
+        hast = matcher.toAST(delta, context);
+        context.current = hast;
       }
     }
 
-    return mdast;
+    return hast;
   }
 
   private _spreadAstToDelta(

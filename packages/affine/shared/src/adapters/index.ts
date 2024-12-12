@@ -23,6 +23,16 @@ export {
   MarkdownDeltaConverter,
 } from './markdown/index.js';
 export {
+  BlockNotionHtmlAdapterExtension,
+  type BlockNotionHtmlAdapterMatcher,
+  BlockNotionHtmlAdapterMatcherIdentifier,
+  type InlineDeltaToNotionHtmlAdapterMatcher,
+  type NotionHtml,
+  type NotionHtmlASTToDeltaMatcher,
+  NotionHtmlASTToDeltaMatcherIdentifier,
+  NotionHtmlDeltaConverter,
+} from './notion-html/index.js';
+export {
   BlockPlainTextAdapterExtension,
   type BlockPlainTextAdapterMatcher,
   BlockPlainTextAdapterMatcherIdentifier,

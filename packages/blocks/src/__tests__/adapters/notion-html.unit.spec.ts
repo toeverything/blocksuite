@@ -9,7 +9,7 @@ import {
 } from '@blocksuite/store';
 import { describe, expect, test } from 'vitest';
 
-import { NotionHtmlAdapter } from '../../_common/adapters/notion-html.js';
+import { NotionHtmlAdapter } from '../../_common/adapters/notion-html/notion-html.js';
 import { nanoidReplacement } from '../../_common/test-utils/test-utils.js';
 import { createJob } from '../utils/create-job.js';
 
