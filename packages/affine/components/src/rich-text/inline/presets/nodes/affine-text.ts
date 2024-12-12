@@ -28,6 +28,7 @@ export function affineTextStyles(
       color: 'var(--affine-text-primary-color)',
       'font-variant-ligatures': 'none',
       'line-height': 'auto',
+      'font-size': '12px',
     };
   }
 
