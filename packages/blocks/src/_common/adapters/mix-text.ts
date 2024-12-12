@@ -1,3 +1,4 @@
+import type { ExtensionType } from '@blocksuite/block-std';
 import type { DeltaInsert } from '@blocksuite/inline';
 
 import {
@@ -25,6 +26,7 @@ import {
 } from '@blocksuite/store';
 
 import { MarkdownAdapter } from './markdown/index.js';
+import { AdapterFactoryIdentifier } from './type.js';
 
 export type MixText = string;
 
@@ -353,3 +355,14 @@ export class MixTextAdapter extends BaseAdapter<MixText> {
     return sliceSnapshot;
   }
 }
+
+export const MixTextAdapterFactoryIdentifier =
+  AdapterFactoryIdentifier('MixText');
+
+export const MixTextAdapterFactoryExtension: ExtensionType = {
+  setup: di => {
+    di.addImpl(MixTextAdapterFactoryIdentifier, () => ({
+      get: (job: Job) => new MixTextAdapter(job),
+    }));
+  },
+};
