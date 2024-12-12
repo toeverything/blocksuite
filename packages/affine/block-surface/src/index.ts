@@ -18,6 +18,7 @@ export {
   ConnectorEndpointLocations,
   ConnectorEndpointLocationsOnTriangle,
   ConnectorPathGenerator,
+  PathGenerator,
 } from './managers/connector-manager.js';
 export { CanvasRenderer } from './renderer/canvas-renderer.js';
 export * from './renderer/elements/group/consts.js';
