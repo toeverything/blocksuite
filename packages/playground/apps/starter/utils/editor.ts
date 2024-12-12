@@ -6,7 +6,9 @@ import {
   type ExtensionType,
 } from '@blocksuite/block-std';
 import {
+  AffineFormatBarWidget,
   CommunityCanvasTextFonts,
+  DocModeProvider,
   FontConfigExtension,
   GenerateDocUrlExtension,
   NotificationExtension,
@@ -16,10 +18,6 @@ import {
   RefNodeSlotsExtension,
   RefNodeSlotsProvider,
   SpecProvider,
-} from '@blocksuite/blocks';
-import {
-  AffineFormatBarWidget,
-  DocModeProvider,
   toolbarDefaultConfig,
 } from '@blocksuite/blocks';
 import { AffineEditorContainer, CommentPanel } from '@blocksuite/presets';
@@ -42,7 +40,6 @@ import {
   mockGenerateDocUrlService,
   mockNotificationService,
   mockParseDocUrlService,
-  mockPeekViewExtension,
   themeExtension,
 } from '../../_common/mock-services';
 
@@ -93,7 +90,7 @@ export async function mountDefaultDocEditor(collection: DocCollection) {
         );
       },
     },
-    mockPeekViewExtension(attachmentViewerPanel),
+    // mockPeekViewExtension(attachmentViewerPanel),
   ];
 
   const pageSpecs = SpecProvider.getInstance().getSpec('page');
