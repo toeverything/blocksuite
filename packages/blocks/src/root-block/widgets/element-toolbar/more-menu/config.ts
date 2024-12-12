@@ -133,7 +133,6 @@ export const reorderGroup: MenuItemGroup<ElementToolbarMoreMenuContext> = {
       },
     },
   ],
-  when: ctx => !ctx.hasFrame(),
 };
 
 // Open Group
