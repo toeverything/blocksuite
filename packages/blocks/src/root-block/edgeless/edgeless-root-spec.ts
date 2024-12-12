@@ -92,7 +92,7 @@ const EdgelessCommonExtension: ExtensionType[] = [
   CommandExtension(commands),
   ExportManagerExtension,
   ToolController,
-  DNDAPIExtension(),
+  DNDAPIExtension,
 ];
 
 export const EdgelessRootBlockSpec: ExtensionType[] = [

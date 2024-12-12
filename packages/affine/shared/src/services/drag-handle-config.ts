@@ -1,12 +1,21 @@
-import type {
-  BlockComponent,
-  DndEventState,
-  EditorHost,
-  ExtensionType,
-} from '@blocksuite/block-std';
 import type { Point } from '@blocksuite/global/utils';
 
-import { createIdentifier } from '@blocksuite/global/di';
+import {
+  type BlockComponent,
+  type BlockStdScope,
+  type DndEventState,
+  type EditorHost,
+  Extension,
+  type ExtensionType,
+  StdIdentifier,
+} from '@blocksuite/block-std';
+import { type Container, createIdentifier } from '@blocksuite/global/di';
+import {
+  type BlockModel,
+  Job,
+  Slice,
+  type SliceSnapshot,
+} from '@blocksuite/store';
 
 export type DropType = 'before' | 'after' | 'in';
 export type OnDragStartProps = {
@@ -62,48 +71,54 @@ export function DragHandleConfigExtension(
   };
 }
 
-export type DndApi = {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  decodeSnapshot: (dataTransfer: DataTransfer) => any | null;
-  encodeSnapshot: (
-    json: Record<string, unknown>,
-    dataTransfer: DataTransfer,
-    html?: string
-  ) => void;
-};
-
-export const DndApiExtensionIdentifier = createIdentifier<DndApi>(
+export const DndApiExtensionIdentifier = createIdentifier<DNDAPIExtension>(
   'AffineDndApiIdentifier'
 );
 
-export function DNDAPIExtension(): ExtensionType {
-  return {
-    setup: di => {
-      di.addImpl(DndApiExtensionIdentifier, () => ({
-        decodeSnapshot: dataTransfer => {
-          const html = dataTransfer.getData('text/html');
-          if (!html) return null;
+export class DNDAPIExtension extends Extension {
+  mimeType = 'application/x-blocksuite-dnd';
 
-          const parser = new DOMParser();
-          const doc = parser.parseFromString(html, 'text/html');
-          const dom = doc.querySelector<HTMLDivElement>(
-            '[data-blocksuite-snapshot]'
-          );
-          if (!dom) return null;
+  constructor(readonly std: BlockStdScope) {
+    super();
+  }
 
-          const json = JSON.parse(
-            decodeURIComponent(dom.dataset.blocksuiteSnapshot as string)
-          );
-          return json;
-        },
-        encodeSnapshot: (json, dataTransfer, htmlBody = '') => {
-          const snapshot = JSON.stringify(json);
-          dataTransfer.setData(
-            'text/html',
-            `<div data-blocksuite-snapshot="${encodeURIComponent(snapshot)}">${htmlBody}</div>`
-          );
-        },
-      }));
-    },
-  };
+  static override setup(di: Container) {
+    di.add(this, [StdIdentifier]);
+
+    di.addImpl(DndApiExtensionIdentifier, provider => provider.get(this));
+  }
+
+  decodeSnapshot(dataTransfer: DataTransfer): SliceSnapshot {
+    const data = dataTransfer.getData(this.mimeType);
+
+    return JSON.parse(decodeURIComponent(data));
+  }
+
+  encodeSnapshot(json: SliceSnapshot, dataTransfer: DataTransfer) {
+    const snapshot = JSON.stringify(json);
+    dataTransfer.setData(this.mimeType, encodeURIComponent(snapshot));
+  }
+
+  fromEntity(docId: string, blockId?: string): SliceSnapshot | null {
+    const doc = this.std.collection.getDoc(docId);
+    if (!doc) {
+      console.error(`Doc ${docId} not found`);
+      return null;
+    }
+    const blocks: BlockModel[] = [];
+    if (blockId) {
+      const model = doc.getBlock(blockId)?.model;
+      if (model) {
+        blocks.push(model);
+      }
+    }
+    const slice = Slice.fromModels(doc, blocks);
+    const job = new Job({ collection: this.std.collection });
+    const snapshot = job.sliceToSnapshot(slice);
+    if (!snapshot) {
+      console.error('Failed to convert slice to snapshot');
+      return null;
+    }
+    return snapshot;
+  }
 }
