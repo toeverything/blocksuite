@@ -1105,62 +1105,24 @@ test('should select texts on dragging around the page', async ({ page }) => {
   await assertRichTexts(page, ['123', '45']);
 });
 
-test('should indent native multi-selection block', async ({
-  page,
-}, testInfo) => {
+test('indent native multi-selection block', async ({ page }, testInfo) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await initThreeParagraphs(page);
-  await assertRichTexts(page, ['123', '456', '789']);
+  await pressEnter(page);
+  await type(page, '012');
+  await assertRichTexts(page, ['123', '456', '789', '012']);
 
-  const box456 = await getRichTextBoundingBox(page, '3');
-  const inside456 = { x: box456.left + 1, y: box456.top + 1 };
-
-  const box789 = await getRichTextBoundingBox(page, '4');
-  const inside789 = { x: box789.right - 1, y: box789.bottom - 1 };
-
-  // from top to bottom
-  await dragBetweenCoords(page, inside456, inside789, { steps: 50 });
-
-  await page.keyboard.press('Tab');
-
-  expect(await getPageSnapshot(page, true)).toMatchSnapshot(
-    `${testInfo.title}_after_tab.json`
-  );
-});
-
-test('should unindent native multi-selection block', async ({
-  page,
-}, testInfo) => {
-  await enterPlaygroundRoom(page);
-  await initEmptyParagraphState(page);
-  await initThreeParagraphs(page);
-  await assertRichTexts(page, ['123', '456', '789']);
-
-  let box456 = await getRichTextBoundingBox(page, '3');
-  let inside456 = { x: box456.left + 1, y: box456.top + 1 };
-
-  let box789 = await getRichTextBoundingBox(page, '4');
-  let inside789 = { x: box789.right - 1, y: box789.bottom - 1 };
-
-  // from top to bottom
-  await dragBetweenCoords(page, inside456, inside789, { steps: 50 });
-
-  await page.keyboard.press('Tab');
+  await setSelection(page, 3, 1, 5, 1);
+  await waitNextFrame(page);
+  await pressTab(page);
 
   expect(await getPageSnapshot(page, true)).toMatchSnapshot(
     `${testInfo.title}_after_tab.json`
   );
 
-  box456 = await getRichTextBoundingBox(page, '3');
-  inside456 = { x: box456.left + 1, y: box456.top + 1 };
-
-  box789 = await getRichTextBoundingBox(page, '4');
-  inside789 = { x: box789.right - 1, y: box789.bottom - 1 };
-
-  // from top to bottom
-  await dragBetweenCoords(page, inside456, inside789, { steps: 50 });
-
+  await setSelection(page, 3, 1, 5, 1);
+  await waitNextFrame(page);
   await pressShiftTab(page);
 
   expect(await getPageSnapshot(page, true)).toMatchSnapshot(
