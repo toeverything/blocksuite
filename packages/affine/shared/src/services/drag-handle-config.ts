@@ -10,12 +10,7 @@ import {
   StdIdentifier,
 } from '@blocksuite/block-std';
 import { type Container, createIdentifier } from '@blocksuite/global/di';
-import {
-  type BlockModel,
-  Job,
-  Slice,
-  type SliceSnapshot,
-} from '@blocksuite/store';
+import { Job, Slice, type SliceSnapshot } from '@blocksuite/store';
 
 export type DropType = 'before' | 'after' | 'in';
 export type OnDragStartProps = {
@@ -99,26 +94,35 @@ export class DNDAPIExtension extends Extension {
     dataTransfer.setData(this.mimeType, encodeURIComponent(snapshot));
   }
 
-  fromEntity(docId: string, blockId?: string): SliceSnapshot | null {
-    const doc = this.std.collection.getDoc(docId);
-    if (!doc) {
-      console.error(`Doc ${docId} not found`);
-      return null;
-    }
-    const blocks: BlockModel[] = [];
-    if (blockId) {
-      const model = doc.getBlock(blockId)?.model;
-      if (model) {
-        blocks.push(model);
-      }
-    }
-    const slice = Slice.fromModels(doc, blocks);
+  fromEntity(options: {
+    docId: string;
+    flavour?: string;
+    blockId?: string;
+  }): SliceSnapshot | null {
+    const { docId, flavour = 'affine:embed-linked-doc', blockId } = options;
+
+    const slice = Slice.fromModels(this.std.doc, []);
     const job = new Job({ collection: this.std.collection });
     const snapshot = job.sliceToSnapshot(slice);
     if (!snapshot) {
       console.error('Failed to convert slice to snapshot');
       return null;
     }
-    return snapshot;
+    const props = {
+      ...(blockId ? { blockId } : {}),
+      pageId: docId,
+    };
+    return {
+      ...snapshot,
+      content: [
+        {
+          id: this.std.collection.idGenerator(),
+          type: 'block',
+          flavour,
+          props,
+          children: [],
+        },
+      ],
+    };
   }
 }
