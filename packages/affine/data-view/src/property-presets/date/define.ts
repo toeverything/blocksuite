@@ -15,5 +15,6 @@ export const datePropertyModelConfig = datePropertyType.modelConfig<number>({
     };
   },
   cellToJson: ({ value }) => value ?? null,
+  cellFromJson: ({ value }) => (typeof value !== 'number' ? undefined : value),
   isEmpty: ({ value }) => value == null,
 });

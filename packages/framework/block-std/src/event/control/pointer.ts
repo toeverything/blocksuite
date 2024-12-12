@@ -29,11 +29,35 @@ function createContext(
 }
 
 abstract class PointerControllerBase {
+  private _cachedRect: DOMRect | null = null;
+
+  private _resizeObserver: ResizeObserver | null = null;
+
   protected get _rect() {
-    return this._dispatcher.host.getBoundingClientRect();
+    if (!this._cachedRect) {
+      this._updateRect();
+    }
+    return this._cachedRect as DOMRect;
   }
 
-  constructor(protected _dispatcher: UIEventDispatcher) {}
+  constructor(protected _dispatcher: UIEventDispatcher) {
+    this._resizeObserver = new ResizeObserver(() => this._updateRect());
+  }
+
+  protected _updateRect() {
+    if (!this._dispatcher.host) return;
+
+    if (this._resizeObserver && !this._cachedRect) {
+      this._resizeObserver.observe(this._dispatcher.host);
+    }
+
+    this._cachedRect = this._dispatcher.host.getBoundingClientRect();
+  }
+
+  dispose() {
+    this._resizeObserver?.disconnect();
+    this._resizeObserver = null;
+  }
 
   abstract listen(): void;
 }
@@ -549,6 +573,10 @@ export class PointerControl {
       new PanController(dispatcher),
       new PinchController(dispatcher),
     ];
+  }
+
+  dispose() {
+    this.controllers.forEach(controller => controller.dispose());
   }
 
   listen() {

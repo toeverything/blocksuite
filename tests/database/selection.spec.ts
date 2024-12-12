@@ -27,9 +27,11 @@ import { test } from '../utils/playwright.js';
 import {
   assertCellsSelection,
   assertDatabaseTitleColumnText,
+  assertKanbanCardHeaderText,
   assertKanbanCardSelected,
   assertKanbanCellSelected,
   assertRowsSelection,
+  clickKanbanCardHeader,
   focusKanbanCardHeader,
   getDatabaseBodyCell,
   getKanbanCard,
@@ -537,5 +539,29 @@ test.describe('kanban view selection', () => {
       groupIndex: 1,
       cardIndex: 0,
     });
+  });
+
+  test("should support move cursor in card's title by arrow key(left&right)", async ({
+    page,
+  }) => {
+    await enterPlaygroundRoom(page);
+    await initKanbanViewState(page, {
+      rows: ['row1'],
+      columns: [
+        {
+          type: 'rich-text',
+          value: ['text'],
+        },
+      ],
+    });
+
+    await clickKanbanCardHeader(page);
+    await type(page, 'abc');
+    await pressArrowLeft(page, 2);
+    await pressArrowRight(page);
+    await pressBackspace(page);
+    await pressEscape(page);
+
+    await assertKanbanCardHeaderText(page, 'row1ac');
   });
 });

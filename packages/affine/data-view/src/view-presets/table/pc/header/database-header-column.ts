@@ -9,10 +9,12 @@ import { SignalWatcher, WithDisposable } from '@blocksuite/global/utils';
 import {
   DeleteIcon,
   DuplicateIcon,
+  FilterIcon,
   InsertLeftIcon,
   InsertRightIcon,
   MoveLeftIcon,
   MoveRightIcon,
+  SortIcon,
   ViewIcon,
 } from '@blocksuite/icons/lit';
 import { css } from 'lit';
@@ -30,13 +32,18 @@ import {
   inputConfig,
   typeConfig,
 } from '../../../../core/common/property-menu.js';
+import { filterTraitKey } from '../../../../core/filter/trait.js';
+import { firstFilterByRef } from '../../../../core/filter/utils.js';
 import { renderUniLit } from '../../../../core/index.js';
+import { sortTraitKey } from '../../../../core/sort/manager.js';
+import { createSortUtils } from '../../../../core/sort/utils.js';
 import {
   draggable,
   dragHandler,
   droppable,
 } from '../../../../core/utils/wc-dnd/dnd-context.js';
 import { numberFormats } from '../../../../property-presets/number/utils/formats.js';
+import { ShowQuickSettingBarContextKey } from '../../../../widget-presets/quick-setting-bar/context.js';
 import { DEFAULT_COLUMN_TITLE_HEIGHT } from '../../consts.js';
 import {
   getTableGroupRect,
@@ -140,6 +147,61 @@ export class DatabaseHeaderColumn extends SignalWatcher(
     return this.tableViewManager.readonly$.value;
   }
 
+  private _addFilter() {
+    const filterTrait = this.tableViewManager.traitGet(filterTraitKey);
+    if (!filterTrait) return;
+
+    const filter = firstFilterByRef(this.tableViewManager.vars$.value, {
+      type: 'ref',
+      name: this.column.id,
+    });
+
+    filterTrait.filterSet({
+      type: 'group',
+      op: 'and',
+      conditions: [filter, ...filterTrait.filter$.value.conditions],
+    });
+
+    this._toggleQuickSettingBar();
+  }
+
+  private _addSort(desc: boolean) {
+    const sortTrait = this.tableViewManager.traitGet(sortTraitKey);
+    if (!sortTrait) return;
+
+    const sortUtils = createSortUtils(
+      sortTrait,
+      this.closest('affine-data-view-renderer')?.view?.expose.eventTrace ??
+        (() => {})
+    );
+    const sortList = sortUtils.sortList$.value;
+    const existingIndex = sortList.findIndex(
+      sort => sort.ref.name === this.column.id
+    );
+
+    if (existingIndex !== -1) {
+      sortUtils.change(existingIndex, {
+        ref: { type: 'ref', name: this.column.id },
+        desc,
+      });
+    } else {
+      sortUtils.add({
+        ref: { type: 'ref', name: this.column.id },
+        desc,
+      });
+    }
+
+    this._toggleQuickSettingBar();
+  }
+
+  private _toggleQuickSettingBar(show = true) {
+    const map = this.tableViewManager.contextGet(ShowQuickSettingBarContextKey);
+    map.value = {
+      ...map.value,
+      [this.tableViewManager.id]: show,
+    };
+  }
+
   private popMenu(ele?: HTMLElement) {
     const enableNumberFormatting =
       this.tableViewManager.featureFlags$.value.enable_number_formatting;
@@ -199,6 +261,25 @@ export class DatabaseHeaderColumn extends SignalWatcher(
                 select: () => {
                   this.column.hideSet(true);
                 },
+              }),
+            ],
+          }),
+          menu.group({
+            items: [
+              menu.action({
+                name: 'Filter',
+                prefix: FilterIcon(),
+                select: () => this._addFilter(),
+              }),
+              menu.action({
+                name: 'Sort Ascending',
+                prefix: SortIcon(),
+                select: () => this._addSort(false),
+              }),
+              menu.action({
+                name: 'Sort Descending',
+                prefix: SortIcon(),
+                select: () => this._addSort(true),
               }),
             ],
           }),

@@ -84,7 +84,7 @@ test('snapshot to model', async () => {
   const map = tempDoc.getMap('temp');
 
   expect(rootModel).not.toBeNull();
-  const snapshot = await transformer.toSnapshot({
+  const snapshot = transformer.toSnapshot({
     model: rootModel,
     assets,
   });

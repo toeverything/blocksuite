@@ -38,7 +38,7 @@ export async function duplicate(
   const totalBound = getCommonBoundWithRotation(copyElements);
   totalBound.x += totalBound.w + offset;
 
-  const snapshot = await prepareCloneData(copyElements, edgeless.std);
+  const snapshot = prepareCloneData(copyElements, edgeless.std);
   const { canvasElements, blockModels } =
     await clipboardController.createElementsFromClipboardData(
       snapshot,

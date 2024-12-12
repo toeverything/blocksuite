@@ -60,10 +60,10 @@ export class FilterableListComponent<Props = unknown> extends WithDisposable(
       const isActiveA = this.options.active?.(a);
       const isActiveB = this.options.active?.(b);
 
-      if (isActiveA && !isActiveB) return -Infinity;
-      if (!isActiveA && isActiveB) return Infinity;
+      if (isActiveA && !isActiveB) return -1;
+      if (!isActiveA && isActiveB) return 1;
 
-      return this.listFilter?.(a, b) ?? Infinity;
+      return this.listFilter?.(a, b) ?? 0;
     });
   }
 

@@ -14,6 +14,7 @@ export const numberFilter = [
       }
       return self == target;
     },
+    defaultValue: args => args[0],
   }),
   createFilter({
     name: 'notEqual',
@@ -40,6 +41,7 @@ export const numberFilter = [
       }
       return self > target;
     },
+    defaultValue: args => args[0] + 1,
   }),
   createFilter({
     name: 'lessThan',
@@ -53,6 +55,7 @@ export const numberFilter = [
       }
       return self < target;
     },
+    defaultValue: args => args[0] - 1,
   }),
   createFilter({
     name: 'greatThanOrEqual',
@@ -66,6 +69,7 @@ export const numberFilter = [
       }
       return self >= target;
     },
+    defaultValue: args => args[0],
   }),
   createFilter({
     name: 'lessThanOrEqual',
@@ -79,5 +83,6 @@ export const numberFilter = [
       }
       return self <= target;
     },
+    defaultValue: args => args[0],
   }),
 ];

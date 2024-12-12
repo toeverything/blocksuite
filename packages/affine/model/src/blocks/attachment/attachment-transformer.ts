@@ -1,8 +1,4 @@
-import type {
-  FromSnapshotPayload,
-  SnapshotNode,
-  ToSnapshotPayload,
-} from '@blocksuite/store';
+import type { FromSnapshotPayload, SnapshotNode } from '@blocksuite/store';
 
 import { BaseBlockTransformer } from '@blocksuite/store';
 
@@ -18,13 +14,5 @@ export class AttachmentBlockTransformer extends BaseBlockTransformer<AttachmentB
       await payload.assets.writeToBlob(sourceId);
 
     return snapshotRet;
-  }
-
-  override async toSnapshot(payload: ToSnapshotPayload<AttachmentBlockProps>) {
-    const snapshot = super.toSnapshot(payload);
-    const sourceId = payload.model.sourceId;
-    if (sourceId) await payload.assets.readFromBlob(sourceId);
-
-    return snapshot;
   }
 }

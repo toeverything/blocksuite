@@ -12,5 +12,6 @@ export const linkColumnModelConfig = linkColumnType.modelConfig<string>({
     };
   },
   cellToJson: ({ value }) => value ?? null,
+  cellFromJson: ({ value }) => (typeof value !== 'string' ? undefined : value),
   isEmpty: ({ value }) => value == null || value.length == 0,
 });

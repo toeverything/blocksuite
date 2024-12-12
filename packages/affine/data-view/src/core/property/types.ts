@@ -61,6 +61,12 @@ export type PropertyConfig<
       data: Data;
     }>
   ) => DVJSON;
+  cellFromJson: (
+    config: WithCommonPropertyConfig<{
+      value: DVJSON;
+      data: Data;
+    }>
+  ) => Value | undefined;
   addGroup?: (
     config: WithCommonPropertyConfig<{
       text: string;

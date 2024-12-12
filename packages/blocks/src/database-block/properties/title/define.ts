@@ -1,6 +1,5 @@
-import type { Text } from '@blocksuite/store';
-
 import { propertyType, t } from '@blocksuite/data-view';
+import { Text } from '@blocksuite/store';
 
 import { HostContextKey } from '../../context/host-context.js';
 import { isLinkedDoc } from '../../utils/title-doc.js';
@@ -35,6 +34,8 @@ export const titlePurePropertyConfig = titleColumnType.modelConfig<Text>({
     }
     return value?.toString() ?? null;
   },
+  cellFromJson: ({ value }) =>
+    typeof value !== 'string' ? undefined : new Text(value),
   onUpdate: ({ value, callback }) => {
     value.yText.observe(callback);
     callback();
