@@ -1,6 +1,6 @@
 {
   "name": "@blocksuite/global",
-  "version": "0.18.5",
+  "version": "0.18.6",
   "types": "./index.d.ts",
   "type": "module",
   "repository": {
