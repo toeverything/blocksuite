@@ -1,5 +1,43 @@
 # @blocksuite/affine-block-embed
 
+## 0.18.7
+
+### Patch Changes
+
+- 1057773: Blocksuite patch release.
+
+  ## Feat
+
+  - feat(edgeless): rewrite mind map drag indicator (#8805)
+  - feat: remove data transfer from dnd api (#8955)
+
+  ## Fix
+
+  - fix: dnd from entity api (#8958)
+  - fix(std): edge case on pointer controller (#8954)
+  - fix: indent behavior (#8941)
+  - fix(edgeless): add index reorder buttong for frame block (#8951)
+
+  ## Chore
+
+  - chore: run headless vitest locally by default (#8957)
+  - chore(blocks): disable image peekview on mobile (#8952)
+
+  ## Refactor
+
+  - refactor(database): refactor addRow functionality in kanban and table views (#8956)
+  - refactor: notion html adapter (#8947)
+
+- Updated dependencies [1057773]
+  - @blocksuite/affine-block-surface@0.18.7
+  - @blocksuite/affine-components@0.18.7
+  - @blocksuite/affine-model@0.18.7
+  - @blocksuite/affine-shared@0.18.7
+  - @blocksuite/block-std@0.18.7
+  - @blocksuite/global@0.18.7
+  - @blocksuite/inline@0.18.7
+  - @blocksuite/store@0.18.7
+
 ## 0.18.6
 
 ### Patch Changes
