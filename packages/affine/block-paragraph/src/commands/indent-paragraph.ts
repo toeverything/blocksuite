@@ -2,7 +2,6 @@ import type { ListBlockModel } from '@blocksuite/affine-model';
 import type { IndentContext } from '@blocksuite/affine-shared/types';
 import type { Command } from '@blocksuite/block-std';
 
-import { focusTextModel } from '@blocksuite/affine-components/rich-text';
 import { matchFlavours } from '@blocksuite/affine-shared/utils';
 
 export const canIndentParagraphCommand: Command<
@@ -60,7 +59,7 @@ export const canIndentParagraphCommand: Command<
 
 export const indentParagraphCommand: Command<'indentContext'> = (ctx, next) => {
   const { indentContext, std } = ctx;
-  const { doc } = std;
+  const { doc, selection, host, range } = std;
 
   if (
     !indentContext ||
@@ -72,7 +71,7 @@ export const indentParagraphCommand: Command<'indentContext'> = (ctx, next) => {
     );
     return;
   }
-  const { blockId, inlineIndex } = indentContext;
+  const { blockId } = indentContext;
 
   const model = doc.getBlock(blockId)?.model;
   if (!model) return;
@@ -93,7 +92,14 @@ export const indentParagraphCommand: Command<'indentContext'> = (ctx, next) => {
     } as Partial<ListBlockModel>);
   }
 
-  focusTextModel(std, model.id, inlineIndex);
+  const textSelection = selection.find('text');
+  if (textSelection) {
+    host.updateComplete
+      .then(() => {
+        range.syncTextSelectionToRange(textSelection);
+      })
+      .catch(console.error);
+  }
 
   return next();
 };
