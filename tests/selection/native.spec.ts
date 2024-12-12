@@ -59,6 +59,7 @@ import {
   assertNativeSelectionRangeCount,
   assertRichTextInlineRange,
   assertRichTexts,
+  assertTextSelection,
   assertTitle,
 } from '../utils/asserts.js';
 import { test } from '../utils/playwright.js';
@@ -1113,17 +1114,34 @@ test('indent native multi-selection block', async ({ page }, testInfo) => {
   await type(page, '012');
   await assertRichTexts(page, ['123', '456', '789', '012']);
 
+  const from = {
+    blockId: '3',
+    index: 1,
+    length: 2,
+  };
+  const to = {
+    blockId: '5',
+    index: 0,
+    length: 1,
+  };
+
   await setSelection(page, 3, 1, 5, 1);
+  await assertTextSelection(page, from, to);
   await waitNextFrame(page);
   await pressTab(page);
+  // should restore selection
+  await assertTextSelection(page, from, to);
 
   expect(await getPageSnapshot(page, true)).toMatchSnapshot(
     `${testInfo.title}_after_tab.json`
   );
 
   await setSelection(page, 3, 1, 5, 1);
+  await assertTextSelection(page, from, to);
   await waitNextFrame(page);
   await pressShiftTab(page);
+  // should restore selection
+  await assertTextSelection(page, from, to);
 
   expect(await getPageSnapshot(page, true)).toMatchSnapshot(
     `${testInfo.title}_after_shift_tab.json`
