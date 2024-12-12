@@ -5,17 +5,16 @@ import { signal } from '@preact/signals-core';
 import type { BlockModel, Schema } from '../../schema/index.js';
 import type { DraftModel } from '../../transformer/index.js';
 import type { BlockOptions } from './block/index.js';
-import type { BlockCollection, BlockProps } from './block-collection.js';
 import type { DocCRUD } from './crud.js';
 
 import { syncBlockProps } from '../../utils/utils.js';
 import { Block } from './block/index.js';
+import { BlockCollection, type BlockProps } from './block-collection.js';
 import { type Query, runQuery } from './query.js';
 
 type DocOptions = {
   schema: Schema;
   blockCollection: BlockCollection;
-  crud: DocCRUD;
   readonly?: boolean;
   query?: Query;
 };
@@ -25,13 +24,13 @@ export class Doc {
     runQuery(this._query, block);
   };
 
-  protected readonly _blockCollection: BlockCollection;
+  protected _blockCollection!: BlockCollection;
 
   protected readonly _blocks = signal<Record<string, Block>>({});
 
-  protected readonly _crud: DocCRUD;
+  protected _crud!: DocCRUD;
 
-  protected readonly _disposeBlockUpdated: Disposable;
+  protected _disposeBlockUpdated!: Disposable;
 
   protected readonly _query: Query = {
     match: [],
@@ -266,46 +265,23 @@ export class Doc {
     return this._blockCollection.withoutTransact.bind(this._blockCollection);
   }
 
-  constructor({ schema, blockCollection, crud, readonly, query }: DocOptions) {
-    this._blockCollection = blockCollection;
-
+  constructor({ schema, blockCollection, readonly, query }: DocOptions) {
     this.slots = {
       ready: new Slot(),
       rootAdded: new Slot(),
       rootDeleted: new Slot(),
       blockUpdated: new Slot(),
-      historyUpdated: this._blockCollection.slots.historyUpdated,
-      yBlockUpdated: this._blockCollection.slots.yBlockUpdated,
+      historyUpdated: blockCollection.slots.historyUpdated,
+      yBlockUpdated: blockCollection.slots.yBlockUpdated,
     };
 
-    this._crud = crud;
     this._schema = schema;
     this._readonly = readonly;
     if (query) {
       this._query = query;
     }
 
-    this._yBlocks.forEach((_, id) => {
-      if (id in this._blocks.peek()) {
-        return;
-      }
-      this._onBlockAdded(id, true);
-    });
-
-    this._disposeBlockUpdated = this._blockCollection.slots.yBlockUpdated.on(
-      ({ type, id }) => {
-        switch (type) {
-          case 'add': {
-            this._onBlockAdded(id);
-            return;
-          }
-          case 'delete': {
-            this._onBlockRemoved(id);
-            return;
-          }
-        }
-      }
-    );
+    this._initializeBlockCollection(blockCollection);
   }
 
   private _getSiblings<T>(
@@ -323,6 +299,32 @@ export class Doc {
     if (index === -1) return null;
 
     return fn(parent, index);
+  }
+
+  private _initializeBlockCollection(blockCollection: BlockCollection) {
+    this._blockCollection = blockCollection;
+    this._crud = blockCollection.crud;
+
+    this._yBlocks.forEach((_, id) => {
+      if (id in this._blocks.peek()) return;
+      this._onBlockAdded(id, true);
+    });
+
+    this._disposeBlockUpdated?.dispose();
+    this._disposeBlockUpdated = this._blockCollection.slots.yBlockUpdated.on(
+      ({ type, id }) => {
+        switch (type) {
+          case 'add': {
+            this._onBlockAdded(id);
+            return;
+          }
+          case 'delete': {
+            this._onBlockRemoved(id);
+            return;
+          }
+        }
+      }
+    );
   }
 
   private _onBlockAdded(id: string, init = false) {
@@ -539,12 +541,12 @@ export class Doc {
   }
 
   dispose() {
-    // this._blockCollection.dispose();
+    this._blockCollection.dispose();
     this._disposeBlockUpdated.dispose();
-    this.slots.ready.dispose();
-    this.slots.blockUpdated.dispose();
-    this.slots.rootAdded.dispose();
-    this.slots.rootDeleted.dispose();
+    // this.slots.ready.dispose();
+    // this.slots.blockUpdated.dispose();
+    // this.slots.rootAdded.dispose();
+    // this.slots.rootDeleted.dispose();
   }
 
   getBlock(id: string): Block | undefined {
@@ -644,6 +646,20 @@ export class Doc {
   }
 
   load(initFn?: () => void) {
+    // recreate space doc
+    if (this._blockCollection.spaceDoc.isDestroyed) {
+      const newBlockCollection = new BlockCollection({
+        id: this._blockCollection.id,
+        collection: this._blockCollection.collection,
+        doc: this._blockCollection.rootDoc,
+        awarenessStore: this._blockCollection.awarenessStore,
+      });
+      this._initializeBlockCollection(newBlockCollection);
+      newBlockCollection.load(initFn);
+      this.slots.ready.emit();
+      return this;
+    }
+
     this._blockCollection.load(initFn);
     this.slots.ready.emit();
     return this;

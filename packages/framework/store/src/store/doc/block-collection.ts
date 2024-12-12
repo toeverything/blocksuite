@@ -340,7 +340,6 @@ export class BlockCollection {
 
     const doc = new Doc({
       blockCollection: this,
-      crud: this._docCRUD,
       schema: this.collection.schema,
       readonly,
       query,

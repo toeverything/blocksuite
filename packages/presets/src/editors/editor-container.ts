@@ -1,4 +1,4 @@
-import type { BlockModel, Doc, RcRef } from '@blocksuite/store';
+import type { Doc, RcRef } from '@blocksuite/store';
 
 import {
   BlockStdScope,
@@ -15,7 +15,7 @@ import {
 import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 import { SignalWatcher, Slot, WithDisposable } from '@blocksuite/global/utils';
 import { computed, signal } from '@preact/signals-core';
-import { css, html } from 'lit';
+import { css, html, nothing } from 'lit';
 import { property } from 'lit/decorators.js';
 import { keyed } from 'lit/directives/keyed.js';
 import { when } from 'lit/directives/when.js';
@@ -169,7 +169,7 @@ export class AffineEditorContainer
   }
 
   get rootModel() {
-    return this.doc.root as BlockModel;
+    return this.doc.root;
   }
 
   get std() {
@@ -183,7 +183,10 @@ export class AffineEditorContainer
     super.connectedCallback();
 
     this._disposables.add(
-      this.doc.slots.rootAdded.on(() => this.requestUpdate())
+      this.doc.slots.rootAdded.on(() => {
+        console.log('root added');
+        this.requestUpdate();
+      })
     );
   }
 
@@ -212,9 +215,12 @@ export class AffineEditorContainer
     const themeService = this.std.get(ThemeProvider);
     const appTheme = themeService.app$.value;
     const edgelessTheme = themeService.edgeless$.value;
+    const rootModel = this.rootModel;
+
+    if (!rootModel) return nothing;
 
     return html`${keyed(
-      this.rootModel.id + mode,
+      rootModel.id + mode,
       html`
         <div
           data-theme=${mode === 'page' ? appTheme : edgelessTheme}
