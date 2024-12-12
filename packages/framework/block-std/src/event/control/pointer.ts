@@ -31,44 +31,10 @@ function createContext(
 const POLL_INTERVAL = 1000;
 
 abstract class PointerControllerBase {
-  private _cachedRect: DOMRect | null = null;
-
-  // XXX: polling is used instead of MutationObserver
-  // due to potential performance issues
-  private _pollingInterval: number | null = null;
-
-  protected get _rect() {
-    if (!this._cachedRect) {
-      this._updateRect();
-    }
-    return this._cachedRect as DOMRect;
-  }
-
-  constructor(protected _dispatcher: UIEventDispatcher) {
-    this._startPolling();
-  }
-
-  private _startPolling() {
-    const poll = () => {
-      nextTick()
-        .then(() => this._updateRect())
-        .catch(console.error);
-    };
-    this._pollingInterval = window.setInterval(poll, POLL_INTERVAL);
-    poll();
-  }
-
-  protected _updateRect() {
-    if (!this._dispatcher.host) return;
-    this._cachedRect = this._dispatcher.host.getBoundingClientRect();
-  }
-
-  dispose() {
-    if (this._pollingInterval !== null) {
-      clearInterval(this._pollingInterval);
-      this._pollingInterval = null;
-    }
-  }
+  constructor(
+    protected _dispatcher: UIEventDispatcher,
+    protected _getRect: () => DOMRect
+  ) {}
 
   abstract listen(): void;
 }
@@ -79,7 +45,7 @@ class PointerEventForward extends PointerControllerBase {
 
     const pointerState = new PointerEventState({
       event,
-      rect: this._rect,
+      rect: this._getRect(),
       startX: -Infinity,
       startY: -Infinity,
       last: null,
@@ -99,7 +65,7 @@ class PointerEventForward extends PointerControllerBase {
 
     const state = new PointerEventState({
       event,
-      rect: this._rect,
+      rect: this._getRect(),
       startX: start?.x ?? -Infinity,
       startY: start?.y ?? -Infinity,
       last,
@@ -119,7 +85,7 @@ class PointerEventForward extends PointerControllerBase {
 
     const state = new PointerEventState({
       event,
-      rect: this._rect,
+      rect: this._getRect(),
       startX: start?.x ?? -Infinity,
       startY: start?.y ?? -Infinity,
       last,
@@ -161,7 +127,7 @@ class ClickController extends PointerControllerBase {
 
     this._downPointerState = new PointerEventState({
       event,
-      rect: this._rect,
+      rect: this._getRect(),
       startX: -Infinity,
       startY: -Infinity,
       last: null,
@@ -183,7 +149,7 @@ class ClickController extends PointerControllerBase {
 
     const state = new PointerEventState({
       event,
-      rect: this._rect,
+      rect: this._getRect(),
       startX: -Infinity,
       startY: -Infinity,
       last: null,
@@ -225,7 +191,7 @@ class DragController extends PointerControllerBase {
 
     const pointerState = new PointerEventState({
       event,
-      rect: this._rect,
+      rect: this._getRect(),
       startX: -Infinity,
       startY: -Infinity,
       last: null,
@@ -256,7 +222,7 @@ class DragController extends PointerControllerBase {
 
     const state = new PointerEventState({
       event,
-      rect: this._rect,
+      rect: this._getRect(),
       startX: start.x,
       startY: start.y,
       last,
@@ -339,7 +305,7 @@ class DragController extends PointerControllerBase {
 
     const state = new PointerEventState({
       event,
-      rect: this._rect,
+      rect: this._getRect(),
       startX: start.x,
       startY: start.y,
       last,
@@ -407,7 +373,7 @@ abstract class DualDragControllerBase extends PointerControllerBase {
 
     const state = new PointerEventState({
       event,
-      rect: this._rect,
+      rect: this._getRect(),
       startX: -Infinity,
       startY: -Infinity,
       last: null,
@@ -446,7 +412,7 @@ abstract class DualDragControllerBase extends PointerControllerBase {
     if (isPrimary) {
       lastPrimaryState = new PointerEventState({
         event,
-        rect: this._rect,
+        rect: this._getRect(),
         startX: startPrimaryState.x,
         startY: startPrimaryState.y,
         last: lastPrimaryState,
@@ -454,7 +420,7 @@ abstract class DualDragControllerBase extends PointerControllerBase {
     } else {
       lastSecondaryState = new PointerEventState({
         event,
-        rect: this._rect,
+        rect: this._getRect(),
         startX: startSecondaryState.x,
         startY: startSecondaryState.y,
         last: lastSecondaryState,
@@ -574,23 +540,55 @@ class PanController extends DualDragControllerBase {
 }
 
 export class PointerControl {
+  private _cachedRect: DOMRect | null = null;
+
+  private _getRect = () => {
+    if (this._cachedRect === null) {
+      this._updateRect();
+    }
+    return this._cachedRect as DOMRect;
+  };
+
+  // XXX: polling is used instead of MutationObserver
+  // due to potential performance issues
+  private _pollingInterval: number | null = null;
+
   private controllers: PointerControllerBase[];
 
-  constructor(dispatcher: UIEventDispatcher) {
+  constructor(private _dispatcher: UIEventDispatcher) {
     this.controllers = [
-      new PointerEventForward(dispatcher),
-      new ClickController(dispatcher),
-      new DragController(dispatcher),
-      new PanController(dispatcher),
-      new PinchController(dispatcher),
+      new PointerEventForward(_dispatcher, this._getRect),
+      new ClickController(_dispatcher, this._getRect),
+      new DragController(_dispatcher, this._getRect),
+      new PanController(_dispatcher, this._getRect),
+      new PinchController(_dispatcher, this._getRect),
     ];
   }
 
+  private _startPolling() {
+    const poll = () => {
+      nextTick()
+        .then(() => this._updateRect())
+        .catch(console.error);
+    };
+    this._pollingInterval = window.setInterval(poll, POLL_INTERVAL);
+    poll();
+  }
+
+  protected _updateRect() {
+    if (!this._dispatcher.host) return;
+    this._cachedRect = this._dispatcher.host.getBoundingClientRect();
+  }
+
   dispose() {
-    this.controllers.forEach(controller => controller.dispose());
+    if (this._pollingInterval !== null) {
+      clearInterval(this._pollingInterval);
+      this._pollingInterval = null;
+    }
   }
 
   listen() {
+    this._startPolling();
     this.controllers.forEach(controller => controller.listen());
   }
 }
