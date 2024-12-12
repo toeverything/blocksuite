@@ -75,6 +75,7 @@ export class BookmarkBlockComponent extends CaptionedBlockComponent<
     const selected = !!this.selected?.is('block');
     return html`
       <div
+        draggable="true"
         class=${classMap({
           'affine-bookmark-container': true,
           'selected-style': selected,

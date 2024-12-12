@@ -108,6 +108,7 @@ export class EmbedBlockComponent<
     const selected = !!this.selected?.is('block');
     return html`
       <div
+        draggable="true"
         class=${classMap({
           'embed-block-container': true,
           'selected-style': selected,

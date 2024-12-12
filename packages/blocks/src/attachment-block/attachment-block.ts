@@ -227,6 +227,7 @@ export class AttachmentBlockComponent extends CaptionedBlockComponent<
       <div
         ${this._whenHover ? ref(this._whenHover.setReference) : nothing}
         class="affine-attachment-container"
+        draggable="true"
         style=${this.containerStyleMap}
       >
         ${embedView
