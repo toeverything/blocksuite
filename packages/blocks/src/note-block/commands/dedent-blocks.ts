@@ -30,11 +30,6 @@ export const dedentBlocks: Command<
 
   if (!blockIds || !blockIds.length || doc.readonly) return;
 
-  if (blockIds.length === 1) {
-    const block = doc.getBlock(blockIds[0]);
-    if (!block || !block.model.text) return;
-  }
-
   // Find the first model that can be unindented
   let firstDedentIndex = -1;
   for (let i = 0; i < blockIds.length; i++) {
