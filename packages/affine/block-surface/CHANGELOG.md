@@ -1,5 +1,42 @@
 # @blocksuite/affine-block-surface
 
+## 0.19.0
+
+### Minor Changes
+
+- d7ec057: Blocksuite minor release.
+
+  ## Feat
+
+  - feat: enable new dnd by default (#8970)
+  - feat: should insert bookmark when drop frame and group (#8969)
+  - feat(blocks): add block adapters for note block (#8963)
+
+  ## Fix
+
+  - fix: note dnd preview (#8968)
+  - fix: attachment, bookmark and embed blocks should be draggable (#8967)
+  - fix: should copy embed doc when dnd (#8966)
+  - fix(std): undefined editor during rect polling on mobile (#8965)
+  - fix(blocks): fix incorrect font family in mobile widgets (#8961)
+  - fix(blocks): at menu styles (#8962)
+
+  ## Refactor
+
+  - refactor: optimize code of new drag event watcher (#8971)
+  - refactor(playground): remove `mockPeekViewExtension` (#8964)
+
+### Patch Changes
+
+- Updated dependencies [d7ec057]
+  - @blocksuite/affine-components@0.19.0
+  - @blocksuite/affine-model@0.19.0
+  - @blocksuite/affine-shared@0.19.0
+  - @blocksuite/block-std@0.19.0
+  - @blocksuite/global@0.19.0
+  - @blocksuite/inline@0.19.0
+  - @blocksuite/store@0.19.0
+
 ## 0.18.7
 
 ### Patch Changes
