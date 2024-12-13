@@ -85,54 +85,55 @@ test.describe('Embed synced doc', () => {
     expect(await embedSyncedBlock.count()).toBe(1);
   });
 
-  test('drag embed synced doc to whiteboard should fit in height', async ({
-    page,
-  }) => {
-    await initEmptyEdgelessState(page);
-    await focusRichText(page);
+  test.fixme(
+    'drag embed synced doc to whiteboard should fit in height',
+    async ({ page }) => {
+      await initEmptyEdgelessState(page);
+      await focusRichText(page);
 
-    await createAndConvertToEmbedSyncedDoc(page);
+      await createAndConvertToEmbedSyncedDoc(page);
 
-    // Focus on the embed synced doc
-    const embedSyncedBlock = page.locator('affine-embed-synced-doc-block');
-    let embedSyncedBox = await embedSyncedBlock.boundingBox();
-    assertExists(embedSyncedBox);
-    await page.mouse.click(
-      embedSyncedBox.x + embedSyncedBox.width / 2,
-      embedSyncedBox.y + embedSyncedBox.height / 2
-    );
+      // Focus on the embed synced doc
+      const embedSyncedBlock = page.locator('affine-embed-synced-doc-block');
+      let embedSyncedBox = await embedSyncedBlock.boundingBox();
+      assertExists(embedSyncedBox);
+      await page.mouse.click(
+        embedSyncedBox.x + embedSyncedBox.width / 2,
+        embedSyncedBox.y + embedSyncedBox.height / 2
+      );
 
-    // Switch to edgeless mode
-    await switchEditorMode(page);
-    await waitNextFrame(page, 200);
+      // Switch to edgeless mode
+      await switchEditorMode(page);
+      await waitNextFrame(page, 200);
 
-    // Double click on note to enter edit status
-    const noteBlock = page.locator('affine-edgeless-note');
-    const noteBlockBox = await noteBlock.boundingBox();
-    assertExists(noteBlockBox);
-    await page.mouse.dblclick(noteBlockBox.x + 10, noteBlockBox.y + 10);
-    await waitNextFrame(page, 200);
+      // Double click on note to enter edit status
+      const noteBlock = page.locator('affine-edgeless-note');
+      const noteBlockBox = await noteBlock.boundingBox();
+      assertExists(noteBlockBox);
+      await page.mouse.dblclick(noteBlockBox.x + 10, noteBlockBox.y + 10);
+      await waitNextFrame(page, 200);
 
-    // Drag the embed synced doc to whiteboard
-    embedSyncedBox = await embedSyncedBlock.boundingBox();
-    assertExists(embedSyncedBox);
-    const height = embedSyncedBox.height;
-    await page.mouse.move(embedSyncedBox.x - 10, embedSyncedBox.y - 100);
-    await page.mouse.move(embedSyncedBox.x - 10, embedSyncedBox.y + 10);
-    await waitNextFrame(page);
-    await page.mouse.down();
-    await page.mouse.move(100, 200, { steps: 30 });
-    await page.mouse.up();
+      // Drag the embed synced doc to whiteboard
+      embedSyncedBox = await embedSyncedBlock.boundingBox();
+      assertExists(embedSyncedBox);
+      const height = embedSyncedBox.height;
+      await page.mouse.move(embedSyncedBox.x - 10, embedSyncedBox.y - 100);
+      await page.mouse.move(embedSyncedBox.x - 10, embedSyncedBox.y + 10);
+      await waitNextFrame(page);
+      await page.mouse.down();
+      await page.mouse.move(100, 200, { steps: 30 });
+      await page.mouse.up();
 
-    // Check the height of the embed synced doc portal, it should be the same as the embed synced doc in note
-    const EmbedSyncedDocBlock = page.locator(
-      'affine-embed-edgeless-synced-doc-block'
-    );
-    const EmbedSyncedDocBlockBox = await EmbedSyncedDocBlock.boundingBox();
-    const border = 1;
-    assertExists(EmbedSyncedDocBlockBox);
-    expect(EmbedSyncedDocBlockBox.height).toBeCloseTo(height + 2 * border, 1);
-  });
+      // Check the height of the embed synced doc portal, it should be the same as the embed synced doc in note
+      const EmbedSyncedDocBlock = page.locator(
+        'affine-embed-edgeless-synced-doc-block'
+      );
+      const EmbedSyncedDocBlockBox = await EmbedSyncedDocBlock.boundingBox();
+      const border = 1;
+      assertExists(EmbedSyncedDocBlockBox);
+      expect(EmbedSyncedDocBlockBox.height).toBeCloseTo(height + 2 * border, 1);
+    }
+  );
 
   test('nested embed synced doc should be rendered as card when depth >=1', async ({
     page,

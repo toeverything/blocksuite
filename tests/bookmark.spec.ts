@@ -349,7 +349,7 @@ test('bookmark can be dragged from note to surface top level block', async ({
   await dragBlockToPoint(page, '4', { x: 200, y: 200 });
 
   await waitNextFrame(page);
-  await assertParentBlockFlavour(page, '5', 'affine:surface');
+  await assertParentBlockFlavour(page, '4', 'affine:surface');
 });
 
 test.describe('embed youtube card', () => {

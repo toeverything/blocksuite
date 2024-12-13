@@ -1,5 +1,9 @@
-import type { NoteBlockModel } from '@blocksuite/affine-model';
+import type { EmbedCardStyle, NoteBlockModel } from '@blocksuite/affine-model';
 
+import {
+  EMBED_CARD_HEIGHT,
+  EMBED_CARD_WIDTH,
+} from '@blocksuite/affine-shared/consts';
 import { DndApiExtensionIdentifier } from '@blocksuite/affine-shared/services';
 import {
   captureEventTarget,
@@ -14,6 +18,7 @@ import {
   type UIEventHandler,
   type UIEventStateContext,
 } from '@blocksuite/block-std';
+import { GfxControllerIdentifier } from '@blocksuite/block-std/gfx';
 import { Bound, Point } from '@blocksuite/global/utils';
 import { Job, Slice, type SliceSnapshot } from '@blocksuite/store';
 
@@ -36,10 +41,6 @@ import { surfaceRefToEmbed } from '../middleware/surface-ref-to-embed.js';
 import { containBlock, includeTextSelection } from '../utils.js';
 
 export class DragEventWatcher {
-  private _changeCursorToGrabbing = () => {
-    document.documentElement.classList.add('affine-drag-preview-grabbing');
-  };
-
   private _createDropIndicator = () => {
     if (!this.widget.dropIndicator) {
       this.widget.dropIndicator = new DropIndicator();
@@ -47,26 +48,13 @@ export class DragEventWatcher {
     }
   };
 
-  /**
-   * When drag end, should move blocks to drop position
-   */
   private _dragEndHandler: UIEventHandler = () => {
     this.widget.clearRaf();
     this.widget.hide(true);
 
-    if (this.widget.mode === 'edgeless') {
-      this.widget.edgelessWatcher.checkTopLevelBlockSelection();
-    }
-
     return true;
   };
 
-  /**
-   * When dragging, should:
-   * Update drag preview position
-   * Update indicator position
-   * Update drop block id
-   */
   private _dragMoveHandler: UIEventHandler = ctx => {
     if (
       this.widget.isHoverDragHandleVisible ||
@@ -81,17 +69,6 @@ export class DragEventWatcher {
 
     ctx.get('defaultState').event.preventDefault();
     const state = ctx.get('dndState');
-
-    for (const option of this.widget.optionRunner.options) {
-      if (
-        option.onDragMove?.({
-          state,
-          draggingElements: this.widget.draggingElements,
-        })
-      ) {
-        return true;
-      }
-    }
 
     // call default drag move handler if no option return true
     return this._onDragMove(state);
@@ -136,8 +113,8 @@ export class DragEventWatcher {
     }
 
     const selectBlockAndStartDragging = () => {
-      this.widget.std.selection.setGroup('note', [
-        this.widget.std.selection.create('block', {
+      this._std.selection.setGroup('note', [
+        this._std.selection.create('block', {
           blockId: hoverBlock.blockId,
         }),
       ]);
@@ -182,7 +159,7 @@ export class DragEventWatcher {
     // Should set BlockSelection for the blocks in native range
     if (selections.length > 0 && includeTextSelection(selections)) {
       const nativeSelection = document.getSelection();
-      const rangeManager = this.widget.std.range;
+      const rangeManager = this._std.range;
       if (nativeSelection && nativeSelection.rangeCount > 0 && rangeManager) {
         const range = nativeSelection.getRangeAt(0);
         const blocks = rangeManager.getSelectedBlockComponentsByRange(range, {
@@ -212,7 +189,7 @@ export class DragEventWatcher {
 
     const blocks = this.widget.selectionHelper.selectedBlockComponents;
 
-    // This could be skip if we can ensure that all selected blocks are on the same level
+    // This could be skipped if we can ensure that all selected blocks are on the same level
     // Which means not selecting parent block and child block at the same time
     const blocksExcludingChildren = getBlockComponentsExcludeSubtrees(
       blocks
@@ -243,7 +220,7 @@ export class DragEventWatcher {
       return;
     }
     const model = element.model;
-    const parent = this.widget.std.doc.getParent(model.id);
+    const parent = this._std.doc.getParent(model.id);
     if (!parent) return;
     if (matchFlavours(parent, ['affine:surface'])) {
       return;
@@ -260,7 +237,9 @@ export class DragEventWatcher {
       if (snapshot) {
         const [first] = snapshot.content;
         if (first.flavour === 'affine:note') {
-          this._onDropNoteOnNote(snapshot, parent.id, index);
+          if (parent.id !== first.id) {
+            this._onDropNoteOnNote(snapshot, parent.id, index);
+          }
           return;
         }
       }
@@ -277,9 +256,9 @@ export class DragEventWatcher {
     const [first] = snapshot.content;
     const id = first.id;
 
-    const std = this.widget.std;
+    const std = this._std;
     const job = new Job({
-      collection: this.widget.std.collection,
+      collection: std.collection,
     });
     const snapshotWithoutNote = {
       ...snapshot,
@@ -288,9 +267,9 @@ export class DragEventWatcher {
     job
       .snapshotToSlice(snapshotWithoutNote, std.doc, parent, index)
       .then(() => {
-        const block = this.widget.std.doc.getBlock(id)?.model;
+        const block = std.doc.getBlock(id)?.model;
         if (block) {
-          this.widget.std.doc.deleteBlock(block);
+          std.doc.deleteBlock(block);
         }
       })
       .catch(console.error);
@@ -300,13 +279,95 @@ export class DragEventWatcher {
     const state = context.get('dndState');
     // If drop a note, should do nothing
     const snapshot = this._deserializeSnapshot(state);
+    const edgelessRoot = this.widget
+      .rootComponent as EdgelessRootBlockComponent;
+
     if (snapshot) {
       const [first] = snapshot.content;
       if (first.flavour === 'affine:note') return;
+
+      if (snapshot.content.length === 1) {
+        if (
+          ['affine:attachment', 'affine:bookmark'].includes(first.flavour) ||
+          first.flavour.startsWith('affine:embed-')
+        ) {
+          const controller = this._std.get(GfxControllerIdentifier);
+          const rect = this.widget.dragPreview?.getBoundingClientRect();
+          if (!rect) return;
+          const style = first.props.style as EmbedCardStyle;
+          const width = EMBED_CARD_WIDTH[style];
+          const height = EMBED_CARD_HEIGHT[style];
+
+          const border = 2;
+          const noteScale = this.widget.noteScale.peek();
+          const { viewport } = controller;
+          const { left: viewportLeft, top: viewportTop } = viewport;
+          const currentViewBound = new Bound(
+            rect.x - viewportLeft,
+            rect.y - viewportTop,
+            rect.width + border / noteScale,
+            rect.height + border / noteScale
+          );
+          const currentModelBound = viewport.toModelBound(currentViewBound);
+          const newBound = new Bound(
+            currentModelBound.x,
+            currentModelBound.y,
+            width * noteScale,
+            height * noteScale
+          );
+          first.props.xywh = newBound.serialize();
+          first.props.width = EMBED_CARD_WIDTH[style];
+          first.props.height = EMBED_CARD_HEIGHT[style];
+
+          const std = this._std;
+          const job = new Job({ collection: std.collection });
+          job
+            .snapshotToSlice(
+              snapshot,
+              std.doc,
+              edgelessRoot.surfaceBlockModel.id
+            )
+            .catch(console.error);
+          return;
+        }
+
+        if (first.flavour === 'affine:image') {
+          const controller = this._std.get(GfxControllerIdentifier);
+          const rect = this.widget.dragPreview?.getBoundingClientRect();
+          if (!rect) return;
+
+          const border = 2;
+          const noteScale = this.widget.noteScale.peek();
+          const { viewport } = controller;
+          const { left: viewportLeft, top: viewportTop } = viewport;
+          const currentViewBound = new Bound(
+            rect.x - viewportLeft,
+            rect.y - viewportTop,
+            rect.width + border / noteScale,
+            rect.height + border / noteScale
+          );
+          const currentModelBound = viewport.toModelBound(currentViewBound);
+          const newBound = new Bound(
+            currentModelBound.x,
+            currentModelBound.y,
+            Number(first.props.width) * noteScale,
+            Number(first.props.height) * noteScale
+          );
+          first.props.xywh = newBound.serialize();
+          const std = this._std;
+          const job = new Job({ collection: std.collection });
+          job
+            .snapshotToSlice(
+              snapshot,
+              std.doc,
+              edgelessRoot.surfaceBlockModel.id
+            )
+            .catch(console.error);
+          return;
+        }
+      }
     }
 
-    const edgelessRoot = this.widget
-      .rootComponent as EdgelessRootBlockComponent;
     const { left: viewportLeft, top: viewportTop } = edgelessRoot.viewport;
     const newNoteId = addNoteAtPoint(
       edgelessRoot.std,
@@ -354,19 +415,22 @@ export class DragEventWatcher {
     );
 
     const slice = Slice.fromModels(
-      this.widget.std.doc,
+      this._std.doc,
       blocks.map(block => block.model)
     );
 
     this.widget.dragging = true;
-    this._changeCursorToGrabbing();
     this._createDropIndicator();
     this.widget.hide();
     this._serializeData(slice, state);
   };
 
   private get _dndAPI() {
-    return this.widget.std.get(DndApiExtensionIdentifier);
+    return this._std.get(DndApiExtensionIdentifier);
+  }
+
+  private get _std() {
+    return this.widget.std;
   }
 
   constructor(readonly widget: AffineDragHandleWidget) {}
@@ -380,11 +444,11 @@ export class DragEventWatcher {
       const dataTransfer = state.raw.dataTransfer;
       if (!dataTransfer) throw new Error('No data transfer');
 
+      const std = this._std;
       const job = new Job({
-        collection: this.widget.std.collection,
-        middlewares: [copyEmbedDoc, surfaceRefToEmbed(this.widget.std)],
+        collection: std.collection,
+        middlewares: [copyEmbedDoc, surfaceRefToEmbed(std)],
       });
-      const std = this.widget.std;
 
       const snapshot = this._deserializeSnapshot(state);
       if (snapshot) {
@@ -444,7 +508,7 @@ export class DragEventWatcher {
 
     const job = new Job({
       middlewares: [],
-      collection: this.widget.std.collection,
+      collection: this._std.collection,
     });
 
     const snapshot = job.sliceToSnapshot(slice);
