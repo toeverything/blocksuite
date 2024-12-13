@@ -648,6 +648,8 @@ export class Doc {
   load(initFn?: () => void) {
     // recreate space doc
     if (this._blockCollection.spaceDoc.isDestroyed) {
+      // This section intentionally recreates the BlockCollection by design (circular dependency).
+      // It ensures the underlying Y.Doc is reinitialized after being garbage collected.
       const newBlockCollection = new BlockCollection({
         id: this._blockCollection.id,
         collection: this._blockCollection.collection,
