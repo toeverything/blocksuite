@@ -15,7 +15,7 @@ import {
 import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 import { SignalWatcher, Slot, WithDisposable } from '@blocksuite/global/utils';
 import { computed, signal } from '@preact/signals-core';
-import { css, html, nothing } from 'lit';
+import { css, html } from 'lit';
 import { property } from 'lit/decorators.js';
 import { keyed } from 'lit/directives/keyed.js';
 import { when } from 'lit/directives/when.js';
@@ -217,7 +217,7 @@ export class AffineEditorContainer
     const edgelessTheme = themeService.edgeless$.value;
     const rootModel = this.rootModel;
 
-    if (!rootModel) return nothing;
+    if (!rootModel) return html`<div></div>`;
 
     return html`${keyed(
       rootModel.id + mode,
