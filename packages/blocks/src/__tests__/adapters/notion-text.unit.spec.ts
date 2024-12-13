@@ -92,8 +92,6 @@ describe('notion-text to snapshot', () => {
           ],
         },
       ],
-      pageVersion: 0,
-      workspaceVersion: 0,
       workspaceId: '',
       pageId: '',
     };
@@ -101,8 +99,6 @@ describe('notion-text to snapshot', () => {
     const ntAdapter = new NotionTextAdapter(createJob());
     const target = ntAdapter.toSliceSnapshot({
       file: notionText,
-      pageVersion: 0,
-      workspaceVersion: 0,
       workspaceId: '',
       pageId: '',
     });

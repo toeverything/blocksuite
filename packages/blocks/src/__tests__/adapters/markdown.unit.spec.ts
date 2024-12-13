@@ -2420,8 +2420,6 @@ describe('markdown to snapshot', () => {
           ],
         },
       ],
-      pageVersion: 0,
-      workspaceVersion: 0,
       workspaceId: '',
       pageId: '',
     };
@@ -2429,8 +2427,6 @@ describe('markdown to snapshot', () => {
     const mdAdapter = new MarkdownAdapter(createJob());
     const rawSliceSnapshot = await mdAdapter.toSliceSnapshot({
       file: markdown,
-      pageVersion: 0,
-      workspaceVersion: 0,
       workspaceId: '',
       pageId: '',
     });
@@ -2475,8 +2471,6 @@ describe('markdown to snapshot', () => {
           ],
         },
       ],
-      pageVersion: 0,
-      workspaceVersion: 0,
       workspaceId: '',
       pageId: '',
     };
@@ -2484,8 +2478,6 @@ describe('markdown to snapshot', () => {
     const mdAdapter = new MarkdownAdapter(createJob());
     const rawSliceSnapshot = await mdAdapter.toSliceSnapshot({
       file: markdown,
-      pageVersion: 0,
-      workspaceVersion: 0,
       workspaceId: '',
       pageId: '',
     });
@@ -2530,8 +2522,6 @@ describe('markdown to snapshot', () => {
           ],
         },
       ],
-      pageVersion: 0,
-      workspaceVersion: 0,
       workspaceId: '',
       pageId: '',
     };
@@ -2539,8 +2529,6 @@ describe('markdown to snapshot', () => {
     const mdAdapter = new MarkdownAdapter(createJob());
     const rawSliceSnapshot = await mdAdapter.toSliceSnapshot({
       file: markdown,
-      pageVersion: 0,
-      workspaceVersion: 0,
       workspaceId: '',
       pageId: '',
     });
@@ -3198,8 +3186,6 @@ bbb
           ],
         },
       ],
-      pageVersion: 0,
-      workspaceVersion: 0,
       workspaceId: '',
       pageId: '',
     };
@@ -3207,8 +3193,6 @@ bbb
     const mdAdapter = new MarkdownAdapter(createJob());
     const rawSliceSnapshot = await mdAdapter.toSliceSnapshot({
       file: markdown,
-      pageVersion: 0,
-      workspaceVersion: 0,
       workspaceId: '',
       pageId: '',
     });

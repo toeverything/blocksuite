@@ -41,8 +41,6 @@ type NotionHtmlToSliceSnapshotPayload = {
   file: NotionHtml;
   assets?: AssetsManager;
   blockVersions: Record<string, number>;
-  pageVersion: number;
-  workspaceVersion: number;
   workspaceId: string;
   pageId: string;
 };
@@ -278,8 +276,6 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
     return {
       type: 'slice',
       content: [contentSlice],
-      pageVersion: payload.pageVersion,
-      workspaceVersion: payload.workspaceVersion,
       workspaceId: payload.workspaceId,
       pageId: payload.pageId,
     };

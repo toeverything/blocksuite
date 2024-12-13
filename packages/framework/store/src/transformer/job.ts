@@ -144,8 +144,7 @@ export class Job {
         type: 'slice',
         slice,
       });
-      const { content, pageVersion, workspaceVersion, pageId, workspaceId } =
-        slice.data;
+      const { content, pageId, workspaceId } = slice.data;
       const contentSnapshot = [];
       for (const block of content) {
         const blockSnapshot = this.blockToSnapshot(block);
@@ -158,8 +157,6 @@ export class Job {
         type: 'slice',
         workspaceId,
         pageId,
-        pageVersion,
-        workspaceVersion,
         content: contentSnapshot,
       };
       this._slots.afterExport.emit({
@@ -258,8 +255,7 @@ export class Job {
         snapshot,
       });
 
-      const { content, pageVersion, workspaceVersion, workspaceId, pageId } =
-        snapshot;
+      const { content, workspaceId, pageId } = snapshot;
 
       // Create a temporary root snapshot to encompass all content blocks
       const tmpRootSnapshot: BlockSnapshot = {
@@ -286,8 +282,6 @@ export class Job {
 
       const slice = new Slice({
         content: contentBlocks,
-        pageVersion,
-        workspaceVersion,
         workspaceId,
         pageId,
       });
@@ -474,25 +468,11 @@ export class Job {
 
   private _getCollectionMeta() {
     const { meta } = this._collection;
-    const { pageVersion, workspaceVersion, docs } = meta;
-    if (!pageVersion) {
-      throw new BlockSuiteError(
-        ErrorCode.TransformerError,
-        'Page version not found'
-      );
-    }
-    if (!workspaceVersion) {
-      throw new BlockSuiteError(
-        ErrorCode.TransformerError,
-        'Workspace version not found'
-      );
-    }
+    const { docs } = meta;
     if (!docs) {
       throw new BlockSuiteError(ErrorCode.TransformerError, 'Docs not found');
     }
     return {
-      pageVersion,
-      workspaceVersion,
       properties: {}, // for backward compatibility
       pages: JSON.parse(JSON.stringify(docs)) as DocMeta[],
     };

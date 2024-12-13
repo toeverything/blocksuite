@@ -46,8 +46,6 @@ import { remarkGfm } from './gfm.js';
 type MarkdownToSliceSnapshotPayload = {
   file: Markdown;
   assets?: AssetsManager;
-  pageVersion: number;
-  workspaceVersion: number;
   workspaceId: string;
   pageId: string;
 };
@@ -434,8 +432,6 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
     return {
       type: 'slice',
       content: [contentSlice],
-      pageVersion: payload.pageVersion,
-      workspaceVersion: payload.workspaceVersion,
       workspaceId: payload.workspaceId,
       pageId: payload.pageId,
     };

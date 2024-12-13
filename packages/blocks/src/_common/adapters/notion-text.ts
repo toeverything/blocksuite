@@ -38,8 +38,6 @@ export type NotionText = string;
 type NotionHtmlToSliceSnapshotPayload = {
   file: NotionText;
   assets?: AssetsManager;
-  pageVersion: number;
-  workspaceVersion: number;
   workspaceId: string;
   pageId: string;
 };
@@ -155,8 +153,6 @@ export class NotionTextAdapter extends BaseAdapter<NotionText> {
     return {
       type: 'slice',
       content,
-      pageVersion: payload.pageVersion,
-      workspaceVersion: payload.workspaceVersion,
       workspaceId: payload.workspaceId,
       pageId: payload.pageId,
     };

@@ -47,8 +47,6 @@ type HtmlToSliceSnapshotPayload = {
   file: Html;
   assets?: AssetsManager;
   blockVersions: Record<string, number>;
-  pageVersion: number;
-  workspaceVersion: number;
   workspaceId: string;
   pageId: string;
 };
@@ -365,8 +363,6 @@ export class HtmlAdapter extends BaseAdapter<Html> {
     return {
       type: 'slice',
       content: [contentSlice],
-      pageVersion: payload.pageVersion,
-      workspaceVersion: payload.workspaceVersion,
       workspaceId: payload.workspaceId,
       pageId: payload.pageId,
     };

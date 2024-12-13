@@ -28,8 +28,6 @@ type AttachmentToSliceSnapshotPayload = {
   file: Attachment;
   assets?: AssetsManager;
   blockVersions: Record<string, number>;
-  pageVersion: number;
-  workspaceVersion: number;
   workspaceId: string;
   pageId: string;
 };
@@ -124,8 +122,6 @@ export class AttachmentAdapter extends BaseAdapter<Attachment> {
     return {
       type: 'slice',
       content,
-      pageVersion: payload.pageVersion,
-      workspaceVersion: payload.workspaceVersion,
       workspaceId: payload.workspaceId,
       pageId: payload.pageId,
     };

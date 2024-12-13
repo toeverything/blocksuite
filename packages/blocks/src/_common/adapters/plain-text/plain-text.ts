@@ -40,8 +40,6 @@ type PlainTextToSliceSnapshotPayload = {
   file: PlainText;
   assets?: AssetsManager;
   blockVersions: Record<string, number>;
-  pageVersion: number;
-  workspaceVersion: number;
   workspaceId: string;
   pageId: string;
 };
@@ -300,8 +298,6 @@ export class PlainTextAdapter extends BaseAdapter<PlainText> {
     return {
       type: 'slice',
       content: [contentSlice],
-      pageVersion: payload.pageVersion,
-      workspaceVersion: payload.workspaceVersion,
       workspaceId: payload.workspaceId,
       pageId: payload.pageId,
     };

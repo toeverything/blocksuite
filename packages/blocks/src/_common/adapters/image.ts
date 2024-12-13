@@ -28,8 +28,6 @@ type ImageToSliceSnapshotPayload = {
   file: Image;
   assets?: AssetsManager;
   blockVersions: Record<string, number>;
-  pageVersion: number;
-  workspaceVersion: number;
   workspaceId: string;
   pageId: string;
 };
@@ -116,8 +114,6 @@ export class ImageAdapter extends BaseAdapter<Image> {
     return {
       type: 'slice',
       content,
-      pageVersion: payload.pageVersion,
-      workspaceVersion: payload.workspaceVersion,
       workspaceId: payload.workspaceId,
       pageId: payload.pageId,
     };

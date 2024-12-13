@@ -94,8 +94,6 @@ async function importMarkdownToBlock({
   const snapshot = await adapter.toSliceSnapshot({
     file: markdown,
     assets: job.assetsManager,
-    pageVersion: doc.collection.meta.pageVersion!,
-    workspaceVersion: doc.collection.meta.workspaceVersion!,
     workspaceId: doc.collection.id,
     pageId: doc.id,
   });
