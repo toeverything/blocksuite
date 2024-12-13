@@ -41,6 +41,30 @@ import { surfaceRefToEmbed } from '../middleware/surface-ref-to-embed.js';
 import { containBlock, includeTextSelection } from '../utils.js';
 
 export class DragEventWatcher {
+  private _computeEdgelessBound = (width: number, height: number) => {
+    const rect = this.widget.dragPreview?.getBoundingClientRect();
+    if (!rect) return null;
+
+    const controller = this._std.get(GfxControllerIdentifier);
+    const border = 2;
+    const noteScale = this.widget.noteScale.peek();
+    const { viewport } = controller;
+    const { left: viewportLeft, top: viewportTop } = viewport;
+    const currentViewBound = new Bound(
+      rect.x - viewportLeft,
+      rect.y - viewportTop,
+      rect.width + border / noteScale,
+      rect.height + border / noteScale
+    );
+    const currentModelBound = viewport.toModelBound(currentViewBound);
+    return new Bound(
+      currentModelBound.x,
+      currentModelBound.y,
+      width * noteScale,
+      height * noteScale
+    );
+  };
+
   private _createDropIndicator = () => {
     if (!this.widget.dropIndicator) {
       this.widget.dropIndicator = new DropIndicator();
@@ -257,9 +281,7 @@ export class DragEventWatcher {
     const id = first.id;
 
     const std = this._std;
-    const job = new Job({
-      collection: std.collection,
-    });
+    const job = this._job;
     const snapshotWithoutNote = {
       ...snapshot,
       content: first.children,
@@ -287,82 +309,50 @@ export class DragEventWatcher {
       if (first.flavour === 'affine:note') return;
 
       if (snapshot.content.length === 1) {
+        const importToSurface = (
+          width: number,
+          height: number,
+          newBound: Bound
+        ) => {
+          first.props.xywh = newBound.serialize();
+          first.props.width = width;
+          first.props.height = height;
+
+          const std = this._std;
+          const job = this._job;
+          job
+            .snapshotToSlice(
+              snapshot,
+              std.doc,
+              edgelessRoot.surfaceBlockModel.id
+            )
+            .catch(console.error);
+        };
+
         if (
           ['affine:attachment', 'affine:bookmark'].includes(first.flavour) ||
           first.flavour.startsWith('affine:embed-')
         ) {
-          const controller = this._std.get(GfxControllerIdentifier);
-          const rect = this.widget.dragPreview?.getBoundingClientRect();
-          if (!rect) return;
           const style = first.props.style as EmbedCardStyle;
           const width = EMBED_CARD_WIDTH[style];
           const height = EMBED_CARD_HEIGHT[style];
 
-          const border = 2;
-          const noteScale = this.widget.noteScale.peek();
-          const { viewport } = controller;
-          const { left: viewportLeft, top: viewportTop } = viewport;
-          const currentViewBound = new Bound(
-            rect.x - viewportLeft,
-            rect.y - viewportTop,
-            rect.width + border / noteScale,
-            rect.height + border / noteScale
-          );
-          const currentModelBound = viewport.toModelBound(currentViewBound);
-          const newBound = new Bound(
-            currentModelBound.x,
-            currentModelBound.y,
-            width * noteScale,
-            height * noteScale
-          );
-          first.props.xywh = newBound.serialize();
-          first.props.width = EMBED_CARD_WIDTH[style];
-          first.props.height = EMBED_CARD_HEIGHT[style];
+          const newBound = this._computeEdgelessBound(width, height);
+          if (!newBound) return;
 
-          const std = this._std;
-          const job = new Job({ collection: std.collection });
-          job
-            .snapshotToSlice(
-              snapshot,
-              std.doc,
-              edgelessRoot.surfaceBlockModel.id
-            )
-            .catch(console.error);
+          importToSurface(width, height, newBound);
           return;
         }
 
         if (first.flavour === 'affine:image') {
-          const controller = this._std.get(GfxControllerIdentifier);
-          const rect = this.widget.dragPreview?.getBoundingClientRect();
-          if (!rect) return;
-
-          const border = 2;
           const noteScale = this.widget.noteScale.peek();
-          const { viewport } = controller;
-          const { left: viewportLeft, top: viewportTop } = viewport;
-          const currentViewBound = new Bound(
-            rect.x - viewportLeft,
-            rect.y - viewportTop,
-            rect.width + border / noteScale,
-            rect.height + border / noteScale
-          );
-          const currentModelBound = viewport.toModelBound(currentViewBound);
-          const newBound = new Bound(
-            currentModelBound.x,
-            currentModelBound.y,
-            Number(first.props.width) * noteScale,
-            Number(first.props.height) * noteScale
-          );
-          first.props.xywh = newBound.serialize();
-          const std = this._std;
-          const job = new Job({ collection: std.collection });
-          job
-            .snapshotToSlice(
-              snapshot,
-              std.doc,
-              edgelessRoot.surfaceBlockModel.id
-            )
-            .catch(console.error);
+          const width = Number(first.props.width) * noteScale;
+          const height = Number(first.props.height) * noteScale;
+
+          const newBound = this._computeEdgelessBound(width, height);
+          if (!newBound) return;
+
+          importToSurface(width, height, newBound);
           return;
         }
       }
@@ -429,6 +419,14 @@ export class DragEventWatcher {
     return this._std.get(DndApiExtensionIdentifier);
   }
 
+  private get _job() {
+    const std = this._std;
+    return new Job({
+      collection: std.collection,
+      middlewares: [copyEmbedDoc, surfaceRefToEmbed(std)],
+    });
+  }
+
   private get _std() {
     return this.widget.std;
   }
@@ -445,10 +443,7 @@ export class DragEventWatcher {
       if (!dataTransfer) throw new Error('No data transfer');
 
       const std = this._std;
-      const job = new Job({
-        collection: std.collection,
-        middlewares: [copyEmbedDoc, surfaceRefToEmbed(std)],
-      });
+      const job = this._job;
 
       const snapshot = this._deserializeSnapshot(state);
       if (snapshot) {
@@ -506,10 +501,7 @@ export class DragEventWatcher {
     const dataTransfer = state.raw.dataTransfer;
     if (!dataTransfer) return;
 
-    const job = new Job({
-      middlewares: [],
-      collection: this._std.collection,
-    });
+    const job = this._job;
 
     const snapshot = job.sliceToSnapshot(slice);
     if (!snapshot) return;
