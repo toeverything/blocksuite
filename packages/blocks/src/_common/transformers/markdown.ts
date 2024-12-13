@@ -88,7 +88,7 @@ async function importMarkdownToBlock({
 }: ImportMarkdownToBlockOptions) {
   const job = new Job({
     collection: doc.collection,
-    middlewares: [defaultImageProxyMiddleware],
+    middlewares: [defaultImageProxyMiddleware, docLinkBaseURLMiddleware],
   });
   const adapter = new MarkdownAdapter(job);
   const snapshot = await adapter.toSliceSnapshot({
@@ -124,7 +124,11 @@ async function importMarkdownToDoc({
 }: ImportMarkdownToDocOptions) {
   const job = new Job({
     collection,
-    middlewares: [defaultImageProxyMiddleware, fileNameMiddleware(fileName)],
+    middlewares: [
+      defaultImageProxyMiddleware,
+      fileNameMiddleware(fileName),
+      docLinkBaseURLMiddleware,
+    ],
   });
   const mdAdapter = new MarkdownAdapter(job);
   const page = await mdAdapter.toDoc({
@@ -181,6 +185,7 @@ async function importMarkdownZip({
         middlewares: [
           defaultImageProxyMiddleware,
           fileNameMiddleware(fileNameWithoutExt),
+          docLinkBaseURLMiddleware,
         ],
       });
       const assets = job.assets;
