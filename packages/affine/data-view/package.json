@@ -1,6 +1,6 @@
 {
   "name": "@blocksuite/data-view",
-  "version": "0.18.7",
+  "version": "0.19.0",
   "description": "Views of database in affine",
   "type": "module",
   "repository": {
