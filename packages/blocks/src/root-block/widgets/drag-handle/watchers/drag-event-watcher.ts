@@ -77,8 +77,6 @@ export class DragEventWatcher {
   private _dragEndHandler: UIEventHandler = () => {
     this.widget.clearRaf();
     this.widget.hide(true);
-
-    return true;
   };
 
   private _dragMoveHandler: UIEventHandler = ctx => {
@@ -112,6 +110,12 @@ export class DragEventWatcher {
     }
 
     return this._onDragStart(state);
+  };
+
+  private _dropHandler = (context: UIEventStateContext) => {
+    this._onDrop(context);
+    this.widget.clearRaf();
+    this.widget.hide(true);
   };
 
   private _onDragMove = (state: DndEventState) => {
@@ -352,8 +356,8 @@ export class DragEventWatcher {
 
       if (first.flavour === 'affine:image') {
         const noteScale = this.widget.noteScale.peek();
-        const width = Number(first.props.width) * noteScale;
-        const height = Number(first.props.height) * noteScale;
+        const width = Number(first.props.width || 100) * noteScale;
+        const height = Number(first.props.height || 100) * noteScale;
 
         const newBound = this._computeEdgelessBound(
           state.raw.clientX,
@@ -555,7 +559,7 @@ export class DragEventWatcher {
     this.widget.handleEvent('nativeDragEnd', this._dragEndHandler, {
       global: true,
     });
-    this.widget.handleEvent('nativeDrop', this._onDrop, {
+    this.widget.handleEvent('nativeDrop', this._dropHandler, {
       global: true,
     });
   }
