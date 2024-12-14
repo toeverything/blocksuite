@@ -41,20 +41,22 @@ import { surfaceRefToEmbed } from '../middleware/surface-ref-to-embed.js';
 import { containBlock, includeTextSelection } from '../utils.js';
 
 export class DragEventWatcher {
-  private _computeEdgelessBound = (width: number, height: number) => {
-    const rect = this.widget.dragPreview?.getBoundingClientRect();
-    if (!rect) return null;
-
+  private _computeEdgelessBound = (
+    x: number,
+    y: number,
+    width: number,
+    height: number
+  ) => {
     const controller = this._std.get(GfxControllerIdentifier);
     const border = 2;
     const noteScale = this.widget.noteScale.peek();
     const { viewport } = controller;
     const { left: viewportLeft, top: viewportTop } = viewport;
     const currentViewBound = new Bound(
-      rect.x - viewportLeft,
-      rect.y - viewportTop,
-      rect.width + border / noteScale,
-      rect.height + border / noteScale
+      x - viewportLeft,
+      y - viewportTop,
+      width + border / noteScale,
+      height + border / noteScale
     );
     const currentModelBound = viewport.toModelBound(currentViewBound);
     return new Bound(
@@ -304,57 +306,65 @@ export class DragEventWatcher {
     const edgelessRoot = this.widget
       .rootComponent as EdgelessRootBlockComponent;
 
-    if (snapshot) {
-      const [first] = snapshot.content;
-      if (first.flavour === 'affine:note') return;
+    if (!snapshot) {
+      return;
+    }
 
-      if (snapshot.content.length === 1) {
-        const importToSurface = (
-          width: number,
-          height: number,
-          newBound: Bound
-        ) => {
-          first.props.xywh = newBound.serialize();
-          first.props.width = width;
-          first.props.height = height;
+    const [first] = snapshot.content;
+    if (first.flavour === 'affine:note') return;
 
-          const std = this._std;
-          const job = this._job;
-          job
-            .snapshotToSlice(
-              snapshot,
-              std.doc,
-              edgelessRoot.surfaceBlockModel.id
-            )
-            .catch(console.error);
-        };
+    if (snapshot.content.length === 1) {
+      const importToSurface = (
+        width: number,
+        height: number,
+        newBound: Bound
+      ) => {
+        first.props.xywh = newBound.serialize();
+        first.props.width = width;
+        first.props.height = height;
 
-        if (
-          ['affine:attachment', 'affine:bookmark'].includes(first.flavour) ||
-          first.flavour.startsWith('affine:embed-')
-        ) {
-          const style = first.props.style as EmbedCardStyle;
-          const width = EMBED_CARD_WIDTH[style];
-          const height = EMBED_CARD_HEIGHT[style];
+        const std = this._std;
+        const job = this._job;
+        job
+          .snapshotToSlice(snapshot, std.doc, edgelessRoot.surfaceBlockModel.id)
+          .catch(console.error);
+      };
 
-          const newBound = this._computeEdgelessBound(width, height);
-          if (!newBound) return;
+      if (
+        ['affine:attachment', 'affine:bookmark'].includes(first.flavour) ||
+        first.flavour.startsWith('affine:embed-')
+      ) {
+        const style = first.props.style as EmbedCardStyle;
+        const width = EMBED_CARD_WIDTH[style];
+        const height = EMBED_CARD_HEIGHT[style];
 
-          importToSurface(width, height, newBound);
-          return;
-        }
+        const newBound = this._computeEdgelessBound(
+          state.raw.clientX,
+          state.raw.clientY,
+          width,
+          height
+        );
+        if (!newBound) return;
 
-        if (first.flavour === 'affine:image') {
-          const noteScale = this.widget.noteScale.peek();
-          const width = Number(first.props.width) * noteScale;
-          const height = Number(first.props.height) * noteScale;
+        importToSurface(width, height, newBound);
+        return;
+      }
 
-          const newBound = this._computeEdgelessBound(width, height);
-          if (!newBound) return;
+      if (first.flavour === 'affine:image') {
+        const noteScale = this.widget.noteScale.peek();
+        const width = Number(first.props.width) * noteScale;
+        const height = Number(first.props.height) * noteScale;
 
-          importToSurface(width, height, newBound);
-          return;
-        }
+        const newBound = this._computeEdgelessBound(
+          state.raw.clientX,
+          state.raw.clientY,
+          width,
+          height
+        );
+        if (!newBound) return;
+
+        importToSurface(width, height, newBound);
+        return;
       }
     }
 

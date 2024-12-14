@@ -17,6 +17,8 @@ export class AttachmentEdgelessBlockComponent extends toGfxBlockComponent(
 ) {
   protected override _whenHover: HoverController | null = null;
 
+  override blockDraggable = false;
+
   get rootService() {
     return this.std.getService('affine:page') as EdgelessRootService;
   }
