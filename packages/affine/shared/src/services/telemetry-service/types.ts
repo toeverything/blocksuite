@@ -35,7 +35,7 @@ export interface DocCreatedEvent extends TelemetryEvent {
 
 export interface ElementCreationEvent extends TelemetryEvent {
   segment?: 'toolbar' | 'whiteboard' | 'right sidebar';
-  page: 'whiteboard editor';
+  page?: 'doc editor' | 'whiteboard editor';
   module?: 'toolbar' | 'canvas' | 'ai chat panel';
   control?: ElementCreationSource;
 }

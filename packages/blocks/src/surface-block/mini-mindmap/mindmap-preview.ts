@@ -135,10 +135,7 @@ export class MiniMindmapPreview extends WithDisposable(LitElement) {
       this._mindmap!.style = style;
     });
 
-    this.ctx.set({
-      ...this.ctx.get(),
-      style,
-    });
+    this.ctx.set({ style });
     this.requestUpdate();
   }
 

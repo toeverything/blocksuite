@@ -23,7 +23,7 @@ export type Template = {
    * `template`: normal template, looks like an article
    * `sticker`: sticker template, only contains one image block under surface block
    */
-  type: string;
+  type: 'template' | 'sticker';
 };
 
 export type TemplateCategory = {
