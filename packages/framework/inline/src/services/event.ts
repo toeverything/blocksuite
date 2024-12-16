@@ -17,6 +17,8 @@ export class EventService<TextAttributes extends BaseTextAttributes> {
   private _isComposing = false;
 
   private _isRangeCompletelyInRoot = (range: Range) => {
+    if (range.commonAncestorContainer.ownerDocument !== document) return false;
+
     const rootElement = this.editor.rootElement;
     const rootRange = document.createRange();
     rootRange.selectNode(rootElement);
