@@ -13,6 +13,7 @@ import {
   dragBetweenViewCoords,
   edgelessCommonSetup,
   getFirstContainerId,
+  getIds,
   getSelectedIds,
   pickColorAtPoints,
   setEdgelessTool,
@@ -344,7 +345,7 @@ test.describe('resize frame then move ', () => {
   });
 });
 
-test('delete frame', async ({ page }) => {
+test('delete frame should also delete its children', async ({ page }) => {
   await createFrame(page, [50, 50], [450, 450]);
   await createShapeElement(page, [200, 200], [300, 300], Shape.Square);
   await pressEscape(page);
@@ -356,6 +357,28 @@ test('delete frame', async ({ page }) => {
   await expect(page.locator('affine-frame')).toHaveCount(0);
 
   await assertCanvasElementsCount(page, 0);
+});
+
+test('delete frame by click ungroup should not delete its children', async ({
+  page,
+}) => {
+  await createFrame(page, [50, 50], [450, 450]);
+  const shapeId = await createShapeElement(
+    page,
+    [200, 200],
+    [300, 300],
+    Shape.Square
+  );
+  await pressEscape(page);
+
+  const frameTitle = page.locator('affine-frame-title');
+  await frameTitle.click();
+  const elementToolbar = page.locator('edgeless-element-toolbar-widget');
+  const ungroupButton = elementToolbar.getByLabel('Ungroup');
+  await ungroupButton.click();
+
+  await assertCanvasElementsCount(page, 1);
+  expect(await getIds(page)).toEqual([shapeId]);
 });
 
 test('outline should keep updated during a new frame created by frame-tool dragging', async ({
