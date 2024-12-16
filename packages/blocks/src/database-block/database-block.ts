@@ -165,7 +165,7 @@ export class DatabaseBlockComponent extends CaptionedBlockComponent<
     return html` <affine-database-title
       style="overflow: hidden"
       .titleText="${this.model.title}"
-      .readonly="${this.doc.readonly}"
+      .readonly="${this.dataSource.readonly$.value}"
       .onPressEnterKey="${addRow}"
     ></affine-database-title>`;
   };
@@ -365,7 +365,7 @@ export class DatabaseBlockComponent extends CaptionedBlockComponent<
   }
 
   private renderDatabaseOps() {
-    if (this.doc.readonly) {
+    if (this.dataSource.readonly$.value) {
       return nothing;
     }
     return html` <div class="database-ops" @click="${this._clickDatabaseOps}">
