@@ -43,8 +43,6 @@ export class AffineKeyboardToolbar extends SignalWatcher(
 ) {
   static override styles = keyboardToolbarStyles;
 
-  private _autoScrolling = false;
-
   private readonly _closeToolPanel = () => {
     if (!this._isPanelOpened) return;
 
@@ -110,13 +108,9 @@ export class AffineKeyboardToolbar extends SignalWatcher(
 
         if (y2 < y1 + gap) return;
 
-        this._autoScrolling = true;
         scrollTo({
           top: window.scrollY + y2 - y1 + gap,
           behavior: 'instant',
-        });
-        requestAnimationFrame(() => {
-          this._autoScrolling = false;
         });
       })
       .run();
@@ -289,10 +283,6 @@ export class AffineKeyboardToolbar extends SignalWatcher(
         });
       })
     );
-
-    this.disposables.addFromEvent(window, 'scroll', () => {
-      if (!this._autoScrolling) this.close(true);
-    });
   }
 
   override disconnectedCallback() {
