@@ -25,7 +25,7 @@
           "flavour": "affine:edgeless-text",
           "version": 1,
           "props": {
-            "xywh": "[-25,-25,799.0093994140625,154]",
+            "xywh": "[-25,-25,497,154]",
             "index": "a1",
             "lockedBySelf": false,
             "color": "--affine-palette-line-blue",
