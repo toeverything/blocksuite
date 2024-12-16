@@ -1,5 +1,42 @@
 # @blocksuite/affine-block-surface
 
+## 0.19.1
+
+### Patch Changes
+
+- ded71c4: chore: release blocksuite
+
+  ## Feat
+
+  - feat(edgeless): release frame by clicking ungroup button (#8984)
+
+  ## Fix
+
+  - fix(edgeless): new inner frame should be inside parent frame (#8985)
+  - fix(inline): range in different document (#8986)
+  - fix(blocks): focus ai input after position updated (#8981)
+  - fix(edgeless): export template job and image upload api (#8980)
+  - fix: preview won't disappear after drag end (#8979)
+  - fix: corner cases of dnd (#8978)
+  - fix(blocks): doc link import/export handling (#8976)
+
+  ## Chore
+
+  - chore(blocks): add image file upload entries to keyboard toolbar (#8987)
+  - chore(blocks): set readonly to database on mobile (#8975)
+  - chore: lock file maintenance (#8983)
+  - chore: lock file maintenance (#8982)
+  - chore: remove legacy versions in transformer and adapter (#8974)
+
+- Updated dependencies [ded71c4]
+  - @blocksuite/affine-components@0.19.1
+  - @blocksuite/affine-model@0.19.1
+  - @blocksuite/affine-shared@0.19.1
+  - @blocksuite/block-std@0.19.1
+  - @blocksuite/global@0.19.1
+  - @blocksuite/inline@0.19.1
+  - @blocksuite/store@0.19.1
+
 ## 0.19.0
 
 ### Minor Changes
