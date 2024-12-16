@@ -350,6 +350,10 @@ export class AffineAIPanelWidget extends WidgetComponent {
         .then(({ x, y }) => {
           this.style.left = `${x}px`;
           this.style.top = `${y}px`;
+          setTimeout(() => {
+            const input = this.shadowRoot?.querySelector('ai-panel-input');
+            input?.textarea?.focus();
+          }, 0);
         })
         .catch(console.error);
     });
