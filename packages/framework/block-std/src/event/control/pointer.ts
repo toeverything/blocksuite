@@ -275,6 +275,7 @@ class DragController extends PointerControllerBase {
 
   private _nativeDrop = (event: DragEvent) => {
     this._reset();
+    this._nativeDragging = false;
     const dndEventState = new DndEventState({ event });
     this._dispatcher.run(
       'nativeDrop',
