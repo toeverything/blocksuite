@@ -28,8 +28,6 @@ import { GfxBlockModel } from './block-model.js';
 import { areSetsEqual } from './utils/misc.js';
 import { isFrameBlock } from './utils/query.js';
 
-const MIN_FRAME_WIDTH = 800;
-const MIN_FRAME_HEIGHT = 640;
 const FRAME_PADDING = 40;
 
 export class FrameOverlay extends Overlay {
@@ -317,15 +315,28 @@ export class EdgelessFrameManager extends GfxExtension {
   }
 
   createFrameOnElements(elements: GfxModel[]) {
-    let bound = this.gfx.selection.selectedBound;
-    bound = bound.expand(FRAME_PADDING);
-    if (bound.w < MIN_FRAME_WIDTH) {
-      const offset = (MIN_FRAME_WIDTH - bound.w) / 2;
-      bound = bound.expand(offset, 0);
+    // make sure all elements are in the same level
+    for (const element of elements) {
+      if (element.group !== elements[0].group) return;
     }
-    if (bound.h < MIN_FRAME_HEIGHT) {
-      const offset = (MIN_FRAME_HEIGHT - bound.h) / 2;
-      bound = bound.expand(0, offset);
+
+    const parentFrameBound = this.getParentFrame(elements[0])?.elementBound;
+
+    let bound = this.gfx.selection.selectedBound;
+
+    if (parentFrameBound?.contains(bound)) {
+      bound.x -= Math.min(0.5 * (bound.x - parentFrameBound.x), FRAME_PADDING);
+      bound.y -= Math.min(0.5 * (bound.y - parentFrameBound.y), FRAME_PADDING);
+      bound.w += Math.min(
+        0.5 * (parentFrameBound.x + parentFrameBound.w - bound.x - bound.w),
+        FRAME_PADDING
+      );
+      bound.h += Math.min(
+        0.5 * (parentFrameBound.y + parentFrameBound.h - bound.y - bound.h),
+        FRAME_PADDING
+      );
+    } else {
+      bound = bound.expand(FRAME_PADDING);
     }
 
     const frameModel = this._addFrameBlock(bound);
