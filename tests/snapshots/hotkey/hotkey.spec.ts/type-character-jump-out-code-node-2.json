@@ -52,7 +52,8 @@
                   "insert": "block suite"
                 }
               ]
-            }
+            },
+            "collapsed": false
           },
           "children": []
         }

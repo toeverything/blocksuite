@@ -46,7 +46,8 @@
                   "insert": "hello world"
                 }
               ]
-            }
+            },
+            "collapsed": false
           },
           "children": []
         }

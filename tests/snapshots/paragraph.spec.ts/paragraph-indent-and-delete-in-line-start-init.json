@@ -46,7 +46,8 @@
                   "insert": "abc"
                 }
               ]
-            }
+            },
+            "collapsed": false
           },
           "children": [
             {
@@ -63,7 +64,8 @@
                       "insert": "efg"
                     }
                   ]
-                }
+                },
+                "collapsed": false
               },
               "children": [
                 {
@@ -80,7 +82,8 @@
                           "insert": "hij"
                         }
                       ]
-                    }
+                    },
+                    "collapsed": false
                   },
                   "children": []
                 }
@@ -100,7 +103,8 @@
                       "insert": "klm"
                     }
                   ]
-                }
+                },
+                "collapsed": false
               },
               "children": []
             },
@@ -118,7 +122,8 @@
                       "insert": "nop"
                     }
                   ]
-                }
+                },
+                "collapsed": false
               },
               "children": []
             }

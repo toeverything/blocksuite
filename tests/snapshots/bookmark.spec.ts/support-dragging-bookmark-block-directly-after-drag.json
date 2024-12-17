@@ -45,7 +45,8 @@
                   "insert": "111"
                 }
               ]
-            }
+            },
+            "collapsed": false
           },
           "children": []
         },
@@ -63,7 +64,8 @@
                   "insert": "222"
                 }
               ]
-            }
+            },
+            "collapsed": false
           },
           "children": []
         },
@@ -100,7 +102,8 @@
                   "insert": "333"
                 }
               ]
-            }
+            },
+            "collapsed": false
           },
           "children": []
         }

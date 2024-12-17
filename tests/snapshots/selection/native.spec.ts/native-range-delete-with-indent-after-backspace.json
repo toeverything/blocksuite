@@ -46,7 +46,8 @@
                   "insert": "12ef"
                 }
               ]
-            }
+            },
+            "collapsed": false
           },
           "children": []
         },
@@ -64,7 +65,8 @@
                   "insert": "ghi"
                 }
               ]
-            }
+            },
+            "collapsed": false
           },
           "children": []
         }

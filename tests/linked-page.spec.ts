@@ -106,6 +106,7 @@ test.describe('reference node', () => {
       page,
       `
 <affine:paragraph
+  prop:collapsed={false}
   prop:text="@"
   prop:type="text"
 />`,
@@ -151,6 +152,7 @@ test.describe('reference node', () => {
       page,
       `
 <affine:paragraph
+  prop:collapsed={false}
   prop:text={
     <>
       <text
@@ -174,6 +176,7 @@ test.describe('reference node', () => {
       page,
       `
 <affine:paragraph
+  prop:collapsed={false}
   prop:type="text"
 />`,
       paragraphId
@@ -233,6 +236,7 @@ test.describe('reference node', () => {
 
     const snapshot = `
 <affine:paragraph
+  prop:collapsed={false}
   prop:text={
     <>
       <text
@@ -302,6 +306,7 @@ test.describe('reference node', () => {
 
     const snapshot = `
 <affine:paragraph
+  prop:collapsed={false}
   prop:text={
     <>
       <text
@@ -367,6 +372,7 @@ test.describe('reference node', () => {
 
     const snapshot = `
 <affine:paragraph
+  prop:collapsed={false}
   prop:text={
     <>
       <text
@@ -397,6 +403,7 @@ test.describe('reference node', () => {
       page,
       `
 <affine:paragraph
+  prop:collapsed={false}
   prop:text="1432"
   prop:type="text"
 />`,
@@ -409,6 +416,7 @@ test.describe('reference node', () => {
       page,
       `
 <affine:paragraph
+  prop:collapsed={false}
   prop:text="1432"
   prop:type="text"
 />`,
@@ -757,6 +765,7 @@ test('should [[Selected text]] converted to linked page', async ({ page }) => {
     page,
     `
 <affine:paragraph
+  prop:collapsed={false}
   prop:text={
     <>
       <text

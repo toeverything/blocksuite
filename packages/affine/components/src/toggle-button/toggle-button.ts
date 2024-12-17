@@ -12,9 +12,8 @@ export class ToggleButton extends WithDisposable(ShadowlessElement) {
   static override styles = css`
     .toggle-icon {
       display: flex;
-      align-items: center;
-      height: 16px;
-      margin: 4px 0;
+      align-items: start;
+      margin-top: 0.3em;
       position: absolute;
       left: 0;
       transform: translateX(-100%);

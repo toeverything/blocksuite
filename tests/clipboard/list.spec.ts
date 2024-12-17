@@ -463,6 +463,7 @@ test(scoped`should copy and paste of database work`, async ({ page }) => {
       prop:views="Array [1]"
     >
       <affine:paragraph
+        prop:collapsed={false}
         prop:type="text"
       />
     </affine:database>
@@ -472,10 +473,12 @@ test(scoped`should copy and paste of database work`, async ({ page }) => {
       prop:views="Array [1]"
     >
       <affine:paragraph
+        prop:collapsed={false}
         prop:type="text"
       />
     </affine:database>
     <affine:paragraph
+      prop:collapsed={false}
       prop:type="text"
     />
   </affine:note>
@@ -510,10 +513,12 @@ test(scoped`should copy and paste of database work`, async ({ page }) => {
       prop:views="Array [1]"
     >
       <affine:paragraph
+        prop:collapsed={false}
         prop:type="text"
       />
     </affine:database>
     <affine:paragraph
+      prop:collapsed={false}
       prop:type="text"
     />
   </affine:note>

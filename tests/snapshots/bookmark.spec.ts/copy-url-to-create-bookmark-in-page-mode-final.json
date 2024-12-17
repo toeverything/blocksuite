@@ -46,7 +46,8 @@
                   "insert": "http://localhost"
                 }
               ]
-            }
+            },
+            "collapsed": false
           },
           "children": []
         },

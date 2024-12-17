@@ -52,7 +52,8 @@
                       "insert": "aaa"
                     }
                   ]
-                }
+                },
+                "collapsed": false
               },
               "children": []
             }
@@ -92,7 +93,8 @@
             "text": {
               "$blocksuite:internal:text$": true,
               "delta": []
-            }
+            },
+            "collapsed": false
           },
           "children": []
         }

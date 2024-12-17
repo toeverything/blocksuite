@@ -46,7 +46,8 @@
                   "insert": "123"
                 }
               ]
-            }
+            },
+            "collapsed": false
           },
           "children": [
             {
@@ -63,7 +64,8 @@
                       "insert": "4"
                     }
                   ]
-                }
+                },
+                "collapsed": false
               },
               "children": []
             }

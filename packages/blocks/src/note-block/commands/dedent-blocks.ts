@@ -1,5 +1,10 @@
 import type { Command } from '@blocksuite/block-std';
 
+import {
+  calculateCollapsedSiblings,
+  matchFlavours,
+} from '@blocksuite/affine-shared/utils';
+
 export const dedentBlocks: Command<
   never,
   never,
@@ -49,8 +54,25 @@ export const dedentBlocks: Command<
   if (firstDedentIndex === -1) return;
 
   if (stopCapture) doc.captureSync();
-  const dedentIds = blockIds.slice(firstDedentIndex);
-  dedentIds.forEach(id => {
+
+  const collapsedIds: string[] = [];
+  blockIds.slice(firstDedentIndex).forEach(id => {
+    const model = doc.getBlock(id)?.model;
+    if (!model) return;
+    if (
+      matchFlavours(model, ['affine:paragraph']) &&
+      model.type.startsWith('h') &&
+      model.collapsed
+    ) {
+      const collapsedSiblings = calculateCollapsedSiblings(model);
+      collapsedIds.push(...collapsedSiblings.map(sibling => sibling.id));
+    }
+  });
+  // Models waiting to be dedented
+  const dedentIds = blockIds
+    .slice(firstDedentIndex)
+    .filter(id => !collapsedIds.includes(id));
+  dedentIds.reverse().forEach(id => {
     std.command.exec('dedentBlock', { blockId: id, stopCapture: false });
   });
 

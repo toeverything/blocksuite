@@ -246,6 +246,7 @@ test('should undo/redo works for attachment', async ({ page }) => {
   prop:lockedBySelf={false}
 >
   <affine:paragraph
+    prop:collapsed={false}
     prop:text="/"
     prop:type="text"
   />
@@ -447,6 +448,7 @@ test('should attachment can be deleted', async ({ page }) => {
   prop:lockedBySelf={false}
 >
   <affine:paragraph
+    prop:collapsed={false}
     prop:type="text"
   />
 </affine:note>`,
@@ -556,14 +558,17 @@ test.fixme(`support dragging attachment block directly`, async ({ page }) => {
       prop:type="image/png"
     />
     <affine:paragraph
+      prop:collapsed={false}
       prop:text="111"
       prop:type="text"
     />
     <affine:paragraph
+      prop:collapsed={false}
       prop:text="222"
       prop:type="text"
     />
     <affine:paragraph
+      prop:collapsed={false}
       prop:text="333"
       prop:type="text"
     />
@@ -601,10 +606,12 @@ test.fixme(`support dragging attachment block directly`, async ({ page }) => {
     prop:lockedBySelf={false}
   >
     <affine:paragraph
+      prop:collapsed={false}
       prop:text="111"
       prop:type="text"
     />
     <affine:paragraph
+      prop:collapsed={false}
       prop:text="222"
       prop:type="text"
     />
@@ -619,6 +626,7 @@ test.fixme(`support dragging attachment block directly`, async ({ page }) => {
       prop:type="image/png"
     />
     <affine:paragraph
+      prop:collapsed={false}
       prop:text="333"
       prop:type="text"
     />
