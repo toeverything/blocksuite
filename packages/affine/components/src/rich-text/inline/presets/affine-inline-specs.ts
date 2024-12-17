@@ -1,3 +1,4 @@
+import type { AffineTextAttributes } from '@blocksuite/affine-shared/types';
 import type { InlineEditor, InlineRootElement } from '@blocksuite/inline';
 
 import { ReferenceInfoSchema } from '@blocksuite/affine-model';
@@ -5,10 +6,7 @@ import { StdIdentifier } from '@blocksuite/block-std';
 import { html } from 'lit';
 import { z } from 'zod';
 
-import {
-  type AffineTextAttributes,
-  InlineSpecExtension,
-} from '../../extension/index.js';
+import { InlineSpecExtension } from '../../extension/index.js';
 import {
   ReferenceNodeConfigIdentifier,
   ReferenceNodeConfigProvider,
@@ -125,12 +123,6 @@ export const ReferenceInlineSpecExtension = InlineSpecExtension(
     const config = provider.getOptional(ReferenceNodeConfigIdentifier) ?? {};
     if (config.customContent) {
       configProvider.setCustomContent(config.customContent);
-    }
-    if (config.customIcon) {
-      configProvider.setCustomIcon(config.customIcon);
-    }
-    if (config.customTitle) {
-      configProvider.setCustomTitle(config.customTitle);
     }
     if (config.interactable !== undefined) {
       configProvider.setInteractable(config.interactable);

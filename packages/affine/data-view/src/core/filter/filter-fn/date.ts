@@ -1,4 +1,6 @@
+import { addDays } from 'date-fns/addDays';
 import { format } from 'date-fns/format';
+import { subDays } from 'date-fns/subDays';
 
 import { t } from '../../logical/type-presets.js';
 import { createFilter } from './create.js';
@@ -16,6 +18,7 @@ export const dateFilter = [
       }
       return self < value;
     },
+    defaultValue: args => subDays(args[0], 1).getTime(),
   }),
   createFilter({
     name: 'after',
@@ -29,5 +32,6 @@ export const dateFilter = [
       }
       return self > value;
     },
+    defaultValue: args => addDays(args[0], 1).getTime(),
   }),
 ];

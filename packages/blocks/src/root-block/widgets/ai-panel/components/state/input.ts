@@ -1,9 +1,7 @@
-import {
-  AIStarIcon,
-  ArrowUpBigIcon,
-} from '@blocksuite/affine-components/icons';
+import { AIStarIcon } from '@blocksuite/affine-components/icons';
 import { stopPropagation } from '@blocksuite/affine-shared/utils';
 import { WithDisposable } from '@blocksuite/global/utils';
+import { SendIcon } from '@blocksuite/icons/lit';
 import { css, html, LitElement, nothing } from 'lit';
 import { property, query, state } from 'lit/decorators.js';
 
@@ -87,11 +85,11 @@ export class AIPanelInput extends WithDisposable(LitElement) {
   `;
 
   private _onInput = () => {
-    this._textarea.style.height = 'auto';
-    this._textarea.style.height = this._textarea.scrollHeight + 'px';
+    this.textarea.style.height = 'auto';
+    this.textarea.style.height = this.textarea.scrollHeight + 'px';
 
-    this.onInput?.(this._textarea.value);
-    const value = this._textarea.value.trim();
+    this.onInput?.(this.textarea.value);
+    const value = this.textarea.value.trim();
     if (value.length > 0) {
       this._arrow.dataset.active = '';
       this._hasContent = true;
@@ -109,7 +107,7 @@ export class AIPanelInput extends WithDisposable(LitElement) {
   };
 
   private _sendToAI = () => {
-    const value = this._textarea.value.trim();
+    const value = this.textarea.value.trim();
     if (value.length === 0) return;
 
     this.onFinish?.(value);
@@ -117,19 +115,11 @@ export class AIPanelInput extends WithDisposable(LitElement) {
   };
 
   override render() {
-    this.updateComplete
-      .then(() => {
-        requestAnimationFrame(() => {
-          this._textarea.focus();
-        });
-      })
-      .catch(console.error);
-
     return html`<div class="root">
       <div class="icon">${AIStarIcon}</div>
       <div class="textarea-container">
         <textarea
-          placeholder="Ask AI to edit or generate..."
+          placeholder="What are your thoughts?"
           rows="1"
           @keydown=${this._onKeyDown}
           @input=${this._onInput}
@@ -146,7 +136,7 @@ export class AIPanelInput extends WithDisposable(LitElement) {
           @click=${this._sendToAI}
           @pointerdown=${stopPropagation}
         >
-          ${ArrowUpBigIcon}
+          ${SendIcon()}
           ${this._hasContent
             ? html`<affine-tooltip .offset=${12}>Send to AI</affine-tooltip>`
             : nothing}
@@ -157,7 +147,7 @@ export class AIPanelInput extends WithDisposable(LitElement) {
 
   override updated(_changedProperties: Map<PropertyKey, unknown>): void {
     const result = super.updated(_changedProperties);
-    this._textarea.style.height = this._textarea.scrollHeight + 'px';
+    this.textarea.style.height = this.textarea.scrollHeight + 'px';
     return result;
   }
 
@@ -167,14 +157,14 @@ export class AIPanelInput extends WithDisposable(LitElement) {
   @state()
   private accessor _hasContent = false;
 
-  @query('textarea')
-  private accessor _textarea!: HTMLTextAreaElement;
-
   @property({ attribute: false })
   accessor onFinish: ((input: string) => void) | undefined = undefined;
 
   @property({ attribute: false })
   accessor onInput: ((input: string) => void) | undefined = undefined;
+
+  @query('textarea')
+  accessor textarea!: HTMLTextAreaElement;
 }
 
 declare global {

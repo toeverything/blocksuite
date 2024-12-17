@@ -139,30 +139,19 @@ export class EmbedSyncedDocCard extends WithDisposable(ShadowlessElement) {
     const theme = this.std.get(ThemeProvider).theme;
     const {
       LoadingIcon,
-      SyncedDocIcon,
       SyncedDocErrorIcon,
-      SyncedDocDeletedIcon,
       ReloadIcon,
       SyncedDocEmptyBanner,
       SyncedDocErrorBanner,
       SyncedDocDeletedBanner,
     } = getSyncedDocIcons(theme, this.editorMode);
 
-    const titleIcon = error
+    const icon = error
       ? SyncedDocErrorIcon
       : isLoading
         ? LoadingIcon
-        : isDeleted
-          ? SyncedDocDeletedIcon
-          : SyncedDocIcon;
-
-    const titleText = error
-      ? this.block.docTitle
-      : isLoading
-        ? 'Loading...'
-        : isDeleted
-          ? `Deleted doc`
-          : this.block.docTitle;
+        : this.block.icon$.value;
+    const title = isLoading ? 'Loading...' : this.block.title$;
 
     const showDefaultNoteContent = isLoading || error || isDeleted || isEmpty;
     const defaultNoteContent = error
@@ -195,11 +184,11 @@ export class EmbedSyncedDocCard extends WithDisposable(ShadowlessElement) {
         <div class="affine-embed-synced-doc-card-content">
           <div class="affine-embed-synced-doc-card-content-title">
             <div class="affine-embed-synced-doc-card-content-title-icon">
-              ${titleIcon}
+              ${icon}
             </div>
 
             <div class="affine-embed-synced-doc-card-content-title-text">
-              ${titleText}
+              ${title}
             </div>
           </div>
 

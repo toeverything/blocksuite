@@ -245,18 +245,6 @@ export class DocCollectionMeta {
     this.docMetaUpdated.emit();
   }
 
-  updateVersion(collection: DocCollection) {
-    this._proxy.workspaceVersion = COLLECTION_VERSION;
-
-    this._proxy.pageVersion = PAGE_VERSION;
-
-    const _versions: Record<string, number> = {};
-    collection.schema.flavourSchemaMap.forEach((schema, flavour) => {
-      _versions[flavour] = schema.version;
-    });
-    this._proxy.blockVersions = _versions;
-  }
-
   /**
    * @deprecated Only used for legacy doc version validation
    */

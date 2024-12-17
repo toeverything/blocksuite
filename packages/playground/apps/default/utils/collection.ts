@@ -51,7 +51,7 @@ export async function createDefaultDocCollection() {
           shadows: [new BroadcastChannelDocSource()],
         };
         awarenessSources = [
-          new BroadcastChannelAwarenessSource('quickEdgeless'),
+          new BroadcastChannelAwarenessSource('collabPlayground'),
         ];
       });
   }
@@ -63,11 +63,11 @@ export async function createDefaultDocCollection() {
   );
 
   const options: DocCollectionOptions = {
-    id: 'quickEdgeless',
+    id: 'collabPlayground',
     schema,
     idGenerator,
     blobSources: {
-      main: new IndexedDBBlobSource('quickEdgeless'),
+      main: new IndexedDBBlobSource('collabPlayground'),
     },
     docSources,
     awarenessSources,
@@ -105,27 +105,6 @@ export async function initDefaultDocCollection(collection: DocCollection) {
       title: new Text(),
     });
     doc.addBlock('affine:surface', {}, rootId);
-    doc.resetHistory();
-  } else {
-    // wait for data injected from provider
-    const firstPageId =
-      collection.docs.size > 0
-        ? collection.docs.keys().next().value
-        : await new Promise<string>(resolve =>
-            collection.slots.docAdded.once(id => resolve(id))
-          );
-    if (!firstPageId) {
-      throw new Error('No first page id found');
-    }
-    const doc = collection.getDoc(firstPageId);
-    if (!doc) {
-      throw new Error(`Failed to get doc ${firstPageId}`);
-    }
-    doc.load();
-    // wait for data injected from provider
-    if (!doc.root) {
-      await new Promise(resolve => doc.slots.rootAdded.once(resolve));
-    }
     doc.resetHistory();
   }
 }

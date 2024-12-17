@@ -3,10 +3,6 @@ import {
   popMenu,
   popupTargetFromElement,
 } from '@blocksuite/affine-components/context-menu';
-import {
-  insertPositionToIndex,
-  type InsertToPosition,
-} from '@blocksuite/affine-shared/utils';
 import { AddCursorIcon } from '@blocksuite/icons/lit';
 import { css } from 'lit';
 import { repeat } from 'lit/directives/repeat.js';
@@ -16,14 +12,11 @@ import { html } from 'lit/static-html.js';
 import type { GroupTrait } from '../../../core/group-by/trait.js';
 import type { DataViewInstance } from '../../../core/index.js';
 import type { TableSingleView } from '../table-view-manager.js';
+import type { TableViewSelectionWithType } from '../types.js';
 
 import { renderUniLit } from '../../../core/utils/uni-component/uni-component.js';
 import { DataViewBase } from '../../../core/view/data-view-base.js';
 import { LEFT_TOOL_BAR_WIDTH } from '../consts.js';
-import {
-  TableAreaSelection,
-  type TableViewSelectionWithType,
-} from '../types.js';
 import { TableClipboardController } from './controller/clipboard.js';
 import { TableDragController } from './controller/drag.js';
 import { TableHotkeysController } from './controller/hotkeys.js';
@@ -154,31 +147,6 @@ export class DataViewTable extends DataViewBase<
 > {
   static override styles = styles;
 
-  private _addRow = (
-    tableViewManager: TableSingleView,
-    position: InsertToPosition | number
-  ) => {
-    if (this.readonly) return;
-
-    const index =
-      typeof position === 'number'
-        ? position
-        : insertPositionToIndex(
-            position,
-            this.props.view.rows$.value.map(id => ({ id }))
-          );
-    tableViewManager.rowAdd(position);
-    requestAnimationFrame(() => {
-      this.selectionController.selection = TableAreaSelection.create({
-        focus: {
-          rowIndex: index,
-          columnIndex: 0,
-        },
-        isEditing: true,
-      });
-    });
-  };
-
   clipboardController = new TableClipboardController(this);
 
   dragController = new TableDragController(this);
@@ -209,7 +177,7 @@ export class DataViewTable extends DataViewBase<
         options: {
           items: [
             menu.input({
-              onChange: text => {
+              onComplete: text => {
                 const column = groupHelper.property$.value;
                 if (column) {
                   column.dataUpdate(
@@ -247,7 +215,15 @@ export class DataViewTable extends DataViewBase<
         this.selectionController.clear();
       },
       addRow: position => {
-        this._addRow(this.props.view, position);
+        if (this.readonly) return;
+        const rowId = this.props.view.rowAdd(position);
+        if (rowId) {
+          this.props.dataViewEle.openDetailPanel({
+            view: this.props.view,
+            rowId,
+          });
+        }
+        return rowId;
       },
       focusFirstCell: () => {
         this.selectionController.focusFirstCell();

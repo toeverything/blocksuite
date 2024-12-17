@@ -84,6 +84,8 @@ export class EmbedBlockComponent<
    */
   protected _scale = 1;
 
+  blockDraggable = true;
+
   /**
    * The style of the embed card.
    * You can use this to change the height and width of the card.
@@ -108,6 +110,7 @@ export class EmbedBlockComponent<
     const selected = !!this.selected?.is('block');
     return html`
       <div
+        draggable="${this.blockDraggable ? 'true' : 'false'}"
         class=${classMap({
           'embed-block-container': true,
           'selected-style': selected,

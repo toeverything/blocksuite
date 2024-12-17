@@ -35,7 +35,14 @@ export interface DocCreatedEvent extends TelemetryEvent {
 
 export interface ElementCreationEvent extends TelemetryEvent {
   segment?: 'toolbar' | 'whiteboard' | 'right sidebar';
-  page: 'whiteboard editor';
+  page?: 'doc editor' | 'whiteboard editor';
   module?: 'toolbar' | 'canvas' | 'ai chat panel';
   control?: ElementCreationSource;
+}
+
+export interface ElementLockEvent extends TelemetryEvent {
+  page: 'whiteboard editor';
+  segment: 'element toolbar';
+  module: 'element toolbar';
+  control: 'lock' | 'unlock' | 'group-lock';
 }

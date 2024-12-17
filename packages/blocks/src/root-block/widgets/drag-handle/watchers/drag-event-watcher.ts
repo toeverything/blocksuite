@@ -1,3 +1,10 @@
+import type { EmbedCardStyle, NoteBlockModel } from '@blocksuite/affine-model';
+
+import {
+  EMBED_CARD_HEIGHT,
+  EMBED_CARD_WIDTH,
+} from '@blocksuite/affine-shared/consts';
+import { DndApiExtensionIdentifier } from '@blocksuite/affine-shared/services';
 import {
   captureEventTarget,
   getBlockComponentsExcludeSubtrees,
@@ -13,10 +20,9 @@ import {
 } from '@blocksuite/block-std';
 import { GfxControllerIdentifier } from '@blocksuite/block-std/gfx';
 import { Bound, Point } from '@blocksuite/global/utils';
-import { Job, Slice } from '@blocksuite/store';
-import { render } from 'lit';
-import * as lz from 'lz-string';
+import { Job, Slice, type SliceSnapshot } from '@blocksuite/store';
 
+import type { EdgelessRootBlockComponent } from '../../../edgeless/index.js';
 import type { AffineDragHandleWidget } from '../drag-handle.js';
 
 import {
@@ -27,13 +33,38 @@ import {
   calcDropTarget,
   type DropResult,
 } from '../../../../_common/utils/index.js';
+import { addNoteAtPoint } from '../../../edgeless/utils/common.js';
 import { DropIndicator } from '../components/drop-indicator.js';
 import { AFFINE_DRAG_HANDLE_WIDGET } from '../consts.js';
+import { copyEmbedDoc } from '../middleware/copy-embed-doc.js';
+import { surfaceRefToEmbed } from '../middleware/surface-ref-to-embed.js';
 import { containBlock, includeTextSelection } from '../utils.js';
 
 export class DragEventWatcher {
-  private _changeCursorToGrabbing = () => {
-    document.documentElement.classList.add('affine-drag-preview-grabbing');
+  private _computeEdgelessBound = (
+    x: number,
+    y: number,
+    width: number,
+    height: number
+  ) => {
+    const controller = this._std.get(GfxControllerIdentifier);
+    const border = 2;
+    const noteScale = this.widget.noteScale.peek();
+    const { viewport } = controller;
+    const { left: viewportLeft, top: viewportTop } = viewport;
+    const currentViewBound = new Bound(
+      x - viewportLeft,
+      y - viewportTop,
+      width + border / noteScale,
+      height + border / noteScale
+    );
+    const currentModelBound = viewport.toModelBound(currentViewBound);
+    return new Bound(
+      currentModelBound.x,
+      currentModelBound.y,
+      width * noteScale,
+      height * noteScale
+    );
   };
 
   private _createDropIndicator = () => {
@@ -43,26 +74,11 @@ export class DragEventWatcher {
     }
   };
 
-  /**
-   * When drag end, should move blocks to drop position
-   */
   private _dragEndHandler: UIEventHandler = () => {
     this.widget.clearRaf();
     this.widget.hide(true);
-
-    if (this.widget.mode === 'edgeless') {
-      this.widget.edgelessWatcher.checkTopLevelBlockSelection();
-    }
-
-    return true;
   };
 
-  /**
-   * When dragging, should:
-   * Update drag preview position
-   * Update indicator position
-   * Update drop block id
-   */
   private _dragMoveHandler: UIEventHandler = ctx => {
     if (
       this.widget.isHoverDragHandleVisible ||
@@ -77,17 +93,6 @@ export class DragEventWatcher {
 
     ctx.get('defaultState').event.preventDefault();
     const state = ctx.get('dndState');
-
-    for (const option of this.widget.optionRunner.options) {
-      if (
-        option.onDragMove?.({
-          state,
-          draggingElements: this.widget.draggingElements,
-        })
-      ) {
-        return true;
-      }
-    }
 
     // call default drag move handler if no option return true
     return this._onDragMove(state);
@@ -105,6 +110,12 @@ export class DragEventWatcher {
     }
 
     return this._onDragStart(state);
+  };
+
+  private _dropHandler = (context: UIEventStateContext) => {
+    this._onDrop(context);
+    this.widget.clearRaf();
+    this.widget.hide(true);
   };
 
   private _onDragMove = (state: DndEventState) => {
@@ -127,25 +138,13 @@ export class DragEventWatcher {
     const isInSurface = isGfxBlockComponent(hoverBlock);
 
     if (isInSurface && dragByHandle) {
-      const viewport = this.widget.std.get(GfxControllerIdentifier).viewport;
-      const zoom = viewport.zoom ?? 1;
-      const dragPreviewEl = document.createElement('div');
-      const bound = Bound.deserialize(hoverBlock.model.xywh);
-      const offset = new Point(bound.x * zoom, bound.y * zoom);
-
-      // TODO: not use `dangerouslyRenderModel` to render drag preview
-      render(
-        this.widget.std.host.dangerouslyRenderModel(hoverBlock.model),
-        dragPreviewEl
-      );
-
-      this._startDragging([hoverBlock], state, dragPreviewEl, offset);
+      this._startDragging([hoverBlock], state);
       return true;
     }
 
     const selectBlockAndStartDragging = () => {
-      this.widget.std.selection.setGroup('note', [
-        this.widget.std.selection.create('block', {
+      this._std.selection.setGroup('note', [
+        this._std.selection.create('block', {
           blockId: hoverBlock.blockId,
         }),
       ]);
@@ -190,7 +189,7 @@ export class DragEventWatcher {
     // Should set BlockSelection for the blocks in native range
     if (selections.length > 0 && includeTextSelection(selections)) {
       const nativeSelection = document.getSelection();
-      const rangeManager = this.widget.std.range;
+      const rangeManager = this._std.range;
       if (nativeSelection && nativeSelection.rangeCount > 0 && rangeManager) {
         const range = nativeSelection.getRangeAt(0);
         const blocks = rangeManager.getSelectedBlockComponentsByRange(range, {
@@ -220,7 +219,7 @@ export class DragEventWatcher {
 
     const blocks = this.widget.selectionHelper.selectedBlockComponents;
 
-    // This could be skip if we can ensure that all selected blocks are on the same level
+    // This could be skipped if we can ensure that all selected blocks are on the same level
     // Which means not selecting parent block and child block at the same time
     const blocksExcludingChildren = getBlockComponentsExcludeSubtrees(
       blocks
@@ -235,13 +234,23 @@ export class DragEventWatcher {
 
   private _onDrop = (context: UIEventStateContext) => {
     const state = context.get('dndState');
+
     const event = state.raw;
     const { clientX, clientY } = event;
     const point = new Point(clientX, clientY);
     const element = getClosestBlockComponentByPoint(point.clone());
-    if (!element) return;
+    if (!element) {
+      const target = captureEventTarget(event.target);
+      const isEdgelessContainer =
+        target?.classList.contains('edgeless-container');
+      if (!isEdgelessContainer) return;
+
+      // drop to edgeless container
+      this._onDropOnEdgelessCanvas(context);
+      return;
+    }
     const model = element.model;
-    const parent = this.widget.std.doc.getParent(model.id);
+    const parent = this._std.doc.getParent(model.id);
     if (!parent) return;
     if (matchFlavours(parent, ['affine:surface'])) {
       return;
@@ -251,7 +260,143 @@ export class DragEventWatcher {
 
     const index =
       parent.children.indexOf(model) + (result.type === 'before' ? 0 : 1);
+    event.preventDefault();
+
+    if (matchFlavours(parent, ['affine:note'])) {
+      const snapshot = this._deserializeSnapshot(state);
+      if (snapshot) {
+        const [first] = snapshot.content;
+        if (first.flavour === 'affine:note') {
+          if (parent.id !== first.id) {
+            this._onDropNoteOnNote(snapshot, parent.id, index);
+          }
+          return;
+        }
+      }
+    }
+
     this._deserializeData(state, parent.id, index).catch(console.error);
+  };
+
+  private _onDropNoteOnNote = (
+    snapshot: SliceSnapshot,
+    parent?: string,
+    index?: number
+  ) => {
+    const [first] = snapshot.content;
+    const id = first.id;
+
+    const std = this._std;
+    const job = this._job;
+    const snapshotWithoutNote = {
+      ...snapshot,
+      content: first.children,
+    };
+    job
+      .snapshotToSlice(snapshotWithoutNote, std.doc, parent, index)
+      .then(() => {
+        const block = std.doc.getBlock(id)?.model;
+        if (block) {
+          std.doc.deleteBlock(block);
+        }
+      })
+      .catch(console.error);
+  };
+
+  private _onDropOnEdgelessCanvas = (context: UIEventStateContext) => {
+    const state = context.get('dndState');
+    // If drop a note, should do nothing
+    const snapshot = this._deserializeSnapshot(state);
+    const edgelessRoot = this.widget
+      .rootComponent as EdgelessRootBlockComponent;
+
+    if (!snapshot) {
+      return;
+    }
+
+    const [first] = snapshot.content;
+    if (first.flavour === 'affine:note') return;
+
+    if (snapshot.content.length === 1) {
+      const importToSurface = (
+        width: number,
+        height: number,
+        newBound: Bound
+      ) => {
+        first.props.xywh = newBound.serialize();
+        first.props.width = width;
+        first.props.height = height;
+
+        const std = this._std;
+        const job = this._job;
+        job
+          .snapshotToSlice(snapshot, std.doc, edgelessRoot.surfaceBlockModel.id)
+          .catch(console.error);
+      };
+
+      if (
+        ['affine:attachment', 'affine:bookmark'].includes(first.flavour) ||
+        first.flavour.startsWith('affine:embed-')
+      ) {
+        const style = first.props.style as EmbedCardStyle;
+        const width = EMBED_CARD_WIDTH[style];
+        const height = EMBED_CARD_HEIGHT[style];
+
+        const newBound = this._computeEdgelessBound(
+          state.raw.clientX,
+          state.raw.clientY,
+          width,
+          height
+        );
+        if (!newBound) return;
+
+        importToSurface(width, height, newBound);
+        return;
+      }
+
+      if (first.flavour === 'affine:image') {
+        const noteScale = this.widget.noteScale.peek();
+        const width = Number(first.props.width || 100) * noteScale;
+        const height = Number(first.props.height || 100) * noteScale;
+
+        const newBound = this._computeEdgelessBound(
+          state.raw.clientX,
+          state.raw.clientY,
+          width,
+          height
+        );
+        if (!newBound) return;
+
+        importToSurface(width, height, newBound);
+        return;
+      }
+    }
+
+    const { left: viewportLeft, top: viewportTop } = edgelessRoot.viewport;
+    const newNoteId = addNoteAtPoint(
+      edgelessRoot.std,
+      new Point(state.raw.x - viewportLeft, state.raw.y - viewportTop),
+      {
+        scale: this.widget.noteScale.peek(),
+      }
+    );
+    const newNoteBlock = this.widget.doc.getBlock(newNoteId)?.model as
+      | NoteBlockModel
+      | undefined;
+    if (!newNoteBlock) return;
+
+    const bound = Bound.deserialize(newNoteBlock.xywh);
+    bound.h *= this.widget.noteScale.peek();
+    bound.w *= this.widget.noteScale.peek();
+    this.widget.doc.updateBlock(newNoteBlock, {
+      xywh: bound.serialize(),
+      edgeless: {
+        ...newNoteBlock.edgeless,
+        scale: this.widget.noteScale.peek(),
+      },
+    });
+
+    this._deserializeData(state, newNoteId).catch(console.error);
   };
 
   private _startDragging = (
@@ -274,16 +419,31 @@ export class DragEventWatcher {
     );
 
     const slice = Slice.fromModels(
-      this.widget.std.doc,
+      this._std.doc,
       blocks.map(block => block.model)
     );
 
     this.widget.dragging = true;
-    this._changeCursorToGrabbing();
     this._createDropIndicator();
     this.widget.hide();
-    this._serializeData(slice, state).catch(console.error);
+    this._serializeData(slice, state);
   };
+
+  private get _dndAPI() {
+    return this._std.get(DndApiExtensionIdentifier);
+  }
+
+  private get _job() {
+    const std = this._std;
+    return new Job({
+      collection: std.collection,
+      middlewares: [copyEmbedDoc, surfaceRefToEmbed(std)],
+    });
+  }
+
+  private get _std() {
+    return this.widget.std;
+  }
 
   constructor(readonly widget: AffineDragHandleWidget) {}
 
@@ -296,29 +456,23 @@ export class DragEventWatcher {
       const dataTransfer = state.raw.dataTransfer;
       if (!dataTransfer) throw new Error('No data transfer');
 
-      const job = new Job({
-        collection: this.widget.std.collection,
-      });
+      const std = this._std;
+      const job = this._job;
 
-      const std = this.widget.std;
+      const snapshot = this._deserializeSnapshot(state);
+      if (snapshot) {
+        // use snapshot
+        const slice = await job.snapshotToSlice(
+          snapshot,
+          std.doc,
+          parent,
+          index
+        );
+        return slice;
+      }
+
       const html = dataTransfer.getData('text/html');
       if (html) {
-        const domParser = new DOMParser();
-        const doc = domParser.parseFromString(html, 'text/html');
-        const dom = doc.querySelector<HTMLDivElement>(
-          '[data-blocksuite-snapshot]'
-        );
-        if (dom) {
-          // use snapshot
-          const json = JSON.parse(
-            lz.decompressFromEncodedURIComponent(
-              dom.dataset.blocksuiteSnapshot as string
-            )
-          );
-          const slice = await job.snapshotToSlice(json, std.doc, parent, index);
-          return slice;
-        }
-
         // use html parser;
         const htmlAdapter = new HtmlAdapter(job);
         const slice = await htmlAdapter.toSlice(
@@ -344,28 +498,30 @@ export class DragEventWatcher {
     }
   }
 
-  private async _serializeData(slice: Slice, state: DndEventState) {
+  private _deserializeSnapshot(state: DndEventState) {
+    try {
+      const dataTransfer = state.raw.dataTransfer;
+      if (!dataTransfer) throw new Error('No data transfer');
+      const data = dataTransfer.getData(this._dndAPI.mimeType);
+      const snapshot = this._dndAPI.decodeSnapshot(data);
+
+      return snapshot;
+    } catch {
+      return null;
+    }
+  }
+
+  private _serializeData(slice: Slice, state: DndEventState) {
     const dataTransfer = state.raw.dataTransfer;
     if (!dataTransfer) return;
 
-    const job = new Job({
-      middlewares: [],
-      collection: this.widget.std.collection,
-    });
-    const textAdapter = new MarkdownAdapter(job);
-    const htmlAdapter = new HtmlAdapter(job);
+    const job = this._job;
 
-    const snapshot = await job.sliceToSnapshot(slice);
-    const text = await textAdapter.fromSlice(slice);
-    const innerHTML = await htmlAdapter.fromSlice(slice);
-    if (!snapshot || !text || !innerHTML) return;
+    const snapshot = job.sliceToSnapshot(slice);
+    if (!snapshot) return;
 
-    const snapshotCompressed = lz.compressToEncodedURIComponent(
-      JSON.stringify(snapshot)
-    );
-    const html = `<div data-blocksuite-snapshot=${snapshotCompressed}>${innerHTML.file}</div>`;
-    dataTransfer.setData('text/plain', text.file);
-    dataTransfer.setData('text/html', html);
+    const data = this._dndAPI.encodeSnapshot(snapshot);
+    dataTransfer.setData(this._dndAPI.mimeType, data);
   }
 
   watch() {
@@ -403,7 +559,7 @@ export class DragEventWatcher {
     this.widget.handleEvent('nativeDragEnd', this._dragEndHandler, {
       global: true,
     });
-    this.widget.handleEvent('nativeDrop', this._onDrop, {
+    this.widget.handleEvent('nativeDrop', this._dropHandler, {
       global: true,
     });
   }

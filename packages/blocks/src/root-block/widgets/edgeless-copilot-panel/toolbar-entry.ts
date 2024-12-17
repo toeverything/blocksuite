@@ -23,6 +23,11 @@ export class EdgelessCopilotToolbarEntry extends WithDisposable(LitElement) {
     }
   `;
 
+  private _onClick = () => {
+    this.onClick?.();
+    this._showCopilotPanel();
+  };
+
   private _showCopilotPanel() {
     const selectedElements = sortEdgelessElements(
       this.edgeless.service.selection.selectedElements
@@ -52,7 +57,7 @@ export class EdgelessCopilotToolbarEntry extends WithDisposable(LitElement) {
     return html`<edgeless-tool-icon-button
       aria-label="Ask AI"
       class="copilot-icon-button"
-      @click=${this._showCopilotPanel}
+      @click=${this._onClick}
     >
       ${AIStarIcon} <span class="label medium">Ask AI</span>
     </edgeless-tool-icon-button>`;
@@ -66,4 +71,7 @@ export class EdgelessCopilotToolbarEntry extends WithDisposable(LitElement) {
 
   @property({ attribute: false })
   accessor host!: EditorHost;
+
+  @property({ attribute: false })
+  accessor onClick: (() => void) | undefined = undefined;
 }

@@ -19,7 +19,8 @@
                 "insert": "hi"
               }
             ]
-          }
+          },
+          "collapsed": false
         },
         "children": []
       },
@@ -37,7 +38,8 @@
                 "insert": "j"
               }
             ]
-          }
+          },
+          "collapsed": false
         },
         "children": []
       }

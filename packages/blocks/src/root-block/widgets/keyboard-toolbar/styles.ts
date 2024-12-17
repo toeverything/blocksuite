@@ -6,7 +6,7 @@ import { scrollbarStyle } from '../../../_common/components/utils.js';
 export const TOOLBAR_HEIGHT = 46;
 
 export const keyboardToolbarStyles = css`
-  :host {
+  affine-keyboard-toolbar {
     position: fixed;
     display: block;
     width: 100vw;
@@ -40,6 +40,7 @@ export const keyboardToolbarStyles = css`
   }
 
   .item-container {
+    flex: 1;
     display: flex;
     overflow-x: auto;
     gap: 8px;
@@ -50,7 +51,9 @@ export const keyboardToolbarStyles = css`
     }
   }
 
-  ${scrollbarStyle('.item-container')}
+  .item-container::-webkit-scrollbar {
+    display: none;
+  }
 
   .divider {
     height: 24px;
@@ -59,7 +62,7 @@ export const keyboardToolbarStyles = css`
 `;
 
 export const keyboardToolPanelStyles = css`
-  :host {
+  affine-keyboard-tool-panel {
     display: flex;
     flex-direction: column;
     gap: 24px;
@@ -70,7 +73,7 @@ export const keyboardToolPanelStyles = css`
     background-color: ${unsafeCSSVarV2('layer/background/primary')};
   }
 
-  ${scrollbarStyle(':host')}
+  ${scrollbarStyle('affine-keyboard-tool-panel')}
 
   .keyboard-tool-panel-group {
     display: flex;
@@ -84,7 +87,7 @@ export const keyboardToolPanelStyles = css`
     color: ${unsafeCSSVarV2('text/secondary')};
 
     /* Footnote/Emphasized */
-    font-family: 'SF Pro';
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
     font-size: 13px;
     font-style: normal;
     font-weight: 590;
@@ -131,7 +134,7 @@ export const keyboardToolPanelStyles = css`
 
     span {
       width: 100%;
-      font-family: SF Pro;
+      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
       font-size: 13px;
       font-weight: 400;
       line-height: 18px;

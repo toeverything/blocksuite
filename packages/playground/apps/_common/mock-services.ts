@@ -11,9 +11,11 @@ import {
   ColorScheme,
   type DocMode,
   type DocModeProvider,
+  type GenerateDocUrlService,
   matchFlavours,
   type NotificationService,
   type ParseDocUrlService,
+  type ReferenceParams,
   type ThemeExtension,
   toast,
 } from '@blocksuite/blocks';
@@ -109,12 +111,10 @@ export function mockParseDocUrlService(collection: DocCollection) {
   const parseDocUrlService: ParseDocUrlService = {
     parseDocUrl: (url: string) => {
       if (url && URL.canParse(url)) {
-        const path = new URL(url).pathname;
+        const path = decodeURIComponent(new URL(url).hash.slice(1));
         const item =
-          path.length > 1
-            ? [...collection.docs.values()].find(doc => {
-                return doc.meta?.title === path.slice(1);
-              })
+          path.length > 0
+            ? [...collection.docs.values()].find(doc => doc.id === path)
             : null;
         if (item) {
           return {
@@ -180,4 +180,26 @@ export function mockPeekViewExtension(
       return Promise.resolve();
     },
   } satisfies PeekViewService);
+}
+
+export function mockGenerateDocUrlService(collection: DocCollection) {
+  const generateDocUrlService: GenerateDocUrlService = {
+    generateDocUrl: (docId: string, params?: ReferenceParams) => {
+      const doc = collection.getDoc(docId);
+      if (!doc) return;
+
+      const url = new URL(location.pathname, location.origin);
+      url.search = location.search;
+      if (params) {
+        const search = url.searchParams;
+        for (const [key, value] of Object.entries(params)) {
+          search.set(key, Array.isArray(value) ? value.join(',') : value);
+        }
+      }
+      url.hash = encodeURIComponent(docId);
+
+      return url.toString();
+    },
+  };
+  return generateDocUrlService;
 }

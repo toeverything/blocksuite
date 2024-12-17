@@ -1,3 +1,5 @@
+import type { ExtensionType } from '@blocksuite/block-std';
+
 import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 import { sha } from '@blocksuite/global/utils';
 import {
@@ -11,11 +13,14 @@ import {
   type FromDocSnapshotResult,
   type FromSliceSnapshotPayload,
   type FromSliceSnapshotResult,
+  type Job,
   nanoid,
   type SliceSnapshot,
   type ToBlockSnapshotPayload,
   type ToDocSnapshotPayload,
 } from '@blocksuite/store';
+
+import { AdapterFactoryIdentifier } from './type.js';
 
 export type Image = File[];
 
@@ -23,8 +28,6 @@ type ImageToSliceSnapshotPayload = {
   file: Image;
   assets?: AssetsManager;
   blockVersions: Record<string, number>;
-  pageVersion: number;
-  workspaceVersion: number;
   workspaceId: string;
   pageId: string;
 };
@@ -111,10 +114,18 @@ export class ImageAdapter extends BaseAdapter<Image> {
     return {
       type: 'slice',
       content,
-      pageVersion: payload.pageVersion,
-      workspaceVersion: payload.workspaceVersion,
       workspaceId: payload.workspaceId,
       pageId: payload.pageId,
     };
   }
 }
+
+export const ImageAdapterFactoryIdentifier = AdapterFactoryIdentifier('Image');
+
+export const ImageAdapterFactoryExtension: ExtensionType = {
+  setup: di => {
+    di.addImpl(ImageAdapterFactoryIdentifier, () => ({
+      get: (job: Job) => new ImageAdapter(job),
+    }));
+  },
+};

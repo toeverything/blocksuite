@@ -190,6 +190,7 @@ export class BlockStdScope {
     this._lifeCycleWatchers.forEach(watcher => {
       watcher.unmounted.call(watcher);
     });
+    this._getHost = () => null as unknown as EditorHost;
   }
 }
 

@@ -23,11 +23,16 @@ export enum DefaultModeDragType {
 export type DragState = {
   movedElements: GfxModel[];
   dragType: DefaultModeDragType;
+  event: PointerEventState;
 };
 
 export class DefaultToolExt {
   get gfx() {
     return this.defaultTool.gfx;
+  }
+
+  get std() {
+    return this.defaultTool.std;
   }
 
   constructor(protected defaultTool: DefaultTool) {}

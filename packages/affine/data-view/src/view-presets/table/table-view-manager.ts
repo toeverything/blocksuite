@@ -10,6 +10,7 @@ import type { TableViewData } from './define.js';
 import type { StatCalcOpType } from './types.js';
 
 import { evalFilter } from '../../core/filter/eval.js';
+import { generateDefaultValues } from '../../core/filter/generate-default-values.js';
 import { FilterTrait, filterTraitKey } from '../../core/filter/trait.js';
 import { emptyFilterGroup } from '../../core/filter/utils.js';
 import {
@@ -319,10 +320,27 @@ export class TableSingleView extends SingleViewBase<TableViewData> {
     groupKey?: string
   ): string {
     const id = super.rowAdd(insertPosition);
-    if (!groupKey) {
-      return id;
+
+    const filter = this.filter$.value;
+    if (filter.conditions.length > 0) {
+      const defaultValues = generateDefaultValues(filter, this.vars$.value);
+      Object.entries(defaultValues).forEach(([propertyId, jsonValue]) => {
+        const property = this.propertyGet(propertyId);
+        const propertyMeta = this.propertyMetaGet(property.type$.value);
+        if (propertyMeta?.config.cellFromJson) {
+          const value = propertyMeta.config.cellFromJson({
+            value: jsonValue,
+            data: property.data$.value,
+            dataSource: this.dataSource,
+          });
+          this.cellValueSet(id, propertyId, value);
+        }
+      });
     }
-    this.groupTrait.addToGroup(id, groupKey);
+
+    if (groupKey) {
+      this.groupTrait.addToGroup(id, groupKey);
+    }
     return id;
   }
 

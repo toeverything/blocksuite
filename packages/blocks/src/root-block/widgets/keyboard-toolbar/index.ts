@@ -2,6 +2,7 @@ import type { RootBlockModel } from '@blocksuite/affine-model';
 
 import { WidgetComponent } from '@blocksuite/block-std';
 import { IS_MOBILE } from '@blocksuite/global/env';
+import { assertType } from '@blocksuite/global/utils';
 import { signal } from '@preact/signals-core';
 import { html, nothing } from 'lit';
 
@@ -17,7 +18,26 @@ export class AffineKeyboardToolbarWidget extends WidgetComponent<
   RootBlockModel,
   PageRootBlockComponent
 > {
+  private _close = (blur: boolean) => {
+    if (blur) {
+      if (document.activeElement === this._docTitle) {
+        this._docTitle?.blur();
+      } else if (document.activeElement === this.block.rootComponent) {
+        this.block.rootComponent?.blur();
+      }
+    }
+    this._show$.value = false;
+  };
+
   private readonly _show$ = signal(false);
+
+  private get _docTitle(): HTMLDivElement | null {
+    const docTitle = this.std.host
+      .closest('.affine-page-viewport')
+      ?.querySelector('doc-title rich-text .inline-editor');
+    assertType<HTMLDivElement | null>(docTitle);
+    return docTitle;
+  }
 
   get config() {
     return {
@@ -30,13 +50,23 @@ export class AffineKeyboardToolbarWidget extends WidgetComponent<
     super.connectedCallback();
 
     const { rootComponent } = this.block;
-    if (!rootComponent) return;
-    this.disposables.addFromEvent(rootComponent, 'focus', () => {
-      this._show$.value = true;
-    });
-    this.disposables.addFromEvent(rootComponent, 'blur', () => {
-      this._show$.value = false;
-    });
+    if (rootComponent) {
+      this.disposables.addFromEvent(rootComponent, 'focus', () => {
+        this._show$.value = true;
+      });
+      this.disposables.addFromEvent(rootComponent, 'blur', () => {
+        this._show$.value = false;
+      });
+    }
+
+    if (this._docTitle) {
+      this.disposables.addFromEvent(this._docTitle, 'focus', () => {
+        this._show$.value = true;
+      });
+      this.disposables.addFromEvent(this._docTitle, 'blur', () => {
+        this._show$.value = false;
+      });
+    }
   }
 
   override render() {
@@ -52,12 +82,11 @@ export class AffineKeyboardToolbarWidget extends WidgetComponent<
     if (!this.block.rootComponent) return nothing;
 
     return html`<blocksuite-portal
+      .shadowDom=${false}
       .template=${html`<affine-keyboard-toolbar
         .config=${this.config}
         .rootComponent=${this.block.rootComponent}
-        .close=${() => {
-          this._show$.value = false;
-        }}
+        .close=${this._close}
       ></affine-keyboard-toolbar> `}
     ></blocksuite-portal>`;
   }

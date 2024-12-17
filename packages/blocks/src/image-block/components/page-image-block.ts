@@ -19,7 +19,6 @@ export class ImageBlockPageComponent extends WithDisposable(ShadowlessElement) {
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 8px;
       line-height: 0;
       cursor: pointer;
     }

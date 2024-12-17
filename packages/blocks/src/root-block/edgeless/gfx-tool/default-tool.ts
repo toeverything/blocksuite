@@ -28,6 +28,7 @@ import {
   BaseTool,
   getTopElements,
   GfxExtensionIdentifier,
+  type GfxModel,
   type GfxPrimitiveElementModel,
   isGfxGroupCompatibleModel,
   type PointTestOptions,
@@ -67,7 +68,7 @@ import {
 } from '../utils/text.js';
 import { fitToScreen } from '../utils/viewport.js';
 import { DefaultModeDragType } from './default-tool-ext/ext.js';
-import { MindMapExt } from './default-tool-ext/mind-map-ext.js';
+import { MindMapExt } from './default-tool-ext/mind-map-ext/mind-map-ext.js';
 
 export class DefaultTool extends BaseTool {
   static override toolName: string = 'default';
@@ -156,7 +157,7 @@ export class DefaultTool extends BaseTool {
     }
   };
 
-  private _toBeMoved: BlockSuite.EdgelessModel[] = [];
+  private _toBeMoved: GfxModel[] = [];
 
   private _updateSelectingState = (delta: IVec = [0, 0]) => {
     const { gfx } = this;
@@ -199,7 +200,17 @@ export class DefaultTool extends BaseTool {
     const { x, y, w, h } = this.controller.draggingArea$.peek();
     const bound = new Bound(x, y, w, h);
 
-    const elements = getTopElements(gfx.getElementsByBound(bound));
+    let elements = gfx.getElementsByBound(bound).filter(el => {
+      if (isFrameBlock(el)) {
+        return el.childElements.length === 0 || bound.contains(el.elementBound);
+      }
+      if (el instanceof MindmapElementModel) {
+        return bound.contains(el.elementBound);
+      }
+      return true;
+    });
+
+    elements = getTopElements(elements).filter(el => !el.isLocked());
 
     const set = new Set(
       gfx.keyboard.shiftKey$.peek()
@@ -282,7 +293,7 @@ export class DefaultTool extends BaseTool {
     if (!this._edgeless) return;
 
     const clipboardController = this._edgeless?.clipboardController;
-    const snapshot = await prepareCloneData(this._toBeMoved, this.std);
+    const snapshot = prepareCloneData(this._toBeMoved, this.std);
 
     const bound = getCommonBoundWithRotation(this._toBeMoved);
     const { canvasElements, blockModels } =
@@ -384,7 +395,7 @@ export class DefaultTool extends BaseTool {
     });
   }
 
-  private _isDraggable(element: BlockSuite.EdgelessModel) {
+  private _isDraggable(element: GfxModel) {
     return !(
       element instanceof ConnectorElementModel &&
       !ConnectorUtils.isConnectorAndBindingsAllSelected(
@@ -445,7 +456,7 @@ export class DefaultTool extends BaseTool {
       this._toBeMoved.filter(ele => isFrameBlock(ele))
     );
 
-    this._hoveredFrame
+    this._hoveredFrame && !this._hoveredFrame.isLocked()
       ? this.frameOverlay.highlight(this._hoveredFrame)
       : this.frameOverlay.clear();
   }
@@ -471,6 +482,13 @@ export class DefaultTool extends BaseTool {
   private _pick(x: number, y: number, options?: PointTestOptions) {
     const modelPos = this.gfx.viewport.toModelCoord(x, y);
 
+    const tryGetLockedAncestor = (e: GfxModel | null) => {
+      if (e?.isLockedByAncestor()) {
+        return e.groups.findLast(group => group.isLocked());
+      }
+      return e;
+    };
+
     const frameByPickingTitle = last(
       this.gfx
         .getElementByPoint(modelPos[0], modelPos[1], {
@@ -482,11 +500,15 @@ export class DefaultTool extends BaseTool {
         )
     );
 
-    if (frameByPickingTitle) return frameByPickingTitle;
+    if (frameByPickingTitle) return tryGetLockedAncestor(frameByPickingTitle);
 
-    const group = this.gfx.getElementInGroup(modelPos[0], modelPos[1], options);
+    const result = this.gfx.getElementInGroup(
+      modelPos[0],
+      modelPos[1],
+      options
+    );
 
-    if (group instanceof MindmapElementModel) {
+    if (result instanceof MindmapElementModel) {
       const picked = this.gfx.getElementByPoint(modelPos[0], modelPos[1], {
         ...((options ?? {}) as PointTestOptions),
         all: true,
@@ -496,7 +518,7 @@ export class DefaultTool extends BaseTool {
 
       while (pickedIdx >= 0) {
         const element = picked[pickedIdx];
-        if (element === group) {
+        if (element === result) {
           pickedIdx -= 1;
           continue;
         }
@@ -504,10 +526,15 @@ export class DefaultTool extends BaseTool {
         break;
       }
 
-      return picked[pickedIdx] ?? null;
+      return tryGetLockedAncestor(picked[pickedIdx]) ?? null;
     }
 
-    return group;
+    // if the frame has title, it only can be picked by clicking the title
+    if (isFrameBlock(result) && result.externalXYWH) {
+      return null;
+    }
+
+    return tryGetLockedAncestor(result);
   }
 
   private _scheduleUpdate(
@@ -527,7 +554,10 @@ export class DefaultTool extends BaseTool {
     });
   }
 
-  private initializeDragState(dragType: DefaultModeDragType) {
+  private initializeDragState(
+    dragType: DefaultModeDragType,
+    event: PointerEventState
+  ) {
     this.dragType = dragType;
 
     if (
@@ -553,6 +583,7 @@ export class DefaultTool extends BaseTool {
     const ctx = {
       movedElements: this._toBeMoved,
       dragType,
+      event,
     };
 
     this._extHandlers = this._exts.map(ext => ext.initDrag(ctx));
@@ -624,6 +655,7 @@ export class DefaultTool extends BaseTool {
     const selected = this._pick(e.x, e.y, {
       ignoreTransparent: true,
     });
+
     if (selected) {
       const { selectedIds, surfaceSelections } = this.edgelessSelectionManager;
       const editing = surfaceSelections[0]?.editing ?? false;
@@ -645,8 +677,9 @@ export class DefaultTool extends BaseTool {
         return;
       }
 
-      // click non-active edgeless text block and note block
+      // click non-active edgeless text block and note block, and then enter editing
       if (
+        !selected.isLocked() &&
         !e.keys.shift &&
         selectedIds.length === 1 &&
         (isNoteBlock(selected) || isEdgelessTextBlock(selected)) &&
@@ -760,6 +793,7 @@ export class DefaultTool extends BaseTool {
       });
       return;
     } else {
+      if (selected.isLocked()) return;
       const [x, y] = this.gfx.viewport.toModelCoord(e.x, e.y);
       if (selected instanceof TextElementModel) {
         mountTextElementEditor(selected, this._edgeless, {
@@ -865,6 +899,7 @@ export class DefaultTool extends BaseTool {
       case DefaultModeDragType.AltCloning:
       case DefaultModeDragType.ContentMoving: {
         if (
+          this._toBeMoved.length &&
           this._toBeMoved.every(ele => {
             return !this._isDraggable(ele);
           })
@@ -905,6 +940,8 @@ export class DefaultTool extends BaseTool {
     let dragType = this._determineDragType(e);
 
     const elements = this.edgelessSelectionManager.selectedElements;
+    if (elements.some(e => e.isLocked())) return;
+
     const toBeMoved = new Set(elements);
 
     elements.forEach(element => {
@@ -930,7 +967,7 @@ export class DefaultTool extends BaseTool {
     );
 
     // Set up drag state
-    this.initializeDragState(dragType);
+    this.initializeDragState(dragType, e);
 
     // stash the state
     this._toBeMoved.forEach(ele => {

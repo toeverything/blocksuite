@@ -1,7 +1,7 @@
 import { sha } from '@blocksuite/global/utils';
 import { type DocCollection, extMimeMap, Job } from '@blocksuite/store';
 
-import { NotionHtmlAdapter } from '../adapters/notion-html.js';
+import { NotionHtmlAdapter } from '../adapters/notion-html/notion-html.js';
 import { defaultImageProxyMiddleware } from './middlewares.js';
 import { Unzip } from './utils.js';
 

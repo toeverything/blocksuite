@@ -1,4 +1,5 @@
-import type { AffineTextAttributes } from '@blocksuite/affine-components/rich-text';
+import type { AffineTextAttributes } from '@blocksuite/affine-shared/types';
+import type { ExtensionType } from '@blocksuite/block-std';
 import type { DeltaInsert } from '@blocksuite/inline';
 
 import { DEFAULT_NOTE_BACKGROUND_COLOR } from '@blocksuite/affine-model';
@@ -11,9 +12,12 @@ import {
   type FromBlockSnapshotResult,
   type FromDocSnapshotResult,
   type FromSliceSnapshotResult,
+  type Job,
   nanoid,
   type SliceSnapshot,
 } from '@blocksuite/store';
+
+import { AdapterFactoryIdentifier } from './type.js';
 
 type NotionEditingStyle = {
   0: string;
@@ -34,8 +38,6 @@ export type NotionText = string;
 type NotionHtmlToSliceSnapshotPayload = {
   file: NotionText;
   assets?: AssetsManager;
-  pageVersion: number;
-  workspaceVersion: number;
   workspaceId: string;
   pageId: string;
 };
@@ -151,10 +153,19 @@ export class NotionTextAdapter extends BaseAdapter<NotionText> {
     return {
       type: 'slice',
       content,
-      pageVersion: payload.pageVersion,
-      workspaceVersion: payload.workspaceVersion,
       workspaceId: payload.workspaceId,
       pageId: payload.pageId,
     };
   }
 }
+
+export const NotionTextAdapterFactoryIdentifier =
+  AdapterFactoryIdentifier('NotionText');
+
+export const NotionTextAdapterFactoryExtension: ExtensionType = {
+  setup: di => {
+    di.addImpl(NotionTextAdapterFactoryIdentifier, () => ({
+      get: (job: Job) => new NotionTextAdapter(job),
+    }));
+  },
+};

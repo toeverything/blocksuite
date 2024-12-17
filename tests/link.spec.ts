@@ -157,6 +157,7 @@ test('type character in link should not jump out link node', async ({
     page,
     `
 <affine:paragraph
+  prop:collapsed={false}
   prop:text={
     <>
       <text
@@ -185,6 +186,7 @@ test('type character after link should not extend the link attributes', async ({
     page,
     `
 <affine:paragraph
+  prop:collapsed={false}
   prop:text={
     <>
       <text
@@ -257,6 +259,7 @@ test('should mock selection not stored', async ({ page }) => {
     page,
     `
 <affine:paragraph
+  prop:collapsed={false}
   prop:text="linkText"
   prop:type="text"
 />`,
@@ -377,6 +380,7 @@ test('create link with paste', async ({ page }) => {
     page,
     `
 <affine:paragraph
+  prop:collapsed={false}
   prop:text={
     <>
       <text
@@ -487,12 +491,15 @@ test.skip('convert link to embed', async ({ page }) => {
     }
     prop:hidden={false}
     prop:index="a0"
+    prop:lockedBySelf={false}
   >
     <affine:paragraph
+      prop:collapsed={false} 
       prop:text="aaa"
       prop:type="text"
     />
     <affine:paragraph
+      prop:collapsed={false}
       prop:text={
         <>
           <text

@@ -21,6 +21,8 @@ export class BookmarkBlockComponent extends CaptionedBlockComponent<
 > {
   private _fetchAbortController?: AbortController;
 
+  blockDraggable = true;
+
   protected containerStyleMap!: ReturnType<typeof styleMap>;
 
   open = () => {
@@ -75,6 +77,7 @@ export class BookmarkBlockComponent extends CaptionedBlockComponent<
     const selected = !!this.selected?.is('block');
     return html`
       <div
+        draggable="${this.blockDraggable ? 'true' : 'false'}"
         class=${classMap({
           'affine-bookmark-container': true,
           'selected-style': selected,

@@ -1,16 +1,8 @@
 import type {
   AttachmentBlockModel,
-  BookmarkBlockModel,
   BrushElementModel,
   ConnectorElementModel,
   EdgelessTextBlockModel,
-  EmbedFigmaModel,
-  EmbedGithubModel,
-  EmbedHtmlModel,
-  EmbedLinkedDocModel,
-  EmbedLoomModel,
-  EmbedSyncedDocModel,
-  EmbedYoutubeModel,
   FrameBlockModel,
   ImageBlockModel,
   MindmapElementModel,
@@ -48,6 +40,7 @@ import { css, html, nothing, type TemplateResult, unsafeCSS } from 'lit';
 import { property, state } from 'lit/decorators.js';
 import { join } from 'lit/directives/join.js';
 
+import type { EmbedModel } from '../../../_common/components/embed-card/type.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 import type { ElementToolbarMoreMenuContext } from './more-menu/context.js';
 
@@ -90,14 +83,7 @@ type CategorizedElements = {
   image?: ImageBlockModel[];
   attachment?: AttachmentBlockModel[];
   mindmap?: MindmapElementModel[];
-  embedCard?: BookmarkBlockModel[] &
-    EmbedGithubModel[] &
-    EmbedYoutubeModel[] &
-    EmbedFigmaModel[] &
-    EmbedLinkedDocModel[] &
-    EmbedSyncedDocModel[] &
-    EmbedHtmlModel[] &
-    EmbedLoomModel[];
+  embedCard?: EmbedModel[];
   edgelessText?: EdgelessTextBlockModel[];
 };
 
@@ -210,10 +196,12 @@ export class EdgelessElementToolbarWidget extends WidgetComponent<
     const bound = getCommonBoundWithRotation(elements);
 
     const { width, height } = viewport;
-    const [x, y] = viewport.toViewCoord(bound.x, bound.y);
+    const { x, y, w } = viewport.toViewBound(bound);
 
     let left = x;
     let top = y;
+
+    const hasLocked = elements.some(e => e.isLocked());
 
     let offset = 37 + 12;
     // frame, group, shape
@@ -248,11 +236,116 @@ export class EdgelessElementToolbarWidget extends WidgetComponent<
     requestConnectedFrame(() => {
       const rect = this.getBoundingClientRect();
 
-      left = CommonUtils.clamp(x, 10, width - rect.width - 10);
+      if (hasLocked) {
+        left += 0.5 * (w - rect.width);
+      }
+
+      left = CommonUtils.clamp(left, 10, width - rect.width - 10);
       top = CommonUtils.clamp(top, 10, height - rect.height - 150);
 
       this.style.transform = `translate3d(${left}px, ${top}px, 0)`;
     }, this);
+  }
+
+  private _renderButtons() {
+    if (this.doc.readonly || this._dragging || !this.toolbarVisible) {
+      return [];
+    }
+    const { selectedElements } = this.selection;
+    if (selectedElements.some(e => e.isLocked())) {
+      return [
+        html`<edgeless-lock-button
+          .edgeless=${this.edgeless}
+        ></edgeless-lock-button>`,
+      ];
+    }
+
+    const groupedSelected = this._groupSelected();
+    const { edgeless, selection } = this;
+    const {
+      shape,
+      brush,
+      connector,
+      note,
+      text,
+      frame,
+      group,
+      embedCard,
+      attachment,
+      image,
+      edgelessText,
+      mindmap: mindmaps,
+    } = groupedSelected;
+    const selectedAtLeastTwoTypes = atLeastNMatches(
+      Object.values(groupedSelected),
+      e => !!e.length,
+      2
+    );
+
+    const quickConnectButton =
+      selectedElements.length === 1 && !connector?.length
+        ? this._renderQuickConnectButton()
+        : undefined;
+
+    const generalButtons =
+      selectedElements.length !== connector?.length
+        ? [
+            renderAddFrameButton(edgeless, selectedElements),
+            renderAddGroupButton(edgeless, selectedElements),
+            renderAlignButton(edgeless, selectedElements),
+          ]
+        : [];
+
+    const buttons: (symbol | TemplateResult)[] = selectedAtLeastTwoTypes
+      ? generalButtons
+      : [
+          ...generalButtons,
+          renderMindmapButton(edgeless, mindmaps),
+          renderMindmapButton(edgeless, shape),
+          renderChangeShapeButton(edgeless, shape),
+          renderChangeBrushButton(edgeless, brush),
+          renderConnectorButton(edgeless, connector),
+          renderNoteButton(edgeless, note, quickConnectButton),
+          renderChangeTextButton(edgeless, text),
+          renderChangeEdgelessTextButton(edgeless, edgelessText),
+          renderFrameButton(edgeless, frame),
+          renderGroupButton(edgeless, group),
+          renderEmbedButton(edgeless, embedCard, quickConnectButton),
+          renderAttachmentButton(edgeless, attachment),
+          renderChangeImageButton(edgeless, image),
+        ];
+
+    if (selectedElements.length === 1) {
+      if (selection.firstElement.group instanceof GroupElementModel) {
+        buttons.unshift(renderReleaseFromGroupButton(this.edgeless));
+      }
+
+      if (!connector?.length) {
+        buttons.push(quickConnectButton?.pop() ?? nothing);
+      }
+    }
+
+    buttons.push(
+      html`<edgeless-lock-button
+        .edgeless=${this.edgeless}
+      ></edgeless-lock-button>`
+    );
+
+    this._registeredEntries
+      .filter(entry => entry.when(selectedElements))
+      .map(entry => entry.render(this.edgeless))
+      .forEach(entry => entry && buttons.unshift(entry));
+
+    buttons.push(html`
+      <edgeless-more-button
+        .elements=${selectedElements}
+        .edgeless=${edgeless}
+        .groups=${this.moreGroups}
+        .vertical=${true}
+      ></edgeless-more-button>
+    `);
+
+    return buttons;
   }
 
   private _renderQuickConnectButton() {
@@ -350,89 +443,8 @@ export class EdgelessElementToolbarWidget extends WidgetComponent<
   }
 
   override render() {
-    if (this.doc.readonly || this._dragging || !this.toolbarVisible) {
-      return nothing;
-    }
-
-    const groupedSelected = this._groupSelected();
-    const { edgeless, selection } = this;
-    const {
-      shape,
-      brush,
-      connector,
-      note,
-      text,
-      frame,
-      group,
-      embedCard,
-      attachment,
-      image,
-      edgelessText,
-      mindmap: mindmaps,
-    } = groupedSelected;
-    const { selectedElements } = this.selection;
-    const selectedAtLeastTwoTypes = atLeastNMatches(
-      Object.values(groupedSelected),
-      e => !!e.length,
-      2
-    );
-
-    const quickConnectButton =
-      selectedElements.length === 1 && !connector?.length
-        ? this._renderQuickConnectButton()
-        : undefined;
-
-    const generalButtons =
-      selectedElements.length !== connector?.length
-        ? [
-            renderAddFrameButton(edgeless, selectedElements),
-            renderAddGroupButton(edgeless, selectedElements),
-            renderAlignButton(edgeless, selectedElements),
-          ]
-        : [];
-
-    const buttons: (symbol | TemplateResult)[] = selectedAtLeastTwoTypes
-      ? generalButtons
-      : [
-          ...generalButtons,
-          renderMindmapButton(edgeless, mindmaps),
-          renderMindmapButton(edgeless, shape),
-          renderChangeShapeButton(edgeless, shape),
-          renderChangeBrushButton(edgeless, brush),
-          renderConnectorButton(edgeless, connector),
-          renderNoteButton(edgeless, note, quickConnectButton),
-          renderChangeTextButton(edgeless, text),
-          renderChangeEdgelessTextButton(edgeless, edgelessText),
-          renderFrameButton(edgeless, frame),
-          renderGroupButton(edgeless, group),
-          renderEmbedButton(edgeless, embedCard, quickConnectButton),
-          renderAttachmentButton(edgeless, attachment),
-          renderChangeImageButton(edgeless, image),
-        ];
-
-    if (selectedElements.length === 1) {
-      if (selection.firstElement.group instanceof GroupElementModel) {
-        buttons.unshift(renderReleaseFromGroupButton(this.edgeless));
-      }
-
-      if (!connector?.length) {
-        buttons.push(quickConnectButton?.pop() ?? nothing);
-      }
-    }
-
-    this._registeredEntries
-      .filter(entry => entry.when(selectedElements))
-      .map(entry => entry.render(this.edgeless))
-      .forEach(entry => entry && buttons.unshift(entry));
-
-    buttons.push(html`
-      <edgeless-more-button
-        .elements=${selectedElements}
-        .edgeless=${edgeless}
-        .groups=${this.moreGroups}
-        .vertical=${true}
-      ></edgeless-more-button>
-    `);
+    const buttons = this._renderButtons();
+    if (buttons.length === 0) return nothing;
 
     const appTheme = this.std.get(ThemeProvider).app$.value;
     return html`

@@ -1,3 +1,4 @@
+import type { ExtensionType } from '@blocksuite/block-std';
 import type { DeltaInsert } from '@blocksuite/inline';
 
 import {
@@ -24,7 +25,8 @@ import {
   type ToDocSnapshotPayload,
 } from '@blocksuite/store';
 
-import { MarkdownAdapter } from './markdown.js';
+import { MarkdownAdapter } from './markdown/index.js';
+import { AdapterFactoryIdentifier } from './type.js';
 
 export type MixText = string;
 
@@ -32,8 +34,6 @@ type MixTextToSliceSnapshotPayload = {
   file: MixText;
   assets?: AssetsManager;
   blockVersions: Record<string, number>;
-  pageVersion: number;
-  workspaceVersion: number;
   workspaceId: string;
   pageId: string;
 };
@@ -272,8 +272,6 @@ export class MixTextAdapter extends BaseAdapter<MixText> {
     const sliceSnapshot = await this._markdownAdapter.toSliceSnapshot({
       file: payload.file,
       assets: payload.assets,
-      pageVersion: payload.pageVersion,
-      workspaceVersion: payload.workspaceVersion,
       workspaceId: payload.workspaceId,
       pageId: payload.pageId,
     });
@@ -353,3 +351,14 @@ export class MixTextAdapter extends BaseAdapter<MixText> {
     return sliceSnapshot;
   }
 }
+
+export const MixTextAdapterFactoryIdentifier =
+  AdapterFactoryIdentifier('MixText');
+
+export const MixTextAdapterFactoryExtension: ExtensionType = {
+  setup: di => {
+    di.addImpl(MixTextAdapterFactoryIdentifier, () => ({
+      get: (job: Job) => new MixTextAdapter(job),
+    }));
+  },
+};

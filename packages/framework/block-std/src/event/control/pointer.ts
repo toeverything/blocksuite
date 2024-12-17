@@ -1,4 +1,5 @@
 import { IS_IPAD } from '@blocksuite/global/env';
+import { nextTick, Vec } from '@blocksuite/global/utils';
 
 import type { UIEventDispatcher } from '../dispatcher.js';
 
@@ -9,7 +10,7 @@ import {
   PointerEventState,
 } from '../state/index.js';
 import { EventScopeSourceType, EventSourceState } from '../state/source.js';
-import { center, isFarEnough } from '../utils.js';
+import { isFarEnough } from '../utils.js';
 
 type PointerId = typeof PointerEvent.prototype.pointerId;
 
@@ -27,12 +28,13 @@ function createContext(
   );
 }
 
-abstract class PointerControllerBase {
-  protected get _rect() {
-    return this._dispatcher.host.getBoundingClientRect();
-  }
+const POLL_INTERVAL = 1000;
 
-  constructor(protected _dispatcher: UIEventDispatcher) {}
+abstract class PointerControllerBase {
+  constructor(
+    protected _dispatcher: UIEventDispatcher,
+    protected _getRect: () => DOMRect
+  ) {}
 
   abstract listen(): void;
 }
@@ -43,7 +45,7 @@ class PointerEventForward extends PointerControllerBase {
 
     const pointerState = new PointerEventState({
       event,
-      rect: this._rect,
+      rect: this._getRect(),
       startX: -Infinity,
       startY: -Infinity,
       last: null,
@@ -63,7 +65,7 @@ class PointerEventForward extends PointerControllerBase {
 
     const state = new PointerEventState({
       event,
-      rect: this._rect,
+      rect: this._getRect(),
       startX: start?.x ?? -Infinity,
       startY: start?.y ?? -Infinity,
       last,
@@ -83,7 +85,7 @@ class PointerEventForward extends PointerControllerBase {
 
     const state = new PointerEventState({
       event,
-      rect: this._rect,
+      rect: this._getRect(),
       startX: start?.x ?? -Infinity,
       startY: start?.y ?? -Infinity,
       last,
@@ -125,7 +127,7 @@ class ClickController extends PointerControllerBase {
 
     this._downPointerState = new PointerEventState({
       event,
-      rect: this._rect,
+      rect: this._getRect(),
       startX: -Infinity,
       startY: -Infinity,
       last: null,
@@ -147,7 +149,7 @@ class ClickController extends PointerControllerBase {
 
     const state = new PointerEventState({
       event,
-      rect: this._rect,
+      rect: this._getRect(),
       startX: -Infinity,
       startY: -Infinity,
       last: null,
@@ -189,7 +191,7 @@ class DragController extends PointerControllerBase {
 
     const pointerState = new PointerEventState({
       event,
-      rect: this._rect,
+      rect: this._getRect(),
       startX: -Infinity,
       startY: -Infinity,
       last: null,
@@ -220,7 +222,7 @@ class DragController extends PointerControllerBase {
 
     const state = new PointerEventState({
       event,
-      rect: this._rect,
+      rect: this._getRect(),
       startX: start.x,
       startY: start.y,
       last,
@@ -273,6 +275,7 @@ class DragController extends PointerControllerBase {
 
   private _nativeDrop = (event: DragEvent) => {
     this._reset();
+    this._nativeDragging = false;
     const dndEventState = new DndEventState({ event });
     this._dispatcher.run(
       'nativeDrop',
@@ -303,7 +306,7 @@ class DragController extends PointerControllerBase {
 
     const state = new PointerEventState({
       event,
-      rect: this._rect,
+      rect: this._getRect(),
       startX: start.x,
       startY: start.y,
       last,
@@ -371,7 +374,7 @@ abstract class DualDragControllerBase extends PointerControllerBase {
 
     const state = new PointerEventState({
       event,
-      rect: this._rect,
+      rect: this._getRect(),
       startX: -Infinity,
       startY: -Infinity,
       last: null,
@@ -400,58 +403,41 @@ abstract class DualDragControllerBase extends PointerControllerBase {
       return;
     }
 
-    const { pointerId } = event;
+    const { isPrimary } = event;
+    const startPrimaryState = this._startPointerStates.primary;
+    let lastPrimaryState = this._lastPointerStates.primary;
 
-    const start1 =
-      this._startPointerStates.primary.raw.pointerId === pointerId
-        ? this._startPointerStates.primary
-        : this._startPointerStates.secondary;
+    const startSecondaryState = this._startPointerStates.secondary;
+    let lastSecondaryState = this._lastPointerStates.secondary;
 
-    const last1 =
-      (this._lastPointerStates.primary?.raw.pointerId === pointerId
-        ? this._lastPointerStates.primary
-        : this._lastPointerStates.secondary) ?? start1;
-
-    if (!isFarEnough(last1.raw, event)) return;
-
-    const state1 = new PointerEventState({
-      event,
-      rect: this._rect,
-      startX: start1.x,
-      startY: start1.y,
-      last: last1,
-    });
-
-    const start2 =
-      this._startPointerStates.primary.raw.pointerId !== pointerId
-        ? this._startPointerStates.primary
-        : this._startPointerStates.secondary;
-
-    const last2 =
-      (this._lastPointerStates.primary?.raw.pointerId !== pointerId
-        ? this._lastPointerStates.primary
-        : this._lastPointerStates.secondary) ?? start2;
-
-    const state2 = new PointerEventState({
-      event: last2.raw,
-      rect: this._rect,
-      startX: start2.x,
-      startY: start2.y,
-      last: last2,
-    });
-
-    if (!isFarEnough(state1.delta, state2.delta)) return;
+    if (isPrimary) {
+      lastPrimaryState = new PointerEventState({
+        event,
+        rect: this._getRect(),
+        startX: startPrimaryState.x,
+        startY: startPrimaryState.y,
+        last: lastPrimaryState,
+      });
+    } else {
+      lastSecondaryState = new PointerEventState({
+        event,
+        rect: this._getRect(),
+        startX: startSecondaryState.x,
+        startY: startSecondaryState.y,
+        last: lastSecondaryState,
+      });
+    }
 
     const multiPointerState = new MultiPointerEventState(event, [
-      state1,
-      state2,
+      lastPrimaryState ?? startPrimaryState,
+      lastSecondaryState ?? startSecondaryState,
     ]);
 
     this._handleMove(event, multiPointerState);
 
     this._lastPointerStates = {
-      primary: state1.raw.isPrimary ? state1 : state2,
-      secondary: state1.raw.isPrimary ? state2 : state1,
+      primary: lastPrimaryState,
+      secondary: lastSecondaryState,
     };
   };
 
@@ -502,8 +488,30 @@ class PinchController extends DualDragControllerBase {
   override _handleMove(event: PointerEvent, state: MultiPointerEventState) {
     if (event.pointerType !== 'touch') return;
 
+    const deltaFirstPointer = state.pointers[0].delta;
+    const deltaSecondPointer = state.pointers[1].delta;
+
+    const deltaFirstPointerVec = Vec.toVec(deltaFirstPointer);
+    const deltaSecondPointerVec = Vec.toVec(deltaSecondPointer);
+
+    const deltaFirstPointerValue = Vec.len(deltaFirstPointerVec);
+    const deltaSecondPointerValue = Vec.len(deltaSecondPointerVec);
+
+    const deltaDotProduct = Vec.dpr(
+      deltaFirstPointerVec,
+      deltaSecondPointerVec
+    );
+
+    const deltaValueThreshold = 0.1;
+
     // the changes of distance between two pointers is not far enough
-    if (!isFarEnough(state.pointers[0].delta, state.pointers[1].delta)) return;
+    if (
+      !isFarEnough(deltaFirstPointer, deltaSecondPointer) ||
+      deltaDotProduct > 0 ||
+      deltaFirstPointerValue < deltaValueThreshold ||
+      deltaSecondPointerValue < deltaValueThreshold
+    )
+      return;
 
     this._dispatcher.run('pinch', createContext(event, state));
   }
@@ -513,34 +521,75 @@ class PanController extends DualDragControllerBase {
   override _handleMove(event: PointerEvent, state: MultiPointerEventState) {
     if (event.pointerType !== 'touch') return;
 
-    //  current center,          last center   = center move vector
-    // 0.5 * (a + da + b + db) - 0.5 * (a + b) = 0.5 * (da + db)
-    const centerMoveVec = center(
-      state.pointers[0].delta,
-      state.pointers[1].delta
+    const deltaFirstPointer = state.pointers[0].delta;
+    const deltaSecondPointer = state.pointers[1].delta;
+
+    const deltaDotProduct = Vec.dpr(
+      Vec.toVec(deltaFirstPointer),
+      Vec.toVec(deltaSecondPointer)
     );
 
     // the center move distance is not far enough
-    if (!isFarEnough({ x: 0, y: 0 }, centerMoveVec)) return;
+    if (
+      !isFarEnough(deltaFirstPointer, deltaSecondPointer) &&
+      deltaDotProduct < 0
+    )
+      return;
 
     this._dispatcher.run('pan', createContext(event, state));
   }
 }
 
 export class PointerControl {
+  private _cachedRect: DOMRect | null = null;
+
+  private _getRect = () => {
+    if (this._cachedRect === null) {
+      this._updateRect();
+    }
+    return this._cachedRect as DOMRect;
+  };
+
+  // XXX: polling is used instead of MutationObserver
+  // due to potential performance issues
+  private _pollingInterval: number | null = null;
+
   private controllers: PointerControllerBase[];
 
-  constructor(dispatcher: UIEventDispatcher) {
+  constructor(private _dispatcher: UIEventDispatcher) {
     this.controllers = [
-      new PointerEventForward(dispatcher),
-      new ClickController(dispatcher),
-      new DragController(dispatcher),
-      new PanController(dispatcher),
-      new PinchController(dispatcher),
+      new PointerEventForward(_dispatcher, this._getRect),
+      new ClickController(_dispatcher, this._getRect),
+      new DragController(_dispatcher, this._getRect),
+      new PanController(_dispatcher, this._getRect),
+      new PinchController(_dispatcher, this._getRect),
     ];
   }
 
+  private _startPolling() {
+    const poll = () => {
+      nextTick()
+        .then(() => this._updateRect())
+        .catch(console.error);
+    };
+    this._pollingInterval = window.setInterval(poll, POLL_INTERVAL);
+    poll();
+  }
+
+  protected _updateRect() {
+    if (!this._dispatcher.host) return;
+    this._cachedRect = this._dispatcher.host.getBoundingClientRect();
+  }
+
+  dispose() {
+    if (this._pollingInterval !== null) {
+      clearInterval(this._pollingInterval);
+      this._pollingInterval = null;
+    }
+  }
+
   listen() {
+    this._startPolling();
     this.controllers.forEach(controller => controller.listen());
   }
 }

@@ -87,6 +87,7 @@ export const styles = css`
 
   ${embedNoteContentStyles}
 
+  .affine-embed-linked-doc-content-note.alias,
   .affine-embed-linked-doc-content-note.default {
     flex: 1;
     display: -webkit-box;
@@ -103,6 +104,10 @@ export const styles = css`
     font-style: normal;
     font-weight: 400;
     line-height: 20px;
+  }
+
+  .affine-embed-linked-doc-content-note.alias {
+    color: var(--affine-text-primary-color);
   }
 
   .affine-embed-linked-doc-card-content-reload,
@@ -180,8 +185,8 @@ export const styles = css`
   }
 
   .affine-embed-linked-doc-block:not(.in-canvas) {
-    max-width: 100%;
-    min-width: ${EMBED_CARD_MIN_WIDTH}px;
+    width: 100%;
+    min-width: calc(min(${EMBED_CARD_MIN_WIDTH}px, 100%));
   }
 
   .affine-embed-linked-doc-block.loading {

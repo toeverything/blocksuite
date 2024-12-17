@@ -6,7 +6,6 @@ import type {
   PointTestOptions,
   ReorderingDirection,
 } from '@blocksuite/block-std/gfx';
-import type { IBound } from '@blocksuite/global/utils';
 
 import {
   type ElementRenderer,
@@ -138,10 +137,13 @@ export class EdgelessRootService extends RootService implements SurfaceContext {
     ) as EdgelessFrameManager;
   }
 
+  /**
+   * Get all sorted frames by presentation orderer,
+   * the legacy frame that uses `index` as presentation order
+   * will be put at the beginning of the array.
+   */
   get frames() {
-    return this.layer.blocks.filter(
-      block => block.flavour === 'affine:frame'
-    ) as FrameBlockModel[];
+    return this.frame.frames;
   }
 
   get gfx(): GfxController {
@@ -269,6 +271,10 @@ export class EdgelessRootService extends RootService implements SurfaceContext {
     return groupId;
   }
 
+  /**
+   * Create a group from selected elements, if the selected elements are in the same group
+   * @returns the id of the created group
+   */
   createGroupFromSelected() {
     const { selection } = this;
 
@@ -307,15 +313,17 @@ export class EdgelessRootService extends RootService implements SurfaceContext {
     return groupId;
   }
 
-  createTemplateJob(type: 'template' | 'sticker') {
+  createTemplateJob(
+    type: 'template' | 'sticker',
+    center?: { x: number; y: number }
+  ) {
     const middlewares: ((job: TemplateJob) => void)[] = [];
 
     if (type === 'template') {
-      const currentContentBound = getCommonBound(
-        (
-          this.blocks.map(block => Bound.deserialize(block.xywh)) as IBound[]
-        ).concat(this.elements)
+      const bounds = [...this.blocks, ...this.elements].map(i =>
+        Bound.deserialize(i.xywh)
       );
+      const currentContentBound = getCommonBound(bounds);
 
       if (currentContentBound) {
         currentContentBound.x +=
@@ -330,7 +338,7 @@ export class EdgelessRootService extends RootService implements SurfaceContext {
 
     if (type === 'sticker') {
       middlewares.push(
-        createStickerMiddleware(this.viewport.center, () =>
+        createStickerMiddleware(center || this.viewport.center, () =>
           this.layer.generateIndex()
         )
       );

@@ -3,10 +3,12 @@ import type { Doc, DocCollection } from '@blocksuite/store';
 import { sha } from '@blocksuite/global/utils';
 import { extMimeMap, Job } from '@blocksuite/store';
 
-import { HtmlAdapter } from '../adapters/index.js';
+import { HtmlAdapter } from '../adapters/html-adapter/html.js';
 import {
   defaultImageProxyMiddleware,
+  docLinkBaseURLMiddleware,
   fileNameMiddleware,
+  titleMiddleware,
 } from './middlewares.js';
 import { createAssetsArchive, download, Unzip } from './utils.js';
 
@@ -28,8 +30,11 @@ type ImportHTMLZipOptions = {
  * @returns A Promise that resolves when the export is complete.
  */
 async function exportDoc(doc: Doc) {
-  const job = new Job({ collection: doc.collection });
-  const snapshot = await job.docToSnapshot(doc);
+  const job = new Job({
+    collection: doc.collection,
+    middlewares: [docLinkBaseURLMiddleware, titleMiddleware],
+  });
+  const snapshot = job.docToSnapshot(doc);
   const adapter = new HtmlAdapter(job);
   if (!snapshot) {
     return;
@@ -73,7 +78,11 @@ async function importHTMLToDoc({
 }: ImportHTMLToDocOptions) {
   const job = new Job({
     collection,
-    middlewares: [defaultImageProxyMiddleware, fileNameMiddleware(fileName)],
+    middlewares: [
+      defaultImageProxyMiddleware,
+      fileNameMiddleware(fileName),
+      docLinkBaseURLMiddleware,
+    ],
   });
   const htmlAdapter = new HtmlAdapter(job);
   const page = await htmlAdapter.toDoc({
@@ -128,6 +137,7 @@ async function importHTMLZip({ collection, imported }: ImportHTMLZipOptions) {
         middlewares: [
           defaultImageProxyMiddleware,
           fileNameMiddleware(fileNameWithoutExt),
+          docLinkBaseURLMiddleware,
         ],
       });
       const assets = job.assets;

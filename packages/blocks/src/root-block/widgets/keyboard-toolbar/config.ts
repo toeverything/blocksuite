@@ -1,9 +1,9 @@
 import type { FrameBlockModel } from '@blocksuite/affine-model';
+import type { AffineTextAttributes } from '@blocksuite/affine-shared/types';
 import type { BlockStdScope } from '@blocksuite/block-std';
 import type { TemplateResult } from 'lit';
 
 import {
-  type AffineTextAttributes,
   getInlineEditorByModel,
   insertContent,
   REFERENCE_NODE,
@@ -34,6 +34,7 @@ import {
   FrameIcon,
   GithubIcon,
   GroupIcon,
+  ImageIcon,
   ItalicIcon,
   LinkedPageIcon,
   LinkIcon,
@@ -80,11 +81,6 @@ export type KeyboardToolbarConfig = {
    * @default false
    */
   useScreenHeight?: boolean;
-  /**
-   * @description The safe bottom padding of the keyboard toolbar.
-   * It is useful when the device has a rounded corner screen.
-   */
-  safeBottomPadding?: string;
 };
 
 export type KeyboardToolbarItem =
@@ -125,9 +121,9 @@ export type KeyboardToolbarContext = {
   std: BlockStdScope;
   rootComponent: PageRootBlockComponent;
   /**
-   * Close tool bar
+   * Close tool bar, and blur the focus if blur is true, default is false
    */
-  closeToolbar: () => void;
+  closeToolbar: (blur?: boolean) => void;
   /**
    * Close current tool panel and show virtual keyboard
    */
@@ -339,7 +335,7 @@ const contentMediaToolGroup: KeyboardToolPanelGroup = {
   items: [
     {
       name: 'Image',
-      icon: NewPageIcon(),
+      icon: ImageIcon(),
       showWhen: ({ std }) =>
         std.doc.schema.flavourSchemaMap.has('affine:image'),
       action: ({ std }) => {
@@ -882,6 +878,42 @@ export const defaultKeyboardToolbarConfig: KeyboardToolbarConfig = {
     // TODO(@L-Sun): add ai function in AFFiNE side
     // { icon: AiIcon(iconStyle) },
     textSubToolbarConfig,
+    {
+      name: 'Image',
+      icon: ImageIcon(),
+      showWhen: ({ std }) =>
+        std.doc.schema.flavourSchemaMap.has('affine:image'),
+      action: ({ std }) => {
+        std.command
+          .chain()
+          .getSelectedModels()
+          .insertImages({ removeEmptyLine: true })
+          .run();
+      },
+    },
+    {
+      name: 'Attachment',
+      icon: AttachmentIcon(),
+      showWhen: ({ std }) =>
+        std.doc.schema.flavourSchemaMap.has('affine:attachment'),
+      action: async ({ std }) => {
+        const { selectedModels } = std.command.exec('getSelectedModels');
+        const model = selectedModels?.[0];
+        if (!model) return;
+
+        const file = await openFileOrFiles();
+        if (!file) return;
+
+        const attachmentService = std.getService('affine:attachment');
+        if (!attachmentService) return;
+        const maxFileSize = attachmentService.maxFileSize;
+
+        await addSiblingAttachmentBlocks(std.host, [file], maxFileSize, model);
+        if (model.text?.length === 0) {
+          std.doc.deleteBlock(model);
+        }
+      },
+    },
     {
       name: 'Undo',
       icon: UndoIcon(),

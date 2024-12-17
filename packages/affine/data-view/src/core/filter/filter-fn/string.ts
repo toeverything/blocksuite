@@ -11,6 +11,7 @@ export const stringFilter = [
     impl: (self = '', value) => {
       return self.toLowerCase().includes(value.toLowerCase());
     },
+    defaultValue: args => args[0],
   }),
   createFilter({
     name: 'doesNoContains',
@@ -31,6 +32,7 @@ export const stringFilter = [
     impl: (self = '', value) => {
       return self.toLowerCase().startsWith(value.toLowerCase());
     },
+    defaultValue: args => args[0],
   }),
   createFilter({
     name: 'endsWith',
@@ -41,6 +43,7 @@ export const stringFilter = [
     impl: (self = '', value) => {
       return self.toLowerCase().endsWith(value.toLowerCase());
     },
+    defaultValue: args => args[0],
   }),
   createFilter({
     name: 'is',
@@ -51,6 +54,7 @@ export const stringFilter = [
     impl: (self = '', value) => {
       return self.toLowerCase() == value.toLowerCase();
     },
+    defaultValue: args => args[0],
   }),
   createFilter({
     name: 'isNot',

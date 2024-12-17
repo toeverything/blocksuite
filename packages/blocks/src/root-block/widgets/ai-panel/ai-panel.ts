@@ -148,7 +148,7 @@ export class AffineAIPanelWidget extends WidgetComponent {
       return;
     }
 
-    const { key, isComposing } = event;
+    const { key } = event;
     if (key === 'Escape') {
       if (state === 'generating') {
         this.stopGenerating();
@@ -156,14 +156,6 @@ export class AffineAIPanelWidget extends WidgetComponent {
         this.hide();
       }
       return;
-    }
-
-    if (key === 'Delete' || key === 'Backspace') {
-      if (isComposing) return;
-
-      if (state === 'input' && !this._inputText) {
-        this.hide();
-      }
     }
   };
 
@@ -196,7 +188,7 @@ export class AffineAIPanelWidget extends WidgetComponent {
         } else {
           this._cancelCallback();
         }
-        this._restoreSelection();
+        this.restoreSelection();
       })
       .catch(console.error);
   };
@@ -205,6 +197,8 @@ export class AffineAIPanelWidget extends WidgetComponent {
    * You can evaluate this method multiple times to regenerate the answer.
    */
   generate = () => {
+    this.restoreSelection();
+
     assertExists(this.config);
     const text = this._inputText;
     assertExists(text);
@@ -259,6 +253,21 @@ export class AffineAIPanelWidget extends WidgetComponent {
 
   onInput = (text: string) => {
     this._inputText = text;
+    this.config?.inputCallback?.(text);
+  };
+
+  restoreSelection = () => {
+    if (this._selection) {
+      this.host.selection.set([...this._selection]);
+      if (this.state === 'hidden') {
+        this._selection = undefined;
+      }
+    }
+  };
+
+  setState = (state: AffineAIPanelState, reference: Element) => {
+    this.state = state;
+    this._autoUpdatePosition(reference);
   };
 
   showDiscardModal = () => {
@@ -341,6 +350,10 @@ export class AffineAIPanelWidget extends WidgetComponent {
         .then(({ x, y }) => {
           this.style.left = `${x}px`;
           this.style.top = `${y}px`;
+          setTimeout(() => {
+            const input = this.shadowRoot?.querySelector('ai-panel-input');
+            input?.textarea?.focus();
+          }, 0);
         })
         .catch(console.error);
     });
@@ -412,15 +425,6 @@ export class AffineAIPanelWidget extends WidgetComponent {
     }
   }
 
-  private _restoreSelection() {
-    if (this._selection) {
-      this.host.selection.set([...this._selection]);
-      if (this.state === 'hidden') {
-        this._selection = undefined;
-      }
-    }
-  }
-
   override connectedCallback() {
     super.connectedCallback();
 
@@ -462,19 +466,13 @@ export class AffineAIPanelWidget extends WidgetComponent {
     if (!this.config) return nothing;
     const config = this.config;
 
-    this.updateComplete
-      .then(() => {
-        this.focus();
-      })
-      .catch(console.error);
-
     const theme = this.std.get(ThemeProvider).theme;
     const mainTemplate = choose(this.state, [
       [
         'input',
         () =>
           html`<ai-panel-input
-            .onBlur=${() => this.discard()}
+            .onBlur=${this.discard}
             .onFinish=${this._inputFinish}
             .onInput=${this.onInput}
           ></ai-panel-input>`,
@@ -537,20 +535,8 @@ export class AffineAIPanelWidget extends WidgetComponent {
     if (prevState) {
       if (prevState === 'hidden') {
         this._selection = this.host.selection.value;
-        requestAnimationFrame(() => {
-          this.scrollIntoView({
-            block: 'center',
-          });
-        });
       } else {
-        this.host.updateComplete
-          .then(() => {
-            if (this.state !== 'hidden') {
-              this.focus();
-            }
-          })
-          .catch(console.error);
-        this._restoreSelection();
+        this.restoreSelection();
       }
 
       // tell format bar to show or hide

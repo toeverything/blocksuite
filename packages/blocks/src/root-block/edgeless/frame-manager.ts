@@ -3,6 +3,7 @@ import type { Doc } from '@blocksuite/store';
 
 import { Overlay } from '@blocksuite/affine-block-surface';
 import {
+  generateKeyBetweenV2,
   getTopElements,
   type GfxController,
   GfxExtension,
@@ -27,8 +28,6 @@ import { GfxBlockModel } from './block-model.js';
 import { areSetsEqual } from './utils/misc.js';
 import { isFrameBlock } from './utils/query.js';
 
-const MIN_FRAME_WIDTH = 800;
-const MIN_FRAME_HEIGHT = 640;
 const FRAME_PADDING = 40;
 
 export class FrameOverlay extends Overlay {
@@ -138,17 +137,50 @@ export class EdgelessFrameManager extends GfxExtension {
   private _disposable = new DisposableGroup();
 
   /**
-   * Get all sorted frames
+   * Get all sorted frames by presentation orderer,
+   * the legacy frame that uses `index` as presentation order
+   * will be put at the beginning of the array.
    */
   get frames() {
-    return this.gfx.layer.blocks.filter(
-      block => block.flavour === 'affine:frame'
-    ) as FrameBlockModel[];
+    return Object.values(this.gfx.doc.blocks.value)
+      .map(({ model }) => model)
+      .filter(isFrameBlock)
+      .sort(EdgelessFrameManager.framePresentationComparator);
   }
 
   constructor(gfx: GfxController) {
     super(gfx);
     this._watchElementAdded();
+  }
+
+  static framePresentationComparator<
+    T extends FrameBlockModel | { index: string; presentationIndex?: string },
+  >(a: T, b: T) {
+    function stringCompare(a: string, b: string) {
+      if (a < b) return -1;
+      if (a > b) return 1;
+      return 0;
+    }
+
+    if (
+      'presentationIndex$' in a &&
+      'presentationIndex$' in b &&
+      a.presentationIndex$.value &&
+      b.presentationIndex$.value
+    ) {
+      return stringCompare(
+        a.presentationIndex$.value,
+        b.presentationIndex$.value
+      );
+    } else if (a.presentationIndex && b.presentationIndex) {
+      return stringCompare(a.presentationIndex, b.presentationIndex);
+    } else if (a.presentationIndex) {
+      return -1;
+    } else if (b.presentationIndex) {
+      return 1;
+    } else {
+      return stringCompare(a.index, b.index);
+    }
   }
 
   private _addChildrenToLegacyFrame(frame: FrameBlockModel) {
@@ -171,6 +203,7 @@ export class EdgelessFrameManager extends GfxExtension {
         ),
         xywh: bound.serialize(),
         index: this.gfx.layer.generateIndex(true),
+        presentationIndex: this.generatePresentationIndex(),
       },
       surfaceModel
     );
@@ -248,6 +281,8 @@ export class EdgelessFrameManager extends GfxExtension {
    * Reset parent of elements to the frame
    */
   addElementsToFrame(frame: FrameBlockModel, elements: GfxModel[]) {
+    if (frame.isLocked()) return;
+
     if (frame.childElementIds === undefined) {
       this._addChildrenToLegacyFrame(frame);
     }
@@ -280,15 +315,28 @@ export class EdgelessFrameManager extends GfxExtension {
   }
 
   createFrameOnElements(elements: GfxModel[]) {
-    let bound = this.gfx.selection.selectedBound;
-    bound = bound.expand(FRAME_PADDING);
-    if (bound.w < MIN_FRAME_WIDTH) {
-      const offset = (MIN_FRAME_WIDTH - bound.w) / 2;
-      bound = bound.expand(offset, 0);
+    // make sure all elements are in the same level
+    for (const element of elements) {
+      if (element.group !== elements[0].group) return;
     }
-    if (bound.h < MIN_FRAME_HEIGHT) {
-      const offset = (MIN_FRAME_HEIGHT - bound.h) / 2;
-      bound = bound.expand(0, offset);
+
+    const parentFrameBound = this.getParentFrame(elements[0])?.elementBound;
+
+    let bound = this.gfx.selection.selectedBound;
+
+    if (parentFrameBound?.contains(bound)) {
+      bound.x -= Math.min(0.5 * (bound.x - parentFrameBound.x), FRAME_PADDING);
+      bound.y -= Math.min(0.5 * (bound.y - parentFrameBound.y), FRAME_PADDING);
+      bound.w += Math.min(
+        0.5 * (parentFrameBound.x + parentFrameBound.w - bound.x - bound.w),
+        FRAME_PADDING
+      );
+      bound.h += Math.min(
+        0.5 * (parentFrameBound.y + parentFrameBound.h - bound.y - bound.h),
+        FRAME_PADDING
+      );
+    } else {
+      bound = bound.expand(FRAME_PADDING);
     }
 
     const frameModel = this._addFrameBlock(bound);
@@ -319,6 +367,13 @@ export class EdgelessFrameManager extends GfxExtension {
     );
 
     this.createFrameOnBound(bound);
+  }
+
+  generatePresentationIndex() {
+    const before =
+      this.frames[this.frames.length - 1]?.presentationIndex ?? null;
+
+    return generateKeyBetweenV2(before, null);
   }
 
   /**
@@ -369,6 +424,28 @@ export class EdgelessFrameManager extends GfxExtension {
   getParentFrame(element: GfxModel) {
     const container = element.group;
     return container && isFrameBlock(container) ? container : null;
+  }
+
+  /**
+   * This method will populate `presentationIndex` for all legacy frames,
+   * and keep the orderer of the legacy frames.
+   */
+  refreshLegacyFrameOrder() {
+    const frames = this.frames.splice(0, this.frames.length);
+
+    let splitIndex = frames.findIndex(frame => frame.presentationIndex);
+    if (splitIndex === 0) return;
+
+    if (splitIndex === -1) splitIndex = frames.length;
+
+    let afterPreIndex =
+      frames[splitIndex]?.presentationIndex || generateKeyBetweenV2(null, null);
+
+    for (let index = splitIndex - 1; index >= 0; index--) {
+      const preIndex = generateKeyBetweenV2(null, afterPreIndex);
+      frames[index].presentationIndex = preIndex;
+      afterPreIndex = preIndex;
+    }
   }
 
   removeAllChildrenFromFrame(frame: FrameBlockModel) {

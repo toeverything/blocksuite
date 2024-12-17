@@ -21,4 +21,24 @@ export const styles = css`
       transform: translateY(0);
     }
   }
+
+  editor-icon-button.doc-title .label {
+    max-width: 110px;
+    display: inline-block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    user-select: none;
+    cursor: pointer;
+    color: var(--affine-link-color);
+    font-feature-settings:
+      'clig' off,
+      'liga' off;
+    font-family: var(--affine-font-family);
+    font-size: var(--affine-font-sm);
+    font-style: normal;
+    font-weight: 400;
+    text-decoration: none;
+    text-wrap: nowrap;
+  }
 `;

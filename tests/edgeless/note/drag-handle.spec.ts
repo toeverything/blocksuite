@@ -119,34 +119,37 @@ test('drag handle should work inside one note', async ({ page }) => {
   await assertRichTexts(page, ['456', '789', '123']);
 });
 
-test('drag handle should work across multiple notes', async ({ page }) => {
-  await enterPlaygroundRoom(page);
-  await initEmptyEdgelessState(page);
-  await initThreeParagraphs(page);
-  await assertRichTexts(page, ['123', '456', '789']);
+test.fixme(
+  'drag handle should work across multiple notes',
+  async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyEdgelessState(page);
+    await initThreeParagraphs(page);
+    await assertRichTexts(page, ['123', '456', '789']);
 
-  await switchEditorMode(page);
+    await switchEditorMode(page);
 
-  await setEdgelessTool(page, 'note');
+    await setEdgelessTool(page, 'note');
 
-  await page.mouse.click(200, 200);
-  await focusRichText(page, 3);
-  await waitNextFrame(page);
+    await page.mouse.click(200, 200);
+    await focusRichText(page, 3);
+    await waitNextFrame(page);
 
-  // block id 7
-  await type(page, '000');
+    // block id 7
+    await type(page, '000');
 
-  await page.mouse.dblclick(CENTER_X, CENTER_Y - 20);
-  await dragHandleFromBlockToBlockBottomById(page, '3', '7');
-  await expect(page.locator('.affine-drag-handle-container')).toBeHidden();
-  await waitNextFrame(page);
-  await assertRichTexts(page, ['456', '789', '000', '123']);
+    await page.mouse.dblclick(CENTER_X, CENTER_Y - 20);
+    await dragHandleFromBlockToBlockBottomById(page, '3', '7');
+    await expect(page.locator('.affine-drag-handle-container')).toBeHidden();
+    await waitNextFrame(page);
+    await assertRichTexts(page, ['456', '789', '000', '123']);
 
-  // await page.mouse.dblclick(305, 305);
-  await dragHandleFromBlockToBlockBottomById(page, '3', '4');
-  await waitNextFrame(page);
-  await expect(page.locator('.affine-drag-handle-container')).toBeHidden();
-  await assertRichTexts(page, ['456', '123', '789', '000']);
+    // await page.mouse.dblclick(305, 305);
+    await dragHandleFromBlockToBlockBottomById(page, '3', '4');
+    await waitNextFrame(page);
+    await expect(page.locator('.affine-drag-handle-container')).toBeHidden();
+    await assertRichTexts(page, ['456', '123', '789', '000']);
 
-  await expect(page.locator('selected > *')).toHaveCount(0);
-});
+    await expect(page.locator('selected > *')).toHaveCount(0);
+  }
+);

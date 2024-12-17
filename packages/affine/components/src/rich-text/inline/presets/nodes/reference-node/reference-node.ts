@@ -1,6 +1,12 @@
 import type { ReferenceInfo } from '@blocksuite/affine-model';
+import type { AffineTextAttributes } from '@blocksuite/affine-shared/types';
 import type { Doc, DocMeta } from '@blocksuite/store';
 
+import { DocDisplayMetaProvider } from '@blocksuite/affine-shared/services';
+import {
+  cloneReferenceInfo,
+  referenceToNode,
+} from '@blocksuite/affine-shared/utils';
 import {
   BLOCK_ID_ATTR,
   type BlockComponent,
@@ -8,6 +14,7 @@ import {
 } from '@blocksuite/block-std';
 import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 import { WithDisposable } from '@blocksuite/global/utils';
+import { LinkedPageIcon } from '@blocksuite/icons/lit';
 import {
   type DeltaInsert,
   INLINE_ROOT_ATTR,
@@ -18,26 +25,18 @@ import {
 import { css, html, nothing } from 'lit';
 import { property, state } from 'lit/decorators.js';
 import { choose } from 'lit/directives/choose.js';
+import { ifDefined } from 'lit/directives/if-defined.js';
 import { ref } from 'lit/directives/ref.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import type { ReferenceNodeConfigProvider } from './reference-config.js';
 
 import { HoverController } from '../../../../../hover/index.js';
-import {
-  BlockLinkIcon,
-  FontDocIcon,
-  FontLinkedDocIcon,
-} from '../../../../../icons/index.js';
 import { Peekable } from '../../../../../peek/index.js';
-import {
-  type AffineTextAttributes,
-  RefNodeSlotsProvider,
-} from '../../../../extension/index.js';
+import { RefNodeSlotsProvider } from '../../../../extension/index.js';
 import { affineTextStyles } from '../affine-text.js';
 import { DEFAULT_DOC_NAME, REFERENCE_NODE } from '../consts.js';
 import { toggleReferencePopup } from './reference-popup.js';
-import { cloneReferenceInfo, isLinkToNode } from './utils.js';
 
 @Peekable({ action: false })
 export class AffineReference extends WithDisposable(ShadowlessElement) {
@@ -121,7 +120,7 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
       return {
         template: toggleReferencePopup(
           this,
-          this.isLinkToNode(),
+          this.referenceToNode(),
           this.referenceInfo,
           this.inlineEditor,
           this.selfInlineRange,
@@ -133,6 +132,23 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
     { enterDelay: 500 }
   );
 
+  get _icon() {
+    const { pageId, params, title } = this.referenceInfo;
+    return this.block?.std
+      ?.get(DocDisplayMetaProvider)
+      .icon(pageId, { params, title, referenced: true }).value;
+  }
+
+  get _title() {
+    const { pageId, params, title } = this.referenceInfo;
+    return (
+      title ||
+      this.block?.std
+        ?.get(DocDisplayMetaProvider)
+        .title(pageId, { params, title, referenced: true }).value
+    );
+  }
+
   get block() {
     const block = this.inlineEditor?.rootElement.closest<BlockComponent>(
       `[${BLOCK_ID_ATTR}]`
@@ -142,14 +158,6 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
 
   get customContent() {
     return this.config.customContent;
-  }
-
-  get customIcon() {
-    return this.config.customIcon;
-  }
-
-  get customTitle() {
-    return this.config.customTitle;
   }
 
   get doc() {
@@ -227,9 +235,9 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
       .catch(console.error);
   }
 
-  // linking to block/element
-  isLinkToNode() {
-    return isLinkToNode(this.referenceInfo);
+  // reference to block/element
+  referenceToNode() {
+    return referenceToNode(this.referenceInfo);
   }
 
   override render() {
@@ -237,30 +245,26 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
     const isDeleted = !refMeta;
 
     const attributes = this.delta.attributes;
-    const type = attributes?.reference?.type;
-    if (!type) {
+    const reference = attributes?.reference;
+    const type = reference?.type;
+    if (!attributes || !type) {
       return nothing;
     }
 
-    const title = this.customTitle
-      ? this.customTitle(this)
-      : isDeleted
-        ? 'Deleted doc'
-        : refMeta.title.length > 0
-          ? refMeta.title
-          : DEFAULT_DOC_NAME;
-
-    const icon = choose(
-      type,
+    const title = this._title;
+    const icon = choose(type, [
+      ['LinkedPage', () => this._icon],
       [
-        [
-          'LinkedPage',
-          () => (this.isLinkToNode() ? BlockLinkIcon : FontLinkedDocIcon),
-        ],
-        ['Subpage', () => FontDocIcon],
+        'Subpage',
+        () =>
+          LinkedPageIcon({
+            width: '1.25em',
+            height: '1.25em',
+            style:
+              'user-select:none;flex-shrink:0;vertical-align:middle;font-size:inherit;margin-bottom:0.1em;',
+          }),
       ],
-      () => this.customIcon?.(this) ?? nothing
-    );
+    ]);
 
     const style = affineTextStyles(
       attributes,
@@ -275,7 +279,9 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
 
     const content = this.customContent
       ? this.customContent(this)
-      : html`${icon}<span data-title=${title} class="affine-reference-title"
+      : html`${icon}<span
+            data-title=${ifDefined(title)}
+            class="affine-reference-title"
             >${title}</span
           >`;
 

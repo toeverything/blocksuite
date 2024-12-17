@@ -6,8 +6,8 @@ import type { InlineRange, InlineRootElement } from '@inline/index.js';
 import type { CustomFramePanel } from '@playground/apps/_common/components/custom-frame-panel.js';
 import type { CustomOutlinePanel } from '@playground/apps/_common/components/custom-outline-panel.js';
 import type { CustomOutlineViewer } from '@playground/apps/_common/components/custom-outline-viewer.js';
-import type { DebugMenu } from '@playground/apps/_common/components/debug-menu.js';
 import type { DocsPanel } from '@playground/apps/_common/components/docs-panel.js';
+import type { StarterDebugMenu } from '@playground/apps/_common/components/starter-debug-menu.js';
 import type { ConsoleMessage, Locator, Page } from '@playwright/test';
 import type { BlockModel } from '@store/schema/index.js';
 
@@ -144,7 +144,8 @@ async function initEmptyEditor({
 
         editor.updateComplete
           .then(() => {
-            const debugMenu: DebugMenu = document.createElement('debug-menu');
+            const debugMenu: StarterDebugMenu =
+              document.createElement('starter-debug-menu');
             const docsPanel: DocsPanel = document.createElement('docs-panel');
             const framePanel: CustomFramePanel =
               document.createElement('custom-frame-panel');
@@ -1071,9 +1072,9 @@ export async function getClipboardSnapshot(page: Page) {
 }
 
 export async function getPageSnapshot(page: Page, toJSON?: boolean) {
-  const json = await page.evaluate(async () => {
+  const json = await page.evaluate(() => {
     const { job, doc } = window;
-    const snapshot = await job.docToSnapshot(doc);
+    const snapshot = job.docToSnapshot(doc);
     if (!snapshot) {
       throw new Error('Failed to get snapshot');
     }

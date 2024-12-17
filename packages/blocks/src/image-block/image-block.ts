@@ -2,6 +2,7 @@ import type { ImageBlockModel } from '@blocksuite/affine-model';
 
 import { CaptionedBlockComponent } from '@blocksuite/affine-components/caption';
 import { Peekable } from '@blocksuite/affine-components/peek';
+import { IS_MOBILE } from '@blocksuite/global/env';
 import { html } from 'lit';
 import { property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -18,7 +19,9 @@ import {
   turnImageIntoCardView,
 } from './utils.js';
 
-@Peekable()
+@Peekable({
+  enableOn: () => !IS_MOBILE,
+})
 export class ImageBlockComponent extends CaptionedBlockComponent<
   ImageBlockModel,
   ImageBlockService
@@ -61,11 +64,13 @@ export class ImageBlockComponent extends CaptionedBlockComponent<
 
     this.refreshData();
     this.contentEditable = 'false';
-    this.model.propsUpdated.on(({ key }) => {
-      if (key === 'sourceId') {
-        this.refreshData();
-      }
-    });
+    this._disposables.add(
+      this.model.propsUpdated.on(({ key }) => {
+        if (key === 'sourceId') {
+          this.refreshData();
+        }
+      })
+    );
   }
 
   override disconnectedCallback() {

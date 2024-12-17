@@ -2,14 +2,21 @@ import type {
   EdgelessTextBlockModel,
   EmbedSyncedDocModel,
   FrameBlockModel,
+  FrameBlockProps,
   ImageBlockModel,
   NoteBlockModel,
 } from '@blocksuite/affine-model';
 
+import {
+  generateKeyBetweenV2,
+  type SerializedElement,
+} from '@blocksuite/block-std/gfx';
 import { getCommonBoundWithRotation, groupBy } from '@blocksuite/global/utils';
+import { type BlockSnapshot, BlockSnapshotSchema } from '@blocksuite/store';
 
 import type { EdgelessRootBlockComponent } from '../edgeless-root-block.js';
 
+import { EdgelessFrameManager } from '../frame-manager.js';
 import { getSortedCloneElements, prepareCloneData } from './clone-utils.js';
 import { getElementsWithoutGroup } from './group.js';
 import {
@@ -31,7 +38,7 @@ export async function duplicate(
   const totalBound = getCommonBoundWithRotation(copyElements);
   totalBound.x += totalBound.w + offset;
 
-  const snapshot = await prepareCloneData(copyElements, edgeless.std);
+  const snapshot = prepareCloneData(copyElements, edgeless.std);
   const { canvasElements, blockModels } =
     await clipboardController.createElementsFromClipboardData(
       snapshot,
@@ -82,3 +89,31 @@ export const splitElements = (elements: BlockSuite.EdgelessModel[]) => {
     embedSyncedDocs: embedSyncedDocs ?? [],
   };
 };
+
+type FrameSnapshot = BlockSnapshot & {
+  props: FrameBlockProps;
+};
+
+export function createNewPresentationIndexes(
+  raw: (SerializedElement | BlockSnapshot)[],
+  edgeless: EdgelessRootBlockComponent
+) {
+  const frames = raw
+    .filter((block): block is FrameSnapshot => {
+      const { data } = BlockSnapshotSchema.safeParse(block);
+      return data?.flavour === 'affine:frame';
+    })
+    .sort((a, b) =>
+      EdgelessFrameManager.framePresentationComparator(a.props, b.props)
+    );
+
+  const frameMgr = edgeless.service.frame;
+  let before = frameMgr.generatePresentationIndex();
+  const result = new Map<string, string>();
+  frames.forEach(frame => {
+    result.set(frame.id, before);
+    before = generateKeyBetweenV2(before, null);
+  });
+
+  return result;
+}

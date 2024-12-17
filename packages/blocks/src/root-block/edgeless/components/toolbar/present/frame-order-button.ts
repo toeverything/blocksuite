@@ -24,6 +24,11 @@ export class EdgelessFrameOrderButton extends WithDisposable(LitElement) {
     typeof createButtonPopper
   > | null = null;
 
+  override disconnectedCallback() {
+    super.disconnectedCallback();
+    this._edgelessFrameOrderPopper?.dispose();
+  }
+
   override firstUpdated() {
     this._edgelessFrameOrderPopper = createButtonPopper(
       this._edgelessFrameOrderButton,
@@ -54,10 +59,7 @@ export class EdgelessFrameOrderButton extends WithDisposable(LitElement) {
       >
         ${FrameOrderAdjustmentIcon}
       </edgeless-tool-icon-button>
-      <edgeless-frame-order-menu
-        .edgeless=${this.edgeless}
-        .frames=${this.frames}
-      >
+      <edgeless-frame-order-menu .edgeless=${this.edgeless}>
       </edgeless-frame-order-menu>
     `;
   }

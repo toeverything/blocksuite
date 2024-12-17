@@ -131,7 +131,7 @@ export class DataViewKanban extends DataViewBase<
         options: {
           items: [
             menu.input({
-              onChange: text => {
+              onComplete: text => {
                 const column = this.groupManager.property$.value;
                 if (column) {
                   column.dataUpdate(
@@ -202,6 +202,17 @@ export class DataViewKanban extends DataViewBase<
     return {
       clearSelection: () => {
         this.selectionController.clear();
+      },
+      addRow: position => {
+        if (this.props.view.readonly$.value) return;
+        const rowId = this.props.view.rowAdd(position);
+        if (rowId) {
+          this.props.dataViewEle.openDetailPanel({
+            view: this.props.view,
+            rowId,
+          });
+        }
+        return rowId;
       },
       focusFirstCell: () => {
         this.selectionController.focusFirstCell();

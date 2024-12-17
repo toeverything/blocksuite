@@ -360,7 +360,7 @@ export class AffineDragHandleWidget extends WidgetComponent<RootBlockModel> {
   };
 
   private get _enableNewDnd() {
-    return this.std.doc.awarenessStore.getFlag('enable_new_dnd') ?? false;
+    return this.std.doc.awarenessStore.getFlag('enable_new_dnd') ?? true;
   }
 
   get dragHandleContainerOffsetParent() {

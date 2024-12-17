@@ -512,7 +512,7 @@ test('auto scroll horizontally when typing', async ({ page }) => {
   await focusRichText(page);
   await type(page, '``` ');
 
-  for (let i = 0; i < 60; i++) {
+  for (let i = 0; i < 100; i++) {
     await type(page, String(i));
   }
 
@@ -588,6 +588,41 @@ test('language selection list should not close when hovering out of code block',
   await page.mouse.move(x - 10, y - 10);
   await waitNextFrame(page);
   await expect(langLocator).toBeVisible();
+});
+
+test('language selection list should not change when hovering over its elements', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyCodeBlockState(page);
+
+  const codeBlockController = getCodeBlock(page);
+  await codeBlockController.codeBlock.hover();
+  await codeBlockController.clickLanguageButton();
+  await waitNextFrame(page, 100);
+
+  const langListLocator = codeBlockController.langList;
+  const langItemsLocator = langListLocator.locator('icon-button');
+
+  // checking first 4 language list items
+  for (let i = 0; i < 3; i++) {
+    const item = langItemsLocator.nth(i); // current item in language list
+    const nextItem = langItemsLocator.nth(i + 1); // next item in language list
+
+    await item.hover();
+
+    const initialItemText = await item.textContent();
+    const initialNextItemText = await nextItem.textContent();
+
+    await nextItem.hover();
+
+    const currentItemText = await item.textContent();
+    const currentNextItemText = await nextItem.textContent();
+
+    // text content should remain unchanged after next item receives focus
+    expect(initialItemText).toBe(currentItemText);
+    expect(initialNextItemText).toBe(currentNextItemText);
+  }
 });
 
 test('format text in code block', async ({ page }, testInfo) => {

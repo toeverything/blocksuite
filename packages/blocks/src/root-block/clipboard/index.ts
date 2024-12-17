@@ -137,7 +137,7 @@ export class PageClipboard {
     this._std.command
       .chain()
       .try(cmd => [
-        cmd.getTextSelection().deleteText(),
+        cmd.getTextSelection(),
         cmd
           .getSelectedModels()
           .clearAndSelectFirstModel()

@@ -1300,6 +1300,40 @@ export async function assertBlockSelections(page: Page, paths: string[]) {
   expect(actualPaths).toEqual(paths);
 }
 
+export async function assertTextSelection(
+  page: Page,
+  from?: {
+    blockId: string;
+    index: number;
+    length: number;
+  },
+  to?: {
+    blockId: string;
+    index: number;
+    length: number;
+  }
+) {
+  const selection = await page.evaluate(() => {
+    const host = document.querySelector<EditorHost>('editor-host');
+    if (!host) {
+      throw new Error('editor-host host not found');
+    }
+    return host.selection.find('text');
+  });
+
+  if (!from && !to) {
+    expect(selection).toBeUndefined();
+    return;
+  }
+
+  if (from) {
+    expect(selection?.from).toEqual(from);
+  }
+  if (to) {
+    expect(selection?.to).toEqual(to);
+  }
+}
+
 export async function assertConnectorStrokeColor(page: Page, color: string) {
   const colorButton = page
     .locator('edgeless-change-connector-button')

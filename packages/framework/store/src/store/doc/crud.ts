@@ -85,6 +85,18 @@ export class DocCRUD {
         ) {
           parentIndex--;
         }
+        const props = {
+          ...initialProps,
+        };
+        delete props.id;
+        delete props.flavour;
+        delete props.children;
+
+        Object.entries(props).forEach(([key, value]) => {
+          if (value === undefined) return;
+
+          yBlock.set(`prop:${key}`, native2Y(value));
+        });
       }
     } else {
       const yBlock = new Y.Map() as YBlock;

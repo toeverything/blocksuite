@@ -24,8 +24,8 @@ import type { insertEdgelessTextCommand } from './edgeless-text-block/commands/i
 import type { updateBlockType } from './note-block/commands/block-type.js';
 import type { dedentBlock } from './note-block/commands/dedent-block.js';
 import type { dedentBlockToRoot } from './note-block/commands/dedent-block-to-root.js';
+import type { dedentBlocks } from './note-block/commands/dedent-blocks.js';
 import type { dedentBlocksToRoot } from './note-block/commands/dedent-blocks-to-root.js';
-import type { dedentBlocks } from './note-block/commands/dendent-blocks.js';
 import type { focusBlockEnd } from './note-block/commands/focus-block-end.js';
 import type { focusBlockStart } from './note-block/commands/focus-block-start.js';
 import type { indentBlock } from './note-block/commands/indent-block.js';
@@ -163,7 +163,6 @@ import {
   EdgelessSelectedRectWidget,
 } from './root-block/edgeless/components/rects/edgeless-selected-rect.js';
 import { EdgelessConnectorLabelEditor } from './root-block/edgeless/components/text/edgeless-connector-label-editor.js';
-// TODO
 import { EdgelessFrameTitleEditor } from './root-block/edgeless/components/text/edgeless-frame-title-editor.js';
 import { EdgelessGroupTitleEditor } from './root-block/edgeless/components/text/edgeless-group-title-editor.js';
 import { EdgelessShapeTextEditor } from './root-block/edgeless/components/text/edgeless-shape-text-editor.js';
@@ -210,8 +209,6 @@ import {
   AFFINE_EMBED_CARD_TOOLBAR_WIDGET,
   AFFINE_FORMAT_BAR_WIDGET,
   AffineAIPanelWidget,
-  AffineCodeLanguageListWidget,
-  AffineCodeToolbarWidget,
   AffineDocRemoteSelectionWidget,
   AffineDragHandleWidget,
   AffineEdgelessZoomToolbarWidget,
@@ -243,10 +240,7 @@ import {
   AIPanelGenerating,
   AIPanelInput,
 } from './root-block/widgets/ai-panel/components/index.js';
-import { LanguageListButton } from './root-block/widgets/code-language-list/components/lang-button.js';
-import { AFFINE_CODE_LANGUAGE_LIST_WIDGET } from './root-block/widgets/code-language-list/index.js';
-import { AffineCodeToolbar } from './root-block/widgets/code-toolbar/components/code-toolbar.js';
-import { AFFINE_CODE_TOOLBAR_WIDGET } from './root-block/widgets/code-toolbar/index.js';
+import { effects as widgetCodeToolbarEffects } from './root-block/widgets/code-toolbar/effects.js';
 import { AFFINE_DOC_REMOTE_SELECTION_WIDGET } from './root-block/widgets/doc-remote-selection/index.js';
 import { DragPreview } from './root-block/widgets/drag-handle/components/drag-preview.js';
 import { DropIndicator } from './root-block/widgets/drag-handle/components/drop-indicator.js';
@@ -333,6 +327,7 @@ export function effects() {
   widgetLinkedDocEffects();
   widgetFrameTitleEffects();
   widgetEdgelessElementToolbarEffects();
+  widgetCodeToolbarEffects();
 
   customElements.define('affine-database-title', DatabaseTitle);
   customElements.define(
@@ -554,7 +549,6 @@ export function effects() {
     'edgeless-group-title-editor',
     EdgelessGroupTitleEditor
   );
-  customElements.define('language-list-button', LanguageListButton);
   customElements.define('affine-drag-preview', DragPreview);
   customElements.define(EDGELESS_TOOLBAR_WIDGET, EdgelessToolbarWidget);
   customElements.define('edgeless-shape-style-panel', EdgelessShapeStylePanel);
@@ -568,7 +562,6 @@ export function effects() {
   );
   customElements.define('edgeless-text-editor', EdgelessTextEditor);
   customElements.define('affine-image-toolbar', AffineImageToolbar);
-  customElements.define('affine-code-toolbar', AffineCodeToolbar);
   customElements.define('affine-drop-indicator', DropIndicator);
   customElements.define('mini-mindmap-root-block', MindmapRootBlock);
   customElements.define('affine-block-selection', BlockSelection);
@@ -580,7 +573,6 @@ export function effects() {
   );
 
   customElements.define(AFFINE_AI_PANEL_WIDGET, AffineAIPanelWidget);
-  customElements.define(AFFINE_CODE_TOOLBAR_WIDGET, AffineCodeToolbarWidget);
   customElements.define(AFFINE_EMBED_CARD_TOOLBAR_WIDGET, EmbedCardToolbar);
   customElements.define(AFFINE_INNER_MODAL_WIDGET, AffineInnerModalWidget);
   customElements.define(
@@ -598,10 +590,6 @@ export function effects() {
 
   customElements.define(AFFINE_IMAGE_TOOLBAR_WIDGET, AffineImageToolbarWidget);
   customElements.define(AFFINE_SLASH_MENU_WIDGET, AffineSlashMenuWidget);
-  customElements.define(
-    AFFINE_CODE_LANGUAGE_LIST_WIDGET,
-    AffineCodeLanguageListWidget
-  );
   customElements.define(
     AFFINE_EDGELESS_REMOTE_SELECTION_WIDGET,
     EdgelessRemoteSelectionWidget

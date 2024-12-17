@@ -6,6 +6,10 @@ import { ParagraphBlockSpec } from '@blocksuite/affine-block-paragraph';
 import { RichTextExtensions } from '@blocksuite/affine-components/rich-text';
 import { EditPropsStore } from '@blocksuite/affine-shared/services';
 
+import {
+  AdapterFactoryExtensions,
+  BlockAdapterMatcherExtensions,
+} from '../_common/adapters/extension.js';
 import { AttachmentBlockSpec } from '../attachment-block/attachment-spec.js';
 import { BookmarkBlockSpec } from '../bookmark-block/bookmark-spec.js';
 import { CellBlockSpec } from '../cell-block/cell-spec.js';
@@ -40,6 +44,8 @@ export const CommonFirstPartyBlockSpecs: ExtensionType[] = [
   BookmarkBlockSpec,
   AttachmentBlockSpec,
   EmbedExtensions,
+  BlockAdapterMatcherExtensions,
+  AdapterFactoryExtensions,
 ].flat();
 
 export const EdgelessFirstPartyBlockSpecs: ExtensionType[] = [
@@ -60,4 +66,6 @@ export const EdgelessFirstPartyBlockSpecs: ExtensionType[] = [
   BookmarkBlockSpec,
   AttachmentBlockSpec,
   EmbedExtensions,
+  BlockAdapterMatcherExtensions,
+  AdapterFactoryExtensions,
 ].flat();

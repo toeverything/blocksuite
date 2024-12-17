@@ -1,4 +1,5 @@
-import type { AffineTextAttributes } from './extension/index.js';
+import type { AffineTextAttributes } from '@blocksuite/affine-shared/types';
+
 import type { deleteTextCommand } from './format/delete-text.js';
 import type { formatBlockCommand } from './format/format-block.js';
 import type { formatNativeCommand } from './format/format-native.js';
@@ -22,6 +23,7 @@ import { LatexEditorMenu } from './inline/presets/nodes/latex-node/latex-editor-
 import { LatexEditorUnit } from './inline/presets/nodes/latex-node/latex-editor-unit.js';
 import { AffineLatexNode } from './inline/presets/nodes/latex-node/latex-node.js';
 import { LinkPopup } from './inline/presets/nodes/link-node/link-popup/link-popup.js';
+import { ReferenceAliasPopup } from './inline/presets/nodes/reference-node/reference-alias-popup.js';
 import { ReferencePopup } from './inline/presets/nodes/reference-node/reference-popup.js';
 import { RichText } from './rich-text.js';
 
@@ -34,6 +36,7 @@ export function effects() {
   customElements.define('link-popup', LinkPopup);
   customElements.define('affine-link', AffineLink);
   customElements.define('reference-popup', ReferencePopup);
+  customElements.define('reference-alias-popup', ReferenceAliasPopup);
   customElements.define('affine-reference', AffineReference);
 }
 
@@ -45,6 +48,7 @@ declare global {
     'affine-text': AffineText;
     'rich-text': RichText;
     'reference-popup': ReferencePopup;
+    'reference-alias-popup': ReferenceAliasPopup;
     'latex-editor-unit': LatexEditorUnit;
     'latex-editor-menu': LatexEditorMenu;
     'link-popup': LinkPopup;

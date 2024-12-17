@@ -11,13 +11,11 @@ import {
 } from '@blocksuite/affine-model';
 import {
   generateKeyBetween,
-  type GfxModel,
   type SurfaceBlockModel,
 } from '@blocksuite/block-std/gfx';
 import { assertType, isEqual, type IVec, last } from '@blocksuite/global/utils';
 import { DocCollection } from '@blocksuite/store';
 
-import { ConnectorPathGenerator } from '../../managers/connector-manager.js';
 import { fitContent } from '../../renderer/elements/shape/utils.js';
 import { layout } from './layout.js';
 
@@ -27,26 +25,23 @@ export class LayoutableMindmapElementModel extends MindmapElementModel {
     options: {
       applyStyle?: boolean;
       layoutType?: LayoutType;
-      calculateTreeBound?: boolean;
       stashed?: boolean;
     } = {
       applyStyle: true,
-      calculateTreeBound: true,
       stashed: true,
     }
   ) {
-    const { stashed, applyStyle, layoutType, calculateTreeBound } =
-      Object.assign(
-        {
-          applyStyle: true,
-          calculateTreeBound: true,
-          stashed: true,
-        },
-        options
-      );
+    const { stashed, applyStyle, layoutType } = Object.assign(
+      {
+        applyStyle: true,
+        calculateTreeBound: true,
+        stashed: true,
+      },
+      options
+    );
 
     const pop = stashed ? this.stashTree(tree) : null;
-    handleLayout(this, tree, applyStyle, layoutType, calculateTreeBound);
+    handleLayout(this, tree, applyStyle, layoutType);
     pop?.();
   }
 }
@@ -371,8 +366,7 @@ export function handleLayout(
   mindmap: MindmapElementModel,
   tree?: MindmapNode | MindmapRoot,
   shouldApplyStyle = true,
-  layoutType?: LayoutType,
-  calculateTreeBound = true
+  layoutType?: LayoutType
 ) {
   if (!tree || !tree.element) return;
 
@@ -382,13 +376,7 @@ export function handleLayout(
 
   mindmap.surface.doc.transact(() => {
     const path = mindmap.getPath(tree.id);
-    layout(
-      tree,
-      mindmap,
-      layoutType ?? mindmap.getLayoutDir(tree.id),
-      path,
-      calculateTreeBound
-    );
+    layout(tree, mindmap, layoutType ?? mindmap.getLayoutDir(tree.id), path);
   });
 }
 
@@ -456,13 +444,20 @@ export function findTargetNode(
   mindmap: MindmapElementModel,
   position: IVec
 ): MindmapNode | null {
-  const find = (mindMapNode: MindmapNode): MindmapNode | null => {
-    if (mindMapNode.treeBound?.containsPoint(position)) {
-      if (mindMapNode.responseArea?.containsPoint(position)) {
-        return mindMapNode;
-      }
+  const find = (node: MindmapNode): MindmapNode | null => {
+    if (!node.responseArea) {
+      return null;
+    }
 
-      for (const child of mindMapNode.children) {
+    const layoutDir = mindmap.getLayoutDir(node);
+
+    if (
+      layoutDir === LayoutType.BALANCE ||
+      (layoutDir === LayoutType.RIGHT &&
+        position[0] > node.element.x + node.element.w) ||
+      (layoutDir === LayoutType.LEFT && position[0] < node.element.x)
+    ) {
+      for (const child of node.children) {
         const result = find(child);
         if (result) {
           return result;
@@ -470,7 +465,7 @@ export function findTargetNode(
       }
     }
 
-    return null;
+    return node.responseArea.containsPoint(position) ? node : null;
   };
 
   return find(mindmap.tree);
@@ -545,48 +540,33 @@ function determineInsertPosition(
   };
 }
 
-function showInsertPreview(
-  targetMindMap: MindmapElementModel,
-  sourceMindMap: MindmapElementModel,
-  source: MindmapNode,
-  newParent: MindmapNode,
-  insertPosition:
-    | { type: 'sibling'; layoutDir: LayoutType; position: 'prev' | 'next' }
-    | { type: 'child'; layoutDir: LayoutType },
-  path: number[]
-) {
-  const connector = targetMindMap['addConnector'](
-    newParent,
-    source,
-    insertPosition.layoutDir,
-    targetMindMap.styleGetter.getNodeStyle(source, path).connector,
-    true
-  );
-  source.overriddenDir = insertPosition.layoutDir;
-  ConnectorPathGenerator.updatePath(connector, null, (id: string) => {
-    return (targetMindMap.surface.getElementById(id) ??
-      targetMindMap.surface.doc.getBlockById(id)) as GfxModel;
-  });
-
-  sourceMindMap.layout(source, {
-    layoutType: insertPosition.layoutDir,
-    calculateTreeBound: false,
-  });
-
-  return () => {
-    targetMindMap.extraConnectors.delete(connector.id);
-    delete source.overriddenDir;
-  };
-}
-
 function showMergeIndicator(
   targetMindMap: MindmapElementModel,
   target: MindmapNode,
   sourceMindMap: MindmapElementModel,
   source: MindmapNode,
   insertPosition:
-    | { type: 'sibling'; layoutDir: LayoutType; position: 'prev' | 'next' }
-    | { type: 'child'; layoutDir: LayoutType }
+    | {
+        type: 'sibling';
+        layoutDir: Exclude<LayoutType, LayoutType.BALANCE>;
+        position: 'prev' | 'next';
+      }
+    | { type: 'child'; layoutDir: Exclude<LayoutType, LayoutType.BALANCE> },
+  callback: (option: {
+    targetMindMap: MindmapElementModel;
+    target: MindmapNode;
+    sourceMindMap: MindmapElementModel;
+    source: MindmapNode;
+    newParent: MindmapNode;
+    insertPosition:
+      | {
+          type: 'sibling';
+          layoutDir: Exclude<LayoutType, LayoutType.BALANCE>;
+          position: 'prev' | 'next';
+        }
+      | { type: 'child'; layoutDir: Exclude<LayoutType, LayoutType.BALANCE> };
+    path: number[];
+  }) => () => void
 ) {
   const newParent =
     insertPosition.type === 'child'
@@ -598,6 +578,7 @@ function showMergeIndicator(
   }
 
   const path = targetMindMap.getPath(newParent);
+  const curPath = sourceMindMap.getPath(source.id);
 
   if (insertPosition.type === 'sibling') {
     const curPath = targetMindMap.getPath(target.id);
@@ -623,33 +604,28 @@ function showMergeIndicator(
     path.push(target.children.length);
   }
 
-  if (targetMindMap === sourceMindMap) {
-    const curPath = sourceMindMap.getPath(source.id);
-
-    if (isEqual(path, curPath)) {
-      return null;
-    }
-  }
-
   // hide original connector
-  const abortHide = hideNodeConnector(sourceMindMap, source);
-  // show preview in new mind map
-  const resetPreview = showInsertPreview(
+  const abortPreview = callback({
     targetMindMap,
+    target: target,
     sourceMindMap,
     source,
     newParent,
     insertPosition,
-    path
-  );
+    path,
+  });
 
   const abort = () => {
-    abortHide?.();
-    resetPreview();
+    abortPreview?.();
   };
 
   const merge = () => {
     abort();
+
+    if (targetMindMap === sourceMindMap && isEqual(path, curPath)) {
+      return;
+    }
+
     moveNode(sourceMindMap, source, targetMindMap, newParent, last(path)!);
   };
 
@@ -674,7 +650,22 @@ export function tryMoveNode(
   target: MindmapNode,
   sourceMindMap: MindmapElementModel,
   source: MindmapNode,
-  position: IVec
+  position: IVec,
+  callback: (option: {
+    targetMindMap: MindmapElementModel;
+    target: MindmapNode;
+    sourceMindMap: MindmapElementModel;
+    source: MindmapNode;
+    newParent: MindmapNode;
+    insertPosition:
+      | {
+          type: 'sibling';
+          layoutDir: Exclude<LayoutType, LayoutType.BALANCE>;
+          position: 'prev' | 'next';
+        }
+      | { type: 'child'; layoutDir: Exclude<LayoutType, LayoutType.BALANCE> };
+    path: number[];
+  }) => () => void
 ) {
   const insertInfo = determineInsertPosition(targetMindMap, target, position);
 
@@ -687,7 +678,8 @@ export function tryMoveNode(
     target,
     sourceMindMap,
     source,
-    insertInfo
+    insertInfo,
+    callback
   );
 }
 

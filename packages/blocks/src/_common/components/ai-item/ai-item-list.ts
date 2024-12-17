@@ -121,9 +121,7 @@ export class AIItemList extends WithDisposable(LitElement) {
           group.items,
           item =>
             html`<ai-item
-              .onClick=${() => {
-                this.onClick?.();
-              }}
+              .onClick=${this.onClick}
               .item=${item}
               .host=${this.host}
               class=${this._itemClassName(item)}

@@ -149,7 +149,9 @@ export class LassoTool extends BaseTool<LassoToolOption> {
 
   private _updateSelection(e: PointerEventState) {
     // elements inside the lasso selection
-    const elements = this._getElementsInsideLasso().map(el => el.id);
+    const elements = this._getElementsInsideLasso()
+      .filter(el => !el.isLocked())
+      .map(el => el.id);
 
     // current selections
     const selection = this.selection.selectedElements.map(el => el.id);
@@ -176,6 +178,7 @@ export class LassoTool extends BaseTool<LassoToolOption> {
         set = new Set(elements);
         break;
     }
+
     this._setSelectionState(Array.from(set), false);
   }
 

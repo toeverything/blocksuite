@@ -2,9 +2,8 @@ import type {
   BookmarkBlockModel,
   EmbedFigmaModel,
   EmbedGithubModel,
-  EmbedLinkedDocModel,
+  EmbedHtmlModel,
   EmbedLoomModel,
-  EmbedSyncedDocModel,
   EmbedYoutubeModel,
 } from '@blocksuite/affine-model';
 import type { BlockComponent } from '@blocksuite/block-std';
@@ -12,42 +11,70 @@ import type { BlockComponent } from '@blocksuite/block-std';
 import {
   EmbedFigmaBlockComponent,
   EmbedGithubBlockComponent,
+  EmbedHtmlBlockComponent,
   EmbedLinkedDocBlockComponent,
   EmbedLoomBlockComponent,
   EmbedSyncedDocBlockComponent,
   EmbedYoutubeBlockComponent,
 } from '@blocksuite/affine-block-embed';
+import {
+  EmbedLinkedDocModel,
+  EmbedSyncedDocModel,
+} from '@blocksuite/affine-model';
 
 import { BookmarkBlockComponent } from '../../../bookmark-block/bookmark-block.js';
 
-export type EmbedToolbarBlockComponent =
+export type ExternalEmbedBlockComponent =
   | BookmarkBlockComponent
-  | EmbedGithubBlockComponent
-  | EmbedYoutubeBlockComponent
   | EmbedFigmaBlockComponent
-  | EmbedLinkedDocBlockComponent
-  | EmbedSyncedDocBlockComponent
-  | EmbedLoomBlockComponent;
+  | EmbedGithubBlockComponent
+  | EmbedLoomBlockComponent
+  | EmbedYoutubeBlockComponent;
 
-export type EmbedToolbarModel =
+export type InternalEmbedBlockComponent =
+  | EmbedLinkedDocBlockComponent
+  | EmbedSyncedDocBlockComponent;
+
+export type LinkableEmbedBlockComponent =
+  | ExternalEmbedBlockComponent
+  | InternalEmbedBlockComponent;
+
+export type EmbedBlockComponent =
+  | LinkableEmbedBlockComponent
+  | EmbedHtmlBlockComponent;
+
+export type ExternalEmbedModel =
   | BookmarkBlockModel
-  | EmbedGithubModel
-  | EmbedYoutubeModel
   | EmbedFigmaModel
-  | EmbedLinkedDocModel
-  | EmbedSyncedDocModel
-  | EmbedLoomModel;
+  | EmbedGithubModel
+  | EmbedLoomModel
+  | EmbedYoutubeModel;
+
+export type InternalEmbedModel = EmbedLinkedDocModel | EmbedSyncedDocModel;
+
+export type LinkableEmbedModel = ExternalEmbedModel | InternalEmbedModel;
+
+export type EmbedModel = LinkableEmbedModel | EmbedHtmlModel;
 
 export function isEmbedCardBlockComponent(
   block: BlockComponent
-): block is EmbedToolbarBlockComponent {
+): block is EmbedBlockComponent {
   return (
     block instanceof BookmarkBlockComponent ||
-    block instanceof EmbedGithubBlockComponent ||
-    block instanceof EmbedYoutubeBlockComponent ||
     block instanceof EmbedFigmaBlockComponent ||
+    block instanceof EmbedGithubBlockComponent ||
+    block instanceof EmbedHtmlBlockComponent ||
+    block instanceof EmbedLoomBlockComponent ||
+    block instanceof EmbedYoutubeBlockComponent ||
     block instanceof EmbedLinkedDocBlockComponent ||
-    block instanceof EmbedSyncedDocBlockComponent ||
-    block instanceof EmbedLoomBlockComponent
+    block instanceof EmbedSyncedDocBlockComponent
+  );
+}
+
+export function isInternalEmbedModel(
+  model: EmbedModel
+): model is InternalEmbedModel {
+  return (
+    model instanceof EmbedLinkedDocModel || model instanceof EmbedSyncedDocModel
   );
 }

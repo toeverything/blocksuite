@@ -13,7 +13,7 @@ import { Slice } from '@blocksuite/store';
 import { css, html, LitElement, nothing } from 'lit';
 import { property } from 'lit/decorators.js';
 
-import type { EmbedToolbarBlockComponent } from './type.js';
+import type { EmbedBlockComponent } from './type.js';
 
 import {
   isEmbedLinkedDocBlock,
@@ -213,7 +213,7 @@ export class EmbedCardMoreMenu extends WithDisposable(LitElement) {
   accessor abortController!: AbortController;
 
   @property({ attribute: false })
-  accessor block!: EmbedToolbarBlockComponent;
+  accessor block!: EmbedBlockComponent;
 }
 
 declare global {

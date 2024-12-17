@@ -25,7 +25,7 @@ import { property, query } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { MarkdownAdapter } from '../../_common/adapters/markdown.js';
+import { MarkdownAdapter } from '../../_common/adapters/markdown/index.js';
 import { MiniMindmapSchema, MiniMindmapSpecs } from './spec.js';
 
 const mindmapStyles = [
@@ -135,10 +135,7 @@ export class MiniMindmapPreview extends WithDisposable(LitElement) {
       this._mindmap!.style = style;
     });
 
-    this.ctx.set({
-      ...this.ctx.get(),
-      style,
-    });
+    this.ctx.set({ style });
     this.requestUpdate();
   }
 

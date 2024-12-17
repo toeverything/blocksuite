@@ -783,6 +783,14 @@ export class LayerManager {
               this.update(block as GfxBlockElementModel, {
                 [payload.props.key]: true,
               });
+            } else if (
+              this.blocks.includes(block as GfxBlockElementModel) &&
+              !(
+                block.parent instanceof SurfaceBlockModel ||
+                block.parent?.role === 'root'
+              )
+            ) {
+              this.delete(block as GfxBlockElementModel);
             }
           }
           if (payload.type === 'delete') {

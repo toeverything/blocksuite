@@ -30,6 +30,11 @@ import type { SurfaceBlockModel } from './surface-model.js';
 import {
   descendantElementsImpl,
   hasDescendantElementImpl,
+  isLockedByAncestorImpl,
+  isLockedBySelfImpl,
+  isLockedImpl,
+  lockElementImpl,
+  unlockElementImpl,
 } from '../../../utils/tree.js';
 import { gfxGroupCompatibleSymbol } from '../base.js';
 import {
@@ -45,6 +50,7 @@ import {
 export type BaseElementProps = {
   index: string;
   seed: number;
+  lockedBySelf?: boolean;
 };
 
 export type SerializedElement = Record<string, unknown> & {
@@ -52,6 +58,7 @@ export type SerializedElement = Record<string, unknown> & {
   xywh: SerializedXYWH;
   id: string;
   index: string;
+  lockedBySelf?: boolean;
   props: Record<string, unknown>;
 };
 export abstract class GfxPrimitiveElementModel<
@@ -129,6 +136,9 @@ export abstract class GfxPrimitiveElementModel<
     return this.surface.getGroup(this.id);
   }
 
+  /**
+   * Return the ancestor elements in order from the most recent to the earliest.
+   */
   get groups(): GfxGroupModel[] {
     return this.surface.getGroups(this.id);
   }
@@ -229,6 +239,22 @@ export abstract class GfxPrimitiveElementModel<
     );
   }
 
+  isLocked(): boolean {
+    return isLockedImpl(this);
+  }
+
+  isLockedByAncestor(): boolean {
+    return isLockedByAncestorImpl(this);
+  }
+
+  isLockedBySelf(): boolean {
+    return isLockedBySelfImpl(this);
+  }
+
+  lock() {
+    lockElementImpl(this.surface.doc, this);
+  }
+
   onCreated() {}
 
   pop(prop: keyof Props | string) {
@@ -303,6 +329,10 @@ export abstract class GfxPrimitiveElementModel<
     });
   }
 
+  unlock() {
+    unlockElementImpl(this.surface.doc, this);
+  }
+
   @local()
   accessor display: boolean = true;
 
@@ -320,6 +350,9 @@ export abstract class GfxPrimitiveElementModel<
 
   @field()
   accessor index!: string;
+
+  @field()
+  accessor lockedBySelf: boolean | undefined = false;
 
   @local()
   accessor opacity: number = 1;

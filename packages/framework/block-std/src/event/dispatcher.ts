@@ -115,6 +115,7 @@ export class UIEventDispatcher extends LifeCycleWatcher {
     this._keyboardControl = new KeyboardControl(this);
     this._rangeControl = new RangeControl(this);
     this._clipboardControl = new ClipboardControl(this);
+    this.disposables.add(this._pointerControl);
   }
 
   private _bindEvents() {

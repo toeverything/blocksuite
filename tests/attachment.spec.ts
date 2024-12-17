@@ -158,10 +158,12 @@ test('can insert attachment from slash menu', async ({ page }) => {
   }
   prop:hidden={false}
   prop:index="a0"
+  prop:lockedBySelf={false}
 >
   <affine:attachment
     prop:embed={false}
     prop:index="a0"
+    prop:lockedBySelf={false}
     prop:name="${FILE_NAME}"
     prop:rotate={0}
     prop:size={${FILE_SIZE}}
@@ -203,10 +205,12 @@ test('should undo/redo works for attachment', async ({ page }) => {
   }
   prop:hidden={false}
   prop:index="a0"
+  prop:lockedBySelf={false}
 >
   <affine:attachment
     prop:embed={false}
     prop:index="a0"
+    prop:lockedBySelf={false}
     prop:name="${FILE_NAME}"
     prop:rotate={0}
     prop:size={${FILE_SIZE}}
@@ -239,8 +243,10 @@ test('should undo/redo works for attachment', async ({ page }) => {
   }
   prop:hidden={false}
   prop:index="a0"
+  prop:lockedBySelf={false}
 >
   <affine:paragraph
+    prop:collapsed={false}
     prop:text="/"
     prop:type="text"
   />
@@ -268,10 +274,12 @@ test('should undo/redo works for attachment', async ({ page }) => {
   }
   prop:hidden={false}
   prop:index="a0"
+  prop:lockedBySelf={false}
 >
   <affine:attachment
     prop:embed={false}
     prop:index="a0"
+    prop:lockedBySelf={false}
     prop:name="${FILE_NAME}"
     prop:rotate={0}
     prop:size={${FILE_SIZE}}
@@ -354,11 +362,13 @@ test('should turn attachment to image works', async ({ page }) => {
   }
   prop:hidden={false}
   prop:index="a0"
+  prop:lockedBySelf={false}
 >
   <affine:image
     prop:caption=""
     prop:height={0}
     prop:index="a0"
+    prop:lockedBySelf={false}
     prop:rotate={0}
     prop:size={${FILE_SIZE}}
     prop:sourceId="${FILE_ID}"
@@ -386,11 +396,13 @@ test('should turn attachment to image works', async ({ page }) => {
   }
   prop:hidden={false}
   prop:index="a0"
+  prop:lockedBySelf={false}
 >
   <affine:attachment
     prop:caption=""
     prop:embed={false}
     prop:index="a0"
+    prop:lockedBySelf={false}
     prop:name="${FILE_NAME}"
     prop:rotate={0}
     prop:size={${FILE_SIZE}}
@@ -433,8 +445,10 @@ test('should attachment can be deleted', async ({ page }) => {
   }
   prop:hidden={false}
   prop:index="a0"
+  prop:lockedBySelf={false}
 >
   <affine:paragraph
+    prop:collapsed={false}
     prop:type="text"
   />
 </affine:note>`,
@@ -475,10 +489,12 @@ test.fixme(`support dragging attachment block directly`, async ({ page }) => {
   }
   prop:hidden={false}
   prop:index="a0"
+  prop:lockedBySelf={false}
 >
   <affine:attachment
     prop:embed={false}
     prop:index="a0"
+    prop:lockedBySelf={false}
     prop:name="${FILE_NAME}"
     prop:rotate={0}
     prop:size={${FILE_SIZE}}
@@ -529,6 +545,7 @@ test.fixme(`support dragging attachment block directly`, async ({ page }) => {
     }
     prop:hidden={false}
     prop:index="a0"
+    prop:lockedBySelf={false}
   >
     <affine:attachment
       prop:embed={false}
@@ -541,14 +558,17 @@ test.fixme(`support dragging attachment block directly`, async ({ page }) => {
       prop:type="image/png"
     />
     <affine:paragraph
+      prop:collapsed={false}
       prop:text="111"
       prop:type="text"
     />
     <affine:paragraph
+      prop:collapsed={false}
       prop:text="222"
       prop:type="text"
     />
     <affine:paragraph
+      prop:collapsed={false}
       prop:text="333"
       prop:type="text"
     />
@@ -583,12 +603,15 @@ test.fixme(`support dragging attachment block directly`, async ({ page }) => {
     }
     prop:hidden={false}
     prop:index="a0"
+    prop:lockedBySelf={false}
   >
     <affine:paragraph
+      prop:collapsed={false}
       prop:text="111"
       prop:type="text"
     />
     <affine:paragraph
+      prop:collapsed={false}
       prop:text="222"
       prop:type="text"
     />
@@ -603,6 +626,7 @@ test.fixme(`support dragging attachment block directly`, async ({ page }) => {
       prop:type="image/png"
     />
     <affine:paragraph
+      prop:collapsed={false}
       prop:text="333"
       prop:type="text"
     />
@@ -741,5 +765,5 @@ test('attachment can be dragged from note to surface top level block', async ({
   await dragBlockToPoint(page, '4', { x: 200, y: 200 });
 
   await waitNextFrame(page);
-  await assertParentBlockFlavour(page, '5', 'affine:surface');
+  await assertParentBlockFlavour(page, '4', 'affine:surface');
 });

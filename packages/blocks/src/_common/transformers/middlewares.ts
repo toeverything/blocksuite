@@ -212,6 +212,15 @@ export const customImageProxyMiddleware = (
   };
 };
 
+const customDocLinkBaseUrlMiddleware = (baseUrl: string): JobMiddleware => {
+  return ({ adapterConfigs, collection }) => {
+    const docLinkBaseUrl = baseUrl
+      ? `${baseUrl}/workspace/${collection.id}`
+      : '';
+    adapterConfigs.set('docLinkBaseUrl', docLinkBaseUrl);
+  };
+};
+
 export const titleMiddleware: JobMiddleware = ({
   slots,
   collection,
@@ -225,38 +234,24 @@ export const titleMiddleware: JobMiddleware = ({
 };
 
 export const docLinkBaseURLMiddlewareBuilder = (baseUrl: string) => {
-  let middleware: JobMiddleware = ({ slots, collection, adapterConfigs }) => {
-    slots.beforeExport.on(() => {
-      const docLinkBaseUrl = baseUrl
-        ? `${baseUrl}/workspace/${collection.id}/`
-        : '';
-      adapterConfigs.set('docLinkBaseUrl', docLinkBaseUrl);
-    });
-  };
-
+  let middleware = customDocLinkBaseUrlMiddleware(baseUrl);
   return {
     get: () => middleware,
-    set: (customBaseUrl: string) => {
-      middleware = ({ slots, collection, adapterConfigs }) => {
-        slots.beforeExport.on(() => {
-          const docLinkBaseUrl = customBaseUrl
-            ? `${customBaseUrl}/workspace/${collection.id}/`
-            : '';
-          adapterConfigs.set('docLinkBaseUrl', docLinkBaseUrl);
-        });
-      };
+    set: (url: string) => {
+      middleware = customDocLinkBaseUrlMiddleware(url);
     },
   };
 };
 
-const defaultDocLinkBaseURLMiddlewareBuilder =
-  docLinkBaseURLMiddlewareBuilder('');
-
-export const setDocLinkBaseURLMiddleware =
-  defaultDocLinkBaseURLMiddlewareBuilder.set;
+const defaultDocLinkBaseURLMiddlewareBuilder = docLinkBaseURLMiddlewareBuilder(
+  typeof window !== 'undefined' ? window.location.origin : '.'
+);
 
 export const docLinkBaseURLMiddleware =
   defaultDocLinkBaseURLMiddlewareBuilder.get();
+
+export const setDocLinkBaseURLMiddleware =
+  defaultDocLinkBaseURLMiddlewareBuilder.set;
 
 const imageProxyMiddlewareBuilder = () => {
   let middleware = customImageProxyMiddleware(DEFAULT_IMAGE_PROXY_ENDPOINT);

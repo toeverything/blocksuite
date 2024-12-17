@@ -1,5 +1,355 @@
 # @blocksuite/data-view
 
+## 0.19.2
+
+### Patch Changes
+
+- bc04f27: ## Feat
+
+  - feat: support heading toggle (#8829)
+  - feat(blocks): add surface element plain text adapter (#8977)
+  - feat: add doc display meta extension (#8953)
+
+  ## Fix
+
+  - fix(blocks): incorrect image icon in keyboard tool panel (#8998)
+  - fix(inline): incorrect caret position in safari when using IME (#8993)
+  - fix(blocks): toolbar color should be light when app theme is light and edgeless theme is dark (#8996)
+  - fix: dnd in edgeless (#8995)
+  - fix: dnd status error (#8994)
+  - fix(blocks): the width of the card view is not fully filled (#8988)
+  - fix(blocks): prevent hiding keyboard when scrolling (#8989)
+
+- Updated dependencies [bc04f27]
+  - @blocksuite/affine-components@0.19.2
+  - @blocksuite/affine-shared@0.19.2
+  - @blocksuite/block-std@0.19.2
+  - @blocksuite/global@0.19.2
+  - @blocksuite/store@0.19.2
+
+## 0.19.1
+
+### Patch Changes
+
+- ded71c4: chore: release blocksuite
+
+  ## Feat
+
+  - feat(edgeless): release frame by clicking ungroup button (#8984)
+
+  ## Fix
+
+  - fix(edgeless): new inner frame should be inside parent frame (#8985)
+  - fix(inline): range in different document (#8986)
+  - fix(blocks): focus ai input after position updated (#8981)
+  - fix(edgeless): export template job and image upload api (#8980)
+  - fix: preview won't disappear after drag end (#8979)
+  - fix: corner cases of dnd (#8978)
+  - fix(blocks): doc link import/export handling (#8976)
+
+  ## Chore
+
+  - chore(blocks): add image file upload entries to keyboard toolbar (#8987)
+  - chore(blocks): set readonly to database on mobile (#8975)
+  - chore: lock file maintenance (#8983)
+  - chore: lock file maintenance (#8982)
+  - chore: remove legacy versions in transformer and adapter (#8974)
+
+- Updated dependencies [ded71c4]
+  - @blocksuite/affine-components@0.19.1
+  - @blocksuite/affine-shared@0.19.1
+  - @blocksuite/block-std@0.19.1
+  - @blocksuite/global@0.19.1
+  - @blocksuite/store@0.19.1
+
+## 0.19.0
+
+### Minor Changes
+
+- d7ec057: Blocksuite minor release.
+
+  ## Feat
+
+  - feat: enable new dnd by default (#8970)
+  - feat: should insert bookmark when drop frame and group (#8969)
+  - feat(blocks): add block adapters for note block (#8963)
+
+  ## Fix
+
+  - fix: note dnd preview (#8968)
+  - fix: attachment, bookmark and embed blocks should be draggable (#8967)
+  - fix: should copy embed doc when dnd (#8966)
+  - fix(std): undefined editor during rect polling on mobile (#8965)
+  - fix(blocks): fix incorrect font family in mobile widgets (#8961)
+  - fix(blocks): at menu styles (#8962)
+
+  ## Refactor
+
+  - refactor: optimize code of new drag event watcher (#8971)
+  - refactor(playground): remove `mockPeekViewExtension` (#8964)
+
+### Patch Changes
+
+- Updated dependencies [d7ec057]
+  - @blocksuite/affine-components@0.19.0
+  - @blocksuite/affine-shared@0.19.0
+  - @blocksuite/block-std@0.19.0
+  - @blocksuite/global@0.19.0
+  - @blocksuite/store@0.19.0
+
+## 0.18.7
+
+### Patch Changes
+
+- 1057773: Blocksuite patch release.
+
+  ## Feat
+
+  - feat(edgeless): rewrite mind map drag indicator (#8805)
+  - feat: remove data transfer from dnd api (#8955)
+
+  ## Fix
+
+  - fix: dnd from entity api (#8958)
+  - fix(std): edge case on pointer controller (#8954)
+  - fix: indent behavior (#8941)
+  - fix(edgeless): add index reorder buttong for frame block (#8951)
+
+  ## Chore
+
+  - chore: run headless vitest locally by default (#8957)
+  - chore(blocks): disable image peekview on mobile (#8952)
+
+  ## Refactor
+
+  - refactor(database): refactor addRow functionality in kanban and table views (#8956)
+  - refactor: notion html adapter (#8947)
+
+- Updated dependencies [1057773]
+  - @blocksuite/affine-components@0.18.7
+  - @blocksuite/affine-shared@0.18.7
+  - @blocksuite/block-std@0.18.7
+  - @blocksuite/global@0.18.7
+  - @blocksuite/store@0.18.7
+
+## 0.18.6
+
+### Patch Changes
+
+- d925364: Blocksuite patch release.
+
+  ## Feat
+
+  - feat: add from entity api for dnd (#8946)
+  - feat: make block to snapshot a sync method (#8943)
+  - feat(database): enhance filter functionality with default values (#8932)
+  - feat: bring back the ability to drag blocks from note to edgeless (#8914)
+  - feat(blocks): responsive ui for embed doc (#8900)
+  - feat(edgeless): unlock and unlock button (#8826)
+  - feat(edgeless): impl lock interface for edgeless element and block (#8825)
+  - feat(edgeless): add lock property to edgeless block and element (#8824)
+  - feat(blocks): support embed linked doc and synced doc html block adapter (#8907)
+  - feat(blocks): support database html block adapter (#8898)
+
+  ## Fix
+
+  - fix(blocks): inconsistent language list behavior on hover in Firefox (#8944)
+  - fix(database): adjust detail panel layout for better responsiveness (#8945)
+  - fix(database): move cursor in kanban card title by arrow keys (#8893)
+  - fix(blocks): show keyboard toolbar when focus on title and hide on scrolling (#8939)
+  - fix(blocks): missing aliases when duplicating linked doc block on edgeless (#8930)
+  - fix: remove vitest extension from recommendation list (#8936)
+  - fix(blocks): should prevent default if drop event is handled (#8929)
+  - fix(blocks): missing aliases when converting from embed to card (#8928)
+  - fix(blocks): should show original doc title when hovering title button (#8925)
+  - fix(blocks): hide the thumb for bookmark if its width is less than 375 (#8922)
+  - fix(blocks): button styling when disabled on embed card edit popup (#8924)
+  - fix(edgeless): undefined telemetry service (#8918)
+  - fix(database): add group call frequency is incorrect (#8916)
+  - fix(database): adjust padding for mobile menu to accommodate safe area insets (#8915)
+
+  ## Chore
+
+  - chore(edgeless): telemetry for edgeless lock feature (#8933)
+  - chore(blocks): use rest params in parsed result (#8908)
+  - chore: lock file maintenance (#8919)
+  - chore: lock file maintenance (#8894)
+
+  ## Refactor
+
+  - refactor: adapter types and utils (#8934)
+  - refactor: make notion text adapter as an extension (#8926)
+
+  ## Perf
+
+  - perf(std): cache dom rect for pointer controller (#8940)
+
+  ## Test
+
+  - test(database): add sorting functionality tests for multiple rules (#8917)
+  - test(edgeless): fix lock flaky test by adding waitNextFrame (#8937)
+  - test(edgeless): edgeless element lock feature tests (#8867)
+
+- Updated dependencies [d925364]
+  - @blocksuite/affine-components@0.18.6
+  - @blocksuite/affine-shared@0.18.6
+  - @blocksuite/block-std@0.18.6
+  - @blocksuite/global@0.18.6
+  - @blocksuite/store@0.18.6
+
+## 0.18.5
+
+### Patch Changes
+
+- ec2956c: ## Feat
+
+  - feat: api for encode and decode dnd data (#8909)
+  - feat(blocks): add event tracking for linked doc (#8876)
+  - feat(playground): outside click to close docs panel (#8885)
+
+  ## Fix
+
+  - fix(store): fix awareness destroy (#8904)
+  - fix: switch card view style does not work (#8886)
+  - fix: no need to save aliases on embed synced doc model (#8884)
+  - fix: should differentiate between internal and external links when pasting links (#8896)
+  - fix(presets): incorrectly adding page root widgets to edgeless (#8897)
+  - fix: sentry-0f7fafa98f7c483ca95c04c188f485b8 (#8892)
+  - fix: sentry-2d6423fce9c242ec9e63364243a6cf59 (#8891)
+  - fix: sentry-d6ecba020e5047e394de05bf0ff77e71 (#8890)
+  - fix: sentry-6d40eee6cbcd4704bb2dff3d5347544c (#8889)
+  - fix: sentry-f25281abb20a4260aa424741c30e5756 (#8888)
+  - fix(playground): starter debug menu theming (#8883)
+  - fix(playground): adapt docs panel to dark mode (#8881)
+  - fix: should show alias icon when title has alias (#8880)
+
+  ## Chore
+
+  - chore: lock file maintenance (#8895)
+
+  ## Refactor
+
+  - refactor(playground): remove redundant doc init logic (#8906)
+
+- Updated dependencies [ec2956c]
+  - @blocksuite/affine-components@0.18.5
+  - @blocksuite/affine-shared@0.18.5
+  - @blocksuite/block-std@0.18.5
+  - @blocksuite/global@0.18.5
+  - @blocksuite/store@0.18.5
+
+## 0.18.4
+
+### Patch Changes
+
+- f517653: Edgeless perf improvement, linked doc aliases support and fixes
+
+  ## Feat
+
+  - feat: linked doc supports aliases (#8806)
+  - feat(playground): add preview view for html adapter panel (#8871)
+  - feat(blocks): add html block adapter for embed link block (#8874)
+  - feat(blocks): show input directly after the user clicks ask ai (#8872)
+
+  ## Fix
+
+  - fix(edgeless): incorrect presentation order (#8840)
+  - fix(std): pan and pinch events were calculate relative to only one finger (#8870)
+  - fix(edgeless): large frame crash on ios safari (#8877)
+  - fix(std): shadowless element should inject styles in parent node (#8861)
+  - fix(blocks): linked popover style issue (#8875)
+  - fix(database): sum shows too many digits after decimal point (#8833)
+
+  ## Refactor
+
+  - refactor: hast utils (#8873)
+  - refactor: migrate html adapter to extension (#8868)
+
+- Updated dependencies [f517653]
+  - @blocksuite/affine-components@0.18.4
+  - @blocksuite/affine-shared@0.18.4
+  - @blocksuite/block-std@0.18.4
+  - @blocksuite/global@0.18.4
+  - @blocksuite/store@0.18.4
+
+## 0.18.3
+
+### Patch Changes
+
+- 3448094: ## Fix
+
+  - fix(database): storage should be accessed via globalThis (#8863)
+  - fix(edgeless): memory leak in edgeless widgets (#8862)
+  - fix: page switching under starter route (#8860)
+
+  ## Refactor
+
+  - refactor(blocks): shadowless keyboard toolbar (#8864)
+
+- Updated dependencies [3448094]
+  - @blocksuite/affine-components@0.18.3
+  - @blocksuite/affine-shared@0.18.3
+  - @blocksuite/block-std@0.18.3
+  - @blocksuite/global@0.18.3
+  - @blocksuite/store@0.18.3
+
+## 0.18.2
+
+### Patch Changes
+
+- f97c4ab: bump
+
+  ## Feat
+
+  - feat(database): date-picker add clear button (#8856)
+  - feat(blocks): add plain text block adapter for linked and synced doc block (#8848)
+  - feat: generate url service (#8813)
+  - feat(blocks): add plain text block adapter for latex (#8845)
+  - feat(blocks): provide a mobile spec patches (#8836)
+  - feat(blocks): add plain text block adapter for embed link block (#8843)
+  - feat(blocks): add support for non consecutive list in adapter (#8802)
+  - feat(playground): add an adpater panel to playground (#8841)
+  - feat(database): store current view id in local-storage (#8838)
+
+  ## Fix
+
+  - fix: dispose model update listeners (#8857)
+  - fix: memory leak in zero width block (#8855)
+  - fix: block selection memory leak (#8854)
+  - fix(store): add dispose method to collection (#8852)
+  - fix(playground): cannot click docs panel doc (#8850)
+  - fix(edgeless): widget memory leak (#8853)
+  - fix: memory leak on switching from doc to edgeless (#8851)
+  - fix(database): multiple spaces in the title are displayed as a single space (#8839)
+  - fix(store): add shim.d.ts to files (#8834)
+  - fix(blocks): should paste text content as note on edgeless when copy from doc mode (#8827)
+  - fix(blocks): peek db doc should also pass the dbs doc id (#8818)
+  - fix: background color and width of input in color picker (#8822)
+  - fix(blocks): newline handling in MixTextAdapter and paste middleware (#8821)
+
+  ## Chore
+
+  - chore(blocks): update code block styles (#8847)
+  - chore: lock file maintenance (#8835)
+  - chore(blocks): bump theme (#8849)
+
+  ## Refactor
+
+  - refactor(edgeless): adjust logic of dragging selection (#8842)
+  - refactor(database): make Tag-Select component compatible with mobile devices (#8844)
+  - refactor(database): make Date-Picker component compatible with mobile devices (#8846)
+  - refactor: migrate plain text adapter to extension (#8831)
+  - refactor: markdown adapter (#8798)
+  - refactor(edgeless): extract side effects of edgeless element toolbar (#8828)
+  - refactor(edgeless): refine and remove duplicate type (#8823)
+
+- Updated dependencies [f97c4ab]
+  - @blocksuite/affine-components@0.18.2
+  - @blocksuite/affine-shared@0.18.2
+  - @blocksuite/block-std@0.18.2
+  - @blocksuite/global@0.18.2
+  - @blocksuite/store@0.18.2
+
 ## 0.18.1
 
 ### Patch Changes

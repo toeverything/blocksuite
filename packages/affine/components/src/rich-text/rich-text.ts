@@ -1,3 +1,4 @@
+import type { AffineTextAttributes } from '@blocksuite/affine-shared/types';
 import type { Y } from '@blocksuite/store';
 
 import { ShadowlessElement } from '@blocksuite/block-std';
@@ -19,7 +20,6 @@ import { property, query } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { z } from 'zod';
 
-import type { AffineTextAttributes } from './extension/index.js';
 import type { AffineInlineEditor } from './inline/index.js';
 
 import { onVBeforeinput, onVCompositionEnd } from './hooks.js';

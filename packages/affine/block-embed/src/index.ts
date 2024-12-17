@@ -20,12 +20,17 @@ export const EmbedExtensions: ExtensionType[] = [
   EmbedSyncedDocBlockSpec,
 ].flat();
 
+export { createEmbedBlockHtmlAdapterMatcher } from './common/adapters/html.js';
+export { createEmbedBlockMarkdownAdapterMatcher } from './common/adapters/markdown.js';
+export { createEmbedBlockPlainTextAdapterMatcher } from './common/adapters/plain-text.js';
+export { generateDocUrl } from './common/adapters/utils.js';
 export { EmbedBlockComponent } from './common/embed-block-element.js';
 export { insertEmbedCard } from './common/insert-embed-card.js';
 export {
   LinkPreviewer,
   type LinkPreviewResponseData,
 } from './common/link-previewer.js';
+export { getDocContentWithMaxLength } from './common/render-linked-doc.js';
 export { toEdgelessEmbedBlock } from './common/to-edgeless-embed-block.js';
 
 export * from './embed-figma-block/index.js';

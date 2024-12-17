@@ -19,6 +19,7 @@
         "xywh": "[0,0,498,92]",
         "background": "--affine-note-background-white",
         "index": "a0",
+        "lockedBySelf": false,
         "hidden": false,
         "displayMode": "both",
         "edgeless": {
@@ -45,7 +46,8 @@
                   "insert": "123"
                 }
               ]
-            }
+            },
+            "collapsed": false
           },
           "children": [
             {
@@ -62,7 +64,8 @@
                       "insert": "456"
                     }
                   ]
-                }
+                },
+                "collapsed": false
               },
               "children": [
                 {
@@ -79,7 +82,8 @@
                           "insert": "789"
                         }
                       ]
-                    }
+                    },
+                    "collapsed": false
                   },
                   "children": []
                 },
@@ -97,7 +101,8 @@
                           "insert": "012"
                         }
                       ]
-                    }
+                    },
+                    "collapsed": false
                   },
                   "children": [
                     {
@@ -114,7 +119,8 @@
                               "insert": "345"
                             }
                           ]
-                        }
+                        },
+                        "collapsed": false
                       },
                       "children": []
                     }

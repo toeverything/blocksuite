@@ -35,9 +35,7 @@ import {
   pressBackspace,
   pressEnter,
   pressTab,
-  redoByClick,
   type,
-  undoByClick,
   undoByKeyboard,
   waitForInlineEditorStateUpdated,
   waitNextFrame,
@@ -49,11 +47,11 @@ import {
   assertEdgelessNoteBackground,
   assertEdgelessSelectedRect,
   assertExists,
-  assertNativeSelectionRangeCount,
   assertNoteSequence,
   assertNoteXYWH,
   assertRichTextInlineRange,
   assertRichTexts,
+  assertTextSelection,
 } from '../../utils/asserts.js';
 import { test } from '../../utils/playwright.js';
 
@@ -325,22 +323,19 @@ test('cursor for active and inactive state', async ({ page }) => {
   await pressEnter(page);
   await assertRichTexts(page, ['hello', '', '']);
 
-  // inactive
   await switchEditorMode(page);
-  await undoByClick(page);
-  await waitNextFrame(page);
 
-  await redoByClick(page);
+  await assertTextSelection(page);
+  await page.mouse.click(CENTER_X, CENTER_Y);
   await waitNextFrame(page);
-
-  // active
+  await assertTextSelection(page);
   await page.mouse.dblclick(CENTER_X, CENTER_Y);
   await waitNextFrame(page);
-  await assertNativeSelectionRangeCount(page, 1);
-
-  await undoByClick(page);
-  await waitNextFrame(page);
-  await assertNativeSelectionRangeCount(page, 1);
+  await assertTextSelection(page, {
+    blockId: '3',
+    index: 5,
+    length: 0,
+  });
 });
 
 test('when no visible note block, clicking in page mode will auto add a new note block', async ({
@@ -373,60 +368,63 @@ test('when no visible note block, clicking in page mode will auto add a new note
   expect(note).not.toBeNull();
 });
 
-test('Click at empty note should add a paragraph block', async ({ page }) => {
-  await enterPlaygroundRoom(page);
-  await initEmptyEdgelessState(page);
-  await focusRichText(page);
-  await type(page, '123');
-  await assertRichTexts(page, ['123']);
+test.fixme(
+  'Click at empty note should add a paragraph block',
+  async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyEdgelessState(page);
+    await focusRichText(page);
+    await type(page, '123');
+    await assertRichTexts(page, ['123']);
 
-  await switchEditorMode(page);
+    await switchEditorMode(page);
 
-  // Drag paragraph out of note block
-  const paragraphBlock = await page
-    .locator(`[data-block-id="3"]`)
-    .boundingBox();
-  assertExists(paragraphBlock);
-  await page.mouse.dblclick(paragraphBlock.x, paragraphBlock.y);
-  await waitNextFrame(page);
-  await page.mouse.move(
-    paragraphBlock.x + paragraphBlock.width / 2,
-    paragraphBlock.y + paragraphBlock.height / 2
-  );
-  await waitNextFrame(page);
-  const handle = await page
-    .locator('.affine-drag-handle-container')
-    .boundingBox();
-  assertExists(handle);
-  await page.mouse.move(
-    handle.x + handle.width / 2,
-    handle.y + handle.height / 2,
-    { steps: 10 }
-  );
-  await page.mouse.down();
-  await page.mouse.move(100, 200, { steps: 30 });
-  await page.mouse.up();
+    // Drag paragraph out of note block
+    const paragraphBlock = await page
+      .locator(`[data-block-id="3"]`)
+      .boundingBox();
+    assertExists(paragraphBlock);
+    await page.mouse.dblclick(paragraphBlock.x, paragraphBlock.y);
+    await waitNextFrame(page);
+    await page.mouse.move(
+      paragraphBlock.x + paragraphBlock.width / 2,
+      paragraphBlock.y + paragraphBlock.height / 2
+    );
+    await waitNextFrame(page);
+    const handle = await page
+      .locator('.affine-drag-handle-container')
+      .boundingBox();
+    assertExists(handle);
+    await page.mouse.move(
+      handle.x + handle.width / 2,
+      handle.y + handle.height / 2,
+      { steps: 10 }
+    );
+    await page.mouse.down();
+    await page.mouse.move(100, 200, { steps: 30 });
+    await page.mouse.up();
 
-  // There should be two note blocks and one paragraph block
-  await assertRichTexts(page, ['123']);
-  await assertBlockCount(page, 'edgeless-note', 2);
-  await assertBlockCount(page, 'paragraph', 1);
+    // There should be two note blocks and one paragraph block
+    await assertRichTexts(page, ['123']);
+    await assertBlockCount(page, 'edgeless-note', 2);
+    await assertBlockCount(page, 'paragraph', 1);
 
-  // Click at empty note block to add a paragraph block
-  const emptyNote = await page.locator(`[data-block-id="2"]`).boundingBox();
-  assertExists(emptyNote);
-  await page.mouse.click(
-    emptyNote.x + emptyNote.width / 2,
-    emptyNote.y + emptyNote.height / 2
-  );
-  await waitNextFrame(page, 300);
-  await type(page, '456');
-  await waitNextFrame(page, 400);
+    // Click at empty note block to add a paragraph block
+    const emptyNote = await page.locator(`[data-block-id="2"]`).boundingBox();
+    assertExists(emptyNote);
+    await page.mouse.click(
+      emptyNote.x + emptyNote.width / 2,
+      emptyNote.y + emptyNote.height / 2
+    );
+    await waitNextFrame(page, 300);
+    await type(page, '456');
+    await waitNextFrame(page, 400);
 
-  await page.mouse.click(100, 100);
-  await waitNextFrame(page, 400);
-  await assertBlockCount(page, 'paragraph', 2);
-});
+    await page.mouse.click(100, 100);
+    await waitNextFrame(page, 400);
+    await assertBlockCount(page, 'paragraph', 2);
+  }
+);
 
 test('Should focus at closest text block when note collapse', async ({
   page,

@@ -25,8 +25,9 @@
           "flavour": "affine:edgeless-text",
           "version": 1,
           "props": {
-            "xywh": "[-25,-25,799.0093994140625,154]",
+            "xywh": "[-25,-25,497,154]",
             "index": "a1",
+            "lockedBySelf": false,
             "color": "--affine-palette-line-blue",
             "fontFamily": "blocksuite:surface:Inter",
             "fontStyle": "normal",
@@ -45,6 +46,7 @@
               "props": {
                 "index": "a0",
                 "xywh": "[0,0,0,0]",
+                "lockedBySelf": false,
                 "rotate": 0,
                 "pageId": "6",
                 "style": "horizontal",
@@ -65,6 +67,7 @@
         "xywh": "[0,0,498,92]",
         "background": "--affine-note-background-white",
         "index": "a0",
+        "lockedBySelf": false,
         "hidden": false,
         "displayMode": "both",
         "edgeless": {
@@ -87,7 +90,8 @@
             "text": {
               "$blocksuite:internal:text$": true,
               "delta": []
-            }
+            },
+            "collapsed": false
           },
           "children": []
         }

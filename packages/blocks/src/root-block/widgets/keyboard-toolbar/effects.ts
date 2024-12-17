@@ -19,3 +19,10 @@ export function effects() {
   customElements.define(AFFINE_KEYBOARD_TOOLBAR, AffineKeyboardToolbar);
   customElements.define(AFFINE_KEYBOARD_TOOL_PANEL, AffineKeyboardToolPanel);
 }
+
+declare global {
+  interface HTMLElementTagNameMap {
+    [AFFINE_KEYBOARD_TOOLBAR]: AffineKeyboardToolbar;
+    [AFFINE_KEYBOARD_TOOL_PANEL]: AffineKeyboardToolPanel;
+  }
+}

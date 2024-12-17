@@ -161,14 +161,10 @@ export class LinkCell extends BaseCellRenderer<string> {
         this.docId = undefined;
         return;
       }
-      const result = std
-        ?.getOptional(ParseDocUrlProvider)
-        ?.parseDocUrl(this.value);
-      if (result) {
-        this.docId = result.docId;
-      } else {
-        this.docId = undefined;
-      }
+
+      this.docId =
+        std?.getOptional(ParseDocUrlProvider)?.parseDocUrl(this.value)?.docId ??
+        undefined;
     }
   }
 

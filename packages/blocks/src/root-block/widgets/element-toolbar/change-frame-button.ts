@@ -1,4 +1,8 @@
-import { NoteIcon, RenameIcon } from '@blocksuite/affine-components/icons';
+import {
+  NoteIcon,
+  RenameIcon,
+  UngroupButtonIcon,
+} from '@blocksuite/affine-components/icons';
 import { toast } from '@blocksuite/affine-components/toast';
 import { renderToolbarSeparator } from '@blocksuite/affine-components/toolbar';
 import {
@@ -9,6 +13,7 @@ import {
   NoteDisplayMode,
 } from '@blocksuite/affine-model';
 import { matchFlavours } from '@blocksuite/affine-shared/utils';
+import { GfxExtensionIdentifier } from '@blocksuite/block-std/gfx';
 import {
   countBy,
   deserializeXYWH,
@@ -25,6 +30,7 @@ import type { EdgelessColorPickerButton } from '../../edgeless/components/color-
 import type { PickColorEvent } from '../../edgeless/components/color-picker/types.js';
 import type { ColorEvent } from '../../edgeless/components/panel/color-panel.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
+import type { EdgelessFrameManager } from '../../edgeless/frame-manager.js';
 
 import {
   packColor,
@@ -153,6 +159,29 @@ export class EdgelessChangeFrameButton extends WithDisposable(LitElement) {
               </editor-icon-button>
             `
           : nothing,
+
+        html`
+          <editor-icon-button
+            aria-label="Ungroup"
+            .tooltip=${'Ungroup'}
+            .iconSize=${'20px'}
+            @click=${() => {
+              this.edgeless.doc.captureSync();
+              const frameMgr = this.edgeless.std.get(
+                GfxExtensionIdentifier('frame-manager')
+              ) as EdgelessFrameManager;
+              frames.forEach(frame =>
+                frameMgr.removeAllChildrenFromFrame(frame)
+              );
+              frames.forEach(frame => {
+                this.edgeless.service.removeElement(frame);
+              });
+              this.edgeless.service.selection.clear();
+            }}
+          >
+            ${UngroupButtonIcon}
+          </editor-icon-button>
+        `,
 
         when(
           this.edgeless.doc.awarenessStore.getFlag('enable_color_picker'),

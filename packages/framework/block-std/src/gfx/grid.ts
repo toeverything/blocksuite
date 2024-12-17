@@ -239,6 +239,7 @@ export class GridManager {
         grid.delete(element);
       }
     }
+    this._elementToGrids.delete(element);
 
     this._removeFromExternalGrids(element);
   }
@@ -330,7 +331,19 @@ export class GridManager {
           }
 
           if (payload.type === 'update') {
-            if (payload.props.key === 'xywh') {
+            const model = doc.getBlock(payload.id)
+              ?.model as GfxBlockElementModel;
+
+            if (!model) {
+              return;
+            }
+
+            if (this._elementToGrids.has(model) && !isRenderableBlock(model)) {
+              this.remove(model as GfxBlockElementModel);
+            } else if (
+              payload.props.key === 'xywh' &&
+              isRenderableBlock(model)
+            ) {
               this.update(
                 doc.getBlock(payload.id)?.model as GfxBlockElementModel
               );

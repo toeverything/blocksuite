@@ -1,6 +1,6 @@
 {
   "name": "@blocksuite/docs",
-  "version": "0.18.1",
+  "version": "0.19.2",
   "description": "BlockSuite documentation",
   "private": true,
   "keywords": [],
@@ -9,10 +9,10 @@
   "license": "MPL-2.0",
   "type": "module",
   "devDependencies": {
-    "typedoc": "^0.26.6",
-    "typedoc-plugin-markdown": "4.2.9",
+    "typedoc": "^0.27.0",
+    "typedoc-plugin-markdown": "4.3.2",
     "vite-plugin-wasm": "^3.3.0",
-    "vitepress": "1.4.1",
+    "vitepress": "1.5.0",
     "vue": "^3.4.38"
   },
   "scripts": {

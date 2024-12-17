@@ -2,6 +2,7 @@ import {
   DEFAULT_NOTE_HEIGHT,
   DEFAULT_NOTE_WIDTH,
 } from '@blocksuite/affine-model';
+import { Bound } from '@blocksuite/global/utils';
 import { expect, type Page } from '@playwright/test';
 
 import { clickView } from '../../utils/actions/click.js';
@@ -13,6 +14,8 @@ import {
   dragBetweenViewCoords,
   edgelessCommonSetup,
   getFirstContainerId,
+  getIds,
+  getSelectedBound,
   getSelectedIds,
   pickColorAtPoints,
   setEdgelessTool,
@@ -51,7 +54,7 @@ test.beforeEach(async ({ page }) => {
   await zoomResetByKeyboard(page);
 });
 
-test.describe('add a frame then drag to move', () => {
+test.describe('add a frame', () => {
   const createThreeShapesAndSelectTowShape = async (page: Page) => {
     await createShapeElement(page, [0, 0], [100, 100], Shape.Square);
     await createShapeElement(page, [100, 0], [200, 100], Shape.Square);
@@ -66,7 +69,7 @@ test.describe('add a frame then drag to move', () => {
     await page.keyboard.press('f');
 
     await expect(page.locator('affine-frame')).toHaveCount(1);
-    await assertSelectedBound(page, [-300, -270, 800, 640]);
+    await assertSelectedBound(page, [-40, -40, 280, 180]);
 
     const frameId = await getFirstContainerId(page);
     await assertContainerChildCount(page, frameId, 2);
@@ -77,7 +80,7 @@ test.describe('add a frame then drag to move', () => {
     await triggerComponentToolbarAction(page, 'addFrame');
 
     await expect(page.locator('affine-frame')).toHaveCount(1);
-    await assertSelectedBound(page, [-300, -270, 800, 640]);
+    await assertSelectedBound(page, [-40, -40, 280, 180]);
 
     const frameId = await getFirstContainerId(page);
     await assertContainerChildCount(page, frameId, 2);
@@ -90,7 +93,7 @@ test.describe('add a frame then drag to move', () => {
     await triggerComponentToolbarAction(page, 'createFrameOnMoreOption');
 
     await expect(page.locator('affine-frame')).toHaveCount(1);
-    await assertSelectedBound(page, [-300, -270, 800, 640]);
+    await assertSelectedBound(page, [-40, -40, 280, 180]);
 
     const frameId = await getFirstContainerId(page);
     await assertContainerChildCount(page, frameId, 2);
@@ -124,6 +127,19 @@ test.describe('add a frame then drag to move', () => {
     const frameId = await getFirstContainerId(page);
     await assertContainerChildCount(page, frameId, 2);
   });
+
+  test('add inner frame', async ({ page }) => {
+    await createFrame(page, [50, 50], [450, 450]);
+    await createShapeElement(page, [200, 200], [300, 300], Shape.Square);
+    await pressEscape(page);
+
+    await shiftClickView(page, [250, 250]);
+    await page.keyboard.press('f');
+    const innerFrameBound = await getSelectedBound(page);
+    expect(
+      new Bound(50, 50, 400, 400).contains(Bound.fromXYWH(innerFrameBound))
+    ).toBeTruthy();
+  });
 });
 
 test.describe('add element to frame and then move frame', () => {
@@ -142,9 +158,11 @@ test.describe('add element to frame and then move frame', () => {
       const noteCoord = await toViewCoord(page, [200, 200]);
       const noteId = await addNote(page, '', noteCoord[0], noteCoord[1]);
 
+      const frameTitle = page.locator('affine-frame-title');
+
       await pressEscape(page);
 
-      await clickView(page, [60, 60]);
+      await frameTitle.click();
       await dragBetweenViewCoords(page, [60, 60], [110, 110]);
 
       await assertEdgelessElementBound(page, shapeId, [150, 150, 100, 100]);
@@ -169,7 +187,9 @@ test.describe('add element to frame and then move frame', () => {
       );
       await pressEscape(page);
 
-      await clickView(page, [60, 60]);
+      const frameTitle = page.locator('affine-frame-title');
+
+      await frameTitle.click();
       await dragBetweenViewCoords(page, [60, 60], [110, 110]);
 
       await assertEdgelessElementBound(page, shapeId, [500, 500, 100, 100]);
@@ -195,13 +215,15 @@ test.describe('add element to frame and then move frame', () => {
       ];
       await pressEscape(page);
 
+      const frameTitle = page.locator('affine-frame-title');
+
       await shiftClickView(page, [110, 110]);
       await shiftClickView(page, [160, 160]);
       await page.keyboard.press(`${SHORT_KEY}+g`);
       const groupId = (await getSelectedIds(page))[0];
       await pressEscape(page);
 
-      await clickView(page, [60, 60]);
+      await frameTitle.click();
       await dragBetweenViewCoords(page, [60, 60], [110, 110]);
 
       await assertEdgelessElementBound(page, shapeIds[0], [150, 150, 100, 100]);
@@ -220,13 +242,15 @@ test.describe('add element to frame and then move frame', () => {
       ];
       await pressEscape(page);
 
+      const frameTitle = page.locator('affine-frame-title');
+
       await shiftClickView(page, [460, 460]);
       await shiftClickView(page, [510, 510]);
       await page.keyboard.press(`${SHORT_KEY}+g`);
       const groupId = (await getSelectedIds(page))[0];
       await pressEscape(page);
 
-      await clickView(page, [60, 60]);
+      await frameTitle.click();
       await dragBetweenViewCoords(page, [60, 60], [110, 110]);
 
       await assertEdgelessElementBound(page, shapeIds[0], [500, 500, 100, 100]);
@@ -247,7 +271,9 @@ test.describe('add element to frame and then move frame', () => {
       ];
       await pressEscape(page);
 
-      await clickView(page, [60, 60]);
+      const frameTitles = page.locator('affine-frame-title');
+
+      await frameTitles.nth(0).click();
       await dragBetweenViewCoords(page, [60, 60], [110, 110]);
 
       await assertEdgelessElementBound(page, shapeId, [200, 200, 100, 100]);
@@ -265,7 +291,9 @@ test.describe('add element to frame and then move frame', () => {
       ];
       await pressEscape(page);
 
-      await clickView(page, [60, 60]);
+      const frameTitles = page.locator('affine-frame-title');
+
+      await frameTitles.nth(0).click();
       await dragBetweenViewCoords(page, [60, 60], [110, 110]);
 
       await assertEdgelessElementBound(page, shapeId, [600, 600, 50, 50]);
@@ -282,7 +310,9 @@ test.describe('add element to frame and then move frame', () => {
         await createShapeElement(page, [550, 550], [600, 600], Shape.Square),
       ];
 
-      await clickView(page, [60, 60]);
+      const frameTitles = page.locator('affine-frame-title');
+
+      await frameTitles.nth(0).click();
       await dragBetweenViewCoords(page, [60, 60], [110, 110]);
 
       await assertEdgelessElementBound(page, shapeId, [600, 600, 50, 50]);
@@ -300,7 +330,9 @@ test.describe('resize frame then move ', () => {
     ];
     await pressEscape(page);
 
-    await clickView(page, [60, 60]);
+    const frameTitle = page.locator('affine-frame-title');
+
+    await frameTitle.click();
     await dragBetweenViewCoords(page, [150, 150], [450, 450]);
 
     await dragBetweenViewCoords(page, [60, 60], [110, 110]);
@@ -316,7 +348,9 @@ test.describe('resize frame then move ', () => {
     ];
     await pressEscape(page);
 
-    await clickView(page, [60, 60]);
+    const frameTitle = page.locator('affine-frame-title');
+
+    await frameTitle.click();
     await dragBetweenViewCoords(page, [450, 450], [150, 150]);
 
     await dragBetweenViewCoords(page, [60, 60], [110, 110]);
@@ -326,16 +360,40 @@ test.describe('resize frame then move ', () => {
   });
 });
 
-test('delete frame', async ({ page }) => {
+test('delete frame should also delete its children', async ({ page }) => {
   await createFrame(page, [50, 50], [450, 450]);
   await createShapeElement(page, [200, 200], [300, 300], Shape.Square);
   await pressEscape(page);
 
-  await clickView(page, [60, 60]);
+  const frameTitle = page.locator('affine-frame-title');
+
+  await frameTitle.click();
   await pressBackspace(page);
   await expect(page.locator('affine-frame')).toHaveCount(0);
 
   await assertCanvasElementsCount(page, 0);
+});
+
+test('delete frame by click ungroup should not delete its children', async ({
+  page,
+}) => {
+  await createFrame(page, [50, 50], [450, 450]);
+  const shapeId = await createShapeElement(
+    page,
+    [200, 200],
+    [300, 300],
+    Shape.Square
+  );
+  await pressEscape(page);
+
+  const frameTitle = page.locator('affine-frame-title');
+  await frameTitle.click();
+  const elementToolbar = page.locator('edgeless-element-toolbar-widget');
+  const ungroupButton = elementToolbar.getByLabel('Ungroup');
+  await ungroupButton.click();
+
+  await assertCanvasElementsCount(page, 1);
+  expect(await getIds(page)).toEqual([shapeId]);
 });
 
 test('outline should keep updated during a new frame created by frame-tool dragging', async ({

@@ -18,6 +18,7 @@ export class MemoryBlobCRUD {
   list() {
     return Array.from(this._map.keys());
   }
+
   async set(value: Blob): Promise<string>;
 
   async set(key: string, value: Blob): Promise<string>;

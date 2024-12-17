@@ -65,7 +65,7 @@ const FLAGS_PRESET = {
   enable_mind_map_import: false,
   enable_advanced_block_visibility: false,
   enable_shape_shadow_blur: false,
-  enable_new_dnd: false,
+  enable_new_dnd: true,
   enable_mobile_keyboard_toolbar: false,
   enable_mobile_linked_doc_menu: false,
   readonly: {},
@@ -232,6 +232,10 @@ export class DocCollection extends DocCollectionAddonType {
     });
     this.slots.docCreated.emit(docId);
     return this.getDoc(docId, { query }) as Doc;
+  }
+
+  dispose() {
+    this.awarenessStore.destroy();
   }
 
   /**

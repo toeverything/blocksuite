@@ -20,5 +20,6 @@ export const numberPropertyModelConfig = numberPropertyType.modelConfig<
     };
   },
   cellToJson: ({ value }) => value ?? null,
+  cellFromJson: ({ value }) => (typeof value !== 'number' ? undefined : value),
   isEmpty: ({ value }) => value == null,
 });
