@@ -12,7 +12,6 @@ import {
 } from '@blocksuite/affine-components/icons';
 import { notifyLinkedDocSwitchedToEmbed } from '@blocksuite/affine-components/notification';
 import { isPeekable, peek } from '@blocksuite/affine-components/peek';
-import { referenceToNode } from '@blocksuite/affine-components/rich-text';
 import { toast } from '@blocksuite/affine-components/toast';
 import {
   cloneGroups,
@@ -39,7 +38,7 @@ import {
   TelemetryProvider,
   ThemeProvider,
 } from '@blocksuite/affine-shared/services';
-import { getHostName } from '@blocksuite/affine-shared/utils';
+import { getHostName, referenceToNode } from '@blocksuite/affine-shared/utils';
 import { type BlockStdScope, WidgetComponent } from '@blocksuite/block-std';
 import { type BlockModel, DocCollection } from '@blocksuite/store';
 import { autoUpdate, computePosition, flip, offset } from '@floating-ui/dom';
@@ -438,7 +437,7 @@ export class EmbedCardToolbar extends WidgetComponent<
     }
 
     if ('convertToEmbed' in this.focusBlock) {
-      const referenceInfo = this.focusBlock.referenceInfo;
+      const referenceInfo = this.focusBlock.referenceInfo$.peek();
 
       this.focusBlock.convertToEmbed();
 

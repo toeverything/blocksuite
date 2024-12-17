@@ -6,9 +6,7 @@ import { createIdentifier } from '@blocksuite/global/di';
 import type { AffineReference } from './reference-node.js';
 
 export interface ReferenceNodeConfig {
-  customContent?: ((reference: AffineReference) => TemplateResult) | null;
-  customIcon?: ((reference: AffineReference) => TemplateResult) | null;
-  customTitle?: ((reference: AffineReference) => string) | null;
+  customContent?: (reference: AffineReference) => TemplateResult;
   interactable?: boolean;
   hidePopup?: boolean;
 }
@@ -29,12 +27,7 @@ export function ReferenceNodeConfigExtension(
 export class ReferenceNodeConfigProvider {
   private _customContent:
     | ((reference: AffineReference) => TemplateResult)
-    | null = null;
-
-  private _customIcon: ((reference: AffineReference) => TemplateResult) | null =
-    null;
-
-  private _customTitle: ((reference: AffineReference) => string) | null = null;
+    | undefined = undefined;
 
   private _hidePopup = false;
 
@@ -42,14 +35,6 @@ export class ReferenceNodeConfigProvider {
 
   get customContent() {
     return this._customContent;
-  }
-
-  get customIcon() {
-    return this._customIcon;
-  }
-
-  get customTitle() {
-    return this._customTitle;
   }
 
   get doc() {
@@ -68,14 +53,6 @@ export class ReferenceNodeConfigProvider {
 
   setCustomContent(content: ReferenceNodeConfigProvider['_customContent']) {
     this._customContent = content;
-  }
-
-  setCustomIcon(icon: ReferenceNodeConfigProvider['_customIcon']) {
-    this._customIcon = icon;
-  }
-
-  setCustomTitle(title: ReferenceNodeConfigProvider['_customTitle']) {
-    this._customTitle = title;
   }
 
   setHidePopup(hidePopup: boolean) {

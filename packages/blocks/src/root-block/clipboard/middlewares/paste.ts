@@ -1,11 +1,11 @@
 import type { ParagraphBlockModel } from '@blocksuite/affine-model';
 
-import { referenceToNode } from '@blocksuite/affine-components/rich-text';
 import {
   ParseDocUrlProvider,
   type ParseDocUrlService,
   TelemetryProvider,
 } from '@blocksuite/affine-shared/services';
+import { referenceToNode } from '@blocksuite/affine-shared/utils';
 import {
   BLOCK_ID_ATTR,
   type BlockComponent,

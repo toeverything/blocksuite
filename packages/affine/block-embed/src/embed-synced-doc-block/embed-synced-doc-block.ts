@@ -4,7 +4,6 @@ import {
 } from '@blocksuite/affine-components/icons';
 import { Peekable } from '@blocksuite/affine-components/peek';
 import {
-  cloneReferenceInfo,
   REFERENCE_NODE,
   RefNodeSlotsProvider,
 } from '@blocksuite/affine-components/rich-text';
@@ -16,11 +15,15 @@ import {
   type ReferenceInfo,
 } from '@blocksuite/affine-model';
 import {
+  DocDisplayMetaProvider,
   DocModeProvider,
   ThemeExtensionIdentifier,
   ThemeProvider,
 } from '@blocksuite/affine-shared/services';
-import { SpecProvider } from '@blocksuite/affine-shared/utils';
+import {
+  cloneReferenceInfo,
+  SpecProvider,
+} from '@blocksuite/affine-shared/utils';
 import {
   BlockServiceWatcher,
   BlockStdScope,
@@ -34,6 +37,7 @@ import {
   type GetDocOptions,
   type Query,
 } from '@blocksuite/store';
+import { computed } from '@preact/signals-core';
 import { html, type PropertyValues } from 'lit';
 import { query, state } from 'lit/decorators.js';
 import { choose } from 'lit/directives/choose.js';
@@ -303,6 +307,13 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockComponent<EmbedSynce
     height: 'unset',
   };
 
+  icon$ = computed(() => {
+    const { pageId, params } = this.model;
+    return this.std
+      .get(DocDisplayMetaProvider)
+      .icon(pageId, { params, referenced: true }).value;
+  });
+
   open = () => {
     const pageId = this.model.pageId;
     if (pageId === this.doc.id) return;
@@ -316,6 +327,13 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockComponent<EmbedSynce
       this._error = true;
     });
   };
+
+  title$ = computed(() => {
+    const { pageId, params } = this.model;
+    return this.std
+      .get(DocDisplayMetaProvider)
+      .title(pageId, { params, referenced: true });
+  });
 
   private get _rootService() {
     return this.std.getService('affine:page');

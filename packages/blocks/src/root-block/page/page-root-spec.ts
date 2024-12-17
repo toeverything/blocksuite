@@ -1,5 +1,6 @@
 import {
   DNDAPIExtension,
+  DocDisplayMetaService,
   DocModeService,
   EmbedOptionService,
   ThemeService,
@@ -71,4 +72,5 @@ export const PageRootBlockSpec: ExtensionType[] = [
   WidgetViewMapExtension('affine:page', pageRootWidgetViewMap),
   ExportManagerExtension,
   DNDAPIExtension,
+  DocDisplayMetaService,
 ];

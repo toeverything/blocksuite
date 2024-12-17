@@ -1589,6 +1589,7 @@ __metadata:
     "@blocksuite/affine-model": "workspace:*"
     "@blocksuite/block-std": "workspace:*"
     "@blocksuite/global": "workspace:*"
+    "@blocksuite/icons": "npm:^2.1.75"
     "@blocksuite/inline": "workspace:*"
     "@blocksuite/store": "workspace:*"
     "@floating-ui/dom": "npm:^1.6.10"

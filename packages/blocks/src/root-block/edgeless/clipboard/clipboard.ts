@@ -12,7 +12,6 @@ import {
   SurfaceGroupLikeModel,
   TextUtils,
 } from '@blocksuite/affine-block-surface';
-import { referenceToNode } from '@blocksuite/affine-components/rich-text';
 import {
   BookmarkStyles,
   DEFAULT_NOTE_HEIGHT,
@@ -28,6 +27,7 @@ import {
   isInsidePageEditor,
   isUrlInClipboard,
   matchFlavours,
+  referenceToNode,
 } from '@blocksuite/affine-shared/utils';
 import {
   compareLayer,

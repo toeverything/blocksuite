@@ -13,7 +13,6 @@ import {
 } from '@blocksuite/affine-components/icons';
 import { notifyLinkedDocSwitchedToEmbed } from '@blocksuite/affine-components/notification';
 import { isPeekable, peek } from '@blocksuite/affine-components/peek';
-import { referenceToNode } from '@blocksuite/affine-components/rich-text';
 import { toast } from '@blocksuite/affine-components/toast';
 import {
   type MenuItem,
@@ -30,7 +29,7 @@ import {
   TelemetryProvider,
   ThemeProvider,
 } from '@blocksuite/affine-shared/services';
-import { getHostName } from '@blocksuite/affine-shared/utils';
+import { getHostName, referenceToNode } from '@blocksuite/affine-shared/utils';
 import { Bound, WithDisposable } from '@blocksuite/global/utils';
 import { css, html, LitElement, nothing, type TemplateResult } from 'lit';
 import { property, state } from 'lit/decorators.js';
@@ -172,7 +171,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
 
     const block = this._blockComponent;
     if (block && 'convertToEmbed' in block) {
-      const referenceInfo = block.referenceInfo;
+      const referenceInfo = block.referenceInfo$.peek();
 
       block.convertToEmbed();
 
