@@ -1313,6 +1313,7 @@ test.describe('readonly mode', () => {
       page,
       `
 <affine:paragraph
+  prop:collapsed={false}
   prop:text="hello"
   prop:type="text"
 />`,
@@ -1324,6 +1325,7 @@ test.describe('readonly mode', () => {
       page,
       `
 <affine:paragraph
+  prop:collapsed={false}
   prop:text="hello"
   prop:type="text"
 />`,

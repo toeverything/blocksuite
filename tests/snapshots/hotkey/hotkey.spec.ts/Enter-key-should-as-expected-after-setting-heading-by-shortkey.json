@@ -46,7 +46,8 @@
                   "insert": "hello"
                 }
               ]
-            }
+            },
+            "collapsed": false
           },
           "children": []
         },
@@ -64,7 +65,8 @@
                   "insert": "world"
                 }
               ]
-            }
+            },
+            "collapsed": false
           },
           "children": []
         }

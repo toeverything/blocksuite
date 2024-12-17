@@ -46,7 +46,8 @@
                   "insert": "aaa"
                 }
               ]
-            }
+            },
+            "collapsed": false
           },
           "children": [
             {
@@ -63,7 +64,8 @@
                       "insert": "bbb"
                     }
                   ]
-                }
+                },
+                "collapsed": false
               },
               "children": [
                 {
@@ -80,7 +82,8 @@
                           "insert": "ccc"
                         }
                       ]
-                    }
+                    },
+                    "collapsed": false
                   },
                   "children": []
                 }

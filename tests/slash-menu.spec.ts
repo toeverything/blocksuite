@@ -76,6 +76,7 @@ test.describe('slash menu should show and hide correctly', () => {
       page,
       `
 <affine:paragraph
+  prop:collapsed={false}
   prop:text="/"
   prop:type="text"
 />`,
@@ -119,6 +120,7 @@ test.describe('slash menu should show and hide correctly', () => {
       page,
       `
 <affine:paragraph
+  prop:collapsed={false}
   prop:type="text"
 />`,
       paragraphId
@@ -538,6 +540,7 @@ test('should clean slash string after soft enter', async ({ page }) => {
     page,
     `
   <affine:paragraph
+  prop:collapsed={false}
   prop:text="hello\n"
   prop:type="text"
 />`,
@@ -731,6 +734,7 @@ test.describe('slash menu with style', () => {
       page,
       `
 <affine:paragraph
+  prop:collapsed={false}
   prop:text={
     <>
       <text
@@ -761,6 +765,7 @@ test.describe('slash menu with style', () => {
       page,
       `
 <affine:paragraph
+  prop:collapsed={false}
   prop:text={
     <>
       <text

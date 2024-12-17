@@ -1,7 +1,10 @@
 import type { IndentContext } from '@blocksuite/affine-shared/types';
 import type { Command } from '@blocksuite/block-std';
 
-import { matchFlavours } from '@blocksuite/affine-shared/utils';
+import {
+  calculateCollapsedSiblings,
+  matchFlavours,
+} from '@blocksuite/affine-shared/utils';
 
 export const canDedentParagraphCommand: Command<
   never,
@@ -82,9 +85,18 @@ export const dedentParagraphCommand: Command<'indentContext'> = (ctx, next) => {
 
   doc.captureSync();
 
-  const nextSiblings = doc.getNexts(model);
-  doc.moveBlocks(nextSiblings, model);
-  doc.moveBlocks([model], grandParent, parent, false);
+  if (
+    matchFlavours(model, ['affine:paragraph']) &&
+    model.type.startsWith('h') &&
+    model.collapsed
+  ) {
+    const collapsedSiblings = calculateCollapsedSiblings(model);
+    doc.moveBlocks([model, ...collapsedSiblings], grandParent, parent, false);
+  } else {
+    const nextSiblings = doc.getNexts(model);
+    doc.moveBlocks(nextSiblings, model);
+    doc.moveBlocks([model], grandParent, parent, false);
+  }
 
   const textSelection = selection.find('text');
   if (textSelection) {

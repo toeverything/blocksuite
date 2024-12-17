@@ -46,7 +46,8 @@
                   "insert": "abcfg"
                 }
               ]
-            }
+            },
+            "collapsed": false
           },
           "children": [
             {
@@ -63,7 +64,8 @@
                       "insert": "hijlm"
                     }
                   ]
-                }
+                },
+                "collapsed": false
               },
               "children": []
             },
@@ -81,7 +83,8 @@
                       "insert": "nop"
                     }
                   ]
-                }
+                },
+                "collapsed": false
               },
               "children": []
             }

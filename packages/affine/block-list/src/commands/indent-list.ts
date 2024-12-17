@@ -1,7 +1,10 @@
 import type { IndentContext } from '@blocksuite/affine-shared/types';
 import type { Command } from '@blocksuite/block-std';
 
-import { matchFlavours } from '@blocksuite/affine-shared/utils';
+import {
+  getNearestHeadingBefore,
+  matchFlavours,
+} from '@blocksuite/affine-shared/utils';
 
 import { correctNumberedListsOrderToPrev } from './utils.js';
 
@@ -114,6 +117,22 @@ export const indentListCommand: Command<'indentContext', never> = (
   doc.moveBlocks([model], previousSibling);
   correctNumberedListsOrderToPrev(doc, model);
   if (nextSibling) correctNumberedListsOrderToPrev(doc, nextSibling);
+
+  // 123
+  //   > # 456
+  // 789
+  //
+  // we need to update 456 collapsed state to false when indent 789
+  const nearestHeading = getNearestHeadingBefore(model);
+  if (
+    nearestHeading &&
+    matchFlavours(nearestHeading, ['affine:paragraph']) &&
+    nearestHeading.collapsed
+  ) {
+    doc.updateBlock(nearestHeading, {
+      collapsed: false,
+    });
+  }
 
   const textSelection = selection.find('text');
   if (textSelection) {

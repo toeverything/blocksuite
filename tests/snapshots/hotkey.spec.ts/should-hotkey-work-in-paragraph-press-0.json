@@ -45,7 +45,8 @@
                   "insert": "hello"
                 }
               ]
-            }
+            },
+            "collapsed": false
           },
           "children": []
         }

@@ -19,7 +19,8 @@
                 "insert": "bc"
               }
             ]
-          }
+          },
+          "collapsed": false
         },
         "children": [
           {
@@ -36,7 +37,8 @@
                     "insert": "d"
                   }
                 ]
-              }
+              },
+              "collapsed": false
             },
             "children": []
           }
