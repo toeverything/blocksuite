@@ -21,6 +21,8 @@
 
 ## Feat
 
+- feat: support heading toggle (#8829)
+- feat(blocks): add surface element plain text adapter (#8977)
 - feat: add doc display meta extension (#8953)
 
 ## Fix
