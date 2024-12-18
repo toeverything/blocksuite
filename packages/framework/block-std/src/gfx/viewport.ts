@@ -17,6 +17,12 @@ export const ZOOM_MAX = 6.0;
 export const ZOOM_MIN = 0.1;
 
 export class Viewport {
+  private _cachedHeight: number = 0;
+
+  private _cachedWidth: number = 0;
+
+  private _resizeObserver: ResizeObserver | null = null;
+
   protected _center: IPoint = { x: 0, y: 0 };
 
   protected _el: HTMLElement | null = null;
@@ -68,8 +74,7 @@ export class Viewport {
   }
 
   get height() {
-    this._height = this._el?.offsetHeight ?? this._height;
-    return this._height;
+    return this._cachedHeight;
   }
 
   get left() {
@@ -144,8 +149,7 @@ export class Viewport {
   }
 
   get width() {
-    this._width = this._el?.offsetWidth ?? this._width;
-    return this._width;
+    return this._cachedWidth;
   }
 
   get zoom() {
@@ -157,10 +161,18 @@ export class Viewport {
   }
 
   clearViewportElement() {
+    if (this._resizeObserver && this._el) {
+      this._resizeObserver.unobserve(this._el);
+      this._resizeObserver.disconnect();
+    }
+    this._resizeObserver = null;
     this._el = null;
+    this._cachedWidth = 0;
+    this._cachedHeight = 0;
   }
 
   dispose() {
+    this.clearViewportElement();
     this.sizeUpdated.dispose();
     this.viewportMoved.dispose();
     this.viewportUpdated.dispose();
@@ -213,6 +225,9 @@ export class Viewport {
       centerX - (oldWidth - width) / zoom / 2,
       centerY - (oldHeight - height) / zoom / 2
     );
+
+    this._width = width;
+    this._height = height;
   }
 
   setCenter(centerX: number, centerY: number) {
@@ -285,6 +300,19 @@ export class Viewport {
     this._el = el;
 
     this.setRect(rect.left, rect.top, el.offsetWidth, el.offsetHeight);
+
+    this._resizeObserver = new ResizeObserver(entries => {
+      for (const entry of entries) {
+        if (entry.target === this._el) {
+          this._cachedWidth = entry.contentRect.width;
+          this._cachedHeight = entry.contentRect.height;
+          this.onResize();
+        }
+      }
+    });
+    this._resizeObserver.observe(el);
+    this._cachedWidth = el.offsetWidth;
+    this._cachedHeight = el.offsetHeight;
   }
 
   setZoom(zoom: number, focusPoint?: IPoint) {
