@@ -837,7 +837,7 @@ test('linked doc can be dragged from note to surface top level block', async ({
   await dragBlockToPoint(page, '9', { x: 200, y: 200 });
 
   await waitNextFrame(page);
-  await assertParentBlockFlavour(page, '10', 'affine:surface');
+  await assertParentBlockFlavour(page, '9', 'affine:surface');
 });
 
 // Aliases
