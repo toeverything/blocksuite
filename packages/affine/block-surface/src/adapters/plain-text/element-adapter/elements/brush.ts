@@ -1,6 +1,6 @@
-import type { ElementModelToPlainTextAdapterMatcher } from './type.js';
+import type { ElementModelToPlainTextAdapterMatcher } from '../type.js';
 
-export const brushElementModelToPlainTextAdapterMatcher: ElementModelToPlainTextAdapterMatcher =
+export const brushToPlainTextAdapterMatcher: ElementModelToPlainTextAdapterMatcher =
   {
     name: 'brush',
     match: elementModel => elementModel.type === 'brush',

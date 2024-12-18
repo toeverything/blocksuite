@@ -3,9 +3,8 @@ import {
   type BlockPlainTextAdapterMatcher,
 } from '@blocksuite/affine-shared/adapters';
 
-import type { ElementModelMap } from '../../element-model/index.js';
-
 import { SurfaceBlockSchema } from '../../surface-model.js';
+import { getMindMapNodeMap } from '../utils/mindmap.js';
 import { PlainTextElementModelAdapter } from './element-adapter/index.js';
 
 export const surfaceBlockPlainTextAdapterMatcher: BlockPlainTextAdapterMatcher =
@@ -32,15 +31,29 @@ export const edgelessSurfaceBlockPlainTextAdapterMatcher: BlockPlainTextAdapterM
     toBlockSnapshot: {},
     fromBlockSnapshot: {
       enter: (o, context) => {
+        const { walkerContext } = context;
         const plainTextElementModelAdapter = new PlainTextElementModelAdapter();
         if ('elements' in o.node.props) {
+          const elements = o.node.props.elements as Record<
+            string,
+            Record<string, unknown>
+          >;
+          // Get all the node maps of mindMap elements
+          const mindMapArray = Object.entries(elements)
+            .filter(([_, element]) => element.type === 'mindmap')
+            .map(([_, element]) => getMindMapNodeMap(element));
+          walkerContext.setGlobalContext(
+            'surface:mindMap:nodeMapArray',
+            mindMapArray
+          );
+
           Object.entries(
             o.node.props.elements as Record<string, Record<string, unknown>>
-          ).forEach(([_, elementModel]) => {
-            const element =
-              elementModel as unknown as ElementModelMap[keyof ElementModelMap];
-            const plainText =
-              plainTextElementModelAdapter.fromElementModel(element);
+          ).forEach(([_, element]) => {
+            const plainText = plainTextElementModelAdapter.fromElementModel(
+              element,
+              { walkerContext, elements }
+            );
             if (plainText) {
               context.textBuffer.content += plainText + '\n';
             }
