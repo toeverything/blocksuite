@@ -39,6 +39,10 @@ type DragMindMapCtx = {
 export class MindMapExt extends DefaultToolExt {
   private _responseAreaUpdated = new Set<MindmapElementModel>();
 
+  override supportedDragTypes: DefaultModeDragType[] = [
+    DefaultModeDragType.ContentMoving,
+  ];
+
   private get _indicatorOverlay() {
     return this.std.getOptional(
       OverlayIdentifier('mindmap-indicator')

@@ -279,7 +279,12 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
                     element.get('id') as string,
                     element,
                     {
-                      onChange: payload => this.elementUpdated.emit(payload),
+                      onChange: payload => {
+                        this.elementUpdated.emit(payload);
+                        Object.keys(payload.props).forEach(key => {
+                          model.model.propsUpdated.emit({ key });
+                        });
+                      },
                       skipFieldInit: true,
                     }
                   );
@@ -321,7 +326,12 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
         val.get('id') as string,
         val,
         {
-          onChange: payload => this.elementUpdated.emit(payload),
+          onChange: payload => {
+            this.elementUpdated.emit(payload),
+              Object.keys(payload.props).forEach(key => {
+                model.model.propsUpdated.emit({ key });
+              });
+          },
           skipFieldInit: true,
         }
       );
@@ -443,7 +453,12 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
     props.id = id;
 
     const elementModel = this._createElementFromProps(props, {
-      onChange: payload => this.elementUpdated.emit(payload),
+      onChange: payload => {
+        this.elementUpdated.emit(payload);
+        Object.keys(payload.props).forEach(key => {
+          elementModel.model.propsUpdated.emit({ key });
+        });
+      },
     });
 
     this._elementModels.set(id, elementModel);

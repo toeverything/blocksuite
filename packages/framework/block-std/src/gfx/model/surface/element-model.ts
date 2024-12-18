@@ -1,5 +1,9 @@
-import type { IVec, SerializedXYWH, XYWH } from '@blocksuite/global/utils';
-
+import {
+  type IVec,
+  type SerializedXYWH,
+  Slot,
+  type XYWH,
+} from '@blocksuite/global/utils';
 import {
   Bound,
   deserializeXYWH,
@@ -85,6 +89,8 @@ export abstract class GfxPrimitiveElementModel<
   protected _preserved = new Map<string, unknown>();
 
   protected _stashed: Map<keyof Props | string, unknown>;
+
+  propsUpdated = new Slot<{ key: string }>();
 
   abstract rotate: number;
 

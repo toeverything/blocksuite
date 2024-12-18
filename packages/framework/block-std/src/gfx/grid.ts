@@ -134,7 +134,10 @@ export class GridManager {
     }
   }
 
-  private _searchExternal(bound: IBound, strict = false): Set<GfxModel> {
+  private _searchExternal(
+    bound: IBound,
+    options: { filterFunc: FilterFunc; strict: boolean }
+  ): Set<GfxModel> {
     const [minRow, maxRow, minCol, maxCol] = rangeFromBound(bound);
     const results = new Set<GfxModel>();
     const b = Bound.from(bound);
@@ -147,8 +150,9 @@ export class GridManager {
         for (const element of gridElements) {
           const externalBound = element.externalBound;
           if (
+            options.filterFunc(element) &&
             externalBound &&
-            (strict
+            (options.strict
               ? b.contains(externalBound)
               : intersects(externalBound, bound))
           ) {
@@ -161,13 +165,14 @@ export class GridManager {
     return results;
   }
 
-  private _toFilterFuncs(filters: (keyof typeof typeFilters | FilterFunc)[]) {
+  private _toFilterFunc(filters: (keyof typeof typeFilters | FilterFunc)[]) {
     const filterFuncs: FilterFunc[] = filters.map(filter => {
       if (typeof filter === 'function') {
         return filter;
       }
       return typeFilters[filter];
     });
+
     return (model: GfxModel | GfxLocalElementModel) =>
       filterFuncs.some(filter => filter(model));
   }
@@ -300,17 +305,20 @@ export class GridManager {
     | (GfxModel | GfxLocalElementModel)[]
     | Set<GfxModel | GfxLocalElementModel> {
     const strict = options.strict ?? false;
-    const results: Set<GfxModel | GfxLocalElementModel> = this._searchExternal(
-      bound,
-      strict
-    );
     const [minRow, maxRow, minCol, maxCol] = rangeFromBound(bound);
     const b = Bound.from(bound);
     const returnSet = options.useSet ?? false;
-    const filter =
+    const filterFunc =
       (Array.isArray(options.filter)
-        ? this._toFilterFuncs(options.filter)
-        : options.filter) ?? this._toFilterFuncs(['canvas', 'block']);
+        ? this._toFilterFunc(options.filter)
+        : options.filter) ?? this._toFilterFunc(['canvas', 'block']);
+    const results: Set<GfxModel | GfxLocalElementModel> = this._searchExternal(
+      bound,
+      {
+        filterFunc,
+        strict,
+      }
+    );
 
     for (let i = minRow; i <= maxRow; i++) {
       for (let j = minCol; j <= maxCol; j++) {
@@ -318,7 +326,7 @@ export class GridManager {
         if (!gridElements) continue;
         for (const element of gridElements) {
           if (
-            filter(element) &&
+            filterFunc(element) &&
             (strict
               ? b.contains(element.elementBound)
               : intersects(element.elementBound, b))
