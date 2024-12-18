@@ -256,7 +256,7 @@ class ToolOverlay extends Overlay {
     );
   }
 
-  dispose(): void {
+  override dispose(): void {
     this.disposables.dispose();
   }
 
