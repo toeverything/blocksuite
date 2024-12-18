@@ -38,6 +38,7 @@ import {
   textFormatConfigs,
 } from '@blocksuite/affine-components/rich-text';
 import { toast } from '@blocksuite/affine-components/toast';
+import { TelemetryProvider } from '@blocksuite/affine-shared/services';
 import {
   createDefaultDoc,
   openFileOrFiles,
@@ -555,6 +556,15 @@ export const defaultSlashMenuConfig: SlashMenuConfig = {
             place: 'after',
             removeEmptyLine: true,
           })
+          .inline(({ insertedDatabaseBlockId }) => {
+            if (insertedDatabaseBlockId) {
+              const telemetry =
+                rootComponent.std.getOptional(TelemetryProvider);
+              telemetry?.track('AddDatabase', {
+                blockId: insertedDatabaseBlockId,
+              });
+            }
+          })
           .run();
       },
     },
@@ -606,6 +616,15 @@ export const defaultSlashMenuConfig: SlashMenuConfig = {
             viewType: viewPresets.kanbanViewMeta.type,
             place: 'after',
             removeEmptyLine: true,
+          })
+          .inline(({ insertedDatabaseBlockId }) => {
+            if (insertedDatabaseBlockId) {
+              const telemetry =
+                rootComponent.std.getOptional(TelemetryProvider);
+              telemetry?.track('AddDatabase', {
+                blockId: insertedDatabaseBlockId,
+              });
+            }
           })
           .run();
       },

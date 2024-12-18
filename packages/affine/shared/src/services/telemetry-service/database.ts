@@ -20,7 +20,9 @@ export type DatabaseViewEvents = {
   };
 };
 
-export type DatabaseEvents = {};
+export type DatabaseEvents = {
+  AddDatabase: {};
+};
 
 export interface DatabaseAllSortEvents {
   DatabaseSortAdd: {};
