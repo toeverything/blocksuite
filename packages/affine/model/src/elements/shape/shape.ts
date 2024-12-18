@@ -12,8 +12,10 @@ import type {
 
 import {
   field,
+  GfxLocalElementModel,
   GfxPrimitiveElementModel,
   local,
+  prop,
 } from '@blocksuite/block-std/gfx';
 import { DocCollection, type Y } from '@blocksuite/store';
 
@@ -59,6 +61,9 @@ export const SHAPE_TEXT_PADDING = 20;
 export const SHAPE_TEXT_VERTICAL_PADDING = 10;
 
 export class ShapeElementModel extends GfxPrimitiveElementModel<ShapeProps> {
+  /**
+   * The bound of the text content.
+   */
   textBound: IBound | null = null;
 
   get type() {
@@ -184,6 +189,80 @@ export class ShapeElementModel extends GfxPrimitiveElementModel<ShapeProps> {
 
   @field()
   accessor xywh: SerializedXYWH = '[0,0,100,100]';
+}
+
+export class LocalShapeElementModel extends GfxLocalElementModel {
+  roughness: number = DEFAULT_ROUGHNESS;
+
+  textBound: Bound | null = null;
+
+  textDisplay: boolean = true;
+
+  get type() {
+    return 'shape';
+  }
+
+  @prop()
+  accessor color: Color = '#000000';
+
+  @prop()
+  accessor fillColor: Color = ShapeFillColor.Yellow;
+
+  @prop()
+  accessor filled: boolean = false;
+
+  @prop()
+  accessor fontFamily: string = FontFamily.Inter;
+
+  @prop()
+  accessor fontSize: number = 16;
+
+  @prop()
+  accessor fontStyle: FontStyle = FontStyle.Normal;
+
+  @prop()
+  accessor fontWeight: FontWeight = FontWeight.Regular;
+
+  @prop()
+  accessor padding: [number, number] = [
+    SHAPE_TEXT_VERTICAL_PADDING,
+    SHAPE_TEXT_PADDING,
+  ];
+
+  @prop()
+  accessor radius: number = 0;
+
+  @prop()
+  accessor shadow: {
+    blur: number;
+    offsetX: number;
+    offsetY: number;
+    color: string;
+  } | null = null;
+
+  @prop()
+  accessor shapeStyle: ShapeStyle = ShapeStyle.General;
+
+  @prop()
+  accessor shapeType: ShapeType = ShapeType.Rect;
+
+  @prop()
+  accessor strokeColor: Color = LineColor.Yellow;
+
+  @prop()
+  accessor strokeStyle: StrokeStyle = StrokeStyle.Solid;
+
+  @prop()
+  accessor strokeWidth: number = 4;
+
+  @prop()
+  accessor text: string = '';
+
+  @prop()
+  accessor textAlign: TextAlign = TextAlign.Center;
+
+  @prop()
+  accessor textVerticalAlign: TextVerticalAlign = TextVerticalAlign.Center;
 }
 
 declare global {

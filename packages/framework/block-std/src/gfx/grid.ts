@@ -30,6 +30,12 @@ function rangeFromBound(a: IBound): number[] {
 
 function rangeFromElement(ele: GfxModel | GfxLocalElementModel): number[] {
   const bound = ele.elementBound;
+
+  bound.w += ele.responseExtension[0] * 2;
+  bound.h += ele.responseExtension[1] * 2;
+  bound.x -= ele.responseExtension[0];
+  bound.y -= ele.responseExtension[1];
+
   const minRow = getGridIndex(bound.x);
   const maxRow = getGridIndex(bound.maxX);
   const minCol = getGridIndex(bound.y);
@@ -326,10 +332,11 @@ export class GridManager {
         if (!gridElements) continue;
         for (const element of gridElements) {
           if (
+            !(element as GfxPrimitiveElementModel).hidden &&
             filterFunc(element) &&
             (strict
               ? b.contains(element.elementBound)
-              : intersects(element.elementBound, b))
+              : intersects(element.responseBound, b))
           ) {
             results.add(element);
           }
@@ -422,7 +429,11 @@ export class GridManager {
 
       disposables.push(
         surface.elementUpdated.on(payload => {
-          if (payload.props['xywh'] || payload.props['externalXYWH']) {
+          if (
+            payload.props['xywh'] ||
+            payload.props['externalXYWH'] ||
+            payload.props['responseExtension']
+          ) {
             this.update(surface.getElementById(payload.id)!);
           }
         })
@@ -436,7 +447,7 @@ export class GridManager {
 
       disposables.push(
         surface.localElementUpdated.on(payload => {
-          if (payload.props['xywh']) {
+          if (payload.props['xywh'] || payload.props['responseExtension']) {
             this.update(payload.model);
           }
         })
@@ -449,6 +460,9 @@ export class GridManager {
       );
 
       surface.elementModels.forEach(model => {
+        this.add(model);
+      });
+      surface.localElementModels.forEach(model => {
         this.add(model);
       });
     }

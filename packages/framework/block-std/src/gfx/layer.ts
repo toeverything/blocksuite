@@ -292,11 +292,6 @@ export class LayerManager {
   }
 
   private _insertIntoLayer(target: GfxModel, type: 'block' | 'canvas') {
-    if (this.layers.length === 0) {
-      this._initLayers();
-      return;
-    }
-
     const layers = this.layers;
     let cur = layers.length - 1;
 
@@ -347,6 +342,7 @@ export class LayerManager {
     };
 
     if (
+      !last(this.layers) ||
       [SortOrder.AFTER, SortOrder.SAME].includes(
         compare(target, last(last(this.layers)!.elements)!)
       )

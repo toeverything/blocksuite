@@ -52,7 +52,7 @@ const calculateNodeSize = (
     children,
   };
 
-  if (rootChildren?.length) {
+  if (rootChildren?.length && !root.detail.collapsed) {
     const childrenBound = rootChildren.reduce(
       (pre, node) => {
         const childSize = calculateNodeSize(node, treeSize);
@@ -108,23 +108,25 @@ const layoutTree = (
     currentY += (tree.root.element.h - onlyChild.root.element.h) / 2;
   }
 
-  tree.children.forEach((subtree, idx) => {
-    const subtreeRootEl = subtree.root.element;
-    const subtreeHeight = subtree.bound.h;
-    const xywh = `[${
-      layoutType === LayoutType.RIGHT ? currentX : currentX - subtreeRootEl.w
-    },${currentY + (subtreeHeight - subtreeRootEl.h) / 2},${subtreeRootEl.w},${subtreeRootEl.h}]` as SerializedXYWH;
+  if (!tree.root.detail.collapsed) {
+    tree.children.forEach((subtree, idx) => {
+      const subtreeRootEl = subtree.root.element;
+      const subtreeHeight = subtree.bound.h;
+      const xywh = `[${
+        layoutType === LayoutType.RIGHT ? currentX : currentX - subtreeRootEl.w
+      },${currentY + (subtreeHeight - subtreeRootEl.h) / 2},${subtreeRootEl.w},${subtreeRootEl.h}]` as SerializedXYWH;
 
-    const currentNodePath = [...path, idx];
+      const currentNodePath = [...path, idx];
 
-    if (subtreeRootEl.xywh !== xywh) {
-      subtreeRootEl.xywh = xywh;
-    }
+      if (subtreeRootEl.xywh !== xywh) {
+        subtreeRootEl.xywh = xywh;
+      }
 
-    layoutTree(subtree, layoutType, mindmap, currentNodePath);
+      layoutTree(subtree, layoutType, mindmap, currentNodePath);
 
-    currentY += subtreeHeight + NODE_VERTICAL_SPACING;
-  });
+      currentY += subtreeHeight + NODE_VERTICAL_SPACING;
+    });
+  }
 };
 
 const layoutRight = (

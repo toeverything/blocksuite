@@ -15,13 +15,13 @@ import type { GfxPrimitiveElementModel } from '../model/surface/element-model.js
 import type { GfxLocalElementModel } from '../model/surface/local-element-model.js';
 
 export type EventsHandlerMap = {
-  click: (e: PointerEventState) => void;
-  dblclick: (e: PointerEventState) => void;
-  pointerdown: (e: PointerEventState) => void;
-  pointerenter: (e: PointerEventState) => void;
-  pointerleave: (e: PointerEventState) => void;
-  pointermove: (e: PointerEventState) => void;
-  pointerup: (e: PointerEventState) => void;
+  click: PointerEventState;
+  dblclick: PointerEventState;
+  pointerdown: PointerEventState;
+  pointerenter: PointerEventState;
+  pointerleave: PointerEventState;
+  pointermove: PointerEventState;
+  pointerup: PointerEventState;
 };
 
 export type SupportedEvent = keyof EventsHandlerMap;
@@ -42,7 +42,8 @@ export class GfxElementModelView<
 
   private _handlers = new Map<
     keyof EventsHandlerMap,
-    ((evt: unknown) => void)[]
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ((evt: any) => void)[]
   >();
 
   private _isConnected = true;
@@ -92,7 +93,7 @@ export class GfxElementModelView<
 
   dispatch<K extends keyof EventsHandlerMap>(
     event: K,
-    evt: Parameters<EventsHandlerMap[K]>[0]
+    evt: EventsHandlerMap[K]
   ) {
     this._handlers.get(event)?.forEach(callback => callback(evt));
   }
@@ -127,7 +128,10 @@ export class GfxElementModelView<
     );
   }
 
-  off<K extends keyof EventsHandlerMap>(event: K, callback: () => void) {
+  off<K extends keyof EventsHandlerMap>(
+    event: K,
+    callback: (evt: EventsHandlerMap[K]) => void
+  ) {
     if (!this._handlers.has(event)) {
       return;
     }
@@ -140,7 +144,10 @@ export class GfxElementModelView<
     }
   }
 
-  on<K extends keyof EventsHandlerMap>(event: K, callback: () => void) {
+  on<K extends keyof EventsHandlerMap>(
+    event: K,
+    callback: (evt: EventsHandlerMap[K]) => void
+  ) {
     if (!this._handlers.has(event)) {
       this._handlers.set(event, []);
     }
@@ -150,10 +157,13 @@ export class GfxElementModelView<
     return () => this.off(event, callback);
   }
 
-  once<K extends keyof EventsHandlerMap>(event: K, callback: () => void) {
-    const off = this.on(event, () => {
+  once<K extends keyof EventsHandlerMap>(
+    event: K,
+    callback: (evt: EventsHandlerMap[K]) => void
+  ) {
+    const off = this.on(event, evt => {
       off();
-      callback();
+      callback(evt);
     });
 
     return off;
@@ -168,6 +178,7 @@ export class GfxElementModelView<
   onDestroyed() {
     this._isConnected = false;
     this.disposable.dispose();
+    this._handlers.clear();
   }
 
   render(_: RendererContext) {}

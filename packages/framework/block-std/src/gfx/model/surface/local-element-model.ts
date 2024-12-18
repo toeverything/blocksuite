@@ -98,6 +98,10 @@ export abstract class GfxLocalElementModel implements GfxCompatibleInterface {
     return this.deserializedXYWH[3];
   }
 
+  get responseBound() {
+    return this.elementBound.expand(this.responseExtension);
+  }
+
   get surface() {
     return this._surface;
   }
@@ -186,10 +190,11 @@ export abstract class GfxLocalElementModel implements GfxCompatibleInterface {
   includesPoint(
     x: number,
     y: number,
-    _: PointTestOptions,
+    opt: PointTestOptions,
     __: EditorHost
   ): boolean {
-    return this.elementBound.isPointInBound([x, y]);
+    const bound = opt.useElementBound ? this.elementBound : this.responseBound;
+    return bound.isPointInBound([x, y]);
   }
 
   intersectsBound(bound: Bound): boolean {
@@ -232,6 +237,9 @@ export abstract class GfxLocalElementModel implements GfxCompatibleInterface {
 
   @prop()
   accessor opacity: number = 1;
+
+  @prop()
+  accessor responseExtension: [number, number] = [0, 0];
 
   @prop()
   accessor rotate: number = 0;

@@ -69,6 +69,23 @@ export class GfxBlockElementModel<
 
   connectable = true;
 
+  /**
+   * Defines the extension of the response area beyond the element's bounding box.
+   * This tuple specifies the horizontal and vertical margins to be added to the element's [x, y, width, height].
+   *
+   * The first value represents the horizontal extension (added to both left and right sides),
+   * and the second value represents the vertical extension (added to both top and bottom sides).
+   *
+   * The response area is computed as:
+   * `[x - horizontal, y - vertical, width + 2 * horizontal, height + 2 * vertical]`.
+   *
+   * Example:
+   * - Bounding box: `[0, 0, 100, 100]`, `responseExtension: [10, 20]`
+   *   Resulting response area: `[-10, -20, 120, 140]`.
+   * - `responseExtension: [0, 0]` keeps the response area equal to the bounding box.
+   */
+  responseExtension: [number, number] = [0, 0];
+
   rotate = 0;
 
   get deserializedXYWH() {
@@ -110,6 +127,10 @@ export class GfxBlockElementModel<
 
   get h() {
     return this.deserializedXYWH[3];
+  }
+
+  get responseBound() {
+    return this.elementBound.expand(this.responseExtension);
   }
 
   get surface(): SurfaceBlockModel | null {
@@ -177,10 +198,10 @@ export class GfxBlockElementModel<
   includesPoint(
     x: number,
     y: number,
-    _: PointTestOptions,
+    opt: PointTestOptions,
     __: EditorHost
   ): boolean {
-    const bound = Bound.deserialize(this.xywh);
+    const bound = opt.useElementBound ? this.elementBound : this.responseBound;
     return bound.isPointInBound([x, y], 0);
   }
 

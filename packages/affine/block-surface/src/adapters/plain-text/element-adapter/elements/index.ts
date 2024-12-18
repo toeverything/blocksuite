@@ -1,13 +1,15 @@
-import { brushElementModelToPlainTextAdapterMatcher } from './brush.js';
-import { connectorElementModelToPlainTextAdapterMatcher } from './connector.js';
-import { groupElementModelToPlainTextAdapterMatcher } from './group.js';
-import { shapeElementModelToPlainTextAdapterMatcher } from './shape.js';
-import { textElementModelToPlainTextAdapterMatcher } from './text.js';
+import { brushToPlainTextAdapterMatcher } from './brush.js';
+import { connectorToPlainTextAdapterMatcher } from './connector.js';
+import { groupToPlainTextAdapterMatcher } from './group.js';
+import { mindmapToPlainTextAdapterMatcher } from './mindmap.js';
+import { shapeToPlainTextAdapterMatcher } from './shape.js';
+import { textToPlainTextAdapterMatcher } from './text.js';
 
 export const elementModelToPlainTextAdapterMatchers = [
-  groupElementModelToPlainTextAdapterMatcher,
-  shapeElementModelToPlainTextAdapterMatcher,
-  connectorElementModelToPlainTextAdapterMatcher,
-  brushElementModelToPlainTextAdapterMatcher,
-  textElementModelToPlainTextAdapterMatcher,
+  groupToPlainTextAdapterMatcher,
+  shapeToPlainTextAdapterMatcher,
+  connectorToPlainTextAdapterMatcher,
+  brushToPlainTextAdapterMatcher,
+  textToPlainTextAdapterMatcher,
+  mindmapToPlainTextAdapterMatcher,
 ];

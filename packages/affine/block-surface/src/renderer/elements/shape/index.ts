@@ -1,4 +1,8 @@
-import type { ShapeElementModel, ShapeType } from '@blocksuite/affine-model';
+import type {
+  LocalShapeElementModel,
+  ShapeElementModel,
+  ShapeType,
+} from '@blocksuite/affine-model';
 import type { IBound } from '@blocksuite/global/utils';
 
 import {
@@ -30,7 +34,7 @@ import { type Colors, horizontalOffset, verticalOffset } from './utils.js';
 const shapeRenderers: Record<
   ShapeType,
   (
-    model: ShapeElementModel,
+    model: ShapeElementModel | LocalShapeElementModel,
     ctx: CanvasRenderingContext2D,
     matrix: DOMMatrix,
     renderer: CanvasRenderer,
@@ -45,7 +49,7 @@ const shapeRenderers: Record<
 };
 
 export function shape(
-  model: ShapeElementModel,
+  model: ShapeElementModel | LocalShapeElementModel,
   ctx: CanvasRenderingContext2D,
   matrix: DOMMatrix,
   renderer: CanvasRenderer,
@@ -76,7 +80,7 @@ export function shape(
 }
 
 function renderText(
-  model: ShapeElementModel,
+  model: ShapeElementModel | LocalShapeElementModel,
   ctx: CanvasRenderingContext2D,
   { color }: Colors
 ) {
@@ -103,9 +107,10 @@ function renderText(
     fontWeight
   );
   const metrics = getFontMetrics(fontFamily, fontSize, fontWeight);
-  const lines = deltaInsertsToChunks(
-    wrapTextDeltas(text, font, w - horPadding * 2)
-  );
+  const lines =
+    typeof text === 'string'
+      ? [text.split('\n').map(line => ({ insert: line }))]
+      : deltaInsertsToChunks(wrapTextDeltas(text, font, w - horPadding * 2));
   const horOffset = horizontalOffset(model.w, model.textAlign, horPadding);
   const vertOffset =
     verticalOffset(

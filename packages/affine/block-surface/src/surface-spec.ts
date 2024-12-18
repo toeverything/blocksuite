@@ -13,12 +13,14 @@ import {
 } from './adapters/extension.js';
 import { commands } from './commands/index.js';
 import { SurfaceBlockService } from './surface-service.js';
+import { MindMapView } from './view/mindmap.js';
 
 const CommonSurfaceBlockSpec: ExtensionType[] = [
   FlavourExtension('affine:surface'),
   SurfaceBlockService,
   CommandExtension(commands),
   HighlightSelectionExtension,
+  MindMapView,
 ];
 
 export const PageSurfaceBlockSpec: ExtensionType[] = [

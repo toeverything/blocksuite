@@ -19,7 +19,7 @@ export function getLayerEndZIndex(layers: Layer[], layerIndex: number) {
     ? layer.type === 'block'
       ? layer.zIndex + layer.elements.length - 1
       : layer.zIndex
-    : 1;
+    : 0;
 }
 
 export function updateLayersZIndex(layers: Layer[], startIdx: number) {

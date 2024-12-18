@@ -46,3 +46,9 @@ export interface ElementLockEvent extends TelemetryEvent {
   module: 'element toolbar';
   control: 'lock' | 'unlock' | 'group-lock';
 }
+
+export interface MindMapCollapseEvent extends TelemetryEvent {
+  page: 'whiteboard editor';
+  segment: 'mind map';
+  type: 'expand' | 'collapse';
+}

@@ -1,16 +1,30 @@
+import type { ASTWalkerContext } from '@blocksuite/store';
+
 import type { ElementModelMap } from '../element-model/index.js';
+
+export type ElementModelAdapterContext<TNode extends object = never> = {
+  walkerContext: ASTWalkerContext<TNode>;
+  elements: Record<string, Record<string, unknown>>;
+};
 
 export type ElementModelMatcher<TNode extends object = never> = {
   name: keyof ElementModelMap;
-  match: (elementModel: ElementModelMap[keyof ElementModelMap]) => boolean;
-  toAST: (elementModel: ElementModelMap[keyof ElementModelMap]) => TNode;
+  match: (element: Record<string, unknown>) => boolean;
+  toAST: (
+    element: Record<string, unknown>,
+    context: ElementModelAdapterContext<TNode>
+  ) => TNode;
 };
 
-export abstract class ElementModelAdapter<AST = unknown> {
+export abstract class ElementModelAdapter<
+  AST = unknown,
+  TNode extends object = never,
+> {
   /**
    * Convert element model to AST format
    */
   abstract fromElementModel(
-    elementModel: ElementModelMap[keyof ElementModelMap]
+    element: Record<string, unknown>,
+    context: ElementModelAdapterContext<TNode>
   ): AST;
 }

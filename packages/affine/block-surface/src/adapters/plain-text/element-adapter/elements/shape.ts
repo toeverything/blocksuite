@@ -1,27 +1,42 @@
-import type { DeltaInsert } from '@blocksuite/inline/types';
+import type { MindMapTreeNode } from '../../../types/mindmap.js';
+import type { ElementModelToPlainTextAdapterMatcher } from '../type.js';
 
-import type { ElementModelToPlainTextAdapterMatcher } from './type.js';
+import { getShapeText } from '../../../utils/shape.js';
 
-export const shapeElementModelToPlainTextAdapterMatcher: ElementModelToPlainTextAdapterMatcher =
+export const shapeToPlainTextAdapterMatcher: ElementModelToPlainTextAdapterMatcher =
   {
     name: 'shape',
     match: elementModel => elementModel.type === 'shape',
-    toAST: elementModel => {
-      let text = '';
-      let shapeType = '';
-      if ('text' in elementModel && elementModel.text) {
-        let delta: DeltaInsert[] = [];
-        if ('delta' in elementModel.text) {
-          delta = elementModel.text.delta as DeltaInsert[];
+    toAST: (elementModel, context) => {
+      let content = '';
+      const { walkerContext } = context;
+      const mindMapNodeMaps = walkerContext.getGlobalContext(
+        'surface:mindMap:nodeMapArray'
+      ) as Array<Map<string, MindMapTreeNode>>;
+      if (mindMapNodeMaps && mindMapNodeMaps.length > 0) {
+        // Check if the elementModel is a mindMap node
+        // If it is, we should return { content: '' } directly
+        // And get the content when we handle the whole mindMap
+        const isMindMapNode = mindMapNodeMaps.some(nodeMap =>
+          nodeMap.has(elementModel.id as string)
+        );
+        if (isMindMapNode) {
+          return { content };
         }
-        text = delta.map(d => d.insert).join('');
       }
-      if ('shapeType' in elementModel) {
+
+      // If it is not, we should return the text and shapeType
+      const text = getShapeText(elementModel);
+      let shapeType = '';
+      if (
+        'shapeType' in elementModel &&
+        typeof elementModel.shapeType === 'string'
+      ) {
         shapeType =
           elementModel.shapeType.charAt(0).toUpperCase() +
           elementModel.shapeType.slice(1);
       }
-      const content = `${shapeType}, with text label "${text}"`;
+      content = `${shapeType}, with text label "${text}"`;
       return { content };
     },
   };
