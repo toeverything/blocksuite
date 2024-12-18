@@ -99,11 +99,11 @@ export interface GfxGroupCompatibleInterface extends GfxCompatibleInterface {
 
   descendantElements: GfxModel[];
 
-  addChild(element: GfxModel): void;
-  removeChild(element: GfxModel): void;
-  hasChild(element: GfxModel): boolean;
+  addChild(element: GfxCompatibleInterface): void;
+  removeChild(element: GfxCompatibleInterface): void;
+  hasChild(element: GfxCompatibleInterface): boolean;
 
-  hasDescendant(element: GfxModel): boolean;
+  hasDescendant(element: GfxCompatibleInterface): boolean;
 }
 
 /**

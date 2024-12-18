@@ -1,5 +1,9 @@
-import type { IVec, SerializedXYWH, XYWH } from '@blocksuite/global/utils';
-
+import {
+  type IVec,
+  type SerializedXYWH,
+  Slot,
+  type XYWH,
+} from '@blocksuite/global/utils';
 import {
   Bound,
   deserializeXYWH,
@@ -85,6 +89,8 @@ export abstract class GfxPrimitiveElementModel<
   protected _preserved = new Map<string, unknown>();
 
   protected _stashed: Map<keyof Props | string, unknown>;
+
+  propsUpdated = new Slot<{ key: string }>();
 
   abstract rotate: number;
 
@@ -452,21 +458,21 @@ export abstract class GfxGroupLikeElementModel<
    * The actual field that stores the children of the group.
    * It should be a ymap decorated with `@field`.
    */
-  hasChild(element: GfxModel) {
-    return this.childElements.includes(element);
+  hasChild(element: GfxCompatibleInterface) {
+    return this.childElements.includes(element as GfxModel);
   }
 
   /**
    * Check if the group has the given descendant.
    */
-  hasDescendant(element: GfxModel): boolean {
+  hasDescendant(element: GfxCompatibleInterface): boolean {
     return hasDescendantElementImpl(this, element);
   }
 
   /**
    * Remove the child from the group
    */
-  abstract removeChild(element: GfxModel): void;
+  abstract removeChild(element: GfxCompatibleInterface): void;
 
   /**
    * Set the new value of the childIds
@@ -486,44 +492,6 @@ export abstract class GfxGroupLikeElementModel<
       },
       local: fromLocal,
     });
-  }
-}
-
-export abstract class GfxLocalElementModel {
-  private _lastXYWH: SerializedXYWH = '[0,0,-1,-1]';
-
-  protected _local = new Map<string | symbol, unknown>();
-
-  opacity: number = 1;
-
-  abstract rotate: number;
-
-  abstract xywh: SerializedXYWH;
-
-  get deserializedXYWH() {
-    if (this.xywh !== this._lastXYWH) {
-      const xywh = this.xywh;
-      this._local.set('deserializedXYWH', deserializeXYWH(xywh));
-      this._lastXYWH = xywh;
-    }
-
-    return this._local.get('deserializedXYWH') as XYWH;
-  }
-
-  get h() {
-    return this.deserializedXYWH[3];
-  }
-
-  get w() {
-    return this.deserializedXYWH[2];
-  }
-
-  get x() {
-    return this.deserializedXYWH[0];
-  }
-
-  get y() {
-    return this.deserializedXYWH[1];
   }
 }
 

@@ -67,6 +67,7 @@ import {
   mountTextElementEditor,
 } from '../utils/text.js';
 import { fitToScreen } from '../utils/viewport.js';
+import { CanvasElementEventExt } from './default-tool-ext/event-ext.js';
 import { DefaultModeDragType } from './default-tool-ext/ext.js';
 import { MindMapExt } from './default-tool-ext/mind-map-ext/mind-map-ext.js';
 
@@ -240,6 +241,12 @@ export class DefaultTool extends BaseTool {
     return this.std.get(
       GfxExtensionIdentifier('frame-manager')
     ) as EdgelessFrameManager;
+  }
+
+  private get _supportedExts() {
+    return this._exts.filter(ext =>
+      ext.supportedDragTypes.includes(this.dragType)
+    );
   }
 
   /**
@@ -586,7 +593,7 @@ export class DefaultTool extends BaseTool {
       event,
     };
 
-    this._extHandlers = this._exts.map(ext => ext.initDrag(ctx));
+    this._extHandlers = this._supportedExts.map(ext => ext.initDrag(ctx));
     this._selectedBounds = this._toBeMoved.map(element =>
       Bound.deserialize(element.xywh)
     );
@@ -742,6 +749,7 @@ export class DefaultTool extends BaseTool {
     }
 
     this._isDoubleClickedOnMask = false;
+    this._supportedExts.forEach(ext => ext.click?.(e));
   }
 
   override deactivate() {
@@ -819,6 +827,8 @@ export class DefaultTool extends BaseTool {
         return;
       }
     }
+
+    this._supportedExts.forEach(ext => ext.click?.(e));
 
     if (
       e.raw.target &&
@@ -1003,14 +1013,21 @@ export class DefaultTool extends BaseTool {
       })
     );
 
-    this._exts = [MindMapExt].map(constructor => new constructor(this));
+    this._exts = [MindMapExt, CanvasElementEventExt].map(
+      constructor => new constructor(this)
+    );
     this._exts.forEach(ext => ext.mounted());
+  }
+
+  override pointerDown(e: PointerEventState): void {
+    this._supportedExts.forEach(ext => ext.pointerDown(e));
   }
 
   override pointerMove(e: PointerEventState) {
     const hovered = this._pick(e.x, e.y, {
       hitThreshold: 10,
     });
+
     if (
       isFrameBlock(hovered) &&
       hovered.externalBound?.isPointInBound(
@@ -1021,6 +1038,12 @@ export class DefaultTool extends BaseTool {
     } else {
       this.frameOverlay.clear();
     }
+
+    this._supportedExts.forEach(ext => ext.pointerMove(e));
+  }
+
+  override pointerUp(e: PointerEventState) {
+    this._supportedExts.forEach(ext => ext.pointerUp(e));
   }
 
   override tripleClick() {

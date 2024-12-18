@@ -26,7 +26,6 @@ import {
 } from '@blocksuite/affine-shared/utils';
 import { BlockComponent } from '@blocksuite/block-std';
 import {
-  GfxBlockElementModel,
   GfxControllerIdentifier,
   type GfxViewportElement,
 } from '@blocksuite/block-std/gfx';
@@ -540,10 +539,9 @@ export class EdgelessRootBlockComponent extends BlockComponent<
           .getModelsInViewport=${() => {
             const blocks = this.gfx.grid.search(
               this.gfx.viewport.viewportBounds,
-              undefined,
               {
                 useSet: true,
-                filter: model => model instanceof GfxBlockElementModel,
+                filter: ['block'],
               }
             );
 

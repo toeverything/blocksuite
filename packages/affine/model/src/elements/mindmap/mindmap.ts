@@ -264,7 +264,10 @@ export class MindmapElementModel extends GfxGroupLikeElementModel<MindmapElement
     const id = `#${from.id}-${to.id}`;
 
     if (extra) {
-      this.extraConnectors.set(id, new LocalConnectorElementModel());
+      this.extraConnectors.set(
+        id,
+        new LocalConnectorElementModel(this.surface)
+      );
     } else if (this.connectors.has(id)) {
       const connector = this.connectors.get(id)!;
       const { outdated } = this._isConnectorOutdated({
@@ -278,7 +281,7 @@ export class MindmapElementModel extends GfxGroupLikeElementModel<MindmapElement
         return connector;
       }
     } else {
-      const connector = new LocalConnectorElementModel();
+      const connector = new LocalConnectorElementModel(this.surface);
       // update cache key
       this._isConnectorOutdated({
         connector,
