@@ -24,6 +24,8 @@ export function mindmap(
 
   matrix = matrix.translate(-dx, -dy);
 
+  const mindmapOpacity = model.opacity;
+
   const traverse = (node: MindmapNode) => {
     const connectors = model.getConnectors(node);
     if (!connectors) return;
@@ -40,10 +42,11 @@ export function mindmap(
       const dx = connector.x - bound.x;
       const dy = connector.y - bound.y;
       const origin = ctx.globalAlpha;
-      const shouldSetGlobalAlpha = origin !== connector.opacity;
+      const shouldSetGlobalAlpha =
+        origin !== connector.opacity * mindmapOpacity;
 
       if (shouldSetGlobalAlpha) {
-        ctx.globalAlpha = connector.opacity;
+        ctx.globalAlpha = connector.opacity * mindmapOpacity;
       }
 
       renderConnector(connector, ctx, matrix.translate(dx, dy), renderer, rc);
