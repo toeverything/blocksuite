@@ -339,7 +339,7 @@ export class DragEventWatcher {
         ['affine:attachment', 'affine:bookmark'].includes(first.flavour) ||
         first.flavour.startsWith('affine:embed-')
       ) {
-        const style = first.props.style as EmbedCardStyle;
+        const style = (first.props.style ?? 'horizontal') as EmbedCardStyle;
         const width = EMBED_CARD_WIDTH[style];
         const height = EMBED_CARD_HEIGHT[style];
 
