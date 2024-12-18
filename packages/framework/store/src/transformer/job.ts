@@ -200,8 +200,12 @@ export class Job {
   ): Promise<Slice | undefined> => {
     SliceSnapshotSchema.parse(snapshot);
     try {
-      const { content, pageVersion, workspaceVersion, workspaceId, pageId } =
-        snapshot;
+      const {
+        content,
+        // pageVersion, workspaceVersion,
+        workspaceId,
+        pageId,
+      } = snapshot;
 
       // Create a temporary root snapshot to encompass all content blocks
       const tmpRootSnapshot: BlockSnapshot = {
@@ -230,8 +234,8 @@ export class Job {
 
       const slice = new Slice({
         content: contentBlocks,
-        pageVersion,
-        workspaceVersion,
+        // pageVersion,
+        // workspaceVersion,
         workspaceId,
         pageId,
       });
