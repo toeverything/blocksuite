@@ -1,5 +1,38 @@
 # @blocksuite/affine-block-embed
 
+## 0.19.3
+
+### Patch Changes
+
+- 59e0cd6: Release patch version.
+
+  ## Feat
+
+  - feat(edgeless): mind map collapse (#8905)
+  - feat(blocks): add plain text adapter for mind map element (#9006)
+  - feat(edgeless): add views and event support for canvas elements (#8882)
+  - feat(edgeless): improve local element support (#8869)
+
+  ## Fix
+
+  - fix: drag doc from affine to edgeless (#9011)
+  - fix: mind map opacity (#9010)
+  - fix: should only generate new id when cross doc (#9009)
+
+  ## Perf
+
+  - perf(std): add cache for gfx viewport (#9003)
+
+- Updated dependencies [59e0cd6]
+  - @blocksuite/affine-block-surface@0.19.3
+  - @blocksuite/affine-components@0.19.3
+  - @blocksuite/affine-model@0.19.3
+  - @blocksuite/affine-shared@0.19.3
+  - @blocksuite/block-std@0.19.3
+  - @blocksuite/global@0.19.3
+  - @blocksuite/inline@0.19.3
+  - @blocksuite/store@0.19.3
+
 ## 0.19.2
 
 ### Patch Changes
