@@ -11,6 +11,7 @@ export {
   hasDescendantElementImpl,
 } from '../utils/tree.js';
 export { GfxController } from './controller.js';
+export type { CursorType, StandardCursor } from './cursor.js';
 export { GfxExtension, GfxExtensionIdentifier } from './extension.js';
 export { GridManager } from './grid.js';
 export { GfxControllerIdentifier } from './identifiers.js';
@@ -49,10 +50,13 @@ export {
 export {
   type BaseElementProps,
   GfxGroupLikeElementModel,
-  GfxLocalElementModel,
   GfxPrimitiveElementModel,
   type SerializedElement,
 } from './model/surface/element-model.js';
+export {
+  GfxLocalElementModel,
+  prop,
+} from './model/surface/local-element-model.js';
 export {
   SurfaceBlockModel,
   type SurfaceBlockProps,
@@ -72,7 +76,14 @@ export {
   type GfxToolsMap,
   type GfxToolsOption,
 } from './tool/tool.js';
+
 export { MouseButton, ToolController } from './tool/tool-controller.js';
+export {
+  type EventsHandlerMap,
+  GfxElementModelView,
+  type SupportedEvent,
+} from './view/view.js';
+export { ViewManager } from './view/view-manager.js';
 export * from './viewport.js';
 export { GfxViewportElement } from './viewport-element.js';
 export { generateKeyBetween, generateNKeysBetween } from 'fractional-indexing';

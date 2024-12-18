@@ -2,7 +2,11 @@ import type { ListBlockModel } from '@blocksuite/affine-model';
 import type { IndentContext } from '@blocksuite/affine-shared/types';
 import type { Command } from '@blocksuite/block-std';
 
-import { matchFlavours } from '@blocksuite/affine-shared/utils';
+import {
+  calculateCollapsedSiblings,
+  getNearestHeadingBefore,
+  matchFlavours,
+} from '@blocksuite/affine-shared/utils';
 
 export const canIndentParagraphCommand: Command<
   never,
@@ -80,9 +84,54 @@ export const indentParagraphCommand: Command<'indentContext'> = (ctx, next) => {
   if (!previousSibling) return;
 
   doc.captureSync();
-  doc.moveBlocks([model], previousSibling);
 
-  // update collapsed state
+  {
+    // > # 123
+    // > # 456
+    //
+    // we need to update 123 collapsed state to false when indent 456
+    const nearestHeading = getNearestHeadingBefore(model);
+    if (
+      nearestHeading &&
+      matchFlavours(nearestHeading, ['affine:paragraph']) &&
+      nearestHeading.collapsed
+    ) {
+      doc.updateBlock(nearestHeading, {
+        collapsed: false,
+      });
+    }
+  }
+
+  if (
+    matchFlavours(model, ['affine:paragraph']) &&
+    model.type.startsWith('h') &&
+    model.collapsed
+  ) {
+    const collapsedSiblings = calculateCollapsedSiblings(model);
+    doc.moveBlocks([model, ...collapsedSiblings], previousSibling);
+  } else {
+    doc.moveBlocks([model], previousSibling);
+  }
+
+  {
+    // 123
+    //   > # 456
+    // 789
+    //
+    // we need to update 456 collapsed state to false when indent 789
+    const nearestHeading = getNearestHeadingBefore(model);
+    if (
+      nearestHeading &&
+      matchFlavours(nearestHeading, ['affine:paragraph']) &&
+      nearestHeading.collapsed
+    ) {
+      doc.updateBlock(nearestHeading, {
+        collapsed: false,
+      });
+    }
+  }
+
+  // update collapsed state of affine list
   if (
     matchFlavours(previousSibling, ['affine:list']) &&
     previousSibling.collapsed

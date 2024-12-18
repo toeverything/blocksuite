@@ -32,8 +32,8 @@ import {
 } from '@blocksuite/global/utils';
 
 import {
-  setAttachmentUploaded,
-  setAttachmentUploading,
+  getFileType,
+  uploadAttachmentBlob,
 } from '../../../attachment-block/utils.js';
 import { calcBoundByOrigin, readImageSize } from '../components/utils.js';
 import { DEFAULT_NOTE_OFFSET_X, DEFAULT_NOTE_OFFSET_Y } from './consts.js';
@@ -102,26 +102,8 @@ export async function addAttachments(
 
   // upload file and update the attachment model
   const uploadPromises = dropInfos.map(async ({ blockId, file }) => {
-    let sourceId: string | undefined;
-    try {
-      setAttachmentUploading(blockId);
-      sourceId = await std.doc.blobSync.set(file);
-    } catch (error) {
-      console.error(error);
-      if (error instanceof Error) {
-        toast(
-          std.host,
-          `Failed to upload attachment! ${error.message || error.toString()}`
-        );
-      }
-    } finally {
-      setAttachmentUploaded(blockId);
-      std.doc.withoutTransact(() => {
-        gfx.updateElement(blockId, {
-          sourceId,
-        } satisfies Partial<AttachmentBlockProps>);
-      });
-    }
+    const filetype = await getFileType(file);
+    await uploadAttachmentBlob(std.host, blockId, file, filetype, true);
     return blockId;
   });
   const blockIds = await Promise.all(uploadPromises);

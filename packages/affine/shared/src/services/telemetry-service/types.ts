@@ -46,3 +46,18 @@ export interface ElementLockEvent extends TelemetryEvent {
   module: 'element toolbar';
   control: 'lock' | 'unlock' | 'group-lock';
 }
+
+export interface MindMapCollapseEvent extends TelemetryEvent {
+  page: 'whiteboard editor';
+  segment: 'mind map';
+  type: 'expand' | 'collapse';
+}
+
+export interface AttachmentUploadedEvent extends TelemetryEvent {
+  page: 'doc editor' | 'whiteboard editor';
+  segment: 'attachment';
+  module: 'attachment';
+  control: 'uploader';
+  type: string; // file type
+  category: 'success' | 'failure';
+}

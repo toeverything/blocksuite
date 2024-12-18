@@ -1302,7 +1302,7 @@ export async function assertBlockSelections(page: Page, paths: string[]) {
 
 export async function assertTextSelection(
   page: Page,
-  from: {
+  from?: {
     blockId: string;
     index: number;
     length: number;
@@ -1320,7 +1320,15 @@ export async function assertTextSelection(
     }
     return host.selection.find('text');
   });
-  expect(selection?.from).toEqual(from);
+
+  if (!from && !to) {
+    expect(selection).toBeUndefined();
+    return;
+  }
+
+  if (from) {
+    expect(selection?.from).toEqual(from);
+  }
   if (to) {
     expect(selection?.to).toEqual(to);
   }

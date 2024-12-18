@@ -1,11 +1,13 @@
 import type { ParagraphBlockModel } from '@blocksuite/affine-model';
+import type { AffineTextAttributes } from '@blocksuite/affine-shared/types';
 
-import { referenceToNode } from '@blocksuite/affine-components/rich-text';
+import { REFERENCE_NODE } from '@blocksuite/affine-components/rich-text';
 import {
   ParseDocUrlProvider,
   type ParseDocUrlService,
   TelemetryProvider,
 } from '@blocksuite/affine-shared/services';
+import { referenceToNode } from '@blocksuite/affine-shared/utils';
 import {
   BLOCK_ID_ATTR,
   type BlockComponent,
@@ -154,10 +156,19 @@ class PasteTr {
   private _mergeSingle = () => {
     this._updateFlavour();
     const { firstDelta } = this._getDeltas();
-    this.pointState.text.applyDelta([
-      { retain: this.pointState.point.index },
-      ...firstDelta,
-    ]);
+    const { index, length } = this.pointState.point;
+
+    // Pastes a link
+    if (length && firstDelta.length === 1 && firstDelta[0].attributes?.link) {
+      this.pointState.text.format(index, length, firstDelta[0].attributes);
+    } else {
+      const ops: DeltaOperation[] = [{ retain: index }];
+      if (length) ops.push({ delete: length });
+      ops.push(...firstDelta);
+
+      this.pointState.text.applyDelta(ops);
+    }
+
     this.snapshot.content.splice(0, 1);
     this._updateSnapshot();
   };
@@ -424,7 +435,14 @@ class PasteTr {
         return { ...op };
       }
 
-      const reference = { pageId, type: 'LinkedPage' };
+      const reference: AffineTextAttributes['reference'] = {
+        pageId,
+        type: 'LinkedPage',
+      };
+      // Title alias
+      if (op.insert && op.insert !== REFERENCE_NODE && op.insert !== link) {
+        reference.title = op.insert;
+      }
 
       const extractedParams = extractSearchParams(link);
       const isLinkedBlock = extractedParams
@@ -446,7 +464,7 @@ class PasteTr {
       return {
         ...op,
         attributes: { reference },
-        insert: ' ',
+        insert: REFERENCE_NODE,
       };
     });
     return [newDelta, transformed];

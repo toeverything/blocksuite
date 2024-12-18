@@ -182,12 +182,23 @@ export class Bound implements IBound {
     return minX <= x && x <= maxX && minY <= y && y <= maxY;
   }
 
+  expand(margin: [number, number]): Bound;
+  expand(left: number, top?: number, right?: number, bottom?: number): Bound;
   expand(
-    left: number,
-    top: number = left,
-    right: number = left,
-    bottom: number = top
+    left: number | [number, number],
+    top?: number,
+    right?: number,
+    bottom?: number
   ) {
+    if (Array.isArray(left)) {
+      const [x, y] = left;
+      return new Bound(this.x - x, this.y - y, this.w + x * 2, this.h + y * 2);
+    }
+
+    top ??= left;
+    right ??= left;
+    bottom ??= top;
+
     return new Bound(
       this.x - left,
       this.y - top,

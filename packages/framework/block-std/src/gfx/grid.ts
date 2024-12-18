@@ -5,13 +5,14 @@ import {
   Bound,
   getBoundWithRotation,
   intersects,
-  isPointIn,
 } from '@blocksuite/global/utils';
 
 import type { GfxModel } from './model/model.js';
 
 import { compare } from '../utils/layer.js';
 import { GfxBlockElementModel } from './model/gfx-block-model.js';
+import { GfxPrimitiveElementModel } from './model/surface/element-model.js';
+import { GfxLocalElementModel } from './model/surface/local-element-model.js';
 import { SurfaceBlockModel } from './model/surface/surface-model.js';
 
 function getGridIndex(val: number) {
@@ -27,8 +28,14 @@ function rangeFromBound(a: IBound): number[] {
   return [minRow, maxRow, minCol, maxCol];
 }
 
-function rangeFromElement(ele: GfxModel): number[] {
+function rangeFromElement(ele: GfxModel | GfxLocalElementModel): number[] {
   const bound = ele.elementBound;
+
+  bound.w += ele.responseExtension[0] * 2;
+  bound.h += ele.responseExtension[1] * 2;
+  bound.x -= ele.responseExtension[0];
+  bound.y -= ele.responseExtension[1];
+
   const minRow = getGridIndex(bound.x);
   const maxRow = getGridIndex(bound.maxX);
   const minCol = getGridIndex(bound.y);
@@ -49,14 +56,28 @@ function rangeFromElementExternal(ele: GfxModel): number[] | null {
 
 export const DEFAULT_GRID_SIZE = 3000;
 
+const typeFilters = {
+  block: (model: GfxModel | GfxLocalElementModel) =>
+    model instanceof GfxBlockElementModel,
+  canvas: (model: GfxModel | GfxLocalElementModel) =>
+    model instanceof GfxPrimitiveElementModel,
+  local: (model: GfxModel | GfxLocalElementModel) =>
+    model instanceof GfxLocalElementModel,
+};
+
+type FilterFunc = (model: GfxModel | GfxLocalElementModel) => boolean;
+
 export class GridManager {
-  private _elementToGrids = new Map<GfxModel, Set<Set<GfxModel>>>();
+  private _elementToGrids = new Map<
+    GfxModel | GfxLocalElementModel,
+    Set<Set<GfxModel | GfxLocalElementModel>>
+  >();
 
   private _externalElementToGrids = new Map<GfxModel, Set<Set<GfxModel>>>();
 
   private _externalGrids = new Map<string, Set<GfxModel>>();
 
-  private _grids = new Map<string, Set<GfxModel>>();
+  private _grids = new Map<string, Set<GfxModel | GfxLocalElementModel>>();
 
   get isEmpty() {
     return this._grids.size === 0;
@@ -119,7 +140,10 @@ export class GridManager {
     }
   }
 
-  private _searchExternal(bound: IBound, strict = false): Set<GfxModel> {
+  private _searchExternal(
+    bound: IBound,
+    options: { filterFunc: FilterFunc; strict: boolean }
+  ): Set<GfxModel> {
     const [minRow, maxRow, minCol, maxCol] = rangeFromBound(bound);
     const results = new Set<GfxModel>();
     const b = Bound.from(bound);
@@ -132,8 +156,9 @@ export class GridManager {
         for (const element of gridElements) {
           const externalBound = element.externalBound;
           if (
+            options.filterFunc(element) &&
             externalBound &&
-            (strict
+            (options.strict
               ? b.contains(externalBound)
               : intersects(externalBound, bound))
           ) {
@@ -146,11 +171,25 @@ export class GridManager {
     return results;
   }
 
-  add(element: GfxModel) {
-    this._addToExternalGrids(element);
+  private _toFilterFunc(filters: (keyof typeof typeFilters | FilterFunc)[]) {
+    const filterFuncs: FilterFunc[] = filters.map(filter => {
+      if (typeof filter === 'function') {
+        return filter;
+      }
+      return typeFilters[filter];
+    });
+
+    return (model: GfxModel | GfxLocalElementModel) =>
+      filterFuncs.some(filter => filter(model));
+  }
+
+  add(element: GfxModel | GfxLocalElementModel) {
+    if (!(element instanceof GfxLocalElementModel)) {
+      this._addToExternalGrids(element);
+    }
 
     const [minRow, maxRow, minCol, maxCol] = rangeFromElement(element);
-    const grids = new Set<Set<GfxModel>>();
+    const grids = new Set<Set<GfxModel | GfxLocalElementModel>>();
     this._elementToGrids.set(element, grids);
 
     for (let i = minRow; i <= maxRow; i++) {
@@ -187,7 +226,7 @@ export class GridManager {
     bound: IBound,
     strict: boolean = false,
     reverseChecking: boolean = false,
-    filter?: (model: GfxModel) => boolean
+    filter?: (model: GfxModel | GfxLocalElementModel) => boolean
   ) {
     const [minRow, maxRow, minCol, maxCol] = rangeFromBound(bound);
     const b = Bound.from(bound);
@@ -214,69 +253,78 @@ export class GridManager {
     return false;
   }
 
-  pick(x: number, y: number): GfxModel[] {
-    const row = getGridIndex(x);
-    const col = getGridIndex(y);
-    const gridElements = this._getGrid(row, col);
-    if (!gridElements) return [];
-
-    const results: GfxModel[] = [];
-    for (const element of gridElements) {
-      if (
-        isPointIn(getBoundWithRotation(Bound.deserialize(element.xywh)), x, y)
-      ) {
-        results.push(element);
-      }
-    }
-
-    return results;
-  }
-
-  remove(element: GfxModel) {
+  remove(element: GfxModel | GfxLocalElementModel) {
     const grids = this._elementToGrids.get(element);
     if (grids) {
       for (const grid of grids) {
         grid.delete(element);
       }
     }
+    this._elementToGrids.delete(element);
 
-    this._removeFromExternalGrids(element);
+    if (!(element instanceof GfxLocalElementModel)) {
+      this._removeFromExternalGrids(element);
+    }
   }
-  search(
-    bound: IBound,
-    strict?: boolean,
-    options?: {
-      useSet?: false;
-      filter?: (model: GfxModel) => boolean;
-    }
-  ): GfxModel[];
-  search(
-    bound: IBound,
-    strict: boolean | undefined,
-    options: {
-      useSet: true;
-      filter?: (model: GfxModel) => boolean;
-    }
-  ): Set<GfxModel>;
 
-  search(
+  /**
+   * Search for elements in a bound.
+   * @param bound
+   * @param options
+   */
+  search<T extends keyof typeof typeFilters>(
     bound: IBound,
-    strict = false,
-    options: {
+    options?: {
+      /**
+       * If true, only return elements that are completely inside the bound.
+       * Default is false.
+       */
+      strict?: boolean;
       /**
        * If true, return a set of elements instead of an array
        */
+      useSet?: false;
+      /**
+       * Use this to filter the elements, if not provided, it will return blocks and canvas elements by default
+       */
+      filter?: (T | FilterFunc)[] | FilterFunc;
+    }
+  ): T extends 'local'[] ? (GfxModel | GfxLocalElementModel)[] : GfxModel[];
+  search<T extends keyof typeof typeFilters>(
+    bound: IBound,
+    options: {
+      strict?: boolean | undefined;
+      useSet: true;
+      filter?: (T | FilterFunc)[] | FilterFunc;
+    }
+  ): T extends 'local'[] ? Set<GfxModel | GfxLocalElementModel> : Set<GfxModel>;
+  search<T extends keyof typeof typeFilters>(
+    bound: IBound,
+    options: {
+      strict?: boolean;
       useSet?: boolean;
-      filter?: (model: GfxModel) => boolean;
+      filter?: (T | FilterFunc)[] | FilterFunc;
     } = {
       useSet: false,
     }
-  ): GfxModel[] | Set<GfxModel> {
-    const results: Set<GfxModel> = this._searchExternal(bound, strict);
+  ):
+    | (GfxModel | GfxLocalElementModel)[]
+    | Set<GfxModel | GfxLocalElementModel> {
+    const strict = options.strict ?? false;
     const [minRow, maxRow, minCol, maxCol] = rangeFromBound(bound);
     const b = Bound.from(bound);
     const returnSet = options.useSet ?? false;
-    const filter = options.filter;
+    const filterFunc =
+      (Array.isArray(options.filter)
+        ? this._toFilterFunc(options.filter)
+        : options.filter) ?? this._toFilterFunc(['canvas', 'block']);
+    const results: Set<GfxModel | GfxLocalElementModel> = this._searchExternal(
+      bound,
+      {
+        filterFunc,
+        strict,
+      }
+    );
 
     for (let i = minRow; i <= maxRow; i++) {
       for (let j = minCol; j <= maxCol; j++) {
@@ -284,9 +332,11 @@ export class GridManager {
         if (!gridElements) continue;
         for (const element of gridElements) {
           if (
-            (!filter || filter(element)) && strict
+            !(element as GfxPrimitiveElementModel).hidden &&
+            filterFunc(element) &&
+            (strict
               ? b.contains(element.elementBound)
-              : intersects(element.elementBound, b)
+              : intersects(element.responseBound, b))
           ) {
             results.add(element);
           }
@@ -302,7 +352,7 @@ export class GridManager {
     return sorted;
   }
 
-  update(element: GfxModel) {
+  update(element: GfxModel | GfxLocalElementModel) {
     this.remove(element);
     this.add(element);
   }
@@ -330,7 +380,19 @@ export class GridManager {
           }
 
           if (payload.type === 'update') {
-            if (payload.props.key === 'xywh') {
+            const model = doc.getBlock(payload.id)
+              ?.model as GfxBlockElementModel;
+
+            if (!model) {
+              return;
+            }
+
+            if (this._elementToGrids.has(model) && !isRenderableBlock(model)) {
+              this.remove(model as GfxBlockElementModel);
+            } else if (
+              payload.props.key === 'xywh' &&
+              isRenderableBlock(model)
+            ) {
               this.update(
                 doc.getBlock(payload.id)?.model as GfxBlockElementModel
               );
@@ -367,13 +429,40 @@ export class GridManager {
 
       disposables.push(
         surface.elementUpdated.on(payload => {
-          if (payload.props['xywh'] || payload.props['externalXYWH']) {
+          if (
+            payload.props['xywh'] ||
+            payload.props['externalXYWH'] ||
+            payload.props['responseExtension']
+          ) {
             this.update(surface.getElementById(payload.id)!);
           }
         })
       );
 
+      disposables.push(
+        surface.localElementAdded.on(elm => {
+          this.add(elm);
+        })
+      );
+
+      disposables.push(
+        surface.localElementUpdated.on(payload => {
+          if (payload.props['xywh'] || payload.props['responseExtension']) {
+            this.update(payload.model);
+          }
+        })
+      );
+
+      disposables.push(
+        surface.localElementDeleted.on(elm => {
+          this.remove(elm);
+        })
+      );
+
       surface.elementModels.forEach(model => {
+        this.add(model);
+      });
+      surface.localElementModels.forEach(model => {
         this.add(model);
       });
     }

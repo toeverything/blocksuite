@@ -1,6 +1,7 @@
 import type {
   GridManager,
   LayerManager,
+  SurfaceBlockModel,
   Viewport,
 } from '@blocksuite/block-std/gfx';
 import type { IBound } from '@blocksuite/global/utils';
@@ -15,10 +16,10 @@ import {
   Slot,
 } from '@blocksuite/global/utils';
 
+import type { SurfaceElementModel } from '../element-model/base.js';
 import type { ElementRenderer } from './elements/index.js';
 import type { Overlay } from './overlay.js';
 
-import { SurfaceElementModel } from '../element-model/base.js';
 import { RoughCanvas } from '../utils/rough/canvas.js';
 
 type EnvProvider = {
@@ -37,6 +38,7 @@ type RendererOptions = {
   onStackingCanvasCreated?: (canvas: HTMLCanvasElement) => void;
   elementRenderers: Record<string, ElementRenderer>;
   gridManager: GridManager;
+  surfaceModel: SurfaceBlockModel;
 };
 
 export class CanvasRenderer {
@@ -90,6 +92,8 @@ export class CanvasRenderer {
     if (options.enableStackingCanvas) {
       this._initStackingCanvas(options.onStackingCanvasCreated);
     }
+
+    this._watchSurface(options.surfaceModel);
   }
 
   /**
@@ -271,13 +275,12 @@ export class CanvasRenderer {
 
     const elements =
       surfaceElements ??
-      (this.grid.search(bound, undefined, {
-        filter: el => el instanceof SurfaceElementModel,
+      (this.grid.search(bound, {
+        filter: ['canvas', 'local'],
       }) as SurfaceElementModel[]);
-    for (const element of elements) {
-      ctx.save();
 
-      const display = element.display ?? true;
+    for (const element of elements) {
+      const display = (element.display ?? true) && !element.hidden;
       if (display && intersects(getBoundWithRotation(element), bound)) {
         const renderFn =
           this.elementRenderers[
@@ -286,18 +289,18 @@ export class CanvasRenderer {
 
         if (!renderFn) {
           console.warn(`Cannot find renderer for ${element.type}`);
-          ctx.restore();
           continue;
         }
+
+        ctx.save();
 
         ctx.globalAlpha = element.opacity ?? 1;
         const dx = element.x - bound.x;
         const dy = element.y - bound.y;
 
         renderFn(element, ctx, matrix.translate(dx, dy), this, rc, bound);
+        ctx.restore();
       }
-
-      ctx.restore();
     }
 
     if (overLay) {
@@ -319,6 +322,28 @@ export class CanvasRenderer {
 
     this._stackingCanvas.forEach(sizeUpdater.update);
     this.refresh();
+  }
+
+  private _watchSurface(surfaceModel: SurfaceBlockModel) {
+    const slots = [
+      'elementAdded',
+      'elementRemoved',
+      'localElementAdded',
+      'localElementDeleted',
+      'localElementUpdated',
+    ] as const;
+
+    slots.forEach(slotName => {
+      this._disposables.add(surfaceModel[slotName].on(() => this.refresh()));
+    });
+
+    this._disposables.add(
+      surfaceModel.elementUpdated.on(payload => {
+        // ignore externalXYWH update cause it's updated by the renderer
+        if (payload.props['externalXYWH']) return;
+        this.refresh();
+      })
+    );
   }
 
   addOverlay(overlay: Overlay) {

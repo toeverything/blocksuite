@@ -82,7 +82,6 @@ export class MindmapSurfaceBlock extends BlockComponent<SurfaceBlockModel> {
   private _setupRenderer() {
     this._disposables.add(
       this.model.elementUpdated.on(() => {
-        this.renderer?.refresh();
         this.mindmapService.center();
       })
     );
@@ -122,7 +121,9 @@ export class MindmapSurfaceBlock extends BlockComponent<SurfaceBlockModel> {
           ),
       },
       elementRenderers,
+      surfaceModel: this.model,
     });
+    this._disposables.add(this.renderer);
   }
 
   override firstUpdated(_changedProperties: Map<PropertyKey, unknown>): void {

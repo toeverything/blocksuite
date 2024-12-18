@@ -35,9 +35,7 @@ import {
   pressBackspace,
   pressEnter,
   pressTab,
-  redoByClick,
   type,
-  undoByClick,
   undoByKeyboard,
   waitForInlineEditorStateUpdated,
   waitNextFrame,
@@ -49,11 +47,11 @@ import {
   assertEdgelessNoteBackground,
   assertEdgelessSelectedRect,
   assertExists,
-  assertNativeSelectionRangeCount,
   assertNoteSequence,
   assertNoteXYWH,
   assertRichTextInlineRange,
   assertRichTexts,
+  assertTextSelection,
 } from '../../utils/asserts.js';
 import { test } from '../../utils/playwright.js';
 
@@ -325,22 +323,19 @@ test('cursor for active and inactive state', async ({ page }) => {
   await pressEnter(page);
   await assertRichTexts(page, ['hello', '', '']);
 
-  // inactive
   await switchEditorMode(page);
-  await undoByClick(page);
-  await waitNextFrame(page);
 
-  await redoByClick(page);
+  await assertTextSelection(page);
+  await page.mouse.click(CENTER_X, CENTER_Y);
   await waitNextFrame(page);
-
-  // active
+  await assertTextSelection(page);
   await page.mouse.dblclick(CENTER_X, CENTER_Y);
   await waitNextFrame(page);
-  await assertNativeSelectionRangeCount(page, 1);
-
-  await undoByClick(page);
-  await waitNextFrame(page);
-  await assertNativeSelectionRangeCount(page, 1);
+  await assertTextSelection(page, {
+    blockId: '3',
+    index: 5,
+    length: 0,
+  });
 });
 
 test('when no visible note block, clicking in page mode will auto add a new note block', async ({

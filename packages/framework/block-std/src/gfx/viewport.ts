@@ -17,6 +17,12 @@ export const ZOOM_MAX = 6.0;
 export const ZOOM_MIN = 0.1;
 
 export class Viewport {
+  private _cachedBoundingClientRect: DOMRect | null = null;
+
+  private _cachedOffsetWidth: number | null = null;
+
+  private _resizeObserver: ResizeObserver | null = null;
+
   protected _center: IPoint = { x: 0, y: 0 };
 
   protected _el: HTMLElement | null = null;
@@ -52,7 +58,10 @@ export class Viewport {
 
   get boundingClientRect() {
     if (!this._el) return new DOMRect(0, 0, 0, 0);
-    return this._el.getBoundingClientRect();
+    if (!this._cachedBoundingClientRect) {
+      this._cachedBoundingClientRect = this._el.getBoundingClientRect();
+    }
+    return this._cachedBoundingClientRect;
   }
 
   get center() {
@@ -68,8 +77,7 @@ export class Viewport {
   }
 
   get height() {
-    this._height = this._el?.offsetHeight ?? this._height;
-    return this._height;
+    return this.boundingClientRect.height;
   }
 
   get left() {
@@ -91,8 +99,8 @@ export class Viewport {
    * This property is used to calculate the scale of the editor.
    */
   get scale() {
-    if (!this._el) return 1;
-    return this.boundingClientRect.width / this._el.offsetWidth;
+    if (!this._el || this._cachedOffsetWidth === null) return 1;
+    return this.boundingClientRect.width / this._cachedOffsetWidth;
   }
 
   get top() {
@@ -144,8 +152,7 @@ export class Viewport {
   }
 
   get width() {
-    this._width = this._el?.offsetWidth ?? this._width;
-    return this._width;
+    return this.boundingClientRect.width;
   }
 
   get zoom() {
@@ -157,10 +164,18 @@ export class Viewport {
   }
 
   clearViewportElement() {
+    if (this._resizeObserver && this._el) {
+      this._resizeObserver.unobserve(this._el);
+      this._resizeObserver.disconnect();
+    }
+    this._resizeObserver = null;
     this._el = null;
+    this._cachedBoundingClientRect = null;
+    this._cachedOffsetWidth = null;
   }
 
   dispose() {
+    this.clearViewportElement();
     this.sizeUpdated.dispose();
     this.viewportMoved.dispose();
     this.viewportUpdated.dispose();
@@ -205,14 +220,17 @@ export class Viewport {
   onResize() {
     if (!this._el) return;
     const { centerX, centerY, zoom, width: oldWidth, height: oldHeight } = this;
-    const { left, top } = this._el.getBoundingClientRect();
-    const { offsetWidth: width, offsetHeight: height } = this._el;
+    const { left, top, width, height } = this.boundingClientRect;
+    this._cachedOffsetWidth = this._el.offsetWidth;
 
     this.setRect(left, top, width, height);
     this.setCenter(
       centerX - (oldWidth - width) / zoom / 2,
       centerY - (oldHeight - height) / zoom / 2
     );
+
+    this._width = width;
+    this._height = height;
   }
 
   setCenter(centerX: number, centerY: number) {
@@ -280,11 +298,19 @@ export class Viewport {
   }
 
   setViewportElement(el: HTMLElement) {
-    const rect = el.getBoundingClientRect();
-
     this._el = el;
+    this._cachedBoundingClientRect = el.getBoundingClientRect();
+    this._cachedOffsetWidth = el.offsetWidth;
 
-    this.setRect(rect.left, rect.top, el.offsetWidth, el.offsetHeight);
+    const { left, top, width, height } = this._cachedBoundingClientRect;
+    this.setRect(left, top, width, height);
+
+    this._resizeObserver = new ResizeObserver(() => {
+      this._cachedBoundingClientRect = null;
+      this._cachedOffsetWidth = null;
+      this.onResize();
+    });
+    this._resizeObserver.observe(el);
   }
 
   setZoom(zoom: number, focusPoint?: IPoint) {

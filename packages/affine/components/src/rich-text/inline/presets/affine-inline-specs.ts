@@ -124,12 +124,6 @@ export const ReferenceInlineSpecExtension = InlineSpecExtension(
     if (config.customContent) {
       configProvider.setCustomContent(config.customContent);
     }
-    if (config.customIcon) {
-      configProvider.setCustomIcon(config.customIcon);
-    }
-    if (config.customTitle) {
-      configProvider.setCustomTitle(config.customTitle);
-    }
     if (config.interactable !== undefined) {
       configProvider.setInteractable(config.interactable);
     }

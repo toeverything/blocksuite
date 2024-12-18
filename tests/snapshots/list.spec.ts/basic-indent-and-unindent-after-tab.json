@@ -46,7 +46,8 @@
                   "insert": "text1"
                 }
               ]
-            }
+            },
+            "collapsed": false
           },
           "children": [
             {
@@ -63,7 +64,8 @@
                       "insert": "text2"
                     }
                   ]
-                }
+                },
+                "collapsed": false
               },
               "children": []
             }

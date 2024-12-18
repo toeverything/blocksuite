@@ -1,5 +1,6 @@
 import {
   DNDAPIExtension,
+  DocDisplayMetaService,
   DocModeService,
   EmbedOptionService,
   ThemeService,
@@ -93,6 +94,7 @@ const EdgelessCommonExtension: ExtensionType[] = [
   ExportManagerExtension,
   ToolController,
   DNDAPIExtension,
+  DocDisplayMetaService,
 ];
 
 export const EdgelessRootBlockSpec: ExtensionType[] = [

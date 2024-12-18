@@ -2,16 +2,11 @@ import type {
   DocMode,
   EmbedLinkedDocModel,
   EmbedLinkedDocStyles,
-  ReferenceInfo,
 } from '@blocksuite/affine-model';
 
-import { BlockLinkIcon } from '@blocksuite/affine-components/icons';
 import { isPeekable, Peekable } from '@blocksuite/affine-components/peek';
 import {
-  cloneReferenceInfo,
-  cloneReferenceInfoWithoutAliases,
   REFERENCE_NODE,
-  referenceToNode,
   RefNodeSlotsProvider,
 } from '@blocksuite/affine-components/rich-text';
 import {
@@ -19,13 +14,19 @@ import {
   EMBED_CARD_WIDTH,
 } from '@blocksuite/affine-shared/consts';
 import {
+  DocDisplayMetaProvider,
   DocModeProvider,
   ThemeProvider,
 } from '@blocksuite/affine-shared/services';
-import { matchFlavours } from '@blocksuite/affine-shared/utils';
+import {
+  cloneReferenceInfo,
+  cloneReferenceInfoWithoutAliases,
+  matchFlavours,
+  referenceToNode,
+} from '@blocksuite/affine-shared/utils';
 import { Bound } from '@blocksuite/global/utils';
-import { AliasIcon } from '@blocksuite/icons/lit';
 import { DocCollection } from '@blocksuite/store';
+import { computed } from '@preact/signals-core';
 import { html, nothing } from 'lit';
 import { property, queryAsync, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
@@ -142,7 +143,10 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockComponent<EmbedLinke
 
     doc.addBlock(
       'affine:embed-synced-doc',
-      { caption, ...cloneReferenceInfoWithoutAliases(this.referenceInfo) },
+      {
+        caption,
+        ...cloneReferenceInfoWithoutAliases(this.referenceInfo$.peek()),
+      },
       parent,
       index
     );
@@ -164,7 +168,7 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockComponent<EmbedLinke
     yText.format(0, REFERENCE_NODE.length, {
       reference: {
         type: 'LinkedPage',
-        ...this.referenceInfo,
+        ...this.referenceInfo$.peek(),
       },
     });
     const text = new doc.Text(yText);
@@ -181,10 +185,27 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockComponent<EmbedLinke
     doc.deleteBlock(this.model);
   };
 
+  referenceInfo$ = computed(() => {
+    const { pageId, params, title$, description$ } = this.model;
+    return cloneReferenceInfo({
+      pageId,
+      params,
+      title: title$.value,
+      description: description$.value,
+    });
+  });
+
+  icon$ = computed(() => {
+    const { pageId, params, title } = this.referenceInfo$.value;
+    return this.std
+      .get(DocDisplayMetaProvider)
+      .icon(pageId, { params, title, referenced: true }).value;
+  });
+
   open = () => {
     this.std
       .getOptional(RefNodeSlotsProvider)
-      ?.docLinkClicked.emit(this.referenceInfo);
+      ?.docLinkClicked.emit(this.referenceInfo$.peek());
   };
 
   refreshData = () => {
@@ -193,6 +214,16 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockComponent<EmbedLinke
       this.isError = true;
     });
   };
+
+  title$ = computed(() => {
+    const { pageId, params, title } = this.referenceInfo$.value;
+    return (
+      title ||
+      this.std
+        .get(DocDisplayMetaProvider)
+        .title(pageId, { params, title, referenced: true })
+    );
+  });
 
   get config(): EmbedLinkedDocBlockConfig {
     return (
@@ -212,13 +243,13 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockComponent<EmbedLinke
     return this.std.collection.getDoc(this.model.pageId);
   }
 
-  get referenceInfo(): ReferenceInfo {
-    return cloneReferenceInfo(this.model);
-  }
-
   private _handleDoubleClick(event: MouseEvent) {
     if (this.config.handleDoubleClick) {
-      this.config.handleDoubleClick(event, this.host, this.referenceInfo);
+      this.config.handleDoubleClick(
+        event,
+        this.host,
+        this.referenceInfo$.peek()
+      );
       if (event.defaultPrevented) {
         return;
       }
@@ -241,7 +272,7 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockComponent<EmbedLinke
 
   protected _handleClick(event: MouseEvent) {
     if (this.config.handleClick) {
-      this.config.handleClick(event, this.host, this.referenceInfo);
+      this.config.handleClick(event, this.host, this.referenceInfo$.peek());
       if (event.defaultPrevented) {
         return;
       }
@@ -358,35 +389,18 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockComponent<EmbedLinke
     const {
       LoadingIcon,
       ReloadIcon,
-      LinkedDocIcon,
-      LinkedDocDeletedIcon,
       LinkedDocDeletedBanner,
       LinkedDocEmptyBanner,
       SyncedDocErrorBanner,
     } = getEmbedLinkedDocIcons(theme, this._linkedDocMode, this._cardStyle);
 
-    const titleIcon = isError
+    const icon = isError
       ? SyncedDocErrorIcon
       : isLoading
         ? LoadingIcon
-        : isDeleted
-          ? LinkedDocDeletedIcon
-          : this.model.title
-            ? AliasIcon({ width: '16px', height: '16pc' })
-            : this._referenceToNode
-              ? BlockLinkIcon
-              : LinkedDocIcon;
-
-    const title = this.docTitle;
-    const description = this.model.description;
-
-    const titleText = isError
-      ? title
-      : isLoading
-        ? 'Loading...'
-        : isDeleted
-          ? `Deleted doc`
-          : title;
+        : this.icon$.value;
+    const title = isLoading ? 'Loading...' : this.title$;
+    const description = this.model.description$;
 
     const showDefaultNoteContent = isError || isLoading || isDeleted || isEmpty;
     const defaultNoteContent = isError
@@ -414,7 +428,7 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockComponent<EmbedLinke
           ? LinkedDocDeletedBanner
           : LinkedDocEmptyBanner;
 
-    const hasDescriptionAlias = Boolean(description && description.length > 0);
+    const hasDescriptionAlias = Boolean(description.value);
 
     return this.renderEmbed(
       () => html`
@@ -430,11 +444,11 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockComponent<EmbedLinke
           <div class="affine-embed-linked-doc-content">
             <div class="affine-embed-linked-doc-content-title">
               <div class="affine-embed-linked-doc-content-title-icon">
-                ${titleIcon}
+                ${icon}
               </div>
 
               <div class="affine-embed-linked-doc-content-title-text">
-                ${titleText}
+                ${title}
               </div>
             </div>
 

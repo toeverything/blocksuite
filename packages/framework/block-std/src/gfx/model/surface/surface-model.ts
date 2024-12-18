@@ -4,6 +4,7 @@ import { assertType, type Constructor, Slot } from '@blocksuite/global/utils';
 import { BlockModel, DocCollection, nanoid } from '@blocksuite/store';
 
 import type { GfxGroupModel, GfxModel } from '../model.js';
+import type { GfxLocalElementModel } from './local-element-model.js';
 
 import {
   type GfxGroupCompatibleInterface,
@@ -77,10 +78,26 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
 
   elementUpdated = new Slot<ElementUpdatedData>();
 
+  localElementAdded = new Slot<GfxLocalElementModel>();
+
+  localElementDeleted = new Slot<GfxLocalElementModel>();
+
+  protected localElements = new Set<GfxLocalElementModel>();
+
+  localElementUpdated = new Slot<{
+    model: GfxLocalElementModel;
+    props: Record<string, unknown>;
+    oldValues: Record<string, unknown>;
+  }>();
+
   get elementModels() {
     const models: GfxPrimitiveElementModel[] = [];
     this._elementModels.forEach(model => models.push(model.model));
     return models;
+  }
+
+  get localElementModels() {
+    return this.localElements;
   }
 
   get registeredElementTypes() {
@@ -180,7 +197,7 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
 
     const unmount = () => {
       mounted = false;
-      elementModel['_disposable'].dispose();
+      elementModel.onDestroyed();
     };
 
     const mount = () => {
@@ -262,7 +279,12 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
                     element.get('id') as string,
                     element,
                     {
-                      onChange: payload => this.elementUpdated.emit(payload),
+                      onChange: payload => {
+                        this.elementUpdated.emit(payload);
+                        Object.keys(payload.props).forEach(key => {
+                          model.model.propsUpdated.emit({ key });
+                        });
+                      },
                       skipFieldInit: true,
                     }
                   );
@@ -304,7 +326,12 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
         val.get('id') as string,
         val,
         {
-          onChange: payload => this.elementUpdated.emit(payload),
+          onChange: payload => {
+            this.elementUpdated.emit(payload),
+              Object.keys(payload.props).forEach(key => {
+                model.model.propsUpdated.emit({ key });
+              });
+          },
           skipFieldInit: true,
         }
       );
@@ -426,7 +453,12 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
     props.id = id;
 
     const elementModel = this._createElementFromProps(props, {
-      onChange: payload => this.elementUpdated.emit(payload),
+      onChange: payload => {
+        this.elementUpdated.emit(payload);
+        Object.keys(payload.props).forEach(key => {
+          elementModel.model.propsUpdated.emit({ key });
+        });
+      },
     });
 
     this._elementModels.set(id, elementModel);
@@ -436,6 +468,11 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
     });
 
     return id;
+  }
+
+  addLocalElement(elem: GfxLocalElementModel) {
+    this.localElements.add(elem);
+    this.localElementAdded.emit(elem);
   }
 
   applyMiddlewares(middlewares: SurfaceMiddleware[]) {
@@ -470,6 +507,12 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
 
       this.elements.getValue()!.delete(id);
     });
+  }
+
+  deleteLocalElement(elem: GfxLocalElementModel) {
+    if (this.localElements.delete(elem)) {
+      this.localElementDeleted.emit(elem);
+    }
   }
 
   override dispose(): void {

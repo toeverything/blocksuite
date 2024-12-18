@@ -7,7 +7,10 @@ import {
   type TelemetryEvent,
   TelemetryProvider,
 } from '@blocksuite/affine-shared/services';
-import { isInsideBlockByFlavour } from '@blocksuite/affine-shared/utils';
+import {
+  cloneReferenceInfoWithoutAliases,
+  isInsideBlockByFlavour,
+} from '@blocksuite/affine-shared/utils';
 import {
   BLOCK_ID_ATTR,
   type BlockComponent,
@@ -45,7 +48,6 @@ import {
 import { RefNodeSlotsProvider } from '../../../../extension/index.js';
 import { ReferenceAliasPopup } from './reference-alias-popup.js';
 import { styles } from './styles.js';
-import { cloneReferenceInfoWithoutAliases } from './utils.js';
 
 export class ReferencePopup extends WithDisposable(LitElement) {
   static override styles = styles;
@@ -73,6 +75,10 @@ export class ReferencePopup extends WithDisposable(LitElement) {
 
   private _openEditPopup = (e: MouseEvent) => {
     e.stopPropagation();
+
+    if (document.body.querySelector('reference-alias-popup')) {
+      return;
+    }
 
     const {
       std,

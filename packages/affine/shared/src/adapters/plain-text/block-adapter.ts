@@ -5,9 +5,9 @@ import {
   type ServiceIdentifier,
 } from '@blocksuite/global/di';
 
-import type { BlockAdapterMatcher } from '../types/adapter.js';
+import type { BlockAdapterMatcher, TextBuffer } from '../types/adapter.js';
 
-export type BlockPlainTextAdapterMatcher = BlockAdapterMatcher;
+export type BlockPlainTextAdapterMatcher = BlockAdapterMatcher<TextBuffer>;
 
 export const BlockPlainTextAdapterMatcherIdentifier =
   createIdentifier<BlockPlainTextAdapterMatcher>(

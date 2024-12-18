@@ -2,11 +2,11 @@ import {
   BrushElementModel,
   ConnectorElementModel,
   GroupElementModel,
+  MindmapElementModel,
   ShapeElementModel,
   TextElementModel,
 } from '@blocksuite/affine-model';
 
-import { LayoutableMindmapElementModel } from '../utils/mindmap/utils.js';
 import { SurfaceElementModel } from './base.js';
 
 export const elementsCtorMap = {
@@ -15,14 +15,14 @@ export const elementsCtorMap = {
   shape: ShapeElementModel,
   brush: BrushElementModel,
   text: TextElementModel,
-  mindmap: LayoutableMindmapElementModel,
+  mindmap: MindmapElementModel,
 };
 
 export {
   BrushElementModel,
   ConnectorElementModel,
   GroupElementModel,
-  LayoutableMindmapElementModel,
+  MindmapElementModel,
   ShapeElementModel,
   SurfaceElementModel,
   TextElementModel,
@@ -43,7 +43,7 @@ export type ElementModelMap = {
   ['connector']: ConnectorElementModel;
   ['text']: TextElementModel;
   ['group']: GroupElementModel;
-  ['mindmap']: LayoutableMindmapElementModel;
+  ['mindmap']: MindmapElementModel;
 };
 
 export function isCanvasElementType(type: string): type is CanvasElementType {

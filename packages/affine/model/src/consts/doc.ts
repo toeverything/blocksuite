@@ -15,8 +15,8 @@ export const DocModes = ['edgeless', 'page'] as const;
  */
 export const AliasInfoSchema = z
   .object({
-    title: z.string().nullable(),
-    description: z.string().nullable(),
+    title: z.string(),
+    description: z.string(),
   })
   .partial();
 

@@ -35,13 +35,38 @@ export interface GfxCompatibleInterface extends IBound, GfxElementGeometry {
   xywh: SerializedXYWH;
   index: string;
 
+  /**
+   * Defines the extension of the response area beyond the element's bounding box.
+   * This tuple specifies the horizontal and vertical margins to be added to the element's bound.
+   *
+   * The first value represents the horizontal extension (added to both left and right sides),
+   * and the second value represents the vertical extension (added to both top and bottom sides).
+   *
+   * The response area is computed as:
+   * `[x - horizontal, y - vertical, w + 2 * horizontal, h + 2 * vertical]`.
+   *
+   * Example:
+   * - xywh: `[0, 0, 100, 100]`, `responseExtension: [10, 20]`
+   *   Resulting response area: `[-10, -20, 120, 140]`.
+   * - `responseExtension: [0, 0]` keeps the response area equal to the bounding box.
+   */
+  responseExtension: [number, number];
+
   readonly group: GfxGroupCompatibleInterface | null;
 
   readonly groups: GfxGroupCompatibleInterface[];
 
   readonly deserializedXYWH: XYWH;
 
+  /**
+   * The bound of the element without considering the response extension.
+   */
   readonly elementBound: Bound;
+
+  /**
+   * The bound of the element considering the response extension.
+   */
+  readonly responseBound: Bound;
 
   /**
    * Indicates whether the current block is explicitly locked by self.
@@ -99,11 +124,11 @@ export interface GfxGroupCompatibleInterface extends GfxCompatibleInterface {
 
   descendantElements: GfxModel[];
 
-  addChild(element: GfxModel): void;
-  removeChild(element: GfxModel): void;
-  hasChild(element: GfxModel): boolean;
+  addChild(element: GfxCompatibleInterface): void;
+  removeChild(element: GfxCompatibleInterface): void;
+  hasChild(element: GfxCompatibleInterface): boolean;
 
-  hasDescendant(element: GfxModel): boolean;
+  hasDescendant(element: GfxCompatibleInterface): boolean;
 }
 
 /**
@@ -114,6 +139,12 @@ export interface PointTestOptions {
    * The threshold of the hit test. The unit is pixel.
    */
   hitThreshold?: number;
+
+  /**
+   * If true, the element bound will be used for the hit testing.
+   * By default, the response bound will be used.
+   */
+  useElementBound?: boolean;
 
   /**
    * The padding of the response area for each element when do the hit testing. The unit is pixel.

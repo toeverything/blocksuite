@@ -186,7 +186,8 @@
               "text": {
                 "$blocksuite:internal:text$": true,
                 "delta": []
-              }
+              },
+              "collapsed": false
             },
             "children": []
           },

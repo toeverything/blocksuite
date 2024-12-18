@@ -26,18 +26,12 @@ import {
 } from '@blocksuite/affine-shared/utils';
 import { BlockComponent } from '@blocksuite/block-std';
 import {
-  GfxBlockElementModel,
   GfxControllerIdentifier,
   type GfxViewportElement,
 } from '@blocksuite/block-std/gfx';
 import { IS_WINDOWS } from '@blocksuite/global/env';
-import {
-  assertExists,
-  Bound,
-  Point,
-  throttle,
-  Vec,
-} from '@blocksuite/global/utils';
+import { assertExists, Bound, Point, Vec } from '@blocksuite/global/utils';
+import { effect } from '@preact/signals-core';
 import { css, html } from 'lit';
 import { query } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
@@ -47,7 +41,7 @@ import type { EdgelessRootBlockWidgetName } from '../types.js';
 import type { EdgelessSelectedRectWidget } from './components/rects/edgeless-selected-rect.js';
 import type { EdgelessRootService } from './edgeless-root-service.js';
 
-import { isSelectSingleMindMap } from '../../_common/edgeless/mindmap/index.js';
+import { isSingleMindMapNode } from '../../_common/edgeless/mindmap/index.js';
 import { EdgelessClipboardController } from './clipboard/clipboard.js';
 import { EdgelessPageKeyboardManager } from './edgeless-keyboard.js';
 import { getBackgroundGrid, isCanvasElement } from './utils/query.js';
@@ -328,11 +322,9 @@ export class EdgelessRootBlockComponent extends BlockComponent<
     );
 
     disposables.add(
-      slots.cursorUpdated.on(
-        throttle((cursor: string) => {
-          this.style.cursor = cursor;
-        }, 144)
-      )
+      effect(() => {
+        this.style.cursor = this.gfx.cursor$.value;
+      })
     );
 
     let canCopyAsPng = true;
@@ -439,7 +431,7 @@ export class EdgelessRootBlockComponent extends BlockComponent<
         keymap[key] = ctx => {
           const elements = selection.selectedElements;
 
-          if (isSelectSingleMindMap(elements) && !selection.editing) {
+          if (isSingleMindMapNode(elements) && !selection.editing) {
             const target = gfx.getElementById(
               elements[0].id
             ) as ShapeElementModel;
@@ -540,10 +532,9 @@ export class EdgelessRootBlockComponent extends BlockComponent<
           .getModelsInViewport=${() => {
             const blocks = this.gfx.grid.search(
               this.gfx.viewport.viewportBounds,
-              undefined,
               {
                 useSet: true,
-                filter: model => model instanceof GfxBlockElementModel,
+                filter: ['block'],
               }
             );
 

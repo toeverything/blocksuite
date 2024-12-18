@@ -7,6 +7,7 @@ import type { BlockModel } from '@blocksuite/store';
 
 import { toast } from '@blocksuite/affine-components/toast';
 import { defaultAttachmentProps } from '@blocksuite/affine-model';
+import { TelemetryProvider } from '@blocksuite/affine-shared/services';
 import { humanFileSize } from '@blocksuite/affine-shared/utils';
 
 import type { AttachmentBlockComponent } from './attachment-block.js';
@@ -37,10 +38,12 @@ function isAttachmentUploading(blockId: string) {
 /**
  * This function will not verify the size of the file.
  */
-async function uploadAttachmentBlob(
+export async function uploadAttachmentBlob(
   editorHost: EditorHost,
   blockId: string,
-  blob: Blob
+  blob: Blob,
+  filetype: string,
+  isEdgeless?: boolean
 ): Promise<void> {
   if (isAttachmentUploading(blockId)) {
     return;
@@ -63,18 +66,26 @@ async function uploadAttachmentBlob(
   } finally {
     setAttachmentUploaded(blockId);
 
-    const attachmentModel = doc.getBlockById(
-      blockId
-    ) as AttachmentBlockModel | null;
+    const block = doc.getBlock(blockId);
 
     doc.withoutTransact(() => {
-      if (!attachmentModel) {
-        return;
-      }
-      doc.updateBlock(attachmentModel, {
+      if (!block) return;
+
+      doc.updateBlock(block.model, {
         sourceId,
       } satisfies Partial<AttachmentBlockProps>);
     });
+
+    editorHost.std
+      .getOptional(TelemetryProvider)
+      ?.track('AttachmentUploadedEvent', {
+        page: `${isEdgeless ? 'whiteboard' : 'doc'} editor`,
+        module: 'attachment',
+        segment: 'attachment',
+        control: 'uploader',
+        type: filetype,
+        category: block && sourceId ? 'success' : 'failure',
+      });
   }
 }
 
@@ -236,7 +247,7 @@ export async function addSiblingAttachmentBlocks(
 
   blockIds.map(
     (blockId, index) =>
-      void uploadAttachmentBlob(editorHost, blockId, files[index])
+      void uploadAttachmentBlob(editorHost, blockId, files[index], types[index])
   );
 
   return blockIds;

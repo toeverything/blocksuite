@@ -1,3 +1,4 @@
+export * from './doc-display-meta-service.js';
 export * from './doc-mode-service.js';
 export * from './drag-handle-config.js';
 export * from './edit-props-store.js';

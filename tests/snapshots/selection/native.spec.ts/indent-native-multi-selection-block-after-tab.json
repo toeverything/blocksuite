@@ -46,7 +46,8 @@
                   "insert": "123"
                 }
               ]
-            }
+            },
+            "collapsed": false
           },
           "children": [
             {
@@ -63,7 +64,8 @@
                       "insert": "456"
                     }
                   ]
-                }
+                },
+                "collapsed": false
               },
               "children": []
             },
@@ -81,7 +83,8 @@
                       "insert": "789"
                     }
                   ]
-                }
+                },
+                "collapsed": false
               },
               "children": []
             },
@@ -99,7 +102,8 @@
                       "insert": "012"
                     }
                   ]
-                }
+                },
+                "collapsed": false
               },
               "children": []
             }

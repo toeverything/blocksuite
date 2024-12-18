@@ -49,7 +49,8 @@
                   }
                 }
               ]
-            }
+            },
+            "collapsed": false
           },
           "children": []
         },
@@ -70,7 +71,8 @@
                   }
                 }
               ]
-            }
+            },
+            "collapsed": false
           },
           "children": []
         },
@@ -91,7 +93,8 @@
                   }
                 }
               ]
-            }
+            },
+            "collapsed": false
           },
           "children": []
         }

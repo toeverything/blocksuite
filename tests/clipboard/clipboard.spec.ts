@@ -276,6 +276,48 @@ test(scoped`pasting internal url with params`, async ({ page }) => {
   await expect(page.locator('affine-reference')).toContainText('test page');
 });
 
+test(
+  scoped`pasting an external URL from clipboard to automatically creating a link from selection`,
+  async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyParagraphState(page);
+    await focusTitle(page);
+    await type(page, 'test page');
+
+    await focusRichText(page);
+    await type(page, 'title alias');
+    await setSelection(page, 1, 6, 1, 11);
+
+    await pasteContent(page, {
+      'text/plain': 'https://affine.pro/',
+    });
+    await expect(page.locator('affine-link')).toContainText('alias');
+  }
+);
+
+test(
+  scoped`pasting an internal URL from clipboard to automatically creating a link from selection`,
+  async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyParagraphState(page);
+    await focusTitle(page);
+    await type(page, 'test page');
+
+    await focusRichText(page);
+    await type(page, 'title alias');
+    await setSelection(page, 1, 6, 1, 11);
+
+    const docId = await getCurrentEditorDocId(page);
+    await mockParseDocUrlService(page, {
+      'http://workspace/doc-id': docId,
+    });
+    await pasteContent(page, {
+      'text/plain': 'http://workspace/doc-id',
+    });
+    await expect(page.locator('affine-reference')).toContainText('alias');
+  }
+);
+
 test(scoped`paste parent block`, async ({ page }) => {
   test.info().annotations.push({
     type: 'issue',

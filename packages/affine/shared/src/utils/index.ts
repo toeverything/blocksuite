@@ -1,4 +1,5 @@
 export * from './button-popper.js';
+export * from './collapsed/index.js';
 export * from './dnd/index.js';
 export * from './dom/index.js';
 export * from './event.js';
@@ -8,6 +9,7 @@ export * from './is-abort-error.js';
 export * from './math.js';
 export * from './model/index.js';
 export * from './print-to-pdf.js';
+export * from './reference.js';
 export * from './reordering.js';
 export * from './signal.js';
 export * from './spec/index.js';

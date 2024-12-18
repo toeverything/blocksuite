@@ -1,4 +1,7 @@
-import type { MindmapElementModel } from '@blocksuite/affine-model';
+import type {
+  MindmapElementModel,
+  MindmapNode,
+} from '@blocksuite/affine-model';
 import type { GfxModel } from '@blocksuite/block-std/gfx';
 import type { IBound } from '@blocksuite/global/utils';
 
@@ -21,23 +24,29 @@ export function mindmap(
 
   matrix = matrix.translate(-dx, -dy);
 
-  model.traverse((to, from) => {
-    if (from) {
-      const connector = model.getConnector(from, to);
-      if (!connector) return;
+  const mindmapOpacity = model.opacity;
 
+  const traverse = (node: MindmapNode) => {
+    const connectors = model.getConnectors(node);
+    if (!connectors) return;
+    connectors.reverse().forEach(result => {
+      const { connector, outdated } = result;
       const elementGetter = (id: string) =>
         model.surface.getElementById(id) ??
         (model.surface.doc.getBlockById(id) as GfxModel);
-      ConnectorPathGenerator.updatePath(connector, null, elementGetter);
+
+      if (outdated) {
+        ConnectorPathGenerator.updatePath(connector, null, elementGetter);
+      }
 
       const dx = connector.x - bound.x;
       const dy = connector.y - bound.y;
       const origin = ctx.globalAlpha;
-      const shouldSetGlobalAlpha = origin !== connector.opacity;
+      const shouldSetGlobalAlpha =
+        origin !== connector.opacity * mindmapOpacity;
 
       if (shouldSetGlobalAlpha) {
-        ctx.globalAlpha = connector.opacity;
+        ctx.globalAlpha = connector.opacity * mindmapOpacity;
       }
 
       renderConnector(connector, ctx, matrix.translate(dx, dy), renderer, rc);
@@ -45,13 +54,14 @@ export function mindmap(
       if (shouldSetGlobalAlpha) {
         ctx.globalAlpha = origin;
       }
+    });
+
+    if (node.detail.collapsed) {
+      return;
+    } else {
+      node.children.forEach(traverse);
     }
-  });
+  };
 
-  model.extraConnectors.forEach(connector => {
-    const dx = connector.x - bound.x;
-    const dy = connector.y - bound.y;
-
-    renderConnector(connector, ctx, matrix.translate(dx, dy), renderer, rc);
-  });
+  model.tree && traverse(model.tree);
 }

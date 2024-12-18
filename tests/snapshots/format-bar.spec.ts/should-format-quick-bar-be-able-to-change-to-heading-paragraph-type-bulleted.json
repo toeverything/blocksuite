@@ -67,7 +67,8 @@
                   "insert": "456"
                 }
               ]
-            }
+            },
+            "collapsed": false
           },
           "children": []
         },
@@ -85,7 +86,8 @@
                   "insert": "789"
                 }
               ]
-            }
+            },
+            "collapsed": false
           },
           "children": []
         }

@@ -36,7 +36,7 @@ import {
 import { addNoteAtPoint } from '../../../edgeless/utils/common.js';
 import { DropIndicator } from '../components/drop-indicator.js';
 import { AFFINE_DRAG_HANDLE_WIDGET } from '../consts.js';
-import { copyEmbedDoc } from '../middleware/copy-embed-doc.js';
+import { newIdCrossDoc } from '../middleware/new-id-cross-doc.js';
 import { surfaceRefToEmbed } from '../middleware/surface-ref-to-embed.js';
 import { containBlock, includeTextSelection } from '../utils.js';
 
@@ -114,6 +114,7 @@ export class DragEventWatcher {
 
   private _dropHandler = (context: UIEventStateContext) => {
     this._onDrop(context);
+    this._std.selection.setGroup('gfx', []);
     this.widget.clearRaf();
     this.widget.hide(true);
   };
@@ -338,7 +339,7 @@ export class DragEventWatcher {
         ['affine:attachment', 'affine:bookmark'].includes(first.flavour) ||
         first.flavour.startsWith('affine:embed-')
       ) {
-        const style = first.props.style as EmbedCardStyle;
+        const style = (first.props.style ?? 'horizontal') as EmbedCardStyle;
         const width = EMBED_CARD_WIDTH[style];
         const height = EMBED_CARD_HEIGHT[style];
 
@@ -437,7 +438,7 @@ export class DragEventWatcher {
     const std = this._std;
     return new Job({
       collection: std.collection,
-      middlewares: [copyEmbedDoc, surfaceRefToEmbed(std)],
+      middlewares: [newIdCrossDoc(std), surfaceRefToEmbed(std)],
     });
   }
 

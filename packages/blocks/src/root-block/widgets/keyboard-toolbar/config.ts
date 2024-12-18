@@ -335,7 +335,7 @@ const contentMediaToolGroup: KeyboardToolPanelGroup = {
   items: [
     {
       name: 'Image',
-      icon: NewPageIcon(),
+      icon: ImageIcon(),
       showWhen: ({ std }) =>
         std.doc.schema.flavourSchemaMap.has('affine:image'),
       action: ({ std }) => {

@@ -4,6 +4,7 @@ import {
 } from '@blocksuite/affine-block-surface';
 import { RefNodeSlotsExtension } from '@blocksuite/affine-components/rich-text';
 import {
+  DocDisplayMetaService,
   DocModeService,
   EmbedOptionService,
   FontLoaderService,
@@ -37,6 +38,7 @@ const PreviewPageSpec: ExtensionType[] = [
   ThemeService,
   EmbedOptionService,
   BlockViewExtension('affine:page', literal`affine-preview-root`),
+  DocDisplayMetaService,
 ];
 
 export const PreviewEdgelessEditorBlockSpecs: ExtensionType[] = [
