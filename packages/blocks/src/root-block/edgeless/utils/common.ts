@@ -31,10 +31,7 @@ import {
   Vec,
 } from '@blocksuite/global/utils';
 
-import {
-  setAttachmentUploaded,
-  setAttachmentUploading,
-} from '../../../attachment-block/utils.js';
+import { uploadAttachmentBlob } from '../../../attachment-block/utils.js';
 import { calcBoundByOrigin, readImageSize } from '../components/utils.js';
 import { DEFAULT_NOTE_OFFSET_X, DEFAULT_NOTE_OFFSET_Y } from './consts.js';
 import { addBlock } from './crud.js';
@@ -102,26 +99,7 @@ export async function addAttachments(
 
   // upload file and update the attachment model
   const uploadPromises = dropInfos.map(async ({ blockId, file }) => {
-    let sourceId: string | undefined;
-    try {
-      setAttachmentUploading(blockId);
-      sourceId = await std.doc.blobSync.set(file);
-    } catch (error) {
-      console.error(error);
-      if (error instanceof Error) {
-        toast(
-          std.host,
-          `Failed to upload attachment! ${error.message || error.toString()}`
-        );
-      }
-    } finally {
-      setAttachmentUploaded(blockId);
-      std.doc.withoutTransact(() => {
-        gfx.updateElement(blockId, {
-          sourceId,
-        } satisfies Partial<AttachmentBlockProps>);
-      });
-    }
+    await uploadAttachmentBlob(std.host, blockId, file);
     return blockId;
   });
   const blockIds = await Promise.all(uploadPromises);

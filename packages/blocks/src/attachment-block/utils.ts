@@ -37,7 +37,7 @@ function isAttachmentUploading(blockId: string) {
 /**
  * This function will not verify the size of the file.
  */
-async function uploadAttachmentBlob(
+export async function uploadAttachmentBlob(
   editorHost: EditorHost,
   blockId: string,
   blob: Blob
@@ -63,15 +63,12 @@ async function uploadAttachmentBlob(
   } finally {
     setAttachmentUploaded(blockId);
 
-    const attachmentModel = doc.getBlockById(
-      blockId
-    ) as AttachmentBlockModel | null;
+    const block = doc.getBlock(blockId);
 
     doc.withoutTransact(() => {
-      if (!attachmentModel) {
-        return;
-      }
-      doc.updateBlock(attachmentModel, {
+      if (!block) return;
+
+      doc.updateBlock(block.model, {
         sourceId,
       } satisfies Partial<AttachmentBlockProps>);
     });
