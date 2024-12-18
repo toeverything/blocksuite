@@ -15,10 +15,10 @@ import {
   Slot,
 } from '@blocksuite/global/utils';
 
+import type { SurfaceElementModel } from '../element-model/base.js';
 import type { ElementRenderer } from './elements/index.js';
 import type { Overlay } from './overlay.js';
 
-import { SurfaceElementModel } from '../element-model/base.js';
 import { RoughCanvas } from '../utils/rough/canvas.js';
 
 type EnvProvider = {
@@ -271,8 +271,8 @@ export class CanvasRenderer {
 
     const elements =
       surfaceElements ??
-      (this.grid.search(bound, undefined, {
-        filter: el => el instanceof SurfaceElementModel,
+      (this.grid.search(bound, {
+        filter: ['canvas', 'local'],
       }) as SurfaceElementModel[]);
     for (const element of elements) {
       ctx.save();

@@ -1776,8 +1776,8 @@ export async function getSortedIdsInViewport(page: Page) {
     if (!container) throw new Error('container not found');
     const { service } = container;
     return service.gfx.grid
-      .search(service.viewport.viewportBounds, undefined, {
-        filter: model => !('flavour' in model),
+      .search(service.viewport.viewportBounds, {
+        filter: ['canvas'],
       })
       .map(e => e.id);
   });

@@ -402,7 +402,7 @@ export class EdgelessFrameManager extends GfxExtension {
   getElementsInFrameBound(frame: FrameBlockModel, fullyContained = true) {
     const bound = Bound.deserialize(frame.xywh);
     const elements: GfxModel[] = this.gfx.grid
-      .search(bound, fullyContained)
+      .search(bound, { strict: fullyContained })
       .filter(element => element !== frame);
 
     return elements;
