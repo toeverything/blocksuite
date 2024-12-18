@@ -9,6 +9,7 @@ import {
   GroupElementModel,
   type LocalConnectorElementModel,
 } from '@blocksuite/affine-model';
+import { ThemeProvider } from '@blocksuite/affine-shared/services';
 import {
   almostEqual,
   assertEquals,
@@ -31,6 +32,7 @@ import {
   toRadian,
   Vec,
 } from '@blocksuite/global/utils';
+import { effect } from '@preact/signals-core';
 
 import { Overlay } from '../renderer/overlay.js';
 import { AStarRunner } from '../utils/a-star.js';
@@ -822,6 +824,10 @@ function renderRect(
 export class ConnectionOverlay extends Overlay {
   static override overlayName = 'connection';
 
+  private _emphasisColor: string;
+
+  private _themeDisposer: (() => void) | null = null;
+
   highlightPoint: IVec | null = null;
 
   points: IVec[] = [];
@@ -832,12 +838,28 @@ export class ConnectionOverlay extends Overlay {
 
   constructor(gfx: GfxController) {
     super(gfx);
+    this._emphasisColor = this._getEmphasisColor();
+    this._setupThemeListener();
   }
 
   private _findConnectablesInViews() {
     const gfx = this.gfx;
     const bound = gfx.viewport.viewportBounds;
     return gfx.getElementsByBound(bound).filter(ele => ele.connectable);
+  }
+
+  private _getEmphasisColor(): string {
+    return getComputedStyle(this.gfx.std.host).getPropertyValue(
+      '--affine-text-emphasis-color'
+    );
+  }
+
+  private _setupThemeListener(): void {
+    const themeService = this.gfx.std.get(ThemeProvider);
+    this._themeDisposer = effect(() => {
+      themeService.theme$;
+      this._emphasisColor = this._getEmphasisColor();
+    });
   }
 
   _clearRect() {
@@ -852,13 +874,17 @@ export class ConnectionOverlay extends Overlay {
     this._clearRect();
   }
 
+  override dispose() {
+    this._themeDisposer?.();
+    if (!this._renderer) return;
+    this._renderer.removeOverlay(this);
+    this._renderer = null;
+  }
+
   override render(ctx: CanvasRenderingContext2D): void {
     const zoom = this.gfx.viewport.zoom;
     const radius = 5 / zoom;
-    const color = getComputedStyle(this.gfx.std.host).getPropertyValue(
-      '--affine-text-emphasis-color'
-    );
-
+    const color = this._emphasisColor;
     ctx.globalAlpha = 0.6;
     let lineWidth = 1 / zoom;
     if (this.sourceBounds) {

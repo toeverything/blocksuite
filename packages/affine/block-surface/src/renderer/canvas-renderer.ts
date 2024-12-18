@@ -365,6 +365,8 @@ export class CanvasRenderer {
   }
 
   dispose(): void {
+    this._overlays.forEach(overlay => overlay.dispose());
+    this._overlays.clear();
     this._disposables.dispose();
   }
 
