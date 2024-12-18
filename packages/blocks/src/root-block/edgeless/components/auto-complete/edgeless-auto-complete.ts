@@ -115,6 +115,10 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
         background 0.3s linear,
         box-shadow 0.2s linear;
     }
+    .edgeless-auto-complete-arrow-wrapper.mindmap {
+      width: 26px;
+      height: 26px;
+    }
 
     .edgeless-auto-complete-arrow-wrapper:hover
       > .edgeless-auto-complete-arrow {
@@ -244,10 +248,14 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
 
     if (!(mindmap instanceof MindmapElementModel)) return;
 
-    const parentNode =
+    const parent =
       target === 'sibling'
         ? (mindmap.getParentNode(this.current.id) ?? this.current)
         : this.current;
+
+    const parentNode = mindmap.getNode(parent.id);
+
+    if (!parentNode) return;
 
     const newNode = mindmap.addNode(
       parentNode.id,
@@ -255,6 +263,10 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
       undefined,
       undefined
     );
+
+    if (parentNode.detail.collapsed) {
+      mindmap.toggleCollapse(parentNode);
+    }
 
     requestAnimationFrame(() => {
       mountShapeTextEditor(
@@ -399,9 +411,7 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
     }, [] as ShapeElementModel[]);
   }
 
-  private _getMindmapButtons():
-    | [Direction, 'child' | 'sibling', LayoutType.LEFT | LayoutType.RIGHT][]
-    | null {
+  private _getMindmapButtons() {
     const mindmap = this.current.group as MindmapElementModel;
     const mindmapDirection =
       this.current instanceof ShapeElementModel &&
@@ -409,35 +419,45 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
         ? mindmap.getLayoutDir(this.current.id)
         : null;
     const isRoot = mindmap?.tree.id === this.current.id;
+    const mindmapNode = mindmap.getNode(this.current.id);
 
-    let result: ReturnType<typeof this._getMindmapButtons> = null;
+    let buttons: [
+      Direction,
+      'child' | 'sibling',
+      LayoutType.LEFT | LayoutType.RIGHT,
+    ][] = [];
 
     switch (mindmapDirection) {
       case LayoutType.LEFT:
-        result = [[Direction.Left, 'child', LayoutType.LEFT]];
+        buttons = [[Direction.Left, 'child', LayoutType.LEFT]];
 
         if (!isRoot) {
-          result.push([Direction.Bottom, 'sibling', mindmapDirection]);
+          buttons.push([Direction.Bottom, 'sibling', mindmapDirection]);
         }
-        return result;
+        break;
       case LayoutType.RIGHT:
-        result = [[Direction.Right, 'child', LayoutType.RIGHT]];
+        buttons = [[Direction.Right, 'child', LayoutType.RIGHT]];
 
         if (!isRoot) {
-          result.push([Direction.Bottom, 'sibling', mindmapDirection]);
+          buttons.push([Direction.Bottom, 'sibling', mindmapDirection]);
         }
-        return result;
+        break;
       case LayoutType.BALANCE:
-        result = [
+        buttons = [
           [Direction.Right, 'child', LayoutType.RIGHT],
           [Direction.Left, 'child', LayoutType.LEFT],
         ];
-        return result;
+        break;
       default:
-        result = null;
+        buttons = [];
     }
 
-    return result;
+    return buttons.length
+      ? {
+          mindmapNode,
+          buttons,
+        }
+      : null;
   }
 
   private _initOverlay() {
@@ -546,11 +566,14 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
 
     const { selectedRect } = this;
     const { zoom } = this.edgeless.service.viewport;
-    const width = 72;
-    const height = 44;
-    const buttonMargin = height / 2;
+    const size = 26;
+    const buttonMargin =
+      (mindmapButtons.mindmapNode?.children.length ?? 0) > 0
+        ? size / 2 + 32 * zoom
+        : size / 2 + 6;
+    const verticalMargin = size / 2 + 6;
 
-    return mindmapButtons.map(type => {
+    return mindmapButtons.buttons.map(type => {
       let transform = '';
 
       const [position, target, layout] = type;
@@ -560,7 +583,7 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
       switch (position) {
         case Direction.Bottom:
           transform += `translate(${selectedRect.width / 2}px, ${
-            selectedRect.height + buttonMargin
+            selectedRect.height + verticalMargin
           }px)`;
           isLeftLayout && (transform += `scale(-1)`);
           break;
@@ -578,7 +601,7 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
           break;
       }
 
-      transform += `translate(${-width / 2}px, ${-height / 2}px)`;
+      transform += `translate(${-size / 2}px, ${-size / 2}px)`;
 
       const arrowWrapperClasses = classMap({
         'edgeless-auto-complete-arrow-wrapper': true,

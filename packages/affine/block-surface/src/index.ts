@@ -59,7 +59,6 @@ export {
   NODE_HORIZONTAL_SPACING,
   NODE_VERTICAL_SPACING,
 } from './utils/mindmap/layout.js';
-export { LayoutableMindmapElementModel } from './utils/mindmap/utils.js';
 export { RoughCanvas } from './utils/rough/canvas.js';
 
 import {

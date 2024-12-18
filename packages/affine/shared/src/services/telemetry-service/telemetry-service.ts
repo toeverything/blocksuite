@@ -6,6 +6,7 @@ import type {
   DocCreatedEvent,
   ElementCreationEvent,
   ElementLockEvent,
+  MindMapCollapseEvent,
   TelemetryEvent,
 } from './types.js';
 
@@ -17,6 +18,7 @@ export type TelemetryEventMap = OutDatabaseAllEvents &
     SplitNote: TelemetryEvent;
     CanvasElementAdded: ElementCreationEvent;
     EdgelessElementLocked: ElementLockEvent;
+    ExpandedAndCollapsed: MindMapCollapseEvent;
   };
 
 export interface TelemetryService {

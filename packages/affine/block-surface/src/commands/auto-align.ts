@@ -4,12 +4,11 @@ import {
   ConnectorElementModel,
   EdgelessTextBlockModel,
   EmbedSyncedDocModel,
+  MindmapElementModel,
   NoteBlockModel,
 } from '@blocksuite/affine-model';
 import { Bound } from '@blocksuite/global/utils';
 import chunk from 'lodash.chunk';
-
-import { LayoutableMindmapElementModel } from '../utils/mindmap/utils.js';
 
 const ALIGN_HEIGHT = 200;
 const ALIGN_PADDING = 20;
@@ -121,7 +120,7 @@ function autoResizeElements(
   elements.forEach(ele => {
     if (
       ele instanceof ConnectorElementModel ||
-      ele instanceof LayoutableMindmapElementModel
+      ele instanceof MindmapElementModel
     ) {
       return;
     }

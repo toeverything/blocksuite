@@ -40,6 +40,7 @@ import {
 } from '@blocksuite/affine-shared/utils';
 import { WidgetComponent } from '@blocksuite/block-std';
 import {
+  type CursorType,
   getTopElements,
   GfxControllerIdentifier,
   GfxExtensionIdentifier,
@@ -660,7 +661,7 @@ export class EdgelessSelectedRectWidget extends WidgetComponent<
       point?: IVec;
     }
   ) => {
-    let cursor = 'default';
+    let cursor: CursorType = 'default';
 
     if (dragging && options) {
       const { type, target, point } = options;
@@ -670,10 +671,10 @@ export class EdgelessSelectedRectWidget extends WidgetComponent<
           angle = calcAngle(target, point, 45);
         }
         this._cursorRotate += angle || 0;
-        cursor = generateCursorUrl(this._cursorRotate).toString();
+        cursor = generateCursorUrl(this._cursorRotate);
       } else {
         if (this.resizeMode === 'edge') {
-          cursor = 'ew';
+          cursor = 'ew-resize';
         } else if (target && point) {
           const label = getResizeLabel(target);
           const { width, height, left, top } = this._selectedRect;
@@ -702,12 +703,11 @@ export class EdgelessSelectedRectWidget extends WidgetComponent<
           }
           cursor = rotateResizeCursor((angle * Math.PI) / 180);
         }
-        cursor += '-resize';
       }
     } else {
       this._cursorRotate = 0;
     }
-    this.edgelessSlots.cursorUpdated.emit(cursor);
+    this.gfx.cursor$.value = cursor;
   };
 
   private _updateMode = () => {

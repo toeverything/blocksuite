@@ -1,7 +1,7 @@
 import {
   applyNodeStyle,
   LayoutType,
-  MindmapElementModel,
+  type MindmapElementModel,
   type MindmapNode,
   type MindmapRoot,
   type MindmapStyle,
@@ -18,33 +18,6 @@ import { DocCollection } from '@blocksuite/store';
 
 import { fitContent } from '../../renderer/elements/shape/utils.js';
 import { layout } from './layout.js';
-
-export class LayoutableMindmapElementModel extends MindmapElementModel {
-  override layout(
-    tree: MindmapNode | MindmapRoot = this.tree,
-    options: {
-      applyStyle?: boolean;
-      layoutType?: LayoutType;
-      stashed?: boolean;
-    } = {
-      applyStyle: true,
-      stashed: true,
-    }
-  ) {
-    const { stashed, applyStyle, layoutType } = Object.assign(
-      {
-        applyStyle: true,
-        calculateTreeBound: true,
-        stashed: true,
-      },
-      options
-    );
-
-    const pop = stashed ? this.stashTree(tree) : null;
-    handleLayout(this, tree, applyStyle, layoutType);
-    pop?.();
-  }
-}
 
 export function getHoveredArea(
   target: ShapeElementModel,
@@ -157,6 +130,10 @@ function moveNodePosition(
     mindmap.children.set(node.id, val);
   });
 
+  if (parent.detail.collapsed) {
+    mindmap.toggleCollapse(parent);
+  }
+
   mindmap.layout();
 
   return mindmap.nodeMap.get(node.id);
@@ -255,6 +232,10 @@ export function addNode(
 
     recursiveAddChild(node);
   });
+
+  if (parentNode.detail.collapsed) {
+    mindmap.toggleCollapse(parentNode);
+  }
 
   mindmap.layout();
 }

@@ -161,6 +161,10 @@ export abstract class GfxPrimitiveElementModel<
     return this.surface.hasElementById(this.id);
   }
 
+  get responseBound() {
+    return this.elementBound.expand(this.responseExtension);
+  }
+
   abstract get type(): string;
 
   get w() {
@@ -230,10 +234,11 @@ export abstract class GfxPrimitiveElementModel<
   includesPoint(
     x: number,
     y: number,
-    _: PointTestOptions,
+    opt: PointTestOptions,
     __: EditorHost
   ): boolean {
-    return this.elementBound.isPointInBound([x, y]);
+    const bound = opt.useElementBound ? this.elementBound : this.responseBound;
+    return bound.isPointInBound([x, y]);
   }
 
   intersectsBound(bound: Bound): boolean {
@@ -262,6 +267,11 @@ export abstract class GfxPrimitiveElementModel<
   }
 
   onCreated() {}
+
+  onDestroyed() {
+    this._disposable.dispose();
+    this.propsUpdated.dispose();
+  }
 
   pop(prop: keyof Props | string) {
     if (!this._stashed.has(prop)) {
@@ -354,6 +364,9 @@ export abstract class GfxPrimitiveElementModel<
   @local()
   accessor externalXYWH: SerializedXYWH | undefined = undefined;
 
+  @field(false)
+  accessor hidden: boolean = false;
+
   @field()
   accessor index!: string;
 
@@ -362,6 +375,9 @@ export abstract class GfxPrimitiveElementModel<
 
   @local()
   accessor opacity: number = 1;
+
+  @local()
+  accessor responseExtension: [number, number] = [0, 0];
 
   @field()
   accessor seed!: number;
@@ -440,6 +456,10 @@ export abstract class GfxGroupLikeElementModel<
     let bound: Bound | undefined;
 
     this.childElements.forEach(child => {
+      if (child instanceof GfxPrimitiveElementModel && child.hidden) {
+        return;
+      }
+
       bound = bound ? bound.unite(child.elementBound) : child.elementBound;
     });
 
@@ -529,6 +549,9 @@ export function syncElementFromY(
 
         model['_preserved'].set(key, value);
         props[key] = value;
+        oldValues[key] = oldValue;
+      } else {
+        model['_preserved'].delete(key);
         oldValues[key] = oldValue;
       }
     });

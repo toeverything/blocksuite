@@ -11,6 +11,7 @@ export {
   hasDescendantElementImpl,
 } from '../utils/tree.js';
 export { GfxController } from './controller.js';
+export type { CursorType, StandardCursor } from './cursor.js';
 export { GfxExtension, GfxExtensionIdentifier } from './extension.js';
 export { GridManager } from './grid.js';
 export { GfxControllerIdentifier } from './identifiers.js';

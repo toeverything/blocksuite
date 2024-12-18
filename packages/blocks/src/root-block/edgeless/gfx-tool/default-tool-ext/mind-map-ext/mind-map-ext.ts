@@ -23,7 +23,7 @@ import type { MindMapIndicatorOverlay } from './indicator-overlay.js';
 
 import {
   isMindmapNode,
-  isSelectSingleMindMap,
+  isSingleMindMapNode,
 } from '../../../../../_common/edgeless/mindmap/index.js';
 import { DefaultModeDragType, DefaultToolExt, type DragState } from '../ext.js';
 import { calculateResponseArea } from './drag-utils.js';
@@ -391,7 +391,7 @@ export class MindMapExt extends DefaultToolExt {
       return {};
     }
 
-    if (isSelectSingleMindMap(dragState.movedElements)) {
+    if (isSingleMindMapNode(dragState.movedElements)) {
       const mindmap = dragState.movedElements[0].group as MindmapElementModel;
       const mindmapNode = mindmap.getNode(dragState.movedElements[0].id)!;
       const mindmapBound = mindmap.elementBound;

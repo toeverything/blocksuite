@@ -64,7 +64,6 @@ export class EdgelessRootService extends RootService implements SurfaceContext {
 
   slots = {
     pressShiftKeyUpdated: new Slot<boolean>(),
-    cursorUpdated: new Slot<string>(),
     copyAsPng: new Slot<{
       blocks: BlockSuite.EdgelessBlockModelType[];
       shapes: BlockSuite.SurfaceModel[];
@@ -209,12 +208,12 @@ export class EdgelessRootService extends RootService implements SurfaceContext {
   }
 
   private _initSlotEffects() {
-    const { disposables, slots } = this;
+    const { disposables } = this;
 
     disposables.add(
       effect(() => {
         const value = this.gfx.tool.currentToolOption$.value;
-        slots.cursorUpdated.emit(getCursorMode(value));
+        this.gfx.cursor$.value = getCursorMode(value);
       })
     );
   }

@@ -28,7 +28,7 @@ import type { EdgelessRootBlockComponent } from './edgeless-root-block.js';
 import {
   getNearestTranslation,
   isElementOutsideViewport,
-  isSelectSingleMindMap,
+  isSingleMindMapNode,
 } from '../../_common/edgeless/mindmap/index.js';
 import { LassoMode } from '../../_common/types.js';
 import { EdgelessTextBlockComponent } from '../../edgeless-text-block/edgeless-text-block.js';
@@ -367,7 +367,7 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
             }
           }
 
-          if (!isSelectSingleMindMap(elements)) {
+          if (!isSingleMindMapNode(elements)) {
             return;
           }
 
@@ -398,7 +398,7 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
           const selection = service.selection;
           const elements = selection.selectedElements;
 
-          if (!isSelectSingleMindMap(elements)) {
+          if (!isSingleMindMapNode(elements)) {
             return;
           }
 
@@ -408,6 +408,10 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
           const node = mindmap.getNode(elements[0].id)!;
           const id = mindmap.addNode(node.id);
           const target = service.getElementById(id) as ShapeElementModel;
+
+          if (node.detail.collapsed) {
+            mindmap.toggleCollapse(node, { layout: true });
+          }
 
           requestAnimationFrame(() => {
             mountShapeTextEditor(target, rootComponent);
@@ -477,7 +481,7 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
           const elements = selection.selectedElements;
           const doc = this.rootComponent.doc;
 
-          if (isSelectSingleMindMap(elements)) {
+          if (isSingleMindMapNode(elements)) {
             const target = service.getElementById(
               elements[0].id
             ) as ShapeElementModel;
@@ -519,7 +523,7 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
     const selectedElements = edgeless.service.selection.selectedElements;
     if (selectedElements.some(e => e.isLocked())) return;
 
-    if (isSelectSingleMindMap(selectedElements)) {
+    if (isSingleMindMapNode(selectedElements)) {
       const node = selectedElements[0];
       const mindmap = node.group as MindmapElementModel;
       const focusNode =

@@ -49,7 +49,7 @@ import type { EdgelessFrameManager, FrameOverlay } from '../frame-manager.js';
 import type { EdgelessSnapManager } from '../utils/snap-manager.js';
 import type { DefaultToolExt } from './default-tool-ext/ext.js';
 
-import { isSelectSingleMindMap } from '../../../_common/edgeless/mindmap/index.js';
+import { isSingleMindMapNode } from '../../../_common/edgeless/mindmap/index.js';
 import { prepareCloneData } from '../utils/clone-utils.js';
 import { calPanDelta } from '../utils/panning-utils.js';
 import {
@@ -572,7 +572,7 @@ export class DefaultTool extends BaseTool {
         this._toBeMoved.every(
           ele => !(ele.group instanceof MindmapElementModel)
         )) ||
-      (isSelectSingleMindMap(this._toBeMoved) &&
+      (isSingleMindMapNode(this._toBeMoved) &&
         this._toBeMoved[0].id ===
           (this._toBeMoved[0].group as MindmapElementModel).tree.id)
     ) {
