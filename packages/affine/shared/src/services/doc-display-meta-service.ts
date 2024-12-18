@@ -152,11 +152,11 @@ export class DocDisplayMetaService
     });
   }
 
-  title(pageId: string): Signal<string> {
+  title(pageId: string, { title }: DocDisplayMetaParams = {}): Signal<string> {
     const doc = this.std.collection.getDoc(pageId);
 
     if (!doc) {
-      return signal('Deleted doc');
+      return signal(title || 'Deleted doc');
     }
 
     let title$ = this.titleMap.get(doc);
@@ -183,7 +183,9 @@ export class DocDisplayMetaService
       this.titleMap.set(doc, title$);
     }
 
-    return title$;
+    return computed(() => {
+      return title || title$.value;
+    });
   }
 
   override unmounted() {
