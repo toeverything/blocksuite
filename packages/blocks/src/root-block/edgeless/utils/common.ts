@@ -31,7 +31,10 @@ import {
   Vec,
 } from '@blocksuite/global/utils';
 
-import { uploadAttachmentBlob } from '../../../attachment-block/utils.js';
+import {
+  getFileType,
+  uploadAttachmentBlob,
+} from '../../../attachment-block/utils.js';
 import { calcBoundByOrigin, readImageSize } from '../components/utils.js';
 import { DEFAULT_NOTE_OFFSET_X, DEFAULT_NOTE_OFFSET_Y } from './consts.js';
 import { addBlock } from './crud.js';
@@ -99,7 +102,8 @@ export async function addAttachments(
 
   // upload file and update the attachment model
   const uploadPromises = dropInfos.map(async ({ blockId, file }) => {
-    await uploadAttachmentBlob(std.host, blockId, file);
+    const filetype = await getFileType(file);
+    await uploadAttachmentBlob(std.host, blockId, file, filetype, true);
     return blockId;
   });
   const blockIds = await Promise.all(uploadPromises);

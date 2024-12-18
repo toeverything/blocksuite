@@ -52,3 +52,12 @@ export interface MindMapCollapseEvent extends TelemetryEvent {
   segment: 'mind map';
   type: 'expand' | 'collapse';
 }
+
+export interface AttachmentUploadedEvent extends TelemetryEvent {
+  page: 'doc editor' | 'whiteboard editor';
+  segment: 'attachment';
+  module: 'attachment';
+  control: 'uploader';
+  type: string; // file type
+  category: 'success' | 'failure';
+}

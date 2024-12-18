@@ -7,6 +7,7 @@ import type { BlockModel } from '@blocksuite/store';
 
 import { toast } from '@blocksuite/affine-components/toast';
 import { defaultAttachmentProps } from '@blocksuite/affine-model';
+import { TelemetryProvider } from '@blocksuite/affine-shared/services';
 import { humanFileSize } from '@blocksuite/affine-shared/utils';
 
 import type { AttachmentBlockComponent } from './attachment-block.js';
@@ -40,7 +41,9 @@ function isAttachmentUploading(blockId: string) {
 export async function uploadAttachmentBlob(
   editorHost: EditorHost,
   blockId: string,
-  blob: Blob
+  blob: Blob,
+  filetype: string,
+  isEdgeless?: boolean
 ): Promise<void> {
   if (isAttachmentUploading(blockId)) {
     return;
@@ -72,6 +75,17 @@ export async function uploadAttachmentBlob(
         sourceId,
       } satisfies Partial<AttachmentBlockProps>);
     });
+
+    editorHost.std
+      .getOptional(TelemetryProvider)
+      ?.track('AttachmentUploadedEvent', {
+        page: `${isEdgeless ? 'whiteboard' : 'doc'} editor`,
+        module: 'attachment',
+        segment: 'attachment',
+        control: 'uploader',
+        type: filetype,
+        category: block && sourceId ? 'success' : 'failure',
+      });
   }
 }
 
@@ -233,7 +247,7 @@ export async function addSiblingAttachmentBlocks(
 
   blockIds.map(
     (blockId, index) =>
-      void uploadAttachmentBlob(editorHost, blockId, files[index])
+      void uploadAttachmentBlob(editorHost, blockId, files[index], types[index])
   );
 
   return blockIds;

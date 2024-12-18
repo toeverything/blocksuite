@@ -3,6 +3,7 @@ import { createIdentifier } from '@blocksuite/global/di';
 import type { OutDatabaseAllEvents } from './database.js';
 import type { LinkToolbarEvents } from './link.js';
 import type {
+  AttachmentUploadedEvent,
   DocCreatedEvent,
   ElementCreationEvent,
   ElementLockEvent,
@@ -19,6 +20,7 @@ export type TelemetryEventMap = OutDatabaseAllEvents &
     CanvasElementAdded: ElementCreationEvent;
     EdgelessElementLocked: ElementLockEvent;
     ExpandedAndCollapsed: MindMapCollapseEvent;
+    AttachmentUploadedEvent: AttachmentUploadedEvent;
   };
 
 export interface TelemetryService {
