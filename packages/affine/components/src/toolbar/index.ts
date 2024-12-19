@@ -15,6 +15,7 @@ export {
   EditorMenuContent,
 } from './menu-button.js';
 export { EditorToolbarSeparator } from './separator.js';
+export { darkToolbarStyles, lightToolbarStyles } from './styles.js';
 export { EditorToolbar } from './toolbar.js';
 export { Tooltip } from './tooltip.js';
 export type {

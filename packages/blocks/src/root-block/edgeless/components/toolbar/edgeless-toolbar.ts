@@ -8,11 +8,13 @@ import {
   ArrowRightSmallIcon,
   MoreHorizontalIcon,
 } from '@blocksuite/affine-components/icons';
-import { ColorScheme, type RootBlockModel } from '@blocksuite/affine-model';
 import {
   darkToolbarStyles,
-  EditPropsStore,
   lightToolbarStyles,
+} from '@blocksuite/affine-components/toolbar';
+import { ColorScheme, type RootBlockModel } from '@blocksuite/affine-model';
+import {
+  EditPropsStore,
   ThemeProvider,
 } from '@blocksuite/affine-shared/services';
 import { stopPropagation } from '@blocksuite/affine-shared/utils';

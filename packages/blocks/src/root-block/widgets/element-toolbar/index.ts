@@ -15,6 +15,8 @@ import { CommonUtils } from '@blocksuite/affine-block-surface';
 import { ConnectorCWithArrowIcon } from '@blocksuite/affine-components/icons';
 import {
   cloneGroups,
+  darkToolbarStyles,
+  lightToolbarStyles,
   type MenuItemGroup,
   renderToolbarSeparator,
 } from '@blocksuite/affine-components/toolbar';
@@ -23,11 +25,7 @@ import {
   GroupElementModel,
   ShapeElementModel,
 } from '@blocksuite/affine-model';
-import {
-  darkToolbarStyles,
-  lightToolbarStyles,
-  ThemeProvider,
-} from '@blocksuite/affine-shared/services';
+import { ThemeProvider } from '@blocksuite/affine-shared/services';
 import { requestConnectedFrame } from '@blocksuite/affine-shared/utils';
 import { WidgetComponent } from '@blocksuite/block-std';
 import {

@@ -1,7 +1,9 @@
 import {
   darkToolbarStyles,
-  EditPropsStore,
   lightToolbarStyles,
+} from '@blocksuite/affine-components/toolbar';
+import {
+  EditPropsStore,
   ThemeProvider,
 } from '@blocksuite/affine-shared/services';
 import {
