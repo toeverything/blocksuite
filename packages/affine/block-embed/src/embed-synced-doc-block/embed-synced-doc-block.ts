@@ -1,7 +1,3 @@
-import {
-  EmbedEdgelessIcon,
-  EmbedPageIcon,
-} from '@blocksuite/affine-components/icons';
 import { Peekable } from '@blocksuite/affine-components/peek';
 import {
   REFERENCE_NODE,
@@ -206,8 +202,6 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockComponent<EmbedSynce
       ]);
     };
 
-    const icon = isPageMode ? EmbedPageIcon : EmbedEdgelessIcon;
-
     return this.renderEmbed(
       () => html`
         <div
@@ -240,10 +234,10 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockComponent<EmbedSynce
             })}
           >
             <div class="affine-embed-synced-doc-header">
-              <span class="affine-embed-synced-doc-icon">${icon}</span>
-              <span class="affine-embed-synced-doc-title">
-                ${this.docTitle}
-              </span>
+              <span class="affine-embed-synced-doc-icon"
+                >${this.icon$.value}</span
+              >
+              <span class="affine-embed-synced-doc-title">${this.title$}</span>
             </div>
           </div>
         </div>
