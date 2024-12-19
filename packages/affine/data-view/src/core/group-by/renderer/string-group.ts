@@ -30,7 +30,7 @@ export class StringGroupView extends BaseGroup<NonNullable<unknown>, string> {
         items: [
           menu.input({
             initialValue: this.value ?? '',
-            onChange: text => {
+            onComplete: text => {
               this.updateValue?.(text);
             },
           }),

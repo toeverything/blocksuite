@@ -6,6 +6,7 @@ import { computed, type ReadonlySignal } from '@preact/signals-core';
 
 import type { GroupBy, GroupProperty } from '../common/types.js';
 import type { TypeInstance } from '../logical/type.js';
+import type { DVJSON } from '../property/types.js';
 import type { Property } from '../view-manager/property.js';
 import type { SingleView } from '../view-manager/single-view.js';
 
@@ -19,7 +20,7 @@ export type GroupData = {
   key: string;
   name: string;
   type: TypeInstance;
-  value: unknown;
+  value: DVJSON;
   rows: string[];
 };
 
@@ -281,13 +282,13 @@ export class GroupTrait {
     this.view.cellValueSet(rowId, propertyId, newValue);
   }
 
-  updateValue(rows: string[], value: unknown) {
+  updateValue(rows: string[], value: DVJSON) {
     const propertyId = this.propertyId;
     if (!propertyId) {
       return;
     }
     rows.forEach(id => {
-      this.view.cellValueSet(id, propertyId, value);
+      this.view.cellJsonValueSet(id, propertyId, value);
     });
   }
 }

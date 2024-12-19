@@ -43,7 +43,7 @@ export const groupByMatchers = [
       return [
         {
           key: `${value}`,
-          value,
+          value: value.toString(),
         },
       ];
     },
