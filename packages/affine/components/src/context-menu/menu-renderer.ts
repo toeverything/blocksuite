@@ -502,11 +502,12 @@ const popMobileMenu = (options: MenuOptions): MenuHandler => {
   };
   return {
     close: () => {
-      closePopup();
+      menu.close();
     },
     menu,
     reopen: () => {
-      options.onClose?.();
+      menu.close();
+      popMobileMenu(options);
     },
   };
 };
@@ -526,15 +527,16 @@ export const popMenu = (
   const onClose = () => {
     props.options.onClose?.();
     popupEnd();
+    closePopup();
   };
   const menu = new Menu({
     ...props.options,
-    onClose: () => {
-      closePopup();
-    },
+    onClose: onClose,
   });
   const closePopup = createPopup(target, menu.menuElement, {
-    onClose: onClose,
+    onClose: () => {
+      menu.close();
+    },
     middleware: props.middleware ?? [
       autoPlacement({
         allowedPlacements: [
