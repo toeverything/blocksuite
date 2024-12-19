@@ -3,15 +3,14 @@ import {
   type BlockPlainTextAdapterMatcher,
 } from '@blocksuite/affine-shared/adapters';
 
-import { SurfaceBlockSchema } from '../../surface-model.js';
 import { getMindMapNodeMap } from '../utils/mindmap.js';
 import { PlainTextElementModelAdapter } from './element-adapter/index.js';
 
 export const surfaceBlockPlainTextAdapterMatcher: BlockPlainTextAdapterMatcher =
   {
-    flavour: SurfaceBlockSchema.model.flavour,
+    flavour: 'affine:surface',
     toMatch: () => false,
-    fromMatch: o => o.node.flavour === SurfaceBlockSchema.model.flavour,
+    fromMatch: o => o.node.flavour === 'affine:surface',
     toBlockSnapshot: {},
     fromBlockSnapshot: {
       enter: (_, context) => {
@@ -25,9 +24,9 @@ export const SurfaceBlockPlainTextAdapterExtension =
 
 export const edgelessSurfaceBlockPlainTextAdapterMatcher: BlockPlainTextAdapterMatcher =
   {
-    flavour: SurfaceBlockSchema.model.flavour,
+    flavour: 'affine:surface',
     toMatch: () => false,
-    fromMatch: o => o.node.flavour === SurfaceBlockSchema.model.flavour,
+    fromMatch: o => o.node.flavour === 'affine:surface',
     toBlockSnapshot: {},
     fromBlockSnapshot: {
       enter: (o, context) => {
