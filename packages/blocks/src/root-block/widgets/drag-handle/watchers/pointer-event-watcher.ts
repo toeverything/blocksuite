@@ -117,7 +117,7 @@ export class PointerEventWatcher {
     const scaleInNote = this.widget.scaleInNote.value;
 
     const rowPaddingY =
-      ((containerHeight - DRAG_HANDLE_GRABBER_HEIGHT) / 2) * scaleInNote;
+      ((containerHeight - DRAG_HANDLE_GRABBER_HEIGHT) / 2 + 2) * scaleInNote;
 
     // use padding to control grabber's height
     const paddingTop = rowPaddingY + posTop - draggingAreaRect.top;

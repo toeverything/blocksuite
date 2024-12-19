@@ -13,7 +13,7 @@ export class ToggleButton extends WithDisposable(ShadowlessElement) {
     .toggle-icon {
       display: flex;
       align-items: start;
-      margin-top: 0.3em;
+      margin-top: 0.45em;
       position: absolute;
       left: 0;
       transform: translateX(-100%);
