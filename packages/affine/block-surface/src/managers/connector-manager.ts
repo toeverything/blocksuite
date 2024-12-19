@@ -9,7 +9,6 @@ import {
   GroupElementModel,
   type LocalConnectorElementModel,
 } from '@blocksuite/affine-model';
-import { ThemeProvider } from '@blocksuite/affine-shared/services';
 import {
   almostEqual,
   assertEquals,
@@ -32,7 +31,6 @@ import {
   toRadian,
   Vec,
 } from '@blocksuite/global/utils';
-import { effect } from '@preact/signals-core';
 
 import { Overlay } from '../renderer/overlay.js';
 import { AStarRunner } from '../utils/a-star.js';
@@ -855,11 +853,16 @@ export class ConnectionOverlay extends Overlay {
   }
 
   private _setupThemeListener(): void {
-    const themeService = this.gfx.std.get(ThemeProvider);
-    this._themeDisposer = effect(() => {
-      themeService.theme$;
+    const observer = new MutationObserver(() => {
       this._emphasisColor = this._getEmphasisColor();
     });
+
+    observer.observe(this.gfx.std.host, {
+      attributes: true,
+      attributeFilter: ['style', 'class'],
+    });
+
+    this._themeDisposer = () => observer.disconnect();
   }
 
   _clearRect() {
