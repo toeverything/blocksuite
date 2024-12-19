@@ -15,6 +15,7 @@ import {
   DocModeProvider,
   download,
   EdgelessRootService,
+  embedSyncedDocMiddleware,
   ExportManager,
   FontFamilyVariables,
   HtmlAdapterFactoryIdentifier,
@@ -245,7 +246,11 @@ export class StarterDebugMenu extends ShadowlessElement {
     const doc = this.editor.doc;
     const job = new Job({
       collection: this.editor.doc.collection,
-      middlewares: [docLinkBaseURLMiddleware, titleMiddleware],
+      middlewares: [
+        docLinkBaseURLMiddleware,
+        titleMiddleware,
+        embedSyncedDocMiddleware('content'),
+      ],
     });
 
     const adapterFactory = this.editor.std.provider.get(config.identifier);

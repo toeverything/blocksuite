@@ -5,6 +5,7 @@ import {
 } from '@blocksuite/block-std';
 import { literal } from 'lit/static-html.js';
 
+import { EmbedLinkedDocBlockAdapterExtensions } from './adapters/extension.js';
 import { commands } from './commands/index.js';
 
 export const EmbedLinkedDocBlockSpec: ExtensionType[] = [
@@ -14,4 +15,5 @@ export const EmbedLinkedDocBlockSpec: ExtensionType[] = [
       ? literal`affine-embed-edgeless-linked-doc-block`
       : literal`affine-embed-linked-doc-block`;
   }),
-];
+  EmbedLinkedDocBlockAdapterExtensions,
+].flat();

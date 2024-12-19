@@ -8,6 +8,7 @@ import {
 } from '@blocksuite/block-std';
 import { literal } from 'lit/static-html.js';
 
+import { ImageBlockAdapterExtensions } from './adapters/extension.js';
 import { commands } from './commands/index.js';
 import { ImageBlockService, ImageDragHandleOption } from './image-service.js';
 
@@ -29,4 +30,5 @@ export const ImageBlockSpec: ExtensionType[] = [
   }),
   ImageDragHandleOption,
   ImageSelectionExtension,
-];
+  ImageBlockAdapterExtensions,
+].flat();

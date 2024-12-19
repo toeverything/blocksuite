@@ -6,6 +6,7 @@ import {
 } from '@blocksuite/block-std';
 import { literal } from 'lit/static-html.js';
 
+import { BookmarkBlockAdapterExtensions } from './adapters/extension.js';
 import {
   BookmarkBlockService,
   BookmarkDragHandleOption,
@@ -22,4 +23,5 @@ export const BookmarkBlockSpec: ExtensionType[] = [
       : literal`affine-bookmark`;
   }),
   BookmarkDragHandleOption,
-];
+  BookmarkBlockAdapterExtensions,
+].flat();

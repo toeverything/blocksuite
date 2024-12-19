@@ -5,6 +5,7 @@ import {
 } from '@blocksuite/block-std';
 import { literal } from 'lit/static-html.js';
 
+import { EmbedFigmaBlockAdapterExtensions } from './adapters/extension.js';
 import { EmbedFigmaBlockService } from './embed-figma-service.js';
 
 export const EmbedFigmaBlockSpec: ExtensionType[] = [
@@ -15,4 +16,5 @@ export const EmbedFigmaBlockSpec: ExtensionType[] = [
       ? literal`affine-embed-edgeless-figma-block`
       : literal`affine-embed-figma-block`;
   }),
-];
+  EmbedFigmaBlockAdapterExtensions,
+].flat();

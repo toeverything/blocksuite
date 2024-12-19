@@ -1,7 +1,4 @@
-export {
-  BlockHtmlAdapterExtensions,
-  defaultBlockHtmlAdapterMatchers,
-} from './block-matcher.js';
+export { defaultBlockHtmlAdapterMatchers } from './block-matcher.js';
 export {
   HtmlAdapter,
   HtmlAdapterFactoryExtension,

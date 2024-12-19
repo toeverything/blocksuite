@@ -17,6 +17,7 @@ import { ToolController } from '@blocksuite/block-std/gfx';
 import { literal, unsafeStatic } from 'lit/static-html.js';
 
 import { ExportManagerExtension } from '../../_common/export-manager/export-manager.js';
+import { RootBlockAdapterExtensions } from '../adapters/extension.js';
 import { commands } from '../commands/index.js';
 import { AFFINE_DOC_REMOTE_SELECTION_WIDGET } from '../widgets/doc-remote-selection/doc-remote-selection.js';
 import { AFFINE_DRAG_HANDLE_WIDGET } from '../widgets/drag-handle/consts.js';
@@ -95,7 +96,8 @@ const EdgelessCommonExtension: ExtensionType[] = [
   ToolController,
   DNDAPIExtension,
   DocDisplayMetaService,
-];
+  RootBlockAdapterExtensions,
+].flat();
 
 export const EdgelessRootBlockSpec: ExtensionType[] = [
   ...EdgelessCommonExtension,

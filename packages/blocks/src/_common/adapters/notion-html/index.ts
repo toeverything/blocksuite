@@ -1,7 +1,4 @@
-export {
-  BlockNotionHtmlAdapterExtensions,
-  defaultBlockNotionHtmlAdapterMatchers,
-} from './block-matcher.js';
+export { defaultBlockNotionHtmlAdapterMatchers } from './block-matcher.js';
 export {
   NotionHtmlAdapter,
   NotionHtmlAdapterFactoryExtension,

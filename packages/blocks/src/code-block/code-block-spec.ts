@@ -7,6 +7,7 @@ import {
 import { literal, unsafeStatic } from 'lit/static-html.js';
 
 import { AFFINE_CODE_TOOLBAR_WIDGET } from '../root-block/widgets/code-toolbar/index.js';
+import { CodeBlockAdapterExtensions } from './adapters/extension.js';
 import {
   CodeBlockInlineManagerExtension,
   CodeBlockUnitSpecExtension,
@@ -22,4 +23,5 @@ export const CodeBlockSpec: ExtensionType[] = [
   }),
   CodeBlockInlineManagerExtension,
   CodeBlockUnitSpecExtension,
-];
+  CodeBlockAdapterExtensions,
+].flat();
