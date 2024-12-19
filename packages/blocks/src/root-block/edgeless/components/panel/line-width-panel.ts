@@ -1,15 +1,17 @@
-import { LineWidth } from '@blocksuite/affine-model';
-import { requestConnectedFrame } from '@blocksuite/affine-shared/utils';
+import { LINE_WIDTHS, LineWidth } from '@blocksuite/affine-model';
+import { clamp, on, once } from '@blocksuite/affine-shared/utils';
 import { WithDisposable } from '@blocksuite/global/utils';
 import { css, html, LitElement, nothing, type PropertyValues } from 'lit';
-import { property, query, queryAll } from 'lit/decorators.js';
+import { property, query } from 'lit/decorators.js';
+import { repeat } from 'lit/directives/repeat.js';
 
-type DragConfig = {
-  stepWidth: number;
-  boundLeft: number;
-  containerWidth: number;
-  bottomLineWidth: number;
-};
+interface Config {
+  width: number;
+  itemSize: number;
+  itemIconSize: number;
+  dragHandleSize: number;
+  count: number;
+}
 
 export class LineWidthEvent extends Event {
   detail: LineWidth;
@@ -34,10 +36,28 @@ export class EdgelessLineWidthPanel extends WithDisposable(LitElement) {
       align-items: center;
       justify-content: center;
       align-self: stretch;
+
+      --width: 140px;
+      --item-size: 16px;
+      --item-icon-size: 8px;
+      --drag-handle-size: 14px;
+      --cursor: 0;
+      --count: 6;
+      /* (16 - 14) / 2 + (cursor / (count - 1)) * (140 - 16) */
+      --drag-handle-center-x: calc(
+        (var(--item-size) - var(--drag-handle-size)) / 2 +
+          (var(--cursor) / (var(--count) - 1)) *
+          (var(--width) - var(--item-size))
+      );
+    }
+
+    :host([disabled]) {
+      opacity: 0.5;
+      pointer-events: none;
     }
 
     .line-width-panel {
-      width: 108px;
+      width: var(--width);
       height: 24px;
       display: flex;
       flex-direction: row;
@@ -51,162 +71,70 @@ export class EdgelessLineWidthPanel extends WithDisposable(LitElement) {
       display: flex;
       align-items: center;
       justify-content: center;
-      width: 16px;
-      height: 16px;
+      width: var(--item-size);
+      height: var(--item-size);
       z-index: 2;
     }
 
     .line-width-icon {
-      width: 4px;
-      height: 4px;
-      border-radius: 50%;
+      width: var(--item-icon-size);
+      height: var(--item-icon-size);
       background-color: var(--affine-border-color);
+      border-radius: 50%;
     }
 
-    .line-width-button:nth-child(1) {
-      margin-right: 0;
-    }
-
-    .line-width-button:nth-child(6) {
-      margin-left: 0;
+    .line-width-button[data-selected] .line-width-icon {
+      background-color: var(--affine-icon-color);
     }
 
     .drag-handle {
       position: absolute;
-      left: 0;
-      top: 50%;
-      width: 8px;
-      height: 8px;
-      transform: translateY(-50%) translateX(4px);
+      width: var(--drag-handle-size);
+      height: var(--drag-handle-size);
       border-radius: 50%;
       background-color: var(--affine-icon-color);
       z-index: 3;
+      transform: translateX(var(--drag-handle-center-x));
     }
 
     .bottom-line,
     .line-width-overlay {
-      left: 8px;
-      top: 50%;
-      transform: translateY(-50%);
-      height: 1px;
-      background-color: var(--affine-border-color);
       position: absolute;
+      height: 1px;
+      left: calc(var(--item-size) / 2);
     }
 
     .bottom-line {
-      width: calc(100% - 16px);
+      width: calc(100% - var(--item-size));
       background-color: var(--affine-border-color);
     }
 
     .line-width-overlay {
-      width: 0;
       background-color: var(--affine-icon-color);
       z-index: 1;
+      width: var(--drag-handle-center-x);
     }
   `;
 
-  private _dragConfig: DragConfig | null = null;
-
-  private _getDragHandlePosition = (e: PointerEvent, config: DragConfig) => {
-    const x = e.clientX;
-    const { boundLeft, bottomLineWidth, stepWidth, containerWidth } = config;
-
-    let steps: number;
-    if (x <= boundLeft) {
-      steps = 0;
-    } else if (x - boundLeft >= containerWidth) {
-      steps = 100;
-    } else {
-      steps = Math.floor((x - boundLeft) / stepWidth);
-    }
-
-    // The drag handle should not be dragged to the left of the first icon or right of the last icon.
-    // Calculate the drag handle position based on the steps.
-    const bottomLineOffsetX = 4;
-    const bottomLineStepWidth = (bottomLineWidth - bottomLineOffsetX) / 100;
-    const dragHandlerPosition = steps * bottomLineStepWidth;
-    return dragHandlerPosition;
+  private _getDragHandlePosition = (e: PointerEvent) => {
+    return clamp(e.offsetX, 0, this.config.width);
   };
 
   private _onPointerDown = (e: PointerEvent) => {
     e.preventDefault();
-    if (this.disable) return;
-    const { left, width } = this._lineWidthPanel.getBoundingClientRect();
-    const bottomLineWidth = this._bottomLine.getBoundingClientRect().width;
-    this._dragConfig = {
-      stepWidth: width / 100,
-      boundLeft: left,
-      containerWidth: width,
-      bottomLineWidth,
-    };
     this._onPointerMove(e);
+
+    const dispose = on(this, 'pointermove', this._onPointerMove);
+    this._disposables.add(once(this, 'pointerup', dispose));
+    this._disposables.add(once(this, 'pointerout', dispose));
   };
 
   private _onPointerMove = (e: PointerEvent) => {
     e.preventDefault();
-    if (!this._dragConfig) return;
-    const dragHandlerPosition = this._getDragHandlePosition(
-      e,
-      this._dragConfig
-    );
-    this._dragHandle.style.left = `${dragHandlerPosition}%`;
-    this._lineWidthOverlay.style.width = `${dragHandlerPosition}%`;
-    this._updateIconsColor();
-  };
 
-  private _onPointerOut = (e: PointerEvent) => {
-    // If the pointer is out of the line width panel
-    // Stop dragging and update the selected size by nearest size.
-    e.preventDefault();
-    if (!this._dragConfig) return;
-    const dragHandlerPosition = this._getDragHandlePosition(
-      e,
-      this._dragConfig
-    );
-    this._updateLineWidthPanelByDragHandlePosition(dragHandlerPosition);
-    this._dragConfig = null;
-  };
+    const x = this._getDragHandlePosition(e);
 
-  private _onPointerUp = (e: PointerEvent) => {
-    e.preventDefault();
-    if (!this._dragConfig) return;
-    const dragHandlerPosition = this._getDragHandlePosition(
-      e,
-      this._dragConfig
-    );
-    this._updateLineWidthPanelByDragHandlePosition(dragHandlerPosition);
-    this._dragConfig = null;
-  };
-
-  private _updateIconsColor = () => {
-    if (!this._dragHandle.offsetParent) {
-      requestConnectedFrame(() => this._updateIconsColor(), this);
-      return;
-    }
-
-    const dragHandleRect = this._dragHandle.getBoundingClientRect();
-    const dragHandleCenterX = dragHandleRect.left + dragHandleRect.width / 2;
-    // All the icons located at the left of the drag handle should be filled with the icon color.
-    const leftIcons = [];
-    // All the icons located at the right of the drag handle should be filled with the border color.
-    const rightIcons = [];
-
-    for (const icon of this._lineWidthIcons) {
-      const { left, width } = icon.getBoundingClientRect();
-      const centerX = left + width / 2;
-      if (centerX < dragHandleCenterX) {
-        leftIcons.push(icon);
-      } else {
-        rightIcons.push(icon);
-      }
-    }
-
-    leftIcons.forEach(
-      icon => (icon.style.backgroundColor = 'var(--affine-icon-color)')
-    );
-    rightIcons.forEach(
-      icon => (icon.style.backgroundColor = 'var(--affine-border-color)')
-    );
+    this._updateLineWidthPanelByDragHandlePosition(x);
   };
 
   private _onSelect(lineWidth: LineWidth) {
@@ -224,110 +152,73 @@ export class EdgelessLineWidthPanel extends WithDisposable(LitElement) {
 
   private _updateLineWidthPanel(selectedSize: LineWidth) {
     if (!this._lineWidthOverlay) return;
-    let width = 0;
-    let dragHandleOffsetX = 0;
-    switch (selectedSize) {
-      case LineWidth.Two:
-        width = 0;
-        break;
-      case LineWidth.Four:
-        width = 16;
-        dragHandleOffsetX = 1;
-        break;
-      case LineWidth.Six:
-        width = 32;
-        dragHandleOffsetX = 2;
-        break;
-      case LineWidth.Eight:
-        width = 48;
-        dragHandleOffsetX = 3;
-        break;
-      case LineWidth.Ten:
-        width = 64;
-        dragHandleOffsetX = 4;
-        break;
-      default:
-        width = 80;
-        dragHandleOffsetX = 4;
-    }
+    const index = this.lineWidths.findIndex(w => w === selectedSize);
+    if (index === -1) return;
 
-    dragHandleOffsetX += 4;
-    this._lineWidthOverlay.style.width = `${width}%`;
-    this._dragHandle.style.left = `${width}%`;
-    this._dragHandle.style.transform = `translateY(-50%) translateX(${dragHandleOffsetX}px)`;
-    this._updateIconsColor();
+    this.style.setProperty('--cursor', `${index}`);
   }
 
-  private _updateLineWidthPanelByDragHandlePosition(
-    dragHandlerPosition: number
-  ) {
+  private _updateLineWidthPanelByDragHandlePosition(x: number) {
     // Calculate the selected size based on the drag handle position.
     // Need to select the nearest size.
-    let selectedSize = this.selectedSize;
-    if (dragHandlerPosition <= 12) {
-      selectedSize = LineWidth.Two;
-    } else if (dragHandlerPosition > 12 && dragHandlerPosition <= 26) {
-      selectedSize = LineWidth.Four;
-    } else if (dragHandlerPosition > 26 && dragHandlerPosition <= 40) {
-      selectedSize = LineWidth.Six;
-    } else if (dragHandlerPosition > 40 && dragHandlerPosition <= 54) {
-      selectedSize = LineWidth.Eight;
-    } else if (dragHandlerPosition > 54 && dragHandlerPosition <= 68) {
-      selectedSize = LineWidth.Ten;
-    } else {
-      selectedSize = LineWidth.Twelve;
-    }
+
+    const {
+      config: { width, itemSize, count },
+      lineWidths,
+    } = this;
+    const targetWidth = width - itemSize;
+    const halfItemSize = itemSize / 2;
+    const offsetX = halfItemSize + (width - itemSize * count) / (count - 1) / 2;
+    const selectedSize = lineWidths.findLast((_, n) => {
+      const cx = halfItemSize + (n / (count - 1)) * targetWidth;
+      return x >= cx - offsetX && x < cx + offsetX;
+    });
+    if (!selectedSize) return;
+
     this._updateLineWidthPanel(selectedSize);
     this._onSelect(selectedSize);
   }
 
-  override disconnectedCallback(): void {
-    this._disposables.dispose();
+  override connectedCallback() {
+    super.connectedCallback();
+    const {
+      style,
+      config: { width, itemSize, itemIconSize, dragHandleSize, count },
+    } = this;
+    style.setProperty('--width', `${width}px`);
+    style.setProperty('--item-size', `${itemSize}px`);
+    style.setProperty('--item-icon-size', `${itemIconSize}px`);
+    style.setProperty('--drag-handle-size', `${dragHandleSize}px`);
+    style.setProperty('--count', `${count}`);
   }
 
-  override firstUpdated(): void {
+  override firstUpdated() {
     this._updateLineWidthPanel(this.selectedSize);
     this._disposables.addFromEvent(this, 'pointerdown', this._onPointerDown);
-    this._disposables.addFromEvent(this, 'pointermove', this._onPointerMove);
-    this._disposables.addFromEvent(this, 'pointerup', this._onPointerUp);
-    this._disposables.addFromEvent(this, 'pointerout', this._onPointerOut);
   }
 
   override render() {
-    return html`<style>
-        .line-width-panel {
-          opacity: ${this.disable ? '0.5' : '1'};
-        }
-      </style>
-      <div
-        class="line-width-panel"
-        @mousedown="${(e: Event) => e.preventDefault()}"
-      >
-        <div class="line-width-button">
-          <div class="line-width-icon"></div>
-        </div>
-        <div class="line-width-button">
-          <div class="line-width-icon"></div>
-        </div>
-        <div class="line-width-button">
-          <div class="line-width-icon"></div>
-        </div>
-        <div class="line-width-button">
-          <div class="line-width-icon"></div>
-        </div>
-        <div class="line-width-button">
-          <div class="line-width-icon"></div>
-        </div>
-        <div class="line-width-button">
-          <div class="line-width-icon"></div>
-        </div>
-        <div class="drag-handle"></div>
-        <div class="bottom-line"></div>
-        <div class="line-width-overlay"></div>
-        ${this.hasTooltip
-          ? html`<affine-tooltip .offset=${8}>Thickness</affine-tooltip>`
-          : nothing}
-      </div>`;
+    return html`<div class="line-width-panel">
+      ${repeat(
+        this.lineWidths,
+        w => w,
+        (w, n) =>
+          html`<div
+            class="line-width-button"
+            aria-label=${w}
+            data-index=${n}
+            ?data-selected=${w <= this.selectedSize}
+          >
+            <div class="line-width-icon"></div>
+          </div>`
+      )}
+      <div class="drag-handle"></div>
+      <div class="bottom-line"></div>
+      <div class="line-width-overlay"></div>
+      ${this.hasTooltip
+        ? html`<affine-tooltip .offset=${8}>Thickness</affine-tooltip>`
+        : nothing}
+    </div>`;
   }
 
   override willUpdate(changedProperties: PropertyValues<this>) {
@@ -336,26 +227,25 @@ export class EdgelessLineWidthPanel extends WithDisposable(LitElement) {
     }
   }
 
-  @query('.bottom-line')
-  private accessor _bottomLine!: HTMLElement;
-
-  @query('.drag-handle')
-  private accessor _dragHandle!: HTMLElement;
-
-  @queryAll('.line-width-icon')
-  private accessor _lineWidthIcons!: NodeListOf<HTMLElement>;
-
   @query('.line-width-overlay')
   private accessor _lineWidthOverlay!: HTMLElement;
 
-  @query('.line-width-panel')
-  private accessor _lineWidthPanel!: HTMLElement;
+  accessor config: Config = {
+    width: 140,
+    itemSize: 16,
+    itemIconSize: 8,
+    dragHandleSize: 14,
+    count: LINE_WIDTHS.length,
+  };
 
-  @property({ attribute: false })
-  accessor disable = false;
+  @property({ attribute: false, type: Boolean })
+  accessor disabled = false;
 
   @property({ attribute: false })
   accessor hasTooltip = true;
+
+  @property({ attribute: false })
+  accessor lineWidths: LineWidth[] = LINE_WIDTHS;
 
   @property({ attribute: false })
   accessor selectedSize: LineWidth = LineWidth.Two;

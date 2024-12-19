@@ -1,3 +1,4 @@
+import { StrokeColor } from '@blocksuite/affine-model';
 import { expect } from '@playwright/test';
 
 import {
@@ -148,7 +149,7 @@ test('change connector line width', async ({ page }) => {
 
   await page.mouse.click(start.x + 5, start.y);
   await triggerComponentToolbarAction(page, 'changeConnectorStrokeColor');
-  await changeConnectorStrokeColor(page, '--affine-palette-line-teal');
+  await changeConnectorStrokeColor(page, StrokeColor.Grey);
 
   await triggerComponentToolbarAction(page, 'changeConnectorStrokeStyles');
   await changeConnectorStrokeWidth(page, 5);
@@ -173,7 +174,7 @@ test('change connector stroke style', async ({ page }) => {
 
   await page.mouse.click(start.x + 5, start.y);
   await triggerComponentToolbarAction(page, 'changeConnectorStrokeColor');
-  await changeConnectorStrokeColor(page, '--affine-palette-line-teal');
+  await changeConnectorStrokeColor(page, StrokeColor.Grey);
 
   await triggerComponentToolbarAction(page, 'changeConnectorStrokeStyles');
   await changeConnectorStrokeStyle(page, 'dash');

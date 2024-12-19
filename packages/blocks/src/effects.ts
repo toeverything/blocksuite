@@ -134,7 +134,6 @@ import { EdgelessFontWeightAndStylePanel } from './root-block/edgeless/component
 import { EdgelessLineWidthPanel } from './root-block/edgeless/components/panel/line-width-panel.js';
 import { NoteDisplayModePanel } from './root-block/edgeless/components/panel/note-display-mode-panel.js';
 import { EdgelessNoteShadowPanel } from './root-block/edgeless/components/panel/note-shadow-panel.js';
-import { EdgelessOneRowColorPanel } from './root-block/edgeless/components/panel/one-row-color-panel.js';
 import { EdgelessScalePanel } from './root-block/edgeless/components/panel/scale-panel.js';
 import { EdgelessShapePanel } from './root-block/edgeless/components/panel/shape-panel.js';
 import { EdgelessShapeStylePanel } from './root-block/edgeless/components/panel/shape-style-panel.js';
@@ -536,10 +535,6 @@ export function effects() {
   customElements.define(
     'edgeless-frame-title-editor',
     EdgelessFrameTitleEditor
-  );
-  customElements.define(
-    'edgeless-one-row-color-panel',
-    EdgelessOneRowColorPanel
   );
   customElements.define('edgeless-text-editor', EdgelessTextEditor);
   customElements.define('affine-image-toolbar', AffineImageToolbar);
