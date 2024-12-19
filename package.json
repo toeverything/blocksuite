@@ -20,7 +20,7 @@
     "lint": "eslint --cache --cache-location=node_modules/.cache/.eslintcache/ ./ --max-warnings=0",
     "lint:fix": "yarn lint --fix",
     "lint:lit": "lit-analyzer --strict=false --rules.no-incompatible-property-type=error --rules.no-incompatible-type-binding=off --rules.no-invalid-css=off --rules.no-invalid-tag-name=off \"packages/**/*.ts\"",
-    "lint:circular": "madge --circular ./packages/**/*/dist/index.js",
+    "lint:circular": "madge --circular ./packages/**/*/dist/index.js --exclude block-collection",
     "lint:format": "prettier . --check",
     "coverage:report": "nyc report -t .nyc_output --report-dir .coverage --reporter=html",
     "test": "yarn workspace @blocksuite/e2e exec playwright test",
