@@ -1,4 +1,4 @@
-import { Black, Light, LIGHT_PALETTES, StrokeColor, White } from './color.js';
+import { Black, Light, LIGHT_PALETTES, StrokeColor, White } from './palette.js';
 
 export const DEFAULT_ROUGHNESS = 1.4;
 

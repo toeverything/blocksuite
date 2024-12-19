@@ -1,4 +1,5 @@
 import {
+  ColorSchema,
   ConnectorMode,
   DEFAULT_CONNECTOR_COLOR,
   DEFAULT_CONNECTOR_TEXT_COLOR,
@@ -18,13 +19,10 @@ import {
   FontStyle,
   FontWeight,
   LayoutType,
-  LineColorsSchema,
   LineWidth,
   MindmapStyle,
-  NoteBackgroundPaletteEnum,
   NoteDisplayMode,
   NoteShadowsSchema,
-  PaletteEnum,
   PointStyle,
   ShapeStyle,
   StrokeColor,
@@ -48,34 +46,17 @@ const ConnectorModeSchema = z.nativeEnum(ConnectorMode);
 const LayoutTypeSchema = z.nativeEnum(LayoutType);
 const MindmapStyleSchema = z.nativeEnum(MindmapStyle);
 
-export const ColorSchema = z.union([
-  z.object({
-    normal: z.string(),
-  }),
-  z.object({
-    light: z.string(),
-    dark: z.string(),
-  }),
-]);
-const ColorPaletteSchema = z.union([ColorSchema, PaletteEnum]);
-const LineColorSchema = z.union([LineColorsSchema, ColorPaletteSchema]);
-const TextColorSchema = z.union([LineColorsSchema, ColorPaletteSchema]);
-const NoteBackgroundColorSchema = z.union([
-  ColorSchema,
-  NoteBackgroundPaletteEnum,
-]);
-
 export const ConnectorSchema = z
   .object({
     frontEndpointStyle: ConnectorEndpointSchema,
     rearEndpointStyle: ConnectorEndpointSchema,
-    stroke: LineColorSchema,
+    stroke: ColorSchema,
     strokeStyle: StrokeStyleSchema,
     strokeWidth: LineWidthSchema,
     rough: z.boolean(),
     mode: ConnectorModeSchema,
     labelStyle: z.object({
-      color: TextColorSchema,
+      color: ColorSchema,
       fontSize: z.number(),
       fontFamily: FontFamilySchema,
       fontWeight: FontWeightSchema,
@@ -103,7 +84,7 @@ export const ConnectorSchema = z
 
 export const BrushSchema = z
   .object({
-    color: ColorPaletteSchema,
+    color: ColorSchema,
     lineWidth: LineWidthSchema,
   })
   .default({
@@ -129,9 +110,9 @@ const DEFAULT_SHAPE = {
 };
 
 const ShapeObject = {
-  color: TextColorSchema,
-  fillColor: ColorPaletteSchema,
-  strokeColor: ColorPaletteSchema,
+  color: ColorSchema,
+  fillColor: ColorSchema,
+  strokeColor: ColorSchema,
   strokeStyle: StrokeStyleSchema,
   strokeWidth: z.number(),
   shapeStyle: ShapeStyleSchema,
@@ -155,7 +136,7 @@ export const RoundedShapeSchema = z
 
 export const TextSchema = z
   .object({
-    color: TextColorSchema,
+    color: ColorSchema,
     fontSize: z.number(),
     fontFamily: FontFamilySchema,
     fontWeight: FontWeightSchema,
@@ -173,7 +154,7 @@ export const TextSchema = z
 
 export const EdgelessTextSchema = z
   .object({
-    color: TextColorSchema,
+    color: ColorSchema,
     fontFamily: FontFamilySchema,
     fontWeight: FontWeightSchema,
     fontStyle: FontStyleSchema,
@@ -189,7 +170,7 @@ export const EdgelessTextSchema = z
 
 export const NoteSchema = z
   .object({
-    background: NoteBackgroundColorSchema,
+    background: ColorSchema,
     displayMode: NoteDisplayModeSchema,
     edgeless: z.object({
       style: z.object({
@@ -225,7 +206,7 @@ export const MindmapSchema = z
 
 export const FrameSchema = z
   .object({
-    background: ColorPaletteSchema.optional(),
+    background: ColorSchema.optional(),
   })
   .default({});
 

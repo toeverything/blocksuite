@@ -1,3 +1,3 @@
-import { Light } from './color.js';
+import { Light } from './palette.js';
 
 export const FrameBackgroundColor = Light;

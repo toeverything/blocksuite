@@ -6,5 +6,6 @@ export * from './frame.js';
 export * from './line.js';
 export * from './mindmap.js';
 export * from './note.js';
+export * from './palette.js';
 export * from './shape.js';
 export * from './text.js';
