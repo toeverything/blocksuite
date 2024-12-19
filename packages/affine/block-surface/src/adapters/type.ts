@@ -13,7 +13,7 @@ export type ElementModelMatcher<TNode extends object = never> = {
   toAST: (
     element: Record<string, unknown>,
     context: ElementModelAdapterContext<TNode>
-  ) => TNode;
+  ) => TNode | null;
 };
 
 export abstract class ElementModelAdapter<
@@ -26,5 +26,5 @@ export abstract class ElementModelAdapter<
   abstract fromElementModel(
     element: Record<string, unknown>,
     context: ElementModelAdapterContext<TNode>
-  ): AST;
+  ): AST | null;
 }

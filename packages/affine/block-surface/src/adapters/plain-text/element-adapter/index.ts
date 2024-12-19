@@ -24,7 +24,7 @@ export class PlainTextElementModelAdapter extends ElementModelAdapter<
   ) {
     for (const matcher of this.elementModelMatchers) {
       if (matcher.match(element)) {
-        return matcher.toAST(element, context).content;
+        return matcher.toAST(element, context)?.content ?? '';
       }
     }
     return '';

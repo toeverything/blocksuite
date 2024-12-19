@@ -1,9 +1,9 @@
 import type { MindMapTreeNode } from '../../../types/mindmap.js';
-import type { ElementModelToPlainTextAdapterMatcher } from '../type.js';
+import type { ElementModelToMarkdownAdapterMatcher } from '../type.js';
 
 import { getShapeText, getShapeType } from '../../../utils/text.js';
 
-export const shapeToPlainTextAdapterMatcher: ElementModelToPlainTextAdapterMatcher =
+export const shapeToMarkdownAdapterMatcher: ElementModelToMarkdownAdapterMatcher =
   {
     name: 'shape',
     match: elementModel => elementModel.type === 'shape',
@@ -21,15 +21,27 @@ export const shapeToPlainTextAdapterMatcher: ElementModelToPlainTextAdapterMatch
           nodeMap.has(elementModel.id as string)
         );
         if (isMindMapNode) {
-          return { content };
+          return null;
         }
       }
 
       // If it is not, we should return the text and shapeType
       const text = getShapeText(elementModel);
       const type = getShapeType(elementModel);
+      if (!text && !type) {
+        return null;
+      }
+
       const shapeType = type.charAt(0).toUpperCase() + type.slice(1);
       content = `${shapeType}, with text label "${text}"`;
-      return { content };
+      return {
+        type: 'paragraph',
+        children: [
+          {
+            type: 'text',
+            value: content,
+          },
+        ],
+      };
     },
   };
