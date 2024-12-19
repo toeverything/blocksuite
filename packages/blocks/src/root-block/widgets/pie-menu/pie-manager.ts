@@ -1,4 +1,4 @@
-import { assertExists, assertNotExists } from '@blocksuite/global/utils';
+import { assertExists } from '@blocksuite/global/utils';
 import { Slot } from '@blocksuite/store';
 
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
@@ -53,10 +53,9 @@ export class PieManager {
   private static _register(schema: PieMenuSchema) {
     const { id } = schema;
 
-    assertNotExists(
-      this.registeredSchemas[id],
-      `Menu with id '${id}' already exists. Please provide a unique id`
-    );
+    if (this.registeredSchemas[id]) {
+      return;
+    }
 
     this.registeredSchemas[id] = schema;
   }

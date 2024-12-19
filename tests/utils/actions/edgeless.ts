@@ -128,6 +128,17 @@ export async function switchEditorMode(page: Page) {
   await waitNextFrame(page);
 }
 
+export async function switchMultipleEditorsMode(page: Page) {
+  await page.evaluate(() => {
+    const containers = document.querySelectorAll('affine-editor-container');
+    const mode = containers[0].mode === 'edgeless' ? 'page' : 'edgeless';
+
+    containers.forEach(container => {
+      container.mode = mode;
+    });
+  });
+}
+
 export async function switchEditorEmbedMode(page: Page) {
   await page.click('sl-button:text("Test Operations")');
   await page.click('sl-menu-item:text("Switch Offset Mode")');
