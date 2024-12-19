@@ -4,7 +4,11 @@ import {
   EMBED_CARD_HEIGHT,
   EMBED_CARD_WIDTH,
 } from '@blocksuite/affine-shared/consts';
-import { DndApiExtensionIdentifier } from '@blocksuite/affine-shared/services';
+import {
+  DndApiExtensionIdentifier,
+  DocModeProvider,
+  TelemetryProvider,
+} from '@blocksuite/affine-shared/services';
 import {
   captureEventTarget,
   getBlockComponentsExcludeSubtrees,
@@ -288,7 +292,7 @@ export class DragEventWatcher {
     const id = first.id;
 
     const std = this._std;
-    const job = this._job;
+    const job = this._getJob();
     const snapshotWithoutNote = {
       ...snapshot,
       content: first.children,
@@ -329,7 +333,7 @@ export class DragEventWatcher {
         first.props.height = height;
 
         const std = this._std;
-        const job = this._job;
+        const job = this._getJob();
         job
           .snapshotToSlice(snapshot, std.doc, edgelessRoot.surfaceBlockModel.id)
           .catch(console.error);
@@ -350,6 +354,10 @@ export class DragEventWatcher {
           height
         );
         if (!newBound) return;
+
+        if (first.flavour === 'affine:embed-linked-doc') {
+          this._trackLinkedDocCreated(first.id);
+        }
 
         importToSurface(width, height, newBound);
         return;
@@ -430,16 +438,26 @@ export class DragEventWatcher {
     this._serializeData(slice, state);
   };
 
+  private _trackLinkedDocCreated = (id: string) => {
+    const isNewBlock = !this._std.doc.hasBlock(id);
+    if (!isNewBlock) {
+      return;
+    }
+
+    const mode =
+      this._std.getOptional(DocModeProvider)?.getEditorMode() ?? 'page';
+
+    const telemetryService = this._std.getOptional(TelemetryProvider);
+    telemetryService?.track('LinkedDocCreated', {
+      control: `drop on ${mode}`,
+      module: 'drag and drop',
+      type: 'doc',
+      other: 'new doc',
+    });
+  };
+
   private get _dndAPI() {
     return this._std.get(DndApiExtensionIdentifier);
-  }
-
-  private get _job() {
-    const std = this._std;
-    return new Job({
-      collection: std.collection,
-      middlewares: [newIdCrossDoc(std), surfaceRefToEmbed(std)],
-    });
   }
 
   private get _std() {
@@ -458,10 +476,16 @@ export class DragEventWatcher {
       if (!dataTransfer) throw new Error('No data transfer');
 
       const std = this._std;
-      const job = this._job;
+      const job = this._getJob();
 
       const snapshot = this._deserializeSnapshot(state);
       if (snapshot) {
+        if (snapshot.content.length === 1) {
+          const [first] = snapshot.content;
+          if (first.flavour === 'affine:embed-linked-doc') {
+            this._trackLinkedDocCreated(first.id);
+          }
+        }
         // use snapshot
         const slice = await job.snapshotToSlice(
           snapshot,
@@ -512,11 +536,19 @@ export class DragEventWatcher {
     }
   }
 
+  private _getJob() {
+    const std = this._std;
+    return new Job({
+      collection: std.collection,
+      middlewares: [newIdCrossDoc(std), surfaceRefToEmbed(std)],
+    });
+  }
+
   private _serializeData(slice: Slice, state: DndEventState) {
     const dataTransfer = state.raw.dataTransfer;
     if (!dataTransfer) return;
 
-    const job = this._job;
+    const job = this._getJob();
 
     const snapshot = job.sliceToSnapshot(slice);
     if (!snapshot) return;
