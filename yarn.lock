@@ -1824,7 +1824,7 @@ __metadata:
     "@blocksuite/sync": "workspace:*"
     "@preact/signals-core": "npm:^1.8.0"
     "@shoelace-style/shoelace": "npm:2.19.0"
-    "@toeverything/pdf-viewer": "npm:^0.1.0"
+    "@toeverything/pdf-viewer": "npm:^0.1.1"
     "@toeverything/y-indexeddb": "npm:0.10.0-canary.9"
     "@tweakpane/core": "npm:^2.0.4"
     "@types/katex": "npm:^0.16.7"
@@ -4546,7 +4546,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@toeverything/pdf-viewer@npm:^0.1.0":
+"@toeverything/pdf-viewer@npm:^0.1.1":
   version: 0.1.1
   resolution: "@toeverything/pdf-viewer@npm:0.1.1"
   dependencies:

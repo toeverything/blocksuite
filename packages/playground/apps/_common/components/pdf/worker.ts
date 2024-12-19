@@ -37,7 +37,7 @@ function renderToImageData(index: number, scale: number) {
   page.render(bitmap, 0, 0, width, height, 0, flags);
 
   // @ts-ignore
-  const data = new Uint8ClampedArray(bitmap.toBytes());
+  const data = new Uint8ClampedArray(bitmap.toUint8Array());
 
   bitmap.close();
   page.close();
