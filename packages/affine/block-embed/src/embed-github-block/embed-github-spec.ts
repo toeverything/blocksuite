@@ -5,6 +5,7 @@ import {
 } from '@blocksuite/block-std';
 import { literal } from 'lit/static-html.js';
 
+import { EmbedGithubBlockAdapterExtensions } from './adapters/extension.js';
 import { EmbedGithubBlockService } from './embed-github-service.js';
 
 export const EmbedGithubBlockSpec: ExtensionType[] = [
@@ -15,4 +16,5 @@ export const EmbedGithubBlockSpec: ExtensionType[] = [
       ? literal`affine-embed-edgeless-github-block`
       : literal`affine-embed-github-block`;
   }),
-];
+  EmbedGithubBlockAdapterExtensions,
+].flat();

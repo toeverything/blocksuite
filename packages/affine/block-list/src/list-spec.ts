@@ -6,6 +6,7 @@ import {
 } from '@blocksuite/block-std';
 import { literal } from 'lit/static-html.js';
 
+import { ListBlockAdapterExtensions } from './adapters/extension.js';
 import { commands } from './commands/index.js';
 import { ListKeymapExtension, ListTextKeymapExtension } from './list-keymap.js';
 import { ListBlockService, ListDragHandleOption } from './list-service.js';
@@ -18,4 +19,5 @@ export const ListBlockSpec: ExtensionType[] = [
   ListKeymapExtension,
   ListTextKeymapExtension,
   ListDragHandleOption,
-];
+  ListBlockAdapterExtensions,
+].flat();

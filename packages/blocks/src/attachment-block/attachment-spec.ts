@@ -5,6 +5,7 @@ import {
 } from '@blocksuite/block-std';
 import { literal } from 'lit/static-html.js';
 
+import { AttachmentBlockNotionHtmlAdapterExtension } from './adapters/notion-html.js';
 import {
   AttachmentBlockService,
   AttachmentDragHandleOption,
@@ -25,4 +26,5 @@ export const AttachmentBlockSpec: ExtensionType[] = [
   AttachmentDragHandleOption,
   AttachmentEmbedConfigExtension(),
   AttachmentEmbedService,
+  AttachmentBlockNotionHtmlAdapterExtension,
 ];

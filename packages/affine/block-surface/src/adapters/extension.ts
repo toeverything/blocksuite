@@ -1,4 +1,3 @@
-import { SurfaceBlockHtmlAdapterExtension } from './html-adapter/html.js';
 import {
   EdgelessSurfaceBlockMarkdownAdapterExtension,
   SurfaceBlockMarkdownAdapterExtension,
@@ -11,7 +10,6 @@ import {
 export const SurfaceBlockAdapterExtensions = [
   SurfaceBlockPlainTextAdapterExtension,
   SurfaceBlockMarkdownAdapterExtension,
-  SurfaceBlockHtmlAdapterExtension,
 ];
 
 export const EdgelessSurfaceBlockAdapterExtensions = [

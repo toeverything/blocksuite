@@ -5,6 +5,7 @@ import {
 } from '@blocksuite/block-std';
 import { literal } from 'lit/static-html.js';
 
+import { EmbedSyncedDocBlockAdapterExtensions } from './adapters/extension.js';
 import { EmbedSyncedDocBlockService } from './embed-synced-doc-service.js';
 
 export const EmbedSyncedDocBlockSpec: ExtensionType[] = [
@@ -15,4 +16,5 @@ export const EmbedSyncedDocBlockSpec: ExtensionType[] = [
       ? literal`affine-embed-edgeless-synced-doc-block`
       : literal`affine-embed-synced-doc-block`;
   }),
-];
+  EmbedSyncedDocBlockAdapterExtensions,
+].flat();

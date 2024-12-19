@@ -5,6 +5,7 @@ import {
 } from '@blocksuite/block-std';
 import { literal } from 'lit/static-html.js';
 
+import { EmbedYoutubeBlockAdapterExtensions } from './adapters/extension.js';
 import { EmbedYoutubeBlockService } from './embed-youtube-service.js';
 
 export const EmbedYoutubeBlockSpec: ExtensionType[] = [
@@ -15,4 +16,5 @@ export const EmbedYoutubeBlockSpec: ExtensionType[] = [
       ? literal`affine-embed-edgeless-youtube-block`
       : literal`affine-embed-youtube-block`;
   }),
-];
+  EmbedYoutubeBlockAdapterExtensions,
+].flat();

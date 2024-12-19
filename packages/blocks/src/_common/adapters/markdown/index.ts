@@ -1,7 +1,4 @@
-export {
-  BlockMarkdownAdapterExtensions,
-  defaultBlockMarkdownAdapterMatchers,
-} from './block-matcher.js';
+export { defaultBlockMarkdownAdapterMatchers } from './block-matcher.js';
 export {
   MarkdownAdapter,
   MarkdownAdapterFactoryExtension,

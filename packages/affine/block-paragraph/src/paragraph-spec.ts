@@ -6,6 +6,7 @@ import {
 } from '@blocksuite/block-std';
 import { literal } from 'lit/static-html.js';
 
+import { ParagraphBlockAdapterExtensions } from './adapters/extension.js';
 import { commands } from './commands/index.js';
 import { ParagraphDragHandleOption } from './paragraph-drag-extension.js';
 import {
@@ -22,4 +23,5 @@ export const ParagraphBlockSpec: ExtensionType[] = [
   ParagraphTextKeymapExtension,
   ParagraphKeymapExtension,
   ParagraphDragHandleOption,
-];
+  ParagraphBlockAdapterExtensions,
+].flat();
