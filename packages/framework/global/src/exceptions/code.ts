@@ -18,6 +18,7 @@ export enum ErrorCode {
   GfxBlockElementError,
   MissingViewModelError,
   DatabaseBlockError,
+  MicrosheetBlockError,
   ParsingError,
   UserAbortError,
   ExecutionError,
