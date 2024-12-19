@@ -1,12 +1,7 @@
+import type { Color } from './color.js';
+
 import { createEnumMap } from '../utils/enum.js';
-import { StrokeColor } from './color.js';
-
-export enum ColorScheme {
-  Dark = 'dark',
-  Light = 'light',
-}
-
-export type Color = string | Partial<Record<ColorScheme | 'normal', string>>;
+import { StrokeColor } from './palette.js';
 
 export enum TextAlign {
   Center = 'center',

@@ -1,5 +1,5 @@
 import { createEnumMap } from '../utils/enum.js';
-import { StrokeColor } from './color.js';
+import { StrokeColor } from './palette.js';
 
 export enum ConnectorEndpoint {
   Front = 'Front',

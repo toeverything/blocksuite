@@ -1,4 +1,10 @@
-import { Black, ColorScheme, PALETTES, White } from '@blocksuite/affine-model';
+import {
+  Black,
+  type Color,
+  ColorScheme,
+  PALETTES,
+  White,
+} from '@blocksuite/affine-model';
 import { unsafeCSSVarV2 } from '@blocksuite/affine-shared/theme';
 import { css, html, LitElement, nothing, svg, type TemplateResult } from 'lit';
 import { property } from 'lit/decorators.js';
@@ -221,7 +227,7 @@ export class EdgelessColorPanel extends LitElement {
     }
   `;
 
-  onSelect(value: string) {
+  onSelect(value: Color) {
     this.dispatchEvent(
       new ColorEvent('select', {
         detail: value,
@@ -265,7 +271,7 @@ export class EdgelessColorPanel extends LitElement {
   accessor openColorPicker!: (e: MouseEvent) => void;
 
   @property({ type: Array })
-  accessor palettes: readonly string[] = PALETTES;
+  accessor palettes: readonly Color[] = PALETTES;
 
   @property({ attribute: false })
   accessor showLetterMark = false;

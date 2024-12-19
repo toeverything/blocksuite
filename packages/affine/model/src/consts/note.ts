@@ -1,7 +1,7 @@
-import { themeToVar } from '@toeverything/theme/v2';
 import { z } from 'zod';
 
 import { createEnumMap } from '../utils/enum.js';
+import { getColorByKey } from './color.js';
 
 export const NOTE_MIN_WIDTH = 450 + 24 * 2;
 export const NOTE_MIN_HEIGHT = 92;
@@ -74,17 +74,17 @@ export const NoteCornersSchema = z.nativeEnum(NoteCorners);
 export const DEFAULT_NOTE_BORDER_SIZE = 4;
 
 export const NoteBackgroundColor = {
-  Yellow: themeToVar('edgeless/note/yellow'),
-  Orange: themeToVar('edgeless/note/orange'),
-  Red: themeToVar('edgeless/note/red'),
-  Magenta: themeToVar('edgeless/note/magenta'),
-  Purple: themeToVar('edgeless/note/purple'),
-  Blue: themeToVar('edgeless/note/blue'),
-  Teal: themeToVar('edgeless/note/teal'),
-  Green: themeToVar('edgeless/note/green'),
-  Black: themeToVar('edgeless/note/black'),
-  Grey: themeToVar('edgeless/note/grey'),
-  White: themeToVar('edgeless/note/white'),
+  Yellow: getColorByKey('edgeless/note/yellow'),
+  Orange: getColorByKey('edgeless/note/orange'),
+  Red: getColorByKey('edgeless/note/red'),
+  Magenta: getColorByKey('edgeless/note/magenta'),
+  Purple: getColorByKey('edgeless/note/purple'),
+  Blue: getColorByKey('edgeless/note/blue'),
+  Teal: getColorByKey('edgeless/note/teal'),
+  Green: getColorByKey('edgeless/note/green'),
+  Black: getColorByKey('edgeless/note/black'),
+  Grey: getColorByKey('edgeless/note/grey'),
+  White: getColorByKey('edgeless/note/white'),
 } as const;
 
 export const NOTE_BACKGROUND_PALETTES = [
@@ -100,12 +100,5 @@ export const NOTE_BACKGROUND_PALETTES = [
   NoteBackgroundColor.Grey,
   NoteBackgroundColor.White,
 ] as const;
-
-export const NoteBackgroundPaletteEnum = z.enum(NOTE_BACKGROUND_PALETTES);
-export type NoteBackgroundPaletteEnum = z.infer<
-  typeof NoteBackgroundPaletteEnum
->;
-
-export const NoteBackgroundColorMap = createEnumMap(NoteBackgroundColor);
 
 export const DEFAULT_NOTE_BACKGROUND_COLOR = NoteBackgroundColor.White;
