@@ -40,10 +40,29 @@ export type MenuOptions = {
   items: MenuConfig[];
 };
 
+// Global menu open listener type
+type MenuOpenListener = (menu: Menu) => (() => void) | void;
+
+// Global menu open listeners
+const menuOpenListeners = new Set<MenuOpenListener>();
+
+// Add global menu open listener
+export function onMenuOpen(listener: MenuOpenListener) {
+  menuOpenListeners.add(listener);
+  // Return cleanup function
+  return () => {
+    menuOpenListeners.delete(listener);
+  };
+}
+
 export class Menu {
+  private _cleanupFns: Array<() => void> = [];
+
   private _currentFocused$ = signal<MenuFocusable>();
 
   private _subMenu$ = signal<Menu>();
+
+  closed = false;
 
   readonly currentFocused$ = computed(() => this._currentFocused$.value);
 
@@ -68,9 +87,25 @@ export class Menu {
       ? new MobileMenuComponent()
       : new MenuComponent();
     this.menuElement.menu = this;
+
+    // Call global menu open listeners
+    menuOpenListeners.forEach(listener => {
+      const cleanup = listener(this);
+      if (cleanup) {
+        this._cleanupFns.push(cleanup);
+      }
+    });
   }
 
   close() {
+    if (this.closed) {
+      return;
+    }
+    this.closed = true;
+    // Execute cleanup functions
+    this._cleanupFns.forEach(cleanup => cleanup());
+    this._cleanupFns = [];
+
     this.menuElement.remove();
     this.options.onClose?.();
   }
