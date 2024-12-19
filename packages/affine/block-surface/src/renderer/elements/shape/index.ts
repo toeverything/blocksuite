@@ -5,12 +5,7 @@ import type {
 } from '@blocksuite/affine-model';
 import type { IBound } from '@blocksuite/global/utils';
 
-import {
-  DEFAULT_SHAPE_FILL_COLOR,
-  DEFAULT_SHAPE_STROKE_COLOR,
-  DEFAULT_SHAPE_TEXT_COLOR,
-  TextAlign,
-} from '@blocksuite/affine-model';
+import { DefaultTheme, TextAlign } from '@blocksuite/affine-model';
 import { Bound } from '@blocksuite/global/utils';
 import { deltaInsertsToChunks } from '@blocksuite/inline';
 
@@ -57,17 +52,17 @@ export function shape(
 ) {
   const color = renderer.getColorValue(
     model.color,
-    DEFAULT_SHAPE_TEXT_COLOR,
+    DefaultTheme.shapeTextColor,
     true
   );
   const fillColor = renderer.getColorValue(
     model.fillColor,
-    DEFAULT_SHAPE_FILL_COLOR,
+    DefaultTheme.shapeFillColor,
     true
   );
   const strokeColor = renderer.getColorValue(
     model.strokeColor,
-    DEFAULT_SHAPE_STROKE_COLOR,
+    DefaultTheme.shapeStrokeColor,
     true
   );
   const colors = { color, fillColor, strokeColor };

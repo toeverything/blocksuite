@@ -1,3 +1,4 @@
+import { ColorSchema } from '@blocksuite/affine-model';
 import { type BlockStdScope, LifeCycleWatcher } from '@blocksuite/block-std';
 import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 import {
@@ -11,11 +12,7 @@ import clonedeep from 'lodash.clonedeep';
 import mergeWith from 'lodash.mergewith';
 import { z } from 'zod';
 
-import {
-  ColorSchema,
-  makeDeepOptional,
-  NodePropsSchema,
-} from '../utils/index.js';
+import { makeDeepOptional, NodePropsSchema } from '../utils/index.js';
 import { EditorSettingProvider } from './editor-setting-service.js';
 
 const LastPropsSchema = NodePropsSchema;

@@ -24,17 +24,13 @@ import {
   ViewBarIcon,
 } from '@blocksuite/affine-components/icons';
 import {
+  type Color,
   ConnectorMode,
-  LINE_COLORS,
-  SHAPE_FILL_COLORS,
+  DefaultTheme,
   ShapeStyle,
   ShapeType,
-  STROKE_COLORS,
 } from '@blocksuite/affine-model';
-import {
-  EditPropsStore,
-  type LastProps,
-} from '@blocksuite/affine-shared/services';
+import { EditPropsStore } from '@blocksuite/affine-shared/services';
 import { isControlledKeyboardEvent } from '@blocksuite/affine-shared/utils';
 import { html } from 'lit';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -80,12 +76,12 @@ pie.expandableCommand({
     pie.colorPicker({
       label: 'Pen Color',
       active: getActiveConnectorStrokeColor,
-      onChange: (color: string, { rootComponent }: PieMenuContext) => {
+      onChange: (color: Color, { rootComponent }: PieMenuContext) => {
         rootComponent.std.get(EditPropsStore).recordLastProps('brush', {
-          color: color as LastProps['brush']['color'],
+          color: color,
         });
       },
-      colors: LINE_COLORS.map(color => ({ color })),
+      colors: DefaultTheme.palettes,
     });
   },
 });
@@ -216,12 +212,12 @@ pie.command({
 pie.colorPicker({
   label: 'Line Color',
   active: getActiveConnectorStrokeColor,
-  onChange: (color: string, { rootComponent }: PieMenuContext) => {
+  onChange: (color: Color, { rootComponent }: PieMenuContext) => {
     rootComponent.std.get(EditPropsStore).recordLastProps('connector', {
-      stroke: color as LastProps['connector']['stroke'],
+      stroke: color,
     });
   },
-  colors: LINE_COLORS.map(color => ({ color })),
+  colors: DefaultTheme.palettes,
 });
 
 pie.endSubmenu();
@@ -312,26 +308,26 @@ pie.command({
 pie.colorPicker({
   label: 'Fill',
   active: getActiveShapeColor('fill'),
-  onChange: (color: string, { rootComponent }: PieMenuContext) => {
+  onChange: (color: Color, { rootComponent }: PieMenuContext) => {
     rootComponent.std.get(EditPropsStore).recordLastProps('shape:roundedRect', {
-      fillColor: color as LastProps['shape:roundedRect']['fillColor'],
+      fillColor: color,
     });
     updateShapeOverlay(rootComponent);
   },
-  colors: SHAPE_FILL_COLORS.map(color => ({ color })),
+  colors: DefaultTheme.palettes,
 });
 
 pie.colorPicker({
   label: 'Stroke',
   hollow: true,
   active: getActiveShapeColor('stroke'),
-  onChange: (color: string, { rootComponent }: PieMenuContext) => {
+  onChange: (color: Color, { rootComponent }: PieMenuContext) => {
     rootComponent.std.get(EditPropsStore).recordLastProps('shape:roundedRect', {
-      strokeColor: color as LastProps['shape:roundedRect']['strokeColor'],
+      strokeColor: color,
     });
     updateShapeOverlay(rootComponent);
   },
-  colors: STROKE_COLORS.map(color => ({ color, name: 'Color' })),
+  colors: DefaultTheme.palettes,
 });
 
 pie.endSubmenu();

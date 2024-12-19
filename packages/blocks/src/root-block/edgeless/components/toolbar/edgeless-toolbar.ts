@@ -24,6 +24,7 @@ import { debounce } from '@blocksuite/global/utils';
 import { Slot } from '@blocksuite/store';
 import { autoPlacement, offset } from '@floating-ui/dom';
 import { ContextProvider } from '@lit/context';
+import { computed } from '@preact/signals-core';
 import { baseTheme, cssVar } from '@toeverything/theme';
 import { css, html, nothing, unsafeCSS } from 'lit';
 import { query, state } from 'lit/decorators.js';
@@ -221,6 +222,10 @@ export class EdgelessToolbarWidget extends WidgetComponent<
       transform: scale(1.15);
     }
   `;
+
+  private _appTheme$ = computed(() => {
+    return this.std.get(ThemeProvider).app$.value;
+  });
 
   private _moreQuickToolsMenu: MenuHandler | null = null;
 
@@ -625,9 +630,11 @@ export class EdgelessToolbarWidget extends WidgetComponent<
       return nothing;
     }
 
-    const appTheme = this.std.get(ThemeProvider).app$.value;
     return html`
-      <div class="edgeless-toolbar-wrapper" data-app-theme=${appTheme}>
+      <div
+        class="edgeless-toolbar-wrapper"
+        data-app-theme=${this._appTheme$.value}
+      >
         <div
           class="edgeless-toolbar-toggle-control"
           data-enable=${this._enableAutoHide}

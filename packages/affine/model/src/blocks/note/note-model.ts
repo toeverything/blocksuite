@@ -9,13 +9,13 @@ import { BlockModel, defineBlockSchema } from '@blocksuite/store';
 
 import {
   type Color,
-  DEFAULT_NOTE_BACKGROUND_COLOR,
   DEFAULT_NOTE_BORDER_SIZE,
   DEFAULT_NOTE_BORDER_STYLE,
   DEFAULT_NOTE_CORNER,
   DEFAULT_NOTE_HEIGHT,
   DEFAULT_NOTE_SHADOW,
   DEFAULT_NOTE_WIDTH,
+  DefaultTheme,
   NoteDisplayMode,
   type StrokeStyle,
 } from '../../consts/index.js';
@@ -24,7 +24,7 @@ export const NoteBlockSchema = defineBlockSchema({
   flavour: 'affine:note',
   props: (): NoteProps => ({
     xywh: `[0,0,${DEFAULT_NOTE_WIDTH},${DEFAULT_NOTE_HEIGHT}]`,
-    background: DEFAULT_NOTE_BACKGROUND_COLOR,
+    background: DefaultTheme.noteBackgrounColor,
     index: 'a0',
     lockedBySelf: false,
     hidden: false,

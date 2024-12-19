@@ -1,4 +1,5 @@
 import { expect } from '@playwright/test';
+import { lightThemeV2 } from '@toeverything/theme/v2';
 
 import { initDatabaseColumn } from '../database/actions.js';
 import {
@@ -441,7 +442,12 @@ test(scoped`should copy and paste of database work`, async ({ page }) => {
     /*xml*/ `
 <affine:page>
   <affine:note
-    prop:background="--affine-v2-edgeless-note-white"
+    prop:background={
+      Object {
+        "dark": "#000000",
+        "light": "#ffffff",
+      }
+    }
     prop:displayMode="both"
     prop:edgeless={
       Object {
@@ -491,7 +497,12 @@ test(scoped`should copy and paste of database work`, async ({ page }) => {
     /*xml*/ `
 <affine:page>
   <affine:note
-    prop:background="--affine-v2-edgeless-note-white"
+    prop:background={
+      Object {
+        "dark": "#000000",
+        "light": "#ffffff",
+      }
+    }
     prop:displayMode="both"
     prop:edgeless={
       Object {
@@ -574,9 +585,12 @@ test(scoped`paste note block with background`, async ({ page }) => {
   await selectNoteInEdgeless(page, ids.noteId);
 
   await triggerComponentToolbarAction(page, 'changeNoteColor');
-  const color = '--affine-v2-edgeless-note-white';
-  await changeEdgelessNoteBackground(page, color);
-  await assertEdgelessNoteBackground(page, ids.noteId, color);
+  await changeEdgelessNoteBackground(page, 'White');
+  await assertEdgelessNoteBackground(
+    page,
+    ids.noteId,
+    lightThemeV2['edgeless/note/white']
+  );
 
   await copyByKeyboard(page);
 
@@ -584,7 +598,11 @@ test(scoped`paste note block with background`, async ({ page }) => {
   await pasteByKeyboard(page, false);
   const noteIds = await getAllNoteIds(page);
   for (const noteId of noteIds) {
-    await assertEdgelessNoteBackground(page, noteId, color);
+    await assertEdgelessNoteBackground(
+      page,
+      noteId,
+      lightThemeV2['edgeless/note/white']
+    );
   }
 });
 

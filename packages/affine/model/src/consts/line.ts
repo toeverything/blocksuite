@@ -25,7 +25,7 @@ export const LINE_WIDTHS = [
 ];
 
 /**
- * Use `StrokeColor` instead.
+ * Use `DefaultTheme.StrokeColorMap` instead.
  *
  * @deprecated
  */

@@ -2,7 +2,7 @@ import type { CanvasRenderer } from '@blocksuite/affine-block-surface';
 import type { NoteBlockModel } from '@blocksuite/affine-model';
 
 import {
-  DEFAULT_NOTE_BACKGROUND_COLOR,
+  DefaultTheme,
   NoteDisplayMode,
   NoteShadow,
 } from '@blocksuite/affine-model';
@@ -75,7 +75,7 @@ export class SurfaceRefNotePortal extends WithDisposable(ShadowlessElement) {
 
     const backgroundColor = this.host.std
       .get(ThemeProvider)
-      .generateColorProperty(model.background, DEFAULT_NOTE_BACKGROUND_COLOR);
+      .generateColorProperty(model.background, DefaultTheme.noteBackgrounColor);
 
     const [modelX, modelY, modelW, modelH] = deserializeXYWH(model.xywh);
     const style = {

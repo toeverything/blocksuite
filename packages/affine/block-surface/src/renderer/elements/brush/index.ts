@@ -1,4 +1,4 @@
-import type { BrushElementModel } from '@blocksuite/affine-model';
+import { type BrushElementModel, DefaultTheme } from '@blocksuite/affine-model';
 
 import type { CanvasRenderer } from '../../canvas-renderer.js';
 
@@ -17,7 +17,7 @@ export function brush(
     matrix.translateSelf(cx, cy).rotateSelf(rotate).translateSelf(-cx, -cy)
   );
 
-  const color = renderer.getColorValue(model.color, '#000000', true);
+  const color = renderer.getColorValue(model.color, DefaultTheme.black, true);
 
   ctx.fillStyle = color;
 

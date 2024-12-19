@@ -6,7 +6,6 @@ import type {
   Hsv,
   Hsva,
   ModeType,
-  PickColorDetail,
   PickColorType,
   Point,
   Rgb,
@@ -270,12 +269,13 @@ export const preprocessColor = (style: CSSStyleDeclaration) => {
  *
  * ```json
  * { 'fillColor': '--affine-palette-shape-yellow' }
+ * { 'fillColor': '#ffffff' }
  * { 'fillColor': { normal: '#ffffffff' }}
  * { 'fillColor': { light: '#fff000ff', 'dark': '#0000fff00' }}
  * ```
  */
-export const packColor = (key: string, detail: PickColorDetail) => {
-  return { [key]: detail.palette ?? detail };
+export const packColor = (key: string, color: Color) => {
+  return { [key]: typeof color === 'object' ? { ...color } : color };
 };
 
 /**
@@ -299,10 +299,14 @@ export const packColorsWithColorScheme = (
   let type: PickColorType = 'palette';
 
   if (typeof oldColor === 'object') {
-    type = colorScheme in oldColor ? colorScheme : 'normal';
-    colors[0].value = oldColor.normal ?? value;
-    colors[1].value = oldColor.light ?? value;
-    colors[2].value = oldColor.dark ?? value;
+    if ('normal' in oldColor) {
+      type = 'normal';
+      colors[0].value = oldColor.normal ?? value;
+    } else {
+      type = colorScheme;
+      colors[1].value = oldColor.light ?? value;
+      colors[2].value = oldColor.dark ?? value;
+    }
   }
 
   return { type, colors };

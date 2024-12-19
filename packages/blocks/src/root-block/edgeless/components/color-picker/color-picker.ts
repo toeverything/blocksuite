@@ -1,3 +1,5 @@
+import type { Color } from '@blocksuite/affine-model';
+
 import { on, once, stopPropagation } from '@blocksuite/affine-shared/utils';
 import { SignalWatcher, WithDisposable } from '@blocksuite/global/utils';
 import { batch, computed, signal } from '@preact/signals-core';
@@ -112,15 +114,15 @@ export class EdgelessColorPicker extends SignalWatcher(
   #pick() {
     const hsva = this.hsva$.peek();
     const type = this.modeType$.peek();
-    const detail = { [type]: hsvaToHex8(hsva) };
+    const value = { [type]: hsvaToHex8(hsva) };
+    const key = 'Custom';
 
     if (type !== 'normal') {
       const another = type === 'light' ? 'dark' : 'light';
       const { hsva } = this[`${another}$`].peek();
-      detail[another] = hsvaToHex8(hsva);
+      value[another] = hsvaToHex8(hsva);
     }
-
-    this.pick?.({ type: 'pick', detail });
+    this.pick?.({ type: 'pick', detail: { key, value: value as Color } });
   }
 
   #pickEnd() {

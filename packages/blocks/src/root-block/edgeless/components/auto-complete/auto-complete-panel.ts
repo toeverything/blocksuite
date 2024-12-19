@@ -15,11 +15,8 @@ import {
   SmallNoteIcon,
 } from '@blocksuite/affine-components/icons';
 import {
-  DEFAULT_NOTE_BACKGROUND_COLOR,
   DEFAULT_NOTE_WIDTH,
-  DEFAULT_SHAPE_FILL_COLOR,
-  DEFAULT_SHAPE_STROKE_COLOR,
-  DEFAULT_TEXT_COLOR,
+  DefaultTheme,
   FontFamily,
   FontStyle,
   FontWeight,
@@ -281,7 +278,7 @@ export class EdgelessAutoCompletePanel extends WithDisposable(LitElement) {
         textAlign: 'left',
         fontSize: 24,
         fontFamily: FontFamily.Inter,
-        color: DEFAULT_TEXT_COLOR,
+        color: DefaultTheme.textColor,
         fontWeight: FontWeight.Regular,
         fontStyle: FontStyle.Normal,
       });
@@ -472,7 +469,7 @@ export class EdgelessAutoCompletePanel extends WithDisposable(LitElement) {
       .getColorValue(
         this.edgeless.std.get(EditPropsStore).lastProps$.value['affine:note']
           .background,
-        DEFAULT_NOTE_BACKGROUND_COLOR,
+        DefaultTheme.noteBackgrounColor,
         true
       );
     this._overlay = new AutoCompleteNoteOverlay(this.gfx, xywh, background);
@@ -513,10 +510,10 @@ export class EdgelessAutoCompletePanel extends WithDisposable(LitElement) {
 
     const stroke = this.edgeless.std
       .get(ThemeProvider)
-      .getColorValue(strokeColor, DEFAULT_SHAPE_STROKE_COLOR, true);
+      .getColorValue(strokeColor, DefaultTheme.shapeStrokeColor, true);
     const fill = this.edgeless.std
       .get(ThemeProvider)
-      .getColorValue(fillColor, DEFAULT_SHAPE_FILL_COLOR, true);
+      .getColorValue(fillColor, DefaultTheme.shapeFillColor, true);
 
     const options = {
       seed: 666,

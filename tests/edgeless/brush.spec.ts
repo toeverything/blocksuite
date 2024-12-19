@@ -1,5 +1,5 @@
-import { StrokeColor } from '@blocksuite/affine-model';
 import { expect } from '@playwright/test';
+import { lightThemeV2 } from '@toeverything/theme/v2';
 
 import {
   assertEdgelessTool,
@@ -80,15 +80,14 @@ test('add brush element with color', async ({ page }) => {
   await switchEditorMode(page);
 
   await setEdgelessTool(page, 'brush');
-  const color = StrokeColor.Blue;
-  await selectBrushColor(page, color);
+  await selectBrushColor(page, 'Blue');
 
   const start = { x: 100, y: 100 };
   const end = { x: 200, y: 200 };
   await dragBetweenCoords(page, start, end, { steps: 100 });
 
   const [pickedColor] = await pickColorAtPoints(page, [[110, 110]]);
-
+  const color = lightThemeV2['edgeless/palette/medium/blueMedium'];
   await assertEdgelessColorSameWithHexColor(page, color, pickedColor);
 });
 
@@ -101,8 +100,8 @@ test('keep same color when mouse mode switched back to brush', async ({
   await deleteAll(page);
 
   await setEdgelessTool(page, 'brush');
-  const color = StrokeColor.Blue;
-  await selectBrushColor(page, color);
+  await selectBrushColor(page, 'Blue');
+
   const start = { x: 200, y: 200 };
   const end = { x: 300, y: 300 };
   await dragBetweenCoords(page, start, end, { steps: 100 });
@@ -113,7 +112,9 @@ test('keep same color when mouse mode switched back to brush', async ({
   await setEdgelessTool(page, 'brush');
   const origin = { x: 100, y: 100 };
   await dragBetweenCoords(page, origin, start, { steps: 100 });
+
   const [pickedColor] = await pickColorAtPoints(page, [[110, 110]]);
+  const color = lightThemeV2['edgeless/palette/medium/blueMedium'];
   await assertEdgelessColorSameWithHexColor(page, color, pickedColor);
 });
 
@@ -124,8 +125,7 @@ test('add brush element with different size', async ({ page }) => {
 
   await setEdgelessTool(page, 'brush');
   await selectBrushSize(page, 'ten');
-  const color = StrokeColor.Blue;
-  await selectBrushColor(page, color);
+  await selectBrushColor(page, 'Blue');
 
   const start = { x: 100, y: 100 };
   const end = { x: 200, y: 100 };
@@ -143,6 +143,7 @@ test('add brush element with different size', async ({ page }) => {
       [110, 105],
     ]);
 
+  const color = lightThemeV2['edgeless/palette/medium/blueMedium'];
   await assertEdgelessColorSameWithHexColor(page, color, topEdge);
   await assertEdgelessColorSameWithHexColor(page, color, bottomEdge);
   assertSameColor(nearTopEdge, '#84cfff');

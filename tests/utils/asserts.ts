@@ -1083,7 +1083,7 @@ export async function assertEdgelessNoteBackground(
       return noteWrapper.style.backgroundColor;
     });
 
-  expect(backgroundColor).toEqual(`var(${color})`);
+  expect(toHex(backgroundColor)).toEqual(color);
 }
 
 function toHex(color: string) {
@@ -1116,7 +1116,9 @@ export async function assertEdgelessColorSameWithHexColor(
   edgelessColor: string,
   hexColor: `#${string}`
 ) {
-  const themeColor = await getCurrentThemeCSSPropertyValue(page, edgelessColor);
+  const themeColor = edgelessColor.startsWith('---')
+    ? await getCurrentThemeCSSPropertyValue(page, edgelessColor)
+    : edgelessColor;
   expect(themeColor).toBeTruthy();
   const edgelessHexColor = toHex(themeColor);
 
@@ -1334,11 +1336,20 @@ export async function assertTextSelection(
   }
 }
 
-export async function assertConnectorStrokeColor(page: Page, color: string) {
+export async function assertConnectorStrokeColor(
+  page: Page,
+  label: string,
+  color: string
+) {
   const colorButton = page
     .locator('edgeless-change-connector-button')
     .locator('edgeless-color-panel')
-    .locator(`.color-unit[aria-label="${color}"]`);
+    .locator(`.color-unit[aria-label="${label}"]`)
+    .locator('svg');
 
-  expect(await colorButton.count()).toBe(1);
+  const realColor = await colorButton.evaluate(
+    element => window.getComputedStyle(element).fill
+  );
+
+  expect(toHex(realColor)).toBe(color);
 }

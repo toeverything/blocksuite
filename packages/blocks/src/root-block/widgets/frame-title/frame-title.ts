@@ -1,4 +1,8 @@
-import { ColorScheme, FrameBlockModel } from '@blocksuite/affine-model';
+import {
+  ColorScheme,
+  FrameBlockModel,
+  isTransparent,
+} from '@blocksuite/affine-model';
 import { ThemeProvider } from '@blocksuite/affine-shared/services';
 import {
   type BlockStdScope,
@@ -21,7 +25,6 @@ import { property, state } from 'lit/decorators.js';
 import type { EdgelessRootService } from '../../edgeless/index.js';
 
 import { parseStringToRgba } from '../../edgeless/components/color-picker/utils.js';
-import { isTransparent } from '../../edgeless/components/panel/color-panel.js';
 import { frameTitleStyle, frameTitleStyleVars } from './styles.js';
 
 export const AFFINE_FRAME_TITLE = 'affine-frame-title';

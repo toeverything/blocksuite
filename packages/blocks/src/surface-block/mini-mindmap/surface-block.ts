@@ -101,7 +101,7 @@ export class MindmapSurfaceBlock extends BlockComponent<SurfaceBlockModel> {
       provider: {
         selectedElements: () => [],
         getColorScheme: () => themeService.edgelessTheme,
-        getColorValue: (color: Color, fallback?: string, real?: boolean) =>
+        getColorValue: (color: Color, fallback?: Color, real?: boolean) =>
           themeService.getColorValue(
             color,
             fallback,

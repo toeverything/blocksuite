@@ -1,6 +1,6 @@
 import type { GfxToolsFullOptionValue } from '@blocksuite/block-std/gfx';
 
-import { STROKE_COLORS } from '@blocksuite/affine-model';
+import { DefaultTheme } from '@blocksuite/affine-model';
 import {
   EditPropsStore,
   ThemeProvider,
@@ -10,12 +10,9 @@ import { computed } from '@preact/signals-core';
 import { css, html, LitElement } from 'lit';
 import { property } from 'lit/decorators.js';
 
+import type { ColorEvent } from '../../panel/color-panel.js';
 import type { LineWidthEvent } from '../../panel/line-width-panel.js';
 
-import {
-  type ColorEvent,
-  GET_DEFAULT_LINE_COLOR,
-} from '../../panel/color-panel.js';
 import { EdgelessToolbarToolMixin } from '../mixins/tool.mixin.js';
 
 export class EdgelessBrushMenu extends EdgelessToolbarToolMixin(
@@ -48,14 +45,13 @@ export class EdgelessBrushMenu extends EdgelessToolbarToolMixin(
     };
   });
 
+  private _theme$ = computed(() => {
+    return this.edgeless.std.get(ThemeProvider).theme$.value;
+  });
+
   type: GfxToolsFullOptionValue['type'] = 'brush';
 
   override render() {
-    const theme = this.edgeless.std.get(ThemeProvider).theme;
-    const color = this.edgeless.std
-      .get(ThemeProvider)
-      .getColorValue(this._props$.value.color, GET_DEFAULT_LINE_COLOR(theme));
-
     return html`
       <edgeless-slide-menu>
         <div class="menu-content">
@@ -68,12 +64,14 @@ export class EdgelessBrushMenu extends EdgelessToolbarToolMixin(
           <menu-divider .vertical=${true}></menu-divider>
           <edgeless-color-panel
             class="one-way"
-            .value=${color}
-            .palettes=${STROKE_COLORS}
+            .value=${this._props$.value.color}
+            .theme=${this._theme$.value}
+            .palettes=${DefaultTheme.globalToolbarPalettes}
             .hasTransparent=${!this.edgeless.doc.awarenessStore.getFlag(
               'enable_color_picker'
             )}
-            @select=${(e: ColorEvent) => this.onChange({ color: e.detail })}
+            @select=${(e: ColorEvent) =>
+              this.onChange({ color: e.detail.value })}
           ></edgeless-color-panel>
         </div>
       </edgeless-slide-menu>

@@ -1,6 +1,8 @@
 import type { GfxToolsFullOptionValue } from '@blocksuite/block-std/gfx';
 
-import { STROKE_COLORS } from '@blocksuite/affine-model';
+import { DefaultTheme } from '@blocksuite/affine-model';
+import { ThemeProvider } from '@blocksuite/affine-shared/services';
+import { computed } from '@preact/signals-core';
 import { css, html, LitElement, nothing } from 'lit';
 import { property } from 'lit/decorators.js';
 
@@ -17,6 +19,10 @@ export class EdgelessTextMenu extends EdgelessToolbarToolMixin(LitElement) {
     }
   `;
 
+  private _theme$ = computed(() => {
+    return this.edgeless.std.get(ThemeProvider).theme$.value;
+  });
+
   override type: GfxToolsFullOptionValue['type'] = 'text';
 
   override render() {
@@ -28,7 +34,8 @@ export class EdgelessTextMenu extends EdgelessToolbarToolMixin(LitElement) {
           <edgeless-color-panel
             class="one-way"
             .value=${this.color}
-            .palettes=${STROKE_COLORS}
+            .theme=${this._theme$.value}
+            .palettes=${DefaultTheme.globalToolbarPalettes}
             @select=${(e: ColorEvent) => this.onChange({ color: e.detail })}
           ></edgeless-color-panel>
         </div>

@@ -168,7 +168,7 @@ export class SurfaceBlockComponent extends BlockComponent<
             fallback,
             themeService.edgelessTheme
           ),
-        getColorValue: (color: Color, fallback?: string, real?: boolean) =>
+        getColorValue: (color: Color, fallback?: Color, real?: boolean) =>
           themeService.getColorValue(
             color,
             fallback,

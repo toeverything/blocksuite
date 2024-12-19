@@ -1,9 +1,7 @@
 import {
-  Black,
   DEFAULT_ROUGHNESS,
   LineWidth,
   StrokeStyle,
-  White,
 } from '@blocksuite/affine-model';
 
 export const BOOKMARK_MIN_WIDTH = 450;
@@ -51,10 +49,6 @@ export const EXCLUDING_MOUSE_OUT_CLASS_LIST = [
 export const SurfaceColor = '#6046FE';
 export const NoteColor = '#1E96EB';
 export const BlendColor = '#7D91FF';
-
-export const SHAPE_TEXT_COLOR_PURE_WHITE = White;
-export const SHAPE_TEXT_COLOR_PURE_BLACK = Black;
-export const SHAPE_FILL_COLOR_BLACK = Black;
 
 export const AI_CHAT_BLOCK_MIN_WIDTH = 260;
 export const AI_CHAT_BLOCK_MIN_HEIGHT = 160;

@@ -1,5 +1,5 @@
-import { ShapeFillColor, StrokeColor } from '@blocksuite/affine-model';
 import { expect, type Page } from '@playwright/test';
+import { lightThemeV2 } from '@toeverything/theme/v2';
 
 import {
   assertEdgelessTool,
@@ -168,14 +168,17 @@ test.skip('change shape fill color', async ({ page }) => {
 
   await page.mouse.click(rect.start.x + 5, rect.start.y + 5);
   await triggerComponentToolbarAction(page, 'changeShapeFillColor');
-  const color = ShapeFillColor.Grey;
-  await changeShapeFillColor(page, color);
+  await changeShapeFillColor(page, 'MediumGrey');
   await page.waitForTimeout(50);
   const [picked] = await pickColorAtPoints(page, [
     [rect.start.x + 20, rect.start.y + 20],
   ]);
 
-  await assertEdgelessColorSameWithHexColor(page, color, picked);
+  await assertEdgelessColorSameWithHexColor(
+    page,
+    lightThemeV2['edgeless/palette/medium/greyMedium'],
+    picked
+  );
 });
 
 test('change shape stroke color', async ({ page }) => {
@@ -191,14 +194,17 @@ test('change shape stroke color', async ({ page }) => {
 
   await page.mouse.click(rect.start.x + 5, rect.start.y + 5);
   await triggerComponentToolbarAction(page, 'changeShapeStrokeColor');
-  const color = StrokeColor.Grey;
-  await changeShapeStrokeColor(page, color);
+  await changeShapeStrokeColor(page, 'HeavyYellow');
   await page.waitForTimeout(50);
   const [picked] = await pickColorAtPoints(page, [
     [rect.start.x + 1, rect.start.y + 1],
   ]);
 
-  await assertEdgelessColorSameWithHexColor(page, color, picked);
+  await assertEdgelessColorSameWithHexColor(
+    page,
+    lightThemeV2['edgeless/palette/heavy/yellow'],
+    picked
+  );
 });
 
 test('the tooltip of shape tool button should be hidden when the shape menu is shown', async ({
@@ -339,7 +345,7 @@ test('change shape stroke width', async ({ page }) => {
 
   await page.mouse.click(start.x + 5, start.y + 5);
   await triggerComponentToolbarAction(page, 'changeShapeStrokeColor');
-  await changeShapeStrokeColor(page, StrokeColor.Magenta);
+  await changeShapeStrokeColor(page, 'MediumMagenta');
 
   await triggerComponentToolbarAction(page, 'changeShapeStrokeStyles');
   await changeShapeStrokeWidth(page);
@@ -362,7 +368,7 @@ test('change shape stroke style', async ({ page }) => {
 
   await page.mouse.click(start.x + 5, start.y + 5);
   await triggerComponentToolbarAction(page, 'changeShapeStrokeColor');
-  await changeShapeStrokeColor(page, StrokeColor.Blue);
+  await changeShapeStrokeColor(page, 'MediumBlue');
 
   await triggerComponentToolbarAction(page, 'changeShapeStrokeStyles');
   await changeShapeStrokeStyle(page, 'dash');
@@ -549,12 +555,16 @@ test('change shape style', async ({ page }) => {
 
   await page.mouse.click(start.x + 5, start.y + 5);
   await triggerComponentToolbarAction(page, 'changeShapeStrokeColor');
-  const color = StrokeColor.Purple;
+  const color = 'LightPurple';
   await changeShapeStrokeColor(page, color);
   await page.waitForTimeout(50);
   const [picked] = await pickColorAtPoints(page, [[start.x + 1, start.y + 1]]);
 
-  await assertEdgelessColorSameWithHexColor(page, color, picked);
+  await assertEdgelessColorSameWithHexColor(
+    page,
+    lightThemeV2['edgeless/palette/light/purpleLight'],
+    picked
+  );
 });
 
 test('shape adds text by button', async ({ page }) => {

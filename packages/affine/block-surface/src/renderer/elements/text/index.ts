@@ -1,5 +1,4 @@
-import type { TextElementModel } from '@blocksuite/affine-model';
-
+import { DefaultTheme, type TextElementModel } from '@blocksuite/affine-model';
 import { deltaInsertsToChunks } from '@blocksuite/inline';
 
 import type { CanvasRenderer } from '../../canvas-renderer.js';
@@ -41,7 +40,11 @@ export function text(
   const horizontalOffset =
     textAlign === 'center' ? w / 2 : textAlign === 'right' ? w : 0;
 
-  const color = renderer.getColorValue(model.color, '#000000', true);
+  const color = renderer.getColorValue(
+    model.color,
+    DefaultTheme.textColor,
+    true
+  );
 
   ctx.font = font;
   ctx.fillStyle = color;

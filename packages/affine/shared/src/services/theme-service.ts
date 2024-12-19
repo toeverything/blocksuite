@@ -1,4 +1,9 @@
-import { type Color, ColorScheme } from '@blocksuite/affine-model';
+import {
+  type Color,
+  ColorScheme,
+  DefaultTheme,
+  resolveColor,
+} from '@blocksuite/affine-model';
 import {
   type BlockStdScope,
   Extension,
@@ -14,8 +19,6 @@ import {
 } from '@toeverything/theme';
 
 import { isInsideEdgelessEditor } from '../utils/index.js';
-
-const TRANSPARENT = 'transparent';
 
 export const ThemeExtensionIdentifier = createIdentifier<ThemeExtension>(
   'AffineThemeExtension'
@@ -52,9 +55,7 @@ export class ThemeService extends Extension {
   }
 
   get theme() {
-    return isInsideEdgelessEditor(this.std.host)
-      ? this.edgelessTheme
-      : this.appTheme;
+    return this.theme$.peek();
   }
 
   get theme$() {
@@ -94,24 +95,19 @@ export class ThemeService extends Extension {
    */
   generateColorProperty(
     color: Color,
-    fallback = 'transparent',
+    fallback: Color = DefaultTheme.transparent,
     theme = this.theme
   ) {
-    let result: string | undefined = undefined;
+    const result = resolveColor(color, theme, resolveColor(fallback, theme));
 
-    if (typeof color === 'object') {
-      result = color[theme] ?? color.normal;
-    } else {
-      result = color;
-    }
-    if (!result) {
-      result = fallback;
-    }
+    // Compatible old data
     if (result.startsWith('--')) {
-      return result.endsWith(TRANSPARENT) ? TRANSPARENT : `var(${result})`;
+      return result.endsWith('transparent')
+        ? DefaultTheme.transparent
+        : `var(${result})`;
     }
 
-    return result ?? TRANSPARENT;
+    return result;
   }
 
   /**
@@ -132,35 +128,30 @@ export class ThemeService extends Extension {
    */
   getColorValue(
     color: Color,
-    fallback = TRANSPARENT,
+    fallback: Color = DefaultTheme.transparent,
     real = false,
     theme = this.theme
   ) {
-    let result: string | undefined = undefined;
+    let result = resolveColor(color, theme, resolveColor(fallback, theme));
 
-    if (typeof color === 'object') {
-      result = color[theme] ?? color.normal;
-    } else {
-      result = color;
-    }
-    if (!result) {
-      result = fallback;
-    }
+    // Compatible old data
     if (real && result.startsWith('--')) {
-      result = result.endsWith(TRANSPARENT)
-        ? TRANSPARENT
+      result = result.endsWith('transparent')
+        ? DefaultTheme.transparent
         : this.getCssVariableColor(result, theme);
     }
 
-    return result ?? TRANSPARENT;
+    return result ?? DefaultTheme.transparent;
   }
 
   getCssVariableColor(property: string, theme = this.theme) {
+    // Compatible old data
     if (property.startsWith('--')) {
-      if (property.endsWith(TRANSPARENT)) {
-        return TRANSPARENT;
+      if (property.endsWith('transparent')) {
+        return DefaultTheme.transparent;
       }
       const key = property as keyof AffineCssVariables;
+      // V1 theme
       const color =
         theme === ColorScheme.Dark
           ? combinedDarkCssVariables[key]

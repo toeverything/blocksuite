@@ -67,7 +67,6 @@ describe('theme service', () => {
     expect(themeService.generateColorProperty({ normal: 'grey' })).toBe('grey');
 
     expect(themeService.generateColorProperty('', 'blue')).toBe('blue');
-    expect(themeService.generateColorProperty({}, 'red')).toBe('red');
   });
 
   test('gets a color value', () => {

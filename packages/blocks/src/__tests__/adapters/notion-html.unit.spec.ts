@@ -1,7 +1,4 @@
-import {
-  DEFAULT_NOTE_BACKGROUND_COLOR,
-  NoteDisplayMode,
-} from '@blocksuite/affine-model';
+import { DefaultTheme, NoteDisplayMode } from '@blocksuite/affine-model';
 import {
   AssetsManager,
   type BlockSnapshot,
@@ -29,7 +26,7 @@ describe('notion html to snapshot', () => {
       flavour: 'affine:note',
       props: {
         xywh: '[0,0,800,95]',
-        background: DEFAULT_NOTE_BACKGROUND_COLOR,
+        background: DefaultTheme.noteBackgrounColor,
         index: 'a0',
         hidden: false,
         displayMode: NoteDisplayMode.DocAndEdgeless,
@@ -84,7 +81,7 @@ describe('notion html to snapshot', () => {
       flavour: 'affine:note',
       props: {
         xywh: '[0,0,800,95]',
-        background: DEFAULT_NOTE_BACKGROUND_COLOR,
+        background: DefaultTheme.noteBackgrounColor,
         index: 'a0',
         hidden: false,
         displayMode: NoteDisplayMode.DocAndEdgeless,
@@ -199,7 +196,7 @@ describe('notion html to snapshot', () => {
       flavour: 'affine:note',
       props: {
         xywh: '[0,0,800,95]',
-        background: DEFAULT_NOTE_BACKGROUND_COLOR,
+        background: DefaultTheme.noteBackgrounColor,
         index: 'a0',
         hidden: false,
         displayMode: NoteDisplayMode.DocAndEdgeless,
@@ -365,7 +362,7 @@ describe('notion html to snapshot', () => {
       flavour: 'affine:note',
       props: {
         xywh: '[0,0,800,95]',
-        background: DEFAULT_NOTE_BACKGROUND_COLOR,
+        background: DefaultTheme.noteBackgrounColor,
         index: 'a0',
         hidden: false,
         displayMode: NoteDisplayMode.DocAndEdgeless,
@@ -810,7 +807,7 @@ describe('notion html to snapshot', () => {
       flavour: 'affine:note',
       props: {
         xywh: '[0,0,800,95]',
-        background: DEFAULT_NOTE_BACKGROUND_COLOR,
+        background: DefaultTheme.noteBackgrounColor,
         index: 'a0',
         hidden: false,
         displayMode: NoteDisplayMode.DocAndEdgeless,
@@ -939,7 +936,7 @@ describe('notion html to snapshot', () => {
       flavour: 'affine:note',
       props: {
         xywh: '[0,0,800,95]',
-        background: DEFAULT_NOTE_BACKGROUND_COLOR,
+        background: DefaultTheme.noteBackgrounColor,
         index: 'a0',
         hidden: false,
         displayMode: NoteDisplayMode.DocAndEdgeless,
@@ -1040,7 +1037,7 @@ describe('notion html to snapshot', () => {
       flavour: 'affine:note',
       props: {
         xywh: '[0,0,800,95]',
-        background: DEFAULT_NOTE_BACKGROUND_COLOR,
+        background: DefaultTheme.noteBackgrounColor,
         index: 'a0',
         hidden: false,
         displayMode: NoteDisplayMode.DocAndEdgeless,
@@ -1089,7 +1086,7 @@ describe('notion html to snapshot', () => {
       flavour: 'affine:note',
       props: {
         xywh: '[0,0,800,95]',
-        background: DEFAULT_NOTE_BACKGROUND_COLOR,
+        background: DefaultTheme.noteBackgrounColor,
         index: 'a0',
         hidden: false,
         displayMode: NoteDisplayMode.DocAndEdgeless,
@@ -1158,7 +1155,7 @@ describe('notion html to snapshot', () => {
       flavour: 'affine:note',
       props: {
         xywh: '[0,0,800,95]',
-        background: DEFAULT_NOTE_BACKGROUND_COLOR,
+        background: DefaultTheme.noteBackgrounColor,
         index: 'a0',
         hidden: false,
         displayMode: NoteDisplayMode.DocAndEdgeless,
@@ -1207,7 +1204,7 @@ describe('notion html to snapshot', () => {
       flavour: 'affine:note',
       props: {
         xywh: '[0,0,800,95]',
-        background: DEFAULT_NOTE_BACKGROUND_COLOR,
+        background: DefaultTheme.noteBackgrounColor,
         index: 'a0',
         hidden: false,
         displayMode: NoteDisplayMode.DocAndEdgeless,
@@ -1254,7 +1251,7 @@ describe('notion html to snapshot', () => {
       flavour: 'affine:note',
       props: {
         xywh: '[0,0,800,95]',
-        background: DEFAULT_NOTE_BACKGROUND_COLOR,
+        background: DefaultTheme.noteBackgrounColor,
         index: 'a0',
         hidden: false,
         displayMode: NoteDisplayMode.DocAndEdgeless,
@@ -1298,7 +1295,7 @@ describe('notion html to snapshot', () => {
       flavour: 'affine:note',
       props: {
         xywh: '[0,0,800,95]',
-        background: DEFAULT_NOTE_BACKGROUND_COLOR,
+        background: DefaultTheme.noteBackgrounColor,
         index: 'a0',
         hidden: false,
         displayMode: NoteDisplayMode.DocAndEdgeless,
@@ -1422,7 +1419,7 @@ describe('notion html to snapshot', () => {
       flavour: 'affine:note',
       props: {
         xywh: '[0,0,800,95]',
-        background: DEFAULT_NOTE_BACKGROUND_COLOR,
+        background: DefaultTheme.noteBackgrounColor,
         index: 'a0',
         hidden: false,
         displayMode: NoteDisplayMode.DocAndEdgeless,
@@ -1701,7 +1698,7 @@ describe('notion html to snapshot', () => {
       flavour: 'affine:note',
       props: {
         xywh: '[0,0,800,95]',
-        background: DEFAULT_NOTE_BACKGROUND_COLOR,
+        background: DefaultTheme.noteBackgrounColor,
         index: 'a0',
         hidden: false,
         displayMode: 'both',
@@ -1894,7 +1891,7 @@ describe('notion html to snapshot', () => {
       flavour: 'affine:note',
       props: {
         xywh: '[0,0,800,95]',
-        background: DEFAULT_NOTE_BACKGROUND_COLOR,
+        background: DefaultTheme.noteBackgrounColor,
         index: 'a0',
         hidden: false,
         displayMode: NoteDisplayMode.DocAndEdgeless,
@@ -1935,7 +1932,7 @@ describe('notion html to snapshot', () => {
       flavour: 'affine:note',
       props: {
         xywh: '[0,0,800,95]',
-        background: DEFAULT_NOTE_BACKGROUND_COLOR,
+        background: DefaultTheme.noteBackgrounColor,
         index: 'a0',
         hidden: false,
         displayMode: NoteDisplayMode.DocAndEdgeless,
@@ -1977,7 +1974,7 @@ describe('notion html to snapshot', () => {
   test('inline style', async () => {
     const html = `<div class="page-body">
       <p id="12d088dd-6fdb-80e5-97be-ebd049a327f5" class="">
-        <strong>strong</strong> <em>italic</em> <span style="border-bottom:0.05em solid">underline</span> <del>strikethrough</del> <code>code</code> 
+        <strong>strong</strong> <em>italic</em> <span style="border-bottom:0.05em solid">underline</span> <del>strikethrough</del> <code>code</code>
       </p>
     </div>`;
 
@@ -1987,7 +1984,7 @@ describe('notion html to snapshot', () => {
       flavour: 'affine:note',
       props: {
         xywh: '[0,0,800,95]',
-        background: DEFAULT_NOTE_BACKGROUND_COLOR,
+        background: DefaultTheme.noteBackgrounColor,
         index: 'a0',
         hidden: false,
         displayMode: NoteDisplayMode.DocAndEdgeless,

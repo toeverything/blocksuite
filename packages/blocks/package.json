@@ -49,6 +49,7 @@
     "html2canvas": "^1.4.1",
     "katex": "^0.16.11",
     "lit": "^3.2.0",
+    "lodash.isequal": "^4.5.0",
     "lz-string": "^1.5.0",
     "mdast-util-gfm-autolink-literal": "^2.0.1",
     "mdast-util-gfm-strikethrough": "^2.0.0",
@@ -106,6 +107,7 @@
   ],
   "devDependencies": {
     "@types/dompurify": "^3.0.5",
-    "@types/katex": "^0.16.7"
+    "@types/katex": "^0.16.7",
+    "@types/lodash.isequal": "^4.5.8"
   }
 }

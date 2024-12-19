@@ -1,6 +1,7 @@
 import {
   type ConnectorElementModel,
   ConnectorMode,
+  DefaultTheme,
   type LocalConnectorElementModel,
   type PointStyle,
 } from '@blocksuite/affine-model';
@@ -76,7 +77,11 @@ export function connector(
     ctx.clip(path, 'evenodd');
   }
 
-  const strokeColor = renderer.getColorValue(model.stroke, '#000000', true);
+  const strokeColor = renderer.getColorValue(
+    model.stroke,
+    DefaultTheme.connectorColor,
+    true
+  );
 
   renderPoints(
     model,
@@ -250,7 +255,7 @@ function renderLabel(
   ctx.font = font;
   ctx.textAlign = textAlign;
   ctx.textBaseline = 'middle';
-  ctx.fillStyle = renderer.getColorValue(color, '#000000', true);
+  ctx.fillStyle = renderer.getColorValue(color, DefaultTheme.black, true);
 
   let textMaxWidth = textAlign === 'center' ? 0 : getMaxTextWidth(lines, font);
   if (hasMaxWidth && maxWidth > 0) {

@@ -12,16 +12,17 @@ import {
 import { renderToolbarSeparator } from '@blocksuite/affine-components/toolbar';
 import {
   type ColorScheme,
+  DefaultTheme,
   FontFamily,
   FontStyle,
   FontWeight,
+  resolveColor,
   TextAlign,
   type TextStyleProps,
 } from '@blocksuite/affine-model';
 import {
   ConnectorElementModel,
   EdgelessTextBlockModel,
-  PALETTES,
   ShapeElementModel,
   TextElementModel,
 } from '@blocksuite/affine-model';
@@ -41,16 +42,13 @@ import type {
   EdgelessColorPickerButton,
   PickColorEvent,
 } from '../../edgeless/components/color-picker/index.js';
+import type { ColorEvent } from '../../edgeless/components/panel/color-panel.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 
 import {
   packColor,
   packColorsWithColorScheme,
 } from '../../edgeless/components/color-picker/utils.js';
-import {
-  type ColorEvent,
-  GET_DEFAULT_LINE_COLOR,
-} from '../../edgeless/components/panel/color-panel.js';
 
 const FONT_SIZE_LIST = [
   { value: 16 },
@@ -123,12 +121,12 @@ function getMostCommonColor(
   const colors = countBy(elements, (ele: BlockSuite.EdgelessTextModelType) => {
     const color =
       ele instanceof ConnectorElementModel ? ele.labelStyle.color : ele.color;
-    return typeof color === 'object'
-      ? (color[colorScheme] ?? color.normal ?? null)
-      : color;
+    return resolveColor(color, colorScheme);
   });
   const max = maxBy(Object.entries(colors), ([_k, count]) => count);
-  return max ? (max[0] as string) : GET_DEFAULT_LINE_COLOR(colorScheme);
+  return max
+    ? (max[0] as string)
+    : resolveColor(DefaultTheme.textColor, colorScheme);
 }
 
 function getMostCommonFontFamily(elements: BlockSuite.EdgelessTextModelType[]) {
@@ -227,7 +225,8 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
     });
   };
 
-  private _setTextColor = ({ detail: color }: ColorEvent) => {
+  private _setTextColor = (e: ColorEvent) => {
+    const color = e.detail.value;
     const props = { color };
     this.elements.forEach(element => {
       this.service.updateElement(element.id, buildProps(element, props));
@@ -303,10 +302,11 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
     // no need to update the bound of edgeless text block, which updates itself using ResizeObserver
   };
 
-  pickColor = (event: PickColorEvent) => {
-    if (event.type === 'pick') {
+  pickColor = (e: PickColorEvent) => {
+    if (e.type === 'pick') {
+      const color = e.detail.value;
       this.elements.forEach(element => {
-        const props = packColor('color', { ...event.detail });
+        const props = packColor('color', color);
         this.service.updateElement(element.id, buildProps(element, props));
         this._updateElementBound(element);
       });
@@ -316,7 +316,7 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
     const key = this.elementType === 'connector' ? 'labelStyle' : 'color';
     this.elements.forEach(ele => {
       // @ts-expect-error: FIXME
-      ele[event.type === 'start' ? 'stash' : 'pop'](key);
+      ele[e.type === 'start' ? 'stash' : 'pop'](key);
     });
   };
 
@@ -388,7 +388,8 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
                 .color=${selectedColor}
                 .colors=${colors}
                 .colorType=${type}
-                .palettes=${PALETTES}
+                .theme=${colorScheme}
+                .palettes=${DefaultTheme.palettes}
               >
               </edgeless-color-picker-button>
             `;
@@ -409,6 +410,8 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
             >
               <edgeless-color-panel
                 .value=${selectedColor}
+                .theme=${colorScheme}
+                .palettes=${DefaultTheme.palettes}
                 @select=${this._setTextColor}
               ></edgeless-color-panel>
             </editor-menu-button>

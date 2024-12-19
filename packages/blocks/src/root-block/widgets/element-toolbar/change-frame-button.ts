@@ -8,9 +8,10 @@ import { renderToolbarSeparator } from '@blocksuite/affine-components/toolbar';
 import {
   type ColorScheme,
   DEFAULT_NOTE_HEIGHT,
+  DefaultTheme,
   type FrameBlockModel,
   NoteDisplayMode,
-  PALETTES,
+  resolveColor,
 } from '@blocksuite/affine-model';
 import { matchFlavours } from '@blocksuite/affine-shared/utils';
 import { GfxExtensionIdentifier } from '@blocksuite/block-std/gfx';
@@ -41,30 +42,36 @@ import { mountFrameTitleEditor } from '../../edgeless/utils/text.js';
 function getMostCommonColor(
   elements: FrameBlockModel[],
   colorScheme: ColorScheme
-): string | null {
-  const colors = countBy(elements, (ele: FrameBlockModel) => {
-    return typeof ele.background === 'object'
-      ? (ele.background[colorScheme] ?? ele.background.normal ?? null)
-      : ele.background;
-  });
+): string {
+  const colors = countBy(elements, (ele: FrameBlockModel) =>
+    resolveColor(ele.background, colorScheme)
+  );
   const max = maxBy(Object.entries(colors), ([_k, count]) => count);
-  return max ? (max[0] as string) : null;
+  return max ? (max[0] as string) : 'transparent';
 }
 
 export class EdgelessChangeFrameButton extends WithDisposable(LitElement) {
-  pickColor = (event: PickColorEvent) => {
-    if (event.type === 'pick') {
-      this.frames.forEach(ele =>
-        this.service.updateElement(
-          ele.id,
-          packColor('background', { ...event.detail })
-        )
-      );
+  private _setFrameBackground = (e: ColorEvent) => {
+    const background = e.detail.value;
+    this.frames.forEach(frame => {
+      this.service.updateElement(frame.id, { background });
+    });
+  };
+
+  pickColor = (e: PickColorEvent) => {
+    const field = 'background';
+
+    if (e.type === 'pick') {
+      const color = e.detail.value;
+      this.frames.forEach(ele => {
+        const props = packColor(field, color);
+        this.service.updateElement(ele.id, props);
+      });
       return;
     }
 
     this.frames.forEach(ele =>
-      ele[event.type === 'start' ? 'stash' : 'pop']('background')
+      ele[e.type === 'start' ? 'stash' : 'pop'](field)
     );
   };
 
@@ -115,18 +122,12 @@ export class EdgelessChangeFrameButton extends WithDisposable(LitElement) {
     toast(this.edgeless.host, 'Frame has been inserted into doc');
   }
 
-  private _setFrameBackground(color: string) {
-    this.frames.forEach(frame => {
-      this.service.updateElement(frame.id, { background: color });
-    });
-  }
-
   protected override render() {
     const { frames } = this;
     const len = frames.length;
     const onlyOne = len === 1;
     const colorScheme = this.edgeless.surface.renderer.getColorScheme();
-    const background = getMostCommonColor(frames, colorScheme) ?? 'transparent';
+    const background = getMostCommonColor(frames, colorScheme);
 
     return join(
       [
@@ -199,7 +200,8 @@ export class EdgelessChangeFrameButton extends WithDisposable(LitElement) {
                 .color=${background}
                 .colors=${colors}
                 .colorType=${type}
-                .palettes=${PALETTES}
+                .theme=${colorScheme}
+                .palettes=${DefaultTheme.palettes}
               >
               </edgeless-color-picker-button>
             `;
@@ -220,8 +222,9 @@ export class EdgelessChangeFrameButton extends WithDisposable(LitElement) {
             >
               <edgeless-color-panel
                 .value=${background}
-                .palettes=${PALETTES}
-                @select=${(e: ColorEvent) => this._setFrameBackground(e.detail)}
+                .theme=${colorScheme}
+                .palettes=${DefaultTheme.palettes}
+                @select=${this._setFrameBackground}
               >
               </edgeless-color-panel>
             </editor-menu-button>

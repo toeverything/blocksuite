@@ -25,7 +25,7 @@ import { RoughCanvas } from '../utils/rough/canvas.js';
 type EnvProvider = {
   generateColorProperty: (color: Color, fallback: string) => string;
   getColorScheme: () => ColorScheme;
-  getColorValue: (color: Color, fallback?: string, real?: boolean) => string;
+  getColorValue: (color: Color, fallback?: Color, real?: boolean) => string;
   getPropertyValue: (property: string) => string;
   selectedElements?: () => string[];
 };
@@ -411,7 +411,7 @@ export class CanvasRenderer {
     return this.provider.getColorScheme?.() ?? ColorScheme.Light;
   }
 
-  getColorValue(color: Color, fallback?: string, real?: boolean) {
+  getColorValue(color: Color, fallback?: Color, real?: boolean) {
     return (
       this.provider.getColorValue?.(color, fallback, real) ?? 'transparent'
     );

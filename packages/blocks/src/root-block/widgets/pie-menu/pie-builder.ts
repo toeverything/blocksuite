@@ -1,3 +1,5 @@
+import type { Color, Palette } from '@blocksuite/affine-model';
+
 import { assertExists } from '@blocksuite/global/utils';
 import { html } from 'lit';
 
@@ -16,11 +18,11 @@ import { calcNodeAngles, calcNodeWedges, isNodeWithChildren } from './utils.js';
 
 export interface IPieColorPickerNodeProps {
   label: string;
-  active: (ctx: PieMenuContext) => string;
+  active: (ctx: PieMenuContext) => Color;
   onChange: PieColorNodeModel['onChange'];
   openOnHover?: PieSubmenuNodeModel['openOnHover'];
   hollow?: boolean;
-  colors: { color: string }[];
+  colors: Palette[];
 }
 
 type PieBuilderConstructorProps = Omit<
@@ -131,17 +133,18 @@ export class PieMenuBuilder {
       label: props.label,
       role: 'color-picker',
       openOnHover: props.openOnHover ?? true,
-      children: props.colors.map(({ color }) => ({
+      children: props.colors.map(palette => ({
         icon: () =>
           html`<edgeless-color-button
             class="large"
-            .color=${color}
+            .label=${palette.key}
+            .color=${palette.value}
             .hollowCircle=${hollow}
           ></edgeless-color-button>`,
         type: 'color',
         hollowCircle: hollow,
-        label: color,
-        color: color,
+        label: palette.key,
+        color: palette.value,
         onChange: props.onChange,
       })),
     };

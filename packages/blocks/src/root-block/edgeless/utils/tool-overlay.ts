@@ -9,9 +9,7 @@ import {
 } from '@blocksuite/affine-block-surface';
 import {
   type Color,
-  DEFAULT_NOTE_BACKGROUND_COLOR,
-  DEFAULT_SHAPE_FILL_COLOR,
-  DEFAULT_SHAPE_STROKE_COLOR,
+  DefaultTheme,
   shapeMethods,
   type ShapeStyle,
 } from '@blocksuite/affine-model';
@@ -288,10 +286,10 @@ export class ShapeOverlay extends ToolOverlay {
     const { shapeStyle, fillColor, strokeColor } = style;
     const fill = this.gfx.std
       .get(ThemeProvider)
-      .getColorValue(fillColor, DEFAULT_SHAPE_FILL_COLOR, true);
+      .getColorValue(fillColor, DefaultTheme.shapeFillColor, true);
     const stroke = this.gfx.std
       .get(ThemeProvider)
-      .getColorValue(strokeColor, DEFAULT_SHAPE_STROKE_COLOR, true);
+      .getColorValue(strokeColor, DefaultTheme.shapeStrokeColor, true);
 
     options.fill = fill;
     options.stroke = stroke;
@@ -358,7 +356,7 @@ export class NoteOverlay extends ToolOverlay {
     this.globalAlpha = 0;
     this.backgroundColor = gfx.std
       .get(ThemeProvider)
-      .getColorValue(background, DEFAULT_NOTE_BACKGROUND_COLOR, true);
+      .getColorValue(background, DefaultTheme.noteBackgrounColor, true);
     this.disposables.add(
       effect(() => {
         // when change note child type, update overlay text

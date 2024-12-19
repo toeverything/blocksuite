@@ -1,3 +1,4 @@
+import type { Color } from '@blocksuite/affine-model';
 import type { TemplateResult } from 'lit';
 
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
@@ -69,10 +70,10 @@ export interface PieSubmenuNodeModel extends PieBaseNodeModel {
 
 export interface PieColorNodeModel extends PieBaseNodeModel {
   type: 'color';
-  color: string;
+  color: Color;
   hollowCircle: boolean;
   text?: string;
-  onChange: (color: string, ctx: PieMenuContext) => void;
+  onChange: (color: Color, ctx: PieMenuContext) => void;
 }
 
 export type IPieNodeWithAction =

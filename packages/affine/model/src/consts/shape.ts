@@ -1,5 +1,3 @@
-import { Black, Light, LIGHT_PALETTES, StrokeColor, White } from './color.js';
-
 export const DEFAULT_ROUGHNESS = 1.4;
 
 // TODO: need to check the default central area ratio
@@ -46,13 +44,3 @@ export enum ShapeStyle {
   General = 'General',
   Scribbled = 'Scribbled',
 }
-
-export const ShapeFillColor = { Black, White, ...Light } as const;
-
-export const SHAPE_FILL_COLORS = [...LIGHT_PALETTES, Black, White];
-
-export const DEFAULT_SHAPE_FILL_COLOR = Light.Yellow;
-
-export const DEFAULT_SHAPE_STROKE_COLOR = StrokeColor.Yellow;
-
-export const DEFAULT_SHAPE_TEXT_COLOR = StrokeColor.Black;

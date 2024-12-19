@@ -33,7 +33,7 @@ export function getActiveShapeColor(type: 'fill' | 'stroke') {
           'shape:roundedRect'
         ];
       const color = type == 'fill' ? props.fillColor : props.strokeColor;
-      return color.toString();
+      return color;
     }
     return '';
   };
@@ -46,7 +46,7 @@ export function getActiveConnectorStrokeColor({
     const props =
       rootComponent.std.get(EditPropsStore).lastProps$.value.connector;
     const color = props.stroke;
-    return color.toString();
+    return color;
   }
   return '';
 }

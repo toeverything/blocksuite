@@ -2,7 +2,7 @@ import type { AffineTextAttributes } from '@blocksuite/affine-shared/types';
 import type { ExtensionType } from '@blocksuite/block-std';
 import type { DeltaInsert } from '@blocksuite/inline';
 
-import { DEFAULT_NOTE_BACKGROUND_COLOR } from '@blocksuite/affine-model';
+import { DefaultTheme } from '@blocksuite/affine-model';
 import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 import {
   type AssetsManager,
@@ -128,7 +128,7 @@ export class NotionTextAdapter extends BaseAdapter<NotionText> {
       flavour: 'affine:note',
       props: {
         xywh: '[0,0,800,95]',
-        background: DEFAULT_NOTE_BACKGROUND_COLOR,
+        background: DefaultTheme.noteBackgrounColor,
         index: 'a0',
         hidden: false,
         displayMode: 'both',

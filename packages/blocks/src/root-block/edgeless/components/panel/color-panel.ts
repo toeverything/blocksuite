@@ -1,12 +1,16 @@
-import { Black, ColorScheme, PALETTES, White } from '@blocksuite/affine-model';
+import type { Color, ColorScheme, Palette } from '@blocksuite/affine-model';
+
+import { isTransparent, resolveColor } from '@blocksuite/affine-model';
 import { unsafeCSSVarV2 } from '@blocksuite/affine-shared/theme';
 import { css, html, LitElement, nothing, svg, type TemplateResult } from 'lit';
 import { property } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
+import { ifDefined } from 'lit/directives/if-defined.js';
 import { repeat } from 'lit/directives/repeat.js';
+import isEqual from 'lodash.isequal';
 
 export class ColorEvent extends Event {
-  detail: string;
+  detail: Palette;
 
   constructor(
     type: string,
@@ -14,19 +18,11 @@ export class ColorEvent extends Event {
       detail,
       composed,
       bubbles,
-    }: { detail: string; composed: boolean; bubbles: boolean }
+    }: { detail: Palette; composed: boolean; bubbles: boolean }
   ) {
     super(type, { bubbles, composed });
     this.detail = detail;
   }
-}
-
-export const GET_DEFAULT_LINE_COLOR = (theme: ColorScheme) => {
-  return theme === ColorScheme.Dark ? White : Black;
-};
-
-export function isTransparent(color: string) {
-  return color.toLowerCase().endsWith('transparent');
 }
 
 function TransparentIcon(hollowCircle = false) {
@@ -167,18 +163,14 @@ export class EdgelessColorButton extends LitElement {
   `;
 
   get preprocessColor() {
-    const color = this.color;
-    return color.startsWith('--') ? `var(${color})` : color;
+    const value = resolveColor(this.color, this.theme);
+    return value.startsWith('--') ? `var(${value})` : value;
   }
 
   override render() {
-    const { color, preprocessColor, hollowCircle, letter } = this;
+    const { label, preprocessColor, hollowCircle } = this;
     const additionIcon = AdditionIcon(preprocessColor, !!hollowCircle);
-    return html`<div
-      class="color-unit"
-      aria-label=${color}
-      data-letter=${letter ? 'A' : nothing}
-    >
+    return html`<div class="color-unit" aria-label=${ifDefined(label)}>
       ${additionIcon}
     </div>`;
   }
@@ -187,13 +179,16 @@ export class EdgelessColorButton extends LitElement {
   accessor active: boolean = false;
 
   @property({ attribute: false })
-  accessor color!: string;
+  accessor color!: Color;
 
   @property({ attribute: false })
   accessor hollowCircle: boolean = false;
 
   @property({ attribute: false })
-  accessor letter: boolean | undefined = undefined;
+  accessor label: string | undefined = undefined;
+
+  @property({ attribute: false })
+  accessor theme!: ColorScheme;
 }
 
 export class EdgelessColorPanel extends LitElement {
@@ -221,35 +216,37 @@ export class EdgelessColorPanel extends LitElement {
     }
   `;
 
-  onSelect(value: string) {
+  onSelect(palette: Palette) {
     this.dispatchEvent(
       new ColorEvent('select', {
-        detail: value,
+        detail: palette,
         composed: true,
         bubbles: true,
       })
     );
-    this.value = value;
   }
 
   override render() {
     return html`
       ${repeat(
         this.palettes,
-        color => color,
-        color =>
-          html`<edgeless-color-button
-            class=${classMap({
-              large: true,
-              black: color.startsWith('--') && color.endsWith('black'),
-            })}
-            .color=${color}
-            .letter=${this.showLetterMark}
+        palette => palette.key,
+        palette => {
+          const resolvedColor = resolveColor(palette.value, this.theme);
+          return html`<edgeless-color-button
+            class=${classMap({ large: true })}
+            .label=${palette.key}
+            .color=${palette.value}
+            .theme=${this.theme}
             .hollowCircle=${this.hollowCircle}
-            ?active=${color === this.value}
-            @click=${() => this.onSelect(color)}
+            ?active=${isEqual(resolvedColor, this.value)}
+            @click=${() => {
+              this.onSelect(palette);
+              this.value = resolvedColor;
+            }}
           >
-          </edgeless-color-button>`
+          </edgeless-color-button>`;
+        }
       )}
       <slot name="custom"></slot>
     `;
@@ -265,10 +262,10 @@ export class EdgelessColorPanel extends LitElement {
   accessor openColorPicker!: (e: MouseEvent) => void;
 
   @property({ type: Array })
-  accessor palettes: readonly string[] = PALETTES;
+  accessor palettes: readonly Palette[] = [];
 
   @property({ attribute: false })
-  accessor showLetterMark = false;
+  accessor theme!: ColorScheme;
 
   @property({ attribute: false })
   accessor value: string | null = null;

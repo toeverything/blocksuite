@@ -1,6 +1,6 @@
 import type { SliceSnapshot } from '@blocksuite/store';
 
-import { DEFAULT_NOTE_BACKGROUND_COLOR } from '@blocksuite/affine-model';
+import { DefaultTheme } from '@blocksuite/affine-model';
 import { describe, expect, test } from 'vitest';
 
 import { NotionTextAdapter } from '../../_common/adapters/notion-text.js';
@@ -21,7 +21,7 @@ describe('notion-text to snapshot', () => {
           flavour: 'affine:note',
           props: {
             xywh: '[0,0,800,95]',
-            background: DEFAULT_NOTE_BACKGROUND_COLOR,
+            background: DefaultTheme.noteBackgrounColor,
             index: 'a0',
             hidden: false,
             displayMode: 'both',

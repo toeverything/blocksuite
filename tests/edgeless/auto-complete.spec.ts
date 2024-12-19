@@ -1,10 +1,5 @@
-import {
-  DEFAULT_NOTE_BACKGROUND_COLOR,
-  NoteBackgroundColor,
-  ShapeFillColor,
-  StrokeColor,
-} from '@blocksuite/affine-model';
 import { expect, type Page } from '@playwright/test';
+import { lightThemeV2 } from '@toeverything/theme/v2';
 
 import { clickView, moveView } from '../utils/actions/click.js';
 import { dragBetweenCoords } from '../utils/actions/drag.js';
@@ -140,11 +135,9 @@ test.describe('auto-complete', () => {
       await createShapeElement(page, [0, 0], [100, 100], Shape.Square);
       await assertSelectedBound(page, [0, 0, 100, 100]);
       await triggerComponentToolbarAction(page, 'changeShapeStrokeColor');
-      const lineColor = StrokeColor.Red;
-      await changeShapeStrokeColor(page, lineColor);
+      await changeShapeStrokeColor(page, 'MediumRed');
       await triggerComponentToolbarAction(page, 'changeShapeFillColor');
-      const color = ShapeFillColor.Green;
-      await changeShapeFillColor(page, color);
+      await changeShapeFillColor(page, 'HeavyGreen');
       await dragBetweenViewCoords(page, [120, 50], [200, 0]);
 
       const noteButton = getAutoCompletePanelButton(page, 'note');
@@ -169,7 +162,7 @@ test.describe('auto-complete', () => {
       await assertEdgelessNoteBackground(
         page,
         noteId,
-        DEFAULT_NOTE_BACKGROUND_COLOR
+        lightThemeV2['edgeless/note/white']
       );
 
       const rect = await edgelessNote.boundingBox();
@@ -182,15 +175,18 @@ test.describe('auto-complete', () => {
       // select connector
       await dragBetweenViewCoords(page, [140, 50], [160, 0]);
       await waitNextFrame(page);
-      await assertConnectorStrokeColor(page, lineColor);
+      await assertConnectorStrokeColor(
+        page,
+        'MediumRed',
+        lightThemeV2['edgeless/palette/medium/redMedium']
+      );
 
       // select note block
       await page.mouse.click(rect.x + rect.width / 2, rect.y + rect.height / 2);
       await waitNextFrame(page);
 
       await triggerComponentToolbarAction(page, 'changeNoteColor');
-      const noteColor = NoteBackgroundColor.Red;
-      await changeEdgelessNoteBackground(page, noteColor);
+      await changeEdgelessNoteBackground(page, 'Red');
 
       // move to arrow icon
       await page.mouse.move(
@@ -224,7 +220,11 @@ test.describe('auto-complete', () => {
         return note?.getAttribute('data-block-id');
       });
       assertExists(noteId2);
-      await assertEdgelessNoteBackground(page, noteId, noteColor);
+      await assertEdgelessNoteBackground(
+        page,
+        noteId,
+        lightThemeV2['edgeless/note/red']
+      );
 
       expect(await edgelessNote.count()).toBe(2);
     });
