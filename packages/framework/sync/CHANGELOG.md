@@ -1,5 +1,35 @@
 # @blocksuite/sync
 
+## 0.19.4
+
+### Patch Changes
+
+- 8ae61d6: Improves edgeless viewport stability
+
+  ## Feat
+
+  - feat(database): add AddDatabase event tracking to slash menu (#9015)
+
+  ## Fix
+
+  - fix: should show title alias first (#9005)
+
+  ## Chore
+
+  - chore(blocks): add event tracking for attachment upload (#9008)
+  - chore(blocks): reuse attachment upload method (#9007)
+
+  ## Refactor
+
+  - refactor(std): optimize gfx viewport cache fields (#9014)
+
+  ## Perf
+
+  - perf(edgeless): reduce redundant dom query per render (#9016)
+
+- Updated dependencies [8ae61d6]
+  - @blocksuite/global@0.19.4
+
 ## 0.19.3
 
 ### Patch Changes

@@ -1,5 +1,42 @@
 # @blocksuite/affine-block-embed
 
+## 0.19.4
+
+### Patch Changes
+
+- 8ae61d6: Improves edgeless viewport stability
+
+  ## Feat
+
+  - feat(database): add AddDatabase event tracking to slash menu (#9015)
+
+  ## Fix
+
+  - fix: should show title alias first (#9005)
+
+  ## Chore
+
+  - chore(blocks): add event tracking for attachment upload (#9008)
+  - chore(blocks): reuse attachment upload method (#9007)
+
+  ## Refactor
+
+  - refactor(std): optimize gfx viewport cache fields (#9014)
+
+  ## Perf
+
+  - perf(edgeless): reduce redundant dom query per render (#9016)
+
+- Updated dependencies [8ae61d6]
+  - @blocksuite/affine-block-surface@0.19.4
+  - @blocksuite/affine-components@0.19.4
+  - @blocksuite/affine-model@0.19.4
+  - @blocksuite/affine-shared@0.19.4
+  - @blocksuite/block-std@0.19.4
+  - @blocksuite/global@0.19.4
+  - @blocksuite/inline@0.19.4
+  - @blocksuite/store@0.19.4
+
 ## 0.19.3
 
 ### Patch Changes
