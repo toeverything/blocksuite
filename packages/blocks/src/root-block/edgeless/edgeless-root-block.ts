@@ -127,6 +127,10 @@ export class EdgelessRootBlockComponent extends BlockComponent<
     return this.std.event;
   }
 
+  get fontLoader() {
+    return this.std.get(FontLoaderService);
+  }
+
   get gfx() {
     return this.std.get(GfxControllerIdentifier);
   }

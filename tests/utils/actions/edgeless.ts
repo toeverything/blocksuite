@@ -1912,3 +1912,30 @@ export function toIdCountMap(ids: string[]) {
 export function getFrameTitle(page: Page, frame: string) {
   return page.locator(`affine-frame-title[data-id="${frame}"]`);
 }
+
+export async function selectElementInEdgeless(page: Page, elements: string[]) {
+  await page.evaluate(
+    ({ elements }) => {
+      const edgelessBlock = document.querySelector('affine-edgeless-root');
+      if (!edgelessBlock) {
+        throw new Error('edgeless block not found');
+      }
+
+      edgelessBlock.gfx.selection.set({
+        elements,
+      });
+    },
+    { elements }
+  );
+}
+
+export async function waitFontsLoaded(page: Page) {
+  await page.evaluate(() => {
+    const edgelessBlock = document.querySelector('affine-edgeless-root');
+    if (!edgelessBlock) {
+      throw new Error('edgeless block not found');
+    }
+
+    return edgelessBlock.fontLoader?.ready;
+  });
+}
