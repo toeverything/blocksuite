@@ -241,6 +241,8 @@ export class DragEventWatcher {
     const state = context.get('dndState');
 
     const event = state.raw;
+    event.preventDefault();
+
     const { clientX, clientY } = event;
     const point = new Point(clientX, clientY);
     const element = getClosestBlockComponentByPoint(point.clone());
@@ -265,7 +267,6 @@ export class DragEventWatcher {
 
     const index =
       parent.children.indexOf(model) + (result.type === 'before' ? 0 : 1);
-    event.preventDefault();
 
     if (matchFlavours(parent, ['affine:note'])) {
       const snapshot = this._deserializeSnapshot(state);
