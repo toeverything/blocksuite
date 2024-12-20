@@ -626,6 +626,17 @@ export class MindmapElementModel extends GfxGroupLikeElementModel<MindmapElement
     return this._nodeMap.get(id) ?? null;
   }
 
+  getNodeByPath(path: number[]): MindmapNode | null {
+    let node: MindmapNode | null = this._tree;
+
+    for (let i = 1; i < path.length; i++) {
+      node = node?.children[path[i]];
+      if (!node) return null;
+    }
+
+    return node;
+  }
+
   getParentNode(id: string) {
     const node = this.children.get(id);
 
