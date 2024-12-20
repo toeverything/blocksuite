@@ -41,18 +41,6 @@ export class ParagraphBlockModel extends BlockModel<ParagraphProps> {
   override flavour!: 'affine:paragraph';
 
   override text!: Text;
-
-  constructor() {
-    super();
-
-    this.propsUpdated.on(({ key }) => {
-      if (key === 'type') {
-        if (!this.type.startsWith('h')) {
-          this.collapsed = false;
-        }
-      }
-    });
-  }
 }
 
 declare global {

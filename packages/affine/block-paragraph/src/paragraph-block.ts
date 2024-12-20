@@ -144,39 +144,52 @@ export class ParagraphBlockComponent extends CaptionedBlockComponent<
       })
     );
 
-    // collapsed change effect
+    this.disposables.add(
+      effect(() => {
+        const type = this.model.type$.value;
+        if (!type.startsWith('h') && this.model.collapsed) {
+          this.model.collapsed = false;
+        }
+      })
+    );
+
     this.disposables.add(
       effect(() => {
         const collapsed = this.model.collapsed$.value;
         this._readonlyCollapsed = collapsed;
 
-        if (!collapsed) return;
+        // reset text selection when selected block is collapsed
+        if (this.model.type.startsWith('h') && collapsed) {
+          const collapsedSiblings = this.collapsedSiblings;
+          const textSelection = this.host.selection.find('text');
+          const blockSelections = this.host.selection.filter('block');
 
-        const collapsedSiblings = this.collapsedSiblings;
-        const textSelection = this.host.selection.find('text');
-        const blockSelection = this.host.selection.find('block');
+          if (
+            textSelection &&
+            collapsedSiblings.some(
+              sibling => sibling.id === textSelection.blockId
+            )
+          ) {
+            this.host.selection.clear(['text']);
+          }
 
-        if (
-          textSelection &&
-          collapsedSiblings.some(
-            sibling => sibling.id === textSelection.blockId
-          )
-        ) {
-          this.host.selection.clear(['text']);
-        }
-
-        if (
-          blockSelection &&
-          collapsedSiblings.some(
-            sibling => sibling.id === blockSelection.blockId
-          )
-        ) {
-          this.host.selection.clear(['block']);
+          if (
+            blockSelections.some(selection =>
+              collapsedSiblings.some(
+                sibling => sibling.id === selection.blockId
+              )
+            )
+          ) {
+            this.host.selection.clear(['block']);
+          }
         }
       })
     );
 
-    // type change effect
+    // > # 123
+    // # 456
+    //
+    // we need to update collapsed state of 123 when 456 converted to text
     let beforeType = this.model.type;
     this.disposables.add(
       effect(() => {
@@ -189,7 +202,7 @@ export class ParagraphBlockComponent extends CaptionedBlockComponent<
             nearestHeading.collapsed &&
             !this.doc.readonly
           ) {
-            this.model.collapsed = false;
+            nearestHeading.collapsed = false;
           }
         }
         beforeType = type;
