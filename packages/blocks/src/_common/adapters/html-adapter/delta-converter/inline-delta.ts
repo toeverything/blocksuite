@@ -74,6 +74,33 @@ export const underlineDeltaToHtmlAdapterMatcher: InlineDeltaToHtmlAdapterMatcher
     },
   };
 
+export const backgroundDeltaToHtmlAdapterMatcher: InlineDeltaToHtmlAdapterMatcher =
+  {
+    name: 'background',
+    match: delta => !!delta.attributes?.background,
+    toAST: (_, context) => {
+      return {
+        type: 'element',
+        tagName: 'span',
+        properties: { style: `background-color: ${_.attributes?.background}` },
+        children: [context.current],
+      };
+    },
+  };
+
+export const colorDeltaToHtmlAdapterMatcher: InlineDeltaToHtmlAdapterMatcher = {
+  name: 'color',
+  match: delta => !!delta.attributes?.color,
+  toAST: (_, context) => {
+    return {
+      type: 'element',
+      tagName: 'span',
+      properties: { style: `color: ${_.attributes?.color}` },
+      children: [context.current],
+    };
+  },
+};
+
 export const referenceDeltaToHtmlAdapterMatcher: InlineDeltaToHtmlAdapterMatcher =
   {
     name: 'reference',
@@ -141,6 +168,8 @@ export const inlineDeltaToHtmlAdapterMatchers: InlineDeltaToHtmlAdapterMatcher[]
     strikeDeltaToHtmlAdapterMatcher,
     underlineDeltaToHtmlAdapterMatcher,
     inlineCodeDeltaToMarkdownAdapterMatcher,
+    backgroundDeltaToHtmlAdapterMatcher,
+    colorDeltaToHtmlAdapterMatcher,
     referenceDeltaToHtmlAdapterMatcher,
     linkDeltaToHtmlAdapterMatcher,
   ];
