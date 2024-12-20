@@ -1187,4 +1187,229 @@ describe('snapshot to plain text', () => {
     });
     expect(target.file).toBe(plainText);
   });
+
+  test('table', async () => {
+    const blockSnapshot: BlockSnapshot = {
+      type: 'block',
+      id: 'block:8Wb7CSJ9Qe',
+      flavour: 'affine:database',
+      props: {
+        cells: {
+          'block:P_-Wg7Rg9O': {
+            'block:qyo8q9VPWU': {
+              columnId: 'block:qyo8q9VPWU',
+              value: 'TKip9uc7Yx',
+            },
+            'block:5cglrBmAr3': {
+              columnId: 'block:5cglrBmAr3',
+              value: 1702598400000,
+            },
+            'block:8Fa0JQe7WY': {
+              columnId: 'block:8Fa0JQe7WY',
+              value: 1,
+            },
+            'block:5ej6StPuF_': {
+              columnId: 'block:5ej6StPuF_',
+              value: 65,
+            },
+            'block:DPhZ6JBziD': {
+              columnId: 'block:DPhZ6JBziD',
+              value: ['-2_QD3GZT1', '73UrEZWaKk'],
+            },
+            'block:O8dpIDiP7-': {
+              columnId: 'block:O8dpIDiP7-',
+              value: {
+                '$blocksuite:internal:text$': true,
+                delta: [
+                  {
+                    insert: 'test2',
+                    attributes: {
+                      link: 'https://google.com',
+                    },
+                  },
+                ],
+              },
+            },
+            'block:U8lPD59MkF': {
+              columnId: 'block:U8lPD59MkF',
+              value: 'https://google.com',
+            },
+            'block:-DT7B0TafG': {
+              columnId: 'block:-DT7B0TafG',
+              value: true,
+            },
+          },
+          'block:0vhfgcHtPF': {
+            'block:qyo8q9VPWU': {
+              columnId: 'block:qyo8q9VPWU',
+              value: 'F2bgsaE3X2',
+            },
+            'block:O8dpIDiP7-': {
+              columnId: 'block:O8dpIDiP7-',
+              value: {
+                '$blocksuite:internal:text$': true,
+                delta: [
+                  {
+                    insert: 'test1',
+                  },
+                ],
+              },
+            },
+            'block:5cglrBmAr3': {
+              columnId: 'block:5cglrBmAr3',
+              value: 1703030400000,
+            },
+          },
+          'block:b4_02QXMAM': {
+            'block:qyo8q9VPWU': {
+              columnId: 'block:qyo8q9VPWU',
+              value: 'y3O1A2IHHu',
+            },
+          },
+          'block:W_eirvg7EJ': {
+            'block:qyo8q9VPWU': {
+              columnId: 'block:qyo8q9VPWU',
+            },
+          },
+        },
+        columns: [
+          {
+            type: 'title',
+            name: 'Title',
+            data: {},
+            id: 'block:2VfUaitjf9',
+          },
+          {
+            type: 'select',
+            name: 'Status',
+            data: {
+              options: [
+                {
+                  id: 'TKip9uc7Yx',
+                  color: 'var(--affine-tag-white)',
+                  value: 'TODO',
+                },
+                {
+                  id: 'F2bgsaE3X2',
+                  color: 'var(--affine-tag-green)',
+                  value: 'In Progress',
+                },
+                {
+                  id: 'y3O1A2IHHu',
+                  color: 'var(--affine-tag-gray)',
+                  value: 'Done',
+                },
+              ],
+            },
+            id: 'block:qyo8q9VPWU',
+          },
+          {
+            type: 'date',
+            name: 'Date',
+            data: {},
+            id: 'block:5cglrBmAr3',
+          },
+          {
+            type: 'number',
+            name: 'Number',
+            data: {
+              decimal: 0,
+            },
+            id: 'block:8Fa0JQe7WY',
+          },
+          {
+            type: 'progress',
+            name: 'Progress',
+            data: {},
+            id: 'block:5ej6StPuF_',
+          },
+          {
+            type: 'multi-select',
+            name: 'MultiSelect',
+            data: {
+              options: [
+                {
+                  id: '73UrEZWaKk',
+                  value: 'test2',
+                  color: 'var(--affine-tag-purple)',
+                },
+                {
+                  id: '-2_QD3GZT1',
+                  value: 'test1',
+                  color: 'var(--affine-tag-teal)',
+                },
+              ],
+            },
+            id: 'block:DPhZ6JBziD',
+          },
+          {
+            type: 'rich-text',
+            name: 'RichText',
+            data: {},
+            id: 'block:O8dpIDiP7-',
+          },
+          {
+            type: 'link',
+            name: 'Link',
+            data: {},
+            id: 'block:U8lPD59MkF',
+          },
+          {
+            type: 'checkbox',
+            name: 'Checkbox',
+            data: {},
+            id: 'block:-DT7B0TafG',
+          },
+        ],
+      },
+      children: [
+        {
+          type: 'block',
+          id: 'block:P_-Wg7Rg9O',
+          flavour: 'affine:paragraph',
+          props: {
+            type: 'text',
+            text: {
+              '$blocksuite:internal:text$': true,
+              delta: [
+                {
+                  insert: 'Task 1',
+                },
+              ],
+            },
+          },
+          children: [],
+        },
+        {
+          type: 'block',
+          id: 'block:0vhfgcHtPF',
+          flavour: 'affine:paragraph',
+          props: {
+            type: 'text',
+            text: {
+              '$blocksuite:internal:text$': true,
+              delta: [
+                {
+                  insert: 'Task 2',
+                },
+              ],
+            },
+          },
+          children: [],
+        },
+      ],
+    };
+
+    const plainText = `\
+| Title  | Status      | Date       | Number | Progress | MultiSelect | RichText                  | Link               | Checkbox |
+| ------ | ----------- | ---------- | ------ | -------- | ----------- | ------------------------- | ------------------ | -------- |
+| Task 1 | TODO        | 2023-12-15 | 1      | 65       | test1,test2 | test2: https://google.com | https://google.com | true     |
+| Task 2 | In Progress | 2023-12-20 |        |          |             | test1                     |                    |          |
+`;
+    const plainTextAdapter = new PlainTextAdapter(createJob());
+    const target = await plainTextAdapter.fromBlockSnapshot({
+      snapshot: blockSnapshot,
+    });
+    expect(target.file).toBe(plainText);
+  });
 });
