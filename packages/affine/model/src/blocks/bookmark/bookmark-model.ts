@@ -50,6 +50,7 @@ export const BookmarkBlockSchema = defineBlockSchema({
       'affine:edgeless-text',
       'affine:paragraph',
       'affine:list',
+      'affine:cell',
     ],
   },
   toModel: () => new BookmarkBlockModel(),

@@ -17,6 +17,7 @@ import { effects as widgetScrollAnchoringEffects } from '@blocksuite/affine-widg
 import { effects as stdEffects } from '@blocksuite/block-std/effects';
 import { effects as dataViewEffects } from '@blocksuite/data-view/effects';
 import { effects as inlineEffects } from '@blocksuite/inline/effects';
+import { effects as microsheetDataViewEffects } from '@blocksuite/microsheet-data-view/effects';
 
 import type { insertBookmarkCommand } from './bookmark-block/commands/insert-bookmark.js';
 import type { insertEdgelessTextCommand } from './edgeless-text-block/commands/insert-edgeless-text.js';
@@ -62,6 +63,10 @@ import {
   BookmarkBlockComponent,
   type BookmarkBlockService,
 } from './bookmark-block/index.js';
+import {
+  CellBlockComponent,
+  type CellBlockService,
+} from './cell-block/index.js';
 import { AffineCodeUnit } from './code-block/highlight/affine-code-unit.js';
 import {
   CodeBlockComponent,
@@ -104,6 +109,11 @@ import {
 } from './image-block/index.js';
 import { effects as blockLatexEffects } from './latex-block/effects.js';
 import { LatexBlockComponent } from './latex-block/index.js';
+import {
+  MicrosheetBlockComponent,
+  type MicrosheetBlockService,
+} from './microsheet-block/index.js';
+import { MicrosheetDataViewBlockComponent } from './microsheet-data-view-block/data-view-block.js';
 import {
   EdgelessNoteBlockComponent,
   EdgelessNoteMask,
@@ -271,6 +281,7 @@ import {
   AFFINE_VIEWPORT_OVERLAY_WIDGET,
   AffineViewportOverlayWidget,
 } from './root-block/widgets/viewport-overlay/viewport-overlay.js';
+import { RowBlockComponent, type RowBlockService } from './row-block/index.js';
 import {
   MindmapRootBlock,
   MindmapSurfaceBlock,
@@ -300,6 +311,7 @@ export function effects() {
   blockDatabaseEffects();
   blockSurfaceRefEffects();
   blockLatexEffects();
+  microsheetDataViewEffects();
 
   componentCaptionEffects();
   componentContextMenuEffects();
@@ -360,6 +372,10 @@ export function effects() {
   customElements.define('affine-frame', FrameBlockComponent);
   customElements.define('mini-mindmap-surface-block', MindmapSurfaceBlock);
   customElements.define('affine-data-view', DataViewBlockComponent);
+  customElements.define(
+    'affine-microsheet-data-view',
+    MicrosheetDataViewBlockComponent
+  );
   customElements.define('affine-edgeless-root', EdgelessRootBlockComponent);
   customElements.define('affine-divider', DividerBlockComponent);
   customElements.define('edgeless-copilot-panel', EdgelessCopilotPanel);
@@ -383,6 +399,9 @@ export function effects() {
   );
   customElements.define('affine-custom-modal', AffineCustomModal);
   customElements.define('affine-database', DatabaseBlockComponent);
+  customElements.define('affine-microsheet', MicrosheetBlockComponent);
+  customElements.define('affine-row', RowBlockComponent);
+  customElements.define('affine-cell', CellBlockComponent);
   customElements.define('affine-surface-ref', SurfaceRefBlockComponent);
   customElements.define('pie-node-child', PieNodeChild);
   customElements.define('pie-node-content', PieNodeContent);
@@ -624,6 +643,9 @@ declare global {
       'affine:attachment': AttachmentBlockService;
       'affine:bookmark': BookmarkBlockService;
       'affine:database': DatabaseBlockService;
+      'affine:microsheet': MicrosheetBlockService;
+      'affine:row': RowBlockService;
+      'affine:cell': CellBlockService;
       'affine:image': ImageBlockService;
       'affine:surface-ref': SurfaceRefBlockService;
     }
