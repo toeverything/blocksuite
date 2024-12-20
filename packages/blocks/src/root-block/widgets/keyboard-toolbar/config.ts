@@ -295,7 +295,7 @@ const pageToolGroup: KeyboardToolPanelGroup = {
 
         return std.doc.schema.flavourSchemaMap.has('affine:embed-linked-doc');
       },
-      action: ({ rootComponent, closeToolbar }) => {
+      action: ({ rootComponent, closeToolPanel }) => {
         const { std } = rootComponent;
 
         const linkedDocWidget = std.view.getWidget(
@@ -321,7 +321,7 @@ const pageToolGroup: KeyboardToolPanelGroup = {
             // Wait for range to be updated
             inlineEditor?.slots.inlineRangeSync.once(() => {
               linkedDocWidget.show('mobile');
-              closeToolbar();
+              closeToolPanel();
             });
           })
           .run();

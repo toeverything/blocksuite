@@ -94,7 +94,14 @@ export const mobileLinkedDocMenuStyles = css`
     box-shadow: 0px -3px 10px 0px rgba(0, 0, 0, 0.07);
   }
 
-  ${scrollbarStyle(':host')}
+  :host::-webkit-scrollbar {
+    display: none;
+  }
+
+  .divider {
+    width: 100%;
+    border-top: 0.5px solid ${unsafeCSSVarV2('layer/insideBorder/border')};
+  }
 
   .mobile-linked-doc-menu-item {
     display: flex;

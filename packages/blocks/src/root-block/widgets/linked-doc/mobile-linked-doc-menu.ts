@@ -9,6 +9,7 @@ import { MoreHorizontalIcon } from '@blocksuite/icons/lit';
 import { signal } from '@preact/signals-core';
 import { html, LitElement, nothing } from 'lit';
 import { property } from 'lit/decorators.js';
+import { join } from 'lit/directives/join.js';
 import { repeat } from 'lit/directives/repeat.js';
 
 import type {
@@ -24,6 +25,7 @@ import {
 } from '../../../_common/components/utils.js';
 import { PageRootBlockComponent } from '../../index.js';
 import { mobileLinkedDocMenuStyles } from './styles.js';
+import { resolveSignal } from './utils.js';
 
 export const AFFINE_MOBILE_LINKED_DOC_MENU = 'affine-mobile-linked-doc-menu';
 
@@ -36,13 +38,40 @@ export class AffineMobileLinkedDocMenu extends SignalWatcher(
 ) {
   static override styles = mobileLinkedDocMenuStyles;
 
-  private readonly _expand$ = signal(false);
+  private readonly _expand = new Set<string>();
 
   private _firstActionItem: LinkedMenuItem | null = null;
 
   private readonly _keyboardController = new VirtualKeyboardController(this);
 
   private readonly _linkedDocGroup$ = signal<LinkedMenuGroup[]>([]);
+
+  private _renderGroup = (group: LinkedMenuGroup) => {
+    let items = resolveSignal(group.items);
+
+    const isOverflow = !!group.maxDisplay && items.length > group.maxDisplay;
+    const expanded = this._expand.has(group.name);
+
+    let moreItem = null;
+    if (!expanded && isOverflow) {
+      items = items.slice(0, group.maxDisplay);
+
+      moreItem = html`<div
+        class="mobile-linked-doc-menu-item"
+        @click=${() => {
+          this._expand.add(group.name);
+          this.requestUpdate();
+        }}
+      >
+        ${MoreHorizontalIcon()}
+        <div class="text">${group.overflowText || 'more'}</div>
+      </div>`;
+    }
+
+    return html`
+      ${repeat(items, item => item.key, this._renderItem)} ${moreItem}
+    `;
+  };
 
   private readonly _renderItem = ({
     key,
@@ -198,54 +227,17 @@ export class AffineMobileLinkedDocMenu extends SignalWatcher(
   override firstUpdated() {
     if (!this._keyboardController.opened) {
       this._keyboardController.show();
-      const id = setInterval(() => {
-        if (!this._keyboardController.opened) return;
-        this._scrollInputToTop();
-        clearInterval(id);
-      }, 50);
-      this.disposables.add(() => {
-        clearInterval(id);
-      });
-    } else {
-      this._scrollInputToTop();
     }
+    this._scrollInputToTop();
   }
 
   override render() {
-    // todo: get rid of hard coded config
-    if (this._linkedDocGroup$.value.length === 0) {
+    const groups = this._linkedDocGroup$.value;
+    if (groups.length === 0) {
       return nothing;
     }
 
-    let group = this._linkedDocGroup$.value[0];
-
-    let items = Array.isArray(group.items) ? group.items : group.items.value;
-
-    if (items.length === 0) {
-      group = this._linkedDocGroup$.value[1];
-      items = (
-        Array.isArray(group.items) ? group.items : group.items.value
-      ).filter(item => item.name !== 'Import');
-    }
-
-    const isOverflow = !!group.maxDisplay && items.length > group.maxDisplay;
-
-    let moreItem = null;
-    if (!this._expand$.value && isOverflow) {
-      items = items.slice(0, group.maxDisplay);
-
-      moreItem = html`<div
-        class="mobile-linked-doc-menu-item"
-        @click=${() => {
-          this._expand$.value = true;
-        }}
-      >
-        ${MoreHorizontalIcon()}
-        <div class="text">${group.overflowText || 'more'}</div>
-      </div>`;
-    }
-
-    this._firstActionItem = items[0];
+    this._firstActionItem = resolveSignal(groups[0].items)[0];
 
     this.style.bottom =
       this.context.config.mobile.useScreenHeight &&
@@ -254,7 +246,7 @@ export class AffineMobileLinkedDocMenu extends SignalWatcher(
         : `max(0px, ${this._keyboardController.keyboardHeight}px)`;
 
     return html`
-      ${repeat(items, item => item.key, this._renderItem)} ${moreItem}
+      ${join(groups.map(this._renderGroup), html`<div class="divider"></div>`)}
     `;
   }
 
