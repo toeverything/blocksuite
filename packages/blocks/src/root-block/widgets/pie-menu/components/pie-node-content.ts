@@ -4,7 +4,6 @@ import { property, query } from 'lit/decorators.js';
 
 import type { PieNode } from '../node.js';
 
-import { ColorUnit } from '../../../edgeless/components/panel/color-panel.js';
 import { isSubmenuNode } from '../utils.js';
 
 const styles = css`
@@ -46,7 +45,11 @@ export class PieNodeContent extends LitElement {
         'IPieSubMenuNode.role with color-picker should have children of type color'
       );
       const { color, hollowCircle } = hoveredNode.model;
-      return ColorUnit(color, { hollowCircle });
+      return html`<edgeless-color-button
+        class="large"
+        .color=${color}
+        .hollowCircle=${hollowCircle}
+      ></edgeless-color-button>`;
     }
 
     const { label } = model;

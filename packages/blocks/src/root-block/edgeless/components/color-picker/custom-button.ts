@@ -1,18 +1,36 @@
 import { css, html, LitElement } from 'lit';
 import { property } from 'lit/decorators.js';
 
-import { colorContainerStyles } from '../panel/color-panel.js';
-
 export class EdgelessColorCustomButton extends LitElement {
   static override styles = css`
-    ${colorContainerStyles}
+    :host {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+      cursor: pointer;
+    }
+
+    :host([active]):after {
+      position: absolute;
+      display: block;
+      content: '';
+      width: 27px;
+      height: 27px;
+      border: 1.5px solid var(--affine-primary-color);
+      border-radius: 50%;
+      box-sizing: border-box;
+      overflow: hidden;
+      pointer-events: none;
+    }
 
     .color-custom {
       display: flex;
       align-items: center;
       justify-content: center;
-      width: 16px;
-      height: 16px;
+      width: 21px;
+      height: 21px;
       border-radius: 50%;
       box-sizing: border-box;
       overflow: hidden;
@@ -43,15 +61,11 @@ export class EdgelessColorCustomButton extends LitElement {
   `;
 
   override render() {
-    return html`
-      <div class="color-container" ?active=${this.active}>
-        <div class="color-unit color-custom"></div>
-      </div>
-    `;
+    return html`<div class="color-unit color-custom"></div>`;
   }
 
-  @property({ attribute: false })
-  accessor active!: boolean;
+  @property({ attribute: true, type: Boolean })
+  accessor active: boolean = false;
 }
 
 declare global {

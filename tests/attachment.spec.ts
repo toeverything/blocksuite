@@ -144,7 +144,7 @@ test('can insert attachment from slash menu', async ({ page }) => {
     page,
     `
 <affine:note
-  prop:background="--affine-note-background-white"
+  prop:background="--affine-v2-edgeless-note-white"
   prop:displayMode="both"
   prop:edgeless={
     Object {
@@ -191,7 +191,7 @@ test('should undo/redo works for attachment', async ({ page }) => {
   await assertStoreMatchJSX(
     page,
     `  <affine:note
-  prop:background="--affine-note-background-white"
+  prop:background="--affine-v2-edgeless-note-white"
   prop:displayMode="both"
   prop:edgeless={
     Object {
@@ -229,7 +229,7 @@ test('should undo/redo works for attachment', async ({ page }) => {
     page,
     `
 <affine:note
-  prop:background="--affine-note-background-white"
+  prop:background="--affine-v2-edgeless-note-white"
   prop:displayMode="both"
   prop:edgeless={
     Object {
@@ -260,7 +260,7 @@ test('should undo/redo works for attachment', async ({ page }) => {
     page,
     `
 <affine:note
-  prop:background="--affine-note-background-white"
+  prop:background="--affine-v2-edgeless-note-white"
   prop:displayMode="both"
   prop:edgeless={
     Object {
@@ -348,7 +348,7 @@ test('should turn attachment to image works', async ({ page }) => {
     page,
     `
 <affine:note
-  prop:background="--affine-note-background-white"
+  prop:background="--affine-v2-edgeless-note-white"
   prop:displayMode="both"
   prop:edgeless={
     Object {
@@ -382,7 +382,7 @@ test('should turn attachment to image works', async ({ page }) => {
     page,
     `
 <affine:note
-  prop:background="--affine-note-background-white"
+  prop:background="--affine-v2-edgeless-note-white"
   prop:displayMode="both"
   prop:edgeless={
     Object {
@@ -431,7 +431,7 @@ test('should attachment can be deleted', async ({ page }) => {
     page,
     `
 <affine:note
-  prop:background="--affine-note-background-white"
+  prop:background="--affine-v2-edgeless-note-white"
   prop:displayMode="both"
   prop:edgeless={
     Object {
@@ -475,7 +475,7 @@ test.fixme(`support dragging attachment block directly`, async ({ page }) => {
   await assertStoreMatchJSX(
     page,
     `  <affine:note
-  prop:background="--affine-note-background-white"
+  prop:background="--affine-v2-edgeless-note-white"
   prop:displayMode="both"
   prop:edgeless={
     Object {
@@ -531,7 +531,7 @@ test.fixme(`support dragging attachment block directly`, async ({ page }) => {
     page,
     /*xml*/ `<affine:page>
   <affine:note
-    prop:background="--affine-note-background-white"
+    prop:background="--affine-v2-edgeless-note-white"
     prop:displayMode="both"
     prop:edgeless={
       Object {
@@ -589,7 +589,7 @@ test.fixme(`support dragging attachment block directly`, async ({ page }) => {
     page,
     /*xml*/ `<affine:page>
   <affine:note
-    prop:background="--affine-note-background-white"
+    prop:background="--affine-v2-edgeless-note-white"
     prop:displayMode="both"
     prop:edgeless={
       Object {
