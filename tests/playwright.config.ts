@@ -1,6 +1,6 @@
 import type { PlaywrightWorkerOptions } from '@playwright/test';
 
-import { defineConfig } from '@playwright/test';
+import { defineConfig, devices } from '@playwright/test';
 import process from 'node:process';
 
 export default defineConfig({
@@ -17,6 +17,27 @@ export default defineConfig({
       COVERAGE: process.env.COVERAGE ?? '',
     },
   },
+  projects: [
+    // To avoid burning github actions minutes, we only run interesting tests on mobile.
+    // The rest of the tests are run on desktop.
+    //   .spec.ts files are run on desktop only
+    //   .mobile.spec.ts files are run on mobile only
+    //   .shared.spec.ts files are run on both desktop and mobile
+    {
+      name: 'desktop',
+      testIgnore: 'tests/**/*.mobile.spec.ts',
+    },
+    {
+      name: 'mobile',
+      testMatch: [
+        'tests/**/*.mobile.spec.ts',
+        'tests/**/*.shared.spec.ts',
+      ],
+      // Note: we ignore the BROWSER environment variable here.
+      // We can special-case firefox/webkit in the future if this causes us to miss bugs in CI.
+      use: { ...devices['Pixel 7'] },
+    },
+  ],
   use: {
     browserName:
       (process.env.BROWSER as PlaywrightWorkerOptions['browserName']) ??
