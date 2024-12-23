@@ -1,4 +1,4 @@
-import { expect, type Page } from '@playwright/test';
+import { test, expect, type Page } from '@playwright/test';
 
 import { waitNextFrame } from './actions/misc.js';
 import { assertAlmostEqual } from './asserts.js';
@@ -122,4 +122,27 @@ export function getEmbedCardToolbar(page: Page) {
     cardStyleHorizontalButton,
     cardStyleListButton,
   };
+}
+
+/**
+ * mobile views typically use different component names.
+ *
+ * If you want to write a test that works on both desktop and mobile,
+ * you need to use a different component name on mobile.
+ *
+ * Typically, it is good enough to replace the `affine-data-view-`
+ * prefix and replace it with `mobile-`.
+ *
+ * In the future, we might want to consider using data-testid attributes instead.
+ */
+export function portableLocator(page: Page, selector: string) {
+  if (!selector.startsWith('affine-data-view-')) {
+    throw new Error(`Received invalid selector '${selector}'). Please use a selector starting with affine-data-view-`);
+  }
+
+  if (test.info().project.name === 'mobile') {
+    return page.locator(selector.replaceAll('affine-data-view-', 'mobile-'));
+  }
+
+  return page.locator(selector);
 }

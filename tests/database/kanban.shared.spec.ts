@@ -1,4 +1,6 @@
 
+import { portableLocator } from 'utils/query.js';
+
 import {
   enterPlaygroundRoom,
   initKanbanViewState,
@@ -9,7 +11,7 @@ import {
 } from './actions.js';
 
 test.describe('kanban view', () => {
-  test('basic rendering of kanban card', async ({ page }) => {
+  test('drag and drop', async ({ page }) => {
     await enterPlaygroundRoom(page);
     await initKanbanViewState(page, {
       rows: ['row1'],
@@ -26,6 +28,20 @@ test.describe('kanban view', () => {
     });
 
     await focusKanbanCardHeader(page);
+    // https://playwright.dev/docs/input#dragging-manually mentions that you may need two drags to
+    // trigger `dragover`, so we drag to our own column header before dragging to "Ungroups".
+    await portableLocator(page, 'affine-data-view-kanban-card').hover()
+    await page.mouse.down();
+    await page.locator('[data-wc-dnd-drag-handler-id="g:0"]').hover();
+    await page.locator('[data-wc-dnd-drag-handler-id="Ungroups"]').hover({ force: true });
+    await page.mouse.up();
+
+    if (test.info().project.name === 'mobile') {
+      // Mobile does not support drag and drop yet
+      test.fixme();
+    }
+    // When we drag into "Ungroups", our old group collapses.
+    await test.expect(page.locator('[data-wc-dnd-drag-handler-id="g:0"]')).not.toBeVisible();
   });
 
 });
