@@ -289,6 +289,7 @@ test('cursor move to up and down with children block', async ({ page }) => {
     await page.keyboard.press('ArrowLeft');
   }
   await page.keyboard.press('ArrowUp');
+  await page.waitForTimeout(0);
   const indexTwo = await getInlineSelectionIndex(page);
   const textTwo = await getInlineSelectionText(page);
   expect(textTwo).toBe('arrow down test 1');

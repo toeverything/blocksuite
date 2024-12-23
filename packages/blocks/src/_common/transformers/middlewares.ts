@@ -125,6 +125,12 @@ export const replaceIdMiddleware: JobMiddleware = ({ slots, collection }) => {
 
     if (payload.type === 'block') {
       const { snapshot } = payload;
+      if (
+        snapshot.flavour === 'affine:cell' ||
+        snapshot.flavour === 'affine:row'
+      ) {
+        return;
+      }
       if (snapshot.flavour === 'affine:page') {
         const index = snapshot.children.findIndex(
           c => c.flavour === 'affine:surface'

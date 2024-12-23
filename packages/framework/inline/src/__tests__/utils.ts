@@ -3,7 +3,7 @@ import { expect, type Page } from '@playwright/test';
 import type { DeltaInsert, InlineEditor, InlineRange } from '../index.js';
 
 const defaultPlaygroundURL = new URL(
-  `http://localhost:${process.env.CI ? 4173 : 5173}/`
+  `http://localhost:${process.env.CI ? 4173 : 8001}/`
 );
 
 export async function type(page: Page, content: string) {

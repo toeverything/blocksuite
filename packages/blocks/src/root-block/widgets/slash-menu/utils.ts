@@ -80,8 +80,44 @@ export function getFirstNotDividerItem(
   return firstItem ?? null;
 }
 
+export function insideDatabase(model: BlockModel) {
+  return isInsideBlockByFlavour(model.doc, model, 'affine:database');
+}
+
+export function insideMicrosheet(model: BlockModel) {
+  return isInsideBlockByFlavour(model.doc, model, 'affine:microsheet');
+}
+
 export function insideEdgelessText(model: BlockModel) {
   return isInsideBlockByFlavour(model.doc, model, 'affine:edgeless-text');
+}
+
+export function createDatabaseBlockInNextLine(model: BlockModel) {
+  let parent = model.doc.getParent(model);
+  while (parent && parent.flavour !== 'affine:note') {
+    model = parent;
+    parent = model.doc.getParent(parent);
+  }
+  if (!parent) {
+    return;
+  }
+  const index = parent.children.indexOf(model);
+
+  return model.doc.addBlock('affine:database', {}, parent, index + 1);
+}
+
+export function createMicrosheetBlockInNextLine(model: BlockModel) {
+  let parent = model.doc.getParent(model);
+  while (parent && parent.flavour !== 'affine:note') {
+    model = parent;
+    parent = model.doc.getParent(parent);
+  }
+  if (!parent) {
+    return;
+  }
+  const index = parent.children.indexOf(model);
+
+  return model.doc.addBlock('affine:microsheet', {}, parent, index + 1);
 }
 
 export function tryRemoveEmptyLine(model: BlockModel) {

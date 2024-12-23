@@ -12,15 +12,19 @@ import {
 } from '../_common/adapters/extension.js';
 import { AttachmentBlockSpec } from '../attachment-block/attachment-spec.js';
 import { BookmarkBlockSpec } from '../bookmark-block/bookmark-spec.js';
+import { CellBlockSpec } from '../cell-block/cell-spec.js';
 import { CodeBlockSpec } from '../code-block/code-block-spec.js';
 import { DataViewBlockSpec } from '../data-view-block/data-view-spec.js';
 import { DatabaseBlockSpec } from '../database-block/database-spec.js';
 import { DividerBlockSpec } from '../divider-block/divider-spec.js';
 import { ImageBlockSpec } from '../image-block/image-spec.js';
+import { MicrosheetBlockSpec } from '../microsheet-block/microsheet-spec.js';
+import { MicrosheetDataViewBlockSpec } from '../microsheet-data-view-block/data-view-spec.js';
 import {
   EdgelessNoteBlockSpec,
   NoteBlockSpec,
 } from '../note-block/note-spec.js';
+import { RowBlockSpec } from '../row-block/row-spec.js';
 
 export const CommonFirstPartyBlockSpecs: ExtensionType[] = [
   RichTextExtensions,
@@ -28,7 +32,11 @@ export const CommonFirstPartyBlockSpecs: ExtensionType[] = [
   ListBlockSpec,
   NoteBlockSpec,
   DatabaseBlockSpec,
+  MicrosheetBlockSpec,
+  RowBlockSpec,
+  CellBlockSpec,
   DataViewBlockSpec,
+  MicrosheetDataViewBlockSpec,
   DividerBlockSpec,
   CodeBlockSpec,
   ImageBlockSpec,
@@ -46,7 +54,11 @@ export const EdgelessFirstPartyBlockSpecs: ExtensionType[] = [
   ListBlockSpec,
   EdgelessNoteBlockSpec,
   DatabaseBlockSpec,
+  MicrosheetBlockSpec,
+  RowBlockSpec,
+  CellBlockSpec,
   DataViewBlockSpec,
+  MicrosheetDataViewBlockSpec,
   DividerBlockSpec,
   CodeBlockSpec,
   ImageBlockSpec,
