@@ -41,11 +41,60 @@ function handleGfxConnection(instance: GfxBlockComponent) {
   updateTransform(instance);
 }
 
+interface BlockRect {
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+  zIndex: string;
+}
+
+function updateBlockRect(
+  element: HTMLElement,
+  rect: BlockRect,
+  cachedRect: BlockRect
+) {
+  const { x, y, w, h, zIndex } = rect;
+
+  if (x !== cachedRect.x) {
+    element.style.left = `${x}px`;
+    cachedRect.x = x;
+  }
+  if (y !== cachedRect.y) {
+    element.style.top = `${y}px`;
+    cachedRect.y = y;
+  }
+  if (w !== cachedRect.w) {
+    element.style.width = `${w}px`;
+    cachedRect.w = w;
+  }
+  if (h !== cachedRect.h) {
+    element.style.height = `${h}px`;
+    cachedRect.h = h;
+  }
+  if (zIndex !== cachedRect.zIndex) {
+    element.style.zIndex = zIndex;
+    cachedRect.zIndex = zIndex;
+  }
+}
+
+function createBlockRect(): BlockRect {
+  return {
+    x: 0,
+    y: 0,
+    w: 0,
+    h: 0,
+    zIndex: '0',
+  };
+}
+
 export abstract class GfxBlockComponent<
   Model extends GfxBlockElementModel = GfxBlockElementModel,
   Service extends BlockService = BlockService,
   WidgetName extends string = string,
 > extends BlockComponent<Model, Service, WidgetName> {
+  cachedRect = createBlockRect();
+
   [GfxElementSymbol] = true;
 
   get gfx() {
@@ -57,20 +106,7 @@ export abstract class GfxBlockComponent<
     handleGfxConnection(this);
   }
 
-  getCSSTransform() {
-    const viewport = this.gfx.viewport;
-    const { translateX, translateY, zoom } = viewport;
-    const bound = Bound.deserialize(this.model.xywh);
-
-    const scaledX = bound.x * zoom;
-    const scaledY = bound.y * zoom;
-    const deltaX = scaledX - bound.x;
-    const deltaY = scaledY - bound.y;
-
-    return `translate(${translateX + deltaX}px, ${translateY + deltaY}px) scale(${zoom})`;
-  }
-
-  getRenderingRect() {
+  getBlockRect(): BlockRect {
     const { xywh$ } = this.model;
 
     if (!xywh$) {
@@ -85,15 +121,22 @@ export abstract class GfxBlockComponent<
     return { x, y, w, h, zIndex: this.toZIndex() };
   }
 
+  getCSSTransform() {
+    const viewport = this.gfx.viewport;
+    const { translateX, translateY, zoom } = viewport;
+    const bound = Bound.deserialize(this.model.xywh);
+
+    const scaledX = bound.x * zoom;
+    const scaledY = bound.y * zoom;
+    const deltaX = scaledX - bound.x;
+    const deltaY = scaledY - bound.y;
+
+    return `translate3d(${translateX + deltaX}px, ${translateY + deltaY}px, 0) scale3d(${zoom}, ${zoom}, 1)`;
+  }
+
   override renderBlock() {
-    const { x, y, w, h, zIndex } = this.getRenderingRect();
-
-    this.style.left = `${x}px`;
-    this.style.top = `${y}px`;
-    this.style.width = `${w}px`;
-    this.style.height = `${h}px`;
-    this.style.zIndex = zIndex;
-
+    const rect = this.getBlockRect();
+    updateBlockRect(this, rect, this.cachedRect);
     return this.renderGfxBlock();
   }
 
@@ -137,6 +180,8 @@ export function toGfxBlockComponent<
 >(CustomBlock: B) {
   // @ts-ignore
   return class extends CustomBlock {
+    cachedRect = createBlockRect();
+
     [GfxElementSymbol] = true;
 
     get gfx() {
@@ -148,24 +193,11 @@ export function toGfxBlockComponent<
       handleGfxConnection(this);
     }
 
-    getCSSTransform() {
-      const viewport = this.gfx.viewport;
-      const { translateX, translateY, zoom } = viewport;
-      const bound = Bound.deserialize(this.model.xywh);
-
-      const scaledX = bound.x * zoom;
-      const scaledY = bound.y * zoom;
-      const deltaX = scaledX - bound.x;
-      const deltaY = scaledY - bound.y;
-
-      return `translate(${translateX + deltaX}px, ${translateY + deltaY}px) scale(${zoom})`;
-    }
-
-    getRenderingRect(): {
+    getBlockRect(): {
       x: number;
       y: number;
-      w: number | string;
-      h: number | string;
+      w: number;
+      h: number;
       zIndex: string;
     } {
       const { xywh$ } = this.model;
@@ -182,15 +214,22 @@ export function toGfxBlockComponent<
       return { x, y, w, h, zIndex: this.toZIndex() };
     }
 
+    getCSSTransform() {
+      const viewport = this.gfx.viewport;
+      const { translateX, translateY, zoom } = viewport;
+      const bound = Bound.deserialize(this.model.xywh);
+
+      const scaledX = bound.x * zoom;
+      const scaledY = bound.y * zoom;
+      const deltaX = scaledX - bound.x;
+      const deltaY = scaledY - bound.y;
+
+      return `translate(${translateX + deltaX}px, ${translateY + deltaY}px) scale(${zoom})`;
+    }
+
     override renderBlock() {
-      const { x, y, w, h, zIndex } = this.getRenderingRect();
-
-      this.style.left = `${x}px`;
-      this.style.top = `${y}px`;
-      this.style.width = typeof w === 'number' ? `${w}px` : w;
-      this.style.height = typeof h === 'number' ? `${h}px` : h;
-      this.style.zIndex = zIndex;
-
+      const rect = this.getBlockRect();
+      updateBlockRect(this, rect, this.cachedRect);
       return this.renderGfxBlock();
     }
 

@@ -55,7 +55,7 @@ export class GfxViewportElement extends WithDisposable(ShadowlessElement) {
       modelsInViewport.forEach(model => {
         const view = host.std.view.getBlock(model.id);
 
-        if (view) {
+        if (view && view.style.display !== '') {
           view.style.display = '';
         }
 
@@ -63,11 +63,17 @@ export class GfxViewportElement extends WithDisposable(ShadowlessElement) {
           this._lastVisibleModels!.delete(model);
         }
       });
+      // console.log(
+      //   'blocks updated DOM',
+      //   modelsInViewport.size,
+      //   'diffed block',
+      //   this._lastVisibleModels?.size
+      // );
 
       this._lastVisibleModels?.forEach(model => {
         const view = host.std.view.getBlock(model.id);
 
-        if (view) {
+        if (view && view.style.display !== 'none') {
           view.style.display = 'none';
         }
       });
