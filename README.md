@@ -1,5 +1,11 @@
 # BlockSuite
 
+> [!CAUTION]
+> The git repository will undergo major changes, so we will suspend accepting PRs.
+> 
+> Read more:
+> https://github.com/toeverything/blocksuite/issues/9045
+
 <p align="center">
   <picture style="width: 500px">
     <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/toeverything/blocksuite/master/assets/logo-and-name-h.svg" />
