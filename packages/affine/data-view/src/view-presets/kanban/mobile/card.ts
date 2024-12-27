@@ -23,6 +23,7 @@ const styles = css`
     box-shadow: 0px 2px 3px 0px rgba(0, 0, 0, 0.05);
     border-radius: 8px;
     background-color: var(--affine-background-kanban-card-color);
+    touch-action: none;
   }
 
   .mobile-card-header {

@@ -23,6 +23,7 @@ const styles = css`
     border-radius: 8px;
     transition: background-color 100ms ease-in-out;
     background-color: var(--affine-background-kanban-card-color);
+    touch-action: none;
   }
 
   affine-data-view-kanban-card:hover {
