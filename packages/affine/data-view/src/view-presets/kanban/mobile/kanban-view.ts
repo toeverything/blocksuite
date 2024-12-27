@@ -98,8 +98,8 @@ export class MobileDataViewKanban extends DataViewBase<
       },
       hideIndicator: () => {},
       moveTo: () => {},
-      showIndicator: () => {
-        return false;
+      showIndicator: evt => {
+        return this.dragController.shooIndicator(evt, undefined) != null;
       },
       view: this.props.view,
       eventTrace: this.props.eventTrace,
