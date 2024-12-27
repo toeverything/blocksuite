@@ -35,6 +35,7 @@ export const startDrag = <
   const clear = () => {
     window.removeEventListener('pointermove', move);
     window.removeEventListener('pointerup', up);
+    window.removeEventListener('pointercancel', up);
     window.removeEventListener('keydown', keydown);
     document.body.style.cursor = oldCursor;
     ops.onClear();
@@ -63,6 +64,7 @@ export const startDrag = <
   };
   window.addEventListener('pointermove', move);
   window.addEventListener('pointerup', up);
+  window.addEventListener('pointercancel', up);
   window.addEventListener('keydown', keydown);
 
   return result;
