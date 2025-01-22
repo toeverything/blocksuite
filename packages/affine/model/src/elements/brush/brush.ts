@@ -138,21 +138,19 @@ export class BrushElementModel extends GfxPrimitiveElementModel<BrushProps> {
     instance['_local'].delete('commands');
   })
   @derive((lineWidth: number, instance: Instance) => {
-    const oldBound = instance.elementBound;
-
     if (
       lineWidth === instance.lineWidth ||
-      oldBound.w === 0 ||
-      oldBound.h === 0
+      instance.w === 0 ||
+      instance.h === 0
     )
       return {};
 
     const points = instance.points;
     const transformed = transformPointsToNewBound(
       points.map(([x, y]) => ({ x, y })),
-      oldBound,
+      instance,
       instance.lineWidth / 2,
-      inflateBound(oldBound, lineWidth - instance.lineWidth),
+      inflateBound(instance, lineWidth - instance.lineWidth),
       lineWidth / 2
     );
 
