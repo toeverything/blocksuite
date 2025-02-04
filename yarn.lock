@@ -5279,14 +5279,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@vitest/browser@npm:2.1.8":
-  version: 2.1.8
-  resolution: "@vitest/browser@npm:2.1.8"
+"@vitest/browser@npm:2.1.9":
+  version: 2.1.9
+  resolution: "@vitest/browser@npm:2.1.9"
   dependencies:
     "@testing-library/dom": "npm:^10.4.0"
     "@testing-library/user-event": "npm:^14.5.2"
-    "@vitest/mocker": "npm:2.1.8"
-    "@vitest/utils": "npm:2.1.8"
+    "@vitest/mocker": "npm:2.1.9"
+    "@vitest/utils": "npm:2.1.9"
     magic-string: "npm:^0.30.12"
     msw: "npm:^2.6.4"
     sirv: "npm:^3.0.0"
@@ -5294,7 +5294,7 @@ __metadata:
     ws: "npm:^8.18.0"
   peerDependencies:
     playwright: "*"
-    vitest: 2.1.8
+    vitest: 2.1.9
     webdriverio: "*"
   peerDependenciesMeta:
     playwright:
@@ -5303,7 +5303,7 @@ __metadata:
       optional: true
     webdriverio:
       optional: true
-  checksum: 10/6063e02222440347bbc23b2c54e259078aa83a29869337b9ffd642be5a4321ac3ddf3c0bbe4eac5237eb0bb8b9fa17d21d2c31299376de407716e3c7dd3b704c
+  checksum: 10/cc0d47c6cae58ac40066f45f11dd92928a762624074e79013912bb24bd2aef065a1801550f298d2ef1b19e86c5c2c772caad871af90358be79ed453f039869a6
   languageName: node
   linkType: hard
 
@@ -5358,12 +5358,40 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@vitest/pretty-format@npm:2.1.8, @vitest/pretty-format@npm:^2.1.8":
+"@vitest/mocker@npm:2.1.9":
+  version: 2.1.9
+  resolution: "@vitest/mocker@npm:2.1.9"
+  dependencies:
+    "@vitest/spy": "npm:2.1.9"
+    estree-walker: "npm:^3.0.3"
+    magic-string: "npm:^0.30.12"
+  peerDependencies:
+    msw: ^2.4.9
+    vite: ^5.0.0
+  peerDependenciesMeta:
+    msw:
+      optional: true
+    vite:
+      optional: true
+  checksum: 10/54c5ef47065e047b011cf0d89321654250a77601c93cc5bbd613782d1939d014385d6c909e4857dd473278ce63f8b6bfbbf7a96e05f7f22f33951cdbfce22993
+  languageName: node
+  linkType: hard
+
+"@vitest/pretty-format@npm:2.1.8":
   version: 2.1.8
   resolution: "@vitest/pretty-format@npm:2.1.8"
   dependencies:
     tinyrainbow: "npm:^1.2.0"
   checksum: 10/f0f60c007424194887ad398d202867d58d850154de327993925041e2972357544eea95a22e0bb3a62a470b006ff8de5f691d2078708dcd7f625e24f8a06b26e7
+  languageName: node
+  linkType: hard
+
+"@vitest/pretty-format@npm:2.1.9, @vitest/pretty-format@npm:^2.1.8":
+  version: 2.1.9
+  resolution: "@vitest/pretty-format@npm:2.1.9"
+  dependencies:
+    tinyrainbow: "npm:^1.2.0"
+  checksum: 10/557dc637c5825abd62ccb15080e59e04d22121e746d8020a0815d7c0c45132fed81b1ff36b26f5991e57a9f1d36e52aa19712abbfe1d0cbcd14252b449a919dc
   languageName: node
   linkType: hard
 
@@ -5397,6 +5425,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@vitest/spy@npm:2.1.9":
+  version: 2.1.9
+  resolution: "@vitest/spy@npm:2.1.9"
+  dependencies:
+    tinyspy: "npm:^3.0.2"
+  checksum: 10/a47302082b6071b0f756df10045477b4f4d12391c35f595f66ba99e9c4b51d286096a61a640d87c948f5f050ecb3a46f73d51ae62b5bcaf52e4b8f12ecfb86e3
+  languageName: node
+  linkType: hard
+
 "@vitest/ui@npm:2.1.8":
   version: 2.1.8
   resolution: "@vitest/ui@npm:2.1.8"
@@ -5422,6 +5459,17 @@ __metadata:
     loupe: "npm:^3.1.2"
     tinyrainbow: "npm:^1.2.0"
   checksum: 10/be1f4254347199fb5c1d9de8e4537dad4af3f434c033e7cd023165bd4b7e9de16fa0f86664256ab331120585df95ed6be8eea58b209b510651b49f6482051733
+  languageName: node
+  linkType: hard
+
+"@vitest/utils@npm:2.1.9":
+  version: 2.1.9
+  resolution: "@vitest/utils@npm:2.1.9"
+  dependencies:
+    "@vitest/pretty-format": "npm:2.1.9"
+    loupe: "npm:^3.1.2"
+    tinyrainbow: "npm:^1.2.0"
+  checksum: 10/83d62d5703a3210a2f137c25dc4e797a7a1d74d5d2e14ecc33b274c7710304fa8b5099101c98bc8d66cc2bf18a14f88ebf21f0996a99d0ee1439ae23b49f3961
   languageName: node
   linkType: hard
 
@@ -6228,7 +6276,7 @@ __metadata:
     "@types/node": "npm:^22.5.0"
     "@typescript-eslint/eslint-plugin": "npm:^8.0.0"
     "@typescript-eslint/parser": "npm:^8.0.0"
-    "@vitest/browser": "npm:2.1.8"
+    "@vitest/browser": "npm:2.1.9"
     "@vitest/coverage-istanbul": "npm:2.1.8"
     "@vitest/ui": "npm:2.1.8"
     es-module-lexer: "npm:^1.5.4"
