@@ -132,3 +132,4 @@ Example:
 - satoren, @satoren, 2024/08/09
 - Nikita Minaev, @majula2111, 2024/09/26
 - Oleg, @OlegDev1, 2024/12/03
+- Egor Titov, @EGRoBBeRTiT, 2025/01/22
