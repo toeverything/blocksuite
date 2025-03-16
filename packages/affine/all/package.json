@@ -3,10 +3,7 @@
   "description": "BlockSuite for Affine",
   "type": "module",
   "scripts": {
-    "build": "tsc --build --verbose",
-    "test:unit": "nx vite:test --run --passWithNoTests",
-    "test:unit:coverage": "nx vite:test --run --coverage",
-    "test:e2e": "playwright test"
+    "build": "tsc --build --verbose"
   },
   "sideEffects": false,
   "keywords": [],

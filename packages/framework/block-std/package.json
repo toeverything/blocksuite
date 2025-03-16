@@ -3,11 +3,7 @@
   "description": "Std for blocksuite blocks",
   "type": "module",
   "scripts": {
-    "build": "tsc",
-    "test:unit": "nx vite:test --run",
-    "test:unit:coverage": "nx vite:test --run --coverage",
-    "test:unit:ui": "nx vite:test --ui",
-    "test": "yarn test:unit"
+    "build": "tsc"
   },
   "sideEffects": false,
   "keywords": [],
