@@ -36,6 +36,14 @@ import {
 } from './utils/asserts.js';
 import { test } from './utils/playwright.js';
 
+function formatWithTimezone(date: Date, timeZone: string = 'Asia/Tokyo') {
+  const tokyoDate = date.toLocaleString('en-US', { timeZone });
+  const year = tokyoDate.split(',')[0].split('/')[2];
+  const month = tokyoDate.split(',')[0].split('/')[0].padStart(2, '0');
+  const day = tokyoDate.split(',')[0].split('/')[1];
+  return `${year}-${month}-${day}`;
+}
+
 test.describe('slash menu should show and hide correctly', () => {
   test.beforeEach(async ({ page }) => {
     await enterPlaygroundRoom(page);
@@ -681,9 +689,8 @@ test.describe('slash menu with date & time', () => {
     await expect(slashMenu).toBeHidden();
 
     const date = new Date();
-    const strTime = date.toISOString().split('T')[0];
-
-    await assertRichTexts(page, [strTime]);
+    const formattedDate = formatWithTimezone(date);
+    await assertRichTexts(page, [formattedDate]);
   });
 
   test("should create Tomorrow's time string", async ({ page }) => {
@@ -701,9 +708,9 @@ test.describe('slash menu with date & time', () => {
 
     const date = new Date();
     date.setDate(date.getDate() + 1);
-    const strTime = date.toISOString().split('T')[0];
+    const formattedDate = formatWithTimezone(date);
 
-    await assertRichTexts(page, [strTime]);
+    await assertRichTexts(page, [formattedDate]);
   });
 
   test("should insert Yesterday's time string", async ({ page }) => {
@@ -721,9 +728,9 @@ test.describe('slash menu with date & time', () => {
 
     const date = new Date();
     date.setDate(date.getDate() - 1);
-    const strTime = date.toISOString().split('T')[0];
+    const formattedDate = formatWithTimezone(date);
 
-    await assertRichTexts(page, [strTime]);
+    await assertRichTexts(page, [formattedDate]);
   });
 });
 
