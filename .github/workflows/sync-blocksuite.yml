@@ -38,5 +38,4 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add .
           git commit -m "chore: sync affine blocksuite to packages on $(date)" || exit 0
-          git push https://x-access-token:${GITHUB_TOKEN}@github.com/toeverything/blocksuite.git main
           git push https://${{ secrets.BS_SYNC_TOKEN }}@github.com/toeverything/blocksuite.git main
