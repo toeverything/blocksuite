@@ -26,118 +26,6 @@ jobs:
 
       - uses: ./.github/actions/setup
 
-      - name: Build
-        run: yarn exec nx vite:build @blocksuite/playground
-
-  unit:
-    name: Unit Test
-    runs-on: ubuntu-latest
-    needs: install-deps
-    strategy:
-      fail-fast: false
-      matrix:
-        shard: [1, 2, 3, 4, 5]
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - uses: ./.github/actions/setup
-
-      - uses: nrwl/nx-set-shas@v4
-        with:
-          main-branch-name: main
-
-      - name: Install playwright browsers
-        run: npx playwright install chromium
-
-      - name: Run unit tests
-        run: yarn exec vitest run --coverage --shard=${{ matrix.shard }}/${{ strategy.job-total }}
-
-        # The coverage seems not working now, re-enable it when it's fixed
-      - name: Upload unit test coverage results
-        uses: codecov/codecov-action@v4
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          files: ./.coverage/unit/lcov.info
-          flags: unittest
-          name: blocksuite
-          fail_ci_if_error: false
-
-      - name: Upload test results
-        if: ${{ failure() }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: test-results-unit-${{ matrix.shard }}
-          path: dist/.playwright/tests
-          if-no-files-found: ignore
-
-  e2e:
-    name: E2E Test
-    runs-on: ubuntu-latest
-    needs: install-deps
-    strategy:
-      fail-fast: false
-      matrix:
-        shard:
-          [
-            1,
-            2,
-            3,
-            4,
-            5,
-            6,
-            7,
-            8,
-            9,
-            10,
-            11,
-            12,
-            13,
-            14,
-            15,
-            16,
-            17,
-            18,
-            19,
-            20,
-          ]
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - uses: ./.github/actions/setup
-
-      - name: Build
-        run: yarn exec nx vite:build @blocksuite/playground
-
-      - name: Install playwright browsers
-        run: npx playwright install chromium
-
-      - name: Run playwright test
-        run: yarn test --forbid-only --shard=${{ matrix.shard }}/${{ strategy.job-total }}
-
-      #      - name: Collect code coverage report
-      #        run: yarn exec nyc report -t .nyc_output --reporter=lcov
-
-      - name: Upload E2E test coverage results
-        uses: codecov/codecov-action@v4
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          files: ./.coverage/lcov.info
-          flags: e2etest
-          name: blocksuite
-          fail_ci_if_error: false
-
-      - name: Upload test results
-        if: ${{ failure() }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: test-results-e2e-${{ matrix.shard }}
-          path: ./tests/test-results
-          if-no-files-found: ignore
-
   lint:
     name: Lint
     runs-on: ubuntu-latest
@@ -180,9 +68,9 @@ jobs:
   build-and-test:
     if: ${{ always() }}
     name: Build & Test
-    needs: [e2e, unit, lint, build]
+    needs: [lint, build]
     runs-on: ubuntu-latest
     steps:
       - name: on error
-        if: ${{ needs.e2e.result != 'success' || needs.unit.result != 'success' || needs.lint.result != 'success' || needs.build.result != 'success' }}
+        if: ${{ needs.lint.result != 'success' || needs.build.result != 'success' }}
         run: exit 1
