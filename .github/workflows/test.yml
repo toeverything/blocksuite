@@ -37,10 +37,6 @@ jobs:
 
       - uses: ./.github/actions/setup
 
-      - uses: nrwl/nx-set-shas@v4
-        with:
-          main-branch-name: main
-
       - name: Run format check
         run: yarn lint:format
 
@@ -54,10 +50,6 @@ jobs:
           fetch-depth: 0
 
       - uses: ./.github/actions/setup
-
-      - uses: nrwl/nx-set-shas@v4
-        with:
-          main-branch-name: main
 
       - name: Check dedupe
         run: yarn dedupe --check

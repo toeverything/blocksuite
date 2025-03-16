@@ -146,7 +146,6 @@
     "./shared/theme": "./src/shared/theme.ts",
     "./shared/types": "./src/shared/types.ts",
     "./shared/utils": "./src/shared/utils.ts",
-    "./shared/viewport-renderer": "./src/shared/viewport-renderer.ts",
     "./schemas": "./src/schemas.ts",
     "./model": "./src/model/index.ts",
     "./sync": "./src/sync/index.ts",

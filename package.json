@@ -1,12 +1,10 @@
 {
   "name": "blocksuite",
-  "version": "0.16.0",
   "private": true,
   "type": "commonjs",
   "engines": {
     "node": ">=18.19.0 <21.0.0"
   },
-  "nx": {},
   "packageManager": "yarn@4.5.1",
   "workspaces": [
     "packages/**/*"
@@ -15,7 +13,6 @@
     "preview": "yarn workspace @blocksuite/playground preview",
     "dev": "yarn workspace @blocksuite/playground dev",
     "dev:docs": "yarn workspace @blocksuite/docs dev",
-    "lint:circular": "madge --circular ./packages/**/*/dist/index.js",
     "lint:format": "prettier . --check",
     "coverage:report": "nyc report -t .nyc_output --report-dir .coverage --reporter=html",
     "format": "prettier . --write",
@@ -23,7 +20,6 @@
     "build:packages": "yarn workspace @blocksuite/affine build",
     "build:playground": "yarn workspace @blocksuite/playground build",
     "build:docs": "yarn workspace @blocksuite/docs build",
-    "size:generate": "./scripts/size-generate.sh",
     "ci:version": "changeset version && yarn install --no-frozen-lockfile",
     "ci:publish": "yarn build:packages && yarn workspaces foreach -Ap --no-private npm publish --tolerate-republish --access public --tag latest",
     "ci:version:canary": "changeset version --snapshot canary && yarn install --no-frozen-lockfile",
@@ -43,7 +39,6 @@
     "@changesets/cli": "^2.27.7",
     "@commitlint/cli": "^19.4.0",
     "@commitlint/config-conventional": "^19.2.2",
-    "@nx/vite": "20.0.5",
     "@open-wc/dev-server-hmr": "^0.2.0",
     "@playwright/test": "1.48.1",
     "@size-limit/preset-small-lib": "^11.1.4",
@@ -60,7 +55,6 @@
     "madge": "^8.0.0",
     "markdown-table": "^3.0.3",
     "micromatch": "^4.0.7",
-    "nx": "20.0.5",
     "nyc": "^17.0.0",
     "prettier": "^3.3.3",
     "pretty-bytes": "^6.1.1",

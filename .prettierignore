@@ -6,6 +6,5 @@ __snapshots__/
 tsconfig.tsbuildinfo
 **/docs/api/
 .coverage/
-.nx/
 **/test-results/
 packages/

@@ -3,11 +3,6 @@
   "extends": ["config:recommended", ":disablePeerDependencies"],
   "packageRules": [
     {
-      "rangeStrategy": "replace",
-      "groupName": "linter",
-      "matchPackageNames": ["/^eslint/", "/^@typescript-eslint/"]
-    },
-    {
       "groupName": "all non-major dependencies",
       "groupSlug": "all-minor-patch",
       "matchUpdateTypes": ["minor", "patch"],

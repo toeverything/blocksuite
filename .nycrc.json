@@ -1,5 +1,0 @@
-{
-  "report-dir": ".coverage",
-  "exclude": ["packages/playground/**"],
-  "reporter": ["text", "json-summary", "html"]
-}

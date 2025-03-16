@@ -1,9 +1,12 @@
 name: Release
 
 on:
-  push:
-    branches:
-      - main
+  # TODO: enable this again when we're ready to release
+  # disable for now since we're not ready to release yet
+  # push:
+  #   branches:
+  #     - main
+  workflow_dispatch:
 
 concurrency: ${{ github.workflow }}-${{ github.ref }}
 
@@ -53,7 +56,7 @@ jobs:
 
       - name: Get package version
         run: |
-          BLOCKSUITE_VERSION=$(jq -r ".version" packages/blocks/package.json)
+          BLOCKSUITE_VERSION=$(jq -r ".version" packages/affine/all/package.json)
           echo "BLOCKSUITE_RELEASE_TAG=v${BLOCKSUITE_VERSION}" >> "$GITHUB_ENV"
 
       - name: Create GitHub release
@@ -62,7 +65,8 @@ jobs:
         with:
           commit: main
           tag: '${{ env.BLOCKSUITE_RELEASE_TAG }}'
-          body: 'Please refer to [CHANGELOG.md](https://github.com/toeverything/blocksuite/blob/${{ env.BLOCKSUITE_RELEASE_TAG }}/packages/blocks/CHANGELOG.md) for details.'
+          # We dont' have changelog now. Need to add it back.
+          # body: 'Please refer to [CHANGELOG.md](https://github.com/toeverything/blocksuite/blob/${{ env.BLOCKSUITE_RELEASE_TAG }}/packages/blocks/CHANGELOG.md) for details.'
           token: ${{ secrets.GITHUB_TOKEN }}
         continue-on-error: true
 

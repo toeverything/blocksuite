@@ -1,6 +1,6 @@
 {
   "$schema": "https://unpkg.com/@changesets/config@3.0.2/schema.json",
-  "changelog": "@changesets/cli/changelog",
+  "changelog": false,
   "commit": false,
   "fixed": [["@blocksuite/*"]],
   "linked": [],
@@ -8,9 +8,8 @@
   "baseBranch": "main",
   "updateInternalDependencies": "patch",
   "ignore": [
-    "@blocksuite/e2e",
+    "@blocksuite/legacy-e2e",
     "@blocksuite/playground",
-    "@blocksuite/tests-legacy",
     "@blocksuite/integration-test"
   ],
   "___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH": {
