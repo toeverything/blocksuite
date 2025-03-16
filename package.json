@@ -5,7 +5,7 @@
   "engines": {
     "node": ">=18.19.0 <21.0.0"
   },
-  "packageManager": "yarn@4.5.1",
+  "packageManager": "yarn@4.7.0",
   "workspaces": [
     "packages/**/*"
   ],
@@ -40,7 +40,7 @@
     "@commitlint/cli": "^19.4.0",
     "@commitlint/config-conventional": "^19.2.2",
     "@open-wc/dev-server-hmr": "^0.2.0",
-    "@playwright/test": "1.48.1",
+    "@playwright/test": "1.51.0",
     "@size-limit/preset-small-lib": "^11.1.4",
     "@swc-node/register": "^1.10.9",
     "@swc/core": "^1.7.14",
@@ -64,7 +64,7 @@
     "size-limit": "^11.1.4",
     "terser": "^5.31.6",
     "tsx": "^4.19.0",
-    "typescript": "5.7.2",
+    "typescript": "5.8.2",
     "vite": "5.4.10",
     "vite-plugin-istanbul": "^6.0.2",
     "vite-plugin-web-components-hmr": "^0.1.3"
