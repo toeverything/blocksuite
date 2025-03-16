@@ -33,9 +33,6 @@ next-env.d.ts
 __screenshots__/
 
 
-.nx/cache
-.nx/workspace-data
-
 .pnp.*
 .yarn/*
 !.yarn/patches
