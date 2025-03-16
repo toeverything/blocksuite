@@ -1,0 +1,35 @@
+name: Sync affine blocksuite to blocksuite/packages
+
+on:
+  schedule:
+    - cron: '0 0 * * *' # daily
+  workflow_dispatch:
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout blocksuite Repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Clone affine Repository and Extract blocksuite
+        run: |
+          git clone --depth=1 https://github.com/toeverything/affine.git affine_repo
+          cd affine_repo
+          git filter-repo --subdirectory-filter blocksuite
+          cd ..
+
+      - name: Copy blocksuite to packages/
+        run: |
+          rsync -av --delete --exclude '.git' affine_repo/ blocksuite/packages/
+
+      - name: Commit and Push Changes
+        run: |
+          cd blocksuite
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add .
+          git commit -m "chore: sync affine blocksuite to packages on $(date)" || exit 0
+          git push origin main
