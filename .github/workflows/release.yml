@@ -3,7 +3,7 @@ name: Release
 on:
   push:
     branches:
-      - master
+      - main
 
 concurrency: ${{ github.workflow }}-${{ github.ref }}
 
@@ -60,7 +60,7 @@ jobs:
         id: release
         uses: ncipollo/release-action@v1
         with:
-          commit: master
+          commit: main
           tag: '${{ env.BLOCKSUITE_RELEASE_TAG }}'
           body: 'Please refer to [CHANGELOG.md](https://github.com/toeverything/blocksuite/blob/${{ env.BLOCKSUITE_RELEASE_TAG }}/packages/blocks/CHANGELOG.md) for details.'
           token: ${{ secrets.GITHUB_TOKEN }}

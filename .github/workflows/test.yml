@@ -3,7 +3,7 @@ name: Test
 on:
   push:
     branches:
-      - master
+      - main
   pull_request:
   workflow_dispatch:
 
@@ -46,7 +46,7 @@ jobs:
 
       - uses: nrwl/nx-set-shas@v4
         with:
-          main-branch-name: master
+          main-branch-name: main
 
       - name: Install playwright browsers
         run: npx playwright install chromium
@@ -151,7 +151,7 @@ jobs:
 
       - uses: nrwl/nx-set-shas@v4
         with:
-          main-branch-name: master
+          main-branch-name: main
 
       - name: Run format check
         run: yarn lint:format
@@ -169,7 +169,7 @@ jobs:
 
       - uses: nrwl/nx-set-shas@v4
         with:
-          main-branch-name: master
+          main-branch-name: main
 
       - name: Check dedupe
         run: yarn dedupe --check

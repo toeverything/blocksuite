@@ -5,7 +5,7 @@
   "fixed": [["@blocksuite/*"]],
   "linked": [],
   "access": "public",
-  "baseBranch": "master",
+  "baseBranch": "main",
   "updateInternalDependencies": "patch",
   "ignore": ["@blocksuite/e2e", "@blocksuite/playground"],
   "___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH": {

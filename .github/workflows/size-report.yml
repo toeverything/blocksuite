@@ -3,7 +3,7 @@ name: Size Report
 on:
   pull_request:
     branches:
-      - master
+      - main
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}

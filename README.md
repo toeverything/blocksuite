@@ -2,20 +2,20 @@
 
 <p align="center">
   <picture style="width: 500px">
-    <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/toeverything/blocksuite/master/assets/logo-and-name-h.svg" />
-    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/toeverything/blocksuite/master/assets/logo-and-name-h-white.svg" />
-    <img src="https://raw.githubusercontent.com/toeverything/blocksuite/master/assets/logo-and-name-h.svg" width="500" alt="BlockSuite logo and name" />
+    <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/toeverything/blocksuite/main/assets/logo-and-name-h.svg" />
+    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/toeverything/blocksuite/main/assets/logo-and-name-h-white.svg" />
+    <img src="https://raw.githubusercontent.com/toeverything/blocksuite/main/assets/logo-and-name-h.svg" width="500" alt="BlockSuite logo and name" />
   </picture>
 </p>
 
 <!--
-[![Codecov](https://codecov.io/gh/toeverything/blocksuite/branch/master/graph/badge.svg?token=T86JYCDSMN)](https://codecov.io/gh/toeverything/blocksuite)
+[![Codecov](https://codecov.io/gh/toeverything/blocksuite/branch/main/graph/badge.svg?token=T86JYCDSMN)](https://codecov.io/gh/toeverything/blocksuite)
 -->
 
-[![Checks Status](https://img.shields.io/github/checks-status/toeverything/blocksuite/master)](https://github.com/toeverything/blocksuite/actions?query=branch%3Amaster)
+[![Checks Status](https://img.shields.io/github/checks-status/toeverything/blocksuite/main)](https://github.com/toeverything/blocksuite/actions?query=branch%3Amain)
 [![Issues Closed](https://img.shields.io/github/issues-closed/toeverything/blocksuite?color=6880ff)](https://github.com/toeverything/blocksuite/issues?q=is%3Aissue+is%3Aclosed)
 [![NPM Latest Release](https://img.shields.io/npm/v/@blocksuite/store.svg?maxAge=300&color=6880ff)](./packages/framework/store/package.json)
-[![NPM Canary Release](https://img.shields.io/npm/v/@blocksuite/presets/canary?color=6880ff)](https://github.com/toeverything/blocksuite/actions/workflows/canary-release.yml?query=branch%3Amaster)
+[![NPM Canary Release](https://img.shields.io/npm/v/@blocksuite/presets/canary?color=6880ff)](https://github.com/toeverything/blocksuite/actions/workflows/canary-release.yml?query=branch%3Amain)
 [![Open in StackBlitz](https://img.shields.io/badge/open%20in-StackBlitz-black)](https://stackblitz.com/github/toeverything/blocksuite)
 [![Join Discord](https://img.shields.io/discord/959027316334407691)](https://discord.gg/9vwSWmYYcZ)
 [![Gurubase](https://img.shields.io/badge/Gurubase-Ask%20BlockSuite%20Guru-006BFF)](https://gurubase.io/g/blocksuite)
@@ -59,7 +59,7 @@ With BlockSuite editors, you can selectively reuse all the editing features in [
 And under the hood, the vanilla BlockSuite framework supports:
 
 - Defining [custom blocks](https://blocksuite.io/guide/working-with-block-tree.html#defining-new-blocks) and inline embeds.
-- Incremental updates, [real-time collaboration](https://github.com/toeverything/blocksuite/blob/master/BUILDING.md#test-collaboration), and even decentralized data synchronization based on the [document streaming](https://blocksuite.io/guide/data-synchronization.html#document-streaming) mechanism of the document.
+- Incremental updates, [real-time collaboration](https://github.com/toeverything/blocksuite/blob/main/BUILDING.md#test-collaboration), and even decentralized data synchronization based on the [document streaming](https://blocksuite.io/guide/data-synchronization.html#document-streaming) mechanism of the document.
 - Writing type-safe complex editing logic based on the [command](https://blocksuite.io/guide/command.html) mechanism, similar to react hooks designed for document editing.
 - Persistence of documents and compatibility with various third-party formats (such as markdown and HTML) based on block [snapshot](https://blocksuite.io/guide/data-synchronization.html#snapshot-api) and transformer.
 - State scheduling across multiple documents and reusing one document in multiple editors.
@@ -75,7 +75,7 @@ This difference has led BlockSuite to set clear boundaries based on a component-
 - Both AFFiNE and other projects should equally reuse and extend BlockSuite through components, without any privileges.
 - BlockSuite components can be easily reused regardless of whether you are using React or other frameworks.
 
-To that end, the BlockSuite project is structured around key packages that are categorized into two groups: a headless [framework](https://github.com/toeverything/blocksuite/tree/master/packages/framework) and prebuilt editing components.
+To that end, the BlockSuite project is structured around key packages that are categorized into two groups: a headless [framework](https://github.com/toeverything/blocksuite/tree/main/packages/framework) and prebuilt editing components.
 
 <table>
   <tr>
@@ -115,7 +115,7 @@ To that end, the BlockSuite project is structured around key packages that are c
   - [Canary Playground](https://try-blocksuite.vercel.app/starter/?init)
   - [Examples](./examples/)
   - [BlockSuite in StackBlitz](https://stackblitz.com/github/toeverything/blocksuite)
-  - [Testing Real-Time Collaboration](https://github.com/toeverything/blocksuite/blob/master/BUILDING.md#test-collaboration)
+  - [Testing Real-Time Collaboration](https://github.com/toeverything/blocksuite/blob/main/BUILDING.md#test-collaboration)
   - [BlockSuite Ecosystem CI](https://github.com/toeverything/blocksuite-ecosystem-ci)
   - [Vue-based BlocksVite Editor](https://github.com/zuozijian3720/blocksvite)
 - 📝 [Documentation](https://blocksuite.io/guide/overview.html)
@@ -130,7 +130,7 @@ See [BUILDING.md](BUILDING.md) for instructions on how to build and test BlockSu
 
 ## Contributing
 
-BlockSuite accepts pull requests on GitHub. **Before you start contributing, please make sure you have read and accepted our [Contributor License Agreement](https://github.com/toeverything/blocksuite/edit/master/.github/CLA.md).** To indicate your agreement, simply edit this file and submit a pull request.
+BlockSuite accepts pull requests on GitHub. **Before you start contributing, please make sure you have read and accepted our [Contributor License Agreement](https://github.com/toeverything/blocksuite/edit/main/.github/CLA.md).** To indicate your agreement, simply edit this file and submit a pull request.
 
 ## License
 
