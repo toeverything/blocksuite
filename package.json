@@ -13,7 +13,6 @@
     "preview": "yarn workspace @blocksuite/playground preview",
     "dev": "yarn workspace @blocksuite/playground dev",
     "dev:docs": "yarn workspace @blocksuite/docs dev",
-    "lint:circular": "madge --circular ./packages/**/*/dist/index.js",
     "lint:format": "prettier . --check",
     "coverage:report": "nyc report -t .nyc_output --report-dir .coverage --reporter=html",
     "format": "prettier . --write",
