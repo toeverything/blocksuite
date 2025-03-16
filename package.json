@@ -42,7 +42,7 @@
     "@size-limit/preset-small-lib": "^11.1.4",
     "@types/node": "^22.13.10",
     "es-module-lexer": "^1.5.4",
-    "esbuild": "^0.24.0",
+    "esbuild": "^0.25.0",
     "husky": "^9.1.5",
     "lint-staged": "^15.2.9",
     "micromatch": "^4.0.7",
