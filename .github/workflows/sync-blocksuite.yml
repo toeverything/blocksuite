@@ -29,11 +29,11 @@ jobs:
 
       - name: Copy blocksuite to packages/
         run: |
-          rsync -av --delete --exclude '.git' affine_repo/ blocksuite/packages/
+          rsync -av --delete --exclude '.git' affine_repo/ packages/
+          rm -rf affine_repo
 
       - name: Commit and Push Changes
         run: |
-          cd blocksuite
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add .
