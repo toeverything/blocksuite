@@ -46,7 +46,7 @@
     "@swc/core": "^1.7.14",
     "@types/node": "^22.13.10",
     "es-module-lexer": "^1.5.4",
-    "esbuild": "^0.24.0",
+    "esbuild": "^0.25.0",
     "globals": "^15.9.0",
     "happy-dom": "^15.0.0",
     "husky": "^9.1.5",
