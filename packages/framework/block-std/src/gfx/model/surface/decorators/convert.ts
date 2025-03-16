@@ -1,5 +1,4 @@
 import type { GfxPrimitiveElementModel } from '../element-model.js';
-
 import { getObjectPropMeta, setObjectPropMeta } from './common.js';
 
 const convertSymbol = Symbol('convert');

@@ -1,8 +1,7 @@
 import { computed, type ReadonlySignal } from '@preact/signals-core';
 
-import type { SingleView } from './single-view.js';
-
 import { type Cell, CellBase } from './cell.js';
+import type { SingleView } from './single-view.js';
 
 export interface Row {
   readonly cells$: ReadonlySignal<Cell[]>;

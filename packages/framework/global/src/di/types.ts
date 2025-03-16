@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { ServiceProvider } from './provider.js';
 
 export type Type<T = any> = abstract new (...args: any) => T;

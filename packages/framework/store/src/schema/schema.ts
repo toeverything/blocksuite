@@ -1,13 +1,28 @@
 import { minimatch } from 'minimatch';
 
-import type { BlockSchemaType } from './base.js';
-
 import { SCHEMA_NOT_FOUND_MESSAGE } from '../consts.js';
-import { BlockSchema } from './base.js';
+import { BlockSchema, type BlockSchemaType } from '../model/index.js';
 import { SchemaValidateError } from './error.js';
 
 export class Schema {
   readonly flavourSchemaMap = new Map<string, BlockSchemaType>();
+
+  safeValidate = (
+    flavour: string,
+    parentFlavour?: string,
+    childFlavours?: string[]
+  ): boolean => {
+    try {
+      this.validate(flavour, parentFlavour, childFlavours);
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
+  get(flavour: string) {
+    return this.flavourSchemaMap.get(flavour);
+  }
 
   validate = (
     flavour: string,

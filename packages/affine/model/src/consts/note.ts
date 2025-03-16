@@ -2,45 +2,14 @@ import { z } from 'zod';
 
 import { createEnumMap } from '../utils/enum.js';
 
-export const NOTE_MIN_WIDTH = 450 + 24 * 2;
+export const NOTE_MIN_WIDTH = 170 + 24 * 2;
 export const NOTE_MIN_HEIGHT = 92;
 
-export const DEFAULT_NOTE_WIDTH = NOTE_MIN_WIDTH;
+export const DEFAULT_NOTE_WIDTH = 450 + 24 * 2;
 export const DEFAULT_NOTE_HEIGHT = NOTE_MIN_HEIGHT;
 
-export enum NoteBackgroundColor {
-  Black = '--affine-note-background-black',
-  Blue = '--affine-note-background-blue',
-  Green = '--affine-note-background-green',
-  Grey = '--affine-note-background-grey',
-  Magenta = '--affine-note-background-magenta',
-  Orange = '--affine-note-background-orange',
-  Purple = '--affine-note-background-purple',
-  Red = '--affine-note-background-red',
-  Teal = '--affine-note-background-teal',
-  White = '--affine-note-background-white',
-  Yellow = '--affine-note-background-yellow',
-}
-
-export const NoteBackgroundColorMap = createEnumMap(NoteBackgroundColor);
-
-export const NOTE_BACKGROUND_COLORS = [
-  NoteBackgroundColor.Yellow,
-  NoteBackgroundColor.Orange,
-  NoteBackgroundColor.Red,
-  NoteBackgroundColor.Magenta,
-  NoteBackgroundColor.Purple,
-  NoteBackgroundColor.Blue,
-  NoteBackgroundColor.Teal,
-  NoteBackgroundColor.Green,
-  NoteBackgroundColor.Black,
-  NoteBackgroundColor.Grey,
-  NoteBackgroundColor.White,
-] as const;
-
-export const DEFAULT_NOTE_BACKGROUND_COLOR = NoteBackgroundColor.White;
-
-export const NoteBackgroundColorsSchema = z.nativeEnum(NoteBackgroundColor);
+export const DEFAULT_PAGE_BLOCK_WIDTH = 800;
+export const DEFAULT_PAGE_BLOCK_HEIGHT = DEFAULT_NOTE_HEIGHT;
 
 export enum NoteShadow {
   Box = '--affine-note-shadow-box',
@@ -77,6 +46,10 @@ export enum StrokeStyle {
   None = 'none',
   Solid = 'solid',
 }
+
+export const StrokeStyleSchema = z.nativeEnum(StrokeStyle);
+
+export const NoteDisplayModeSchema = z.nativeEnum(NoteDisplayMode);
 
 export const DEFAULT_NOTE_BORDER_STYLE = StrokeStyle.None;
 

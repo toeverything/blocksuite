@@ -1,6 +1,9 @@
 import type { Text } from '@blocksuite/store';
-
-import { BlockModel, defineBlockSchema } from '@blocksuite/store';
+import {
+  BlockModel,
+  BlockSchemaExtension,
+  defineBlockSchema,
+} from '@blocksuite/store';
 
 import type { Column, SerializedCells, ViewBasicDataType } from './types.js';
 
@@ -29,3 +32,6 @@ export const DatabaseBlockSchema = defineBlockSchema({
   },
   toModel: () => new DatabaseBlockModel(),
 });
+
+export const DatabaseBlockSchemaExtension =
+  BlockSchemaExtension(DatabaseBlockSchema);

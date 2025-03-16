@@ -1,4 +1,4 @@
-import { signal, type Signal } from '@preact/signals-core';
+import { type Signal, signal } from '@preact/signals-core';
 
 import { createContextKey } from '../../core/index.js';
 

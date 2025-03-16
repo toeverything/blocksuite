@@ -1,6 +1,5 @@
-import type { ServiceIdentifierValue } from './types.js';
-
 import { DEFAULT_SERVICE_VARIANT } from './consts.js';
+import type { ServiceIdentifierValue } from './types.js';
 
 export class RecursionLimitError extends Error {
   constructor() {

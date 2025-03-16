@@ -42,10 +42,8 @@ export function getScrollableAncestors(
 
     const computedStyle = window.getComputedStyle(currentNode);
 
-    if (currentNode !== element) {
-      if (isScrollable(currentNode, computedStyle)) {
-        scrollParents.push(currentNode);
-      }
+    if (currentNode !== element && isScrollable(currentNode, computedStyle)) {
+      scrollParents.push(currentNode);
     }
 
     if (isFixed(currentNode, computedStyle)) {

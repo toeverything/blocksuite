@@ -95,7 +95,7 @@ export function isValidUrl(str: string) {
 }
 
 // https://en.wikipedia.org/wiki/Top-level_domain
-const COMMON_TLDS = [
+const COMMON_TLDS = new Set([
   'com',
   'org',
   'net',
@@ -116,28 +116,31 @@ const COMMON_TLDS = [
   'jp',
   'uk',
   'pro',
-];
+]);
 
 function isCommonTLD(url: URL) {
   const tld = url.hostname.split('.').pop();
   if (!tld) {
     return false;
   }
-  return COMMON_TLDS.includes(tld);
+  return COMMON_TLDS.has(tld);
 }
 
 /**
  * Assuming the user will input anything, we need to check rigorously.
  */
 export function isStrictUrl(str: string) {
-  if (!isValidUrl(str)) {
+  try {
+    if (!isValidUrl(str)) {
+      return false;
+    }
+
+    const url = new URL(normalizeUrl(str));
+
+    return isCommonTLD(url);
+  } catch {
     return false;
   }
-  const url = new URL(normalizeUrl(str));
-  if (isCommonTLD(url)) {
-    return true;
-  }
-  return false;
 }
 
 export function isUrlInClipboard(clipboardData: DataTransfer) {

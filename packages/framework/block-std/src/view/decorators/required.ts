@@ -1,7 +1,6 @@
+import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 import type { Constructor } from '@blocksuite/global/utils';
 import type { LitElement } from 'lit';
-
-import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 
 type ValidatorFunction = (value: unknown) => boolean;
 

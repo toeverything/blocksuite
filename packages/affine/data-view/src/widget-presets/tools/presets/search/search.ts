@@ -7,13 +7,12 @@ import { query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
+import { stopPropagation } from '../../../../core/utils/event.js';
+import { WidgetBase } from '../../../../core/widget/widget-base.js';
 import type {
   KanbanSingleView,
   TableSingleView,
 } from '../../../../view-presets/index.js';
-
-import { stopPropagation } from '../../../../core/utils/event.js';
-import { WidgetBase } from '../../../../core/widget/widget-base.js';
 
 const styles = css`
   .affine-database-search-container {
@@ -94,7 +93,7 @@ export class DataViewHeaderToolsSearch extends WidgetBase<
 > {
   static override styles = styles;
 
-  private _clearSearch = () => {
+  private readonly _clearSearch = () => {
     this._searchInput.value = '';
     this.view.setSearch('');
     this.preventBlur = true;
@@ -103,25 +102,25 @@ export class DataViewHeaderToolsSearch extends WidgetBase<
     });
   };
 
-  private _clickSearch = (e: MouseEvent) => {
+  private readonly _clickSearch = (e: MouseEvent) => {
     e.stopPropagation();
     this.showSearch = true;
   };
 
-  private _onSearch = (event: InputEvent) => {
+  private readonly _onSearch = (event: InputEvent) => {
     const el = event.target as HTMLInputElement;
     const inputValue = el.value.trim();
     this.view.setSearch(inputValue);
   };
 
-  private _onSearchBlur = () => {
+  private readonly _onSearchBlur = () => {
     if (this._searchInput.value || this.preventBlur) {
       return;
     }
     this.showSearch = false;
   };
 
-  private _onSearchKeydown = (event: KeyboardEvent) => {
+  private readonly _onSearchKeydown = (event: KeyboardEvent) => {
     if (event.key === 'Escape') {
       if (this._searchInput.value) {
         this._searchInput.value = '';

@@ -1,9 +1,8 @@
 import { INLINE_ROOT_ATTR, type InlineRootElement } from '@blocksuite/inline';
 
-import type { TextSelection } from '../selection/index.js';
-import type { BlockComponent } from '../view/element/block-component.js';
-
 import { LifeCycleWatcher } from '../extension/index.js';
+import { TextSelection } from '../selection/index.js';
+import type { BlockComponent } from '../view/element/block-component.js';
 import { BLOCK_ID_ATTR } from '../view/index.js';
 import { RANGE_QUERY_EXCLUDE_ATTR, RANGE_SYNC_EXCLUDE_ATTR } from './consts.js';
 import { RangeBinding } from './range-binding.js';
@@ -99,17 +98,14 @@ export class RangeManager extends LifeCycleWatcher {
     }
 
     const firstElement = this.getClosestBlock(range.startContainer);
-    if (!firstElement) {
-      return [];
-    }
+    if (!firstElement) return [];
+    const firstElementIndex = result.indexOf(firstElement);
+    if (firstElementIndex === -1) return [];
 
     if (mode === 'flat') {
-      result = result.filter(
-        el =>
-          firstElement.compareDocumentPosition(el) &
-            Node.DOCUMENT_POSITION_FOLLOWING || el === firstElement
-      );
+      result = result.slice(firstElementIndex);
     } else if (mode === 'highest') {
+      result = result.slice(firstElementIndex);
       let parent = result[0];
       result = result.filter((node, index) => {
         if (index === 0) return true;
@@ -167,7 +163,7 @@ export class RangeManager extends LifeCycleWatcher {
       return null;
     }
 
-    return this.std.host.selection.create('text', {
+    return this.std.host.selection.create(TextSelection, {
       from: {
         blockId: startBlock.blockId,
         index: startInlineRange.index,

@@ -1,5 +1,9 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+import { DEFAULT_SERVICE_VARIANT, ROOT_SCOPE } from './consts.js';
+import { DuplicateServiceDefinitionError } from './error.js';
+import { parseIdentifier } from './identifier.js';
 import type { ServiceProvider } from './provider.js';
+import { BasicServiceProvider } from './provider.js';
+import { stringifyScope } from './scope.js';
 import type {
   GeneralServiceIdentifier,
   ServiceFactory,
@@ -11,12 +15,6 @@ import type {
   Type,
   TypesToDeps,
 } from './types.js';
-
-import { DEFAULT_SERVICE_VARIANT, ROOT_SCOPE } from './consts.js';
-import { DuplicateServiceDefinitionError } from './error.js';
-import { parseIdentifier } from './identifier.js';
-import { BasicServiceProvider } from './provider.js';
-import { stringifyScope } from './scope.js';
 
 /**
  * A container of services.

@@ -1,65 +1,47 @@
 {
   "compilerOptions": {
-    "jsx": "react",
-    "target": "ES2022",
-    "useDefineForClassFields": false,
-    "module": "NodeNext",
-    "lib": ["ESNext", "DOM", "DOM.Iterable"],
-    "moduleResolution": "NodeNext",
+    // Strictness
     "strict": true,
-    "sourceMap": true,
-    "inlineSources": true,
-    "declaration": true,
-    "declarationMap": true,
-    "resolveJsonModule": true,
     "verbatimModuleSyntax": true,
-    "esModuleInterop": true,
-    "noEmitOnError": true,
+    "exactOptionalPropertyTypes": false,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitOverride": true,
+    "noImplicitReturns": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "noImplicitReturns": true,
-    "noImplicitOverride": true,
+    "noPropertyAccessFromIndexSignature": false,
+    "noUncheckedIndexedAccess": false,
     "skipLibCheck": true,
-    "incremental": true,
+
+    // Modules
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+
+    // Emit
+    "lib": ["esnext", "dom", "dom.iterable"],
+    "target": "esnext",
+    "useDefineForClassFields": false,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "importsNotUsedAsValues": "remove",
+
+    // Interop Constraints
+    "forceConsistentCasingInFileNames": true,
+    "allowSyntheticDefaultImports": true,
+    "isolatedModules": true,
+
+    // Composite
     "composite": true
   },
+  "include": [],
   "files": [],
+  "exclude": ["node_modules", "target", "dist", "lib"],
   "references": [
-    {
-      "path": "./packages/framework/block-std"
-    },
-    {
-      "path": "./packages/blocks"
-    },
-    {
-      "path": "./packages/presets"
-    },
-    {
-      "path": "./packages/playground"
-    },
-    {
-      "path": "./packages/framework/store"
-    },
-    {
-      "path": "./packages/framework/global"
-    },
-    {
-      "path": "./packages/framework/inline"
-    },
-    {
-      "path": "./tests"
-    },
-    {
-      "path": "./scripts"
-    }
-  ],
-  "ts-node": {
-    "esm": true,
-    "experimentalSpecifierResolution": "node",
-    "compilerOptions": {
-      "noUnusedLocals": false,
-      "noUnusedParameters": false,
-      "noImplicitReturns": false
-    }
-  }
+    { "path": "./packages/affine/all" },
+    { "path": "./packages/integration-test" },
+    { "path": "./packages/playground" },
+    { "path": "./packages/tests-legacy" }
+  ]
 }

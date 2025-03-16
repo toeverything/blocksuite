@@ -1,5 +1,4 @@
 import type { AttributePart } from 'lit';
-
 import { Directive, directive, type PartInfo } from 'lit/directive.js';
 
 export type DataName = {

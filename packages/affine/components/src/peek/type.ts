@@ -1,5 +1,5 @@
 import type { BlockComponent, BlockStdScope } from '@blocksuite/block-std';
-import type { DisposableClass } from '@blocksuite/global/utils';
+import type { DisposableClass } from '@blocksuite/global/lit';
 import type { LitElement, TemplateResult } from 'lit';
 
 export type PeekableClass = { std: BlockStdScope } & DisposableClass &
@@ -40,6 +40,7 @@ export interface PeekViewService {
    * @returns A promise that resolves when the peek view is closed.
    */
   peek(
+    // eslint-disable-next-line @typescript-eslint/unified-signatures
     element: { target: HTMLElement; template?: TemplateResult },
     options?: PeekOptions
   ): Promise<void>;

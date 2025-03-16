@@ -1,9 +1,6 @@
-import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
-
 import type { InlineEditor } from '../inline-editor.js';
 import type { DeltaInsert, InlineRange } from '../types.js';
 import type { BaseTextAttributes } from '../utils/base-attributes.js';
-
 import { intersectInlineRange } from '../utils/inline-range.js';
 
 export class InlineTextService<TextAttributes extends BaseTextAttributes> {
@@ -71,18 +68,13 @@ export class InlineTextService<TextAttributes extends BaseTextAttributes> {
   ): void => {
     if (this.editor.isReadonly) return;
 
+    if (!text || !text.length) return;
+
     if (this.editor.attributeService.marks) {
       attributes = { ...attributes, ...this.editor.attributeService.marks };
     }
     const normalizedAttributes =
       this.editor.attributeService.normalizeAttributes(attributes);
-
-    if (!text || !text.length) {
-      throw new BlockSuiteError(
-        ErrorCode.InlineEditorError,
-        'text must not be empty'
-      );
-    }
 
     this.transact(() => {
       this.yText.delete(inlineRange.index, inlineRange.length);

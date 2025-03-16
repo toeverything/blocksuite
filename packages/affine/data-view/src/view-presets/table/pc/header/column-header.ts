@@ -1,6 +1,6 @@
 import { getScrollContainer } from '@blocksuite/affine-shared/utils';
 import { ShadowlessElement } from '@blocksuite/block-std';
-import { SignalWatcher, WithDisposable } from '@blocksuite/global/utils';
+import { SignalWatcher, WithDisposable } from '@blocksuite/global/lit';
 import { PlusIcon } from '@blocksuite/icons/lit';
 import { autoUpdate } from '@floating-ui/dom';
 import { nothing, type TemplateResult } from 'lit';
@@ -11,7 +11,6 @@ import { html } from 'lit/static-html.js';
 
 import type { TableSingleView } from '../../table-view-manager.js';
 import type { TableGroup } from '../group.js';
-
 import { styles } from './styles.js';
 
 export class DatabaseColumnHeader extends SignalWatcher(
@@ -19,7 +18,7 @@ export class DatabaseColumnHeader extends SignalWatcher(
 ) {
   static override styles = styles;
 
-  private _onAddColumn = (e: MouseEvent) => {
+  private readonly _onAddColumn = (e: MouseEvent) => {
     if (this.readonly) return;
     this.tableViewManager.propertyAdd('end');
     const ele = e.currentTarget as HTMLElement;

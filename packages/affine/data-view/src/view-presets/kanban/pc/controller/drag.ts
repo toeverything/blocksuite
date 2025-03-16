@@ -1,15 +1,13 @@
 import type { InsertToPosition } from '@blocksuite/affine-shared/utils';
-import type { ReactiveController } from 'lit';
-
-import { assertExists, Point, Rect } from '@blocksuite/global/utils';
+import { Point, Rect } from '@blocksuite/global/gfx';
 import { computed } from '@preact/signals-core';
-
-import type { DataViewKanban } from '../kanban-view.js';
+import type { ReactiveController } from 'lit';
 
 import { autoScrollOnBoundary } from '../../../../core/utils/auto-scroll.js';
 import { startDrag } from '../../../../core/utils/drag.js';
 import { KanbanCard } from '../card.js';
 import { KanbanGroup } from '../group.js';
+import type { DataViewKanban } from '../kanban-view.js';
 
 export class KanbanDragController implements ReactiveController {
   dragStart = (ele: KanbanCard, evt: PointerEvent) => {
@@ -138,11 +136,10 @@ export class KanbanDragController implements ReactiveController {
     const scrollContainer = this.host.querySelector(
       '.affine-data-view-kanban-groups'
     ) as HTMLElement;
-    assertExists(scrollContainer);
     return scrollContainer;
   }
 
-  constructor(private host: DataViewKanban) {
+  constructor(private readonly host: DataViewKanban) {
     this.host.addController(this);
   }
 
@@ -156,7 +153,7 @@ export class KanbanDragController implements ReactiveController {
         const target = event.target;
         if (target instanceof Element) {
           const cell = target.closest('affine-data-view-kanban-cell');
-          if (cell?.editing) {
+          if (cell?.isEditing$.value) {
             return;
           }
           cell?.selectCurrentCell(false);
@@ -214,7 +211,10 @@ const createDropPreview = () => {
       card?: KanbanCard
     ) {
       const target = card ?? group.querySelector('.add-card');
-      assertExists(target);
+      if (!target) {
+        console.error('`target` is not found');
+        return;
+      }
       if (target.previousElementSibling === self || target === self) {
         div.remove();
         return;

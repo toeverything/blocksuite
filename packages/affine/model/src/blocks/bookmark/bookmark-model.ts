@@ -2,9 +2,12 @@ import type {
   GfxCommonBlockProps,
   GfxElementGeometry,
 } from '@blocksuite/block-std/gfx';
-
 import { GfxCompatible } from '@blocksuite/block-std/gfx';
-import { BlockModel, defineBlockSchema } from '@blocksuite/store';
+import {
+  BlockModel,
+  BlockSchemaExtension,
+  defineBlockSchema,
+} from '@blocksuite/store';
 
 import type { EmbedCardStyle, LinkPreviewData } from '../../utils/index.js';
 
@@ -34,6 +37,7 @@ const defaultBookmarkProps: BookmarkBlockProps = {
 
   index: 'a0',
   xywh: '[0,0,0,0]',
+  lockedBySelf: false,
   rotate: 0,
 };
 
@@ -54,17 +58,9 @@ export const BookmarkBlockSchema = defineBlockSchema({
   toModel: () => new BookmarkBlockModel(),
 });
 
+export const BookmarkBlockSchemaExtension =
+  BlockSchemaExtension(BookmarkBlockSchema);
+
 export class BookmarkBlockModel
   extends GfxCompatible<BookmarkBlockProps>(BlockModel)
   implements GfxElementGeometry {}
-
-declare global {
-  namespace BlockSuite {
-    interface EdgelessBlockModelMap {
-      'affine:bookmark': BookmarkBlockModel;
-    }
-    interface BlockModels {
-      'affine:bookmark': BookmarkBlockModel;
-    }
-  }
-}

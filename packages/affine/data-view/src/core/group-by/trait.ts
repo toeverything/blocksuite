@@ -6,10 +6,9 @@ import { computed, type ReadonlySignal } from '@preact/signals-core';
 
 import type { GroupBy, GroupProperty } from '../common/types.js';
 import type { TypeInstance } from '../logical/type.js';
+import { createTraitKey } from '../traits/key.js';
 import type { Property } from '../view-manager/property.js';
 import type { SingleView } from '../view-manager/single-view.js';
-
-import { createTraitKey } from '../traits/key.js';
 import { defaultGroupBy } from './default.js';
 import { groupByMatcher } from './matcher.js';
 
@@ -103,16 +102,19 @@ export class GroupTrait {
     return groupMap;
   });
 
-  private _groupsDataList$ = computed(() => {
+  private readonly _groupsDataList$ = computed(() => {
     const groupMap = this.groupDataMap$.value;
     if (!groupMap) {
       return;
     }
     const sortedGroup = this.ops.sortGroup(Object.keys(groupMap));
     sortedGroup.forEach(key => {
+      if (!groupMap[key]) return;
       groupMap[key].rows = this.ops.sortRow(key, groupMap[key].rows);
     });
-    return (this.preDataList = sortedGroup.map(key => groupMap[key]));
+    return (this.preDataList = sortedGroup
+      .map(key => groupMap[key])
+      .filter((v): v is GroupData => v != null));
   });
 
   groupsDataList$ = computed(() => {
@@ -143,9 +145,9 @@ export class GroupTrait {
   }
 
   constructor(
-    private groupBy$: ReadonlySignal<GroupBy | undefined>,
+    private readonly groupBy$: ReadonlySignal<GroupBy | undefined>,
     public view: SingleView,
-    private ops: {
+    private readonly ops: {
       groupBySet: (groupBy: GroupBy | undefined) => void;
       sortGroup: (keys: string[]) => string[];
       sortRow: (groupKey: string, rowIds: string[]) => string[];
@@ -165,11 +167,11 @@ export class GroupTrait {
       return;
     }
     const addTo = this.config$.value?.addToGroup ?? (value => value);
-    const newValue = addTo(
-      groupMap[key].value,
-      this.view.cellJsonValueGet(rowId, propertyId)
-    );
-    this.view.cellValueSet(rowId, propertyId, newValue);
+    const v = groupMap[key]?.value;
+    if (v != null) {
+      const newValue = addTo(v, this.view.cellJsonValueGet(rowId, propertyId));
+      this.view.cellJsonValueSet(rowId, propertyId, newValue);
+    }
   }
 
   changeCardSort(groupKey: string, cardIds: string[]) {
@@ -230,9 +232,9 @@ export class GroupTrait {
       if (!propertyId) {
         return;
       }
-      const remove = this.config$.value?.removeFromGroup ?? (() => undefined);
+      const remove = this.config$.value?.removeFromGroup ?? (() => null);
       const group = fromGroupKey != null ? groupMap[fromGroupKey] : undefined;
-      let newValue: unknown = undefined;
+      let newValue: unknown = null;
       if (group) {
         newValue = remove(
           group.value,
@@ -240,10 +242,10 @@ export class GroupTrait {
         );
       }
       const addTo = this.config$.value?.addToGroup ?? (value => value);
-      newValue = addTo(groupMap[toGroupKey].value, newValue);
-      this.view.cellValueSet(rowId, propertyId, newValue);
+      newValue = addTo(groupMap[toGroupKey]?.value ?? null, newValue);
+      this.view.cellJsonValueSet(rowId, propertyId, newValue);
     }
-    const rows = groupMap[toGroupKey].rows.filter(id => id !== rowId);
+    const rows = groupMap[toGroupKey]?.rows.filter(id => id !== rowId) ?? [];
     const index = insertPositionToIndex(position, rows, id => id);
     rows.splice(index, 0, rowId);
     this.changeCardSort(toGroupKey, rows);
@@ -275,7 +277,7 @@ export class GroupTrait {
     }
     const remove = this.config$.value?.removeFromGroup ?? (() => undefined);
     const newValue = remove(
-      groupMap[key].value,
+      groupMap[key]?.value ?? null,
       this.view.cellJsonValueGet(rowId, propertyId)
     );
     this.view.cellValueSet(rowId, propertyId, newValue);
@@ -287,7 +289,7 @@ export class GroupTrait {
       return;
     }
     rows.forEach(id => {
-      this.view.cellValueSet(id, propertyId, value);
+      this.view.cellJsonValueSet(id, propertyId, value);
     });
   }
 }

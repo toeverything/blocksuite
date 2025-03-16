@@ -4,20 +4,19 @@ import {
   popupTargetFromElement,
 } from '@blocksuite/affine-components/context-menu';
 import { ShadowlessElement } from '@blocksuite/block-std';
-import { SignalWatcher, WithDisposable } from '@blocksuite/global/utils';
+import { SignalWatcher, WithDisposable } from '@blocksuite/global/lit';
 import { PlusIcon } from '@blocksuite/icons/lit';
 import { css, html } from 'lit';
 import { property, query } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
 import type { DataViewRenderer } from '../../../core/data-view.js';
-import type { GroupData } from '../../../core/group-by/trait.js';
-import type { DataViewTable } from '../pc/table-view.js';
-import type { TableSingleView } from '../table-view-manager.js';
-
 import { GroupTitle } from '../../../core/group-by/group-title.js';
+import type { GroupData } from '../../../core/group-by/trait.js';
 import { LEFT_TOOL_BAR_WIDTH } from '../consts.js';
-import { TableAreaSelection } from '../types.js';
+import type { DataViewTable } from '../pc/table-view.js';
+import { TableViewAreaSelection } from '../selection';
+import type { TableSingleView } from '../table-view-manager.js';
 
 const styles = css`
   .data-view-table-group-add-row {
@@ -51,14 +50,14 @@ export class MobileTableGroup extends SignalWatcher(
 ) {
   static override styles = styles;
 
-  private clickAddRow = () => {
+  private readonly clickAddRow = () => {
     this.view.rowAdd('end', this.group?.key);
     requestAnimationFrame(() => {
       const selectionController = this.viewEle.selectionController;
       const index = this.view.properties$.value.findIndex(
         v => v.type$.value === 'title'
       );
-      selectionController.selection = TableAreaSelection.create({
+      selectionController.selection = TableViewAreaSelection.create({
         groupKey: this.group?.key,
         focus: {
           rowIndex: this.rows.length - 1,
@@ -69,14 +68,14 @@ export class MobileTableGroup extends SignalWatcher(
     });
   };
 
-  private clickAddRowInStart = () => {
+  private readonly clickAddRowInStart = () => {
     this.view.rowAdd('start', this.group?.key);
     requestAnimationFrame(() => {
       const selectionController = this.viewEle.selectionController;
       const index = this.view.properties$.value.findIndex(
         v => v.type$.value === 'title'
       );
-      selectionController.selection = TableAreaSelection.create({
+      selectionController.selection = TableViewAreaSelection.create({
         groupKey: this.group?.key,
         focus: {
           rowIndex: 0,
@@ -87,7 +86,7 @@ export class MobileTableGroup extends SignalWatcher(
     });
   };
 
-  private clickGroupOptions = (e: MouseEvent) => {
+  private readonly clickGroupOptions = (e: MouseEvent) => {
     const group = this.group;
     if (!group) {
       return;
@@ -112,7 +111,7 @@ export class MobileTableGroup extends SignalWatcher(
     ]);
   };
 
-  private renderGroupHeader = () => {
+  private readonly renderGroupHeader = () => {
     if (!this.group) {
       return null;
     }

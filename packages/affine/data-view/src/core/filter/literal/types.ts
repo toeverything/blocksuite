@@ -8,7 +8,7 @@ export type CreateLiteralItemsConfig = <
 >(
   config: LiteralItemsConfig<Type>
 ) => LiteralItemsConfig<Type>;
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+
 export type LiteralItemsConfig<Type extends TypeInstance = any> = {
   type: Type;
   getItems: (

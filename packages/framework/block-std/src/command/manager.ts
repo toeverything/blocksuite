@@ -1,17 +1,6 @@
-import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
-
-import type {
-  Chain,
-  Command,
-  ExecCommandResult,
-  IfAllKeysOptional,
-  InDataOfCommand,
-  InitCommandCtx,
-} from './types.js';
-
 import { LifeCycleWatcher } from '../extension/index.js';
-import { CommandIdentifier } from '../identifier.js';
 import { cmdSymbol } from './consts.js';
+import type { Chain, Command, InitCommandCtx } from './types.js';
 
 /**
  * Command manager to manage all commands
@@ -19,7 +8,7 @@ import { cmdSymbol } from './consts.js';
  * Commands are functions that take a context and a next function as arguments
  *
  * ```ts
- * const myCommand: Command<'count', 'count'> = (ctx, next) => {
+ * const myCommand: Command<input, output> = (ctx, next) => {
  *  const count = ctx.count || 0;
  *
  *  const success = someOperation();
@@ -30,38 +19,15 @@ import { cmdSymbol } from './consts.js';
  *  return;
  * ```
  *
- * You should always add the command to the global interface `BlockSuite.Commands`
- * ```ts
- * declare global {
- *   namespace BlockSuite {
- *     interface Commands {
- *       'myCommand': typeof myCommand
- *     }
- *   }
- * }
- * ```
- *
  * Command input and output data can be defined in the `Command` type
  *
  * ```ts
  * // input: ctx.firstName, ctx.lastName
  * // output: ctx.fullName
- * const myCommand: Command<'firstName' | 'lastName', 'fullName'> = (ctx, next) => {
+ * const myCommand: Command<{ firstName: string; lastName: string }, { fullName: string }> = (ctx, next) => {
  *   const { firstName, lastName } = ctx;
  *   const fullName = `${firstName} ${lastName}`;
  *   return next({ fullName });
- * }
- *
- * declare global {
- *   namespace BlockSuite {
- *     interface CommandContext {
- *       // All command input and output data should be defined here
- *       // The keys should be optional
- *       firstName?: string;
- *       lastName?: string;
- *       fullName?: string;
- *     }
- *   }
  * }
  *
  * ```
@@ -74,7 +40,7 @@ import { cmdSymbol } from './consts.js';
  * 1. Using `exec` method
  * `exec` is used to run a single command
  * ```ts
- * const { success, ...data } = commandManager.exec('myCommand', payload);
+ * const [result, data] = commandManager.exec(myCommand, payload);
  * ```
  *
  * 2. Using `chain` method
@@ -82,8 +48,8 @@ import { cmdSymbol } from './consts.js';
  * ```ts
  * const chain = commandManager.chain();
  * const [result, data] = chain
- *   .myCommand1()
- *   .myCommand2(payload)
+ *   .pipe(myCommand1)
+ *   .pipe(myCommand2, payload)
  *   .run();
  * ```
  *
@@ -94,8 +60,8 @@ import { cmdSymbol } from './consts.js';
  * ```ts
  * const chain = commandManager.chain();
  * const [result, data] = chain
- *   .myCommand1() <-- if this fail
- *   .myCommand2(payload) <- this won't run
+ *   .chain(myCommand1) <-- if this fail
+ *   .chain(myCommand2, payload) <- this won't run
  *   .run();
  *
  * result <- result will be `false`
@@ -106,9 +72,9 @@ import { cmdSymbol } from './consts.js';
  * const chain = commandManager.chain();
  * const [result, data] = chain
  *   .try(chain => [
- *     chain.myCommand1(), <- if this fail
- *     chain.myCommand2(), <- this will run, if this success
- *     chain.myCommand3(), <- this won't run
+ *     chain.pipe(myCommand1), <- if this fail
+ *     chain.pipe(myCommand2, payload), <- this will run, if this success
+ *     chain.pipe(myCommand3), <- this won't run
  *   ])
  *   .run();
  * ```
@@ -118,9 +84,9 @@ import { cmdSymbol } from './consts.js';
  * const chain = commandManager.chain();
  * const [result, data] = chain
  *   .try(chain => [
- *     chain.myCommand1(), <- if this success
- *     chain.myCommand2(), <- this will also run
- *     chain.myCommand3(), <- so will this
+ *     chain.pipe(myCommand1), <- if this success
+ *     chain.pipe(myCommand2), <- this will also run
+ *     chain.pipe(myCommand3), <- so will this
  *   ])
  *   .run();
  * ```
@@ -129,12 +95,7 @@ import { cmdSymbol } from './consts.js';
 export class CommandManager extends LifeCycleWatcher {
   static override readonly key = 'commandManager';
 
-  private _commands = new Map<string, Command>();
-
-  private _createChain = (
-    methods: Record<BlockSuite.CommandName, unknown>,
-    _cmds: Command[]
-  ): Chain => {
+  private readonly _createChain = (_cmds: Command[]): Chain => {
     const getCommandCtx = this._getCommandCtx;
     const createChain = this._createChain;
     const chain = this.chain;
@@ -146,7 +107,7 @@ export class CommandManager extends LifeCycleWatcher {
         let success = false;
         try {
           const cmds = this[cmdSymbol];
-          ctx = runCmds(ctx as BlockSuite.CommandContext, [
+          ctx = runCmds(ctx, [
             ...cmds,
             (_, next) => {
               success = true;
@@ -161,38 +122,35 @@ export class CommandManager extends LifeCycleWatcher {
       },
       with: function (this: Chain, value) {
         const cmds = this[cmdSymbol];
-        return createChain(methods, [
-          ...cmds,
-          (_, next) => next(value),
-        ]) as never;
+        return createChain([...cmds, (_, next) => next(value)]) as never;
       },
-      inline: function (this: Chain, command) {
+      pipe: function (this: Chain, command: Command, input?: object) {
         const cmds = this[cmdSymbol];
-        return createChain(methods, [...cmds, command]) as never;
+        return createChain([
+          ...cmds,
+          (ctx, next) => command({ ...ctx, ...input }, next),
+        ]);
       },
       try: function (this: Chain, fn) {
         const cmds = this[cmdSymbol];
-        return createChain(methods, [
+        return createChain([
           ...cmds,
           (beforeCtx, next) => {
             let ctx = beforeCtx;
-            const chains = fn(chain());
 
-            chains.some(chain => {
-              // inject ctx in the beginning
-              chain[cmdSymbol] = [
+            const commands = fn(chain());
+
+            commands.some(innerChain => {
+              innerChain[cmdSymbol] = [
                 (_, next) => {
                   next(ctx);
                 },
-                ...chain[cmdSymbol],
+                ...innerChain[cmdSymbol],
               ];
 
-              const [success] = chain
-                .inline((branchCtx, next) => {
-                  ctx = { ...ctx, ...branchCtx };
-                  next();
-                })
-                .run();
+              const [success, branchCtx] = innerChain.run();
+              ctx = { ...ctx, ...branchCtx };
+
               if (success) {
                 next(ctx);
                 return true;
@@ -204,43 +162,41 @@ export class CommandManager extends LifeCycleWatcher {
       },
       tryAll: function (this: Chain, fn) {
         const cmds = this[cmdSymbol];
-        return createChain(methods, [
+        return createChain([
           ...cmds,
           (beforeCtx, next) => {
             let ctx = beforeCtx;
-            const chains = fn(chain());
 
             let allFail = true;
-            chains.forEach(chain => {
-              // inject ctx in the beginning
-              chain[cmdSymbol] = [
+
+            const commands = fn(chain());
+
+            commands.forEach(innerChain => {
+              innerChain[cmdSymbol] = [
                 (_, next) => {
                   next(ctx);
                 },
-                ...chain[cmdSymbol],
+                ...innerChain[cmdSymbol],
               ];
 
-              const [success] = chain
-                .inline((branchCtx, next) => {
-                  ctx = { ...ctx, ...branchCtx };
-                  next();
-                })
-                .run();
+              const [success, branchCtx] = innerChain.run();
+              ctx = { ...ctx, ...branchCtx };
+
               if (success) {
                 allFail = false;
               }
             });
+
             if (!allFail) {
               next(ctx);
             }
           },
         ]) as never;
       },
-      ...methods,
-    } as Chain;
+    };
   };
 
-  private _getCommandCtx = (): InitCommandCtx => {
+  private readonly _getCommandCtx = (): InitCommandCtx => {
     return {
       std: this.std,
     };
@@ -259,120 +215,18 @@ export class CommandManager extends LifeCycleWatcher {
    *   data is the final context after running the chain
    */
   chain = (): Chain<InitCommandCtx> => {
-    const methods = {} as Record<
-      string,
-      (data: Record<string, unknown>) => Chain
-    >;
-    const createChain = this._createChain;
-    for (const [name, command] of this._commands.entries()) {
-      methods[name] = function (
-        this: { [cmdSymbol]: Command[] },
-        data: Record<string, unknown>
-      ) {
-        const cmds = this[cmdSymbol];
-        return createChain(methods, [
-          ...cmds,
-          (ctx, next) => command({ ...ctx, ...data }, next),
-        ]);
-      };
-    }
-
-    return createChain(methods, []) as never;
+    return this._createChain([]);
   };
 
-  /**
-   * Register a command to the command manager
-   * @param name
-   * @param command
-   * Make sure to also add the command to the global interface `BlockSuite.Commands`
-   * ```ts
-   * const myCommand: Command = (ctx, next) => {
-   *   // do something
-   * }
-   *
-   * declare global {
-   *   namespace BlockSuite {
-   *     interface Commands {
-   *       'myCommand': typeof myCommand
-   *     }
-   *   }
-   * }
-   * ```
-   */
-  add<N extends BlockSuite.CommandName>(
-    name: N,
-    command: BlockSuite.Commands[N]
-  ): CommandManager;
-
-  add(name: string, command: Command) {
-    this._commands.set(name, command);
-    return this;
-  }
-
-  override created() {
-    const add = this.add.bind(this);
-    this.std.provider.getAll(CommandIdentifier).forEach((command, key) => {
-      add(key as keyof BlockSuite.Commands, command);
-    });
-  }
-
-  /**
-   * Execute a registered command by name
-   * @param command
-   * @param payloads
-   * ```ts
-   * const { success, ...data } = commandManager.exec('myCommand', { data: 'data' });
-   * ```
-   * @returns { success, ...data } - success is a boolean to indicate if the command is successful,
-   *  data is the final context after running the command
-   */
-  exec<K extends keyof BlockSuite.Commands>(
-    command: K,
-    ...payloads: IfAllKeysOptional<
-      Omit<InDataOfCommand<BlockSuite.Commands[K]>, keyof InitCommandCtx>,
-      [
-        inData: void | Omit<
-          InDataOfCommand<BlockSuite.Commands[K]>,
-          keyof InitCommandCtx
-        >,
-      ],
-      [
-        inData: Omit<
-          InDataOfCommand<BlockSuite.Commands[K]>,
-          keyof InitCommandCtx
-        >,
-      ]
-    >
-  ): ExecCommandResult<K> & { success: boolean } {
-    const cmdFunc = this._commands.get(command);
-
-    if (!cmdFunc) {
-      throw new BlockSuiteError(
-        ErrorCode.CommandError,
-        `The command "${command}" not found`
-      );
-    }
-
-    const inData = payloads[0];
-    const ctx = {
-      ...this._getCommandCtx(),
-      ...inData,
-    };
-
-    let execResult = {
-      success: false,
-    } as ExecCommandResult<K> & { success: boolean };
-
-    cmdFunc(ctx, result => {
-      // @ts-ignore
-      execResult = { ...result, success: true };
-    });
-
-    return execResult;
-  }
+  exec = <Output extends object, Input extends object>(
+    command: Command<Input, Output>,
+    input?: Input
+  ) => {
+    return this.chain().pipe(command, input).run();
+  };
 }
 
-function runCmds(ctx: BlockSuite.CommandContext, [cmd, ...rest]: Command[]) {
+function runCmds(ctx: InitCommandCtx, [cmd, ...rest]: Command[]) {
   let _ctx = ctx;
   if (cmd) {
     cmd(ctx, data => {

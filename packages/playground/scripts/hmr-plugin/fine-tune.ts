@@ -1,9 +1,10 @@
-import type { Plugin } from 'vite';
+/* eslint-disable import-x/no-extraneous-dependencies */
+import path from 'node:path';
 
 import { init, parse } from 'es-module-lexer';
 import MagicString from 'magic-string';
 import micromatch from 'micromatch';
-import path from 'node:path';
+import type { Plugin } from 'vite';
 const isMatch = micromatch.isMatch;
 
 export function fineTuneHmr({

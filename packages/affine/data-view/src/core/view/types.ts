@@ -8,7 +8,7 @@ import type {
   EventName,
   UIEventHandler,
 } from '@blocksuite/block-std';
-import type { Disposable } from '@blocksuite/global/utils';
+import type { Disposable } from '@blocksuite/global/disposable';
 import type { ReadonlySignal } from '@preact/signals-core';
 
 import type { DataSource } from '../common/index.js';

@@ -1,23 +1,20 @@
-import { ShadowlessElement } from '@blocksuite/block-std';
+import '@shoelace-style/shoelace';
+
+import { ShadowlessElement } from '@blocksuite/affine/block-std';
 import {
   type AttributeRenderer,
   type BaseTextAttributes,
   baseTextAttributes,
-  createInlineKeyDownHandler,
   InlineEditor,
-  KEYBOARD_ALLOW_DEFAULT,
   ZERO_WIDTH_NON_JOINER,
-} from '@blocksuite/inline';
-import { effects } from '@blocksuite/inline/effects';
+} from '@blocksuite/affine/inline';
+import { effects } from '@blocksuite/affine/inline/effects';
 import { effect } from '@preact/signals-core';
-import '@shoelace-style/shoelace';
 import { css, html, nothing } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import * as Y from 'yjs';
 import { z } from 'zod';
-
-import { markdownMatches } from './markdown.js';
 
 effects();
 
@@ -55,7 +52,7 @@ function inlineTextStyles(
 }
 
 const attributeRenderer: AttributeRenderer = ({ delta, selected }) => {
-  // @ts-ignore
+  // @ts-expect-error ignore
   if (delta.attributes?.embed) {
     return html`<span
       style=${styleMap({
@@ -131,31 +128,7 @@ export class TestRichText extends ShadowlessElement {
     this.style.outline = 'none';
     this.inlineEditor.mount(this._container, this);
 
-    const keydownHandler = createInlineKeyDownHandler(this.inlineEditor, {
-      inputRule: {
-        key: ' ',
-        handler: context => {
-          const { inlineEditor, prefixText, inlineRange } = context;
-          for (const match of markdownMatches) {
-            const matchedText = prefixText.match(match.pattern);
-            if (matchedText) {
-              return match.action({
-                inlineEditor,
-                prefixText,
-                inlineRange,
-                pattern: match.pattern,
-                undoManager: this.undoManager,
-              });
-            }
-          }
-
-          return KEYBOARD_ALLOW_DEFAULT;
-        },
-      },
-    });
-    this.addEventListener('keydown', keydownHandler);
-
-    this.inlineEditor.slots.textChange.on(() => {
+    this.inlineEditor.slots.textChange.subscribe(() => {
       const el = this.querySelector('.y-text');
       if (el) {
         const text = this.inlineEditor.yText.toDelta();
@@ -189,8 +162,9 @@ export class TestRichText extends ShadowlessElement {
         }
 
         code {
-          font-family: 'SFMono-Regular', Menlo, Consolas, 'PT Mono',
-            'Liberation Mono', Courier, monospace;
+          font-family:
+            'SFMono-Regular', Menlo, Consolas, 'PT Mono', 'Liberation Mono',
+            Courier, monospace;
           line-height: normal;
           background: rgba(135, 131, 120, 0.15);
           color: #eb5757;
@@ -201,8 +175,9 @@ export class TestRichText extends ShadowlessElement {
 
         .v-range,
         .y-text {
-          font-family: 'SFMono-Regular', Menlo, Consolas, 'PT Mono',
-            'Liberation Mono', Courier, monospace;
+          font-family:
+            'SFMono-Regular', Menlo, Consolas, 'PT Mono', 'Liberation Mono',
+            Courier, monospace;
           line-height: normal;
           background: rgba(135, 131, 120, 0.15);
         }
@@ -323,7 +298,7 @@ export class CustomToolbar extends ShadowlessElement {
     });
     embed.addEventListener('click', () => {
       undoManager.stopCapturing();
-      //@ts-ignore
+      // @ts-expect-error ignore
       toggleStyle(this.inlineEditor, { embed: true });
     });
     resetButton.addEventListener('click', () => {

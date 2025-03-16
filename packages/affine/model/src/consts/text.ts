@@ -1,12 +1,7 @@
+import { z } from 'zod';
+
+import type { Color } from '../themes/color.js';
 import { createEnumMap } from '../utils/enum.js';
-import { LineColor } from './line.js';
-
-export enum ColorScheme {
-  Dark = 'dark',
-  Light = 'light',
-}
-
-export type Color = string | Partial<Record<ColorScheme | 'normal', string>>;
 
 export enum TextAlign {
   Center = 'center',
@@ -67,4 +62,7 @@ export enum TextResizing {
   AUTO_HEIGHT,
 }
 
-export const DEFAULT_TEXT_COLOR = LineColor.Blue;
+export const FontFamilySchema = z.nativeEnum(FontFamily);
+export const FontWeightSchema = z.nativeEnum(FontWeight);
+export const FontStyleSchema = z.nativeEnum(FontStyle);
+export const TextAlignSchema = z.nativeEnum(TextAlign);

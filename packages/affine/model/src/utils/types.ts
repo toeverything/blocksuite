@@ -1,3 +1,11 @@
+import type { GfxModel } from '@blocksuite/block-std/gfx';
+
+import type {
+  BrushElementModel,
+  ConnectorElementModel,
+  GroupElementModel,
+} from '../elements';
+
 export type EmbedCardStyle =
   | 'horizontal'
   | 'horizontalThin'
@@ -16,4 +24,16 @@ export type LinkPreviewData = {
   icon: string | null;
   image: string | null;
   title: string | null;
+};
+
+export type Connectable = Exclude<
+  GfxModel,
+  ConnectorElementModel | BrushElementModel | GroupElementModel
+>;
+
+export type BlockMeta = {
+  'meta:createdAt'?: number;
+  'meta:createdBy'?: string;
+  'meta:updatedAt'?: number;
+  'meta:updatedBy'?: string;
 };

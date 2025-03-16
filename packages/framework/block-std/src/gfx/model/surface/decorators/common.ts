@@ -13,9 +13,9 @@ export function setObjectPropMeta(
   prop: string | symbol,
   val: unknown
 ) {
-  // @ts-ignore
+  // @ts-expect-error ignore
   target[symbol] = target[symbol] ?? {};
-  // @ts-ignore
+  // @ts-expect-error ignore
   target[symbol][prop] = val;
 }
 
@@ -32,11 +32,11 @@ export function getObjectPropMeta(
   prop?: string | symbol
 ) {
   if (prop) {
-    // @ts-ignore
+    // @ts-expect-error ignore
     return target[symbol]?.[prop] ?? null;
   }
 
-  // @ts-ignore
+  // @ts-expect-error ignore
   return target[symbol] ?? {};
 }
 

@@ -1,5 +1,4 @@
 import type { GfxPrimitiveElementModel } from '../element-model.js';
-
 import { getDecoratorState } from './common.js';
 import { convertProps } from './convert.js';
 import { getDerivedProps, updateDerivedProps } from './derive.js';

@@ -1,11 +1,10 @@
 import type { Command } from '@blocksuite/block-std';
+import { type BlockModel, type DraftModel, Slice } from '@blocksuite/store';
 
-import { Slice } from '@blocksuite/store';
-
-export const copySelectedModelsCommand: Command<'draftedModels' | 'onCopy'> = (
-  ctx,
-  next
-) => {
+export const copySelectedModelsCommand: Command<{
+  draftedModels?: Promise<DraftModel<BlockModel<object>>[]>;
+  onCopy?: () => void;
+}> = (ctx, next) => {
   const models = ctx.draftedModels;
   if (!models) {
     console.error(
@@ -16,7 +15,7 @@ export const copySelectedModelsCommand: Command<'draftedModels' | 'onCopy'> = (
 
   models
     .then(models => {
-      const slice = Slice.fromModels(ctx.std.doc, models);
+      const slice = Slice.fromModels(ctx.std.store, models);
 
       return ctx.std.clipboard.copy(slice);
     })
@@ -24,14 +23,3 @@ export const copySelectedModelsCommand: Command<'draftedModels' | 'onCopy'> = (
     .catch(console.error);
   return next();
 };
-
-declare global {
-  namespace BlockSuite {
-    interface CommandContext {
-      onCopy?: () => void;
-    }
-    interface Commands {
-      copySelectedModels: typeof copySelectedModelsCommand;
-    }
-  }
-}

@@ -1,7 +1,11 @@
-import type { EmbedCardStyle } from '@blocksuite/affine-model';
+import type {
+  EmbedCardStyle,
+  FootNote,
+  ReferenceInfo,
+} from '@blocksuite/affine-model';
 import type { BlockComponent } from '@blocksuite/block-std';
 import type { BlockModel } from '@blocksuite/store';
-
+export * from './uni-component';
 export interface EditingState {
   element: BlockComponent;
   model: BlockModel;
@@ -36,7 +40,6 @@ export interface Viewport {
   clientHeight: number;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type ExtendedModel = BlockModel & Record<string, any>;
 
 export type EmbedOptions = {
@@ -49,9 +52,24 @@ export type EmbedOptions = {
 export type IndentContext = {
   blockId: string;
   inlineIndex: number;
-  flavour: Extract<
-    keyof BlockSuite.BlockModels,
-    'affine:paragraph' | 'affine:list'
-  >;
+  flavour: string;
   type: 'indent' | 'dedent';
 };
+
+export interface AffineTextAttributes {
+  bold?: true | null;
+  italic?: true | null;
+  underline?: true | null;
+  strike?: true | null;
+  code?: true | null;
+  link?: string | null;
+  reference?:
+    | ({
+        type: 'Subpage' | 'LinkedPage';
+      } & ReferenceInfo)
+    | null;
+  background?: string | null;
+  color?: string | null;
+  latex?: string | null;
+  footnote?: FootNote | null;
+}

@@ -1,5 +1,4 @@
 import type { BlockModel } from '@blocksuite/store';
-
 import { createContext } from '@lit/context';
 
 import type { BlockService } from '../../extension/index.js';

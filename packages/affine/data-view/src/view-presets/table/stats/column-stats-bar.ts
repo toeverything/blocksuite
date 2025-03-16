@@ -1,13 +1,12 @@
 import { ShadowlessElement } from '@blocksuite/block-std';
-import { SignalWatcher, WithDisposable } from '@blocksuite/global/utils';
+import { SignalWatcher, WithDisposable } from '@blocksuite/global/lit';
 import { css, html } from 'lit';
 import { property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
 import type { GroupData } from '../../../core/group-by/trait.js';
-import type { TableSingleView } from '../table-view-manager.js';
-
 import { LEFT_TOOL_BAR_WIDTH, STATS_BAR_HEIGHT } from '../consts.js';
+import type { TableSingleView } from '../table-view-manager.js';
 
 const styles = css`
   .affine-database-column-stats {

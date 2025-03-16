@@ -1,13 +1,13 @@
-import type { CSSResult } from 'lit';
-
-import { assertExists } from '@blocksuite/global/utils';
+import { requestConnectedFrame } from '@blocksuite/affine-shared/utils';
 import {
   arrow,
   type ComputePositionReturn,
   flip,
   offset,
   type Placement,
+  shift,
 } from '@floating-ui/dom';
+import type { CSSResult } from 'lit';
 import { css, html, LitElement, unsafeCSS } from 'lit';
 import { property } from 'lit/decorators.js';
 import { type StyleInfo, styleMap } from 'lit/directives/style-map.js';
@@ -26,11 +26,9 @@ const styles = css`
     color: var(--affine-white);
     background: var(--affine-tooltip);
 
-    display: flex;
-    justify-content: center;
-    align-items: center;
     overflow-wrap: anywhere;
-    white-space: pre-wrap;
+    white-space: normal;
+    word-break: break-all;
   }
 
   .arrow {
@@ -69,6 +67,11 @@ const triangleMap = {
     borderColor: 'transparent transparent transparent var(--affine-tooltip)',
   },
 };
+
+// The padding for the autoShift and autoFlip middleware
+// It's used to prevent the tooltip from overflowing the screen
+const AUTO_SHIFT_PADDING = 12;
+const AUTO_FLIP_PADDING = 12;
 
 // Ported from https://floating-ui.com/docs/tutorial#arrow-middleware
 const updateArrowStyles = ({
@@ -126,7 +129,7 @@ export class Tooltip extends LitElement {
 
   private _hoverController!: HoverController;
 
-  private _setUpHoverController = () => {
+  private readonly _setUpHoverController = () => {
     this._hoverController = new HoverController(
       this,
       () => {
@@ -141,7 +144,7 @@ export class Tooltip extends LitElement {
         let arrowStyles: StyleInfo = {};
         return {
           template: ({ positionSlot, updatePortal }) => {
-            positionSlot.on(data => {
+            positionSlot.subscribe(data => {
               // The tooltip placement may change,
               // so we need to update the arrow position
               if (this.arrow) {
@@ -168,7 +171,8 @@ export class Tooltip extends LitElement {
             referenceElement: this.parentElement!,
             placement: this.placement,
             middleware: [
-              this.autoFlip && flip({ padding: 12 }),
+              this.autoFlip && flip({ padding: AUTO_FLIP_PADDING }),
+              this.autoShift && shift({ padding: AUTO_SHIFT_PADDING }),
               offset((this.arrow ? TRIANGLE_HEIGHT : 0) + this.offset),
               arrow({
                 element: portalRoot.shadowRoot!.querySelector('.arrow')!,
@@ -188,12 +192,15 @@ export class Tooltip extends LitElement {
     );
 
     const parent = this.parentElement;
-    assertExists(parent, 'Tooltip must have a parent element');
+    if (!parent) {
+      console.error('Tooltip must have a parent element');
+      return;
+    }
 
     // Wait for render
-    setTimeout(() => {
+    requestConnectedFrame(() => {
       this._hoverController.setReference(parent);
-    }, 0);
+    }, this);
   };
 
   private _getStyles() {
@@ -202,10 +209,8 @@ export class Tooltip extends LitElement {
       :host {
         z-index: ${unsafeCSS(this.zIndex)};
         opacity: 0;
-        ${
-          // All the styles are applied to the portal element
-          unsafeCSS(this.style.cssText)
-        }
+        // All the styles are applied to the portal element
+        ${unsafeCSS(this.style.cssText)}
       }
 
       ${this.allowInteractive
@@ -251,6 +256,17 @@ export class Tooltip extends LitElement {
    */
   @property({ attribute: false })
   accessor autoFlip = true;
+
+  /**
+   * shifts the floating element to keep it in view.
+   * this prevents the floating element from
+   * overflowing along its axis of alignment,
+   * thereby preserving the side it’s placed on.
+   *
+   * See https://floating-ui.com/docs/shift
+   */
+  @property({ attribute: false })
+  accessor autoShift = false;
 
   @property({ attribute: false })
   accessor hoverOptions: Partial<HoverOptions> = {};

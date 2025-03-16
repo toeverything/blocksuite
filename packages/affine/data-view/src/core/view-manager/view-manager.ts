@@ -1,5 +1,4 @@
 import type { InsertToPosition } from '@blocksuite/affine-shared/utils';
-
 import { nanoid } from '@blocksuite/store';
 import { computed, type ReadonlySignal, signal } from '@preact/signals-core';
 
@@ -16,14 +15,14 @@ export interface ViewManager {
   dataSource: DataSource;
   readonly$: ReadonlySignal<boolean>;
 
-  currentViewId$: ReadonlySignal<string>;
-  currentView$: ReadonlySignal<SingleView>;
+  currentViewId$: ReadonlySignal<string | undefined>;
+  currentView$: ReadonlySignal<SingleView | undefined>;
 
   setCurrentView(id: string): void;
 
   views$: ReadonlySignal<string[]>;
 
-  viewGet(id: string): SingleView;
+  viewGet(id: string): SingleView | undefined;
 
   viewAdd(type: DataViewMode): string;
 
@@ -50,7 +49,9 @@ export class ViewManagerBase implements ViewManager {
   });
 
   currentView$ = computed(() => {
-    return this.viewGet(this.currentViewId$.value);
+    const id = this.currentViewId$.value;
+    if (!id) return;
+    return this.viewGet(id);
   });
 
   readonly$ = computed(() => {
@@ -67,7 +68,7 @@ export class ViewManagerBase implements ViewManager {
     this.dataSource.viewDataMoveTo(id, position);
   }
 
-  setCurrentView(id: string): void {
+  setCurrentView(id: string | undefined): void {
     this._currentViewId$.value = id;
   }
 
@@ -85,7 +86,7 @@ export class ViewManagerBase implements ViewManager {
   }
 
   viewChangeType(id: string, type: string): void {
-    const from = this.viewGet(id).type;
+    const from = this.viewGet(id)?.type;
     const meta = this.dataSource.viewMetaGet(type);
     this.dataSource.viewDataUpdate(id, old => {
       let data = {
@@ -121,8 +122,9 @@ export class ViewManagerBase implements ViewManager {
     this.setCurrentView(newId);
   }
 
-  viewGet(id: string): SingleView {
+  viewGet(id: string): SingleView | undefined {
     const meta = this.dataSource.viewMetaGetById(id);
+    if (!meta) return;
     return new meta.model.dataViewManager(this, id);
   }
 }

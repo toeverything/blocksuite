@@ -1,20 +1,14 @@
 {
-  "extends": "../../../tsconfig.json",
+  "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "rootDir": "./src/",
-    "outDir": "./dist/",
-    "noEmit": false
+    "rootDir": "./src",
+    "outDir": "./dist",
+    "tsBuildInfoFile": "./dist/tsconfig.tsbuildinfo"
   },
   "include": ["./src"],
   "references": [
-    {
-      "path": "../global"
-    },
-    {
-      "path": "../sync"
-    },
-    {
-      "path": "../inline"
-    }
+    { "path": "../global" },
+    { "path": "../inline" },
+    { "path": "../sync" }
   ]
 }

@@ -74,12 +74,13 @@ const selectTagColorPoll = selectOptionColors.map(color => color.color);
 
 function tagColorHelper() {
   let colors = [...selectTagColorPoll];
-  return () => {
+  return (): string => {
     if (colors.length === 0) {
       colors = [...selectTagColorPoll];
     }
     const index = Math.floor(Math.random() * colors.length);
     const color = colors.splice(index, 1)[0];
+    if (!color) return '';
     return color;
   };
 }

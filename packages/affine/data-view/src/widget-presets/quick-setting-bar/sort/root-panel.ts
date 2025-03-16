@@ -6,7 +6,7 @@ import {
 } from '@blocksuite/affine-components/context-menu';
 import { unsafeCSSVarV2 } from '@blocksuite/affine-shared/theme';
 import { ShadowlessElement } from '@blocksuite/block-std';
-import { SignalWatcher, WithDisposable } from '@blocksuite/global/utils';
+import { SignalWatcher, WithDisposable } from '@blocksuite/global/lit';
 import {
   ArrowDownSmallIcon,
   CloseIcon,
@@ -19,11 +19,10 @@ import { property } from 'lit/decorators.js';
 import { keyed } from 'lit/directives/keyed.js';
 import { repeat } from 'lit/directives/repeat.js';
 
-import type { SortBy } from '../../../core/sort/types.js';
-import type { SortUtils } from '../../../core/sort/utils.js';
-
 import { renderUniLit } from '../../../core/index.js';
 import { popCreateSort } from '../../../core/sort/add-sort.js';
+import type { SortBy } from '../../../core/sort/types.js';
+import type { SortUtils } from '../../../core/sort/utils.js';
 import { dragHandler } from '../../../core/utils/wc-dnd/dnd-context.js';
 import { defaultActivators } from '../../../core/utils/wc-dnd/sensors/index.js';
 import {

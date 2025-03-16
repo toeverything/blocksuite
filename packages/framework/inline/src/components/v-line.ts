@@ -1,13 +1,11 @@
 import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
-import { assertExists } from '@blocksuite/global/utils';
 import { html, LitElement, type TemplateResult } from 'lit';
 import { property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
+import { INLINE_ROOT_ATTR, ZERO_WIDTH_SPACE } from '../consts.js';
 import type { InlineRootElement } from '../inline-editor.js';
 import type { DeltaInsert } from '../types.js';
-
-import { INLINE_ROOT_ATTR, ZERO_WIDTH_SPACE } from '../consts.js';
 import { EmbedGap } from './embed-gap.js';
 
 export class VLine extends LitElement {
@@ -15,12 +13,19 @@ export class VLine extends LitElement {
     const rootElement = this.closest(
       `[${INLINE_ROOT_ATTR}]`
     ) as InlineRootElement;
-    assertExists(rootElement, 'v-line must be inside a v-root');
+    if (!rootElement) {
+      throw new BlockSuiteError(
+        BlockSuiteError.ErrorCode.ValueNotExists,
+        'v-line must be inside a v-root'
+      );
+    }
     const inlineEditor = rootElement.inlineEditor;
-    assertExists(
-      inlineEditor,
-      'v-line must be inside a v-root with inline-editor'
-    );
+    if (!inlineEditor) {
+      throw new BlockSuiteError(
+        BlockSuiteError.ErrorCode.ValueNotExists,
+        'v-line must be inside a v-root with inline-editor'
+      );
+    }
 
     return inlineEditor;
   }

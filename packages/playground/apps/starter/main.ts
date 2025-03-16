@@ -1,36 +1,27 @@
-import {
-  type ExtensionType,
-  WidgetViewMapExtension,
-  WidgetViewMapIdentifier,
-} from '@blocksuite/block-std';
-import * as blocks from '@blocksuite/blocks';
-import {
-  CommunityCanvasTextFonts,
-  DocModeProvider,
-  FontConfigExtension,
-  ParseDocUrlProvider,
-  QuickSearchProvider,
-  RefNodeSlotsExtension,
-  RefNodeSlotsProvider,
-} from '@blocksuite/blocks';
-import { effects as blocksEffects } from '@blocksuite/blocks/effects';
-import * as globalUtils from '@blocksuite/global/utils';
-import * as editor from '@blocksuite/presets';
-import { effects as presetsEffects } from '@blocksuite/presets/effects';
-import * as store from '@blocksuite/store';
-
 import '../../style.css';
-import { mockDocModeService } from '../_common/mock-services.js';
+
+import * as blockStd from '@blocksuite/affine/block-std';
+import * as databaseBlocks from '@blocksuite/affine/blocks/database';
+import * as noteBlocks from '@blocksuite/affine/blocks/note';
+import { effects as blocksEffects } from '@blocksuite/affine/effects';
+import * as globalUtils from '@blocksuite/affine/global/utils';
+import * as services from '@blocksuite/affine/shared/services';
+import * as store from '@blocksuite/affine/store';
+import * as editor from '@blocksuite/integration-test';
+import { effects as presetsEffects } from '@blocksuite/integration-test/effects';
+
 import { setupEdgelessTemplate } from '../_common/setup.js';
-import '../dev-format.js';
+import { effects as commentEffects } from '../comment/effects.js';
 import {
   createStarterDocCollection,
   initStarterDocCollection,
 } from './utils/collection.js';
-import { mountDefaultDocEditor } from './utils/editor.js';
+import { mountDefaultDocEditor } from './utils/setup-playground';
+import { prepareTestApp } from './utils/test';
 
 blocksEffects();
 presetsEffects();
+commentEffects();
 
 async function main() {
   if (window.collection) return;
@@ -46,38 +37,17 @@ async function main() {
     Object.defineProperty(window, '$blocksuite', {
       value: Object.freeze({
         store,
-        blocks,
+        blocks: {
+          database: databaseBlocks,
+          note: noteBlocks,
+        },
         global: { utils: globalUtils },
+        services,
         editor,
-        identifiers: {
-          WidgetViewMapIdentifier,
-          QuickSearchProvider,
-          DocModeProvider,
-          RefNodeSlotsProvider,
-          ParseDocUrlService: ParseDocUrlProvider,
-        },
-        defaultExtensions: (): ExtensionType[] => [
-          FontConfigExtension(CommunityCanvasTextFonts),
-          RefNodeSlotsExtension(),
-        ],
-        extensions: {
-          FontConfigExtension: FontConfigExtension(CommunityCanvasTextFonts),
-          WidgetViewMapExtension,
-          RefNodeSlotsExtension: RefNodeSlotsExtension(),
-        },
-        mockServices: {
-          mockDocModeService,
-        },
+        blockStd: blockStd,
       }),
     });
-
-    // test if blocksuite can run in a web worker, SEE: tests/worker.spec.ts
-    // window.testWorker = new Worker(
-    //   new URL('./utils/test-worker.ts', import.meta.url),
-    //   {
-    //     type: 'module',
-    //   }
-    // );
+    await prepareTestApp(collection);
 
     return;
   }

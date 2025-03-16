@@ -4,14 +4,13 @@ import {
   popupTargetFromElement,
 } from '@blocksuite/affine-components/context-menu';
 import { ShadowlessElement } from '@blocksuite/block-std';
-import { SignalWatcher, WithDisposable } from '@blocksuite/global/utils';
+import { SignalWatcher, WithDisposable } from '@blocksuite/global/lit';
 import { css } from 'lit';
 import { property } from 'lit/decorators.js';
 import { html } from 'lit/static-html.js';
 
-import type { SingleView } from '../../../core/index.js';
-
 import { groupTraitKey } from '../../../core/group-by/trait.js';
+import type { SingleView } from '../../../core/index.js';
 
 const styles = css`
   affine-data-view-kanban-header {
@@ -36,7 +35,7 @@ export class KanbanHeader extends SignalWatcher(
 ) {
   static override styles = styles;
 
-  private clickGroup = (e: MouseEvent) => {
+  private readonly clickGroup = (e: MouseEvent) => {
     const groupTrait = this.view.traitGet(groupTraitKey);
     if (!groupTrait) {
       return;

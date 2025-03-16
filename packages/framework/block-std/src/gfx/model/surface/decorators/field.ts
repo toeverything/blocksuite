@@ -1,5 +1,4 @@
 import type { GfxPrimitiveElementModel } from '../element-model.js';
-
 import { getDecoratorState } from './common.js';
 import { convertProps } from './convert.js';
 import { getDerivedProps, updateDerivedProps } from './derive.js';
@@ -9,13 +8,10 @@ const yPropsSetSymbol = Symbol('yProps');
 
 export function getFieldPropsSet(target: unknown): Set<string | symbol> {
   const proto = Object.getPrototypeOf(target);
-  // @ts-ignore
   if (!Object.hasOwn(proto, yPropsSetSymbol)) {
-    // @ts-ignore
     proto[yPropsSetSymbol] = new Set();
   }
 
-  // @ts-ignore
   return proto[yPropsSetSymbol] as Set<string | symbol>;
 }
 

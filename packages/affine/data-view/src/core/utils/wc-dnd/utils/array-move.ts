@@ -3,11 +3,11 @@
  */
 export function arrayMove<T>(array: T[], from: number, to: number): T[] {
   const newArray = array.slice();
-  newArray.splice(
-    to < 0 ? newArray.length + to : to,
-    0,
-    newArray.splice(from, 1)[0]
-  );
+  const value = newArray.splice(from, 1)[0];
+  if (value == null) {
+    return newArray;
+  }
+  newArray.splice(to < 0 ? newArray.length + to : to, 0, value);
 
   return newArray;
 }

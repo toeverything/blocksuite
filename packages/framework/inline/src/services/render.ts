@@ -1,7 +1,4 @@
-/* eslint-disable perfectionist/sort-classes */
-/* eslint-disable @stylistic/ts/lines-between-class-members */
 import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
-import { assertExists } from '@blocksuite/global/utils';
 import { html, render } from 'lit';
 import { repeat } from 'lit/directives/repeat.js';
 import * as Y from 'yjs';
@@ -10,12 +7,14 @@ import type { VLine } from '../components/v-line.js';
 import type { InlineEditor } from '../inline-editor.js';
 import type { InlineRange } from '../types.js';
 import type { BaseTextAttributes } from '../utils/base-attributes.js';
-
 import { deltaInsertsToChunks } from '../utils/delta-convert.js';
 
 export class RenderService<TextAttributes extends BaseTextAttributes> {
-  private _onYTextChange = (_: Y.YTextEvent, transaction: Y.Transaction) => {
-    this.editor.slots.textChange.emit();
+  private readonly _onYTextChange = (
+    _: Y.YTextEvent,
+    transaction: Y.Transaction
+  ) => {
+    this.editor.slots.textChange.next();
 
     const yText = this.editor.yText;
 
@@ -36,7 +35,10 @@ export class RenderService<TextAttributes extends BaseTextAttributes> {
     if (!lastStartRelativePosition || !lastEndRelativePosition) return;
 
     const doc = this.editor.yText.doc;
-    assertExists(doc);
+    if (!doc) {
+      console.error('doc is not found when syncing yText');
+      return;
+    }
     const absoluteStart = Y.createAbsolutePositionFromRelativePosition(
       lastStartRelativePosition,
       doc
@@ -78,7 +80,7 @@ export class RenderService<TextAttributes extends BaseTextAttributes> {
   }
   // render current deltas to VLines
   render = () => {
-    if (!this.editor.mounted) return;
+    if (!this.editor.rootElement) return;
 
     this._rendering = true;
 
@@ -142,7 +144,7 @@ export class RenderService<TextAttributes extends BaseTextAttributes> {
         ),
         rootElement
       );
-    } catch (_) {
+    } catch {
       // Lit may be crashed by IME input and we need to rerender whole editor for it
       this.editor.rerenderWholeEditor();
     }
@@ -151,7 +153,7 @@ export class RenderService<TextAttributes extends BaseTextAttributes> {
       .waitForUpdate()
       .then(() => {
         this._rendering = false;
-        this.editor.slots.renderComplete.emit();
+        this.editor.slots.renderComplete.next();
         this.editor.syncInlineRange();
       })
       .catch(console.error);
@@ -160,18 +162,19 @@ export class RenderService<TextAttributes extends BaseTextAttributes> {
   rerenderWholeEditor = () => {
     const rootElement = this.editor.rootElement;
 
-    if (!rootElement.isConnected) return;
+    if (!rootElement || !rootElement.isConnected) return;
 
     rootElement.replaceChildren();
     // Because we bypassed Lit and disrupted the DOM structure, this will cause an inconsistency in the original state of `ChildPart`.
     // Therefore, we need to remove the original `ChildPart`.
     // https://github.com/lit/lit/blob/a2cd76cfdea4ed717362bb1db32710d70550469d/packages/lit-html/src/lit-html.ts#L2248
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
     delete (rootElement as any)['_$litPart$'];
     this.render();
   };
 
   waitForUpdate = async () => {
+    if (!this.editor.rootElement) return;
     const vLines = Array.from(
       this.editor.rootElement.querySelectorAll('v-line')
     );

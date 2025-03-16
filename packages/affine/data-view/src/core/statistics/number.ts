@@ -1,7 +1,6 @@
-import type { StatisticsConfig } from './types.js';
-
 import { t } from '../logical/index.js';
 import { createStatisticConfig } from './create.js';
+import type { StatisticsConfig } from './types.js';
 
 export const numberStatsFunctions: StatisticsConfig[] = [
   createStatisticConfig({
@@ -15,7 +14,9 @@ export const numberStatsFunctions: StatisticsConfig[] = [
       if (numbers.length === 0) {
         return 'None';
       }
-      return numbers.reduce((a, b) => a + b, 0).toString();
+      return parseFloat(
+        numbers.reduce((a, b) => a + b, 0).toFixed(2)
+      ).toString();
     },
   }),
   createStatisticConfig({
@@ -29,7 +30,9 @@ export const numberStatsFunctions: StatisticsConfig[] = [
       if (numbers.length === 0) {
         return 'None';
       }
-      return (numbers.reduce((a, b) => a + b, 0) / numbers.length).toString();
+      return parseFloat(
+        (numbers.reduce((a, b) => a + b, 0) / numbers.length).toFixed(2)
+      ).toString();
     },
   }),
   createStatisticConfig({
@@ -40,12 +43,15 @@ export const numberStatsFunctions: StatisticsConfig[] = [
     dataType: t.number.instance(),
     impl: data => {
       const arr = withoutNull(data).sort((a, b) => a - b);
-      let result = 0;
+      let result: number | undefined = undefined;
       if (arr.length % 2 === 1) {
         result = arr[(arr.length - 1) / 2];
       } else {
         const index = arr.length / 2;
-        result = (arr[index] + arr[index - 1]) / 2;
+        const a = arr[index];
+        const b = arr[index - 1];
+        if (a == null || b == null) return 'None';
+        result = parseFloat(((a + b) / 2).toFixed(2));
       }
       return result?.toString() ?? 'None';
     },
@@ -116,7 +122,7 @@ export const numberStatsFunctions: StatisticsConfig[] = [
       if (min == null || max == null) {
         return 'None';
       }
-      return (max - min).toString();
+      return parseFloat((max - min).toFixed(2)).toString();
     },
   }),
 ];

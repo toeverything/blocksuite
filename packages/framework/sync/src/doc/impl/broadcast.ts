@@ -1,6 +1,6 @@
-import { assertExists } from '@blocksuite/global/utils';
 import { diffUpdate, encodeStateVectorFromUpdate, mergeUpdates } from 'yjs';
 
+import { MANUALLY_STOP } from '../../utils/throw-if-aborted.js';
 import type { DocSource } from '../source.js';
 
 type ChannelMessage =
@@ -14,7 +14,7 @@ type ChannelMessage =
     };
 
 export class BroadcastChannelDocSource implements DocSource {
-  private _onMessage = (event: MessageEvent<ChannelMessage>) => {
+  private readonly _onMessage = (event: MessageEvent<ChannelMessage>) => {
     if (event.data.type === 'init') {
       for (const [docId, data] of this.docMap) {
         this.channel.postMessage({
@@ -65,7 +65,12 @@ export class BroadcastChannelDocSource implements DocSource {
       this.docMap.set(docId, data);
     }
 
-    assertExists(this.docMap.get(docId));
+    const doc = this.docMap.get(docId);
+    if (!doc) {
+      console.error('data is not found when syncing broadcast channel');
+      return;
+    }
+
     this.channel.postMessage({
       type: 'update',
       docId,
@@ -85,7 +90,7 @@ export class BroadcastChannelDocSource implements DocSource {
       { signal: abortController.signal }
     );
     return () => {
-      abortController.abort();
+      abortController.abort(MANUALLY_STOP);
     };
   }
 }

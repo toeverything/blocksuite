@@ -1,6 +1,7 @@
 import {
+  BlockModel,
+  BlockSchemaExtension,
   defineBlockSchema,
-  type SchemaToModel,
   type Text,
 } from '@blocksuite/store';
 
@@ -31,14 +32,9 @@ export const CodeBlockSchema = defineBlockSchema({
     ],
     children: [],
   },
+  toModel: () => new CodeBlockModel(),
 });
 
-export type CodeBlockModel = SchemaToModel<typeof CodeBlockSchema>;
+export const CodeBlockSchemaExtension = BlockSchemaExtension(CodeBlockSchema);
 
-declare global {
-  namespace BlockSuite {
-    interface BlockModels {
-      'affine:code': CodeBlockModel;
-    }
-  }
-}
+export class CodeBlockModel extends BlockModel<CodeBlockProps> {}

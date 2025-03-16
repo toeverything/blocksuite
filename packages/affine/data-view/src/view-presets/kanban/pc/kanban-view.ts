@@ -11,9 +11,6 @@ import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
 
-import type { KanbanSingleView } from '../kanban-view-manager.js';
-import type { KanbanViewSelectionWithType } from '../types.js';
-
 import { type DataViewInstance, renderUniLit } from '../../../core/index.js';
 import { defaultActivators } from '../../../core/utils/wc-dnd/sensors/index.js';
 import {
@@ -22,6 +19,8 @@ import {
 } from '../../../core/utils/wc-dnd/sort/sort-context.js';
 import { horizontalListSortingStrategy } from '../../../core/utils/wc-dnd/sort/strategies/index.js';
 import { DataViewBase } from '../../../core/view/data-view-base.js';
+import type { KanbanSingleView } from '../kanban-view-manager.js';
+import type { KanbanViewSelectionWithType } from '../selection';
 import { KanbanClipboardController } from './controller/clipboard.js';
 import { KanbanDragController } from './controller/drag.js';
 import { KanbanHotkeysController } from './controller/hotkeys.js';
@@ -101,7 +100,7 @@ export class DataViewKanban extends DataViewBase<
 > {
   static override styles = styles;
 
-  private dragController = new KanbanDragController(this);
+  private readonly dragController = new KanbanDragController(this);
 
   clipboardController = new KanbanClipboardController(this);
 
@@ -131,7 +130,7 @@ export class DataViewKanban extends DataViewBase<
         options: {
           items: [
             menu.input({
-              onChange: text => {
+              onComplete: text => {
                 const column = this.groupManager.property$.value;
                 if (column) {
                   column.dataUpdate(
@@ -167,8 +166,8 @@ export class DataViewKanban extends DataViewBase<
       const activeId = evt.active.id;
       const groups = this.groupManager.groupsDataList$.value;
       if (over && over.id !== activeId && groups) {
-        const activeIndex = groups.findIndex(data => data.key === activeId);
-        const overIndex = groups.findIndex(data => data.key === over.id);
+        const activeIndex = groups.findIndex(data => data?.key === activeId);
+        const overIndex = groups.findIndex(data => data?.key === over.id);
 
         this.groupManager.moveGroupTo(
           activeId,
@@ -193,7 +192,11 @@ export class DataViewKanban extends DataViewBase<
       },
     ],
     items: computed(() => {
-      return this.groupManager.groupsDataList$.value?.map(v => v.key) ?? [];
+      return (
+        this.groupManager.groupsDataList$.value?.map(
+          v => v?.key ?? 'default key'
+        ) ?? []
+      );
     }),
     strategy: horizontalListSortingStrategy,
   });
@@ -202,6 +205,17 @@ export class DataViewKanban extends DataViewBase<
     return {
       clearSelection: () => {
         this.selectionController.clear();
+      },
+      addRow: position => {
+        if (this.props.view.readonly$.value) return;
+        const rowId = this.props.view.rowAdd(position);
+        if (rowId) {
+          this.props.dataViewEle.openDetailPanel({
+            view: this.props.view,
+            rowId,
+          });
+        }
+        return rowId;
       },
       focusFirstCell: () => {
         this.selectionController.focusFirstCell();
@@ -258,8 +272,9 @@ export class DataViewKanban extends DataViewBase<
       >
         ${repeat(
           groups,
-          group => group.key,
+          group => group?.key ?? 'default key',
           group => {
+            if (!group) return;
             return html` <affine-data-view-kanban-group
               ${sortable(group.key)}
               data-key="${group.key}"

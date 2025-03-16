@@ -1,14 +1,12 @@
-import type { BlockModel } from '@blocksuite/store';
+import type { BaseSelection, BlockModel } from '@blocksuite/store';
+import throttle from 'lodash-es/throttle';
 
-import { throttle } from '@blocksuite/global/utils';
-
-import type { BaseSelection, TextSelection } from '../selection/index.js';
+import { TextSelection } from '../selection/index.js';
 import type { BlockComponent } from '../view/element/block-component.js';
-import type { RangeManager } from './range-manager.js';
-
 import { BLOCK_ID_ATTR } from '../view/index.js';
+import { isActiveInEditor } from './active.js';
 import { RANGE_SYNC_EXCLUDE_ATTR } from './consts.js';
-
+import type { RangeManager } from './range-manager.js';
 /**
  * Two-way binding between native range and text selection
  */
@@ -17,8 +15,8 @@ export class RangeBinding {
     | ((event: CompositionEvent) => Promise<void>)
     | null = null;
 
-  private _computePath = (modelId: string) => {
-    const block = this.host.std.doc.getBlock(modelId)?.model;
+  private readonly _computePath = (modelId: string) => {
+    const block = this.host.std.store.getBlock(modelId)?.model;
     if (!block) return [];
 
     const path: string[] = [];
@@ -31,8 +29,8 @@ export class RangeBinding {
     return path;
   };
 
-  private _onBeforeInput = (event: InputEvent) => {
-    const selection = this.selectionManager.find('text');
+  private readonly _onBeforeInput = (event: InputEvent) => {
+    const selection = this.selectionManager.find(TextSelection);
     if (!selection) return;
 
     if (event.isComposing) return;
@@ -76,7 +74,7 @@ export class RangeBinding {
         });
     });
 
-    const newSelection = this.selectionManager.create('text', {
+    const newSelection = this.selectionManager.create(TextSelection, {
       from: {
         blockId: from.blockId,
         index: from.index + (event.data?.length ?? 0),
@@ -87,7 +85,7 @@ export class RangeBinding {
     this.selectionManager.setGroup('note', [newSelection]);
   };
 
-  private _onCompositionEnd = (event: CompositionEvent) => {
+  private readonly _onCompositionEnd = (event: CompositionEvent) => {
     if (this._compositionStartCallback) {
       event.preventDefault();
       event.stopPropagation();
@@ -96,8 +94,8 @@ export class RangeBinding {
     }
   };
 
-  private _onCompositionStart = () => {
-    const selection = this.selectionManager.find('text');
+  private readonly _onCompositionStart = () => {
+    const selection = this.selectionManager.find(TextSelection);
     if (!selection) return;
 
     const { from, to } = selection;
@@ -127,7 +125,7 @@ export class RangeBinding {
       // Because we bypassed Lit and disrupted the DOM structure, this will cause an inconsistency in the original state of `ChildPart`.
       // Therefore, we need to remove the original `ChildPart`.
       // https://github.com/lit/lit/blob/a2cd76cfdea4ed717362bb1db32710d70550469d/packages/lit-html/src/lit-html.ts#L2248
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
       delete (this.host.renderRoot as any)['_$litPart$'];
       this.host.requestUpdate();
       await this.host.updateComplete;
@@ -155,7 +153,7 @@ export class RangeBinding {
 
       await this.host.updateComplete;
 
-      const selection = this.selectionManager.create('text', {
+      const selection = this.selectionManager.create(TextSelection, {
         from: {
           blockId: from.blockId,
           index: from.index + (event.data?.length ?? 0),
@@ -168,8 +166,10 @@ export class RangeBinding {
     };
   };
 
-  private _onNativeSelectionChanged = async () => {
+  private readonly _onNativeSelectionChanged = async () => {
     if (this.isComposing) return;
+    if (!this.host) return; // Unstable when switching views, card <-> embed
+    if (!isActiveInEditor(this.host)) return;
 
     await this.host.updateComplete;
 
@@ -247,10 +247,14 @@ export class RangeBinding {
     this.rangeManager?.syncRangeToTextSelection(range, isRangeReversed);
   };
 
-  private _onStdSelectionChanged = (selections: BaseSelection[]) => {
+  private readonly _onStdSelectionChanged = (selections: BaseSelection[]) => {
+    // TODO(@mirone): this is a trade-off, we need to use separate awareness store for every store to make sure the selection is isolated.
+    const closestHost = document.activeElement?.closest('editor-host');
+    if (closestHost && closestHost !== this.host) return;
+
     const text =
       selections.find((selection): selection is TextSelection =>
-        selection.is('text')
+        selection.is(TextSelection)
       ) ?? null;
 
     if (text === this._prevTextSelection) {
@@ -309,7 +313,7 @@ export class RangeBinding {
 
   constructor(public manager: RangeManager) {
     this.host.disposables.add(
-      this.selectionManager.slots.changed.on(this._onStdSelectionChanged)
+      this.selectionManager.slots.changed.subscribe(this._onStdSelectionChanged)
     );
 
     this.host.disposables.addFromEvent(

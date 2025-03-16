@@ -2,7 +2,7 @@ import * as Y from 'yjs';
 
 import { NATIVE_UNIQ_IDENTIFIER } from '../consts.js';
 
-export type OnBoxedChange = (data: unknown) => void;
+export type OnBoxedChange = (data: unknown, isLocal: boolean) => void;
 
 export class Boxed<T = unknown> {
   static from = <T>(map: Y.Map<T>, onChange?: OnBoxedChange): Boxed<T> => {
@@ -44,8 +44,17 @@ export class Boxed<T = unknown> {
       this._map.set('type', NATIVE_UNIQ_IDENTIFIER as T);
       this._map.set('value', value);
     }
-    this._map.observeDeep(() => {
-      this._onChange?.(this.getValue());
+    this._map.observeDeep(events => {
+      events.forEach(event => {
+        const isLocal =
+          !event.transaction.origin ||
+          !this._map.doc ||
+          event.transaction.origin instanceof Y.UndoManager ||
+          event.transaction.origin.proxy
+            ? true
+            : event.transaction.origin === this._map.doc.clientID;
+        this._onChange?.(this.getValue(), isLocal);
+      });
     });
   }
 

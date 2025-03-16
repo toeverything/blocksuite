@@ -1,16 +1,14 @@
-import type { PointLocation, SerializedXYWH } from '@blocksuite/global/utils';
-
 import { GfxLocalElementModel } from '@blocksuite/block-std/gfx';
-
-import type { Connection } from './connector.js';
+import type { PointLocation } from '@blocksuite/global/gfx';
 
 import {
-  type Color,
   ConnectorMode,
   DEFAULT_ROUGHNESS,
   type PointStyle,
   StrokeStyle,
-} from '../../consts/index.js';
+} from '../../consts/index';
+import { type Color, DefaultTheme } from '../../themes/index';
+import type { Connection } from './connector.js';
 
 export class LocalConnectorElementModel extends GfxLocalElementModel {
   private _path: PointLocation[] = [];
@@ -19,25 +17,19 @@ export class LocalConnectorElementModel extends GfxLocalElementModel {
 
   frontEndpointStyle!: PointStyle;
 
-  id: string = '';
-
   mode: ConnectorMode = ConnectorMode.Orthogonal;
 
   rearEndpointStyle!: PointStyle;
-
-  rotate: number = 0;
 
   rough?: boolean;
 
   roughness: number = DEFAULT_ROUGHNESS;
 
-  seed: number = Math.random();
-
   source: Connection = {
     position: [0, 0],
   };
 
-  stroke: Color = '#000000';
+  stroke: Color = DefaultTheme.connectorColor;
 
   strokeStyle: StrokeStyle = StrokeStyle.Solid;
 
@@ -48,8 +40,6 @@ export class LocalConnectorElementModel extends GfxLocalElementModel {
   };
 
   updatingPath = false;
-
-  xywh: SerializedXYWH = '[0,0,0,0]';
 
   get path(): PointLocation[] {
     return this._path;
@@ -64,13 +54,5 @@ export class LocalConnectorElementModel extends GfxLocalElementModel {
 
   get type() {
     return 'connector';
-  }
-}
-
-declare global {
-  namespace BlockSuite {
-    interface SurfaceLocalModelMap {
-      connector: LocalConnectorElementModel;
-    }
   }
 }

@@ -1,5 +1,3 @@
-import type { StyleInfo } from 'lit-html/directives/style-map.js';
-
 import { unsafeCSSVarV2 } from '@blocksuite/affine-shared/theme';
 import { IS_MOBILE } from '@blocksuite/global/env';
 import { cssVarV2 } from '@toeverything/theme/v2';
@@ -7,11 +5,11 @@ import { css, html, type TemplateResult } from 'lit';
 import { property, query } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { styleMap } from 'lit/directives/style-map.js';
-
-import type { Menu } from './menu.js';
-import type { MenuItemRender } from './types.js';
+import type { StyleInfo } from 'lit-html/directives/style-map.js';
 
 import { MenuFocusable } from './focusable.js';
+import type { Menu } from './menu.js';
+import type { MenuItemRender } from './types.js';
 
 export type MenuInputData = {
   placeholder?: string;
@@ -47,17 +45,17 @@ export class MenuInput extends MenuFocusable {
     }
   `;
 
-  private onCompositionEnd = () => {
+  private readonly onCompositionEnd = () => {
     this.data.onChange?.(this.inputRef.value);
   };
 
-  private onInput = (e: InputEvent) => {
+  private readonly onInput = (e: InputEvent) => {
     e.stopPropagation();
     if (e.isComposing) return;
     this.data.onChange?.(this.inputRef.value);
   };
 
-  private onKeydown = (e: KeyboardEvent) => {
+  private readonly onKeydown = (e: KeyboardEvent) => {
     e.stopPropagation();
     if (e.isComposing) return;
     if (e.key === 'Escape') {
@@ -73,7 +71,7 @@ export class MenuInput extends MenuFocusable {
     }
   };
 
-  private stopPropagation = (e: Event) => {
+  private readonly stopPropagation = (e: Event) => {
     e.stopPropagation();
   };
 
@@ -142,17 +140,17 @@ export class MobileMenuInput extends MenuFocusable {
     }
   `;
 
-  private onCompositionEnd = () => {
+  private readonly onCompositionEnd = () => {
     this.data.onChange?.(this.inputRef.value);
   };
 
-  private onInput = (e: InputEvent) => {
+  private readonly onInput = (e: InputEvent) => {
     e.stopPropagation();
     if (e.isComposing) return;
     this.data.onChange?.(this.inputRef.value);
   };
 
-  private stopPropagation = (e: Event) => {
+  private readonly stopPropagation = (e: Event) => {
     e.stopPropagation();
   };
 

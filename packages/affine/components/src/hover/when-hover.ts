@@ -1,7 +1,6 @@
-import type { HoverMiddleware, WhenHoverOptions } from './types.js';
-
 import { dedupe, delayHide, delayShow } from './middlewares/basic.js';
 import { safeBridge, safeTriangle } from './middlewares/safe-area.js';
+import type { HoverMiddleware, WhenHoverOptions } from './types.js';
 
 /**
  * Call the `whenHoverChange` callback when the element is hovered.
@@ -81,7 +80,7 @@ export const whenHover = (
     }
     // ignore expired event
     if (e !== currentEvent) return;
-    const isHover = e.type === 'mouseover' ? true : false;
+    const isHover = e.type === 'mouseenter' ? true : false;
     whenHoverChange(isHover, e);
   }) as (e: Event) => void;
 
@@ -91,9 +90,9 @@ export const whenHover = (
     const alreadyHover = element.matches(':hover');
     if (alreadyHover && !abortController.signal.aborted) {
       // When the element is already hovered, we need to trigger the callback manually
-      onHoverChange(new MouseEvent('mouseover'));
+      onHoverChange(new MouseEvent('mouseenter'));
     }
-    element.addEventListener('mouseover', onHoverChange, {
+    element.addEventListener('mouseenter', onHoverChange, {
       capture: true,
       signal: abortController.signal,
     });
@@ -113,7 +112,9 @@ export const whenHover = (
 
   const removeHoverListener = (element?: Element) => {
     if (!element) return;
-    element.removeEventListener('mouseover', onHoverChange);
+    element.removeEventListener('mouseenter', onHoverChange, {
+      capture: true,
+    });
     element.removeEventListener('mouseleave', onHoverChange);
   };
 

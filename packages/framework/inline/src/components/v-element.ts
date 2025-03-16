@@ -1,15 +1,15 @@
+import { DisposableGroup } from '@blocksuite/global/disposable';
 import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
-import { DisposableGroup, SignalWatcher } from '@blocksuite/global/utils';
+import { SignalWatcher } from '@blocksuite/global/lit';
 import { effect, signal } from '@preact/signals-core';
 import { html, LitElement } from 'lit';
 import { property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
+import { ZERO_WIDTH_SPACE } from '../consts.js';
 import type { InlineEditor } from '../inline-editor.js';
 import type { DeltaInsert } from '../types.js';
 import type { BaseTextAttributes } from '../utils/base-attributes.js';
-
-import { ZERO_WIDTH_SPACE } from '../consts.js';
 import { isInlineRangeIntersect } from '../utils/inline-range.js';
 
 export class VElement<

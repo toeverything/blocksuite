@@ -1,3 +1,5 @@
+import { BlockSchemaExtension } from '@blocksuite/store';
+
 import { createEmbedBlockSchema } from '../../../utils/index.js';
 import {
   type EmbedSyncedDocBlockProps,
@@ -10,6 +12,9 @@ export const defaultEmbedSyncedDocBlockProps: EmbedSyncedDocBlockProps = {
   style: EmbedSyncedDocStyles[0],
   caption: undefined,
   scale: undefined,
+  // title & description aliases
+  title: undefined,
+  description: undefined,
 };
 
 export const EmbedSyncedDocBlockSchema = createEmbedBlockSchema({
@@ -18,3 +23,7 @@ export const EmbedSyncedDocBlockSchema = createEmbedBlockSchema({
   toModel: () => new EmbedSyncedDocModel(),
   props: (): EmbedSyncedDocBlockProps => defaultEmbedSyncedDocBlockProps,
 });
+
+export const EmbedSyncedDocBlockSchemaExtension = BlockSchemaExtension(
+  EmbedSyncedDocBlockSchema
+);

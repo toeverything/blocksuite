@@ -1,6 +1,5 @@
 import type { PointTestOptions } from '@blocksuite/block-std/gfx';
-import type { IBound, IVec } from '@blocksuite/global/utils';
-
+import type { IBound, IVec } from '@blocksuite/global/gfx';
 import {
   Bound,
   getCenterAreaBounds,
@@ -12,11 +11,10 @@ import {
   polygonGetPointTangent,
   polygonNearestPoint,
   rotatePoints,
-} from '@blocksuite/global/utils';
-
-import type { ShapeElementModel } from '../shape.js';
+} from '@blocksuite/global/gfx';
 
 import { DEFAULT_CENTRAL_AREA_RATIO } from '../../../consts/index.js';
+import type { ShapeElementModel } from '../shape.js';
 
 export const diamond = {
   points({ x, y, w, h }: IBound): IVec[] {

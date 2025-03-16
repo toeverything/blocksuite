@@ -1,45 +1,30 @@
-// checkout https://vitest.dev/guide/debugging.html for debugging tests
-
-import type { Slot } from '@blocksuite/global/utils';
-
+import type { Subject } from 'rxjs';
 import { assert, beforeEach, describe, expect, it, vi } from 'vitest';
-import { applyUpdate, encodeStateAsUpdate } from 'yjs';
+import { applyUpdate, type Doc, encodeStateAsUpdate } from 'yjs';
 
-import type { BlockModel, BlockSchemaType, Doc } from '../index.js';
-import type { DocMeta } from '../store/index.js';
-import type { BlockSuiteDoc } from '../yjs/index.js';
-
-import { COLLECTION_VERSION, PAGE_VERSION } from '../consts.js';
-import { DocCollection, IdGeneratorType, Schema } from '../index.js';
+import type { BlockModel, DocMeta, Store } from '../index.js';
+import { Text } from '../reactive/text.js';
+import { createAutoIncrementIdGenerator } from '../test/index.js';
+import { TestWorkspace } from '../test/test-workspace.js';
 import {
-  NoteBlockSchema,
-  ParagraphBlockSchema,
-  RootBlockSchema,
+  NoteBlockSchemaExtension,
+  ParagraphBlockSchemaExtension,
+  RootBlockSchemaExtension,
 } from './test-schema.js';
-import { assertExists } from './test-utils-dom.js';
-
-export const BlockSchemas = [
-  ParagraphBlockSchema,
-  RootBlockSchema,
-  NoteBlockSchema,
-] as BlockSchemaType[];
 
 function createTestOptions() {
-  const idGenerator = IdGeneratorType.AutoIncrement;
-  const schema = new Schema();
-  schema.register(BlockSchemas);
-  return { id: 'test-collection', idGenerator, schema };
+  const idGenerator = createAutoIncrementIdGenerator();
+  return { id: 'test-collection', idGenerator };
 }
 
 const defaultDocId = 'doc:home';
 const spaceId = defaultDocId;
 const spaceMetaId = 'meta';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function serializCollection(doc: BlockSuiteDoc): Record<string, any> {
+function serializCollection(doc: Doc): Record<string, any> {
   const spaces = {};
-  doc.spaces.forEach((subDoc, key) => {
-    // @ts-ignore
+  doc.getMap('spaces').forEach((subDoc, key) => {
+    // @ts-expect-error ignore
     spaces[key] = subDoc.toJSON();
   });
   const json = doc.toJSON();
@@ -51,21 +36,35 @@ function serializCollection(doc: BlockSuiteDoc): Record<string, any> {
   };
 }
 
-function waitOnce<T>(slot: Slot<T>) {
-  return new Promise<T>(resolve => slot.once(val => resolve(val)));
+function waitOnce<T>(slot: Subject<T>) {
+  return new Promise<T>(resolve => {
+    const subscription = slot.subscribe(val => {
+      subscription.unsubscribe();
+      resolve(val);
+    });
+  });
 }
 
-function createRoot(doc: Doc) {
+function createRoot(doc: Store) {
   doc.addBlock('affine:page');
   if (!doc.root) throw new Error('root not found');
   return doc.root;
 }
 
+const extensions = [
+  NoteBlockSchemaExtension,
+  ParagraphBlockSchemaExtension,
+  RootBlockSchemaExtension,
+];
+
 function createTestDoc(docId = defaultDocId) {
   const options = createTestOptions();
-  const collection = new DocCollection(options);
+  const collection = new TestWorkspace(options);
   collection.meta.initialize();
-  const doc = collection.createDoc({ id: docId });
+  const doc = collection.createDoc({
+    id: docId,
+    extensions,
+  });
   doc.load();
   return doc;
 }
@@ -95,18 +94,16 @@ beforeEach(() => {
 describe('basic', () => {
   it('can init collection', () => {
     const options = createTestOptions();
-    const collection = new DocCollection(options);
+    const collection = new TestWorkspace(options);
     collection.meta.initialize();
-    assert.equal(collection.isEmpty, true);
 
     const doc = collection.createDoc({ id: 'doc:home' });
     doc.load();
     const actual = serializCollection(collection.doc);
     const actualDoc = actual[spaceMetaId].pages[0] as DocMeta;
 
-    assert.equal(collection.isEmpty, false);
     assert.equal(typeof actualDoc.createDate, 'number');
-    // @ts-ignore
+    // @ts-expect-error ignore
     delete actualDoc.createDate;
 
     assert.deepEqual(actual, {
@@ -118,13 +115,6 @@ describe('basic', () => {
             tags: [],
           },
         ],
-        workspaceVersion: COLLECTION_VERSION,
-        pageVersion: PAGE_VERSION,
-        blockVersions: {
-          'affine:note': 1,
-          'affine:page': 2,
-          'affine:paragraph': 1,
-        },
       },
       spaces: {
         [spaceId]: {
@@ -137,7 +127,7 @@ describe('basic', () => {
   it('init collection with custom id generator', () => {
     const options = createTestOptions();
     let id = 100;
-    const collection = new DocCollection({
+    const collection = new TestWorkspace({
       ...options,
       idGenerator: () => {
         return String(id++);
@@ -156,43 +146,42 @@ describe('basic', () => {
 
   it('doc ready lifecycle', () => {
     const options = createTestOptions();
-    const collection = new DocCollection(options);
+    const collection = new TestWorkspace(options);
     collection.meta.initialize();
     const doc = collection.createDoc({
       id: 'space:0',
+      extensions,
     });
 
     const readyCallback = vi.fn();
     const rootAddedCallback = vi.fn();
-    doc.slots.ready.on(readyCallback);
-    doc.slots.rootAdded.on(rootAddedCallback);
+    doc.slots.ready.subscribe(readyCallback);
+    doc.slots.rootAdded.subscribe(rootAddedCallback);
 
     doc.load(() => {
-      expect(doc.ready).toBe(false);
       const rootId = doc.addBlock('affine:page', {
-        title: new doc.Text(),
+        title: new Text(),
       });
       expect(rootAddedCallback).toBeCalledTimes(1);
-      expect(doc.ready).toBe(false);
 
       doc.addBlock('affine:note', {}, rootId);
     });
 
-    expect(doc.ready).toBe(true);
     expect(readyCallback).toBeCalledTimes(1);
   });
 
   it('collection docs with yjs applyUpdate', () => {
     const options = createTestOptions();
-    const collection = new DocCollection(options);
+    const collection = new TestWorkspace(options);
     collection.meta.initialize();
-    const collection2 = new DocCollection(options);
+    const collection2 = new TestWorkspace(options);
     const doc = collection.createDoc({
       id: 'space:0',
+      extensions,
     });
     doc.load(() => {
       doc.addBlock('affine:page', {
-        title: new doc.Text(),
+        title: new Text(),
       });
     });
     {
@@ -205,7 +194,7 @@ describe('basic', () => {
       expect(collection2.docs.size).toBe(0);
       const update = encodeStateAsUpdate(collection.doc);
       applyUpdate(collection2.doc, update);
-      expect(collection2.doc.toJSON()['spaces']).toEqual({
+      expect(serializCollection(collection2.doc)['spaces']).toEqual({
         'space:0': {
           blocks: {},
         },
@@ -217,10 +206,14 @@ describe('basic', () => {
       // apply doc update
       const update = encodeStateAsUpdate(doc.spaceDoc);
       expect(collection2.docs.size).toBe(1);
-      const doc2 = collection2.getDoc('space:0');
-      assertExists(doc2);
+      const doc2 = collection2.getDoc('space:0', {
+        extensions,
+      });
+      if (!doc2) {
+        throw new Error('doc2 is not found');
+      }
       applyUpdate(doc2.spaceDoc, update);
-      expect(collection2.doc.toJSON()['spaces']).toEqual({
+      expect(serializCollection(collection2.doc)['spaces']).toEqual({
         'space:0': {
           blocks: {
             '0': {
@@ -251,7 +244,7 @@ describe('addBlock', () => {
   it('can add single model', () => {
     const doc = createTestDoc();
     doc.addBlock('affine:page', {
-      title: new doc.Text(),
+      title: new Text(),
     });
 
     assert.deepEqual(serializCollection(doc.rootDoc).spaces[spaceId].blocks, {
@@ -270,7 +263,7 @@ describe('addBlock', () => {
 
   it('can add model with props', () => {
     const doc = createTestDoc();
-    doc.addBlock('affine:page', { title: new doc.Text('hello') });
+    doc.addBlock('affine:page', { title: new Text('hello') });
 
     assert.deepEqual(serializCollection(doc.rootDoc).spaces[spaceId].blocks, {
       '0': {
@@ -289,7 +282,7 @@ describe('addBlock', () => {
   it('can add multi models', () => {
     const doc = createTestDoc();
     const rootId = doc.addBlock('affine:page', {
-      title: new doc.Text(),
+      title: new Text(),
     });
     const noteId = doc.addBlock('affine:note', {}, rootId);
     doc.addBlock('affine:paragraph', {}, noteId);
@@ -350,7 +343,7 @@ describe('addBlock', () => {
 
     queueMicrotask(() =>
       doc.addBlock('affine:page', {
-        title: new doc.Text(),
+        title: new Text(),
       })
     );
     const blockId = await waitOnce(doc.slots.rootAdded);
@@ -386,7 +379,7 @@ describe('addBlock', () => {
 
   it('can add and remove multi docs', async () => {
     const options = createTestOptions();
-    const collection = new DocCollection(options);
+    const collection = new TestWorkspace(options);
     collection.meta.initialize();
 
     const doc0 = collection.createDoc({ id: 'doc:home' });
@@ -395,7 +388,7 @@ describe('addBlock', () => {
     assert.equal(collection.docs.size, 2);
 
     doc0.addBlock('affine:page', {
-      title: new doc0.Text(),
+      title: new Text(),
     });
     collection.removeDoc(doc0.id);
 
@@ -411,7 +404,7 @@ describe('addBlock', () => {
 
   it('can remove doc that has not been loaded', () => {
     const options = createTestOptions();
-    const collection = new DocCollection(options);
+    const collection = new TestWorkspace(options);
     collection.meta.initialize();
 
     const doc0 = collection.createDoc({ id: 'doc:home' });
@@ -422,7 +415,7 @@ describe('addBlock', () => {
 
   it('can set doc state', () => {
     const options = createTestOptions();
-    const collection = new DocCollection(options);
+    const collection = new TestWorkspace(options);
     collection.meta.initialize();
     collection.createDoc({ id: 'doc:home' });
 
@@ -440,14 +433,12 @@ describe('addBlock', () => {
     );
 
     let called = false;
-    collection.meta.docMetaUpdated.on(() => {
+    collection.slots.docListUpdated.subscribe(() => {
       called = true;
     });
 
-    // @ts-ignore
-    collection.setDocMeta('doc:home', { favorite: true });
+    collection.meta.setDocMeta('doc:home', { favorite: true });
     assert.deepEqual(
-      // @ts-ignore
       collection.meta.docMetas.map(({ id, title, favorite }) => ({
         id,
         title,
@@ -466,7 +457,7 @@ describe('addBlock', () => {
 
   it('can set collection common meta fields', async () => {
     const options = createTestOptions();
-    const collection = new DocCollection(options);
+    const collection = new TestWorkspace(options);
 
     queueMicrotask(() => collection.meta.setName('hello'));
     await waitOnce(collection.meta.commonFieldsUpdated);
@@ -869,91 +860,3 @@ describe('getBlock', () => {
     assert.equal(invalid, null);
   });
 });
-
-// Inline snapshot is not supported under describe.parallel config
-describe('collection.exportJSX works', () => {
-  it('collection matches snapshot', () => {
-    const options = createTestOptions();
-    const collection = new DocCollection(options);
-    collection.meta.initialize();
-    const doc = collection.createDoc({ id: 'doc:home' });
-
-    doc.addBlock('affine:page', { title: new doc.Text('hello') });
-
-    expect(collection.exportJSX()).toMatchInlineSnapshot(`
-      <affine:page
-        prop:count={0}
-        prop:items={[]}
-        prop:style={{}}
-        prop:title="hello"
-      />
-    `);
-  });
-
-  it('empty collection matches snapshot', () => {
-    const options = createTestOptions();
-    const collection = new DocCollection(options);
-    collection.meta.initialize();
-    collection.createDoc({ id: 'doc:home' });
-
-    expect(collection.exportJSX()).toMatchInlineSnapshot('null');
-  });
-
-  it('collection with multiple blocks children matches snapshot', () => {
-    const options = createTestOptions();
-    const collection = new DocCollection(options);
-    collection.meta.initialize();
-    const doc = collection.createDoc({ id: 'doc:home' });
-    doc.load(() => {
-      const rootId = doc.addBlock('affine:page', {
-        title: new doc.Text(),
-      });
-      const noteId = doc.addBlock('affine:note', {}, rootId);
-      doc.addBlock('affine:paragraph', {}, noteId);
-      doc.addBlock('affine:paragraph', {}, noteId);
-    });
-
-    expect(collection.exportJSX()).toMatchInlineSnapshot(/* xml */ `
-      <affine:page
-        prop:count={0}
-        prop:items={[]}
-        prop:style={{}}
-      >
-        <affine:note>
-          <affine:paragraph
-            prop:type="text"
-          />
-          <affine:paragraph
-            prop:type="text"
-          />
-        </affine:note>
-      </affine:page>
-    `);
-  });
-});
-
-describe('flags', () => {
-  it('update flags', () => {
-    const options = createTestOptions();
-    const collection = new DocCollection(options);
-    collection.meta.initialize();
-
-    const awareness = collection.awarenessStore;
-
-    awareness.setFlag('enable_lasso_tool', false);
-    expect(awareness.getFlag('enable_lasso_tool')).toBe(false);
-
-    awareness.setFlag('enable_lasso_tool', true);
-    expect(awareness.getFlag('enable_lasso_tool')).toBe(true);
-  });
-});
-
-declare global {
-  namespace BlockSuite {
-    interface BlockModels {
-      'affine:page': BlockModel;
-      'affine:paragraph': BlockModel;
-      'affine:note': BlockModel;
-    }
-  }
-}

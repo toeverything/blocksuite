@@ -4,7 +4,7 @@ import {
   popupTargetFromElement,
 } from '@blocksuite/affine-components/context-menu';
 import { ShadowlessElement } from '@blocksuite/block-std';
-import { SignalWatcher, WithDisposable } from '@blocksuite/global/utils';
+import { SignalWatcher, WithDisposable } from '@blocksuite/global/lit';
 import { AddCursorIcon } from '@blocksuite/icons/lit';
 import { css, nothing } from 'lit';
 import { property } from 'lit/decorators.js';
@@ -12,11 +12,10 @@ import { repeat } from 'lit/directives/repeat.js';
 import { html } from 'lit/static-html.js';
 
 import type { DataViewRenderer } from '../../../core/data-view.js';
-import type { GroupData } from '../../../core/group-by/trait.js';
-import type { KanbanSingleView } from '../kanban-view-manager.js';
-
 import { GroupTitle } from '../../../core/group-by/group-title.js';
+import type { GroupData } from '../../../core/group-by/trait.js';
 import { dragHandler } from '../../../core/utils/wc-dnd/dnd-context.js';
+import type { KanbanSingleView } from '../kanban-view-manager.js';
 
 const styles = css`
   affine-data-view-kanban-group {
@@ -97,43 +96,47 @@ export class KanbanGroup extends SignalWatcher(
 ) {
   static override styles = styles;
 
-  private clickAddCard = () => {
+  private readonly clickAddCard = () => {
     const id = this.view.addCard('end', this.group.key);
     requestAnimationFrame(() => {
       const kanban = this.closest('affine-data-view-kanban');
       if (kanban) {
+        const columnId =
+          this.view.mainProperties$.value.titleColumn ||
+          this.view.propertyIds$.value[0];
+        if (!columnId) return;
         kanban.selectionController.selection = {
           selectionType: 'cell',
           groupKey: this.group.key,
           cardId: id,
-          columnId:
-            this.view.mainProperties$.value.titleColumn ||
-            this.view.propertyIds$.value[0],
+          columnId,
           isEditing: true,
         };
       }
     });
   };
 
-  private clickAddCardInStart = () => {
+  private readonly clickAddCardInStart = () => {
     const id = this.view.addCard('start', this.group.key);
     requestAnimationFrame(() => {
       const kanban = this.closest('affine-data-view-kanban');
       if (kanban) {
+        const columnId =
+          this.view.mainProperties$.value.titleColumn ||
+          this.view.propertyIds$.value[0];
+        if (!columnId) return;
         kanban.selectionController.selection = {
           selectionType: 'cell',
           groupKey: this.group.key,
           cardId: id,
-          columnId:
-            this.view.mainProperties$.value.titleColumn ||
-            this.view.propertyIds$.value[0],
+          columnId,
           isEditing: true,
         };
       }
     });
   };
 
-  private clickGroupOptions = (e: MouseEvent) => {
+  private readonly clickGroupOptions = (e: MouseEvent) => {
     const ele = e.currentTarget as HTMLElement;
     popFilterableSimpleMenu(popupTargetFromElement(ele), [
       menu.action({

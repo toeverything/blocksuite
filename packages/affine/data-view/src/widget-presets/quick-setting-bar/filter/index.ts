@@ -1,9 +1,8 @@
 import { IS_MOBILE } from '@blocksuite/global/env';
 import { html } from 'lit';
 
-import type { DataViewWidgetProps } from '../../../core/widget/types.js';
-
 import { filterTraitKey } from '../../../core/filter/trait.js';
+import type { DataViewWidgetProps } from '../../../core/widget/types.js';
 
 export const renderFilterBar = (props: DataViewWidgetProps) => {
   const filterTrait = props.dataViewInstance.view.traitGet(filterTraitKey);

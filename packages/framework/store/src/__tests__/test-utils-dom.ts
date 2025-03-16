@@ -1,11 +1,11 @@
-import type { DocCollection } from '../store/index.js';
+import type { TestWorkspace } from '../test';
 
 declare global {
   interface WindowEventMap {
     'test-result': CustomEvent<TestResult>;
   }
   interface Window {
-    collection: DocCollection;
+    collection: TestWorkspace;
   }
 }
 
@@ -63,13 +63,6 @@ export async function runOnce() {
   }
   reportTestResult();
   testCases = [];
-}
-
-// XXX: workaround typing issue in blobs/__tests__/test-entry.ts
-export function assertExists<T>(val: T | null | undefined): asserts val is T {
-  if (val === null || val === undefined) {
-    throw new Error('val does not exist');
-  }
 }
 
 export async function nextFrame() {

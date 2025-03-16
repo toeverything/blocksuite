@@ -4,16 +4,13 @@ import {
   type PopupTarget,
 } from '@blocksuite/affine-components/context-menu';
 import { ShadowlessElement } from '@blocksuite/block-std';
-import { SignalWatcher, WithDisposable } from '@blocksuite/global/utils';
+import { SignalWatcher, WithDisposable } from '@blocksuite/global/lit';
 import { InvisibleIcon, ViewIcon } from '@blocksuite/icons/lit';
 import { computed } from '@preact/signals-core';
 import { css, html } from 'lit';
 import { property, query } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { repeat } from 'lit/directives/repeat.js';
-
-import type { Property } from '../view-manager/property.js';
-import type { SingleView } from '../view-manager/single-view.js';
 
 import { dragHandler } from '../utils/wc-dnd/dnd-context.js';
 import { defaultActivators } from '../utils/wc-dnd/sensors/index.js';
@@ -22,6 +19,8 @@ import {
   sortable,
 } from '../utils/wc-dnd/sort/sort-context.js';
 import { verticalListSortingStrategy } from '../utils/wc-dnd/sort/strategies/index.js';
+import type { Property } from '../view-manager/property.js';
+import type { SingleView } from '../view-manager/single-view.js';
 
 export class DataViewPropertiesSettingView extends SignalWatcher(
   WithDisposable(ShadowlessElement)
@@ -137,16 +136,15 @@ export class DataViewPropertiesSettingView extends SignalWatcher(
   });
 
   renderProperty = (property: Property) => {
-    const isTitle = property.type$.value === 'title';
     const icon = property.hide$.value ? InvisibleIcon() : ViewIcon();
     const changeVisible = () => {
-      if (property.type$.value !== 'title') {
+      if (property.hideCanSet) {
         property.hideSet(!property.hide$.value);
       }
     };
     const classList = classMap({
       'property-item-op-icon': true,
-      disabled: isTitle,
+      disabled: !property.hideCanSet,
     });
     return html` <div
       ${dragHandler(property.id)}
@@ -252,7 +250,7 @@ export const popPropertiesSetting = (
           const isAllShowed = items.every(v => !v.hide$.value);
           const clickChangeAll = () => {
             props.view.propertiesWithoutFilter$.value.forEach(id => {
-              if (props.view.propertyTypeGet(id) !== 'title') {
+              if (props.view.propertyCanHide(id)) {
                 props.view.propertyHideSet(id, isAllShowed);
               }
             });

@@ -1,8 +1,7 @@
+import type { KanbanCardSelection } from '../../view-presets';
 import type { KanbanCard } from '../../view-presets/kanban/pc/card.js';
-import type { KanbanCardSelection } from '../../view-presets/kanban/types.js';
-import type { RecordDetail } from './detail.js';
-
 import { KanbanCell } from '../../view-presets/kanban/pc/cell.js';
+import type { RecordDetail } from './detail.js';
 import { RecordField } from './field.js';
 
 type DetailViewSelection = {
@@ -50,7 +49,7 @@ export class DetailSelection {
     }
   }
 
-  constructor(private viewEle: RecordDetail) {}
+  constructor(private readonly viewEle: RecordDetail) {}
 
   blur(selection: DetailViewSelection) {
     const container = this.getFocusCellContainer(selection);
@@ -62,13 +61,11 @@ export class DetailSelection {
     const cell = container.cell;
 
     if (selection.isEditing) {
-      requestAnimationFrame(() => {
-        cell?.onExitEditMode();
-      });
+      cell?.beforeExitEditingMode();
       if (cell?.blurCell()) {
         container.blur();
       }
-      container.editing = false;
+      container.isEditing$.value = false;
     } else {
       container.blur();
     }
@@ -86,11 +83,13 @@ export class DetailSelection {
     container.isFocus = true;
     const cell = container.cell;
     if (selection.isEditing) {
-      cell?.onEnterEditMode();
       if (cell?.focusCell()) {
         container.focus();
       }
-      container.editing = true;
+      container.isEditing$.value = true;
+      requestAnimationFrame(() => {
+        cell?.afterEnterEditingMode();
+      });
     } else {
       container.focus();
     }

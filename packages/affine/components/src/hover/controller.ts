@@ -1,13 +1,11 @@
+import { DisposableGroup } from '@blocksuite/global/disposable';
 import type { ReactiveController, ReactiveElement } from 'lit';
-
-import { DisposableGroup } from '@blocksuite/global/utils';
-
-import type { HoverOptions } from './types.js';
 
 import {
   type AdvancedPortalOptions,
   createLitPortal,
 } from '../portal/index.js';
+import type { HoverOptions } from './types.js';
 import { whenHover } from './when-hover.js';
 
 type OptionsParams = Omit<

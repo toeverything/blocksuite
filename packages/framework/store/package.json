@@ -1,13 +1,7 @@
 {
   "name": "@blocksuite/store",
-  "version": "0.18.1",
   "description": "BlockSuite data store built for general purpose state management.",
   "type": "module",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/toeverything/blocksuite.git",
-    "directory": "packages/framework/store"
-  },
   "scripts": {
     "build": "tsc",
     "test:unit": "nx vite:test --run",
@@ -18,49 +12,33 @@
   "sideEffects": false,
   "keywords": [],
   "author": "toeverything",
-  "license": "MPL-2.0",
+  "license": "MIT",
   "dependencies": {
     "@blocksuite/global": "workspace:*",
     "@blocksuite/inline": "workspace:*",
     "@blocksuite/sync": "workspace:*",
     "@preact/signals-core": "^1.8.0",
-    "@types/flexsearch": "^0.7.6",
     "@types/lodash.ismatch": "^4.4.9",
-    "file-type": "^19.5.0",
-    "flexsearch": "0.7.43",
+    "file-type": "^20.0.0",
     "lib0": "^0.2.97",
     "lodash.clonedeep": "^4.5.0",
     "lodash.ismatch": "^4.4.0",
     "lodash.merge": "^4.6.2",
     "minimatch": "^10.0.1",
     "nanoid": "^5.0.7",
+    "rxjs": "^7.8.1",
     "y-protocols": "^1.0.6",
+    "yjs": "^13.6.21",
     "zod": "^3.23.8"
   },
   "devDependencies": {
     "@types/lodash.clonedeep": "^4.5.9",
     "@types/lodash.merge": "^4.6.9",
-    "lit": "^3.2.0",
-    "yjs": "^13.6.18"
-  },
-  "peerDependencies": {
-    "yjs": "^13.6.18"
+    "vitest": "3.0.8"
   },
   "exports": {
-    ".": "./src/index.ts"
-  },
-  "publishConfig": {
-    "access": "public",
-    "main": "dist/index.js",
-    "types": "dist/index.d.ts",
-    "exports": {
-      ".": {
-        "types": "./dist/index.d.ts",
-        "module": "./dist/index.js",
-        "import": "./dist/index.js"
-      },
-      "./shim.d.ts": "./shim.d.ts"
-    }
+    ".": "./src/index.ts",
+    "./test": "./src/test/index.ts"
   },
   "files": [
     "src",
@@ -68,5 +46,6 @@
     "!src/__tests__",
     "!dist/__tests__",
     "shim.d.ts"
-  ]
+  ],
+  "version": "0.20.0"
 }

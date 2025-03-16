@@ -3,8 +3,9 @@ import {
   popMenu,
   popupTargetFromElement,
 } from '@blocksuite/affine-components/context-menu';
+import type { UniComponent } from '@blocksuite/affine-shared/types';
 import { ShadowlessElement } from '@blocksuite/block-std';
-import { SignalWatcher, WithDisposable } from '@blocksuite/global/utils';
+import { SignalWatcher, WithDisposable } from '@blocksuite/global/lit';
 import {
   ArrowDownBigIcon,
   ArrowUpBigIcon,
@@ -18,13 +19,9 @@ import { keyed } from 'lit/directives/keyed.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { html } from 'lit/static-html.js';
 
-import type { SingleView } from '../view-manager/single-view.js';
-
 import { dataViewCommonStyle } from '../common/css-variable.js';
-import {
-  renderUniLit,
-  type UniComponent,
-} from '../utils/uni-component/uni-component.js';
+import { renderUniLit } from '../utils/uni-component/uni-component.js';
+import type { SingleView } from '../view-manager/single-view.js';
 import { DetailSelection } from './selection.js';
 
 export type DetailSlotProps = {
@@ -51,6 +48,7 @@ const styles = css`
     border-radius: 8px;
     height: 100%;
     width: 100%;
+    box-sizing: border-box;
   }
 
   .add-property {
@@ -119,7 +117,7 @@ export class RecordDetail extends SignalWatcher(
         },
         items: [
           menu.group({
-            items: this.view.propertyMetas.map(meta => {
+            items: this.view.propertyMetas$.value.map(meta => {
               return menu.action({
                 name: meta.config.name,
                 prefix: renderUniLit(this.view.propertyIconGet(meta.type)),
@@ -234,7 +232,7 @@ export class RecordDetail extends SignalWatcher(
         </div>
       </div>
       <div
-        style="max-width: var(--affine-editor-width);display: flex;flex-direction: column;margin: 0 auto"
+        style="width: 100%;max-width: var(--affine-editor-width);display: flex;flex-direction: column;margin: 0 auto;box-sizing: border-box;"
       >
         ${keyed(this.rowId, this.renderHeader())}
         ${repeat(
@@ -258,7 +256,6 @@ export class RecordDetail extends SignalWatcher(
               Add Property
             </div>`
           : nothing}
-        <div style="width: var(--affine-editor-width)"></div>
       </div>
       ${keyed(this.rowId, this.renderNote())}
     `;

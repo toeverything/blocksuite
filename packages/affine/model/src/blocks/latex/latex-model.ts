@@ -3,7 +3,11 @@ import {
   GfxCompatible,
   type GfxElementGeometry,
 } from '@blocksuite/block-std/gfx';
-import { BlockModel, defineBlockSchema } from '@blocksuite/store';
+import {
+  BlockModel,
+  BlockSchemaExtension,
+  defineBlockSchema,
+} from '@blocksuite/store';
 
 export type LatexProps = {
   latex: string;
@@ -14,6 +18,7 @@ export const LatexBlockSchema = defineBlockSchema({
   props: (): LatexProps => ({
     xywh: '[0,0,16,16]',
     index: 'a0',
+    lockedBySelf: false,
     scale: 1,
     rotate: 0,
     latex: '',
@@ -33,18 +38,8 @@ export const LatexBlockSchema = defineBlockSchema({
   },
 });
 
+export const LatexBlockSchemaExtension = BlockSchemaExtension(LatexBlockSchema);
+
 export class LatexBlockModel
   extends GfxCompatible<LatexProps>(BlockModel)
   implements GfxElementGeometry {}
-
-declare global {
-  namespace BlockSuite {
-    interface BlockModels {
-      'affine:latex': LatexBlockModel;
-    }
-
-    interface EdgelessBlockModelMap {
-      'affine:latex': LatexBlockModel;
-    }
-  }
-}

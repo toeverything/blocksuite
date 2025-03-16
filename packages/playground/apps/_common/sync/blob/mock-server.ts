@@ -39,7 +39,6 @@ export class MockServerBlobSource implements BlobSource {
     }
   }
 
-  // eslint-disable-next-line @typescript-eslint/require-await
   async list() {
     return Array.from(this._cache.keys());
   }

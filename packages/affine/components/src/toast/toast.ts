@@ -1,5 +1,4 @@
 import type { EditorHost } from '@blocksuite/block-std';
-
 import { baseTheme } from '@toeverything/theme';
 import { html } from 'lit';
 

@@ -1,21 +1,19 @@
 import type { DocMode } from '@blocksuite/affine-model';
-import type { BlockStdScope } from '@blocksuite/block-std';
-import type { BlockModel, Doc } from '@blocksuite/store';
-
 import { stopPropagation } from '@blocksuite/affine-shared/utils';
+import type { BlockStdScope } from '@blocksuite/block-std';
 import {
   docContext,
   modelContext,
   ShadowlessElement,
   stdContext,
+  TextSelection,
 } from '@blocksuite/block-std';
-import { WithDisposable } from '@blocksuite/global/utils';
+import { WithDisposable } from '@blocksuite/global/lit';
+import type { BlockModel, Store } from '@blocksuite/store';
 import { Text } from '@blocksuite/store';
 import { consume } from '@lit/context';
 import { css, html, nothing } from 'lit';
 import { query, state } from 'lit/decorators.js';
-
-import { focusTextModel } from '../rich-text/index.js';
 
 export interface BlockCaptionProps {
   caption: string | null | undefined;
@@ -36,6 +34,9 @@ export class BlockCaptionEditor<
       font-size: var(--affine-font-sm);
       font-family: inherit;
       text-align: center;
+      field-sizing: content;
+      padding: 0;
+      margin-top: 4px;
     }
     .block-caption-editor::placeholder {
       color: var(--affine-placeholder-color);
@@ -90,7 +91,13 @@ export class BlockCaptionEditor<
         index + 1
       );
 
-      focusTextModel(this.std, id);
+      const std = this.std;
+      std.selection.setGroup('note', [
+        std.selection.create(TextSelection, {
+          from: { blockId: id, index: 0, length: 0 },
+          to: null,
+        }),
+      ]);
     }
   }
 
@@ -114,12 +121,12 @@ export class BlockCaptionEditor<
   override connectedCallback(): void {
     super.connectedCallback();
 
-    this.caption = this.model.caption;
+    this.caption = this.model.props.caption;
 
     this.disposables.add(
-      this.model.propsUpdated.on(({ key }) => {
+      this.model.propsUpdated.subscribe(({ key }) => {
         if (key === 'caption') {
-          this.caption = this.model.caption;
+          this.caption = this.model.props.caption;
           if (!this._focus) {
             this.display = !!this.caption?.length;
           }
@@ -159,7 +166,7 @@ export class BlockCaptionEditor<
   accessor display = false;
 
   @consume({ context: docContext })
-  accessor doc!: Doc;
+  accessor doc!: Store;
 
   @query('.block-caption-editor')
   accessor input!: HTMLInputElement;

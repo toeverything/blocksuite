@@ -1,4 +1,4 @@
-import type { IPoint } from '@blocksuite/global/utils';
+import type { IPoint } from '@blocksuite/global/gfx';
 
 export function isFarEnough(a: IPoint, b: IPoint) {
   const dx = a.x - b.x;

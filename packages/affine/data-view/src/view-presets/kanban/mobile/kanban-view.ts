@@ -10,12 +10,11 @@ import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
 
-import type { KanbanSingleView } from '../kanban-view-manager.js';
-import type { KanbanViewSelectionWithType } from '../types.js';
-
 import { type DataViewInstance, renderUniLit } from '../../../core/index.js';
 import { sortable } from '../../../core/utils/wc-dnd/sort/sort-context.js';
 import { DataViewBase } from '../../../core/view/data-view-base.js';
+import type { KanbanSingleView } from '../kanban-view-manager.js';
+import type { KanbanViewSelectionWithType } from '../selection';
 
 const styles = css`
   mobile-data-view-kanban {
@@ -63,7 +62,7 @@ export class MobileDataViewKanban extends DataViewBase<
         options: {
           items: [
             menu.input({
-              onChange: text => {
+              onComplete: text => {
                 const column = this.groupManager.property$.value;
                 if (column) {
                   column.dataUpdate(

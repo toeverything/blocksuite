@@ -3,7 +3,6 @@ import type {
   Coordinates,
   DndClientRect,
 } from '../types.js';
-
 import { distanceBetween } from './distance-between-points.js';
 
 /**

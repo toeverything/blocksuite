@@ -1,9 +1,8 @@
 import { computed, type ReadonlySignal } from '@preact/signals-core';
 
+import { createTraitKey } from '../traits/key.js';
 import type { SingleView } from '../view-manager/index.js';
 import type { FilterGroup } from './types.js';
-
-import { createTraitKey } from '../traits/key.js';
 
 export class FilterTrait {
   filterSet = (filter: FilterGroup) => {

@@ -1,3 +1,5 @@
+import { stopPropagation } from '../../event.js';
+import { dragHandlerDataName } from '../dnd-context.js';
 import type {
   Coordinates,
   DistanceMeasurement,
@@ -5,9 +7,6 @@ import type {
   DndSessionProps,
   Sensor,
 } from '../types.js';
-
-import { stopPropagation } from '../../event.js';
-import { dragHandlerDataName } from '../dnd-context.js';
 import { subtract } from '../utils/adjustment.js';
 import { asHTMLElement } from '../utils/element.js';
 import { preventDefault } from '../utils/events.js';
@@ -75,17 +74,25 @@ export function hasViewportRelativeCoordinates(
   return 'clientX' in event && 'clientY' in event;
 }
 
+function isTouchEvent(event: Event): event is TouchEvent {
+  return 'TouchEvent' in globalThis && event instanceof TouchEvent;
+}
+
 const getEventCoordinates = (event: Event) => {
-  if (event instanceof TouchEvent) {
+  if (isTouchEvent(event)) {
     if (event.touches && event.touches.length) {
-      const { clientX: x, clientY: y } = event.touches[0];
+      const touch = event.touches[0];
+      if (!touch) return;
+      const { clientX: x, clientY: y } = touch;
 
       return {
         x,
         y,
       };
     } else if (event.changedTouches && event.changedTouches.length) {
-      const { clientX: x, clientY: y } = event.changedTouches[0];
+      const touch = event.changedTouches[0];
+      if (!touch) return;
+      const { clientX: x, clientY: y } = touch;
 
       return {
         x,
@@ -145,10 +152,11 @@ export class MouseSession implements DndSession {
     // Constraint validation
     if (!activated && activationConstraint) {
       const delta = subtract(initialCoordinates, coordinates);
-      if (activationConstraint.distance) {
-        if (hasExceededDistance(delta, activationConstraint.distance)) {
-          return this.handleStart();
-        }
+      if (
+        activationConstraint.distance &&
+        hasExceededDistance(delta, activationConstraint.distance)
+      ) {
+        return this.handleStart();
       }
       return;
     }
@@ -192,8 +200,8 @@ export class MouseSession implements DndSession {
 
   constructor(
     event: Event,
-    private sessionProps: DndSessionProps,
-    private props: MouseSensorProps
+    private readonly sessionProps: DndSessionProps,
+    private readonly props: MouseSensorProps
   ) {
     this.initialCoordinates = getEventCoordinates(event) ?? defaultCoordinates;
     this.attach();
@@ -210,10 +218,8 @@ export class MouseSession implements DndSession {
     this.windowListeners.add('contextmenu', preventDefault);
     this.documentListeners.add('keydown', this.handleKeydown);
     const { activationConstraint } = this.props;
-    if (activationConstraint) {
-      if (activationConstraint.distance != null) {
-        return;
-      }
+    if (activationConstraint && activationConstraint.distance != null) {
+      return;
     }
 
     this.handleStart();

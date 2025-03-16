@@ -10,11 +10,10 @@ import { html, nothing, type TemplateResult } from 'lit';
 import { property } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 
-import type { MenuItemRender } from './types.js';
-
 import { MenuFocusable } from './focusable.js';
 import { Menu, type MenuOptions } from './menu.js';
 import { popMenu, popupTargetFromElement } from './menu-renderer.js';
+import type { MenuItemRender } from './types.js';
 
 export type MenuSubMenuData = {
   content: () => TemplateResult;

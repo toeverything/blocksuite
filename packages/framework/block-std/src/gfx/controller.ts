@@ -1,22 +1,20 @@
-import type { BlockModel } from '@blocksuite/store';
-
+import { DisposableGroup } from '@blocksuite/global/disposable';
 import {
-  assertType,
   Bound,
-  DisposableGroup,
+  getCommonBound,
   getCommonBoundWithRotation,
   type IBound,
-  last,
-} from '@blocksuite/global/utils';
-
-import type { BlockStdScope } from '../scope/block-std-scope.js';
-import type { BlockComponent } from '../view/index.js';
-import type { PointTestOptions } from './model/base.js';
-import type { GfxModel } from './model/model.js';
-import type { SurfaceBlockModel } from './model/surface/surface-model.js';
+} from '@blocksuite/global/gfx';
+import { assertType } from '@blocksuite/global/utils';
+import type { BlockModel } from '@blocksuite/store';
+import { Signal } from '@preact/signals-core';
+import last from 'lodash-es/last';
 
 import { LifeCycleWatcher } from '../extension/lifecycle-watcher.js';
+import type { BlockStdScope } from '../scope/block-std-scope.js';
 import { onSurfaceAdded } from '../utils/gfx.js';
+import type { BlockComponent } from '../view/index.js';
+import type { CursorType } from './cursor.js';
 import {
   GfxClassExtenderIdentifier,
   GfxExtensionIdentifier,
@@ -25,30 +23,39 @@ import { GridManager } from './grid.js';
 import { gfxControllerKey } from './identifiers.js';
 import { KeyboardController } from './keyboard.js';
 import { LayerManager } from './layer.js';
+import type { PointTestOptions } from './model/base.js';
 import { GfxBlockElementModel } from './model/gfx-block-model.js';
+import type { GfxModel } from './model/model.js';
 import {
   GfxGroupLikeElementModel,
   GfxPrimitiveElementModel,
 } from './model/surface/element-model.js';
-import { Viewport } from './viewport.js';
+import type { SurfaceBlockModel } from './model/surface/surface-model.js';
+import { FIT_TO_SCREEN_PADDING, Viewport, ZOOM_INITIAL } from './viewport.js';
 
 export class GfxController extends LifeCycleWatcher {
   static override key = gfxControllerKey;
 
-  private _disposables: DisposableGroup = new DisposableGroup();
+  private readonly _disposables: DisposableGroup = new DisposableGroup();
 
-  private _surface: SurfaceBlockModel | null = null;
+  private readonly _surface$ = new Signal<SurfaceBlockModel | null>(null);
 
-  readonly grid: GridManager;
+  readonly cursor$ = new Signal<CursorType>();
 
   readonly keyboard: KeyboardController;
 
-  readonly layer: LayerManager;
-
   readonly viewport: Viewport = new Viewport();
 
+  get grid() {
+    return this.std.get(GridManager);
+  }
+
+  get layer() {
+    return this.std.get(LayerManager);
+  }
+
   get doc() {
-    return this.std.doc;
+    return this.std.store;
   }
 
   get elementsBound() {
@@ -59,8 +66,12 @@ export class GfxController extends LifeCycleWatcher {
     return [...this.layer.blocks, ...this.layer.canvasElements];
   }
 
+  get surface$() {
+    return this._surface$;
+  }
+
   get surface() {
-    return this._surface;
+    return this._surface$.peek();
   }
 
   get surfaceComponent(): BlockComponent | null {
@@ -72,22 +83,13 @@ export class GfxController extends LifeCycleWatcher {
   constructor(std: BlockStdScope) {
     super(std);
 
-    this.grid = new GridManager();
-    this.layer = new LayerManager(this.doc, null);
     this.keyboard = new KeyboardController(std);
 
     this._disposables.add(
       onSurfaceAdded(this.doc, surface => {
-        this._surface = surface;
-
-        if (surface) {
-          this._disposables.add(this.grid.watch({ surface }));
-          this.layer.watch({ surface });
-        }
+        this._surface$.value = surface;
       })
     );
-    this._disposables.add(this.grid.watch({ doc: this.doc }));
-    this._disposables.add(this.layer);
     this._disposables.add(this.viewport);
     this._disposables.add(this.keyboard);
 
@@ -118,7 +120,7 @@ export class GfxController extends LifeCycleWatcher {
   getElementById<
     T extends GfxModel | BlockModel<object> = GfxModel | BlockModel<object>,
   >(id: string): T | null {
-    // @ts-ignore
+    // @ts-expect-error FIXME: ts error
     return (
       this.surface?.getElementById(id) ?? this.doc.getBlock(id)?.model ?? null
     );
@@ -271,7 +273,7 @@ export class GfxController extends LifeCycleWatcher {
   }
 
   override mounted() {
-    this.viewport.setViewportElm(this.std.host);
+    this.viewport.setShellElement(this.std.host);
     this.std.provider.getAll(GfxExtensionIdentifier).forEach(ext => {
       ext.mounted();
     });
@@ -281,6 +283,7 @@ export class GfxController extends LifeCycleWatcher {
     this.std.provider.getAll(GfxExtensionIdentifier).forEach(ext => {
       ext.unmounted();
     });
+    this.viewport.clearViewportElement();
     this._disposables.dispose();
   }
 
@@ -296,5 +299,29 @@ export class GfxController extends LifeCycleWatcher {
       const block = this.doc.getBlock(elemId);
       block && this.doc.updateBlock(block.model, props);
     }
+  }
+
+  fitToScreen(
+    options: {
+      bounds?: Bound[];
+      smooth?: boolean;
+      padding?: [number, number, number, number];
+    } = {
+      smooth: false,
+      padding: [0, 0, 0, 0],
+    }
+  ) {
+    const elemBounds =
+      options.bounds ??
+      this.gfxElements.map(element => Bound.deserialize(element.xywh));
+    const commonBound = getCommonBound(elemBounds);
+    const { zoom, centerX, centerY } = this.viewport.getFitToScreenData(
+      commonBound,
+      options.padding,
+      ZOOM_INITIAL,
+      FIT_TO_SCREEN_PADDING
+    );
+
+    this.viewport.setViewport(zoom, [centerX, centerY], options.smooth);
   }
 }

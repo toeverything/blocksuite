@@ -3,7 +3,7 @@ import {
   popupTargetFromElement,
 } from '@blocksuite/affine-components/context-menu';
 import { ShadowlessElement } from '@blocksuite/block-std';
-import { SignalWatcher } from '@blocksuite/global/utils';
+import { SignalWatcher } from '@blocksuite/global/lit';
 import {
   ArrowDownSmallIcon,
   FilterIcon,
@@ -15,7 +15,6 @@ import { property } from 'lit/decorators.js';
 
 import type { Variable } from '../../../core/expression/types.js';
 import type { Filter, FilterGroup } from '../../../core/filter/types.js';
-
 import { popCreateFilter } from '../../../core/index.js';
 import { popFilterGroup } from './group-panel-view.js';
 
@@ -78,7 +77,7 @@ export class FilterBar extends SignalWatcher(ShadowlessElement) {
     }
   `;
 
-  private _setFilter = (index: number, filter: Filter) => {
+  private readonly _setFilter = (index: number, filter: Filter) => {
     this.onChange({
       ...this.filterGroup.value,
       conditions: this.filterGroup.value.conditions.map((v, i) =>
@@ -87,7 +86,7 @@ export class FilterBar extends SignalWatcher(ShadowlessElement) {
     });
   };
 
-  private addFilter = (e: MouseEvent) => {
+  private readonly addFilter = (e: MouseEvent) => {
     const element = popupTargetFromElement(e.target as HTMLElement);
     popCreateFilter(element, {
       vars: this.vars,
@@ -104,7 +103,7 @@ export class FilterBar extends SignalWatcher(ShadowlessElement) {
     });
   };
 
-  private expandGroup = (position: PopupTarget, i: number) => {
+  private readonly expandGroup = (position: PopupTarget, i: number) => {
     if (this.filterGroup.value.conditions[i]?.type !== 'group') {
       return;
     }

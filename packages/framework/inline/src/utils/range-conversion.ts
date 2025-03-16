@@ -1,10 +1,8 @@
+import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 import type * as Y from 'yjs';
 
-import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
-
-import type { InlineRange } from '../types.js';
-
 import { VElement } from '../components/v-element.js';
+import type { InlineRange } from '../types.js';
 import { isInEmbedElement } from './embed.js';
 import {
   nativePointToTextPoint,
@@ -262,6 +260,7 @@ export function inlineRangeToDomRange(
   let focusOffset = 0;
   let index = 0;
 
+  // eslint-disable-next-line @typescript-eslint/prefer-for-of
   for (let i = 0; i < lineElements.length; i++) {
     if (startText && endText) {
       break;

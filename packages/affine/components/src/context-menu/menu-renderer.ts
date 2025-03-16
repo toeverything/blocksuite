@@ -1,7 +1,7 @@
 import { unsafeCSSVar, unsafeCSSVarV2 } from '@blocksuite/affine-shared/theme';
 import { ShadowlessElement } from '@blocksuite/block-std';
 import { IS_MOBILE } from '@blocksuite/global/env';
-import { SignalWatcher, WithDisposable } from '@blocksuite/global/utils';
+import { SignalWatcher, WithDisposable } from '@blocksuite/global/lit';
 import {
   ArrowLeftBigIcon,
   ArrowLeftSmallIcon,
@@ -23,9 +23,8 @@ import { createRef, ref } from 'lit/directives/ref.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import type { MenuFocusable } from './focusable.js';
-import type { MenuComponentInterface } from './types.js';
-
 import { Menu, type MenuConfig, type MenuOptions } from './menu.js';
+import type { MenuComponentInterface } from './types.js';
 
 export class MenuComponent
   extends SignalWatcher(WithDisposable(ShadowlessElement))
@@ -84,13 +83,13 @@ export class MenuComponent
     }
   `;
 
-  private _clickContainer = (e: MouseEvent) => {
+  private readonly _clickContainer = (e: MouseEvent) => {
     e.stopPropagation();
     this.focusInput();
     this.menu.closeSubMenu();
   };
 
-  private searchRef = createRef<HTMLInputElement>();
+  private readonly searchRef = createRef<HTMLInputElement>();
 
   override firstUpdated() {
     const input = this.searchRef.value;
@@ -262,7 +261,8 @@ export class MobileMenuComponent
       user-select: none;
       width: 100%;
       background-color: ${unsafeCSSVarV2('layer/background/secondary')};
-      padding: 8px;
+      padding: calc(8px + env(safe-area-inset-top, 0px)) 8px
+        calc(8px + env(safe-area-inset-bottom, 0px)) 8px;
       position: absolute;
       z-index: 999;
       color: ${unsafeCSSVarV2('text/primary')};
@@ -369,7 +369,7 @@ export class MobileMenuComponent
 
 declare global {
   interface HTMLElementTagNameMap {
-    'affine-menu-mobile': MobileMenuComponent;
+    'mobile-menu': MobileMenuComponent;
   }
 }
 
@@ -501,11 +501,12 @@ const popMobileMenu = (options: MenuOptions): MenuHandler => {
   };
   return {
     close: () => {
-      closePopup();
+      menu.close();
     },
     menu,
     reopen: () => {
-      options.onClose?.();
+      menu.close();
+      popMobileMenu(options);
     },
   };
 };
@@ -525,15 +526,16 @@ export const popMenu = (
   const onClose = () => {
     props.options.onClose?.();
     popupEnd();
+    closePopup();
   };
   const menu = new Menu({
     ...props.options,
-    onClose: () => {
-      closePopup();
-    },
+    onClose: onClose,
   });
   const closePopup = createPopup(target, menu.menuElement, {
-    onClose: onClose,
+    onClose: () => {
+      menu.close();
+    },
     middleware: props.middleware ?? [
       autoPlacement({
         allowedPlacements: [

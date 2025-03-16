@@ -1,10 +1,7 @@
-import type { Doc } from '@blocksuite/store';
-
-import { SignalWatcher, WithDisposable } from '@blocksuite/global/utils';
+import { SignalWatcher, WithDisposable } from '@blocksuite/global/lit';
+import type { ExtensionType, Store } from '@blocksuite/store';
 import { html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-
-import type { ExtensionType } from '../extension/index.js';
 
 import { BlockStdScope } from '../scope/index.js';
 import { ShadowlessElement } from '../view/index.js';
@@ -22,7 +19,7 @@ export class TestEditorContainer extends SignalWatcher(
   override connectedCallback() {
     super.connectedCallback();
     this._std = new BlockStdScope({
-      doc: this.doc,
+      store: this.doc,
       extensions: this.specs,
     });
   }
@@ -34,7 +31,7 @@ export class TestEditorContainer extends SignalWatcher(
   }
 
   @property({ attribute: false })
-  accessor doc!: Doc;
+  accessor doc!: Store;
 
   @property({ attribute: false })
   accessor specs: ExtensionType[] = [];

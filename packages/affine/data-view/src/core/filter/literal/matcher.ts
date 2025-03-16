@@ -1,8 +1,7 @@
 import type { ReadonlySignal } from '@preact/signals-core';
 
-import type { TypeInstance } from '../../logical/type.js';
-
 import { typeSystem } from '../../logical/index.js';
+import type { TypeInstance } from '../../logical/type.js';
 import { allLiteralConfig } from './define.js';
 
 export const literalItemsMatcher = {

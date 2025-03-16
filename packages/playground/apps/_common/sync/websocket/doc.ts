@@ -1,12 +1,10 @@
 import type { DocSource } from '@blocksuite/sync';
-
-import { assertExists } from '@blocksuite/global/utils';
 import { diffUpdate, encodeStateVectorFromUpdate, mergeUpdates } from 'yjs';
 
 import type { WebSocketMessage } from './types';
 
 export class WebSocketDocSource implements DocSource {
-  private _onMessage = (event: MessageEvent<string>) => {
+  private readonly _onMessage = (event: MessageEvent<string>) => {
     const data = JSON.parse(event.data) as WebSocketMessage;
 
     if (data.channel !== 'doc') return;
@@ -70,7 +68,9 @@ export class WebSocketDocSource implements DocSource {
     }
 
     const latest = this.docMap.get(docId);
-    assertExists(latest);
+    if (!latest) {
+      throw new Error('latest is not found');
+    }
     this.ws.send(
       JSON.stringify({
         channel: 'doc',

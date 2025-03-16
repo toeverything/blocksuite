@@ -1,11 +1,14 @@
-import { WithDisposable } from '@blocksuite/global/utils';
+import { WithDisposable } from '@blocksuite/global/lit';
 import { css, html } from 'lit';
 import { property } from 'lit/decorators.js';
 
-import type { GfxBlockElementModel } from './model/gfx-block-model.js';
-
 import { PropTypes, requiredProperties } from '../view/decorators/required.js';
-import { type EditorHost, ShadowlessElement } from '../view/index.js';
+import {
+  type BlockComponent,
+  type EditorHost,
+  ShadowlessElement,
+} from '../view/index.js';
+import type { GfxBlockElementModel } from './model/gfx-block-model.js';
 import { Viewport } from './viewport.js';
 
 /**
@@ -32,6 +35,24 @@ export function requestThrottledConnectedFrame<
   }) as T;
 }
 
+function setBlockState(view: BlockComponent | null, state: 'active' | 'idle') {
+  if (!view) return;
+
+  if (state === 'active') {
+    view.style.visibility = 'visible';
+    view.style.pointerEvents = 'auto';
+    view.classList.remove('block-idle');
+    view.classList.add('block-active');
+    view.dataset.blockState = 'active';
+  } else {
+    view.style.visibility = 'hidden';
+    view.style.pointerEvents = 'none';
+    view.classList.remove('block-active');
+    view.classList.add('block-idle');
+    view.dataset.blockState = 'idle';
+  }
+}
+
 @requiredProperties({
   viewport: PropTypes.instanceOf(Viewport),
 })
@@ -45,66 +66,75 @@ export class GfxViewportElement extends WithDisposable(ShadowlessElement) {
       display: block;
       transform: none;
     }
+
+    /* CSS for idle blocks that are hidden but maintain layout */
+    .block-idle {
+      visibility: hidden;
+      pointer-events: none;
+      will-change: transform;
+      contain: size layout style;
+    }
+
+    /* CSS for active blocks participating in viewport transformations */
+    .block-active {
+      visibility: visible;
+      pointer-events: auto;
+    }
   `;
 
-  private _hideOutsideBlock = requestThrottledConnectedFrame(() => {
-    if (this.getModelsInViewport && this.host) {
-      const host = this.host;
-      const modelsInViewport = this.getModelsInViewport();
+  private readonly _hideOutsideBlock = () => {
+    if (!this.host) return;
 
-      modelsInViewport.forEach(model => {
-        const view = host.std.view.getBlock(model.id);
+    const { host } = this;
+    const modelsInViewport = this.getModelsInViewport();
 
-        if (view) {
-          view.style.display = '';
-        }
+    modelsInViewport.forEach(model => {
+      const view = host.std.view.getBlock(model.id);
+      setBlockState(view, 'active');
 
-        if (this._lastVisibleModels?.has(model)) {
-          this._lastVisibleModels!.delete(model);
-        }
-      });
+      if (this._lastVisibleModels?.has(model)) {
+        this._lastVisibleModels!.delete(model);
+      }
+    });
 
-      this._lastVisibleModels?.forEach(model => {
-        const view = host.std.view.getBlock(model.id);
+    this._lastVisibleModels?.forEach(model => {
+      const view = host.std.view.getBlock(model.id);
+      setBlockState(view, 'idle');
+    });
 
-        if (view) {
-          view.style.display = 'none';
-        }
-      });
-
-      this._lastVisibleModels = modelsInViewport;
-    }
-  }, this);
+    this._lastVisibleModels = modelsInViewport;
+  };
 
   private _lastVisibleModels?: Set<GfxBlockElementModel>;
 
-  private _pendingChildrenUpdates: {
+  private readonly _pendingChildrenUpdates: {
     id: string;
     resolve: () => void;
   }[] = [];
 
-  private _refreshViewport = requestThrottledConnectedFrame(() => {
+  private readonly _refreshViewport = requestThrottledConnectedFrame(() => {
     this._hideOutsideBlock();
   }, this);
 
   private _updatingChildrenFlag = false;
-
-  renderingBlocks = new Set<string>();
 
   override connectedCallback(): void {
     super.connectedCallback();
 
     const viewportUpdateCallback = () => {
       this._refreshViewport();
-      this._hideOutsideBlock();
     };
 
-    viewportUpdateCallback();
+    if (!this.enableChildrenSchedule) {
+      delete this.scheduleUpdateChildren;
+    }
+
+    this._hideOutsideBlock();
     this.disposables.add(
-      this.viewport.viewportUpdated.on(() => viewportUpdateCallback())
+      this.viewport.viewportUpdated.subscribe(() => viewportUpdateCallback())
     );
     this.disposables.add(
-      this.viewport.sizeUpdated.on(() => viewportUpdateCallback())
+      this.viewport.sizeUpdated.subscribe(() => viewportUpdateCallback())
     );
   }
 
@@ -112,7 +142,7 @@ export class GfxViewportElement extends WithDisposable(ShadowlessElement) {
     return html``;
   }
 
-  scheduleUpdateChildren(id: string) {
+  scheduleUpdateChildren? = (id: string) => {
     const { promise, resolve } = Promise.withResolvers<void>();
 
     this._pendingChildrenUpdates.push({ id, resolve });
@@ -144,10 +174,11 @@ export class GfxViewportElement extends WithDisposable(ShadowlessElement) {
     }
 
     return promise;
-  }
+  };
 
   @property({ attribute: false })
-  accessor getModelsInViewport: undefined | (() => Set<GfxBlockElementModel>);
+  accessor getModelsInViewport: () => Set<GfxBlockElementModel> = () =>
+    new Set();
 
   @property({ attribute: false })
   accessor host: undefined | EditorHost;
@@ -156,5 +187,30 @@ export class GfxViewportElement extends WithDisposable(ShadowlessElement) {
   accessor maxConcurrentRenders: number = 2;
 
   @property({ attribute: false })
+  accessor enableChildrenSchedule: boolean = true;
+
+  @property({ attribute: false })
   accessor viewport!: Viewport;
+
+  setBlocksActive(blockIds: string[]): void {
+    if (!this.host) return;
+
+    blockIds.forEach(id => {
+      const view = this.host?.std.view.getBlock(id);
+      if (view) {
+        setBlockState(view, 'active');
+      }
+    });
+  }
+
+  setBlocksIdle(blockIds: string[]): void {
+    if (!this.host) return;
+
+    blockIds.forEach(id => {
+      const view = this.host?.std.view.getBlock(id);
+      if (view) {
+        setBlockState(view, 'idle');
+      }
+    });
+  }
 }

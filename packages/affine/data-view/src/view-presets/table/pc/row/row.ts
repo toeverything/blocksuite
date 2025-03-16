@@ -1,6 +1,6 @@
 import { popupTargetFromElement } from '@blocksuite/affine-components/context-menu';
 import { ShadowlessElement } from '@blocksuite/block-std';
-import { SignalWatcher, WithDisposable } from '@blocksuite/global/utils';
+import { SignalWatcher, WithDisposable } from '@blocksuite/global/lit';
 import { CenterPeekIcon, MoreHorizontalIcon } from '@blocksuite/icons/lit';
 import { css, nothing } from 'lit';
 import { property } from 'lit/decorators.js';
@@ -9,9 +9,12 @@ import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
 
 import type { DataViewRenderer } from '../../../../core/data-view.js';
+import {
+  TableViewRowSelection,
+  type TableViewSelection,
+} from '../../selection';
 import type { TableSingleView } from '../../table-view-manager.js';
-
-import { TableRowSelection, type TableViewSelection } from '../../types.js';
+import type { TableGroup } from '../group.js';
 import { openDetail, popRowMenu } from '../menu.js';
 
 export class TableRow extends SignalWatcher(WithDisposable(ShadowlessElement)) {
@@ -115,7 +118,7 @@ export class TableRow extends SignalWatcher(WithDisposable(ShadowlessElement)) {
     }
   `;
 
-  private _clickDragHandler = () => {
+  private readonly _clickDragHandler = () => {
     if (this.view.readonly$.value) {
       return;
     }
@@ -134,8 +137,8 @@ export class TableRow extends SignalWatcher(WithDisposable(ShadowlessElement)) {
     const ele = e.target as HTMLElement;
     const cell = ele.closest('affine-database-cell-container');
     const row = { id: this.rowId, groupKey: this.groupKey };
-    if (!TableRowSelection.includes(selection.selection, row)) {
-      selection.selection = TableRowSelection.create({
+    if (!TableViewRowSelection.includes(selection.selection, row)) {
+      selection.selection = TableViewRowSelection.create({
         rows: [row],
       });
     }
@@ -154,7 +157,7 @@ export class TableRow extends SignalWatcher(WithDisposable(ShadowlessElement)) {
   };
 
   get groupKey() {
-    return this.closest('affine-data-view-table-group')?.group?.key;
+    return this.closest<TableGroup>('affine-data-view-table-group')?.group?.key;
   }
 
   get selectionController() {
@@ -202,7 +205,7 @@ export class TableRow extends SignalWatcher(WithDisposable(ShadowlessElement)) {
               return;
             }
             this.setSelection(
-              TableRowSelection.create({
+              TableViewRowSelection.create({
                 rows: [{ id: this.rowId, groupKey: this.groupKey }],
               })
             );
@@ -215,14 +218,14 @@ export class TableRow extends SignalWatcher(WithDisposable(ShadowlessElement)) {
             const ele = e.currentTarget as HTMLElement;
             const selection = this.selectionController.selection;
             if (
-              !TableRowSelection.is(selection) ||
+              !TableViewRowSelection.is(selection) ||
               !selection.rows.some(
                 row => row.id === this.rowId && row.groupKey === this.groupKey
               )
             ) {
               const row = { id: this.rowId, groupKey: this.groupKey };
               this.setSelection(
-                TableRowSelection.create({
+                TableViewRowSelection.create({
                   rows: [row],
                 })
               );

@@ -1,22 +1,20 @@
-import { type Color, ColorScheme } from '@blocksuite/affine-model';
 import {
-  type BlockStdScope,
-  Extension,
-  type ExtensionType,
-  StdIdentifier,
-} from '@blocksuite/block-std';
+  type Color,
+  ColorScheme,
+  DefaultTheme,
+  resolveColor,
+} from '@blocksuite/affine-model';
+import { type BlockStdScope, StdIdentifier } from '@blocksuite/block-std';
 import { type Container, createIdentifier } from '@blocksuite/global/di';
-import { signal, type Signal } from '@preact/signals-core';
+import { Extension, type ExtensionType } from '@blocksuite/store';
+import { type Signal, signal } from '@preact/signals-core';
 import {
   type AffineCssVariables,
   combinedDarkCssVariables,
   combinedLightCssVariables,
 } from '@toeverything/theme';
-import { unsafeCSS } from 'lit';
 
-import { isInsideEdgelessEditor } from '../utils/index.js';
-
-const TRANSPARENT = 'transparent';
+import { isInsideEdgelessEditor } from '../utils/dom';
 
 export const ThemeExtensionIdentifier = createIdentifier<ThemeExtension>(
   'AffineThemeExtension'
@@ -53,21 +51,19 @@ export class ThemeService extends Extension {
   }
 
   get theme() {
-    return isInsideEdgelessEditor(this.std.host)
-      ? this.edgelessTheme
-      : this.appTheme;
+    return this.theme$.peek();
   }
 
   get theme$() {
     return isInsideEdgelessEditor(this.std.host) ? this.edgeless$ : this.app$;
   }
 
-  constructor(private std: BlockStdScope) {
+  constructor(private readonly std: BlockStdScope) {
     super();
     const extension = this.std.getOptional(ThemeExtensionIdentifier);
     this.app$ = extension?.getAppTheme?.() || getThemeObserver().theme$;
     this.edgeless$ =
-      extension?.getEdgelessTheme?.(this.std.doc.id) ||
+      extension?.getEdgelessTheme?.(this.std.store.id) ||
       getThemeObserver().theme$;
   }
 
@@ -95,24 +91,19 @@ export class ThemeService extends Extension {
    */
   generateColorProperty(
     color: Color,
-    fallback = 'transparent',
+    fallback: Color = DefaultTheme.transparent,
     theme = this.theme
   ) {
-    let result: string | undefined = undefined;
+    const result = resolveColor(color, theme, resolveColor(fallback, theme));
 
-    if (typeof color === 'object') {
-      result = color[theme] ?? color.normal;
-    } else {
-      result = color;
-    }
-    if (!result) {
-      result = fallback;
-    }
+    // Compatible old data
     if (result.startsWith('--')) {
-      return result.endsWith(TRANSPARENT) ? TRANSPARENT : `var(${result})`;
+      return result.endsWith('transparent')
+        ? DefaultTheme.transparent
+        : `var(${result})`;
     }
 
-    return result ?? TRANSPARENT;
+    return result;
   }
 
   /**
@@ -133,35 +124,30 @@ export class ThemeService extends Extension {
    */
   getColorValue(
     color: Color,
-    fallback = TRANSPARENT,
+    fallback: Color = DefaultTheme.transparent,
     real = false,
     theme = this.theme
   ) {
-    let result: string | undefined = undefined;
+    let result = resolveColor(color, theme, resolveColor(fallback, theme));
 
-    if (typeof color === 'object') {
-      result = color[theme] ?? color.normal;
-    } else {
-      result = color;
-    }
-    if (!result) {
-      result = fallback;
-    }
+    // Compatible old data
     if (real && result.startsWith('--')) {
-      result = result.endsWith(TRANSPARENT)
-        ? TRANSPARENT
+      result = result.endsWith('transparent')
+        ? DefaultTheme.transparent
         : this.getCssVariableColor(result, theme);
     }
 
-    return result ?? TRANSPARENT;
+    return result ?? DefaultTheme.transparent;
   }
 
   getCssVariableColor(property: string, theme = this.theme) {
+    // Compatible old data
     if (property.startsWith('--')) {
-      if (property.endsWith(TRANSPARENT)) {
-        return TRANSPARENT;
+      if (property.endsWith('transparent')) {
+        return DefaultTheme.transparent;
       }
       const key = property as keyof AffineCssVariables;
+      // V1 theme
       const color =
         theme === ColorScheme.Dark
           ? combinedDarkCssVariables[key]
@@ -173,12 +159,19 @@ export class ThemeService extends Extension {
 }
 
 export class ThemeObserver {
-  private observer: MutationObserver;
+  private readonly observer: MutationObserver;
 
-  theme$ = signal(ColorScheme.Light);
+  theme$: Signal<ColorScheme>;
 
   constructor() {
     const COLOR_SCHEMES: string[] = Object.values(ColorScheme);
+    // Set initial theme according to the data-theme attribute
+    const initialMode = document.documentElement.dataset.theme;
+    this.theme$ = signal(
+      initialMode && COLOR_SCHEMES.includes(initialMode)
+        ? (initialMode as ColorScheme)
+        : ColorScheme.Light
+    );
     this.observer = new MutationObserver(() => {
       const mode = document.documentElement.dataset.theme;
       if (!mode) return;
@@ -206,24 +199,3 @@ export const getThemeObserver = (function () {
     return observer;
   };
 })();
-
-const toolbarColorKeys: Array<keyof AffineCssVariables> = [
-  '--affine-background-overlay-panel-color',
-  '--affine-background-primary-color',
-  '--affine-background-tertiary-color',
-  '--affine-icon-color',
-  '--affine-icon-secondary',
-  '--affine-border-color',
-  '--affine-divider-color',
-  '--affine-text-primary-color',
-  '--affine-hover-color',
-  '--affine-hover-color-filled',
-];
-
-export const lightToolbarStyles = toolbarColorKeys.map(
-  key => `${key}: ${unsafeCSS(combinedLightCssVariables[key])};`
-);
-
-export const darkToolbarStyles = toolbarColorKeys.map(
-  key => `${key}: ${unsafeCSS(combinedDarkCssVariables[key])};`
-);

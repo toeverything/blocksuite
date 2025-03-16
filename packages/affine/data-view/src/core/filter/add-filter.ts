@@ -1,17 +1,15 @@
-import type { Middleware } from '@floating-ui/dom';
-import type { ReadonlySignal } from '@preact/signals-core';
-
 import {
   menu,
   popMenu,
   type PopupTarget,
 } from '@blocksuite/affine-components/context-menu';
 import { AddCursorIcon } from '@blocksuite/icons/lit';
+import type { Middleware } from '@floating-ui/dom';
+import type { ReadonlySignal } from '@preact/signals-core';
 
 import type { Variable } from '../expression/index.js';
-import type { Filter } from './types.js';
-
 import { renderUniLit } from '../utils/index.js';
+import type { Filter } from './types.js';
 import { firstFilterByRef, firstFilterInGroup } from './utils.js';
 
 export const popCreateFilter = (

@@ -1,18 +1,16 @@
 import type { Container } from '@blocksuite/global/di';
-
+import { DisposableGroup } from '@blocksuite/global/disposable';
 import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
-import { DisposableGroup } from '@blocksuite/global/utils';
+import { Extension } from '@blocksuite/store';
 
 import type { EventName, UIEventHandler } from '../event/index.js';
-import type { BlockStdScope } from '../scope/index.js';
-
 import {
   BlockFlavourIdentifier,
   BlockServiceIdentifier,
   StdIdentifier,
 } from '../identifier.js';
+import type { BlockStdScope } from '../scope/index.js';
 import { getSlots } from '../spec/index.js';
-import { Extension } from './extension.js';
 
 /**
  * @deprecated
@@ -32,11 +30,11 @@ export abstract class BlockService extends Extension {
   readonly specSlots = getSlots();
 
   get collection() {
-    return this.std.collection;
+    return this.std.workspace;
   }
 
   get doc() {
-    return this.std.doc;
+    return this.std.store;
   }
 
   get host() {
@@ -111,12 +109,12 @@ export abstract class BlockService extends Extension {
   // life cycle end
 
   mounted() {
-    this.specSlots.mounted.emit({ service: this });
+    this.specSlots.mounted.next({ service: this });
   }
 
   unmounted() {
     this.dispose();
-    this.specSlots.unmounted.emit({ service: this });
+    this.specSlots.unmounted.next({ service: this });
   }
   // event handlers end
 }

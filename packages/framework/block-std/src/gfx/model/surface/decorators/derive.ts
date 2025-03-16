@@ -1,5 +1,4 @@
 import type { GfxPrimitiveElementModel } from '../element-model.js';
-
 import {
   getDecoratorState,
   getObjectPropMeta,
@@ -57,7 +56,7 @@ export function updateDerivedProps(
     const decoratorState = getDecoratorState(receiver.surface);
     decoratorState.deriving = true;
     keys(derivedProps).forEach(key => {
-      // @ts-ignore
+      // @ts-expect-error ignore
       receiver[key] = derivedProps[key];
     });
     decoratorState.deriving = false;
@@ -79,11 +78,7 @@ export function updateDerivedProps(
  * @returns
  */
 export function derive<V, T extends GfxPrimitiveElementModel>(
-  fn: (
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    propValue: any,
-    instance: T
-  ) => Record<string, unknown>
+  fn: (propValue: any, instance: T) => Record<string, unknown>
 ) {
   return function deriveDecorator(
     _: unknown,

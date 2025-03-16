@@ -54,12 +54,15 @@ export class FnTypeInstance<
 
   unify(ctx: TypeVarContext, template: FnTypeInstance, unify: Unify): boolean {
     const newCtx = { ...ctx };
+
+    // eslint-disable-next-line @typescript-eslint/prefer-for-of
     for (let i = 0; i < template.args.length; i++) {
       const arg = template.args[i];
       const realArg = this.args[i];
       if (arg == null) {
         return false;
       }
+      // eslint-disable-next-line sonarjs/no-collapsible-if
       if (realArg != null) {
         if (!unify(newCtx, realArg, arg)) {
           return false;

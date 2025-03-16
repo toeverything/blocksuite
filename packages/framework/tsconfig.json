@@ -1,0 +1,21 @@
+{
+  "extends": "../tsconfig.json",
+  "include": [],
+  "references": [
+    {
+      "path": "./global"
+    },
+    {
+      "path": "./inline"
+    },
+    {
+      "path": "./block-std"
+    },
+    {
+      "path": "./store"
+    },
+    {
+      "path": "./sync"
+    }
+  ]
+}

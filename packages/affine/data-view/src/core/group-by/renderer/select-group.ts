@@ -7,9 +7,8 @@ import { css, html } from 'lit';
 import { classMap } from 'lit/directives/class-map.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type { SelectTag } from '../../logical/index.js';
-
 import { selectOptionColors } from '../../component/tags/colors.js';
+import type { SelectTag } from '../../logical/index.js';
 import { BaseGroup } from './base.js';
 
 export class SelectGroupView extends BaseGroup<
@@ -43,7 +42,7 @@ export class SelectGroupView extends BaseGroup<
     }
   `;
 
-  private _click = (e: MouseEvent) => {
+  private readonly _click = (e: MouseEvent) => {
     if (this.readonly) {
       return;
     }
@@ -79,7 +78,7 @@ export class SelectGroupView extends BaseGroup<
   };
 
   get tag() {
-    return this.data.options.find(v => v.id === this.value);
+    return this.data.options?.find(v => v.id === this.value);
   }
 
   protected override render(): unknown {

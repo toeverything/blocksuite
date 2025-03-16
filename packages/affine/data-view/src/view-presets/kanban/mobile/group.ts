@@ -4,7 +4,7 @@ import {
   popupTargetFromElement,
 } from '@blocksuite/affine-components/context-menu';
 import { ShadowlessElement } from '@blocksuite/block-std';
-import { SignalWatcher, WithDisposable } from '@blocksuite/global/utils';
+import { SignalWatcher, WithDisposable } from '@blocksuite/global/lit';
 import { AddCursorIcon } from '@blocksuite/icons/lit';
 import { css, nothing } from 'lit';
 import { property } from 'lit/decorators.js';
@@ -12,11 +12,10 @@ import { repeat } from 'lit/directives/repeat.js';
 import { html } from 'lit/static-html.js';
 
 import type { DataViewRenderer } from '../../../core/data-view.js';
-import type { GroupData } from '../../../core/group-by/trait.js';
-import type { KanbanSingleView } from '../kanban-view-manager.js';
-
 import { GroupTitle } from '../../../core/group-by/group-title.js';
+import type { GroupData } from '../../../core/group-by/trait.js';
 import { dragHandler } from '../../../core/utils/wc-dnd/dnd-context.js';
+import type { KanbanSingleView } from '../kanban-view-manager.js';
 
 const styles = css`
   mobile-kanban-group {
@@ -61,15 +60,15 @@ export class MobileKanbanGroup extends SignalWatcher(
 ) {
   static override styles = styles;
 
-  private clickAddCard = () => {
+  private readonly clickAddCard = () => {
     this.view.addCard('end', this.group.key);
   };
 
-  private clickAddCardInStart = () => {
+  private readonly clickAddCardInStart = () => {
     this.view.addCard('start', this.group.key);
   };
 
-  private clickGroupOptions = (e: MouseEvent) => {
+  private readonly clickGroupOptions = (e: MouseEvent) => {
     const ele = e.currentTarget as HTMLElement;
     popFilterableSimpleMenu(popupTargetFromElement(ele), [
       menu.group({

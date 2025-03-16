@@ -4,11 +4,10 @@ import { property, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { repeat } from 'lit/directives/repeat.js';
 
+import { type DataViewInstance, renderUniLit } from '../../core/index.js';
 import type { SingleView } from '../../core/view-manager/single-view.js';
 import type { ViewManager } from '../../core/view-manager/view-manager.js';
 import type { DataViewWidget } from '../../core/widget/types.js';
-
-import { type DataViewInstance, renderUniLit } from '../../core/index.js';
 import { WidgetBase } from '../../core/widget/widget-base.js';
 
 const styles = css`

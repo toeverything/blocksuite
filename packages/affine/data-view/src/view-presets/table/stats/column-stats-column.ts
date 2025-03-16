@@ -5,7 +5,7 @@ import {
   popupTargetFromElement,
 } from '@blocksuite/affine-components/context-menu';
 import { ShadowlessElement } from '@blocksuite/block-std';
-import { SignalWatcher, WithDisposable } from '@blocksuite/global/utils';
+import { SignalWatcher, WithDisposable } from '@blocksuite/global/lit';
 import { ArrowDownSmallIcon } from '@blocksuite/icons/lit';
 import { Text } from '@blocksuite/store';
 import { autoPlacement, offset } from '@floating-ui/dom';
@@ -15,11 +15,10 @@ import { property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import type { GroupData } from '../../../core/group-by/trait.js';
-import type { StatisticsConfig } from '../../../core/statistics/types.js';
-import type { TableColumn } from '../table-view-manager.js';
-
 import { typeSystem } from '../../../core/index.js';
 import { statsFunctions } from '../../../core/statistics/index.js';
+import type { StatisticsConfig } from '../../../core/statistics/types.js';
+import type { TableColumn } from '../table-view-manager.js';
 
 const styles = css`
   .stats-cell {
@@ -82,7 +81,7 @@ export class DatabaseColumnStatsCell extends SignalWatcher(
         return this.column.valueGet(id);
       });
     }
-    return this.column.cells$.value.map(cell => cell.value$.value);
+    return this.column.cells$.value.map(cell => cell.jsonValue$.value);
   });
 
   groups$ = computed(() => {
@@ -95,12 +94,15 @@ export class DatabaseColumnStatsCell extends SignalWatcher(
       if (!groups[func.group]) {
         groups[func.group] = {};
       }
-      const oldFunc = groups[func.group][func.type];
+      const oldFunc = groups[func.group]?.[func.type];
       if (!oldFunc || typeSystem.unify(func.dataType, oldFunc.dataType)) {
         if (!func.impl) {
-          delete groups[func.group][func.type];
+          delete groups[func.group]?.[func.type];
         } else {
-          groups[func.group][func.type] = func;
+          const group = groups[func.group];
+          if (group) {
+            group[func.type] = func;
+          }
         }
       }
     });
@@ -209,6 +211,7 @@ export class DatabaseColumnStatsCell extends SignalWatcher(
       this.subscriptionMap.forEach(unsub => {
         unsub();
       });
+      this.subscriptionMap.clear();
     });
   }
 

@@ -1,22 +1,20 @@
-import type { ReadonlySignal } from '@preact/signals-core';
-import type { ClassInfo } from 'lit-html/directives/class-map.js';
-
-import { unsafeCSSVarV2 } from '@blocksuite/affine-shared/theme';
 import { IS_MOBILE } from '@blocksuite/global/env';
 import {
-  CheckBoxCkeckSolidIcon,
+  CheckBoxCheckSolidIcon,
   CheckBoxUnIcon,
   DoneIcon,
 } from '@blocksuite/icons/lit';
-import { css, html, type TemplateResult } from 'lit';
+import type { ReadonlySignal } from '@preact/signals-core';
+import { cssVarV2 } from '@toeverything/theme/v2';
+import { css, html, type TemplateResult, unsafeCSS } from 'lit';
 import { property } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { keyed } from 'lit/directives/keyed.js';
-
-import type { Menu } from './menu.js';
-import type { MenuClass, MenuItemRender } from './types.js';
+import type { ClassInfo } from 'lit-html/directives/class-map.js';
 
 import { MenuFocusable } from './focusable.js';
+import type { Menu } from './menu.js';
+import type { MenuClass, MenuItemRender } from './types.js';
 
 export type MenuButtonData = {
   content: () => TemplateResult;
@@ -52,7 +50,7 @@ export class MenuButton extends MenuFocusable {
     }
 
     .affine-menu-button.focused {
-      outline: 1px solid ${unsafeCSSVarV2('layer/insideBorder/primaryBorder')};
+      outline: 1px solid ${unsafeCSS(cssVarV2.layer.insideBorder.primaryBorder)};
     }
 
     .affine-menu-button.delete-item:hover {
@@ -141,6 +139,7 @@ export class MobileMenuButton extends MenuFocusable {
     this.disposables.addFromEvent(this, 'click', this.onClick);
   }
 
+  // eslint-disable-next-line sonarjs/no-identical-functions
   onClick() {
     if (this.data.select(this) !== false) {
       this.menu.options.onComplete?.();
@@ -229,7 +228,7 @@ export const menuButtonItems = {
       const data: MenuButtonData = {
         content: () => html`
           ${config.checked.value
-            ? CheckBoxCkeckSolidIcon({ style: `color:#1E96EB` })
+            ? CheckBoxCheckSolidIcon({ style: `color:#1E96EB` })
             : CheckBoxUnIcon()}
           <div class="affine-menu-action-text">
             ${config.label?.() ?? config.name}

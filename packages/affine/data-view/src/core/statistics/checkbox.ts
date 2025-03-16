@@ -1,7 +1,6 @@
-import type { StatisticsConfig } from './types.js';
-
 import { t } from '../logical/index.js';
 import { createStatisticConfig } from './create.js';
+import type { StatisticsConfig } from './types.js';
 
 export const checkboxTypeStatsFunctions: StatisticsConfig[] = [
   createStatisticConfig({

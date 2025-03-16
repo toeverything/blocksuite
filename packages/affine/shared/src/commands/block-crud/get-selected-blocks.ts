@@ -3,23 +3,26 @@ import type {
   Command,
   TextSelection,
 } from '@blocksuite/block-std';
-import type { RoleType } from '@blocksuite/store';
-
 import { BlockComponent } from '@blocksuite/block-std';
+import type { RoleType } from '@blocksuite/store';
 
 import type { ImageSelection } from '../../selection/index.js';
 
 export const getSelectedBlocksCommand: Command<
-  'currentTextSelection' | 'currentBlockSelections' | 'currentImageSelections',
-  'selectedBlocks',
   {
+    currentTextSelection?: TextSelection;
+    currentBlockSelections?: BlockSelection[];
+    currentImageSelections?: ImageSelection[];
     textSelection?: TextSelection;
     blockSelections?: BlockSelection[];
     imageSelections?: ImageSelection[];
     filter?: (el: BlockComponent) => boolean;
-    types?: Extract<BlockSuite.SelectionType, 'block' | 'text' | 'image'>[];
+    types?: Array<'image' | 'text' | 'block'>;
     roles?: RoleType[];
     mode?: 'all' | 'flat' | 'highest';
+  },
+  {
+    selectedBlocks: BlockComponent[];
   }
 > = (ctx, next) => {
   const {
@@ -52,7 +55,7 @@ export const getSelectedBlocksCommand: Command<
   const blockSelections = ctx.blockSelections ?? ctx.currentBlockSelections;
   if (types.includes('block') && blockSelections) {
     const viewStore = ctx.std.view;
-    const doc = ctx.std.doc;
+    const doc = ctx.std.store;
     const selectedBlockComponents = blockSelections.flatMap(selection => {
       const el = viewStore.getBlock(selection.blockId);
       if (!el) {
@@ -147,15 +150,3 @@ export const getSelectedBlocksCommand: Command<
     selectedBlocks: result,
   });
 };
-
-declare global {
-  namespace BlockSuite {
-    interface CommandContext {
-      selectedBlocks?: BlockComponent[];
-    }
-
-    interface Commands {
-      getSelectedBlocks: typeof getSelectedBlocksCommand;
-    }
-  }
-}

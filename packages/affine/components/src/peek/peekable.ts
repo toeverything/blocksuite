@@ -1,16 +1,13 @@
+import { isInsideEdgelessEditor } from '@blocksuite/affine-shared/utils';
 import type { Constructor } from '@blocksuite/global/utils';
 import type { LitElement, TemplateResult } from 'lit';
 
-import { isInsideEdgelessEditor } from '@blocksuite/affine-shared/utils';
-
-import type { PeekableClass, PeekableOptions } from './type.js';
-
 import { PeekableController } from './controller.js';
+import type { PeekableClass, PeekableOptions } from './type.js';
 
 const symbol = Symbol('peekable');
 
 export const isPeekable = <Element extends LitElement>(e: Element): boolean => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return Reflect.has(e, symbol) && (e as any)[symbol]?.peekable;
 };
 
@@ -18,7 +15,6 @@ export const peek = <Element extends LitElement>(
   e: Element,
   template?: TemplateResult
 ): void => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   isPeekable(e) && (e as any)[symbol]?.peek(template);
 };
 

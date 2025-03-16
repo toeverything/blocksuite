@@ -2,12 +2,14 @@ import type {
   GfxCommonBlockProps,
   GfxElementGeometry,
 } from '@blocksuite/block-std/gfx';
-
 import { GfxCompatible } from '@blocksuite/block-std/gfx';
-import { BlockModel, defineBlockSchema } from '@blocksuite/store';
+import {
+  BlockModel,
+  BlockSchemaExtension,
+  defineBlockSchema,
+} from '@blocksuite/store';
 
 import type { EmbedCardStyle } from '../../utils/index.js';
-
 import { AttachmentBlockTransformer } from './attachment-transformer.js';
 
 /**
@@ -65,6 +67,7 @@ export const defaultAttachmentProps: AttachmentBlockProps = {
   style: AttachmentBlockStyles[1],
   index: 'a0',
   xywh: '[0,0,0,0]',
+  lockedBySelf: false,
   rotate: 0,
 };
 
@@ -82,21 +85,15 @@ export const AttachmentBlockSchema = defineBlockSchema({
       'affine:list',
     ],
   },
-  transformer: () => new AttachmentBlockTransformer(),
+  transformer: transformerConfigs =>
+    new AttachmentBlockTransformer(transformerConfigs),
   toModel: () => new AttachmentBlockModel(),
 });
+
+export const AttachmentBlockSchemaExtension = BlockSchemaExtension(
+  AttachmentBlockSchema
+);
 
 export class AttachmentBlockModel
   extends GfxCompatible<AttachmentBlockProps>(BlockModel)
   implements GfxElementGeometry {}
-
-declare global {
-  namespace BlockSuite {
-    interface EdgelessBlockModelMap {
-      'affine:attachment': AttachmentBlockModel;
-    }
-    interface BlockModels {
-      'affine:attachment': AttachmentBlockModel;
-    }
-  }
-}

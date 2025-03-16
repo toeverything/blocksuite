@@ -13,9 +13,8 @@ import {
 import { html } from 'lit';
 
 import type { DataViewRenderer } from '../../../core/data-view.js';
-import type { KanbanSingleView } from '../kanban-view-manager.js';
-
 import { groupTraitKey } from '../../../core/group-by/trait.js';
+import type { KanbanSingleView } from '../kanban-view-manager.js';
 
 export const popCardMenu = (
   ele: PopupTarget,

@@ -1,15 +1,11 @@
-import { signal, type Signal } from '@preact/signals-core';
-/* eslint-disable @stylistic/ts/lines-between-class-members */
-/* eslint-disable perfectionist/sort-classes */
+import { DisposableGroup } from '@blocksuite/global/disposable';
+import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
+import { type Signal, signal } from '@preact/signals-core';
+import { nothing, render, type TemplateResult } from 'lit';
+import { Subject } from 'rxjs';
 import type * as Y from 'yjs';
 
-import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
-import { assertExists, DisposableGroup, Slot } from '@blocksuite/global/utils';
-import { nothing, render, type TemplateResult } from 'lit';
-
 import type { VLine } from './components/v-line.js';
-import type { DeltaInsert, InlineRange } from './types.js';
-
 import { INLINE_ROOT_ATTR } from './consts.js';
 import { InlineHookService } from './services/hook.js';
 import {
@@ -20,6 +16,7 @@ import {
 } from './services/index.js';
 import { RenderService } from './services/render.js';
 import { InlineTextService } from './services/text.js';
+import type { DeltaInsert, InlineRange } from './types.js';
 import {
   type BaseTextAttributes,
   nativePointToTextPoint,
@@ -140,11 +137,10 @@ export class InlineEditor<
 
   private _rootElement: InlineRootElement<TextAttributes> | null = null;
   get rootElement() {
-    assertExists(this._rootElement);
     return this._rootElement;
   }
 
-  private _inlineRangeProviderOverride = false;
+  private readonly _inlineRangeProviderOverride: boolean;
   get inlineRangeProviderOverride() {
     return this._inlineRangeProviderOverride;
   }
@@ -165,19 +161,19 @@ export class InlineEditor<
   };
 
   readonly slots = {
-    mounted: new Slot(),
-    unmounted: new Slot(),
-    renderComplete: new Slot(),
-    textChange: new Slot(),
-    inlineRangeSync: new Slot<Range | null>(),
+    mounted: new Subject<void>(),
+    unmounted: new Subject<void>(),
+    renderComplete: new Subject<void>(),
+    textChange: new Subject<void>(),
+    inlineRangeSync: new Subject<Range | null>(),
     /**
      * Corresponding to the `compositionUpdate` and `beforeInput` events, and triggered only when the `inlineRange` is not null.
      */
-    inputting: new Slot(),
+    inputting: new Subject<void>(),
     /**
      * Triggered only when the `inlineRange` is not null.
      */
-    keydown: new Slot<KeyboardEvent>(),
+    keydown: new Subject<KeyboardEvent>(),
   };
 
   readonly vLineRenderer: ((vLine: VLine) => TemplateResult) | null;
@@ -224,6 +220,7 @@ export class InlineEditor<
       inlineRangeProvider,
       vLineRenderer = null,
     } = ops;
+    this._inlineRangeProviderOverride = false;
     this.yText = yText;
     this.isEmbed = isEmbed;
     this.vLineRenderer = vLineRenderer;
@@ -247,8 +244,8 @@ export class InlineEditor<
     this._rootElement.dataset.vRoot = 'true';
     this.setReadonly(isReadonly);
 
-    this.rootElement.replaceChildren();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    this._rootElement.replaceChildren();
+
     delete (this.rootElement as any)['_$litPart$'];
 
     this.eventService.mount();
@@ -256,26 +253,28 @@ export class InlineEditor<
     this.renderService.mount();
 
     this._mounted = true;
-    this.slots.mounted.emit();
+    this.slots.mounted.next();
 
     this.render();
   }
 
   unmount() {
-    if (this.rootElement.isConnected) {
-      render(nothing, this.rootElement);
+    if (this.rootElement) {
+      if (this.rootElement.isConnected) {
+        render(nothing, this.rootElement);
+      }
+      this.rootElement.removeAttribute(INLINE_ROOT_ATTR);
     }
-    this.rootElement.removeAttribute(INLINE_ROOT_ATTR);
     this._rootElement = null;
     this._mounted = false;
     this.disposables.dispose();
-    this.slots.unmounted.emit();
+    this.slots.unmounted.next();
   }
 
   setReadonly(isReadonly: boolean): void {
     const value = isReadonly ? 'false' : 'true';
 
-    if (this.rootElement.contentEditable !== value) {
+    if (this.rootElement && this.rootElement.contentEditable !== value) {
       this.rootElement.contentEditable = value;
     }
 

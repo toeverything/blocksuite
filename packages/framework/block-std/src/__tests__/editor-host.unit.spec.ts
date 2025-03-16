@@ -1,23 +1,30 @@
-import { DocCollection, IdGeneratorType, Schema } from '@blocksuite/store';
+import {
+  createAutoIncrementIdGenerator,
+  TestWorkspace,
+} from '@blocksuite/store/test';
 import { describe, expect, test } from 'vitest';
 
 import { effects } from '../effects.js';
 import { TestEditorContainer } from './test-editor.js';
 import {
   type HeadingBlockModel,
-  HeadingBlockSchema,
-  NoteBlockSchema,
-  RootBlockSchema,
+  HeadingBlockSchemaExtension,
+  NoteBlockSchemaExtension,
+  RootBlockSchemaExtension,
 } from './test-schema.js';
 import { testSpecs } from './test-spec.js';
 
 effects();
 
+const extensions = [
+  RootBlockSchemaExtension,
+  NoteBlockSchemaExtension,
+  HeadingBlockSchemaExtension,
+];
+
 function createTestOptions() {
-  const idGenerator = IdGeneratorType.AutoIncrement;
-  const schema = new Schema();
-  schema.register([RootBlockSchema, NoteBlockSchema, HeadingBlockSchema]);
-  return { id: 'test-collection', idGenerator, schema };
+  const idGenerator = createAutoIncrementIdGenerator();
+  return { id: 'test-collection', idGenerator };
 }
 
 function wait(time: number) {
@@ -26,10 +33,10 @@ function wait(time: number) {
 
 describe('editor host', () => {
   test('editor host should rerender model when view changes', async () => {
-    const collection = new DocCollection(createTestOptions());
+    const collection = new TestWorkspace(createTestOptions());
 
     collection.meta.initialize();
-    const doc = collection.createDoc({ id: 'home' });
+    const doc = collection.createDoc({ id: 'home', extensions });
     doc.load();
     const rootId = doc.addBlock('test:page');
     const noteId = doc.addBlock('test:note', {}, rootId);
@@ -47,7 +54,7 @@ describe('editor host', () => {
 
     expect(headingElm!.tagName).toBe('TEST-H1-BLOCK');
 
-    (headingBlock.model as HeadingBlockModel).type = 'h2';
+    (headingBlock.model as HeadingBlockModel).props.type = 'h2';
     await wait(50);
     headingElm = editorContainer.std.view.getBlock(headingId);
 

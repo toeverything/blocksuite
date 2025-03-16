@@ -1,7 +1,6 @@
 import { BlockModel } from '@blocksuite/store';
 
 import type { EmbedCardStyle } from '../../../utils/index.js';
-
 import { defineEmbedModel } from '../../../utils/index.js';
 
 export type EmbedFigmaBlockUrlData = {
@@ -20,14 +19,3 @@ export type EmbedFigmaBlockProps = {
 export class EmbedFigmaModel extends defineEmbedModel<EmbedFigmaBlockProps>(
   BlockModel
 ) {}
-
-declare global {
-  namespace BlockSuite {
-    interface EdgelessBlockModelMap {
-      'affine:embed-figma': EmbedFigmaModel;
-    }
-    interface BlockModels {
-      'affine:embed-figma': EmbedFigmaModel;
-    }
-  }
-}

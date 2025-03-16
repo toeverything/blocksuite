@@ -1,10 +1,9 @@
+import { createUniComponentFromWebComponent } from '../../core/index.js';
+import { uniMap } from '../../core/utils/uni-component/operation.js';
 import type {
   DataViewWidget,
   DataViewWidgetProps,
 } from '../../core/widget/types.js';
-
-import { createUniComponentFromWebComponent } from '../../core/index.js';
-import { uniMap } from '../../core/utils/uni-component/operation.js';
 import { DataViewHeaderToolsFilter } from './presets/filter/filter.js';
 import { DataViewHeaderToolsSearch } from './presets/search/search.js';
 import { DataViewHeaderToolsSort } from './presets/sort/sort.js';

@@ -2,7 +2,6 @@ import type {
   BaseElementProps,
   PointTestOptions,
 } from '@blocksuite/block-std/gfx';
-
 import {
   convert,
   derive,
@@ -27,9 +26,9 @@ import {
   type SerializedXYWH,
   transformPointsToNewBound,
   Vec,
-} from '@blocksuite/global/utils';
+} from '@blocksuite/global/gfx';
 
-import type { Color } from '../../consts/index.js';
+import { type Color, DefaultTheme } from '../../themes/index';
 
 export type BrushProps = BaseElementProps & {
   /**
@@ -47,7 +46,7 @@ export class BrushElementModel extends GfxPrimitiveElementModel<BrushProps> {
    */
   get commands() {
     if (!this._local.has('commands')) {
-      const stroke = getSolidStrokePoints(this.points, this.lineWidth);
+      const stroke = getSolidStrokePoints(this.points ?? [], this.lineWidth);
       const commands = getSvgPathFromStroke(stroke);
 
       this._local.set('commands', commands);
@@ -62,10 +61,6 @@ export class BrushElementModel extends GfxPrimitiveElementModel<BrushProps> {
 
   override get type() {
     return 'brush';
-  }
-
-  static override propsToY(props: BrushProps) {
-    return props;
   }
 
   override containsBound(bounds: Bound) {
@@ -132,7 +127,7 @@ export class BrushElementModel extends GfxPrimitiveElementModel<BrushProps> {
   }
 
   @field()
-  accessor color: Color = '#000000';
+  accessor color: Color = DefaultTheme.black;
 
   @watch((_, instance) => {
     instance['_local'].delete('commands');
@@ -225,11 +220,3 @@ export class BrushElementModel extends GfxPrimitiveElementModel<BrushProps> {
 }
 
 type Instance = GfxPrimitiveElementModel<BrushProps> & BrushProps;
-
-declare global {
-  namespace BlockSuite {
-    interface SurfaceElementModelMap {
-      brush: BrushElementModel;
-    }
-  }
-}

@@ -14,31 +14,13 @@ import { GroupSetting } from './core/group-by/setting.js';
 import { AffineLitIcon, UniAnyRender, UniLit } from './core/index.js';
 import { AnyRender } from './core/utils/uni-component/render-template.js';
 import { CheckboxCell } from './property-presets/checkbox/cell-renderer.js';
-import {
-  DateCell,
-  DateCellEditing,
-} from './property-presets/date/cell-renderer.js';
-import { TextCell as ImageTextCell } from './property-presets/image/cell-renderer.js';
-import {
-  MultiSelectCell,
-  MultiSelectCellEditing,
-} from './property-presets/multi-select/cell-renderer.js';
-import {
-  NumberCell,
-  NumberCellEditing,
-} from './property-presets/number/cell-renderer.js';
-import {
-  ProgressCell,
-  ProgressCellEditing,
-} from './property-presets/progress/cell-renderer.js';
-import {
-  SelectCell,
-  SelectCellEditing,
-} from './property-presets/select/cell-renderer.js';
-import {
-  TextCell,
-  TextCellEditing,
-} from './property-presets/text/cell-renderer.js';
+import { DateCell } from './property-presets/date/cell-renderer.js';
+import { ImageCell } from './property-presets/image/cell-renderer.js';
+import { MultiSelectCell } from './property-presets/multi-select/cell-renderer.js';
+import { NumberCell } from './property-presets/number/cell-renderer.js';
+import { ProgressCell } from './property-presets/progress/cell-renderer.js';
+import { SelectCell } from './property-presets/select/cell-renderer.js';
+import { TextCell } from './property-presets/text/cell-renderer.js';
 import { DataViewKanban, DataViewTable } from './view-presets/index.js';
 import { MobileKanbanCard } from './view-presets/kanban/mobile/card.js';
 import { MobileKanbanCell } from './view-presets/kanban/mobile/cell.js';
@@ -83,16 +65,8 @@ import { DataViewHeaderViews } from './widget-presets/views-bar/views-view.js';
 
 export function effects() {
   customElements.define('affine-database-progress-cell', ProgressCell);
-  customElements.define(
-    'affine-database-progress-cell-editing',
-    ProgressCellEditing
-  );
   customElements.define('data-view-header-tools', DataViewHeaderTools);
   customElements.define('affine-database-number-cell', NumberCell);
-  customElements.define(
-    'affine-database-number-cell-editing',
-    NumberCellEditing
-  );
   customElements.define(
     'affine-database-cell-container',
     DatabaseCellContainer
@@ -100,26 +74,16 @@ export function effects() {
   customElements.define('mobile-table-cell', MobileTableCell);
   customElements.define('affine-data-view-renderer', DataViewRenderer);
   customElements.define('any-render', AnyRender);
-  customElements.define('affine-database-image-cell', ImageTextCell);
+  customElements.define('affine-database-image-cell', ImageCell);
   customElements.define('affine-database-date-cell', DateCell);
-  customElements.define('affine-database-date-cell-editing', DateCellEditing);
   customElements.define(
     'data-view-properties-setting',
     DataViewPropertiesSettingView
   );
   customElements.define('affine-database-checkbox-cell', CheckboxCell);
   customElements.define('affine-database-text-cell', TextCell);
-  customElements.define('affine-database-text-cell-editing', TextCellEditing);
   customElements.define('affine-database-select-cell', SelectCell);
-  customElements.define(
-    'affine-database-select-cell-editing',
-    SelectCellEditing
-  );
   customElements.define('affine-database-multi-select-cell', MultiSelectCell);
-  customElements.define(
-    'affine-database-multi-select-cell-editing',
-    MultiSelectCellEditing
-  );
   customElements.define('affine-data-view-record-field', RecordField);
   customElements.define('data-view-drag-to-fill', DragToFillElement);
   customElements.define('affine-data-view-table-group', TableGroup);

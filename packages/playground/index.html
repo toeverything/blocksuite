@@ -5,15 +5,11 @@
     <link rel="icon" type="image/svg+xml" href="/logo.svg" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link
       href="https://fonts.googleapis.com/css2?family=Kalam&display=swap"
       rel="stylesheet"
     />
-    <link
-      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono&display=swap"
-      rel="stylesheet"
-    />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>BlockSuite Playground</title>
     <style>
       html,
@@ -34,20 +30,39 @@
         margin-top: 78px;
       }
 
+      :root .tp-dfwv {
+        position: fixed;
+        overflow: scroll;
+
+        top: 0;
+        bottom: 0;
+        right: 0;
+      }
+
       @media print {
         doc-title {
           margin-top: 0px;
         }
       }
+
+      affine-editor-container {
+        display: block;
+        height: 100%;
+      }
+
+      .affine-page-viewport {
+        height: 100%;
+      }
+
+      .playground-page-editor-container {
+        height: 100%;
+      }
     </style>
   </head>
 
   <body>
-    <script type="module" src="./apps/default/main.ts"></script>
-    <div
-      id="app"
-      style="margin: 0; overflow: initial; height: 100%; box-shadow: initial"
-    >
+    <script type="module" src="./apps/starter/main.ts"></script>
+    <div id="app">
       <div id="inspector"></div>
     </div>
   </body>

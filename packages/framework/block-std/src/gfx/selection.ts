@@ -1,17 +1,21 @@
+import { DisposableGroup } from '@blocksuite/global/disposable';
 import {
-  assertType,
-  DisposableGroup,
   getCommonBoundWithRotation,
-  groupBy,
   type IPoint,
-  Slot,
-} from '@blocksuite/global/utils';
+} from '@blocksuite/global/gfx';
+import { assertType } from '@blocksuite/global/utils';
+import groupBy from 'lodash-es/groupBy';
+import { Subject } from 'rxjs';
 
-import type { CursorSelection, SurfaceSelection } from '../selection/index.js';
+import {
+  BlockSelection,
+  CursorSelection,
+  SurfaceSelection,
+  TextSelection,
+} from '../selection/index.js';
 import type { GfxController } from './controller.js';
-import type { GfxModel } from './model/model.js';
-
 import { GfxExtension, GfxExtensionIdentifier } from './extension.js';
+import type { GfxModel } from './model/model.js';
 import { GfxGroupLikeElementModel } from './model/surface/element-model.js';
 
 export interface SurfaceSelectionState {
@@ -57,11 +61,11 @@ export class GfxSelectionManager extends GfxExtension {
   disposable: DisposableGroup = new DisposableGroup();
 
   readonly slots = {
-    updated: new Slot<SurfaceSelection[]>(),
-    remoteUpdated: new Slot(),
+    updated: new Subject<SurfaceSelection[]>(),
+    remoteUpdated: new Subject<void>(),
 
-    cursorUpdated: new Slot<CursorSelection>(),
-    remoteCursorUpdated: new Slot(),
+    cursorUpdated: new Subject<CursorSelection>(),
+    remoteCursorUpdated: new Subject<void>(),
   };
 
   get activeGroup() {
@@ -214,11 +218,11 @@ export class GfxSelectionManager extends GfxExtension {
 
   override mounted() {
     this.disposable.add(
-      this.stdSelection.slots.changed.on(selections => {
+      this.stdSelection.slots.changed.subscribe(selections => {
         const { cursor = [], surface = [] } = groupBy(selections, sel => {
-          if (sel.is('surface')) {
+          if (sel.is(SurfaceSelection)) {
             return 'surface';
-          } else if (sel.is('cursor')) {
+          } else if (sel.is(CursorSelection)) {
             return 'cursor';
           }
 
@@ -230,7 +234,7 @@ export class GfxSelectionManager extends GfxExtension {
 
         if (cursor[0] && !this.cursorSelection?.equals(cursor[0])) {
           this._cursorSelection = cursor[0];
-          this.slots.cursorUpdated.emit(cursor[0]);
+          this.slots.cursorUpdated.next(cursor[0]);
         }
 
         if ((surface.length === 0 && this.empty) || this.equals(surface)) {
@@ -247,12 +251,12 @@ export class GfxSelectionManager extends GfxExtension {
           })
         );
 
-        this.slots.updated.emit(this.surfaceSelections);
+        this.slots.updated.next(this.surfaceSelections);
       })
     );
 
     this.disposable.add(
-      this.stdSelection.slots.remoteChanged.on(states => {
+      this.stdSelection.slots.remoteChanged.subscribe(states => {
         const surfaceMap = new Map<number, SurfaceSelection[]>();
         const cursorMap = new Map<number, CursorSelection>();
         const selectedSet = new Set<string>();
@@ -262,15 +266,15 @@ export class GfxSelectionManager extends GfxExtension {
           let hasBlockSelection = false;
 
           selections.forEach(selection => {
-            if (selection.is('text')) {
+            if (selection.is(TextSelection)) {
               hasTextSelection = true;
             }
 
-            if (selection.is('block')) {
+            if (selection.is(BlockSelection)) {
               hasBlockSelection = true;
             }
 
-            if (selection.is('surface')) {
+            if (selection.is(SurfaceSelection)) {
               const surfaceSelections = surfaceMap.get(id) ?? [];
               surfaceSelections.push(selection);
               surfaceMap.set(id, surfaceSelections);
@@ -278,7 +282,7 @@ export class GfxSelectionManager extends GfxExtension {
               selection.elements.forEach(id => selectedSet.add(id));
             }
 
-            if (selection.is('cursor')) {
+            if (selection.is(CursorSelection)) {
               cursorMap.set(id, selection);
             }
           });
@@ -296,8 +300,8 @@ export class GfxSelectionManager extends GfxExtension {
         this._remoteSurfaceSelectionsMap = surfaceMap;
         this._remoteSelectedSet = selectedSet;
 
-        this.slots.remoteUpdated.emit();
-        this.slots.remoteCursorUpdated.emit();
+        this.slots.remoteUpdated.next();
+        this.slots.remoteCursorUpdated.next();
       })
     );
   }
@@ -312,14 +316,14 @@ export class GfxSelectionManager extends GfxExtension {
     }
 
     const { blocks = [], elements = [] } = groupBy(selection.elements, id => {
-      return this.std.doc.getBlockById(id) ? 'blocks' : 'elements';
+      return this.std.store.getBlockById(id) ? 'blocks' : 'elements';
     });
     let instances: (SurfaceSelection | CursorSelection)[] = [];
 
     if (elements.length > 0 && this.surfaceModel) {
       instances.push(
         this.stdSelection.create(
-          'surface',
+          SurfaceSelection,
           this.surfaceModel.id,
           elements,
           selection.editing ?? false,
@@ -332,7 +336,7 @@ export class GfxSelectionManager extends GfxExtension {
       instances = instances.concat(
         blocks.map(blockId =>
           this.stdSelection.create(
-            'surface',
+            SurfaceSelection,
             blockId,
             [blockId],
             selection.editing ?? false,
@@ -369,7 +373,11 @@ export class GfxSelectionManager extends GfxExtension {
   }
 
   setCursor(cursor: CursorSelection | IPoint) {
-    const instance = this.stdSelection.create('cursor', cursor.x, cursor.y);
+    const instance = this.stdSelection.create(
+      CursorSelection,
+      cursor.x,
+      cursor.y
+    );
 
     this.stdSelection.setGroup('gfx', [...this.surfaceSelections, instance]);
   }

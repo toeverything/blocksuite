@@ -1,10 +1,9 @@
-import type { TypeInstance } from '../../logical/type.js';
-import type { FilterConfig } from './create.js';
-
 import { ct } from '../../logical/composite-type.js';
 import { t } from '../../logical/index.js';
+import type { TypeInstance } from '../../logical/type.js';
 import { typeSystem } from '../../logical/type-system.js';
 import { booleanFilter } from './boolean.js';
+import type { FilterConfig } from './create.js';
 import { dateFilter } from './date.js';
 import { multiTagFilter } from './multi-tag.js';
 import { numberFilter } from './number.js';

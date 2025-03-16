@@ -1,7 +1,7 @@
+import type { Logger } from '@blocksuite/global/utils';
+import isEqual from 'lodash-es/isEqual';
+import { Subject } from 'rxjs';
 import type { Doc } from 'yjs';
-
-import { type Logger, Slot } from '@blocksuite/global/utils';
-import { isEqual } from '@blocksuite/global/utils';
 import {
   applyUpdate,
   encodeStateAsUpdate,
@@ -9,14 +9,13 @@ import {
   mergeUpdates,
 } from 'yjs';
 
-import type { DocSource } from './source.js';
-
 import {
   PriorityAsyncQueue,
   SharedPriorityTarget,
 } from '../utils/async-queue.js';
 import { MANUALLY_STOP, throwIfAborted } from '../utils/throw-if-aborted.js';
 import { DocPeerStep } from './consts.js';
+import type { DocSource } from './source.js';
 
 export interface DocPeerStatus {
   step: DocPeerStep;
@@ -111,7 +110,7 @@ export class SyncPeer {
     this.updateSyncStatus();
   };
 
-  readonly onStatusChange = new Slot<DocPeerStatus>();
+  readonly onStatusChange = new Subject<DocPeerStatus>();
 
   readonly state: {
     connectedDocs: Map<string, Doc>;
@@ -143,7 +142,7 @@ export class SyncPeer {
     if (!isEqual(s, this._status)) {
       this.logger.debug(`doc-peer:${this.name} status change`, s);
       this._status = s;
-      this.onStatusChange.emit(s);
+      this.onStatusChange.next(s);
     }
   }
 
@@ -403,50 +402,50 @@ export class SyncPeer {
   }
 
   async waitForLoaded(abort?: AbortSignal) {
-    if (this.status.step > DocPeerStep.Loaded) {
+    if (this.status.step >= DocPeerStep.LoadingSubDoc) {
       return;
-    } else {
-      return Promise.race([
-        new Promise<void>(resolve => {
-          this.onStatusChange.on(status => {
-            if (status.step > DocPeerStep.Loaded) {
-              resolve();
-            }
-          });
-        }),
-        new Promise((_, reject) => {
-          if (abort?.aborted) {
-            reject(abort?.reason);
-          }
-          abort?.addEventListener('abort', () => {
-            reject(abort.reason);
-          });
-        }),
-      ]);
     }
+    await Promise.race([
+      new Promise<void>(resolve => {
+        this.onStatusChange.subscribe(status => {
+          if (status.step >= DocPeerStep.LoadingSubDoc) {
+            resolve();
+          }
+        });
+      }),
+      new Promise((_, reject) => {
+        if (abort?.aborted) {
+          reject(abort.reason);
+        }
+        abort?.addEventListener('abort', () => {
+          reject(abort.reason);
+        });
+      }),
+    ]);
+    throwIfAborted(abort);
   }
 
   async waitForSynced(abort?: AbortSignal) {
-    if (this.status.step >= DocPeerStep.Synced) {
+    if (this.status.step === DocPeerStep.Synced) {
       return;
-    } else {
-      return Promise.race([
-        new Promise<void>(resolve => {
-          this.onStatusChange.on(status => {
-            if (status.step >= DocPeerStep.Synced) {
-              resolve();
-            }
-          });
-        }),
-        new Promise((_, reject) => {
-          if (abort?.aborted) {
-            reject(abort?.reason);
-          }
-          abort?.addEventListener('abort', () => {
-            reject(abort.reason);
-          });
-        }),
-      ]);
     }
+    await Promise.race([
+      new Promise<void>(resolve => {
+        this.onStatusChange.subscribe(status => {
+          if (status.step === DocPeerStep.Synced) {
+            resolve();
+          }
+        });
+      }),
+      new Promise((_, reject) => {
+        if (abort?.aborted) {
+          reject(abort.reason);
+        }
+        abort?.addEventListener('abort', () => {
+          reject(abort.reason);
+        });
+      }),
+    ]);
+    throwIfAborted(abort);
   }
 }

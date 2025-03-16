@@ -1,15 +1,14 @@
 import type { BlockComponent } from '../../view/index.js';
+import { UIEventState, UIEventStateContext } from '../base.js';
 import type {
   EventHandlerRunner,
   EventName,
   UIEventDispatcher,
 } from '../dispatcher.js';
-
-import { UIEventState, UIEventStateContext } from '../base.js';
 import { EventScopeSourceType, EventSourceState } from '../state/source.js';
 
 export class RangeControl {
-  private _buildScope = (eventName: EventName) => {
+  private readonly _buildScope = (eventName: EventName) => {
     let scope: EventHandlerRunner[] | undefined;
     const selection = document.getSelection();
     if (selection && selection.rangeCount > 0) {
@@ -24,19 +23,19 @@ export class RangeControl {
     return scope;
   };
 
-  private _compositionEnd = (event: Event) => {
+  private readonly _compositionEnd = (event: Event) => {
     const scope = this._buildScope('compositionEnd');
 
     this._dispatcher.run('compositionEnd', this._createContext(event), scope);
   };
 
-  private _compositionStart = (event: Event) => {
+  private readonly _compositionStart = (event: Event) => {
     const scope = this._buildScope('compositionStart');
 
     this._dispatcher.run('compositionStart', this._createContext(event), scope);
   };
 
-  private _compositionUpdate = (event: Event) => {
+  private readonly _compositionUpdate = (event: Event) => {
     const scope = this._buildScope('compositionUpdate');
 
     this._dispatcher.run(
@@ -48,7 +47,7 @@ export class RangeControl {
 
   private _prev: Range | null = null;
 
-  private _selectionChange = (event: Event) => {
+  private readonly _selectionChange = (event: Event) => {
     const selection = document.getSelection();
     if (!selection) return;
 
@@ -60,7 +59,7 @@ export class RangeControl {
     this._dispatcher.run('selectionChange', this._createContext(event), scope);
   };
 
-  constructor(private _dispatcher: UIEventDispatcher) {}
+  constructor(private readonly _dispatcher: UIEventDispatcher) {}
 
   private _buildEventScopeByNativeRange(name: EventName, range: Range) {
     const blockIds = this._findBlockComponentPath(range);
@@ -111,6 +110,7 @@ export class RangeControl {
       if (current === start) {
         startRecorded = true;
       }
+      // eslint-disable-next-line sonarjs/no-collapsible-if
       if (startRecorded) {
         if (
           current.nodeType === Node.TEXT_NODE ||

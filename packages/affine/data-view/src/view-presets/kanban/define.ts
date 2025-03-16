@@ -2,9 +2,8 @@ import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 
 import type { GroupBy, GroupProperty } from '../../core/common/types.js';
 import type { FilterGroup } from '../../core/filter/types.js';
-import type { Sort } from '../../core/sort/types.js';
-
 import { defaultGroupBy, groupByMatcher, t } from '../../core/index.js';
+import type { Sort } from '../../core/sort/types.js';
 import { type BasicViewDataType, viewType } from '../../core/view/data-view.js';
 import { KanbanSingleView } from './kanban-view-manager.js';
 
@@ -54,6 +53,12 @@ export const kanbanViewModel = kanbanViewType.createModel<KanbanViewData>({
       return 1;
     };
     const columnId = allowList.sort((a, b) => getWeight(b) - getWeight(a))[0];
+    if (!columnId) {
+      throw new BlockSuiteError(
+        ErrorCode.DatabaseBlockError,
+        'no groupable column found'
+      );
+    }
     const type = viewManager.dataSource.propertyTypeGet(columnId);
     const meta = type && viewManager.dataSource.propertyMetaGet(type);
     const data = viewManager.dataSource.propertyDataGet(columnId);

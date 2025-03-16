@@ -19,7 +19,7 @@ export function insertPositionToIndex<T>(
 export function insertPositionToIndex<T>(
   position: InsertToPosition,
   arr: T[],
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   key: (value: T) => string = (value: any) => value.id
 ): number {
   if (typeof position === 'object') {

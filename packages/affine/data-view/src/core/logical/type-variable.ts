@@ -29,7 +29,7 @@ export class TypeVarReferenceInstance<Name extends string = string>
   constructor(readonly varName: Name) {}
 
   subst(ctx: TypeVarContext): void | TypeInstance {
-    return ctx[this.varName].type;
+    return ctx[this.varName]?.type;
   }
 
   unify(_ctx: TypeVarContext, _type: TypeInstance, _unify: Unify): boolean {

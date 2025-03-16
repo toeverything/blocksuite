@@ -1,17 +1,12 @@
 import type { ServiceIdentifier } from '@blocksuite/global/di';
-
+import { DisposableGroup } from '@blocksuite/global/disposable';
 import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
-import {
-  DisposableGroup,
-  type IBound,
-  type IPoint,
-  Slot,
-} from '@blocksuite/global/utils';
+import type { IBound, IPoint } from '@blocksuite/global/gfx';
 import { Signal } from '@preact/signals-core';
+import { Subject } from 'rxjs';
 
 import type { PointerEventState } from '../../event/index.js';
 import type { GfxController } from '../controller.js';
-
 import { GfxExtension, GfxExtensionIdentifier } from '../extension.js';
 import {
   type BaseTool,
@@ -85,15 +80,15 @@ export const eventTarget = Symbol('eventTarget');
 export class ToolController extends GfxExtension {
   static override key = 'ToolController';
 
-  private _builtInHookSlot = new Slot<BuiltInSlotContext>();
+  private readonly _builtInHookSlot = new Subject<BuiltInSlotContext>();
 
-  private _disposableGroup = new DisposableGroup();
+  private readonly _disposableGroup = new DisposableGroup();
 
-  private _toolOption$ = new Signal<GfxToolsFullOptionValue>(
+  private readonly _toolOption$ = new Signal<GfxToolsFullOptionValue>(
     {} as GfxToolsFullOptionValue
   );
 
-  private _tools = new Map<string, BaseTool>();
+  private readonly _tools = new Map<string, BaseTool>();
 
   readonly currentToolName$ = new Signal<keyof GfxToolsMap>();
 
@@ -131,7 +126,7 @@ export class ToolController extends GfxExtension {
   });
 
   get currentTool$() {
-    // eslint-disable-next-line @typescript-eslint/no-this-alias
+    // oxlint-disable-next-line typescript/no-this-alias
     const self = this;
 
     return {
@@ -145,7 +140,7 @@ export class ToolController extends GfxExtension {
   }
 
   get currentToolOption$() {
-    // eslint-disable-next-line @typescript-eslint/no-this-alias
+    // oxlint-disable-next-line typescript/no-this-alias
     const self = this;
 
     return {
@@ -390,12 +385,13 @@ export class ToolController extends GfxExtension {
         this.dragging$.value = false;
         const evt = ctx.get('pointerState');
 
-        if (!invokeToolHandler('dragEnd', evt, dragContext?.tool)) {
-          // if the tool dragEnd is prevented by the hook, call the dragEnd method manually
-          // this guarantee the dragStart and dragEnd events are always called together
-          if (dragContext?.tool) {
-            dragContext.tool.dragEnd(evt);
-          }
+        // if the tool dragEnd is prevented by the hook, call the dragEnd method manually
+        // this guarantee the dragStart and dragEnd events are always called together
+        if (
+          !invokeToolHandler('dragEnd', evt, dragContext?.tool) &&
+          dragContext?.tool
+        ) {
+          dragContext.tool.dragEnd(evt);
         }
 
         dragContext = null;
@@ -446,7 +442,7 @@ export class ToolController extends GfxExtension {
       );
     });
 
-    this._builtInHookSlot.on(evt => {
+    this._builtInHookSlot.subscribe(evt => {
       hooks[evt.event]?.forEach(hook => hook(evt));
     });
 
@@ -476,7 +472,7 @@ export class ToolController extends GfxExtension {
     };
 
     this.std.provider.getAll(ToolIdentifier).forEach(tool => {
-      // @ts-ignore
+      // @ts-expect-error ignore
       tool['eventTarget'] = eventTarget;
       this._register(tool);
     });
@@ -504,7 +500,7 @@ export class ToolController extends GfxExtension {
     const beforeUpdateCtx = this._createBuiltInHookCtx('beforeToolUpdate', {
       toolName: toolNameStr,
     });
-    this._builtInHookSlot.emit(beforeUpdateCtx.slotCtx);
+    this._builtInHookSlot.next(beforeUpdateCtx.slotCtx);
 
     if (beforeUpdateCtx.prevented) {
       return;
@@ -533,7 +529,7 @@ export class ToolController extends GfxExtension {
     const afterUpdateCtx = this._createBuiltInHookCtx('toolUpdate', {
       toolName: toolNameStr,
     });
-    this._builtInHookSlot.emit(afterUpdateCtx.slotCtx);
+    this._builtInHookSlot.next(afterUpdateCtx.slotCtx);
   }
 
   override unmounted(): void {
@@ -542,7 +538,7 @@ export class ToolController extends GfxExtension {
       tool.unmounted();
       tool['disposable'].dispose();
     });
-    this._builtInHookSlot.dispose();
+    this._builtInHookSlot.complete();
   }
 }
 

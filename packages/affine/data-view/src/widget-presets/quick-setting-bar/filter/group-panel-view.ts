@@ -6,7 +6,7 @@ import {
   popupTargetFromElement,
 } from '@blocksuite/affine-components/context-menu';
 import { ShadowlessElement } from '@blocksuite/block-std';
-import { SignalWatcher } from '@blocksuite/global/utils';
+import { SignalWatcher } from '@blocksuite/global/lit';
 import {
   ArrowDownSmallIcon,
   ConvertIcon,
@@ -23,7 +23,6 @@ import { repeat } from 'lit/directives/repeat.js';
 
 import type { Variable } from '../../../core/expression/types.js';
 import type { Filter, FilterGroup } from '../../../core/filter/types.js';
-
 import { firstFilter, firstFilterInGroup } from '../../../core/filter/utils.js';
 
 export const popAddNewFilter = (
@@ -185,7 +184,7 @@ export class FilterGroupView extends SignalWatcher(ShadowlessElement) {
     }
   `;
 
-  private _addNew = (e: MouseEvent) => {
+  private readonly _addNew = (e: MouseEvent) => {
     if (this.isMaxDepth) {
       this.onChange({
         ...this.filterGroup.value,
@@ -203,7 +202,7 @@ export class FilterGroupView extends SignalWatcher(ShadowlessElement) {
     });
   };
 
-  private _selectOp = (event: MouseEvent) => {
+  private readonly _selectOp = (event: MouseEvent) => {
     popFilterableSimpleMenu(
       popupTargetFromElement(event.currentTarget as HTMLElement),
       [
@@ -229,7 +228,7 @@ export class FilterGroupView extends SignalWatcher(ShadowlessElement) {
     );
   };
 
-  private _setFilter = (index: number, filter: Filter) => {
+  private readonly _setFilter = (index: number, filter: Filter) => {
     this.onChange({
       ...this.filterGroup.value,
       conditions: this.filterGroup.value.conditions.map((v, i) =>
@@ -238,7 +237,7 @@ export class FilterGroupView extends SignalWatcher(ShadowlessElement) {
     });
   };
 
-  private opMap = {
+  private readonly opMap = {
     and: 'And',
     or: 'Or',
   };
@@ -263,6 +262,9 @@ export class FilterGroupView extends SignalWatcher(ShadowlessElement) {
 
   private _clickConditionOps(target: HTMLElement, i: number) {
     const filter = this.filterGroup.value.conditions[i];
+    if (!filter) {
+      return;
+    }
     popFilterableSimpleMenu(popupTargetFromElement(target), [
       menu.group({
         items: [

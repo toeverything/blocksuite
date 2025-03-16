@@ -1,8 +1,9 @@
+import { DisposableGroup } from '@blocksuite/global/disposable';
 import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
-import { DisposableGroup } from '@blocksuite/global/utils';
 
 import { LifeCycleWatcher } from '../extension/index.js';
 import { KeymapIdentifier } from '../identifier.js';
+import type { BlockStdScope } from '../scope/index.js';
 import { type BlockComponent, EditorHost } from '../view/index.js';
 import {
   type UIEventHandler,
@@ -58,6 +59,8 @@ const eventNames = [
   'nativeDragMove',
   'nativeDragEnd',
   'nativeDrop',
+  'nativeDragOver',
+  'nativeDragLeave',
 
   ...bypassEventNames,
 ] as const;
@@ -80,17 +83,17 @@ export class UIEventDispatcher extends LifeCycleWatcher {
 
   private _active = false;
 
-  private _clipboardControl: ClipboardControl;
+  private readonly _clipboardControl: ClipboardControl;
 
   private _handlersMap = Object.fromEntries(
     eventNames.map((name): [EventName, Array<EventHandlerRunner>] => [name, []])
   ) as Record<EventName, Array<EventHandlerRunner>>;
 
-  private _keyboardControl: KeyboardControl;
+  private readonly _keyboardControl: KeyboardControl;
 
-  private _pointerControl: PointerControl;
+  private readonly _pointerControl: PointerControl;
 
-  private _rangeControl: RangeControl;
+  private readonly _rangeControl: RangeControl;
 
   bindHotkey = (...args: Parameters<KeyboardControl['bindHotkey']>) =>
     this._keyboardControl.bindHotkey(...args);
@@ -109,12 +112,13 @@ export class UIEventDispatcher extends LifeCycleWatcher {
     return this.std.host;
   }
 
-  constructor(std: BlockSuite.Std) {
+  constructor(std: BlockStdScope) {
     super(std);
     this._pointerControl = new PointerControl(this);
     this._keyboardControl = new KeyboardControl(this);
     this._rangeControl = new RangeControl(this);
     this._clipboardControl = new ClipboardControl(this);
+    this.disposables.add(this._pointerControl);
   }
 
   private _bindEvents() {
@@ -174,12 +178,22 @@ export class UIEventDispatcher extends LifeCycleWatcher {
       this._setActive(false);
     });
     this.disposables.addFromEvent(this.host, 'dragover', () => {
+      _dragging = true;
+      this._setActive(true);
+    });
+    this.disposables.addFromEvent(this.host, 'dragenter', () => {
+      _dragging = true;
+      this._setActive(true);
+    });
+    this.disposables.addFromEvent(this.host, 'dragstart', () => {
+      _dragging = true;
       this._setActive(true);
     });
     this.disposables.addFromEvent(this.host, 'dragend', () => {
-      this._setActive(false);
+      _dragging = false;
     });
     this.disposables.addFromEvent(this.host, 'drop', () => {
+      _dragging = false;
       this._setActive(true);
     });
     this.disposables.addFromEvent(this.host, 'pointerenter', () => {
@@ -337,7 +351,7 @@ export class UIEventDispatcher extends LifeCycleWatcher {
       );
 
       const flavourHandlers = blockIds
-        .map(blockId => this.std.doc.getBlock(blockId)?.flavour)
+        .map(blockId => this.std.store.getBlock(blockId)?.flavour)
         .filter((flavour): flavour is string => {
           if (!flavour) return false;
           if (flavourSeen[flavour]) return false;
@@ -351,7 +365,7 @@ export class UIEventDispatcher extends LifeCycleWatcher {
       events.push(...idHandlers, ...flavourHandlers);
       blockIds = blockIds
         .map(blockId => {
-          const parent = this.std.doc.getParent(blockId);
+          const parent = this.std.store.getParent(blockId);
           return parent?.id;
         })
         .filter((id): id is string => !!id);

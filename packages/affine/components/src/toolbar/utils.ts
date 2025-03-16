@@ -1,9 +1,17 @@
+import type { BlockStdScope } from '@blocksuite/block-std';
 import { html, nothing } from 'lit';
 import { ifDefined } from 'lit/directives/if-defined.js';
 import { join } from 'lit/directives/join.js';
 import { repeat } from 'lit/directives/repeat.js';
 
-import type { FatMenuItems, MenuItem, MenuItemGroup } from './types.js';
+import { ToolbarMoreMenuConfigExtension } from './config.js';
+import type { MenuContext } from './menu-context.js';
+import type {
+  FatMenuItems,
+  MenuItem,
+  MenuItemGroup,
+  ToolbarMoreMenuConfig,
+} from './types.js';
 
 export function groupsToActions<T>(
   groups: MenuItemGroup<T>[],
@@ -32,7 +40,7 @@ export function groupsToActions<T>(
           if (generate && typeof generate === 'function') {
             const result = generate(context);
 
-            if (!result) return;
+            if (!result) return null;
 
             return {
               type,
@@ -43,7 +51,7 @@ export function groupsToActions<T>(
             };
           }
 
-          return;
+          return null;
         })
         .filter(item => !!item)
     );
@@ -98,6 +106,15 @@ export function renderGroups<T>(groups: MenuItemGroup<T>[], context: T) {
   return renderActions(groupsToActions(groups, context));
 }
 
-export function renderToolbarSeparator() {
-  return html`<editor-toolbar-separator></editor-toolbar-separator>`;
+export function renderToolbarSeparator(orientation?: 'horizontal') {
+  return html`<editor-toolbar-separator
+    data-orientation=${ifDefined(orientation)}
+  ></editor-toolbar-separator>`;
+}
+
+export function getMoreMenuConfig(std: BlockStdScope): ToolbarMoreMenuConfig {
+  return {
+    configure: <T extends MenuContext>(groups: MenuItemGroup<T>[]) => groups,
+    ...std.getOptional(ToolbarMoreMenuConfigExtension.identifier),
+  };
 }

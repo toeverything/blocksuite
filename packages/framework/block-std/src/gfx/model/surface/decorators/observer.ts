@@ -1,14 +1,12 @@
-import type { Y } from '@blocksuite/store';
+import type * as Y from 'yjs';
 
 import type { GfxPrimitiveElementModel } from '../element-model.js';
-
 import { getObjectPropMeta, setObjectPropMeta } from './common.js';
 
 const observeSymbol = Symbol('observe');
 const observerDisposableSymbol = Symbol('observerDisposable');
 
 type ObserveFn<
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   E extends Y.YEvent<any> = Y.YEvent<any>,
   T extends GfxPrimitiveElementModel = GfxPrimitiveElementModel,
 > = (
@@ -34,7 +32,6 @@ type ObserveFn<
  */
 export function observe<
   V,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   E extends Y.YEvent<any>,
   T extends GfxPrimitiveElementModel,
 >(fn: ObserveFn<E, T>) {
@@ -56,7 +53,6 @@ function getObserveMeta(
   proto: unknown,
   prop: string | symbol
 ): null | ObserveFn {
-  // @ts-ignore
   return getObjectPropMeta(proto, observeSymbol, prop);
 }
 
@@ -66,10 +62,10 @@ export function startObserve(
 ) {
   const proto = Object.getPrototypeOf(receiver);
   const observeFn = getObserveMeta(proto, prop as string)!;
-  // @ts-ignore
+  // @ts-expect-error ignore
   const observerDisposable = receiver[observerDisposableSymbol] ?? {};
 
-  // @ts-ignore
+  // @ts-expect-error ignore
   receiver[observerDisposableSymbol] = observerDisposable;
 
   if (observerDisposable[prop]) {
@@ -88,7 +84,6 @@ export function startObserve(
 
   observeFn(null, receiver, null);
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const fn = (event: Y.YEvent<any>, transaction: Y.Transaction) => {
     observeFn(event, receiver, transaction);
   };
@@ -119,7 +114,7 @@ export function initializeObservers(
   });
 
   receiver['_disposable'].add(() => {
-    // @ts-ignore
+    // @ts-expect-error ignore
     Object.values(receiver[observerDisposableSymbol] ?? {}).forEach(dispose =>
       (dispose as () => void)()
     );

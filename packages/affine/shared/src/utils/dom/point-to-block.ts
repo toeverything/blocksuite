@@ -1,10 +1,11 @@
-import type { Point, Rect } from '@blocksuite/global/utils';
-
+import { NoteBlockModel, RootBlockModel } from '@blocksuite/affine-model';
 import { BLOCK_ID_ATTR, type BlockComponent } from '@blocksuite/block-std';
+import { SurfaceBlockModel } from '@blocksuite/block-std/gfx';
+import { clamp, type Point, type Rect } from '@blocksuite/global/gfx';
+import type { BlockModel } from '@blocksuite/store';
 
 import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '../../consts/index.js';
-import { clamp } from '../math.js';
-import { matchFlavours } from '../model/checker.js';
+import { matchModels } from '../model/checker.js';
 
 const ATTR_SELECTOR = `[${BLOCK_ID_ATTR}]`;
 
@@ -34,11 +35,10 @@ function hasBlockId(element: Element): element is BlockComponent {
  * Returns `true` if element is default/edgeless page or note.
  */
 function isRootOrNoteOrSurface(element: BlockComponent) {
-  return matchFlavours(element.model, [
-    'affine:page',
-    'affine:note',
-    // @ts-ignore TODO: migrate surface model to @blocksuite/affine-model
-    'affine:surface',
+  return matchModels(element.model, [
+    RootBlockModel,
+    NoteBlockModel,
+    SurfaceBlockModel,
   ]);
 }
 
@@ -147,8 +147,8 @@ export function getClosestBlockComponentByPoint(
         }
       }
     } else {
-      // Indented paragraphs or list
       bounds = getRectByBlockComponent(element);
+      // Indented paragraphs or list
       childBounds = element
         .querySelector('.affine-block-children-container')
         ?.firstElementChild?.getBoundingClientRect();
@@ -264,8 +264,8 @@ export function getClosestBlockComponentByElement(
  * https://github.com/toeverything/blocksuite/pull/1121
  */
 export function getRectByBlockComponent(element: Element | BlockComponent) {
-  if (isDatabase(element)) return element.getBoundingClientRect();
-  return (element.firstElementChild ?? element).getBoundingClientRect();
+  if (!isDatabase(element)) element = element.firstElementChild ?? element;
+  return element.getBoundingClientRect();
 }
 
 /**
@@ -273,18 +273,32 @@ export function getRectByBlockComponent(element: Element | BlockComponent) {
  * Only keep block elements of same level.
  */
 export function getBlockComponentsExcludeSubtrees(
-  elements: Element[] | BlockComponent[]
+  elements: BlockComponent[]
 ): BlockComponent[] {
   if (elements.length <= 1) return elements as BlockComponent[];
-  let parent = elements[0];
-  return elements.filter((node, index) => {
-    if (index === 0) return true;
-    if (contains(parent, node)) {
-      return false;
-    } else {
-      parent = node;
-      return true;
+
+  const getLevel = (element: BlockComponent) => {
+    let level = 0;
+    let model: BlockModel | null = element.model;
+
+    while (model && model.role !== 'root') {
+      level++;
+      model = model.parent;
     }
+
+    return level;
+  };
+
+  let topMostLevel = Number.POSITIVE_INFINITY;
+  const levels = elements.map(element => {
+    const level = getLevel(element);
+
+    topMostLevel = Math.min(topMostLevel, level);
+    return level;
+  });
+
+  return elements.filter((_, index) => {
+    return levels[index] === topMostLevel;
   }) as BlockComponent[];
 }
 
@@ -304,9 +318,8 @@ function findBlockComponent(elements: Element[], parent?: Element) {
     if (hasBlockId(element) && isBlock(element)) return element;
     if (isImage(element)) {
       const element = elements[i];
-      if (i < len && hasBlockId(element) && isBlock(element)) {
-        return elements[i];
-      }
+      if (!element) return null;
+      if (hasBlockId(element) && isBlock(element)) return element;
       return getClosestBlockComponentByElement(element);
     }
   }

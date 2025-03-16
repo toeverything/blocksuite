@@ -1,11 +1,11 @@
-import { MarkdownTransformer } from '@blocksuite/blocks';
-import { type DocCollection, Text } from '@blocksuite/store';
+import { MarkdownTransformer } from '@blocksuite/affine/blocks/root';
+import { Text, type Workspace } from '@blocksuite/affine/store';
 
 import type { InitFn } from './utils.js';
 
 const presetMarkdown = `Click the 🔁 button to switch between editors dynamically - they are fully compatible!`;
 
-export const preset: InitFn = async (collection: DocCollection, id: string) => {
+export const preset: InitFn = async (collection: Workspace, id: string) => {
   const doc = collection.createDoc({ id });
   doc.load();
   // Add root block and surface block at root level

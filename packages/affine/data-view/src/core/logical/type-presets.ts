@@ -1,10 +1,9 @@
 import * as zod from 'zod';
 import Zod from 'zod';
 
-import type { TypeConvertConfig, TypeInstance, ValueTypeOf } from './type.js';
-
 import { ct } from './composite-type.js';
 import { defineDataType } from './data-type.js';
+import type { TypeConvertConfig, TypeInstance, ValueTypeOf } from './type.js';
 import { tv } from './type-variable.js';
 
 export type SelectTag = Zod.TypeOf<typeof SelectTagSchema>;
@@ -12,7 +11,6 @@ export const SelectTagSchema = Zod.object({
   id: Zod.string(),
   color: Zod.string(),
   value: Zod.string(),
-  parentId: Zod.string().optional(),
 });
 export const unknown = defineDataType('Unknown', zod.never(), zod.unknown());
 export const dt = {

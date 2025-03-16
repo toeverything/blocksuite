@@ -1,11 +1,10 @@
 import type {
   BaseElementProps,
   GfxModel,
+  GfxPrimitiveElementModel,
   PointTestOptions,
   SerializedElement,
 } from '@blocksuite/block-std/gfx';
-import type { Bound, SerializedXYWH, XYWH } from '@blocksuite/global/utils';
-
 import {
   convert,
   field,
@@ -13,23 +12,21 @@ import {
   observe,
   watch,
 } from '@blocksuite/block-std/gfx';
-import {
-  assertType,
-  deserializeXYWH,
-  keys,
-  last,
-  noop,
-  pick,
-} from '@blocksuite/global/utils';
-import { DocCollection, type Y } from '@blocksuite/store';
+import type { Bound, SerializedXYWH, XYWH } from '@blocksuite/global/gfx';
+import { deserializeXYWH } from '@blocksuite/global/gfx';
+import { assertType, noop } from '@blocksuite/global/utils';
 import { generateKeyBetween } from 'fractional-indexing';
+import last from 'lodash-es/last';
+import pick from 'lodash-es/pick';
+import * as Y from 'yjs';
 import { z } from 'zod';
 
-import type { ConnectorStyle, MindmapStyleGetter } from './style.js';
-
+import { ConnectorMode } from '../../consts/connector.js';
 import { LayoutType, MindmapStyle } from '../../consts/mindmap.js';
 import { LocalConnectorElementModel } from '../connector/local-connector.js';
+import type { MindmapStyleGetter } from './style.js';
 import { mindmapStyleGetters } from './style.js';
+import { findInfiniteLoop } from './utils.js';
 
 export type NodeDetail = {
   /**
@@ -37,25 +34,25 @@ export type NodeDetail = {
    */
   index: string;
   parent?: string;
+  collapsed?: boolean;
 };
 
 export type MindmapNode = {
   id: string;
   detail: NodeDetail;
 
-  element: BlockSuite.SurfaceElementModel;
+  element: GfxPrimitiveElementModel;
   children: MindmapNode[];
 
-  /**
-   * When dragging another node into this area, it will become a sibling of the target node.
-   * However, if it is dragged into the small area located right after the target node, it will become a child node of the target node.
-   */
-  responseArea?: Bound;
+  parent: MindmapNode | null;
 
   /**
-   * The bound of the entire subtree
+   * This area is used to determine where to place the dragged node.
+   *
+   * When dragging another node into this area, it will become a sibling of the this node.
+   * But if it is dragged into the small area located right after the this node, it will become a child of the this node.
    */
-  treeBound?: Bound;
+  responseArea?: Bound;
 
   /**
    * This property override the preferredDir or default layout direction.
@@ -143,19 +140,19 @@ function watchStyle(_: unknown, instance: MindmapElementModel, local: boolean) {
 }
 
 export class MindmapElementModel extends GfxGroupLikeElementModel<MindmapElementProps> {
+  private _layout: MindmapElementModel['layout'] | null = null;
+
   private _nodeMap = new Map<string, MindmapNode>();
 
   private _queueBuildTree = false;
 
-  private _queued = false;
+  private _queuedLayout = false;
 
-  private _stashedNode = new Set<string>();
+  private readonly _stashedNode = new Set<string>();
 
   private _tree!: MindmapRoot;
 
   connectors = new Map<string, LocalConnectorElementModel>();
-
-  extraConnectors = new Map<string, LocalConnectorElementModel>();
 
   get nodeMap() {
     return this._nodeMap;
@@ -179,19 +176,19 @@ export class MindmapElementModel extends GfxGroupLikeElementModel<MindmapElement
     return 'mindmap';
   }
 
-  static override propsToY(props: Record<string, unknown>) {
+  static propsToY(props: Record<string, unknown>) {
     if (
       props.children &&
       !isNodeType(props.children as Record<string, unknown>) &&
-      !(props.children instanceof DocCollection.Y.Map)
+      !(props.children instanceof Y.Map)
     ) {
-      const children: Y.Map<NodeDetail> = new DocCollection.Y.Map();
+      const children: Y.Map<NodeDetail> = new Y.Map();
 
-      keys(props.children).forEach(key => {
-        const detail = pick<Record<string, unknown>, keyof NodeDetail>(
-          props.children![key],
-          ['index', 'parent']
-        );
+      Object.entries(props.children).forEach(([key, value]) => {
+        const detail = pick<Record<string, unknown>, keyof NodeDetail>(value, [
+          'index',
+          'parent',
+        ]);
         children.set(key as string, detail as NodeDetail);
       });
 
@@ -215,26 +212,42 @@ export class MindmapElementModel extends GfxGroupLikeElementModel<MindmapElement
   }
 
   private _isConnectorOutdated(
-    options: {
-      connector: LocalConnectorElementModel;
-      from: MindmapNode;
-      to: MindmapNode;
-      layout: LayoutType;
-    },
+    options:
+      | {
+          connector: LocalConnectorElementModel;
+          from: MindmapNode;
+          to: MindmapNode;
+          layout: LayoutType;
+        }
+      | {
+          connector: LocalConnectorElementModel;
+          from: MindmapNode;
+          layout: LayoutType;
+          collapsed: boolean;
+        },
     updateKey: boolean = true
   ) {
-    const { connector, from, to, layout } = options;
-    const cacheKey = `${from.element.xywh}-${to.element.xywh}-${layout}-${this.style}`;
+    const hasFromTo = 'to' in options;
+    const { connector, from, layout } = options;
 
-    // @ts-ignore
-    if (connector['MINDMAP_CONNECTOR'] === cacheKey) {
-      return { outdated: false, cacheKey };
-    } else if (updateKey) {
-      // @ts-ignore
-      connector['MINDMAP_CONNECTOR'] = cacheKey;
+    if (!from?.element) {
+      return { outdated: true, cacheKey: '' };
+    }
+    if (hasFromTo && !options.to?.element) {
+      return { outdated: true, cacheKey: '' };
     }
 
-    return { outdated: true, cacheKey };
+    const cacheKey = !hasFromTo
+      ? `${from.element.xywh}-collapsed-${layout}-${this.style}`
+      : `${from.element.xywh}-${options.to.element.xywh}-${layout}-${this.style}`;
+
+    if (connector.cache.get('MINDMAP_CONNECTOR') === cacheKey) {
+      return false;
+    } else if (updateKey) {
+      connector.cache.set('MINDMAP_CONNECTOR', cacheKey);
+    }
+
+    return true;
   }
 
   protected override _getXYWH(): Bound {
@@ -247,63 +260,6 @@ export class MindmapElementModel extends GfxGroupLikeElementModel<MindmapElement
    */
   addChild(_element: GfxModel) {
     noop();
-  }
-
-  protected addConnector(
-    from: MindmapNode,
-    to: MindmapNode,
-    layout: LayoutType,
-    connectorStyle: ConnectorStyle,
-    extra: boolean = false
-  ) {
-    const id = `#${from.id}-${to.id}`;
-
-    if (extra) {
-      this.extraConnectors.set(id, new LocalConnectorElementModel());
-    } else if (this.connectors.has(id)) {
-      const connector = this.connectors.get(id)!;
-      const { outdated } = this._isConnectorOutdated({
-        connector,
-        from,
-        to,
-        layout,
-      });
-
-      if (!outdated) {
-        return connector;
-      }
-    } else {
-      const connector = new LocalConnectorElementModel();
-      // update cache key
-      this._isConnectorOutdated({
-        connector,
-        from,
-        to,
-        layout,
-      });
-      this.connectors.set(id, connector);
-    }
-
-    const connector = extra
-      ? this.extraConnectors.get(id)!
-      : this.connectors.get(id)!;
-
-    connector.id = id;
-    connector.source = {
-      id: from.id,
-      position: layout === LayoutType.RIGHT ? [1, 0.5] : [0, 0.5],
-    };
-    connector.target = {
-      id: to.id,
-      position: layout === LayoutType.RIGHT ? [0, 0.5] : [1, 0.5],
-    };
-
-    Object.entries(connectorStyle).forEach(([key, value]) => {
-      // @ts-ignore
-      connector[key as unknown] = value;
-    });
-
-    return connector;
   }
 
   addNode(
@@ -325,9 +281,7 @@ export class MindmapElementModel extends GfxGroupLikeElementModel<MindmapElement
       throw new Error(`Parent node ${parent} not found`);
     }
 
-    props['text'] = new DocCollection.Y.Text(
-      (props['text'] as string) ?? 'New node'
-    );
+    props['text'] = new Y.Text((props['text'] as string) ?? 'New node');
 
     const type = (props.type as string) ?? 'shape';
     let id: string;
@@ -414,7 +368,7 @@ export class MindmapElementModel extends GfxGroupLikeElementModel<MindmapElement
     // The element may be removed
     if (!nodesMap || nodesMap.size === 0) {
       this._nodeMap = mindmapNodeMap;
-      // @ts-ignore
+      // @ts-expect-error FIXME: ts error
       this._tree = null;
       return;
     }
@@ -422,39 +376,43 @@ export class MindmapElementModel extends GfxGroupLikeElementModel<MindmapElement
     let rootNode: MindmapRoot | undefined;
 
     nodesMap.forEach((val, id) => {
-      const node = mindmapNodeMap.has(id)
-        ? mindmapNodeMap.get(id)!
-        : ({
-            id,
-            parent: val.parent,
-            index: val.index,
-            detail: val,
-            element: this.surface.getElementById(id)!,
-            children: [],
-          } as MindmapNode);
-
-      if (!node.detail) {
-        node.detail = val;
+      if (!mindmapNodeMap.has(id)) {
+        mindmapNodeMap.set(id, {
+          id,
+          index: val.index,
+          detail: val,
+          element: this.surface.getElementById(id)!,
+          children: [],
+          parent: null,
+        } as MindmapNode);
       }
 
-      if (!mindmapNodeMap.has(id)) {
-        mindmapNodeMap.set(id, node);
+      const node = mindmapNodeMap.get(id)!;
+
+      // some node may be already created during
+      // iterating its children
+      if (!node.detail) {
+        node.detail = val;
       }
 
       if (!val.parent) {
         rootNode = node as MindmapRoot;
         rootNode.left = [];
         rootNode.right = [];
-      } else if (mindmapNodeMap.has(val.parent)) {
-        const parentNode = mindmapNodeMap.get(val.parent)!;
-        parentNode.children = parentNode.children ?? [];
-        parentNode.children.push(node);
       } else {
-        mindmapNodeMap.set(val.parent, {
-          id: val.parent,
-          children: [node],
-          element: this.surface.getElementById(val.parent)!,
-        } as MindmapNode);
+        if (!mindmapNodeMap.has(val.parent)) {
+          mindmapNodeMap.set(val.parent, {
+            id: val.parent,
+            detail: nodesMap.get(val.parent)!,
+            parent: null,
+            children: [],
+            element: this.surface.getElementById(val.parent)!,
+          } as MindmapNode);
+        }
+
+        const parent = mindmapNodeMap.get(val.parent)!;
+        parent.children.push(node);
+        node.parent = parent;
       }
     });
 
@@ -469,6 +427,29 @@ export class MindmapElementModel extends GfxGroupLikeElementModel<MindmapElement
     });
 
     if (!rootNode) {
+      return;
+    }
+
+    const loops = findInfiniteLoop(rootNode, mindmapNodeMap);
+
+    if (loops.length) {
+      this.surface.doc.withoutTransact(() => {
+        loops.forEach(loop => {
+          if (loop.detached) {
+            loop.chain.forEach(node => {
+              this.children.delete(node.id);
+            });
+          } else {
+            const child = last(loop.chain);
+
+            if (child) {
+              this.children.set(child.id, {
+                index: child.detail.index,
+              });
+            }
+          }
+        });
+      });
       return;
     }
 
@@ -502,17 +483,105 @@ export class MindmapElementModel extends GfxGroupLikeElementModel<MindmapElement
     return node.children;
   }
 
-  getConnector(from: MindmapNode, to: MindmapNode) {
-    if (!this._nodeMap.has(from.id) || !this._nodeMap.has(to.id)) {
+  /**
+   * Get all the connectors start from the given node
+   * @param node
+   * @returns
+   */
+  getConnectors(node: MindmapNode) {
+    if (!this._nodeMap.has(node.id)) {
       return null;
     }
 
-    return this.addConnector(
-      from,
-      to,
-      this.getLayoutDir(to)!,
-      this.styleGetter.getNodeStyle(to, this.getPath(to)).connector
-    );
+    if (node.detail.collapsed) {
+      const id = `#${node.id}-collapsed`;
+      const layout = this.getLayoutDir(node)!;
+      const connector =
+        this.connectors.get(id) ?? new LocalConnectorElementModel(this.surface);
+      const connectorExist = this.connectors.has(id);
+      const connectorStyle = this.styleGetter.getNodeStyle(
+        node,
+        this.getPath(node).concat([0])
+      ).connector;
+      const outdated = this._isConnectorOutdated({
+        connector,
+        from: node,
+        collapsed: true,
+        layout,
+      });
+
+      if (!connectorExist) {
+        connector.id = id;
+        this.connectors.set(id, connector);
+      }
+
+      if (outdated) {
+        const nodeBound = node.element.elementBound;
+        connector.id = id;
+        connector.source = {
+          id: node.id,
+          position: layout === LayoutType.LEFT ? [0, 0.5] : [1, 0.5],
+        };
+        connector.target = {
+          position:
+            layout === LayoutType.LEFT
+              ? [nodeBound.x - 6, nodeBound.y + nodeBound.h / 2]
+              : [nodeBound.x + nodeBound.w + 6, nodeBound.y + nodeBound.h / 2],
+        };
+
+        Object.entries(connectorStyle).forEach(([key, value]) => {
+          // @ts-expect-error FIXME: ts error
+          connector[key as unknown] = value;
+        });
+
+        connector.mode = ConnectorMode.Straight;
+      }
+
+      return [{ outdated, connector }];
+    } else {
+      const from = node;
+      return from.children.map(to => {
+        const layout = this.getLayoutDir(to)!;
+        const id = `#${from.id}-${to.id}`;
+        const connectorExist = this.connectors.has(id);
+        const connectorStyle = this.styleGetter.getNodeStyle(
+          to,
+          this.getPath(to)
+        ).connector;
+        const connector =
+          this.connectors.get(id) ??
+          new LocalConnectorElementModel(this.surface);
+        const outdated = this._isConnectorOutdated({
+          connector,
+          from,
+          to,
+          layout,
+        });
+
+        if (!connectorExist) {
+          connector.id = id;
+          this.connectors.set(id, connector);
+        }
+
+        if (outdated) {
+          connector.source = {
+            id: from.id,
+            position: layout === LayoutType.RIGHT ? [1, 0.5] : [0, 0.5],
+          };
+          connector.target = {
+            id: to.id,
+            position: layout === LayoutType.RIGHT ? [0, 0.5] : [1, 0.5],
+          };
+
+          Object.entries(connectorStyle).forEach(([key, value]) => {
+            // @ts-expect-error FIXME: ts error
+            connector[key as unknown] = value;
+          });
+        }
+
+        return { outdated, connector };
+      });
+    }
   }
 
   getLayoutDir(node: string | MindmapNode): LayoutType {
@@ -551,6 +620,15 @@ export class MindmapElementModel extends GfxGroupLikeElementModel<MindmapElement
 
   getNode(id: string) {
     return this._nodeMap.get(id) ?? null;
+  }
+
+  getNodeByPath(path: number[]): MindmapNode | null {
+    let node: MindmapNode | null = this._tree;
+    for (let i = 1; i < path.length; i++) {
+      node = node?.children[path[i]];
+      if (!node) return null;
+    }
+    return node;
   }
 
   getParentNode(id: string) {
@@ -653,7 +731,11 @@ export class MindmapElementModel extends GfxGroupLikeElementModel<MindmapElement
       stashed: true,
     }
   ) {
-    // should be override by subclass
+    // should be implemented by the view
+    // otherwise, it would be just an empty function
+    if (this._layout) {
+      this._layout(_tree, _options);
+    }
   }
 
   moveTo(targetXYWH: SerializedXYWH | XYWH) {
@@ -674,7 +756,7 @@ export class MindmapElementModel extends GfxGroupLikeElementModel<MindmapElement
   }
 
   override onCreated(): void {
-    this.requestBuildTree();
+    this.buildTree();
   }
 
   removeChild(element: GfxModel) {
@@ -720,12 +802,12 @@ export class MindmapElementModel extends GfxGroupLikeElementModel<MindmapElement
   }
 
   requestLayout() {
-    if (!this._queued) {
-      this._queued = true;
+    if (!this._queuedLayout) {
+      this._queuedLayout = true;
 
       queueMicrotask(() => {
         this.layout();
-        this._queued = false;
+        this._queuedLayout = false;
       });
     }
   }
@@ -733,6 +815,10 @@ export class MindmapElementModel extends GfxGroupLikeElementModel<MindmapElement
   override serialize() {
     const result = super.serialize();
     return result as SerializedMindmapElement;
+  }
+
+  setLayoutMethod(layoutMethod: MindmapElementModel['layout']) {
+    this._layout = layoutMethod;
   }
 
   /**
@@ -747,7 +833,7 @@ export class MindmapElementModel extends GfxGroupLikeElementModel<MindmapElement
       return;
     }
 
-    const stashed = new Set<BlockSuite.SurfaceElementModel>();
+    const stashed = new Set<GfxPrimitiveElementModel>();
     const traverse = (node: MindmapNode) => {
       node.element.stash('xywh');
       stashed.add(node.element);
@@ -767,27 +853,73 @@ export class MindmapElementModel extends GfxGroupLikeElementModel<MindmapElement
     };
   }
 
-  traverse(callback: (node: MindmapNode, parent: MindmapNode | null) => void) {
+  toggleCollapse(node: MindmapNode, options: { layout?: boolean } = {}) {
+    if (!this._nodeMap.has(node.id)) {
+      return;
+    }
+
+    const { layout = false } = options;
+
+    if (node && node.children.length > 0) {
+      const collapsed = node.detail.collapsed ? false : true;
+      const isExpand = !collapsed;
+
+      const changeNodesVisibility = (node: MindmapNode) => {
+        node.element.hidden = collapsed;
+
+        if (isExpand && node.detail.collapsed) {
+          return;
+        }
+
+        node.children.forEach(child => {
+          changeNodesVisibility(child);
+        });
+      };
+
+      node.children.forEach(changeNodesVisibility);
+      this.surface.doc.transact(() => {
+        this.children.set(node.id, {
+          ...node.detail,
+          collapsed,
+        });
+      });
+    }
+
+    if (layout) {
+      this.requestLayout();
+    }
+  }
+
+  traverse(
+    callback: (node: MindmapNode, parent: MindmapNode | null) => void,
+    root: MindmapNode = this._tree,
+    options: { stopOnCollapse?: boolean } = {}
+  ) {
+    const { stopOnCollapse = false } = options;
     const traverse = (node: MindmapNode, parent: MindmapNode | null) => {
       callback(node, parent);
+
+      if (stopOnCollapse && node.detail.collapsed) {
+        return;
+      }
 
       node?.children.forEach(child => {
         traverse(child, node);
       });
     };
 
-    if (this._tree) {
-      traverse(this._tree, null);
+    if (root) {
+      traverse(root, null);
     }
   }
 
   @convert((initialValue, instance) => {
-    if (!(initialValue instanceof DocCollection.Y.Map)) {
+    if (!(initialValue instanceof Y.Map)) {
       nodeSchema.parse(initialValue);
 
       assertType<NodeType>(initialValue);
 
-      const map: Y.Map<NodeDetail> = new DocCollection.Y.Map();
+      const map: Y.Map<NodeDetail> = new Y.Map();
       const surface = instance.surface;
       const doc = surface.doc;
       const recursive = (
@@ -830,7 +962,7 @@ export class MindmapElementModel extends GfxGroupLikeElementModel<MindmapElement
   // since this model package is imported by playwright
   @observe(observeChildren)
   @field()
-  accessor children: Y.Map<NodeDetail> = new DocCollection.Y.Map();
+  accessor children: Y.Map<NodeDetail> = new Y.Map();
 
   @watch(watchLayoutType)
   @field()
@@ -839,12 +971,4 @@ export class MindmapElementModel extends GfxGroupLikeElementModel<MindmapElement
   @watch(watchStyle)
   @field()
   accessor style: MindmapStyle = MindmapStyle.ONE;
-}
-
-declare global {
-  namespace BlockSuite {
-    interface SurfaceGroupLikeModelMap {
-      mindmap: MindmapElementModel;
-    }
-  }
 }

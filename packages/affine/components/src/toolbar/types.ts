@@ -1,5 +1,7 @@
 import type { nothing, TemplateResult } from 'lit';
 
+import type { MenuContext } from './menu-context.js';
+
 export type MenuItemPart = {
   action: () => void;
   disabled?: boolean;
@@ -29,3 +31,9 @@ export type MenuItemGroup<T> = {
 
 // Group Actions
 export type FatMenuItems = (MenuItem | typeof nothing)[][];
+
+export interface ToolbarMoreMenuConfig {
+  configure: <T extends MenuContext>(
+    groups: MenuItemGroup<T>[]
+  ) => MenuItemGroup<T>[];
+}

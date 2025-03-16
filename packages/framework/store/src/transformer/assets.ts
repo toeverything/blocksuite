@@ -1,11 +1,6 @@
 import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 
-interface BlobCRUD {
-  get: (key: string) => Promise<Blob | null> | Blob | null;
-  set: (key: string, value: Blob) => Promise<string> | string;
-  delete: (key: string) => Promise<void> | void;
-  list: () => Promise<string[]> | string[];
-}
+import type { BlobCRUD } from './type';
 
 type AssetsManagerConfig = {
   blob: BlobCRUD;
@@ -92,11 +87,6 @@ export class AssetsManager {
         ErrorCode.TransformerError,
         `Blob ${blobId} not found in assets manager`
       );
-    }
-
-    const exists = (await this._blob.get(blobId)) !== null;
-    if (exists) {
-      return;
     }
 
     await this._blob.set(blobId, blob);

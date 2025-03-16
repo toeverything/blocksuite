@@ -1,4 +1,5 @@
-import { WithDisposable } from '@blocksuite/global/utils';
+import { clamp } from '@blocksuite/global/gfx';
+import { WithDisposable } from '@blocksuite/global/lit';
 import { isSameDay, isSameMonth, isToday } from 'date-fns';
 import {
   html,
@@ -13,7 +14,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 
 import { arrowLeftIcon } from './icons.js';
 import { datePickerStyle } from './style.js';
-import { clamp, getMonthMatrix, toDate } from './utils.js';
+import { getMonthMatrix, toDate } from './utils.js';
 
 const days = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
 const months = [
@@ -54,9 +55,9 @@ export class DatePicker extends WithDisposable(LitElement) {
   /** current active month */
   private _cursor = new Date();
 
-  private _maxYear = 2099;
+  private readonly _maxYear = 2099;
 
-  private _minYear = 1970;
+  private readonly _minYear = 1970;
 
   get _cardStyle() {
     return {
@@ -176,7 +177,19 @@ export class DatePicker extends WithDisposable(LitElement) {
               ${week.map(cell => this._cellRenderer(cell))}
             </div>`
         )}
-      </div>`;
+      </div>
+      ${this.onClear
+        ? html`<div class="date-picker-footer">
+            <button
+              tabindex="0"
+              aria-label="clear"
+              class="footer-button interactive"
+              @click=${() => this.onClear?.()}
+            >
+              Clear
+            </button>
+          </div>`
+        : nothing}`;
   }
 
   /** Week header */
@@ -389,8 +402,13 @@ export class DatePicker extends WithDisposable(LitElement) {
       'keydown',
       e => {
         e.stopPropagation();
-        const directions = ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'];
-        if (directions.includes(e.key) && this.isDateCellFocused()) {
+        const directions = new Set([
+          'ArrowLeft',
+          'ArrowRight',
+          'ArrowUp',
+          'ArrowDown',
+        ]);
+        if (directions.has(e.key) && this.isDateCellFocused()) {
           e.preventDefault();
 
           if (e.key === 'ArrowLeft') {
@@ -406,7 +424,7 @@ export class DatePicker extends WithDisposable(LitElement) {
           setTimeout(this.focusDateCell.bind(this));
         }
 
-        if (directions.includes(e.key) && this.isMonthCellFocused()) {
+        if (directions.has(e.key) && this.isMonthCellFocused()) {
           e.preventDefault();
           if (e.key === 'ArrowLeft') {
             this._monthCursor = (this._monthCursor - 1 + 12) % 12;
@@ -420,7 +438,7 @@ export class DatePicker extends WithDisposable(LitElement) {
           setTimeout(this.focusMonthCell.bind(this));
         }
 
-        if (directions.includes(e.key) && this.isYearCellFocused()) {
+        if (directions.has(e.key) && this.isYearCellFocused()) {
           e.preventDefault();
           if (e.key === 'ArrowLeft') {
             this._modeDecade(-1);
@@ -505,7 +523,7 @@ export class DatePicker extends WithDisposable(LitElement) {
   }
 
   openYearSelector() {
-    this._yearCursor = clamp(this._minYear, this._maxYear, this.year);
+    this._yearCursor = clamp(this.year, this._minYear, this._maxYear);
     this._mode = 'year';
     this._getYearMatrix();
   }
@@ -578,6 +596,9 @@ export class DatePicker extends WithDisposable(LitElement) {
 
   @property({ attribute: false })
   accessor onChange: ((value: Date) => void) | undefined = undefined;
+
+  @property({ attribute: false })
+  accessor onClear: (() => void) | undefined = undefined;
 
   @property({ attribute: false })
   accessor onEscape: ((value: Date) => void) | undefined = undefined;

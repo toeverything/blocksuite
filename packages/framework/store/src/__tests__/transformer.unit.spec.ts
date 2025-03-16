@@ -2,14 +2,12 @@ import { expect, test } from 'vitest';
 import * as Y from 'yjs';
 
 import { MemoryBlobCRUD } from '../adapter/index.js';
+import { BlockSchemaExtension } from '../extension/schema.js';
+import { BlockModel } from '../model/block/block-model.js';
+import { defineBlockSchema } from '../model/block/zod.js';
 import { Text } from '../reactive/index.js';
-import {
-  type BlockModel,
-  defineBlockSchema,
-  Schema,
-  type SchemaToModel,
-} from '../schema/index.js';
-import { DocCollection, IdGeneratorType } from '../store/index.js';
+import { createAutoIncrementIdGenerator } from '../test/index.js';
+import { TestWorkspace } from '../test/test-workspace.js';
 import { AssetsManager, BaseBlockTransformer } from '../transformer/index.js';
 
 const docSchema = defineBlockSchema({
@@ -41,24 +39,27 @@ const docSchema = defineBlockSchema({
   },
 });
 
-type RootBlockModel = SchemaToModel<typeof docSchema>;
+const docSchemaExtension = BlockSchemaExtension(docSchema);
+class RootBlockModel extends BlockModel<
+  ReturnType<(typeof docSchema)['model']['props']>
+> {}
+
+const extensions = [docSchemaExtension];
 
 function createTestOptions() {
-  const idGenerator = IdGeneratorType.AutoIncrement;
-  const schema = new Schema();
-  schema.register([docSchema]);
-  return { id: 'test-collection', idGenerator, schema };
+  const idGenerator = createAutoIncrementIdGenerator();
+  return { id: 'test-collection', idGenerator };
 }
 
-const transformer = new BaseBlockTransformer();
+const transformer = new BaseBlockTransformer(new Map());
 const blobCRUD = new MemoryBlobCRUD();
 const assets = new AssetsManager({ blob: blobCRUD });
 
 test('model to snapshot', () => {
   const options = createTestOptions();
-  const collection = new DocCollection(options);
+  const collection = new TestWorkspace(options);
   collection.meta.initialize();
-  const doc = collection.createDoc({ id: 'home' });
+  const doc = collection.createDoc({ id: 'home', extensions });
   doc.load();
   doc.addBlock('page');
   const rootModel = doc.root as RootBlockModel;
@@ -73,9 +74,9 @@ test('model to snapshot', () => {
 
 test('snapshot to model', async () => {
   const options = createTestOptions();
-  const collection = new DocCollection(options);
+  const collection = new TestWorkspace(options);
   collection.meta.initialize();
-  const doc = collection.createDoc({ id: 'home' });
+  const doc = collection.createDoc({ id: 'home', extensions });
   doc.load();
   doc.addBlock('page');
   const rootModel = doc.root as RootBlockModel;
@@ -84,7 +85,7 @@ test('snapshot to model', async () => {
   const map = tempDoc.getMap('temp');
 
   expect(rootModel).not.toBeNull();
-  const snapshot = await transformer.toSnapshot({
+  const snapshot = transformer.toSnapshot({
     model: rootModel,
     assets,
   });
@@ -96,23 +97,23 @@ test('snapshot to model', async () => {
   });
   expect(model.flavour).toBe(rootModel.flavour);
 
-  // @ts-ignore
+  // @ts-expect-error ignore
   expect(model.props.title).toBeInstanceOf(Text);
 
-  // @ts-ignore
+  // @ts-expect-error ignore
   map.set('title', model.props.title.yText);
-  // @ts-ignore
+  // @ts-expect-error ignore
   expect(model.props.title.toString()).toBe('doc title');
 
-  // @ts-ignore
+  // @ts-expect-error ignore
   expect(model.props.style).toEqual({
     color: 'red',
   });
 
-  // @ts-ignore
+  // @ts-expect-error ignore
   expect(model.props.count).toBe(3);
 
-  // @ts-ignore
+  // @ts-expect-error ignore
   expect(model.props.items).toMatchObject([
     {
       id: 0,
@@ -125,7 +126,7 @@ test('snapshot to model', async () => {
     },
   ]);
 
-  // @ts-ignore
+  // @ts-expect-error ignore
   model.props.items.forEach((item, index) => {
     expect(item.content).toBeInstanceOf(Text);
     const key = `item:${index}:content`;
@@ -133,11 +134,3 @@ test('snapshot to model', async () => {
     expect(item.content.toString()).toBe(`item ${index + 1}`);
   });
 });
-
-declare global {
-  namespace BlockSuite {
-    interface BlockModels {
-      page: BlockModel;
-    }
-  }
-}

@@ -1,8 +1,9 @@
+import { FrameBlockModel } from '@blocksuite/affine-model';
 import type { EditorHost } from '@blocksuite/block-std';
 import type { BlockModel } from '@blocksuite/store';
 
 import { DocModeProvider } from '../../services/doc-mode-service.js';
-import { matchFlavours } from './checker.js';
+import { matchModels } from './checker.js';
 
 /**
  *
@@ -73,7 +74,7 @@ export function getPrevContentBlock(
 
     const prev = getPrev(model);
     if (prev) {
-      if (prev.role === 'content' && !matchFlavours(prev, ['affine:frame'])) {
+      if (prev.role === 'content' && !matchModels(prev, [FrameBlockModel])) {
         return prev;
       }
 

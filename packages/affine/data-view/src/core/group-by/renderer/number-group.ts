@@ -21,7 +21,7 @@ export class NumberGroupView extends BaseGroup<NonNullable<unknown>, number> {
     }
   `;
 
-  private _click = () => {
+  private readonly _click = () => {
     if (this.readonly) {
       return;
     }

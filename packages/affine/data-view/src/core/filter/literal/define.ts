@@ -1,12 +1,11 @@
 import { menu } from '@blocksuite/affine-components/context-menu';
 import { unsafeCSSVarV2 } from '@blocksuite/affine-shared/theme';
-import { CheckBoxCkeckSolidIcon, CheckBoxUnIcon } from '@blocksuite/icons/lit';
+import { CheckBoxCheckSolidIcon, CheckBoxUnIcon } from '@blocksuite/icons/lit';
 import { html } from 'lit';
-
-import type { LiteralItemsConfig } from './types.js';
 
 import { t } from '../../logical/type-presets.js';
 import { createLiteral } from './create.js';
+import type { LiteralItemsConfig } from './types.js';
 
 export const allLiteralConfig: LiteralItemsConfig[] = [
   createLiteral({
@@ -88,7 +87,7 @@ export const allLiteralConfig: LiteralItemsConfig[] = [
             type.element.data?.map(tag => {
               const selected = set.has(tag.id);
               const prefix = selected
-                ? CheckBoxCkeckSolidIcon({ style: `color:#1E96EB` })
+                ? CheckBoxCheckSolidIcon({ style: `color:#1E96EB` })
                 : CheckBoxUnIcon();
               return menu.action({
                 name: tag.value,

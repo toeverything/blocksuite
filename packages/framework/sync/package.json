@@ -1,13 +1,7 @@
 {
   "name": "@blocksuite/sync",
-  "version": "0.18.1",
   "description": "BlockSuite data synchronization engine abstraction and implementation.",
   "type": "module",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/toeverything/blocksuite.git",
-    "directory": "packages/framework/sync"
-  },
   "scripts": {
     "build": "tsc",
     "test:unit": "nx vite:test --run",
@@ -16,35 +10,30 @@
   "sideEffects": false,
   "keywords": [],
   "author": "toeverything",
-  "license": "MPL-2.0",
+  "license": "MIT",
   "dependencies": {
     "@blocksuite/global": "workspace:*",
+    "@types/lodash-es": "^4.17.12",
     "idb": "^8.0.0",
     "idb-keyval": "^6.2.1",
+    "lodash-es": "^4.17.21",
+    "rxjs": "^7.8.1",
     "y-protocols": "^1.0.6"
   },
+  "devDependencies": {
+    "vitest": "3.0.8"
+  },
   "peerDependencies": {
-    "yjs": "^13.6.15"
+    "yjs": "*"
   },
   "exports": {
     ".": "./src/index.ts"
-  },
-  "publishConfig": {
-    "access": "public",
-    "main": "dist/index.js",
-    "types": "dist/index.d.ts",
-    "exports": {
-      ".": {
-        "types": "./dist/index.d.ts",
-        "module": "./dist/index.js",
-        "import": "./dist/index.js"
-      }
-    }
   },
   "files": [
     "src",
     "dist",
     "!src/__tests__",
     "!dist/__tests__"
-  ]
+  ],
+  "version": "0.20.0"
 }

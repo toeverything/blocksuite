@@ -22,6 +22,10 @@ export interface TelemetryEvent {
   other?: unknown;
 }
 
+export interface LinkedDocCreatedEvent extends TelemetryEvent {
+  parentFlavour?: string;
+}
+
 export interface DocCreatedEvent extends TelemetryEvent {
   page?: 'doc editor' | 'whiteboard editor';
   segment?: 'whiteboard' | 'note' | 'doc';
@@ -35,7 +39,33 @@ export interface DocCreatedEvent extends TelemetryEvent {
 
 export interface ElementCreationEvent extends TelemetryEvent {
   segment?: 'toolbar' | 'whiteboard' | 'right sidebar';
-  page: 'whiteboard editor';
+  page?: 'doc editor' | 'whiteboard editor';
   module?: 'toolbar' | 'canvas' | 'ai chat panel';
   control?: ElementCreationSource;
+}
+
+export interface ElementLockEvent extends TelemetryEvent {
+  page: 'whiteboard editor';
+  segment: 'element toolbar';
+  module: 'element toolbar';
+  control: 'lock' | 'unlock' | 'group-lock';
+}
+
+export interface BlockCreationEvent extends TelemetryEvent {
+  blockType: string;
+}
+
+export interface MindMapCollapseEvent extends TelemetryEvent {
+  page: 'whiteboard editor';
+  segment: 'mind map';
+  type: 'expand' | 'collapse';
+}
+
+export interface AttachmentUploadedEvent extends TelemetryEvent {
+  page: 'doc editor' | 'whiteboard editor';
+  segment: 'attachment';
+  module: 'attachment';
+  control: 'uploader';
+  type: string; // file type
+  category: 'success' | 'failure';
 }

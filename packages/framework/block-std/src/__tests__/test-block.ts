@@ -1,13 +1,12 @@
 import { html } from 'lit';
 import { customElement } from 'lit/decorators.js';
 
+import { BlockComponent } from '../view/index.js';
 import type {
   HeadingBlockModel,
   NoteBlockModel,
   RootBlockModel,
 } from './test-schema.js';
-
-import { BlockComponent } from '../view/index.js';
 
 @customElement('test-root-block')
 export class RootBlockComponent extends BlockComponent<RootBlockModel> {

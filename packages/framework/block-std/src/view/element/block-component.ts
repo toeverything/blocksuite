@@ -1,7 +1,6 @@
 import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
-import { SignalWatcher, WithDisposable } from '@blocksuite/global/utils';
-import { Doc } from '@blocksuite/store';
-import { type BlockModel, BlockViewType } from '@blocksuite/store';
+import { SignalWatcher, WithDisposable } from '@blocksuite/global/lit';
+import { type BlockModel, type BlockViewType, Store } from '@blocksuite/store';
 import { consume, provide } from '@lit/context';
 import { computed } from '@preact/signals-core';
 import { nothing, type TemplateResult } from 'lit';
@@ -12,9 +11,9 @@ import { html } from 'lit/static-html.js';
 
 import type { EventName, UIEventHandler } from '../../event/index.js';
 import type { BlockService } from '../../extension/index.js';
+import { BlockServiceIdentifier } from '../../identifier.js';
 import type { BlockStdScope } from '../../scope/index.js';
-import type { WidgetComponent } from './widget-component.js';
-
+import { BlockSelection } from '../../selection/index.js';
 import { PropTypes, requiredProperties } from '../decorators/index.js';
 import {
   blockComponentSymbol,
@@ -23,9 +22,10 @@ import {
 } from './consts.js';
 import { docContext, stdContext } from './lit-host.js';
 import { ShadowlessElement } from './shadowless-element.js';
+import type { WidgetComponent } from './widget-component.js';
 
 @requiredProperties({
-  doc: PropTypes.instanceOf(Doc),
+  doc: PropTypes.instanceOf(Store),
   std: PropTypes.object,
   widgets: PropTypes.recordOf(PropTypes.object),
 })
@@ -37,16 +37,12 @@ export class BlockComponent<
   @consume({ context: stdContext })
   accessor std!: BlockStdScope;
 
-  private _selected = computed(() => {
-    const selection = this.std.selection.value.find(selection => {
-      return selection.blockId === this.model?.id;
-    });
-
-    if (!selection) {
-      return null;
-    }
-
-    return selection;
+  selected$ = computed(() => {
+    const selection = this.std.selection.value.find(
+      selection => selection.blockId === this.model?.id
+    );
+    if (!selection) return false;
+    return selection.is(BlockSelection);
   });
 
   [blockComponentSymbol] = true;
@@ -143,10 +139,6 @@ export class BlockComponent<
     return rootComponent ?? null;
   }
 
-  get selected() {
-    return this._selected.value;
-  }
-
   get selection() {
     return this.host.selection;
   }
@@ -155,9 +147,11 @@ export class BlockComponent<
     if (this._service) {
       return this._service;
     }
-    const service = this.std.getService(this.model.flavour) as Service;
-    this._service = service;
-    return service;
+    const service = this.std.getOptional(
+      BlockServiceIdentifier(this.model.flavour)
+    );
+    this._service = service as Service;
+    return service as Service;
   }
 
   get topContenteditableElement(): BlockComponent | null {
@@ -189,9 +183,9 @@ export class BlockComponent<
 
   private _renderViewType(content: unknown) {
     return choose(this.viewType, [
-      [BlockViewType.Display, () => content],
-      [BlockViewType.Hidden, () => nothing],
-      [BlockViewType.Bypass, () => this.renderChildren(this.model)],
+      ['display', () => content],
+      ['hidden', () => nothing],
+      ['bypass', () => this.renderChildren(this.model)],
     ]);
   }
 
@@ -220,21 +214,23 @@ export class BlockComponent<
 
     this.std.view.setBlock(this);
 
-    const disposable = this.std.doc.slots.blockUpdated.on(({ type, id }) => {
-      if (id === this.model.id && type === 'delete') {
-        this.std.view.deleteBlock(this);
-        disposable.dispose();
+    const disposable = this.std.store.slots.blockUpdated.subscribe(
+      ({ type, id }) => {
+        if (id === this.model.id && type === 'delete') {
+          this.std.view.deleteBlock(this);
+          disposable.unsubscribe();
+        }
       }
-    });
+    );
     this._disposables.add(disposable);
 
     this._disposables.add(
-      this.model.propsUpdated.on(() => {
+      this.model.propsUpdated.subscribe(() => {
         this.requestUpdate();
       })
     );
 
-    this.service?.specSlots.viewConnected.emit({
+    this.service?.specSlots.viewConnected.next({
       service: this.service,
       component: this,
     });
@@ -243,7 +239,7 @@ export class BlockComponent<
   override disconnectedCallback() {
     super.disconnectedCallback();
 
-    this.service?.specSlots.viewDisconnected.emit({
+    this.service?.specSlots.viewDisconnected.next({
       service: this.service,
       component: this,
     });
@@ -309,10 +305,10 @@ export class BlockComponent<
   private accessor _service: Service | null = null;
 
   @consume({ context: docContext })
-  accessor doc!: Doc;
+  accessor doc!: Store;
 
   @property({ attribute: false })
-  accessor viewType: BlockViewType = BlockViewType.Display;
+  accessor viewType: BlockViewType = 'display';
 
   @property({
     attribute: false,

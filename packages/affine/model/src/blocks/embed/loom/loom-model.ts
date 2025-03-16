@@ -1,7 +1,6 @@
 import { BlockModel } from '@blocksuite/store';
 
 import type { EmbedCardStyle } from '../../../utils/index.js';
-
 import { defineEmbedModel } from '../../../utils/index.js';
 
 export type EmbedLoomBlockUrlData = {
@@ -22,14 +21,3 @@ export type EmbedLoomBlockProps = {
 export class EmbedLoomModel extends defineEmbedModel<EmbedLoomBlockProps>(
   BlockModel
 ) {}
-
-declare global {
-  namespace BlockSuite {
-    interface EdgelessBlockModelMap {
-      'affine:embed-loom': EmbedLoomModel;
-    }
-    interface BlockModels {
-      'affine:embed-loom': EmbedLoomModel;
-    }
-  }
-}

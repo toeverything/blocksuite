@@ -3,14 +3,13 @@ import type {
   PointTestOptions,
   SerializedElement,
 } from '@blocksuite/block-std/gfx';
-import type { IVec, SerializedXYWH, XYWH } from '@blocksuite/global/utils';
-
 import {
   derive,
   field,
   GfxPrimitiveElementModel,
   local,
 } from '@blocksuite/block-std/gfx';
+import type { IVec, SerializedXYWH, XYWH } from '@blocksuite/global/gfx';
 import {
   Bound,
   curveIntersects,
@@ -23,11 +22,10 @@ import {
   Polyline,
   polyLineNearestPoint,
   Vec,
-} from '@blocksuite/global/utils';
-import { DocCollection, type Y } from '@blocksuite/store';
+} from '@blocksuite/global/gfx';
+import * as Y from 'yjs';
 
 import {
-  type Color,
   CONNECTOR_LABEL_MAX_WIDTH,
   ConnectorLabelOffsetAnchor,
   ConnectorMode,
@@ -39,7 +37,8 @@ import {
   StrokeStyle,
   TextAlign,
   type TextStyleProps,
-} from '../../consts/index.js';
+} from '../../consts/index';
+import { type Color, DefaultTheme } from '../../themes/index';
 
 export type SerializedConnection = {
   id?: string;
@@ -106,7 +105,6 @@ export type ConnectorElementProps = BaseElementProps & {
 export class ConnectorElementModel extends GfxPrimitiveElementModel<ConnectorElementProps> {
   updatingPath = false;
 
-  // @ts-ignore
   override get connectable() {
     return false as const;
   }
@@ -127,9 +125,9 @@ export class ConnectorElementModel extends GfxPrimitiveElementModel<ConnectorEle
     return 'connector';
   }
 
-  static override propsToY(props: ConnectorElementProps) {
-    if (props.text && !(props.text instanceof DocCollection.Y.Text)) {
-      props.text = new DocCollection.Y.Text(props.text);
+  static propsToY(props: ConnectorElementProps) {
+    if (typeof props.text === 'string') {
+      props.text = new Y.Text(props.text);
     }
 
     return props;
@@ -295,6 +293,10 @@ export class ConnectorElementModel extends GfxPrimitiveElementModel<ConnectorEle
         ? getBezierNearestPoint(getBezierParameters(path), currentPoint)
         : polyLineNearestPoint(path, currentPoint);
 
+    if (!point) {
+      return false;
+    }
+
     return (
       Vec.dist(point, currentPoint) <
       (options?.hitThreshold ? strokeWidth / 2 : 0) + 8
@@ -435,7 +437,7 @@ export class ConnectorElementModel extends GfxPrimitiveElementModel<ConnectorEle
    * Defines the style of the label.
    */
   @field({
-    color: '#000000',
+    color: DefaultTheme.black,
     fontFamily: FontFamily.Inter,
     fontSize: 16,
     fontStyle: FontStyle.Normal,
@@ -488,7 +490,7 @@ export class ConnectorElementModel extends GfxPrimitiveElementModel<ConnectorEle
   };
 
   @field()
-  accessor stroke: Color = '#000000';
+  accessor stroke: Color = DefaultTheme.connectorColor;
 
   @field()
   accessor strokeStyle: StrokeStyle = StrokeStyle.Solid;
@@ -509,15 +511,4 @@ export class ConnectorElementModel extends GfxPrimitiveElementModel<ConnectorEle
 
   @local()
   accessor xywh: SerializedXYWH = '[0,0,0,0]';
-}
-
-declare global {
-  namespace BlockSuite {
-    interface SurfaceElementModelMap {
-      connector: ConnectorElementModel;
-    }
-    interface EdgelessTextModelMap {
-      connector: ConnectorElementModel;
-    }
-  }
 }

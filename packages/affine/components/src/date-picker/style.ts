@@ -285,4 +285,25 @@ export const datePickerStyle = css`
   .date-picker--mode-year .date-picker-header {
     /* padding: 0 10px; */
   }
+
+  .date-picker-footer {
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid var(--affine-border-color);
+  }
+
+  .footer-button {
+    height: 28px;
+    border: none;
+    border-radius: 4px;
+    background: none;
+    color: var(--affine-text-secondary-color);
+    cursor: pointer;
+    font-size: var(--affine-font-sm);
+    padding: 0 12px;
+  }
+
+  .footer-button:hover {
+    background: var(--affine-hover-color);
+  }
 `;

@@ -11,7 +11,6 @@ export interface TypeDefinition {
 }
 
 export interface TypeInstance extends AnyTypeInstance {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   readonly _valueType: any;
   readonly _validate: Zod.ZodSchema;
 

@@ -6,15 +6,12 @@ import {
   type PopupTarget,
 } from '@blocksuite/affine-components/context-menu';
 import { ShadowlessElement } from '@blocksuite/block-std';
-import { SignalWatcher, WithDisposable } from '@blocksuite/global/utils';
+import { SignalWatcher, WithDisposable } from '@blocksuite/global/lit';
 import { DeleteIcon } from '@blocksuite/icons/lit';
 import { computed } from '@preact/signals-core';
 import { css, html, unsafeCSS } from 'lit';
 import { property, query } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
-
-import type { GroupTrait } from './trait.js';
-import type { GroupRenderProps } from './types.js';
 
 import { KanbanSingleView } from '../../view-presets/kanban/kanban-view-manager.js';
 import { TableSingleView } from '../../view-presets/table/table-view-manager.js';
@@ -28,6 +25,8 @@ import {
 } from '../utils/wc-dnd/sort/sort-context.js';
 import { verticalListSortingStrategy } from '../utils/wc-dnd/sort/strategies/index.js';
 import { groupByMatcher } from './matcher.js';
+import type { GroupTrait } from './trait.js';
+import type { GroupRenderProps } from './types.js';
 
 export class GroupSetting extends SignalWatcher(
   WithDisposable(ShadowlessElement)
@@ -79,8 +78,8 @@ export class GroupSetting extends SignalWatcher(
       const activeId = evt.active.id;
       const groups = this.groups$.value;
       if (over && over.id !== activeId && groups) {
-        const activeIndex = groups.findIndex(data => data.key === activeId);
-        const overIndex = groups.findIndex(data => data.key === over.id);
+        const activeIndex = groups.findIndex(data => data?.key === activeId);
+        const overIndex = groups.findIndex(data => data?.key === over.id);
 
         this.groupTrait.moveGroupTo(
           activeId,
@@ -105,7 +104,11 @@ export class GroupSetting extends SignalWatcher(
       },
     ],
     items: computed(() => {
-      return this.groupTrait.groupsDataList$.value?.map(v => v.key) ?? [];
+      return (
+        this.groupTrait.groupsDataList$.value?.map(
+          v => v?.key ?? 'default key'
+        ) ?? []
+      );
     }),
     strategy: verticalListSortingStrategy,
   });
@@ -137,8 +140,9 @@ export class GroupSetting extends SignalWatcher(
       >
         ${repeat(
           groups,
-          group => group.key,
+          group => group?.key ?? 'default key',
           group => {
+            if (!group) return;
             const props: GroupRenderProps = {
               value: group.value,
               data: group.property.data$.value,

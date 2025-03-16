@@ -1,12 +1,11 @@
 import type { VariableRef } from '../expression/types.js';
 import type { ArrayTypeInstance } from '../logical/composite-type.js';
 import type { DataTypeOf } from '../logical/data-type.js';
+import { t } from '../logical/index.js';
 import type { TypeInstance } from '../logical/type.js';
+import { typeSystem } from '../logical/type-system.js';
 import type { SingleView } from '../view-manager/index.js';
 import type { Sort } from './types.js';
-
-import { t } from '../logical/index.js';
-import { typeSystem } from '../logical/type-system.js';
 
 export const Compare = {
   GT: 'GT',
@@ -35,7 +34,12 @@ const compareList = <T>(
 ) => {
   let i = 0;
   while (i < listA.length && i < listB.length) {
-    const result = compare(listA[i], listB[i]);
+    const a = listA[i];
+    const b = listB[i];
+    if (a == null || b == null) {
+      continue;
+    }
+    const result = compare(a, b);
     if (result !== 0) {
       return result;
     }
@@ -106,8 +110,7 @@ const compareAny = (a: unknown, b: unknown) => {
   if (!b) {
     return Compare.LT;
   }
-  // @ts-ignore
-  return a - b;
+  return Number(a) - Number(b);
 };
 
 const compareTag = (type: DataTypeOf<typeof t.tag>, a: unknown, b: unknown) => {
@@ -170,7 +173,13 @@ export const evalSort = (
         if (typeof result === 'number' && result !== 0) {
           return sort.desc ? -result : result;
         }
-        return result === Compare.GT ? 1 : -1;
+        if (result === Compare.GT) {
+          return 1;
+        }
+        if (result === Compare.LT) {
+          return -1;
+        }
+        continue;
       }
       return 0;
     };

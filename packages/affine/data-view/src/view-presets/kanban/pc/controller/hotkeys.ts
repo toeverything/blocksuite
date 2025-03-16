@@ -7,7 +7,7 @@ export class KanbanHotkeysController implements ReactiveController {
     return !!this.host.selectionController.selection;
   }
 
-  constructor(private host: DataViewKanban) {
+  constructor(private readonly host: DataViewKanban) {
     this.host.addController(this);
   }
 
@@ -42,18 +42,16 @@ export class KanbanHotkeysController implements ReactiveController {
           context.get('keyboardState').raw.preventDefault();
           return true;
         },
-        ArrowLeft: context => {
+        ArrowLeft: () => {
           if (!this.hasSelection) return false;
 
           this.host.selectionController.focusNext('left');
-          context.get('keyboardState').raw.preventDefault();
           return true;
         },
-        ArrowRight: context => {
+        ArrowRight: () => {
           if (!this.hasSelection) return false;
 
           this.host.selectionController.focusNext('right');
-          context.get('keyboardState').raw.preventDefault();
           return true;
         },
         Backspace: () => {

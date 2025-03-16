@@ -15,6 +15,7 @@ import {
   PlusIcon,
 } from '@blocksuite/icons/lit';
 import { css, html } from 'lit';
+import { property } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 
 import { WidgetBase } from '../../core/widget/widget-base.js';
@@ -95,7 +96,7 @@ export class DataViewHeaderViews extends WidgetBase {
       popupTargetFromElement(event.currentTarget as HTMLElement),
       [
         menu.group({
-          items: views.map(id => {
+          items: views.flatMap(id => {
             const openViewOption = (event: MouseEvent) => {
               event.stopPropagation();
               this.openViewOption(
@@ -104,9 +105,12 @@ export class DataViewHeaderViews extends WidgetBase {
               );
             };
             const view = this.viewManager.viewGet(id);
+            if (!view) {
+              return [];
+            }
             return menu.action({
               prefix: html`<uni-lit
-                .uni=${this.getRenderer(id).icon}
+                .uni=${this.getRenderer(id)?.icon}
               ></uni-lit>`,
               name: view.name$.value ?? '',
               label: () => html`${view.name$.value}`,
@@ -147,7 +151,11 @@ export class DataViewHeaderViews extends WidgetBase {
     }
     const views = this.viewManager.views$.value;
     const index = views.findIndex(v => v === id);
-    const view = this.viewManager.viewGet(views[index]);
+    const viewId = views[index];
+    if (!viewId) {
+      return;
+    }
+    const view = this.viewManager.viewGet(viewId);
     if (!view) {
       return;
     }
@@ -257,7 +265,7 @@ export class DataViewHeaderViews extends WidgetBase {
           style="margin-right: 4px;"
           @click="${(event: MouseEvent) => this._clickView(event, id)}"
         >
-          <uni-lit class="icon" .uni="${this.getRenderer(id).icon}"></uni-lit>
+          <uni-lit class="icon" .uni="${this.getRenderer(id)?.icon}"></uni-lit>
           <div class="name">${view?.name}</div>
         </div>
       `;
@@ -269,12 +277,13 @@ export class DataViewHeaderViews extends WidgetBase {
   }
 
   private getRenderer(viewId: string) {
-    return this.dataSource.viewMetaGetById(viewId).renderer;
+    return this.dataSource.viewMetaGetById(viewId)?.renderer;
   }
 
   _clickView(event: MouseEvent, id: string) {
     if (this.viewManager.currentViewId$.value !== id) {
       this.viewManager.setCurrentView(id);
+      this.onChangeView?.(id);
       return;
     }
     this.openViewOption(
@@ -291,6 +300,9 @@ export class DataViewHeaderViews extends WidgetBase {
       ></component-overflow>
     `;
   }
+
+  @property({ attribute: false })
+  accessor onChangeView: ((id: string) => void) | undefined;
 }
 
 declare global {

@@ -1,7 +1,7 @@
-import type { BlockViewType } from '../spec/type.js';
-import type { ExtensionType } from './extension.js';
+import type { ExtensionType } from '@blocksuite/store';
 
 import { BlockViewIdentifier } from '../identifier.js';
+import type { BlockViewType } from '../spec/type.js';
 
 /**
  * Create a block view extension.
@@ -22,7 +22,7 @@ import { BlockViewIdentifier } from '../identifier.js';
  * ```
  */
 export function BlockViewExtension(
-  flavour: BlockSuite.Flavour,
+  flavour: string,
   view: BlockViewType
 ): ExtensionType {
   return {

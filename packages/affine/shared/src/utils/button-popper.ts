@@ -1,8 +1,7 @@
-import type { Disposable } from '@blocksuite/global/utils';
-
-import { autoUpdate } from '@floating-ui/dom';
+import type { Disposable } from '@blocksuite/global/disposable';
 import {
   autoPlacement,
+  autoUpdate,
   computePosition,
   offset,
   type Rect,
@@ -56,11 +55,13 @@ export function createButtonPopper(
     crossAxis,
     rootBoundary,
     ignoreShift,
+    offsetHeight,
   }: {
     mainAxis?: number;
     crossAxis?: number;
     rootBoundary?: Rect | (() => Rect | undefined);
     ignoreShift?: boolean;
+    offsetHeight?: number;
   } = {}
 ) {
   let display: Display = 'hidden';
@@ -88,9 +89,10 @@ export function createButtonPopper(
         size({
           ...overflowOptions,
           apply({ availableHeight }) {
-            popperElement.style.maxHeight = originMaxHeight
-              ? `min(${originMaxHeight}, ${availableHeight}px)`
-              : `${availableHeight}px`;
+            popperElement.style.maxHeight =
+              originMaxHeight && originMaxHeight !== 'none'
+                ? `min(${originMaxHeight}, ${availableHeight}px)`
+                : `${availableHeight - (offsetHeight ?? 0)}px`;
           },
         }),
       ],

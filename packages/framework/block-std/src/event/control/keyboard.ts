@@ -1,18 +1,18 @@
-import { IS_MAC } from '@blocksuite/global/env';
-
-import type { EventOptions, UIEventDispatcher } from '../dispatcher.js';
+import { DisposableGroup } from '@blocksuite/global/disposable';
+import { IS_ANDROID, IS_MAC } from '@blocksuite/global/env';
 
 import {
   type UIEventHandler,
   UIEventState,
   UIEventStateContext,
 } from '../base.js';
-import { bindKeymap } from '../keymap.js';
+import type { EventOptions, UIEventDispatcher } from '../dispatcher.js';
+import { androidBindKeymapPatch, bindKeymap } from '../keymap.js';
 import { KeyboardEventState } from '../state/index.js';
 import { EventScopeSourceType, EventSourceState } from '../state/source.js';
 
 export class KeyboardControl {
-  private _down = (event: KeyboardEvent) => {
+  private readonly _down = (event: KeyboardEvent) => {
     if (!this._shouldTrigger(event)) {
       return;
     }
@@ -26,7 +26,7 @@ export class KeyboardControl {
     );
   };
 
-  private _shouldTrigger = (event: KeyboardEvent) => {
+  private readonly _shouldTrigger = (event: KeyboardEvent) => {
     if (event.isComposing) {
       return false;
     }
@@ -42,7 +42,7 @@ export class KeyboardControl {
     return true;
   };
 
-  private _up = (event: KeyboardEvent) => {
+  private readonly _up = (event: KeyboardEvent) => {
     if (!this._shouldTrigger(event)) {
       return;
     }
@@ -59,7 +59,7 @@ export class KeyboardControl {
 
   private composition = false;
 
-  constructor(private _dispatcher: UIEventDispatcher) {}
+  constructor(private readonly _dispatcher: UIEventDispatcher) {}
 
   private _createContext(event: Event, keyboardState: KeyboardEventState) {
     return UIEventStateContext.from(
@@ -73,17 +73,33 @@ export class KeyboardControl {
   }
 
   bindHotkey(keymap: Record<string, UIEventHandler>, options?: EventOptions) {
-    return this._dispatcher.add(
-      'keyDown',
-      ctx => {
-        if (this.composition) {
-          return false;
-        }
-        const binding = bindKeymap(keymap);
-        return binding(ctx);
-      },
-      options
+    const disposables = new DisposableGroup();
+    if (IS_ANDROID) {
+      disposables.add(
+        this._dispatcher.add(
+          'beforeInput',
+          ctx => {
+            if (this.composition) return false;
+            const binding = androidBindKeymapPatch(keymap);
+            return binding(ctx);
+          },
+          options
+        )
+      );
+    }
+
+    disposables.add(
+      this._dispatcher.add(
+        'keyDown',
+        ctx => {
+          if (this.composition) return false;
+          const binding = bindKeymap(keymap);
+          return binding(ctx);
+        },
+        options
+      )
     );
+    return () => disposables.dispose();
   }
 
   listen() {

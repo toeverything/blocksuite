@@ -1,13 +1,12 @@
+import type { Logger } from '@blocksuite/global/utils';
+import { Subject } from 'rxjs';
 import type { Doc } from 'yjs';
-
-import { type Logger, Slot } from '@blocksuite/global/utils';
-
-import type { DocSource } from './source.js';
 
 import { SharedPriorityTarget } from '../utils/async-queue.js';
 import { MANUALLY_STOP, throwIfAborted } from '../utils/throw-if-aborted.js';
 import { DocEngineStep, DocPeerStep } from './consts.js';
 import { type DocPeerStatus, SyncPeer } from './peer.js';
+import type { DocSource } from './source.js';
 
 export interface DocEngineStatus {
   step: DocEngineStep;
@@ -50,7 +49,7 @@ export class DocEngine {
 
   private _status: DocEngineStatus;
 
-  readonly onStatusChange = new Slot<DocEngineStatus>();
+  readonly onStatusChange = new Subject<DocEngineStatus>();
 
   readonly priorityTarget = new SharedPriorityTarget();
 
@@ -80,7 +79,7 @@ export class DocEngine {
   private setStatus(s: DocEngineStatus) {
     this.logger.debug(`syne-engine:${this.rootDocId} status change`, s);
     this._status = s;
-    this.onStatusChange.emit(s);
+    this.onStatusChange.next(s);
   }
 
   canGracefulStop() {
@@ -134,10 +133,10 @@ export class DocEngine {
       );
 
       cleanUp.push(
-        state.mainPeer.onStatusChange.on(() => {
+        state.mainPeer.onStatusChange.subscribe(() => {
           if (!signal.aborted)
             this.updateSyncingState(state.mainPeer, state.shadowPeers);
-        }).dispose
+        }).unsubscribe
       );
 
       this.updateSyncingState(state.mainPeer, state.shadowPeers);
@@ -154,10 +153,10 @@ export class DocEngine {
           this.logger
         );
         cleanUp.push(
-          peer.onStatusChange.on(() => {
+          peer.onStatusChange.subscribe(() => {
             if (!signal.aborted)
               this.updateSyncingState(state.mainPeer, state.shadowPeers);
-          }).dispose
+          }).unsubscribe
         );
         return peer;
       });
@@ -222,7 +221,7 @@ export class DocEngine {
         });
       }),
       new Promise<void>(resolve => {
-        this.onStatusChange.on(() => {
+        this.onStatusChange.subscribe(() => {
           if (this.canGracefulStop()) {
             resolve();
           }
@@ -244,7 +243,7 @@ export class DocEngine {
     } else {
       return Promise.race([
         new Promise<void>(resolve => {
-          this.onStatusChange.on(status => {
+          this.onStatusChange.subscribe(status => {
             if (isLoadedRootDoc(status)) {
               resolve();
             }
@@ -268,7 +267,7 @@ export class DocEngine {
     } else {
       return Promise.race([
         new Promise<void>(resolve => {
-          this.onStatusChange.on(status => {
+          this.onStatusChange.subscribe(status => {
             if (status.step === DocEngineStep.Synced) {
               resolve();
             }

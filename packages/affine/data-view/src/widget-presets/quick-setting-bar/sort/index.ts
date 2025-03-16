@@ -2,10 +2,9 @@ import { popupTargetFromElement } from '@blocksuite/affine-components/context-me
 import { SortIcon } from '@blocksuite/icons/lit';
 import { html } from 'lit';
 
-import type { DataViewWidgetProps } from '../../../core/widget/types.js';
-
 import { sortTraitKey } from '../../../core/sort/manager.js';
 import { createSortUtils } from '../../../core/sort/utils.js';
+import type { DataViewWidgetProps } from '../../../core/widget/types.js';
 import { popSortRoot } from './root-panel.js';
 
 export const renderSortBar = (props: DataViewWidgetProps) => {

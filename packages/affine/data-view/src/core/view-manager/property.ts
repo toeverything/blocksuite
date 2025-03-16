@@ -1,14 +1,15 @@
+import type { UniComponent } from '@blocksuite/affine-shared/types';
 import { computed, type ReadonlySignal } from '@preact/signals-core';
 
 import type { TypeInstance } from '../logical/type.js';
 import type { CellRenderer } from '../property/index.js';
 import type { PropertyDataUpdater } from '../types.js';
-import type { UniComponent } from '../utils/uni-component/index.js';
 import type { Cell } from './cell.js';
 import type { SingleView } from './single-view.js';
 
 export interface Property<
-  Value = unknown,
+  RawValue = unknown,
+  JsonValue = unknown,
   Data extends Record<string, unknown> = Record<string, unknown>,
 > {
   readonly id: string;
@@ -23,33 +24,39 @@ export interface Property<
   readonly icon?: UniComponent;
 
   readonly delete?: () => void;
-  readonly duplicate?: () => void;
+  get canDelete(): boolean;
 
-  cellGet(rowId: string): Cell<Value>;
+  readonly duplicate?: () => void;
+  get canDuplicate(): boolean;
+
+  cellGet(rowId: string): Cell<RawValue, JsonValue, Data>;
 
   readonly data$: ReadonlySignal<Data>;
   dataUpdate(updater: PropertyDataUpdater<Data>): void;
 
   readonly type$: ReadonlySignal<string>;
   readonly typeSet?: (type: string) => void;
+  get typeCanSet(): boolean;
 
   readonly name$: ReadonlySignal<string>;
   nameSet(name: string): void;
 
   readonly hide$: ReadonlySignal<boolean>;
   hideSet(hide: boolean): void;
+  get hideCanSet(): boolean;
 
-  valueGet(rowId: string): Value | undefined;
-  valueSet(rowId: string, value: Value | undefined): void;
+  valueGet(rowId: string): RawValue | undefined;
+  valueSet(rowId: string, value: RawValue | undefined): void;
 
   stringValueGet(rowId: string): string;
   valueSetFromString(rowId: string, value: string): void;
 }
 
 export abstract class PropertyBase<
-  Value = unknown,
+  RawValue = unknown,
+  JsonValue = unknown,
   Data extends Record<string, unknown> = Record<string, unknown>,
-> implements Property<Value, Data>
+> implements Property<RawValue, JsonValue, Data>
 {
   cells$ = computed(() => {
     return this.view.rows$.value.map(id => this.cellGet(id));
@@ -123,9 +130,21 @@ export abstract class PropertyBase<
     public view: SingleView,
     public propertyId: string
   ) {}
+  get canDelete(): boolean {
+    return this.view.propertyCanDelete(this.id);
+  }
+  get canDuplicate(): boolean {
+    return this.view.propertyCanDuplicate(this.id);
+  }
+  get typeCanSet(): boolean {
+    return this.view.propertyTypeCanSet(this.id);
+  }
+  get hideCanSet(): boolean {
+    return this.view.propertyCanHide(this.id);
+  }
 
-  cellGet(rowId: string): Cell<Value> {
-    return this.view.cellGet(rowId, this.id) as Cell<Value>;
+  cellGet(rowId: string): Cell<RawValue, JsonValue, Data> {
+    return this.view.cellGet(rowId, this.id) as Cell<RawValue, JsonValue, Data>;
   }
 
   dataUpdate(updater: PropertyDataUpdater<Data>): void {
@@ -148,11 +167,11 @@ export abstract class PropertyBase<
     return this.cellGet(rowId).stringValue$.value;
   }
 
-  valueGet(rowId: string): Value | undefined {
+  valueGet(rowId: string): RawValue | undefined {
     return this.cellGet(rowId).value$.value;
   }
 
-  valueSet(rowId: string, value: Value | undefined): void {
+  valueSet(rowId: string, value: RawValue | undefined): void {
     return this.cellGet(rowId).valueSet(value);
   }
 
@@ -164,6 +183,6 @@ export abstract class PropertyBase<
     if (data.data) {
       this.dataUpdate(() => data.data as Data);
     }
-    this.valueSet(rowId, data.value as Value);
+    this.valueSet(rowId, data.value as RawValue);
   }
 }

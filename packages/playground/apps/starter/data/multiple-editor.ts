@@ -1,10 +1,9 @@
-import { RefNodeSlotsProvider } from '@blocksuite/affine-components/rich-text';
-import { AffineEditorContainer } from '@blocksuite/presets';
-import { type DocCollection, Text } from '@blocksuite/store';
+import { Text, type Workspace } from '@blocksuite/affine/store';
 
+import { createTestEditor } from '../utils/extensions.js';
 import type { InitFn } from './utils.js';
 
-export const multiEditor: InitFn = (collection: DocCollection, id: string) => {
+export const multiEditor: InitFn = (collection: Workspace, id: string) => {
   const doc = collection.createDoc({ id });
   doc.load(() => {
     // Add root block and surface block at root level
@@ -24,18 +23,7 @@ export const multiEditor: InitFn = (collection: DocCollection, id: string) => {
 
   const app = document.getElementById('app');
   if (app) {
-    const editor = new AffineEditorContainer();
-    editor.doc = doc;
-    editor.std
-      .get(RefNodeSlotsProvider)
-      .docLinkClicked.on(({ pageId: docId }) => {
-        const target = collection.getDoc(docId);
-        if (!target) {
-          throw new Error(`Failed to jump to doc ${docId}`);
-        }
-        target.load();
-        editor.doc = target;
-      });
+    const editor = createTestEditor(doc, collection);
     editor.style.borderRight = '1px solid var(--affine-border-color)';
 
     app.append(editor);
@@ -48,7 +36,7 @@ multiEditor.displayName = 'Multiple Editor Example';
 multiEditor.description = 'Multiple Editor basic example';
 
 export const multiEditorVertical: InitFn = (
-  collection: DocCollection,
+  collection: Workspace,
   docId: string
 ) => {
   const doc = collection.createDoc({ id: docId });
@@ -70,18 +58,7 @@ export const multiEditorVertical: InitFn = (
 
   const app = document.getElementById('app');
   if (app) {
-    const editor = new AffineEditorContainer();
-    editor.doc = doc;
-    editor.std
-      .get(RefNodeSlotsProvider)
-      .docLinkClicked.on(({ pageId: docId }) => {
-        const target = collection.getDoc(docId);
-        if (!target) {
-          throw new Error(`Failed to jump to doc ${docId}`);
-        }
-        target.load();
-        editor.doc = target;
-      });
+    const editor = createTestEditor(doc, collection);
     editor.style.borderBottom = '1px solid var(--affine-border-color)';
 
     app.append(editor);

@@ -1,6 +1,5 @@
-import type { InlineEditor, InlineRootElement } from '../inline-editor.js';
-
 import { INLINE_ROOT_ATTR } from '../consts.js';
+import type { InlineEditor, InlineRootElement } from '../inline-editor.js';
 
 export function getInlineEditorInsideRoot(
   element: Element

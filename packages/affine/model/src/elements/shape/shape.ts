@@ -2,29 +2,27 @@ import type {
   BaseElementProps,
   PointTestOptions,
 } from '@blocksuite/block-std/gfx';
+import {
+  field,
+  GfxLocalElementModel,
+  GfxPrimitiveElementModel,
+  local,
+  prop,
+} from '@blocksuite/block-std/gfx';
 import type {
   Bound,
   IBound,
   IVec,
   PointLocation,
   SerializedXYWH,
-} from '@blocksuite/global/utils';
+} from '@blocksuite/global/gfx';
+import * as Y from 'yjs';
 
 import {
-  field,
-  GfxPrimitiveElementModel,
-  local,
-} from '@blocksuite/block-std/gfx';
-import { DocCollection, type Y } from '@blocksuite/store';
-
-import {
-  type Color,
   DEFAULT_ROUGHNESS,
   FontFamily,
   FontStyle,
   FontWeight,
-  LineColor,
-  ShapeFillColor,
   ShapeStyle,
   ShapeTextFontSize,
   ShapeType,
@@ -34,6 +32,7 @@ import {
   type TextStyleProps,
   TextVerticalAlign,
 } from '../../consts/index.js';
+import { type Color, DefaultTheme } from '../../themes/index.js';
 import { shapeMethods } from './api/index.js';
 
 export type ShapeProps = BaseElementProps & {
@@ -59,15 +58,18 @@ export const SHAPE_TEXT_PADDING = 20;
 export const SHAPE_TEXT_VERTICAL_PADDING = 10;
 
 export class ShapeElementModel extends GfxPrimitiveElementModel<ShapeProps> {
+  /**
+   * The bound of the text content.
+   */
   textBound: IBound | null = null;
 
   get type() {
     return 'shape';
   }
 
-  static override propsToY(props: ShapeProps) {
-    if (props.text && !(props.text instanceof DocCollection.Y.Text)) {
-      props.text = new DocCollection.Y.Text(props.text);
+  static propsToY(props: ShapeProps) {
+    if (typeof props.text === 'string') {
+      props.text = new Y.Text(props.text);
     }
 
     return props;
@@ -96,11 +98,11 @@ export class ShapeElementModel extends GfxPrimitiveElementModel<ShapeProps> {
     });
   }
 
-  @field('#000000' as Color)
+  @field(DefaultTheme.shapeTextColor)
   accessor color!: Color;
 
   @field()
-  accessor fillColor: Color = ShapeFillColor.Yellow;
+  accessor fillColor: Color = DefaultTheme.shapeFillColor;
 
   @field()
   accessor filled: boolean = false;
@@ -146,7 +148,7 @@ export class ShapeElementModel extends GfxPrimitiveElementModel<ShapeProps> {
     blur: number;
     offsetX: number;
     offsetY: number;
-    color: string;
+    color: Color;
   } | null = null;
 
   @field()
@@ -156,7 +158,7 @@ export class ShapeElementModel extends GfxPrimitiveElementModel<ShapeProps> {
   accessor shapeType: ShapeType = ShapeType.Rect;
 
   @field()
-  accessor strokeColor: Color = LineColor.Yellow;
+  accessor strokeColor: Color = DefaultTheme.shapeStrokeColor;
 
   @field()
   accessor strokeStyle: StrokeStyle = StrokeStyle.Solid;
@@ -186,14 +188,76 @@ export class ShapeElementModel extends GfxPrimitiveElementModel<ShapeProps> {
   accessor xywh: SerializedXYWH = '[0,0,100,100]';
 }
 
-declare global {
-  namespace BlockSuite {
-    interface SurfaceElementModelMap {
-      shape: ShapeElementModel;
-    }
+export class LocalShapeElementModel extends GfxLocalElementModel {
+  roughness: number = DEFAULT_ROUGHNESS;
 
-    interface EdgelessTextModelMap {
-      shape: ShapeElementModel;
-    }
+  textBound: Bound | null = null;
+
+  textDisplay: boolean = true;
+
+  get type() {
+    return 'shape';
   }
+
+  @prop()
+  accessor color: Color = DefaultTheme.shapeTextColor;
+
+  @prop()
+  accessor fillColor: Color = DefaultTheme.shapeFillColor;
+
+  @prop()
+  accessor filled: boolean = false;
+
+  @prop()
+  accessor fontFamily: string = FontFamily.Inter;
+
+  @prop()
+  accessor fontSize: number = 16;
+
+  @prop()
+  accessor fontStyle: FontStyle = FontStyle.Normal;
+
+  @prop()
+  accessor fontWeight: FontWeight = FontWeight.Regular;
+
+  @prop()
+  accessor padding: [number, number] = [
+    SHAPE_TEXT_VERTICAL_PADDING,
+    SHAPE_TEXT_PADDING,
+  ];
+
+  @prop()
+  accessor radius: number = 0;
+
+  @prop()
+  accessor shadow: {
+    blur: number;
+    offsetX: number;
+    offsetY: number;
+    color: Color;
+  } | null = null;
+
+  @prop()
+  accessor shapeStyle: ShapeStyle = ShapeStyle.General;
+
+  @prop()
+  accessor shapeType: ShapeType = ShapeType.Rect;
+
+  @prop()
+  accessor strokeColor: Color = DefaultTheme.shapeStrokeColor;
+
+  @prop()
+  accessor strokeStyle: StrokeStyle = StrokeStyle.Solid;
+
+  @prop()
+  accessor strokeWidth: number = 4;
+
+  @prop()
+  accessor text: string = '';
+
+  @prop()
+  accessor textAlign: TextAlign = TextAlign.Center;
+
+  @prop()
+  accessor textVerticalAlign: TextVerticalAlign = TextVerticalAlign.Center;
 }

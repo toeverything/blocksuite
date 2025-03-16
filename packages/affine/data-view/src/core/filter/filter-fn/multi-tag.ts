@@ -23,6 +23,13 @@ export const multiTagFilter = [
       }
       return value.some(v => self.includes(v));
     },
+    defaultValue: args => {
+      const value = args[0][0];
+      if (value != null) {
+        return [value];
+      }
+      return;
+    },
   }),
   createFilter({
     name: 'doesNotContainOneOf',
@@ -59,6 +66,7 @@ export const multiTagFilter = [
       }
       return value.every(v => self.includes(v));
     },
+    defaultValue: args => args[0],
   }),
   createFilter({
     name: 'doesNotContainAll',

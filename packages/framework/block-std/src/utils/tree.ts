@@ -1,27 +1,29 @@
-import type { GfxModel } from '../gfx/model/model.js';
+import type { Store } from '@blocksuite/store';
 
 import {
+  type GfxCompatibleInterface,
   type GfxGroupCompatibleInterface,
   isGfxGroupCompatibleModel,
 } from '../gfx/model/base.js';
+import type { GfxGroupModel, GfxModel } from '../gfx/model/model.js';
 
 /**
  * Get the top elements from the list of elements, which are in some tree structures.
  *
- * For example: a list `[C1, E1, C2, E2, E2, E3, E4, C4, E6]`,
+ * For example: a list `[G1, E1, G2, E2, E3, E4, G4, E5, E6]`,
  * and they are in the elements tree like:
  * ```
- *     C1         C4      E6
+ *     G1         G4      E6
  *    /  \        |
- *  E1   C2       E5
+ *  E1   G2       E5
  *       / \
- *      E2  C3*
+ *      E2  G3*
  *         / \
  *        E3 E4
  * ```
  * where the star symbol `*` denote it is not in the list.
  *
- * The result should be `[F1, F2, E6, E3, E4]`.
+ * The result should be `[G1, G4, E6]`
  */
 export function getTopElements(elements: GfxModel[]): GfxModel[] {
   const results = new Set(elements);
@@ -68,18 +70,6 @@ function traverse(
   innerTraverse(element);
 }
 
-export function getAncestorContainersImpl(element: GfxModel) {
-  const containers: GfxGroupCompatibleInterface[] = [];
-
-  let container = element.group;
-  while (container) {
-    containers.push(container);
-    container = container.group;
-  }
-
-  return containers;
-}
-
 export function descendantElementsImpl(
   container: GfxGroupCompatibleInterface
 ): GfxModel[] {
@@ -94,7 +84,7 @@ export function descendantElementsImpl(
 
 export function hasDescendantElementImpl(
   container: GfxGroupCompatibleInterface,
-  element: GfxModel
+  element: GfxCompatibleInterface
 ): boolean {
   let _container = element.group;
   while (_container) {
@@ -108,8 +98,8 @@ export function hasDescendantElementImpl(
  * This checker is used to prevent circular reference, when adding a child element to a container.
  */
 export function canSafeAddToContainer(
-  container: GfxGroupCompatibleInterface & GfxModel,
-  element: GfxModel
+  container: GfxGroupModel,
+  element: GfxCompatibleInterface
 ) {
   if (
     element === container ||
@@ -118,4 +108,30 @@ export function canSafeAddToContainer(
     return false;
   }
   return true;
+}
+
+export function isLockedByAncestorImpl(
+  element: GfxCompatibleInterface
+): boolean {
+  return element.groups.some(isLockedBySelfImpl);
+}
+
+export function isLockedBySelfImpl(element: GfxCompatibleInterface): boolean {
+  return element.lockedBySelf ?? false;
+}
+
+export function isLockedImpl(element: GfxCompatibleInterface): boolean {
+  return isLockedBySelfImpl(element) || isLockedByAncestorImpl(element);
+}
+
+export function lockElementImpl(doc: Store, element: GfxCompatibleInterface) {
+  doc.transact(() => {
+    element.lockedBySelf = true;
+  });
+}
+
+export function unlockElementImpl(doc: Store, element: GfxCompatibleInterface) {
+  doc.transact(() => {
+    element.lockedBySelf = false;
+  });
 }

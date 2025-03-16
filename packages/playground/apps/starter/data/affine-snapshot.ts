@@ -1,7 +1,7 @@
-import { ZipTransformer } from '@blocksuite/blocks';
-import { type DocCollection, Text } from '@blocksuite/store';
-
-export async function affineSnapshot(collection: DocCollection, id: string) {
+import { ZipTransformer } from '@blocksuite/affine/blocks/root';
+import { AffineSchemas } from '@blocksuite/affine/schemas';
+import { Schema, Text, type Workspace } from '@blocksuite/affine/store';
+export async function affineSnapshot(collection: Workspace, id: string) {
   const doc = collection.createDoc({ id });
   doc.load();
   // Add root block and surface block at root level
@@ -13,7 +13,9 @@ export async function affineSnapshot(collection: DocCollection, id: string) {
   const path = '/apps/starter/data/snapshots/affine-default.zip';
   const response = await fetch(path);
   const file = await response.blob();
-  await ZipTransformer.importDocs(collection, file);
+  const schema = new Schema();
+  schema.register(AffineSchemas);
+  await ZipTransformer.importDocs(collection, schema, file);
 }
 
 affineSnapshot.id = 'affine-snapshot';

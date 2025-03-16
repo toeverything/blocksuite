@@ -1,16 +1,19 @@
-import { MenuButton, MobileMenuButton } from './button.js';
-import { MenuInput, MobileMenuInput } from './input.js';
-import { MenuComponent, MobileMenuComponent } from './menu-renderer.js';
-import { MenuSubMenu, MobileSubMenu } from './sub-menu.js';
+import { MenuButton, MobileMenuButton } from './button';
+import { MenuInput, MobileMenuInput } from './input';
+import { MenuDivider } from './menu-divider';
+import { MenuComponent, MobileMenuComponent } from './menu-renderer';
+import { MenuSubMenu, MobileSubMenu } from './sub-menu';
 
-export * from './button.js';
-export * from './focusable.js';
-export * from './group.js';
-export * from './input.js';
-export * from './item.js';
-export * from './menu.js';
-export * from './menu-renderer.js';
-export * from './sub-menu.js';
+export * from './button';
+export * from './focusable';
+export * from './group';
+export * from './input';
+export * from './item';
+export * from './menu';
+export * from './menu-all';
+export * from './menu-divider';
+export * from './menu-renderer';
+export * from './sub-menu';
 
 export function effects() {
   customElements.define('affine-menu', MenuComponent);
@@ -21,6 +24,7 @@ export function effects() {
   customElements.define('mobile-menu-input', MobileMenuInput);
   customElements.define('affine-menu-sub-menu', MenuSubMenu);
   customElements.define('mobile-sub-menu', MobileSubMenu);
+  customElements.define('menu-divider', MenuDivider);
 }
 
 export * from './types.js';

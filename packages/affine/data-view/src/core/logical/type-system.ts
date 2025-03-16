@@ -1,6 +1,5 @@
 import type { FnTypeInstance } from './composite-type.js';
 import type { TypeConvertConfig, TypeInstance, Unify } from './type.js';
-
 import { converts } from './type-presets.js';
 import {
   tv,
@@ -33,7 +32,7 @@ const getMap2 = <T>(
 };
 
 export class TypeSystem {
-  private _unify: Unify = (
+  private readonly _unify: Unify = (
     ctx: TypeVarContext,
     left: TypeInstance | undefined,
     right: TypeInstance | undefined
@@ -181,6 +180,7 @@ export class TypeSystem {
       if (arg == null) {
         return;
       }
+      // eslint-disable-next-line sonarjs/no-collapsible-if
       if (realArg != null) {
         if (!this._unify(newCtx, realArg, arg)) {
           console.log('arg', realArg, arg);

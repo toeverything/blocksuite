@@ -1,15 +1,15 @@
-import type { ListBlockModel } from '@blocksuite/affine-model';
+import { ListBlockModel } from '@blocksuite/affine-model';
 import type { BlockStdScope } from '@blocksuite/block-std';
-import type { BlockModel, Doc } from '@blocksuite/store';
+import type { BlockModel, Store } from '@blocksuite/store';
 
-import { matchFlavours } from './checker.js';
+import { matchModels } from './checker.js';
 
 /**
  * Pass in a list model, and this function will look forward to find continuous sibling numbered lists,
  * typically used for updating list numbers. The result not contains the list passed in.
  */
 export function getNextContinuousNumberedLists(
-  doc: Doc,
+  doc: Store,
   modelOrId: BlockModel | string
 ): ListBlockModel[] {
   const model =
@@ -23,7 +23,7 @@ export function getNextContinuousNumberedLists(
   const firstNotNumberedListIndex = parent.children.findIndex(
     (model, i) =>
       i > modelIndex &&
-      (!matchFlavours(model, ['affine:list']) || model.type !== 'numbered')
+      (!matchModels(model, [ListBlockModel]) || model.props.type !== 'numbered')
   );
   const newContinuousLists = parent.children.slice(
     modelIndex + 1,
@@ -32,7 +32,7 @@ export function getNextContinuousNumberedLists(
   if (
     !newContinuousLists.every(
       model =>
-        matchFlavours(model, ['affine:list']) && model.type === 'numbered'
+        matchModels(model, [ListBlockModel]) && model.props.type === 'numbered'
     )
   )
     return [];
@@ -45,7 +45,7 @@ export function toNumberedList(
   model: BlockModel,
   order: number
 ) {
-  const { doc } = std;
+  const { store: doc } = std;
   if (!model.text) return;
   const parent = doc.getParent(model);
   if (!parent) return;
@@ -56,12 +56,12 @@ export function toNumberedList(
   // if there is a numbered list before, the order continues from the previous list
   if (
     prevSibling &&
-    matchFlavours(prevSibling, ['affine:list']) &&
-    prevSibling.type === 'numbered'
+    matchModels(prevSibling, [ListBlockModel]) &&
+    prevSibling.props.type === 'numbered'
   ) {
     doc.transact(() => {
-      if (!prevSibling.order) prevSibling.order = 1;
-      realOrder = prevSibling.order + 1;
+      if (!prevSibling.props.order) prevSibling.props.order = 1;
+      realOrder = prevSibling.props.order + 1;
     });
   }
 
@@ -94,7 +94,7 @@ export function toNumberedList(
   let base = realOrder + 1;
   nextContinuousNumberedLists.forEach(list => {
     doc.transact(() => {
-      list.order = base;
+      list.props.order = base;
     });
     base += 1;
   });

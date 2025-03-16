@@ -1,8 +1,7 @@
+import { VElement } from '../components/v-element.js';
 import type { InlineEditor } from '../inline-editor.js';
 import type { DeltaInsert } from '../types.js';
 import type { BaseTextAttributes } from './base-attributes.js';
-
-import { VElement } from '../components/v-element.js';
 
 export function isInEmbedElement(node: Node): boolean {
   if (node instanceof Element) {

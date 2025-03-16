@@ -1,13 +1,14 @@
-/* eslint-disable lit/binding-positions, lit/no-invalid-html */
-
 import {
   BlockSuiteError,
   ErrorCode,
   handleError,
 } from '@blocksuite/global/exceptions';
-import { SignalWatcher, Slot, WithDisposable } from '@blocksuite/global/utils';
-import { Doc } from '@blocksuite/store';
-import { type BlockModel, BlockViewType } from '@blocksuite/store';
+import { SignalWatcher, WithDisposable } from '@blocksuite/global/lit';
+import {
+  type BlockModel,
+  Store,
+  type StoreSelectionExtension,
+} from '@blocksuite/store';
 import { createContext, provide } from '@lit/context';
 import { css, LitElement, nothing, type TemplateResult } from 'lit';
 import { property } from 'lit/decorators.js';
@@ -16,21 +17,19 @@ import { html, type StaticValue, unsafeStatic } from 'lit/static-html.js';
 
 import type { CommandManager } from '../../command/index.js';
 import type { UIEventDispatcher } from '../../event/index.js';
+import { WidgetViewIdentifier } from '../../identifier.js';
 import type { RangeManager } from '../../range/index.js';
 import type { BlockStdScope } from '../../scope/block-std-scope.js';
-import type { SelectionManager } from '../../selection/index.js';
-import type { ViewStore } from '../view-store.js';
-
-import { WidgetViewMapIdentifier } from '../../identifier.js';
 import { PropTypes, requiredProperties } from '../decorators/index.js';
+import type { ViewStore } from '../view-store.js';
 import { BLOCK_ID_ATTR, WIDGET_ID_ATTR } from './consts.js';
 import { ShadowlessElement } from './shadowless-element.js';
 
-export const docContext = createContext<Doc>('doc');
+export const docContext = createContext<Store>('doc');
 export const stdContext = createContext<BlockStdScope>('std');
 
 @requiredProperties({
-  doc: PropTypes.instanceOf(Doc),
+  doc: PropTypes.instanceOf(Store),
   std: PropTypes.object,
 })
 export class EditorHost extends SignalWatcher(
@@ -45,10 +44,10 @@ export class EditorHost extends SignalWatcher(
     }
   `;
 
-  private _renderModel = (model: BlockModel): TemplateResult => {
+  private readonly _renderModel = (model: BlockModel): TemplateResult => {
     const { flavour } = model;
     const block = this.doc.getBlock(model.id);
-    if (!block || block.blockViewType === BlockViewType.Hidden) {
+    if (!block || block.blockViewType === 'hidden') {
       return html`${nothing}`;
     }
     const schema = this.doc.schema.flavourSchemaMap.get(flavour);
@@ -57,38 +56,26 @@ export class EditorHost extends SignalWatcher(
       console.warn(`Cannot find render flavour ${flavour}.`);
       return html`${nothing}`;
     }
-    const widgetViewMap = this.std.getOptional(
-      WidgetViewMapIdentifier(flavour)
+
+    const widgetViews = this.std.provider.getAll(WidgetViewIdentifier);
+    const widgets = Array.from(widgetViews.entries()).reduce(
+      (mapping, [key, tag]) => {
+        const [widgetFlavour, id] = key.split('|');
+        if (widgetFlavour === flavour) {
+          const template = html`<${tag} ${unsafeStatic(WIDGET_ID_ATTR)}=${id}></${tag}>`;
+          mapping[id] = template;
+        }
+        return mapping;
+      },
+      {} as Record<string, TemplateResult>
     );
 
     const tag = typeof view === 'function' ? view(model) : view;
-    const widgets: Record<string, TemplateResult> = widgetViewMap
-      ? Object.entries(widgetViewMap).reduce((mapping, [key, tag]) => {
-          const template = html`<${tag} ${unsafeStatic(WIDGET_ID_ATTR)}=${key}></${tag}>`;
-
-          return {
-            ...mapping,
-            [key]: template,
-          };
-        }, {})
-      : {};
-
     return html`<${tag}
       ${unsafeStatic(BLOCK_ID_ATTR)}=${model.id}
       .widgets=${widgets}
       .viewType=${block.blockViewType}
     ></${tag}>`;
-  };
-
-  /**
-   * @deprecated
-   * Render a block model manually instead of let blocksuite render it.
-   * If you render the same block model multiple times,
-   * the event flow and data binding will be broken.
-   * Only use this method as a last resort.
-   */
-  dangerouslyRenderModel = (model: BlockModel): TemplateResult => {
-    return this._renderModel(model);
   };
 
   renderChildren = (
@@ -100,10 +87,6 @@ export class EditorHost extends SignalWatcher(
       child => child.id,
       child => this._renderModel(child)
     )}`;
-  };
-
-  readonly slots = {
-    unmounted: new Slot(),
   };
 
   get command(): CommandManager {
@@ -118,7 +101,7 @@ export class EditorHost extends SignalWatcher(
     return this.std.range;
   }
 
-  get selection(): SelectionManager {
+  get selection(): StoreSelectionExtension {
     return this.std.selection;
   }
 
@@ -143,7 +126,6 @@ export class EditorHost extends SignalWatcher(
   override disconnectedCallback() {
     super.disconnectedCallback();
     this.std.unmount();
-    this.slots.unmounted.emit();
   }
 
   override async getUpdateComplete(): Promise<boolean> {
@@ -155,13 +137,22 @@ export class EditorHost extends SignalWatcher(
       const view = this.std.getView(rootModel.flavour);
       if (!view) return result;
 
-      const widgetViewMap = this.std.getOptional(
-        WidgetViewMapIdentifier(rootModel.flavour)
+      const widgetViews = this.std.provider.getAll(
+        WidgetViewIdentifier(rootModel.flavour)
       );
-      const widgetTags = Object.values(widgetViewMap ?? {});
+      const widgetTags = Object.entries(widgetViews).reduce(
+        (mapping, [key, tag]) => {
+          const [widgetFlavour, id] = key.split('|');
+          if (widgetFlavour === rootModel.flavour) {
+            mapping[id] = tag;
+          }
+          return mapping;
+        },
+        {} as Record<string, StaticValue>
+      );
       const elementsTags: StaticValue[] = [
         typeof view === 'function' ? view(rootModel) : view,
-        ...widgetTags,
+        ...Object.values(widgetTags),
       ];
       await Promise.all(
         elementsTags.map(tag => {
@@ -169,7 +160,7 @@ export class EditorHost extends SignalWatcher(
           if (element instanceof LitElement) {
             return element.updateComplete;
           }
-          return;
+          return null;
         })
       );
       return result;
@@ -192,11 +183,11 @@ export class EditorHost extends SignalWatcher(
 
   @provide({ context: docContext })
   @property({ attribute: false })
-  accessor doc!: Doc;
+  accessor doc!: Store;
 
   @provide({ context: stdContext })
   @property({ attribute: false })
-  accessor std!: BlockSuite.Std;
+  accessor std!: BlockStdScope;
 }
 
 declare global {

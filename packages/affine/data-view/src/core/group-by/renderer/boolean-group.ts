@@ -1,4 +1,4 @@
-import { CheckBoxCkeckSolidIcon, CheckBoxUnIcon } from '@blocksuite/icons/lit';
+import { CheckBoxCheckSolidIcon, CheckBoxUnIcon } from '@blocksuite/icons/lit';
 import { css, html } from 'lit';
 
 import { BaseGroup } from './base.js';
@@ -18,7 +18,7 @@ export class BooleanGroupView extends BaseGroup<NonNullable<unknown>, boolean> {
   protected override render(): unknown {
     return html` <div class="data-view-group-title-boolean-view">
       ${this.value
-        ? CheckBoxCkeckSolidIcon({ style: `color:#1E96EB` })
+        ? CheckBoxCheckSolidIcon({ style: `color:#1E96EB` })
         : CheckBoxUnIcon()}
     </div>`;
   }

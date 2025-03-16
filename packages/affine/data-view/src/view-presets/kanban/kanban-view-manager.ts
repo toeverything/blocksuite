@@ -4,19 +4,20 @@ import {
 } from '@blocksuite/affine-shared/utils';
 import { computed, type ReadonlySignal } from '@preact/signals-core';
 
-import type { FilterGroup } from '../../core/filter/types.js';
-import type { KanbanViewData } from './define.js';
-
 import { evalFilter } from '../../core/filter/eval.js';
+import { generateDefaultValues } from '../../core/filter/generate-default-values.js';
 import { FilterTrait, filterTraitKey } from '../../core/filter/trait.js';
+import type { FilterGroup } from '../../core/filter/types.js';
 import { emptyFilterGroup } from '../../core/filter/utils.js';
 import {
   GroupTrait,
   groupTraitKey,
   sortByManually,
 } from '../../core/group-by/trait.js';
+import { fromJson } from '../../core/property/utils';
 import { PropertyBase } from '../../core/view-manager/property.js';
 import { SingleViewBase } from '../../core/view-manager/single-view.js';
+import type { KanbanViewData } from './define.js';
 
 export class KanbanSingleView extends SingleViewBase<KanbanViewData> {
   propertiesWithoutFilter$ = computed(() => {
@@ -176,6 +177,25 @@ export class KanbanSingleView extends SingleViewBase<KanbanViewData> {
   addCard(position: InsertToPosition, group: string) {
     const id = this.rowAdd(position);
     this.groupTrait.addToGroup(id, group);
+
+    const filter = this.filter$.value;
+    if (filter.conditions.length > 0) {
+      const defaultValues = generateDefaultValues(filter, this.vars$.value);
+      Object.entries(defaultValues).forEach(([propertyId, jsonValue]) => {
+        const property = this.propertyGet(propertyId);
+        const propertyMeta = this.propertyMetaGet(property.type$.value);
+        if (!propertyMeta) {
+          return;
+        }
+        const value = fromJson(propertyMeta.config, {
+          value: jsonValue,
+          data: property.data$.value,
+          dataSource: this.dataSource,
+        });
+        this.cellValueSet(id, propertyId, value);
+      });
+    }
+
     return id;
   }
 
@@ -267,6 +287,9 @@ export class KanbanSingleView extends SingleViewBase<KanbanViewData> {
       }
       const columns = [...view.columns];
       const [column] = columns.splice(columnIndex, 1);
+      if (!column) {
+        return {};
+      }
       const index = insertPositionToIndex(toAfterOfColumn, columns);
       columns.splice(index, 0, column);
       return {
@@ -279,12 +302,12 @@ export class KanbanSingleView extends SingleViewBase<KanbanViewData> {
     this.dataSource.rowMove(rowId, position);
   }
 
-  override rowNextGet(rowId: string): string {
+  override rowNextGet(rowId: string): string | undefined {
     const index = this.rows$.value.indexOf(rowId);
     return this.rows$.value[index + 1];
   }
 
-  override rowPrevGet(rowId: string): string {
+  override rowPrevGet(rowId: string): string | undefined {
     const index = this.rows$.value.indexOf(rowId);
     return this.rows$.value[index - 1];
   }

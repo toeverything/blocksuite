@@ -1,11 +1,11 @@
-import type { AffineEditorContainer } from '@blocksuite/presets';
-
-import { WithDisposable } from '@blocksuite/global/utils';
-import { css, html, LitElement, nothing } from 'lit';
+import { ShadowlessElement } from '@blocksuite/affine/block-std';
+import { WithDisposable } from '@blocksuite/affine/global/lit';
+import type { TestAffineEditorContainer } from '@blocksuite/integration-test';
+import { css, html, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
 @customElement('custom-outline-panel')
-export class CustomOutlinePanel extends WithDisposable(LitElement) {
+export class CustomOutlinePanel extends WithDisposable(ShadowlessElement) {
   static override styles = css`
     .custom-outline-container {
       position: absolute;
@@ -22,7 +22,7 @@ export class CustomOutlinePanel extends WithDisposable(LitElement) {
 
   private _renderPanel() {
     return html`<affine-outline-panel
-      .editor=${this.editor}
+      .editor=${this.editor.host}
       .fitPadding=${[50, 360, 50, 50]}
     ></affine-outline-panel>`;
   }
@@ -45,7 +45,7 @@ export class CustomOutlinePanel extends WithDisposable(LitElement) {
   private accessor _show = false;
 
   @property({ attribute: false })
-  accessor editor!: AffineEditorContainer;
+  accessor editor!: TestAffineEditorContainer;
 }
 
 declare global {

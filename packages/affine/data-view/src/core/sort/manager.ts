@@ -1,10 +1,9 @@
 import { computed, type ReadonlySignal } from '@preact/signals-core';
 
-import type { SingleView } from '../view-manager/index.js';
-import type { Sort, SortBy } from './types.js';
-
 import { createTraitKey } from '../traits/key.js';
+import type { SingleView } from '../view-manager/index.js';
 import { evalSort } from './eval.js';
+import type { Sort, SortBy } from './types.js';
 
 export class SortManager {
   hasSort$ = computed(() => (this.sort$.value?.sortBy?.length ?? 0) > 0);
@@ -35,7 +34,7 @@ export class SortManager {
   constructor(
     readonly sort$: ReadonlySignal<Sort | undefined>,
     readonly view: SingleView,
-    private ops: {
+    private readonly ops: {
       setSortList: (sortList: Sort) => void;
     }
   ) {}

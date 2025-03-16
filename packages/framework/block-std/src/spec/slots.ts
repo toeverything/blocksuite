@@ -1,15 +1,15 @@
-import { Slot } from '@blocksuite/global/utils';
+import { Subject } from 'rxjs';
 
 import type { BlockService } from '../extension/service.js';
 import type { BlockComponent, WidgetComponent } from '../view/index.js';
 
 export type BlockSpecSlots<Service extends BlockService = BlockService> = {
-  mounted: Slot<{ service: Service }>;
-  unmounted: Slot<{ service: Service }>;
-  viewConnected: Slot<{ component: BlockComponent; service: Service }>;
-  viewDisconnected: Slot<{ component: BlockComponent; service: Service }>;
-  widgetConnected: Slot<{ component: WidgetComponent; service: Service }>;
-  widgetDisconnected: Slot<{
+  mounted: Subject<{ service: Service }>;
+  unmounted: Subject<{ service: Service }>;
+  viewConnected: Subject<{ component: BlockComponent; service: Service }>;
+  viewDisconnected: Subject<{ component: BlockComponent; service: Service }>;
+  widgetConnected: Subject<{ component: WidgetComponent; service: Service }>;
+  widgetDisconnected: Subject<{
     component: WidgetComponent;
     service: Service;
   }>;
@@ -17,11 +17,11 @@ export type BlockSpecSlots<Service extends BlockService = BlockService> = {
 
 export const getSlots = (): BlockSpecSlots => {
   return {
-    mounted: new Slot(),
-    unmounted: new Slot(),
-    viewConnected: new Slot(),
-    viewDisconnected: new Slot(),
-    widgetConnected: new Slot(),
-    widgetDisconnected: new Slot(),
+    mounted: new Subject(),
+    unmounted: new Subject(),
+    viewConnected: new Subject(),
+    viewDisconnected: new Subject(),
+    widgetConnected: new Subject(),
+    widgetDisconnected: new Subject(),
   };
 };

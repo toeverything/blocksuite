@@ -1,7 +1,12 @@
-import type { DocCollection } from '@blocksuite/store';
+import {
+  DEFAULT_PAGE_BLOCK_HEIGHT,
+  DEFAULT_PAGE_BLOCK_WIDTH,
+} from '@blocksuite/affine-model';
+import type { Workspace } from '@blocksuite/store';
+import { Text } from '@blocksuite/store';
 
 export function createDefaultDoc(
-  collection: DocCollection,
+  collection: Workspace,
   options: { id?: string; title?: string } = {}
 ) {
   const doc = collection.createDoc({ id: options.id });
@@ -9,15 +14,20 @@ export function createDefaultDoc(
   doc.load();
   const title = options.title ?? '';
   const rootId = doc.addBlock('affine:page', {
-    title: new doc.Text(title),
+    title: new Text(title),
   });
-  collection.setDocMeta(doc.id, {
+  collection.meta.setDocMeta(doc.id, {
     title,
   });
 
-  // @ts-ignore FIXME: will be fixed when surface model migrated to affine-model
   doc.addBlock('affine:surface', {}, rootId);
-  const noteId = doc.addBlock('affine:note', {}, rootId);
+  const noteId = doc.addBlock(
+    'affine:note',
+    {
+      xywh: `[0, 0, ${DEFAULT_PAGE_BLOCK_WIDTH}, ${DEFAULT_PAGE_BLOCK_HEIGHT}]`,
+    },
+    rootId
+  );
   doc.addBlock('affine:paragraph', {}, noteId);
   // To make sure the content of new doc would not be clear
   // By undo operation for the first time

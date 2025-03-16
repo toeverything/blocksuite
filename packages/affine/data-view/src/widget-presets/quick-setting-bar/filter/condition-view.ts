@@ -7,7 +7,7 @@ import {
   subMenuMiddleware,
 } from '@blocksuite/affine-components/context-menu';
 import { ShadowlessElement } from '@blocksuite/block-std';
-import { SignalWatcher } from '@blocksuite/global/utils';
+import { SignalWatcher } from '@blocksuite/global/lit';
 import {
   ArrowDownSmallIcon,
   ArrowRightSmallIcon,
@@ -17,12 +17,11 @@ import { computed, type ReadonlySignal } from '@preact/signals-core';
 import { css, html } from 'lit';
 import { property } from 'lit/decorators.js';
 
-import type { Variable } from '../../../core/expression/types.js';
-import type { Filter, SingleFilter } from '../../../core/filter/types.js';
-
 import { getRefType } from '../../../core/expression/ref/ref.js';
+import type { Variable } from '../../../core/expression/types.js';
 import { filterMatcher } from '../../../core/filter/filter-fn/matcher.js';
 import { literalItemsMatcher } from '../../../core/filter/literal/index.js';
+import type { Filter, SingleFilter } from '../../../core/filter/types.js';
 import {
   renderUniLit,
   t,
@@ -83,13 +82,13 @@ export class FilterConditionView extends SignalWatcher(ShadowlessElement) {
     }
   `;
 
-  private onClickButton = (evt: Event) => {
+  private readonly onClickButton = (evt: Event) => {
     this.popConditionEdit(
       popupTargetFromElement(evt.currentTarget as HTMLElement)
     );
   };
 
-  private popConditionEdit = (target: PopupTarget) => {
+  private readonly popConditionEdit = (target: PopupTarget) => {
     const type = this.leftVar$.value?.type;
     if (!type) {
       return;
@@ -234,9 +233,12 @@ export class FilterConditionView extends SignalWatcher(ShadowlessElement) {
     if (!type || !argValues || !data) {
       return;
     }
-    const argDataList = argValues.map((v, i) =>
-      v ? { value: v, type: type.args[i + 1] } : undefined
-    );
+    const argDataList = argValues.map((v, i) => {
+      if (v == null) return undefined;
+      const argType = type.args[i + 1];
+      if (!argType) return undefined;
+      return { value: v, type: argType };
+    });
     const valueString = data.shortString?.(...argDataList) ?? '';
     if (valueString) {
       return `${name}${valueString}`;

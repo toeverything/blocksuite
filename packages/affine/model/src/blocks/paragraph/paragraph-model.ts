@@ -1,8 +1,11 @@
 import {
+  BlockModel,
+  BlockSchemaExtension,
   defineBlockSchema,
-  type SchemaToModel,
   type Text,
 } from '@blocksuite/store';
+
+import type { BlockMeta } from '../../utils/types';
 
 export type ParagraphType =
   | 'text'
@@ -17,13 +20,19 @@ export type ParagraphType =
 export type ParagraphProps = {
   type: ParagraphType;
   text: Text;
-};
+  collapsed: boolean;
+} & BlockMeta;
 
 export const ParagraphBlockSchema = defineBlockSchema({
   flavour: 'affine:paragraph',
   props: (internal): ParagraphProps => ({
     type: 'text',
     text: internal.Text(),
+    collapsed: false,
+    'meta:createdAt': undefined,
+    'meta:createdBy': undefined,
+    'meta:updatedAt': undefined,
+    'meta:updatedBy': undefined,
   }),
   metadata: {
     version: 1,
@@ -34,16 +43,17 @@ export const ParagraphBlockSchema = defineBlockSchema({
       'affine:paragraph',
       'affine:list',
       'affine:edgeless-text',
+      'affine:callout',
     ],
   },
+  toModel: () => new ParagraphBlockModel(),
 });
 
-export type ParagraphBlockModel = SchemaToModel<typeof ParagraphBlockSchema>;
+export const ParagraphBlockSchemaExtension =
+  BlockSchemaExtension(ParagraphBlockSchema);
 
-declare global {
-  namespace BlockSuite {
-    interface BlockModels {
-      'affine:paragraph': ParagraphBlockModel;
-    }
+export class ParagraphBlockModel extends BlockModel<ParagraphProps> {
+  override isEmpty(): boolean {
+    return this.props.text$.value.length === 0 && this.children.length === 0;
   }
 }

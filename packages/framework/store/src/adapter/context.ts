@@ -5,7 +5,7 @@ export class ASTWalkerContext<TNode extends object> {
 
   private _globalContext: Record<string, unknown> = Object.create(null);
 
-  private _stack: {
+  private readonly _stack: {
     node: TNode;
     prop: Keyof<TNode>;
     context: Record<string, unknown>;

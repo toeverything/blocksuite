@@ -1,5 +1,4 @@
 import type { Awareness } from 'y-protocols/awareness';
-
 import {
   applyAwarenessUpdate,
   encodeAwarenessUpdate,

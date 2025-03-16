@@ -1,13 +1,7 @@
 {
   "name": "@blocksuite/affine-components",
-  "version": "0.18.1",
   "description": "Default BlockSuite editable blocks.",
   "type": "module",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/toeverything/blocksuite.git",
-    "directory": "packages/affine/components"
-  },
   "scripts": {
     "build": "tsc",
     "test:unit": "nx vite:test --run --passWithNoTests",
@@ -17,106 +11,64 @@
   "sideEffects": false,
   "keywords": [],
   "author": "toeverything",
-  "license": "MPL-2.0",
+  "license": "MIT",
   "dependencies": {
     "@blocksuite/affine-model": "workspace:*",
     "@blocksuite/affine-shared": "workspace:*",
     "@blocksuite/block-std": "workspace:*",
     "@blocksuite/global": "workspace:*",
-    "@blocksuite/icons": "^2.1.70",
+    "@blocksuite/icons": "^2.2.6",
     "@blocksuite/inline": "workspace:*",
     "@blocksuite/store": "workspace:*",
-    "@floating-ui/dom": "^1.6.10",
+    "@floating-ui/dom": "^1.6.13",
     "@lit/context": "^1.1.2",
-    "@lottiefiles/dotlottie-wc": "^0.2.16",
+    "@lottiefiles/dotlottie-wc": "^0.4.0",
     "@preact/signals-core": "^1.8.0",
-    "@toeverything/theme": "^1.0.19",
+    "@toeverything/theme": "^1.1.12",
+    "@types/hast": "^3.0.4",
+    "@types/katex": "^0.16.7",
+    "@types/lodash-es": "^4.17.12",
+    "@types/mdast": "^4.0.4",
+    "collapse-white-space": "^2.1.0",
     "date-fns": "^4.0.0",
     "katex": "^0.16.11",
     "lit": "^3.2.0",
     "lit-html": "^3.2.1",
-    "lodash.clonedeep": "^4.5.0",
-    "shiki": "^1.12.0",
+    "lodash-es": "^4.17.21",
+    "remark-math": "^6.0.0",
+    "rxjs": "^7.8.1",
+    "shiki": "^3.0.0",
+    "yjs": "^13.6.21",
     "zod": "^3.23.8"
   },
   "exports": {
     ".": "./src/index.ts",
+    "./color-picker": "./src/color-picker/index.ts",
     "./icons": "./src/icons/index.ts",
     "./peek": "./src/peek/index.ts",
     "./portal": "./src/portal/index.ts",
     "./hover": "./src/hover/index.ts",
+    "./icon-button": "./src/icon-button/index.ts",
     "./toolbar": "./src/toolbar/index.ts",
     "./toast": "./src/toast/index.ts",
-    "./rich-text": "./src/rich-text/index.ts",
+    "./smooth-corner": "./src/smooth-corner/index.ts",
     "./caption": "./src/caption/index.ts",
     "./context-menu": "./src/context-menu/index.ts",
     "./date-picker": "./src/date-picker/index.ts",
-    "./drag-indicator": "./src/drag-indicator/index.ts",
-    "./virtual-keyboard": "./src/virtual-keyboard/index.ts",
-    "./toggle-button": "./src/toggle-button/index.ts"
-  },
-  "publishConfig": {
-    "access": "public",
-    "main": "dist/index.js",
-    "types": "dist/index.d.ts",
-    "exports": {
-      ".": {
-        "types": "./dist/index.d.ts",
-        "import": "./dist/index.js"
-      },
-      "./icons": {
-        "types": "./dist/icons/index.d.ts",
-        "import": "./dist/icons/index.js"
-      },
-      "./peek": {
-        "types": "./dist/peek/index.d.ts",
-        "import": "./dist/peek/index.js"
-      },
-      "./portal": {
-        "types": "./dist/portal/index.d.ts",
-        "import": "./dist/portal/index.js"
-      },
-      "./hover": {
-        "types": "./dist/hover/index.d.ts",
-        "import": "./dist/hover/index.js"
-      },
-      "./toolbar": {
-        "types": "./dist/toolbar/index.d.ts",
-        "import": "./dist/toolbar/index.js"
-      },
-      "./toast": {
-        "types": "./dist/toast/index.d.ts",
-        "import": "./dist/toast/index.js"
-      },
-      "./rich-text": {
-        "types": "./dist/rich-text/index.d.ts",
-        "import": "./dist/rich-text/index.js"
-      },
-      "./caption": {
-        "types": "./dist/caption/index.d.ts",
-        "import": "./dist/caption/index.js"
-      },
-      "./context-menu": {
-        "types": "./dist/context-menu/index.d.ts",
-        "import": "./dist/context-menu/index.js"
-      },
-      "./date-picker": {
-        "types": "./dist/date-picker/index.d.ts",
-        "import": "./dist/date-picker/index.js"
-      },
-      "./drag-indicator": {
-        "types": "./dist/drag-indicator/index.d.ts",
-        "import": "./dist/drag-indicator/index.js"
-      },
-      "./virtual-keyboard": {
-        "types": "./dist/virtual-keyboard/index.d.ts",
-        "import": "./dist/virtual-keyboard/index.js"
-      },
-      "./toggle-button": {
-        "types": "./dist/toggle-button/index.d.ts",
-        "import": "./dist/toggle-button/index.js"
-      }
-    }
+    "./drop-indicator": "./src/drop-indicator/index.ts",
+    "./filterable-list": "./src/filterable-list/index.ts",
+    "./toggle-button": "./src/toggle-button/index.ts",
+    "./toggle-switch": "./src/toggle-switch/index.ts",
+    "./notification": "./src/notification/index.ts",
+    "./block-zero-width": "./src/block-zero-width/index.ts",
+    "./block-selection": "./src/block-selection/index.ts",
+    "./embed-card-modal": "./src/embed-card-modal/index.ts",
+    "./link-preview": "./src/link-preview/index.ts",
+    "./linked-doc-title": "./src/linked-doc-title/index.ts",
+    "./view-dropdown-menu": "./src/view-dropdown-menu/index.ts",
+    "./card-style-dropdown-menu": "./src/card-style-dropdown-menu/index.ts",
+    "./highlight-dropdown-menu": "./src/highlight-dropdown-menu/index.ts",
+    "./tooltip-content-with-shortcut": "./src/tooltip-content-with-shortcut/index.ts"
   },
   "files": [
     "src",
@@ -124,8 +76,5 @@
     "!src/__tests__",
     "!dist/__tests__"
   ],
-  "devDependencies": {
-    "@types/katex": "^0.16.7",
-    "@types/lodash.clonedeep": "^4.5.9"
-  }
+  "version": "0.20.0"
 }

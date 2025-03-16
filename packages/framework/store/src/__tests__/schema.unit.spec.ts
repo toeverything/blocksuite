@@ -1,24 +1,23 @@
 import { literal } from 'lit/static-html.js';
 import { describe, expect, it, vi } from 'vitest';
 
+import { BlockSchemaExtension } from '../extension/schema.js';
+import { defineBlockSchema } from '../model/block/zod.js';
 // import some blocks
-import { type BlockModel, defineBlockSchema } from '../schema/base.js';
 import { SchemaValidateError } from '../schema/error.js';
-import { Schema } from '../schema/index.js';
-import { DocCollection, IdGeneratorType } from '../store/index.js';
+import { createAutoIncrementIdGenerator } from '../test/index.js';
+import { TestWorkspace } from '../test/test-workspace.js';
 import {
-  DividerBlockSchema,
-  ListBlockSchema,
-  NoteBlockSchema,
-  ParagraphBlockSchema,
-  RootBlockSchema,
+  DividerBlockSchemaExtension,
+  ListBlockSchemaExtension,
+  NoteBlockSchemaExtension,
+  ParagraphBlockSchemaExtension,
+  RootBlockSchemaExtension,
 } from './test-schema.js';
 
 function createTestOptions() {
-  const idGenerator = IdGeneratorType.AutoIncrement;
-  const schema = new Schema();
-  schema.register(BlockSchemas);
-  return { id: 'test-collection', idGenerator, schema };
+  const idGenerator = createAutoIncrementIdGenerator();
+  return { id: 'test-collection', idGenerator };
 }
 
 const TestCustomNoteBlockSchema = defineBlockSchema({
@@ -34,6 +33,10 @@ const TestCustomNoteBlockSchema = defineBlockSchema({
   },
 });
 
+const TestCustomNoteBlockSchemaExtension = BlockSchemaExtension(
+  TestCustomNoteBlockSchema
+);
+
 const TestInvalidNoteBlockSchema = defineBlockSchema({
   flavour: 'affine:note-invalid-block-video',
   props: internal => ({
@@ -47,22 +50,26 @@ const TestInvalidNoteBlockSchema = defineBlockSchema({
   },
 });
 
-const BlockSchemas = [
-  RootBlockSchema,
-  ParagraphBlockSchema,
-  ListBlockSchema,
-  NoteBlockSchema,
-  DividerBlockSchema,
-  TestCustomNoteBlockSchema,
-  TestInvalidNoteBlockSchema,
+const TestInvalidNoteBlockSchemaExtension = BlockSchemaExtension(
+  TestInvalidNoteBlockSchema
+);
+
+const extensions = [
+  RootBlockSchemaExtension,
+  ParagraphBlockSchemaExtension,
+  ListBlockSchemaExtension,
+  NoteBlockSchemaExtension,
+  DividerBlockSchemaExtension,
+  TestCustomNoteBlockSchemaExtension,
+  TestInvalidNoteBlockSchemaExtension,
 ];
 
 const defaultDocId = 'doc0';
 function createTestDoc(docId = defaultDocId) {
   const options = createTestOptions();
-  const collection = new DocCollection(options);
+  const collection = new TestWorkspace(options);
   collection.meta.initialize();
-  const doc = collection.createDoc({ id: docId });
+  const doc = collection.createDoc({ id: docId, extensions });
   doc.load();
   return doc;
 }
@@ -122,12 +129,3 @@ describe('schema', () => {
     });
   });
 });
-
-declare global {
-  namespace BlockSuite {
-    interface BlockModels {
-      'affine:note-block-video': BlockModel;
-      'affine:note-invalid-block-video': BlockModel;
-    }
-  }
-}

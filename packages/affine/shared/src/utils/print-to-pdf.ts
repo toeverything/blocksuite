@@ -74,7 +74,7 @@ export async function printToPdf(
         const canvasImgObjectUrl = await new Promise<Blob | null>(resolve => {
           try {
             canvas.toBlob(resolve);
-          } catch (_e) {
+          } catch {
             resolve(null);
           }
         });

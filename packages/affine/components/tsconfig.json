@@ -1,29 +1,17 @@
 {
-  "extends": "../../../tsconfig.json",
+  "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "rootDir": "./src/",
-    "outDir": "./dist/",
-    "noEmit": false
+    "rootDir": "./src",
+    "outDir": "./dist",
+    "tsBuildInfoFile": "./dist/tsconfig.tsbuildinfo"
   },
   "include": ["./src"],
   "references": [
-    {
-      "path": "../../framework/global"
-    },
-    {
-      "path": "../../framework/store"
-    },
-    {
-      "path": "../../framework/block-std"
-    },
-    {
-      "path": "../../framework/inline"
-    },
-    {
-      "path": "../shared"
-    },
-    {
-      "path": "../model"
-    }
+    { "path": "../model" },
+    { "path": "../shared" },
+    { "path": "../../framework/block-std" },
+    { "path": "../../framework/global" },
+    { "path": "../../framework/inline" },
+    { "path": "../../framework/store" }
   ]
 }

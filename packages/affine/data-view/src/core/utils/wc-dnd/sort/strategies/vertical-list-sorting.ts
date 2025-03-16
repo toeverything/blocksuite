@@ -12,7 +12,7 @@ export const verticalListSortingStrategy: SortingStrategy = ({
   overIndex,
 }) => {
   const activeNodeRect = rects[activeIndex] ?? fallbackActiveRect;
-
+  if (!activeNodeRect) return [];
   const strategy = (index: number) => {
     if (index === activeIndex) {
       const overIndexRect = rects[overIndex];

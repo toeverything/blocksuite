@@ -1,0 +1,49 @@
+[
+  {
+    "type": "block",
+    "id": "",
+    "flavour": "affine:note",
+    "props": {},
+    "children": [
+      {
+        "type": "block",
+        "id": "2",
+        "flavour": "affine:paragraph",
+        "version": 1,
+        "props": {
+          "type": "text",
+          "text": {
+            "$blocksuite:internal:text$": true,
+            "delta": [
+              {
+                "insert": "bc"
+              }
+            ]
+          },
+          "collapsed": false
+        },
+        "children": [
+          {
+            "type": "block",
+            "id": "3",
+            "flavour": "affine:paragraph",
+            "version": 1,
+            "props": {
+              "type": "text",
+              "text": {
+                "$blocksuite:internal:text$": true,
+                "delta": [
+                  {
+                    "insert": "d"
+                  }
+                ]
+              },
+              "collapsed": false
+            },
+            "children": []
+          }
+        ]
+      }
+    ]
+  }
+]

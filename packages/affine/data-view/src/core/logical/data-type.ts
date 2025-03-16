@@ -50,9 +50,9 @@ export class DataType<
 > implements TypeDefinition
 {
   constructor(
-    private name: Name,
+    private readonly name: Name,
     _dataSchema: DataSchema,
-    private valueSchema: ValueSchema
+    private readonly valueSchema: ValueSchema
   ) {}
 
   instance(literal?: Zod.TypeOf<DataSchema>) {

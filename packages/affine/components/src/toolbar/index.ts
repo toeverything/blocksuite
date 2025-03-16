@@ -8,13 +8,16 @@ import { EditorToolbarSeparator } from './separator.js';
 import { EditorToolbar } from './toolbar.js';
 import { Tooltip } from './tooltip.js';
 
+export { ToolbarMoreMenuConfigExtension } from './config.js';
 export { EditorIconButton } from './icon-button.js';
 export {
   EditorMenuAction,
   EditorMenuButton,
   EditorMenuContent,
 } from './menu-button.js';
+export { MenuContext } from './menu-context.js';
 export { EditorToolbarSeparator } from './separator.js';
+export { darkToolbarStyles, lightToolbarStyles } from './styles.js';
 export { EditorToolbar } from './toolbar.js';
 export { Tooltip } from './tooltip.js';
 export type {
@@ -22,9 +25,11 @@ export type {
   FatMenuItems,
   MenuItem,
   MenuItemGroup,
+  ToolbarMoreMenuConfig,
 } from './types.js';
 export {
   cloneGroups,
+  getMoreMenuConfig,
   groupsToActions,
   renderActions,
   renderGroups,

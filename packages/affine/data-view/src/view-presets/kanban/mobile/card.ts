@@ -1,7 +1,7 @@
 import { popupTargetFromElement } from '@blocksuite/affine-components/context-menu';
 import { unsafeCSSVarV2 } from '@blocksuite/affine-shared/theme';
 import { ShadowlessElement } from '@blocksuite/block-std';
-import { SignalWatcher, WithDisposable } from '@blocksuite/global/utils';
+import { SignalWatcher, WithDisposable } from '@blocksuite/global/lit';
 import { CenterPeekIcon, MoreHorizontalIcon } from '@blocksuite/icons/lit';
 import { css } from 'lit';
 import { property, state } from 'lit/decorators.js';
@@ -11,7 +11,6 @@ import { html } from 'lit/static-html.js';
 
 import type { DataViewRenderer } from '../../../core/data-view.js';
 import type { KanbanColumn, KanbanSingleView } from '../kanban-view-manager.js';
-
 import { popCardMenu } from './menu.js';
 
 const styles = css`
@@ -92,7 +91,7 @@ export class MobileKanbanCard extends SignalWatcher(
 ) {
   static override styles = styles;
 
-  private clickCenterPeek = (e: MouseEvent) => {
+  private readonly clickCenterPeek = (e: MouseEvent) => {
     e.stopPropagation();
     this.dataViewEle.openDetailPanel({
       view: this.view,
@@ -100,7 +99,7 @@ export class MobileKanbanCard extends SignalWatcher(
     });
   };
 
-  private clickMore = (e: MouseEvent) => {
+  private readonly clickMore = (e: MouseEvent) => {
     e.stopPropagation();
     popCardMenu(
       popupTargetFromElement(e.currentTarget as HTMLElement),

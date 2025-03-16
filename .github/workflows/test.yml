@@ -153,17 +153,8 @@ jobs:
         with:
           main-branch-name: master
 
-      - name: Run eslint
-        run: yarn lint
-
       - name: Run format check
         run: yarn lint:format
-
-      - name: Run lit lint
-        run: yarn lint:lit
-
-      - name: Node Environment Test
-        run: yarn test:node
 
   build:
     name: Build
@@ -183,14 +174,8 @@ jobs:
       - name: Check dedupe
         run: yarn dedupe --check
 
-      - name: Run type check
-        run: yarn test:type
-
       - name: Run build
-        run: yarn build:packages
-
-      - name: Run circular imports detect
-        run: yarn lint:circular
+        run: yarn build
 
   build-and-test:
     if: ${{ always() }}

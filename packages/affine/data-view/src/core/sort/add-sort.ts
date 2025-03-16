@@ -4,9 +4,8 @@ import {
   type PopupTarget,
 } from '@blocksuite/affine-components/context-menu';
 
-import type { SortUtils } from './utils.js';
-
 import { renderUniLit } from '../utils/index.js';
+import type { SortUtils } from './utils.js';
 
 export const popCreateSort = (
   target: PopupTarget,

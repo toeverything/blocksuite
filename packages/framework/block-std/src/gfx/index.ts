@@ -1,3 +1,4 @@
+export { generateKeyBetweenV2 } from '../utils/fractional-indexing.js';
 export {
   compare as compareLayer,
   renderableInEdgeless,
@@ -6,11 +7,11 @@ export {
 export {
   canSafeAddToContainer,
   descendantElementsImpl,
-  getAncestorContainersImpl,
   getTopElements,
   hasDescendantElementImpl,
 } from '../utils/tree.js';
 export { GfxController } from './controller.js';
+export type { CursorType, StandardCursor } from './cursor.js';
 export { GfxExtension, GfxExtensionIdentifier } from './extension.js';
 export { GridManager } from './grid.js';
 export { GfxControllerIdentifier } from './identifiers.js';
@@ -49,22 +50,25 @@ export {
 export {
   type BaseElementProps,
   GfxGroupLikeElementModel,
-  GfxLocalElementModel,
   GfxPrimitiveElementModel,
   type SerializedElement,
 } from './model/surface/element-model.js';
 export {
+  GfxLocalElementModel,
+  prop,
+} from './model/surface/local-element-model.js';
+export {
+  SURFACE_TEXT_UNIQ_IDENTIFIER,
+  SURFACE_YMAP_UNIQ_IDENTIFIER,
   SurfaceBlockModel,
   type SurfaceBlockProps,
   type SurfaceMiddleware,
 } from './model/surface/surface-model.js';
 export { GfxSelectionManager } from './selection.js';
-
 export {
   SurfaceMiddlewareBuilder,
   SurfaceMiddlewareExtension,
 } from './surface-middleware.js';
-
 export {
   BaseTool,
   type GfxToolsFullOption,
@@ -73,6 +77,12 @@ export {
   type GfxToolsOption,
 } from './tool/tool.js';
 export { MouseButton, ToolController } from './tool/tool-controller.js';
+export {
+  type EventsHandlerMap,
+  GfxElementModelView,
+  type SupportedEvent,
+} from './view/view.js';
+export { ViewManager } from './view/view-manager.js';
 export * from './viewport.js';
 export { GfxViewportElement } from './viewport-element.js';
 export { generateKeyBetween, generateNKeysBetween } from 'fractional-indexing';

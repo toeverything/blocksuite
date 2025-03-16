@@ -1,5 +1,5 @@
 import { ShadowlessElement } from '@blocksuite/block-std';
-import { SignalWatcher, WithDisposable } from '@blocksuite/global/utils';
+import { SignalWatcher, WithDisposable } from '@blocksuite/global/lit';
 import { css, html, type PropertyValues, type TemplateResult } from 'lit';
 import { property, query, queryAll, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
@@ -56,7 +56,9 @@ export class Overflow extends SignalWatcher(WithDisposable(ShadowlessElement)) {
 
     let width = 0;
     for (let i = 0; i < this.items.length; i++) {
-      const itemWidth = this.items[i].getBoundingClientRect().width;
+      const item = this.items[i];
+      if (!item) continue;
+      const itemWidth = item.getBoundingClientRect().width;
       // Try to calculate the width occupied by rendering n+1 items;
       // if it exceeds the limit, render n items(in i++ round).
       const totalWidth =

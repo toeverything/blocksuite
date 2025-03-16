@@ -4,29 +4,27 @@ import {
   popupTargetFromElement,
 } from '@blocksuite/affine-components/context-menu';
 import { ShadowlessElement } from '@blocksuite/block-std';
-import { SignalWatcher, WithDisposable } from '@blocksuite/global/utils';
+import { SignalWatcher, WithDisposable } from '@blocksuite/global/lit';
 import {
   DeleteIcon,
   DuplicateIcon,
   MoveLeftIcon,
   MoveRightIcon,
 } from '@blocksuite/icons/lit';
-import { computed } from '@preact/signals-core';
+import { computed, signal } from '@preact/signals-core';
 import { css } from 'lit';
 import { property, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
-import { createRef } from 'lit/directives/ref.js';
 import { html } from 'lit/static-html.js';
 
+import { inputConfig, typeConfig } from '../common/property-menu.js';
 import type {
   CellRenderProps,
   DataViewCellLifeCycle,
 } from '../property/index.js';
+import { renderUniLit } from '../utils/uni-component/uni-component.js';
 import type { Property } from '../view-manager/property.js';
 import type { SingleView } from '../view-manager/single-view.js';
-
-import { inputConfig, typeConfig } from '../common/property-menu.js';
-import { renderUniLit } from '../utils/uni-component/uni-component.js';
 
 export class RecordField extends SignalWatcher(
   WithDisposable(ShadowlessElement)
@@ -110,7 +108,7 @@ export class RecordField extends SignalWatcher(
     }
   `;
 
-  private _cell = createRef<DataViewCellLifeCycle>();
+  private readonly _cell = signal<DataViewCellLifeCycle>();
 
   _click = (e: MouseEvent) => {
     e.stopPropagation();
@@ -185,8 +183,7 @@ export class RecordField extends SignalWatcher(
               menu.action({
                 name: 'Duplicate',
                 prefix: DuplicateIcon(),
-                hide: () =>
-                  !this.column.duplicate || this.column.type$.value === 'title',
+                hide: () => !this.column.canDuplicate,
                 select: () => {
                   this.column.duplicate?.();
                 },
@@ -194,8 +191,7 @@ export class RecordField extends SignalWatcher(
               menu.action({
                 name: 'Delete',
                 prefix: DeleteIcon(),
-                hide: () =>
-                  !this.column.delete || this.column.type$.value === 'title',
+                hide: () => !this.column.canDelete,
                 select: () => {
                   this.column.delete?.();
                 },
@@ -241,18 +237,18 @@ export class RecordField extends SignalWatcher(
 
     const props: CellRenderProps = {
       cell: this.cell$.value,
-      isEditing: this.editing,
+      isEditing$: this.isEditing$,
       selectCurrentCell: this.changeEditing,
     };
     const renderer = this.column.renderer$.value;
     if (!renderer) {
       return;
     }
-    const { view, edit } = renderer;
+    const { view } = renderer;
     const contentClass = classMap({
       'field-content': true,
-      empty: !this.editing && this.cell$.value.isEmpty$.value,
-      'is-editing': this.editing,
+      empty: !this.isEditing$.value && this.cell$.value.isEmpty$.value,
+      'is-editing': this.isEditing$.value,
       'is-focus': this.isFocus,
     });
     return html`
@@ -265,7 +261,7 @@ export class RecordField extends SignalWatcher(
         </div>
       </div>
       <div @click="${this._click}" class="${contentClass}">
-        ${renderUniLit(this.editing && edit ? edit : view, props, {
+        ${renderUniLit(view, props, {
           ref: this._cell,
           class: 'kanban-cell',
         })}
@@ -273,8 +269,7 @@ export class RecordField extends SignalWatcher(
     `;
   }
 
-  @state()
-  accessor editing = false;
+  isEditing$ = signal(false);
 
   @state()
   accessor isFocus = false;

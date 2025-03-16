@@ -1,4 +1,4 @@
-import { BaseSelection, SelectionExtension } from '@blocksuite/block-std';
+import { BaseSelection, SelectionExtension } from '@blocksuite/store';
 import z from 'zod';
 
 const ImageSelectionSchema = z.object({
@@ -27,14 +27,6 @@ export class ImageSelection extends BaseSelection {
       type: this.type,
       blockId: this.blockId,
     };
-  }
-}
-
-declare global {
-  namespace BlockSuite {
-    interface Selection {
-      image: typeof ImageSelection;
-    }
   }
 }
 

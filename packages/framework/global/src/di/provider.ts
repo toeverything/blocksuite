@@ -1,11 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { Container } from './container.js';
-import type {
-  GeneralServiceIdentifier,
-  ServiceIdentifierValue,
-  ServiceVariant,
-} from './types.js';
-
 import {
   CircularDependencyError,
   MissingDependencyError,
@@ -13,6 +6,11 @@ import {
   ServiceNotFoundError,
 } from './error.js';
 import { parseIdentifier } from './identifier.js';
+import type {
+  GeneralServiceIdentifier,
+  ServiceIdentifierValue,
+  ServiceVariant,
+} from './types.js';
 
 export interface ResolveOptions {
   sameScope?: boolean;

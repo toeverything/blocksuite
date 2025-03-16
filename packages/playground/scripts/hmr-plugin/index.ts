@@ -1,7 +1,8 @@
 import path from 'node:path';
+
 import {
-  presets,
   hmrPlugin as wcHmrPlugin,
+  presets,
 } from 'vite-plugin-web-components-hmr';
 
 import { fineTuneHmr } from './fine-tune.js';

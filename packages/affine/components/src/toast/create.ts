@@ -1,5 +1,4 @@
 import type { BlockComponent, EditorHost } from '@blocksuite/block-std';
-
 import { html } from 'lit';
 
 import { htmlToElement } from './html-to-element.js';

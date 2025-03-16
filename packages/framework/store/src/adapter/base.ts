@@ -1,14 +1,18 @@
 import { BlockSuiteError } from '@blocksuite/global/exceptions';
 
-import type { Doc } from '../store/index.js';
+import {
+  BlockModel,
+  type DraftModel,
+  type Store,
+  toDraftModel,
+} from '../model/index.js';
 import type { AssetsManager } from '../transformer/assets.js';
-import type { DraftModel, Job, Slice } from '../transformer/index.js';
+import type { Slice, Transformer } from '../transformer/index.js';
 import type {
   BlockSnapshot,
   DocSnapshot,
   SliceSnapshot,
 } from '../transformer/type.js';
-
 import { ASTWalkerContext } from './context.js';
 
 export type FromDocSnapshotPayload = {
@@ -63,19 +67,21 @@ export function wrapFakeNote(snapshot: SliceSnapshot) {
 }
 
 export abstract class BaseAdapter<AdapterTarget = unknown> {
-  job: Job;
+  job: Transformer;
 
   get configs() {
     return this.job.adapterConfigs;
   }
 
-  constructor(job: Job) {
+  constructor(job: Transformer) {
     this.job = job;
   }
 
-  async fromBlock(model: DraftModel) {
+  async fromBlock(model: BlockModel | DraftModel) {
     try {
-      const blockSnapshot = await this.job.blockToSnapshot(model);
+      const draftModel =
+        model instanceof BlockModel ? toDraftModel(model) : model;
+      const blockSnapshot = this.job.blockToSnapshot(draftModel);
       if (!blockSnapshot) return;
       return await this.fromBlockSnapshot({
         snapshot: blockSnapshot,
@@ -94,9 +100,9 @@ export abstract class BaseAdapter<AdapterTarget = unknown> {
     | Promise<FromBlockSnapshotResult<AdapterTarget>>
     | FromBlockSnapshotResult<AdapterTarget>;
 
-  async fromDoc(doc: Doc) {
+  async fromDoc(doc: Store) {
     try {
-      const docSnapshot = await this.job.docToSnapshot(doc);
+      const docSnapshot = this.job.docToSnapshot(doc);
       if (!docSnapshot) return;
       return await this.fromDocSnapshot({
         snapshot: docSnapshot,
@@ -117,7 +123,7 @@ export abstract class BaseAdapter<AdapterTarget = unknown> {
 
   async fromSlice(slice: Slice) {
     try {
-      const sliceSnapshot = await this.job.sliceToSnapshot(slice);
+      const sliceSnapshot = this.job.sliceToSnapshot(slice);
       if (!sliceSnapshot) return;
       wrapFakeNote(sliceSnapshot);
       return await this.fromSliceSnapshot({
@@ -139,7 +145,7 @@ export abstract class BaseAdapter<AdapterTarget = unknown> {
 
   async toBlock(
     payload: ToBlockSnapshotPayload<AdapterTarget>,
-    doc: Doc,
+    doc: Store,
     parent?: string,
     index?: number
   ) {
@@ -176,7 +182,7 @@ export abstract class BaseAdapter<AdapterTarget = unknown> {
 
   async toSlice(
     payload: ToSliceSnapshotPayload<AdapterTarget>,
-    doc: Doc,
+    doc: Store,
     parent?: string,
     index?: number
   ) {
@@ -203,7 +209,7 @@ type WalkerFn<ONode extends object, TNode extends object> = (
   context: ASTWalkerContext<TNode>
 ) => Promise<void> | void;
 
-type NodeProps<Node extends object> = {
+export type NodeProps<Node extends object> = {
   node: Node;
   next?: Node | null;
   parent: NodeProps<Node> | null;
@@ -219,7 +225,7 @@ export class ASTWalker<ONode extends object, TNode extends object | never> {
 
   private _leave: WalkerFn<ONode, TNode> | undefined;
 
-  private _visit = async (o: NodeProps<ONode>) => {
+  private readonly _visit = async (o: NodeProps<ONode>) => {
     if (!o.node) return;
     this.context._skipChildrenNum = 0;
     this.context._skip = false;
@@ -229,6 +235,9 @@ export class ASTWalker<ONode extends object, TNode extends object | never> {
     }
 
     if (this.context._skip) {
+      if (this._leave) {
+        await this._leave(o, this.context);
+      }
       return;
     }
 
@@ -278,7 +287,7 @@ export class ASTWalker<ONode extends object, TNode extends object | never> {
     }
   };
 
-  private context: ASTWalkerContext<TNode>;
+  private readonly context: ASTWalkerContext<TNode>;
 
   setEnter = (fn: WalkerFn<ONode, TNode>) => {
     this._enter = fn;
@@ -296,7 +305,6 @@ export class ASTWalker<ONode extends object, TNode extends object | never> {
     this.context.openNode(tNode);
     await this._visit({ node: oNode, parent: null, prop: null, index: null });
     if (this.context.stack.length !== 1) {
-      console.error(this.context.stack.map(n => n.node));
       throw new BlockSuiteError(1, 'There are unclosed nodes');
     }
     return this.context.currentNode();

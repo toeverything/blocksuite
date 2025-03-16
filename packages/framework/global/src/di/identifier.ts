@@ -1,14 +1,11 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
+import { DEFAULT_SERVICE_VARIANT } from './consts.js';
+import { stableHash } from './stable-hash.js';
 import type {
   ServiceIdentifier,
   ServiceIdentifierValue,
   ServiceVariant,
   Type,
 } from './types.js';
-
-import { DEFAULT_SERVICE_VARIANT } from './consts.js';
-import { stableHash } from './stable-hash.js';
 
 /**
  * create a ServiceIdentifier.
@@ -81,10 +78,11 @@ import { stableHash } from './stable-hash.js';
 export function createIdentifier<T>(
   name: string,
   variant: ServiceVariant = DEFAULT_SERVICE_VARIANT
-): ServiceIdentifier<T> & ((variant: ServiceVariant) => ServiceIdentifier<T>) {
+): ServiceIdentifier<T> &
+  (<U extends T = T>(variant: ServiceVariant) => ServiceIdentifier<U>) {
   return Object.assign(
-    (variant: ServiceVariant) => {
-      return createIdentifier<T>(name, variant);
+    <U extends T = T>(variant: ServiceVariant) => {
+      return createIdentifier<U>(name, variant);
     },
     {
       identifierName: name,

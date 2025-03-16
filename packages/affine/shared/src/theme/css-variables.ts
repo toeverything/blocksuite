@@ -1,14 +1,15 @@
 /* CSS variables. You need to handle all places where `CSS variables` are marked. */
 
-import { LINE_COLORS, SHAPE_FILL_COLORS } from '@blocksuite/affine-model';
+import { LINE_COLORS } from '@blocksuite/affine-model';
 import {
   type AffineCssVariables,
   type AffineTheme,
   cssVar,
 } from '@toeverything/theme';
+export { cssVar } from '@toeverything/theme';
 import { type AffineThemeKeyV2, cssVarV2 } from '@toeverything/theme/v2';
 import { unsafeCSS } from 'lit';
-
+export { cssVarV2 } from '@toeverything/theme/v2';
 export const ColorVariables = [
   '--affine-brand-color',
   '--affine-primary-color',
@@ -66,7 +67,6 @@ export const ColorVariables = [
   '--affine-tag-orange',
   '--affine-tag-gray',
   ...LINE_COLORS,
-  ...SHAPE_FILL_COLORS,
   '--affine-tooltip',
   '--affine-blue',
 ];

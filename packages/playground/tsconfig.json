@@ -1,20 +1,17 @@
 {
-  "extends": "../../tsconfig.json",
+  "extends": "../tsconfig.json",
   "compilerOptions": {
-    "target": "ESNext",
-    "useDefineForClassFields": false,
-    "lib": ["DOM", "DOM.Iterable", "ESNext"],
-    "allowJs": false,
-    "skipLibCheck": true,
-    "esModuleInterop": false,
-    "allowSyntheticDefaultImports": true,
-    "strict": true,
-    "forceConsistentCasingInFileNames": true,
-    "module": "ESNext",
-    "moduleResolution": "Bundler",
-    "noEmit": true,
-    "composite": false
+    "rootDir": ".",
+    "outDir": "./dist",
+    "tsBuildInfoFile": "./dist/tsconfig.tsbuildinfo"
   },
   "include": ["./apps", "./examples"],
-  "references": [{ "path": "./tsconfig.node.json" }]
+  "references": [
+    { "path": "../affine/all" },
+    { "path": "../affine/components" },
+    { "path": "../affine/model" },
+    { "path": "../affine/shared" },
+    { "path": "../affine/data-view" },
+    { "path": "../integration-test" }
+  ]
 }

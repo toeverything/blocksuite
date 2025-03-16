@@ -1,11 +1,5 @@
-import type {
-  Constructor,
-  IVec,
-  SerializedXYWH,
-  XYWH,
-} from '@blocksuite/global/utils';
-
 import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
+import type { IVec, SerializedXYWH, XYWH } from '@blocksuite/global/gfx';
 import {
   Bound,
   deserializeXYWH,
@@ -16,9 +10,17 @@ import {
   polygonGetPointTangent,
   polygonNearestPoint,
   rotatePoints,
-} from '@blocksuite/global/utils';
+} from '@blocksuite/global/gfx';
+import type { Constructor } from '@blocksuite/global/utils';
 import { BlockModel } from '@blocksuite/store';
 
+import {
+  isLockedByAncestorImpl,
+  isLockedBySelfImpl,
+  isLockedImpl,
+  lockElementImpl,
+  unlockElementImpl,
+} from '../../utils/tree.js';
 import type { EditorHost } from '../../view/index.js';
 import type { GfxCompatibleInterface, PointTestOptions } from './base.js';
 import type { GfxGroupModel } from './model.js';
@@ -30,6 +32,7 @@ import type { SurfaceBlockModel } from './surface/surface-model.js';
 export type GfxCompatibleProps = {
   xywh: SerializedXYWH;
   index: string;
+  lockedBySelf?: boolean;
 };
 
 /**
@@ -59,6 +62,59 @@ export class GfxBlockElementModel<
   private _externalXYWH: SerializedXYWH | undefined = undefined;
 
   connectable = true;
+
+  get xywh() {
+    return this.props.xywh;
+  }
+
+  get xywh$() {
+    return this.props.xywh$;
+  }
+
+  set xywh(xywh: SerializedXYWH) {
+    this.props.xywh = xywh;
+  }
+
+  get index() {
+    return this.props.index;
+  }
+
+  get index$() {
+    return this.props.index$;
+  }
+
+  set index(index: string) {
+    this.props.index = index;
+  }
+
+  get lockedBySelf(): boolean | undefined {
+    return this.props.lockedBySelf;
+  }
+
+  get lockedBySelf$() {
+    return this.props.lockedBySelf$;
+  }
+
+  set lockedBySelf(lockedBySelf: boolean | undefined) {
+    this.props.lockedBySelf = lockedBySelf;
+  }
+
+  /**
+   * Defines the extension of the response area beyond the element's bounding box.
+   * This tuple specifies the horizontal and vertical margins to be added to the element's [x, y, width, height].
+   *
+   * The first value represents the horizontal extension (added to both left and right sides),
+   * and the second value represents the vertical extension (added to both top and bottom sides).
+   *
+   * The response area is computed as:
+   * `[x - horizontal, y - vertical, width + 2 * horizontal, height + 2 * vertical]`.
+   *
+   * Example:
+   * - Bounding box: `[0, 0, 100, 100]`, `responseExtension: [10, 20]`
+   *   Resulting response area: `[-10, -20, 120, 140]`.
+   * - `responseExtension: [0, 0]` keeps the response area equal to the bounding box.
+   */
+  responseExtension: [number, number] = [0, 0];
 
   rotate = 0;
 
@@ -101,6 +157,10 @@ export class GfxBlockElementModel<
 
   get h() {
     return this.deserializedXYWH[3];
+  }
+
+  get responseBound() {
+    return this.elementBound.expand(this.responseExtension);
   }
 
   get surface(): SurfaceBlockModel | null {
@@ -168,10 +228,10 @@ export class GfxBlockElementModel<
   includesPoint(
     x: number,
     y: number,
-    _: PointTestOptions,
+    opt: PointTestOptions,
     __: EditorHost
   ): boolean {
-    const bound = Bound.deserialize(this.xywh);
+    const bound = opt.useElementBound ? this.elementBound : this.responseBound;
     return bound.isPointInBound([x, y], 0);
   }
 
@@ -182,6 +242,26 @@ export class GfxBlockElementModel<
         this.getLineIntersections(point, points[(i + 1) % points.length])
       )
     );
+  }
+
+  isLocked(): boolean {
+    return isLockedImpl(this);
+  }
+
+  isLockedByAncestor(): boolean {
+    return isLockedByAncestorImpl(this);
+  }
+
+  isLockedBySelf(): boolean {
+    return isLockedBySelfImpl(this);
+  }
+
+  lock() {
+    lockElementImpl(this.doc, this);
+  }
+
+  unlock() {
+    unlockElementImpl(this.doc, this);
   }
 }
 

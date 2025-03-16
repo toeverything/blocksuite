@@ -1,5 +1,5 @@
 export class Listeners<T extends EventTarget> {
-  private listeners: [
+  private readonly listeners: [
     string,
     EventListenerOrEventListenerObject | null,
     AddEventListenerOptions | boolean | undefined,

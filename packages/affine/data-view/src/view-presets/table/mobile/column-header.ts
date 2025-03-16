@@ -6,7 +6,7 @@ import {
 } from '@blocksuite/affine-components/context-menu';
 import { unsafeCSSVarV2 } from '@blocksuite/affine-shared/theme';
 import { ShadowlessElement } from '@blocksuite/block-std';
-import { SignalWatcher, WithDisposable } from '@blocksuite/global/utils';
+import { SignalWatcher, WithDisposable } from '@blocksuite/global/lit';
 import {
   DeleteIcon,
   DuplicateIcon,
@@ -21,13 +21,11 @@ import { property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
 
-import type { Property } from '../../../core/view-manager/property.js';
-import type { NumberPropertyDataType } from '../../../property-presets/index.js';
-import type { TableColumn, TableSingleView } from '../table-view-manager.js';
-
 import { inputConfig, typeConfig } from '../../../core/common/property-menu.js';
+import type { Property } from '../../../core/view-manager/property.js';
 import { numberFormats } from '../../../property-presets/number/utils/formats.js';
 import { DEFAULT_COLUMN_TITLE_HEIGHT } from '../consts.js';
+import type { TableColumn, TableSingleView } from '../table-view-manager.js';
 
 export class MobileTableColumnHeader extends SignalWatcher(
   WithDisposable(ShadowlessElement)
@@ -54,7 +52,7 @@ export class MobileTableColumnHeader extends SignalWatcher(
     }
   `;
 
-  private _clickColumn = () => {
+  private readonly _clickColumn = () => {
     if (this.tableViewManager.readonly$.value) {
       return;
     }
@@ -92,12 +90,7 @@ export class MobileTableColumnHeader extends SignalWatcher(
                     items: [
                       numberFormatConfig(this.column),
                       ...numberFormats.map(format => {
-                        const data = (
-                          this.column as Property<
-                            number,
-                            NumberPropertyDataType
-                          >
-                        ).data$.value;
+                        const data = this.column.data$.value;
                         return menu.action({
                           isSelected: data.format === format.type,
                           prefix: html`<span
@@ -124,9 +117,7 @@ export class MobileTableColumnHeader extends SignalWatcher(
               menu.action({
                 name: 'Hide In View',
                 prefix: ViewIcon(),
-                hide: () =>
-                  this.column.hide$.value ||
-                  this.column.type$.value === 'title',
+                hide: () => !this.column.hideCanSet,
                 select: () => {
                   this.column.hideSet(true);
                 },
@@ -221,8 +212,7 @@ export class MobileTableColumnHeader extends SignalWatcher(
               menu.action({
                 name: 'Duplicate',
                 prefix: DuplicateIcon(),
-                hide: () =>
-                  !this.column.duplicate || this.column.type$.value === 'title',
+                hide: () => !this.column.canDuplicate,
                 select: () => {
                   this.column.duplicate?.();
                 },
@@ -230,8 +220,7 @@ export class MobileTableColumnHeader extends SignalWatcher(
               menu.action({
                 name: 'Delete',
                 prefix: DeleteIcon(),
-                hide: () =>
-                  !this.column.delete || this.column.type$.value === 'title',
+                hide: () => !this.column.canDelete,
                 select: () => {
                   this.column.delete?.();
                 },

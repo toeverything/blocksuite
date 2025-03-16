@@ -1,11 +1,10 @@
-import type { UIEventDispatcher } from '../dispatcher.js';
-
 import { UIEventState, UIEventStateContext } from '../base.js';
+import type { UIEventDispatcher } from '../dispatcher.js';
 import { ClipboardEventState } from '../state/clipboard.js';
 import { EventScopeSourceType, EventSourceState } from '../state/source.js';
 
 export class ClipboardControl {
-  private _copy = (event: ClipboardEvent) => {
+  private readonly _copy = (event: ClipboardEvent) => {
     const clipboardEventState = new ClipboardEventState({
       event,
     });
@@ -15,7 +14,7 @@ export class ClipboardControl {
     );
   };
 
-  private _cut = (event: ClipboardEvent) => {
+  private readonly _cut = (event: ClipboardEvent) => {
     const clipboardEventState = new ClipboardEventState({
       event,
     });
@@ -25,7 +24,7 @@ export class ClipboardControl {
     );
   };
 
-  private _paste = (event: ClipboardEvent) => {
+  private readonly _paste = (event: ClipboardEvent) => {
     const clipboardEventState = new ClipboardEventState({
       event,
     });
@@ -36,7 +35,7 @@ export class ClipboardControl {
     );
   };
 
-  constructor(private _dispatcher: UIEventDispatcher) {}
+  constructor(private readonly _dispatcher: UIEventDispatcher) {}
 
   private _createContext(event: Event, clipboardState: ClipboardEventState) {
     return UIEventStateContext.from(

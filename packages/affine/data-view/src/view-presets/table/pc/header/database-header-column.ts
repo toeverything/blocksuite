@@ -5,14 +5,16 @@ import {
   popupTargetFromElement,
 } from '@blocksuite/affine-components/context-menu';
 import { ShadowlessElement } from '@blocksuite/block-std';
-import { SignalWatcher, WithDisposable } from '@blocksuite/global/utils';
+import { SignalWatcher, WithDisposable } from '@blocksuite/global/lit';
 import {
   DeleteIcon,
   DuplicateIcon,
+  FilterIcon,
   InsertLeftIcon,
   InsertRightIcon,
   MoveLeftIcon,
   MoveRightIcon,
+  SortIcon,
   ViewIcon,
 } from '@blocksuite/icons/lit';
 import { css } from 'lit';
@@ -22,22 +24,25 @@ import { createRef, ref } from 'lit/directives/ref.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
 
-import type { Property } from '../../../../core/view-manager/property.js';
-import type { NumberPropertyDataType } from '../../../../property-presets/index.js';
-import type { TableColumn, TableSingleView } from '../../table-view-manager.js';
-
 import {
   inputConfig,
   typeConfig,
 } from '../../../../core/common/property-menu.js';
+import { filterTraitKey } from '../../../../core/filter/trait.js';
+import { firstFilterByRef } from '../../../../core/filter/utils.js';
 import { renderUniLit } from '../../../../core/index.js';
+import { sortTraitKey } from '../../../../core/sort/manager.js';
+import { createSortUtils } from '../../../../core/sort/utils.js';
 import {
   draggable,
   dragHandler,
   droppable,
 } from '../../../../core/utils/wc-dnd/dnd-context.js';
+import type { Property } from '../../../../core/view-manager/property.js';
 import { numberFormats } from '../../../../property-presets/number/utils/formats.js';
+import { ShowQuickSettingBarContextKey } from '../../../../widget-presets/quick-setting-bar/context.js';
 import { DEFAULT_COLUMN_TITLE_HEIGHT } from '../../consts.js';
+import type { TableColumn, TableSingleView } from '../../table-view-manager.js';
 import {
   getTableGroupRect,
   getVerticalIndicator,
@@ -57,14 +62,14 @@ export class DatabaseHeaderColumn extends SignalWatcher(
     }
   `;
 
-  private _clickColumn = () => {
+  private readonly _clickColumn = () => {
     if (this.tableViewManager.readonly$.value) {
       return;
     }
     this.popMenu();
   };
 
-  private _clickTypeIcon = (event: MouseEvent) => {
+  private readonly _clickTypeIcon = (event: MouseEvent) => {
     if (this.tableViewManager.readonly$.value) {
       return;
     }
@@ -74,7 +79,7 @@ export class DatabaseHeaderColumn extends SignalWatcher(
     event.stopPropagation();
     popMenu(popupTargetFromElement(this), {
       options: {
-        items: this.tableViewManager.propertyMetas.map(config => {
+        items: this.tableViewManager.propertyMetas$.value.map(config => {
           return menu.action({
             name: config.config.name,
             isSelected: config.type === this.column.type$.value,
@@ -90,7 +95,7 @@ export class DatabaseHeaderColumn extends SignalWatcher(
     });
   };
 
-  private _contextMenu = (e: MouseEvent) => {
+  private readonly _contextMenu = (e: MouseEvent) => {
     if (this.tableViewManager.readonly$.value) {
       return;
     }
@@ -98,7 +103,7 @@ export class DatabaseHeaderColumn extends SignalWatcher(
     this.popMenu(e.currentTarget as HTMLElement);
   };
 
-  private _enterWidthDragBar = () => {
+  private readonly _enterWidthDragBar = () => {
     if (this.tableViewManager.readonly$.value) {
       return;
     }
@@ -109,13 +114,13 @@ export class DatabaseHeaderColumn extends SignalWatcher(
     this.drawWidthDragBar();
   };
 
-  private _leaveWidthDragBar = () => {
+  private readonly _leaveWidthDragBar = () => {
     cancelAnimationFrame(this.drawWidthDragBarTask);
     this.drawWidthDragBarTask = 0;
     getVerticalIndicator().remove();
   };
 
-  private drawWidthDragBar = () => {
+  private readonly drawWidthDragBar = () => {
     const rect = getTableGroupRect(this);
     if (!rect) {
       return;
@@ -130,7 +135,7 @@ export class DatabaseHeaderColumn extends SignalWatcher(
 
   private drawWidthDragBarTask = 0;
 
-  private widthDragBar = createRef();
+  private readonly widthDragBar = createRef();
 
   editTitle = () => {
     this._clickColumn();
@@ -138,6 +143,60 @@ export class DatabaseHeaderColumn extends SignalWatcher(
 
   private get readonly() {
     return this.tableViewManager.readonly$.value;
+  }
+
+  private _addFilter() {
+    const filterTrait = this.tableViewManager.traitGet(filterTraitKey);
+    if (!filterTrait) return;
+
+    const filter = firstFilterByRef(this.tableViewManager.vars$.value, {
+      type: 'ref',
+      name: this.column.id,
+    });
+
+    filterTrait.filterSet({
+      type: 'group',
+      op: 'and',
+      conditions: [filter, ...filterTrait.filter$.value.conditions],
+    });
+
+    this._toggleQuickSettingBar();
+  }
+
+  private _addSort(desc: boolean) {
+    const sortTrait = this.tableViewManager.traitGet(sortTraitKey);
+    if (!sortTrait) return;
+
+    const sortUtils = createSortUtils(
+      sortTrait,
+      this.closest('affine-data-view-renderer')?.view?.eventTrace ?? (() => {})
+    );
+    const sortList = sortUtils.sortList$.value;
+    const existingIndex = sortList.findIndex(
+      sort => sort.ref.name === this.column.id
+    );
+
+    if (existingIndex !== -1) {
+      sortUtils.change(existingIndex, {
+        ref: { type: 'ref', name: this.column.id },
+        desc,
+      });
+    } else {
+      sortUtils.add({
+        ref: { type: 'ref', name: this.column.id },
+        desc,
+      });
+    }
+
+    this._toggleQuickSettingBar();
+  }
+
+  private _toggleQuickSettingBar(show = true) {
+    const map = this.tableViewManager.contextGet(ShowQuickSettingBarContextKey);
+    map.value = {
+      ...map.value,
+      [this.tableViewManager.id]: show,
+    };
   }
 
   private popMenu(ele?: HTMLElement) {
@@ -161,12 +220,7 @@ export class DatabaseHeaderColumn extends SignalWatcher(
                     items: [
                       numberFormatConfig(this.column),
                       ...numberFormats.map(format => {
-                        const data = (
-                          this.column as Property<
-                            number,
-                            NumberPropertyDataType
-                          >
-                        ).data$.value;
+                        const data = this.column.data$.value;
                         return menu.action({
                           isSelected: data.format === format.type,
                           prefix: html`<span
@@ -193,12 +247,29 @@ export class DatabaseHeaderColumn extends SignalWatcher(
               menu.action({
                 name: 'Hide In View',
                 prefix: ViewIcon(),
-                hide: () =>
-                  this.column.hide$.value ||
-                  this.column.type$.value === 'title',
+                hide: () => !this.column.hideCanSet,
                 select: () => {
                   this.column.hideSet(true);
                 },
+              }),
+            ],
+          }),
+          menu.group({
+            items: [
+              menu.action({
+                name: 'Filter',
+                prefix: FilterIcon(),
+                select: () => this._addFilter(),
+              }),
+              menu.action({
+                name: 'Sort Ascending',
+                prefix: SortIcon(),
+                select: () => this._addSort(false),
+              }),
+              menu.action({
+                name: 'Sort Descending',
+                prefix: SortIcon(),
+                select: () => this._addSort(true),
               }),
             ],
           }),
@@ -290,8 +361,7 @@ export class DatabaseHeaderColumn extends SignalWatcher(
               menu.action({
                 name: 'Duplicate',
                 prefix: DuplicateIcon(),
-                hide: () =>
-                  !this.column.duplicate || this.column.type$.value === 'title',
+                hide: () => !this.column.canDuplicate,
                 select: () => {
                   this.column.duplicate?.();
                 },
@@ -299,8 +369,7 @@ export class DatabaseHeaderColumn extends SignalWatcher(
               menu.action({
                 name: 'Delete',
                 prefix: DeleteIcon(),
-                hide: () =>
-                  !this.column.delete || this.column.type$.value === 'title',
+                hide: () => !this.column.canDelete,
                 select: () => {
                   this.column.delete?.();
                 },
@@ -335,13 +404,14 @@ export class DatabaseHeaderColumn extends SignalWatcher(
           }
           const event = context.get('pointerState').raw;
           const target = event.target;
-          if (target instanceof Element) {
-            if (this.widthDragBar.value?.contains(target)) {
-              event.preventDefault();
-              event.stopPropagation();
-              this.widthDragStart(event);
-              return true;
-            }
+          if (
+            target instanceof Element &&
+            this.widthDragBar.value?.contains(target)
+          ) {
+            event.preventDefault();
+            event.stopPropagation();
+            this.widthDragStart(event);
+            return true;
           }
           return false;
         })

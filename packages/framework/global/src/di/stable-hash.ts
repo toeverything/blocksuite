@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 // copied from https://github.com/shuding/stable-hash
 
 // Use WeakMap to store the object-key mapping so the objects can still be

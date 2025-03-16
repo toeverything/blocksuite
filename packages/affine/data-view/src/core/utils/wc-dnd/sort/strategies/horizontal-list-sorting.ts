@@ -12,6 +12,7 @@ export const horizontalListSortingStrategy: SortingStrategy = ({
   overIndex,
 }) => {
   const activeNodeRect = rects[activeIndex] ?? fallbackActiveRect;
+  if (!activeNodeRect) return [];
   const strategy = (index: number) => {
     const itemGap = getItemGap(rects, index, activeIndex);
 
@@ -73,12 +74,22 @@ function getItemGap(
   }
 
   if (activeIndex < index) {
-    return previousRect
-      ? currentRect.left - (previousRect.left + previousRect.width)
-      : nextRect.left - (currentRect.left + currentRect.width);
+    if (previousRect) {
+      return currentRect.left - (previousRect.left + previousRect.width);
+    }
+    if (nextRect) {
+      return nextRect.left - (currentRect.left + currentRect.width);
+    }
+    return 0;
   }
 
-  return nextRect
-    ? nextRect.left - (currentRect.left + currentRect.width)
-    : currentRect.left - (previousRect.left + previousRect.width);
+  if (nextRect) {
+    return nextRect.left - (currentRect.left + currentRect.width);
+  }
+
+  if (previousRect) {
+    return currentRect.left - (previousRect.left + previousRect.width);
+  }
+
+  return 0;
 }

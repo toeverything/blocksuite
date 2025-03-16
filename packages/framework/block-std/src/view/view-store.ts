@@ -1,16 +1,39 @@
-import type { BlockComponent, WidgetComponent } from './element/index.js';
+import { Subject } from 'rxjs';
 
 import { LifeCycleWatcher } from '../extension/index.js';
+import type { BlockComponent, WidgetComponent } from './element/index.js';
+
+type ViewUpdateMethod = 'delete' | 'add';
+
+export type ViewUpdatePayload =
+  | {
+      id: string;
+      method: ViewUpdateMethod;
+      type: 'block';
+      view: BlockComponent;
+    }
+  | {
+      id: string;
+      method: ViewUpdateMethod;
+      type: 'widget';
+      view: WidgetComponent;
+    };
 
 export class ViewStore extends LifeCycleWatcher {
   static override readonly key = 'viewStore';
 
   private readonly _blockMap = new Map<string, BlockComponent>();
 
-  private _fromId = (
+  viewUpdated: Subject<ViewUpdatePayload> = new Subject();
+
+  get views() {
+    return Array.from(this._blockMap.values());
+  }
+
+  private readonly _fromId = (
     blockId: string | undefined | null
   ): BlockComponent | null => {
-    const id = blockId ?? this.std.doc.root?.id;
+    const id = blockId ?? this.std.store.root?.id;
     if (!id) {
       return null;
     }
@@ -20,13 +43,25 @@ export class ViewStore extends LifeCycleWatcher {
   private readonly _widgetMap = new Map<string, WidgetComponent>();
 
   deleteBlock = (node: BlockComponent) => {
-    this._blockMap.delete(node.id);
+    this._blockMap.delete(node.model.id);
+    this.viewUpdated.next({
+      id: node.model.id,
+      method: 'delete',
+      type: 'block',
+      view: node,
+    });
   };
 
   deleteWidget = (node: WidgetComponent) => {
     const id = node.dataset.widgetId as string;
     const widgetIndex = `${node.model.id}|${id}`;
     this._widgetMap.delete(widgetIndex);
+    this.viewUpdated.next({
+      id: node.model.id,
+      method: 'delete',
+      type: 'widget',
+      view: node,
+    });
   };
 
   getBlock = (id: string): BlockComponent | null => {
@@ -42,13 +77,28 @@ export class ViewStore extends LifeCycleWatcher {
   };
 
   setBlock = (node: BlockComponent) => {
+    if (this._blockMap.has(node.model.id)) {
+      this.deleteBlock(node);
+    }
     this._blockMap.set(node.model.id, node);
+    this.viewUpdated.next({
+      id: node.model.id,
+      method: 'add',
+      type: 'block',
+      view: node,
+    });
   };
 
   setWidget = (node: WidgetComponent) => {
     const id = node.dataset.widgetId as string;
     const widgetIndex = `${node.model.id}|${id}`;
     this._widgetMap.set(widgetIndex, node);
+    this.viewUpdated.next({
+      id: node.model.id,
+      method: 'add',
+      type: 'widget',
+      view: node,
+    });
   };
 
   walkThrough = (
@@ -90,5 +140,6 @@ export class ViewStore extends LifeCycleWatcher {
   override unmounted() {
     this._blockMap.clear();
     this._widgetMap.clear();
+    this.viewUpdated.complete();
   }
 }

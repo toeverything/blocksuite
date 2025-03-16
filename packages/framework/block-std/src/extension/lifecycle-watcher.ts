@@ -1,11 +1,9 @@
 import type { Container } from '@blocksuite/global/di';
-
 import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
-
-import type { BlockStdScope } from '../scope/index.js';
+import { Extension } from '@blocksuite/store';
 
 import { LifeCycleWatcherIdentifier, StdIdentifier } from '../identifier.js';
-import { Extension } from './extension.js';
+import type { BlockStdScope } from '../scope/index.js';
 
 /**
  * A life cycle watcher is an extension that watches the life cycle of the editor.

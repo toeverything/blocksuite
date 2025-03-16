@@ -1,12 +1,12 @@
-import type { Slot } from '@blocksuite/global/utils';
+import type { Subject } from 'rxjs';
 
-import type { Doc, DocCollection } from '../store/index.js';
+import type { BlockModel, DraftModel, Store } from '../model/index.js';
 import type { AssetsManager } from './assets.js';
-import type { DraftModel } from './draft.js';
 import type { Slice } from './slice.js';
 import type {
   BlockSnapshot,
   CollectionInfoSnapshot,
+  DocCRUD,
   DocSnapshot,
   SliceSnapshot,
 } from './type.js';
@@ -37,7 +37,7 @@ export type BeforeExportPayload =
       type: 'block';
     }
   | {
-      page: Doc;
+      page: Store;
       type: 'page';
     }
   | {
@@ -48,7 +48,7 @@ export type BeforeExportPayload =
       type: 'info';
     };
 
-export type FinalPayload =
+export type AfterExportPayload =
   | {
       snapshot: BlockSnapshot;
       type: 'block';
@@ -59,7 +59,7 @@ export type FinalPayload =
   | {
       snapshot: DocSnapshot;
       type: 'page';
-      page: Doc;
+      page: Store;
     }
   | {
       snapshot: SliceSnapshot;
@@ -71,18 +71,44 @@ export type FinalPayload =
       type: 'info';
     };
 
-export type JobSlots = {
-  beforeImport: Slot<BeforeImportPayload>;
-  afterImport: Slot<FinalPayload>;
-  beforeExport: Slot<BeforeExportPayload>;
-  afterExport: Slot<FinalPayload>;
+export type AfterImportPayload =
+  | {
+      snapshot: BlockSnapshot;
+      type: 'block';
+      model: BlockModel;
+      parent?: string;
+      index?: number;
+    }
+  | {
+      snapshot: DocSnapshot;
+      type: 'page';
+      page: Store;
+    }
+  | {
+      snapshot: SliceSnapshot;
+      type: 'slice';
+      slice: Slice;
+    }
+  | {
+      snapshot: CollectionInfoSnapshot;
+      type: 'info';
+    };
+
+export type TransformerSlots = {
+  beforeImport: Subject<BeforeImportPayload>;
+  afterImport: Subject<AfterImportPayload>;
+  beforeExport: Subject<BeforeExportPayload>;
+  afterExport: Subject<AfterExportPayload>;
 };
 
-type JobMiddlewareOptions = {
-  collection: DocCollection;
+type TransformerMiddlewareOptions = {
   assetsManager: AssetsManager;
-  slots: JobSlots;
-  adapterConfigs: Map<string, string>;
+  slots: TransformerSlots;
+  docCRUD: DocCRUD;
+  adapterConfigs: Map<string, unknown>;
+  transformerConfigs: Map<string, unknown>;
 };
 
-export type JobMiddleware = (options: JobMiddlewareOptions) => void;
+export type TransformerMiddleware = (
+  options: TransformerMiddlewareOptions
+) => void;

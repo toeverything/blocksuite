@@ -1,11 +1,9 @@
-import type { BaseTextAttributes, DeltaInsert } from '@blocksuite/inline';
-
 import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
+import type { BaseTextAttributes, DeltaInsert } from '@blocksuite/inline';
 import { type Signal, signal } from '@preact/signals-core';
 import * as Y from 'yjs';
 
 export interface OptionalAttributes {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   attributes?: Record<string, any>;
 }
 
@@ -15,12 +13,12 @@ export type DeltaOperation = {
   retain?: number;
 } & OptionalAttributes;
 
-export type OnTextChange = (data: Y.Text) => void;
+export type OnTextChange = (data: Y.Text, isLocal: boolean) => void;
 
 export class Text {
-  private _deltas$: Signal<DeltaOperation[]>;
+  private readonly _deltas$: Signal<DeltaOperation[]>;
 
-  private _length$: Signal<number>;
+  private readonly _length$: Signal<number>;
 
   private _onChange?: OnTextChange;
 
@@ -69,10 +67,17 @@ export class Text {
 
     this._length$ = signal(length);
     this._deltas$ = signal(this._yText.doc ? this._yText.toDelta() : []);
-    this._yText.observe(() => {
+    this._yText.observe(event => {
+      const isLocal =
+        !event.transaction.origin ||
+        !this._yText.doc ||
+        event.transaction.origin instanceof Y.UndoManager ||
+        event.transaction.origin.proxy
+          ? true
+          : event.transaction.origin === this._yText.doc.clientID;
       this._length$.value = this._yText.length;
       this._deltas$.value = this._yText.toDelta();
-      this._onChange?.(this._yText);
+      this._onChange?.(this._yText, isLocal);
     });
   }
 
@@ -132,7 +137,6 @@ export class Text {
     });
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   format(index: number, length: number, format: any) {
     if (length === 0) {
       return;
@@ -163,7 +167,7 @@ export class Text {
         'Failed to insert text! Index or length out of range, index: ' +
           index +
           ', length: ' +
-          length +
+          content.length +
           ', text length: ' +
           this._yText.length
       );
@@ -226,6 +230,7 @@ export class Text {
 
     if (delta && delta instanceof Array) {
       let charNum = 0;
+      // eslint-disable-next-line @typescript-eslint/prefer-for-of
       for (let i = 0; i < delta.length; i++) {
         const content = delta[i];
         let contentText: string = content.insert || '';

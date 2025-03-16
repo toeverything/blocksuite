@@ -3,14 +3,12 @@ import type {
   EventTraceFn,
   SortParams,
 } from '@blocksuite/affine-shared/services';
-
 import { computed, type ReadonlySignal } from '@preact/signals-core';
 
 import type { Variable } from '../expression/index.js';
+import { arrayMove } from '../utils/wc-dnd/utils/array-move.js';
 import type { SortManager } from './manager.js';
 import type { SortBy } from './types.js';
-
-import { arrayMove } from '../utils/wc-dnd/utils/array-move.js';
 
 export interface SortUtils {
   sortList$: ReadonlySignal<SortBy[]>;

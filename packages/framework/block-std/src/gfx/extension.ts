@@ -1,9 +1,8 @@
 import { type Container, createIdentifier } from '@blocksuite/global/di';
 import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
+import { Extension } from '@blocksuite/store';
 
 import type { GfxController } from './controller.js';
-
-import { Extension } from '../extension/extension.js';
 import { GfxControllerIdentifier } from './identifiers.js';
 
 export const GfxExtensionIdentifier =

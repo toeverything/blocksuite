@@ -1,7 +1,5 @@
 import hash from '@emotion/hash';
 
-import type { GroupByConfig } from './types.js';
-
 import { MatcherCreator } from '../logical/matcher.js';
 import { t } from '../logical/type-presets.js';
 import { createUniComponentFromWebComponent } from '../utils/uni-component/uni-component.js';
@@ -9,6 +7,7 @@ import { BooleanGroupView } from './renderer/boolean-group.js';
 import { NumberGroupView } from './renderer/number-group.js';
 import { SelectGroupView } from './renderer/select-group.js';
 import { StringGroupView } from './renderer/string-group.js';
+import type { GroupByConfig } from './types.js';
 
 const groupByMatcherCreator = new MatcherCreator<GroupByConfig>();
 const ungroups = {
@@ -43,7 +42,7 @@ export const groupByMatchers = [
       return [
         {
           key: `${value}`,
-          value,
+          value: value.toString(),
         },
       ];
     },
@@ -73,13 +72,11 @@ export const groupByMatchers = [
       if (value == null) {
         return [ungroups];
       }
-      if (Array.isArray(value)) {
-        if (value.length) {
-          return value.map(id => ({
-            key: `${id}`,
-            value: id,
-          }));
-        }
+      if (Array.isArray(value) && value.length) {
+        return value.map(id => ({
+          key: `${id}`,
+          value: id,
+        }));
       }
       return [ungroups];
     },
@@ -137,7 +134,7 @@ export const groupByMatchers = [
         },
       ];
     },
-    addToGroup: value => (typeof value === 'number' ? value * 10 : undefined),
+    addToGroup: value => (typeof value === 'number' ? value * 10 : null),
     view: createUniComponentFromWebComponent(NumberGroupView),
   }),
   groupByMatcherCreator.createMatcher(t.boolean.instance(), {

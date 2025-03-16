@@ -1,4 +1,13 @@
-import type { EmbedCardStyle } from '@blocksuite/affine-model';
+import {
+  type EmbedCardStyle,
+  EmbedFigmaModel,
+  EmbedGithubModel,
+  EmbedHtmlModel,
+  EmbedLinkedDocModel,
+  EmbedLoomModel,
+  EmbedSyncedDocModel,
+  EmbedYoutubeModel,
+} from '@blocksuite/affine-model';
 
 export const BLOCK_CHILDREN_CONTAINER_PADDING_LEFT = 24;
 export const EDGELESS_BLOCK_CHILD_PADDING = 24;
@@ -20,7 +29,7 @@ export const EMBED_CARD_WIDTH: Record<EmbedCardStyle, number> = {
   video: 752,
   figma: 752,
   html: 752,
-  syncedDoc: 752,
+  syncedDoc: 800,
   pdf: 537 + 24 + 2,
 };
 
@@ -48,6 +57,16 @@ export const EMBED_BLOCK_FLAVOUR_LIST = [
   'affine:embed-loom',
 ] as const;
 
+export const EMBED_BLOCK_MODEL_LIST = [
+  EmbedGithubModel,
+  EmbedYoutubeModel,
+  EmbedFigmaModel,
+  EmbedLinkedDocModel,
+  EmbedSyncedDocModel,
+  EmbedHtmlModel,
+  EmbedLoomModel,
+] as const;
+
 export const DEFAULT_IMAGE_PROXY_ENDPOINT =
   'https://affine-worker.toeverything.workers.dev/api/worker/image-proxy';
 
@@ -59,9 +78,10 @@ export const DEFAULT_LINK_PREVIEW_ENDPOINT =
 export const CANVAS_EXPORT_IGNORE_TAGS = [
   'EDGELESS-TOOLBAR-WIDGET',
   'AFFINE-DRAG-HANDLE-WIDGET',
-  'AFFINE-FORMAT-BAR-WIDGET',
+  'AFFINE-TOOLBAR-WIDGET',
   'AFFINE-BLOCK-SELECTION',
 ];
 
 export * from './bracket-pairs.js';
 export * from './note.js';
+export * from './text.js';

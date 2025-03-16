@@ -1,26 +1,19 @@
-import type { YArrayEvent, YMapEvent } from 'yjs';
-
 import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
+import type { YArrayEvent, YMapEvent } from 'yjs';
 import { Array as YArray, Map as YMap } from 'yjs';
 
-import type { UnRecord } from './utils.js';
-
+import { BaseReactiveYData } from './base-reactive-data.js';
 import { Boxed, type OnBoxedChange } from './boxed.js';
+import { proxies } from './memory.js';
+import { native2Y, y2Native } from './native-y.js';
 import { type OnTextChange, Text } from './text.js';
-import { BaseReactiveYData, native2Y, y2Native } from './utils.js';
-
-export type ProxyOptions<T> = {
-  onChange?: (data: T) => void;
-};
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const proxies = new WeakMap<any, BaseReactiveYData<any, any>>();
+import type { ProxyOptions, TransformOptions, UnRecord } from './types.js';
 
 export class ReactiveYArray extends BaseReactiveYData<
   unknown[],
   YArray<unknown>
 > {
-  private _observer = (event: YArrayEvent<unknown>) => {
+  private readonly _observer = (event: YArrayEvent<unknown>) => {
     this._onObserve(event, () => {
       let retain = 0;
       event.changes.delta.forEach(change => {
@@ -69,7 +62,7 @@ export class ReactiveYArray extends BaseReactiveYData<
 
         if (this._stashed.has(index)) {
           const result = Reflect.set(target, p, value, receiver);
-          this._options.onChange?.(this._proxy);
+          this._options.onChange?.(this._proxy, true);
           return result;
         }
 
@@ -162,7 +155,7 @@ export class ReactiveYArray extends BaseReactiveYData<
 }
 
 export class ReactiveYMap extends BaseReactiveYData<UnRecord, YMap<unknown>> {
-  private _observer = (event: YMapEvent<unknown>) => {
+  private readonly _observer = (event: YMapEvent<unknown>) => {
     this._onObserve(event, () => {
       event.keysChanged.forEach(key => {
         const type = event.changes.keys.get(key);
@@ -203,7 +196,7 @@ export class ReactiveYMap extends BaseReactiveYData<UnRecord, YMap<unknown>> {
 
         if (this._stashed.has(p)) {
           const result = Reflect.set(target, p, value, receiver);
-          this._options.onChange?.(this._proxy);
+          this._options.onChange?.(this._proxy, true);
           return result;
         }
 
@@ -269,6 +262,7 @@ export class ReactiveYMap extends BaseReactiveYData<UnRecord, YMap<unknown>> {
 
   protected readonly _proxy: UnRecord;
 
+  // eslint-disable-next-line sonarjs/no-identical-functions
   constructor(
     protected readonly _source: UnRecord,
     protected readonly _ySource: YMap<unknown>,
@@ -280,6 +274,7 @@ export class ReactiveYMap extends BaseReactiveYData<UnRecord, YMap<unknown>> {
     _ySource.observe(this._observer);
   }
 
+  // eslint-disable-next-line sonarjs/no-identical-functions
   pop(prop: string) {
     const value = this._source[prop];
     this._stashed.delete(prop);
@@ -299,60 +294,34 @@ export function createYProxy<Data>(
     return proxies.get(yAbstract)!.proxy as Data;
   }
 
-  return y2Native(yAbstract, {
-    transform: (value, origin) => {
-      if (value instanceof Text) {
-        value.bind(options.onChange as OnTextChange);
-        return value;
-      }
-      if (Boxed.is(origin)) {
-        (value as Boxed).bind(options.onChange as OnBoxedChange);
-        return value;
-      }
-      if (origin instanceof YArray) {
-        const data = new ReactiveYArray(
-          value as unknown[],
-          origin,
-          options as ProxyOptions<unknown[]>
-        );
-        return data.proxy;
-      }
-      if (origin instanceof YMap) {
-        const data = new ReactiveYMap(
-          value as UnRecord,
-          origin,
-          options as ProxyOptions<UnRecord>
-        );
-        return data.proxy;
-      }
-
+  const transform: TransformOptions['transform'] = (value, origin) => {
+    if (value instanceof Text) {
+      value.bind(options.onChange as OnTextChange);
       return value;
-    },
-  }) as Data;
-}
+    }
+    if (Boxed.is(origin)) {
+      (value as Boxed).bind(options.onChange as OnBoxedChange);
+      return value;
+    }
+    if (origin instanceof YArray) {
+      const data = new ReactiveYArray(
+        value as unknown[],
+        origin,
+        options as ProxyOptions<unknown[]>
+      );
+      return data.proxy;
+    }
+    if (origin instanceof YMap) {
+      const data = new ReactiveYMap(
+        value as UnRecord,
+        origin,
+        options as ProxyOptions<UnRecord>
+      );
+      return data.proxy;
+    }
 
-export function stashProp(yMap: YMap<unknown>, prop: string): void;
-export function stashProp(yMap: YArray<unknown>, prop: number): void;
-export function stashProp(yAbstract: unknown, prop: string | number) {
-  const proxy = proxies.get(yAbstract);
-  if (!proxy) {
-    throw new BlockSuiteError(
-      ErrorCode.ReactiveProxyError,
-      'YData is not subscribed before changes'
-    );
-  }
-  proxy.stash(prop);
-}
+    return value;
+  };
 
-export function popProp(yMap: YMap<unknown>, prop: string): void;
-export function popProp(yMap: YArray<unknown>, prop: number): void;
-export function popProp(yAbstract: unknown, prop: string | number) {
-  const proxy = proxies.get(yAbstract);
-  if (!proxy) {
-    throw new BlockSuiteError(
-      ErrorCode.ReactiveProxyError,
-      'YData is not subscribed before changes'
-    );
-  }
-  proxy.pop(prop);
+  return y2Native(yAbstract, { transform }) as Data;
 }

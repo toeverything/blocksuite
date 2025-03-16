@@ -7,7 +7,7 @@ import {
   subMenuMiddleware,
 } from '@blocksuite/affine-components/context-menu';
 import { ShadowlessElement } from '@blocksuite/block-std';
-import { SignalWatcher } from '@blocksuite/global/utils';
+import { SignalWatcher } from '@blocksuite/global/lit';
 import {
   ArrowDownSmallIcon,
   ConvertIcon,
@@ -26,7 +26,6 @@ import { repeat } from 'lit/directives/repeat.js';
 import type { Variable } from '../../../core/expression/types.js';
 import type { FilterTrait } from '../../../core/filter/trait.js';
 import type { Filter, FilterGroup } from '../../../core/filter/types.js';
-
 import { popCreateFilter } from '../../../core/index.js';
 import {
   type FilterGroupView,
@@ -159,7 +158,7 @@ export class FilterRootView extends SignalWatcher(ShadowlessElement) {
     }
   `;
 
-  private _setFilter = (index: number, filter: Filter) => {
+  private readonly _setFilter = (index: number, filter: Filter) => {
     this.onChange({
       ...this.filterGroup.value,
       conditions: this.filterGroup.value.conditions.map((v, i) =>
@@ -168,7 +167,7 @@ export class FilterRootView extends SignalWatcher(ShadowlessElement) {
     });
   };
 
-  private expandGroup = (position: PopupTarget, i: number) => {
+  private readonly expandGroup = (position: PopupTarget, i: number) => {
     if (this.filterGroup.value.conditions[i]?.type !== 'group') {
       return;
     }
@@ -203,6 +202,9 @@ export class FilterRootView extends SignalWatcher(ShadowlessElement) {
 
   private _clickConditionOps(target: HTMLElement, i: number) {
     const filter = this.filterGroup.value.conditions[i];
+    if (!filter) {
+      return;
+    }
     popFilterableSimpleMenu(popupTargetFromElement(target), [
       menu.action({
         name: filter.type === 'filter' ? 'Turn into group' : 'Wrap in group',

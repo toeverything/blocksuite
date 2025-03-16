@@ -3,9 +3,6 @@ import type {
   GfxModel,
   SerializedElement,
 } from '@blocksuite/block-std/gfx';
-import type { IVec, PointLocation } from '@blocksuite/global/utils';
-import type { Y } from '@blocksuite/store';
-
 import {
   canSafeAddToContainer,
   field,
@@ -13,8 +10,9 @@ import {
   local,
   observe,
 } from '@blocksuite/block-std/gfx';
-import { Bound, keys, linePolygonIntersects } from '@blocksuite/global/utils';
-import { DocCollection } from '@blocksuite/store';
+import type { IVec, PointLocation } from '@blocksuite/global/gfx';
+import { Bound, linePolygonIntersects } from '@blocksuite/global/gfx';
+import * as Y from 'yjs';
 
 type GroupElementProps = BaseElementProps & {
   children: Y.Map<boolean>;
@@ -37,15 +35,15 @@ export class GroupElementModel extends GfxGroupLikeElementModel<GroupElementProp
     return 'group';
   }
 
-  static override propsToY(props: Record<string, unknown>) {
-    if ('title' in props && !(props.title instanceof DocCollection.Y.Text)) {
-      props.title = new DocCollection.Y.Text(props.title as string);
+  static propsToY(props: Record<string, unknown>) {
+    if (typeof props.title === 'string') {
+      props.title = new Y.Text(props.title as string);
     }
 
-    if (props.children && !(props.children instanceof DocCollection.Y.Map)) {
-      const children = new DocCollection.Y.Map() as Y.Map<boolean>;
+    if (props.children && !(props.children instanceof Y.Map)) {
+      const children = new Y.Map() as Y.Map<boolean>;
 
-      keys(props.children).forEach(key => {
+      Object.keys(props.children).forEach(key => {
         children.set(key as string, true);
       });
 
@@ -91,6 +89,16 @@ export class GroupElementModel extends GfxGroupLikeElementModel<GroupElementProp
     return result as SerializedGroupElement;
   }
 
+  override lock(): void {
+    super.lock();
+    this.showTitle = false;
+  }
+
+  override unlock(): void {
+    super.unlock();
+    this.showTitle = true;
+  }
+
   @observe(
     // use `GroupElementModel` type in decorator will cause playwright error
     (_, instance: GfxGroupLikeElementModel<GroupElementProps>, transaction) => {
@@ -103,23 +111,11 @@ export class GroupElementModel extends GfxGroupLikeElementModel<GroupElementProp
     }
   )
   @field()
-  accessor children: Y.Map<boolean> = new DocCollection.Y.Map<boolean>();
+  accessor children: Y.Map<boolean> = new Y.Map<boolean>();
 
   @local()
   accessor showTitle: boolean = true;
 
   @field()
-  accessor title: Y.Text = new DocCollection.Y.Text();
-}
-
-declare global {
-  namespace BlockSuite {
-    interface SurfaceGroupLikeModelMap {
-      group: GroupElementModel;
-    }
-
-    interface SurfaceElementModelMap {
-      group: GroupElementModel;
-    }
-  }
+  accessor title: Y.Text = new Y.Text();
 }

@@ -1,20 +1,19 @@
+import type { UniComponent } from '@blocksuite/affine-shared/types';
 import type { InsertToPosition } from '@blocksuite/affine-shared/utils';
-
 import { computed, type ReadonlySignal, signal } from '@preact/signals-core';
 
 import type { DataViewContextKey } from '../data-source/context.js';
 import type { Variable } from '../expression/types.js';
 import type { TypeInstance } from '../logical/type.js';
 import type { PropertyMetaConfig } from '../property/property-config.js';
+import { fromJson } from '../property/utils';
 import type { TraitKey } from '../traits/key.js';
 import type { DatabaseFlags } from '../types.js';
-import type { UniComponent } from '../utils/uni-component/index.js';
 import type { DataViewDataType, ViewMeta } from '../view/data-view.js';
-import type { Property } from './property.js';
-import type { ViewManager } from './view-manager.js';
-
 import { type Cell, CellBase } from './cell.js';
+import type { Property } from './property.js';
 import { type Row, RowBase } from './row.js';
+import type { ViewManager } from './view-manager.js';
 
 export type MainProperties = {
   titleColumn?: string;
@@ -51,7 +50,9 @@ export interface SingleView {
 
   cellValueSet(rowId: string, propertyId: string, value: unknown): void;
 
-  cellJsonValueGet(rowId: string, propertyId: string): unknown;
+  cellJsonValueGet(rowId: string, propertyId: string): unknown | null;
+
+  cellJsonValueSet(rowId: string, propertyId: string, value: unknown): void;
 
   cellStringValueGet(rowId: string, propertyId: string): string | undefined;
 
@@ -75,17 +76,24 @@ export interface SingleView {
 
   rowGet(rowId: string): Row;
 
-  rowPrevGet(rowId: string): string;
+  rowPrevGet(rowId: string): string | undefined;
 
-  rowNextGet(rowId: string): string;
+  rowNextGet(rowId: string): string | undefined;
 
-  readonly propertyMetas: PropertyMetaConfig[];
+  readonly propertyMetas$: ReadonlySignal<PropertyMetaConfig[]>;
 
-  propertyAdd(toAfterOfProperty: InsertToPosition, type?: string): string;
+  propertyAdd(
+    toAfterOfProperty: InsertToPosition,
+    type?: string
+  ): string | undefined;
 
   propertyDelete(propertyId: string): void;
 
+  propertyCanDelete(propertyId: string): boolean;
+
   propertyDuplicate(propertyId: string): void;
+
+  propertyCanDuplicate(propertyId: string): boolean;
 
   propertyGet(propertyId: string): Property;
 
@@ -103,9 +111,13 @@ export interface SingleView {
 
   propertyTypeSet(propertyId: string, type: string): void;
 
+  propertyTypeCanSet(propertyId: string): boolean;
+
   propertyHideGet(propertyId: string): boolean;
 
   propertyHideSet(propertyId: string, hide: boolean): void;
+
+  propertyCanHide(propertyId: string): boolean;
 
   propertyDataGet(propertyId: string): Record<string, unknown>;
 
@@ -115,7 +127,7 @@ export interface SingleView {
 
   propertyIndexGet(propertyId: string): number;
 
-  propertyIdGetByIndex(index: number): string;
+  propertyIdGetByIndex(index: number): string | undefined;
 
   propertyReadonlyGet(propertyId: string): boolean;
 
@@ -138,9 +150,9 @@ export abstract class SingleViewBase<
   ViewData extends DataViewDataType = DataViewDataType,
 > implements SingleView
 {
-  private searchString = signal('');
+  private readonly searchString = signal('');
 
-  private traitMap = new Map<symbol, unknown>();
+  private readonly traitMap = new Map<symbol, unknown>();
 
   data$ = computed(() => {
     return this.dataSource.viewDataGet(this.id) as ViewData | undefined;
@@ -182,13 +194,16 @@ export abstract class SingleViewBase<
   });
 
   vars$ = computed(() => {
-    return this.propertiesWithoutFilter$.value.map(id => {
+    return this.propertiesWithoutFilter$.value.flatMap(id => {
       const v = this.propertyGet(id);
       const propertyMeta = this.dataSource.propertyMetaGet(v.type$.value);
+      if (!propertyMeta) {
+        return [];
+      }
       return {
         id: v.id,
         name: v.name$.value,
-        type: propertyMeta.config.type({
+        type: propertyMeta.config.jsonValue.type({
           data: v.data$.value,
           dataSource: this.dataSource,
         }),
@@ -214,8 +229,8 @@ export abstract class SingleViewBase<
     return this.dataSource.viewMetaGet(this.type);
   }
 
-  get propertyMetas(): PropertyMetaConfig[] {
-    return this.dataSource.propertyMetas;
+  get propertyMetas$() {
+    return this.dataSource.propertyMetas$;
   }
 
   abstract get type(): string;
@@ -224,6 +239,22 @@ export abstract class SingleViewBase<
     public manager: ViewManager,
     public id: string
   ) {}
+
+  propertyCanDelete(propertyId: string): boolean {
+    return this.dataSource.propertyCanDelete(propertyId);
+  }
+
+  propertyCanDuplicate(propertyId: string): boolean {
+    return this.dataSource.propertyCanDuplicate(propertyId);
+  }
+
+  propertyTypeCanSet(propertyId: string): boolean {
+    return this.dataSource.propertyTypeCanSet(propertyId);
+  }
+
+  propertyCanHide(propertyId: string): boolean {
+    return this.propertyTypeGet(propertyId) !== 'title';
+  }
 
   private searchRowsMapping(rows: string[], searchString: string): string[] {
     return rows.filter(id => {
@@ -247,16 +278,35 @@ export abstract class SingleViewBase<
     return new CellBase(this, propertyId, rowId);
   }
 
-  cellJsonValueGet(rowId: string, propertyId: string): unknown {
+  cellJsonValueGet(rowId: string, propertyId: string): unknown | null {
+    const type = this.propertyTypeGet(propertyId);
+    if (!type) {
+      return null;
+    }
+    return (
+      this.dataSource.propertyMetaGet(type)?.config.rawValue.toJson({
+        value: this.dataSource.cellValueGet(rowId, propertyId),
+        data: this.propertyDataGet(propertyId),
+        dataSource: this.dataSource,
+      }) ?? null
+    );
+  }
+
+  cellJsonValueSet(rowId: string, propertyId: string, value: unknown): void {
     const type = this.propertyTypeGet(propertyId);
     if (!type) {
       return;
     }
-    return this.dataSource.propertyMetaGet(type).config.cellToJson({
-      value: this.dataSource.cellValueGet(rowId, propertyId),
+    const config = this.dataSource.propertyMetaGet(type)?.config;
+    if (!config) {
+      return;
+    }
+    const rawValue = fromJson(config, {
+      value: value,
       data: this.propertyDataGet(propertyId),
       dataSource: this.dataSource,
     });
+    this.dataSource.cellValueChange(rowId, propertyId, rawValue);
   }
 
   cellStringValueGet(rowId: string, propertyId: string): string | undefined {
@@ -265,10 +315,9 @@ export abstract class SingleViewBase<
       return;
     }
     return (
-      this.dataSource.propertyMetaGet(type).config.cellToString({
+      this.dataSource.propertyMetaGet(type)?.config.rawValue.toString({
         value: this.dataSource.cellValueGet(rowId, propertyId),
         data: this.propertyDataGet(propertyId),
-        dataSource: this.dataSource,
       }) ?? ''
     );
   }
@@ -278,14 +327,7 @@ export abstract class SingleViewBase<
     if (!type) {
       return;
     }
-    const cellValue = this.dataSource.cellValueGet(rowId, propertyId);
-    return (
-      this.dataSource.propertyMetaGet(type).config.formatValue?.({
-        value: cellValue,
-        data: this.propertyDataGet(propertyId),
-        dataSource: this.dataSource,
-      }) ?? cellValue
-    );
+    return this.dataSource.cellValueGet(rowId, propertyId);
   }
 
   cellValueSet(rowId: string, propertyId: string, value: unknown): void {
@@ -322,8 +364,11 @@ export abstract class SingleViewBase<
     });
   }
 
-  propertyAdd(position: InsertToPosition, type?: string): string {
+  propertyAdd(position: InsertToPosition, type?: string): string | undefined {
     const id = this.dataSource.propertyAdd(position, type);
+    if (!id) {
+      return;
+    }
     this.propertyMove(id, position);
     return id;
   }
@@ -341,7 +386,11 @@ export abstract class SingleViewBase<
     if (!type) {
       return;
     }
-    return this.dataSource.propertyMetaGet(type).config.type({
+    const meta = this.dataSource.propertyMetaGet(type);
+    if (!meta) {
+      return;
+    }
+    return meta.config.jsonValue.type({
       data: this.propertyDataGet(propertyId),
       dataSource: this.dataSource,
     });
@@ -353,6 +402,9 @@ export abstract class SingleViewBase<
 
   propertyDuplicate(propertyId: string): void {
     const id = this.dataSource.propertyDuplicate(propertyId);
+    if (!id) {
+      return;
+    }
     this.propertyMove(id, {
       before: false,
       id: propertyId,
@@ -366,10 +418,10 @@ export abstract class SingleViewBase<
   abstract propertyHideSet(propertyId: string, hide: boolean): void;
 
   propertyIconGet(type: string): UniComponent | undefined {
-    return this.dataSource.propertyMetaGet(type).renderer.icon;
+    return this.dataSource.propertyMetaGet(type)?.renderer.icon;
   }
 
-  propertyIdGetByIndex(index: number): string {
+  propertyIdGetByIndex(index: number): string | undefined {
     return this.propertyIds$.value[index];
   }
 
@@ -377,7 +429,7 @@ export abstract class SingleViewBase<
     return this.propertyIds$.value.indexOf(propertyId);
   }
 
-  propertyMetaGet(type: string): PropertyMetaConfig {
+  propertyMetaGet(type: string): PropertyMetaConfig | undefined {
     return this.dataSource.propertyMetaGet(type);
   }
 
@@ -392,9 +444,10 @@ export abstract class SingleViewBase<
   }
 
   propertyNextGet(propertyId: string): Property | undefined {
-    return this.propertyGet(
-      this.propertyIdGetByIndex(this.propertyIndexGet(propertyId) + 1)
-    );
+    const index = this.propertyIndexGet(propertyId);
+    const nextId = this.propertyIdGetByIndex(index + 1);
+    if (!nextId) return;
+    return this.propertyGet(nextId);
   }
 
   propertyParseValueFromString(propertyId: string, cellData: string) {
@@ -402,19 +455,23 @@ export abstract class SingleViewBase<
     if (!type) {
       return;
     }
-    return (
-      this.dataSource.propertyMetaGet(type).config.cellFromString({
-        value: cellData,
-        data: this.propertyDataGet(propertyId),
-        dataSource: this.dataSource,
-      }) ?? ''
-    );
+    const fromString =
+      this.dataSource.propertyMetaGet(type)?.config.rawValue.fromString;
+    if (!fromString) {
+      return;
+    }
+    return fromString({
+      value: cellData,
+      data: this.propertyDataGet(propertyId),
+      dataSource: this.dataSource,
+    });
   }
 
   propertyPreGet(propertyId: string): Property | undefined {
-    return this.propertyGet(
-      this.propertyIdGetByIndex(this.propertyIndexGet(propertyId) - 1)
-    );
+    const index = this.propertyIndexGet(propertyId);
+    const prevId = this.propertyIdGetByIndex(index - 1);
+    if (!prevId) return;
+    return this.propertyGet(prevId);
   }
 
   propertyReadonlyGet(propertyId: string): boolean {
@@ -445,9 +502,9 @@ export abstract class SingleViewBase<
     this.dataSource.rowMove(rowId, position);
   }
 
-  abstract rowNextGet(rowId: string): string;
+  abstract rowNextGet(rowId: string): string | undefined;
 
-  abstract rowPrevGet(rowId: string): string;
+  abstract rowPrevGet(rowId: string): string | undefined;
 
   protected rowsMapping(rows: string[]): string[] {
     return this.searchRowsMapping(rows, this.searchString.value);

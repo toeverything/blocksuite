@@ -1,7 +1,6 @@
 import type { ReferenceParams } from '@blocksuite/affine-model';
-import type { ExtensionType } from '@blocksuite/block-std';
-
 import { createIdentifier } from '@blocksuite/global/di';
+import type { ExtensionType } from '@blocksuite/store';
 
 export interface QuickSearchService {
   openQuickSearch: () => Promise<QuickSearchResult>;

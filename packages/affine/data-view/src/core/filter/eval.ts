@@ -1,7 +1,6 @@
 import type { Value, VariableRef } from '../expression/types.js';
-import type { Filter } from './types.js';
-
 import { filterMatcher } from './filter-fn/matcher.js';
+import type { Filter } from './types.js';
 
 const evalRef = (ref: VariableRef, row: Record<string, unknown>): unknown => {
   return row[ref.name];
@@ -26,7 +25,7 @@ export const evalFilter = (
       for (let i = 0; i < expectArgLen; i++) {
         const argValue = evalValue(filter.args[i]);
         const argType = func.args[i];
-        if (argValue == null) {
+        if (argValue == null || argType == null) {
           return true;
         }
         if (!argType.valueValidate(argValue)) {
@@ -36,7 +35,7 @@ export const evalFilter = (
       }
       const impl = func.impl;
       try {
-        return impl(value, ...args);
+        return impl(value ?? undefined, ...args);
       } catch (e) {
         console.error(e);
         return true;

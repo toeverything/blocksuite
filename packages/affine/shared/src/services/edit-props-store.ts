@@ -1,21 +1,16 @@
+import { ColorSchema } from '@blocksuite/affine-model';
 import { type BlockStdScope, LifeCycleWatcher } from '@blocksuite/block-std';
+import { DisposableGroup } from '@blocksuite/global/disposable';
 import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
-import {
-  type DeepPartial,
-  DisposableGroup,
-  Slot,
-} from '@blocksuite/global/utils';
-import { DocCollection } from '@blocksuite/store';
+import type { DeepPartial } from '@blocksuite/global/utils';
 import { computed, type Signal, signal } from '@preact/signals-core';
-import clonedeep from 'lodash.clonedeep';
-import mergeWith from 'lodash.mergewith';
+import clonedeep from 'lodash-es/cloneDeep';
+import mergeWith from 'lodash-es/mergeWith';
+import { Subject } from 'rxjs';
+import * as Y from 'yjs';
 import { z } from 'zod';
 
-import {
-  ColorSchema,
-  makeDeepOptional,
-  NodePropsSchema,
-} from '../utils/index.js';
+import { makeDeepOptional, NodePropsSchema } from '../utils/index.js';
 import { EditorSettingProvider } from './editor-setting-service.js';
 
 const LastPropsSchema = NodePropsSchema;
@@ -24,6 +19,12 @@ export type LastProps = z.infer<typeof NodePropsSchema>;
 export type LastPropsKey = keyof LastProps;
 
 const SessionPropsSchema = z.object({
+  templateCache: z.string(),
+  remoteColor: z.string(),
+  showBidirectional: z.boolean(),
+});
+
+const LocalPropsSchema = z.object({
   viewport: z.union([
     z.object({
       centerX: z.number(),
@@ -37,12 +38,6 @@ const SessionPropsSchema = z.object({
         .optional(),
     }),
   ]),
-  templateCache: z.string(),
-  remoteColor: z.string(),
-  showBidirectional: z.boolean(),
-});
-
-const LocalPropsSchema = z.object({
   presentBlackBackground: z.boolean(),
   presentFillScreen: z.boolean(),
   presentHideToolbar: z.boolean(),
@@ -66,9 +61,9 @@ function isSessionProp(key: string): key is keyof SessionProps {
 function customizer(_target: unknown, source: unknown) {
   if (
     ColorSchema.safeParse(source).success ||
-    source instanceof DocCollection.Y.Text ||
-    source instanceof DocCollection.Y.Array ||
-    source instanceof DocCollection.Y.Map
+    source instanceof Y.Text ||
+    source instanceof Y.Array ||
+    source instanceof Y.Map
   ) {
     return source;
   }
@@ -78,14 +73,14 @@ function customizer(_target: unknown, source: unknown) {
 export class EditPropsStore extends LifeCycleWatcher {
   static override key = 'EditPropsStore';
 
-  private _disposables = new DisposableGroup();
+  private readonly _disposables = new DisposableGroup();
 
-  private innerProps$: Signal<DeepPartial<LastProps>> = signal({});
+  private readonly innerProps$: Signal<DeepPartial<LastProps>> = signal({});
 
   lastProps$: Signal<LastProps>;
 
   slots = {
-    storageUpdated: new Slot<{
+    storageUpdated: new Subject<{
       key: StoragePropsKey;
       value: StorageProps[StoragePropsKey];
     }>(),
@@ -119,7 +114,7 @@ export class EditPropsStore extends LifeCycleWatcher {
   }
 
   private _getStorageKey<T extends StoragePropsKey>(key: T) {
-    const id = this.std.doc.id;
+    const id = this.std.store.id;
     switch (key) {
       case 'viewport':
         return 'blocksuite:' + id + ':edgelessViewport';
@@ -142,7 +137,10 @@ export class EditPropsStore extends LifeCycleWatcher {
     }
   }
 
-  applyLastProps(key: LastPropsKey, props: Record<string, unknown>) {
+  applyLastProps<K extends LastPropsKey>(
+    key: K,
+    props: Record<string, unknown>
+  ) {
     if (['__proto__', 'constructor', 'prototype'].includes(key)) {
       throw new BlockSuiteError(
         ErrorCode.DefaultRuntimeError,
@@ -201,7 +199,7 @@ export class EditPropsStore extends LifeCycleWatcher {
       JSON.stringify(value)
     );
     if (oldValue === value) return;
-    this.slots.storageUpdated.emit({ key, value });
+    this.slots.storageUpdated.next({ key, value });
   }
 
   override unmounted() {

@@ -1,24 +1,23 @@
 import type { BaseElementProps } from '@blocksuite/block-std/gfx';
-import type { IVec, SerializedXYWH } from '@blocksuite/global/utils';
-
 import { field, GfxPrimitiveElementModel } from '@blocksuite/block-std/gfx';
+import type { IVec, SerializedXYWH } from '@blocksuite/global/gfx';
 import {
   Bound,
   getPointsFromBoundWithRotation,
   linePolygonIntersects,
   pointInPolygon,
   polygonNearestPoint,
-} from '@blocksuite/global/utils';
-import { DocCollection, type Y } from '@blocksuite/store';
+} from '@blocksuite/global/gfx';
+import * as Y from 'yjs';
 
 import {
-  type Color,
   FontFamily,
   FontStyle,
   FontWeight,
   TextAlign,
   type TextStyleProps,
-} from '../../consts/index.js';
+} from '../../consts/index';
+import { type Color, DefaultTheme } from '../../themes/index';
 
 export type TextElementProps = BaseElementProps & {
   text: Y.Text;
@@ -31,9 +30,9 @@ export class TextElementModel extends GfxPrimitiveElementModel<TextElementProps>
     return 'text';
   }
 
-  static override propsToY(props: Record<string, unknown>) {
-    if (props.text && !(props.text instanceof DocCollection.Y.Text)) {
-      props.text = new DocCollection.Y.Text(props.text as string);
+  static propsToY(props: Record<string, unknown>) {
+    if (typeof props.text === 'string') {
+      props.text = new Y.Text(props.text);
     }
 
     return props;
@@ -62,7 +61,7 @@ export class TextElementModel extends GfxPrimitiveElementModel<TextElementProps>
   }
 
   @field()
-  accessor color: Color = '#000000';
+  accessor color: Color = DefaultTheme.black;
 
   @field()
   accessor fontFamily: FontFamily = FontFamily.Inter;
@@ -83,23 +82,11 @@ export class TextElementModel extends GfxPrimitiveElementModel<TextElementProps>
   accessor rotate: number = 0;
 
   @field()
-  accessor text: Y.Text = new DocCollection.Y.Text();
+  accessor text: Y.Text = new Y.Text();
 
   @field()
   accessor textAlign: TextAlign = TextAlign.Center;
 
   @field()
   accessor xywh: SerializedXYWH = '[0,0,16,16]';
-}
-
-declare global {
-  namespace BlockSuite {
-    interface SurfaceElementModelMap {
-      text: TextElementModel;
-    }
-
-    interface EdgelessTextModelMap {
-      text: TextElementModel;
-    }
-  }
 }

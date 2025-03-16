@@ -1,4 +1,5 @@
-import type { ExtensionType } from './extension.js';
+import type { ServiceIdentifier } from '@blocksuite/global/di';
+import type { ExtensionType } from '@blocksuite/store';
 
 import { ConfigIdentifier } from '../identifier.js';
 
@@ -15,17 +16,25 @@ import { ConfigIdentifier } from '../identifier.js';
  *
  * @example
  * ```ts
- * import { ConfigExtension } from '@blocksuite/block-std';
- * const MyConfigExtension = ConfigExtension('my-flavour', config);
+ * import { ConfigExtensionFactory } from '@blocksuite/block-std';
+ * const MyConfigExtensionFactory = ConfigExtensionFactory<ConfigType>('my-flavour');
+ * const MyConfigExtension = MyConfigExtensionFactory({
+ *   option1: 'value1',
+ *   option2: 'value2',
+ * });
  * ```
  */
-export function ConfigExtension(
-  flavor: BlockSuite.Flavour,
-  config: Record<string, unknown>
-): ExtensionType {
-  return {
+export function ConfigExtensionFactory<Config extends Record<string, any>>(
+  flavor: string
+): ((config: Config) => ExtensionType) & {
+  identifier: ServiceIdentifier<Config>;
+} {
+  const identifier = ConfigIdentifier(flavor) as ServiceIdentifier<Config>;
+  const extensionFactory = (config: Config): ExtensionType => ({
     setup: di => {
       di.addImpl(ConfigIdentifier(flavor), () => config);
     },
-  };
+  });
+  extensionFactory.identifier = identifier;
+  return extensionFactory;
 }

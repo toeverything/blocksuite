@@ -1,14 +1,13 @@
 import { type Container, createIdentifier } from '@blocksuite/global/di';
 import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
+import { Extension } from '@blocksuite/store';
 
-import type { BlockStdScope } from '../scope/block-std-scope.js';
-import type { SurfaceMiddleware } from './model/surface/surface-model.js';
-
-import { Extension } from '../extension/extension.js';
 import { LifeCycleWatcher } from '../extension/lifecycle-watcher.js';
 import { StdIdentifier } from '../identifier.js';
+import type { BlockStdScope } from '../scope/block-std-scope.js';
 import { onSurfaceAdded } from '../utils/gfx.js';
 import { GfxControllerIdentifier } from './identifiers.js';
+import type { SurfaceMiddleware } from './model/surface/surface-model.js';
 
 export abstract class SurfaceMiddlewareBuilder extends Extension {
   static key: string = '';
@@ -52,9 +51,10 @@ export class SurfaceMiddlewareExtension extends LifeCycleWatcher {
       this.std.provider.getAll(SurfaceMiddlewareBuilderIdentifier).values()
     );
 
-    onSurfaceAdded(this.std.doc, surface => {
+    const dispose = onSurfaceAdded(this.std.store, surface => {
       if (surface) {
         surface.applyMiddlewares(builders.map(builder => builder.middleware));
+        queueMicrotask(() => dispose());
       }
     });
   }

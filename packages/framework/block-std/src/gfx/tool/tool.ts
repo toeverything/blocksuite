@@ -1,13 +1,12 @@
 import { type Container, createIdentifier } from '@blocksuite/global/di';
+import { DisposableGroup } from '@blocksuite/global/disposable';
 import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
-import { DisposableGroup } from '@blocksuite/global/utils';
+import { Extension } from '@blocksuite/store';
 
 import type { PointerEventState } from '../../event/index.js';
 import type { GfxController } from '../controller.js';
-import type { ToolEventTarget } from './tool-controller.js';
-
-import { Extension } from '../../extension/extension.js';
 import { GfxControllerIdentifier } from '../identifiers.js';
+import type { ToolEventTarget } from './tool-controller.js';
 
 export abstract class BaseTool<
   Option = Record<string, unknown>,

@@ -1,7 +1,5 @@
+import { BaseSelection, SelectionExtension } from '@blocksuite/store';
 import z from 'zod';
-
-import { SelectionExtension } from '../../extension/selection.js';
-import { BaseSelection } from '../base.js';
 
 export type TextRangePoint = {
   blockId: string;

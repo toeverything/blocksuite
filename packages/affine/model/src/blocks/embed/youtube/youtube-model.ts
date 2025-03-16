@@ -1,7 +1,6 @@
 import { BlockModel } from '@blocksuite/store';
 
 import type { EmbedCardStyle } from '../../../utils/index.js';
-
 import { defineEmbedModel } from '../../../utils/index.js';
 
 export type EmbedYoutubeBlockUrlData = {
@@ -25,14 +24,3 @@ export type EmbedYoutubeBlockProps = {
 export class EmbedYoutubeModel extends defineEmbedModel<EmbedYoutubeBlockProps>(
   BlockModel
 ) {}
-
-declare global {
-  namespace BlockSuite {
-    interface EdgelessBlockModelMap {
-      'affine:embed-youtube': EmbedYoutubeModel;
-    }
-    interface BlockModels {
-      'affine:embed-youtube': EmbedYoutubeModel;
-    }
-  }
-}

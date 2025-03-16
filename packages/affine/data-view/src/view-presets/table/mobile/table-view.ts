@@ -1,10 +1,9 @@
-import type { InsertToPosition } from '@blocksuite/affine-shared/utils';
-
 import {
   menu,
   popMenu,
   popupTargetFromElement,
 } from '@blocksuite/affine-components/context-menu';
+import type { InsertToPosition } from '@blocksuite/affine-shared/utils';
 import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 import { AddCursorIcon } from '@blocksuite/icons/lit';
 import { css } from 'lit';
@@ -14,12 +13,11 @@ import { html } from 'lit/static-html.js';
 
 import type { GroupTrait } from '../../../core/group-by/trait.js';
 import type { DataViewInstance } from '../../../core/index.js';
-import type { TableSingleView } from '../table-view-manager.js';
-import type { TableViewSelectionWithType } from '../types.js';
-
 import { renderUniLit } from '../../../core/utils/uni-component/uni-component.js';
 import { DataViewBase } from '../../../core/view/data-view-base.js';
 import { LEFT_TOOL_BAR_WIDTH } from '../consts.js';
+import type { TableViewSelectionWithType } from '../selection';
+import type { TableSingleView } from '../table-view-manager.js';
 
 export class MobileDataViewTable extends DataViewBase<
   TableSingleView,
@@ -47,7 +45,7 @@ export class MobileDataViewTable extends DataViewBase<
     }
   `;
 
-  private _addRow = (
+  private readonly _addRow = (
     tableViewManager: TableSingleView,
     position: InsertToPosition | number
   ) => {
@@ -79,7 +77,7 @@ export class MobileDataViewTable extends DataViewBase<
         options: {
           items: [
             menu.input({
-              onChange: text => {
+              onComplete: text => {
                 const column = groupHelper.property$.value;
                 if (column) {
                   column.dataUpdate(

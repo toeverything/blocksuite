@@ -1,13 +1,7 @@
 {
   "name": "@blocksuite/inline",
-  "version": "0.18.1",
   "description": "A micro editor.",
   "type": "module",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/toeverything/blocksuite.git",
-    "directory": "packages/framework/inline"
-  },
   "scripts": {
     "build": "tsc",
     "test:unit": "nx vite:test --run",
@@ -23,51 +17,23 @@
     "!dist/__tests__"
   ],
   "author": "toeverything",
-  "license": "MPL-2.0",
-  "devDependencies": {
-    "lit": "^3.2.0",
-    "yjs": "^13.6.18"
-  },
-  "peerDependencies": {
-    "lit": "^3.2.0",
-    "yjs": "^13.6.18"
-  },
+  "license": "MIT",
   "exports": {
     ".": "./src/index.ts",
     "./consts": "./src/consts.ts",
     "./effects": "./src/effects.ts",
     "./types": "./src/types.ts"
   },
-  "publishConfig": {
-    "access": "public",
-    "main": "dist/index.js",
-    "types": "dist/index.d.ts",
-    "exports": {
-      ".": {
-        "types": "./dist/index.d.ts",
-        "module": "./dist/index.js",
-        "import": "./dist/index.js"
-      },
-      "./consts": {
-        "types": "./dist/consts.d.ts",
-        "module": "./dist/consts.js",
-        "import": "./dist/consts.js"
-      },
-      "./effects": {
-        "types": "./dist/effects.d.ts",
-        "module": "./dist/effects.js",
-        "import": "./dist/effects.js"
-      },
-      "./types": {
-        "types": "./dist/types.d.ts",
-        "module": "./dist/types.js",
-        "import": "./dist/types.js"
-      }
-    }
-  },
   "dependencies": {
     "@blocksuite/global": "workspace:*",
     "@preact/signals-core": "^1.8.0",
+    "lit": "^3.2.0",
+    "rxjs": "^7.8.1",
+    "yjs": "^13.6.21",
     "zod": "^3.23.8"
-  }
+  },
+  "devDependencies": {
+    "vitest": "3.0.8"
+  },
+  "version": "0.20.0"
 }

@@ -1,7 +1,6 @@
 import { BlockModel } from '@blocksuite/store';
 
 import type { EmbedCardStyle } from '../../../utils/index.js';
-
 import { defineEmbedModel } from '../../../utils/index.js';
 
 export type EmbedGithubBlockUrlData = {
@@ -34,14 +33,3 @@ export type EmbedGithubBlockProps = {
 export class EmbedGithubModel extends defineEmbedModel<EmbedGithubBlockProps>(
   BlockModel
 ) {}
-
-declare global {
-  namespace BlockSuite {
-    interface EdgelessBlockModelMap {
-      'affine:embed-github': EmbedGithubModel;
-    }
-    interface BlockModels {
-      'affine:embed-github': EmbedGithubModel;
-    }
-  }
-}

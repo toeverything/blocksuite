@@ -2,11 +2,10 @@ import type {
   DatabaseAllEvents,
   EventTraceFn,
 } from '@blocksuite/affine-shared/services';
-
 import { ShadowlessElement } from '@blocksuite/block-std';
 import { IS_MOBILE } from '@blocksuite/global/env';
-import { SignalWatcher, WithDisposable } from '@blocksuite/global/utils';
-import { computed, type ReadonlySignal } from '@preact/signals-core';
+import { SignalWatcher, WithDisposable } from '@blocksuite/global/lit';
+import { computed, type ReadonlySignal, signal } from '@preact/signals-core';
 import { css, unsafeCSS } from 'lit';
 import { property, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
@@ -14,12 +13,11 @@ import { keyed } from 'lit/directives/keyed.js';
 import { createRef, ref } from 'lit/directives/ref.js';
 import { html } from 'lit/static-html.js';
 
+import { dataViewCommonStyle } from './common/css-variable.js';
 import type { DataViewSelection, DataViewSelectionState } from './types.js';
+import { renderUniLit } from './utils/uni-component/index.js';
 import type { DataViewInstance, DataViewProps } from './view/types.js';
 import type { SingleView } from './view-manager/single-view.js';
-
-import { dataViewCommonStyle } from './common/css-variable.js';
-import { renderUniLit } from './utils/uni-component/index.js';
 
 type ViewProps = {
   view: SingleView;
@@ -65,14 +63,12 @@ export class DataViewRenderer extends SignalWatcher(
     }
   `;
 
-  private _view = createRef<{
-    expose: DataViewInstance;
-  }>();
+  private readonly _view = signal<DataViewInstance>();
 
   @property({ attribute: false })
   accessor config!: DataViewRendererConfig;
 
-  private currentViewId$ = computed(() => {
+  private readonly currentViewId$ = computed(() => {
     return this.config.dataSource.viewManager.currentViewId$.value;
   });
 
@@ -89,6 +85,9 @@ export class DataViewRenderer extends SignalWatcher(
       return;
     }
     const view = this.viewMap$.value[currentViewId];
+    if (!view) {
+      return;
+    }
     return {
       view: view,
       selection$: computed(() => {
@@ -120,7 +119,7 @@ export class DataViewRenderer extends SignalWatcher(
   });
 
   focusFirstCell = () => {
-    this.view?.expose.focusFirstCell();
+    this.view?.focusFirstCell();
   };
 
   openDetailPanel = (ops: {
@@ -220,10 +219,10 @@ declare global {
 }
 
 export class DataView {
-  private _ref = createRef<DataViewRenderer>();
+  private readonly _ref = createRef<DataViewRenderer>();
 
   get expose() {
-    return this._ref.value?.view?.expose;
+    return this._ref.value?.view;
   }
 
   render(props: DataViewRendererConfig) {

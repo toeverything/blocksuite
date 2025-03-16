@@ -1,7 +1,6 @@
 import type { GfxCompatibleProps } from '@blocksuite/block-std/gfx';
-import type { Constructor } from '@blocksuite/global/utils';
-
 import { GfxCompatible } from '@blocksuite/block-std/gfx';
+import type { Constructor } from '@blocksuite/global/utils';
 import {
   type BaseBlockTransformer,
   type BlockModel,
@@ -49,6 +48,7 @@ export function createEmbedBlockSchema<
       return {
         index: 'a0',
         xywh: '[0,0,0,0]',
+        lockedBySelf: false,
         rotate: 0,
         ...userProps,
       } as unknown as EmbedProps<Props>;

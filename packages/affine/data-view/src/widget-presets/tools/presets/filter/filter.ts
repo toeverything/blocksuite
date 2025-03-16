@@ -6,10 +6,9 @@ import { cssVarV2 } from '@toeverything/theme/v2';
 import { css, html, nothing } from 'lit';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type { FilterGroup } from '../../../../core/filter/types.js';
-
 import { popCreateFilter } from '../../../../core/filter/add-filter.js';
 import { filterTraitKey } from '../../../../core/filter/trait.js';
+import type { FilterGroup } from '../../../../core/filter/types.js';
 import { emptyFilterGroup } from '../../../../core/filter/utils.js';
 import { WidgetBase } from '../../../../core/widget/widget-base.js';
 import { ShowQuickSettingBarContextKey } from '../../../quick-setting-bar/context.js';

@@ -1,25 +1,10 @@
-import type { TemplateResult } from 'lit';
-
 import { IS_MOBILE } from '@blocksuite/global/env';
 import { computed, signal } from '@preact/signals-core';
+import type { TemplateResult } from 'lit';
 
-import type { MenuComponentInterface, MenuItemRender } from './types.js';
-
-import { menuButtonItems } from './button.js';
-import { menuDynamicItems } from './dynamic.js';
 import { MenuFocusable } from './focusable.js';
-import { menuGroupItems } from './group.js';
-import { menuInputItems } from './input.js';
-import { MenuComponent, MobileMenuComponent } from './menu-renderer.js';
-import { subMenuItems } from './sub-menu.js';
+import type { MenuComponentInterface } from './types.js';
 
-export const menu = {
-  ...menuButtonItems,
-  ...subMenuItems,
-  ...menuInputItems,
-  ...menuGroupItems,
-  ...menuDynamicItems,
-} satisfies Record<string, MenuItemRender<never>>;
 export type MenuConfig = (
   menu: Menu,
   index: number
@@ -40,10 +25,29 @@ export type MenuOptions = {
   items: MenuConfig[];
 };
 
-export class Menu {
-  private _currentFocused$ = signal<MenuFocusable>();
+// Global menu open listener type
+type MenuOpenListener = (menu: Menu) => (() => void) | void;
 
-  private _subMenu$ = signal<Menu>();
+// Global menu open listeners
+const menuOpenListeners = new Set<MenuOpenListener>();
+
+// Add global menu open listener
+export function onMenuOpen(listener: MenuOpenListener) {
+  menuOpenListeners.add(listener);
+  // Return cleanup function
+  return () => {
+    menuOpenListeners.delete(listener);
+  };
+}
+
+export class Menu {
+  private _cleanupFns: Array<() => void> = [];
+
+  private readonly _currentFocused$ = signal<MenuFocusable>();
+
+  private readonly _subMenu$ = signal<Menu>();
+
+  closed = false;
 
   readonly currentFocused$ = computed(() => this._currentFocused$.value);
 
@@ -65,12 +69,28 @@ export class Menu {
 
   constructor(public options: MenuOptions) {
     this.menuElement = IS_MOBILE
-      ? new MobileMenuComponent()
-      : new MenuComponent();
+      ? document.createElement('mobile-menu')
+      : document.createElement('affine-menu');
     this.menuElement.menu = this;
+
+    // Call global menu open listeners
+    menuOpenListeners.forEach(listener => {
+      const cleanup = listener(this);
+      if (cleanup) {
+        this._cleanupFns.push(cleanup);
+      }
+    });
   }
 
   close() {
+    if (this.closed) {
+      return;
+    }
+    this.closed = true;
+    // Execute cleanup functions
+    this._cleanupFns.forEach(cleanup => cleanup());
+    this._cleanupFns = [];
+
     this.menuElement.remove();
     this.options.onClose?.();
   }
@@ -125,6 +145,7 @@ export class Menu {
 
   renderItems(items: MenuConfig[]) {
     const result = [];
+    // eslint-disable-next-line @typescript-eslint/prefer-for-of
     for (let i = 0; i < items.length; i++) {
       const item = items[i];
       const template = item(this, result.length);

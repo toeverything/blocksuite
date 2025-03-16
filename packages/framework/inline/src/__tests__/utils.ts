@@ -33,7 +33,6 @@ export async function focusInlineRichText(
       throw new Error('Cannot find test-rich-text');
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (richTexts[index] as any).inlineEditor.focusEnd();
   }, index);
 }
@@ -52,7 +51,6 @@ export async function getDeltaFromInlineRichText(
       throw new Error('Cannot find test-rich-text');
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const editor = (richTexts[index] as any).inlineEditor as InlineEditor;
     return editor.yText.toDelta();
   }, index);
@@ -72,7 +70,6 @@ export async function getInlineRangeFromInlineRichText(
       throw new Error('Cannot find test-rich-text');
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const editor = (richTexts[index] as any).inlineEditor as InlineEditor;
     return editor.getInlineRange();
   }, index);
@@ -93,7 +90,6 @@ export async function setInlineRichTextRange(
         throw new Error('Cannot find test-rich-text');
       }
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const editor = (richTexts[index as number] as any)
         .inlineEditor as InlineEditor;
       editor.setInlineRange(inlineRange as InlineRange);
@@ -115,7 +111,6 @@ export async function getInlineRichTextLine(
         throw new Error('Cannot find test-rich-text');
       }
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const editor = (richTexts[i] as any).inlineEditor as InlineEditor;
       const result = editor.getLine(index);
       if (!result) {
@@ -137,7 +132,6 @@ export async function getInlineRangeIndexRect(
     ({ richTextIndex, inlineIndex: vIndex, coordOffSet }) => {
       const richText = document.querySelectorAll('test-rich-text')[
         richTextIndex
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       ] as any;
       const domRange = richText.inlineEditor.toDomRange({
         index: vIndex,
@@ -168,7 +162,7 @@ export async function assertSelection(
     ([richTextIndex]) => {
       const richText =
         document?.querySelectorAll('test-rich-text')[richTextIndex];
-      // @ts-ignore
+      // @ts-expect-error getInlineRange
       const inlineEditor = richText.inlineEditor;
       return inlineEditor?.getInlineRange();
     },

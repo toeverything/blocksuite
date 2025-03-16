@@ -1,26 +1,21 @@
 import { ShadowlessElement } from '@blocksuite/block-std';
-import {
-  assertExists,
-  SignalWatcher,
-  WithDisposable,
-} from '@blocksuite/global/utils';
-import { computed } from '@preact/signals-core';
+import { SignalWatcher, WithDisposable } from '@blocksuite/global/lit';
+import { computed, signal } from '@preact/signals-core';
 import { css } from 'lit';
-import { property, state } from 'lit/decorators.js';
-import { createRef } from 'lit/directives/ref.js';
+import { property } from 'lit/decorators.js';
 
+import { renderUniLit } from '../../../core/index.js';
 import type {
   CellRenderProps,
   DataViewCellLifeCycle,
 } from '../../../core/property/index.js';
 import type { SingleView } from '../../../core/view-manager/single-view.js';
-import type { TableColumn } from '../table-view-manager.js';
-
-import { renderUniLit } from '../../../core/index.js';
 import {
-  TableAreaSelection,
+  TableViewAreaSelection,
   type TableViewSelectionWithType,
-} from '../types.js';
+} from '../selection';
+import type { TableColumn } from '../table-view-manager.js';
+import type { TableGroup } from './group.js';
 
 export class DatabaseCellContainer extends SignalWatcher(
   WithDisposable(ShadowlessElement)
@@ -44,7 +39,7 @@ export class DatabaseCellContainer extends SignalWatcher(
     }
   `;
 
-  private _cell = createRef<DataViewCellLifeCycle>();
+  private readonly _cell = signal<DataViewCellLifeCycle>();
 
   @property({ attribute: false })
   accessor column!: TableColumn;
@@ -64,7 +59,7 @@ export class DatabaseCellContainer extends SignalWatcher(
     if (selectionView) {
       const selection = selectionView.selection;
       if (selection && this.isSelected(selection) && editing) {
-        selectionView.selection = TableAreaSelection.create({
+        selectionView.selection = TableViewAreaSelection.create({
           groupKey: this.groupKey,
           focus: {
             rowIndex: this.rowIndex,
@@ -73,7 +68,7 @@ export class DatabaseCellContainer extends SignalWatcher(
           isEditing: true,
         });
       } else {
-        selectionView.selection = TableAreaSelection.create({
+        selectionView.selection = TableViewAreaSelection.create({
           groupKey: this.groupKey,
           focus: {
             rowIndex: this.rowIndex,
@@ -90,11 +85,7 @@ export class DatabaseCellContainer extends SignalWatcher(
   }
 
   private get groupKey() {
-    return this.closest('affine-data-view-table-group')?.group?.key;
-  }
-
-  private get readonly() {
-    return this.column.readonly$.value;
+    return this.closest<TableGroup>('affine-data-view-table-group')?.group?.key;
   }
 
   private get selectionView() {
@@ -103,14 +94,13 @@ export class DatabaseCellContainer extends SignalWatcher(
 
   get table() {
     const table = this.closest('affine-database-table');
-    assertExists(table);
     return table;
   }
 
   override connectedCallback() {
     super.connectedCallback();
     this._disposables.addFromEvent(this, 'click', () => {
-      if (!this.isEditing) {
+      if (!this.isEditing$.value) {
         this.selectCurrentCell(!this.column.readonly$.value);
       }
     });
@@ -134,17 +124,16 @@ export class DatabaseCellContainer extends SignalWatcher(
     if (!renderer) {
       return;
     }
-    const { edit, view } = renderer;
-    const uni = !this.readonly && this.isEditing && edit != null ? edit : view;
-    this.view.lockRows(this.isEditing);
-    this.dataset['editing'] = `${this.isEditing}`;
+    const { view } = renderer;
+    this.view.lockRows(this.isEditing$.value);
+    this.dataset['editing'] = `${this.isEditing$.value}`;
     const props: CellRenderProps = {
       cell: this.cell$.value,
-      isEditing: this.isEditing,
+      isEditing$: this.isEditing$,
       selectCurrentCell: this.selectCurrentCell,
     };
 
-    return renderUniLit(uni, props, {
+    return renderUniLit(view, props, {
       ref: this._cell,
       style: {
         display: 'contents',
@@ -158,8 +147,7 @@ export class DatabaseCellContainer extends SignalWatcher(
   @property({ attribute: false })
   accessor columnIndex!: number;
 
-  @state()
-  accessor isEditing = false;
+  isEditing$ = signal(false);
 
   @property({ attribute: false })
   accessor rowIndex!: number;
