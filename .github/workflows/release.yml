@@ -1,9 +1,12 @@
 name: Release
 
 on:
-  push:
-    branches:
-      - main
+  # TODO: enable this again when we're ready to release
+  # disable for now since we're not ready to release yet
+  # push:
+  #   branches:
+  #     - main
+  workflow_dispatch:
 
 concurrency: ${{ github.workflow }}-${{ github.ref }}
 
