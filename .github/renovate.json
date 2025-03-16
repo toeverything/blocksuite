@@ -9,7 +9,7 @@
       "matchPackageNames": ["*"]
     }
   ],
-  "commitMessage": "chore: lock file maintenance",
+  "commitMessagePrefix": "chore:",
   "commitMessageAction": "bump up",
   "commitMessageTopic": "{{depName}} version",
   "ignoreDeps": [],
