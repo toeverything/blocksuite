@@ -3,7 +3,7 @@
   "private": true,
   "type": "commonjs",
   "engines": {
-    "node": ">=18.19.0 <21.0.0"
+    "node": ">=18.19.0 <23.0.0"
   },
   "packageManager": "yarn@4.7.0",
   "workspaces": [
