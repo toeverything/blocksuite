@@ -73,7 +73,7 @@ jobs:
       - name: Send release notification
         if: steps.release.outcome == 'success'
         id: slack
-        uses: slackapi/slack-github-action@v1.27.1
+        uses: slackapi/slack-github-action@v2.0.0
         with:
           payload: |
             { "message": "[BlockSuite Release]: New BlockSuite version ${{ env.BLOCKSUITE_RELEASE_TAG }} has been released to NPM." }
