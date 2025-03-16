@@ -19,7 +19,7 @@ export function sourcemapExclude(): Plugin {
       if (id.includes('node_modules') && !id.includes('@blocksuite')) {
         return {
           code,
-          // https://github.com/rollup/rollup/blob/main/docs/plugin-development/index.md#source-code-transformations
+          // https://github.com/rollup/rollup/blob/master/docs/plugin-development/index.md#source-code-transformations
           map: { mappings: '' },
         };
       }
