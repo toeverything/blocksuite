@@ -15,5 +15,5 @@
   "ignoreDeps": [],
   "postUpdateOptions": ["yarnDedupeHighest"],
   "baseBranches": ["main"],
-  "lockFileMaintenance": { "enabled": false, "extends": ["schedule:weekly"] }
+  "lockFileMaintenance": { "enabled": true, "extends": ["schedule:weekly"] }
 }
