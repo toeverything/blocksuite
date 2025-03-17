@@ -14,5 +14,6 @@
   "commitMessageTopic": "{{depName}} version",
   "ignoreDeps": [],
   "postUpdateOptions": ["yarnDedupeHighest"],
+  "baseBranches": ["main"],
   "lockFileMaintenance": { "enabled": true, "extends": ["schedule:weekly"] }
 }
