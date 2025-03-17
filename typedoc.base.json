@@ -1,7 +1,0 @@
-{
-  "$schema": "https://typedoc.org/schema.json",
-  "includeVersion": true,
-  "readme": "none",
-  "excludeExternals": true,
-  "externalPattern": ["node_modules/**/*"]
-}

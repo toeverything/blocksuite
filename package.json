@@ -7,7 +7,8 @@
   },
   "packageManager": "yarn@4.7.0",
   "workspaces": [
-    "packages/**/*"
+    "packages/**/*",
+    "docs"
   ],
   "scripts": {
     "preview": "yarn workspace @blocksuite/playground preview",

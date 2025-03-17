@@ -1,0 +1,31 @@
+{
+  "entryPoints": ["../packages/**/*"],
+  "exclude": [
+    "../packages/tests-legacy",
+    "../packages/integration-test",
+    "../packages/playground",
+    "**/__tests__/**/*"
+  ],
+  "packageOptions": {
+    "includeVersion": true,
+    "readme": "none",
+    "excludeExternals": true,
+    "externalPattern": ["node_modules/**/*"],
+    "entryPoints": ["src/index.ts"]
+  },
+  "plugin": ["typedoc-plugin-markdown"],
+  "out": "./api",
+  "entryPointStrategy": "packages",
+  "includeVersion": false,
+  "logLevel": "Error",
+  "readme": "none",
+  "name": "BlockSuite API Documentation",
+  "entryFileName": "index.md",
+  "outputFileStrategy": "members",
+  "hidePageHeader": true,
+  "excludePrivate": true,
+  "excludeProtected": true,
+  "excludeExternals": true,
+  "categorizeByGroup": true,
+  "sort": ["source-order"]
+}

@@ -10,7 +10,8 @@
   "ignore": [
     "@blocksuite/legacy-e2e",
     "@blocksuite/playground",
-    "@blocksuite/integration-test"
+    "@blocksuite/integration-test",
+    "@blocksuite/docs"
   ],
   "___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH": {
     "onlyUpdatePeerDependentsWhenOutOfRange": true
