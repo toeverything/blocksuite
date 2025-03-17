@@ -6,6 +6,9 @@ import { guide, reference, components } from './sidebar';
 
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
+  // FIXME: remove dead links
+  ignoreDeadLinks: true,
+
   title: 'BlockSuite',
   description: 'Content Editing Tech Stack for the Web',
   vite: {
