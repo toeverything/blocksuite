@@ -41,7 +41,6 @@
   "references": [
     { "path": "./packages/affine/all" },
     { "path": "./packages/integration-test" },
-    { "path": "./packages/playground" },
-    { "path": "./packages/tests-legacy" }
+    { "path": "./packages/playground" }
   ]
 }

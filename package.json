@@ -40,6 +40,7 @@
     "@commitlint/cli": "^19.4.0",
     "@commitlint/config-conventional": "^19.2.2",
     "@open-wc/dev-server-hmr": "^0.2.0",
+    "@playwright/test": "^1.51.1",
     "@size-limit/preset-small-lib": "^11.1.4",
     "@types/node": "^22.13.10",
     "es-module-lexer": "^1.5.4",
