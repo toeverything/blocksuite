@@ -12,7 +12,6 @@ import {
   PageViewportService,
   ViewportElementProvider,
 } from '@blocksuite/affine-shared/services';
-import type { Viewport } from '@blocksuite/affine-shared/types';
 import {
   focusTitle,
   getClosestBlockComponentByPoint,
@@ -158,40 +157,23 @@ export class PageRootBlockComponent extends BlockComponent<
     return getScrollContainer(this);
   }
 
-  get viewport(): Viewport | null {
-    if (!this.viewportElement) {
-      return null;
-    }
-    const {
-      scrollLeft,
-      scrollTop,
-      scrollWidth,
-      scrollHeight,
-      clientWidth,
-      clientHeight,
-    } = this.viewportElement;
-    const { top, left } = this.viewportElement.getBoundingClientRect();
-    return {
-      top,
-      left,
-      scrollLeft,
-      scrollTop,
-      scrollWidth,
-      scrollHeight,
-      clientWidth,
-      clientHeight,
-    };
+  get viewportProvider() {
+    return this.std.get(ViewportElementProvider);
+  }
+
+  get viewport() {
+    return this.viewportProvider.viewport;
   }
 
   get viewportElement(): HTMLElement {
-    return this.std.get(ViewportElementProvider).viewportElement;
+    return this.viewportProvider.viewportElement;
   }
 
   private _createDefaultNoteBlock() {
     const { doc } = this;
 
     const noteId = doc.addBlock('affine:note', {}, doc.root?.id);
-    return doc.getBlockById(noteId) as NoteBlockModel;
+    return doc.getModelById(noteId) as NoteBlockModel;
   }
 
   private _getDefaultNoteBlock() {
@@ -262,7 +244,7 @@ export class PageRootBlockComponent extends BlockComponent<
         );
         if (!sel) return;
         let model: BlockModel | null = null;
-        let current = this.doc.getBlockById(sel.blockId);
+        let current = this.doc.getModelById(sel.blockId);
         while (current && !model) {
           if (current.flavour === 'affine:note') {
             model = current;
@@ -280,7 +262,7 @@ export class PageRootBlockComponent extends BlockComponent<
           }
           return;
         }
-        const notes = this.doc.getBlockByFlavour('affine:note');
+        const notes = this.doc.getModelsByFlavour('affine:note');
         const index = notes.indexOf(prevNote);
         if (index !== 0) return;
 

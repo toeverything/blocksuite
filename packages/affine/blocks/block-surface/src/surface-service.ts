@@ -25,7 +25,7 @@ export class SurfaceBlockService extends BlockService {
       const disposable = this.doc.slots.blockUpdated.subscribe(payload => {
         if (payload.flavour === 'affine:surface') {
           disposable.unsubscribe();
-          const surface = this.doc.getBlockById(
+          const surface = this.doc.getModelById(
             payload.id
           ) as SurfaceBlockModel | null;
           if (!surface) return;

@@ -8,6 +8,7 @@ import {
   OverlayIdentifier,
   type RoughCanvas,
 } from '@blocksuite/affine-block-surface';
+import { mountShapeTextEditor } from '@blocksuite/affine-gfx-shape';
 import type {
   Connection,
   ConnectorElementModel,
@@ -42,7 +43,6 @@ import { classMap } from 'lit/directives/class-map.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
-import { mountShapeTextEditor } from '../../utils/text.js';
 import type { SelectedRect } from '../rects/edgeless-selected-rect.js';
 import { EdgelessAutoCompletePanel } from './auto-complete-panel.js';
 import {
@@ -380,7 +380,7 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
         this.edgeless
       );
     } else {
-      const model = doc.getBlockById(id);
+      const model = doc.getModelById(id);
       if (!model) {
         return;
       }

@@ -3,7 +3,12 @@ import type { CreateProxyOptions } from './types';
 
 type UpdateSignalOptions = Pick<
   CreateProxyOptions,
-  'shouldByPassSignal' | 'root' | 'onChange' | 'byPassSignalUpdate' | 'basePath'
+  | 'shouldByPassSignal'
+  | 'root'
+  | 'onChange'
+  | 'byPassSignalUpdate'
+  | 'basePath'
+  | 'shouldByPassYjs'
 > & {
   firstKey: string;
   value: unknown;
@@ -19,6 +24,7 @@ export function signalUpdater({
   basePath,
   value,
   handleNestedUpdate,
+  shouldByPassYjs,
 }: UpdateSignalOptions): void {
   const isRoot = !basePath;
   if (shouldByPassSignal()) {
@@ -44,6 +50,9 @@ export function signalUpdater({
           : prev;
     // @ts-expect-error allow magic props
     root[signalKey].value = next;
-    onChange?.(firstKey, true);
+    // If the update is from yjs, it's already called from y-event-handler
+    if (!shouldByPassYjs()) {
+      onChange?.(firstKey, true);
+    }
   });
 }

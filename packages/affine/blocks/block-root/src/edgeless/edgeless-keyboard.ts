@@ -2,6 +2,8 @@ import { insertLinkByQuickSearchCommand } from '@blocksuite/affine-block-bookmar
 import { EdgelessTextBlockComponent } from '@blocksuite/affine-block-edgeless-text';
 import { isNoteBlock } from '@blocksuite/affine-block-surface';
 import { toast } from '@blocksuite/affine-components/toast';
+import { mountConnectorLabelEditor } from '@blocksuite/affine-gfx-connector';
+import { mountShapeTextEditor, ShapeTool } from '@blocksuite/affine-gfx-shape';
 import {
   ConnectorElementModel,
   ConnectorMode,
@@ -34,7 +36,6 @@ import { Bound, getCommonBound } from '@blocksuite/global/gfx';
 import { PageKeyboardManager } from '../keyboard/keyboard-manager.js';
 import type { EdgelessRootBlockComponent } from './edgeless-root-block.js';
 import { LassoTool } from './gfx-tool/lasso-tool.js';
-import { ShapeTool } from './gfx-tool/shape-tool.js';
 import {
   DEFAULT_NOTE_CHILD_FLAVOUR,
   DEFAULT_NOTE_CHILD_TYPE,
@@ -48,10 +49,6 @@ import {
   isSingleMindMapNode,
 } from './utils/mindmap.js';
 import { isCanvasElement } from './utils/query.js';
-import {
-  mountConnectorLabelEditor,
-  mountShapeTextEditor,
-} from './utils/text.js';
 
 export class EdgelessPageKeyboardManager extends PageKeyboardManager {
   get gfx() {

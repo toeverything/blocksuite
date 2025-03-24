@@ -1,10 +1,7 @@
-import { getSurfaceBlock } from '@blocksuite/affine-block-surface';
-import {
-  FrameBlockModel,
-  type SurfaceRefProps,
-} from '@blocksuite/affine-model';
-import { matchModels } from '@blocksuite/affine-shared/utils';
+import { EdgelessCRUDExtension } from '@blocksuite/affine-block-surface';
+import { type SurfaceRefProps } from '@blocksuite/affine-model';
 import type { Command } from '@blocksuite/block-std';
+import { GfxPrimitiveElementModel } from '@blocksuite/block-std/gfx';
 import type { BlockModel } from '@blocksuite/store';
 
 export const insertSurfaceRefBlockCommand: Command<
@@ -33,20 +30,18 @@ export const insertSurfaceRefBlockCommand: Command<
     reference,
   };
 
-  const surface = getSurfaceBlock(std.store);
-  if (!surface) return;
+  const crud = std.get(EdgelessCRUDExtension);
+  const element = crud.getElementById(reference);
 
-  const element = surface.getElementById(reference);
-  const blockModel = std.store.getBlock(reference)?.model ?? null;
-
-  if (element?.type === 'group') {
-    surfaceRefProps.refFlavour = 'group';
-  } else if (matchModels(blockModel, [FrameBlockModel])) {
-    surfaceRefProps.refFlavour = 'frame';
-  } else {
+  if (!element) {
     console.error(`reference not found ${reference}`);
     return;
   }
+
+  surfaceRefProps.refFlavour =
+    element instanceof GfxPrimitiveElementModel
+      ? element.type
+      : element.flavour;
 
   const result = std.store.addSiblingBlocks(
     targetModel,

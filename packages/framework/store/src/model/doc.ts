@@ -24,19 +24,19 @@ export interface Doc {
   dispose(): void;
 
   slots: {
+    /**
+     * This fires when the doc history is updated.
+     */
     historyUpdated: Subject<void>;
-    yBlockUpdated: Subject<
-      | {
-          type: 'add';
-          id: string;
-          isLocal: boolean;
-        }
-      | {
-          type: 'delete';
-          id: string;
-          isLocal: boolean;
-        }
-    >;
+    /**
+     * @internal
+     * This fires when the doc yBlock is updated.
+     */
+    yBlockUpdated: Subject<{
+      type: 'add' | 'delete';
+      id: string;
+      isLocal: boolean;
+    }>;
   };
 
   get history(): Y.UndoManager;

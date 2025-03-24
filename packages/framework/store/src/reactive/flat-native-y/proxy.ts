@@ -61,6 +61,7 @@ function updateSignal(
     basePath,
     initialized,
     onDispose,
+    shouldByPassYjs,
   } = options;
 
   const fullPath = basePath ? `${basePath}.${prop}` : prop;
@@ -69,6 +70,7 @@ function updateSignal(
     root,
     firstKey,
     shouldByPassSignal,
+    shouldByPassYjs,
     byPassSignalUpdate,
     onChange,
     basePath,

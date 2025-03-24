@@ -1,10 +1,11 @@
-import type { DeltaInsert } from '@blocksuite/inline';
-import type { Text } from '@blocksuite/store';
+import type { DeltaInsert, Text } from '@blocksuite/store';
 import {
   BlockModel,
   BlockSchemaExtension,
   defineBlockSchema,
 } from '@blocksuite/store';
+
+import type { BlockMeta } from '../../utils/types';
 
 export type TableCell = {
   text: Text;
@@ -23,7 +24,7 @@ export interface TableColumn {
   width?: number;
 }
 
-export interface TableBlockProps {
+export interface TableBlockProps extends BlockMeta {
   rows: Record<string, TableRow>;
   columns: Record<string, TableColumn>;
   // key = `${rowId}:${columnId}`
@@ -50,6 +51,10 @@ export const TableBlockSchema = defineBlockSchema({
     rows: {},
     columns: {},
     cells: {},
+    'meta:createdAt': undefined,
+    'meta:createdBy': undefined,
+    'meta:updatedAt': undefined,
+    'meta:updatedBy': undefined,
   }),
   metadata: {
     isFlatData: true,

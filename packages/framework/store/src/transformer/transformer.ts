@@ -293,7 +293,7 @@ export class Transformer {
       }
 
       const contentBlocks = blockTree.children
-        .map(tree => doc.getBlockById(tree.draft.id))
+        .map(tree => doc.getModelById(tree.draft.id))
         .filter((x): x is BlockModel => x !== null)
         .map(model => toDraftModel(model));
 

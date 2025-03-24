@@ -42,6 +42,7 @@ export type DocCollectionOptions = {
 };
 
 /**
+ * @internal
  * Test only
  * Do not use this in production
  */

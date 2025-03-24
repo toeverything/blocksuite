@@ -24,12 +24,20 @@
     { "path": "../block-table" },
     { "path": "../../components" },
     { "path": "../../fragments/fragment-doc-title" },
+    { "path": "../../gfx/connector" },
+    { "path": "../../gfx/note" },
+    { "path": "../../gfx/shape" },
     { "path": "../../gfx/text" },
+    { "path": "../../inlines/latex" },
+    { "path": "../../inlines/link" },
+    { "path": "../../inlines/preset" },
+    { "path": "../../inlines/reference" },
     { "path": "../../model" },
     { "path": "../../rich-text" },
     { "path": "../../shared" },
     { "path": "../../widgets/widget-drag-handle" },
     { "path": "../../widgets/widget-edgeless-auto-connect" },
+    { "path": "../../widgets/widget-edgeless-toolbar" },
     { "path": "../../widgets/widget-frame-title" },
     { "path": "../../widgets/widget-remote-selection" },
     { "path": "../../widgets/widget-scroll-anchoring" },
@@ -38,7 +46,6 @@
     { "path": "../../../framework/block-std" },
     { "path": "../../data-view" },
     { "path": "../../../framework/global" },
-    { "path": "../../../framework/inline" },
     { "path": "../../../framework/store" }
   ]
 }

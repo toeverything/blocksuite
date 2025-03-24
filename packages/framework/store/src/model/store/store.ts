@@ -34,36 +34,154 @@ export type StoreOptions = {
   extensions?: ExtensionType[];
 };
 
-export type BlockUpdatedPayload =
-  | {
-      type: 'add';
-      id: string;
-      isLocal: boolean;
-      init: boolean;
-      flavour: string;
-      model: BlockModel;
-    }
-  | {
-      type: 'delete';
-      id: string;
-      isLocal: boolean;
-      flavour: string;
-      parent: string;
-      model: BlockModel;
-    }
-  | {
-      type: 'update';
-      id: string;
-      isLocal: boolean;
-      flavour: string;
-      props: { key: string };
-    };
+type StoreBlockAddedPayload = {
+  /**
+   * The type of the event.
+   */
+  type: 'add';
+  /**
+   * The id of the block.
+   */
+  id: string;
+  /**
+   * Whether the event is triggered by local changes.
+   */
+  isLocal: boolean;
+  /**
+   * The flavour of the block.
+   */
+  flavour: string;
+  /**
+   * The model of the block.
+   */
+  model: BlockModel;
+  /**
+   * @internal
+   * Whether the event is triggered by initialization.
+   * FIXME: This seems not working as expected now.
+   */
+  init: boolean;
+};
+
+type StoreBlockDeletedPayload = {
+  /**
+   * The type of the event.
+   */
+  type: 'delete';
+  /**
+   * The id of the block.
+   */
+  id: string;
+  /**
+   * Whether the event is triggered by local changes.
+   */
+  isLocal: boolean;
+  /**
+   * The flavour of the block.
+   */
+  flavour: string;
+  /**
+   * The parent id of the block.
+   */
+  parent: string;
+  /**
+   * The model of the block.
+   */
+  model: BlockModel;
+};
+
+type StoreBlockUpdatedPayload = {
+  /**
+   * The type of the event.
+   */
+  type: 'update';
+  /**
+   * The id of the block.
+   */
+  id: string;
+  /**
+   * Whether the event is triggered by local changes.
+   */
+  isLocal: boolean;
+  /**
+   * The flavour of the block.
+   */
+  flavour: string;
+  /**
+   * The changed props of the block.
+   */
+  props: { key: string };
+};
+
+type StoreBlockUpdatedPayloads =
+  | StoreBlockAddedPayload
+  | StoreBlockDeletedPayload
+  | StoreBlockUpdatedPayload;
+
+/**
+ * Slots for receiving events from the store.
+ * All events are rxjs Subjects, you can subscribe to them like this:
+ *
+ * ```ts
+ * store.slots.ready.subscribe(() => {
+ *   console.log('store is ready');
+ * });
+ * ```
+ *
+ * You can also use rxjs operators to handle the events.
+ *
+ * @interface
+ * @category Store
+ */
+export type StoreSlots = Doc['slots'] & {
+  /**
+   * This fires after `doc.load` is called.
+   * The Y.Doc is fully loaded and ready to use.
+   */
+  ready: Subject<void>;
+  /**
+   * This fires when the root block is added via API call or has just been initialized from existing ydoc.
+   * useful for internal block UI components to start subscribing following up events.
+   * Note that at this moment, the whole block tree may not be fully initialized yet.
+   */
+  rootAdded: Subject<string>;
+  /**
+   * This fires when the root block is deleted via API call or has just been removed from existing ydoc.
+   * In most cases, you don't need to subscribe to this event.
+   */
+  rootDeleted: Subject<string>;
+  /**
+   * This fires when a block is updated via API call or has just been updated from existing ydoc.
+   *
+   * The payload can have three types:
+   * - add: When a new block is added
+   * - delete: When a block is removed
+   * - update: When a block's properties are modified
+   *
+   */
+  blockUpdated: Subject<StoreBlockUpdatedPayloads>;
+};
 
 const internalExtensions = [StoreSelectionExtension];
 
+/**
+ * Core store class that manages blocks and their lifecycle in BlockSuite
+ * @remarks
+ * The Store class is responsible for managing the lifecycle of blocks, handling transactions,
+ * and maintaining the block tree structure.
+ * A store is a piece of data created from one or a part of a Y.Doc.
+ *
+ * @category Store
+ */
 export class Store {
+  /** @internal */
   readonly userExtensions: ExtensionType[];
 
+  /**
+   * Group of disposable resources managed by the store
+   *
+   * @category Store Lifecycle
+   */
   disposableGroup = new DisposableGroup();
 
   private readonly _provider: ServiceProvider;
@@ -91,119 +209,77 @@ export class Store {
 
   private readonly _schema: Schema;
 
-  readonly slots: Doc['slots'] & {
-    /** This is always triggered after `doc.load` is called. */
-    ready: Subject<void>;
-    /**
-     * This fires when the root block is added via API call or has just been initialized from existing ydoc.
-     * useful for internal block UI components to start subscribing following up events.
-     * Note that at this moment, the whole block tree may not be fully initialized yet.
-     */
-    rootAdded: Subject<string>;
-    rootDeleted: Subject<string>;
-    blockUpdated: Subject<BlockUpdatedPayload>;
-  };
+  /**
+   * Get the id of the store.
+   *
+   * @category Store Lifecycle
+   */
+  get id() {
+    return this._doc.id;
+  }
 
-  updateBlock: {
-    <T extends Partial<BlockProps>>(model: BlockModel | string, props: T): void;
-    (model: BlockModel | string, callback: () => void): void;
-  } = (
-    modelOrId: BlockModel | string,
-    callBackOrProps: (() => void) | Partial<BlockProps>
-  ) => {
-    if (this.readonly) {
-      console.error('cannot modify data in readonly mode');
-      return;
-    }
-
-    const isCallback = typeof callBackOrProps === 'function';
-
-    const model =
-      typeof modelOrId === 'string'
-        ? this.getBlock(modelOrId)?.model
-        : modelOrId;
-    if (!model) {
-      throw new BlockSuiteError(
-        ErrorCode.ModelCRUDError,
-        `updating block: ${modelOrId} not found`
-      );
-    }
-
-    if (!isCallback) {
-      const parent = this.getParent(model);
-      this.schema.validate(
-        model.flavour,
-        parent?.flavour,
-        callBackOrProps.children?.map(child => child.flavour)
-      );
-    }
-
-    const yBlock = this._yBlocks.get(model.id);
-    if (!yBlock) {
-      throw new BlockSuiteError(
-        ErrorCode.ModelCRUDError,
-        `updating block: ${model.id} not found`
-      );
-    }
-
-    const block = this.getBlock(model.id);
-    if (!block) return;
-
-    this.transact(() => {
-      if (isCallback) {
-        callBackOrProps();
-        this._runQuery(block);
-        return;
-      }
-
-      if (callBackOrProps.children) {
-        this._crud.updateBlockChildren(
-          model.id,
-          callBackOrProps.children.map(child => child.id)
-        );
-      }
-
-      const schema = this.schema.flavourSchemaMap.get(model.flavour);
-      if (!schema) {
-        throw new BlockSuiteError(
-          ErrorCode.ModelCRUDError,
-          `schema for flavour: ${model.flavour} not found`
-        );
-      }
-      syncBlockProps(schema, model, yBlock, callBackOrProps);
-      this._runQuery(block);
-      return;
-    });
-  };
+  /**
+   * {@inheritDoc StoreSlots}
+   *
+   * @category Store Lifecycle
+   */
+  readonly slots: StoreSlots;
 
   private get _yBlocks() {
     return this._doc.yBlocks;
   }
 
+  /**
+   * Get the {@link AwarenessStore} instance for current store
+   */
   get awarenessStore() {
     return this._doc.awarenessStore;
   }
 
+  /**
+   * Get the di provider for current store.
+   *
+   * @category Extension
+   */
   get provider() {
     return this._provider;
   }
 
+  /**
+   * Get the {@link BlobEngine} instance for current store.
+   */
   get blobSync() {
     return this.workspace.blobSync;
   }
 
+  /**
+   * Get the {@link Doc} instance for current store.
+   */
   get doc() {
     return this._doc;
   }
 
+  /**
+   * @internal
+   */
   get blocks() {
     return this._blocks;
   }
 
+  /**
+   * Get the number of blocks in the store
+   *
+   * @category Block CRUD
+   */
   get blockSize() {
     return Object.values(this._blocks.peek()).length;
   }
 
+  /**
+   * Check if the store can redo
+   *
+   * @category History
+   */
   get canRedo() {
     if (this.readonly) {
       return false;
@@ -211,6 +287,11 @@ export class Store {
     return this._doc.canRedo;
   }
 
+  /**
+   * Check if the store can undo
+   *
+   * @category History
+   */
   get canUndo() {
     if (this.readonly) {
       return false;
@@ -218,93 +299,11 @@ export class Store {
     return this._doc.canUndo;
   }
 
-  get captureSync() {
-    return this._doc.captureSync.bind(this._doc);
-  }
-
-  get clear() {
-    return this._doc.clear.bind(this._doc);
-  }
-
-  get workspace() {
-    return this._doc.workspace;
-  }
-
-  get history() {
-    return this._doc.history;
-  }
-
-  get id() {
-    return this._doc.id;
-  }
-
-  get isEmpty() {
-    return this._isEmpty.peek();
-  }
-
-  get isEmpty$() {
-    return this._isEmpty;
-  }
-
-  get loaded() {
-    return this._doc.loaded;
-  }
-
-  get meta() {
-    return this._doc.meta;
-  }
-
-  get readonly$() {
-    return this._readonly;
-  }
-
-  get readonly() {
-    return this._readonly.value === true;
-  }
-
-  set readonly(value: boolean) {
-    this._readonly.value = value;
-  }
-
-  get ready() {
-    return this._doc.ready;
-  }
-
-  get redo() {
-    if (this.readonly) {
-      return () => {
-        console.error('cannot undo in readonly mode');
-      };
-    }
-    return this._doc.redo.bind(this._doc);
-  }
-
-  get resetHistory() {
-    return this._doc.resetHistory.bind(this._doc);
-  }
-
-  get root() {
-    const rootId = this._crud.root;
-    if (!rootId) return null;
-    return this.getBlock(rootId)?.model ?? null;
-  }
-
-  get rootDoc() {
-    return this._doc.rootDoc;
-  }
-
-  get schema() {
-    return this._schema;
-  }
-
-  get spaceDoc() {
-    return this._doc.spaceDoc;
-  }
-
-  get transact() {
-    return this._doc.transact.bind(this._doc);
-  }
-
+  /**
+   * Undo the last transaction.
+   *
+   * @category History
+   */
   get undo() {
     if (this.readonly) {
       return () => {
@@ -314,12 +313,214 @@ export class Store {
     return this._doc.undo.bind(this._doc);
   }
 
+  /**
+   * Redo the last undone transaction.
+   *
+   * @category History
+   */
+  get redo() {
+    if (this.readonly) {
+      return () => {
+        console.error('cannot undo in readonly mode');
+      };
+    }
+    return this._doc.redo.bind(this._doc);
+  }
+
+  /**
+   * Reset the history of the store.
+   *
+   * @category History
+   */
+  get resetHistory() {
+    return this._doc.resetHistory.bind(this._doc);
+  }
+
+  /**
+   * Execute a transaction.
+   *
+   * @example
+   * ```ts
+   * store.transact(() => {
+   *   op1();
+   *   op2();
+   * });
+   * ```
+   *
+   * @category History
+   */
+  get transact() {
+    return this._doc.transact.bind(this._doc);
+  }
+
+  /**
+   * Execute a transaction without capturing the history.
+   *
+   * @example
+   * ```ts
+   * store.withoutTransact(() => {
+   *   op1();
+   *   op2();
+   * });
+   * ```
+   *
+   * @category History
+   */
   get withoutTransact() {
     return this._doc.withoutTransact.bind(this._doc);
   }
 
+  /**
+   * Force the following history to be captured into a new stack.
+   *
+   * @example
+   * ```ts
+   * op1();
+   * op2();
+   * store.captureSync();
+   * op3();
+   *
+   * store.undo(); // undo op3
+   * store.undo(); // undo op1, op2
+   * ```
+   *
+   * @category History
+   */
+  get captureSync() {
+    return this._doc.captureSync.bind(this._doc);
+  }
+
+  /**
+   * Get the {@link Workspace} instance for current store.
+   */
+  get workspace() {
+    return this._doc.workspace;
+  }
+
+  /**
+   * Get the {@link Y.UndoManager} instance for current store.
+   *
+   * @category History
+   */
+  get history() {
+    return this._doc.history;
+  }
+
+  /**
+   * Check if there are no blocks in the store.
+   *
+   * @category Block CRUD
+   */
+  get isEmpty() {
+    return this._isEmpty.peek();
+  }
+
+  /**
+   * Get the signal for the empty state of the store.
+   *
+   * @category Block CRUD
+   */
+  get isEmpty$() {
+    return this._isEmpty;
+  }
+
+  /**
+   * Check if the store is loaded.
+   *
+   * @category Store Lifecycle
+   */
+  get loaded() {
+    return this._doc.loaded;
+  }
+
+  /**
+   * Get the meta data of the store.
+   *
+   * @internal
+   */
+  get meta() {
+    return this._doc.meta;
+  }
+
+  /**
+   * Check if the store is readonly.
+   *
+   * @category Block CRUD
+   */
+  get readonly() {
+    return this._readonly.value === true;
+  }
+
+  /**
+   * Get the signal for the readonly state of the store.
+   *
+   * @category Block CRUD
+   */
+  get readonly$() {
+    return this._readonly;
+  }
+
+  /**
+   * Set the readonly state of the store.
+   *
+   * @category Block CRUD
+   */
+  set readonly(value: boolean) {
+    this._readonly.value = value;
+  }
+
+  /**
+   * Check if the store is ready.
+   * Which means the Y.Doc is loaded and the root block is added.
+   *
+   * @category Store Lifecycle
+   */
+  get ready() {
+    return this._doc.ready;
+  }
+
+  /**
+   * Get the root block of the store.
+   *
+   * @category Block CRUD
+   */
+  get root() {
+    const rootId = this._crud.root;
+    if (!rootId) return null;
+    return this.getBlock(rootId)?.model ?? null;
+  }
+
+  /**
+   * @internal
+   * Get the root Y.Doc of sub Y.Doc.
+   * In the current design, store is on a sub Y.Doc, and all sub docs have the same root Y.Doc.
+   */
+  get rootDoc() {
+    return this._doc.rootDoc;
+  }
+
+  /**
+   * Get the {@link Schema} instance of the store.
+   */
+  get schema() {
+    return this._schema;
+  }
+
+  /**
+   * @internal
+   * Get the Y.Doc instance of the store.
+   */
+  get spaceDoc() {
+    return this._doc.spaceDoc;
+  }
+
   private _isDisposed = false;
 
+  /**
+   * @internal
+   * In most cases, you don't need to use the constructor directly.
+   * The store is created by the {@link Doc} instance.
+   */
   constructor({ doc, readonly, query, provider, extensions }: StoreOptions) {
     this._doc = doc;
     this.slots = {
@@ -488,6 +689,17 @@ export class Store {
     }
   }
 
+  /**
+   * Creates and adds a new block to the store
+   * @param flavour - The block's flavour (type)
+   * @param blockProps - Optional properties for the new block
+   * @param parent - Optional parent block or parent block ID
+   * @param parentIndex - Optional index position in parent's children
+   * @returns The ID of the newly created block
+   * @throws {BlockSuiteError} When store is in readonly mode
+   *
+   * @category Block CRUD
+   */
   addBlock(
     flavour: string,
     blockProps: Partial<BlockProps & Omit<BlockProps, 'flavour'>> = {},
@@ -516,6 +728,15 @@ export class Store {
     return id;
   }
 
+  /**
+   * Add multiple blocks to the store
+   * @param blocks - Array of blocks to add
+   * @param parent - Optional parent block or parent block ID
+   * @param parentIndex - Optional index position in parent's children
+   * @returns Array of IDs of the newly created blocks
+   *
+   * @category Block CRUD
+   */
   addBlocks(
     blocks: Array<{
       flavour: string;
@@ -539,6 +760,15 @@ export class Store {
     return ids;
   }
 
+  /**
+   * Add sibling blocks to the store
+   * @param targetModel - The target block model
+   * @param props - Array of block properties
+   * @param place - Optional position to place the new blocks ('after' or 'before')
+   * @returns Array of IDs of the newly created blocks
+   *
+   * @category Block CRUD
+   */
   addSiblingBlocks(
     targetModel: BlockModel,
     props: Array<Partial<BlockProps>>,
@@ -576,6 +806,92 @@ export class Store {
     return this.addBlocks(blocks, parent.id, insertIndex);
   }
 
+  /**
+   * Updates a block's properties or executes a callback in a transaction
+   * @param modelOrId - The block model or block ID to update
+   * @param callBackOrProps - Either a callback function to execute or properties to update
+   * @throws {BlockSuiteError} When the block is not found or schema validation fails
+   *
+   * @category Block CRUD
+   */
+  updateBlock(
+    modelOrId: BlockModel | string,
+    callBackOrProps: (() => void) | Partial<BlockProps>
+  ) {
+    if (this.readonly) {
+      console.error('cannot modify data in readonly mode');
+      return;
+    }
+
+    const isCallback = typeof callBackOrProps === 'function';
+
+    const model =
+      typeof modelOrId === 'string'
+        ? this.getBlock(modelOrId)?.model
+        : modelOrId;
+    if (!model) {
+      throw new BlockSuiteError(
+        ErrorCode.ModelCRUDError,
+        `updating block: ${modelOrId} not found`
+      );
+    }
+
+    if (!isCallback) {
+      const parent = this.getParent(model);
+      this.schema.validate(
+        model.flavour,
+        parent?.flavour,
+        callBackOrProps.children?.map(child => child.flavour)
+      );
+    }
+
+    const yBlock = this._yBlocks.get(model.id);
+    if (!yBlock) {
+      throw new BlockSuiteError(
+        ErrorCode.ModelCRUDError,
+        `updating block: ${model.id} not found`
+      );
+    }
+
+    const block = this.getBlock(model.id);
+    if (!block) return;
+
+    this.transact(() => {
+      if (isCallback) {
+        callBackOrProps();
+        this._runQuery(block);
+        return;
+      }
+
+      if (callBackOrProps.children) {
+        this._crud.updateBlockChildren(
+          model.id,
+          callBackOrProps.children.map(child => child.id)
+        );
+      }
+
+      const schema = this.schema.flavourSchemaMap.get(model.flavour);
+      if (!schema) {
+        throw new BlockSuiteError(
+          ErrorCode.ModelCRUDError,
+          `schema for flavour: ${model.flavour} not found`
+        );
+      }
+      syncBlockProps(schema, model, yBlock, callBackOrProps);
+      this._runQuery(block);
+      return;
+    });
+  }
+
+  /**
+   * Delete a block from the store
+   * @param model - The block model or block ID to delete
+   * @param options - Optional options for the deletion
+   * @param options.bringChildrenTo - Optional block model to bring children to
+   * @param options.deleteChildren - Optional flag to delete children
+   *
+   * @category Block CRUD
+   */
   deleteBlock(
     model: BlockModel | string,
     options: {
@@ -610,49 +926,49 @@ export class Store {
     });
   }
 
-  dispose() {
-    this._provider.getAll(StoreExtensionIdentifier).forEach(ext => {
-      ext.disposed();
-    });
-    this.slots.ready.complete();
-    this.slots.rootAdded.complete();
-    this.slots.rootDeleted.complete();
-    this.slots.blockUpdated.complete();
-    this.disposableGroup.dispose();
-    this._isDisposed = true;
-  }
-
+  /**
+   * Gets a block by its ID
+   * @param id - The block's ID
+   * @returns The block instance if found, undefined otherwise
+   *
+   * @category Block CRUD
+   */
   getBlock(id: string): Block | undefined {
     return this._blocks.peek()[id];
   }
 
+  /**
+   * Gets a block by its ID
+   * @param id - The block's ID
+   * @returns The block instance in signal if found, undefined otherwise
+   *
+   * @category Block CRUD
+   */
   getBlock$(id: string): Block | undefined {
     return this._blocks.value[id];
   }
 
   /**
-   * @deprecated
-   * Use `getBlocksByFlavour` instead.
+   * Get a model by its ID
+   * @param id - The model's ID
+   * @returns The model instance if found, null otherwise
+   *
+   * @category Block CRUD
    */
-  getBlockByFlavour(blockFlavour: string | string[]) {
-    return this.getBlocksByFlavour(blockFlavour).map(x => x.model);
-  }
-
-  /**
-   * @deprecated
-   * Use `getBlock` instead.
-   */
-  getBlockById<Model extends BlockModel = BlockModel>(
+  getModelById<Model extends BlockModel = BlockModel>(
     id: string
   ): Model | null {
     return (this.getBlock(id)?.model ?? null) as Model | null;
   }
 
-  getStore() {
-    return Object.values(this._blocks.peek()).map(block => block.model);
-  }
-
-  getBlocksByFlavour(blockFlavour: string | string[]) {
+  /**
+   * Gets all blocks of specified flavour(s)
+   * @param blockFlavour - Single flavour or array of flavours to filter by
+   * @returns Array of matching blocks
+   *
+   * @category Block CRUD
+   */
+  getBlocksByFlavour(blockFlavour: string | string[]): Block[] {
     const flavours =
       typeof blockFlavour === 'string' ? [blockFlavour] : blockFlavour;
 
@@ -661,21 +977,34 @@ export class Store {
     );
   }
 
-  getNext(block: BlockModel | string) {
-    return this._getSiblings(
-      block,
-      (parent, index) => parent.children[index + 1] ?? null
-    );
+  /**
+   * Get all models in the store
+   * @returns Array of all models
+   *
+   * @category Block CRUD
+   */
+  getAllModels() {
+    return Object.values(this._blocks.peek()).map(block => block.model);
   }
 
-  getNexts(block: BlockModel | string) {
-    return (
-      this._getSiblings(block, (parent, index) =>
-        parent.children.slice(index + 1)
-      ) ?? []
-    );
+  /**
+   * Get all models of specified flavour(s)
+   * @param blockFlavour - Single flavour or array of flavours to filter by
+   * @returns Array of matching models
+   *
+   * @category Block CRUD
+   */
+  getModelsByFlavour(blockFlavour: string | string[]): BlockModel[] {
+    return this.getBlocksByFlavour(blockFlavour).map(x => x.model);
   }
 
+  /**
+   * Gets the parent block of a given block
+   * @param target - Block model or block ID to find parent for
+   * @returns The parent block model if found, null otherwise
+   *
+   * @category Block CRUD
+   */
   getParent(target: BlockModel | string): BlockModel | null {
     const targetId = typeof target === 'string' ? target : target.id;
     const parentId = this._crud.getParent(targetId);
@@ -687,6 +1016,13 @@ export class Store {
     return parent.model;
   }
 
+  /**
+   * Get the previous sibling block of a given block
+   * @param block - Block model or block ID to find previous sibling for
+   * @returns The previous sibling block model if found, null otherwise
+   *
+   * @category Block CRUD
+   */
   getPrev(block: BlockModel | string) {
     return this._getSiblings(
       block,
@@ -694,6 +1030,13 @@ export class Store {
     );
   }
 
+  /**
+   * Get all previous sibling blocks of a given block
+   * @param block - Block model or block ID to find previous siblings for
+   * @returns Array of previous sibling blocks if found, empty array otherwise
+   *
+   * @category Block CRUD
+   */
   getPrevs(block: BlockModel | string) {
     return (
       this._getSiblings(block, (parent, index) =>
@@ -702,38 +1045,55 @@ export class Store {
     );
   }
 
-  getSchemaByFlavour(flavour: string) {
-    return this._schema.flavourSchemaMap.get(flavour);
+  /**
+   * Get the next sibling block of a given block
+   * @param block - Block model or block ID to find next sibling for
+   * @returns The next sibling block model if found, null otherwise
+   *
+   * @category Block CRUD
+   */
+  getNext(block: BlockModel | string) {
+    return this._getSiblings(
+      block,
+      (parent, index) => parent.children[index + 1] ?? null
+    );
   }
 
+  /**
+   * Get all next sibling blocks of a given block
+   * @param block - Block model or block ID to find next siblings for
+   * @returns Array of next sibling blocks if found, empty array otherwise
+   *
+   * @category Block CRUD
+   */
+  getNexts(block: BlockModel | string) {
+    return (
+      this._getSiblings(block, (parent, index) =>
+        parent.children.slice(index + 1)
+      ) ?? []
+    );
+  }
+
+  /**
+   * Check if a block exists by its ID
+   * @param id - The block's ID
+   * @returns True if the block exists, false otherwise
+   *
+   * @category Block CRUD
+   */
   hasBlock(id: string) {
     return id in this._blocks.peek();
   }
 
   /**
-   * @deprecated
-   * Use `hasBlock` instead.
+   * Move blocks to a new parent block
+   * @param blocksToMove - Array of block models to move
+   * @param newParent - The new parent block model
+   * @param targetSibling - Optional target sibling block model
+   * @param shouldInsertBeforeSibling - Optional flag to insert before sibling
+   *
+   * @category Block CRUD
    */
-  hasBlockById(id: string) {
-    return this.hasBlock(id);
-  }
-
-  load(initFn?: () => void) {
-    if (this._isDisposed) {
-      this.disposableGroup = new DisposableGroup();
-      this._subscribeToSlots();
-      this._isDisposed = false;
-    }
-
-    this._doc.load(initFn);
-    this._provider.getAll(StoreExtensionIdentifier).forEach(ext => {
-      ext.loaded();
-    });
-    this.slots.ready.next();
-    this.slots.rootAdded.next(this.root?.id ?? '');
-    return this;
-  }
-
   moveBlocks(
     blocksToMove: BlockModel[],
     newParent: BlockModel,
@@ -755,14 +1115,13 @@ export class Store {
     });
   }
 
-  get get() {
-    return this.provider.get.bind(this.provider);
-  }
-
-  get getOptional() {
-    return this.provider.getOptional.bind(this.provider);
-  }
-
+  /**
+   * Creates a new transformer instance for the store
+   * @param middlewares - Optional array of transformer middlewares
+   * @returns A new Transformer instance
+   *
+   * @category Transformer
+   */
   getTransformer(middlewares: TransformerMiddleware[] = []) {
     return new Transformer({
       schema: this.schema,
@@ -774,5 +1133,77 @@ export class Store {
       },
       middlewares,
     });
+  }
+
+  /**
+   * Get an extension instance from the store
+   * @returns The extension instance
+   *
+   * @example
+   * ```ts
+   * const extension = store.get(SomeExtension);
+   * ```
+   *
+   * @category Extension
+   */
+  get get() {
+    return this.provider.get.bind(this.provider);
+  }
+
+  /**
+   * Optional get an extension instance from the store.
+   * The major difference between `get` and `getOptional` is that `getOptional` will not throw an error if the extension is not found.
+   *
+   * @returns The extension instance
+   *
+   * @example
+   * ```ts
+   * const extension = store.getOptional(SomeExtension);
+   * ```
+   *
+   * @category Extension
+   */
+  get getOptional() {
+    return this.provider.getOptional.bind(this.provider);
+  }
+
+  /**
+   * Initializes and loads the store
+   * @param initFn - Optional initialization function
+   * @returns The store instance
+   *
+   * @category Store Lifecycle
+   */
+  load(initFn?: () => void) {
+    if (this._isDisposed) {
+      this.disposableGroup = new DisposableGroup();
+      this._subscribeToSlots();
+      this._isDisposed = false;
+    }
+
+    this._doc.load(initFn);
+    this._provider.getAll(StoreExtensionIdentifier).forEach(ext => {
+      ext.loaded();
+    });
+    this.slots.ready.next();
+    this.slots.rootAdded.next(this.root?.id ?? '');
+    return this;
+  }
+
+  /**
+   * Disposes the store and releases all resources
+   *
+   * @category Store Lifecycle
+   */
+  dispose() {
+    this._provider.getAll(StoreExtensionIdentifier).forEach(ext => {
+      ext.disposed();
+    });
+    this.slots.ready.complete();
+    this.slots.rootAdded.complete();
+    this.slots.rootDeleted.complete();
+    this.slots.blockUpdated.complete();
+    this.disposableGroup.dispose();
+    this._isDisposed = true;
   }
 }

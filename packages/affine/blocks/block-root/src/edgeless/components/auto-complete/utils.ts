@@ -3,6 +3,7 @@ import {
   Overlay,
   type RoughCanvas,
 } from '@blocksuite/affine-block-surface';
+import { type Shape, ShapeFactory } from '@blocksuite/affine-gfx-shape';
 import {
   type Connection,
   getShapeRadius,
@@ -20,7 +21,6 @@ import { assertType } from '@blocksuite/global/utils';
 import * as Y from 'yjs';
 
 import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
-import { type Shape, ShapeFactory } from '../../utils/tool-overlay.js';
 
 export enum Direction {
   Right,
