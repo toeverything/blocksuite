@@ -34,7 +34,6 @@ import {
   ErrorCode,
 } from '@blocksuite/affine/global/exceptions';
 import type { SerializedXYWH } from '@blocksuite/affine/global/gfx';
-import type { DeltaInsert } from '@blocksuite/affine/inline/types';
 import { ColorScheme, type DocMode } from '@blocksuite/affine/model';
 import {
   docLinkBaseURLMiddleware,
@@ -51,7 +50,11 @@ import {
   StyleVariables,
 } from '@blocksuite/affine/shared/theme';
 import { openFileOrFiles, printToPdf } from '@blocksuite/affine/shared/utils';
-import { Text, type Workspace } from '@blocksuite/affine/store';
+import {
+  type DeltaInsert,
+  Text,
+  type Workspace,
+} from '@blocksuite/affine/store';
 import { NotionHtmlAdapter } from '@blocksuite/affine-shared/adapters';
 import type { AffineTextAttributes } from '@blocksuite/affine-shared/types';
 import { TestAffineEditorContainer } from '@blocksuite/integration-test';
@@ -489,7 +492,7 @@ export class StarterDebugMenu extends ShadowlessElement {
         );
         for (const doc of docs) {
           if (doc) {
-            const noteBlock = window.doc.getBlockByFlavour('affine:note');
+            const noteBlock = window.doc.getModelsByFlavour('affine:note');
             window.doc.addBlock(
               'affine:paragraph',
               {

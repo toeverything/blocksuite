@@ -25,10 +25,7 @@ import {
   PageSurfaceRefBlockSpec,
 } from '@blocksuite/affine-block-surface-ref';
 import { TableBlockSpec } from '@blocksuite/affine-block-table';
-import {
-  RefNodeSlotsExtension,
-  RichTextExtensions,
-} from '@blocksuite/affine-rich-text';
+import { inlinePresetExtensions } from '@blocksuite/affine-inline-preset';
 import {
   DefaultOpenDocExtension,
   DocDisplayMetaService,
@@ -38,10 +35,9 @@ import {
 import type { ExtensionType } from '@blocksuite/store';
 
 export const CommonBlockSpecs: ExtensionType[] = [
+  inlinePresetExtensions,
   DocDisplayMetaService,
-  RefNodeSlotsExtension,
   EditPropsStore,
-  RichTextExtensions,
   LatexBlockSpec,
   ListBlockSpec,
   DatabaseBlockSpec,
@@ -57,6 +53,7 @@ export const CommonBlockSpecs: ExtensionType[] = [
   DefaultOpenDocExtension,
   FontLoaderService,
   CalloutBlockSpec,
+  FrameBlockSpec,
 ].flat();
 
 export const PageFirstPartyBlockSpecs: ExtensionType[] = [
@@ -72,6 +69,5 @@ export const EdgelessFirstPartyBlockSpecs: ExtensionType[] = [
   EdgelessNoteBlockSpec,
   EdgelessSurfaceBlockSpec,
   EdgelessSurfaceRefBlockSpec,
-  FrameBlockSpec,
   EdgelessTextBlockSpec,
 ].flat();

@@ -1,5 +1,9 @@
 import type { NoteBlockComponent } from '@blocksuite/affine-block-note';
-import { isNoteBlock } from '@blocksuite/affine-block-surface';
+import {
+  EdgelessLegacySlotIdentifier,
+  getSurfaceComponent,
+  isNoteBlock,
+} from '@blocksuite/affine-block-surface';
 import {
   DEFAULT_NOTE_HEIGHT,
   type NoteBlockModel,
@@ -18,7 +22,7 @@ import { state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type { EdgelessRootBlockComponent } from '../../edgeless-root-block';
+import type { EdgelessSelectedRectWidget } from '../rects/edgeless-selected-rect';
 
 const DIVIDING_LINE_OFFSET = 4;
 const NEW_NOTE_GAP = 40;
@@ -96,10 +100,7 @@ const styles = css`
 
 export const NOTE_SLICER_WIDGET = 'note-slicer';
 
-export class NoteSlicer extends WidgetComponent<
-  RootBlockModel,
-  EdgelessRootBlockComponent
-> {
+export class NoteSlicer extends WidgetComponent<RootBlockModel> {
   static override styles = styles;
 
   private _divingLinePositions: Point[] = [];
@@ -143,7 +144,10 @@ export class NoteSlicer extends WidgetComponent<
   }
 
   get selectedRectEle() {
-    return this.block.selectedRectWidget;
+    return this.host.view.getWidget(
+      'edgeless-selected-rect',
+      this.host.id
+    ) as EdgelessSelectedRectWidget | null;
   }
 
   private _sliceNote() {
@@ -182,7 +186,7 @@ export class NoteSlicer extends WidgetComponent<
       doc.root?.id
     );
 
-    doc.moveBlocks(resetBlocks, doc.getBlockById(newNoteId) as NoteBlockModel);
+    doc.moveBlocks(resetBlocks, doc.getModelById(newNoteId) as NoteBlockModel);
 
     this._activeSlicerIndex = 0;
     this._selection.set({
@@ -262,18 +266,20 @@ export class NoteSlicer extends WidgetComponent<
   override connectedCallback(): void {
     super.connectedCallback();
 
-    const { disposables, std, block, gfx } = this;
+    const { disposables, std, gfx } = this;
 
     this._updateDivingLineAndBlockIds();
 
+    const slots = std.get(EdgelessLegacySlotIdentifier);
+
     disposables.add(
-      block.slots.elementResizeStart.subscribe(() => {
+      slots.elementResizeStart.subscribe(() => {
         this._isResizing = true;
       })
     );
 
     disposables.add(
-      block.slots.elementResizeEnd.subscribe(() => {
+      slots.elementResizeEnd.subscribe(() => {
         this._isResizing = false;
       })
     );
@@ -307,7 +313,7 @@ export class NoteSlicer extends WidgetComponent<
     );
 
     disposables.add(
-      block.slots.toggleNoteSlicer.subscribe(() => {
+      slots.toggleNoteSlicer.subscribe(() => {
         this._enableNoteSlicer = !this._enableNoteSlicer;
 
         if (this.selectedRectEle && this._enableNoteSlicer) {
@@ -316,9 +322,9 @@ export class NoteSlicer extends WidgetComponent<
       })
     );
 
-    const { surface } = block;
     requestAnimationFrame(() => {
-      if (surface.isConnected && std.event) {
+      const surface = getSurfaceComponent(std);
+      if (surface?.isConnected && std.event) {
         disposables.add(
           std.event.add('click', ctx => {
             const event = ctx.get('pointerState');
@@ -343,7 +349,7 @@ export class NoteSlicer extends WidgetComponent<
   }
 
   override firstUpdated() {
-    if (!this.block.service) return;
+    if (!this.block?.service) return;
     this.disposables.add(
       this.block.service.uiEventDispatcher.add('wheel', () => {
         this._hidden = true;

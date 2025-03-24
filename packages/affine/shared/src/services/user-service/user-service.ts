@@ -6,6 +6,8 @@ import type { AffineUserInfo } from './types';
 
 export interface UserService {
   userInfo$(id: string): Signal<AffineUserInfo | null>;
+  isLoading$(id: string): Signal<boolean>;
+  error$(id: string): Signal<string | null>; // user friendly error string
   revalidateUserInfo(id: string): void;
 }
 

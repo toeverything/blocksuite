@@ -51,7 +51,7 @@ const snapshotTest = async (snapshotUrl: string, elementsCount: number) => {
   editor.doc = newDoc;
   await wait();
 
-  const surface = newDoc.getBlockByFlavour(
+  const surface = newDoc.getModelsByFlavour(
     'affine:surface'
   )[0] as SurfaceBlockModel;
   const surfaceElements = [...surface['_elementModels']].map(

@@ -7,6 +7,7 @@ import {
   getBgGridGap,
   normalizeWheelDeltaY,
 } from '@blocksuite/affine-block-surface';
+import { mountShapeTextEditor } from '@blocksuite/affine-gfx-shape';
 import {
   NoteBlockModel,
   NoteDisplayMode,
@@ -52,7 +53,6 @@ import { EdgelessPageKeyboardManager } from './edgeless-keyboard.js';
 import type { EdgelessRootService } from './edgeless-root-service.js';
 import { isSingleMindMapNode } from './utils/mindmap.js';
 import { isCanvasElement } from './utils/query.js';
-import { mountShapeTextEditor } from './utils/text.js';
 
 export class EdgelessRootBlockComponent extends BlockComponent<
   RootBlockModel,

@@ -129,7 +129,7 @@ export class EdgelessCRUDExtension extends Extension {
       return;
     }
 
-    const block = this.std.store.getBlockById(id);
+    const block = this.std.store.getModelById(id);
     if (block) {
       const key = getLastPropsKey(block.flavour, {
         ...block.yBlock.toJSON(),
@@ -145,7 +145,7 @@ export class EdgelessCRUDExtension extends Extension {
     if (!surface) {
       return null;
     }
-    const el = surface.getElementById(id) ?? this.std.store.getBlockById(id);
+    const el = surface.getElementById(id) ?? this.std.store.getModelById(id);
     return el as GfxModel | null;
   }
 

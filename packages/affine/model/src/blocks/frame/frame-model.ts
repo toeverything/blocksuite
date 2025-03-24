@@ -78,7 +78,7 @@ export class FrameBlockModel
     for (const key of this.childIds) {
       const element =
         this.surface.getElementById(key) ||
-        (this.surface.doc.getBlockById(key) as GfxBlockElementModel);
+        (this.surface.doc.getModelById(key) as GfxBlockElementModel);
 
       element && elements.push(element);
     }

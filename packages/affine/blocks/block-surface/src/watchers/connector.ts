@@ -8,9 +8,9 @@ export const connectorWatcher: SurfaceMiddleware = (
   surface: SurfaceBlockModel
 ) => {
   const hasElementById = (id: string) =>
-    surface.hasElementById(id) || surface.doc.hasBlockById(id);
+    surface.hasElementById(id) || surface.doc.hasBlock(id);
   const elementGetter = (id: string) =>
-    surface.getElementById(id) ?? (surface.doc.getBlockById(id) as GfxModel);
+    surface.getElementById(id) ?? (surface.doc.getModelById(id) as GfxModel);
   const updateConnectorPath = (connector: ConnectorElementModel) => {
     if (
       ((connector.source?.id && hasElementById(connector.source.id)) ||

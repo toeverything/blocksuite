@@ -1,7 +1,10 @@
 import { addAttachments } from '@blocksuite/affine-block-attachment';
 import { insertEdgelessTextCommand } from '@blocksuite/affine-block-edgeless-text';
 import { addImages } from '@blocksuite/affine-block-image';
-import { CanvasElementType } from '@blocksuite/affine-block-surface';
+import {
+  CanvasElementType,
+  EdgelessCRUDIdentifier,
+} from '@blocksuite/affine-block-surface';
 import { mountTextElementEditor } from '@blocksuite/affine-gfx-text';
 import {
   MAX_IMAGE_WIDTH,
@@ -13,12 +16,10 @@ import {
   TelemetryProvider,
 } from '@blocksuite/affine-shared/services';
 import { openFileOrFiles } from '@blocksuite/affine-shared/utils';
+import type { BlockComponent } from '@blocksuite/block-std';
 import { Bound } from '@blocksuite/global/gfx';
 import type { TemplateResult } from 'lit';
 import * as Y from 'yjs';
-
-import type { EdgelessRootBlockComponent } from '../../../edgeless-root-block.js';
-import type { EdgelessRootService } from '../../../edgeless-root-service.js';
 
 export type ConfigProperty = 'x' | 'y' | 'r' | 's' | 'z' | 'o';
 export type ConfigState = 'default' | 'active' | 'hover' | 'next';
@@ -30,11 +31,7 @@ export type DraggableTool = {
   icon: TemplateResult;
   config: ToolConfig;
   standardWidth?: number;
-  render: (
-    bound: Bound,
-    edgelessService: EdgelessRootService,
-    edgeless: EdgelessRootBlockComponent
-  ) => Promise<string | null>;
+  render: (bound: Bound, edgeless: BlockComponent) => Promise<string | null>;
 };
 
 const unitMap = { x: 'px', y: 'px', r: 'deg', s: '', z: '', o: '' };
@@ -59,7 +56,7 @@ export const mediaConfig: ToolConfig = {
 
 export const getMindmapRender =
   (mindmapStyle: MindmapStyle): DraggableTool['render'] =>
-  async (bound, edgelessService) => {
+  async (bound, edgeless) => {
     const [x, y, _, h] = bound.toXYWH();
 
     const rootW = 145;
@@ -94,29 +91,24 @@ export const getMindmapRender =
       });
     }
 
-    const mindmapId = edgelessService.crud.addElement('mindmap', {
+    const crud = edgeless.std.get(EdgelessCRUDIdentifier);
+    const mindmapId = crud.addElement('mindmap', {
       style: mindmapStyle,
       children: root,
     }) as string;
 
-    edgelessService.std
-      .getOptional(TelemetryProvider)
-      ?.track('CanvasElementAdded', {
-        control: 'toolbar:dnd', // for now we use toolbar:dnd for all mindmap creation here
-        page: 'whiteboard editor',
-        module: 'toolbar',
-        segment: 'toolbar',
-        type: 'mindmap',
-      });
+    edgeless.std.getOptional(TelemetryProvider)?.track('CanvasElementAdded', {
+      control: 'toolbar:dnd', // for now we use toolbar:dnd for all mindmap creation here
+      page: 'whiteboard editor',
+      module: 'toolbar',
+      segment: 'toolbar',
+      type: 'mindmap',
+    });
 
     return mindmapId;
   };
 
-export const textRender: DraggableTool['render'] = async (
-  bound,
-  service,
-  edgeless
-) => {
+export const textRender: DraggableTool['render'] = async (bound, edgeless) => {
   const vCenter = bound.y + bound.h / 2;
   const w = 100;
   const h = 32;
@@ -135,13 +127,14 @@ export const textRender: DraggableTool['render'] = async (
     );
     id = textId!;
   } else {
-    id = service.crud.addElement(CanvasElementType.TEXT, {
+    const crud = edgeless.std.get(EdgelessCRUDIdentifier);
+    id = crud.addElement(CanvasElementType.TEXT, {
       xywh: new Bound(bound.x, vCenter - h / 2, w, h).serialize(),
       text: new Y.Text(),
     }) as string;
 
     edgeless.doc.captureSync();
-    const textElement = edgeless.service.crud.getElementById(id);
+    const textElement = crud.getElementById(id);
     if (!(textElement instanceof TextElementModel)) {
       console.error('Cannot mount text editor on a non-text element');
       return null;
@@ -149,7 +142,7 @@ export const textRender: DraggableTool['render'] = async (
     mountTextElementEditor(textElement, edgeless);
   }
 
-  service.std.getOptional(TelemetryProvider)?.track('CanvasElementAdded', {
+  edgeless.std.getOptional(TelemetryProvider)?.track('CanvasElementAdded', {
     control: 'toolbar:dnd',
     page: 'whiteboard editor',
     module: 'toolbar',
@@ -160,11 +153,7 @@ export const textRender: DraggableTool['render'] = async (
   return id;
 };
 
-export const mediaRender: DraggableTool['render'] = async (
-  bound,
-  _,
-  edgeless
-) => {
+export const mediaRender: DraggableTool['render'] = async (bound, edgeless) => {
   let file: File | null = null;
   try {
     file = await openFileOrFiles();

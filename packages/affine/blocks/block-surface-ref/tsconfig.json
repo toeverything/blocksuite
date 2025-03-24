@@ -7,6 +7,7 @@
   },
   "include": ["./src"],
   "references": [
+    { "path": "../block-frame" },
     { "path": "../block-surface" },
     { "path": "../../components" },
     { "path": "../../model" },
@@ -14,7 +15,6 @@
     { "path": "../../widgets/widget-slash-menu" },
     { "path": "../../../framework/block-std" },
     { "path": "../../../framework/global" },
-    { "path": "../../../framework/inline" },
     { "path": "../../../framework/store" }
   ]
 }

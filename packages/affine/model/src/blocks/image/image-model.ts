@@ -9,6 +9,7 @@ import {
   defineBlockSchema,
 } from '@blocksuite/store';
 
+import type { BlockMeta } from '../../utils/types.js';
 import { ImageBlockTransformer } from './image-transformer.js';
 
 export type ImageBlockProps = {
@@ -18,7 +19,8 @@ export type ImageBlockProps = {
   height?: number;
   rotate: number;
   size?: number;
-} & Omit<GfxCommonBlockProps, 'scale'>;
+} & Omit<GfxCommonBlockProps, 'scale'> &
+  BlockMeta;
 
 const defaultImageProps: ImageBlockProps = {
   caption: '',
@@ -30,6 +32,10 @@ const defaultImageProps: ImageBlockProps = {
   lockedBySelf: false,
   rotate: 0,
   size: -1,
+  'meta:createdAt': undefined,
+  'meta:createdBy': undefined,
+  'meta:updatedAt': undefined,
+  'meta:updatedBy': undefined,
 };
 
 export const ImageBlockSchema = defineBlockSchema({

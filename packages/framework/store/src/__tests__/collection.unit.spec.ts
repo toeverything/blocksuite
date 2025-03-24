@@ -3,7 +3,7 @@ import { assert, beforeEach, describe, expect, it, vi } from 'vitest';
 import { applyUpdate, type Doc, encodeStateAsUpdate } from 'yjs';
 
 import type { BlockModel, DocMeta, Store } from '../index.js';
-import { Text } from '../reactive/text.js';
+import { Text } from '../reactive/text/index.js';
 import { createAutoIncrementIdGenerator } from '../test/index.js';
 import { TestWorkspace } from '../test/test-workspace.js';
 import {
@@ -347,7 +347,7 @@ describe('addBlock', () => {
       })
     );
     const blockId = await waitOnce(doc.slots.rootAdded);
-    const block = doc.getBlockById(blockId) as BlockModel;
+    const block = doc.getModelById(blockId) as BlockModel;
     assert.equal(block.flavour, 'affine:page');
   });
 
@@ -512,7 +512,7 @@ describe('deleteBlock', () => {
       },
     });
 
-    const deletedModel = doc.getBlockById('1') as BlockModel;
+    const deletedModel = doc.getModelById('1') as BlockModel;
     doc.deleteBlock(deletedModel);
 
     assert.deepEqual(serializCollection(doc.rootDoc).spaces[spaceId].blocks, {
@@ -581,8 +581,8 @@ describe('deleteBlock', () => {
       },
     });
 
-    const deletedModel = doc.getBlockById('2') as BlockModel;
-    const deletedModelParent = doc.getBlockById('1') as BlockModel;
+    const deletedModel = doc.getModelById('2') as BlockModel;
+    const deletedModelParent = doc.getModelById('1') as BlockModel;
     doc.deleteBlock(deletedModel, {
       bringChildrenTo: deletedModelParent,
     });
@@ -693,8 +693,8 @@ describe('deleteBlock', () => {
       },
     });
 
-    const deletedModel = doc.getBlockById('2') as BlockModel;
-    const moveToModel = doc.getBlockById('3') as BlockModel;
+    const deletedModel = doc.getModelById('2') as BlockModel;
+    const moveToModel = doc.getModelById('3') as BlockModel;
     doc.deleteBlock(deletedModel, {
       bringChildrenTo: moveToModel,
     });
@@ -820,11 +820,11 @@ describe('getBlock', () => {
     doc.addBlock('affine:paragraph', {}, noteId);
     doc.addBlock('affine:paragraph', {}, noteId);
 
-    const text = doc.getBlockById('3') as BlockModel;
+    const text = doc.getModelById('3') as BlockModel;
     assert.equal(text.flavour, 'affine:paragraph');
     assert.equal(rootModel.children[0].children.indexOf(text), 1);
 
-    const invalid = doc.getBlockById('😅');
+    const invalid = doc.getModelById('😅');
     assert.equal(invalid, null);
   });
 

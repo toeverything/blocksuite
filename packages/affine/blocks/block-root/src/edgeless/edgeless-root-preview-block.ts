@@ -23,7 +23,7 @@ import {
 } from '@blocksuite/block-std/gfx';
 import { css, html } from 'lit';
 import { query, state } from 'lit/decorators.js';
-import { styleMap } from 'lit/directives/style-map.js';
+import { type StyleInfo, styleMap } from 'lit/directives/style-map.js';
 
 import type { EdgelessRootBlockWidgetName } from '../types.js';
 import type { EdgelessRootService } from './edgeless-root-service.js';
@@ -68,19 +68,15 @@ export class EdgelessRootPreviewBlockComponent extends BlockComponent<
     }
   `;
 
-  @query('.edgeless-background')
-  accessor background!: HTMLDivElement;
-
   private readonly _refreshLayerViewport = requestThrottledConnectedFrame(
     () => {
       const { zoom, translateX, translateY } = this.service.viewport;
       const gap = getBgGridGap(zoom);
 
-      this.background.style.setProperty(
-        'background-position',
-        `${translateX}px ${translateY}px`
-      );
-      this.background.style.setProperty('background-size', `${gap}px ${gap}px`);
+      this.backgroundStyle = {
+        backgroundPosition: `${translateX}px ${translateY}px`,
+        backgroundSize: `${gap}px ${gap}px`,
+      };
     },
     this
   );
@@ -229,6 +225,7 @@ export class EdgelessRootPreviewBlockComponent extends BlockComponent<
 
   override renderBlock() {
     const background = styleMap({
+      ...this.backgroundStyle,
       background: this.overrideBackground,
     });
 
@@ -259,6 +256,9 @@ export class EdgelessRootPreviewBlockComponent extends BlockComponent<
 
   @state()
   accessor overrideBackground: string | undefined = undefined;
+
+  @state()
+  accessor backgroundStyle: Readonly<StyleInfo> | null = null;
 
   @query('gfx-viewport')
   accessor gfxViewportElm!: GfxViewportElement;

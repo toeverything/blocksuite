@@ -109,7 +109,7 @@ export class BlockComponent<
     if (this._model) {
       return this._model;
     }
-    const model = this.doc.getBlockById<Model>(this.blockId);
+    const model = this.doc.getModelById<Model>(this.blockId);
     if (!model) {
       throw new BlockSuiteError(
         ErrorCode.MissingViewModelError,
@@ -229,20 +229,6 @@ export class BlockComponent<
         this.requestUpdate();
       })
     );
-
-    this.service?.specSlots.viewConnected.next({
-      service: this.service,
-      component: this,
-    });
-  }
-
-  override disconnectedCallback() {
-    super.disconnectedCallback();
-
-    this.service?.specSlots.viewDisconnected.next({
-      service: this.service,
-      component: this,
-    });
   }
 
   protected override async getUpdateComplete(): Promise<boolean> {

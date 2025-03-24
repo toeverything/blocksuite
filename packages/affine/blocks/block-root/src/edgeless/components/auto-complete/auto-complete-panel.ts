@@ -4,6 +4,12 @@ import {
   EdgelessCRUDIdentifier,
 } from '@blocksuite/affine-block-surface';
 import { FontFamilyIcon } from '@blocksuite/affine-components/icons';
+import {
+  mountShapeTextEditor,
+  SHAPE_OVERLAY_HEIGHT,
+  SHAPE_OVERLAY_WIDTH,
+  ShapeComponentConfig,
+} from '@blocksuite/affine-gfx-shape';
 import { mountTextElementEditor } from '@blocksuite/affine-gfx-text';
 import type {
   Connection,
@@ -53,12 +59,6 @@ import { styleMap } from 'lit/directives/style-map.js';
 import * as Y from 'yjs';
 
 import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
-import {
-  SHAPE_OVERLAY_HEIGHT,
-  SHAPE_OVERLAY_WIDTH,
-} from '../../utils/consts.js';
-import { mountShapeTextEditor } from '../../utils/text.js';
-import { ShapeComponentConfig } from '../toolbar/shape/shape-menu-config.js';
 import {
   type AUTO_COMPLETE_TARGET_TYPE,
   AutoCompleteFrameOverlay,

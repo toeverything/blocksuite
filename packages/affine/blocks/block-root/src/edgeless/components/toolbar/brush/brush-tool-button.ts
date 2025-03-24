@@ -2,12 +2,12 @@ import {
   EditPropsStore,
   ThemeProvider,
 } from '@blocksuite/affine-shared/services';
+import { EdgelessToolbarToolMixin } from '@blocksuite/affine-widget-edgeless-toolbar';
 import { SignalWatcher } from '@blocksuite/global/lit';
 import { computed } from '@preact/signals-core';
 import { css, html, LitElement } from 'lit';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { EdgelessToolbarToolMixin } from '../mixins/tool.mixin.js';
 import { EdgelessPenDarkIcon, EdgelessPenLightIcon } from './icons.js';
 
 export class EdgelessBrushToolButton extends EdgelessToolbarToolMixin(

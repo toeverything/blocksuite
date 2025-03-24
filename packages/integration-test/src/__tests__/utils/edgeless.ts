@@ -8,7 +8,7 @@ import type { Store } from '@blocksuite/store';
 import type { TestAffineEditorContainer } from '../../index.js';
 
 export function getSurface(doc: Store, editor: TestAffineEditorContainer) {
-  const surfaceModel = doc.getBlockByFlavour('affine:surface');
+  const surfaceModel = doc.getModelsByFlavour('affine:surface');
 
   return editor.host!.view.getBlock(
     surfaceModel[0]!.id

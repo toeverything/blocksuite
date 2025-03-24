@@ -1,5 +1,5 @@
 import {
-  EdgelessCRUDExtension,
+  EdgelessCRUDIdentifier,
   getSurfaceBlock,
   type SurfaceBlockModel,
   SurfaceElementModel,
@@ -281,7 +281,7 @@ export class SurfaceRefBlockComponent extends BlockComponent<SurfaceRefBlockMode
           flavour: 'affine:paragraph',
         },
       ]);
-      const model = this.doc.getBlockById(paragraphId);
+      const model = this.doc.getModelById(paragraphId);
       if (!model) return;
 
       requestConnectedFrame(() => {
@@ -457,7 +457,7 @@ export class SurfaceRefBlockComponent extends BlockComponent<SurfaceRefBlockMode
       private readonly _disposable = new DisposableGroup();
 
       override mounted() {
-        const crud = this.std.get(EdgelessCRUDExtension);
+        const crud = this.std.get(EdgelessCRUDIdentifier);
         const { _disposable } = this;
         const surfaceModel = getSurfaceBlock(this.std.store);
         if (!surfaceModel) return;

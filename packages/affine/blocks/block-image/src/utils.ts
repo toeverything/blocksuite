@@ -68,7 +68,7 @@ export async function uploadBlobForImage(
   } finally {
     setImageUploaded(blockId);
 
-    const imageModel = doc.getBlockById(blockId) as ImageBlockModel | null;
+    const imageModel = doc.getModelById(blockId) as ImageBlockModel | null;
     if (sourceId && imageModel) {
       const props: Partial<ImageBlockProps> = {
         sourceId,

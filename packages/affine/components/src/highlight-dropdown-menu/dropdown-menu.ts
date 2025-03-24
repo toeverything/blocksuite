@@ -1,11 +1,12 @@
 import type { AffineTextAttributes } from '@blocksuite/affine-shared/types';
 import { PropTypes, requiredProperties } from '@blocksuite/block-std';
-import { ArrowDownSmallIcon } from '@blocksuite/icons/lit';
 import { LitElement } from 'lit';
 import { property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit-html';
 import { repeat } from 'lit-html/directives/repeat.js';
+
+import { EditorChevronDown } from '../toolbar';
 
 const colors = [
   'default',
@@ -22,7 +23,7 @@ const colors = [
 type HighlightType = 'color' | 'background';
 
 // TODO(@fundon): these recent settings should be added to the dropdown menu
-// blocksuite/tests-legacy/e2e/format-bar.spec.ts#253
+// tests/blocksutie/e2e/format-bar.spec.ts#253
 //
 // let latestHighlightColor: string | null = null;
 // let latestHighlightType: HighlightType = 'background';
@@ -56,8 +57,7 @@ export class HighlightDropdownMenu extends LitElement {
                   'var(--affine-text-primary-color)',
               })}
             ></affine-highlight-duotone-icon>
-
-            ${ArrowDownSmallIcon()}
+            ${EditorChevronDown}
           </editor-icon-button>
         `}
       >

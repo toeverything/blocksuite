@@ -492,7 +492,7 @@ export class LayerManager extends GfxExtension {
   private _reset() {
     const elements = (
       this._doc
-        .getStore()
+        .getAllModels()
         .filter(
           model =>
             model instanceof GfxBlockElementModel &&
@@ -798,7 +798,7 @@ export class LayerManager extends GfxExtension {
     this._disposable.add(
       store.slots.blockUpdated.subscribe(payload => {
         if (payload.type === 'add') {
-          const block = store.getBlockById(payload.id)!;
+          const block = store.getModelById(payload.id)!;
 
           if (
             block instanceof GfxBlockElementModel &&
@@ -810,7 +810,7 @@ export class LayerManager extends GfxExtension {
           }
         }
         if (payload.type === 'update') {
-          const block = store.getBlockById(payload.id)!;
+          const block = store.getModelById(payload.id)!;
 
           if (
             (payload.props.key === 'index' ||
@@ -825,7 +825,7 @@ export class LayerManager extends GfxExtension {
           }
         }
         if (payload.type === 'delete') {
-          const block = store.getBlockById(payload.id);
+          const block = store.getModelById(payload.id);
 
           if (block instanceof GfxBlockElementModel) {
             this.delete(block as GfxBlockElementModel);

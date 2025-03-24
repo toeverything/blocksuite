@@ -62,7 +62,7 @@ export class EdgelessWatcher {
   };
 
   private readonly _showDragHandle = async () => {
-    const surfaceModel = this.widget.doc.getBlockByFlavour('affine:surface');
+    const surfaceModel = this.widget.doc.getModelsByFlavour('affine:surface');
     const surface = this.widget.std.view.getBlock(
       surfaceModel[0]!.id
     ) as SurfaceBlockComponent;

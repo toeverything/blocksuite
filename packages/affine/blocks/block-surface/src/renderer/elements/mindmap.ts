@@ -32,7 +32,7 @@ export function mindmap(
       const { connector, outdated } = result;
       const elementGetter = (id: string) =>
         model.surface.getElementById(id) ??
-        (model.surface.doc.getBlockById(id) as GfxModel);
+        (model.surface.doc.getModelById(id) as GfxModel);
 
       if (outdated) {
         ConnectorPathGenerator.updatePath(connector, null, elementGetter);

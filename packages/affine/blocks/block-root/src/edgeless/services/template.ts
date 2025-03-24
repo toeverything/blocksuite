@@ -188,7 +188,7 @@ export class TemplateJob {
         if (isMergeBlock) {
           this._mergeProps(
             json,
-            this.model.doc.getBlockById(
+            this.model.doc.getModelById(
               this._getMergeBlockId(json)
             ) as BlockModel
           );
