@@ -10053,7 +10053,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"vite-node@npm:3.0.9":
+"vite-node@npm:3.0.9, vite-node@npm:^3.0.4":
   version: 3.0.9
   resolution: "vite-node@npm:3.0.9"
   dependencies:
@@ -10065,21 +10065,6 @@ __metadata:
   bin:
     vite-node: vite-node.mjs
   checksum: 10/2ea7f6d15c0776509aa4055a2dab65833d434364fd43a66c294912618867f715f48f27e1a91156045503b3169462519617fbf0d78239ebd8ea4333794dbf0a18
-  languageName: node
-  linkType: hard
-
-"vite-node@npm:^3.0.4":
-  version: 3.0.8
-  resolution: "vite-node@npm:3.0.8"
-  dependencies:
-    cac: "npm:^6.7.14"
-    debug: "npm:^4.4.0"
-    es-module-lexer: "npm:^1.6.0"
-    pathe: "npm:^2.0.3"
-    vite: "npm:^5.0.0 || ^6.0.0"
-  bin:
-    vite-node: vite-node.mjs
-  checksum: 10/9a06d27d9f56f17cf9586cd36f19e4c275227f55f0d9b71c0002d7dbe1a76398cac836b639e2c2537be67f16adb33c40d6d64d3640a97696ebfdfd731e5ea13f
   languageName: node
   linkType: hard
 
