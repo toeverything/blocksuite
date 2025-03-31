@@ -1,6 +1,6 @@
 import { NoteBlockModel, NoteDisplayMode } from '@blocksuite/affine-model';
 import { matchModels } from '@blocksuite/affine-shared/utils';
-import type { Command } from '@blocksuite/block-std';
+import type { Command } from '@blocksuite/std';
 
 export const changeNoteDisplayMode: Command<{
   noteId: string;

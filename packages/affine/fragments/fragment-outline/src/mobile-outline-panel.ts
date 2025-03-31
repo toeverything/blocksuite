@@ -6,12 +6,12 @@ import {
 import { DocModeProvider } from '@blocksuite/affine-shared/services';
 import { unsafeCSSVarV2 } from '@blocksuite/affine-shared/theme';
 import { matchModels } from '@blocksuite/affine-shared/utils';
+import { SignalWatcher, WithDisposable } from '@blocksuite/global/lit';
 import {
   type EditorHost,
   PropTypes,
   requiredProperties,
-} from '@blocksuite/block-std';
-import { SignalWatcher, WithDisposable } from '@blocksuite/global/lit';
+} from '@blocksuite/std';
 import type { BlockModel } from '@blocksuite/store';
 import { signal } from '@preact/signals-core';
 import { css, html, LitElement, nothing } from 'lit';

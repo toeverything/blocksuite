@@ -1,7 +1,7 @@
 import type { FrameBlockModel } from '@blocksuite/affine-model';
-import type { BlockComponent } from '@blocksuite/block-std';
-import { GfxControllerIdentifier } from '@blocksuite/block-std/gfx';
 import { BlockSuiteError } from '@blocksuite/global/exceptions';
+import type { BlockComponent } from '@blocksuite/std';
+import { GfxControllerIdentifier } from '@blocksuite/std/gfx';
 
 import { EdgelessFrameTitleEditor } from './edgeless-frame-title-editor';
 

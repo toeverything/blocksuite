@@ -1,4 +1,4 @@
-import type { UIEventStateContext } from '@blocksuite/block-std';
+import type { UIEventStateContext } from '@blocksuite/std';
 import type { ReactiveController } from 'lit';
 
 import type { KanbanViewSelectionWithType } from '../../selection';

@@ -8,13 +8,13 @@ import {
   type ToolbarActionGroup,
   type ToolbarModuleConfig,
 } from '@blocksuite/affine-shared/services';
-import { BlockSelection } from '@blocksuite/block-std';
 import {
   CopyIcon,
   DeleteIcon,
   EditIcon,
   UnlinkIcon,
 } from '@blocksuite/icons/lit';
+import { BlockSelection } from '@blocksuite/std';
 import { signal } from '@preact/signals-core';
 import { html } from 'lit-html';
 import { keyed } from 'lit-html/directives/keyed.js';
@@ -315,6 +315,17 @@ export const builtinInlineLinkToolbarConfig = {
           target.block.closest('affine-table')
         )
           return false;
+
+        const { link } = target;
+        try {
+          const url = new URL(link);
+          if (!url.protocol.startsWith('http')) {
+            return false;
+          }
+        } catch (err) {
+          console.error(err);
+          return false;
+        }
 
         const { model } = target.block;
         const parent = model.parent;

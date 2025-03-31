@@ -1,6 +1,6 @@
-import type { BlockComponent } from '@blocksuite/block-std';
 import type { Bound } from '@blocksuite/global/gfx';
 import type { DisposableClass } from '@blocksuite/global/lit';
+import type { BlockComponent } from '@blocksuite/std';
 import type { TemplateResult } from 'lit';
 
 export interface EdgelessDraggableElementHost extends DisposableClass {}

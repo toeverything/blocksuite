@@ -1,6 +1,6 @@
 import type { FootNote } from '@blocksuite/affine-model';
-import { type BlockStdScope, StdIdentifier } from '@blocksuite/block-std';
 import { createIdentifier } from '@blocksuite/global/di';
+import { type BlockStdScope, StdIdentifier } from '@blocksuite/std';
 import type { ExtensionType } from '@blocksuite/store';
 import type { TemplateResult } from 'lit';
 

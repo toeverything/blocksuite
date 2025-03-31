@@ -105,3 +105,20 @@ export class ViewportLayoutPainter {
     }
   };
 }
+
+const meta = {
+  emSize: 2048,
+  hHeadAscent: 1984,
+  hHeadDescent: -494,
+};
+
+export function getBaseline(fontSize: number) {
+  const lineHeight = 1.2 * fontSize;
+
+  const A = fontSize * (meta.hHeadAscent / meta.emSize); // ascent
+  const D = fontSize * (meta.hHeadDescent / meta.emSize); // descent
+  const AD = A + Math.abs(D); // ascent + descent
+  const L = lineHeight - AD; // leading
+  const y = A + L / 2;
+  return y;
+}

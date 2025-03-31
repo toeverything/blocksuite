@@ -1,6 +1,6 @@
-import type { GfxController } from '@blocksuite/block-std/gfx';
 import { DisposableGroup } from '@blocksuite/global/disposable';
 import { noop } from '@blocksuite/global/utils';
+import type { GfxController } from '@blocksuite/std/gfx';
 
 import type { RoughCanvas } from '../utils/rough/canvas';
 import { Overlay } from './overlay';

@@ -1,6 +1,6 @@
 import { QuickToolMixin } from '@blocksuite/affine-widget-edgeless-toolbar';
-import type { GfxToolsFullOptionValue } from '@blocksuite/block-std/gfx';
 import { HandIcon, SelectIcon } from '@blocksuite/icons/lit';
+import type { GfxToolsFullOptionValue } from '@blocksuite/std/gfx';
 import { effect } from '@preact/signals-core';
 import { css, html, LitElement } from 'lit';
 import { query } from 'lit/decorators.js';

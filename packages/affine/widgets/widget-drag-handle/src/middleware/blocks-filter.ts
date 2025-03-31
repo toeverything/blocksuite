@@ -1,13 +1,13 @@
 import type { SurfaceBlockModel } from '@blocksuite/affine-block-surface';
 import type { ConnectorElementModel } from '@blocksuite/affine-model';
-import type { BlockStdScope } from '@blocksuite/block-std';
+import type { IVec, SerializedXYWH } from '@blocksuite/global/gfx';
+import { assertType } from '@blocksuite/global/utils';
+import type { BlockStdScope } from '@blocksuite/std';
 import {
   GfxController,
   type GfxModel,
   isGfxGroupCompatibleModel,
-} from '@blocksuite/block-std/gfx';
-import type { IVec, SerializedXYWH } from '@blocksuite/global/gfx';
-import { assertType } from '@blocksuite/global/utils';
+} from '@blocksuite/std/gfx';
 import type { TransformerMiddleware } from '@blocksuite/store';
 
 /**

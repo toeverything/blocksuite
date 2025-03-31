@@ -1,5 +1,4 @@
 import { unsafeCSSVar, unsafeCSSVarV2 } from '@blocksuite/affine-shared/theme';
-import { ShadowlessElement } from '@blocksuite/block-std';
 import { IS_MOBILE } from '@blocksuite/global/env';
 import { SignalWatcher, WithDisposable } from '@blocksuite/global/lit';
 import {
@@ -8,6 +7,7 @@ import {
   CloseIcon,
   SearchIcon,
 } from '@blocksuite/icons/lit';
+import { ShadowlessElement } from '@blocksuite/std';
 import {
   autoPlacement,
   autoUpdate,
@@ -36,7 +36,7 @@ export class MenuComponent
       display: flex;
       flex-direction: column;
       user-select: none;
-      min-width: 276px;
+      min-width: 180px;
       box-shadow: ${unsafeCSSVar('overlayPanelShadow')};
       border-radius: 4px;
       background-color: ${unsafeCSSVarV2('layer/background/overlayPanel')};

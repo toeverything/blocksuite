@@ -1,11 +1,12 @@
-import type { GfxPrimitiveElementModel } from '@blocksuite/block-std/gfx';
 import type { IBound } from '@blocksuite/global/gfx';
+import type { GfxPrimitiveElementModel } from '@blocksuite/std/gfx';
 
 import type { RoughCanvas } from '../../index.js';
 import type { CanvasRenderer } from '../canvas-renderer.js';
 import { brush } from './brush/index.js';
 import { connector } from './connector/index.js';
 import { group } from './group/index.js';
+import { highlighter } from './highlighter/index.js';
 import { mindmap } from './mindmap.js';
 import { shape } from './shape/index.js';
 import { text } from './text/index.js';
@@ -24,6 +25,7 @@ export type ElementRenderer<
 
 export const elementRenderers = {
   brush,
+  highlighter,
   connector,
   group,
   shape,

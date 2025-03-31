@@ -14,7 +14,7 @@ export const embedGithubSlashMenuConfig: SlashMenuConfig = {
         figure: GithubRepoTooltip,
         caption: 'GitHub Repo',
       },
-      group: '4_Content & Media@6',
+      group: '4_Content & Media@7',
       when: ({ model }) =>
         model.doc.schema.flavourSchemaMap.has('affine:embed-github'),
       action: ({ std, model }) => {

@@ -12,8 +12,8 @@
   "dependencies": {
     "@blocksuite/affine-model": "workspace:*",
     "@blocksuite/affine-shared": "workspace:*",
-    "@blocksuite/block-std": "workspace:*",
     "@blocksuite/global": "workspace:*",
+    "@blocksuite/std": "workspace:*",
     "@preact/signals-core": "^1.8.0",
     "@toeverything/theme": "^1.1.12",
     "lit": "^3.2.0",

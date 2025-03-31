@@ -4,14 +4,14 @@ import {
   DocModeProvider,
   EditPropsStore,
 } from '@blocksuite/affine-shared/services';
-import { type EditorHost, ShadowlessElement } from '@blocksuite/block-std';
-import {
-  generateKeyBetweenV2,
-  GfxControllerIdentifier,
-} from '@blocksuite/block-std/gfx';
 import { DisposableGroup } from '@blocksuite/global/disposable';
 import { Bound } from '@blocksuite/global/gfx';
 import { SignalWatcher, WithDisposable } from '@blocksuite/global/lit';
+import { type EditorHost, ShadowlessElement } from '@blocksuite/std';
+import {
+  generateKeyBetweenV2,
+  GfxControllerIdentifier,
+} from '@blocksuite/std/gfx';
 import type { Store } from '@blocksuite/store';
 import { css, html, nothing, type PropertyValues } from 'lit';
 import { property, query, state } from 'lit/decorators.js';

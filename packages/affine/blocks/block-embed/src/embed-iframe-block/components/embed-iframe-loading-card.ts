@@ -1,7 +1,7 @@
 import { ThemeProvider } from '@blocksuite/affine-shared/services';
 import { unsafeCSSVarV2 } from '@blocksuite/affine-shared/theme';
-import { type BlockStdScope } from '@blocksuite/block-std';
 import { EmbedIcon } from '@blocksuite/icons/lit';
+import { type BlockStdScope } from '@blocksuite/std';
 import { css, html, LitElement } from 'lit';
 import { property } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';

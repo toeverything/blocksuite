@@ -9,7 +9,7 @@
       "path": "./inline"
     },
     {
-      "path": "./block-std"
+      "path": "./std"
     },
     {
       "path": "./store"

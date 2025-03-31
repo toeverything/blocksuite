@@ -15,14 +15,14 @@ import {
   listenClickAway,
   stopPropagation,
 } from '@blocksuite/affine-shared/utils';
+import { SignalWatcher, WithDisposable } from '@blocksuite/global/lit';
+import { nextTick } from '@blocksuite/global/utils';
 import {
   type BlockComponent,
   type BlockStdScope,
   type EditorHost,
   EditorLifeCycleExtension,
-} from '@blocksuite/block-std';
-import { SignalWatcher, WithDisposable } from '@blocksuite/global/lit';
-import { nextTick } from '@blocksuite/global/utils';
+} from '@blocksuite/std';
 import { autoUpdate, computePosition, flip, offset } from '@floating-ui/dom';
 import { computed, signal } from '@preact/signals-core';
 import { css, html, LitElement } from 'lit';

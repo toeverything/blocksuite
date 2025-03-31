@@ -1,9 +1,10 @@
-import { type BlockStdScope, StdIdentifier } from '@blocksuite/block-std';
-import type { GfxModel } from '@blocksuite/block-std/gfx';
 import { type Container, createIdentifier } from '@blocksuite/global/di';
+import { type BlockStdScope, StdIdentifier } from '@blocksuite/std';
+import type { GfxModel } from '@blocksuite/std/gfx';
 import { Extension, type ExtensionType } from '@blocksuite/store';
 import { signal } from '@preact/signals-core';
 
+import type { ToolbarPlacement } from './config';
 import { Flags } from './flags';
 import type { ToolbarModule } from './module';
 
@@ -33,6 +34,8 @@ export class ToolbarRegistryExtension extends Extension {
     setFloating: (element?: Element) => void;
   } | null>(null);
 
+  placement$ = signal<ToolbarPlacement>('top');
+
   flags = new Flags();
 
   constructor(readonly std: BlockStdScope) {
@@ -41,6 +44,14 @@ export class ToolbarRegistryExtension extends Extension {
 
   get modules() {
     return this.std.provider.getAll(ToolbarModuleIdentifier);
+  }
+
+  getModulePlacement(flavour: string, fallback: ToolbarPlacement = 'top') {
+    return (
+      this.modules.get(`custom:${flavour}`)?.config.placement ??
+      this.modules.get(flavour)?.config.placement ??
+      fallback
+    );
   }
 
   static override setup(di: Container) {

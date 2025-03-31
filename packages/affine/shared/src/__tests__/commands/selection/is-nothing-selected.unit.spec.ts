@@ -1,7 +1,7 @@
 /**
  * @vitest-environment happy-dom
  */
-import { BlockSelection, TextSelection } from '@blocksuite/block-std';
+import { BlockSelection, TextSelection } from '@blocksuite/std';
 import { describe, expect, it, vi } from 'vitest';
 
 import { isNothingSelectedCommand } from '../../../commands/selection/is-nothing-selected';

@@ -1,6 +1,6 @@
 import { DatabaseBlockModel, ListBlockModel } from '@blocksuite/affine-model';
-import type { BlockComponent } from '@blocksuite/block-std';
 import { type Point, Rect } from '@blocksuite/global/gfx';
+import type { BlockComponent } from '@blocksuite/std';
 import type { BlockModel } from '@blocksuite/store';
 
 import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '../../consts/index.js';

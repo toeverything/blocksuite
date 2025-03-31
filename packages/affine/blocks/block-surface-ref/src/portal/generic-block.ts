@@ -10,9 +10,9 @@ import type {
   EmbedYoutubeModel,
   ImageBlockModel,
 } from '@blocksuite/affine-model';
-import { ShadowlessElement } from '@blocksuite/block-std';
 import { Bound } from '@blocksuite/global/gfx';
 import { WithDisposable } from '@blocksuite/global/lit';
+import { ShadowlessElement } from '@blocksuite/std';
 import type { BlockModel } from '@blocksuite/store';
 import { css, type TemplateResult } from 'lit';
 import { property } from 'lit/decorators.js';

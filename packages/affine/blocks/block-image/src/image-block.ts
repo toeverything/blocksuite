@@ -1,8 +1,8 @@
 import { CaptionedBlockComponent } from '@blocksuite/affine-components/caption';
 import { Peekable } from '@blocksuite/affine-components/peek';
 import type { ImageBlockModel } from '@blocksuite/affine-model';
-import { BlockSelection } from '@blocksuite/block-std';
 import { IS_MOBILE } from '@blocksuite/global/env';
+import { BlockSelection } from '@blocksuite/std';
 import { html } from 'lit';
 import { property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';

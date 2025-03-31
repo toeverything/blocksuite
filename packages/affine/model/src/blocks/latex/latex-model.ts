@@ -2,7 +2,7 @@ import {
   type GfxCommonBlockProps,
   GfxCompatible,
   type GfxElementGeometry,
-} from '@blocksuite/block-std/gfx';
+} from '@blocksuite/std/gfx';
 import {
   BlockModel,
   BlockSchemaExtension,

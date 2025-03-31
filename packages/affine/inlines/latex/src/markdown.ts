@@ -1,6 +1,6 @@
 import type { AffineTextAttributes } from '@blocksuite/affine-shared/types';
-import type { BlockComponent } from '@blocksuite/block-std';
-import { InlineMarkdownExtension } from '@blocksuite/block-std/inline';
+import type { BlockComponent } from '@blocksuite/std';
+import { InlineMarkdownExtension } from '@blocksuite/std/inline';
 
 export const LatexExtension = InlineMarkdownExtension<AffineTextAttributes>({
   name: 'latex',

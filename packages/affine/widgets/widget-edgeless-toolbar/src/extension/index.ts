@@ -1,7 +1,7 @@
 import type { MenuConfig } from '@blocksuite/affine-components/context-menu';
-import type { BlockComponent } from '@blocksuite/block-std';
-import type { GfxController, GfxToolsMap } from '@blocksuite/block-std/gfx';
 import { createIdentifier } from '@blocksuite/global/di';
+import type { BlockComponent } from '@blocksuite/std';
+import type { GfxController, GfxToolsMap } from '@blocksuite/std/gfx';
 import type { ExtensionType } from '@blocksuite/store';
 import { type TemplateResult } from 'lit';
 

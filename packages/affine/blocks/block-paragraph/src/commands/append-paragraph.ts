@@ -1,6 +1,6 @@
 import { focusTextModel } from '@blocksuite/affine-rich-text';
 import { getLastNoteBlock } from '@blocksuite/affine-shared/utils';
-import type { Command } from '@blocksuite/block-std';
+import type { Command } from '@blocksuite/std';
 import { Text } from '@blocksuite/store';
 
 /**

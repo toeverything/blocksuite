@@ -1,9 +1,9 @@
 import { EmbedOptionProvider } from '@blocksuite/affine-shared/services';
 import { isValidUrl, stopPropagation } from '@blocksuite/affine-shared/utils';
-import type { EditorHost } from '@blocksuite/block-std';
-import { ShadowlessElement } from '@blocksuite/block-std';
-import { GfxControllerIdentifier } from '@blocksuite/block-std/gfx';
 import { WithDisposable } from '@blocksuite/global/lit';
+import type { EditorHost } from '@blocksuite/std';
+import { ShadowlessElement } from '@blocksuite/std';
+import { GfxControllerIdentifier } from '@blocksuite/std/gfx';
 import type { BlockModel } from '@blocksuite/store';
 import { html } from 'lit';
 import { property, query, state } from 'lit/decorators.js';

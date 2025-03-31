@@ -1,5 +1,5 @@
-import { ShadowlessElement } from '@blocksuite/block-std';
 import { ArrowUpSmallIcon } from '@blocksuite/icons/lit';
+import { ShadowlessElement } from '@blocksuite/std';
 import { css, html } from 'lit';
 
 export class ToolbarArrowUpIcon extends ShadowlessElement {

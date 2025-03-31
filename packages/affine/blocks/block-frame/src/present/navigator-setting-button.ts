@@ -1,9 +1,9 @@
 import { EdgelessLegacySlotIdentifier } from '@blocksuite/affine-block-surface';
 import { EditPropsStore } from '@blocksuite/affine-shared/services';
 import { createButtonPopper } from '@blocksuite/affine-shared/utils';
-import type { BlockComponent } from '@blocksuite/block-std';
 import { WithDisposable } from '@blocksuite/global/lit';
 import { SettingsIcon } from '@blocksuite/icons/lit';
+import type { BlockComponent } from '@blocksuite/std';
 import { css, html, LitElement, nothing } from 'lit';
 import { property, query, state } from 'lit/decorators.js';
 

@@ -1,13 +1,13 @@
 import type { SurfaceElementModelMap } from '@blocksuite/affine-model';
 import { EditPropsStore } from '@blocksuite/affine-shared/services';
-import { type BlockStdScope, StdIdentifier } from '@blocksuite/block-std';
+import { type Container, createIdentifier } from '@blocksuite/global/di';
+import { type BlockStdScope, StdIdentifier } from '@blocksuite/std';
 import {
   GfxBlockElementModel,
   GfxControllerIdentifier,
   type GfxModel,
   isGfxGroupCompatibleModel,
-} from '@blocksuite/block-std/gfx';
-import { type Container, createIdentifier } from '@blocksuite/global/di';
+} from '@blocksuite/std/gfx';
 import { type BlockModel, Extension } from '@blocksuite/store';
 
 import type { SurfaceBlockModel } from '../surface-model';

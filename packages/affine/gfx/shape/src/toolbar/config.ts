@@ -8,6 +8,10 @@ import {
 } from '@blocksuite/affine-components/color-picker';
 import type { LineDetailType } from '@blocksuite/affine-components/edgeless-line-styles-panel';
 import {
+  createMindmapLayoutActionMenu,
+  createMindmapStyleActionMenu,
+} from '@blocksuite/affine-gfx-mindmap';
+import {
   type Color,
   DefaultTheme,
   FontFamily,
@@ -24,9 +28,10 @@ import {
   ShapeType,
   StrokeStyle,
 } from '@blocksuite/affine-model';
-import type {
-  ToolbarGenericAction,
-  ToolbarModuleConfig,
+import {
+  type ToolbarGenericAction,
+  type ToolbarModuleConfig,
+  ToolbarModuleExtension,
 } from '@blocksuite/affine-shared/services';
 import { getMostCommonValue } from '@blocksuite/affine-shared/utils';
 import {
@@ -37,15 +42,66 @@ import {
 } from '@blocksuite/affine-widget-edgeless-toolbar';
 import { Bound } from '@blocksuite/global/gfx';
 import { AddTextIcon, ShapeIcon } from '@blocksuite/icons/lit';
+import { BlockFlavourIdentifier } from '@blocksuite/std';
 import { html } from 'lit';
 import isEqual from 'lodash-es/isEqual';
 
 import type { ShapeToolOption } from '../shape-tool';
-import { mountShapeTextEditor } from '../text';
+import { mountShapeTextEditor } from '../text/edgeless-shape-text-editor';
 import { ShapeComponentConfig } from './shape-menu-config';
 
 export const shapeToolbarConfig = {
   actions: [
+    {
+      id: 'a.mindmap-style',
+      when(ctx) {
+        const models = ctx.getSurfaceModelsByType(ShapeElementModel);
+        return models.some(hasGrouped);
+      },
+      content(ctx) {
+        const models = ctx.getSurfaceModelsByType(ShapeElementModel);
+        if (!models.length) return null;
+
+        let mindmaps = models
+          .map(model => model.group)
+          .filter(model => ctx.matchModel(model, MindmapElementModel));
+        if (!mindmaps.length) return null;
+
+        // Not displayed when there is both a normal shape and a mindmap shape.
+        if (models.length !== mindmaps.length) return null;
+
+        mindmaps = Array.from(new Set(mindmaps));
+
+        return createMindmapStyleActionMenu(ctx, mindmaps);
+      },
+    },
+    {
+      id: 'b.mindmap-layout',
+      when(ctx) {
+        const models = ctx.getSurfaceModelsByType(ShapeElementModel);
+        return models.some(hasGrouped);
+      },
+      content(ctx) {
+        const models = ctx.getSurfaceModelsByType(ShapeElementModel);
+        if (!models.length) return null;
+
+        let mindmaps = models
+          .map(model => model.group)
+          .filter(model => ctx.matchModel(model, MindmapElementModel));
+        if (!mindmaps.length) return null;
+
+        // Not displayed when there is both a normal shape and a mindmap shape.
+        if (models.length !== mindmaps.length) return null;
+
+        mindmaps = Array.from(new Set(mindmaps));
+
+        // It's a sub node.
+        if (models.length === 1 && mindmaps[0].tree.element !== models[0])
+          return null;
+
+        return createMindmapLayoutActionMenu(ctx, mindmaps);
+      },
+    },
     {
       id: 'c.switch-type',
       when(ctx) {
@@ -55,6 +111,12 @@ export const shapeToolbarConfig = {
       content(ctx) {
         const models = ctx.getSurfaceModelsByType(ShapeElementModel);
         if (!models.length) return null;
+
+        const shapeStyle = ctx.features.getFlag(
+          'enable_edgeless_scribbled_style'
+        )
+          ? (getMostCommonValue(models, 'shapeStyle') ?? ShapeStyle.General)
+          : ShapeStyle.General;
 
         const shapeName =
           getMostCommonValue<ShapeToolOption, 'shapeName'>(
@@ -83,8 +145,10 @@ export const shapeToolbarConfig = {
           items: ShapeComponentConfig.map(item => ({
             key: item.tooltip,
             value: item.name,
-            // TODO(@fundon): should add a feature flag to switch style
-            icon: item.generalIcon,
+            icon:
+              shapeStyle === ShapeStyle.General
+                ? item.generalIcon
+                : item.scribbledIcon,
             disabled: item.disabled,
           })),
           currentValue: shapeName,
@@ -94,8 +158,7 @@ export const shapeToolbarConfig = {
     },
     {
       id: 'd.style',
-      // TODO(@fundon): should add a feature flag
-      when: false,
+      when: ctx => ctx.features.getFlag('enable_edgeless_scribbled_style'),
       content(ctx) {
         const models = ctx.getSurfaceModelsByType(ShapeElementModel);
         if (!models.length) return null;
@@ -326,3 +389,8 @@ function getTextColor(fillColor: Color, isNotTransparent = false) {
 function hasGrouped(model: ShapeElementModel) {
   return model.group instanceof MindmapElementModel;
 }
+
+export const shapeToolbarExtension = ToolbarModuleExtension({
+  id: BlockFlavourIdentifier('affine:surface:shape'),
+  config: shapeToolbarConfig,
+});

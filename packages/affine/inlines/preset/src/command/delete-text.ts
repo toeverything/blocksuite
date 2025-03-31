@@ -1,6 +1,6 @@
 import { RootBlockModel } from '@blocksuite/affine-model';
 import { matchModels } from '@blocksuite/affine-shared/utils';
-import { type Command, TextSelection } from '@blocksuite/block-std';
+import { type Command, TextSelection } from '@blocksuite/std';
 import type { Text } from '@blocksuite/store';
 
 export const deleteTextCommand: Command<{

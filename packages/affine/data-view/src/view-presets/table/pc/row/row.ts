@@ -1,7 +1,7 @@
 import { popupTargetFromElement } from '@blocksuite/affine-components/context-menu';
-import { ShadowlessElement } from '@blocksuite/block-std';
 import { SignalWatcher, WithDisposable } from '@blocksuite/global/lit';
 import { CenterPeekIcon, MoreHorizontalIcon } from '@blocksuite/icons/lit';
+import { ShadowlessElement } from '@blocksuite/std';
 import { cssVarV2 } from '@toeverything/theme/v2';
 import { css, nothing, unsafeCSS } from 'lit';
 import { property } from 'lit/decorators.js';
@@ -86,7 +86,7 @@ export class TableRow extends SignalWatcher(WithDisposable(ShadowlessElement)) {
       display: flex;
       padding: 4px;
       border-radius: 4px;
-      box-shadow: 0px 0px 4px 0px rgba(66, 65, 73, 0.14);
+      box-shadow: var(--affine-button-shadow);
       background-color: var(--affine-background-primary-color);
       position: relative;
     }

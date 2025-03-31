@@ -1,7 +1,8 @@
 import { DefaultTheme, type FrameBlockModel } from '@blocksuite/affine-model';
 import { ThemeProvider } from '@blocksuite/affine-shared/services';
-import { GfxBlockComponent } from '@blocksuite/block-std';
 import { Bound } from '@blocksuite/global/gfx';
+import { GfxBlockComponent } from '@blocksuite/std';
+import type { SelectedContext } from '@blocksuite/std/gfx';
 import { cssVarV2 } from '@toeverything/theme/v2';
 import { html } from 'lit';
 import { state } from 'lit/decorators.js';
@@ -50,6 +51,22 @@ export class FrameBlockComponent extends GfxBlockComponent<FrameBlockModel> {
       rotate,
       zIndex: this.toZIndex(),
     };
+  }
+
+  override onSelected(context: SelectedContext): void {
+    const { x, y } = context.position;
+
+    if (
+      !context.fallback &&
+      // if the frame is selected by title, then ignore it because the title selection is handled by the title widget
+      (this.model.externalBound?.containsPoint([x, y]) ||
+        // otherwise if the frame has title, then ignore it because in this case the frame cannot be selected by frame body
+        this.model.props.title.length)
+    ) {
+      return;
+    }
+
+    super.onSelected(context);
   }
 
   override renderGfxBlock() {

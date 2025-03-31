@@ -1,6 +1,6 @@
 import { TableModelFlavour } from '@blocksuite/affine-model';
 import { SlashMenuConfigExtension } from '@blocksuite/affine-widget-slash-menu';
-import { BlockViewExtension, FlavourExtension } from '@blocksuite/block-std';
+import { BlockViewExtension, FlavourExtension } from '@blocksuite/std';
 import type { ExtensionType } from '@blocksuite/store';
 import { literal } from 'lit/static-html.js';
 

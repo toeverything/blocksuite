@@ -1,11 +1,8 @@
 import type { DocMode } from '@blocksuite/affine-model';
 import { HighlightSelection } from '@blocksuite/affine-shared/selection';
-import { WidgetComponent } from '@blocksuite/block-std';
-import {
-  GfxControllerIdentifier,
-  type GfxModel,
-} from '@blocksuite/block-std/gfx';
 import { Bound, deserializeXYWH } from '@blocksuite/global/gfx';
+import { WidgetComponent } from '@blocksuite/std';
+import { GfxControllerIdentifier, type GfxModel } from '@blocksuite/std/gfx';
 import { computed, signal } from '@preact/signals-core';
 import { cssVarV2 } from '@toeverything/theme/v2';
 import { css, html, nothing, unsafeCSS } from 'lit';

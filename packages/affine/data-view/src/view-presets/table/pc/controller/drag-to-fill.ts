@@ -1,4 +1,4 @@
-import { ShadowlessElement } from '@blocksuite/block-std';
+import { ShadowlessElement } from '@blocksuite/std';
 import { type Text } from '@blocksuite/store';
 import { css, html } from 'lit';
 import { state } from 'lit/decorators.js';

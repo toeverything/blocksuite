@@ -1,6 +1,6 @@
 import { addSiblingAttachmentBlocks } from '@blocksuite/affine-block-attachment';
 import { insertDatabaseBlockCommand } from '@blocksuite/affine-block-database';
-import { toggleEmbedIframeCreateModal } from '@blocksuite/affine-block-embed';
+import { insertEmptyEmbedIframeCommand } from '@blocksuite/affine-block-embed';
 import { insertImagesCommand } from '@blocksuite/affine-block-image';
 import { insertLatexBlockCommand } from '@blocksuite/affine-block-latex';
 import {
@@ -58,7 +58,6 @@ import {
   openFileOrFiles,
   type Signal,
 } from '@blocksuite/affine-shared/utils';
-import type { BlockStdScope } from '@blocksuite/block-std';
 import { viewPresets } from '@blocksuite/data-view/view-presets';
 import { assertType } from '@blocksuite/global/utils';
 import {
@@ -103,6 +102,7 @@ import {
   YesterdayIcon,
   YoutubeDuotoneIcon,
 } from '@blocksuite/icons/lit';
+import type { BlockStdScope } from '@blocksuite/std';
 import { computed } from '@preact/signals-core';
 import { cssVarV2 } from '@toeverything/theme/v2';
 import type { TemplateResult } from 'lit';
@@ -484,24 +484,18 @@ const embedToolGroup: KeyboardToolPanelGroup = {
         );
       },
       action: async ({ std }) => {
-        const [_, { selectedModels }] = std.command.exec(
-          getSelectedModelsCommand
-        );
-        const model = selectedModels?.[0];
-        if (!model) return;
-
-        const parentModel = std.store.getParent(model);
-        if (!parentModel) return;
-
-        const index = parentModel.children.indexOf(model) + 1;
-        await toggleEmbedIframeCreateModal(std, {
-          parentModel,
-          index,
-          variant: 'compact',
-        });
-        if (model.text?.length === 0) {
-          std.store.deleteBlock(model);
-        }
+        std.command
+          .chain()
+          .pipe(getSelectedModelsCommand)
+          .pipe(insertEmptyEmbedIframeCommand, {
+            place: 'after',
+            removeEmptyLine: true,
+            linkInputPopupOptions: {
+              showCloseButton: true,
+              variant: 'mobile',
+            },
+          })
+          .run();
       },
     },
     {

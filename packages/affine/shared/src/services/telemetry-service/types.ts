@@ -69,3 +69,20 @@ export interface AttachmentUploadedEvent extends TelemetryEvent {
   type: string; // file type
   category: 'success' | 'failure';
 }
+
+export interface EdgelessToolPickedEvent extends TelemetryEvent {
+  page: 'whiteboard editor';
+  segment: 'global toolbar';
+  module: 'global toolbar';
+  control: 'drawing';
+  type: 'brush' | 'highlighter';
+}
+
+export interface ElementUpdatedEvent extends TelemetryEvent {
+  page: 'whiteboard editor';
+  segment: 'toolbar';
+  module: 'toolbar';
+  category: string;
+  control: string;
+  type?: string;
+}

@@ -8,7 +8,6 @@ import {
   ToolbarModuleExtension,
 } from '@blocksuite/affine-shared/services';
 import { getBlockProps } from '@blocksuite/affine-shared/utils';
-import { BlockFlavourIdentifier } from '@blocksuite/block-std';
 import {
   CaptionIcon,
   CopyIcon,
@@ -16,6 +15,7 @@ import {
   DuplicateIcon,
   ExpandFullIcon,
 } from '@blocksuite/icons/lit';
+import { BlockFlavourIdentifier } from '@blocksuite/std';
 import { type ExtensionType, Slice } from '@blocksuite/store';
 import { html } from 'lit';
 import { keyed } from 'lit/directives/keyed.js';

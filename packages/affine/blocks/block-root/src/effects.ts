@@ -1,4 +1,7 @@
+import { effects as gfxBrushEffects } from '@blocksuite/affine-gfx-brush/effects';
 import { effects as gfxConnectorEffects } from '@blocksuite/affine-gfx-connector/effects';
+import { effects as gfxGroupEffects } from '@blocksuite/affine-gfx-group/effects';
+import { effects as gfxMindmapEffects } from '@blocksuite/affine-gfx-mindmap/effects';
 import { effects as gfxNoteEffects } from '@blocksuite/affine-gfx-note/effects';
 import { effects as gfxShapeEffects } from '@blocksuite/affine-gfx-shape/effects';
 import { effects as gfxCanvasTextEffects } from '@blocksuite/affine-gfx-text/effects';
@@ -10,11 +13,6 @@ import {
   NOTE_SLICER_WIDGET,
   NoteSlicer,
 } from './edgeless/components/note-slicer/index.js';
-import { EdgelessFontFamilyPanel } from './edgeless/components/panel/font-family-panel.js';
-import { EdgelessFontWeightAndStylePanel } from './edgeless/components/panel/font-weight-and-style-panel.js';
-import { EdgelessScalePanel } from './edgeless/components/panel/scale-panel.js';
-import { EdgelessSizePanel } from './edgeless/components/panel/size-panel.js';
-import { StrokeStylePanel } from './edgeless/components/panel/stroke-style-panel.js';
 import {
   EDGELESS_DRAGGING_AREA_WIDGET,
   EdgelessDraggingAreaRectWidget,
@@ -23,18 +21,11 @@ import {
   EDGELESS_SELECTED_RECT_WIDGET,
   EdgelessSelectedRectWidget,
 } from './edgeless/components/rects/edgeless-selected-rect.js';
-import { EdgelessGroupTitleEditor } from './edgeless/components/text/edgeless-group-title-editor.js';
-import { EdgelessBrushMenu } from './edgeless/components/toolbar/brush/brush-menu.js';
-import { EdgelessBrushToolButton } from './edgeless/components/toolbar/brush/brush-tool-button.js';
 import { EdgelessSlideMenu } from './edgeless/components/toolbar/common/slide-menu.js';
 import { ToolbarArrowUpIcon } from './edgeless/components/toolbar/common/toolbar-arrow-up-icon.js';
 import { EdgelessDefaultToolButton } from './edgeless/components/toolbar/default/default-tool-button.js';
-import { EdgelessEraserToolButton } from './edgeless/components/toolbar/eraser/eraser-tool-button.js';
 import { EdgelessLassoToolButton } from './edgeless/components/toolbar/lasso/lasso-tool-button.js';
 import { EdgelessLinkToolButton } from './edgeless/components/toolbar/link/link-tool-button.js';
-import { MindMapPlaceholder } from './edgeless/components/toolbar/mindmap/mindmap-importing-placeholder.js';
-import { EdgelessMindmapMenu } from './edgeless/components/toolbar/mindmap/mindmap-menu.js';
-import { EdgelessMindmapToolButton } from './edgeless/components/toolbar/mindmap/mindmap-tool-button.js';
 import { OverlayScrollbar } from './edgeless/components/toolbar/template/overlay-scrollbar.js';
 import { AffineTemplateLoading } from './edgeless/components/toolbar/template/template-loading.js';
 import { EdgelessTemplatePanel } from './edgeless/components/toolbar/template/template-panel.js';
@@ -88,8 +79,6 @@ export function effects() {
   registerGfxEffects();
   registerWidgets();
   registerEdgelessToolbarComponents();
-  registerEdgelessPanelComponents();
-  registerEdgelessEditorComponents();
   registerMiscComponents();
 }
 
@@ -108,6 +97,9 @@ function registerGfxEffects() {
   gfxShapeEffects();
   gfxNoteEffects();
   gfxConnectorEffects();
+  gfxMindmapEffects();
+  gfxGroupEffects();
+  gfxBrushEffects();
 }
 
 function registerWidgets() {
@@ -130,48 +122,19 @@ function registerWidgets() {
 
 function registerEdgelessToolbarComponents() {
   // Tool buttons
-  customElements.define('edgeless-brush-tool-button', EdgelessBrushToolButton);
   customElements.define(
     'edgeless-default-tool-button',
     EdgelessDefaultToolButton
   );
-  customElements.define(
-    'edgeless-eraser-tool-button',
-    EdgelessEraserToolButton
-  );
   customElements.define('edgeless-link-tool-button', EdgelessLinkToolButton);
   customElements.define('edgeless-lasso-tool-button', EdgelessLassoToolButton);
-  customElements.define(
-    'edgeless-mindmap-tool-button',
-    EdgelessMindmapToolButton
-  );
   customElements.define('edgeless-template-button', EdgelessTemplateButton);
 
   // Menus
-  customElements.define('edgeless-brush-menu', EdgelessBrushMenu);
-  customElements.define('edgeless-mindmap-menu', EdgelessMindmapMenu);
   customElements.define('edgeless-slide-menu', EdgelessSlideMenu);
 
   // Toolbar components
   customElements.define('toolbar-arrow-up-icon', ToolbarArrowUpIcon);
-}
-
-function registerEdgelessPanelComponents() {
-  customElements.define(
-    'edgeless-font-weight-and-style-panel',
-    EdgelessFontWeightAndStylePanel
-  );
-  customElements.define('edgeless-size-panel', EdgelessSizePanel);
-  customElements.define('edgeless-scale-panel', EdgelessScalePanel);
-  customElements.define('edgeless-font-family-panel', EdgelessFontFamilyPanel);
-  customElements.define('stroke-style-panel', StrokeStylePanel);
-}
-
-function registerEdgelessEditorComponents() {
-  customElements.define(
-    'edgeless-group-title-editor',
-    EdgelessGroupTitleEditor
-  );
 }
 
 function registerMiscComponents() {
@@ -214,9 +177,6 @@ function registerMiscComponents() {
     EDGELESS_SELECTED_RECT_WIDGET,
     EdgelessSelectedRectWidget
   );
-
-  // Mindmap components
-  customElements.define('mindmap-import-placeholder', MindMapPlaceholder);
 }
 
 declare global {
@@ -226,26 +186,14 @@ declare global {
     'edgeless-auto-complete-panel': EdgelessAutoCompletePanel;
     'edgeless-auto-complete': EdgelessAutoComplete;
     'note-slicer': NoteSlicer;
-    'edgeless-font-family-panel': EdgelessFontFamilyPanel;
-    'edgeless-font-weight-and-style-panel': EdgelessFontWeightAndStylePanel;
-    'edgeless-scale-panel': EdgelessScalePanel;
-    'edgeless-size-panel': EdgelessSizePanel;
-    'stroke-style-panel': StrokeStylePanel;
     'edgeless-navigator-black-background': EdgelessNavigatorBlackBackgroundWidget;
     'edgeless-dragging-area-rect': EdgelessDraggingAreaRectWidget;
     'edgeless-selected-rect': EdgelessSelectedRectWidget;
-    'edgeless-group-title-editor': EdgelessGroupTitleEditor;
-    'edgeless-brush-menu': EdgelessBrushMenu;
-    'edgeless-brush-tool-button': EdgelessBrushToolButton;
     'edgeless-slide-menu': EdgelessSlideMenu;
     'toolbar-arrow-up-icon': ToolbarArrowUpIcon;
     'edgeless-default-tool-button': EdgelessDefaultToolButton;
-    'edgeless-eraser-tool-button': EdgelessEraserToolButton;
     'edgeless-lasso-tool-button': EdgelessLassoToolButton;
     'edgeless-link-tool-button': EdgelessLinkToolButton;
-    'mindmap-import-placeholder': MindMapPlaceholder;
-    'edgeless-mindmap-menu': EdgelessMindmapMenu;
-    'edgeless-mindmap-tool-button': EdgelessMindmapToolButton;
     'overlay-scrollbar': OverlayScrollbar;
     'affine-template-loading': AffineTemplateLoading;
     'edgeless-templates-panel': EdgelessTemplatePanel;

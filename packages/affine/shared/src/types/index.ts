@@ -3,8 +3,8 @@ import type {
   FootNote,
   ReferenceInfo,
 } from '@blocksuite/affine-model';
-import type { BlockComponent } from '@blocksuite/block-std';
-import type { InlineEditor } from '@blocksuite/block-std/inline';
+import type { BlockComponent } from '@blocksuite/std';
+import type { InlineEditor } from '@blocksuite/std/inline';
 import type { BlockModel } from '@blocksuite/store';
 export * from './uni-component';
 export interface EditingState {
@@ -73,6 +73,10 @@ export interface AffineTextAttributes {
   color?: string | null;
   latex?: string | null;
   footnote?: FootNote | null;
+  mention?: {
+    member: string;
+    notification?: string;
+  } | null;
 }
 
 export type AffineInlineEditor = InlineEditor<AffineTextAttributes>;

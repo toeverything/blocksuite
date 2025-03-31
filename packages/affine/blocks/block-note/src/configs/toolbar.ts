@@ -23,10 +23,6 @@ import {
   ToolbarModuleExtension,
 } from '@blocksuite/affine-shared/services';
 import { getMostCommonResolvedValue } from '@blocksuite/affine-shared/utils';
-import {
-  BlockFlavourIdentifier,
-  EditorLifeCycleExtension,
-} from '@blocksuite/block-std';
 import { Bound } from '@blocksuite/global/gfx';
 import {
   AutoHeightIcon,
@@ -35,6 +31,10 @@ import {
   LinkedPageIcon,
   ScissorsIcon,
 } from '@blocksuite/icons/lit';
+import {
+  BlockFlavourIdentifier,
+  EditorLifeCycleExtension,
+} from '@blocksuite/std';
 import type { ExtensionType } from '@blocksuite/store';
 import { computed } from '@preact/signals-core';
 import { html } from 'lit';

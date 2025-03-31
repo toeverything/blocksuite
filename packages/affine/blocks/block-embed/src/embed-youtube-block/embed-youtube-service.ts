@@ -7,7 +7,7 @@ import {
   EmbedOptionConfig,
   LinkPreviewerService,
 } from '@blocksuite/affine-shared/services';
-import { BlockService } from '@blocksuite/block-std';
+import { BlockService } from '@blocksuite/std';
 
 import { youtubeUrlRegex } from './embed-youtube-model.js';
 import { queryEmbedYoutubeData } from './utils.js';

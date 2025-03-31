@@ -29,7 +29,7 @@ export const latexSlashMenuConfig: SlashMenuConfig = {
       description: 'Create a equation block.',
       icon: TeXIcon(),
       searchAlias: ['mathBlock, equationBlock', 'latexBlock'],
-      group: '4_Content & Media@9',
+      group: '4_Content & Media@10',
       action: ({ std }) => {
         std.command
           .chain()

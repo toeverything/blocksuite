@@ -4,8 +4,6 @@ import {
 } from '@blocksuite/affine-block-surface';
 import { ThemeProvider } from '@blocksuite/affine-shared/services';
 import { LassoMode } from '@blocksuite/affine-shared/types';
-import type { PointerEventState } from '@blocksuite/block-std';
-import { BaseTool } from '@blocksuite/block-std/gfx';
 import type { IPoint, IVec } from '@blocksuite/global/gfx';
 import {
   Bound,
@@ -17,6 +15,8 @@ import {
   rotatePoints,
   Vec,
 } from '@blocksuite/global/gfx';
+import type { PointerEventState } from '@blocksuite/std';
+import { BaseTool } from '@blocksuite/std/gfx';
 
 class LassoOverlay extends Overlay {
   d = '';
@@ -315,7 +315,7 @@ export class LassoTool extends BaseTool<LassoToolOption> {
   }
 }
 
-declare module '@blocksuite/block-std/gfx' {
+declare module '@blocksuite/std/gfx' {
   interface GfxToolsMap {
     lasso: LassoTool;
   }

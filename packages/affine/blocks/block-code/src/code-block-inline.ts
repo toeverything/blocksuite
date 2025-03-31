@@ -13,7 +13,7 @@ import type { AffineTextAttributes } from '@blocksuite/affine-shared/types';
 import {
   InlineManagerExtension,
   InlineSpecExtension,
-} from '@blocksuite/block-std/inline';
+} from '@blocksuite/std/inline';
 import { html } from 'lit';
 import { z } from 'zod';
 

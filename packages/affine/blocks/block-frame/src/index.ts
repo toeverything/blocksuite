@@ -10,7 +10,7 @@ export * from './frame-tool';
 export * from './frame-toolbar';
 export * from './preset-tool';
 
-declare module '@blocksuite/block-std/gfx' {
+declare module '@blocksuite/std/gfx' {
   interface GfxToolsMap {
     frameNavigator: PresentTool;
     frame: FrameTool;

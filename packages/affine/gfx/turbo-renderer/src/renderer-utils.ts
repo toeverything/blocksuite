@@ -1,9 +1,9 @@
-import type { EditorHost, GfxBlockComponent } from '@blocksuite/block-std';
+import type { EditorHost, GfxBlockComponent } from '@blocksuite/std';
 import {
   GfxBlockElementModel,
   GfxControllerIdentifier,
   type Viewport,
-} from '@blocksuite/block-std/gfx';
+} from '@blocksuite/std/gfx';
 
 import { BlockLayoutHandlersIdentifier } from './layout/block-layout-provider';
 import type { BlockLayout, RenderingState, ViewportLayout } from './types';

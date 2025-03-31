@@ -1,12 +1,12 @@
 import { DefaultInlineManagerExtension } from '@blocksuite/affine-inline-preset';
-import type { EditorHost } from '@blocksuite/block-std';
-import { ShadowlessElement } from '@blocksuite/block-std';
 import type { DetailSlotProps } from '@blocksuite/data-view';
 import type {
   KanbanSingleView,
   TableSingleView,
 } from '@blocksuite/data-view/view-presets';
 import { WithDisposable } from '@blocksuite/global/lit';
+import type { EditorHost } from '@blocksuite/std';
+import { ShadowlessElement } from '@blocksuite/std';
 import { cssVarV2 } from '@toeverything/theme/v2';
 import { css, html, unsafeCSS } from 'lit';
 import { property } from 'lit/decorators.js';

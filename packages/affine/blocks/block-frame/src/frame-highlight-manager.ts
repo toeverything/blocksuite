@@ -11,7 +11,7 @@ import {
   getTopElements,
   GfxExtensionIdentifier,
   TransformExtension,
-} from '@blocksuite/block-std/gfx';
+} from '@blocksuite/std/gfx';
 
 import {
   type EdgelessFrameManager,

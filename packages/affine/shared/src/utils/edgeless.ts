@@ -1,9 +1,9 @@
 import { FrameBlockModel, GroupElementModel } from '@blocksuite/affine-model';
-import type { GfxBlockElementModel, GfxModel } from '@blocksuite/block-std/gfx';
 import {
   deserializeXYWH,
   getQuadBoundWithRotation,
 } from '@blocksuite/global/gfx';
+import type { GfxBlockElementModel, GfxModel } from '@blocksuite/std/gfx';
 import type { BlockModel } from '@blocksuite/store';
 
 export function getSelectedRect(selected: GfxModel[]): DOMRect {

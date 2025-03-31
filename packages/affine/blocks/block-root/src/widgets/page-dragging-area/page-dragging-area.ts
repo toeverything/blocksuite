@@ -11,7 +11,7 @@ import {
   BlockSelection,
   type PointerEventState,
   WidgetComponent,
-} from '@blocksuite/block-std';
+} from '@blocksuite/std';
 import { html, nothing } from 'lit';
 import { state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';

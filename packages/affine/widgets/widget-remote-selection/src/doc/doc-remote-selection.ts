@@ -13,8 +13,8 @@ import {
   BlockSelection,
   TextSelection,
   WidgetComponent,
-} from '@blocksuite/block-std';
-import { GfxControllerIdentifier } from '@blocksuite/block-std/gfx';
+} from '@blocksuite/std';
+import { GfxControllerIdentifier } from '@blocksuite/std/gfx';
 import type { BaseSelection, UserInfo } from '@blocksuite/store';
 import { computed, effect } from '@preact/signals-core';
 import { css, html, nothing, type PropertyValues } from 'lit';

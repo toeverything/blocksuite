@@ -2,8 +2,8 @@ import type {
   MindmapElementModel,
   MindmapNode,
 } from '@blocksuite/affine-model';
-import type { GfxModel } from '@blocksuite/block-std/gfx';
 import type { IBound } from '@blocksuite/global/gfx';
+import type { GfxModel } from '@blocksuite/std/gfx';
 
 import { ConnectorPathGenerator } from '../../managers/connector-manager.js';
 import type { RoughCanvas } from '../../utils/rough/canvas.js';

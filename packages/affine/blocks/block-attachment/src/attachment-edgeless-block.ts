@@ -4,7 +4,7 @@ import {
   EMBED_CARD_HEIGHT,
   EMBED_CARD_WIDTH,
 } from '@blocksuite/affine-shared/consts';
-import { toGfxBlockComponent } from '@blocksuite/block-std';
+import { toGfxBlockComponent } from '@blocksuite/std';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { AttachmentBlockComponent } from './attachment-block.js';

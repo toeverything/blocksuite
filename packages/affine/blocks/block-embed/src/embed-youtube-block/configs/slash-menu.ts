@@ -14,7 +14,7 @@ export const embedYoutubeSlashMenuConfig: SlashMenuConfig = {
         figure: YoutubeVideoTooltip,
         caption: 'YouTube Video',
       },
-      group: '4_Content & Media@5',
+      group: '4_Content & Media@6',
       when: ({ model }) =>
         model.doc.schema.flavourSchemaMap.has('affine:embed-youtube'),
       action: ({ std, model }) => {

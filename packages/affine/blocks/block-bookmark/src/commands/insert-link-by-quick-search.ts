@@ -1,6 +1,6 @@
 import {
   type InsertedLinkType,
-  insertEmbedIframeCommand,
+  insertEmbedIframeWithUrlCommand,
   insertEmbedLinkedDocCommand,
   type LinkableFlavour,
 } from '@blocksuite/affine-block-embed';
@@ -8,7 +8,7 @@ import {
   FeatureFlagService,
   QuickSearchProvider,
 } from '@blocksuite/affine-shared/services';
-import type { Command } from '@blocksuite/block-std';
+import type { Command } from '@blocksuite/std';
 
 import { insertBookmarkCommand } from './insert-bookmark';
 
@@ -50,7 +50,9 @@ export const insertLinkByQuickSearchCommand: Command<
           const [success, { flavour }] = std.command
             .chain()
             .try(chain => [
-              chain.pipe(insertEmbedIframeCommand, { url: result.externalUrl }),
+              chain.pipe(insertEmbedIframeWithUrlCommand, {
+                url: result.externalUrl,
+              }),
               chain.pipe(insertBookmarkCommand, { url: result.externalUrl }),
             ])
             .run();

@@ -3,7 +3,7 @@ import {
   calculateCollapsedSiblings,
   matchModels,
 } from '@blocksuite/affine-shared/utils';
-import type { Command } from '@blocksuite/block-std';
+import type { Command } from '@blocksuite/std';
 
 /**
  * @example

@@ -16,8 +16,6 @@ import {
   TelemetryProvider,
 } from '@blocksuite/affine-shared/services';
 import { getDropResult } from '@blocksuite/affine-widget-drag-handle';
-import { type BlockComponent } from '@blocksuite/block-std';
-import { RANGE_SYNC_EXCLUDE_ATTR } from '@blocksuite/block-std/inline';
 import {
   createRecordDetail,
   createUniComponentFromWebComponent,
@@ -40,6 +38,8 @@ import {
   DeleteIcon,
   MoreHorizontalIcon,
 } from '@blocksuite/icons/lit';
+import { type BlockComponent } from '@blocksuite/std';
+import { RANGE_SYNC_EXCLUDE_ATTR } from '@blocksuite/std/inline';
 import { Slice } from '@blocksuite/store';
 import { autoUpdate } from '@floating-ui/dom';
 import { computed, signal } from '@preact/signals-core';

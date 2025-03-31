@@ -2,7 +2,7 @@ import { selectBlock } from '@blocksuite/affine-block-note';
 import { CaptionedBlockComponent } from '@blocksuite/affine-components/caption';
 import { createLitPortal } from '@blocksuite/affine-components/portal';
 import type { LatexBlockModel } from '@blocksuite/affine-model';
-import { BlockSelection } from '@blocksuite/block-std';
+import { BlockSelection } from '@blocksuite/std';
 import type { Placement } from '@floating-ui/dom';
 import { effect } from '@preact/signals-core';
 import katex from 'katex';

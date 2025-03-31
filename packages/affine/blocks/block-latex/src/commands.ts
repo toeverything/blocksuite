@@ -1,5 +1,5 @@
 import type { LatexProps } from '@blocksuite/affine-model';
-import type { Command } from '@blocksuite/block-std';
+import type { Command } from '@blocksuite/std';
 import type { BlockModel } from '@blocksuite/store';
 
 import { LatexBlockComponent } from './latex-block.js';

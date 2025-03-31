@@ -1,12 +1,12 @@
 import { createLitPortal } from '@blocksuite/affine-components/portal';
 import type { EmbedIframeBlockModel } from '@blocksuite/affine-model';
 import { unsafeCSSVarV2 } from '@blocksuite/affine-shared/theme';
-import type { BlockStdScope } from '@blocksuite/block-std';
 import { WithDisposable } from '@blocksuite/global/lit';
 import { EditIcon, InformationIcon, ResetIcon } from '@blocksuite/icons/lit';
+import type { BlockStdScope } from '@blocksuite/std';
 import { flip, offset } from '@floating-ui/dom';
 import { baseTheme } from '@toeverything/theme';
-import { css, html, LitElement, unsafeCSS } from 'lit';
+import { css, html, LitElement, nothing, unsafeCSS } from 'lit';
 import { property, query } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -161,7 +161,7 @@ export class EmbedIframeErrorCard extends WithDisposable(LitElement) {
   private _editAbortController: AbortController | null = null;
   private readonly _toggleEdit = (e: MouseEvent) => {
     e.stopPropagation();
-    if (!this._editButton) {
+    if (!this._editButton || this.readonly) {
       return;
     }
 
@@ -225,12 +225,16 @@ export class EmbedIframeErrorCard extends WithDisposable(LitElement) {
             ${this.error?.message || 'Failed to load embedded content'}
           </div>
           <div class="error-info">
-            <div class="button edit" @click=${this._toggleEdit}>
-              <span class="icon"
-                >${EditIcon({ width: '16px', height: '16px' })}</span
-              >
-              <span class="text">Edit</span>
-            </div>
+            ${this.readonly
+              ? nothing
+              : html`
+                  <div class="button edit" @click=${this._toggleEdit}>
+                    <span class="icon"
+                      >${EditIcon({ width: '16px', height: '16px' })}</span
+                    >
+                    <span class="text">Edit</span>
+                  </div>
+                `}
             <div class="button retry" @click=${this._handleRetry}>
               <span class="icon"
                 >${ResetIcon({ width: '16px', height: '16px' })}</span
@@ -249,6 +253,10 @@ export class EmbedIframeErrorCard extends WithDisposable(LitElement) {
 
   get host() {
     return this.std.host;
+  }
+
+  get readonly() {
+    return this.model.doc.readonly;
   }
 
   @query('.button.edit')

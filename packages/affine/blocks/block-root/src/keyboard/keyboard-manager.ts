@@ -11,12 +11,12 @@ import {
   getSelectedModelsCommand,
 } from '@blocksuite/affine-shared/commands';
 import { matchModels } from '@blocksuite/affine-shared/utils';
+import { IS_MAC, IS_WINDOWS } from '@blocksuite/global/env';
 import {
   type BlockComponent,
   BlockSelection,
   type UIEventHandler,
-} from '@blocksuite/block-std';
-import { IS_MAC, IS_WINDOWS } from '@blocksuite/global/env';
+} from '@blocksuite/std';
 import { toDraftModel } from '@blocksuite/store';
 
 export class PageKeyboardManager {

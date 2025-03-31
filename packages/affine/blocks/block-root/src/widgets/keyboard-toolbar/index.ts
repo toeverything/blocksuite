@@ -1,8 +1,8 @@
 import { getDocTitleByEditorHost } from '@blocksuite/affine-fragment-doc-title';
 import type { RootBlockModel } from '@blocksuite/affine-model';
 import { FeatureFlagService } from '@blocksuite/affine-shared/services';
-import { WidgetComponent } from '@blocksuite/block-std';
 import { IS_MOBILE } from '@blocksuite/global/env';
+import { WidgetComponent } from '@blocksuite/std';
 import { signal } from '@preact/signals-core';
 import { html, nothing } from 'lit';
 

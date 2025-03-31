@@ -5,10 +5,10 @@ import {
   normalizeUrl,
   stopPropagation,
 } from '@blocksuite/affine-shared/utils';
-import { type BlockStdScope, TextSelection } from '@blocksuite/block-std';
-import type { InlineRange } from '@blocksuite/block-std/inline';
 import { WithDisposable } from '@blocksuite/global/lit';
 import { DoneIcon } from '@blocksuite/icons/lit';
+import { type BlockStdScope, TextSelection } from '@blocksuite/std';
+import type { InlineRange } from '@blocksuite/std/inline';
 import { computePosition, inline, offset, shift } from '@floating-ui/dom';
 import { html, LitElement } from 'lit';
 import { property, query } from 'lit/decorators.js';

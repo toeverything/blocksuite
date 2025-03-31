@@ -1,6 +1,6 @@
 import type { AffineTextAttributes } from '@blocksuite/affine-shared/types';
-import { StdIdentifier } from '@blocksuite/block-std';
-import { InlineSpecExtension } from '@blocksuite/block-std/inline';
+import { StdIdentifier } from '@blocksuite/std';
+import { InlineSpecExtension } from '@blocksuite/std/inline';
 import { html } from 'lit';
 import { z } from 'zod';
 

@@ -3,9 +3,9 @@ import {
   getSurfaceBlock,
 } from '@blocksuite/affine-block-surface';
 import { focusTextModel } from '@blocksuite/affine-rich-text';
-import type { Command } from '@blocksuite/block-std';
-import { GfxControllerIdentifier } from '@blocksuite/block-std/gfx';
 import { Bound } from '@blocksuite/global/gfx';
+import type { Command } from '@blocksuite/std';
+import { GfxControllerIdentifier } from '@blocksuite/std/gfx';
 
 import {
   EDGELESS_TEXT_BLOCK_MIN_HEIGHT,

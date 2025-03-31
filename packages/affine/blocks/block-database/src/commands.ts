@@ -1,5 +1,5 @@
 import type { DatabaseBlockModel } from '@blocksuite/affine-model';
-import type { Command } from '@blocksuite/block-std';
+import type { Command } from '@blocksuite/std';
 import type { BlockModel, Store } from '@blocksuite/store';
 
 import {

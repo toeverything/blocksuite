@@ -3,11 +3,11 @@ import {
   BLOCK_ID_ATTR,
   type BlockComponent,
   type Command,
-} from '@blocksuite/block-std';
+} from '@blocksuite/std';
 import {
   INLINE_ROOT_ATTR,
   type InlineRootElement,
-} from '@blocksuite/block-std/inline';
+} from '@blocksuite/std/inline';
 
 import { FORMAT_NATIVE_SUPPORT_FLAVOURS } from './consts.js';
 

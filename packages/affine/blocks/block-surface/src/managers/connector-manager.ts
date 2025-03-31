@@ -7,11 +7,6 @@ import {
   type LocalConnectorElementModel,
 } from '@blocksuite/affine-model';
 import { ThemeProvider } from '@blocksuite/affine-shared/services';
-import type {
-  GfxController,
-  GfxLocalElementModel,
-  GfxModel,
-} from '@blocksuite/block-std/gfx';
 import { BlockSuiteError } from '@blocksuite/global/exceptions';
 import type { IBound, IVec, IVec3 } from '@blocksuite/global/gfx';
 import {
@@ -33,6 +28,11 @@ import {
   Vec,
 } from '@blocksuite/global/gfx';
 import { assertType } from '@blocksuite/global/utils';
+import type {
+  GfxController,
+  GfxLocalElementModel,
+  GfxModel,
+} from '@blocksuite/std/gfx';
 import { effect } from '@preact/signals-core';
 import last from 'lodash-es/last';
 

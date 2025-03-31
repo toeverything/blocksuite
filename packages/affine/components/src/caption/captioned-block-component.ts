@@ -1,5 +1,5 @@
 import { ThemeProvider } from '@blocksuite/affine-shared/services';
-import { BlockComponent, type BlockService } from '@blocksuite/block-std';
+import { BlockComponent, type BlockService } from '@blocksuite/std';
 import type { BlockModel } from '@blocksuite/store';
 import { html, nothing } from 'lit';
 import { classMap } from 'lit/directives/class-map.js';

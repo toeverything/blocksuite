@@ -15,7 +15,7 @@ import {
   ThemeProvider,
 } from '@blocksuite/affine-shared/services';
 import { humanFileSize } from '@blocksuite/affine-shared/utils';
-import { BlockSelection } from '@blocksuite/block-std';
+import { BlockSelection } from '@blocksuite/std';
 import { Slice } from '@blocksuite/store';
 import { html } from 'lit';
 import { property } from 'lit/decorators.js';

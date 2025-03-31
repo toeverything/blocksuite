@@ -1,4 +1,4 @@
-import type { BlockStdScope } from '@blocksuite/block-std';
+import type { BlockStdScope } from '@blocksuite/std';
 import type { Store } from '@blocksuite/store';
 
 import type { SurfaceBlockComponent } from '../surface-block';

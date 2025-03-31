@@ -11,14 +11,14 @@ import {
 } from '@blocksuite/affine-shared/consts';
 import { ThemeProvider } from '@blocksuite/affine-shared/services';
 import { SpecProvider } from '@blocksuite/affine-shared/utils';
+import { deserializeXYWH } from '@blocksuite/global/gfx';
+import { WithDisposable } from '@blocksuite/global/lit';
 import {
   BlockStdScope,
   type EditorHost,
   ShadowlessElement,
-} from '@blocksuite/block-std';
-import { RANGE_QUERY_EXCLUDE_ATTR } from '@blocksuite/block-std/inline';
-import { deserializeXYWH } from '@blocksuite/global/gfx';
-import { WithDisposable } from '@blocksuite/global/lit';
+} from '@blocksuite/std';
+import { RANGE_QUERY_EXCLUDE_ATTR } from '@blocksuite/std/inline';
 import { type BlockModel, type Query } from '@blocksuite/store';
 import { css, nothing } from 'lit';
 import { property } from 'lit/decorators.js';

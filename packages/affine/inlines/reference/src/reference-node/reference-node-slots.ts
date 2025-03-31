@@ -1,7 +1,7 @@
 import type { ReferenceInfo } from '@blocksuite/affine-model';
 import type { OpenDocMode } from '@blocksuite/affine-shared/services';
-import type { EditorHost } from '@blocksuite/block-std';
 import { createIdentifier } from '@blocksuite/global/di';
+import type { EditorHost } from '@blocksuite/std';
 import type { ExtensionType } from '@blocksuite/store';
 import { Subject } from 'rxjs';
 

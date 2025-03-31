@@ -2,7 +2,7 @@ import {
   BlockSelection,
   type BlockStdScope,
   TextSelection,
-} from '@blocksuite/block-std';
+} from '@blocksuite/std';
 
 const getSelection = (std: BlockStdScope) => std.selection;
 

@@ -7,17 +7,31 @@ import {
   BlockViewExtension,
   LifeCycleWatcher,
   WidgetViewExtension,
-} from '@blocksuite/block-std';
-import {
-  GfxControllerIdentifier,
-  ToolController,
-} from '@blocksuite/block-std/gfx';
+} from '@blocksuite/std';
+import { GfxControllerIdentifier, ToolController } from '@blocksuite/std/gfx';
 import type { ExtensionType } from '@blocksuite/store';
 import { literal, unsafeStatic } from 'lit/static-html.js';
 
 import { CommonSpecs } from '../common-specs/index.js';
 import { edgelessNavigatorBgWidget } from '../widgets/edgeless-navigator-bg/index.js';
 import { AFFINE_EDGELESS_ZOOM_TOOLBAR_WIDGET } from '../widgets/edgeless-zoom-toolbar/index.js';
+import { EdgelessClipboardController } from './clipboard/clipboard.js';
+import {
+  EdgelessClipboardAttachmentConfig,
+  EdgelessClipboardBookmarkConfig,
+  EdgelessClipboardEdgelessTextConfig,
+  EdgelessClipboardEmbedFigmaConfig,
+  EdgelessClipboardEmbedGithubConfig,
+  EdgelessClipboardEmbedHtmlConfig,
+  EdgelessClipboardEmbedIframeConfig,
+  EdgelessClipboardEmbedLinkedDocConfig,
+  EdgelessClipboardEmbedLoomConfig,
+  EdgelessClipboardEmbedSyncedDocConfig,
+  EdgelessClipboardEmbedYoutubeConfig,
+  EdgelessClipboardFrameConfig,
+  EdgelessClipboardImageConfig,
+  EdgelessClipboardNoteConfig,
+} from './clipboard/config.js';
 import { NOTE_SLICER_WIDGET } from './components/note-slicer/index.js';
 import { EDGELESS_DRAGGING_AREA_WIDGET } from './components/rects/edgeless-dragging-area-rect.js';
 import { EDGELESS_SELECTED_RECT_WIDGET } from './components/rects/edgeless-selected-rect.js';
@@ -54,6 +68,23 @@ class EdgelessLocker extends LifeCycleWatcher {
   }
 }
 
+const EdgelessClipboardConfigs: ExtensionType[] = [
+  EdgelessClipboardNoteConfig,
+  EdgelessClipboardEdgelessTextConfig,
+  EdgelessClipboardImageConfig,
+  EdgelessClipboardFrameConfig,
+  EdgelessClipboardAttachmentConfig,
+  EdgelessClipboardBookmarkConfig,
+  EdgelessClipboardEmbedFigmaConfig,
+  EdgelessClipboardEmbedGithubConfig,
+  EdgelessClipboardEmbedHtmlConfig,
+  EdgelessClipboardEmbedLoomConfig,
+  EdgelessClipboardEmbedYoutubeConfig,
+  EdgelessClipboardEmbedIframeConfig,
+  EdgelessClipboardEmbedLinkedDocConfig,
+  EdgelessClipboardEmbedSyncedDocConfig,
+];
+
 const EdgelessCommonExtension: ExtensionType[] = [
   CommonSpecs,
   ToolController,
@@ -61,6 +92,7 @@ const EdgelessCommonExtension: ExtensionType[] = [
   ViewportElementExtension('.affine-edgeless-viewport'),
   ...quickTools,
   ...seniorTools,
+  ...EdgelessClipboardConfigs,
 ].flat();
 
 export const EdgelessRootBlockSpec: ExtensionType[] = [
@@ -75,6 +107,7 @@ export const EdgelessRootBlockSpec: ExtensionType[] = [
   edgelessNavigatorBgWidget,
   edgelessSelectedRectWidget,
   edgelessToolbarWidget,
+  EdgelessClipboardController,
 ];
 
 export const PreviewEdgelessRootBlockSpec: ExtensionType[] = [

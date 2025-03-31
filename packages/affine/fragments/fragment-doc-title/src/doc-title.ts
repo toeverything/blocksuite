@@ -8,8 +8,8 @@ import {
 } from '@blocksuite/affine-model';
 import { focusTextModel, type RichText } from '@blocksuite/affine-rich-text';
 import { matchModels } from '@blocksuite/affine-shared/utils';
-import { ShadowlessElement } from '@blocksuite/block-std';
 import { WithDisposable } from '@blocksuite/global/lit';
+import { ShadowlessElement } from '@blocksuite/std';
 import type { Store } from '@blocksuite/store';
 import { effect } from '@preact/signals-core';
 import { css, html } from 'lit';
@@ -82,8 +82,10 @@ export class DocTitle extends WithDisposable(ShadowlessElement) {
 
   private readonly _onTitleKeyDown = (event: KeyboardEvent) => {
     if (event.isComposing || this.doc.readonly) return;
+    if (!this._std) return;
 
     if (event.key === 'Enter') {
+      this._std.event.active = true;
       event.preventDefault();
       event.stopPropagation();
 
@@ -99,6 +101,7 @@ export class DocTitle extends WithDisposable(ShadowlessElement) {
         if (this._std) focusTextModel(this._std, newFirstParagraphId);
       }
     } else if (event.key === 'ArrowDown') {
+      this._std.event.active = true;
       event.preventDefault();
       event.stopPropagation();
 

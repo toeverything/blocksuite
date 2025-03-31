@@ -1,19 +1,11 @@
-import { SurfaceBlockModel } from '@blocksuite/affine-block-surface';
-import { RootBlockModel } from '@blocksuite/affine-model';
 import {
   DocModeExtension,
   DocModeProvider,
   EditorSettingExtension,
   EditorSettingProvider,
 } from '@blocksuite/affine-shared/services';
-import { matchModels, SpecProvider } from '@blocksuite/affine-shared/utils';
-import {
-  type BlockComponent,
-  BlockStdScope,
-  BlockViewIdentifier,
-  LifeCycleWatcher,
-} from '@blocksuite/block-std';
-import { GfxControllerIdentifier } from '@blocksuite/block-std/gfx';
+import { SpecProvider } from '@blocksuite/affine-shared/utils';
+import { BlockStdScope, BlockViewIdentifier } from '@blocksuite/std';
 import type {
   BlockModel,
   BlockViewType,
@@ -24,14 +16,11 @@ import type {
 import { signal } from '@preact/signals-core';
 import { literal } from 'lit/static-html.js';
 
+import { EdgelessDndPreviewElement } from '../components/edgeless-preview/preview.js';
 import type { AffineDragHandleWidget } from '../drag-handle.js';
-import { getSnapshotRect } from '../utils.js';
 
 export class PreviewHelper {
-  private readonly _calculateQuery = (
-    selectedIds: string[],
-    mode: 'block' | 'gfx'
-  ): Query => {
+  private readonly _calculateQuery = (selectedIds: string[]): Query => {
     const ids: Array<{ id: string; viewType: BlockViewType }> = selectedIds.map(
       id => ({
         id,
@@ -58,22 +47,10 @@ export class PreviewHelper {
       }
 
       const children = model.children ?? [];
-      if (
-        mode === 'gfx' &&
-        matchModels(model, [RootBlockModel, SurfaceBlockModel])
-      ) {
-        children.forEach(child => {
-          if (selectedIds.includes(child.id)) {
-            ids.push({ viewType: 'display', id: child.id });
-            addChildren(child.id);
-          }
-        });
-      } else {
-        children.forEach(child => {
-          ids.push({ viewType: 'display', id: child.id });
-          addChildren(child.id);
-        });
-      }
+      children.forEach(child => {
+        ids.push({ viewType: 'display', id: child.id });
+        addChildren(child.id);
+      });
     };
     selectedIds.forEach(addChildren);
 
@@ -83,28 +60,16 @@ export class PreviewHelper {
     };
   };
 
-  getPreviewStd = (
-    blockIds: string[],
-    snapshot: SliceSnapshot,
-    mode: 'block' | 'gfx'
-  ) => {
+  getPreviewStd = (blockIds: string[]) => {
     const widget = this.widget;
     const std = widget.std;
-    const sourceGfx = std.get(GfxControllerIdentifier);
-    const isEdgeless = mode === 'gfx';
     blockIds = blockIds.slice();
-
-    if (isEdgeless) {
-      blockIds.push(sourceGfx.surface!.id, std.store.root!.id);
-    }
 
     const docModeService = std.get(DocModeProvider);
     const editorSetting = std.get(EditorSettingProvider).peek();
-    const query = this._calculateQuery(blockIds as string[], mode);
+    const query = this._calculateQuery(blockIds as string[]);
     const store = widget.doc.doc.getStore({ query });
-    const previewSpec = SpecProvider._.getSpec(
-      isEdgeless ? 'preview:edgeless' : 'preview:page'
-    );
+    const previewSpec = SpecProvider._.getSpec('preview:page');
     const settingSignal = signal({ ...editorSetting });
     const extensions = [
       DocModeExtension(docModeService),
@@ -134,35 +99,6 @@ export class PreviewHelper {
       } as ExtensionType,
     ];
 
-    if (isEdgeless) {
-      class PreviewViewportInitializer extends LifeCycleWatcher {
-        static override key = 'preview-viewport-initializer';
-
-        override mounted(): void {
-          const rect = getSnapshotRect(snapshot);
-          if (!rect) {
-            return;
-          }
-
-          this.std.view.viewUpdated.subscribe(payload => {
-            if (payload.type !== 'block') return;
-
-            if (payload.view.model.flavour === 'affine:page') {
-              const gfx = this.std.get(GfxControllerIdentifier);
-
-              (
-                payload.view as BlockComponent & { overrideBackground: string }
-              ).overrideBackground = 'transparent';
-
-              gfx.viewport.setViewportByBound(rect);
-            }
-          });
-        }
-      }
-
-      extensions.push(PreviewViewportInitializer);
-    }
-
     previewSpec.extend(extensions);
 
     settingSignal.value = {
@@ -177,28 +113,69 @@ export class PreviewHelper {
 
     let width: number = 500;
     let height;
-    let scale = 1;
 
-    if (isEdgeless) {
-      const rect = getSnapshotRect(snapshot);
-      if (rect) {
-        width = rect.w;
-        height = rect.h;
-      } else {
-        height = 500;
-      }
-      scale = sourceGfx.viewport.zoom;
-    } else {
-      const noteBlock = this.widget.host.querySelector('affine-note');
-      width = noteBlock?.offsetWidth ?? noteBlock?.clientWidth ?? 500;
-    }
+    const noteBlock = this.widget.host.querySelector('affine-note');
+    width = noteBlock?.offsetWidth ?? noteBlock?.clientWidth ?? 500;
 
     return {
-      scale,
       previewStd,
       width,
       height,
     };
+  };
+
+  private _extractBlockTypes(snapshot: SliceSnapshot) {
+    const blockTypes: {
+      type: string;
+    }[] = [];
+
+    snapshot.content.forEach(block => {
+      if (block.flavour === 'affine:surface') {
+        Object.values(
+          block.props.elements as Record<string, { id: string; type: string }>
+        ).forEach(elem => {
+          blockTypes.push({
+            type: elem.type,
+          });
+        });
+      } else {
+        blockTypes.push({
+          type: block.flavour,
+        });
+      }
+    });
+
+    return blockTypes;
+  }
+
+  getPreviewElement = (options: {
+    blockIds: string[];
+    snapshot: SliceSnapshot;
+    mode: 'block' | 'gfx';
+  }) => {
+    const { blockIds, snapshot, mode } = options;
+
+    if (mode === 'block') {
+      const { previewStd, width, height } = this.getPreviewStd(blockIds);
+      const previewTemplate = previewStd.render();
+
+      return {
+        width,
+        height,
+        element: previewTemplate,
+      };
+    } else {
+      const blockTypes = this._extractBlockTypes(snapshot);
+
+      const edgelessPreview = new EdgelessDndPreviewElement();
+      edgelessPreview.elementTypes = blockTypes;
+
+      return {
+        left: 12,
+        top: 12,
+        element: edgelessPreview,
+      };
+    }
   };
 
   renderDragPreview = (options: {
@@ -206,21 +183,22 @@ export class PreviewHelper {
     snapshot: SliceSnapshot;
     container: HTMLElement;
     mode: 'block' | 'gfx';
-  }): void => {
-    const { blockIds, snapshot, container, mode } = options;
-    const { previewStd, width, height, scale } = this.getPreviewStd(
-      blockIds,
-      snapshot,
-      mode
-    );
-    const previewTemplate = previewStd.render();
+  }): { x: number; y: number } => {
+    const { container } = options;
+    const { width, height, element, left, top } =
+      this.getPreviewElement(options);
 
-    container.style.transform = `scale(${scale})`;
-    container.style.width = `${width}px`;
-    if (height) {
-      container.style.height = `${height}px`;
-    }
-    container.append(previewTemplate);
+    container.style.position = 'absolute';
+    container.style.left = left ? `${left}px` : '';
+    container.style.top = top ? `${top}px` : '';
+    container.style.width = width ? `${width}px` : '';
+    container.style.height = height ? `${height}px` : '';
+    container.append(element);
+
+    return {
+      x: left ?? 0,
+      y: top ?? 0,
+    };
   };
 
   constructor(readonly widget: AffineDragHandleWidget) {}

@@ -3,7 +3,7 @@ import {
   getBlockProps,
   isInsidePageEditor,
 } from '@blocksuite/affine-shared/utils';
-import { BlockSelection } from '@blocksuite/block-std';
+import { BlockSelection } from '@blocksuite/std';
 
 export function duplicate(
   block: ImageBlockComponent,

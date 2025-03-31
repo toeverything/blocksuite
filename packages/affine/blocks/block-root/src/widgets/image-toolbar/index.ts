@@ -14,7 +14,7 @@ import {
   BlockSelection,
   TextSelection,
   WidgetComponent,
-} from '@blocksuite/block-std';
+} from '@blocksuite/std';
 import { limitShift, shift } from '@floating-ui/dom';
 import { html } from 'lit';
 

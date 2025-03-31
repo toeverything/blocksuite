@@ -21,10 +21,11 @@ import {
   resolveColor,
   StrokeStyle,
 } from '@blocksuite/affine-model';
-import type {
-  ToolbarContext,
-  ToolbarGenericAction,
-  ToolbarModuleConfig,
+import {
+  type ToolbarContext,
+  type ToolbarGenericAction,
+  type ToolbarModuleConfig,
+  ToolbarModuleExtension,
 } from '@blocksuite/affine-shared/services';
 import {
   getMostCommonResolvedValue,
@@ -54,6 +55,7 @@ import {
   StartPointIcon,
   StartPointTriangleIcon,
 } from '@blocksuite/icons/lit';
+import { BlockFlavourIdentifier } from '@blocksuite/std';
 import { html } from 'lit';
 import { styleMap } from 'lit/directives/style-map.js';
 
@@ -207,8 +209,7 @@ export const connectorToolbarConfig = {
     },
     {
       id: 'b.style',
-      // TODO(@fundon): should add a feature flag
-      when: false,
+      when: ctx => ctx.features.getFlag('enable_edgeless_scribbled_style'),
       content(ctx) {
         const models = ctx.getSurfaceModelsByType(ConnectorElementModel);
         if (!models.length) return null;
@@ -417,3 +418,8 @@ function updateModelsWith<
       .updateElement(model.id, { [field]: value });
   }
 }
+
+export const connectorToolbarExtension = ToolbarModuleExtension({
+  id: BlockFlavourIdentifier('affine:surface:connector'),
+  config: connectorToolbarConfig,
+});

@@ -48,6 +48,7 @@ import { effects as fragmentOutlineEffects } from '@blocksuite/affine-fragment-o
 import { effects as inlineFootnoteEffects } from '@blocksuite/affine-inline-footnote/effects';
 import { effects as inlineLatexEffects } from '@blocksuite/affine-inline-latex/effects';
 import { effects as inlineLinkEffects } from '@blocksuite/affine-inline-link/effects';
+import { effects as inlineMentionEffects } from '@blocksuite/affine-inline-mention';
 import { effects as inlinePresetEffects } from '@blocksuite/affine-inline-preset/effects';
 import { effects as inlineReferenceEffects } from '@blocksuite/affine-inline-reference/effects';
 import { effects as richTextEffects } from '@blocksuite/affine-rich-text/effects';
@@ -58,8 +59,8 @@ import { effects as widgetRemoteSelectionEffects } from '@blocksuite/affine-widg
 import { effects as widgetScrollAnchoringEffects } from '@blocksuite/affine-widget-scroll-anchoring/effects';
 import { effects as widgetSlashMenuEffects } from '@blocksuite/affine-widget-slash-menu/effects';
 import { effects as widgetToolbarEffects } from '@blocksuite/affine-widget-toolbar/effects';
-import { effects as stdEffects } from '@blocksuite/block-std/effects';
 import { effects as dataViewEffects } from '@blocksuite/data-view/effects';
+import { effects as stdEffects } from '@blocksuite/std/effects';
 
 import { registerSpecs } from './extensions/register.js';
 
@@ -123,6 +124,7 @@ export function effects() {
   inlineLinkEffects();
   inlineFootnoteEffects();
   inlineLatexEffects();
+  inlineMentionEffects();
 
   blockNoteEffects();
   blockAttachmentEffects();

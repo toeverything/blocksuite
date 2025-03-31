@@ -1,7 +1,7 @@
 import type { FrameBlockModel } from '@blocksuite/affine-model';
-import { ShadowlessElement } from '@blocksuite/block-std';
 import { DisposableGroup } from '@blocksuite/global/disposable';
 import { WithDisposable } from '@blocksuite/global/lit';
+import { ShadowlessElement } from '@blocksuite/std';
 import { css, html, type PropertyValues } from 'lit';
 import { property, query } from 'lit/decorators.js';
 import type * as Y from 'yjs';

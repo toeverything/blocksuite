@@ -3,6 +3,15 @@ import { EdgelessTextBlockComponent } from '@blocksuite/affine-block-edgeless-te
 import { isNoteBlock } from '@blocksuite/affine-block-surface';
 import { toast } from '@blocksuite/affine-components/toast';
 import { mountConnectorLabelEditor } from '@blocksuite/affine-gfx-connector';
+import {
+  createGroupFromSelectedCommand,
+  ungroupCommand,
+} from '@blocksuite/affine-gfx-group';
+import {
+  getNearestTranslation,
+  isElementOutsideViewport,
+  isSingleMindMapNode,
+} from '@blocksuite/affine-gfx-mindmap';
 import { mountShapeTextEditor, ShapeTool } from '@blocksuite/affine-gfx-shape';
 import {
   ConnectorElementModel,
@@ -22,16 +31,16 @@ import {
 } from '@blocksuite/affine-shared/services';
 import { LassoMode } from '@blocksuite/affine-shared/types';
 import { matchModels } from '@blocksuite/affine-shared/utils';
-import { SurfaceSelection, TextSelection } from '@blocksuite/block-std';
+import { IS_MAC } from '@blocksuite/global/env';
+import { Bound, getCommonBound } from '@blocksuite/global/gfx';
+import { SurfaceSelection, TextSelection } from '@blocksuite/std';
 import {
   GfxBlockElementModel,
   type GfxPrimitiveElementModel,
   type GfxToolsMap,
   type GfxToolsOption,
   isGfxGroupCompatibleModel,
-} from '@blocksuite/block-std/gfx';
-import { IS_MAC } from '@blocksuite/global/env';
-import { Bound, getCommonBound } from '@blocksuite/global/gfx';
+} from '@blocksuite/std/gfx';
 
 import { PageKeyboardManager } from '../keyboard/keyboard-manager.js';
 import type { EdgelessRootBlockComponent } from './edgeless-root-block.js';
@@ -43,11 +52,6 @@ import {
 } from './utils/consts.js';
 import { deleteElements } from './utils/crud.js';
 import { getNextShapeType } from './utils/hotkey-utils.js';
-import {
-  getNearestTranslation,
-  isElementOutsideViewport,
-  isSingleMindMapNode,
-} from './utils/mindmap.js';
 import { isCanvasElement } from './utils/query.js';
 
 export class EdgelessPageKeyboardManager extends PageKeyboardManager {
@@ -227,7 +231,7 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
             !this.rootComponent.service.selection.editing
           ) {
             ctx.get('keyboardState').event.preventDefault();
-            rootComponent.service.createGroupFromSelected();
+            rootComponent.std.command.exec(createGroupFromSelectedCommand);
           }
         },
         'Shift-Mod-g': ctx => {
@@ -239,7 +243,9 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
             !selection.firstElement.isLocked()
           ) {
             ctx.get('keyboardState').event.preventDefault();
-            rootComponent.service.ungroup(selection.firstElement);
+            rootComponent.std.command.exec(ungroupCommand, {
+              group: selection.firstElement,
+            });
           }
         },
         'Mod-a': ctx => {
@@ -701,6 +707,7 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
     const edgeless = this.rootComponent;
     const selection = edgeless.service.selection;
     const currentTool = edgeless.gfx.tool.currentTool$.peek()!;
+    const currentSel = selection.surfaceSelections;
     const isKeyDown = event.type === 'keydown';
 
     if (edgeless.gfx.tool.dragging$.peek()) {
@@ -714,6 +721,7 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
           currentTool.toolName,
           currentTool?.activatedOption
         );
+        selection.set(currentSel);
         document.removeEventListener('keyup', revertToPrevTool, false);
       }
     };

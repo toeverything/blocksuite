@@ -25,13 +25,10 @@ import {
   matchModels,
 } from '@blocksuite/affine-shared/utils';
 import { mountFrameTitleEditor } from '@blocksuite/affine-widget-frame-title';
-import {
-  type BlockComponent,
-  BlockFlavourIdentifier,
-} from '@blocksuite/block-std';
-import { GfxControllerIdentifier } from '@blocksuite/block-std/gfx';
 import { Bound } from '@blocksuite/global/gfx';
 import { EditIcon, PageIcon, UngroupIcon } from '@blocksuite/icons/lit';
+import { type BlockComponent, BlockFlavourIdentifier } from '@blocksuite/std';
+import { GfxControllerIdentifier } from '@blocksuite/std/gfx';
 import type { ExtensionType } from '@blocksuite/store';
 import { html } from 'lit';
 

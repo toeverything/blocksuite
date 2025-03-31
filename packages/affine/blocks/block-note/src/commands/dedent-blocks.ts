@@ -3,7 +3,7 @@ import {
   calculateCollapsedSiblings,
   matchModels,
 } from '@blocksuite/affine-shared/utils';
-import { type Command, TextSelection } from '@blocksuite/block-std';
+import { type Command, TextSelection } from '@blocksuite/std';
 
 import { dedentBlock } from './dedent-block';
 

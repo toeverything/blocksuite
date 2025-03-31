@@ -1,4 +1,9 @@
 import { FileDropExtension } from '@blocksuite/affine-components/drop-indicator';
+import { ConnectorElementView } from '@blocksuite/affine-gfx-connector';
+import { GroupElementView } from '@blocksuite/affine-gfx-group';
+import { MindMapView } from '@blocksuite/affine-gfx-mindmap';
+import { ShapeElementView } from '@blocksuite/affine-gfx-shape';
+import { TextElementView } from '@blocksuite/affine-gfx-text';
 import { NoteBlockSchema } from '@blocksuite/affine-model';
 import {
   DNDAPIExtension,
@@ -14,13 +19,11 @@ import { docRemoteSelectionWidget } from '@blocksuite/affine-widget-remote-selec
 import { scrollAnchoringWidget } from '@blocksuite/affine-widget-scroll-anchoring';
 import { SlashMenuExtension } from '@blocksuite/affine-widget-slash-menu';
 import { toolbarWidget } from '@blocksuite/affine-widget-toolbar';
-import {
-  BlockFlavourIdentifier,
-  FlavourExtension,
-} from '@blocksuite/block-std';
+import { BlockFlavourIdentifier, FlavourExtension } from '@blocksuite/std';
 import type { ExtensionType } from '@blocksuite/store';
 
 import { RootBlockAdapterExtensions } from '../adapters/extension';
+import { clipboardConfigs } from '../clipboard';
 import { builtinToolbarConfig } from '../configs/toolbar';
 import {
   innerModalWidget,
@@ -28,6 +31,19 @@ import {
   modalWidget,
   viewportOverlayWidget,
 } from './widgets';
+
+/**
+ * Why do we add these extensions into CommonSpecs?
+ * Because in some cases we need to create edgeless elements in page mode.
+ * And these view may contain some logic when elements initialize.
+ */
+const EdgelessElementViews = [
+  ConnectorElementView,
+  MindMapView,
+  GroupElementView,
+  TextElementView,
+  ShapeElementView,
+];
 
 export const CommonSpecs: ExtensionType[] = [
   FlavourExtension('affine:page'),
@@ -39,6 +55,8 @@ export const CommonSpecs: ExtensionType[] = [
   FileDropExtension,
   ToolbarRegistryExtension,
   ...RootBlockAdapterExtensions,
+  ...clipboardConfigs,
+  ...EdgelessElementViews,
 
   modalWidget,
   innerModalWidget,

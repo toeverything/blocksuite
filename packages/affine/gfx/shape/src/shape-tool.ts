@@ -11,10 +11,10 @@ import {
   ThemeProvider,
 } from '@blocksuite/affine-shared/services';
 import { hasClassNameInList } from '@blocksuite/affine-shared/utils';
-import type { PointerEventState } from '@blocksuite/block-std';
-import { BaseTool } from '@blocksuite/block-std/gfx';
 import type { IBound } from '@blocksuite/global/gfx';
 import { Bound } from '@blocksuite/global/gfx';
+import type { PointerEventState } from '@blocksuite/std';
+import { BaseTool } from '@blocksuite/std/gfx';
 import { effect } from '@preact/signals-core';
 
 import {
@@ -339,7 +339,7 @@ export class ShapeTool extends BaseTool<ShapeToolOption> {
   }
 }
 
-declare module '@blocksuite/block-std/gfx' {
+declare module '@blocksuite/std/gfx' {
   interface GfxToolsMap {
     shape: ShapeTool;
   }
