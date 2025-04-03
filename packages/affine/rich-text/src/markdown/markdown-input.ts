@@ -8,7 +8,7 @@ import {
   isMarkdownPrefix,
   matchModels,
 } from '@blocksuite/affine-shared/utils';
-import { type BlockStdScope, TextSelection } from '@blocksuite/block-std';
+import { type BlockStdScope, TextSelection } from '@blocksuite/std';
 
 import { getInlineEditorByModel } from '../dom.js';
 import { toDivider } from './divider.js';

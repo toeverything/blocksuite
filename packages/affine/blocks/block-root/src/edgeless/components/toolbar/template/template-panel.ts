@@ -11,10 +11,10 @@ import {
   stopPropagation,
 } from '@blocksuite/affine-shared/utils';
 import { EdgelessDraggableElementController } from '@blocksuite/affine-widget-edgeless-toolbar';
-import type { BlockComponent } from '@blocksuite/block-std';
-import { GfxControllerIdentifier } from '@blocksuite/block-std/gfx';
 import type { Bound } from '@blocksuite/global/gfx';
 import { WithDisposable } from '@blocksuite/global/lit';
+import type { BlockComponent } from '@blocksuite/std';
+import { GfxControllerIdentifier } from '@blocksuite/std/gfx';
 import { baseTheme } from '@toeverything/theme';
 import { css, html, LitElement, nothing, unsafeCSS } from 'lit';
 import { property, state } from 'lit/decorators.js';
@@ -46,12 +46,8 @@ export class EdgelessTemplatePanel extends WithDisposable(LitElement) {
       display: flex;
       flex-direction: column;
     }
-    .edgeless-templates-panel[data-app-theme='light'] {
-      ${unsafeCSS(lightToolbarStyles.join('\n'))}
-    }
-    .edgeless-templates-panel[data-app-theme='dark'] {
-      ${unsafeCSS(darkToolbarStyles.join('\n'))}
-    }
+    ${unsafeCSS(lightToolbarStyles('.edgeless-templates-panel'))}
+    ${unsafeCSS(darkToolbarStyles('.edgeless-templates-panel'))}
 
     .search-bar {
       padding: 21px 24px;

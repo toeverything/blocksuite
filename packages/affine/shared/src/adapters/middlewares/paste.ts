@@ -6,6 +6,7 @@ import {
   type ParagraphBlockModel,
   type ReferenceInfo,
 } from '@blocksuite/affine-model';
+import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 import {
   BLOCK_ID_ATTR,
   type BlockComponent,
@@ -13,8 +14,7 @@ import {
   type EditorHost,
   type TextRangePoint,
   TextSelection,
-} from '@blocksuite/block-std';
-import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
+} from '@blocksuite/std';
 import {
   type BlockModel,
   type BlockSnapshot,

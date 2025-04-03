@@ -1,7 +1,7 @@
 import { correctNumberedListsOrderToPrev } from '@blocksuite/affine-block-list';
 import { ListBlockModel } from '@blocksuite/affine-model';
 import { matchModels } from '@blocksuite/affine-shared/utils';
-import type { BlockStdScope } from '@blocksuite/block-std';
+import type { BlockStdScope } from '@blocksuite/std';
 import type { TransformerMiddleware } from '@blocksuite/store';
 
 export const reorderList =

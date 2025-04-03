@@ -1,9 +1,9 @@
+import { Bound } from '@blocksuite/global/gfx';
 import type {
   GfxCompatibleProps,
   GfxElementGeometry,
-} from '@blocksuite/block-std/gfx';
-import { GfxCompatible } from '@blocksuite/block-std/gfx';
-import { Bound } from '@blocksuite/global/gfx';
+} from '@blocksuite/std/gfx';
+import { GfxCompatible } from '@blocksuite/std/gfx';
 import {
   BlockModel,
   BlockSchemaExtension,

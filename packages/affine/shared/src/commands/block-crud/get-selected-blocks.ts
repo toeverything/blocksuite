@@ -1,9 +1,5 @@
-import type {
-  BlockSelection,
-  Command,
-  TextSelection,
-} from '@blocksuite/block-std';
-import { BlockComponent } from '@blocksuite/block-std';
+import type { BlockSelection, Command, TextSelection } from '@blocksuite/std';
+import { BlockComponent } from '@blocksuite/std';
 import type { RoleType } from '@blocksuite/store';
 
 import type { ImageSelection } from '../../selection/index.js';

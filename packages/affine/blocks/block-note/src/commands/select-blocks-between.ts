@@ -2,7 +2,7 @@ import {
   type BlockComponent,
   BlockSelection,
   type Command,
-} from '@blocksuite/block-std';
+} from '@blocksuite/std';
 
 export const selectBlocksBetween: Command<{
   focusBlock?: BlockComponent;

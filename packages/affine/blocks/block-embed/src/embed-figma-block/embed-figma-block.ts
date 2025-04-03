@@ -3,9 +3,8 @@ import type {
   EmbedFigmaModel,
   EmbedFigmaStyles,
 } from '@blocksuite/affine-model';
-import { BlockSelection } from '@blocksuite/block-std';
+import { BlockSelection } from '@blocksuite/std';
 import { html, nothing } from 'lit';
-import { state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
@@ -16,10 +15,6 @@ export class EmbedFigmaBlockComponent extends EmbedBlockComponent<EmbedFigmaMode
   static override styles = styles;
 
   override _cardStyle: (typeof EmbedFigmaStyles)[number] = 'figma';
-
-  protected _isDragging = false;
-
-  protected _isResizing = false;
 
   open = () => {
     let link = this.model.props.url;
@@ -68,25 +63,6 @@ export class EmbedFigmaBlockComponent extends EmbedBlockComponent<EmbedFigmaMode
         }
       })
     );
-
-    // this is required to prevent iframe from capturing pointer events
-    this.disposables.add(
-      this.selected$.subscribe(selected => {
-        this._showOverlay = this._isResizing || this._isDragging || !selected;
-      })
-    );
-    // this is required to prevent iframe from capturing pointer events
-    this.handleEvent('dragStart', () => {
-      this._isDragging = true;
-      this._showOverlay =
-        this._isResizing || this._isDragging || !this.selected$.peek();
-    });
-
-    this.handleEvent('dragEnd', () => {
-      this._isDragging = false;
-      this._showOverlay =
-        this._isResizing || this._isDragging || !this.selected$.peek();
-    });
   }
 
   override renderBlock() {
@@ -115,10 +91,11 @@ export class EmbedFigmaBlockComponent extends EmbedBlockComponent<EmbedFigmaMode
                 loading="lazy"
               ></iframe>
 
+              <!-- overlay to prevent the iframe from capturing pointer events -->
               <div
                 class=${classMap({
                   'affine-embed-figma-iframe-overlay': true,
-                  hide: !this._showOverlay,
+                  hide: !this.showOverlay$.value,
                 })}
               ></div>
             </div>
@@ -150,7 +127,4 @@ export class EmbedFigmaBlockComponent extends EmbedBlockComponent<EmbedFigmaMode
       `
     );
   }
-
-  @state()
-  protected accessor _showOverlay = true;
 }

@@ -1,5 +1,5 @@
 import { ToolbarModuleExtension } from '@blocksuite/affine-shared/services';
-import { BlockFlavourIdentifier } from '@blocksuite/block-std';
+import { BlockFlavourIdentifier } from '@blocksuite/std';
 
 import { builtinInlineReferenceToolbarConfig } from './reference-node/configs/toolbar';
 

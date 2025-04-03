@@ -1,7 +1,7 @@
 import { ConfirmIcon } from '@blocksuite/affine-components/icons';
 import { toast } from '@blocksuite/affine-components/toast';
 import type { AttachmentBlockModel } from '@blocksuite/affine-model';
-import type { EditorHost } from '@blocksuite/block-std';
+import type { EditorHost } from '@blocksuite/std';
 import { html } from 'lit';
 import { createRef, ref } from 'lit/directives/ref.js';
 

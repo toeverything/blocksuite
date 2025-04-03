@@ -1,5 +1,5 @@
 import type { NoteBlockModel } from '@blocksuite/affine-model';
-import { BlockComponent } from '@blocksuite/block-std';
+import { BlockComponent } from '@blocksuite/std';
 import { css, html } from 'lit';
 
 export class NoteBlockComponent extends BlockComponent<NoteBlockModel> {

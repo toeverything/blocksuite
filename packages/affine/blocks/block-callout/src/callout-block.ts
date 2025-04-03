@@ -8,7 +8,7 @@ import {
   ThemeProvider,
 } from '@blocksuite/affine-shared/services';
 import { unsafeCSSVarV2 } from '@blocksuite/affine-shared/theme';
-import type { BlockComponent } from '@blocksuite/block-std';
+import type { BlockComponent } from '@blocksuite/std';
 import { flip, offset } from '@floating-ui/dom';
 import { css, html } from 'lit';
 import { query } from 'lit/decorators.js';

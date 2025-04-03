@@ -2,7 +2,7 @@ import {
   type TableBlockModel,
   TableModelFlavour,
 } from '@blocksuite/affine-model';
-import type { Command } from '@blocksuite/block-std';
+import type { Command } from '@blocksuite/std';
 import { type BlockModel } from '@blocksuite/store';
 
 import { TableDataManager } from './table-data-manager';

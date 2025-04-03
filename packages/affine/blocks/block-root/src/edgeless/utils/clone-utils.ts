@@ -10,7 +10,7 @@ import {
   GroupElementModel,
   MindmapElementModel,
 } from '@blocksuite/affine-model';
-import type { BlockStdScope } from '@blocksuite/block-std';
+import type { BlockStdScope } from '@blocksuite/std';
 import {
   getTopElements,
   GfxBlockElementModel,
@@ -18,7 +18,7 @@ import {
   type GfxPrimitiveElementModel,
   isGfxGroupCompatibleModel,
   type SerializedElement,
-} from '@blocksuite/block-std/gfx';
+} from '@blocksuite/std/gfx';
 import type { BlockSnapshot, Transformer } from '@blocksuite/store';
 
 /**

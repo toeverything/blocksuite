@@ -9,7 +9,7 @@ import {
   isInsideEdgelessEditor,
   matchModels,
 } from '@blocksuite/affine-shared/utils';
-import { GfxControllerIdentifier } from '@blocksuite/block-std/gfx';
+import { GfxControllerIdentifier } from '@blocksuite/std/gfx';
 
 import { addAttachments, addSiblingAttachmentBlocks } from './utils.js';
 

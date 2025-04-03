@@ -1,4 +1,4 @@
-import type { UIEventHandler } from '@blocksuite/block-std';
+import type { UIEventHandler } from '@blocksuite/std';
 
 import type { AffineDragHandleWidget } from '../drag-handle.js';
 

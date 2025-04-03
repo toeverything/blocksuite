@@ -10,9 +10,9 @@ import {
   type ShapeStyle,
 } from '@blocksuite/affine-model';
 import { ThemeProvider } from '@blocksuite/affine-shared/services';
-import type { GfxController } from '@blocksuite/block-std/gfx';
 import type { XYWH } from '@blocksuite/global/gfx';
 import { assertType } from '@blocksuite/global/utils';
+import type { GfxController } from '@blocksuite/std/gfx';
 import { effect } from '@preact/signals-core';
 
 import {

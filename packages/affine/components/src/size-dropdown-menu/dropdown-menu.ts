@@ -1,7 +1,7 @@
 import { stopPropagation } from '@blocksuite/affine-shared/utils';
-import { PropTypes, requiredProperties } from '@blocksuite/block-std';
 import { SignalWatcher, WithDisposable } from '@blocksuite/global/lit';
 import { DoneIcon } from '@blocksuite/icons/lit';
+import { PropTypes, requiredProperties } from '@blocksuite/std';
 import type { ReadonlySignal, Signal } from '@preact/signals-core';
 import { css, html, LitElement, type TemplateResult } from 'lit';
 import { property, query } from 'lit/decorators.js';

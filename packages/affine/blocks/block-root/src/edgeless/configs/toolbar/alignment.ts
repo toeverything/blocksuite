@@ -11,7 +11,6 @@ import type {
   MenuItem,
 } from '@blocksuite/affine-widget-edgeless-toolbar';
 import { renderMenuItems } from '@blocksuite/affine-widget-edgeless-toolbar';
-import type { GfxModel } from '@blocksuite/block-std/gfx';
 import { Bound } from '@blocksuite/global/gfx';
 import {
   AlignBottomIcon,
@@ -25,6 +24,7 @@ import {
   DistributeVerticalIcon,
   ResizeTidyUpIcon,
 } from '@blocksuite/icons/lit';
+import type { GfxModel } from '@blocksuite/std/gfx';
 import { html } from 'lit';
 import { styleMap } from 'lit/directives/style-map.js';
 

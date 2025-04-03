@@ -38,7 +38,6 @@ import type {
 } from '@blocksuite/affine-shared/services';
 import { ActionPlacement } from '@blocksuite/affine-shared/services';
 import type { AffineTextAttributes } from '@blocksuite/affine-shared/types';
-import { type BlockComponent, BlockSelection } from '@blocksuite/block-std';
 import { tableViewMeta } from '@blocksuite/data-view/view-presets';
 import {
   ArrowDownSmallIcon,
@@ -48,6 +47,7 @@ import {
   DuplicateIcon,
   LinkedPageIcon,
 } from '@blocksuite/icons/lit';
+import { type BlockComponent, BlockSelection } from '@blocksuite/std';
 import { toDraftModel } from '@blocksuite/store';
 import { html } from 'lit';
 import { repeat } from 'lit/directives/repeat.js';

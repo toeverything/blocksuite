@@ -16,11 +16,11 @@ import {
   BlockComponent,
   type GfxBlockComponent,
   SurfaceSelection,
-} from '@blocksuite/block-std';
+} from '@blocksuite/std';
 import {
   GfxControllerIdentifier,
   type GfxViewportElement,
-} from '@blocksuite/block-std/gfx';
+} from '@blocksuite/std/gfx';
 import { css, html } from 'lit';
 import { query, state } from 'lit/decorators.js';
 import { type StyleInfo, styleMap } from 'lit/directives/style-map.js';

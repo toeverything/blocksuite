@@ -1,6 +1,6 @@
 import { stopPropagation } from '@blocksuite/affine-shared/utils';
-import { type BlockComponent, ShadowlessElement } from '@blocksuite/block-std';
 import { WithDisposable } from '@blocksuite/global/lit';
+import { type BlockComponent, ShadowlessElement } from '@blocksuite/std';
 import type { BlockModel } from '@blocksuite/store';
 import { html } from 'lit';
 import { property, query } from 'lit/decorators.js';

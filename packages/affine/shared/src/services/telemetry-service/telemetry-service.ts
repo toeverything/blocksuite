@@ -7,8 +7,10 @@ import type {
   AttachmentUploadedEvent,
   BlockCreationEvent,
   DocCreatedEvent,
+  EdgelessToolPickedEvent,
   ElementCreationEvent,
   ElementLockEvent,
+  ElementUpdatedEvent,
   LinkedDocCreatedEvent,
   MindMapCollapseEvent,
   TelemetryEvent,
@@ -22,10 +24,12 @@ export type TelemetryEventMap = OutDatabaseAllEvents &
     LinkedDocCreated: LinkedDocCreatedEvent;
     SplitNote: TelemetryEvent;
     CanvasElementAdded: ElementCreationEvent;
+    CanvasElementUpdated: ElementUpdatedEvent;
     EdgelessElementLocked: ElementLockEvent;
     ExpandedAndCollapsed: MindMapCollapseEvent;
     AttachmentUploadedEvent: AttachmentUploadedEvent;
     BlockCreated: BlockCreationEvent;
+    EdgelessToolPicked: EdgelessToolPickedEvent;
   };
 
 export interface TelemetryService {

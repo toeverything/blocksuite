@@ -1,4 +1,4 @@
-import type { GfxModel } from '@blocksuite/block-std/gfx';
+import type { GfxModel } from '@blocksuite/std/gfx';
 
 import type {
   BrushElementModel,

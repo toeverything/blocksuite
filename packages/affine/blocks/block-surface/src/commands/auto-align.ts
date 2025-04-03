@@ -5,17 +5,14 @@ import {
   MindmapElementModel,
   NoteBlockModel,
 } from '@blocksuite/affine-model';
-import {
-  GfxControllerIdentifier,
-  type GfxModel,
-} from '@blocksuite/block-std/gfx';
 import { Bound } from '@blocksuite/global/gfx';
+import { GfxControllerIdentifier, type GfxModel } from '@blocksuite/std/gfx';
 import chunk from 'lodash-es/chunk';
 
 const ALIGN_HEIGHT = 200;
 const ALIGN_PADDING = 20;
 
-import type { Command } from '@blocksuite/block-std';
+import type { Command } from '@blocksuite/std';
 import type { BlockModel, BlockProps } from '@blocksuite/store';
 
 import { EdgelessCRUDIdentifier } from '../extensions/crud-extension.js';

@@ -15,13 +15,13 @@ import {
   ThemeProvider,
 } from '@blocksuite/affine-shared/services';
 import { stopPropagation } from '@blocksuite/affine-shared/utils';
-import { WidgetComponent, WidgetViewExtension } from '@blocksuite/block-std';
-import { GfxControllerIdentifier } from '@blocksuite/block-std/gfx';
 import {
   ArrowLeftSmallIcon,
   ArrowRightSmallIcon,
   MoreHorizontalIcon,
 } from '@blocksuite/icons/lit';
+import { WidgetComponent, WidgetViewExtension } from '@blocksuite/std';
+import { GfxControllerIdentifier } from '@blocksuite/std/gfx';
 import { autoPlacement, offset } from '@floating-ui/dom';
 import { ContextProvider } from '@lit/context';
 import { computed } from '@preact/signals-core';
@@ -77,12 +77,9 @@ export class EdgelessToolbarWidget extends WidgetComponent<RootBlockModel> {
       display: flex;
       justify-content: center;
     }
-    .edgeless-toolbar-wrapper[data-app-theme='light'] {
-      ${unsafeCSS(lightToolbarStyles.join('\n'))}
-    }
-    .edgeless-toolbar-wrapper[data-app-theme='dark'] {
-      ${unsafeCSS(darkToolbarStyles.join('\n'))}
-    }
+    ${unsafeCSS(lightToolbarStyles('.edgeless-toolbar-wrapper'))}
+    ${unsafeCSS(darkToolbarStyles('.edgeless-toolbar-wrapper'))}
+
     .edgeless-toolbar-toggle-control {
       pointer-events: auto;
       padding-bottom: 16px;
@@ -145,7 +142,7 @@ export class EdgelessToolbarWidget extends WidgetComponent<RootBlockModel> {
       height: 100%;
       background-color: var(--affine-border-color);
     }
-    .brush-and-eraser {
+    .pen-and-eraser {
       display: flex;
       height: 100%;
       gap: 4px;

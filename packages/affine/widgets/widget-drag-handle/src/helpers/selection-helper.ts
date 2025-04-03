@@ -4,7 +4,7 @@ import {
   BlockSelection,
   SurfaceSelection,
   TextSelection,
-} from '@blocksuite/block-std';
+} from '@blocksuite/std';
 
 import type { AffineDragHandleWidget } from '../drag-handle.js';
 

@@ -1,5 +1,4 @@
 import type { AliasInfo, ReferenceParams } from '@blocksuite/affine-model';
-import { LifeCycleWatcher, StdIdentifier } from '@blocksuite/block-std';
 import { type Container, createIdentifier } from '@blocksuite/global/di';
 import {
   type DisposableMember,
@@ -14,6 +13,7 @@ import {
   LinkedPageIcon,
   PageIcon,
 } from '@blocksuite/icons/lit';
+import { LifeCycleWatcher, StdIdentifier } from '@blocksuite/std';
 import type { Store } from '@blocksuite/store';
 import { computed, type Signal, signal } from '@preact/signals-core';
 import type { TemplateResult } from 'lit';
@@ -100,7 +100,9 @@ export class DocDisplayMetaService
       return signal(DocDisplayMetaService.icons.deleted);
     }
 
-    let icon$ = this.iconMap.get(doc);
+    const store = doc.getStore();
+
+    let icon$ = this.iconMap.get(store);
 
     if (!icon$) {
       icon$ = signal(
@@ -128,11 +130,11 @@ export class DocDisplayMetaService
               this.disposables.splice(index, 1);
               disposable.unsubscribe();
             }
-            this.iconMap.delete(doc);
+            this.iconMap.delete(store);
           }
         });
       this.disposables.push(docRemovedSubscription);
-      this.iconMap.set(doc, icon$);
+      this.iconMap.set(store, icon$);
     }
 
     return computed(() => {
@@ -165,7 +167,9 @@ export class DocDisplayMetaService
       return signal(title || 'Deleted doc');
     }
 
-    let title$ = this.titleMap.get(doc);
+    const store = doc.getStore();
+
+    let title$ = this.titleMap.get(store);
     if (!title$) {
       title$ = signal(doc.meta?.title || 'Untitled');
 
@@ -185,11 +189,11 @@ export class DocDisplayMetaService
               this.disposables.splice(index, 1);
               disposable.unsubscribe();
             }
-            this.iconMap.delete(doc);
+            this.iconMap.delete(store);
           }
         });
       this.disposables.push(docRemovedSubscription);
-      this.titleMap.set(doc, title$);
+      this.titleMap.set(store, title$);
     }
 
     return computed(() => {

@@ -13,8 +13,8 @@ import {
   calculateCollapsedSiblings,
   matchModels,
 } from '@blocksuite/affine-shared/utils';
-import { KeymapExtension, TextSelection } from '@blocksuite/block-std';
 import { IS_MAC } from '@blocksuite/global/env';
+import { KeymapExtension, TextSelection } from '@blocksuite/std';
 
 import { addParagraphCommand } from './commands/add-paragraph.js';
 import {

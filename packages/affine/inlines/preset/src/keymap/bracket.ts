@@ -7,8 +7,8 @@ import {
   type BlockStdScope,
   TextSelection,
   type UIEventHandler,
-} from '@blocksuite/block-std';
-import type { InlineEditor } from '@blocksuite/block-std/inline';
+} from '@blocksuite/std';
+import type { InlineEditor } from '@blocksuite/std/inline';
 
 export const bracketKeymap = (
   std: BlockStdScope

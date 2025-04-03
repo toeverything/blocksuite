@@ -3,8 +3,8 @@ import {
   type ToolbarModuleConfig,
   ToolbarModuleExtension,
 } from '@blocksuite/affine-shared/services';
-import { BlockFlavourIdentifier } from '@blocksuite/block-std';
 import { CaptionIcon, DownloadIcon } from '@blocksuite/icons/lit';
+import { BlockFlavourIdentifier } from '@blocksuite/std';
 import type { ExtensionType } from '@blocksuite/store';
 
 import { ImageEdgelessBlockComponent } from '../image-edgeless-block';

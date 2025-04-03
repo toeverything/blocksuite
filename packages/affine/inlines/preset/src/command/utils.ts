@@ -12,13 +12,13 @@ import {
   type BlockComponent,
   type Chain,
   type InitCommandCtx,
-} from '@blocksuite/block-std';
+} from '@blocksuite/std';
 import {
   INLINE_ROOT_ATTR,
   type InlineEditor,
   type InlineRange,
   type InlineRootElement,
-} from '@blocksuite/block-std/inline';
+} from '@blocksuite/std/inline';
 
 import {
   FORMAT_BLOCK_SUPPORT_FLAVOURS,

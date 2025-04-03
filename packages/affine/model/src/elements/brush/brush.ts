@@ -1,14 +1,3 @@
-import type {
-  BaseElementProps,
-  PointTestOptions,
-} from '@blocksuite/block-std/gfx';
-import {
-  convert,
-  derive,
-  field,
-  GfxPrimitiveElementModel,
-  watch,
-} from '@blocksuite/block-std/gfx';
 import {
   Bound,
   getBoundFromPoints,
@@ -27,6 +16,14 @@ import {
   transformPointsToNewBound,
   Vec,
 } from '@blocksuite/global/gfx';
+import type { BaseElementProps, PointTestOptions } from '@blocksuite/std/gfx';
+import {
+  convert,
+  derive,
+  field,
+  GfxPrimitiveElementModel,
+  watch,
+} from '@blocksuite/std/gfx';
 
 import { type Color, DefaultTheme } from '../../themes/index';
 

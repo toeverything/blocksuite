@@ -1,6 +1,6 @@
 import type { MenuOptions } from '@blocksuite/affine-components/context-menu';
 import { type DatabaseBlockModel } from '@blocksuite/affine-model';
-import { ConfigExtensionFactory } from '@blocksuite/block-std';
+import { ConfigExtensionFactory } from '@blocksuite/std';
 
 export interface DatabaseOptionsConfig {
   configure: (model: DatabaseBlockModel, options: MenuOptions) => MenuOptions;

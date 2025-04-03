@@ -1,6 +1,6 @@
 import { type VirtualKeyboardProvider } from '@blocksuite/affine-shared/services';
-import type { BlockStdScope, ShadowlessElement } from '@blocksuite/block-std';
 import { DisposableGroup } from '@blocksuite/global/disposable';
+import type { BlockStdScope, ShadowlessElement } from '@blocksuite/std';
 import { effect, type Signal } from '@preact/signals-core';
 import type { ReactiveController, ReactiveControllerHost } from 'lit';
 

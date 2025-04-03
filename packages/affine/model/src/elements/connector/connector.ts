@@ -1,14 +1,3 @@
-import type {
-  BaseElementProps,
-  PointTestOptions,
-  SerializedElement,
-} from '@blocksuite/block-std/gfx';
-import {
-  derive,
-  field,
-  GfxPrimitiveElementModel,
-  local,
-} from '@blocksuite/block-std/gfx';
 import type { IVec, SerializedXYWH, XYWH } from '@blocksuite/global/gfx';
 import {
   Bound,
@@ -23,6 +12,17 @@ import {
   polyLineNearestPoint,
   Vec,
 } from '@blocksuite/global/gfx';
+import type {
+  BaseElementProps,
+  PointTestOptions,
+  SerializedElement,
+} from '@blocksuite/std/gfx';
+import {
+  derive,
+  field,
+  GfxPrimitiveElementModel,
+  local,
+} from '@blocksuite/std/gfx';
 import * as Y from 'yjs';
 
 import {

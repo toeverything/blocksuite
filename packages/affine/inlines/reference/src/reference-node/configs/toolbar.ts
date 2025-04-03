@@ -9,8 +9,8 @@ import {
   cloneReferenceInfoWithoutAliases,
   isInsideBlockByFlavour,
 } from '@blocksuite/affine-shared/utils';
-import { BlockSelection } from '@blocksuite/block-std';
 import { DeleteIcon } from '@blocksuite/icons/lit';
+import { BlockSelection } from '@blocksuite/std';
 import { signal } from '@preact/signals-core';
 import { html } from 'lit-html';
 import { keyed } from 'lit-html/directives/keyed.js';

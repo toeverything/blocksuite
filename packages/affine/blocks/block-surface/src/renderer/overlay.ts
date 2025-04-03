@@ -1,9 +1,9 @@
+import { type Container, createIdentifier } from '@blocksuite/global/di';
+import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 import {
   type GfxController,
   GfxControllerIdentifier,
-} from '@blocksuite/block-std/gfx';
-import { type Container, createIdentifier } from '@blocksuite/global/di';
-import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
+} from '@blocksuite/std/gfx';
 import { Extension } from '@blocksuite/store';
 
 import type { RoughCanvas } from '../utils/rough/canvas.js';

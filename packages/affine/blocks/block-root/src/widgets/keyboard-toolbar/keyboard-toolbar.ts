@@ -1,12 +1,12 @@
 import { getSelectedModelsCommand } from '@blocksuite/affine-shared/commands';
 import { VirtualKeyboardProvider } from '@blocksuite/affine-shared/services';
+import { SignalWatcher, WithDisposable } from '@blocksuite/global/lit';
+import { ArrowLeftBigIcon, KeyboardIcon } from '@blocksuite/icons/lit';
 import {
   PropTypes,
   requiredProperties,
   ShadowlessElement,
-} from '@blocksuite/block-std';
-import { SignalWatcher, WithDisposable } from '@blocksuite/global/lit';
-import { ArrowLeftBigIcon, KeyboardIcon } from '@blocksuite/icons/lit';
+} from '@blocksuite/std';
 import { effect, type Signal, signal } from '@preact/signals-core';
 import { html } from 'lit';
 import { property } from 'lit/decorators.js';

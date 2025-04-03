@@ -1,16 +1,16 @@
 import { EdgelessLegacySlotIdentifier } from '@blocksuite/affine-block-surface';
+import { Bound } from '@blocksuite/global/gfx';
 import {
   blockComponentSymbol,
   type BlockService,
   type GfxBlockComponent,
   GfxElementSymbol,
   toGfxBlockComponent,
-} from '@blocksuite/block-std';
+} from '@blocksuite/std';
 import type {
   GfxBlockElementModel,
   GfxCompatibleProps,
-} from '@blocksuite/block-std/gfx';
-import { Bound } from '@blocksuite/global/gfx';
+} from '@blocksuite/std/gfx';
 import type { StyleInfo } from 'lit/directives/style-map.js';
 
 import type { EmbedBlockComponent } from './embed-block-element.js';
@@ -23,12 +23,6 @@ export function toEdgelessEmbedBlock<
 >(block: B) {
   return class extends toGfxBlockComponent(block) {
     override selectedStyle$ = null;
-
-    _isDragging = false;
-
-    _isResizing = false;
-
-    _showOverlay = false;
 
     override [blockComponentSymbol] = true;
 
@@ -55,16 +49,13 @@ export function toEdgelessEmbedBlock<
 
       this._disposables.add(
         this.edgelessSlots.elementResizeStart.subscribe(() => {
-          this._isResizing = true;
-          this._showOverlay = true;
+          this.isResizing$.value = true;
         })
       );
 
       this._disposables.add(
         this.edgelessSlots.elementResizeEnd.subscribe(() => {
-          this._isResizing = false;
-          this._showOverlay =
-            this._isResizing || this._isDragging || !this.selected$.peek();
+          this.isResizing$.value = false;
         })
       );
     }

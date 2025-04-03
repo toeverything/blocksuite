@@ -14,9 +14,9 @@
     { "path": "../../rich-text" },
     { "path": "../../shared" },
     { "path": "../../widgets/widget-slash-menu" },
-    { "path": "../../../framework/block-std" },
     { "path": "../../data-view" },
     { "path": "../../../framework/global" },
+    { "path": "../../../framework/std" },
     { "path": "../../../framework/store" }
   ]
 }

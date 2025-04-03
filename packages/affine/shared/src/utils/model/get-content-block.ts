@@ -1,5 +1,5 @@
 import { FrameBlockModel } from '@blocksuite/affine-model';
-import type { EditorHost } from '@blocksuite/block-std';
+import type { EditorHost } from '@blocksuite/std';
 import type { BlockModel } from '@blocksuite/store';
 
 import { DocModeProvider } from '../../services/doc-mode-service.js';

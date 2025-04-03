@@ -1,7 +1,7 @@
 import type { ImageBlockModel } from '@blocksuite/affine-model';
 import { humanFileSize } from '@blocksuite/affine-shared/utils';
-import { modelContext, ShadowlessElement } from '@blocksuite/block-std';
 import { WithDisposable } from '@blocksuite/global/lit';
+import { modelContext, ShadowlessElement } from '@blocksuite/std';
 import { consume } from '@lit/context';
 import { css, html } from 'lit';
 import { property } from 'lit/decorators.js';

@@ -4,7 +4,10 @@ import type {
   TextRect,
   WorkerToHostMessage,
 } from '@blocksuite/affine-gfx-turbo-renderer';
-import { BlockLayoutPainterExtension } from '@blocksuite/affine-gfx-turbo-renderer/painter';
+import {
+  BlockLayoutPainterExtension,
+  getBaseline,
+} from '@blocksuite/affine-gfx-turbo-renderer/painter';
 
 interface SentenceLayout {
   text: string;
@@ -17,24 +20,7 @@ export interface ParagraphLayout extends BlockLayout {
   sentences: SentenceLayout[];
 }
 
-const meta = {
-  emSize: 2048,
-  hHeadAscent: 1984,
-  hHeadDescent: -494,
-};
-
 const debugSentenceBorder = false;
-
-function getBaseline(fontSize: number) {
-  const lineHeight = 1.2 * fontSize;
-
-  const A = fontSize * (meta.hHeadAscent / meta.emSize); // ascent
-  const D = fontSize * (meta.hHeadDescent / meta.emSize); // descent
-  const AD = A + Math.abs(D); // ascent + descent
-  const L = lineHeight - AD; // leading
-  const y = A + L / 2;
-  return y;
-}
 
 function isParagraphLayout(layout: BlockLayout): layout is ParagraphLayout {
   return layout.type === 'affine:paragraph';

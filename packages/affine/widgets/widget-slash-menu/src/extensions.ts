@@ -1,9 +1,9 @@
+import { type Container, createIdentifier } from '@blocksuite/global/di';
 import {
   type BlockStdScope,
   StdIdentifier,
   WidgetViewExtension,
-} from '@blocksuite/block-std';
-import { type Container, createIdentifier } from '@blocksuite/global/di';
+} from '@blocksuite/std';
 import { Extension, type ExtensionType } from '@blocksuite/store';
 import { literal, unsafeStatic } from 'lit/static-html.js';
 

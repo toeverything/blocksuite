@@ -10,10 +10,10 @@ import {
 } from '@blocksuite/affine-shared/consts';
 import { DocModeProvider } from '@blocksuite/affine-shared/services';
 import { findAncestorModel } from '@blocksuite/affine-shared/utils';
-import type { BlockService } from '@blocksuite/block-std';
-import type { GfxCompatibleProps } from '@blocksuite/block-std/gfx';
+import type { BlockService } from '@blocksuite/std';
+import type { GfxCompatibleProps } from '@blocksuite/std/gfx';
 import type { BlockModel } from '@blocksuite/store';
-import { computed, type ReadonlySignal } from '@preact/signals-core';
+import { computed, type ReadonlySignal, signal } from '@preact/signals-core';
 import type { TemplateResult } from 'lit';
 import { html } from 'lit';
 import { query } from 'lit/decorators.js';
@@ -29,6 +29,17 @@ export class EmbedBlockComponent<
     () => ({
       'selected-style': this.selected$.value,
     })
+  );
+
+  readonly isDraggingOnHost$ = signal(false);
+  readonly isResizing$ = signal(false);
+  // show overlay to prevent the iframe from capturing pointer events
+  // when the block is dragging, resizing, or not selected
+  readonly showOverlay$ = computed(
+    () =>
+      this.isDraggingOnHost$.value ||
+      this.isResizing$.value ||
+      !this.selected$.value
   );
 
   private _fetchAbortController = new AbortController();
@@ -114,6 +125,24 @@ export class EmbedBlockComponent<
       this._fetchAbortController = new AbortController();
 
     this.contentEditable = 'false';
+
+    // subscribe the editor host global dragging event
+    // to show the overlay for the dragging area or other pointer events
+    this.handleEvent(
+      'dragStart',
+      () => {
+        this.isDraggingOnHost$.value = true;
+      },
+      { global: true }
+    );
+
+    this.handleEvent(
+      'dragEnd',
+      () => {
+        this.isDraggingOnHost$.value = false;
+      },
+      { global: true }
+    );
   }
 
   override disconnectedCallback(): void {

@@ -1,7 +1,7 @@
 import { NoteDisplayMode } from '@blocksuite/affine-model';
-import { ShadowlessElement } from '@blocksuite/block-std';
 import { SignalWatcher, WithDisposable } from '@blocksuite/global/lit';
 import { CloseIcon, SortIcon } from '@blocksuite/icons/lit';
+import { ShadowlessElement } from '@blocksuite/std';
 import { consume } from '@lit/context';
 import { effect, signal } from '@preact/signals-core';
 import { html, nothing } from 'lit';

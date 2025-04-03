@@ -16,8 +16,6 @@ import '@shoelace-style/shoelace/dist/themes/light.css';
 import '@shoelace-style/shoelace/dist/themes/dark.css';
 import './left-side-panel.js';
 
-import { ShadowlessElement } from '@blocksuite/affine/block-std';
-import { GfxControllerIdentifier } from '@blocksuite/affine/block-std/gfx';
 import { defaultImageProxyMiddleware } from '@blocksuite/affine/blocks/image';
 import {
   createAssetsArchive,
@@ -50,6 +48,8 @@ import {
   StyleVariables,
 } from '@blocksuite/affine/shared/theme';
 import { openFileOrFiles, printToPdf } from '@blocksuite/affine/shared/utils';
+import { ShadowlessElement } from '@blocksuite/affine/std';
+import { GfxControllerIdentifier } from '@blocksuite/affine/std/gfx';
 import {
   type DeltaInsert,
   Text,

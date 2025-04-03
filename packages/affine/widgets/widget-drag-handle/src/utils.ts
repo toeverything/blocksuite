@@ -18,13 +18,13 @@ import {
   getClosestBlockComponentByPoint,
   matchModels,
 } from '@blocksuite/affine-shared/utils';
-import type { BlockComponent, EditorHost } from '@blocksuite/block-std';
 import {
   Bound,
   Point,
   Rect,
   type SerializedXYWH,
 } from '@blocksuite/global/gfx';
+import type { BlockComponent, EditorHost } from '@blocksuite/std';
 import type {
   BaseSelection,
   BlockModel,

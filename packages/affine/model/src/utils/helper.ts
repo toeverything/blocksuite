@@ -1,6 +1,6 @@
-import type { GfxCompatibleProps } from '@blocksuite/block-std/gfx';
-import { GfxCompatible } from '@blocksuite/block-std/gfx';
 import type { Constructor } from '@blocksuite/global/utils';
+import type { GfxCompatibleProps } from '@blocksuite/std/gfx';
+import { GfxCompatible } from '@blocksuite/std/gfx';
 import {
   type BaseBlockTransformer,
   type BlockModel,

@@ -10,7 +10,6 @@ import type { TableColumn, TableRow } from '@blocksuite/affine-model';
 import { RichText } from '@blocksuite/affine-rich-text';
 import { cssVarV2 } from '@blocksuite/affine-shared/theme';
 import { getViewportElement } from '@blocksuite/affine-shared/utils';
-import { ShadowlessElement } from '@blocksuite/block-std';
 import { IS_MAC } from '@blocksuite/global/env';
 import { SignalWatcher, WithDisposable } from '@blocksuite/global/lit';
 import {
@@ -29,6 +28,7 @@ import {
   InsertRightIcon,
   PasteIcon,
 } from '@blocksuite/icons/lit';
+import { ShadowlessElement } from '@blocksuite/std';
 import type { Text } from '@blocksuite/store';
 import { computed, effect, signal } from '@preact/signals-core';
 import { html, nothing } from 'lit';

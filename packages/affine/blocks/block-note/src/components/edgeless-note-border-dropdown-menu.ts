@@ -1,7 +1,7 @@
 import { EditorChevronDown } from '@blocksuite/affine-components/toolbar';
 import { LineWidth, type StrokeStyle } from '@blocksuite/affine-model';
-import { ShadowlessElement } from '@blocksuite/block-std';
 import { LineStyleIcon } from '@blocksuite/icons/lit';
+import { ShadowlessElement } from '@blocksuite/std';
 import { html } from 'lit';
 import { property } from 'lit/decorators.js';
 

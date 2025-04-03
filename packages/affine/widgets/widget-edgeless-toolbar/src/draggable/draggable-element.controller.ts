@@ -4,8 +4,8 @@ import {
   ThemeProvider,
   ViewportElementProvider,
 } from '@blocksuite/affine-shared/services';
-import { GfxControllerIdentifier } from '@blocksuite/block-std/gfx';
 import { Bound } from '@blocksuite/global/gfx';
+import { GfxControllerIdentifier } from '@blocksuite/std/gfx';
 import {
   type ReactiveController,
   type ReactiveControllerHost,
@@ -63,7 +63,6 @@ export class EdgelessDraggableElementController<T>
     public host: EdgelessDraggableElementHost & ReactiveControllerHost,
     public options: EdgelessDraggableElementOptions<T>
   ) {
-    this.host = host;
     host.addController(this);
   }
 

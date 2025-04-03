@@ -340,3 +340,29 @@ export const calcCustomButtonStyle = (
 
   return { '--b': b, '--c': c };
 };
+
+export const adjustColorAlpha = (color: Color, a: number): Color => {
+  let newColor;
+  if (typeof color === 'object') {
+    if ('normal' in color) {
+      const rgba = parseStringToRgba(color.normal);
+      rgba.a = a;
+      newColor = { normal: rgbaToHex8(rgba) };
+    } else {
+      const newDarkRgba = parseStringToRgba(color.dark);
+      newDarkRgba.a = a;
+      const newLightRgba = parseStringToRgba(color.light);
+      newLightRgba.a = a;
+      newColor = {
+        dark: rgbaToHex8(newDarkRgba),
+        light: rgbaToHex8(newLightRgba),
+      };
+    }
+  } else {
+    const rgba = parseStringToRgba(color);
+    rgba.a = a;
+    newColor = rgbaToHex8(rgba);
+  }
+
+  return newColor;
+};

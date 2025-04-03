@@ -2,6 +2,7 @@ import {
   BrushElementModel,
   ConnectorElementModel,
   GroupElementModel,
+  HighlighterElementModel,
   MindmapElementModel,
   ShapeElementModel,
   TextElementModel,
@@ -16,12 +17,14 @@ export const elementsCtorMap = {
   brush: BrushElementModel,
   text: TextElementModel,
   mindmap: MindmapElementModel,
+  highlighter: HighlighterElementModel,
 };
 
 export {
   BrushElementModel,
   ConnectorElementModel,
   GroupElementModel,
+  HighlighterElementModel,
   MindmapElementModel,
   ShapeElementModel,
   SurfaceElementModel,
@@ -35,6 +38,7 @@ export enum CanvasElementType {
   MINDMAP = 'mindmap',
   SHAPE = 'shape',
   TEXT = 'text',
+  HIGHLIGHTER = 'highlighter',
 }
 
 export type ElementModelMap = {
@@ -44,6 +48,7 @@ export type ElementModelMap = {
   ['text']: TextElementModel;
   ['group']: GroupElementModel;
   ['mindmap']: MindmapElementModel;
+  ['highlighter']: HighlighterElementModel;
 };
 
 export function isCanvasElementType(type: string): type is CanvasElementType {

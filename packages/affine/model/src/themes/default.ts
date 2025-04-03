@@ -124,6 +124,8 @@ export const DefaultTheme: Theme = {
   shapeFillColor: Medium.Yellow,
   connectorColor: Medium.Grey,
   noteBackgrounColor: NoteBackgroundColorMap.White,
+  // 50% transparent `Default.black`
+  hightlighterColor: { dark: '#ffffff80', light: '#00000080' },
   Palettes,
   ShapeTextColorPalettes,
   NoteBackgroundColorMap,

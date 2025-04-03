@@ -3,8 +3,8 @@ import {
   getClosestBlockComponentByElement,
   getModelByElement,
 } from '@blocksuite/affine-shared/utils';
-import type { BlockComponent, PointerEventState } from '@blocksuite/block-std';
-import { GfxControllerIdentifier } from '@blocksuite/block-std/gfx';
+import type { BlockComponent, PointerEventState } from '@blocksuite/std';
+import { GfxControllerIdentifier } from '@blocksuite/std/gfx';
 
 export class ImageResizeManager {
   private _activeComponent: BlockComponent | null = null;

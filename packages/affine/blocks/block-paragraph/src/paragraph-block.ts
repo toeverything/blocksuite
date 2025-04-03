@@ -13,12 +13,12 @@ import {
   getNearestHeadingBefore,
   getViewportElement,
 } from '@blocksuite/affine-shared/utils';
-import type { BlockComponent } from '@blocksuite/block-std';
-import { TextSelection } from '@blocksuite/block-std';
+import type { BlockComponent } from '@blocksuite/std';
+import { TextSelection } from '@blocksuite/std';
 import {
   getInlineRangeProvider,
   type InlineRangeProvider,
-} from '@blocksuite/block-std/inline';
+} from '@blocksuite/std/inline';
 import { computed, effect, signal } from '@preact/signals-core';
 import { html, nothing, type TemplateResult } from 'lit';
 import { query, state } from 'lit/decorators.js';

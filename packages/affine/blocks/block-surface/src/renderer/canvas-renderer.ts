@@ -1,14 +1,14 @@
 import { type Color, ColorScheme } from '@blocksuite/affine-model';
 import { requestConnectedFrame } from '@blocksuite/affine-shared/utils';
+import { DisposableGroup } from '@blocksuite/global/disposable';
+import type { IBound } from '@blocksuite/global/gfx';
+import { getBoundWithRotation, intersects } from '@blocksuite/global/gfx';
 import type {
   GridManager,
   LayerManager,
   SurfaceBlockModel,
   Viewport,
-} from '@blocksuite/block-std/gfx';
-import { DisposableGroup } from '@blocksuite/global/disposable';
-import type { IBound } from '@blocksuite/global/gfx';
-import { getBoundWithRotation, intersects } from '@blocksuite/global/gfx';
+} from '@blocksuite/std/gfx';
 import last from 'lodash-es/last';
 import { Subject } from 'rxjs';
 

@@ -4,7 +4,7 @@ import {
   getNextContinuousNumberedLists,
   matchModels,
 } from '@blocksuite/affine-shared/utils';
-import type { Command, EditorHost } from '@blocksuite/block-std';
+import type { Command, EditorHost } from '@blocksuite/std';
 
 import { canDedentListCommand, dedentListCommand } from './dedent-list.js';
 import { correctNumberedListsOrderToPrev } from './utils.js';

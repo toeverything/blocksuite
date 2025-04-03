@@ -1,10 +1,10 @@
 import { ThemeProvider } from '@blocksuite/affine-shared/services';
+import { WithDisposable } from '@blocksuite/global/lit';
 import {
   BlockSelection,
   isGfxBlockComponent,
   ShadowlessElement,
-} from '@blocksuite/block-std';
-import { WithDisposable } from '@blocksuite/global/lit';
+} from '@blocksuite/std';
 import { html, nothing } from 'lit';
 import { property, queryAsync } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';

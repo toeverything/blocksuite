@@ -1,5 +1,5 @@
 import { FrameBlockModel, type RootBlockModel } from '@blocksuite/affine-model';
-import { WidgetComponent, WidgetViewExtension } from '@blocksuite/block-std';
+import { WidgetComponent, WidgetViewExtension } from '@blocksuite/std';
 import { html } from 'lit';
 import { repeat } from 'lit/directives/repeat.js';
 import { literal, unsafeStatic } from 'lit/static-html.js';

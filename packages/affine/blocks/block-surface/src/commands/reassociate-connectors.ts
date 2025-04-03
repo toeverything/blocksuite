@@ -1,4 +1,4 @@
-import type { Command } from '@blocksuite/block-std';
+import type { Command } from '@blocksuite/std';
 
 import { SurfaceBlockService } from '../surface-service';
 

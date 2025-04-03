@@ -1,4 +1,4 @@
-import { BLOCK_ID_ATTR } from '@blocksuite/block-std';
+import { BLOCK_ID_ATTR } from '@blocksuite/std';
 import type { BlockModel } from '@blocksuite/store';
 import { css, html, LitElement } from 'lit';
 import { property } from 'lit/decorators.js';

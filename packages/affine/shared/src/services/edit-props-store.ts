@@ -1,8 +1,8 @@
 import { ColorSchema } from '@blocksuite/affine-model';
-import { type BlockStdScope, LifeCycleWatcher } from '@blocksuite/block-std';
 import { DisposableGroup } from '@blocksuite/global/disposable';
 import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 import type { DeepPartial } from '@blocksuite/global/utils';
+import { type BlockStdScope, LifeCycleWatcher } from '@blocksuite/std';
 import { computed, type Signal, signal } from '@preact/signals-core';
 import clonedeep from 'lodash-es/cloneDeep';
 import mergeWith from 'lodash-es/mergeWith';

@@ -203,6 +203,12 @@ export class EdgelessColorPanel extends LitElement {
       box-sizing: border-box;
       background: var(--affine-background-overlay-panel-color);
     }
+
+    :host(.one-way.small) {
+      display: flex;
+      gap: 4px;
+      background: unset;
+    }
   `;
 
   select(palette: Palette) {
@@ -221,14 +227,13 @@ export class EdgelessColorPanel extends LitElement {
   }
 
   override render() {
-    const resolvedValue = this.resolvedValue;
     return html`
       ${repeat(
         this.palettes,
         palette => palette.key,
         palette => {
           const resolvedColor = resolveColor(palette.value, this.theme);
-          const activated = isEqual(resolvedColor, resolvedValue);
+          const activated = isEqual(resolvedColor, this.resolvedValue);
           return html`<edgeless-color-button
             class=${classMap({ large: true })}
             .label=${palette.key}

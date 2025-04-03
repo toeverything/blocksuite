@@ -23,7 +23,7 @@ import {
   BlockSelection,
   type Command,
   TextSelection,
-} from '@blocksuite/block-std';
+} from '@blocksuite/std';
 import type { BlockModel } from '@blocksuite/store';
 
 type UpdateBlockConfig = {

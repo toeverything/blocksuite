@@ -1,6 +1,6 @@
 import { EditorChevronDown } from '@blocksuite/affine-components/toolbar';
 import { NoteDisplayMode } from '@blocksuite/affine-model';
-import { ShadowlessElement } from '@blocksuite/block-std';
+import { ShadowlessElement } from '@blocksuite/std';
 import { html } from 'lit';
 import { property } from 'lit/decorators.js';
 
