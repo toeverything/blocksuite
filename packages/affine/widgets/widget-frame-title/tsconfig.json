@@ -11,7 +11,7 @@
     { "path": "../../model" },
     { "path": "../../rich-text" },
     { "path": "../../shared" },
-    { "path": "../../../framework/block-std" },
-    { "path": "../../../framework/global" }
+    { "path": "../../../framework/global" },
+    { "path": "../../../framework/std" }
   ]
 }

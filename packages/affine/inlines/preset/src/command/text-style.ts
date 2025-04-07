@@ -3,7 +3,7 @@ import {
   getTextSelectionCommand,
 } from '@blocksuite/affine-shared/commands';
 import type { AffineTextAttributes } from '@blocksuite/affine-shared/types';
-import type { Command } from '@blocksuite/block-std';
+import type { Command } from '@blocksuite/std';
 
 import { formatBlockCommand } from './format-block.js';
 import { formatNativeCommand } from './format-native.js';

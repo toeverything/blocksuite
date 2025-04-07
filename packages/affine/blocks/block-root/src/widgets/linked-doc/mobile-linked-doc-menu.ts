@@ -7,9 +7,9 @@ import {
   createKeydownObserver,
   getViewportElement,
 } from '@blocksuite/affine-shared/utils';
-import { PropTypes, requiredProperties } from '@blocksuite/block-std';
 import { SignalWatcher, WithDisposable } from '@blocksuite/global/lit';
 import { MoreHorizontalIcon } from '@blocksuite/icons/lit';
+import { PropTypes, requiredProperties } from '@blocksuite/std';
 import { signal } from '@preact/signals-core';
 import { html, LitElement, nothing } from 'lit';
 import { property } from 'lit/decorators.js';
@@ -230,9 +230,6 @@ export class AffineMobileLinkedDocMenu extends SignalWatcher(
   }
 
   override firstUpdated() {
-    if (!this.keyboard.visible$.value) {
-      this.keyboard.show();
-    }
     this._scrollInputToTop();
   }
 

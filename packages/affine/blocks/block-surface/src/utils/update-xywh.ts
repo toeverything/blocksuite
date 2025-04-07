@@ -5,12 +5,12 @@ import {
   NOTE_MIN_WIDTH,
   NoteBlockModel,
 } from '@blocksuite/affine-model';
+import { Bound, clamp } from '@blocksuite/global/gfx';
 import {
   type GfxGroupCompatibleInterface,
   type GfxModel,
   isGfxGroupCompatibleModel,
-} from '@blocksuite/block-std/gfx';
-import { Bound, clamp } from '@blocksuite/global/gfx';
+} from '@blocksuite/std/gfx';
 import type { BlockModel, BlockProps } from '@blocksuite/store';
 
 function updatChildElementsXYWH(

@@ -1,30 +1,23 @@
+import { isFrameBlock } from '@blocksuite/affine-block-frame';
 import {
-  EdgelessFrameManager,
-  EdgelessFrameManagerIdentifier,
-  isFrameBlock,
-} from '@blocksuite/affine-block-frame';
-import { isNoteBlock } from '@blocksuite/affine-block-surface';
+  getSurfaceComponent,
+  isNoteBlock,
+} from '@blocksuite/affine-block-surface';
 import type {
   EdgelessTextBlockModel,
   EmbedSyncedDocModel,
   FrameBlockModel,
-  FrameBlockProps,
   ImageBlockModel,
   NoteBlockModel,
   ShapeElementModel,
 } from '@blocksuite/affine-model';
 import { getElementsWithoutGroup } from '@blocksuite/affine-shared/utils';
-import type { BlockComponent } from '@blocksuite/block-std';
-import {
-  generateKeyBetweenV2,
-  type GfxModel,
-  type SerializedElement,
-} from '@blocksuite/block-std/gfx';
 import { getCommonBoundWithRotation } from '@blocksuite/global/gfx';
-import { type BlockSnapshot, BlockSnapshotSchema } from '@blocksuite/store';
+import type { BlockComponent } from '@blocksuite/std';
+import { GfxControllerIdentifier, type GfxModel } from '@blocksuite/std/gfx';
 import groupBy from 'lodash-es/groupBy';
 
-import type { EdgelessRootBlockComponent } from '../edgeless-root-block.js';
+import { createElementsFromClipboardDataCommand } from '../clipboard/command.js';
 import { getSortedCloneElements, prepareCloneData } from './clone-utils.js';
 import {
   isEdgelessTextBlock,
@@ -34,28 +27,36 @@ import {
 
 const offset = 10;
 export async function duplicate(
-  edgeless: EdgelessRootBlockComponent,
+  edgeless: BlockComponent,
   elements: GfxModel[],
   select = true
 ) {
-  const { clipboardController } = edgeless;
+  const gfx = edgeless.std.get(GfxControllerIdentifier);
+
+  const surface = getSurfaceComponent(edgeless.std);
+  if (!surface) return;
+
   const copyElements = getSortedCloneElements(elements);
   const totalBound = getCommonBoundWithRotation(copyElements);
   totalBound.x += totalBound.w + offset;
 
   const snapshot = prepareCloneData(copyElements, edgeless.std);
-  const { canvasElements, blockModels } =
-    await clipboardController.createElementsFromClipboardData(
-      snapshot,
-      totalBound.center
-    );
+  const [_, { createdElementsPromise }] = edgeless.std.command.exec(
+    createElementsFromClipboardDataCommand,
+    {
+      elementsRawData: snapshot,
+      pasteCenter: totalBound.center,
+    }
+  );
+  if (!createdElementsPromise) return;
+  const { canvasElements, blockModels } = await createdElementsPromise;
 
   const newElements = [...canvasElements, ...blockModels];
 
-  edgeless.surface.fitToViewport(totalBound);
+  surface.fitToViewport(totalBound);
 
   if (select) {
-    edgeless.service.selection.set({
+    gfx.selection.set({
       elements: newElements.map(e => e.id),
       editing: false,
     });
@@ -94,29 +95,3 @@ export const splitElements = (elements: GfxModel[]) => {
     embedSyncedDocs: embedSyncedDocs ?? [],
   };
 };
-
-type FrameSnapshot = BlockSnapshot & {
-  props: FrameBlockProps;
-};
-
-export function createNewPresentationIndexes(
-  raw: (SerializedElement | BlockSnapshot)[],
-  edgeless: BlockComponent
-) {
-  const frames = raw
-    .filter((block): block is FrameSnapshot => {
-      const { data } = BlockSnapshotSchema.safeParse(block);
-      return data?.flavour === 'affine:frame';
-    })
-    .sort((a, b) => EdgelessFrameManager.framePresentationComparator(a, b));
-
-  const frameMgr = edgeless.std.get(EdgelessFrameManagerIdentifier);
-  let before = frameMgr.generatePresentationIndex();
-  const result = new Map<string, string>();
-  frames.forEach(frame => {
-    result.set(frame.id, before);
-    before = generateKeyBetweenV2(before, null);
-  });
-
-  return result;
-}

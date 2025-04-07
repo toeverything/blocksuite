@@ -12,15 +12,13 @@ import {
 import { CopyIcon, DeleteIcon } from '@blocksuite/affine-components/icons';
 import { PeekViewProvider } from '@blocksuite/affine-components/peek';
 import { toast } from '@blocksuite/affine-components/toast';
-import { NOTE_SELECTOR } from '@blocksuite/affine-shared/consts';
+import { EDGELESS_TOP_CONTENTEDITABLE_SELECTOR } from '@blocksuite/affine-shared/consts';
 import {
   DocModeProvider,
   NotificationProvider,
   type TelemetryEventMap,
   TelemetryProvider,
 } from '@blocksuite/affine-shared/services';
-import { type BlockComponent } from '@blocksuite/block-std';
-import { RANGE_SYNC_EXCLUDE_ATTR } from '@blocksuite/block-std/inline';
 import {
   createRecordDetail,
   createUniComponentFromWebComponent,
@@ -37,6 +35,8 @@ import {
 } from '@blocksuite/data-view';
 import { widgetPresets } from '@blocksuite/data-view/widget-presets';
 import { MoreHorizontalIcon } from '@blocksuite/icons/lit';
+import { type BlockComponent } from '@blocksuite/std';
+import { RANGE_SYNC_EXCLUDE_ATTR } from '@blocksuite/std/inline';
 import { Slice } from '@blocksuite/store';
 import { computed, signal } from '@preact/signals-core';
 import { css, nothing, unsafeCSS } from 'lit';
@@ -225,7 +225,9 @@ export class DataViewBlockComponent extends CaptionedBlockComponent<DataViewBloc
 
   override get topContenteditableElement() {
     if (this.std.get(DocModeProvider).getEditorMode() === 'edgeless') {
-      return this.closest<BlockComponent>(NOTE_SELECTOR);
+      return this.closest<BlockComponent>(
+        EDGELESS_TOP_CONTENTEDITABLE_SELECTOR
+      );
     }
     return this.rootComponent;
   }

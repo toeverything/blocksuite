@@ -12,10 +12,10 @@ import {
   ThemeProvider,
 } from '@blocksuite/affine-shared/services';
 import type { ColorEvent } from '@blocksuite/affine-shared/utils';
-import type { BlockComponent } from '@blocksuite/block-std';
-import { GfxControllerIdentifier } from '@blocksuite/block-std/gfx';
 import { SignalWatcher, WithDisposable } from '@blocksuite/global/lit';
 import { StyleGeneralIcon, StyleScribbleIcon } from '@blocksuite/icons/lit';
+import type { BlockComponent } from '@blocksuite/std';
+import { GfxControllerIdentifier } from '@blocksuite/std/gfx';
 import { computed, effect, type Signal, signal } from '@preact/signals-core';
 import { css, html, LitElement } from 'lit';
 import { property } from 'lit/decorators.js';

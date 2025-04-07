@@ -27,9 +27,13 @@
     "@blocksuite/affine-block-table": "workspace:*",
     "@blocksuite/affine-components": "workspace:*",
     "@blocksuite/affine-fragment-doc-title": "workspace:*",
+    "@blocksuite/affine-gfx-brush": "workspace:*",
     "@blocksuite/affine-gfx-connector": "workspace:*",
+    "@blocksuite/affine-gfx-group": "workspace:*",
+    "@blocksuite/affine-gfx-mindmap": "workspace:*",
     "@blocksuite/affine-gfx-note": "workspace:*",
     "@blocksuite/affine-gfx-shape": "workspace:*",
+    "@blocksuite/affine-gfx-template": "workspace:*",
     "@blocksuite/affine-gfx-text": "workspace:*",
     "@blocksuite/affine-inline-latex": "workspace:*",
     "@blocksuite/affine-inline-link": "workspace:*",
@@ -46,10 +50,10 @@
     "@blocksuite/affine-widget-scroll-anchoring": "workspace:*",
     "@blocksuite/affine-widget-slash-menu": "workspace:*",
     "@blocksuite/affine-widget-toolbar": "workspace:*",
-    "@blocksuite/block-std": "workspace:*",
     "@blocksuite/data-view": "workspace:*",
     "@blocksuite/global": "workspace:*",
-    "@blocksuite/icons": "^2.2.6",
+    "@blocksuite/icons": "^2.2.10",
+    "@blocksuite/std": "workspace:*",
     "@blocksuite/store": "workspace:*",
     "@floating-ui/dom": "^1.6.13",
     "@lit/context": "^1.1.2",
@@ -79,5 +83,5 @@
     "!src/__tests__",
     "!dist/__tests__"
   ],
-  "version": "0.20.0"
+  "version": "0.21.0"
 }

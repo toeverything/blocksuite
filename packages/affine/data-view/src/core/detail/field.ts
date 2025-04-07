@@ -3,7 +3,6 @@ import {
   popMenu,
   popupTargetFromElement,
 } from '@blocksuite/affine-components/context-menu';
-import { ShadowlessElement } from '@blocksuite/block-std';
 import { SignalWatcher, WithDisposable } from '@blocksuite/global/lit';
 import {
   DeleteIcon,
@@ -11,9 +10,10 @@ import {
   MoveLeftIcon,
   MoveRightIcon,
 } from '@blocksuite/icons/lit';
+import { ShadowlessElement } from '@blocksuite/std';
 import { computed, signal } from '@preact/signals-core';
 import { css } from 'lit';
-import { property, state } from 'lit/decorators.js';
+import { property } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { html } from 'lit/static-html.js';
 
@@ -249,7 +249,7 @@ export class RecordField extends SignalWatcher(
       'field-content': true,
       empty: !this.isEditing$.value && this.cell$.value.isEmpty$.value,
       'is-editing': this.isEditing$.value,
-      'is-focus': this.isFocus,
+      'is-focus': this.isFocus$.value,
     });
     return html`
       <div>
@@ -271,8 +271,7 @@ export class RecordField extends SignalWatcher(
 
   isEditing$ = signal(false);
 
-  @state()
-  accessor isFocus = false;
+  isFocus$ = signal(false);
 
   @property({ attribute: false })
   accessor view!: SingleView;

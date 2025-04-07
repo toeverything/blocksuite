@@ -1,3 +1,6 @@
+import { EmbedIframeService } from '@blocksuite/affine-shared/services';
+import type { BlockStdScope } from '@blocksuite/std';
+
 /**
  * The options for the embed iframe url validation
  */
@@ -58,4 +61,15 @@ export function safeGetIframeSrc(htmlString: string): string | undefined {
   } catch {
     return undefined;
   }
+}
+
+/**
+ * Check if the url can be embedded as an iframe
+ * @param std The block std scope
+ * @param url The url to check
+ * @returns Whether the url can be embedded as an iframe
+ */
+export function canEmbedAsIframe(std: BlockStdScope, url: string) {
+  const embedIframeService = std.get(EmbedIframeService);
+  return embedIframeService.canEmbed(url);
 }

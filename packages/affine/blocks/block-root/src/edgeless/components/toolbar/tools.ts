@@ -1,11 +1,11 @@
 import { frameQuickTool } from '@blocksuite/affine-block-frame';
+import { penSeniorTool } from '@blocksuite/affine-gfx-brush';
 import { connectorQuickTool } from '@blocksuite/affine-gfx-connector';
+import { mindMapSeniorTool } from '@blocksuite/affine-gfx-mindmap';
 import { noteSeniorTool } from '@blocksuite/affine-gfx-note';
 import { shapeSeniorTool } from '@blocksuite/affine-gfx-shape';
-import {
-  QuickToolExtension,
-  SeniorToolExtension,
-} from '@blocksuite/affine-widget-edgeless-toolbar';
+import { templateSeniorTool } from '@blocksuite/affine-gfx-template';
+import { QuickToolExtension } from '@blocksuite/affine-widget-edgeless-toolbar';
 import { html } from 'lit';
 
 import { buildLinkDenseMenu } from './link/link-dense-menu.js';
@@ -25,42 +25,6 @@ const linkQuickTool = QuickToolExtension('link', ({ block, gfx }) => {
       .edgeless=${block}
     ></edgeless-link-tool-button>`,
     menu: buildLinkDenseMenu(block, gfx),
-  };
-});
-
-const penSeniorTool = SeniorToolExtension('pen', ({ block }) => {
-  return {
-    name: 'Pen',
-    content: html`<div class="brush-and-eraser">
-      <edgeless-brush-tool-button
-        .edgeless=${block}
-      ></edgeless-brush-tool-button>
-
-      <edgeless-eraser-tool-button
-        .edgeless=${block}
-      ></edgeless-eraser-tool-button>
-    </div> `,
-  };
-});
-
-const mindMapSeniorTool = SeniorToolExtension(
-  'mindMap',
-  ({ block, toolbarContainer }) => {
-    return {
-      name: 'Mind Map',
-      content: html`<edgeless-mindmap-tool-button
-        .edgeless=${block}
-        .toolbarContainer=${toolbarContainer}
-      ></edgeless-mindmap-tool-button>`,
-    };
-  }
-);
-
-const templateSeniorTool = SeniorToolExtension('template', ({ block }) => {
-  return {
-    name: 'Template',
-    content: html`<edgeless-template-button .edgeless=${block}>
-    </edgeless-template-button>`,
   };
 });
 

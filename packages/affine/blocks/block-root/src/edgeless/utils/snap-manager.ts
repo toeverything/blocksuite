@@ -3,8 +3,8 @@ import {
   ConnectorElementModel,
   MindmapElementModel,
 } from '@blocksuite/affine-model';
-import type { GfxModel } from '@blocksuite/block-std/gfx';
 import { almostEqual, Bound, Point } from '@blocksuite/global/gfx';
+import type { GfxModel } from '@blocksuite/std/gfx';
 
 interface Distance {
   horiz?: {

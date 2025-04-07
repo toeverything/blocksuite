@@ -1,3 +1,7 @@
+import {
+  EMBED_IFRAME_DEFAULT_HEIGHT_IN_SURFACE,
+  EMBED_IFRAME_DEFAULT_WIDTH_IN_SURFACE,
+} from '@blocksuite/affine-block-embed';
 import { ParagraphBlockComponent } from '@blocksuite/affine-block-paragraph';
 import { DropIndicator } from '@blocksuite/affine-components/drop-indicator';
 import {
@@ -20,6 +24,7 @@ import {
 import {
   DndApiExtensionIdentifier,
   DocModeProvider,
+  EmbedIframeService,
   TelemetryProvider,
 } from '@blocksuite/affine-shared/services';
 import {
@@ -31,23 +36,6 @@ import {
   matchModels,
 } from '@blocksuite/affine-shared/utils';
 import {
-  BlockComponent,
-  type BlockStdScope,
-  type DragFromBlockSuite,
-  type DragPayload,
-  type DropPayload,
-} from '@blocksuite/block-std';
-import {
-  GfxBlockElementModel,
-  GfxControllerIdentifier,
-  GfxGroupLikeElementModel,
-  type GfxModel,
-  GfxPrimitiveElementModel,
-  isGfxGroupCompatibleModel,
-  SURFACE_YMAP_UNIQ_IDENTIFIER,
-  SurfaceBlockModel,
-} from '@blocksuite/block-std/gfx';
-import {
   Bound,
   type IVec,
   Point,
@@ -55,6 +43,24 @@ import {
   type SerializedXYWH,
 } from '@blocksuite/global/gfx';
 import { assertType } from '@blocksuite/global/utils';
+import {
+  BlockComponent,
+  type BlockStdScope,
+  type DragFromBlockSuite,
+  type DragPayload,
+  type DropPayload,
+} from '@blocksuite/std';
+import {
+  GfxBlockElementModel,
+  GfxControllerIdentifier,
+  GfxGroupLikeElementModel,
+  type GfxModel,
+  GfxPrimitiveElementModel,
+  isGfxGroupCompatibleModel,
+  isPrimitiveModel,
+  SURFACE_YMAP_UNIQ_IDENTIFIER,
+  SurfaceBlockModel,
+} from '@blocksuite/std/gfx';
 import {
   type BlockModel,
   type BlockSnapshot,
@@ -92,7 +98,7 @@ export type DragBlockEntity = {
 
 export type DragBlockPayload = DragPayload<DragBlockEntity, DragFromBlockSuite>;
 
-declare module '@blocksuite/block-std' {
+declare module '@blocksuite/std' {
   interface DNDEntity {
     blocks: DragBlockPayload;
   }
@@ -511,6 +517,7 @@ export class DragEventWatcher {
         this._mergeSnapshotToCurDoc(snapshot, point).catch(console.error);
       } else {
         this._dropAsGfxBlock(snapshot, point);
+        this.widget.selectionHelper.selection.clear(['block']);
       }
     } else {
       this._onPageDrop(dropBlock, dragPayload, dropPayload, point);
@@ -561,6 +568,7 @@ export class DragEventWatcher {
               let largestElem!: {
                 size: number;
                 id: string;
+                flavour: string;
               };
 
               idRemap.forEach(val => {
@@ -568,9 +576,13 @@ export class DragEventWatcher {
 
                 if (gfxElement?.elementBound) {
                   const elemBound = gfxElement.elementBound;
+                  const flavour = isPrimitiveModel(gfxElement)
+                    ? gfxElement.type
+                    : gfxElement.flavour;
+
                   largestElem =
                     (largestElem?.size ?? 0) < elemBound.w * elemBound.h
-                      ? { size: elemBound.w * elemBound.h, id: val }
+                      ? { size: elemBound.w * elemBound.h, id: val, flavour }
                       : largestElem;
                 }
               });
@@ -589,6 +601,7 @@ export class DragEventWatcher {
                   'affine:surface-ref',
                   {
                     reference: largestElem.id,
+                    refFlavour: largestElem.flavour,
                   },
                   parent.id,
                   index
@@ -602,6 +615,7 @@ export class DragEventWatcher {
           let largestElem!: {
             size: number;
             id: string;
+            flavour: string;
           };
 
           const walk = (block: BlockSnapshot) => {
@@ -609,14 +623,14 @@ export class DragEventWatcher {
               Object.values(
                 block.props.elements as Record<
                   string,
-                  { id: string; xywh: SerializedXYWH }
+                  { id: string; xywh: SerializedXYWH; type: string }
                 >
               ).forEach(elem => {
                 if (elem.xywh) {
                   const bound = Bound.deserialize(elem.xywh);
                   const size = bound.w * bound.h;
                   if ((largestElem?.size ?? 0) < size) {
-                    largestElem = { size, id: elem.id };
+                    largestElem = { size, id: elem.id, flavour: elem.type };
                   }
                 }
               });
@@ -628,7 +642,7 @@ export class DragEventWatcher {
                 );
                 const size = bound.w * bound.h;
                 if ((largestElem?.size ?? 0) < size) {
-                  largestElem = { size, id: block.id };
+                  largestElem = { size, id: block.id, flavour: block.flavour };
                 }
               }
             }
@@ -641,6 +655,7 @@ export class DragEventWatcher {
               'affine:surface-ref',
               {
                 reference: largestElem.id,
+                refFlavour: largestElem.flavour,
               },
               parent.id,
               index
@@ -1052,7 +1067,22 @@ export class DragEventWatcher {
           Bound.deserialize(block.props.xywh as SerializedXYWH) ??
           new Bound(0, 0, 0, 0);
 
-        if (
+        if (block.flavour === 'affine:embed-iframe') {
+          let width = EMBED_IFRAME_DEFAULT_WIDTH_IN_SURFACE;
+          let height = EMBED_IFRAME_DEFAULT_HEIGHT_IN_SURFACE;
+          if (block.props.url && typeof block.props.url === 'string') {
+            const embedIframeService = this.std.get(EmbedIframeService);
+            const options = embedIframeService.getConfig(
+              block.props.url
+            )?.options;
+            if (options) {
+              width = options.widthInSurface;
+              height = options.heightInSurface;
+            }
+          }
+          blockBound.w = width;
+          blockBound.h = height;
+        } else if (
           block.flavour === 'affine:attachment' ||
           block.flavour === 'affine:bookmark' ||
           block.flavour.startsWith('affine:embed-')
@@ -1132,17 +1162,22 @@ export class DragEventWatcher {
         this._dropToModel(surfaceSnapshot, this.gfx.surface!.id)
           .then(slices => {
             slices?.content.forEach((block, idx) => {
-              if (
-                block.id === content[idx].id &&
-                (block.flavour === 'affine:image' ||
+              if (block.id === content[idx].id) {
+                if (block.flavour === 'affine:embed-iframe') {
+                  store.updateBlock(block.id, {
+                    xywh: content[idx].props.xywh,
+                  });
+                } else if (
+                  block.flavour === 'affine:image' ||
                   block.flavour === 'affine:attachment' ||
                   block.flavour === 'affine:bookmark' ||
-                  block.flavour.startsWith('affine:embed-'))
-              ) {
-                store.updateBlock(block.id, {
-                  xywh: content[idx].props.xywh,
-                  style: content[idx].props.style,
-                });
+                  block.flavour.startsWith('affine:embed-')
+                ) {
+                  store.updateBlock(block.id, {
+                    xywh: content[idx].props.xywh,
+                    style: content[idx].props.style,
+                  });
+                }
               }
             });
           })
@@ -1160,7 +1195,11 @@ export class DragEventWatcher {
         this._dropToModel(pageSnapshot, this.widget.doc.root!.id)
           .then(slices => {
             slices?.content.forEach((block, idx) => {
-              if (
+              if (block.flavour === 'affine:embed-iframe') {
+                store.updateBlock(block.id, {
+                  xywh: content[idx].props.xywh,
+                });
+              } else if (
                 block.flavour === 'affine:attachment' ||
                 block.flavour.startsWith('affine:embed-')
               ) {
@@ -1403,14 +1442,14 @@ export class DragEventWatcher {
 
         const { snapshot, fromMode } = source.data.bsEntity;
 
-        this.previewHelper.renderDragPreview({
+        const offset = this.previewHelper.renderDragPreview({
           blockIds: source.data?.bsEntity?.modelIds,
           snapshot,
           container,
           mode: fromMode ?? 'block',
         });
 
-        setOffset({ x: 0, y: 0 });
+        setOffset(offset);
       },
       setDragData: () => {
         const { fromMode, snapshot } = this._getDraggedSnapshot();

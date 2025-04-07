@@ -1,12 +1,10 @@
-import {
-  EdgelessCRUDIdentifier,
-  normalizeShapeBound,
-} from '@blocksuite/affine-block-surface';
+import { EdgelessCRUDIdentifier } from '@blocksuite/affine-block-surface';
 import {
   packColor,
   type PickColorEvent,
 } from '@blocksuite/affine-components/color-picker';
 import type { LineDetailType } from '@blocksuite/affine-components/edgeless-line-styles-panel';
+import { createTextActions } from '@blocksuite/affine-gfx-text';
 import {
   type Color,
   DefaultTheme,
@@ -24,24 +22,26 @@ import {
   ShapeType,
   StrokeStyle,
 } from '@blocksuite/affine-model';
-import type {
-  ToolbarGenericAction,
-  ToolbarModuleConfig,
+import {
+  type ToolbarGenericAction,
+  type ToolbarModuleConfig,
+  ToolbarModuleExtension,
 } from '@blocksuite/affine-shared/services';
 import { getMostCommonValue } from '@blocksuite/affine-shared/utils';
 import {
-  createTextActions,
   getRootBlock,
   LINE_STYLE_LIST,
   renderMenu,
 } from '@blocksuite/affine-widget-edgeless-toolbar';
 import { Bound } from '@blocksuite/global/gfx';
 import { AddTextIcon, ShapeIcon } from '@blocksuite/icons/lit';
+import { BlockFlavourIdentifier } from '@blocksuite/std';
 import { html } from 'lit';
 import isEqual from 'lodash-es/isEqual';
 
+import { normalizeShapeBound } from '../element-renderer';
 import type { ShapeToolOption } from '../shape-tool';
-import { mountShapeTextEditor } from '../text';
+import { mountShapeTextEditor } from '../text/edgeless-shape-text-editor';
 import { ShapeComponentConfig } from './shape-menu-config';
 
 export const shapeToolbarConfig = {
@@ -55,6 +55,12 @@ export const shapeToolbarConfig = {
       content(ctx) {
         const models = ctx.getSurfaceModelsByType(ShapeElementModel);
         if (!models.length) return null;
+
+        const shapeStyle = ctx.features.getFlag(
+          'enable_edgeless_scribbled_style'
+        )
+          ? (getMostCommonValue(models, 'shapeStyle') ?? ShapeStyle.General)
+          : ShapeStyle.General;
 
         const shapeName =
           getMostCommonValue<ShapeToolOption, 'shapeName'>(
@@ -79,12 +85,14 @@ export const shapeToolbarConfig = {
 
         return renderMenu({
           icon: ShapeIcon(),
-          label: 'Switch type',
+          label: 'Switch shape type',
           items: ShapeComponentConfig.map(item => ({
             key: item.tooltip,
             value: item.name,
-            // TODO(@fundon): should add a feature flag to switch style
-            icon: item.generalIcon,
+            icon:
+              shapeStyle === ShapeStyle.General
+                ? item.generalIcon
+                : item.scribbledIcon,
             disabled: item.disabled,
           })),
           currentValue: shapeName,
@@ -94,8 +102,7 @@ export const shapeToolbarConfig = {
     },
     {
       id: 'd.style',
-      // TODO(@fundon): should add a feature flag
-      when: false,
+      when: ctx => ctx.features.getFlag('enable_edgeless_scribbled_style'),
       content(ctx) {
         const models = ctx.getSurfaceModelsByType(ShapeElementModel);
         if (!models.length) return null;
@@ -323,6 +330,11 @@ function getTextColor(fillColor: Color, isNotTransparent = false) {
   return DefaultTheme.shapeTextColor;
 }
 
-function hasGrouped(model: ShapeElementModel) {
+export function hasGrouped(model: ShapeElementModel) {
   return model.group instanceof MindmapElementModel;
 }
+
+export const shapeToolbarExtension = ToolbarModuleExtension({
+  id: BlockFlavourIdentifier('affine:surface:shape'),
+  config: shapeToolbarConfig,
+});

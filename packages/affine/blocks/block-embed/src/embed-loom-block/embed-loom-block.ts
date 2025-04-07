@@ -1,9 +1,9 @@
 import { OpenIcon } from '@blocksuite/affine-components/icons';
 import type { EmbedLoomModel, EmbedLoomStyles } from '@blocksuite/affine-model';
 import { ThemeProvider } from '@blocksuite/affine-shared/services';
-import { BlockSelection } from '@blocksuite/block-std';
+import { BlockSelection } from '@blocksuite/std';
 import { html } from 'lit';
-import { property, state } from 'lit/decorators.js';
+import { property } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
@@ -21,10 +21,6 @@ export class EmbedLoomBlockComponent extends EmbedBlockComponent<
   static override styles = styles;
 
   override _cardStyle: (typeof EmbedLoomStyles)[number] = 'video';
-
-  protected _isDragging = false;
-
-  protected _isResizing = false;
 
   open = () => {
     let link = this.model.props.url;
@@ -89,25 +85,6 @@ export class EmbedLoomBlockComponent extends EmbedBlockComponent<
         }
       })
     );
-
-    // this is required to prevent iframe from capturing pointer events
-    this.disposables.add(
-      this.selected$.subscribe(selected => {
-        this._showOverlay = this._isResizing || this._isDragging || !selected;
-      })
-    );
-    // this is required to prevent iframe from capturing pointer events
-    this.handleEvent('dragStart', () => {
-      this._isDragging = true;
-      this._showOverlay =
-        this._isResizing || this._isDragging || !this.selected$.peek();
-    });
-
-    this.handleEvent('dragEnd', () => {
-      this._isDragging = false;
-      this._showOverlay =
-        this._isResizing || this._isDragging || !this.selected$.peek();
-    });
   }
 
   override renderBlock() {
@@ -152,10 +129,11 @@ export class EmbedLoomBlockComponent extends EmbedBlockComponent<
                       loading="lazy"
                     ></iframe>
 
+                    <!-- overlay to prevent the iframe from capturing pointer events -->
                     <div
                       class=${classMap({
                         'affine-embed-loom-video-iframe-overlay': true,
-                        hide: !this._showOverlay,
+                        hide: !this.showOverlay$.value,
                       })}
                     ></div>
                   </div>
@@ -187,9 +165,6 @@ export class EmbedLoomBlockComponent extends EmbedBlockComponent<
       `
     );
   }
-
-  @state()
-  protected accessor _showOverlay = true;
 
   @property({ attribute: false })
   accessor loading = false;

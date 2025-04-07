@@ -4,6 +4,11 @@ import {
   getSurfaceComponent,
 } from '@blocksuite/affine-block-surface';
 import {
+  createGroupCommand,
+  createGroupFromSelectedCommand,
+  ungroupCommand,
+} from '@blocksuite/affine-gfx-group';
+import {
   ConnectorElementModel,
   DEFAULT_CONNECTOR_MODE,
   GroupElementModel,
@@ -16,7 +21,6 @@ import {
   type ToolbarContext,
   type ToolbarModuleConfig,
 } from '@blocksuite/affine-shared/services';
-import type { GfxModel } from '@blocksuite/block-std/gfx';
 import { Bound } from '@blocksuite/global/gfx';
 import {
   AlignLeftIcon,
@@ -27,9 +31,9 @@ import {
   ReleaseFromGroupIcon,
   UnlockIcon,
 } from '@blocksuite/icons/lit';
+import type { GfxModel } from '@blocksuite/std/gfx';
 import { html } from 'lit';
 
-import { EdgelessRootService } from '../../edgeless-root-service';
 import { renderAlignmentMenu } from './alignment';
 import { moreActions } from './more';
 
@@ -137,10 +141,8 @@ export const builtinMiscToolbarConfig = {
         const models = ctx.getSurfaceModels();
         if (models.length < 2) return;
 
-        const service = ctx.std.get(EdgelessRootService);
-
         // TODO(@fundon): should be a command
-        service.createGroupFromSelected();
+        ctx.command.exec(createGroupFromSelectedCommand);
       },
     },
     {
@@ -268,8 +270,9 @@ export const builtinMiscToolbarConfig = {
           return;
         }
 
-        const service = ctx.std.get(EdgelessRootService);
-        const groupId = service.createGroup([topElement, ...otherElements]);
+        const [_, { groupId }] = ctx.command.exec(createGroupCommand, {
+          elements: [topElement, ...otherElements],
+        });
 
         if (groupId) {
           const element = ctx.std
@@ -335,11 +338,9 @@ export const builtinLockedToolbarConfig = {
 
         ctx.store.captureSync();
 
-        const service = ctx.std.get(EdgelessRootService);
-
         for (const element of elements) {
           if (element instanceof GroupElementModel) {
-            service.ungroup(element);
+            ctx.command.exec(ungroupCommand, { group: element });
           } else {
             element.lockedBySelf = false;
           }

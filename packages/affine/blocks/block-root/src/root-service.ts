@@ -5,8 +5,8 @@ import {
   getSelectedBlocksCommand,
   getTextSelectionCommand,
 } from '@blocksuite/affine-shared/commands';
-import type { BlockComponent } from '@blocksuite/block-std';
-import { BlockService } from '@blocksuite/block-std';
+import type { BlockComponent } from '@blocksuite/std';
+import { BlockService } from '@blocksuite/std';
 
 import type { RootBlockComponent } from './types.js';
 

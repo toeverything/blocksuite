@@ -6,7 +6,6 @@ export interface BlockSuiteFlags {
   enable_database_attachment_note: boolean;
   enable_database_full_width: boolean;
   enable_block_query: boolean;
-  enable_lasso_tool: boolean;
   enable_edgeless_text: boolean;
   enable_ai_onboarding: boolean;
   enable_ai_chat_block: boolean;
@@ -18,7 +17,7 @@ export interface BlockSuiteFlags {
   enable_mobile_linked_doc_menu: boolean;
   enable_block_meta: boolean;
   enable_callout: boolean;
-  enable_embed_iframe_block: boolean;
+  enable_edgeless_scribbled_style: boolean;
 }
 
 export class FeatureFlagService extends StoreExtension {
@@ -29,7 +28,6 @@ export class FeatureFlagService extends StoreExtension {
     enable_database_attachment_note: false,
     enable_database_full_width: false,
     enable_block_query: false,
-    enable_lasso_tool: false,
     enable_edgeless_text: true,
     enable_ai_onboarding: true,
     enable_ai_chat_block: true,
@@ -39,9 +37,9 @@ export class FeatureFlagService extends StoreExtension {
     enable_shape_shadow_blur: false,
     enable_mobile_keyboard_toolbar: false,
     enable_mobile_linked_doc_menu: false,
-    enable_block_meta: false,
+    enable_block_meta: true,
     enable_callout: false,
-    enable_embed_iframe_block: false,
+    enable_edgeless_scribbled_style: false,
   });
 
   setFlag(key: keyof BlockSuiteFlags, value: boolean) {

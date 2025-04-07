@@ -1,27 +1,26 @@
 import { EdgelessFrameManagerIdentifier } from '@blocksuite/affine-block-frame';
 import { EdgelessCRUDExtension } from '@blocksuite/affine-block-surface';
-import { MindmapStyle } from '@blocksuite/affine-model';
+import { MindmapStyle, SurfaceRefBlockSchema } from '@blocksuite/affine-model';
 import {
   type SlashMenuActionItem,
   type SlashMenuConfig,
   SlashMenuConfigExtension,
   type SlashMenuItem,
 } from '@blocksuite/affine-widget-slash-menu';
-import { BlockSelection } from '@blocksuite/block-std';
-import { GfxControllerIdentifier } from '@blocksuite/block-std/gfx';
 import { Bound } from '@blocksuite/global/gfx';
 import { FrameIcon, GroupingIcon, MindmapIcon } from '@blocksuite/icons/lit';
+import { BlockSelection } from '@blocksuite/std';
+import { GfxControllerIdentifier } from '@blocksuite/std/gfx';
 
 import { insertSurfaceRefBlockCommand } from '../commands';
-import { EdgelessTooltip } from './tooltips';
+import { EdgelessTooltip, FrameTooltip, MindMapTooltip } from './tooltips';
 
 const surfaceRefSlashMenuConfig: SlashMenuConfig = {
   items: ({ std, model }) => {
     const crud = std.get(EdgelessCRUDExtension);
     const frameMgr = std.get(EdgelessFrameManagerIdentifier);
 
-    const findSpace = (bound: Bound) => {
-      const padding = 20;
+    const findSpace = (bound: Bound, padding = 20) => {
       const gfx = std.get(GfxControllerIdentifier);
       let elementInFrameBound = gfx.grid.search(bound);
       while (elementInFrameBound.length > 0) {
@@ -57,7 +56,7 @@ const surfaceRefSlashMenuConfig: SlashMenuConfig = {
       description: 'Insert a blank frame',
       icon: FrameIcon(),
       tooltip: {
-        figure: EdgelessTooltip,
+        figure: FrameTooltip,
         caption: 'Frame',
       },
       group: `5_Edgeless Element@${index++}`,
@@ -73,12 +72,12 @@ const surfaceRefSlashMenuConfig: SlashMenuConfig = {
       description: 'Insert a mind map',
       icon: MindmapIcon(),
       tooltip: {
-        figure: EdgelessTooltip,
+        figure: MindMapTooltip,
         caption: 'Edgeless',
       },
       group: `5_Edgeless Element@${index++}`,
       action: () => {
-        const bound = findSpace(Bound.fromXYWH([0, 0, 200, 200]));
+        const bound = findSpace(Bound.fromXYWH([0, 0, 200, 200]), 150);
         const { x, y, h } = bound;
 
         const rootW = 145;
@@ -160,6 +159,6 @@ const surfaceRefSlashMenuConfig: SlashMenuConfig = {
 };
 
 export const SurfaceRefSlashMenuConfigExtension = SlashMenuConfigExtension(
-  'affine:surface-ref',
+  SurfaceRefBlockSchema.model.flavour,
   surfaceRefSlashMenuConfig
 );

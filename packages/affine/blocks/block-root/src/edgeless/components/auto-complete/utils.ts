@@ -1,4 +1,5 @@
 import {
+  EdgelessCRUDIdentifier,
   type Options,
   Overlay,
   type RoughCanvas,
@@ -14,13 +15,12 @@ import {
   type ShapeName,
   type ShapeStyle,
 } from '@blocksuite/affine-model';
-import type { GfxController, GfxModel } from '@blocksuite/block-std/gfx';
 import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 import { Bound, normalizeDegAngle, type XYWH } from '@blocksuite/global/gfx';
 import { assertType } from '@blocksuite/global/utils';
+import type { BlockComponent } from '@blocksuite/std';
+import type { GfxController, GfxModel } from '@blocksuite/std/gfx';
 import * as Y from 'yjs';
-
-import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
 
 export enum Direction {
   Right,
@@ -270,14 +270,13 @@ export function capitalizeFirstLetter(str: string) {
 }
 
 export function createEdgelessElement(
-  edgeless: EdgelessRootBlockComponent,
+  edgeless: BlockComponent,
   current: ShapeElementModel | NoteBlockModel,
   bound: Bound
 ) {
-  let id;
-  const { service } = edgeless;
-  const { crud } = service;
+  const crud = edgeless.std.get(EdgelessCRUDIdentifier);
 
+  let id;
   let element: GfxModel | null = null;
 
   if (isShape(current)) {
@@ -331,11 +330,11 @@ export function createEdgelessElement(
 }
 
 export function createShapeElement(
-  edgeless: EdgelessRootBlockComponent,
+  edgeless: BlockComponent,
   current: ShapeElementModel | NoteBlockModel,
   targetType: TARGET_SHAPE_TYPE
 ) {
-  const { crud } = edgeless.service;
+  const crud = edgeless.std.get(EdgelessCRUDIdentifier);
   const id = crud.addElement('shape', {
     shapeType: getShapeType(targetType),
     radius: getShapeRadius(targetType),

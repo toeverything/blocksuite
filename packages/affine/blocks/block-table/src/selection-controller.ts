@@ -3,8 +3,8 @@ import {
   getAreaByOffsets,
   getTargetIndexByDraggingOffset,
 } from '@blocksuite/affine-shared/utils';
-import type { UIEventStateContext } from '@blocksuite/block-std';
 import { IS_MOBILE } from '@blocksuite/global/env';
+import type { UIEventStateContext } from '@blocksuite/std';
 import { computed } from '@preact/signals-core';
 import type { ReactiveController } from 'lit';
 
@@ -29,9 +29,6 @@ export class SelectionController implements ReactiveController {
     this.host.addController(this);
   }
   hostConnected() {
-    if (this.dataManager.readonly$.value) {
-      return;
-    }
     this.dragListener();
     this.host.handleEvent('copy', this.onCopy);
     this.host.handleEvent('cut', this.onCut);
@@ -84,7 +81,7 @@ export class SelectionController implements ReactiveController {
     window.addEventListener('mouseup', onUp);
   }
   dragListener() {
-    if (IS_MOBILE) {
+    if (IS_MOBILE || this.dataManager.readonly$.value) {
       return;
     }
     this.host.disposables.addFromEvent(this.host, 'mousedown', event => {

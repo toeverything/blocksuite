@@ -7,8 +7,8 @@ import {
   Heading6Icon,
 } from '@blocksuite/affine-components/icons';
 import type { ParagraphBlockModel } from '@blocksuite/affine-model';
-import { ShadowlessElement } from '@blocksuite/block-std';
 import { SignalWatcher, WithDisposable } from '@blocksuite/global/lit';
+import { ShadowlessElement } from '@blocksuite/std';
 import { cssVarV2 } from '@toeverything/theme/v2';
 import { css, html, nothing, unsafeCSS } from 'lit';
 import { property } from 'lit/decorators.js';

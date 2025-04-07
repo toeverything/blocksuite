@@ -11,7 +11,7 @@ import {
   DeltaASTConverter,
   type DeltaASTConverterOptions,
   type InlineDeltaMatcher,
-} from '../types/adapter.js';
+} from '../types/delta-converter.js';
 import type { HtmlAST, InlineHtmlAST } from '../types/hast.js';
 
 export type InlineDeltaToNotionHtmlAdapterMatcher =

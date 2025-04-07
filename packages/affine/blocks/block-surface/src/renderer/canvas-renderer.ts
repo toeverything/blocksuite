@@ -1,18 +1,20 @@
 import { type Color, ColorScheme } from '@blocksuite/affine-model';
 import { requestConnectedFrame } from '@blocksuite/affine-shared/utils';
+import { DisposableGroup } from '@blocksuite/global/disposable';
+import type { IBound } from '@blocksuite/global/gfx';
+import { getBoundWithRotation, intersects } from '@blocksuite/global/gfx';
+import type { BlockStdScope } from '@blocksuite/std';
 import type {
   GridManager,
   LayerManager,
   SurfaceBlockModel,
   Viewport,
-} from '@blocksuite/block-std/gfx';
-import { DisposableGroup } from '@blocksuite/global/disposable';
-import type { IBound } from '@blocksuite/global/gfx';
-import { getBoundWithRotation, intersects } from '@blocksuite/global/gfx';
+} from '@blocksuite/std/gfx';
 import last from 'lodash-es/last';
 import { Subject } from 'rxjs';
 
 import type { SurfaceElementModel } from '../element-model/base.js';
+import { ElementRendererIdentifier } from '../extensions/element-renderer.js';
 import { RoughCanvas } from '../utils/rough/canvas.js';
 import type { ElementRenderer } from './elements/index.js';
 import type { Overlay } from './overlay.js';
@@ -26,12 +28,12 @@ type EnvProvider = {
 };
 
 type RendererOptions = {
+  std: BlockStdScope;
   viewport: Viewport;
   layerManager: LayerManager;
   provider?: Partial<EnvProvider>;
   enableStackingCanvas?: boolean;
   onStackingCanvasCreated?: (canvas: HTMLCanvasElement) => void;
-  elementRenderers: Record<string, ElementRenderer>;
   gridManager: GridManager;
   surfaceModel: SurfaceBlockModel;
 };
@@ -51,7 +53,7 @@ export class CanvasRenderer {
 
   ctx: CanvasRenderingContext2D;
 
-  elementRenderers: Record<string, ElementRenderer>;
+  std: BlockStdScope;
 
   grid: GridManager;
 
@@ -76,11 +78,11 @@ export class CanvasRenderer {
 
     this.canvas = canvas;
     this.ctx = this.canvas.getContext('2d') as CanvasRenderingContext2D;
+    this.std = options.std;
     this.viewport = options.viewport;
     this.layerManager = options.layerManager;
     this.grid = options.gridManager;
     this.provider = options.provider ?? {};
-    this.elementRenderers = options.elementRenderers;
     this._initViewport();
 
     options.enableStackingCanvas = options.enableStackingCanvas ?? false;
@@ -277,10 +279,9 @@ export class CanvasRenderer {
     for (const element of elements) {
       const display = (element.display ?? true) && !element.hidden;
       if (display && intersects(getBoundWithRotation(element), bound)) {
-        const renderFn =
-          this.elementRenderers[
-            element.type as keyof typeof this.elementRenderers
-          ];
+        const renderFn = this.std.getOptional<ElementRenderer>(
+          ElementRendererIdentifier(element.type)
+        );
 
         if (!renderFn) {
           console.warn(`Cannot find renderer for ${element.type}`);

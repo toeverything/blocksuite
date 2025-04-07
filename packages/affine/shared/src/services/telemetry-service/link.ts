@@ -11,6 +11,9 @@ export type LinkEventType =
   | 'OpenedCardStyleSelector'
   | 'SelectedCardStyle'
   | 'OpenedCardScaleSelector'
-  | 'SelectedCardScale';
+  | 'SelectedCardScale'
+  | 'OpenLink'
+  | 'EditLink'
+  | 'ReloadLink';
 
 export type LinkToolbarEvents = Record<LinkEventType, TelemetryEvent>;

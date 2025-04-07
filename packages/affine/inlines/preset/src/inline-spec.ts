@@ -1,12 +1,13 @@
 import { inlineFootnoteExtensions } from '@blocksuite/affine-inline-footnote';
 import { inlineLatexExtensions } from '@blocksuite/affine-inline-latex';
 import { inlineLinkExtensions } from '@blocksuite/affine-inline-link';
+import { inlineMentionExtensions } from '@blocksuite/affine-inline-mention';
 import { inlineReferenceExtensions } from '@blocksuite/affine-inline-reference';
 import type { AffineTextAttributes } from '@blocksuite/affine-shared/types';
 import {
   type InlineRootElement,
   InlineSpecExtension,
-} from '@blocksuite/block-std/inline';
+} from '@blocksuite/std/inline';
 import type { ExtensionType } from '@blocksuite/store';
 import { html } from 'lit';
 import { z } from 'zod';
@@ -109,4 +110,5 @@ export const InlineSpecExtensions: ExtensionType[] = [
   ...inlineReferenceExtensions,
   ...inlineLatexExtensions,
   ...inlineFootnoteExtensions,
+  ...inlineMentionExtensions,
 ];

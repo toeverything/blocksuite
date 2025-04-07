@@ -11,13 +11,14 @@
   "license": "MIT",
   "dependencies": {
     "@blocksuite/affine-components": "workspace:*",
+    "@blocksuite/affine-gfx-turbo-renderer": "workspace:*",
     "@blocksuite/affine-inline-preset": "workspace:*",
     "@blocksuite/affine-model": "workspace:*",
     "@blocksuite/affine-rich-text": "workspace:*",
     "@blocksuite/affine-shared": "workspace:*",
-    "@blocksuite/block-std": "workspace:*",
     "@blocksuite/global": "workspace:*",
-    "@blocksuite/icons": "^2.2.6",
+    "@blocksuite/icons": "^2.2.10",
+    "@blocksuite/std": "workspace:*",
     "@blocksuite/store": "workspace:*",
     "@floating-ui/dom": "^1.6.13",
     "@lit/context": "^1.1.2",
@@ -30,11 +31,12 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
-    "vitest": "3.0.9"
+    "vitest": "3.1.1"
   },
   "exports": {
     ".": "./src/index.ts",
-    "./effects": "./src/effects.ts"
+    "./effects": "./src/effects.ts",
+    "./turbo-painter": "./src/turbo/list-painter.worker.ts"
   },
   "files": [
     "src",
@@ -42,5 +44,5 @@
     "!src/__tests__",
     "!dist/__tests__"
   ],
-  "version": "0.20.0"
+  "version": "0.21.0"
 }

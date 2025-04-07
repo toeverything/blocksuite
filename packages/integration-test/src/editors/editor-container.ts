@@ -1,7 +1,7 @@
-import { BlockStdScope, ShadowlessElement } from '@blocksuite/affine/block-std';
 import { SignalWatcher, WithDisposable } from '@blocksuite/affine/global/lit';
 import type { DocMode } from '@blocksuite/affine/model';
 import { ThemeProvider } from '@blocksuite/affine/shared/services';
+import { BlockStdScope, ShadowlessElement } from '@blocksuite/affine/std';
 import {
   type BlockModel,
   type ExtensionType,
@@ -166,7 +166,7 @@ export class TestAffineEditorContainer extends SignalWatcher(
   override firstUpdated() {
     if (this.mode === 'page') {
       setTimeout(() => {
-        if (this.autofocus) {
+        if (this.autofocus && this.mode === 'page') {
           const richText = this.querySelector('rich-text');
           const inlineEditor = richText?.inlineEditor;
           inlineEditor?.focusEnd();

@@ -4,9 +4,9 @@ import {
   popMenu,
   popupTargetFromElement,
 } from '@blocksuite/affine-components/context-menu';
-import { ShadowlessElement } from '@blocksuite/block-std';
 import { SignalWatcher, WithDisposable } from '@blocksuite/global/lit';
 import { ArrowDownSmallIcon } from '@blocksuite/icons/lit';
+import { ShadowlessElement } from '@blocksuite/std';
 import { Text } from '@blocksuite/store';
 import { autoPlacement, offset } from '@floating-ui/dom';
 import { computed, signal } from '@preact/signals-core';

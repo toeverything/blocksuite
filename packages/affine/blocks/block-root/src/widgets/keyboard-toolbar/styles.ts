@@ -2,8 +2,6 @@ import { scrollbarStyle } from '@blocksuite/affine-shared/styles';
 import { unsafeCSSVarV2 } from '@blocksuite/affine-shared/theme';
 import { css } from 'lit';
 
-export const TOOLBAR_HEIGHT = 46;
-
 export const keyboardToolbarStyles = css`
   affine-keyboard-toolbar {
     position: fixed;
@@ -13,7 +11,7 @@ export const keyboardToolbarStyles = css`
 
   .keyboard-toolbar {
     width: 100%;
-    height: ${TOOLBAR_HEIGHT}px;
+    height: 46px;
     display: inline-flex;
     align-items: center;
     padding: 0px 8px;

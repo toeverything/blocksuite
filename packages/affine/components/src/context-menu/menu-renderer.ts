@@ -1,5 +1,4 @@
 import { unsafeCSSVar, unsafeCSSVarV2 } from '@blocksuite/affine-shared/theme';
-import { ShadowlessElement } from '@blocksuite/block-std';
 import { IS_MOBILE } from '@blocksuite/global/env';
 import { SignalWatcher, WithDisposable } from '@blocksuite/global/lit';
 import {
@@ -8,6 +7,8 @@ import {
   CloseIcon,
   SearchIcon,
 } from '@blocksuite/icons/lit';
+import { ShadowlessElement } from '@blocksuite/std';
+import { RANGE_SYNC_EXCLUDE_ATTR } from '@blocksuite/std/inline';
 import {
   autoPlacement,
   autoUpdate,
@@ -36,7 +37,7 @@ export class MenuComponent
       display: flex;
       flex-direction: column;
       user-select: none;
-      min-width: 276px;
+      min-width: 180px;
       box-shadow: ${unsafeCSSVar('overlayPanelShadow')};
       border-radius: 4px;
       background-color: ${unsafeCSSVarV2('layer/background/overlayPanel')};
@@ -383,6 +384,7 @@ export const getDefaultModalRoot = (ele: HTMLElement) => {
 };
 export const createModal = (container: HTMLElement = document.body) => {
   const div = document.createElement('div');
+  div.setAttribute(RANGE_SYNC_EXCLUDE_ATTR, 'true');
   div.style.pointerEvents = 'auto';
   div.style.position = 'absolute';
   div.style.left = '0';
@@ -488,6 +490,7 @@ export type MenuHandler = {
 
 const popMobileMenu = (options: MenuOptions): MenuHandler => {
   const model = createModal(document.body);
+  model.style.position = 'fixed';
   const menu = new Menu({
     ...options,
     onClose: () => {

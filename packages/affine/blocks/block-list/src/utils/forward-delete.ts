@@ -3,7 +3,7 @@ import {
   getNextContentBlock,
   matchModels,
 } from '@blocksuite/affine-shared/utils';
-import { type BlockStdScope, TextSelection } from '@blocksuite/block-std';
+import { type BlockStdScope, TextSelection } from '@blocksuite/std';
 import type { Text } from '@blocksuite/store';
 
 // When deleting at line end of a list block,

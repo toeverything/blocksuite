@@ -4,8 +4,8 @@ import {
   getCurrentNativeRange,
   matchModels,
 } from '@blocksuite/affine-shared/utils';
-import { type BlockStdScope, TextSelection } from '@blocksuite/block-std';
-import type { InlineEditor, InlineRange } from '@blocksuite/block-std/inline';
+import { type BlockStdScope, TextSelection } from '@blocksuite/std';
+import type { InlineEditor, InlineRange } from '@blocksuite/std/inline';
 import { BlockModel } from '@blocksuite/store';
 
 import type { RichText } from './rich-text.js';
@@ -68,6 +68,7 @@ export function focusTextModel(
   id: string,
   offset: number = 0
 ) {
+  std.event.active = true;
   selectTextModel(std, id, offset);
 }
 

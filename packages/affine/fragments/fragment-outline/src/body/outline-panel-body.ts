@@ -1,14 +1,24 @@
 import { changeNoteDisplayMode } from '@blocksuite/affine-block-note';
 import { NoteBlockModel, NoteDisplayMode } from '@blocksuite/affine-model';
 import { DocModeProvider } from '@blocksuite/affine-shared/services';
-import { matchModels } from '@blocksuite/affine-shared/utils';
-import { ShadowlessElement, SurfaceSelection } from '@blocksuite/block-std';
-import { GfxControllerIdentifier } from '@blocksuite/block-std/gfx';
+import { focusTitle, matchModels } from '@blocksuite/affine-shared/utils';
 import { Bound } from '@blocksuite/global/gfx';
 import { SignalWatcher, WithDisposable } from '@blocksuite/global/lit';
+import {
+  BlockSelection,
+  ShadowlessElement,
+  SurfaceSelection,
+} from '@blocksuite/std';
+import { GfxControllerIdentifier } from '@blocksuite/std/gfx';
 import type { BlockModel } from '@blocksuite/store';
 import { consume } from '@lit/context';
-import { effect, signal } from '@preact/signals-core';
+import {
+  batch,
+  computed,
+  effect,
+  type Signal,
+  signal,
+} from '@preact/signals-core';
 import { html, nothing } from 'lit';
 import { query } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
@@ -49,7 +59,22 @@ export class OutlinePanelBody extends SignalWatcher(
 
   private readonly _edgelessOnlyNotes$ = signal<NoteBlockModel[]>([]);
 
-  private readonly _selectedNotes$ = signal<NoteBlockModel[]>([]);
+  private readonly _selectedNotes$: Record<
+    NoteDisplayMode,
+    Signal<NoteBlockModel[]>
+  > = {
+    [NoteDisplayMode.DocOnly]: signal<NoteBlockModel[]>([]),
+    [NoteDisplayMode.DocAndEdgeless]: signal<NoteBlockModel[]>([]),
+    [NoteDisplayMode.EdgelessOnly]: signal<NoteBlockModel[]>([]),
+  };
+
+  private readonly _allSelectedNotes$ = computed(() =>
+    [
+      NoteDisplayMode.DocAndEdgeless,
+      NoteDisplayMode.DocOnly,
+      NoteDisplayMode.EdgelessOnly,
+    ].flatMap(mode => this._selectedNotes$[mode].value)
+  );
 
   private _clearHighlightMask = () => {};
 
@@ -132,7 +157,7 @@ export class OutlinePanelBody extends SignalWatcher(
     if (!this.doc.root) return;
 
     const pageVisibleNotes = this._pageVisibleNotes$.peek();
-    const selected = this._selectedNotes$.peek();
+    const selected = this._allSelectedNotes$.peek();
     const children = this.doc.root.children.slice();
 
     const noteIndex = new Map<NoteBlockModel, number>();
@@ -170,6 +195,19 @@ export class OutlinePanelBody extends SignalWatcher(
   }
 
   private async _scrollToBlock(blockId: string) {
+    // if focus title
+    if (blockId === this.doc.root?.id) {
+      this.editor.std.selection.setGroup('note', []);
+      this.editor.std.event.active = false;
+      focusTitle(this.editor);
+    } else {
+      this.editor.std.event.active = true;
+      this.editor.std.selection.setGroup('note', [
+        this.editor.std.selection.create(BlockSelection, {
+          blockId,
+        }),
+      ]);
+    }
     this._lockActiveHeadingId = true;
     this._activeHeadingId$.value = blockId;
     this._clearHighlightMask = await scrollToBlockWithHighlight(
@@ -186,23 +224,39 @@ export class OutlinePanelBody extends SignalWatcher(
     const note = this.doc.getBlock(id)?.model;
     if (!note || !matchModels(note, [NoteBlockModel])) return;
 
-    let selectedNotes = this._selectedNotes$.peek();
+    // map from signal to value
+    const selectedNotes = Object.fromEntries(
+      Object.entries(this._selectedNotes$).map(([k, v]) => [k, v.peek()])
+    ) as Record<NoteDisplayMode, NoteBlockModel[]>;
 
-    if (!selected) {
-      selectedNotes = selectedNotes.filter(_note => _note !== note);
-    } else if (multiselect) {
-      selectedNotes = [...selectedNotes, note];
+    if (multiselect) {
+      selectedNotes[note.props.displayMode] = selected
+        ? [...selectedNotes[note.props.displayMode], note]
+        : selectedNotes[note.props.displayMode].filter(_note => _note !== note);
     } else {
-      selectedNotes = [note];
+      selectedNotes[note.props.displayMode] = selected ? [note] : [];
+      Object.keys(this._selectedNotes$).forEach(mode => {
+        if (mode !== note.props.displayMode) {
+          selectedNotes[mode as NoteDisplayMode] = [];
+        }
+      });
     }
 
+    // We use gfx.selection and effect to keep sync between canvas and outline panel
     if (editorMode === 'edgeless') {
       gfx.selection.set({
-        elements: selectedNotes.map(({ id }) => id),
+        elements: [...selectedNotes.both, ...selectedNotes.edgeless].map(
+          ({ id }) => id
+        ),
         editing: false,
       });
+      this._selectedNotes$.doc.value = selectedNotes.doc;
     } else {
-      this._selectedNotes$.value = selectedNotes;
+      [NoteDisplayMode.DocOnly, NoteDisplayMode.DocAndEdgeless].forEach(
+        mode => {
+          this._selectedNotes$[mode].value = selectedNotes[mode];
+        }
+      );
     }
   }
 
@@ -220,13 +274,16 @@ export class OutlinePanelBody extends SignalWatcher(
           return !!model && matchModels(model, [NoteBlockModel]);
         });
 
-      const preSelected = this._selectedNotes$.peek();
-      if (
-        preSelected.length !== currSelectedNotes.length ||
-        preSelected.some(note => !currSelectedNotes.includes(note))
-      ) {
-        this._selectedNotes$.value = currSelectedNotes;
-      }
+      // update selected notes from edgeless selection
+      batch(() => {
+        [NoteDisplayMode.DocAndEdgeless, NoteDisplayMode.EdgelessOnly].forEach(
+          mode => {
+            this._selectedNotes$[mode].value = currSelectedNotes.filter(
+              note => note.props.displayMode === mode
+            );
+          }
+        );
+      });
     });
   }
 
@@ -263,11 +320,6 @@ export class OutlinePanelBody extends SignalWatcher(
       std.dnd.monitor<NoteCardEntity, NoteDropPayload>({
         onDragStart: () => {
           this._dragging$.value = true;
-          this._selectedNotes$.value = this._selectedNotes$
-            .peek()
-            .filter(note => {
-              return this._pageVisibleNotes$.value.includes(note);
-            });
         },
         onDrag: data => {
           const target = data.location.current.dropTargets[0];
@@ -360,7 +412,7 @@ export class OutlinePanelBody extends SignalWatcher(
           index=${index}
           .note=${note}
           .activeHeadingId=${this._activeHeadingId$.value}
-          .status=${this._selectedNotes$.value.includes(note)
+          .status=${this._allSelectedNotes$.value.includes(note)
             ? this._dragging$.value
               ? 'dragging'
               : 'selected'

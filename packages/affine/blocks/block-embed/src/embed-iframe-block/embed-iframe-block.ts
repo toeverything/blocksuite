@@ -3,29 +3,46 @@ import {
   CaptionedBlockComponent,
   SelectedStyle,
 } from '@blocksuite/affine-components/caption';
+import { createLitPortal } from '@blocksuite/affine-components/portal';
 import type { EmbedIframeBlockModel } from '@blocksuite/affine-model';
 import {
   type EmbedIframeData,
   EmbedIframeService,
-  FeatureFlagService,
   type IframeOptions,
   LinkPreviewerService,
+  NotificationProvider,
 } from '@blocksuite/affine-shared/services';
 import { matchModels } from '@blocksuite/affine-shared/utils';
-import { BlockSelection } from '@blocksuite/block-std';
 import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
-import { computed, type ReadonlySignal, signal } from '@preact/signals-core';
-import { html, nothing } from 'lit';
+import { BlockSelection } from '@blocksuite/std';
+import { flip, offset, shift } from '@floating-ui/dom';
+import {
+  computed,
+  effect,
+  type ReadonlySignal,
+  signal,
+} from '@preact/signals-core';
+import { html } from 'lit';
+import { query } from 'lit/decorators.js';
 import { type ClassInfo, classMap } from 'lit/directives/class-map.js';
 import { ifDefined } from 'lit/directives/if-defined.js';
+import { styleMap } from 'lit/directives/style-map.js';
 
+import type { EmbedLinkInputPopupOptions } from './components/embed-iframe-link-input-popup.js';
+import {
+  DEFAULT_IFRAME_HEIGHT,
+  DEFAULT_IFRAME_WIDTH,
+  EMBED_IFRAME_DEFAULT_CONTAINER_BORDER_RADIUS,
+  ERROR_CARD_DEFAULT_HEIGHT,
+  IDLE_CARD_DEFAULT_HEIGHT,
+  LINK_CREATE_POPUP_OFFSET,
+  LOADING_CARD_DEFAULT_HEIGHT,
+} from './consts.js';
 import { embedIframeBlockStyles } from './style.js';
 import type { EmbedIframeStatusCardOptions } from './types.js';
 import { safeGetIframeSrc } from './utils.js';
 
 export type EmbedIframeStatus = 'idle' | 'loading' | 'success' | 'error';
-const DEFAULT_IFRAME_HEIGHT = 152;
-const DEFAULT_IFRAME_WIDTH = '100%';
 
 export class EmbedIframeBlockComponent extends CaptionedBlockComponent<EmbedIframeBlockModel> {
   selectedStyle$: ReadonlySignal<ClassInfo> | null = computed<ClassInfo>(
@@ -41,6 +58,7 @@ export class EmbedIframeBlockComponent extends CaptionedBlockComponent<EmbedIfra
   readonly status$ = signal<EmbedIframeStatus>('idle');
   readonly error$ = signal<Error | null>(null);
 
+  readonly isIdle$ = computed(() => this.status$.value === 'idle');
   readonly isLoading$ = computed(() => this.status$.value === 'loading');
   readonly hasError$ = computed(() => this.status$.value === 'error');
   readonly isSuccess$ = computed(() => this.status$.value === 'success');
@@ -57,7 +75,19 @@ export class EmbedIframeBlockComponent extends CaptionedBlockComponent<EmbedIfra
         !this.selected$.value)
   );
 
-  private _iframeOptions: IframeOptions | undefined = undefined;
+  // since different providers have different border radius
+  // we need to update the selected border radius when the iframe is loaded
+  readonly selectedBorderRadius$ = computed(() => {
+    if (
+      this.status$.value === 'success' &&
+      typeof this.iframeOptions?.containerBorderRadius === 'number'
+    ) {
+      return this.iframeOptions.containerBorderRadius;
+    }
+    return EMBED_IFRAME_DEFAULT_CONTAINER_BORDER_RADIUS;
+  });
+
+  protected iframeOptions: IframeOptions | undefined = undefined;
 
   get embedIframeService() {
     return this.std.get(EmbedIframeService);
@@ -67,29 +97,55 @@ export class EmbedIframeBlockComponent extends CaptionedBlockComponent<EmbedIfra
     return this.std.get(LinkPreviewerService);
   }
 
+  get notificationService() {
+    return this.std.getOptional(NotificationProvider);
+  }
+
   get inSurface() {
     return matchModels(this.model.parent, [SurfaceBlockModel]);
   }
 
-  get isEmbedIframeBlockEnabled() {
-    const featureFlagService = this.doc.get(FeatureFlagService);
-    const flag = featureFlagService.getFlag('enable_embed_iframe_block');
-    return flag ?? false;
+  get _horizontalCardHeight(): number {
+    switch (this.status$.value) {
+      case 'idle':
+        return IDLE_CARD_DEFAULT_HEIGHT;
+      case 'loading':
+        return LOADING_CARD_DEFAULT_HEIGHT;
+      case 'error':
+        return ERROR_CARD_DEFAULT_HEIGHT;
+      default:
+        return LOADING_CARD_DEFAULT_HEIGHT;
+    }
   }
 
   get _statusCardOptions(): EmbedIframeStatusCardOptions {
     return this.inSurface
       ? { layout: 'vertical' }
-      : { layout: 'horizontal', height: 114 };
+      : { layout: 'horizontal', height: this._horizontalCardHeight };
   }
 
   open = () => {
     const link = this.model.props.url;
+    if (!link) {
+      this.notificationService?.notify({
+        title: 'No link found',
+        message: 'Please set a link to the block',
+        accent: 'warning',
+        onClose: function (): void {},
+      });
+      return;
+    }
     window.open(link, '_blank');
   };
 
   refreshData = async () => {
     try {
+      const { url } = this.model.props;
+      if (!url) {
+        this.status$.value = 'idle';
+        return;
+      }
+
       // set loading status
       this.status$.value = 'loading';
       this.error$.value = null;
@@ -101,14 +157,6 @@ export class EmbedIframeBlockComponent extends CaptionedBlockComponent<EmbedIfra
         throw new BlockSuiteError(
           ErrorCode.ValueNotExists,
           'EmbedIframeService or LinkPreviewerService not found'
-        );
-      }
-
-      const { url } = this.model.props;
-      if (!url) {
-        throw new BlockSuiteError(
-          ErrorCode.ValueNotExists,
-          'No original URL provided'
         );
       }
 
@@ -148,6 +196,43 @@ export class EmbedIframeBlockComponent extends CaptionedBlockComponent<EmbedIfra
     }
   };
 
+  private _linkInputAbortController: AbortController | null = null;
+  toggleLinkInputPopup = (options?: EmbedLinkInputPopupOptions) => {
+    if (this.readonly) {
+      return;
+    }
+
+    // toggle create popup when ths block is in idle status and the url is not set
+    if (!this._blockContainer || !this.isIdle$.value || this.model.props.url) {
+      return;
+    }
+
+    if (this._linkInputAbortController) {
+      this._linkInputAbortController.abort();
+    }
+
+    this._linkInputAbortController = new AbortController();
+
+    createLitPortal({
+      template: html`<embed-iframe-link-input-popup
+        .model=${this.model}
+        .abortController=${this._linkInputAbortController}
+        .std=${this.std}
+        .inSurface=${this.inSurface}
+        .options=${options}
+      ></embed-iframe-link-input-popup>`,
+      container: document.body,
+      computePosition: {
+        referenceElement: this._blockContainer,
+        placement: 'bottom',
+        middleware: [flip(), offset(LINK_CREATE_POPUP_OFFSET), shift()],
+        autoUpdate: { animationFrame: true },
+      },
+      abortController: this._linkInputAbortController,
+      closeOnClickAway: true,
+    });
+  };
+
   /**
    * Get the iframe url from the embed data, first check if iframe_url is set,
    * if not, check if html is set and get the iframe src from html
@@ -162,29 +247,39 @@ export class EmbedIframeBlockComponent extends CaptionedBlockComponent<EmbedIfra
   private readonly _updateIframeOptions = (url: string) => {
     const config = this.embedIframeService?.getConfig(url);
     if (config) {
-      this._iframeOptions = config.options;
+      this.iframeOptions = config.options;
     }
   };
 
-  private readonly _handleDoubleClick = (event: MouseEvent) => {
-    event.stopPropagation();
+  private readonly _handleDoubleClick = () => {
     this.open();
   };
 
   private readonly _selectBlock = () => {
-    const selectionManager = this.host.selection;
+    const { selectionManager } = this;
     const blockSelection = selectionManager.create(BlockSelection, {
       blockId: this.blockId,
     });
     selectionManager.setGroup('note', [blockSelection]);
   };
 
-  protected _handleClick = (event: MouseEvent) => {
-    event.stopPropagation();
+  protected _handleClick = () => {
+    // when the block is in idle status and the url is not set, clear the selection
+    // and show the link input popup
+    if (this.isIdle$.value && !this.model.props.url) {
+      // when the block is in the surface, clear the surface selection
+      // otherwise, clear the block selection
+      this.selectionManager.clear([this.inSurface ? 'surface' : 'block']);
+      this.toggleLinkInputPopup();
+      return;
+    }
+
     // We don't need to select the block when the block is in the surface
     if (this.inSurface) {
       return;
     }
+
+    // otherwise, select the block
     this._selectBlock();
   };
 
@@ -202,7 +297,7 @@ export class EmbedIframeBlockComponent extends CaptionedBlockComponent<EmbedIfra
       referrerpolicy,
       scrolling,
       allowFullscreen,
-    } = this._iframeOptions ?? {};
+    } = this.iframeOptions ?? {};
     const width = `${widthPercent}%`;
     // if the block is in the surface, use 100% as the height
     // otherwise, use the heightInNote
@@ -224,6 +319,12 @@ export class EmbedIframeBlockComponent extends CaptionedBlockComponent<EmbedIfra
   };
 
   private readonly _renderContent = () => {
+    if (this.isIdle$.value) {
+      return html`<embed-iframe-idle-card
+        .options=${this._statusCardOptions}
+      ></embed-iframe-idle-card>`;
+    }
+
     if (this.isLoading$.value) {
       return html`<embed-iframe-loading-card
         .std=${this.std}
@@ -237,6 +338,7 @@ export class EmbedIframeBlockComponent extends CaptionedBlockComponent<EmbedIfra
         .model=${this.model}
         .onRetry=${this._handleRetry}
         .std=${this.std}
+        .inSurface=${this.inSurface}
         .options=${this._statusCardOptions}
       ></embed-iframe-error-card>`;
     }
@@ -249,6 +351,24 @@ export class EmbedIframeBlockComponent extends CaptionedBlockComponent<EmbedIfra
 
     this.contentEditable = 'false';
 
+    // update the selected style when the block is in the note
+    this.disposables.add(
+      effect(() => {
+        if (this.inSurface) {
+          return;
+        }
+
+        // when the block is in idle status, use the background style
+        // otherwise, use the border style
+        if (this.status$.value === 'idle') {
+          this.selectedStyle = SelectedStyle.Background;
+        } else {
+          this.selectedStyle = SelectedStyle.Border;
+        }
+      })
+    );
+
+    // if the iframe url is not set, refresh the data to get the iframe url
     if (!this.model.props.iframeUrl) {
       this.doc.withoutTransact(() => {
         this.refreshData().catch(console.error);
@@ -286,16 +406,22 @@ export class EmbedIframeBlockComponent extends CaptionedBlockComponent<EmbedIfra
     );
   }
 
-  override renderBlock() {
-    if (!this.isEmbedIframeBlockEnabled) {
-      return nothing;
-    }
+  override disconnectedCallback() {
+    super.disconnectedCallback();
+    this._linkInputAbortController?.abort();
+    this._linkInputAbortController = null;
+  }
 
+  override renderBlock() {
     const containerClasses = classMap({
       'affine-embed-iframe-block-container': true,
       ...this.selectedStyle$?.value,
       'in-surface': this.inSurface,
     });
+    const containerStyles = styleMap({
+      borderRadius: `${this.selectedBorderRadius$.value}px`,
+    });
+
     const overlayClasses = classMap({
       'affine-embed-iframe-block-overlay': true,
       show: this.showOverlay$.value,
@@ -305,6 +431,7 @@ export class EmbedIframeBlockComponent extends CaptionedBlockComponent<EmbedIfra
       <div
         draggable=${this.blockDraggable ? 'true' : 'false'}
         class=${containerClasses}
+        style=${containerStyles}
         @click=${this._handleClick}
         @dblclick=${this._handleDoubleClick}
       >
@@ -316,11 +443,25 @@ export class EmbedIframeBlockComponent extends CaptionedBlockComponent<EmbedIfra
     `;
   }
 
-  override accessor blockContainerStyles = { margin: '18px 0' };
+  override accessor blockContainerStyles = {
+    margin: '18px 0',
+    backgroundColor: 'transparent',
+  };
+
+  get readonly() {
+    return this.doc.readonly;
+  }
+
+  get selectionManager() {
+    return this.host.selection;
+  }
 
   override accessor useCaptionEditor = true;
 
   override accessor useZeroWidth = true;
 
   override accessor selectedStyle = SelectedStyle.Border;
+
+  @query('.affine-embed-iframe-block-container')
+  accessor _blockContainer: HTMLElement | null = null;
 }

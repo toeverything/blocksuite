@@ -57,6 +57,7 @@ describe('basic', () => {
       'affine:surface-ref',
       {
         reference: frameId,
+        refFlavour: 'affine:frame',
       },
       noteAId
     );
@@ -71,30 +72,12 @@ describe('basic', () => {
     ).instanceOf(Element);
   });
 
-  test('surface-ref should be rendered as empty surface-ref-block-edgeless component page mode', async () => {
-    const surfaceRefId = doc.addBlock(
-      'affine:surface-ref',
-      {
-        reference: frameId,
-      },
-      noteAId
-    );
-
-    await wait();
-
-    const refBlock = document.querySelector(
-      `affine-edgeless-surface-ref[data-block-id="${surfaceRefId}"]`
-    )! as HTMLElement;
-
-    expect(refBlock).instanceOf(Element);
-    expect(refBlock.innerText).toBe('');
-  });
-
   test('content in frame should be rendered in the correct order', async () => {
     const surfaceRefId = doc.addBlock(
       'affine:surface-ref',
       {
         reference: frameId,
+        refFlavour: 'affine:frame',
       },
       noteAId
     );
@@ -132,6 +115,7 @@ describe('basic', () => {
       'affine:surface-ref',
       {
         reference: groupId,
+        refFlavour: 'group',
       },
       noteAId
     );
@@ -161,6 +145,7 @@ describe('basic', () => {
       'affine:surface-ref',
       {
         reference: frameId,
+        refFlavour: 'affine:frame',
       },
       noteAId
     );
@@ -196,6 +181,7 @@ describe('basic', () => {
       'affine:surface-ref',
       {
         reference: groupId,
+        refFlavour: 'group',
       },
       noteAId
     );
@@ -219,6 +205,7 @@ describe('basic', () => {
       'affine:surface-ref',
       {
         reference: frameId,
+        refFlavour: 'affine:frame',
       },
       noteAId
     );
@@ -257,6 +244,7 @@ describe('basic', () => {
       'affine:surface-ref',
       {
         reference: groupId,
+        refFlavour: 'group',
       },
       noteAId
     );

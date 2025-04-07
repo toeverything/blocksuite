@@ -1,6 +1,6 @@
-import type { CursorType, StandardCursor } from '@blocksuite/block-std/gfx';
 import type { IVec } from '@blocksuite/global/gfx';
 import { normalizeDegAngle, Vec } from '@blocksuite/global/gfx';
+import type { CursorType, StandardCursor } from '@blocksuite/std/gfx';
 
 export function generateCursorUrl(
   angle = 0,

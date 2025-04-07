@@ -1,12 +1,12 @@
 import { OverlayIdentifier } from '@blocksuite/affine-block-surface';
 import { MindmapElementModel } from '@blocksuite/affine-model';
+import type { Bound } from '@blocksuite/global/gfx';
 import {
   type DragExtensionInitializeContext,
   type ExtensionDragMoveContext,
   type GfxModel,
   TransformExtension,
-} from '@blocksuite/block-std/gfx';
-import type { Bound } from '@blocksuite/global/gfx';
+} from '@blocksuite/std/gfx';
 
 import type { SnapOverlay } from '../utils/snap-manager';
 

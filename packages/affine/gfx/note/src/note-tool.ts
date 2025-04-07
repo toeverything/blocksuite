@@ -10,9 +10,9 @@ import {
 import { EditPropsStore } from '@blocksuite/affine-shared/services';
 import type { NoteChildrenFlavour } from '@blocksuite/affine-shared/types';
 import { hasClassNameInList } from '@blocksuite/affine-shared/utils';
-import type { PointerEventState } from '@blocksuite/block-std';
-import { BaseTool } from '@blocksuite/block-std/gfx';
 import { Point } from '@blocksuite/global/gfx';
+import type { PointerEventState } from '@blocksuite/std';
+import { BaseTool } from '@blocksuite/std/gfx';
 import { effect } from '@preact/signals-core';
 
 import { DraggingNoteOverlay, NoteOverlay } from './overlay';
@@ -201,7 +201,7 @@ export class NoteTool extends BaseTool<NoteToolOption> {
   }
 }
 
-declare module '@blocksuite/block-std/gfx' {
+declare module '@blocksuite/std/gfx' {
   interface GfxToolsMap {
     'affine:note': NoteTool;
   }

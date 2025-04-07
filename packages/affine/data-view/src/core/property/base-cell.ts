@@ -1,5 +1,5 @@
-import { ShadowlessElement } from '@blocksuite/block-std';
 import { SignalWatcher, WithDisposable } from '@blocksuite/global/lit';
+import { ShadowlessElement } from '@blocksuite/std';
 import { computed, type ReadonlySignal } from '@preact/signals-core';
 import type { PropertyValues } from 'lit';
 import { property } from 'lit/decorators.js';

@@ -5,15 +5,15 @@ import {
 } from '@blocksuite/affine-shared/commands';
 import { FeatureFlagService } from '@blocksuite/affine-shared/services';
 import { getViewportElement } from '@blocksuite/affine-shared/utils';
-import type { BlockComponent } from '@blocksuite/block-std';
-import { BLOCK_ID_ATTR, WidgetComponent } from '@blocksuite/block-std';
-import { GfxControllerIdentifier } from '@blocksuite/block-std/gfx';
+import { IS_MOBILE } from '@blocksuite/global/env';
+import type { BlockComponent } from '@blocksuite/std';
+import { BLOCK_ID_ATTR, WidgetComponent } from '@blocksuite/std';
+import { GfxControllerIdentifier } from '@blocksuite/std/gfx';
 import {
   INLINE_ROOT_ATTR,
   type InlineEditor,
   type InlineRootElement,
-} from '@blocksuite/block-std/inline';
-import { IS_MOBILE } from '@blocksuite/global/env';
+} from '@blocksuite/std/inline';
 import { signal } from '@preact/signals-core';
 import { html, nothing } from 'lit';
 import { choose } from 'lit/directives/choose.js';

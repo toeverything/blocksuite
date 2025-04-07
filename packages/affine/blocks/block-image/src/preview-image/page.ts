@@ -1,7 +1,7 @@
 import type { ImageBlockModel } from '@blocksuite/affine-model';
 import { unsafeCSSVarV2 } from '@blocksuite/affine-shared/theme';
-import { BlockComponent } from '@blocksuite/block-std';
 import { ImageIcon } from '@blocksuite/icons/lit';
+import { BlockComponent } from '@blocksuite/std';
 import { css, html } from 'lit';
 
 export class ImagePlaceholderBlockComponent extends BlockComponent<ImageBlockModel> {

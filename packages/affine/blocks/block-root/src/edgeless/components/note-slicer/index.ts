@@ -12,11 +12,11 @@ import {
 import { EDGELESS_BLOCK_CHILD_PADDING } from '@blocksuite/affine-shared/consts';
 import { TelemetryProvider } from '@blocksuite/affine-shared/services';
 import { getRectByBlockComponent } from '@blocksuite/affine-shared/utils';
-import { WidgetComponent } from '@blocksuite/block-std';
-import { GfxControllerIdentifier } from '@blocksuite/block-std/gfx';
 import { DisposableGroup } from '@blocksuite/global/disposable';
 import { deserializeXYWH, Point, serializeXYWH } from '@blocksuite/global/gfx';
 import { ScissorsIcon } from '@blocksuite/icons/lit';
+import { WidgetComponent } from '@blocksuite/std';
+import { GfxControllerIdentifier } from '@blocksuite/std/gfx';
 import { css, html, nothing, type PropertyValues } from 'lit';
 import { state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';

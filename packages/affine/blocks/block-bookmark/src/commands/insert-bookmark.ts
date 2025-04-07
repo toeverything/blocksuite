@@ -3,7 +3,7 @@ import '@blocksuite/affine-block-embed/effects';
 import { insertEmbedCard } from '@blocksuite/affine-block-embed';
 import type { EmbedCardStyle } from '@blocksuite/affine-model';
 import { EmbedOptionProvider } from '@blocksuite/affine-shared/services';
-import type { Command } from '@blocksuite/block-std';
+import type { Command } from '@blocksuite/std';
 
 export const insertBookmarkCommand: Command<
   { url: string },

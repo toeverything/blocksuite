@@ -4,7 +4,7 @@ import {
   EmbedLoomStyles,
 } from '@blocksuite/affine-model';
 import { EmbedOptionConfig } from '@blocksuite/affine-shared/services';
-import { BlockService } from '@blocksuite/block-std';
+import { BlockService } from '@blocksuite/std';
 
 import { loomUrlRegex } from './embed-loom-model.js';
 import { queryEmbedLoomData } from './utils.js';

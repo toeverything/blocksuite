@@ -1,5 +1,5 @@
 import { NoteBlockSchema } from '@blocksuite/affine-model';
-import { BlockViewExtension, FlavourExtension } from '@blocksuite/block-std';
+import { BlockViewExtension, FlavourExtension } from '@blocksuite/std';
 import type { ExtensionType } from '@blocksuite/store';
 import { literal } from 'lit/static-html.js';
 

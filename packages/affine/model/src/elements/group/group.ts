@@ -1,17 +1,17 @@
+import type { IVec, PointLocation } from '@blocksuite/global/gfx';
+import { Bound, linePolygonIntersects } from '@blocksuite/global/gfx';
 import type {
   BaseElementProps,
   GfxModel,
   SerializedElement,
-} from '@blocksuite/block-std/gfx';
+} from '@blocksuite/std/gfx';
 import {
   canSafeAddToContainer,
   field,
   GfxGroupLikeElementModel,
   local,
   observe,
-} from '@blocksuite/block-std/gfx';
-import type { IVec, PointLocation } from '@blocksuite/global/gfx';
-import { Bound, linePolygonIntersects } from '@blocksuite/global/gfx';
+} from '@blocksuite/std/gfx';
 import * as Y from 'yjs';
 
 type GroupElementProps = BaseElementProps & {

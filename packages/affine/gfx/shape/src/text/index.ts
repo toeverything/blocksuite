@@ -1,1 +1,1 @@
-export * from './text';
+export * from './edgeless-shape-text-editor';

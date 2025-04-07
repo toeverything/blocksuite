@@ -16,8 +16,8 @@ import {
   isFuzzyMatch,
   type Signal,
 } from '@blocksuite/affine-shared/utils';
-import type { BlockStdScope, EditorHost } from '@blocksuite/block-std';
-import type { InlineRange } from '@blocksuite/block-std/inline';
+import type { BlockStdScope, EditorHost } from '@blocksuite/std';
+import type { InlineRange } from '@blocksuite/std/inline';
 import type { TemplateResult } from 'lit';
 
 import { showImportModal } from './import-doc/index.js';
@@ -99,6 +99,8 @@ export type LinkedMenuGroup = {
   loading?: boolean | Signal<boolean>;
   // copywriting when display quantity exceeds
   overflowText?: string | Signal<string>;
+  // hide the group
+  hidden?: boolean | Signal<boolean>;
 };
 
 export type LinkedDocContext = {

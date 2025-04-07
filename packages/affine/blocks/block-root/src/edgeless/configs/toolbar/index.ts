@@ -1,54 +1,43 @@
-import { edgelessTextToolbarConfig } from '@blocksuite/affine-block-edgeless-text';
+import { edgelessTextToolbarExtension } from '@blocksuite/affine-block-edgeless-text';
 import { frameToolbarExtension } from '@blocksuite/affine-block-frame';
-import { connectorToolbarConfig } from '@blocksuite/affine-gfx-connector';
-import { textToolbarConfig } from '@blocksuite/affine-gfx-text';
+import {
+  brushToolbarExtension,
+  highlighterToolbarExtension,
+} from '@blocksuite/affine-gfx-brush';
+import { connectorToolbarExtension } from '@blocksuite/affine-gfx-connector';
+import { groupToolbarExtension } from '@blocksuite/affine-gfx-group';
+import {
+  mindmapToolbarExtension,
+  shapeMindmapToolbarExtension,
+} from '@blocksuite/affine-gfx-mindmap';
+import { shapeToolbarExtension } from '@blocksuite/affine-gfx-shape';
+import { textToolbarExtension } from '@blocksuite/affine-gfx-text';
 import { ToolbarModuleExtension } from '@blocksuite/affine-shared/services';
-import { BlockFlavourIdentifier } from '@blocksuite/block-std';
+import { BlockFlavourIdentifier } from '@blocksuite/std';
 import type { ExtensionType } from '@blocksuite/store';
 
-import { builtinBrushToolbarConfig } from './brush';
-import { builtinGroupToolbarConfig } from './group';
-import { builtinMindmapToolbarConfig } from './mindmap';
 import { builtinLockedToolbarConfig, builtinMiscToolbarConfig } from './misc';
-import { builtinShapeToolbarConfig } from './shape';
 
 export const EdgelessElementToolbarExtension: ExtensionType[] = [
   frameToolbarExtension,
 
-  ToolbarModuleExtension({
-    id: BlockFlavourIdentifier('affine:surface:group'),
-    config: builtinGroupToolbarConfig,
-  }),
+  groupToolbarExtension,
 
-  ToolbarModuleExtension({
-    id: BlockFlavourIdentifier('affine:surface:brush'),
-    config: builtinBrushToolbarConfig,
-  }),
+  brushToolbarExtension,
 
-  ToolbarModuleExtension({
-    id: BlockFlavourIdentifier('affine:surface:connector'),
-    config: connectorToolbarConfig,
-  }),
+  highlighterToolbarExtension,
 
-  ToolbarModuleExtension({
-    id: BlockFlavourIdentifier('affine:surface:mindmap'),
-    config: builtinMindmapToolbarConfig,
-  }),
+  connectorToolbarExtension,
 
-  ToolbarModuleExtension({
-    id: BlockFlavourIdentifier('affine:surface:text'),
-    config: textToolbarConfig,
-  }),
+  shapeToolbarExtension,
 
-  ToolbarModuleExtension({
-    id: BlockFlavourIdentifier('affine:surface:edgeless-text'),
-    config: edgelessTextToolbarConfig,
-  }),
+  shapeMindmapToolbarExtension,
 
-  ToolbarModuleExtension({
-    id: BlockFlavourIdentifier('affine:surface:shape'),
-    config: builtinShapeToolbarConfig,
-  }),
+  mindmapToolbarExtension,
+
+  textToolbarExtension,
+
+  edgelessTextToolbarExtension,
 
   ToolbarModuleExtension({
     id: BlockFlavourIdentifier('affine:surface:*'),

@@ -59,8 +59,10 @@ export class MultiSelectCell extends BaseCellRenderer<
   }
 
   override beforeExitEditingMode() {
-    this.closePopup?.();
-    this.closePopup = undefined;
+    requestAnimationFrame(() => {
+      this.closePopup?.();
+      this.closePopup = undefined;
+    });
   }
 
   override render() {

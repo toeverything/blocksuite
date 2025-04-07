@@ -28,3 +28,5 @@ export class PlainTextElementModelAdapter extends ElementModelAdapter<
     return '';
   }
 }
+
+export * from './type.js';

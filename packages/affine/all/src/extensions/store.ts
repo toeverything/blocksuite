@@ -47,7 +47,7 @@ import {
   CursorSelectionExtension,
   SurfaceSelectionExtension,
   TextSelectionExtension,
-} from '@blocksuite/block-std';
+} from '@blocksuite/std';
 import type { ExtensionType } from '@blocksuite/store';
 
 import {

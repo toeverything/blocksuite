@@ -1,5 +1,5 @@
 import type { RootBlockModel } from '@blocksuite/affine-model';
-import { WidgetComponent } from '@blocksuite/block-std';
+import { WidgetComponent } from '@blocksuite/std';
 import { css, html } from 'lit';
 import { state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';

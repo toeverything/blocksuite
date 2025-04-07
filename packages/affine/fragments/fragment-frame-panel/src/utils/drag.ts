@@ -55,6 +55,7 @@ export function startDragging(
       el.stackOrder = arr.length - 1 - idx;
       el.pos = start;
       el.width = options.width;
+      el.std = container.editorHost.std;
       if (frames.length > 1 && el.stackOrder === 0)
         el.draggingCardNumber = frames.length;
 

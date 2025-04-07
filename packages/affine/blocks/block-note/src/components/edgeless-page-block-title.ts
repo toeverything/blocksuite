@@ -1,12 +1,12 @@
 import { NoteBlockModel } from '@blocksuite/affine-model';
+import { SignalWatcher, WithDisposable } from '@blocksuite/global/lit';
 import {
   type BlockStdScope,
   PropTypes,
   requiredProperties,
   ShadowlessElement,
   stdContext,
-} from '@blocksuite/block-std';
-import { SignalWatcher, WithDisposable } from '@blocksuite/global/lit';
+} from '@blocksuite/std';
 import { consume } from '@lit/context';
 import { html } from 'lit';
 import { property } from 'lit/decorators.js';

@@ -8,7 +8,7 @@ import {
   draftSelectedModelsCommand,
   getSelectedModelsCommand,
 } from '@blocksuite/affine-shared/commands';
-import type { BlockStdScope } from '@blocksuite/block-std';
+import type { BlockStdScope } from '@blocksuite/std';
 import { toDraftModel } from '@blocksuite/store';
 
 export interface QuickActionConfig {

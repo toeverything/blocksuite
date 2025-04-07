@@ -163,7 +163,7 @@ export class EdgelessToolbarShapeDraggable extends EdgelessToolbarToolMixin(
       edgeless: this.edgeless,
       scopeElement: this.toolbarContainer,
       standardWidth: 100,
-      clickToDrag: true,
+      clickToDrag: false,
       onOverlayCreated: (overlay, element) => {
         const shapeName =
           this.draggableController.states.draggingElement?.data.name;
@@ -219,7 +219,6 @@ export class EdgelessToolbarShapeDraggable extends EdgelessToolbarToolMixin(
       },
       onElementClick: el => {
         this.onShapeClick?.(el.data);
-        this._setShapeOverlayLock(true);
       },
       onEnterOrLeaveScope: (overlay, isOutside) => {
         overlay.element.style.filter = isOutside
@@ -260,7 +259,7 @@ export class EdgelessToolbarShapeDraggable extends EdgelessToolbarToolMixin(
           const { viewport } = this.edgeless.std.get(ViewportElementProvider);
           const { left, top } = viewport;
           const clientPos = { x: x + left, y: y + top };
-          this.draggableController.clickToDrag(el, clientPos);
+          this.draggableController.dragAndMoveTo(el, clientPos);
         },
       },
       { global: true }

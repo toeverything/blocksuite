@@ -1,4 +1,4 @@
-import { LINE_WIDTHS, LineWidth } from '@blocksuite/affine-model';
+import { BRUSH_LINE_WIDTHS, LineWidth } from '@blocksuite/affine-model';
 import { on, once } from '@blocksuite/affine-shared/utils';
 import { WithDisposable } from '@blocksuite/global/lit';
 import { css, html, LitElement, nothing, type PropertyValues } from 'lit';
@@ -122,7 +122,7 @@ export class EdgelessLineWidthPanel extends WithDisposable(LitElement) {
     this._updateLineWidthPanelByDragHandlePosition(x);
   };
 
-  private _onSelect(lineWidth: LineWidth) {
+  private _onSelect(lineWidth: number) {
     // If the selected size is the same as the previous one, do nothing.
     if (lineWidth === this.selectedSize) return;
     this.dispatchEvent(
@@ -136,7 +136,7 @@ export class EdgelessLineWidthPanel extends WithDisposable(LitElement) {
     this.selectedSize = lineWidth;
   }
 
-  private _updateLineWidthPanel(selectedSize: LineWidth) {
+  private _updateLineWidthPanel(selectedSize: number) {
     if (!this._lineWidthOverlay) return;
     const index = this.lineWidths.findIndex(w => w === selectedSize);
     if (index === -1) return;
@@ -221,7 +221,7 @@ export class EdgelessLineWidthPanel extends WithDisposable(LitElement) {
     itemSize: 16,
     itemIconSize: 8,
     dragHandleSize: 14,
-    count: LINE_WIDTHS.length,
+    count: BRUSH_LINE_WIDTHS.length,
   };
 
   @property({ attribute: false, type: Boolean })
@@ -231,10 +231,10 @@ export class EdgelessLineWidthPanel extends WithDisposable(LitElement) {
   accessor hasTooltip = true;
 
   @property({ attribute: false })
-  accessor lineWidths: LineWidth[] = LINE_WIDTHS;
+  accessor lineWidths: number[] = BRUSH_LINE_WIDTHS;
 
   @property({ attribute: false })
-  accessor selectedSize: LineWidth = LineWidth.Two;
+  accessor selectedSize: number = LineWidth.Two;
 }
 
 declare global {

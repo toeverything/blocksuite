@@ -11,6 +11,7 @@ import {
 } from '@blocksuite/affine-shared/consts';
 import {
   ActionPlacement,
+  DocDisplayMetaProvider,
   type LinkEventType,
   type OpenDocMode,
   type ToolbarAction,
@@ -23,7 +24,6 @@ import {
   getBlockProps,
   referenceToNode,
 } from '@blocksuite/affine-shared/utils';
-import { BlockFlavourIdentifier } from '@blocksuite/block-std';
 import { Bound } from '@blocksuite/global/gfx';
 import {
   CaptionIcon,
@@ -33,6 +33,7 @@ import {
   ExpandFullIcon,
   OpenInNewIcon,
 } from '@blocksuite/icons/lit';
+import { BlockFlavourIdentifier } from '@blocksuite/std';
 import { type ExtensionType, Slice } from '@blocksuite/store';
 import { computed, signal } from '@preact/signals-core';
 import { html } from 'lit';
@@ -76,11 +77,13 @@ const docTitleAction = {
     if (!model.props.title) return null;
 
     const originalTitle =
-      ctx.workspace.getDoc(model.props.pageId)?.meta?.title || 'Untitled';
+      ctx.std.get(DocDisplayMetaProvider).title(model.props.pageId).value ||
+      'Untitled';
+    const open = (event: MouseEvent) => block.open({ event });
 
     return html`<affine-linked-doc-title
       .title=${originalTitle}
-      .open=${(event: MouseEvent) => block.open({ event })}
+      .open=${open}
     ></affine-linked-doc-title>`;
   },
 } as const satisfies ToolbarAction;

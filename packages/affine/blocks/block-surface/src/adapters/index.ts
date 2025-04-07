@@ -1,4 +1,1 @@
-export {
-  EdgelessSurfaceBlockAdapterExtensions,
-  SurfaceBlockAdapterExtensions,
-} from './extension.js';
+export * from './extension.js';

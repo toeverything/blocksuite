@@ -17,14 +17,40 @@ import {
 } from '@blocksuite/affine-block-note';
 import { ParagraphBlockSpec } from '@blocksuite/affine-block-paragraph';
 import {
+  EdgelessSurfaceBlockAdapterExtensions,
   EdgelessSurfaceBlockSpec,
   PageSurfaceBlockSpec,
+  SurfaceBlockAdapterExtensions,
 } from '@blocksuite/affine-block-surface';
 import {
   EdgelessSurfaceRefBlockSpec,
   PageSurfaceRefBlockSpec,
 } from '@blocksuite/affine-block-surface-ref';
 import { TableBlockSpec } from '@blocksuite/affine-block-table';
+import {
+  brushToMarkdownAdapterMatcher,
+  brushToPlainTextAdapterMatcher,
+} from '@blocksuite/affine-gfx-brush';
+import {
+  connectorToMarkdownAdapterMatcher,
+  connectorToPlainTextAdapterMatcher,
+} from '@blocksuite/affine-gfx-connector';
+import {
+  groupToMarkdownAdapterMatcher,
+  groupToPlainTextAdapterMatcher,
+} from '@blocksuite/affine-gfx-group';
+import {
+  mindmapToMarkdownAdapterMatcher,
+  mindmapToPlainTextAdapterMatcher,
+} from '@blocksuite/affine-gfx-mindmap';
+import {
+  shapeToMarkdownAdapterMatcher,
+  shapeToPlainTextAdapterMatcher,
+} from '@blocksuite/affine-gfx-shape';
+import {
+  textToMarkdownAdapterMatcher,
+  textToPlainTextAdapterMatcher,
+} from '@blocksuite/affine-gfx-text';
 import { inlinePresetExtensions } from '@blocksuite/affine-inline-preset';
 import {
   DefaultOpenDocExtension,
@@ -33,6 +59,24 @@ import {
   FontLoaderService,
 } from '@blocksuite/affine-shared/services';
 import type { ExtensionType } from '@blocksuite/store';
+
+const elementToPlainTextAdapterMatchers = [
+  groupToPlainTextAdapterMatcher,
+  shapeToPlainTextAdapterMatcher,
+  connectorToPlainTextAdapterMatcher,
+  brushToPlainTextAdapterMatcher,
+  textToPlainTextAdapterMatcher,
+  mindmapToPlainTextAdapterMatcher,
+];
+
+const elementToMarkdownAdapterMatchers = [
+  groupToMarkdownAdapterMatcher,
+  shapeToMarkdownAdapterMatcher,
+  connectorToMarkdownAdapterMatcher,
+  brushToMarkdownAdapterMatcher,
+  textToMarkdownAdapterMatcher,
+  mindmapToMarkdownAdapterMatcher,
+];
 
 export const CommonBlockSpecs: ExtensionType[] = [
   inlinePresetExtensions,
@@ -54,6 +98,9 @@ export const CommonBlockSpecs: ExtensionType[] = [
   FontLoaderService,
   CalloutBlockSpec,
   FrameBlockSpec,
+
+  elementToPlainTextAdapterMatchers,
+  elementToMarkdownAdapterMatchers,
 ].flat();
 
 export const PageFirstPartyBlockSpecs: ExtensionType[] = [
@@ -61,6 +108,8 @@ export const PageFirstPartyBlockSpecs: ExtensionType[] = [
   NoteBlockSpec,
   PageSurfaceBlockSpec,
   PageSurfaceRefBlockSpec,
+
+  ...SurfaceBlockAdapterExtensions,
 ].flat();
 
 export const EdgelessFirstPartyBlockSpecs: ExtensionType[] = [
@@ -70,4 +119,6 @@ export const EdgelessFirstPartyBlockSpecs: ExtensionType[] = [
   EdgelessSurfaceBlockSpec,
   EdgelessSurfaceRefBlockSpec,
   EdgelessTextBlockSpec,
+
+  ...EdgelessSurfaceBlockAdapterExtensions,
 ].flat();

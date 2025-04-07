@@ -1,4 +1,17 @@
-import { html } from 'lit';
+import { isFrameBlock } from '@blocksuite/affine-block-frame';
+import {
+  GroupElementModel,
+  MindmapElementModel,
+  ShapeElementModel,
+} from '@blocksuite/affine-model';
+import {
+  EdgelessIcon,
+  FrameIcon,
+  GroupIcon,
+  MindmapIcon,
+} from '@blocksuite/icons/lit';
+import { type GfxModel } from '@blocksuite/std/gfx';
+import { html, type TemplateResult } from 'lit';
 
 export const noContentPlaceholder = html`
   <svg
@@ -97,3 +110,43 @@ export const noContentPlaceholder = html`
     />
   </svg>
 `;
+
+export const TYPE_ICON_MAP: {
+  [key: string]: {
+    name: string;
+    icon: TemplateResult;
+  };
+} = {
+  'affine:frame': {
+    name: 'Frame',
+    icon: FrameIcon(),
+  },
+  group: {
+    name: 'Group',
+    icon: GroupIcon(),
+  },
+  mindmap: {
+    name: 'Mind map',
+    icon: MindmapIcon(),
+  },
+  edgeless: {
+    name: 'Edgeless content',
+    icon: EdgelessIcon(),
+  },
+};
+
+export const getReferenceModelTitle = (model: GfxModel) => {
+  if (model instanceof GroupElementModel) {
+    return model.title.toString();
+  }
+  if (isFrameBlock(model)) {
+    return model.props.title.toString();
+  }
+  if (model instanceof MindmapElementModel) {
+    const rootElement = model.tree.element;
+    if (rootElement instanceof ShapeElementModel) {
+      return rootElement.text?.toString() ?? '';
+    }
+  }
+  return null;
+};

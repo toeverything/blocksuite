@@ -4,7 +4,7 @@ import {
   getInlineEditorByModel,
 } from '@blocksuite/affine-rich-text';
 import { matchModels } from '@blocksuite/affine-shared/utils';
-import { type Command, TextSelection } from '@blocksuite/block-std';
+import { type Command, TextSelection } from '@blocksuite/std';
 
 export const splitParagraphCommand: Command<
   {

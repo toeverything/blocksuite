@@ -1,6 +1,6 @@
 import { addSiblingAttachmentBlocks } from '@blocksuite/affine-block-attachment';
 import { insertDatabaseBlockCommand } from '@blocksuite/affine-block-database';
-import { toggleEmbedIframeCreateModal } from '@blocksuite/affine-block-embed';
+import { insertEmptyEmbedIframeCommand } from '@blocksuite/affine-block-embed';
 import { insertImagesCommand } from '@blocksuite/affine-block-image';
 import { insertLatexBlockCommand } from '@blocksuite/affine-block-latex';
 import {
@@ -48,17 +48,13 @@ import {
   getTextSelectionCommand,
 } from '@blocksuite/affine-shared/commands';
 import { REFERENCE_NODE } from '@blocksuite/affine-shared/consts';
-import {
-  FeatureFlagService,
-  FileSizeLimitService,
-} from '@blocksuite/affine-shared/services';
+import { FileSizeLimitService } from '@blocksuite/affine-shared/services';
 import type { AffineTextAttributes } from '@blocksuite/affine-shared/types';
 import {
   createDefaultDoc,
   openFileOrFiles,
   type Signal,
 } from '@blocksuite/affine-shared/utils';
-import type { BlockStdScope } from '@blocksuite/block-std';
 import { viewPresets } from '@blocksuite/data-view/view-presets';
 import { assertType } from '@blocksuite/global/utils';
 import {
@@ -103,6 +99,7 @@ import {
   YesterdayIcon,
   YoutubeDuotoneIcon,
 } from '@blocksuite/icons/lit';
+import type { BlockStdScope } from '@blocksuite/std';
 import { computed } from '@preact/signals-core';
 import { cssVarV2 } from '@toeverything/theme/v2';
 import type { TemplateResult } from 'lit';
@@ -477,31 +474,22 @@ const embedToolGroup: KeyboardToolPanelGroup = {
       name: 'Embed',
       icon: EmbedIcon({ style: `color: black` }),
       showWhen: ({ std }) => {
-        const featureFlagService = std.get(FeatureFlagService);
-        return (
-          featureFlagService.getFlag('enable_embed_iframe_block') &&
-          std.store.schema.flavourSchemaMap.has('affine:embed-iframe')
-        );
+        return std.store.schema.flavourSchemaMap.has('affine:embed-iframe');
       },
       action: async ({ std }) => {
-        const [_, { selectedModels }] = std.command.exec(
-          getSelectedModelsCommand
-        );
-        const model = selectedModels?.[0];
-        if (!model) return;
-
-        const parentModel = std.store.getParent(model);
-        if (!parentModel) return;
-
-        const index = parentModel.children.indexOf(model) + 1;
-        await toggleEmbedIframeCreateModal(std, {
-          parentModel,
-          index,
-          variant: 'compact',
-        });
-        if (model.text?.length === 0) {
-          std.store.deleteBlock(model);
-        }
+        std.command
+          .chain()
+          .pipe(getSelectedModelsCommand)
+          .pipe(insertEmptyEmbedIframeCommand, {
+            place: 'after',
+            removeEmptyLine: true,
+            linkInputPopupOptions: {
+              showCloseButton: true,
+              variant: 'mobile',
+              telemetrySegment: 'keyboard toolbar',
+            },
+          })
+          .run();
       },
     },
     {

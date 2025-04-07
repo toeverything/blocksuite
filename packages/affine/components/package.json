@@ -12,13 +12,13 @@
   "dependencies": {
     "@blocksuite/affine-model": "workspace:*",
     "@blocksuite/affine-shared": "workspace:*",
-    "@blocksuite/block-std": "workspace:*",
     "@blocksuite/global": "workspace:*",
-    "@blocksuite/icons": "^2.2.6",
+    "@blocksuite/icons": "^2.2.10",
+    "@blocksuite/std": "workspace:*",
     "@blocksuite/store": "workspace:*",
     "@floating-ui/dom": "^1.6.13",
     "@lit/context": "^1.1.2",
-    "@lottiefiles/dotlottie-wc": "^0.4.0",
+    "@lottiefiles/dotlottie-wc": "^0.5.0",
     "@preact/signals-core": "^1.8.0",
     "@toeverything/theme": "^1.1.12",
     "@types/hast": "^3.0.4",
@@ -68,7 +68,8 @@
     "./size-dropdown-menu": "./src/size-dropdown-menu/index.ts",
     "./edgeless-line-width-panel": "./src/edgeless-line-width-panel/index.ts",
     "./edgeless-line-styles-panel": "./src/edgeless-line-styles-panel/index.ts",
-    "./edgeless-shape-color-picker": "./src/edgeless-shape-color-picker/index.ts"
+    "./edgeless-shape-color-picker": "./src/edgeless-shape-color-picker/index.ts",
+    "./open-doc-dropdown-menu": "./src/open-doc-dropdown-menu/index.ts"
   },
   "files": [
     "src",
@@ -76,5 +77,5 @@
     "!src/__tests__",
     "!dist/__tests__"
   ],
-  "version": "0.20.0"
+  "version": "0.21.0"
 }

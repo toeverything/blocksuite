@@ -1,5 +1,5 @@
-import type { GfxBlockComponent } from '@blocksuite/block-std';
 import { createIdentifier } from '@blocksuite/global/di';
+import type { GfxBlockComponent } from '@blocksuite/std';
 import { Extension } from '@blocksuite/store';
 
 import type { BlockLayout, Rect } from '../types';

@@ -1,7 +1,7 @@
 import type { FrameBlockModel } from '@blocksuite/affine-model';
 import { on, once } from '@blocksuite/affine-shared/utils';
-import { ShadowlessElement } from '@blocksuite/block-std';
 import { WithDisposable } from '@blocksuite/global/lit';
+import { type BlockStdScope, ShadowlessElement } from '@blocksuite/std';
 import { css, html, nothing } from 'lit';
 import { property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -177,18 +177,18 @@ export class FrameCard extends WithDisposable(ShadowlessElement) {
 
   override render() {
     const { pos, stackOrder, width } = this;
-    const containerStyle =
+    const containerStyle = styleMap(
       this.status === 'dragging'
-        ? styleMap({
+        ? {
             transform: `${
               stackOrder === 0
                 ? `translate(${pos.x - 16}px, ${pos.y - 8}px)`
                 : `translate(${pos.x - 10}px, ${pos.y - 16}px) scale(0.96)`
             }`,
             width: width ? `${width}px` : undefined,
-          })
-        : {};
-
+          }
+        : {}
+    );
     return html`<div
       class="frame-card-container ${this.status ?? ''}"
       style=${containerStyle}
@@ -207,11 +207,17 @@ export class FrameCard extends WithDisposable(ShadowlessElement) {
       >
         ${this.status === 'dragging' && stackOrder !== 0
           ? nothing
-          : html`<frame-preview .frame=${this.frame}></frame-preview>`}
+          : html`<frame-preview
+              .frame=${this.frame}
+              .std=${this.std}
+            ></frame-preview>`}
         ${this._DraggingCardNumber()}
       </div>
     </div>`;
   }
+
+  @property({ attribute: false })
+  accessor std!: BlockStdScope;
 
   @property({ attribute: false })
   accessor cardIndex!: number;

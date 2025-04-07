@@ -1,6 +1,6 @@
 import type { AffineTextAttributes } from '@blocksuite/affine-shared/types';
-import type { BlockStdScope } from '@blocksuite/block-std';
-import type { InlineEditor } from '@blocksuite/block-std/inline';
+import type { BlockStdScope } from '@blocksuite/std';
+import type { InlineEditor } from '@blocksuite/std/inline';
 import type { BlockModel } from '@blocksuite/store';
 import { effect } from '@preact/signals-core';
 

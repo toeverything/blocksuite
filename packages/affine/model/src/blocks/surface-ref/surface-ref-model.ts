@@ -12,11 +12,11 @@ export type SurfaceRefProps = {
 
 export const SurfaceRefBlockSchema = defineBlockSchema({
   flavour: 'affine:surface-ref',
-  props: () =>
-    ({
-      reference: '',
-      caption: '',
-    }) as SurfaceRefProps,
+  props: () => ({
+    reference: '',
+    caption: '',
+    refFlavour: '',
+  }),
   metadata: {
     version: 1,
     role: 'content',

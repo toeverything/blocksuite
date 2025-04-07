@@ -1,12 +1,12 @@
-import { PANEL_BASE } from '@blocksuite/affine-shared/styles';
+import { panelBaseStyle } from '@blocksuite/affine-shared/styles';
 import { stopPropagation } from '@blocksuite/affine-shared/utils';
 import { WithDisposable } from '@blocksuite/global/lit';
 import { css, html, LitElement } from 'lit';
 
 export class EditorToolbar extends WithDisposable(LitElement) {
   static override styles = css`
+    ${panelBaseStyle(':host')}
     :host {
-      ${PANEL_BASE};
       height: 36px;
       box-sizing: content-box;
     }

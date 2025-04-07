@@ -1,14 +1,14 @@
-import { insertEdgelessTextCommand } from '@blocksuite/affine-block-edgeless-text';
 import type { TextElementModel } from '@blocksuite/affine-model';
 import {
   FeatureFlagService,
   TelemetryProvider,
 } from '@blocksuite/affine-shared/services';
-import type { PointerEventState } from '@blocksuite/block-std';
-import { BaseTool, type GfxController } from '@blocksuite/block-std/gfx';
 import { Bound } from '@blocksuite/global/gfx';
+import type { PointerEventState } from '@blocksuite/std';
+import { BaseTool, type GfxController } from '@blocksuite/std/gfx';
 import * as Y from 'yjs';
 
+import { insertEdgelessTextCommand } from './commands/insert-edgeless-text';
 import { mountTextElementEditor } from './mount-text-editor';
 
 function addText(gfx: GfxController, event: PointerEventState) {
@@ -65,7 +65,7 @@ export class TextTool extends BaseTool {
   }
 }
 
-declare module '@blocksuite/block-std/gfx' {
+declare module '@blocksuite/std/gfx' {
   interface GfxToolsMap {
     text: TextTool;
   }

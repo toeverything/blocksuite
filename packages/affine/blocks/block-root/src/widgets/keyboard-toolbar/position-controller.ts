@@ -1,10 +1,8 @@
 import { type VirtualKeyboardProvider } from '@blocksuite/affine-shared/services';
-import type { BlockStdScope, ShadowlessElement } from '@blocksuite/block-std';
 import { DisposableGroup } from '@blocksuite/global/disposable';
+import type { BlockStdScope, ShadowlessElement } from '@blocksuite/std';
 import { effect, type Signal } from '@preact/signals-core';
 import type { ReactiveController, ReactiveControllerHost } from 'lit';
-
-import { TOOLBAR_HEIGHT } from './styles';
 
 /**
  * This controller is used to control the keyboard toolbar position
@@ -25,7 +23,7 @@ export class PositionController implements ReactiveController {
   }
 
   hostConnected() {
-    const { keyboard, panelOpened } = this.host;
+    const { keyboard } = this.host;
 
     this._disposables.add(
       effect(() => {
@@ -36,20 +34,6 @@ export class PositionController implements ReactiveController {
     );
 
     this.host.style.bottom = '0px';
-    this._disposables.add(
-      effect(() => {
-        if (keyboard.visible$.value) {
-          document.body.style.paddingBottom = `${keyboard.height$.value + TOOLBAR_HEIGHT}px`;
-        } else if (panelOpened) {
-          document.body.style.paddingBottom = `${this.host.panelHeight$.peek() + TOOLBAR_HEIGHT}px`;
-        } else {
-          document.body.style.paddingBottom = '';
-        }
-      })
-    );
-    this._disposables.add(() => {
-      document.body.style.paddingBottom = '';
-    });
   }
 
   hostDisconnected() {

@@ -10,7 +10,7 @@ import {
   type ASTToDeltaMatcher,
   DeltaASTConverter,
   type InlineDeltaMatcher,
-} from '../types/adapter.js';
+} from '../types/delta-converter.js';
 import type { MarkdownAST } from './type.js';
 
 export type InlineDeltaToMarkdownAdapterMatcher =

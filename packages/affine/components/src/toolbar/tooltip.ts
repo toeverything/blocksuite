@@ -3,6 +3,7 @@ import {
   arrow,
   type ComputePositionReturn,
   flip,
+  hide,
   offset,
   type Placement,
   shift,
@@ -28,7 +29,7 @@ const styles = css`
 
     overflow-wrap: anywhere;
     white-space: normal;
-    word-break: break-all;
+    word-break: break-word;
   }
 
   .arrow {
@@ -142,6 +143,7 @@ export class Tooltip extends LitElement {
         //   return null;
         if (this.hidden) return null;
         let arrowStyles: StyleInfo = {};
+        let tooltipStyles: StyleInfo = {};
         return {
           template: ({ positionSlot, updatePortal }) => {
             positionSlot.subscribe(data => {
@@ -152,6 +154,15 @@ export class Tooltip extends LitElement {
               } else {
                 arrowStyles = {};
               }
+
+              if (this.autoHide) {
+                tooltipStyles.visibility = data.middlewareData.hide
+                  ?.referenceHidden
+                  ? 'hidden'
+                  : '';
+                arrowStyles.visibility = tooltipStyles.visibility;
+              }
+
               updatePortal();
             });
 
@@ -163,7 +174,13 @@ export class Tooltip extends LitElement {
               <style>
                 ${this._getStyles()}
               </style>
-              <div class="affine-tooltip" role="tooltip">${children}</div>
+              <div
+                class="affine-tooltip"
+                role="tooltip"
+                style=${styleMap(tooltipStyles)}
+              >
+                ${children}
+              </div>
               <div class="arrow" style=${styleMap(arrowStyles)}></div>
             `;
           },
@@ -177,6 +194,7 @@ export class Tooltip extends LitElement {
               arrow({
                 element: portalRoot.shadowRoot!.querySelector('.arrow')!,
               }),
+              this.autoHide && hide({ strategy: 'referenceHidden' }),
             ],
             autoUpdate: true,
           }),
@@ -256,6 +274,14 @@ export class Tooltip extends LitElement {
    */
   @property({ attribute: false })
   accessor autoFlip = true;
+
+  /**
+   * Hide the tooltip when the reference element is not in view.
+   *
+   * See https://floating-ui.com/docs/hide
+   */
+  @property({ attribute: false })
+  accessor autoHide = false;
 
   /**
    * shifts the floating element to keep it in view.

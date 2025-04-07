@@ -3680,88 +3680,95 @@ bbb
     expect(nanoidReplacement(rawBlockSnapshot)).toEqual(blockSnapshot);
   });
 
-  test('inline latex', async () => {
-    const markdown = 'inline $E=mc^2$ latex\n';
-    const blockSnapshot: BlockSnapshot = {
-      type: 'block',
-      id: 'matchesReplaceMap[0]',
-      flavour: 'affine:note',
-      props: {
-        xywh: '[0,0,800,95]',
-        background: DefaultTheme.noteBackgrounColor,
-        index: 'a0',
-        hidden: false,
-        displayMode: NoteDisplayMode.DocAndEdgeless,
-      },
-      children: [
-        {
-          type: 'block',
-          id: 'matchesReplaceMap[1]',
-          flavour: 'affine:paragraph',
-          props: {
-            type: 'text',
-            text: {
-              '$blocksuite:internal:text$': true,
-              delta: [
-                {
-                  insert: 'inline ',
-                },
-                {
-                  insert: ' ',
-                  attributes: {
-                    latex: 'E=mc^2',
-                  },
-                },
-                {
-                  insert: ' latex',
-                },
-              ],
-            },
-          },
-          children: [],
+  describe('inline latex', () => {
+    test.each([
+      ['dollar sign syntax', 'inline $E=mc^2$ latex\n'],
+      ['backslash syntax', 'inline \\(E=mc^2\\) latex\n'],
+    ])('should convert %s correctly', async (_, markdown) => {
+      const blockSnapshot: BlockSnapshot = {
+        type: 'block',
+        id: 'matchesReplaceMap[0]',
+        flavour: 'affine:note',
+        props: {
+          xywh: '[0,0,800,95]',
+          background: DefaultTheme.noteBackgrounColor,
+          index: 'a0',
+          hidden: false,
+          displayMode: NoteDisplayMode.DocAndEdgeless,
         },
-      ],
-    };
+        children: [
+          {
+            type: 'block',
+            id: 'matchesReplaceMap[1]',
+            flavour: 'affine:paragraph',
+            props: {
+              type: 'text',
+              text: {
+                '$blocksuite:internal:text$': true,
+                delta: [
+                  {
+                    insert: 'inline ',
+                  },
+                  {
+                    insert: ' ',
+                    attributes: {
+                      latex: 'E=mc^2',
+                    },
+                  },
+                  {
+                    insert: ' latex',
+                  },
+                ],
+              },
+            },
+            children: [],
+          },
+        ],
+      };
 
-    const mdAdapter = new MarkdownAdapter(createJob(), provider);
-    const rawBlockSnapshot = await mdAdapter.toBlockSnapshot({
-      file: markdown,
+      const mdAdapter = new MarkdownAdapter(createJob(), provider);
+      const rawBlockSnapshot = await mdAdapter.toBlockSnapshot({
+        file: markdown,
+      });
+      expect(nanoidReplacement(rawBlockSnapshot)).toEqual(blockSnapshot);
     });
-    expect(nanoidReplacement(rawBlockSnapshot)).toEqual(blockSnapshot);
   });
 
-  test('latex block', async () => {
-    const markdown = '$$\nE=mc^2\n$$\n';
-
-    const blockSnapshot: BlockSnapshot = {
-      type: 'block',
-      id: 'matchesReplaceMap[0]',
-      flavour: 'affine:note',
-      props: {
-        xywh: '[0,0,800,95]',
-        background: DefaultTheme.noteBackgrounColor,
-        index: 'a0',
-        hidden: false,
-        displayMode: NoteDisplayMode.DocAndEdgeless,
-      },
-      children: [
-        {
-          type: 'block',
-          id: 'matchesReplaceMap[1]',
-          flavour: 'affine:latex',
-          props: {
-            latex: 'E=mc^2',
-          },
-          children: [],
+  describe('latex block', () => {
+    test.each([
+      ['dollar sign syntax', '$$\nE=mc^2\n$$\n'],
+      ['backslash syntax', '\\[\nE=mc^2\n\\]\n'],
+    ])('should convert %s correctly', async (_, markdown) => {
+      const blockSnapshot: BlockSnapshot = {
+        type: 'block',
+        id: 'matchesReplaceMap[0]',
+        flavour: 'affine:note',
+        props: {
+          xywh: '[0,0,800,95]',
+          background: DefaultTheme.noteBackgrounColor,
+          index: 'a0',
+          hidden: false,
+          displayMode: NoteDisplayMode.DocAndEdgeless,
         },
-      ],
-    };
+        children: [
+          {
+            type: 'block',
+            id: 'matchesReplaceMap[1]',
+            flavour: 'affine:latex',
+            props: {
+              latex: 'E=mc^2',
+            },
+            children: [],
+          },
+        ],
+      };
 
-    const mdAdapter = new MarkdownAdapter(createJob(), provider);
-    const rawBlockSnapshot = await mdAdapter.toBlockSnapshot({
-      file: markdown,
+      const mdAdapter = new MarkdownAdapter(createJob(), provider);
+      const rawBlockSnapshot = await mdAdapter.toBlockSnapshot({
+        file: markdown,
+      });
+      expect(nanoidReplacement(rawBlockSnapshot)).toEqual(blockSnapshot);
     });
-    expect(nanoidReplacement(rawBlockSnapshot)).toEqual(blockSnapshot);
   });
 
   test('reference', async () => {

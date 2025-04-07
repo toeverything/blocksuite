@@ -6,12 +6,15 @@ import {
 
 export const TranscriptionBlockFlavour = 'affine:transcription';
 
+const defaultProps: TranscriptionBlockProps = {
+  transcription: {},
+  jobId: undefined,
+  createdBy: undefined, // the user id of the creator
+};
+
 export const TranscriptionBlockSchema = defineBlockSchema({
   flavour: TranscriptionBlockFlavour,
-  props: () => ({
-    transcription: {},
-    jobId: '',
-  }),
+  props: () => defaultProps,
   metadata: {
     version: 1,
     role: 'attachment-viewer',
@@ -23,7 +26,8 @@ export const TranscriptionBlockSchema = defineBlockSchema({
 
 export type TranscriptionBlockProps = {
   transcription: Record<string, any>;
-  jobId: string;
+  jobId?: string;
+  createdBy?: string;
 };
 
 export class TranscriptionBlockModel extends BlockModel<TranscriptionBlockProps> {}

@@ -2,18 +2,20 @@ import '@toeverything/theme/style.css';
 import '@toeverything/theme/fonts.css';
 
 import { effects as blocksEffects } from '@blocksuite/affine/effects';
+import {
+  EdgelessEditorBlockSpecs,
+  PageEditorBlockSpecs,
+  registerStoreSpecs,
+  StoreExtensions,
+} from '@blocksuite/affine/extensions';
 import type { ExtensionType, Store, Transformer } from '@blocksuite/store';
 
 import { effects } from '../../effects.js';
 
+registerStoreSpecs();
 blocksEffects();
 effects();
 
-import {
-  EdgelessEditorBlockSpecs,
-  PageEditorBlockSpecs,
-  StoreExtensions,
-} from '@blocksuite/affine/extensions';
 import type { DocMode } from '@blocksuite/affine/model';
 import { AffineSchemas } from '@blocksuite/affine/schemas';
 import {
@@ -50,7 +52,7 @@ function createCollectionOptions() {
 }
 
 function initCollection(collection: TestWorkspace) {
-  const doc = collection.createDoc({ id: 'doc:home' });
+  const doc = collection.createDoc('doc:home').getStore();
 
   doc.load(() => {
     const rootId = doc.addBlock('affine:page', {

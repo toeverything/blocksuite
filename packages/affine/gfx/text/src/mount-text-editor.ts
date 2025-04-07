@@ -2,15 +2,15 @@ import {
   CanvasElementType,
   EdgelessCRUDIdentifier,
   type IModelCoord,
-  TextUtils,
 } from '@blocksuite/affine-block-surface';
 import { TextElementModel } from '@blocksuite/affine-model';
-import type { BlockComponent, PointerEventState } from '@blocksuite/block-std';
-import { GfxControllerIdentifier } from '@blocksuite/block-std/gfx';
 import { Bound } from '@blocksuite/global/gfx';
+import type { BlockComponent, PointerEventState } from '@blocksuite/std';
+import { GfxControllerIdentifier } from '@blocksuite/std/gfx';
 import * as Y from 'yjs';
 
 import { EdgelessTextEditor } from './edgeless-text-editor';
+import { getCursorByCoord } from './element-renderer/utils';
 
 export function mountTextElementEditor(
   textElement: TextElementModel,
@@ -20,7 +20,7 @@ export function mountTextElementEditor(
   let cursorIndex = textElement.text.length;
   if (focusCoord) {
     cursorIndex = Math.min(
-      TextUtils.getCursorByCoord(textElement, focusCoord),
+      getCursorByCoord(textElement, focusCoord),
       cursorIndex
     );
   }

@@ -1,4 +1,4 @@
-import { BaseTool } from '@blocksuite/block-std/gfx';
+import { BaseTool } from '@blocksuite/std/gfx';
 
 import type { NavigatorMode } from './frame-manager';
 

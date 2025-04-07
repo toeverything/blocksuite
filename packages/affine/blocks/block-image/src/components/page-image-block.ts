@@ -5,16 +5,13 @@ import {
   getPrevBlockCommand,
 } from '@blocksuite/affine-shared/commands';
 import { ImageSelection } from '@blocksuite/affine-shared/selection';
-import type {
-  BlockComponent,
-  UIEventStateContext,
-} from '@blocksuite/block-std';
+import { WithDisposable } from '@blocksuite/global/lit';
+import type { BlockComponent, UIEventStateContext } from '@blocksuite/std';
 import {
   BlockSelection,
   ShadowlessElement,
   TextSelection,
-} from '@blocksuite/block-std';
-import { WithDisposable } from '@blocksuite/global/lit';
+} from '@blocksuite/std';
 import type { BaseSelection } from '@blocksuite/store';
 import { css, html, type PropertyValues } from 'lit';
 import { property, query, state } from 'lit/decorators.js';

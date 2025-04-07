@@ -1,6 +1,7 @@
-import type { Command } from '@blocksuite/block-std';
+import type { Command } from '@blocksuite/std';
+import { GfxControllerIdentifier } from '@blocksuite/std/gfx';
 
-import { SurfaceBlockService } from '../surface-service';
+import type { SurfaceBlockModel } from '../surface-model';
 
 /**
  * Re-associate bindings for block that have been converted.
@@ -13,14 +14,14 @@ export const reassociateConnectorsCommand: Command<{
   newId: string;
 }> = (ctx, next) => {
   const { oldId, newId } = ctx;
-  const service = ctx.std.get(SurfaceBlockService);
-  if (!oldId || !newId || !service) {
+  const gfx = ctx.std.get(GfxControllerIdentifier);
+  if (!oldId || !newId || !gfx.surface) {
     next();
     return;
   }
 
-  const surface = service.surface;
-  const connectors = surface.getConnectors(oldId);
+  const surface = gfx.surface;
+  const connectors = (surface as SurfaceBlockModel).getConnectors(oldId);
   for (const { id, source, target } of connectors) {
     if (source.id === oldId) {
       surface.updateElement(id, {

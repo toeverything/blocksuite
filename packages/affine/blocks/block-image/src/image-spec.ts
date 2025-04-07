@@ -1,10 +1,6 @@
 import { ImageBlockSchema } from '@blocksuite/affine-model';
 import { SlashMenuConfigExtension } from '@blocksuite/affine-widget-slash-menu';
-import {
-  BlockViewExtension,
-  FlavourExtension,
-  WidgetViewExtension,
-} from '@blocksuite/block-std';
+import { BlockViewExtension, FlavourExtension } from '@blocksuite/std';
 import type { ExtensionType } from '@blocksuite/store';
 import { literal } from 'lit/static-html.js';
 
@@ -15,12 +11,6 @@ import { ImageProxyService } from './image-proxy-service';
 import { ImageDropOption } from './image-service';
 
 const flavour = ImageBlockSchema.model.flavour;
-
-export const imageToolbarWidget = WidgetViewExtension(
-  flavour,
-  'imageToolbar',
-  literal`affine-image-toolbar-widget`
-);
 
 export const ImageBlockSpec: ExtensionType[] = [
   FlavourExtension(flavour),
@@ -33,7 +23,6 @@ export const ImageBlockSpec: ExtensionType[] = [
 
     return literal`affine-image`;
   }),
-  imageToolbarWidget,
   ImageDropOption,
   ImageBlockAdapterExtensions,
   createBuiltinToolbarConfigExtension(flavour),

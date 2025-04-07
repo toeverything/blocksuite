@@ -1,12 +1,12 @@
 import { getSelectedModelsCommand } from '@blocksuite/affine-shared/commands';
-import { VirtualKeyboardProvider } from '@blocksuite/affine-shared/services';
+import { type VirtualKeyboardProviderWithAction } from '@blocksuite/affine-shared/services';
+import { SignalWatcher, WithDisposable } from '@blocksuite/global/lit';
+import { ArrowLeftBigIcon, KeyboardIcon } from '@blocksuite/icons/lit';
 import {
   PropTypes,
   requiredProperties,
   ShadowlessElement,
-} from '@blocksuite/block-std';
-import { SignalWatcher, WithDisposable } from '@blocksuite/global/lit';
-import { ArrowLeftBigIcon, KeyboardIcon } from '@blocksuite/icons/lit';
+} from '@blocksuite/std';
 import { effect, type Signal, signal } from '@preact/signals-core';
 import { html } from 'lit';
 import { property } from 'lit/decorators.js';
@@ -48,10 +48,6 @@ export class AffineKeyboardToolbar extends SignalWatcher(
 
   get std() {
     return this.rootComponent.std;
-  }
-
-  get keyboard() {
-    return this._context.std.get(VirtualKeyboardProvider);
   }
 
   get panelOpened() {
@@ -319,10 +315,13 @@ export class AffineKeyboardToolbar extends SignalWatcher(
       <affine-keyboard-tool-panel
         .config=${this._currentPanelConfig}
         .context=${this._context}
-        height=${this.panelHeight$.value}
+        .height=${this.panelHeight$.value}
       ></affine-keyboard-tool-panel>
     `;
   }
+
+  @property({ attribute: false })
+  accessor keyboard!: VirtualKeyboardProviderWithAction;
 
   @property({ attribute: false })
   accessor close: (blur: boolean) => void = () => {};

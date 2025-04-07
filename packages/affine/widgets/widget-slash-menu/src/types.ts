@@ -1,4 +1,4 @@
-import type { BlockStdScope } from '@blocksuite/block-std';
+import type { BlockStdScope } from '@blocksuite/std';
 import type { BlockModel } from '@blocksuite/store';
 import type { TemplateResult } from 'lit';
 

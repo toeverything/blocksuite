@@ -20,35 +20,18 @@ export {
   PathGenerator,
 } from './managers/connector-manager.js';
 export { CanvasRenderer } from './renderer/canvas-renderer.js';
-export * from './renderer/elements/group/consts.js';
 export type { ElementRenderer } from './renderer/elements/index.js';
-export {
-  elementRenderers,
-  normalizeShapeBound,
-} from './renderer/elements/index.js';
-export { fitContent } from './renderer/elements/shape/utils.js';
 export * from './renderer/elements/type.js';
 export { Overlay, OverlayIdentifier } from './renderer/overlay.js';
 export { ToolOverlay } from './renderer/tool-overlay.js';
-export { MindMapView } from './view/mindmap.js';
-import {
-  getCursorByCoord,
-  getLineHeight,
-  isFontStyleSupported,
-  isFontWeightSupported,
-  normalizeTextBound,
-  splitIntoLines,
-} from './renderer/elements/text/utils.js';
 import {
   getFontFaces,
   getFontFacesByFontFamily,
   isSameFontFamily,
   wrapFontFamily,
 } from './utils/font.js';
-export {
-  EdgelessSurfaceBlockAdapterExtensions,
-  SurfaceBlockAdapterExtensions,
-} from './adapters/index.js';
+export * from './adapters/index.js';
+export * from './extensions';
 export type { SurfaceContext } from './surface-block.js';
 export { SurfaceBlockComponent } from './surface-block.js';
 export {
@@ -56,31 +39,11 @@ export {
   SurfaceBlockSchema,
   SurfaceBlockSchemaExtension,
 } from './surface-model.js';
-export type { SurfaceBlockService } from './surface-service.js';
 export {
   EdgelessSurfaceBlockSpec,
   PageSurfaceBlockSpec,
 } from './surface-spec.js';
 export { SurfaceBlockTransformer } from './surface-transformer.js';
-export { AStarRunner } from './utils/a-star.js';
-export {
-  NODE_FIRST_LEVEL_HORIZONTAL_SPACING,
-  NODE_HORIZONTAL_SPACING,
-  NODE_VERTICAL_SPACING,
-} from './utils/mindmap/layout.js';
-export { RoughCanvas } from './utils/rough/canvas.js';
-
-import {
-  addTree,
-  containsNode,
-  createFromTree,
-  detachMindmap,
-  findTargetNode,
-  hideNodeConnector,
-  moveNode,
-  tryMoveNode,
-} from './utils/mindmap/utils';
-export * from './extensions';
 export {
   addNote,
   addNoteAtPoint,
@@ -91,7 +54,8 @@ export {
   getSurfaceComponent,
   normalizeWheelDeltaY,
 } from './utils';
-export * from './utils/mindmap/style-svg';
+export { AStarRunner } from './utils/a-star.js';
+export { RoughCanvas } from './utils/rough/canvas.js';
 export type { Options } from './utils/rough/core';
 export { sortIndex } from './utils/sort';
 export { updateXYWH } from './utils/update-xywh.js';
@@ -102,27 +66,10 @@ export const ConnectorUtils = {
 };
 
 export const TextUtils = {
-  splitIntoLines,
-  normalizeTextBound,
-  getLineHeight,
-  getCursorByCoord,
-  isFontWeightSupported,
-  isFontStyleSupported,
   wrapFontFamily,
   getFontFaces,
   getFontFacesByFontFamily,
   isSameFontFamily,
-};
-
-export const MindmapUtils = {
-  addTree,
-  createFromTree,
-  detachMindmap,
-  moveNode,
-  findTargetNode,
-  tryMoveNode,
-  hideNodeConnector,
-  containsNode,
 };
 
 export * from './commands';

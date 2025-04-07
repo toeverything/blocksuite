@@ -2,8 +2,8 @@ import {
   type ToolbarAction,
   ToolbarContext,
 } from '@blocksuite/affine-shared/services';
-import { PropTypes, requiredProperties } from '@blocksuite/block-std';
 import { SignalWatcher } from '@blocksuite/global/lit';
+import { PropTypes, requiredProperties } from '@blocksuite/std';
 import type { ReadonlySignal, Signal } from '@preact/signals-core';
 import { LitElement } from 'lit';
 import { property } from 'lit/decorators.js';

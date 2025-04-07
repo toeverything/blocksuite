@@ -1,7 +1,6 @@
 import { EdgelessLegacySlotIdentifier } from '@blocksuite/affine-block-surface';
-import { toGfxBlockComponent } from '@blocksuite/block-std';
 import { Bound } from '@blocksuite/global/gfx';
-import { nothing } from 'lit';
+import { toGfxBlockComponent } from '@blocksuite/std';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
 
@@ -14,7 +13,10 @@ export class EmbedEdgelessIframeBlockComponent extends toGfxBlockComponent(
 
   override blockDraggable = false;
 
-  override accessor blockContainerStyles = { margin: '0' };
+  override accessor blockContainerStyles = {
+    margin: '0',
+    backgroundColor: 'transparent',
+  };
 
   get edgelessSlots() {
     return this.std.get(EdgelessLegacySlotIdentifier);
@@ -33,10 +35,6 @@ export class EmbedEdgelessIframeBlockComponent extends toGfxBlockComponent(
   }
 
   override renderGfxBlock() {
-    if (!this.isEmbedIframeBlockEnabled) {
-      return nothing;
-    }
-
     const bound = Bound.deserialize(this.model.props.xywh$.value);
     const scale = this.model.props.scale$.value;
     const width = bound.w / scale;

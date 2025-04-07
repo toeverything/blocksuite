@@ -18,7 +18,7 @@ import {
   type TextElementModel,
 } from '@blocksuite/affine/model';
 import { EditPropsStore } from '@blocksuite/affine/shared/services';
-import type { BlockStdScope } from '@blocksuite/block-std';
+import type { BlockStdScope } from '@blocksuite/std';
 import { beforeEach, describe, expect, test } from 'vitest';
 
 import { getDocRootBlock } from '../utils/edgeless.js';

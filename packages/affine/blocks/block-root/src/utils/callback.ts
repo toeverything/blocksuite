@@ -1,4 +1,4 @@
-import type { BlockComponent, EditorHost } from '@blocksuite/block-std';
+import type { BlockComponent, EditorHost } from '@blocksuite/std';
 import type { BlockModel } from '@blocksuite/store';
 
 // Run the callback until a model's element updated.

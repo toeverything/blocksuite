@@ -1,7 +1,7 @@
 import type { DatabaseBlockModel } from '@blocksuite/affine-model';
 import { unsafeCSSVarV2 } from '@blocksuite/affine-shared/theme';
-import { BlockComponent } from '@blocksuite/block-std';
 import { DatabaseListViewIcon } from '@blocksuite/icons/lit';
+import { BlockComponent } from '@blocksuite/std';
 import { css, html } from 'lit';
 
 export class DatabaseDndPreviewBlockComponent extends BlockComponent<DatabaseBlockModel> {

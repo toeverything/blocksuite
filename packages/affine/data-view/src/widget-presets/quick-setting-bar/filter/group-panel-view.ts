@@ -5,7 +5,6 @@ import {
   type PopupTarget,
   popupTargetFromElement,
 } from '@blocksuite/affine-components/context-menu';
-import { ShadowlessElement } from '@blocksuite/block-std';
 import { SignalWatcher } from '@blocksuite/global/lit';
 import {
   ArrowDownSmallIcon,
@@ -15,6 +14,7 @@ import {
   MoreHorizontalIcon,
   PlusIcon,
 } from '@blocksuite/icons/lit';
+import { ShadowlessElement } from '@blocksuite/std';
 import { computed, type ReadonlySignal } from '@preact/signals-core';
 import { cssVarV2 } from '@toeverything/theme/v2';
 import { css, html, nothing, type TemplateResult, unsafeCSS } from 'lit';

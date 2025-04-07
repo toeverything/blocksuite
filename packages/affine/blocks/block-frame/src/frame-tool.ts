@@ -4,10 +4,10 @@ import {
   EditPropsStore,
   TelemetryProvider,
 } from '@blocksuite/affine-shared/services';
-import type { PointerEventState } from '@blocksuite/block-std';
-import { BaseTool, getTopElements } from '@blocksuite/block-std/gfx';
 import type { IPoint, IVec } from '@blocksuite/global/gfx';
 import { Bound, Vec } from '@blocksuite/global/gfx';
+import type { PointerEventState } from '@blocksuite/std';
+import { BaseTool, getTopElements } from '@blocksuite/std/gfx';
 import { Text } from '@blocksuite/store';
 import * as Y from 'yjs';
 
@@ -38,9 +38,7 @@ export class FrameTool extends BaseTool {
   override dragEnd(): void {
     if (this._frame) {
       const frame = this._frame;
-      this.doc.transact(() => {
-        frame.pop('xywh');
-      });
+      frame.pop('xywh');
       // @ts-expect-error TODO: refactor gfx tool
       this.gfx.tool.setTool('default');
       this.gfx.selection.set({
@@ -52,8 +50,6 @@ export class FrameTool extends BaseTool {
         frame,
         getTopElements(this.frameManager.getElementsInFrameBound(frame))
       );
-
-      this.doc.captureSync();
     }
 
     this._frame = null;

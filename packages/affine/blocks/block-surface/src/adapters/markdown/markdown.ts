@@ -1,9 +1,9 @@
+import { getMindMapNodeMap } from '@blocksuite/affine-model';
 import {
   BlockMarkdownAdapterExtension,
   type BlockMarkdownAdapterMatcher,
 } from '@blocksuite/affine-shared/adapters';
 
-import { getMindMapNodeMap } from '../utils/mindmap.js';
 import { MarkdownElementModelAdapter } from './element-adapter/index.js';
 import { ElementToMarkdownAdapterMatcherIdentifier } from './element-adapter/type.js';
 
